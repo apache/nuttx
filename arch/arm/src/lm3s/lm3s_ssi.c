@@ -60,6 +60,20 @@
  * Definitions
  ****************************************************************************/
 
+/* Enables debug output from this file (needs CONFIG_DEBUG with
+ * CONFIG_DEBUG_VERBOSE too)
+ */
+
+#undef SSI_DEBUG /* Define to enable debug */
+
+#ifdef SSI_DEBUG
+#  define ssidbg  lldbg
+#  define ssivdbg llvdbg
+#else
+#  define ssidbg(x...)
+#  define ssivdbg(x...)
+#endif
+
 /* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
  * modules (others may support more -- in such case, the following must be
  * expanded).
@@ -181,7 +195,7 @@ static void   ssi_rxnull(struct lm32_ssidev_s *priv);
 static void   ssi_rxuint16(struct lm32_ssidev_s *priv);
 static void   ssi_rxubyte(struct lm32_ssidev_s *priv);
 static inline boolean ssi_txfifofull(struct lm32_ssidev_s *priv);
-static inline boolean ssi_rxfifonotempty(struct lm32_ssidev_s *priv);
+static inline boolean ssi_rxfifoempty(struct lm32_ssidev_s *priv);
 static int    ssi_performtx(struct lm32_ssidev_s *priv);
 static inline void ssi_performrx(struct lm32_ssidev_s *priv);
 static int    ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
@@ -341,6 +355,7 @@ static uint32 ssi_disable(struct lm32_ssidev_s *priv)
   retval = ssi_getreg(priv, LM3S_SSI_CR1_OFFSET);
   regval = (retval & ~SSI_CR1_SSE);
   ssi_putreg(priv, LM3S_SSI_CR1_OFFSET, regval);
+  ssivdbg("CR1: %08x\n", regval);
   return retval;
 }
 
@@ -364,6 +379,7 @@ static void ssi_enable(struct lm32_ssidev_s *priv, uint32 enable)
   regval &= ~SSI_CR1_SSE;
   regval  |= (enable & SSI_CR1_SSE);
   ssi_putreg(priv, LM3S_SSI_CR1_OFFSET, regval);
+  ssivdbg("CR1: %08x\n", regval);
 }
 
 /****************************************************************************
@@ -467,7 +483,7 @@ static void ssi_rxubyte(struct lm32_ssidev_s *priv)
  * Name: ssi_txfifofull
  *
  * Description:
- *   Return TRUE if the Tx FIFO is not full
+ *   Return TRUE if the Tx FIFO is full
  *
  * Input Parameters:
  *   priv   - Device-specific state data
@@ -479,14 +495,14 @@ static void ssi_rxubyte(struct lm32_ssidev_s *priv)
 
 static inline boolean ssi_txfifofull(struct lm32_ssidev_s *priv)
 {
-  return (ssi_getreg(priv, LM3S_SSI_SR_OFFSET) & SSI_SR_TNF) != 0;
+  return (ssi_getreg(priv, LM3S_SSI_SR_OFFSET) & SSI_SR_TNF) == 0;
 }
 
 /****************************************************************************
- * Name: ssi_rxfifonotempty
+ * Name: ssi_rxfifoempty
  *
  * Description:
- *   Return TRUE if the Rx FIFO is not empty
+ *   Return TRUE if the Rx FIFO is empty
  *
  * Input Parameters:
  *   priv   - Device-specific state data
@@ -496,9 +512,9 @@ static inline boolean ssi_txfifofull(struct lm32_ssidev_s *priv)
  *
  ****************************************************************************/
 
-static inline boolean ssi_rxfifonotempty(struct lm32_ssidev_s *priv)
+static inline boolean ssi_rxfifoempty(struct lm32_ssidev_s *priv)
 {
-  return (ssi_getreg(priv, LM3S_SSI_SR_OFFSET) & SSI_SR_RNE) != 0;
+  return (ssi_getreg(priv, LM3S_SSI_SR_OFFSET) & SSI_SR_RNE) == 0;
 }
 
 /****************************************************************************
@@ -555,7 +571,7 @@ static int ssi_performtx(struct lm32_ssidev_s *priv)
            */
 
 #ifdef CONFIG_DEBUG
-          regval |= (SSI_IM_TX|SSI_RIS_ROR)
+          regval |= (SSI_IM_TX|SSI_RIS_ROR);
 #else
           regval |= SSI_IM_TX;
 #endif
@@ -597,7 +613,7 @@ static inline void ssi_performrx(struct lm32_ssidev_s *priv)
 
   /* Loop while data is available in the Rx FIFO */
 
-  while (ssi_rxfifonotempty(priv))
+  while (!ssi_rxfifoempty(priv))
     {
       /* Have all of the requested words been transferred from the Rx FIFO? */
 
@@ -671,6 +687,7 @@ static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
 #endif
   int ntxd;
 
+  ssidbg("txbuffer: %p rxbuffer: %p nwords: %d\n", txbuffer, rxbuffer, nwords);
   ssi_semtake(&priv->exclsem);
 
   /* Set up to perform the transfer */
@@ -707,24 +724,40 @@ static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
   /* Prime the Tx FIFO to start the sequence (saves one interrupt).
    * At this point, all SSI interrupts should be disabled, but the
    * operation of ssi_performtx() will set up the interrupts
-   * approapriately.
+   * approapriately (if nwords > TxFIFO size).
    */
 
 #ifndef CONFIG_SSI_POLLWAIT
   flags = irqsave();
+  ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x\n",
+          priv->ntxwords, priv->nrxwords, priv->nwords,
+          ssi_getreg(priv, LM3S_SSI_SR_OFFSET));
   ntxd  = ssi_performtx(priv);
+
+  /* For the case where nwords < Tx FIFO size, ssi_performrx will
+   * configure interrupts correctly for the final phase of the
+   * the transfer.
+   */
+
+  ssi_performrx(priv);
+  ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x IM: %08x\n",
+          priv->ntxwords, priv->nrxwords, priv->nwords,
+          ssi_getreg(priv, LM3S_SSI_SR_OFFSET),
+          ssi_getreg(priv, LM3S_SSI_IM_OFFSET));
 
   /* Wait for the transfer to complete.  Since there is no handshake
    * with SPI, the following should complete even if there are problems
    * with the transfer, so it should be safe with no timeout.
    */
 
+  ssivdbg("Waiting for transfer complete\n");
   irqrestore(flags);
   do
     {
       ssi_semtake(&priv->xfrsem);
     }
   while (priv->nrxwords < priv->nwords);
+  ssidbg("Transfer complete\n");
 
 #else
   /* Perform the transfer using polling logic.  This will totally
@@ -832,6 +865,10 @@ static int ssi_interrupt(int irq, void *context)
     }
 #endif
 
+  ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x\n",
+          priv->ntxwords, priv->nrxwords, priv->nwords,
+          ssi_getreg(priv, LM3S_SSI_SR_OFFSET));
+
   /* Handle outgoing Tx FIFO transfers */
 
   ntxd = ssi_performtx(priv);
@@ -839,6 +876,11 @@ static int ssi_interrupt(int irq, void *context)
   /* Handle incoming Rx FIFO transfers */
 
   ssi_performrx(priv);
+
+  ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x IM: %08x\n",
+          priv->ntxwords, priv->nrxwords, priv->nwords,
+          ssi_getreg(priv, LM3S_SSI_SR_OFFSET),
+          ssi_getreg(priv, LM3S_SSI_IM_OFFSET));
 
   /* Check if the transfer is complete */
 
@@ -850,6 +892,7 @@ static int ssi_interrupt(int irq, void *context)
 
       /* Wake up the waiting thread */
 
+      ssidbg("Transfer complete\n");
       ssi_semgive(&priv->xfrsem);
     }
   return OK;
@@ -878,6 +921,7 @@ static void ssi_setfrequencyinternal(struct lm32_ssidev_s *priv, uint32 frequenc
   uint32 regval;
   uint32 scr;
 
+  ssidbg("frequency: %d\n", frequency);
   if (priv && frequency != priv->frequency)
     {
       /* "The serial bit rate is derived by dividing down the input clock
@@ -934,7 +978,7 @@ static void ssi_setfrequencyinternal(struct lm32_ssidev_s *priv, uint32 frequenc
 
       /* Set CPDVSR */
 
-      DEBUGASSERT(cpdvsr < 255);
+      DEBUGASSERT(cpsdvsr < 255);
       ssi_putreg(priv, LM3S_SSI_CPSR_OFFSET, cpsdvsr);
 
       /* Set SCR */
@@ -943,6 +987,7 @@ static void ssi_setfrequencyinternal(struct lm32_ssidev_s *priv, uint32 frequenc
       regval &= ~SSI_CR0_SCR_MASK;
       regval |= (scr << SSI_CR0_SCR_SHIFT);
       ssi_putreg(priv, LM3S_SSI_CR0_OFFSET, regval);
+      ssivdbg("CR0: %08x CPSR: %08x\n", regval, cpsdvsr);
 
       /* Calcluate the actual frequency */
 
@@ -985,7 +1030,7 @@ static void ssi_setmodeinternal(struct lm32_ssidev_s *priv, enum spi_mode_e mode
   uint32 modebits;
   uint32 regval;
 
-  ssi_semtake(&priv->exclsem);
+  ssidbg("mode: %d\n", mode);
   if (priv && mode != priv->mode)
     {
       /* Select the CTL register bits based on the selected mode */
@@ -1018,6 +1063,7 @@ static void ssi_setmodeinternal(struct lm32_ssidev_s *priv, enum spi_mode_e mode
       regval &= ~SSI_CR0_FRF_MASK;
       regval |= modebits;
       ssi_putreg(priv, LM3S_SSI_CR0_OFFSET, regval);
+      ssivdbg("CR0: %08x\n", regval);
     }
 }
 
@@ -1054,13 +1100,14 @@ static void ssi_setbitsinternal(struct lm32_ssidev_s *priv, int nbits)
 {
   uint32 regval;
 
-  ssi_semtake(&priv->exclsem);
+  ssidbg("nbits: %d\n", nbits);
   if (priv && nbits != priv->nbits && nbits >=4 && nbits <= 16)
     {
       regval  = ssi_getreg(priv, LM3S_SSI_CR0_OFFSET);
       regval &= ~SSI_CR0_DSS_MASK;
       regval |= ((nbits - 1) << SSI_CR0_DSS_SHIFT);
       ssi_putreg(priv, LM3S_SSI_CR0_OFFSET, regval);
+      ssivdbg("CR0: %08x\n", regval);
 
       priv->nbits = nbits;
     }
@@ -1220,6 +1267,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   irqstate_t flags;
   ubyte regval;
 
+  ssidbg("port: %d\n", port);
+ 
   /* Set up for the selected port */
 
   flags = irqsave();
@@ -1236,6 +1285,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       regval = getreg32(LM3S_SYSCON_RCGC1);
       regval |= SYSCON_RCGC1_SSI0;
       putreg32(regval, LM3S_SYSCON_RCGC1);
+      ssivdbg("RCGC1: %08x\n", regval);
 
       /* Configure SSI0 GPIOs (NOTE that SS is not initialized here, the
        * logic in this file makes no assumptions about chip select)
@@ -1259,6 +1309,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       regval = getreg32(LM3S_SYSCON_RCGC1);
       regval |= SYSCON_RCGC1_SSI1;
       putreg32(regval, LM3S_SYSCON_RCGC1);
+      ssivdbg("RCGC1: %08x\n", regval);
 
       /* Configure SSI1 GPIOs */
 
@@ -1289,19 +1340,28 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   ssi_putreg(priv, LM3S_SSI_CR0_OFFSET, 0);
 
-  /* Set the initial mode to mode 0 */
+  /* Set the initial mode to mode 0.  The application may override
+   * this initial setting using the setmode() method.
+   */
 
   ssi_setmodeinternal(priv, SPIDEV_MODE0);
 
-  /* Set the initial data width to 8-bits */
+  /* Set the initial data width to 8-bits.  The application may
+   * override this initial setting using the setbits() method.
+   */
 
   ssi_setbitsinternal(priv, 8);
 
-  /* Set the initialize clock frequency for detection */
+  /* Pick some initialize clock frequency. 400,000Hz is the startup
+   * MMC/SD frequency used for card detection.  The application may
+   * override this setting using the setfrequency() method.
+   */
 
   ssi_setfrequencyinternal(priv, 400000);
 
-  /* Disable all SSI interrupt sources */
+  /* Disable all SSI interrupt sources.  They will be enabled only
+   * while there is an SSI transfer in progress.
+   */
 
   ssi_putreg(priv, LM3S_SSI_IM_OFFSET, 0);
 
