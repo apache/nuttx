@@ -49,6 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "lm3s_internal.h"
+#include "eagle100_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -58,7 +59,7 @@
  * CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG /* Define to enable debug */
+#undef LED_DEBUG  /* Define to enable debug */
 
 #ifdef LED_DEBUG
 #  define leddbg  lldbg

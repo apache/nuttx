@@ -41,15 +41,45 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <debug.h>
+
 #include <nuttx/spi.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "chip.h"
 #include "lm3s_internal.h"
+#include "eagle100_internal.h"
+
+/* The Eagle100 microSD CS is on SSI0 */
+
+#if !defined(CONFIG_SSI0_DISABLE) /* || !defined(CONFIG_SSI1_DISABLE) */
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+
+/* Enables debug output from this file (needs CONFIG_DEBUG with CONFIG_DEBUG_VERBOSE
+ * too)
+ */
+
+#undef SSI_DEBUG  /* Define to enable debug */
+
+#ifdef SSI_DEBUG
+#  define ssidbg  lldbg
+#  define ssivdbg llvdbg
+#else
+#  define ssidbg(x...)
+#  define ssivdbg(x...)
+#endif
+
+/* Dump GPIO registers */
+
+#ifdef SSI_DEBUG
+#  define ssi_dumpgpio(m) lm3s_dumpgpio(SDCCS_GPIO, m)
+#else
+#  define ssi_dumpgpio(m)
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -58,6 +88,23 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: lm3s_ssiinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the Eagle100 board.
+ *
+ ************************************************************************************/
+
+void weak_function lm3s_ssiinitialize(void)
+{
+  /* Configure the SPI-based microSD CS GPIO */
+
+  ssi_dumpgpio("lm3s_ssiinitialize() before lm3s_configgpio()");
+  lm3s_configgpio(SDCCS_GPIO);
+  ssi_dumpgpio("lm3s_ssiinitialize() after lm3s_configgpio()");
+}
 
 /****************************************************************************
  * The external functions, lm3s_spiselect and lm3s_spistatus must be provided
@@ -80,17 +127,22 @@
 
 void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
+  ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert the CS pin to the card */
 
+      ssi_dumpgpio("lm3s_spiselect() before lm3s_gpiowrite()");
       lm3s_gpiowrite(SDCCS_GPIO, !selected);
+      ssi_dumpgpio("lm3s_spiselect() after lm3s_gpiowrite()");
     }
 }
 
 ubyte lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
 #warning "Need to check schematic"
+  ssidbg("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
 
+#endif /* !CONFIG_SSI0_DISABLE || !CONFIG_SSI1_DISABLE */

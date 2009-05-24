@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/eagle100/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/eagle100/src/eagle100_internal.h
+ * arch/arm/src/board/eagle100_internal.n
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,59 +34,60 @@
  *
  ************************************************************************************/
 
+#ifndef __CONFIGS_EAGLE100_SRC_EAGLE100_INTERNAL_H
+#define __CONFIGS_EAGLE100_SRC_EAGLE100_INTERNAL_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <sys/types.h>
-
-#include <debug.h>
-
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "eagle100_internal.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+/* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
+ * modules (others may support more -- in such case, the following must be
+ * expanded).
+ */
+
+#if LM3S_NSSI == 0
+#  undef CONFIG_SSI0_DISABLE
+#  define CONFIG_SSI0_DISABLE 1
+#  undef CONFIG_SSI1_DISABLE
+#  define CONFIG_SSI1_DISABLE 1
+#elif LM3S_NSSI == 1
+#  undef CONFIG_SSI1_DISABLE
+#  define CONFIG_SSI1_DISABLE 1
+#endif
+
+/* Eagle-100 GPIOs ******************************************************************/
+
+/* GPIO for microSD card chip select */
+
+#define SDCCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
+                    GPIO_VALUE_ONE | GPIO_PORTG | 1)
+#define LED_GPIO   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTE | 1)
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /************************************************************************************
- * Name: lm3s_boardinitialize
+ * Name: lm3s_ssiinitialize
  *
  * Description:
- *   All LM3S architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called to configure SPI chip select GPIO pins for the Eagle100 board.
+ *
  ************************************************************************************/
 
-void lm3s_boardinitialize(void)
-{
-  /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
-   * lm3s_ssiinitialize() has been brought into the link.
-   */
+extern void weak_function lm3s_ssiinitialize(void);
 
-/* The Eagle100 microSD CS is on SSI0 */
+#endif /* __ASSEMBLY__ */
+#endif /* __CONFIGS_EAGLE100_SRC_EAGLE100_INTERNAL_H */
 
-#if !defined(CONFIG_SSI0_DISABLE) /* || !defined(CONFIG_SSI1_DISABLE) */
-  if (lm3s_ssiinitialize)
-    {
-      lm3s_ssiinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
-#endif
-}
