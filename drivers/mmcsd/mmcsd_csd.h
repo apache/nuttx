@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_csd.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@
 
 #define MMC_CSD_SPECVERS(csd) ((csd[0] >> 10) & 0x0f)
 
-/* Reserved 120-155 */
+/* Reserved 120-125 */
 
 /* TAAC 112-119 = Data read access-time-1
  *   TIME_VALUE 3-6 = Time mantissa

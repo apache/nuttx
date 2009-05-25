@@ -99,7 +99,6 @@
 #define MMCSD_CMDRESP_R2             2
 #define MMCSD_CMDRESP_R3             3
 
-
 /* Fudge factor for SD read timeout: ~100msec, Write Time out ~250ms.  Units
  * of Hz.
  */
@@ -399,14 +398,16 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
       SPI_SEND(spi, 0xff);
     }
 
-  /* Get the response to the command */
+  /* Get the response to the command.  A valid response will have bit7=0.
+   * Usually, the non-response is 0xff, but I have seen 0xc0 too.
+   */
 
-  for (i = 0; i < 9 && response == 0xff; i++)
+  for (i = 0; i < 9 && (response & 0x80) != 0; i++)
     {
       response = SPI_SEND(spi, 0xff);
     }
 
-  if (i == 0)
+  if ((response & 0x80) != 0)
     {
       fdbg("Failed: i=%d response=%02x\n", i, response);
       SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
@@ -487,8 +488,8 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
   /* Calculate SPI max clock */
 
   frequency =
-    g_transpeedru[MMCSD_CSD_TRANSPEED_TIMEVALUE(csd)] *
-    g_transpeedtu[MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd)];
+    g_transpeedtu[MMCSD_CSD_TRANSPEED_TIMEVALUE(csd)] *
+    g_transpeedru[MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd)];
 
   if (frequency > 20000000)
     {
@@ -544,8 +545,24 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
       /* SDC ver 2.00 */
       /* Note: On SD card WRITE_BL_LEN is always the same as READ_BL_LEN */
 
-      slot->sectorsize = 1 << SD20_CSD_READBLLEN(csd);
-      slot->nsectors   = (SD20_CSD_CSIZE(csd) + 1) << (SD20_CSD_CSIZEMULT(csd) + 2);
+      int readbllen = SD20_CSD_READBLLEN(csd);
+      int csizemult = (SD20_CSD_CSIZEMULT(csd) + 2);
+
+      /* "To make 2 GByte card, the Maximum Block Length (READ_BL_LEN=WRITE_BL_LEN)
+       *  shall be set to 1024 bytes. However, the Block Length, set by CMD16, shall
+       *  be up to 512 bytes to keep consistency with 512 bytes Maximum Block Length
+       *  cards (Less than and equal 2 Gbyte cards)."
+       */
+#if 0
+      if (readbllen > 9)
+        {
+          fdbg("Forcing 512 byte sector size\n");
+          csizemult   += (readbllen - 9);
+          readbllen    = 9;
+        }
+#endif
+      slot->sectorsize = 1 << readbllen;
+      slot->nsectors   = (SD20_CSD_CSIZE(csd) + 1) << csizemult;
     }
   else
     {
@@ -1108,7 +1125,6 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
    */
 
   slot->state |= MMCSD_SLOTSTATUS_NOTREADY;
-
 
   /* Check if there is a card present in the slot.  This is normally a matter is
    * of GPIO sensing and does not really involve SPI, but by putting this

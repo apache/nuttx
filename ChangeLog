@@ -734,4 +734,5 @@
 	* examples/nsh: Added MMC/SD support for the LM3S6918
 	* arch/arm/src/lm3s: Fix logic for setting and clearing output GPIOs (critical
 	  fix!).
+	* drivers/mmcsd:  Correct frequency calculation based on CSD settings.
 
