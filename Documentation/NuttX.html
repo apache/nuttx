@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 23, 2009</p>
+      <p>Last Updated: May 26, 2009</p>
     </td>
   </tr>
 </table>
@@ -1424,7 +1424,10 @@ nuttx-0.4.7 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* examples/nsh: Added MMC/SD support for the LM3S6918
 	* arch/arm/src/lm3s: Fix logic for setting and clearing output GPIOs (critical
 	  fix!).
-	* drivers/mmcsd:  Correct frequency calculation based on CSD settings.
+	* drivers/mmcsd:  Found numerous errors in current MMC/SD SPI driver.  Bad frequency
+	  calculation based on CSD settings, inappropriate timeouts, odd code that looks like
+	  a bad search and replace.  Also needs support for SDHC ver 2.x.  New MMC/SD is
+	  largely redesigned and probably non-functional in the first check-in.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
