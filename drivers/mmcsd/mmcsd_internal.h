@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_internal.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 20082009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,9 +57,16 @@
 
 /* Card type */
 
-#define MMCSD_CARDTYPE_UNKNOWN       0
-#define MMCSD_CARDTYPE_MMC           1
-#define MMCSD_CARDTYPE_SD            2
+#define MMCSD_CARDTYPE_UNKNOWN       0  /* Unknown card type */
+#define MMCSD_CARDTYPE_MMC           1  /* Bit 0: MMC card */
+#define MMCSD_CARDTYPE_SDV1          2  /* Bit 1: SD version 1.x */
+#define MMCSD_CARDTYPE_SDV2          4  /* Bit 1: SD version 2.x with byte addressing */
+#define MMCSD_CARDTYPE_BLOCK         8  /* Bit 2: SD version 2.x with block addressing */
+
+#define IS_MMC(t)   (((t) & MMCSD_CARDTYPE_MMC) != 0)
+#define IS_SD(t)    (((t) & (MMCSD_CARDTYPE_SDV1|MMCSD_CARDTYPE_SDV2)) != 0)
+#define IS_SDV2(t)  (((t) & MMCSD_CARDTYPE_SDV2) != 0)
+#define IS_BLOCK(t) (((t) & MMCSD_CARDTYPE_BLOCK) != 0)
 
 /****************************************************************************
  * Public Types

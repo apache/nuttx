@@ -734,5 +734,8 @@
 	* examples/nsh: Added MMC/SD support for the LM3S6918
 	* arch/arm/src/lm3s: Fix logic for setting and clearing output GPIOs (critical
 	  fix!).
-	* drivers/mmcsd:  Correct frequency calculation based on CSD settings.
+	* drivers/mmcsd:  Found numerous errors in current MMC/SD SPI driver.  Bad frequency
+	  calculation based on CSD settings, inappropriate timeouts, odd code that looks like
+	  a bad search and replace.  Also needs support for SDHC ver 2.x.  New MMC/SD is
+	  largely redesigned and probably non-functional in the first check-in.
 

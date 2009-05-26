@@ -350,8 +350,12 @@ CONFIG_FS_ROMFS=n
 #   Number of MMC/SD slots supported by the driver
 # CONFIG_MMCSD_READONLY
 #   Provide read-only access (default is read/write)
+# CONFIG_MMCSD_SPICLOCK - Maximum SPI clock to drive MMC/SD card.
+#   Default is 20MHz.
+#
 CONFIG_MMCSD_NSLOTS=1
 CONFIG_MMCSD_READONLY=n
+CONFIG_MMCSD_SPICLOCK=12500000
 
 #
 # TCP/IP and UDP support via uIP

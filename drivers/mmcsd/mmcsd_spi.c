@@ -38,15 +38,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <nuttx/compiler.h>
 #include <sys/types.h>
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/spi.h>
 #include <nuttx/fs.h>
 #include <nuttx/mmcsd.h>
@@ -76,6 +78,10 @@
 #  define MMCSD_MODE 0444
 #endif
 
+#ifndef CONFIG_MMCSD_SPICLOCK
+#  define CONFIG_MMCSD_SPICLOCK 20000000
+#endif
+
 /* Slot struct info *********************************************************/
 /* Slot status definitions */
 
@@ -90,7 +96,9 @@
 #define MMCSD_CMDARG_NONE            0
 #define MMCSD_CMDARG_BLKLEN          1
 #define MMCSD_CMDARG_ADDRESS         2
-#define MMCSD_CMDARG_DUMMY           3
+#define MMCSD_CMDARG_NSECT           3
+#define MMCSD_CMDARG_1AA             4
+#define MMCSD_CMDARG_DUMMY           5
 
 /* These define the value returned by the MMC/SD command */
 
@@ -98,13 +106,26 @@
 #define MMCSD_CMDRESP_R1B            1
 #define MMCSD_CMDRESP_R2             2
 #define MMCSD_CMDRESP_R3             3
+#define MMCSD_CMDRESP_R7             4
 
-/* Fudge factor for SD read timeout: ~100msec, Write Time out ~250ms.  Units
- * of Hz.
+/* Time delays in units of the system clock. CLK_TCK is the number of clock
+ * ticks per second.
  */
 
-#define SD_READACCESSHZ              7
-#define SD_WRITEACCESSHZ             3
+#define MMCSD_DELAY_10MS             (CLK_TCK/100 + 1)
+#define MMCSD_DELAY_50MS             (CLK_TCK/20  + 1)
+#define MMCSD_DELAY_100MS            (CLK_TCK/10  + 1)
+#define MMCSD_DELAY_250MS            (CLK_TCK/4  + 1)
+#define MMCSD_DELAY_500MS            (CLK_TCK/2  + 1)
+#define MMCSD_DELAY_1SEC             (CLK_TCK + 1)
+
+#define ELAPSED_TIME(t)              (g_system_timer-(t))
+#define START_TIME                   (g_system_timer)
+
+/* SD read timeout: ~100msec, Write Time out ~250ms.  Units of clock ticks */
+
+#define SD_READACCESS                MMCSD_DELAY_100MS
+#define SD_WRITEACCESS               MMCSD_DELAY_250MS
 
 /****************************************************************************
  * Private Types
@@ -123,6 +144,8 @@ struct mmcsd_slot_s
   uint32 nsectors;       /* Number of blocks on the media */
   uint32 taccess;        /* Card access time */
   uint32 twrite;         /* Card write time */
+  uint32 ocr;            /* Last 4 bytes of OCR (R3) */
+  uint32 r7;             /* Last 4 bytes of R7 */
 };
 
 struct mmcsd_cmdinfo_s
@@ -146,6 +169,8 @@ static int    mmcsd_waitready(FAR struct mmcsd_slot_s *slot);
 static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
                 const struct mmcsd_cmdinfo_s *cmd, uint32 arg);
 static void   mmcsd_setblklen(FAR struct mmcsd_slot_s *slot, uint32 length);
+static uint32 mmcsd_nsac(FAR struct mmcsd_slot_s *slot, ubyte *csd, uint32 frequency);
+static uint32 mmcsd_taac(FAR struct mmcsd_slot_s *slot, ubyte *csd);
 static void   mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd);
 static void   mmcsd_checkwrprotect(FAR struct mmcsd_slot_s *slot, ubyte *csd);
 static int    mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
@@ -153,6 +178,13 @@ static int    mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
 
 #define mmcsd_getcsd(slot, csd) mmcsd_getcardinfo(slot, csd, &g_cmd9);
 #define mmcsd_getcid(slot, cid) mmcsd_getcardinfo(slot, cid, &g_cmd10);
+
+static int    mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
+                 int nbytes);
+#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+static int    mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot, const ubyte *buffer,
+                 int nbytes, ubyte token);
+#endif
 
 /* Block driver interfaces **************************************************/
 
@@ -233,38 +265,46 @@ static const uint32 g_transpeedtu[16] =
  * time from the end bit of the read command to start bit of the data block.
  *
  * The TAAC consists of a 3-bit time unit (TU) and a 4-bit time value (TV).
- * The access we need time is then given by:
+ * TAAC is in units of time; NSAC is in units of SPI clocks.
+ * The access time we need is then given by:
  *
- *   taccess = spifrequency / (TU*TV) + NAC
+ *   taccess = TU*TV + NSAC/spifrequency
  *
- * g_taactu holds the (1 / TU / 100 ) and g_taactv holds (100 / TV) so
- * that taccess can be computed without division.
+ * g_taactu holds TU in units of nanoseconds and microseconds (you have to use
+ * the index to distiguish.  g_taactv holds TV with 8-bits of fraction.
  */
 
-static const uint32 g_taactu[8] =
+#define MAX_USTUNDX 2
+static const uint16 g_taactu[8] =
 {
-  10000000, /* 0:   1 ns -> 1,000,000,000 Hz / 100 = 10,000,000 */
-   1000000, /* 1:  10 ns ->   100,000,000 Hz / 100 =  1,000,000 */
-    100000, /* 2: 100 ns ->    10,000,000 Hz / 100 =    100,000 */
-     10000, /* 3:   1 us ->     1,000,000 Hz / 100 =     10,000 */
-      1000, /* 4:  10 us ->       100,000 Hz / 100 =      1,000 */
-       100, /* 5: 100 us ->        10,000 Hz / 100 =        100 */
-        10, /* 6:   1 ms ->         1,000 Hz / 100 =         10 */
-         1, /* 7:  10 ms ->           100 Hz / 100 =          1 */
+/* Units of nanoseconds */
+
+      1, /* 0:   1 ns */
+     10, /* 1:  10 ns */
+    100, /* 2: 100 ns */
+
+/* Units of microseconds */
+
+      1, /* 3:   1 us 1,000 ns */
+     10, /* 4:  10 us 10,000 ns */
+    100, /* 5: 100 us 100,000 ns */
+   1000, /* 6:   1 ms 1,000,000 ns*/
+  10000, /* 7:  10 ms 10,000,000 ns */
 };
 
-static const uint32 g_taactv[] =
+static const uint16 g_taactv[] =
 {
-   0, 100,  83,  77, /*  0-3:  Reserved, 100/1.0, 100/1.2, 100/1.3 */
-  67,  50,  40,  33, /*  4-7:   100/1.5, 100/2.0, 100/2.5, 100/3.0 */
-  29,  25,  22,  20, /*  8-11:  100/3.5, 100/4.0, 100/4.5, 100/5.0 */
-  18,  17,  14,  13  /* 12-15:  100/5.5, 100/6.0, 100/7.0, 100/8.0 */
+  0x000,  0x100, 0x133, 0x14d, /*  0-3:  Reserved, 1.0, 1.2, 1.3 */
+  0x180,  0x200, 0x280, 0x300, /*  4-7:   1.5, 2.0, 2.5, 3.0 */
+  0x380,  0x400, 0x480, 0x500, /*  8-11:  3.5, 4.0, 4.5, 5.0 */
+  0x580,  0x600, 0x700, 0x800  /* 12-15:  5.5, 6.0, 7.0, 8.0 */
 };
 
 /* Commands *****************************************************************/
 
 static const struct mmcsd_cmdinfo_s g_cmd0   = {0x40, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1};
 static const struct mmcsd_cmdinfo_s g_cmd1   = {0x41, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1};
+static const struct mmcsd_cmdinfo_s g_cmd8   = {0x48, MMCSD_CMDARG_1AA,     MMCSD_CMDRESP_R7};
 static const struct mmcsd_cmdinfo_s g_cmd9   = {0x49, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1};
 static const struct mmcsd_cmdinfo_s g_cmd10  = {0x4a, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1};
 static const struct mmcsd_cmdinfo_s g_cmd12  = {0x4c, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1};
@@ -290,6 +330,7 @@ static const struct mmcsd_cmdinfo_s g_cmd55  = {0x77, MMCSD_CMDARG_NONE,    MMCS
 static const struct mmcsd_cmdinfo_s g_cmd56  = {0x78, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1};
 static const struct mmcsd_cmdinfo_s g_cmd58  = {0x7a, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R3};
 static const struct mmcsd_cmdinfo_s g_cmd59  = {0x7b, MMCSD_CMDARG_DUMMY,   MMCSD_CMDRESP_R1};
+static const struct mmcsd_cmdinfo_s g_acmd23 = {0x69, MMCSD_CMDARG_NSECT,   MMCSD_CMDRESP_R1};
 static const struct mmcsd_cmdinfo_s g_acmd41 = {0x69, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1};
 
 /****************************************************************************
@@ -326,18 +367,22 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   ubyte response;
-  int i;
+  uint32 start;
+  uint32 elapsed;
 
-  /* Wait until the card is no longer busy */
+  /* Wait until the card is no longer busy (up to 500MS) */
 
-  for (i = 0; i < slot->twrite; i++)
+  start = START_TIME;
+  do
     {
       response = SPI_SEND(spi, 0xff);
       if (response == 0xff)
         {
           return OK;
         }
+      elapsed = ELAPSED_TIME(start);
     }
+  while (elapsed < MMCSD_DELAY_500MS);
 
   fdbg("Card still busy, last response: %02x\n", response);
   return -EBUSY;
@@ -391,7 +436,11 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   if (cmd->cmd == 0x40)
     {
-      SPI_SEND(spi, 0x95);
+      SPI_SEND(spi, 0x95);    /* CRC for CMD0 */
+    }
+  else if (cmd->cmd == 0x58)
+    {
+      SPI_SEND(spi, 0x87);    /* CRC for CMD8 */
     }
   else
     {
@@ -416,44 +465,80 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   /* Interpret the response according to the command */
 
+  result = response;
   switch (cmd->resp)
     {
+    /* The R1B response is two bytes long */
+
     case MMCSD_CMDRESP_R1B:
       {
         uint32 busy = 0;
-        for (i = 0; i < slot->twrite && busy != 0xff; i++)
+        uint32 start;
+        uint32 elapsed;
+
+        start = START_TIME;
+        do
           {
             busy = SPI_SEND(spi, 0xff);
+            elapsed = ELAPSED_TIME(start);
           }
-        fvdbg("Return R1B=%02x\n", response);
+        while (elapsed < slot->twrite && busy != 0xff);
+
+        if (busy != 0xff)
+          {
+            fdbg("Failed: card still busy (%02x)\n", busy);
+            SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+            return (uint32)-1;
+          }
+
+        fvdbg("Return R1B=%04x\n", response);
       }
-      return (uint32)response;
+      break;
+
+    /* The R1 response is a single byte */
 
     case MMCSD_CMDRESP_R1:
       {
         fvdbg("Return R1=%02x\n", response);
       }
-      return (uint32)response;
+      break;
+
+    /* The R2 response is two bytes long */
 
     case MMCSD_CMDRESP_R2:
       {
-        result  = ((uint32) response << 8) & 0x0000ff00;
+        result  = ((uint32)(response & 0xff) << 8);
         result |= SPI_SEND(spi, 0xff) & 0xff;
         fvdbg("Return R2=%04x\n", result);
       }
-      return result;
+      break;
+
+    /* The R3 response is 5 bytes long */
 
     case MMCSD_CMDRESP_R3:
+      {
+        slot->ocr  = ((uint32)(response & 0xff) << 24);
+        slot->ocr |= ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 16);
+        slot->ocr |= ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 8);
+        slot->ocr |= SPI_SEND(spi, 0xff) & 0xff;
+        fvdbg("R1=%02x OCR=%08x\n", response, slot->ocr);
+      }
+
+    /* The R7 response is 5 bytes long */
+    case MMCSD_CMDRESP_R7:
     default:
       {
-        result  = ((uint32)response << 24) & 0xff000000;
-        result |= ((uint32)SPI_SEND(spi, 0xff) << 16) & 0x00ff0000;
-        result |= ((uint32)SPI_SEND(spi, 0xff) << 8) & 0x0000ff00;
-        result |= SPI_SEND(spi, 0xff) & 0xff;
-        fvdbg("Return R3=%08x\n", result);
+        slot->r7  = ((uint32)(response & 0xff) << 24);
+        slot->r7 |= ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 16);
+        slot->r7 |= ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 8);
+        slot->r7 |= SPI_SEND(spi, 0xff) & 0xff;
+        fvdbg("R1=%08x R7=%08x\n", response, slot->r7);
       }
-      return result;
+      break;
     }
+
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+  return result;
 }
 
 /****************************************************************************
@@ -469,8 +554,65 @@ static void mmcsd_setblklen(FAR struct mmcsd_slot_s *slot, uint32 length)
   FAR struct spi_dev_s *spi = slot->spi;
   uint32 result;
 
+  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
   result = mmcsd_sendcmd(slot, &g_cmd16, length);
   SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+}
+
+/****************************************************************************
+ * Name: mmcsd_nsac
+ *
+ * Description: Convert the value of the NSAC to millisconds
+ *
+ ****************************************************************************/
+
+static uint32 mmcsd_nsac(FAR struct mmcsd_slot_s *slot, ubyte *csd, uint32 frequency)
+{
+  /* NSAC is 8-bits width and is in units of 100 clock cycles.  Therefore, the
+   * maximum value is 25.5K clock cycles.
+   */
+
+  uint32 nsac = MMCSD_CSD_NSAC(csd) * 100000;
+  return (nsac + (frequency >> 1)) / frequency;
+}
+
+/****************************************************************************
+ * Name: mmcsd_taac
+ *
+ * Description: Convert the value of the TAAC to millisconds
+ *
+ ****************************************************************************/
+
+static uint32 mmcsd_taac(FAR struct mmcsd_slot_s *slot, ubyte *csd)
+{
+  int tundx;
+
+  /*The TAAC consists of a 3-bit time unit (TU) and a 4-bit time value (TV).
+   * TAAC is in units of time; NSAC is in units of SPI clocks.
+   * The access time we need is then given by:
+   *
+   *   taccess = TU*TV + NSAC/spifrequency
+   *
+   * g_taactu holds TU in units of nanoseconds and microseconds (you have to use
+   * the index to distiguish.  g_taactv holds TV with 8-bits of fraction.
+   */
+
+  tundx  = MMCSD_CSD_TAAC_TIMEUNIT(csd);
+  if (tundx <= MAX_USTUNDX)
+    {
+      /* The maximum value of the nanosecond TAAC is 800 ns. The rounded
+       * answer in milliseconds will always be zero.
+       */
+
+      return 0;
+    }
+  else
+    {
+      /* Return the answer in milliseconds */
+
+      uint32 taacus = (g_taactu[tundx]*g_taactv[MMCSD_CSD_TAAC_TIMEVALUE(csd)] + 0x80) >> 8;
+      return (taacus + 500) / 1000;
+    }
 }
 
 /****************************************************************************
@@ -484,6 +626,9 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   uint32 frequency;
+  uint32 readbllen;
+  uint32 csizemult;
+  uint32 csize;
 
   /* Calculate SPI max clock */
 
@@ -491,32 +636,48 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
     g_transpeedtu[MMCSD_CSD_TRANSPEED_TIMEVALUE(csd)] *
     g_transpeedru[MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd)];
 
-  if (frequency > 20000000)
+  if (frequency > CONFIG_MMCSD_SPICLOCK)
     {
-      frequency = 20000000;
+      frequency = CONFIG_MMCSD_SPICLOCK;
     }
 
   /* Set the SPI frequency to that value */
 
   frequency = SPI_SETFREQUENCY(spi, frequency);
 
-  /* Now determine the delay to */
+  /* Now determine the delay to access data */
 
   if (slot->type == MMCSD_CARDTYPE_MMC)
     {
-      slot->taccess =
-        g_taactu[MMCSD_CSD_TAAC_TIMEUNIT(csd)] *
-        g_taactv[MMCSD_CSD_TAAC_TIMEVALUE(csd)];
+      /* The TAAC consists of a 3-bit time unit (TU) and a 4-bit time value (TV).
+       * TAAC is in units of time; NSAC is in units of SPI clocks.
+       * The access time we need is then given by:
+       *
+       *   taccess = TU*TV + NSAC/spifrequency
+       *
+       * First get the access time in milliseconds.
+       */
 
-      slot->taccess  = frequency / slot->taccess;
-      slot->taccess += 1 << (MMCSD_CSD_NSAC(csd) + 4);
-      slot->taccess *= 10;
-      slot->twrite   = slot->taccess * MMCSD_CSD_R2WFACTOR(csd);
+      uint32 taccessms = mmcsd_taac(slot, csd) + mmcsd_nsac(slot, csd, frequency);
+
+      /* Then convert to system clock ticks.  The maximum read access is 10 * the
+       * tacc value: taccess = 10 * taccessms / CLK_TCK / 1000, or
+       */
+
+      slot->taccess = taccessms / CLK_TCK / 100 + 1;
+
+      /* The write access time is larger by the R2WFACTOR */
+
+      slot->twrite = taccessms * MMCSD_CSD_R2WFACTOR(csd) / CLK_TCK / 100 + 1;
     }
   else
     {
-      slot->taccess  = frequency / SD_READACCESSHZ;
-      slot->twrite   = frequency / SD_WRITEACCESSHZ;
+      /* For SD, the average is still given by the TAAC+NSAC, but the
+       * maximum are the constants 100 and 250MS
+       */
+
+      slot->taccess  = SD_READACCESS;
+      slot->twrite   = SD_WRITEACCESS;
     }
 
   fvdbg("Frequency:         %d\n", frequency);
@@ -526,10 +687,10 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
   /* Get the physical geometry of the card: sector size and number of
    * sectors. The card's total capacity is computed from
    *
-   *   capacity = BLOCKNR * BLOCK_LEN
-   *   BLOCKNR = (C_SIZE+1)*MULT
-   *   MULT = 2**(C_SIZE_MULT+2)         (C_SIZE_MULT < 8)
-   *   BLOCK_LEN = 2**READD_BL_LEN       (READ_BL_LEN < 12)
+   *   capacity  = BLOCKNR * BLOCK_LEN
+   *   BLOCKNR   = (C_SIZE+1)*MULT
+   *   MULT      = 2**(C_SIZE_MULT+2)    (C_SIZE_MULT < 8)
+   *   BLOCK_LEN = 2**READ_BL_LEN        (READ_BL_LEN < 12)
    *
    * Or
    *
@@ -540,39 +701,39 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
    *   nsectors = ((C_SIZE+1) << (C_SIZE_MULT + 2))
    */
 
-  if (MMCSD_CSD_CSDSTRUCT(csd) == 1)
+  if (MMCSD_CSD_CSDSTRUCT(csd) != 0)
     {
-      /* SDC ver 2.00 */
+      /* SDC structure ver 2.xx */
       /* Note: On SD card WRITE_BL_LEN is always the same as READ_BL_LEN */
 
-      int readbllen = SD20_CSD_READBLLEN(csd);
-      int csizemult = (SD20_CSD_CSIZEMULT(csd) + 2);
+      readbllen = SD20_CSD_READBLLEN(csd);
+      csizemult = SD20_CSD_CSIZEMULT(csd) + 2;
+      csize     = SD20_CSD_CSIZE(csd) + 1;
+    }
+  else
+    {
+      /* MMC or SD structure ver 1.xx */
+      /* Note: On SD card WRITE_BL_LEN is always the same as READ_BL_LEN */
 
-      /* "To make 2 GByte card, the Maximum Block Length (READ_BL_LEN=WRITE_BL_LEN)
-       *  shall be set to 1024 bytes. However, the Block Length, set by CMD16, shall
-       *  be up to 512 bytes to keep consistency with 512 bytes Maximum Block Length
-       *  cards (Less than and equal 2 Gbyte cards)."
-       */
-#if 0
+      readbllen = MMCSD_CSD_READBLLEN(csd);
+      csizemult = MMCSD_CSD_CSIZEMULT(csd) + 2;
+      csize     = MMCSD_CSD_CSIZE(csd) + 1;
+    }
+
+  /* SDHC cards have fixed sector size of 512 bytes */
+
+  if (IS_SDV2(slot->type))
+    {
       if (readbllen > 9)
         {
           fdbg("Forcing 512 byte sector size\n");
           csizemult   += (readbllen - 9);
           readbllen    = 9;
         }
-#endif
-      slot->sectorsize = 1 << readbllen;
-      slot->nsectors   = (SD20_CSD_CSIZE(csd) + 1) << csizemult;
-    }
-  else
-    {
-      /* MMC or SD ver 1.xx */
-      /* Note: On SD card WRITE_BL_LEN is always the same as READ_BL_LEN */
-
-      slot->sectorsize = 1 << MMCSD_CSD_READBLLEN(csd);
-      slot->nsectors = (MMCSD_CSD_CSIZE(csd) + 1) << (MMCSD_CSD_CSIZEMULT(csd) + 2);
     }
 
+  slot->sectorsize = 1 << readbllen;
+  slot->nsectors   = csize << csizemult;
   fvdbg("Sector size:       %d\n", slot->sectorsize);
   fvdbg("Number of sectors: %d\n", slot->nsectors);
 }
@@ -580,7 +741,7 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
 /****************************************************************************
  * Name: mmcsd_checkwrprotect
  *
- * Description: 
+ * Description:
  *
  ****************************************************************************/
 
@@ -621,7 +782,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
   ubyte response;
   int i;
 
-  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
   SPI_SEND(spi, 0xff);
 
   /* Send the CMD9 or CMD10 */
@@ -672,6 +833,95 @@ errout_with_eio:
 }
 
 /****************************************************************************
+ * Name: mmcsd_recvblock
+ *
+ * Description:  Receive a data block from the card
+ *
+ ****************************************************************************/
+
+static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, ubyte *buffer, int nbytes)
+{
+  FAR struct spi_dev_s *spi = slot->spi;
+  uint32 start;
+  uint32 elapsed;
+  ubyte  token;
+
+  /* Wait up to the maximum to receive a valid data token.  taccess is the
+   * time from when the command is sent until the first byte of data is
+   * received */
+
+  start = START_TIME;
+  do
+    {
+      token = SPI_SEND(spi, 0xff);
+      elapsed = ELAPSED_TIME(start);
+    }
+  while (token == 0xff && elapsed < slot->taccess);
+
+  if (token == MMCSD_SPIDT_STARTBLKSNGL)
+    {
+      /* Receive the block */
+
+      SPI_RECVBLOCK(spi, buffer, nbytes);
+
+      /* Discard the CRC */
+
+      SPI_SEND(spi, 0xff);
+      SPI_SEND(spi, 0xff);
+      return OK;
+    }
+
+  fdbg("Did not received data token (%02x)\n", token);
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name: mmcsd_xmitblock
+ *
+ * Description:  Transmit a data block to the card
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+static int mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot, const ubyte *buffer,
+                           int nbytes, ubyte token)
+{
+  FAR struct spi_dev_s *spi = slot->spi;
+  ubyte response;
+
+  /* Start the block transfer:
+   * 1. 0xff (sync)
+   * 2. 0xfe or 0xfc (start of block token)
+   * 3. Followed by the block of data and 2 byte CRC
+   */
+
+  SPI_SEND(spi, 0xff);                     /* sync */
+  SPI_SEND(spi, token);                    /* data token */
+
+  /* Transmit the block to the MMC/SD card */
+
+  (void)SPI_SNDBLOCK(spi, buffer, nbytes);
+
+  /* Add the bogus CRC.  By default, the SPI interface is initialized in
+   * non-protected mode.  However, we still have to send bogus CRC values
+   */
+
+  SPI_SEND(spi, 0xff);
+  SPI_SEND(spi, 0xff);
+
+  /* Now get the data response */
+
+  response = SPI_SEND(spi, 0xff);
+  if ((response & MMCSD_SPIDR_MASK) != MMCSD_SPIDR_ACCEPTED)
+    {
+      fdbg("Bad data response: %02x\n", response);
+      return -EIO;
+    }
+  return OK;
+}
+#endif /* CONFIG_FS_WRITABLE && !CONFIG_MMCSD_READONLY */
+
+/****************************************************************************
  * Block Driver Operations
  ****************************************************************************/
 
@@ -714,7 +964,7 @@ static int mmcsd_open(FAR struct inode *inode)
   /* Select the slave */
 
   mmcsd_semtake(&slot->sem);
-  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
 
   /* Verify that the MMC/SD card is alive and ready for business */
 
@@ -751,8 +1001,8 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   FAR struct spi_dev_s *spi;
   size_t nbytes;
   off_t  offset;
-  ubyte response;
-  int i;
+  ubyte  response;
+  int    i;
 
   fvdbg("start_sector=%d nsectors=%d\n", start_sector, nsectors);
 
@@ -801,66 +1051,85 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   /* Convert sector and nsectors to nbytes and byte offset */
 
   nbytes = nsectors * slot->sectorsize;
-  offset = start_sector * slot->sectorsize;
-  fvdbg("nbytes=%d offset=%d\n", nbytes, offset);
+  if (IS_BLOCK(slot->type))
+    {
+      offset = start_sector;
+      fvdbg("nbytes=%d sector offset=%d\n", nbytes, offset);
+    }
+  else
+    {
+      offset = start_sector * slot->sectorsize;
+      fvdbg("nbytes=%d byte offset=%d\n", nbytes, offset);
+    }
 
   /* Select the slave and synchronize */
 
   mmcsd_semtake(&slot->sem);
-  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
   SPI_SEND(spi, 0xff);
 
-  /* Send CMD17: Reads a block of the size selected by the SET_BLOCKLEN
-   * command and verify that good R1 status is returned
-   */
+  /* Single or multiple block read? */
 
-  response = mmcsd_sendcmd(slot, &g_cmd17, offset);
-  if (response != MMCSD_SPIR1_OK)
+  if (nsectors == 1)
     {
-      fdbg("CMD17 failed: R1=%02x\n", response);
-      goto errout_with_eio;
-    }
-
-  /* Loop only for the computed timeout */
-
-  for (i = 0; i < slot->taccess; i++)
-    {
-      /* Synchronize */
-
-      response = SPI_SEND(spi, 0xff);
-      fvdbg("(%d) SPI send returned %02x\n", i, response);
-
-      /* If a read operation fails and the card cannot provide the requested
-       * data, it will send a data error token instead.  The 4 least
-       * significant bits are the same as those in the R2 response.
+      /* Send CMD17: Reads a block of the size selected by the SET_BLOCKLEN
+       * command and verify that good R1 status is returned
        */
 
-      if (response != 0 && (response & MMCSD_SPIDET_UPPER) == 0)
+      response = mmcsd_sendcmd(slot, &g_cmd17, offset);
+      if (response != MMCSD_SPIR1_OK)
         {
-          fdbg("(%d) Data transfer error: %02x\n", i, response);
+          fdbg("CMD17 failed: R1=%02x\n", response);
           goto errout_with_eio;
         }
-      else if (response == MMCSD_SPIDT_STARTBLKSNGL)
+
+      /* Receive the block */
+
+      if (mmcsd_recvblock(slot, buffer, slot->sectorsize) != 0)
         {
-          /* Receive the block of data */
-
-          SPI_RECVBLOCK(spi, buffer, nbytes);
-
-          /* Receive and ignore the two CRC bytes */
-
-          SPI_SEND(spi, 0xff);
-          SPI_SEND(spi, 0xff);
-
-          /* On success, return the number of sectors transfer */
-
-          SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-          mmcsd_semgive(&slot->sem);
-
-          fvdbg("(%d) Read %d bytes:\n", i, nbytes);
-          mmcsd_dumpbuffer(buffer, nbytes);
-          return nsectors;
+          fdbg("Failed: to receive the block\n");
+          goto errout_with_eio;
         }
     }
+  else
+    {
+      /* Send CMD17: Reads a block of the size selected by the SET_BLOCKLEN
+       * command and verify that good R1 status is returned
+       */
+
+      response = mmcsd_sendcmd(slot, &g_cmd18, offset);
+      if (response != MMCSD_SPIR1_OK)
+        {
+          fdbg("CMD118 failed: R1=%02x\n", response);
+          goto errout_with_eio;
+        }
+
+      /* Receive each block */
+
+      for (i = 0; i < nsectors; i++)
+        {
+          if (mmcsd_recvblock(slot, buffer, slot->sectorsize) != 0)
+            {
+              fdbg("Failed: to receive the block\n");
+              goto errout_with_eio;
+            }
+         buffer += slot->sectorsize;
+       }
+
+      /* Send CMD12: Stops transmission */
+
+      response = mmcsd_sendcmd(slot, &g_cmd12, 0);
+    }
+
+  /* On success, return the number of sectors transfer */
+
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+  SPI_SEND(spi, 0xff);
+  mmcsd_semgive(&slot->sem);
+
+  fvdbg("(%d) Read %d bytes:\n", elapsed, nbytes);
+  mmcsd_dumpbuffer(buffer, nbytes);
+  return nsectors;
 
 errout_with_eio:
   SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
@@ -886,6 +1155,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   off_t  offset;
   ubyte response;
   int ret;
+  int i;
 
   fvdbg("start_sector=%d nsectors=%d\n", start_sector, nsectors);
 
@@ -942,74 +1212,102 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   /* Convert sector and nsectors to nbytes and byte offset */
 
   nbytes = nsectors * slot->sectorsize;
-  offset = start_sector * slot->sectorsize;
-  fvdbg("Writing %d bytes to offset %d:\n", nbytes, offset);
+  if (IS_BLOCK(slot->type))
+    {
+      offset = start_sector;
+      fvdbg("nbytes=%d sector offset=%d\n", nbytes, offset);
+    }
+  else
+    {
+      offset = start_sector * slot->sectorsize;
+      fvdbg("nbytes=%d byte offset=%d\n", nbytes, offset);
+    }
   mmcsd_dumpbuffer(buffer, nbytes);
 
   /* Select the slave and synchronize */
 
   mmcsd_semtake(&slot->sem);
-  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
   SPI_SEND(spi, 0xff);
 
-  /* Send CMD24 (WRITE_BLOCK) and verify that good R1 status is returned */
+  /* Single or multiple block transfer? */
 
-  response = mmcsd_sendcmd(slot, &g_cmd24, offset);
-  if (response != MMCSD_SPIR1_OK)
+  if (nsectors == 1)
     {
-      fdbg("CMD24 failed: R1=%02x\n", response);
-      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-      ret = -EIO;
-      goto errout_with_sem;
+      /* Send CMD24 (WRITE_BLOCK) and verify that good R1 status is returned */
+
+      response = mmcsd_sendcmd(slot, &g_cmd24, offset);
+      if (response != MMCSD_SPIR1_OK)
+        {
+          fdbg("CMD24 failed: R1=%02x\n", response);
+          goto errout_with_sem;
+        }
+
+      /* Then transfer the sector */
+
+      if (mmcsd_xmitblock(slot, buffer, slot->sectorsize, 0xfe) != 0)
+        {
+          fdbg("Block transfer failed\n");
+          goto errout_with_sem;
+        }
     }
-
-  /* Start the block transfer:
-   * 1. 0xff (sync)
-   * 2. 0xfe (start of block)
-   * 3. Followed by the block of data
-   */
-
-  SPI_SEND(spi, 0xff);
-  SPI_SEND(spi, MMCSD_SPIDT_STARTBLKSNGL);
-  (void)SPI_SNDBLOCK(spi, buffer, nbytes);
-
-  /* Add the bogus CRC.  By default, the SPI interface is initialized in
-   * non-protected mode.  However, we still have to send bogus CRC values
-   */
-
-  SPI_SEND(spi, 0xff);
-  SPI_SEND(spi, 0xff);
-
-  /* Now get the data response */
-
-  response = SPI_SEND(spi, 0xff);
-  if ((response & MMCSD_SPIDR_MASK) != MMCSD_SPIDR_ACCEPTED)
+  else
     {
-      fdbg("Bad data response: %02x\n", response);
-      ret = -EIO;
-      goto errout_with_sem;
+      /* Set the number of blocks to be pre-erased (SD only) */
+
+      if (IS_SD(slot->type))
+        {
+          response = mmcsd_sendcmd(slot, &g_acmd23, nsectors);
+          if (response != MMCSD_SPIR1_OK)
+            {
+              fdbg("ACMD23 failed: R1=%02x\n", response);
+              goto errout_with_sem;
+            }
+       }
+
+      /* Send CMD25:  Continuously write blocks of data until the
+       * tranmission is stopped.
+       */
+
+      response = mmcsd_sendcmd(slot, &g_cmd25, offset);
+      if (response != MMCSD_SPIR1_OK)
+        {
+          fdbg("CMD25 failed: R1=%02x\n", response);
+          goto errout_with_sem;
+        }
+
+      /* Transmit each block */
+
+      for (i = 0; i < nsectors; i++)
+        {
+          if (mmcsd_xmitblock(slot, buffer, slot->sectorsize, 0xfc) != 0)
+            {
+              fdbg("Failed: to receive the block\n");
+              goto errout_with_sem;
+            }
+          buffer += slot->sectorsize;
+        }
+
+      /* Send the stop transmission token */
+
+      SPI_SEND(spi, MMCSD_SPIDT_STOPTRANS);
     }
 
   /* Wait until the card is no longer busy */
 
   ret = mmcsd_waitready(slot);
   SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+  SPI_SEND(spi, 0xff);
   mmcsd_semgive(&slot->sem);
-
-  /* Verify that the card successfully became non-busy */
-
-  if (ret < 0)
-    {
-      return ret;
-    }
 
   /* The success return value is the number of sectors written */
 
   return nsectors;
 
 errout_with_sem:
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   mmcsd_semgive(&slot->sem);
-  return ret;
+  return -EIO;
 }
 #endif
 
@@ -1118,6 +1416,8 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   FAR struct spi_dev_s *spi = slot->spi;
   ubyte csd[16];
   uint32 result = MMCSD_SPIR1_IDLESTATE;
+  uint32 start;
+  uint32 elapsed;
   int i, j;
 
   /* Assume that the card is not ready (we'll clear this on successful car
@@ -1145,7 +1445,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   /* Set the maximum access time out */
 
-  slot->taccess = MMCSD_IDMODE_CLOCK / SD_READACCESSHZ;
+  slot->taccess = SD_READACCESS;
 
   /* The SD card wakes up in SD mode. It will enter SPI mode if the chip select signal is
    * asserted (negative) during the reception of the reset command (CMD0) and the card is in
@@ -1157,7 +1457,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   fvdbg("Send CMD0\n");
   for (i = 0; i < 2; i++)
     {
-      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+      SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
 
       for (j = 10; j; j--)
         {
@@ -1186,62 +1486,141 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
       return -EIO;
     }
 
-  /* Determinate Card type SD or MMC */
+  slot->type = MMCSD_CARDTYPE_UNKNOWN;
 
-  slot->type = MMCSD_CARDTYPE_MMC;
+  /* Check for SDHC Version 2.x.  CMD 8 is reserved on SD version 1.0 and MMC. */
 
-  for (i = 100; i; --i)
+  fvdbg("Send CMD8\n");
+  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
+  SPI_SEND(spi, 0xff);
+  result = mmcsd_sendcmd(slot, &g_cmd8, 0x1aa);
+
+  if (result == MMCSD_SPIR1_IDLESTATE)
     {
-      fvdbg("%d. Send CMD55\n", i);
-      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-      SPI_SEND(spi, 0xff);
-      result = mmcsd_sendcmd(slot, &g_cmd55, 0);
-      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+      /* Should also check the operating voltage here */
 
-      fvdbg("%d. Send ACMD41\n", i);
-      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-      SPI_SEND(spi, 0xff);
-      result = mmcsd_sendcmd(slot, &g_acmd41, 0);
-      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-
-      /* If this is an MMC card, it will response with ILLEGAL COMMAND */
-
-      if (result & MMCSD_SPIR1_ILLEGALCMD)
+      if ((slot->r7 & MMCSD_SPIR7_ECHO_MASK) == 0xaa)
         {
-          /* MMC card may be CMD1 for MMC Init sequence will be complete within 
-           * 500ms */
+          /* Try CMD55/ACMD41 up to 100 times */
 
-          for (i = 100; i; --i)
+          start   = START_TIME;
+          elapsed = 0;
+          do
             {
-              fvdbg("%d. Send CMD1\n", i);
-              SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+              fvdbg("%d. Send CMD55\n", i);
               SPI_SEND(spi, 0xff);
-              result = mmcsd_sendcmd(slot, &g_cmd1, 0);
-              SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
-
-              if (result == MMCSD_SPIR1_OK)
+              result = mmcsd_sendcmd(slot, &g_cmd55, 0);
+              if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
                 {
-                  fvdbg("%d. Identified MMC card\n", i);
-                  slot->type = MMCSD_CARDTYPE_MMC;
-                  break;
+                  fvdbg("%d. Send ACMD41\n", i);
+                  SPI_SEND(spi, 0xff);
+                  result = mmcsd_sendcmd(slot, &g_acmd41, 1 << 30);
+                  if (result == MMCSD_SPIR1_OK)
+                    {
+                      break;
+                    }
                 }
-              up_mdelay(50);
+              elapsed = ELAPSED_TIME(start);
             }
-          break;
-        }
-      else if (result == MMCSD_SPIR1_OK)
-        {
-          fvdbg("%d. Identified SD card\n", i);
-          slot->type = MMCSD_CARDTYPE_SD;
-          break;
-        }
+          while (elapsed < MMCSD_DELAY_1SEC);
 
-      up_mdelay(50);
+          /* Check if ACMD41 was sent successfully */
+
+          if (elapsed < MMCSD_DELAY_1SEC)
+           {
+             fvdbg("Send CMD58\n");
+             SPI_SEND(spi, 0xff);
+             result = mmcsd_sendcmd(slot, &g_cmd58, 0);
+             if (result == MMCSD_SPIR1_OK)
+               {
+                  fvdbg("OCR: %08x\n", slot->ocr);
+                  if ((slot->ocr & MMCSD_OCR_CCS) != 0)
+                    {
+                      fdbg("Identified SD ver2 card/with block access\n");
+                      slot->type = MMCSD_CARDTYPE_SDV2|MMCSD_CARDTYPE_BLOCK;
+                    }
+                  else
+                    {
+                      fdbg("Identified SD ver2 card\n");
+                      slot->type = MMCSD_CARDTYPE_SDV2;
+                    }
+               }
+           }
+        }
     }
 
-  if (i == 0)
+  /* Check for SDC version 1.x or MMC */
+
+  else
     {
-      fdbg("Retry exhausted\n");
+      /* Both the MMC card and the SD card support CMD55 */
+
+      fvdbg("Send CMD55\n");
+      SPI_SEND(spi, 0xff);
+      result = mmcsd_sendcmd(slot, &g_cmd55, 0);
+      if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
+        {
+          /* But ACMD41 is supported only on SD */
+
+          fvdbg("Send ACMD41\n");
+          SPI_SEND(spi, 0xff);
+          result = mmcsd_sendcmd(slot, &g_acmd41, 0);
+          if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
+            {
+              fdbg("Identified SD ver1 card\n");
+              slot->type = MMCSD_CARDTYPE_SDV1;
+            }
+        }
+
+      /* Make sure that we are out of the Idle state */
+
+      start   = START_TIME;
+      elapsed = 0;
+      do
+        {
+          if (IS_SD(slot->type))
+            {
+              fvdbg("%d. Send CMD55\n", i);
+              result = mmcsd_sendcmd(slot, &g_cmd55, 0);
+              if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
+                {
+                  fvdbg("%d. Send ACMD41\n", i);
+                  SPI_SEND(spi, 0xff);
+                  result = mmcsd_sendcmd(slot, &g_acmd41, 0);
+                  if (result == MMCSD_SPIR1_OK)
+                    {
+                       break;
+                    }
+                }
+            }
+          else
+            {
+              fvdbg("%d. Send CMD1\n", i);
+              SPI_SEND(spi, 0xff);
+              result = mmcsd_sendcmd(slot, &g_cmd1, 0);
+              if (result == MMCSD_SPIR1_OK)
+                {
+                   fdbg("%d. Identified MMC card\n", i);
+                   slot->type = MMCSD_CARDTYPE_MMC;
+                   break;
+                }
+             }
+          elapsed = ELAPSED_TIME(start);
+        }
+      while (elapsed < MMCSD_DELAY_1SEC);
+
+      if (elapsed >= MMCSD_DELAY_1SEC)
+        {
+          fdbg("Failed to exit IDLE state\n");
+          SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+          return -EIO;
+        }
+    }
+
+  if (slot->type == MMCSD_CARDTYPE_UNKNOWN)
+    {
+      fdbg("Failed to identify card\n");
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
       return -EIO;
     }
 
@@ -1252,31 +1631,25 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   if (result != OK)
     {
       fdbg("mmcsd_getcsd(CMD9) failed: %d\n", result);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
       return -EIO;
     }
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
-  if (slot->type == MMCSD_CARDTYPE_MMC)
-    {
-      fdbg("Found MMC card\n");
-    }
-  else if (MMCSD_CSD_CSDSTRUCT(csd) == 1)
-    {
-      fdbg("Found SDHC card\n");
-    }
-  else
-    {
-      fdbg("Found SD card\n");
-    }
   mmcsd_dmpcsd(csd, slot->type);
-#endif
 
   /* CSD data and set block size */
 
   mmcsd_decodecsd(slot, csd);
   mmcsd_checkwrprotect(slot, csd);
-  mmcsd_setblklen(slot, slot->sectorsize);
+
+  /* SD Version block length is always 512 */
+
+  if (!IS_SDV2(slot->type))
+    {
+      mmcsd_setblklen(slot, slot->sectorsize);
+    }
+
   slot->state &= ~MMCSD_SLOTSTATUS_NOTREADY;
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
   return OK;
 }
 

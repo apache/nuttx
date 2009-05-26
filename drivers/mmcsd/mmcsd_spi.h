@@ -79,6 +79,15 @@
 #define MMCSD_SPIR2_ADDRERROR     0x2000 /* Address error */
 #define MMCSD_SPIR2_PARAMERROR    0x4000 /* Parameter error */
 
+/* Last 4 bytes of the 5 byte R7 response */
+
+#define MMCSD_SPIR7_VERSION_SHIFT 28     /* Bits 28-31: Command version number */
+#define MMCSD_SPIR7_VERSION_MASK  (0x0f << MMCSD_SPIR7_VERSION_SHIFT)
+#define MMCSD_SPIR7_VOLTAGE_SHIFT 8      /* Bits 8-11: Voltage accepted */
+#define MMCSD_SPIR7_VOLTAGE_MASK  (0x0f << MMCSD_SPIR7_VOLTAGE_SHIFT)
+#define MMCSD_SPIR7_ECHO_SHIFT    0      /* Bits 0-7: Echoed check pattern */
+#define MMCSD_SPIR7_ECHO_MASK     (0x0f << MMCSD_SPIR7_ECHO_SHIFT)
+
 /* Data Response */
 
 #define MMCSD_SPIDR_MASK          0x1f   /* Mask for valid data response bits */
@@ -99,6 +108,20 @@
 #define MMCSD_SPIDET_CCERROR      0x02   /* CC error */
 #define MMCSD_SPIDET_CARDECCFAIL  0x04   /* Card ECC failed */
 #define MMCSD_SPIDET_OUTOFRANGE   0x08   /* Out of range */
+
+/* Operating Conditions register */
+
+#define MMCSD_OCR_V27             (1 << 15) /* Bit 15: 2.7-2.8V */
+#define MMCSD_OCR_V28             (1 << 16) /* Bit 16: 2.8-2.9V */
+#define MMCSD_OCR_V29             (1 << 17) /* Bit 17: 2.9-3.0V */
+#define MMCSD_OCR_V30             (1 << 18) /* Bit 18: 3.0-3.1V */
+#define MMCSD_OCR_V31             (1 << 19) /* Bit 19: 3.1-3.2V */
+#define MMCSD_OCR_V32             (1 << 20) /* Bit 20: 3.2-3.3V */
+#define MMCSD_OCR_V33             (1 << 21) /* Bit 21: 3.3-3.4V */
+#define MMCSD_OCR_V34             (1 << 22) /* Bit 22: 3.4-3.5V */
+#define MMCSD_OCR_V35             (1 << 23) /* Bit 23: 3.5-3.6V */
+#define MMCSD_OCR_CCS             (1 << 30) /* Bit 30: Card capacity status */
+#define MMCSD_OCR_BUSY            (1 << 31) /* Bit 31: Card powered up status bit */
 
 /****************************************************************************
  * Public Types
