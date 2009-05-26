@@ -59,23 +59,27 @@
  * Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with CONFIG_DEBUG_VERBOSE
- * too)
- */
+/* Enables debug output from this file (needs CONFIG_DEBUG too) */
 
-#undef SSI_DEBUG  /* Define to enable debug */
+#undef SSI_DEBUG   /* Define to enable debug */
+#undef SSI_VERBOSE /* Define to enable verbose debug */
 
 #ifdef SSI_DEBUG
 #  define ssidbg  lldbg
-#  define ssivdbg llvdbg
+#  ifdef SSI_VERBOSE
+#    define ssivdbg lldbg
+#  else
+#    define ssivdbg(x...)
+#  endif
 #else
+#  undef SSI_VERBOSE
 #  define ssidbg(x...)
 #  define ssivdbg(x...)
 #endif
 
 /* Dump GPIO registers */
 
-#ifdef SSI_DEBUG
+#ifdef SSI_VERBOSE
 #  define ssi_dumpgpio(m) lm3s_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssi_dumpgpio(m)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_spi.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,47 @@
  ****************************************************************************/
 
 /* SPI *******************************************************************/
+
+/* SPI Command Set */
+
+#define CMD0   0x40  /* GO_IDLE_STATE: Resets all cards to idle state */
+#define CMD1   0x41  /* SEND_OP_COND: Sends capacity support information */
+#define CMD6   0x46  /* SWITCH_FUNC: Checks switchable function */
+#define CMD8   0x48  /* SEND_IF_COND: Sends SD Memory Card interface condition */
+#define CMD9   0x49  /* SEND_CSD: Asks  card to send its card specific data (CSD) */
+#define CMD10  0x4a  /* SEND_CID: Asks card to send its card identification (CID) */
+#define CMD12  0x4c  /* STOP_TRANSMISSION: Forces the card to stop transmission */
+#define CMD13  0x4d  /* SEND_STATUS: Asks card to send its status register */
+#define CMD16  0x50  /* SET_BLOCKLEN: Sets a block length (in bytes) */
+#define CMD17  0x51  /* READ_SINGLE_BLOCK: Reads a block of the selected size */
+#define CMD18  0x52  /* READ_MULTIPLE_BLOCK: Continuously transfers blocks from card to host */
+#define CMD20  0x54  /* CMD_WRITEBLOCK: Write block to memory (MMC) */
+#define CMD24  0x58  /* WRITE_BLOCK: Writes a block of the selected size */
+#define CMD25  0x59  /* WRITE_MULTIPLE_BLOCK: Continuously writes blocks of data */
+#define CMD27  0x5b  /* PROGRAM_CSD: Set programmable bits of the CSD */
+#define CMD28  0x5c  /* SET_WRITE_PROT: Sets the write protection bit of group */
+#define CMD29  0x5d  /* CLR_WRITE_PROT: Clears the write protection bit of group */
+#define CMD30  0x5e  /* SEND_WRITE_PROT: Asks card to send state of write protection bits */
+#define CMD32  0x60  /* ERASE_WR_BLK_START_ADDR: Sets address of first block to erase */
+#define CMD33  0x61  /* ERASE_WR_BLK_END_ADDR: Sets address of last block to erase */
+#define CMD34  0x62  /* UNTAG_SECTOR: (MMC) */
+#define CMD35  0x63  /* TAG_ERASE_GROUP_START: (MMC) */
+#define CMD36  0x64  /* TAG_ERASE_GOUPR_END: (MMC) */
+#define CMD37  0x65  /* UNTAG_ERASE_GROUP: (MMC) */
+#define CMD38  0x66  /* ERASE: Erases all previously selected write blocks */
+#define CMD40  0x68  /* CRC_ON_OFF: (MMC) */
+#define CMD42  0x6a  /* LOCK_UNLOCK: Used to Set/Reset the Password or lock/unlock card */
+#define CMD55  0x77  /* APP_CMD: Tells card that the next command is an application specific command */
+#define CMD56  0x78  /* GEN_CMD: Used transfer a block to or get block from card */
+#define CMD58  0x7a  /* READ_OCR :Reads the OCR register of a card */
+#define CMD59  0x7b  /* CRC_ON_OFF: Turns the CRC option on or off */
+#define ACMD13 0x4d  /* SD_STATUS: Send the SD Status */
+#define ACMD22 0x56  /* SEND_NUM_WR_BLOCKS: Send number of the errorfree blocks */
+#define ACMD23 0x57  /* SET_WR_BLK_ERASE_COUNT: Set number blocks to erase before writing */
+#define ACMD41 0x69  /* SD_SEND_OP_COND: Sends host capacity support information */
+#define ACMD42 0x6a  /* SET_CLR_CARD_DETECT: Connect/disconnect pull-up resistor on CS */
+#define ACMD51 0x73  /* SEND_SCR: Reads the SD Configuration Register (SCR) */
+
 /* SPI 8-bit R1 response */
 
 #define MMCSD_SPIR1_OK            0x00 /* No error bits set */
