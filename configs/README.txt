@@ -286,6 +286,8 @@ defconfig -- This is a configuration file similar to the Linux
 		  driver. Default is one.
 		CONFIG_MMCSD_READONLY -  Provide read-only access.  Default is
 		  Read/Write
+		CONFIG_MMCSD_SPICLOCK - Maximum SPI clock to drive MMC/SD card.
+		  Default is 20MHz.
 
 	TCP/IP and UDP support via uIP
 		CONFIG_NET - Enable or disable all network features
