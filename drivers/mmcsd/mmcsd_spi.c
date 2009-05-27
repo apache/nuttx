@@ -90,15 +90,6 @@
 #define MMCSD_SLOTSTATUS_MEDIACHGD   0x08 /* Media changed in slot */
 
 /* Values in the MMC/SD command table ***************************************/
-/* These define the expected arguments of the MMC/SD command */
-
-#define MMCSD_CMDARG_NONE            0
-#define MMCSD_CMDARG_BLKLEN          1
-#define MMCSD_CMDARG_ADDRESS         2
-#define MMCSD_CMDARG_NSECT           3
-#define MMCSD_CMDARG_1AA             4
-#define MMCSD_CMDARG_DUMMY           5
-
 /* These define the value returned by the MMC/SD command */
 
 #define MMCSD_CMDRESP_R1             0
@@ -117,6 +108,7 @@
 #define MMCSD_DELAY_250MS            (CLK_TCK/4  + 1)
 #define MMCSD_DELAY_500MS            (CLK_TCK/2  + 1)
 #define MMCSD_DELAY_1SEC             (CLK_TCK + 1)
+#define MMCSD_DELAY_10SEC            (10 * CLK_TCK + 1)
 
 #define ELAPSED_TIME(t)              (g_system_timer-(t))
 #define START_TIME                   (g_system_timer)
@@ -150,7 +142,6 @@ struct mmcsd_slot_s
 struct mmcsd_cmdinfo_s
 {
   ubyte  cmd;
-  ubyte  arg;
   ubyte  resp;
   ubyte  chksum;
 };
@@ -219,10 +210,10 @@ static const struct block_operations g_bops =
 #if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
   mmcsd_write,    /* write    */
 #else
-  NULL,        /* write    */
+  NULL,           /* write    */
 #endif
   mmcsd_geometry, /* geometry */
-  NULL         /* ioctl    */
+  NULL            /* ioctl    */
 };
 
 /* A slot structure allocated for each configured slot */
@@ -277,13 +268,13 @@ static const uint32 g_transpeedtu[16] =
 #define MAX_USTUNDX 2
 static const uint16 g_taactu[8] =
 {
-/* Units of nanoseconds */
+  /* Units of nanoseconds */
 
       1, /* 0:   1 ns */
      10, /* 1:  10 ns */
     100, /* 2: 100 ns */
 
-/* Units of microseconds */
+  /* Units of microseconds */
 
       1, /* 3:   1 us 1,000 ns */
      10, /* 4:  10 us 10,000 ns */
@@ -302,21 +293,21 @@ static const uint16 g_taactv[] =
 
 /* Commands *****************************************************************/
 
-static const struct mmcsd_cmdinfo_s g_cmd0   = {CMD0,   MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1, 0x95};
-static const struct mmcsd_cmdinfo_s g_cmd1   = {CMD1,   MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd8   = {CMD8,   MMCSD_CMDARG_1AA,     MMCSD_CMDRESP_R7, 0x87};
-static const struct mmcsd_cmdinfo_s g_cmd9   = {CMD9,   MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd10  = {CMD10,  MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd12  = {CMD12,  MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd16  = {CMD16,  MMCSD_CMDARG_BLKLEN,  MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd17  = {CMD17,  MMCSD_CMDARG_ADDRESS, MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd18  = {CMD18,  MMCSD_CMDARG_ADDRESS, MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd24  = {CMD24,  MMCSD_CMDARG_ADDRESS, MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd25  = {CMD25,  MMCSD_CMDARG_ADDRESS, MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd55  = {CMD55,  MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_cmd58  = {CMD58,  MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R3, 0xff};
-static const struct mmcsd_cmdinfo_s g_acmd23 = {ACMD23, MMCSD_CMDARG_NSECT,   MMCSD_CMDRESP_R1, 0xff};
-static const struct mmcsd_cmdinfo_s g_acmd41 = {ACMD41, MMCSD_CMDARG_NONE,    MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd0   = {CMD0,   MMCSD_CMDRESP_R1, 0x95};
+static const struct mmcsd_cmdinfo_s g_cmd1   = {CMD1,   MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd8   = {CMD8,   MMCSD_CMDRESP_R7, 0x87};
+static const struct mmcsd_cmdinfo_s g_cmd9   = {CMD9,   MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd10  = {CMD10,  MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd12  = {CMD12,  MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd16  = {CMD16,  MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd17  = {CMD17,  MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd18  = {CMD18,  MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd24  = {CMD24,  MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd25  = {CMD25,  MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd55  = {CMD55,  MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_cmd58  = {CMD58,  MMCSD_CMDRESP_R3, 0xff};
+static const struct mmcsd_cmdinfo_s g_acmd23 = {ACMD23, MMCSD_CMDRESP_R1, 0xff};
+static const struct mmcsd_cmdinfo_s g_acmd41 = {ACMD41, MMCSD_CMDRESP_R1, 0xff};
 
 /****************************************************************************
  * Private Functions
@@ -399,22 +390,12 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
   SPI_SEND(spi, cmd->cmd);
 
-  /* Send command's arguments */
+  /* Send command's arguments (should be zero if there are no arguements) */
 
-  if (cmd->arg == MMCSD_CMDARG_NONE)
-    {
-      SPI_SEND(spi, 0x00);
-      SPI_SEND(spi, 0x00);
-      SPI_SEND(spi, 0x00);
-      SPI_SEND(spi, 0x00);
-    }
-  else
-    {
-      SPI_SEND(spi, arg >> 24);
-      SPI_SEND(spi, arg >> 16);
-      SPI_SEND(spi, arg >> 8);
-      SPI_SEND(spi, arg);
-    }
+  SPI_SEND(spi, (arg >> 24) & 0xff);
+  SPI_SEND(spi, (arg >> 16) & 0xff);
+  SPI_SEND(spi, (arg >> 8) & 0xff);
+  SPI_SEND(spi, arg & 0xff);
 
   /* Send CRC if needed.  The SPI interface is initialized in non-protected
    * mode.  However, the reset command (CMD0) and CMD8 are received by the
@@ -473,7 +454,8 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
             return (uint32)-1;
           }
 
-        fvdbg("Return R1B=%04x\n", response);
+        fvdbg("CMD%d[%08x] R1B=%02x\n",
+              cmd->cmd & 0x3f, arg, response);
       }
       break;
 
@@ -481,7 +463,8 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
     case MMCSD_CMDRESP_R1:
       {
-        fvdbg("Return R1=%02x\n", response);
+        fvdbg("CMD%d[%08x] R1=%02x\n",
+              cmd->cmd & 0x3f, arg, response);
       }
       break;
 
@@ -491,7 +474,9 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
       {
         result  = ((uint32)(response & 0xff) << 8);
         result |= SPI_SEND(spi, 0xff) & 0xff;
-        fvdbg("Return R2=%04x\n", result);
+
+        fvdbg("CMD%d[%08x] R2=%04x\n",
+              cmd->cmd & 0x3f, arg, result);
       }
       break;
 
@@ -499,22 +484,26 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
 
     case MMCSD_CMDRESP_R3:
       {
-        slot->ocr  = ((uint32)(response & 0xff) << 24);
+        slot->ocr  = ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 24);
         slot->ocr |= ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 16);
         slot->ocr |= ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 8);
         slot->ocr |= SPI_SEND(spi, 0xff) & 0xff;
-        fvdbg("R1=%02x OCR=%08x\n", response, slot->ocr);
+
+        fvdbg("CMD%d[%08x] R1=%02x OCR=%08x\n",
+              cmd->cmd & 0x3f, arg, response, slot->ocr);
       }
 
     /* The R7 response is 5 bytes long */
     case MMCSD_CMDRESP_R7:
     default:
       {
-        slot->r7  = ((uint32)(response & 0xff) << 24);
+        slot->r7  = ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 24);
         slot->r7 |= ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 16);
         slot->r7 |= ((uint32)(SPI_SEND(spi, 0xff) & 0xff) << 8);
         slot->r7 |= SPI_SEND(spi, 0xff) & 0xff;
-        fvdbg("R1=%02x R7=%08x\n", response, slot->r7);
+
+        fvdbg("CMD%d[%08x] R1=%02x R7=%08x\n",
+              cmd->cmd & 0x3f, arg, response, slot->r7);
       }
       break;
     }
@@ -869,7 +858,7 @@ static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, ubyte *buffer, int nby
       return OK;
     }
 
-  fdbg("Did not received data token (%02x)\n", token);
+  fdbg("Did not receive data token (%02x)\n", token);
   return ERROR;
 }
 
@@ -1453,29 +1442,36 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
    * IDLE state.
    */
 
-  /* After power up at least 74 clock cycles are required prior to starting bus communication */
-
-  fvdbg("Send CMD0\n");
   for (i = 0; i < 2; i++)
     {
-      SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
-      SPI_SEND(spi, 0xff);
+      /* After power up at least 74 clock cycles are required prior to
+       * starting bus communication
+       */
 
       for (j = 10; j; j--)
         {
           SPI_SEND(spi, 0xff);
         }
 
-      /* Send CMD0 (GO_TO_IDLE) to put MMC/SD in IDLE/SPI mode.
-       * Return from CMD0 is R1 which should now show IDLE STATE
+      /* Send CMD0 (GO_TO_IDLE) with CS asserted to put MMC/SD in
+       * IDLE/SPI mode. Return from CMD0 is R1 which should now
+       * show IDLE STATE
        */
 
+      fvdbg("Send CMD0\n");
+      SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
       result = mmcsd_sendcmd(slot, &g_cmd0, 0);
       if (result == MMCSD_SPIR1_IDLESTATE)
         {
+          /* Break out of the loop with card selected */
+
           fvdbg("Card is in IDLE state\n");
           break;
         }
+
+      /* De-select card and try again */
+
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
     }
 
   /* Verify that we exit the above loop with the card reporting IDLE state */
@@ -1493,26 +1489,25 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   fvdbg("Send CMD8\n");
   result = mmcsd_sendcmd(slot, &g_cmd8, 0x1aa);
-
   if (result == MMCSD_SPIR1_IDLESTATE)
     {
-      /* Should also check the operating voltage here */
+      /* Verify the operating voltage and that the 0xaa was correctly echoed */
 
-      if ((slot->r7 & MMCSD_SPIR7_ECHO_MASK) == 0xaa)
+      if (((slot->r7 & MMCSD_SPIR7_VOLTAGE_MASK) == MMCSD_SPIR7_VOLTAGE_27) &&
+          ((slot->r7 & MMCSD_SPIR7_ECHO_MASK) == 0xaa))
         {
-          /* Try CMD55/ACMD41 up to 100 times */
+          /* Try CMD55/ACMD41 for up to 1 second or until the card exits
+           * the IDLE state
+           */
 
           start   = START_TIME;
           elapsed = 0;
           do
             {
-              fvdbg("%d. Send CMD55\n", i);
-              SPI_SEND(spi, 0xff);
+              fvdbg("%d. Send CMD55/ACMD41\n", elapsed);
               result = mmcsd_sendcmd(slot, &g_cmd55, 0);
               if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
                 {
-                  fvdbg("%d. Send ACMD41\n", i);
-                  SPI_SEND(spi, 0xff);
                   result = mmcsd_sendcmd(slot, &g_acmd41, 1 << 30);
                   if (result == MMCSD_SPIR1_OK)
                     {
@@ -1554,15 +1549,12 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
     {
       /* Both the MMC card and the SD card support CMD55 */
 
-      fvdbg("Send CMD55\n");
-      SPI_SEND(spi, 0xff);
+      fvdbg("Send CMD55/ACMD41\n");
       result = mmcsd_sendcmd(slot, &g_cmd55, 0);
       if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
         {
           /* But ACMD41 is supported only on SD */
 
-          fvdbg("Send ACMD41\n");
-          SPI_SEND(spi, 0xff);
           result = mmcsd_sendcmd(slot, &g_acmd41, 0);
           if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
             {
@@ -1579,11 +1571,10 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
         {
           if (IS_SD(slot->type))
             {
-              fvdbg("%d. Send CMD55\n", i);
+              fvdbg("%d. Send CMD55/ACMD41\n", elapsed);
               result = mmcsd_sendcmd(slot, &g_cmd55, 0);
               if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
                 {
-                  fvdbg("%d. Send ACMD41\n", i);
                   SPI_SEND(spi, 0xff);
                   result = mmcsd_sendcmd(slot, &g_acmd41, 0);
                   if (result == MMCSD_SPIR1_OK)
@@ -1623,7 +1614,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
       return -EIO;
     }
 
-  /* Read CSD.  CSD must always be valid */
+  /* Read CSD. CSD must always be valid */
 
   fvdbg("Get CSD\n");
   result = mmcsd_getcsd(slot, csd);

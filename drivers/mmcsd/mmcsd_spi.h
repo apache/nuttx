@@ -126,8 +126,9 @@
 #define MMCSD_SPIR7_VERSION_MASK  (0x0f << MMCSD_SPIR7_VERSION_SHIFT)
 #define MMCSD_SPIR7_VOLTAGE_SHIFT 8      /* Bits 8-11: Voltage accepted */
 #define MMCSD_SPIR7_VOLTAGE_MASK  (0x0f << MMCSD_SPIR7_VOLTAGE_SHIFT)
+#define   MMCSD_SPIR7_VOLTAGE_27  (0x01 << MMCSD_SPIR7_VOLTAGE_SHIFT) /* 2.7-3.6V */
 #define MMCSD_SPIR7_ECHO_SHIFT    0      /* Bits 0-7: Echoed check pattern */
-#define MMCSD_SPIR7_ECHO_MASK     (0x0f << MMCSD_SPIR7_ECHO_SHIFT)
+#define MMCSD_SPIR7_ECHO_MASK     (0xff << MMCSD_SPIR7_ECHO_SHIFT)
 
 /* Data Response */
 
