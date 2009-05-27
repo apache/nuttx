@@ -426,7 +426,7 @@ static void ssi_semtake(sem_t *sem)
 
 static void ssi_txnull(struct lm32_ssidev_s *priv)
 {
-  ssivdbg("TX: ones\n");
+  ssivdbg("TX: ->0xffff\n");
   ssi_putreg(priv, LM3S_SSI_DR_OFFSET, 0xffff);
 }
 
@@ -545,7 +545,9 @@ static inline boolean ssi_rxfifoempty(struct lm32_ssidev_s *priv)
 
 static int ssi_performtx(struct lm32_ssidev_s *priv)
 {
+#ifndef CONFIG_SSI_POLLWAIT
   uint32 regval;
+#endif
   int ntxd = 0;  /* Number of words written to Tx FIFO */
 
   /* Check if the Tx FIFO is full */
@@ -559,8 +561,15 @@ static int ssi_performtx(struct lm32_ssidev_s *priv)
           /* No.. Transfer more words until either the Tx FIFO is full or
            * until all of the user provided data has been sent.
            */
-
+#if 1
+          /* Further limit the number of words that we put into the Tx
+           * FIFO to half the half the FIFO depth.  Otherwise, we could
+           * overrun the Rx FIFO on a very fast SSI bus.
+           */
+          for (; ntxd < priv->ntxwords && ntxd < LM3S_TXFIFO_WORDS/2 && !ssi_txfifofull(priv); ntxd++)
+#else
           for (; ntxd < priv->ntxwords && !ssi_txfifofull(priv); ntxd++)
+#endif
             {
                priv->txword(priv);
             }
@@ -809,7 +818,7 @@ static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
  *
  * Returned Value:
  *   On success, a reference to the private data structgure for this IRQ.
- *   NULL on failrue.
+ *   NULL on failure.
  *
  ****************************************************************************/
 
