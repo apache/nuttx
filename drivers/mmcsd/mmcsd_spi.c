@@ -1575,7 +1575,6 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
               result = mmcsd_sendcmd(slot, &g_cmd55, 0);
               if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
                 {
-                  SPI_SEND(spi, 0xff);
                   result = mmcsd_sendcmd(slot, &g_acmd41, 0);
                   if (result == MMCSD_SPIR1_OK)
                     {
@@ -1586,7 +1585,6 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
           else
             {
               fvdbg("%d. Send CMD1\n", i);
-              SPI_SEND(spi, 0xff);
               result = mmcsd_sendcmd(slot, &g_cmd1, 0);
               if (result == MMCSD_SPIR1_OK)
                 {

@@ -262,15 +262,20 @@ static inline int fat_path2dirname(const char **path, struct fat_dirinfo_s *diri
 
 static int fat_checkfsinfo(struct fat_mountpt_s *fs)
 {
-  /* Verify that this is, indeed, an FSINFO sector */
+  /* Make sure that the fsinfo sector is in the cache */
 
-  if (FSI_GETLEADSIG(fs->fs_buffer) == 0x41615252  &&
-      FSI_GETSTRUCTSIG(fs->fs_buffer) == 0x61417272 &&
-      FSI_GETTRAILSIG(fs->fs_buffer) == BOOT_SIGNATURE32)
+  if (fat_fscacheread(fs, fs->fs_fsinfo) == OK)
     {
-      fs->fs_fsinextfree  = FSI_GETFREECOUNT(fs->fs_buffer);
-      fs->fs_fsifreecount = FSI_GETNXTFREE(fs->fs_buffer);
-      return OK;
+      /* Verify that this is, indeed, an FSINFO sector */
+
+      if (FSI_GETLEADSIG(fs->fs_buffer) == 0x41615252  &&
+          FSI_GETSTRUCTSIG(fs->fs_buffer) == 0x61417272 &&
+          FSI_GETTRAILSIG(fs->fs_buffer) == BOOT_SIGNATURE32)
+        {
+          fs->fs_fsinextfree  = FSI_GETFREECOUNT(fs->fs_buffer);
+          fs->fs_fsifreecount = FSI_GETNXTFREE(fs->fs_buffer);
+          return OK;
+        }
     }
   return -ENODEV;
 }
@@ -697,7 +702,7 @@ int fat_mount(struct fat_mountpt_s *fs, boolean writeable)
       ret = fat_checkfsinfo(fs);
       if (ret != OK)
       {
-          goto errout_with_buffer;
+        goto errout_with_buffer;
       }
   }
 

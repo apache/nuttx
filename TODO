@@ -10,7 +10,7 @@ NuttX TODO List (Last updated April 12, 2009)
  (12)  Network (net/, netutils/)
   (1)  USB (drivers/usbdev)
   (4)  Libraries (lib/)
-  (6)  File system/Generic drivers (fs/, drivers/)
+  (7)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (0)  Documentation (Documentation/)
@@ -288,11 +288,6 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low.  I have mixed feelings about if NuttX should pay a
                performance penalty for better data integrity.
-
-  Description: FAT: FAT32 is untested -- because I don't have any large
-               enough devices yet to support a FAT32 FS.
-  Status:      Open
-  Priority:    Medium
 
   Description: The simple SPI based MMCS/SD driver in fs/mmcsd does not
                yet handle multiple block transfers.
