@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 26, 2009</p>
+      <p>Last Updated: May 27, 2009</p>
     </td>
   </tr>
 </table>
@@ -1424,10 +1424,15 @@ nuttx-0.4.7 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* examples/nsh: Added MMC/SD support for the LM3S6918
 	* arch/arm/src/lm3s: Fix logic for setting and clearing output GPIOs (critical
 	  fix!).
-	* drivers/mmcsd:  Found numerous errors in current MMC/SD SPI driver.  Bad frequency
+	* drivers/mmcsd: Found numerous errors in current MMC/SD SPI driver.  Bad frequency
 	  calculation based on CSD settings, inappropriate timeouts, odd code that looks like
 	  a bad search and replace.  Also needs support for SDHC ver 2.x.  New MMC/SD is
 	  largely redesigned and probably non-functional in the first check-in.
+	* drivers/mmcsd: Changes verified on 4Gb Kingston SHDC card.  Still having
+	  issues with 2Gb SanDisk SDC card.
+	* fs/fat: With the 4Gb card, the first tests of FAT32 were (finally) performed.
+	  Found a correct a problem that prevented use of FAT32: It was not updating
+	  the sector cache before checking the FAT32 FSINFO sector.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
