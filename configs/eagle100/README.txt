@@ -203,6 +203,8 @@ Eagle100-specific Configuration Options
 	CONFIG_SSI0_DISABLE - Select to disable support for SSI0
 	CONFIG_SSI1_DISABLE - Select to disable support for SSI1
 	CONFIG_SSI_POLLWAIT - Select to disable interrupt driven SSI support.
+	  Poll-waiting is recommended if the interrupt rate would be to
+	  high in the interrupt driven case.
 
 	CONFIG_LM3S_ETHERNET - This must be set (along with CONFIG_NET)
 	  to build the LM3S Ethernet driver
