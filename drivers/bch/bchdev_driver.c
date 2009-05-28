@@ -106,7 +106,6 @@ static int bch_open(FAR struct file *filp)
 {
   FAR struct inode *inode = filp->f_inode;
   FAR struct bchlib_s *bch;
-  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
   bch = (FAR struct bchlib_s *)inode->i_private;
@@ -124,7 +123,7 @@ static int bch_open(FAR struct file *filp)
     }
   bchlib_semgive(bch);
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

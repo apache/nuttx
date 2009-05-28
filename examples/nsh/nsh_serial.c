@@ -363,4 +363,5 @@ int nsh_consolemain(int argc, char *argv[])
           fflush(pstate->ss_stream);
         }
     }
+  return OK;
 }

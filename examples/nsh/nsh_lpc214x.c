@@ -38,8 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
+
+#include <stdio.h>
 #include <debug.h>
 #include <errno.h>
 

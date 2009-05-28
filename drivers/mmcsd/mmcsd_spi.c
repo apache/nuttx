@@ -375,7 +375,7 @@ static inline void mmcsd_synchronize(FAR struct mmcsd_slot_s *slot)
   SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
 }
 #else
-#  define  mmcsd_synchronize(slot) /* No synchronization needed */s
+#  define  mmcsd_synchronize(slot) /* No synchronization needed */
 #endif
 
 /****************************************************************************
