@@ -122,6 +122,20 @@
 
 #define LM3S_TXFIFO_WORDS 8
 
+/* Configuration settings */
+
+#ifndef CONFIG_SSI_TXLIMIT
+#  define CONFIG_SSI_TXLIMIT (LM3S_TXFIFO_WORDS/2)
+#endif
+
+#if CONFIG_SSI_TXLIMIT < 1 || CONFIG_SSI_TXLIMIT > LM3S_TXFIFO_WORDS
+#  error "Invalid range for CONFIG_SSI_TXLIMIT
+#endif
+
+#ifndef CONFIG_SSI_TXLIMIT && CONFIG_SSI_TXLIMIT < (LM3S_TXFIFO_WORDS/2)
+#  error "CONFIG_SSI_TXLIMIT must be at least half the TX FIFO size"
+#endif
+
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
@@ -196,7 +210,11 @@ static void   ssi_rxuint16(struct lm32_ssidev_s *priv);
 static void   ssi_rxubyte(struct lm32_ssidev_s *priv);
 static inline boolean ssi_txfifofull(struct lm32_ssidev_s *priv);
 static inline boolean ssi_rxfifoempty(struct lm32_ssidev_s *priv);
+#if CONFIG_SSI_TXLIMIT == 1 && defined(CONFIG_SSI_POLLWAIT)
+static inline int ssi_performtx(struct lm32_ssidev_s *priv);
+#else
 static int    ssi_performtx(struct lm32_ssidev_s *priv);
+#endif
 static inline void ssi_performrx(struct lm32_ssidev_s *priv);
 static int    ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
                            void *rxbuffer, unsigned int nwords);
@@ -543,6 +561,24 @@ static inline boolean ssi_rxfifoempty(struct lm32_ssidev_s *priv)
  *
  ****************************************************************************/
 
+#if CONFIG_SSI_TXLIMIT == 1 && defined(CONFIG_SSI_POLLWAIT)
+static inline int ssi_performtx(struct lm32_ssidev_s *priv)
+{
+  /* Check if the Tx FIFO is full and more data to transfer */
+
+  if (!ssi_txfifofull(priv) && priv->ntxwords > 0)
+    {
+      /* Transfer one word to the Tx FIFO */
+
+      priv->txword(priv);
+      priv->ntxwords--;
+      return 1;
+    }
+  return 0;
+}
+
+#else /* CONFIG_SSI_TXLIMIT == 1 CONFIG_SSI_POLLWAIT */
+
 static int ssi_performtx(struct lm32_ssidev_s *priv)
 {
 #ifndef CONFIG_SSI_POLLWAIT
@@ -561,12 +597,12 @@ static int ssi_performtx(struct lm32_ssidev_s *priv)
           /* No.. Transfer more words until either the Tx FIFO is full or
            * until all of the user provided data has been sent.
            */
-#if 1
+#ifdef CONFIG_SSI_TXLIMIT
           /* Further limit the number of words that we put into the Tx
-           * FIFO to half the half the FIFO depth.  Otherwise, we could
+           * FIFO to CONFIG_SSI_TXLIMIT.  Otherwise, we could
            * overrun the Rx FIFO on a very fast SSI bus.
            */
-          for (; ntxd < priv->ntxwords && ntxd < LM3S_TXFIFO_WORDS/2 && !ssi_txfifofull(priv); ntxd++)
+          for (; ntxd < priv->ntxwords && ntxd < CONFIG_SSI_TXLIMIT && !ssi_txfifofull(priv); ntxd++)
 #else
           for (; ntxd < priv->ntxwords && !ssi_txfifofull(priv); ntxd++)
 #endif
@@ -608,6 +644,8 @@ static int ssi_performtx(struct lm32_ssidev_s *priv)
     }
   return ntxd;
 }
+
+#endif /* CONFIG_SSI_TXLIMIT == 1 CONFIG_SSI_POLLWAIT */
 
 /****************************************************************************
  * Name: ssi_performrx
@@ -751,6 +789,7 @@ static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
   ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x\n",
           priv->ntxwords, priv->nrxwords, priv->nwords,
           ssi_getreg(priv, LM3S_SSI_SR_OFFSET));
+
   ntxd  = ssi_performtx(priv);
 
   /* For the case where nwords < Tx FIFO size, ssi_performrx will
@@ -759,6 +798,7 @@ static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
    */
 
   ssi_performrx(priv);
+
   ssivdbg("ntxwords: %d nrxwords: %d nwords: %d SR: %08x IM: %08x\n",
           priv->ntxwords, priv->nrxwords, priv->nwords,
           ssi_getreg(priv, LM3S_SSI_SR_OFFSET),
