@@ -51,6 +51,7 @@
 
 #ifdef CONFIG_ARCH_CHIP_LM3S6918
 #  define LM3S_NUARTS          2  /* Two UART modules */
+#  define LM3S_NI2C            2  /* Two I2C modules */
 #  define LM3S_NSSI            2  /* Two SSI modules */
 #  define LM3S_NETHCONTROLLERS 1  /* One ethenet controller */
 #else
@@ -63,6 +64,7 @@
 #include "lm3s_syscontrol.h"     /* System control module */
 #include "lm3s_gpio.h"           /* GPIO modules */
 #include "lm3s_uart.h"           /* UART modules */
+#include "lm3s_i2c.h"            /* I2C modules */
 #include "lm3s_ssi.h"            /* SSI modules */
 #include "lm3s_ethernet.h"       /* Ethernet MAC and PHY */
 #include "lm3s_flash.h"          /* FLASH */

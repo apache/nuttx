@@ -135,7 +135,7 @@ int lm3s_dumpgpio(uint32 pinset, const char *msg)
         rcgc2, enabled ? "enabled" : "disabled" );
 
   /* Don't bother with the rest unless the port is enabled */
-  
+
   if (enabled)
     {
       lldbg("  AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
@@ -151,4 +151,5 @@ int lm3s_dumpgpio(uint32 pinset, const char *msg)
             getreg32(base + LM3S_GPIO_SLR_OFFSET));
     }
   irqrestore(flags);
+  return OK;
 }

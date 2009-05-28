@@ -129,10 +129,10 @@
 #endif
 
 #if CONFIG_SSI_TXLIMIT < 1 || CONFIG_SSI_TXLIMIT > LM3S_TXFIFO_WORDS
-#  error "Invalid range for CONFIG_SSI_TXLIMIT
+#  error "Invalid range for CONFIG_SSI_TXLIMIT"
 #endif
 
-#ifndef CONFIG_SSI_TXLIMIT && CONFIG_SSI_TXLIMIT < (LM3S_TXFIFO_WORDS/2)
+#if CONFIG_SSI_TXLIMIT && CONFIG_SSI_TXLIMIT < (LM3S_TXFIFO_WORDS/2)
 #  error "CONFIG_SSI_TXLIMIT must be at least half the TX FIFO size"
 #endif
 
