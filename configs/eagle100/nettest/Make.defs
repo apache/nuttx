@@ -35,7 +35,13 @@
 
 include ${TOPDIR}/.config
 
-CROSSDEV		= arm-elf-
+# The default value for CROSSDEV can be overridden from the make command line:
+#   make                         -- Will build for the devkitARM toolchain
+#   make CROSSDEV=arm-eabi-      -- Will build for the devkitARM toolchain
+#   make CROSSDEV=arm-none-eabi- -- Will build for the CodeSourcery toolchain
+#   make CROSSDEV=arm-elf-       -- Will build for the NuttX buildroot toolchain
+
+CROSSDEV		= arm-eabi-
 CC			= $(CROSSDEV)gcc
 CXX			= $(CROSSDEV)g++
 CPP			= $(CROSSDEV)gcc -E
@@ -59,7 +65,12 @@ else
   ARCHOPTIMIZATION	= -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS		= -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
+ifeq ($(CROSSDEV),arm-elf-)
+  ARCHCPUFLAGS		= -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
+else
+  ARCHCPUFLAGS		= -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+endif
+
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
 ARCHXXINCLUDES		= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
@@ -78,7 +89,10 @@ OBJEXT			= .o
 LIBEXT			= .a
 EXEEXT			=
 
-ifeq ("${CONFIG_DEBUG}","y")
+ifneq ($(CROSSDEV),arm-elf-)
+  LDFLAGS		+= -nostartfiles -nodefaultlibs
+endif
+ifeq ($(CONFIG_DEBUG),y)
   LDFLAGS		+= -g
 endif
 
