@@ -81,6 +81,10 @@
 #  define CONFIG_MMCSD_SPICLOCK 20000000
 #endif
 
+#ifndef CONFIG_MMCSD_SECTOR512
+#  define CONFIG_MMCSD_SECTOR512          /* Force 512 byte sectors on all cards */
+#endif
+
 /* Slot struct info *********************************************************/
 /* Slot status definitions */
 
@@ -97,6 +101,12 @@
 #define MMCSD_CMDRESP_R2             2
 #define MMCSD_CMDRESP_R3             3
 #define MMCSD_CMDRESP_R7             4
+
+#ifdef CONFIG_MMCSD_SECTOR512
+#  define SECTORSIZE(s)              (512)
+#else
+#  define SECTORSIZE(s)              ((s)->sectorsize)
+#endif
 
 /* Time delays in units of the system clock. CLK_TCK is the number of clock
  * ticks per second.
@@ -131,7 +141,9 @@ struct mmcsd_slot_s
   ubyte  state;          /* State of the slot (see MMCSD_SLOTSTATUS_* definitions) */
   ubyte  type;           /* Disk type */
   ubyte  csd[16];        /* Copy of card CSD */
+#ifndef CONFIG_MMCSD_SECTOR512
   uint16 sectorsize;     /* Media block size (in bytes) */
+#endif
   uint32 nsectors;       /* Number of blocks on the media */
   uint32 taccess;        /* Card access time */
   uint32 twrite;         /* Card write time */
@@ -707,21 +719,37 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
       csize     = MMCSD_CSD_CSIZE(csd) + 1;
     }
 
-  /* SDHC cards have fixed sector size of 512 bytes */
+  /* SDHC ver2.x cards have fixed block transfer size of 512 bytes.  SDC
+   * ver1.x cards with capacity less than 1Gb, will have sector size
+   * 512 byes. SDC ver1.x cards with capacity of 2Gb will report readbllen
+   * of 1024 but should use 512 bytes for block transfers.  SDC ver1.x 4Gb
+   * cards will report readbllen of 2048 bytes -- are they also 512 bytes?
+   */
 
+#ifdef CONFIG_MMCSD_SECTOR512
+  if (readbllen > 9)
+    {
+      csizemult += (readbllen - 9);
+    }
+  else
+    {
+      DEBUGASSERT(readbllen == 9);
+    }
+#else
   if (IS_SDV2(slot->type))
     {
       if (readbllen > 9)
         {
           fdbg("Forcing 512 byte sector size\n");
-          csizemult   += (readbllen - 9);
-          readbllen    = 9;
+          csizemult += (readbllen - 9);
+          readbllen  = 9;
         }
     }
 
   slot->sectorsize = 1 << readbllen;
+#endif
   slot->nsectors   = csize << csizemult;
-  fvdbg("Sector size:       %d\n", slot->sectorsize);
+  fvdbg("Sector size:       %d\n", SECTORSIZE(slot));
   fvdbg("Number of sectors: %d\n", slot->nsectors);
 }
 
@@ -1037,7 +1065,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   /* Convert sector and nsectors to nbytes and byte offset */
 
-  nbytes = nsectors * slot->sectorsize;
+  nbytes = nsectors * SECTORSIZE(slot);
   if (IS_BLOCK(slot->type))
     {
       offset = start_sector;
@@ -1045,7 +1073,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
     }
   else
     {
-      offset = start_sector * slot->sectorsize;
+      offset = start_sector * SECTORSIZE(slot);
       fvdbg("nbytes=%d byte offset=%d\n", nbytes, offset);
     }
 
@@ -1072,7 +1100,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
       /* Receive the block */
 
-      if (mmcsd_recvblock(slot, buffer, slot->sectorsize) != 0)
+      if (mmcsd_recvblock(slot, buffer, SECTORSIZE(slot)) != 0)
         {
           fdbg("Failed: to receive the block\n");
           goto errout_with_eio;
@@ -1095,12 +1123,12 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
       for (i = 0; i < nsectors; i++)
         {
-          if (mmcsd_recvblock(slot, buffer, slot->sectorsize) != 0)
+          if (mmcsd_recvblock(slot, buffer, SECTORSIZE(slot)) != 0)
             {
               fdbg("Failed: to receive the block\n");
               goto errout_with_eio;
             }
-         buffer += slot->sectorsize;
+         buffer += SECTORSIZE(slot);
        }
 
       /* Send CMD12: Stops transmission */
@@ -1198,7 +1226,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   /* Convert sector and nsectors to nbytes and byte offset */
 
-  nbytes = nsectors * slot->sectorsize;
+  nbytes = nsectors * SECTORSIZE(slot);
   if (IS_BLOCK(slot->type))
     {
       offset = start_sector;
@@ -1206,7 +1234,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
     }
   else
     {
-      offset = start_sector * slot->sectorsize;
+      offset = start_sector * SECTORSIZE(slot);
       fvdbg("nbytes=%d byte offset=%d\n", nbytes, offset);
     }
   mmcsd_dumpbuffer(buffer, nbytes);
@@ -1232,7 +1260,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
       /* Then transfer the sector */
 
-      if (mmcsd_xmitblock(slot, buffer, slot->sectorsize, 0xfe) != 0)
+      if (mmcsd_xmitblock(slot, buffer, SECTORSIZE(slot), 0xfe) != 0)
         {
           fdbg("Block transfer failed\n");
           goto errout_with_sem;
@@ -1267,12 +1295,12 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
       for (i = 0; i < nsectors; i++)
         {
-          if (mmcsd_xmitblock(slot, buffer, slot->sectorsize, 0xfc) != 0)
+          if (mmcsd_xmitblock(slot, buffer, SECTORSIZE(slot), 0xfc) != 0)
             {
               fdbg("Failed: to receive the block\n");
               goto errout_with_sem;
             }
-          buffer += slot->sectorsize;
+          buffer += SECTORSIZE(slot);
         }
 
       /* Send the stop transmission token */
@@ -1371,7 +1399,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   geometry->geo_writeenabled = FALSE;
 #endif
   geometry->geo_nsectors   = slot->nsectors;
-  geometry->geo_sectorsize = slot->sectorsize;
+  geometry->geo_sectorsize = SECTORSIZE(slot);
 
   /* After reporting mediachanged, clear the indication so that it is not
    * reported again.
@@ -1629,12 +1657,36 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   mmcsd_decodecsd(slot, csd);
   mmcsd_checkwrprotect(slot, csd);
 
-  /* SD Version 2.xx block length is always 512 */
+  /* SDHC ver2.x cards have fixed block transfer size of 512 bytes.  SDC
+   * ver1.x cards with capacity less than 1Gb, will have sector size
+   * 512 byes. SDC ver1.x cards with capacity of 2Gb will report readbllen
+   * of 1024 but should use 512 bytes for block transfers.  SDC ver1.x 4Gb
+   * cards will report readbllen of 2048 bytes -- are they also 512 bytes?
+   * I think that none of these high capacity cards support setting the
+   * block length??
+   */
 
+#ifdef CONFIG_MMCSD_SECTOR512
+  /* Using 512 byte sectors, the maximum ver1.x capacity is 4096 x 512 blocks.
+   * The saved slot->nsectors is converted to 512 byte blocks, so if slot->nsectors
+   * exceeds 4096 x 512, then we must be dealing with a card with read_bl_len
+   * of 1024 or 2048.
+   */
+ 
+  if (!IS_SDV2(slot->type) && slot->nsectors <= 4096*12)
+    {
+      /* Don't set the block len on high capacity cards (ver1.x or ver2.x) */
+
+      mmcsd_setblklen(slot, SECTORSIZE(slot));
+    }
+#else
   if (!IS_SDV2(slot->type))
     {
-      mmcsd_setblklen(slot, slot->sectorsize);
+      /* Don't set the block len on ver2.x cards */
+
+      mmcsd_setblklen(slot, SECTORSIZE(slot));
     }
+#endif
 
   slot->state &= ~MMCSD_SLOTSTATUS_NOTREADY;
   SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);

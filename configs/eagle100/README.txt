@@ -205,6 +205,10 @@ Eagle100-specific Configuration Options
 	CONFIG_SSI_POLLWAIT - Select to disable interrupt driven SSI support.
 	  Poll-waiting is recommended if the interrupt rate would be to
 	  high in the interrupt driven case.
+	CONFIG_SSI_TXLIMIT - Write this many words to the Tx FIFO before
+	  emptying the Rx FIFO.  If the SPI frequency is high and this
+	  value is large, then larger values of this setting may cause
+	  Rx FIFO overrun errors.  Default: half of the Tx FIFO size (4).
 
 	CONFIG_LM3S_ETHERNET - This must be set (along with CONFIG_NET)
 	  to build the LM3S Ethernet driver

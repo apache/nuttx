@@ -139,7 +139,6 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_DRAM_START - The start address of DRAM (physical)
 		CONFIG_DRAM_VSTART - The start address of DRAM (virtual)
 
-
 	General build options
 
 		CONFIG_RRLOAD_BINARY - make the rrload binary format used with
