@@ -1428,11 +1428,14 @@ nuttx-0.4.7 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  calculation based on CSD settings, inappropriate timeouts, odd code that looks like
 	  a bad search and replace.  Also needs support for SDHC ver 2.x.  New MMC/SD is
 	  largely redesigned and probably non-functional in the first check-in.
-	* drivers/mmcsd: Changes verified on 4Gb Kingston SHDC card.  Still having
-	  issues with 2Gb SanDisk SDC card.
+	* drivers/mmcsd: Changes verified on 4Gb Kingston microSHDC card and on a 2Gb
+	  SanDisk microSDC card on the Eagle100 platform.
 	* fs/fat: With the 4Gb card, the first tests of FAT32 were (finally) performed.
-	  Found a correct a problem that prevented use of FAT32: It was not updating
+	  Found and corrected a problem that prevented use of FAT32: It was not updating
 	  the sector cache before checking the FAT32 FSINFO sector.
+	* configs/eagle100/*/Make.defs:  Added configuration options that should make
+	  it possible to build NuttX for the Eagle100 using CodeSourcery 2009q1 toolchain
+	  and the devkitARM GNU toolchain.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

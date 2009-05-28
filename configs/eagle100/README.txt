@@ -16,12 +16,34 @@ Development Environment
   environment because the Luminary FLASH programming application was used for
   writing to FLASH and this application works only under Windows.
 
-Toolchain
-^^^^^^^^^
+GNU Toolchain Options
+^^^^^^^^^^^^^^^^^^^^^
+
+  The NuttX make system has been modified to support the following different
+  toolchain options.
+
+  1. The CodeSourcery GNU toolchain,
+  2. The devkitARM GNU toolchain, or
+  3. The NuttX buildroot Toolchain (see below).
+
+  All testing has been conducted using the NuttX buildroot toolchain.  However,
+  the make system is setup to default to use the devkitARM toolchain.  To use
+  the CodeSource GNU toolchain, you simply need to build the system as follows:
+
+     make                         # Will build for the devkitARM toolchain
+     make CROSSDEV=arm-eabi-      # Will build for the devkitARM toolchain
+     make CROSSDEV=arm-none-eabi- # Will build for the CodeSourcery toolchain
+     make CROSSDEV=arm-elf-       # Will build for the NuttX buildroot toolchain
+
+  Of course, hard coding this CROSS_COMPILE value in Make.defs file will save
+  some repetitive typing.
+
+NuttX buildroot Toolchain
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
-  different from the default).
+  different from the default in your PATH variable).
 
   If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
   SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).

@@ -144,7 +144,7 @@ endif
 BIN		= nuttx$(EXEEXT)
 
 all: $(BIN)
-.PHONY: clean context clean_context distclean
+.PHONY: context clean_context check_context subdir_clean clean subdir_distclean distclean
 
 # Build the mkconfig tool used to create include/nuttx/config.h
 tools/mkconfig:
@@ -268,7 +268,7 @@ subdir_clean:
 	@$(MAKE) -C tools -f Makefile.mkconfig TOPDIR="$(TOPDIR)" clean
 	@$(MAKE) -C mm -f Makefile.test TOPDIR="$(TOPDIR)" clean
 
-clean: subdir_clean
+clean: subdir_clean clean_context
 	@rm -f $(BIN) nuttx.* mm_test *.map *~
 
 subdir_distclean:
@@ -278,7 +278,7 @@ subdir_distclean:
 		fi \
 	done
 
-distclean: clean subdir_distclean clean_context
+distclean: clean subdir_distclean
 	@rm -f Make.defs setenv.sh .config
 
 

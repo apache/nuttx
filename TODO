@@ -538,6 +538,12 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
   Status:      Open
   Priority:    Low
 
+  Description: Should terminate SSI/SPI transfer if an Rx FIFO overrun occurs.
+               Right now, if an Rx FIFO overrun occurs, the SSI driver hangs.
+  Status:      Open
+  Priority:    Medium, If the transfer is properly tuned, then there should not
+               be any Rx FIFO overruns.
+
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
