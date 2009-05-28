@@ -1,7 +1,7 @@
 ############################################################################
 # Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -268,7 +268,7 @@ subdir_clean:
 	@$(MAKE) -C tools -f Makefile.mkconfig TOPDIR="$(TOPDIR)" clean
 	@$(MAKE) -C mm -f Makefile.test TOPDIR="$(TOPDIR)" clean
 
-clean: subdir_clean clean_context
+clean: subdir_clean
 	@rm -f $(BIN) nuttx.* mm_test *.map *~
 
 subdir_distclean:
@@ -278,7 +278,7 @@ subdir_distclean:
 		fi \
 	done
 
-distclean: clean subdir_distclean
+distclean: clean subdir_distclean clean_context
 	@rm -f Make.defs setenv.sh .config
 
 

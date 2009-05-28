@@ -746,5 +746,8 @@
 	* configs/eagle100/*/Make.defs:  Added configuration options that should make
 	  it possible to build NuttX for the Eagle100 using CodeSourcery 2009q1 toolchain
 	  and the devkitARM GNU toolchain.
+	* configs/mcu123-lpc214x/src: Corrected some logic in the LPC2148 SPI receive block
+	  logic.  Re-verified SDC ver1.x support with 1Gb Toshiba SDC, 1Gb PNY SDC, 2Gb SanDisk SDC,
+	  and 4Gb Kingston SDHC.
 
 

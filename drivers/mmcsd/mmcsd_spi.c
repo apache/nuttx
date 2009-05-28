@@ -168,6 +168,9 @@ static void   mmcsd_semtake(sem_t *sem);
 
 /* Card SPI interface *******************************************************/
 
+#ifdef CONFIG_MMCSD_SYNCHRONIZE
+static inline void mmcsd_synchronize(FAR struct mmcsd_slot_s *slot);
+#endif
 static int    mmcsd_waitready(FAR struct mmcsd_slot_s *slot);
 static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
                 const struct mmcsd_cmdinfo_s *cmd, uint32 arg);
@@ -342,6 +345,38 @@ static void mmcsd_semtake(sem_t *sem)
 }
 
 #define mmcsd_semgive(sem) sem_post(sem)
+
+/****************************************************************************
+ * Name: mmcsd_synchronize
+ *
+ * Description:
+ *   Wait until the the card is no longer busy
+ *
+ * Assumptions:
+ *   MMC/SD card already selected
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD_SYNCHRONIZE
+static inline void mmcsd_synchronize(FAR struct mmcsd_slot_s *slot)
+{
+  FAR struct spi_dev_s *spi = slot->spi;
+
+  /* De-select the MMCSD card */
+
+  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+
+  /* Wait a bit */
+
+  SPI_SEND(spi, 0xff);
+
+  /* Reselect the card */
+
+  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
+}
+#else
+#  define  mmcsd_synchronize(slot) /* No synchronization needed */s
+#endif
 
 /****************************************************************************
  * Name: mmcsd_waitready
@@ -625,7 +660,7 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, ubyte *csd)
     g_transpeedru[MMCSD_CSD_TRANSPEED_TRANSFERRATEUNIT(csd)];
 
   /* Clip the max frequency to account for board limitations */
-  
+
   frequency = maxfrequency;
   if (frequency > CONFIG_MMCSD_SPICLOCK)
     {
@@ -804,6 +839,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, ubyte *buffer,
 
   /* Send the CMD9 or CMD10 */
 
+  mmcsd_synchronize(slot);
   result = mmcsd_sendcmd(slot, cmd, 0);
   if (result != MMCSD_SPIR1_OK)
     {
@@ -1081,7 +1117,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   mmcsd_semtake(&slot->sem);
   SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
-  SPI_SEND(spi, 0xff);
+  mmcsd_synchronize(slot);
 
   /* Single or multiple block read? */
 
@@ -1108,7 +1144,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
     }
   else
     {
-      /* Send CMD17: Reads a block of the size selected by the SET_BLOCKLEN
+      /* Send CMD18: Reads a block of the size selected by the SET_BLOCKLEN
        * command and verify that good R1 status is returned
        */
 
@@ -1243,7 +1279,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   mmcsd_semtake(&slot->sem);
   SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
-  SPI_SEND(spi, 0xff);
+  mmcsd_synchronize(slot);
 
   /* Single or multiple block transfer? */
 
@@ -1533,9 +1569,11 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
           do
             {
               fvdbg("%d. Send CMD55/ACMD41\n", elapsed);
+              mmcsd_synchronize(slot);
               result = mmcsd_sendcmd(slot, &g_cmd55, 0);
               if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
                 {
+                  mmcsd_synchronize(slot);
                   result = mmcsd_sendcmd(slot, &g_acmd41, 1 << 30);
                   if (result == MMCSD_SPIR1_OK)
                     {
@@ -1578,11 +1616,13 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
       /* Both the MMC card and the SD card support CMD55 */
 
       fvdbg("Send CMD55/ACMD41\n");
+      mmcsd_synchronize(slot);
       result = mmcsd_sendcmd(slot, &g_cmd55, 0);
       if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
         {
           /* But ACMD41 is supported only on SD */
 
+          mmcsd_synchronize(slot);
           result = mmcsd_sendcmd(slot, &g_acmd41, 0);
           if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
             {
@@ -1600,9 +1640,11 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
           if (IS_SD(slot->type))
             {
               fvdbg("%d. Send CMD55/ACMD41\n", elapsed);
+              mmcsd_synchronize(slot);
               result = mmcsd_sendcmd(slot, &g_cmd55, 0);
               if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
                 {
+                  mmcsd_synchronize(slot);
                   result = mmcsd_sendcmd(slot, &g_acmd41, 0);
                   if (result == MMCSD_SPIR1_OK)
                     {
@@ -1613,6 +1655,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
           else
             {
               fvdbg("%d. Send CMD1\n", i);
+              mmcsd_synchronize(slot);
               result = mmcsd_sendcmd(slot, &g_cmd1, 0);
               if (result == MMCSD_SPIR1_OK)
                 {

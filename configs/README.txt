@@ -287,6 +287,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  Read/Write
 		CONFIG_MMCSD_SPICLOCK - Maximum SPI clock to drive MMC/SD card.
 		  Default is 20MHz.
+		CONFIG_MMCSD_SYNCHRONIZE - Special synchronization logic needed
 
 	TCP/IP and UDP support via uIP
 		CONFIG_NET - Enable or disable all network features

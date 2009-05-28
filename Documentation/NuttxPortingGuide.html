@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 22, 2009</p>
+      <p>Last Updated: May 28, 2009</p>
     </td>
   </tr>
 </table>
@@ -2179,6 +2179,12 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <code>CONFIG_MMCSD_READONLY</code>: Provide read-only access.  Default is Read/Write
+  </li>
+  <li>
+    <code>CONFIG_MMCSD_SPICLOCK</code>: Maximum SPI clock to drive MMC/SD card. Default is 20MHz.
+  </li>
+  <li>
+    <code>CONFIG_MMCSD_SYNCHRONIZE</code>: Special synchronization logic needed
   </li>
 </ul>
 
