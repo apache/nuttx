@@ -401,7 +401,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Generic driver for SPI-based MMC/SD cards.</li>
+      <li>Generic driver for SPI-based MMC/SD/SDH cards.</li>
     </p>
 </tr>
 <tr>
@@ -687,8 +687,8 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.4.6</b>.
-  The 38<sup>th</sup> release of NuttX (nuttx-0.4.6) is available for download
+<p><b>nuttx-0.4.7</b>.
+  The 39<sup>th</sup> release of NuttX (nuttx-0.4.7) was made on May 29, 2009 and is available for download
   from the <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
@@ -696,20 +696,22 @@
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The release features support for the <a href=" http://www.micromint.com/">Micromint</a>
-  Eagle-100 development board.
-  This board is based around, the Luminary LM3S6918 MCU.
-  This is the first ARM Cortex-M3 architecture supported by Nuttx.
-  This initial, basic port includes timer and serial console with configurations to execute the NuttX OS test and to run the <a href="NuttShell.html">NuttShell (NSH)</a>.
-  Work is still underway on this port and current plans are to have I2C, SSI, MMC/SD, and and Ethernet driver in the 0.4.7 release.
+  This release focuses on cleaning up and extending the Eagle100/LM3S6918 port released
+  in nuttx-0.4.6 and on improved MMC/SD support.  New features include:
+  <ul>
+    <li>
+      Improved reliably and additional drivers for the Eagle-100 board (LM3S6918
+      ARM Cortex-M3).  Additional drivers include Ethernet, SSI, and support for
+      the on-board LEDs and microSD cards.
+    </li>
+    <li>
+      The SPI-based MMC/SD driver was extended to support SDHC Version 2.xx cards.
+    </li>
+  </ul>
 </p>
 <p>
-  Additional work was done on the MXADS i.MX1 port, however, that work has been set aside
-  until I complete work on the Eagle-100 (I also need to come up with a 3V power supply).
-</p>
-<p>
-  Other changes in this release include: Extensions to the SPI interface definition in order to handle 9-bit interfaces to displays.
-  Several bugs were fixed (see the <a href="#currentrelease">ChangeLog</a> for a complete list of changes).
+  In addition, this release includes several important bugfixes for the LM3S6918, the LPC2148,
+  the SPI-based MMC/SD driver, and to FAT32.  See the ChangeLog for details of these bugfixes.
 </p>
 
 <table width ="100%">
@@ -866,11 +868,10 @@
     </p>
     <p>
       <b>STATUS:</b>
-        This initial, basic release of this port has been verifed and included in NuttX
-        version 0.4.6.  The basic port includes timer and serial console with configurations
-        to execute the NuttX OS test and to run the <a href="NuttShell.html">NuttShell (NSH)</a>.
-        Work is still underway on this port and current plans are to have I2C, SSI, MMC/SD, and
-        and Ethernet driver in the 0.4.7 release.
+        The initial, release of this port was included in NuttX  version 0.4.6.
+        The current port includes timer, serial console, Ethernet, SSI, and microSD support.
+        There are working configurations the NuttX OS test, to run the <a href="NuttShell.html">NuttShell
+        (NSH)</a>, the NuttX networking test, and the uIP web server.
     </p>
    </td>
 </tr>
@@ -1358,30 +1359,35 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.4.6 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-0.4.7 2009-05-29 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* Change SPI interface so that is can accomodate interfaces where the
-	  number of bits per word is greater an 8 (such as with many 9-bit display
-	  interfaces). -- this might have broken a few things which will need to
-	  be retested!
-	* arch/arm/src/imx: Added i.MX SPI driver
-	* SPI: Add a method to set the number of bits per word.  Also add an
-	  alternative interface for so that (eventually) I can phase the sndblock
-	  and recvblock methods and replace them with a single exchange method
-	* Build:  objcopy fails with toolchains that use newer GCC and binutils.  The
-	  following arguments need to be included in the objcopy command line "-R .note
-	  -R .note.gnu.build-id -R .comment"  This has bin fixed in arch/arm/src/Makefile,
-	  but other architectures may have the same problem.  Thanks to Dave Marples
-	  for verifying this.
-	* configs/eagle100/ostest: Added support for the MicroMint Eagle100 board. 
-	  This board has a Luminary LM3S6918 Cortex-M3. Added a configuration to build
-	  examples/ostest.
-	* arch/arm/src/lpc214x: Add configuration option to enable fast GPIO (vs.
-	  legacy, "slow" GPIO) for LPC214x.
-	* arch/arm: Restructured the arch/arm directory structure to better suppor ARM
-	  and Cortex-M3.
-	* sched/: pthread_create() must return a (non-negated) errno value on failure.
-	* configs/eagle100/nsh: Add a NuttShell (NSH) configuration for the Eagle-100
+	* arch/arm/src/lm3s: Added an Ethernet driver for the LM3S6918
+	* configs/eagle100/nettest: Added an examples/nettest configuration for the
+	  Micromint Eagle100 board.
+	* Documentation/NuttxPortingGuide.html: Added a section on NuttX device drivers.
+	* configs/eagle100/httpd: Added an examples/uip configuration for the
+	  Micromint Eagle100 board.
+	* arch/arm/src/lm3s: Added an SSI driver for the LM3S6918
+	* examples/nsh: Added MMC/SD support for the LM3S6918
+	* arch/arm/src/lm3s: Fix logic for setting and clearing output GPIOs (critical
+	  fix!).
+	* drivers/mmcsd: Found numerous errors in current MMC/SD SPI driver.  Bad frequency
+	  calculation based on CSD settings, inappropriate timeouts, odd code that looks like
+	  a bad search and replace.  Also needs support for SDHC ver 2.x.  New MMC/SD is
+	  largely redesigned and probably non-functional in the first check-in.
+	* drivers/mmcsd: Changes verified on 4Gb Kingston microSHDC card and on a 2Gb
+	  SanDisk microSDC card on the Eagle100 platform.
+	* fs/fat: With the 4Gb card, the first tests of FAT32 were (finally) performed.
+	  Found and corrected a problem that prevented use of FAT32: It was not updating
+	  the sector cache before checking the FAT32 FSINFO sector.
+	* configs/eagle100/*/Make.defs:  Added configuration options that should make
+	  it possible to build NuttX for the Eagle100 using CodeSourcery 2009q1 toolchain
+	  and the devkitARM GNU toolchain.
+	* configs/mcu123-lpc214x/src: Corrected some logic in the LPC2148 SPI receive block
+	  logic.  Re-verified SDC ver1.x support with 1Gb Toshiba SDC, 1Gb PNY SDC, and
+	  4Gb Kingston SDHC.  There are CMD0 issues with the 2Gb SanDisk SDC on this board.
+	* fs/fs_mount.c: Corrected error handling that could cause a deadlock on certain
+	  mount() failures.
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1412,35 +1418,7 @@ buildroot-0.1.5 2009-04-25 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <pre><ul>
-nuttx-0.4.7 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* arch/arm/src/lm3s: Added an Ethernet driver for the LM3S6918
-	* configs/eagle100/nettest: Added an examples/nettest configuration for the
-	  Micromint Eagle100 board.
-	* Documentation/NuttxPortingGuide.html: Added a section on NuttX device drivers.
-	* configs/eagle100/httpd: Added an examples/uip configuration for the
-	  Micromint Eagle100 board.
-	* arch/arm/src/lm3s: Added an SSI driver for the LM3S6918
-	* examples/nsh: Added MMC/SD support for the LM3S6918
-	* arch/arm/src/lm3s: Fix logic for setting and clearing output GPIOs (critical
-	  fix!).
-	* drivers/mmcsd: Found numerous errors in current MMC/SD SPI driver.  Bad frequency
-	  calculation based on CSD settings, inappropriate timeouts, odd code that looks like
-	  a bad search and replace.  Also needs support for SDHC ver 2.x.  New MMC/SD is
-	  largely redesigned and probably non-functional in the first check-in.
-	* drivers/mmcsd: Changes verified on 4Gb Kingston microSHDC card and on a 2Gb
-	  SanDisk microSDC card on the Eagle100 platform.
-	* fs/fat: With the 4Gb card, the first tests of FAT32 were (finally) performed.
-	  Found and corrected a problem that prevented use of FAT32: It was not updating
-	  the sector cache before checking the FAT32 FSINFO sector.
-	* configs/eagle100/*/Make.defs:  Added configuration options that should make
-	  it possible to build NuttX for the Eagle100 using CodeSourcery 2009q1 toolchain
-	  and the devkitARM GNU toolchain.
-	* configs/mcu123-lpc214x/src: Corrected some logic in the LPC2148 SPI receive block
-	  logic.  Re-verified SDC ver1.x support with 1Gb Toshiba SDC, 1Gb PNY SDC, 2Gb SanDisk SDC,
-	  and 4Gb Kingston SDHC.
-	* fs/fs_mount.c: Corrected error handling that could cause a deadlock on certain
-	  mount() failures.
+nuttx-0.4.8 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
