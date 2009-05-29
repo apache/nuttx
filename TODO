@@ -22,7 +22,7 @@ NuttX TODO List (Last updated April 12, 2009)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
-  (3)  ARM/LPC214x (arch/arm/src/lpc214x/)
+  (8)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (4)  ARM/STR71x (arch/arm/src/str71x/)
   (1)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
@@ -510,6 +510,12 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
                optimiation of the delay time.
   Status:      Open
   Priority:    Medium
+
+  Desription:  I am unable to initialize a 2Gb SanDisk microSD card (in adaptor) on the
+               the mcu123 board.  The card fails to accept CMD0.  Doesn't seem like a software
+               issue, but if anyone else sees the problem, I'd like to know.
+  Status:      Open
+  Priority:    Uncertain
 
 o ARM/STR71x (arch/arm/src/str71x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

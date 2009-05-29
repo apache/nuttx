@@ -722,7 +722,7 @@
 	* sched/: pthread_create() must return a (non-negated) errno value on failure.
 	* configs/eagle100/nsh: Add a NuttShell (NSH) configuration for the Eagle-100
 
-0.4.7 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.7 2009-05-29 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/lm3s: Added an Ethernet driver for the LM3S6918
 	* configs/eagle100/nettest: Added an examples/nettest configuration for the
@@ -747,9 +747,10 @@
 	  it possible to build NuttX for the Eagle100 using CodeSourcery 2009q1 toolchain
 	  and the devkitARM GNU toolchain.
 	* configs/mcu123-lpc214x/src: Corrected some logic in the LPC2148 SPI receive block
-	  logic.  Re-verified SDC ver1.x support with 1Gb Toshiba SDC, 1Gb PNY SDC, 2Gb SanDisk SDC,
-	  and 4Gb Kingston SDHC.
+	  logic.  Re-verified SDC ver1.x support with 1Gb Toshiba SDC, 1Gb PNY SDC, and
+	  4Gb Kingston SDHC.  There are CMD0 issues with the 2Gb SanDisk SDC on this board.
 	* fs/fs_mount.c: Corrected error handling that could cause a deadlock on certain
 	  mount() failures.
 
+0.4.8 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
