@@ -323,7 +323,6 @@ static void lm3s_ethreset(struct lm3s_driver_s *priv)
 {
   irqstate_t flags;
   uint32 regval;
-  volatile uint32 delay;
 
 #if LM3S_NETHCONTROLLERS > 1
 #  error "If multiple interfaces are supported, this function would have to be redesigned"
@@ -343,9 +342,9 @@ static void lm3s_ethreset(struct lm3s_driver_s *priv)
   regval |= (SYSCON_SRCR2_EMAC0|SYSCON_SRCR2_EPHY0);
   putreg32(regval, LM3S_SYSCON_SRCR2);
 
-  /* Wait just a bit */
+  /* Wait just a bit.  This is a much longer delay than necessary */
 
-  for (delay = 0; delay < 16; delay++);
+  up_mdelay(2);
 
   /* Then take the Ethernet controller out of the reset state */
 
