@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 28, 2009</p>
+      <p>Last Updated: May 29, 2009</p>
     </td>
   </tr>
 </table>
@@ -1439,6 +1439,8 @@ nuttx-0.4.7 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* configs/mcu123-lpc214x/src: Corrected some logic in the LPC2148 SPI receive block
 	  logic.  Re-verified SDC ver1.x support with 1Gb Toshiba SDC, 1Gb PNY SDC, 2Gb SanDisk SDC,
 	  and 4Gb Kingston SDHC.
+	* fs/fs_mount.c: Corrected error handling that could cause a deadlock on certain
+	  mount() failures.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

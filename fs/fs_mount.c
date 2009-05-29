@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_mount.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -231,7 +231,7 @@ int mount(const char *source, const char *target,
 
       fdbg("Bind method failed: %d\n", status);
       errcode = -status;
-      goto errout_with_blkdrvr;
+      goto errout_with_mountpt;
   }
 
   /* We have it, now populate it with driver specific information. */
@@ -256,13 +256,16 @@ int mount(const char *source, const char *target,
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
-errout_with_blkdrvr:
-  inode_release(blkdrvr_inode);
 errout_with_mountpt:
+  inode_semgive();
+  inode_release(blkdrvr_inode);
   inode_release(mountpt_inode);
+  goto errout;
+
 errout_with_semaphore:
   inode_semgive();
   inode_release(blkdrvr_inode);
+
 errout:
   errno = errcode;
   return ERROR;

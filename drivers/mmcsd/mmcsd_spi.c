@@ -431,7 +431,16 @@ static uint32 mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
   FAR struct spi_dev_s *spi = slot->spi;
   uint32 result;
   ubyte response = 0xff;
+  int ret;
   int i;
+
+  /* Wait until the card is not busy */
+
+  ret = mmcsd_waitready(slot);
+  if (ret != OK)
+    {
+      return ret;
+    }
 
   /* Send command code */
 
@@ -1012,15 +1021,34 @@ static int mmcsd_open(FAR struct inode *inode)
     }
 #endif
 
-  /* Select the slave */
+  /* Verify that an MMC/SD card has been inserted */
 
+  ret = -ENODEV;
   mmcsd_semtake(&slot->sem);
-  SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
+  if ((SPI_STATUS(spi, SPIDEV_MMCSD) & SPI_STATUS_PRESENT) != 0)
+    {
+      /* Yes.. a card is present.  Has it been initialized? */
 
-  /* Verify that the MMC/SD card is alive and ready for business */
+      if (slot->type == MMCSD_CARDTYPE_UNKNOWN)
+        {
+          /* Ininitialize for the media in the slot */
 
-  ret = mmcsd_waitready(slot);
-  SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+          ret = mmcsd_mediainitialize(slot);
+          if (ret < 0)
+            {
+              fvdbg("Failed to initialize card\n");
+              goto errout_with_sem;
+            }
+        }
+
+      /* Make sure that the card is ready */    
+
+      SPI_SELECT(spi, SPIDEV_MMCSD, TRUE);
+      ret = mmcsd_waitready(slot);
+      SPI_SELECT(spi, SPIDEV_MMCSD, FALSE);
+    }
+
+errout_with_sem:
   mmcsd_semgive(&slot->sem);
   return ret;
 }
@@ -1084,7 +1112,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
     }
 #endif
 
-  /* Verify that card is availabled */
+  /* Verify that card is available */
 
   if (slot->state & MMCSD_SLOTSTATUS_NOTREADY)
     {
@@ -1237,7 +1265,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
     }
 #endif
 
-  /* Verify that card is availabled */
+  /* Verify that card is available */
 
   if (slot->state & MMCSD_SLOTSTATUS_NOTREADY)
     {

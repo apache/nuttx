@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs_fat32.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -1482,7 +1482,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
     }
 
   if (blkdriver->u.i_bops->open &&
-       blkdriver->u.i_bops->open(blkdriver) != OK)
+      blkdriver->u.i_bops->open(blkdriver) != OK)
     {
       return -ENODEV;
     }
