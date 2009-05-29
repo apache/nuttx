@@ -901,12 +901,5 @@ In addition, this release includes several important bugfixes for the LM3S6918,
 the LPC2148, the SPI-based MMC/SD driver, and to FAT32.  See the ChangeLog for
 details of these bugfixes.
 
-This tarball contains a complete CVS snapshot from May 19, 2009.
-
-
-
-
-
-
-
+This tarball contains a complete CVS snapshot from May 29, 2009.
 
