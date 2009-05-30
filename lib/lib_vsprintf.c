@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_vsprintf.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,12 +84,12 @@
 
 int vsprintf(FAR char *dest, const char *src, va_list ap)
 {
-  struct lib_memstream_s memstream;
+  struct lib_memoutstream_s memoutstream;
 
   /* Wrap the destination buffer in a stream object and let
    * lib_vsprintf do the work.
    */
 
-  lib_memstream((FAR struct lib_memstream_s *)&memstream, dest, LIB_BUFLEN_UNKNOWN);
-  return lib_vsprintf((FAR struct lib_stream_s *)&memstream.public, src, ap);
+  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream, dest, LIB_BUFLEN_UNKNOWN);
+  return lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, src, ap);
 }

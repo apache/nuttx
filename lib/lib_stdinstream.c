@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_rawstream.c
+ * lib/lib_stdinstream.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <unistd.h>
-#include <errno.h>
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -46,26 +44,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rawstream_putc
+ * Name: stdinstream_getc
  ****************************************************************************/
 
-static void rawstream_putc(FAR struct lib_stream_s *this, int ch)
+static int stdinstream_getc(FAR struct lib_instream_s *this)
 {
-  FAR struct lib_rawstream_s *rthis = (FAR struct lib_rawstream_s *)this;
-  char buffer = ch;
-  if (this && rthis->fd >= 0)
+  FAR struct lib_stdinstream_s *sthis = (FAR struct lib_stdinstream_s *)this;
+  int ret;
+
+  if (this)
     {
-      int nwritten;
-      do
+      ret = getc(sthis->stream);
+      if (ret != EOF)
         {
-          nwritten = write(rthis->fd, &buffer, 1);
-          if (nwritten == 1)
-            {
-              this->nput++;
-            }
+          this->nget++;
         }
-      while (nwritten < 0 && *get_errno_ptr() == EINTR);
     }
+  return ret;
 }
 
 /****************************************************************************
@@ -73,13 +68,15 @@ static void rawstream_putc(FAR struct lib_stream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_rawstream
+ * Name: lib_stdinstream
  ****************************************************************************/
 
-void lib_rawstream(FAR struct lib_rawstream_s *rawstream, int fd)
+void lib_stdinstream(FAR struct lib_stdinstream_s *stdinstream,
+                     FAR FILE *stream)
 {
-  rawstream->public.put  = rawstream_putc;
-  rawstream->public.nput = 0;
-  rawstream->fd          = fd;
+  stdinstream->public.get  = stdinstream_getc;
+  stdinstream->public.nget = 0;
+  stdinstream->stream      = stream;
 }
+
 

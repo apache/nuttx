@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_libsprintf.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,7 @@
  * Name: lib_sprintf
  ****************************************************************************/
 
-int lib_sprintf(FAR struct lib_stream_s *obj, const char *fmt, ...)
+int lib_sprintf(FAR struct lib_outstream_s *obj, const char *fmt, ...)
 {
   va_list ap;
   int     n;

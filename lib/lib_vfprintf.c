@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_vfprintf.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@
 
 int vfprintf(FAR FILE *stream, FAR const char *fmt, va_list ap)
 {
-  struct lib_stdstream_s stdstream;
+  struct lib_stdoutstream_s stdoutstream;
   int  n = ERROR;
 
   if (stream)
@@ -86,7 +86,7 @@ int vfprintf(FAR FILE *stream, FAR const char *fmt, va_list ap)
        * do the work.
        */
 
-      lib_stdstream(&stdstream, stream);
+      lib_stdoutstream(&stdoutstream, stream);
 
       /* Hold the stream semaphore throughout the lib_vsprintf
        * call so that this thread can get its entire message out
@@ -94,7 +94,7 @@ int vfprintf(FAR FILE *stream, FAR const char *fmt, va_list ap)
        */
 
       lib_take_semaphore(stream);
-      n = lib_vsprintf(&stdstream.public, fmt, ap);
+      n = lib_vsprintf(&stdoutstream.public, fmt, ap);
       lib_give_semaphore(stream);
     }
   return n;

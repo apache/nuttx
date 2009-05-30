@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_nullstream.c
+ * lib/lib_rawinstream.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #include "lib_internal.h"
 
@@ -45,18 +45,45 @@
  * Private Functions
  ****************************************************************************/
 
-static void nullstream_putc(FAR struct lib_stream_s *this, int ch)
+/****************************************************************************
+ * Name: rawinstream_getc
+ ****************************************************************************/
+
+static int rawinstream_getc(FAR struct lib_instream_s *this)
 {
-  this->nput++;
+  FAR struct lib_rawinstream_s *rthis = (FAR struct lib_rawinstream_s *)this;
+  char ch;
+
+  if (this && rthis->fd >= 0)
+    {
+      int nwritten;
+      do
+        {
+          nwritten = read(rthis->fd, &ch, 1);
+          if (nwritten == 1)
+            {
+              this->nget++;
+              return ch;
+            }
+        }
+      while (nwritten < 0 && errno == EINTR);
+    }
+
+  return EOF;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void lib_nullstream(FAR struct lib_stream_s *nullstream)
+/****************************************************************************
+ * Name: lib_rawinstream
+ ****************************************************************************/
+
+void lib_rawinstream(FAR struct lib_rawinstream_s *rawinstream, int fd)
 {
-  nullstream->put  = nullstream_putc;
-  nullstream->nput = 0;
+  rawinstream->public.get  = rawinstream_getc;
+  rawinstream->public.nget = 0;
+  rawinstream->fd          = fd;
 }
 

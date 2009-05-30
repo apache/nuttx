@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_lowprintf.c
+ * lib/lib_meminstream.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,78 +37,48 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdio.h>
-#include <debug.h>
 #include "lib_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
+ * Name: meminstream_getc
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+static int meminstream_getc(FAR struct lib_instream_s *this)
+{
+  FAR struct lib_meminstream_s *mthis = (FAR struct lib_meminstream_s *)this;
+  int ret;
 
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
+  if (this && this->nget < mthis->buflen - 1)
+    {
+      ret = mthis->buffer[this->nget];
+      this->nget++;
+    }
+  else
+    {
+      ret = EOF;
+    }
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_lowvprintf
+ * Name: lib_meminstream
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LOWPUTC
-
-int lib_lowvprintf(const char *fmt, va_list ap)
+void lib_meminstream(FAR struct lib_meminstream_s *meminstream,
+                      FAR char *bufstart, int buflen)
 {
-  struct lib_outstream_s stream;
-
-  /* Wrap the stdout in a stream object and let lib_vsprintf
-   * do the work.
-   */
-
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+  meminstream->public.get  = meminstream_getc;
+  meminstream->public.nget = 0;          /* Will be buffer index */
+  meminstream->buffer      = bufstart;   /* Start of buffer */
+  meminstream->buflen      = buflen;     /* Length of the buffer */
 }
 
-/****************************************************************************
- * Name: lib_lowprintf
- ****************************************************************************/
 
-int lib_lowprintf(const char *fmt, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, fmt);
-  ret= lib_lowvprintf(fmt, ap);
-  va_end(ap);
-  return ret;
-}
-
-#endif /* CONFIG_ARCH_LOWPUTC */

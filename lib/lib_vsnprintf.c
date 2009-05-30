@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_vsnprintf.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,15 +78,15 @@
 
 int vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap)
 {
-  struct lib_memstream_s memstream;
+  struct lib_memoutstream_s memoutstream;
   int     n;
 
   /* Initialize a memory stream to write to the buffer */
 
-  lib_memstream((FAR struct lib_memstream_s *)&memstream, buf, size);
+  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream, buf, size);
 
   /* Then let lib_vsprintf do the real work */
 
-  n = lib_vsprintf((FAR struct lib_stream_s *)&memstream.public, format, ap);
+  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, format, ap);
   return n;
 }

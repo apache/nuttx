@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_stdstream.c
+ * lib/lib_memoutstream.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,18 +44,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stdstream_putc
+ * Name: memoutstream_putc
  ****************************************************************************/
 
-static void stdstream_putc(FAR struct lib_stream_s *this, int ch)
+static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_stdstream_s *sthis = (FAR struct lib_stdstream_s *)this;
-  if (this)
+  FAR struct lib_memoutstream_s *mthis = (FAR struct lib_memoutstream_s *)this;
+  if (this && this->nput < mthis->buflen - 1)
     {
-      if (putc(ch, sthis->stream) != EOF)
-        {
-          this->nput++;
-        }
+      mthis->buffer[this->nput] = ch;
+      this->nput++;
+      mthis->buffer[this->nput] = '\0';
     }
 }
 
@@ -64,15 +63,16 @@ static void stdstream_putc(FAR struct lib_stream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_stdstream
+ * Name: lib_memoutstream
  ****************************************************************************/
 
-void lib_stdstream(FAR struct lib_stdstream_s *stdstream,
-                   FAR FILE *stream)
+void lib_memoutstream(FAR struct lib_memoutstream_s *memoutstream,
+                      FAR char *bufstart, int buflen)
 {
-  stdstream->public.put  = stdstream_putc;
-  stdstream->public.nput = 0;
-  stdstream->stream      = stream;
+  memoutstream->public.put  = memoutstream_putc;
+  memoutstream->public.nput = 0;          /* Will be buffer index */
+  memoutstream->buffer      = bufstart;   /* Start of buffer */
+  memoutstream->buflen      = buflen - 1; /* Save space for null terminator */
 }
 
 

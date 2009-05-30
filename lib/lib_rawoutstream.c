@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib_lowstream.c
+ * lib/lib_rawoutstream.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,14 +37,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#ifdef CONFIG_ARCH_LOWPUTC
-
-#include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
-#include <nuttx/arch.h>
-
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -52,14 +46,25 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lowstream_putc
+ * Name: rawoutstream_putc
  ****************************************************************************/
 
-static void lowstream_putc(FAR struct lib_stream_s *this, int ch)
+static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  if (this && up_putc(ch) != EOF)
+  FAR struct lib_rawoutstream_s *rthis = (FAR struct lib_rawoutstream_s *)this;
+  char buffer = ch;
+  if (this && rthis->fd >= 0)
     {
-      this->nput++;
+      int nwritten;
+      do
+        {
+          nwritten = write(rthis->fd, &buffer, 1);
+          if (nwritten == 1)
+            {
+              this->nput++;
+            }
+        }
+      while (nwritten < 0 && *get_errno_ptr() == EINTR);
     }
 }
 
@@ -68,13 +73,13 @@ static void lowstream_putc(FAR struct lib_stream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_lowstream
+ * Name: lib_rawoutstream
  ****************************************************************************/
 
-void lib_lowstream(FAR struct lib_stream_s *stream)
+void lib_rawoutstream(FAR struct lib_rawoutstream_s *rawoutstream, int fd)
 {
-  stream->put  = lowstream_putc;
-  stream->nput = 0;
+  rawoutstream->public.put  = rawoutstream_putc;
+  rawoutstream->public.nput = 0;
+  rawoutstream->fd          = fd;
 }
 
-#endif /* CONFIG_ARCH_LOWPUTC */

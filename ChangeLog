@@ -754,3 +754,6 @@
 
 0.4.8 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* lib/lib_*stream.c: Extend internal stream logic to support incoming streams.
+
+

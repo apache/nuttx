@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_memstream.c
+ * lib/lib_stdoutstream.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,17 +44,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: memstream_putc
+ * Name: stdoutstream_putc
  ****************************************************************************/
 
-static void memstream_putc(FAR struct lib_stream_s *this, int ch)
+static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_memstream_s *mthis = (FAR struct lib_memstream_s *)this;
-  if (this && this->nput < mthis->buflen - 1)
+  FAR struct lib_stdoutstream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
+  if (this)
     {
-      mthis->buffer[this->nput] = ch;
-      this->nput++;
-      mthis->buffer[this->nput] = '\0';
+      if (putc(ch, sthis->stream) != EOF)
+        {
+          this->nput++;
+        }
     }
 }
 
@@ -63,16 +64,15 @@ static void memstream_putc(FAR struct lib_stream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_memstream
+ * Name: lib_stdoutstream
  ****************************************************************************/
 
-void lib_memstream(FAR struct lib_memstream_s *memstream,
-                   FAR char *bufstart, int buflen)
+void lib_stdoutstream(FAR struct lib_stdoutstream_s *stdoutstream,
+                   FAR FILE *stream)
 {
-  memstream->public.put  = memstream_putc;
-  memstream->public.nput = 0;          /* Will be buffer index */
-  memstream->buffer      = bufstart;   /* Start of buffer */
-  memstream->buflen      = buflen - 1; /* Save space for null terminator */
+  stdoutstream->public.put  = stdoutstream_putc;
+  stdoutstream->public.nput = 0;
+  stdoutstream->stream      = stream;
 }
 
 

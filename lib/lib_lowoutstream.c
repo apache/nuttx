@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_lowprintf.c
+ * lib_lowoutstream.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,77 +38,43 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#ifdef CONFIG_ARCH_LOWPUTC
+
 #include <stdio.h>
-#include <debug.h>
+#include <errno.h>
+#include <nuttx/arch.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
+ * Name: lowoutstream_putc
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
+static void lowoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+{
+  if (this && up_putc(ch) != EOF)
+    {
+      this->nput++;
+    }
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_lowvprintf
+ * Name: lib_lowoutstream
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LOWPUTC
-
-int lib_lowvprintf(const char *fmt, va_list ap)
+void lib_lowoutstream(FAR struct lib_outstream_s *stream)
 {
-  struct lib_outstream_s stream;
-
-  /* Wrap the stdout in a stream object and let lib_vsprintf
-   * do the work.
-   */
-
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
-}
-
-/****************************************************************************
- * Name: lib_lowprintf
- ****************************************************************************/
-
-int lib_lowprintf(const char *fmt, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, fmt);
-  ret= lib_lowvprintf(fmt, ap);
-  va_end(ap);
-  return ret;
+  stream->put  = lowoutstream_putc;
+  stream->nput = 0;
 }
 
 #endif /* CONFIG_ARCH_LOWPUTC */

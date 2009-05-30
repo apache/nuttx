@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_lowprintf.c
+ * lib_lowinstream.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,77 +38,43 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#ifdef CONFIG_ARCH_LOWGETC
+
 #include <stdio.h>
-#include <debug.h>
+#include <errno.h>
+#include <nuttx/arch.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
+ * Name: lowinstream_getc
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
+static int lowinstream_getc(FAR struct lib_outstream_s *this)
+{
+  if (this && up_getc(ch) != EOF)
+    {
+      this->nget++;
+    }
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_lowvprintf
+ * Name: lib_lowinstream
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LOWPUTC
-
-int lib_lowvprintf(const char *fmt, va_list ap)
+void lib_lowinstream(FAR struct lib_outstream_s *stream)
 {
-  struct lib_outstream_s stream;
-
-  /* Wrap the stdout in a stream object and let lib_vsprintf
-   * do the work.
-   */
-
-  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
-  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
+  stream->get  = lowinstream_getc;
+  stream->nget = 0;
 }
 
-/****************************************************************************
- * Name: lib_lowprintf
- ****************************************************************************/
-
-int lib_lowprintf(const char *fmt, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, fmt);
-  ret= lib_lowvprintf(fmt, ap);
-  va_end(ap);
-  return ret;
-}
-
-#endif /* CONFIG_ARCH_LOWPUTC */
+#endif /* CONFIG_ARCH_LOWGETC */

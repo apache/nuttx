@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_rawprintf.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,25 +85,25 @@ int lib_rawvprintf(const char *fmt, va_list ap)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
 
-  struct lib_rawstream_s rawstream;
+  struct lib_rawoutstream_s rawoutstream;
 
   /* Wrap the stdout in a stream object and let lib_vsprintf
    * do the work.
    */
 
-  lib_rawstream(&rawstream, 1);
-  return lib_vsprintf(&rawstream.public, fmt, ap);
+  lib_rawoutstream(&rawoutstream, 1);
+  return lib_vsprintf(&rawoutstream.public, fmt, ap);
 
 #elif defined(CONFIG_ARCH_LOWPUTC)
 
-  struct lib_stream_s stream;
+  struct lib_outstream_s stream;
 
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
    */
 
-  lib_lowstream((FAR struct lib_stream_s *)&stream);
-  return lib_vsprintf((FAR struct lib_stream_s *)&stream, fmt, ap);
+  lib_lowoutstream((FAR struct lib_outstream_s *)&stream);
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, ap);
 
 #else
   return 0;
