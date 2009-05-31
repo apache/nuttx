@@ -44,6 +44,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <semaphore.h>
+#include <nuttx/streams.h>
 
 /****************************************************************************
  * Definitions
@@ -65,72 +66,10 @@
  * Public Types
  ****************************************************************************/
 
-/* This is the generic for of a stream used by the library
- * to manage variable sized output.
- */
-
-struct lib_instream_s;
-struct lib_outstream_s;
-
-typedef int (*lib_getc_t)(FAR struct lib_instream_s *this);
-typedef void (*lib_putc_t)(FAR struct lib_outstream_s *this, int ch);
-
-struct lib_instream_s
-{
-  lib_getc_t get;   /* Pointer to function to get one character */
-  int        nget;  /* Total number of characters gotten.  Written
-                     * by get method, readable by user */
-};
-
-struct lib_outstream_s
-{
-  lib_putc_t put;   /* Pointer to function to put one character */
-  int        nput;  /* Total number of characters put.  Written
-                     * by put method, readable by user */
-};
-
-struct lib_meminstream_s
-{
-  struct lib_instream_s  public;
-  FAR char              *buffer;  /* Address of first byte in the buffer */
-  int                    buflen;  /* Size of the buffer in bytes */
-};
-
-struct lib_memoutstream_s
-{
-  struct lib_outstream_s public;
-  FAR char              *buffer;  /* Address of first byte in the buffer */
-  int                    buflen;  /* Size of the buffer in bytes */
-};
-
-struct lib_stdinstream_s
-{
-  struct lib_instream_s  public;
-  FAR FILE              *stream;
-};
-
-struct lib_stdoutstream_s
-{
-  struct lib_outstream_s public;
-  FAR FILE              *stream;
-};
-
-struct lib_rawoutstream_s
-{
-  struct lib_outstream_s public;
-  int                    fd;
-};
-
-struct lib_rawinstream_s
-{
-  struct lib_instream_s  public;
-  int                    fd;
-};
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
- 
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -141,56 +80,6 @@ struct lib_rawinstream_s
 extern void  stream_semtake(FAR struct streamlist *list);
 extern void  stream_semgive(FAR struct streamlist *list);
 #endif
-
-/* Defined in lib_memoutstream.c */
-
-extern void lib_memoutstream(FAR struct lib_memoutstream_s *memoutstream,
-                             FAR char *bufstart, int buflen);
-
-/* Defined in lib_meminstream.c */
-
-extern void lib_meminstream(FAR struct lib_meminstream_s *meminstream,
-                            FAR char *bufstart, int buflen);
-
-/* Defined in lib_stdinstream.c */
-
-extern void lib_stdinstream(FAR struct lib_stdinstream_s *stdinstream,
-                            FAR FILE *stream);
-
-/* Defined in lib_stdoutstream.c */
-
-extern void lib_stdoutstream(FAR struct lib_stdoutstream_s *stdoutstream,
-                             FAR FILE *stream);
-
-/* Defined in lib_rawinstream.c */
-
-extern void lib_rawinstream(FAR struct lib_rawinstream_s *rawinstream,
-                            int fd);
-
-/* Defined in lib_rawoutstream.c */
-
-extern void lib_rawoutstream(FAR struct lib_rawoutstream_s *rawoutstream,
-                          int fd);
-
-/* Defined in lib_lowinstream.c */
-
-#ifdef CONFIG_ARCH_LOWGETC
-extern void lib_lowinstream(FAR struct lib_instream_s *lowinstream);
-#endif
-
-/* Defined in lib_lowoutstream.c */
-
-#ifdef CONFIG_ARCH_LOWPUTC
-extern void lib_lowoutstream(FAR struct lib_outstream_s *lowoutstream);
-#endif
-
-/* Defined in lib_nullinstream.c */
-
-extern void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
-
-/* Defined in lib_nulloutstream.c */
-
-extern void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 
 /* Defined in lib_libsprintf.c */
 
