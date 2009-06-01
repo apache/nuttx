@@ -755,5 +755,8 @@
 0.4.8 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* lib/lib_*stream.c: Extend internal stream logic to support incoming streams.
+	* arch/arm/src/str71x: Made some progress with the Olimex STR-P711 before my
+	  emulator stopped working.  Serial output is now correct.  I don't think it
+	  would take much more to get it working!
 
 

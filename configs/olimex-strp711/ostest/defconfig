@@ -1,7 +1,7 @@
 ############################################################################
 # configs/olimes-strp711/ostest/defconfig
 #
-#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -556,7 +556,7 @@ CONFIG_USBSTRG_REMOVABLE=y
 #
 # Settings for examples/ostest
 CONFIG_EXAMPLES_OSTEST_LOOPS=1
-CONFIG_EXAMPLES_OSTEST_STACKSIZE=4096
+CONFIG_EXAMPLES_OSTEST_STACKSIZE=2048
 CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 
 #
