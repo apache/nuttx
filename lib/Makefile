@@ -56,7 +56,8 @@ STDIO_SRCS	= lib_printf.c lib_rawprintf.c lib_lowprintf.c lib_dbg.c \
 		  lib_sprintf.c lib_snprintf.c lib_libsprintf.c lib_vsprintf.c \
 		  lib_vsnprintf.c lib_libvsprintf.c lib_meminstream.c \
 		  lib_memoutstream.c lib_lowinstream.c lib_lowoutstream.c \
-		  lib_nullinstream.c lib_nulloutstream.c lib_sscanf.c
+		  lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c \
+		  lib_sscanf.c
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 STDIO_SRCS	+= lib_rawinstream.c lib_rawoutstream.c

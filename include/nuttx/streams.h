@@ -120,7 +120,7 @@ struct lib_rawinstream_s
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
- 
+
 #undef EXTERN
 #if defined(__cplusplus)
 #  define EXTERN extern "C"
@@ -134,54 +134,134 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Defined in lib/lib_meminstream.c */
+/****************************************************************************
+ * Name: lib_meminstream, lib_memoutstream
+ *
+ * Description:
+ *   Initializes a stream for use with a fixed-size memory buffer.
+ *   Defined in lib/lib_meminstream.c and lib/lib_memoutstream.c
+ *
+ * Input parameters:
+ *   meminstream  - User allocated, uninitialized instance of struct
+ *                  lib_meminstream_s to be initialized.
+ *   memoutstream - User allocated, uninitialized instance of struct
+ *                  lib_memoutstream_s to be initialized.
+ *   bufstart     - Address of the beginning of the fixed-size memory buffer
+ *   buflen       - Size of the fixed-sized memory buffer in bytes
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
 
 EXTERN void lib_meminstream(FAR struct lib_meminstream_s *meminstream,
                             FAR const char *bufstart, int buflen);
-
-/* Defined in lib/lib_memoutstream.c */
-
 EXTERN void lib_memoutstream(FAR struct lib_memoutstream_s *memoutstream,
                              FAR char *bufstart, int buflen);
 
-/* Defined in lib/lib_stdinstream.c */
+/****************************************************************************
+ * Name: lib_stdinstream, lib_stdoutstream
+ *
+ * Description:
+ *   Initializes a stream for use with a FILE instance.
+ *   Defined in lib/lib_stdinstream.c and lib/lib_stdoutstream.c
+ *
+ * Input parameters:
+ *   stdinstream  - User allocated, uninitialized instance of struct
+ *                  lib_stdinstream_s to be initialized.
+ *   stdoutstream - User allocated, uninitialized instance of struct
+ *                  lib_stdoutstream_s to be initialized.
+ *   stream       - User provided stream instance (must have been opened for
+ *                  the correct access).
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
 
 EXTERN void lib_stdinstream(FAR struct lib_stdinstream_s *stdinstream,
                             FAR FILE *stream);
-
-/* Defined in lib/lib_stdoutstream.c */
-
 EXTERN void lib_stdoutstream(FAR struct lib_stdoutstream_s *stdoutstream,
                              FAR FILE *stream);
 
-/* Defined in lib/lib_rawinstream.c */
+/****************************************************************************
+ * Name: lib_rawinstream, lib_rawoutstream
+ *
+ * Description:
+ *   Initializes a stream for use with a file descriptor.
+ *   Defined in lib/lib_rawinstream.c and lib/lib_rawoutstream.c
+ *
+ * Input parameters:
+ *   rawinstream  - User allocated, uninitialized instance of struct
+ *                  lib_rawinstream_s to be initialized.
+ *   rawoutstream - User allocated, uninitialized instance of struct
+ *                  lib_rawoutstream_s to be initialized.
+ *   fd           - User provided file/socket descriptor (must have been opened
+ *                  for the correct access).
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
 
 EXTERN void lib_rawinstream(FAR struct lib_rawinstream_s *rawinstream,
                             int fd);
-
-/* Defined in lib/lib_rawoutstream.c */
-
 EXTERN void lib_rawoutstream(FAR struct lib_rawoutstream_s *rawoutstream,
-                          int fd);
+                             int fd);
 
-/* Defined in lib/lib_lowinstream.c */
+/****************************************************************************
+ * Name: lib_lowinstream, lib_lowoutstream
+ *
+ * Description:
+ *   Initializes a stream for use with low-level, architecture-specific I/O.
+ *   Defined in lib/lib_lowinstream.c and lib/lib_lowoutstream.c
+ *
+ * Input parameters:
+ *   lowinstream  - User allocated, uninitialized instance of struct
+ *                  lib_lowinstream_s to be initialized.
+ *   lowoutstream - User allocated, uninitialized instance of struct
+ *                  lib_lowoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LOWGETC
 EXTERN void lib_lowinstream(FAR struct lib_instream_s *lowinstream);
 #endif
-
-/* Defined in lib/lib_lowoutstream.c */
-
 #ifdef CONFIG_ARCH_LOWPUTC
 EXTERN void lib_lowoutstream(FAR struct lib_outstream_s *lowoutstream);
 #endif
 
-/* Defined in lib/lib_nullinstream.c */
+/****************************************************************************
+ * Name: lib_zeroinstream, lib_nullinstream, lib_nulloutstream
+ *
+ * Description:
+ *   Initializes NULL streams:
+ *
+ *   o The stream created by lib_zeroinstream will return an infinitely long
+ *     stream of zeroes. Defined in lib/lib_zeroinstream.c
+ *   o The stream created by lib_nullinstream will return only EOF.
+ *     Defined in lib/lib_nullinstream.c
+ *   o The stream created by lib_nulloutstream will write all data to the
+ *     bit-bucket. Defined in lib/lib_nulloutstream.c
+ *
+ * Input parameters:
+ *   zeroinstream  - User allocated, uninitialized instance of struct
+ *                   lib_instream_s to be initialized.
+ *   nullinstream  - User allocated, uninitialized instance of struct
+ *                   lib_instream_s to be initialized.
+ *   nulloutstream - User allocated, uninitialized instance of struct
+ *                   lib_outstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
 
+EXTERN void lib_zeroinstream(FAR struct lib_instream_s *zeroinstream);
 EXTERN void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
-
-/* Defined in lib/lib_nulloutstream.c */
-
 EXTERN void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 
 #undef EXTERN

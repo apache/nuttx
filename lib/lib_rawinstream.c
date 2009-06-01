@@ -78,6 +78,19 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
 
 /****************************************************************************
  * Name: lib_rawinstream
+ *
+ * Description:
+ *   Initializes a stream for use with a file descriptor.
+ *
+ * Input parameters:
+ *   rawinstream - User allocated, uninitialized instance of struct
+ *                 lib_rawinstream_s to be initialized.
+ *   fd          - User provided file/socket descriptor (must have been opened
+ *                 for the correct access).
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
  ****************************************************************************/
 
 void lib_rawinstream(FAR struct lib_rawinstream_s *rawinstream, int fd)

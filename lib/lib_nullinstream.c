@@ -47,12 +47,27 @@
 
 static int nullinstream_getc(FAR struct lib_instream_s *this)
 {
-  this->nget++;
-  return 0;
+  return EOF;
 }
 
 /****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lib_nullinstream
+ *
+ * Description:
+ *   Initializes a NULL stream. The initialized stream will  will return only
+ *   EOF.
+ *
+ * Input parameters:
+ *   nullinstream  - User allocated, uninitialized instance of struct
+ *                   lib_instream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
  ****************************************************************************/
 
 void lib_nullinstream(FAR struct lib_instream_s *nullinstream)

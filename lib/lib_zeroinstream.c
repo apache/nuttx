@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_memoutstream.c
+ * lib/lib_zeroinstream.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,25 +37,18 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdio.h>
+#include <errno.h>
 #include "lib_internal.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: memoutstream_putc
- ****************************************************************************/
-
-static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static int zeroinstream_getc(FAR struct lib_instream_s *this)
 {
-  FAR struct lib_memoutstream_s *mthis = (FAR struct lib_memoutstream_s *)this;
-  if (this && this->nput < mthis->buflen - 1)
-    {
-      mthis->buffer[this->nput] = ch;
-      this->nput++;
-      mthis->buffer[this->nput] = '\0';
-    }
+  this->nget++;
+  return 0;
 }
 
 /****************************************************************************
@@ -63,29 +56,24 @@ static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_memoutstream
+ * Name: lib_zeroinstream
  *
  * Description:
- *   Initializes a stream for use with a fixed-size memory buffer.
+ *   Initializes a NULL stream.  The initialized stream will return an
+ *   infinitely long stream of zeroes.
  *
  * Input parameters:
- *   memoutstream - User allocated, uninitialized instance of struct
- *                  lib_memoutstream_s to be initialized.
- *   bufstart     - Address of the beginning of the fixed-size memory buffer
- *   buflen       - Size of the fixed-sized memory buffer in bytes
+ *   zeroinstream  - User allocated, uninitialized instance of struct
+ *                   lib_instream_s to be initialized.
  *
  * Returned Value:
- *   None (memoutstream initialized).
+ *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_memoutstream(FAR struct lib_memoutstream_s *memoutstream,
-                      FAR char *bufstart, int buflen)
+void lib_zeroinstream(FAR struct lib_instream_s *zeroinstream)
 {
-  memoutstream->public.put  = memoutstream_putc;
-  memoutstream->public.nput = 0;          /* Will be buffer index */
-  memoutstream->buffer      = bufstart;   /* Start of buffer */
-  memoutstream->buflen      = buflen - 1; /* Save space for null terminator */
+  zeroinstream->get  = zeroinstream_getc;
+  zeroinstream->nget = 0;
 }
-
 

@@ -69,6 +69,19 @@ static int stdinstream_getc(FAR struct lib_instream_s *this)
 
 /****************************************************************************
  * Name: lib_stdinstream
+ *
+ * Description:
+ *   Initializes a stream for use with a FILE instance.
+ *
+ * Input parameters:
+ *   stdinstream - User allocated, uninitialized instance of struct
+ *                 lib_stdinstream_s to be initialized.
+ *   stream      - User provided stream instance (must have been opened for
+ *                 read access).
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
  ****************************************************************************/
 
 void lib_stdinstream(FAR struct lib_stdinstream_s *stdinstream,

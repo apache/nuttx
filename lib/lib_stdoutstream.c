@@ -65,6 +65,19 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 
 /****************************************************************************
  * Name: lib_stdoutstream
+ *
+ * Description:
+ *   Initializes a stream for use with a FILE instance.
+ *
+ * Input parameters:
+ *   stdoutstream - User allocated, uninitialized instance of struct
+ *                  lib_stdoutstream_s to be initialized.
+ *   stream       - User provided stream instance (must have been opened for
+ *                  write access).
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
  ****************************************************************************/
 
 void lib_stdoutstream(FAR struct lib_stdoutstream_s *stdoutstream,
