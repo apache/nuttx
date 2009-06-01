@@ -1,7 +1,7 @@
 /********************************************************************************
  * arch/arm/src/str71x/str71x_prccu.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,20 +48,11 @@
 
 #include "chip.h"
 #include "up_arch.h"
+#include "str71x_internal.h"
 
 /********************************************************************************
  * Definitions
  ********************************************************************************/
-
-/* Input frequency (CLK2) is either the main oscillator or the main oscillator
- * divided by 2.
- */
-
-#ifdef STR71X_PLL1_DIV2
-#  define STR71X_PLL1_CLK2 (STR71X_RCCU_MAIN_OSC/2)
-#else
-#  define STR71X_PLL1_CLK2 STR71X_RCCU_MAIN_OSC
-#endif
 
 /* Select set of peripherals to be enabled */
 
@@ -371,9 +362,9 @@ void str71x_prccuinit(void)
   uint32 reg32;
   uint16 reg16;
 
- /* Divide RCLK to obtain PCLK1 & 2 clock for the APB1 & 2 peripherals.  The divider
-  * values are provided in board.h
-  */
+  /* Divide RCLK to obtain PCLK1 & 2 clock for the APB1 & 2 peripherals.  The divider
+   * values are provided in board.h
+   */
 
   reg16  = getreg16(STR71X_PCU_PDIVR);
   reg16 &= ~(STR71X_PCUPDIVR_FACT1MASK|STR71X_PCUPDIVR_FACT2MASK);
@@ -382,7 +373,7 @@ void str71x_prccuinit(void)
 
   /* Configure the main system clock (MCLK) divider with value from board.h */
 
-  reg16 = getreg16(STR71X_PCU_MDIVR);
+  reg16  = getreg16(STR71X_PCU_MDIVR);
   reg16 &= ~STR71X_PCUMDIVR_FACTMASK;
   reg16 |= MCLKDIV;
   putreg16(reg16 , STR71X_PCU_MDIVR);
@@ -396,7 +387,7 @@ void str71x_prccuinit(void)
    * (CLK2) is greater than 3MHz.
    */
 
-#if STR71X_PLL1_CLK2 > 3000000
+#if STR71X_CLK2 > 3000000
   putreg32(PLL1MUL|PLL1DIV, STR71X_RCCU_PLL1CR);
 #else
   putreg32(PLL1MUL|PLL1DIV|STR71X_RCCUPLL1CR_FREFRANGE, STR71X_RCCU_PLL1CR);
@@ -408,8 +399,17 @@ void str71x_prccuinit(void)
 
   /* Set the CK2_16 Bit in the CFR to use CLK2/PLL1OUT as CLK3 */
 
-  reg32 = getreg32(STR71X_RCCU_CFR);
-  putreg32(reg32 | STR71X_RCCUCFR_CK216, STR71X_RCCU_CFR);
+  reg32  = getreg32(STR71X_RCCU_CFR);
+  reg32 |= STR71X_RCCUCFR_CK216;
+
+  /* Should the main oscillator divided down by 2? */
+
+#ifdef STR71X_PLL1IN_DIV2
+  reg32 |= STR71X_RCCUCFR_DIV2;
+#else
+  reg32 &= ~STR71X_RCCUCFR_DIV2;
+#endif
+  putreg32(reg32, STR71X_RCCU_CFR);
 
   /* Wait for the PLL to lock */
 
