@@ -57,7 +57,7 @@ SECTIONS
 		*(.fixup)
 		*(.gnu.warning)
 		*(.rodata)
-		*(.rodata.str1.1)
+		*(.rodata.str1.*)
 		*(.glue_7)
 		*(.glue_7t)
 		*(.got)			/* Global offset table		*/
