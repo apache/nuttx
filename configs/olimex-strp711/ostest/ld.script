@@ -33,52 +33,64 @@
  *
  ****************************************************************************/
 
+/* The str71x has 256Kb of non-volatile memory beginning at address
+ * 0x4000:0000 for program storage (Bank0, an addition 16Kb is available
+ * for data storage in Bank1).  The OS entry point is via the reset vector
+ * at address 0x00000000 where the FLASH is remapped at reset.
+ *
+ * The str71x has 64Kb of on-chip static RAM beginning at address
+ * 0x2000:0000.  The .data section will be relocated from _eronly
+ * to _sdata at boot time.
+ */
+
+/* The STR711 has 256Kb of FLASH beginning at address 0x4000:0000 and 64Kb
+ * of SRAM beginning at address 0x2000:0000
+ */
+
+MEMORY
+{
+    flash (rx) : ORIGIN = 0x40000000, LENGTH = 256K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+}
+
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	/* The str71x has 256Kb of non-volatile memory beginning at address
-	 * 0x40000000 for program storage (Bank0, an addition 16Kb is avalable
-	 * for data storage in Bank1).  The OS entry point is via the reset vector
-	 * at address 0x00000000 where the FLASH is remapped at reset.
-	 */
-
-	. = 0x40000000;
 	.text : {
 		_stext = ABSOLUTE(.);
+		*(.vectors)
 		*(.text)
 		*(.fixup)
 		*(.gnu.warning)
 		*(.rodata)
-		*(.rodata.str1.4)
+		*(.rodata.str1.*)
 		*(.glue_7)
 		*(.glue_7t)
 		*(.got)			/* Global offset table		*/
 		_etext = ABSOLUTE(.);
-	}
-	_eronly = ABSOLUTE(.);		/* This is where the .data section
-					 * is relocated for execution out
-					 * FLASH */
+	} > flash
 
-	/* The str71x has 64Kb of on-chip static RAM beginning at address
-	 * 0x20000000.  The .data section will be relocated from _eronly
+	/* This is where the .data section is relocated for execution out
+	 * FLASH.  The .data section will be relocated from _eronly
 	 * to _sdata at boot time.
 	 */
 
-	. = 0x20000000;
+	_eronly = ABSOLUTE(.);	
+	
 	.data : {
 		_sdata = ABSOLUTE(.);
 		*(.data)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	}
+	} > sram AT > flash
 
 	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);
 		*(.bss)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	}
+	} > sram
 					/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
