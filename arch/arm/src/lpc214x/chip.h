@@ -163,13 +163,13 @@
 
 /* I2C register offsets */
 
-#define LPC214X_I2C_ONSET_OFFSET        0x00   /* Control Set Register */
+#define LPC214X_I2C_CONSET_OFFSET       0x00   /* Control Set Register */
 #define LPC214X_I2C_STAT_OFFSET         0x04   /* Status Register */
 #define LPC214X_I2C_DAT_OFFSET          0x08   /* Data Register */
 #define LPC214X_I2C_ADR_OFFSET          0x0c   /* Slave Address Register */
 #define LPC214X_I2C_SCLH_OFFSET         0x10   /* SCL Duty Cycle Register (high half word) */
 #define LPC214X_I2C_SCLL_OFFSET         0x14   /* SCL Duty Cycle Register (low half word) */
-#define LPC214X_I2C_ONCLR_OFFSET        0x18   /* Control Clear Register */
+#define LPC214X_I2C_CONCLR_OFFSET       0x18   /* Control Clear Register */
 
 /* Pin function select register offsets */
 
