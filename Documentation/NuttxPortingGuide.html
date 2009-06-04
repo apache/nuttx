@@ -383,7 +383,7 @@
 
 <h3><a name="supportedarchitectures">2.2.3 Supported Architectures</a></h3>
 <p>
-   <b>Archictecture- and Chip-Specific Directories</b>.
+   <b>Architecture- and Chip-Specific Directories</b>.
    All processor architecture-specific directories are maintained in sub-directories of
    the <code>arch/</code> directory.
    Different chips or SoC's may implement the same processor core.
@@ -394,7 +394,7 @@
 <ul>
   <li><code>arch/sim</code>:
     A user-mode port of NuttX to the x86 Linux platform is available.
-    The purpose of this port is primarily to support OS feature developement.
+    The purpose of this port is primarily to support OS feature development.
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
   </li>
@@ -565,7 +565,7 @@
 <h4><a name="boardconfigsubdirs">2.3.2.2 Board Specific Configuration Sub-Directories</a></h4>
 <p>
   The <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directory holds all of the
-  files that are necessary to configure Nuttx for the particular board.
+  files that are necessary to configure NuttX for the particular board.
   A board may have various different configurations using the common source files.
   Each board configuration is described by three files:  <code>Make.defs</code>, <code>defconfig</code>, and <code>setenv.sh</code>.
   Typically, each set of configuration files is retained in a separate configuration sub-directory
@@ -610,7 +610,7 @@
   </li>
   <li>
     <code>setenv.sh</code>: This is a script that you can include that will be installed at
-    the toplevel of the directory structure and can be sourced to set any
+    the top level of the directory structure and can be sourced to set any
     necessary environment variables.
   </li>
 </ul>
@@ -651,7 +651,7 @@
   <li><code>configs/ntosd-dm320</code>:
     This port uses the Neuros OSD with a GNU arm-elf toolchain* under Linux or Cygwin.
     See <a href="http://wiki.neurostechnology.com/index.php/Developer_Welcome">Neuros Wiki</a>
-    for futher information.
+    for further information.
     NuttX operates on the ARM9EJS of this dual core processor.
     STATUS: This port is code complete, verified, and included in the
     NuttX 0.2.1 release.
@@ -660,7 +660,7 @@
   <li><code>configs/olimex-strp711</code>:
     This port uses the Olimex STR-P711 board arm-elf toolchain* under Linux or Cygwin.
     See the <a href="http://www.olimex.com/dev/str-p711.html">Olimex</a> web site
-    for futher information.
+    for further information.
     STATUS: Coding for the basic port -- serial console and system timer -- is complete
     but untested to problems I am having using OpenOCD with a wiggler clone JTAG.
   </li>
@@ -673,7 +673,7 @@
 
   <li><code>configs/sim</code>:
     A user-mode port of NuttX to the x86 Linux platform is available.
-    The purpose of this port is primarily to support OS feature developement.
+    The purpose of this port is primarily to support OS feature development.
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
   </li>
@@ -686,7 +686,7 @@
   <li><code>configs/xtrs</code>:
     TRS80 Model 3.  This port uses a vintage computer based on the Z80.
     An emulator for this computer is available to run TRS80 programs on a 
-    linux platform (http://www.tim-mann.org/xtrs.html).
+    Linux platform (http://www.tim-mann.org/xtrs.html).
   </li>
 
   <li><code>configs/z16f2800100zcog</code>
@@ -701,7 +701,7 @@
     That simulator can be found in the NuttX CVS
     <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim/">here</a>.
     This port also the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
-    under Linux or Cygwin(verfied with version 2.6.0).
+    under Linux or Cygwin(verified with version 2.6.0).
   </li>
 
   <li><code>configs/z8encore000zco</code>
@@ -782,7 +782,7 @@ graphics/
 |   `-- <i>(NuttX graphics library source files)</i>
 |-- nx/
 |   |-- Make.defs
-|   `-- <i>(Nuttx X-server source files)</i>
+|   `-- <i>(NuttX X-server source files)</i>
 `-- <i>(common file system source files)</i>
 </pre></ul>
 
@@ -818,7 +818,7 @@ include/
 <h2>2.9 <a name="DirStructLib">lib</a></h2>
 <p>
   This directory holds a collection of standard libc-like functions with custom
-  interfaces into Nuttx.
+  interfaces into NuttX.
 </p>
 
 <h2>2.10 <a name="DirStructMm">mm</a></h2>
@@ -829,7 +829,7 @@ include/
 <h2>2.11 <a name="DirStructNet">net</a></h2>
 <p>
   This directory contains the implementation of the socket APIs.
-  The subdirectory, <code>uip</code> contians the uIP port.
+  The subdirectory, <code>uip</code> contains the uIP port.
 </P>
 
 <h2>2.12 <a name="DirStructNetUtils">netutils</a></h2>
@@ -968,7 +968,7 @@ make
 </p>
 <ul>
   <li>The makefile fragment <a href="#boardconfigsubdirs"><code>.config</code></a> that describes the current configuration.</li>
-  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Make.defs</code></a> that provides customized build targers, and</li>
+  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Make.defs</code></a> that provides customized build targets, and</li>
   <li>The shell script <a href="#boardconfigsubdirs"><code>setenv.sh</code></a> that sets up the configuration environment for the build.</li>
 </ul>
 <p>
@@ -1051,7 +1051,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   the processor specific portions of the new TCB.
 </p>
 <p>
-  This function must setup the intial architecture registers
+  This function must setup the initial architecture registers
   and/or  stack so that execution will begin at tcb->start
   on the next context switch.
 </p>
@@ -1156,7 +1156,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   <li><code>tcb</code>: Refers to the tcb to be unblocked.  This tcb is
     in one of the waiting tasks lists.  It must be moved to
     the ready-to-run list and, if it is the highest priority
-    ready to run taks, executed.
+    ready to run tasks, executed.
   </li>
 </ul>
 
@@ -1248,7 +1248,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p>
   Unlike other UP APIs, this function may be called
   directly from user programs in various states.  The
-  implementation of this function should diable interrupts
+  implementation of this function should disable interrupts
   before performing scheduling operations.
 </p>
 
@@ -1272,7 +1272,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   This function is called by the OS when one or more
   signal handling actions have been queued for execution.
   The architecture specific code must configure things so
-  that the 'igdeliver' callback is executed on the thread
+  that the 'sigdeliver' callback is executed on the thread
   specified by 'tcb' as soon as possible.
 </p>
 <p>
@@ -1337,7 +1337,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <ul><pre>
 #ifndef CONFIG_ARCH_NOINTC
   void up_disable_irq(int irq);
-#endf
+#endif
 </pre></ul>
 
 <p><b>Description</b>.
@@ -1364,7 +1364,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <ul><pre>
 #ifndef CONFIG_ARCH_NOINTC
   void up_enable_irq(int irq);
-#endf
+#endif
 </pre></ul>
 
 <p><b>Description</b>.
@@ -1385,7 +1385,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <ul><pre>
 #ifdef CONFIG_ARCH_IRQPRIO
   void up_enable_irq(int irq);
-#endf
+#endif
 </pre></ul>
 <p><b>Description</b>.
   Set the priority of an IRQ.
@@ -1436,8 +1436,8 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p><b>Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
-  This function must be called from the achitecture-
-  specific logic in order to dispaly an interrupt to
+  This function must be called from the architecture-
+  specific logic in order to display an interrupt to
   the appropriate, registered handling logic.
 </p>
 
@@ -1481,7 +1481,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
    The implementation of LED support is very specific to a board architecture. 
    Some boards have several LEDS, others have only one or two. 
    Some have none. 
-   Others LED matrices and show alphnumeric data, etc.
+   Others LED matrices and show alphanumeric data, etc.
    The NuttX logic does not refer to specific LEDS, rather, it refers to an event to be shown on the LEDS
    in whatever manner is appropriate for the board;
    the way that this event is presented depends upon the hardware available on the board.
@@ -1587,27 +1587,27 @@ extern void up_ledoff(int led);
 
 <p><b>Overview</b>.
   NuttX includes an optional, scalable file system.
-  This file-system may be omitted altogther; NuttX does not depend on the presence
+  This file-system may be omitted altogether; NuttX does not depend on the presence
   of any file system.
 </p>
 
 <p><b>Pseudo Root File System</b>.
-  Or, a simple <i>in-memory</i>, <i>psuedo</i> file system can be enabled.
+  Or, a simple <i>in-memory</i>, <i>pseudo</i> file system can be enabled.
   This simple file system can be enabled setting the CONFIG_NFILE_DESCRIPTORS
   option to a non-zero value (see <a href="#apndxconfigs">Appendix A</a>).
   This is an <i>in-memory</i> file system because it does not require any
   storage medium or block driver support.
   Rather, file system contents are generated on-the-fly as referenced via
   standard file system operations (open, close, read, write, etc.).
-  In this sense, the file system is <i>psuedo</i> file system (in the
+  In this sense, the file system is <i>pseudo</i> file system (in the
   same sense that the Linux <code>/proc</code> file system is also
-  referred to as a psuedo file system).
+  referred to as a pseudo file system).
 </p>
 
 <p>
-  Any user supplied data or logic can be accessed via the psuedo-file system.
+  Any user supplied data or logic can be accessed via the pseudo-file system.
   Built in support is provided for character and block <a href="#DeviceDrivers">drivers</a> in the
-  <code>/dev</code> psuedo file system directory.
+  <code>/dev</code> pseudo file system directory.
 </p>
 
 <p><b>Mounted File Systems</b>
@@ -1615,7 +1615,7 @@ extern void up_ledoff(int led);
   devices that provide access to true file systems backed up via some
   mass storage device.
   NuttX supports the standard <code>mount()</code> command that allows
-  a block driver to be bound to a mountpoint within the psuedo file system
+  a block driver to be bound to a mountpoint within the pseudo file system
   and to a file system.
   At present, NuttX supports only the VFAT file system.
 </p>
@@ -1624,10 +1624,10 @@ extern void up_ledoff(int led);
   From a programming perspective, the NuttX file system appears very similar
   to a Linux file system.
   However, there is a fundamental difference:
-  The NuttX root file system is a psuedo file system and true file systems may be
-  mounted in the psuedo file system.
+  The NuttX root file system is a pseudo file system and true file systems may be
+  mounted in the pseudo file system.
   In the typical Linux installation by comparison, the Linux root file system
-  is a true file system and psuedo file systems may be mounted in the true,
+  is a true file system and pseudo file systems may be mounted in the true,
   root file system.
   The approach selected by NuttX is intended to support greater scalability
   from the very tiny platform to the moderate platform.
@@ -1649,7 +1649,7 @@ extern void up_ledoff(int led);
     <li>Other <i>Specialized</i> Drivers.</li>
   </ul>
   These different device driver types are discussed in the following paragraphs.
-  Note: device driver support requires that the <i>in-memory</i>, <i>psuedo</i> file system
+  Note: device driver support requires that the <i>in-memory</i>, <i>pseudo</i> file system
   is enabled by setting the CONFIG_NFILE_DESCRIPTORS in the NuttX configuration file to a 
   non-zero value.
 </p>
@@ -1745,7 +1745,7 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <b>Examples</b>.
-    <code>drivers/loop.c</code>, <code>drivers/mmcds/mmcsd_spi.c</code>, <code>drivers/ramdisk.c</code>, etc.
+    <code>drivers/loop.c</code>, <code>drivers/mmcsd/mmcsd_spi.c</code>, <code>drivers/ramdisk.c</code>, etc.
   </li>
 </ul>
 
@@ -1762,7 +1762,7 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <b><code>int netdev_register(FAR struct uip_driver_s *dev);</code></b>.
-    Each Eterhenet driver registers itself by calling <code>netdev_register()</code>.
+    Each Ethernet driver registers itself by calling <code>netdev_register()</code>.
   </li>
   <li>
     <b>Examples</b>:
@@ -1789,17 +1789,22 @@ extern void up_ledoff(int led);
      <code>ubyte status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);</code><br>
      <code>uint16 send(FAR struct spi_dev_s *dev, uint16 wd);</code><br>
      <code>void exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);</code><br>
-     <p><codei>nt registercallback(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);</code></p>
+     <p><code>int registercallback(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);</code></p>
   </ul>
   <li>
     <b>Binding SPI Drivers</b>.
     SPI drivers are not normally directly accessed by user code, but are usually bound to another,
     higher level device driver.
     See for example, <code>int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)</code> in <code>drivers/mmcsd/mmcsd_spi.c</code>.
+    In general, the binding sequence is:
+    <ul>
+      <li>Get an instance of <code>struct spi_dev_s</code> from the hardware-specific SPI device driver, and </li>
+      <li>Provide that instance to the initialization method of the higher level device driver.</li>
+    </ul>
   </li>
   <li>
     <b>Examples</b>:
-    <code>drivers/loop.c</code>, <code>drivers/mmcds/mmcsd_spi.c</code>, <code>drivers/ramdisk.c</code>, etc.
+    <code>drivers/loop.c</code>, <code>drivers/mmcsd/mmcsd_spi.c</code>, <code>drivers/ramdisk.c</code>, etc.
   </li>
 </ul>
 
@@ -1822,8 +1827,13 @@ extern void up_ledoff(int led);
   </ul>
   <li>
     <b>Binding I2C Drivers</b>.
-    SPI drivers are not normally directly accessed by user code, but are usually bound to another,
+    I2C drivers are not normally directly accessed by user code, but are usually bound to another,
     higher level device driver.
+    In general, the binding sequence is:
+    <ul>
+      <li>Get an instance of <code>struct i2c_dev_s</code> from the hardware-specific I2C device driver, and </li>
+      <li>Provide that instance to the initialization method of the higher level device driver.</li>
+    </ul>
   </li>
   <li>
     <b>Examples</b>:
@@ -1862,7 +1872,7 @@ extern void up_ledoff(int led);
     A serial driver may register itself by calling <code>uart_register()</code>, passing it the
     <code>path</code> where it will appear in the <a href="#NxFileSystem">pseudo-file-system</a> and it's
     initialized instance of <code>struct uart_ops_s</code>.
-    By convention, serial device drivers are registered at pathes like <code>/dev/ttyS0</code>, <code>/dev/ttyS1</code>, etc.
+    By convention, serial device drivers are registered at paths like <code>/dev/ttyS0</code>, <code>/dev/ttyS1</code>, etc.
     See the <code>uart_register()</code> implementation in <code>drivers/serial.c</code>.
   </li>
   <li>
@@ -1890,7 +1900,7 @@ extern void up_ledoff(int led);
 
 <h2>Architecture selection</h2>
 <p>
-  The following configuration itemes select the architecture, chip, and
+  The following configuration items select the architecture, chip, and
   board configuration for the build.
 </p>
 <ul>
@@ -1913,7 +1923,7 @@ extern void up_ledoff(int led);
      Define if the architecture does not support an interrupt controller
      or otherwise cannot support APIs like up_enable_irq() and up_disable_irq().</li>
   <li><code>CONFIG_ARCH_IRQPRIO</code>:
-     Define if the architecture suports prioritizaton of interrupts and the
+     Define if the architecture supports prioritization of interrupts and the
      up_prioritize_irq() API.</li>
 </ul>
 
@@ -1939,14 +1949,14 @@ extern void up_ledoff(int led);
   </li>
   <li><code>CONFIG_INTELHEX_BINARY</code>:
     Make the Intel HEX binary format used with many different loaders using the GNU objcopy program
-    This option hould not be selected if you are not using the GNU toolchain.
+    This option should not be selected if you are not using the GNU toolchain.
   </li>
   <li><code>CONFIG_MOTOROLA_SREC</code>:
     Make the Motorola S-Record binary format used with many different loaders using the GNU objcopy program
     Should not be selected if you are not using the GNU toolchain.
   </li>
   <li><code>CONFIG_RAW_BINARY</code>:
-    mmke a raw binary format file used with many different loaders using the GNU objcopy program.
+    Make a raw binary format file used with many different loaders using the GNU objcopy program.
     This option  should not be selected if you are not using the GNU toolchain.
   </li>
   <li><code>CONFIG_HAVE_LIBM</code>:
@@ -1954,7 +1964,7 @@ extern void up_ledoff(int led);
   </li>
   <li><code>CONFIG_HAVE_CXX</code>:
     Toolchain supports C++ and <code>CXX</code>, <code>CXXFLAGS</code>, and <code>COMPILEXX</code>
-    have been defined in the configuratins <code>Make.defs</code> file.
+    have been defined in the configurations <code>Make.defs</code> file.
   </li>
 </ul>
 
@@ -1975,7 +1985,7 @@ extern void up_ledoff(int led);
     <code>CONFIG_DEBUG_SCHED</code>: enable OS debug output (disabled by default)
   </li>
   <li>
-    <code>CONFIG_DEBUG_MM</code>: enable memory management debug output (disabld by default)
+    <code>CONFIG_DEBUG_MM</code>: enable memory management debug output (disabled by default)
   </li>
   <li>
     <code>CONFIG_DEBUG_NET</code>: enable network debug output (disabled by default)
@@ -2003,7 +2013,7 @@ extern void up_ledoff(int led);
     interval other than 10 msec.
   </li>
   <li>
-    <code>CONFIG_RR_INTERVAL</code>: The round robin timeslice will be set
+    <code>CONFIG_RR_INTERVAL</code>: The round robin time slice will be set
     this number of milliseconds;  Round robin scheduling can
     be disabled by setting this value to zero.
   </li>
@@ -2012,7 +2022,7 @@ extern void up_ledoff(int led);
     scheduler to monitor system performance
   </li>
   <li>
-    <code>CONFIG_TASK_NAME_SIZE</code>: Spcifies that maximum size of a
+    <code>CONFIG_TASK_NAME_SIZE</code>: Specifies that maximum size of a
     task name to save in the TCB.  Useful if scheduler
     instrumentation is selected.  Set to zero to disable.
   </li>
@@ -2034,7 +2044,7 @@ extern void up_ledoff(int led);
   <li>
     <code>CONFIG_PRIORITY_INHERITANCE</code>: Set to enable support for
     priority inheritance on mutexes and semaphores.
-    Priority inheritance is a strategy of addessing
+    Priority inheritance is a strategy of addressing
     <a href="NuttxUserGuide.html#priorityinversion"><i>priority inversion</i></a>.
     Details of the NuttX implementation of priority inheritance is
     discussed <a href="NuttxUserGuide.html#priorityinheritance">elsewhere</a>.
@@ -2096,7 +2106,7 @@ extern void up_ledoff(int led);
 
 <p>
   The architecture can provide optimized versions of the
-  following to improve sysem performance.
+  following to improve system performance.
 </p>
 
 <ul>
@@ -2145,7 +2155,7 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <code>CONFIG_MQ_MAXMSGSIZE</code>: Message structures are allocated with
-    a fixed payload size given by this settin (does not include
+    a fixed payload size given by this setting (does not include
     other message structure overhead.
   </li>
   <li>
@@ -2481,7 +2491,7 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <code>CONFIG_IDLETHREAD_STACKSIZE</code>: The size of the initial stack.
-    This is the thread that (1) performs the inital boot of the system up
+    This is the thread that (1) performs the initial boot of the system up
     to the point where user_start() is spawned, and (2) there after is the
     IDLE thread that executes only when there is no other thread ready to
     run.
@@ -2517,7 +2527,7 @@ extern void up_ledoff(int led);
   <li>Linux is a registered trademark of Linus Torvalds.</li>
   <li>Eagle-100 is a trademark of <a href=" http://www.micromint.com/">Micromint USA, LLC</a>.
   <li>LPC2148 is a trademark of NXP Semiconductors.</li>
-  <li>TI is a tradename of Texas Instruments Incorporated.</li>
+  <li>TI is a trade name of Texas Instruments Incorporated.</li>
   <li>UNIX is a registered trademark of The Open Group.</li>
   <li>VxWorks is a registered trademark of Wind River Systems, Incorporated.</li>
   <li>ZDS, ZNEO, Z16F, Z80, and Zilog are a registered trademark of Zilog, Inc.</li>
