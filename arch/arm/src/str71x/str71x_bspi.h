@@ -80,57 +80,63 @@
 
 /* BSPI control/status register 1 */
 
-#define STR71X_BSPICSR1_BSPE        0x0001 /* Bit 0: BSPI enable */
-#define STR71X_BSPICSR1_MSTR        0x0002 /* Bit 1: Master/Slave select */
-#define STR71X_BSPICSR1_RIEMASK     0x000c /* Bit 2-3: BSPI receive interrupt enable */
-#define STR71X_BSPICSR1_RIEDISABLED 0x0000 /*   Disabled */
-#define STR71X_BSPICSR1_RIERFNE     0x0004 /*   Receive FIFO not empty */
-#define STR71X_BSPICSR1_RIERFF      0x000c /*   Receive FIFO full */
-#define STR71X_BSPICSR1_BEIE        0x0080 /* Bit 7: Bus error interrupt enable */
-#define STR71X_BSPICSR1_CPOL        0x0100 /* Bit 8: Clock polarity select */
-#define STR71X_BSPICSR1_CPHA        0x0200 /* Bit 9: Clock phase select */
-#define STR71X_BSPICSR1_WLMASK      0x0c00 /* Bits 10-11: Word length */
-#define STR71X_BSPICSR1_WL8BIT      0x0000 /*   8-bits */
-#define STR71X_BSPICSR1_WL16BIT     0x0400 /*   16-bits */
-#define STR71X_BSPICSR1_RFEMASK     0xf000 /* Bits 12-15: Receive FIFO enable */
-#define STR71X_BSPICSR1_RFE1        0x0000 /*   Word 1 enabled */
-#define STR71X_BSPICSR1_RFE12       0x1000 /*   Word 1-2 enabled */
-#define STR71X_BSPICSR1_RFE13       0x2000 /*   Word 1-3 enabled */
-#define STR71X_BSPICSR1_RFE14       0x3000 /*   Word 1-4 enabled */
-#define STR71X_BSPICSR1_RFE15       0x4000 /*   Word 1-5 enabled */
-#define STR71X_BSPICSR1_RFE16       0x5000 /*   Word 1-6 enabled */
-#define STR71X_BSPICSR1_RFE17       0x6000 /*   Word 1-7 enabled */
-#define STR71X_BSPICSR1_RFE18       0x7000 /*   Word 1-8 enabled */
-#define STR71X_BSPICSR1_RFE19       0x8000 /*   Word 1-9 enabled */
-#define STR71X_BSPICSR1_RFE110      0x9000 /*   Word 1-10 enabled */
+#define STR71X_BSPICSR1_BSPE        (1 << 0) /* Bit 0: BSPI enable */
+#define STR71X_BSPICSR1_MSTR        (1 << 1) /* Bit 1: Master/Slave select */
+#define STR71X_BSPICSR1_RIESHIFT    2        /* Bit 2-3: BSPI receive interrupt enable */
+#define STR71X_BSPICSR1_RIEMASK     (3 << STR71X_BSPICSR1_RIESHIFT)
+#define STR71X_BSPICSR1_RIEDISABLED (0 << STR71X_BSPICSR1_RIESHIFT) /* Disabled */
+#define STR71X_BSPICSR1_RIERFNE     (1 << STR71X_BSPICSR1_RIESHIFT) /* Receive FIFO not empty */
+#define STR71X_BSPICSR1_RIERFF      (3 << STR71X_BSPICSR1_RIESHIFT) /* Receive FIFO full */
+#define STR71X_BSPICSR1_REIE        (1 << 4) /* Bit 4: Receive error interrupt enable */
+#define STR71X_BSPICSR1_BEIE        (1 << 7) /* Bit 7: Bus error interrupt enable */
+#define STR71X_BSPICSR1_CPOL        (1 << 8) /* Bit 8: Clock polarity select */
+#define STR71X_BSPICSR1_CPHA        (1 << 9) /* Bit 9: Clock phase select */
+#define STR71X_BSPICSR1_WLSHIFT     10       /* Bits 10-11: Word length */
+#define STR71X_BSPICSR1_WLMASK      (3 << STR71X_BSPICSR1_WLSHIFT)
+#define STR71X_BSPICSR1_WL8BIT      (0 << STR71X_BSPICSR1_WLSHIFT) /*   8-bits */
+#define STR71X_BSPICSR1_WL16BIT     (1 << STR71X_BSPICSR1_WLSHIFT) /*   16-bits */
+#define STR71X_BSPICSR1_RFESHIFT    12       /* Bits 12-15: Receive FIFO enable */
+#define STR71X_BSPICSR1_RFEMASK     (15 << STR71X_BSPICSR1_RFEMASK)
+#define STR71X_BSPICSR1_RFE1        (0 << STR71X_BSPICSR1_RFEMASK) /* Word 1 enabled */
+#define STR71X_BSPICSR1_RFE12       (1 << STR71X_BSPICSR1_RFEMASK) /* Word 1-2 enabled */
+#define STR71X_BSPICSR1_RFE13       (2 << STR71X_BSPICSR1_RFEMASK) /* Word 1-3 enabled */
+#define STR71X_BSPICSR1_RFE14       (3 << STR71X_BSPICSR1_RFEMASK) /* Word 1-4 enabled */
+#define STR71X_BSPICSR1_RFE15       (4 << STR71X_BSPICSR1_RFEMASK) /* Word 1-5 enabled */
+#define STR71X_BSPICSR1_RFE16       (5 << STR71X_BSPICSR1_RFEMASK) /* Word 1-6 enabled */
+#define STR71X_BSPICSR1_RFE17       (6 << STR71X_BSPICSR1_RFEMASK) /* Word 1-7 enabled */
+#define STR71X_BSPICSR1_RFE18       (7 << STR71X_BSPICSR1_RFEMASK) /* Word 1-8 enabled */
+#define STR71X_BSPICSR1_RFE19       (8 << STR71X_BSPICSR1_RFEMASK) /* Word 1-9 enabled */
+#define STR71X_BSPICSR1_RFE110      (9 << STR71X_BSPICSR1_RFEMASK) /* Word 1-10 enabled */
 
-/* BSPI control/status register 1 */
+/* BSPI control/status register 2 */
 
-#define STR71X_BSPICSR2_DFIFO       0x0000 /* Bit 0: FIFO disable */
-#define STR71X_BSPICSR2_BERR        0x0000 /* Bit 2: Bus error */
-#define STR71X_BSPICSR2_RFNE        0x0000 /* Bit 3: Receiver FIFO not empty */
-#define STR71X_BSPICSR2_RFF         0x0000 /* Bit 4: Receiver FIFO full */
-#define STR71X_BSPICSR2_ROFL        0x0000 /* Bit 5: Receiver overflow */
-#define STR71X_BSPICSR2_TFE         0x0000 /* Bit 6: Transmit FIFO empty */
-#define STR71X_BSPICSR2_TUFL        0x0000 /* Bit 7: Transmit FIFO underflow */
-#define STR71X_BSPICSR2_TFF         0x0000 /* Bit 8: Transmit FIFO full */
-#define STR71X_BSPICSR2_TFNE        0x0000 /* Bit 9: Transmit FIFO not empty */
-#define STR71X_BSPICSR2_TFEMASK     0x3c00 /* Bit 10-13:  Transmit FIFO enable*/
-#define STR71X_BSPICSR2_TFE1        0x0000 /*   Word 1 enabled  */
-#define STR71X_BSPICSR2_TFE12       0x0000 /*   Word 1-2 enabled  */
-#define STR71X_BSPICSR2_TFE13       0x0000 /*   Word 1-3 enabled  */
-#define STR71X_BSPICSR2_TFE14       0x0000 /*   Word 1-4 enabled  */
-#define STR71X_BSPICSR2_TFE15       0x0000 /*   Word 1-5 enabled  */
-#define STR71X_BSPICSR2_TFE16       0x0000 /*   Word 1-6 enabled  */
-#define STR71X_BSPICSR2_TFE17       0x0000 /*   Word 1-7 enabled  */
-#define STR71X_BSPICSR2_TFE18       0x0000 /*   Word 1-8 enabled  */
-#define STR71X_BSPICSR2_TFE19       0x0000 /*   Word 1-9 enabled  */
-#define STR71X_BSPICSR2_TFE110      0x0000 /*   Word 1-10 enabled  */
-#define STR71X_BSPICSR2_TIEMASK     0xc000 /* Bit 14-15:  BSPI transmit interrupt enable */
-#define STR71X_BSPICSR2_TIEDISABLED 0x0000 /*   Disabled  */
-#define STR71X_BSPICSR2_TIETFE      0x4000 /*   Interrupt on transmit FIFO empty  */
-#define STR71X_BSPICSR2_TIETUFL     0x8000 /*   Interrupt on transmit underlow */
-#define STR71X_BSPICSR2_TIETFF      0xc000 /*   Interrupt on transmit FIFO full  */
+#define STR71X_BSPICSR2_DFIFO       (1 << 0) /* Bit 0: FIFO disable */
+#define STR71X_BSPICSR2_BERR        (1 << 2) /* Bit 2: Bus error */
+#define STR71X_BSPICSR2_RFNE        (1 << 3) /* Bit 3: Receiver FIFO not empty */
+#define STR71X_BSPICSR2_RFF         (1 << 4) /* Bit 4: Receiver FIFO full */
+#define STR71X_BSPICSR2_ROFL        (1 << 5) /* Bit 5: Receiver overflow */
+#define STR71X_BSPICSR2_TFE         (1 << 6) /* Bit 6: Transmit FIFO empty */
+#define STR71X_BSPICSR2_TUFL        (1 << 7) /* Bit 7: Transmit FIFO underflow */
+#define STR71X_BSPICSR2_TFF         (1 << 8) /* Bit 8: Transmit FIFO full */
+#define STR71X_BSPICSR2_TFNE        (1 << 9) /* Bit 9: Transmit FIFO not empty */
+#define STR71X_BSPICSR2_TFESHIFT    10       /* Bits 10-13:  Transmit FIFO enable*/
+#define STR71X_BSPICSR2_TFEMASK     (15 << STR71X_BSPICSR2_TFESHIFT)
+#define STR71X_BSPICSR2_TFE1        (0 << STR71X_BSPICSR2_TFESHIFT) /* Word 1 enabled  */
+#define STR71X_BSPICSR2_TFE12       (1 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-2 enabled  */
+#define STR71X_BSPICSR2_TFE13       (2 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-3 enabled  */
+#define STR71X_BSPICSR2_TFE14       (3 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-4 enabled  */
+#define STR71X_BSPICSR2_TFE15       (4 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-5 enabled  */
+#define STR71X_BSPICSR2_TFE16       (5 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-6 enabled  */
+#define STR71X_BSPICSR2_TFE17       (6 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-7 enabled  */
+#define STR71X_BSPICSR2_TFE18       (7 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-8 enabled  */
+#define STR71X_BSPICSR2_TFE19       (8 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-9 enabled  */
+#define STR71X_BSPICSR2_TFE110      (9 << STR71X_BSPICSR2_TFESHIFT) /* Word 1-10 enabled  */
+#define STR71X_BSPICSR2_TIESHIFT    14     /* Bit 14-15:  BSPI transmit interrupt enable */
+#define STR71X_BSPICSR2_TIEMASK     (3 << STR71X_BSPICSR2_TIESHIFT)
+#define STR71X_BSPICSR2_TIEDISABLED (0 << STR71X_BSPICSR2_TIESHIFT) /* Disabled  */
+#define STR71X_BSPICSR2_TIETFE      (1 << STR71X_BSPICSR2_TIESHIFT) /* Interrupt on transmit FIFO empty  */
+#define STR71X_BSPICSR2_TIETUFL     (2 << STR71X_BSPICSR2_TIESHIFT) /* Interrupt on transmit underlow */
+#define STR71X_BSPICSR2_TIETFF      (3 << STR71X_BSPICSR2_TIESHIFT) /* Interrupt on transmit FIFO full  */
 
 /************************************************************************************
  * Public Types

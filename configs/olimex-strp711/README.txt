@@ -168,4 +168,39 @@ Configurations:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
+STR71x-Specific Configuration Settings
+--------------------------------------
+
+  CONFIG_STR71X_I2C0, CONFIG_STR71X_I2C1, CONFIG_STR71X_UART0, CONFIG_STR71X_UART1,
+  CONFIG_STR71X_UART2, CONFIG_STR71X_UART3, CONFIG_STR71X_USB, CONFIG_STR71X_CAN,
+  CONFIG_STR71X_BSPI0, CONFIG_STR71X_BSPI1, CONFIG_STR71X_HDLC, CONFIG_STR71X_XTI, 
+  CONFIG_STR71X_GPIO0, CONFIG_STR71X_GPIO1, CONFIG_STR71X_GPIO2, CONFIG_STR71X_ADC12, 
+  CONFIG_STR71X_CKOUT, CONFIG_STR71X_TIM1, CONFIG_STR71X_TIM2, CONFIG_STR71X_TIM3, and
+  CONFIG_STR71X_RTC
+    Select peripherals to initialize (Timer0 and EIC are always initialized)
+  CONFIG_STR71X_BANK0, CONFIG_STR71X_BANK1, CONFIG_STR71X_BANK2, and CONFIG_STR71X_BANK3
+    Enable initialize of external memory banks 0-3.
+  CONFIG_STR71X_BANK0_SIZE, CONFIG_STR71X_BANK1_SIZE, CONFIG_STR71X_BANK2_SIZE, and
+  CONFIG_STR71X_BANK3_SIZE
+    If a particular external memory bank is configured, then its width must be provided.
+    8 and 16 (bits) are the only valid options.
+  CONFIG_STR71X_BANK0_WAITSTATES, CONFIG_STR71X_BANK1_WAITSTATES,
+  CONFIG_STR71X_BANK2_WAITSTATES, and CONFIG_STR71X_BANK3_WAITSTATES
+    If a particular external memory bank is configured, then the number of waistates
+    for the bank must also be provided.  Valid options are {0, .., 15}
+  CONFIG_STR71X_BIGEXTMEM
+    The default is to provide 20 bits of address for all external memory regions.  If
+    any memory region is larger than 1Mb, then this option should be selected.  In this
+    case, 24 bits of addressing will be used
+
+  CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
+    console and ttys0 (default is the UART0).
+  CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+    This specific the size of the receive buffer
+  CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+    being sent.  This specific the size of the transmit buffer
+  CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
+  CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+  CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
+  CONFIG_UARTn_2STOP - Two stop bits
 
