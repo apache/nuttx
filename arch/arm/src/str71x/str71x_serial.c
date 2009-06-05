@@ -52,6 +52,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "os_internal.h"
 #include "str71x_internal.h"
 
 /****************************************************************************
@@ -500,7 +501,7 @@ static int up_setup(struct uart_dev_s *dev)
       cr |= STR71X_UARTCR_MODE9BIT;
     }
 
-  if (parity == 1)
+  if (priv->parity == 1)
     {
       cr |= STR71X_UARTCR_PARITYODD;
     }
@@ -518,8 +519,8 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Clear FIFOs */
 
-  up_serialout(priv, STR71X_UART2_TXRSTR_OFFSET, 0);
-  up_serialout(priv, SSTR71X_UART2_RXRSTR_OFFSET, 0);
+  up_serialout(priv, STR71X_UART_TXRSTR_OFFSET, 0);
+  up_serialout(priv, STR71X_UART_RXRSTR_OFFSET, 0);
 
   /* We will take RX interrupts on either the FIFO half full or upon
    * a timeout.  The timeout is based upon BAUD rate ticks
@@ -700,7 +701,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
-  struct up_dev_s   *priv  = (struct up_dev_s*)dev->priv;
   int                ret    = OK;
 
   switch (cmd)
@@ -710,8 +710,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          struct up_dev_s *user = (struct up_dev_s*)arg;
          if (!user)
            {
-             *get_errno_ptr() = EINVAL;
-             ret = ERROR;
+             ret = -EINVAL;
            }
          else
            {
@@ -721,8 +720,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
        break;
 
     default:
-      *get_errno_ptr() = ENOTTY;
-      ret = ERROR;
+      ret = -ENOTTY;
       break;
     }
 
@@ -942,11 +940,11 @@ int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  ubyte  ier;
+  uint16 ier;
 
   up_disableuartint(priv, &ier);
   up_waittxnotfull(priv);
-  up_serialout(priv, STR71X_UART_THR_OFFSET, (ubyte)ch);
+  up_serialout(priv, STR71X_UART_TXBUFR_OFFSET, (uint16)ch);
 
   /* Check for LF */
 
@@ -955,7 +953,7 @@ int up_putc(int ch)
       /* Add CR */
 
       up_waittxnotfull(priv);
-      up_serialout(priv, STR71X_UART_THR_OFFSET, '\r');
+      up_serialout(priv, STR71X_UART_TXBUFR_OFFSET, (uint16)'\r');
     }
 
   up_waittxnotfull(priv);
