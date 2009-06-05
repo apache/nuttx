@@ -87,15 +87,19 @@
 void up_decodeirq(uint32 *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
+  up_ledon(LED_INIRQ);
   lib_lowprintf("Unexpected IRQ\n");
   current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 #else
+  unsigned int irq;
+
   /* Read the IRQ number from the IVR register (Could probably get the same
    * info from CIC register without the setup.
    */
 
-  unsigned int irq = getreg32(STR71X_EIC_IVR);
+  up_ledon(LED_INIRQ);
+  irq = getreg32(STR71X_EIC_IVR);
 
   /* Verify that the resulting IRQ number is valid */
 
@@ -105,7 +109,12 @@ void up_decodeirq(uint32 *regs)
        * current_regs is also used to manage interrupt level context switches.
        */
 
+      DEBUGASSERT(current_regs == NULL);
       current_regs = regs;
+
+      /* Mask and acknowledge the interrupt */
+
+      up_maskack_irq(irq);
 
       /* Deliver the IRQ */
 
@@ -114,6 +123,10 @@ void up_decodeirq(uint32 *regs)
       /* Indicate that we are no long in an interrupt handler */
 
       current_regs = NULL;
+
+      /* Unmask the last interrupt (global interrupts are still disabled) */
+
+      up_enable_irq(irq);
     }
 #if CONFIG_DEBUG
   else
@@ -121,5 +134,6 @@ void up_decodeirq(uint32 *regs)
       PANIC(OSERR_ERREXCEPTION); /* Normally never happens */
     }
 #endif
+  up_ledoff(LED_INIRQ);
 #endif
 }
