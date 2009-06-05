@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/str71x/str71x_timerisr.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,10 +125,25 @@
 
 int up_timerisr(int irq, uint32 *regs)
 {
-   /* Process timer interrupt */
+  uint16 ocar;
 
-   sched_process_timer();
-   return 0;
+  /* Clear all the output compare A interrupt status bit */
+
+  putreg16(~STR71X_TIMERSR_OCFA, STR71X_TIMER0_SR);
+
+  /* Set up for the next compare match.  We could either reset
+   * the OCAR and CNTR to restart, or simply update the OCAR as
+   * follows to that the match occurs later without resetting:
+   */
+
+  ocar = getreg16(STR71X_TIMER0_OCAR);
+  ocar += OCAR_VALUE;
+  putreg16(ocar, STR71X_TIMER0_OCAR);
+
+  /* Process timer interrupt */
+
+  sched_process_timer();
+  return 0;
 }
 
 /****************************************************************************
@@ -142,32 +157,29 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
-  uint16 cr1;
-  uint16 cr2;
+  irqstate_t flags;
 
   /* Make sure that timer0 is disabled */
 
+  flags = irqsave();
   putreg16(0x0000, STR71X_TIMER0_CR1);
   putreg16(0x0000, STR71X_TIMER0_CR2);
   putreg16(0x0000, STR71X_TIMER0_SR);
 
-  /* Start The TIM0 Counter */
-
-  cr1 = STR71X_TIMERCR1_EN;
-  putreg16(cr1, STR71X_TIMER0_CR1);
-
  /* Configure TIM0 so that it is clocked by the internal APB2 frequency (PCLK2)
   * divided by the above prescaler value (1) -- versus an external Clock.
   * -- Nothing to do because  STR71X_TIMERCR1_ECKEN is already cleared.
-  *
   *
   * Select a divisor to reduce the frequency of clocking.  This must be
   * done so that the entire timer interval can fit in the 16-bit OCAR register.
   * (see the discussion above).
   */
 
-  cr2 = PCLK2_DIVIDER;
-  putreg16(cr2, STR71X_TIMER0_CR2);
+  putreg16(STR71X_TIMERCR2_OCAIE | (PCLK2_DIVIDER - 1), STR71X_TIMER0_CR2);
+
+  /* Start The TIM0 Counter and enable the output comparison A */
+
+  putreg16(STR71X_TIMERCR1_EN | STR71X_TIMERCR1_OCAE, STR71X_TIMER0_CR1);
 
   /* Setup output compare A for desired interrupt frequency.  Note that
    * the OCAE and OCBE bits are cleared and the pins are available for other
@@ -175,12 +187,7 @@ void up_timerinit(void)
    */
 
   putreg16(OCAR_VALUE, STR71X_TIMER0_OCAR);
-  putreg16(0, STR71X_TIMER0_CNTR);
-
-  /* Enable TIM0 Output Compare A interrupt */
-
-  cr2 |= STR71X_TIMERCR2_OCAIE;
-  putreg16(cr2, STR71X_TIMER0_CR2);
+  putreg16(0xfffc, STR71X_TIMER0_CNTR);
 
   /* Set the IRQ interrupt priority */
 
@@ -193,4 +200,5 @@ void up_timerinit(void)
   /* And enable the timer interrupt */
 
   up_enable_irq(STR71X_IRQ_SYSTIMER);
+  irqrestore(flags);
 }

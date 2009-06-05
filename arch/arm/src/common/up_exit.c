@@ -79,7 +79,8 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
   int i;
 #endif
 
-  sdbg("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
+  sdbg("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
+  sdbg("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
   if (tcb->filelist)
