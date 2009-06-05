@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 01, 2009</p>
+      <p>Last Updated: June 04, 2009</p>
     </td>
   </tr>
 </table>
@@ -1423,9 +1423,9 @@ buildroot-0.1.6 2009-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 nuttx-0.4.8 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* lib/lib_*stream.c: Extend internal stream logic to support incoming streams.
-	* arch/arm/src/str71x: Made some progress with the Olimex STR-P711 before my
-	  emulator stopped working.  Serial output is now correct.  I don't think it
-	  would take much more to get it working!
+	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
+	  working.  The test at configs/olimex-strp711/ostest passes.  This means that
+	  the basic STR-P711 port is complete.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
