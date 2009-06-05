@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lm32/lm32_spi.c
+ * arch/arm/src/lm32/lm3s_spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -140,7 +140,7 @@
  * Private Type Definitions
  ****************************************************************************/
 
-struct lm32_ssidev_s
+struct lm3s_ssidev_s
 {
   const struct spi_ops_s *ops;  /* Common SPI operations */
 #ifndef CONFIG_SSI_POLLWAIT
@@ -164,8 +164,8 @@ struct lm32_ssidev_s
    * per word.
    */
 
-  void  (*txword)(struct lm32_ssidev_s *priv);
-  void  (*rxword)(struct lm32_ssidev_s *priv);
+  void  (*txword)(struct lm3s_ssidev_s *priv);
+  void  (*rxword)(struct lm3s_ssidev_s *priv);
 
 #if NSSI_ENABLED > 1
   uint32 base;                  /* SSI register base address */
@@ -190,49 +190,49 @@ struct lm32_ssidev_s
 
 /* SSI register access */
 
-static inline uint32 ssi_getreg(struct lm32_ssidev_s *priv, unsigned int offset);
-static inline void ssi_putreg(struct lm32_ssidev_s *priv, unsigned int offset, uint32 value);
+static inline uint32 ssi_getreg(struct lm3s_ssidev_s *priv, unsigned int offset);
+static inline void ssi_putreg(struct lm3s_ssidev_s *priv, unsigned int offset, uint32 value);
 
 /* Misc helpers */
 
-static uint32 ssi_disable(struct lm32_ssidev_s *priv);
-static void ssi_enable(struct lm32_ssidev_s *priv, uint32 enable);
+static uint32 ssi_disable(struct lm3s_ssidev_s *priv);
+static void ssi_enable(struct lm3s_ssidev_s *priv, uint32 enable);
 static void ssi_semtake(sem_t *sem);
 #define ssi_semgive(s) sem_post(s);
 
 /* SSI data transfer */
 
-static void   ssi_txnull(struct lm32_ssidev_s *priv);
-static void   ssi_txuint16(struct lm32_ssidev_s *priv);
-static void   ssi_txubyte(struct lm32_ssidev_s *priv);
-static void   ssi_rxnull(struct lm32_ssidev_s *priv);
-static void   ssi_rxuint16(struct lm32_ssidev_s *priv);
-static void   ssi_rxubyte(struct lm32_ssidev_s *priv);
-static inline boolean ssi_txfifofull(struct lm32_ssidev_s *priv);
-static inline boolean ssi_rxfifoempty(struct lm32_ssidev_s *priv);
+static void   ssi_txnull(struct lm3s_ssidev_s *priv);
+static void   ssi_txuint16(struct lm3s_ssidev_s *priv);
+static void   ssi_txubyte(struct lm3s_ssidev_s *priv);
+static void   ssi_rxnull(struct lm3s_ssidev_s *priv);
+static void   ssi_rxuint16(struct lm3s_ssidev_s *priv);
+static void   ssi_rxubyte(struct lm3s_ssidev_s *priv);
+static inline boolean ssi_txfifofull(struct lm3s_ssidev_s *priv);
+static inline boolean ssi_rxfifoempty(struct lm3s_ssidev_s *priv);
 #if CONFIG_SSI_TXLIMIT == 1 && defined(CONFIG_SSI_POLLWAIT)
-static inline int ssi_performtx(struct lm32_ssidev_s *priv);
+static inline int ssi_performtx(struct lm3s_ssidev_s *priv);
 #else
-static int    ssi_performtx(struct lm32_ssidev_s *priv);
+static int    ssi_performtx(struct lm3s_ssidev_s *priv);
 #endif
-static inline void ssi_performrx(struct lm32_ssidev_s *priv);
-static int    ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
+static inline void ssi_performrx(struct lm3s_ssidev_s *priv);
+static int    ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
                            void *rxbuffer, unsigned int nwords);
 
 /* Interrupt handling */
 
 #ifndef CONFIG_SSI_POLLWAIT
-static inline struct lm32_ssidev_s *ssi_mapirq(int irq);
+static inline struct lm3s_ssidev_s *ssi_mapirq(int irq);
 static int    ssi_interrupt(int irq, void *context);
 #endif
 
 /* SPI methods */
 
-static void   ssi_setfrequencyinternal(struct lm32_ssidev_s *priv, uint32 frequency);
+static void   ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32 frequency);
 static uint32 ssi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
-static void   ssi_setmodeinternal(struct lm32_ssidev_s *priv, enum spi_mode_e mode);
+static void   ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode);
 static void   ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void   ssi_setbitsinternal(struct lm32_ssidev_s *priv, int nbits);
+static void   ssi_setbitsinternal(struct lm3s_ssidev_s *priv, int nbits);
 static void   ssi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16 ssi_send(FAR struct spi_dev_s *dev, uint16 wd);
 #ifdef CONFIG_SPI_EXCHANGE
@@ -267,16 +267,16 @@ static const struct spi_ops_s g_spiops =
 
 /* This supports is up to two SSI busses/ports */
 
-static struct lm32_ssidev_s g_ssidev[] =
+static struct lm3s_ssidev_s g_ssidev[] =
 {
 #ifndef CONFIG_SSI0_DISABLE
   {
     .ops  = &g_spiops,
 #if NSSI_ENABLED > 1
-    .base = IMX_CSSI0_VBASE,
+    .base = LM3S_SSI0_BASE,
 #endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
-    .irq  = IMX_IRQ_CSSI0,
+    .irq  = LM3S_IRQ_SSI0,
 #endif
   },
 #endif
@@ -284,10 +284,10 @@ static struct lm32_ssidev_s g_ssidev[] =
   {
     .ops  = &g_spiops,
 #if NSSI_ENABLED > 1
-    .base = IMX_CSSI1_VBASE,
+    .base = LM3S_SSI1_BASE,
 #endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
-    .irq  = IMX_IRQ_CSSI1,
+    .irq  = LM3S_IRQ_SSI1,
 #endif
   },
 #endif
@@ -316,7 +316,7 @@ static struct lm32_ssidev_s g_ssidev[] =
  *
  ****************************************************************************/
 
-static inline uint32 ssi_getreg(struct lm32_ssidev_s *priv, unsigned int offset)
+static inline uint32 ssi_getreg(struct lm3s_ssidev_s *priv, unsigned int offset)
 {
 #if NSSI_ENABLED > 1
   return getreg32(priv->base + offset);
@@ -341,7 +341,7 @@ static inline uint32 ssi_getreg(struct lm32_ssidev_s *priv, unsigned int offset)
  *
  ****************************************************************************/
 
-static inline void ssi_putreg(struct lm32_ssidev_s *priv, unsigned int offset, uint32 value)
+static inline void ssi_putreg(struct lm3s_ssidev_s *priv, unsigned int offset, uint32 value)
 {
 #if NSSI_ENABLED > 1
   putreg32(value, priv->base + offset);
@@ -365,7 +365,7 @@ static inline void ssi_putreg(struct lm32_ssidev_s *priv, unsigned int offset, u
  *
  ****************************************************************************/
 
-static uint32 ssi_disable(struct lm32_ssidev_s *priv)
+static uint32 ssi_disable(struct lm3s_ssidev_s *priv)
 {
   uint32 retval;
   uint32 regval;
@@ -391,7 +391,7 @@ static uint32 ssi_disable(struct lm32_ssidev_s *priv)
  *
  ****************************************************************************/
 
-static void ssi_enable(struct lm32_ssidev_s *priv, uint32 enable)
+static void ssi_enable(struct lm3s_ssidev_s *priv, uint32 enable)
 {
   uint32 regval = ssi_getreg(priv, LM3S_SSI_CR1_OFFSET);
   regval &= ~SSI_CR1_SSE;
@@ -442,13 +442,13 @@ static void ssi_semtake(sem_t *sem)
  *
  ****************************************************************************/
 
-static void ssi_txnull(struct lm32_ssidev_s *priv)
+static void ssi_txnull(struct lm3s_ssidev_s *priv)
 {
   ssivdbg("TX: ->0xffff\n");
   ssi_putreg(priv, LM3S_SSI_DR_OFFSET, 0xffff);
 }
 
-static void ssi_txuint16(struct lm32_ssidev_s *priv)
+static void ssi_txuint16(struct lm3s_ssidev_s *priv)
 {
   uint16 *ptr    = (uint16*)priv->txbuffer;
   ssivdbg("TX: %p->%04x\n", ptr, *ptr);
@@ -456,7 +456,7 @@ static void ssi_txuint16(struct lm32_ssidev_s *priv)
   priv->txbuffer = (void*)ptr;
 }
 
-static void ssi_txubyte(struct lm32_ssidev_s *priv)
+static void ssi_txubyte(struct lm3s_ssidev_s *priv)
 {
   ubyte *ptr     = (ubyte*)priv->txbuffer;
   ssivdbg("TX: %p->%02x\n", ptr, *ptr);
@@ -481,7 +481,7 @@ static void ssi_txubyte(struct lm32_ssidev_s *priv)
  *
  ****************************************************************************/
 
-static void ssi_rxnull(struct lm32_ssidev_s *priv)
+static void ssi_rxnull(struct lm3s_ssidev_s *priv)
 {
 #if defined(SSI_DEBUG) && defined(CONFIG_DEBUG_VERBOSE)
   uint32 regval  = ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
@@ -491,7 +491,7 @@ static void ssi_rxnull(struct lm32_ssidev_s *priv)
 #endif
 }
 
-static void ssi_rxuint16(struct lm32_ssidev_s *priv)
+static void ssi_rxuint16(struct lm3s_ssidev_s *priv)
 {
   uint16 *ptr    = (uint16*)priv->rxbuffer;
   *ptr           = (uint16)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
@@ -499,7 +499,7 @@ static void ssi_rxuint16(struct lm32_ssidev_s *priv)
   priv->rxbuffer = (void*)(++ptr);
 }
 
-static void ssi_rxubyte(struct lm32_ssidev_s *priv)
+static void ssi_rxubyte(struct lm3s_ssidev_s *priv)
 {
   ubyte *ptr     = (ubyte*)priv->rxbuffer;
   *ptr           = (ubyte)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
@@ -521,7 +521,7 @@ static void ssi_rxubyte(struct lm32_ssidev_s *priv)
  *
  ****************************************************************************/
 
-static inline boolean ssi_txfifofull(struct lm32_ssidev_s *priv)
+static inline boolean ssi_txfifofull(struct lm3s_ssidev_s *priv)
 {
   return (ssi_getreg(priv, LM3S_SSI_SR_OFFSET) & SSI_SR_TNF) == 0;
 }
@@ -540,7 +540,7 @@ static inline boolean ssi_txfifofull(struct lm32_ssidev_s *priv)
  *
  ****************************************************************************/
 
-static inline boolean ssi_rxfifoempty(struct lm32_ssidev_s *priv)
+static inline boolean ssi_rxfifoempty(struct lm3s_ssidev_s *priv)
 {
   return (ssi_getreg(priv, LM3S_SSI_SR_OFFSET) & SSI_SR_RNE) == 0;
 }
@@ -562,7 +562,7 @@ static inline boolean ssi_rxfifoempty(struct lm32_ssidev_s *priv)
  ****************************************************************************/
 
 #if CONFIG_SSI_TXLIMIT == 1 && defined(CONFIG_SSI_POLLWAIT)
-static inline int ssi_performtx(struct lm32_ssidev_s *priv)
+static inline int ssi_performtx(struct lm3s_ssidev_s *priv)
 {
   /* Check if the Tx FIFO is full and more data to transfer */
 
@@ -579,7 +579,7 @@ static inline int ssi_performtx(struct lm32_ssidev_s *priv)
 
 #else /* CONFIG_SSI_TXLIMIT == 1 CONFIG_SSI_POLLWAIT */
 
-static int ssi_performtx(struct lm32_ssidev_s *priv)
+static int ssi_performtx(struct lm3s_ssidev_s *priv)
 {
 #ifndef CONFIG_SSI_POLLWAIT
   uint32 regval;
@@ -662,7 +662,7 @@ static int ssi_performtx(struct lm32_ssidev_s *priv)
  *
  ****************************************************************************/
 
-static inline void ssi_performrx(struct lm32_ssidev_s *priv)
+static inline void ssi_performrx(struct lm3s_ssidev_s *priv)
 {
 #ifndef CONFIG_SSI_POLLWAIT
   uint32 regval;
@@ -736,7 +736,7 @@ static inline void ssi_performrx(struct lm32_ssidev_s *priv)
  *
  ****************************************************************************/
 
-static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
+static int ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
                         void *rxbuffer, unsigned int nwords)
 {
 #ifndef CONFIG_SSI_POLLWAIT
@@ -863,7 +863,7 @@ static int ssi_transfer(struct lm32_ssidev_s *priv, const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SSI_POLLWAIT
-static inline struct lm32_ssidev_s *ssi_mapirq(int irq)
+static inline struct lm3s_ssidev_s *ssi_mapirq(int irq)
 {
   switch (irq)
     {
@@ -904,7 +904,7 @@ static inline struct lm32_ssidev_s *ssi_mapirq(int irq)
 #ifndef CONFIG_SSI_POLLWAIT
 static int ssi_interrupt(int irq, void *context)
 {
-  struct lm32_ssidev_s *priv = ssi_mapirq(irq);
+  struct lm3s_ssidev_s *priv = ssi_mapirq(irq);
   uint32 regval;
   int ntxd;
 
@@ -973,7 +973,7 @@ static int ssi_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static void ssi_setfrequencyinternal(struct lm32_ssidev_s *priv, uint32 frequency)
+static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32 frequency)
 {
   uint32 maxdvsr;
   uint32 cpsdvsr;
@@ -1056,7 +1056,7 @@ static void ssi_setfrequencyinternal(struct lm32_ssidev_s *priv, uint32 frequenc
 
 static uint32 ssi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 {
-  struct lm32_ssidev_s *priv = (struct lm32_ssidev_s *)dev;
+  struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
   uint32 enable;
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
@@ -1084,7 +1084,7 @@ static uint32 ssi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
  *
  ****************************************************************************/
 
-static void ssi_setmodeinternal(struct lm32_ssidev_s *priv, enum spi_mode_e mode)
+static void ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode)
 {
   uint32 modebits;
   uint32 regval;
@@ -1128,7 +1128,7 @@ static void ssi_setmodeinternal(struct lm32_ssidev_s *priv, enum spi_mode_e mode
 
 static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  struct lm32_ssidev_s *priv = (struct lm32_ssidev_s *)dev;
+  struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
   uint32 enable;
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
@@ -1155,7 +1155,7 @@ static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ****************************************************************************/
 
-static void ssi_setbitsinternal(struct lm32_ssidev_s *priv, int nbits)
+static void ssi_setbitsinternal(struct lm3s_ssidev_s *priv, int nbits)
 {
   uint32 regval;
 
@@ -1174,7 +1174,7 @@ static void ssi_setbitsinternal(struct lm32_ssidev_s *priv, int nbits)
 
 static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
-  struct lm32_ssidev_s *priv = (struct lm32_ssidev_s *)dev;
+  struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
   uint32 enable;
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
@@ -1204,7 +1204,7 @@ static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint16 ssi_send(FAR struct spi_dev_s *dev, uint16 wd)
 {
-  struct lm32_ssidev_s *priv = (struct lm32_ssidev_s*)dev;
+  struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s*)dev;
   uint16 response = 0;
 
   (void)ssi_transfer(priv, &wd, &response, 1);
@@ -1235,7 +1235,7 @@ static uint16 ssi_send(FAR struct spi_dev_s *dev, uint16 wd)
 static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
-  struct lm32_ssidev_s *priv = (struct lm32_ssidev_s *)dev;
+  struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
   (void)ssi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
@@ -1262,7 +1262,7 @@ static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 #ifndef CONFIG_SPI_EXCHANGE
 static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
-  struct lm32_ssidev_s *priv = (struct lm32_ssidev_s *)dev;
+  struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
   (void)ssi_transfer(priv, buffer, NULL, nwords);
 }
 #endif
@@ -1289,7 +1289,7 @@ static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 #ifndef CONFIG_SPI_EXCHANGE
 static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
-  struct lm32_ssidev_s *priv = (struct lm32_ssidev_s *)dev;
+  struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
   (void)ssi_transfer(priv, NULL, buffer, nwords);
 }
 #endif
@@ -1322,7 +1322,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
-  struct lm32_ssidev_s *priv;
+  struct lm3s_ssidev_s *priv;
   irqstate_t flags;
   ubyte regval;
 
