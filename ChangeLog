@@ -758,5 +758,7 @@
 	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
 	  working.  The test at configs/olimex-strp711/ostest passes.  This means that
 	  the basic STR-P711 port is complete.
+	* configs/olimex-strp711/nsh:  Add a NuttShell (NSH) configuration for the
+	  STR-P711.
 
 

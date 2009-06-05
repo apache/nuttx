@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 04, 2009</p>
+      <p>Last Updated: June 05, 2009</p>
     </td>
   </tr>
 </table>
@@ -800,11 +800,10 @@
     </p>
     <p>
       <b>STATUS:</b>
-      Coding is complete on the basic port (boot logic, system time, serial console),
-      and some testing has been performed.  The board boots and console output is
-      visible on UART0.  However, due to problems I am having with my J-TAG debug
-      environment, testing is incomplete.  If you have a good development environemnt,
-      it should not take too much more effort to get this port up and running.
+      Integration is complete on the basic port (boot logic, system time, serial console),
+      The board boots and passes the OS test with console output visible on UART0.
+      Additional drivers are needed: SPI, USB, to name two. It should not take too much
+      more effort to get this port up and running.
      </p>
   </td>
 </tr>
@@ -1426,6 +1425,8 @@ nuttx-0.4.8 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
 	  working.  The test at configs/olimex-strp711/ostest passes.  This means that
 	  the basic STR-P711 port is complete.
+	* configs/olimex-strp711/nsh:  Add a NuttShell (NSH) configuration for the
+	  STR-P711.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
