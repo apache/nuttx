@@ -79,6 +79,8 @@ Toolchain
   4. cd <some-dir>/buildroot
 
   5. cp configs/arm-defconfig .config
+     or
+     cp configs/arm7tdmi-defconfig-4.3.3 .config  (Last tested with this toolchain)
 
   6. make oldconfig
 
@@ -153,5 +155,17 @@ GENERAL STEPS:
   type 'set debug remote 1' to enable tracing of gdb protocol (if required)
   type 'target remote localhost:3333' to connect to the target
   The same commands from the telnet interface can now be accessed through the
-  'monitor' command, e.g. 'monitor help' 
+  'monitor' command, e.g. 'monitor help'
+
+Configurations:
+---------------
+
+  nsh:
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables both the serial and telnetd NSH interfaces.
+
+  ostest:
+    This configuration directory, performs a simple OS test using
+    examples/ostest.
+
 
