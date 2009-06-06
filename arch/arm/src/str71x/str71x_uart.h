@@ -151,7 +151,7 @@
 #define STR71X_UARTIER_TIMEOUTNE    (0x0040) /* Bit 6: Time out not empty*/
 #define STR71X_UARTIER_TIMEOUTIDLE  (0x0080) /* Bit 7: Timeout out idle */
 #define STR71X_UARTIER_RHF          (0x0100) /* Bit 8: Rx half full */
-#define STR71X_UIRTIER_ALL          (0x01ff) /* All interrupt bits */
+#define STR71X_UARTIER_ALL          (0x01ff) /* All interrupt bits */
 
 /* UART status register (SR) */
 

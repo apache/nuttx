@@ -195,6 +195,26 @@
 #  warning "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
+/* Select RX interrupt enable bits.  There are two models:  (1) We interrupt
+ * when each character is received. Or, (2) we interrupt when either the Rx
+ * FIFO is half full, OR a timeout occurs with data in the RX FIFO.  The
+ * later does not work because there seems to be a disconnect -- we can get
+ * the FIFO half full interrupt with no data in the RX buffer.
+ */
+
+#if 1
+#  define RXENABLE_BITS (STR71X_UARTIER_RHF|STR71X_UARTIER_TIMEOUTNE)
+#else
+#  define RXENABLE_BITS STR71X_UARTIER_RNE
+#endif
+
+/* Which ever model is used, there seems to be some timing disconnects between
+ * Rx FIFO not full and Rx FIFO half full indications.  Best bet is to use
+ * both.
+ */
+
+#define RXAVAILABLE_BITS (STR71X_UARTSR_RNE|STR71X_UARTSR_RHF)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -421,7 +441,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint16 *ier)
       *ier = priv->ier;
     }
 
-  priv->ier =0;
+  priv->ier = 0;
   up_serialout(priv, STR71X_UART_IER_OFFSET, 0);
 }
 
@@ -520,7 +540,7 @@ static int up_setup(struct uart_dev_s *dev)
     }
   else
     {
-      cr |= STR71X_UARTCR_STOPBIT05;
+      cr |= STR71X_UARTCR_STOPBIT10;
     }
 
   up_serialout(priv, STR71X_UART_CR_OFFSET, cr);
@@ -680,8 +700,8 @@ static int up_interrupt(int irq, void *context)
 
       /* Handle incoming, receive bytes (with or without timeout) */
 
-      if ((priv->sr  & STR71X_UARTSR_RNE)  != 0 && /* Rx FIFO not empty */
-          (priv->ier & STR71X_UARTIER_RHF) != 0)   /* Rx FIFO half full int enabled */
+      if ((priv->sr  & RXAVAILABLE_BITS) != 0 && /* Data available in Rx FIFO */
+          (priv->ier & RXENABLE_BITS)    != 0)   /* Rx FIFO interrupts enabled */
         {
            /* Rx buffer not empty ... process incoming bytes */
 
@@ -691,8 +711,8 @@ static int up_interrupt(int irq, void *context)
 
       /* Handle outgoing, transmit bytes */
 
-      if ((priv->sr & STR71X_UARTSR_TF) == 0 &&   /* Tx FIFO not full */
-          (priv->ier & STR71X_UARTIER_THE) != 0)  /* Tx Half empty interrupt enabled */
+      if ((priv->sr & STR71X_UARTSR_TF)    == 0 && /* Tx FIFO not full */
+          (priv->ier & STR71X_UARTIER_THE) != 0)   /* Tx Half empty interrupt enabled */
         {
            /* Tx FIFO not full ... process outgoing bytes */
 
@@ -780,12 +800,12 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->ier |= (STR71X_UARTIER_RHF|STR71X_UARTIER_TIMEOUTNE);
+      priv->ier |= RXENABLE_BITS;
 #endif
     }
   else
     {
-      priv->ier &= ~(STR71X_UARTIER_RHF|STR71X_UARTIER_TIMEOUTNE);
+      priv->ier &= ~RXENABLE_BITS;
     }
   up_serialout(priv, STR71X_UART_IER_OFFSET, priv->ier);
 }
@@ -801,7 +821,7 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
 static boolean up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, STR71X_UART_SR_OFFSET) & STR71X_UARTSR_RNE) != 0);
+  return ((up_serialin(priv, STR71X_UART_SR_OFFSET) & RXAVAILABLE_BITS) != 0);
 }
 
 /****************************************************************************
