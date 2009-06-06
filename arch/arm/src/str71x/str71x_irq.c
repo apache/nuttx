@@ -130,13 +130,6 @@ void up_enable_irq(int irq)
 
   if ((unsigned)irq < NR_IRQS)
     {
-      /* Check the IRQs priority.  the current interrupt priority (CIP) is
-       * always zero so the priority must be at least one for the IRQ to be
-       * truly enabled.
-       */
- 
-      DEBUGASSERT(getreg32(STR71X_EIC_SIR(irq)) & STR71X_EICSIR_SIPLMASK != 0);
-
       /* Enable the IRQ by setting the associated bit in the IER register */
 
       reg32  = getreg32(STR71X_EIC_IER);
