@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq_unexpectedisr.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <sys/types.h>
 #include <nuttx/irq.h>
+#include <debug.h>
 #include "os_internal.h"
 #include "irq_internal.h"
 
@@ -78,6 +79,7 @@
 int irq_unexpected_isr(int irq, FAR void *context)
 {
   (void)irqsave();
-   PANIC(OSERR_UNEXPECTEDISR);
-   return 0;
+  lldbg("irq: %d\n", irq);
+  PANIC(OSERR_UNEXPECTEDISR);
+  return OK; /* Won't get here */
 }

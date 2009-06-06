@@ -55,6 +55,14 @@
  * Definitions
  ****************************************************************************/
 
+/* Configuration */
+
+#ifndef CONFIG_TIM_PRI
+#  define CONFIG_TIM_PRI 1
+#elif CONFIG_TIM_PRI <= 1 && CONFIG_TIM_PRI >15
+#  error "CONFIG_TIM_PRI is out of range"
+#endif
+
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
  * system clock ticks per second.  That value is a user configurable setting
@@ -189,9 +197,9 @@ void up_timerinit(void)
   putreg16(OCAR_VALUE, STR71X_TIMER0_OCAR);
   putreg16(0xfffc, STR71X_TIMER0_CNTR);
 
-  /* Set the IRQ interrupt priority */
+  /* Set the timer interrupt priority */
 
-  up_prioritize_irq(STR71X_IRQ_SYSTIMER, 1);
+  up_prioritize_irq(STR71X_IRQ_SYSTIMER, CONFIG_TIM_PRI);
 
   /* Attach the timer interrupt vector */
 
