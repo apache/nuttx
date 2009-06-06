@@ -1,7 +1,7 @@
 /********************************************************************************
  * arch/arm/src/str71x/str71x_decodeirq.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,7 +95,7 @@ void up_decodeirq(uint32 *regs)
   unsigned int irq;
 
   /* Read the IRQ number from the IVR register (Could probably get the same
-   * info from CIC register without the setup.
+   * info from CIC register without the setup).
    */
 
   up_ledon(LED_INIRQ);
