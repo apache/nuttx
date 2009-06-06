@@ -775,17 +775,17 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   if (enable)
     {
-      /* Receive an interrupt when the Rx FIFO is half full (or an IDLE
-       * timeout occurs.
+      /* Receive an interrupt when the Rx FIFO is half full (or if a timeout
+       * occurs while the Rx FIFO is not empty).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->ier |= (STR71X_UARTIER_RHF|STR71X_UARTIER_TIMEOUTIDLE);
+      priv->ier |= (STR71X_UARTIER_RHF|STR71X_UARTIER_TIMEOUTNE);
 #endif
     }
   else
     {
-      priv->ier &= ~(STR71X_UARTIER_RHF|STR71X_UARTIER_TIMEOUTIDLE);
+      priv->ier &= ~(STR71X_UARTIER_RHF|STR71X_UARTIER_TIMEOUTNE);
     }
   up_serialout(priv, STR71X_UART_IER_OFFSET, priv->ier);
 }
