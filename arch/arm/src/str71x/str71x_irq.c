@@ -87,6 +87,14 @@ void up_irqinitialize(void)
 
   putreg32(STR71X_EICICR_IRQEN, STR71X_EIC_ICR);
 
+  /* This shouldn't be necessary, but it appears that something is needed
+   * here to prevent spurious interrupts when the ARM interrupts are enabled
+   * (Needs more investigation).
+   */
+
+  putreg32(0, STR71X_EIC_IER);          /* Make sure that all interrupts are disabled */
+  putreg32(0xffffffff, STR71X_EIC_IPR); /* And that no interrupts are pending */
+
   /* Enable global ARM interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
