@@ -157,7 +157,6 @@
 #define STR71X_EICSIR_SIPLMASK     (0x0000000f) /* Bits 0-3: Source interrupt priority level */
 #define STR71X_EICSIR_SIVMASK      (0xffff0000) /* Bits 16-31: Source interrupt vector */
 
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/

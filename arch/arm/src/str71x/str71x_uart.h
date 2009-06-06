@@ -161,7 +161,7 @@
 #define STR71X_UARTSR_PERR          (0x0008) /* Bit 3: Parity error */
 #define STR71X_UARTSR_FRERROR       (0x0010) /* Bit 4: Frame error */
 #define STR71X_UARTSR_OVERRUN       (0x0020) /* Bit 5: Overrun error */
-#define STR71X_UARTSR_TIMEOUTNE     (0x0040) /* Bit 6: Time out not empty*/
+#define STR71X_UARTSR_TIMEOUTNE     (0x0040) /* Bit 6: Time out not empty */
 #define STR71X_UARTSR_TIMEOUTIDLE   (0x0080) /* Bit 7: Timeout out idle */
 #define STR71X_UARTSR_RHF           (0x0100) /* Bit 8: Rx half full */
 #define STR71X_UARTSR_TF            (0x0200) /* Bit 9: Tx full */

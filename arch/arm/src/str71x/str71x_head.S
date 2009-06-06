@@ -319,6 +319,10 @@ eicloop:
 	/* Shift the IRQ number to bits 16-31 and save the shifted IRQ
 	 * number as SIR[irqno].  This will appear as bits 0:15 in the
 	 * IVR during IRQ processing.
+	 *
+	 * NOTE that the initial priority is set to zero -- the current
+	 * interrupt priority (CIP) is always zero, so these interrupts
+	 * are all disabled.
 	 */
 
 	mov	\value, \irqno, lsl #16

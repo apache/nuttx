@@ -75,19 +75,19 @@ uint32 *current_regs;
 
 void up_irqinitialize(void)
 {
-  /* The bulk of IRQ initialization if performed in str71x_head.S, so we
-   * have very little to do here:
-   */
-
-  /* Enable IRQs (but not FIQs -- they aren't used) */
-
-  putreg32(STR71X_EICICR_IRQEN, STR71X_EIC_ICR);
-
   /* Currents_regs is non-NULL only while processing an interrupt */
 
   current_regs = NULL;
 
-  /* Enable interrupts */
+  /* The bulk of IRQ initialization if performed in str71x_head.S, so we
+   * have very little to do here -- basically just enabling interrupts;
+   *
+   * Enable IRQs (but not FIQs -- they aren't used)
+   */
+
+  putreg32(STR71X_EICICR_IRQEN, STR71X_EIC_ICR);
+
+  /* Enable global ARM interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   irqrestore(SVC_MODE | PSR_F_BIT);
@@ -130,6 +130,13 @@ void up_enable_irq(int irq)
 
   if ((unsigned)irq < NR_IRQS)
     {
+      /* Check the IRQs priority.  the current interrupt priority (CIP) is
+       * always zero so the priority must be at least one for the IRQ to be
+       * truly enabled.
+       */
+ 
+      DEBUGASSERT(getreg32(STR71X_EIC_SIR(irq)) & STR71X_EICSIR_SIPLMASK != 0);
+
       /* Enable the IRQ by setting the associated bit in the IER register */
 
       reg32  = getreg32(STR71X_EIC_IER);
@@ -165,7 +172,6 @@ void up_maskack_irq(int irq)
       reg32  = getreg32(STR71X_EIC_IPR);
       reg32 |= (1 << irq);
       putreg32(reg32, STR71X_EIC_IPR);
-
     }
 }
 
@@ -182,11 +188,15 @@ int up_prioritize_irq(int irq, int priority)
   uint32 addr;
   uint32 reg32;
 
-  if ((unsigned)irq < NR_IRQS && priority < 16)
+  /* The current interrupt priority (CIP) is always zero, so a minimum prioriy
+   * of one is enforced to prevent disabling the interrupt.
+   */
+
+  if ((unsigned)irq < NR_IRQS && priority > 0 && priority < 16)
     {
       addr   = STR71X_EIC_SIR(irq);
       reg32  = getreg32(addr);
-      reg32 &= STR71X_EICSIR_SIPLMASK;
+      reg32 &= ~STR71X_EICSIR_SIPLMASK;
       reg32 |= priority;
       putreg32(reg32, addr);
       return OK;

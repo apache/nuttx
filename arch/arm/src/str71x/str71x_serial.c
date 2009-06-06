@@ -77,6 +77,12 @@
 #  undef HAVE_CONSOLE
 #endif
 
+#ifndef CONFIG_UART_PRI
+#  define CONFIG_UART_PRI 1
+#elif CONFIG_UART_PRI <= 1 && CONFIG_UART_PRI >15
+#  error "CONFIG_UART_PRI is out of range"
+#endif
+
 /* If we are not using the serial driver for the console, then we
  * still must provide some minimal implementation of up_putc().
  */
@@ -580,6 +586,10 @@ static int up_attach(struct uart_dev_s *dev)
         */
 
        up_enable_irq(priv->irq);
+
+       /* Set the uart interrupt priority (the default value is one) */
+
+       up_prioritize_irq(priv->irq, CONFIG_UART_PRI);
     }
   return ret;
 }
@@ -668,7 +678,8 @@ static int up_interrupt(int irq, void *context)
 
       /* Handle incoming, receive bytes (with or without timeout) */
 
-      if ((priv->sr & STR71X_UARTSR_RNE) != 0)
+      if ((priv->sr  & STR71X_UARTSR_RNE)  != 0 && /* Rx FIFO not empty */
+          (priv->ier & STR71X_UARTIER_RHF) != 0)   /* Rx FIFO half full int enabled */
         {
            /* Rx buffer not empty ... process incoming bytes */
 
@@ -678,7 +689,8 @@ static int up_interrupt(int irq, void *context)
 
       /* Handle outgoing, transmit bytes */
 
-      if ((priv->sr & STR71X_UARTSR_TF) == 0)
+      if ((priv->sr & STR71X_UARTSR_TF) == 0 &&   /* Tx FIFO not full */
+          (priv->ier & STR71X_UARTIER_THE) != 0)  /* Tx Half empty interrupt enabled */
         {
            /* Tx FIFO not full ... process outgoing bytes */
 
@@ -686,7 +698,8 @@ static int up_interrupt(int irq, void *context)
            handled = TRUE;
         }
     }
-    return OK;
+
+  return OK;
 }
 
 /****************************************************************************
