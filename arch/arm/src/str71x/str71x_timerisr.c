@@ -59,7 +59,7 @@
 
 #ifndef CONFIG_TIM_PRI
 #  define CONFIG_TIM_PRI 1
-#elif CONFIG_TIM_PRI <= 1 && CONFIG_TIM_PRI >15
+#elif CONFIG_TIM_PRI <= 1 || CONFIG_TIM_PRI > 15
 #  error "CONFIG_TIM_PRI is out of range"
 #endif
 

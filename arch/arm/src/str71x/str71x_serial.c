@@ -77,9 +77,11 @@
 #  undef HAVE_CONSOLE
 #endif
 
+/* Did the user select a priority? */
+
 #ifndef CONFIG_UART_PRI
 #  define CONFIG_UART_PRI 1
-#elif CONFIG_UART_PRI <= 1 && CONFIG_UART_PRI >15
+#elif CONFIG_UART_PRI <= 1 || CONFIG_UART_PRI > 15
 #  error "CONFIG_UART_PRI is out of range"
 #endif
 
@@ -525,8 +527,8 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Clear FIFOs */
 
-  up_serialout(priv, STR71X_UART_TXRSTR_OFFSET, 0);
-  up_serialout(priv, STR71X_UART_RXRSTR_OFFSET, 0);
+  up_serialout(priv, STR71X_UART_TXRSTR_OFFSET, 0xffff);
+  up_serialout(priv, STR71X_UART_RXRSTR_OFFSET, 0xffff);
 
   /* We will take RX interrupts on either the FIFO half full or upon
    * a timeout.  The timeout is based upon BAUD rate ticks
