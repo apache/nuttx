@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 #include "arm.h"
 #include "up_arch.h"
@@ -92,8 +93,11 @@ void up_irqinitialize(void)
    * (Needs more investigation).
    */
 
+  up_mdelay(50);                        /* Wait a bit */
+#if 0
   putreg32(0, STR71X_EIC_IER);          /* Make sure that all interrupts are disabled */
   putreg32(0xffffffff, STR71X_EIC_IPR); /* And that no interrupts are pending */
+#endif
 
   /* Enable global ARM interrupts */
 
