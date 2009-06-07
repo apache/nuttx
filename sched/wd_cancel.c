@@ -1,7 +1,7 @@
 /****************************************************************************
  * wd_cancel.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,9 +98,9 @@ STATUS wd_cancel (WDOG_ID wdid)
 
   saved_state = irqsave();
 
-  /* Make sure that the the watchdog is still active */
+  /* Make sure that the watchdog is initialed (non-NULL) and is still active */
 
-  if (wdid->active)
+  if (wdid && wdid->active)
     {
       /* Search the g_wdactivelist for the target FCB.  We can't use sq_rem
        * to do this because there are additional operations that need to be

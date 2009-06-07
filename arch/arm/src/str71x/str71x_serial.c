@@ -42,7 +42,9 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
+#include <time.h>
 #include <errno.h>
+#include <wdog.h>
 #include <debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -195,6 +197,11 @@
 #  warning "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
+/* I am problems with lost UART interrupts.  Could this just be my hardware? */
+
+#define CONFIG_UART_LOSTTXINTPROTECTION 1
+#define LOSTINT_TIMEOUT                 (100/CLK_TCK)
+
 /* Select RX interrupt enable bits.  There are two models:  (1) We interrupt
  * when each character is received. Or, (2) we interrupt when either the Rx
  * FIFO is half full, OR a timeout occurs with data in the RX FIFO.  The
@@ -229,11 +236,33 @@ struct up_dev_s
   ubyte   parity;    /* 0=none, 1=odd, 2=even */
   ubyte   bits;      /* Number of bits (7 or 8) */
   boolean stopbits2; /* TRUE: Configure with 2 stop bits instead of 1 */
+#ifdef CONFIG_UART_LOSTTXINTPROTECTION
+  boolean wdrunning; /* TRUE: The watchdog is running */
+  WDOG_ID wdog;      /* Watchdog to catch missed UART interrupts */
+#endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* Internal Helpers */
+
+static inline uint16 up_serialin(struct up_dev_s *priv, int offset);
+static inline void up_serialout(struct up_dev_s *priv, int offset, uint16 value);
+static inline void up_disableuartint(struct up_dev_s *priv, uint16 *ier);
+static inline void up_restoreuartint(struct up_dev_s *priv, uint16 ier);
+#ifdef HAVE_CONSOLE
+static inline void up_waittxnotfull(struct up_dev_s *priv);
+#endif
+#ifdef CONFIG_UART_LOSTTXINTPROTECTION
+static void    up_lostint(int argc, uint32 arg1, ...);
+static int     up_intinternal(struct uart_dev_s *dev);
+#else
+static inline int up_intinternal(struct uart_dev_s *dev);
+#endif
+
+/* Serial Driver Methods */
 
 static int     up_setup(struct uart_dev_s *dev);
 static void    up_shutdown(struct uart_dev_s *dev);
@@ -266,7 +295,7 @@ struct uart_ops_s g_uart_ops =
   .send           = up_send,
   .txint          = up_txint,
   .txready        = up_txready,
-  .txempty    = up_txempty,
+  .txempty        = up_txempty,
 };
 
 /* I/O buffers */
@@ -480,6 +509,35 @@ static inline void up_waittxnotfull(struct up_dev_s *priv)
 #endif
 
 /****************************************************************************
+ * Name: up_lostint
+ *
+ * Description:
+ *   Check for lost interrupts
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_UART_LOSTTXINTPROTECTION
+static void up_lostint(int argc, uint32 arg1, ...)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s*)arg1;
+  struct up_dev_s *priv;
+
+  /* Check if we missed any interrupt conditions */
+
+  DEBUGASSERT(argc == 1 && dev && dev->priv);
+  (void)up_intinternal(dev);
+ 
+  /* Re-start a watchdog to catch more missed interrupts */
+
+  priv = (struct up_dev_s*)dev->priv;
+  if (priv->wdrunning)
+    {
+      wd_start(priv->wdog, LOSTINT_TIMEOUT, up_lostint, 1, (void*)dev);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: up_setup
  *
  * Description:
@@ -559,6 +617,11 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set up the IER */
 
   priv->ier = up_serialin(priv, STR71X_UART_IER_OFFSET);
+
+  /* Set up a watchdog to catch missed UART interrupts */
+#ifdef CONFIG_UART_LOSTTXINTPROTECTION
+  priv->wdog = wd_create();
+#endif
 #endif
   return OK;
 }
@@ -576,6 +639,9 @@ static void up_shutdown(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   up_disableuartint(priv, NULL);
+#ifdef CONFIG_UART_LOSTTXINTPROTECTION
+  wd_delete(priv->wdog);
+#endif
 }
 
 /****************************************************************************
@@ -646,45 +712,18 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+#ifdef CONFIG_UART_LOSTTXINTPROTECTION
+static int up_intinternal(struct uart_dev_s *dev)
+#else
+static inline int up_intinternal(struct uart_dev_s *dev)
+#endif
 {
-  struct uart_dev_s *dev = NULL;
-  struct up_dev_s   *priv;
-  int                passes;
-  boolean            handled;
+  struct up_dev_s *priv;
+  int              passes;
+  boolean          handled;
 
-#ifdef CONFIG_STR71X_UART0
-  if (g_uart0priv.irq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_STR71X_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_STR71X_UART2
-  if (g_uart2priv.irq == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_STR71X_UART3
-  if (g_uart3priv.irq == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-    {
-      PANIC(OSERR_INTERNAL);
-    }
   priv = (struct up_dev_s*)dev->priv;
+  DEBUGASSERT(priv && dev);
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -722,6 +761,44 @@ static int up_interrupt(int irq, void *context)
     }
 
   return OK;
+}
+
+static int up_interrupt(int irq, void *context)
+{
+  struct uart_dev_s *dev = NULL;
+
+#ifdef CONFIG_STR71X_UART0
+  if (g_uart0priv.irq == irq)
+    {
+      dev = &g_uart0port;
+    }
+  else
+#endif
+#ifdef CONFIG_STR71X_UART1
+  if (g_uart1priv.irq == irq)
+    {
+      dev = &g_uart1port;
+    }
+  else
+#endif
+#ifdef CONFIG_STR71X_UART2
+  if (g_uart2priv.irq == irq)
+    {
+      dev = &g_uart2port;
+    }
+  else
+#endif
+#ifdef CONFIG_STR71X_UART3
+  if (g_uart3priv.irq == irq)
+    {
+      dev = &g_uart3port;
+    }
+  else
+#endif
+    {
+      PANIC(OSERR_INTERNAL);
+    }
+  return up_intinternal(dev);
 }
 
 /****************************************************************************
@@ -848,19 +925,73 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
 static void up_txint(struct uart_dev_s *dev, boolean enable)
 {
+#ifdef CONFIG_UART_LOSTTXINTPROTECTION
+  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  irqstate_t flags;
+
+  flags = irqsave();
+  if (enable)
+    {
+      /* Set to receive an interrupt when the TX fifo is half emptied */
+
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+      priv->ier |= STR71X_UARTSR_THE;
+      up_serialout(priv, STR71X_UART_IER_OFFSET, priv->ier);
+
+
+      /* Start a watchdog to catch missed UART Tx interrupts (Need to do
+       * this before calling uart_xmitchars() because that function
+       * could recurse and disable Tx interrupts before returning.
+       */
+
+      wd_start(priv->wdog, LOSTINT_TIMEOUT, up_lostint, 1, (void*)dev);
+      priv->wdrunning = TRUE;
+
+      /* The serial driver wants an interrupt here, but will not get get
+       * one unless we "prime the pump."
+       */
+
+      uart_xmitchars(dev);
+#endif
+    }
+  else
+    {
+      /* Stop the watchdog if it is running */
+
+      if (priv->wdrunning)
+        {
+          wd_cancel(priv->wdog);
+          priv->wdrunning = FALSE;
+        }
+
+      /* Disable the TX interrupt */
+
+      priv->ier &= ~STR71X_UARTSR_THE;
+      up_serialout(priv, STR71X_UART_IER_OFFSET, priv->ier);
+
+    }
+  irqrestore(flags);
+
+#else /* CONFIG_UART_LOSTTXINTPROTECTION */
+
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   if (enable)
     {
       /* Set to receive an interrupt when the TX fifo is half emptied */
+
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->ier |= STR71X_UARTSR_THE;
 #endif
     }
   else
     {
+      /* Disable the TX interrupt */
+
       priv->ier &= ~STR71X_UARTSR_THE;
     }
   up_serialout(priv, STR71X_UART_IER_OFFSET, priv->ier);
+
+#endif /* CONFIG_UART_LOSTTXINTPROTECTION */
 }
 
 /****************************************************************************

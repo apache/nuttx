@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 05, 2009</p>
+      <p>Last Updated: June 07, 2009</p>
     </td>
   </tr>
 </table>
@@ -781,7 +781,8 @@
       This port boots and passes the OS test (examples/ostest).
       The port is complete and verified.  As of NuttX 0.3.17, the port includes:
       timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
-      support.  A verified NuttShell (NSH) configuration is also available.
+      support.  A verified NuttShell <a href="NuttShell.html">(NSH)</a>
+      configuration is also available.
     </p>
   </td>
 </tr>
@@ -800,10 +801,11 @@
     </p>
     <p>
       <b>STATUS:</b>
-      Integration is complete on the basic port (boot logic, system time, serial console),
-      The board boots and passes the OS test with console output visible on UART0.
-      Additional drivers are needed: SPI, USB, to name two. It should not take too much
-      more effort to get this port up and running.
+      Integration is complete on the basic port (boot logic, system time, serial console).
+      Two configurations have been verified: (1) The board boots and passes the OS test
+      with console output visible on UART0, and the NuttShell <a href="NuttShell.html">(NSH)</a>
+      is fully functional with interrupt driven serial console.  An SPI driver is available
+      but untested.  Additional features are needed: USB driver, MMC/SD support, to name two.
      </p>
   </td>
 </tr>
@@ -1425,8 +1427,11 @@ nuttx-0.4.8 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
 	  working.  The test at configs/olimex-strp711/ostest passes.  This means that
 	  the basic STR-P711 port is complete.
-	* configs/olimex-strp711/nsh:  Add a NuttShell (NSH) configuration for the
-	  STR-P711.
+	* configs/olimex-strp711/nsh:  Add and verifed a NuttShell (NSH) configuration
+	  for the STR-P711.
+	* arch/arm/str71x/str71x_serial.c:  The STR711 interrupt driven serial driver
+	  finally works after some extradinary measures to handle missed interrupts.
+	  NSH is fully functional on the Olimex STR-P711 board.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
