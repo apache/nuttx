@@ -763,5 +763,9 @@
 	* arch/arm/str71x/str71x_serial.c:  The STR711 interrupt driven serial driver
 	  finally works after some extradinary measures to handle missed interrupts.
 	  NSH is fully functional on the Olimex STR-P711 board.
+	* example/nsh: Moved architecture specific files from NSH directory to board-
+	  specific directories.
+	* config/olimex-strp711/src/up_nsh.c:  Add an NSH board specific directory for
+	  for the Olimex STR7P11 board.
 
 
