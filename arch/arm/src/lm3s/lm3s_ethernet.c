@@ -1262,7 +1262,7 @@ static int lm3s_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: lm3s_initialize
+ * Function: lm3s_ethinitialize
  *
  * Description:
  *   Initialize the Ethernet driver for one interface
@@ -1278,9 +1278,9 @@ static int lm3s_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #if LM3S_NETHCONTROLLERS > 1
-int lm3s_initialize(int intf)
+int lm3s_ethinitialize(int intf)
 #else
-static inline int lm3s_initialize(int intf)
+static inline int lm3s_ethinitialize(int intf)
 #endif
 {
   struct lm3s_driver_s *priv = &g_lm3sdev[intf];
@@ -1366,7 +1366,7 @@ static inline int lm3s_initialize(int intf)
 #if LM3S_NETHCONTROLLERS == 1
 void up_netinitialize(void)
 {
-  (void)lm3s_initialize(0);
+  (void)lm3s_ethinitialize(0);
 }
 #endif
 

@@ -300,7 +300,7 @@ EXTERN int lm3s_dumpgpio(uint32 pinset, const char *msg);
 EXTERN int weak_function gpio_irqinitialize(void);
 
 /****************************************************************************
- * Function: lm3s_initialize
+ * Function: lm3s_ethinitialize
  *
  * Description:
  *   Initialize the Ethernet driver for one interface.  If the LM3S chip
@@ -319,22 +319,24 @@ EXTERN int weak_function gpio_irqinitialize(void);
  ****************************************************************************/
 
 #if LM3S_NETHCONTROLLERS > 1
-EXTERN int lm3s_initialize(int intf);
+EXTERN int lm3s_ethinitialize(int intf);
 #endif
 
 /****************************************************************************
  * The external functions, lm3s_spiselect and lm3s_spistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
  * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi.h).
- * All othermethods (including up_spiinitialize()) are provided by common
+ * All other methods (including up_spiinitialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
- *   1. Provide lm3s_spiselect() and lm3s_spistatus() functions in your
- *      board-specific logic.  This function will perform chip selection and
+ *   1. Provide logic in lm3s_boardinitialize() to configure SPI chip select
+ *      pins.
+ *   2. Provide lm3s_spiselect() and lm3s_spistatus() functions in your
+ *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   2. Add a call to up_spiinitialize() in your low level initialization
- *      logic
- *   3. The handle returned by up_spiinitialize() may then be used to bind the
+ *   3. Add a call to up_spiinitialize() in your low level application
+ *      initialization logic
+ *   4. The handle returned by up_spiinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling 
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
