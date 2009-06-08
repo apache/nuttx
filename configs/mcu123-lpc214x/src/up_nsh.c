@@ -1,7 +1,8 @@
 /****************************************************************************
- * examples/nsh/nsh_lpc214x.c
+ * config/mcu123-lpc214x/src/up_nsh.c
+ * arch/arm/src/board/up_nsh.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without

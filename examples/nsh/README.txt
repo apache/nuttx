@@ -883,6 +883,12 @@ NSH-Specific Configuration Settings
       you may log into NuttX remotely using telnet in order to
       access NSH.
 
+  * CONFIG_EXAMPLES_NSH_ARCHINIT
+      Set if your board provides architecture specific initialization
+      via the board-specific function nsh_archinitialize().  This
+      function will be called early in NSH initialization to allow
+      board logic to do such things as configure MMC/SD slots.
+
   One or both of CONFIG_EXAMPLES_NSH_CONSOLE and CONFIG_EXAMPLES_NSH_TELNET
   must be defined.  If CONFIG_EXAMPLES_NSH_TELNET is selected, then there some
   other configuration settings that apply:

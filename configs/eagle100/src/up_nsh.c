@@ -1,5 +1,6 @@
 /****************************************************************************
- * examples/nsh/nsh_lm3s.c
+ * config/eagle100/src/up_nsh.c
+ * arch/arm/src/board/up_nsh.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -69,7 +70,7 @@
 #    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
 #  endif
 #else
-   /* Add configuration for new LPC214x boards here */
+   /* Add configuration for new LM3s boards here */
 #  error "Unrecognized lm3s board"
 #  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD

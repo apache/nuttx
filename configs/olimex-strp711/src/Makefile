@@ -41,6 +41,9 @@ CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm -I
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		= up_spi.c up_leds.c up_buttons.c
+ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
+CSRCS		+= up_nsh.c
+endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

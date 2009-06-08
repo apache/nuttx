@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: March 28, 2009</p>
+      <p>Last Updated: June 08, 2009</p>
     </td>
   </tr>
 </table>
@@ -2074,6 +2074,15 @@ nsh>
       server front-end is selected.  When this option is provided,
       you may log into NuttX remotely using telnet in order to
       access NSH.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ARCHINIT</code></b></td>
+    <td>
+      Set <code>CONFIG_EXAMPLES_NSH_ARCHINIT</code> if your board provides architecture
+      specific initialization  via the board-specific function <code>nsh_archinitialize()</code>.
+      This function will be called early in NSH initialization to allow board logic to
+      do such things as configure MMC/SD slots.
     </td>
   </tr>
 </table></center>

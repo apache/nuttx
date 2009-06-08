@@ -720,7 +720,7 @@ static inline int up_intinternal(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv;
   int              passes;
-  boolean          handled;
+  boolean          handled = TRUE;
 
   priv = (struct up_dev_s*)dev->priv;
   DEBUGASSERT(priv && dev);

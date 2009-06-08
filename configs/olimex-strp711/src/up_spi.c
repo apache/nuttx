@@ -116,7 +116,7 @@
 #define BSPI0_GPIO0_SCLK (0x0004)
 #define BSPI0_GPIO0_SS   (0x0008)
 
-#define BSPIO_GPIO0-ALT  (BSPI0_GPIO0_MISO|BSPI0_GPIO0_MOSI|BSPI0_GPIO0_SCLK)
+#define BSPIO_GPIO0_ALT  (BSPI0_GPIO0_MISO|BSPI0_GPIO0_MOSI|BSPI0_GPIO0_SCLK)
 #define BSPIO_GPIO0_OUT   BSPI0_GPIO0_SS
 #define BSPIO_GPIO0_ALL  (0x000f)
 
@@ -125,7 +125,7 @@
 #define BSPI1_GPIO0_SCLK (0x0040)
 #define BSPI1_GPIO0_SS   (0x0080)
 
-#define BSPI1_GPIO0-ALT  (BSPI1_GPIO0_MISO|BSPI1_GPIO0_MOSI|BSPI1_GPIO0_SCLK)
+#define BSPI1_GPIO0_ALT  (BSPI1_GPIO0_MISO|BSPI1_GPIO0_MOSI|BSPI1_GPIO0_SCLK)
 #define BSPI1_GPIO0_OUT   BSPI1_GPIO0_SS
 #define BSPI1_GPIO0_ALL  (0x00f0)
 
@@ -504,12 +504,12 @@ static ubyte spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   ubyte ret = 0;
   uint16 reg16 = getreg16(STR71X_GPIO1_PD);
 
-  if ((re16 & MMCSD_GPIO1_WPIN) != 0)
+  if ((reg16 & MMCSD_GPIO1_WPIN) != 0)
     {
       ret |= SPI_STATUS_WRPROTECTED;
     }
 
-  if ((re16 & MMCSD_GPIO1_CPIN) != 0)
+  if ((reg16 & MMCSD_GPIO1_CPIN) != 0)
     {
       ret |= SPI_STATUS_PRESENT;
     }
@@ -653,7 +653,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR const *buffer, size_t buflen)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
   FAR ubyte *ptr = (FAR ubyte*)buffer;
@@ -736,7 +736,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       putreg16(reg16, STR71X_GPIO0_PC0);
 
       reg16  = getreg16(STR71X_GPIO0_PC1);
-      req16 &= ~BSPIO_GPIO0_ALL;
+      reg16 &= ~BSPIO_GPIO0_ALL;
       reg16 |= BSPIO_GPIO0_ALT;
       putreg16(reg16, STR71X_GPIO0_PC1);
 
@@ -778,7 +778,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       putreg16(reg16, STR71X_GPIO0_PC0);
 
       reg16  = getreg16(STR71X_GPIO0_PC1);
-      req16 &= ~BSPI1_GPIO0_ALL;
+      reg16 &= ~BSPI1_GPIO0_ALL;
       reg16 |= BSPI1_GPIO0_ALT;
       putreg16(reg16, STR71X_GPIO0_PC1);
 
