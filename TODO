@@ -520,16 +520,14 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
 o ARM/STR71x (arch/arm/src/str71x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: Basic port is complete but untested.  Complete integration
-  Status:      Open
-  Priority:    High
-
-  Description: Add SPI driver and integrate with MMC/SD support.
+  Description: Add SPI driver and integrate with MMC/SD support. This effort is stalled
+               at the moment because the slot on the Olimex board only accepts MMC card;
+               I have not MMC cards, only SD cards which won't fit into the slot.
   Status:      Open
   Priority:    Medium
 
-  Description: Develop a USB driver and integrate with existing USB serial
-               and storage class drivers.
+  Description: Develop a USB driver and integrate with existing USB serial and storage
+               class drivers.
   Status:      Open
   Priority:    Medium
 
