@@ -96,17 +96,17 @@
 #define STR71X_BSPICSR1_WL8BIT      (0 << STR71X_BSPICSR1_WLSHIFT) /*   8-bits */
 #define STR71X_BSPICSR1_WL16BIT     (1 << STR71X_BSPICSR1_WLSHIFT) /*   16-bits */
 #define STR71X_BSPICSR1_RFESHIFT    12       /* Bits 12-15: Receive FIFO enable */
-#define STR71X_BSPICSR1_RFEMASK     (15 << STR71X_BSPICSR1_RFEMASK)
-#define STR71X_BSPICSR1_RFE1        (0 << STR71X_BSPICSR1_RFEMASK) /* Word 1 enabled */
-#define STR71X_BSPICSR1_RFE12       (1 << STR71X_BSPICSR1_RFEMASK) /* Word 1-2 enabled */
-#define STR71X_BSPICSR1_RFE13       (2 << STR71X_BSPICSR1_RFEMASK) /* Word 1-3 enabled */
-#define STR71X_BSPICSR1_RFE14       (3 << STR71X_BSPICSR1_RFEMASK) /* Word 1-4 enabled */
-#define STR71X_BSPICSR1_RFE15       (4 << STR71X_BSPICSR1_RFEMASK) /* Word 1-5 enabled */
-#define STR71X_BSPICSR1_RFE16       (5 << STR71X_BSPICSR1_RFEMASK) /* Word 1-6 enabled */
-#define STR71X_BSPICSR1_RFE17       (6 << STR71X_BSPICSR1_RFEMASK) /* Word 1-7 enabled */
-#define STR71X_BSPICSR1_RFE18       (7 << STR71X_BSPICSR1_RFEMASK) /* Word 1-8 enabled */
-#define STR71X_BSPICSR1_RFE19       (8 << STR71X_BSPICSR1_RFEMASK) /* Word 1-9 enabled */
-#define STR71X_BSPICSR1_RFE110      (9 << STR71X_BSPICSR1_RFEMASK) /* Word 1-10 enabled */
+#define STR71X_BSPICSR1_RFEMASK     (15 << STR71X_BSPICSR1_RFESHIFT)
+#define STR71X_BSPICSR1_RFE1        (0 << STR71X_BSPICSR1_RFESHIFT) /* Word 1 enabled */
+#define STR71X_BSPICSR1_RFE12       (1 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-2 enabled */
+#define STR71X_BSPICSR1_RFE13       (2 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-3 enabled */
+#define STR71X_BSPICSR1_RFE14       (3 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-4 enabled */
+#define STR71X_BSPICSR1_RFE15       (4 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-5 enabled */
+#define STR71X_BSPICSR1_RFE16       (5 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-6 enabled */
+#define STR71X_BSPICSR1_RFE17       (6 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-7 enabled */
+#define STR71X_BSPICSR1_RFE18       (7 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-8 enabled */
+#define STR71X_BSPICSR1_RFE19       (8 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-9 enabled */
+#define STR71X_BSPICSR1_RFE110      (9 << STR71X_BSPICSR1_RFESHIFT) /* Word 1-10 enabled */
 
 /* BSPI control/status register 2 */
 
