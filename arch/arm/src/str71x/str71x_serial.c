@@ -197,10 +197,18 @@
 #  warning "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
-/* I am problems with lost UART interrupts.  Could this just be my hardware? */
+/* At one time, I had problems with lost UART interrupts.  This turned out
+ * to be a dumb programming error which has since been fixed.  However, the
+ * instrumentation enabled CONFIG_UART_LOSTTXINTPROTECTION is still interesting
+ * and I am preserving it here for possible future use elsewehre.
+ */
 
-#define CONFIG_UART_LOSTTXINTPROTECTION 1
-#define LOSTINT_TIMEOUT                 (100/CLK_TCK)
+#undef CONFIG_UART_LOSTTXINTPROTECTION
+#if CLK_TCK > 20
+#  define LOSTINT_TIMEOUT (CLK_TCK/20)
+#else
+#  define LOSTINT_TIMEOUT (1)
+#endif
 
 /* Select RX interrupt enable bits.  There are two models:  (1) We interrupt
  * when each character is received. Or, (2) we interrupt when either the Rx
