@@ -1,5 +1,6 @@
 /****************************************************************************
  * config/mcu123-lpc214x/src/up_spi.c
+ * arch/arm/src/board/up_spi.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
