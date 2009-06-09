@@ -370,7 +370,11 @@ eicloop:
 	/* Allow EMI and USB */
 
 	ldr	\base1, =STR71X_RCCU_BASE
+#ifdef CONFIG_STR71X_USB
 	ldr	\value, =(STR71X_RCCUPER_EMI|STR71X_RCCUPER_USBKERNEL)
+#else
+	ldr	\value, =STR71X_RCCUPER_EMI
+#endif
 	strh	\value, [\base1, #STR71X_RCCU_PER_OFFSET]
 #endif
 	.endm

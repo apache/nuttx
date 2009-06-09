@@ -76,107 +76,89 @@
 
 /* Register bit settings ***********************************************************/
 
-/* Interrupt status register (ISTR) */
-
-#define STR71X_USBISTR_CTR      (0x8000)  /* Correct Transfer */
-#define STR71X_USBISTR_DOVR     (0x4000)  /* DMA Over/underrun */
-#define STR71X_USBISTR_ERR      (0x2000)  /* Error */
-#define STR71X_USBISTR_WKUP     (0x1000)  /* Wakeup */
-#define STR71X_USBISTR_SUSP     (0x0800)  /* Suspend */
-#define STR71X_USBISTR_RESET    (0x0400)  /* Reset */
-#define STR71X_USBISTR_SOF      (0x0200)  /* Start of frame */
-#define STR71X_USBISTR_ESOF     (0x0100)  /* Expected start of frame */
-#define STR71X_USBISTR_DIR      (0x0010)  /* DIRection of transaction  */
-#define STR71X_USBISTR_EPID     (0x000f)  /* Endpoint IDentifier  */
-
-#define STR71X_USBCLR_CTR       (~STR71X_USBISTR_CTR)
-#define STR71X_USBCLR_DOVR      (~STR71X_USBISTR_DOVR)
-#define STR71X_USBCLR_ERR       (~STR71X_USBISTR_ERR)
-#define STR71X_USBCLR_WKUP      (~STR71X_USBISTR_WKUP)
-#define STR71X_USBCLR_SUSP      (~STR71X_USBISTR_SUSP)
-#define STR71X_USBCLR_RESET     (~STR71X_USBISTR_RESET)
-#define STR71X_USBCLR_SOF       (~STR71X_USBISTR_SOF)
-#define STR71X_USBCLR_ESOF      (~STR71X_USBISTR_ESOF)
-
 /* Control Register (CNTR) */
 
-#define STR71X_USBCNTR_CTRM     (0x8000)  /* Correct transfer */
-#define STR71X_USBCNTR_DOVRM    (0x4000)  /* DMA over/underrun */
-#define STR71X_USBCNTR_ERRM     (0x2000)  /* Error */
-#define STR71X_USBCNTR_WKUPM    (0x1000)  /* Wake up */
-#define STR71X_USBCNTR_SUSPM    (0x0800)  /* Suspend  */
-#define STR71X_USBCNTR_RESETM   (0x0400)  /* Reset   */
-#define STR71X_USBCNTR_SOFM     (0x0200)  /* Start of frame */
-#define STR71X_USBCNTR_ESOFM    (0x0100)  /* Expected start of frame */
-#define STR71X_USBCNTR_RESUME   (0x0010)  /* Resume request */
-#define STR71X_USBCNTR_FSUSP    (0x0008)  /* Force suspend */
-#define STR71X_USBCNTR_LPMODE   (0x0004)  /* Low-power mode  */
-#define STR71X_USBCNTR_PDWN     (0x0002)  /* Power down */
-#define STR71X_USBCNTR_FRES     (0x0001)  /* Force usb reset */
+#define USB_CNTR_FRES          (1 << 0)   /* Bit 0:  Force usb reset */
+#define USB_CNTR_PDWN          (1 << 1)   /* Bit 1:  Power down */
+#define USB_CNTR_LPMODE        (1 << 2)   /* Bit 2:  Low-power mode  */
+#define USB_CNTR_FSUSP         (1 << 3)   /* Bit 3:  Force suspend */
+#define USB_CNTR_RESUME        (1 << 4)   /* Bit 4:  Resume request */
+#define USB_CNTR_ESOFM         (1 << 8)   /* Bit 8:  Expected start of frame */
+#define USB_CNTR_SOFM          (1 << 9)   /* Bit 9:  Start of frame */
+#define USB_CNTR_RESETM        (1 << 10)  /* Bit 10: Reset   */
+#define USB_CNTR_SUSPM         (1 << 11)  /* Bit 11: Suspend  */
+#define USB_CNTR_WKUPM         (1 << 12)  /* Bit 12: Wake up */
+#define USB_CNTR_ERRM          (1 << 13)  /* Bit 13: Error */
+#define USB_CNTR_DOVRM         (1 << 14)  /* Bit 14: DMA over/underrun */
+#define USB_CNTR_CTRM          (1 << 15)  /* Bit 15: Correct transfer */
+
+/* Interrupt status register (ISTR) */
+
+#define USB_ISTR_EPID_SHIFT    0          /* Bits 0-3: Endpoint Identifier  */
+#define USB_ISTR_EPID_MASK     (0x0f << USB_ISTR_EPID_SHIFT)
+#define USB_ISTR_DIR           (1 << 4)   /* Bit 4:  DIRection of transaction  */
+#define USB_ISTR_ESOF          (1 << 8)   /* Bit 8:  Expected start of frame */
+#define USB_ISTR_SOF           (1 << 9)   /* Bit 9:  Start of frame */
+#define USB_ISTR_RESET         (1 << 10)  /* Bit 10: Reset */
+#define USB_ISTR_SUSP          (1 << 11)  /* Bit 11: Suspend */
+#define USB_ISTR_WKUP          (1 << 12)  /* Bit 12: Wakeup */
+#define USB_ISTR_ERR           (1 << 13)  /* Bit 13: Error */
+#define USB_ISTR_DOVR          (1 << 14)  /* Bit 14: DMA Over/underrun */
+#define USB_ISTR_CTR           (1 << 15)  /* Bit 15: Correct Transfer */
 
 /* Frame number register (FNR) */
 
-#define STR71X_USBFNR_RXDP      (0x8000)  /* Status of D+ data line */
-#define STR71X_USBFNR_RXDM      (0x4000)  /* Status of D- data line */
-#define STR71X_USBFNR_LCK       (0x2000)  /* Locked */
-#define STR71X_USBFNR_LSOF      (0x1800)  /* Lost SOF */
-#define STR71X_USBFNR_FN        (0x07ff)  /* Frame number */
+#define USB_FNR_FN_SHIFT       0          /* Bit 0-10: Frame number */
+#define USB_FNR_LSOF_SHIFT     11         /* Bits 11-12 : Lost SOF */
+#define USB_FNR_LSOF_MASK      (3 << USB_FNR_LSOF_SHIFT)
+#define USB_FNR_FN_MASK        (0x07ff << USB_FNR_FN_SHIFT)
+#define USB_FNR_LCK            (1 << 13)  /* Bit 13: Locked */
+#define USB_FNR_RXDM           (1 << 14)  /* Bit 14: Status of D- data line */
+#define USB_FNR_RXDP           (1 << 15)  /* Bit 15: Status of D+ data line */
 
 /* Device address register (DADDR) */
 
-#define STR71X_USBDADDR_EF      (0x80)
-#define STR71X_USBDADDR_ADD     (0x7f)
+#define USB_DADDR_ADD_SHIFT    0          /* Bits 0-7: Device address */
+#define USB_DADDR_ADD_MASK     (0x7f << USB_DADDR_ADD_SHIFT)
+#define USB_DADDR_EF           (1 << 7)   /* Bit 8:  Enable function */
 
 /* Endpoint registers (EPR) */
 
-#define STR71X_USBEPR_CTRRX     (0x8000) /* Endpoint correct transfer RX   */
-#define STR71X_USBEPR_DTOGRX    (0x4000) /* Endpoint data toggle RX */
-#define STR71X_USBEPR_RXSTAT    (0x3000) /* Endpoint RX status bit */
-#define STR71X_USBEPR_SETUP     (0x0800) /* Endpoint setup */
-#define STR71X_USBEPR_TFIELD    (0x0600) /* Endpoint type */
-#define STR71X_USBEPR_KIND      (0x0100) /* Endpoint kind */
-#define STR71X_USBEPR_CTRTX     (0x0080) /* Endpoint correct transfer TX */
-#define STR71X_USBEPR_DTOGTX    (0x0040) /* Endpoint data toggle TX */
-#define STR71X_USBEPR_TXSTAT    (0x0030) /* Endpoint TX status bit */
-#define STR71X_USBEPR_ADDRFIELD (0x000f) /* Endpoint address */
+#define USB_EPR_ADDRFIELD_SHIFT 0         /* Bits 0-3: Endpoint address */
+#define USB_EPR_ADDRFIELD_MASK  (0x0f << USB_EPR_ADDRFIELD_SHIFT)
+#define USB_EPR_TXSTAT_SHIFT    4         /* Bits 4-5: Endpoint TX status bit */
+#define USB_EPR_TXSTAT_MASK     (3 << USB_EPR_TXSTAT_SHIFT)
+#  define USB_EPR_TXDIS         (0 << USB_EPR_TXSTAT_SHIFT) /* Endpoint TX disabled */
+#  define USB_EPR_TXSTALL       (1 << USB_EPR_TXSTAT_SHIFT) /* Endpoint TX stalled */
+#  define USB_EPR_TXNAK         (2 << USB_EPR_TXSTAT_SHIFT) /* Endpoint TX NAKed */
+#  define USB_EPR_TXVALID       (3 << USB_EPR_TXSTAT_SHIFT) /* Endpoint TX valid */
+#  define USB_EPR_TXDTOG1       (1 << USB_EPR_TXSTAT_SHIFT) /* Bit : Endpoint TX data toggle bit1 */
+#  define USB_EPR_TXDTOG2       (2 << USB_EPR_TXSTAT_SHIFT) /* Bit : Endpoint TX data toggle bit2 */
+#define USB_EPR_DTOGTX          (1 << 6)  /* Bit 6:  Endpoint data toggle TX */
+#define USB_EPR_CTRTX           (1 << 7)  /* Bit 7:  Endpoint correct transfer TX */
+#define USB_EPR_KIND            (1 << 8)  /* Bit 8:  Endpoint kind */
+#define USB_EPR_EPTYPE_SHIFT    9         /* Bits 9-10: Endpoint type */
+#define USB_EPR_EPTYPE_MASK     (3 << USB_EPR_EPTYPE_SHIFT)
+#  define USB_EPR_BULK          (0 << USB_EPR_EPTYPE_SHIFT)  /* Endpoint BULK */
+#  define USB_EPR_CONTROL       (1 << USB_EPR_EPTYPE_SHIFT)  /* Endpoint CONTROL */
+#  define USB_EPR_ISOC          (2 << USB_EPR_EPTYPE_SHIFT)) /* Endpoint ISOCHRONOUS */
+#  define USB_EPR_INTERRUPT     (3 << USB_EPR_EPTYPE_SHIFT)  /* Endpoint INTERRUPT */
+#define USB_EPR_SETUP           (1 << 11) /* Bit 11: Endpoint setup */
+#define USB_EPR_RXSTAT_SHIFT    12        /* Bits 12-13: Endpoint RX status bit */
+#define USB_EPR_RXSTAT_MASK     (3 << USB_EPR_RXSTAT_SHIFT)
+#  define USB_EPR_RXDIS         (0 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX disabled */
+#  define USB_EPR_RXSTALL       (1 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX stalled */
+#  define USB_EPR_RXNAK         (2 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX NAKed */
+#  define USB_EPR_RXVALID       (3 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX valid */
+#  define USB_EPR_RXDTOG1       (1 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX data toggle bit1 */
+#  define USB_EPR_RXDTOG2       (2 << USB_EPR_RXSTAT_SHIFT) /* Endpoint RX data toggle bit2 */
+#define USB_EPR_DTOGRX          (1 << 14) /* Bit 14: Endpoint data toggle RX */
+#define USB_EPR_CTRRX           (1 << 15) /* Bit 15: Endpoint correct transfer RX   */
 
 /* Endpoint register mask (no toggle fields) */
 
-#define STR71X_USBEPRREG_MASK   (STR71X_USBEPR_CTRRX|STR71X_USBEPR_SETUP|STR71X_USBEPR_TFIELD|\
-                                 STR71X_USBEPR_KIND|STR71X_USBEPR_CTRTX|STR71X_USBEPR_ADDRFIELD)
-
-/* EP_TYPE[1:0] Endpoint type */
-
-#define STR71X_USBEPR_TYPEMASK   (0x0600) /* Endpoint type mask */
-#define STR71X_USBEPR_BULK       (0x0000) /* Endpoint BULK */
-#define STR71X_USBEPR_CONTROL    (0x0200) /* Endpoint CONTROL */
-#define STR71X_USBEPR_ISOC       (0x0400) /* Endpoint ISOCHRONOUS */
-#define STR71X_USBEPR_INTERRUPT  (0x0600) /* Endpoint INTERRUPT */
-#define STR71X_USBEPR_TMASK      (~STR71X_USBEPR_TFIELD & STR71X_USBEPRREG_MASK)
-
-/* EP_KIND Endpoint kind */
-
-#define STR71X_USBEPR_KINDMASK    (~STR71X_USBEPR_KIND & STR71X_USBEPRREG_MASK)
-
-/* STAT_TX[1:0] Status for TX transfer */
-
-#define STR71X_USBEPR_TXDIS      (0x0000) /* Endpoint TX disabled */
-#define STR71X_USBEPR_TXSTALL    (0x0010) /* Endpoint TX stalled */
-#define STR71X_USBEPR_TXNAK      (0x0020) /* Endpoint TX NAKed */
-#define STR71X_USBEPR_TXVALID    (0x0030) /* Endpoint TX valid */
-#define STR71X_USBEPRTX_DTOG1    (0x0010) /* Endpoint TX data toggle bit1 */
-#define STR71X_USBEPRTX_DTOG2    (0x0020) /* Endpoint TX data toggle bit2 */
-#define STR71X_USBEPRTX_DTOGMASK (STR71X_USBEPR_TXSTAT|STR71X_USBEPRREG_MASK)
-
-/* STAT_RX[1:0] Status for RX transfer */
-
-#define STR71X_USBEPR_RXDIS      (0x0000) /* Endpoint RX disabled */
-#define STR71X_USBEPR_RXSTALL    (0x1000) /* Endpoint RX stalled */
-#define STR71X_USBEPR_RXNAK      (0x2000) /* Endpoint RX NAKed */
-#define STR71X_USBEPR_RXVALID    (0x3000) /* Endpoint RX valid */
-#define STR71X_USBEPR_RXDTOG1    (0x1000) /* Endpoint RX data toggle bit1 */
-#define STR71X_USBEPR_RXDTOG2    (0x2000) /* Endpoint RX data toggle bit1 */
-#define STR71X_USBEPR_RXDTOGMASK (EPRX_STAT|STR71X_USBEPRREG_MASK)
+#define USB_EPR_MASK            (USB_EPR_CTRRX|USB_EPR_SETUP|USB_EPR_TFIELD|\
+                                 USB_EPR_KIND|USB_EPR_CTRTX|USB_EPR_ADDRFIELD)
 
 /************************************************************************************
  * Public Types

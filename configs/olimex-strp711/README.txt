@@ -178,7 +178,7 @@ STR71x-Specific Configuration Settings
   CONFIG_STR71X_CKOUT, CONFIG_STR71X_TIM1, CONFIG_STR71X_TIM2, CONFIG_STR71X_TIM3, and
   CONFIG_STR71X_RTC
     Select peripherals to initialize (Timer0 and EIC are always initialized)
-  CONFIG_UART_PRI, STR71X_BSPI_PRI, CONFIG_TIM_PRI
+  CONFIG_UART_PRI, STR71X_BSPI_PRI, CONFIG_TIM_PRI, CONFIG_USB_PRI
     Can be defined to set the priority of NuttX managed devices.  Default is 1.
   CONFIG_STR71X_BANK0, CONFIG_STR71X_BANK1, CONFIG_STR71X_BANK2, and CONFIG_STR71X_BANK3
     Enable initialize of external memory banks 0-3.
