@@ -75,7 +75,7 @@ static int pipe_close(FAR struct file *filep);
  * Private Data
  ****************************************************************************/
 
-static struct file_operations pipe_fops =
+static const struct file_operations pipe_fops =
 {
   pipecommon_open,   /* open */
   pipe_close,        /* close */

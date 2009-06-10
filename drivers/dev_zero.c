@@ -64,7 +64,7 @@ static int     devzero_poll(FAR struct file *filp, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static struct file_operations devzero_fops =
+static const struct file_operations devzero_fops =
 {
   0,             /* open */
   0,             /* close */

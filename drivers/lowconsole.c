@@ -68,7 +68,7 @@ static int     lowconsole_ioctl(struct file *filep, int cmd, unsigned long arg);
  * Private Variables
  ****************************************************************************/
 
-struct file_operations g_consoleops =
+static const struct file_operations g_consoleops =
 {
   0,                /* open */
   0,                /* close */

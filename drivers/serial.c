@@ -86,7 +86,7 @@ static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean
  * Private Variables
  ************************************************************************************/
 
-struct file_operations g_serialops =
+static const struct file_operations g_serialops =
 {
   uart_open,  /* open */
   uart_close, /* close */

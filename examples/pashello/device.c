@@ -61,7 +61,7 @@ static ssize_t hello_read(struct file *, char *, size_t);
  * Private Data
  ****************************************************************************/
 
-static struct file_operations hello_fops =
+static const struct file_operations hello_fops =
 {
   0,             /* open */
   0,             /* close */

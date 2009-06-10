@@ -67,7 +67,7 @@
  * Private Data
  ****************************************************************************/
 
-static struct file_operations fifo_fops =
+static const struct file_operations fifo_fops =
 {
   pipecommon_open,  /* open */
   pipecommon_close, /* close */

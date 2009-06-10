@@ -81,7 +81,7 @@ static int            can_ioctl(FAR struct file *filep, int cmd, unsigned long a
  * Private Data
  ****************************************************************************/
 
-struct file_operations g_canops =
+static const struct file_operations g_canops =
 {
   can_open,  /* open */
   can_close, /* close */

@@ -78,7 +78,7 @@ static int     bch_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
  * Public Data
  ****************************************************************************/
 
-struct file_operations bch_fops =
+static const struct file_operations bch_fops =
 {
   bch_open,  /* open */
   bch_close, /* close */

@@ -62,7 +62,7 @@ static int     devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static struct file_operations devconsole_fops =
+static const struct file_operations devconsole_fops =
 {
   .read		= devconsole_read,
   .write	= devconsole_write,
