@@ -43,8 +43,17 @@ else
 ARCH_SUBDIR	= arm
 endif
 
-CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common \
+ifeq ($(WINTOOL),y)
+  NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx}"
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+		   -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}" \
+		   -I "${shell cygpath -w $(TOPDIR)/sched}"
+else
+  NUTTX		= $(TOPDIR)/nuttx
+  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common \
 		   -I$(ARCH_SRCDIR)/$(ARCH_SUBDIR) -I$(TOPDIR)/sched
+endif
 
 HEAD_AOBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
 
@@ -61,7 +70,13 @@ LDFLAGS		= $(ARCHSCRIPT)
 EXTRA_LIBS	=
 
 LINKLIBS	=
-LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+ifeq ($(WINTOOL),y)
+  LIBPATHS	= ${shell for path in $(LINKLIBS); do dir=`dirname $(TOPDIR)/$$path`;echo "-L\"`cygpath -w $$dir`\"";done}
+  LIBPATHS	+= -L"${shell cygpath -w $(BOARDDIR)}"
+else
+  LIBPATHS	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+  LIBPATHS	+= -L"$(BOARDDIR)"
+endif
 LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
 BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
@@ -88,20 +103,20 @@ board/libboard$(LIBEXT):
 
 nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
-	@$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_AOBJ) \
+	@$(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX)$(EXEEXT) $(HEAD_AOBJ) \
 		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC)
 ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
-	@export flashloc=`$(OBJDUMP) --all-headers $(TOPDIR)/$@ | grep _eronly | cut -d' ' -f1`;  \
-	$(OBJCOPY) $(OBJCOPYARGS) --adjust-section-vma=.data=0x$$flashloc $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage
-	@mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@
+	@export flashloc=`$(OBJDUMP) --all-headers $(NUTTX)$(EXEEXT) | grep _eronly | cut -d' ' -f1`;  \
+	$(OBJCOPY) $(OBJCOPYARGS) --adjust-section-vma=.data=0x$$flashloc $(NUTTX)$(EXEEXT) $(NUTTX).flashimage
+	@mv $(NUTTX).flashimage $(NUTTX)$(EXEEXT)
 endif
-	@$(NM) $(TOPDIR)/$@ | \
+	@$(NM) $(NUTTX)$(EXEEXT) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map
-	@export vflashstart=`$(OBJDUMP) --all-headers $(TOPDIR)/$@ | grep _vflashstart | cut -d' ' -f1`;  \
+	@export vflashstart=`$(OBJDUMP) --all-headers $(NUTTX)$(EXEEXT) | grep _vflashstart | cut -d' ' -f1`;  \
 	if [ ! -z "$$vflashstart" ]; then \
-		$(OBJCOPY) $(OBJCOPYARGS) --adjust-section-vma=.vector=0x$$vflashstart $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage; \
-		mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@; \
+		$(OBJCOPY) $(OBJCOPYARGS) --adjust-section-vma=.vector=0x$$vflashstart $(NUTTX)$(EXEEXT) $(NUTTX).flashimage; \
+		mv $(NUTTX).flashimage $(NUTTX)$(EXEEXT); \
 	fi
 
 .depend: Makefile chip/Make.defs $(SRCS)
