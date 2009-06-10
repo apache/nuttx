@@ -38,6 +38,27 @@ GNU Toolchain Options
   Of course, hard coding this CROSS_COMPILE value in Make.defs file will save
   some repetitive typing.
 
+  NOTE: the CodeSourcery and devkitARM toolchains are Windows native toolchains.
+  The NuttX buildroot toolchain is a Cygwin toolchain.  There are several limitations
+  to using a Windows based toolchain in a Cygwin environment.  The two biggestg are:
+
+  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
+     performed automatically in the Cygwin makefiles using the 'cygpath' utility
+     but you might easily find some new path problems.  If so, check out 'cygpath -w'
+
+  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
+     are used in Nuttx (e.g., include/arch).  The make system works around these
+     problems for the Windows tools by copying directories instead of linking them.
+     But this can also cause some confusion for you:  For example, you may edit
+     a file in a "linked" directory and find that your changes had not effect.
+     That is because you are building the copy of the file in the "fake" symbolic
+     directory.  If you use a Windows toolchain, you should get in the habit of
+     making like this:
+       
+       make clean_context; make CROSSDEV=arm-none-eabi-
+
+     An alias in your .bashrc file might make that less painful.
+ 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 

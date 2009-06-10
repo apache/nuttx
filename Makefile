@@ -44,6 +44,14 @@ DIRLINK		= $(TOPDIR)/tools/link.sh
 DIRUNLINK	= $(TOPDIR)/tools/unlink.sh
 endif
 
+# This is the final executable
+
+ifeq ($(WINTOOL),y)
+  NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx}"
+else
+  NUTTX		= $(TOPDIR)/nuttx
+endif
+
 # Process architecture and board-specific directories
 
 ARCH_DIR	= arch/$(CONFIG_ARCH)
@@ -245,13 +253,13 @@ ifeq ($(CONFIG_RRLOAD_BINARY),y)
 	fi
 endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
-	@$(OBJCOPY) $(OBJCOPYARGS) -O ihex $(TOPDIR)/$@ $(TOPDIR)/$@.ihx
+	@$(OBJCOPY) $(OBJCOPYARGS) -O ihex $(NUTTX)$(EXEEXT) $(NUTTX)$(EXEEXT).ihx
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
-	@$(OBJCOPY) $(OBJCOPYARGS) -O srec $(TOPDIR)/$@ $(TOPDIR)/$@.srec
+	@$(OBJCOPY) $(OBJCOPYARGS) -O srec $(NUTTX)$(EXEEXT) $(NUTTX)$(EXEEXT).srec
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
-	@$(OBJCOPY) $(OBJCOPYARGS) -O binary $(TOPDIR)/$@ $(TOPDIR)/$@.bin
+	@$(OBJCOPY) $(OBJCOPYARGS) -O binary $(NUTTX)$(EXEEXT) $(NUTTX)$(EXEEXT).bin
 endif
 
 depend:

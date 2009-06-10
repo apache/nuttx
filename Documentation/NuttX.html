@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 08, 2009</p>
+      <p>Last Updated: June 09, 2009</p>
     </td>
   </tr>
 </table>
@@ -1437,6 +1437,9 @@ nuttx-0.4.8 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  specific directories.
 	* config/olimex-strp711/src/up_nsh.c:  Add an NSH board specific directory for
 	  for the Olimex STR7P11 board.
+	* Fixed build of LM3X6918 using the CodeSourcery Windows native toolchain.  There
+	  were lots of issues with Cygwin paths and Cygwin symbolic links.  These changes
+	  may work with the devarmKIT as well, but that remains untested.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

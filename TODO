@@ -24,7 +24,7 @@ NuttX TODO List (Last updated April 12, 2009)
   (2)  ARM/i.MX (arch/arm/src/imx/)
   (8)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
-  (1)  ARM/LM3S6918 (arch/arm/src/lm3s/)
+  (3)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -547,6 +547,12 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
   Status:      Open
   Priority:    Medium, If the transfer is properly tuned, then there should not
                be any Rx FIFO overruns.
+
+  Description: Dependency generation is currently disabled when a Windows native
+               toolchain is used.  I think that the only issue is that all of the
+               Windows dependencies needed to be quoted in the Make.dep files.
+  Status:      Open
+  Priority:    Low -- unless some dependency-related build issues is discovered.
 
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
