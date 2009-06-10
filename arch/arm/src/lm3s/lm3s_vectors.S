@@ -72,7 +72,6 @@
  ************************************************************************************/
 
 	.globl		__start
-	.globl		dispach_irq
 
 	.syntax		unified
 	.thumb
@@ -334,7 +333,7 @@ lm3s_irqcommon:
 3:
 	ldr	r14, =EXC_RETURN	/* Load the special value */
 	bx	r14			/* And return */
-	.size	handler, .-handlers
+	.size	handlers, .-handlers
 
 /************************************************************************************
  *  Name: up_interruptstack/g_userstack
