@@ -40,7 +40,7 @@ GNU Toolchain Options
 
   NOTE: the CodeSourcery and devkitARM toolchains are Windows native toolchains.
   The NuttX buildroot toolchain is a Cygwin toolchain.  There are several limitations
-  to using a Windows based toolchain in a Cygwin environment.  The two biggestg are:
+  to using a Windows based toolchain in a Cygwin environment.  The two biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -54,11 +54,11 @@ GNU Toolchain Options
      That is because you are building the copy of the file in the "fake" symbolic
      directory.  If you use a Windows toolchain, you should get in the habit of
      making like this:
-       
+
        make clean_context; make CROSSDEV=arm-none-eabi-
 
      An alias in your .bashrc file might make that less painful.
- 
+
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -68,6 +68,7 @@ NuttX buildroot Toolchain
 
   If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
   SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).
+  This GNU toolchain builds and executes in the Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
