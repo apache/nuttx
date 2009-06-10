@@ -157,8 +157,13 @@
 
 /* Endpoint register mask (no toggle fields) */
 
-#define USB_EPR_MASK            (USB_EPR_CTRRX|USB_EPR_SETUP|USB_EPR_TFIELD|\
+#define USB_EPR_NOTOGGLE_MASK   (USB_EPR_CTRRX|USB_EPR_SETUP|USB_EPR_TFIELD|\
                                  USB_EPR_KIND|USB_EPR_CTRTX|USB_EPR_ADDRFIELD)
+
+/* Toggles only */
+
+#define USB_EPR_TXDTOG_MASK     (USB_EPR_TXSTAT_MASK|USB_EPR_NOTOGGLE_MASK)
+#define USB_EPR_RXDTOG_MASK     (USB_EPR_RXSTAT_MASK|USB_EPR_NOTOGGLE_MASK)
 
 /************************************************************************************
  * Public Types
