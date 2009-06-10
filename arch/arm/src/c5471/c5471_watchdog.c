@@ -102,7 +102,7 @@ static int     wdt_ioctl(struct file *filep, int cmd, uint32 arg);
 
 static boolean g_wdtopen;
 
-struct file_operations g_wdtops =
+static const struct file_operations g_wdtops =
 {
   .open  = wdt_open,
   .close = wdt_close,
