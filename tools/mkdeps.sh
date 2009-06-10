@@ -2,7 +2,7 @@
 ############################################################################
 # tools mkdeps.sh
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@
 #
 ############################################################################
 
+WD=
+
 #
 # Usage:
 
@@ -58,6 +60,10 @@ function show_usage ()
   echo "    Do not look in the current directory for the file.  Instead, look in <path> to see"
   echo "    if the file resides there.  --dep-path may be used multiple times to specify"
   echo "    multiple alternative location"
+  echo "  --winpaths <TOPDIR>"
+  echo "    CC generates dependency lists using Windows paths (e.g., C:\blablah\blabla).  This"
+  echo "    switch instructs the script to use 'cygpath' to convert the Windows paths to Cygwin"
+  echo "    paths"
   echo "  --help"
   echo "    Shows this message and exits"
   exit 1
@@ -96,6 +102,8 @@ unset cflags
 unset files
 unset args
 unset altpath
+winpaths=n
+unset topdir
 
 # Accumulate CFLAGS up to "--"
 progname=$0
@@ -117,6 +125,15 @@ while [ ! -z "$1" ]; do
     if [ -z "$args" ]; then
       shift
       altpath="$altpath $1"
+    else
+      args="$args $1"
+    fi
+    ;;
+  --winpaths )
+    if [ -z "$args" ]; then
+      shift
+      winpaths=y
+      topdir=$1
     else
       args="$args $1"
     fi
@@ -144,7 +161,38 @@ if [ -z "$files" ]; then
   exit 2
 fi
 
-for file in $files ; do
-    dodep $file
-done
+# Check if this compiler generates Cygwin/Linux paths or Windows paths
+
+if [ "X${winpaths}" = "Xy" ]; then
+    # We will have to parse and modify each dependency (yech)
+    # Make sure a valid TOPDIR argument was provided
+
+    if [ -z "$topdir" -o ! -d $topdir ]; then
+    	echo "<TOPDIR> not specified or does not exist: $topdir"
+    	show_usage
+    	exit 1
+    fi
+ 
+    # Get the top dir expressed like the Windows GCC would use it, except
+    # with forward slashs
+
+    wtopdir=`cygpath -w ${topdir} | sed -e "s,\\\\\\,/,g"`
+
+    # Then get the dependency and perform conversions on it to make it
+    # palatable to the Cygwin make.  This is probably not sufficiently
+    # general to work on all platforms (like if your disk is not C:).
+
+    for file in $files ; do
+        dodep $file | sed -e "s,\\\,/,g" -e "s,${wtopdir},${topdir},g" \
+                          -e "s,/ ,\\\ ,g" -e "s,c:/,/cygdrive/c/,g" \
+                          -e "s,/$,\\\,g"
+    done
+else
+    # For normal Cygwin/Linux GCC, the dependency paths are in the
+    # correct form and can simply be echoed on stdout
+
+    for file in $files ; do
+        dodep $file
+    done
+fi
 
