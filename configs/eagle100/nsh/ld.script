@@ -53,14 +53,17 @@ SECTIONS
 	.text : {
 		_stext = ABSOLUTE(.);
 		*(.vectors)
-		*(.text)
+		*(.text .text.*)        
 		*(.fixup)
 		*(.gnu.warning)
 		*(.rodata)
-		*(.rodata.str1.1)
+		*(.rodata .rodata.*)        
+		*(.gnu.linkonce.t.*)
 		*(.glue_7)
 		*(.glue_7t)
-		*(.got)			/* Global offset table		*/
+		*(.got)
+		*(.gcc_except_table)
+		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
 	} > flash
 
@@ -70,14 +73,24 @@ SECTIONS
 
 	.data : {
 		_sdata = ABSOLUTE(.);
-		*(.data)
+		*(.data .data.*)
+		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
 	} > sram AT > flash
 
+	.ARM.extab : {
+		*(.ARM.extab*)
+	} >sram
+
+	.ARM.exidx : {
+		*(.ARM.exidx*)
+	} >sram
+
 	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);
-		*(.bss)
+		*(.bss .bss.*)
+		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > sram
