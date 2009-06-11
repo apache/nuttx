@@ -1078,7 +1078,7 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
 
       /* Send the largest number of bytes that we can in this packet */
 
-      buf = privreq->req.buf + privreq->req.xfrd;
+      buf = (ubyte*)privreq->req.buf + privreq->req.xfrd;
       lpc214x_epwrite(privep->epphy, buf, nbytes);
 
       /* Update for the next time through the loop */
@@ -1139,7 +1139,7 @@ static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
 
   /* Receive the next packet */
 
-  buf        = privreq->req.buf + privreq->req.xfrd;
+  buf        = (ubyte*)privreq->req.buf + privreq->req.xfrd;
   nbytesread = lpc214x_epread(privep->epphy, buf, privep->ep.maxpacket);
   if (nbytesread < 0)
     {

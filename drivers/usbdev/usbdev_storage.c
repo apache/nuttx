@@ -800,9 +800,9 @@ static int usbstrg_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *c
               case USB_DESC_TYPE_CONFIG:
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                  ret = usbstrg_mkcfgdesc(ctrlreq->buf, dev->speed, len);
+                  ret = usbstrg_mkcfgdesc((ubyte*)ctrlreq->buf, dev->speed, len);
 #else
-                  ret = usbstrg_mkcfgdesc(ctrlreq->buf);
+                  ret = usbstrg_mkcfgdesc((ubyte*)ctrlreq->buf);
 #endif
                 }
                 break;
