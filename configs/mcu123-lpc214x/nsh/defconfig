@@ -1,7 +1,7 @@
 ############################################################################
 # configs/mcu123-lpc214x/nsh/defconfig
 #
-#   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -577,6 +577,7 @@ CONFIG_EXAMPLES_NSH_MMCSDMINOR=0
 #
 # CONFIG_BOOT_RUNFROMFLASH - Some configurations support XIP
 #   operation from FLASH but must copy initialized .data sections to RAM.
+#   (Must always =n; the LPC214x always runs from FLASH)
 # CONFIG_BOOT_COPYTORAM -  Some configurations boot in FLASH
 #   but copy themselves entirely into RAM for better performance.
 # CONFIG_CUSTOM_STACK - The up_ implementation will handle
@@ -594,7 +595,7 @@ CONFIG_EXAMPLES_NSH_MMCSDMINOR=0
 # CONFIG_HEAP_BASE - The beginning of the heap
 # CONFIG_HEAP_SIZE - The size of the heap
 #
-CONFIG_BOOT_RUNFROMFLASH=y
+CONFIG_BOOT_RUNFROMFLASH=n
 CONFIG_BOOT_COPYTORAM=n
 CONFIG_CUSTOM_STACK=n
 CONFIG_STACK_POINTER=

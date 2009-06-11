@@ -28,7 +28,8 @@ GNU Toolchain Options
 
   All testing has been conducted using the NuttX buildroot toolchain.  However,
   the make system is setup to default to use the devkitARM toolchain.  To use
-  the CodeSource GNU toolchain, you simply need to build the system as follows:
+  the CodeSourcery or devkitARM GNU toolchain, you simply need to build the
+  system as follows:
 
      make                         # Will build for the devkitARM toolchain
      make CROSSDEV=arm-eabi-      # Will build for the devkitARM toolchain

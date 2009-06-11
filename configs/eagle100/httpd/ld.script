@@ -56,7 +56,6 @@ SECTIONS
 		*(.text .text.*)        
 		*(.fixup)
 		*(.gnu.warning)
-		*(.rodata)
 		*(.rodata .rodata.*)        
 		*(.gnu.linkonce.t.*)
 		*(.glue_7)

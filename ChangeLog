@@ -770,3 +770,5 @@
 	* Fixed build of LM3X6918 using the CodeSourcery Windows native toolchain.  There
 	  were lots of issues with Cygwin paths and Cygwin symbolic links.  These changes
 	  may work with the devarmKIT as well, but that remains untested.
+	* The NXP LPC2148 and STR711 targets can now also be built using the CodeSourcery
+	  or devkitARM Windows native toolchains.
