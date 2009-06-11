@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 09, 2009</p>
+      <p>Last Updated: June 11, 2009</p>
     </td>
   </tr>
 </table>
@@ -784,6 +784,14 @@
       support.  A verified NuttShell <a href="NuttShell.html">(NSH)</a>
       configuration is also available.
     </p>
+    <p>
+      <b>Development Environments:</b>
+      1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
+      with Windows native toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux
+      or Cygwin is provided by the NuttX
+      <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
+      package.
+    </p>
   </td>
 </tr>
 <tr>
@@ -807,7 +815,15 @@
       is fully functional with interrupt driven serial console.  An SPI driver is available
       but untested (because the Olimex card slot appears to accept only MMC cards; I have
       only SD cards).  Additional features are needed: USB driver, MMC integration, to name two.
-     </p>
+    </p>
+    <p>
+      <b>Development Environments:</b>
+      1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
+      with Windows native toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux
+      or Cygwin is provided by the NuttX
+      <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
+      package.
+    </p>
   </td>
 </tr>
 <tr>
@@ -876,6 +892,14 @@
         The current port includes timer, serial console, Ethernet, SSI, and microSD support.
         There are working configurations the NuttX OS test, to run the <a href="NuttShell.html">NuttShell
         (NSH)</a>, the NuttX networking test, and the uIP web server.
+    </p>
+    <p>
+      <b>Development Environments:</b>
+      1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
+      with Windows native toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux
+      or Cygwin is provided by the NuttX
+      <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
+      package.
     </p>
    </td>
 </tr>
@@ -1216,11 +1240,29 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
         specific directories in place.
         These copied directories make work a little more complex, but otherwise work well.
       </p>
+      <li>
+        <b>Dependencies</b>
+        NuttX uses the GCC compiler's <code>-M</code> option to generate make dependencies.  These
+        dependencies are retained in files called <code>Make.deps</code> throughout the system.
+        For compilers other than GCC, there is no support for making dependencies in this way.
+        For Windows native GCC compilers, the generated dependencies are windows paths and not
+        directly usable in the Cygwin make.  By default, dependencies are surpressed for these
+        compilers as well.
+      </li>
+      <p><small>
+        NOTE: dependencies are suppress by setting the make variable <code>MKDEPS</code> to point
+        to the do-nothing dependency script, <code>tools/mknulldeps.sh</code>.
+        Dependencies can be enabled for the Windows native GCC compilers by setting
+        <code>MKDEPS</code> to point to <code>$(TOPDIR)/tools/mkdeps.sh --winpaths $(TOPDIR)</code>.
+      </small></p>
     </ul>
     <p>
-      At present, only the Zilog Z16F, z8Encore, and eZ80Acclaim ports use a native Windows toolchain
-      (the Zilog ZDS-II toolchain).
-    </p.
+      At present, only the Zilog Z16F, z8Encore, and eZ80Acclaim ports use a non-GCC native Windows
+      toolchain(the Zilog ZDS-II toolchain).
+      Support for Windows native GCC toolchains (CodeSourcery and devkitARM) is currently implemented
+      for the NXP LPC214x, STMicro STR71x, and Luminary LMS6918 ARM ports.
+      (but could easily be extended to any other GCC-based platform with a small effort).
+    </p>
   </td>
 </tr>
 
@@ -1440,6 +1482,8 @@ nuttx-0.4.8 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Fixed build of LM3X6918 using the CodeSourcery Windows native toolchain.  There
 	  were lots of issues with Cygwin paths and Cygwin symbolic links.  These changes
 	  may work with the devarmKIT as well, but that remains untested.
+	* The NXP LPC2148 and STR711 targets can now also be built using the CodeSourcery
+	  or devkitARM Windows native toolchains.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
