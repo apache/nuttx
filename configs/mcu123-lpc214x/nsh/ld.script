@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/mcu123-lpc214x/nsh/ld.script
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,59 +33,75 @@
  *
  ****************************************************************************/
 
+/* FLASH:
+ *   The lpc2148 has 512Kb of non-volatile memory beginning at address
+ *   0x00000000.  The OS entry point is via the reset vector at address
+ *   0x00000000 (default MEMMAP mode assumed)
+ *
+ * SRAM:
+ *   The lpc2148 has 32Kb of on-chip static RAM beginning at address
+ *   0x40000000.  The .data section will be relocated from _eronly
+ *   to _sdata at boot time.
+ */
+
 MEMORY
 {
-	flash	(rx) : ORIGIN = 0, LENGTH = 500K
-	ram	(rw) : ORIGIN = 0x40000000, LENGTH = 32K - 32
+	flash (rx) : ORIGIN = 0x00000000, LENGTH = 500K
+	sram  (rw) : ORIGIN = 0x40000000, LENGTH = 32K - 32
 }
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	/* The lpc2148 has 512Kb of non-volatile memory beginning at address
-	 * 0x00000000.  The OS entry point is via the reset vector at address
-	 * 0x00000000 (default MEMMAP mode assumed)
-	 */
-
 	.text : {
 		_stext = ABSOLUTE(.);
-		*(.text)
+		*(.vectors)
+		*(.text .text.*)
 		*(.fixup)
 		*(.gnu.warning)
-		*(.rodata)
-		*(.rodata.str1.4)
+		*(.rodata .rodata.*)
+		*(.gnu.linkonce.t.*)
 		*(.glue_7)
 		*(.glue_7t)
-		*(.got)			/* Global offset table		*/
+		*(.got)
+		*(.gcc_except_table)
+		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
 	} > flash
-	_eronly = ABSOLUTE(.);		/* This is where the .data section
-					 * is relocated for execution out
-					 * FLASH */
 
-	/* The lpc2148 has 32Kb of on-chip static RAM beginning at address
-	 * 0x40000000.  The .data section will be relocated from _eronly
+	/* This is where the .data section is relocated for execution out
+	 * FLASH.  The .data section will be relocated from _eronly
 	 * to _sdata at boot time.
 	 */
 
+	_eronly = ABSOLUTE(.);	
+	
 	.data : {
 		_sdata = ABSOLUTE(.);
-		*(.data)
+		*(.data .data.*)
+		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} >ram AT>flash
+	} > sram AT > flash
 
-	. = ALIGN(32 / 8);
-	.bss : {			/* BSS				*/
+	.ARM.extab : {
+		*(.ARM.extab*)
+	} >sram
+
+	.ARM.exidx : {
+		*(.ARM.exidx*)
+	} >sram
+
+	.bss : {
 		_sbss = ABSOLUTE(.);
-		*(.bss)
+		*(.bss .bss.*)
+		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	}
+	} > sram
 
-	. = ALIGN(32 / 8);
-					/* Stabs debugging sections.	*/
+	/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

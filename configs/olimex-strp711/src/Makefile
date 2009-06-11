@@ -36,7 +36,14 @@
 -include $(TOPDIR)/Make.defs
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm -I$(TOPDIR)/sched
+ifeq ($(WINTOOL),y)
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/arm}" \
+  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/sched}"
+else
+  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm -I$(TOPDIR)/sched
+endif
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
