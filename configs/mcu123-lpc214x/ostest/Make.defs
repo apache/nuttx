@@ -62,23 +62,12 @@ OBJCOPYARGS		= -R .note -R .note.gnu.build-id -R .comment
 endif
 endif
 
-ifeq ("${CONFIG_DEBUG}","y")
-  ARCHOPTIMIZATION	= -g
-else
-  ARCHOPTIMIZATION	= -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
-endif
-
-ifeq ($(ARCHCCMAJOR),4)
-  ARCHCPUFLAGS		= -mcpu=arm7tdmi -mfloat-abi=soft
-else
-  ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float
-endif
-
 ifeq ($(CROSSDEV),arm-elf-)
   MKDEP			= $(TOPDIR)/tools/mkdeps.sh
   ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES	= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
   ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
+  MAXOPTIMIZATION	= -Os
 else
   WINTOOL		= y
   DIRLINK		= $(TOPDIR)/tools/winlink.sh
@@ -87,6 +76,19 @@ else
   ARCHINCLUDES		= -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES	= -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT		= -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script}"
+  MAXOPTIMIZATION	= -O2
+endif
+
+ifeq ("${CONFIG_DEBUG}","y")
+  ARCHOPTIMIZATION	= -g
+else
+  ARCHOPTIMIZATION	= $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+endif
+
+ifeq ($(ARCHCCMAJOR),4)
+  ARCHCPUFLAGS		= -mcpu=arm7tdmi -mfloat-abi=soft
+else
+  ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float
 endif
 
 ARCHCFLAGS		= -fno-builtin

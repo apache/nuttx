@@ -93,7 +93,9 @@ SECTIONS
 	} >sram
 
 	.ARM.exidx : {
+		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
+		__exidx_end = ABSOLUTE(.);
 	} >sram
 
 	.bss : {

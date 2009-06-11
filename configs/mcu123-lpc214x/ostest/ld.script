@@ -46,8 +46,8 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x00000000, LENGTH = 500K
-    sram  (rw) : ORIGIN = 0x40000000, LENGTH = 32K - 32
+	flash (rx) : ORIGIN = 0x00000000, LENGTH = 500K
+	sram  (rw) : ORIGIN = 0x40000000, LENGTH = 32K - 32
 }
 
 OUTPUT_ARCH(arm)
@@ -90,7 +90,9 @@ SECTIONS
 	} >sram
 
 	.ARM.exidx : {
+		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
+		__exidx_end = ABSOLUTE(.);
 	} >sram
 
 	.bss : {
