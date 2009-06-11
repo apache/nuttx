@@ -114,8 +114,8 @@ EXTERN int       unsetenv(const char *name);
 
 /* Process exit functions */
 
-EXTERN void      exit(int status);
-EXTERN void      abort(void);
+EXTERN void      exit(int status) noreturn_function;
+EXTERN void      abort(void) noreturn_function;
 EXTERN int       atexit(void (*func)(void));
 
 /* String to binary conversions */

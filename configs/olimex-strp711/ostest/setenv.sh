@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/olimex-strp711/ostest/setenv.sh
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,11 @@ if [ "$(basename $0)" = "setenv.sh" ] ; then
   exit 1
 fi
 
-if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
 WD=`pwd`
-export BUILDROOT_BIN=${WD}/../buildroot/build_arm_nofpu/staging_dir/bin
-export STR41XSCRIPTS=$WD/configs/olimex-strp711/scripts
-export PATH=${BUILDROOT_BIN}:${STR41XSCRIPTS}:/sbin:/usr/sbin:${PATH_ORIG}
+export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+export STR41XSCRIPTS="$WD/configs/olimex-strp711/scripts"
+export PATH="${BUILDROOT_BIN}:${STR41XSCRIPTS}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"

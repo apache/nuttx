@@ -37,10 +37,10 @@ if [ "$(basename $0)" = "setenv.sh" ] ; then
   exit 1
 fi
 
-if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
 WD=`pwd`
-export BUILDROOT_BIN=${WD}/../buildroot/build_arm_nofpu/staging_dir/bin
-export PATH=${BUILDROOT_BIN}:/sbin:/usr/sbin:${PATH_ORIG}
+export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+export PATH="${BUILDROOT_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"

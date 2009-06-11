@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_driver.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ static int     bch_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
  * Public Data
  ****************************************************************************/
 
-static const struct file_operations bch_fops =
+const struct file_operations bch_fops =
 {
   bch_open,  /* open */
   bch_close, /* close */
