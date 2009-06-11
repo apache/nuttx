@@ -1127,7 +1127,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Linux + GNU make + GCC/binutils</b>
+    <b>Linux + GNU <code>make</code> + GCC/binutils</b>
   </td>
 </tr>
 <tr>
@@ -1151,7 +1151,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Linux + GNU make + SDCC</b>
+    <b>Linux + GNU <code>make</code> + SDCC</b>
   </td>
 </tr>
 <tr>
@@ -1170,7 +1170,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Cygwin + GNU make + GCC/binutils</b>
+    <b>Cygwin + GNU <code>make</code> + GCC/binutils</b>
   </td>
 </tr>
 <tr>
@@ -1189,7 +1189,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Cygwin + GNU make + SDCC</b>
+    <b>Cygwin + GNU <code>make</code> + SDCC</b>
   </td>
 </tr>
 <tr>
@@ -1204,7 +1204,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Cygwin + GNU make + Windows Native Toolchain</b>
+    <b>Cygwin + GNU <code>make</code> + Windows Native Toolchain</b>
   </td>
 </tr>
 <tr>
@@ -1257,6 +1257,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
       </small></p>
     </ul>
     <p>
+      <b>Supported Windows Native Toolchains</b>.
       At present, only the Zilog Z16F, z8Encore, and eZ80Acclaim ports use a non-GCC native Windows
       toolchain(the Zilog ZDS-II toolchain).
       Support for Windows native GCC toolchains (CodeSourcery and devkitARM) is currently implemented
@@ -1269,21 +1270,31 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Other Environments?</b>
+    <b>Other Environments?
+    Windows Native <code>make</code> + Windows Native Toolchain?</b>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
     <p>
+      <b>Environment Dependencies</b>.
       The primary environmental dependency of NuttX are (1) GNU make,
-      (2) bash scripting, and (3) Linux utilities (such as sed).
+      (2) bash scripting, and (3) Linux utilities (such as cat, sed, etc.).
       If you have other platforms that support GNU make or make
       utilities that are compatible with GNU make, then it is very
       likely that NuttX would work in that environment as well (with some
       porting effort). If GNU make is not supported, then some significant
       modification of the Make system would be required.
     </p>
+    <p>
+     <b>GNUWin32</b>.
+      For example, with suitable make system changes, it should be possible to
+      use native GNU tools (such as those from
+      <a href="http://sourceforge.net/projects/gnuwin32/">GNUWin32</a>)
+      to build NuttX.
+      However, that environment has not been used as of this writing.
+   </p>
   </td>
 </tr>
 </table></center>
