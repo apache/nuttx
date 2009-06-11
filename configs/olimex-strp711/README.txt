@@ -120,9 +120,13 @@ GNU Toolchain Options
      If you have problems with the dependency build (for example, if you are not
      building on C:), then you may need to modify tools/mkdeps.sh
 
-  NOTE: The CodeSourcery toolchain (2009q1) may not work with default optimization
+  NOTE 1: The CodeSourcery toolchain (2009q1) may not work with default optimization
   level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
   -Os.
+
+  NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
+  the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
+  path or will get the wrong version of make.
 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
