@@ -190,7 +190,7 @@
 struct usbdev_ep_s;
 struct usbdev_req_s
 {
-  char   *buf;     /* Call: Buffer used for data; Return: Unchanged */
+  ubyte  *buf;     /* Call: Buffer used for data; Return: Unchanged */
   ubyte   flags;   /* See USBDEV_REQFLAGS_* definitions */
   uint16  len;     /* Call: Total length of data in buf; Return: Unchanged */
   uint16  xfrd;    /* Call: zero; Return: Bytes transferred so far */

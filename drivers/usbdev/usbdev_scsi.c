@@ -1665,12 +1665,12 @@ static int usbstrg_cmdparsestate(FAR struct usbstrg_dev_s *priv)
       return -ENOMEM;
     }
   DEBUGASSERT(privreq->req && privreq->req->buf);
-  buf               = (ubyte*)privreq->req->buf;
+  buf                = privreq->req->buf;
 
   /* Assume that no errors will be encountered */
 
-  priv->phaseerror  = 0;
-  priv->shortpacket = 0;
+  priv->phaseerror   = 0;
+  priv->shortpacket  = 0;
 
   /* No data is buffered */
 
@@ -2018,7 +2018,7 @@ static int usbstrg_cmdreadstate(FAR struct usbstrg_dev_s *priv)
        */
 
       src    = &priv->iobuffer[lun->sectorsize - priv->nsectbytes];
-      dest   = (ubyte*)&req->buf[priv->nreqbytes];
+      dest   = &req->buf[priv->nreqbytes];
 
       nbytes = min(CONFIG_USBSTRG_BULKINREQLEN - priv->nreqbytes, priv->nsectbytes);
 
@@ -2150,7 +2150,7 @@ static int usbstrg_cmdwritestate(FAR struct usbstrg_dev_s *priv)
        {
          /* Copy the data received in the read request into the sector I/O buffer */
 
-         src  = (ubyte*)&req->buf[xfrd - priv->nreqbytes];
+         src  = &req->buf[xfrd - priv->nreqbytes];
          dest = &priv->iobuffer[priv->nsectbytes];
 
          nbytes = min(lun->sectorsize - priv->nsectbytes, priv->nreqbytes);
