@@ -752,7 +752,7 @@
 	* fs/fs_mount.c: Corrected error handling that could cause a deadlock on certain
 	  mount() failures.
 
-0.4.8 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.8 2009-06-13 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* lib/lib_*stream.c: Extend internal stream logic to support incoming streams.
 	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
@@ -772,3 +772,6 @@
 	  may work with the devarmKIT as well, but that remains untested.
 	* The NXP LPC2148 and STR711 targets can now also be built using the CodeSourcery
 	  or devkitARM Windows native toolchains.
+
+0.4.8 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
