@@ -14,7 +14,7 @@ NuttX TODO List (Last updated April 12, 2009)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (0)  Documentation (Documentation/)
-  (5)  Build system / Toolchains
+  (6)  Build system / Toolchains
   (2)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
   (1)  Linux/Cywgin simulation (arch/sim)
@@ -354,6 +354,12 @@ o Build system
   Status:      Open
   Priority:    Medium-low
 
+  Description: At present, NuttX builds only under Linux or Cygwin.
+               Investigate the possibility of a native Windows build using
+               something like the GNUWin32 tools (coreutils+make+grep+sed+uname).
+  Status:      Open
+  Priority:    Low
+
 o NuttShell (NSH) (examples/nsh)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -406,17 +412,17 @@ o Linux/Cywgin simulation (arch/sim)
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
 
-  Description: ARM interrupt handling performance could be improved in many
-               ways.  One easy way is to use a pointer to the context save
+  Description: ARM interrupt handling performance could be improved in some
+               ways. One easy way is to use a pointer to the context save
                area in current_regs instead of using up_copystate so much.
-               see handling of 'current_regs" in arch/sh/src/common/* for
+               see handling of 'current_regs" in arch/arm/src/cortexm3/* for
                examples of how this might be done.
-  Status:      Open
+                Status:      Open
   Priority:    Low
 
-  Description: The ARM interrupt handler restores all regisers upon return.
-               This could be improved as well:  If there is not context
-               switch, then the static registers need not be restored
+  Description: The ARM and Cortex-M3 interrupt handlers restores all regisers
+               upon return. This could be improved as well:  If there is no
+               context switch, then the static registers need not be restored
                because they will not be modified by the called C code.
                (see arch/sh/src/sh1/sh1_vector.S for example)
   Status:      Open
@@ -520,9 +526,9 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
 o ARM/STR71x (arch/arm/src/str71x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: Add SPI driver and integrate with MMC/SD support. This effort is stalled
+  Description: Verify SPI driver and integrate with MMC support. This effort is stalled
                at the moment because the slot on the Olimex board only accepts MMC card;
-               I have not MMC cards, only SD cards which won't fit into the slot.
+               I have no MMC cards, only SD cards which won't fit into the slot.
   Status:      Open
   Priority:    Medium
 
