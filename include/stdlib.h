@@ -120,9 +120,19 @@ EXTERN int       atexit(void (*func)(void));
 
 /* String to binary conversions */
 
-#define atoi(nptr) strtol((nptr), (FAR char**)NULL, 10)
 EXTERN long      strtol(const char *, char **, int);
-EXTERN double_t  strtod(const char *, char **);
+EXTERN unsigned long strtoul(const char *, char **, int);
+#ifdef CONFIG_HAVE_LONG_LONG
+EXTERN long long strtoll(const char *, char **, int);
+EXTERN unsigned long long strtoull(const char *, char **, int);
+#endif
+EXTERN double_t   strtod(const char *, char **);
+
+#define atoi(nptr)  strtol((nptr), NULL, 10);
+#define atol(nptr)  strtol((nptr), NULL, 10);
+#ifdef CONFIG_HAVE_LONG_LONG
+#define atoll(nptr) strtoll((nptr), NULL, 10);
+#endif
 
 /* Memory Management */
 

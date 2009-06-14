@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib_strtol.c
+ * lib/lib_isbasedigit.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -51,51 +52,52 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: strtol
+ * Name: lib_isbasedigit
  *
  * Description:
- *   The  strtol() function  converts  the initial part of the string in
- *   nptr to a long integer value according to the given base, which must be
- *   between 2 and 36 inclusive, or be the special value 0.
- *
- * Warning: does not check for integer overflow!
+ *   Given an ASCII character, ch, and a base (1-36) do two
+ *   things:  1) Determine if ch is a valid charcter, and 2)
+ *   convert ch to its binary value.
  *
  ****************************************************************************/
- 
-long strtol(const char *nptr, char **endptr, int base)
+
+boolean lib_isbasedigit(int ch, int base, int *value)
 {
-  unsigned long accum = 0;
-  boolean negate = FALSE;
+  boolean ret = FALSE;
+  int    tmp = 0;
 
-  if (nptr)
+  if (base <= 10)
     {
-      /* Skip leading spaces */
-
-      lib_skipspace(&nptr);
-
-      /* Check for leading + or - */
-
-      if (*nptr == '-')
+      if (ch >= '0' && ch <= base + '0' - 1)
         {
-          negate = TRUE;
-          nptr++;
-        }
-      else if (*nptr == '+')
-        {
-          nptr++;
-        }
-
-      /* Get the unsigned value */
-
-      accum = strtoul(nptr, endptr, base);
-
-      /* Correct the sign of the result */
-
-      if (negate)
-        {
-          return -(long)accum;
+          tmp = ch - '0';
+          ret = TRUE;
         }
     }
-  return (long)accum;
+  else if (base <= 36)
+    {
+      if (ch >= '0' && ch <= '9')
+        {
+          tmp = ch - '0';
+          ret =TRUE;
+        }
+      else if (ch >= 'a' && ch <= 'a' + base - 11)
+        {
+          tmp = ch - 'a' + 10;
+          ret = TRUE;
+        }
+      else if (ch >= 'A' && ch <= 'A' + base - 11)
+        {
+          tmp = ch - 'A' + 10;
+          ret = TRUE;
+        }
+    }
+
+  if (value)
+    {
+      *value = tmp;
+    }
+  return ret;
 }
+
 

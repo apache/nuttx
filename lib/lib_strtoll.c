@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib_strtol.c
+ * lib_strtoll.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 #include <stdlib.h>
 #include "lib_internal.h"
 
+#ifdef CONFIG_HAVE_LONG_LONG
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -51,20 +53,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: strtol
+ * Name: strtoll
  *
  * Description:
  *   The  strtol() function  converts  the initial part of the string in
- *   nptr to a long integer value according to the given base, which must be
- *   between 2 and 36 inclusive, or be the special value 0.
+ *   nptr to a long long integer value according to the given base, which
+ *   must be between 2 and 36 inclusive, or be the special value 0.
  *
  * Warning: does not check for integer overflow!
  *
  ****************************************************************************/
  
-long strtol(const char *nptr, char **endptr, int base)
+long long strtoll(const char *nptr, char **endptr, int base)
 {
-  unsigned long accum = 0;
+  unsigned long long accum = 0;
   boolean negate = FALSE;
 
   if (nptr)
@@ -87,15 +89,17 @@ long strtol(const char *nptr, char **endptr, int base)
 
       /* Get the unsigned value */
 
-      accum = strtoul(nptr, endptr, base);
+      accum = strtoull(nptr, endptr, base);
 
       /* Correct the sign of the result */
 
       if (negate)
         {
-          return -(long)accum;
+          return -(long long)accum;
         }
     }
-  return (long)accum;
+  return (long long)accum;
 }
+
+#endif
 

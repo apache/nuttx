@@ -775,3 +775,5 @@
 
 0.4.8 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Add strtoll() and strtoull(); Add macros for atol() and atoll().
+

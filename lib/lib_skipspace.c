@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib_strtol.c
+ * lib/lib_skipspace.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -51,51 +52,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: strtol
+ * Name: lib_skipspace
  *
  * Description:
- *   The  strtol() function  converts  the initial part of the string in
- *   nptr to a long integer value according to the given base, which must be
- *   between 2 and 36 inclusive, or be the special value 0.
- *
- * Warning: does not check for integer overflow!
+ *   Skip over leading whitespace
  *
  ****************************************************************************/
- 
-long strtol(const char *nptr, char **endptr, int base)
+
+void lib_skipspace(const char **pptr)
 {
-  unsigned long accum = 0;
-  boolean negate = FALSE;
-
-  if (nptr)
-    {
-      /* Skip leading spaces */
-
-      lib_skipspace(&nptr);
-
-      /* Check for leading + or - */
-
-      if (*nptr == '-')
-        {
-          negate = TRUE;
-          nptr++;
-        }
-      else if (*nptr == '+')
-        {
-          nptr++;
-        }
-
-      /* Get the unsigned value */
-
-      accum = strtoul(nptr, endptr, base);
-
-      /* Correct the sign of the result */
-
-      if (negate)
-        {
-          return -(long)accum;
-        }
-    }
-  return (long)accum;
+   const char *ptr = *pptr;
+   while (isspace(*ptr)) ptr++;
+   *pptr = ptr;
 }
+
 

@@ -131,4 +131,16 @@ extern void lib_give_semaphore(FAR struct file_struct *stream);
 
 extern int lib_getbase(const char *nptr, const char **endptr);
 
+/* Defined in lib_skipspace.c */
+
+extern void lib_skipspace(const char **pptr);
+
+/* Defined in lib_isbasedigit.c */
+
+extern boolean lib_isbasedigit(int ch, int base, int *value);
+
+/* Defined in lib_checkbase.c */
+
+extern int lib_checkbase(int base, const char **pptr);
+
 #endif /* __LIB_INTERNAL_H */

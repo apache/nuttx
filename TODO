@@ -18,7 +18,7 @@ NuttX TODO List (Last updated April 12, 2009)
   (2)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
   (1)  Linux/Cywgin simulation (arch/sim)
-  (2)  ARM (arch/arm/)
+  (3)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
@@ -425,6 +425,13 @@ o ARM (arch/arm/)
                context switch, then the static registers need not be restored
                because they will not be modified by the called C code.
                (see arch/sh/src/sh1/sh1_vector.S for example)
+  Status:      Open
+  Priority:    Low
+
+  Description: The Cortex-M3 user context swich logic uses SVCall instructions.
+               This user context switching time could be improved by eliminating
+               the SVCalls and developing assembly language implementations
+               of the context save and restore logic.
   Status:      Open
   Priority:    Low
 
