@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpbacklog.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  *
  * Description:
  *   Called from the listen() logic to setup the backlog as specified in the
- *   the listen arguments *.
+ *   the listen arguments.
  *
  * Assumptions:
  *   Called from normal user code. Interrupts may be disabled.
@@ -213,7 +213,7 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
  *
  * Description:
  *  Called uip_listen when a new connection is made with a listener socket
- *  but when there is not accept() in place to receive the connection.  This
+ *  but when there is no accept() in place to receive the connection.  This
  *  function adds the new connection to the backlog.
  *
  * Assumptions:

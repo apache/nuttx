@@ -342,6 +342,30 @@ EXTERN int files_addreflist(FAR struct filelist *list);
 EXTERN int files_releaselist(FAR struct filelist *list);
 EXTERN int files_dup(FAR struct file *filep1, FAR struct file *filep2);
 
+/* fs_filedup.c **************************************************************/
+
+/* This alternative naming is used when dup could operate on both file and
+ * socket descritors to avoid drawing unused socket support into the link.
+ */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+EXTERN int file_dup(int fd);
+#else
+#  defile file_dup(fd)        dup(fd)
+#endif
+
+/* fs_filedup2.c *************************************************************/
+
+/* This alternative naming is used when dup could operate on both file and
+ * socket descritors to avoid drawing unused socket support into the link.
+ */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+EXTERN int file_dup2(int fd1, int fd2);
+#else
+#  defile file_dup2(fd1, fd2) dup2(fd1, fd2)
+#endif
+
 /* fs_openblockdriver.c ******************************************************/
 
 EXTERN int open_blockdriver(FAR const char *pathname, int mountflags,

@@ -271,6 +271,8 @@ void uip_udpfree(struct uip_udp_conn *conn)
    * is protected by a semaphore (that behaves like a mutex).
    */
 
+  DEBUGASSERT(conn->crefs == 0);
+
   _uip_semtake(&g_free_sem);
   conn->lport = 0;
   dq_addlast(&conn->node, &g_free_udp_connections);

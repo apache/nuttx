@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_dup.c
+ * net/net_dup2.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,70 +40,87 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <unistd.h>
+#include <sys/socket.h>
 #include <sched.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/fs.h>
-#include "fs_internal.h"
+#include "net_internal.h"
 
-/* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup is being
- * performed.
- */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dup
+ * Function: net_dup2
  *
  * Description:
- *   Clone a file or socket descriptor to an arbitray descriptor number
+ *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   descriptors are implemented, then this is called by dup2() for the case
+ *   of socket file descriptors.  If file descriptors are not implemented,
+ *   then this function IS dup2().
  *
  ****************************************************************************/
 
-int dup(int fildes)
+#if CONFIG_NFILE_DESCRIPTOR > 0
+int net_dup2(int sockfd1, int sockfd2)
+#else
+int dup2(int sockfd1, int sockfd2)
+#endif
 {
-  /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor. */
+  FAR struct socket *psock1;
+  FAR struct socket *psock2;
+  int err;
+  int ret;
 
-  if ((unsigned int)fildes >= CONFIG_NFILE_DESCRIPTORS)
+  /* Lock the scheduler throughout the following */
+
+  sched_lock();
+
+  /* Get the socket structures underly both descriptors */
+
+  psock1 = sockfd_socket(sockfd1);
+  psock2 = sockfd_socket(sockfd2);
+
+  /* Verify that the sockfd1 and sockfd2 both refer to valid socket
+   * descriptors and that sockfd2 corresponds to allocated socket
+   */
+
+  if (!psock1 || !psock2 || psock1->s_crefs <= 0)
     {
-      /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
-
-      if ((unsigned int)fildes < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          /* Yes.. dup the socket descriptor */
-
-          return net_dup(fildes);
-        }
-      else
-        {
-          /* No.. then it is a bad descriptor number */
-
-          errno = EBADF;
-          return ERROR;
-        }
+      err = EBADF;
+      goto errout;
     }
-  else
+
+  /* If sockfd2 also valid, allocated socket, then we will have to
+   * close it!
+   */
+
+  if (psock2->s_crefs > 0)
     {
-      /* Its a valid file descriptor.. dup the file descriptor */
-
-      return file_dup(fildes);
+      net_close(sockfd2);
     }
+
+  /* Duplicate the socket state */
+
+  ret = net_clone(psock1, psock2);
+  if (ret < 0)
+    {
+      err = -ret;
+      goto errout;
+    }
+
+  sched_unlock();
+  return OK;
+
+errout:
+  sched_unlock();
+  errno = err;
+  return ERROR;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 ... */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
+
 

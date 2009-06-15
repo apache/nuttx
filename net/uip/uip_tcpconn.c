@@ -294,6 +294,7 @@ void uip_tcpfree(struct uip_conn *conn)
    * operation.
    */
 
+  DEBUGASSERT(conn->crefs == 0);
   flags = irqsave();
 
   /* UIP_ALLOCATED means that that the connection is not in the active list

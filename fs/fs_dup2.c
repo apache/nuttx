@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_dup.c
+ * fs/fs_dup2.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,12 +43,10 @@
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
-
-#include <nuttx/fs.h>
 #include "fs_internal.h"
 
 /* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup is being
+ * in that case, this function descriminates which type of dup2 is being
  * performed.
  */
 
@@ -67,27 +65,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dup
+ * Name: dup2
  *
  * Description:
- *   Clone a file or socket descriptor to an arbitray descriptor number
+ *   Clone a file descriptor or socket descriptor to a specific descriptor
+ *   number
  *
  ****************************************************************************/
 
-int dup(int fildes)
+int dup2(int fildes1, int fildes2)
 {
   /* Check the range of the descriptor to see if we got a file or a socket
    * descriptor. */
 
-  if ((unsigned int)fildes >= CONFIG_NFILE_DESCRIPTORS)
+  if ((unsigned int)fildes1 >= CONFIG_NFILE_DESCRIPTORS)
     {
       /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
 
-      if ((unsigned int)fildes < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fildes1 < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor */
 
-          return net_dup(fildes);
+          return net_dup2(fildes1, fildes2);
         }
       else
         {
@@ -101,7 +100,7 @@ int dup(int fildes)
     {
       /* Its a valid file descriptor.. dup the file descriptor */
 
-      return file_dup(fildes);
+      return file_dup2(fildes1, fildes2);
     }
 }
 

@@ -77,6 +77,7 @@ struct uip_udp_conn
   uint16 lport;           /* The local port number in network byte order */
   uint16 rport;           /* The remote port number in network byte order */
   uint8  ttl;             /* Default time-to-live */
+  uint8  crefs;           /* Reference counts on this instance */
 
   /* Defines the list of UDP callbacks */
 

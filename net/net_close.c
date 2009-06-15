@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_close.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@ struct tcp_close_s
 {
   FAR struct socket         *cl_psock; /* Reference to the TCP socket */
   FAR struct uip_callback_s *cl_cb;    /* Reference to TCP callback instance */
-  sem_t                      cl_sem;   /* Semaphore signals disconnect completion */
+  sem_t                       cl_sem;   /* Semaphore signals disconnect completion */
 };
 #endif
 
@@ -222,33 +222,75 @@ int net_close(int sockfd)
       goto errout;
     }
 
-  /* Perform uIP side of the close depending on the protocol type */
+  /* We perform the uIP close operation only if this is the last count on the socket.
+   * (actually, I think the socket crefs only takes the values 0 and 1 right now).
+   */
 
-  switch (psock->s_type)
+  if (psock->s_crefs <= 1)
     {
-#ifdef CONFIG_NET_TCP
-      case SOCK_STREAM:
+      /* Perform uIP side of the close depending on the protocol type */
+
+      switch (psock->s_type)
         {
-          struct uip_conn *conn = psock->s_conn;
-          uip_unlisten(conn);          /* No longer accepting connections */
-          netclose_disconnect(psock);  /* Break any current connections */
-          uip_tcpfree(conn);           /* Free uIP resources */
-        }
-        break;
+#ifdef CONFIG_NET_TCP
+          case SOCK_STREAM:
+            {
+              struct uip_conn *conn = psock->s_conn;
+
+              /* Is this the last reference to the connection structure (there
+               * could be more if the socket was dup'ed.
+               */
+
+              if (conn->crefs <= 1)
+                {
+                  /* Yes... free the connection structure */
+
+                 uip_unlisten(conn);          /* No longer accepting connections */
+                  netclose_disconnect(psock);  /* Break any current connections */
+                  uip_tcpfree(conn);           /* Free uIP resources */
+                }
+              else
+                {
+                  /* No.. Just decrement the reference count */
+
+                  conn->crefs--;
+                }
+            }
+            break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-      case SOCK_DGRAM:
-        uip_udpfree(psock->s_conn);    /* Free uIP resources */
-        break;
+          case SOCK_DGRAM:
+            {
+              struct uip_udp_conn *conn = psock->s_conn;
+
+              /* Is this the last reference to the connection structure (there
+               * could be more if the socket was dup'ed.
+               */
+
+              if (conn->crefs <= 1)
+                {
+                  /* Yes... free the connection structure */
+
+                  uip_udpfree(psock->s_conn);    /* Free uIP resources */
+                }
+              else
+                {
+                  /* No.. Just decrement the reference count */
+
+                  conn->crefs--;
+                }
+            }
+            break;
 #endif
 
-      default:
-        err = EBADF;
-        goto errout;
+          default:
+            err = EBADF;
+            goto errout;
+        }
     }
 
-  /* Then release the socket structure containing the connection */
+  /* Then release our reference on the socket structure containing the connection */
 
   sockfd_release(sockfd);
   return OK;

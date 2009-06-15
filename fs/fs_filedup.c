@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_dup.c
+ * fs/fs_filedup.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -47,16 +47,15 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-/* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup is being
- * performed.
- */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#define DUP_ISOPEN(fd, list) \
+  ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS && \
+   list->fl_files[fd].f_inode != NULL)
 
 /****************************************************************************
  * Private Functions
@@ -67,43 +66,59 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dup
+ * Name: file_dup OR dup
  *
  * Description:
- *   Clone a file or socket descriptor to an arbitray descriptor number
+ *   Clone a file descriptor to an arbitray descriptor number.  If socket
+ *   descriptors are implemented, then this is called by dup() for the case
+ *   of file descriptors.  If socket descriptors are not implemented, then
+ *   this function IS dup().
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+int file_dup(int fildes)
+#else
 int dup(int fildes)
+#endif
 {
-  /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor. */
+  FAR struct filelist *list;
+  int fildes2;
 
-  if ((unsigned int)fildes >= CONFIG_NFILE_DESCRIPTORS)
+  /* Get the thread-specific file list */
+
+  list = sched_getfiles();
+  if (!list)
     {
-      /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
-
-      if ((unsigned int)fildes < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          /* Yes.. dup the socket descriptor */
-
-          return net_dup(fildes);
-        }
-      else
-        {
-          /* No.. then it is a bad descriptor number */
-
-          errno = EBADF;
-          return ERROR;
-        }
+      errno = EMFILE;
+      return ERROR;
     }
-  else
+
+ /* Verify that fildes is a valid, open file descriptor */
+
+  if (!DUP_ISOPEN(fildes, list))
     {
-      /* Its a valid file descriptor.. dup the file descriptor */
-
-      return file_dup(fildes);
+      errno = EBADF;
+      return ERROR;
     }
+
+  /* Increment the reference count on the contained inode */
+
+  inode_addref(list->fl_files[fildes].f_inode);
+
+  /* Then allocate a new file descriptor for the inode */
+
+  fildes2 = files_allocate(list->fl_files[fildes].f_inode,
+                           list->fl_files[fildes].f_oflags,
+                           list->fl_files[fildes].f_pos);
+  if (fildes2 < 0)
+    {
+      errno = EMFILE;
+       inode_release(list->fl_files[fildes].f_inode);
+      return ERROR;
+    }
+  return fildes2;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 ... */
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 

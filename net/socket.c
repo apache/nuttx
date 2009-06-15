@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "net_internal.h"
@@ -155,13 +156,43 @@ int socket(int domain, int type, int protocol)
     {
 #ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
-        psock->s_conn = uip_tcpalloc();
+        {
+          /* Allocate the TCP connection structure and save in the new
+           * socket instance.
+           */
+
+          struct uip_conn *conn = uip_tcpalloc();
+          psock->s_conn = conn;
+
+          /* Set the reference count on the connection structure.  This
+           * reference count will be increment only if the socket is
+           * dup'ed
+           */
+
+          DEBUGASSERT(conn->crefs == 0);
+          conn->crefs = 1;
+        }
         break;
 #endif
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
-        psock->s_conn = uip_udpalloc();
+        {
+          /* Allocate the UDP connection structure and save in the new
+           * socket instance.
+           */
+
+          struct uip_udp_conn *conn = uip_udpalloc();
+          psock->s_conn = conn;
+
+          /* Set the reference count on the connection structure.  This
+           * reference count will be increment only if the socket is
+           * dup'ed
+           */
+
+          DEBUGASSERT(conn->crefs == 0);
+          conn->crefs = 1;
+        }
         break;
 #endif
 

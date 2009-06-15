@@ -50,17 +50,16 @@
 static int stdinstream_getc(FAR struct lib_instream_s *this)
 {
   FAR struct lib_stdinstream_s *sthis = (FAR struct lib_stdinstream_s *)this;
-  int ret;
-
   if (this)
     {
-      ret = getc(sthis->stream);
+      int ret = getc(sthis->stream);
       if (ret != EOF)
         {
           this->nget++;
         }
+      return ret;
     }
-  return ret;
+  return EOF;
 }
 
 /****************************************************************************

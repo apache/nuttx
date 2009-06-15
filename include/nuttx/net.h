@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/net.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -138,14 +138,14 @@ EXTERN FAR struct socketlist *net_alloclist(void);
 EXTERN int net_addreflist(FAR struct socketlist *list);
 EXTERN int net_releaselist(FAR struct socketlist *list);
 
-/* net-close.c ***************************************************************/
+/* net_close.c ***************************************************************/
 /* The standard close() operation redirects operations on socket descriptors
  * to this function.
  */
 
 EXTERN int net_close(int sockfd);
 
-/* net-ioctl.c ***************************************************************/
+/* net_ioctl.c ***************************************************************/
 /* The standard ioctl() operation redirects operations on socket descriptors
  * to this function.
  */
@@ -153,7 +153,7 @@ EXTERN int net_close(int sockfd);
 struct ifreq; /* Forward reference -- see net/ioctls.h */
 EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
 
-/* net-poll.c ****************************************************************/
+/* net_poll.c ****************************************************************/
 /* The standard poll() operation redirects operations on socket descriptors
  * to this function.
  */
@@ -162,6 +162,14 @@ EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
 struct pollfd; /* Forward reference -- see poll.h */
 EXTERN int net_poll(int sockfd, struct pollfd *fds, boolean setup);
 #endif
+
+/* net_dup.c *****************************************************************/
+/* The standard dup() and dup2() operations redirect operations on socket
+ * descriptors to these function.
+ */
+
+EXTERN int net_dup(int sockfd);
+EXTERN int net_dup2(int sockfd1, int sockfd2);
 
 /* netdev-register.c *********************************************************/
 /* This function is called by network interface device drivers to inform the
@@ -172,7 +180,7 @@ EXTERN int net_poll(int sockfd, struct pollfd *fds, boolean setup);
 
 EXTERN int netdev_register(FAR struct uip_driver_s *dev);
 
-/* net-foreach.c ************************************************************/
+/* net_foreach.c ************************************************************/
 /* Enumerates all registered network devices */
 
 EXTERN int netdev_foreach(netdev_callback_t callback, void *arg);

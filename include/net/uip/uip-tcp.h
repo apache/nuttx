@@ -134,6 +134,7 @@ struct uip_conn
                            * connection */
   uint16 initialmss;      /* Initial maximum segment size for the
                            * connection */
+  uint8  crefs;           /* Reference counts on this instance */
   uint8  sa;              /* Retransmission time-out calculation state
                            * variable */
   uint8  sv;              /* Retransmission time-out calculation state

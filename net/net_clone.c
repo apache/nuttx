@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_dup.c
+ * net/net_clone.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,72 +38,80 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_NET
 
 #include <sys/types.h>
-#include <unistd.h>
-#include <sched.h>
+#include <sys/socket.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/fs.h>
-#include "fs_internal.h"
+#include <nuttx/arch.h>
 
-/* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup is being
- * performed.
- */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "net_internal.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dup
+ * Function: net_clone
  *
  * Description:
- *   Clone a file or socket descriptor to an arbitray descriptor number
+ *   Performs the low level, common portion of net_dup() and net_dup2()
  *
  ****************************************************************************/
 
-int dup(int fildes)
+int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 {
-  /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor. */
+  irqstate_t flags;
+  int ret = OK;
 
-  if ((unsigned int)fildes >= CONFIG_NFILE_DESCRIPTORS)
+  /* Parts of this operation need to be atomic */
+
+  flags = irqsave();
+
+  /* Duplicate the socket state */
+
+  psock2->s_type     = psock1->s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+  psock2->s_flags    = psock1->s_flags;     /* See _SF_* definitions */
+#ifdef CONFIG_NET_SOCKOPTS
+  psock2->s_options  = psock1->s_options;   /* Selected socket options */
+#endif
+#ifndef CONFIG_DISABLE_CLOCK
+  psock2->s_rcvtimeo = psock1->s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
+  psock2->s_sndtimeo = psock1->s_sndtimeo;  /* Send timeout value (in deciseconds) */
+#endif
+  psock2->s_conn     = psock1->s_conn;      /* UDP or TCP connection structure */
+
+  /* Increment the reference count on the connection */
+
+#ifdef CONFIG_NET_TCP
+  if (psock2->s_type == SOCK_STREAM)
     {
-      /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
-
-      if ((unsigned int)fildes < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          /* Yes.. dup the socket descriptor */
-
-          return net_dup(fildes);
-        }
-      else
-        {
-          /* No.. then it is a bad descriptor number */
-
-          errno = EBADF;
-          return ERROR;
-        }
+      struct uip_conn *conn = psock2->s_conn;
+      DEBUGASSERT(conn->crefs > 0);
+      conn->crefs++;
     }
   else
+#endif
+#ifdef CONFIG_NET_UDP
+  if (psock2->s_type == SOCK_DGRAM)
     {
-      /* Its a valid file descriptor.. dup the file descriptor */
-
-      return file_dup(fildes);
+      struct uip_udp_conn *conn = psock2->s_conn;
+      DEBUGASSERT(conn->crefs > 0);
+      conn->crefs++;
     }
+  else
+#endif
+    {
+      ndbg("Unsupported type: %d\n", psock2->s_type);
+      ret = -EBADF;
+    }
+
+  irqrestore(flags);
+  return ret;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 ... */
+#endif /* CONFIG_NET */
+
 

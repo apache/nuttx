@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net-internal.h
+ * net/net_internal.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -142,7 +142,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* net-sockets.c *************************************************************/
+/* net_sockets.c *************************************************************/
 
 EXTERN int  sockfd_allocate(void);
 EXTERN void sockfd_release(int sockfd);
@@ -156,38 +156,42 @@ EXTERN socktimeo_t net_timeval2dsec(struct timeval *tv);
 EXTERN void net_dsec2timeval(uint16 dsec, struct timeval *tv);
 #endif
 
-/* net-register.c ************************************************************/
+/* net_clone.c ***************************************************************/
+
+EXTERN int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
+
+/* net_register.c ************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 EXTERN void netdev_semtake(void);
 # define netdev_semgive() sem_post(&g_netdev_sem)
 #endif
 
-/* net-findbyname.c **********************************************************/
+/* net_findbyname.c **********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 EXTERN FAR struct uip_driver_s *netdev_findbyname(const char *ifname);
 #endif
 
-/* net-findbyaddr.c **********************************************************/
+/* net_findbyaddr.c **********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 EXTERN FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t *raddr);
 #endif
 
-/* net-txnotify.c ************************************************************/
+/* net_txnotify.c ************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 EXTERN void netdev_txnotify(const uip_ipaddr_t *raddr);
 #endif
 
-/* net-count.c ***************************************************************/
+/* net_count.c ***************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 EXTERN int netdev_count(void);
 #endif
 
-/* net-arptimer.c ************************************************************/
+/* net_arptimer.c ************************************************************/
 
 EXTERN void arptimer_init(void);
 

@@ -149,6 +149,14 @@ static int accept_interrupt(struct uip_conn *listener, struct uip_conn *conn)
 
       pstate->acpt_newconn     = conn;
       pstate->acpt_result      = OK;
+
+      /* Set a reference of one on the new connection */
+
+      DEBUGASSERT(conn->crefs == 0);
+      conn->crefs              = 1;
+
+      /* Wake-up the waiting caller thread */
+
       sem_post(&pstate->acpt_sem);
 
       /* Stop any further callbacks */
@@ -405,7 +413,10 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
     }
   irqrestore(save);
 
-  /* Initialize the socket structure and mark the socket as connected */
+  /* Initialize the socket structure and mark the socket as connected.
+   * (The reference count on the new connection structure was set in the
+   * interrupt handler).
+   */
 
   pnewsock->s_type   = SOCK_STREAM;
   pnewsock->s_conn   = state.acpt_newconn;

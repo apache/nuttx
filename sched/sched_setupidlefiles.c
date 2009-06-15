@@ -111,8 +111,8 @@ int sched_setupidlefiles(FAR _TCB *tcb)
   fd = open("/dev/console", O_RDWR);
   if (fd == 0)
     {
-      (void)dup2(0, 1);
-      (void)dup2(0, 2);
+      (void)file_dup2(0, 1);
+      (void)file_dup2(0, 2);
     }
   else
     {

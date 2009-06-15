@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_dup.c
+ * fs/fs_filedup2.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,20 +43,17 @@
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
-
-#include <nuttx/fs.h>
 #include "fs_internal.h"
 
-/* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup is being
- * performed.
- */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#define DUP_ISOPEN(fd, list) \
+  ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS && \
+   list->fl_files[fd].f_inode != NULL)
 
 /****************************************************************************
  * Private Functions
@@ -67,43 +64,58 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dup
+ * Name: file_dup2
  *
  * Description:
- *   Clone a file or socket descriptor to an arbitray descriptor number
+ *   Clone a file descriptor or socket descriptor to a specific descriptor
+ *   number. If socket descriptors are implemented, then this is called by
+ *   dup2() for the case of file descriptors.  If socket descriptors are not
+ *   implemented, then this function IS dup2().
  *
  ****************************************************************************/
 
-int dup(int fildes)
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+int file_dup2(int fildes1, int fildes2)
+#else
+int dup2(int fildes1, int fildes2)
+#endif
 {
-  /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor. */
+  FAR struct filelist *list;
 
-  if ((unsigned int)fildes >= CONFIG_NFILE_DESCRIPTORS)
+  /* Get the thread-specific file list */
+
+  list = sched_getfiles();
+  if (!list)
     {
-      /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
-
-      if ((unsigned int)fildes < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          /* Yes.. dup the socket descriptor */
-
-          return net_dup(fildes);
-        }
-      else
-        {
-          /* No.. then it is a bad descriptor number */
-
-          errno = EBADF;
-          return ERROR;
-        }
+      errno = EMFILE;
+      return ERROR;
     }
-  else
+
+ /* Verify that fildes is a valid, open file descriptor */
+
+  if (!DUP_ISOPEN(fildes1, list))
     {
-      /* Its a valid file descriptor.. dup the file descriptor */
-
-      return file_dup(fildes);
+      errno = EBADF;
+      return ERROR;
     }
+
+  /* Handle a special case */
+
+  if (fildes1 == fildes2)
+    {
+      return fildes1;
+    }
+
+  /* Verify fildes2 */
+
+  if ((unsigned int)fildes2 >= CONFIG_NFILE_DESCRIPTORS)
+    {
+        errno = EBADF;
+        return ERROR;
+    }
+
+  return files_dup(&list->fl_files[fildes1], &list->fl_files[fildes2]);
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 ... */
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 
