@@ -216,12 +216,16 @@ defconfig -- This is a configuration file similar to the Linux
 		  to zero if no more than one thread is expected to wait for
 		  a semaphore.
 		CONFIG_FDCLONE_DISABLE. Disable cloning of all file descriptors
-		  by task_create() when a new task is started.
+		  by task_create() when a new task is started.  If set, all
+  		  files/drivers will appear to be closed in the new task.
 		CONFIG_FDCLONE_STDIO. Disable cloning of all but the first
 		  three file descriptors (stdin, stdout, stderr) by task_create()
-		  when a new task is started.
+		  when a new task is started. If set, all files/drivers will
+		  appear to be closed in the new task except for stdin, stdout,
+		  and stderr.
 		CONFIG_SDCLONE_DISABLE. Disable cloning of all socket
-		  desciptors by task_create() when a new task is started.
+		  desciptors by task_create() when a new task is started. If
+		  set, all sockets will appear to be closed in the new task.
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it

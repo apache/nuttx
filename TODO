@@ -1,7 +1,7 @@
-NuttX TODO List (Last updated April 12, 2009)
+NuttX TODO List (Last updated June 15, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  (6)  Task/Scheduler (sched/)
+  (5)  Task/Scheduler (sched/)
   (1)  Dynamic loader (N/A)
   (2)  Memory Managment (mm/)
   (1)  Signals (sched/, arch/)

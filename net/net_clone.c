@@ -91,7 +91,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   if (psock2->s_type == SOCK_STREAM)
     {
       struct uip_conn *conn = psock2->s_conn;
-      DEBUGASSERT(conn->crefs > 0);
+      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
       conn->crefs++;
     }
   else
@@ -100,7 +100,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   if (psock2->s_type == SOCK_DGRAM)
     {
       struct uip_udp_conn *conn = psock2->s_conn;
-      DEBUGASSERT(conn->crefs > 0);
+      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
       conn->crefs++;
     }
   else

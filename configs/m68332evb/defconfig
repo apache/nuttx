@@ -140,6 +140,31 @@ CONFIG_HAVE_LIBM=n
 #   errorcheck mutexes. Enables pthread_mutexattr_settype().
 # CONFIG_PRIORITY_INHERITANCE : Set to enable support for priority
 #   inheritance on mutexes and semaphores. 
+# CONFIG_SEM_PREALLOCHOLDERS: This setting is only used if priority
+#   inheritance is enabled.  It defines the maximum number of
+#   different threads (minus one) that can take counts on a
+#   semaphore with priority inheritance support.  This may be 
+#   set to zero if priority inheritance is disabled OR if you
+#   are only using semaphores as mutexes (only one holder) OR
+#   if no more than two threads participate using a counting
+#   semaphore.
+# CONFIG_SEM_NNESTPRIO.  If priority inheritance is enabled,
+#   then this setting is the maximum number of higher priority
+#   threads (minus 1) than can be waiting for another thread
+#   to release a count on a semaphore.  This value may be set
+#   to zero if no more than one thread is expected to wait for
+#   a semaphore.
+# CONFIG_FDCLONE_DISABLE. Disable cloning of all file descriptors
+#   by task_create() when a new task is started.  If set, all
+#   files/drivers will appear to be closed in the new task.
+# CONFIG_FDCLONE_STDIO. Disable cloning of all but the first
+#   three file descriptors (stdin, stdout, stderr) by task_create()
+#   when a new task is started. If set, all files/drivers will
+#   appear to be closed in the new task except for stdin, stdout,
+#   and stderr.
+# CONFIG_SDCLONE_DISABLE. Disable cloning of all socket
+#   desciptors by task_create() when a new task is started. If
+#   set, all sockets will appear to be closed in the new task.
 #
 CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=n
@@ -157,6 +182,11 @@ CONFIG_DEV_CONSOLE=y
 CONFIG_DEV_LOWCONSOLE=n
 CONFIG_MUTEX_TYPES=n
 CONFIG_PRIORITY_INHERITANCE=n
+CONFIG_SEM_PREALLOCHOLDERS=0
+CONFIG_SEM_NNESTPRIO=0
+CONFIG_FDCLONE_DISABLE=n
+CONFIG_FDCLONE_STDIO=n
+CONFIG_SDCLONE_DISABLE=y
 
 #
 # The following can be used to disable categories of
