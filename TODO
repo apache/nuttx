@@ -17,7 +17,7 @@ NuttX TODO List (Last updated April 12, 2009)
   (6)  Build system / Toolchains
   (2)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
-  (1)  Linux/Cywgin simulation (arch/sim)
+  (2)  Linux/Cywgin simulation (arch/sim)
   (3)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
@@ -59,11 +59,6 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium, required for standard compliance (but makes the
                code bigger)
-
-  Description: socket descriptors are not cloned as are file descriptors
-               by task_create().
-  Status:      Open
-  Priority:    Medium-to-High
 
 o Dynamic Loader
   ^^^^^^^^^^^^^^
@@ -408,6 +403,14 @@ o Linux/Cywgin simulation (arch/sim)
                all C buffered I/O.
   Status:      Open
   Priority:    Low (because the simulator is only a test/development platform)
+
+  Description: Simulator does not build correctly on 64-bit machines.  Two
+               issues:
+               1) It saves addresses in 32-bit types and these fail when cast
+                  to pointers on a 64-bit host.
+               2) up_setjmp.S does not build
+  Status:      Open
+  Priority:    Medium and increasing (as 32-bit hosts gradually disappear)
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^

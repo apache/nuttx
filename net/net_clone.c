@@ -85,6 +85,8 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 
   /* Increment the reference count on the connection */
 
+  DEBUGASSERT(psock2->s_conn);
+
 #ifdef CONFIG_NET_TCP
   if (psock2->s_type == SOCK_STREAM)
     {

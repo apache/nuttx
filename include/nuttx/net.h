@@ -164,12 +164,31 @@ EXTERN int net_poll(int sockfd, struct pollfd *fds, boolean setup);
 #endif
 
 /* net_dup.c *****************************************************************/
-/* The standard dup() and dup2() operations redirect operations on socket
- * descriptors to these function.
+/* The standard dup() operation redirects operations on socket descriptors to
+ * this function (when both file and socket descriptors are supported)
  */
 
+#if CONFIG_NFILE_DESCRIPTOR > 0
 EXTERN int net_dup(int sockfd);
+#else
+#  define net_dup(sockfd) dup(sockfd)
+#endif
+
+/* net_dup2.c ****************************************************************/
+/* The standard dup2() operation redirects operations on socket descriptors to
+ * this function (when both file and socket descriptors are supported)
+ */
+
+#if CONFIG_NFILE_DESCRIPTOR > 0
 EXTERN int net_dup2(int sockfd1, int sockfd2);
+#else
+#  define net_dup2(sockfd1, sockfd2) dup2(sockfd1, sockfd2)
+#endif
+
+/* net_clone.c ***************************************************************/
+/* Performs the low level, common portion of net_dup() and net_dup2() */
+
+EXTERN int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
 
 /* netdev-register.c *********************************************************/
 /* This function is called by network interface device drivers to inform the

@@ -776,4 +776,11 @@
 0.4.8 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add strtoll() and strtoull(); Add macros for atol() and atoll().
+	* dup() and dup2() will now clone socket descriptors
+	* All socket descriptors ar now cloned when when a new task is started
+	  via task_create().
+	* Add configuration options to suppress or eliminate cloning of file
+	  and/or socket descriptors when a new task is started by task_create():
+	  CONFIG_FDCLONE_DISABLE, CONFIG_FDCLONE_STDIO, CONFIG_SDCLONE_DISABLE.
+
 

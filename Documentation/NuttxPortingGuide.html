@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 28, 2009</p>
+      <p>Last Updated: June 15, 2009</p>
     </td>
   </tr>
 </table>
@@ -2064,6 +2064,19 @@ extern void up_ledoff(int led);
     1) than can be waiting for another thread to release a count on a semaphore.
     This value may be set to zero if no more than one thread is expected to
     wait for a semaphore.
+  </li>
+  <li>
+    <code>CONFIG_FDCLONE_DISABLE</code>: Disable cloning of all file descriptors
+		  by task_create() when a new task is started.
+  </li>
+  <li>
+    <code>CONFIG_FDCLONE_STDIO</code>: Disable cloning of all but the first
+    three file descriptors (stdin, stdout, stderr) by task_create()
+    when a new task is started.
+  </li>
+  <li>
+    <code>CONFIG_SDCLONE_DISABLE</code>: Disable cloning of all socket
+    desciptors by task_create() when a new task is started.
   </li>
 </ul>
 

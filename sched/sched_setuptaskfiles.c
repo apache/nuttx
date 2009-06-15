@@ -50,6 +50,22 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Determine how many file descriptors to clone.  If CONFIG_FDCLONE_DISABLE
+ * is set, no file descriptors will be cloned.  If CONFIG_FDCLONE_STDIO is
+ * set, only the first three descriptors (stdin, stdout, and stderr) will
+ * be cloned.  Otherwise all file descriptors will be cloned.
+ */
+
+#if defined(CONFIG_FDCLONE_STDIO) && CONFIG_NFILE_DESCRIPTORS > 3
+#  define NFDS_TOCLONE 3
+#else
+#  define NFDS_TOCLONE CONFIG_NFILE_DESCRIPTORS
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -83,6 +99,7 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
   int ret = OK;
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
+
   /* Allocate file descriptors for the TCB */
 
   tcb->filelist = files_alloclist();
@@ -91,9 +108,11 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
       *get_errno_ptr() = ENOMEM;
        return ERROR;
     }
+
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
+
   /* Allocate socket descriptors for the TCB */
 
   tcb->sockets = net_alloclist();
@@ -102,14 +121,21 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
       *get_errno_ptr() = ENOMEM;
       return ERROR;
     }
+
 #endif /* CONFIG_NSOCKET_DESCRIPTORS */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
- /* Duplicate the file descriptors */
+#if !defined(CONFIG_FDCLONE_DISABLE)
+
+ /* Duplicate the file descriptors.  This will be either all of the
+  * file descriptors or just the first three (stdin, stdout, and stderr)
+  * if CONFIG_FDCLONE_STDIO is defined.  NFSDS_TOCLONE is set
+  * accordingly above.
+  */
 
   if (rtcb->filelist)
     {
-      for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+      for (i = 0; i < NFDS_TOCLONE; i++)
         {
           /* Check if this file is opened */
 
@@ -120,13 +146,35 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
             }
         }
     }
+#endif
 
 #if CONFIG_NFILE_STREAMS > 0
+
   /* Allocate file streams for the TCB */
 
   ret = sched_setupstreams(tcb);
+
 #endif /* CONFIG_NFILE_STREAMS */
 #endif /* CONFIG_NFILE_DESCRIPTORS */
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0 && !defined(CONFIG_SDCLONE_DISABLE)
+
+ /* Duplicate the socket descriptors */
+
+  if (rtcb->sockets)
+    {
+      for (i = 0; i < CONFIG_NSOCKET_DESCRIPTORS; i++)
+        {
+          /* Check if this socket is allocated */
+
+          if (rtcb->sockets->sl_sockets[i].s_crefs > 0)
+            {
+              (void)net_clone(&rtcb->sockets->sl_sockets[i],
+                              &tcb->sockets->sl_sockets[i]);
+            }
+        }
+    }
+#endif
   return ret;
 }
 

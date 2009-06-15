@@ -156,10 +156,6 @@ EXTERN socktimeo_t net_timeval2dsec(struct timeval *tv);
 EXTERN void net_dsec2timeval(uint16 dsec, struct timeval *tv);
 #endif
 
-/* net_clone.c ***************************************************************/
-
-EXTERN int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
-
 /* net_register.c ************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0

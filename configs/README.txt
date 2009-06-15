@@ -215,6 +215,13 @@ defconfig -- This is a configuration file similar to the Linux
 		  to release a count on a semaphore.  This value may be set
 		  to zero if no more than one thread is expected to wait for
 		  a semaphore.
+		CONFIG_FDCLONE_DISABLE. Disable cloning of all file descriptors
+		  by task_create() when a new task is started.
+		CONFIG_FDCLONE_STDIO. Disable cloning of all but the first
+		  three file descriptors (stdin, stdout, stderr) by task_create()
+		  when a new task is started.
+		CONFIG_SDCLONE_DISABLE. Disable cloning of all socket
+		  desciptors by task_create() when a new task is started.
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it
@@ -231,7 +238,6 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_DISABLE_CLOCK, CONFIG_DISABLE_POSIX_TIMERS, CONFIG_DISABLE_PTHREAD.
 		CONFIG_DISABLE_SIGNALS, CONFIG_DISABLE_MQUEUE, CONFIG_DISABLE_MOUNTPOUNT,
 		CONFIG_DISABLE_ENVIRON, CONFIG_DISABLE_POLL
-
 
 	Misc libc settings
 
