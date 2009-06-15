@@ -2067,16 +2067,20 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <code>CONFIG_FDCLONE_DISABLE</code>: Disable cloning of all file descriptors
-		  by task_create() when a new task is started.
+    by task_create() when a new task is started.
+    If set, all files/drivers will appear to be closed in the new task.
   </li>
   <li>
     <code>CONFIG_FDCLONE_STDIO</code>: Disable cloning of all but the first
     three file descriptors (stdin, stdout, stderr) by task_create()
     when a new task is started.
+    If set, all files/drivers will appear to be closed in the new task except
+    for stdin, stdout, and stderr.
   </li>
   <li>
     <code>CONFIG_SDCLONE_DISABLE</code>: Disable cloning of all socket
     desciptors by task_create() when a new task is started.
+    If set, all sockets will appear to be closed in the new task.
   </li>
 </ul>
 
