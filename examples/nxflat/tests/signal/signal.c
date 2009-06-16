@@ -37,11 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdio.h>     /* For printf(), fprintf(), etc. */
-#include <signal.h>    /* For signal(), sigaction(), etc. */
-#include <unistd.h>    /* For usleep() */
-#include <errno.h>     /* For errno */
-#include <sys/types.h> /* (needed by getpid()) */
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 /****************************************************************************
  * Definitions

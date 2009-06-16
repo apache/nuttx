@@ -47,7 +47,7 @@ all: $(BIN)
 $(OBJS): %.o: %.c
 	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
 
-$(BIN): $OBJS)
+$(BIN): $(OBJS)
 	$(NXFLATLD) $(NXFLATLDFLAGS) -o $@ $(OBJS)
 
 clean: 

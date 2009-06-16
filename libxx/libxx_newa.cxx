@@ -65,7 +65,7 @@
 //***************************************************************************
 
 //void *operator new[](size_t size)
-void *operator new[]((unsigned long size)
+void *operator new[](unsigned long nbytes)
 {
   // We have to allocate something
 

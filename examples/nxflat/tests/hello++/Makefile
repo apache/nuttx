@@ -68,7 +68,7 @@ $(CXXOBJS): %.o: %.cpp
 # without actually have libstdc++
 
 $(LIBSTDC_STUBS_LIB):
-	$(MAKE) -C $(LIBSTDC_STUBS_DIR)
+	$(MAKE) -C $(LIBSTDC_STUBS_DIR) TOPDIR=$(TOPDIR)
 
 # BIN1 and BIN2 link just like C code because they contain no
 # static constructors.  BIN1 is equivalent to a C hello world;
@@ -76,10 +76,10 @@ $(LIBSTDC_STUBS_LIB):
 # not statically initialized.
 
 $(BIN1): $(OBJS1)
-	$(XFLATLD) -o $@ $^
+	$(NXFLATLD) -o $@ $^
 
 $(BIN2): $(OBJS2) $(LIBSTDC_STUBS_LIB)
-	$(XFLATLD) -o $@ $^
+	$(NXFLATLD) -o $@ $^
 
 # BIN3 and BIN4 require that we include --cxx in the xflat-ld command.
 # This will instruct xflat-ld that we want it to put togethe the correct

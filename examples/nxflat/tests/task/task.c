@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sched.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -49,6 +50,7 @@
  * Private Data
  ****************************************************************************/
 
+static char child_name[] = "child";
 static char child_arg[] = "Hello from your parent!";
 static sem_t g_sem;
 
@@ -56,7 +58,7 @@ static sem_t g_sem;
  * Privite Functions
  ****************************************************************************/
 
-int child_task(int argc, char **argv, char **envp)
+int child_task(int argc, char **argv)
 {
   printf("Child: execv was successful!\n");
   printf("Child: argc=%d\n", argc);
@@ -70,9 +72,9 @@ int child_task(int argc, char **argv, char **envp)
 
   printf("Child: argv[0]=\"%s\"\n", argv[0]);
 
-  if (strcmp(argv[0], my_path) != 0)
+  if (strcmp(argv[0], child_name) != 0)
     {
-      printf("Child: expected argv[0] to be \"%s\"\n", my_path);
+      printf("Child: expected argv[0] to be \"%s\"\n", child_name);
       printf("Child: Exit-ting with status=3\n");
       exit(3);
     }
@@ -81,7 +83,7 @@ int child_task(int argc, char **argv, char **envp)
 
   if (strcmp(argv[1], child_arg) != 0)
     {
-      printf("Child: expected argv[1] to be \"%s\"\n", parent_arg);
+      printf("Child: expected argv[1] to be \"%s\"\n", child_arg);
       printf("Child: Exit-ting with status=4\n");
       exit(4);
     }
@@ -95,7 +97,7 @@ int child_task(int argc, char **argv, char **envp)
  * Public Functions
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   pid_t parent_pid = getpid();
   char *child_argv[2];
@@ -109,7 +111,7 @@ int main(int argc, char **argv, char **envp)
 
   child_argv[0] = child_arg;
   child_argv[1] = 0;
-  ret = task_create("child", 50, 512, child_task, &child_arg);
+  ret = task_create(child_name, 50, 512, child_task, child_argv);
   if (ret != 0)
     {
       printf("Parent: task_create failed: %d\n", errno);
