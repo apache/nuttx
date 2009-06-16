@@ -59,8 +59,9 @@
 //
 // NOTE:
 //   This should take a type of size_t, which for ARM GCC is unsigned long.
-//   but size_t may actually be a different different, in sys/include.h it
-//   is typed as uint32.  Need to REVISIT this.
+//   but size_t may actually be a different different type, in sys/include.h,
+//   it is typed as uint32.  Need to REVISIT this.
+//
 //***************************************************************************
 
 //void *operator new(size_t nbytes)
@@ -68,7 +69,7 @@ void *operator new(unsigned long nbytes)
 {
   // We have to allocate something
 
-  if (nbytes< 1)
+  if (nbytes < 1)
     {
       nbytes = 1;
     }

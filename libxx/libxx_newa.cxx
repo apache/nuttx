@@ -1,5 +1,5 @@
 //***************************************************************************
-// libxx/libxx_new.cxx
+// libxx/libxx_newa.cxx
 //
 //   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,6 +38,9 @@
 //***************************************************************************
 
 #include <nuttx/config.h>
+#include <cstddef>
+#include <cstdlib>
+#include <debug.h>
 
 //***************************************************************************
 // Definitions
@@ -52,10 +55,40 @@
 //***************************************************************************
 
 //***************************************************************************
-// Name: delete
+// Name: new
+//
+// NOTE:
+//   This should take a type of size_t, which for ARM GCC is unsigned long.
+//   but size_t may actually be a different different type, in sys/include.h,
+//   it is typed as uint32.  Need to REVISIT this.
+//
 //***************************************************************************
 
-void operator delete(void* ptr)
+//void *operator new[](size_t size)
+void *operator new[]((unsigned long size)
 {
-  free(ptr);
+  // We have to allocate something
+
+  if (nbytes< 1)
+    {
+      nbytes = 1;
+    }
+
+  // Perform the allocation
+
+  void *alloc = malloc(nbytes);
+
+#ifdef CONFIG_DEBUG
+  if (alloc == 0)
+    {
+      // Oh my.. we are required to return a valid pointer and
+      // we cannot throw an exception!  We are bad.
+
+      dbg("Failed to allocate\n");
+    }
+#endif
+
+  // Return the allocated value
+
+  return alloc;
 }

@@ -1,5 +1,5 @@
 //***************************************************************************
-// libxx/libxx_new.cxx
+// libxx/libxx_cxapurevirtual.cxx
 //
 //   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,8 +37,6 @@
 // Included Files
 //***************************************************************************
 
-#include <nuttx/config.h>
-
 //***************************************************************************
 // Definitions
 //***************************************************************************
@@ -52,10 +50,15 @@
 //***************************************************************************
 
 //***************************************************************************
-// Name: delete
+// Name:  __cxa_pure_virtual
+//
+// Description:
+//    Do nothing when a pure virtual function is called
+//
 //***************************************************************************
 
-void operator delete(void* ptr)
+int __cxa_pure_virtual(void)
 {
-  free(ptr);
+  return 0;
 }
+

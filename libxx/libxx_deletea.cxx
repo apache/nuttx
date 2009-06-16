@@ -1,5 +1,5 @@
 //***************************************************************************
-// libxx/libxx_new.cxx
+// libxx/libxx_newa.cxx
 //
 //   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -55,7 +55,7 @@
 // Name: delete
 //***************************************************************************
 
-void operator delete(void* ptr)
+void operator delete[](void *ptr)
 {
   free(ptr);
 }
