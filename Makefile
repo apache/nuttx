@@ -70,7 +70,7 @@ ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR)
 #   from the build if file descriptor support is disabled
 
 NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(ADDON_DIRS)
-FSDIRS		= fs drivers
+FSDIRS		= fs drivers binfmt
 
 ifeq ($(CONFIG_NET),y)
 NONFSDIRS	+= net netutils
@@ -129,7 +129,7 @@ ifeq ($(CONFIG_NET),y)
 LINKLIBS	+= drivers/libdrivers$(LIBEXT)
 endif
 else
-LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT)
+LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) binfmt/libbinfmt$(LIBEXT)
 endif
 
 # Add libraries for Pascall P-Code
@@ -231,6 +231,9 @@ fs/libfs$(LIBEXT): context
 
 drivers/libdrivers$(LIBEXT): context
 	@$(MAKE) -C drivers TOPDIR="$(TOPDIR)" libdrivers$(LIBEXT)
+
+binfmt/libbinfmt$(LIBEXT): context
+	@$(MAKE) -C binfmt TOPDIR="$(TOPDIR)" libbinfmt$(LIBEXT)
 
 pcode/libpcode$(LIBEXT): context
 	@$(MAKE) -C pcode TOPDIR="$(TOPDIR)" libpcode$(LIBEXT)

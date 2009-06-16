@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wd_start.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,11 +38,15 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+
 #include <stdarg.h>
 #include <wdog.h>
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
+
+#include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "wd_internal.h"
 
@@ -154,6 +158,9 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   /* Save the data in the watchdog structure */
 
   wdog->func = wdentry;         /* Function to execute when delay expires */
+#ifdef CONFIG_NXFLAT
+  wdog->picbase = up_getpicbase();
+#endif
   wdog->argc = argc;
 
   va_start(ap, argc);
@@ -322,7 +329,7 @@ void wd_timer(void)
                   ((FAR wdog_t*)g_wdactivelist.head)->lag += wdog->lag;
                 }
 
-              /* Indicate that the watchdog is no longer activer. */
+              /* Indicate that the watchdog is no longer active. */
 
               wdog->active = FALSE;
 
@@ -334,6 +341,7 @@ void wd_timer(void)
 
               /* Execute the watchdog function */
 
+              up_setpicbase(wdog->picbase);
               switch (wdog->argc)
                 {
                   default:

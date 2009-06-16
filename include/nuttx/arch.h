@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/arch.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -353,15 +353,29 @@ EXTERN void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver);
  * Name: up_allocate_heap
  *
  * Description:
- *   The heap may be statically allocated by
- *   defining CONFIG_HEAP_BASE and CONFIG_HEAP_SIZE.  If these
- *   are not defined, then this function will be called to
- *   dynamically set aside the heap region.
+ *   The heap may be statically allocated by defining CONFIG_HEAP_BASE and
+ *   CONFIG_HEAP_SIZE.  If these are not defined, then this function will be
+ *   called to dynamically set aside the heap region.
  *
  ****************************************************************************/
 
 #ifndef CONFIG_HEAP_BASE
 EXTERN void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
+#endif
+
+/****************************************************************************
+ * Name: up_setpicbase, up_getpicbase
+ *
+ * Description:
+ *   It NXFLAT external modules are supported, then these macros must
+ *   defined to (1) get or get the PIC base register value.  These must
+ *   be done with in-line assembly.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NXFLAT
+#  define up_setpicbase(picbase)
+#  define up_getpicbase()
 #endif
 
 /****************************************************************************
