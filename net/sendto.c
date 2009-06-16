@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sendto.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ struct sendto_s
  * Parameters:
  *   dev        The sructure of the network driver that caused the interrupt
  *   conn       An instance of the UDP connection structure cast to void *
- *   pvprivate  An instance of struct sendto_s cast to void*
+ *   pvpriv     An instance of struct sendto_s cast to void*
  *   flags      Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -94,9 +94,9 @@ struct sendto_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvprivate, uint16 flags)
+static uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvpriv, uint16 flags)
 {
-  struct sendto_s *pstate = (struct sendto_s *)pvprivate;
+  struct sendto_s *pstate = (struct sendto_s *)pvpriv;
 
   nvdbg("flags: %04x\n", flags);
   if (pstate)
@@ -138,7 +138,7 @@ static uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvpri
       /* Don't allow any further call backs. */
 
       pstate->st_cb->flags   = 0;
-      pstate->st_cb->private = NULL;
+      pstate->st_cb->priv    = NULL;
       pstate->st_cb->event   = NULL;
 
       /* Wake up the waiting thread */
@@ -315,7 +315,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   if (state.st_cb)
     {
       state.st_cb->flags   = UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-      state.st_cb->private = (void*)&state;
+      state.st_cb->priv    = (void*)&state;
       state.st_cb->event   = sendto_interrupt;
 
       /* Enable the UDP socket */

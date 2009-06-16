@@ -76,7 +76,7 @@ static inline int tcp_setup_callbacks(FAR struct socket *psock,
                                       FAR struct tcp_connect_s *pstate);
 static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate, int status);
 static uint16 tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
-                                    void *pvprivate, uint16 flags);
+                                    void *pvpriv, uint16 flags);
 #ifdef CONFIG_NET_IPv6
 static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in6 *inaddr);
 #else
@@ -161,7 +161,7 @@ static inline int tcp_setup_callbacks(FAR struct socket *psock,
   if (pstate->tc_cb)
     {
       pstate->tc_cb->flags   = UIP_NEWDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT|UIP_CONNECTED;
-      pstate->tc_cb->private = (void*)pstate;
+      pstate->tc_cb->priv    = (void*)pstate;
       pstate->tc_cb->event   = tcp_connect_interrupt;
 
       /* Set up to receive callbacks on connection-related events */
@@ -223,13 +223,13 @@ static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate, int stat
 
 #ifdef CONFIG_NET_TCP
 static uint16 tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
-                                    void *pvprivate, uint16 flags)
+                                    void *pvpriv, uint16 flags)
 {
-  struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvprivate;
+  struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
 
   nvdbg("flags: %04x\n", flags);
 
-  /* 'private' might be null in some race conditions (?) */
+  /* 'priv' might be null in some race conditions (?) */
 
   if (pstate)
     {

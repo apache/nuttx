@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_callback.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -236,7 +236,7 @@ uint16 uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn, uint16 fl
            */
 
           nvdbg("Call event=%p with flags=%04x\n", list->event, flags);
-          flags = list->event(dev, pvconn, list->private, flags);
+          flags = list->event(dev, pvconn, list->priv, flags);
         }
 
       /* Set up for the next time through the loop */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_registerdriver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,9 +67,8 @@
  * Name: register_driver
  ****************************************************************************/
 
-STATUS register_driver(const char *path,
-                       const struct file_operations *fops,
-                       mode_t mode, void *private)
+STATUS register_driver(const char *path, const struct file_operations *fops,
+                       mode_t mode, void *priv)
 {
   struct inode *node;
   STATUS ret = ERROR;
@@ -92,7 +91,7 @@ STATUS register_driver(const char *path,
 #ifdef CONFIG_FILE_MODE
         node->i_mode    = mode;
 #endif
-        node->i_private = private;
+        node->i_private = priv;
         ret             = OK;
     }
 

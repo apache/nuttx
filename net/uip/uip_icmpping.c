@@ -134,7 +134,7 @@ static inline int ping_timeout(struct icmp_ping_s *pstate)
  * Parameters:
  *   dev        The structure of the network driver that caused the interrupt
  *   conn       The received packet, cast to void *
- *   pvprivate  An instance of struct icmp_ping_s cast to void*
+ *   pvpriv     An instance of struct icmp_ping_s cast to void*
  *   flags      Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -146,9 +146,9 @@ static inline int ping_timeout(struct icmp_ping_s *pstate)
  ****************************************************************************/
 
 static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
-                             void *pvprivate, uint16 flags)
+                             void *pvpriv, uint16 flags)
 {
-  struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvprivate;
+  struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvpriv;
   ubyte *ptr;
   int failcode = -ETIMEDOUT;
   int i;
@@ -269,7 +269,7 @@ end_wait:
   /* Do not allow any further callbacks */
 
   pstate->png_cb->flags   = 0;
-  pstate->png_cb->private = NULL;
+  pstate->png_cb->priv    = NULL;
   pstate->png_cb->event   = NULL;
 
   /* Wake up the waiting thread */
@@ -334,7 +334,7 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dse
   if (state.png_cb)
     {
       state.png_cb->flags   = UIP_POLL|UIP_ECHOREPLY;
-      state.png_cb->private = (void*)&state;
+      state.png_cb->priv    = (void*)&state;
       state.png_cb->event   = ping_interrupt;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 

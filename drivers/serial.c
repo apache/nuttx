@@ -436,14 +436,14 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
               /* Bind the poll structure and this slot */
 
               dev->fds[i]  = fds;
-              fds->private = &dev->fds[i];
+              fds->priv    = &dev->fds[i];
               break;
             }
         }
 
       if (i >= CONFIG_DEV_CONSOLE_NPOLLWAITERS)
         {
-          fds->private = NULL;
+          fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
         }
@@ -481,11 +481,11 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
         }
 
     }
-  else if (fds->private)
+  else if (fds->priv)
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->private;
+      struct pollfd **slot = (struct pollfd **)fds->priv;
 
 #ifdef CONFIG_DEBUG
       if (!slot)
@@ -498,7 +498,7 @@ int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
       /* Remove all memory of the poll setup */
 
       *slot                = NULL;
-      fds->private         = NULL;
+      fds->priv            = NULL;
     }
 
 errout:

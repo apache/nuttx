@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/send.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,10 +196,10 @@ static inline int send_timeout(struct send_s *pstate)
  ****************************************************************************/
 
 static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
-                             void *pvprivate, uint16 flags)
+                             void *pvpriv, uint16 flags)
 {
   struct uip_conn *conn = (struct uip_conn*)pvconn;
-  struct send_s *pstate = (struct send_s *)pvprivate;
+  struct send_s *pstate = (struct send_s *)pvpriv;
 
   nvdbg("flags: %04x acked: %d sent: %d\n", flags, pstate->snd_acked, pstate->snd_sent);
 
@@ -328,7 +328,7 @@ end_wait:
   /* Do not allow any further callbacks */
 
   pstate->snd_cb->flags   = 0;
-  pstate->snd_cb->private = NULL;
+  pstate->snd_cb->priv    = NULL;
   pstate->snd_cb->event   = NULL;
 
   /* Wake up the waiting thread */
@@ -468,7 +468,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
           /* Set up the callback in the connection */
 
           state.snd_cb->flags   = UIP_ACKDATA|UIP_REXMIT|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-          state.snd_cb->private = (void*)&state;
+          state.snd_cb->priv    = (void*)&state;
           state.snd_cb->event   = send_interrupt;
 
           /* Notify the device driver of the availaibilty of TX data */

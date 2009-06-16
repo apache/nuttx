@@ -5,7 +5,7 @@
  * are used by uIP programs as well as internal uIP structures and function
  * declarations.
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -203,7 +203,7 @@ struct uip_ip_hdr
  *   flink   - Supports a singly linked list
  *   event   - Provides the address of the callback function entry point.
  *             pvconn is a pointer to one of struct uip_conn or struct uip_udp_conn.
- *   private - Holds a reference to application specific data that will
+ *   priv    - Holds a reference to application specific data that will
  *             provided
  *   flags   - Set by the application to inform the uIP layer which flags
  *             are and are not handled by the callback.
@@ -213,8 +213,8 @@ struct uip_driver_s;       /* Forward reference */
 struct uip_callback_s
 {
   FAR struct uip_callback_s *flink;
-  uint16 (*event)(struct uip_driver_s *dev, void *pvconn, void *pvprivate, uint16 flags);
-  void *private;
+  uint16 (*event)(struct uip_driver_s *dev, void *pvconn, void *pvpriv, uint16 flags);
+  void *priv;
   uint16 flags;
 };
 

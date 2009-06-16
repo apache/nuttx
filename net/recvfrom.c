@@ -359,13 +359,13 @@ static inline void recvfrom_tcpsender(struct uip_driver_s *dev, struct recvfrom_
 
 #ifdef CONFIG_NET_TCP
 static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
-                                    void *pvprivate, uint16 flags)
+                                    void *pvpriv, uint16 flags)
 {
-  struct recvfrom_s *pstate = (struct recvfrom_s *)pvprivate;
+  struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
 
   nvdbg("flags: %04x\n", flags);
 
-  /* 'private' might be null in some race conditions (?) */
+  /* 'priv' might be null in some race conditions (?) */
 
   if (pstate)
     {
@@ -400,7 +400,7 @@ static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
                */
 
               pstate->rf_cb->flags   = 0;
-              pstate->rf_cb->private = NULL;
+              pstate->rf_cb->priv    = NULL;
               pstate->rf_cb->event   = NULL;
 
               /* Wake up the waiting thread, returning the number of bytes
@@ -428,7 +428,7 @@ static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
           /* Stop further callbacks */
 
           pstate->rf_cb->flags   = 0;
-          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->priv    = NULL;
           pstate->rf_cb->event   = NULL;
 
           /* Report not connected */
@@ -454,7 +454,7 @@ static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
           nvdbg("TCP timeout\n");
 
           pstate->rf_cb->flags   = 0;
-          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->priv    = NULL;
           pstate->rf_cb->event   = NULL;
 
           /* Report an error only if no data has been received */
@@ -542,13 +542,13 @@ static inline void recvfrom_udpsender(struct uip_driver_s *dev, struct recvfrom_
 
 #ifdef CONFIG_NET_UDP
 static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
-                                    void *pvprivate, uint16 flags)
+                                    void *pvpriv, uint16 flags)
 {
-  struct recvfrom_s *pstate = (struct recvfrom_s *)pvprivate;
+  struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
 
   nvdbg("flags: %04x\n", flags);
 
-  /* 'private' might be null in some race conditions (?) */
+  /* 'priv' might be null in some race conditions (?) */
 
   if (pstate)
     {
@@ -567,7 +567,7 @@ static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
           /* Don't allow any further UDP call backs. */
 
           pstate->rf_cb->flags   = 0;
-          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->priv    = NULL;
           pstate->rf_cb->event   = NULL;
 
           /* Save the sender's address in the caller's 'from' location */
@@ -594,7 +594,7 @@ static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
           /* Stop further callbacks */
 
           pstate->rf_cb->flags   = 0;
-          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->priv    = NULL;
           pstate->rf_cb->event   = NULL;
 
           /* Report not connected */
@@ -622,7 +622,7 @@ static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
           /* Stop further callbacks */
 
           pstate->rf_cb->flags   = 0;
-          pstate->rf_cb->private = NULL;
+          pstate->rf_cb->priv    = NULL;
           pstate->rf_cb->event   = NULL;
 
           /* Report a timeout error */
@@ -795,7 +795,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       /* Set up the callback in the connection */
 
       state.rf_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-      state.rf_cb->private = (void*)&state;
+      state.rf_cb->priv    = (void*)&state;
       state.rf_cb->event   = recvfrom_udpinterrupt;
 
       /* Enable the UDP socket */
@@ -898,7 +898,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       if (state.rf_cb)
         {
           state.rf_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-          state.rf_cb->private = (void*)&state;
+          state.rf_cb->priv    = (void*)&state;
           state.rf_cb->event   = recvfrom_tcpinterrupt;
 
           /* Wait for either the receive to complete or for an error/timeout to occur.

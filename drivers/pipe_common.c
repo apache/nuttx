@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipe_common.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
-
-/****************************************************************************
- * Compilation Switches
  ****************************************************************************/
 
 /****************************************************************************
@@ -550,14 +546,14 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
               /* Bind the poll structure and this slot */
 
               dev->d_fds[i] = fds;
-              fds->private  = &dev->d_fds[i];
+              fds->priv     = &dev->d_fds[i];
               break;
             }
         }
 
       if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
         {
-          fds->private = NULL;
+          fds->priv   = NULL;
           ret          = -EBUSY;
           goto errout;
         }
@@ -599,7 +595,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->private;
+      struct pollfd **slot = (struct pollfd **)fds->priv;
 
 #ifdef CONFIG_DEBUG
       if (!slot)
@@ -612,7 +608,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* Remove all memory of the poll setup */
 
       *slot                = NULL;
-      fds->private         = NULL;
+      fds->priv            = NULL;
     }
 
 errout:

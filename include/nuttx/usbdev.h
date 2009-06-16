@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usbdev.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * NOTE:  This interface was inspired by the Linux gadget interface by
@@ -199,7 +199,7 @@ struct usbdev_req_s
   /* Callback when the transfer completes */
 
   void  (*callback)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
-  void   *private; /* Used only by callee */
+  void   *priv;    /* Used only by callee */
 };
 
 /* Endpoint-specific interface to USB controller hardware. */
@@ -240,7 +240,7 @@ struct usbdev_ep_s
   const struct usbdev_epops_s *ops; /* Endpoint operations */
   ubyte  eplog;                     /* Logical endpoint address */
   uint16 maxpacket;                 /* Maximum packet size for this endpoint */
-  void  *private;                   /* For use by class driver */
+  void  *priv;                      /* For use by class driver */
 };
 
 /* struct usbdev_s represents a usb device */

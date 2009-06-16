@@ -782,5 +782,7 @@
 	* Add configuration options to suppress or eliminate cloning of file
 	  and/or socket descriptors when a new task is started by task_create():
 	  CONFIG_FDCLONE_DISABLE, CONFIG_FDCLONE_STDIO, CONFIG_SDCLONE_DISABLE.
+	* Use of C++ reserved word 'private' in C header files causes problems
+	  for C++ that include them.
 
 

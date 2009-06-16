@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_poll.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -165,7 +165,7 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 
       fds[i].sem     = sem;
       fds[i].revents = 0;
-      fds[i].private = NULL;
+      fds[i].priv    = NULL;
 
       /* Set up the poll */
 

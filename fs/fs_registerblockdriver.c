@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs_registerblockdriver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@
 
 STATUS register_blockdriver(const char *path,
                             const struct block_operations *bops,
-                            mode_t mode, void *private)
+                            mode_t mode, void *priv)
 {
   struct inode *node;
   STATUS ret = -ENOMEM;
@@ -93,7 +93,7 @@ STATUS register_blockdriver(const char *path,
 #ifdef CONFIG_FILE_MODE
       node->i_mode    = mode;
 #endif
-      node->i_private = private;
+      node->i_private = priv;
       ret             = OK;
     }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_serial.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic emulates the Prolific PL2303 serial/USB converter
@@ -613,7 +613,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
           /* Then submit the request to the endpoint */
 
           req->len     = len;
-          req->private = reqcontainer;
+          req->priv    = reqcontainer;
           req->flags   = USBDEV_REQFLAGS_NULLPKT;
           ret          = EP_SUBMIT(ep, req);
           if (ret != OK)
@@ -1045,7 +1045,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
       goto errout;
     }
-  priv->epintin->private = priv;
+  priv->epintin->priv = priv;
 
   /* Configure the IN bulk endpoint */
 
@@ -1070,7 +1070,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
       goto errout;
     }
 
-  priv->epbulkin->private = priv;
+  priv->epbulkin->priv = priv;
 
   /* Configure the OUT bulk endpoint */
 
@@ -1086,7 +1086,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, ubyte config)
       goto errout;
     }
 
-  priv->epbulkout->private = priv;
+  priv->epbulkout->priv = priv;
 
   /* Queue read requests in the bulk OUT endpoint */
 
@@ -1148,7 +1148,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!ep || !ep->private || !req)
+  if (!ep || !ep->priv || !req)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
@@ -1157,7 +1157,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Extract references to private data */
 
-  priv = (FAR struct usbser_dev_s*)ep->private;
+  priv = (FAR struct usbser_dev_s*)ep->priv;
 
   /* Process the received data unless this is some unusual condition */
 
@@ -1215,7 +1215,7 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!ep || !ep->private || !req || !req->private)
+  if (!ep || !ep->priv || !req || !req->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
@@ -1224,8 +1224,8 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Extract references to our private data */
 
-  priv         = (FAR struct usbser_dev_s *)ep->private;
-  reqcontainer = (FAR struct usbser_req_s *)req->private;
+  priv         = (FAR struct usbser_dev_s *)ep->priv;
+  reqcontainer = (FAR struct usbser_req_s *)req->priv;
 
   /* Return the write request to the free list */
 
@@ -1280,8 +1280,8 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
   /* Bind the structures */
 
-  priv->usbdev      = dev;
-  dev->ep0->private = priv;
+  priv->usbdev   = dev;
+  dev->ep0->priv = priv;
 
   /* Preallocate control request */
 
@@ -1310,7 +1310,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       ret = -ENODEV;
       goto errout;
     }
-  priv->epintin->private = priv;
+  priv->epintin->priv = priv;
 
   /* Pre-allocate the IN bulk endpoint */
 
@@ -1321,7 +1321,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       ret = -ENODEV;
       goto errout;
     }
-  priv->epbulkin->private = priv;
+  priv->epbulkin->priv = priv;
 
   /* Pre-allocate the OUT bulk endpoint */
 
@@ -1332,7 +1332,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       ret = -ENODEV;
       goto errout;
     }
-  priv->epbulkout->private = priv;
+  priv->epbulkout->priv = priv;
 
   /* Pre-allocate read requests */
 
@@ -1352,7 +1352,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
           ret = -ENOMEM;
           goto errout;
         }
-      reqcontainer->req->private  = reqcontainer;
+      reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbclass_rdcomplete;
     }
 
@@ -1374,7 +1374,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
           ret = -ENOMEM;
           goto errout;
         }
-      reqcontainer->req->private  = reqcontainer;
+      reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbclass_wrcomplete;
 
       flags = irqsave();
@@ -1422,7 +1422,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct usbser_dev_s *)dev->ep0->private;
+  priv = (FAR struct usbser_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -1547,7 +1547,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
   /* Extract reference to private data */
 
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
-  priv = (FAR struct usbser_dev_s *)dev->ep0->private;
+  priv = (FAR struct usbser_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv || !priv->ctrlreq)
@@ -1806,7 +1806,7 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct usbser_dev_s *)dev->ep0->private;
+  priv = (FAR struct usbser_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv)

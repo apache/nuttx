@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_storage.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -504,8 +504,8 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
 
   /* Bind the structures */
 
-  priv->usbdev      = dev;
-  dev->ep0->private = priv;
+  priv->usbdev   = dev;
+  dev->ep0->priv = priv;
 
   /* The configured EP0 size should match the reported EP0 size.  We could
    * easily adapt to the reported EP0 size, but then we could not use the
@@ -541,7 +541,7 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
       ret = -ENODEV;
       goto errout;
     }
-  priv->epbulkin->private = priv;
+  priv->epbulkin->priv = priv;
 
   /* Pre-allocate the OUT bulk endpoint */
 
@@ -552,7 +552,7 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
       ret = -ENODEV;
       goto errout;
     }
-  priv->epbulkout->private = priv;
+  priv->epbulkout->priv = priv;
 
   /* Pre-allocate read requests */
 
@@ -566,7 +566,7 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
           ret = -ENOMEM;
           goto errout;
         }
-      reqcontainer->req->private  = reqcontainer;
+      reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbstrg_rdcomplete;
     }
 
@@ -582,7 +582,7 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
           ret = -ENOMEM;
           goto errout;
         }
-      reqcontainer->req->private  = reqcontainer;
+      reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbstrg_wrcomplete;
 
       flags = irqsave();
@@ -629,7 +629,7 @@ static void usbstrg_unbind(FAR struct usbdev_s *dev)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct usbstrg_dev_s *)dev->ep0->private;
+  priv = (FAR struct usbstrg_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -743,7 +743,7 @@ static int usbstrg_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *c
   /* Extract reference to private data */
 
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
-  priv = (FAR struct usbstrg_dev_s *)dev->ep0->private;
+  priv = (FAR struct usbstrg_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv || !priv->ctrlreq)
@@ -1018,7 +1018,7 @@ static void usbstrg_disconnect(FAR struct usbdev_s *dev)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct usbstrg_dev_s *)dev->ep0->private;
+  priv = (FAR struct usbstrg_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -1139,7 +1139,7 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
       goto errout;
     }
 
-  priv->epbulkin->private = priv;
+  priv->epbulkin->priv = priv;
 
   /* Configure the OUT bulk endpoint */
 
@@ -1155,7 +1155,7 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
       goto errout;
     }
 
-  priv->epbulkout->private = priv;
+  priv->epbulkout->priv = priv;
 
   /* Queue read requests in the bulk OUT endpoint */
 
@@ -1164,7 +1164,7 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
       privreq       = &priv->rdreqs[i];
       req           = privreq->req;
       req->len      = CONFIG_USBSTRG_BULKOUTREQLEN;
-      req->private  = privreq;
+      req->priv     = privreq;
       req->callback = usbstrg_rdcomplete;
       ret           = EP_SUBMIT(priv->epbulkout, req);
       if (ret < 0)
@@ -1227,7 +1227,7 @@ void usbstrg_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!ep || !ep->private || !req || !req->private)
+  if (!ep || !ep->priv || !req || !req->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_WRCOMPLETEINVALIDARGS), 0);
       return;
@@ -1236,8 +1236,8 @@ void usbstrg_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
 
   /* Extract references to private data */
 
-  priv = (FAR struct usbstrg_dev_s*)ep->private;
-  privreq = (FAR struct usbstrg_req_s *)req->private;
+  priv    = (FAR struct usbstrg_dev_s*)ep->priv;
+  privreq = (FAR struct usbstrg_req_s *)req->priv;
 
   /* Return the write request to the free list */
 
@@ -1287,7 +1287,7 @@ void usbstrg_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!ep || !ep->private || !req || !req->private)
+  if (!ep || !ep->priv || !req || !req->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDCOMPLETEINVALIDARGS), 0);
       return;
@@ -1296,8 +1296,8 @@ void usbstrg_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
 
   /* Extract references to private data */
 
-  priv    = (FAR struct usbstrg_dev_s*)ep->private;
-  privreq = (FAR struct usbstrg_req_s *)req->private;
+  priv    = (FAR struct usbstrg_dev_s*)ep->priv;
+  privreq = (FAR struct usbstrg_req_s *)req->priv;
 
   /* Process the received data unless this is some unusual condition */
 
@@ -1335,7 +1335,7 @@ void usbstrg_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
         /* Return the read request to the bulk out endpoint for re-filling */
 
         req           = privreq->req;
-        req->private  = privreq;
+        req->priv     = privreq;
         req->callback = usbstrg_rdcomplete;
 
         ret = EP_SUBMIT(priv->epbulkout, req);

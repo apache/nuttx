@@ -88,9 +88,9 @@ struct tcp_close_s
 
 #ifdef CONFIG_NET_TCP
 static uint16 netclose_interrupt(struct uip_driver_s *dev, void *pvconn,
-                                 void *pvprivate, uint16 flags)
+                                 void *pvpriv, uint16 flags)
 {
-  struct tcp_close_s *pstate = (struct tcp_close_s *)pvprivate;
+  struct tcp_close_s *pstate = (struct tcp_close_s *)pvpriv;
 
   nvdbg("flags: %04x\n", flags);
 
@@ -105,7 +105,7 @@ static uint16 netclose_interrupt(struct uip_driver_s *dev, void *pvconn,
           /* The disconnection is complete */
 
           pstate->cl_cb->flags   = 0;
-          pstate->cl_cb->private = NULL;
+          pstate->cl_cb->priv    = NULL;
           pstate->cl_cb->event   = NULL;
           sem_post(&pstate->cl_sem);
           nvdbg("Resuming\n");
@@ -167,7 +167,7 @@ static inline void netclose_disconnect(FAR struct socket *psock)
            sem_init(&state.cl_sem, 0, 0);
 
            state.cl_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT;
-           state.cl_cb->private = (void*)&state;
+           state.cl_cb->priv    = (void*)&state;
            state.cl_cb->event   = netclose_interrupt;
 
            /* Notify the device driver of the availaibilty of TX data */

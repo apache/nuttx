@@ -351,7 +351,7 @@ EXTERN int files_dup(FAR struct file *filep1, FAR struct file *filep2);
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 EXTERN int file_dup(int fd);
 #else
-#  defile file_dup(fd)        dup(fd)
+#  define file_dup(fd)        dup(fd)
 #endif
 
 /* fs_filedup2.c *************************************************************/
@@ -363,7 +363,7 @@ EXTERN int file_dup(int fd);
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 EXTERN int file_dup2(int fd1, int fd2);
 #else
-#  defile file_dup2(fd1, fd2) dup2(fd1, fd2)
+#  define file_dup2(fd1, fd2) dup2(fd1, fd2)
 #endif
 
 /* fs_openblockdriver.c ******************************************************/

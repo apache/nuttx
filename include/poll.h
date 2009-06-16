@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/poll.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@ struct pollfd
   sem_t      *sem;      /* Pointer to semaphore used to post output event */
   pollevent_t events;   /* The input event flags */
   pollevent_t revents;  /* The output event flags */
-  FAR void   *private;  /* For use by drivers */
+  FAR void   *priv;     /* For use by drivers */
 };
 
 /****************************************************************************

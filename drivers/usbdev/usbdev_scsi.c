@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_storage.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -1604,7 +1604,7 @@ static int usbstrg_idlestate(FAR struct usbstrg_dev_s *priv)
 
       req           = privreq->req;
       req->len      = CONFIG_USBSTRG_BULKOUTREQLEN;
-      req->private  = privreq;
+      req->priv     = privreq;
       req->callback = usbstrg_rdcomplete;
 
       if (EP_SUBMIT(priv->epbulkout, req) != OK)
@@ -2046,7 +2046,7 @@ static int usbstrg_cmdreadstate(FAR struct usbstrg_dev_s *priv)
           /* And submit the request to the bulk IN endpoint */
 
           req->len      = priv->nreqbytes;
-          req->private  = privreq;
+          req->priv     = privreq;
           req->callback = usbstrg_wrcomplete;
           req->flags    = 0;
 
@@ -2189,7 +2189,7 @@ static int usbstrg_cmdwritestate(FAR struct usbstrg_dev_s *priv)
       */
 
       req->len      = CONFIG_USBSTRG_BULKOUTREQLEN;
-      req->private  = privreq;
+      req->priv     = privreq;
       req->callback = usbstrg_rdcomplete;
 
       ret = EP_SUBMIT(priv->epbulkout, req);
@@ -2283,7 +2283,7 @@ static int usbstrg_cmdfinishstate(FAR struct usbstrg_dev_s *priv)
               req           = privreq->req;
               req->len      = priv->nreqbytes;
               req->callback = usbstrg_wrcomplete;
-              req->private  = privreq;
+              req->priv     = privreq;
               req->flags    = USBDEV_REQFLAGS_NULLPKT;
 
               ret           = EP_SUBMIT(priv->epbulkin, privreq->req);
@@ -2429,7 +2429,7 @@ static int usbstrg_cmdstatusstate(FAR struct usbstrg_dev_s *priv)
 
   req->len       = USBSTRG_CSW_SIZEOF;
   req->callback  = usbstrg_wrcomplete;
-  req->private   = privreq;
+  req->priv      = privreq;
   req->flags     = USBDEV_REQFLAGS_NULLPKT;
 
   ret            = EP_SUBMIT(priv->epbulkin, req);

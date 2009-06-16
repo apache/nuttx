@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_poll.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,13 +102,13 @@
 
 #ifdef HAVE_NETPOLL
 static uint16 poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
-                             FAR void *pvprivate, uint16 flags)
+                             FAR void *pvpriv, uint16 flags)
 {
-  FAR struct pollfd *fds = (FAR struct pollfd *)pvprivate;
+  FAR struct pollfd *fds = (FAR struct pollfd *)pvpriv;
 
   nvdbg("flags: %04x\n", flags);
 
-  /* 'private' might be null in some race conditions (?) */
+  /* 'priv' might be null in some race conditions (?) */
 
   if (fds)
     {
@@ -194,12 +194,12 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
   /* Initialize the callbcack structure */
 
   cb->flags    = UIP_NEWDATA|UIP_BACKLOG|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-  cb->private  = (FAR void *)fds;
+  cb->priv     = (FAR void *)fds;
   cb->event    = poll_interrupt;
 
   /* Save the nps reference in the poll structure for use at teardown as well */
 
-  fds->private = (FAR void *)cb;
+  fds->priv    = (FAR void *)cb;
 
   /* Check for read data availability now */
 
@@ -246,7 +246,7 @@ static inline int net_pollteardown(FAR struct socket *psock, struct pollfd *fds)
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if (!conn || !fds->private)
+  if (!conn || !fds->priv)
     {
       return -EINVAL;
     }
@@ -254,7 +254,7 @@ static inline int net_pollteardown(FAR struct socket *psock, struct pollfd *fds)
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
-  cb = (FAR struct uip_callback_s *)fds->private;
+  cb = (FAR struct uip_callback_s *)fds->priv;
   if (cb)
     {
       /* Release the callback */
@@ -265,7 +265,7 @@ static inline int net_pollteardown(FAR struct socket *psock, struct pollfd *fds)
 
       /* Release the poll/select data slot */
 
-      fds->private = NULL;
+      fds->priv = NULL;
     }
 
   return OK;
