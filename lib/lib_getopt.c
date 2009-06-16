@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib_getopt.c
+ * lib/lib_getopt.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,10 @@
 #include <string.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Global Variables
  ****************************************************************************/
 
@@ -62,7 +66,7 @@ static boolean   g_binitialized = FALSE;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: Name
+ * Name: getopt
  *
  * Description: getopt() parses command-line arguments.  Its arguments argc
  *   and argv are the argument count and array as passed to the main()

@@ -214,7 +214,13 @@ struct _TCB
                                          /* The initial stack pointer value     */
 #endif
 
-  /* POSIX thread Specific Data *************************************************/
+  /* External Module Support ****************************************************/
+
+#ifdef CONFIG_NXFLAT
+  FAR void *picbase;                     /* Allocated area for .bss and .data   */
+#endif
+
+  /* POSIX Thread Specific Data *************************************************/
 
 #if !defined(CONFIG_DISABLE_PTHREAD) && CONFIG_NPTHREAD_KEYS > 0
   FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];

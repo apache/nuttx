@@ -1,7 +1,7 @@
 /****************************************************************************
- * unistd.h
+ * include/unistd.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,11 +108,20 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Used by getopt (obviously NOT thread safe!) */
+/* Used by getopt (obviously NOT thread safe!).  These variables cannot be
+ * accessed directly by an external NXFLAT module.  In that case, accessor
+ * functions must be used.
+ */
 
+#ifndef __NXFLAT__
 EXTERN FAR char *optarg; /* Optional argument following option */
 EXTERN int       optind; /* Index into argv */
 EXTERN int       optopt; /* unrecognized option character */
+#else
+#  define optarg  (*(getoptargp()))
+#  define optind  (*(getopindgp()))
+#  define optopt  (*(getoptoptp()))
+#endif
 
 /****************************************************************************
  * Global Function Prototypes
@@ -152,6 +161,15 @@ EXTERN int     rmdir(FAR const char *pathname);
 /* Other */
 
 EXTERN int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+
+/* Accessor functions intended for use only by external NXFLAT
+ * modules.  The global variables optarg, optind, and optopt cannot
+ * be referenced directly from external modules.
+ */
+
+EXTERN FAR char **getoptargp(void); /* Optional argument following option */
+EXTERN int       *getopindgp(void); /* Index into argv */
+EXTERN int       *getoptoptp(void); /* unrecognized option character */
 
 #undef EXTERN
 #if defined(__cplusplus)

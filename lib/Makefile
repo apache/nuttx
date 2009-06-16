@@ -76,7 +76,7 @@ STDLIB_SRCS	= lib_rand.c
 
 MATH_SRCS	= lib_rint.c lib_fixedmath.c lib_b16sin.c lib_b16cos.c
 
-UNISTD_SRCS	= lib_getopt.c
+UNISTD_SRCS	= lib_getopt.c lib_getoptargp.c lib_getoptindp.c lib_getoptoptp.c
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
 UNISTD_SRCS	+=  lib_chdir.c lib_getcwd.c

@@ -214,6 +214,12 @@ int main(int argc, char **argv, char **envp)
   printf("/* Architecture-specific options *************************/\n\n");
   parse_file(stream);
   printf("\n/* Sanity Checks *****************************************/\n\n");
+  printf("/* If this is an NXFLAT, external build, then make sure that\n");
+  printf(" * NXFLAT support is enabled in the base code.\n");
+  printf(" */\n\n");
+  printf("#if defined(__NXFLAT__) && !defined(CONFIG_NXFLAT)\n");
+  printf("# error \"NXFLAT support not enabled in this configuration\"\n");
+  printf("#endif\n\n");
   printf("/* The correct way to disable RR scheduling is to set the\n");
   printf(" * timeslice to zero.\n");
   printf(" */\n\n");
