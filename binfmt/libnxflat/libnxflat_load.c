@@ -75,6 +75,10 @@ static const char *g_segment[] =
   g_bsssegment,
   g_unksegment
 };
+
+#  define SEGNAME(rl) g_segment[NXFLAT_RELOC_TYPE(rl)]
+#else
+#  define SEGNAME(rl) "(no name)"
 #endif
 
 /****************************************************************************
@@ -124,7 +128,7 @@ static void nxflat_reloc(struct nxflat_loadinfo_s *loadinfo, uint32 rl)
 
       bvdbg("Relocation of variable at DATASEG+0x%08x "
 	  "(address 0x%p, currently 0x%08x) into segment %s\n",
-	  NXFLAT_RELOC_OFFSET(rl), ptr, *ptr, g_segment[NXFLAT_RELOC_TYPE(rl)]);
+	  NXFLAT_RELOC_OFFSET(rl), ptr, *ptr, SEGNAME(rl));
 	
       switch (NXFLAT_RELOC_TYPE(rl))
 	{
@@ -182,7 +186,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   off_t   doffset;     /* Offset to .data in the NXFLAT file */
   uint32 *reloctab;    /* Address of the relocation table */
   uint32  dreadsize;   /* Total number of bytes of .data to be read */
-  uint32  ret;
+  uint32  ret = OK;
   int     i;
 
   /* Calculate the extra space we need to allocate.  This extra space will be

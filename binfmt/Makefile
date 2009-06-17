@@ -35,7 +35,7 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/sched}
 
 ifeq ($(CONFIG_NXFLAT),y)
 include libnxflat/Make.defs
