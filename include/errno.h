@@ -1,7 +1,7 @@
 /************************************************************************
  * include/errno.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************/
 
-#ifndef __ERRNO_H
-#define __ERRNO_H
+#ifndef __INCLUDE_ERRNO_H
+#define __INCLUDE_ERRNO_H
 
 /************************************************************************
  * Included Files
@@ -324,4 +324,4 @@ extern FAR int *get_errno_ptr(void);
 }
 #endif
 
-#endif /* __ERRNO_H */
+#endif /* __INCLUDE_ERRNO_H */

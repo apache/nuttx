@@ -1,5 +1,5 @@
 /****************************************************************************
- * debug.h
+ * include/debug.h
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DEBUG_H
-#define __DEBUG_H
+#ifndef __INCLUDE_DEBUG_H
+#define __INCLUDE_DEBUG_H
 
 /****************************************************************************
  * Included Files
@@ -175,6 +175,18 @@
 # define gllvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_BINFMT
+# define bdbg(format, arg...)    dbg(format, ##arg)
+# define blldbg(format, arg...)  lldbg(format, ##arg)
+# define bvdbg(format, arg...)   vdbg(format, ##arg)
+# define bllvdbg(format, arg...) llvdbg(format, ##arg)
+#else
+# define bdbg(x...)
+# define blldbg(x...)
+# define bvdbg(x...)
+# define bllvdbg(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_LIB
 # define ldbg(format, arg...)    dbg(format, ##arg)
 # define llldbg(format, arg...)  lldbg(format, ##arg)
@@ -284,6 +296,18 @@
 # define gllvdbg (void)
 #endif
 
+#ifdef CONFIG_DEBUG_BINFMT
+# define bdbg    dbg
+# define blldbg  lldbg
+# define bvdbg   vdbg
+# define bllvdbg llvdbg
+#else
+# define bdbg    (void)
+# define blldbg  (void)
+# define bvdbg   (void)
+# define bllvdbg (void)
+#endif
+
 #ifdef CONFIG_DEBUG_LIB
 # define ldbg    dbg
 # define llldbg  lldbg
@@ -357,4 +381,4 @@ EXTERN int llvdbg(const char *format, ...);
 }
 #endif
 
-#endif /* __DEBUG_H */
+#endif /* __INCLUDE_DEBUG_H */

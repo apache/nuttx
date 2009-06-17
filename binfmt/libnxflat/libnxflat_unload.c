@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libnxflat/nxflat_verify.c
+ * binfmt/libnxflat/libnxflat_unload.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,14 +39,15 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <string.h>
+#include <sys/mman.h>
+
+#include <stdlib.h>
 #include <debug.h>
-#include <errno.h>
-#include <arpa/inet.h>
+
 #include <nuttx/nxflat.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -62,41 +63,37 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxflat_verifyheader
+ * Name: nxflat_unload
+ *
+ * Description:
+ *   This function unloads the object from memory. This essentially
+ *   undoes the actions of nxflat_load.
+ *
  ****************************************************************************/
 
-int nxflat_verifyheader(const struct nxflat_hdr_s *header)
+int nxflat_unload(struct nxflat_loadinfo_s *loadinfo)
 {
-  uint16 revision;
+  /* Reset the contents of the info structure. */
 
-  if (!header)
+  /* Nothing is allocated */
+
+  loadinfo->alloc_start = 0;
+  loadinfo->alloc_size  = 0;
+
+  /* Release the memory segments */
+
+  if (loadinfo->ispace)
     {
-      bdbg("NULL NXFLAT header!");
-      return -ENOEXEC;
+      munmap((void*)loadinfo->ispace, loadinfo->ispace_size);
+      loadinfo->ispace = 0;
     }
 
-  /* Check the FLT header -- magic number and revision.
-   * 
-   * If the the magic number does not match.  Just return
-   * silently.  This is not our binary.
-   */
-  
-  if (strncmp(header->h_magic, "NXFLAT", 4) != 0)
+  if (loadinfo->dspace)
     {
-      bdbg("Unrecognized magic=\"%c%c%c%c\"",
-	  header->h_magic[0], header->h_magic[1],
-	  header->h_magic[2], header->h_magic[3]);
-      return -ENOEXEC;
+      free((void*)loadinfo->dspace);
+      loadinfo->dspace = 0;
     }
 
-  /* Complain a little more if the version does not match. */
-
-  revision = ntohs(header->h_rev);
-  if (revision != NXFLAT_VERSION_CURRENT)
-    {
-      bdbg("Unsupported NXFLAT version=%d\n", revision);
-      return -ENOEXEC;
-    }
-  return 0;
+  return OK;
 }
 

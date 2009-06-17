@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libnxflat/nxflat_verify.c
+ * binfmt/libnxflat/libnxflat_init.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,14 +39,19 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+
 #include <string.h>
+#include <fcntl.h>
+#include <nxflat.h>
 #include <debug.h>
 #include <errno.h>
+
 #include <arpa/inet.h>
 #include <nuttx/nxflat.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -62,41 +67,104 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxflat_verifyheader
+ * Name: nxflat_init
  ****************************************************************************/
 
-int nxflat_verifyheader(const struct nxflat_hdr_s *header)
+int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
+                struct nxflat_loadinfo_s *loadinfo)
 {
-  uint16 revision;
+  uint32  datastart;
+  uint32  dataend;
+  uint32  bssstart;
+  uint32  bssend;
+  int     ret;
 
-  if (!header)
+  bvdbg("filename: %s header: %p loadinfo: %p\n", filename, header, loadinfo);
+
+  /* Clear the load info structure */
+
+  memset(loadinfo, 0, sizeof(struct nxflat_loadinfo_s));
+
+  /* Open the binary file */
+
+  loadinfo->filfd = open(filename, O_RDONLY);
+  if (loadinfo->filfd < 0)
     {
-      bdbg("NULL NXFLAT header!");
+      bdbg("Failed to open NXFLAT binary %s: %d\n", filename, ret);
+      return -errno;      
+    }
+
+  /* Read the NXFLAT header from offset 0 */
+
+  ret = nxflat_read(loadinfo, (char*)&header, sizeof(struct nxflat_hdr_s), 0);
+  if (ret < 0)
+    {
+      bdbg("Failed to read NXFLAT header: %d\n", ret);
+      return ret;
+    }
+       
+  /* Verify the NXFLAT header */
+
+  if (nxflat_verifyheader(header) != 0)
+    {
+      /* This is not an error because we will be called to attempt loading
+       * EVERY binary.  Returning -ENOEXEC simply informs the system that
+       * the file is not an NXFLAT file.  Besides, if there is something worth
+       * complaining about, nnxflat_verifyheader() has already
+       * done so.
+       */
+
+      bdbg("Bad NXFLAT header\n");
       return -ENOEXEC;
     }
 
-  /* Check the FLT header -- magic number and revision.
-   * 
-   * If the the magic number does not match.  Just return
-   * silently.  This is not our binary.
+  /* Save all of the input values in the loadinfo structure */
+
+  loadinfo->header     = header;
+
+  /* And extract some additional information from the xflat
+   * header.  Note that the information in the xflat header is in
+   * network order.
    */
-  
-  if (strncmp(header->h_magic, "NXFLAT", 4) != 0)
-    {
-      bdbg("Unrecognized magic=\"%c%c%c%c\"",
-	  header->h_magic[0], header->h_magic[1],
-	  header->h_magic[2], header->h_magic[3]);
-      return -ENOEXEC;
-    }
 
-  /* Complain a little more if the version does not match. */
+  datastart             = ntohl(header->h_datastart);
+  dataend               = ntohl(header->h_dataend);
+  bssstart              = dataend;
+  bssend                = ntohl(header->h_bssend);
 
-  revision = ntohs(header->h_rev);
-  if (revision != NXFLAT_VERSION_CURRENT)
-    {
-      bdbg("Unsupported NXFLAT version=%d\n", revision);
-      return -ENOEXEC;
-    }
+  /* And put this information into the loadinfo structure as well.
+   *
+   * Note that:
+   *
+   *   ispace_size = the address range from 0 up to datastart.
+   *   data_size   = the address range from datastart up to dataend
+   *   bss_size    = the address range from dataend up to bssend.
+   */
+
+  loadinfo->entry_offset = ntohl(header->h_entry);
+  loadinfo->ispace_size  = datastart;
+
+  loadinfo->data_size    = dataend - datastart;
+  loadinfo->bss_size     = bssend - dataend;
+  loadinfo->stack_size   = ntohl(header->h_stacksize);
+
+  /* This is the initial dspace size.  We'll recaculate this later
+   * after the memory has been allocated.  So that the caller can feel
+   * free to modify dspace_size values from now until then.
+   */
+
+  loadinfo->dspace_size  =      /* Total DSpace Size is: */
+    (NXFLAT_DATA_OFFSET +         /*   Memory set aside for ldso */
+     bssend - datastart +      /*   Data and bss segment sizes */
+     loadinfo->stack_size);     /*   (Current) stack size */
+
+  /* Get the offset to the start of the relocations (we'll relocate
+   * this later).
+   */
+
+  loadinfo->reloc_start  = ntohl(header->h_relocstart);
+  loadinfo->reloc_count  = ntohl(header->h_reloccount);
+
   return 0;
 }
 

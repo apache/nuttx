@@ -62,45 +62,6 @@ struct nxflat_ldso_info
 };
 #define NXFLAT_DATA_OFFSET sizeof(struct nxflat_ldso_info)
 
-/* An "opaque" handle that describes the xflat binary to be loaded. */
-
-typedef void *bin_handle_t;
-
-/* An "opaque" handle that describes an open file */
-
-typedef void *file_handle_t;
-
-/* This is a call table that is used by the xflat library to call
- * obtain system information.  The use of this call table allows the
- * library to be designed in a platform independent way.
- */
-
-struct nxflat_vtbl_s
-{
-  /* Allocators.  These imports keep the xflat library independent of
-   * the memory mapping and memory management facilities of the host
-   * system.
-   *
-   *   map/unmap will map/unmap a program file onto an address;
-   *   alloc/free will allocate/deallocate program memory.
-   */
-
-  void *(*map)(file_handle_t file_handle, uint32 nbytes);
-  void  (*unmap)(void *address, uint32 nbytes);
-  void *(*alloc)(uint32 nbytes);
-  void  (*free)(void *address, uint32 nbytes);
-
-  /* File access utilities.  These imports keep the xflat libary independent
-   * of the host system's file system.
-   */
-
-  file_handle_t (*open)(bin_handle_t bin_handle, const char *filename);
-  int   (*read)(bin_handle_t bin_handle, file_handle_t file_handle,
-		char *dest, uint32 nbytes,
-		uint32 fpos);
-  void  (*close)(file_handle_t file_handle);
-};
-
 /* This struct provides a desciption of the currently loaded
  * instantiation of an xflat binary.
  */
@@ -113,8 +74,8 @@ struct nxflat_loadinfo_s
    */
 
   uint32 ispace;       /* Address where hdr/text is loaded */
-                          /* 1st: struct nxflat_hdr_s */
-                          /* 2nd: text section */
+                       /* 1st: struct nxflat_hdr_s */
+                       /* 2nd: text section */
   uint32 entry_offset; /* Offset from ispace to entry point */
   uint32 ispace_size;  /* Size of ispace. */
 
@@ -142,25 +103,18 @@ struct nxflat_loadinfo_s
   uint32 reloc_start;  /* Start of array of struct flat_reloc */
   uint32 reloc_count;  /* Number of elements in reloc array */
 
-  /* These are hooks stored by nxflat_init for subsequent use.
-   * These constitute all points of contact between the flat
-   * library and the rest of the world.  These allows the flat
-   * library to opperate in a variey of contexts without change.
-   */
+  /* File descriptors */
 
-  bin_handle_t  bin_handle;   /* Like a "this" pointer.  Retains
-			       * calling context information in callbacks */
-  file_handle_t file_handle;  /* Describes an open file */
+  int    filfd;        /* Descriptor for the file being loaded */
 
   const struct nxflat_hdr_s  *header; /* A reference to the flat file header */
-  const struct nxflat_vtbl_s *vtbl;   /* Systam callback vtbl */
 
   /* At most one memory allocation will be made.  These describe that
    * allocation.
    */
 
-  uint32 alloc_start; /* Start of the allocation */
-  uint32 alloc_size;  /* Size of the allocation */
+  uint32 alloc_start;  /* Start of the allocation */
+  uint32 alloc_size;   /* Size of the allocation */
 };
 
 /****************************************************************************
@@ -175,54 +129,42 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Given the header from a possible xFLT executable, verify that it
+/* Given the header from a possible NXFLAT executable, verify that it
  * is an NXFLAT executable.
  */
 
 EXTERN int nxflat_verifyheader(const struct nxflat_hdr_s *header);
 
-/* This function is called to configure xflatlib to process an xFLT
- * program binary.  Upon return, the controlling logic has the opportunity
- * to adjust the contents of the load_info structure.
+/* This function is called to configure the library to process an NXFLAT
+ * program binary.
  */
 
-EXTERN int nxflat_init(bin_handle_t bin_handle, file_handle_t file_handle,
-	                const struct nxflat_hdr_s *header,
-	                const struct nxflat_vtbl_s *vtbl,
-	                struct nxflat_loadinfo_s *load_info);
-
-/* This function unloads the object from memory. This essentially
- * undoes the actions of nxflat_load.
- */
-
-EXTERN int nxflat_unload(struct nxflat_loadinfo_s *load_info);
+EXTERN int nxflat_init(const char *filename,
+                       struct nxflat_hdr_s *header,
+	               struct nxflat_loadinfo_s *loadinfo);
 
 /* Releases any resources committed by nxflat_init().  This essentially
- * undoes the actions of nxflat_init or nxflat_init_interpreter. */
+ * undoes the actions of nxflat_init.
+ */
 
-EXTERN int nxflat_uninit(struct nxflat_loadinfo_s *load_info);
+EXTERN int nxflat_uninit(struct nxflat_loadinfo_s *loadinfo);
 
 /* Loads the binary specified by nxflat_init into memory,
  * Completes all relocations, and clears BSS.
  */
 
-EXTERN int nxflat_load(struct nxflat_loadinfo_s *load_info);
+EXTERN int nxflat_load(struct nxflat_loadinfo_s *loadinfo);
 
-/* Adjust stack size to include argc, envc, xFLT internal usage and
- * system internal usage. */
+/* Read 'readsize' bytes from the object file at 'offset' */
 
-EXTERN void nxflat_adjuststacksize(struct nxflat_loadinfo_s *load_info,
-			            int argc, int envc, int system_usage);
+EXTERN int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
+                       int readsize, int offset);
 
-/* Initialize stack frame for execution */
+/* This function unloads the object from memory. This essentially
+ * undoes the actions of nxflat_load.
+ */
 
-EXTERN uint32 nxflat_initstack(struct nxflat_loadinfo_s *prog_load_info,
-		                struct nxflat_loadinfo_s *lib_load_info,
-		                int argc, int envc, char *p);
-
-/* Releases any resources committed by nxflat_init(). */
-
-EXTERN int nxflat_uninit(struct nxflat_loadinfo_s *load_info);
+EXTERN int nxflat_unload(struct nxflat_loadinfo_s *loadinfo);
 
 #undef EXTERN
 #if defined(__cplusplus)

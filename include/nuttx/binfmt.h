@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libnxflat/nxflat_verify.c
+ * include/nuttx/binfmt.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,70 +33,68 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_BINFMT_H
+#define __INCLUDE_NUTTX_BINFMT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <string.h>
-#include <debug.h>
-#include <errno.h>
-#include <arpa/inet.h>
-#include <nuttx/nxflat.h>
+#include <nxflat.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Constant Data
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/* This describes the file to be loaded */
+
+struct binary_s
+{
+  /* Provided to the loader */
+
+  const char  *filename;             /* Full path to the binary */
+  const char **argv;                 /* Argument list */
+
+  /* Provided by the loader (if successful) */
+
+  main_t       entrypt;              /* Entry point into a program module */
+  void        *picbase;              /* Address of the allocate .data/.bss space */
+};
+
+/* This describes one binary format handler */
+
+struct binfmt_s
+{
+  struct binfmt_s *next;             /* Supports a singly-linked list */
+  int (*load)(struct binary_s *bin); /* Verify and load binary into memory */
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: nxflat_verifyheader
- ****************************************************************************/
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
-int nxflat_verifyheader(const struct nxflat_hdr_s *header)
-{
-  uint16 revision;
+/* Register/unregister a binary format */
 
-  if (!header)
-    {
-      bdbg("NULL NXFLAT header!");
-      return -ENOEXEC;
-    }
+EXTERN int register_binfmt(struct binfmt_s *binfmt);
+EXTERN int unregister_binfmt(struct binfmt_s *binfmt);
 
-  /* Check the FLT header -- magic number and revision.
-   * 
-   * If the the magic number does not match.  Just return
-   * silently.  This is not our binary.
-   */
-  
-  if (strncmp(header->h_magic, "NXFLAT", 4) != 0)
-    {
-      bdbg("Unrecognized magic=\"%c%c%c%c\"",
-	  header->h_magic[0], header->h_magic[1],
-	  header->h_magic[2], header->h_magic[3]);
-      return -ENOEXEC;
-    }
-
-  /* Complain a little more if the version does not match. */
-
-  revision = ntohs(header->h_rev);
-  if (revision != NXFLAT_VERSION_CURRENT)
-    {
-      bdbg("Unsupported NXFLAT version=%d\n", revision);
-      return -ENOEXEC;
-    }
-  return 0;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
+#endif /* __INCLUDE_NUTTX_BINFMT_H */

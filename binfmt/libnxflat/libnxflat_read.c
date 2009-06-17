@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libnxflat/nxflat_verify.c
+ * binfmt/libnxflat/libnxflat_read.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,14 +39,18 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
+#include <unistd.h>
 #include <string.h>
+#include <nxflat.h>
 #include <debug.h>
 #include <errno.h>
+
 #include <arpa/inet.h>
 #include <nuttx/nxflat.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -62,41 +66,58 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxflat_verifyheader
+ * Name: nxflat_read
  ****************************************************************************/
 
-int nxflat_verifyheader(const struct nxflat_hdr_s *header)
+int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, int offset)
 {
-  uint16 revision;
+  ssize_t nbytes;      /* Number of bytes read */
+  off_t   rpos;        /* Position returned by lseek */
+  char   *bufptr;      /* Next buffer location to read into */
+  int     bytesleft;   /* Number of bytes of .data left to read */
+  int     bytesread;   /* Total number of bytes read */
 
-  if (!header)
-    {
-      bdbg("NULL NXFLAT header!");
-      return -ENOEXEC;
-    }
-
-  /* Check the FLT header -- magic number and revision.
-   * 
-   * If the the magic number does not match.  Just return
-   * silently.  This is not our binary.
+  /* Seek to the position in the object file where the initialized
+   * data is saved.
    */
-  
-  if (strncmp(header->h_magic, "NXFLAT", 4) != 0)
-    {
-      bdbg("Unrecognized magic=\"%c%c%c%c\"",
-	  header->h_magic[0], header->h_magic[1],
-	  header->h_magic[2], header->h_magic[3]);
-      return -ENOEXEC;
-    }
 
-  /* Complain a little more if the version does not match. */
-
-  revision = ntohs(header->h_rev);
-  if (revision != NXFLAT_VERSION_CURRENT)
+  bytesread = 0;
+  bufptr    = buffer;
+  bytesleft = readsize;
+  do
     {
-      bdbg("Unsupported NXFLAT version=%d\n", revision);
-      return -ENOEXEC;
+      rpos = lseek(loadinfo->filfd, offset, SEEK_SET);
+      if (rpos != offset)
+        {
+          bdbg("Failed to seek to position %d: %d\n", offset, errno);
+          return -errno;
+        }
+
+      /* Read the file data at offset into the user buffer */
+
+       nbytes = read(loadinfo->filfd, bufptr, bytesleft);
+       if (nbytes < 0)
+         {
+           if (errno != EINTR)
+             {
+               bdbg("Read of .data failed: %d\n", errno);
+               return -errno;
+             }
+         }
+       else if (nbytes == 0)
+         {
+           bdbg("Unexpected end of file\n");
+           return -ENODATA;
+         }
+       else
+         {
+           bytesread += nbytes;
+           bytesleft -= nbytes;
+           bufptr    += nbytes;
+           offset    += nbytes;
+         }
     }
-  return 0;
+  while (bytesread < readsize);
+  return OK;
 }
 
