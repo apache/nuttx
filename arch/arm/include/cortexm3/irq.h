@@ -109,6 +109,12 @@
 #define REG_LR              REG_R14
 #define REG_PC              REG_R15
 
+/* The PIC register is usually R10. It can be R9 is stack checking is enabled
+ * or if the user changes it with -mpic-register on the GCC command line.
+ */
+
+#define REG_PIC             REG_R10
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

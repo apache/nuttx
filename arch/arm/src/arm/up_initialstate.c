@@ -93,6 +93,21 @@ void up_initial_state(_TCB *tcb)
 
   xcp->regs[REG_PC]      = (uint32)tcb->start;
 
+  /* If this task is running PIC, then set the PIC base register to the
+   * address of the allocated D-Space region.
+   */
+
+#ifdef CONFIG_PIC
+  if (tcb->dspace != NULL)
+    {
+      /* Set the PIC base register (probably R10) to the address of the
+       * alloacated D-Space region.
+       */
+
+      xcp->regs[REG_PIC] = (uint32)tcb->dspace->region;
+    }
+#endif
+
   /* Enable or disable interrupts, based on user configuration */
 
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
