@@ -48,7 +48,7 @@
 
 #include "binfmt_internal.h"
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT) && !defined(CONFIG_BINFMT_DISABLE)
 
 /****************************************************************************
  * Pre-processor Definitions

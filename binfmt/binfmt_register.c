@@ -49,6 +49,8 @@
 
 #include "binfmt_internal.h"
 
+#ifndef CONFIG_BINFMT_DISABLE
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -99,4 +101,5 @@ int register_binfmt(FAR struct binfmt_s *binfmt)
   return -EINVAL;
 }
 
+#endif /* CONFIG_BINFMT_DISABLE */
 

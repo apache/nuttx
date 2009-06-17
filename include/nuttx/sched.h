@@ -216,7 +216,7 @@ struct _TCB
 
   /* External Module Support ****************************************************/
 
-#ifdef CONFIG_NXFLAT
+#ifdef CONFIG_PIC
   FAR void *picbase;                     /* Allocated area for .bss and .data   */
 #endif
 

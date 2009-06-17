@@ -48,6 +48,8 @@
 
 #include "binfmt_internal.h"
 
+#ifndef CONFIG_BINFMT_DISABLE
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -136,4 +138,5 @@ int load_module(const char *filename, FAR struct binary_s *bin)
   return OK;
 }
 
+#endif /* CONFIG_BINFMT_DISABLE */
 

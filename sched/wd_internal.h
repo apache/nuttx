@@ -65,7 +65,7 @@ struct wdog_s
 {
   FAR struct wdog_s *next;       /* Support for singly linked lists. */
   wdentry_t          func;       /* Function to execute when delay expires */
-#ifdef CONFIG_NXFLAT
+#ifdef CONFIG_PIC
   FAR void          *picbase;    /* PIC base address */
 #endif
   int                lag;        /* Timer associated with the delay */

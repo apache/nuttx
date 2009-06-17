@@ -51,6 +51,8 @@
 #include "os_internal.h"
 #include "binfmt_internal.h"
 
+#ifndef CONFIG_BINFMT_DISABLE
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -142,11 +144,13 @@ int exec_module(FAR const struct binary_s *bin, int priority)
 
   /* Add the DSpace address as the PIC base address */
 
+#ifdef CONFIG_PIC
   tcb->picbase = bin->dspace;
 
   /* Re-initialize the task's initial state to account for the new PIC base */
 
   up_initial_state(tcb);
+#endif
 
   /* Get the assigned pid before we start the task */
 
@@ -181,4 +185,5 @@ errout:
   return ERROR;
 }
 
+#endif /* CONFIG_BINFMT_DISABLE */
 

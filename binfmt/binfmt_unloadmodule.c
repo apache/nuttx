@@ -50,6 +50,8 @@
 
 #include "binfmt_internal.h"
 
+#ifndef CONFIG_BINFMT_DISABLE
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -102,4 +104,6 @@ int unload_module(FAR const struct binary_s *bin)
     }
   return OK;
 }
+
+#endif /* CONFIG_BINFMT_DISABLE */
 

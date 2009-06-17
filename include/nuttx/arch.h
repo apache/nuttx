@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_H
-#define __ARCH_H
+#ifndef __INCLUDE_NUTTX_ARCH_H
+#define __INCLUDE_NUTTX_ARCH_H
 
 /****************************************************************************
  * Included Files
@@ -367,15 +367,16 @@ EXTERN void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
  * Name: up_setpicbase, up_getpicbase
  *
  * Description:
- *   It NXFLAT external modules are supported, then these macros must
- *   defined to (1) get or get the PIC base register value.  These must
- *   be done with in-line assembly.
+ *   It NXFLAT external modules (or any other binary format that requires)
+ *   PIC) are supported, then these macros must defined to (1) get or get
+ *   the PIC base register value.  These must be implemented with in-line
+ *   assembly.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NXFLAT
+#ifndef CONFIG_PIC
 #  define up_setpicbase(picbase)
-#  define up_getpicbase()
+#  define up_getpicbase(ppicbase)
 #endif
 
 /****************************************************************************
@@ -529,5 +530,5 @@ EXTERN int up_putc(int ch);
 }
 #endif
 
-#endif /* __ARCH_H */
+#endif /* __INCLUDE_NUTTX_ARCH_H */
 

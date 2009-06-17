@@ -49,6 +49,8 @@
 #include <nuttx/binfmt.h>
 #include <nuttx/nxflat.h>
 
+#ifdef CONFIG_NXFLAT
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -234,4 +236,6 @@ void nxflat_uninitialize(void)
 {
   unregister_binfmt(&g_nxflatbinfmt);
 }
+
+#endif /* CONFIG_NXFLAT */
 
