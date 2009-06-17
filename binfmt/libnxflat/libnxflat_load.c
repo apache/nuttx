@@ -87,37 +87,25 @@ static const char *g_segment[] =
 
 static void nxflat_reloc(struct nxflat_loadinfo_s *loadinfo, uint32 rl)
 {
-  union
-  {
-    uint32 l;
-    struct nxflat_reloc_s s;
-  } reloc;
   uint32 *ptr;
   uint32 datastart;
 
-  /* Force the long value into a union so that we can strip off some
-   * bit-encoded values.
+  /* We only support relocations in the data sections. Verify that the
+   * relocation address lies in the data section of the file image.
    */
 
-  reloc.l = rl;
-
-  /* We only support relocations in the data sections.
-   * Verify that the the relocation address lies in the data
-   * section of the file image.
-   */
-
-  if (reloc.s.r_offset > loadinfo->datasize)
+  if (NXFLAT_RELOC_OFFSET(rl) > loadinfo->datasize)
     {
       bdbg("ERROR: Relocation at 0x%08x invalid -- "
 	  "does not lie in the data segment, size=0x%08x\n",
-	  reloc.s.r_offset, loadinfo->datasize);
+	  NXFLAT_RELOC_OFFSET(rl), loadinfo->datasize);
       bdbg("       Relocation not performed!\n");
     }
-  else if ((reloc.s.r_offset & 0x00000003) != 0)
+  else if ((NXFLAT_RELOC_OFFSET(rl) & 0x00000003) != 0)
     {
       bdbg("ERROR: Relocation at 0x%08x invalid -- "
 	  "Improperly aligned\n",
-	  reloc.s.r_offset);
+	  NXFLAT_RELOC_OFFSET(rl));
     }
   else
     {
@@ -132,13 +120,13 @@ static void nxflat_reloc(struct nxflat_loadinfo_s *loadinfo, uint32 rl)
        * DSpace.
        */
       
-      ptr = (uint32*)(datastart + reloc.s.r_offset);
+      ptr = (uint32*)(datastart + NXFLAT_RELOC_OFFSET(rl));
 
       bvdbg("Relocation of variable at DATASEG+0x%08x "
 	  "(address 0x%p, currently 0x%08x) into segment %s\n",
-	  reloc.s.r_offset, ptr, *ptr, g_segment[reloc.s.r_type]);
+	  NXFLAT_RELOC_OFFSET(rl), ptr, *ptr, g_segment[NXFLAT_RELOC_TYPE(rl)]);
 	
-      switch (reloc.s.r_type)
+      switch (NXFLAT_RELOC_TYPE(rl))
 	{
 	  /* TEXT is located at an offset of sizeof(struct nxflat_hdr_s) from
 	   * the allocated/mapped ISpace region.
@@ -173,7 +161,7 @@ static void nxflat_reloc(struct nxflat_loadinfo_s *loadinfo, uint32 rl)
 	  break;
 
 	default:
-	  bdbg("ERROR: Unknown relocation type=%d\n", reloc.s.r_type);
+	  bdbg("ERROR: Unknown relocation type=%d\n", NXFLAT_RELOC_TYPE(rl));
 	  break;
 	}
 

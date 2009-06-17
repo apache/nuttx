@@ -44,10 +44,20 @@
 #include <sys/types.h>
 
 /****************************************************************************
- * Maximum Sizes
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define NXFLAT_MAX_STRING_SIZE 64 /* Largest size of string (w/zterminator) */
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifdef CONFIG_NXFLAT_SMALL
+  typedef uint16 nxoff_t;
+#else
+  typedef uint32 nxoff_t;
+#endif
 
 /****************************************************************************
  * The NXFLAT file header
@@ -90,10 +100,10 @@ struct nxflat_hdr_s
    * The bss segment is data_end through bss_end.
    */
 
-  uint32 h_entry;
-  uint32 h_datastart;
-  uint32 h_dataend;
-  uint32 h_bssend;
+  nxoff_t h_entry;
+  nxoff_t h_datastart;
+  nxoff_t h_dataend;
+  nxoff_t h_bssend;
 
   /* Size of stack, in bytes */
 
@@ -106,8 +116,8 @@ struct nxflat_hdr_s
    * h_reloccount - The number of relocation records in the arry
    */
 
-  uint32 h_relocstart;       /* Offset of relocation records */
-  uint32 h_reloccount;       /* Number of relocation records */
+  nxoff_t h_relocstart;       /* Offset of relocation records */
+  nxoff_t h_reloccount;       /* Number of relocation records */
 
   /* Imported symbol table (NOTE no symbols are exported)
    *
@@ -121,33 +131,40 @@ struct nxflat_hdr_s
    * h_importcount   - The number of records in the h_exportsymbols array.
    */
 
-  uint32  h_importsymbols;   /* Offset to list of imported symbols */
+  nxoff_t h_importsymbols;   /* Offset to list of imported symbols */
   uint16  h_importcount;     /* Number of imported symbols */
 };
 
 /****************************************************************************
  * NXFLAT Relocation types.
  *
- * The relocation records are an array of the following type.  The fields
- * in each element are stored in native machine order.
+ * The relocation records are an array of the following type.
  ****************************************************************************/
+
+struct nxflat_reloc_s
+{
+  uint32 r_info;             /* Bit-encoded relocation info */
+};
+
+/* The top three bits of the relocation info is the relocation type (see the
+ * NXFLAT_RELOC_TYPE_* definitions below.  This is an unsigned value.
+ */
+
+#define NXFLAT_RELOC_TYPE(r)    ((uint32)(r) >> 28)
+
+/* The bottom 28 bits of the relocation info is the (non-negative) offset into
+ * the D-Space that needs the fixup.
+ */
+
+#define NXFLAT_RELOC_OFFSET(r)  ((uint32)(r) & 0x1fffffff)
+
+/* These are possible values for the relocation type */
 
 #define NXFLAT_RELOC_TYPE_NONE  0      /* Invalid relocation type */
 #define NXFLAT_RELOC_TYPE_TEXT  1      /* Symbol lies in .text region */
 #define NXFLAT_RELOC_TYPE_DATA  2      /* Symbol lies in .data region */
 #define NXFLAT_RELOC_TYPE_BSS   3      /* Symbol lies in .bss region */
 #define NXFLAT_RELOC_TYPE_NUM   4
-
-struct nxflat_reloc_s
-{
-#ifdef CONFIG_ENDIAN_BIG
-  uint32 r_type   : 2; 
-  sint32 r_offset : 30;
-#else
-  sint32 r_offset : 30;
-  uint32 r_type   : 2; 
-#endif
-};
 
 /****************************************************************************
  * NXFLAT Imported symbol type 
