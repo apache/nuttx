@@ -145,7 +145,7 @@ int exec_module(FAR const struct binary_s *bin, int priority)
   /* Add the DSpace address as the PIC base address */
 
 #ifdef CONFIG_PIC
-  tcb->picbase = bin->dspace;
+  tcb->dspace = bin->dspace;
 
   /* Re-initialize the task's initial state to account for the new PIC base */
 

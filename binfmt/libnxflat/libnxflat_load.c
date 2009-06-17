@@ -118,7 +118,7 @@ static void nxflat_reloc(struct nxflat_loadinfo_s *loadinfo, uint32 rl)
        * DSpace to hold information needed by ld.so at run time.
        */
 
-      datastart = loadinfo->dspace;
+      datastart = (uint32)loadinfo->dspace->region;
 
       /* Get a pointer to the value that needs relocation in
        * DSpace.
@@ -257,22 +257,22 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    * uninitialized ISpace memory.
    */
 
-  loadinfo->dspace = (uint32)malloc(loadinfo->dsize);
+  loadinfo->dspace = (struct dspace_s *)malloc(SIZEOF_DSPACE_S(loadinfo->dsize));
   if (loadinfo->dspace == 0)
     {
       bdbg("Failed to allocate DSpace\n");
       ret = -ENOMEM;
       goto errout;
     }
+  loadinfo->dspace->crefs = 1;
 
-  bvdbg("Allocated DSpace (%d bytes) at %08x\n",
-      loadinfo->dsize, loadinfo->dspace);
+  bvdbg("Allocated DSpace (%d bytes) at %p\n", loadinfo->dsize, loadinfo->dspace);
 
   /* Now, read the data into allocated DSpace at doffset into the
    * allocated DSpace memory.
    */
 
-  ret = nxflat_read(loadinfo, (char*)loadinfo->dspace, dreadsize, doffset);
+  ret = nxflat_read(loadinfo, (char*)loadinfo->dspace->region, dreadsize, doffset);
   if (ret < 0)
     {
       bdbg("Failed to read .data section: %d\n", ret);
@@ -285,10 +285,10 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   /* Resolve the address of the relocation table.  In the file, the
    * relocations should lie at the same offset as BSS.  The current
    * value of relocstart is the offset from the beginning of the file.
-   * The following adjustment will convert it to an address in DSpace.
+   * The following adjustment will convert it to an address in dspace->
    */
 
-  reloctab = (uint32*)(loadinfo->relocstart + loadinfo->dspace - loadinfo->isize);
+  reloctab = (uint32*)(loadinfo->relocstart + (uint32)loadinfo->dspace->region - loadinfo->isize);
 
   bvdbg("Relocation table at 0x%p, reloccount=%d\n",
       reloctab, loadinfo->reloccount);
@@ -304,7 +304,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    * in the file.
    */
 
-  memset((void*)(loadinfo->dspace + loadinfo->datasize),
+  memset((void*)(loadinfo->dspace->region + loadinfo->datasize),
 	          0, loadinfo->bsssize);
   return OK;
 

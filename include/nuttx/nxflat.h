@@ -40,7 +40,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <nxflat.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,29 +63,29 @@ struct nxflat_loadinfo_s
    * text section instance in the system for each module.
    */
 
-  uint32 ispace;       /* Address where hdr/text is loaded */
-  uint32 entryoffs;    /* Offset from ispace to entry point */
-  uint32 isize;        /* Size of ispace. */
+  uint32 ispace;           /* Address where hdr/text is loaded */
+  uint32 entryoffs;        /* Offset from ispace to entry point */
+  uint32 isize;            /* Size of ispace. */
 
   /* Data Space (DSpace): This region contains all information that in referenced
    * as data (other than the stack which is separately allocated).  There will be
    * a unique instance of DSpace (and stack) for each instance of a process.
    */
 
-  uint32 dspace;       /* Address where data/bss/etc. is loaded */
-  uint32 datasize;     /* Size of data segment in dspace */
-  uint32 bsssize;      /* Size of bss segment in dspace */
-  uint32 stacksize;    /* Size of stack (not allocated) */
-  uint32 dsize;        /* Size of dspace (may be large than parts) */
+  struct dspace_s *dspace; /* Allocated D-Space (data/bss/etc) */
+  uint32 datasize;         /* Size of data segment in dspace */
+  uint32 bsssize;          /* Size of bss segment in dspace */
+  uint32 stacksize;        /* Size of stack (not allocated) */
+  uint32 dsize;            /* Size of dspace (may be large than parts) */
 
   /* This is temporary memory where relocation records will be loaded. */
 
-  uint32 relocstart;   /* Start of array of struct flat_reloc */
-  uint32 reloccount;   /* Number of elements in reloc array */
+  uint32 relocstart;       /* Start of array of struct flat_reloc */
+  uint32 reloccount;       /* Number of elements in reloc array */
 
   /* File descriptors */
 
-  int    filfd;        /* Descriptor for the file being loaded */
+  int    filfd;            /* Descriptor for the file being loaded */
 
   const struct nxflat_hdr_s  *header; /* A reference to the flat file header */
 };

@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <nxflat.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,7 +66,7 @@ struct binary_s
 
   main_t       entrypt;              /* Entry point into a program module */
   FAR void    *ispace;               /* Memory-mapped, I-space (.text) address */
-  FAR void    *dspace;               /* Address of the allocated .data/.bss space */
+  FAR struct dspace_s *dspace;       /* Address of the allocated .data/.bss space */
   size_t       isize;                /* Size of the I-space region (needed for munmap) */
   size_t       stacksize;            /* Size of the stack in bytes (unallocated) */
 };

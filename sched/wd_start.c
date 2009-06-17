@@ -158,9 +158,7 @@ STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   /* Save the data in the watchdog structure */
 
   wdog->func = wdentry;         /* Function to execute when delay expires */
-#ifdef CONFIG_PIC
   up_getpicbase(&wdog->picbase);
-#endif
   wdog->argc = argc;
 
   va_start(ap, argc);

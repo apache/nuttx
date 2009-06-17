@@ -138,9 +138,16 @@ int sched_releasetcb(FAR _TCB *tcb)
       /* Delete the tasks's allocated DSpace region (external modules only) */
 
 #ifdef CONFIG_PIC
-      if (tcb->picbase)
+      if (tcb->dspace)
         {
-          sched_free(tcb->picbase);
+          if (tcb->dspace->crefs <= 1)
+            {
+              sched_free(tcb->dspace);
+            }
+          else
+            {
+              tcb->dspace->crefs--;
+            }
         }
 #endif
 

@@ -161,6 +161,18 @@ typedef struct environ_s environ_t;
 # define SIZEOF_ENVIRON_T(alloc) (sizeof(environ_t) + alloc - 1)
 #endif
 
+/* This structure describes a reference counted D-Space region */
+
+struct dspace_s
+{
+  uint32 crefs;               /* This is the number of pthreads that shared the
+                               * the same D-Space.
+                               */
+  ubyte  region[1];           /* Beginning of the allocated region */
+};
+
+#define SIZEOF_DSPACE_S(n) (sizeof(struct dspace_s) - 1 + (n))
+
 /* This is the task control block (TCB) */
 
 struct _TCB
@@ -217,7 +229,7 @@ struct _TCB
   /* External Module Support ****************************************************/
 
 #ifdef CONFIG_PIC
-  FAR void *picbase;                     /* Allocated area for .bss and .data   */
+  FAR struct dspace_s *dspace;           /* Allocated area for .bss and .data   */
 #endif
 
   /* POSIX Thread Specific Data *************************************************/

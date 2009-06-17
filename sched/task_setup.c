@@ -143,6 +143,43 @@ static STATUS task_assignpid(FAR _TCB *tcb)
 }
 
 /****************************************************************************
+ * Function: task_dupdspace
+ *
+ * Description:
+ *   When a new task or thread is created from a PIC module, then that
+ *   module (probably) intends the task or thread to execute in the same
+ *   D-Space.  This function will duplicate the D-Space for that purpose.
+ *
+ * Parameters:
+ *   tcb - The TCB of the new task.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC
+static inline void task_dupdspace(FAR _TCB *tcb)
+{
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  if (rtcb->dspace != NULL)
+    {
+      /* Copy the D-Space structure reference and increment the reference
+       * count on the memory.  The D-Space memory will persist until the
+       * last thread exits (see sched_releasetcb()).
+       */
+
+      tcb->dspace = rtcb->dspace;
+      tcb->dspace->crefs++;
+    }
+}
+#else
+#  define task_dupdspace(tcb)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -150,11 +187,11 @@ static STATUS task_assignpid(FAR _TCB *tcb)
  * Name: task_schedsetup
  *
  * Description:
- *   This functions initializes a Task Control Block (TCB)
- *   in preparation for starting a new thread.
+ *   This functions initializes a Task Control Block (TCB) in preparation
+ *   for starting a new thread.
  *
- *   task_schedsetup() is called from task_init(),
- *   task_start(), and pthread_create();
+ *   task_schedsetup() is called from task_init(), task_start(), and
+ *   pthread_create();
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -165,8 +202,8 @@ static STATUS task_assignpid(FAR _TCB *tcb)
  * Return Value:
  *   OK on success; ERROR on failure.
  *
- *   This function can only failure is it is unable to assign
- *   a new, unique task ID to the TCB (errno is not set).
+ *   This function can only failure is it is unable to assign a new, unique
+ *   task ID to the TCB (errno is not set).
  *
  ****************************************************************************/
 
@@ -203,6 +240,13 @@ STATUS task_schedsetup(FAR _TCB *tcb, int priority,
        */
 
       tcb->task_state   = TSTATE_TASK_INVALID;
+
+      /* Clone the parent tasks D-Space (if it was running PIC).  This
+       * must be done before calling up_initial_state() so that the
+       * state setup will take the PIC address base into account.
+       */
+
+      task_dupdspace(tcb);
 
       /* Initialize the processor-specific portion of the TCB */
 
