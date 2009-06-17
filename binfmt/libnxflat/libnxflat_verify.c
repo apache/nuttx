@@ -67,8 +67,6 @@
 
 int nxflat_verifyheader(const struct nxflat_hdr_s *header)
 {
-  uint16 revision;
-
   if (!header)
     {
       bdbg("NULL NXFLAT header!");
@@ -88,15 +86,6 @@ int nxflat_verifyheader(const struct nxflat_hdr_s *header)
 	  header->h_magic[2], header->h_magic[3]);
       return -ENOEXEC;
     }
-
-  /* Complain a little more if the version does not match. */
-
-  revision = ntohs(header->h_rev);
-  if (revision != NXFLAT_VERSION_CURRENT)
-    {
-      bdbg("Unsupported NXFLAT version=%d\n", revision);
-      return -ENOEXEC;
-    }
-  return 0;
+  return OK;
 }
 

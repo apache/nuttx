@@ -50,71 +50,42 @@
  * Public Types
  ****************************************************************************/
 
-/* When DSpace is allocated, space is reserved at the beginning to
- * hold ldso-specific information.  The following structure defines
- * that information.  This structure can be referenced at run-time
- * using a negative offset from the PID base address.
- */
-
-struct nxflat_ldso_info
-{
-  uint32 dspace; /* The beginning of ldso DSpace */
-};
-#define NXFLAT_DATA_OFFSET sizeof(struct nxflat_ldso_info)
-
-/* This struct provides a desciption of the currently loaded
- * instantiation of an xflat binary.
+/* This struct provides a desciption of the currently loaded instantiation
+ * of an nxflat binary.
  */
 
 struct nxflat_loadinfo_s
 {
-  /* Instruction Space (ISpace):  This region contains the flat
-   * file header plus everything from the text section.  Ideally,
-   * will have only one text section instance in the system.
+  /* Instruction Space (ISpace):  This region contains the nxflat file header
+   * plus everything from the text section.  Ideally, will have only one mmap'ed
+   * text section instance in the system for each module.
    */
 
   uint32 ispace;       /* Address where hdr/text is loaded */
-                       /* 1st: struct nxflat_hdr_s */
-                       /* 2nd: text section */
-  uint32 entry_offset; /* Offset from ispace to entry point */
-  uint32 ispace_size;  /* Size of ispace. */
+  uint32 entryoffs;    /* Offset from ispace to entry point */
+  uint32 isize;        /* Size of ispace. */
 
-  /* Data Space (DSpace): This region contains all information that
-   * in referenced as data.  There will be a unique instance of
-   * DSpace for each instance of a process.
+  /* Data Space (DSpace): This region contains all information that in referenced
+   * as data (other than the stack which is separately allocated).  There will be
+   * a unique instance of DSpace (and stack) for each instance of a process.
    */
 
-  uint32 dspace;       /* Address where data/bss/stack/etc. is loaded */
-                          /* 1st: Memory set aside for ldso */
-  uint32 data_size;    /* 2nd: Size of data segment in dspace */
-  uint32 bss_size;     /* 3rd: Size of bss segment in dspace */
-                          /* 4th: Potential padding from relocs/mm/etc. */
-  uint32 stack_size;   /* 5th: Size of stack in dspace */
-  uint32 dspace_size;  /* Size of dspace (may be large than parts) */
-
-  /* Program arguments (addresses in dspace) */
-
-  uint32 arg_start;    /* Beginning of program arguments */
-  uint32 env_start;    /* End of argments, beginning of env */
-  uint32 env_end;      /* End(+4) of env */
+  uint32 dspace;       /* Address where data/bss/etc. is loaded */
+  uint32 datasize;     /* Size of data segment in dspace */
+  uint32 bsssize;      /* Size of bss segment in dspace */
+  uint32 stacksize;    /* Size of stack (not allocated) */
+  uint32 dsize;        /* Size of dspace (may be large than parts) */
 
   /* This is temporary memory where relocation records will be loaded. */
 
-  uint32 reloc_start;  /* Start of array of struct flat_reloc */
-  uint32 reloc_count;  /* Number of elements in reloc array */
+  uint32 relocstart;   /* Start of array of struct flat_reloc */
+  uint32 reloccount;   /* Number of elements in reloc array */
 
   /* File descriptors */
 
   int    filfd;        /* Descriptor for the file being loaded */
 
   const struct nxflat_hdr_s  *header; /* A reference to the flat file header */
-
-  /* At most one memory allocation will be made.  These describe that
-   * allocation.
-   */
-
-  uint32 alloc_start;  /* Start of the allocation */
-  uint32 alloc_size;   /* Size of the allocation */
 };
 
 /****************************************************************************

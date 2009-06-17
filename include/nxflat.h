@@ -60,15 +60,11 @@
 struct nxflat_hdr_s
 {
   /* The "magic number identifying the file type.  This field should contain
-   * "NxFT"
+   * "NxFT".  NOTE that there is not other versioning information other than
+   * this magic number.
    */
 
   char  h_magic[4];
-
-  /* NXFLAT revision number number. */
-
-  uint16 h_rev;
-  uint16 h_pad;
 
   /* The following fields provide the memory map for the nxflat binary.
    *
@@ -113,7 +109,7 @@ struct nxflat_hdr_s
   uint32 h_relocstart;       /* Offset of relocation records */
   uint32 h_reloccount;       /* Number of relocation records */
 
-  /* Imported and exported symbol tables
+  /* Imported symbol table (NOTE no symbols are exported)
    *
    * h_importsymbols - Offset to the beginning of an array of imported
    *                   symbol structures (struct nxflat_import).  The
@@ -123,38 +119,11 @@ struct nxflat_hdr_s
    *                   the beginning of the file) to the name of
    *                   a symbol string.  This string is null-terminated.
    * h_importcount   - The number of records in the h_exportsymbols array.
-   * h_exportsymbols - Offset to the beginning of an array of export
-   *                   symbol structures (struct nxflat_export).  The
-   *                   h_importsymbols offset is relative to the
-   *                   beginning of the file.  Each entry of the
-   *                   array contains an uint32 offset (again from
-   *                   the beginning of the file) to the name of
-   *                   a symbol string.  This string is null-terminated.
-   * h_exportcount   - The number of records in the h_exportsymbols array.
-   *
-   * NOTE:  All of the arrays referenced in the header reside in the
-   * the .text section.  This is possible because these arrays are
-   * read-only and are only referenced by the load.  Residing in text
-   * also guarantees that only one copy of the array is required.
-   *
-   * An exception is the h_importsymbols array with will lie
-   * in .data.  This array contains write-able data and must have
-   * a single instance per process.  NOTE:  The string offset contained
-   * within nxflat_import still refers to strings residing in the text
-   * section.
    */
 
   uint32  h_importsymbols;   /* Offset to list of imported symbols */
-  uint32  h_exportsymbols;   /* Offset to list of exported symbols */
   uint16  h_importcount;     /* Number of imported symbols */
-  uint16  h_exportcount;     /* Number of imported symbols */
 };
-
-/* Legal values for the version field.  */
-
-#define NXFLAT_VERSION_NONE     0      /* Invalid NXFLAT version */
-#define NXFLAT_VERSION_CURRENT  1      /* Current version */
-#define NXFLAT_VERSION_NUM      2
 
 /****************************************************************************
  * NXFLAT Relocation types.
@@ -191,19 +160,6 @@ struct nxflat_import_s
 {
   uint32 i_funcname;    /* Offset to name of imported function */
   uint32 i_funcaddress; /* Resolved address of imported function */
-};
-
-/****************************************************************************
- * Exported symbol type
- *
- * The exported symbols are an array of the following type.  The fields
- * in each element are stored in native machine order.
- ****************************************************************************/
-
-struct nxflat_export_s
-{
-  uint32 x_funcname;    /* Offset to name of exported function */
-  uint32 x_funcaddress; /* Address of exported function */
 };
 
 #endif /* __INCLUDE_NXFLAT_H */

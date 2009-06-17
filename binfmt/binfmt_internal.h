@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/binfmt.h
+ * binfmt/binfmt_internal.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_BINFMT_H
-#define __INCLUDE_NUTTX_BINFMT_H
+#ifndef __BINFMT_BINFMT_INTERNAL_H
+#define __BINFMT_BINFMT_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -42,44 +42,15 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <nxflat.h>
+
+#include <nuttx/binfmt.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This describes the file to be loaded */
-
-struct binary_s
-{
-  /* Provided to the loader */
-
-  FAR const char  *filename;         /* Full path to the binary */
-  FAR const char **argv;             /* Argument list */
-
-  /* Provided by the loader (if successful) */
-
-  main_t       entrypt;              /* Entry point into a program module */
-  FAR void    *ispace;               /* Memory-mapped, I-space (.text) address */
-  FAR void    *dspace;               /* Address of the allocated .data/.bss space */
-  size_t       isize;                /* Size of the I-space region (needed for munmap) */
-  size_t       stacksize;            /* Size of the stack in bytes (unallocated) */
-};
-
-/* This describes one binary format handler */
-
-struct binfmt_s
-{
-  FAR struct binfmt_s *next;             /* Supports a singly-linked list */
-  int (*load)(FAR struct binary_s *bin); /* Verify and load binary into memory */
-};
-
-/****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
@@ -90,30 +61,29 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Register a binary format handler */
+/* This is a list of registered handlers for different binary formats.  This
+ * list should only be accessed by normal user programs.  It should be sufficient
+ * protection to simply disable pre-emption when accessing this list.
+ */
 
-EXTERN int register_binfmt(FAR struct binfmt_s *binfmt);
+EXTERN FAR struct binfmt_s *g_binfmts;
 
-/* Unregister a binary format handler */
+/***********************************************************************
+ * Public Function Prototypes
+ ***********************************************************************/
 
-EXTERN int unregister_binfmt(FAR struct binfmt_s *binfmt);
+/* Dump the contents of strtuc binary_s */
 
-/* Load a module into memory */
-
-EXTERN int load_module(const char *filename, FAR struct binary_s *bin);
-
-/* Unload a (non-running) module from memory */
-
-EXTERN int unload_module(FAR const struct binary_s *bin);
-
-/* Execute a module that has been loaded into memory */
-
-EXTERN int exec_module(FAR const struct binary_s *bin);
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
+EXTERN int dump_module(FAR const struct binary_s *bin);
+#else
+#  define dump_module(bin)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_BINFMT_H */
+#endif /* __BINFMT_BINFMT_INTERNAL_H */
 

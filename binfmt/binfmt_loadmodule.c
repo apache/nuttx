@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/binfmt.h
+ * binfmt/binfmt_loadmodule.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,87 +33,95 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_BINFMT_H
-#define __INCLUDE_NUTTX_BINFMT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <nxflat.h>
+
+#include <sched.h>
+#include <debug.h>
+#include <errno.h>
+
+#include <nuttx/binfmt.h>
+
+#include "binfmt_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Private Function Prototypes
  ****************************************************************************/
-
-/* This describes the file to be loaded */
-
-struct binary_s
-{
-  /* Provided to the loader */
-
-  FAR const char  *filename;         /* Full path to the binary */
-  FAR const char **argv;             /* Argument list */
-
-  /* Provided by the loader (if successful) */
-
-  main_t       entrypt;              /* Entry point into a program module */
-  FAR void    *ispace;               /* Memory-mapped, I-space (.text) address */
-  FAR void    *dspace;               /* Address of the allocated .data/.bss space */
-  size_t       isize;                /* Size of the I-space region (needed for munmap) */
-  size_t       stacksize;            /* Size of the stack in bytes (unallocated) */
-};
-
-/* This describes one binary format handler */
-
-struct binfmt_s
-{
-  FAR struct binfmt_s *next;             /* Supports a singly-linked list */
-  int (*load)(FAR struct binary_s *bin); /* Verify and load binary into memory */
-};
 
 /****************************************************************************
- * Public Functions
+ * Private Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/***********************************************************************
+ * Public Functions
+ ***********************************************************************/
+
+/***********************************************************************
+ * Name: load_module
+ *
+ * Description:
+ *   Load a module into memory and prep it for execution.
+ *
+ ***********************************************************************/
+
+int load_module(const char *filename, FAR struct binary_s *bin)
+{
+  FAR struct binfmt_s *binfmt;
+  int ret;
+
+#ifdef CONFIG_DEBUG
+  if (!filename || !bin)
+    {
+      ret = -EINVAL;
+    }
+  else
+    {
 #endif
+      bdbg("Loading %s\n", filename);
 
-/* Register a binary format handler */
+      /* Disabling pre-emption should be sufficient protection while
+       * accessing the list of registered binary format handlers.
+       */
 
-EXTERN int register_binfmt(FAR struct binfmt_s *binfmt);
+      sched_lock();
 
-/* Unregister a binary format handler */
+      /* Traverse the list of registered binary format handlers.  Stop
+       * when either (1) a handler recognized and loads the format, or
+       * (2) no handler recognizes the format.
+       */
 
-EXTERN int unregister_binfmt(FAR struct binfmt_s *binfmt);
+      for (binfmt = g_binfmts; binfmt; binfmt = binfmt->next)
+        {
+          /* Use this handler to try to load the format */
 
-/* Load a module into memory */
+          ret = binfmt->load(bin);
+          if (ret == OK)
+            {
 
-EXTERN int load_module(const char *filename, FAR struct binary_s *bin);
+              /* Successfully loaded -- break out with ret == 0 */
 
-/* Unload a (non-running) module from memory */
+              dump_module(bin);
+              break;
+            }
+        }
 
-EXTERN int unload_module(FAR const struct binary_s *bin);
+      sched_unlock();
+    }
 
-/* Execute a module that has been loaded into memory */
-
-EXTERN int exec_module(FAR const struct binary_s *bin);
-
-#undef EXTERN
-#if defined(__cplusplus)
+  if (ret < 0) bdbg("Returning %d\n", ret);
+  return ret;
 }
-#endif
 
-#endif /* __INCLUDE_NUTTX_BINFMT_H */
 

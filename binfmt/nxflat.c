@@ -64,7 +64,7 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo);
 #endif
 
 /****************************************************************************
- * Private Constant Data
+ * Private Data
  ****************************************************************************/
 
 static struct binfmt_s g_nxflatbinfmt =
@@ -103,45 +103,31 @@ static void nxflat_dumpmemory(void *addr, int nbytes)
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
 static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 {
-  unsigned long dspace_size =
-    NXFLAT_DATA_OFFSET +
-    loadinfo->data_size +
-    loadinfo->bss_size +
-    loadinfo->stack_size;
+  unsigned long dsize = loadinfo->datasize + loadinfo->bsssize;
 
   bdbg("LOAD_INFO:\n");
   bdbg("  ISPACE:\n");
   bdbg("    ispace:       %08lx\n", loadinfo->ispace);
-  bdbg("    entry_offset: %08lx\n", loadinfo->entry_offset);
-  bdbg("    ispace_size:  %08lx\n", loadinfo->ispace_size);
+  bdbg("    entryoffs:    %08lx\n", loadinfo->entryoffs);
+  bdbg("    isize:        %08lx\n", loadinfo->isize);
 
   bdbg("  DSPACE:\n");
   bdbg("    dspace:       %08lx\n", loadinfo->dspace);
-  bdbg("      (ldso):     %08x\n",  NXFLAT_DATA_OFFSET);
-  bdbg("    data_size:    %08lx\n", loadinfo->data_size);
-  bdbg("    bss_size:     %08lx\n", loadinfo->bss_size);
-  bdbg("      (pad):      %08lx\n", loadinfo->dspace_size - dspace_size);
-  bdbg("    stack_size:   %08lx\n", loadinfo->stack_size);
-  bdbg("    dspace_size:  %08lx\n", loadinfo->dspace_size);
-
-  bdbg("  ARGUMENTS:\n");
-  bdbg("    arg_start:    %08lx\n", loadinfo->arg_start);
-  bdbg("    env_start:    %08lx\n", loadinfo->env_start);
-  bdbg("    env_end:      %08lx\n", loadinfo->env_end);
+  bdbg("    datasize:     %08lx\n", loadinfo->datasize);
+  bdbg("    bsssize:      %08lx\n", loadinfo->bsssize);
+  bdbg("      (pad):      %08lx\n", loadinfo->dsize - dsize);
+  bdbg("    stacksize:    %08lx\n", loadinfo->stacksize);
+  bdbg("    dsize:        %08lx\n", loadinfo->dsize);
 
   bdbg("  RELOCS:\n");
-  bdbg("    reloc_start:  %08lx\n", loadinfo->reloc_start);
-  bdbg("    reloc_count:  %08lx\n", loadinfo->reloc_count);
+  bdbg("    relocstart:   %08lx\n", loadinfo->relocstart);
+  bdbg("    reloccount:   %08lx\n", loadinfo->reloccount);
 
   bdbg("  HANDLES:\n");
   bdbg("    filfd:        %d\n",    loadinfo->filfd);
 
   bdbg("  NXFLT HEADER:");
   bdbg("    header:       %p\n",    loadinfo->header);
-
-  bdbg("  ALLOCATIONS:\n");
-  bdbg("    alloc_start:  %08lx\n", loadinfo->alloc_start);
-  bdbg("    alloc_size:   %08lx\n", loadinfo->alloc_size);
 }
 #else /* CONFIG_XFLAT_DEBUG */
 # define nxflat_dumploadinfo(i)
@@ -187,11 +173,14 @@ static int nxflat_loadbinary(struct binary_s *binp)
 
   /* Return the load information */
 
-  binp->entrypt = (main_t)(loadinfo.ispace + loadinfo.entry_offset);
-  binp->picbase = (void*)loadinfo.dspace;
+  binp->entrypt   = (main_t)(loadinfo.ispace + loadinfo.entryoffs);
+  binp->ispace    = (void*)loadinfo.ispace;
+  binp->dspace    = (void*)loadinfo.dspace;
+  binp->isize     = loadinfo.isize;
+  binp->stacksize = loadinfo.stacksize;
 
   bvdbg("ENTRY CODE:\n");
-  nxflat_dumpmemory(binp->entrypt, 16*sizeof(unsigned long));
+  nxflat_dumpmemory(binp->entrypt, 16*sizeof(uint32));
   nxflat_uninit(&loadinfo);
   return OK;
 }

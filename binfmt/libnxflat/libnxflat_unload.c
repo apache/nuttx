@@ -75,16 +75,11 @@ int nxflat_unload(struct nxflat_loadinfo_s *loadinfo)
 {
   /* Reset the contents of the info structure. */
 
-  /* Nothing is allocated */
-
-  loadinfo->alloc_start = 0;
-  loadinfo->alloc_size  = 0;
-
   /* Release the memory segments */
 
   if (loadinfo->ispace)
     {
-      munmap((void*)loadinfo->ispace, loadinfo->ispace_size);
+      munmap((void*)loadinfo->ispace, loadinfo->isize);
       loadinfo->ispace = 0;
     }
 

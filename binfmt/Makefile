@@ -35,14 +35,21 @@
 
 -include $(TOPDIR)/Make.defs
 
+ifeq ($(CONFIG_NXFLAT),y)
 include libnxflat/Make.defs
+LIBNXFLAT_CSRCS	+= nxflat.c 
+endif
+
+BINFMT_ASRCS	=
+BINFMT_CSRCS	= binfmt_globals.c binfmt_register.c binfmt_unregister.c \
+		  binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_dumpmodule.c
 
 SUBDIRS		= libnxflat
 
-ASRCS		= $(LIBNXFLAT_ASRCS)
+ASRCS		= $(BINFMT_ASRCS) $(LIBNXFLAT_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= nxflat.c $(LIBNXFLAT_CSRCS)
+CSRCS		= $(BINFMT_CSRCS) $(LIBNXFLAT_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

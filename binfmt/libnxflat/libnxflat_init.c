@@ -136,34 +136,30 @@ int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
    *
    * Note that:
    *
-   *   ispace_size = the address range from 0 up to datastart.
-   *   data_size   = the address range from datastart up to dataend
-   *   bss_size    = the address range from dataend up to bssend.
+   *   isize       = the address range from 0 up to datastart.
+   *   datasize   = the address range from datastart up to dataend
+   *   bsssize    = the address range from dataend up to bssend.
    */
 
-  loadinfo->entry_offset = ntohl(header->h_entry);
-  loadinfo->ispace_size  = datastart;
+  loadinfo->entryoffs   = ntohl(header->h_entry);
+  loadinfo->isize       = datastart;
 
-  loadinfo->data_size    = dataend - datastart;
-  loadinfo->bss_size     = bssend - dataend;
-  loadinfo->stack_size   = ntohl(header->h_stacksize);
+  loadinfo->datasize    = dataend - datastart;
+  loadinfo->bsssize     = bssend - dataend;
+  loadinfo->stacksize   = ntohl(header->h_stacksize);
 
-  /* This is the initial dspace size.  We'll recaculate this later
-   * after the memory has been allocated.  So that the caller can feel
-   * free to modify dspace_size values from now until then.
+  /* This is the initial dspace size.  We'll re-calculate this later
+   * after the memory has been allocated.
    */
 
-  loadinfo->dspace_size  =      /* Total DSpace Size is: */
-    (NXFLAT_DATA_OFFSET +         /*   Memory set aside for ldso */
-     bssend - datastart +      /*   Data and bss segment sizes */
-     loadinfo->stack_size);     /*   (Current) stack size */
+  loadinfo->dsize       = bssend - datastart;
 
   /* Get the offset to the start of the relocations (we'll relocate
    * this later).
    */
 
-  loadinfo->reloc_start  = ntohl(header->h_relocstart);
-  loadinfo->reloc_count  = ntohl(header->h_reloccount);
+  loadinfo->relocstart  = ntohl(header->h_relocstart);
+  loadinfo->reloccount  = ntohl(header->h_reloccount);
 
   return 0;
 }
