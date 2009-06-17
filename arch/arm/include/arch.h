@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/arch.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,41 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* This identifies the register the is used by the processor as the PIC base
+ * register.  It is usually r9 or r10
+ */
+
+#define PIC_REG         r10
+#define PIC_REG_STRING "r10"
+
+/* Macros to get and set the PIC base register.  picbase is assumed to be
+ * of type (void*) and that it will fit into a uint32.  These must be
+ * inline so that they will be compatible with the ABIs rules for
+ * preserving the PIC register
+ */
+
+#define up_getpicbase(ppicbase) \
+do { \
+  uint32 picbase; \
+  __asm__ \
+  ( \
+    "\tmov %0, " PIC_REG_STRING "\n\t" \
+    : "=r"(picbase) \
+  ); \
+  *ppicbase = (FAR void*)picbase; \
+} while (0)
+
+#define up_setpicbase(picbase) \
+do { \
+  uint32 _picbase = (uint32)picbase; \
+  __asm__ \
+  ( \
+    "\tmov " PIC_REG_STRING ", %0\n\t" \
+    : : "r"(_picbase) : PIC_REG_STRING \
+  ); \
+} while (0)
+
 
 /****************************************************************************
  * Inline functions
