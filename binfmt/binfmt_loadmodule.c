@@ -64,17 +64,22 @@
  * Private Functions
  ****************************************************************************/
 
-/***********************************************************************
+/****************************************************************************
  * Public Functions
- ***********************************************************************/
+ ****************************************************************************/
 
-/***********************************************************************
+/****************************************************************************
  * Name: load_module
  *
  * Description:
  *   Load a module into memory and prep it for execution.
  *
- ***********************************************************************/
+ * Returned Value:
+ *   This is an end-user function, so it follows the normal convention:
+ *   Returns 0 (OK) on success.  On failure, it returns -1 (ERROR) with
+ *   errno set appropriately.
+ *
+ ****************************************************************************/
 
 int load_module(const char *filename, FAR struct binary_s *bin)
 {
@@ -120,8 +125,15 @@ int load_module(const char *filename, FAR struct binary_s *bin)
       sched_unlock();
     }
 
-  if (ret < 0) bdbg("Returning %d\n", ret);
-  return ret;
+  /* This is an end-user function.  Return failures via errno */
+
+  if (ret < 0)
+    {
+      bdbg("Returning errno %d\n", -ret);
+      errno = -ret;
+      return ERROR;
+    }
+  return OK;
 }
 
 

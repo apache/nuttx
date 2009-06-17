@@ -100,42 +100,133 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Given the header from a possible NXFLAT executable, verify that it
- * is an NXFLAT executable.
- */
+/****************************************************************************
+ * These are APIs exported by libnxflat (and may be used outside of NuttX):
+ ****************************************************************************/
+
+/***********************************************************************
+ * Name: 
+ *
+ * Description:
+ *   Given the header from a possible NXFLAT executable, verify that it
+ *   is an NXFLAT executable.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ***********************************************************************/
 
 EXTERN int nxflat_verifyheader(const struct nxflat_hdr_s *header);
 
-/* This function is called to configure the library to process an NXFLAT
- * program binary.
- */
+/***********************************************************************
+ * Name: 
+ *
+ * Description:
+ *   This function is called to configure the library to process an NXFLAT
+ *   program binary.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ***********************************************************************/
 
-EXTERN int nxflat_init(const char *filename,
-                       struct nxflat_hdr_s *header,
+EXTERN int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
 	               struct nxflat_loadinfo_s *loadinfo);
 
-/* Releases any resources committed by nxflat_init().  This essentially
- * undoes the actions of nxflat_init.
- */
+/***********************************************************************
+ * Name: 
+ *
+ * Description:
+ *   Releases any resources committed by nxflat_init().  This essentially
+ *   undoes the actions of nxflat_init.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ***********************************************************************/
 
 EXTERN int nxflat_uninit(struct nxflat_loadinfo_s *loadinfo);
 
-/* Loads the binary specified by nxflat_init into memory,
- * Completes all relocations, and clears BSS.
- */
+/***********************************************************************
+ * Name: 
+ *
+ * Description:
+ *   Loads the binary specified by nxflat_init into memory,
+ *   Completes all relocations, and clears BSS.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ***********************************************************************/
 
 EXTERN int nxflat_load(struct nxflat_loadinfo_s *loadinfo);
 
-/* Read 'readsize' bytes from the object file at 'offset' */
+/***********************************************************************
+ * Name: 
+ *
+ * Description:
+ *   Read 'readsize' bytes from the object file at 'offset'
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ***********************************************************************/
 
 EXTERN int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
                        int readsize, int offset);
 
-/* This function unloads the object from memory. This essentially
- * undoes the actions of nxflat_load.
- */
+/***********************************************************************
+ * Name: 
+ *
+ * Description:
+ *   This function unloads the object from memory. This essentially
+ *   undoes the actions of nxflat_load.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ***********************************************************************/
 
 EXTERN int nxflat_unload(struct nxflat_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * These are APIs used internally only by NuttX:
+ ****************************************************************************/
+/***********************************************************************
+ * Name: nxflat_initialize
+ *
+ * Description:
+ *   NXFLAT support is built unconditionally.  However, it order to
+ *   use this binary format, this function must be called during system
+ *   format in order to register the NXFLAT binary format.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ***********************************************************************/
+
+EXTERN int nxflat_initialize(void);
+
+/****************************************************************************
+ * Name: nxflat_uninitialize
+ *
+ * Description:
+ *   Unregister the NXFLAT binary loader
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxflat_uninitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

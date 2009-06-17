@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 16, 2009</p>
+      <p>Last Updated: June 17, 2009</p>
     </td>
   </tr>
 </table>
@@ -1476,6 +1476,11 @@ nuttx-0.4.9 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  via task_create().
 	* Use of C++ reserved word 'private' in C header files causes problems
 	  for C++ that include them.
+	* Added 'binfmt' support to allow execution of programs in a file system,
+	  binding to NuttX symbols. A custom format call NXFLAT is used; this
+	  derives from http://xflat.sourceforge.net.  At present is supports on
+	  XIP execution from ROMFS file systems.  Initial check-in is untested
+	  and probably breaks many builds.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

@@ -90,25 +90,81 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Register a binary format handler */
+/****************************************************************************
+ * Name: register_binfmt
+ *
+ * Description:
+ *   Register a loader for a binary format
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
 
 EXTERN int register_binfmt(FAR struct binfmt_s *binfmt);
 
-/* Unregister a binary format handler */
+/****************************************************************************
+ * Name: unregister_binfmt
+ *
+ * Description:
+ *   Register a loader for a binary format
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
 
 EXTERN int unregister_binfmt(FAR struct binfmt_s *binfmt);
 
-/* Load a module into memory */
+/****************************************************************************
+ * Name: load_module
+ *
+ * Description:
+ *   Load a module into memory and prep it for execution.
+ *
+ * Returned Value:
+ *   This is an end-user function, so it follows the normal convention:
+ *   Returns 0 (OK) on success.  On failure, it returns -1 (ERROR) with
+ *   errno set appropriately.
+ *
+ ****************************************************************************/
 
 EXTERN int load_module(const char *filename, FAR struct binary_s *bin);
 
-/* Unload a (non-running) module from memory */
+/****************************************************************************
+ * Name: unload_module
+ *
+ * Description:
+ *   Unload a (non-executing) module from memory.  If the module has
+ *   been started (via exec_module), calling this will be fatal.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
 
 EXTERN int unload_module(FAR const struct binary_s *bin);
 
-/* Execute a module that has been loaded into memory */
+/****************************************************************************
+ * Name: exec_module
+ *
+ * Description:
+ *   Execute a module that has been loaded into memory by load_module().
+ *
+ * Returned Value:
+ *   This is an end-user function, so it follows the normal convention:
+ *   Returns the PID of the exec'ed module.  On failure, it.returns
+ *   -1 (ERROR) and sets errno appropriately.
+ *
+ ****************************************************************************/
 
-EXTERN int exec_module(FAR const struct binary_s *bin);
+EXTERN int exec_module(FAR const struct binary_s *bin, int priority);
 
 #undef EXTERN
 #if defined(__cplusplus)

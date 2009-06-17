@@ -1,7 +1,7 @@
-/************************************************************
+/****************************************************************************
  * task_init.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,56 +31,60 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <sched.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
+#include "env_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: task_init
  *
  * Description:
- *   This function initializes a Task Control Block (TCB)
- *   in preparation for starting a new thread.  It performs a
- *   subset of the functionality of task_create()
+ *   This function initializes a Task Control Block (TCB) in preparation for
+ *   starting a new thread.  It performs a subset of the functionality of
+ *   task_create()
  *
- *   Unlike task_create(), task_init() does not activate the
- *   task. This must be done by calling task_activate().
+ *   Unlike task_create():
+ *     1. Allocate the TCB.  The pre-allocated TCB is passed in the arguments.
+ *     2. Allocate the stack.  The pre-allocated stack is passed in the arguments.
+ *     3. Activate the task. This must be done by calling task_activate().
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -89,19 +93,19 @@
  *   stack      - Start of the pre-allocated stack
  *   stack_size - Size (in bytes) of the stack allocated
  *   entry      - Application start point of the new task
- *   arg        - A pointer to an array of input parameters.
- *                Up to  CONFIG_MAX_TASK_ARG parameters may
- *                be provided.  If fewer than CONFIG_MAX_TASK_ARG
- *                parameters are passed, the list should be
- *                terminated with a NULL argv[] value.
- *                If no parameters are required, argv may be
- *                NULL.
+ *   arg        - A pointer to an array of input parameters. Up to
+ *                CONFIG_MAX_TASK_ARG parameters may be provided.  If fewer
+ *                than CONFIG_MAX_TASK_ARG parameters are passed, the list
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
  *
  * Return Value:
- *   OK on success; ERROR on failure.  (See task_schedsetup()
- *   for possible failure conditions).
+ *   OK on success; ERROR on failure.  (See task_schedsetup() for possible
+ *   failure conditions).  On failure, the caller is responsible for freeing
+ *   the stack memory and for calling  sched_releasetcb() to free the TCB
+ *   (which could be in most any state).
  *
- ************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
 STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
@@ -113,6 +117,19 @@ STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
 #endif
 {
   STATUS ret;
+
+ /* Associate file descriptors with the new task */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+  if (sched_setuptaskfiles(tcb) != OK)
+    {
+      return ERROR;
+    }
+#endif
+
+  /* Clone the parent's task environment */
+
+  (void)env_dup(tcb);
 
   /* Configure the user provided stack region */
 
@@ -130,4 +147,5 @@ STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
       (void)task_argsetup(tcb, name, argv);
     }
   return ret;
- }
+}
+

@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/binfmt_dumpmodule.c
+ * binfmt/binfmt_execmodule.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,15 +40,16 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <stdlib.h>
 #include <sched.h>
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/binfmt.h>
 
+#include "os_internal.h"
 #include "binfmt_internal.h"
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,37 +67,118 @@
  * Private Functions
  ****************************************************************************/
 
-/***********************************************************************
+/****************************************************************************
  * Public Functions
- ***********************************************************************/
+ ****************************************************************************/
 
-/***********************************************************************
- * Name: load_module
+/****************************************************************************
+ * Name: exec_module
  *
  * Description:
- *   Load a module into memory and prep it for execution.
+ *   Execute a module that has been loaded into memory by load_module().
  *
  * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
+ *   This is an end-user function, so it follows the normal convention:
+ *   Returns the PID of the exec'ed module.  On failure, it.returns
+ *   -1 (ERROR) and sets errno appropriately.
  *
- ***********************************************************************/
+ ****************************************************************************/
 
-int dump_module(FAR const struct binary_s *bin)
+int exec_module(FAR const struct binary_s *bin, int priority)
 {
-  if (bin)
-    {
-      bdbg("Module:\n");
-      bdbg("  filename:  %s\n", bin->filename);
-      bdbg("  argv:      %p\n", bin->argv);
-      bdbg("  entrypt:   %p\n", bin->entrypt);
-      bdbg("  ispace:    %p size=%d\n", bin->ispace, bin->isize);
-      bdbg("  dspace:    %p\n", bin->dspace);
-      bdbg("  stacksize: %d\n", bin->stacksize);
-    }
-  return OK;
-}
+  FAR _TCB   *tcb;
+#ifndef CONFIG_CUSTOM_STACK
+  FAR uint32 *stack;
 #endif
+  pid_t       pid;
+  int         err;
+  int         ret;
+
+  /* Sanity checking */
+
+#ifdef CONFIG_DEBUG
+  if (!bin || !bin->ispace || !bin->entrypt || bin->stacksize <= 0)
+    {
+      err = EINVAL;
+      goto errout;
+    }
+#endif
+
+  bdbg("Executing %s\n", bin->filename);
+
+  /* Allocate a TCB for the new task. */
+
+  tcb = (FAR _TCB*)zalloc(sizeof(_TCB));
+  if (!tcb)
+    {
+      err = ENOMEM;
+      goto errout;
+    }
+
+  /* Allocate the stack for the new task */
+
+#ifndef CONFIG_CUSTOM_STACK
+  stack = (FAR uint32*)malloc(bin->stacksize);
+  if (!tcb)
+    {
+      err = ENOMEM;
+      goto errout_with_tcb;
+    }
+
+  /* Initialize the task */
+
+  ret = task_init(tcb, bin->filename, priority, stack, bin->stacksize, bin->entrypt, bin->argv);
+#else
+  /* Initialize the task */
+
+  ret = task_init(tcb, bin->filename, priority, stack, bin->entrypt, bin->argv);
+#endif
+  if (ret < 0)
+    {
+      err = errno;
+      dbg("task_init() failed: %d\n", err);
+      goto errout_with_stack;
+    }
+
+  /* Add the DSpace address as the PIC base address */
+
+  tcb->picbase = bin->dspace;
+
+  /* Re-initialize the task's initial state to account for the new PIC base */
+
+  up_initial_state(tcb);
+
+  /* Get the assigned pid before we start the task */
+
+  pid = tcb->pid;
+
+  /* Then activate the task at the provided priority */
+
+  ret = task_activate(tcb);
+  if (ret < 0)
+    {
+      err = errno;
+      dbg("task_activate() failed: %d\n", err);
+      goto errout_with_stack;
+    }
+  return (int)pid;
+
+errout_with_stack:
+#ifndef CONFIG_CUSTOM_STACK
+  tcb->stack_alloc_ptr = NULL;
+  sched_releasetcb(tcb);
+  free(stack);
+#else
+  sched_releasetcb(tcb);
+#endif
+  goto errout;
+
+errout_with_tcb:
+  free(tcb);
+errout:
+  errno = err;
+  dbg("returning errno: %d\n", err);
+  return ERROR;
+}
 
 

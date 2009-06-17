@@ -784,5 +784,11 @@
 	  CONFIG_FDCLONE_DISABLE, CONFIG_FDCLONE_STDIO, CONFIG_SDCLONE_DISABLE.
 	* Use of C++ reserved word 'private' in C header files causes problems
 	  for C++ that include them.
+	* Added 'binfmt' support to allow execution of programs in a file system,
+	  binding to NuttX symbols. A custom format call NXFLAT is used; this
+	  derives from http://xflat.sourceforge.net.  At present is supports on
+	  XIP execution from ROMFS file systems.  Initial check-in is untested
+	  and probably breaks many builds.
+
 
 

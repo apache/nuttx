@@ -35,6 +35,8 @@
 
 -include $(TOPDIR)/Make.defs
 
+CFLAGS		+= -I$(TOPDIR)/sched
+
 ifeq ($(CONFIG_NXFLAT),y)
 include libnxflat/Make.defs
 LIBNXFLAT_CSRCS	+= nxflat.c 
@@ -42,7 +44,8 @@ endif
 
 BINFMT_ASRCS	=
 BINFMT_CSRCS	= binfmt_globals.c binfmt_register.c binfmt_unregister.c \
-		  binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_dumpmodule.c
+		  binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c \
+		  binfmt_dumpmodule.c
 
 SUBDIRS		= libnxflat
 

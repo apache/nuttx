@@ -66,18 +66,23 @@
  * Private Functions
  ****************************************************************************/
 
-/***********************************************************************
+/****************************************************************************
  * Public Functions
- ***********************************************************************/
+ ****************************************************************************/
 
-/***********************************************************************
+/****************************************************************************
  * Name: unload_module
  *
  * Description:
  *   Unload a (non-executing) module from memory.  If the module has
  *   been started (via exec_module), calling this will be fatal.
  *
- ***********************************************************************/
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
 
 int unload_module(FAR const struct binary_s *bin)
 {
