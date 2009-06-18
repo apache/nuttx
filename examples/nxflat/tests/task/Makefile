@@ -54,13 +54,13 @@ $(R2OBJ): %.o: %.S
 	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
 
 $(BIN).r1: $(R1OBJS)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
 
 $(R2SRC): $(BIN).r1
 	$(MKNXFLAT) -o $@ $^
 
 $(BIN).r2: $(R2OBJ)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS) $(R2OBJ)
 
 $(BIN): $(BIN).r2
 	touch $(BIN) # For now

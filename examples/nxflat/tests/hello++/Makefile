@@ -44,22 +44,22 @@ BIN3			= hello++3
 ALL_BIN			= $(BIN1) $(BIN2) $(BIN3) $(BIN4)
 
 R1SRCS1			= $(BIN1).c
-OBJS1			= $(R1SRCS1:.c=.o)
+R1OBJS1			= $(R1SRCS1:.c=.o)
 R2SRC1			= $(BIN1)-thunk.S
 R2OBJ1			= $(R2SRC1:.S=.o)
 
 R1SRCS2			= $(BIN2).c
-OBJS2			= $(R1SRCS2:.c=.o)
+R1OBJS2			= $(R1SRCS2:.c=.o)
 R2SRC2			= $(BIN2)-thunk.S
 R2OBJ2			= $(R2SRC2:.S=.o)
 
 R1SRCS3			= $(BIN3).c
-OBJS3			= $(R1SRCS3:.c=.o)
+R1OBJS3			= $(R1SRCS3:.c=.o)
 R2SRC3			= $(BIN3)-thunk.S
 R2OBJ3			= $(R2SRC3:.S=.o)
 
 #R1SRCS4		= $(BIN4).c
-#OBJS4			= $(R1SRCS4:.c=.o)
+#R1OBJS4			= $(R1SRCS4:.c=.o)
 #R2SRC4			= $(BIN4)-thunk.S
 #R2OBJ4			= $(R2SRC4:.S=.o)
 
@@ -90,26 +90,26 @@ $(LIBSTDC_STUBS_LIB):
 # BIN2 contains a class that implements hello world, but it is
 # not statically initialized.
 
-$(BIN1).r1: $(OBJS1)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+$(BIN1).r1: $(R1OBJS1)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
 
 $(R2SRC1): $(BIN1).r1
 	$(MKNXFLAT) -o $@ $^
 
 $(BIN1).r2: $(R2OBJ1)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS1) $(R2OBJ1)
 
 $(BIN1): $(BIN1).r2
 	touch $(BIN1) # For now
 
-$(BIN2).r1: $(OBJS2) $(LIBSTDC_STUBS_LIB)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+$(BIN2).r1: $(R1OBJS2) $(LIBSTDC_STUBS_LIB)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
 
 $(R2SRC2): $(BIN2).r1
 	$(MKNXFLAT) -o $@ $^
 
 $(BIN2).r2: $(R2OBJ2)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS2) $(R2OBJ2)
 
 (BIN2): $(BIN2).r2
 	touch $(BIN2) # For now
@@ -120,14 +120,14 @@ $(BIN2).r2: $(R2OBJ2)
 #
 # BIN3 is equivalent to BIN2 except that is uses static initializers
 
-$(BIN3).r1: $(OBJS3) $(LIBSTDC_STUBS_LIB)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+$(BIN3).r1: $(R1OBJS3) $(LIBSTDC_STUBS_LIB)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
 
-$(R2SRC3): $(BI3N).r1
+$(R2SRC3): $(BIN3).r1
 	$(MKNXFLAT) -o $@ $^
 
 $(BIN3).r2: $(R2OBJ3)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS3) $(R2OBJ3)
 
 $(BIN3): $(BIN3).r2
 	touch $(BIN3) # For now
@@ -136,14 +136,14 @@ $(BIN3): $(BIN3).r2
 #
 # NOTE:  libstdc++ is not available for XFLAT as of this writing
 #
-#$(BIN4).r1: $(OBJS4) $(LIBSTDC_STUBS_LIB)
-#	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+#$(BIN4).r1: $(R1OBJS4) $(LIBSTDC_STUBS_LIB)
+#	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
 #
 #$(R2SRC4): $(BIN4).r1
 #	$(MKNXFLAT) -o $@ $^
 #
 #$(BIN4).r2: $(R2OBJ4)
-#	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+#	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS4) $(R2OBJ4)
 #
 #$(BIN4): $(BIN4).r2
 #	touch $(BIN4) # For now

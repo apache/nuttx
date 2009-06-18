@@ -39,19 +39,34 @@ include ../Make.defs		# NXFLAT make info
 
 BIN			= signal
 
-SRCS			= $(BIN).c
-OBJS			= $(SRCS:.c=.o)
+R1SRCS			= $(BIN).c
+R1OBJS			= $(R1SRCS:.c=.o)
+
+R2SRC			= $(BIN)-thunk.S
+R2OBJ			= $(R2SRC:.S=.o)
 
 all: $(BIN)
 
-$(OBJS): %.o: %.c
+$(R1OBJS): %.o: %.c
 	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
 
-$(BIN): $(OBJS)
-	$(NXFLATLD) $(NXFLATLDFLAGS) -o $@ $(OBJS)
+$(R2OBJ): %.o: %.S
+	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
+
+$(BIN).r1: $(R1OBJS)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
+
+$(R2SRC): $(BIN).r1
+	$(MKNXFLAT) -o $@ $^
+
+$(BIN).r2: $(R2OBJ)
+	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS) $(R2OBJ)
+
+$(BIN): $(BIN).r2
+	touch $(BIN) # For now
 
 clean: 
-	rm -f $(BIN) *.o core
+	rm -f $(BIN) $(R2SRC) *.o *.r1 *.r2 *~ .*.swp core
 
 install:
 	install -D $(BIN) $(ROMFS_DIR)/$(BIN)

@@ -41,5 +41,6 @@ NXFLATCC = $(CC)
 NXFLATCFLAGS = $(CFLAGS)
 
 NXFLATLD = $(LD)
-NXFLATLDFLAGS = -e main
+NXFLATLDFLAGS1 = -e main
+NXFLATLDFLAGS2 = -e main -T $(TOPDIR)/examples/nxflat/nxflat.ld -no-check-sections
 
