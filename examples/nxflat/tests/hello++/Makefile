@@ -41,31 +41,46 @@ BIN1			= hello++1
 BIN2			= hello++2
 BIN3			= hello++3
 #BIN4			= hello++4
+ALL_BIN			= $(BIN1) $(BIN2) $(BIN3) $(BIN4)
 
-SRCS1			= $(BIN1).c
-OBJS1			= $(SRCS1:.c=.o)
+R1SRCS1			= $(BIN1).c
+OBJS1			= $(R1SRCS1:.c=.o)
+R2SRC1			= $(BIN1)-thunk.S
+R2OBJ1			= $(R2SRC1:.S=.o)
 
-SRCS2			= $(BIN2).c
-OBJS2			= $(SRCS2:.c=.o)
+R1SRCS2			= $(BIN2).c
+OBJS2			= $(R1SRCS2:.c=.o)
+R2SRC2			= $(BIN2)-thunk.S
+R2OBJ2			= $(R2SRC2:.S=.o)
 
-SRCS3			= $(BIN3).c
-OBJS3			= $(SRCS3:.c=.o)
+R1SRCS3			= $(BIN3).c
+OBJS3			= $(R1SRCS3:.c=.o)
+R2SRC3			= $(BIN3)-thunk.S
+R2OBJ3			= $(R2SRC3:.S=.o)
 
-#SRCS4			= $(BIN4).c
-#OBJS4			= $(SRCS4:.c=.o)
+#R1SRCS4		= $(BIN4).c
+#OBJS4			= $(R1SRCS4:.c=.o)
+#R2SRC4			= $(BIN4)-thunk.S
+#R2OBJ4			= $(R2SRC4:.S=.o)
 
-CXXOBJS			= $(OBJS1) $(OBJS2) $(OBJS3) # $(OBJS4)
+DERIVED			= $(R2SRC1) $(R2SRC2) $(R2SRC3) $(R2SRC4)
+
+R1CXXOBJS		= $(R1OBJS1) $(R1OBJS2) $(R1OBJS3) # $(R1OBJS4)
+R2AOBJS			= $(R2OBJ1) $(R2OBJ2) $(R2OBJ3) # $(R2OBJ4)
 
 LIBSTDC_STUBS_DIR	= $(TOPDIR)/libxx
 LIBSTDC_STUBS_LIB	= $(LIBSTDC_STUBS_DIR)/liblibxx.a
 
 all: $(BIN1) $(BIN2) $(BIN3) # $(BIN4)
 
-$(CXXOBJS): %.o: %.cpp
+$(R1CXXOBJS): %.o: %.cpp
 	$(NXFLATCXX) -c $(NXFLATCXXFLAGS) $< -o $@
 
+$(R2AOBJS): %.o: %.S
+	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
+
 # This contains libstdc++ stubs to that you can build C++ code
-# without actually have libstdc++
+# without actually having libstdc++
 
 $(LIBSTDC_STUBS_LIB):
 	$(MAKE) -C $(LIBSTDC_STUBS_DIR) TOPDIR=$(TOPDIR)
@@ -75,16 +90,28 @@ $(LIBSTDC_STUBS_LIB):
 # BIN2 contains a class that implements hello world, but it is
 # not statically initialized.
 
-$(BIN1).rnx: $(OBJS1)
+$(BIN1).r1: $(OBJS1)
 	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
 
-$(BIN1): $(BIN1).rnx
+$(R2SRC1): $(BIN1).r1
+	$(MKNXFLAT) -o $@ $^
+
+$(BIN1).r2: $(R2OBJ1)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+
+$(BIN1): $(BIN1).r2
 	touch $(BIN1) # For now
 
-$(BIN2).rnx: $(OBJS2) $(LIBSTDC_STUBS_LIB)
+$(BIN2).r1: $(OBJS2) $(LIBSTDC_STUBS_LIB)
 	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
 
-$(BIN2): $(BIN2).rnx
+$(R2SRC2): $(BIN2).r1
+	$(MKNXFLAT) -o $@ $^
+
+$(BIN2).r2: $(R2OBJ2)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+
+(BIN2): $(BIN2).r2
 	touch $(BIN2) # For now
 
 # BIN3 and BIN4 require that we include --cxx in the xflat-ld command.
@@ -93,26 +120,38 @@ $(BIN2): $(BIN2).rnx
 #
 # BIN3 is equivalent to BIN2 except that is uses static initializers
 
-$(BIN3).rnx: $(OBJS3) $(LIBSTDC_STUBS_LIB)
+$(BIN3).r1: $(OBJS3) $(LIBSTDC_STUBS_LIB)
 	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
 
-$(BIN3): $(BIN3).rnx
+$(R2SRC3): $(BI3N).r1
+	$(MKNXFLAT) -o $@ $^
+
+$(BIN3).r2: $(R2OBJ3)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+
+$(BIN3): $(BIN3).r2
 	touch $(BIN3) # For now
 
 # BIN4 is similar to BIN3 except that it uses the streams code from libstdc++
 #
 # NOTE:  libstdc++ is not available for XFLAT as of this writing
 #
-#$(BIN4).rnx: $(OBJS4) $(LIBSTDC_STUBS_LIB)
+#$(BIN4).r1: $(OBJS4) $(LIBSTDC_STUBS_LIB)
 #	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
 #
-#$(BIN4): $(BIN4).rnx
+#$(R2SRC4): $(BIN4).r1
+#	$(MKNXFLAT) -o $@ $^
+#
+#$(BIN4).r2: $(R2OBJ4)
+#	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+#
+#$(BIN4): $(BIN4).r2
 #	touch $(BIN4) # For now
 
 clean: 
-	rm -f $(BIN1) $(BIN2) $(BIN3) $(BIN4) *.o *.rnx *~ .*.swp core
+	rm -f $(ALL_BIN) $(DERIVED) *.o *.r1 *.r2 *~ .*.swp core
 
-user_install: $(BIN1) $(BIN2) $(BIN3) # $(BIN4)
+install: $(ALL_BIN)
 	install -D $(BIN1) $(ROMFS_DIR)/$(BIN1)
 	install -D $(BIN2) $(ROMFS_DIR)/$(BIN2)
 	install -D $(BIN3) $(ROMFS_DIR)/$(BIN3)

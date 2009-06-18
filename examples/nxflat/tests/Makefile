@@ -33,23 +33,25 @@
 #
 ############################################################################
 
-TESTDIRS	:= errno hello hello++ longjmp mutex pthread signal task
+# Most of these do no build yet
+#SUBDIRS	= errno hello hello++ longjmp mutex pthread signal task
+SUBDIRS	= errno hello pthread task
 
-define TEST_template
+define DIR_template
 $(1)_$(2):
 	$(MAKE) -C $(1) $(3)
 endef
 
-$(foreach TEST, $(TESTDIRS), $(eval $(call TEST_template,$(TEST),build, all)))
-$(foreach TEST, $(TESTDIRS), $(eval $(call TEST_template,$(TEST),clean,clean)))
-$(foreach TEST, $(TESTDIRS), $(eval $(call TEST_template,$(TEST),install,install)))
-
 all: build
-.PHONY: all build clean user_install root_install
+.PHONY: all build clean install
 
-build: $(foreach TEST, $(TESTDIRS), $(TEST)_build)
+$(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),build, all)))
+$(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),clean,clean)))
+$(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),install,install)))
 
-clean: $(foreach TEST, $(TESTDIRS), $(TEST)_clean)
+build: $(foreach DIR, $(SUBDIRS), $(DIR)_build)
 
-install: $(foreach TEST, $(TESTDIRS), $(TEST)_install)
+clean: $(foreach DIR, $(SUBDIRS), $(DIR)_clean)
+
+install: $(foreach DIR, $(SUBDIRS), $(DIR)_install)
 

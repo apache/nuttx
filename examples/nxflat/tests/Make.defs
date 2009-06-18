@@ -34,9 +34,9 @@
 ############################################################################
 
 NXFLATCC = $(CC)
-NXFLATCFLAGS = $(CFLAGS)
+NXFLATCFLAGS = $(CPICFLAGS)
 NXFLATCXX = $(CXX)
-NXFLATCXXFLAGS = $(CXXFLAGS)
+NXFLATCXXFLAGS = $(CXXPICFLAGS)
 NXFLATCC = $(CC)
 NXFLATCFLAGS = $(CFLAGS)
 

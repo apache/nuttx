@@ -1,5 +1,5 @@
-############################################################################
-# examples/nxflat/tests/hello/Makefile
+#!/bin/bash
+# configs/eagle100/nxflat/setenv.sh
 #
 #   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,43 +31,16 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
--include $(TOPDIR)/.config	# Current configuration
--include $(TOPDIR)/Make.defs	# Basic make info
-include ../Make.defs		# NXFLAT make info
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-BIN			= hello
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
-R1SRCS			= $(BIN).c
-R1OBJS			= $(R1SRCS:.c=.o)
+WD=`pwd`
+export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+export PATH="${BUILDROOT_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-R2SRC			= $(BIN)-thunk.S
-R2OBJ			= $(R2SRC:.S=.o)
-
-all: $(BIN)
-
-$(R1OBJS): %.o: %.c
-	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
-
-$(R2OBJ): %.o: %.S
-	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
-
-$(BIN).r1: $(R1OBJS)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
-
-$(R2SRC): $(BIN).r1
-	$(MKNXFLAT) -o $@ $^
-
-$(BIN).r2: $(R2OBJ)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
-
-$(BIN): $(BIN).r2
-	touch $(BIN) # For now
-
-clean: 
-	rm -f $(BIN) $(R2SRC) *.o *.r1 *.r2 *~ .*.swp core
-
-install:
-	install -D $(BIN) $(ROMFS_DIR)/$(BIN)
-
+echo "PATH : ${PATH}"

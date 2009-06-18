@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 #define NXFLAT_MAX_STRING_SIZE 64    /* Largest size of string (w/zterminator) */
-#define NXFLAT_MAGIC          "NxFT" /* NXFLAT magic number"
+#define NXFLAT_MAGIC          "NxFT" /* NXFLAT magic number */
 
 /****************************************************************************
  * Public Types
@@ -140,6 +140,10 @@ struct nxflat_reloc_s
 {
   uint32 r_info;             /* Bit-encoded relocation info */
 };
+
+/* Pack the type and the offset into one 32-bit value */
+
+#define NXFLAT_RELOC(t,o)       (((u_int32_t)((t) & 3) << 28) | ((o) & 0x1fffffff))
 
 /* The top three bits of the relocation info is the relocation type (see the
  * NXFLAT_RELOC_TYPE_* definitions below.  This is an unsigned value.
