@@ -73,11 +73,11 @@
 int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
                 struct nxflat_loadinfo_s *loadinfo)
 {
-  uint32  datastart;
-  uint32  dataend;
-  uint32  bssstart;
-  uint32  bssend;
-  int     ret;
+  uint32 datastart;
+  uint32 dataend;
+  uint32 bssstart;
+  uint32 bssend;
+  int   ret;
 
   bvdbg("filename: %s header: %p loadinfo: %p\n", filename, header, loadinfo);
 

@@ -79,7 +79,7 @@ int nxflat_verifyheader(const struct nxflat_hdr_s *header)
    * silently.  This is not our binary.
    */
   
-  if (strncmp(header->h_magic, "NXFLAT", 4) != 0)
+  if (strncmp(header->h_magic, NXFLAT_MAGIC, 4) != 0)
     {
       bdbg("Unrecognized magic=\"%c%c%c%c\"",
 	  header->h_magic[0], header->h_magic[1],

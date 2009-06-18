@@ -47,17 +47,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NXFLAT_MAX_STRING_SIZE 64 /* Largest size of string (w/zterminator) */
+#define NXFLAT_MAX_STRING_SIZE 64    /* Largest size of string (w/zterminator) */
+#define NXFLAT_MAGIC          "NxFT" /* NXFLAT magic number"
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-#ifdef CONFIG_NXFLAT_SMALL
-  typedef uint16 nxoff_t;
-#else
-  typedef uint32 nxoff_t;
-#endif
 
 /****************************************************************************
  * The NXFLAT file header
@@ -69,8 +64,8 @@
 
 struct nxflat_hdr_s
 {
-  /* The "magic number identifying the file type.  This field should contain
-   * "NxFT".  NOTE that there is not other versioning information other than
+  /* The "magic number" identifying the file type.  This field should contain
+   * "NxFT". NOTE that there is no other versioning information other than
    * this magic number.
    */
 
@@ -100,10 +95,10 @@ struct nxflat_hdr_s
    * The bss segment is data_end through bss_end.
    */
 
-  nxoff_t h_entry;
-  nxoff_t h_datastart;
-  nxoff_t h_dataend;
-  nxoff_t h_bssend;
+  uint32 h_entry;
+  uint32 h_datastart;
+  uint32 h_dataend;
+  uint32 h_bssend;
 
   /* Size of stack, in bytes */
 
@@ -116,8 +111,8 @@ struct nxflat_hdr_s
    * h_reloccount - The number of relocation records in the arry
    */
 
-  nxoff_t h_relocstart;       /* Offset of relocation records */
-  nxoff_t h_reloccount;       /* Number of relocation records */
+  uint32 h_relocstart;       /* Offset of relocation records */
+  uint32 h_reloccount;       /* Number of relocation records */
 
   /* Imported symbol table (NOTE no symbols are exported)
    *
@@ -131,8 +126,8 @@ struct nxflat_hdr_s
    * h_importcount   - The number of records in the h_exportsymbols array.
    */
 
-  nxoff_t h_importsymbols;   /* Offset to list of imported symbols */
-  uint16  h_importcount;     /* Number of imported symbols */
+  uint32 h_importsymbols;    /* Offset to list of imported symbols */
+  uint16 h_importcount;      /* Number of imported symbols */
 };
 
 /****************************************************************************
