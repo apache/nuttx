@@ -226,6 +226,9 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_SDCLONE_DISABLE. Disable cloning of all socket
 		  desciptors by task_create() when a new task is started. If
 		  set, all sockets will appear to be closed in the new task.
+		CONFIG_NXFLAT. Enable support for the NXFLAT binary format.
+		  This format will support execution of NuttX binaries located
+		  in a ROMFS filesystem (see examples/nxflat).
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it

@@ -59,7 +59,7 @@ ifeq ($(ARCHCCMAJOR),4)
 else
   ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float -fno-builtin
 endif
-ARCHPICFLAGS		= -fpic
+ARCHPICFLAGS		= -fpic -msingle-pic-base -mpic-register=r10
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
@@ -67,6 +67,7 @@ ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ld.script
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
+CPICFLAGS		= $(ARCHPICFLAGS) $(CFLAGS)
 CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES)
 AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
 
