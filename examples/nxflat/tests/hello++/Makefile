@@ -75,11 +75,17 @@ $(LIBSTDC_STUBS_LIB):
 # BIN2 contains a class that implements hello world, but it is
 # not statically initialized.
 
-$(BIN1): $(OBJS1)
-	$(NXFLATLD) -o $@ $^
+$(BIN1).rnx: $(OBJS1)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
 
-$(BIN2): $(OBJS2) $(LIBSTDC_STUBS_LIB)
-	$(NXFLATLD) -o $@ $^
+$(BIN1): $(BIN1).rnx
+	touch $(BIN1) # For now
+
+$(BIN2).rnx: $(OBJS2) $(LIBSTDC_STUBS_LIB)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+
+$(BIN2): $(BIN2).rnx
+	touch $(BIN2) # For now
 
 # BIN3 and BIN4 require that we include --cxx in the xflat-ld command.
 # This will instruct xflat-ld that we want it to put togethe the correct
@@ -87,18 +93,24 @@ $(BIN2): $(OBJS2) $(LIBSTDC_STUBS_LIB)
 #
 # BIN3 is equivalent to BIN2 except that is uses static initializers
 
-$(BIN3): $(OBJS3) $(LIBSTDC_STUBS_LIB)
-	$(XFLATLD) --cxx -o $@ $^
+$(BIN3).rnx: $(OBJS3) $(LIBSTDC_STUBS_LIB)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+
+$(BIN3): $(BIN3).rnx
+	touch $(BIN3) # For now
 
 # BIN4 is similar to BIN3 except that it uses the streams code from libstdc++
 #
 # NOTE:  libstdc++ is not available for XFLAT as of this writing
 #
-#$(BIN4): $(OBJS4) $(LIBSTDC_STUBS_LIB)
-#	$(XFLATLD) --cxx -o $@ $^
+#$(BIN4).rnx: $(OBJS4) $(LIBSTDC_STUBS_LIB)
+#	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+#
+#$(BIN4): $(BIN4).rnx
+#	touch $(BIN4) # For now
 
 clean: 
-	rm -f $(BIN1) $(BIN2) $(BIN3) $(BIN4) *.o *~ core
+	rm -f $(BIN1) $(BIN2) $(BIN3) $(BIN4) *.o *.rnx *~ .*.swp core
 
 user_install: $(BIN1) $(BIN2) $(BIN3) # $(BIN4)
 	install -D $(BIN1) $(ROMFS_DIR)/$(BIN1)

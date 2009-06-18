@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 
   child_argv[0] = child_arg;
   child_argv[1] = 0;
-  ret = task_create(child_name, 50, 512, child_task, child_argv);
+  ret = task_create(child_name, 50, 512, child_task, (char**)child_argv);
   if (ret != 0)
     {
       printf("Parent: task_create failed: %d\n", errno);

@@ -47,11 +47,14 @@ all: $(BIN)
 $(OBJS): %.o: %.c
 	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
 
-$(BIN): $(OBJS)
-	$(NXFLATLD) $(NXFLATLDFLAGS) -o $@ $(OBJS)
+$(BIN).rnx: $(OBJS)
+	$(NXFLATLD) -r $(NXFLATLDFLAGS) -o $@ $^
+
+$(BIN): $(BIN).rnx
+	touch $(BIN) # For now
 
 clean: 
-	rm -f $(BIN) *.o core
+	rm -f $(BIN) *.o *.rnx *~ .*.swp core
 
 install:
 	install -D $(BIN) $(ROMFS_DIR)/$(BIN)
