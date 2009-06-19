@@ -1,8 +1,7 @@
-NuttX TODO List (Last updated June 15, 2009)
+NuttX TODO List (Last updated June 19, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
-  (1)  Dynamic loader (N/A)
   (2)  Memory Managment (mm/)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
@@ -10,7 +9,7 @@ NuttX TODO List (Last updated June 15, 2009)
  (12)  Network (net/, netutils/)
   (1)  USB (drivers/usbdev)
   (4)  Libraries (lib/)
-  (7)  File system/Generic drivers (fs/, drivers/)
+  (8)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (0)  Documentation (Documentation/)
@@ -59,16 +58,6 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium, required for standard compliance (but makes the
                code bigger)
-
-o Dynamic Loader
-  ^^^^^^^^^^^^^^
-
-  Description: At some point in the future, I intend to port the XFLAT
-               dynamic loader into NuttX (see http://xflat.sourceforge.net/).
-               That would allow NuttX to dynamically load and link
-               external code in a mounted filesystem.
-  Status:      Open
-  Priority:    Low, Nice feature and I might do it someday
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
@@ -288,6 +277,17 @@ o File system / Generic drivers (fs/, drivers/)
                yet handle multiple block transfers.
   Status:      Open
   Priority:    Medium-Low
+
+  Description: At present, mmap() only works with file descriptors associated
+               with a ROMFS file system.  Generalize this logic so that if
+               mmap is not supported by the file system or block driver, it
+               will allocate memory and copy the file into RAM.  This would
+               need some centralized logic so that the memory region would
+               be shared on later mmap()'s on the same inode.  Reference counting
+               would be required so that the multiply mmap()'ed region persists
+               until the last munmap().
+  Status:      Open
+  Priority:    Low
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
