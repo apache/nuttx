@@ -143,6 +143,11 @@ EXTERN FAR void  *memalign(size_t, size_t);
 EXTERN FAR void  *zalloc(size_t);
 EXTERN FAR void  *calloc(size_t, size_t);
 
+/* Sorting */
+
+EXTERN void       qsort(void *base, size_t nmemb, size_t size,
+                        int(*compar)(const void *, const void *));
+
 #ifdef CONFIG_CAN_PASS_STRUCTS
 EXTERN struct mallinfo mallinfo(void);
 #else
