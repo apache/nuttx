@@ -789,6 +789,8 @@
 	  derives from http://xflat.sourceforge.net.  At present is supports on
 	  XIP execution from ROMFS file systems.  Initial check-in is untested
 	  and probably breaks many builds.
+	* examples/lib: Added qsort()
+	* examples/nxflat: Added support for symbol tables
 
 
 

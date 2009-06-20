@@ -47,12 +47,16 @@ BINFMT_CSRCS	= binfmt_globals.c binfmt_register.c binfmt_unregister.c \
 		  binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c \
 		  binfmt_dumpmodule.c
 
+SYMTAB_ASRCS	=
+SYMTAB_CSRCS	= symtab_findbyname.c symtab_findbyvalue.c \
+		  symtab_findorderedbyname.c  symtab_findorderedbyvalue.c
+
 SUBDIRS		= libnxflat
 
-ASRCS		= $(BINFMT_ASRCS) $(LIBNXFLAT_ASRCS)
+ASRCS		= $(BINFMT_ASRCS) $(SYMTAB_ASRCS) $(LIBNXFLAT_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(BINFMT_CSRCS) $(LIBNXFLAT_CSRCS)
+CSRCS		= $(BINFMT_CSRCS) $(SYMTAB_CSRCS) $(LIBNXFLAT_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
