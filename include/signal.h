@@ -67,8 +67,12 @@
 #define SIGRTMIN        0  /* First real time signal */
 #define SIGRTMAX        31 /* Last real time signal */
 
-/* A few of the real time signals are used within the OS: */
+/* A few of the real time signals are used within the OS.  The reset are all
+ * user signals:
+ */
 
+#define SIGUSR1         0  /* User signal 1 */
+#define SIGUSR2         1  /* User signal 2 */
 #define SIGALRM         2  /* Default signal used with POSIX timers (used only */
                            /* no other signal is provided) */
 #define SIGCONDTIMEDOUT 3  /* Used in the implementation of */
@@ -104,6 +108,7 @@
 
 /* Special values of sigaction (all treated like NULL) */
 
+#define SIG_ERR         ((CODE void*)-1)
 #define SIG_DFL         ((CODE void*)0)
 #define SIG_IGN         ((CODE void*)0)
 
@@ -158,6 +163,7 @@ struct sigaction
   sigset_t         sa_mask;
   int              sa_flags;
 };
+
 #define sa_handler   sa_u._sa_handler
 #define sa_sigaction sa_u._sa_sigaction
 

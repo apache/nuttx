@@ -59,7 +59,7 @@ R2SRC3			= $(BIN3)-thunk.S
 R2OBJ3			= $(R2SRC3:.S=.o)
 
 #R1SRCS4		= $(BIN4).c
-#R1OBJS4			= $(R1SRCS4:.c=.o)
+#R1OBJS4		= $(R1SRCS4:.c=.o)
 #R2SRC4			= $(BIN4)-thunk.S
 #R2OBJ4			= $(R2SRC4:.S=.o)
 
@@ -91,7 +91,7 @@ $(LIBSTDC_STUBS_LIB):
 # not statically initialized.
 
 $(BIN1).r1: $(R1OBJS1)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
+	$(NXFLATLD) $(NXFLATLDFLAGS1) -o $@ $^
 
 $(R2SRC1): $(BIN1).r1
 	$(MKNXFLAT) -o $@ $^
@@ -100,10 +100,10 @@ $(BIN1).r2: $(R2OBJ1)
 	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS1) $(R2OBJ1)
 
 $(BIN1): $(BIN1).r2
-	touch $(BIN1) # For now
+	$(LDNXFLAT) $(LDNXFLATFLAGS) -o $@ $^
 
 $(BIN2).r1: $(R1OBJS2) $(LIBSTDC_STUBS_LIB)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
+	$(NXFLATLD) $(NXFLATLDFLAGS1) -o $@ $^
 
 $(R2SRC2): $(BIN2).r1
 	$(MKNXFLAT) -o $@ $^
@@ -112,7 +112,7 @@ $(BIN2).r2: $(R2OBJ2)
 	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS2) $(R2OBJ2)
 
 (BIN2): $(BIN2).r2
-	touch $(BIN2) # For now
+	$(LDNXFLAT) $(LDNXFLATFLAGS) -o $@ $^
 
 # BIN3 and BIN4 require that we include --cxx in the xflat-ld command.
 # This will instruct xflat-ld that we want it to put togethe the correct
@@ -121,7 +121,7 @@ $(BIN2).r2: $(R2OBJ2)
 # BIN3 is equivalent to BIN2 except that is uses static initializers
 
 $(BIN3).r1: $(R1OBJS3) $(LIBSTDC_STUBS_LIB)
-	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
+	$(NXFLATLD) $(NXFLATLDFLAGS1) -o $@ $^
 
 $(R2SRC3): $(BIN3).r1
 	$(MKNXFLAT) -o $@ $^
@@ -130,14 +130,14 @@ $(BIN3).r2: $(R2OBJ3)
 	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS3) $(R2OBJ3)
 
 $(BIN3): $(BIN3).r2
-	touch $(BIN3) # For now
+	$(LDNXFLAT) $(LDNXFLATFLAGS) -o $@ $^
 
 # BIN4 is similar to BIN3 except that it uses the streams code from libstdc++
 #
 # NOTE:  libstdc++ is not available for XFLAT as of this writing
 #
 #$(BIN4).r1: $(R1OBJS4) $(LIBSTDC_STUBS_LIB)
-#	$(NXFLATLD) -r $(NXFLATLDFLAGS1) -o $@ $^
+#	$(NXFLATLD) $(NXFLATLDFLAGS1) -o $@ $^
 #
 #$(R2SRC4): $(BIN4).r1
 #	$(MKNXFLAT) -o $@ $^
@@ -146,7 +146,7 @@ $(BIN3): $(BIN3).r2
 #	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS4) $(R2OBJ4)
 #
 #$(BIN4): $(BIN4).r2
-#	touch $(BIN4) # For now
+#	$(LDNXFLAT) $(LDNXFLATFLAGS) -o $@ $^
 
 clean: 
 	rm -f $(ALL_BIN) $(DERIVED) *.o *.r1 *.r2 *~ .*.swp core

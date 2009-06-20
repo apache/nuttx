@@ -35,7 +35,7 @@
 
 # Most of these do no build yet
 #SUBDIRS	= errno hello hello++ longjmp mutex pthread signal task
-SUBDIRS	= errno hello pthread task
+SUBDIRS	= errno hello mutex pthread task
 
 define DIR_template
 $(1)_$(2):

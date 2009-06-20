@@ -40,7 +40,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <signal.h>
 
 /****************************************************************************
  * Private Data
@@ -89,14 +88,6 @@ static void thread_func(void *parameter)
     }	
 }
 
-static void signal_handler(int signo)
-{
-  printf("\tThread1\tThread2\n");
-  printf("Loops\t%ld\t%ld\n", nloops[0], nloops[1]);
-  printf("Errors\t%ld\t%ld\n", nerrors[0], nerrors[1]);
-  exit(0);
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -106,10 +97,6 @@ int main(int argc, char **argv, char **envp)
   pthread_t thread1, thread2;
 
   printf("Starting threads\n");
-
-  /* Set up to catch control-C interrupt */
-
-  (void)signal(SIGINT, signal_handler);
 
   /* Initialize the mutex */
 

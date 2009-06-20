@@ -39,6 +39,8 @@ NXFLATCXX = $(CXX)
 NXFLATCXXFLAGS = $(CXXPICFLAGS)
 
 NXFLATLD = $(LD)
-NXFLATLDFLAGS1 = -e main
-NXFLATLDFLAGS2 = -e main -T $(TOPDIR)/examples/nxflat/tests/nxflat.ld -no-check-sections
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T $(TOPDIR)/examples/nxflat/tests/nxflat.ld -no-check-sections
+
+LDNXFLATFLAGS = -e main -s 2048
 
