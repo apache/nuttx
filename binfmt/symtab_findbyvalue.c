@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/symtab_findbyname.c
+ * binfmt/symtab_findbyvalue.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <string.h>
 #include <debug.h>
 #include <assert.h>
 #include <errno.h>
@@ -68,12 +67,13 @@
  ***********************************************************************/
 
 /****************************************************************************
- * Name: symtab_findbyname
+ * Name: symtab_findbyvalue
  *
  * Description:
- *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table is not ordered with respect to symbol
- *   name and, hence, access time will be linear with respect to nsyms.
+ *   Find the symbol in the symbol table whose value closest (but not greater
+ *   than), the provided value. This version assumes that table is not ordered
+ *   with respect to symbol name and, hence, access time will be linear with
+ *   respect to nsyms.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching
@@ -82,17 +82,40 @@
  ****************************************************************************/
 
 FAR const struct symtab_s *
-symtab_findbyname(FAR const struct symtab_s *symtab,
-                  FAR const char *name, int nsyms)
+symtab_findbyvalue(FAR const struct symtab_s *symtab,
+                   FAR void *value, int nsyms)
 {
-  DEBUGASSERT(symtab != NULL && name != NULL);
+  FAR const struct symtab_s *retval = NULL;
+
+  DEBUGASSERT(symtab != NULL);
   for (; nsyms > 0; symtab++, nsyms--)
     {
-      if (strcmp(name, symtab->sym_name) == 0)
+      /* Look for symbols of lesser or equal value (probably address) to value */
+
+      if (symtab->sym_value <= value)
         {
-          return symtab;
+          /* Found one.  Is it the largest we have found so far? */
+
+          if (!retval || symtab->sym_value > retval->sym_value)
+            {
+              /* Yes, then it is the new candidate for the symbol whose value
+               * just below 'value'
+               */
+
+              retval = symtab;
+
+              /* If it is exactly equal to the search 'value', then we might as
+               * well terminate early because we can't do any better than that.
+               */
+
+              if (retval->sym_value == value)
+                {
+                  break;
+                }
+            }
         }
     }
-  return NULL;
+
+  return retval;
 }
 

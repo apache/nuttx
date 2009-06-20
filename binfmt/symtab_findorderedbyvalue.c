@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/symtab_findbyname.c
+ * binfmt/symtab_findorderedbyvalue.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <string.h>
 #include <debug.h>
 #include <assert.h>
 #include <errno.h>
@@ -68,12 +67,12 @@
  ***********************************************************************/
 
 /****************************************************************************
- * Name: symtab_findbyname
+ * Name: symtab_findorderedbyvalue
  *
  * Description:
- *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table is not ordered with respect to symbol
- *   name and, hence, access time will be linear with respect to nsyms.
+ *   Find the symbol in the symbol table whose value closest (but not greater
+ *   than), the provided value. This version assumes that table is ordered
+ *   with respect to symbol name.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching
@@ -82,17 +81,47 @@
  ****************************************************************************/
 
 FAR const struct symtab_s *
-symtab_findbyname(FAR const struct symtab_s *symtab,
-                  FAR const char *name, int nsyms)
+symtab_findorderedbyvalue(FAR const struct symtab_s *symtab,
+                          FAR void *value, int nsyms)
 {
-  DEBUGASSERT(symtab != NULL && name != NULL);
-  for (; nsyms > 0; symtab++, nsyms--)
+  int low  = 0;
+  int high = nsyms -1;
+  int mid;
+
+  /* Loop until the range has been isolated to a single symbol table
+   * entry that may or may not match the search name.
+   */
+
+  DEBUGASSERT(symtab != NULL);
+  while (low < high)
     {
-      if (strcmp(name, symtab->sym_name) == 0)
+      /* Compare the name to the one in the middle.  (or just below
+       * the middle in the case where one is even and one is odd).
+       */
+
+      mid = (low + high) >> 1;
+      if ( value < symtab[mid].sym_value)
         {
-          return symtab;
+          high = mid - 1;
+        }
+      else if (value > symtab[mid].sym_value)
+        {
+          low = mid + 1;
+        }
+      else /* if (value == symtab[mid].sym_value) */
+        {
+          return &symtab[mid];
         }
     }
-  return NULL;
+
+ /* low == high... One final check.  We might not have actually tested
+  * the final symtab[] name.
+  *
+  *   Example: Only the last pass through loop, suppose low = 1, high = 2,
+  *   mid = 1, and symtab[high].sym_name == name.  Then we would get here with
+  *   low = 2, high = 2, but symtab[2].sym_name was never tested.
+  */
+
+  return value == symtab[low].sym_value ? &symtab[low] : NULL;
 }
 
