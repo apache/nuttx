@@ -94,8 +94,8 @@ int load_module(const char *filename, FAR struct binary_s *bin)
       ret = -EINVAL;
     }
   else
-    {
 #endif
+    {
       bdbg("Loading %s\n", filename);
 
       /* Disabling pre-emption should be sufficient protection while

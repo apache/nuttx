@@ -1,7 +1,7 @@
 ############################################################################
-# examples/nxflat/Makefile
+# examples/hello/Makefile
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
-
 CSRCS	= 
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 
@@ -74,4 +73,3 @@ distclean: clean
 	@rm -f Make.dep .depend
 
 -include Make.dep
-
