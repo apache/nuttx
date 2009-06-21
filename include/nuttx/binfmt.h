@@ -55,20 +55,25 @@
 
 /* This describes the file to be loaded */
 
+struct symtab_s;
 struct binary_s
 {
-  /* Provided to the loader */
+  /* Information provided to the loader to load and bind a module */
 
-  FAR const char  *filename;         /* Full path to the binary */
-  FAR const char **argv;             /* Argument list */
+  FAR const char *filename;            /* Full path to the binary to be loaded */
+  FAR const char **argv;               /* Argument list */
+  FAR const struct symtab_s *exports;  /* Table of exported symbols */
+  int nexports;                        /* The number of symbols in exports[] */
 
-  /* Provided by the loader (if successful) */
+  /* Information provided from the loader (if successful) describing the
+   * resources used by the loaded module.
+   */
 
-  main_t       entrypt;              /* Entry point into a program module */
-  FAR void    *ispace;               /* Memory-mapped, I-space (.text) address */
-  FAR struct dspace_s *dspace;       /* Address of the allocated .data/.bss space */
-  size_t       isize;                /* Size of the I-space region (needed for munmap) */
-  size_t       stacksize;            /* Size of the stack in bytes (unallocated) */
+  main_t entrypt;                      /* Entry point into a program module */
+  FAR void *ispace;                    /* Memory-mapped, I-space (.text) address */
+  FAR struct dspace_s *dspace;         /* Address of the allocated .data/.bss space */
+  size_t isize;                        /* Size of the I-space region (needed for munmap) */
+  size_t stacksize;                    /* Size of the stack in bytes (unallocated) */
 };
 
 /* This describes one binary format handler */
@@ -125,7 +130,8 @@ EXTERN int unregister_binfmt(FAR struct binfmt_s *binfmt);
  * Name: load_module
  *
  * Description:
- *   Load a module into memory and prep it for execution.
+ *   Load a module into memory, bind it to an exported symbol take, and
+ *   prep the module for execution.
  *
  * Returned Value:
  *   This is an end-user function, so it follows the normal convention:
@@ -134,7 +140,7 @@ EXTERN int unregister_binfmt(FAR struct binfmt_s *binfmt);
  *
  ****************************************************************************/
 
-EXTERN int load_module(const char *filename, FAR struct binary_s *bin);
+EXTERN int load_module(FAR struct binary_s *bin);
 
 /****************************************************************************
  * Name: unload_module

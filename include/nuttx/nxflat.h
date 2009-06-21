@@ -183,6 +183,23 @@ EXTERN int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
                        int readsize, int offset);
 
 /***********************************************************************
+ * Name: nxflat_bind
+ *
+ * Description:
+ *   Bind the imported symbol names in the loaded module described by
+ *   'loadinfo' using the exported symbol values provided by 'symtab'
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ***********************************************************************/
+
+struct symtab_s;
+EXTERN int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
+                       FAR const struct symtab_s *exports, int nexports);
+
+/***********************************************************************
  * Name: 
  *
  * Description:

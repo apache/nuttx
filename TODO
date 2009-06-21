@@ -320,6 +320,11 @@ o Pascal Add-On (pcode/)
 o Documentation (Documentation/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Description: Need to document which APIs can be used in interrupt
+               handlers (like mq_send and sem_post) and which cannot.
+  Status:      Open
+  Priority:    Low
+
 o Build system
   ^^^^^^^^^^^^
 

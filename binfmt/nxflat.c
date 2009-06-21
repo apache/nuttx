@@ -173,6 +173,16 @@ static int nxflat_loadbinary(struct binary_s *binp)
       return ret;
     }
 
+  /* Bind the program to the exported symbol table */
+
+  ret = nxflat_bind(&loadinfo, binp->exports, binp->nexports);
+  if (ret != 0)
+    {
+      bdbg("Failed to bind symbols program binary: %d\n", ret);
+      nxflat_uninit(&loadinfo);
+      return ret;
+    }
+
   /* Return the load information */
 
   binp->entrypt   = (main_t)(loadinfo.ispace + loadinfo.entryoffs);

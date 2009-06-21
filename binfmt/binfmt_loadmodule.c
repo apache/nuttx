@@ -74,7 +74,8 @@
  * Name: load_module
  *
  * Description:
- *   Load a module into memory and prep it for execution.
+ *   Load a module into memory, bind it to an exported symbol take, and
+ *   prep the module for execution.
  *
  * Returned Value:
  *   This is an end-user function, so it follows the normal convention:
@@ -83,7 +84,7 @@
  *
  ****************************************************************************/
 
-int load_module(const char *filename, FAR struct binary_s *bin)
+int load_module(FAR struct binary_s *bin)
 {
   FAR struct binfmt_s *binfmt;
   int ret;
@@ -96,7 +97,7 @@ int load_module(const char *filename, FAR struct binary_s *bin)
   else
 #endif
     {
-      bdbg("Loading %s\n", filename);
+      bdbg("Loading %s\n", bin->filename);
 
       /* Disabling pre-emption should be sufficient protection while
        * accessing the list of registered binary format handlers.
@@ -116,7 +117,6 @@ int load_module(const char *filename, FAR struct binary_s *bin)
           ret = binfmt->load(bin);
           if (ret == OK)
             {
-
               /* Successfully loaded -- break out with ret == 0 */
 
               dump_module(bin);
