@@ -94,9 +94,9 @@ static void nxflat_dumpmemory(void *addr, int nbytes)
       bdbg("  %p: %02x %02x %02x %02x\n", ptr, ptr[0], ptr[1], ptr[2], ptr[3]);
     }
 }
-#else /* CONFIG_XFLAT_DEBUG */
+#else
 # define nnxflat_dumpmemory(a,n)
-#endif /* CONFIG_XFLAT_DEBUG */
+#endif
 
 /****************************************************************************
  * Name: nxflat_dumploadinfo
@@ -131,9 +131,9 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
   bdbg("  NXFLT HEADER:");
   bdbg("    header:       %p\n",    loadinfo->header);
 }
-#else /* CONFIG_XFLAT_DEBUG */
+#else
 # define nxflat_dumploadinfo(i)
-#endif /* CONFIG_XFLAT_DEBUG */
+#endif
 
 /****************************************************************************
  * Name: nxflat_loadbinary

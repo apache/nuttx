@@ -60,6 +60,32 @@
  * Definitions
  ****************************************************************************/
 
+/* Check configuration.  This is not all of the configuration settings that
+ * are required -- only the more obvious.
+ */
+
+#if CONFIG_NFILE_DESCRIPTORS < 1
+#  error "You must provide file descriptors via CONFIG_NFILE_DESCRIPTORS in your configuration file"
+#endif
+
+#ifndef CONFIG_NXFLAT
+#  error "You must select CONFIG_NXFLAT in your configuration file"
+#endif
+
+#ifndef CONFIG_FS_ROMFS
+#  error "You must select CONFIG_FS_ROMFS in your configuration file"
+#endif
+
+#ifdef CONFIG_DISABLE_MOUNTPOINT
+#  error "You must not disable mountpoints via CONFIG_DISABLE_MOUNTPOINT in your configuration file"
+#endif
+
+#ifdef CONFIG_BINFMT_DISABLE
+#  error "You must not disable loadable modules via CONFIG_BINFMT_DISABLE in your configuration file"
+#endif
+
+/* Describe the ROMFS file system */
+
 #define SECTORSIZE   512
 #define NSECTORS(b)  (((b)+SECTORSIZE-1)/SECTORSIZE)
 #define ROMFSDEV     "/dev/ram0"
