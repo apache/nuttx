@@ -137,6 +137,14 @@ examples/nx
     CONFIG_DISABLE_PTHREAD=n
     CONFIG_NX_BLOCKING=y
 
+examples/nxflat
+^^^^^^^^^^^^^^^
+
+  This example builds a small NXFLAT test case.  This includes several
+  test programs under examples/nxflat tests.  These tests are build using
+  the NXFLAT format and installed in a ROMFS file system.  At run time,
+  each program int eh ROMFS file system is executed.
+
 examples/null
 ^^^^^^^^^^^^^
 

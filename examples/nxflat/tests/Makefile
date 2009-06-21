@@ -35,23 +35,73 @@
 
 # Most of these do no build yet
 #SUBDIRS	= errno hello hello++ longjmp mutex pthread signal task
-SUBDIRS	= errno hello mutex pthread task
+SUBDIRS		= errno hello mutex pthread task
+
+NXFLAT_DIR	= $(TOPDIR)/examples/nxflat
+TESTS_DIR	= $(NXFLAT_DIR)/tests
+ROMFS_DIR	= $(TESTS_DIR)/romfs
+ROMFS_IMG	= $(TESTS_DIR)/romfs.img
+ROMFS_HDR	= $(TESTS_DIR)/romfs.h
+ROMFS_DIRLIST	= $(TESTS_DIR)/dirlist.h
 
 define DIR_template
 $(1)_$(2):
-	$(MAKE) -C $(1) $(3)
+	@$(MAKE) -C $(1) $(3) TOPDIR=$(TOPDIR) ROMFS_DIR=$(ROMFS_DIR) CROSSDEV=$(CROSSDEV)
 endef
 
-all: build
-.PHONY: all build clean install
+all: $(ROMFS_HDR) $(ROMFS_DIRLIST)
+.PHONY: all build clean install populate
 
 $(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),build, all)))
 $(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),clean,clean)))
 $(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),install,install)))
 
+# Build program(s) in each sud-directory 
+
 build: $(foreach DIR, $(SUBDIRS), $(DIR)_build)
 
-clean: $(foreach DIR, $(SUBDIRS), $(DIR)_clean)
+# Install each program in the romfs directory
 
 install: $(foreach DIR, $(SUBDIRS), $(DIR)_install)
+
+# Create the romfs directory
+
+$(ROMFS_DIR):
+	@mkdir $(ROMFS_DIR)
+
+# Populate the romfs directory
+
+populate:  $(ROMFS_DIR) build install
+
+# Create the romfs.img file from the populated romfs directory
+
+$(ROMFS_IMG): populate
+	@genromfs -f $@ -d $(ROMFS_DIR) -V "NXFLATTEST"
+
+# Create the romfs.h header file from the romfs.img file
+
+$(ROMFS_HDR) : $(ROMFS_IMG)
+	@xxd -i $^ >$@
+
+$(ROMFS_DIRLIST) : populate
+	@echo "#ifndef __EXAMPLES_NXFLAT_TESTS_DIRLIST_H" >$(ROMFS_DIRLIST)
+	@echo "#define __EXAMPLES_NXFLAT_TESTS_DIRLIST_H" >>$(ROMFS_DIRLIST)
+	@echo "" >>$(ROMFS_DIRLIST)
+	@echo "static const char *dirlist[] =" >>$(ROMFS_DIRLIST)
+	@echo "{" >>$(ROMFS_DIRLIST)
+	@(\
+		for file in `ls $(ROMFS_DIR)`; do \
+		echo "  \"$$file\"," >>$(ROMFS_DIRLIST); \
+		done; \
+	)
+	@echo "};" >>$(ROMFS_DIRLIST)
+	@echo "" >>$(ROMFS_DIRLIST)
+	@echo "#endif /* __EXAMPLES_NXFLAT_TESTS_DIRLIST_H */" >>$(ROMFS_DIRLIST)
+
+# Clean each subdirectory
+
+clean: $(foreach DIR, $(SUBDIRS), $(DIR)_clean)
+	@rm -f $(ROMFS_HDR) $(ROMFS_IMG)
+	@rm -rf $(ROMFS_DIR)
+
 
