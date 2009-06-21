@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <sys/mount.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +49,9 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/ramdisk.h>
 #include <nuttx/binfmt.h>
+
 #include "tests/romfs.h"
 #include "tests/dirlist.h"
 #include "tests/symtab.h"
@@ -56,6 +59,11 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#define SECTORSIZE   512
+#define NSECTORS(b)  (((b)+SECTORSIZE-1)/SECTORSIZE)
+#define ROMFSDEV     "/dev/ram0"
+#define MOUNTPT      "/mnt/romfs"
 
 /****************************************************************************
  * Private Types
@@ -67,6 +75,8 @@
 
 static const char delimiter[] =
   "****************************************************************************";
+
+static char path[128];
 
 /****************************************************************************
  * Private Functions
@@ -103,12 +113,38 @@ int user_start(int argc, char *argv[])
   int ret;
   int i;
 
+  /* Create a ROM disk for the ROMFS filesystem */
+
+  printf("Registering romdisk\n");
+  ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len), SECTORSIZE);
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: romdisk_register failed: %d\n", ret);
+      exit(1);
+    }
+
+  /* Mount the file system */
+
+  printf("Mounting ROMFS filesystem at target=%s with source=%s\n",
+         MOUNTPT, ROMFSDEV);
+
+  ret = mount(ROMFSDEV, MOUNTPT, "romfs", MS_RDONLY, NULL);
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: mount(%s,%s,romfs) failed: %s\n",
+              ROMFSDEV, MOUNTPT, errno);
+    }
+
+  /* Now excercise every progrm in the ROMFS file system */
+
   for (i = 0; dirlist[i]; i++)
     {
       testheader(dirlist[i]);
 
       memset(&bin, 0, sizeof(struct binary_s));
-      bin.filename = dirlist[i];
+      snprintf(path, 128, "%s/%s", MOUNTPT, dirlist[i]);
+
+      bin.filename = path;
       bin.exports  = exports;
       bin.nexports = NEXPORTS;
 

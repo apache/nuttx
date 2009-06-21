@@ -82,7 +82,7 @@ $(ROMFS_IMG): populate
 # Create the romfs.h header file from the romfs.img file
 
 $(ROMFS_HDR) : $(ROMFS_IMG)
-	@xxd -i $^ >$@
+	@(cd $(TESTS_DIR); xxd -i romfs.img >$@)
 
 # Create the dirlist.h header file from the romfs directory 
 
