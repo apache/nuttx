@@ -35,7 +35,6 @@
 
 -include $(TOPDIR)/.config	# Current configuration
 -include $(TOPDIR)/Make.defs	# Basic make info
-include ../Make.defs		# NXFLAT make info
 
 BIN			= task
 
@@ -48,27 +47,33 @@ R2OBJ			= $(R2SRC:.S=.o)
 all: $(BIN)
 
 $(R1OBJS): %.o: %.c
-	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
+	@echo "CC: $<"
+	@$(CC) -c $(CPICFLAGS) $< -o $@
 
 $(R2OBJ): %.o: %.S
-	$(NXFLATCC) -c $(NXFLATCFLAGS) $< -o $@
+	@echo "AS: $<"
+	@$(CC) -c $(CPICFLAGS) $< -o $@
 
 $(BIN).r1: $(R1OBJS)
-	$(NXFLATLD) $(NXFLATLDFLAGS1) -o $@ $^
+	@echo "LD: $<"
+	@$(LD) $(NXFLATLDFLAGS1) -o $@ $^
 
 $(R2SRC): $(BIN).r1
-	$(MKNXFLAT) -o $@ $^
+	@echo "MK: $<"
+	@$(MKNXFLAT) -o $@ $^
 
 $(BIN).r2: $(R2OBJ)
-	$(NXFLATLD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS) $(R2OBJ)
+	@echo "LD: $<"
+	@$(LD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS) $(R2OBJ)
 
 $(BIN): $(BIN).r2
-	$(LDNXFLAT) $(LDNXFLATFLAGS) -o $@ $^
+	@echo "LD: $<"
+	@$(LDNXFLAT) $(LDNXFLATFLAGS) -o $@ $^
 
 clean: 
-	rm -f $(BIN) $(R2SRC) *.o *.r1 *.r2 *~ .*.swp core
+	@rm -f $(BIN) $(R2SRC) *.o *.r1 *.r2 *~ .*.swp core
 
 install:
-	install -D $(BIN) $(ROMFS_DIR)/$(BIN)
+	@install -D $(BIN) $(ROMFS_DIR)/$(BIN)
 
 

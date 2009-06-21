@@ -38,7 +38,7 @@
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
-CSRCS	= 
+CSRCS	= nxflat_main.c
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 
 SRCS	= $(ASRCS) $(CSRCS)
@@ -47,6 +47,7 @@ OBJS	= $(AOBJS) $(COBJS)
 BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
 all:	$(BIN)
+.PHONY:	tests/romfs.h tests/dirlist.h clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -54,7 +55,10 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN):	$(OBJS)
+headers:
+	@$(MAKE) -C tests TOPDIR=$(TOPDIR) CROSSDEV=$(CROSSDEV)
+
+$(BIN):	headers $(OBJS)
 	@( for obj in $(OBJS) ; do \
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
