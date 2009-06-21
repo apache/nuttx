@@ -43,13 +43,14 @@ ROMFS_DIR	= $(TESTS_DIR)/romfs
 ROMFS_IMG	= $(TESTS_DIR)/romfs.img
 ROMFS_HDR	= $(TESTS_DIR)/romfs.h
 ROMFS_DIRLIST	= $(TESTS_DIR)/dirlist.h
+SYMTAB		= $(TESTS_DIR)/symtab.h
 
 define DIR_template
 $(1)_$(2):
 	@$(MAKE) -C $(1) $(3) TOPDIR=$(TOPDIR) ROMFS_DIR=$(ROMFS_DIR) CROSSDEV=$(CROSSDEV)
 endef
 
-all: $(ROMFS_HDR) $(ROMFS_DIRLIST)
+all: $(ROMFS_HDR) $(ROMFS_DIRLIST) $(SYMTAB)
 .PHONY: all build clean install populate
 
 $(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),build, all)))
@@ -83,25 +84,20 @@ $(ROMFS_IMG): populate
 $(ROMFS_HDR) : $(ROMFS_IMG)
 	@xxd -i $^ >$@
 
+# Create the dirlist.h header file from the romfs directory 
+
 $(ROMFS_DIRLIST) : populate
-	@echo "#ifndef __EXAMPLES_NXFLAT_TESTS_DIRLIST_H" >$(ROMFS_DIRLIST)
-	@echo "#define __EXAMPLES_NXFLAT_TESTS_DIRLIST_H" >>$(ROMFS_DIRLIST)
-	@echo "" >>$(ROMFS_DIRLIST)
-	@echo "static const char *dirlist[] =" >>$(ROMFS_DIRLIST)
-	@echo "{" >>$(ROMFS_DIRLIST)
-	@(\
-		for file in `ls $(ROMFS_DIR)`; do \
-		echo "  \"$$file\"," >>$(ROMFS_DIRLIST); \
-		done; \
-	)
-	@echo "};" >>$(ROMFS_DIRLIST)
-	@echo "" >>$(ROMFS_DIRLIST)
-	@echo "#endif /* __EXAMPLES_NXFLAT_TESTS_DIRLIST_H */" >>$(ROMFS_DIRLIST)
+	@$(TESTS_DIR)/mkdirlist.sh $(ROMFS_DIR) >$@
+
+# Create the exported symbol table list from the derived *-thunk.S files
+
+$(SYMTAB): build
+	@$(TESTS_DIR)/mksymtab.sh $(TESTS_DIR) >$@
 
 # Clean each subdirectory
 
 clean: $(foreach DIR, $(SUBDIRS), $(DIR)_clean)
-	@rm -f $(ROMFS_HDR) $(ROMFS_IMG)
+	@rm -f $(ROMFS_HDR) $(ROMFS_IMG) $(SYMTAB)
 	@rm -rf $(ROMFS_DIR)
 
 

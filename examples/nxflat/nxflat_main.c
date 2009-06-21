@@ -40,10 +40,18 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <pthread.h>
 #include <debug.h>
+#include <errno.h>
 
+#include <nuttx/binfmt.h>
 #include "tests/romfs.h"
 #include "tests/dirlist.h"
+#include "tests/symtab.h"
 
 /****************************************************************************
  * Definitions
@@ -57,9 +65,21 @@
  * Private Data
  ****************************************************************************/
 
+static const char delimiter[] =
+  "****************************************************************************";
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: testheader
+ ****************************************************************************/
+
+static inline void testheader(FAR const char *progname)
+{
+  printf("\n%s\n* Executing %s\n%s\n\n", delimiter, progname, delimiter);
+}
 
 /****************************************************************************
  * Public Functions
@@ -79,5 +99,32 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
+  struct binary_s bin;
+  int ret;
+  int i;
+
+  for (i = 0; dirlist[i]; i++)
+    {
+      testheader(dirlist[i]);
+
+      memset(&bin, 0, sizeof(struct binary_s));
+      bin.filename = dirlist[i];
+      bin.exports  = exports;
+      bin.nexports = NEXPORTS;
+
+      ret = load_module(&bin);
+      if (ret < 0)
+        {
+          fprintf(stderr, "ERROR: Failed to load program '%s'\n", dirlist[i]);
+          exit(1);
+        }
+
+      ret = exec_module(&bin, 50);
+      if (ret < 0)
+        {
+          fprintf(stderr, "ERROR: Failed to execute program '%s'\n", dirlist[i]);
+          unload_module(&bin);
+        }
+    }
   return 0;
 }
