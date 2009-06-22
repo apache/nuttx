@@ -87,13 +87,13 @@ static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
   uint32 *addr;
 
   bvdbg("NXFLAT_RELOC_TYPE_REL32I Offset: %08x I-Space: %p\n",
-        offset, loadinfo->ispace);
+        offset, loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
   if (offset < loadinfo->dsize)
     {
       addr = (uint32*)(offset + loadinfo->dspace->region);
       bvdbg("  Before: %08x\n", *addr);
-     *addr += (uint32)(loadinfo->ispace);
+     *addr += (uint32)(loadinfo->ispace + sizeof(struct nxflat_hdr_s));
       bvdbg("  After: %08x\n", *addr);
       return OK;
     }
@@ -321,7 +321,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
           offset = imports[i].i_funcname;
           DEBUGASSERT(offset < loadinfo->isize);
 
-	  symname = (char*)(offset + loadinfo->ispace);
+	  symname = (char*)(offset + loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
 	  /* Find the exported symbol value for this this symbol name. */
 
