@@ -69,6 +69,10 @@
  *   This function unloads the object from memory. This essentially
  *   undoes the actions of nxflat_load.
  *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
  ****************************************************************************/
 
 int nxflat_unload(struct nxflat_loadinfo_s *loadinfo)

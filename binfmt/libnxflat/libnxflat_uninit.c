@@ -66,6 +66,15 @@
 
 /****************************************************************************
  * Name: nxflat_uninit
+ *
+ * Description:
+ *   Releases any resources committed by nxflat_init().  This essentially
+ *   undoes the actions of nxflat_init.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
  ****************************************************************************/
 
 int nxflat_uninit(struct nxflat_loadinfo_s *loadinfo)

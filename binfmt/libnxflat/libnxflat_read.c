@@ -67,6 +67,14 @@
 
 /****************************************************************************
  * Name: nxflat_read
+ *
+ * Description:
+ *   Read 'readsize' bytes from the object file at 'offset'
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
  ****************************************************************************/
 
 int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, int offset)

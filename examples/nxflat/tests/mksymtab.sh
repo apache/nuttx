@@ -26,6 +26,7 @@ echo "#include <nuttx/symtab.h>"
 echo ""
 echo "static const struct symtab_s exports[] = "
 echo "{"
+
 for string in $varlist; do
 	var=`echo $string | sed -e "s/\"//g"`
 	echo "  {$string, $var},"

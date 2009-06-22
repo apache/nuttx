@@ -68,6 +68,15 @@
 
 /****************************************************************************
  * Name: nxflat_init
+ *
+ * Description:
+ *   This function is called to configure the library to process an NXFLAT
+ *   program binary.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
  ****************************************************************************/
 
 int nxflat_init(const char *filename, struct nxflat_hdr_s *header,

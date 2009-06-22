@@ -107,7 +107,7 @@ extern "C" {
  ****************************************************************************/
 
 /***********************************************************************
- * Name: 
+ * Name: nxflat_verifyheader
  *
  * Description:
  *   Given the header from a possible NXFLAT executable, verify that it
@@ -122,7 +122,7 @@ extern "C" {
 EXTERN int nxflat_verifyheader(const struct nxflat_hdr_s *header);
 
 /***********************************************************************
- * Name: 
+ * Name: nxflat_init
  *
  * Description:
  *   This function is called to configure the library to process an NXFLAT
@@ -138,7 +138,7 @@ EXTERN int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
 	               struct nxflat_loadinfo_s *loadinfo);
 
 /***********************************************************************
- * Name: 
+ * Name: nxflat_uninit
  *
  * Description:
  *   Releases any resources committed by nxflat_init().  This essentially
@@ -153,11 +153,14 @@ EXTERN int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
 EXTERN int nxflat_uninit(struct nxflat_loadinfo_s *loadinfo);
 
 /***********************************************************************
- * Name: 
+ * Name: nxflat_load
  *
  * Description:
- *   Loads the binary specified by nxflat_init into memory,
- *   Completes all relocations, and clears BSS.
+ *   Loads the binary specified by nxflat_init into memory, mapping
+ *   the I-space executable regions, allocating the D-Space region,
+ *   and inializing the data segment (relocation information is
+ *   temporarily loaded into the BSS region.  BSS will be cleared
+ *   by nxflat_bind() after the relocation data has been processed).
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -168,7 +171,7 @@ EXTERN int nxflat_uninit(struct nxflat_loadinfo_s *loadinfo);
 EXTERN int nxflat_load(struct nxflat_loadinfo_s *loadinfo);
 
 /***********************************************************************
- * Name: 
+ * Name: nxflat_read
  *
  * Description:
  *   Read 'readsize' bytes from the object file at 'offset'
@@ -188,6 +191,8 @@ EXTERN int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
  * Description:
  *   Bind the imported symbol names in the loaded module described by
  *   'loadinfo' using the exported symbol values provided by 'symtab'
+ *   After binding the module, clear the BSS region (which held the relocation
+ *   data) in preparation for execution.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -200,7 +205,7 @@ EXTERN int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
                        FAR const struct symtab_s *exports, int nexports);
 
 /***********************************************************************
- * Name: 
+ * Name: nxflat_unload
  *
  * Description:
  *   This function unloads the object from memory. This essentially

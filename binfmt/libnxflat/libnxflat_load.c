@@ -42,7 +42,6 @@
 #include <sys/mman.h>
 
 #include <stdlib.h>
-#include <string.h>
 #include <nxflat.h>
 #include <debug.h>
 #include <errno.h>
@@ -63,22 +62,21 @@
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_BINFMT)
-static const char g_textsegment[] = "TEXT";
-static const char g_datasegment[] = "DATA";
-static const char g_bsssegment[]  = "BSS";
-static const char g_unksegment[]  = "UNKNOWN";
+static const char g_relocrel32i[]  = "RELOC_REL32I";
+static const char g_relocrel32d[]  = "RELOC_REL32D";
+static const char g_relocrel32id[] = "RELOC_REL32ID";
+static const char g_relocabs32[]   = "RELOC_AB32";
 
-static const char *g_segment[] =
+static const char *g_reloctype[] =
 {
-  g_textsegment,
-  g_datasegment,
-  g_bsssegment,
-  g_unksegment
+  g_relocrel32i,
+  g_relocrel32d,
+  g_relocrel32id,
+  g_relocabs32
 };
-
-#  define SEGNAME(rl) g_segment[NXFLAT_RELOC_TYPE(rl)]
+#  define RELONAME(rl) g_reloctype[NXFLAT_RELOC_TYPE(rl)]
 #else
-#  define SEGNAME(rl) "(no name)"
+#  define RELONAME(rl) "(no name)"
 #endif
 
 /****************************************************************************
@@ -86,108 +84,30 @@ static const char *g_segment[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxflat_reloc
- ****************************************************************************/
-
-static void nxflat_reloc(struct nxflat_loadinfo_s *loadinfo, uint32 rl)
-{
-  uint32 *ptr;
-  ubyte  *datastart;
-
-  /* We only support relocations in the data sections. Verify that the
-   * relocation address lies in the data section of the file image.
-   */
-
-  if (NXFLAT_RELOC_OFFSET(rl) > loadinfo->datasize)
-    {
-      bdbg("ERROR: Relocation at %08x invalid -- "
-	  "does not lie in the data segment, size: %08x\n",
-	  NXFLAT_RELOC_OFFSET(rl), loadinfo->datasize);
-      bdbg("       Relocation not performed!\n");
-    }
-  else if ((NXFLAT_RELOC_OFFSET(rl) & 0x00000003) != 0)
-    {
-      bdbg("ERROR: Relocation at %08x invalid -- "
-	  "Improperly aligned\n",
-	  NXFLAT_RELOC_OFFSET(rl));
-    }
-  else
-    {
-      /* Get a reference to the "real" start of data.  It is
-       * offset slightly from the beginning of the allocated
-       * DSpace to hold information needed by ld.so at run time.
-       */
-
-      datastart = loadinfo->dspace->region;
-
-      /* Get a pointer to the value that needs relocation in
-       * DSpace.
-       */
-      
-      ptr = (uint32*)(datastart + NXFLAT_RELOC_OFFSET(rl));
-
-      bvdbg("Relocation of variable at DATASEG+%08x "
-	  "(address %p, currently %08x) into segment %s\n",
-	  NXFLAT_RELOC_OFFSET(rl), ptr, *ptr, SEGNAME(rl));
-	
-      switch (NXFLAT_RELOC_TYPE(rl))
-	{
-	  /* TEXT is located at an offset of sizeof(struct nxflat_hdr_s) from
-	   * the allocated/mapped ISpace region.
-	   */
-
-	case NXFLAT_RELOC_TYPE_TEXT:
-	  *ptr += loadinfo->ispace + sizeof(struct nxflat_hdr_s);
-	  break;
-
-	  /* DATA and BSS are always contiguous regions.  DATA
-	   * begins at the beginning of the allocated data segment.
-	   * BSS is positioned after DATA, unrelocated references
-	   * to BSS include the data offset.
-	   *
-	   * In other contexts, is it necessary to add the datasize
-	   * to get the BSS offset like:
-	   *
-	   *   *ptr += datastart + loadinfo->datasize;
-	   */
-
-	case NXFLAT_RELOC_TYPE_DATA:
-	case NXFLAT_RELOC_TYPE_BSS:
-	  *ptr += (uint32)datastart;
-	  break;
-
-	  /* This case happens normally if the symbol is a weak
-	   * undefined symbol.  We permit these.
-	   */
-
-	case NXFLAT_RELOC_TYPE_NONE:
-	  bdbg("NULL relocation!\n");
-	  break;
-
-	default:
-	  bdbg("ERROR: Unknown relocation type: %d\n", NXFLAT_RELOC_TYPE(rl));
-	  break;
-	}
-
-      bvdbg("Relocation became %08x\n", *ptr);
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: nxflat_load
+ *
+ * Description:
+ *   Loads the binary specified by nxflat_init into memory, mapping
+ *   the I-space executable regions, allocating the D-Space region,
+ *   and inializing the data segment (relocation information is
+ *   temporarily loaded into the BSS region.  BSS will be cleared
+ *   by nxflat_bind() after the relocation data has been processed).
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
  ****************************************************************************/
 
 int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
 {
   off_t   doffset;     /* Offset to .data in the NXFLAT file */
-  uint32 *reloctab;    /* Address of the relocation table */
   uint32  dreadsize;   /* Total number of bytes of .data to be read */
   int     ret = OK;
-  int     i;
 
   /* Calculate the extra space we need to allocate.  This extra space will be
    * the size of the BSS section.  This extra space will also be used
@@ -266,7 +186,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
     }
   loadinfo->dspace->crefs = 1;
 
-  bvdbg("Allocated DSpace (%d bytes) at %p\n", loadinfo->dsize, loadinfo->dspace);
+  bvdbg("Allocated DSpace (%d bytes) at %p\n", loadinfo->dsize, loadinfo->dspace->region);
 
   /* Now, read the data into allocated DSpace at doffset into the
    * allocated DSpace memory.
@@ -282,30 +202,6 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   bvdbg("TEXT: %08x Entry point offset: %08x Data offset: %08x\n",
       loadinfo->ispace, loadinfo->entryoffs, doffset);
 
-  /* Resolve the address of the relocation table.  In the file, the
-   * relocations should lie at the same offset as BSS.  The current
-   * value of relocstart is the offset from the beginning of the file.
-   * The following adjustment will convert it to an address in dspace->
-   */
-
-  reloctab = (uint32*)(loadinfo->relocstart + (uint32)loadinfo->dspace->region - loadinfo->isize);
-
-  bvdbg("Relocation table at %p, reloccount: %d\n",
-      reloctab, loadinfo->reloccount);
-
-  /* Now run through the relocation entries. */
-
-  for (i=0; i < loadinfo->reloccount; i++)
-    {
-      nxflat_reloc(loadinfo, htonl(reloctab[i]));
-    }
-
-  /* Zero the BSS area, trashing the relocations that lived in space
-   * in the file.
-   */
-
-  memset((void*)(loadinfo->dspace->region + loadinfo->datasize),
-	          0, loadinfo->bsssize);
   return OK;
 
 errout:
