@@ -95,7 +95,7 @@ static void nxflat_dumpmemory(void *addr, int nbytes)
     }
 }
 #else
-# define nnxflat_dumpmemory(a,n)
+# define nxflat_dumpmemory(a,n)
 #endif
 
 /****************************************************************************

@@ -167,11 +167,6 @@ struct nxflat_reloc_s
  *                                    into D-Space at the the offset.
  *                           Fixup:   Add allocated D-Space address to the
  *                                    offset.
- * NXFLAT_RELOC_TYPE_REL32ID Meaning: Object file contains a 32-bit offset
- *                                    into I-Space at the the offset, but will
- *                                    be referenced as data
- *                           Fixup:   Add mapped I-Space address - allocated
- *                                    D-Space address to the offset.
  * NXFLAT_RELOC_TYPE_ABS32   Meaning: Offset refers to a struct nxflat_import_s
  *                                    describing a function pointer to be
  *                                    imported.
@@ -181,9 +176,8 @@ struct nxflat_reloc_s
 
 #define NXFLAT_RELOC_TYPE_REL32I  0
 #define NXFLAT_RELOC_TYPE_REL32D  1
-#define NXFLAT_RELOC_TYPE_REL32ID 2
-#define NXFLAT_RELOC_TYPE_ABS32   3
-#define NXFLAT_RELOC_TYPE_NUM     4 /* Number of relocation types */
+#define NXFLAT_RELOC_TYPE_ABS32   2
+#define NXFLAT_RELOC_TYPE_NUM     3 /* Number of relocation types */
 
 /****************************************************************************
  * NXFLAT Imported symbol type 
