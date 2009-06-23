@@ -47,7 +47,7 @@ OBJS	= $(AOBJS) $(COBJS)
 BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
 all:	$(BIN)
-.PHONY:	tests/romfs.h tests/dirlist.h clean distclean
+.PHONY:	headers clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
