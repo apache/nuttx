@@ -34,8 +34,8 @@
 ############################################################################
 
 # Most of these do no build yet
-#SUBDIRS	= errno hello hello++ longjmp mutex pthread signal task
-SUBDIRS		= errno hello mutex pthread task
+#SUBDIRS	= errno hello hello++ longjmp mutex pthread signal task struct
+SUBDIRS		= errno hello mutex pthread task struct
 
 NXFLAT_DIR	= $(TOPDIR)/examples/nxflat
 TESTS_DIR	= $(NXFLAT_DIR)/tests
