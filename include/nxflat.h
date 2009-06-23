@@ -161,21 +161,24 @@ struct nxflat_reloc_s
 /* These are possible values for the relocation type:
  *
  * NXFLAT_RELOC_TYPE_REL32I  Meaning: Object file contains a 32-bit offset
- *                                    into I-Space at the the offset.
+ *                                    into I-Space at the offset.
  *                           Fixup:   Add mapped I-Space address to the offset.
  * NXFLAT_RELOC_TYPE_REL32D  Meaning: Object file contains a 32-bit offset
- *                                    into D-Space at the the offset.
+ *                                    into D-Space at the offset.
  *                           Fixup:   Add allocated D-Space address to the
  *                                    offset.
- * NXFLAT_RELOC_TYPE_ABS32   Meaning: Offset refers to a struct nxflat_import_s
- *                                    describing a function pointer to be
- *                                    imported.
- *                           Fixup:   Provide the absolute function address
- *                                    in the struct nxflat_import_s instance.
+ * NXFLAT_RELOC_TYPE_REL32ID Meaning: Object file contains a 32-bit offset
+ *                                    into I-Space at the offset that will
+ *                                    unfortunately be references relative
+ *                                    to the GOT
+ *                           Fixup:   Add allocated the mapped I-Space
+ *                                    address MINUS the allocated D-Space
+ *                                    address to the offset.
  */
 
 #define NXFLAT_RELOC_TYPE_REL32I  0
 #define NXFLAT_RELOC_TYPE_REL32D  1
+#undef  NXFLAT_RELOC_TYPE_REL32ID   /* May not need */
 #define NXFLAT_RELOC_TYPE_NUM     2 /* Number of relocation types */
 
 /****************************************************************************

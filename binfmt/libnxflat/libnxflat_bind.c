@@ -145,6 +145,49 @@ static inline int nxflat_bindrel32d(FAR struct nxflat_loadinfo_s *loadinfo,
 }
 
 /****************************************************************************
+ * Name: nxflat_bindrel32id
+ *
+ * Description:
+ *   Perform the NXFLAT_RELOC_TYPE_REL32ID binding:
+ *
+ *   Meaning: Object file contains a 32-bit offset into I-Space at the offset
+ *            that will unfortunately be references relative to the GOT
+ *   Fixup:   Add allocated the mapped I-Space address MINUS the allocated
+ *            D-Space address to the offset.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef NXFLAT_RELOC_TYPE_REL32ID
+static inline int nxflat_bindrel32id(FAR struct nxflat_loadinfo_s *loadinfo,
+                                       uint32 offset)
+{
+  uint32 *addr;
+
+  bvdbg("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
+        offset, loadinfo->dspace->region);
+
+  if (offset < loadinfo->dsize)
+    {
+      addr = (uint32*)(offset + loadinfo->dspace->region);
+      bvdbg("  Before: %08x\n", *addr);
+     *addr += ((uint32)loadinfo->ispace - (uint32)(loadinfo->dspace->region));
+      bvdbg("  After: %08x\n", *addr);
+      return OK;
+    }
+  else
+    {
+      bdbg("Offset: %08 does not lie in D-Space size: %08x\n",
+           offset, loadinfo->dsize);
+      return -EINVAL;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: nxflat_gotrelocs
  *
  * Description:
@@ -220,6 +263,23 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
             result = nxflat_bindrel32d(loadinfo, NXFLAT_RELOC_OFFSET(reloc.r_info));
           }
           break;
+
+        /* NXFLAT_RELOC_TYPE_REL32ID Meaning: Object file contains a 32-bit offset
+         *                                    into I-Space at the offset that will
+         *                                    unfortunately be references relative
+         *                                    to the GOT
+         *                           Fixup:   Add allocated the mapped I-Space
+         *                                    address MINUS the allocated D-Space
+         *                                    address to the offset.
+         */
+
+#ifdef NXFLAT_RELOC_TYPE_REL32ID
+        case NXFLAT_RELOC_TYPE_REL32ID:
+          {
+            result = nxflat_bindrel32id(loadinfo, NXFLAT_RELOC_OFFSET(reloc.r_info));
+          }
+          break;
+#endif
 
         default:
           {
