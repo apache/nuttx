@@ -186,9 +186,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
   DEBUGASSERT(offset >= loadinfo->isize && offset < (loadinfo->isize + loadinfo->dsize));
   relocs = (FAR struct nxflat_reloc_s*)(offset - loadinfo->isize + loadinfo->dspace->region);
 
-  /* Now, traverse the relocation list of imported symbols and attempt to bind
-   * each GOT relocation (imported symbols will be handled elsewhere).
-   */
+  /* Now, traverse the relocation list of and bind each GOT relocation. */
 
   ret = OK; /* Assume success */
   for (i = 0; i < nrelocs; i++)
@@ -223,16 +221,10 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
           }
           break;
 
-        /* NXFLAT_RELOC_TYPE_ABS32   Meaning: Offset refers to a struct nxflat_import_s
-         *                                    describing a function pointer to be
-         *                                    imported.
-         *                           Fixup:   Provide the absolute function address
-         *                                    in the struct nxflat_import_s instance.
-         */
-
-        case NXFLAT_RELOC_TYPE_ABS32:
+        default:
           {
-            /* These will be handled together in nxflat_bindimports */
+            bdbg("ERROR: Unrecognized relocation type: %d\n", NXFLAT_RELOC_TYPE(reloc.r_info));
+            result = -EINVAL;
           }
           break;
         }
@@ -370,22 +362,18 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
                 FAR const struct symtab_s *exports, int nexports)
 {
-  /* First bind all GOT relocations (omitting absolute symbol relocations) */
+  /* First bind all GOT relocations */
 
   int ret = nxflat_gotrelocs(loadinfo);
   if (ret == OK)
     {
-      /* Then bind the imported symbol, absolute relocations separately.
-       * There is no particular reason to do these separately over than
-       * traversing the import list directly is simpler than traversing
-       * it indirectly through the relocation list.
-       */
+      /* Then bind the imported symbol, absolute relocations separately. */
 
       ret = nxflat_bindimports(loadinfo, exports, nexports);
       if (ret == OK)
         {
-          /* Zero the BSS area, trashing the relocations that lived in space
-           * in the file.
+          /* Zero the BSS area, trashing the relocations that lived in that
+           * space in the loaded file.
            */
 
           memset((void*)(loadinfo->dspace->region + loadinfo->datasize),

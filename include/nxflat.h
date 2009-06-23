@@ -176,8 +176,7 @@ struct nxflat_reloc_s
 
 #define NXFLAT_RELOC_TYPE_REL32I  0
 #define NXFLAT_RELOC_TYPE_REL32D  1
-#define NXFLAT_RELOC_TYPE_ABS32   2
-#define NXFLAT_RELOC_TYPE_NUM     3 /* Number of relocation types */
+#define NXFLAT_RELOC_TYPE_NUM     2 /* Number of relocation types */
 
 /****************************************************************************
  * NXFLAT Imported symbol type 
