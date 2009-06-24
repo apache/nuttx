@@ -116,6 +116,7 @@ static const struct block_operations g_bops =
 
 static int rd_open(FAR struct inode *inode)
 {
+  fvdbg("Entry\n");
   return OK;
 }
 
@@ -128,6 +129,7 @@ static int rd_open(FAR struct inode *inode)
 
 static int rd_close(FAR struct inode *inode)
 {
+  fvdbg("Entry\n");
   return OK;
 }
 
@@ -143,12 +145,18 @@ static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
 {
   struct rd_struct_s *dev;
 
+  fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
+
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct rd_struct_s *)inode->i_private;
   if (start_sector < dev->rd_nsectors &&
       start_sector + nsectors <= dev->rd_nsectors)
     {
-      memcpy(buffer,
+       fvdbg("Transfer %d bytes from %p\n",
+             nsectors * dev->rd_sectsize,
+             &dev->rd_buffer[start_sector * dev->rd_sectsize]);
+
+       memcpy(buffer,
              &dev->rd_buffer[start_sector * dev->rd_sectsize],
              nsectors * dev->rd_sectsize);
       return nsectors;
@@ -169,6 +177,8 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
 {
   struct rd_struct_s *dev;
 
+  fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
+
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct rd_struct_s *)inode->i_private;
   if (!dev->rd_writeenabled)
@@ -178,6 +188,10 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
   else if (start_sector < dev->rd_nsectors &&
            start_sector + nsectors <= dev->rd_nsectors)
     {
+      fvdbg("Transfer %d bytes from %p\n",
+             nsectors * dev->rd_sectsize,
+             &dev->rd_buffer[start_sector * dev->rd_sectsize]);
+
       memcpy(&dev->rd_buffer[start_sector * dev->rd_sectsize],
              buffer,
              nsectors * dev->rd_sectsize);
@@ -198,6 +212,8 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
   struct rd_struct_s *dev;
 
+  fvdbg("Entry\n");
+
   DEBUGASSERT(inode);
   if (geometry)
     {
@@ -211,6 +227,12 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
 #endif
       geometry->geo_nsectors      = dev->rd_nsectors;
       geometry->geo_sectorsize    = dev->rd_sectsize;
+
+      fvdbg("available: TRUE mediachanged: FALSE writeenabled: %s\n",
+            geometry->geo_writeenabled ? "TRUE" : "FALSE");
+      fvdbg("nsectors: %d sectorsize: %d\n",
+            geometry->geo_nsectors, geometry->geo_sectorsize);
+ 
       return OK;
     }
   return -EINVAL;
@@ -228,6 +250,8 @@ static int rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   struct rd_struct_s *dev ;
   void **ppv = (void**)arg;
 
+  fvdbg("Entry\n");
+
   /* Only one ioctl command is supported */
 
   DEBUGASSERT(inode && inode->i_private);
@@ -235,6 +259,8 @@ static int rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
     {
        dev  = (struct rd_struct_s *)inode->i_private;
        *ppv = (void*)dev->rd_buffer;
+
+       fvdbg("ppv: %p\n", *ppv);
        return OK;
     }
 
@@ -262,6 +288,8 @@ int romdisk_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize)
   struct rd_struct_s *dev;
   char devname[16];
   int ret = -ENOMEM;
+
+  fvdbg("buffer: %p nsectors: %d sectsize: %d\n", buffer, nsectors, sectsize);
 
   /* Sanity check */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * rm/romfs/fs_romfsutil.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -445,6 +445,10 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf, uin
 {
   int ret;
 
+  fvdbg("sector: %d cached: %d sectorsize: %d XIP base: %p buffer: %p\n",
+        sector, rf->rf_cachesector, rm->rm_hwsectorsize,
+        rm->rm_xipbase, rf->rf_buffer);
+
   /* rf->rf_cachesector holds the current sector that is buffer in or referenced
    * by rf->rf_buffer. If the requested sector is the same as this sector,
    * then we do nothing.
@@ -461,14 +465,17 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf, uin
            */
 
           rf->rf_buffer = rm->rm_xipbase + sector * rm->rm_hwsectorsize;
+          fvdbg("XIP buffer: %p\n", rf->rf_buffer);
         }
       else
         {
           /* In non-XIP mode, we will have to read the new sector.*/
 
+          fvdbg("Calling romfs_hwread\n");
           ret = romfs_hwread(rm, rf->rf_buffer, sector, 1);
           if (ret < 0)
             {
+              fdbg("romfs_hwread failed: %d\n", ret);
               return ret;
             }
         }
@@ -623,7 +630,7 @@ int romfs_fileconfigure(struct romfs_mountpt_s *rm, struct romfs_file_s *rf)
       /* We'll put a valid address in rf_buffer just in case. */
 
       rf->rf_cachesector = 0;
-      rf->rf_buffer      = rm->rm_xipbase  + rf->rf_startoffset;
+      rf->rf_buffer      = rm->rm_xipbase;
     }
   else
     {

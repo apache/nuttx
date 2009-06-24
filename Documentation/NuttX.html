@@ -1487,6 +1487,9 @@ nuttx-0.4.9 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  include paths for Cygwin-based GCC were being converted to windows
 	  native paths.  That causes many problems -- breaking dependencies
 	  for one.
+	* Fixed an important bug in ROMFS.  The initial XIP offset was set
+	  incorrectly so if sector zero was read first, there was a bad read.
+	  I don't know how it worked before.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
