@@ -71,7 +71,7 @@ static const char *g_reloctype[] =
 {
   g_relocrel32i,
   g_relocrel32d,
-  g_relocabs32.
+  g_relocabs32,
   g_undefined
 };
 #  define RELONAME(rl) g_reloctype[NXFLAT_RELOC_TYPE(rl)]

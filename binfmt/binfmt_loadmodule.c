@@ -90,7 +90,7 @@ int load_module(FAR struct binary_s *bin)
   int ret;
 
 #ifdef CONFIG_DEBUG
-  if (!filename || !bin)
+  if (!bin || !bin->filename)
     {
       ret = -EINVAL;
     }

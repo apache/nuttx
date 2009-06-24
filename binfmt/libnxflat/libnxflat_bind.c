@@ -343,7 +343,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
     {
       /* It does.. make sure that exported symbols are provided */
 
-      DEBUGASSERT(symtab && nexports > 0);
+      DEBUGASSERT(exports && nexports > 0);
 
       /* If non-zero, the value of the imported symbol list that we get
        * from the header is a file offset.  We will have to convert this
@@ -393,7 +393,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 	  imports[i].i_funcaddress =  (uint32)symbol->sym_value;
 
 	  bvdbg("Bound imported function '%s' to address %08x\n",
-	        symname, imports[i].function_address);
+	        symname, imports[i].i_funcaddress);
 	}
     }
 
