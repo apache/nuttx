@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,10 @@
 
 -include $(TOPDIR)/Make.defs
 
+ifeq ($(WINTOOL),y)
+INCDIROPT	= -w
+endif
+
 ifeq ($(CONFIG_NET),y)
 include net/Make.defs
 ROOTDEPPATH	= --dep-path .
@@ -45,20 +49,20 @@ ifeq ($(CONFIG_USBDEV),y)
 include usbdev/Make.defs
 ROOTDEPPATH	= --dep-path .
 USBDEVDEPPATH	= --dep-path usbdev
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/drivers/usbdev}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/usbdev}
 endif
 
 include mmcsd/Make.defs
 ROOTDEPPATH	= --dep-path .
 MMCSDDEPPATH	= --dep-path mmcsd
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/drivers/mmcsd}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/mmcsd}
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 include bch/Make.defs
 ROOTDEPPATH	= --dep-path .
 BCHDEPPATH	= --dep-path bch
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/drivers/bch}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/bch}
 endif
 endif
 

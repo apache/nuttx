@@ -35,7 +35,10 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/sched}
+ifeq ($(WINTOOL),y)
+INCDIROPT	= -w
+endif
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/sched}
 
 ifeq ($(CONFIG_NXFLAT),y)
 include libnxflat/Make.defs
@@ -81,7 +84,7 @@ $(BIN): $(OBJS)
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) --dep-path . --dep-path libnxflat \
-	$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+		$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend

@@ -1,7 +1,7 @@
 #!/bin/bash
 # tools/incdir.sh
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,25 +32,60 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Input parameters:
-#  $1 : Compiler name as it appears in  config/*/*/Make.defs
-#  $2, $3, ...: Include file paths
+# Handle command line options
+
+progname=$0
+wintool=n
+usage="USAGE: $progname [-w] [-d] [-l] [-h] <compiler-path> <dir1> [<dir2> [<dir3> ...]]"
+advice="Try '$progname -h' for more information"
+
+while [ ! -z "$1" ]; do 
+	case $1 in
+	-d )
+		set -x
+		;;
+	-w )
+		wintool=y
+		;;
+	-h )
+		echo "$progname is a tool for flexible generate of include path arguments for a"
+		echo "variety of diffent compilers in a variety of compilation environments"
+		echo ""
+		echo $usage
+		echo ""
+		echo "Where:"
+		echo "	<compiler-path>"
+		echo "		The full path to your compiler"
+		echo "	<dir1> [<dir2> [<dir3> ...]]"
+		echo "		A list of include directories"
+		echo "	-w"
+		echo "		The compiler is a Windows native tool and requires Windows"
+		echo "		style pathnames like C:\\Program Files"
+		echo "	-d"
+		echo "		Enable script debug"
+		;;
+	* )
+		break;
+		;;
+	esac
+	shift
+done
 
 ccpath=$1
 shift
 dirlist=$@
 
-usage="USAGE: $0 <compiler-path> <dir1> [<dir2> [<dir3> ...]]"
-
 if [ -z "$ccpath" ]; then
 	echo "Missing compiler path"
 	echo $usage
+	echo $advice
 	exit 1
 fi
 
 if [ -z "$dirlist" ]; then
 	echo "Missing include directory list"
 	echo $usage
+	echo $advice
 	exit 1
 fi
 
@@ -75,14 +110,47 @@ fi
 # files.
 
 os=`uname -o`
+
+# Let's assume that all GCC compiler paths contain the string gcc and
+# no non-GCC compiler pathes include this substring
+
+gcc=`echo $ccpath | grep gcc`
+sdcc=`echo $ccpath | grep sdcc`
+
 if [ "X$os" = "XCygwin" ]; then
-	windows=yes
-	compiler=`cygpath -u "$ccpath"`
+	# We can treat Cygwin native toolchains just like Linux native
+	# toolchains in the Linux.  Let's assume:
+	# 1. GCC or SDCC are the only possible Cygwin native compilers
+	# 2. If this is a Window native GCC version, then -w provided
+	#    on the command line (wintool=y)
+
+	if [ -z "$gcc" -a -z "$sdcc" ]; then
+	
+		# Not GCC or SDCC, must be Windows native
+		windows=yes
+		compiler=`cygpath -u "$ccpath"`
+	else
+		if [ "X$wintool" == "Xy" ]; then
+	
+			# It is a native GCC or SDCC compiler
+			windows=yes
+			compiler=`cygpath -u "$ccpath"`
+		else
+			# GCC or SDCC and not for Windows
+			windows=no
+			compiler="$ccpath"
+		fi
+	fi
 else
+	# Otherwise, we must be in a Linux environment where there are
+	# only Linux native toolchains
 	windows=no
 	compiler="$ccpath"
 fi
 exefile=`basename "$compiler"`
+
+# Check for some well known, non-GCC Windows native tools that require
+# a special output format as well as special paths
 
 if [ "X$exefile" = "Xez8cc.exe" -o "X$exefile" = "Xzneocc.exe" -o "X$exefile" = "Xez80cc.exe" ]; then
 	fmt=userinc

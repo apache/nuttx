@@ -791,6 +791,11 @@
 	  and probably breaks many builds.
 	* examples/lib: Added qsort()
 	* examples/nxflat: Added support for symbol tables
+	* Correct logic that creates compiler include paths.  On Cygwin, the
+	  include paths for Cygwin-based GCC were being converted to windows
+	  native paths.  That causes many problems -- breaking dependencies
+	  for one.
+
 
 
 

@@ -1,5 +1,5 @@
 ############################################################################
-# examples/hello/Makefile
+# examples/nxflat/Makefile
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -63,17 +63,15 @@ $(BIN):	headers $(OBJS)
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
+# We can't make dependencies in this directory because the required
+# header files may not yet exist.
 
-depend: .depend
+depend:
 
 clean:
 	@rm -f $(BIN) *~ .*.swp
 	$(call CLEAN)
 
 distclean: clean
-	@rm -f Make.dep .depend
 
 -include Make.dep

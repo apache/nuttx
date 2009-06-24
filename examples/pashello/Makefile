@@ -1,7 +1,7 @@
 ############################################################################
 # examples/pashello/Makefile
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,12 @@
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
+ifeq ($(WINTOOL),y)
+INCDIROPT	= -w
+endif
+
 COMPILER	= ${shell basename $(CC)}
-USRINCLUDES	= ${shell $(TOPDIR)/tools/incdir.sh "$CC" $(TOPDIR)/pcode/include $(TOPDIR)/pcode/insn/include}
+USRINCLUDES	= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$CC" $(TOPDIR)/pcode/include $(TOPDIR)/pcode/insn/include}
 ifneq ($(ARCHSTDINCLUDES),)
 INCLUDES        = $(ARCHSTDINCLUDES) $(USRINCLUDES)
 else

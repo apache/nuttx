@@ -1,7 +1,7 @@
 ############################################################################
 # graphics/Makefile
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,31 +38,35 @@
 
 DEPPATH		= --dep-path .
 
+ifeq ($(WINTOOL),y)
+INCDIROPT	= -w
+endif
+
 include nxglib/Make.defs
 DEPPATH		+= --dep-path nxglib
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxglib}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxglib}
 
 include nxbe/Make.defs
 DEPPATH		+= --dep-path nxbe
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxbe}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxbe}
 
 ifeq ($(CONFIG_NX_MULTIUSER),y)
 include nxmu/Make.defs
 DEPPATH		+= --dep-path nxmu
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxmu}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxmu}
 else
 include nxsu/Make.defs
 DEPPATH		+= --dep-path nxsu
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxsu}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxsu}
 endif
 
 include nxtk/Make.defs
 DEPPATH		+= --dep-path nxtk
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxtk}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxtk}
 
 include nxfonts/Make.defs
 DEPPATH		+= --dep-path nxfonts
-CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh "$(CC)" $(TOPDIR)/graphics/nxfonts}
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxfonts}
 
 ASRCS		= $(NXGLIB_ASRCS) $(NXBE_ASRCS) $(NX_ASRCS) $(NXTK_ASRCS) $(NXFONTS_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
