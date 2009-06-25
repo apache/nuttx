@@ -71,21 +71,21 @@
 
 # ifdef CONFIG_ARCH_LOWPUTC
 #  define lldbg(format, arg...) \
-     lib_lowprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
+   lib_lowprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
 # else
 #  define lldbg(x...)
 # endif
 
 # ifdef CONFIG_DEBUG_VERBOSE
 #  define vdbg(format, arg...) \
-     lib_rawprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
+   lib_rawprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
 
-#     ifdef CONFIG_ARCH_LOWPUTC
-#       define llvdbg(format, arg...) \
-          lib_lowprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
-#     else
-#         define llvdbg(x...)
-#     endif
+#  ifdef CONFIG_ARCH_LOWPUTC
+#    define llvdbg(format, arg...) \
+     lib_lowprintf(EXTRA_FMT format EXTRA_ARG, ##arg)
+#  else
+#    define llvdbg(x...)
+#  endif
 
 # else
 #  define vdbg(x...)
@@ -322,6 +322,86 @@
 
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
+/* Buffer dumping macros do not depend on varargs */
+
+#ifdef CONFIG_DEBUG
+#  define dbgdumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
+#  ifdef CONFIG_DEBUG_VERBOSE
+#    define vdbgdumpbuffer(m,b,n) lib_dumpbuffer(m,b,n)
+#  else
+#   define vdbgdumpbuffer(m,b,n)
+#  endif
+#else
+#  define dbgdumpbuffer(m,b,n)
+#  define vdbgdumpbuffer(m,b,n)
+# endif
+
+/* Subsystem specific debug */
+
+#ifdef CONFIG_DEBUG_MM
+#  define mdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define mvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define mdbgdumpbuffer(m,b,n)
+#  define mvdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_SCHED
+#  define sdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define svdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define sdbgdumpbuffer(m,b,n)
+#  define svdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_NET
+#  define ndbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define nvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define ndbgdumpbuffer(m,b,n)
+#  define nvdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_USB
+#  define udbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define uvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define udbgdumpbuffer(m,b,n)
+#  define uvdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_FS
+#  define fdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define fvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define fdbgdumpbuffer(m,b,n)
+#  define fvdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_GRAPHICS
+#  define gdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define gvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define gdbgdumpbuffer(m,b,n)
+#  define gvdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_BINFMT
+#  define bdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define bvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define bdbgdumpbuffer(m,b,n)
+#  define bvdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_LIB
+#  define ldbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define lvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define ldbgdumpbuffer(m,b,n)
+#  define lvdbgdumpbuffer(m,b,n)
+#endif
+
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
@@ -353,6 +433,10 @@ EXTERN int lib_rawprintf(const char *format, ...);
 #ifdef CONFIG_ARCH_LOWPUTC
 EXTERN int lib_lowprintf(const char *format, ...);
 #endif
+
+/* Dump a buffer of data */
+
+EXTERN int lib_dumpbuffer(FAR const char *msg, FAR const ubyte *buffer, unsigned int buflen);
 
 /* If the cross-compiler's pre-processor does not support variable
  * length arguments, then these additional APIs will be built.

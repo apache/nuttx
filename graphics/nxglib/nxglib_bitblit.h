@@ -49,7 +49,7 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Make sure the the bits-per-pixel value has been set by the includer of
+/* Make sure the bits-per-pixel value has been set by the includer of
  * this header file.
  */
 

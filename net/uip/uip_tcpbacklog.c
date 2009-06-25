@@ -120,7 +120,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
           return -ENOMEM;
         }
 
-      /* Then add all of the pre-allocated containers to the the free list */
+      /* Then add all of the pre-allocated containers to the free list */
 
       blc = (FAR struct uip_blcontainer_s*)(((FAR ubyte*)bls) + offset);
       for (i = 0; i < nblg; i++)

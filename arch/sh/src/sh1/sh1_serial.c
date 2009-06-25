@@ -644,7 +644,7 @@ static int up_interrupt(int irq, void *context)
  * Description:
  *   Called (usually) from the interrupt level to receive one
  *   character from the SCI.  Error bits associated with the
- *   receipt are provided in the the return 'status'.
+ *   receipt are provided in the return 'status'.
  *
  ****************************************************************************/
 

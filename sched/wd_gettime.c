@@ -70,7 +70,7 @@
  * Function:  wd_gettime
  *
  * Description:
- *   This function returns the time remaining before the the specified watchdog
+ *   This function returns the time remaining before the specified watchdog
  *   expires.
  *
  * Parameters:

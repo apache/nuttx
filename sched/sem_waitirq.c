@@ -117,7 +117,7 @@ void sem_waitirq(FAR _TCB *wtcb)
 
       wtcb->pterrno = EINTR;
 
-      /* Restart the the task. */
+      /* Restart the task. */
 
       up_unblock_task(wtcb);
     }

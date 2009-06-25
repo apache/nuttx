@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_internal.h
  *
- *   Copyright (C) 20082009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <debug.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -85,9 +86,9 @@ extern "C" {
 #endif
 
 #ifdef CONFIG_MMCSD_DUMPALL
-EXTERN void mmcsd_dumpbuffer(FAR const ubyte *buffer, unsigned int buflen);
+#  define mmcsd_dumpbuffer(m,b,l) fvdbgdumpbuffer(m,b,l)
 #else
-#  define mmcsd_dumpbuffer(b,l)
+#  define mmcsd_dumpbuffer(m,b,l)
 #endif
 
 #if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)

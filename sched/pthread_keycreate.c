@@ -81,7 +81,7 @@
  *   thread.
  *
  *   Upon key creation, the value NULL will be associated with
- *   the the new key in all active threads.  Upon thread
+ *   the new key in all active threads.  Upon thread
  *   creation, the value NULL will be associated with all
  *   defined keys in the new thread.
  *

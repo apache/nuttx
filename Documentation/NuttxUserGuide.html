@@ -170,7 +170,7 @@ paragraphs.
 </p>
 </p>
   If CONFIG_DEV_CONSOLE is defined, the first three file descriptors (corresponding
-  to stdin, stdout, stderr) will be duplicated for the the new task.
+  to stdin, stdout, stderr) will be duplicated for the new task.
   Since these file descriptors are duplicated, the child task can free close
   them or manipulate them in any way without effecting the parent task.
   File-related operations (open, close, etc.) within a task will have no effect
@@ -2430,7 +2430,7 @@ VxWorks provides the following comparable interface:
 </pre>
 <p>
   <b>Description:</b> 
-   This function returns the time remaining before the the specified watchdog expires.
+   This function returns the time remaining before the specified watchdog expires.
 </p>
 <p>
   <b>Input Parameters:</b>
@@ -4490,7 +4490,7 @@ per-thread basis and persist for the life of the calling
 thread.
 <p>
 Upon key creation, the value <I>NULL</I> will be associated with
-the the new key in all active threads.  Upon thread
+the new key in all active threads.  Upon thread
 creation, the value <I>NULL</I> will be associated with all
 defined keys in the new thread.
 <p>

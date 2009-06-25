@@ -160,7 +160,7 @@ static inline irqstate_t irqsave(void)
 {
   unsigned short primask;
 
-  /* Return the the current value of primask register and set
+  /* Return the current value of primask register and set
    * bit 0 of the primask register to disable interrupts
    */
 

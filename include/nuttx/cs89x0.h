@@ -140,7 +140,7 @@ extern "C" {
  *   Initialize the Ethernet driver
  *
  * Parameters:
- *   impl - decribes the the implementation of the cs89x00 implementation.
+ *   impl - decribes the implementation of the cs89x00 implementation.
  *     This reference is retained so so must remain stable throughout the
  *     life of the driver instance.
  *   devno - Identifies the device number.  This must be a number between

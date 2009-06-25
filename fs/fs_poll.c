@@ -304,7 +304,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
           poll_semtake(&sem);
         }
 
-      /* Teardown the the poll operation and get the count of events */
+      /* Teardown the poll operation and get the count of events */
 
       ret = poll_teardown(fds, nfds, &count);
     }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * netuils/tftp/tftpc_packets.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -325,53 +325,5 @@ ssize_t tftp_sendto(int sd, const void *buf, size_t len, struct sockaddr_in *to)
         }
     }
 }
-
-/****************************************************************************
- * Name: tftp_sendto
- *
- * Description:
- *   Dump a buffer of data
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NETUTILS_TFTP_DUMPBUFFERS
-void tftp_dumpbuffer(const char *msg, ubyte *buffer, int nbytes)
-{
-#ifdef CONFIG_DEBUG
-  char line[128];
-  int ch;
-  int i;
-  int j;
-
-  dbg("%s:\n", msg);
-  for (i = 0; i < nbytes; i += 16)
-    {
-      sprintf(line, "%04x: ", i);
-
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              sprintf(&line[strlen(line)], "%02x ", buffer[i+j] );
-            }
-          else
-            {
-              strcpy(&line[strlen(line)], "   ");
-            }
-        }
-
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              ch = buffer[i+j];
-              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
-            }
-        }
-      dbg("%s\n", line);
-    }
-#endif
-}
-#endif
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS */

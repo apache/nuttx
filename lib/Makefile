@@ -53,7 +53,7 @@ STRING_SRCS	= lib_checkbase.c lib_isbasedigit.c lib_memset.c lib_memcpy.c \
 
 CTYPE_SRCS	= 
 
-STDIO_SRCS	= lib_printf.c lib_rawprintf.c lib_lowprintf.c lib_dbg.c \
+STDIO_SRCS	= lib_printf.c lib_rawprintf.c lib_lowprintf.c \
 		  lib_sprintf.c lib_snprintf.c lib_libsprintf.c lib_vsprintf.c \
 		  lib_vsnprintf.c lib_libvsprintf.c lib_meminstream.c \
 		  lib_memoutstream.c lib_lowinstream.c lib_lowoutstream.c \
@@ -93,8 +93,11 @@ SQ_SRCS		= sq_addlast.c sq_addfirst.c sq_addafter.c \
 DQ_SRCS		= dq_addlast.c dq_addfirst.c dq_addafter.c dq_addbefore.c \
 		  dq_rem.c dq_remlast.c dq_remfirst.c
 
+DBG_SRCS	= lib_dbg.c lib_dumpbuffer.c
+
 CSRCS		= $(MISC_SRCS) $(STRING_SRCS) $(CTYPE_SRCS) $(STDIO_SRCS) $(STDLIB_SRCS) \
-		  $(MATH_SRCS) $(UNISTD_SRCS) $(NET_SRCS) $(LIBGEN_SRCS) $(SQ_SRCS) $(DQ_SRCS)
+		  $(MATH_SRCS) $(UNISTD_SRCS) $(NET_SRCS) $(LIBGEN_SRCS) $(SQ_SRCS) \
+		  $(DQ_SRCS) $(DBG_SRCS) 
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

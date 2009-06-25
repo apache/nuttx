@@ -50,7 +50,7 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Make sure the the bits-per-pixel value has been set */
+/* Make sure the bits-per-pixel value has been set */
 
 #ifndef NXFONTS_BITSPERPIXEL
 #  error "NXFONTS_BITSPERPIXEL must be defined on the command line"

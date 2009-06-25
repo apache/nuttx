@@ -171,7 +171,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
       else
         {
           /* Check if this is a ICMP ECHO reply.  If so, return the sequence
-           * number to the the caller.  NOTE: We may not even have sent the
+           * number to the caller.  NOTE: We may not even have sent the
            * requested ECHO request; this could have been the delayed ECHO
            * response from a previous ping.
            */

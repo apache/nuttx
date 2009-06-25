@@ -415,53 +415,16 @@ static void c5471_macassign(struct c5471_driver_s *c5471);
  ****************************************************************************/
 
 #ifdef CONFIG_C5471_NET_DUMPBUFFER
-static void c5471_dumpbuffer(const char *buffer, ssize_t nbytes)
+static inline void c5471_dumpbuffer(const char *msg, const ubyte *buffer, unsigned int nbytes)
 {
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  char line[128];
-  int ch;
-  int i;
-  int j;
-
-  for (i = 0; i < nbytes; i += 16)
-    {
-      sprintf(line, "%04x: ", i);
-      for (j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              sprintf(&line[strlen(line)], "%02x", buffer[i+j] );
-            }
-          else
-            {
-              strcpy(&line[strlen(line)], "  ");
-            }
-
-          if (j == 7 || j == 15)
-            {
-              strcpy(&line[strlen(line)], " ");
-           }
-        }
-
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              ch = buffer[i+j];
-              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
-            }
-
-          if (j == 7 || j == 15)
-            {
-              strcpy(&line[strlen(line)], " ");
-           }
-        }
-      ndbg("%s\n", line);
-    }
-#endif
+  /* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_NET have to be
+   * defined or the following does nothing.
+   */
+    
+  nvdbgdumpbuffer(msg, buffer, nbytes);
 }
 #else
-# define c5471_dumpbuffer(buffer,nbytes)
+# define c5471_dumpbuffer(msg, buffer,nbytes)
 #endif
 
 /****************************************************************************
@@ -494,7 +457,7 @@ static void c5471_mdtxbit (int bit_state)
 
   putreg32((getreg32(GPIO_CIO) & ~GPIO_CIO_MDIO), GPIO_CIO);
 
-  /* Select the the bit output state */
+  /* Select the bit output state */
 
   if (bit_state)
     {
@@ -907,7 +870,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
   c5471->c_lastdescstart = c5471->c_rxcpudesc;
 
   nvdbg("Packet size: %d RX CPU desc: %08x\n", nbytes, c5471->c_rxcpudesc);
-  c5471_dumpbuffer(dev->d_buf, dev->d_len);
+  c5471_dumpbuffer("Transmit packet", dev->d_buf, dev->d_len);
 
   while (nbytes)
     {
@@ -1276,7 +1239,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 
       dev->d_len = packetlen;
       nvdbg("Received packet, packetlen: %d type: %02x\n", packetlen, ntohs(BUF->type));
-      c5471_dumpbuffer(dev->d_buf, dev->d_len);
+      c5471_dumpbuffer("Received packet", dev->d_buf, dev->d_len);
 
       /* We only accept IP packets of the configured type and ARP packets */
 
@@ -2006,7 +1969,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
   putreg32(ENET_ADR_BROADCAST|ENET_ADR_PROMISCUOUS, ENET0_ADRMODE_EN);
 #else 
   /* The CPU port is not PROMISCUOUS, it wants a no-promiscuous address
-   * match yet the the SWITCH receives packets from the PROMISCUOUS ENET0
+   * match yet the SWITCH receives packets from the PROMISCUOUS ENET0
    * which routes all packets for filter matching at the CPU port which
    * then allows the s/w to see the new incoming packetes that passed
    * the filter. Here we are setting the main SWITCH closest the ether

@@ -801,7 +801,7 @@ support for two new architectures:
 	  been integrated due to toolchain issues.
 
 	* Renesas M16C/20.  Support for the Renesas SKP16C20 board has been included in
-	  the NuttX source tree.  However, as the the eZ80Acclaim!, testing and integration
+	  the NuttX source tree.  However, as the eZ80Acclaim!, testing and integration
 	  of that port is stalled due to toolchain issues.
 
 These changes were verified only on the ZiLOG eZ80910200zcog-d board. Please report any errors

@@ -85,7 +85,7 @@
  *   NOTE:  wnd must have been allocated using malloc() (or related allocators)
  *   Once provided to nxfe_constructwindow() that memory is owned and managed
  *   by NX.  On certain error conditions or when the window is closed, NX will
- *   free() the the window.
+ *   free() the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect

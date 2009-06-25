@@ -110,7 +110,7 @@ up_phyrestart:
 	bic	r0, r0, #(CR_S|CR_I|CR_V|CR_RR)
 	mcr	p15, 0, r0, c1, c0, 0		/* Write control reg */
 
-	/* We know that the the bootloader entry point is at the
+	/* We know that the bootloader entry point is at the
 	 * beginning of flash.
 	 */
 #if 1

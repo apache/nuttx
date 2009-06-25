@@ -55,13 +55,32 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#undef NXFLAT_DUMPBUFFER /* Define to enable very verbose buffer dumping */
+
+/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
+ * defined or NXFLAT_DUMPBUFFER does nothing.
+ */
+
+#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#  undef NXFLAT_DUMPBUFFER
+#endif
+
+#ifdef NXFLAT_DUMPBUFFER
+# define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+#else
+# define nxflat_dumpbuffer(m,b,n)
+#endif
+
+#ifndef MIN
+#  define MIN(a,b) (a < b ? a : b)
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 static int nxflat_loadbinary(struct binary_s *binp);
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
-static void nxflat_dumpmemory(void *addr, int nbytes);
 static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo);
 #endif
 
@@ -80,25 +99,6 @@ static struct binfmt_s g_nxflatbinfmt =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nnxflat_dumpmemory
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
-static void nxflat_dumpmemory(void *addr, int nbytes)
-{
-  ubyte *ptr;
-
-  bdbg("  ADDRESS    VALUE\n");
-  for (ptr = (ubyte*)addr; nbytes > 0; ptr += 4, nbytes -= 4)
-    {
-      bdbg("  %p: %02x %02x %02x %02x\n", ptr, ptr[0], ptr[1], ptr[2], ptr[3]);
-    }
-}
-#else
-# define nxflat_dumpmemory(a,n)
-#endif
-
-/****************************************************************************
  * Name: nxflat_dumploadinfo
  ****************************************************************************/
 
@@ -115,7 +115,7 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 
   bdbg("  DSPACE:\n");
   bdbg("    dspace:       %08lx\n", loadinfo->dspace);
-  if (oadinfo->dspace != NULL)
+  if (loadinfo->dspace != NULL)
     {
       bdbg("      crefs:      %d\n",    loadinfo->dspace->crefs);
       bdbg("      region:     %08lx\n", loadinfo->dspace->region);
@@ -196,8 +196,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   binp->isize     = loadinfo.isize;
   binp->stacksize = loadinfo.stacksize;
 
-  bvdbg("ENTRY CODE:\n");
-  nxflat_dumpmemory(binp->entrypt, 16*sizeof(uint32));
+  nxflat_dumpbuffer("Entry code", (FAR const ubyte*)binp->entrypt, MIN(binp->isize,512));
   nxflat_uninit(&loadinfo);
   return OK;
 }

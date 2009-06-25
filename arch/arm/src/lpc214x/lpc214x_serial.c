@@ -612,7 +612,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Description:
  *   Called (usually) from the interrupt level to receive one
  *   character from the UART.  Error bits associated with the
- *   receipt are provided in the the return 'status'.
+ *   receipt are provided in the return 'status'.
  *
  ****************************************************************************/
 

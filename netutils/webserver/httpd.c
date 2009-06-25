@@ -115,42 +115,16 @@ static const char g_httpheader404[]         =
  ****************************************************************************/
 
 #ifdef CONFIG_NETUTILS_HTTPD_DUMPBUFFER
-static void httpd_dumpbuffer(const char *buffer, ssize_t nbytes)
+static void httpd_dumpbuffer(FAR const char *msg, FAR const char *buffer, unsigned int nbytes)
 {
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_NET)
-  char line[128];
-  int ch;
-  int i;
-  int j;
-
-  for (i = 0; i < nbytes; i += 16)
-    {
-      sprintf(line, "%04x: ", i);
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              sprintf(&line[strlen(line)], "%02x ", buffer[i+j] );
-            }
-          else
-            {
-              strcpy(&line[strlen(line)], "   ");
-            }
-        }
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              ch = buffer[i+j];
-              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
-            }
-        }
-      nvdbg("%s\n", line);
-    }
-#endif
+  /* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_NET have to be
+   * defined or the following does nothing.
+   */
+    
+  nvdbgdumpbuffer(msg, (FAR const ubyte*)buffer, nbytes);
 }
 #else
-# define httpd_dumpbuffer(buffer,nbytes)
+# define httpd_dumpbuffer(msg,buffer,nbytes)
 #endif
 
 #ifdef CONFIG_NETUTILS_HTTPD_DUMPPSTATE
@@ -280,7 +254,7 @@ static int httpd_addchunk(struct httpd_state *pstate, const char *buffer, int le
         {
           /* The buffer is full.. Send what we have and reset to send again */
 
-          httpd_dumpbuffer(pstate->ht_buffer, newlen);
+          httpd_dumpbuffer("Outgoing buffer", pstate->ht_buffer, newlen);
           ret = send(pstate->ht_sockfd, pstate->ht_buffer, newlen, 0);
           if (ret < 0)
             {
@@ -382,7 +356,7 @@ static int httpd_sendfile(struct httpd_state *pstate)
 
   if (ret == OK && pstate->ht_sndlen > 0)
     {
-      httpd_dumpbuffer(pstate->ht_buffer, pstate->ht_sndlen);
+      httpd_dumpbuffer("Outgoing buffer", pstate->ht_buffer, pstate->ht_sndlen);
       if (send(pstate->ht_sockfd, pstate->ht_buffer, pstate->ht_sndlen, 0) < 0)
         {
           ret = ERROR;
@@ -405,7 +379,7 @@ static inline int httpd_cmd(struct httpd_state *pstate)
       ndbg("[%d] recv failed: %d\n", pstate->ht_sockfd, errno);
       return ERROR;
     }
-  httpd_dumpbuffer(pstate->ht_buffer, recvlen);
+  httpd_dumpbuffer("Incoming buffer", pstate->ht_buffer, recvlen);
 
   /*  We will handle only GET */
 

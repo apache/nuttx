@@ -347,7 +347,7 @@ static void mmcsd_semtake(sem_t *sem)
  * Name: mmcsd_waitready
  *
  * Description:
- *   Wait until the the card is no longer busy
+ *   Wait until the card is no longer busy
  *
  * Assumptions:
  *   MMC/SD card already selected
@@ -1170,7 +1170,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   mmcsd_semgive(&slot->sem);
 
   fvdbg("Read %d bytes:\n", nbytes);
-  mmcsd_dumpbuffer(buffer, nbytes);
+  mmcsd_dumpbuffer("Read buffer", buffer, nbytes);
   return nsectors;
 
 errout_with_eio:
@@ -1264,7 +1264,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
       offset = start_sector * SECTORSIZE(slot);
       fvdbg("nbytes=%d byte offset=%d\n", nbytes, offset);
     }
-  mmcsd_dumpbuffer(buffer, nbytes);
+  mmcsd_dumpbuffer("Write buffer", buffer, nbytes);
 
   /* Select the slave */
 

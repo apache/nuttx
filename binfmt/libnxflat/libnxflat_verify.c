@@ -84,7 +84,7 @@ int nxflat_verifyheader(const struct nxflat_hdr_s *header)
 
   /* Check the FLT header -- magic number and revision.
    * 
-   * If the the magic number does not match.  Just return
+   * If the magic number does not match.  Just return
    * silently.  This is not our binary.
    */
   

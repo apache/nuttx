@@ -1900,7 +1900,7 @@ static int usbstrg_cmdparsestate(FAR struct usbstrg_dev_s *priv)
 
   if (priv->cbwdir == USBSTRG_FLAGS_DIRDEVICE2HOST)
     {
-      /* The number of bytes in the response cannot exceed the the host
+      /* The number of bytes in the response cannot exceed the host
        * 'allocation length' in the command.
        */
 

@@ -51,8 +51,24 @@
 #include <nuttx/symtab.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#undef NXFLAT_DUMPBUFFER /* Define to enable very verbose buffer dumping */
+
+/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
+ * defined or NXFLAT_DUMPBUFFER does nothing.
+ */
+
+#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#  undef NXFLAT_DUMPBUFFER
+#endif
+
+#ifdef NXFLAT_DUMPBUFFER
+# define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+#else
+# define nxflat_dumpbuffer(m,b,n)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -72,7 +88,7 @@
  * Description:
  *   Perform the NXFLAT_RELOC_TYPE_REL32I binding:
  *
- *   Meaning: Object file contains a 32-bit offset into I-Space at the the offset.
+ *   Meaning: Object file contains a 32-bit offset into I-Space at the offset.
  *   Fixup:   Add mapped I-Space address to the offset.
  *
  * Returned Value:
@@ -111,7 +127,7 @@ static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
  * Description:
  *   Perform the NXFLAT_RELOC_TYPE_REL32D binding:
  *
- *   Meaning: Object file contains a 32-bit offset into D-Space at the the offset.
+ *   Meaning: Object file contains a 32-bit offset into D-Space at the offset.
  *   Fixup:   Add allocated D-Space address to the offset.
  *
  * Returned Value:
@@ -246,7 +262,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
         {
 
         /* NXFLAT_RELOC_TYPE_REL32I  Meaning: Object file contains a 32-bit offset
-         *                                    into I-Space at the the offset.
+         *                                    into I-Space at the offset.
          *                           Fixup:   Add mapped I-Space address to the offset.
          */
 
@@ -257,7 +273,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
           break;
 
         /* NXFLAT_RELOC_TYPE_REL32D  Meaning: Object file contains a 32-bit offset
-         *                                    into D-Space at the the offset.
+         *                                    into D-Space at the offset.
          *                           Fixup:   Add allocated D-Space address to the
          *                                    offset.
          */
@@ -301,6 +317,15 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
         }
     }
 
+  /* Dump the relocation got */
+
+#ifdef NXFLAT_DUMPBUFFER
+  if (ret == OK && nrelocs > 0)
+    {
+      relocs = (FAR struct nxflat_reloc_s*)(offset - loadinfo->isize + loadinfo->dspace->region);
+      nxflat_dumpbuffer("GOT", (FAR const ubyte*)relocs, nrelocs * sizeof(struct nxflat_reloc_s));
+    }
+#endif
   return ret;
 }
 
@@ -396,11 +421,19 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
 	  imports[i].i_funcaddress =  (uint32)symbol->sym_value;
 
-	  bvdbg("Bound imported function '%s' to address %08x\n",
-	        symname, imports[i].i_funcaddress);
+	  bvdbg("Bound import %d (%08p) to export 's' (%08x)\n",
+	        i, &imports[i], symname, imports[i].i_funcaddress);
 	}
     }
 
+  /* Dump the relocation import table */
+
+#ifdef NXFLAT_DUMPBUFFER
+  if (nimports > 0)
+    {
+      nxflat_dumpbuffer("Imports", (FAR const ubyte*)imports, nimports * sizeof(struct nxflat_import_s));
+    }
+#endif
   return OK;
 }
 

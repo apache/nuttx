@@ -229,7 +229,7 @@ EXTERN void up_unblock_task(FAR _TCB *tcb);
  *
  * Inputs:
  *   tcb: Refers to a task in the ready-to-run list (normally
- *     the task at the the head of the list).  It most be
+ *     the task at the head of the list).  It most be
  *     stopped, its context saved and moved into one of the
  *     waiting task lists.  It it was the task at the head
  *     of the ready-to-run list, then a context to the new
@@ -293,7 +293,7 @@ EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
  *   This function causes the currently executing task to cease
  *   to exist.  This is a special case of task_delete() where the task to
  *   be deleted is the currently executing task.  It is more complex because
- *   a context switch must be perform to the the next ready to run task.
+ *   a context switch must be perform to the next ready to run task.
  *
  *   Unlike other UP APIs, this function may be called directly from user
  *   programs in various states.  The implementation of this function should

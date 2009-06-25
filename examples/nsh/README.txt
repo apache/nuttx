@@ -551,7 +551,7 @@ o mount -t <fstype> <block-device> <dir-path>
       create whatever psuedo directories that may be needed to complete
       the full path but the full path must not already exist.
 
-  After the the volume has been mounted in the NuttX psuedo file
+  After the volume has been mounted in the NuttX psuedo file
   system, it may be access in the same way as other objects in the
   file system.
 
@@ -898,7 +898,7 @@ NSH-Specific Configuration Settings
       receiving TELNET commands/reponses
 
   * CONFIG_EXAMPLES_NSH_DHCPC
-      Obtain the the IP address via DHCP.
+      Obtain the IP address via DHCP.
 
   * CONFIG_EXAMPLES_NSH_IPADDR
       If CONFIG_EXAMPLES_NSH_DHCPC is NOT set, then the static IP

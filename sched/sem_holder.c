@@ -114,7 +114,7 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
           pholder->flink   = sem->hlist.flink;
           sem->hlist.flink = pholder;
 
-          /* Make sure the the initial count is zero */
+          /* Make sure the initial count is zero */
 
           pholder->counts  = 0;
         }

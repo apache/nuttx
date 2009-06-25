@@ -2119,7 +2119,7 @@ int up_multicastfilter(FAR struct uip_driver_s *dev, FAR ubyte *mac, boolean ena
    * is '0', the multicast packet is rejected.
    */
 
-  /* Apply the hash algorithm to the the hash table index and bit number
+  /* Apply the hash algorithm to the hash table index and bit number
    * corresponding to this MAC
    */
 

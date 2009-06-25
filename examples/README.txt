@@ -349,7 +349,7 @@ examples/usbserial
 
      dmesg
 
-     At the end of the dmesg output, you should see the the seria
+     At the end of the dmesg output, you should see the serial
      device was successfully idenfied and assigned to a tty device,
      probably /dev/ttyUSB0.
 

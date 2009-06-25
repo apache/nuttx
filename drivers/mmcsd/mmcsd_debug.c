@@ -85,68 +85,6 @@
  * Name: mmcsd_dmpcsd
  *
  * Description:
- *   Dump the contents a buffer
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MMCSD_DUMPALL
-void mmcsd_dumpbuffer(FAR const ubyte *buffer, unsigned int buflen)
-{
-  int i, j, k;
-
-  for (i = 0; i < buflen; i += 32)
-    {
-       message("%04x: ", i);
-       for (j = 0; j < 32; j++)
-         {
-           k = i + j;
-
-           if (j == 16)
-             {
-               message(" ");
-             }
-
-           if (k < buflen)
-             {
-               message("%02x", buffer[k]);
-             }
-           else
-             {
-               message("  ");
-             }
-         }
-
-       message(" ");
-       for (j = 0; j < 32; j++)
-         {
-           k = i + j;
-
-           if (j == 16)
-             {
-               message(" ");
-             }
-
-           if (k < buflen)
-             {
-               if (buffer[k] >= 0x20 && buffer[k] < 0x7f)
-                 {
-                   message("%c", buffer[k]);
-                 }
-               else
-                 {
-                   message(".");
-                 }
-             }
-         }
-       message("\n");
-    }
-}
-#endif
-
-/****************************************************************************
- * Name: mmcsd_dmpcsd
- *
- * Description:
  *   Dump the contents of the CSD
  *
  ****************************************************************************/

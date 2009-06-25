@@ -167,7 +167,7 @@ struct uart_ops_s
   CODE boolean (*txready)(FAR struct uart_dev_s *dev);
 
   /* Return TRUE if all characters have been sent.  If for example, the UART
-   * hardware implements FIFOs, then this would mean the the transmit FIFO is
+   * hardware implements FIFOs, then this would mean the transmit FIFO is
    * empty.  This method is called when the driver needs to make sure that
    * all characters are "drained" from the TX hardware.
    */

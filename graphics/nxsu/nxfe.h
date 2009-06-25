@@ -61,7 +61,7 @@
 
 /* Server state structure ***************************************************/
 
-/* This the the server 'front-end' state structure.  It is really the same
+/* This the server 'front-end' state structure.  It is really the same
  * as the back-end state, but we wrap the back-end state so that we can add
  * things to the structure in the future
  */
@@ -108,7 +108,7 @@ EXTERN const struct nx_callback_s g_bkgdcb;
  *   NOTE:  wnd must have been allocated using malloc() (or related allocators)
  *   Once provided to nxfe_constructwindow() that memory is owned and managed
  *   by NX.  On certain error conditions or when the window is closed, NX will
- *   free() the the window.
+ *   free() the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect

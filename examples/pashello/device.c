@@ -85,7 +85,7 @@ static ssize_t hello_read(struct file *filep, char *buffer, size_t len)
 
   if (offset < hello_pex_len)
     {
-      /* Make sure the the read does not extend beyond the .pex file */
+      /* Make sure the read does not extend beyond the .pex file */
 
       nread = len;
       if (nread + offset > hello_pex_len)

@@ -2492,7 +2492,7 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
 
       sectoroffset = SEC_NSECTORS(fs, position) & CLUS_NDXMASK(fs);
 
-      /* The current cluster is the the first sector of the cluster plus
+      /* The current cluster is the first sector of the cluster plus
        * the sector offset
         */
 

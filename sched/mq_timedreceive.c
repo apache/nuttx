@@ -114,7 +114,7 @@ static void mq_rcvtimeout(int argc, uint32 pid)
 
       wtcb->pterrno = ETIMEDOUT;
 
-      /* Restart the the task. */
+      /* Restart the task. */
 
       up_unblock_task(wtcb);
     }

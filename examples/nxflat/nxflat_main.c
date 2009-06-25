@@ -93,7 +93,7 @@
 #define ROMFSDEV     "/dev/ram0"
 #define MOUNTPT      "/mnt/romfs"
 
-/* If CONFIG_DEBUG is enabled, use dbg instead of printf so that the the
+/* If CONFIG_DEBUG is enabled, use dbg instead of printf so that the
  * output will be synchronous with the debug output.
  */
 

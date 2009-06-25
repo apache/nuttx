@@ -719,7 +719,7 @@ int cmd_wget(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   fullpath = nsh_getfullpath(vtbl, localfile);
 
-  /* Open the the local file for writing */
+  /* Open the local file for writing */
 
   fd = open(fullpath, O_WRONLY|O_CREAT|O_TRUNC, 0644);
   if (fd < 0)

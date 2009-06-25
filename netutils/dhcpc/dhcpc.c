@@ -512,7 +512,7 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
                   state = STATE_HAVE_LEASE;
                 }
 
-              /* NAK means the the server has refused our request.  Break out of
+              /* NAK means the server has refused our request.  Break out of
                * this loop with state == STATE_HAVE_OFFER and send DISCOVER again
                */
 

@@ -127,42 +127,13 @@ struct telnetd_s
  ****************************************************************************/
 
 #ifdef CONFIG_NETUTILS_TELNETD_DUMPBUFFER
-static void telnetd_dumpbuffer(const char *msg, const char *buffer, ssize_t nbytes)
+static inline void telnetd_dumpbuffer(FAR const char *msg, FAR const char *buffer, unsigned int nbytes)
 {
-#ifdef CONFIG_DEBUG
-  char line[128];
-  int ch;
-  int i;
-  int j;
-
-  dbg("%s:\n", msg);
-  for (i = 0; i < nbytes; i += 16)
-    {
-      sprintf(line, "%04x: ", i);
-
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              sprintf(&line[strlen(line)], "%02x ", buffer[i+j] );
-            }
-          else
-            {
-              strcpy(&line[strlen(line)], "   ");
-            }
-        }
-
-      for ( j = 0; j < 16; j++)
-        {
-          if (i + j < nbytes)
-            {
-              ch = buffer[i+j];
-              sprintf(&line[strlen(line)], "%c", ch >= 0x20 && ch <= 0x7e ? ch : '.');
-            }
-        }
-      dbg("%s\n", line);
-    }
-#endif
+  /* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_NET have to be
+  * defined or the following does nothing.
+  */
+    
+  nvdbgdumpbuffer(msg, (FAR const ubyte*)buffer, nbytes);
 }
 #else
 # define telnetd_dumpbuffer(msg,buffer,nbytes)

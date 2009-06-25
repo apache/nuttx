@@ -161,7 +161,7 @@ extern ssize_t tftp_recvfrom(int sd, void *buf, size_t len, struct sockaddr_in *
 extern ssize_t tftp_sendto(int sd, const void *buf, size_t len, struct sockaddr_in *to);
 
 #ifdef CONFIG_NETUTILS_TFTP_DUMPBUFFERS
-extern void tftp_dumpbuffer(const char *msg, ubyte *buffer, int nbytes);
+# define tftp_dumpbuffer(msg, buffer, nbytes) nvdbgdumpbuffer(msg, buffer, nbytes)
 #else
 # define tftp_dumpbuffer(msg, buffer, nbytes)
 #endif

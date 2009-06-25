@@ -55,7 +55,7 @@
  *   Reduce the size of the chunk specified by the node
  *   structure to the specified size.  this internal logic
  *   is used both from memalign to dispose of any trailing
- *   memory in the the aligned allocation and also by realloc
+ *   memory in the aligned allocation and also by realloc
  *   when there is a request to reduce the size of an allocation.
  *
  *   NOTES:

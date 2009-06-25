@@ -123,7 +123,7 @@ $(BIN2): $(BIN2).r2
 	@$(LDNXFLAT) $(LDNXFLATFLAGS) -o $@ $^
 
 # BIN3 and BIN4 require that we include --cxx in the xflat-ld command.
-# This will instruct xflat-ld that we want it to put togethe the correct
+# This will instruct xflat-ld that we want it to put together the correct
 # startup files to handle the C++ static initializers.
 #
 # BIN3 is equivalent to BIN2 except that is uses static initializers

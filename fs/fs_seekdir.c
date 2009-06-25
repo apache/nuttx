@@ -166,7 +166,7 @@ static inline void seekmountptdir(struct internal_dir_s *idir, off_t offset)
        pos++;
     }
 
-  /* If we get here the the directory position has been successfully set */
+  /* If we get here the directory position has been successfully set */
 
   idir->fd_position = pos;
 }

@@ -906,7 +906,7 @@ static boolean up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-  /* Return true if the there is data available in the read buffer */
+  /* Return true if there is data available in the read buffer */
 
   return ((up_serialin(priv, M16C_UART_C1) & UART_C1_RI) != 0);
 }

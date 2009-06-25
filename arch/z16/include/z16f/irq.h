@@ -163,7 +163,7 @@
 
 #ifndef __ASSEMBLY__
 
-/* This is the the type of the register save array */
+/* This is the type of the register save array */
 
 typedef uint16 chipreg_t;
 

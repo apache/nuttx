@@ -73,7 +73,7 @@ struct nxflat_hdr_s
 
   /* The following fields provide the memory map for the nxflat binary.
    *
-   * h_entry      - Offset to the the first executable insruction from
+   * h_entry      - Offset to the first executable insruction from
    *                the beginning of the file.
    * h_datastart  - Offset to the beginning of the data segment from
    *                the beginning of the file.  This field can also

@@ -132,7 +132,7 @@ int netdev_register(FAR struct uip_driver_s *dev)
       int devnum;
       netdev_semtake();
 
-      /* Assign a device name to the the interface */
+      /* Assign a device name to the interface */
 
       devnum = g_next_devnum++;
       snprintf( dev->d_ifname, IFNAMSIZ, "eth%d", devnum );

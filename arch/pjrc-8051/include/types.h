@@ -59,7 +59,7 @@
  * For SDCC, sizeof(int) is 16 and sizeof(long) is 32.
  * long long and double are not supported.
  *
- * Generic pointers are 3 bytes in length with the the
+ * Generic pointers are 3 bytes in length with the
  * first byte holding data space intformation.
  */
 
