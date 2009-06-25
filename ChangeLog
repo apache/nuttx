@@ -798,6 +798,9 @@
 	* Fixed an important bug in ROMFS.  The initial XIP offset was set
 	  incorrectly so if sector zero was read first, there was a bad read.
 	  I don't know how it worked before.
+	* arch/arm/src/common/up_use_stack.c.  Fixed a fatal stack setup error.
+	  This file has been around for a long time, but I don't think it has
+	  every been used before (i.e., prior to the NXFLAT logic)
 
 
 
