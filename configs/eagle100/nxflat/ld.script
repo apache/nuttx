@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* The LM3S6918 has 256Kb of FLASH beginning at address 0x0000:0000. However,
- * if the the Eagle100 Ethernet bootloader is used, then the entry point must
+ * if the Eagle100 Ethernet bootloader is used, then the entry point must
  * be at the following offset in FLASH (and the size of the FLASH must be
  * reduced to 248Kb):
  */
