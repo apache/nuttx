@@ -82,7 +82,7 @@ $(ROMFS_IMG): populate
 # Create the romfs.h header file from the romfs.img file
 
 $(ROMFS_HDR) : $(ROMFS_IMG)
-	@(cd $(TESTS_DIR); xxd -i romfs.img >$@)
+	@(cd $(TESTS_DIR); xxd -i romfs.img | sed -e "s/^unsigned/static const unsigned/g" >$@)
 
 # Create the dirlist.h header file from the romfs directory 
 

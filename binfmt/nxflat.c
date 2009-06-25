@@ -158,7 +158,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   if (ret != 0)
     {
       bdbg("Failed to initialize for load of NXFLT program: %d\n", ret);
-      return ret;
+      goto errout;
     }
 
   /* Load the program binary */
@@ -168,8 +168,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   if (ret != 0)
     {
       bdbg("Failed to load NXFLT program binary: %d\n", ret);
-      nxflat_uninit(&loadinfo);
-      return ret;
+      goto errout_with_init;
     }
 
   /* Bind the program to the exported symbol table */
@@ -178,8 +177,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   if (ret != 0)
     {
       bdbg("Failed to bind symbols program binary: %d\n", ret);
-      nxflat_uninit(&loadinfo);
-      return ret;
+      goto errout_with_load;
     }
 
   /* Return the load information */
@@ -192,8 +190,16 @@ static int nxflat_loadbinary(struct binary_s *binp)
 
   nxflat_dumpbuffer("Entry code", (FAR const ubyte*)binp->entrypt,
                     MIN(binp->isize - loadinfo.entryoffs,512));
+
   nxflat_uninit(&loadinfo);
   return OK;
+
+errout_with_load:
+  nxflat_unload(&loadinfo);
+errout_with_init:
+  nxflat_uninit(&loadinfo);
+errout:
+  return ret;
 }
 
 /***********************************************************************
