@@ -128,7 +128,7 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
   bdbg("  HANDLES:\n");
   bdbg("    filfd:        %d\n",    loadinfo->filfd);
 
-  bdbg("  NXFLT HEADER:");
+  bdbg("  NXFLT HEADER:\n");
   bdbg("    header:       %p\n",    loadinfo->header);
 }
 #else

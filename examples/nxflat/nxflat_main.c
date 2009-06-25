@@ -51,6 +51,7 @@
 
 #include <nuttx/ramdisk.h>
 #include <nuttx/binfmt.h>
+#include <nuttx/nxflat.h>
 
 #include "tests/romfs.h"
 #include "tests/dirlist.h"
@@ -91,6 +92,18 @@
 #define ROMFSDEV     "/dev/ram0"
 #define MOUNTPT      "/mnt/romfs"
 
+/* If CONFIG_DEBUG is enabled, use dbg instead of printf so that the the
+ * output will be synchronous with the debug output.
+ */
+
+#ifdef CONFIG_DEBUG
+#  define message dbg
+#  define err     dbg
+#else
+#  define message printf
+#  define err     fprintf(stderr, 
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -114,7 +127,7 @@ static char path[128];
 
 static inline void testheader(FAR const char *progname)
 {
-  printf("\n%s\n* Executing %s\n%s\n\n", delimiter, progname, delimiter);
+  message("\n%s\n* Executing %s\n%s\n\n", delimiter, progname, delimiter);
 }
 
 /****************************************************************************
@@ -139,26 +152,38 @@ int user_start(int argc, char *argv[])
   int ret;
   int i;
 
+  /* Initialize the NXFLAT binary loader */
+
+  message("Initializing the NXFLAT binary loader\n");
+  ret = nxflat_initialize();
+  if (ret < 0)
+    {
+      err("ERROR: Initialization of the NXFLAT loader failed: %d\n", ret);
+      exit(1);
+    }
+
   /* Create a ROM disk for the ROMFS filesystem */
 
-  printf("Registering romdisk\n");
+  message("Registering romdisk\n");
   ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len), SECTORSIZE);
   if (ret < 0)
     {
-      fprintf(stderr, "ERROR: romdisk_register failed: %d\n", ret);
+      err("ERROR: romdisk_register failed: %d\n", ret);
+      nxflat_uninitialize();
       exit(1);
     }
 
   /* Mount the file system */
 
-  printf("Mounting ROMFS filesystem at target=%s with source=%s\n",
+  message("Mounting ROMFS filesystem at target=%s with source=%s\n",
          MOUNTPT, ROMFSDEV);
 
   ret = mount(ROMFSDEV, MOUNTPT, "romfs", MS_RDONLY, NULL);
   if (ret < 0)
     {
-      fprintf(stderr, "ERROR: mount(%s,%s,romfs) failed: %s\n",
+      err("ERROR: mount(%s,%s,romfs) failed: %s\n",
               ROMFSDEV, MOUNTPT, errno);
+      nxflat_uninitialize();
     }
 
   /* Now excercise every progrm in the ROMFS file system */
@@ -177,16 +202,19 @@ int user_start(int argc, char *argv[])
       ret = load_module(&bin);
       if (ret < 0)
         {
-          fprintf(stderr, "ERROR: Failed to load program '%s'\n", dirlist[i]);
+          err("ERROR: Failed to load program '%s'\n", dirlist[i]);
           exit(1);
         }
 
       ret = exec_module(&bin, 50);
       if (ret < 0)
         {
-          fprintf(stderr, "ERROR: Failed to execute program '%s'\n", dirlist[i]);
+          err("ERROR: Failed to execute program '%s'\n", dirlist[i]);
           unload_module(&bin);
         }
+
+      message("Wait a bit for test completion\n");
+      sleep(2);
     }
   return 0;
 }

@@ -87,14 +87,10 @@
 int load_module(FAR struct binary_s *bin)
 {
   FAR struct binfmt_s *binfmt;
-  int ret;
+  int ret = -ENOENT;
 
 #ifdef CONFIG_DEBUG
-  if (!bin || !bin->filename)
-    {
-      ret = -EINVAL;
-    }
-  else
+  if (bin && bin->filename)
 #endif
     {
       bdbg("Loading %s\n", bin->filename);
@@ -119,6 +115,7 @@ int load_module(FAR struct binary_s *bin)
             {
               /* Successfully loaded -- break out with ret == 0 */
 
+              bvdbg("Successfully loaded module %s\n", bin->filename);
               dump_module(bin);
               break;
             }

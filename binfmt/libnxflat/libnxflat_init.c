@@ -105,7 +105,7 @@ int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
 
   /* Read the NXFLAT header from offset 0 */
 
-  ret = nxflat_read(loadinfo, (char*)&header, sizeof(struct nxflat_hdr_s), 0);
+  ret = nxflat_read(loadinfo, (char*)header, sizeof(struct nxflat_hdr_s), 0);
   if (ret < 0)
     {
       bdbg("Failed to read NXFLAT header: %d\n", ret);

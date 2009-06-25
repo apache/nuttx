@@ -215,10 +215,12 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 
   hdr = (FAR struct nxflat_hdr_s*)loadinfo->ispace;
 
+  /* From this, we can get the list of relocation entries. */
+
   /* From this, we can get the offset to the list of relocation entries */
 
   offset  = ntohl(hdr->h_relocstart);
-  nrelocs = ntohs(hdr->h_reloccount);
+  nrelocs = ntohl(hdr->h_reloccount);
 
   /* The value of the relocation list that we get from the header is a
    * file offset.  We will have to convert this to an offset into the
@@ -226,7 +228,9 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
    * list.
    */
 
-  DEBUGASSERT(offset >= loadinfo->isize && offset < (loadinfo->isize + loadinfo->dsize));
+  DEBUGASSERT(offset >= loadinfo->isize);
+  DEBUGASSERT(offset + nrelocs * sizeof(struct nxflat_reloc_s) <= (loadinfo->isize + loadinfo->dsize));
+
   relocs = (FAR struct nxflat_reloc_s*)(offset - loadinfo->isize + loadinfo->dspace->region);
 
   /* Now, traverse the relocation list of and bind each GOT relocation. */

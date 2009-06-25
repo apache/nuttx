@@ -53,6 +53,10 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#undef NXFLAT_DUMP_READDATA    /* Define to dump all file data read */
+#define DUMPER lib_rawprintf   /* If NXFLAT_DUMP_READDATA is defined, this
+                                * is the API used to dump data */
+
 /****************************************************************************
  * Private Constant Data
  ****************************************************************************/
@@ -60,6 +64,31 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxflat_dumpreaddata
+ ****************************************************************************/
+
+#if defined(NXFLAT_DUMP_READDATA)
+static inline void nxflat_dumpreaddata(char *buffer, int buflen)
+{
+  uint32 *buf32 = (uint32*)buffer;
+  int i;
+  int j;
+
+  for (i = 0; i < buflen; i += 32)
+    {
+      DUMPER("%04x:", i);
+      for (j = 0; j < 32; j += sizeof(uint32))
+        {
+          DUMPER("  %08x", *buf32++);
+        }
+      DUMPER("\n");
+    }
+}
+#else
+#  define nxflat_dumpreaddata(b,n)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -84,6 +113,8 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, 
   char   *bufptr;      /* Next buffer location to read into */
   int     bytesleft;   /* Number of bytes of .data left to read */
   int     bytesread;   /* Total number of bytes read */
+
+  bvdbg("Read %d bytes from offset %d\n", readsize, offset);
 
   /* Seek to the position in the object file where the initialized
    * data is saved.
@@ -126,6 +157,8 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, 
          }
     }
   while (bytesread < readsize);
+
+  nxflat_dumpreaddata(buffer, readsize);
   return OK;
 }
 

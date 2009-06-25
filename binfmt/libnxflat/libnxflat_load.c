@@ -107,6 +107,8 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
 {
   off_t   doffset;     /* Offset to .data in the NXFLAT file */
   uint32  dreadsize;   /* Total number of bytes of .data to be read */
+  uint32  relocsize;   /* Memory needed to hold relocations */
+  uint32  extrasize;   /* MAX(BSS size, relocsize) */
   int     ret = OK;
 
   /* Calculate the extra space we need to allocate.  This extra space will be
@@ -114,40 +116,34 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    * temporarily to hold relocation information.  So the allocated size of this
    * region will either be the size of .data + size of.bss section OR, the
    * size of .data + the relocation entries, whichever is larger
+   *
+   * This is the amount of memory that we have to have to hold the
+   * relocations.
    */
 
-  {
-    uint32 relocsize;
-    uint32 extrasize;
+  relocsize  = loadinfo->reloccount * sizeof(struct nxflat_reloc_s);
 
-    /* This is the amount of memory that we have to have to hold the
-     * relocations.
-     */
+  /* In the file, the relocations should lie at the same offset as BSS.
+   * The additional amount that we allocate have to be either (1) the
+   * BSS size, or (2) the size of the relocation records, whicher is
+   * larger.
+   */
 
-    relocsize  = loadinfo->reloccount * sizeof(uint32);
+  extrasize = MAX(loadinfo->bsssize, relocsize);
 
-    /* In the file, the relocations should lie at the same offset as BSS.
-     * The additional amount that we allocate have to be either (1) the
-     * BSS size, or (2) the size of the relocation records, whicher is
-     * larger.
-     */
+  /* Use this additional amount to adjust the total size of the dspace
+   * region.
+   */
 
-    extrasize = MAX(loadinfo->bsssize, relocsize);
+  loadinfo->dsize = loadinfo->datasize + extrasize;
 
-    /* Use this addtional amount to adjust the total size of the dspace
-     * region.
-     */
+  /* The number of bytes of data that we have to read from the file is
+   * the data size plus the size of the relocation table.
+   */
 
-    loadinfo->dsize = loadinfo->datasize + extrasize;
+  dreadsize = loadinfo->datasize + relocsize;
 
-    /* The number of bytes of data that we have to read from the file is
-     * the data size plus the size of the relocation table.
-     */
-
-    dreadsize = loadinfo->datasize + relocsize;
-  }
-
-  /* We'll need this a few times as well. */
+  /* We'll need this a few times. */
 
   doffset = loadinfo->isize;
 
