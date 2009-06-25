@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <sys/types.h>
 #include <sys/mount.h>
 
@@ -96,12 +97,22 @@
  * output will be synchronous with the debug output.
  */
 
-#ifdef CONFIG_DEBUG
-#  define message dbg
-#  define err     dbg
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(format, arg...) dbg(format, ##arg)
+#    define err(format, arg...)     dbg(format, ##arg)
+#  else
+#    define message(format, arg...) printf(format, ##arg)
+#    define err(format, arg...)     fprintf(stderr, format, ##arg)
+#  endif
 #else
-#  define message printf
-#  define err     fprintf(stderr, 
+#  ifdef CONFIG_DEBUG
+#    define message                 dbg
+#    define err                     dbg
+#  else
+#    define message                 printf
+#    define err                     printf
+#  endif
 #endif
 
 /****************************************************************************
