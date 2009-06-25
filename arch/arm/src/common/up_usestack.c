@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_usestack.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,7 @@ STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 
   /* Save the adjusted stack values in the _TCB */
 
-  tcb->adj_stack_size = top_of_stack;
+  tcb->adj_stack_ptr  = (uint32*)top_of_stack;
   tcb->adj_stack_size = size_of_stack;
 
   return OK;
