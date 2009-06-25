@@ -123,7 +123,7 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 
   bdbg("  RELOCS:\n");
   bdbg("    relocstart:   %08lx\n", loadinfo->relocstart);
-  bdbg("    reloccount:   %08lx\n", loadinfo->reloccount);
+  bdbg("    reloccount:   %04lx\n", loadinfo->reloccount);
 
   bdbg("  HANDLES:\n");
   bdbg("    filfd:        %d\n",    loadinfo->filfd);

@@ -109,11 +109,9 @@ struct nxflat_hdr_s
    * h_relocstart - Offset to the beginning of an array of relocation
    *                records (struct nxflat_reloc).  The offset is
    *                relative to the start of the file
-   * h_reloccount - The number of relocation records in the arry
    */
 
   uint32 h_relocstart;       /* Offset of relocation records */
-  uint32 h_reloccount;       /* Number of relocation records */
 
   /* Imported symbol table (NOTE no symbols are exported):
    *
@@ -124,10 +122,17 @@ struct nxflat_hdr_s
    *                   array contains an uint32 offset (again from
    *                   the beginning of the file) to the name of
    *                   a symbol string.  This string is null-terminated.
-   * h_importcount   - The number of records in the h_exportsymbols array.
    */
 
   uint32 h_importsymbols;    /* Offset to list of imported symbols */
+
+  /* 16-bit counts
+   *
+   * h_reloccount  - The number of relocation records in the arry
+   * h_importcount - The number of records in the h_importsymbols array.
+   */
+
+  uint16 h_reloccount;       /* Number of relocation records */
   uint16 h_importcount;      /* Number of imported symbols */
 };
 

@@ -81,7 +81,7 @@ struct nxflat_loadinfo_s
   /* This is temporary memory where relocation records will be loaded. */
 
   uint32 relocstart;       /* Start of array of struct flat_reloc */
-  uint32 reloccount;       /* Number of elements in reloc array */
+  uint16 reloccount;       /* Number of elements in reloc array */
 
   /* File descriptors */
 

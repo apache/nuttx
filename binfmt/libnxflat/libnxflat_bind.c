@@ -220,7 +220,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
   /* From this, we can get the offset to the list of relocation entries */
 
   offset  = ntohl(hdr->h_relocstart);
-  nrelocs = ntohl(hdr->h_reloccount);
+  nrelocs = ntohs(hdr->h_reloccount);
 
   /* The value of the relocation list that we get from the header is a
    * file offset.  We will have to convert this to an offset into the

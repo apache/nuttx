@@ -168,7 +168,7 @@ int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
    */
 
   loadinfo->relocstart  = ntohl(header->h_relocstart);
-  loadinfo->reloccount  = ntohl(header->h_reloccount);
+  loadinfo->reloccount  = ntohs(header->h_reloccount);
 
   return 0;
 }
