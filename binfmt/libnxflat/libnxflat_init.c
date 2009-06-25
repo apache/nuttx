@@ -54,6 +54,20 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
+ * defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
+ */
+
+#if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
+#  undef CONFIG_NXFLAT_DUMPBUFFER
+#endif
+
+#ifdef CONFIG_NXFLAT_DUMPBUFFER
+# define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
+#else
+# define nxflat_dumpbuffer(m,b,n)
+#endif
+
 /****************************************************************************
  * Private Constant Data
  ****************************************************************************/
@@ -79,8 +93,7 @@
  *
  ****************************************************************************/
 
-int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
-                struct nxflat_loadinfo_s *loadinfo)
+int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
 {
   uint32 datastart;
   uint32 dataend;
@@ -88,7 +101,7 @@ int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
   uint32 bssend;
   int   ret;
 
-  bvdbg("filename: %s header: %p loadinfo: %p\n", filename, header, loadinfo);
+  bvdbg("filename: %s loadinfo: %p\n", filename, loadinfo);
 
   /* Clear the load info structure */
 
@@ -105,16 +118,19 @@ int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
 
   /* Read the NXFLAT header from offset 0 */
 
-  ret = nxflat_read(loadinfo, (char*)header, sizeof(struct nxflat_hdr_s), 0);
+  ret = nxflat_read(loadinfo, (char*)&loadinfo->header,
+                    sizeof(struct nxflat_hdr_s), 0);
   if (ret < 0)
     {
       bdbg("Failed to read NXFLAT header: %d\n", ret);
       return ret;
     }
-       
+  nxflat_dumpbuffer("NXFLAT header", (FAR const ubyte*)&loadinfo->header,
+                    sizeof(struct nxflat_hdr_s));
+
   /* Verify the NXFLAT header */
 
-  if (nxflat_verifyheader(header) != 0)
+  if (nxflat_verifyheader(&loadinfo->header) != 0)
     {
       /* This is not an error because we will be called to attempt loading
        * EVERY binary.  Returning -ENOEXEC simply informs the system that
@@ -127,19 +143,16 @@ int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
       return -ENOEXEC;
     }
 
-  /* Save all of the input values in the loadinfo structure */
-
-  loadinfo->header     = header;
-
-  /* And extract some additional information from the xflat
+  /* Save all of the input values in the loadinfo structure 
+   * and extract some additional information from the xflat
    * header.  Note that the information in the xflat header is in
    * network order.
    */
 
-  datastart             = ntohl(header->h_datastart);
-  dataend               = ntohl(header->h_dataend);
+  datastart             = ntohl(loadinfo->header.h_datastart);
+  dataend               = ntohl(loadinfo->header.h_dataend);
   bssstart              = dataend;
-  bssend                = ntohl(header->h_bssend);
+  bssend                = ntohl(loadinfo->header.h_bssend);
 
   /* And put this information into the loadinfo structure as well.
    *
@@ -150,12 +163,12 @@ int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
    *   bsssize    = the address range from dataend up to bssend.
    */
 
-  loadinfo->entryoffs   = ntohl(header->h_entry);
+  loadinfo->entryoffs   = ntohl(loadinfo->header.h_entry);
   loadinfo->isize       = datastart;
 
   loadinfo->datasize    = dataend - datastart;
   loadinfo->bsssize     = bssend - dataend;
-  loadinfo->stacksize   = ntohl(header->h_stacksize);
+  loadinfo->stacksize   = ntohl(loadinfo->header.h_stacksize);
 
   /* This is the initial dspace size.  We'll re-calculate this later
    * after the memory has been allocated.
@@ -167,8 +180,8 @@ int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
    * this later).
    */
 
-  loadinfo->relocstart  = ntohl(header->h_relocstart);
-  loadinfo->reloccount  = ntohs(header->h_reloccount);
+  loadinfo->relocstart  = ntohl(loadinfo->header.h_relocstart);
+  loadinfo->reloccount  = ntohs(loadinfo->header.h_reloccount);
 
   return 0;
 }

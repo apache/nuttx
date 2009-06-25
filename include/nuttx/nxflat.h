@@ -87,7 +87,9 @@ struct nxflat_loadinfo_s
 
   int    filfd;            /* Descriptor for the file being loaded */
 
-  const struct nxflat_hdr_s  *header; /* A reference to the flat file header */
+  /* This is a copy of the NXFLAT header (still in network order) */
+
+  struct nxflat_hdr_s header;
 };
 
 /****************************************************************************
@@ -134,7 +136,7 @@ EXTERN int nxflat_verifyheader(const struct nxflat_hdr_s *header);
  *
  ***********************************************************************/
 
-EXTERN int nxflat_init(const char *filename, struct nxflat_hdr_s *header,
+EXTERN int nxflat_init(const char *filename,
 	               struct nxflat_loadinfo_s *loadinfo);
 
 /***********************************************************************

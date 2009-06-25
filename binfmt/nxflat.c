@@ -55,17 +55,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef NXFLAT_DUMPBUFFER /* Define to enable very verbose buffer dumping */
-
 /* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_BINFMT have to be
- * defined or NXFLAT_DUMPBUFFER does nothing.
+ * defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_VERBOSE) || !defined (CONFIG_DEBUG_BINFMT)
-#  undef NXFLAT_DUMPBUFFER
+#  undef CONFIG_NXFLAT_DUMPBUFFER
 #endif
 
-#ifdef NXFLAT_DUMPBUFFER
+#ifdef CONFIG_NXFLAT_DUMPBUFFER
 # define nxflat_dumpbuffer(m,b,n) bvdbgdumpbuffer(m,b,n)
 #else
 # define nxflat_dumpbuffer(m,b,n)
@@ -132,9 +130,6 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 
   bdbg("  HANDLES:\n");
   bdbg("    filfd:        %d\n",    loadinfo->filfd);
-
-  bdbg("  NXFLT HEADER:\n");
-  bdbg("    header:       %p\n",    loadinfo->header);
 }
 #else
 # define nxflat_dumploadinfo(i)
@@ -151,7 +146,6 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 
 static int nxflat_loadbinary(struct binary_s *binp)
 {
-  struct nxflat_hdr_s      header;    /* Just allocated memory */
   struct nxflat_loadinfo_s loadinfo;  /* Contains globals for libnxflat */
   int                      ret;
 
@@ -159,7 +153,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
 
   /* Initialize the xflat library to load the program binary. */
 
-  ret = nxflat_init(binp->filename, &header, &loadinfo);
+  ret = nxflat_init(binp->filename, &loadinfo);
   nxflat_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
@@ -196,7 +190,8 @@ static int nxflat_loadbinary(struct binary_s *binp)
   binp->isize     = loadinfo.isize;
   binp->stacksize = loadinfo.stacksize;
 
-  nxflat_dumpbuffer("Entry code", (FAR const ubyte*)binp->entrypt, MIN(binp->isize,512));
+  nxflat_dumpbuffer("Entry code", (FAR const ubyte*)binp->entrypt,
+                    MIN(binp->isize - loadinfo.entryoffs,512));
   nxflat_uninit(&loadinfo);
   return OK;
 }
