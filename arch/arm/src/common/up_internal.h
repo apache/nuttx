@@ -74,7 +74,7 @@
 /* Macros to handle saving and restore interrupt state.  In the current ARM
  * model, the state is always copied to and from the stack and TCB.  In the
  * Cortex-M3 model, the state is copied from the stack to the TCB, but only
- * a referenced is passed to get the the state from the TCB.
+ * a referenced is passed to get the state from the TCB.
  */
 
 #ifdef CONFIG_ARCH_CORTEXM3

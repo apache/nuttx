@@ -75,7 +75,7 @@
  *
  * Inputs:
  *   tcb: Refers to a task in the ready-to-run list (normally
- *     the task at the the head of the list).  It most be
+ *     the task at the head of the list).  It most be
  *     stopped, its context saved and moved into one of the
  *     waiting task lists.  It it was the task at the head
  *     of the ready-to-run list, then a context to the new

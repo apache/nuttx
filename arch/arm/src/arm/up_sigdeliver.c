@@ -86,7 +86,7 @@ void up_sigdeliver(void)
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the
-   * signal handling so that the the user code final gets
+   * signal handling so that the user code final gets
    * the correct errno value (probably EINTR).
    */
 

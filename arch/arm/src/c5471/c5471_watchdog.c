@@ -287,7 +287,7 @@ static int wdt_ioctl(struct file *filep, int cmd, uint32 arg)
 {
   dbg("ioctl Call: cmd=0x%x arg=0x%x", cmd, arg);
 
-  /* Process the the IOCTL command (see arch/watchdog.h) */
+  /* Process the IOCTL command (see arch/watchdog.h) */
 
   switch(cmd)
     {
