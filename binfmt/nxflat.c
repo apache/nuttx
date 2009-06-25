@@ -115,6 +115,11 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 
   bdbg("  DSPACE:\n");
   bdbg("    dspace:       %08lx\n", loadinfo->dspace);
+  if (oadinfo->dspace != NULL)
+    {
+      bdbg("      crefs:      %d\n",    loadinfo->dspace->crefs);
+      bdbg("      region:     %08lx\n", loadinfo->dspace->region);
+    }
   bdbg("    datasize:     %08lx\n", loadinfo->datasize);
   bdbg("    bsssize:      %08lx\n", loadinfo->bsssize);
   bdbg("      (pad):      %08lx\n", loadinfo->dsize - dsize);
@@ -123,7 +128,7 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
 
   bdbg("  RELOCS:\n");
   bdbg("    relocstart:   %08lx\n", loadinfo->relocstart);
-  bdbg("    reloccount:   %04lx\n", loadinfo->reloccount);
+  bdbg("    reloccount:   %d\n",    loadinfo->reloccount);
 
   bdbg("  HANDLES:\n");
   bdbg("    filfd:        %d\n",    loadinfo->filfd);
