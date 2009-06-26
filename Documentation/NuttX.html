@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 25, 2009</p>
+      <p>Last Updated: June 26, 2009</p>
     </td>
   </tr>
 </table>
@@ -411,6 +411,15 @@
       <li>ROMFS filesystem support.</li>
     </p>
 </tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li><a href="NuttXNxFlat.html">NXFLAT</a>.
+      A new binary format call NXFLAT that can be used to 
+      execute separately linked programs in place in a file system.
+    </p>
+</tr>
 
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
@@ -687,8 +696,8 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.4.8</b>.
-  This 40<sup>th</sup> release of NuttX (nuttx-0.4.8) was made on June 13, 2009
+<p><b>nuttx-0.4.9</b>.
+  This 41<sup>st</sup> release of NuttX (nuttx-0.4.9) was made on June 26, 2009
   and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
   website.
@@ -698,21 +707,16 @@
 </p>
   This release adds:
   <ul>
-  <li>
-    Support for the Olimex STRP711 board.  That board is based on the STMicro
-    STR711 MCU (ARM7TDMI). Integration is complete on the basic port (boot logic,
-    system time, serial console). Two configurations have been verified: (1) The
-    board boots and passes the OS test with console output visible on UART0, and
-    the NuttShell (NSH) is fully functional with interrupt driven serial console. 
-    An SPI driver is available but untested (because the Olimex card slot appears
-    to accept only MMC cards; I have only SD cards).  Additional needed: USB and
-    driver, MMC integration.
-  </li>
-  <li>
-    Support for the CodeSourcery and devkitARM Windows-native GNU toolchains.
-    Makefiles have been modified for the LM3S6918, LPC2148, and STR711 to support
-    these toolchains under Cygwin.
-  </li>
+    <li>
+       Support for a new binary format call NXFLAT that can be used to 
+       execute separately linked programs in place in a file system.
+       See <a href="NuttXNxFlat.html">NXFLAT Documentation</a>
+       for detailed information.
+    </li>
+    <li>
+       Several important bugs were files related to networking and ROMFS
+      (see the <a href="#currentrelease">ChangeLog</a> for a complete list).
+    </li>
   </ul>
 </p>
 
@@ -1418,57 +1422,7 @@ Other memory:
 </table>
 
 <pre><ul>
-nuttx-0.4.8 2009-06-13 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* lib/lib_*stream.c: Extend internal stream logic to support incoming streams.
-	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
-	  working.  The test at configs/olimex-strp711/ostest passes.  This means that
-	  the basic STR-P711 port is complete.
-	* configs/olimex-strp711/nsh:  Add and verifed a NuttShell (NSH) configuration
-	  for the STR-P711.
-	* arch/arm/str71x/str71x_serial.c:  The STR711 interrupt driven serial driver
-	  finally works after some extradinary measures to handle missed interrupts.
-	  NSH is fully functional on the Olimex STR-P711 board.
-	* example/nsh: Moved architecture specific files from NSH directory to board-
-	  specific directories.
-	* config/olimex-strp711/src/up_nsh.c:  Add an NSH board specific directory for
-	  for the Olimex STR7P11 board.
-	* Fixed build of LM3X6918 using the CodeSourcery Windows native toolchain.  There
-	  were lots of issues with Cygwin paths and Cygwin symbolic links.  These changes
-	  may work with the devarmKIT as well, but that remains untested.
-	* The NXP LPC2148 and STR711 targets can now also be built using the CodeSourcery
-	  or devkitARM Windows native toolchains.
-
-pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Add logic to build and link with the ZDS-II toolchain
-	  use with the z16f.
-	* Make sure that POFF header structures are aligned
-	* Standardized POFF file format to big-endian
-	* Break up large switch statements to lower complexity
-	  and eliminate a compiler bug
-	* Changes so that runtime compiles with SDCC.
-
-buildroot-0.1.6 2009-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Added config/arm7tdmi-defconfig-4.2.4
-	* Added config/arm920t-defconfig-4.3.3
-	* Correct error in arm-defconfig gcc-3.4.6 build. The gcc-3.4.6 configuration
-	  does not not take --with-abi
-	* Correct error in gcc-3.4.6/gcc/collect.c.  Calls open with O_CREAT but
-	  does not specify mode.  Newer host compilers can error out on this.
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<pre><ul>
-nuttx-0.4.9 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-0.4.9 2009-06-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Add strtoll() and strtoull(); Add macros for atol() and atoll().
 	* dup() and dup2() will now clone socket descriptors
@@ -1494,14 +1448,40 @@ nuttx-0.4.9 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  This file has been around for a long time, but I don't think it has
 	  every been used before (i.e., prior to the NXFLAT logic)
 
-pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-buildroot-0.1.7 2009-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
+	* Add logic to build and link with the ZDS-II toolchain
+	  use with the z16f.
+	* Make sure that POFF header structures are aligned
+	* Standardized POFF file format to big-endian
+	* Break up large switch statements to lower complexity
+	  and eliminate a compiler bug
+	* Changes so that runtime compiles with SDCC.
+
+buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
 
 	* configs/avr-defconfig-4.3.3: Added support for AVR to support a NuttX
 	  port of the ATmega128.
 	* toolchain/nxflat:  Added logic to build NuttX NXFLAT binding support tools
 	* toolchain/genromfs:  Added support for the genromfs tool
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<pre><ul>
+nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+buildroot-0.1.8 2009-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 </pre></ul>
 
 <table width ="100%">
@@ -1538,6 +1518,10 @@ buildroot-0.1.7 2009-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td><a href="NuttShell.html">NuttShell (NSH)</a></td>
+</tr>
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td><a href="NuttXNxFlat.html">NXFLAT</a> Binary Format</td>
 </tr>
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
