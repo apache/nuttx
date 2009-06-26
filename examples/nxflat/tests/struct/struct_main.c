@@ -67,23 +67,36 @@ int main(int argc, char **argv)
   printf("  n = %d (vs %d) %s\n",
          mystruct->n, DUMMY_SCALAR_VALUE1,
          mystruct->n == DUMMY_SCALAR_VALUE1 ? "PASS" : "FAIL");
+
   printf("  pn = %p (vs %p) %s\n",
          mystruct->pn, &dummy_scalar,
          mystruct->pn == &dummy_scalar ? "PASS" : "FAIL");
-  printf(" *pn = %d (vs %d) %s\n",
-         *mystruct->pn, DUMMY_SCALAR_VALUE2,
-         *mystruct->pn == DUMMY_SCALAR_VALUE2 ? "PASS" : "FAIL");
+  if (mystruct->pn == &dummy_scalar)
+    {
+      printf(" *pn = %d (vs %d) %s\n",
+             *mystruct->pn, DUMMY_SCALAR_VALUE2,
+             *mystruct->pn == DUMMY_SCALAR_VALUE2 ? "PASS" : "FAIL");
+    }
+
   printf("  ps = %p (vs %p) %s\n",
          mystruct->ps, &dummy_struct,
          mystruct->ps == &dummy_struct ? "PASS" : "FAIL");
-  printf("  ps->n = %d (vs %d) %s\n",
-         mystruct->ps->n, DUMMY_SCALAR_VALUE3,
-         mystruct->ps->n == DUMMY_SCALAR_VALUE3 ? "PASS" : "FAIL");
+  if (mystruct->ps == &dummy_struct)
+    {
+      printf("  ps->n = %d (vs %d) %s\n",
+             mystruct->ps->n, DUMMY_SCALAR_VALUE3,
+             mystruct->ps->n == DUMMY_SCALAR_VALUE3 ? "PASS" : "FAIL");
+    }
+
   printf("  pf = %p (vs %p) %s\n",
          mystruct->pf, dummyfunc,
          mystruct->pf == dummyfunc ? "PASS" : "FAIL");
-  printf("Calling mystruct->pf()\n");
-  mystruct->pf();
+  if (mystruct->pf == dummyfunc)
+    {
+      printf("Calling mystruct->pf()\n");
+      mystruct->pf();
+    }
+
   printf("Exit-ing\n");
   return 0;
 }
