@@ -235,6 +235,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 
   offset  = ntohl(hdr->h_relocstart);
   nrelocs = ntohs(hdr->h_reloccount);
+  bvdbg("offset: %08lx nrelocs: %d\n", (long)offset, nrelocs);
 
   /* The value of the relocation list that we get from the header is a
    * file offset.  We will have to convert this to an offset into the
@@ -243,9 +244,13 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
    */
 
   DEBUGASSERT(offset >= loadinfo->isize);
-  DEBUGASSERT(offset + nrelocs * sizeof(struct nxflat_reloc_s) <= (loadinfo->isize + loadinfo->dsize));
+  DEBUGASSERT(offset + nrelocs * sizeof(struct nxflat_reloc_s)
+              <= (loadinfo->isize + loadinfo->dsize));
 
-  relocs = (FAR struct nxflat_reloc_s*)(offset - loadinfo->isize + loadinfo->dspace->region);
+  relocs = (FAR struct nxflat_reloc_s*)
+        (offset - loadinfo->isize + loadinfo->dspace->region);
+  bvdbg("isize: %08lx dpsace: %p relocs: %p\n", 
+        (long)loadinfo->isize, loadinfo->dspace->region, relocs);
 
   /* Now, traverse the relocation list of and bind each GOT relocation. */
 
