@@ -44,7 +44,7 @@
  * Public Functions
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   int i;
 
@@ -73,17 +73,6 @@ int main(int argc, char **argv, char **envp)
     }
 
   printf("argv[%d]\t= 0x%p\n", argc, argv[argc]);
-
-  /* Print environment variables */
-
-  printf("envp\t= 0x%p\n", envp);
-
-  for (i = 0; envp[i] != NULL; i++)
-    {
-      printf("envp[%d]\t= (0x%p) \"%s\"\n", i, envp[i], envp[i]);
-    }
-  printf("envp[%d]\t= 0x%p\n", i, envp[i]);
-
   printf("Goodbye, world!\n");
   return 0;
 }

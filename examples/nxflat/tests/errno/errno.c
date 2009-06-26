@@ -51,7 +51,7 @@ static const char g_nonexistent[] = "aflav-sautga-ay";
  * Public Functions
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   FILE *test_stream;
 

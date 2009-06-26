@@ -94,7 +94,7 @@ static void *child_start_routine(void *arg)
  * Public Functions
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   pthread_attr_t attr;
   pthread_t      thread;

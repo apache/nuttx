@@ -104,7 +104,7 @@ void CThingSayer::SayThing(void)
 // Public Functions
 /////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   // We should see the message from constructor, CThingSayer::CThingSayer(),
   // BEFORE we see the following messages.  That is proof that the

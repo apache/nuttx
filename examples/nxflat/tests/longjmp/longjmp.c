@@ -98,7 +98,7 @@ static int function(int some_arg)
  * Public Functions
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   int value;
 

@@ -133,7 +133,7 @@ static void sigusr2_sighandler(int signo)
  * Name: main
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   struct sigaction act;
   struct sigaction oact;

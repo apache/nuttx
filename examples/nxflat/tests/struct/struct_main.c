@@ -57,7 +57,7 @@ int dummy_scalar = DUMMY_SCALAR_VALUE2;
  * Public Functions
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   const struct struct_s *mystruct = getstruct();
 

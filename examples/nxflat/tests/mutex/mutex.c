@@ -92,7 +92,7 @@ static void thread_func(void *parameter)
  * Public Functions
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+int main(int argc, char **argv)
 {
   pthread_t thread1, thread2;
 
