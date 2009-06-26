@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Definitions
@@ -436,7 +437,7 @@ EXTERN int lib_lowprintf(const char *format, ...);
 
 /* Dump a buffer of data */
 
-EXTERN int lib_dumpbuffer(FAR const char *msg, FAR const ubyte *buffer, unsigned int buflen);
+EXTERN void lib_dumpbuffer(FAR const char *msg, FAR const ubyte *buffer, unsigned int buflen);
 
 /* If the cross-compiler's pre-processor does not support variable
  * length arguments, then these additional APIs will be built.

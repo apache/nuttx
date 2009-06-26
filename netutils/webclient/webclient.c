@@ -66,6 +66,7 @@
 #  include <net/uip/resolv.h>
 #endif
 
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <net/uip/uip-lib.h>
 #include <net/uip/webclient.h>

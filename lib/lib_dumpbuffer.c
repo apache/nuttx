@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <sys/types.h>
 #include <debug.h>
 
@@ -51,11 +52,19 @@
 
 /* Select the lowest level debug interface available */
 
-# ifdef CONFIG_ARCH_LOWPUTC
-#  define message(format, arg...) lib_lowprintf(format, ##arg)
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_ARCH_LOWPUTC
+#    define message(format, arg...) lib_lowprintf(format, ##arg)
+#  else
+#    define message(format, arg...) lib_rawprintf(format, ##arg)
+#  endif
 #else
-#  define message(format, arg...) lib_rawprintf(format, ##arg)
-# endif
+#  ifdef CONFIG_ARCH_LOWPUTC
+#    define message lib_lowprintf
+#  else
+#    define message lib_rawprintf
+#  endif
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -69,7 +78,7 @@
  *
  ****************************************************************************/
 
-int lib_dumpbuffer(FAR const char *msg, FAR const ubyte *buffer, unsigned int buflen)
+void lib_dumpbuffer(FAR const char *msg, FAR const ubyte *buffer, unsigned int buflen)
 {
   int i, j, k;
 
