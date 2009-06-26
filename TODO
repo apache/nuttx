@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 19, 2009)
+NuttX TODO List (Last updated June 26, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -6,15 +6,16 @@ NuttX TODO List (Last updated June 19, 2009)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
   (1)  C++ Support
+  (5)  Binary loaders (binfmt/)
  (12)  Network (net/, netutils/)
   (1)  USB (drivers/usbdev)
   (4)  Libraries (lib/)
   (8)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
-  (0)  Documentation (Documentation/)
+  (2)  Documentation (Documentation/)
   (6)  Build system / Toolchains
-  (2)  NuttShell (NSH) (examples/nsh)
+  (3)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
   (2)  Linux/Cywgin simulation (arch/sim)
   (3)  ARM (arch/arm/)
@@ -101,6 +102,39 @@ o C++ Support
   Priority:    Low, depends on toolchain.  Call to gcc's built-in static
                constructor logic will probably have to be performed by
                user logic in user_start().
+
+o Binary loaders (binfmt/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: Not all of the NXFLAT test under examples/nxflat are working.
+               Most simply do not compile yet.  tests/mutex runs okay but
+               outputs garbage on completion.
+  Status:      Open
+  Priority:    High
+
+  Description: The ARM up_getpicbase() does not seem to work.  This means
+               the some features like wdog's might not work in NXFLAT modules.
+  Status:      Open
+  Priority:    Medium-High
+
+  Description: At present, all .rodata must be put into RAM.  There is a 
+               tentative design change that might allow .rodata to be placed
+               in FLASH (see Documentation/NuttXNxFlat.html).
+  Status:      Open
+  Priority:    Medium
+
+  Description: If the function pointer to a statically defined function is
+               taken, then GCC generates a relocation that cannot be handled
+               by NXFLAT.  There is a solution described in Documentataion/NuttXNxFlat.html,
+               by that would require a compiler change (which we want to avoid).
+               The simple workaround is to make such functions global in scope.
+  Status:      Open
+  Priority:    Low (probably will not fix)
+
+  Description: In the NXFLAT symbol tables... Using a 32-bit hash value instead
+               of a string to identify a symbol should result in a smaller footprint.
+  Status:      Open
+  Priority:    Low
 
 o Network (net/, netutils/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -325,6 +359,10 @@ o Documentation (Documentation/)
   Status:      Open
   Priority:    Low
 
+  Description: Need to document binary loader APIs
+  Status:      Open
+  Priority:    Low
+
 o Build system
   ^^^^^^^^^^^^
 
@@ -377,6 +415,10 @@ o NuttShell (NSH) (examples/nsh)
                logic, it is like non-functional.
   Status:      Open
   Priority:    Med-High
+
+  Description: Add support to NSH to run NXFLAT programs from a ROMFS file system
+  Status:      Open
+  Priority:    Low
 
 o Other Applications & Tests (examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

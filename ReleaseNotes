@@ -923,3 +923,17 @@ This is the 40th release of NuttX.  This release adds:
 
 This tarball contains a complete CVS snapshot from June 13, 2009.
 
+nuttx-0.4.9
+^^^^^^^^^^^
+
+This is the 41st release of NuttX.  This release adds:
+
+	* Support for a new binary format call NXFLAT that can be used to 
+	  execute separately linked programs in place in a file system.
+	  See http://www.nuttx.org/NuttXNxFlat.html.
+
+	* Several important bugs were files related to networking and ROMFS
+	  (see the ChangeLog for a complete list).
+
+This tarball contains a complete CVS snapshot from June 26, 2009.
+

@@ -773,7 +773,7 @@
 	* The NXP LPC2148 and STR711 targets can now also be built using the CodeSourcery
 	  or devkitARM Windows native toolchains.
 
-0.4.8 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.9 2009-06-26 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add strtoll() and strtoull(); Add macros for atol() and atoll().
 	* dup() and dup2() will now clone socket descriptors
@@ -802,6 +802,7 @@
 	  This file has been around for a long time, but I don't think it has
 	  every been used before (i.e., prior to the NXFLAT logic)
 
+0.4.10 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 
 
