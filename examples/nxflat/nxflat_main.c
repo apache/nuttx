@@ -225,7 +225,9 @@ int user_start(int argc, char *argv[])
         }
 
       message("Wait a bit for test completion\n");
-      sleep(2);
+      sleep(4);
     }
+
+  message("End-of-Test.. Exit-ing\n");
   return 0;
 }

@@ -368,6 +368,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
   offset   = ntohl(hdr->h_importsymbols);
   nimports = ntohs(hdr->h_importcount);
+  bvdbg("Imports offset: %08x nimports: %d\n", offset, nimports);
 
   /* Verify that this module requires imported symbols */
 
@@ -396,6 +397,9 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
       for (i = 0; i < nimports; i++)
 	{
+	  bvdbg("Import[%d] (%08p) offset: %08x func: %08x\n",
+	        i, &imports[i], imports[i].i_funcname, imports[i].i_funcaddress);
+
 	  /* Get a pointer to the imported symbol name.  The name itself
 	   * lies in the TEXT segment.  But the reference to the name
 	   * lies in DATA segment.  Therefore, the name reference should
@@ -424,7 +428,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
 	  imports[i].i_funcaddress =  (uint32)symbol->sym_value;
 
-	  bvdbg("Bound import %d (%08p) to export '%s' (%08x)\n",
+	  bvdbg("Bound import[%d] (%08p) to export '%s' (%08x)\n",
 	        i, &imports[i], symname, imports[i].i_funcaddress);
 	}
     }
@@ -462,14 +466,17 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
                 FAR const struct symtab_s *exports, int nexports)
 {
-  /* First bind all GOT relocations */
+  /* Bind the imported symbol, absolute relocations separately.  This is done
+   * before the standard relocations because that logic may modify the
+   * import list (for the better hopefully, but we don't want to depend on it).
+   */
 
-  int ret = nxflat_gotrelocs(loadinfo);
+  int ret = nxflat_bindimports(loadinfo, exports, nexports);
   if (ret == OK)
     {
-      /* Then bind the imported symbol, absolute relocations separately. */
+      /* Then bind all GOT relocations */
 
-      ret = nxflat_bindimports(loadinfo, exports, nexports);
+      ret = nxflat_gotrelocs(loadinfo);
       if (ret == OK)
         {
           /* Zero the BSS area, trashing the relocations that lived in that
