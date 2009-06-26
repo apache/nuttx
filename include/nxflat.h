@@ -47,8 +47,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NXFLAT_MAX_STRING_SIZE 64    /* Largest size of string (w/zterminator) */
-#define NXFLAT_MAGIC          "NxFT" /* NXFLAT magic number */
+#define NXFLAT_MAX_STRING_SIZE 64     /* Largest size of string (w/zterminator) */
+#define NXFLAT_MAGIC          "NxFT"  /* NXFLAT magic number */
 
 /****************************************************************************
  * Public Types
@@ -69,7 +69,7 @@ struct nxflat_hdr_s
    * this magic number.
    */
 
-  char  h_magic[4];
+  char h_magic[4];
 
   /* The following fields provide the memory map for the nxflat binary.
    *
@@ -116,7 +116,7 @@ struct nxflat_hdr_s
   /* Imported symbol table (NOTE no symbols are exported):
    *
    * h_importsymbols - Offset to the beginning of an array of imported
-   *                   symbol structures (struct nxflat_import).  The
+   *                   symbol structures (struct nxflat_import_s).  The
    *                   h_importsymbols offset is relative to the
    *                   beginning of the file.  Each entry of the
    *                   array contains an uint32 offset (again from
@@ -149,7 +149,7 @@ struct nxflat_reloc_s
 
 /* Pack the type and the offset into one 32-bit value */
 
-#define NXFLAT_RELOC(t,o)       (((u_int32_t)((t) & 3) << 30) | ((o) & 0x1fffffff))
+#define NXFLAT_RELOC(t,o)       (((u_int32_t)((t) & 3) << 30) | ((o) & 0x3fffffff))
 
 /* The top three bits of the relocation info is the relocation type (see the
  * NXFLAT_RELOC_TYPE_* definitions below.  This is an unsigned value.
