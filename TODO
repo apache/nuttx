@@ -13,7 +13,7 @@ NuttX TODO List (Last updated June 26, 2009)
   (8)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
-  (2)  Documentation (Documentation/)
+  (1)  Documentation (Documentation/)
   (6)  Build system / Toolchains
   (3)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
@@ -356,10 +356,6 @@ o Documentation (Documentation/)
 
   Description: Need to document which APIs can be used in interrupt
                handlers (like mq_send and sem_post) and which cannot.
-  Status:      Open
-  Priority:    Low
-
-  Description: Need to document binary loader APIs
   Status:      Open
   Priority:    Low
 

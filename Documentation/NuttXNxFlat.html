@@ -96,6 +96,12 @@
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td>
+    <a href="#binfmt">3.0.  Binary Loader APIs</a>
+  </td>
+</tr>
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td>
     <a href="#nogot">Appendix A.  No GOT Operation</a>
   </td>
 </tr>
@@ -161,7 +167,7 @@
 <p>
   NXFLAT is derived from <a href="http://xflat.sourceforge.net/">XFLAT</a>.
   XFLAT is a toolchain add that provides full shared library and XIP executable
-  support for processors that have no Memory Management Unit (MMU).
+  support for processors that have no Memory Management Unit (MMU<sup>1</sup>).
   NXFLAT is greatly simplified for the deeply embedded environment targeted by Nuttx:
 </p>
 <ul>
@@ -170,13 +176,19 @@
 </ul>
 <p>
   Rather, the NXFLAT module only <i>imports</i> symbol values.
-  In the NXFLAT model, the (PIC<sup>1</sup>) NXFLAT module resides in a FLASH file system and
+  In the NXFLAT model, the (PIC<sup>2</sup>) NXFLAT module resides in a FLASH file system and
   when it is loaded at run time, it is dynamically linked only to the (non-PIC) base NuttX
   code:
   The base NuttX <i>exports</i> a symbol table; the NXFLAT module <i>imports</i> those symbol value
   to dynamically bind the module to the base code.
 </p>
-<p><sup>1</sup><small>&quot;Position Independent Code&quot;</small></p>
+
+<ul>
+  <p>
+    <sup>1</sup><small>MMU: &quot;Memory Management Unit&quot;</small><br>
+    <sup>2</sup><small>PIC: &quot;Position Independent Code&quot;</small>
+  </p>
+</ul>
 
 <a name="limitations"><h2>1.3 Limitations</h2></a>
 
@@ -220,8 +232,8 @@
 </ul>
 
 <ul><p>
-  <sup>1</sup><small>&quot;Memory Management Unit&quot;</small><br>
-  <sup>2</sup><small>&quot;Position Independent Code&quot;</small><br>
+  <sup>1</sup><small>MMU: &quot;Memory Management Unit&quot;</small><br>
+  <sup>2</sup><small>PIC: &quot;Position Independent Code&quot;</small><br>
   <sup>3</sup><small>A work around is under consideration:
     At run time, the <code>.rodata</code> offsets will be indexed by a RAM address.
     If the dynamic loader were to offset those <code>.rodata</code> offsets properly, it
@@ -406,27 +418,186 @@ any following arguments.
 </table></ul>
 
 <p><b>Target 1</b>.
-  This target links all of the object files together into one relocation object.
-  In this case, there is only a single object file, <code>hello.o</code>, and it is linked to produce <code>hello.r1</code>.
+  This target links all of the module's object files together into one relocatable object.
+  Two relocatable objects will be generated; this is the first one (hence, the suffic <code>.r1</code>).
+  In this &quot;Hello, World!&quot; case, there is only a single object file, <code>hello.o</code>, 
+  that is linked to produce the <code>hello.r1</code> object.
+</p>
+
+<p>
+  When the module's object files are compiled, some special compiler CFLAGS must be provided.
+  First, the option <code>-fpic</code> is required to tell the compiler to generate position independent code (other
+  GCC options, like <code>-fno-jump-tables</code> might also be desirable).
+  For ARM compilers, two additional compilation options are required: <code>-msingle-pic-base</code>
+  and  <code>-mpic-register=r10</code>.
 </p>
 
 <p><b>Target 2</b>.
-  Given <code>hello.r1</code>, this target will invoke <a href="#mknxflat"><code>mknxflat</code></a>
+  Given the <code>hello.r1</code> relocatable object, this target will invoke
+  <a href="#mknxflat"><code>mknxflat</code></a>
   to make the <i>thunk</i> file, <code>hello-thunk.S</code>.
-  This <i>thunk</i> contains all of the information needed to create the imported function list.
+  This <i>thunk</i> file contains all of the information needed to create the imported function list.
 </p>
 
 <p><b>Target 3</b>
-  This this target is similar to <b>Target 1</b>.
-  In this case, it will link together the object file, <code>hello.o</code> along with the assembled <i>thunk</i> file,
-  <code>hello-thunk.o</code> to create another, single relocatable object, <code>hello.r2</code>.
+  This target is similar to <b>Target 1</b>.
+  In this case, it will link together the module's object files (only <code>hello.o</code> here)
+  along with the assembled <i>thunk</i> file, <code>hello-thunk.o</code> to create the second relocatable object,
+  <code>hello.r2</code>.
   The linker script, <code>gnu-nxflat.ld</code> is required at this point to correctly position the sections.
+  This linker script produces two segments:
+  An <i>I-Space</i> (Instruction Space) segment containing mostly <code>.text</code> and a <i>D-Space</i> (Data Space) segment
+  containing <code>.got</code>, <code>.data</code>, and <code>.bss</code> sections.
+  The I-Space section must be origined at address 0 (so that the segment's addresses are really offsets into
+  the I-Space segment)
+  and the D-Space section must also be origined at address 0 (so that segment's addresses are really offsets into
+  the I-Space segment).
+  The option <code>-no-check-sections</code> is required to prevent the linker from failing because these segments overlap.
 </p>
 
 <p><b>Target 4</b>.
   Finally, this target will use the <code>hello.r2</code> relocatable object to create the final, NXFLAT module
-  <code>hello</code> by calling <a href="#ldnxflat"><code>ldnxflat</code></a>.
+  <code>hello</code> by executing <a href="#ldnxflat"><code>ldnxflat</code></a>.
 </p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="binfmt"><h1>3.0  Binary Loader APIs</h1></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Relevant Header Files:</b></p>
+<ul>
+  <li>
+    The interface to the binary loader is described in the header file 
+    <a href="http://nuttx.cvs.sourceforge.net/viewvc/nuttx/nuttx/include/nuttx/binfmt.h?revision=1.5&view=markup">
+    <code>include/nuttx/binfmt.h</code></a>.
+    A brief summary of the APIs prototyped in that header file are listed below.
+  </li>
+  <li>
+    NXFLAT APIs needed to register NXFLAT as a binary loader appear in the header file
+    <a href="http://nuttx.cvs.sourceforge.net/viewvc/*checkout*/nuttx/nuttx/include/nuttx/nxflat.h?revision=1.9">
+    <code>include/nuttx/nxflat.h</code></a>.
+  </li>
+  <li>
+    The format of an NXFLAT object itself is described in the header file:
+    <a href="http://nuttx.cvs.sourceforge.net/viewvc/*checkout*/nuttx/nuttx/include/nxflat.h?revision=1.12">
+    <code>include/nxflat.h</code></a>.
+  </li>
+</ul>
+
+<p><b>binfmt Registration</b>
+  These first interfaces are used only by a binary loader module, such as NXFLAT itself.
+  NXFLAT (or any future binary loader) calls <code>register_binfmt()</code> to incorporate
+  itself into the system.
+  In this way, the binary loader logic is dynamically extensible to support any kind of loader.
+  Normal application code should not be concerned with these interfaces.
+</p>
+
+<ul>
+<p><b><code>int register_binfmt(FAR struct binfmt_s *binfmt)</code></b>
+<ul>
+<p><b>Description:</b>
+  Register a loader for a binary format
+</p>
+<p><b>Returned Value:</b>
+  This is a NuttX internal function so it follows the convention that
+  0 (<code>OK</code>) is returned on success and a negated errno is returned on
+  failure.
+</p>
+</ul>
+
+<p><b><code>int unregister_binfmt(FAR struct binfmt_s *binfmt)</code></b>
+<ul>
+<p><b>Description:</b>
+  Register a loader for a binary format
+</p>
+<p><b>Returned Value:</b>
+  This is a NuttX internal function so it follows the convention that
+  0 (<code>OK</code>) is returned on success and a negated errno is returned on
+  failure.
+</p>
+</ul>
+</ul>
+
+<p><b>NXFLAT Initialization</b>
+  These interfaces are specific to NXFLAT.
+  Normally, an application needs only call <code>nxflat_initialize()</code> during its initialization
+  to have full NXFLAT support.
+</p>
+
+<ul>
+<p><b><code>int nxflat_initialize(void)</code></b>
+<ul>
+<p><b>Description:</b>
+  NXFLAT support is built unconditionally.  However, it order to
+  use this binary format, this function must be called during system
+  format in order to register the NXFLAT binary format.
+  This function calls <code>register_binfmt()</code> appropriately.
+</p>
+<p><b>Returned Value:</b>
+  This is a NuttX internal function so it follows the convention that
+  0 (OK) is returned on success and a negated errno is returned on
+  failure.
+</p>
+</ul>
+
+<p><b><code>void nxflat_uninitialize(void)</code></b>
+<ul>
+<p><b>Description:</b>
+  Unregister the NXFLAT binary loader
+</p>
+<p><b>Returned Value:</b>
+  None
+</p>
+</ul>
+</ul>
+
+<p><b>Binary Loader Interfaces</b>.
+  The remaining APIs are called by user applications to maintain modules in the file system.
+</p>
+
+<ul>
+<p><b><code>int load_module(FAR struct binary_s *bin)</code></b>
+<ul>
+<p><b>Description:</b>
+  Load a module into memory, bind it to an exported symbol take, and
+  prep the module for execution.
+</p>
+<p><b>Returned Value:</b>
+  This is an end-user function, so it follows the normal convention:
+  Returns 0 (<code>OK</code>) on success.  On failure, it returns -1 (<code>ERROR</code>) with
+  errno set appropriately.
+</p>
+</ul>
+
+<p><b><code>int unload_module(FAR const struct binary_s *bin)</code></b>
+<ul>
+<p><b>Description:</b>
+  Unload a (non-executing) module from memory.  If the module has
+  been started (via <code>exec_module()</code>), calling this will be fatal.
+</p>
+<p><b>Returned Value:</b>
+  This is a NuttX internal function so it follows the convention that
+  0 (<code>OK</code>) is returned on success and a negated errno is returned on
+  failure.
+</p>
+</ul>
+
+<p><b><code>int exec_module(FAR const struct binary_s *bin, int priority)</code></b>
+<ul>
+<p><b>Description:</b>
+  Execute a module that has been loaded into memory by load_module().
+</p>
+<p><b>Returned Value:</b>
+  This is an end-user function, so it follows the normal convention:
+  Returns the PID of the exec'ed module.  On failure, it.returns
+  -1 (<code>ERROR</code>) and sets errno appropriately.
+</p>
+</ul>
+</ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -438,7 +609,7 @@ any following arguments.
 
 <p>
   When GCC generate position independent code, new code sections will appear in your programs.
-  One of these the the GOT (Global Offset Table) and, in ELF environments, the PLT (Procedure
+  One of these is the  GOT (Global Offset Table) and, in ELF environments, another is the PLT (Procedure
   Lookup Table.
   For example, if your C code generated (ARM) assembly language like this without PIC:
 <p>
