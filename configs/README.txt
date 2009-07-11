@@ -194,7 +194,13 @@ defconfig -- This is a configuration file similar to the Linux
 		  instrumentation is selected.  Set to zero to disable.
 		CONFIG_START_YEAR, CONFIG_START_MONTH, CONFIG_START_DAY -
 		  Used to initialize the internal time logic.
-		CONFIG_JULIAN_TIME - Enables Julian time conversions
+		CONFIG_GREGORIAN_TIME - Enables Gregorian time conversions.
+		  You would only need this if you are concerned about accurate
+		  time conversions in the past or in the distant future.
+		CONFIG_JULIAN_TIME - Enables Julian time conversions. You
+		  would only need this if you are concerned about accurate
+		  time conversion in the distand past.  You must also define
+		  CONFIG_GREGORIAN_TIME in order to use Julian time.
 		CONFIG_DEV_CONSOLE - Set if architecture-specific logic
 		  provides /dev/console.  Enables stdout, stderr, stdin.
 		CONFIG_MUTEX_TYPES - Set to enable support for recursive and

@@ -1,6 +1,5 @@
 /****************************************************************************
- * include/nuttx/regex.h
- * Non-standard, pattern-matching APIs available in lib/.
+ * include/nuttx/time.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,19 +33,42 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_REGEX_H
-#define __INCLUDE_NUTTX_REGEX_H
+#ifndef __INCLUDE_NUTTX_TIME_H
+#define __INCLUDE_NUTTX_TIME_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
+/* If Gregorian time is not supported, then neither is Julian */
+
+#ifndef CONFIG_GREGORIAN_TIME
+#  undef CONFIG_JULIAN_TIME
+#else
+#  define JD_OF_EPOCH           2440588    /* Julian Date of noon, J1970 */
+
+#  ifdef CONFIG_JULIAN_TIME
+#    define GREG_DUTC           -141427    /* Default is October 15, 1582 */
+#    define GREG_YEAR            1582
+#    define GREG_MONTH           10
+#    define GREG_DAY             15
+#  endif /* CONFIG_JULIAN_TIME */
+#endif /* !CONFIG_GREGORIAN_TIME */
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef CONFIG_GREGORIAN_TIME
+extern uint16 g_daysbeforemonth[13];
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -60,23 +82,33 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Name: match
+ * Function:  clock_isleapyear
  *
  * Description:
- *   Simple shell-style filename pattern matcher written by Jef Poskanzer
- *   (See copyright notice in lib/lib_match.c).  This pattern matcher only
- *   handles '?', '*' and '**', and  multiple patterns separated by '|'.
- *
- * Returned Value:
- *   Returns 1 (match) or 0 (no-match).
+ *    Return true if the specified year is a leap year
  *
  ****************************************************************************/
 
-EXTERN int match(const char *pattern, const char *string);
+#ifndef CONFIG_GREGORIAN_TIME
+EXTERN int clock_isleapyear(int year);
+#endif
+
+/****************************************************************************
+ * Function:  clock_calendar2utc
+ *
+ * Description:
+ *    Calendar/UTC conversion based on algorithms from p. 604
+ *    of Seidelman, P. K. 1992.  Explanatory Supplement to
+ *    the Astronomical Almanac.  University Science Books,
+ *    Mill Valley. 
+ *
+ ****************************************************************************/
+
+EXTERN time_t clock_calendar2utc(int year, int month, int day);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_REGEX_H */
+#endif /* __INCLUDE_NUTTX_TIME_H */

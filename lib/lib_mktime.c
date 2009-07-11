@@ -1,5 +1,5 @@
 /****************************************************************************
- * clock_initialize.c
+ * lib/lib_mktime.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,11 +41,9 @@
 #include <sys/types.h>
 
 #include <time.h>
-#include <errno.h>
 #include <debug.h>
-#include <nuttx/time.h>
 
-#include "clock_internal.h"
+#include <nuttx/time.h>
 
 /****************************************************************************
  * Definitions
@@ -59,21 +57,17 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Public Constant Data
- **************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
 
-volatile uint32 g_system_timer = 0;
-struct timespec g_basetime     = {0,0};
-uint32 g_tickbias               = 0;
-
-/**************************************************************************
+/****************************************************************************
  * Private Variables
- **************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -84,49 +78,72 @@ uint32 g_tickbias               = 0;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: clock_initialize
+ * Function:  mktime
  *
  * Description:
- *   Perform one-time initialization of the timing facilities.
+ *  Time conversion (based on the POSIX API)
  *
  ****************************************************************************/
 
-void clock_initialize(void)
+#ifdef CONFIG_GREGORIAN_TIME
+time_t mktime(struct tm *tp)
 {
+  time_t ret;
   time_t jdn;
-
-  /* Initialize the real time close */
-
-  g_system_timer = 0;
 
   /* Get the EPOCH-relative julian date from the calendar year,
    * month, and date
    */
 
-  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
-                           CONFIG_START_DAY);
+  jdn = clock_calendar2utc(tp->tm_year+1900, tp->tm_mon+1, tp->tm_mday);
+  sdbg("jdn=%d tm_year=%d tm_mon=%d tm_mday=%d\n",
+       (int)jdn, tp->tm_year, tp->tm_mon, tp->tm_mday);
 
-  /* Set the base time as seconds into this julian day. */
+  /* Return the seconds into the julian day. */
 
-  g_basetime.tv_sec  = jdn * (24*60*60);
-  g_basetime.tv_nsec = 0;
+  ret = ((jdn*24 + tp->tm_hour)*60 + tp->tm_min)*60 + tp->tm_sec;
+  sdbg("ret=%d tm_hour=%d tm_min=%d tm_sec=%d\n",
+       (int)ret, tp->tm_hour, tp->tm_min, tp->tm_sec);
 
-  /* These is no time bias from this time. */
-
-  g_tickbias = 0;
+  return ret;
 }
+#else
 
-/****************************************************************************
- * Function: clock_timer
- *
- * Description:
- *   This function must be called once every time the real
- *   time clock interrupt occurs.  The interval of this
- *   clock interrupt must be MSEC_PER_TICK
- *
- ****************************************************************************/
+/* Simple version that only works for dates within a (relatively) small range
+ * from the epoch.  It does not handle earlier days on longer days where leap
+ * seconds, etc. apply.
+ */
 
-void clock_timer(void)
+time_t mktime(struct tm *tp)
 {
-   g_system_timer++;
+  unsigned int days;
+
+  /* Years since epoch in units of days (ignoring leap years). */
+
+  days = (tp->tm_year - 70) * 365;
+
+  /* Add in the extra days for the leap years prior to the current year. */
+
+  days += (tp->tm_year - 69) >> 2;
+
+  /* Add in the days up to the beginning of this month (ignoring any possible leap day). */
+
+  days += (time_t)g_daysbeforemonth[tp->tm_mon];
+
+  /* Add in the leap day for this year (months are zero based) */
+
+  if (tp->tm_mon >= 2 && clock_isleapyear(tp->tm_year + 1900))
+    {
+      days++;
+    }
+
+  /* Add in the days since the beginning of this month (days are 1-based). */
+
+  days += tp->tm_mday - 1;
+
+  /* Then convert the seconds and add in hours, minutes, and seconds */
+
+  return ((days * 24 + tp->tm_hour) * 60 + tp->tm_min) * 60 + tp->tm_sec;
 }
+#endif /* CONFIG_GREGORIAN_TIME */
+

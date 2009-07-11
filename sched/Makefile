@@ -71,8 +71,8 @@ TIME_SRCS	= sched_processtimer.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 TIME_SRCS	+= sleep.c usleep.c
 endif
-CLOCK_SRCS	= clock_initialize.c mktime.c gmtime_r.c clock_settime.c clock_gettime.c \
-		  clock_getres.c clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
+CLOCK_SRCS	= clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c \
+		  clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
 
 SIGNAL_SRCS	= sig_initialize.c \
 		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \

@@ -1,7 +1,7 @@
-/************************************************************
- * gmtime_r.c
+/****************************************************************************
+ * lib/lib_gmtimer.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,56 +31,61 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
+
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
-#include "clock_internal.h"
 
-/************************************************************
+#include <nuttx/time.h>
+
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
 /* Calendar/UTC conversion routines */
 
 static void   clock_utc2calendar(time_t utc, int *year, int *month, int *day);
+#ifdef CONFIG_GREGORIAN_TIME
 static void   clock_utc2gregorian (time_t jdn, int *year, int *month, int *day);
 
 #ifdef CONFIG_JULIAN_TIME
 static void   clock_utc2julian(time_t jdn, int *year, int *month, int *day);
 #endif /* CONFIG_JULIAN_TIME */
+#endif /* CONFIG_GREGORIAN_TIME */
 
-/**********************************************************
+/**************************************************************************
  * Public Constant Data
- **********************************************************/
+ **************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/**********************************************************
+/**************************************************************************
  * Private Variables
- **********************************************************/
+ **************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  clock_calendar2utc, clock_gregorian2utc,
  *            and clock_julian2utc
  *
@@ -90,8 +95,9 @@ static void   clock_utc2julian(time_t jdn, int *year, int *month, int *day);
  *    1992.  Explanatory Supplement to the Astronomical
  *    Almanac.  University Science Books, Mill Valley. 
  *
- ************************************************************/
+ ****************************************************************************/
 
+#ifdef CONFIG_GREGORIAN_TIME
 static void clock_utc2calendar(time_t utc, int *year, int *month, int *day)
 {
 #ifdef CONFIG_JULIAN_TIME
@@ -132,8 +138,8 @@ static void clock_utc2gregorian(time_t jd, int *year, int *month, int *day)
   *day   = d;
 }
 
-
 #ifdef CONFIG_JULIAN_TIME
+
 static void clock_utc2julian(time_t jd, int *year, int *month, int *day)
 {
   long	j, k, l, n, d, i, m, y;
@@ -153,26 +159,114 @@ static void clock_utc2julian(time_t jd, int *year, int *month, int *day)
   *month = m;
   *day   = d;
 }
+
 #endif /* CONFIG_JULIAN_TIME */
+#else/* CONFIG_GREGORIAN_TIME */
 
-/************************************************************
+static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
+{
+  int     value;
+  int     tmp;
+  boolean leapyear;
+
+  /* There must be a better way to do this than the brute for method below */
+
+  value = 70;
+  for (;;)
+    {
+      /* Is this year a leap year (we'll need this later too) */
+
+      leapyear = clock_isleapyear(value + 1900);
+
+      /* Get the number of days in the year */
+
+      tmp = (leapyear ? 366 : 365);
+
+      /* Do we have that many days? */
+
+      if (days >= tmp)
+        {
+           /* Yes.. bump up the year */
+
+           value++;
+           days -= tmp;
+        }
+      else
+        {
+           /* Nope... then go handle months */
+
+           break;
+        }
+    }
+
+  /* At this point, value has the year and days has number days into this year */
+
+  *year = value;
+
+  /* Handle the month */
+
+  value = 0; /* zero-based */
+  for (;;)
+    {
+      /* Get the number of days that occurred before the beginning of the next month */
+
+      tmp = g_daysbeforemonth[value + 1];
+      if (value >= 2 && leapyear)
+        {
+          tmp++;
+        }
+
+      /* Does that equal or exceed the number of days we have remaining? */
+
+      if (tmp >= days)
+        {
+          /* Yes.. this is the one we want.  The 'days' for this number of days that
+           * occurred before this month.
+           */
+
+          days -= g_daysbeforemonth[value];
+          break;
+        }
+      else
+        {
+           /* No... try the next month */
+
+           value++;
+        }
+    }
+
+  /* At this point, value has the month into this year (zero based) and days has
+   * number of days into this month (zero based)
+   */
+
+  *month = value;
+  *day   = days + 1; /* 1-based */
+}
+
+#endif /* CONFIG_GREGORIAN_TIME */
+
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  gmtime_r
  *
  * Description:
  *  Time conversion (based on the POSIX API)
  *
- ************************************************************/
+ ****************************************************************************/
 
 struct tm *gmtime_r(const time_t *clock, struct tm *result)
 {
   time_t time;
   time_t jdn;
-  int year, month, day;
-  int hour, min, sec;
+  int    year;
+  int    month;
+  int    day;
+  int    hour;
+  int    min;
+  int    sec;
 
   /* Get the seconds since the EPOCH */
 
@@ -213,3 +307,4 @@ struct tm *gmtime_r(const time_t *clock, struct tm *result)
 
   return result;
 }
+

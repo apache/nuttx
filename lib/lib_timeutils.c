@@ -1,7 +1,7 @@
-/************************************************************
- * mktime.c
+/****************************************************************************
+ * lib/lib_calendar2utc.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,46 +31,56 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
+
 #include <time.h>
 #include <debug.h>
-#include "clock_internal.h"
 
-/************************************************************
+#include <nuttx/time.h>
+
+/****************************************************************************
  * Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/**********************************************************
+/****************************************************************************
  * Public Constant Data
- **********************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Variables
- ************************************************************/
+ ****************************************************************************/
 
-/**********************************************************
+#ifndef CONFIG_GREGORIAN_TIME
+uint16 g_daysbeforemonth[13] =
+{
+  0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+};
+#endif
+
+/****************************************************************************
  * Private Variables
- **********************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Function:  clock_gregorian2utc, clock_julian2utc
  *
  * Description:
@@ -79,8 +89,9 @@
  *    Explanatory Supplement to the Astronomical Almanac.
  *    University Science Books, Mill Valley. 
  *
- ************************************************************/
+ ****************************************************************************/
 
+#ifdef CONFIG_GREGORIAN_TIME
 static time_t clock_gregorian2utc(int year, int month, int day)
 {
   int temp;
@@ -102,43 +113,29 @@ static time_t clock_julian2utc(int year, int month, int day)
     + (275*month)/9
     + day + 1729777;
 }
-#endif
+#endif /* CONFIG_JULIAN_TIME */
+#endif /* CONFIG_GREGORIAN_TIME */
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
- * Function:  mktime
+/****************************************************************************
+ * Function:  clock_isleapyear
  *
  * Description:
- *  Time conversion (based on the POSIX API)
+ *    Return true if the specified year is a leap year
  *
- ************************************************************/
+ ****************************************************************************/
 
-time_t mktime(struct tm *tp)
+#ifndef CONFIG_GREGORIAN_TIME
+int clock_isleapyear(int year)
 {
-  time_t ret;
-  time_t jdn;
-
-  /* Get the EPOCH-relative julian date from the calendar year,
-   * month, and date
-   */
-
-  jdn = clock_calendar2utc(tp->tm_year+1900, tp->tm_mon+1, tp->tm_mday);
-  sdbg("jdn=%d tm_year=%d tm_mon=%d tm_mday=%d\n",
-       (int)jdn, tp->tm_year, tp->tm_mon, tp->tm_mday);
-
-  /* Return the seconds into the julian day. */
-
-  ret = ((jdn*24 + tp->tm_hour)*60 + tp->tm_min)*60 + tp->tm_sec;
-  sdbg("ret=%d tm_hour=%d tm_min=%d tm_sec=%d\n",
-       (int)ret, tp->tm_hour, tp->tm_min, tp->tm_sec);
-
-  return ret;
+  return year % 400 ? (year % 100 ? (year % 4 ? 0 : 1) : 0) : 1;
 }
+#endif /* !CONFIG_GREGORIAN_TIME */
 
-/************************************************************
+/****************************************************************************
  * Function:  clock_calendar2utc
  *
  * Description:
@@ -147,8 +144,9 @@ time_t mktime(struct tm *tp)
  *    the Astronomical Almanac.  University Science Books,
  *    Mill Valley. 
  *
- ************************************************************/
+ ****************************************************************************/
 
+#ifdef CONFIG_GREGORIAN_TIME
 time_t clock_calendar2utc(int year, int month, int day)
 {
   int dyear;
@@ -209,3 +207,20 @@ time_t clock_calendar2utc(int year, int month, int day)
 
 #endif /* CONFIG_JULIAN_TIME */
 }
+#else
+time_t clock_calendar2utc(int year, int month, int day)
+{
+  struct tm t;
+
+  /* mktime can (kind of) do this */
+
+  t.tm_year = year;
+  t.tm_mon  = month;
+  t.tm_mday = day;
+  t.tm_hour = 0;
+  t.tm_min  = 0;
+  t.tm_sec  = 0;
+  return mktime(&t);
+}
+#endif /* CONFIG_GREGORIAN_TIME */
+
