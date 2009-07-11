@@ -116,7 +116,7 @@ endif
 # Add libraries for network support
 
 ifeq ($(CONFIG_NET),y)
-LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT) 
+LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT) netutils/libthttpd$(LIBEXT)
 endif
 
 # Add libraries for file system support
@@ -225,6 +225,9 @@ net/libnet$(LIBEXT): context
 
 netutils/libnetutils$(LIBEXT): context
 	@$(MAKE) -C netutils TOPDIR="$(TOPDIR)" libnetutils$(LIBEXT)
+
+netutils/libthttpd$(LIBEXT): context
+	@$(MAKE) -C netutils TOPDIR="$(TOPDIR)" libthttpd$(LIBEXT)
 
 fs/libfs$(LIBEXT): context
 	@$(MAKE) -C fs TOPDIR="$(TOPDIR)" libfs$(LIBEXT)
