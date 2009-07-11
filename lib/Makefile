@@ -87,6 +87,8 @@ NET_SRCS	= lib_htons.c lib_htonl.c lib_inetntoa.c lib_etherntoa.c
 
 LIBGEN_SRCS	= lib_basename.c lib_dirname.c
 
+REGEX_SRCS	= lib_match.c
+
 SQ_SRCS		= sq_addlast.c sq_addfirst.c sq_addafter.c \
 		  sq_rem.c sq_remlast.c sq_remfirst.c sq_remafter.c
 
@@ -96,8 +98,8 @@ DQ_SRCS		= dq_addlast.c dq_addfirst.c dq_addafter.c dq_addbefore.c \
 DBG_SRCS	= lib_dbg.c lib_dumpbuffer.c
 
 CSRCS		= $(MISC_SRCS) $(STRING_SRCS) $(CTYPE_SRCS) $(STDIO_SRCS) $(STDLIB_SRCS) \
-		  $(MATH_SRCS) $(UNISTD_SRCS) $(NET_SRCS) $(LIBGEN_SRCS) $(SQ_SRCS) \
-		  $(DQ_SRCS) $(DBG_SRCS) 
+		  $(MATH_SRCS) $(UNISTD_SRCS) $(NET_SRCS) $(LIBGEN_SRCS) $(REGEX_SRCS) \
+		  $(SQ_SRCS) $(DQ_SRCS) $(DBG_SRCS) 
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

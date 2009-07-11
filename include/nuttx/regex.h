@@ -1,7 +1,8 @@
 /****************************************************************************
- * lib/lib_dbg.c
+ * include/nuttx/regex.h
+ * Non-standard, pattern-matching APIs available in lib/.
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,81 +34,53 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_REGEX_H
+#define __INCLUDE_NUTTX_REGEX_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <stdarg.h>
-#include <debug.h>
-
-#include "lib_internal.h"
+#include <nuttx/fs.h>
 
 /****************************************************************************
- * Global Functions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dbg, lldbg, vdbg
+ * Global Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: match
  *
  * Description:
- *  If the cross-compiler's pre-processor does not support variable
- * length arguments, then these additional APIs will be built.
+ *   Simple shell-style filename pattern matcher written by Jef Poskanzer
+ *   (See copyright notice in lib/lib_match.c).  This pattern matcher only
+ *   handles '?', '*' and '**', and  multiple patterns separated by '|'.
+ *
+ * Returned Value:
+ *   Returns 1 (match) or 0 (no-match).
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CPP_HAVE_VARARGS
-#ifdef CONFIG_DEBUG
-int dbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
+EXTERN int match(const char *pattern, const char *string);
 
-  va_start(ap, format);
-  ret = lib_rawvprintf(format, ap);
-  va_end(ap);
-  return ret;
-}
-
-#ifdef CONFIG_ARCH_LOWPUTC
-int lldbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lib_lowvprintf(format, ap);
-  va_end(ap);
-  return ret;
+#undef EXTERN
+#ifdef __cplusplus
 }
 #endif
 
-#ifdef CONFIG_DEBUG_VERBOSE
-int vdbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lib_rawvprintf(format, ap);
-  va_end(ap);
-  return ret;
-}
-
-#ifdef CONFIG_ARCH_LOWPUTC
-int llvdbg(const char *format, ...)
-{
-  va_list ap;
-  int     ret;
-
-  va_start(ap, format);
-  ret = lib_lowvprintf(format, ap);
-  va_end(ap);
-  return ret;
-}
-#endif /* CONFIG_ARCH_LOWPUTC */
-#endif /* CONFIG_DEBUG_VERBOSE */
-#endif /* CONFIG_DEBUG */
-#endif /* CONFIG_CPP_HAVE_VARARGS */
+#endif /* __INCLUDE_NUTTX_REGEX_H */
