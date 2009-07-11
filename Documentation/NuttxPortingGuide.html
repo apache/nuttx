@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: June 18, 2009</p>
+      <p>Last Updated: July 11, 2009</p>
     </td>
   </tr>
 </table>
@@ -2054,7 +2054,14 @@ extern void up_ledoff(int led);
     Used to initialize the internal time logic.
   </li>
   <li>
-    <code>CONFIG_JULIAN_TIME</code>: Enables Julian time conversions
+    <code>CONFIG_GREGORIAN_TIME</code>: Enables Gregorian time conversions.
+    You would only need this if you are concerned about accurate time conversions in
+    the recent past or in the distant future.
+  </li>
+  <li>
+    <code>CONFIG_JULIAN_TIME</code>: Enables Julian time conversions.
+    You would only need this if you are concerned about accurate time conversion in the distand past.
+    You must also define <code>CONFIG_GREGORIAN_TIME</code> in order to use Julian time.
   </li>
   <li>
     <code>CONFIG_DEV_CONSOLE</code>: Set if architecture-specific logic

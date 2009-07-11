@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 26, 2009</p>
+      <p>Last Updated: July 11, 2009</p>
     </td>
   </tr>
 </table>
@@ -1476,6 +1476,11 @@ buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
 
 <pre><ul>
 nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* lib/: Added some basic regex-subset, pattern matching functions
+	* lib/: Greatly simplified mktime() and gmtime_r().  The Gregorian and
+	  Julian time calculations were interesting, but not necessary in the
+	  typical embeddd system.
 
 nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
