@@ -2469,6 +2469,7 @@ VxWorks provides the following comparable interface:
   <li><a href="#timersettime">2.7.9 timer_settime</a></li>
   <li><a href="#timergettime">2.7.10 timer_gettime</a></li>
   <li><a href="#timergetoverrun">2.7.11 timer_getoverrun</a></li>
+  <li><a href="#gettimeofday">2.7.12 gettimeofday</a></li>
 </ul>
 
 <H3><a name="clocksettime">2.7.1 clock_settime</a></H3>
@@ -2915,6 +2916,33 @@ VxWorks provides the following comparable interface:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
+</p>
+
+<h3><a name="gettimeofday">2.7.12 gettimeofday</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;sys/time.h&gt;
+    int gettimeofday(struct timeval *tp, void *tzp);
+</pre>
+<p>
+  <b>Description:</b>
+  This implementation of <code>gettimeofday()</code> is simply a thin wrapper around
+  <a href="#clockgettime"><code>clock_gettime()</code></a>.
+  It simply calls <code>clock_gettime()</code> using the <code>CLOCK_REALTIME</code> timer and
+  converts the result to the required <code>struct timeval</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+ <li><code>tp</code>. The current time will be returned to this user provided location.</li>
+ <li><code>tzp</code>. A reference to the timezone -- <i>IGNORED</i>.</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+  See <a href="#clockgettime"><code>clock_gettime()</code></a>.
 </p>
 
 <table width ="100%">

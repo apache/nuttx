@@ -808,6 +808,8 @@
 	* lib/: Greatly simplified mktime() and gmtime_r().  The Gregorian and
 	  Julian time calculations were interesting, but not necessary in the
 	  typical embeddd system.
+	* sched/: Added gettimeofday().  This implementation is simply a thin
+	  wrapper around clock_gettimer().
 
 
 
