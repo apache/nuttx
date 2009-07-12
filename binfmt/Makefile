@@ -48,11 +48,11 @@ endif
 BINFMT_ASRCS	=
 BINFMT_CSRCS	= binfmt_globals.c binfmt_register.c binfmt_unregister.c \
 		  binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c \
-		  binfmt_dumpmodule.c
+		  binfmt_exec.c binfmt_dumpmodule.c
 
 SYMTAB_ASRCS	=
 SYMTAB_CSRCS	= symtab_findbyname.c symtab_findbyvalue.c \
-		  symtab_findorderedbyname.c  symtab_findorderedbyvalue.c
+		  symtab_findorderedbyname.c symtab_findorderedbyvalue.c
 
 SUBDIRS		= libnxflat
 

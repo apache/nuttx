@@ -810,8 +810,9 @@
 	  typical embeddd system.
 	* sched/: Added gettimeofday().  This implementation is simply a thin
 	  wrapper around clock_gettimer().
-	* lib/: Add gmtime() and localtime()
-
-
-
+	* lib/: Add gmtime(), localtime(), and strftime()
+	* binfmt/: Add exec().  This is just a wrapper that executes both
+	  load_ and exec_module() in a more familiar manner.  It is not consistent
+	  with more standard exec() functions, however, because (1) it returns
+	  and (2) it requires symbol table arguments.
 

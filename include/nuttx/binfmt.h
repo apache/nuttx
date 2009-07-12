@@ -85,7 +85,7 @@ struct binfmt_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
@@ -95,6 +95,10 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: register_binfmt
@@ -172,6 +176,29 @@ EXTERN int unload_module(FAR const struct binary_s *bin);
  ****************************************************************************/
 
 EXTERN int exec_module(FAR const struct binary_s *bin, int priority);
+
+/****************************************************************************
+ * Name: exec
+ *
+ * Description:
+ *   This is a convenience function that wraps load_ and exec_module into
+ *   one call.
+ *
+ * Input Parameter:
+ *   filename - Fulll path to the binary to be loaded
+ *   argv     - Argument list
+ *   exports  - Table of exported symbols
+ *   nexports - The number of symbols in exports
+ *
+ * Returned Value:
+ *   This is an end-user function, so it follows the normal convention:
+ *   Returns the PID of the exec'ed module.  On failure, it.returns
+ *   -1 (ERROR) and sets errno appropriately.
+ *
+ ****************************************************************************/
+
+EXTERN int exec(FAR const char *filename, FAR const char **argv,
+                FAR const struct symtab_s *exports, int nexports);
 
 #undef EXTERN
 #if defined(__cplusplus)
