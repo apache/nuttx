@@ -42,7 +42,7 @@ SUBDIRS		= cgi-src
 ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= thttpd.c libhttpd.c timers.c fdwatch.c
+CSRCS		= thttpd.c libhttpd.c timers.c fdwatch.c tdate_parse.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STDIO_H
-#define __STDIO_H
+#ifndef __INCLUDE_STDIO_H
+#define __INCLUDE_STDIO_H
 
 /****************************************************************************
  * Included Files
@@ -125,12 +125,14 @@ EXTERN int    puts(FAR const char *s);
 EXTERN int    rename(FAR const char *oldpath, FAR const char *newpath);
 EXTERN int    sprintf(FAR char *buf, const char *format, ...);
 EXTERN int    snprintf(FAR char *buf, size_t size, const char *format, ...);
+EXTERN int    sscanf(const char *buf, const char *fmt, ...);
 
 EXTERN int    ungetc(int c, FAR FILE *stream);
 EXTERN int    vprintf(FAR const char *format, va_list ap);
 EXTERN int    vfprintf(FAR FILE *stream, const char *format, va_list ap);
 EXTERN int    vsprintf(FAR char *buf, const char *format, va_list ap);
 EXTERN int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
+EXTERN int    vsscanf(char *buf, const char *s, va_list ap);
 
 /* POSIX-like File System Interfaces */
 
@@ -142,4 +144,4 @@ EXTERN int    statfs(FAR const char *path, FAR struct statfs *buf);
 }
 #endif
 
-#endif /* __STDIO_H */
+#endif /* __INCLUDE_STDIO_H */
