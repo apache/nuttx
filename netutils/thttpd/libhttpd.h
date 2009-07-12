@@ -53,22 +53,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_THTTPD_PORT
-#  define CONFIG_THTTPD_PORT 80
-#endif
-
-#ifndef CONFIG_THTTPD_CHARSET
-#  define CONFIG_THTTPD_CHARSET "iso-8859-1"
-#endif
-
-#ifndef CONFIG_THTTPD_IOBUFFERSIZE
-#  define CONFIG_THTTPD_IOBUFFERSIZE 256
-#endif
-
-#if CONFIG_THTTPD_IOBUFFERSIZE > 65535
-#  error "Can't use uint16 for buffer"
-#endif
-
 /* A few convenient defines. */
 
 #ifndef MAX
@@ -117,15 +101,11 @@
 
 /* A multi-family sockaddr. */
 
-typedef union
-{
-  struct sockaddr sa;
 #ifdef  CONFIG_NET_IPv6
-  struct sockaddr_in6 sa_in6;
+typedef struct sockaddr_in6 httpd_sockaddr;
 #else
-  struct sockaddr_in sa_in;
-#endif                        /*  CONFIG_NET_IPv6 */
-} httpd_sockaddr;
+typedef struct sockaddr_in httpd_sockaddr;
+#endif
 
 /* A server. */
 
@@ -212,11 +192,7 @@ typedef struct
  * Return (httpd_server*) 0 on error.
  */
 
-#ifdef  CONFIG_NET_IPv6
-extern httpd_server *httpd_initialize(struct sockaddr_in6 *sa, char *cwd);
-#else
-extern httpd_server *httpd_initialize(struct sockaddr_in *sa, char *cwd);
-#endif
+extern httpd_server *httpd_initialize(httpd_sockaddr *sa, char *cwd);
 
 /* Call to unlisten/close socket(s) listening for new connections. */
 

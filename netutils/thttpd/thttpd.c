@@ -54,35 +54,16 @@
 
 #include <nuttx/compiler.h>
 
-#include "version.h"
+#include "config.h"
 #include "fdwatch.h"
 #include "libhttpd.h"
 #include "timers.h"
 
+#ifdef CONFIG_THTTPD
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef CONFIG_THTTPD_IPADDR
-#  warning "CONFIG_THTTPD_IPADDR not defined"
-#  define CONFIG_THTTPD_IPADDR (10<<24|0<<16|0<<8|2)
-#endif
-
-#ifndef CONFIG_THTTPD_LINGER_MSEC
-#  define CONFIG_THTTPD_LINGER_MSEC 5000
-#endif
-
-#ifndef CONFIG_THTTPD_OCCASIONAL_MSEC
-#  define CONFIG_THTTPD_OCCASIONAL_MSEC 2000
-#endif
-
-#ifndef CONFIG_THTTPD_IDLE_READ_LIMIT_SEC
-#  define CONFIG_THTTPD_IDLE_READ_LIMIT_SEC 5
-#endif
-
-#ifndef CONFIG_THTTPD_IDLE_SEND_LIMIT_SEC
-#  define CONFIG_THTTPD_IDLE_SEND_LIMIT_SEC 5
-#endif
 
 #ifndef MAXPATHLEN
 #  define MAXPATHLEN 64
@@ -944,4 +925,5 @@ int thttpd_main(int argc, char **argv)
   exit(0);
 }
 
+#endif /* CONFIG_THTTPD */
 

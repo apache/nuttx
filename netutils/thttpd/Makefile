@@ -42,7 +42,7 @@ SUBDIRS		= cgi-src
 ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= thttpd.c
+CSRCS		= thttpd.c libhttpd.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
