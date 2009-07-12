@@ -53,6 +53,8 @@
 #include <debug.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/symtab.h>
+#include <net/uip/thttpd.h>
 
 #include "config.h"
 #include "fdwatch.h"
@@ -709,13 +711,29 @@ static void thttpd_logstats(long secs)
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Function: thttpd_main
+ *
+ * Description:
+ *   This function is the entrypoint into the THTTPD server.  It does not
+ *   return.  It may be called, the normal mechanism for starting the server
+ *   is:
+ *
+ *   1) Set is g_thttpdsymtab and g_thttpdnsymbols.  The user is required
+ *      to provide a symbol table to use for binding CGI programs (if CGI
+ *      is enabled.  See examples/nxflat and examples/thttpd for examples of
+ *      how such a symbol table may be created.
+ *   2) Call task_create() to start thttpd_main()
+ *
+ ****************************************************************************/
+
 int thttpd_main(int argc, char **argv)
 {
   char cwd[MAXPATHLEN + 1];
   int num_ready;
   int cnum;
-  struct connect_s *conn;
-  httpd_conn *hc;
+  FAR struct connect_s *conn;
+  FAR httpd_conn *hc;
 #ifdef  CONFIG_NET_IPv6
   struct sockaddr_in6 sa;
 #else
@@ -726,7 +744,7 @@ int thttpd_main(int argc, char **argv)
   /* Setup host address */
 
 #ifdef  CONFIG_NET_IPv6
-# error "IPv6 support not yet implemented"
+#  error "IPv6 support not yet implemented"
 #else
   sa.sin_family      = AF_INET;
   sa.sin_port        = HTONS(CONFIG_THTTPD_PORT);

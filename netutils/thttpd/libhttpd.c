@@ -52,10 +52,14 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <signal.h>
+#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/regex.h>
+#include <nuttx/symtab.h>
+#include <nuttx/binfmt.h>
+#include <net/uip/thttpd.h>
 
 #include "config.h"
 #include "libhttpd.h"
@@ -108,49 +112,50 @@ extern char *crypt(const char *key, const char *setting);
 
 static void free_httpd_server(httpd_server *hs);
 static int  initialize_listen_socket(httpd_sockaddr *saP);
-static void add_response(httpd_conn * hc, char *str);
-static void send_mime(httpd_conn * hc, int status, char *title, char *encodings,
+static void add_response(httpd_conn *hc, char *str);
+static void send_mime(httpd_conn *hc, int status, char *title, char *encodings,
                       char *extraheads, char *type, off_t length, time_t mod);
-static void send_response(httpd_conn * hc, int status, char *title,
+static void send_response(httpd_conn *hc, int status, char *title,
                           char *extraheads, char *form, char *arg);
-static void send_response_tail(httpd_conn * hc);
+static void send_response_tail(httpd_conn *hc);
 static void defang(char *str, char *dfstr, int dfsize);
 #ifdef CONFIG_THTTPD_ERROR_DIRECTORY
-static int  send_err_file(httpd_conn * hc, int status, char *title,
+static int  send_err_file(httpd_conn *hc, int status, char *title,
                            char *extraheads, char *filename);
 #endif
 #ifdef CONFIG_THTTPD_AUTH_FILE
-static void send_authenticate(httpd_conn * hc, char *realm);
+static void send_authenticate(httpd_conn *hc, char *realm);
 static int  b64_decode(const char *str, unsigned char *space, int size);
-static int  auth_check(httpd_conn * hc, char *dirname);
-static int  auth_check2(httpd_conn * hc, char *dirname);
+static int  auth_check(httpd_conn *hc, char *dirname);
+static int  auth_check2(httpd_conn *hc, char *dirname);
 #endif
-static void send_dirredirect(httpd_conn * hc);
+static void send_dirredirect(httpd_conn *hc);
 static int  hexit(char c);
 static void strdecode(char *to, char *from);
 #ifdef GENERATE_INDEXES
 static void strencode(char *to, int tosize, char *from);
 #endif
 #ifdef TILDE_MAP_1
-static int  tilde_map_1(httpd_conn * hc);
+static int  tilde_map_1(httpd_conn *hc);
 #endif
 #ifdef TILDE_MAP_2
-static int  tilde_map_2(httpd_conn * hc);
+static int  tilde_map_2(httpd_conn *hc);
 #endif
 #ifdef CONFIG_THTTPD_VHOST
-static int  vhost_map(httpd_conn * hc);
+static int  vhost_map(httpd_conn *hc);
 #endif
 static char *expand_filename(char *path, char **restP, boolean tildemapped);
-static char *bufgets(httpd_conn * hc);
+static char *bufgets(httpd_conn *hc);
 static void de_dotdot(char *file);
 static void init_mime(void);
-static void figure_mime(httpd_conn * hc);
+static void figure_mime(httpd_conn *hc);
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
 static void cgi_kill2(ClientData client_data, struct timeval *nowP);
 static void cgi_kill(ClientData client_data, struct timeval *nowP);
 #endif
 #ifdef GENERATE_INDEXES
-static int  ls(httpd_conn * hc);
+static void ls_child(int argc, char **argv);
+static int  ls(httpd_conn *hc);
 #endif
 #ifdef SERVER_NAME_LIST
 static char *hostname_map(char *hostname);
@@ -159,20 +164,19 @@ static char *hostname_map(char *hostname);
 /* CGI Support */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static char *build_env(char *fmt, char *arg);
-static char **make_envp(httpd_conn * hc);
-static char **make_argp(httpd_conn * hc);
-static void cgi_interpose_input(httpd_conn * hc, int wfd);
-static void post_post_garbage_hack(httpd_conn * hc);
-static void cgi_interpose_output(httpd_conn * hc, int rfd);
-static void cgi_child(httpd_conn * hc);
-static int  cgi(httpd_conn * hc);
+static void create_environment(httpd_conn *hc);
+static char **make_argp(httpd_conn *hc);
+static void cgi_interpose_input(httpd_conn *hc, int wfd);
+static void post_post_garbage_hack(httpd_conn *hc);
+static void cgi_interpose_output(httpd_conn *hc, int rfd);
+static void cgi_child(int argc, char **argv);
+static int  cgi(httpd_conn *hc);
 #endif
 
-static int  really_start_request(httpd_conn * hc, struct timeval *nowP);
-static int  check_referer(httpd_conn * hc);
+static int  really_start_request(httpd_conn *hc, struct timeval *nowP);
+static int  check_referer(httpd_conn *hc);
 #ifdef CONFIG_THTTPD_URLPATTERN
-static int  really_check_referer(httpd_conn * hc);
+static int  really_check_referer(httpd_conn *hc);
 #endif
 static int  sockaddr_check(httpd_sockaddr * saP);
 static size_t sockaddr_len(httpd_sockaddr * saP);
@@ -359,7 +363,7 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
 
 /* Append a string to the buffer waiting to be sent as response. */
 
-static void add_response(httpd_conn * hc, char *str)
+static void add_response(httpd_conn *hc, char *str)
 {
   int resplen;
   int len;
@@ -378,7 +382,7 @@ static void add_response(httpd_conn * hc, char *str)
   hc->buflen = resplen;
 }
 
-static void send_mime(httpd_conn * hc, int status, char *title, char *encodings,
+static void send_mime(httpd_conn *hc, int status, char *title, char *encodings,
                        char *extraheads, char *type, off_t length, time_t mod)
 {
   struct timeval now;
@@ -485,7 +489,7 @@ static void send_mime(httpd_conn * hc, int status, char *title, char *encodings,
     }
 }
 
-static void send_response(httpd_conn * hc, int status, char *title, char *extraheads,
+static void send_response(httpd_conn *hc, int status, char *title, char *extraheads,
                            char *form, char *arg)
 {
   char defanged_arg[1000], buf[2000];
@@ -515,7 +519,7 @@ static void send_response(httpd_conn * hc, int status, char *title, char *extrah
   send_response_tail(hc);
 }
 
-static void send_response_tail(httpd_conn * hc)
+static void send_response_tail(httpd_conn *hc)
 {
   char buf[1000];
 
@@ -558,7 +562,7 @@ static void defang(char *str, char *dfstr, int dfsize)
 }
 
 #ifdef CONFIG_THTTPD_ERROR_DIRECTORY
-static int send_err_file(httpd_conn * hc, int status, char *title, char *extraheads,
+static int send_err_file(httpd_conn *hc, int status, char *title, char *extraheads,
                           char *filename)
 {
   FILE *fp;
@@ -589,7 +593,7 @@ static int send_err_file(httpd_conn * hc, int status, char *title, char *extrahe
 #endif /* CONFIG_THTTPD_ERROR_DIRECTORY */
 
 #ifdef CONFIG_THTTPD_AUTH_FILE
-static void send_authenticate(httpd_conn * hc, char *realm)
+static void send_authenticate(httpd_conn *hc, char *realm)
 {
   static char *header;
   static size_t maxheader = 0;
@@ -661,7 +665,7 @@ static int b64_decode(const char *str, unsigned char *space, int size)
 
 /* Returns -1 == unauthorized, 0 == no auth file, 1 = authorized. */
 
-static int auth_check(httpd_conn * hc, char *dirname)
+static int auth_check(httpd_conn *hc, char *dirname)
 {
 #ifdef CONFIG_THTTPD_GLOBALPASSWD
   char *topdir;
@@ -686,7 +690,7 @@ static int auth_check(httpd_conn * hc, char *dirname)
 
 /* Returns -1 == unauthorized, 0 == no auth file, 1 = authorized. */
 
-static int auth_check2(httpd_conn * hc, char *dirname)
+static int auth_check2(httpd_conn *hc, char *dirname)
 {
   static char *authpath;
   static size_t maxauthpath = 0;
@@ -867,7 +871,7 @@ static int auth_check2(httpd_conn * hc, char *dirname)
 }
 #endif /* CONFIG_THTTPD_AUTH_FILE */
 
-static void send_dirredirect(httpd_conn * hc)
+static void send_dirredirect(httpd_conn *hc)
 {
   static char *location;
   static char *header;
@@ -964,7 +968,7 @@ static void strencode(char *to, int tosize, char *from)
 /* Map a ~username/whatever URL into <prefix>/username. */
 
 #ifdef TILDE_MAP_1
-static int tilde_map_1(httpd_conn * hc)
+static int tilde_map_1(httpd_conn *hc)
 {
   static char *temp;
   static size_t maxtemp = 0;
@@ -991,7 +995,7 @@ static int tilde_map_1(httpd_conn * hc)
 /* Map a ~username/whatever URL into <user's homedir>/<postfix>. */
 
 #ifdef TILDE_MAP_2
-static int tilde_map_2(httpd_conn * hc)
+static int tilde_map_2(httpd_conn *hc)
 {
   static char *temp;
   static size_t maxtemp = 0;
@@ -1058,7 +1062,7 @@ static int tilde_map_2(httpd_conn * hc)
 /* Virtual host mapping. */
 
 #ifdef CONFIG_THTTPD_VHOST
-static int vhost_map(httpd_conn * hc)
+static int vhost_map(httpd_conn *hc)
 {
   httpd_sockaddr sa;
   socklen_t sz;
@@ -1355,7 +1359,7 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
   return checked;
 }
 
-static char *bufgets(httpd_conn * hc)
+static char *bufgets(httpd_conn *hc)
 {
   int i;
   char c;
@@ -1474,7 +1478,7 @@ static void init_mime(void)
  * which they were applied to the file.
  */
 
-static void figure_mime(httpd_conn * hc)
+static void figure_mime(httpd_conn *hc)
 {
   char *prev_dot;
   char *dot;
@@ -1624,8 +1628,9 @@ static int name_compare(char **a, char **b)
   return strcmp(*a, *b);
 }
 
-static int ls(httpd_conn * hc)
+static void ls_child(int argc, char **argv)
 {
+  FAR httpd_conn *hc = (FAR httpd_conn*)strtoul(argv[1], NULL, 16);
   DIR *dirp;
   struct dirent *de;
   int namlen;
@@ -1649,6 +1654,258 @@ static int ls(httpd_conn * hc)
   char *fileclass;
   time_t now;
   char *timestr;
+  ClientData client_data;
+
+  httpd_unlisten(hc->hs);
+  send_mime(hc, 200, ok200title, "", "", "text/html; charset=%s",
+            (off_t) - 1, hc->sb.st_mtime);
+  httpd_write_response(hc);
+
+  /* Open a stdio stream so that we can use fprintf, which is more
+   * efficient than a bunch of separate write()s.  We don't have to
+   * worry about double closes or file descriptor leaks cause we're
+   * in a subprocess.
+   */
+
+  fp = fdopen(hc->conn_fd, "w");
+  if (fp == (FILE *) 0)
+    {
+      ndbg("fdopen: %d\n", errno);
+      httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
+      httpd_write_response(hc);
+      closedir(dirp);
+      exit(1);
+    }
+
+  (void)fprintf(fp, "\
+<HTML>\n\
+<HEAD><TITLE>Index of %s</TITLE></HEAD>\n\
+<BODY BGCOLOR=\"#99cc99\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\n\
+<H2>Index of %s</H2>\n\
+<PRE>\n\
+mode  links  bytes  last-changed  name\n\
+<HR>", hc->encodedurl, hc->encodedurl);
+
+  /* Read in names. */
+
+  nnames = 0;
+  while ((de = readdir(dirp)) != 0)     /* dirent or direct */
+    {
+      if (nnames >= maxnames)
+        {
+          if (maxnames == 0)
+            {
+              maxnames = 100;
+              names    = NEW(char, maxnames * (MAXPATHLEN + 1));
+              nameptrs = NEW(char *, maxnames);
+            }
+          else
+            {
+              maxnames *= 2;
+              names     = RENEW(names, char, maxnames * (MAXPATHLEN + 1));
+              nameptrs  = RENEW(nameptrs, char *, maxnames);
+            }
+
+          if (!names || !nameptrs)
+            {
+              ndbg("out of memory reallocating directory names\n");
+              exit(1);
+            }
+
+          for (i = 0; i < maxnames; ++i)
+            {
+              nameptrs[i] = &names[i * (MAXPATHLEN + 1)];
+            }
+        }
+
+      namlen = NAMLEN(de);
+      (void)strncpy(nameptrs[nnames], de->d_name, namlen);
+      nameptrs[nnames][namlen] = '\0';
+      ++nnames;
+    }
+  closedir(dirp);
+
+  /* Sort the names. */
+
+  qsort(nameptrs, nnames, sizeof(*nameptrs), name_compare);
+
+  /* Generate output. */
+
+  for (i = 0; i < nnames; ++i)
+    {
+      httpd_realloc_str(&name, &maxname,
+                        strlen(hc->expnfilename) + 1 +
+                        strlen(nameptrs[i]));
+      httpd_realloc_str(&rname, &maxrname,
+                        strlen(hc->origfilename) + 1 +
+                        strlen(nameptrs[i]));
+
+      if (hc->expnfilename[0] == '\0' ||
+          strcmp(hc->expnfilename, ".") == 0)
+        {
+          (void)strcpy(name, nameptrs[i]);
+          (void)strcpy(rname, nameptrs[i]);
+        }
+      else
+        {
+          (void)snprintf(name, maxname, "%s/%s", hc->expnfilename, nameptrs[i]);
+          if (strcmp(hc->origfilename, ".") == 0)
+            {
+              (void)snprintf(rname, maxrname, "%s", nameptrs[i]);
+            }
+          else
+            {
+              (void)snprintf(rname, maxrname, "%s%s", hc->origfilename, nameptrs[i]);
+            }
+        }
+
+      httpd_realloc_str(&encrname, &maxencrname, 3 * strlen(rname) + 1);
+      strencode(encrname, maxencrname, rname);
+
+      if (stat(name, &sb) < 0 || lstat(name, &lsb) < 0)
+        {
+          continue;
+        }
+
+      linkprefix = "";
+      link[0] = '\0';
+
+      /* Break down mode word.  First the file type. */
+
+      switch (lsb.st_mode & S_IFMT)
+        {
+        case S_IFIFO:
+          modestr[0] = 'p';
+          break;
+
+        case S_IFCHR:
+          modestr[0] = 'c';
+          break;
+
+        case S_IFDIR:
+          modestr[0] = 'd';
+          break;
+
+        case S_IFBLK:
+          modestr[0] = 'b';
+          break;
+
+        case S_IFREG:
+          modestr[0] = '-';
+          break;
+
+        case S_IFSOCK:
+          modestr[0] = 's';
+          break;
+
+        case S_IFLNK:
+        default:
+          modestr[0] = '?';
+          break;
+        }
+
+      /* Now the world permissions.  Owner and group permissions are 
+       * not of interest to web clients.
+       */
+
+      modestr[1] = (lsb.st_mode & S_IROTH) ? 'r' : '-';
+      modestr[2] = (lsb.st_mode & S_IWOTH) ? 'w' : '-';
+      modestr[3] = (lsb.st_mode & S_IXOTH) ? 'x' : '-';
+      modestr[4] = '\0';
+
+      /* We also leave out the owner and group name */
+
+      /* Get time string. */
+
+      now = time((time_t *) 0);
+      timestr = ctime(&lsb.st_mtime);
+      timestr[0] = timestr[4];
+      timestr[1] = timestr[5];
+      timestr[2] = timestr[6];
+      timestr[3] = ' ';
+      timestr[4] = timestr[8];
+      timestr[5] = timestr[9];
+      timestr[6] = ' ';
+
+      if (now - lsb.st_mtime > 60 * 60 * 24 * 182)      /* 1/2 year */
+        {
+          timestr[7] = ' ';
+          timestr[8] = timestr[20];
+          timestr[9] = timestr[21];
+          timestr[10] = timestr[22];
+          timestr[11] = timestr[23];
+        }
+      else
+        {
+          timestr[7] = timestr[11];
+          timestr[8] = timestr[12];
+          timestr[9] = ':';
+          timestr[10] = timestr[14];
+          timestr[11] = timestr[15];
+        }
+      timestr[12] = '\0';
+
+      /* The ls -F file class. */
+
+      switch (sb.st_mode & S_IFMT)
+        {
+        case S_IFDIR:
+          fileclass = "/";
+          break;
+
+        case S_IFSOCK:
+          fileclass = "=";
+          break;
+
+        case S_IFLNK:
+          fileclass = "@";
+          break;
+
+        default:
+          fileclass = (sb.st_mode & S_IXOTH) ? "*" : "";
+          break;
+        }
+
+      /* And print. */
+
+      (void)fprintf(fp, "%s %3ld  %10lld  %s  <A HREF=\"/%.500s%s\">%s</A>%s%s%s\n",
+                    modestr, (long)lsb.st_nlink, (sint16) lsb.st_size,
+                    timestr, encrname, S_ISDIR(sb.st_mode) ? "/" : "",
+                    nameptrs[i], linkprefix, link, fileclass);
+    }
+
+  (void)fprintf(fp, "</PRE></BODY>\n</HTML>\n");
+  (void)fclose(fp);
+  exit(0);
+}
+
+static int ls(httpd_conn *hc)
+{
+  DIR *dirp;
+  struct dirent *de;
+  int namlen;
+  static int maxnames = 0;
+  int nnames;
+  static char *names;
+  static char **nameptrs;
+  static char *name;
+  static size_t maxname = 0;
+  static char *rname;
+  static size_t maxrname = 0;
+  static char *encrname;
+  static size_t maxencrname = 0;
+  FILE *fp;
+  int i, child;
+  struct stat sb;
+  struct stat lsb;
+  char modestr[20];
+  char *linkprefix;
+  char link[MAXPATHLEN + 1];
+  char *fileclass;
+  time_t now;
+  char *timestr;
+  char arg[16];
+  char *argv[1];
   ClientData client_data;
 
   dirp = opendir(hc->expnfilename);
@@ -1678,248 +1935,34 @@ static int ls(httpd_conn * hc)
 #endif
       ++hc->hs->cgi_count;
 
-      r = fork();
-      if (r < 0)
+      /* Start the child task. */
+
+      snprintf(arg, 16, "%p", hc); /* task_create doesn't handle binary arguments. */
+      argv[0] = arg;
+
+#ifndef CONFIG_CUSTOM_STACK
+      child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
+                          CONFIG_THTTPD_CGI_STACKSIZE,
+                          (main_t)ls_child, (const char **)argv);
+#else
+      child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
+                          (main_t)ls_child, (const char **)argv);
+#endif
+      if (child < 0)
         {
-          ndbg("fork: %d\n", errno);
+          ndbg("task_create: %d\n", errno);
           closedir(dirp);
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
           return -1;
         }
 
-      if (r == 0)
-        {
-          /* Child process. */
-
-          httpd_unlisten(hc->hs);
-          send_mime(hc, 200, ok200title, "", "", "text/html; charset=%s",
-                    (off_t) - 1, hc->sb.st_mtime);
-          httpd_write_response(hc);
-
-          /* Open a stdio stream so that we can use fprintf, which is more
-           * efficient than a bunch of separate write()s.  We don't have to
-           * worry about double closes or file descriptor leaks cause we're
-           * in a subprocess.
-           */
-
-          fp = fdopen(hc->conn_fd, "w");
-          if (fp == (FILE *) 0)
-            {
-              ndbg("fdopen: %d\n", errno);
-              httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-              httpd_write_response(hc);
-              closedir(dirp);
-              exit(1);
-            }
-
-          (void)fprintf(fp, "\
-<HTML>\n\
-<HEAD><TITLE>Index of %s</TITLE></HEAD>\n\
-<BODY BGCOLOR=\"#99cc99\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\n\
-<H2>Index of %s</H2>\n\
-<PRE>\n\
-mode  links  bytes  last-changed  name\n\
-<HR>", hc->encodedurl, hc->encodedurl);
-
-          /* Read in names. */
-
-          nnames = 0;
-          while ((de = readdir(dirp)) != 0)     /* dirent or direct */
-            {
-              if (nnames >= maxnames)
-                {
-                  if (maxnames == 0)
-                    {
-                      maxnames = 100;
-                      names    = NEW(char, maxnames * (MAXPATHLEN + 1));
-                      nameptrs = NEW(char *, maxnames);
-                    }
-                  else
-                    {
-                      maxnames *= 2;
-                      names     = RENEW(names, char, maxnames * (MAXPATHLEN + 1));
-                      nameptrs  = RENEW(nameptrs, char *, maxnames);
-                    }
-
-                  if (!names || !nameptrs)
-                    {
-                      ndbg("out of memory reallocating directory names\n");
-                      exit(1);
-                    }
-
-                  for (i = 0; i < maxnames; ++i)
-                    nameptrs[i] = &names[i * (MAXPATHLEN + 1)];
-                }
-
-              namlen = NAMLEN(de);
-              (void)strncpy(nameptrs[nnames], de->d_name, namlen);
-              nameptrs[nnames][namlen] = '\0';
-              ++nnames;
-            }
-          closedir(dirp);
-
-          /* Sort the names. */
-
-          qsort(nameptrs, nnames, sizeof(*nameptrs), name_compare);
-
-          /* Generate output. */
-
-          for (i = 0; i < nnames; ++i)
-            {
-              httpd_realloc_str(&name, &maxname,
-                                strlen(hc->expnfilename) + 1 +
-                                strlen(nameptrs[i]));
-              httpd_realloc_str(&rname, &maxrname,
-                                strlen(hc->origfilename) + 1 +
-                                strlen(nameptrs[i]));
-              if (hc->expnfilename[0] == '\0' ||
-                  strcmp(hc->expnfilename, ".") == 0)
-                {
-                  (void)strcpy(name, nameptrs[i]);
-                  (void)strcpy(rname, nameptrs[i]);
-                }
-              else
-                {
-                  (void)snprintf(name, maxname, "%s/%s", hc->expnfilename, nameptrs[i]);
-                  if (strcmp(hc->origfilename, ".") == 0)
-                    {
-                      (void)snprintf(rname, maxrname, "%s", nameptrs[i]);
-                    }
-                  else
-                    {
-                      (void)snprintf(rname, maxrname, "%s%s", hc->origfilename, nameptrs[i]);
-                    }
-                }
-
-              httpd_realloc_str(&encrname, &maxencrname, 3 * strlen(rname) + 1);
-              strencode(encrname, maxencrname, rname);
-
-              if (stat(name, &sb) < 0 || lstat(name, &lsb) < 0)
-                {
-                  continue;
-                }
-
-              linkprefix = "";
-              link[0] = '\0';
-
-              /* Break down mode word.  First the file type. */
-
-              switch (lsb.st_mode & S_IFMT)
-                {
-                case S_IFIFO:
-                  modestr[0] = 'p';
-                  break;
-
-                case S_IFCHR:
-                  modestr[0] = 'c';
-                  break;
-
-                case S_IFDIR:
-                  modestr[0] = 'd';
-                  break;
-
-                case S_IFBLK:
-                  modestr[0] = 'b';
-                  break;
-
-                case S_IFREG:
-                  modestr[0] = '-';
-                  break;
-
-                case S_IFSOCK:
-                  modestr[0] = 's';
-                  break;
-
-                case S_IFLNK:
-                default:
-                  modestr[0] = '?';
-                  break;
-                }
-
-              /* Now the world permissions.  Owner and group permissions are 
-               * not of interest to web clients.
-               */
-
-              modestr[1] = (lsb.st_mode & S_IROTH) ? 'r' : '-';
-              modestr[2] = (lsb.st_mode & S_IWOTH) ? 'w' : '-';
-              modestr[3] = (lsb.st_mode & S_IXOTH) ? 'x' : '-';
-              modestr[4] = '\0';
-
-              /* We also leave out the owner and group name */
-
-              /* Get time string. */
-
-              now = time((time_t *) 0);
-              timestr = ctime(&lsb.st_mtime);
-              timestr[0] = timestr[4];
-              timestr[1] = timestr[5];
-              timestr[2] = timestr[6];
-              timestr[3] = ' ';
-              timestr[4] = timestr[8];
-              timestr[5] = timestr[9];
-              timestr[6] = ' ';
-
-              if (now - lsb.st_mtime > 60 * 60 * 24 * 182)      /* 1/2 year */
-                {
-                  timestr[7] = ' ';
-                  timestr[8] = timestr[20];
-                  timestr[9] = timestr[21];
-                  timestr[10] = timestr[22];
-                  timestr[11] = timestr[23];
-                }
-              else
-                {
-                  timestr[7] = timestr[11];
-                  timestr[8] = timestr[12];
-                  timestr[9] = ':';
-                  timestr[10] = timestr[14];
-                  timestr[11] = timestr[15];
-                }
-              timestr[12] = '\0';
-
-              /* The ls -F file class. */
-
-              switch (sb.st_mode & S_IFMT)
-                {
-                case S_IFDIR:
-                  fileclass = "/";
-                  break;
-
-                case S_IFSOCK:
-                  fileclass = "=";
-                  break;
-
-                case S_IFLNK:
-                  fileclass = "@";
-                  break;
-
-                default:
-                  fileclass = (sb.st_mode & S_IXOTH) ? "*" : "";
-                  break;
-                }
-
-              /* And print. */
-
-              (void)fprintf(fp, "%s %3ld  %10lld  %s  <A HREF=\"/%.500s%s\">%s</A>%s%s%s\n",
-                            modestr, (long)lsb.st_nlink, (sint16) lsb.st_size,
-                            timestr, encrname, S_ISDIR(sb.st_mode) ? "/" : "",
-                            nameptrs[i], linkprefix, link, fileclass);
-            }
-
-          (void)fprintf(fp, "</PRE></BODY>\n</HTML>\n");
-          (void)fclose(fp);
-          exit(0);
-        }
-
-      /* Parent process. */
-
       closedir(dirp);
-      ndbg("spawned indexing process %d for directory '%s'\n", r, hc->expnfilename);
+      ndbg("spawned indexing process %d for directory '%s'\n", child, hc->expnfilename);
 
       /* Schedule a kill for the child process, in case it runs too long */
 
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
-      client_data.i = r;
+      client_data.i = child;
       if (tmr_create((struct timeval *)0, cgi_kill, client_data, CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
         {
           ndbg("tmr_create(cgi_kill ls) failed\n");
@@ -1942,50 +1985,24 @@ mode  links  bytes  last-changed  name\n\
 }
 #endif /* GENERATE_INDEXES */
 
-#ifdef CONFIG_THTTPD_CGI_PATTERN
-static char *build_env(char *fmt, char *arg)
-{
-  char *cp;
-  size_t size;
-  static char *buf;
-  static size_t maxbuf = 0;
-
-  size = strlen(fmt) + strlen(arg);
-  if (size > maxbuf)
-    {
-      httpd_realloc_str(&buf, &maxbuf, size);
-    }
-
-  (void)snprintf(buf, maxbuf, fmt, arg);
-  cp = strdup(buf);
-  if (!cp)
-    {
-      ndbg("out of memory copying environment variable\n");
-      exit(1);
-    }
-  return cp;
-}
-#endif
-
 /* Set up environment variables. Be real careful here to avoid
  * letting malicious clients overrun a buffer.  We don't have
  * to worry about freeing stuff since we're a sub-process.
  */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static char **make_envp(httpd_conn * hc)
+static void create_environment(httpd_conn *hc)
 {
-  static char *envp[50];
-  int envn;
   char *cp;
   char buf[256];
 
-  envn = 0;
-  envp[envn++] = build_env("PATH=%s", CONFIG_THTTPD_CGI_PATH);
+  setenv("PATH", CONFIG_THTTPD_CGI_PATH, TRUE);
 #ifdef CGI_LD_LIBRARY_PATH
-  envp[envn++] = build_env("LD_LIBRARY_PATH=%s", CGI_LD_LIBRARY_PATH);
-#endif                                 /* CGI_LD_LIBRARY_PATH */
-  envp[envn++] = build_env("SERVER_SOFTWARE=%s",  CONFIG_THTTPD_SERVER_SOFTWARE);
+  setenv("LD_LIBRARY_PATH", CGI_LD_LIBRARY_PATH, TRUE);
+#endif /* CGI_LD_LIBRARY_PATH */
+
+  setenv("SERVER_SOFTWARE",  CONFIG_THTTPD_SERVER_SOFTWARE, TRUE);
+
   /* If vhosting, use that server-name here. */
 #ifdef CONFIG_THTTPD_VHOST
   if (hc->vhostname)
@@ -2000,116 +2017,116 @@ static char **make_envp(httpd_conn * hc)
 
   if (cp)
     {
-      envp[envn++] = build_env("SERVER_NAME=%s", cp);
+      setenv("SERVER_NAME", cp, TRUE);
     }
 
-  envp[envn++] = "GATEWAY_INTERFACE=CGI/1.1";
-  envp[envn++] = build_env("SERVER_PROTOCOL=%s", hc->protocol);
+  setenv("GATEWAY_INTERFACE", "CGI/1.1", TRUE);
+  setenv("SERVER_PROTOCOL", hc->protocol, TRUE);
+
   (void)snprintf(buf, sizeof(buf), "%d", (int)CONFIG_THTTPD_PORT);
-  envp[envn++] = build_env("SERVER_PORT=%s", buf);
-  envp[envn++] = build_env("REQUEST_METHOD=%s", httpd_method_str(hc->method));
+  setenv("SERVER_PORT", buf, TRUE);
+
+  setenv("REQUEST_METHOD", httpd_method_str(hc->method), TRUE);
 
   if (hc->pathinfo[0] != '\0')
     {
       char *cp2;
       size_t l;
-      envp[envn++] = build_env("PATH_INFO=/%s", hc->pathinfo);
+
+      (void)snprintf(buf, sizeof(buf), "/%s", hc->pathinfo);
+      setenv("PATH_INFO", buf, TRUE);
+
       l = strlen(hc->hs->cwd) + strlen(hc->pathinfo) + 1;
       cp2 = NEW(char, l);
       if (cp2)
         {
           (void)snprintf(cp2, l, "%s%s", hc->hs->cwd, hc->pathinfo);
-          envp[envn++] = build_env("PATH_TRANSLATED=%s", cp2);
+          setenv("PATH_TRANSLATED", cp2, TRUE);
         }
     }
 
-  envp[envn++] =
-    build_env("SCRIPT_NAME=/%s",
-              strcmp(hc->origfilename, ".") == 0 ? "" : hc->origfilename);
+  (void)snprintf(buf, sizeof(buf), "/%s",strcmp(hc->origfilename, ".") == 0 ? "" : hc->origfilename);
+  setenv("SCRIPT_NAME", buf, TRUE);
+
   if (hc->query[0] != '\0')
     {
-      envp[envn++] = build_env("QUERY_STRING=%s", hc->query);
+      setenv("QUERY_STRING", hc->query, TRUE);
     }
 
-  envp[envn++] = build_env("REMOTE_ADDR=%s", httpd_ntoa(&hc->client_addr));
+  setenv("REMOTE_ADDR", httpd_ntoa(&hc->client_addr), TRUE);
   if (hc->referer[0] != '\0')
     {
-      envp[envn++] = build_env("HTTP_REFERER=%s", hc->referer);
+      setenv("HTTP_REFERER", hc->referer, TRUE);
     }
 
   if (hc->useragent[0] != '\0')
     {
-      envp[envn++] = build_env("HTTP_USER_AGENT=%s", hc->useragent);
+      setenv("HTTP_USER_AGENT", hc->useragent, TRUE);
     }
 
   if (hc->accept[0] != '\0')
     {
-      envp[envn++] = build_env("HTTP_ACCEPT=%s", hc->accept);
+      setenv("HTTP_ACCEPT", hc->accept, TRUE);
     }
 
   if (hc->accepte[0] != '\0')
     {
-      envp[envn++] = build_env("HTTP_ACCEPT_ENCODING=%s", hc->accepte);
+      setenv("HTTP_ACCEPT_ENCODING", hc->accepte, TRUE);
     }
 
   if (hc->acceptl[0] != '\0')
     {
-      envp[envn++] = build_env("HTTP_ACCEPT_LANGUAGE=%s", hc->acceptl);
+      setenv("HTTP_ACCEPT_LANGUAGE", hc->acceptl, TRUE);
     }
 
   if (hc->cookie[0] != '\0')
     {
-      envp[envn++] = build_env("HTTP_COOKIE=%s", hc->cookie);
+      setenv("HTTP_COOKIE", hc->cookie, TRUE);
     }
 
   if (hc->contenttype[0] != '\0')
     {
-      envp[envn++] = build_env("CONTENT_TYPE=%s", hc->contenttype);
+      setenv("CONTENT_TYPE", hc->contenttype, TRUE);
     }
 
   if (hc->hdrhost[0] != '\0')
     {
-      envp[envn++] = build_env("HTTP_HOST=%s", hc->hdrhost);
+      setenv("HTTP_HOST", hc->hdrhost, TRUE);
     }
 
   if (hc->contentlength != -1)
     {
       (void)snprintf(buf, sizeof(buf), "%lu", (unsigned long)hc->contentlength);
-      envp[envn++] = build_env("CONTENT_LENGTH=%s", buf);
+      setenv("CONTENT_LENGTH", buf, TRUE);
     }
 
   if (hc->remoteuser[0] != '\0')
     {
-      envp[envn++] = build_env("REMOTE_USER=%s", hc->remoteuser);
+      setenv("REMOTE_USER", hc->remoteuser, TRUE);
     }
 
   if (hc->authorization[0] != '\0')
     {
-      envp[envn++] = build_env("AUTH_TYPE=%s", "Basic");
+      setenv("AUTH_TYPE", "Basic", TRUE);
     }
 
   /* We only support Basic auth at the moment. */
 
   if (getenv("TZ") != NULL)
     {
-      envp[envn++] = build_env("TZ=%s", getenv("TZ"));
+      setenv("TZ", getenv("TZ"), TRUE);
     }
 
-  envp[envn++] = build_env("CGI_PATTERN=%s", CONFIG_THTTPD_CGI_PATTERN);
-  envp[envn] = (char *)0;
-  return envp;
+  setenv("CGI_PATTERN", CONFIG_THTTPD_CGI_PATTERN, TRUE);
 }
 #endif
 
-/* Set up argument vector.  Again, we don't have to worry about freeing stuff
- * since we're a sub-process.  This gets done after make_envp() because we
- * scribble on hc->query.
- */
+/* Set up argument vector */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static char **make_argp(httpd_conn * hc)
+static FAR char **make_argp(httpd_conn *hc)
 {
-  char **argp;
+  FAR char **argp;
   int argn;
   char *cp1;
   char *cp2;
@@ -2175,7 +2192,7 @@ static char **make_argp(httpd_conn * hc)
  */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static void cgi_interpose_input(httpd_conn * hc, int wfd)
+static void cgi_interpose_input(httpd_conn *hc, int wfd)
 {
   size_t c;
   ssize_t r;
@@ -2223,7 +2240,7 @@ static void cgi_interpose_input(httpd_conn * hc, int wfd)
  */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static void post_post_garbage_hack(httpd_conn * hc)
+static void post_post_garbage_hack(httpd_conn *hc)
 {
   char buf[2];
 
@@ -2251,7 +2268,7 @@ static void post_post_garbage_hack(httpd_conn * hc)
  */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static void cgi_interpose_output(httpd_conn * hc, int rfd)
+static void cgi_interpose_output(httpd_conn *hc, int rfd)
 {
   int r;
   char buf[1024];
@@ -2424,13 +2441,13 @@ static void cgi_interpose_output(httpd_conn * hc, int rfd)
 /* CGI child process. */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static void cgi_child(httpd_conn * hc)
+static void cgi_child(int argc, char **argv)
 {
-  int r;
-  char **argp;
-  char **envp;
+  FAR httpd_conn *hc = (FAR httpd_conn*)strtoul(argv[1], NULL, 16);
+  FAR char **argp;
   char *binary;
   char *directory;
+  int child;
 
   /* Unset close-on-exec flag for this socket.  This actually shouldn't be
    * necessary, according to POSIX a dup()'d file descriptor does *not*
@@ -2463,9 +2480,11 @@ static void cgi_child(httpd_conn * hc)
        */
     }
 
-  /* Make the environment vector. */
+  /* Update all of the environment variable settings, these will be inherited
+   * by the CGI task.
+   */
 
-  envp = make_envp(hc);
+  create_environment(hc);
 
   /* Make the argument vector. */
 
@@ -2478,6 +2497,9 @@ static void cgi_child(httpd_conn * hc)
 
   if (hc->method == METHOD_POST && hc->read_idx > hc->checked_idx)
     {
+      char child_arg1[16];
+      char child_arg2[16];
+      char *child_argv[2];
       int p[2];
 
       if (pipe(p) < 0)
@@ -2488,25 +2510,30 @@ static void cgi_child(httpd_conn * hc)
           exit(1);
         }
 
-      r = fork();
-      if (r < 0)
+      /* Start the cig_interpose_input task */
+
+      snprintf(child_arg1, 16, "%p", hc); /* task_create doesn't handle binary arguments. */
+      child_argv[0] = child_arg1;
+      snprintf(child_arg2, 16, "%08x", p[1]); /* task_create doesn't handle binary arguments. */
+      child_argv[1] = child_arg2;
+
+#ifndef CONFIG_CUSTOM_STACK
+      child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
+                          CONFIG_THTTPD_CGI_STACKSIZE,
+                          (main_t)cgi_interpose_input, (const char **)child_argv);
+#else
+      child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
+                          (main_t)cgi_interpose_input, (const char **)child_argv);
+#endif
+      if (child < 0)
         {
-          ndbg("fork: %d\n", errno);
+          ndbg("task_create: %d\n", errno);
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
           httpd_write_response(hc);
           exit(1);
         }
 
-      if (r == 0)
-        {
-          /* Interposer process. */
-
-          (void)close(p[0]);
-          cgi_interpose_input(hc, p[1]);
-          exit(0);
-        }
-
-      /* Need to schedule a kill for process r; but in the main process! */
+      /* Need to schedule a kill for process child; but in the main process! */
 
       (void)close(p[1]);
       if (p[0] != STDIN_FILENO)
@@ -2531,6 +2558,9 @@ static void cgi_child(httpd_conn * hc)
 
   if (strncmp(argp[0], "nph-", 4) != 0 && hc->mime_flag)
     {
+      char child_arg1[16];
+      char child_arg2[16];
+      char *child_argv[2];
       int p[2];
 
       if (pipe(p) < 0)
@@ -2541,8 +2571,22 @@ static void cgi_child(httpd_conn * hc)
           exit(1);
         }
 
-      r = fork();
-      if (r < 0)
+       /* Start the cgi_interpose_output task */
+
+       snprintf(child_arg1, 16, "%p", hc); /* task_create doesn't handle binary arguments. */
+       child_argv[0] = child_arg1;
+       snprintf(child_arg2, 16, "%08x", p[0]); /* task_create doesn't handle binary arguments. */
+       child_argv[1] = child_arg2;
+
+#ifndef CONFIG_CUSTOM_STACK
+       child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
+                           CONFIG_THTTPD_CGI_STACKSIZE,
+                          (main_t)cgi_interpose_output, (const char **)child_argv);
+#else
+       child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
+                           (main_t)cgi_interpose_output, (const char **)child_argv);
+#endif
+      if (child < 0)
         {
           ndbg("fork: %d\n", errno);
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
@@ -2550,16 +2594,7 @@ static void cgi_child(httpd_conn * hc)
           exit(1);
         }
 
-      if (r == 0)
-        {
-          /* Interposer process. */
-
-          (void)close(p[1]);
-          cgi_interpose_output(hc, p[0]);
-          exit(0);
-        }
-
-      /* Need to schedule a kill for process r; but in the main process! */
+      /* Need to schedule a kill for process child; but in the main process! */
 
       (void)close(p[0]);
       if (p[1] != STDOUT_FILENO)
@@ -2629,24 +2664,28 @@ static void cgi_child(httpd_conn * hc)
 
   /* Run the program. */
 
-  (void)execve(binary, argp, envp);
+  child = exec(binary, (FAR const char **)argp, g_thttpdsymtab, g_thttpdnsymbols);
+  if (child < 0)
+    {
+      /* Something went wrong. */
 
-  /* Something went wrong. */
-
-  ndbg("execve %s: %d\n", hc->expnfilename, errno);
-  httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-  httpd_write_response(hc);
-  exit(1);
+      ndbg("execve %s: %d\n", hc->expnfilename, errno);
+      httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
+      httpd_write_response(hc);
+      exit(1);
+   }
 }
 #endif /* CONFIG_THTTPD_CGI_PATTERN */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static int cgi(httpd_conn * hc)
+static int cgi(httpd_conn *hc)
 {
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
   ClientData client_data;
 #endif
-  int r;
+  char arg[16];
+  char *argv[1];
+  pid_t child;
 
   if (hc->method == METHOD_GET || hc->method == METHOD_POST)
     {
@@ -2661,30 +2700,40 @@ static int cgi(httpd_conn * hc)
       ++hc->hs->cgi_count;
       httpd_clear_ndelay(hc->conn_fd);
 
-      r = fork();
-      if (r < 0)
+      /* Start the child task.  We use a trampoline task here so that we can
+       * safely muck with the file descriptors before actually started the CGI
+       * task.
+       */
+
+      snprintf(arg, 16, "%p", hc); /* task_create doesn't handle binary arguments. */
+      argv[0] = arg;
+
+#ifndef CONFIG_CUSTOM_STACK
+      child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
+                          CONFIG_THTTPD_CGI_STACKSIZE,
+                          (main_t)cgi_child, (const char **)argv);
+#else
+      child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
+                          (main_t)cgi_child, (const char **)argv);
+#endif
+      if (child < 0)
         {
-          ndbg("fork: %d\n", errno);
+          ndbg("task_create: %d\n", errno);
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
           return -1;
         }
-      else if (r == 0)
-        {
-          /* Child process. */
 
-          httpd_unlisten(hc->hs);
-          cgi_child(hc);
-        }
+      ndbg("started CGI process %d for file '%s'\n", child, hc->expnfilename);
 
-      /* Parent process. */
-
-      ndbg("spawned CGI process %d for file '%s'\n", r, hc->expnfilename);
+      /* Schedule a kill for the child process, in case it runs too long.
+       * Unfortunately, the returned value in 'child' is the pid of the trampoline
+       * task -- NOT the pid of the CGI task.  So the following cannot work.
+       */
 
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
-      /* Schedule a kill for the child process, in case it runs too long */
-
-      client_data.i = r;
-      if (tmr_create((struct timeval *)0, cgi_kill, client_data, CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
+      client_data.i = child;
+      if (tmr_create((struct timeval *)0, cgi_kill, client_data,
+                      CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
         {
           ndbg("tmr_create(cgi_kill child) failed\n");
           exit(1);
@@ -2705,7 +2754,7 @@ static int cgi(httpd_conn * hc)
 }
 #endif
 
-static int really_start_request(httpd_conn * hc, struct timeval *nowP)
+static int really_start_request(httpd_conn *hc, struct timeval *nowP)
 {
   static char *indexname;
   static size_t maxindexname = 0;
@@ -3004,7 +3053,7 @@ static int really_start_request(httpd_conn * hc, struct timeval *nowP)
 
 /* Returns 1 if ok to serve the url, 0 if not. */
 
-static int check_referer(httpd_conn * hc)
+static int check_referer(httpd_conn *hc)
 {
   /* Are we doing referer checking at all? */
 
@@ -3012,7 +3061,7 @@ static int check_referer(httpd_conn * hc)
   int r;
   char *cp;
 
-  r = really_check_referer(hc);
+  child = really_check_referer(hc);
 
   if (!r)
     {
@@ -3048,7 +3097,7 @@ static int check_referer(httpd_conn * hc)
 /* Returns 1 if ok to serve the url, 0 if not. */
 
 #ifdef CONFIG_THTTPD_URLPATTERN
-static int really_check_referer(httpd_conn * hc)
+static int really_check_referer(httpd_conn *hc)
 {
   httpd_server *hs;
   char *cp1;
@@ -3189,9 +3238,9 @@ static size_t sockaddr_len(httpd_sockaddr * saP)
  * Public Functions
  ****************************************************************************/
 
-httpd_server *httpd_initialize(httpd_sockaddr *sa, char *cwd)
+FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd)
 {
-  httpd_server *hs;
+  FAR httpd_server *hs;
 
   /* Save the PID of the main thread */
 
@@ -3200,10 +3249,10 @@ httpd_server *httpd_initialize(httpd_sockaddr *sa, char *cwd)
   /* Allocate the server structure */
 
   hs = NEW(httpd_server, 1);
-  if (hs == (httpd_server *) 0)
+  if (!hs)
     {
       ndbg("out of memory allocating an httpd_server\n");
-      return (httpd_server *) 0;
+      return NULL;
     }
 
 #ifdef CONFIG_THTTPD_HOSTNAME
@@ -3260,7 +3309,7 @@ void httpd_unlisten(httpd_server * hs)
 
 /* Send the buffered response. */
 
-void httpd_write_response(httpd_conn * hc)
+void httpd_write_response(httpd_conn *hc)
 {
   /* If we are in a sub-process, turn off no-delay mode. */
 
@@ -3338,7 +3387,7 @@ void httpd_realloc_str(char **strP, size_t * maxsizeP, size_t size)
     }
 }
 
-void httpd_send_err(httpd_conn * hc, int status, char *title, char *extraheads,
+void httpd_send_err(httpd_conn *hc, int status, char *title, char *extraheads,
                     char *form, char *arg)
 {
 #ifdef CONFIG_THTTPD_ERROR_DIRECTORY
@@ -3396,7 +3445,7 @@ char *httpd_method_str(int method)
     }
 }
 
-int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn * hc)
+int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
 {
   httpd_sockaddr sa;
   socklen_t sz;
@@ -3515,8 +3564,9 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn * hc)
  * hc->read_idx is how much has been read in; hc->checked_idx is how much we
  * have checked so far; and hc->checked_state is the current state of the
  * finite state machine.
-*/
-int httpd_got_request(httpd_conn * hc)
+ */
+
+int httpd_got_request(httpd_conn *hc)
 {
   char c;
 
@@ -3719,7 +3769,7 @@ int httpd_got_request(httpd_conn * hc)
   return GR_NO_REQUEST;
 }
 
-int httpd_parse_request(httpd_conn * hc)
+int httpd_parse_request(httpd_conn *hc)
 {
   char *buf;
   char *method_str;
@@ -4199,7 +4249,7 @@ int httpd_parse_request(httpd_conn * hc)
   return 0;
 }
 
-void httpd_close_conn(httpd_conn * hc, struct timeval *nowP)
+void httpd_close_conn(httpd_conn *hc, struct timeval *nowP)
 {
   if (hc->file_fd)
     {
@@ -4214,7 +4264,7 @@ void httpd_close_conn(httpd_conn * hc, struct timeval *nowP)
     }
 }
 
-void httpd_destroy_conn(httpd_conn * hc)
+void httpd_destroy_conn(httpd_conn *hc)
 {
   if (hc->initialized)
     {
@@ -4238,7 +4288,7 @@ void httpd_destroy_conn(httpd_conn * hc)
     }
 }
 
-int httpd_start_request(httpd_conn * hc, struct timeval *nowP)
+int httpd_start_request(httpd_conn *hc, struct timeval *nowP)
 {
   int r;
 

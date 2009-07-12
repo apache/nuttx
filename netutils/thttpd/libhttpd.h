@@ -192,15 +192,15 @@ typedef struct
  * Return (httpd_server*) 0 on error.
  */
 
-extern httpd_server *httpd_initialize(httpd_sockaddr *sa, char *cwd);
+extern FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd);
 
 /* Call to unlisten/close socket(s) listening for new connections. */
 
-extern void httpd_unlisten(httpd_server * hs);
+extern void httpd_unlisten(httpd_server *hs);
 
 /* Call to shut down. */
 
-extern void httpd_terminate(httpd_server * hs);
+extern void httpd_terminate(httpd_server *hs);
 
 /* When a listen fd is ready to read, call this.  It does the accept() and
  * returns an httpd_conn* which includes the fd to read the request from and
@@ -212,7 +212,7 @@ extern void httpd_terminate(httpd_server * hs);
  * first call using each different httpd_conn.
  */
 
-extern int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn * hc);
+extern int httpd_get_conn(httpd_server *hs, int listen_fd, httpd_conn *hc);
 
 /* Checks whether the data in hc->read_buf constitutes a complete request
  * yet.  The caller reads data into hc->read_buf[hc->read_idx] and advances
@@ -222,7 +222,7 @@ extern int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn * hc);
  * complete request, or there won't be a valid request due to a syntax error.
  */
 
-extern int httpd_got_request(httpd_conn * hc);
+extern int httpd_got_request(httpd_conn *hc);
 
 /* Parses the request in hc->read_buf.  Fills in lots of fields in hc,
  * like the URL and the various headers.
@@ -230,7 +230,7 @@ extern int httpd_got_request(httpd_conn * hc);
  * Returns -1 on error.
  */
 
-extern int httpd_parse_request(httpd_conn * hc);
+extern int httpd_parse_request(httpd_conn *hc);
 
 /* Starts sending data back to the client.  In some cases (directories,
  * CGI programs), finishes sending by itself - in those cases, hc->file_fd
@@ -241,29 +241,27 @@ extern int httpd_parse_request(httpd_conn * hc);
  * Returns -1 on error.
  */
 
-extern int httpd_start_request(httpd_conn * hc, struct timeval *nowP);
+extern int httpd_start_request(httpd_conn *hc, struct timeval *nowP);
 
 /* Actually sends any buffered response text. */
 
-extern void httpd_write_response(httpd_conn * hc);
+extern void httpd_write_response(httpd_conn *hc);
 
-/* Call this to close down a connection and free the data.  A fine point,
- * if you fork() with a connection open you should still call this in the
- * parent process - the connection will stay open in the child.
+/* Call this to close down a connection and free the data. 
  * If you don't have a current timeval handy just pass in 0.
  */
 
-extern void httpd_close_conn(httpd_conn * hc, struct timeval *nowP);
+extern void httpd_close_conn(httpd_conn *hc, struct timeval *nowP);
 
 /* Call this to de-initialize a connection struct and *really* free the
  * mallocced strings.
  */
 
-extern void httpd_destroy_conn(httpd_conn * hc);
+extern void httpd_destroy_conn(httpd_conn *hc);
 
 /* Send an error message back to the client. */
 
-extern void httpd_send_err(httpd_conn * hc, int status, char *title,
+extern void httpd_send_err(httpd_conn *hc, int status, char *title,
                            char *extraheads, char *form, char *arg);
 
 /* Some error messages. */
@@ -281,7 +279,7 @@ extern char *httpd_method_str(int method);
 
 /* Reallocate a string. */
 
-extern void httpd_realloc_str(char **strP, size_t * maxsizeP, size_t size);
+extern void httpd_realloc_str(char **strP, size_t *maxsizeP, size_t size);
 
 /* Format a network socket to a string representation. */
 

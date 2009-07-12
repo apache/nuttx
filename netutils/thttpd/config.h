@@ -43,7 +43,8 @@
 /* Make sure that the system is configured to handle THTTPD */
 
 #undef CONFIG_THTTPD
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCPBACKLOG)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && \
+    defined(CONFIG_NET_TCPBACKLOG) && !defined(CONFIG_DISABLE_ENVIRONMENT)
 #  define CONFIG_THTTPD
 #else
 #  warning "THTTPD not built because dependenciesnot selected in configuration"
@@ -94,6 +95,16 @@
 
 #ifndef CONFIG_THTTPD_CGI_PATTERN
 #  define CONFIG_THTTPD_CGI_PATTERN "/cgi-bin/*"
+#endif
+
+/* These provide the priority and stack size of the CGI child tasks */
+
+#ifndef CONFIG_THTTPD_CGI_PRIORITY
+#  define CONFIG_THTTPD_CGI_PRIORITY 50
+#endif
+
+#ifndef CONFIG_THTTPD_CGI_STACKSIZE
+#  define CONFIG_THTTPD_CGI_STACKSIZE 2048
 #endif
 
 /* Byte output limit for CGI tasks */
