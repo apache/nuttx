@@ -810,6 +810,7 @@
 	  typical embeddd system.
 	* sched/: Added gettimeofday().  This implementation is simply a thin
 	  wrapper around clock_gettimer().
+	* lib/: Add gmtime() and localtime()
 
 
 

@@ -62,6 +62,7 @@ struct mime_entry
 
 /* A list of file extensions followed by the corresponding MIME encoding.
  * Extensions not found in the table proceed to the mime_types table.
+ * Must be ordered by extension so to support binary searches.
  */
 
 static struct mime_entry enc_tab[] =
@@ -74,6 +75,7 @@ static const int n_enc_tab = sizeof(enc_tab) / sizeof(*enc_tab);
 
 /* A list of file extensions followed by the corresponding MIME type.
  * Extensions not found in the table are returned as text/plain.
+ * Must be ordered by extension so to support binary searches.
  */
 
 static struct mime_entry typ_tab[] =

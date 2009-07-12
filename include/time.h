@@ -143,7 +143,10 @@ EXTERN int clock_gettime(clockid_t clockid, struct timespec *tp);
 EXTERN int clock_getres(clockid_t clockid, struct timespec *res);
 
 EXTERN time_t mktime(struct tm *tp);
+EXTERN struct tm *gmtime(const time_t *clock);
 EXTERN struct tm *gmtime_r(const time_t *clock, struct tm *result);
+
+#define localtime(c)     gmtime(c)
 #define localtime_r(c,r) gmtime_r(c,r)
 
 EXTERN int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid);

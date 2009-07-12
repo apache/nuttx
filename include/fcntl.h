@@ -57,8 +57,9 @@
 #define O_APPEND    0x10     /* Keep contents, append to end */
 #define O_TRUNC     0x20     /* Delete contents */
 #define O_NONBLOCK  0x40     /* Don't wait for data */
+#define O_NDELAY    O_NONBLOCK
 #define O_SYNC      0x80     /* Synchronize output on write */
-#define O_DSYNC     OSYNC
+#define O_DSYNC     O_SYNC
 
 #define O_RSYNC     0x00     /* Sychronize input on read */
 #define O_ACCMODE   0x00     /* Required by POSIX */
