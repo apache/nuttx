@@ -83,7 +83,8 @@ UNISTD_SRCS	+=  lib_chdir.c lib_getcwd.c
 endif
 endif
 
-TIME_SRCS	= lib_mktime.c lib_gmtime.c lib_gmtimer.c lib_timeutils.c
+TIME_SRCS	= lib_mktime.c lib_gmtime.c lib_gmtimer.c lib_strftime.c \
+		  lib_calendar2utc.c lib_daysbeforemonth.c lib_isleapyear.c
 
 NET_SRCS	= lib_htons.c lib_htonl.c lib_inetntoa.c lib_etherntoa.c
 

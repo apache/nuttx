@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_mktime.c
+ * lib/lib_isleapyear.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,6 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-
-#include <time.h>
-#include <debug.h>
-
 #include <nuttx/time.h>
 
 /****************************************************************************
@@ -78,65 +74,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  mktime
+ * Function:  clock_isleapyear
  *
  * Description:
- *  Time conversion (based on the POSIX API)
+ *    Return true if the specified year is a leap year
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GREGORIAN_TIME
-time_t mktime(const struct tm *tp)
+int clock_isleapyear(int year)
 {
-  time_t ret;
-  time_t jdn;
-
-  /* Get the EPOCH-relative julian date from the calendar year,
-   * month, and date
-   */
-
-  jdn = clock_calendar2utc(tp->tm_year+1900, tp->tm_mon+1, tp->tm_mday);
-  sdbg("jdn=%d tm_year=%d tm_mon=%d tm_mday=%d\n",
-       (int)jdn, tp->tm_year, tp->tm_mon, tp->tm_mday);
-
-  /* Return the seconds into the julian day. */
-
-  ret = ((jdn*24 + tp->tm_hour)*60 + tp->tm_min)*60 + tp->tm_sec;
-  sdbg("ret=%d tm_hour=%d tm_min=%d tm_sec=%d\n",
-       (int)ret, tp->tm_hour, tp->tm_min, tp->tm_sec);
-
-  return ret;
+  return year % 400 ? (year % 100 ? (year % 4 ? 0 : 1) : 0) : 1;
 }
-#else
-
-/* Simple version that only works for dates within a (relatively) small range
- * from the epoch.  It does not handle earlier days on longer days where leap
- * seconds, etc. apply.
- */
-
-time_t mktime(const struct tm *tp)
-{
-  unsigned int days;
-
-  /* Years since epoch in units of days (ignoring leap years). */
-
-  days = (tp->tm_year - 70) * 365;
-
-  /* Add in the extra days for the leap years prior to the current year. */
-
-  days += (tp->tm_year - 69) >> 2;
-
-  /* Add in the days up to the beginning of this month. */
-
-  days += (time_t)clock_daysbeforemonth(tp->tm_mon, clock_isleapyear(tp->tm_year + 1900));
-
-  /* Add in the days since the beginning of this month (days are 1-based). */
-
-  days += tp->tm_mday - 1;
-
-  /* Then convert the seconds and add in hours, minutes, and seconds */
-
-  return ((days * 24 + tp->tm_hour) * 60 + tp->tm_min) * 60 + tp->tm_sec;
-}
-#endif /* CONFIG_GREGORIAN_TIME */
 

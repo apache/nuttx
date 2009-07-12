@@ -163,15 +163,26 @@ static void clock_utc2julian(time_t jd, int *year, int *month, int *day)
 #endif /* CONFIG_JULIAN_TIME */
 #else/* CONFIG_GREGORIAN_TIME */
 
+/* Only handles dates since Jan 1, 1970 */
+
 static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
 {
   int     value;
+  int     min;
+  int     max;
   int     tmp;
   boolean leapyear;
 
-  /* There must be a better way to do this than the brute for method below */
+  /* There is one leap year every four years, so we can get close with the
+   * following:
+   */
 
-  value = 70;
+  value = days  / (4*365 + 1);  /* Number of 4-years periods */
+  days -= value * (4*365 + 1);  /* Remaining days */
+  value = 70 + (value << 2);    /* 1970 plus the 4 year groups */
+
+  /* Then we will brute force the next 0-3 years */
+
   for (;;)
     {
       /* Is this year a leap year (we'll need this later too) */
@@ -203,43 +214,63 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
 
   *year = value;
 
-  /* Handle the month */
+  /* Handle the month (zero based) */
 
-  value = 0; /* zero-based */
-  for (;;)
+  min = 0;
+  max = 11;
+
+  do
     {
-      /* Get the number of days that occurred before the beginning of the next month */
+      /* Get the midpoint */
 
-      tmp = g_daysbeforemonth[value + 1];
-      if (value >= 2 && leapyear)
-        {
-          tmp++;
-        }
+      value = (min + max) >> 1;
+
+      /* Get the number of days that occurred before the beginning month
+       * following the midpoint.
+      */
+
+      tmp = clock_daysbeforemonth(value + 1, leapyear);
 
       /* Does that equal or exceed the number of days we have remaining? */
 
       if (tmp >= days)
         {
-          /* Yes.. this is the one we want.  The 'days' for this number of days that
-           * occurred before this month.
+          /* Yes.. then the month we want is somewhere between 'min' and the.
+           * midpoint, 'value'.  Check if it is the midpoint.
            */
 
-          days -= g_daysbeforemonth[value];
-          break;
+          tmp = clock_daysbeforemonth(value, leapyear);
+          if (tmp >= days)
+            {
+              /* No... The one we want is somewhere between min and value-1 */
+
+              max = value - 1;
+            }
+          else
+            {
+              /* Yes.. 'value' contains the month that we want */
+
+              break;
+            }
         }
       else
         {
-           /* No... try the next month */
+           /* No... The one we want is somwhere between value+1 and max */
 
-           value++;
+           min = value + 1;
         }
     }
+  while (min < max);
+
+  /* Subtract the number of days in the selected month */
+
+  days -= clock_daysbeforemonth(value, leapyear);
 
   /* At this point, value has the month into this year (zero based) and days has
    * number of days into this month (zero based)
    */
 
-  *month = value;
+  *month = value;    /* Zero based */
   *day   = days + 1; /* 1-based */
 }
 

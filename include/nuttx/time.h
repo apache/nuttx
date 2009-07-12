@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <time.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -66,10 +67,6 @@
  * Public Data
  ****************************************************************************/
 
-#ifndef CONFIG_GREGORIAN_TIME
-extern uint16 g_daysbeforemonth[13];
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -89,9 +86,17 @@ extern "C" {
  *
  ****************************************************************************/
 
-#ifndef CONFIG_GREGORIAN_TIME
 EXTERN int clock_isleapyear(int year);
-#endif
+
+/****************************************************************************
+ * Function:  clock_daysbeforemonth
+ *
+ * Description:
+ *    Get the number of days that occurred before the beginning of the month.
+ *
+ ****************************************************************************/
+
+EXTERN int clock_daysbeforemonth(int month, boolean leapyear);
 
 /****************************************************************************
  * Function:  clock_calendar2utc

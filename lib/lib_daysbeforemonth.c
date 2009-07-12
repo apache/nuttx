@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_calendar2utc.c
+ * lib/lib_daysbeforemonth.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,10 +39,6 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-
-#include <time.h>
-#include <debug.h>
-
 #include <nuttx/time.h>
 
 /****************************************************************************
@@ -65,12 +61,10 @@
  * Public Variables
  ****************************************************************************/
 
-#ifndef CONFIG_GREGORIAN_TIME
 uint16 g_daysbeforemonth[13] =
 {
   0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
 };
-#endif
 
 /****************************************************************************
  * Private Variables
@@ -81,146 +75,25 @@ uint16 g_daysbeforemonth[13] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_gregorian2utc, clock_julian2utc
- *
- * Description:
- *    UTC conversion routines.  These conversions are based
- *    on algorithms from p. 604 of Seidelman, P. K. 1992.
- *    Explanatory Supplement to the Astronomical Almanac.
- *    University Science Books, Mill Valley. 
- *
- ****************************************************************************/
-
-#ifdef CONFIG_GREGORIAN_TIME
-static time_t clock_gregorian2utc(int year, int month, int day)
-{
-  int temp;
-
-  /* temp = (month - 14)/12; */
-
-  temp = (month <= 2 ? -1:0);
-
-  return (1461*(year + 4800 + temp))/4
-    + (367*(month - 2 - 12*temp))/12
-    - (3*((year + 4900 + temp)/100))/4 + day - 32075;
-}
-
-#ifdef CONFIG_JULIAN_TIME
-static time_t clock_julian2utc(int year, int month, int day)
-{
-  return 367*year
-    - (7*(year + 5001 + (month-9)/7))/4
-    + (275*month)/9
-    + day + 1729777;
-}
-#endif /* CONFIG_JULIAN_TIME */
-#endif /* CONFIG_GREGORIAN_TIME */
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_isleapyear
+ * Function:  clock_daysbeforemonth
  *
  * Description:
- *    Return true if the specified year is a leap year
+ *    Get the number of days that occurred before the beginning of the month.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_GREGORIAN_TIME
-int clock_isleapyear(int year)
+int clock_daysbeforemonth(int month, boolean leapyear)
 {
-  return year % 400 ? (year % 100 ? (year % 4 ? 0 : 1) : 0) : 1;
+  int retval = g_daysbeforemonth[month];
+  if (month >= 2 && leapyear)
+    {
+      retval++;
+    }
+  return retval;
 }
-#endif /* !CONFIG_GREGORIAN_TIME */
 
-/****************************************************************************
- * Function:  clock_calendar2utc
- *
- * Description:
- *    Calendar/UTC conversion based on algorithms from p. 604
- *    of Seidelman, P. K. 1992.  Explanatory Supplement to
- *    the Astronomical Almanac.  University Science Books,
- *    Mill Valley. 
- *
- ****************************************************************************/
-
-#ifdef CONFIG_GREGORIAN_TIME
-time_t clock_calendar2utc(int year, int month, int day)
-{
-  int dyear;
-#ifdef CONFIG_JULIAN_TIME
-  int isgreg;
-#endif /* CONFIG_JULIAN_TIME */
-
-  /* Correct year & month ranges.  Shift month into range 1-12 */
-
-  dyear = (month-1) / 12;	
-  month -= 12 * dyear;
-  year += dyear;
-
-  if (month < 1)
-    {
-      month += 12;
-      year -= 1;
-    }
-
-#ifdef CONFIG_JULIAN_TIME
-  /* Determine which calendar to use */
-
-  if (year > GREG_YEAR)
-    {
-      isgreg = TRUE;
-    }
-  else if (year < GREG_YEAR)
-    {
-      isgreg = FALSE;
-    }
-  else if (month > GREG_MONTH)
-    {
-      isgreg = TRUE;
-    }
-  else if (month < GREG_MONTH)
-    {
-      isgreg = FALSE;
-    }
-  else
-    {
-      isgreg = (day >= GREG_DAY);
-    }
-
-  /* Calculate and return date */
-
-  if (isgreg)
-    {
-      return clock_gregorian2utc(year, month, day) - JD_OF_EPOCH;
-    }
-  else
-    {
-      return clock_julian2utc (year, month, day) - JD_OF_EPOCH;
-    }
-
-#else /* CONFIG_JULIAN_TIME */
-
-  return clock_gregorian2utc(year, month, day) - JD_OF_EPOCH;
-
-#endif /* CONFIG_JULIAN_TIME */
-}
-#else
-time_t clock_calendar2utc(int year, int month, int day)
-{
-  struct tm t;
-
-  /* mktime can (kind of) do this */
-
-  t.tm_year = year;
-  t.tm_mon  = month;
-  t.tm_mday = day;
-  t.tm_hour = 0;
-  t.tm_min  = 0;
-  t.tm_sec  = 0;
-  return mktime(&t);
-}
-#endif /* CONFIG_GREGORIAN_TIME */
 

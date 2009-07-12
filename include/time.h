@@ -73,6 +73,11 @@
 
 #define TIMER_ABSTIME 1
 
+/* Local time is the same as gmtime in this implementation */
+
+#define localtime(c)     gmtime(c)
+#define localtime_r(c,r) gmtime_r(c,r)
+
 /********************************************************************************
  * Global Type Declarations
  ********************************************************************************/
@@ -142,12 +147,10 @@ EXTERN int clock_settime(clockid_t clockid, const struct timespec *tp);
 EXTERN int clock_gettime(clockid_t clockid, struct timespec *tp);
 EXTERN int clock_getres(clockid_t clockid, struct timespec *res);
 
-EXTERN time_t mktime(struct tm *tp);
+EXTERN time_t mktime(const struct tm *tp);
 EXTERN struct tm *gmtime(const time_t *clock);
 EXTERN struct tm *gmtime_r(const time_t *clock, struct tm *result);
-
-#define localtime(c)     gmtime(c)
-#define localtime_r(c,r) gmtime_r(c,r)
+EXTERN size_t strftime(char *s, size_t max, const char *format, const struct tm *tm);
 
 EXTERN int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid);
 EXTERN int timer_delete(timer_t timerid);
