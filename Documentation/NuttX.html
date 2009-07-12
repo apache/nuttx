@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 11, 2009</p>
+      <p>Last Updated: July 12, 2009</p>
     </td>
   </tr>
 </table>
@@ -1483,7 +1483,11 @@ nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  typical embeddd system.
 	* sched/: Added gettimeofday().  This implementation is simply a thin
 	  wrapper around clock_gettimer().
-	* lib/: Add gmtime() and localtime()
+	* lib/: Add gmtime(), localtime(), and strftime()
+	* binfmt/: Add exec().  This is just a wrapper that executes both
+	  load_ and exec_module() in a more familiar manner.  It is not consistent
+	  with more standard exec() functions, however, because (1) it returns
+	  and (2) it requires symbol table arguments.
 
 nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
