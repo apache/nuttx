@@ -2462,14 +2462,16 @@ VxWorks provides the following comparable interface:
   <li><a href="#clockgettime">2.7.2 clock_gettime</a></li>
   <li><a href="#clockgetres">2.7.3 clock_getres</a></li>
   <li><a href="#mktime">2.7.4 mktime</a></li>
-  <li><a href="#gmtimer">2.7.5 gmtime_r</a></li>
-  <li><a href="#localtimer">2.7.6 localtime_r</a></li>
-  <li><a href="#timercreate">2.7.7 timer_create</a></li>
-  <li><a href="#timerdelete">2.7.8 timer_delete</a></li>
-  <li><a href="#timersettime">2.7.9 timer_settime</a></li>
-  <li><a href="#timergettime">2.7.10 timer_gettime</a></li>
-  <li><a href="#timergetoverrun">2.7.11 timer_getoverrun</a></li>
-  <li><a href="#gettimeofday">2.7.12 gettimeofday</a></li>
+  <li><a href="#gmtime">2.7.5 gmtime</a></li>
+  <li><a href="#localtime">2.7.6 localtime</a></li>
+  <li><a href="#gmtimer">2.7.7 gmtime_r</a></li>
+  <li><a href="#localtimer">2.7.8 localtime_r</a></li>
+  <li><a href="#timercreate">2.7.9 timer_create</a></li>
+  <li><a href="#timerdelete">2.7.10 timer_delete</a></li>
+  <li><a href="#timersettime">2.7.11 timer_settime</a></li>
+  <li><a href="#timergettime">2.7.12 timer_gettime</a></li>
+  <li><a href="#timergetoverrun">2.7.13 timer_getoverrun</a></li>
+  <li><a href="#gettimeofday">2.7.14 gettimeofday</a></li>
 </ul>
 
 <H3><a name="clocksettime">2.7.1 clock_settime</a></H3>
@@ -2584,7 +2586,46 @@ VxWorks provides the following comparable interface:
   <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="gmtimer">2.7.5 gmtime_r</a></H3>
+<H3><a name="gmtime">2.7.5 gmtime</a></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;time.h&gt;
+    struct tm *gmtime(const time_t *clock);
+</pre>
+<p>
+  <b>Description:</b>
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>clock</code>.
+  Represents calendar time.
+  This is an absolute time  value representing the number of seconds elapsed since 00:00:00
+  on January 1, 1970, Coordinated Universal Time (UTC).
+</li>
+</ul>
+<p>
+  <b>Returned Values:</b>
+</p>
+<p>
+  If successful, the <I>gmtime()</I> function will return the pointer to a statically
+  defined instance of <code>struct tim</code>.
+  Otherwise, a NULL will be returned to indicate the error:
+</p>
+<ul>
+  <li><code>To be provided</code>.</li>
+</ul>
+
+<H3><a name="localtime">2.7.6 localtime</a></H3>
+<pre>
+    #include &lt;time.h&gt;
+    #define localtime(c) gmtime(c)
+</pre>
+
+<H3><a name="gmtimer">2.7.7 gmtime_r</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2599,26 +2640,32 @@ VxWorks provides the following comparable interface:
   <b>Input Parameters:</b>
 </p>
 <ul>
-  <li><code>parm</code>. </li>
+  <li><code>clock</code>.
+  Represents calendar time.
+  This is an absolute time  value representing the number of seconds elapsed since 00:00:00
+  on January 1, 1970, Coordinated Universal Time (UTC).
+  <li><code>result</code>.
+  A user-provided buffer to receive the converted time structure.
 </ul>
 <p>
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>gmtime_r()</I> function will return zero (<I>OK</I>).
-  Otherwise, an non-zero error number will be returned to indicate the error:
+  If successful, the <I>gmtime_r()</I> function will return the pointer, <code>result</code>,
+  provided by the caller.
+  Otherwise, a NULL will be returned to indicate the error:
 </p>
 <ul>
   <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="localtimer">2.7.6 localtime_r</a></H3>
+<H3><a name="localtimer">2.7.8 localtime_r</a></H3>
 <pre>
     #include &lt;time.h&gt;
     #define localtime_r(c,r) gmtime_r(c,r)
 </pre>
 
-<H3><a name="timercreate">2.7.7 timer_create</a></H3>
+<H3><a name="timercreate">2.7.9 timer_create</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2688,7 +2735,7 @@ VxWorks provides the following comparable interface:
   <li>Only <code>CLOCK_REALTIME</code> is supported for the <code>clockid</code> argument.</li>
 </ul>
 
-<H3><a name="timerdelete">2.7.8 timer_delete</a></H3>
+<H3><a name="timerdelete">2.7.10 timer_delete</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2727,7 +2774,7 @@ VxWorks provides the following comparable interface:
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="timersettime">2.7.9 timer_settime</a></H3>
+<H3><a name="timersettime">2.7.11 timer_settime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2810,7 +2857,7 @@ VxWorks provides the following comparable interface:
   <li>The <code>ovalue</code> argument is ignored.</li>
 </ul>
 
-<H3><a name="timergettime">2.7.10 timer_gettime</a></H3>
+<H3><a name="timergettime">2.7.12 timer_gettime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2857,7 +2904,7 @@ VxWorks provides the following comparable interface:
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="timergetoverrun">2.7.11 timer_getoverrun</a></H3>
+<H3><a name="timergetoverrun">2.7.13 timer_getoverrun</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2918,7 +2965,7 @@ VxWorks provides the following comparable interface:
 interface of the same name.
 </p>
 
-<h3><a name="gettimeofday">2.7.12 gettimeofday</a></h3>
+<h3><a name="gettimeofday">2.7.14 gettimeofday</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7553,6 +7600,7 @@ notify a task when a message is available on a queue.
   <li><a href="#getpid">getpid</a></li>
   <li><a href="#standardio">gets</a></li>
   <li><a href="#getsockopt">getsockopt</a></li>
+  <li><a href="#gmtime">gmtime</a></li>
   <li><a href="#gmtimer">gmtime_r</a></li>
   <li><a href="#Introduction">Introduction</a>
   <li><a href="#drvrioctlops">ioctl</a></li>
