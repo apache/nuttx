@@ -1906,7 +1906,9 @@ static int ls(httpd_conn *hc)
   char *timestr;
   char arg[16];
   char *argv[1];
+#if CONFIG_THTTPD_CGI_TIMELIMIT > 0
   ClientData client_data;
+#endif
 
   dirp = opendir(hc->expnfilename);
   if (dirp == (DIR *) 0)
@@ -2444,6 +2446,9 @@ static void cgi_interpose_output(httpd_conn *hc, int rfd)
 static void cgi_child(int argc, char **argv)
 {
   FAR httpd_conn *hc = (FAR httpd_conn*)strtoul(argv[1], NULL, 16);
+#if CONFIG_THTTPD_CGI_TIMELIMIT > 0
+  ClientData client_data;
+#endif
   FAR char **argp;
   char *binary;
   char *directory;
@@ -2627,17 +2632,6 @@ static void cgi_child(int argc, char **argv)
         }
     }
 
-  /* At this point we would like to set close-on-exec again for hc->conn_fd
-   * (see previous comments on Linux's broken behavior re: close-on-exec and 
-   * dup.) Unfortunately there seems to be another Linux problem, or perhaps 
-   * a different aspect of the same problem - if we do this close-on-exec in 
-   * Linux, the socket stays open but stderr gets closed - the last fd duped 
-   * from the socket.  What a mess.  So we'll just leave the socket as is,
-   * which under other OSs means an extra file descriptor gets passed to the 
-   * child process.  Since the child probably already has that file open via 
-   * stdin stdout and/or stderr, this is not a problem.
-   */
-
   /* Split the program into directory and binary, so we can chdir() to the
    * program's own directory.  This isn't in the CGI 1.1 spec, but it's what 
    * other HTTP servers do.
@@ -2674,15 +2668,26 @@ static void cgi_child(int argc, char **argv)
       httpd_write_response(hc);
       exit(1);
    }
+ else
+   {
+      /* Schedule a kill for the child process, in case it runs too long. */
+
+#if CONFIG_THTTPD_CGI_TIMELIMIT > 0
+      client_data.i = child;
+      if (tmr_create((struct timeval *)0, cgi_kill, client_data,
+                      CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
+        {
+          ndbg("tmr_create(cgi_kill child) failed\n");
+          exit(1);
+        }
+#endif
+   }
 }
 #endif /* CONFIG_THTTPD_CGI_PATTERN */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
 static int cgi(httpd_conn *hc)
 {
-#if CONFIG_THTTPD_CGI_TIMELIMIT > 0
-  ClientData client_data;
-#endif
   char arg[16];
   char *argv[1];
   pid_t child;
@@ -2724,21 +2729,6 @@ static int cgi(httpd_conn *hc)
         }
 
       ndbg("started CGI process %d for file '%s'\n", child, hc->expnfilename);
-
-      /* Schedule a kill for the child process, in case it runs too long.
-       * Unfortunately, the returned value in 'child' is the pid of the trampoline
-       * task -- NOT the pid of the CGI task.  So the following cannot work.
-       */
-
-#if CONFIG_THTTPD_CGI_TIMELIMIT > 0
-      client_data.i = child;
-      if (tmr_create((struct timeval *)0, cgi_kill, client_data,
-                      CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
-        {
-          ndbg("tmr_create(cgi_kill child) failed\n");
-          exit(1);
-        }
-#endif
 
       hc->status        = 200;
       hc->bytes_sent    = CONFIG_THTTPD_CGI_BYTECOUNT;

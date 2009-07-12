@@ -47,11 +47,9 @@
 #  define INFTIM -1
 #endif
 
-/* Figure out how many file descriptors the system allows, and
- * initialize the fdwatch data structures.  Returns -1 on failure.
- */
+/* initialize the fdwatch data structures.  Returns -1 on failure. */
 
-extern int fdwatch_get_nfiles(void);
+extern int fdwatch_initialize(void);
 
 /* Add a descriptor to the watch list. rw is either FDW_READ or FDW_WRITE.  */
 
@@ -80,7 +78,9 @@ extern void *fdwatch_get_next_client_data(void);
 
 /* Generate debugging statistics syslog message. */
 
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 extern void fdwatch_logstats(long secs);
+#endif
 
 #endif /* __NETUTILS_THTTPD_FDWATCH_H */
 

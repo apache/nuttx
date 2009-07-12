@@ -79,6 +79,9 @@
 #define CNST_PAUSING   3
 #define CNST_LINGERING 4
 
+#define SPARE_FDS      2
+#define AVAILABLE_FDS  (CONFIG_NSOCKET_DESCRIPTORS - SPARE_FDS)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -103,7 +106,6 @@ struct connect_s
 static httpd_server *hs = NULL;
 static struct connect_s *connects;
 static int num_connects;
-static int max_connects;
 static int first_free_connect;
 static int httpd_conn_count;
 
@@ -156,7 +158,7 @@ static void shut_down(void)
 
   (void)gettimeofday(&tv, (struct timezone *)0);
   logstats(&tv);
-  for (cnum = 0; cnum < max_connects; ++cnum)
+  for (cnum = 0; cnum < AVAILABLE_FDS; ++cnum)
     {
       if (connects[cnum].conn_state != CNST_FREE)
         {
@@ -199,7 +201,7 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
   for (;;)
     {
       /* Is there room in the connection table? */
-      if (num_connects >= max_connects)
+      if (num_connects >= AVAILABLE_FDS)
         {
           /* Out of connection slots.  Run the timers, then the  existing
            * connections, and maybe we'll free up a slot  by the time we get
@@ -613,7 +615,7 @@ static void idle(ClientData client_data, struct timeval *nowP)
   int cnum;
   struct connect_s *conn;
 
-  for (cnum = 0; cnum < max_connects; ++cnum)
+  for (cnum = 0; cnum < AVAILABLE_FDS; ++cnum)
     {
       conn = &connects[cnum];
       switch (conn->conn_state)
@@ -740,6 +742,7 @@ int thttpd_main(int argc, char **argv)
   struct sockaddr_in sa;
 #endif 
   struct timeval tv;
+  int ret;
 
   /* Setup host address */
 
@@ -754,7 +757,8 @@ int thttpd_main(int argc, char **argv)
   /* Switch directories if requested */
 
 #ifdef CONFIG_THTTPD_DIR
-  if (chdir(CONFIG_THTTPD_DIR) < 0)
+  ret = chdir(CONFIG_THTTPD_DIR);
+  if (ret < 0)
     {
       ndbg("chdir: %d\n", errno);
       exit(1);
@@ -771,8 +775,8 @@ int thttpd_main(int argc, char **argv)
 
   /* Initialize the fdwatch package */
 
-  max_connects = fdwatch_get_nfiles();
-  if (max_connects < 0)
+  ret = fdwatch_initialize();
+  if (ret < 0)
     {
       ndbg("fdwatch initialization failure\n");
       exit(1);
@@ -834,21 +838,21 @@ int thttpd_main(int argc, char **argv)
 
   /* Initialize our connections table */
 
-  connects = NEW(struct connect_s, max_connects);
+  connects = NEW(struct connect_s, AVAILABLE_FDS);
   if (connects == (struct connect_s *) 0)
     {
       ndbg("out of memory allocating a struct connect_s\n");
       exit(1);
     }
 
-  for (cnum = 0; cnum < max_connects; ++cnum)
+  for (cnum = 0; cnum < AVAILABLE_FDS; ++cnum)
     {
       connects[cnum].conn_state = CNST_FREE;
       connects[cnum].next_free_connect = cnum + 1;
       connects[cnum].hc = (httpd_conn *) 0;
     }
 
-  connects[max_connects - 1].next_free_connect = -1;    /* end of link list */
+  connects[AVAILABLE_FDS - 1].next_free_connect = -1;    /* end of link list */
   first_free_connect = 0;
   num_connects = 0;
   httpd_conn_count = 0;
