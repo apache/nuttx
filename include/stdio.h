@@ -106,6 +106,7 @@ EXTERN int    fclose(FAR FILE *stream);
 EXTERN int    fflush(FAR FILE *stream);
 EXTERN int    feof(FAR FILE *stream);
 EXTERN int    ferror(FAR FILE *stream);
+EXTERN int    fileno(FAR FILE *stream);
 EXTERN int    fgetc(FAR FILE *stream);
 EXTERN int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
 EXTERN char  *fgets(FAR char *s, int n, FAR FILE *stream);

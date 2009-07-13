@@ -353,6 +353,63 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_DHCP_LIGHT - Reduces size of DHCP
 		CONFIG_NET_RESOLV_ENTRIES - Number of resolver entries
 
+	THTTPD:
+		CONFIG_THTTPD_PORT - THTTPD Server port number
+		CONFIG_THTTPD_IPADDR - Server IP address (no host name)
+		CONFIG_THTTPD_SERVER_ADDRESS - SERVER_ADDRESS: response
+		CONFIG_THTTPD_SERVER_SOFTWARE - SERVER_SOFTWARE: response
+		CONFIG_THTTPD_CGI_PATH -
+		CONFIG_THTTPD_CGI_PATTERN - Only CGI programs matching this
+		  pattern will be executed.  In fact, if this value is not defined
+		  then no CGI logic will be built.
+		CONFIG_THTTPD_CGI_PRIORITY - Provides the priority of CGI child tasks
+		CONFIG_THTTPD_CGI_STACKSIZE - Provides the initial stack size of
+		  CGI child task (will be overridden by the stack size in the NXFLAT
+		  header)
+		CONFIG_THTTPD_CGI_BYTECOUNT - Byte output limit for CGI tasks.
+		CONFIG_THTTPD_CGI_TIMELIMIT - How many seconds to allow CGI programs
+		  to run before killing them.
+		CONFIG_THTTPD_CGI_OUTFD - In NuttX, CGI cannot use stdout for output. 
+		  Rather, it must use this file descriptor number.
+		CONFIG_THTTPD_CHARSET- The default character set name to use with
+		  text MIME types.
+		CONFIG_THTTPD_IOBUFFERSIZE - 
+		CONFIG_THTTPD_INDEX_NAMES - A list of index filenames to check. The
+		  files are searched for in this order.
+		CONFIG_AUTH_FILE - The file to use for authentication. If this is
+		  defined then thttpd checks for this file in the local directory
+		  before every fetch. If the file exists then authentication is done,
+		  otherwise the fetch proceeds as usual. If you leave this undefined
+		  then thttpd will not implement authentication at all and will not
+		  check for auth files, which saves a bit of CPU time. A typical
+		  value is ".htpasswd"
+		CONFIG_THTTPD_LISTEN_BACKLOG - The listen() backlog queue length.
+		CONFIG_THTTPD_LINGER_MSEC - How many milliseconds to leave a connection
+		  open while doing a lingering close.
+		CONFIG_THTTPD_OCCASIONAL_MSEC - How often to run the occasional
+		  cleanup job.
+		CONFIG_THTTPD_IDLE_READ_LIMIT_SEC - How many seconds to allow for
+		 reading the initial request on a new connection.
+		CONFIG_THTTPD_IDLE_SEND_LIMIT_SEC - How many seconds before an
+		  idle connection gets closed.
+		CONFIG_THTTPD_TILDE_MAP1 and CONFIG_THTTPD_TILDE_MAP2 - Tilde mapping.
+		  Many URLs use ~username to indicate a user's home directory. thttpd
+ 		  provides two options for mapping this construct to an  actual filename.
+		  1) Map ~username to <prefix>/username. This is the recommended choice.
+		    Each user gets a subdirectory in the main web tree, and the tilde
+		    construct points there. The prefix could be something like "users",
+		    or it could be empty.
+		  2) Map ~username to <user's homedir>/<postfix>. The postfix would be
+		    the name of a subdirectory off of the user's actual home dir,
+		    something like "public_html".
+		  You can also leave both options undefined, and thttpd will not do
+		  anything special about tildes. Enabling both options is an error.
+		  Typical values, if they're defined, are "users" for
+		  CONFIG_THTTPD_TILDE_MAP1 and "public_html"forCONFIG_THTTPD_TILDE_MAP2. 
+		CONFIG_THTTPD_GENERATE_INDICES
+		CONFIG_THTTPD_URLPATTERN - If defined, then it will be used to match
+		  and verify referrers.
+
 	USB device controller driver
 		CONFIG_USBDEV - Enables USB device support
 		CONFIG_USBDEV_ISOCHRONOUS - Build in extra support for isochronous

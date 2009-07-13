@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/binfmt_exec.c
+ * lib/lib_fileno.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,85 +40,26 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <string.h>
-#include <sched.h>
-#include <debug.h>
+#include <stdio.h>
 #include <errno.h>
 
-#include <nuttx/binfmt.h>
-
-#include "binfmt_internal.h"
-
-#ifndef CONFIG_BINFMT_DISABLE
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Global Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: exec
- *
- * Description:
- *   This is a convenience function that wraps load_ and exec_module into
- *   one call.
- *
- * Input Parameter:
- *   filename - Fulll path to the binary to be loaded
- *   argv     - Argument list
- *   exports  - Table of exported symbols
- *   nexports - The number of symbols in exports
- *
- * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
- *   Returns the PID of the exec'ed module.  On failure, it.returns
- *   -1 (ERROR) and sets errno appropriately.
- *
- ****************************************************************************/
-
-int exec(FAR const char *filename, FAR const char **argv,
-         FAR const struct symtab_s *exports, int nexports)
+int ileno(FAR FILE *stream)
 {
-  struct binary_s bin;
-  int ret;
-
-  memset(&bin, 0, sizeof(struct binary_s));
-  bin.filename = filename;
-  bin.exports  = exports;
-  bin.nexports = nexports;
-
-  ret = load_module(&bin);
-  if (ret < 0)
+  int ret = -1;
+  if (stream)
     {
-      bdbg("ERROR: Failed to load program '%s'\n", filename);
-      return ERROR;
+      ret = stream->fs_filedes;
     }
 
-  ret = exec_module(&bin, 50);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to execute program '%s'\n", filename);
-      unload_module(&bin);
+      errno = EBADF;
       return ERROR;
     }
-
   return ret;
 }
-
-#endif /* CONFIG_BINFMT_DISABLE */
 

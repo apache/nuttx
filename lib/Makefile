@@ -53,7 +53,7 @@ STRING_SRCS	= lib_checkbase.c lib_isbasedigit.c lib_memset.c lib_memcpy.c \
 
 CTYPE_SRCS	= 
 
-STDIO_SRCS	= lib_printf.c lib_rawprintf.c lib_lowprintf.c \
+STDIO_SRCS	= lib_fileno.c lib_printf.c lib_rawprintf.c lib_lowprintf.c \
 		  lib_sprintf.c lib_snprintf.c lib_libsprintf.c lib_vsprintf.c \
 		  lib_vsnprintf.c lib_libvsprintf.c lib_meminstream.c \
 		  lib_memoutstream.c lib_lowinstream.c lib_lowoutstream.c \
