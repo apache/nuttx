@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: July 11, 2009</p>
+      <p>Last Updated: July 12, 2009</p>
     </td>
   </tr>
 </table>
@@ -2344,6 +2344,117 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <code>CONFIG_NET_RESOLV_ENTRIES</code>: Number of resolver entries
+  </li>
+</ul>
+
+<h3>THTTPD</h3>
+<ul>
+  <li>
+    <code>CONFIG_THTTPD_PORT</code>: THTTPD Server port number
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_IPADDR</code>: Server IP address (no host name)
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_SERVER_ADDRESS</code>: SERVER_ADDRESS: response
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_SERVER_SOFTWARE</code>: SERVER_SOFTWARE: response
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_CGI_PATH</code>:
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_CGI_PATTERN</code>: Only CGI programs matching this
+    pattern will be executed.  In fact, if this value is not defined
+    then no CGI logic will be built.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_CGI_PRIORITY</code>: Provides the priority of CGI child tasks
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_CGI_STACKSIZE</code>: Provides the initial stack size of
+     CGI child task (will be overridden by the stack size in the NXFLAT
+    header)
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_CGI_BYTECOUNT</code>: Byte output limit for CGI tasks.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_CGI_TIMELIMIT</code>: How many seconds to allow CGI programs
+    to run before killing them.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_CGI_OUTFD</code>: In NuttX, CGI cannot use stdout for output. 
+    Rather, it must use this file descriptor number.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_CHARSET- The default character set name to use with
+    text MIME types.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_IOBUFFERSIZE</code>: 
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_INDEX_NAMES</code>: A list of index filenames to check. The
+    files are searched for in this order.
+  </li>
+  <li>
+    <code>CONFIG_AUTH_FILE</code>: The file to use for authentication. If this is
+    defined then thttpd checks for this file in the local directory
+    before every fetch. If the file exists then authentication is done,
+    otherwise the fetch proceeds as usual. If you leave this undefined
+    then thttpd will not implement authentication at all and will not
+    check for auth files, which saves a bit of CPU time. A typical
+    value is &quot;.htpasswd&quout;
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_LISTEN_BACKLOG</code>: The listen() backlog queue length.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_LINGER_MSEC</code>: How many milliseconds to leave a connection
+    open while doing a lingering close.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_OCCASIONAL_MSEC</code>: How often to run the occasional
+    cleanup job.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_IDLE_READ_LIMIT_SEC</code>: How many seconds to allow for
+    reading the initial request on a new connection.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_IDLE_SEND_LIMIT_SEC</code>: How many seconds before an
+    idle connection gets closed.
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_TILDE_MAP1 and CONFIG_THTTPD_TILDE_MAP2</code>: Tilde mapping.
+    Many URLs use ~username to indicate a user's home directory. thttpd
+    provides two options for mapping this construct to an  actual filename.
+    <ol>
+      <li>
+        Map ~username to &lt;prefix&gt;/username. This is the recommended choice.
+        Each user gets a subdirectory in the main web tree, and the tilde
+        construct points there. The prefix could be something like "users",
+        or it could be empty.
+      </li>
+      <li>
+        Map ~username to &lt;user's homedir&gt;/&lt;postfix&gt;. The postfix would be
+        the name of a subdirectory off of the user's actual home dir,
+        something like &quot;public_html&quot;.
+      </li>
+    </ol>
+    You can also leave both options undefined, and thttpd will not do
+    anything special about tildes. Enabling both options is an error.
+    Typical values, if they're defined, are &quot;users&quot; for
+    CONFIG_THTTPD_TILDE_MAP1 and &quot;public_html&quot; forCONFIG_THTTPD_TILDE_MAP2. 
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_GENERATE_INDICES
+  </li>
+  <li>
+    <code>CONFIG_THTTPD_URLPATTERN</code>: If defined, then it will be used to match
+		  and verify referrers.
   </li>
 </ul>
 
