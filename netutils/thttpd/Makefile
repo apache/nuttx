@@ -37,7 +37,15 @@
 -include $(TOPDIR)/Make.defs
 
 CGIBINDIR	= $(TOPDIR)/netutils/thttpd/cgi-bin
+
+SUBDIRS		=
+ifeq ($(CONFIG_NXFLAT),y)
 SUBDIRS		= cgi-src
+SUBDIR_BIN1	= phf
+SUBDIR_BIN2	= redirect
+SUBDIR_BIN3	= ssi
+SUBDIR_BIN	+= cgi-bin/$(SUBDIR_BIN1) cgi-bin/$(SUBDIR_BIN2)  cgi-bin/$(SUBDIR_BIN3)
+endif
 
 ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
@@ -50,7 +58,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libthttpd$(LIBEXT)
 
-all:	$(BIN)
+all:	$(BIN) $(SUBDIR_BIN)
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -63,6 +71,29 @@ $(BIN):	$(OBJS)
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
+ifeq ($(CONFIG_NXFLAT),y)
+cgi-bin:
+	@mkdir cgi-bin
+
+cgi-src/$(SUBDIR_BIN1):
+	@$(MAKE) -C cgi-src $(SUBDIR_BIN1)
+
+cgi-bin/$(SUBDIR_BIN1): cgi-bin cgi-src/$(SUBDIR_BIN1)
+	@cp -a cgi-src/$(SUBDIR_BIN1) $@
+
+cgi-src/$(SUBDIR_BIN2):
+	@$(MAKE) -C cgi-src $(SUBDIR_BIN2)
+
+cgi-bin/$(SUBDIR_BIN2): cgi-bin cgi-src/$(SUBDIR_BIN2)
+	@cp -a cgi-src/$(SUBDIR_BIN2) $@
+
+cgi-src/$(SUBDIR_BIN3):
+	@$(MAKE) -C cgi-src $(SUBDIR_BIN3)
+
+cgi-bin/$(SUBDIR_BIN3): cgi-bin cgi-src/$(SUBDIR_BIN3)
+	@cp -a cgi-src/$(SUBDIR_BIN3) $@
+endif
+
 .depend: Makefile $(SRCS)
 	@$(MKDEP) --dep-path .  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
@@ -71,6 +102,7 @@ depend: .depend
 
 clean:
 	@rm -f $(BIN) *~ .*.swp
+	@rm -rf cgi-bin
 	$(call CLEAN)
 	@( for dir in $(SUBDIRS); do \
 		rm -f $${dir}/*~ $${dir}/.*.swp; \

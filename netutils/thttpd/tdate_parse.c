@@ -190,7 +190,9 @@ time_t tdate_parse(char *str)
   /* Skip initial whitespace ourselves - sscanf is clumsy at this. */
 
   for (cp = str; *cp == ' ' || *cp == '\t'; ++cp)
-    continue;
+    {
+      continue;
+    }
 
   /* And do the sscanfs.  WARNING: you can add more formats here, but be
    * careful! You can easily screw up the parsing of existing formats when

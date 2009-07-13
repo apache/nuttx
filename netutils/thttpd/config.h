@@ -119,6 +119,14 @@
 #  define CONFIG_THTTPD_CGI_TIMELIMIT 0 /* No time limit */
 #endif
 
+/* In NuttX, CGI cannot use stdout for output.  Rather, it must use
+ * the following file descriptor number.
+ */
+
+#ifndef CONFIG_THTTPD_CGI_OUTFD
+#  define CONFIG_THTTPD_CGI_OUTFD CONFIG_NFILE_DESCRIPTORS
+#endif
+
 /* The default character set name to use with text MIME types. */
 
 #ifndef CONFIG_THTTPD_CHARSET
@@ -189,15 +197,15 @@
  * You can also leave both options undefined, and thttpd will not do anything special
  * about tildes. Enabling both options is an error.
  *
- * Typical values, if they're defined, are "users" for TILDE_MAP_1 and "public_html"
- * for TILDE_MAP_2. 
+ * Typical values, if they're defined, are "users" for CONFIG_THTTPD_TILDE_MAP1 and "public_html"
+ * for CONFIG_THTTPD_TILDE_MAP2. 
  */
 
-#if defined(TILDE_MAP_1) && defined(TILDE_MAP_2)
-#  error "Both TILDE_MAP_1 and TILDE_MAP_2 are defined"
+#if defined(CONFIG_THTTPD_TILDE_MAP1) && defined(CONFIG_THTTPD_TILDE_MAP2)
+#  error "Both CONFIG_THTTPD_TILDE_MAP1 andCONFIG_THTTPD_TILDE_MAP2 are defined"
 #endif
 
-/* If CONFIG_THTTPD_URLPATTERN is not defined, then it will be used to match and verify
+/* If CONFIG_THTTPD_URLPATTERN is defined, then it will be used to match and verify
  * referrers.
  */
 

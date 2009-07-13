@@ -132,14 +132,14 @@ static int  auth_check2(httpd_conn *hc, char *dirname);
 static void send_dirredirect(httpd_conn *hc);
 static int  hexit(char c);
 static void strdecode(char *to, char *from);
-#ifdef GENERATE_INDEXES
+#ifdef CONFIG_THTTPD_GENERATE_INDICES
 static void strencode(char *to, int tosize, char *from);
 #endif
-#ifdef TILDE_MAP_1
-static int  tilde_map_1(httpd_conn *hc);
+#ifdef CONFIG_THTTPD_TILDE_MAP1
+static int CONFIG_THTTPD_TILDE_MAP1(httpd_conn *hc);
 #endif
-#ifdef TILDE_MAP_2
-static int  tilde_map_2(httpd_conn *hc);
+#ifdef CONFIG_THTTPD_TILDE_MAP2
+static int CONFIG_THTTPD_TILDE_MAP2(httpd_conn *hc);
 #endif
 #ifdef CONFIG_THTTPD_VHOST
 static int  vhost_map(httpd_conn *hc);
@@ -153,7 +153,7 @@ static void figure_mime(httpd_conn *hc);
 static void cgi_kill2(ClientData client_data, struct timeval *nowP);
 static void cgi_kill(ClientData client_data, struct timeval *nowP);
 #endif
-#ifdef GENERATE_INDEXES
+#ifdef CONFIG_THTTPD_GENERATE_INDICES
 static void ls_child(int argc, char **argv);
 static int  ls(httpd_conn *hc);
 #endif
@@ -941,7 +941,7 @@ static void strdecode(char *to, char *from)
 
 /* Copies and encodes a string. */
 
-#ifdef GENERATE_INDEXES
+#ifdef CONFIG_THTTPD_GENERATE_INDICES
 static void strencode(char *to, int tosize, char *from)
 {
   int tolen;
@@ -963,17 +963,17 @@ static void strencode(char *to, int tosize, char *from)
     }
   *to = '\0';
 }
-#endif                                 /* GENERATE_INDEXES */
+#endif /* CONFIG_THTTPD_GENERATE_INDICES */
 
 /* Map a ~username/whatever URL into <prefix>/username. */
 
-#ifdef TILDE_MAP_1
-static int tilde_map_1(httpd_conn *hc)
+#ifdef CONFIG_THTTPD_TILDE_MAP1
+static intCONFIG_THTTPD_TILDE_MAP1(httpd_conn *hc)
 {
   static char *temp;
   static size_t maxtemp = 0;
   int len;
-  static char *prefix = TILDE_MAP_1;
+  static char *prefix =CONFIG_THTTPD_TILDE_MAP1;
 
   len = strlen(hc->expnfilename) - 1;
   httpd_realloc_str(&temp, &maxtemp, len);
@@ -990,16 +990,16 @@ static int tilde_map_1(httpd_conn *hc)
   (void)strcat(hc->expnfilename, temp);
   return 1;
 }
-#endif /* TILDE_MAP_1 */
+#endif /*CONFIG_THTTPD_TILDE_MAP1 */
 
 /* Map a ~username/whatever URL into <user's homedir>/<postfix>. */
 
-#ifdef TILDE_MAP_2
-static int tilde_map_2(httpd_conn *hc)
+#ifdef CONFIG_THTTPD_TILDE_MAP2
+static intCONFIG_THTTPD_TILDE_MAP2(httpd_conn *hc)
 {
   static char *temp;
   static size_t maxtemp = 0;
-  static char *postfix = TILDE_MAP_2;
+  static char *postfix =CONFIG_THTTPD_TILDE_MAP2;
   char *cp;
   struct passwd *pw;
   char *alt;
@@ -1057,7 +1057,7 @@ static int tilde_map_2(httpd_conn *hc)
   hc->tildemapped = TRUE;
   return 1;
 }
-#endif /* TILDE_MAP_2 */
+#endif /*CONFIG_THTTPD_TILDE_MAP2 */
 
 /* Virtual host mapping. */
 
@@ -1622,7 +1622,7 @@ static void cgi_kill(ClientData client_data, struct timeval *nowP)
 
 /* qsort comparison routine. */
 
-#ifdef GENERATE_INDEXES
+#ifdef CONFIG_THTTPD_GENERATE_INDICES
 static int name_compare(char **a, char **b)
 {
   return strcmp(*a, *b);
@@ -1985,7 +1985,7 @@ static int ls(httpd_conn *hc)
 
   return 0;
 }
-#endif /* GENERATE_INDEXES */
+#endif /* CONFIG_THTTPD_GENERATE_INDICES */
 
 /* Set up environment variables. Be real careful here to avoid
  * letting malicious clients overrun a buffer.  We don't have
@@ -2843,7 +2843,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
         }
 
       /* Nope, no index file, so it's an actual directory request. */
-#ifdef GENERATE_INDEXES
+#ifdef CONFIG_THTTPD_GENERATE_INDICES
       /* Directories must be readable for indexing. */
       if (!(hc->sb.st_mode & S_IROTH))
         {
@@ -2873,7 +2873,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
 
       /* Ok, generate an index. */
       return ls(hc);
-#else /* GENERATE_INDEXES */
+#else /* CONFIG_THTTPD_GENERATE_INDICES */
       ndbg("%s URL \"%s\" tried to index a directory\n",
              httpd_ntoa(&hc->client_addr), hc->encodedurl);
       httpd_send_err(hc, 403, err403title, "",
@@ -2881,7 +2881,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
                                 "The requested URL '%s' is a directory, and directory indexing is disabled on this server.\n"),
                      hc->encodedurl);
       return -1;
-#endif /* GENERATE_INDEXES */
+#endif /* CONFIG_THTTPD_GENERATE_INDICES */
 
     got_one:
 
@@ -3449,9 +3449,9 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
         hc->maxpathinfo = hc->maxquery = hc->maxaccept =
         hc->maxaccepte = hc->maxreqhost = hc->maxhostdir =
         hc->maxremoteuser = 0;
-#ifdef TILDE_MAP_2
+#ifdef CONFIG_THTTPD_TILDE_MAP2
       hc->maxaltdir = 0;
-#endif                                 /* TILDE_MAP_2 */
+#endif                                 /*CONFIG_THTTPD_TILDE_MAP2 */
       httpd_realloc_str(&hc->decodedurl, &hc->maxdecodedurl, 1);
       httpd_realloc_str(&hc->origfilename, &hc->maxorigfilename, 1);
       httpd_realloc_str(&hc->expnfilename, &hc->maxexpnfilename, 0);
@@ -3463,7 +3463,7 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
       httpd_realloc_str(&hc->reqhost, &hc->maxreqhost, 0);
       httpd_realloc_str(&hc->hostdir, &hc->maxhostdir, 0);
       httpd_realloc_str(&hc->remoteuser, &hc->maxremoteuser, 0);
-#ifdef TILDE_MAP_2
+#ifdef CONFIG_THTTPD_TILDE_MAP2
       httpd_realloc_str(&hc->altdir, &hc->maxaltdir, 0);
 #endif
       hc->initialized = 1;
@@ -3524,9 +3524,9 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
   hc->authorization = "";
   hc->remoteuser[0] = '\0';
   hc->buffer[0] = '\0';
-#ifdef TILDE_MAP_2
+#ifdef CONFIG_THTTPD_TILDE_MAP2
   hc->altdir[0] = '\0';
-#endif                                 /* TILDE_MAP_2 */
+#endif                                 /*CONFIG_THTTPD_TILDE_MAP2 */
   hc->buflen = 0;
   hc->if_modified_since = (time_t) - 1;
   hc->range_if = (time_t) - 1;
@@ -4149,20 +4149,20 @@ int httpd_parse_request(httpd_conn *hc)
 
   if (hc->expnfilename[0] == '~')
     {
-#ifdef TILDE_MAP_1
+#ifdef CONFIG_THTTPD_TILDE_MAP1
       if (!tilde_map_1(hc))
         {
           httpd_send_err(hc, 404, err404title, "", err404form, hc->encodedurl);
           return -1;
         }
-#endif                                 /* TILDE_MAP_1 */
-#ifdef TILDE_MAP_2
+#endif                                 /*CONFIG_THTTPD_TILDE_MAP1 */
+#ifdef CONFIG_THTTPD_TILDE_MAP2
       if (!tilde_map_2(hc))
         {
           httpd_send_err(hc, 404, err404title, "", err404form, hc->encodedurl);
           return -1;
         }
-#endif                                 /* TILDE_MAP_2 */
+#endif                                 /*CONFIG_THTTPD_TILDE_MAP2 */
     }
 
   /* Virtual host mapping. */
@@ -4215,7 +4215,7 @@ int httpd_parse_request(httpd_conn *hc)
 
           (void)strcpy(hc->expnfilename, &hc->expnfilename[strlen(hc->hs->cwd)]);
         }
-#ifdef TILDE_MAP_2
+#ifdef CONFIG_THTTPD_TILDE_MAP2
       else if (hc->altdir[0] != '\0' &&
                (strncmp(hc->expnfilename, hc->altdir,
                         strlen(hc->altdir)) == 0 &&
@@ -4223,7 +4223,7 @@ int httpd_parse_request(httpd_conn *hc)
                  hc->expnfilename[strlen(hc->altdir)] == '/')))
         {
         }
-#endif /* TILDE_MAP_2 */
+#endif /*CONFIG_THTTPD_TILDE_MAP2 */
       else
         {
           ndbg("%s URL \"%s\" goes outside the web tree\n",
@@ -4271,9 +4271,9 @@ void httpd_destroy_conn(httpd_conn *hc)
       free((void *)hc->hostdir);
       free((void *)hc->remoteuser);
       free((void *)hc->buffer);
-#ifdef TILDE_MAP_2
+#ifdef CONFIG_THTTPD_TILDE_MAP2
       free((void *)hc->altdir);
-#endif                                 /* TILDE_MAP_2 */
+#endif                                 /*CONFIG_THTTPD_TILDE_MAP2 */
       hc->initialized = 0;
     }
 }

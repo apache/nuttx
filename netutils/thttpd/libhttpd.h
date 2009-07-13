@@ -155,10 +155,10 @@ typedef struct
   size_t maxdecodedurl, maxorigfilename, maxexpnfilename, maxencodings,
     maxpathinfo, maxquery, maxaccept, maxaccepte, maxreqhost, maxhostdir,
     maxremoteuser, maxresponse;
-#ifdef TILDE_MAP_2
+#ifdef CONFIG_THTTPD_TILDE_MAP2
   char *altdir;
   size_t maxaltdir;
-#endif                           /* TILDE_MAP_2 */
+#endif                           /*CONFIG_THTTPD_TILDE_MAP2 */
   time_t if_modified_since, range_if;
   size_t contentlength;
   char *type;                  /* not malloc()ed */
