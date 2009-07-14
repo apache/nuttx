@@ -1,7 +1,7 @@
 /********************************************************************************
  * arch/arm/src/lpc214x/lpc214x_decodeirq.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,7 +162,7 @@ static void lpc214x_decodeirq( uint32 *regs)
 #ifdef CONFIG_VECTORED_INTERRUPTS
 void up_decodeirq(uint32 *regs)
 {
-  vic_vector_t vector = (vic_vector)vic_getreg(LPC214X_VIC_VECTADDR_OFFSET);
+  vic_vector_t vector = (vic_vector_t)vic_getreg(LPC214X_VIC_VECTADDR_OFFSET);
   vector(regs);
 }
 #endif
