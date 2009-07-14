@@ -1,7 +1,7 @@
 /***********************************************************************
  * examples/ostest/cancel.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,7 +131,7 @@ static void start_thread(pthread_t *waiter, int cancelable)
       printf("start_thread: pthread_attr_init failed, status=%d\n", status);
     }
 
-  status = pthread_attr_setstacksize(&attr, 16384);
+  status = pthread_attr_setstacksize(&attr, STACKSIZE);
   if (status != 0)
     {
       printf("start_thread: pthread_attr_setstacksize failed, status=%d\n", status);

@@ -816,4 +816,7 @@
 	  with more standard exec() functions, however, because (1) it returns
 	  and (2) it requires symbol table arguments.
 	* lib/: Add fileno()
-
+	* examples/ostest: Several of the tests used a big, hard-coded stack size
+	  when creating test threads (16Kb stacksize).  The stack size should
+	  be controlled by the .config file or the OSTest won't work on platforms
+	  with memory constraints.

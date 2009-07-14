@@ -1,7 +1,7 @@
 /**************************************************************************
  * mqueue.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -296,7 +296,7 @@ void mqueue_test(void)
       printf("mqueue_test: pthread_attr_init failed, status=%d\n", status);
     }
 
-  status = pthread_attr_setstacksize(&attr, 16384);
+  status = pthread_attr_setstacksize(&attr, STACKSIZE);
   if (status != 0)
     {
       printf("mqueue_test: pthread_attr_setstacksize failed, status=%d\n", status);
@@ -332,7 +332,7 @@ void mqueue_test(void)
       printf("mqueue_test: pthread_attr_init failed, status=%d\n", status);
     }
 
-  status = pthread_attr_setstacksize(&attr, 16384);
+  status = pthread_attr_setstacksize(&attr, STACKSIZE);
   if (status != 0)
     {
       printf("mqueue_test: pthread_attr_setstacksize failed, status=%d\n", status);
