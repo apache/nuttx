@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 12, 2009</p>
+      <p>Last Updated: July 13, 2009</p>
     </td>
   </tr>
 </table>
@@ -1489,6 +1489,10 @@ nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  with more standard exec() functions, however, because (1) it returns
 	  and (2) it requires symbol table arguments.
 	* lib/: Add fileno()
+	* examples/ostest: Several of the tests used a big, hard-coded stack size
+	  when creating test threads (16Kb stacksize).  The stack size should
+	  be controlled by the .config file or the OSTest won't work on platforms
+	  with memory constraints.
 
 nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
