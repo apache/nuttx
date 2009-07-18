@@ -98,12 +98,11 @@ static char g_url[LINE_SIZE];
  * Private Functions
  ****************************************************************************/
 
-static void internal_error(FILE *outstream, char *reason)
+static void internal_error(char *reason)
 {
   char *title = "500 Internal Error";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 Status: %s\n\
 Content-type: text/html\n\
 \n\
@@ -116,12 +115,11 @@ Something unusual went wrong during a redirection request:\n\
 </BODY></HTML>\n", title, title, title, reason);
 }
 
-static void not_found(FILE *outstream, char *script_name)
+static void not_found(char *script_name)
 {
   char *title = "404 Not Found";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 Status: %s\n\
 Content-type: text/html\n\
 \n\
@@ -132,12 +130,11 @@ however, the new URL has not yet been specified.\n\
 </BODY></HTML>\n", title, title, title, script_name);
 }
 
-static void moved(FILE *outstream, char *script_name, char *url)
+static void moved(char *script_name, char *url)
 {
   char *title = "Moved";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 Location: %s\n\
 Content-type: text/html\n\
 \n\
@@ -154,21 +151,12 @@ The requested filename, %s, has moved to a new URL:\n\
 
 int main(int argc, char **argv)
 {
-  FILE *outstream;
   char *script_name;
   char *path_info;
   char *cp = 0;
   FILE *fp;
   char *star;
   int  err = 0;
-
-  outstream = fdopen(CONFIG_THTTPD_CGI_OUTFD, "w");
-  if (!outstream)
-    {
-      fprintf(stderr, "fdopen failed: %d\n", errno);
-      err = 1;
-      goto errout;
-    }
 
   /* Get the name that we were run as, which is the filename being **
    * redirected.
@@ -177,9 +165,8 @@ int main(int argc, char **argv)
   script_name = getenv("SCRIPT_NAME");
   if (!script_name)
     {
-      internal_error(outstream, "Couldn't get SCRIPT_NAME environment variable.");
-      err = 2;
-      goto errout_with_outstream;
+      internal_error("Couldn't get SCRIPT_NAME environment variable.");
+      return 1;
     }
 
   /* Append the PATH_INFO, if any.  This allows redirection of whole **
@@ -192,9 +179,8 @@ int main(int argc, char **argv)
       cp = (char *)malloc(strlen(script_name) + strlen(path_info) + 1);
       if (!cp)
         {
-          internal_error(outstream, "Out of memory.");
-          err = 3;
-          goto errout_with_outstream;
+          internal_error("Out of memory.");
+          return 2;
         }
 
       (void)sprintf(cp, "%s%s", script_name, path_info);
@@ -206,8 +192,8 @@ int main(int argc, char **argv)
   fp = fopen(".redirects", "r");
   if (fp == (FILE *) 0)
     {
-      internal_error(outstream, "Couldn't open .redirects file.");
-      err = 4;
+      internal_error("Couldn't open .redirects file.");
+      err = 3;
       goto errout_with_cp;
     }
 
@@ -251,7 +237,7 @@ int main(int argc, char **argv)
 
                       /* XXX Whack the script_name, too? */
 
-                      moved(outstream, script_name, g_url);
+                      moved(script_name, g_url);
                       goto success_out;
                     }
                 }
@@ -262,7 +248,7 @@ int main(int argc, char **argv)
                 {
                   /* Got it. */
 
-                  moved(outstream, script_name, g_url);
+                  moved(script_name, g_url);
                   goto success_out;
                 }
             }
@@ -271,8 +257,8 @@ int main(int argc, char **argv)
 
   /* No match found. */
 
-  not_found(outstream, script_name);
-  err = 5;
+  not_found(script_name);
+  err = 4;
 
 success_out:
   fclose(fp);
@@ -281,8 +267,5 @@ errout_with_cp:
     {
       free(cp);
     }
-errout_with_outstream:
-  fclose(outstream);
-errout:
   return err;
 }

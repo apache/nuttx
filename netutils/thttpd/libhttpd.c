@@ -65,6 +65,7 @@
 #include "libhttpd.h"
 #include "timers.h"
 #include "tdate_parse.h"
+#include "fdwatch.h"
 
 #ifdef CONFIG_THTTPD
 
@@ -104,6 +105,29 @@ extern char *crypt(const char *key, const char *setting);
 #  define ERROR_FORM(a,b) b
 #else
 #  define ERROR_FORM(a,b) a
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_THTTPD_CGI_PATTERN
+enum cgi_outbuffer_e
+{
+  CGI_OUTBUFFER_READHEADER = 0,
+  CGI_OUTBUFFER_HEADERREAD,
+  CGI_OUTBUFFER_HEADERSENT,
+  CGI_OUTBUFFER_READDATA,
+  CGI_OUTBUFFER_DONE,
+};
+
+struct cgi_outbuffer_s
+{
+  enum cgi_outbuffer_e state;
+  char  *buffer;
+  size_t size;
+  size_t len;
+};
 #endif
 
 /****************************************************************************
@@ -166,10 +190,10 @@ static char *hostname_map(char *hostname);
 #ifdef CONFIG_THTTPD_CGI_PATTERN
 static void create_environment(httpd_conn *hc);
 static char **make_argp(httpd_conn *hc);
-static void cgi_interpose_input(httpd_conn *hc, int wfd);
-static void post_post_garbage_hack(httpd_conn *hc);
-static void cgi_interpose_output(httpd_conn *hc, int rfd);
-static void cgi_child(int argc, char **argv);
+static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer);
+static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
+                                          struct cgi_outbuffer_s *hdr);
+static int  cgi_child(int argc, char **argv);
 static int  cgi(httpd_conn *hc);
 #endif
 
@@ -197,37 +221,6 @@ static size_t sockaddr_len(httpd_sockaddr * saP);
 static pid_t  main_thread;
 static int    str_alloc_count = 0;
 static size_t str_alloc_size  = 0;
-
-/* Base-64 decoding.  This represents binary data as printable ASCII
- * characters.  Three 8-bit binary bytes are turned into four 6-bit
- * values, like so:
- *
- *   [11111111][22222222][33333333] -> [111111][112222][222233][333333]
- *
- * Then the 6-bit values are represented using the characters "A-Za-z0-9+/".
- */
-
-#ifdef CONFIG_THTTPD_AUTH_FILE
-static const int b64_decode_table[256] =
-{
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* 00-0F */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* 10-1F */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,       /* 20-2F */
-  52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,       /* 30-3F */
-  -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,       /* 40-4F */
-  15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,       /* 50-5F */
-  -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,       /* 60-6F */
-  41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1,       /* 70-7F */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* 80-8F */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* 90-9F */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* A0-AF */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* B0-BF */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* C0-CF */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* D0-DF */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,       /* E0-EF */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1        /* F0-FF */
-};
-#endif
 
 /* Include MIME encodings and types */
 
@@ -313,7 +306,6 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
       ndbg("socket %s: %d\n", httpd_ntoa(saP), errno);
       return -1;
     }
-  (void)fcntl(listen_fd, F_SETFD, 1);
 
   /* Allow reuse of local addresses. */
 
@@ -590,7 +582,7 @@ static int send_err_file(httpd_conn *hc, int status, char *title, char *extrahea
 
   return 1;
 }
-#endif /* CONFIG_THTTPD_ERROR_DIRECTORY */
+#endif
 
 #ifdef CONFIG_THTTPD_AUTH_FILE
 static void send_authenticate(httpd_conn *hc, char *realm)
@@ -613,6 +605,52 @@ static void send_authenticate(httpd_conn *hc, char *realm)
     }
 }
 
+/* Base-64 decoding.  This represents binary data as printable ASCII
+ * characters.  Three 8-bit binary bytes are turned into four 6-bit
+ * values, like so:
+ *
+ *   [11111111][22222222][33333333] -> [111111][112222][222233][333333]
+ *
+ * Then the 6-bit values are represented using the characters "A-Za-z0-9+/".
+ */
+
+static inline b64_charmap(char *ch)
+{
+  char bin6;
+
+       bin6 = -1;
+       if (c == 0x20)                         /* ' ' */
+         {
+           bin6 = 62;                          /* ' '  maps to 62 */
+         }
+       elseif (c == 0x2f)                      /* '/' */
+         {
+           bin6 = 63;                          /* '/'  maps to 63 */
+         }
+       else if (c >=  0x30)                    /* '0' */
+         {
+           else if (c <= 0x39)                 /* '9' */
+             {
+               bin6 = (c - 0x39 + 52);         /* '0'-'9' maps to 52-61 */
+             }
+           else if (c >= 0x41)                 /* 'A' */
+             {
+               if (c <= 0x5a)                  /* 'Z' */
+                 {
+                   bin6 = c - 0x41;            /* 'A'-'Z' map to 0 - 25 */
+                 }
+               else if (c >= 0x61)             /* 'a' */
+                 {
+                   if (c <= 0x7a)              /* 'z' */
+                     {
+                       bin6 = c - 0x61 + 26;   /* 'a'-'z' map to 0 - 25 */
+                     }
+                 }
+             }
+         }
+
+}
+
 /* Do base-64 decoding on a string.  Ignore any non-base64 bytes.
  * Return the actual number of bytes generated.  The decoded size will
  * be at most 3/4 the size of the encoded, and may be smaller if there
@@ -622,45 +660,46 @@ static void send_authenticate(httpd_conn *hc, char *realm)
 static int b64_decode(const char *str, unsigned char *space, int size)
 {
   const char *cp;
-  int space_idx, phase;
-  int d, prev_d = 0;
-  unsigned char c;
+  int ndx;
+  int phase;
+  int decoded;
+  int prev_decoded = 0;
+  unsigned char packed;
 
-  space_idx = 0;
+  ndx = 0;
   phase = 0;
-  for (cp = str; *cp != '\0'; ++cp)
+  for (cp = str; *cp != '\0', ndx < size; cp++)
     {
-      d = b64_decode_table[(int)*cp];
-      if (d != -1)
+       /* Decode base-64 */
+
+      decoded = b64_charmap(*cp);  /* Decode ASCII representations to 6-bit binary */
+      if (decoded != -1)
         {
           switch (phase)
             {
             case 0:
-              ++phase;
+              phase = 1;
               break;
+
             case 1:
-              c = ((prev_d << 2) | ((d & 0x30) >> 4));
-              if (space_idx < size)
-                space[space_idx++] = c;
-              ++phase;
+              space[ndx++] = ((prev_decoded << 2) | ((decoded & 0x30) >> 4));
+              phase = 2;
               break;
+
             case 2:
-              c = (((prev_d & 0xf) << 4) | ((d & 0x3c) >> 2));
-              if (space_idx < size)
-                space[space_idx++] = c;
-              ++phase;
+              space[ndx++] =(((prev_decoded & 0xf) << 4) | ((decoded & 0x3packed) >> 2));
+              phase = 3;
               break;
+
             case 3:
-              c = (((prev_d & 0x03) << 6) | d);
-              if (space_idx < size)
-                space[space_idx++] = c;
+              space[ndx++] =(((prev_decoded & 0x03) << 6) | decoded);
               phase = 0;
               break;
             }
-          prev_d = d;
+          prev_decoded = decoded;
         }
     }
-  return space_idx;
+  return ndx;
 }
 
 /* Returns -1 == unauthorized, 0 == no auth file, 1 = authorized. */
@@ -901,19 +940,19 @@ static void send_dirredirect(httpd_conn *hc)
   send_response(hc, 302, err302title, header, err302form, location);
 }
 
-static int hexit(char c)
+static int hexit(char nibble)
 {
-  if (c >= '0' && c <= '9')
+  if (nibble >= '0' && nibble <= '9')
     {
-      return c - '0';
+      return nibble - '0';
     }
-  else if (c >= 'a' && c <= 'f')
+  else if (nibble >= 'a' && nibble <= 'f')
     {
-      return c - 'a' + 10;
+      return nibble - 'a' + 10;
     }
-  else if (c >= 'A' && c <= 'F')
+  else if (nibble >= 'A' && nibble <= 'F')
     {
-      return c - 'A' + 10;
+      return nibble - 'A' + 10;
     }
   return 0;
 }
@@ -990,7 +1029,7 @@ static intCONFIG_THTTPD_TILDE_MAP1(httpd_conn *hc)
   (void)strcat(hc->expnfilename, temp);
   return 1;
 }
-#endif /*CONFIG_THTTPD_TILDE_MAP1 */
+#endif
 
 /* Map a ~username/whatever URL into <user's homedir>/<postfix>. */
 
@@ -1057,7 +1096,7 @@ static intCONFIG_THTTPD_TILDE_MAP2(httpd_conn *hc)
   hc->tildemapped = TRUE;
   return 1;
 }
-#endif /*CONFIG_THTTPD_TILDE_MAP2 */
+#endif
 
 /* Virtual host mapping. */
 
@@ -1073,7 +1112,7 @@ static int vhost_map(httpd_conn *hc)
 #ifdef VHOST_DIRLEVELS
   int i;
   char *cp2;
-#endif /* VHOST_DIRLEVELS */
+#endif
 
   /* Figure out the virtual hostname. */
 
@@ -2186,80 +2225,74 @@ static FAR char **make_argp(httpd_conn *hc)
 }
 #endif
 
-/* This routine is used only for POST requests.  It reads the data
- * from the request and sends it to the child process.  The only reason
- * we need to do it this way instead of just letting the child read
- * directly is that we have already read part of the data into our
- * buffer.
+/* Data is available from the client socket. This routine is used only for POST
+ * requests.  It reads the data from the client and sends it to the child thread.
  */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static void cgi_interpose_input(httpd_conn *hc, int wfd)
+static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
 {
-  size_t c;
-  ssize_t r;
-  char buf[1024];
+  size_t nbytes;
+  ssize_t nbytes_read;
+  ssize_t nbytes_written;
 
-  c = hc->read_idx - hc->checked_idx;
-  if (c > 0)
+  nbytes = hc->read_idx - hc->checked_idx;
+  if (nbytes > 0)
     {
-      if (httpd_write(wfd, &(hc->read_buf[hc->checked_idx]), c) != c)
+      if (httpd_write(wfd, &(hc->read_buf[hc->checked_idx]), nbytes) != nbytes)
         {
-          return;
+          return 1;
         }
     }
-  while (c < hc->contentlength)
+
+  if (nbytes < hc->contentlength)
     {
-      r = read(hc->conn_fd, buf, MIN(sizeof(buf), hc->contentlength - c));
-      if (r < 0 && (errno == EINTR || errno == EAGAIN))
+      do
         {
-          sleep(1);
-          continue;
+          nbytes_read = read(hc->conn_fd, buffer, MIN(sizeof(buffer), hc->contentlength - nbytes));
+          if (nbytes_read < 0)
+            {
+              if (errno != EINTR)
+                {
+                  return 1;
+                }
+            }
         }
-      if (r <= 0)
-        {
-          return;
-        }
+      while (nbytes_read < 0);
 
-      if (httpd_write(wfd, buf, r) != r)
+      if (nbytes_read > 0)
         {
-          return;
+          nbytes_written = httpd_write(wfd, buffer, nbytes_read);
+          if (nbytes_written != nbytes_read)
+            {
+              return 1;
+            }
         }
-
-      c += r;
     }
-  post_post_garbage_hack(hc);
+
+  if (nbytes >= hc->contentlength)
+    {
+      /* Special hack to deal with broken browsers that send a LF or CRLF
+       * after POST data, causing TCP resets - we just read and discard up
+       * to 2 bytes.  Unfortunately this doesn't fix the problem for CGIs
+       * which avoid the interposer process due to their POST data being
+       * short.  Creating an interposer process for all POST CGIs is
+       * unacceptably expensive.  The eventual fix will come when interposing
+       * gets integrated into the main loop as a tasklet instead of a process.
+       */
+
+      /* Turn on no-delay mode in case we previously cleared it. */
+
+      httpd_set_ndelay(hc->conn_fd);
+
+      /* And read up to 2 bytes. */
+
+      (void)read(hc->conn_fd, buffer, sizeof(buffer));
+      return 1;
+    }
+  return 0;
 }
 #endif
-
-/* Special hack to deal with broken browsers that send a LF or CRLF
- * after POST data, causing TCP resets - we just read and discard up
- * to 2 bytes.  Unfortunately this doesn't fix the problem for CGIs
- * which avoid the interposer process due to their POST data being
- * short.  Creating an interposer process for all POST CGIs is
- * unacceptably expensive.  The eventual fix will come when interposing
- * gets integrated into the main loop as a tasklet instead of a process.
- */
-
-#ifdef CONFIG_THTTPD_CGI_PATTERN
-static void post_post_garbage_hack(httpd_conn *hc)
-{
-  char buf[2];
-
-  /* If we are in a sub-process, turn on no-delay mode in case we previously 
-   * cleared it.
-   */
-
-  if (main_thread != getpid())
-    {
-      httpd_set_ndelay(hc->conn_fd);
-    }
-
-  /* And read up to 2 bytes. */
-
-  (void)read(hc->conn_fd, buf, sizeof(buf));
-}
-#endif /* CONFIG_THTTPD_CGI_PATTERN */
 
 /* This routine is used for parsed-header CGIs.  The idea here is that the
  * CGI can return special headers such as "Status:" and "Location:" which
@@ -2270,12 +2303,10 @@ static void post_post_garbage_hack(httpd_conn *hc)
  */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static void cgi_interpose_output(httpd_conn *hc, int rfd)
+static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
+                                         struct cgi_outbuffer_s *hdr)
 {
-  int r;
-  char buf[1024];
-  size_t headers_size, headers_len;
-  char *headers;
+  ssize_t nbytes_read;
   char *br;
   int status;
   char *title;
@@ -2287,203 +2318,251 @@ static void cgi_interpose_output(httpd_conn *hc, int rfd)
 
   httpd_clear_ndelay(hc->conn_fd);
 
-  /* Slurp in all headers. */
+  /* Loop while there are things we can do without waiting for more input */
 
-  headers_size = 0;
-  httpd_realloc_str(&headers, &headers_size, 500);
-  headers_len = 0;
-  for (;;)
+  switch (hdr->state)
     {
-      r = read(rfd, buf, sizeof(buf));
-      if (r < 0 && (errno == EINTR || errno == EAGAIN))
+      case CGI_OUTBUFFER_READHEADER:
         {
-          sleep(1);
-          continue;
-        }
+          /* Slurp in all headers as they become available from the CGI program. */
 
-      if (r <= 0)
+          do
+            {
+              /* Read until we successfully read data or until an error occurs.
+               * EAGAIN is not an error, but it is still cause to return.
+               */
+
+              nbytes_read = read(rfd, inbuffer, sizeof(inbuffer));
+              if (nbytes_read < 0)
+                {
+                  if (errno != EINTR)
+                    {
+                      if (errno != EAGAIN)
+                        {
+                          ndbg("read: %d\n", errno);
+                        }
+                      return 1;
+                    }
+                }
+            }
+          while (nbytes_read < 0);
+
+          /* Check for end-of-file */
+
+          if (nbytes_read <= 0)
+            {
+              br         = &(hdr->buffer[hdr->len]);
+              hdr->state = CGI_OUTBUFFER_HEADERREAD;
+            }
+          else
+            {
+              /* Accumulate more header data */
+
+              httpd_realloc_str(&hdr->buffer, &hdr->size, hdr->len + nbytes_read);
+              (void)memcpy(&(hdr->buffer[hdr->len]), inbuffer, nbytes_read);
+              hdr->len += nbytes_read;
+              hdr->buffer[hdr->len] = '\0';
+
+              /* Check for end of header */
+
+              if ((br = strstr(hdr->buffer, "\015\012\015\012")) != NULL ||
+                  (br = strstr(hdr->buffer, "\012\012")) != NULL)
+                {
+                  hdr->state = CGI_OUTBUFFER_HEADERREAD;
+                }
+              else
+                {
+                  /* Return.  We will be called again when more data is available
+                   * on the pipe.
+                   */
+
+                  return 0;
+                }
+            }
+        }
+        break;
+
+      case CGI_OUTBUFFER_HEADERREAD:
         {
-          br = &(headers[headers_len]);
-          break;
-        }
+          /* If there were no headers, bail. */
 
-      httpd_realloc_str(&headers, &headers_size, headers_len + r);
-      (void)memmove(&(headers[headers_len]), buf, r);
-      headers_len += r;
-      headers[headers_len] = '\0';
+          if (hdr->buffer[0] == '\0')
+            {
+              hdr->state = CGI_OUTBUFFER_DONE;
+              return 1;
+            }
 
-      if ((br = strstr(headers, "\015\012\015\012")) != NULL ||
-          (br = strstr(headers, "\012\012")) != NULL)
-        {
-          break;
-        }
-    }
+          /* Figure out the status.  Look for a Status: or Location: header; else if 
+           * there's an HTTP header line, get it from there; else default to 200.
+           */
 
-  /* If there were no headers, bail. */
+          status = 200;
+          if (strncmp(hdr->buffer, "HTTP/", 5) == 0)
+            {
+              cp = hdr->buffer;
+              cp += strcspn(cp, " \t");
+              status = atoi(cp);
+            }
 
-  if (headers[0] == '\0')
-    {
-      return;
-    }
+          if ((cp = strstr(hdr->buffer, "Status:")) != (char *)0 &&
+              cp < br && (cp == hdr->buffer || *(cp - 1) == '\012'))
+            {
+              cp += 7;
+              cp += strspn(cp, " \t");
+              status = atoi(cp);
+            }
 
-  /* Figure out the status.  Look for a Status: or Location: header; else if 
-   * there's an HTTP header line, get it from there; else default to 200.
-   */
+          if ((cp = strstr(hdr->buffer, "Location:")) != (char *)0 &&
+              cp < br && (cp == hdr->buffer || *(cp - 1) == '\012'))
+            {
+              status = 302;
+            }
 
-  status = 200;
-  if (strncmp(headers, "HTTP/", 5) == 0)
-    {
-      cp = headers;
-      cp += strcspn(cp, " \t");
-      status = atoi(cp);
-    }
+          /* Write the status line. */
 
-  if ((cp = strstr(headers, "Status:")) != (char *)0 &&
-      cp < br && (cp == headers || *(cp - 1) == '\012'))
-    {
-      cp += 7;
-      cp += strspn(cp, " \t");
-      status = atoi(cp);
-    }
+         switch (status)
+            {
+            case 200:
+              title = ok200title;
+              break;
 
-  if ((cp = strstr(headers, "Location:")) != (char *)0 &&
-      cp < br && (cp == headers || *(cp - 1) == '\012'))
-    {
-      status = 302;
-    }
+            case 302:
+              title = err302title;
+              break;
 
-  /* Write the status line. */
+            case 304:
+              title = err304title;
+              break;
 
-  switch (status)
-    {
-    case 200:
-      title = ok200title;
-      break;
-
-    case 302:
-      title = err302title;
-      break;
-
-    case 304:
-      title = err304title;
-      break;
-
-    case 400:
-      title = httpd_err400title;
-      break;
+            case 400:
+              title = httpd_err400title;
+              break;
 
 #ifdef CONFIG_THTTPD_AUTH_FILE
-    case 401:
-      title = err401title;
-      break;
-#endif  /* CONFIG_THTTPD_AUTH_FILE */
+            case 401:
+              title = err401title;
+              break;
+#endif
 
-    case 403:
-      title = err403title;
-      break;
+            case 403:
+              title = err403title;
+              break;
 
-    case 404:
-      title = err404title;
-      break;
+            case 404:
+              title = err404title;
+             break;
 
-    case 408:
-      title = httpd_err408title;
-      break;
+           case 408:
+              title = httpd_err408title;
+              break;
 
-    case 500:
-      title = err500title;
-      break;
+            case 500:
+              title = err500title;
+              break;
 
-    case 501:
-      title = err501title;
-      break;
+            case 501:
+              title = err501title;
+              break;
 
-    case 503:
-      title = httpd_err503title;
-      break;
+            case 503:
+              title = httpd_err503title;
+              break;
 
-    default:
-      title = "Something";
-      break;
+            default:
+              title = "Something";
+              break;
+            }
+
+          (void)snprintf(inbuffer, sizeof(inbuffer), "HTTP/1.0 %d %s\015\012", status, title);
+          (void)httpd_write(hc->conn_fd, inbuffer, strlen(inbuffer));
+
+          /* Write the saved hdr->buffer. */
+
+          (void)httpd_write(hc->conn_fd, hdr->buffer, hdr->len);
+        }
+
+        /* Then set up to read the data following the header from the CGI program.
+         * We return here; we will be called again when data is available on the pipe.
+         */
+
+        hdr->state = CGI_OUTBUFFER_READDATA;
+        return 0;
+
+      case CGI_OUTBUFFER_READDATA:
+        {
+          /* Read data from the pipe. */
+
+          do
+            {
+              /* Read until we successfully read data or until an error occurs.
+               * EAGAIN is not an error, but it is still cause to return.
+               */
+
+              nbytes_read = read(rfd, inbuffer, sizeof(inbuffer));
+              if (nbytes_read < 0)
+                {
+                  if (errno != EINTR)
+                    {
+                      if (errno != EAGAIN)
+                        {
+                          ndbg("read: %d\n", errno);
+                        }
+                      return 1;
+                    }
+                }
+            }
+          while (nbytes_read < 0);
+
+          /* Check for end of file */
+
+          if (nbytes_read == 0)
+            {
+              close(hc->conn_fd);
+              close(rfd);
+              hdr->state = CGI_OUTBUFFER_DONE;
+              return 1;
+            }
+          else
+            {
+               /* Forward the data from the CGI program to the client */
+
+             (void)httpd_write(hc->conn_fd, inbuffer, strlen(inbuffer));
+            }
+        }
+        break;
+
+      case CGI_OUTBUFFER_DONE:
+      default:
+        return 1;
     }
-
-  (void)snprintf(buf, sizeof(buf), "HTTP/1.0 %d %s\015\012", status, title);
-  (void)httpd_write(hc->conn_fd, buf, strlen(buf));
-
-  /* Write the saved headers. */
-
-  (void)httpd_write(hc->conn_fd, headers, headers_len);
-
-  /* Echo the rest of the output. */
-
-  for (;;)
-    {
-      r = read(rfd, buf, sizeof(buf));
-      if (r < 0 && (errno == EINTR || errno == EAGAIN))
-        {
-          sleep(1);
-          continue;
-        }
-
-      if (r <= 0)
-        {
-          break;
-        }
-
-      if (httpd_write(hc->conn_fd, buf, r) != r)
-        {
-          break;
-        }
-    }
-
-  close(hc->conn_fd);
+  return 0;
 }
 #endif
 
 /* CGI child process. */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
-static void cgi_child(int argc, char **argv)
+static int cgi_child(int argc, char **argv)
 {
   FAR httpd_conn *hc = (FAR httpd_conn*)strtoul(argv[1], NULL, 16);
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
   ClientData client_data;
 #endif
   FAR char **argp;
-  char *binary;
-  char *directory;
-  int child;
-
-  /* Unset close-on-exec flag for this socket.  This actually shouldn't be
-   * necessary, according to POSIX a dup()'d file descriptor does *not*
-   * inherit the close-on-exec flag, its flag is always clear. However,
-   * Linux messes this up and does copy the flag to the dup()'d descriptor,
-   * so we have to clear it.  This could be ifdeffed for Linux only.
-   */
-
-  (void)fcntl(hc->conn_fd, F_SETFD, 0);
-
-  /* If the socket happens to be using one of the stdin/stdout/stderr
-   * descriptors, move it to another descriptor so that the dup2 calls below 
-   * don't screw things up.  We arbitrarily pick fd 3 - if there was already 
-   * something on it, we clobber it, but that doesn't matter since at this
-   * point the only fd of interest is the connection. All others will be
-   * closed on exec.
-   */
-
-  if (hc->conn_fd == STDIN_FILENO || hc->conn_fd == STDOUT_FILENO ||
-      hc->conn_fd == STDERR_FILENO)
-    {
-      int newfd = dup2(hc->conn_fd, STDERR_FILENO + 1);
-      if (newfd >= 0)
-        {
-          hc->conn_fd = newfd;
-        }
-
-      /* If the dup2 fails, shrug.  We'll just take our chances. Shouldn't
-       * happen though.
-       */
-    }
+  struct cgi_outbuffer_s hdr;
+  struct fdwatch_s *fw;
+  char   *buffer;
+  char   *binary;
+  char   *directory;
+  boolean indone;
+  boolean outdone;
+  int     child;
+  int     pipefd[2];
+  int     wfd;
+  int     rfd;
+  int     fd;
+  int     ret;
+  int     err = 1;
 
   /* Update all of the environment variable settings, these will be inherited
    * by the CGI task.
@@ -2495,140 +2574,80 @@ static void cgi_child(int argc, char **argv)
 
   argp = make_argp(hc);
 
-  /* Set up stdin.  For POSTs we may have to set up a pipe from an
-   * interposer process, depending on if we've read some of the data into
-   * our buffer.
+  /* Close all file descriptors (including stdio, stdin, stdout) EXCEPT for
+   * stderr and hc->conn_fd
    */
 
-  if (hc->method == METHOD_POST && hc->read_idx > hc->checked_idx)
+  for (fd = 0; fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS); fd++)
     {
-      char child_arg1[16];
-      char child_arg2[16];
-      char *child_argv[2];
-      int p[2];
+       /* Keep stderr open for debug; keep hc->conn_fd open for obvious reasons */
 
-      if (pipe(p) < 0)
-        {
-          ndbg("pipe: %d\n", errno);
-          httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-          httpd_write_response(hc);
-          exit(1);
-        }
+       if (fd != 2 && fd != hc->conn_fd)
+         {
+           close(fd);
+         }
+    }
 
-      /* Start the cig_interpose_input task */
+  /* Create pipes that will be interposed between the CGI task's stdin or
+   * stdout and the socket.
+   *
+   *
+   * Setup up the STDIN pipe - a pipe to transfer data received on the
+   * socket to the CGI program.
+   */
 
-      snprintf(child_arg1, 16, "%p", hc); /* task_create doesn't handle binary arguments. */
-      child_argv[0] = child_arg1;
-      snprintf(child_arg2, 16, "%08x", p[1]); /* task_create doesn't handle binary arguments. */
-      child_argv[1] = child_arg2;
-
-#ifndef CONFIG_CUSTOM_STACK
-      child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
-                          CONFIG_THTTPD_CGI_STACKSIZE,
-                          (main_t)cgi_interpose_input, (const char **)child_argv);
-#else
-      child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
-                          (main_t)cgi_interpose_input, (const char **)child_argv);
-#endif
-      if (child < 0)
-        {
-          ndbg("task_create: %d\n", errno);
-          httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-          httpd_write_response(hc);
-          exit(1);
-        }
-
-      /* Need to schedule a kill for process child; but in the main process! */
-
-      (void)close(p[1]);
-      if (p[0] != STDIN_FILENO)
-        {
-          (void)dup2(p[0], STDIN_FILENO);
-          (void)close(p[0]);
-        }
+  ret = pipe(pipefd);
+  if (ret < 0)
+    {
+      ndbg("STDIN pipe: %d\n", errno);
+      goto errout_with_descriptors;
     }
   else
     {
-      /* Otherwise, the request socket is stdin. */
+      /* Then map the receiving end the pipe to stdin, save the sending end, and
+       * closing the original receiving end
+       */
 
-      if (hc->conn_fd != STDIN_FILENO)
+      ret = dup2(pipefd[0], 0);
+      if (ret < 0)
         {
-          (void)dup2(hc->conn_fd, STDIN_FILENO);
+          ndbg("STDIN dup2: %d\n", errno);
+          close(pipefd[1]);
+          goto errout_with_descriptors;
         }
+
+      wfd = pipefd[1];
+      close(pipefd[0]);
     }
 
-  /* Set up stdout/stderr.  If we're doing CGI header parsing, we need an
-   * output interposer too.
+  /* Set up the STDOUT pipe - a pipe to transfer data received from the CGI program
+   * to the client.
    */
 
-  if (strncmp(argp[0], "nph-", 4) != 0 && hc->mime_flag)
+  if (ret == 0)
     {
-      char child_arg1[16];
-      char child_arg2[16];
-      char *child_argv[2];
-      int p[2];
-
-      if (pipe(p) < 0)
+      ret = pipe(pipefd);
+      if (ret < 0)
         {
-          ndbg("pipe: %d\n", errno);
-          httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-          httpd_write_response(hc);
-          exit(1);
+          ndbg("STDOUT pipe: %d\n", errno);
+          goto errout_with_descriptors;
         }
-
-       /* Start the cgi_interpose_output task */
-
-       snprintf(child_arg1, 16, "%p", hc); /* task_create doesn't handle binary arguments. */
-       child_argv[0] = child_arg1;
-       snprintf(child_arg2, 16, "%08x", p[0]); /* task_create doesn't handle binary arguments. */
-       child_argv[1] = child_arg2;
-
-#ifndef CONFIG_CUSTOM_STACK
-       child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
-                           CONFIG_THTTPD_CGI_STACKSIZE,
-                          (main_t)cgi_interpose_output, (const char **)child_argv);
-#else
-       child = task_create("CGI child", CONFIG_THTTPD_CGI_PRIORITY,
-                           (main_t)cgi_interpose_output, (const char **)child_argv);
-#endif
-      if (child < 0)
+      else
         {
-          ndbg("fork: %d\n", errno);
-          httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-          httpd_write_response(hc);
-          exit(1);
-        }
+          /* Then map the sending end the pipe to stdout, save the receiving end, and
+           * closing the original sending end
+           */
 
-      /* Need to schedule a kill for process child; but in the main process! */
+          ret = dup2(pipefd[1], 1);
+          if (ret < 0)
+            {
+              ndbg("STDOUT dup2: %d\n", errno);
+              close(pipefd[1]);
+              goto errout_with_descriptors;
+             }
 
-      (void)close(p[0]);
-      if (p[1] != STDOUT_FILENO)
-        {
-          (void)dup2(p[1], STDOUT_FILENO);
-        }
-
-      if (p[1] != STDERR_FILENO)
-        {
-          (void)dup2(p[1], STDERR_FILENO);
-        }
-
-      if (p[1] != STDOUT_FILENO && p[1] != STDERR_FILENO)
-        {
-          (void)close(p[1]);
-        }
-    }
-  else
-    {
-      /* Otherwise, the request socket is stdout/stderr. */
-
-      if (hc->conn_fd != STDOUT_FILENO)
-        {
-          (void)dup2(hc->conn_fd, STDOUT_FILENO);
-        }
-
-      if (hc->conn_fd != STDERR_FILENO)
-        {
-          (void)dup2(hc->conn_fd, STDERR_FILENO);
+          rfd = pipefd[0];
+          close(pipefd[1]);
         }
     }
 
@@ -2656,7 +2675,38 @@ static void cgi_child(int argc, char **argv)
         }
     }
 
-  /* Run the program. */
+  /* Allocate memory for buffering */
+
+  memset(&hdr, 0, sizeof(struct cgi_outbuffer_s));
+  httpd_realloc_str(&hdr.buffer, &hdr.size, 500);
+  if (!hdr.buffer)
+    {
+      ndbg("hdr allocation failed\n");
+      goto errout_with_descriptors;
+    }
+
+  buffer = (char*)malloc(CONFIG_THTTPD_IOBUFFERSIZE);
+  if (!buffer)
+    {
+      ndbg("buffer allocation failed\n");
+      goto errout_with_header;
+    }
+
+  /* Create fdwatch structures */
+
+  fw = fdwatch_initialize(2);
+  if (!fw)
+    {
+      ndbg("fdwatch allocation failed\n");
+      goto errout_with_buffer;
+    }
+
+  /* Add the read descriptors to the watch */
+
+  fdwatch_add_fd(fw, hc->conn_fd, NULL, FDW_READ);
+  fdwatch_add_fd(fw, rfd, NULL, FDW_READ);
+
+  /* Run the CGI program. */
 
   child = exec(binary, (FAR const char **)argp, g_thttpdsymtab, g_thttpdnsymbols);
   if (child < 0)
@@ -2664,24 +2714,63 @@ static void cgi_child(int argc, char **argv)
       /* Something went wrong. */
 
       ndbg("execve %s: %d\n", hc->expnfilename, errno);
-      httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-      httpd_write_response(hc);
-      exit(1);
+      goto errout_with_watch;
    }
- else
-   {
-      /* Schedule a kill for the child process, in case it runs too long. */
+
+  /* Schedule a kill for the child process, in case it runs too long. */
 
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
-      client_data.i = child;
-      if (tmr_create((struct timeval *)0, cgi_kill, client_data,
-                      CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
-        {
-          ndbg("tmr_create(cgi_kill child) failed\n");
-          exit(1);
-        }
+  client_data.i = child;
+  if (tmr_create((struct timeval *)0, cgi_kill, client_data,
+                  CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
+    {
+      ndbg("tmr_create(cgi_kill child) failed\n");
+      goto errout_with_watch;
+    }
 #endif
-   }
+
+  /* Then perform the interposition */
+
+  indone  = FALSE;
+  outdone = FALSE;
+
+  do
+    {
+      if (!indone)
+        {
+          indone = cgi_interpose_input(hc, wfd, buffer);
+        }
+
+      if (!outdone)
+        {
+          outdone = cgi_interpose_output(hc, rfd, buffer, &hdr);
+        }
+  }
+  while (!outdone);
+  err = 0;
+
+  /* Get rid of watch structures */
+
+errout_with_watch:
+  fdwatch_uninitialize(fw);
+
+  /* Free memory */
+
+errout_with_buffer:
+  free(buffer);
+errout_with_header:
+  free(hdr.buffer);
+
+  /* Close all descriptors */
+
+errout_with_descriptors:
+  close(wfd);
+  close(rfd);
+  close(hc->conn_fd);
+
+  httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
+  httpd_write_response(hc);
+  return err;
 }
 #endif /* CONFIG_THTTPD_CGI_PATTERN */
 
@@ -2873,7 +2962,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
 
       /* Ok, generate an index. */
       return ls(hc);
-#else /* CONFIG_THTTPD_GENERATE_INDICES */
+#else
       ndbg("%s URL \"%s\" tried to index a directory\n",
              httpd_ntoa(&hc->client_addr), hc->encodedurl);
       httpd_send_err(hc, 403, err403title, "",
@@ -2881,7 +2970,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
                                 "The requested URL '%s' is a directory, and directory indexing is disabled on this server.\n"),
                      hc->encodedurl);
       return -1;
-#endif /* CONFIG_THTTPD_GENERATE_INDICES */
+#endif
 
     got_one:
 
@@ -2962,7 +3051,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
                      hc->encodedurl);
       return -1;
     }
-#endif /* CONFIG_THTTPD_AUTH_FILE */
+#endif
 
   /* Referer check. */
 
@@ -3169,7 +3258,7 @@ static int really_check_referer(httpd_conn *hc)
 
       return 1;
     }
-#endif /* CONFIG_THTTPD_VHOST */
+#endif
 #endif /* CONFIG_THTTPD_LOCALPATTERN */
 
   /* If the referer host doesn't match the local host pattern, and the
@@ -3187,7 +3276,7 @@ static int really_check_referer(httpd_conn *hc)
 
   return 1;
 }
-#endif /* CONFIG_THTTPD_URLPATTERN */
+#endif
 
 static int sockaddr_check(httpd_sockaddr * saP)
 {
@@ -3199,7 +3288,7 @@ static int sockaddr_check(httpd_sockaddr * saP)
 #ifdef  CONFIG_NET_IPv6
     case AF_INET6:
       return 1;
-#endif /* CONFIG_NET_IPv6 */
+#endif
 
     default:
       return 0;
@@ -3216,7 +3305,7 @@ static size_t sockaddr_len(httpd_sockaddr * saP)
 #ifdef  CONFIG_NET_IPv6
     case AF_INET6:
       return sizeof(struct sockaddr_in6);
-#endif /* CONFIG_NET_IPv6 */
+#endif
 
     default:
       break;
@@ -3410,11 +3499,11 @@ void httpd_send_err(httpd_conn *hc, int status, char *title, char *extraheads,
 
   send_response(hc, status, title, extraheads, form, arg);
 
-#else /* CONFIG_THTTPD_ERROR_DIRECTORY */
+#else
 
   send_response(hc, status, title, extraheads, form, arg);
 
-#endif /* CONFIG_THTTPD_ERROR_DIRECTORY */
+#endif
 }
 
 char *httpd_method_str(int method)
@@ -3492,7 +3581,6 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
       return GC_FAIL;
     }
 
-  (void)fcntl(hc->conn_fd, F_SETFD, 1);
   hc->hs = hs;
   (void)memset(&hc->client_addr, 0, sizeof(hc->client_addr));
   (void)memmove(&hc->client_addr, &sa, sockaddr_len(&sa));
@@ -3526,7 +3614,7 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
   hc->buffer[0] = '\0';
 #ifdef CONFIG_THTTPD_TILDE_MAP2
   hc->altdir[0] = '\0';
-#endif                                 /*CONFIG_THTTPD_TILDE_MAP2 */
+#endif
   hc->buflen = 0;
   hc->if_modified_since = (time_t) - 1;
   hc->range_if = (time_t) - 1;
@@ -4108,7 +4196,7 @@ int httpd_parse_request(httpd_conn *hc)
             {
               ndbg("unknown request header: %s\n", buf);
             }
-#endif /* LOG_UNKNOWN_HEADERS */
+#endif
         }
     }
 
@@ -4223,7 +4311,7 @@ int httpd_parse_request(httpd_conn *hc)
                  hc->expnfilename[strlen(hc->altdir)] == '/')))
         {
         }
-#endif /*CONFIG_THTTPD_TILDE_MAP2 */
+#endif
       else
         {
           ndbg("%s URL \"%s\" goes outside the web tree\n",
@@ -4317,7 +4405,7 @@ char *httpd_ntoa(httpd_sockaddr *saP)
 
   return inet_ntoa(saP->sin_addr);
 
-#endif /* CONFIG_NET_IPv6 */
+#endif
 }
 
 /* Read to requested buffer, accounting for interruptions and EOF */

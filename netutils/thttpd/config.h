@@ -119,14 +119,6 @@
 #  define CONFIG_THTTPD_CGI_TIMELIMIT 0 /* No time limit */
 #endif
 
-/* In NuttX, CGI cannot use stdout for output.  Rather, it must use
- * the following file descriptor number.
- */
-
-#ifndef CONFIG_THTTPD_CGI_OUTFD
-#  define CONFIG_THTTPD_CGI_OUTFD CONFIG_NFILE_DESCRIPTORS
-#endif
-
 /* The default character set name to use with text MIME types. */
 
 #ifndef CONFIG_THTTPD_CHARSET

@@ -40,6 +40,10 @@
 #ifndef __NETUTILS_THTTPD_FDWATCH_H
 #define __NETUTILS_THTTPD_FDWATCH_H
 
+/****************************************************************************
+ * Pre-Processor Definitions
+ ****************************************************************************/
+
 #define FDW_READ 0
 #define FDW_WRITE 1
 
@@ -47,39 +51,62 @@
 #  define INFTIM -1
 #endif
 
-/* initialize the fdwatch data structures.  Returns -1 on failure. */
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
-extern int fdwatch_initialize(void);
+struct fdwatch_s
+{
+  int           *fd_rw;
+  void         **fd_data;
+  struct pollfd *pollfds;
+  int           *poll_pollndx;
+  int           *poll_rfdidx;
+  int            nfds;
+  int            npoll_fds;
+};
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* Initialize the fdwatch data structures.  Returns NULL on failure. */
+
+extern struct fdwatch_s *fdwatch_initialize(int nfds);
+
+/* Uninitialize the fwdatch data structure */
+
+extern void fdwatch_uninitialize(struct fdwatch_s *fw);
 
 /* Add a descriptor to the watch list. rw is either FDW_READ or FDW_WRITE.  */
 
-extern void fdwatch_add_fd(int fd, void *client_data, int rw);
+extern void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data, int rw);
 
 /* Delete a descriptor from the watch list. */
 
-extern void fdwatch_del_fd(int fd);
+extern void fdwatch_del_fd(struct fdwatch_s *fw, int fd);
 
 /* Do the watch.  Return value is the number of descriptors that are ready,
  * or 0 if the timeout expired, or -1 on errors.  A timeout of INFTIM means
  * wait indefinitely.
  */
 
-extern int fdwatch(long timeout_msecs);
+extern int fdwatch(struct fdwatch_s *fw, long timeout_msecs);
 
 /* Check if a descriptor was ready. */
 
-extern int fdwatch_check_fd(int fd);
+extern int fdwatch_check_fd(struct fdwatch_s *fw, int fd);
 
 /* Get the client data for the next returned event.  Returns -1 when there
  * are no more events.
  */
 
-extern void *fdwatch_get_next_client_data(void);
+extern void *fdwatch_get_next_client_data(struct fdwatch_s *fw);
 
 /* Generate debugging statistics syslog message. */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-extern void fdwatch_logstats(long secs);
+extern void fdwatch_logstats(struct fdwatch_s *fw, long secs);
 #endif
 
 #endif /* __NETUTILS_THTTPD_FDWATCH_H */

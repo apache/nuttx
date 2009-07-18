@@ -78,7 +78,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void read_file(FILE *outstream, FILE *instream, char *vfilename, char *filename);
+static void read_file(FILE *instream, char *vfilename, char *filename);
 
 /****************************************************************************
  * Private Data
@@ -96,12 +96,11 @@ static struct stat g_sb;
  * Private Functions
  ****************************************************************************/
 
-static void internal_error(FILE *outstream, char *reason)
+static void internal_error(char *reason)
 {
   char *title = "500 Internal Error";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 <HTML><HEAD><TITLE>%s</TITLE></HEAD>\n\
 <BODY><H2>%s</H2>\n\
 Something unusual went wrong during a server-side-includes request:\n\
@@ -111,12 +110,11 @@ Something unusual went wrong during a server-side-includes request:\n\
 </BODY></HTML>\n", title, title, reason);
 }
 
-static void not_found(FILE *outstream, char *filename)
+static void not_found(char *filename)
 {
   char *title = "404 Not Found";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 <HTML><HEAD><TITLE>%s</TITLE></HEAD>\n\
 <BODY><H2>%s</H2>\n\
 The requested server-side-includes filename, %s,\n\
@@ -124,67 +122,62 @@ does not seem to exist.\n\
 </BODY></HTML>\n", title, title, filename);
 }
 
-static void not_found2(FILE *outstream, char *directive, char *tag, char *filename)
+static void not_found2(char *directive, char *tag, char *filename)
 {
   char *title = "Not Found";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 <HR><H2>%s</H2>\n\
 The filename requested in a %s %s directive, %s,\n\
 does not seem to exist.\n\
 <HR>\n", title, directive, tag, filename);
 }
 
-static void not_permitted(FILE *outstream, char *directive, char *tag, char *val)
+static void not_permitted(char *directive, char *tag, char *val)
 {
   char *title = "Not Permitted";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 <HR><H2>%s</H2>\n\
 The filename requested in the %s %s=%s directive\n\
 may not be fetched.\n\
 <HR>\n", title, directive, tag, val);
 }
 
-static void unknown_directive(FILE *outstream, char *filename, char *directive)
+static void unknown_directive(char *filename, char *directive)
 {
   char *title = "Unknown Directive";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 <HR><H2>%s</H2>\n\
 The requested server-side-includes filename, %s,\n\
 tried to use an unknown directive, %s.\n\
 <HR>\n", title, filename, directive);
 }
 
-static void unknown_tag(FILE *outstream, char *filename, char *directive, char *tag)
+static void unknown_tag(char *filename, char *directive, char *tag)
 {
   char *title = "Unknown Tag";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 <HR><H2>%s</H2>\n\
 The requested server-side-includes filename, %s,\n\
 tried to use the directive %s with an unknown tag, %s.\n\
 <HR>\n", title, filename, directive, tag);
 }
 
-static void unknown_value(FILE *outstream, char *filename, char *directive, char *tag, char *val)
+static void unknown_value(char *filename, char *directive, char *tag, char *val)
 {
   char *title = "Unknown Value";
 
-  (void)fprintf(outstream,
-"\
+  (void)printf("\
 <HR><H2>%s</H2>\n\
 The requested server-side-includes filename, %s,\n\
 tried to use the directive %s %s with an unknown value, %s.\n\
 <HR>\n", title, filename, directive, tag, val);
 }
 
-static int get_filename(FILE *outstream, char *vfilename, char *filename,
+static int get_filename(char *vfilename, char *filename,
                          char *directive, char *tag, char *val, char *fn,
                          int fnsize)
 {
@@ -205,7 +198,7 @@ static int get_filename(FILE *outstream, char *vfilename, char *filename,
     {
       if (strstr(val, "../") != (char *)0)
         {
-          not_permitted(outstream, directive, tag, val);
+          not_permitted(directive, tag, val);
           return -1;
         }
 
@@ -228,7 +221,7 @@ static int get_filename(FILE *outstream, char *vfilename, char *filename,
     {
       if (val[0] == '/' || strstr(val, "../") != (char *)0)
         {
-          not_permitted(outstream, directive, tag, val);
+          not_permitted(directive, tag, val);
           return -1;
         }
       if (fl + 1 + strlen(val) >= fnsize)
@@ -247,7 +240,7 @@ static int get_filename(FILE *outstream, char *vfilename, char *filename,
     }
   else
     {
-      unknown_tag(outstream, filename, directive, tag);
+      unknown_tag(filename, directive, tag);
       return -1;
     }
   return 0;
@@ -353,7 +346,7 @@ static int check_filename(char *filename)
   return 1;
 }
 
-static void show_time(FILE *outstream, time_t t, int gmt)
+static void show_time(time_t t, int gmt)
 {
   struct tm *tmP;
 
@@ -368,40 +361,40 @@ static void show_time(FILE *outstream, time_t t, int gmt)
 
   if (strftime(g_iobuffer2, BUFFER_SIZE, g_timeformat, tmP) > 0)
     {
-      (void)fputs(g_iobuffer2, outstream);
+      (void)puts(g_iobuffer2);
     }
 }
 
-static void show_size(FILE *outstream, off_t size)
+static void show_size(off_t size)
 {
   switch (g_sizefmt)
     {
     case SF_BYTES:
-      (void)fprintf(outstream, "%ld", (long)size);  /* spec says should have commas */
+      (void)printf("%ld", (long)size);  /* spec says should have commas */
       break;
 
     case SF_ABBREV:
       if (size < 1024)
         {
-          (void)fprintf(outstream, "%ld", (long)size);
+          (void)printf("%ld", (long)size);
         }
       else if (size < 1024)
         {
-          (void)fprintf(outstream, "%ldK", (long)size / 1024L);
+          (void)printf("%ldK", (long)size / 1024L);
         }
       else if (size < 1024 * 1024)
         {
-          (void)fprintf(outstream, "%ldM", (long)size / (1024L * 1024L));
+          (void)printf("%ldM", (long)size / (1024L * 1024L));
         }
       else
         {
-          (void)fprintf(outstream, "%ldG", (long)size / (1024L * 1024L * 1024L));
+          (void)printf("%ldG", (long)size / (1024L * 1024L * 1024L));
         }
       break;
     }
 }
 
-static void do_config(FILE *outstream, FILE *instream, char *vfilename, char *filename,
+static void do_config(FILE *instream, char *vfilename, char *filename,
                        char *directive, char *tag, char *val)
 {
   /* The config directive controls various aspects of the file parsing. **
@@ -431,16 +424,16 @@ static void do_config(FILE *outstream, FILE *instream, char *vfilename, char *fi
         }
       else
         {
-          unknown_value(outstream, filename, directive, tag, val);
+          unknown_value(filename, directive, tag, val);
         }
     }
   else
     {
-      unknown_tag(outstream, filename, directive, tag);
+      unknown_tag(filename, directive, tag);
     }
 }
 
-static void do_include(FILE *outstream, FILE *instream, char *vfilename, char *filename,
+static void do_include(FILE *instream, char *vfilename, char *filename,
                         char *directive, char *tag, char *val)
 {
   FILE *instream2;
@@ -448,7 +441,7 @@ static void do_include(FILE *outstream, FILE *instream, char *vfilename, char *f
 
   /* Inserts the text of another document into the parsed document. */
 
-  ret = get_filename(outstream, vfilename, filename, directive, tag, val, g_iobuffer1, BUFFER_SIZE);
+  ret = get_filename(vfilename, filename, directive, tag, val, g_iobuffer1, BUFFER_SIZE);
   if (ret < 0)
     {
       return;
@@ -456,14 +449,14 @@ static void do_include(FILE *outstream, FILE *instream, char *vfilename, char *f
 
   if (!check_filename(g_iobuffer1))
     {
-      not_permitted(outstream, directive, tag, g_iobuffer1);
+      not_permitted(directive, tag, g_iobuffer1);
       return;
     }
 
   instream2 = fopen(g_iobuffer1, "r");
   if (instream2 == (FILE *) 0)
     {
-      not_found2(outstream, directive, tag, g_iobuffer1);
+      not_found2(directive, tag, g_iobuffer1);
       return;
     }
 
@@ -498,11 +491,11 @@ static void do_include(FILE *outstream, FILE *instream, char *vfilename, char *f
         }
     }
 
-  read_file(outstream, instream2, g_iobuffer2, g_iobuffer1);
+  read_file(instream2, g_iobuffer2, g_iobuffer1);
   (void)fclose(instream2);
 }
 
-static void do_echo(FILE *outstream, FILE *instream, char *vfilename, char *filename, 
+static void do_echo(FILE *instream, char *vfilename, char *filename, 
                      char *directive, char *tag, char *val)
 {
   char *cp;
@@ -515,7 +508,7 @@ static void do_echo(FILE *outstream, FILE *instream, char *vfilename, char *file
 
   if (strcmp(tag, "var") != 0)
     {
-      unknown_tag(outstream, filename, directive, tag);
+      unknown_tag(filename, directive, tag);
     }
   else
     {
@@ -523,13 +516,13 @@ static void do_echo(FILE *outstream, FILE *instream, char *vfilename, char *file
         {
           /* The current filename. */
 
-          (void)fputs(filename, outstream);
+          (void)puts(filename);
         }
       else if (strcmp(val, "DOCUMENT_URI") == 0)
         {
           /* The virtual path to this file (such as /~robm/foo.shtml). */
 
-          (void)fputs(vfilename, outstream);
+          (void)puts(vfilename);
         }
       else if (strcmp(val, "QUERY_STRING_UNESCAPED") == 0)
         {
@@ -538,7 +531,7 @@ static void do_echo(FILE *outstream, FILE *instream, char *vfilename, char *file
           cp = getenv("QUERY_STRING");
           if (cp != (char *)0)
             {
-              (void)fputs(cp, outstream);
+              (void)puts(cp);
             }
         }
       else if (strcmp(val, "DATE_LOCAL") == 0)
@@ -548,7 +541,7 @@ static void do_echo(FILE *outstream, FILE *instream, char *vfilename, char *file
           /* The current date, local time zone. */
 
           gettimeofday(&tm, NULL);
-          show_time(outstream, tm.tv_sec, 0);
+          show_time(tm.tv_sec, 0);
         }
       else if (strcmp(val, "DATE_GMT") == 0)
         {
@@ -557,7 +550,7 @@ static void do_echo(FILE *outstream, FILE *instream, char *vfilename, char *file
           /* Same as DATE_LOCAL but in Greenwich mean time. */
 
           gettimeofday(&tm, NULL);
-          show_time(outstream, t, 1);
+          show_time(t, 1);
         }
       else if (strcmp(val, "LAST_MODIFIED") == 0)
         {
@@ -565,7 +558,7 @@ static void do_echo(FILE *outstream, FILE *instream, char *vfilename, char *file
 
           if (fstat(fileno(instream), &g_sb) >= 0)
             {
-              show_time(outstream, g_sb.st_mtime, 0);
+              show_time(g_sb.st_mtime, 0);
             }
         }
       else
@@ -575,24 +568,24 @@ static void do_echo(FILE *outstream, FILE *instream, char *vfilename, char *file
           cp = getenv(val);
           if (cp == (char *)0)
             {
-              unknown_value(outstream, filename, directive, tag, val);
+              unknown_value(filename, directive, tag, val);
             }
           else
             {
-              (void)fputs(cp, outstream);
+              (void)puts(cp);
             }
         }
     }
 }
 
-static void do_fsize(FILE *outstream, FILE *instream, char *vfilename, char *filename,
+static void do_fsize(FILE *instream, char *vfilename, char *filename,
                       char *directive, char *tag, char *val)
 {
   int ret;
 
   /* Prints the size of the specified file. */
 
-  ret = get_filename(outstream, vfilename, filename, directive, tag, val, g_iobuffer1, BUFFER_SIZE);
+  ret = get_filename(vfilename, filename, directive, tag, val, g_iobuffer1, BUFFER_SIZE);
   if (ret < 0)
     {
       return;
@@ -600,21 +593,21 @@ static void do_fsize(FILE *outstream, FILE *instream, char *vfilename, char *fil
 
   if (stat(g_iobuffer1, &g_sb) < 0)
     {
-      not_found2(outstream, directive, tag, g_iobuffer1);
+      not_found2(directive, tag, g_iobuffer1);
       return;
     }
 
-  show_size(outstream, g_sb.st_size);
+  show_size(g_sb.st_size);
 }
 
-static void do_flastmod(FILE *outstream, FILE *instream, char *vfilename, char *filename,
+static void do_flastmod(FILE *instream, char *vfilename, char *filename,
                          char *directive, char *tag, char *val)
 {
   int ret;
 
   /* Prints the last modification date of the specified file. */
 
-  ret = get_filename(outstream, vfilename, filename, directive, tag, val, g_iobuffer1, BUFFER_SIZE);
+  ret = get_filename(vfilename, filename, directive, tag, val, g_iobuffer1, BUFFER_SIZE);
   if (ret < 0)
     {
       return;
@@ -622,13 +615,13 @@ static void do_flastmod(FILE *outstream, FILE *instream, char *vfilename, char *
 
   if (stat(g_iobuffer1, &g_sb) < 0)
     {
-      not_found2(outstream, directive, tag, g_iobuffer1);
+      not_found2(directive, tag, g_iobuffer1);
       return;
     }
-  show_time(outstream, g_sb.st_mtime, 0);
+  show_time(g_sb.st_mtime, 0);
 }
 
-static void parse(FILE *outstream, FILE *instream, char *vfilename, char *filename, char *str)
+static void parse(FILE *instream, char *vfilename, char *filename, char *str)
 {
   char *directive;
   char *cp;
@@ -695,7 +688,7 @@ static void parse(FILE *outstream, FILE *instream, char *vfilename, char *filena
     }
   else
     {
-      unknown_directive(outstream, filename, directive);
+      unknown_directive(filename, directive);
       return;
     }
 
@@ -703,7 +696,7 @@ static void parse(FILE *outstream, FILE *instream, char *vfilename, char *filena
     {
       if (i > 0)
         {
-          putc(' ', outstream);
+          putchar(' ');
         }
 
       val = strchr(g_tags[i], '=');
@@ -725,29 +718,29 @@ static void parse(FILE *outstream, FILE *instream, char *vfilename, char *filena
       switch (dirn)
         {
         case DI_CONFIG:
-          do_config(outstream, instream, vfilename, filename, directive, g_tags[i], val);
+          do_config(instream, vfilename, filename, directive, g_tags[i], val);
           break;
 
         case DI_INCLUDE:
-          do_include(outstream, instream, vfilename, filename, directive, g_tags[i], val);
+          do_include(instream, vfilename, filename, directive, g_tags[i], val);
           break;
 
         case DI_ECHO:
-          do_echo(outstream, instream, vfilename, filename, directive, g_tags[i], val);
+          do_echo(instream, vfilename, filename, directive, g_tags[i], val);
           break;
 
         case DI_FSIZE:
-          do_fsize(outstream, instream, vfilename, filename, directive, g_tags[i], val);
+          do_fsize(instream, vfilename, filename, directive, g_tags[i], val);
           break;
 
         case DI_FLASTMOD:
-          do_flastmod(outstream, instream, vfilename, filename, directive, g_tags[i], val);
+          do_flastmod(instream, vfilename, filename, directive, g_tags[i], val);
           break;
         }
     }
 }
 
-static void slurp(FILE *outstream, FILE *instream, char *vfilename, char *filename)
+static void slurp(FILE *instream, char *vfilename, char *filename)
 {
   int state;
   int ich;
@@ -783,7 +776,7 @@ static void slurp(FILE *outstream, FILE *instream, char *vfilename, char *filena
           if (ich == '>')
             {
               g_iobuffer1[i - 2] = '\0';
-              parse(outstream, instream, vfilename, filename, g_iobuffer1);
+              parse(instream, vfilename, filename, g_iobuffer1);
               return;
             }
           else if (ich != '-')
@@ -800,7 +793,7 @@ static void slurp(FILE *outstream, FILE *instream, char *vfilename, char *filena
     }
 }
 
-static void read_file(FILE *outstream, FILE *instream, char *vfilename, char *filename)
+static void read_file(FILE *instream, char *vfilename, char *filename)
 {
   int ich;
   int state;
@@ -831,7 +824,7 @@ static void read_file(FILE *outstream, FILE *instream, char *vfilename, char *fi
           else
             {
               state = ST_GROUND;
-              putc('<', outstream);
+              putchar('<');
             }
           break;
 
@@ -844,7 +837,7 @@ static void read_file(FILE *outstream, FILE *instream, char *vfilename, char *fi
           else
             {
               state = ST_GROUND;
-              (void)fputs("<!", outstream);
+              (void)puts("<!");
             }
           break;
 
@@ -857,26 +850,26 @@ static void read_file(FILE *outstream, FILE *instream, char *vfilename, char *fi
           else
             {
               state = ST_GROUND;
-              (void)fputs("<!-", outstream);
+              (void)puts("<!-");
             }
           break;
 
         case ST_MINUS2:
           if (ich == '#')
             {
-              slurp(outstream, instream, vfilename, filename);
+              slurp(instream, vfilename, filename);
               state = ST_GROUND;
               continue;
             }
           else
             {
               state = ST_GROUND;
-              (void)fputs("<!--", outstream);
+              (void)puts("<!--");
             }
           break;
         }
 
-      putc((char)ich, outstream);
+      putcchar((char)ich);
     }
 }
 
@@ -886,20 +879,11 @@ static void read_file(FILE *outstream, FILE *instream, char *vfilename, char *fi
 
 int main(int argc, char **argv)
 {
-  FILE *outstream;
   FILE *instream;
   char *script_name;
   char *path_info;
   char *path_translated;
   int err = 0;
-
-  outstream = fdopen(CONFIG_THTTPD_CGI_OUTFD, "w");
-  if (!outstream)
-    {
-      fprintf(stderr, "fdopen failed: %d\n", errno);
-      err = 1;
-      goto errout;
-    }
 
   /* Default formats. */
 
@@ -908,16 +892,15 @@ int main(int argc, char **argv)
 
   /* The MIME type has to be text/html. */
 
-  (void)fputs("Content-type: text/html\n\n", outstream);
+  (voidfputs("Content-type: text/html\n\n");
 
   /* Get the name that we were run as. */
 
   script_name = getenv("SCRIPT_NAME");
   if (!script_name)
     {
-      internal_error(outstream, "Couldn't get SCRIPT_NAME environment variable.");
-      err = 2;
-      goto errout_with_outstream;
+      internal_error("Couldn't get SCRIPT_NAME environment variable.");
+      return 1;
     }
 
   /* Append the PATH_INFO, if any, to get the full URL. */
@@ -931,9 +914,8 @@ int main(int argc, char **argv)
   g_url = (char*)malloc(strlen(script_name) + strlen(path_info) + 1);
   if (!g_url)
     {
-      internal_error(outstream, "Out of memory.");
-      err = 3;
-      goto errout_with_outstream;
+      internal_error("Out of memory.");
+      return 2;
     }
   (void)sprintf(g_url, "%s%s", script_name, path_info);
 
@@ -942,15 +924,15 @@ int main(int argc, char **argv)
   path_translated = getenv("PATH_TRANSLATED");
   if (!path_translated)
     {
-      internal_error(outstream, "Couldn't get PATH_TRANSLATED environment variable.");
-      err = 4;
+      internal_error("Couldn't get PATH_TRANSLATED environment variable.");
+      err = 3;
       goto errout_with_g_url;
     }
 
   if (!check_filename(path_translated))
     {
-      not_permitted(outstream, "initial", "PATH_TRANSLATED", path_translated);
-      err = 5;
+      not_permitted("initial", "PATH_TRANSLATED", path_translated);
+      err = 4;
       goto errout_with_g_url;
     }
 
@@ -959,21 +941,18 @@ int main(int argc, char **argv)
   instream = fopen(path_translated, "r");
   if (!instream)
     {
-      not_found(outstream, path_translated);
-      err = 6;
+      not_found(path_translated);
+      err = 5;
       goto errout_with_g_url;
     }
 
   /* Read and handle the file. */
 
-  read_file(outstream, instream, path_info, path_translated);
+  read_file(instream, path_info, path_translated);
 
   (void)fclose(instream);
 
 errout_with_g_url:
   free(g_url);
-errout_with_outstream:
-  fclose(outstream);
-errout:
   return err;
 }

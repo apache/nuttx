@@ -108,6 +108,7 @@ static struct connect_s *connects;
 static int num_connects;
 static int first_free_connect;
 static int httpd_conn_count;
+static struct fdwatch_s *fw;
 
 /****************************************************************************
  * Public Data
@@ -180,7 +181,7 @@ static void shut_down(void)
       hs = (httpd_server *) 0;
       if (ths->listen_fd != -1)
         {
-          fdwatch_del_fd(ths->listen_fd);
+          fdwatch_del_fd(fw, ths->listen_fd);
         }
       httpd_terminate(ths);
     }
@@ -271,7 +272,7 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
 
       httpd_set_ndelay(conn->hc->conn_fd);
 
-      fdwatch_add_fd(conn->hc->conn_fd, conn, FDW_READ);
+      fdwatch_add_fd(fw, conn->hc->conn_fd, conn, FDW_READ);
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
       ++stats_connections;
@@ -403,8 +404,8 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
   conn->conn_state = CNST_SENDING;
   client_data.p = conn;
 
-  fdwatch_del_fd(hc->conn_fd);
-  fdwatch_add_fd(hc->conn_fd, conn, FDW_WRITE);
+  fdwatch_del_fd(fw, hc->conn_fd);
+  fdwatch_add_fd(fw, hc->conn_fd, conn, FDW_WRITE);
   return;
 
 errout_with_400:
@@ -560,12 +561,12 @@ static void clear_connection(struct connect_s *conn, struct timeval *tv)
     {
       if (conn->conn_state != CNST_PAUSING)
         {
-          fdwatch_del_fd(conn->hc->conn_fd);
+          fdwatch_del_fd(fw, conn->hc->conn_fd);
         }
 
       conn->conn_state = CNST_LINGERING;
       close(conn->hc->conn_fd);
-      fdwatch_add_fd(conn->hc->conn_fd, conn, FDW_READ);
+      fdwatch_add_fd(fw, conn->hc->conn_fd, conn, FDW_READ);
       client_data.p = conn;
 
       if (conn->linger_timer != (Timer *) 0)
@@ -594,7 +595,7 @@ static void really_clear_connection(struct connect_s *conn, struct timeval *tv)
 #endif
   if (conn->conn_state != CNST_PAUSING)
     {
-      fdwatch_del_fd(conn->hc->conn_fd);
+      fdwatch_del_fd(fw, conn->hc->conn_fd);
     }
 
   httpd_close_conn(conn->hc, tv);
@@ -685,7 +686,7 @@ static void logstats(struct timeval *nowP)
 
   thttpd_logstats(stats_secs);
   httpd_logstats(stats_secs);
-  fdwatch_logstats(stats_secs);
+  fdwatch_logstats(fw, stats_secs);
   tmr_logstats(stats_secs);
 }
 #endif
@@ -742,7 +743,6 @@ int thttpd_main(int argc, char **argv)
   struct sockaddr_in sa;
 #endif 
   struct timeval tv;
-  int ret;
 
   /* Setup host address */
 
@@ -773,10 +773,12 @@ int thttpd_main(int argc, char **argv)
        (void)strcat(cwd, "/");
     }
 
-  /* Initialize the fdwatch package */
+  /* Initialize the fdwatch package to handle all of the configured
+   * socket descriptors
+   */
 
-  ret = fdwatch_initialize();
-  if (ret < 0)
+  fw = fdwatch_initialize(CONFIG_NSOCKET_DESCRIPTORS);
+  if (!fw)
     {
       ndbg("fdwatch initialization failure\n");
       exit(1);
@@ -860,7 +862,7 @@ int thttpd_main(int argc, char **argv)
   if (hs != (httpd_server *) 0)
     {
       if (hs->listen_fd != -1)
-        fdwatch_add_fd(hs->listen_fd, (void *)0, FDW_READ);
+        fdwatch_add_fd(fw, hs->listen_fd, (void *)0, FDW_READ);
     }
 
   /* Main loop */
@@ -870,7 +872,7 @@ int thttpd_main(int argc, char **argv)
     {
       /* Do the fd watch */
 
-      num_ready = fdwatch(tmr_mstimeout(&tv));
+      num_ready = fdwatch(fw, tmr_mstimeout(&tv));
       if (num_ready < 0)
         {
           if (errno == EINTR || errno == EAGAIN)
@@ -892,7 +894,7 @@ int thttpd_main(int argc, char **argv)
       /* Is it a new connection? */
 
       if (hs != (httpd_server *) 0 && hs->listen_fd != -1 &&
-          fdwatch_check_fd(hs->listen_fd))
+          fdwatch_check_fd(fw, hs->listen_fd))
         {
           if (handle_newconnect(&tv, hs->listen_fd))
             {
@@ -908,14 +910,14 @@ int thttpd_main(int argc, char **argv)
       /* Find the connections that need servicing */
 
       while ((conn =
-              (struct connect_s *) fdwatch_get_next_client_data()) !=
-             (struct connect_s *) - 1)
+              (struct connect_s*)fdwatch_get_next_client_data(fw)) !=
+             (struct connect_s*)- 1)
         {
           if (conn == (struct connect_s *) 0)
             continue;
 
           hc = conn->hc;
-          if (!fdwatch_check_fd(hc->conn_fd))
+          if (!fdwatch_check_fd(fw, hc->conn_fd))
             {
               /* Something went wrong */
 
