@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_strstr.c
+ * lib/lib_strpbrk.pcs
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -45,59 +45,40 @@
  * Global Functions
  ****************************************************************************/
 
-char *strstr(const char *str, const char *substr)
+char *strpbrk(const char *str, const char *charset)
 {
-  const char *candidate;  /* Candidate in str with matching start character */
-  char         ch;        /* First character of the substring */
-  int          len;       /* The length of the substring */
+  /* Sanity checking */
 
-  /* Special case the empty substring */
-
-  ch = *substr++;
-  if (!ch)
+#ifdef CONFIG_DEBUG
+  if (!str || !charset)
     {
-      /* We'll say that an empty substring matches at the beginning of
-       * the string
+      return NULL;
+    }
+#endif
+    
+  /* Check each character in the string */
+
+  while (*str)
+    {
+      /* Check if the character from the string matches any character in the charset */
+
+      if (strchr(charset, *str) != NULL)
+        {
+          /* Yes, then this position must be the first occurrence in string */
+
+          return (char*)str;
+	}
+
+      /* This character from the strings matches none of those in the charset.
+       * Try the next character from the string.
        */
 
-      return (char*)str;
+      str++;
     }
 
-  /* Search for the substring */
-
-  candidate = str;
-  len       = strlen(substr);
-
-  for (;;)
-    {
-      /* strchr() will return a pointer to the next occurrence of the
-       * character ch in the string
-       */
-
-      candidate = strchr(candidate, ch);
-      if (!candidate || strlen(candidate) < len)
-        {
-           /* First character of the substring does not appear in the string
-            * or the remainder of the string is not long enough to contain the
-            * substring.
-            */
-
-           return NULL;
-        }
-
-      /* Check if this is the beginning of a matching substring */
-
-      if (strncmp(candidate, substr, len) == 0)
-        {
-           return (char*)candidate;
-        }
-
-      /* No, find the next candidate after this one */
-
-      candidate++;
-    }
-
-  /* Won't get here, but some compilers might complain */
+  /* We have looked at every character in the string, and none of them match any of
+   * the characters in charset.
+   */
 
   return NULL;
 }
