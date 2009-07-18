@@ -825,4 +825,5 @@
 	* examples/thttpd: A basic test program for THTTPD
 	* configs/eagle100/thttpd: A build configuration for THTTPD on the Micromint
 	  Eagle-100 LMS6918 (Cortex-M3) board.
+	* lib/: Added strstr()
 

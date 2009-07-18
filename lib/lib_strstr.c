@@ -1,17 +1,17 @@
 /****************************************************************************
- * lib/lib_strchr.c
+ * lib/lib_strstr.ch
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution and use str source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
+ * 2. Redistributions str binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer str
  *    the documentation and/or other materials provided with the
  *    distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
@@ -45,22 +45,59 @@
  * Global Functions
  ****************************************************************************/
 
-/* The strchr() function returns a pointer to the first
- * occurrence of the character c in the string s.
- */
-
-char *strchr(const char *s, int c)
+char *strstr(const char *str, const char *substr)
 {
-  if (s)
+  const char *candidate;  /* Candidate in str with matching start character */
+  char         ch;        /* First character of the substring */
+  int          len;       /* The length of the substring */
+
+  /* Special case the empty substring */
+
+  ch = *substr++;
+  if (!ch)
     {
-      for (; *s; s++)
-        {
-          if (*s == c)
-            {
-              return (char*)s;
-            }
-        }
+      /* We'll say that an empty substring matches at the beginning of
+       * the string
+       */
+
+      return (char*)str;
     }
+
+  /* Search for the substring */
+
+  candidate = str;
+  len       = strlen(substr);
+
+  for (;;)
+    {
+      /* strchr() will return a pointer to the next occurrence of the
+       * character ch in the string
+       */
+
+      candidate = strchr(candidate, ch);
+      if (!candidate || strlen(candidate) < len)
+        {
+           /* First character of the substring does not appear in the string
+            * or the remainder of the string is not long enough to contain the
+            * substring.
+            */
+
+           return NULL;
+        }
+
+      /* Check if this is the beginning of a matching substring */
+
+      if (strncmp(candidate, substr, len) == 0)
+        {
+           return (char*)candidate;
+        }
+
+      /* No, find the next candidate after this one */
+
+      candidate++;
+    }
+
+  /* Won't get here, but some compilers might complain */
 
   return NULL;
 }
