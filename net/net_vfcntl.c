@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_fcntl.c
+ * net/net_vfcntl.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -44,43 +44,30 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include <nuttx/fs.h>
 #include <nuttx/net.h>
-#include <nuttx/sched.h>
+#include "net_internal.h"
 
-#include "fs_internal.h"
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
- * Private Functions
+ * Global Functions
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-static inline int file_vfcntl(int fildes, int cmd, va_list ap)
+int net_vfcntl(int sockfd, int cmd, va_list ap)
 {
-  FAR struct filelist *list;
-  FAR struct file *this_file;
+  FAR struct socket *psock = sockfd_socket(sockfd);
   int err = 0;
   int ret = 0;
 
-  /* Get the thread-specific file list */
+  /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
-
-  /* Was this file opened ? */
-
-  this_file = &list->fl_files[fildes];
-  if (!this_file->f_inode)
+  if (!psock || psock->s_crefs <= 0)
     {
       err = EBADF;
       goto errout;
     }
 
-#warning "Many fcntl() commands not yet implemented"
+#warning "fcntl() commands not yet implemented"
   switch (cmd)
     {
       case F_DUPFD:
@@ -109,9 +96,6 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
          * successful execution of one  of  the  exec  functions.
          */
 
-         err = ENOSYS;
-         break;
-
       case F_GETFL:
         /* Get the file status flags and file access modes, defined in <fcntl.h>,
          * for the file description associated with fildes. The file access modes
@@ -121,11 +105,6 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
          * refer to the same file with different open file descriptions.
          */
 
-        {
-          ret = this_file->f_oflags;
-        }
-        break;
-
       case F_SETFL:
         /* Set the file status flags, defined in <fcntl.h>, for the file description
          * associated with fildes from the corresponding  bits in the third argument,
@@ -134,11 +113,6 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
          * be ignored. If any bits in arg other than those mentioned here are changed
          * by the application, the result is unspecified.
          */
-
-        {
-          this_file->f_oflags = va_arg(ap, int);
-        }
-        break;
 
       case F_GETOWN:
         /* If fildes refers to a socket, get the process or process group ID specified
@@ -154,9 +128,6 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
          * process ID; negative values, other than -1, indicate a process group ID. If
          * fildes does not refer to a socket, the results are unspecified.
          */
-
-         err = EBADF; /* Only valid on socket descriptors */
-         break;
 
       case F_GETLK:
         /* Get the first lock which blocks the lock description pointed to by the third
@@ -185,7 +156,7 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
          * not be done.
          */
 
-         err = ENOSYS; /* Not implemented */
+         err = ENOSYS;
          break;
 
       default:
@@ -199,54 +170,8 @@ errout:
       errno = err;
       return ERROR;
     }
-  return OK;
-}
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
-
-/****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-int fcntl(int fildes, int cmd, ...)
-{
-  va_list ap;
-  int ret;
-
-  /* Setup to access the variable argument list */
-
-  va_start(ap, cmd);
-
-  /* Did we get a valid file descriptor? */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  if ((unsigned int)fildes < CONFIG_NFILE_DESCRIPTORS)
-    {
-       /* Yes.. defer file operations to file_vfcntl() */
-
-       ret = file_vfcntl(fildes, cmd, ap);
-    }
-  else
-#endif
-    {
-      /* No... check for operations on a socket descriptor */
-
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fildes < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          /* Yes.. defer socket descriptor operations to net_vfcntl() */
-
-          ret = net_vfcntl(fildes, cmd, ap);
-        }
-      else
-#endif
-        {
-          /* No.. this descriptor number is out of range */
-
-          ret = EBADF;
-        }
-    }
-
-  va_end(ap);
   return ret;
 }
+
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
 

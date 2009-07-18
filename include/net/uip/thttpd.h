@@ -71,7 +71,6 @@ extern "C" {
 EXTERN FAR const struct symtab_s *g_thttpdsymtab;
 EXTERN int                         g_thttpdnsymbols;
 
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

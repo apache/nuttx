@@ -73,6 +73,23 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* These values must be provided by the user before the THTTPD task daemon
+ * is started:
+ *
+ * g_thttpdsymtab:  A symbol table describing all of the symbols exported
+ *   from the base system.  These symbols are used to bind address references
+ *   in CGI programs to NuttX.
+ * g_nsymbols:  The number of symbols in g_thttpdsymtab[].
+ */
+
+#warning "Not yet initialized"
+FAR const struct symtab_s *g_thttpdsymtab;
+int                         g_thttpdnsymbols;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

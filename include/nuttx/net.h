@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
+#include <stdarg.h>
 #include <semaphore.h>
 
 #include <net/uip/uip.h>
@@ -189,6 +190,11 @@ EXTERN int net_dup2(int sockfd1, int sockfd2);
 /* Performs the low level, common portion of net_dup() and net_dup2() */
 
 EXTERN int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
+
+/* net_vfcntl.c **************************************************************/
+/* Performs fcntl operations on socket */
+
+EXTERN int net_vfcntl(int sockfd, int cmd, va_list ap);
 
 /* netdev-register.c *********************************************************/
 /* This function is called by network interface device drivers to inform the
