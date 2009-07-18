@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/fcntl.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,6 +85,12 @@
 #define F_SETLKW    12 /* Like F_SETLK, but wait for lock to become available */
 #define F_SETOWN    13 /* Set pid that will receive SIGIO and SIGURG signals for fd */
 #define F_SETSIG    14 /* Set the signal to be sent */
+
+/* For posix fcntl() and lockf() */
+
+#define F_RDLCK     0
+#define F_WRLCK     1
+#define F_UNLCK     2
 
 /* close-on-exec flag for F_GETRL and F_SETFL */
 

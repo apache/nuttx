@@ -44,9 +44,10 @@ ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 CSRCS		+= fs_close.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
 endif
 else
-CSRCS		+= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c \
-		   fs_select.c fs_lseek.c fs_dup.c fs_filedup.c fs_dup2.c fs_filedup2.c \
-		   fs_mmap.c fs_opendir.c fs_closedir.c fs_stat.c fs_readdir.c fs_readdirr.c \
+CSRCS		+= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c \
+		   fs_poll.c fs_select.c fs_lseek.c fs_dup.c fs_filedup.c \
+		   fs_dup2.c fs_fcntl.c fs_filedup2.c fs_mmap.c fs_opendir.c \
+		   fs_closedir.c fs_stat.c fs_readdir.c fs_readdirr.c \
 		   fs_seekdir.c fs_telldir.c fs_rewinddir.c fs_files.c fs_inode.c \
 		   fs_inodefind.c fs_inodereserve.c fs_statfs.c fs_inoderemove.c \
 		   fs_registerdriver.c fs_unregisterdriver.c fs_inodeaddref.c \
