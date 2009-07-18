@@ -369,8 +369,6 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_THTTPD_CGI_BYTECOUNT - Byte output limit for CGI tasks.
 		CONFIG_THTTPD_CGI_TIMELIMIT - How many seconds to allow CGI programs
 		  to run before killing them.
-		CONFIG_THTTPD_CGI_OUTFD - In NuttX, CGI cannot use stdout for output. 
-		  Rather, it must use this file descriptor number.
 		CONFIG_THTTPD_CHARSET- The default character set name to use with
 		  text MIME types.
 		CONFIG_THTTPD_IOBUFFERSIZE - 
