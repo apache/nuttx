@@ -6088,10 +6088,12 @@ interface of the same name.
   <li><a href="#FileSystemOverview">2.11.1 NuttX File System Overview</a></li>
   <li><a href="#driveroperations">2.11.2 Driver Operations</a></li>
   <li><a href="#directoryoperations">2.11.3 Directory Operations</a></li>
-  <li><a href="#standardio">2.11.4 Standard I/O</a></li>
-  <li><a href="#PipesNFifos">2.11.5 Pipes and FIFOs</a></li>
-  <li><a href="#fatsupport">2.11.6 FAT File System Support</a></li>
-  <li><a href="#mmapxip">2.11.7 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
+  <li><a href="#dirunistdops">2.11.4 UNIX Standard Operations</a></li>
+  <li><a href="#standardio">2.11.5 Standard I/O</a></li>
+  <li><a href="#stdstrings">2.11.6 Standard String Operations</a></li>
+  <li><a href="#PipesNFifos">2.11.7 Pipes and FIFOs</a></li>
+  <li><a href="#fatsupport">2.11.8 FAT File System Support</a></li>
+  <li><a href="#mmapxip">2.11.9 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
 </ul>
 
 <h3><a name="FileSystemOverview">2.11.1 NuttX File System Overview</a></h3>
@@ -6310,66 +6312,132 @@ interface of the same name.
 <h3><a name="directoryoperations">2.11.3 Directory Operations</a></h3>
 <a name="dirdirentops">
 <ul><pre>
-  #include &lt;dirent.h&gt;
-  int        closedir(DIR *dirp);
-  FAR DIR   *opendir(const char *path);
-  FAR struct dirent *readdir(FAR DIR *dirp);
-  int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry, FAR struct dirent **result);
-  void       rewinddir(FAR DIR *dirp);
-  void       seekdir(FAR DIR *dirp, int loc);
-  int        telldir(FAR DIR *dirp);
+#include &lt;dirent.h&gt;
+
+int        closedir(DIR *dirp);
+FAR DIR   *opendir(const char *path);
+FAR struct dirent *readdir(FAR DIR *dirp);
+int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry, FAR struct dirent **result);
+void       rewinddir(FAR DIR *dirp);
+void       seekdir(FAR DIR *dirp, int loc);
+int        telldir(FAR DIR *dirp);
 </pre></ul>
 </a>
 
-<a name="dirunistdops">
+<h3><a name="dirunistdops">2.11.4 UNIX Standard Operations</a></h3>
 <ul><pre>
-  #include &lt;unistd.h&gt;
-  int       chdir(FAR const char *path);
-  FAR char *getcwd(FAR char *buf, size_t size);
+#include &lt;unistd.h&gt;
+
+pid_t   getpid(void);
+void    _exit(int status) noreturn_function;
+unsigned int sleep(unsigned int seconds);
+void    usleep(unsigned long usec);
+
+int     close(int fd);
+int     dup(int fd);
+int     dup2(int fd1, int fd2);
+int     fsync(int fd);
+off_t   lseek(int fd, off_t offset, int whence);
+ssize_t read(int fd, FAR void *buf, size_t nbytes);
+ssize_t write(int fd, FAR const void *buf, size_t nbytes);
+
+int     pipe(int filedes[2]);
+
+int     chdir(FAR const char *path);
+FAR char *getcwd(FAR char *buf, size_t size);
+
+int     unlink(FAR const char *pathname);
+int     rmdir(FAR const char *pathname);
+int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 </pre></ul>
 </a>
 
-<h3><a name="standardio">2.11.4 Standard I/O</a></h3>
+<h3><a name="standardio">2.11.5 Standard I/O</a></h3>
 <ul><pre>
-  #include &lt;stdio.h&gt;
-  int    fclose(FILE *stream);
-  int    fflush(FILE *stream);
-  int    feof(FILE *stream);                               /* Prototyped but not implemented */
-  int    ferror(FILE *stream);                             /* Prototyped but not implemented */
-  int    fgetc(FILE *stream);
-  int    fgetpos(FILE *stream, fpos_t *pos);
-  char  *fgets(char *s, int n, FILE *stream);
-  FILE  *fopen(const char *path, const char *type);
-  int    fprintf(FILE *stream, const char *format, ...);
-  int    fputc(int c, FILE *stream);
-  int    fputs(const char *s, FILE *stream);
-  size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
-  int    fseek(FILE *stream, long int offset, int whence);
-  int    fsetpos(FILE *stream, fpos_t *pos);
-  long   ftell(FILE *stream);
-  size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
-  char  *gets(char *s);
+#include &lt;stdio.h&gt;
 
-  int    printf(const char *format, ...);
-  int    puts(const char *s);
-  int    rename(const char *source, const char *target);
-  int    sprintf(char *dest, const char *format, ...);
-  int    ungetc(int c, FILE *stream);
-  int    vprintf(const char *s, va_list ap);
-  int    vfprintf(FILE *stream, const char *s, va_list ap);
-  int    vsprintf(char *buf, const char *s, va_list ap);
+int    fclose(FILE *stream);
+int    fflush(FILE *stream);
+FILE  *fdopen(int fd, const char *type);
+int    feof(FILE *stream);                               /* Prototyped but not implemented */
+int    ferror(FILE *stream);                             /* Prototyped but not implemented */
+int    fileno(FAR FILE *stream);
+int    fgetc(FILE *stream);
+int    fgetpos(FILE *stream, fpos_t *pos);
+char  *fgets(char *s, int n, FILE *stream);
+FILE  *fopen(const char *path, const char *type);
+int    fprintf(FILE *stream, const char *format, ...);
+int    fputc(int c, FILE *stream);
+int    fputs(const char *s, FILE *stream);
+size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+int    fseek(FILE *stream, long int offset, int whence);
+int    fsetpos(FILE *stream, fpos_t *pos);
+long   ftell(FILE *stream);
+size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
+char  *gets(char *s);
 
-  FILE  *fdopen(int fd, const char *type);
-  int    fstat(int fd, FAR struct stat *buf);              /* Prototyped but not implemented */
-  int    mkdir(const char *path, mode_t mode);
-  int    rmdir(const char *path);
-  int    stat(const char *path, FAR struct stat *buf);
-  int    statfs(const char *path, FAR struct statfs *buf); /* Prototyped but not implemented */
+int    printf(const char *format, ...);
+int    puts(const char *s);
+int    rename(const char *source, const char *target);
+int    snprintf(FAR char *buf, size_t size, const char *format, ...);
+int    sprintf(char *dest, const char *format, ...);
+int    sscanf(const char *buf, const char *fmt, ...);
+int    ungetc(int c, FILE *stream);
+int    vprintf(const char *s, va_list ap);
+int    vfprintf(FILE *stream, const char *s, va_list ap);
+int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
+int    vsscanf(char *buf, const char *s, va_list ap);
+int    vsprintf(char *buf, const char *s, va_list ap);
+
+#include &lt;sys/stat.h&gt;
+
+int mkdir(FAR const char *pathname, mode_t mode);
+int mkfifo(FAR const char *pathname, mode_t mode);
+int stat(const char *path, FAR struct stat *buf);
+int fstat(int fd, FAR struct stat *buf);
+
+#include &lt;sys/statfs.h&gt;
+
+int statfs(const char *path, struct statfs *buf);
+int fstatfs(int fd, struct statfs *buf);
 </pre></ul>
 
-<h3><a name="PipesNFifos">2.11.5 Pipes and FIFOs</a></h3>
+<h3><a name="stdstrings">2.11.6 Standard String Operations</a></h3>
+<ul><pre>
+#include &lt;string.h&gt;
 
-<h3>2.11.5.1 <a name="pipe"><code>pipe</code></a></h3>
+char  *strchr(const char *s, int c);
+FAR char *strdup(const char *s);
+const char *strerror(int);
+size_t strlen(const char *);
+char  *strcat(char *, const char *);
+char  *strncat(char *, const char *, size_t);
+int    strcmp(const char *, const char *);
+int    strncmp(const char *, const char *, size_t);
+int    strcasecmp(const char *, const char *);
+int    strncasecmp(const char *, const char *, size_t);
+char  *strcpy(char *dest, const char *src);
+char  *strncpy(char *, const char *, size_t);
+char  *strpbrk(const char *, const char *);
+char  *strchr(const char *, int);
+char  *strrchr(const char *, int);
+size_t strspn(const char *, const char *);
+size_t strcspn(const char *, const char *);
+char  *strstr(const char *, const char *);
+char  *strtok(char *, const char *);
+char  *strtok_r(char *, const char *, char **);
+
+void  *memset(void *s, int c, size_t n);
+void  *memcpy(void *dest, const void *src, size_t n);
+int    memcmp(const void *s1, const void *s2, size_t n);
+void  *memmove(void *dest, const void *src, size_t count);
+
+# define bzero(s,n) (void)memset(s,0,n)
+</pre></ul>
+
+<h3><a name="PipesNFifos">2.11.7 Pipes and FIFOs</a></h3>
+
+<h3>2.11.7.1 <a name="pipe"><code>pipe</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6403,7 +6471,7 @@ interface of the same name.
   </ul>
 </p>
 
-<h3>2.11.5.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
+<h3>2.11.7.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6450,8 +6518,8 @@ interface of the same name.
   </ul>
 </p>
 
-<h3><a name="fatsupport">2.11.6 FAT File System Support</a></h3>
-<h3>2.11.6.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
+<h3><a name="fatsupport">2.11.8 FAT File System Support</a></h3>
+<h3>2.11.8.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6528,7 +6596,7 @@ struct fat_format_s
   </ul>
 </p>
 
-<h3><a name="mmapxip">2.11.7 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
+<h3><a name="mmapxip">2.11.9 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
 <p>
   NuttX operates in a flat open address space.
   Therefore, it generally does not require <code>mmap()</code> functionality.
@@ -6551,7 +6619,7 @@ struct fat_format_s
   </ol>
 </p>
 
-<h3><a name="mmap">2.11.7.1 <code>mmap</code></a></h3>
+<h3><a name="mmap">2.11.9.1 <code>mmap</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
