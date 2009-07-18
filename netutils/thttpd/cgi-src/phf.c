@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 {
   fprintf(stderr, "phf CGI probe from %s\n", getenv("REMOTE_ADDR"));
 
-      (void)printf("\
+  (void)printf("\
 Content-type: text/html\n\
 Status: 404/html\n\
 \n\
@@ -73,7 +73,5 @@ The requested object does not exist on this server.\n\
 The link you followed is either outdated, inaccurate,\n\
 or the server has been instructed not to let you have it.\n\
 </BODY></HTML>\n");
-      return 0;
-    }
-  return 1;
+  return 0;
 }

@@ -743,6 +743,9 @@ int thttpd_main(int argc, char **argv)
   struct sockaddr_in sa;
 #endif 
   struct timeval tv;
+#ifdef CONFIG_THTTPD_DIR
+  int ret;
+#endif
 
   /* Setup host address */
 

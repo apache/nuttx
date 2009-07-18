@@ -1,5 +1,5 @@
-#############################################################################
-# netutils/thttpd/Makefile
+############################################################################
+# netutils/thttpd/Make.defs
 #
 #   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,58 +31,8 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-#############################################################################
+############################################################################
 
--include $(TOPDIR)/.config
--include $(TOPDIR)/Make.defs
-
-CGIBINDIR	= $(TOPDIR)/netutils/thttpd/cgi-bin
-
-SUBDIRS		=
-ifeq ($(CONFIG_NXFLAT),y)
-SUBDIRS		= cgi-src
-SUBDIR_BIN1	= phf
-SUBDIR_BIN2	= redirect
-SUBDIR_BIN3	= ssi
-SUBDIR_BIN	+= cgi-bin/$(SUBDIR_BIN1) cgi-bin/$(SUBDIR_BIN2)  cgi-bin/$(SUBDIR_BIN3)
-endif
-
-all:	$(SUBDIR_BIN)
-.PHONY: depend clean distclean
-
-ifeq ($(CONFIG_NXFLAT),y)
-cgi-bin:
-	@mkdir cgi-bin
-
-cgi-src/$(SUBDIR_BIN1):
-	@$(MAKE) -C cgi-src $(SUBDIR_BIN1)
-
-cgi-bin/$(SUBDIR_BIN1): cgi-bin cgi-src/$(SUBDIR_BIN1)
-	@cp -a cgi-src/$(SUBDIR_BIN1) $@
-
-cgi-src/$(SUBDIR_BIN2):
-	@$(MAKE) -C cgi-src $(SUBDIR_BIN2)
-
-cgi-bin/$(SUBDIR_BIN2): cgi-bin cgi-src/$(SUBDIR_BIN2)
-	@cp -a cgi-src/$(SUBDIR_BIN2) $@
-
-cgi-src/$(SUBDIR_BIN3):
-	@$(MAKE) -C cgi-src $(SUBDIR_BIN3)
-
-cgi-bin/$(SUBDIR_BIN3): cgi-bin cgi-src/$(SUBDIR_BIN3)
-	@cp -a cgi-src/$(SUBDIR_BIN3) $@
-endif
-
-depend:
-
-clean:
-	@rm -f *~ .*.swp
-	@rm -rf cgi-bin
-	@$(MAKE) -C cgi-src clean
-
-distclean: clean
-	@$(MAKE) -C cgi-src distclean
-
--include Make.dep
-
+THTTPD_ASRCS =
+THTTPD_CSRCS = thttpd.c libhttpd.c timers.c fdwatch.c tdate_parse.c
 

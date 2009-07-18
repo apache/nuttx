@@ -293,6 +293,17 @@ examples/serloop
       Use C buffered I/O (getchar/putchar) vs. raw console I/O
       (read/read).
 
+examples/thttpd
+^^^^^^^^^^^^^^^
+
+  An example that builds netutils/thttpd with some simple NXFLAT
+  CGI programs.  see configs/README.txt for most THTTPD settings.
+  In addition to those, this example accepts:
+
+    CONFIG_EXAMPLE_THTTPD_NOMAC    - (May be defined to use software assigned MAC)
+    CONFIG_EXAMPLE_THTTPD_DRIPADDR - Default router IP addess
+    CONFIG_EXAMPLE_THTTPD_NETMASK  - Network mask
+
 examples/udp
 ^^^^^^^^^^^^
 

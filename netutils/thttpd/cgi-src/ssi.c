@@ -869,7 +869,7 @@ static void read_file(FILE *instream, char *vfilename, char *filename)
           break;
         }
 
-      putcchar((char)ich);
+      putchar((char)ich);
     }
 }
 
@@ -892,7 +892,7 @@ int main(int argc, char **argv)
 
   /* The MIME type has to be text/html. */
 
-  (voidfputs("Content-type: text/html\n\n");
+  (void)puts("Content-type: text/html\n\n");
 
   /* Get the name that we were run as. */
 

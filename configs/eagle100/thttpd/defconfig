@@ -254,7 +254,7 @@ CONFIG_HAVE_LIBM=n
 #   desciptors by task_create() when a new task is started. If
 #   set, all sockets will appear to be closed in the new task.
 #
-CONFIG_EXAMPLE=nxflat
+CONFIG_EXAMPLE=thttpd
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_NET=y
@@ -555,6 +555,13 @@ CONFIG_THTTPD_TILDE_MAP1=n
 CONFIG_THTTPD_TILDE_MAP2=n
 CONFIG_THTTPD_GENERATE_INDICES=n
 CONFIG_THTTPD_URLPATTERN=n
+
+#
+# Additional settings for examples/thttpd
+#
+CONFIG_EXAMPLE_THTTPD_NOMAC=n
+CONFIG_EXAMPLE_THTTPD_DRIPADDR=(10<<24|0<<16|0<<8|1)
+CONFIG_EXAMPLE_THTTPD_NETMASK=(255<<24|255<<16|255<<8|0)
 
 #
 # Settings for examples/uip

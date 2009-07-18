@@ -1,7 +1,7 @@
 ############################################################################
-# netutils/Makefile
+# examples/thttpd/Makefile
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,45 +33,18 @@
 #
 ############################################################################
 
+-include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_NET),y)
-include uiplib/Make.defs
-ifeq ($(CONFIG_NET_TCP),y)
-include smtp/Make.defs
-include telnetd/Make.defs
-include webclient/Make.defs
-include webserver/Make.defs
-include thttpd/Make.defs
-endif
-ifeq ($(CONFIG_NET_UDP),y)
-include dhcpc/Make.defs
-include dhcpd/Make.defs
-include resolv/Make.defs
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-include tftpc/Make.defs
-endif
-endif
-endif
+ASRCS	= 
+AOBJS	= $(ASRCS:.S=$(OBJEXT))
+CSRCS	= main.c
+COBJS	= $(CSRCS:.c=$(OBJEXT))
 
-SUBDIRS		= uiplib dhcpc dhcpd resolv smtp telnetd webclient webserver tftpc thttpd
+SRCS	= $(ASRCS) $(CSRCS)
+OBJS	= $(AOBJS) $(COBJS)
 
-ASRCS		= $(UIPLIB_ASRCS) $(DHCPC_ASRCS) $(DHCPD_ASRCS) $(RESOLV_ASRCS) \
-		  $(SMTP_ASRCS) $(TELNETD_ASRCS) $(WEBCLIENT_ASRCS) $(WEBSERVER_ASRCS) \
-		  $(TFTPC_ASRCS) $(THTTPD_ASRCS)
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-
-CSRCS		= $(UIPLIB_CSRCS) $(DHCPC_CSRCS) $(DHCPD_CSRCS) $(RESOLV_CSRCS) \
-		  $(SMTP_CSRCS) $(TELNETD_CSRCS) $(WEBCLIENT_CSRCS) $(WEBSERVER_CSRCS) \
-		  $(TFTPC_CSRCS) $(THTTPD_CSRCS)
-COBJS		= $(CSRCS:.c=$(OBJEXT))
-
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
-
-BIN		= libnetutils$(LIBEXT)
-
-VPATH		= uiplib:dhcpc:dhcpd:resolv:smtp:telnetd:webclient:webserver:tftpc:thttpd
+BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
 all:	$(BIN)
 
@@ -81,35 +54,22 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): $(OBJS)
+$(BIN):	$(OBJS)
 	@( for obj in $(OBJS) ; do \
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MAKE) -C thttpd all TOPDIR="$(TOPDIR)"
-ifeq ($(CONFIG_NET),y)
-	@$(MKDEP) --dep-path . --dep-path uiplib --dep-path dhcpc --dep-path dhcpd \
-		  --dep-path smtp --dep-path webclient --dep-path resolv --dep-path telnetd \
-		  --dep-path webserver --dep-path tftpc --dep-path thttpd \
-	$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-endif
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend
-	@$(MAKE) -C thttpd depend TOPDIR="$(TOPDIR)"
 
 clean:
 	@rm -f $(BIN) *~ .*.swp
 	$(call CLEAN)
-	@( for dir in $(SUBDIRS); do \
-		rm -f $${dir}/*~ $${dir}/.*.swp; \
-	done ; )
-	@$(MAKE) -C thttpd clean TOPDIR="$(TOPDIR)"
 
 distclean: clean
 	@rm -f Make.dep .depend
-	@$(MAKE) -C thttpd distclean TOPDIR="$(TOPDIR)"
 
 -include Make.dep
-

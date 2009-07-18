@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 13, 2009</p>
+      <p>Last Updated: July 18, 2009</p>
     </td>
   </tr>
 </table>
@@ -1493,6 +1493,11 @@ nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  when creating test threads (16Kb stacksize).  The stack size should
 	  be controlled by the .config file or the OSTest won't work on platforms
 	  with memory constraints.
+	* netutils/thttpd: An initial port of Jef Poskanzer's THTTPD HTPPD server.
+          See http://acme.com/software/thttpd/.
+	* examples/thttpd: A basic test program for THTTPD
+	* configs/eagle100/thttpd: A build configuration for THTTPD on the Micromint
+	  Eagle-100 LMS6918 (Cortex-M3) board.
 
 nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
