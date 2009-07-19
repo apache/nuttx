@@ -114,19 +114,19 @@ extern char *crypt(const char *key, const char *setting);
 #ifdef CONFIG_THTTPD_CGI_PATTERN
 enum cgi_outbuffer_e
 {
-  CGI_OUTBUFFER_READHEADER = 0,
-  CGI_OUTBUFFER_HEADERREAD,
-  CGI_OUTBUFFER_HEADERSENT,
-  CGI_OUTBUFFER_READDATA,
-  CGI_OUTBUFFER_DONE,
+  CGI_OUTBUFFER_READHEADER = 0,  /* Reading header from HTTP client */
+  CGI_OUTBUFFER_HEADERREAD,      /* Header has been read */
+  CGI_OUTBUFFER_HEADERSENT,      /* Header has been sent to the CGI program */
+  CGI_OUTBUFFER_READDATA,        /* Transferring data from CGI to client */
+  CGI_OUTBUFFER_DONE,            /* Finished */
 };
 
 struct cgi_outbuffer_s
 {
-  enum cgi_outbuffer_e state;
-  char  *buffer;
-  size_t size;
-  size_t len;
+  enum cgi_outbuffer_e state;    /* State of the transfer */
+  char  *buffer;                 /* Allocated I/O buffer */
+  size_t size;                   /* Size of the allocation */
+  size_t len;                    /* Amount of valid data in the allocated buffer */
 };
 #endif
 
@@ -2304,7 +2304,7 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
 static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
-                                         struct cgi_outbuffer_s *hdr)
+                                          struct cgi_outbuffer_s *hdr)
 {
   ssize_t nbytes_read;
   char *br;
@@ -2324,7 +2324,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
     {
       case CGI_OUTBUFFER_READHEADER:
         {
-          /* Slurp in all headers as they become available from the CGI program. */
+          /* Slurp in all headers as they become available from the client. */
 
           do
             {
@@ -2373,7 +2373,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               else
                 {
                   /* Return.  We will be called again when more data is available
-                   * on the pipe.
+                   * on the socket.
                    */
 
                   return 0;
@@ -2476,13 +2476,14 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
           (void)snprintf(inbuffer, sizeof(inbuffer), "HTTP/1.0 %d %s\015\012", status, title);
           (void)httpd_write(hc->conn_fd, inbuffer, strlen(inbuffer));
 
-          /* Write the saved hdr->buffer. */
+          /* Write the saved hdr->buffer to the client. */
 
           (void)httpd_write(hc->conn_fd, hdr->buffer, hdr->len);
         }
 
-        /* Then set up to read the data following the header from the CGI program.
-         * We return here; we will be called again when data is available on the pipe.
+        /* Then set up to read the data following the header from the CGI program and
+         * pass it back to the client. We return now; we will be called again when
+         * data is available on the pipe.
          */
 
         hdr->state = CGI_OUTBUFFER_READDATA;
@@ -2701,11 +2702,6 @@ static int cgi_child(int argc, char **argv)
       goto errout_with_buffer;
     }
 
-  /* Add the read descriptors to the watch */
-
-  fdwatch_add_fd(fw, hc->conn_fd, NULL, FDW_READ);
-  fdwatch_add_fd(fw, rfd, NULL, FDW_READ);
-
   /* Run the CGI program. */
 
   child = exec(binary, (FAR const char **)argp, g_thttpdsymtab, g_thttpdnsymbols);
@@ -2729,6 +2725,11 @@ static int cgi_child(int argc, char **argv)
     }
 #endif
 
+  /* Add the read descriptors to the watch */
+
+  fdwatch_add_fd(fw, hc->conn_fd, NULL, FDW_READ);
+  fdwatch_add_fd(fw, rfd, NULL, FDW_READ);
+
   /* Then perform the interposition */
 
   indone  = FALSE;
@@ -2736,13 +2737,23 @@ static int cgi_child(int argc, char **argv)
 
   do
     {
-      if (!indone)
+      (void)fdwatch(fw, 5000);
+
+      if (!indone && fdwatch_check_fd(fw, hc->conn_fd))
         {
+          /* Transfer data from the client to the CGI program (POST) */
+
           indone = cgi_interpose_input(hc, wfd, buffer);
+          if (indone)
+            {
+              fdwatch_del_fd(fw, hc->conn_fd);
+            }
         }
 
-      if (!outdone)
+      if (fdwatch_check_fd(fw, rfd))
         {
+          /* Handle receipt of headers and CGI program response (GET) */
+
           outdone = cgi_interpose_output(hc, rfd, buffer, &hdr);
         }
   }
