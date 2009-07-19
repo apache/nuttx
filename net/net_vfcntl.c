@@ -39,11 +39,13 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 
 #include <stdarg.h>
 #include <fcntl.h>
 #include <errno.h>
 
+#include <arch/irq.h>
 #include <nuttx/net.h>
 #include "net_internal.h"
 
@@ -60,6 +62,7 @@
 int net_vfcntl(int sockfd, int cmd, va_list ap)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
+  irqstate_t flags;
   int err = 0;
   int ret = 0;
 
@@ -70,6 +73,10 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
       err = EBADF;
       goto errout;
     }
+
+  /* Interrupts must be disabled in order to perform operations on socket structures */
+
+  flags = irqsave();
 
 #warning "Most fcntl() commands not yet implemented"
   switch (cmd)
@@ -105,6 +112,9 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * successful execution of one  of  the  exec  functions.
          */
 
+         err = ENOSYS; /* F_GETFD and F_SETFD not implemented */
+         break;
+
       case F_GETFL:
         /* Get the file status flags and file access modes, defined in <fcntl.h>,
          * for the file description associated with fildes. The file access modes
@@ -114,6 +124,22 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * refer to the same file with different open file descriptions.
          */
 
+        {
+          /* This summarizes the behavior of the NuttX/uIP sockets */
+
+	  ret = O_RDWR | O_SYNC | O_RSYNC;
+
+          /* TCP/IP sockets may also be non-blocking if read-ahead is enabled */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+          if (psock->s_type == SOCK_STREAM && _SS_ISNONBLOCK(psock->s_flags))
+            {
+              ret |= O_NONBLOCK;
+            }
+#endif
+        }
+        break;
+
       case F_SETFL:
         /* Set the file status flags, defined in <fcntl.h>, for the file description
          * associated with fildes from the corresponding  bits in the third argument,
@@ -122,6 +148,28 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * be ignored. If any bits in arg other than those mentioned here are changed
          * by the application, the result is unspecified.
          */
+
+        {
+           /* Non-blocking is the only configurable option.  And it applies only to
+            * read operations on TCP/IP sockets when read-ahead is enabled.
+            */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+          int mode =  va_arg(ap, int);
+          if (psock->s_type == SOCK_STREAM)
+            {
+               if ((mode & O_NONBLOCK) != 0)
+                 {
+                   psock->s_type |= _SF_NONBLOCK;
+                 }
+               else
+                 {
+                   psock->s_type &= ~_SF_NONBLOCK;
+                 }
+            }
+#endif
+        }
+        break;
 
       case F_GETOWN:
         /* If fildes refers to a socket, get the process or process group ID specified
@@ -165,13 +213,15 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * not be done.
          */
 
-         err = ENOSYS;
+         err = ENOSYS; /* F_GETOWN, F_SETOWN, F_GETLK, F_SETLK, F_SETLKW */
          break;
 
       default:
          err = EINVAL;
          break;
   }
+
+  irqrestore(flags);
 
 errout:
   if (err != 0)

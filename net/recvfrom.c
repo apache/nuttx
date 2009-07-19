@@ -868,7 +868,6 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       return -ENOTCONN;
     }
 
-
   /* Initialize the state structure.  This is done with interrupts
    * disabled because we don't want anything to happen until we
    * are ready.
@@ -883,11 +882,29 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   recvfrom_readahead(&state);
 
-  /* If there is space to receive anything more, then we will
-   * wait to receive the data.
+  /* In general, this uI-based implementation will not support non-blocking
+   * socket operations... except in this one case: TCP receive with read-ahead
+   * enabled.  If this socket is configured as non-blocking then return EAGAIN
+   * if no data was obtained from the read-ahead buffers.
    */
 
-  if (state.rf_buflen > 0)
+  if (_SS_ISNONBLOCK(psock->s_flags))
+    {
+      /* Return OK if something was received; EGAIN if not */
+
+      if (state.rf_recvlen <= 0)
+        {
+          /* Nothing was received */
+
+          return -EAGAIN;
+        }
+    }
+
+  /* It is okay to block if we need to.  If there is space to receive anything
+   * more, then we will wait to receive the data.
+   */
+
+  else if (state.rf_buflen > 0)
 #endif
     {
       struct uip_conn *conn = (struct uip_conn *)psock->s_conn;

@@ -44,15 +44,10 @@
 
 #undef CONFIG_THTTPD
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && \
-    defined(CONFIG_NET_TCPBACKLOG) && !defined(CONFIG_DISABLE_ENVIRONMENT)
-#  define CONFIG_THTTPD
-#else
-#  warning "THTTPD not built because dependenciesnot selected in configuration"
-#endif
+    defined(CONFIG_NET_TCPBACKLOG) && !defined(CONFIG_DISABLE_ENVIRONMENT) && \
+    CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
 
-#if !defined(CONFIG_NET_NTCP_READAHEAD_BUFFERS) || CONFIG_NET_NTCP_READAHEAD_BUFFERS < 1
-#  warning "CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0 is recommended"
-#endif
+#  define CONFIG_THTTPD 1
 
 /* Check all THTTPD configuration settings.  Complain on any that should have
  * been defined but were not.  Supply some kind of reasonable value for all
@@ -200,6 +195,10 @@
 /* If CONFIG_THTTPD_URLPATTERN is defined, then it will be used to match and verify
  * referrers.
  */
+
+#else  /* Dependencies not provided */
+#  warning "THTTPD not built because dependencies not selected in configuration"
+#endif  /* Dependencies not provided */
 
 #endif /* __NETUTILS_THTTPD_VERSION_H */
 
