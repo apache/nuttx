@@ -126,7 +126,7 @@ int socket(int domain, int type, int protocol)
 
   /* Everything looks good.  Allocate a socket descriptor */
 
-  sockfd = sockfd_allocate();
+  sockfd = sockfd_allocate(0);
   if (sockfd < 0)
     {
       err = ENFILE;

@@ -166,14 +166,10 @@ EXTERN int net_poll(int sockfd, struct pollfd *fds, boolean setup);
 
 /* net_dup.c *****************************************************************/
 /* The standard dup() operation redirects operations on socket descriptors to
- * this function (when both file and socket descriptors are supported)
+ * this function
  */
 
-#if CONFIG_NFILE_DESCRIPTOR > 0
-EXTERN int net_dup(int sockfd);
-#else
-#  define net_dup(sockfd) dup(sockfd)
-#endif
+EXTERN int net_dup(int sockfd, int minsd);
 
 /* net_dup2.c ****************************************************************/
 /* The standard dup2() operation redirects operations on socket descriptors to

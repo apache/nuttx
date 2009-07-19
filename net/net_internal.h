@@ -144,7 +144,7 @@ extern "C" {
 
 /* net_sockets.c *************************************************************/
 
-EXTERN int  sockfd_allocate(void);
+EXTERN int  sockfd_allocate(int minsd);
 EXTERN void sockfd_release(int sockfd);
 EXTERN FAR struct socket *sockfd_socket(int sockfd);
 

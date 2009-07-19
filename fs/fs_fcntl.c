@@ -94,6 +94,11 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
          * exec functions.
          */
 
+        {
+          ret = file_dup(fildes, va_arg(ap, int));
+        }
+        break;
+
       case F_GETFD:
         /* Get the file descriptor flags defined in <fcntl.h> that are associated
          * with the file descriptor fildes.  File descriptor flags are associated

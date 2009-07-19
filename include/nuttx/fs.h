@@ -344,15 +344,9 @@ EXTERN int files_dup(FAR struct file *filep1, FAR struct file *filep2);
 
 /* fs_filedup.c **************************************************************/
 
-/* This alternative naming is used when dup could operate on both file and
- * socket descritors to avoid drawing unused socket support into the link.
- */
+/* Dupicate a file descriptor using any value greater than or equal to minfd */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-EXTERN int file_dup(int fd);
-#else
-#  define file_dup(fd)        dup(fd)
-#endif
+EXTERN int file_dup(int fd, int minfd);
 
 /* fs_filedup2.c *************************************************************/
 

@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <unistd.h>
 #include <sched.h>
 #include <errno.h>
 
@@ -76,11 +75,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-int file_dup(int fildes)
-#else
-int dup(int fildes)
-#endif
+int file_dup(int fildes, int minfd)
 {
   FAR struct filelist *list;
   int fildes2;
@@ -110,7 +105,8 @@ int dup(int fildes)
 
   fildes2 = files_allocate(list->fl_files[fildes].f_inode,
                            list->fl_files[fildes].f_oflags,
-                           list->fl_files[fildes].f_pos);
+                           list->fl_files[fildes].f_pos,
+                           minfd);
   if (fildes2 < 0)
     {
       errno = EMFILE;

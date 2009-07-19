@@ -50,11 +50,15 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dup OR dup
+ * Function: net_dup
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
@@ -64,17 +68,29 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTOR > 0
-int net_dup(int sockfd)
-#else
-int dup(int sockfd)
-#endif
+int net_dup(int sockfd, int minsd)
 {
   FAR struct socket *psock1 = sockfd_socket(sockfd);
   FAR struct socket *psock2;
   int sockfd2;
   int err;
   int ret;
+
+  /* Make sure that the minimum socket descriptor is within the legal range.
+   * the minimum value we receive is relative to file descriptor 0;  we need
+   * map it relative of the first socket descriptor.
+   */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if (minsd >= CONFIG_NFILE_DESCRIPTORS)
+    {
+      minsd -= CONFIG_NFILE_DESCRIPTORS;
+    }
+  else
+    {
+      minsd = 0;
+    }
+#endif
 
   /* Lock the scheduler throughout the following */
 
@@ -94,7 +110,7 @@ int dup(int sockfd)
 
   /* Allocate a new socket descriptor */
 
-  sockfd2 = sockfd_allocate();
+  sockfd2 = sockfd_allocate(minsd);
   if (sockfd2 < 0)
     {
       err = ENFILE;

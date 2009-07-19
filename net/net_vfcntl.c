@@ -50,6 +50,10 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
+ * Pre-Processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
@@ -67,7 +71,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
       goto errout;
     }
 
-#warning "fcntl() commands not yet implemented"
+#warning "Most fcntl() commands not yet implemented"
   switch (cmd)
     {
       case F_DUPFD:
@@ -80,6 +84,11 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * shall be cleared to keep the file open across calls to one of the
          * exec functions.
          */
+
+        {
+          ret = net_dup(sockfd, va_arg(ap, int));
+        }
+        break;
 
       case F_GETFD:
         /* Get the file descriptor flags defined in <fcntl.h> that are associated

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net_sockets.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007- 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -192,7 +192,7 @@ int net_releaselist(FAR struct socketlist *list)
   return OK;
 }
 
-int sockfd_allocate(void)
+int sockfd_allocate(int minsd)
 {
   FAR struct socketlist *list;
   int i;
@@ -205,14 +205,16 @@ int sockfd_allocate(void)
       /* Search for a socket structure with no references */
 
       _net_semtake(list);
-      for (i = 0; i < CONFIG_NSOCKET_DESCRIPTORS; i++)
+      for (i = minsd; i < CONFIG_NSOCKET_DESCRIPTORS; i++)
         {
           /* Are there references on this socket? */
+
           if (!list->sl_sockets[i].s_crefs)
             {
               /* No take the reference and return the index + an offset
                * as the socket descriptor.
                */
+
                memset(&list->sl_sockets[i], 0, sizeof(struct socket));
                list->sl_sockets[i].s_crefs = 1;
                _net_semgive(list);

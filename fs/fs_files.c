@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_files.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -361,7 +361,8 @@ errout:
  *   Returns the file descriptor == index into the files array.
  *
  ****************************************************************************/
-int files_allocate(FAR struct inode *inode, int oflags, off_t pos)
+
+int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
 {
   FAR struct filelist *list;
   int i;
@@ -370,7 +371,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos)
   if (list)
     {
       _files_semtake(list);
-      for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
+      for (i = minfd; i < CONFIG_NFILE_DESCRIPTORS; i++)
         {
           if (!list->fl_files[i].f_inode)
             {

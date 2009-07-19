@@ -47,15 +47,8 @@
 #include <nuttx/fs.h>
 #include "fs_internal.h"
 
-/* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup is being
- * performed.
- */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -76,34 +69,40 @@
 
 int dup(int fildes)
 {
+ int ret = OK;
+
   /* Check the range of the descriptor to see if we got a file or a socket
    * descriptor. */
 
-  if ((unsigned int)fildes >= CONFIG_NFILE_DESCRIPTORS)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if ((unsigned int)fildes < CONFIG_NFILE_DESCRIPTORS)
+    {
+      /* Its a valid file descriptor.. dup the file descriptor using any
+       * other file descriptor*/
+
+      ret = file_dup(fildes, 0);
+    }
+  else
+#endif
     {
       /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
 
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
       if ((unsigned int)fildes < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor */
 
-          return net_dup(fildes);
+          ret = net_dup(fildes, CONFIG_NFILE_DESCRIPTORS);
         }
       else
+#endif
         {
           /* No.. then it is a bad descriptor number */
 
           errno = EBADF;
-          return ERROR;
+          ret = ERROR;
         }
     }
-  else
-    {
-      /* Its a valid file descriptor.. dup the file descriptor */
-
-      return file_dup(fildes);
-    }
+  return ret;
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 ... */
 

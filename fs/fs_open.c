@@ -140,7 +140,7 @@ int open(const char *path, int oflags, ...)
 
   /* Associate the inode with a file structure */
 
-  fd = files_allocate(inode, oflags, 0);
+  fd = files_allocate(inode, oflags, 0, 0);
   if (fd < 0)
     {
       ret = EMFILE;

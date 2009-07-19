@@ -225,7 +225,7 @@ EXTERN void inode_release(FAR struct inode *inode);
 /* fs_files.c ****************************************************************/
 
 EXTERN void weak_function files_initialize(void);
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos);
+EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd);
 EXTERN int  files_close(int filedes);
 EXTERN void files_release(int filedes);
 

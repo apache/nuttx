@@ -318,7 +318,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
    * (so that it cannot fail later)
    */
 
-  newfd = sockfd_allocate();
+  newfd = sockfd_allocate(0);
   if (newfd < 0)
     {
       err = ENFILE;
