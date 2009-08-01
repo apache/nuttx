@@ -99,6 +99,6 @@ $(SYMTAB): build
 clean: $(foreach DIR, $(SUBDIRS), $(DIR)_clean)
 	@rm -f $(ROMFS_HDR) $(ROMFS_IMG) $(SYMTAB)
 	@rm -rf $(ROMFS_DIR)
-	@rm *~ .*.swp
+	@rm -f *~ .*.swp
 
 
