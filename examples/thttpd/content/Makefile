@@ -1,5 +1,5 @@
 ############################################################################
-# examples/thttpd/Makefile
+# examples/thttpd/content/Makefile
 #
 #   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,48 +33,64 @@
 #
 ############################################################################
 
--include $(TOPDIR)/.config
--include $(TOPDIR)/Make.defs
+SUBDIRS		= hello
 
-ASRCS	= 
-AOBJS	= $(ASRCS:.S=$(OBJEXT))
-CSRCS	= main.c
-COBJS	= $(CSRCS:.c=$(OBJEXT))
+THTTPD_DIR	= $(TOPDIR)/examples/thttpd
+CONTENT_DIR	= $(THTTPD_DIR)/content
+ROMFS_DIR	= $(CONTENT_DIR)/romfs
+ROMFS_IMG	= $(CONTENT_DIR)/romfs.img
+ROMFS_HDR	= $(CONTENT_DIR)/romfs.h
+SYMTAB		= $(CONTENT_DIR)/symtab.h
 
-SRCS	= $(ASRCS) $(CSRCS)
-OBJS	= $(AOBJS) $(COBJS)
+define DIR_template
+$(1)_$(2):
+	@$(MAKE) -C $(1) $(3) TOPDIR=$(TOPDIR) ROMFS_DIR=$(ROMFS_DIR) CROSSDEV=$(CROSSDEV)
+endef
 
-BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
+all: $(ROMFS_HDR) $(SYMTAB)
+.PHONY: all build clean install populate
 
-all:	$(BIN)
-.PHONY:	clean headers
+$(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),build, all)))
+$(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),clean,clean)))
+$(foreach DIR, $(SUBDIRS), $(eval $(call DIR_template,$(DIR),install,install)))
 
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
+# Build program(s) in each sud-directory 
 
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
+build: $(foreach DIR, $(SUBDIRS), $(DIR)_build)
 
-headers:
-	@$(MAKE) -C content TOPDIR=$(TOPDIR) CROSSDEV=$(CROSSDEV)
+# Install each program in the romfs directory
 
-$(BIN):	headers $(OBJS)
-	@( for obj in $(OBJS) ; do \
-		$(call ARCHIVE, $@, $${obj}); \
-	done ; )
+install: $(foreach DIR, $(SUBDIRS), $(DIR)_install)
 
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
+# Create the romfs directory
 
-depend: .depend
+$(ROMFS_DIR):
+	@mkdir $(ROMFS_DIR)
 
-clean:
-	@rm -f $(BIN) *~ .*.swp
-	@make -C content clean TOPDIR=$(TOPDIR) CROSSDEV=$(CROSSDEV)
-	$(call CLEAN)
+# Populate the romfs directory
 
-distclean: clean
-	@rm -f Make.dep .depend
+populate:  $(ROMFS_DIR) build install
 
--include Make.dep
+# Create the romfs.img file from the populated romfs directory
+
+$(ROMFS_IMG): populate
+	@genromfs -f $@ -d $(ROMFS_DIR) -V "THTTPDTEST"
+
+# Create the romfs.h header file from the romfs.img file
+
+$(ROMFS_HDR) : $(ROMFS_IMG)
+	@(cd $(CONTENT_DIR); xxd -i romfs.img | sed -e "s/^unsigned/static const unsigned/g" >$@)
+
+# Create the exported symbol table list from the derived *-thunk.S files
+
+$(SYMTAB): build
+	@$(CONTENT_DIR)/mksymtab.sh $(CONTENT_DIR) >$@
+
+# Clean each subdirectory
+
+clean: $(foreach DIR, $(SUBDIRS), $(DIR)_clean)
+	@rm -f $(ROMFS_HDR) $(ROMFS_IMG) $(SYMTAB)
+	@rm -rf $(ROMFS_DIR)
+	@rm *~ .*.swp
+
+

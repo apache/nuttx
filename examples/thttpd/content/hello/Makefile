@@ -1,5 +1,5 @@
 ############################################################################
-# examples/thttpd/Makefile
+# examples/thttpd/content/hello/Makefile
 #
 #   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,48 +33,46 @@
 #
 ############################################################################
 
--include $(TOPDIR)/.config
--include $(TOPDIR)/Make.defs
+-include $(TOPDIR)/.config	# Current configuration
+-include $(TOPDIR)/Make.defs	# Basic make info
 
-ASRCS	= 
-AOBJS	= $(ASRCS:.S=$(OBJEXT))
-CSRCS	= main.c
-COBJS	= $(CSRCS:.c=$(OBJEXT))
+BIN			= hello
 
-SRCS	= $(ASRCS) $(CSRCS)
-OBJS	= $(AOBJS) $(COBJS)
+R1SRCS			= $(BIN).c
+R1OBJS			= $(R1SRCS:.c=.o)
 
-BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
+R2SRC			= $(BIN)-thunk.S
+R2OBJ			= $(R2SRC:.S=.o)
 
-all:	$(BIN)
-.PHONY:	clean headers
+all: $(BIN)
 
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
+$(R1OBJS): %.o: %.c
+	@echo "CC: $<"
+	@$(CC) -c $(CPICFLAGS) $< -o $@
 
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
+$(R2OBJ): %.o: %.S
+	@echo "AS: $<"
+	@$(CC) -c $(CPICFLAGS) $< -o $@
 
-headers:
-	@$(MAKE) -C content TOPDIR=$(TOPDIR) CROSSDEV=$(CROSSDEV)
+$(BIN).r1: $(R1OBJS)
+	@echo "LD: $<"
+	@$(LD) $(NXFLATLDFLAGS1) -o $@ $^
 
-$(BIN):	headers $(OBJS)
-	@( for obj in $(OBJS) ; do \
-		$(call ARCHIVE, $@, $${obj}); \
-	done ; )
+$(R2SRC): $(BIN).r1
+	@echo "MK: $<"
+	@$(MKNXFLAT) -o $@ $^
 
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
+$(BIN).r2: $(R2OBJ)
+	@echo "LD: $<"
+	@$(LD) $(NXFLATLDFLAGS2) -o $@ $(R1OBJS) $(R2OBJ)
 
-depend: .depend
+$(BIN): $(BIN).r2
+	@echo "LD: $<"
+	@$(LDNXFLAT) $(LDNXFLATFLAGS) -o $@ $^
 
-clean:
-	@rm -f $(BIN) *~ .*.swp
-	@make -C content clean TOPDIR=$(TOPDIR) CROSSDEV=$(CROSSDEV)
-	$(call CLEAN)
+clean: 
+	@rm -f $(BIN) $(R2SRC) *.o *.r1 *.r2 *~ .*.swp core
 
-distclean: clean
-	@rm -f Make.dep .depend
+install:
+	@install -D $(BIN) $(ROMFS_DIR)/$(BIN)
 
--include Make.dep

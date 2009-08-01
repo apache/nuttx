@@ -38,11 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 #include <sys/ioctl.h>
+#include <sys/mount.h>
+
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
-#include <time.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <net/if.h>
@@ -50,9 +53,47 @@
 #include <net/uip/uip-arp.h>
 #include <net/uip/uip-lib.h>
 
+#include <nuttx/ramdisk.h>
+#include <nuttx/binfmt.h>
+#include <nuttx/nxflat.h>
+
+#include "content/romfs.h"
+#include "content/symtab.h"
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* Check configuration.  This is not all of the configuration settings that
+ * are required -- only the more obvious.
+ */
+
+#if CONFIG_NFILE_DESCRIPTORS < 1
+#  error "You must provide file descriptors via CONFIG_NFILE_DESCRIPTORS in your configuration file"
+#endif
+
+#ifndef CONFIG_NXFLAT
+#  error "You must select CONFIG_NXFLAT in your configuration file"
+#endif
+
+#ifndef CONFIG_FS_ROMFS
+#  error "You must select CONFIG_FS_ROMFS in your configuration file"
+#endif
+
+#ifdef CONFIG_DISABLE_MOUNTPOINT
+#  error "You must not disable mountpoints via CONFIG_DISABLE_MOUNTPOINT in your configuration file"
+#endif
+
+#ifdef CONFIG_BINFMT_DISABLE
+#  error "You must not disable loadable modules via CONFIG_BINFMT_DISABLE in your configuration file"
+#endif
+
+/* Describe the ROMFS file system */
+
+#define SECTORSIZE   512
+#define NSECTORS(b)  (((b)+SECTORSIZE-1)/SECTORSIZE)
+#define ROMFSDEV     "/dev/ram0"
+#define MOUNTPT      "/mnt/www"
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG
@@ -85,7 +126,6 @@
  * g_nsymbols:  The number of symbols in g_thttpdsymtab[].
  */
 
-#warning "Not yet initialized"
 FAR const struct symtab_s *g_thttpdsymtab;
 int                         g_thttpdnsymbols;
 
@@ -117,10 +157,13 @@ int user_start(int argc, char *argv[])
   uint8 mac[IFHWADDRLEN];
 #endif
   char *thttpd_argv = "thttpd";
+  int ret;
 
 /* Many embedded network interfaces must have a software assigned MAC */
 
 #ifdef CONFIG_EXAMPLE_UIP_NOMAC
+  message("Assigning MAC\n");
+
   mac[0] = 0x00;
   mac[1] = 0xe0;
   mac[2] = 0xb0;
@@ -132,6 +175,7 @@ int user_start(int argc, char *argv[])
 
   /* Set up our host address */
 
+  message("Setup network addresses\n");
   addr.s_addr = HTONL(CONFIG_THTTPD_IPADDR);
   uip_sethostaddr("eth0", &addr);
 
@@ -145,6 +189,44 @@ int user_start(int argc, char *argv[])
   addr.s_addr = HTONL(CONFIG_EXAMPLE_THTTPD_NETMASK);
   uip_setnetmask("eth0", &addr);
 
+  /* Initialize the NXFLAT binary loader */
+
+  message("Initializing the NXFLAT binary loader\n");
+  ret = nxflat_initialize();
+  if (ret < 0)
+    {
+      message("ERROR: Initialization of the NXFLAT loader failed: %d\n", ret);
+      exit(1);
+    }
+
+  /* Create a ROM disk for the ROMFS filesystem */
+
+  message("Registering romdisk\n");
+  ret = romdisk_register(0, (ubyte*)romfs_img, NSECTORS(romfs_img_len), SECTORSIZE);
+  if (ret < 0)
+    {
+      message("ERROR: romdisk_register failed: %d\n", ret);
+      nxflat_uninitialize();
+      exit(1);
+    }
+
+  /* Mount the file system */
+
+  message("Mounting ROMFS filesystem at target=%s with source=%s\n",
+         MOUNTPT, ROMFSDEV);
+
+  ret = mount(ROMFSDEV, MOUNTPT, "romfs", MS_RDONLY, NULL);
+  if (ret < 0)
+    {
+      message("ERROR: mount(%s,%s,romfs) failed: %s\n",
+              ROMFSDEV, MOUNTPT, errno);
+      nxflat_uninitialize();
+    }
+
+  /* Start THTTPD.  At present, symbol table info is passed via global variables */
+
+  g_thttpdsymtab   = exports;
+  g_thttpdnsymbols = NEXPORTS;
 
   printf("Starting THTTPD\n");
   thttpd_main(1, &thttpd_argv);
