@@ -74,5 +74,5 @@ clean:
 	@rm -f $(BIN) $(R2SRC) *.o *.r1 *.r2 *~ .*.swp core
 
 install:
-	@install -D $(BIN) $(ROMFS_DIR)/$(BIN)
+	@install -m 0755 -D $(BIN) $(CGI_DIR)/$(BIN)
 

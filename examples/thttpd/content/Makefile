@@ -34,17 +34,19 @@
 ############################################################################
 
 SUBDIRS		= hello
+INSTALL_FILES	= index.html style.css
 
 THTTPD_DIR	= $(TOPDIR)/examples/thttpd
 CONTENT_DIR	= $(THTTPD_DIR)/content
 ROMFS_DIR	= $(CONTENT_DIR)/romfs
 ROMFS_IMG	= $(CONTENT_DIR)/romfs.img
 ROMFS_HDR	= $(CONTENT_DIR)/romfs.h
+ROMFSCGI_DIR	= $(ROMFS_DIR)/cgi-bin
 SYMTAB		= $(CONTENT_DIR)/symtab.h
 
 define DIR_template
 $(1)_$(2):
-	@$(MAKE) -C $(1) $(3) TOPDIR=$(TOPDIR) ROMFS_DIR=$(ROMFS_DIR) CROSSDEV=$(CROSSDEV)
+	@$(MAKE) -C $(1) $(3) TOPDIR=$(TOPDIR) CROSSDEV=$(CROSSDEV) CGI_DIR=$(ROMFSCGI_DIR)
 endef
 
 all: $(ROMFS_HDR) $(SYMTAB)
@@ -61,15 +63,21 @@ build: $(foreach DIR, $(SUBDIRS), $(DIR)_build)
 # Install each program in the romfs directory
 
 install: $(foreach DIR, $(SUBDIRS), $(DIR)_install)
+	@( for file in $(INSTALL_FILES); do\
+		install -m 0644 -D $${file} $(ROMFS_DIR)/$${file}; \
+	done; )
 
 # Create the romfs directory
 
 $(ROMFS_DIR):
 	@mkdir $(ROMFS_DIR)
 
+$(ROMFSCGI_DIR): $(ROMFS_DIR)
+	@mkdir $(ROMFSCGI_DIR)
+
 # Populate the romfs directory
 
-populate:  $(ROMFS_DIR) build install
+populate:  $(ROMFSCGI_DIR) build install
 
 # Create the romfs.img file from the populated romfs directory
 
