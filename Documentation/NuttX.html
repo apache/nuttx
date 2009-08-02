@@ -1501,9 +1501,10 @@ nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* configs/ntosd-dm320/thttpd: A build configuration for THTTPD on the Neuros
 	  DM320 platform.
 	* lib/: Added strstr() and strpbrk().
-	* net/recvfrom.c: Sockets now support some non-blocking operations --
-	  specifically only for TCP/IP read operations when read-ahead buffering
-	  is enabled.
+	* net/recvfrom.c and net/accept(): Sockets now support some non-blocking
+	  operations, specifically for (1) TCP/IP read operations when read-ahead
+	  buffering is enabled, and (2) TCP/IP accept() operations when TCP/IP
+	  connection backlog is enabled.
 	* fs/fs_fcntl.c and net/net_vfcntl.c: Minimal support provided for fcntl().
 	  It can, at least, be used to mark sockets as blocking or non-blocking.
 	* net/net_close.c: Fix bug in close().  If reference count not set to zero
