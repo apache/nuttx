@@ -125,7 +125,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
         {
           /* This summarizes the behavior of the NuttX/uIP sockets */
 
-	  ret = O_RDWR | O_SYNC | O_RSYNC;
+          ret = O_RDWR | O_SYNC | O_RSYNC;
 
           /* TCP/IP sockets may also be non-blocking if read-ahead is enabled */
 
@@ -158,11 +158,11 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
             {
                if ((mode & O_NONBLOCK) != 0)
                  {
-                   psock->s_type |= _SF_NONBLOCK;
+                   psock->s_flags |= _SF_NONBLOCK;
                  }
                else
                  {
-                   psock->s_type &= ~_SF_NONBLOCK;
+                   psock->s_flags &= ~_SF_NONBLOCK;
                  }
             }
 #endif

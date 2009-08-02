@@ -202,8 +202,12 @@ static int  check_referer(httpd_conn *hc);
 #ifdef CONFIG_THTTPD_URLPATTERN
 static int  really_check_referer(httpd_conn *hc);
 #endif
-static int  sockaddr_check(httpd_sockaddr * saP);
-static size_t sockaddr_len(httpd_sockaddr * saP);
+#ifdef CONFIG_DEBUG
+static int  sockaddr_check(httpd_sockaddr *saP);
+#else
+#  define sockaddr_check(saP) (1)
+#endif
+static size_t sockaddr_len(httpd_sockaddr *saP);
 
 /****************************************************************************
  * Private Data
@@ -295,11 +299,13 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
 
   /* Check sockaddr. */
 
+#ifdef CONFIG_DEBUG
   if (!sockaddr_check(saP))
     {
       ndbg("unknown sockaddr family on listen socket\n");
       return -1;
     }
+#endif
 
   /* Create socket. */
 
@@ -321,7 +327,7 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
 
   /* Bind to it. */
 
-  if (bind(listen_fd, (struct sockaddr*)&saP, sockaddr_len(saP)) < 0)
+  if (bind(listen_fd, (struct sockaddr*)saP, sockaddr_len(saP)) < 0)
     {
       ndbg("bind to %s failed: %d\n", httpd_ntoa(saP), errno);
       (void)close(listen_fd);
@@ -3293,7 +3299,8 @@ static int really_check_referer(httpd_conn *hc)
 }
 #endif
 
-static int sockaddr_check(httpd_sockaddr * saP)
+#ifdef CONFIG_DEBUG
+static int sockaddr_check(httpd_sockaddr *saP)
 {
   switch (saP->sin_family)
     {
@@ -3309,8 +3316,9 @@ static int sockaddr_check(httpd_sockaddr * saP)
       return 0;
     }
 }
+#endif
 
-static size_t sockaddr_len(httpd_sockaddr * saP)
+static size_t sockaddr_len(httpd_sockaddr *saP)
 {
   switch (saP->sin_family)
     {
@@ -3382,7 +3390,6 @@ FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd)
       return NULL;
     }
 
-  nvdbg("Calling init_mime()\n");
   init_mime();
 
   /* Done initializing. */
@@ -3593,6 +3600,7 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
       return GC_FAIL;
     }
 
+#ifdef CONFIG_DEBUG
   if (!sockaddr_check(&sa))
     {
       ndbg("unknown sockaddr family\n");
@@ -3600,6 +3608,7 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
       hc->conn_fd = -1;
       return GC_FAIL;
     }
+#endif
 
   hc->hs = hs;
   (void)memset(&hc->client_addr, 0, sizeof(hc->client_addr));

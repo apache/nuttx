@@ -737,11 +737,7 @@ int thttpd_main(int argc, char **argv)
   int cnum;
   FAR struct connect_s *conn;
   FAR httpd_conn *hc;
-#ifdef  CONFIG_NET_IPv6
-  struct sockaddr_in6 sa;
-#else
-  struct sockaddr_in sa;
-#endif 
+  httpd_sockaddr sa;
   struct timeval tv;
 #ifdef CONFIG_THTTPD_DIR
   int ret;
