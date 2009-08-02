@@ -49,6 +49,9 @@
 
 #include <time.h>
 
+#include "config.h"
+#ifdef CONFIG_THTTPD
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -309,5 +312,6 @@ extern int httpd_read(int fd, const void *buf, size_t nbytes);
 
 extern int httpd_write(int fd, const void *buf, size_t nbytes);
 
+#endif /* CONFIG_THTTPD */
 #endif /* __NETUTILS_THTTPD_LIBHTTPD_H */
 

@@ -43,11 +43,15 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <nuttx/fs.h>
+
+#if CONFIG_NFILE_STREAMS > 0
+
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
-int ileno(FAR FILE *stream)
+int fileno(FAR FILE *stream)
 {
   int ret = -1;
   if (stream)
@@ -62,4 +66,5 @@ int ileno(FAR FILE *stream)
     }
   return ret;
 }
+#endif /* CONFIG_NFILE_STREAMS */
 
