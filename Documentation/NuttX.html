@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 19, 2009</p>
+      <p>Last Updated: August 3, 2009</p>
     </td>
   </tr>
 </table>
@@ -1494,16 +1494,22 @@ nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  be controlled by the .config file or the OSTest won't work on platforms
 	  with memory constraints.
 	* netutils/thttpd: An initial port of Jef Poskanzer's THTTPD HTTP server.
-          See http://acme.com/software/thttpd/.
+	  See http://acme.com/software/thttpd/.
 	* examples/thttpd: A basic test program for THTTPD
 	* configs/eagle100/thttpd: A build configuration for THTTPD on the Micromint
 	  Eagle-100 LMS6918 (Cortex-M3) board.
+	* configs/ntosd-dm320/thttpd: A build configuration for THTTPD on the Neuros
+	  DM320 platform.
 	* lib/: Added strstr() and strpbrk().
 	* net/recvfrom.c: Sockets now support some non-blocking operations --
 	  specifically only for TCP/IP read operations when read-ahead buffering
 	  is enabled.
-
-nuttx-0.4.10 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+	* fs/fs_fcntl.c and net/net_vfcntl.c: Minimal support provided for fcntl().
+	  It can, at least, be used to mark sockets as blocking or non-blocking.
+	* net/net_close.c: Fix bug in close().  If reference count not set to zero
+	  then uip_tcpfree() will assert when DEBUG is enabled.
+	* net/accept.c: Fix bug in accept().  The logic expected parts of the
+	  return address structure to be initialized or it would return an error.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
