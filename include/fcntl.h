@@ -88,19 +88,13 @@
 
 /* For posix fcntl() and lockf() */
 
-#define F_RDLCK     0
-#define F_WRLCK     1
-#define F_UNLCK     2
+#define F_RDLCK     0 /* Take out a read lease */
+#define F_WRLCK     1  /* Take out a write lease */
+#define F_UNLCK     2  /* Remove a lease */
 
 /* close-on-exec flag for F_GETRL and F_SETFL */
 
 #define FD_CLOEXEC  1
-
-/* Arguments to F_SETLEASE */
-
-#define F_RDLCK     0  /* Take out a read lease */
-#define F_WRLCK     2  /* Take out a write lease */
-#define F_UNLCK     3  /* Remove a lease */
 
 /* These are the notifications that can be received from F_NOTIFY (linux) */
 

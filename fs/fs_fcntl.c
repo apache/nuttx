@@ -80,7 +80,6 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
       goto errout;
     }
 
-#warning "Many fcntl() commands not yet implemented"
   switch (cmd)
     {
       case F_DUPFD:

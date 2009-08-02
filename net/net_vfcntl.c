@@ -77,8 +77,6 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
   /* Interrupts must be disabled in order to perform operations on socket structures */
 
   flags = irqsave();
-
-#warning "Most fcntl() commands not yet implemented"
   switch (cmd)
     {
       case F_DUPFD:
