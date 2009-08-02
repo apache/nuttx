@@ -3469,7 +3469,7 @@ void httpd_realloc_str(char **strP, size_t * maxsizeP, size_t size)
 {
   if (*maxsizeP == 0)
     {
-      *maxsizeP       = MAX(200, size + 100);
+      *maxsizeP       = MAX(CONFIG_THTTPD_IOBUFFERSIZE, size + CONFIG_THTTPD_REALLOCINCR);
       *strP           = NEW(char, *maxsizeP + 1);
       ++str_alloc_count;
       str_alloc_size += *maxsizeP;
@@ -3559,7 +3559,7 @@ int httpd_get_conn(httpd_server *hs, int listen_fd, httpd_conn *hc)
   if (!hc->initialized)
     {
       hc->read_size = 0;
-      httpd_realloc_str(&hc->read_buf, &hc->read_size, 500);
+      httpd_realloc_str(&hc->read_buf, &hc->read_size, CONFIG_THTTPD_IOBUFFERSIZE);
       hc->maxdecodedurl =
         hc->maxorigfilename = hc->maxexpnfilename = hc->maxencodings =
         hc->maxpathinfo = hc->maxquery = hc->maxaccept =
@@ -3567,7 +3567,7 @@ int httpd_get_conn(httpd_server *hs, int listen_fd, httpd_conn *hc)
         hc->maxremoteuser = 0;
 #ifdef CONFIG_THTTPD_TILDE_MAP2
       hc->maxaltdir = 0;
-#endif                                 /*CONFIG_THTTPD_TILDE_MAP2 */
+#endif
       httpd_realloc_str(&hc->decodedurl, &hc->maxdecodedurl, 1);
       httpd_realloc_str(&hc->origfilename, &hc->maxorigfilename, 1);
       httpd_realloc_str(&hc->expnfilename, &hc->maxexpnfilename, 0);
@@ -3587,6 +3587,7 @@ int httpd_get_conn(httpd_server *hs, int listen_fd, httpd_conn *hc)
 
   /* Accept the new connection. */
 
+  nvdbg("accept() new connection on listen_fd %d\n", listen_fd);
   sz = sizeof(sa);
   hc->conn_fd = accept(listen_fd, (struct sockaddr*)&sa, &sz);
   if (hc->conn_fd < 0)
@@ -3613,54 +3614,56 @@ int httpd_get_conn(httpd_server *hs, int listen_fd, httpd_conn *hc)
   hc->hs = hs;
   (void)memset(&hc->client_addr, 0, sizeof(hc->client_addr));
   (void)memmove(&hc->client_addr, &sa, sockaddr_len(&sa));
-  hc->read_idx = 0;
-  hc->checked_idx = 0;
-  hc->checked_state = CHST_FIRSTWORD;
-  hc->method = METHOD_UNKNOWN;
-  hc->status = 0;
-  hc->bytes_to_send = 0;
-  hc->bytes_sent = 0;
-  hc->encodedurl = "";
-  hc->decodedurl[0] = '\0';
-  hc->protocol = "UNKNOWN";
-  hc->origfilename[0] = '\0';
-  hc->expnfilename[0] = '\0';
-  hc->encodings[0] = '\0';
-  hc->pathinfo[0] = '\0';
-  hc->query[0] = '\0';
-  hc->referer = "";
-  hc->useragent = "";
-  hc->accept[0] = '\0';
-  hc->accepte[0] = '\0';
-  hc->acceptl = "";
-  hc->cookie = "";
-  hc->contenttype = "";
-  hc->reqhost[0] = '\0';
-  hc->hdrhost = "";
-  hc->hostdir[0] = '\0';
-  hc->authorization = "";
-  hc->remoteuser[0] = '\0';
-  hc->buffer[0] = '\0';
+  hc->read_idx          = 0;
+  hc->checked_idx       = 0;
+  hc->checked_state     = CHST_FIRSTWORD;
+  hc->method            = METHOD_UNKNOWN;
+  hc->status            = 0;
+  hc->bytes_to_send     = 0;
+  hc->bytes_sent        = 0;
+  hc->encodedurl        = "";
+  hc->decodedurl[0]     = '\0';
+  hc->protocol          = "UNKNOWN";
+  hc->origfilename[0]   = '\0';
+  hc->expnfilename[0]   = '\0';
+  hc->encodings[0]      = '\0';
+  hc->pathinfo[0]       = '\0';
+  hc->query[0]          = '\0';
+  hc->referer           = "";
+  hc->useragent         = "";
+  hc->accept[0]         = '\0';
+  hc->accepte[0]        = '\0';
+  hc->acceptl           = "";
+  hc->cookie            = "";
+  hc->contenttype       = "";
+  hc->reqhost[0]        = '\0';
+  hc->hdrhost           = "";
+  hc->hostdir[0]        = '\0';
+  hc->authorization     = "";
+  hc->remoteuser[0]     = '\0';
+  hc->buffer[0]         = '\0';
 #ifdef CONFIG_THTTPD_TILDE_MAP2
-  hc->altdir[0] = '\0';
+  hc->altdir[0]         = '\0';
 #endif
   hc->buflen = 0;
   hc->if_modified_since = (time_t) - 1;
-  hc->range_if = (time_t) - 1;
-  hc->contentlength = -1;
+  hc->range_if          = (time_t)-1;
+  hc->contentlength     = -1;
   hc->type = "";
 #ifdef CONFIG_THTTPD_VHOST
-  hc->vhostname = NULL;
+  hc->vhostname         = NULL;
 #endif
-  hc->mime_flag = TRUE;
-  hc->one_one = FALSE;
-  hc->got_range = FALSE;
-  hc->tildemapped = FALSE;
-  hc->range_start = 0;
-  hc->range_end = -1;
-  hc->keep_alive = FALSE;
-  hc->should_linger = FALSE;
-  hc->file_fd = -1;
+  hc->mime_flag         = TRUE;
+  hc->one_one           = FALSE;
+  hc->got_range         = FALSE;
+  hc->tildemapped       = FALSE;
+  hc->range_start       = 0;
+  hc->range_end         = -1;
+  hc->keep_alive        = FALSE;
+  hc->should_linger     = FALSE;
+  hc->file_fd           = -1;
+
+  nvdbg("New connection accepted on %d\n", hc->conn_fd);
   return GC_OK;
 }
 
@@ -4067,14 +4070,13 @@ int httpd_parse_request(httpd_conn *hc)
               cp += strspn(cp, " \t");
               if (hc->accept[0] != '\0')
                 {
-                  if (strlen(hc->accept) > 5000)
+                  if (strlen(hc->accept) > CONFIG_THTTPD_MAXREALLOC)
                     {
                       ndbg("%s way too much Accept: data\n",
                              httpd_ntoa(&hc->client_addr));
                       continue;
                     }
-                  httpd_realloc_str(&hc->accept, &hc->maxaccept,
-                                    strlen(hc->accept) + 2 + strlen(cp));
+                  httpd_realloc_str(&hc->accept, &hc->maxaccept, strlen(hc->accept) + 2 + strlen(cp));
                   (void)strcat(hc->accept, ", ");
                 }
               else
@@ -4089,14 +4091,13 @@ int httpd_parse_request(httpd_conn *hc)
               cp += strspn(cp, " \t");
               if (hc->accepte[0] != '\0')
                 {
-                  if (strlen(hc->accepte) > 5000)
+                  if (strlen(hc->accepte) > CONFIG_THTTPD_MAXREALLOC)
                     {
                       ndbg("%s way too much Accept-Encoding: data\n",
                              httpd_ntoa(&hc->client_addr));
                       continue;
                     }
-                  httpd_realloc_str(&hc->accepte, &hc->maxaccepte,
-                                    strlen(hc->accepte) + 2 + strlen(cp));
+                  httpd_realloc_str(&hc->accepte, &hc->maxaccepte, strlen(hc->accepte) + 2 + strlen(cp));
                   (void)strcat(hc->accepte, ", ");
                 }
               else

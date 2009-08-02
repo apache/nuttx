@@ -195,37 +195,42 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
   struct connect_s *conn;
   ClientData client_data;
 
-  /* This loops until the accept() fails, trying to start new  connections as 
-   * fast as possible so we don't overrun the  listen queue.
+  /* This loops until the accept() fails, trying to start new connections as 
+   * fast as possible so we don't overrun the listen queue.
    */
 
+  nvdbg("New connection(s) on listen_fd %d\n", listen_fd);
   for (;;)
     {
       /* Is there room in the connection table? */
+
       if (num_connects >= AVAILABLE_FDS)
         {
           /* Out of connection slots.  Run the timers, then the  existing
            * connections, and maybe we'll free up a slot  by the time we get
-           * back here. */
+           * back here.
+           */
+
           ndbg("too many connections!\n");
           tmr_run(tv);
-          return 0;
+          return -1;
         }
 
       /* Get the first free connection entry off the free list */
 
+#ifdef CONFIG_DEBUG
       if (first_free_connect == -1 ||
           connects[first_free_connect].conn_state != CNST_FREE)
         {
           ndbg("the connects free list is messed up\n");
           exit(1);
         }
-
+#endif
       conn = &connects[first_free_connect];
 
       /* Make the httpd_conn if necessary */
 
-      if (conn->hc == (httpd_conn *) 0)
+      if (!conn->hc)
         {
           conn->hc = NEW(httpd_conn, 1);
           if (conn->hc == (httpd_conn *) 0)
@@ -233,8 +238,9 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
               ndbg("out of memory allocating an httpd_conn\n");
               exit(1);
             }
+
           conn->hc->initialized = 0;
-          ++httpd_conn_count;
+          httpd_conn_count++;
         }
 
       /* Get the connection */
@@ -247,37 +253,43 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
 
         case GC_FAIL:
           tmr_run(tv);
-          return 0;
+          return -1;
 
           /* No more connections to accept for now */
 
         case GC_NO_MORE:
-          return 1;
+          return 0;
+
+        default:
+          break;
         }
+
+      nvdbg("New connection fd %d\n", conn->hc->conn_fd);
 
       conn->conn_state = CNST_READING;
 
       /* Pop it off the free list */
 
-      first_free_connect = conn->next_free_connect;
+      first_free_connect      = conn->next_free_connect;
       conn->next_free_connect = -1;
-      ++num_connects;
-      client_data.p = conn;
-      conn->active_at = tv->tv_sec;
-      conn->wakeup_timer = (Timer *) 0;
-      conn->linger_timer = (Timer *) 0;
-      conn->offset = 0;
+      num_connects++;
+      client_data.p           = conn;
+      conn->active_at         = tv->tv_sec;
+      conn->wakeup_timer      = NULL;
+      conn->linger_timer      = NULL;
+      conn->offset            = 0;
  
       /* Set the connection file descriptor to no-delay mode */
 
       httpd_set_ndelay(conn->hc->conn_fd);
-
       fdwatch_add_fd(fw, conn->hc->conn_fd, conn, FDW_READ);
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
       ++stats_connections;
       if (num_connects > stats_simultaneous)
-        stats_simultaneous = num_connects;
+        {
+          stats_simultaneous = num_connects;
+        }
 #endif
     }
 }
@@ -293,11 +305,11 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
 
   if (hc->read_idx >= hc->read_size)
     {
-      if (hc->read_size > 5000)
+      if (hc->read_size > CONFIG_THTTPD_MAXREALLOC)
         {
           goto errout_with_400;
         }
-      httpd_realloc_str(&hc->read_buf, &hc->read_size, hc->read_size + 1000);
+      httpd_realloc_str(&hc->read_buf, &hc->read_size, hc->read_size + CONFIG_THTTPD_REALLOCINCR);
     }
 
   /* Read some more bytes */
@@ -880,7 +892,12 @@ int thttpd_main(int argc, char **argv)
       if (num_ready < 0)
         {
           if (errno == EINTR || errno == EAGAIN)
-            continue;           /* try again */
+            {
+              /* Not errors... try again */
+
+              continue;
+            }
+
           ndbg("fdwatch: %d\n", errno);
           exit(1);
         }
@@ -897,10 +914,9 @@ int thttpd_main(int argc, char **argv)
 
       /* Is it a new connection? */
 
-      if (hs != (httpd_server *) 0 && hs->listen_fd != -1 &&
-          fdwatch_check_fd(fw, hs->listen_fd))
+      if (fdwatch_check_fd(fw, hs->listen_fd))
         {
-          if (handle_newconnect(&tv, hs->listen_fd))
+          if (!handle_newconnect(&tv, hs->listen_fd))
             {
               /* Go around the loop and do another fdwatch, rather than 
                * dropping through and processing existing connections.  New
@@ -913,33 +929,33 @@ int thttpd_main(int argc, char **argv)
 
       /* Find the connections that need servicing */
 
-      while ((conn =
-              (struct connect_s*)fdwatch_get_next_client_data(fw)) !=
-             (struct connect_s*)- 1)
+      while ((conn = (struct connect_s*)fdwatch_get_next_client_data(fw)) != (struct connect_s*)-1)
         {
-          if (conn == (struct connect_s *) 0)
-            continue;
-
-          hc = conn->hc;
-          if (!fdwatch_check_fd(fw, hc->conn_fd))
+          if (conn)
             {
-              /* Something went wrong */
-
-              clear_connection(conn, &tv);
-            }
-          else
-            {
-              switch (conn->conn_state)
+              hc = conn->hc;
+              if (!fdwatch_check_fd(fw, hc->conn_fd))
                 {
-                case CNST_READING:
-                  handle_read(conn, &tv);
-                  break;
-                case CNST_SENDING:
-                  handle_send(conn, &tv);
-                  break;
-                case CNST_LINGERING:
-                  handle_linger(conn, &tv);
-                  break;
+                  /* Something went wrong */
+
+                  nvdbg("Clearing connection\n");
+                  clear_connection(conn, &tv);
+                }
+              else
+                {
+                  nvdbg("Handle conn_state %d\n", conn->conn_state);
+                  switch (conn->conn_state)
+                    {
+                      case CNST_READING:
+                        handle_read(conn, &tv);
+                        break;
+                      case CNST_SENDING:
+                        handle_send(conn, &tv);
+                        break;
+                      case CNST_LINGERING:
+                        handle_linger(conn, &tv);
+                        break;
+                    }
                 }
             }
         }

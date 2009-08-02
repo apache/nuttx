@@ -131,8 +131,18 @@
 #    define CONFIG_THTTPD_CHARSET "iso-8859-1"
 #  endif
 
+/* Initial buffer size, buffer reallocation increment, maximum buffer size */
+
 #  ifndef CONFIG_THTTPD_IOBUFFERSIZE
 #    define CONFIG_THTTPD_IOBUFFERSIZE 256
+#  endif
+
+#  ifndef CONFIG_THTTPD_REALLOCINCR
+#    define CONFIG_THTTPD_REALLOCINCR 128
+#  endif
+
+#  ifndef CONFIG_THTTPD_MAXREALLOC
+#    define CONFIG_THTTPD_MAXREALLOC 4096
 #  endif
 
 #  if CONFIG_THTTPD_IOBUFFERSIZE > 65535

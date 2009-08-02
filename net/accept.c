@@ -356,6 +356,18 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       nvdbg("Pending conn=%p\n", state.acpt_newconn);
       accept_tcpsender(state.acpt_newconn, inaddr);
     }
+
+  /* In general, this uIP-based implementation will not support non-blocking
+   * socket operations... except in a few cases:  Here for TCP accept with backlog
+   * enabled.  If this socket is configured as non-blocking then return EAGAIN
+   * if there is no pending connection in the backlog.
+   */
+
+  else if (_SS_ISNONBLOCK(psock->s_flags))
+    {
+      err = EAGAIN;
+      goto errout_with_irq;
+    }
   else
 #endif
     {
