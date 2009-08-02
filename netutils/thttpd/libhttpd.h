@@ -114,8 +114,7 @@ typedef struct sockaddr_in httpd_sockaddr;
 
 typedef struct
 {
-  char *binding_hostname;
-  char *server_hostname;
+  char *hostname;
   int   cgi_count;
   char *cwd;
   int   listen_fd;

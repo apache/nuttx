@@ -175,7 +175,7 @@ static void shut_down(void)
         }
     }
 
-  if (hs != (httpd_server *) 0)
+  if (hs)
     {
       httpd_server *ths = hs;
       hs = (httpd_server *) 0;
@@ -747,6 +747,8 @@ int thttpd_main(int argc, char **argv)
   int ret;
 #endif
 
+  nvdbg("THTTPD started\n");
+
   /* Setup host address */
 
 #ifdef  CONFIG_NET_IPv6
@@ -803,9 +805,11 @@ int thttpd_main(int argc, char **argv)
 
   /* Initialize the HTTP layer */
 
+  nvdbg("Calling httpd_initialize()\n");
   hs = httpd_initialize(&sa, cwd);
   if (!hs)
     {
+      ndbg("httpd_initialize() failed\n");
       exit(1);
     }
 
@@ -870,6 +874,7 @@ int thttpd_main(int argc, char **argv)
 
   /* Main loop */
 
+  nvdbg("Entering the main loop\n");
   (void)gettimeofday(&tv, (struct timezone *)0);
   while ((!terminate) || num_connects > 0)
     {

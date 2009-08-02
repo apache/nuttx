@@ -272,16 +272,19 @@ char *httpd_err503form    = "The requested URL '%s' is temporarily overloaded.  
 
 static void free_httpd_server(httpd_server * hs)
 {
-  if (hs->binding_hostname)
+  if (hs)
     {
-      free((void *)hs->binding_hostname);
-    }
+      if (hs->hostname)
+        {
+          free(hs->hostname);
+        }
 
-  if (hs->cwd)
-    {
-      free((void *)hs->cwd);
+      if (hs->cwd)
+        {
+          free(hs->cwd);
+        }
+      free(hs);
     }
-  free((void *)hs);
 }
 
 static int initialize_listen_socket(httpd_sockaddr *saP)
@@ -300,10 +303,11 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
 
   /* Create socket. */
 
+  nvdbg("Create listen socket\n");
   listen_fd = socket(saP->sin_family, SOCK_STREAM, 0);
   if (listen_fd < 0)
     {
-      ndbg("socket %s: %d\n", httpd_ntoa(saP), errno);
+      ndbg("socket failed: %d\n", errno);
       return -1;
     }
 
@@ -312,14 +316,14 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
   on = 1;
   if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on)) < 0)
     {
-      ndbg("setsockopt SO_REUSEADDR: %d\n", errno);
+      ndbg("setsockopt(SO_REUSEADDR) failed: %d\n", errno);
     }
 
   /* Bind to it. */
 
   if (bind(listen_fd, (struct sockaddr*)&saP, sockaddr_len(saP)) < 0)
     {
-      ndbg("bind %s: %d\n", httpd_ntoa(saP), errno);
+      ndbg("bind to %s failed: %d\n", httpd_ntoa(saP), errno);
       (void)close(listen_fd);
       return -1;
     }
@@ -329,14 +333,14 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
   flags = fcntl(listen_fd, F_GETFL, 0);
   if (flags == -1)
     {
-      ndbg("fcntl F_GETFL: %d\n", errno);
+      ndbg("fcntl(F_GETFL) failed: %d\n", errno);
       (void)close(listen_fd);
       return -1;
     }
 
   if (fcntl(listen_fd, F_SETFL, flags | O_NDELAY) < 0)
     {
-      ndbg("fcntl O_NDELAY: %d\n", errno);
+      ndbg("fcntl(O_NDELAY) failed: %d\n", errno);
       (void)close(listen_fd);
       return -1;
     }
@@ -345,7 +349,7 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
 
   if (listen(listen_fd, CONFIG_THTTPD_LISTEN_BACKLOG) < 0)
     {
-      ndbg("listen: %d\n", errno);
+      ndbg("listen failed: %d\n", errno);
       (void)close(listen_fd);
       return -1;
     }
@@ -2053,7 +2057,7 @@ static void create_environment(httpd_conn *hc)
   else
 #endif
     {
-      cp = hc->hs->server_hostname;
+      cp = hc->hs->hostname;
     }
 
   if (cp)
@@ -3163,7 +3167,7 @@ static int check_referer(httpd_conn *hc)
       else
 #endif
         {
-          cp = hc->hs->server_hostname;
+          cp = hc->hs->hostname;
         }
 
       if (cp == NULL)
@@ -3247,7 +3251,7 @@ static int really_check_referer(httpd_conn *hc)
 #ifndef CONFIG_THTTPD_VHOST
   /* Not vhosting, use the server name. */
 
-  lp = hs->server_hostname;
+  lp = hs->hostname;
   if (!lp)
     {
       /* Couldn't figure out local hostname - give up. */
@@ -3332,13 +3336,15 @@ FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd)
 {
   FAR httpd_server *hs;
 
+  nvdbg("cwd: %s\n", cwd);
+
   /* Save the PID of the main thread */
 
   main_thread = getpid();
 
   /* Allocate the server structure */
 
-  hs = NEW(httpd_server, 1);
+  hs = (FAR httpd_server *)zalloc(sizeof(httpd_server));
   if (!hs)
     {
       ndbg("out of memory allocating an httpd_server\n");
@@ -3346,12 +3352,13 @@ FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd)
     }
 
 #ifdef CONFIG_THTTPD_HOSTNAME
-  hs->server_hostname = strdup(CONFIG_THTTPD_HOSTNAME);
+  hs->hostname = strdup(CONFIG_THTTPD_HOSTNAME);
 #else
-  hs->server_hostname = strdup(httpd_ntoa(sa));
+  hs->hostname = strdup(httpd_ntoa(sa));
 #endif
+  nvdbg("hostname: %s\n", hs->hostname);
 
-  if (!hs->server_hostname)
+  if (!hs->hostname)
     {
       ndbg("out of memory copying hostname\n");
       return NULL;
@@ -3370,10 +3377,12 @@ FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd)
   hs->listen_fd = initialize_listen_socket(sa);
   if (hs->listen_fd == -1)
     {
+      ndbg("Failed to create listen socket\n");
       free_httpd_server(hs);
-      return (httpd_server *) 0;
+      return NULL;
     }
 
+  nvdbg("Calling init_mime()\n");
   init_mime();
 
   /* Done initializing. */

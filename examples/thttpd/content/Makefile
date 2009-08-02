@@ -70,10 +70,10 @@ install: $(foreach DIR, $(SUBDIRS), $(DIR)_install)
 # Create the romfs directory
 
 $(ROMFS_DIR):
-	@mkdir $(ROMFS_DIR)
+	@mkdir -p $(ROMFS_DIR)
 
 $(ROMFSCGI_DIR): $(ROMFS_DIR)
-	@mkdir $(ROMFSCGI_DIR)
+	@mkdir -p $(ROMFSCGI_DIR)
 
 # Populate the romfs directory
 

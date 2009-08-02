@@ -245,8 +245,9 @@ int net_close(int sockfd)
                 {
                   /* Yes... free the connection structure */
 
-                 uip_unlisten(conn);          /* No longer accepting connections */
+                  uip_unlisten(conn);          /* No longer accepting connections */
                   netclose_disconnect(psock);  /* Break any current connections */
+                  conn->crefs = 0;             /* No more references on the connection */
                   uip_tcpfree(conn);           /* Free uIP resources */
                 }
               else

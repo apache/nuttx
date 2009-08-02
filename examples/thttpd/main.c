@@ -228,7 +228,8 @@ int user_start(int argc, char *argv[])
   g_thttpdsymtab   = exports;
   g_thttpdnsymbols = NEXPORTS;
 
-  printf("Starting THTTPD\n");
+  message("Starting THTTPD\n");
   thttpd_main(1, &thttpd_argv);
+  message("THTTPD terminated\n");
   return 0;
 }
