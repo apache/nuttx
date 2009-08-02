@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/accept.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,10 +102,17 @@ struct accept_s
 #ifdef CONFIG_NET_IPv6
 static inline void accept_tcpsender(FAR struct uip_conn *conn,
                                     FAR struct sockaddr_in6 *addr)
+{
+  if (addr)
+    {
+      addr->sin_family = AF_INET6;
+      addr->sin_port   = conn->rport;
+      uip_ipaddr_copy(addr->sin_addr.s_addr, conn->ripaddr);
+    }
+}
 #else
 static inline void accept_tcpsender(FAR struct uip_conn *conn,
                                     FAR struct sockaddr_in *addr)
-#endif
 {
   if (addr)
     {
@@ -114,7 +121,8 @@ static inline void accept_tcpsender(FAR struct uip_conn *conn,
       uip_ipaddr_copy(addr->sin_addr.s_addr, conn->ripaddr);
     }
 }
-#endif
+#endif /* CONFIG_NET_IPv6 */
+#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: accept_interrupt
@@ -304,9 +312,9 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   if (addr)
     {
 #ifdef CONFIG_NET_IPv6
-      if (addr->sa_family != AF_INET6 || *addrlen < sizeof(struct sockaddr_in6))
+      if (*addrlen < sizeof(struct sockaddr_in6))
 #else
-      if (addr->sa_family != AF_INET || *addrlen < sizeof(struct sockaddr_in))
+      if (*addrlen < sizeof(struct sockaddr_in))
 #endif
         {
           err = EBADF;

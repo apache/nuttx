@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 26, 2009)
+NuttX TODO List (Last updated August 3, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -233,6 +233,11 @@ o Network (net/, netutils/)
                a case where you can read from a UDP socket without blocking.
   Status:      Open, depends on UDP read-ahead support
   Priority:    Medium
+
+  Description: sockets do not support any modes except for O_NONBLOCK (that
+               that is not implemented in a very general way at present)
+  Status:      Open
+  Priority:    Low.
 
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^

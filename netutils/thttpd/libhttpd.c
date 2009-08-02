@@ -3551,7 +3551,7 @@ char *httpd_method_str(int method)
     }
 }
 
-int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
+int httpd_get_conn(httpd_server *hs, int listen_fd, httpd_conn *hc)
 {
   httpd_sockaddr sa;
   socklen_t sz;
@@ -3596,7 +3596,7 @@ int httpd_get_conn(httpd_server * hs, int listen_fd, httpd_conn *hc)
           return GC_NO_MORE;
         }
 
-      ndbg("accept: %d\n", errno);
+      ndbg("accept failed: %d\n", errno);
       return GC_FAIL;
     }
 
