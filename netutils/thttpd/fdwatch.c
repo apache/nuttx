@@ -82,6 +82,25 @@ static long nwatches = 0;
  * Private Functions
  ****************************************************************************/
 
+static int fdwatch_pollndx(FAR struct fdwatch_s *fw, int fd)
+{
+  int pollndx;
+
+  /* Get the index associated with the fd */
+
+  for (pollndx = 0; pollndx < fw->nwatched; pollndx++)
+    {
+      if (fw->pollfds[pollndx].fd == fd)
+        {
+          nvdbg("pollndx: %d\n", pollndx);
+          return pollndx;
+        }
+    }
+
+  ndbg("No poll index for fd %d: %d\n", fd);
+  return -1;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -90,8 +109,7 @@ static long nwatches = 0;
 
 struct fdwatch_s *fdwatch_initialize(int nfds)
 {
-  struct fdwatch_s *fw;
-  int i;
+  FAR struct fdwatch_s *fw;
 
   /* Allocate the fdwatch data structure */
 
@@ -106,21 +124,10 @@ struct fdwatch_s *fdwatch_initialize(int nfds)
 
   fw->nfds = nfds;
 
-  fw->fd_rw = (int*)malloc(sizeof(int) * nfds);
-  if (!fw->fd_rw)
+  fw->client = (struct fw_fd_s*)malloc(sizeof(struct fw_fd_s) * nfds);
+  if (!fw->client)
     {
       goto errout_with_allocations;
-    }
-
-  fw->fd_data = (void**)malloc(sizeof(void*) * nfds);
-  if (!fw->fd_data)
-    {
-      goto errout_with_allocations;
-    }
-
-  for (i = 0; i < nfds; ++i)
-    {
-      fw->fd_rw[i] = -1;
     }
 
   fw->pollfds = (struct pollfd*)malloc(sizeof(struct pollfd) * nfds);
@@ -129,23 +136,11 @@ struct fdwatch_s *fdwatch_initialize(int nfds)
       goto errout_with_allocations;
     }
 
-  fw->poll_pollndx = (int*)malloc(sizeof(int) * nfds);
-  if (!fw->poll_pollndx)
+  fw->ready = (uint8*)malloc(sizeof(uint8) * nfds);
+  if (!fw->ready)
     {
       goto errout_with_allocations;
     }
-
-  fw->poll_rfdidx  = (int*)malloc(sizeof(int) * nfds);
-  if (!fw->poll_rfdidx)
-    {
-      goto errout_with_allocations;
-    }
-
-  for (i = 0; i < nfds; i++)
-    {
-      fw->pollfds[i].fd = fw->poll_pollndx[i] = -1;
-    }
-
   return fw;
 
 errout_with_allocations:
@@ -159,14 +154,9 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
 {
   if (fw)
     {
-      if (fw->fd_rw)
+      if (fw->client)
         {
-          free(fw->fd_rw);
-        }
-
-      if (fw->fd_data)
-        {
-          free(fw->fd_data);
+          free(fw->client);
         }
 
       if (fw->pollfds)
@@ -174,14 +164,9 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
           free(fw->pollfds);
         }
 
-      if (fw->poll_pollndx)
+      if (fw->ready)
         {
-          free(fw->poll_pollndx);
-        }
-
-      if (fw->poll_rfdidx)
-        {
-          free(fw->poll_rfdidx);
+          free(fw->ready);
         }
 
       free(fw);
@@ -192,101 +177,80 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
 
 void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data, int rw)
 {
-  int fdndx;
+  nvdbg("fd: %d\n", fd);
 
 #ifdef CONFIG_DEBUG
   if (fd < CONFIG_NFILE_DESCRIPTORS ||
-      fd >= CONFIG_NFILE_DESCRIPTORS+fw->nfds ||
-      fw->fd_rw[fd-CONFIG_NFILE_DESCRIPTORS] != -1)
+      fd >= CONFIG_NFILE_DESCRIPTORS+fw->nfds)
     {
       ndbg("Received bad fd (%d)\n", fd);
       return;
     }
 #endif
 
-  if (fw->npoll_fds >= fw->nfds)
+  if (fw->nwatched >= fw->nfds)
     {
       ndbg("too many fds\n");
       return;
     }
 
-  /* Get the socket index associated with the fd */
-
-  fdndx = fd-CONFIG_NFILE_DESCRIPTORS;
-
   /* Save the new fd at the end of the list */
 
-  fw->pollfds[fw->npoll_fds].fd = fd;
-  switch (rw)
-    {
-    default:
-    case FDW_READ:
-      fw->pollfds[fw->npoll_fds].events = POLLIN;
-      break;
+  fw->pollfds[fw->nwatched].fd  = fd;
+  fw->client[fw->nwatched].rw   = rw;
+  fw->client[fw->nwatched].data = client_data;
 
-    case FDW_WRITE:
-      fw->pollfds[fw->npoll_fds].events = POLLOUT;
-      break;
+  if (rw == FDW_READ)
+    {
+      fw->pollfds[fw->nwatched].events = POLLIN;
+    }
+  else
+    {
+      fw->pollfds[fw->nwatched].events = POLLOUT;
     }
 
-  /* Save the new index and increment the cound of watched descriptors */
+  /* Increment the count of watched descriptors */
 
-  fw->poll_pollndx[fdndx] = fw->npoll_fds;
-  fw->npoll_fds++;
-
-  fw->fd_rw[fdndx]        = rw;
-  fw->fd_data[fdndx]      = client_data;
+  fw->nwatched++;
 }
 
 /* Remove a descriptor from the watch list. */
 
 void fdwatch_del_fd(struct fdwatch_s *fw, int fd)
 {
-  int fdndx;
   int pollndx;
-  int tmpndx;
+
+  nvdbg("fd: %d\n", fd);
 
 #ifdef CONFIG_DEBUG
   if (fd < CONFIG_NFILE_DESCRIPTORS ||
-      fd >= CONFIG_NFILE_DESCRIPTORS+fw->nfds ||
-      fw->fd_rw[fd-CONFIG_NFILE_DESCRIPTORS] == -1)
+      fd >= CONFIG_NFILE_DESCRIPTORS+fw->nfds)
     {
       ndbg("Received bad fd: %d\n", fd);
       return;
     }
 #endif
 
-  /* Get the socket index associated with the fd and then the poll
-   * index associated with that.
-   */
+  /* Get the index associated with the fd */
 
-  fdndx   = fd-CONFIG_NFILE_DESCRIPTORS;
-  pollndx = fw->poll_pollndx[fdndx];
-
-#ifdef CONFIG_DEBUG
-  if (pollndx < 0 || pollndx >= fw->nfds)
+  pollndx = fdwatch_pollndx(fw, fd);
+  if (pollndx >= 0)
     {
-      ndbg("Bad poll index: %d\n", pollndx);
-      return;
+      /* Decrement the number of fds in the poll table */
+
+      fw->nwatched--;
+
+      /* Replace the deleted one with the one at the the end
+       * of the list.
+       */
+
+      if (pollndx != fw->nwatched)
+        {
+          fw->pollfds[pollndx]      = fw->pollfds[fw->nwatched];
+          fw->client[pollndx].rw    = fw->client[fw->nwatched].rw;
+          fw->client[pollndx].data  = fw->client[fw->nwatched].data;
+        }
     }
-#endif
-
-  /* Decrement the number of fds in the poll table */
-
-  fw->npoll_fds--;
-
-  /* Replace the deleted one with the one at the the end
-   * of the list.
-   */
-
-  tmpndx                = fw->pollfds[pollndx].fd - CONFIG_NFILE_DESCRIPTORS;
-  fw->pollfds[pollndx]      = fw->pollfds[fw->npoll_fds];
-  fw->poll_pollndx[tmpndx]    =  fw->poll_pollndx[fdndx];;
-  fw->pollfds[fw->npoll_fds].fd = -1;
-  fw->poll_pollndx[fdndx]     = -1;
-
-  fw->fd_rw[fdndx]          = -1;
-  fw->fd_data[fdndx]        = NULL;
 }
 
 /* Do the watch.  Return value is the number of descriptors that are ready,
@@ -296,7 +260,6 @@ void fdwatch_del_fd(struct fdwatch_s *fw, int fd)
 
 int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
 {
-  int rfndx;
   int ret;
   int i;
 
@@ -304,100 +267,92 @@ int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
   nwatches++;
 #endif
 
-  ret = poll(fw->pollfds, fw->npoll_fds, (int)timeout_msecs);
-  if (ret <= 0)
-    {
-      return ret;
-    }
+  /* Wait for activity on any of the desciptors.  When poll() returns, ret
+   * will hold the number of descriptors with activity (or zero on a timeout
+   * or <0 on an error.
+   */
 
-  rfndx = 0;
-  for (i = 0; i < fw->npoll_fds; i++)
+  nvdbg("Waiting...\n");
+  fw->nactive = 0;
+  fw->next    = 0;
+  ret = poll(fw->pollfds, fw->nwatched, (int)timeout_msecs);
+  nvdbg("Awakened: %d\n", ret);
+
+  /* Look through all of the descriptors and make a list of all of them than
+   * have activity.
+   */
+
+  if (ret > 0)
     {
-      if (fw->pollfds[i].revents & (POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL))
+      for (i = 0; i < fw->nwatched; i++)
         {
-          fw->poll_rfdidx[rfndx++] = fw->pollfds[i].fd;
-          if (rfndx == ret)
+          /* Is there activity on this descriptor? */
+
+          if (fw->pollfds[i].revents & (POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL))
             {
-              break;
+              /* Yes... save it in a shorter list */
+
+              fw->ready[fw->nactive++] = fw->pollfds[i].fd;
+              if (fw->nactive == ret)
+                {
+                  /* We have all of them, break out early */
+
+                  break;
+                }
             }
         }
     }
 
-  return rfndx;
+  /* Return the number of descriptors with activity */
+
+  nvdbg("nactive: %d\n", fw->nactive);
+  return ret;
 }
 
 /* Check if a descriptor was ready. */
 
 int fdwatch_check_fd(struct fdwatch_s *fw, int fd)
 {
-  int fdndx;
   int pollndx;
+
+  nvdbg("fd: %d\n", fd);
 
 #ifdef CONFIG_DEBUG
   if (fd < CONFIG_NFILE_DESCRIPTORS ||
-      fd >= CONFIG_NFILE_DESCRIPTORS+fw->nfds ||
-      fw->fd_rw[fd-CONFIG_NFILE_DESCRIPTORS] == -1)
+      fd >= CONFIG_NFILE_DESCRIPTORS + fw->nfds)
     {
       ndbg("Bad fd: %d\n", fd);
       return 0;
     }
 #endif
 
-  /* Get the socket index associated with the fd and then the poll
-   * index associated with that.
-   */
+  /* Get the index associated with the fd */
 
-  fdndx   = fd-CONFIG_NFILE_DESCRIPTORS;
-  pollndx = fw->poll_pollndx[fdndx];
-
-#ifdef CONFIG_DEBUG
-  if (pollndx < 0 || pollndx >= fw->nfds)
+   pollndx = fdwatch_pollndx(fw, fd);
+   if (pollndx >= 0 && (fw->pollfds[pollndx].revents & POLLERR) == 0)
     {
-      ndbg("Bad poll index: %d\n", pollndx);
-      return 0;
-    }
-#endif
-
-  if (fw->pollfds[pollndx].revents & POLLERR)
-    {
-        return 0;
+      if (fw->client[pollndx].rw == FDW_READ)
+        {
+          return fw->pollfds[pollndx].revents & (POLLIN | POLLHUP | POLLNVAL);
+        }
+      else
+        {
+          return fw->pollfds[pollndx].revents & (POLLOUT | POLLHUP | POLLNVAL);
+        }
     }
 
-  switch (fw->fd_rw[fdndx])
-    {
-    case FDW_READ:
-      return fw->pollfds[pollndx].revents & (POLLIN | POLLHUP | POLLNVAL);
-
-    case FDW_WRITE:
-      return fw->pollfds[pollndx].revents & (POLLOUT | POLLHUP | POLLNVAL);
-
-    default:
-      break;
-    }
+  nvdbg("POLLERR fd: %d\n", fd);
   return 0;
 }
 
 void *fdwatch_get_next_client_data(struct fdwatch_s *fw)
 {
-  int rfndx;
-  int fdndx;
-  int fd;
-
-#ifdef CONFIG_DEBUG
-  if (rfndx < 0 || rfndx >= fw->nfds)
+  if (fw->next >= fw->nfds)
     {
-      ndbg("Bad rfndx: %d\n", rfndx);
+      ndbg("All client data returned: %d\n", fw->next);
       return NULL;
     }
-#endif
-
-  fd   = fw->poll_rfdidx[rfndx];
-  fdndx = fd-CONFIG_NFILE_DESCRIPTORS;
-  if (fdndx < 0 || fdndx >= fw->nfds)
-    {
-      return NULL;
-    }
-  return fw->fd_data[fdndx];
+  return fw->client[fw->next++].data;
 }
 
 /* Generate debugging statistics ndbg message. */
@@ -406,7 +361,9 @@ void *fdwatch_get_next_client_data(struct fdwatch_s *fw)
 void fdwatch_logstats(struct fdwatch_s *fw, long secs)
 {
   if (secs > 0)
-    ndbg("fdwatch - %ld polls (%g/sec)\n", nwatches, (float)nwatches / secs);
+    {
+      ndbg("fdwatch - %ld polls (%g/sec)\n", nwatches, (float)nwatches / secs);
+    }
   nwatches = 0;
 }
 #endif

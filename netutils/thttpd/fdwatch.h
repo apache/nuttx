@@ -33,12 +33,15 @@
  *
  ****************************************************************************/
 
+#ifndef __NETUTILS_THTTPD_FDWATCH_H
+#define __NETUTILS_THTTPD_FDWATCH_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __NETUTILS_THTTPD_FDWATCH_H
-#define __NETUTILS_THTTPD_FDWATCH_H
+#include <nuttx/config.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -55,15 +58,21 @@
  * Private Types
  ****************************************************************************/
 
+struct fw_fd_s
+{
+  uint8           rw;               /* Read or write fd */
+  void           *data;             /* Retained client data */
+};
+
 struct fdwatch_s
 {
-  int           *fd_rw;
-  void         **fd_data;
-  struct pollfd *pollfds;
-  int           *poll_pollndx;
-  int           *poll_rfdidx;
-  int            nfds;
-  int            npoll_fds;
+  struct pollfd  *pollfds;          /* Poll data */
+  struct fw_fd_s *client;           /* Client data */
+  uint8          *ready;            /* The list of fds with activity */
+  uint8           nfds;             /* The configured maximum number of fds */
+  uint8           nwatched;         /* The number of fds currently watched */
+  uint8           nactive;          /* The number of fds with activity */
+  uint8           next;             /* The index to the next client data */
 };
 
 /****************************************************************************
