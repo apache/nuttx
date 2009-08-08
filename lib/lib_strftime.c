@@ -214,7 +214,7 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
 
            case 'C':
              {
-               len = snprintf(dest, chleft, "%02d", tm->tm_year);
+               len = snprintf(dest, chleft, "%02d", tm->tm_year % 100);
              }
              break;
 

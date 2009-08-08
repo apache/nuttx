@@ -177,9 +177,9 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
    * following:
    */
 
-  value = days  / (4*365 + 1);  /* Number of 4-years periods */
-  days -= value * (4*365 + 1);  /* Remaining days */
-  value = 70 + (value << 2);    /* 1970 plus the 4 year groups */
+  value   = days  / (4*365 + 1);  /* Number of 4-years periods since the epoch*/
+  days   -= value * (4*365 + 1);  /* Remaining days */
+  value <<= 2;                    /* Years since the epoch */
 
   /* Then we will brute force the next 0-3 years */
 
@@ -212,7 +212,7 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
 
   /* At this point, value has the year and days has number days into this year */
 
-  *year = value;
+  *year = 1970 + value;
 
   /* Handle the month (zero based) */
 
@@ -225,18 +225,20 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
 
       value = (min + max) >> 1;
 
-      /* Get the number of days that occurred before the beginning month
+      /* Get the number of days that occurred before the beginning of the month
        * following the midpoint.
       */
 
       tmp = clock_daysbeforemonth(value + 1, leapyear);
 
-      /* Does that equal or exceed the number of days we have remaining? */
+      /* Does the number of days before this month that equal or exceed the
+       * number of days we have remaining?
+       */
 
       if (tmp >= days)
         {
-          /* Yes.. then the month we want is somewhere between 'min' and the.
-           * midpoint, 'value'.  Check if it is the midpoint.
+          /* Yes.. then the month we want is somewhere from 'min' and to the
+           * midpoint, 'value'.  Could it be the midpoint?
            */
 
           tmp = clock_daysbeforemonth(value, leapyear);
@@ -262,15 +264,17 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
     }
   while (min < max);
 
-  /* Subtract the number of days in the selected month */
+  /* The selected month number is in min (and max). Subtract the number of days in the
+   * selected month
+   */
 
-  days -= clock_daysbeforemonth(value, leapyear);
+  days -= clock_daysbeforemonth(min, leapyear);
 
   /* At this point, value has the month into this year (zero based) and days has
    * number of days into this month (zero based)
    */
 
-  *month = value;    /* Zero based */
+  *month = min + 1;  /* 1-based */
   *day   = days + 1; /* 1-based */
 }
 
@@ -329,9 +333,9 @@ struct tm *gmtime_r(const time_t *clock, struct tm *result)
 
   /* Then return the struct tm contents */
 
-  result->tm_year = (int)year - 1900;
-  result->tm_mon  = (int)month - 1;
-  result->tm_mday = (int)day;
+  result->tm_year = (int)year - 1900; /* Relative to 1900 */
+  result->tm_mon  = (int)month - 1;   /* zero-based */
+  result->tm_mday = (int)day;         /* one-based */
   result->tm_hour = (int)hour;
   result->tm_min  = (int)min;
   result->tm_sec  = (int)sec;
