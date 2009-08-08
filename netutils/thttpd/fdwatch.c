@@ -177,7 +177,7 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
 
 void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data, int rw)
 {
-  nvdbg("fd: %d\n", fd);
+  nvdbg("fd: %d client_data: %p\n", fd, client_data);
 
 #ifdef CONFIG_DEBUG
   if (fd < CONFIG_NFILE_DESCRIPTORS ||
@@ -347,11 +347,13 @@ int fdwatch_check_fd(struct fdwatch_s *fw, int fd)
 
 void *fdwatch_get_next_client_data(struct fdwatch_s *fw)
 {
-  if (fw->next >= fw->nfds)
+  if (fw->next >= fw->nwatched)
     {
-      ndbg("All client data returned: %d\n", fw->next);
-      return NULL;
+      nvdbg("All client data returned: %d\n", fw->next);
+      return (void*)-1;
     }
+
+  nvdbg("client_data[%d]: %p\n", fw->next, fw->client[fw->next].data);
   return fw->client[fw->next++].data;
 }
 

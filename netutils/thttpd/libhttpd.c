@@ -372,10 +372,10 @@ static void add_response(httpd_conn *hc, char *str)
 
   len = strlen(str);
   resplen = hc->buflen + len;
-  DEBUGASSERT(resplen < CONFIG_THTTPD_IOBUFFERSIZE);
 
   if (resplen > CONFIG_THTTPD_IOBUFFERSIZE)
     {
+      ndbg("resplen(%d) > buffer size(%d)\n", resplen, CONFIG_THTTPD_IOBUFFERSIZE);
       resplen = CONFIG_THTTPD_IOBUFFERSIZE;
       len     = resplen - hc->buflen;
     }

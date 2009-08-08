@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_strftime.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,13 +70,13 @@
  * Private Data
  ****************************************************************************/
 
-static const char *g_abbrevmonthname[12] =
+static const char * const g_abbrevmonthname[12] =
 {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-static const char *g_monthname[12] =
+static const char * const g_monthname[12] =
 {
   "January", "February", "March",     "April",   "May",      "June",
   "July",    "August",   "September", "October", "November", "December"
@@ -163,12 +163,21 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
 
       /* Handle the format character */
 
+       format++;
        len   = 0;
-       value = 0;
-       str   = "??";
 
-       switch (*++format)
+       switch (*format++)
          {
+           /* %a: A three-letter abbreviation for the day of the week. */
+           /* %A: The full name for the day of the week. */
+
+           case 'a':
+           case 'A':
+             {
+               len = snprintf(dest, chleft, "Day"); /* Not supported */
+             }
+             break;
+           
            /* %h: Equivalent to %b */
 
            case 'h':
