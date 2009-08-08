@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 3, 2009)
+NuttX TODO List (Last updated August 8, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -7,7 +7,7 @@ NuttX TODO List (Last updated August 3, 2009)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (12)  Network (net/, netutils/)
+ (15)  Network (net/, netutils/)
   (1)  USB (drivers/usbdev)
   (4)  Libraries (lib/)
   (8)  File system/Generic drivers (fs/, drivers/)
@@ -234,10 +234,17 @@ o Network (net/, netutils/)
   Status:      Open, depends on UDP read-ahead support
   Priority:    Medium
 
-  Description: sockets do not support any modes except for O_NONBLOCK (that
-               that is not implemented in a very general way at present)
+  Description: sockets do not support all modes except for O_NONBLOCK. Sockets
+               support only (1) TCP/IP non-blocking read operations when read-ahead
+	       buffering is enabled, and (2) TCP/IP accept() operations when TCP/IP
+	       connection backlog is enabled.
   Status:      Open
   Priority:    Low.
+
+  Description: THTTPD is included in the source tree, but has not yet been fully
+               integrated.
+  Status:      Open
+  Priority:    High
 
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
