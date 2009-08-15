@@ -54,7 +54,7 @@
 #ifndef CONFIG_ARCH_STRNCASECMP
 int strncasecmp(const char *cs, const char *ct, size_t nb)
 {
-  register int result = 0;
+  int result = 0;
   for (; nb > 0; nb--)
     {
       if ((result = (int)toupper(*cs) - (int)toupper(*ct)) != 0 || !*cs)

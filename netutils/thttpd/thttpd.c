@@ -752,7 +752,6 @@ static void thttpd_logstats(long secs)
 
 int thttpd_main(int argc, char **argv)
 {
-  char cwd[MAXPATHLEN + 1];
   int num_ready;
   int cnum;
   FAR struct connect_s *conn;
@@ -774,25 +773,6 @@ int thttpd_main(int argc, char **argv)
   sa.sin_port        = HTONS(CONFIG_THTTPD_PORT);
   sa.sin_addr.s_addr = HTONL(CONFIG_THTTPD_IPADDR);
 #endif
-
-  /* Switch directories if requested */
-
-#ifdef CONFIG_THTTPD_DIR
-  ret = chdir(CONFIG_THTTPD_DIR);
-  if (ret < 0)
-    {
-      ndbg("chdir: %d\n", errno);
-      exit(1);
-    }
-#endif
-
-  /* Get current directory */
-
-  (void)getcwd(cwd, sizeof(cwd) - 1);
-  if (cwd[strlen(cwd) - 1] != '/')
-    {
-       (void)strcat(cwd, "/");
-    }
 
   /* Initialize the fdwatch package to handle all of the configured
    * socket descriptors
@@ -822,7 +802,7 @@ int thttpd_main(int argc, char **argv)
   /* Initialize the HTTP layer */
 
   nvdbg("Calling httpd_initialize()\n");
-  hs = httpd_initialize(&sa, cwd);
+  hs = httpd_initialize(&sa);
   if (!hs)
     {
       ndbg("httpd_initialize() failed\n");

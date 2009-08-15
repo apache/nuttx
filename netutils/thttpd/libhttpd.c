@@ -293,10 +293,6 @@ static void free_httpd_server(httpd_server * hs)
           free(hs->hostname);
         }
 
-      if (hs->cwd)
-        {
-          free(hs->cwd);
-        }
       free(hs);
     }
 }
@@ -736,10 +732,14 @@ static int auth_check(httpd_conn *hc, char *dirname)
 
 #ifdef CONFIG_THTTPD_VHOST
   if (hc->hostdir[0] != '\0')
-    topdir = hc->hostdir;
+    {
+      topdir = hc->hostdir;
+    }
   else
 #endif
-    topdir = ".";
+    {
+      topdir = CONFIG_THTTPD_PATH;
+    }
 
   switch (auth_check2(hc, topdir))
     {
@@ -1418,7 +1418,7 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
   *restP = r;
   if (checked[0] == '\0')
     {
-      (void)strcpy(checked, ".");
+      (void)strcpy(checked, CONFIG_THTTPD_PATH);
     }
   return checked;
 }
@@ -1807,8 +1807,7 @@ static void ls_child(int argc, char **argv)
                         strlen(hc->origfilename) + 1 +
                         strlen(nameptrs[i]));
 
-      if (hc->expnfilename[0] == '\0' ||
-          strcmp(hc->expnfilename, ".") == 0)
+      if (hc->expnfilename[0] == '\0' || strcmp(hc->expnfilename, ".") == 0)
         {
           (void)strcpy(name, nameptrs[i]);
           (void)strcpy(rname, nameptrs[i]);
@@ -2109,11 +2108,11 @@ static void create_environment(httpd_conn *hc)
       (void)snprintf(buf, sizeof(buf), "/%s", hc->pathinfo);
       setenv("PATH_INFO", buf, TRUE);
 
-      l = strlen(hc->hs->cwd) + strlen(hc->pathinfo) + 1;
+      l = strlen(CONFIG_THTTPD_PATH) + strlen(hc->pathinfo) + 1;
       cp2 = NEW(char, l);
       if (cp2)
         {
-          (void)snprintf(cp2, l, "%s%s", hc->hs->cwd, hc->pathinfo);
+          (void)snprintf(cp2, l, "%s%s", CONFIG_THTTPD_PATH, hc->pathinfo);
           setenv("PATH_TRANSLATED", cp2, TRUE);
         }
     }
@@ -3072,7 +3071,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
   cp = strrchr(dirname, '/');
   if (!cp)
     {
-      (void)strcpy(dirname, ".");
+      (void)strcpy(dirname, CONFIG_THTTPD_PATH);
     }
   else
     {
@@ -3381,11 +3380,9 @@ static size_t sockaddr_len(httpd_sockaddr *saP)
  * Public Functions
  ****************************************************************************/
 
-FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd)
+FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa)
 {
   FAR httpd_server *hs;
-
-  nvdbg("cwd: %s\n", cwd);
 
   /* Save the PID of the main thread */
 
@@ -3414,12 +3411,6 @@ FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd)
     }
 
   hs->cgi_count = 0;
-  hs->cwd       = strdup(cwd);
-  if (!hs->cwd)
-    {
-      ndbg("out of memory copying cwd\n");
-      return (httpd_server *) 0;
-    }
 
   /* Initialize listen sockets */
 
@@ -3999,7 +3990,7 @@ int httpd_parse_request(httpd_conn *hc)
         }
       *url = '\0';
 
-      if (strchr(reqhost, '/') != (char *)0 || reqhost[0] == '.')
+      if (strchr(reqhost, '/') != NULL || reqhost[0] == '.')
         {
           BADREQUEST("reqhost-2");
           httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
@@ -4048,7 +4039,7 @@ int httpd_parse_request(httpd_conn *hc)
 
   if (hc->origfilename[0] == '\0')
     {
-      (void)strcpy(hc->origfilename, ".");
+      (void)strcpy(hc->origfilename, CONFIG_THTTPD_PATH);
     }
 
   /* Extract query string from encoded URL. */
@@ -4386,11 +4377,11 @@ int httpd_parse_request(httpd_conn *hc)
 
   if (hc->expnfilename[0] == '/')
     {
-      if (strncmp(hc->expnfilename, hc->hs->cwd, strlen(hc->hs->cwd)) == 0)
+      if (strncmp(hc->expnfilename, CONFIG_THTTPD_PATH, strlen(CONFIG_THTTPD_PATH)) == 0)
         {
           /* Elide the current directory. */
 
-          (void)strcpy(hc->expnfilename, &hc->expnfilename[strlen(hc->hs->cwd)]);
+          (void)strcpy(hc->expnfilename, &hc->expnfilename[strlen(CONFIG_THTTPD_PATH)]);
         }
 #ifdef CONFIG_THTTPD_TILDE_MAP2
       else if (hc->altdir[0] != '\0' &&

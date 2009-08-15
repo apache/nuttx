@@ -93,7 +93,7 @@
 #define SECTORSIZE   512
 #define NSECTORS(b)  (((b)+SECTORSIZE-1)/SECTORSIZE)
 #define ROMFSDEV     "/dev/ram0"
-#define MOUNTPT      "/mnt/www"
+#define MOUNTPT      CONFIG_THTTPD_PATH
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG

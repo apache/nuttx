@@ -167,7 +167,6 @@ typedef struct
 {
   char *hostname;
   int   cgi_count;
-  char *cwd;
   int   listen_fd;
 } httpd_server;
 
@@ -245,7 +244,7 @@ typedef struct
  * Return (httpd_server*) 0 on error.
  */
 
-extern FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa, FAR const char *cwd);
+extern FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa);
 
 /* Call to unlisten/close socket(s) listening for new connections. */
 

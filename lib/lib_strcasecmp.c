@@ -54,7 +54,7 @@
 #ifndef CONFIG_ARCH_STRCMP
 int strcasecmp(const char *cs, const char *ct)
 {
-  register int result;
+  int result;
   for (;;)
     {
       if ((result = (int)toupper(*cs) - (int)toupper(*ct)) != 0 || !*cs)

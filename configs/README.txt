@@ -358,7 +358,8 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_THTTPD_IPADDR - Server IP address (no host name)
 		CONFIG_THTTPD_SERVER_ADDRESS - SERVER_ADDRESS: response
 		CONFIG_THTTPD_SERVER_SOFTWARE - SERVER_SOFTWARE: response
-		CONFIG_THTTPD_CGI_PATH -
+		CONFIG_THTTPD_PATH - Server working directory
+		CONFIG_THTTPD_CGI_PATH - Path to CGI executables
 		CONFIG_THTTPD_CGI_PATTERN - Only CGI programs matching this
 		  pattern will be executed.  In fact, if this value is not defined
 		  then no CGI logic will be built.

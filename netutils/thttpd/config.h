@@ -88,6 +88,13 @@
 #    define CONFIG_THTTPD_SERVER_SOFTWARE "thttpd/2.25b 29dec2003-NuttX"
 #  endif
 
+#  ifndef CONFIG_THTTPD_PATH
+#    ifdef CONFIG_CPP_HAVE_WARNING
+#      warning "CONFIG_THTTPD_PATH not defined"
+#    endif
+#    define CONFIG_THTTPD_PATH "/mnt/www"
+#  endif
+
 #  ifndef CONFIG_THTTPD_CGI_PATH
 #    ifdef CONFIG_CPP_HAVE_WARNING
 #      warning "CONFIG_THTTPD_CGI_PATH not defined"
