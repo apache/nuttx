@@ -68,7 +68,58 @@
 #define NEW(t,n) ((t*) malloc( sizeof(t) * (n) ))
 #define RENEW(o,t,n) ((t*) realloc( (void*) o, sizeof(t) * (n) ))
 
-/* Methods. */
+/* Enable special instrumentation to track down "400 Bad Request" problems */
+
+#undef CONFIG_THTTPD_BADREQUEST /* Define to enable "Bad Request" instrumentation */
+
+#ifdef CONFIG_THTTPD_BADREQUEST
+#  if !defined(CONFIG_DEBUG_VERBOSE) || !defined(CONFIG_DEBUG_NET)
+#    undef CONFIG_THTTPD_BADREQUEST
+#  else
+#    define BADREQUEST(s) nvdbg("Bad Request: \"%s\"\n", s)
+#  endif
+#endif
+
+#ifndef CONFIG_THTTPD_BADREQUEST
+#  undef  BADREQUEST
+#  define BADREQUEST(s)
+#endif
+
+/* Enable special instrumentation to track down "501 Not Implemented" problems */
+
+#undef CONFIG_THTTPD_NOTIMPLEMENTED /* Define to enable "Not Implemented" instrumentation */
+
+#ifdef CONFIG_THTTPD_NOTIMPLEMENTED
+#  if !defined(CONFIG_DEBUG_VERBOSE) || !defined(CONFIG_DEBUG_NET)
+#    undef CONFIG_THTTPD_NOTIMPLEMENTED
+#  else
+#    define NOTIMPLEMENTED(s) nvdbg("Not Implemented: \"%s\"\n", s)
+#  endif
+#endif
+
+#ifndef CONFIG_THTTPD_NOTIMPLEMENTED
+#  undef  NOTIMPLEMENTED
+#  define NOTIMPLEMENTED(s)
+#endif
+
+/* Enable special instrumentation to track down "500 Internal Error" problems */
+
+#undef CONFIG_THTTPD_INTERNALERROR /* Define to enable "Internal Error" instrumentation */
+
+#ifdef CONFIG_THTTPD_INTERNALERROR
+#  if !defined(CONFIG_DEBUG_VERBOSE) || !defined(CONFIG_DEBUG_NET)
+#    undef CONFIG_THTTPD_INTERNALERROR
+#  else
+#    define INTERNALERROR(s) nvdbg("Internal Error: \"%s\"\n", s)
+#  endif
+#endif
+
+#ifndef CONFIG_THTTPD_INTERNALERROR
+#  undef  INTERNALERROR
+#  define INTERNALERROR(s)
+#endif
+
+/* Methods */
 
 #define METHOD_UNKNOWN 0
 #define METHOD_GET 1
@@ -263,21 +314,19 @@ extern void httpd_destroy_conn(httpd_conn *hc);
 
 /* Send an error message back to the client. */
 
-extern void httpd_send_err(httpd_conn *hc, int status, char *title,
-                           char *extraheads, char *form, char *arg);
+extern void httpd_send_err(httpd_conn *hc, int status, const char *title,
+                           const char *extraheads, const char *form, const char *arg);
 
 /* Some error messages. */
 
-extern char *httpd_err400title;
-extern char *httpd_err400form;
-extern char *httpd_err408title;
-extern char *httpd_err408form;
-extern char *httpd_err503title;
-extern char *httpd_err503form;
+extern const char httpd_err400title[];
+extern const char httpd_err400form[];
+extern const char httpd_err408title[];
+extern const char httpd_err408form[];
 
 /* Generate a string representation of a method number. */
 
-extern char *httpd_method_str(int method);
+extern const char *httpd_method_str(int method);
 
 /* Reallocate a string. */
 

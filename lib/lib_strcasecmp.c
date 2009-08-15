@@ -54,10 +54,10 @@
 #ifndef CONFIG_ARCH_STRCMP
 int strcasecmp(const char *cs, const char *ct)
 {
-  register signed char result;
+  register int result;
   for (;;)
     {
-      if ((result = toupper(*cs) - toupper(*ct)) != 0 || !*cs)
+      if ((result = (int)toupper(*cs) - (int)toupper(*ct)) != 0 || !*cs)
         {
           break;
         }

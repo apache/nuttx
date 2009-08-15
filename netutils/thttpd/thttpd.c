@@ -307,6 +307,7 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
     {
       if (hc->read_size > CONFIG_THTTPD_MAXREALLOC)
         {
+          BADREQUEST("MAXREALLOC");
           goto errout_with_400;
         }
       httpd_realloc_str(&hc->read_buf, &hc->read_size, hc->read_size + CONFIG_THTTPD_REALLOCINCR);
@@ -317,12 +318,13 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
   sz = read(hc->conn_fd, &(hc->read_buf[hc->read_idx]), hc->read_size - hc->read_idx);
   if (sz == 0)
     {
+      BADREQUEST("EOF");
       goto errout_with_400;
     }
 
   if (sz < 0)
     {
-      /* Ignore EINTR and EAGAIN.  Also ignore EWOULDBLOCK.  At first glanc
+      /* Ignore EINTR and EAGAIN.  Also ignore EWOULDBLOCK.  At first glance
        * you would think that connections returned by fdwatch as readable
        * should never give an EWOULDBLOCK; however, this apparently can
        * happen if a packet gets garbled.
@@ -332,6 +334,9 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
         {
           return;
         }
+ 
+      ndbg("read(fd=%d) failed: %d\n", hc->conn_fd, errno);
+      BADREQUEST("read");
       goto errout_with_400;
     }
 
@@ -345,7 +350,8 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
     case GR_NO_REQUEST:
       return;
     case GR_BAD_REQUEST:
-      goto errout_with_400;
+     BADREQUEST("httpd_got_request");
+     goto errout_with_400;
     }
 
   /* Yes.  Try parsing and resolving it */
@@ -408,6 +414,7 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
   if (actual != conn->offset)
     {
        ndbg("fseek to %d failed: offset=%d errno=%d\n", conn->offset, actual, errno);
+       BADREQUEST("lseek");
        goto errout_with_400;
     }
 
@@ -421,6 +428,7 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
   return;
 
 errout_with_400:
+  BADREQUEST("errout");
   httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
 
 errout_with_connection:

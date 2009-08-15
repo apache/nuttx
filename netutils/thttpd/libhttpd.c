@@ -136,13 +136,13 @@ struct cgi_outbuffer_s
 
 static void free_httpd_server(httpd_server *hs);
 static int  initialize_listen_socket(httpd_sockaddr *saP);
-static void add_response(httpd_conn *hc, char *str);
-static void send_mime(httpd_conn *hc, int status, char *title, char *encodings,
-                      char *extraheads, char *type, off_t length, time_t mod);
-static void send_response(httpd_conn *hc, int status, char *title,
-                          char *extraheads, char *form, char *arg);
+static void add_response(httpd_conn *hc, const char *str);
+static void send_mime(httpd_conn *hc, int status, const char *title, const char *encodings,
+                      const char *extraheads, const char *type, off_t length, time_t mod);
+static void send_response(httpd_conn *hc, int status, const char *title,
+                          const char *extraheads, const char *form, const char *arg);
 static void send_response_tail(httpd_conn *hc);
-static void defang(char *str, char *dfstr, int dfsize);
+static void defang(const char *str, char *dfstr, int dfsize);
 #ifdef CONFIG_THTTPD_ERROR_DIRECTORY
 static int  send_err_file(httpd_conn *hc, int status, char *title,
                            char *extraheads, char *filename);
@@ -234,41 +234,51 @@ static size_t str_alloc_size  = 0;
  * HTTP Strings
  ****************************************************************************/
 
-static char *ok200title  = "OK";
-static char *ok206title  = "Partial Content";
+static const char ok200title[]  = "OK";
+static const char ok206title[]  = "Partial Content";
 
-static char *err302title = "Found";
-static char *err302form  = "The actual URL is '%s'.\n";
+static const char err302title[] = "Found";
+static const char err302form[]  = "The actual URL is '%s'.\n";
 
-static char *err304title = "Not Modified";
+static const char err304title[] = "Not Modified";
 
-char *httpd_err400title   = "Bad Request";
-char *httpd_err400form    = "Your request has bad syntax or is inherently impossible to satisfy.\n";
+const char httpd_err400title[]  = "Bad Request";
+const char httpd_err400form[]   = "Your request has bad syntax or is inherently impossible to satisfy.\n";
 
 #ifdef CONFIG_THTTPD_AUTH_FILE
-static char *err401title = "Unauthorized";
-static char *err401form  = "Authorization required for the URL '%s'.\n";
+static const char err401title[] = "Unauthorized";
+static const char err401form[]  = "Authorization required for the URL '%s'.\n";
 #endif
 
-static char *err403title = "Forbidden";
+static const char err403title[] = "Forbidden";
 #ifndef EXPLICIT_ERROR_PAGES
-static char *err403form  = "You do not have permission to get URL '%s' from this server.\n";
+static const char err403form[]  = "You do not have permission to get URL '%s' from this server.\n";
 #endif
 
-static char *err404title = "Not Found";
-static char *err404form  = "The requested URL '%s' was not found on this server.\n";
+static const char err404title[] = "Not Found";
+static const char err404form[]  = "The requested URL '%s' was not found on this server.\n";
 
-char *httpd_err408title   = "Request Timeout";
-char *httpd_err408form    = "No request appeared within a reasonable time period.\n";
+const char httpd_err408title[]  = "Request Timeout";
+const char httpd_err408form[]   = "No request appeared within a reasonable time period.\n";
 
-static char *err500title = "Internal Error";
-static char *err500form  = "There was an unusual problem serving the requested URL '%s'.\n";
+static const char err500title[] = "Internal Error";
+static const char err500form[]  = "There was an unusual problem serving the requested URL '%s'.\n";
 
-static char *err501title = "Not Implemented";
-static char *err501form  = "The requested method '%s' is not implemented by this server.\n";
+static const char err501title[] = "Not Implemented";
+static const char err501form[]  = "The requested method '%s' is not implemented by this server.\n";
 
-char *httpd_err503title   = "Service Temporarily Overloaded";
-char *httpd_err503form    = "The requested URL '%s' is temporarily overloaded.  Please try again later.\n";
+static const char httpd_err503title[] = "Service Temporarily Overloaded";
+static const char httpd_err503form[]  = "The requested URL '%s' is temporarily overloaded.  Please try again later.\n";
+
+static const char html_crlf[]      = "\r\n";
+static const char html_html[]      = "<HTML>\r\n";
+static const char html_endhtml[]   = "</HTML>\r\n";
+static const char html_hdtitle[]   = "<HEAD><TITLE>";
+static const char html_titlehd[]   = "</TITLE></HEAD>\r\n";
+static const char html_body[]      = "<BODY BGCOLOR=\"#99cc99\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\r\n";
+static const char html_endbody[]   = "</BODY>\r\n";
+static const char html_hdr2[]      = "<H2>";
+static const char html_endhdr2[]   = "</H2>";
 
 /****************************************************************************
  * Private Functions
@@ -365,12 +375,12 @@ static int initialize_listen_socket(httpd_sockaddr *saP)
 
 /* Append a string to the buffer waiting to be sent as response. */
 
-static void add_response(httpd_conn *hc, char *str)
+static void add_response(httpd_conn *hc, const char *str)
 {
   int resplen;
   int len;
 
-  len = strlen(str);
+  len     = strlen(str);
   resplen = hc->buflen + len;
 
   if (resplen > CONFIG_THTTPD_IOBUFFERSIZE)
@@ -384,8 +394,8 @@ static void add_response(httpd_conn *hc, char *str)
   hc->buflen = resplen;
 }
 
-static void send_mime(httpd_conn *hc, int status, char *title, char *encodings,
-                       char *extraheads, char *type, off_t length, time_t mod)
+static void send_mime(httpd_conn *hc, int status, const char *title, const char *encodings,
+                      const char *extraheads, const char *type, off_t length, time_t mod)
 {
   struct timeval now;
   const char *rfc1123fmt = "%a, %d %b %Y %H:%M:%S GMT";
@@ -491,21 +501,27 @@ static void send_mime(httpd_conn *hc, int status, char *title, char *encodings,
     }
 }
 
-static void send_response(httpd_conn *hc, int status, char *title, char *extraheads,
-                           char *form, char *arg)
+static void send_response(httpd_conn *hc, int status, const char *title, const char *extraheads,
+                          const char *form, const char *arg)
 {
-  char defanged_arg[1000], buf[2000];
+  char defanged[72];
+  char buf[128];
 
-  send_mime(hc, status, title, "", extraheads, "text/html; charset=%s",
-            (off_t) - 1, (time_t) 0);
-  (void)snprintf(buf, sizeof(buf), "\
-<HTML>\n\
-<HEAD><TITLE>%d %s</TITLE></HEAD>\n\
-<BODY BGCOLOR=\"#cc9999\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\n\
-<H2>%d %s</H2>\n", status, title, status, title);
+  nvdbg("title: \"%s\" form: \"%s\"\n", title, form);
+
+  send_mime(hc, status, title, "", extraheads, "text/html; charset=%s", (off_t) - 1, (time_t) 0);
+  add_response(hc, html_html);
+  add_response(hc, html_hdtitle);
+  (void)snprintf(buf, sizeof(buf), "%d %s", status, title);
   add_response(hc, buf);
-  defang(arg, defanged_arg, sizeof(defanged_arg));
-  (void)snprintf(buf, sizeof(buf), form, defanged_arg);
+  add_response(hc, html_titlehd);
+  add_response(hc, html_body);
+  add_response(hc, html_hdr2);
+  add_response(hc, buf);
+  add_response(hc, html_endhdr2);
+
+  defang(arg, defanged, sizeof(defanged));
+  (void)snprintf(buf, sizeof(buf), form, defanged);
   add_response(hc, buf);
 
   if (match("**MSIE**", hc->useragent))
@@ -523,19 +539,18 @@ static void send_response(httpd_conn *hc, int status, char *title, char *extrahe
 
 static void send_response_tail(httpd_conn *hc)
 {
-  char buf[1000];
-
-  (void)snprintf(buf, sizeof(buf), "\
-<HR>\n\
-<ADDRESS><A HREF=\"%s\">%s</A></ADDRESS>\n\
-</BODY>\n\
-</HTML>\n", CONFIG_THTTPD_SERVER_ADDRESS, "thttpd");
-  add_response(hc, buf);
+  add_response(hc, "<HR>\r\n<ADDRESS><A HREF=\"");
+  add_response(hc, CONFIG_THTTPD_SERVER_ADDRESS);
+  add_response(hc, "\">");
+  add_response(hc, "thttpd");
+  add_response(hc, "</A></ADDRESS>\r\n");
+  add_response(hc, html_endbody);
+  add_response(hc, html_endhtml);
 }
 
-static void defang(char *str, char *dfstr, int dfsize)
+static void defang(const char *str, char *dfstr, int dfsize)
 {
-  char *cp1;
+  const char *cp1;
   char *cp2;
 
   for (cp1 = str, cp2 = dfstr;
@@ -1720,20 +1735,23 @@ static void ls_child(int argc, char **argv)
   if (fp == (FILE *) 0)
     {
       ndbg("fdopen: %d\n", errno);
+      INTERNALERROR("fdopen");
       httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
       httpd_write_response(hc);
       closedir(dirp);
       exit(1);
     }
 
-  (void)fprintf(fp, "\
-<HTML>\n\
-<HEAD><TITLE>Index of %s</TITLE></HEAD>\n\
-<BODY BGCOLOR=\"#99cc99\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\n\
-<H2>Index of %s</H2>\n\
-<PRE>\n\
-mode  links  bytes  last-changed  name\n\
-<HR>", hc->encodedurl, hc->encodedurl);
+  fputs(html_html, fp);
+  fputs(html_hdtitle, fp);
+  (void)fprintf(fp, "Index of %s", hc->encodedurl, hc->encodedurl);
+  fputs(html_titlehd, fp);
+  fputs(html_body, fp);
+  fputs(html_hdr2, fp);
+  (void)fprintf(fp, "Index of %s", hc->encodedurl, hc->encodedurl);
+  fputs(html_endhdr2, fp);
+  fputs(html_crlf, fp);
+  fputs("<PRE>\r\nmode  links  bytes  last-changed  name\r\n<HR>", fp);
 
   /* Read in names. */
 
@@ -1923,7 +1941,9 @@ mode  links  bytes  last-changed  name\n\
                     nameptrs[i], linkprefix, link, fileclass);
     }
 
-  (void)fprintf(fp, "</PRE></BODY>\n</HTML>\n");
+  fputs("</PRE>", fp);
+  fputs(html_endbody, fp);
+  fputs(html_endhtml, fp);
   (void)fclose(fp);
   exit(0);
 }
@@ -2003,6 +2023,7 @@ static int ls(httpd_conn *hc)
         {
           ndbg("task_create: %d\n", errno);
           closedir(dirp);
+          INTERNALERROR("task_create");
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
           return -1;
         }
@@ -2028,6 +2049,7 @@ static int ls(httpd_conn *hc)
   else
     {
       closedir(dirp);
+      NOTIMPLEMENTED(httpd_method_str(hc->method));
       httpd_send_err(hc, 501, err501title, "", err501form, httpd_method_str(hc->method));
       return -1;
     }
@@ -2319,7 +2341,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
   ssize_t nbytes_read;
   char *br;
   int status;
-  char *title;
+  const char *title;
   char *cp;
 
   /* Make sure the connection is in blocking mode.  It should already be
@@ -2342,7 +2364,9 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                * EAGAIN is not an error, but it is still cause to return.
                */
 
-              nbytes_read = read(rfd, inbuffer, sizeof(inbuffer));
+              nbytes_read = read(hc->conn_fd, inbuffer, sizeof(inbuffer));
+              nvdbg("Read %d bytes from fd %d\n", nbytes_read, hc->conn_fd);
+
               if (nbytes_read < 0)
                 {
                   if (errno != EINTR)
@@ -2361,6 +2385,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 
           if (nbytes_read <= 0)
             {
+              nvdbg("End-of-file\n");
               br         = &(hdr->buffer[hdr->len]);
               hdr->state = CGI_OUTBUFFER_HEADERREAD;
             }
@@ -2372,12 +2397,14 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               (void)memcpy(&(hdr->buffer[hdr->len]), inbuffer, nbytes_read);
               hdr->len += nbytes_read;
               hdr->buffer[hdr->len] = '\0';
+              nvdbg("Header bytes accumulated: %d\n", hdr->len);
 
               /* Check for end of header */
 
               if ((br = strstr(hdr->buffer, "\015\012\015\012")) != NULL ||
                   (br = strstr(hdr->buffer, "\012\012")) != NULL)
                 {
+                  nvdbg("End-of-header\n");
                   hdr->state = CGI_OUTBUFFER_HEADERREAD;
                 }
               else
@@ -2430,7 +2457,8 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 
           /* Write the status line. */
 
-         switch (status)
+          nvdbg("Status: %d\n", status);
+          switch (status)
             {
             case 200:
               title = ok200title;
@@ -2445,6 +2473,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               break;
 
             case 400:
+              BADREQUEST("status");
               title = httpd_err400title;
               break;
 
@@ -2467,10 +2496,12 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               break;
 
             case 500:
+              INTERNALERROR("status");
               title = err500title;
               break;
 
             case 501:
+              NOTIMPLEMENTED("status");
               title = err501title;
               break;
 
@@ -2510,6 +2541,8 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                */
 
               nbytes_read = read(rfd, inbuffer, sizeof(inbuffer));
+              nvdbg("Read %d bytes from fd %d\n", nbytes_read, rfd);
+
               if (nbytes_read < 0)
                 {
                   if (errno != EINTR)
@@ -2528,6 +2561,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 
           if (nbytes_read == 0)
             {
+              nvdbg("End-of-file\n");
               close(hc->conn_fd);
               close(rfd);
               hdr->state = CGI_OUTBUFFER_DONE;
@@ -2789,6 +2823,7 @@ errout_with_descriptors:
   close(rfd);
   close(hc->conn_fd);
 
+  INTERNALERROR("errout");
   httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
   httpd_write_response(hc);
   return err;
@@ -2834,6 +2869,7 @@ static int cgi(httpd_conn *hc)
       if (child < 0)
         {
           ndbg("task_create: %d\n", errno);
+          INTERNALERROR("task_create");
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
           return -1;
         }
@@ -2846,6 +2882,7 @@ static int cgi(httpd_conn *hc)
     }
   else
     {
+      NOTIMPLEMENTED("CGI");
       httpd_send_err(hc, 501, err501title, "", err501form, httpd_method_str(hc->method));
       return -1;
     }
@@ -2873,6 +2910,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
   if (hc->method != METHOD_GET && hc->method != METHOD_HEAD &&
       hc->method != METHOD_POST)
     {
+      NOTIMPLEMENTED("really start");
       httpd_send_err(hc, 501, err501title, "", err501form,
                      httpd_method_str(hc->method));
       return -1;
@@ -2881,6 +2919,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
   /* Stat the file. */
   if (stat(hc->expnfilename, &hc->sb) < 0)
     {
+      INTERNALERROR(hc->expnfilename);
       httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
       return -1;
     }
@@ -3002,6 +3041,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
       cp = expand_filename(indexname, &pi, hc->tildemapped);
       if (cp == (char *)0 || pi[0] != '\0')
         {
+          INTERNALERROR(indexname);
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
           return -1;
         }
@@ -3141,6 +3181,7 @@ static int really_start_request(httpd_conn *hc, struct timeval *nowP)
       hc->file_fd = open(hc->expnfilename, O_RDONLY);
       if (!hc->file_fd < 0)
         {
+          INTERNALERROR(hc->expnfilename);
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
           return -1;
         }
@@ -3493,13 +3534,15 @@ void httpd_realloc_str(char **strP, size_t * maxsizeP, size_t size)
     }
 }
 
-void httpd_send_err(httpd_conn *hc, int status, char *title, char *extraheads,
-                    char *form, char *arg)
+void httpd_send_err(httpd_conn *hc, int status, const char *title, const char *extraheads,
+                    const char *form, const char *arg)
 {
 #ifdef CONFIG_THTTPD_ERROR_DIRECTORY
   char filename[1000];
 
   /* Try virtual host error page. */
+
+  ndbg("title: \"%s\" form: \"%s\"\n", title, form);
 
 #ifdef CONFIG_THTTPD_VHOST
   if (hc->hostdir[0] != '\0')
@@ -3508,6 +3551,7 @@ void httpd_send_err(httpd_conn *hc, int status, char *title, char *extraheads,
                      "%s/%s/err%d.html", hc->hostdir, CONFIG_THTTPD_ERROR_DIRECTORY, status);
       if (send_err_file(hc, status, title, extraheads, filename))
         {
+          nvdbg("Sent VHOST error file\n");
           return;
         }
     }
@@ -3515,10 +3559,10 @@ void httpd_send_err(httpd_conn *hc, int status, char *title, char *extraheads,
 
   /* Try server-wide error page. */
 
-  (void)snprintf(filename, sizeof(filename),
-                    "%s/err%d.html", CONFIG_THTTPD_ERROR_DIRECTORY, status);
+  (void)snprintf(filename, sizeof(filename), "%s/err%d.html", CONFIG_THTTPD_ERROR_DIRECTORY, status);
   if (send_err_file(hc, status, title, extraheads, filename))
     {
+      nvdbg("Sent server-wide error page\n");
       return;
     }
 
@@ -3533,7 +3577,7 @@ void httpd_send_err(httpd_conn *hc, int status, char *title, char *extraheads,
 #endif
 }
 
-char *httpd_method_str(int method)
+const char *httpd_method_str(int method)
 {
   switch (method)
     {
@@ -3891,21 +3935,27 @@ int httpd_parse_request(httpd_conn *hc)
   char *pi;
 
   hc->checked_idx = 0;          /* reset */
-  method_str = bufgets(hc);
+  method_str      = bufgets(hc);
+  nvdbg("method_str: \"%s\"\n", method_str);
 
   url = strpbrk(method_str, " \t\012\015");
   if (!url)
     {
+      BADREQUEST("url-1");
       httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
       return -1;
     }
+
   *url++ = '\0';
-  url += strspn(url, " \t\012\015");
+  url   += strspn(url, " \t\012\015");
+  nvdbg("url: \"%s\"\n", url);
 
   protocol = strpbrk(url, " \t\012\015");
+  nvdbg("protocol: \"%s\"\n", protocol ? protocol : "<null>");
+
   if (!protocol)
     {
-      protocol = "HTTP/0.9";
+      protocol      = "HTTP/0.9";
       hc->mime_flag = FALSE;
     }
   else
@@ -3934,14 +3984,16 @@ int httpd_parse_request(httpd_conn *hc)
     {
       if (!hc->one_one)
         {
+          BADREQUEST("one_one");
           httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
           return -1;
         }
 
       reqhost = url + 7;
-      url = strchr(reqhost, '/');
+      url     = strchr(reqhost, '/');
       if (!url)
         {
+          BADREQUEST("reqhost-1");
           httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
           return -1;
         }
@@ -3949,6 +4001,7 @@ int httpd_parse_request(httpd_conn *hc)
 
       if (strchr(reqhost, '/') != (char *)0 || reqhost[0] == '.')
         {
+          BADREQUEST("reqhost-2");
           httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
           return -1;
         }
@@ -3960,6 +4013,7 @@ int httpd_parse_request(httpd_conn *hc)
 
   if (*url != '/')
     {
+      BADREQUEST("url-2");
       httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
       return -1;
     }
@@ -3978,6 +4032,7 @@ int httpd_parse_request(httpd_conn *hc)
     }
   else
     {
+      NOTIMPLEMENTED(method_str);
       httpd_send_err(hc, 501, err501title, "", err501form, method_str);
       return -1;
     }
@@ -4019,6 +4074,7 @@ int httpd_parse_request(httpd_conn *hc)
       (hc->origfilename[0] == '.' && hc->origfilename[1] == '.' &&
        (hc->origfilename[2] == '\0' || hc->origfilename[2] == '/')))
     {
+      BADREQUEST("origfilename");
       httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
       return -1;
     }
@@ -4059,8 +4115,8 @@ int httpd_parse_request(httpd_conn *hc)
               if (strchr(hc->hdrhost, '/') != (char *)0 ||
                   hc->hdrhost[0] == '.')
                 {
-                  httpd_send_err(hc, 400, httpd_err400title, "",
-                                 httpd_err400form, "");
+                  BADREQUEST("hdrhost");
+                  httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
                   return -1;
                 }
             }
@@ -4236,6 +4292,7 @@ int httpd_parse_request(httpd_conn *hc)
 
       if (hc->reqhost[0] == '\0' && hc->hdrhost[0] == '\0')
         {
+          BADREQUEST("reqhost-3");
           httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
           return -1;
         }
@@ -4288,6 +4345,7 @@ int httpd_parse_request(httpd_conn *hc)
 #ifdef CONFIG_THTTPD_VHOST
     if (!vhost_map(hc))
       {
+        INTERNALERROR("VHOST");
         httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
         return -1;
       }
@@ -4300,6 +4358,7 @@ int httpd_parse_request(httpd_conn *hc)
   cp = expand_filename(hc->expnfilename, &pi, hc->tildemapped);
   if (!cp)
     {
+      INTERNALERROR(hc->expnfilename);
       httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
       return -1;
     }
