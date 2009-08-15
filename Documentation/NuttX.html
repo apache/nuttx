@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 8, 2009</p>
+      <p>Last Updated: August 15, 2009</p>
     </td>
   </tr>
 </table>
@@ -1435,7 +1435,7 @@ Other memory:
   </tr>
 </table>
 
-<pre><ul>
+<ul><pre>
 nuttx-0.4.10 2009-08-08 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* lib/: Added some basic regex-subset, pattern matching functions
@@ -1499,8 +1499,14 @@ buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
   </tr>
 </table>
 
-<pre><ul>
+<ul><pre>
 nuttx-0.4.11 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* fs/fs_read.c and fs/fs_write.c.  read() and write() to socket is the
+	  same as recv() and send() with flags = 0.  Fixed!
+	* net/recvfrom.c: Fix errors in return value from non-blocking socket read.
+	* lib/lib_strcasecmp.c and lib/lib_strncasecmp.c.  Use of post-incremented
+	  argument to macro caused strcasecmp() and strncasecmp() to fail.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

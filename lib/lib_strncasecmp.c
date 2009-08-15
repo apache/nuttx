@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_strncasecmp.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,10 +57,13 @@ int strncasecmp(const char *cs, const char *ct, size_t nb)
   register signed char result = 0;
   for (; nb > 0; nb--)
     {
-      if ((result = toupper(*cs) - toupper(*ct++)) != 0 || !*cs++)
+      if ((result = toupper(*cs) - toupper(*ct)) != 0 || !*cs)
         {
           break;
         }
+
+      cs++;
+      ct++;
     }
   return result;
 }

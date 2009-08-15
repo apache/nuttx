@@ -841,3 +841,8 @@
 
 0.4.11 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* fs/fs_read.c and fs/fs_write.c.  read() and write() to socket is the
+	  same as recv() and send() with flags = 0.  Fixed!
+	* net/recvfrom.c: Fix errors in return value from non-blocking socket read.
+	* lib/lib_strcasecmp.c and lib/lib_strncasecmp.c.  Use of post-incremented
+	  argument to macro caused strcasecmp() and strncasecmp() to fail.
