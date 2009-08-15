@@ -1507,6 +1507,8 @@ nuttx-0.4.11 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* net/recvfrom.c: Fix errors in return value from non-blocking socket read.
 	* lib/lib_strcasecmp.c and lib/lib_strncasecmp.c.  Use of post-incremented
 	  argument to macro caused strcasecmp() and strncasecmp() to fail.
+	* lib/lib_strstr.c:  Length of substring off by one causes false alarm
+	  sub-string matches.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

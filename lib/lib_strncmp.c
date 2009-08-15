@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_strncmp.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,10 +52,10 @@
 #ifndef CONFIG_ARCH_STRNCMP
 int strncmp(const char *cs, const char *ct, size_t nb)
 {
-  register signed char result = 0;
+  int result = 0;
   for (; nb > 0; nb--)
     {
-      if ((result = *cs - *ct++) != 0 || !*cs++)
+      if ((result = (int)*cs - (int)*ct++) != 0 || !*cs++)
         {
           break;
         }

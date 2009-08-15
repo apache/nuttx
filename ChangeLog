@@ -846,3 +846,5 @@
 	* net/recvfrom.c: Fix errors in return value from non-blocking socket read.
 	* lib/lib_strcasecmp.c and lib/lib_strncasecmp.c.  Use of post-incremented
 	  argument to macro caused strcasecmp() and strncasecmp() to fail.
+	* lib/lib_strstr.c:  Length of substring off by one causes false alarm
+	  sub-string matches.

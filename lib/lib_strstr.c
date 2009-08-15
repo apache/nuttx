@@ -53,7 +53,9 @@ char *strstr(const char *str, const char *substr)
 
   /* Special case the empty substring */
 
-  ch = *substr++;
+  len = strlen(substr);
+  ch  = *substr++;
+
   if (!ch)
     {
       /* We'll say that an empty substring matches at the beginning of
@@ -66,8 +68,6 @@ char *strstr(const char *str, const char *substr)
   /* Search for the substring */
 
   candidate = str;
-  len       = strlen(substr);
-
   for (;;)
     {
       /* strchr() will return a pointer to the next occurrence of the
