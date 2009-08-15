@@ -89,11 +89,13 @@ static inline int statpsuedo(FAR struct inode *inode, FAR struct stat *buf)
     }
   else
     {
-      /* If it has no operations, then it must just be a intermeidate
+      /* If it has no operations, then it must just be a intermediate
        * node in the inode tree.  It is something like a directory.
+       * We'll say that all psuedo-directories are read-able but not
+       * write-able.
        */
 
-      buf->st_mode |= S_IFDIR;
+      buf->st_mode |= S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
     }
 
   return OK;
@@ -108,7 +110,7 @@ static inline int statroot(FAR struct stat *buf)
   /* There is no inode associated with the fake root directory */
   
   memset(buf, 0, sizeof(struct stat) );
-  buf->st_mode = S_IFDIR;
+  buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
   return OK;
 }
 

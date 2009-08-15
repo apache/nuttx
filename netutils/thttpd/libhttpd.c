@@ -197,7 +197,6 @@ static int  cgi_child(int argc, char **argv);
 static int  cgi(httpd_conn *hc);
 #endif
 
-static int  really_start_request(httpd_conn *hc, struct timeval *nowP);
 static int  check_referer(httpd_conn *hc);
 #ifdef CONFIG_THTTPD_URLPATTERN
 static int  really_check_referer(httpd_conn *hc);
@@ -225,6 +224,10 @@ static size_t sockaddr_len(httpd_sockaddr *saP);
 static pid_t  main_thread;
 static int    str_alloc_count = 0;
 static size_t str_alloc_size  = 0;
+
+/* This is the 'root' of the Filesystem as seen by the HTTP client */
+
+static const char httpd_root[] = CONFIG_THTTPD_PATH;
 
 /* Include MIME encodings and types */
 
@@ -738,7 +741,7 @@ static int auth_check(httpd_conn *hc, char *dirname)
   else
 #endif
     {
-      topdir = CONFIG_THTTPD_PATH;
+      topdir = httpd_root;
     }
 
   switch (auth_check2(hc, topdir))
@@ -1248,12 +1251,16 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
   static char *rest;
   static size_t maxchecked = 0, maxrest = 0;
   size_t checkedlen, restlen, prevcheckedlen, prevrestlen;
+#if 0 // REVISIT
   struct stat sb;
+#endif
   int nlinks, i;
   char *r;
   char *cp1;
   char *cp2;
 
+  nvdbg("path: \"%s\"\n", path);
+#if 0 // REVISIT
   /* We need to do the pathinfo check.  we do a single stat() of the whole
    * filename - if it exists, then we return it as is with nothing in restP.
    * If it doesn't exist, we fall through to the existing code.
@@ -1278,12 +1285,36 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
       *restP = rest;
       return checked;
     }
+#endif
 
-  /* Start out with nothing in checked and the whole filename in rest. */
+  /* Handle leading /, or . or by copying the default directory into checked */
 
-  httpd_realloc_str(&checked, &maxchecked, 1);
-  checked[0] = '\0';
-  checkedlen = 0;
+  if (path[0] == '.' || (path[0] == '/' && strncmp(path, httpd_root, strlen(httpd_root)) != 0))
+    {
+      /* Start out with httpd_root in checked */
+ 
+      checkedlen = strlen(httpd_root) + 1;
+      httpd_realloc_str(&checked, &maxchecked, checkedlen);
+      strcpy(checked, httpd_root);
+
+      /* Skip over leading '.' */
+
+      if (path[0] == '.')
+        {
+          path++;
+        }
+    }
+  else
+    {
+      /* Start out with nothing in checked */
+
+      httpd_realloc_str(&checked, &maxchecked, 1);
+      checked[0] = '\0';
+      checkedlen = 0;
+    }       
+
+  /* Copy the whole filename (minus the leading '.') into rest. */
+
   restlen = strlen(path);
   httpd_realloc_str(&rest, &maxrest, restlen);
   (void)strcpy(rest, path);
@@ -1293,17 +1324,6 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
   if (rest[restlen - 1] == '/')
     {
       rest[--restlen] = '\0';
-    }
-
-  if (!tildemapped)
-    {
-      /* Remove any leading slashes. */
-
-      while (rest[0] == '/')
-        {
-          (void)strcpy(rest, &(rest[1]));
-          --restlen;
-        }
     }
 
   r = rest;
@@ -1316,7 +1336,7 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
       /* Save current checkedlen.  Save current restlen in case we get a non-existant component. */
 
       prevcheckedlen = checkedlen;
-      prevrestlen = restlen;
+      prevrestlen    = restlen;
 
       /* Grab one component from r and transfer it to checked. */
 
@@ -1418,8 +1438,10 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
   *restP = r;
   if (checked[0] == '\0')
     {
-      (void)strcpy(checked, CONFIG_THTTPD_PATH);
+      (void)strcpy(checked, httpd_root);
     }
+
+  nvdbg("checked: \"%s\"\n", checked);
   return checked;
 }
 
@@ -2108,11 +2130,11 @@ static void create_environment(httpd_conn *hc)
       (void)snprintf(buf, sizeof(buf), "/%s", hc->pathinfo);
       setenv("PATH_INFO", buf, TRUE);
 
-      l = strlen(CONFIG_THTTPD_PATH) + strlen(hc->pathinfo) + 1;
+      l = strlen(httpd_root) + strlen(hc->pathinfo) + 1;
       cp2 = NEW(char, l);
       if (cp2)
         {
-          (void)snprintf(cp2, l, "%s%s", CONFIG_THTTPD_PATH, hc->pathinfo);
+          (void)snprintf(cp2, l, "%s%s", httpd_root, hc->pathinfo);
           setenv("PATH_TRANSLATED", cp2, TRUE);
         }
     }
@@ -2889,307 +2911,6 @@ static int cgi(httpd_conn *hc)
   return 0;
 }
 #endif
-
-static int really_start_request(httpd_conn *hc, struct timeval *nowP)
-{
-  static char *indexname;
-  static size_t maxindexname = 0;
-  static const char *index_names[] = { CONFIG_THTTPD_INDEX_NAMES };
-  int i;
-#ifdef CONFIG_THTTPD_AUTH_FILE
-  static char *dirname;
-  static size_t maxdirname = 0;
-#endif                                 /* CONFIG_THTTPD_AUTH_FILE */
-  size_t expnlen, indxlen;
-  char *cp;
-  char *pi;
-
-  expnlen = strlen(hc->expnfilename);
-
-  if (hc->method != METHOD_GET && hc->method != METHOD_HEAD &&
-      hc->method != METHOD_POST)
-    {
-      NOTIMPLEMENTED("really start");
-      httpd_send_err(hc, 501, err501title, "", err501form,
-                     httpd_method_str(hc->method));
-      return -1;
-    }
-
-  /* Stat the file. */
-  if (stat(hc->expnfilename, &hc->sb) < 0)
-    {
-      INTERNALERROR(hc->expnfilename);
-      httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-      return -1;
-    }
-
-  /* Is it world-readable or world-executable? We check explicitly instead
-   * of just trying to open it, so that no one ever gets surprised by a file 
-   * that's not set world-readable and yet somehow is readable by the HTTP
-   * server and therefore the *whole* world.
-   */
-
-  if (!(hc->sb.st_mode & (S_IROTH | S_IXOTH)))
-    {
-      ndbg("%s URL \"%s\" resolves to a non world-readable file\n",
-             httpd_ntoa(&hc->client_addr), hc->encodedurl);
-      httpd_send_err(hc, 403, err403title, "",
-                     ERROR_FORM(err403form,
-                                "The requested URL '%s' resolves to a file that is not world-readable.\n"),
-                     hc->encodedurl);
-      return -1;
-    }
-
-  /* Is it a directory? */
-
-  if (S_ISDIR(hc->sb.st_mode))
-    {
-      /* If there's pathinfo, it's just a non-existent file. */
-
-      if (hc->pathinfo[0] != '\0')
-        {
-          httpd_send_err(hc, 404, err404title, "", err404form, hc->encodedurl);
-          return -1;
-        }
-
-      /* Special handling for directory URLs that don't end in a slash. We
-       * send back an explicit redirect with the slash, because otherwise
-       * many clients can't build relative URLs properly.
-       */
-
-      if (strcmp(hc->origfilename, "") != 0 &&
-          strcmp(hc->origfilename, ".") != 0 &&
-          hc->origfilename[strlen(hc->origfilename) - 1] != '/')
-        {
-          send_dirredirect(hc);
-          return -1;
-        }
-
-      /* Check for an index file. */
-
-      for (i = 0; i < sizeof(index_names) / sizeof(char *); ++i)
-        {
-          httpd_realloc_str(&indexname, &maxindexname,
-                            expnlen + 1 + strlen(index_names[i]));
-          (void)strcpy(indexname, hc->expnfilename);
-          indxlen = strlen(indexname);
-          if (indxlen == 0 || indexname[indxlen - 1] != '/')
-            {
-              (void)strcat(indexname, "/");
-            }
-
-          if (strcmp(indexname, "./") == 0)
-            {
-              indexname[0] = '\0';
-            }
-
-          (void)strcat(indexname, index_names[i]);
-          if (stat(indexname, &hc->sb) >= 0)
-            {
-              goto got_one;
-            }
-        }
-
-      /* Nope, no index file, so it's an actual directory request. */
-#ifdef CONFIG_THTTPD_GENERATE_INDICES
-      /* Directories must be readable for indexing. */
-      if (!(hc->sb.st_mode & S_IROTH))
-        {
-          ndbg("%s URL \"%s\" tried to index a directory with indexing disabled\n",
-                 httpd_ntoa(&hc->client_addr), hc->encodedurl);
-          httpd_send_err(hc, 403, err403title, "",
-                         ERROR_FORM(err403form,
-                                    "The requested URL '%s' resolves to a directory that has indexing disabled.\n"),
-                         hc->encodedurl);
-          return -1;
-        }
-#  ifdef CONFIG_THTTPD_AUTH_FILE
-      /* Check authorization for this directory. */
-
-      if (auth_check(hc, hc->expnfilename) == -1)
-        {
-          return -1;
-        }
-#  endif /* CONFIG_THTTPD_AUTH_FILE */
-
-      /* Referer check. */
-
-      if (!check_referer(hc))
-        {
-          return -1;
-        }
-
-      /* Ok, generate an index. */
-      return ls(hc);
-#else
-      ndbg("%s URL \"%s\" tried to index a directory\n",
-             httpd_ntoa(&hc->client_addr), hc->encodedurl);
-      httpd_send_err(hc, 403, err403title, "",
-                     ERROR_FORM(err403form,
-                                "The requested URL '%s' is a directory, and directory indexing is disabled on this server.\n"),
-                     hc->encodedurl);
-      return -1;
-#endif
-
-    got_one:
-
-      /* Got an index file.  Expand again.  More pathinfo means
-       * something went wrong.
-       */
-
-      cp = expand_filename(indexname, &pi, hc->tildemapped);
-      if (cp == (char *)0 || pi[0] != '\0')
-        {
-          INTERNALERROR(indexname);
-          httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-          return -1;
-        }
-
-      expnlen = strlen(cp);
-      httpd_realloc_str(&hc->expnfilename, &hc->maxexpnfilename, expnlen);
-      (void)strcpy(hc->expnfilename, cp);
-
-      /* Now, is the index version world-readable or world-executable? */
-
-      if (!(hc->sb.st_mode & (S_IROTH | S_IXOTH)))
-        {
-          ndbg("%s URL \"%s\" resolves to a non-world-readable index file\n",
-                 httpd_ntoa(&hc->client_addr), hc->encodedurl);
-          httpd_send_err(hc, 403, err403title, "",
-                         ERROR_FORM(err403form,
-                                    "The requested URL '%s' resolves to an index file that is not world-readable.\n"),
-                         hc->encodedurl);
-          return -1;
-        }
-    }
-
-  /* Check authorization for this directory. */
-
-#ifdef CONFIG_THTTPD_AUTH_FILE
-  httpd_realloc_str(&dirname, &maxdirname, expnlen);
-  (void)strcpy(dirname, hc->expnfilename);
-  cp = strrchr(dirname, '/');
-  if (!cp)
-    {
-      (void)strcpy(dirname, CONFIG_THTTPD_PATH);
-    }
-  else
-    {
-      *cp = '\0';
-    }
-
-  if (auth_check(hc, dirname) == -1)
-    {
-      return -1;
-    }
-
-  /* Check if the filename is the CONFIG_THTTPD_AUTH_FILE itself - that's verboten. */
-
-  if (expnlen == sizeof(CONFIG_THTTPD_AUTH_FILE) - 1)
-    {
-      if (strcmp(hc->expnfilename, CONFIG_THTTPD_AUTH_FILE) == 0)
-        {
-          ndbg("%s URL \"%s\" tried to retrieve an auth file\n",
-                 httpd_ntoa(&hc->client_addr), hc->encodedurl);
-          httpd_send_err(hc, 403, err403title, "",
-                         ERROR_FORM(err403form,
-                                    "The requested URL '%s' is an authorization file, retrieving it is not permitted.\n"),
-                         hc->encodedurl);
-          return -1;
-        }
-    }
-  else if (expnlen >= sizeof(CONFIG_THTTPD_AUTH_FILE) &&
-           strcmp(&(hc->expnfilename[expnlen - sizeof(CONFIG_THTTPD_AUTH_FILE) + 1]),
-                  CONFIG_THTTPD_AUTH_FILE) == 0 &&
-           hc->expnfilename[expnlen - sizeof(CONFIG_THTTPD_AUTH_FILE)] == '/')
-    {
-      ndbg("%s URL \"%s\" tried to retrieve an auth file\n",
-             httpd_ntoa(&hc->client_addr), hc->encodedurl);
-      httpd_send_err(hc, 403, err403title, "",
-                     ERROR_FORM(err403form,
-                                "The requested URL '%s' is an authorization file, retrieving it is not permitted.\n"),
-                     hc->encodedurl);
-      return -1;
-    }
-#endif
-
-  /* Referer check. */
-
-  if (!check_referer(hc))
-    return -1;
-
-  /* Is it in the CGI area? */
-
-#ifdef CONFIG_THTTPD_CGI_PATTERN
-  if (match(CONFIG_THTTPD_CGI_PATTERN, hc->expnfilename))
-    {
-      return cgi(hc);
-    }
-#endif
-
-  /* It's not CGI.  If it's executable or there's pathinfo, someone's trying 
-   * to either serve or run a non-CGI file as CGI.  Either case is
-   * prohibited.
-   */
-
-  if (hc->sb.st_mode & S_IXOTH)
-    {
-      ndbg("%s URL \"%s\" is executable but isn't CGI\n",
-             httpd_ntoa(&hc->client_addr), hc->encodedurl);
-      httpd_send_err(hc, 403, err403title, "",
-                     ERROR_FORM(err403form,
-                                "The requested URL '%s' resolves to a file which is marked executable but is not a CGI file; retrieving it is forbidden.\n"),
-                     hc->encodedurl);
-      return -1;
-    }
-
-  if (hc->pathinfo[0] != '\0')
-    {
-      ndbg("%s URL \"%s\" has pathinfo but isn't CGI\n",
-             httpd_ntoa(&hc->client_addr), hc->encodedurl);
-      httpd_send_err(hc, 403, err403title, "",
-                     ERROR_FORM(err403form,
-                                "The requested URL '%s' resolves to a file plus CGI-style pathinfo, but the file is not a valid CGI file.\n"),
-                     hc->encodedurl);
-      return -1;
-    }
-
-  /* Fill in range_end, if necessary. */
-
-  if (hc->got_range &&
-      (hc->range_end == -1 || hc->range_end >= hc->sb.st_size))
-    {
-      hc->range_end = hc->sb.st_size - 1;
-    }
-
-  figure_mime(hc);
-
-  if (hc->method == METHOD_HEAD)
-    {
-      send_mime(hc, 200, ok200title, hc->encodings, "", hc->type,
-                hc->sb.st_size, hc->sb.st_mtime);
-    }
-  else if (hc->if_modified_since != (time_t) - 1 &&
-           hc->if_modified_since >= hc->sb.st_mtime)
-    {
-      send_mime(hc, 304, err304title, hc->encodings, "", hc->type, (off_t) - 1,
-                hc->sb.st_mtime);
-    }
-  else
-    {
-      hc->file_fd = open(hc->expnfilename, O_RDONLY);
-      if (!hc->file_fd < 0)
-        {
-          INTERNALERROR(hc->expnfilename);
-          httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-          return -1;
-        }
-      send_mime(hc, 200, ok200title, hc->encodings, "", hc->type,
-                hc->sb.st_size, hc->sb.st_mtime);
-    }
-
-  return 0;
-}
 
 /* Returns 1 if ok to serve the url, 0 if not. */
 
@@ -4039,7 +3760,7 @@ int httpd_parse_request(httpd_conn *hc)
 
   if (hc->origfilename[0] == '\0')
     {
-      (void)strcpy(hc->origfilename, CONFIG_THTTPD_PATH);
+      (void)strcpy(hc->origfilename, ".");
     }
 
   /* Extract query string from encoded URL. */
@@ -4342,9 +4063,7 @@ int httpd_parse_request(httpd_conn *hc)
       }
 #endif
 
-  /* Expand all symbolic links in the filename.  This also gives us any
-   * trailing non-existing components, for pathinfo.
-   */
+  /* Expand the filename */
 
   cp = expand_filename(hc->expnfilename, &pi, hc->tildemapped);
   if (!cp)
@@ -4358,6 +4077,7 @@ int httpd_parse_request(httpd_conn *hc)
   (void)strcpy(hc->expnfilename, cp);
   httpd_realloc_str(&hc->pathinfo, &hc->maxpathinfo, strlen(pi));
   (void)strcpy(hc->pathinfo, pi);
+  nvdbg("expnfilename: \"%s\" pathinfo: \"%s\"\n", hc->expnfilename, hc->pathinfo);
 
   /* Remove pathinfo stuff from the original filename too. */
 
@@ -4377,16 +4097,12 @@ int httpd_parse_request(httpd_conn *hc)
 
   if (hc->expnfilename[0] == '/')
     {
-      if (strncmp(hc->expnfilename, CONFIG_THTTPD_PATH, strlen(CONFIG_THTTPD_PATH)) == 0)
+      if (strncmp(hc->expnfilename, httpd_root, strlen(httpd_root)) == 0)
         {
-          /* Elide the current directory. */
-
-          (void)strcpy(hc->expnfilename, &hc->expnfilename[strlen(CONFIG_THTTPD_PATH)]);
         }
 #ifdef CONFIG_THTTPD_TILDE_MAP2
       else if (hc->altdir[0] != '\0' &&
-               (strncmp(hc->expnfilename, hc->altdir,
-                        strlen(hc->altdir)) == 0 &&
+               (strncmp(hc->expnfilename, hc->altdir, strlen(hc->altdir)) == 0 &&
                 (hc->expnfilename[strlen(hc->altdir)] == '\0' ||
                  hc->expnfilename[strlen(hc->altdir)] == '/')))
         {
@@ -4448,15 +4164,305 @@ void httpd_destroy_conn(httpd_conn *hc)
 
 int httpd_start_request(httpd_conn *hc, struct timeval *nowP)
 {
-  int r;
+  static char *indexname;
+  static size_t maxindexname = 0;
+  static const char *index_names[] = { CONFIG_THTTPD_INDEX_NAMES };
+  int i;
+#ifdef CONFIG_THTTPD_AUTH_FILE
+  static char *dirname;
+  static size_t maxdirname = 0;
+#endif                                 /* CONFIG_THTTPD_AUTH_FILE */
+  size_t expnlen, indxlen;
+  char *cp;
+  char *pi;
 
-  /* Really start the request. */
+  nvdbg("File: \"%s\"\n", hc->expnfilename);
+  expnlen = strlen(hc->expnfilename);
 
-  r = really_start_request(hc, nowP);
+  if (hc->method != METHOD_GET && hc->method != METHOD_HEAD &&
+      hc->method != METHOD_POST)
+    {
+      NOTIMPLEMENTED("start");
+      httpd_send_err(hc, 501, err501title, "", err501form,
+                     httpd_method_str(hc->method));
+      return -1;
+    }
 
-  /* And return the status. */
+  /* Stat the file. */
 
-  return r;
+  if (stat(hc->expnfilename, &hc->sb) < 0)
+    {
+      INTERNALERROR(hc->expnfilename);
+      httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
+      return -1;
+    }
+
+  /* Is it world-readable or world-executable? We check explicitly instead
+   * of just trying to open it, so that no one ever gets surprised by a file 
+   * that's not set world-readable and yet somehow is readable by the HTTP
+   * server and therefore the *whole* world.
+   */
+
+  if (!(hc->sb.st_mode & (S_IROTH | S_IXOTH)))
+    {
+      ndbg("%s URL \"%s\" resolves to a non world-readable file\n",
+           httpd_ntoa(&hc->client_addr), hc->encodedurl);
+      httpd_send_err(hc, 403, err403title, "",
+                     ERROR_FORM(err403form,
+                                "The requested URL '%s' resolves to a file that is not world-readable.\n"),
+                     hc->encodedurl);
+      return -1;
+    }
+
+  /* Is it a directory? */
+
+  if (S_ISDIR(hc->sb.st_mode))
+    {
+      /* If there's pathinfo, it's just a non-existent file. */
+
+      if (hc->pathinfo[0] != '\0')
+        {
+          httpd_send_err(hc, 404, err404title, "", err404form, hc->encodedurl);
+          return -1;
+        }
+
+      /* Special handling for directory URLs that don't end in a slash. We
+       * send back an explicit redirect with the slash, because otherwise
+       * many clients can't build relative URLs properly.
+       */
+
+      if (strcmp(hc->origfilename, "") != 0 &&
+          strcmp(hc->origfilename, ".") != 0 &&
+          hc->origfilename[strlen(hc->origfilename) - 1] != '/')
+        {
+          send_dirredirect(hc);
+          return -1;
+        }
+
+      /* Check for an index file. */
+
+      for (i = 0; i < sizeof(index_names) / sizeof(char *); ++i)
+        {
+          httpd_realloc_str(&indexname, &maxindexname,
+                            expnlen + 1 + strlen(index_names[i]));
+          (void)strcpy(indexname, hc->expnfilename);
+          indxlen = strlen(indexname);
+          if (indxlen == 0 || indexname[indxlen - 1] != '/')
+            {
+              (void)strcat(indexname, "/");
+            }
+
+          if (strcmp(indexname, "./") == 0)
+            {
+              indexname[0] = '\0';
+            }
+
+          (void)strcat(indexname, index_names[i]);
+          if (stat(indexname, &hc->sb) >= 0)
+            {
+              goto got_one;
+            }
+        }
+
+      /* Nope, no index file, so it's an actual directory request. */
+#ifdef CONFIG_THTTPD_GENERATE_INDICES
+      /* Directories must be readable for indexing. */
+      if (!(hc->sb.st_mode & S_IROTH))
+        {
+          ndbg("%s URL \"%s\" tried to index a directory with indexing disabled\n",
+                 httpd_ntoa(&hc->client_addr), hc->encodedurl);
+          httpd_send_err(hc, 403, err403title, "",
+                         ERROR_FORM(err403form,
+                                    "The requested URL '%s' resolves to a directory that has indexing disabled.\n"),
+                         hc->encodedurl);
+          return -1;
+        }
+#  ifdef CONFIG_THTTPD_AUTH_FILE
+      /* Check authorization for this directory. */
+
+      if (auth_check(hc, hc->expnfilename) == -1)
+        {
+          return -1;
+        }
+#  endif /* CONFIG_THTTPD_AUTH_FILE */
+
+      /* Referer check. */
+
+      if (!check_referer(hc))
+        {
+          return -1;
+        }
+
+      /* Ok, generate an index. */
+      return ls(hc);
+#else
+      ndbg("%s URL \"%s\" tried to index a directory\n",
+             httpd_ntoa(&hc->client_addr), hc->encodedurl);
+      httpd_send_err(hc, 403, err403title, "",
+                     ERROR_FORM(err403form,
+                                "The requested URL '%s' is a directory, and directory indexing is disabled on this server.\n"),
+                     hc->encodedurl);
+      return -1;
+#endif
+
+    got_one:
+
+      /* Got an index file.  Expand again.  More pathinfo means
+       * something went wrong.
+       */
+
+      cp = expand_filename(indexname, &pi, hc->tildemapped);
+      if (cp == (char *)0 || pi[0] != '\0')
+        {
+          INTERNALERROR(indexname);
+          httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
+          return -1;
+        }
+
+      expnlen = strlen(cp);
+      httpd_realloc_str(&hc->expnfilename, &hc->maxexpnfilename, expnlen);
+      (void)strcpy(hc->expnfilename, cp);
+
+      /* Now, is the index version world-readable or world-executable? */
+
+      if (!(hc->sb.st_mode & (S_IROTH | S_IXOTH)))
+        {
+          ndbg("%s URL \"%s\" resolves to a non-world-readable index file\n",
+                 httpd_ntoa(&hc->client_addr), hc->encodedurl);
+          httpd_send_err(hc, 403, err403title, "",
+                         ERROR_FORM(err403form,
+                                    "The requested URL '%s' resolves to an index file that is not world-readable.\n"),
+                         hc->encodedurl);
+          return -1;
+        }
+    }
+
+  /* Check authorization for this directory. */
+
+#ifdef CONFIG_THTTPD_AUTH_FILE
+  httpd_realloc_str(&dirname, &maxdirname, expnlen);
+  (void)strcpy(dirname, hc->expnfilename);
+  cp = strrchr(dirname, '/');
+  if (!cp)
+    {
+      (void)strcpy(dirname, httpd_root);
+    }
+  else
+    {
+      *cp = '\0';
+    }
+
+  if (auth_check(hc, dirname) == -1)
+    {
+      return -1;
+    }
+
+  /* Check if the filename is the CONFIG_THTTPD_AUTH_FILE itself - that's verboten. */
+
+  if (expnlen == sizeof(CONFIG_THTTPD_AUTH_FILE) - 1)
+    {
+      if (strcmp(hc->expnfilename, CONFIG_THTTPD_AUTH_FILE) == 0)
+        {
+          ndbg("%s URL \"%s\" tried to retrieve an auth file\n",
+                 httpd_ntoa(&hc->client_addr), hc->encodedurl);
+          httpd_send_err(hc, 403, err403title, "",
+                         ERROR_FORM(err403form,
+                                    "The requested URL '%s' is an authorization file, retrieving it is not permitted.\n"),
+                         hc->encodedurl);
+          return -1;
+        }
+    }
+  else if (expnlen >= sizeof(CONFIG_THTTPD_AUTH_FILE) &&
+           strcmp(&(hc->expnfilename[expnlen - sizeof(CONFIG_THTTPD_AUTH_FILE) + 1]),
+                  CONFIG_THTTPD_AUTH_FILE) == 0 &&
+           hc->expnfilename[expnlen - sizeof(CONFIG_THTTPD_AUTH_FILE)] == '/')
+    {
+      ndbg("%s URL \"%s\" tried to retrieve an auth file\n",
+             httpd_ntoa(&hc->client_addr), hc->encodedurl);
+      httpd_send_err(hc, 403, err403title, "",
+                     ERROR_FORM(err403form,
+                                "The requested URL '%s' is an authorization file, retrieving it is not permitted.\n"),
+                     hc->encodedurl);
+      return -1;
+    }
+#endif
+
+  /* Referer check. */
+
+  if (!check_referer(hc))
+    return -1;
+
+  /* Is it in the CGI area? */
+
+#ifdef CONFIG_THTTPD_CGI_PATTERN
+  if (match(CONFIG_THTTPD_CGI_PATTERN, hc->expnfilename))
+    {
+      return cgi(hc);
+    }
+#endif
+
+  /* It's not CGI.  If it's executable or there's pathinfo, someone's trying 
+   * to either serve or run a non-CGI file as CGI.  Either case is
+   * prohibited.
+   */
+
+  if (hc->sb.st_mode & S_IXOTH)
+    {
+      ndbg("%s URL \"%s\" is executable but isn't CGI\n",
+             httpd_ntoa(&hc->client_addr), hc->encodedurl);
+      httpd_send_err(hc, 403, err403title, "",
+                     ERROR_FORM(err403form,
+                                "The requested URL '%s' resolves to a file which is marked executable but is not a CGI file; retrieving it is forbidden.\n"),
+                     hc->encodedurl);
+      return -1;
+    }
+
+  if (hc->pathinfo[0] != '\0')
+    {
+      ndbg("%s URL \"%s\" has pathinfo but isn't CGI\n",
+             httpd_ntoa(&hc->client_addr), hc->encodedurl);
+      httpd_send_err(hc, 403, err403title, "",
+                     ERROR_FORM(err403form,
+                                "The requested URL '%s' resolves to a file plus CGI-style pathinfo, but the file is not a valid CGI file.\n"),
+                     hc->encodedurl);
+      return -1;
+    }
+
+  /* Fill in range_end, if necessary. */
+
+  if (hc->got_range &&
+      (hc->range_end == -1 || hc->range_end >= hc->sb.st_size))
+    {
+      hc->range_end = hc->sb.st_size - 1;
+    }
+
+  figure_mime(hc);
+
+  if (hc->method == METHOD_HEAD)
+    {
+      send_mime(hc, 200, ok200title, hc->encodings, "", hc->type,
+                hc->sb.st_size, hc->sb.st_mtime);
+    }
+  else if (hc->if_modified_since != (time_t) - 1 &&
+           hc->if_modified_since >= hc->sb.st_mtime)
+    {
+      send_mime(hc, 304, err304title, hc->encodings, "", hc->type, (off_t) - 1,
+                hc->sb.st_mtime);
+    }
+  else
+    {
+      hc->file_fd = open(hc->expnfilename, O_RDONLY);
+      if (!hc->file_fd < 0)
+        {
+          INTERNALERROR(hc->expnfilename);
+          httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
+          return -1;
+        }
+      send_mime(hc, 200, ok200title, hc->encodings, "", hc->type,
+                hc->sb.st_size, hc->sb.st_mtime);
+    }
+
+  return 0;
 }
 
 char *httpd_ntoa(httpd_sockaddr *saP)

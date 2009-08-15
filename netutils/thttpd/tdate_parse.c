@@ -45,6 +45,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <debug.h>
 
 #include "tdate_parse.h"
 
@@ -170,6 +171,7 @@ static int scan_mon(char *str_mon, long *tm_monP)
 
 time_t tdate_parse(char *str)
 {
+#if 0 // REVISIT -- doesn't work
   struct tm tm;
   char *cp;
   char str_mon[32];
@@ -184,7 +186,10 @@ time_t tdate_parse(char *str)
   long tm_wday;
 #endif
 
+  nvdbg("str: \"%s\"\n", str);
+
   /* Initialize. */
+
   (void)memset((char *)&tm, 0, sizeof(struct tm));
 
   /* Skip initial whitespace ourselves - sscanf is clumsy at this. */
@@ -315,5 +320,8 @@ time_t tdate_parse(char *str)
     }
 
   return mktime(&tm);
+#else
+  return 0; // for now
+#endif
 }
 
