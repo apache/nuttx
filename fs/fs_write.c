@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_write.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,89 +51,17 @@
 #include "fs_internal.h"
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
  ****************************************************************************/
 
-/***************************************************************************
- * Function: write
- *
- * Description:
- *  write() writes up to nytes bytes to the file referenced by the file
- *  descriptor fd from the buffer starting at buf.
- *
- * Parameters:
- *   fd       file descriptor (or socket descriptor) to write to
- *   buf      Data to write
- *   nbytes   Length of data to write
- *
- * Returned Value:
- *  On success, the number of bytes  written are returned (zero indicates
- *  nothing was written). On error, -1 is returned, and errno is set appro‐
- *  priately:
- *
- *  EAGAIN
- *    Non-blocking I/O has been selected using O_NONBLOCK and the write
- *    would block.
- *  EBADF
- *    fd is not a valid file descriptor or is not open for writing.
- *  EFAULT
- *    buf is outside your accessible address space.
- *  EFBIG
- *    An attempt was made to write a file that exceeds the implementation
- *    defined maximum file size or the process' file size limit, or
- *    to write at a position past the maximum allowed offset.
- *  EINTR
- *    The call was interrupted by a signal before any data was written.
- *  EINVAL
- *    fd is attached to an object which is unsuitable for writing; or
- *    the file was opened with the O_DIRECT flag, and either the address
- *    specified in buf, the value specified in count, or the current
- *     file offset is not suitably aligned.
- *  EIO
- *    A low-level I/O error occurred while modifying the inode.
- *  ENOSPC
- *    The device containing the file referred to by fd has no room for
- *    the data.
- *  EPIPE
- *    fd is connected to a pipe or socket whose reading end is closed.
- *    When this happens the writing process will also receive a SIGPIPE
- *    signal. (Thus, the write return value is seen only if the program
- *    catches, blocks or ignores this signal.)
- *
- * Assumptions:
- *
- ********************************************************************************************/
-
-ssize_t write(int fd, FAR const void *buf, size_t nbytes)
-{
 #if CONFIG_NFILE_DESCRIPTORS > 0
+static inline ssize_t file_write(int fd, FAR const void *buf, size_t nbytes)
+{
   FAR struct filelist *list;
   FAR struct file *this_file;
   FAR struct inode *inode;
   int ret;
-#endif
   int err;
-
-  /* Did we get a valid file descriptor? */
-
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-    {
-      /* Write to a socket descriptor is equivalent to send with flags == 0 */
-
-#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          return send(fd, buf, nbytes, 0);
-        }
-      else
-#endif
-        {
-          err = EBADF;
-          goto errout;
-        }
-    }
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
 
   /* Get the thread-specific file list */
 
@@ -172,10 +100,89 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
     }
 
   return ret;
-#endif
 
 errout:
   *get_errno_ptr() = err;
   return ERROR;
+}
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/***************************************************************************
+ * Function: write
+ *
+ * Description:
+ *  write() writes up to nytes bytes to the file referenced by the file
+ *  descriptor fd from the buffer starting at buf.
+ *
+ * Parameters:
+ *   fd       file descriptor (or socket descriptor) to write to
+ *   buf      Data to write
+ *   nbytes   Length of data to write
+ *
+ * Returned Value:
+ *  On success, the number of bytes  written are returned (zero indicates
+ *  nothing was written). On error, -1 is returned, and errno is set appro-
+ *  priately:
+ *
+ *  EAGAIN
+ *    Non-blocking I/O has been selected using O_NONBLOCK and the write
+ *    would block.
+ *  EBADF
+ *    fd is not a valid file descriptor or is not open for writing.
+ *  EFAULT
+ *    buf is outside your accessible address space.
+ *  EFBIG
+ *    An attempt was made to write a file that exceeds the implementation
+ *    defined maximum file size or the process' file size limit, or
+ *    to write at a position past the maximum allowed offset.
+ *  EINTR
+ *    The call was interrupted by a signal before any data was written.
+ *  EINVAL
+ *    fd is attached to an object which is unsuitable for writing; or
+ *    the file was opened with the O_DIRECT flag, and either the address
+ *    specified in buf, the value specified in count, or the current
+ *     file offset is not suitably aligned.
+ *  EIO
+ *    A low-level I/O error occurred while modifying the inode.
+ *  ENOSPC
+ *    The device containing the file referred to by fd has no room for
+ *    the data.
+ *  EPIPE
+ *    fd is connected to a pipe or socket whose reading end is closed.
+ *    When this happens the writing process will also receive a SIGPIPE
+ *    signal. (Thus, the write return value is seen only if the program
+ *    catches, blocks or ignores this signal.)
+ *
+ * Assumptions:
+ *
+ ********************************************************************************************/
+
+ssize_t write(int fd, FAR const void *buf, size_t nbytes)
+{
+  /* Did we get a valid file descriptor? */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+#endif
+    {
+      /* Write to a socket descriptor is equivalent to send with flags == 0 */
+
+#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      return send(fd, buf, nbytes, 0);
+#else
+      errno = EBADF;
+      return ERROR;
+#endif
+    }
+
+  /* The descriptor is in the right range to be a file descriptor... write to the file */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  return file_write(fd, buf, nbytes);
+#endif
 }
 

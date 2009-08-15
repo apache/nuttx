@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs_read.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,21 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
  ****************************************************************************/
 
-ssize_t read(int fd, FAR void *buf, size_t nbytes)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static inline ssize_t file_read(int fd, FAR void *buf, size_t nbytes)
 {
   FAR struct filelist *list;
   int ret = -EBADF;
@@ -103,4 +107,37 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
 
   return ret;
 }
+#endif
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+ssize_t read(int fd, FAR void *buf, size_t nbytes)
+{
+  /* Did we get a valid file descriptor? */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+#endif
+    {
+      /* No.. If networking is enabled, read() is the same as recv() with
+       * the flags parameter set to zero.
+       */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      return recv(fd, buf, nbytes, 0);
+#else
+      /* No networking... it is a bad descriptor in any event */
+
+      errno = EBADF;
+      return ERROR;
+#endif
+    }
+
+  /* The descriptor is in a valid range to file descriptor... do the read */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  return file_read(fd, buf, nbytes);
+#endif
+}

@@ -41,7 +41,7 @@ AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		=
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-CSRCS		+= fs_close.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
+CSRCS		+= fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
 endif
 else
 CSRCS		+= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c \
