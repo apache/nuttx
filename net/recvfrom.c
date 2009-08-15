@@ -704,7 +704,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 {
-  int save_errno = *get_errno_ptr(); /* In case something we do changes it */
+  int save_errno = errno; /* In case something we do changes it */
 
   /* Release semaphore in the state structure */
 
@@ -896,7 +896,13 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         {
           /* Nothing was received */
 
-          return -EAGAIN;
+          ret = -EAGAIN;
+        }
+      else
+        {
+          /* The return value is the number of bytes read from the read-ahead buffer */
+
+          ret = state.rf_recvlen;
         }
     }
 
@@ -1091,7 +1097,7 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
   return ret;
 
 errout:
-  *get_errno_ptr() = err;
+  errno = err;
   return ERROR;
 }
 
