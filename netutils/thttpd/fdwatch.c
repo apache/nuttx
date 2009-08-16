@@ -124,7 +124,7 @@ struct fdwatch_s *fdwatch_initialize(int nfds)
 
   fw->nfds = nfds;
 
-  fw->client = (struct fw_fd_s*)malloc(sizeof(struct fw_fd_s) * nfds);
+  fw->client = (void**)malloc(sizeof(void*) * nfds);
   if (!fw->client)
     {
       goto errout_with_allocations;
@@ -175,7 +175,7 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
 
 /* Add a descriptor to the watch list.  rw is either FDW_READ or FDW_WRITE.  */
 
-void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data, int rw)
+void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data)
 {
   nvdbg("fd: %d client_data: %p\n", fd, client_data);
 
@@ -196,18 +196,9 @@ void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data, int rw)
 
   /* Save the new fd at the end of the list */
 
-  fw->pollfds[fw->nwatched].fd  = fd;
-  fw->client[fw->nwatched].rw   = rw;
-  fw->client[fw->nwatched].data = client_data;
-
-  if (rw == FDW_READ)
-    {
-      fw->pollfds[fw->nwatched].events = POLLIN;
-    }
-  else
-    {
-      fw->pollfds[fw->nwatched].events = POLLOUT;
-    }
+  fw->pollfds[fw->nwatched].fd     = fd;
+  fw->pollfds[fw->nwatched].events = POLLIN;
+  fw->client[fw->nwatched]         = client_data;
 
   /* Increment the count of watched descriptors */
 
@@ -246,9 +237,8 @@ void fdwatch_del_fd(struct fdwatch_s *fw, int fd)
 
       if (pollndx != fw->nwatched)
         {
-          fw->pollfds[pollndx]      = fw->pollfds[fw->nwatched];
-          fw->client[pollndx].rw    = fw->client[fw->nwatched].rw;
-          fw->client[pollndx].data  = fw->client[fw->nwatched].data;
+          fw->pollfds[pollndx] = fw->pollfds[fw->nwatched];
+          fw->client[pollndx]  = fw->client[fw->nwatched];
         }
     }
 }
@@ -328,17 +318,10 @@ int fdwatch_check_fd(struct fdwatch_s *fw, int fd)
 
   /* Get the index associated with the fd */
 
-   pollndx = fdwatch_pollndx(fw, fd);
-   if (pollndx >= 0 && (fw->pollfds[pollndx].revents & POLLERR) == 0)
+  pollndx = fdwatch_pollndx(fw, fd);
+  if (pollndx >= 0 && (fw->pollfds[pollndx].revents & POLLERR) == 0)
     {
-      if (fw->client[pollndx].rw == FDW_READ)
-        {
-          return fw->pollfds[pollndx].revents & (POLLIN | POLLHUP | POLLNVAL);
-        }
-      else
-        {
-          return fw->pollfds[pollndx].revents & (POLLOUT | POLLHUP | POLLNVAL);
-        }
+      return fw->pollfds[pollndx].revents & (POLLIN | POLLHUP | POLLNVAL);
     }
 
   nvdbg("POLLERR fd: %d\n", fd);
@@ -353,8 +336,8 @@ void *fdwatch_get_next_client_data(struct fdwatch_s *fw)
       return (void*)-1;
     }
 
-  nvdbg("client_data[%d]: %p\n", fw->next, fw->client[fw->next].data);
-  return fw->client[fw->next++].data;
+  nvdbg("client_data[%d]: %p\n", fw->next, fw->client[fw->next]);
+  return fw->client[fw->next++];
 }
 
 /* Generate debugging statistics ndbg message. */

@@ -58,21 +58,15 @@
  * Private Types
  ****************************************************************************/
 
-struct fw_fd_s
-{
-  uint8           rw;               /* Read or write fd */
-  void           *data;             /* Retained client data */
-};
-
 struct fdwatch_s
 {
-  struct pollfd  *pollfds;          /* Poll data */
-  struct fw_fd_s *client;           /* Client data */
-  uint8          *ready;            /* The list of fds with activity */
-  uint8           nfds;             /* The configured maximum number of fds */
-  uint8           nwatched;         /* The number of fds currently watched */
-  uint8           nactive;          /* The number of fds with activity */
-  uint8           next;             /* The index to the next client data */
+  struct pollfd *pollfds;          /* Poll data */
+  void         **client;           /* Client data */
+  uint8         *ready;            /* The list of fds with activity */
+  uint8          nfds;             /* The configured maximum number of fds */
+  uint8          nwatched;         /* The number of fds currently watched */
+  uint8          nactive;          /* The number of fds with activity */
+  uint8          next;             /* The index to the next client data */
 };
 
 /****************************************************************************
@@ -87,9 +81,9 @@ extern struct fdwatch_s *fdwatch_initialize(int nfds);
 
 extern void fdwatch_uninitialize(struct fdwatch_s *fw);
 
-/* Add a descriptor to the watch list. rw is either FDW_READ or FDW_WRITE.  */
+/* Add a descriptor to the watch list */
 
-extern void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data, int rw);
+extern void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data);
 
 /* Delete a descriptor from the watch list. */
 

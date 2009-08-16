@@ -157,7 +157,7 @@ static void shut_down(void)
   int cnum;
   struct timeval tv;
 
-  (void)gettimeofday(&tv, (struct timezone *)0);
+  (void)gettimeofday(&tv, NULL);
   logstats(&tv);
   for (cnum = 0; cnum < AVAILABLE_FDS; ++cnum)
     {
@@ -166,19 +166,19 @@ static void shut_down(void)
           httpd_close_conn(connects[cnum].hc, &tv);
         }
 
-      if (connects[cnum].hc != (httpd_conn *) 0)
+      if (connects[cnum].hc != NULL)
         {
           httpd_destroy_conn(connects[cnum].hc);
           free((void *)connects[cnum].hc);
           --httpd_conn_count;
-          connects[cnum].hc = (httpd_conn *) 0;
+          connects[cnum].hc = NULL;
         }
     }
 
   if (hs)
     {
       httpd_server *ths = hs;
-      hs = (httpd_server *) 0;
+      hs = NULL;
       if (ths->listen_fd != -1)
         {
           fdwatch_del_fd(fw, ths->listen_fd);
@@ -233,7 +233,7 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
       if (!conn->hc)
         {
           conn->hc = NEW(httpd_conn, 1);
-          if (conn->hc == (httpd_conn *) 0)
+          if (conn->hc == NULL)
             {
               ndbg("out of memory allocating an httpd_conn\n");
               exit(1);
@@ -282,7 +282,7 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
       /* Set the connection file descriptor to no-delay mode */
 
       httpd_set_ndelay(conn->hc->conn_fd);
-      fdwatch_add_fd(fw, conn->hc->conn_fd, conn, FDW_READ);
+      fdwatch_add_fd(fw, conn->hc->conn_fd, conn);
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
       ++stats_connections;
@@ -421,10 +421,8 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
   /* We have a valid connection and a file to send to it */
 
   conn->conn_state = CNST_SENDING;
-  client_data.p = conn;
-
+  client_data.p    = conn;
   fdwatch_del_fd(fw, hc->conn_fd);
-  fdwatch_add_fd(fw, hc->conn_fd, conn, FDW_WRITE);
   return;
 
 errout_with_400:
@@ -466,57 +464,57 @@ static void handle_send(struct connect_s *conn, struct timeval *tv)
   int nwritten;
   int nread;
 
-  /* Fill the rest of the response buffer with file data */
+  /* Read until the entire file is sent -- this could take awhile!! */
 
-  nread = read_buffer(conn);
-  if (nread < 0)
+  while (conn->offset < conn->end_offset)
     {
-      ndbg("File read error: %d\n", errno);
-      goto errout_clear_connection;
-    }
-  nvdbg("Read %d bytes, buflen %d\n", nread, hc->buflen);
+      nvdbg("offset: %d end_offset: %d bytes_sent: %d\n",
+            conn->offset, conn->end_offset, conn->hc->bytes_sent);
 
-  /* Send the buffer */
+      /* Fill the rest of the response buffer with file data */
 
-  if (hc->buflen > 0)
-    {
-      /* httpd_write does not return until all bytes have been sent
-       * (or an error occurs).
-       */
- 
-      nwritten = httpd_write(hc->conn_fd, hc->buffer, hc->buflen);
-      if (nwritten < 0)
+      nread = read_buffer(conn);
+      if (nread < 0)
         {
-          ndbg("Error sending %s: %d\n", hc->encodedurl, errno);
+          ndbg("File read error: %d\n", errno);
           goto errout_clear_connection;
         }
+      nvdbg("Read %d bytes, buflen %d\n", nread, hc->buflen);
 
-      /* We wrote one full buffer of data (httpd_write does not
-       * return until the full buffer is written (or an error occurs).
-       */
+      /* Send the buffer */
 
-      conn->active_at       = tv->tv_sec;
-      hc->buflen            = 0;
+      if (hc->buflen > 0)
+        {
+          /* httpd_write does not return until all bytes have been sent
+           * (or an error occurs).
+           */
+ 
+          nwritten = httpd_write(hc->conn_fd, hc->buffer, hc->buflen);
+          if (nwritten < 0)
+            {
+              ndbg("Error sending %s: %d\n", hc->encodedurl, errno);
+              goto errout_clear_connection;
+            }
 
-      /* And update how much of the file we wrote */
+          /* We wrote one full buffer of data (httpd_write does not
+           * return until the full buffer is written (or an error occurs).
+           */
 
-      conn->offset         += nwritten;
-      conn->hc->bytes_sent += nwritten;
-      nvdbg("Wrote %d bytes\n", nwritten);
+          conn->active_at       = tv->tv_sec;
+          hc->buflen            = 0;
+
+          /* And update how much of the file we wrote */
+
+          conn->offset         += nwritten;
+          conn->hc->bytes_sent += nwritten;
+          nvdbg("Wrote %d bytes\n", nwritten);
+        }
     }
 
-  /* Are we done? */
+  /* The file transfer is complete -- finish the connection */
 
-  nvdbg("offset: %d end_offset: %d bytes_sent: %d\n",
-        conn->offset, conn->end_offset, conn->hc->bytes_sent);
-
-  if (conn->offset >= conn->end_offset)
-    {
-      /* This connection is finished! */
-
-      nvdbg("Finish connection\n");
-      finish_connection(conn, tv);
-    }
+  nvdbg("Finish connection\n");
+  finish_connection(conn, tv);
   return;
 
 errout_clear_connection:
@@ -561,7 +559,7 @@ static void clear_connection(struct connect_s *conn, struct timeval *tv)
 {
   ClientData client_data;
 
-  if (conn->wakeup_timer != (Timer *) 0)
+  if (conn->wakeup_timer != NULL)
     {
       tmr_cancel(conn->wakeup_timer);
       conn->wakeup_timer = 0;
@@ -584,7 +582,7 @@ static void clear_connection(struct connect_s *conn, struct timeval *tv)
       /* If we were already lingering, shut down for real */
 
       tmr_cancel(conn->linger_timer);
-      conn->linger_timer = (Timer *) 0;
+      conn->linger_timer = NULL;
       conn->hc->should_linger = FALSE;
     }
 
@@ -597,17 +595,17 @@ static void clear_connection(struct connect_s *conn, struct timeval *tv)
 
       conn->conn_state = CNST_LINGERING;
       close(conn->hc->conn_fd);
-      fdwatch_add_fd(fw, conn->hc->conn_fd, conn, FDW_READ);
+      fdwatch_add_fd(fw, conn->hc->conn_fd, conn);
       client_data.p = conn;
 
-      if (conn->linger_timer != (Timer *) 0)
+      if (conn->linger_timer != NULL)
         {
           ndbg("replacing non-null linger_timer!\n");
         }
 
       conn->linger_timer =
         tmr_create(tv, linger_clear_connection, client_data, CONFIG_THTTPD_LINGER_MSEC, 0);
-      if (conn->linger_timer == (Timer *) 0)
+      if (conn->linger_timer == NULL)
         {
           ndbg("tmr_create(linger_clear_connection) failed\n");
           exit(1);
@@ -630,7 +628,7 @@ static void really_clear_connection(struct connect_s *conn, struct timeval *tv)
     }
 
   httpd_close_conn(conn->hc, tv);
-  if (conn->linger_timer != (Timer *) 0)
+  if (conn->linger_timer != NULL)
     {
       tmr_cancel(conn->linger_timer);
       conn->linger_timer = 0;
@@ -679,7 +677,7 @@ static void linger_clear_connection(ClientData client_data, struct timeval *nowP
   struct connect_s *conn;
 
   conn = (struct connect_s *) client_data.p;
-  conn->linger_timer = (Timer *) 0;
+  conn->linger_timer = NULL;
   really_clear_connection(conn, nowP);
 }
 
@@ -698,9 +696,9 @@ static void logstats(struct timeval *nowP)
   long up_secs;
   long stats_secs;
 
-  if (nowP == (struct timeval *)0)
+  if (!nowP)
     {
-      (void)gettimeofday(&tv, (struct timezone *)0);
+      (void)gettimeofday(&tv, NULL);
       nowP = &tv;
     }
 
@@ -822,9 +820,7 @@ int thttpd_main(int argc, char **argv)
 
   /* Set up the occasional timer */
 
-  if (tmr_create
-      ((struct timeval *)0, occasional, JunkClientData, CONFIG_THTTPD_OCCASIONAL_MSEC * 1000L,
-       1) == (Timer *) 0)
+  if (tmr_create(NULL, occasional, JunkClientData, CONFIG_THTTPD_OCCASIONAL_MSEC * 1000L, 1) == NULL)
     {
       ndbg("tmr_create(occasional) failed\n");
       exit(1);
@@ -832,8 +828,7 @@ int thttpd_main(int argc, char **argv)
 
   /* Set up the idle timer */
 
-  if (tmr_create((struct timeval *)0, idle, JunkClientData, 5 * 1000L, 1) ==
-      (Timer *) 0)
+  if (tmr_create(NULL, idle, JunkClientData, 5 * 1000L, 1) == NULL)
     {
       ndbg("tmr_create(idle) failed\n");
       exit(1);
@@ -844,10 +839,10 @@ int thttpd_main(int argc, char **argv)
     {
       struct timeval ts;
       gettimeofday(&ts, NULL);
-      start_time = ts.tv_sec;
-      stats_time = ts.tv_sec;
-      stats_connections = 0;
-      stats_bytes = 0;
+      start_time         = ts.tv_sec;
+      stats_time         = ts.tv_sec;
+      stats_connections  = 0;
+      stats_bytes        = 0;
       stats_simultaneous = 0;
     }
 #endif
@@ -855,34 +850,36 @@ int thttpd_main(int argc, char **argv)
   /* Initialize our connections table */
 
   connects = NEW(struct connect_s, AVAILABLE_FDS);
-  if (connects == (struct connect_s *) 0)
+  if (connects == NULL)
     {
-      ndbg("out of memory allocating a struct connect_s\n");
+      ndbg("Out of memory allocating a struct connect_s\n");
       exit(1);
     }
 
   for (cnum = 0; cnum < AVAILABLE_FDS; ++cnum)
     {
-      connects[cnum].conn_state = CNST_FREE;
+      connects[cnum].conn_state        = CNST_FREE;
       connects[cnum].next_free_connect = cnum + 1;
-      connects[cnum].hc = (httpd_conn *) 0;
+      connects[cnum].hc                = NULL;
     }
 
   connects[AVAILABLE_FDS - 1].next_free_connect = -1;    /* end of link list */
   first_free_connect = 0;
-  num_connects = 0;
-  httpd_conn_count = 0;
+  num_connects       = 0;
+  httpd_conn_count   = 0;
 
-  if (hs != (httpd_server *) 0)
+  if (hs != NULL)
     {
       if (hs->listen_fd != -1)
-        fdwatch_add_fd(fw, hs->listen_fd, (void *)0, FDW_READ);
+        {
+          fdwatch_add_fd(fw, hs->listen_fd, NULL);
+        }
     }
 
   /* Main loop */
 
   nvdbg("Entering the main loop\n");
-  (void)gettimeofday(&tv, (struct timezone *)0);
+  (void)gettimeofday(&tv, NULL);
   while ((!terminate) || num_connects > 0)
     {
       /* Do the fd watch */
@@ -901,7 +898,7 @@ int thttpd_main(int argc, char **argv)
           exit(1);
         }
 
-      (void)gettimeofday(&tv, (struct timezone *)0);
+      (void)gettimeofday(&tv, NULL);
 
       if (num_ready == 0)
         {
@@ -946,13 +943,36 @@ int thttpd_main(int argc, char **argv)
                   switch (conn->conn_state)
                     {
                       case CNST_READING:
-                        handle_read(conn, &tv);
-                        break;
+                        {
+                          handle_read(conn, &tv);
+
+                          /* If a GET request was received and a file is ready to
+                           * be sent, then fall through to send the file.
+                           */
+
+                          if (conn->conn_state != CNST_SENDING)
+                            { 
+                              break;
+                            }
+                        }
+
                       case CNST_SENDING:
-                        handle_send(conn, &tv);
+                        {
+                          /* Send a file -- this really should be performed on a
+                           * separate thread to keep the serve from locking up during
+                           * the write.
+                           */
+
+                          handle_send(conn, &tv);
+                        }
                         break;
+
                       case CNST_LINGERING:
-                        handle_linger(conn, &tv);
+                        {
+                          /* Linger close the connection */
+
+                          handle_linger(conn, &tv);
+                        }
                         break;
                     }
                 }

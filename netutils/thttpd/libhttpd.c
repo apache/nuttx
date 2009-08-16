@@ -430,7 +430,7 @@ static void send_mime(httpd_conn *hc, int status, const char *title, const char 
         }
 
       gettimeofday(&now, NULL);
-      if (mod == (time_t) 0)
+      if (mod == (time_t)0)
         {
           mod = now.tv_sec;
         }
@@ -508,7 +508,7 @@ static void send_response(httpd_conn *hc, int status, const char *title, const c
 
   nvdbg("title: \"%s\" form: \"%s\"\n", title, form);
 
-  send_mime(hc, status, title, "", extraheads, "text/html; charset=%s", (off_t) - 1, (time_t) 0);
+  send_mime(hc, status, title, "", extraheads, "text/html; charset=%s", (off_t)-1, (time_t)0);
   add_response(hc, html_html);
   add_response(hc, html_hdtitle);
   (void)snprintf(buf, sizeof(buf), "%d %s", status, title);
@@ -586,10 +586,13 @@ static int send_err_file(httpd_conn *hc, int status, char *title, char *extrahea
   size_t nread;
 
   fp = fopen(filename, "r");
-  if (fp == (FILE *) 0)
-    return 0;
+  if (fp == NULL)
+    {
+      return 0;
+    }
+
   send_mime(hc, status, title, "", extraheads, "text/html; charset=%s",
-            (off_t) - 1, (time_t) 0);
+            (off_t)-1, (time_t)0);
   for (;;)
     {
       nread = fread(buf, 1, sizeof(buf) - 1, fp);
@@ -856,7 +859,7 @@ static int auth_check2(httpd_conn *hc, char *dirname)
   /* Open the password file. */
 
   fp = fopen(authpath, "r");
-  if (fp == (FILE *) 0)
+  if (fp == NULL)
     {
       /* The file exists but we can't open it? Disallow access. */
 
@@ -1240,7 +1243,7 @@ static int vhost_map(httpd_conn *hc)
 #endif
 
 /* Expands filename, deleting ..'s and leading /'s.
- * Returns the expanded path (pointer to static string), or (char*) 0 on
+ * Returns the expanded path (pointer to static string), or NULL on
  * errors.  Also returns, in the string pointed to by restP, any trailing
  * parts of the path that don't exist.
  */
@@ -1466,7 +1469,7 @@ static char *bufgets(httpd_conn *hc)
           return &(hc->read_buf[i]);
         }
     }
-  return (char *)0;
+  return NULL;
 }
 
 static void de_dotdot(char *file)
@@ -1697,7 +1700,7 @@ static void cgi_kill(ClientData client_data, struct timeval *nowP)
 
       /* In case this isn't enough, schedule an uncatchable kill. */
 
-      if (tmr_create(nowP, cgi_kill2, client_data, 5 * 1000L, 0) == (Timer *) 0)
+      if (tmr_create(nowP, cgi_kill2, client_data, 5 * 1000L, 0) == NULL)
         {
           ndbg("tmr_create(cgi_kill2) failed\n");
           exit(1);
@@ -1754,7 +1757,7 @@ static void ls_child(int argc, char **argv)
    */
 
   fp = fdopen(hc->conn_fd, "w");
-  if (fp == (FILE *) 0)
+  if (fp == NULL)
     {
       ndbg("fdopen: %d\n", errno);
       INTERNALERROR("fdopen");
@@ -1905,7 +1908,7 @@ static void ls_child(int argc, char **argv)
 
       /* Get time string. */
 
-      now = time((time_t *) 0);
+      now = time(NULL);
       timestr = ctime(&lsb.st_mtime);
       timestr[0] = timestr[4];
       timestr[1] = timestr[5];
@@ -2001,7 +2004,7 @@ static int ls(httpd_conn *hc)
 #endif
 
   dirp = opendir(hc->expnfilename);
-  if (dirp == (DIR *) 0)
+  if (dirp == NULL)
     {
       ndbg("opendir %s: %d\n", hc->expnfilename, errno);
       httpd_send_err(hc, 404, err404title, "", err404form, hc->encodedurl);
@@ -2056,7 +2059,7 @@ static int ls(httpd_conn *hc)
 
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
       client_data.i = child;
-      if (tmr_create((struct timeval *)0, cgi_kill, client_data, CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
+      if (tmr_create(NULL, cgi_kill, client_data, CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == NULL)
         {
           ndbg("tmr_create(cgi_kill ls) failed\n");
           exit(1);
@@ -2233,7 +2236,7 @@ static FAR char **make_argp(httpd_conn *hc)
   argp = NEW(char *, strlen(hc->query) + 2);
   if (!argp)
     {
-      return (char **)0;
+      return NULL;
     }
 
   argp[0] = strrchr(hc->expnfilename, '/');
@@ -2273,7 +2276,7 @@ static FAR char **make_argp(httpd_conn *hc)
         }
     }
 
-  argp[argn] = (char *)0;
+  argp[argn] = NULL;
   return argp;
 }
 #endif
@@ -2360,7 +2363,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                                           struct cgi_outbuffer_s *hdr)
 {
   ssize_t nbytes_read;
-  char *br;
+  char *br = NULL;
   int status;
   const char *title;
   char *cp;
@@ -2462,7 +2465,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               status = atoi(cp);
             }
 
-          if ((cp = strstr(hdr->buffer, "Status:")) != (char *)0 &&
+          if ((cp = strstr(hdr->buffer, "Status:")) != NULL &&
               cp < br && (cp == hdr->buffer || *(cp - 1) == '\012'))
             {
               cp += 7;
@@ -2470,7 +2473,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               status = atoi(cp);
             }
 
-          if ((cp = strstr(hdr->buffer, "Location:")) != (char *)0 &&
+          if ((cp = strstr(hdr->buffer, "Location:")) != NULL &&
               cp < br && (cp == hdr->buffer || *(cp - 1) == '\012'))
             {
               status = 302;
@@ -2624,8 +2627,8 @@ static int cgi_child(int argc, char **argv)
   boolean outdone;
   int     child;
   int     pipefd[2];
-  int     wfd;
-  int     rfd;
+  int     wfd = -1;
+  int     rfd = -1;
   int     fd;
   int     ret;
   int     err = 1;
@@ -2782,8 +2785,7 @@ static int cgi_child(int argc, char **argv)
 
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
   client_data.i = child;
-  if (tmr_create((struct timeval *)0, cgi_kill, client_data,
-                  CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == (Timer *) 0)
+  if (tmr_create(NULL, cgi_kill, client_data, CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == NULL)
     {
       ndbg("tmr_create(cgi_kill child) failed\n");
       goto errout_with_watch;
@@ -2792,8 +2794,8 @@ static int cgi_child(int argc, char **argv)
 
   /* Add the read descriptors to the watch */
 
-  fdwatch_add_fd(fw, hc->conn_fd, NULL, FDW_READ);
-  fdwatch_add_fd(fw, rfd, NULL, FDW_READ);
+  fdwatch_add_fd(fw, hc->conn_fd, NULL);
+  fdwatch_add_fd(fw, rfd, NULL);
 
   /* Then perform the interposition */
 
@@ -2964,7 +2966,7 @@ static int really_check_referer(httpd_conn *hc)
   char *cp1;
   char *cp2;
   char *cp3;
-  static char *refhost = (char *)0;
+  static char *refhost = NULL;
   static size_t refhost_size = 0;
   char *lp;
 
@@ -3824,8 +3826,7 @@ int httpd_parse_request(httpd_conn *hc)
                   *cp = '\0';
                 }
 
-              if (strchr(hc->hdrhost, '/') != (char *)0 ||
-                  hc->hdrhost[0] == '.')
+              if (strchr(hc->hdrhost, '/') != NULL || hc->hdrhost[0] == '.')
                 {
                   BADREQUEST("hdrhost");
                   httpd_send_err(hc, 400, httpd_err400title, "", httpd_err400form, "");
@@ -3903,7 +3904,7 @@ int httpd_parse_request(httpd_conn *hc)
                   if (cp)
                     {
                       cp_dash = strchr(cp + 1, '-');
-                      if (cp_dash != (char *)0 && cp_dash != cp + 1)
+                      if (cp_dash != NULL && cp_dash != cp + 1)
                         {
                           *cp_dash = '\0';
                           hc->got_range = TRUE;
@@ -4125,7 +4126,7 @@ int httpd_parse_request(httpd_conn *hc)
 
 void httpd_close_conn(httpd_conn *hc, struct timeval *nowP)
 {
-  if (hc->file_fd)
+  if (hc->file_fd >= 0)
     {
       (void)close(hc->file_fd);
       hc->file_fd = -1;
@@ -4312,7 +4313,7 @@ int httpd_start_request(httpd_conn *hc, struct timeval *nowP)
        */
 
       cp = expand_filename(indexname, &pi, hc->tildemapped);
-      if (cp == (char *)0 || pi[0] != '\0')
+      if (cp == NULL || pi[0] != '\0')
         {
           INTERNALERROR(indexname);
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
