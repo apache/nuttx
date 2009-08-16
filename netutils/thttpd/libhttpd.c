@@ -283,6 +283,8 @@ static const char html_endbody[]   = "</BODY>\r\n";
 static const char html_hdr2[]      = "<H2>";
 static const char html_endhdr2[]   = "</H2>";
 
+static const char *index_names[]   = { CONFIG_THTTPD_INDEX_NAMES };
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -398,14 +400,13 @@ static void send_mime(httpd_conn *hc, int status, const char *title, const char 
 {
   struct timeval now;
   const char *rfc1123fmt = "%a, %d %b %Y %H:%M:%S GMT";
-  char nowbuf[100];
-  char modbuf[100];
+  char tmbuf[72];
 #ifdef CONFIG_THTTPD_MAXAGE
   time_t expires;
-  char expbuf[100];
+  char expbuf[72];
 #endif
-  char fixed_type[500];
-  char buf[1000];
+  char fixed_type[72];
+  char buf[128];
   int partial_content;
   int s100;
 
@@ -435,51 +436,52 @@ static void send_mime(httpd_conn *hc, int status, const char *title, const char 
           mod = now.tv_sec;
         }
 
-      (void)strftime(nowbuf, sizeof(nowbuf), rfc1123fmt, gmtime(&now.tv_sec));
-      (void)strftime(modbuf, sizeof(modbuf), rfc1123fmt, gmtime(&mod));
       (void)snprintf(fixed_type, sizeof(fixed_type), type, CONFIG_THTTPD_CHARSET);
-      (void)snprintf(buf, sizeof(buf),
-                     "%.20s %d %s\015\012"
-                     "Server: %s\015\012"
-                     "Content-Type: %s\015\012"
-                     "Date: %s\015\012"
-                     "Last-Modified: %s\015\012"
-                     "Accept-Ranges: bytes\015\012"
-                     "Connection: close\015\012",
-                     hc->protocol, status, title, "thttpd", fixed_type, nowbuf, modbuf);
+      (void)snprintf(buf, sizeof(buf), "%.20s %d %s\r\n", hc->protocol, status, title);
       add_response(hc, buf);
+      (void)snprintf(buf, sizeof(buf), "Server: %s\r\n", "thttpd");
+      add_response(hc, buf);
+      (void)snprintf(buf, sizeof(buf), "Content-Type: %s\r\n", fixed_type);
+      add_response(hc, buf);
+      (void)strftime(tmbuf, sizeof(tmbuf), rfc1123fmt, gmtime(&now.tv_sec));
+      (void)snprintf(buf, sizeof(buf), "Date: %s\r\n", tmbuf);
+      add_response(hc, buf);
+      (void)strftime(tmbuf, sizeof(tmbuf), rfc1123fmt, gmtime(&mod));
+      (void)snprintf(buf, sizeof(buf), "Last-Modified: %s\r\n", tmbuf);
+      add_response(hc, buf);
+      add_response(hc, "Accept-Ranges: bytes\r\n");
+      add_response(hc, "Connection: close\r\n");
 
       s100 = status / 100;
       if (s100 != 2 && s100 != 3)
         {
-          (void)snprintf(buf, sizeof(buf), "Cache-Control: no-cache,no-store\015\012");
+          (void)snprintf(buf, sizeof(buf), "Cache-Control: no-cache,no-store\r\n");
           add_response(hc, buf);
         }
 
       if (encodings[0] != '\0')
         {
-          (void)snprintf(buf, sizeof(buf), "Content-Encoding: %s\015\012", encodings);
+          (void)snprintf(buf, sizeof(buf), "Content-Encoding: %s\r\n", encodings);
           add_response(hc, buf);
         }
 
       if (partial_content)
         {
-          (void)snprintf(buf, sizeof(buf),
-                         "Content-Range: bytes %lld-%lld/%lld\015\012"
-                         "Content-Length: %lld\015\012",
-                         (sint16) hc->range_start,
-                         (sint16) hc->range_end, (sint16) length,
-                         (sint16) (hc->range_end - hc->range_start + 1));
+          (void)snprintf(buf, sizeof(buf),"Content-Range: bytes %ld-%ld/%ld\r\n",
+                         (long)hc->range_start, (long)hc->range_end, (long)length);
+          add_response(hc, buf);
+          (void)snprintf(buf, sizeof(buf),"Content-Length: %ld\r\n",
+                         (long)(hc->range_end - hc->range_start + 1));
           add_response(hc, buf);
         }
       else if (length >= 0)
         {
-          (void)snprintf(buf, sizeof(buf), "Content-Length: %lld\015\012", (sint16) length);
+          (void)snprintf(buf, sizeof(buf), "Content-Length: %ld\r\n", (long)length);
           add_response(hc, buf);
         }
 
 #ifdef CONFIG_THTTPD_P3P
-      (void)snprintf(buf, sizeof(buf), "P3P: %s\015\012", CONFIG_THTTPD_P3P);
+      (void)snprintf(buf, sizeof(buf), "P3P: %s\r\n", CONFIG_THTTPD_P3P);
       add_response(hc, buf);
 #endif
 
@@ -487,8 +489,8 @@ static void send_mime(httpd_conn *hc, int status, const char *title, const char 
       expires = now + CONFIG_THTTPD_MAXAGE;
       (void)strftime(expbuf, sizeof(expbuf), rfc1123fmt, gmtime(&expires));
       (void)snprintf(buf, sizeof(buf),
-                        "Cache-Control: max-age=%d\015\012Expires: %s\015\012",
-                        CONFIG_THTTPD_MAXAGE, expbuf);
+                     "Cache-Control: max-age=%d\r\nExpires: %s\r\n",
+                     CONFIG_THTTPD_MAXAGE, expbuf);
       add_response(hc, buf);
 #endif
 
@@ -496,7 +498,7 @@ static void send_mime(httpd_conn *hc, int status, const char *title, const char 
         {
           add_response(hc, extraheads);
         }
-      add_response(hc, "\015\012");
+      add_response(hc, "\r\n");
     }
 }
 
@@ -619,7 +621,7 @@ static void send_authenticate(httpd_conn *hc, char *realm)
   static char headstr[] = "WWW-Authenticate: Basic realm=\"";
 
   httpd_realloc_str(&header, &maxheader, sizeof(headstr) + strlen(realm) + 3);
-  (void)snprintf(header, maxheader, "%s%s\"\015\012", headstr, realm);
+  (void)snprintf(header, maxheader, "%s%s\"\r\n", headstr, realm);
   httpd_send_err(hc, 401, err401title, header, err401form, hc->encodedurl);
 
   /* If the request was a POST then there might still be data to be read, so 
@@ -967,7 +969,7 @@ static void send_dirredirect(httpd_conn *hc)
     }
 
   httpd_realloc_str(&header, &maxheader, sizeof(headstr) + strlen(location));
-  (void)snprintf(header, maxheader, "%s%s\015\012", headstr, location);
+  (void)snprintf(header, maxheader, "%s%s\r\n", headstr, location);
   send_response(hc, 302, err302title, header, err302form, location);
 }
 
@@ -2425,7 +2427,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 
               /* Check for end of header */
 
-              if ((br = strstr(hdr->buffer, "\015\012\015\012")) != NULL ||
+              if ((br = strstr(hdr->buffer, "\r\n\r\n")) != NULL ||
                   (br = strstr(hdr->buffer, "\012\012")) != NULL)
                 {
                   nvdbg("End-of-header\n");
@@ -2538,7 +2540,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               break;
             }
 
-          (void)snprintf(inbuffer, sizeof(inbuffer), "HTTP/1.0 %d %s\015\012", status, title);
+          (void)snprintf(inbuffer, sizeof(inbuffer), "HTTP/1.0 %d %s\r\n", status, title);
           (void)httpd_write(hc->conn_fd, inbuffer, strlen(inbuffer));
 
           /* Write the saved hdr->buffer to the client. */
@@ -4167,8 +4169,6 @@ int httpd_start_request(httpd_conn *hc, struct timeval *nowP)
 {
   static char *indexname;
   static size_t maxindexname = 0;
-  static const char *index_names[] = { CONFIG_THTTPD_INDEX_NAMES };
-  int i;
 #ifdef CONFIG_THTTPD_AUTH_FILE
   static char *dirname;
   static size_t maxdirname = 0;
@@ -4176,6 +4176,7 @@ int httpd_start_request(httpd_conn *hc, struct timeval *nowP)
   size_t expnlen, indxlen;
   char *cp;
   char *pi;
+  int i;
 
   nvdbg("File: \"%s\"\n", hc->expnfilename);
   expnlen = strlen(hc->expnfilename);

@@ -524,14 +524,14 @@ errout_clear_connection:
 
 static void handle_linger(struct connect_s *conn, struct timeval *tv)
 {
-  char buf[4096];
+  httpd_conn *hc = conn->hc;
   int ret;
 
-  /* In lingering-close mode we just read and ignore bytes.  An error or EOF 
+    /* In lingering-close mode we just read and ignore bytes.  An error or EOF 
    * ends things, otherwise we go until a timeout 
    */
 
-  ret = read(conn->hc->conn_fd, buf, sizeof(buf));
+  ret = read(conn->hc->conn_fd, hc->buffer, CONFIG_THTTPD_IOBUFFERSIZE);
   if (ret < 0 && (errno == EINTR || errno == EAGAIN))
     {
       return;
