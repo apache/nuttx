@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 8, 2009)
+NuttX TODO List (Last updated August 16, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -233,6 +233,14 @@ o Network (net/, netutils/)
                a case where you can read from a UDP socket without blocking.
   Status:      Open, depends on UDP read-ahead support
   Priority:    Medium
+
+  Description: poll()/select() only works for availability of buffered TCP
+               read data (when read-ahead is enabled).  The way writing is
+               handled in uIP, all sockets must wait when send and cannot
+               be notifiied when they can send without waiting.
+  Status:      Open, probably will not be fixed.
+  Priority:    Medium... this does effect porting of applications that expect
+               different behavior from poll()/select()
 
   Description: sockets do not support all modes except for O_NONBLOCK. Sockets
                support only (1) TCP/IP non-blocking read operations when read-ahead
