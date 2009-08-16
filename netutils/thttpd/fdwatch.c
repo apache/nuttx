@@ -43,15 +43,8 @@
 
 #include <stdlib.h>
 #include <debug.h>
-
-#if 0
-#include <sys/time.h>
-
-#include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
-#endif
 #include <poll.h>
+#include <debug.h>
 
 #include "config.h"
 #include "fdwatch.h"
@@ -81,6 +74,29 @@ static long nwatches = 0;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_THTTPD_FDWATCH_DEBUG
+static void fdwatch_dump(const char *msg, FAR struct fdwatch_s *fw)
+{
+  int i;
+ 
+  nvdbg("%s\n", msg);
+  nvdbg("nwatched: %d nfds: %d\n", fw->nwatched, fw->nfds);
+  for (i = 0; i < fw->nwatched; i++)
+  {
+    nvdbg("%2d. pollfds: {fd: %d events: %02x revents: %02x} client: %p\n",
+          i+1, fw->pollfds[i].fd, fw->pollfds[i].events,
+          fw->pollfds[i].revents, fw->client[i]);
+  }
+  nvdbg("nactive: %d next: %d\n", fw->nactive, fw->next);
+  for (i = 0; i < fw->nactive; i++)
+  {
+    nvdbg("%2d. %d active\n", i, fw->ready[i]);
+  }
+}
+#else
+#  define fdwatch_dump(m,f)
+#endif
 
 static int fdwatch_pollndx(FAR struct fdwatch_s *fw, int fd)
 {
@@ -141,6 +157,8 @@ struct fdwatch_s *fdwatch_initialize(int nfds)
     {
       goto errout_with_allocations;
     }
+
+  fdwatch_dump("Initial state:", fw);
   return fw;
 
 errout_with_allocations:
@@ -154,6 +172,7 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
 {
   if (fw)
     {
+      fdwatch_dump("Uninitializing:", fw);
       if (fw->client)
         {
           free(fw->client);
@@ -178,15 +197,7 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
 void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data)
 {
   nvdbg("fd: %d client_data: %p\n", fd, client_data);
-
-#ifdef CONFIG_DEBUG
-  if (fd < CONFIG_NFILE_DESCRIPTORS ||
-      fd >= CONFIG_NFILE_DESCRIPTORS+fw->nfds)
-    {
-      ndbg("Received bad fd (%d)\n", fd);
-      return;
-    }
-#endif
+  fdwatch_dump("Before adding:", fw);
 
   if (fw->nwatched >= fw->nfds)
     {
@@ -203,6 +214,7 @@ void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data)
   /* Increment the count of watched descriptors */
 
   fw->nwatched++;
+  fdwatch_dump("After adding:", fw);
 }
 
 /* Remove a descriptor from the watch list. */
@@ -212,15 +224,7 @@ void fdwatch_del_fd(struct fdwatch_s *fw, int fd)
   int pollndx;
 
   nvdbg("fd: %d\n", fd);
-
-#ifdef CONFIG_DEBUG
-  if (fd < CONFIG_NFILE_DESCRIPTORS ||
-      fd >= CONFIG_NFILE_DESCRIPTORS+fw->nfds)
-    {
-      ndbg("Received bad fd: %d\n", fd);
-      return;
-    }
-#endif
+  fdwatch_dump("Before deleting:", fw);
 
   /* Get the index associated with the fd */
 
@@ -241,6 +245,7 @@ void fdwatch_del_fd(struct fdwatch_s *fw, int fd)
           fw->client[pollndx]  = fw->client[fw->nwatched];
         }
     }
+   fdwatch_dump("After deleting:", fw);
 }
 
 /* Do the watch.  Return value is the number of descriptors that are ready,
@@ -262,10 +267,11 @@ int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
    * or <0 on an error.
    */
 
-  nvdbg("Waiting...\n");
+  fdwatch_dump("Before waiting:", fw);
+  nvdbg("Waiting... (timeout %d)\n", timeout_msecs);
   fw->nactive = 0;
   fw->next    = 0;
-  ret = poll(fw->pollfds, fw->nwatched, (int)timeout_msecs);
+  ret         = poll(fw->pollfds, fw->nwatched, (int)timeout_msecs);
   nvdbg("Awakened: %d\n", ret);
 
   /* Look through all of the descriptors and make a list of all of them than
@@ -296,6 +302,7 @@ int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
   /* Return the number of descriptors with activity */
 
   nvdbg("nactive: %d\n", fw->nactive);
+  fdwatch_dump("After wakeup:", fw);
   return ret;
 }
 
@@ -306,15 +313,7 @@ int fdwatch_check_fd(struct fdwatch_s *fw, int fd)
   int pollndx;
 
   nvdbg("fd: %d\n", fd);
-
-#ifdef CONFIG_DEBUG
-  if (fd < CONFIG_NFILE_DESCRIPTORS ||
-      fd >= CONFIG_NFILE_DESCRIPTORS + fw->nfds)
-    {
-      ndbg("Bad fd: %d\n", fd);
-      return 0;
-    }
-#endif
+  fdwatch_dump("Checking:", fw);
 
   /* Get the index associated with the fd */
 
@@ -330,6 +329,7 @@ int fdwatch_check_fd(struct fdwatch_s *fw, int fd)
 
 void *fdwatch_get_next_client_data(struct fdwatch_s *fw)
 {
+  fdwatch_dump("Before getting client data:", fw);
   if (fw->next >= fw->nwatched)
     {
       nvdbg("All client data returned: %d\n", fw->next);
@@ -345,6 +345,7 @@ void *fdwatch_get_next_client_data(struct fdwatch_s *fw)
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 void fdwatch_logstats(struct fdwatch_s *fw, long secs)
 {
+  fdwatch_dump("LOG stats:", fw);
   if (secs > 0)
     {
       ndbg("fdwatch - %ld polls (%g/sec)\n", nwatches, (float)nwatches / secs);

@@ -202,33 +202,33 @@ Timer *tmr_create(struct timeval *nowP, TimerProc * timer_proc,
     }
   else
     {
-      t = (Timer *) malloc(sizeof(Timer));
+      t = (Timer*)malloc(sizeof(Timer));
       if (!t)
         {
           return NULL;
         }
-      ++alloc_count;
+      alloc_count++;
     }
 
-  t->timer_proc = timer_proc;
+  t->timer_proc  = timer_proc;
   t->client_data = client_data;
-  t->msecs = msecs;
-  t->periodic = periodic;
+  t->msecs       = msecs;
+  t->periodic    = periodic;
 
-  if (nowP != (struct timeval *)0)
+  if (nowP != NULL)
     {
       t->time = *nowP;
     }
   else
     {
-      (void)gettimeofday(&t->time, (struct timezone *)0);
+      (void)gettimeofday(&t->time, NULL);
     }
 
-  t->time.tv_sec += msecs / 1000L;
+  t->time.tv_sec  += msecs / 1000L;
   t->time.tv_usec += (msecs % 1000L) * 1000L;
   if (t->time.tv_usec >= 1000000L)
     {
-      t->time.tv_sec += t->time.tv_usec / 1000000L;
+      t->time.tv_sec  += t->time.tv_usec / 1000000L;
       t->time.tv_usec %= 1000000L;
     }
   t->hash = hash(t);
@@ -248,7 +248,7 @@ long tmr_mstimeout(struct timeval *nowP)
   register Timer *t;
 
   gotone = 0;
-  msecs = 0;                    /* make lint happy */
+  msecs  = 0;
 
   /* Since the lists are sorted, we only need to look at the  * first timer on
    * each one.
@@ -272,6 +272,7 @@ long tmr_mstimeout(struct timeval *nowP)
             }
         }
     }
+
   if (!gotone)
     {
       return INFTIM;
@@ -306,7 +307,7 @@ void tmr_run(struct timeval *nowP)
             break;
           }
 
-        (t->timer_proc) (t->client_data, nowP);
+        (t->timer_proc)(t->client_data, nowP);
         if (t->periodic)
           {
             /* Reschedule. */
@@ -332,14 +333,14 @@ void tmr_cancel(Timer * t)
   /* Remove it from its active list. */
 
   l_remove(t);
-  --active_count;
+  active_count--;
 
   /* And put it on the free list. */
 
-  t->next = free_timers;
+  t->next     = free_timers;
   free_timers = t;
-  ++free_count;
-  t->prev = NULL;
+  free_count++;
+  t->prev     = NULL;
 }
 
 void tmr_cleanup(void)
@@ -350,9 +351,9 @@ void tmr_cleanup(void)
     {
       t = free_timers;
       free_timers = t->next;
-      --free_count;
-      free((void *)t);
-      --alloc_count;
+      free_count--;
+      free((void*)t);
+      alloc_count--;
     }
 }
 

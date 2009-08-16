@@ -47,8 +47,9 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define FDW_READ 0
-#define FDW_WRITE 1
+/* Define to enable detailed FDWATCH debug output */
+
+#undef CONFIG_THTTPD_FDWATCH_DEBUG
 
 #ifndef INFTIM
 #  define INFTIM -1
@@ -60,9 +61,9 @@
 
 struct fdwatch_s
 {
-  struct pollfd *pollfds;          /* Poll data */
-  void         **client;           /* Client data */
-  uint8         *ready;            /* The list of fds with activity */
+  struct pollfd *pollfds;          /* Poll data (allocated) */
+  void         **client;           /* Client data (allocated) */
+  uint8         *ready;            /* The list of fds with activity (allocated) */
   uint8          nfds;             /* The configured maximum number of fds */
   uint8          nwatched;         /* The number of fds currently watched */
   uint8          nactive;          /* The number of fds with activity */

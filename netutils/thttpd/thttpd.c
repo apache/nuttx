@@ -76,8 +76,7 @@
 #define CNST_FREE      0
 #define CNST_READING   1
 #define CNST_SENDING   2
-#define CNST_PAUSING   3
-#define CNST_LINGERING 4
+#define CNST_LINGERING 3
 
 #define SPARE_FDS      2
 #define AVAILABLE_FDS  (CONFIG_NSOCKET_DESCRIPTORS - SPARE_FDS)
@@ -528,7 +527,7 @@ static void handle_linger(struct connect_s *conn, struct timeval *tv)
   char buf[4096];
   int ret;
 
-  /* In lingering-close mode we just read and ignore bytes.  An error  or EOF 
+  /* In lingering-close mode we just read and ignore bytes.  An error or EOF 
    * ends things, otherwise we go until a timeout 
    */
 
@@ -582,39 +581,29 @@ static void clear_connection(struct connect_s *conn, struct timeval *tv)
       /* If we were already lingering, shut down for real */
 
       tmr_cancel(conn->linger_timer);
-      conn->linger_timer = NULL;
+      conn->linger_timer      = NULL;
       conn->hc->should_linger = FALSE;
     }
 
   if (conn->hc->should_linger)
     {
-      if (conn->conn_state != CNST_PAUSING)
-        {
-          fdwatch_del_fd(fw, conn->hc->conn_fd);
-        }
-
+      fdwatch_del_fd(fw, conn->hc->conn_fd);
       conn->conn_state = CNST_LINGERING;
-      close(conn->hc->conn_fd);
       fdwatch_add_fd(fw, conn->hc->conn_fd, conn);
       client_data.p = conn;
 
+      conn->linger_timer = tmr_create(tv, linger_clear_connection, client_data,
+                                      CONFIG_THTTPD_LINGER_MSEC, 0);
       if (conn->linger_timer != NULL)
         {
-          ndbg("replacing non-null linger_timer!\n");
+          return;
         }
+      ndbg("tmr_create(linger_clear_connection) failed\n");
+    }
 
-      conn->linger_timer =
-        tmr_create(tv, linger_clear_connection, client_data, CONFIG_THTTPD_LINGER_MSEC, 0);
-      if (conn->linger_timer == NULL)
-        {
-          ndbg("tmr_create(linger_clear_connection) failed\n");
-          exit(1);
-        }
-    }
-  else
-    {
-      really_clear_connection(conn, tv);
-    }
+  /* Either we are done lingering, we shouldn't linger, or we failed to setup the linger */
+
+  really_clear_connection(conn, tv);
 }
 
 static void really_clear_connection(struct connect_s *conn, struct timeval *tv)
@@ -622,11 +611,8 @@ static void really_clear_connection(struct connect_s *conn, struct timeval *tv)
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
   stats_bytes += conn->hc->bytes_sent;
 #endif
-  if (conn->conn_state != CNST_PAUSING)
-    {
-      fdwatch_del_fd(fw, conn->hc->conn_fd);
-    }
 
+  fdwatch_del_fd(fw, conn->hc->conn_fd);
   httpd_close_conn(conn->hc, tv);
   if (conn->linger_timer != NULL)
     {
@@ -634,7 +620,7 @@ static void really_clear_connection(struct connect_s *conn, struct timeval *tv)
       conn->linger_timer = 0;
     }
 
-  conn->conn_state         = CNST_FREE;
+  conn->conn_state        = CNST_FREE;
   conn->next_free_connect = first_free_connect;
   first_free_connect      = conn - connects;    /* division by sizeof is implied */
   num_connects--;
@@ -661,7 +647,6 @@ static void idle(ClientData client_data, struct timeval *nowP)
           break;
 
         case CNST_SENDING:
-        case CNST_PAUSING:
           if (nowP->tv_sec - conn->active_at >= CONFIG_THTTPD_IDLE_SEND_LIMIT_SEC)
             {
               ndbg("%s connection timed out sending\n", httpd_ntoa(&conn->hc->client_addr));
@@ -676,6 +661,7 @@ static void linger_clear_connection(ClientData client_data, struct timeval *nowP
 {
   struct connect_s *conn;
 
+  nvdbg("Clear connection\n");
   conn = (struct connect_s *) client_data.p;
   conn->linger_timer = NULL;
   really_clear_connection(conn, nowP);
@@ -894,7 +880,7 @@ int thttpd_main(int argc, char **argv)
               continue;
             }
 
-          ndbg("fdwatch: %d\n", errno);
+          ndbg("fdwatch failed: %d\n", errno);
           exit(1);
         }
 
