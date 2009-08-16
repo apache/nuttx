@@ -474,11 +474,16 @@ static void handle_send(struct connect_s *conn, struct timeval *tv)
       ndbg("File read error: %d\n", errno);
       goto errout_clear_connection;
     }
+  nvdbg("Read %d bytes, buflen %d\n", nread, hc->buflen);
 
   /* Send the buffer */
 
   if (hc->buflen > 0)
     {
+      /* httpd_write does not return until all bytes have been sent
+       * (or an error occurs).
+       */
+ 
       nwritten = httpd_write(hc->conn_fd, hc->buffer, hc->buflen);
       if (nwritten < 0)
         {
@@ -495,21 +500,27 @@ static void handle_send(struct connect_s *conn, struct timeval *tv)
 
       /* And update how much of the file we wrote */
 
-      conn->offset         += nread;
-      conn->hc->bytes_sent += nread;
+      conn->offset         += nwritten;
+      conn->hc->bytes_sent += nwritten;
+      nvdbg("Wrote %d bytes\n", nwritten);
     }
 
   /* Are we done? */
+
+  nvdbg("offset: %d end_offset: %d bytes_sent: %d\n",
+        conn->offset, conn->end_offset, conn->hc->bytes_sent);
 
   if (conn->offset >= conn->end_offset)
     {
       /* This connection is finished! */
 
+      nvdbg("Finish connection\n");
       finish_connection(conn, tv);
-      return;
     }
+  return;
 
 errout_clear_connection:
+  ndbg("Clear connection\n");
   clear_connection(conn, tv);
   return;
 }
