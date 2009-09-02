@@ -87,8 +87,8 @@
 
 struct connect_s
 {
+  struct connect_s *next;
   int conn_state;
-  int next_free_connect;
   httpd_conn *hc;
   time_t active_at;
   Timer *wakeup_timer;
@@ -102,25 +102,20 @@ struct connect_s
  * Private Data
  ****************************************************************************/
 
-static httpd_server *hs = NULL;
+static httpd_server *hs;
+static struct connect_s *free_connections;
 static struct connect_s *connects;
-static int num_connects;
-static int first_free_connect;
-static int httpd_conn_count;
 static struct fdwatch_s *fw;
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-int terminate = 0;
-
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 time_t start_time;
 time_t stats_time;
 long   stats_connections;
 off_t  stats_bytes;
-int    stats_simultaneous;
 #endif
 
 /****************************************************************************
@@ -169,7 +164,6 @@ static void shut_down(void)
         {
           httpd_destroy_conn(connects[cnum].hc);
           free((void *)connects[cnum].hc);
-          --httpd_conn_count;
           connects[cnum].hc = NULL;
         }
     }
@@ -201,31 +195,23 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
   nvdbg("New connection(s) on listen_fd %d\n", listen_fd);
   for (;;)
     {
-      /* Is there room in the connection table? */
+      /* Get the next free connection from the free list */
 
-      if (num_connects >= AVAILABLE_FDS)
+      conn = free_connections;
+      
+      /* Are there any free connections? */
+
+      if (!conn)
         {
           /* Out of connection slots.  Run the timers, then the  existing
            * connections, and maybe we'll free up a slot  by the time we get
            * back here.
            */
 
-          ndbg("too many connections!\n");
+          ndbg("No free connections\n");
           tmr_run(tv);
           return -1;
         }
-
-      /* Get the first free connection entry off the free list */
-
-#ifdef CONFIG_DEBUG
-      if (first_free_connect == -1 ||
-          connects[first_free_connect].conn_state != CNST_FREE)
-        {
-          ndbg("the connects free list is messed up\n");
-          exit(1);
-        }
-#endif
-      conn = &connects[first_free_connect];
 
       /* Make the httpd_conn if necessary */
 
@@ -239,7 +225,6 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
             }
 
           conn->hc->initialized = 0;
-          httpd_conn_count++;
         }
 
       /* Get the connection */
@@ -264,14 +249,13 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
         }
 
       nvdbg("New connection fd %d\n", conn->hc->conn_fd);
+ 
+      /* Remove the connection entry from the free list */
 
-      conn->conn_state = CNST_READING;
+      conn->conn_state        = CNST_READING;
+      free_connections        = conn->next;
+      conn->next              = NULL;
 
-      /* Pop it off the free list */
-
-      first_free_connect      = conn->next_free_connect;
-      conn->next_free_connect = -1;
-      num_connects++;
       client_data.p           = conn;
       conn->active_at         = tv->tv_sec;
       conn->wakeup_timer      = NULL;
@@ -285,10 +269,6 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
       ++stats_connections;
-      if (num_connects > stats_simultaneous)
-        {
-          stats_simultaneous = num_connects;
-        }
 #endif
     }
 }
@@ -620,10 +600,11 @@ static void really_clear_connection(struct connect_s *conn, struct timeval *tv)
       conn->linger_timer = 0;
     }
 
-  conn->conn_state        = CNST_FREE;
-  conn->next_free_connect = first_free_connect;
-  first_free_connect      = conn - connects;    /* division by sizeof is implied */
-  num_connects--;
+  /* Put the connection structure back on the free list */
+
+  conn->conn_state  = CNST_FREE;
+  conn->next        = free_connections;
+  free_connections  = conn;
 }
 
 static void idle(ClientData client_data, struct timeval *nowP)
@@ -713,15 +694,13 @@ static void thttpd_logstats(long secs)
 {
   if (secs > 0)
     {
-      ndbg("thttpd - %ld connections (%g/sec), %d max simultaneous, %lld bytes (%g/sec), %d httpd_conns allocated\n",
+      ndbg("thttpd - %ld connections (%g/sec) %lld bytes (%g/sec)\n",
            stats_connections, (float)stats_connections / secs,
-           stats_simultaneous, (sint64) stats_bytes,
-           (float)stats_bytes / secs, httpd_conn_count);
+           (sint64) stats_bytes, (float)stats_bytes / secs);
     }
 
   stats_connections  = 0;
   stats_bytes        = 0;
-  stats_simultaneous = 0;
 }
 #endif
 
@@ -829,7 +808,6 @@ int thttpd_main(int argc, char **argv)
       stats_time         = ts.tv_sec;
       stats_connections  = 0;
       stats_bytes        = 0;
-      stats_simultaneous = 0;
     }
 #endif
 
@@ -844,15 +822,13 @@ int thttpd_main(int argc, char **argv)
 
   for (cnum = 0; cnum < AVAILABLE_FDS; ++cnum)
     {
-      connects[cnum].conn_state        = CNST_FREE;
-      connects[cnum].next_free_connect = cnum + 1;
-      connects[cnum].hc                = NULL;
+      connects[cnum].conn_state  = CNST_FREE;
+      connects[cnum].next        = &connects[cnum + 1];
+      connects[cnum].hc          = NULL;
     }
 
-  connects[AVAILABLE_FDS - 1].next_free_connect = -1;    /* end of link list */
-  first_free_connect = 0;
-  num_connects       = 0;
-  httpd_conn_count   = 0;
+  connects[AVAILABLE_FDS-1].next = NULL;      /* End of link list */
+  free_connections               = connects;  /* Beginning of the link list */
 
   if (hs != NULL)
     {
@@ -866,7 +842,7 @@ int thttpd_main(int argc, char **argv)
 
   nvdbg("Entering the main loop\n");
   (void)gettimeofday(&tv, NULL);
-  while ((!terminate) || num_connects > 0)
+  for(;;)
     {
       /* Do the fd watch */
 
