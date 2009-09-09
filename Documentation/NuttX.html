@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 15, 2009</p>
+      <p>Last Updated: September 09, 2009</p>
     </td>
   </tr>
 </table>
@@ -1509,6 +1509,14 @@ nuttx-0.4.11 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  argument to macro caused strcasecmp() and strncasecmp() to fail.
 	* lib/lib_strstr.c:  Length of substring off by one causes false alarm
 	  sub-string matches.
+	* arch/arm/src/lm3s/lm3s_ethernet.c: Fix errors in LMS6918 FIFO length
+	  handling.  (1) The incorrect size of the ethernet header was being
+	  subtracted on outgoing messages (4 vs 14), which caused outgoing messages to
+	  be a little too long.  (2) The size of incoming FIFO messages is 6 bytes
+	  larger than it expected (2 for the length and 4 for the FCS).  The unhandled
+	  extra two bytes of length cause the driver to sometimes read one too many
+	  words from the received FIFO (corrupting the next queued receive packet,
+	  if any).
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
