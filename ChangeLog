@@ -848,3 +848,11 @@
 	  argument to macro caused strcasecmp() and strncasecmp() to fail.
 	* lib/lib_strstr.c:  Length of substring off by one causes false alarm
 	  sub-string matches.
+	* arch/arm/src/lm3s/lm3s_ethernet.c: Fix errors in LMS6918 FIFO length
+	  handling.  (1) The incorrect size of the ethernet header was being
+	  subtracted on outgoing messages (4 vs 14), which caused outgoing messages to
+	  be a little too long.  (2) The size of incoming FIFO messages is 6 bytes
+	  larger than it expected (2 for the length and 4 for the FCS).  The unhandled
+	  extra two bytes of length cause the driver to sometimes read one too many
+	  words from the received FIFO (corrupting the next queued receive packet,
+	  if any).

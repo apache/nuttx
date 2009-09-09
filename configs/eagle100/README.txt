@@ -287,6 +287,7 @@ Eagle100-specific Configuration Options
 	CONFIG_LM3S_MULTICAST - Set to enable multicast frames
 	CONFIG_LM3S_PROMISCUOUS - Set to enable promiscuous mode
 	CONFIG_LM3S_BADCRC - Set to enable bad CRC rejection.
+	CONFIG_LM3S_DUMPPACKET - Dump each packet received/sent to the console.
 
 Configurations
 ^^^^^^^^^^^^^^
