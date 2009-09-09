@@ -657,6 +657,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 
           /* We will have to drop this packet */
 
+          ndbg("Bad packet size dropped (%d)\n", pktlen);
           EMAC_STAT(priv, rx_pktsize);
 
           /* This is the number of bytes and words left to read (including,
@@ -763,7 +764,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 #ifdef CONFIG_DEBUG
       else
         {
-          ndbg("Unsupported packet type dropped (%02x)\n", ETHBUF->type);
+          ndbg("Unsupported packet type dropped (%02x)\n", htons(ETHBUF->type));
           EMAC_STAT(priv, rx_dropped);
         }
 #endif

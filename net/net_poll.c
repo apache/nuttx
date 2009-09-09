@@ -325,6 +325,7 @@ int net_poll(int sockfd, struct pollfd *fds, boolean setup)
 #endif
 
   /* Check if we are setting up or tearing down the poll */
+ 
   if (setup)
     {
       /* Perform the TCP/IP poll() setup */
