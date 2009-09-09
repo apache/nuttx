@@ -127,6 +127,14 @@
 #define LM3S_RCTCL_SETBITS (LM3S_AMUL_SETBITS|LM3S_PRMS_SETBITS|LM3S_BADCRC_SETBITS)
 #define LM3S_RCTCL_CLRBITS (LM3S_AMUL_CLRBITS|LM3S_PRMS_CLRBITS|LM3S_BADCRC_CLRBITS)
 
+/* CONFIG_LM3S_DUMPPACKET will dump the contents of each packet to the console. */
+
+#ifdef CONFIG_LM3S_DUMPPACKET
+#  define lm3s_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
+#else
+#  define lm3s_dumppacket(m,a,n)
+#endif
+
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define LM3S_WDDELAY   (1*CLK_TCK)
@@ -483,6 +491,7 @@ static int lm3s_transmit(struct lm3s_driver_s *priv)
       /* Increment statistics */
 
       EMAC_STAT(priv, tx_packets);
+      lm3s_dumppacket("Transmit packet", priv->ld_dev.d_buf, priv->ld_dev.d_len);
 
       /* Transfer the packet into the Tx FIFO.  The LS 16-bits of the first
        * 32-bit word written to the Tx FIFO contains the Ethernet payload
@@ -495,7 +504,7 @@ static int lm3s_transmit(struct lm3s_driver_s *priv)
       DEBUGASSERT(pktlen > UIP_LLH_LEN);
 
       dbuf       = priv->ld_dev.d_buf;
-      regval     = (uint32)(pktlen - 4);
+      regval     = (uint32)(pktlen - 14);
       regval    |= ((uint32)(*dbuf++) << 16);
       regval    |= ((uint32)(*dbuf++) << 24);
       lm3s_ethout(priv, LM3S_MAC_DATA_OFFSET, regval);
@@ -639,7 +648,8 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
        * word from the FIFO followed by the Ethernet header beginning
        * in the MS 16-bits of the first word.
        *
-       * Pick off the packet length from the first word.
+       * Pick off the packet length from the first word.  This packet length
+       * includes the len/type field (size 2) and the FCS (size 4).
        */
 
       regval = lm3s_ethin(priv, LM3S_MAC_DATA_OFFSET);
@@ -660,11 +670,11 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
           ndbg("Bad packet size dropped (%d)\n", pktlen);
           EMAC_STAT(priv, rx_pktsize);
 
-          /* This is the number of bytes and words left to read (including,
-           * the final, possibly partial word).
+          /* The number of bytes and words left to read is pktlen - 4 (including,
+           * the final, possibly partial word) because we've already read 4 bytes.
            */
 
-          wordlen = (pktlen + 1) >> 4;
+          wordlen = (pktlen - 1) >> 2;
 
           /* Read and discard the remaining words in the FIFO */
 
@@ -683,9 +693,12 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
       *dbuf++   = (ubyte)((regval >> 16) & 0xff);
       *dbuf++   = (ubyte)((regval >> 24) & 0xff);
 
-      /* Read all of the whole, 32-bit values in the middle of the packet */
+      /* Read all of the whole, 32-bit values in the middle of the packet.
+       * We've already read the length (2 bytes) plus the first two bytes
+       * of data
+       */
 
-      for (bytesleft = pktlen - 2; bytesleft > 3; bytesleft -= 4, dbuf += 4)
+      for (bytesleft = pktlen - 4; bytesleft > 3; bytesleft -= 4, dbuf += 4)
         {
           /* Transfer a whole word to the user buffer.  Note, the user
            * buffer may be un-aligned.
@@ -717,9 +730,13 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
             }
         }
 
-      /* Pass the packet length to uIP */
+      lm3s_dumppacket("Received packet", priv->ld_dev.d_buf, pktlen);
 
-      priv->ld_dev.d_len = pktlen;
+      /* Pass the packet length to uIP MINUS 2 bytes for the length and
+       * 4 bytes for the FCS.
+       */
+
+      priv->ld_dev.d_len = pktlen - 6;
 
       /* We only accept IP packets of the configured type and ARP packets */
 
@@ -916,7 +933,7 @@ static void lm3s_txtimeout(int argc, uint32 arg, ...)
 {
   struct lm3s_driver_s *priv = (struct lm3s_driver_s *)arg;
 
-  /* Increment statistics and dump debug info */
+  /* Increment statistics */
 
   ndbg("Tx timeout\n");
   EMAC_STAT(priv, tx_timeouts);
