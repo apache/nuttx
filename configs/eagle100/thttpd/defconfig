@@ -152,6 +152,7 @@ CONFIG_SSI_POLLWAIT=y
 # CONFIG_LM3S_MULTICAST - Set to enable multicast frames
 # CONFIG_LM3S_PROMISCUOUS - Set to enable promiscuous mode
 # CONFIG_LM3S_BADCRC - Set to enable bad CRC rejection.
+# CONFIG_LM3S_DUMPPACKET - Dump each packet received/sent to the console.
 #
 CONFIG_LM3S_ETHERNET=y
 CONFIG_LM3S_ETHLEDS=n
@@ -162,6 +163,7 @@ CONFIG_LM3S_ETHNOPAD=n
 CONFIG_LM3S_MULTICAST=n
 CONFIG_LM3S_PROMISCUOUS=n
 CONFIG_LM3S_BADCRC=n
+CONFIG_LM3S_DUMPPACKET=n
 
 #
 # General build options
