@@ -201,9 +201,15 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
 
   fds->priv    = (FAR void *)cb;
 
+#ifdef CONFIG_NET_TCPBACKLOG
+  /* Check for read data or backlogged connection availability now */
+
+  if (!sq_empty(&conn->readahead) || uip_backlogavailable(conn))
+#else
   /* Check for read data availability now */
 
   if (!sq_empty(&conn->readahead))
+#endif
     {
       fds->revents = fds->events & POLLIN;
       if (fds->revents != 0)

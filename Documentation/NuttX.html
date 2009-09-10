@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 09, 2009</p>
+      <p>Last Updated: September 10, 2009</p>
     </td>
   </tr>
 </table>
@@ -1517,6 +1517,10 @@ nuttx-0.4.11 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  extra two bytes of length cause the driver to sometimes read one too many
 	  words from the received FIFO (corrupting the next queued receive packet,
 	  if any).
+	* net/net_poll.c and net/uip/uip_tcpbacklog.c.  Fixed an important race condition
+	  bug in polling for connections.  The logic worked if the poll was inplace
+	  before the connection was received; but the poll failed to awaken if the
+	  connection was already pending in the backlog when poll() was called.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

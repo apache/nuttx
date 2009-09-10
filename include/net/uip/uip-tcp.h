@@ -400,6 +400,11 @@ extern int uip_backlogdestroy(FAR struct uip_conn *conn);
 /* APIs to manage individual backlog actions */
 
 extern int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
+#ifndef CONFIG_DISABLE_POLL
+extern boolean uip_backlogavailable(FAR struct uip_conn *conn);
+#else
+#  define uip_backlogavailable(conn)   (FALSE);
+#endif
 extern FAR struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn);
 extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
 
@@ -407,6 +412,7 @@ extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blc
 #  define uip_backlogcreate(conn,nblg) (-ENOSYS)
 #  define uip_backlogdestroy(conn)     (-ENOSYS)
 #  define uip_backlogadd(conn,blconn)  (-ENOSYS)
+#  define uip_backlogavailable(conn)   (FALSE);
 #  define uip_backlogremove(conn)      (NULL)
 #endif
 

@@ -265,6 +265,25 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
  * Function: uip_backlogremove
  *
  * Description:
+ *  Called from poll().  Before waiting for a new connection, poll will
+ *  call this API to see if there are pending connections in the backlog.
+ *
+ * Assumptions:
+ *   Called from normal user code, but with interrupts disabled,
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+boolean uip_backlogavailable(FAR struct uip_conn *conn)
+{
+  return (conn && conn->backlog && !sq_empty(&conn->backlog->bl_pending));
+}
+#endif
+
+/****************************************************************************
+ * Function: uip_backlogremove
+ *
+ * Description:
  *  Called from accept().  Before waiting for a new connection, accept will
  *  call this API to see if there are pending connections in the backlog.
  *
