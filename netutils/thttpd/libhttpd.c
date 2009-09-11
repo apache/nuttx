@@ -63,6 +63,7 @@
 
 #include "config.h"
 #include "libhttpd.h"
+#include "httpd_alloc.h"
 #include "timers.h"
 #include "tdate_parse.h"
 #include "fdwatch.h"
@@ -222,8 +223,6 @@ static size_t sockaddr_len(httpd_sockaddr *saP);
  */
 
 static pid_t  main_thread;
-static int    str_alloc_count = 0;
-static size_t str_alloc_size  = 0;
 
 /* This is the 'root' of the Filesystem as seen by the HTTP client */
 
@@ -295,10 +294,10 @@ static void free_httpd_server(httpd_server * hs)
     {
       if (hs->hostname)
         {
-          free(hs->hostname);
+          httpd_free(hs->hostname);
         }
 
-      free(hs);
+      httpd_free(hs);
     }
 }
 
@@ -1791,13 +1790,14 @@ static void ls_child(int argc, char **argv)
             {
               maxnames = 100;
               names    = NEW(char, maxnames * (MAXPATHLEN + 1));
-              nameptrs = NEW(char *, maxnames);
+              nameptrs = NEW(char*, maxnames);
             }
           else
             {
+              oldmax    = maxnames;
               maxnames *= 2;
-              names     = RENEW(names, char, maxnames * (MAXPATHLEN + 1));
-              nameptrs  = RENEW(nameptrs, char *, maxnames);
+              names     = RENEW(names, char, oldmax*(MAXPATHLEN+1), maxnames*(MAXPATHLEN + 1));
+              nameptrs  = RENEW(nameptrs, char*, oldmax, maxnames);
             }
 
           if (!names || !nameptrs)
@@ -2756,7 +2756,7 @@ static int cgi_child(int argc, char **argv)
       goto errout_with_descriptors;
     }
 
-  buffer = (char*)malloc(CONFIG_THTTPD_IOBUFFERSIZE);
+  buffer = (char*)httpd_malloc(CONFIG_THTTPD_IOBUFFERSIZE);
   if (!buffer)
     {
       ndbg("buffer allocation failed\n");
@@ -2837,9 +2837,9 @@ errout_with_watch:
   /* Free memory */
 
 errout_with_buffer:
-  free(buffer);
+  httpd_free(buffer);
 errout_with_header:
-  free(hdr.buffer);
+  httpd_free(hdr.buffer);
 
   /* Close all descriptors */
 
@@ -3219,34 +3219,6 @@ void httpd_clear_ndelay(int fd)
         {
           (void)fcntl(fd, F_SETFL, newflags);
         }
-    }
-}
-
-void httpd_realloc_str(char **strP, size_t * maxsizeP, size_t size)
-{
-  if (*maxsizeP == 0)
-    {
-      *maxsizeP       = MAX(CONFIG_THTTPD_IOBUFFERSIZE, size + CONFIG_THTTPD_REALLOCINCR);
-      *strP           = NEW(char, *maxsizeP + 1);
-      ++str_alloc_count;
-      str_alloc_size += *maxsizeP;
-    }
-  else if (size > *maxsizeP)
-    {
-      str_alloc_size -= *maxsizeP;
-      *maxsizeP       = MAX(*maxsizeP * 2, size * 5 / 4);
-      *strP = RENEW(*strP, char, *maxsizeP + 1);
-      str_alloc_size += *maxsizeP;
-    }
-  else
-    {
-      return;
-    }
-
-  if (!*strP)
-    {
-      ndbg("out of memory reallocating a string to %d bytes\n", *maxsizeP);
-      exit(1);
     }
 }
 
@@ -4145,21 +4117,21 @@ void httpd_destroy_conn(httpd_conn *hc)
 {
   if (hc->initialized)
     {
-      free((void *)hc->read_buf);
-      free((void *)hc->decodedurl);
-      free((void *)hc->origfilename);
-      free((void *)hc->expnfilename);
-      free((void *)hc->encodings);
-      free((void *)hc->pathinfo);
-      free((void *)hc->query);
-      free((void *)hc->accept);
-      free((void *)hc->accepte);
-      free((void *)hc->reqhost);
-      free((void *)hc->hostdir);
-      free((void *)hc->remoteuser);
-      free((void *)hc->buffer);
+      httpd_free((void *)hc->read_buf);
+      httpd_free((void *)hc->decodedurl);
+      httpd_free((void *)hc->origfilename);
+      httpd_free((void *)hc->expnfilename);
+      httpd_free((void *)hc->encodings);
+      httpd_free((void *)hc->pathinfo);
+      httpd_free((void *)hc->query);
+      httpd_free((void *)hc->accept);
+      httpd_free((void *)hc->accepte);
+      httpd_free((void *)hc->reqhost);
+      httpd_free((void *)hc->hostdir);
+      httpd_free((void *)hc->remoteuser);
+      httpd_free((void *)hc->buffer);
 #ifdef CONFIG_THTTPD_TILDE_MAP2
-      free((void *)hc->altdir);
+      httpd_free((void *)hc->altdir);
 #endif                                 /*CONFIG_THTTPD_TILDE_MAP2 */
       hc->initialized = 0;
     }
@@ -4560,18 +4532,5 @@ int httpd_write(int fd, const void *buf, size_t nbytes)
   return ntotal;
 }
 
-/* Generate debugging statistics */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-void httpd_logstats(long secs)
-{
-  if (str_alloc_count > 0)
-    {
-      ndbg("  libhttpd - %d strings allocated, %lu bytes (%g bytes/str)\n",
-           str_alloc_count, (unsigned long)str_alloc_size,
-           (float)str_alloc_size / str_alloc_count);
-    }
-}
-#endif
 #endif /* CONFIG_THTTPD */
 

@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include "config.h"
+#include "httpd_alloc.h"
 #include "fdwatch.h"
 
 #ifdef CONFIG_THTTPD
@@ -140,19 +141,19 @@ struct fdwatch_s *fdwatch_initialize(int nfds)
 
   fw->nfds = nfds;
 
-  fw->client = (void**)malloc(sizeof(void*) * nfds);
+  fw->client = (void**)httpd_malloc(sizeof(void*) * nfds);
   if (!fw->client)
     {
       goto errout_with_allocations;
     }
 
-  fw->pollfds = (struct pollfd*)malloc(sizeof(struct pollfd) * nfds);
+  fw->pollfds = (struct pollfd*)httpd_malloc(sizeof(struct pollfd) * nfds);
   if (!fw->pollfds)
     {
       goto errout_with_allocations;
     }
 
-  fw->ready = (uint8*)malloc(sizeof(uint8) * nfds);
+  fw->ready = (uint8*)httpd_malloc(sizeof(uint8) * nfds);
   if (!fw->ready)
     {
       goto errout_with_allocations;
@@ -175,20 +176,20 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
       fdwatch_dump("Uninitializing:", fw);
       if (fw->client)
         {
-          free(fw->client);
+          httpd_free(fw->client);
         }
 
       if (fw->pollfds)
         {
-          free(fw->pollfds);
+          httpd_free(fw->pollfds);
         }
 
       if (fw->ready)
         {
-          free(fw->ready);
+          httpd_free(fw->ready);
         }
 
-      free(fw);
+      httpd_free(fw);
     }
 }
 

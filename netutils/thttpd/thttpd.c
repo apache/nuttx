@@ -59,6 +59,7 @@
 #include "config.h"
 #include "fdwatch.h"
 #include "libhttpd.h"
+#include "httpd_alloc.h"
 #include "timers.h"
 
 #ifdef CONFIG_THTTPD
@@ -163,7 +164,7 @@ static void shut_down(void)
       if (connects[cnum].hc != NULL)
         {
           httpd_destroy_conn(connects[cnum].hc);
-          free((void *)connects[cnum].hc);
+          httpd_free((void *)connects[cnum].hc);
           connects[cnum].hc = NULL;
         }
     }
@@ -180,7 +181,7 @@ static void shut_down(void)
     }
 
   tmr_destroy();
-  free((void *)connects);
+  httpd_free((void *)connects);
 }
 
 static int handle_newconnect(struct timeval *tv, int listen_fd)
@@ -681,7 +682,7 @@ static void logstats(struct timeval *nowP)
   ndbg("up %ld seconds, stats for %ld seconds\n", up_secs, stats_secs);
 
   thttpd_logstats(stats_secs);
-  httpd_logstats(stats_secs);
+  httpd_memstats();
   fdwatch_logstats(fw, stats_secs);
   tmr_logstats(stats_secs);
 }

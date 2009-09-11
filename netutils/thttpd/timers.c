@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <debug.h>
 
+#include "httpd_alloc.h"
 #include "timers.h"
 
 /****************************************************************************
@@ -202,7 +203,7 @@ Timer *tmr_create(struct timeval *nowP, TimerProc * timer_proc,
     }
   else
     {
-      t = (Timer*)malloc(sizeof(Timer));
+      t = (Timer*)httpd_malloc(sizeof(Timer));
       if (!t)
         {
           return NULL;
@@ -352,7 +353,7 @@ void tmr_cleanup(void)
       t = free_timers;
       free_timers = t->next;
       free_count--;
-      free((void*)t);
+      httpd_free((void*)t);
       alloc_count--;
     }
 }

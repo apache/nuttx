@@ -34,5 +34,5 @@
 ############################################################################
 
 THTTPD_ASRCS =
-THTTPD_CSRCS = thttpd.c libhttpd.c timers.c fdwatch.c tdate_parse.c
+THTTPD_CSRCS = thttpd.c libhttpd.c httpd_alloc.c timers.c fdwatch.c tdate_parse.c
 

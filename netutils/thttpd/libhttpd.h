@@ -65,9 +65,6 @@
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
-#define NEW(t,n) ((t*) malloc( sizeof(t) * (n) ))
-#define RENEW(o,t,n) ((t*) realloc( (void*) o, sizeof(t) * (n) ))
-
 /* Enable special instrumentation to track down "400 Bad Request" problems */
 
 #undef CONFIG_THTTPD_BADREQUEST /* Define to enable "Bad Request" instrumentation */
@@ -327,10 +324,6 @@ extern const char httpd_err408form[];
 
 extern const char *httpd_method_str(int method);
 
-/* Reallocate a string. */
-
-extern void httpd_realloc_str(char **strP, size_t *maxsizeP, size_t size);
-
 /* Format a network socket to a string representation. */
 
 extern char *httpd_ntoa(httpd_sockaddr * saP);
@@ -342,14 +335,6 @@ extern void httpd_set_ndelay(int fd);
 /* Clear NDELAY mode on a socket. */
 
 extern void httpd_clear_ndelay(int fd);
-
-/* Generate debugging statistics syslog message. */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-extern void httpd_logstats(long secs);
-#else
-#  define  httpd_logstats(secs)
-#endif
 
 /* Read to requested buffer, accounting for interruptions and EOF */
 

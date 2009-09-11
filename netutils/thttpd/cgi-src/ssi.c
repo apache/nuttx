@@ -499,7 +499,6 @@ static void do_echo(FILE *instream, char *vfilename, char *filename,
                      char *directive, char *tag, char *val)
 {
   char *cp;
-  time_t t;
 
   /* Prints the value of one of the include variables.  Any dates are
    * printed subject to the currently configured g_timeformat.  The only valid
@@ -550,7 +549,7 @@ static void do_echo(FILE *instream, char *vfilename, char *filename,
           /* Same as DATE_LOCAL but in Greenwich mean time. */
 
           gettimeofday(&tm, NULL);
-          show_time(t, 1);
+          show_time(tm.tv_sec, 1);
         }
       else if (strcmp(val, "LAST_MODIFIED") == 0)
         {
