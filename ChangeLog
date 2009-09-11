@@ -860,3 +860,6 @@
 	  bug in polling for connections.  The logic worked if the poll was inplace
 	  before the connection was received; but the poll failed to awaken if the
 	  connection was already pending in the backlog when poll() was called.
+	* net/net_close.c.  Fixed another important TCP/IP race condition bug:  If
+	  the host closes the TCP connection just before the target calls close(), then
+	  the close operation may hang indefinitely!

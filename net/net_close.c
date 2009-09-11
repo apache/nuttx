@@ -158,30 +158,35 @@ static inline void netclose_disconnect(FAR struct socket *psock)
     {
        struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
 
-       /* Set up to receive TCP data event callbacks */
+       /* Check for the case where the host beat us and disconnected first */
 
-       state.cl_cb = uip_tcpcallbackalloc(conn);
-       if (state.cl_cb)
+       if (conn->tcpstateflags == UIP_ESTABLISHED)
          {
-           state.cl_psock       = psock;
-           sem_init(&state.cl_sem, 0, 0);
+           /* Set up to receive TCP data event callbacks */
 
-           state.cl_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT;
-           state.cl_cb->priv    = (void*)&state;
-           state.cl_cb->event   = netclose_interrupt;
+           state.cl_cb = uip_tcpcallbackalloc(conn);
+           if (state.cl_cb)
+             {
+               state.cl_psock       = psock;
+               sem_init(&state.cl_sem, 0, 0);
 
-           /* Notify the device driver of the availaibilty of TX data */
+               state.cl_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT;
+               state.cl_cb->priv    = (void*)&state;
+               state.cl_cb->event   = netclose_interrupt;
 
-           netdev_txnotify(&conn->ripaddr);
+              /* Notify the device driver of the availaibilty of TX data */
 
-           /* Wait for the disconnect event */
+               netdev_txnotify(&conn->ripaddr);
 
-           (void)sem_wait(&state.cl_sem);
+               /* Wait for the disconnect event */
 
-           /* We are now disconnected */
+               (void)sem_wait(&state.cl_sem);
 
-           sem_destroy(&state.cl_sem);
-           uip_tcpcallbackfree(conn, state.cl_cb);
+               /* We are now disconnected */
+
+               sem_destroy(&state.cl_sem);
+               uip_tcpcallbackfree(conn, state.cl_cb);
+            }
         }
     }
 

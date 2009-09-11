@@ -166,6 +166,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
                * least queue it it for acceptance).
                */
 
+              conn->tcpstateflags = UIP_ESTABLISHED;
               if (uip_accept(dev, conn, tmp16) != OK)
                 {
                   /* No, then we have to give the connection back */
