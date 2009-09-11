@@ -144,8 +144,12 @@
 #    define CONFIG_THTTPD_IOBUFFERSIZE 256
 #  endif
 
+#  ifndef CONFIG_THTTPD_MINSTRSIZE
+#   define CONFIG_THTTPD_MINSTRSIZE 64
+#  endif
+
 #  ifndef CONFIG_THTTPD_REALLOCINCR
-#    define CONFIG_THTTPD_REALLOCINCR 128
+#    define CONFIG_THTTPD_REALLOCINCR 64
 #  endif
 
 #  ifndef CONFIG_THTTPD_MAXREALLOC
@@ -153,7 +157,7 @@
 #  endif
 
 #  if CONFIG_THTTPD_IOBUFFERSIZE > 65535
-#    error "Can't use uint16 for buffer"
+#    error "Can't use uint16 for buffer size"
 #  endif
 
 /* A list of index filenames to check. The files are searched for in this order. */

@@ -139,7 +139,7 @@ void httpd_realloc_str(char **pstr, size_t *maxsize, size_t size)
   size_t oldsize;
   if (*maxsize == 0)
     {
-      *maxsize = MAX(CONFIG_THTTPD_IOBUFFERSIZE, size + CONFIG_THTTPD_REALLOCINCR);
+      *maxsize = MAX(CONFIG_THTTPD_MINSTRSIZE, size + CONFIG_THTTPD_REALLOCINCR);
       *pstr    = NEW(char, *maxsize + 1);
     }
   else if (size > *maxsize)
