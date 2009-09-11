@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_listen.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * A direct leverage of logic from uIP which also has b BSD style license
@@ -256,7 +256,7 @@ int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16 portno)
            * may be waiting on poll()/select() that the connection is available.
            */
 
-          ret =  uip_backlogadd(listener, conn);
+          ret = uip_backlogadd(listener, conn);
           if (ret == OK)
             {
               (void)uip_tcpcallback(dev, listener, UIP_BACKLOG);

@@ -161,7 +161,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
           conn = uip_tcpaccept(pbuf);
           if (conn)
             {
-              /* The connection structure was successfully allocated.  Now see
+              /* The connection structure was successfully allocated.  Now see if
                * there is an application waiting to accept the connection (or at
                * least queue it it for acceptance).
                */

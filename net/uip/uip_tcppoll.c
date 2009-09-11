@@ -2,7 +2,7 @@
  * net/uip/uip_tcppoll.c
  * Poll for the availability of TCP TX data
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -97,7 +97,7 @@ void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
   uint8 result;
 
   /* Verify that the connection is established and if the connection has
-   * oustanding (unacknowledged) sent data.
+   * no outstanding (unacknowledged) sent data.
    */
 
   if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED &&

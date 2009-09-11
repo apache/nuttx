@@ -297,7 +297,7 @@ int net_close(int sockfd)
   return OK;
 
 errout:
-  *get_errno_ptr() = err;
+  errno = err;
   return ERROR;
 }
 

@@ -60,7 +60,11 @@
 
 static Timer *timers[HASH_SIZE];
 static Timer *free_timers;
-static int alloc_count, active_count, free_count;
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+static int alloc_count;
+static int active_count;
+static int free_count;
+#endif
 
 /****************************************************************************
  * Public Data
@@ -72,7 +76,7 @@ ClientData JunkClientData;
  * Private Functions
  ****************************************************************************/
 
-static unsigned int hash(Timer *t)
+static unsigned int hash(Timer *tmr)
 {
   /* We can hash on the trigger time, even though it can change over the
    * life of a timer via the periodic bit.
@@ -80,97 +84,97 @@ static unsigned int hash(Timer *t)
    * the hash and moves the timer to the appropriate list.
    */
 
-  return ((unsigned int)t->time.tv_sec ^
-          (unsigned int)t->time.tv_usec) % HASH_SIZE;
+  return ((unsigned int)tmr->time.tv_sec ^
+          (unsigned int)tmr->time.tv_usec) % HASH_SIZE;
 }
 
-static void l_add(Timer * t)
+static void l_add(Timer *tmr)
 {
-  int h = t->hash;
-  register Timer *t2;
-  register Timer *t2prev;
+  int h = tmr->hash;
+  register Timer *tmr2;
+  register Timer *tmr2prev;
 
-  t2 = timers[h];
-  if (t2 == NULL)
+  tmr2 = timers[h];
+  if (tmr2 == NULL)
     {
       /* The list is empty. */
-      timers[h] = t;
-      t->prev = t->next = NULL;
+      timers[h] = tmr;
+      tmr->prev = tmr->next = NULL;
     }
   else
     {
-      if (t->time.tv_sec < t2->time.tv_sec ||
-          (t->time.tv_sec == t2->time.tv_sec &&
-           t->time.tv_usec <= t2->time.tv_usec))
+      if (tmr->time.tv_sec < tmr2->time.tv_sec ||
+          (tmr->time.tv_sec == tmr2->time.tv_sec &&
+           tmr->time.tv_usec <= tmr2->time.tv_usec))
         {
           /* The new timer goes at the head of the list. */
 
-          timers[h] = t;
-          t->prev = NULL;
-          t->next = t2;
-          t2->prev = t;
+          timers[h] = tmr;
+          tmr->prev = NULL;
+          tmr->next = tmr2;
+          tmr2->prev = tmr;
         }
       else
         {
           /* Walk the list to find the insertion point. */
 
-          for (t2prev = t2, t2 = t2->next; t2 != NULL;
-               t2prev = t2, t2 = t2->next)
+          for (tmr2prev = tmr2, tmr2 = tmr2->next; tmr2 != NULL;
+               tmr2prev = tmr2, tmr2 = tmr2->next)
             {
-              if (t->time.tv_sec < t2->time.tv_sec ||
-                  (t->time.tv_sec == t2->time.tv_sec &&
-                   t->time.tv_usec <= t2->time.tv_usec))
+              if (tmr->time.tv_sec < tmr2->time.tv_sec ||
+                  (tmr->time.tv_sec == tmr2->time.tv_sec &&
+                   tmr->time.tv_usec <= tmr2->time.tv_usec))
                 {
                   /* Found it. */
-                  t2prev->next = t;
-                  t->prev = t2prev;
-                  t->next = t2;
-                  t2->prev = t;
+                  tmr2prev->next = tmr;
+                  tmr->prev = tmr2prev;
+                  tmr->next = tmr2;
+                  tmr2->prev = tmr;
                   return;
                 }
             }
 
           /* Oops, got to the end of the list.  Add to tail. */
 
-          t2prev->next = t;
-          t->prev = t2prev;
-          t->next = NULL;
+          tmr2prev->next = tmr;
+          tmr->prev = tmr2prev;
+          tmr->next = NULL;
         }
     }
 }
 
-static void l_remove(Timer * t)
+static void l_remove(Timer *tmr)
 {
-  int h = t->hash;
+  int h = tmr->hash;
 
-  if (t->prev == NULL)
+  if (tmr->prev == NULL)
     {
-      timers[h] = t->next;
+      timers[h] = tmr->next;
     }
   else
     {
-      t->prev->next = t->next;
+      tmr->prev->next = tmr->next;
     }
 
-  if (t->next != NULL)
+  if (tmr->next != NULL)
     {
-      t->next->prev = t->prev;
+      tmr->next->prev = tmr->prev;
     }
 }
 
-static void l_resort(Timer * t)
+static void l_resort(Timer *tmr)
 {
   /* Remove the timer from its old list. */
 
-  l_remove(t);
+  l_remove(tmr);
 
   /* Recompute the hash. */
 
-  t->hash = hash(t);
+  tmr->hash = hash(tmr);
 
   /* And add it back in to its new list, sorted correctly. */
 
-  l_add(t);
+  l_add(tmr);
 }
 
 /****************************************************************************
@@ -187,66 +191,78 @@ void tmr_init(void)
     }
 
   free_timers = NULL;
-  alloc_count = active_count = free_count = 0;
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+  alloc_count  = 0;
+  active_count = 0;
+  free_count   = 0;
+#endif
 }
 
-Timer *tmr_create(struct timeval *nowP, TimerProc * timer_proc,
+Timer *tmr_create(struct timeval *now, TimerProc *timer_proc,
                   ClientData client_data, long msecs, int periodic)
 {
-  Timer *t;
+  Timer *tmr;
 
   if (free_timers != NULL)
     {
-      t = free_timers;
-      free_timers = t->next;
+      tmr = free_timers;
+      free_timers = tmr->next;
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
       --free_count;
+#endif
     }
   else
     {
-      t = (Timer*)httpd_malloc(sizeof(Timer));
-      if (!t)
+      tmr = (Timer*)httpd_malloc(sizeof(Timer));
+      if (!tmr)
         {
           return NULL;
         }
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
       alloc_count++;
+#endif
     }
 
-  t->timer_proc  = timer_proc;
-  t->client_data = client_data;
-  t->msecs       = msecs;
-  t->periodic    = periodic;
+  tmr->timer_proc  = timer_proc;
+  tmr->client_data = client_data;
+  tmr->msecs       = msecs;
+  tmr->periodic    = periodic;
 
-  if (nowP != NULL)
+  if (now != NULL)
     {
-      t->time = *nowP;
+      tmr->time = *now;
     }
   else
     {
-      (void)gettimeofday(&t->time, NULL);
+      (void)gettimeofday(&tmr->time, NULL);
     }
 
-  t->time.tv_sec  += msecs / 1000L;
-  t->time.tv_usec += (msecs % 1000L) * 1000L;
-  if (t->time.tv_usec >= 1000000L)
+  tmr->time.tv_sec  += msecs / 1000L;
+  tmr->time.tv_usec += (msecs % 1000L) * 1000L;
+  if (tmr->time.tv_usec >= 1000000L)
     {
-      t->time.tv_sec  += t->time.tv_usec / 1000000L;
-      t->time.tv_usec %= 1000000L;
+      tmr->time.tv_sec  += tmr->time.tv_usec / 1000000L;
+      tmr->time.tv_usec %= 1000000L;
     }
-  t->hash = hash(t);
+  tmr->hash = hash(tmr);
 
   /* Add the new timer to the proper active list. */
 
-  l_add(t);
-  ++active_count;
-  return t;
+  l_add(tmr);
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+  active_count++;
+#endif
+
+  nvdbg("Return: %p\n", tmr);
+  return tmr;
 }
 
-long tmr_mstimeout(struct timeval *nowP)
+long tmr_mstimeout(struct timeval *now)
 {
   int h;
   int gotone;
   long msecs, m;
-  register Timer *t;
+  register Timer *tmr;
 
   gotone = 0;
   msecs  = 0;
@@ -257,11 +273,11 @@ long tmr_mstimeout(struct timeval *nowP)
 
   for (h = 0; h < HASH_SIZE; ++h)
     {
-      t = timers[h];
-      if (t != NULL)
+      tmr = timers[h];
+      if (tmr != NULL)
         {
-          m = (t->time.tv_sec - nowP->tv_sec) * 1000L +
-            (t->time.tv_usec - nowP->tv_usec) / 1000L;
+          m = (tmr->time.tv_sec - now->tv_sec) * 1000L +
+            (tmr->time.tv_usec - now->tv_usec) / 1000L;
           if (!gotone)
             {
               msecs = m;
@@ -287,74 +303,86 @@ long tmr_mstimeout(struct timeval *nowP)
   return msecs;
 }
 
-void tmr_run(struct timeval *nowP)
+void tmr_run(struct timeval *now)
 {
   int h;
-  Timer *t;
+  Timer *tmr;
   Timer *next;
 
   for (h = 0; h < HASH_SIZE; ++h)
-    for (t = timers[h]; t != NULL; t = next)
-      {
-        next = t->next;
+    {
+      for (tmr = timers[h]; tmr != NULL; tmr = next)
+        {
+          next = tmr->next;
 
-        /* Since the lists are sorted, as soon as we find a timer  * that isn't 
-         * ready yet, we can go on to the next list
-         */
+          /* Since the lists are sorted, as soon as we find a timer  * that isn'tmr 
+           * ready yet, we can go on to the next list
+           */
 
-        if (t->time.tv_sec > nowP->tv_sec ||
-            (t->time.tv_sec == nowP->tv_sec && t->time.tv_usec > nowP->tv_usec))
-          {
-            break;
-          }
+          if (tmr->time.tv_sec > now->tv_sec ||
+              (tmr->time.tv_sec == now->tv_sec && tmr->time.tv_usec > now->tv_usec))
+            {
+              break;
+            }
 
-        (t->timer_proc)(t->client_data, nowP);
-        if (t->periodic)
-          {
-            /* Reschedule. */
+          (tmr->timer_proc)(tmr->client_data, now);
+          if (tmr->periodic)
+            {
+              /* Reschedule. */
 
-            t->time.tv_sec += t->msecs / 1000L;
-            t->time.tv_usec += (t->msecs % 1000L) * 1000L;
-            if (t->time.tv_usec >= 1000000L)
-              {
-                t->time.tv_sec += t->time.tv_usec / 1000000L;
-                t->time.tv_usec %= 1000000L;
-              }
-            l_resort(t);
-          }
-        else
-          {
-            tmr_cancel(t);
-          }
-      }
+              tmr->time.tv_sec += tmr->msecs / 1000L;
+              tmr->time.tv_usec += (tmr->msecs % 1000L) * 1000L;
+              if (tmr->time.tv_usec >= 1000000L)
+                {
+                  tmr->time.tv_sec += tmr->time.tv_usec / 1000000L;
+                  tmr->time.tv_usec %= 1000000L;
+                }
+              l_resort(tmr);
+            }
+          else
+            {
+              tmr_cancel(tmr);
+            }
+        }
+    }
 }
 
-void tmr_cancel(Timer * t)
+void tmr_cancel(Timer *tmr)
 {
+  nvdbg("tmr: %p\n", tmr);
+
   /* Remove it from its active list. */
 
-  l_remove(t);
+  l_remove(tmr);
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
   active_count--;
+#endif
 
   /* And put it on the free list. */
 
-  t->next     = free_timers;
-  free_timers = t;
+  tmr->next   = free_timers;
+  free_timers = tmr;
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
   free_count++;
-  t->prev     = NULL;
+#endif
+  tmr->prev   = NULL;
 }
 
 void tmr_cleanup(void)
 {
-  Timer *t;
+  Timer *tmr;
 
   while (free_timers != NULL)
     {
-      t = free_timers;
-      free_timers = t->next;
+      tmr = free_timers;
+      free_timers = tmr->next;
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
       free_count--;
-      httpd_free((void*)t);
+#endif
+      httpd_free((void*)tmr);
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
       alloc_count--;
+#endif
     }
 }
 

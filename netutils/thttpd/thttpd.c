@@ -565,8 +565,7 @@ static void clear_connection(struct connect_s *conn, struct timeval *tv)
       conn->linger_timer      = NULL;
       conn->hc->should_linger = FALSE;
     }
-
-  if (conn->hc->should_linger)
+  else if (conn->hc->should_linger)
     {
       fdwatch_del_fd(fw, conn->hc->conn_fd);
       conn->conn_state = CNST_LINGERING;
@@ -893,14 +892,7 @@ int thttpd_main(int argc, char **argv)
           if (conn)
             {
               hc = conn->hc;
-              if (!fdwatch_check_fd(fw, hc->conn_fd))
-                {
-                  /* Something went wrong */
-
-                  nvdbg("Clearing connection\n");
-                  clear_connection(conn, &tv);
-                }
-              else
+              if (fdwatch_check_fd(fw, hc->conn_fd))
                 {
                   nvdbg("Handle conn_state %d\n", conn->conn_state);
                   switch (conn->conn_state)

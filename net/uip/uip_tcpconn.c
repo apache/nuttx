@@ -347,7 +347,7 @@ void uip_tcpfree(struct uip_conn *conn)
  *
  * Description:
  *   Find a connection structure that is the appropriate
- *   connection to be used withi the provided TCP/IP header
+ *   connection to be used with the provided TCP/IP header
  *
  * Assumptions:
  *   This function is called from UIP logic at interrupt level

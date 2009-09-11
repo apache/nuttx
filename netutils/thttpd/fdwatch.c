@@ -285,9 +285,12 @@ int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
         {
           /* Is there activity on this descriptor? */
 
-          if (fw->pollfds[i].revents & (POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL))
+          if (fw->pollfds[i].revents & (POLLIN | POLLERR | POLLHUP | POLLNVAL))
             {
               /* Yes... save it in a shorter list */
+
+              nvdbg("pollndx: %d fd: %d revents: %04x\n",
+                    i, fw->pollfds[i].fd, fw->pollfds[i].revents);
 
               fw->ready[fw->nactive++] = fw->pollfds[i].fd;
               if (fw->nactive == ret)
