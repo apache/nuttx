@@ -597,7 +597,7 @@ static int lm3s_uiptxpoll(struct uip_driver_s *dev)
 
       DEBUGASSERT((lm3s_ethin(priv, LM3S_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
       uip_arp_out(&priv->ld_dev);
-      ret =lm3s_transmit(priv);
+      ret = lm3s_transmit(priv);
     }
 
   /* If zero is returned, the polling will continue until all connections have
