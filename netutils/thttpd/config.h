@@ -102,12 +102,12 @@
 #    define CONFIG_THTTPD_CGI_PATH "/mnt/www/cgi-bin"
 #  endif
 
-/* Only CGI programs matching this pattern will be executed.  In fact,
+/* Only CGI programs whose fully expanded pathes match this pattern will be executed.  In fact,
  * if this value is not defined then no CGI logic will be built.
  */
 
 #  ifndef CONFIG_THTTPD_CGI_PATTERN
-#    define CONFIG_THTTPD_CGI_PATTERN "/cgi-bin/*"
+#    define CONFIG_THTTPD_CGI_PATTERN "/mnt/www/cgi-bin/*"
 #  endif
 
 /* These provide the priority and stack size of the CGI child tasks */
