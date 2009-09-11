@@ -207,12 +207,12 @@ typedef struct
 #ifdef CONFIG_THTTPD_TILDE_MAP2
   char *altdir;
   size_t maxaltdir;
-#endif                           /*CONFIG_THTTPD_TILDE_MAP2 */
+#endif
   time_t if_modified_since, range_if;
   size_t contentlength;
   char *type;                  /* not malloc()ed */
 #ifdef CONFIG_THTTPD_VHOST
-  char *vhostname;              /* not malloc()ed */
+  char *vhostname;             /* not malloc()ed */
 #endif
   boolean mime_flag;
   boolean one_one;             /* HTTP/1.1 or better */

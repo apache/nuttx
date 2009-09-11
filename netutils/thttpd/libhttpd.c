@@ -161,10 +161,10 @@ static void strdecode(char *to, char *from);
 static void strencode(char *to, int tosize, char *from);
 #endif
 #ifdef CONFIG_THTTPD_TILDE_MAP1
-static int CONFIG_THTTPD_TILDE_MAP1(httpd_conn *hc);
+static int httpd_tilde_map1(httpd_conn *hc);
 #endif
 #ifdef CONFIG_THTTPD_TILDE_MAP2
-static int CONFIG_THTTPD_TILDE_MAP2(httpd_conn *hc);
+static int httpd_tilde_map2(httpd_conn *hc);
 #endif
 #ifdef CONFIG_THTTPD_VHOST
 static int  vhost_map(httpd_conn *hc);
@@ -1039,12 +1039,12 @@ static void strencode(char *to, int tosize, char *from)
 /* Map a ~username/whatever URL into <prefix>/username. */
 
 #ifdef CONFIG_THTTPD_TILDE_MAP1
-static intCONFIG_THTTPD_TILDE_MAP1(httpd_conn *hc)
+static int httpd_tilde_map1(httpd_conn *hc)
 {
   static char *temp;
   static size_t maxtemp = 0;
   int len;
-  static char *prefix =CONFIG_THTTPD_TILDE_MAP1;
+  static char *prefix = CONFIG_THTTPD_TILDE_MAP1;
 
   len = strlen(hc->expnfilename) - 1;
   httpd_realloc_str(&temp, &maxtemp, len);
@@ -1066,11 +1066,11 @@ static intCONFIG_THTTPD_TILDE_MAP1(httpd_conn *hc)
 /* Map a ~username/whatever URL into <user's homedir>/<postfix>. */
 
 #ifdef CONFIG_THTTPD_TILDE_MAP2
-static intCONFIG_THTTPD_TILDE_MAP2(httpd_conn *hc)
+static int httpd_tilde_map2(httpd_conn *hc)
 {
   static char *temp;
   static size_t maxtemp = 0;
-  static char *postfix =CONFIG_THTTPD_TILDE_MAP2;
+  static char *postfix = CONFIG_THTTPD_TILDE_MAP2;
   char *cp;
   struct passwd *pw;
   char *alt;
@@ -1291,14 +1291,16 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
     }
 #endif
 
-  /* Handle leading /, or . or by copying the default directory into checked */
+  /* Handle leading / or . and relative pathes by copying the default directory into checked */
 
-  if (path[0] == '.' || (path[0] == '/' && strncmp(path, httpd_root, strlen(httpd_root)) != 0))
+  if ((path[0] == '/' && strncmp(path, httpd_root, strlen(httpd_root)) != 0) || path[0] != '/')
     {
-      /* Start out with httpd_root in checked */
+      /* Start out with httpd_root in checked.  Allow space in the reallocation
+       * include NULL terminator and possibly a '/' 
+       */
  
-      checkedlen = strlen(httpd_root) + 1;
-      httpd_realloc_str(&checked, &maxchecked, checkedlen);
+      checkedlen = strlen(httpd_root);
+      httpd_realloc_str(&checked, &maxchecked, checkedlen+2);
       strcpy(checked, httpd_root);
 
       /* Skip over leading '.' */
@@ -1306,6 +1308,14 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
       if (path[0] == '.')
         {
           path++;
+        }
+
+      /* Add '/' to separate relative pathes */
+
+      else if (path[0] != '/')
+        {
+          checked[checkedlen]   = '/';
+          checked[checkedlen+1] = '\0';
         }
     }
   else
@@ -1320,7 +1330,7 @@ static char *expand_filename(char *path, char **restP, boolean tildemapped)
   /* Copy the whole filename (minus the leading '.') into rest. */
 
   restlen = strlen(path);
-  httpd_realloc_str(&rest, &maxrest, restlen);
+  httpd_realloc_str(&rest, &maxrest, restlen+1);
   (void)strcpy(rest, path);
 
   /* trim trailing slash */
@@ -4012,19 +4022,19 @@ int httpd_parse_request(httpd_conn *hc)
   if (hc->expnfilename[0] == '~')
     {
 #ifdef CONFIG_THTTPD_TILDE_MAP1
-      if (!tilde_map_1(hc))
+      if (!httpd_tilde_map1(hc))
         {
           httpd_send_err(hc, 404, err404title, "", err404form, hc->encodedurl);
           return -1;
         }
-#endif                                 /*CONFIG_THTTPD_TILDE_MAP1 */
+#endif
 #ifdef CONFIG_THTTPD_TILDE_MAP2
-      if (!tilde_map_2(hc))
+      if (!httpd_tilde_map2(hc))
         {
           httpd_send_err(hc, 404, err404title, "", err404form, hc->encodedurl);
           return -1;
         }
-#endif                                 /*CONFIG_THTTPD_TILDE_MAP2 */
+#endif
     }
 
   /* Virtual host mapping. */
