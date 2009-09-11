@@ -863,3 +863,6 @@
 	* net/net_close.c.  Fixed another important TCP/IP race condition bug:  If
 	  the host closes the TCP connection just before the target calls close(), then
 	  the close operation may hang indefinitely!
+	* net/net_tcppoll.c.  Removed an unnecessary check for outstanding, un-ACKed
+	  data.  The NuttX socket layer keeps track of ACKs and doesn't need this check;
+	  removing the check should improve write throughput

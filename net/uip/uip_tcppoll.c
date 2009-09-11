@@ -96,12 +96,9 @@ void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
 {
   uint8 result;
 
-  /* Verify that the connection is established and if the connection has
-   * no outstanding (unacknowledged) sent data.
-   */
+  /* Verify that the connection is established */
 
-  if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED &&
-      !uip_outstanding(conn))
+  if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
     {
       /* Set up for the callback */
 
