@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: July 18, 2009</p>
+      <p>Last Updated: September 11, 2009</p>
     </td>
   </tr>
 </table>
@@ -2362,15 +2362,15 @@ extern void up_ledoff(int led);
     <code>CONFIG_THTTPD_SERVER_SOFTWARE</code>: SERVER_SOFTWARE: response
   </li>
   <li>
-    <code>CONFIG_THTTPD_PATH</code>: Server working directory
+    <code>CONFIG_THTTPD_PATH</code>: Server working directory. Default: <code>/mnt/www</code>.
   </li>
   <li>
-    <code>CONFIG_THTTPD_CGI_PATH</code>: Path to CGI executables
+    <code>CONFIG_THTTPD_CGI_PATH</code>: Path to CGI executables.  Default: <code>/mnt/www/cgi-bin</code>.
   </li>
   <li>
-    <code>CONFIG_THTTPD_CGI_PATTERN</code>: Only CGI programs matching this
-    pattern will be executed.  In fact, if this value is not defined
-    then no CGI logic will be built.
+    <code>CONFIG_THTTPD_CGI_PATTERN</code>: Only CGI programs whose expanded paths
+    match this pattern will be executed.  In fact, if this value is not defined
+    then no CGI logic will be built. Default: <code>/mnt/www/cgi-bin/*</code>.
   </li>
   <li>
     <code>CONFIG_THTTPD_CGI_PRIORITY</code>: Provides the priority of CGI child tasks
