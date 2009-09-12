@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 16, 2009)
+NuttX TODO List (Last updated September 12, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -9,7 +9,7 @@ NuttX TODO List (Last updated August 16, 2009)
   (5)  Binary loaders (binfmt/)
  (15)  Network (net/, netutils/)
   (1)  USB (drivers/usbdev)
-  (4)  Libraries (lib/)
+  (5)  Libraries (lib/)
   (8)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
@@ -290,6 +290,10 @@ o Libraries (lib/)
   Description: Need some minimal termios support... at a minimum, enough to
                switch between raw and "normal" modes to support behavior like
                that needed for readline().
+  Status:      Open
+  Priority:    Low
+
+  Description: strftime() and other timing functions do not handle days of the week.
   Status:      Open
   Priority:    Low
 
