@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipe.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,6 +99,7 @@ static uint32 g_pipecreated = 0;
 /****************************************************************************
  * Name: pipe_allocate
  ****************************************************************************/
+
 static inline int pipe_allocate(void)
 {
   int pipeno;
@@ -119,6 +120,7 @@ static inline int pipe_allocate(void)
 /****************************************************************************
  * Name: pipe_free
  ****************************************************************************/
+
 static inline void pipe_free(int pipeno)
 {
   int ret = sem_wait(&g_pipesem);
@@ -132,6 +134,7 @@ static inline void pipe_free(int pipeno)
 /****************************************************************************
  * Name: pipe_close
  ****************************************************************************/
+
 static int pipe_close(FAR struct file *filep)
 {
   struct inode      *inode = filep->f_inode;
@@ -179,6 +182,7 @@ static int pipe_close(FAR struct file *filep)
  *   appropriately.
  *
  ****************************************************************************/
+
 int pipe(int filedes[2])
 {
   struct pipe_dev_s *dev = NULL;

@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
+
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
@@ -206,6 +206,7 @@ int pipecommon_open(FAR struct file *filep)
           /* If this this is the first writer, then the read semaphore indicates the
            * number of readers waiting for the first writer.  Wake them all up.
            */
+
           if (dev->d_nwriters == 1)
             {
               while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
