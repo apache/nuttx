@@ -342,7 +342,7 @@ static void lm3s_ethreset(struct lm3s_driver_s *priv)
   regval  = getreg32(LM3S_SYSCON_RCGC2);
   regval |= (SYSCON_RCGC2_EMAC0|SYSCON_RCGC2_EPHY0);
   putreg32(regval, LM3S_SYSCON_RCGC2);
-  nvdbg("RCGC2: %08x\n", regval);
+  nllvdbg("RCGC2: %08x\n", regval);
 
   /* Put the Ethernet controller into the reset state */
 
@@ -358,7 +358,7 @@ static void lm3s_ethreset(struct lm3s_driver_s *priv)
 
   regval &= ~(SYSCON_SRCR2_EMAC0|SYSCON_SRCR2_EPHY0);
   putreg32(regval, LM3S_SYSCON_SRCR2);
-  nvdbg("SRCR2: %08x\n", regval);
+  nllvdbg("SRCR2: %08x\n", regval);
 
   /* Enable Port F for Ethernet LEDs: LED0=Bit 3; LED1=Bit 2 */
 
@@ -500,7 +500,7 @@ static int lm3s_transmit(struct lm3s_driver_s *priv)
        */
 
       pktlen     = priv->ld_dev.d_len;
-      nvdbg("Sending packet, pktlen: %d\n", pktlen);
+      nllvdbg("Sending packet, pktlen: %d\n", pktlen);
       DEBUGASSERT(pktlen > UIP_LLH_LEN);
 
       dbuf       = priv->ld_dev.d_buf;
@@ -588,7 +588,7 @@ static int lm3s_uiptxpoll(struct uip_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nvdbg("Poll result: d_len=%d\n", priv->ld_dev.d_len);
+  nllvdbg("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
       /* Send the packet.  lm3s_transmit() will return zero if the
@@ -654,7 +654,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 
       regval = lm3s_ethin(priv, LM3S_MAC_DATA_OFFSET);
       pktlen = (int)(regval & 0x0000ffff);
-      nvdbg("Receiving packet, pktlen: %d\n", pktlen);
+      nllvdbg("Receiving packet, pktlen: %d\n", pktlen);
 
       /* Check if the pktlen is valid.  It should be large enough to
        * hold an Ethernet header and small enough to fit entirely in
@@ -667,7 +667,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 
           /* We will have to drop this packet */
 
-          ndbg("Bad packet size dropped (%d)\n", pktlen);
+          nlldbg("Bad packet size dropped (%d)\n", pktlen);
           EMAC_STAT(priv, rx_pktsize);
 
           /* The number of bytes and words left to read is pktlen - 4 (including,
@@ -746,7 +746,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
       if (ETHBUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
-          nvdbg("IP packet received (%02x)\n", ETHBUF->type);
+          nllvdbg("IP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_ip);
 
           uip_arp_ipin();
@@ -764,7 +764,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
         }
       else if (ETHBUF->type == htons(UIP_ETHTYPE_ARP))
         {
-          nvdbg("ARP packet received (%02x)\n", ETHBUF->type);
+          nllvdbg("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);
 
           uip_arp_arpin(&priv->ld_dev);
@@ -781,7 +781,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 #ifdef CONFIG_DEBUG
       else
         {
-          ndbg("Unsupported packet type dropped (%02x)\n", htons(ETHBUF->type));
+          nlldbg("Unsupported packet type dropped (%02x)\n", htons(ETHBUF->type));
           EMAC_STAT(priv, rx_dropped);
         }
 #endif
@@ -935,7 +935,7 @@ static void lm3s_txtimeout(int argc, uint32 arg, ...)
 
   /* Increment statistics */
 
-  ndbg("Tx timeout\n");
+  nlldbg("Tx timeout\n");
   EMAC_STAT(priv, tx_timeouts);
 
   /* Then reset the hardware */
@@ -1015,7 +1015,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
   uint32 div;
   uint16 phyreg;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
+  nlldbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
@@ -1036,7 +1036,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
 
   div = SYSCLK_FREQUENCY / 2 / LM32S_MAX_MDCCLK;
   lm3s_ethout(priv, LM3S_MAC_MDV_OFFSET, div);
-  nvdbg("MDV:   %08x\n", div);
+  nllvdbg("MDV:   %08x\n", div);
 
   /* Then configure the Ethernet Controller for normal operation 
    *
@@ -1048,7 +1048,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
   regval &= ~LM3S_TCTCL_CLRBITS;
   regval |= LM3S_TCTCL_SETBITS;
   lm3s_ethout(priv, LM3S_MAC_TCTL_OFFSET, regval);
-  nvdbg("TCTL:  %08x\n", regval);
+  nllvdbg("TCTL:  %08x\n", regval);
 
   /* Setup the receive control register (Disable multicast frames, disable
    * promiscuous mode, disable bad CRC rejection).
@@ -1058,7 +1058,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
   regval &= ~LM3S_RCTCL_CLRBITS;
   regval |= LM3S_RCTCL_SETBITS;
   lm3s_ethout(priv, LM3S_MAC_RCTL_OFFSET, regval);
-  nvdbg("RCTL:  %08x\n", regval);
+  nllvdbg("RCTL:  %08x\n", regval);
 
   /* Setup the time stamp configuration register */
 
@@ -1070,7 +1070,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
   regval &= ~(MAC_TS_EN);
 #endif
   lm3s_ethout(priv, LM3S_MAC_TS_OFFSET, regval);
-  nvdbg("TS:    %08x\n", regval);
+  nllvdbg("TS:    %08x\n", regval);
 #endif
 
   /* Wait for the link to come up.  This following is not very conservative
@@ -1079,13 +1079,13 @@ static int lm3s_ifup(struct uip_driver_s *dev)
    * set
    */
 
-  ndbg("Waiting for link\n");
+  nlldbg("Waiting for link\n");
   do
     {
       phyreg = lm3s_phyread(priv, MII_MSR);
     }
   while ((phyreg & MII_MSR_LINKSTATUS) == 0);
-  ndbg("Link established\n");
+  nlldbg("Link established\n");
 
   /* Reset the receive FIFO */
 
@@ -1169,7 +1169,7 @@ static int lm3s_ifdown(struct uip_driver_s *dev)
   irqstate_t flags;
   uint32 regval;
 
-  ndbg("Taking down: %d.%d.%d.%d\n",
+  nlldbg("Taking down: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
@@ -1306,7 +1306,7 @@ static inline int lm3s_ethinitialize(int intf)
 
   /* Check if the Ethernet module is present */
 
-  ndbg("Setting up eth%d\n", intf);
+  nlldbg("Setting up eth%d\n", intf);
 
 #if LM3S_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"
