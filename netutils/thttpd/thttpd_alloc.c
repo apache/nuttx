@@ -147,6 +147,25 @@ void httpd_free(FAR void *ptr)
 }
 #endif
 
+#ifdef CONFIG_THTTPD_MEMDEBUG
+FAR char *httpd_strdup(const char *str)
+{
+  FAR char *newstr = strdup(str);
+  if (!newstr)
+    {
+      ndbg("strdup of %s failed\n", str);
+    }
+  else
+    {
+      nvdbg("strdup'ed %s\n", str);
+      g_nallocations++;
+      g_allocated += (strlen(str)+1);
+    }
+  httpd_memstats();
+  return newstr;
+}
+#endif
+
 /* Helpers to implement dynamically allocated strings */
 
 void httpd_realloc_str(char **pstr, size_t *maxsize, size_t size)

@@ -2149,9 +2149,9 @@ FAR httpd_server *httpd_initialize(FAR httpd_sockaddr *sa)
     }
 
 #ifdef CONFIG_THTTPD_HOSTNAME
-  hs->hostname = strdup(CONFIG_THTTPD_HOSTNAME);
+  hs->hostname = httpd_strdup(CONFIG_THTTPD_HOSTNAME);
 #else
-  hs->hostname = strdup(httpd_ntoa(sa));
+  hs->hostname = httpd_strdup(httpd_ntoa(sa));
 #endif
   nvdbg("hostname: %s\n", hs->hostname);
 

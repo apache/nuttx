@@ -41,6 +41,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdlib.h>
+#include <string.h>
 #include "config.h"
 
 #ifdef CONFIG_THTTPD
@@ -55,10 +57,12 @@
 extern FAR void *httpd_malloc(size_t nbytes);
 extern FAR void *httpd_realloc(FAR void *oldptr, size_t oldsize, size_t newsize);
 extern void      httpd_free(FAR void *ptr);
+extern FAR char *httpd_strdup(const char *str);
 #else
 #  define httpd_malloc(n)      malloc(n)
 #  define httpd_realloc(p,o,n) realloc(p,n)
 #  define httpd_free(p)        free(p)
+#  define httpd_strdup(s)      strdup(s)
 #endif
 
 /* Helpers to support allocations in multiples of a type size */

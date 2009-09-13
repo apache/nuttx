@@ -46,6 +46,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <libgen.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -632,8 +633,8 @@ static int cgi_child(int argc, char **argv)
   struct cgi_outbuffer_s hdr;
   struct fdwatch_s *fw;
   char   *buffer;
-  char   *binary;
   char   *directory;
+  char   *dupname;
   boolean indone;
   boolean outdone;
   int     child;
@@ -741,28 +742,19 @@ static int cgi_child(int argc, char **argv)
         }
     }
 
-  /* Split the program into directory and binary, so we can chdir() to the
-   * program's own directory.  This isn't in the CGI 1.1 spec, but it's what 
-   * other HTTP servers do.
+  /* chdir to the directory containing the binary. This isn't in the CGI 1.1
+   * spec, but it's what  other HTTP servers do.
    */
 
-  directory = strdup(hc->expnfilename);
-  if (!directory)
+  dupname = httpd_strdup(hc->expnfilename);
+  if (dupname)
     {
-      binary = hc->expnfilename;  /* ignore errors */
-    }
-  else
-    {
-      binary = strrchr(directory, '/');
-      if (!binary)
+      directory = dirname(dupname);
+      if (directory)
         {
-          binary = hc->expnfilename;
+          (void)chdir(directory); /* ignore errors */
         }
-      else
-        {
-          *binary++ = '\0';
-          (void)chdir(directory);       /* ignore errors */
-        }
+      httpd_free(dupname);
     }
 
   /* Allocate memory for buffering */
@@ -794,7 +786,7 @@ static int cgi_child(int argc, char **argv)
   /* Run the CGI program. */
 
   nllvdbg("Starting CGI\n");
-  child = exec(binary, (FAR const char **)argp, g_thttpdsymtab, g_thttpdnsymbols);
+  child = exec(hc->expnfilename, (FAR const char **)argp, g_thttpdsymtab, g_thttpdnsymbols);
   if (child < 0)
     {
       /* Something went wrong. */
