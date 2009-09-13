@@ -100,8 +100,35 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 static int  cgi_child(int argc, char **argv);
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Used to hold off the main task until the CGI tasks have been configured */
+
+static sem_t g_cgisem;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/* semaphore helpers */
+
+static inline void cgi_semtake(void)
+{
+  while (sem_wait(&g_cgisem) != 0)
+    {
+      /* The only case that an error should occr here is if the wait was\
+       * awakened by a signal.
+       */
+
+      ASSERT(*get_errno_ptr() == EINTR);
+    }
+}
+
+static inline void cgi_semgive(void)
+{
+  sem_post(&g_cgisem);
+}
 
 /* Set up environment variables. Be real careful here to avoid
  * letting malicious clients overrun a buffer.  We don't have
@@ -817,6 +844,7 @@ static int cgi_child(int argc, char **argv)
   outdone = FALSE;
 
   nllvdbg("Interposing\n");
+  cgi_semgive();
   do
     {
       (void)fdwatch(fw, 5000);
@@ -867,6 +895,11 @@ errout_with_descriptors:
   httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
   httpd_write_response(hc);
   nllvdbg("Return %d\n", ret);
+
+  if (err != 0)
+    {
+      cgi_semgive();
+    }
   return err;
 }
 
@@ -879,6 +912,14 @@ int cgi(httpd_conn *hc)
   char arg[16];
   char *argv[1];
   pid_t child;
+  int   retval = ERROR;
+
+  /* Set up a semaphore to hold off the make THTTPD thread until the CGI
+   * threads are configured (basically until the file descriptors are all
+   * dup'ed and can be closed by the main thread.
+   */
+
+  sem_init(&g_cgisem, 0, 0);
 
   if (hc->method == METHOD_GET || hc->method == METHOD_POST)
     {
@@ -887,7 +928,7 @@ int cgi(httpd_conn *hc)
         {
           httpd_send_err(hc, 503, httpd_err503title, "", httpd_err503form,
                          hc->encodedurl);
-          return -1;
+          goto errout_with_sem;
         }
 #endif
       ++hc->hs->cgi_count;
@@ -914,12 +955,15 @@ int cgi(httpd_conn *hc)
           ndbg("task_create: %d\n", errno);
           INTERNALERROR("task_create");
           httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-          return -1;
+          goto errout_with_sem;
         }
 
       ndbg("Started CGI task %d for file '%s'\n", child, hc->expnfilename);
 
-      hc->status        = 200;
+      /* Wait for the CGI threads to become initialized */
+
+      cgi_semtake();
+
       hc->bytes_sent    = CONFIG_THTTPD_CGI_BYTECOUNT;
       hc->should_linger = FALSE;
     }
@@ -927,10 +971,16 @@ int cgi(httpd_conn *hc)
     {
       NOTIMPLEMENTED("CGI");
       httpd_send_err(hc, 501, err501title, "", err501form, httpd_method_str(hc->method));
-      return -1;
+      goto errout_with_sem;
     }
 
-  return 0;
+  /* Successfully started */
+
+  retval = OK;
+
+errout_with_sem:
+  sem_destroy(&g_cgisem);
+  return retval;
 }
 
 #endif /* CONFIG_THTTPD && CONFIG_THTTPD_CGI_PATTERN */
