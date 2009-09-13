@@ -296,11 +296,9 @@ extern int httpd_start_request(httpd_conn *hc, struct timeval *nowP);
 
 extern void httpd_write_response(httpd_conn *hc);
 
-/* Call this to close down a connection and free the data. 
- * If you don't have a current timeval handy just pass in 0.
- */
+/* Call this to close down a connection and free the data. */
 
-extern void httpd_close_conn(httpd_conn *hc, struct timeval *nowP);
+extern void httpd_close_conn(httpd_conn *hc);
 
 /* Call this to de-initialize a connection struct and *really* free the
  * mallocced strings.

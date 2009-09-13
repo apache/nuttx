@@ -51,7 +51,7 @@
 
 /* Allows all memory management calls to be intercepted */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#ifdef CONFIG_THTTPD_MEMDEBUG
 extern FAR void *httpd_malloc(size_t nbytes);
 extern FAR void *httpd_realloc(FAR void *oldptr, size_t oldsize, size_t newsize);
 extern void      httpd_free(FAR void *ptr);
@@ -69,14 +69,6 @@ extern void      httpd_free(FAR void *ptr);
 /* Helpers to implement dynamically allocated strings */
 
 extern void httpd_realloc_str(char **pstr, size_t *maxsizeP, size_t size);
-
-/* Generate debugging statistics */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-extern void httpd_memstats(void);
-#else
-#  define httpd_memstats()
-#endif
 
 #endif /* CONFIG_THTTPD */
 #endif /* __NETUTILS_THTTPD_HTTDP_ALLOC_H */

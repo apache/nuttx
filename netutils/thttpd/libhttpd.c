@@ -213,11 +213,11 @@ static size_t sockaddr_len(httpd_sockaddr *saP);
  * Private Data
  ****************************************************************************/
 
-/* This global keeps track of whether we are in the main process or a
- * sub-process.  The reason is that httpd_write_response() can get called
- * in either context; when it is called from the main process it must use
+/* This global keeps track of whether we are in the main task or a
+ * sub-task.  The reason is that httpd_write_response() can get called
+ * in either context; when it is called from the main task it must use
  * non-blocking I/O to avoid stalling the server, but when it is called
- * from a sub-process it wants to use blocking I/O so that the whole
+ * from a sub-task it wants to use blocking I/O so that the whole
  * response definitely gets written.  So, it checks this variable.  A bit
  * of a hack but it seems to do the right thing.
  */
@@ -1696,7 +1696,7 @@ static void cgi_kill2(ClientData client_data, struct timeval *nowP)
   pid = (pid_t) client_data.i;
   if (kill(pid, SIGKILL) == 0)
     {
-      ndbg("hard-killed CGI process %d\n", pid);
+      ndbg("hard-killed CGI task %d\n", pid);
     }
 }
 
@@ -1707,7 +1707,7 @@ static void cgi_kill(ClientData client_data, struct timeval *nowP)
   pid = (pid_t) client_data.i;
   if (kill(pid, SIGINT) == 0)
     {
-      ndbg("killed CGI process %d\n", pid);
+      ndbg("killed CGI task %d\n", pid);
 
       /* In case this isn't enough, schedule an uncatchable kill. */
 
@@ -1764,7 +1764,7 @@ static void ls_child(int argc, char **argv)
   /* Open a stdio stream so that we can use fprintf, which is more
    * efficient than a bunch of separate write()s.  We don't have to
    * worry about double closes or file descriptor leaks cause we're
-   * in a subprocess.
+   * in a sub-task.
    */
 
   fp = fdopen(hc->conn_fd, "w");
@@ -2065,9 +2065,9 @@ static int ls(httpd_conn *hc)
         }
 
       closedir(dirp);
-      ndbg("spawned indexing process %d for directory '%s'\n", child, hc->expnfilename);
+      ndbg("spawned indexing task %d for directory '%s'\n", child, hc->expnfilename);
 
-      /* Schedule a kill for the child process, in case it runs too long */
+      /* Schedule a kill for the child task, in case it runs too long */
 
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
       client_data.i = child;
@@ -2096,7 +2096,7 @@ static int ls(httpd_conn *hc)
 
 /* Set up environment variables. Be real careful here to avoid
  * letting malicious clients overrun a buffer.  We don't have
- * to worry about freeing stuff since we're a sub-process.
+ * to worry about freeing stuff since we're a sub-task.
  */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
@@ -2343,10 +2343,10 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
       /* Special hack to deal with broken browsers that send a LF or CRLF
        * after POST data, causing TCP resets - we just read and discard up
        * to 2 bytes.  Unfortunately this doesn't fix the problem for CGIs
-       * which avoid the interposer process due to their POST data being
-       * short.  Creating an interposer process for all POST CGIs is
+       * which avoid the interposer task due to their POST data being
+       * short.  Creating an interposer task for all POST CGIs is
        * unacceptably expensive.  The eventual fix will come when interposing
-       * gets integrated into the main loop as a tasklet instead of a process.
+       * gets integrated into the main loop as a tasklet instead of a task.
        */
 
       /* Turn on no-delay mode in case we previously cleared it. */
@@ -2620,7 +2620,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 }
 #endif
 
-/* CGI child process. */
+/* CGI child task. */
 
 #ifdef CONFIG_THTTPD_CGI_PATTERN
 static int cgi_child(int argc, char **argv)
@@ -2645,6 +2645,12 @@ static int cgi_child(int argc, char **argv)
   int     ret;
   int     err = 1;
 
+  /* Use low-level debug out (because the low-level output may survive closing
+   * all file descriptors
+   */
+
+  nllvdbg("Started: %s\n", argv[1]);
+
   /* Update all of the environment variable settings, these will be inherited
    * by the CGI task.
    */
@@ -2659,6 +2665,7 @@ static int cgi_child(int argc, char **argv)
    * stderr and hc->conn_fd
    */
 
+  nllvdbg("Closing all descriptors\n");
   for (fd = 0; fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS); fd++)
     {
        /* Keep stderr open for debug; keep hc->conn_fd open for obvious reasons */
@@ -2672,15 +2679,15 @@ static int cgi_child(int argc, char **argv)
   /* Create pipes that will be interposed between the CGI task's stdin or
    * stdout and the socket.
    *
-   *
    * Setup up the STDIN pipe - a pipe to transfer data received on the
    * socket to the CGI program.
    */
 
+  nllvdbg("Create STDIN pipe\n");
   ret = pipe(pipefd);
   if (ret < 0)
     {
-      ndbg("STDIN pipe: %d\n", errno);
+      nlldbg("STDIN pipe: %d\n", errno);
       goto errout_with_descriptors;
     }
   else
@@ -2692,7 +2699,7 @@ static int cgi_child(int argc, char **argv)
       ret = dup2(pipefd[0], 0);
       if (ret < 0)
         {
-          ndbg("STDIN dup2: %d\n", errno);
+          nlldbg("STDIN dup2: %d\n", errno);
           close(pipefd[1]);
           goto errout_with_descriptors;
         }
@@ -2707,10 +2714,11 @@ static int cgi_child(int argc, char **argv)
 
   if (ret == 0)
     {
+      nllvdbg("Create STDOUT pipe\n");
       ret = pipe(pipefd);
       if (ret < 0)
         {
-          ndbg("STDOUT pipe: %d\n", errno);
+          nlldbg("STDOUT pipe: %d\n", errno);
           goto errout_with_descriptors;
         }
       else
@@ -2722,10 +2730,10 @@ static int cgi_child(int argc, char **argv)
           ret = dup2(pipefd[1], 1);
           if (ret < 0)
             {
-              ndbg("STDOUT dup2: %d\n", errno);
+              nlldbg("STDOUT dup2: %d\n", errno);
               close(pipefd[1]);
               goto errout_with_descriptors;
-             }
+            }
 
           rfd = pipefd[0];
           close(pipefd[1]);
@@ -2762,14 +2770,14 @@ static int cgi_child(int argc, char **argv)
   httpd_realloc_str(&hdr.buffer, &hdr.size, 500);
   if (!hdr.buffer)
     {
-      ndbg("hdr allocation failed\n");
+      nlldbg("hdr allocation failed\n");
       goto errout_with_descriptors;
     }
 
   buffer = (char*)httpd_malloc(CONFIG_THTTPD_IOBUFFERSIZE);
   if (!buffer)
     {
-      ndbg("buffer allocation failed\n");
+      nlldbg("buffer allocation failed\n");
       goto errout_with_header;
     }
 
@@ -2778,28 +2786,29 @@ static int cgi_child(int argc, char **argv)
   fw = fdwatch_initialize(2);
   if (!fw)
     {
-      ndbg("fdwatch allocation failed\n");
+      nlldbg("fdwatch allocation failed\n");
       goto errout_with_buffer;
     }
 
   /* Run the CGI program. */
 
+  nllvdbg("Starting CGI\n");
   child = exec(binary, (FAR const char **)argp, g_thttpdsymtab, g_thttpdnsymbols);
   if (child < 0)
     {
       /* Something went wrong. */
 
-      ndbg("execve %s: %d\n", hc->expnfilename, errno);
+      nlldbg("execve %s: %d\n", hc->expnfilename, errno);
       goto errout_with_watch;
    }
 
-  /* Schedule a kill for the child process, in case it runs too long. */
+  /* Schedule a kill for the child task in case it runs too long. */
 
 #if CONFIG_THTTPD_CGI_TIMELIMIT > 0
   client_data.i = child;
   if (tmr_create(NULL, cgi_kill, client_data, CONFIG_THTTPD_CGI_TIMELIMIT * 1000L, 0) == NULL)
     {
-      ndbg("tmr_create(cgi_kill child) failed\n");
+      nlldbg("tmr_create(cgi_kill child) failed\n");
       goto errout_with_watch;
     }
 #endif
@@ -2814,6 +2823,7 @@ static int cgi_child(int argc, char **argv)
   indone  = FALSE;
   outdone = FALSE;
 
+  nllvdbg("Interposing\n");
   do
     {
       (void)fdwatch(fw, 5000);
@@ -2822,6 +2832,7 @@ static int cgi_child(int argc, char **argv)
         {
           /* Transfer data from the client to the CGI program (POST) */
 
+          nllvdbg("Interpose input\n");
           indone = cgi_interpose_input(hc, wfd, buffer);
           if (indone)
             {
@@ -2833,6 +2844,7 @@ static int cgi_child(int argc, char **argv)
         {
           /* Handle receipt of headers and CGI program response (GET) */
 
+          nllvdbg("Interpose output\n");
           outdone = cgi_interpose_output(hc, rfd, buffer, &hdr);
         }
   }
@@ -2861,6 +2873,7 @@ errout_with_descriptors:
   INTERNALERROR("errout");
   httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
   httpd_write_response(hc);
+  nllvdbg("Return %d\n", ret);
   return err;
 }
 #endif /* CONFIG_THTTPD_CGI_PATTERN */
@@ -2909,7 +2922,7 @@ static int cgi(httpd_conn *hc)
           return -1;
         }
 
-      ndbg("started CGI process %d for file '%s'\n", child, hc->expnfilename);
+      ndbg("Started CGI task %d for file '%s'\n", child, hc->expnfilename);
 
       hc->status        = 200;
       hc->bytes_sent    = CONFIG_THTTPD_CGI_BYTECOUNT;
@@ -3184,7 +3197,7 @@ void httpd_unlisten(httpd_server * hs)
 
 void httpd_write_response(httpd_conn *hc)
 {
-  /* If we are in a sub-process, turn off no-delay mode. */
+  /* If we are in a sub-task, turn off no-delay mode. */
 
   if (main_thread != getpid())
     {
@@ -4108,7 +4121,7 @@ int httpd_parse_request(httpd_conn *hc)
   return 0;
 }
 
-void httpd_close_conn(httpd_conn *hc, struct timeval *nowP)
+void httpd_close_conn(httpd_conn *hc)
 {
   if (hc->file_fd >= 0)
     {

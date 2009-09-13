@@ -60,11 +60,6 @@
 
 static Timer *timers[HASH_SIZE];
 static Timer *free_timers;
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-static int alloc_count;
-static int active_count;
-static int free_count;
-#endif
 
 /****************************************************************************
  * Public Data
@@ -191,11 +186,6 @@ void tmr_init(void)
     }
 
   free_timers = NULL;
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  alloc_count  = 0;
-  active_count = 0;
-  free_count   = 0;
-#endif
 }
 
 Timer *tmr_create(struct timeval *now, TimerProc *timer_proc,
@@ -207,9 +197,6 @@ Timer *tmr_create(struct timeval *now, TimerProc *timer_proc,
     {
       tmr = free_timers;
       free_timers = tmr->next;
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-      --free_count;
-#endif
     }
   else
     {
@@ -218,9 +205,6 @@ Timer *tmr_create(struct timeval *now, TimerProc *timer_proc,
         {
           return NULL;
         }
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-      alloc_count++;
-#endif
     }
 
   tmr->timer_proc  = timer_proc;
@@ -249,9 +233,6 @@ Timer *tmr_create(struct timeval *now, TimerProc *timer_proc,
   /* Add the new timer to the proper active list. */
 
   l_add(tmr);
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  active_count++;
-#endif
 
   nvdbg("Return: %p\n", tmr);
   return tmr;
@@ -354,17 +335,11 @@ void tmr_cancel(Timer *tmr)
   /* Remove it from its active list. */
 
   l_remove(tmr);
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  active_count--;
-#endif
 
   /* And put it on the free list. */
 
   tmr->next   = free_timers;
   free_timers = tmr;
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  free_count++;
-#endif
   tmr->prev   = NULL;
 }
 
@@ -376,13 +351,7 @@ void tmr_cleanup(void)
     {
       tmr = free_timers;
       free_timers = tmr->next;
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-      free_count--;
-#endif
       httpd_free((void*)tmr);
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-      alloc_count--;
-#endif
     }
 }
 
@@ -399,19 +368,3 @@ void tmr_destroy(void)
     }
   tmr_cleanup();
 }
-
-/* Generate debugging statistics. */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-void tmr_logstats(long secs)
-{
-  ndbg("timers - %d allocated, %d active, %d free",
-       alloc_count, active_count, free_count);
-
-  if (active_count + free_count != alloc_count)
-    {
-      ndbg("ERROR: Timer counts don't add up!");
-    }
-}
-#endif
-

@@ -64,10 +64,6 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-static long nwatches = 0;
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -259,10 +255,6 @@ int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
   int ret;
   int i;
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  nwatches++;
-#endif
-
   /* Wait for activity on any of the desciptors.  When poll() returns, ret
    * will hold the number of descriptors with activity (or zero on a timeout
    * or <0 on an error.
@@ -343,20 +335,6 @@ void *fdwatch_get_next_client_data(struct fdwatch_s *fw)
   nvdbg("client_data[%d]: %p\n", fw->next, fw->client[fw->next]);
   return fw->client[fw->next++];
 }
-
-/* Generate debugging statistics ndbg message. */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-void fdwatch_logstats(struct fdwatch_s *fw, long secs)
-{
-  fdwatch_dump("LOG stats:", fw);
-  if (secs > 0)
-    {
-      ndbg("fdwatch - %ld polls (%g/sec)\n", nwatches, (float)nwatches / secs);
-    }
-  nwatches = 0;
-}
-#endif
 
 #endif /* CONFIG_THTTPD */
 

@@ -65,16 +65,41 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#ifdef CONFIG_THTTPD_MEMDEBUG
 static int    g_nallocations = 0;
 static size_t g_allocated    = 0;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* Generate debugging statistics */
+
+#ifdef CONFIG_THTTPD_MEMDEBUG
+void httpd_memstats(void)
+{
+  static struct mallinfo mm;
+
+  ndbg("%d allocations (%lu bytes)\n", g_nallocations, (unsigned long)g_allocated);
+
+  /* Get the current memory usage */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  mm = mallinfo();
+#else
+  (void)mallinfo(&mm);
+#endif
+  ndbg("arena: %08x ordblks: %08x mxordblk: %08x uordblks: %08x fordblks: %08x\n",
+       mm.arena, mm.ordblks, mm.mxordblk, mm.uordblks, mm.fordblks);
+}
 #endif
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#ifdef CONFIG_THTTPD_MEMDEBUG
 FAR void *httpd_malloc(size_t nbytes)
 {
   void *ptr = malloc(nbytes);
@@ -84,20 +109,16 @@ FAR void *httpd_malloc(size_t nbytes)
     }
   else
     {
-#ifdef CONFIG_THTTPD_MEMDEBUG
       nvdbg("Allocated %d bytes at %p\n", nbytes, ptr);
-#endif
       g_nallocations++;
       g_allocated += nbytes;
     }
-#ifdef CONFIG_THTTPD_MEMDEBUG
   httpd_memstats();
-#endif
   return ptr;
 }
 #endif
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#ifdef CONFIG_THTTPD_MEMDEBUG
 FAR void *httpd_realloc(FAR void *oldptr, size_t oldsize, size_t newsize)
 {
   void *ptr = realloc(oldptr, newsize);
@@ -108,27 +129,21 @@ FAR void *httpd_realloc(FAR void *oldptr, size_t oldsize, size_t newsize)
     }
   else
     {
-#ifdef CONFIG_THTTPD_MEMDEBUG
       nvdbg("Re-allocated form %d to %d bytes (from %p to %p)\n",
             oldsize, newsize, oldptr, ptr);
-#endif
       g_allocated += (newsize - oldsize);
     }
-#ifdef CONFIG_THTTPD_MEMDEBUG
   httpd_memstats();
-#endif
   return ptr;
 }
 #endif
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+#ifdef CONFIG_THTTPD_MEMDEBUG
 void httpd_free(FAR void *ptr)
 {
   free(ptr);
-#ifdef CONFIG_THTTPD_MEMDEBUG
   nvdbg("Freed memory at %p\n", ptr);
   httpd_memstats();
-#endif
 }
 #endif
 
@@ -159,30 +174,5 @@ void httpd_realloc_str(char **pstr, size_t *maxsize, size_t size)
       exit(1);
     }
 }
-
-/* Generate debugging statistics */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-void httpd_memstats(void)
-{
-#ifdef CONFIG_THTTPD_MEMDEBUG
-  static struct mallinfo mm;
-#endif
-
-  ndbg("%d allocations (%lu bytes)\n", g_nallocations, (unsigned long)g_allocated);
-
-  /* Get the current memory usage */
-
-#ifdef CONFIG_THTTPD_MEMDEBUG
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  mm = mallinfo();
-#else
-  (void)mallinfo(&mm);
-#endif
-  ndbg("arena: %08x ordblks: %08x mxordblk: %08x uordblks: %08x fordblks: %08x\n",
-       mm.arena, mm.ordblks, mm.mxordblk, mm.uordblks, mm.fordblks);
-#endif
-}
-#endif
 
 #endif /* CONFIG_THTTPD */

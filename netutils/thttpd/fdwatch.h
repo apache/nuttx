@@ -107,11 +107,5 @@ extern int fdwatch_check_fd(struct fdwatch_s *fw, int fd);
 
 extern void *fdwatch_get_next_client_data(struct fdwatch_s *fw);
 
-/* Generate debugging statistics syslog message. */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-extern void fdwatch_logstats(struct fdwatch_s *fw, long secs);
-#endif
-
 #endif /* __NETUTILS_THTTPD_FDWATCH_H */
 

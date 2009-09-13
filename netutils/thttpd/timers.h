@@ -132,13 +132,5 @@ extern void tmr_cleanup(void);
 
 extern void tmr_destroy(void);
 
-/* Generate debugging statistics syslog message. */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-extern void tmr_logstats(long secs);
-#else
-#  define tmr_logstats(secs)
-#endif
-
 #endif /* __NETUTILS_THTTPD_TIMERS_H */
 

@@ -112,13 +112,6 @@ static struct fdwatch_s *fw;
  * Public Data
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-time_t start_time;
-time_t stats_time;
-long   stats_connections;
-off_t  stats_bytes;
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -130,18 +123,10 @@ static void handle_send(struct connect_s *conn, struct timeval *tv);
 static void handle_linger(struct connect_s *conn, struct timeval *tv);
 static void finish_connection(struct connect_s *conn, struct timeval *tv);
 static void clear_connection(struct connect_s *conn, struct timeval *tv);
-static void really_clear_connection(struct connect_s *conn, struct timeval *tv);
+static void really_clear_connection(struct connect_s *conn);
 static void idle(ClientData client_data, struct timeval *nowP);
 static void linger_clear_connection(ClientData client_data, struct timeval *nowP);
 static void occasional(ClientData client_data, struct timeval *nowP);
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-static void logstats(struct timeval *nowP);
-static void thttpd_logstats(long secs);
-#else
-#  define logstats(nowP)
-#  define thttpd_logstats(secs)
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -150,15 +135,12 @@ static void thttpd_logstats(long secs);
 static void shut_down(void)
 {
   int cnum;
-  struct timeval tv;
 
-  (void)gettimeofday(&tv, NULL);
-  logstats(&tv);
   for (cnum = 0; cnum < AVAILABLE_FDS; ++cnum)
     {
       if (connects[cnum].conn_state != CNST_FREE)
         {
-          httpd_close_conn(connects[cnum].hc, &tv);
+          httpd_close_conn(connects[cnum].hc);
         }
 
       if (connects[cnum].hc != NULL)
@@ -267,10 +249,6 @@ static int handle_newconnect(struct timeval *tv, int listen_fd)
 
       httpd_set_ndelay(conn->hc->conn_fd);
       fdwatch_add_fd(fw, conn->hc->conn_fd, conn);
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-      ++stats_connections;
-#endif
     }
 }
 
@@ -520,7 +498,7 @@ static void handle_linger(struct connect_s *conn, struct timeval *tv)
 
   if (ret <= 0)
     {
-      really_clear_connection(conn, tv);
+      really_clear_connection(conn);
     }
 }
 
@@ -583,17 +561,13 @@ static void clear_connection(struct connect_s *conn, struct timeval *tv)
 
   /* Either we are done lingering, we shouldn't linger, or we failed to setup the linger */
 
-  really_clear_connection(conn, tv);
+  really_clear_connection(conn);
 }
 
-static void really_clear_connection(struct connect_s *conn, struct timeval *tv)
+static void really_clear_connection(struct connect_s *conn)
 {
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  stats_bytes += conn->hc->bytes_sent;
-#endif
-
   fdwatch_del_fd(fw, conn->hc->conn_fd);
-  httpd_close_conn(conn->hc, tv);
+  httpd_close_conn(conn->hc);
   if (conn->linger_timer != NULL)
     {
       tmr_cancel(conn->linger_timer);
@@ -645,64 +619,13 @@ static void linger_clear_connection(ClientData client_data, struct timeval *nowP
   nvdbg("Clear connection\n");
   conn = (struct connect_s *) client_data.p;
   conn->linger_timer = NULL;
-  really_clear_connection(conn, nowP);
+  really_clear_connection(conn);
 }
 
 static void occasional(ClientData client_data, struct timeval *nowP)
 {
   tmr_cleanup();
 }
-
-/* Generate debugging statistics ndbg messages for all packages */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-static void logstats(struct timeval *nowP)
-{
-  struct timeval tv;
-  time_t now;
-  long up_secs;
-  long stats_secs;
-
-  if (!nowP)
-    {
-      (void)gettimeofday(&tv, NULL);
-      nowP = &tv;
-    }
-
-  now        = nowP->tv_sec;
-  up_secs    = now - start_time;
-  stats_secs = now - stats_time;
-  if (stats_secs == 0)
-    {
-      stats_secs = 1;             /* fudge */
-    }
-
-  stats_time = now;
-  ndbg("up %ld seconds, stats for %ld seconds\n", up_secs, stats_secs);
-
-  thttpd_logstats(stats_secs);
-  httpd_memstats();
-  fdwatch_logstats(fw, stats_secs);
-  tmr_logstats(stats_secs);
-}
-#endif
-
-/* Generate debugging statistics */
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-static void thttpd_logstats(long secs)
-{
-  if (secs > 0)
-    {
-      ndbg("thttpd - %ld connections (%g/sec) %lld bytes (%g/sec)\n",
-           stats_connections, (float)stats_connections / secs,
-           (sint64) stats_bytes, (float)stats_bytes / secs);
-    }
-
-  stats_connections  = 0;
-  stats_bytes        = 0;
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -799,17 +722,6 @@ int thttpd_main(int argc, char **argv)
       exit(1);
 
     }
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-    {
-      struct timeval ts;
-      gettimeofday(&ts, NULL);
-      start_time         = ts.tv_sec;
-      stats_time         = ts.tv_sec;
-      stats_connections  = 0;
-      stats_bytes        = 0;
-    }
-#endif
 
   /* Initialize our connections table */
 
