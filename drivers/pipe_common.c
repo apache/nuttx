@@ -51,6 +51,9 @@
 #include <debug.h>
 
 #include <nuttx/fs.h>
+#if CONFIG_DEBUG
+#  include <nuttx/arch.h>
+#endif
 
 #include "pipe_common.h"
 
@@ -416,6 +419,20 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
       return -ENODEV;
     }
 #endif
+
+  /* At present, this method cannot be called from interrupt handlers.  That is
+   * because it calls sem_wait (via pipecommon_semtake below) and sem_wait cannot
+   * be called from interrupt level.  This actually happens fairly commonly
+   * IF dbg() is called from interrupt handlers and stdout is being redirected
+   * via a pipe.  In that case, the debug output will try to go out the pipe
+   * (interrupt handlers should use the lldbg() APIs).
+   *
+   * On the other hand, it would be very valuable to be able to feed the pipe
+   * from an interrupt handler!  TODO:  Consider disabling interrupts instead
+   * of taking semaphores so that pipes can be written from interupt handlers
+   */
+
+  DEBUGASSERT(up_interrupt_context() == FALSE)
 
   /* Make sure that we have exclusive access to the device structure */
 
