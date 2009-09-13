@@ -660,16 +660,18 @@ static int cgi_child(int argc, char **argv)
 
   argp = make_argp(hc);
 
-  /* Close all file descriptors (including stdio, stdin, stdout) EXCEPT for
-   * stderr and hc->conn_fd
+  /* Close all file descriptors EXCEPT for stdin, stdout, stderr and
+   * hc->conn_fd.  We'll keep stderr open for error reporting; stdin and
+   * stdout will be closed later by dup2().  Keeping stdin and stdout open
+   * now prevents re-use of fd=0 and 1 by pipe().
    */
 
-  nllvdbg("Closing all descriptors\n");
-  for (fd = 0; fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS); fd++)
+  nllvdbg("Closing descriptors\n");
+  for (fd = 3; fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS); fd++)
     {
-       /* Keep stderr open for debug; keep hc->conn_fd open for obvious reasons */
+       /* Keep hc->conn_fd open for obvious reasons */
 
-       if (fd != 2 && fd != hc->conn_fd)
+       if (fd != hc->conn_fd)
          {
            close(fd);
          }
@@ -940,3 +942,4 @@ int cgi(httpd_conn *hc)
 }
 
 #endif /* CONFIG_THTTPD && CONFIG_THTTPD_CGI_PATTERN */
+
