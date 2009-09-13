@@ -67,6 +67,7 @@
 
 #ifdef CONFIG_THTTPD_MEMDEBUG
 static int    g_nallocations = 0;
+static int    g_nfreed       = 0;
 static size_t g_allocated    = 0;
 #endif
 
@@ -81,7 +82,7 @@ void httpd_memstats(void)
 {
   static struct mallinfo mm;
 
-  ndbg("%d allocations (%lu bytes)\n", g_nallocations, (unsigned long)g_allocated);
+  ndbg("%d allocations (%lu bytes), %d freed\n", g_nallocations, (unsigned long)g_allocated, g_nfreed);
 
   /* Get the current memory usage */
 
@@ -142,6 +143,7 @@ FAR void *httpd_realloc(FAR void *oldptr, size_t oldsize, size_t newsize)
 void httpd_free(FAR void *ptr)
 {
   free(ptr);
+  g_nfreed++;
   nvdbg("Freed memory at %p\n", ptr);
   httpd_memstats();
 }
