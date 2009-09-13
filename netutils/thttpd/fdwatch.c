@@ -47,7 +47,7 @@
 #include <debug.h>
 
 #include "config.h"
-#include "httpd_alloc.h"
+#include "thttpd_alloc.h"
 #include "fdwatch.h"
 
 #ifdef CONFIG_THTTPD

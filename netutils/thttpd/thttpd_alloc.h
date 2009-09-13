@@ -1,5 +1,5 @@
 /****************************************************************************
- * netutils/thttpd/httpd_alloc.h
+ * netutils/thttpd/thttpd_alloc.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

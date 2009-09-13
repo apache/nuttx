@@ -59,7 +59,8 @@
 #include "config.h"
 #include "fdwatch.h"
 #include "libhttpd.h"
-#include "httpd_alloc.h"
+#include "thttpd_alloc.h"
+#include "thttpd_strings.h"
 #include "timers.h"
 
 #ifdef CONFIG_THTTPD

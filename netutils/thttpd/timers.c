@@ -45,7 +45,7 @@
 #include <stdio.h>
 #include <debug.h>
 
-#include "httpd_alloc.h"
+#include "thttpd_alloc.h"
 #include "timers.h"
 
 /****************************************************************************

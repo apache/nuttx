@@ -311,13 +311,6 @@ extern void httpd_destroy_conn(httpd_conn *hc);
 extern void httpd_send_err(httpd_conn *hc, int status, const char *title,
                            const char *extraheads, const char *form, const char *arg);
 
-/* Some error messages. */
-
-extern const char httpd_err400title[];
-extern const char httpd_err400form[];
-extern const char httpd_err408title[];
-extern const char httpd_err408form[];
-
 /* Generate a string representation of a method number. */
 
 extern const char *httpd_method_str(int method);

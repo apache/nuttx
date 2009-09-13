@@ -1,5 +1,5 @@
 /****************************************************************************
- * netutils/thttpd/httpd_alloc.c
+ * netutils/thttpd/thttpd_alloc.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -45,7 +45,7 @@
 #include <errno.h>
 
 #include "config.h"
-#include "httpd_alloc.h"
+#include "thttpd_alloc.h"
 
 #ifdef CONFIG_THTTPD
 
