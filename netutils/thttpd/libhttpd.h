@@ -178,7 +178,6 @@ typedef struct
   size_t read_size, read_idx, checked_idx;
   int checked_state;
   int method;
-  int status;
   off_t bytes_to_send;
   off_t bytes_sent;
   char *encodedurl;

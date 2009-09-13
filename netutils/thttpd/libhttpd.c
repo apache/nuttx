@@ -321,7 +321,6 @@ static void send_mime(httpd_conn *hc, int status, const char *title, const char 
   int partial_content;
   int s100;
 
-  hc->status = status;
   hc->bytes_to_send = length;
   if (hc->mime_flag)
     {
@@ -332,8 +331,8 @@ static void send_mime(httpd_conn *hc, int status, const char *title, const char 
           (hc->range_if == (time_t) - 1 || hc->range_if == hc->sb.st_mtime))
         {
           partial_content = 1;
-          hc->status = status = 206;
-          title = ok206title;
+          status = 206;
+          title  = ok206title;
         }
       else
         {
@@ -1926,7 +1925,6 @@ static int ls(httpd_conn *hc)
         }
 #endif
 
-      hc->status = 200;
       hc->bytes_sent = CONFIG_THTTPD_CGI_BYTECOUNT;
       hc->should_linger = FALSE;
     }
@@ -2376,7 +2374,6 @@ int httpd_get_conn(httpd_server *hs, int listen_fd, httpd_conn *hc)
   hc->checked_idx       = 0;
   hc->checked_state     = CHST_FIRSTWORD;
   hc->method            = METHOD_UNKNOWN;
-  hc->status            = 0;
   hc->bytes_to_send     = 0;
   hc->bytes_sent        = 0;
   hc->encodedurl        = "";
