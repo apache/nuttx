@@ -2,7 +2,7 @@
  * net/uip/uip_tcptimer.c
  * Poll for the availability of TCP TX data
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -123,7 +123,7 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
       if (conn->timer >= UIP_TIME_WAIT_TIMEOUT)
         {
           conn->tcpstateflags = UIP_CLOSED;
-          nvdbg("TCP state: UIP_CLOSED\n");
+          nllvdbg("TCP state: UIP_CLOSED\n");
         }
     }
   else if (conn->tcpstateflags != UIP_CLOSED)
@@ -157,7 +157,7 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
                     conn->nrtx == UIP_MAXSYNRTX))
                 {
                   conn->tcpstateflags = UIP_CLOSED;
-                  nvdbg("TCP state: UIP_CLOSED\n");
+                  nllvdbg("TCP state: UIP_CLOSED\n");
 
                   /* We call uip_tcpcallback() with UIP_TIMEDOUT to
                    * inform the application that the connection has

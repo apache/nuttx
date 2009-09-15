@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_udpcallback.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@
 void uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
                      uint16 flags)
 {
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
 
   /* Some sanity checking */
 

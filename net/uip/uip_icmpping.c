@@ -153,7 +153,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
   int failcode = -ETIMEDOUT;
   int i;
 
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
   if (pstate)
     {
       /* Check if this device is on the same network as the destination device. */
@@ -165,7 +165,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
            * that the destination address is not reachable.
            */
 
-          nvdbg("Not reachable\n");
+          nllvdbg("Not reachable\n");
           failcode = -ENETUNREACH;
         }
       else
@@ -179,7 +179,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
           if ((flags & UIP_ECHOREPLY) != 0 && conn != NULL)
             {
               struct uip_icmpip_hdr *icmp = (struct uip_icmpip_hdr *)conn;
-              ndbg("ECHO reply: id=%d seqno=%d\n", ntohs(icmp->id), ntohs(icmp->seqno));
+              nlldbg("ECHO reply: id=%d seqno=%d\n", ntohs(icmp->id), ntohs(icmp->seqno));
 
               if (ntohs(icmp->id) == pstate->png_id)
                 {
@@ -240,7 +240,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
                * of the ICMP header.
                */
 
-              ndbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
+              nlldbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
               dev->d_sndlen= pstate->png_datlen + 4;
               uip_icmpsend(dev, &pstate->png_addr);
               pstate->png_sent = TRUE;
@@ -254,7 +254,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
         {
           /* Yes.. report the timeout */
 
-          ndbg("Ping timeout\n");
+          nlldbg("Ping timeout\n");
           pstate->png_result = failcode;
           goto end_wait;
         }
@@ -264,7 +264,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
   return flags;
 
 end_wait:
-  nvdbg("Resuming\n");
+  nllvdbg("Resuming\n");
 
   /* Do not allow any further callbacks */
 
@@ -349,7 +349,7 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dse
        * re-enabled when the task restarts.
        */
 
-      ndbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
+      nlldbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       sem_wait(&state.png_sem);
 
       uip_icmpcallbackfree(state.png_cb);
@@ -362,12 +362,12 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dse
 
   if (!state.png_result)
     {
-      ndbg("Return seqno=%d\n", state.png_seqno);
+      nlldbg("Return seqno=%d\n", state.png_seqno);
       return (int)state.png_seqno;
     }
   else
     {
-      ndbg("Return error=%d\n", -state.png_result);
+      nlldbg("Return error=%d\n", -state.png_result);
       return state.png_result;
     }
 }

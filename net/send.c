@@ -201,7 +201,8 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
   struct uip_conn *conn = (struct uip_conn*)pvconn;
   struct send_s *pstate = (struct send_s *)pvpriv;
 
-  nvdbg("flags: %04x acked: %d sent: %d\n", flags, pstate->snd_acked, pstate->snd_sent);
+  nllvdbg("flags: %04x acked: %d sent: %d\n",
+          flags, pstate->snd_acked, pstate->snd_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
    * acknowldged bytes.
@@ -216,8 +217,8 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
        */
 
       pstate->snd_acked = send_getackno(dev) - pstate->snd_isn;
-      nvdbg("ACK: acked=%d sent=%d buflen=%d\n",
-            pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+      nllvdbg("ACK: acked=%d sent=%d buflen=%d\n",
+              pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Have all of the bytes in the buffer been sent and ACKed? */
 
@@ -252,7 +253,7 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
     {
       /* Report not connected */
 
-      nvdbg("Lost connection\n");
+      nllvdbg("Lost connection\n");
       pstate->snd_sent = -ENOTCONN;
       goto end_wait;
     }
@@ -295,8 +296,8 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
       /* And update the amount of data sent (but not necessarily ACKed) */
 
       pstate->snd_sent += sndlen;
-      nvdbg("SEND: acked=%d sent=%d buflen=%d\n",
-            pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+      nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
+              pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Update the send time */
 
@@ -314,7 +315,7 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
     {
       /* Yes.. report the timeout */
 
-      nvdbg("TCP timeout\n");
+      nllvdbg("TCP timeout\n");
       pstate->snd_sent = -EAGAIN;
       goto end_wait;
     }

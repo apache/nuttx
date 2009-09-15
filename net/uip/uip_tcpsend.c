@@ -142,8 +142,8 @@ static void uip_tcpsendcomplete(struct uip_driver_s *dev)
 
 #endif /* CONFIG_NET_IPv6 */
 
-  nvdbg("Outgoing TCP packet length: %d (%d)\n",
-       dev->d_len, (pbuf->len[0] << 8) | pbuf->len[1]);
+  nllvdbg("Outgoing TCP packet length: %d (%d)\n",
+          dev->d_len, (pbuf->len[0] << 8) | pbuf->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.tcp.sent++;

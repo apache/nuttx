@@ -165,8 +165,8 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
       pudpbuf->udpchksum   = 0;
 #endif
 
-      nvdbg("Outgoing UDP packet length: %d (%d)\n",
-           dev->d_len, (pudpbuf->len[0] << 8) | pudpbuf->len[1]);
+      nllvdbg("Outgoing UDP packet length: %d (%d)\n",
+              dev->d_len, (pudpbuf->len[0] << 8) | pudpbuf->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       uip_stat.udp.sent++;

@@ -152,20 +152,20 @@ static const ubyte g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
 #if defined(CONFIG_NET_DUMPARP) && defined(CONFIG_DEBUG)
 static void uip_arp_dump(struct arp_hdr *arp)
 {
-  ndbg("  HW type: %04x Protocol: %04x\n",
-       arp->ah_hwtype, arp->ah_protocol);\
-  ndbg("  HW len: %02x Proto len: %02x Operation: %04x\n",
-       arp->ah_hwlen, arp->ah_protolen, arp->ah_opcode);
-  ndbg("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
-       arp->ah_shwaddr[0], arp->ah_shwaddr[1], arp->ah_shwaddr[2],
-       arp->ah_shwaddr[3], arp->ah_shwaddr[4], arp->ah_shwaddr[5],
-       arp->ah_sipaddr[0] & 0xff, arp->ah_sipaddr[0] >> 8,
-       arp->ah_sipaddr[1] & 0xff, arp->ah_sipaddr[1] >> 8);
-  ndbg("  Dest MAC:   %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
-       arp->ah_dhwaddr[0], arp->ah_dhwaddr[1], arp->ah_dhwaddr[2],
-       arp->ah_dhwaddr[3], arp->ah_dhwaddr[4], arp->ah_dhwaddr[5],
-       arp->ah_dipaddr[0] & 0xff, arp->ah_dipaddr[0] >> 8,
-       arp->ah_dipaddr[1] & 0xff, arp->ah_dipaddr[1] >> 8);
+  nlldbg("  HW type: %04x Protocol: %04x\n",
+         arp->ah_hwtype, arp->ah_protocol);\
+  nlldbg("  HW len: %02x Proto len: %02x Operation: %04x\n",
+         arp->ah_hwlen, arp->ah_protolen, arp->ah_opcode);
+  nlldbg("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
+         arp->ah_shwaddr[0], arp->ah_shwaddr[1], arp->ah_shwaddr[2],
+         arp->ah_shwaddr[3], arp->ah_shwaddr[4], arp->ah_shwaddr[5],
+         arp->ah_sipaddr[0] & 0xff, arp->ah_sipaddr[0] >> 8,
+         arp->ah_sipaddr[1] & 0xff, arp->ah_sipaddr[1] >> 8);
+  nlldbg("  Dest MAC:   %02x:%02x:%02x:%02x:%02x:%02x IP: %d.%d.%d.%d\n",
+         arp->ah_dhwaddr[0], arp->ah_dhwaddr[1], arp->ah_dhwaddr[2],
+         arp->ah_dhwaddr[3], arp->ah_dhwaddr[4], arp->ah_dhwaddr[5],
+         arp->ah_dipaddr[0] & 0xff, arp->ah_dipaddr[0] >> 8,
+         arp->ah_dipaddr[1] & 0xff, arp->ah_dipaddr[1] >> 8);
 }
 #else
 # define uip_arp_dump(arp)
@@ -203,7 +203,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
   if (dev->d_len < (sizeof(struct arp_hdr) + UIP_LLH_LEN))
     {
-      ndbg("Too small\n");    
+      nlldbg("Too small\n");    
       dev->d_len = 0;
       return;
     }
@@ -213,7 +213,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
   switch(parp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
-        nvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
+        nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
 
         /* ARP request. If it asked for our address, we send out a reply. */
 
@@ -245,7 +245,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
         break;
 
       case HTONS(ARP_REPLY):
-        nvdbg("ARP reply for IP %04lx\n", (long)ipaddr);    
+        nllvdbg("ARP reply for IP %04lx\n", (long)ipaddr);    
 
         /* ARP reply. We insert or update the ARP table if it was meant
          * for us.
@@ -356,7 +356,7 @@ void uip_arp_out(struct uip_driver_s *dev)
       tabptr = uip_arp_find(ipaddr);
       if (!tabptr)
         {
-           nvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
+           nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
 
           /* The destination address was not in our ARP table, so we
            * overwrite the IP packet with an ARP request.

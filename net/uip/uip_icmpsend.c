@@ -156,8 +156,8 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
           picmp->icmpchksum = 0xffff;
         }
 
-      nvdbg("Outgoing ICMP packet length: %d (%d)\n",
-            dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
+      nllvdbg("Outgoing ICMP packet length: %d (%d)\n",
+              dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       uip_stat.icmp.sent++;

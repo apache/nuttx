@@ -166,8 +166,8 @@ void uip_icmpinput(struct uip_driver_s *dev)
         }
 #endif
 
-      nvdbg("Outgoing ICMP packet length: %d (%d)\n",
-            dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
+      nllvdbg("Outgoing ICMP packet length: %d (%d)\n",
+              dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       uip_stat.icmp.sent++;
@@ -190,7 +190,7 @@ void uip_icmpinput(struct uip_driver_s *dev)
 
   else
     {
-      ndbg("Unknown ICMP cmd: %d\n", picmp->type);
+      nlldbg("Unknown ICMP cmd: %d\n", picmp->type);
       goto typeerr;
     }
 
@@ -286,12 +286,12 @@ typeerr:
 
   else
     {
-      ndbg("Unknown ICMP6 cmd: %d\n", picmp->type);
+      nlldbg("Unknown ICMP6 cmd: %d\n", picmp->type);
       goto typeerr;
     }
 
-  nvdbg("Outgoing ICMP6 packet length: %d (%d)\n",
-        dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
+  nllvdbg("Outgoing ICMP6 packet length: %d (%d)\n",
+          dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.icmp.sent++;

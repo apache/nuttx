@@ -132,7 +132,7 @@ FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list)
 #ifdef CONFIG_DEBUG
   else
     {
-      dbg("Failed to allocate callback\n");
+      nlldbg("Failed to allocate callback\n");
     }
 #endif
 
@@ -235,7 +235,7 @@ uint16 uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn, uint16 fl
            * beginning of the list (which will be ignored on this pass)
            */
 
-          nvdbg("Call event=%p with flags=%04x\n", list->event, flags);
+          nllvdbg("Call event=%p with flags=%04x\n", list->event, flags);
           flags = list->event(dev, pvconn, list->priv, flags);
         }
 

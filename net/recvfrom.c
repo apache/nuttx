@@ -129,7 +129,7 @@ static void recvfrom_newdata(struct uip_driver_s *dev, struct recvfrom_s *pstate
   /* Copy the new appdata into the user buffer */
 
   memcpy(pstate->rf_buffer, dev->d_appdata, recvlen);
-  nvdbg("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
+  nllvdbg("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
 
   /* Update the accumulated size of the data read */
 
@@ -199,7 +199,7 @@ static inline void recvfrom_readahead(struct recvfrom_s *pstate)
               /* Copy the read-ahead data into the user buffer */
 
               memcpy(pstate->rf_buffer, readahead->rh_buffer, recvlen);
-              nvdbg("Received %d bytes (of %d)\n", recvlen, readahead->rh_nbytes);
+              nllvdbg("Received %d bytes (of %d)\n", recvlen, readahead->rh_nbytes);
 
               /* Update the accumulated size of the data read */
 
@@ -363,7 +363,7 @@ static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
 
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -391,7 +391,7 @@ static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
 
           if (pstate->rf_buflen == 0)
             {
-              nvdbg("TCP resume\n");
+              nllvdbg("TCP resume\n");
 
               /* The TCP receive buffer is full.  Return now, perhaps truncating
                * the received data (need to fix that).
@@ -423,7 +423,7 @@ static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
 
       else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
-          nvdbg("error\n");
+          nllvdbg("error\n");
 
           /* Stop further callbacks */
 
@@ -451,7 +451,7 @@ static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
            * callbacks
            */
 
-          nvdbg("TCP timeout\n");
+          nllvdbg("TCP timeout\n");
 
           pstate->rf_cb->flags   = 0;
           pstate->rf_cb->priv    = NULL;
@@ -546,7 +546,7 @@ static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
 
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -562,7 +562,7 @@ static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
 
           /* We are finished. */
 
-          nvdbg("UDP done\n");
+          nllvdbg("UDP done\n");
 
           /* Don't allow any further UDP call backs. */
 
@@ -589,7 +589,7 @@ static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
 
       else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
-          nvdbg("error\n");
+          nllvdbg("error\n");
 
           /* Stop further callbacks */
 
@@ -617,7 +617,7 @@ static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
            * callbacks
            */
 
-          nvdbg("UDP timeout\n");
+          nllvdbg("UDP timeout\n");
 
           /* Stop further callbacks */
 

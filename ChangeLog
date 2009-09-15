@@ -868,3 +868,7 @@
 	  removing the check should improve write throughput
 	* Add DEBUG configuration option to enable debug console output without disabling
 	  optimization (and vice versa)
+	* Changed lots of occurrents of debug macro dbg() to lldbg().  dbg() uses
+	  stdout to output debug data.  That works fine unless (1) the dbg() macro
+	  is interrupt logic and the interrupted task has redirected stdout!  Most
+	  changes were in uIP.

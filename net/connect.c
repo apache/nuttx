@@ -113,7 +113,7 @@ static void connection_event(struct uip_conn *conn, uint16 flags)
 
   if (psock)
     {
-      nvdbg("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
+      nllvdbg("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
 
       /* UIP_CLOSE: The remote host has closed the connection
        * UIP_ABORT: The remote host has aborted the connection
@@ -227,7 +227,7 @@ static uint16 tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
 
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -283,7 +283,7 @@ static uint16 tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
           return flags & ~UIP_NEWDATA;
         }
 
-      nvdbg("Resuming: %d\n", pstate->tc_result);
+      nllvdbg("Resuming: %d\n", pstate->tc_result);
 
       /* Stop further callbacks */
 

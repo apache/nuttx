@@ -96,7 +96,7 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 resu
 {
   /* Handle the result based on the application response */
 
-  nvdbg("result: %04x\n", result);
+  nllvdbg("result: %04x\n", result);
 
   /* Check for connection aborted */
 
@@ -104,7 +104,7 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 resu
     {
       dev->d_sndlen = 0;
       conn->tcpstateflags = UIP_CLOSED;
-      nvdbg("TCP state: UIP_CLOSED\n");
+      nllvdbg("TCP state: UIP_CLOSED\n");
 
       uip_tcpsend(dev, conn, TCP_RST | TCP_ACK, UIP_IPTCPH_LEN);
     }
@@ -116,7 +116,7 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 resu
       conn->tcpstateflags = UIP_FIN_WAIT_1;
       conn->len = 1;
       conn->nrtx = 0;
-      nvdbg("TCP state: UIP_FIN_WAIT_1\n");
+      nllvdbg("TCP state: UIP_FIN_WAIT_1\n");
 
       dev->d_sndlen = 0;
       uip_tcpsend(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
@@ -202,7 +202,7 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 resu
 
 void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn, uint16 result)
 {
-  nvdbg("result: %04x\n", result);
+  nllvdbg("result: %04x\n", result);
 
   dev->d_appdata = dev->d_snddata;
 

@@ -318,7 +318,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.vhlerr++;
 #endif
-      ndbg("Invalid IPv6 version: %d\n", pbuf->vtc >> 4);
+      nlldbg("Invalid IPv6 version: %d\n", pbuf->vtc >> 4);
       goto drop;
     }
 #else /* CONFIG_NET_IPv6 */
@@ -332,7 +332,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.vhlerr++;
 #endif
-      ndbg("Invalid IP version or header length: %02x\n", pbuf->vhl);
+      nlldbg("Invalid IP version or header length: %02x\n", pbuf->vhl);
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -361,7 +361,7 @@ void uip_input(struct uip_driver_s *dev)
     }
   else
     {
-      ndbg("IP packet shorter than length in IP header\n");
+      nlldbg("IP packet shorter than length in IP header\n");
       goto drop;
     }
 
@@ -381,7 +381,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.fragerr++;
 #endif
-      ndbg("IP fragment dropped\n");
+      nlldbg("IP fragment dropped\n");
       goto drop;
 #endif /* UIP_REASSEMBLY */
     }
@@ -423,14 +423,14 @@ void uip_input(struct uip_driver_s *dev)
 #if defined(CONFIG_NET_PINGADDRCONF) && !defined(CONFIG_NET_IPv6)
       if (pbuf->proto == UIP_PROTO_ICMP)
         {
-          ndbg("Possible ping config packet received\n");
+          nlldbg("Possible ping config packet received\n");
           uip_icmpinput(dev);
           goto done;
         }
       else
 #endif
         {
-          ndbg("No IP address assigned\n");
+          nlldbg("No IP address assigned\n");
           goto drop;
         }
     }
@@ -476,7 +476,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_stat.ip.drop++;
       uip_stat.ip.chkerr++;
 #endif
-      ndbg("Bad IP checksum\n");
+      nlldbg("Bad IP checksum\n");
       goto drop;
     }
 #endif /* CONFIG_NET_IPv6 */
@@ -517,7 +517,7 @@ void uip_input(struct uip_driver_s *dev)
         uip_stat.ip.protoerr++;
 #endif
 
-        ndbg("Unrecognized IP protocol\n");
+        nlldbg("Unrecognized IP protocol\n");
         goto drop;
     }
 

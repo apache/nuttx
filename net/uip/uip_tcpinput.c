@@ -122,7 +122,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
       uip_stat.tcp.drop++;
       uip_stat.tcp.chkerr++;
 #endif
-      ndbg("Bad TCP checksum\n");
+      nlldbg("Bad TCP checksum\n");
       goto drop;
     }
 
@@ -187,7 +187,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 #ifdef CONFIG_NET_STATISTICS
               uip_stat.tcp.syndrop++;
 #endif
-              ndbg("No free TCP connections\n");
+              nlldbg("No free TCP connections\n");
               goto drop;
             }
 
@@ -282,7 +282,7 @@ found:
   if (pbuf->flags & TCP_RST)
     {
       conn->tcpstateflags = UIP_CLOSED;
-      ndbg("RESET - TCP state: UIP_CLOSED\n");
+      nlldbg("RESET - TCP state: UIP_CLOSED\n");
 
       (void)uip_tcpcallback(dev, conn, UIP_ABORT);
       goto drop;
@@ -392,7 +392,7 @@ found:
           {
             conn->tcpstateflags = UIP_ESTABLISHED;
             conn->len           = 0;
-            nvdbg("TCP state: UIP_ESTABLISHED\n");
+            nllvdbg("TCP state: UIP_ESTABLISHED\n");
 
             flags               = UIP_CONNECTED;
 
@@ -474,7 +474,7 @@ found:
 
             conn->tcpstateflags = UIP_ESTABLISHED;
             memcpy(conn->rcv_nxt, pbuf->seqno, 4);
-            nvdbg("TCP state: UIP_ESTABLISHED\n");
+            nllvdbg("TCP state: UIP_ESTABLISHED\n");
 
             uip_incr32(conn->rcv_nxt, 1);
             conn->len           = 0;
@@ -492,7 +492,7 @@ found:
         /* The connection is closed after we send the RST */
 
         conn->tcpstateflags = UIP_CLOSED;
-        nvdbg("Connection failed - TCP state: UIP_CLOSED\n");
+        nllvdbg("Connection failed - TCP state: UIP_CLOSED\n");
 
         /* We do not send resets in response to resets. */
 
@@ -536,7 +536,7 @@ found:
             conn->tcpstateflags = UIP_LAST_ACK;
             conn->len           = 1;
             conn->nrtx          = 0;
-            nvdbg("TCP state: UIP_LAST_ACK\n");
+            nllvdbg("TCP state: UIP_LAST_ACK\n");
 
             uip_tcpsend(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
             return;
@@ -641,7 +641,7 @@ found:
         if (flags & UIP_ACKDATA)
           {
             conn->tcpstateflags = UIP_CLOSED;
-            nvdbg("UIP_LAST_ACK TCP state: UIP_CLOSED\n");
+            nllvdbg("UIP_LAST_ACK TCP state: UIP_CLOSED\n");
 
             (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
           }
@@ -664,12 +664,12 @@ found:
                 conn->tcpstateflags = UIP_TIME_WAIT;
                 conn->timer         = 0;
                 conn->len           = 0;
-                nvdbg("TCP state: UIP_TIME_WAIT\n");
+                nllvdbg("TCP state: UIP_TIME_WAIT\n");
               }
             else
               {
                 conn->tcpstateflags = UIP_CLOSING;
-                nvdbg("TCP state: UIP_CLOSING\n");
+                nllvdbg("TCP state: UIP_CLOSING\n");
               }
 
             uip_incr32(conn->rcv_nxt, 1);
@@ -681,7 +681,7 @@ found:
           {
             conn->tcpstateflags = UIP_FIN_WAIT_2;
             conn->len = 0;
-            nvdbg("TCP state: UIP_FIN_WAIT_2\n");
+            nllvdbg("TCP state: UIP_FIN_WAIT_2\n");
             goto drop;
           }
 
@@ -702,7 +702,7 @@ found:
           {
             conn->tcpstateflags = UIP_TIME_WAIT;
             conn->timer         = 0;
-            nvdbg("TCP state: UIP_TIME_WAIT\n");
+            nllvdbg("TCP state: UIP_TIME_WAIT\n");
 
             uip_incr32(conn->rcv_nxt, 1);
             (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
@@ -726,7 +726,7 @@ found:
           {
             conn->tcpstateflags = UIP_TIME_WAIT;
             conn->timer        = 0;
-            nvdbg("TCP state: UIP_TIME_WAIT\n");
+            nllvdbg("TCP state: UIP_TIME_WAIT\n");
           }
 
       default:

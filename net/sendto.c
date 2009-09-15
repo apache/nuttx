@@ -98,7 +98,7 @@ static uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvpri
 {
   struct sendto_s *pstate = (struct sendto_s *)pvpriv;
 
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
   if (pstate)
     {
       /* Check if the connection was rejected */

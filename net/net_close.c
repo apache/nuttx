@@ -92,7 +92,7 @@ static uint16 netclose_interrupt(struct uip_driver_s *dev, void *pvconn,
 {
   struct tcp_close_s *pstate = (struct tcp_close_s *)pvpriv;
 
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
 
   if (pstate)
     {
@@ -108,7 +108,7 @@ static uint16 netclose_interrupt(struct uip_driver_s *dev, void *pvconn,
           pstate->cl_cb->priv    = NULL;
           pstate->cl_cb->event   = NULL;
           sem_post(&pstate->cl_sem);
-          nvdbg("Resuming\n");
+          nllvdbg("Resuming\n");
         }
       else
         {

@@ -84,7 +84,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
   int offset;
   int i;
 
-  nvdbg("conn=%p nblg=%d\n", conn, nblg);
+  nllvdbg("conn=%p nblg=%d\n", conn, nblg);
 
 #ifdef CONFIG_DEBUG
   if (!conn)
@@ -116,7 +116,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
       bls = (FAR struct uip_backlog_s *)zalloc(size);
       if (!bls)
         {
-          ndbg("Failed to allocate backlog\n");
+          nlldbg("Failed to allocate backlog\n");
           return -ENOMEM;
         }
 
@@ -167,7 +167,7 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
   FAR struct uip_blcontainer_s *blc;
   FAR struct uip_conn          *blconn;
 
-  nvdbg("conn=%p\n", conn);
+  nllvdbg("conn=%p\n", conn);
 
 #ifdef CONFIG_DEBUG
   if (!conn)
@@ -227,7 +227,7 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
   FAR struct uip_blcontainer_s *blc;
   int ret = -EINVAL;
 
-  nvdbg("conn=%p blconn=%p\n", conn, blconn);
+  nllvdbg("conn=%p blconn=%p\n", conn, blconn);
 
 #ifdef CONFIG_DEBUG
   if (!conn)
@@ -244,7 +244,7 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
        blc = (FAR struct uip_blcontainer_s *)sq_remfirst(&bls->bl_free);
        if (!blc)
          {
-           ndbg("Failed to allocate container\n");
+           nlldbg("Failed to allocate container\n");
            ret = -ENOMEM;
          }
        else
@@ -325,7 +325,7 @@ struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn)
          }
     }
 
-  nvdbg("conn=%p, returning %p\n", conn, blconn);
+  nllvdbg("conn=%p, returning %p\n", conn, blconn);
   return blconn;
 }
 
@@ -348,7 +348,7 @@ int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
   FAR struct uip_blcontainer_s *blc;
   FAR struct uip_blcontainer_s *prev;
 
-  nvdbg("conn=%p blconn=%p\n", conn, blconn);
+  nllvdbg("conn=%p blconn=%p\n", conn, blconn);
 
 #ifdef CONFIG_DEBUG
   if (!conn)
@@ -393,7 +393,7 @@ int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
               }
           }
 
-        ndbg("Failed to find pending connection\n");
+        nlldbg("Failed to find pending connection\n");
         return -EINVAL;
     }
   return OK;

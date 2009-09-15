@@ -112,7 +112,7 @@ void uip_udpinput(struct uip_driver_s *dev)
       uip_stat.udp.drop++;
       uip_stat.udp.chkerr++;
 #endif
-      ndbg("Bad UDP checksum\n");
+      nlldbg("Bad UDP checksum\n");
       dev->d_len = 0;
     }
   else
@@ -142,7 +142,7 @@ void uip_udpinput(struct uip_driver_s *dev)
         }
       else
         {
-          ndbg("No listener on UDP port\n");
+          nlldbg("No listener on UDP port\n");
           dev->d_len = 0;
         }
     }

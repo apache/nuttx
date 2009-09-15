@@ -1306,7 +1306,7 @@ static inline int lm3s_ethinitialize(int intf)
 
   /* Check if the Ethernet module is present */
 
-  nlldbg("Setting up eth%d\n", intf);
+  ndbg("Setting up eth%d\n", intf);
 
 #if LM3S_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"

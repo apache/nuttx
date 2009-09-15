@@ -48,7 +48,42 @@
  * Definitions
  ****************************************************************************/
 
-/* Debug macros to runtime filter the opsys debug messages */
+/* Debug macros to runtime filter the debug messages sent to the console.  In
+ * general, there are four forms of the debug macros:
+ *
+ * [a-z]dbg() -- Outputs messages to the console similar to printf() except
+ *    that the output is not buffered.  The first character indicates the
+ *    system system (e.g., n=network, f=filesystm, etc.).  If the first
+ *    character is missing (i.e., dbg()), then it is common.  The common
+ *    dbg() macro is enabled by CONFIG_DEBUG.  Subystem debug requires an
+ *    additional configuration setting to enable it (e.g., CONFIG_DEBUG_NET
+ *    for the network, CONFIG_DEBUG_FS for the file syste, etc).
+ *
+ *    In general, error messages and output of importance use [a-z]dbg().
+ *    [a-z]dbg() is implementation dependent but usually uses file descriptors.
+ *    (that is a problem only because the interrupt task may have re-
+ *    directed stdout).  Therefore [a-z]dbg() should not be used in interrupt
+ *    handlers.
+ *
+ * [a-z]vdbg() -- Identifcal to [a-z]dbg() except that it also requires that
+ *    CONFIG_DEBUG_VERBOSE be defined.  This is intended for general debug
+ *    output that you would normally want to suppress.
+ *
+ * [a-z]lldbg() -- Identical to [a-z]dbg() except this is uses special
+ *    interfaces provided by architecture-specific logic to talk directly
+ *    to the underlying console hardware.  If the architecture provides such
+ *    logic, it should define CONFIG_ARCH_LOWPUTC.
+ *
+ *    [a-z]lldbg() should not be used in normal code because the implementation
+ *    probably disables interrupts and does things that are not consistent with
+ *    good real-time performance.  However, [a-z]lldbg() is particularly useful
+ *    in low-level code where it is inappropriate to use file descriptors.  For
+ *    example, only [a-z]lldbg() should be used in interrupt handlers.
+ *
+ * [a-z]llvdbg() -- Identifcal to [a-z]lldbg() except that it also requires that
+ *    CONFIG_DEBUG_VERBOSE be defined.  This is intended for general debug
+ *    output that you would normally want to suppress.
+ */
 
 #ifdef CONFIG_HAVE_FUNCTIONNAME
 # define EXTRA_FMT "%s: "
@@ -177,9 +212,9 @@
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT
-# define bdbg(format, arg...)    lldbg(format, ##arg)
+# define bdbg(format, arg...)    dbg(format, ##arg)
 # define blldbg(format, arg...)  lldbg(format, ##arg)
-# define bvdbg(format, arg...)   llvdbg(format, ##arg)
+# define bvdbg(format, arg...)   vdbg(format, ##arg)
 # define bllvdbg(format, arg...) llvdbg(format, ##arg)
 #else
 # define bdbg(x...)
@@ -298,9 +333,9 @@
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT
-# define bdbg    lldbg
+# define bdbg    dbg
 # define blldbg  lldbg
-# define bvdbg   llvdbg
+# define bvdbg   vdbg
 # define bllvdbg llvdbg
 #else
 # define bdbg    (void)

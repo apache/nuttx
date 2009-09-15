@@ -106,7 +106,7 @@ static uint16 poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
 {
   FAR struct pollfd *fds = (FAR struct pollfd *)pvpriv;
 
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 

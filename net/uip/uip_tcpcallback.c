@@ -136,7 +136,7 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
       int    buflen  = dev->d_len;
 #endif
 
-      nvdbg("No listener on connection\n");
+      nllvdbg("No listener on connection\n");
 
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
       /* First, we need to determine if we have space to buffer the data.  This
@@ -181,7 +181,7 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
               sq_addlast(&readahead2->rh_node, &conn->readahead);
             }
 
-          nvdbg("Buffered %d bytes\n", dev->d_len);
+          nllvdbg("Buffered %d bytes\n", dev->d_len);
         }
       else
 #endif
@@ -190,7 +190,7 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
            * read-ahead buffers to retain the data -- drop the packet.
            */
 
-         nvdbg("Dropped %d bytes\n", dev->d_len);
+         nllvdbg("Dropped %d bytes\n", dev->d_len);
 
  #ifdef CONFIG_NET_STATISTICS
           uip_stat.tcp.syndrop++;
@@ -233,7 +233,7 @@ uint16 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint16 f
 
   uint16 ret = flags;
 
-  nvdbg("flags: %04x\n", flags);
+  nllvdbg("flags: %04x\n", flags);
 
   /* Perform the data callback.  When a data callback is executed from 'list',
    * the input flags are normally returned, however, the implementation

@@ -81,10 +81,10 @@ void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr)
   int i, oldest;
   uint8 oldest_time;
 
-  ndbg("Add neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
-       addr->addr.ether_addr_octet[0], addr->addr.ether_addr_octet[1],
-       addr->addr.ether_addr_octet[2], addr->addr.ether_addr_octet[3],
-       addr->addr.ether_addr_octet[4], addr->addr.ether_addr_octet[5]);
+  nlldbg("Add neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
+         addr->addr.ether_addr_octet[0], addr->addr.ether_addr_octet[1],
+         addr->addr.ether_addr_octet[2], addr->addr.ether_addr_octet[3],
+         addr->addr.ether_addr_octet[4], addr->addr.ether_addr_octet[5]);
 
   /* Find the first unused entry or the oldest used entry. */
 
@@ -150,10 +150,10 @@ struct uip_neighbor_addr *uip_neighbor_lookup(uip_ipaddr_t ipaddr)
   e = find_entry(ipaddr);
   if (e != NULL)
     {
-      ndbg("Lookup neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
-           e->addr.addr.ether_addr_octet[0], e->addr.addr.ether_addr_octet[1],
-           e->addr.addr.ether_addr_octet[2], e->addr.addr.ether_addr_octet[3],
-           e->addr.addr.ether_addr_octet[4], e->addr.addr.ether_addr_octet[5]);
+      nlldbg("Lookup neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
+             e->addr.addr.ether_addr_octet[0], e->addr.addr.ether_addr_octet[1],
+             e->addr.addr.ether_addr_octet[2], e->addr.addr.ether_addr_octet[3],
+             e->addr.addr.ether_addr_octet[4], e->addr.addr.ether_addr_octet[5]);
 
     return &e->addr;
   }
