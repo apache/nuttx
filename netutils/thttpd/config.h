@@ -156,6 +156,14 @@
 #    define CONFIG_THTTPD_MAXREALLOC 4096
 #  endif
 
+#  ifndef CONFIG_THTTPD_CGIINBUFFERSIZE
+#    define CONFIG_THTTPD_CGIINBUFFERSIZE 512	/* Size of buffer to interpose input */
+#  endif
+
+#  ifndef CONFIG_THTTPD_CGIOUTBUFFERSIZE
+#    define CONFIG_THTTPD_CGIOUTBUFFERSIZE 512	/* Size of buffer to interpose output */
+#  endif
+
 #  if CONFIG_THTTPD_IOBUFFERSIZE > 65535
 #    error "Can't use uint16 for buffer size"
 #  endif

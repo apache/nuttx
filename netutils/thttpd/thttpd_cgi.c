@@ -67,6 +67,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* CONFIG_THTTPD_CGIDUMP will dump the contents of each transfer to and from the CGI task. */
+
+#ifdef CONFIG_THTTPD_CGIDUMP
+#  define cgi_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
+#else
+#  define cgi_dumppacket(m,a,n)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -88,15 +96,35 @@ struct cgi_outbuffer_s
   size_t len;                    /* Amount of valid data in the allocated buffer */
 };
 
+struct cgi_inbuffer_s
+{
+  int    contentlength;			/* Size of content to send to CGI task */
+  int    nbytes;				/* Number of bytes sent */
+  char   buffer[CONFIG_THTTPD_CGIINBUFFERSIZE]; /* Fixed size input buffer */
+};
+
+struct cgi_conn_s
+{
+  /* Descriptors */
+
+  int    connfd;                 /* Socket connect to CGI client */
+  int    rdfd;                   /* Pipe read fd */
+  int    wrfd;                   /* Pipe write fd */
+
+  /* Buffering */
+
+  struct cgi_outbuffer_s outbuf; /* Dynamically sized output buffer */
+  struct cgi_inbuffer_s inbuf;   /* Fixed size input buffer */
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 static void create_environment(httpd_conn *hc);
 static char **make_argp(httpd_conn *hc);
-static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer);
-static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
-                                       struct cgi_outbuffer_s *hdr);
+static inline int cgi_interpose_input(struct cgi_conn_s *cc);
+static inline int cgi_interpose_output(struct cgi_conn_s *cc);
 static int  cgi_child(int argc, char **argv);
 
 /****************************************************************************
@@ -329,28 +357,18 @@ static FAR char **make_argp(httpd_conn *hc)
  * requests.  It reads the data from the client and sends it to the child thread.
  */
 
-static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
+static inline int cgi_interpose_input(struct cgi_conn_s *cc)
 {
-  size_t nbytes;
   ssize_t nbytes_read;
   ssize_t nbytes_written;
 
-  nbytes = hc->read_idx - hc->checked_idx;
-  llvdbg("nbytes: %d contentlength: %d\n", nbytes, hc->contentlength);
-  if (nbytes > 0)
-    {
-      if (httpd_write(wfd, &(hc->read_buf[hc->checked_idx]), nbytes) != nbytes)
-        {
-          lldbg("httpd_write failed\n");
-          return 1;
-        }
-    }
-
-  if (nbytes < hc->contentlength)
+  llvdbg("nbytes: %d contentlength: %d\n", cc->inbuf.nbytes, cc->inbuf.contentlength);
+  if (cc->inbuf.nbytes < cc->inbuf.contentlength)
     {
       do
         {
-          nbytes_read = read(hc->conn_fd, buffer, MIN(sizeof(buffer), hc->contentlength - nbytes));
+          nbytes_read = read(cc->connfd, cc->inbuf.buffer,
+            MIN(CONFIG_THTTPD_CGIINBUFFERSIZE, cc->inbuf.contentlength - cc->inbuf.nbytes));
           llvdbg("nbytes_read: %d\n", nbytes_read);
           if (nbytes_read < 0)
             {
@@ -365,17 +383,20 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
 
       if (nbytes_read > 0)
         {
-          nbytes_written = httpd_write(wfd, buffer, nbytes_read);
+          nbytes_written = httpd_write(cc->wrfd, cc->inbuf.buffer, nbytes_read);
           llvdbg("nbytes_written: %d\n", nbytes_written);
           if (nbytes_written != nbytes_read)
             {
               lldbg("httpd_write failed\n");
               return 1;
             }
+          cgi_dumppacket("Sent to CGI:", cc->inbuf.buffer, nbytes_written);
         }
+
+      cc->inbuf.nbytes += nbytes_read;
     }
 
-  if (nbytes >= hc->contentlength)
+  if (cc->inbuf.nbytes >= cc->inbuf.contentlength)
     {
       /* Special hack to deal with broken browsers that send a LF or CRLF
        * after POST data, causing TCP resets - we just read and discard up
@@ -388,11 +409,11 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
 
       /* Turn on no-delay mode in case we previously cleared it. */
 
-      httpd_set_ndelay(hc->conn_fd);
+      httpd_set_ndelay(cc->connfd);
 
       /* And read up to 2 bytes. */
 
-      (void)read(hc->conn_fd, buffer, sizeof(buffer));
+      (void)read(cc->connfd, cc->inbuf.buffer, CONFIG_THTTPD_CGIINBUFFERSIZE);
       return 1;
     }
   return 0;
@@ -406,8 +427,7 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
  * out the saved headers and proceed to echo the rest of the response.
  */
 
-static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
-                                       struct cgi_outbuffer_s *hdr)
+static inline int cgi_interpose_output(struct cgi_conn_s *cc)
 {
   ssize_t nbytes_read;
   char *br = NULL;
@@ -419,12 +439,12 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
    * blocking, but we might as well be sure.
    */
 
-  httpd_clear_ndelay(hc->conn_fd);
+  httpd_clear_ndelay(cc->connfd);
 
   /* Loop while there are things we can do without waiting for more input */
 
-  llvdbg("state: %d\n", hdr->state);
-  switch (hdr->state)
+  llvdbg("state: %d\n", cc->outbuf.state);
+  switch (cc->outbuf.state)
     {
       case CGI_OUTBUFFER_READHEADER:
         {
@@ -436,8 +456,8 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                * EAGAIN is not an error, but it is still cause to return.
                */
 
-              nbytes_read = read(hc->conn_fd, inbuffer, sizeof(inbuffer));
-              nllvdbg("Read %d bytes from fd %d\n", nbytes_read, hc->conn_fd);
+              nbytes_read = read(cc->rdfd, cc->inbuf.buffer, CONFIG_THTTPD_CGIINBUFFERSIZE);
+              nllvdbg("Read %d bytes from fd %d\n", nbytes_read, cc->rdfd);
 
               if (nbytes_read < 0)
                 {
@@ -450,6 +470,10 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                       return 1;
                     }
                 }
+              else
+                {
+                  cgi_dumppacket("Received from CGI:", cc->inbuf.buffer, nbytes_read);
+                }
             }
           while (nbytes_read < 0);
 
@@ -458,26 +482,26 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
           if (nbytes_read <= 0)
             {
               nllvdbg("End-of-file\n");
-              br         = &(hdr->buffer[hdr->len]);
-              hdr->state = CGI_OUTBUFFER_HEADERREAD;
+              br               = &(cc->outbuf.buffer[cc->outbuf.len]);
+              cc->outbuf.state = CGI_OUTBUFFER_HEADERREAD;
             }
           else
             {
               /* Accumulate more header data */
 
-              httpd_realloc_str(&hdr->buffer, &hdr->size, hdr->len + nbytes_read);
-              (void)memcpy(&(hdr->buffer[hdr->len]), inbuffer, nbytes_read);
-              hdr->len += nbytes_read;
-              hdr->buffer[hdr->len] = '\0';
-              nllvdbg("Header bytes accumulated: %d\n", hdr->len);
+              httpd_realloc_str(&cc->outbuf.buffer, &cc->outbuf.size, cc->outbuf.len + nbytes_read);
+              (void)memcpy(&(cc->outbuf.buffer[cc->outbuf.len]), cc->inbuf.buffer, nbytes_read);
+              cc->outbuf.len                    += nbytes_read;
+              cc->outbuf.buffer[cc->outbuf.len] = '\0';
+              nllvdbg("Header bytes accumulated: %d\n", cc->outbuf.len);
 
               /* Check for end of header */
 
-              if ((br = strstr(hdr->buffer, "\r\n\r\n")) != NULL ||
-                  (br = strstr(hdr->buffer, "\012\012")) != NULL)
+              if ((br = strstr(cc->outbuf.buffer, "\r\n\r\n")) != NULL ||
+                  (br = strstr(cc->outbuf.buffer, "\012\012")) != NULL)
                 {
                   nllvdbg("End-of-header\n");
-                  hdr->state = CGI_OUTBUFFER_HEADERREAD;
+                  cc->outbuf.state = CGI_OUTBUFFER_HEADERREAD;
                 }
               else
                 {
@@ -495,9 +519,9 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
         {
           /* If there were no headers, bail. */
 
-          if (hdr->buffer[0] == '\0')
+          if (cc->outbuf.buffer[0] == '\0')
             {
-              hdr->state = CGI_OUTBUFFER_DONE;
+              cc->outbuf.state = CGI_OUTBUFFER_DONE;
               return 1;
             }
 
@@ -506,23 +530,23 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
            */
 
           status = 200;
-          if (strncmp(hdr->buffer, "HTTP/", 5) == 0)
+          if (strncmp(cc->outbuf.buffer, "HTTP/", 5) == 0)
             {
-              cp = hdr->buffer;
-              cp += strcspn(cp, " \t");
+              cp     = cc->outbuf.buffer;
+              cp    += strcspn(cp, " \t");
               status = atoi(cp);
             }
 
-          if ((cp = strstr(hdr->buffer, "Status:")) != NULL &&
-              cp < br && (cp == hdr->buffer || *(cp - 1) == '\012'))
+          if ((cp = strstr(cc->outbuf.buffer, "Status:")) != NULL &&
+              cp < br && (cp == cc->outbuf.buffer || *(cp - 1) == '\012'))
             {
-              cp += 7;
-              cp += strspn(cp, " \t");
+              cp    += 7;
+              cp    += strspn(cp, " \t");
               status = atoi(cp);
             }
 
-          if ((cp = strstr(hdr->buffer, "Location:")) != NULL &&
-              cp < br && (cp == hdr->buffer || *(cp - 1) == '\012'))
+          if ((cp = strstr(cc->outbuf.buffer, "Location:")) != NULL &&
+              cp < br && (cp == cc->outbuf.buffer || *(cp - 1) == '\012'))
             {
               status = 302;
             }
@@ -586,12 +610,12 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               break;
             }
 
-          (void)snprintf(inbuffer, sizeof(inbuffer), "HTTP/1.0 %d %s\r\n", status, title);
-          (void)httpd_write(hc->conn_fd, inbuffer, strlen(inbuffer));
+          (void)snprintf(cc->inbuf.buffer, CONFIG_THTTPD_CGIINBUFFERSIZE, "HTTP/1.0 %d %s\r\n", status, title);
+          (void)httpd_write(cc->connfd, cc->inbuf.buffer, strlen(cc->inbuf.buffer));
 
-          /* Write the saved hdr->buffer to the client. */
+          /* Write the saved cc->outbuf.buffer to the client. */
 
-          (void)httpd_write(hc->conn_fd, hdr->buffer, hdr->len);
+          (void)httpd_write(cc->connfd, cc->outbuf.buffer, cc->outbuf.len);
         }
 
         /* Then set up to read the data following the header from the CGI program and
@@ -599,7 +623,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
          * data is available on the pipe.
          */
 
-        hdr->state = CGI_OUTBUFFER_READDATA;
+        cc->outbuf.state = CGI_OUTBUFFER_READDATA;
         return 0;
 
       case CGI_OUTBUFFER_READDATA:
@@ -612,8 +636,8 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                * EAGAIN is not an error, but it is still cause to return.
                */
 
-              nbytes_read = read(rfd, inbuffer, sizeof(inbuffer));
-              nllvdbg("Read %d bytes from fd %d\n", nbytes_read, rfd);
+              nbytes_read = read(cc->rdfd, cc->inbuf.buffer, CONFIG_THTTPD_CGIINBUFFERSIZE);
+              nllvdbg("Read %d bytes from fd %d\n", nbytes_read, cc->rdfd);
 
               if (nbytes_read < 0)
                 {
@@ -634,16 +658,16 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
           if (nbytes_read == 0)
             {
               nllvdbg("End-of-file\n");
-              close(hc->conn_fd);
-              close(rfd);
-              hdr->state = CGI_OUTBUFFER_DONE;
+              close(cc->connfd);
+              close(cc->rdfd);
+              cc->outbuf.state = CGI_OUTBUFFER_DONE;
               return 1;
             }
           else
             {
                /* Forward the data from the CGI program to the client */
 
-             (void)httpd_write(hc->conn_fd, inbuffer, strlen(inbuffer));
+             (void)httpd_write(cc->connfd, cc->inbuf.buffer, strlen(cc->inbuf.buffer));
             }
         }
         break;
@@ -664,26 +688,39 @@ static int cgi_child(int argc, char **argv)
   ClientData client_data;
 #endif
   FAR char **argp;
-  struct cgi_outbuffer_s hdr;
-  struct fdwatch_s *fw;
-  char   *buffer;
-  char   *directory;
-  char   *dupname;
-  boolean indone;
-  boolean outdone;
-  int     child;
-  int     pipefd[2];
-  int     wfd = -1;
-  int     rfd = -1;
-  int     fd;
-  int     ret;
-  int     err = 1;
+  FAR struct cgi_conn_s *cc;
+  FAR struct fdwatch_s *fw;
+  FAR char  *directory;
+  FAR char  *dupname;
+  boolean    indone;
+  boolean    outdone;
+  int        child;
+  int        pipefd[2];
+  int        nbytes;
+  int        fd;
+  int        ret;
+  int        err = 1;
 
   /* Use low-level debug out (because the low-level output may survive closing
    * all file descriptors
    */
 
   nllvdbg("Started: %s\n", argv[1]);
+
+  /* Allocate memory and initialize memory for interposing */
+
+  cc = (FAR struct cgi_conn_s*)httpd_malloc(sizeof(struct cgi_conn_s));
+  if (!cc)
+    {
+      nlldbg("cgi_conn allocation failed\n");
+      close(hc->conn_fd);
+      goto errout;
+    }
+
+  cc->connfd = hc->conn_fd;
+  cc->wrfd   = -1;
+  cc->rdfd   = -1;
+  memset(&cc->outbuf, 0, sizeof(struct cgi_outbuffer_s));
 
   /* Update all of the environment variable settings, these will be inherited
    * by the CGI task.
@@ -724,7 +761,7 @@ static int cgi_child(int argc, char **argv)
   if (ret < 0)
     {
       nlldbg("STDIN pipe: %d\n", errno);
-      goto errout_with_descriptors;
+      goto errout_with_cgiconn;
     }
   else
     {
@@ -733,15 +770,15 @@ static int cgi_child(int argc, char **argv)
        */
 
       ret = dup2(pipefd[0], 0);
+
+      cc->wrfd = pipefd[1];
+      close(pipefd[0]);
+
       if (ret < 0)
         {
           nlldbg("STDIN dup2: %d\n", errno);
-          close(pipefd[1]);
           goto errout_with_descriptors;
         }
-
-      wfd = pipefd[1];
-      close(pipefd[0]);
     }
 
   /* Set up the STDOUT pipe - a pipe to transfer data received from the CGI program
@@ -764,15 +801,15 @@ static int cgi_child(int argc, char **argv)
            */
 
           ret = dup2(pipefd[1], 1);
+
+          cc->rdfd = pipefd[0];
+          close(pipefd[1]);
+ 
           if (ret < 0)
             {
               nlldbg("STDOUT dup2: %d\n", errno);
-              close(pipefd[1]);
               goto errout_with_descriptors;
             }
-
-          rfd = pipefd[0];
-          close(pipefd[1]);
         }
     }
 
@@ -791,21 +828,13 @@ static int cgi_child(int argc, char **argv)
       httpd_free(dupname);
     }
 
-  /* Allocate memory for buffering */
+  /* Allocate memory for output buffering */
 
-  memset(&hdr, 0, sizeof(struct cgi_outbuffer_s));
-  httpd_realloc_str(&hdr.buffer, &hdr.size, 500);
-  if (!hdr.buffer)
+  httpd_realloc_str(&cc->outbuf.buffer, &cc->outbuf.size, CONFIG_THTTPD_CGIOUTBUFFERSIZE);
+  if (!cc->outbuf.buffer)
     {
       nlldbg("hdr allocation failed\n");
       goto errout_with_descriptors;
-    }
-
-  buffer = (char*)httpd_malloc(CONFIG_THTTPD_IOBUFFERSIZE);
-  if (!buffer)
-    {
-      nlldbg("buffer allocation failed\n");
-      goto errout_with_header;
     }
 
   /* Create fdwatch structures */
@@ -814,12 +843,12 @@ static int cgi_child(int argc, char **argv)
   if (!fw)
     {
       nlldbg("fdwatch allocation failed\n");
-      goto errout_with_buffer;
+      goto errout_with_outbuffer;
     }
 
   /* Run the CGI program. */
 
-  nllvdbg("Starting CGI\n");
+  nllvdbg("Starting CGI: %s\n", hc->expnfilename);
   child = exec(hc->expnfilename, (FAR const char **)argp, g_thttpdsymtab, g_thttpdnsymbols);
   if (child < 0)
     {
@@ -842,8 +871,24 @@ static int cgi_child(int argc, char **argv)
 
   /* Add the read descriptors to the watch */
 
-  fdwatch_add_fd(fw, hc->conn_fd, NULL);
-  fdwatch_add_fd(fw, rfd, NULL);
+  fdwatch_add_fd(fw, cc->connfd, NULL);
+  fdwatch_add_fd(fw, cc->rdfd, NULL);
+
+  /* Send any data that is already buffer to the CGI task */
+
+  nbytes = hc->read_idx - hc->checked_idx;
+  llvdbg("nbytes: %d contentlength: %d\n", nbytes, hc->contentlength);
+  if (nbytes > 0)
+    {
+      if (httpd_write(cc->wrfd, &(hc->read_buf[hc->checked_idx]), nbytes) != nbytes)
+        {
+          lldbg("httpd_write failed\n");
+          return 1;
+        }
+    }
+
+  cc->inbuf.contentlength = hc->contentlength;
+  cc->inbuf.nbytes        = nbytes;
 
   /* Then perform the interposition */
 
@@ -851,29 +896,29 @@ static int cgi_child(int argc, char **argv)
   outdone = FALSE;
 
   nllvdbg("Interposing\n");
-  cgi_semgive();
+  cgi_semgive();  /* Not safe to reference hc after this point */
   do
     {
       (void)fdwatch(fw, 5000);
 
-      if (!indone && fdwatch_check_fd(fw, hc->conn_fd))
+      if (!indone && fdwatch_check_fd(fw, cc->connfd))
         {
           /* Transfer data from the client to the CGI program (POST) */
 
           nllvdbg("Interpose input\n");
-          indone = cgi_interpose_input(hc, wfd, buffer);
+          indone = cgi_interpose_input(cc);
           if (indone)
             {
-              fdwatch_del_fd(fw, hc->conn_fd);
+              fdwatch_del_fd(fw, cc->connfd);
             }
         }
 
-      if (fdwatch_check_fd(fw, rfd))
+      if (fdwatch_check_fd(fw, cc->rdfd))
         {
           /* Handle receipt of headers and CGI program response (GET) */
 
           nllvdbg("Interpose output\n");
-          outdone = cgi_interpose_output(hc, rfd, buffer, &hdr);
+          outdone = cgi_interpose_output(cc);
         }
   }
   while (!outdone);
@@ -884,27 +929,29 @@ static int cgi_child(int argc, char **argv)
 errout_with_watch:
   fdwatch_uninitialize(fw);
 
-  /* Free memory */
+  /* Free output buffer memory */
 
-errout_with_buffer:
-  httpd_free(buffer);
-errout_with_header:
-  httpd_free(hdr.buffer);
+errout_with_outbuffer:
+  httpd_free(cc->outbuf.buffer);
 
   /* Close all descriptors */
 
 errout_with_descriptors:
-  close(wfd);
-  close(rfd);
-  close(hc->conn_fd);
+  close(cc->wrfd);
+  close(cc->rdfd);
 
-  INTERNALERROR("errout");
-  httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
-  httpd_write_response(hc);
-  nllvdbg("Return %d\n", ret);
+errout_with_cgiconn:
+  close(cc->connfd);
+  httpd_free(cc);
 
+errout:
+  nllvdbg("Return %d\n", err);
   if (err != 0)
     {
+      INTERNALERROR("errout");
+      httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
+      httpd_write_response(hc);
+
       cgi_semgive();
     }
   return err;
