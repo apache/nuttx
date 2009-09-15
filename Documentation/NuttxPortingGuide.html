@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: September 11, 2009</p>
+      <p>Last Updated: September 15, 2009</p>
     </td>
   </tr>
 </table>
@@ -2005,6 +2005,9 @@ extern void up_ledoff(int led);
     <code>CONFIG_DEBUG_VERBOSE</code>: enables verbose debug output
   </li>
   <li>
+    <code>CONFIG_DEBUG_SYMBOLS</code>: build without optimization and with debug symbols (needed for use with a debugger).
+  </li>
+  <li>
     <code>CONFIG_DEBUG_SCHED</code>: enable OS debug output (disabled by default)
   </li>
   <li>
@@ -2014,10 +2017,19 @@ extern void up_ledoff(int led);
     <code>CONFIG_DEBUG_NET</code>: enable network debug output (disabled by default)
   </li>
   <li>
+    <code>CONFIG_DEBUG_USB</code>: enable USB debug output (disabled by default)
+  </li>
+  <li>
     <code>CONFIG_DEBUG_FS</code>: enable file system debug output (disabled by default)
   </li>
   <li>
     <code>CONFIG_DEBUG_LIB</code>: enable C library debug output (disabled by default)
+  </li>
+  <li>
+    <code>CONFIG_DEBUG_BINFMT</code>: enable binary loader debug output (disabled by default)
+  </li>
+  <li>
+    <code>CONFIG_DEBUG_GRAPHICS</code>: enable NX graphics debug output (disabled by default)
   </li>
   <li>
     <code>CONFIG_ARCH_LOWPUTC</code>: architecture supports low-level, boot

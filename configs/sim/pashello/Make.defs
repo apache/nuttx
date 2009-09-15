@@ -37,7 +37,7 @@ include ${TOPDIR}/.config
 
 HOSTOS			= ${shell uname -o}
 
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION	= -g
 else
   ARCHOPTIMIZATION	= -O2
@@ -73,7 +73,7 @@ else
   EXEEXT		=
 endif
 
-ifeq ("${CONFIG_DEBUG}","y")
+ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
   LDFLAGS		+= -g
 endif
 EXTRA_LIBS		= -lm

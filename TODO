@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated September 12, 2009)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated September 15, 2009)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (2)  Memory Managment (mm/)
@@ -14,7 +14,7 @@ NuttX TODO List (Last updated September 12, 2009)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (6)  Build system / Toolchains
+  (5)  Build system / Toolchains
   (3)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
   (2)  Linux/Cywgin simulation (arch/sim)
@@ -399,13 +399,6 @@ o Build system
                (same as arch/<arch>/src/board).
   Status:      Open
   Priority:    Medium (maybe higher for z80 target)
-
-  Description: It would be nice to de-couple some of the behaviors enabled by
-               CONFIG_DEBUG.  For example, CONFIG_DEBUG turns on debug output,
-               but also disables optimization make the binary much bigger.
-  Status:      Open
-  Priority:    Low.  There workaround is easy.. just edit the configuration's
-               Make.def file to control the behavior that you want.
 
   Description: Need a NuttX configuration tool.  The number of configuration
                settings has become quite large and difficult to manage manually.

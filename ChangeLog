@@ -866,3 +866,5 @@
 	* net/net_tcppoll.c.  Removed an unnecessary check for outstanding, un-ACKed
 	  data.  The NuttX socket layer keeps track of ACKs and doesn't need this check;
 	  removing the check should improve write throughput
+	* Add DEBUG configuration option to enable debug console output without disabling
+	  optimization (and vice versa)

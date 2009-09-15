@@ -177,9 +177,9 @@
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT
-# define bdbg(format, arg...)    dbg(format, ##arg)
+# define bdbg(format, arg...)    lldbg(format, ##arg)
 # define blldbg(format, arg...)  lldbg(format, ##arg)
-# define bvdbg(format, arg...)   vdbg(format, ##arg)
+# define bvdbg(format, arg...)   llvdbg(format, ##arg)
 # define bllvdbg(format, arg...) llvdbg(format, ##arg)
 #else
 # define bdbg(x...)
@@ -298,9 +298,9 @@
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT
-# define bdbg    dbg
+# define bdbg    lldbg
 # define blldbg  lldbg
-# define bvdbg   vdbg
+# define bvdbg   llvdbg
 # define bllvdbg llvdbg
 #else
 # define bdbg    (void)
