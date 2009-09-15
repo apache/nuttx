@@ -96,7 +96,7 @@ static void create_environment(httpd_conn *hc);
 static char **make_argp(httpd_conn *hc);
 static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer);
 static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
-                                          struct cgi_outbuffer_s *hdr);
+                                       struct cgi_outbuffer_s *hdr);
 static int  cgi_child(int argc, char **argv);
 
 /****************************************************************************
@@ -407,7 +407,7 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
  */
 
 static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
-                                          struct cgi_outbuffer_s *hdr)
+                                       struct cgi_outbuffer_s *hdr)
 {
   ssize_t nbytes_read;
   char *br = NULL;
