@@ -336,10 +336,12 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
   ssize_t nbytes_written;
 
   nbytes = hc->read_idx - hc->checked_idx;
+  llvdbg("nbytes: %d contentlength: %d\n", nbytes, hc->contentlength);
   if (nbytes > 0)
     {
       if (httpd_write(wfd, &(hc->read_buf[hc->checked_idx]), nbytes) != nbytes)
         {
+          lldbg("httpd_write failed\n");
           return 1;
         }
     }
@@ -349,10 +351,12 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
       do
         {
           nbytes_read = read(hc->conn_fd, buffer, MIN(sizeof(buffer), hc->contentlength - nbytes));
+          llvdbg("nbytes_read: %d\n", nbytes_read);
           if (nbytes_read < 0)
             {
               if (errno != EINTR)
                 {
+                   lldbg("read failed: %d\n", errno);
                   return 1;
                 }
             }
@@ -362,8 +366,10 @@ static inline int cgi_interpose_input(httpd_conn *hc, int wfd, char *buffer)
       if (nbytes_read > 0)
         {
           nbytes_written = httpd_write(wfd, buffer, nbytes_read);
+          llvdbg("nbytes_written: %d\n", nbytes_written);
           if (nbytes_written != nbytes_read)
             {
+              lldbg("httpd_write failed\n");
               return 1;
             }
         }
@@ -417,6 +423,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 
   /* Loop while there are things we can do without waiting for more input */
 
+  llvdbg("state: %d\n", hdr->state);
   switch (hdr->state)
     {
       case CGI_OUTBUFFER_READHEADER:
@@ -430,7 +437,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                */
 
               nbytes_read = read(hc->conn_fd, inbuffer, sizeof(inbuffer));
-              nvdbg("Read %d bytes from fd %d\n", nbytes_read, hc->conn_fd);
+              nllvdbg("Read %d bytes from fd %d\n", nbytes_read, hc->conn_fd);
 
               if (nbytes_read < 0)
                 {
@@ -438,7 +445,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                     {
                       if (errno != EAGAIN)
                         {
-                          ndbg("read: %d\n", errno);
+                          nlldbg("read: %d\n", errno);
                         }
                       return 1;
                     }
@@ -450,7 +457,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 
           if (nbytes_read <= 0)
             {
-              nvdbg("End-of-file\n");
+              nllvdbg("End-of-file\n");
               br         = &(hdr->buffer[hdr->len]);
               hdr->state = CGI_OUTBUFFER_HEADERREAD;
             }
@@ -462,14 +469,14 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
               (void)memcpy(&(hdr->buffer[hdr->len]), inbuffer, nbytes_read);
               hdr->len += nbytes_read;
               hdr->buffer[hdr->len] = '\0';
-              nvdbg("Header bytes accumulated: %d\n", hdr->len);
+              nllvdbg("Header bytes accumulated: %d\n", hdr->len);
 
               /* Check for end of header */
 
               if ((br = strstr(hdr->buffer, "\r\n\r\n")) != NULL ||
                   (br = strstr(hdr->buffer, "\012\012")) != NULL)
                 {
-                  nvdbg("End-of-header\n");
+                  nllvdbg("End-of-header\n");
                   hdr->state = CGI_OUTBUFFER_HEADERREAD;
                 }
               else
@@ -522,7 +529,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 
           /* Write the status line. */
 
-          nvdbg("Status: %d\n", status);
+          nllvdbg("Status: %d\n", status);
           switch (status)
             {
             case 200:
@@ -606,7 +613,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                */
 
               nbytes_read = read(rfd, inbuffer, sizeof(inbuffer));
-              nvdbg("Read %d bytes from fd %d\n", nbytes_read, rfd);
+              nllvdbg("Read %d bytes from fd %d\n", nbytes_read, rfd);
 
               if (nbytes_read < 0)
                 {
@@ -614,7 +621,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
                     {
                       if (errno != EAGAIN)
                         {
-                          ndbg("read: %d\n", errno);
+                          nlldbg("read: %d\n", errno);
                         }
                       return 1;
                     }
@@ -626,7 +633,7 @@ static inline int cgi_interpose_output(httpd_conn *hc, int rfd, char *inbuffer,
 
           if (nbytes_read == 0)
             {
-              nvdbg("End-of-file\n");
+              nllvdbg("End-of-file\n");
               close(hc->conn_fd);
               close(rfd);
               hdr->state = CGI_OUTBUFFER_DONE;
