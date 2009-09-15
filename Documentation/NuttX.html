@@ -1532,6 +1532,12 @@ nuttx-0.4.11 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Changed lots of occurrents of debug macro dbg() to lldbg().  dbg() uses
 	  stdout to output debug data.  That works fine unless (1) the dbg() macro
 	  is interrupt logic and the interrupted task has redirected stdout!  Most
+	* net/uip/uip_tcpinput.c.  Connection reference count was not being set correctly
+	  when a socket is created by accepting a new connection.  Since the reference
+	  count is bad, such sockets are not successfully duplicated when being passed
+	  to new tasks.
+	* net/net_clone.c.  Similarly, after a socket is cloned, its reference count
+	  was not being initialized.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
