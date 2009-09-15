@@ -70,9 +70,9 @@
 /* CONFIG_THTTPD_CGIDUMP will dump the contents of each transfer to and from the CGI task. */
 
 #ifdef CONFIG_THTTPD_CGIDUMP
-#  define cgi_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
+#  define cgi_dumpbuffer(m,a,n) lib_dumpbuffer(m,a,n)
 #else
-#  define cgi_dumppacket(m,a,n)
+#  define cgi_dumpbuffer(m,a,n)
 #endif
 
 /****************************************************************************
@@ -390,7 +390,7 @@ static inline int cgi_interpose_input(struct cgi_conn_s *cc)
               lldbg("httpd_write failed\n");
               return 1;
             }
-          cgi_dumppacket("Sent to CGI:", cc->inbuf.buffer, nbytes_written);
+          cgi_dumpbuffer("Sent to CGI:", cc->inbuf.buffer, nbytes_written);
         }
 
       cc->inbuf.nbytes += nbytes_read;
@@ -472,7 +472,7 @@ static inline int cgi_interpose_output(struct cgi_conn_s *cc)
                 }
               else
                 {
-                  cgi_dumppacket("Received from CGI:", cc->inbuf.buffer, nbytes_read);
+                  cgi_dumpbuffer("Received from CGI:", cc->inbuf.buffer, nbytes_read);
                 }
             }
           while (nbytes_read < 0);

@@ -60,8 +60,18 @@
 #if CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* CONFIG_DEV_PIPEDUMP will dump the contents of each transfer into and out
+ * of the pipe.
+ */
+
+#ifdef CONFIG_DEV_PIPEDUMP
+#  define pipe_dumpbuffer(m,a,n) lib_dumpbuffer(m,a,n)
+#else
+#  define pipe_dumpbuffer(m,a,n)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -319,6 +329,9 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   struct inode      *inode  = filep->f_inode;
   struct pipe_dev_s *dev    = inode->i_private;
+#ifdef CONFIG_DEV_PIPEDUMP
+  FAR ubyte         *start  = (ubyte*)buffer;
+#endif
   ssize_t            nread  = 0;
   int                sval;
   int                ret;
@@ -396,6 +409,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   pipecommon_pollnotify(dev, POLLOUT);
 
   sem_post(&dev->d_bfsem);
+  pipe_dumpbuffer("From PIPE:", start, nread);
   return nread;
 }
 
@@ -413,12 +427,14 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
   int                sval;
 
   /* Some sanity checking */
+
 #if CONFIG_DEBUG
   if (!dev)
     {
       return -ENODEV;
     }
 #endif
+  pipe_dumpbuffer("To PIPE:", (ubyte*)buffer, len);
 
   /* At present, this method cannot be called from interrupt handlers.  That is
    * because it calls sem_wait (via pipecommon_semtake below) and sem_wait cannot
