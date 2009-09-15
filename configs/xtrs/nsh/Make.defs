@@ -35,7 +35,7 @@
 
 include ${TOPDIR}/.config
 
-ifeq ("${CONFIG_DEBUG}","y")
+ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
   ARCHOPTIMIZATION	= --debug
 else
   ARCHOPTIMIZATION	=

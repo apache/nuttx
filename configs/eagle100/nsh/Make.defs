@@ -73,7 +73,7 @@ else
   MAXOPTIMIZATION	= -O2
 endif
 
-ifeq ("${CONFIG_DEBUG}","y")
+ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
   ARCHOPTIMIZATION	= -g
 else
   ARCHOPTIMIZATION	= $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
@@ -108,7 +108,7 @@ EXEEXT			=
 ifneq ($(CROSSDEV),arm-elf-)
   LDFLAGS		+= -nostartfiles -nodefaultlibs
 endif
-ifeq ($(CONFIG_DEBUG),y)
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS		+= -g
 endif
 
