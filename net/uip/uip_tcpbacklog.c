@@ -238,7 +238,7 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
 #endif
 
   bls = conn->backlog;
-  if (conn->backlog && blconn)
+  if (bls && blconn)
     {
        /* Allocate a container for the connection from the free list */
 

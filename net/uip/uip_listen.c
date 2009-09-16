@@ -64,6 +64,43 @@ static struct uip_conn *uip_listenports[CONFIG_NET_MAX_LISTENPORTS];
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: uip_findlistener
+ *
+ * Description:
+ *   Return the connection listener for connections on this port (if any)
+ *
+ * Assumptions:
+ *   Called at interrupt level
+ *
+ ****************************************************************************/
+
+struct uip_conn *uip_findlistener(uint16 portno)
+{
+  int ndx;
+
+  /* Examine each connection structure in each slot of the listener list */
+
+  for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
+    {
+      /* Is this slot assigned?  If so, does the connection have the same
+       * local port number?
+       */
+
+      struct uip_conn *conn = uip_listenports[ndx];
+      if (conn && conn->lport == portno)
+        {
+          /* Yes.. we found a listener on this port */
+
+          return conn;
+        }
+    }
+
+  /* No listener for this port */
+
+  return NULL;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -193,28 +230,7 @@ int uip_listen(struct uip_conn *conn)
 
 boolean uip_islistener(uint16 portno)
 {
-  int ndx;
-
-  /* Examine each connection structure in each slot of the listener list */
-
-  for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
-    {
-      /* Is this slot assigned?  If so, does the connection have the same
-       * local port number?
-       */
-
-      struct uip_conn *conn = uip_listenports[ndx];
-      if (conn && conn->lport == portno)
-        {
-          /* Yes.. we found a listener on this port */
-
-          return TRUE;
-        }
-    }
-
-  /* No listener for this port */
-
-  return FALSE;
+  return uip_findlistener(portno) != NULL;
 }
 
 /****************************************************************************
@@ -238,7 +254,7 @@ int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16 portno)
    * connection.
    */
 
-  listener = uip_tcplistener(portno);
+  listener = uip_findlistener(portno);
   if (listener)
     {
       /* Yes, there is a listener.  Is it accepting connections now? */
