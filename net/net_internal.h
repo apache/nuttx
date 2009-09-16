@@ -148,8 +148,13 @@ extern "C" {
 /* net_sockets.c *************************************************************/
 
 EXTERN int  sockfd_allocate(int minsd);
+EXTERN void sock_release(FAR struct socket *psock);
 EXTERN void sockfd_release(int sockfd);
 EXTERN FAR struct socket *sockfd_socket(int sockfd);
+
+/* net_close.c ***************************************************************/
+
+EXTERN int net_closesocket(FAR struct socket *psock);
 
 /* sockopt support ***********************************************************/
 

@@ -161,6 +161,8 @@ int net_addreflist(FAR struct socketlist *list)
 int net_releaselist(FAR struct socketlist *list)
 {
   int crefs;
+  int ndx;
+
   if (list)
     {
        /* Decrement the reference count on the list.
@@ -182,12 +184,29 @@ int net_releaselist(FAR struct socketlist *list)
         */
 
        if (crefs <= 0)
-          {
+         {
+	       /* Close each open socket in the list
+	        * REVISIT:  net_closesocket() will attempt to use semaphores.
+	        * If we actually are in the IDLE thread, then could this cause
+	        * problems?  Probably not, it the task has exited and crefs is
+	        * zero, then there probably could not be a contender for the
+	        * semaphore.
+	        */
+
+           for (ndx = 0; ndx < CONFIG_NSOCKET_DESCRIPTORS; ndx++)
+             {
+               FAR struct socket *psock = &list->sl_sockets[ndx];
+               if (psock->s_crefs > 0)
+                 {
+	               (void)net_closesocket(psock);
+                 }
+             }
+
              /* Destroy the semaphore and release the filelist */
 
              (void)sem_destroy(&list->sl_sem);
              sched_free(list);
-          }
+         }
     }
   return OK;
 }
@@ -226,14 +245,11 @@ int sockfd_allocate(int minsd)
   return ERROR;
 }
 
-void sockfd_release(int sockfd)
+void sock_release(FAR struct socket *psock)
 {
-  FAR struct socket *psock;
-
-  /* Get the socket structure for this sockfd */
-
-  psock = sockfd_socket(sockfd);
+#if CONFIG_DEBUG
   if (psock)
+#endif
     {
       /* Take the list semaphore so that there will be no accesses
        * to this socket structure.
@@ -259,6 +275,20 @@ void sockfd_release(int sockfd)
             }
           _net_semgive(list);
         }
+    }
+}
+
+void sockfd_release(int sockfd)
+{
+  /* Get the socket structure for this sockfd */
+
+  FAR struct socket *psock = sockfd_socket(sockfd);
+
+  /* Get the socket structure for this sockfd */
+
+  if (psock)
+    {
+      sock_release(psock);
     }
 }
 

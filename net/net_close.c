@@ -199,13 +199,13 @@ static inline void netclose_disconnect(FAR struct socket *psock)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_close
+ * Function: net_closesocket
  *
  * Description:
- *   Performs the close operation on socket descriptors
+ *   Performs the close operation on asocket instance
  *
  * Parameters:
- *   sockfd   Socket descriptor of socket
+ *   psock   Socket instance
  *
  * Returned Value:
  *   0 on success; -1 on error with errno set appropriately.
@@ -214,9 +214,8 @@ static inline void netclose_disconnect(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-int net_close(int sockfd)
+int net_closesocket(FAR struct socket *psock)
 {
-  FAR struct socket *psock = sockfd_socket(sockfd);
   int err;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -298,12 +297,33 @@ int net_close(int sockfd)
 
   /* Then release our reference on the socket structure containing the connection */
 
-  sockfd_release(sockfd);
+  sock_release(psock);
   return OK;
 
 errout:
   errno = err;
   return ERROR;
+}
+
+/****************************************************************************
+ * Function: net_close
+ *
+ * Description:
+ *   Performs the close operation on socket descriptors
+ *
+ * Parameters:
+ *   sockfd   Socket descriptor of socket
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int net_close(int sockfd)
+{
+  return net_closesocket(sockfd_socket(sockfd));
 }
 
 #endif /* CONFIG_NET */
