@@ -92,7 +92,7 @@ int socket(int domain, int type, int protocol)
 {
   FAR struct socket *psock;
   int sockfd;
-  int err;
+  int err = ENFILE;
 
   /* Only PF_INET or PF_INET6 domains supported */
 
@@ -129,8 +129,7 @@ int socket(int domain, int type, int protocol)
   sockfd = sockfd_allocate(0);
   if (sockfd < 0)
     {
-      err = ENFILE;
-      goto errout;
+      goto errout;  /* with err == ENFILE */
     }
 
   /* Initialize the socket structure */
@@ -152,6 +151,7 @@ int socket(int domain, int type, int protocol)
    * not actually be initialized until the socket is connected.
    */
 
+  err = ENOMEM; /* Assume failure to allocate connection instance */
   switch (type)
     {
 #ifdef CONFIG_NET_TCP
@@ -162,15 +162,17 @@ int socket(int domain, int type, int protocol)
            */
 
           struct uip_conn *conn = uip_tcpalloc();
-          psock->s_conn = conn;
+          if (conn)
+            {
+              /* Set the reference count on the connection structure.  This
+               * reference count will be increment only if the socket is
+               * dup'ed
+               */
 
-          /* Set the reference count on the connection structure.  This
-           * reference count will be increment only if the socket is
-           * dup'ed
-           */
-
-          DEBUGASSERT(conn->crefs == 0);
-          conn->crefs = 1;
+              DEBUGASSERT(conn->crefs == 0);
+              psock->s_conn = conn;
+              conn->crefs   = 1;
+            }
         }
         break;
 #endif
@@ -183,15 +185,17 @@ int socket(int domain, int type, int protocol)
            */
 
           struct uip_udp_conn *conn = uip_udpalloc();
-          psock->s_conn = conn;
+          if (conn)
+            {
+              /* Set the reference count on the connection structure.  This
+               * reference count will be increment only if the socket is
+               * dup'ed
+               */
 
-          /* Set the reference count on the connection structure.  This
-           * reference count will be increment only if the socket is
-           * dup'ed
-           */
-
-          DEBUGASSERT(conn->crefs == 0);
-          conn->crefs = 1;
+              DEBUGASSERT(conn->crefs == 0);
+              psock->s_conn = conn;
+              conn->crefs   = 1;
+            }
         }
         break;
 #endif
@@ -207,14 +211,13 @@ int socket(int domain, int type, int protocol)
       /* Failed to reserve a connection structure */
 
       sockfd_release(sockfd);
-      err = ENFILE;
-      goto errout;
+      goto errout; /* With err == ENFILE or ENOMEM */
     }
 
   return sockfd;
 
 errout:
-  *get_errno_ptr() = err;
+  errno = err;
   return ERROR;
 }
 
