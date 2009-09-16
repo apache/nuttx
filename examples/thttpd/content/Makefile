@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-SUBDIRS		= hello
+SUBDIRS		= hello tasks
 INSTALL_FILES	= index.html style.css
 
 THTTPD_DIR	= $(TOPDIR)/examples/thttpd

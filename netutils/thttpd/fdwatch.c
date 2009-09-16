@@ -56,6 +56,37 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* Debug output from this file is normally suppressed.  If enabled, be aware
+ * that output to stdout will interfere with CGI programs (you could use the
+ * the low-level debug (lldbg) functions which probably do not use stdout
+ */
+
+#ifdef CONFIG_THTTPD_FDWATCH_DEBUG
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define fwdbg(format, arg...)    ndbg(format, ##arg)
+#    define fwlldbg(format, arg...)  nlldbg(format, ##arg)
+#    define fwvdbg(format, arg...)   nvdbg(format, ##arg)
+#    define fwllvdbg(format, arg...) nllvdbg(format, ##arg)
+#  else
+#    define fwdbg    ndbg
+#    define fwlldbg  nlldbg
+#    define fwvdbg   nvdbg
+#    define fwllvdbg nllvdbg
+#  endif
+#else
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define fwdbg(x...)
+#    define fwlldbg(x...)
+#    define fwvdbg(x...)
+#    define fwllvdbg(x...)
+#  else
+#    define fwdbg    (void)
+#    define fwlldbg  (void)
+#    define fwvdbg   (void)
+#    define fwllvdbg (void)
+#  endif
+#endif
+
 #ifndef MIN
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
@@ -77,18 +108,18 @@ static void fdwatch_dump(const char *msg, FAR struct fdwatch_s *fw)
 {
   int i;
  
-  nvdbg("%s\n", msg);
-  nvdbg("nwatched: %d nfds: %d\n", fw->nwatched, fw->nfds);
+  fwvdbg("%s\n", msg);
+  fwvdbg("nwatched: %d nfds: %d\n", fw->nwatched, fw->nfds);
   for (i = 0; i < fw->nwatched; i++)
   {
-    nvdbg("%2d. pollfds: {fd: %d events: %02x revents: %02x} client: %p\n",
-          i+1, fw->pollfds[i].fd, fw->pollfds[i].events,
-          fw->pollfds[i].revents, fw->client[i]);
+    fwvdbg("%2d. pollfds: {fd: %d events: %02x revents: %02x} client: %p\n",
+           i+1, fw->pollfds[i].fd, fw->pollfds[i].events,
+           fw->pollfds[i].revents, fw->client[i]);
   }
-  nvdbg("nactive: %d next: %d\n", fw->nactive, fw->next);
+  fwvdbg("nactive: %d next: %d\n", fw->nactive, fw->next);
   for (i = 0; i < fw->nactive; i++)
   {
-    nvdbg("%2d. %d active\n", i, fw->ready[i]);
+    fwvdbg("%2d. %d active\n", i, fw->ready[i]);
   }
 }
 #else
@@ -105,12 +136,12 @@ static int fdwatch_pollndx(FAR struct fdwatch_s *fw, int fd)
     {
       if (fw->pollfds[pollndx].fd == fd)
         {
-          nvdbg("pollndx: %d\n", pollndx);
+          fwvdbg("pollndx: %d\n", pollndx);
           return pollndx;
         }
     }
 
-  ndbg("No poll index for fd %d: %d\n", fd);
+  fwdbg("No poll index for fd %d: %d\n", fd);
   return -1;
 }
 
@@ -129,7 +160,7 @@ struct fdwatch_s *fdwatch_initialize(int nfds)
   fw = (struct fdwatch_s*)zalloc(sizeof(struct fdwatch_s));
   if (!fw)
     {
-      ndbg("Failed to allocate fdwatch\n");
+      fwdbg("Failed to allocate fdwatch\n");
       return NULL;
     }
 
@@ -193,12 +224,12 @@ void fdwatch_uninitialize(struct fdwatch_s *fw)
 
 void fdwatch_add_fd(struct fdwatch_s *fw, int fd, void *client_data)
 {
-  nvdbg("fd: %d client_data: %p\n", fd, client_data);
+  fwvdbg("fd: %d client_data: %p\n", fd, client_data);
   fdwatch_dump("Before adding:", fw);
 
   if (fw->nwatched >= fw->nfds)
     {
-      ndbg("too many fds\n");
+      fwdbg("too many fds\n");
       return;
     }
 
@@ -220,7 +251,7 @@ void fdwatch_del_fd(struct fdwatch_s *fw, int fd)
 {
   int pollndx;
 
-  nvdbg("fd: %d\n", fd);
+  fwvdbg("fd: %d\n", fd);
   fdwatch_dump("Before deleting:", fw);
 
   /* Get the index associated with the fd */
@@ -261,11 +292,11 @@ int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
    */
 
   fdwatch_dump("Before waiting:", fw);
-  nvdbg("Waiting... (timeout %d)\n", timeout_msecs);
+  fwvdbg("Waiting... (timeout %d)\n", timeout_msecs);
   fw->nactive = 0;
   fw->next    = 0;
   ret         = poll(fw->pollfds, fw->nwatched, (int)timeout_msecs);
-  nvdbg("Awakened: %d\n", ret);
+  fwvdbg("Awakened: %d\n", ret);
 
   /* Look through all of the descriptors and make a list of all of them than
    * have activity.
@@ -281,7 +312,7 @@ int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
             {
               /* Yes... save it in a shorter list */
 
-              nvdbg("pollndx: %d fd: %d revents: %04x\n",
+              fwvdbg("pollndx: %d fd: %d revents: %04x\n",
                     i, fw->pollfds[i].fd, fw->pollfds[i].revents);
 
               fw->ready[fw->nactive++] = fw->pollfds[i].fd;
@@ -297,7 +328,7 @@ int fdwatch(struct fdwatch_s *fw, long timeout_msecs)
 
   /* Return the number of descriptors with activity */
 
-  nvdbg("nactive: %d\n", fw->nactive);
+  fwvdbg("nactive: %d\n", fw->nactive);
   fdwatch_dump("After wakeup:", fw);
   return ret;
 }
@@ -308,7 +339,7 @@ int fdwatch_check_fd(struct fdwatch_s *fw, int fd)
 {
   int pollndx;
 
-  nvdbg("fd: %d\n", fd);
+  fwvdbg("fd: %d\n", fd);
   fdwatch_dump("Checking:", fw);
 
   /* Get the index associated with the fd */
@@ -319,7 +350,7 @@ int fdwatch_check_fd(struct fdwatch_s *fw, int fd)
       return fw->pollfds[pollndx].revents & (POLLIN | POLLHUP | POLLNVAL);
     }
 
-  nvdbg("POLLERR fd: %d\n", fd);
+  fwvdbg("POLLERR fd: %d\n", fd);
   return 0;
 }
 
@@ -328,11 +359,11 @@ void *fdwatch_get_next_client_data(struct fdwatch_s *fw)
   fdwatch_dump("Before getting client data:", fw);
   if (fw->next >= fw->nwatched)
     {
-      nvdbg("All client data returned: %d\n", fw->next);
+      fwvdbg("All client data returned: %d\n", fw->next);
       return (void*)-1;
     }
 
-  nvdbg("client_data[%d]: %p\n", fw->next, fw->client[fw->next]);
+  fwvdbg("client_data[%d]: %p\n", fw->next, fw->client[fw->next]);
   return fw->client[fw->next++];
 }
 

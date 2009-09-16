@@ -491,7 +491,7 @@ static inline int cgi_interpose_output(struct cgi_conn_s *cc)
 
               httpd_realloc_str(&cc->outbuf.buffer, &cc->outbuf.size, cc->outbuf.len + nbytes_read);
               (void)memcpy(&(cc->outbuf.buffer[cc->outbuf.len]), cc->inbuf.buffer, nbytes_read);
-              cc->outbuf.len                    += nbytes_read;
+              cc->outbuf.len                   += nbytes_read;
               cc->outbuf.buffer[cc->outbuf.len] = '\0';
               nllvdbg("Header bytes accumulated: %d\n", cc->outbuf.len);
 
@@ -505,15 +505,17 @@ static inline int cgi_interpose_output(struct cgi_conn_s *cc)
                 }
               else
                 {
-                  /* Return.  We will be called again when more data is available
-                   * on the socket.
+                  /* All of the headers have not yet been read ... Return.  We
+                   * will be called again when more data is available in the pipe
+                   * connected to the CGI task.
                    */
 
                   return 0;
                 }
             }
         }
-        break;
+
+        /* Otherwise, fall through and parse status in the HTTP headers */
 
       case CGI_OUTBUFFER_HEADERREAD:
         {
@@ -587,7 +589,7 @@ static inline int cgi_interpose_output(struct cgi_conn_s *cc)
               title = err404title;
              break;
 
-           case 408:
+            case 408:
               title = httpd_err408title;
               break;
 
@@ -650,6 +652,10 @@ static inline int cgi_interpose_output(struct cgi_conn_s *cc)
                       return 1;
                     }
                 }
+              else
+                {
+                  cgi_dumpbuffer("Received from CGI:", cc->inbuf.buffer, nbytes_read);
+                }
             }
           while (nbytes_read < 0);
 
@@ -667,7 +673,7 @@ static inline int cgi_interpose_output(struct cgi_conn_s *cc)
             {
                /* Forward the data from the CGI program to the client */
 
-             (void)httpd_write(cc->connfd, cc->inbuf.buffer, strlen(cc->inbuf.buffer));
+             (void)httpd_write(cc->connfd, cc->inbuf.buffer, nbytes_read);
             }
         }
         break;

@@ -233,8 +233,6 @@ Timer *tmr_create(struct timeval *now, TimerProc *timer_proc,
   /* Add the new timer to the proper active list. */
 
   l_add(tmr);
-
-  nvdbg("Return: %p\n", tmr);
   return tmr;
 }
 
@@ -330,8 +328,6 @@ void tmr_run(struct timeval *now)
 
 void tmr_cancel(Timer *tmr)
 {
-  nvdbg("tmr: %p\n", tmr);
-
   /* Remove it from its active list. */
 
   l_remove(tmr);
