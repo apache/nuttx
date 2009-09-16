@@ -363,19 +363,19 @@ static inline int cgi_interpose_input(struct cgi_conn_s *cc)
   ssize_t nbytes_read;
   ssize_t nbytes_written;
 
-  llvdbg("nbytes: %d contentlength: %d\n", cc->inbuf.nbytes, cc->inbuf.contentlength);
+  nllvdbg("nbytes: %d contentlength: %d\n", cc->inbuf.nbytes, cc->inbuf.contentlength);
   if (cc->inbuf.nbytes < cc->inbuf.contentlength)
     {
       do
         {
           nbytes_read = read(cc->connfd, cc->inbuf.buffer,
             MIN(CONFIG_THTTPD_CGIINBUFFERSIZE, cc->inbuf.contentlength - cc->inbuf.nbytes));
-          llvdbg("nbytes_read: %d\n", nbytes_read);
+          nllvdbg("nbytes_read: %d\n", nbytes_read);
           if (nbytes_read < 0)
             {
               if (errno != EINTR)
                 {
-                   lldbg("read failed: %d\n", errno);
+                  nlldbg("read failed: %d\n", errno);
                   return 1;
                 }
             }
@@ -385,10 +385,10 @@ static inline int cgi_interpose_input(struct cgi_conn_s *cc)
       if (nbytes_read > 0)
         {
           nbytes_written = httpd_write(cc->wrfd, cc->inbuf.buffer, nbytes_read);
-          llvdbg("nbytes_written: %d\n", nbytes_written);
+          nllvdbg("nbytes_written: %d\n", nbytes_written);
           if (nbytes_written != nbytes_read)
             {
-              lldbg("httpd_write failed\n");
+              nlldbg("httpd_write failed\n");
               return 1;
             }
           cgi_dumpbuffer("Sent to CGI:", cc->inbuf.buffer, nbytes_written);
@@ -444,7 +444,7 @@ static inline int cgi_interpose_output(struct cgi_conn_s *cc)
 
   /* Loop while there are things we can do without waiting for more input */
 
-  llvdbg("state: %d\n", cc->outbuf.state);
+  nllvdbg("state: %d\n", cc->outbuf.state);
   switch (cc->outbuf.state)
     {
       case CGI_OUTBUFFER_READHEADER:
@@ -665,8 +665,6 @@ static inline int cgi_interpose_output(struct cgi_conn_s *cc)
           if (nbytes_read == 0)
             {
               nllvdbg("End-of-file\n");
-              close(cc->connfd);
-              close(cc->rdfd);
               cc->outbuf.state = CGI_OUTBUFFER_DONE;
               return 1;
             }
@@ -884,12 +882,12 @@ static int cgi_child(int argc, char **argv)
   /* Send any data that is already buffer to the CGI task */
 
   nbytes = hc->read_idx - hc->checked_idx;
-  llvdbg("nbytes: %d contentlength: %d\n", nbytes, hc->contentlength);
+  nllvdbg("nbytes: %d contentlength: %d\n", nbytes, hc->contentlength);
   if (nbytes > 0)
     {
       if (httpd_write(cc->wrfd, &(hc->read_buf[hc->checked_idx]), nbytes) != nbytes)
         {
-          lldbg("httpd_write failed\n");
+          nlldbg("httpd_write failed\n");
           return 1;
         }
     }
@@ -976,7 +974,6 @@ errout:
       INTERNALERROR("errout");
       httpd_send_err(hc, 500, err500title, "", err500form, hc->encodedurl);
       httpd_write_response(hc);
-
       cgi_semgive();
     }
   return err;
