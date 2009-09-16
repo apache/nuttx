@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 15, 2009)
+NuttX TODO List (Last updated September 16, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -7,7 +7,8 @@ NuttX TODO List (Last updated September 15, 2009)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (15)  Network (net/, netutils/)
+ (13)  Network (net/, netutils/)
+  (4)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
   (8)  File system/Generic drivers (fs/, drivers/)
@@ -136,15 +137,8 @@ o Binary loaders (binfmt/)
   Status:      Open
   Priority:    Low
 
-o Network (net/, netutils/)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Description: One critical part of netutils/ apps is untested: The uIP
-               resolver in netutils/resolv.  The webclient code has been
-               tested on host using gethosbyname(), but still depends on the
-               untested resolve logic.
-  Status:      Open
-  Priority:    Medium, Important but not core NuttX functionality
+o Network (net/)
+  ^^^^^^^^^^^^^^
 
   Description: Should implement SOCK_RAW, SOCK_PACKET
   Status:      Open
@@ -204,10 +198,6 @@ o Network (net/, netutils/)
   Status:      Open
   Priority:    Medium
 
-  Description: Port PPP support from http://contiki.cvs.sourceforge.net/contiki/contiki-2.x/backyard/core/net/ppp/
-  Status:      Open
-  Priority:    Low
-
   Description: At present, there cannot be two concurrent active TCP send
                operations in progress using the same socket.  This is because
                the uIP ACK logic will support only one transfer at a time.  The
@@ -244,15 +234,36 @@ o Network (net/, netutils/)
 
   Description: sockets do not support all modes except for O_NONBLOCK. Sockets
                support only (1) TCP/IP non-blocking read operations when read-ahead
-	       buffering is enabled, and (2) TCP/IP accept() operations when TCP/IP
-	       connection backlog is enabled.
+               buffering is enabled, and (2) TCP/IP accept() operations when TCP/IP
+               connection backlog is enabled.
   Status:      Open
   Priority:    Low.
 
-  Description: THTTPD is included in the source tree, but has not yet been fully
-               integrated.
+o Network Utilities (netutils/)
+
+  Description: One critical part of netutils/ apps is untested: The uIP
+               resolver in netutils/resolv.  The webclient code has been
+               tested on host using gethosbyname(), but still depends on the
+               untested resolve logic.
   Status:      Open
-  Priority:    High
+  Priority:    Medium, Important but not core NuttX functionality
+
+  Description: Port PPP support from http://contiki.cvs.sourceforge.net/contiki/contiki-2.x/backyard/core/net/ppp/
+  Status:      Open
+  Priority:    Low
+
+  Description: Not all THTTPD features/options have been verified.  In particular, there is no
+               test case of a CGI program receiving POST input.  Only the configuration of
+               examples/thttpd has been tested.
+  Status:      Open
+  Priority:    Medium
+
+  Description: The first GET received by THTTPD is not responded to.  Refreshing the page
+               from the browser solves the problem and THTTPD works fine after thatg.  I 
+               believe that this is the duplicate of another bug: "Outgoing [uIP] packets are dropped
+               and overwritten by ARP packets if the destination IP has not been mapped to a MAC."
+  Status:      Open
+  Priority:    Medium
 
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^

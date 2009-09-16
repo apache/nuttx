@@ -839,7 +839,7 @@
 	* net/accept.c: Fix bug in accept().  The logic expected parts of the
 	  return address structure to be initialized or it would return an error.
 
-0.4.11 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.11 2009-09-16 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* fs/fs_read.c and fs/fs_write.c.  read() and write() to socket is the
 	  same as recv() and send() with flags = 0.  Fixed!
@@ -878,4 +878,19 @@
 	  to new tasks.
 	* net/net_clone.c.  Similarly, after a socket is cloned, its reference count
 	  was not being initialized.
+	* lib/lib_strstr.c.  Improperly incremented pointer could cause comparison
+	  failures.
+	* net/.  Connection reference count must always be set to zero before calling
+	  uip_tcpfree() or it could trigger a DEBUGASSERT that verifies that the
+	  reference count is zero before freeing a connection structure.
+	* net/uip/uip_listen.c.  uip_accept() consulted the wrong list to find the
+	  listener on a socket.  The previous logic worked most of the time, but
+	  occasionally picked the wrong listener.
+	* net/net_close.c and net/net_sockets.c.  Sockets were not being closed
+	  when a task exits.  If many server tasks are created and exit without closing
+	  sockets (such as with CGI tasks), then eventually, you will run out of sockets.
+	* netutils/thttpd.  Basic functionality of THTTPD is complete.  This includes
+	  serving up files from a file system and executing NXFLAT-based CGI programs
+	  and pipe the stdout back to the HTTP client.
 
+0.4.12 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
