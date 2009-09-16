@@ -54,7 +54,7 @@ char *strstr(const char *str, const char *substr)
   /* Special case the empty substring */
 
   len = strlen(substr);
-  ch  = *substr++;
+  ch  = *substr;
 
   if (!ch)
     {
