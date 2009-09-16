@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_fclose.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,14 +62,14 @@ int fclose(FAR FILE *stream)
         {
           ret = close(stream->fs_filedes);
         }
-#ifdef CONFIG_CPP_HAVE_WARNING
-#  warning REVIEW for race conditions
-#endif
+
 #if CONFIG_STDIO_BUFFER_SIZE > 0
       /* Destroy the semaphore */
+
       sem_destroy(&stream->fs_sem);
 
       /* release the buffer */
+
       if (stream->fs_bufstart)
         {
           free(stream->fs_bufstart);
@@ -92,6 +92,7 @@ int fclose(FAR FILE *stream)
 
       stream->fs_filedes = -1;
     }
+
   return ret;
 }
 
