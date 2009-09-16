@@ -199,6 +199,7 @@ int files_addreflist(FAR struct filelist *list)
  * Description: Release a reference to the file list
  *
  ****************************************************************************/
+
 int files_releaselist(FAR struct filelist *list)
 {
   int crefs;
@@ -228,7 +229,7 @@ int files_releaselist(FAR struct filelist *list)
 
             /* Close each file descriptor .. Normally, you would need
              * take the list semaphore, but it is safe to ignore the
-             * semaphore in this context because there are not references
+             * semaphore in this context because there are no references
              */
 
             for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
