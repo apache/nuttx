@@ -46,6 +46,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 #include <libgen.h>
 #include <errno.h>
 #include <debug.h>
@@ -70,7 +71,7 @@
 /* CONFIG_THTTPD_CGIDUMP will dump the contents of each transfer to and from the CGI task. */
 
 #ifdef CONFIG_THTTPD_CGIDUMP
-#  define cgi_dumpbuffer(m,a,n) lib_dumpbuffer(m,a,n)
+#  define cgi_dumpbuffer(m,a,n) lib_dumpbuffer(m,(FAR const ubyte*)a,n)
 #else
 #  define cgi_dumpbuffer(m,a,n)
 #endif
@@ -905,7 +906,9 @@ static int cgi_child(int argc, char **argv)
   cgi_semgive();  /* Not safe to reference hc after this point */
   do
     {
-      (void)fdwatch(fw, 5000);
+      (void)fdwatch(fw, 1000);
+
+      /* Check for incoming data from the remote client to the CGI task */
 
       if (!indone && fdwatch_check_fd(fw, cc->connfd))
         {
@@ -919,12 +922,28 @@ static int cgi_child(int argc, char **argv)
             }
         }
 
+      /* Check for outgoing data from the CGI task to the remote client */
+
       if (fdwatch_check_fd(fw, cc->rdfd))
         {
           /* Handle receipt of headers and CGI program response (GET) */
 
           nllvdbg("Interpose output\n");
           outdone = cgi_interpose_output(cc);
+        }
+
+      /* No outgoing data... is the child task still running?   Use kill()
+       * kill() with signal number == 0 does not actually send a signal, but
+       * can be used to check if the target task exists.  If the task exists
+       * but is hung, then you might enable CONFIG_THTTPD_CGI_TIMELIMIT to
+       * kill the task.  However, killing the task could cause other problems
+       * (consider resetting the microprocessor instead).
+       */
+
+      else if (kill(child, 0) != 0)
+        {
+          nllvdbg("CGI no longer running: %d\n", errno);
+          outdone = TRUE;
         }
   }
   while (!outdone);
@@ -1042,6 +1061,21 @@ errout_with_sem:
   sem_destroy(&g_cgisem);
   return retval;
 }
+
+#if CONFIG_THTTPD_CGI_TIMELIMIT > 0
+static void cgi_kill(ClientData client_data, struct timeval *nowP)
+{
+  pid_t pid = (pid_t)client_data.i;
+
+  /* task_delete() is a very evil API.  It can leave memory stranded! */
+
+  nlldbg("Killing CGI child: %d\n", pid);
+  if (task_delete(pid) != 0)
+    {
+      nlldbg("task_delete() failed: %d\n", errno);
+    }
+}
+#endif
 
 #endif /* CONFIG_THTTPD && CONFIG_THTTPD_CGI_PATTERN */
 

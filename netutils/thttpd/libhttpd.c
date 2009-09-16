@@ -150,10 +150,6 @@ static char *bufgets(httpd_conn *hc);
 static void de_dotdot(char *file);
 static void init_mime(void);
 static void figure_mime(httpd_conn *hc);
-#if CONFIG_THTTPD_CGI_TIMELIMIT > 0
-static void cgi_kill2(ClientData client_data, struct timeval *nowP);
-static void cgi_kill(ClientData client_data, struct timeval *nowP);
-#endif
 #ifdef CONFIG_THTTPD_GENERATE_INDICES
 static void ls_child(int argc, char **argv);
 static int  ls(httpd_conn *hc);
@@ -1534,38 +1530,6 @@ done:
       encodings_len += enc_tab[me_indexes[i]].val_len;
     }
 }
-
-#if CONFIG_THTTPD_CGI_TIMELIMIT > 0
-static void cgi_kill2(ClientData client_data, struct timeval *nowP)
-{
-  pid_t pid;
-
-  pid = (pid_t) client_data.i;
-  if (kill(pid, SIGKILL) == 0)
-    {
-      ndbg("hard-killed CGI task %d\n", pid);
-    }
-}
-
-static void cgi_kill(ClientData client_data, struct timeval *nowP)
-{
-  pid_t pid;
-
-  pid = (pid_t) client_data.i;
-  if (kill(pid, SIGINT) == 0)
-    {
-      ndbg("killed CGI task %d\n", pid);
-
-      /* In case this isn't enough, schedule an uncatchable kill. */
-
-      if (tmr_create(nowP, cgi_kill2, client_data, 5 * 1000L, 0) == NULL)
-        {
-          ndbg("tmr_create(cgi_kill2) failed\n");
-          exit(1);
-        }
-    }
-}
-#endif
 
 /* qsort comparison routine. */
 
