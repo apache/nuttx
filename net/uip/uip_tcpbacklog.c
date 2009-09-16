@@ -196,6 +196,7 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
 
                blconn->blparent = NULL;
                blconn->backlog  = NULL;
+               blconn->crefs    = 0;
                uip_tcpfree(blconn);
              }
          }

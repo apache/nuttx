@@ -173,6 +173,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
                 {
                   /* No, then we have to give the connection back */
 
+                  conn->crefs     = 0;
                   uip_tcpfree(conn);
                   conn = NULL;
                 }
