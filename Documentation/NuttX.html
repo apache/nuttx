@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 15, 2009</p>
+      <p>Last Updated: September 16, 2009</p>
     </td>
   </tr>
 </table>
@@ -706,32 +706,32 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.4.10</b>.
-  This 42<sup>nd</sup> release of NuttX (nuttx-0.4.10) was made on August 8, 2009
-  and is available for download from the
-  <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a>
-  website.
+<p><b>nuttx-0.4.11</b>.
+
+<p>
+  This 43<sup>rd</sup> release of NuttX was made on September 16, 2009 and is available for download from the
+  <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
+  This release of NuttX incorporates the verified port of Jeff Poskanzer's <a href="http://acme.com/software/thttpd">THTTPD</a> HTTP server.
+  Many of the key features of THTTPD have been tested on the Micromint Eagle-100 development board (Cortex-M3).
+  These tests verify:
 </p>
-  The changes in thsi release focus on the port of Jeff Poskanzer's
-  <a href="http://acme.com/software/thttpd/">THTTPD</a> to NuttX.
-  Do to limited time to work on NuttX, that port is still not fully functional.
-  However, numerous related bug-fixes and functional additions for THTTPD were
-  added:
-  <ul>
-    <li>Several new standard C-library functions (<code>fileno</code>, <code>strstr</code>,
-        <code>strpbrk</code>, <code>fcntl</code>).</li>
-    <li>Improved and extended timing APIs (<code>mktime</code>, <code>gmtime</code>, <code>gmtime_r</code>,
-        <code>gettimeofday</code>, <code>localtime</code>, <code>localtime_r</code>, and
-        <code>strftime</code>)</li>
-    <li>Networking enhancements: <code>recvfrom</code> and <code>accept</code> now work with non-blocking
-	sockets.</li>
-    <li><a href="NuttXNxFlat.html">NXFLAT</a> extensions (<code>exec</code>)</li>
-    <li>Pattern matching logic.</li>
-    <li>And miscellaneous bug fixes (see the <a href="#currentrelease">ChangeLog</a> for a complete list).</li>
-  </ul>
+<ul>
+  <li>Serving of files from any file system, and </li>
+  <li>Execution of CGI executable.
+    This release supports execution of <a href="http://www.nuttx.org/NuttXNxFlat.html">NXFLAT executables</a> residing on a ROMFS file system.
+</ul>
+<p>
+  A standard CGI interface is used:  Information is pasted to the CGI program via POST commands and via environment variables.
+  CGI socket I/O is redirected to <code>stdin</code> and <code>stdout</code> so that the CGI program only need to <code>printf()</code> to send its content back to the HTTP client.
+</p>
+<p>
+  Another value to this THTTPD integration effort has been that THTTPD has provided a very good test bed for finding NuttX networking bugs.
+  Several very critical networking bugs have been fixed with this 0.4.11 release (see the <a href="#currentrelease">ChangeLog</a> for details).
+  Networking throughput has also been greatly improved.
+  Anyone using NuttX networking should consider upgrading to this release.
 </p>
 
 <table width ="100%">
@@ -1436,70 +1436,6 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-0.4.10 2009-08-08 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* lib/: Added some basic regex-subset, pattern matching functions
-	* lib/: Greatly simplified mktime() and gmtime_r().  The Gregorian and
-	  Julian time calculations were interesting, but not necessary in the
-	  typical embeddd system.
-	* sched/: Added gettimeofday().  This implementation is simply a thin
-	  wrapper around clock_gettimer().
-	* lib/: Add gmtime(), localtime(), and strftime()
-	* binfmt/: Add exec().  This is just a wrapper that executes both
-	  load_ and exec_module() in a more familiar manner.  It is not consistent
-	  with more standard exec() functions, however, because (1) it returns
-	  and (2) it requires symbol table arguments.
-	* lib/: Add fileno()
-	* examples/ostest: Several of the tests used a big, hard-coded stack size
-	  when creating test threads (16Kb stacksize).  The stack size should
-	  be controlled by the .config file or the OSTest won't work on platforms
-	  with memory constraints.
-	* netutils/thttpd: An initial port of Jef Poskanzer's THTTPD HTTP server.
-	  See http://acme.com/software/thttpd/.
-	* examples/thttpd: A basic test program for THTTPD
-	* configs/eagle100/thttpd: A build configuration for THTTPD on the Micromint
-	  Eagle-100 LMS6918 (Cortex-M3) board.
-	* configs/ntosd-dm320/thttpd: A build configuration for THTTPD on the Neuros
-	  DM320 platform.
-	* lib/: Added strstr() and strpbrk().
-	* net/recvfrom.c and net/accept(): Sockets now support some non-blocking
-	  operations, specifically for (1) TCP/IP read operations when read-ahead
-	  buffering is enabled, and (2) TCP/IP accept() operations when TCP/IP
-	  connection backlog is enabled.
-	* fs/fs_fcntl.c and net/net_vfcntl.c: Minimal support provided for fcntl().
-	  It can, at least, be used to mark sockets as blocking or non-blocking.
-	* net/net_close.c: Fix bug in close().  If reference count not set to zero
-	  then uip_tcpfree() will assert when DEBUG is enabled.
-	* net/accept.c: Fix bug in accept().  The logic expected parts of the
-	  return address structure to be initialized or it would return an error.
-
-pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Add logic to build and link with the ZDS-II toolchain
-	  use with the z16f.
-	* Make sure that POFF header structures are aligned
-	* Standardized POFF file format to big-endian
-	* Break up large switch statements to lower complexity
-	  and eliminate a compiler bug
-	* Changes so that runtime compiles with SDCC.
-
-buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
-
-	* configs/avr-defconfig-4.3.3: Added support for AVR to support a NuttX
-	  port of the ATmega128.
-	* toolchain/nxflat:  Added logic to build NuttX NXFLAT binding support tools
-	* toolchain/genromfs:  Added support for the genromfs tool
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
 nuttx-0.4.11 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* fs/fs_read.c and fs/fs_write.c.  read() and write() to socket is the
@@ -1538,6 +1474,49 @@ nuttx-0.4.11 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  to new tasks.
 	* net/net_clone.c.  Similarly, after a socket is cloned, its reference count
 	  was not being initialized.
+	* lib/lib_strstr.c.  Improperly incremented pointer could cause comparison
+	  failures.
+	* net/.  Connection reference count must always be set to zero before calling
+	  uip_tcpfree() or it could trigger a DEBUGASSERT that verifies that the
+	  reference count is zero before freeing a connection structure.
+	* net/uip/uip_listen.c.  uip_accept() consulted the wrong list to find the
+	  listener on a socket.  The previous logic worked most of the time, but
+	  occasionally picked the wrong listener.
+	* net/net_close.c and net/net_sockets.c.  Sockets were not being closed
+	  when a task exits.  If many server tasks are created and exit without closing
+	  sockets (such as with CGI tasks), then eventually, you will run out of sockets.
+	* netutils/thttpd.  Basic functionality of THTTPD is complete.  This includes
+	  serving up files from a file system and executing NXFLAT-based CGI programs
+	  and pipe the stdout back to the HTTP client.
+
+pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* Add logic to build and link with the ZDS-II toolchain
+	  use with the z16f.
+	* Make sure that POFF header structures are aligned
+	* Standardized POFF file format to big-endian
+	* Break up large switch statements to lower complexity
+	  and eliminate a compiler bug
+	* Changes so that runtime compiles with SDCC.
+
+buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
+
+	* configs/avr-defconfig-4.3.3: Added support for AVR to support a NuttX
+	  port of the ATmega128.
+	* toolchain/nxflat:  Added logic to build NuttX NXFLAT binding support tools
+	* toolchain/genromfs:  Added support for the genromfs tool
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<ul><pre>
+nuttx-0.4.12 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
