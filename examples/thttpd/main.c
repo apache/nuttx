@@ -52,6 +52,7 @@
 #include <net/uip/thttpd.h>
 #include <net/uip/uip-arp.h>
 #include <net/uip/uip-lib.h>
+#include <netinet/ether.h>
 
 #include <nuttx/ramdisk.h>
 #include <nuttx/binfmt.h>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * examples/thttpd/tasks.c
+ * examples/thttpd/tasks/tasks.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -86,13 +86,14 @@ static const char *g_statenames[] =
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: show_task
- ****************************************************************************/
-
-/* NOTE:  One limitation in the use of NXFLAT is that functions that are
- * referenced as a pointer-to-a-function must have global scope.  Otherwise
- * ARM GCC will generate some bad logic.
+/* NOTEs:
+ *
+ * 1. One limitation in the use of NXFLAT is that functions that are
+ *    referenced as a pointer-to-a-function must have global scope.  Otherwise
+ *    ARM GCC will generate some bad logic.
+ * 2. In general, when called back, there is no guarantee to that PIC registers
+ *    will be valid and, unless you take special precautions, it could be
+ *    dangerous to reference global variables in the callback function.
  */
 
 /* static */ void show_task(FAR _TCB *tcb, FAR void *arg)
@@ -143,7 +144,7 @@ int main(int argc, char *argv[])
 	"\r\n"
     "<html>\r\n"
       "<head>\r\n"
-        "<title>Hello!</title>\r\n"
+        "<title>NuttX Tasks</title>\r\n"
         "<link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\">\r\n"
       "</head>\r\n"
       "<body bgcolor=\"#fffeec\" text=\"black\">\r\n"

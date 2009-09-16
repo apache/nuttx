@@ -1,6 +1,5 @@
 /****************************************************************************
- * examples/thttpd/content/hello/hello.c
- * Manatory "Hello, World!" Example
+ * examples/thttpd/netstat/netstat.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -15,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -43,6 +42,59 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
+#include <netinet/ether.h>
+#include <net/uip/uip-arch.h>
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* NOTEs:
+ *
+ * 1. One limitation in the use of NXFLAT is that functions that are
+ *    referenced as a pointer-to-a-function must have global scope.  Otherwise
+ *    ARM GCC will generate some bad logic.
+ * 2. In general, when called back, there is no guarantee to that PIC registers
+ *    will be valid and, unless you take special precautions, it could be
+ *    dangerous to reference global variables in the callback function.
+ */
+
+/* static */ int netdev_callback(FAR struct uip_driver_s *dev, void *arg)
+{
+  struct in_addr addr;
+
+  printf("  <dt>%s\r\n", dev->d_ifname);
+  printf("    <dd>HWaddr %s<br>\r\n", ether_ntoa(&dev->d_mac));
+  addr.s_addr = dev->d_ipaddr;
+  printf("    IPaddr: %s<br>\r\n", inet_ntoa(addr));
+  addr.s_addr = dev->d_draddr;
+  printf("    DRaddr: %s<br>\r\n", inet_ntoa(addr));
+  addr.s_addr = dev->d_netmask;
+  printf("    Mask: %s\r\n", inet_ntoa(addr));
+  return OK;
+}
 
 /****************************************************************************
  * Public Functions
@@ -50,15 +102,13 @@
 
 int main(int argc, char *argv[])
 {
-  fprintf(stderr, "Hello requested from: %s\n", getenv("REMOTE_ADDR"));
-
   puts(
 	"Content-type: text/html\r\n"
 	"Status: 200/html\r\n"
 	"\r\n"
     "<html>\r\n"
       "<head>\r\n"
-        "<title>Hello!</title>\r\n"
+        "<title>Network Status</title>\r\n"
         "<link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\">\r\n"
       "</head>\r\n"
       "<body bgcolor=\"#fffeec\" text=\"black\">\r\n"
@@ -69,11 +119,13 @@ int main(int argc, char *argv[])
         "<div class=\"menubox\"><a href=\"netstat\">Network status</a></div>\r\n"
         "<br>\r\n"
         "</div>\r\n"
-        "<div class=\"contentblock\">\r\n");
-  printf(
-        "<h2>Hello, World!</h2><p>Requested by: %s</p>\r\n", 
-        getenv("REMOTE_ADDR"));
+        "<div class=\"contentblock\">\r\n"
+        "<dl>\r\n");
+
+  netdev_foreach(netdev_callback, NULL);
+
   puts(
+        "</dl>\r\n"
       "</body>\r\n"
    "</html>\r\n");
   return 0;

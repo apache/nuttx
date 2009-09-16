@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-SUBDIRS		= hello tasks
+SUBDIRS		= hello tasks netstat
 INSTALL_FILES	= index.html style.css
 
 THTTPD_DIR	= $(TOPDIR)/examples/thttpd
