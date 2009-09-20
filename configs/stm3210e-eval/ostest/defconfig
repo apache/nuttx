@@ -1,5 +1,5 @@
 ############################################################################
-# configs/eagle100/ostest/defconfig
+# configs/stm3210e-eval/ostest/defconfig
 #
 #   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -52,14 +52,13 @@
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_DRAM_START - The start address of DRAM (physical)
 # CONFIG_DRAM_END - Last address+1 of installed RAM
-# CONFIG_ARCH_IRQPRIO - The LM3S6918 supports interrupt prioritization
+# CONFIG_ARCH_IRQPRIO - The ST32F103Z supports interrupt prioritization
 # CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 #   stack. If defined, this symbol is the size of the interrupt
 #   stack in bytes.  If not defined, the user task stacks will be
 #   used during interrupt handling.
 # CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
-# CONFIG_ARCH_BOOTLOADER - Configure to use the MicroMint Eagle-100
-#   Ethernet bootloader.
+# CONFIG_ARCH_BOOTLOADER - Set if you are using a bootloader.
 # CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 # CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
 #   cause a 100 second delay during boot-up.  This 100 second delay
@@ -71,10 +70,10 @@
 CONFIG_ARCH=arm
 CONFIG_ARCH_ARM=y
 CONFIG_ARCH_CORTEXM3=y
-CONFIG_ARCH_CHIP=lm3s
-CONFIG_ARCH_CHIP_LM3S6918=y
-CONFIG_ARCH_BOARD=eagle100
-CONFIG_ARCH_BOARD_EAGLE100=y
+CONFIG_ARCH_CHIP=stm32
+CONFIG_ARCH_CHIP_STM32F103Z=y
+CONFIG_ARCH_BOARD=stm3210e_eval
+CONFIG_ARCH_BOARD_STM3210E_EVAL=y
 CONFIG_BOARD_LOOPSPERMSEC=4531
 CONFIG_DRAM_SIZE=0x00010000
 CONFIG_DRAM_START=0x20000000
@@ -83,12 +82,12 @@ CONFIG_ARCH_IRQPRIO=y
 CONFIG_DRAM_NUTTXENTRY=0x00002000
 CONFIG_ARCH_INTERRUPTSTACK=n
 CONFIG_ARCH_STACKDUMP=y
-CONFIG_ARCH_BOOTLOADER=y
+CONFIG_ARCH_BOOTLOADER=n
 CONFIG_ARCH_LEDS=y
 CONFIG_ARCH_CALIBRATION=n
 
 #
-# LM3S6918 specific serial device driver settings
+# STM32F103Z specific serial device driver settings
 #
 # CONFIG_UARTn_DISABLE - select to disable all support for
 #   the UART
@@ -121,7 +120,7 @@ CONFIG_UART0_2STOP=0
 CONFIG_UART1_2STOP=0
 
 #
-# LM3S6918 specific SSI device driver settings
+# STM32F103Z specific SSI device driver settings
 #
 # CONFIG_SSIn_DISABLE - select to disable all support for
 #   the SSI
@@ -137,33 +136,6 @@ CONFIG_SSI0_DISABLE=n
 CONFIG_SSI1_DISABLE=y
 CONFIG_SSI_POLLWAIT=y
 #CONFIG_SSI_TXLIMIT=4
-
-#
-# LM3S6918 specific serial device driver settings
-#
-# CONFIG_LM3S_ETHERNET - This must be set (along with CONFIG_NET)
-#   to build the LM3S Ethernet driver
-# CONFIG_LM3S_ETHLEDS - Enable to use Ethernet LEDs on the board.
-# CONFIG_LM3S_BOARDMAC - If the board-specific logic can provide
-#   a MAC address (via lm3s_ethernetmac()), then this should be selected.
-# CONFIG_LM3S_ETHHDUPLEX - Set to force half duplex operation
-# CONFIG_LM3S_ETHNOAUTOCRC - Set to suppress auto-CRC generation
-# CONFIG_LM3S_ETHNOPAD - Set to suppress Tx padding
-# CONFIG_LM3S_MULTICAST - Set to enable multicast frames
-# CONFIG_LM3S_PROMISCUOUS - Set to enable promiscuous mode
-# CONFIG_LM3S_BADCRC - Set to enable bad CRC rejection.
-# CONFIG_LM3S_DUMPPACKET - Dump each packet received/sent to the console.
-#
-CONFIG_LM3S_ETHERNET=n
-CONFIG_LM3S_ETHLEDS=n
-CONFIG_LM3S_BOARDMAC=y
-CONFIG_LM3S_ETHHDUPLEX=n
-CONFIG_LM3S_ETHNOAUTOCRC=n
-CONFIG_LM3S_ETHNOPAD=n
-CONFIG_LM3S_MULTICAST=n
-CONFIG_LM3S_PROMISCUOUS=n
-CONFIG_LM3S_BADCRC=n
-CONFIG_LM3S_DUMPPACKET=n
 
 #
 # General build options
@@ -271,8 +243,8 @@ CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_START_YEAR=2009
-CONFIG_START_MONTH=5
-CONFIG_START_DAY=6
+CONFIG_START_MONTH=9
+CONFIG_START_DAY=21
 CONFIG_GREGORIAN_TIME=n
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
@@ -562,7 +534,7 @@ CONFIG_EXAMPLES_NSH_MMCSDMINOR=0
 #
 # CONFIG_BOOT_RUNFROMFLASH - Some configurations support XIP
 #   operation from FLASH but must copy initialized .data sections to RAM.
-#   (should also be =n for the Eagle100 which always runs from flash)
+#   (should also be =n for the STM3210E-EVAL which always runs from flash)
 # CONFIG_BOOT_COPYTORAM -  Some configurations boot in FLASH
 #   but copy themselves entirely into RAM for better performance.
 # CONFIG_CUSTOM_STACK - The up_ implementation will handle
