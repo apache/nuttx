@@ -51,7 +51,7 @@
 
 #ifdef CONFIG_CHIP_STM32F103Z
 #  define STM32_NTIM     4 /* TIM1-TIM4 */
-#  define STM32_NSPI     2 /* SPI1-2 */
+#  define STM32_NSPI     1 /* SPI1 */
 #  define STM32_NUSART   3 /* USART1-3 */
 #  define STM32_NI2C     2 /* I2C1-2 */
 #  define STM32_NCAN     1 /* bxCAN1 */
@@ -67,6 +67,8 @@
 /* Then get all of the register definitions */
 
 #include "stm32_memorymap.h"
+#include "stm32_uart.h"
+#include "stm32_spi.h"
 
 /************************************************************************************
  * Public Types

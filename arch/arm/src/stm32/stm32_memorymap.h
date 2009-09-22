@@ -107,7 +107,6 @@
 #define STM32_USART1_BASE    0x40013800     /* 0x40013800 - 0x40013bff: USART1 */
 #define STM32_ADC3_BASE      0x40012800     /* 0x40012800 - 0x40013fff: ADC3 */
                                             /* 0x40014000 - 0x40017fff: Reserved */
-
 /* AHB bus */
 
 #define STM32_SDIO_BASE     0x40020000     /* 0x40018000 - 0x400183ff: SDIO  */
