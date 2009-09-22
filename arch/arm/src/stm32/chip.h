@@ -64,11 +64,11 @@
 #  error "Unsupported STM32 chip */
 #endif
 
-/* Then get all of the register definitions */
+/* Include only the memory map.  Other chip hardware files should then include this
+ * file for the proper setup
+ */
 
 #include "stm32_memorymap.h"
-#include "stm32_uart.h"
-#include "stm32_spi.h"
 
 /************************************************************************************
  * Public Types
