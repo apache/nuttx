@@ -68,10 +68,10 @@
 #define STM32_WWDG_BASE      0x40002C00     /* 0x40002C00 - 0x40002fff: Window watchdog (WWDG) */
 #define STM32_IWDG_BASE      0x40003000     /* 0x40003000 - 0x400033ff: Independent watchdog (IWDG) */
                                             /* 0x40003400 - 0x400037ff: Reserved */
-#define STM32_SPI1_BASE      0x40003800     /* 0x40003800 - 0x40003bff: SPI1/I21 */
-#define STM32_I2S1_BASE      0x40003800
-#define STM32_SPI2_BASE      0x40003c00     /* 0x40003c00 - 0x40003fff: SPI2/I2S */
-#define STM32_I2S2_BASE      0x40003c00
+#define STM32_SPI2_BASE      0x40003800     /* 0x40003800 - 0x40003bff: SPI2/I22 */
+#define STM32_I2S2_BASE      0x40003800
+#define STM32_SPI3_BASE      0x40003c00     /* 0x40003c00 - 0x40003fff: SPI3/I23 */
+#define STM32_I2S3_BASE      0x40003c00
                                             /* 0x40004000 - 0x400043ff: Reserved */
 #define STM32_USART2_BASE    0x40004400     /* 0x40004400 - 0x400047ff: USART2 */
 #define STM32_USART3_BASE    0x40004800     /* 0x40004800 - 0x40004bff: USART3 */
