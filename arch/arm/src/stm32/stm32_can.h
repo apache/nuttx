@@ -48,6 +48,25 @@
  * Definitions
  ************************************************************************************/
 
+/* 3 TX mailboxes */
+
+#define CAN_TXMBOX1 0
+#define CAN_TXMBOX2 1
+#define CAN_TXMBOX3 2
+
+/* 2 RX mailboxes */
+
+#define CAN_RXMBOX1 0
+#define CAN_RXMBOX2 1
+
+/* Number of filters depends on silicon */
+
+#ifdef CONFIG_STM32_CONNECTIVITYLINE
+#  define CAN_NFILTERS 28
+#else
+#  define CAN_NFILTERS 14
+#endif
+
 /* Register Offsets *****************************************************************/
 
 /* CAN control and status registers */
