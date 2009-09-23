@@ -618,6 +618,11 @@ configs/skp16c26
     Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
     uses the GNU m32c toolchain.
 
+configs/stm3210e-evel
+    STMicrco STM3210E-EVAL development board based on the STMicro STM32F103ZET6
+    microcontroller (ARM Cortex-M3).  This port uses the GNU Cortex-M3
+    toolchain.
+
 configs/us7032evb1
     This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
     STATUS:  Work has just began on this port.
