@@ -81,8 +81,8 @@
 #define STM32_I2C2_BASE      0x40005800     /* 0x40005800 - 0x40005Bff: I2C2 */
 #define STM32_USB_BASE       0x40005c00     /* 0x40005c00 - 0x40005fff: USB device FS registers */
 #define STM32_USBCANRAM_BASE 0x40006000     /* 0x40006000 - 0x400063ff: Shared USB/CAN SRAM 512 bytes */
-#define STM32_bxCAN1_BASE    0x40006400     /* 0x40006400 - 0x400067ff: bxCAN1 */
-#define STM32_bxCAN2_BASE    0x40006800     /* 0x40006800 - 0x40006bff: bxCAN2 */
+#define STM32_CAN1_BASE      0x40006400     /* 0x40006400 - 0x400067ff: bxCAN1 */
+#define STM32_CAN2_BASE      0x40006800     /* 0x40006800 - 0x40006bff: bxCAN2 */
 #define STM32_BKP_BASE       0x40006c00     /* 0x40006c00 - 0x40006fff: Backup registers (BKP) */
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000 - 0x400073ff: Power control PWR */
 #define STM32_DAC_BASE       0x40007400     /* 0x40007400 - 0x400077ff: DAC */
