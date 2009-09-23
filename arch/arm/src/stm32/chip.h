@@ -50,6 +50,7 @@
 /* Get customizations for each supported chip (only the STM32F103Z right now) */
 
 #ifdef CONFIG_CHIP_STM32F103Z
+#  undef  CONFIG_STM32_CONNECTIVITYLINE
 #  define STM32_NTIM     4 /* TIM1-TIM4 */
 #  define STM32_NSPI     1 /* SPI1 */
 #  define STM32_NUSART   3 /* USART1-3 */
