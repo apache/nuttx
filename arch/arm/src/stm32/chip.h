@@ -50,20 +50,23 @@
 /* Get customizations for each supported chip (only the STM32F103Z right now) */
 
 #ifdef CONFIG_CHIP_STM32F103ZET6
-#  undef CONFIG_STM32_LOWDENSITY          /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
-#  undef  CONFIG_STM32_MEDIUMDENSITY      /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
-#  define CONFIG_STM32_HIGHDENSITY      1 /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
-#  undef  CONFIG_STM32_CONNECTIVITYLINE   /* STM32F105x and STM32F107x */
-#  define STM32_NTIM                    4 /* TIM1-TIM4 */
-#  define STM32_NSPI                    1 /* SPI1 */
-#  define STM32_NUSART                  3 /* USART1-3 */
-#  define STM32_NI2C                    2 /* I2C1-2 */
-#  define STM32_NCAN                    1 /* bxCAN1 */
-#  define STM32_NGPIO                   5 /* GPIOA-E */
-#  define STM32_NADC                    2 /* ADC 1-2 */
-#  define STM32_NDAC                    0 /* No DAC */
-#  define STM32_NCRC                    0 /* No CRC */
-#  define STM32_NTHERNET                0 /* No ethernet */
+#  undef CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY        /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  define CONFIG_STM32_HIGHDENSITY      1   /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE     /* STM32F105x and STM32F107x */
+#  define STM32_NATIM                   2   /* Advanced timers TIM1,8 */
+#  define STM32_NGTIM                   4   /* General timers TIM2,3,4,5
+#  define STM32 NBTIM                   2   /* Basic timers TIM6,7 */
+#  define STM32_NSPI                    1   /* SPI1 */
+#  define STM32_NUSART                  5   /* USART1-3, UART4-5 */
+#  define STM32_NI2C                    2   /* I2C1-2 */
+#  define STM32_NCAN                    1   /* bxCAN1 */
+#  define STM32_NSDIO                   1   /* 1 */
+#  define STM32_NGPIO                   112 /* GPIOA-G */
+#  define STM32_NADC                    3   /* ADC 1-3 */
+#  define STM32_NDAC                    2   /* No DAC */
+#  define STM32_NCRC                    0   /* No CRC */
+#  define STM32_NTHERNET                0   /* No ethernet */
 #else
 #  error "Unsupported STM32 chip */
 #endif
