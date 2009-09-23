@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip.h
+ * arch/arm/src/stm32/stm32_exti.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_H
-#define __ARCH_ARM_SRC_STM32_CHIP_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_EXTI_H
+#define __ARCH_ARM_SRC_STM32_STM32_EXTI_H
 
 /************************************************************************************
  * Included Files
@@ -42,37 +42,71 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include "chip.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* Get customizations for each supported chip (only the STM32F103Z right now) */
-
-#ifdef CONFIG_CHIP_STM32F103ZET6
-#  undef CONFIG_STM32_LOWDENSITY          /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
-#  undef  CONFIG_STM32_MEDIUMDENSITY      /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
-#  define CONFIG_STM32_HIGHDENSITY      1 /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
-#  undef  CONFIG_STM32_CONNECTIVITYLINE   /* STM32F105x and STM32F107x */
-#  define STM32_NTIM                    4 /* TIM1-TIM4 */
-#  define STM32_NSPI                    1 /* SPI1 */
-#  define STM32_NUSART                  3 /* USART1-3 */
-#  define STM32_NI2C                    2 /* I2C1-2 */
-#  define STM32_NCAN                    1 /* bxCAN1 */
-#  define STM32_NGPIO                   5 /* GPIOA-E */
-#  define STM32_NADC                    2 /* ADC 1-2 */
-#  define STM32_NDAC                    0 /* No DAC */
-#  define STM32_NCRC                    0 /* No CRC */
-#  define STM32_NTHERNET                0 /* No ethernet */
+#ifdef CONFIG_STM32_CONNECTIVITYLINE
+#  define STM32_NEXTI            20
+#  define STM32_EXTI_MASK        0x000fffff
 #else
-#  error "Unsupported STM32 chip */
+#  define STM32_NEXTI            19
+#  define STM32_EXTI_MASK        0x0007ffff
 #endif
 
-/* Include only the memory map.  Other chip hardware files should then include this
- * file for the proper setup
- */
+#define STM32_EXTI_BIT(n)        (1 << (n))
 
-#include "stm32_memorymap.h"
+/* Register Offsets *****************************************************************/
+
+#define STM32_EXTI_IMR_OFFSET    0x0000  /* Interrupt mask register */
+#define STM32_EXTI_EMR_OFFSET    0x0004  /* Event mask register */
+#define STM32_EXTI_RTSR_OFFSET   0x0008  /* Rising Trigger selection register */
+#define STM32_EXTI_FTSR_OFFSET   0x000c  /* Falling Trigger selection register */
+#define STM32_EXTI_SWIER_OFFSET  0x0010  /* Software interrupt event register */
+#define STM32_EXTI_PR_OFFSET     0x0014  /* Pending register */
+
+/* Register Addresses ***************************************************************/
+
+
+/* Register Bitfield Definitions ****************************************************/
+
+/* Interrupt mask register */
+
+#define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n)
+#define EXTI_IMR_SHIFT           (0)     /* Bits 18/19-0: Interrupt Mask on line n */
+#define EXTI_IMR_MASK            STM32_EXTI_MASK
+
+/* Event mask register */
+
+#define EXTI_EMR_BIT(n)          STM32_EXTI_BIT(n)
+#define EXTI_EMR_SHIFT           (0)     /* Bits 18/19-0:  Event Mask on line n */
+#define EXTI_EMR_MASK            STM32_EXTI_MASK
+
+/* Rising Trigger selection register */
+
+#define EXTI_RTSR_BIT(n)         STM32_EXTI_BIT(n)
+#define EXTI_RTSR_SHIFT          (0)     /* Bits 18/19-0: Rising trigger event configuration bit of line n */
+#define EXTI_RTSR_MASK           STM32_EXTI_MASK
+
+/* Falling Trigger selection register */
+
+#define EXTI_FTSR_BIT(n)         STM32_EXTI_BIT(n)
+#define EXTI_FTSR_SHIFT          (0)     /* Bits 18/19-0: Falling trigger event configuration bit of line n */
+#define EXTI_FTSR_MASK           STM32_EXTI_MASK
+
+/* Software interrupt event register  */
+
+#define EXTI_SWIER_BIT(n)        STM32_EXTI_BIT(n)
+#define EXTI_SWIER_SHIFT         (0)     /*  Bits 18/19-0: Software Interrupt on line n */
+#define EXTI_SWIER_MASK          STM32_EXTI_MASK
+
+/* Pending register */
+
+#define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n)
+#define EXTI_IMR_SHIFT           (0)     /* Bits 18/19-0: Pending bit on line x */
+#define EXTI_IMR_MASK            STM32_EXTI_MASK
 
 /************************************************************************************
  * Public Types
@@ -86,4 +120,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_EXTI_H */

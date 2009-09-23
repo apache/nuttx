@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip.h
+ * arch/arm/src/stm32/stm32_pwr.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_H
-#define __ARCH_ARM_SRC_STM32_CHIP_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_PWR_H
+#define __ARCH_ARM_SRC_STM32_STM32_PWR_H
 
 /************************************************************************************
  * Included Files
@@ -42,37 +42,47 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include "chip.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* Get customizations for each supported chip (only the STM32F103Z right now) */
+/* Register Offsets *****************************************************************/
 
-#ifdef CONFIG_CHIP_STM32F103ZET6
-#  undef CONFIG_STM32_LOWDENSITY          /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
-#  undef  CONFIG_STM32_MEDIUMDENSITY      /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
-#  define CONFIG_STM32_HIGHDENSITY      1 /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
-#  undef  CONFIG_STM32_CONNECTIVITYLINE   /* STM32F105x and STM32F107x */
-#  define STM32_NTIM                    4 /* TIM1-TIM4 */
-#  define STM32_NSPI                    1 /* SPI1 */
-#  define STM32_NUSART                  3 /* USART1-3 */
-#  define STM32_NI2C                    2 /* I2C1-2 */
-#  define STM32_NCAN                    1 /* bxCAN1 */
-#  define STM32_NGPIO                   5 /* GPIOA-E */
-#  define STM32_NADC                    2 /* ADC 1-2 */
-#  define STM32_NDAC                    0 /* No DAC */
-#  define STM32_NCRC                    0 /* No CRC */
-#  define STM32_NTHERNET                0 /* No ethernet */
-#else
-#  error "Unsupported STM32 chip */
-#endif
+#define STM32_PWR_CR_OFFSET    000x00  /* Power control register */
+#define STM32_PWR_CSR_OFFSET   0x0004  /* Power control/status register */
 
-/* Include only the memory map.  Other chip hardware files should then include this
- * file for the proper setup
- */
+/* Register Addresses ***************************************************************/
 
-#include "stm32_memorymap.h"
+
+/* Register Bitfield Definitions ****************************************************/
+
+/* Power control register */
+
+#define PWR_CR_LPDS            (1 << 0)  /* Bit 0: Low-Power Deepsleep */
+#define PWR_CR_PDDS            (1 << 1)  /* Bit 1: Power Down Deepsleep */
+#define PWR_CR_CWUF            (1 << 2)  /* Bit 2: Clear Wakeup Flag */
+#define PWR_CR_CSBF            (1 << 3)  /* Bit 3: Clear Standby Flag */
+#define PWR_CR_PVDE            (1 << 4)  /* Bit 4: Power Voltage Detector Enable */
+#define PWR_CR_PLS_SHIFT       (5)       /* Bits 7-5: PVD Level Selection */
+#define PWR_CR_PLS_MASK        (7 << PWR_CR_PLS_SHIFT)
+#  define PWR_CR_2p2V          (0 << PWR_CR_PLS_SHIFT) /* 000: 2.2V */
+#  define PWR_CR_2p3V          (1 << PWR_CR_PLS_SHIFT) /* 001: 2.3V */
+#  define PWR_CR_2p4V          (2 << PWR_CR_PLS_SHIFT) /* 010: 2.4V */
+#  define PWR_CR_2p5V          (3 << PWR_CR_PLS_SHIFT) /* 011: 2.5V */
+#  define PWR_CR_2p6V          (4 << PWR_CR_PLS_SHIFT) /* 100: 2.6V */
+#  define PWR_CR_2p7V          (5 << PWR_CR_PLS_SHIFT) /* 101: 2.7V */
+#  define PWR_CR_2p8V          (6 << PWR_CR_PLS_SHIFT) /* 110: 2.8V */
+#  define PWR_CR_2p9V          (7 << PWR_CR_PLS_SHIFT) /* 111: 2.9V */
+#define PWR_CR_DBP             (1 << 8)  /* Bit 8: Disable Backup Domain write protection */
+
+/* Power control/status register */
+
+#define PWR_CSR_WUF            (1 << 0)  /* Bit 0: Wakeup Flag */
+#define PWR_CSR_SBF            (1 << 1)  /* Bit 1: Standby Flag */
+#define PWR_CSR_PVDO           (1 << 2)  /* Bit 2: PVD Output */
+#define PWR_CSR_EWUP           (1 << 8)  /* Bit 8: Enable WKUP pin */
 
 /************************************************************************************
  * Public Types
@@ -86,4 +96,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_PWR_H */
