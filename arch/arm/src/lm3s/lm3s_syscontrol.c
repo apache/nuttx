@@ -177,7 +177,7 @@ static inline void lm3s_plllock(void)
  * Name: lm3s_clockconfig
  *
  * Description:
- *   Called to check to new clock based on desired rcc and rcc2 settings.
+ *   Called to change to new clock based on desired rcc and rcc2 settings.
  *   This is use to set up the initial clocking but can be used later to
  *   support slow clocked, low power consumption modes.
  *
