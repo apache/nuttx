@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "stm3210e_internal.h"
+#include "stm3210e-internal.h"
 
 /************************************************************************************
  * Definitions

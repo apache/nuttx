@@ -49,7 +49,7 @@
 
 /* Get customizations for each supported chip (only the STM32F103Z right now) */
 
-#ifdef CONFIG_CHIP_STM32F103ZET6
+#ifdef CONFIG_ARCH_CHIP_STM32F103ZET6
 #  undef CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY        /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  define CONFIG_STM32_HIGHDENSITY      1   /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
@@ -68,7 +68,7 @@
 #  define STM32_NCRC                    0   /* No CRC */
 #  define STM32_NTHERNET                0   /* No ethernet */
 #else
-#  error "Unsupported STM32 chip */
+#  error "Unsupported STM32 chip"
 #endif
 
 /* Include only the memory map.  Other chip hardware files should then include this

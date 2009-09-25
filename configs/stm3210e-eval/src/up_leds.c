@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32_internal.h"
-#include "stm3210e_internal.h"
+#include "stm3210e-internal.h"
 
 /****************************************************************************
  * Definitions
