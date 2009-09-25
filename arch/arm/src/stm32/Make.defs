@@ -46,10 +46,5 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 
 CHIP_ASRCS	= 
 CHIP_CSRCS	= stm32_start.c
-#		  stm32_syscontrol.c stm32_irq.c \
-#		  stm32_gpio.c stm32_gpioirq.c stm32_timerisr.c stm32_lowputc.c \
-#		  stm32_serial.c stm32_ssi.c stm32_dumpgpio.c
-
-ifdef CONFIG_NET
-CHIP_CSRCS	+= stm32_ethernet.c
-endif
+#		  stm32_irq.c stm32_gpio.c stm32_timerisr.c stm32_lowputc.c \
+#		  stm32_serial.c stm32_spi.c stm32_dumpgpio.c
