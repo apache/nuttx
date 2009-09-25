@@ -55,7 +55,7 @@
 #  define CONFIG_STM32_HIGHDENSITY      1   /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE     /* STM32F105x and STM32F107x */
 #  define STM32_NATIM                   2   /* Advanced timers TIM1,8 */
-#  define STM32_NGTIM                   4   /* General timers TIM2,3,4,5
+#  define STM32_NGTIM                   4   /* General timers TIM2,3,4,5 */
 #  define STM32 NBTIM                   2   /* Basic timers TIM6,7 */
 #  define STM32_NSPI                    1   /* SPI1 */
 #  define STM32_NUSART                  5   /* USART1-3, UART4-5 */
