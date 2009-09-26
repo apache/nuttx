@@ -218,10 +218,15 @@ static int lml3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
            *regaddr = NVIC_IRQ0_31_ENABLE;
            *bit     = 1 << (irq - STM32_IRQ_INTERRUPTS);
         }
+      if (irq < STM32_IRQ_INTERRUPTS + 64)
+        {
+           *regaddr = NVIC_IRQ0_31_ENABLE;
+           *bit     = 1 << (irq - STM32_IRQ_INTERRUPTS);
+        }
       else if (irq < NR_IRQS)
         {
-           *regaddr = NVIC_IRQ32_63_ENABLE;
-           *bit     = 1 << (irq - STM32_IRQ_INTERRUPTS - 32);
+           *regaddr = NVIC_IRQ64_95_ENABLE;
+           *bit     = 1 << (irq - STM32_IRQ_INTERRUPTS - 64);
         }
       else
         {
@@ -229,7 +234,7 @@ static int lml3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
         }
     }
 
-  /* Handler processor exceptions.  Only a few can be disabled */
+  /* Handle processor exceptions.  Only a few can be disabled */
 
   else
     {

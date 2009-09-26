@@ -120,25 +120,25 @@
 #  define STM32_IRQ_RTCALR      (57) /* 41: RTC alarm through EXTI line interrupt */
 #  define STM32_IRQ_OTGFSWKUP   (58) /* 42: USB On-The-Go FS Wakeup through EXTI line interrupt */
                                      /* 43-49: Reserved */
-#  define STM32_IRQ_TIM5        (59) /* 50: TIM5 global interrupt */
-#  define STM32_IRQ_SPI3        (60) /* 51: SPI3 global interrupt */
-#  define STM32_IRQ_UART4       (71) /* 52: UART4 global interrupt */
-#  define STM32_IRQ_UART5       (72) /* 53: UART5 global interrupt */
-#  define STM32_IRQ_TIM6        (73) /* 54: TIM6 global interrupt */
-#  define STM32_IRQ_TIM7        (74) /* 55: TIM7 global interrupt */
-#  define STM32_IRQ_DMA2CH1     (75) /* 56: DMA2 Channel 1 global interrupt */
-#  define STM32_IRQ_DMA2CH2     (76) /* 57: DMA2 Channel 2 global interrupt */
-#  define STM32_IRQ_DMA2CH3     (77) /* 58: DMA2 Channel 3 global interrupt */
-#  define STM32_IRQ_DMA2CH4     (78) /* 59: DMA2 Channel 4 global interrupt */
-#  define STM32_IRQ_DMA2CH5     (79) /* 60: DMA2 Channel 5 global interrupt */
-#  define STM32_IRQ_ETH         (80) /* 61: Ethernet global interrupt */
-#  define STM32_IRQ_ETHWKUP     (81) /* 62: Ethernet Wakeup through EXTI line interrupt */
-#  define STM32_IRQ_CAN2TX      (82) /* 63: CAN2 TX interrupts */
-#  define STM32_IRQ_CAN2RX0     (83) /* 64: CAN2 RX0 interrupts */
-#  define STM32_IRQ_CAN2RX1     (84) /* 65: CAN2 RX1 interrupt */
-#  define STM32_IRQ_CAN2SCE     (85) /* 66: CAN2 SCE interrupt */
-#  define STM32_IRQ_OTGFS       (86) /* 67: USB On The Go FS global interrupt */
-#  define NR_IRQS               (87)
+#  define STM32_IRQ_TIM5        (66) /* 50: TIM5 global interrupt */
+#  define STM32_IRQ_SPI3        (67) /* 51: SPI3 global interrupt */
+#  define STM32_IRQ_UART4       (68) /* 52: UART4 global interrupt */
+#  define STM32_IRQ_UART5       (69) /* 53: UART5 global interrupt */
+#  define STM32_IRQ_TIM6        (70) /* 54: TIM6 global interrupt */
+#  define STM32_IRQ_TIM7        (71) /* 55: TIM7 global interrupt */
+#  define STM32_IRQ_DMA2CH1     (72) /* 56: DMA2 Channel 1 global interrupt */
+#  define STM32_IRQ_DMA2CH2     (73) /* 57: DMA2 Channel 2 global interrupt */
+#  define STM32_IRQ_DMA2CH3     (74) /* 58: DMA2 Channel 3 global interrupt */
+#  define STM32_IRQ_DMA2CH4     (75) /* 59: DMA2 Channel 4 global interrupt */
+#  define STM32_IRQ_DMA2CH5     (76) /* 60: DMA2 Channel 5 global interrupt */
+#  define STM32_IRQ_ETH         (77) /* 61: Ethernet global interrupt */
+#  define STM32_IRQ_ETHWKUP     (78) /* 62: Ethernet Wakeup through EXTI line interrupt */
+#  define STM32_IRQ_CAN2TX      (79) /* 63: CAN2 TX interrupts */
+#  define STM32_IRQ_CAN2RX0     (70) /* 64: CAN2 RX0 interrupts */
+#  define STM32_IRQ_CAN2RX1     (81) /* 65: CAN2 RX1 interrupt */
+#  define STM32_IRQ_CAN2SCE     (82) /* 66: CAN2 SCE interrupt */
+#  define STM32_IRQ_OTGFS       (83) /* 67: USB On The Go FS global interrupt */
+#  define NR_IRQS               (84)
 #else
 #  define STM32_IRQ_WWDG        (16) /* 0:  Window Watchdog interrupt */
 #  define STM32_IRQ_PVD         (17) /* 1:  PVD through EXTI Line detection interrupt */
