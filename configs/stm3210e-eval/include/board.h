@@ -52,6 +52,10 @@
 
 /* Clocking *************************************************************************/
 
+# warning "This frequencies are still needed"
+#define STM32_PCLK1_FREQUENCY 1
+#define STM32_PCLK2_FREQUENCY 1
+
 /* LED definitions ******************************************************************/
 
 #define LED_STARTED       0
