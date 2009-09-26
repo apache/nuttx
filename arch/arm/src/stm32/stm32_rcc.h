@@ -117,7 +117,7 @@
 #define RCC_CFGR_PPRE1_SHIFT        (8)       /* Bits 10-8: APB Low speed prescaler (APB1) */
 #define RCC_CFGR_PPRE1_MASK         (7 << RCC_CFGR_PPRE1_SHIFT)
 #  define RCC_CFGR_PPRE1_HCLK       (0 << RCC_CFGR_PPRE1_SHIFT) /* 0xx: HCLK not divided */
-#  define RCC_CFGR_PPRE2_HCLKd2     (4 << RCC_CFGR_PPRE1_SHIFT) /* 100: HCLK divided by 2 */
+#  define RCC_CFGR_PPRE1_HCLKd2     (4 << RCC_CFGR_PPRE1_SHIFT) /* 100: HCLK divided by 2 */
 #  define RCC_CFGR_PPRE1_HCLKd4     (5 << RCC_CFGR_PPRE1_SHIFT) /* 101: HCLK divided by 4 */
 #  define RCC_CFGR_PPRE1_HCLKd8     (6 << RCC_CFGR_PPRE1_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE1_HCLKd16    (7 << RCC_CFGR_PPRE1_SHIFT) /* 111: HCLK divided by 16 */
@@ -230,7 +230,7 @@
 #define RCC_AHBENR_SRAMEN           (1 << 2)  /* Bit 2: SRAM interface clock enable */
 #define RCC_AHBENR_FLITFEN          (1 << 4)  /* Bit 4: FLITF clock enable */
 #define RCC_AHBENR_CRCEN            (1 << 6)  /* Bit 6: CRC clock enable */
-#define RCC_AHBENR_SDIOEN           (1 << 8)  /* Bit 8: FSMC clock enable */
+#define RCC_AHBENR_FSMCEN           (1 << 8)  /* Bit 8: FSMC clock enable */
 #define RCC_AHBENR_SDIOEN           (1 << 10) /* Bit 10: SDIO clock enable */
 
 /* APB2 Peripheral Clock enable register */
