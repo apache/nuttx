@@ -91,11 +91,21 @@
 #endif
 
 #if STM32_NUSART > 3
-#  warning "Check UART4 register definitions"
+#  define STM32_UART4_SR          (STM32_UART4_BASE+STM32_USART_SR_OFFSET)
+#  define STM32_UART4_DR          (STM32_UART4_BASE+STM32_USART_DR_OFFSET)
+#  define STM32_UART4_BRR         (STM32_UART4_BASE+STM32_USART_BRR_OFFSET)
+#  define STM32_UART4_CR1         (STM32_UART4_BASE+STM32_USART_CR1_OFFSET)
+#  define STM32_UART4_CR2         (STM32_UART4_BASE+STM32_USART_CR2_OFFSET)
+#  define STM32_UART4_CR3         (STM32_UART4_BASE+STM32_USART_CR3_OFFSET)
 #endif
 
 #if STM32_NUSART > 4
-#  warning "Check UART5 register definitions"
+#  define STM32_UART5_SR          (STM32_UART5_BASE+STM32_USART_SR_OFFSET)
+#  define STM32_UART5_DR          (STM32_UART5_BASE+STM32_USART_DR_OFFSET)
+#  define STM32_UART5_BRR         (STM32_UART5_BASE+STM32_USART_BRR_OFFSET)
+#  define STM32_UART5_CR1         (STM32_UART5_BASE+STM32_USART_CR1_OFFSET)
+#  define STM32_UART5_CR2         (STM32_UART5_BASE+STM32_USART_CR2_OFFSET)
+#  define STM32_UART5_CR3         (STM32_UART5_BASE+STM32_USART_CR3_OFFSET)
 #endif
 
 /* Register Bitfield Definitions ****************************************************/
