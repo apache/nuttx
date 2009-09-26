@@ -113,6 +113,9 @@
 #define USART_SR_LBD              (1 << 8)  /* Bit 8: LIN Break Detection Flag */
 #define USART_SR_CTS              (1 << 9)  /* Bit 9: CTS Flag */
 
+#define USART_SR_ALLBITS          (0x03ff)
+#define USART_SR_CLRBITS          (USART_SR_CTS|USART_SR_LBD) /* Cleared by SW write to SR */
+
 /* Data register */
 
 #define USART_DR_SHIFT            (0)       /* Bits 8:0: Data value */
@@ -141,6 +144,8 @@
 #define USART_CR1_WAKE            (1 << 11) /* Bit 11: Wakeup method */
 #define USART_CR1_M               (1 << 12) /* Bit 12: word length */
 #define USART_CR1_UE              (1 << 13) /* Bit 13: USART Enable */
+
+#define USART_CR1_ALLINTS         (USART_CR1_IDLEIE|USART_CR1_RXNEIE|USART_CR1_TCIE|USART_CR1_PEIE)
 
 /* Control register 2 */
 
