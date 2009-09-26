@@ -195,23 +195,23 @@ STM3210E-EVAL-specific Configuration Options
 
   STM32F103Z specific device driver settings
 
-	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
+	CONFIG_USARTn_SERIAL_CONSOLE - selects the UARTn for the
 	   console and ttys0 (default is the UART0).
-	CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+	CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
 	   This specific the size of the receive buffer
-	CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+	CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
 	   being sent.  This specific the size of the transmit buffer
-	CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_UARTn_2STOP - Two stop bits
+	CONFIG_USARTn_BAUD - The configure BAUD of the UART.  Must be
+	CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+	CONFIG_USARTn_2STOP - Two stop bits
 
-	CONFIG_SSI0_DISABLE - Select to disable support for SSI0
-	CONFIG_SSI1_DISABLE - Select to disable support for SSI1
-	CONFIG_SSI_POLLWAIT - Select to disable interrupt driven SSI support.
+	CONFIG_SPI1_DISABLE - Select to disable support for SPI1
+	CONFIG_SPI2_DISABLE - Select to disable support for SPI2
+	CONFIG_SPI_POLLWAIT - Select to disable interrupt driven SPI support.
 	  Poll-waiting is recommended if the interrupt rate would be to
 	  high in the interrupt driven case.
-	CONFIG_SSI_TXLIMIT - Write this many words to the Tx FIFO before
+	CONFIG_SPI_TXLIMIT - Write this many words to the Tx FIFO before
 	  emptying the Rx FIFO.  If the SPI frequency is high and this
 	  value is large, then larger values of this setting may cause
 	  Rx FIFO overrun errors.  Default: half of the Tx FIFO size (4).
