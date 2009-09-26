@@ -195,16 +195,16 @@ STM3210E-EVAL-specific Configuration Options
 
   STM32F103Z specific device driver settings
 
-	CONFIG_USARTn_SERIAL_CONSOLE - selects the UARTn for the
-	   console and ttys0 (default is the UART0).
-	CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
+	CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
+           m (m=4,5) for the console and ttys0 (default is the USART1).
+	CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
 	   This specific the size of the receive buffer
-	CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
+	CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
 	   being sent.  This specific the size of the transmit buffer
-	CONFIG_USARTn_BAUD - The configure BAUD of the UART.  Must be
-	CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_USARTn_2STOP - Two stop bits
+	CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.  Must be
+	CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+	CONFIG_U[S]ARTn_2STOP - Two stop bits
 
 	CONFIG_SPI1_DISABLE - Select to disable support for SPI1
 	CONFIG_SPI2_DISABLE - Select to disable support for SPI2
