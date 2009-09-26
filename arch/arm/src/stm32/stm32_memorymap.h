@@ -117,7 +117,7 @@
 #define STM32_RCC_BASE      0x40021000     /* 0x40021000 - 0x400213ff: Reset and Clock control RCC */
                                            /* 0x40021400 - 0x40021fff:  Reserved */
 #define STM32_OTGFS_BASE    0x50000000     /* 0x50000000 - 0x500003ff: USB OTG FS */
-#define STM32_FLASH_BASE    0x40022000     /* 0x40022000 - 0x400223ff: Flash memory interface */
+#define STM32_FLASHIF_BASE  0x40022000     /* 0x40022000 - 0x400223ff: Flash memory interface */
 #define STM32_CRC_BASE      0x40028000     /* 0x40023000 - 0x400233ff: RC */
                                            /* 0x40023400 - 0x40027fff: Reserved */
 #define STM32_ETHERNET_BASE 0x40028000     /* 0x40028000 - 0x40029fff: Ethernet */
