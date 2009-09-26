@@ -52,7 +52,8 @@
 
 /* Clocking *************************************************************************/
 
-# warning "This frequencies are still needed"
+# warning "These frequencies are still needed"
+#define SYSCLK_FREQUENCY 1
 #define STM32_PCLK1_FREQUENCY 1
 #define STM32_PCLK2_FREQUENCY 1
 
