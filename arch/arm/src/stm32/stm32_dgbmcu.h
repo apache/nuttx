@@ -70,10 +70,10 @@
 #define DBGMCU_CR_TRACEIOEN       (1 << 5)  /* Bit 5: Trace enabled */
 #define DBGMCU_CR_TRACEMODE_SHIFT (6)        /* Bits 7-6: Trace mode pin assignement */
 #define DBGMCU_CR_TRACEMODE_MASK  (3 << DBGMCU_CR_TRACEMODE_SHIFT)
-#  define DBGMCU_CR_ASYNCH        (0 <<  DBGMCU_CR_TRACEMODE_SHIFT) /* Asynchronous Mode */
-#  define DBGMCU_CR_SYNCH1        (1 <<  DBGMCU_CR_TRACEMODE_SHIFT) /* Synchronous Mode, TRACEDATA size=1 */
-#  define DBGMCU_CR_SYNCH2        (2 <<  DBGMCU_CR_TRACEMODE_SHIFT) /* Synchronous Mode, TRACEDATA size=2 */
-#  define DBGMCU_CR_SYNCH4        (3 <<  DBGMCU_CR_TRACEMODE_SHIFT) /* Synchronous Mode, TRACEDATA size=4 */
+#  define DBGMCU_CR_ASYNCH        (0 << DBGMCU_CR_TRACEMODE_SHIFT) /* Asynchronous Mode */
+#  define DBGMCU_CR_SYNCH1        (1 << DBGMCU_CR_TRACEMODE_SHIFT) /* Synchronous Mode, TRACEDATA size=1 */
+#  define DBGMCU_CR_SYNCH2        (2 << DBGMCU_CR_TRACEMODE_SHIFT) /* Synchronous Mode, TRACEDATA size=2 */
+#  define DBGMCU_CR_SYNCH4        (3 << DBGMCU_CR_TRACEMODE_SHIFT) /* Synchronous Mode, TRACEDATA size=4 */
 #define DBGMCU_CR_IWDGSTOP        (1 << 8)   /* Bit 8: Independent Watchdog stopped when core is halted */
 #define DBGMCU_CR_WWDGSTOP        (1 << 9)   /* Bit 9: Window Watchdog stopped when core is halted */
 #define DBGMCU_CR_TIM1STOP        (1 << 10)  /* Bit 10: TIM1 stopped when core is halted */
