@@ -101,8 +101,8 @@ void __start(void)
 
   /* Configure the uart so that we can get debug output as soon as possible */
 
-  up_clockconfig();
-  up_lowsetup();
+  stm32_clockconfig();
+  stm32_lowsetup();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be

@@ -133,14 +133,14 @@ extern "C" {
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowsetup
+ * Name: stm32_lowsetup
  *
  * Description:
  *   Called at the very beginning of _start.  Performs low level initialization.
  *
  ****************************************************************************/
 
-EXTERN void up_lowsetup(void);
+EXTERN void stm32_lowsetup(void);
 
 /****************************************************************************
  * Name: stm32_clockconfig
@@ -151,17 +151,6 @@ EXTERN void up_lowsetup(void);
  ****************************************************************************/
 
 EXTERN void stm32_clockconfig(void);
-
-/****************************************************************************
- * Name: up_clockconfig
- *
- * Description:
- *   Called early in the bootsequence (before .data and .bss are available)
- *   in order to configure initial clocking.
- *
- ****************************************************************************/
-
-EXTERN void up_clockconfig(void);
 
 /****************************************************************************
  * Name: stm32_configgpio
