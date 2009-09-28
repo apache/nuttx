@@ -438,7 +438,7 @@ static int up_setup(struct uart_dev_s *dev)
   uint16 regval;
 
   /* Note: The logic here depends on the fact that that the USART module
-   * was enabled and the pins were configured in up_lowsetup().
+   * was enabled and the pins were configured in stm32_lowsetup().
    */
 
   /* Configure CR2 */
@@ -961,7 +961,7 @@ static boolean up_txready(struct uart_dev_s *dev)
 void up_earlyserialinit(void)
 {
   /* NOTE:  All GPIO configuration for the USARTs was performed in
-   * up_lowsetup
+   * stm32_lowsetup
    */
 
   /* Disable all USARTS */

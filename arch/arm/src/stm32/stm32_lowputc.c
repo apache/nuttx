@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <arch/board/board.h>
+
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -206,7 +208,7 @@ void up_lowputc(char ch)
 }
 
 /**************************************************************************
- * Name: up_lowsetup
+ * Name: stm32_lowsetup
  *
  * Description:
  *   This performs basic initialization of the USART used for the serial
@@ -215,7 +217,7 @@ void up_lowputc(char ch)
  *
  **************************************************************************/
 
-void up_lowsetup(void)
+void stm32_lowsetup(void)
 {
 #if !defined(CONFIG_USART1_DISABLE) || !defined(CONFIG_USART2_DISABLE) || !defined(CONFIG_USART3_DISABLE)
   uint32 enr;
