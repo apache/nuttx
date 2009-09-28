@@ -61,11 +61,13 @@
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * The timer counts at the rate SYSCLK_FREQUENCY as defined in the board.h
- * header file.
+ * The RCC feeds the Cortex System Timer (SysTick) with the AHB clock (HCLK)
+ * divided by 8.  The SysTick can work either with this clock or with the
+ * Cortex clock (HCLK), configurable in the SysTick Control and Status
+ * register.
  */
 
-#define SYSTICK_RELOAD ((SYSCLK_FREQUENCY / CLK_TCK) - 1)
+#define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
 
 /* The size of the reload field is 24 bits.  Verify taht the reload value
  * will fit in the reload register.

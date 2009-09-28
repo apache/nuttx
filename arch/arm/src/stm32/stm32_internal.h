@@ -146,13 +146,11 @@ EXTERN void up_lowsetup(void);
  * Name: stm32_clockconfig
  *
  * Description:
- *   Called to change to new clock based on desired rcc and rcc2 settings.
- *   This is use to set up the initial clocking but can be used later to
- *   support slow clocked, low power consumption modes.
+ *   Called to change to new clock based on settings in board.h
  *
  ****************************************************************************/
 
-EXTERN void stm32_clockconfig(uint32 newrcc, uint32 newrcc2);
+EXTERN void stm32_clockconfig(void);
 
 /****************************************************************************
  * Name: up_clockconfig
