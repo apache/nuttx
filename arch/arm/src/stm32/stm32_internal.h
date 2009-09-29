@@ -208,7 +208,11 @@ EXTERN boolean stm32_gpioread(uint32 pinset);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DEBUG
 EXTERN int stm32_dumpgpio(uint32 pinset, const char *msg);
+#else
+#  define stm32_dumpgpio(p,m)
+#endif
 
 /****************************************************************************
  * Name: gpio_irqinitialize

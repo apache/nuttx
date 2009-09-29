@@ -151,7 +151,7 @@
 #define GPIO_CR_MODE_SHIFT(n)        ((n) << 2)
 #define GPIO_CR_MODE_MASK(n)         (3 << GPIO_CR_MODE_SHIFT(n))
 #define GPIO_CR_CNF_SHIFT(n)         (2 + ((n) << 2))
-#define GPIO_CR_CNF_MASK(n)          (3 << GPIO_CRL_CNF_SHIFT(n))
+#define GPIO_CR_CNF_MASK(n)          (3 << GPIO_CR_CNF_SHIFT(n))
 
 #define GPIO_CR_MODECNF_SHIFT(n)     ((n) << 2)
 #define GPIO_CR_MODECNF_MASK(n)      (0x0f << GPIO_CR_MODECNF_SHIFT(n))
