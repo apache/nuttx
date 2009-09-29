@@ -126,8 +126,6 @@ CONFIG_STM32_ADC3=n
 #
 # STM32F103Z specific serial device driver settings
 #
-# CONFIG_USARTn_DISABLE - select to disable all support for
-#   the UART
 # CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
 #   console and ttys0 (default is the USART1).
 # CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
@@ -139,12 +137,6 @@ CONFIG_STM32_ADC3=n
 # CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 # CONFIG_USARTn_2STOP - Two stop bits
 #
-CONFIG_USART1_DISABLE=n
-CONFIG_USART2_DISABLE=y
-CONFIG_USART3_DISABLE=y
-CONFIG_USART4_DISABLE=y
-CONFIG_USART5_DISABLE=y
-
 CONFIG_USART1_SERIAL_CONSOLE=y
 CONFIG_USART2_SERIAL_CONSOLE=n
 CONFIG_USART3_SERIAL_CONSOLE=n

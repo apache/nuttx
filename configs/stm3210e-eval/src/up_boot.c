@@ -76,7 +76,7 @@ void stm32_boardinitialize(void)
    * stm32_spiinitialize() has been brought into the link.
    */
 
-#if !defined(CONFIG_SPI1_DISABLE) || !defined(CONFIG_SPI2_DISABLE)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
   if (stm32_spiinitialize)
     {
       stm32_spiinitialize();

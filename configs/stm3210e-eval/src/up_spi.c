@@ -51,7 +51,7 @@
 #include "stm32_internal.h"
 #include "stm3210e-internal.h"
 
-#if !defined(CONFIG_SPI1_DISABLE) || !defined(CONFIG_SPI2_DISABLE)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 
 /************************************************************************************
  * Definitions
@@ -115,7 +115,7 @@ void weak_function stm32_spiinitialize(void)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI1_DISABLE
+#ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -127,7 +127,7 @@ ubyte stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifndef CONFIG_SPI2_DISABLE
+#ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -139,4 +139,4 @@ ubyte stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#endif /* !CONFIG_SPI1_DISABLE || !CONFIG_SPI2_DISABLE */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */
