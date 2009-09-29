@@ -148,6 +148,11 @@
 
 /* Port configuration register low */
 
+#define GPIO_CR_MODE_SHIFT(n)        ((n) << 1)
+#define GPIO_CR_MODE_MASK(n)         (3 << GPIO_CR_MODE_SHIFT(n))
+#define GPIO_CRL_CNF_SHIFT(n)        (2+((n) << 1))
+#define GPIO_CRL_CNF_MASK(n)         (3 << GPIO_CRL_CNF_SHIFT(n))
+
 #define GPIO_CRL_MODE0_SHIFT         (0)     /* Bits 1:0: Port mode bits */
 #define GPIO_CRL_MODE0_MASK          (3 << GPIO_CRL_MODE0_SHIFT)
 #define GPIO_CRL_CNF0_SHIFT          (2)     /* Bits 3:2: Port configuration bits */
