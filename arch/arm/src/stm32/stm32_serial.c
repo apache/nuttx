@@ -65,21 +65,21 @@
 
 /* Is there a USART enabled? */
 
-#if defined(CONFIG_USART1_DISABLE) && defined(CONFIG_USART2_DISABLE) && defined(CONFIG_USART3_DISABLE)
+#if !defined(CONFIG_STM32_USART1) && !defined(CONFIG_STM32_USART2) && !defined(CONFIG_STM32_USART3)
 #  error "No USARTs enabled"
 #endif
 
 /* Is there a serial console? */
 
-#if defined(CONFIG_USART1_SERIAL_CONSOLE) && !defined(CONFIG_USART1_DISABLE)
+#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART1)
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && !defined(CONFIG_USART2_DISABLE)
+#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART2)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && !defined(CONFIG_USART3_DISABLE)
+#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART3)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
@@ -102,15 +102,15 @@
 #if defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart1port     /* USART1 is console */
 #  define TTYS0_DEV       g_usart1port     /* USART1 is ttyS0 */
-#  ifndef CONFIG_USART2_DISABLE
+#  ifdef CONFIG_STM32_USART2
 #    define TTYS1_DEV     g_usart2port     /* USART2 is ttyS1 */
-#    ifndef CONFIG_USART3_DISABLE
+#    ifdef CONFIG_STM32_USART3
 #      define TTYS2_DEV   g_usart3port     /* USART3 is ttyS2 */
 #    else
 #      undef TTYS1_DEV                     /* No ttyS2 */
 #    endif
 #  else
-#    ifndef CONFIG_USART3_DISABLE
+#    ifdef CONFIG_STM32_USART3
 #      define TTYS1_DEV   g_usart3port     /* USART3 is ttyS1 */
 #    else
 #      undef TTYS1_DEV                     /* No ttyS1 */
@@ -120,15 +120,15 @@
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart2port     /* USART2 is console */
 #  define TTYS0_DEV       g_usart2port     /* USART2 is ttyS0 */
-#  ifndef CONFIG_USART1_DISABLE
+#  ifdef CONFIG_STM32_USART1
 #    define TTYS1_DEV     g_usart1port     /* USART1 is ttyS1 */
-#    ifndef CONFIG_USART3_DISABLE
+#    ifdef CONFIG_STM32_USART3
 #      define TTYS2_DEV   g_usart3port     /* USART3 is ttyS2 */
 #    else
 #      undef TTYS1_DEV                     /* No ttyS2 */
 #    endif
 #  else
-#    ifndef CONFIG_USART3_DISABLE
+#    ifdef CONFIG_STM32_USART3
 #      define TTYS1_DEV   g_usart3port     /* USART3 is ttyS1 */
 #    else
 #      undef TTYS1_DEV                     /* No ttyS1 */
@@ -138,15 +138,15 @@
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart3port     /* USART3 is console */
 #  define TTYS0_DEV       g_usart3port     /* USART3 is ttyS0 */
-#  ifndef CONFIG_USART1_DISABLE
+#  ifdef CONFIG_STM32_USART1
 #    define TTYS1_DEV     g_usart1port     /* USART1 is ttyS1 */
-#    ifndef CONFIG_USART2_DISABLE
+#    ifdef CONFIG_STM32_USART2
 #      define TTYS2_DEV   g_usart2port     /* USART2 is ttyS2 */
 #    else
 #      undef TTYS1_DEV                     /* No ttyS2 */
 #    endif
 #  else
-#    ifndef CONFIG_USART2_DISABLE
+#    ifdef CONFIG_STM32_USART2
 #      define TTYS1_DEV   g_usart2port     /* USART2 is ttyS1 */
 #    else
 #      undef TTYS1_DEV                     /* No ttyS1 */
@@ -211,22 +211,22 @@ struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifndef CONFIG_USART1_DISABLE
+#ifdef CONFIG_STM32_USART1
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
-#ifndef CONFIG_USART2_DISABLE
+#ifdef CONFIG_STM32_USART2
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
-#ifndef CONFIG_USART3_DISABLE
+#ifdef CONFIG_STM32_USART3
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #endif
 
 /* This describes the state of the STM32 USART1 ports. */
 
-#ifndef CONFIG_USART1_DISABLE
+#ifdef CONFIG_STM32_USART1
 static struct up_dev_s g_usart1priv =
 {
   .usartbase      = STM32_USART1_BASE,
@@ -257,7 +257,7 @@ static uart_dev_t g_usart1port =
 
 /* This describes the state of the STM32 USART2 port. */
 
-#ifndef CONFIG_USART2_DISABLE
+#ifdef CONFIG_STM32_USART2
 static struct up_dev_s g_usart2priv =
 {
   .usartbase      = STM32_USART2_BASE,
@@ -288,7 +288,7 @@ static uart_dev_t g_usart2port =
 
 /* This describes the state of the STM32 USART3 port. */
 
-#ifndef CONFIG_USART3_DISABLE
+#ifdef CONFIG_STM32_USART3
 static struct up_dev_s g_usart3priv =
 {
   .usartbase      = STM32_USART3_BASE,
@@ -627,21 +627,21 @@ static int up_interrupt(int irq, void *context)
   int                passes;
   boolean            handled;
 
-#ifndef CONFIG_USART1_DISABLE
+#ifdef CONFIG_STM32_USART1
   if (g_usart1priv.irq == irq)
     {
       dev = &g_usart1port;
     }
   else
 #endif
-#ifndef CONFIG_USART2_DISABLE
+#ifdef CONFIG_STM32_USART2
   if (g_usart2priv.irq == irq)
     {
       dev = &g_usart2port;
     }
   else
 #endif
-#ifndef CONFIG_USART3_DISABLE
+#ifdef CONFIG_STM32_USART3
   if (g_usart3priv.irq == irq)
     {
       dev = &g_usart3port;

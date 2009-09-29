@@ -59,15 +59,15 @@
 
 /* Is there a serial console? */
 
-#if defined(CONFIG_USART1_SERIAL_CONSOLE) && !defined(CONFIG_USART1_DISABLE)
+#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART1)
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && !defined(CONFIG_USART2_DISABLE)
+#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART2)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && !defined(CONFIG_USART3_DISABLE)
+#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART3)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
@@ -219,7 +219,7 @@ void up_lowputc(char ch)
 
 void stm32_lowsetup(void)
 {
-#if !defined(CONFIG_USART1_DISABLE) || !defined(CONFIG_USART2_DISABLE) || !defined(CONFIG_USART3_DISABLE)
+#if defined(CONFIG_STM32_USART1) || defined(CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3)
   uint32 enr;
   uint32 mapr;
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_USART_CONFIG)
@@ -233,7 +233,7 @@ void stm32_lowsetup(void)
 
   mapr = getreg32(STM32_AFIO_MAPR);
 
-#ifndef CONFIG_USART1_DISABLE
+#ifdef CONFIG_STM32_USART1
   /* Enable USART1 clocking */
 
   enr  = getreg32(STM32_RCC_APB2ENR_OFFSET);
@@ -251,12 +251,12 @@ void stm32_lowsetup(void)
 
   mapr &= ~AFIO_MAPR_USART1_REMAP;
 
-#endif /* !CONFIG_USART1_DISABLE */
+#endif /* CONFIG_STM32_USART1 */
 
-#if !defined(CONFIG_USART2_DISABLE) && !defined(CONFIG_USART3_DISABLE)
+#if defined(CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3)
   enr  = getreg32(STM32_RCC_APB1ENR_OFFSET);
 
-#ifndef CONFIG_USART2_DISABLE
+#ifdef CONFIG_STM32_USART2
   /* Enable USART2 clocking */
 
   enr |= RCC_APB1ENR_USART2EN;
@@ -272,9 +272,9 @@ void stm32_lowsetup(void)
 
   mapr &= ~AFIO_MAPR_USART2_REMAP;
 
-#endif /* !CONFIG_USART2_DISABLE */
+#endif /* CONFIG_STM32_USART2 */
 
-#ifndef CONFIG_USART3_DISABLE
+#ifdef CONFIG_STM32_USART3
   /* Enable USART3 clocking */
 
   enr |= RCC_APB1ENR_USART3EN;
@@ -291,11 +291,11 @@ void stm32_lowsetup(void)
 
   mapr &= ~AFIO_MAPR_USART3_REMAP_MASK;
 
-#endif /* !CONFIG_USART3_DISABLE */
+#endif /* CONFIG_STM32_USART3 */
   /* Save the UART enable settings */
 
   putreg32(enr, STM32_RCC_APB1ENR_OFFSET);
-#endif /* !CONFIG_USART2_DISABLE && !CONFIG_USART3_DISABLE */
+#endif /* CONFIG_STM32_USART2 || CONFIG_STM32_USART3 */
   /* Save the USART pin mappings */
 
   putreg32(mapr, STM32_AFIO_MAPR);
@@ -334,7 +334,7 @@ void stm32_lowsetup(void)
   cr |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
   putreg16(cr, STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
 #endif
-#endif /* !CONFIG_USART1_DISABLE && !CONFIG_USART2_DISABLE && !CONFIG_USART3_DISABLE */
+#endif /* CONFIG_STM32_USART1 || CONFIG_STM32_USART2 || CONFIG_STM32_USART3 */
 }
 
 
