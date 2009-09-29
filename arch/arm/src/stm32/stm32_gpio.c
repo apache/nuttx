@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
+#include "up_arch.h"
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_internal.h"
@@ -52,9 +53,37 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const uint32 g_gpiobase[STM32_NGPIO] =
+{
+#if STM32_NGPIO > 0
+	STM32_GPIOA_BASE,
+#endif
+#if STM32_NGPIO > 1
+	STM32_GPIOB_BASE,
+#endif
+#if STM32_NGPIO > 2
+	STM32_GPIOC_BASE,
+#endif
+#if STM32_NGPIO > 3
+	STM32_GPIOD_BASE,
+#endif
+#if STM32_NGPIO > 4
+	STM32_GPIOE_BASE,
+#endif
+#if STM32_NGPIO > 5
+	STM32_GPIOF_BASE,
+#endif
+#if STM32_NGPIO > 6
+	STM32_GPIOG_BASE,
+#endif
+};
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,6 +100,190 @@
 
 int stm32_configgpio(uint32 cfgset)
 {
+  uint32 gpiobase;
+  uint32 cr;
+  uint32 regval;
+  uint32 regaddr;
+  unsigned int gpio;
+  unsigned int pin;
+  unsigned int pos;
+  unsigned int mode;
+  unsigned int cnf;
+  boolean output;
+ 
+  /* Verify that this hardware supports the select GPIO port */
+
+  gpio = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  if (gpio < STM32_NGPIO)
+    {
+      /* Get the port base address */
+
+      gpiobase = g_gpiobase[gpio];
+
+      /* Get the pin number and select the port configuration register for that pin */
+
+      pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+      if (pin < 8)
+        {
+          cr  = gpiobase + STM32_GPIO_CRL_OFFSET;
+          pos = pin;
+        }
+      else
+        {
+          cr  = gpiobase + STM32_GPIO_CRH_OFFSET;
+          pos = pin - 8;
+        }
+
+      /* Input or output? */
+
+      output = ((cfgset & GPIO_OUTPUT_PIN) != 0);
+
+      /* Decode the mode and configuration */
+
+      if (output)
+        {
+          mode = (cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
+        }
+      else
+        {
+          mode = 0;
+        }
+
+      cnf = (cfgset & GPIO_CNF_MASK) >> GPIO_CNF_SHIFT;
+     
+      /* Set the port configuration register */
+
+      regval = getreg32(cr);
+      regval &= ~(GPIO_CR_MODE_MASK(pos)|GPIO_CRL_CNF_MASK(pos));
+      regval |= (mode << GPIO_CR_MODE_SHIFT(pos)) | (cnf << GPIO_CRL_CNF_SHIFT(pos));
+      putreg32(regval, cr);
+
+      /* Set or reset the corresponding BRR/BSRR bit */
+
+      if (output)
+        {
+	        /* It is an output pin, we need to set/clear the output value */
+
+
+	        if ((cfgset & GPIO_OUTPUT_VALUE) != 0)
+	          {
+		          /* Use the BSRR register to set the output */
+
+		          regaddr = gpiobase + STM32_GPIO_BSRR_OFFSET;
+	          }
+	        else
+	          {
+		          /* Use the BRR register to clear */
+
+		          regaddr = gpiobase + STM32_GPIO_BRR_OFFSET;
+	          }
+        }
+      else
+        {
+          if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLDWN)
+            {
+	          regaddr = gpiobase + STM32_GPIO_BSRR_OFFSET;
+            }
+          else if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLUP)
+            {
+	          regaddr = gpiobase + STM32_GPIO_BRR_OFFSET;
+            }
+            else
+            {
+              return OK;
+            }
+        }
+
+        regval = getreg32(regaddr);
+        regval |= (1 << pin);
+        putreg32(regval, regaddr);
+        return OK;
+    }
+  return ERROR;
 }
+
+/****************************************************************************
+ * Name: stm32_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin
+ *
+ ****************************************************************************/
+
+void stm32_gpiowrite(uint32 pinset, boolean value)
+{
+  uint32 gpiobase;
+  uint32 offset;
+  unsigned int gpio;
+  unsigned int pin;
+
+  gpio = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  if (gpio < STM32_NGPIO)
+    {
+      /* Get the port base address */
+
+      gpiobase = g_gpiobase[gpio];
+
+      /* Get the pin number  */
+
+      pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+
+      /* Set or clear the output on the pin */
+
+      if (value)
+        {
+          offset = STM32_GPIO_BSRR_OFFSET;
+        }
+      else
+          offset = STM32_GPIO_BRR_OFFSET;
+        {
+        }
+      putreg32((1 << pin), gpiobase + offset);
+    }
+}
+
+/****************************************************************************
+ * Name: stm32_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ ****************************************************************************/
+
+boolean stm32_gpioread(uint32 pinset)
+{
+  uint32 gpiobase;
+  unsigned int gpio;
+  unsigned int pin;
+
+  gpio = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  if (gpio < STM32_NGPIO)
+    {
+      /* Get the port base address */
+
+      gpiobase = g_gpiobase[gpio];
+
+      /* Get the pin number and return the input state of that pin */
+
+      pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+      return ((getreg32(gpiobase + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
+    }
+  return 0;
+}
+
+/****************************************************************************
+ * Function:  stm32_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided base address
+ *
+ ****************************************************************************/
+
+#if 0 /* Not implemented */
+int stm32_dumpgpio(uint32 pinset, const char *msg)
+{
+}
+#endif
+
 
 

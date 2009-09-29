@@ -59,34 +59,52 @@
 /* Bit-encoded input to stm32_configgpio() *******************************************/
 
 /* Encoding:
- * FFFn nPPP IIIn nnnn nnnn nnnn VPPP BBBB
- *
- * These bits set the primary function of the pin:
- * FFFn nnnn nnnn nnnn nnnn nnnn nnnn nnnn
+ * .... .... .... .... OFFS S... VPPP BBBB
  */
 
-#define GPIO_FUNC_SHIFT               29                         /* Bit 31-29: GPIO function */
-#define GPIO_FUNC_MASK                (7 << GPIO_FUNC_SHIFT)
-#define GPIO_FUNC_INFLOAT             (0 << GPIO_FUNC_SHIFT)     /* Input floating */
-#define GPIO_FUNC_INPULLUP            (1 << GPIO_FUNC_SHIFT)     /* Input pull-up */
-#define GPIO_FUNC_INPULLDWN           (2 << GPIO_FUNC_SHIFT)     /* Input pull-down */
-#define GPIO_FUNC_ANALOGIN            (3 << GPIO_FUNC_SHIFT)     /* Analog input */
-#define GPIO_FUNC_OUTOD               (4 << GPIO_FUNC_SHIFT)     /* Output open-drain */
-#define GPIO_FUNC_OUTPP               (5 << GPIO_FUNC_SHIFT)     /* Output push-pull */
-#define GPIO_FUNC_AFPP                (6 << GPIO_FUNC_SHIFT)     /* Altnernate function push-pull */
-#define GPIO_FUNC_AFOD                (7 << GPIO_FUNC_SHIFT)     /* Altnernate function open-drain */
+/* Output mode:
+ *
+ * .... .... .... .... O... .... VPPP BBBB
+ */
+
+#define GPIO_OUTPUT_PIN               (1 << 15)                  /* Bit 15: Output mode */
+
+/* These bits set the primary function of the pin:
+ * .... .... .... .... FFF. .... .... ....
+ */
+
+#define GPIO_CNF_SHIFT                13                         /* Bits 13-14: GPIO function */
+#define GPIO_CNF_MASK                 (3 << GPIO_CNF_SHIFT)
+
+#  define GPIO_CNF_ANALOGIN           (0 << GPIO_CNF_SHIFT)      /* Analog input */
+#  define GPIO_CNF_INFLOAT            (1 << GPIO_CNF_SHIFT)      /* Input floating */
+#  define GPIO_CNF_INPULLUP           (2 << GPIO_CNF_SHIFT)      /* Input pull-up */
+#  define GPIO_CNF_INPULLDWN          (3 << GPIO_CNF_SHIFT)      /* Input pull-down */
+
+#  define GPIO_CNF_OUTPP              (0 << GPIO_CNF_SHIFT)      /* Output push-pull */
+#  define GPIO_CNF_OUTOD              (1 << GPIO_CNF_SHIFT)      /* Output open-drain */
+#  define GPIO_CNF_AFPP               (2 << GPIO_CNF_SHIFT)      /* Altnernate function push-pull */
+#  define GPIO_CNF_AFOD               (3 << GPIO_CNF_SHIFT)      /* Altnernate function open-drain */
+
+/* Maximum frequency selection:
+ * .... .... .... .... ...S S... .... ....
+ */
+
+#define GPIO_MODE_SHIFT               11                         /* Bits 11-12: GPIO frequency selection */
+#define GPIO_MODE_MASK                (3 << GPIO_MODE_SHIFT)
+#  define GPIO_MODE_INPUT             (0 << GPIO_MODE_SHIFT)     /* Input mode (reset state) */
+#  define GPIO_MODE_10MHz             (1 << GPIO_MODE_SHIFT)     /* Output mode, max speed 10 MHz */
+#  define GPIO_MODE_2MHz              (2 << GPIO_MODE_SHIFT)     /* Output mode, max speed 2 MHz */
+#  define GPIO_MODE_50MHz             (3 << GPIO_MODE_SHIFT)     /* Output mode, max speed 50 MHz */
 
 /* If the pin is an GPIO digital output, then this identifies the initial output value:
- * nnnn nnnn nnnn nnnn nnnn nnnn Vnnn nnnn
+ * .... .... .... .... .... .... V... ....
  */
 
-#define GPIO_VALUE_SHIFT              7                          /* Bit 7: If output, inital value of output */
-#define GPIO_VALUE_MASK               (1 << GPIO_VALUE_SHIFT)
-#define GPIO_VALUE_ZERO               (0 << GPIO_VALUE_SHIFT)    /*   Initial value is zero */
-#define GPIO_VALUE_ONE                (1 << GPIO_VALUE_SHIFT)    /*   Initial value is one */
+#define GPIO_OUTPUT_VALUE             (1 << 7)                   /* Bit 7: If output, inital value of output */
 
 /* This identifies the GPIO port:
- * nnnn nnnn nnnn nnnn nnnn nnnn nPPP nnnn
+ * .... .... .... .... .... .... .PPP ....
  */
 
 #define GPIO_PORT_SHIFT               4                          /* Bit 4-6:  Port number */
@@ -100,11 +118,11 @@
 #define GPIO_PORTG                    (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 
 /* This identifies the bit in the port:
- * nnnn nnnn nnnn nnnn nnnn nnnn nnnn BBBB
+ * .... .... .... .... .... .... .... BBBB
  */
 
-#define GPIO_NUMBER_SHIFT             0                           /* Bits 0-3: GPIO number: 0-15 */
-#define GPIO_NUMBER_MASK              (15 << GPIO_NUMBER_SHIFT)
+#define GPIO_PIN_SHIFT                 0                           /* Bits 0-3: GPIO number: 0-15 */
+#define GPIO_PIN_MASK                  (15 << GPIO_PIN_SHIFT)
 
 /************************************************************************************
  * Public Types
@@ -180,7 +198,7 @@ EXTERN void stm32_gpiowrite(uint32 pinset, boolean value);
  *
  ****************************************************************************/
 
-EXTERN boolean stm32_gpioread(uint32 pinset, boolean value);
+EXTERN boolean stm32_gpioread(uint32 pinset);
 
 /****************************************************************************
  * Function:  stm32_dumpgpio
