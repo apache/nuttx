@@ -237,8 +237,6 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_U[S]ARTn_2STOP - Two stop bits
 
-	CONFIG_SPI1_DISABLE - Select to disable support for SPI1
-	CONFIG_SPI2_DISABLE - Select to disable support for SPI2
 	CONFIG_SPI_POLLWAIT - Select to disable interrupt driven SPI support.
 	  Poll-waiting is recommended if the interrupt rate would be to
 	  high in the interrupt driven case.

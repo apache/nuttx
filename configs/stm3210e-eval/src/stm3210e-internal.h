@@ -54,14 +54,11 @@
  * expanded).
  */
 
-#if STM32_NSPI == 0
-#  undef CONFIG_SPI1_DISABLE
-#  define CONFIG_SPI1_DISABLE 1
-#  undef CONFIG_SPI2_DISABLE
-#  define CONFIG_SPI2_DISABLE 1
-#elif STM32_NSPI == 1
-#  undef CONFIG_SPI2_DISABLE
-#  define CONFIG_SPI2_DISABLE 1
+#if STM32_NSPI < 1
+#  undef CONFIG_STM32_SPI1
+#  undef CONFIG_STM32_SPI2
+#elif STM32_NSPI < 2
+#  undef CONFIG_STM32_SPI2
 #endif
 
 /* STM3210E-EVAL GPIOs **************************************************************/
