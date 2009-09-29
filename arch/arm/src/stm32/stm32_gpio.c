@@ -47,12 +47,13 @@
 #include "stm32_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
+ 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -82,6 +83,10 @@ static const uint32 g_gpiobase[STM32_NGPIO] =
 #endif
 };
 
+#ifdef CONFIG_DEBUG
+static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -100,11 +105,11 @@ static const uint32 g_gpiobase[STM32_NGPIO] =
 
 int stm32_configgpio(uint32 cfgset)
 {
-  uint32 gpiobase;
+  uint32 base;
   uint32 cr;
   uint32 regval;
   uint32 regaddr;
-  unsigned int gpio;
+  unsigned int port;
   unsigned int pin;
   unsigned int pos;
   unsigned int modecnf;
@@ -112,24 +117,24 @@ int stm32_configgpio(uint32 cfgset)
  
   /* Verify that this hardware supports the select GPIO port */
 
-  gpio = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (gpio < STM32_NGPIO)
+  port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  if (port < STM32_NGPIO)
     {
       /* Get the port base address */
 
-      gpiobase = g_gpiobase[gpio];
+      base = g_gpiobase[port];
 
       /* Get the pin number and select the port configuration register for that pin */
 
       pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
       if (pin < 8)
         {
-          cr  = gpiobase + STM32_GPIO_CRL_OFFSET;
+          cr  = base + STM32_GPIO_CRL_OFFSET;
           pos = pin;
         }
       else
         {
-          cr  = gpiobase + STM32_GPIO_CRH_OFFSET;
+          cr  = base + STM32_GPIO_CRH_OFFSET;
           pos = pin - 8;
         }
 
@@ -169,13 +174,13 @@ int stm32_configgpio(uint32 cfgset)
 	          {
 		          /* Use the BSRR register to set the output */
 
-		          regaddr = gpiobase + STM32_GPIO_BSRR_OFFSET;
+		          regaddr = base + STM32_GPIO_BSRR_OFFSET;
 	          }
 	        else
 	          {
 		          /* Use the BRR register to clear */
 
-		          regaddr = gpiobase + STM32_GPIO_BRR_OFFSET;
+		          regaddr = base + STM32_GPIO_BRR_OFFSET;
 	          }
         }
       else
@@ -189,13 +194,13 @@ int stm32_configgpio(uint32 cfgset)
             {
               /* Set the ODR bit (using BSRR) to one for the PULL-UP functionality */
             
-	          regaddr = gpiobase + STM32_GPIO_BSRR_OFFSET;
+	          regaddr = base + STM32_GPIO_BSRR_OFFSET;
             }
           else if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLDWN)
             {
               /* Clear the ODR bit (using BRR) to zero for the PULL-DOWN functionality */
 
-	          regaddr = gpiobase + STM32_GPIO_BRR_OFFSET;
+	          regaddr = base + STM32_GPIO_BRR_OFFSET;
             }
             else
             {
@@ -223,17 +228,17 @@ int stm32_configgpio(uint32 cfgset)
 
 void stm32_gpiowrite(uint32 pinset, boolean value)
 {
-  uint32 gpiobase;
+  uint32 base;
   uint32 offset;
-  unsigned int gpio;
+  unsigned int port;
   unsigned int pin;
 
-  gpio = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (gpio < STM32_NGPIO)
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  if (port < STM32_NGPIO)
     {
       /* Get the port base address */
 
-      gpiobase = g_gpiobase[gpio];
+      base = g_gpiobase[port];
 
       /* Get the pin number  */
 
@@ -249,7 +254,7 @@ void stm32_gpiowrite(uint32 pinset, boolean value)
           offset = STM32_GPIO_BRR_OFFSET;
         {
         }
-      putreg32((1 << pin), gpiobase + offset);
+      putreg32((1 << pin), base + offset);
     }
 }
 
@@ -263,21 +268,21 @@ void stm32_gpiowrite(uint32 pinset, boolean value)
 
 boolean stm32_gpioread(uint32 pinset)
 {
-  uint32 gpiobase;
-  unsigned int gpio;
+  uint32 base;
+  unsigned int port;
   unsigned int pin;
 
-  gpio = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (gpio < STM32_NGPIO)
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  if (port < STM32_NGPIO)
     {
       /* Get the port base address */
 
-      gpiobase = g_gpiobase[gpio];
+      base = g_gpiobase[port];
 
       /* Get the pin number and return the input state of that pin */
 
       pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-      return ((getreg32(gpiobase + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
+      return ((getreg32(base + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
     }
   return 0;
 }
@@ -290,9 +295,35 @@ boolean stm32_gpioread(uint32 pinset)
  *
  ****************************************************************************/
 
-#if 0 /* Not implemented */
+#ifdef CONFIG_DEBUG
 int stm32_dumpgpio(uint32 pinset, const char *msg)
 {
+  irqstate_t   flags;
+  uint32       base;
+  unsigned int port;
+  unsigned int pin;
+
+  /* Get the base address associated with the GPIO port */
+
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  base = g_gpiobase[port];
+
+  /* The following requires exclusive access to the GPIO registers */
+
+  flags   = irqsave();
+  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
+        g_portchar[port], pinset, base, msg);
+  lldbg("  CR: %08x %08x IDR: %04x ODR: %04x LCKR: %04x\n",
+        getreg32(base + STM32_GPIO_CRH_OFFSET), getreg32(base + STM32_GPIO_CRL_OFFSET),
+        getreg32(base + STM32_GPIO_IDR_OFFSET), getreg32(base + STM32_GPIO_ODR_OFFSET),
+        getreg32(base + STM32_GPIO_LCKR_OFFSET));
+  lldbg("  EVCR: %02x MAPR: %08x CR: %04x %04x %04x %04x\n",
+        getreg32(STM32_AFIO_EVCR), getreg32(STM32_AFIO_MAPR),
+        getreg32(STM32_AFIO_EXTICR1), getreg32(STM32_AFIO_EXTICR2),
+        getreg32(STM32_AFIO_EXTICR3), getreg32(STM32_AFIO_EXTICR4));
+  irqrestore(flags);
+  return OK;
 }
 #endif
 
