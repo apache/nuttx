@@ -107,8 +107,7 @@ int stm32_configgpio(uint32 cfgset)
   unsigned int gpio;
   unsigned int pin;
   unsigned int pos;
-  unsigned int mode;
-  unsigned int cnf;
+  unsigned int modecnf;
   boolean output;
  
   /* Verify that this hardware supports the select GPIO port */
@@ -142,28 +141,29 @@ int stm32_configgpio(uint32 cfgset)
 
       if (output)
         {
-          mode = (cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
+          modecnf = (cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
         }
       else
         {
-          mode = 0;
+          modecnf = 0;
         }
 
-      cnf = (cfgset & GPIO_CNF_MASK) >> GPIO_CNF_SHIFT;
+      modecnf |= ((cfgset & GPIO_CNF_MASK) >> GPIO_CNF_SHIFT) << 2;
      
       /* Set the port configuration register */
 
       regval = getreg32(cr);
-      regval &= ~(GPIO_CR_MODE_MASK(pos)|GPIO_CRL_CNF_MASK(pos));
-      regval |= (mode << GPIO_CR_MODE_SHIFT(pos)) | (cnf << GPIO_CRL_CNF_SHIFT(pos));
+      regval &= ~(GPIO_CR_MODECNF_MASK(pos));
+      regval |= (modecnf << GPIO_CR_MODECNF_SHIFT(pos));
       putreg32(regval, cr);
 
       /* Set or reset the corresponding BRR/BSRR bit */
 
       if (output)
         {
-	        /* It is an output pin, we need to set/clear the output value */
-
+	        /* It is an output pin, we need to instantiate the initial
+	         * pin output value
+	         */
 
 	        if ((cfgset & GPIO_OUTPUT_VALUE) != 0)
 	          {
@@ -180,16 +180,27 @@ int stm32_configgpio(uint32 cfgset)
         }
       else
         {
-          if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLDWN)
+          /* It is an input pin... If it is pull-down or pull up,
+           * then we need to set the ODR appropriately for that
+           * function.
+           */
+        
+          if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLUP)
             {
+              /* Set the ODR bit (using BSRR) to one for the PULL-UP functionality */
+            
 	          regaddr = gpiobase + STM32_GPIO_BSRR_OFFSET;
             }
-          else if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLUP)
+          else if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLDWN)
             {
+              /* Clear the ODR bit (using BRR) to zero for the PULL-DOWN functionality */
+
 	          regaddr = gpiobase + STM32_GPIO_BRR_OFFSET;
             }
             else
             {
+              /* Neither... we can return early */
+
               return OK;
             }
         }
