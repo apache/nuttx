@@ -140,7 +140,7 @@ int stm32_configgpio(uint32 cfgset)
 
       /* Input or output? */
 
-      output = ((cfgset & GPIO_OUTPUT_PIN) != 0);
+      output = ((cfgset & GPIO_OUTPUT) != 0);
 
       /* Decode the mode and configuration */
 
@@ -170,7 +170,7 @@ int stm32_configgpio(uint32 cfgset)
 	         * pin output value
 	         */
 
-	        if ((cfgset & GPIO_OUTPUT_VALUE) != 0)
+	        if ((cfgset & GPIO_OUTPUT_SET) != 0)
 	          {
 		          /* Use the BSRR register to set the output */
 
