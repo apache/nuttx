@@ -91,14 +91,16 @@
 
 /* LED definitions ******************************************************************/
 
-#define LED_STARTED       0
-#define LED_HEAPALLOCATE  1
-#define LED_IRQSENABLED   2
-#define LED_STACKCREATED  3
-#define LED_INIRQ         4
-#define LED_SIGNAL        5
-#define LED_ASSERTION     6
-#define LED_PANIC         7
+/* The STM3210E-EVAL board has 4 LEDs that we will encode as */
+
+#define LED_STARTED       0  /* LED1 */
+#define LED_HEAPALLOCATE  1  /* LED2 */
+#define LED_IRQSENABLED   2  /* LED1 + LED2 */
+#define LED_STACKCREATED  3  /* LED3 */
+#define LED_INIRQ         4  /* LED1 + LED3 */
+#define LED_SIGNAL        5  /* LED2 + LED3 */
+#define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
+#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
 /************************************************************************************
  * Public Function Prototypes
