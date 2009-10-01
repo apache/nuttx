@@ -118,6 +118,15 @@ NuttX buildroot Toolchain
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
+DFU
+^^^
+
+  The linker files in these projects assume that you will be loading code
+  using STMicro built in USB DFU loader.  In this case, the code will not
+  be positioned at the beginning of FLASH (0x80000000) but will be offset
+  to 0x08030000.  If you need to change that origin, you will need to
+  edit the file(s) ld.script for each configuration.
+
 STM3210E-EVAL-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
