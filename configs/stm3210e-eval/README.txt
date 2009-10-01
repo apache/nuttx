@@ -233,6 +233,13 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_STM32_USART1
 	CONFIG_STM32_ADC3
 
+  Alternate pin mappings (should not be used with the STM3210E-EVAL board):
+
+    CONFIG_STM32_USART1_REMAP
+    CONFIG_STM32_USART2_REMAP
+    CONFIG_STM32_USART3_PARTIAL_REMAP
+    CONFIG_STM32_USART3_FULL_REMAP
+    
   STM32F103Z specific device driver settings
 
 	CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
