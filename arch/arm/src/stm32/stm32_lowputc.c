@@ -234,12 +234,6 @@ void stm32_lowsetup(void)
   mapr = getreg32(STM32_AFIO_MAPR);
 
 #ifdef CONFIG_STM32_USART1
-  /* Enable USART1 clocking */
-
-  enr  = getreg32(STM32_RCC_APB2ENR_OFFSET);
-  enr |= RCC_APB2ENR_USART1EN;
-  putreg32(enr, STM32_RCC_APB2ENR_OFFSET);
-
   /* Assume default pin mapping:
    *
    *   Alternate  USART1_REMAP USART1_REMAP
@@ -249,20 +243,32 @@ void stm32_lowsetup(void)
    *   USART1_RX  PA10         PB7
    */
 
+#ifdef CONFIG_STM32_USART1_REMAP
+  mapr |= AFIO_MAPR_USART1_REMAP;
+  putreg32(mapr, STM32_AFIO_MAPR);
+
+  stm32_configgpio(GPIO_USART1_RMTX);
+  stm32_configgpio(GPIO_USART1_RMRX);
+#else
+  mapr &= ~AFIO_MAPR_USART1_REMAP;
+  putreg32(mapr, STM32_AFIO_MAPR);
+
   stm32_configgpio(GPIO_USART1_TX);
   stm32_configgpio(GPIO_USART1_RX);
-  mapr &= ~AFIO_MAPR_USART1_REMAP;
+#endif
+
+  /* Enable USART1 clocking */
+
+  enr  = getreg32(STM32_RCC_APB2ENR);
+  enr |= RCC_APB2ENR_USART1EN;
+  putreg32(enr, STM32_RCC_APB2ENR);
 
 #endif /* CONFIG_STM32_USART1 */
 
 #if defined(CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3)
-  enr  = getreg32(STM32_RCC_APB1ENR_OFFSET);
+  enr  = getreg32(STM32_RCC_APB1ENR);
 
 #ifdef CONFIG_STM32_USART2
-  /* Enable USART2 clocking */
-
-  enr |= RCC_APB1ENR_USART2EN;
-
   /* Assume default pin mapping:
    *
    *   Alternate  USART2_REMAP USART2_REMAP
@@ -275,17 +281,28 @@ void stm32_lowsetup(void)
    *   USART3_CK  PA4          PD7
    */
 
+#ifdef CONFIG_STM32_USART2_REMAP
+  mapr |= ~AFIO_MAPR_USART2_REMAP;
+  putreg32(mapr, STM32_AFIO_MAPR);
+
+  stm32_configgpio(GPIO_USART2_RMTX);
+  stm32_configgpio(GPIO_USART2_RMRX);
+#else
+  mapr &= ~AFIO_MAPR_USART2_REMAP;
+  putreg32(mapr, STM32_AFIO_MAPR);
+
   stm32_configgpio(GPIO_USART2_TX);
   stm32_configgpio(GPIO_USART2_RX);
-  mapr &= ~AFIO_MAPR_USART2_REMAP;
+#endif
+
+  /* Enable USART2 clocking */
+
+  enr |= RCC_APB1ENR_USART2EN;
+  putreg32(enr, STM32_RCC_APB1ENR);
 
 #endif /* CONFIG_STM32_USART2 */
 
 #ifdef CONFIG_STM32_USART3
-  /* Enable USART3 clocking */
-
-  enr |= RCC_APB1ENR_USART3EN;
-
   /* Assume default pin mapping:
    *
    * Alternate  USART3_REMAP[1:0]  USART3_REMAP[1:0]      USART3_REMAP[1:0]
@@ -298,18 +315,33 @@ void stm32_lowsetup(void)
    * USART3_RTS PB14               PB14                   PD12
    */
 
+  mapr &= ~AFIO_MAPR_USART3_REMAP_MASK;
+#if defined(CONFIG_STM32_USART2_PARTIAL_REMAP)
+  mapr |= AFIO_MAPR_USART3_PARTREMAP;
+  putreg32(mapr, STM32_AFIO_MAPR);
+
+  stm32_configgpio(GPIO_USART3_PRMTX);
+  stm32_configgpio(GPIO_USART3_PRMRX);
+#elif defined(CONFIG_STM32_USART2_FULL_REMAP)
+  mapr |= AFIO_MAPR_USART3_FULLREMAP;
+  putreg32(mapr, STM32_AFIO_MAPR);
+
+  stm32_configgpio(GPIO_USART3_FRMTX);
+  stm32_configgpio(GPIO_USART3_FRMRX);
+#else
+  putreg32(mapr, STM32_AFIO_MAPR);
+
   stm32_configgpio(GPIO_USART3_TX);
   stm32_configgpio(GPIO_USART3_RX);
-  mapr &= ~AFIO_MAPR_USART3_REMAP_MASK;
+#endif
+
+  /* Enable USART3 clocking */
+
+  enr |= RCC_APB1ENR_USART3EN;
+  putreg32(enr, STM32_RCC_APB1ENR);
 
 #endif /* CONFIG_STM32_USART3 */
-  /* Save the UART enable settings */
-
-  putreg32(enr, STM32_RCC_APB1ENR_OFFSET);
 #endif /* CONFIG_STM32_USART2 || CONFIG_STM32_USART3 */
-  /* Save the USART pin mappings */
-
-  putreg32(mapr, STM32_AFIO_MAPR);
 
   /* Enable and configure the selected console device */
 
