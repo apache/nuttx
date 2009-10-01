@@ -249,6 +249,8 @@ void stm32_lowsetup(void)
    *   USART1_RX  PA10         PB7
    */
 
+  stm32_configgpio(GPIO_USART1_TX);
+  stm32_configgpio(GPIO_USART1_RX);
   mapr &= ~AFIO_MAPR_USART1_REMAP;
 
 #endif /* CONFIG_STM32_USART1 */
@@ -266,10 +268,15 @@ void stm32_lowsetup(void)
    *   Alternate  USART2_REMAP USART2_REMAP
    *   Function   = 0          = 1
    *   ---------- ------------ ------------
+   *   USART2_CTS PA0          PD3
+   *   USART2_RTS PA1          PD4
    *   USART2_TX  PA2          PD5
    *   USART2_RX  PA3          PD6
+   *   USART3_CK  PA4          PD7
    */
 
+  stm32_configgpio(GPIO_USART2_TX);
+  stm32_configgpio(GPIO_USART2_RX);
   mapr &= ~AFIO_MAPR_USART2_REMAP;
 
 #endif /* CONFIG_STM32_USART2 */
@@ -281,14 +288,18 @@ void stm32_lowsetup(void)
 
   /* Assume default pin mapping:
    *
-   *            
-   * Alternate USART3_REMAP[1:0]  USART3_REMAP[1:0]      USART3_REMAP[1:0]
-   * Function  = “00” (no remap)  = “01” (partial remap) = “11” (full remap)
-   * --------- ------------------ ---------------------- --------------------
-   * USART3_TX PB10               PC10                   PD8
-   * USART3_RX PB11               PC11                   PD9
+   * Alternate  USART3_REMAP[1:0]  USART3_REMAP[1:0]      USART3_REMAP[1:0]
+   * Function   = “00” (no remap)  = “01” (partial remap) = “11” (full remap)
+   * ---------_ ------------------ ---------------------- --------------------
+   * USART3_TX  PB10               PC10                   PD8
+   * USART3_RX  PB11               PC11                   PD9
+   * USART3_CK  PB12               PC12                   PD10
+   * USART3_CTS PB13               PB13                   PD11
+   * USART3_RTS PB14               PB14                   PD12
    */
 
+  stm32_configgpio(GPIO_USART3_TX);
+  stm32_configgpio(GPIO_USART3_RX);
   mapr &= ~AFIO_MAPR_USART3_REMAP_MASK;
 
 #endif /* CONFIG_STM32_USART3 */
