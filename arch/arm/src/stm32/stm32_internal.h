@@ -69,6 +69,7 @@
 
 #define GPIO_OUTPUT                   (1 << 15)                  /* Bit 15: Output mode */
 #define GPIO_INPUT                    (0)
+#define GPIO_ALTERNATE                (0)
 
 /* These bits set the primary function of the pin:
  * .... .... .... .... FFF. .... .... ....
@@ -140,6 +141,14 @@
 #define GPIO_PIN13                     (13 << GPIO_PIN_SHIFT)
 #define GPIO_PIN14                     (14 << GPIO_PIN_SHIFT)
 #define GPIO_PIN15                     (15 << GPIO_PIN_SHIFT)
+
+/* Alternate Pin Functions */
+/* SPI1 */
+
+#define GPIO_SPI1_NSS  (GPIO_ALTERNATE|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTA|GPIO_PIN4)
+#define GPIO_SPI1_SCK  (GPIO_ALTERNATE|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTA|GPIO_PIN5)
+#define GPIO_SPI1_MISO (GPIO_ALTERNATE|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTA|GPIO_PIN6)
+#define GPIO_SPI1_MOSI (GPIO_ALTERNATE|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTA|GPIO_PIN7)
 
 /************************************************************************************
  * Public Types

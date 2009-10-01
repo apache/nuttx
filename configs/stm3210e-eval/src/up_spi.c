@@ -93,7 +93,18 @@
 
 void weak_function stm32_spiinitialize(void)
 {
-  /* Configure the SPI-based microSD CS GPIO */
+#ifdef CONFIG_STM32_SPI1
+  /* Configure SPI1 alternate function pins */
+
+  stm32_configgpio(GPIO_SPI1_SCK);
+  stm32_configgpio(GPIO_SPI1_MISO);
+  stm32_configgpio(GPIO_SPI1_MOSI);
+ 
+  /* Configure the SPI-based microSD and FLASH CS GPIO */
+
+  stm32_configgpio(GPIO_MMCSD_CS);
+  stm32_configgpio(GPIO_FLASH_CS);
+#endif
 }
 
 /****************************************************************************
@@ -119,6 +130,19 @@ void weak_function stm32_spiinitialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+  if (devid == SPIDEV_MMCSD)
+  {
+    /* Set the GPIO low to select and high to de-select */
+
+    stm32_gpiowrite(GPIO_MMCSD_CS, !selected);
+  }
+  else if (devid == SPIDEV_FLASH)
+  {
+    /* Set the GPIO low to select and high to de-select */
+
+    stm32_gpiowrite(GPIO_FLASH_CS, !selected);
+  }
 }
 
 ubyte stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

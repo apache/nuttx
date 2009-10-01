@@ -275,6 +275,7 @@ enum spi_dev_e
 {
   SPIDEV_NONE = 0,  /* Not a valid value */
   SPIDEV_MMCSD,     /* Select SPI MMC/SD device */
+  SPIDEV_FLASH,     /* Select SPI FLASH device */
   SPIDEV_ETHERNET   /* Select SPI ethernet device */
 };
 
