@@ -220,7 +220,6 @@ void up_lowputc(char ch)
 void stm32_lowsetup(void)
 {
 #if defined(CONFIG_STM32_USART1) || defined(CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3)
-  uint32 enr;
   uint32 mapr;
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_USART_CONFIG)
   uint32 cr;
@@ -229,6 +228,8 @@ void stm32_lowsetup(void)
   /* Enable the selected USARTs and configure GPIO pins need byed the
    * the selected USARTs.  NOTE: The serial driver later depends on
    * this pin configuration -- whether or not a serial console is selected.
+   *
+   * NOTE: Clocking for USART1, USART2, and/or USART3 was already provided in stm32_rcc.c
    */
 
   mapr = getreg32(STM32_AFIO_MAPR);
@@ -256,17 +257,7 @@ void stm32_lowsetup(void)
   stm32_configgpio(GPIO_USART1_TX);
   stm32_configgpio(GPIO_USART1_RX);
 #endif
-
-  /* Enable USART1 clocking */
-
-  enr  = getreg32(STM32_RCC_APB2ENR);
-  enr |= RCC_APB2ENR_USART1EN;
-  putreg32(enr, STM32_RCC_APB2ENR);
-
 #endif /* CONFIG_STM32_USART1 */
-
-#if defined(CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3)
-  enr  = getreg32(STM32_RCC_APB1ENR);
 
 #ifdef CONFIG_STM32_USART2
   /* Assume default pin mapping:
@@ -294,12 +285,6 @@ void stm32_lowsetup(void)
   stm32_configgpio(GPIO_USART2_TX);
   stm32_configgpio(GPIO_USART2_RX);
 #endif
-
-  /* Enable USART2 clocking */
-
-  enr |= RCC_APB1ENR_USART2EN;
-  putreg32(enr, STM32_RCC_APB1ENR);
-
 #endif /* CONFIG_STM32_USART2 */
 
 #ifdef CONFIG_STM32_USART3
@@ -334,14 +319,7 @@ void stm32_lowsetup(void)
   stm32_configgpio(GPIO_USART3_TX);
   stm32_configgpio(GPIO_USART3_RX);
 #endif
-
-  /* Enable USART3 clocking */
-
-  enr |= RCC_APB1ENR_USART3EN;
-  putreg32(enr, STM32_RCC_APB1ENR);
-
 #endif /* CONFIG_STM32_USART3 */
-#endif /* CONFIG_STM32_USART2 || CONFIG_STM32_USART3 */
 
   /* Enable and configure the selected console device */
 
