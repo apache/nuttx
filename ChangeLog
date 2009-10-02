@@ -894,3 +894,12 @@
 	  and pipe the stdout back to the HTTP client.
 
 0.4.12 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* arch/arm/src/stm32 and configs/stm3210e-eval.  Added basic support for the
+	  STMicro STM32, Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL
+	  development board based around the STM32F103ZET6 MCU.
+
+	  As of this writing, the basic code is in place for boot-up, serial port and
+	  timer interrupt, but lots of debug work remains (and a few more drivers are
+	  needed) before it is released in 0.4.12.
+
