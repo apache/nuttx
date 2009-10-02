@@ -93,6 +93,8 @@
 
 void weak_function stm32_spiinitialize(void)
 {
+  /* NOTE: Clocking for SPI1 and/or SPI2 was already provided in stm32_rcc.c */
+
 #ifdef CONFIG_STM32_SPI1
   /* Configure SPI1 alternate function pins */
 
@@ -104,6 +106,14 @@ void weak_function stm32_spiinitialize(void)
 
   stm32_configgpio(GPIO_MMCSD_CS);
   stm32_configgpio(GPIO_FLASH_CS);
+#endif
+#ifdef CONFIG_STM32_SPI2
+  /* Configure SPI1 alternate function pins */
+
+  stm32_configgpio(GPIO_SPI2_SCK);
+  stm32_configgpio(GPIO_SPI3_MISO);
+  stm32_configgpio(GPIO_SPI4_MOSI);
+ 
 #endif
 }
 
