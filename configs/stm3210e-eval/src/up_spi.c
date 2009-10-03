@@ -96,6 +96,16 @@ void weak_function stm32_spiinitialize(void)
   /* NOTE: Clocking for SPI1 and/or SPI2 was already provided in stm32_rcc.c */
 
 #ifdef CONFIG_STM32_SPI1
+  /* Select SPI1 pin mapping */
+
+  uint32 mapr = getreg32(STM32_AFIO_MAPR);
+#ifdef CONFIG_STM32_SPI1_REMAP
+  mapr |= AFIO_MAPR_SPI1_REMAP;
+#else
+  mapr &= ~AFIO_MAPR_SPI1_REMAP;
+#endif
+  putreg32(mapr, STM32_AFIO_MAPR);
+
   /* Configure SPI1 alternate function pins */
 
   stm32_configgpio(GPIO_SPI1_SCK);
@@ -107,12 +117,13 @@ void weak_function stm32_spiinitialize(void)
   stm32_configgpio(GPIO_MMCSD_CS);
   stm32_configgpio(GPIO_FLASH_CS);
 #endif
+
 #ifdef CONFIG_STM32_SPI2
   /* Configure SPI1 alternate function pins */
 
   stm32_configgpio(GPIO_SPI2_SCK);
-  stm32_configgpio(GPIO_SPI3_MISO);
-  stm32_configgpio(GPIO_SPI4_MOSI);
+  stm32_configgpio(GPIO_SPI2_MISO);
+  stm32_configgpio(GPIO_SPI2_MOSI);
  
 #endif
 }
