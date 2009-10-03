@@ -1,9 +1,6 @@
 README
 ^^^^^^
 
-References:
-^^^^^^^^^^
-
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -122,10 +119,37 @@ DFU
 ^^^
 
   The linker files in these projects assume that you will be loading code
-  using STMicro built in USB DFU loader.  In this case, the code will not
-  be positioned at the beginning of FLASH (0x80000000) but will be offset
-  to 0x08030000.  If you need to change that origin, you will need to
+  using STMicro built-in USB DFU loader.  In this case, the code will not
+  be positioned at the beginning of FLASH (0x08000000) but will be offset
+  to 0x08003000.  If you need to change that origin, you will need to
   edit the file(s) ld.script for each configuration.
+
+  The DFU SE PC-based software is available from the STMicro website,
+  http://www.st.com.  General usage instructions:
+  
+  1. Convert the NuttX Intel Hex file (nuttx.ihx) into a special DFU
+     file (nuttx.dfu)... see below for details.
+  2. Connect the STM3210E-EVAL board to your computer using a USB
+     cable.
+  3. Start the DFU loader on the STM3210E-EVAL board.  You do this by
+     resetting the board while holding the "Key" button.  Windows should
+     recognize that the DFU loader has been installed.
+  3. Run the DFU SE program to load nutt.dfu into FLASH.
+
+  What if the DFU loader is not in FLASH?  The loader code is available
+  inside of the Demo dirctory of the USBLib ZIP file that can be downloaded
+  from the STMicro Website.  You can build it using RIDE (or other toolchains);
+  you will need a JTAG emulator to burn it into FLASH the first time.
+
+  In order to use STMicro's built-in DFU loader, you will have to get
+  the NuttX binary into a special format with a .dfu extension.  The
+  DFU SE PC_based software installation includes a file "DFU File Manager"
+  conversion program that a file in Intel Hex format to the special DFU
+  format.  When you successfully build NuttX, you will find a file called
+  nutt.ihx in the top-level directory.  That is the file that you should
+  provide to the DFU File Manager.  You will need to rename it to nuttx.hex
+  in order to find it with the DFU File Manager. You will end up with
+  a file called nuttx.dfu that you can use with the STMicro DFU SE program.
 
 STM3210E-EVAL-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
