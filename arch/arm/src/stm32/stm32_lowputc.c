@@ -246,17 +246,13 @@ void stm32_lowsetup(void)
 
 #ifdef CONFIG_STM32_USART1_REMAP
   mapr |= AFIO_MAPR_USART1_REMAP;
-  putreg32(mapr, STM32_AFIO_MAPR);
-
-  stm32_configgpio(GPIO_USART1_RMTX);
-  stm32_configgpio(GPIO_USART1_RMRX);
 #else
   mapr &= ~AFIO_MAPR_USART1_REMAP;
+#endif
   putreg32(mapr, STM32_AFIO_MAPR);
 
   stm32_configgpio(GPIO_USART1_TX);
   stm32_configgpio(GPIO_USART1_RX);
-#endif
 #endif /* CONFIG_STM32_USART1 */
 
 #ifdef CONFIG_STM32_USART2
@@ -274,17 +270,13 @@ void stm32_lowsetup(void)
 
 #ifdef CONFIG_STM32_USART2_REMAP
   mapr |= ~AFIO_MAPR_USART2_REMAP;
-  putreg32(mapr, STM32_AFIO_MAPR);
-
-  stm32_configgpio(GPIO_USART2_RMTX);
-  stm32_configgpio(GPIO_USART2_RMRX);
 #else
   mapr &= ~AFIO_MAPR_USART2_REMAP;
+#endif
   putreg32(mapr, STM32_AFIO_MAPR);
 
   stm32_configgpio(GPIO_USART2_TX);
   stm32_configgpio(GPIO_USART2_RX);
-#endif
 #endif /* CONFIG_STM32_USART2 */
 
 #ifdef CONFIG_STM32_USART3
@@ -301,24 +293,15 @@ void stm32_lowsetup(void)
    */
 
   mapr &= ~AFIO_MAPR_USART3_REMAP_MASK;
-#if defined(CONFIG_STM32_USART2_PARTIAL_REMAP)
+#if defined(CONFIG_STM32_USART3_PARTIAL_REMAP)
   mapr |= AFIO_MAPR_USART3_PARTREMAP;
-  putreg32(mapr, STM32_AFIO_MAPR);
-
-  stm32_configgpio(GPIO_USART3_PRMTX);
-  stm32_configgpio(GPIO_USART3_PRMRX);
-#elif defined(CONFIG_STM32_USART2_FULL_REMAP)
+#elif defined(CONFIG_STM32_USART3_FULL_REMAP)
   mapr |= AFIO_MAPR_USART3_FULLREMAP;
-  putreg32(mapr, STM32_AFIO_MAPR);
-
-  stm32_configgpio(GPIO_USART3_FRMTX);
-  stm32_configgpio(GPIO_USART3_FRMRX);
-#else
+#endif
   putreg32(mapr, STM32_AFIO_MAPR);
 
   stm32_configgpio(GPIO_USART3_TX);
   stm32_configgpio(GPIO_USART3_RX);
-#endif
 #endif /* CONFIG_STM32_USART3 */
 
   /* Enable and configure the selected console device */
