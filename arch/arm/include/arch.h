@@ -44,9 +44,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_PIC
 
 /* This identifies the register the is used by the processor as the PIC base
  * register.  It is usually r9 or r10
@@ -82,6 +86,7 @@ do { \
   ); \
 } while (0)
 
+#endif
 
 /****************************************************************************
  * Inline functions
