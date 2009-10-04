@@ -149,17 +149,38 @@
  *   usartdiv = fCK / (16 * baud)
  *
  * Where fCK is the input clock to the peripheral (PCLK1 for USART2, 3, 4, 5
- * or PCLK2 for USART1)
+ * or PCLK2 for USART1).  Example, fCK=72MHz baud=115200, usartdiv=39.0625=39 1/16th;
  *
- * First calculate (NOTE: all stand baud values are even so dividing by two
- * does not lose precision):
+ * First calculate:
  *
  *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
+ *
+ * (NOTE: all standard baud values are even so dividing by two does not
+ * lose precision).  Eg. (same fCK and buad), usartdiv32 = 1250
  */
 
 #define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
+
+/* The mantissa is then usartdiv32 * 32:
+ *
+ *   mantissa = 32 * usartdiv32
+ *
+ * Eg. usartdiv32=1250, mantissa = 39 
+ */
+
 #define STM32_MANTISSA   (STM32_USARTDIV32 >> 5)
+
+/* And the fraction:
+ *
+ *  fraction = (usartdiv32 - mantissa*32 + 1) / 2
+ *
+ * Eg., (1,250 - 39*32 + 1)/2 = 1 (or 0.0625)
+ */
+ 
 #define STM32_FRACTION   ((STM32_USARTDIV32 - (STM32_MANTISSA << 5) + 1) >> 1)
+
+/* And, finally, the BRR value is: */
+
 #define STM32_BRR_VALUE  ((STM32_MANTISSA << USART_BRR_MANT_SHIFT) | (STM32_FRACTION << USART_BRR_FRAC_SHIFT))
 
 /**************************************************************************

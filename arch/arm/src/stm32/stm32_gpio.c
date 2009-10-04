@@ -114,7 +114,7 @@ int stm32_configgpio(uint32 cfgset)
   unsigned int pin;
   unsigned int pos;
   unsigned int modecnf;
-  boolean output;
+  boolean input;
  
   /* Verify that this hardware supports the select GPIO port */
 
@@ -141,17 +141,21 @@ int stm32_configgpio(uint32 cfgset)
 
       /* Input or output? */
 
-      output = ((cfgset & GPIO_OUTPUT) != 0);
+      input = ((cfgset & GPIO_INPUT) != 0);
 
       /* Decode the mode and configuration */
 
-      if (output)
+      if (input)
         {
-          modecnf = (cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
+          /* Input.. force mode = INPUT */
+
+          modecnf = 0;
         }
       else
         {
-          modecnf = 0;
+          /* Output or alternate function */
+
+          modecnf = (cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
         }
 
       modecnf |= ((cfgset & GPIO_CNF_MASK) >> GPIO_CNF_SHIFT) << 2;
@@ -165,24 +169,37 @@ int stm32_configgpio(uint32 cfgset)
 
       /* Set or reset the corresponding BRR/BSRR bit */
 
-      if (output)
+      if (!input)
         {
-	        /* It is an output pin, we need to instantiate the initial
-	         * pin output value
-	         */
+          /* It is an output or an alternate function.  We have to look at the CNF
+           * bits to know which.
+           */
 
-	        if ((cfgset & GPIO_OUTPUT_SET) != 0)
-	          {
-		          /* Use the BSRR register to set the output */
+          unsigned int cnf = (cfgset & GPIO_CNF_MASK);
+          if (cnf == GPIO_CNF_OUTPP || cnf == GPIO_CNF_OUTOD)
+            {
 
-		          regaddr = base + STM32_GPIO_BSRR_OFFSET;
-	          }
-	        else
-	          {
-		          /* Use the BRR register to clear */
+              /* Its an output... set the pin to the correct initial state */
 
-		          regaddr = base + STM32_GPIO_BRR_OFFSET;
-	          }
+              if ((cfgset & GPIO_OUTPUT_SET) != 0)
+               {
+                  /* Use the BSRR register to set the output */
+
+                  regaddr = base + STM32_GPIO_BSRR_OFFSET;
+                }
+              else
+                {
+                  /* Use the BRR register to clear */
+
+                  regaddr = base + STM32_GPIO_BRR_OFFSET;
+                }
+            }
+          else
+            {
+              /* Its an alternate function pin... we can return early */
+
+              return OK;
+            }
         }
       else
         {
@@ -191,13 +208,13 @@ int stm32_configgpio(uint32 cfgset)
            * function.
            */
         
-          if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLUP)
+          if ((cfgset & GPIO_CNF_MASK) == GPIO_CNF_INPULLUP)
             {
               /* Set the ODR bit (using BSRR) to one for the PULL-UP functionality */
             
 	          regaddr = base + STM32_GPIO_BSRR_OFFSET;
             }
-          else if ((cfgset & GPIO_MODE_MASK) == GPIO_CNF_INPULLDWN)
+          else if ((cfgset & GPIO_CNF_MASK) == GPIO_CNF_INPULLDWN)
             {
               /* Clear the ODR bit (using BRR) to zero for the PULL-DOWN functionality */
 

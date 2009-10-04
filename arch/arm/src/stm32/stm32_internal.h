@@ -67,8 +67,8 @@
  * .... .... .... .... O... .... VPPP BBBB
  */
 
-#define GPIO_OUTPUT                   (1 << 15)                  /* Bit 15: Output mode */
-#define GPIO_INPUT                    (0)
+#define GPIO_INPUT                    (1 << 15)                  /* Bit 15: 1=Input mode */
+#define GPIO_OUTPUT                   (0)                        /*         0=Output or alternate function */
 #define GPIO_ALT                      (0)
 
 /* These bits set the primary function of the pin:
@@ -85,8 +85,8 @@
 
 #  define GPIO_CNF_OUTPP              (0 << GPIO_CNF_SHIFT)      /* Output push-pull */
 #  define GPIO_CNF_OUTOD              (1 << GPIO_CNF_SHIFT)      /* Output open-drain */
-#  define GPIO_CNF_AFPP               (2 << GPIO_CNF_SHIFT)      /* Altnernate function push-pull */
-#  define GPIO_CNF_AFOD               (3 << GPIO_CNF_SHIFT)      /* Altnernate function open-drain */
+#  define GPIO_CNF_AFPP               (2 << GPIO_CNF_SHIFT)      /* Alternate function push-pull */
+#  define GPIO_CNF_AFOD               (3 << GPIO_CNF_SHIFT)      /* Alternate function open-drain */
 
 /* Maximum frequency selection:
  * .... .... .... .... ...S S... .... ....
