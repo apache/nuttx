@@ -37,6 +37,12 @@ include ${TOPDIR}/.config
 
 # Setup for the selected toolchain
 
+ifeq ($(CONFIG_STM32_DFU)y)
+  LDSCRIPT		= ld.script.dfu
+else
+  LDSCRIPT		= ld.script
+endif
+
 ifneq ($(CONFIG_STM32_BUILDROOT),y)
   # Windows-native toolchains
 ifeq ($(CONFIG_STM32_DEVKITARM),y)
@@ -51,7 +57,7 @@ endif
   ARCHCPUFLAGS		= -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
   ARCHINCLUDES		= -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES	= -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT		= -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script}"
+  ARCHSCRIPT		= -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)}"
   MAXOPTIMIZATION	= -O2
 # The NuttX buildroot toolchain
 else
@@ -61,7 +67,7 @@ else
   ARCHCPUFLAGS		= -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
   ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES	= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-  ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
+  ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
   MAXOPTIMIZATION	= -Os
 endif
 
