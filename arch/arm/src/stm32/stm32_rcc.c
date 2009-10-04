@@ -223,7 +223,7 @@ static inline void rcc_enableapb1(void)
 
   regval |= RCC_APB1ENR_DACEN;
 #endif
-  putreg32(regval, STM32_RCC_APB2ENR);
+  putreg32(regval, STM32_RCC_APB1ENR);
 
 #if CONFIG_STM32_USB
   /* USB clock divider */
@@ -246,23 +246,23 @@ static inline void rcc_enableapb2(void)
 #if STM32_NGPIO > 0
              |RCC_APB2ENR_IOPAEN
 #endif
-#if STM32_NGPIO > 1
+#if STM32_NGPIO > 16
              |RCC_APB2ENR_IOPBEN
 #endif
-#if STM32_NGPIO > 2
+#if STM32_NGPIO > 32
              |RCC_APB2ENR_IOPCEN
 #endif
-#if STM32_NGPIO > 3
+#if STM32_NGPIO > 48
              |RCC_APB2ENR_IOPDEN
 #endif
-#if STM32_NGPIO > 4
+#if STM32_NGPIO > 64
              |RCC_APB2ENR_IOPEEN
 #endif
-#if STM32_NGPIO > 5
+#if STM32_NGPIO > 80
              |RCC_APB2ENR_IOPFEN
 #endif
-#if STM32_NGPIO > 6
-             |RCC_APB2ENR_IOPEEN
+#if STM32_NGPIO > 96
+             |RCC_APB2ENR_IOPGEN
 #endif
              );
 
