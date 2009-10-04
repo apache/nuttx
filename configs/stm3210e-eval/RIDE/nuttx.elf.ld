@@ -1,9 +1,8 @@
 
 SEARCH_DIR(".")
 SEARCH_DIR("C:\Program Files\Raisonance\Ride\Lib\ARM")
-STARTUP("C:\Program Files\Raisonance\Ride\lib\ARM\crt0_STM32x_HD.o")
+STARTUP("C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\stm32_vectors.o")
 INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\stm32_timerisr.o")
-INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\stm32_vectors.o")
 INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\stm32_gpio.o")
 INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\stm32_irq.o")
 INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\stm32_lowputc.o")

@@ -95,7 +95,9 @@ IDEs
      on the command line.
 
   Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/stm32/stm32_vectors.S
+  is arch/arm/src/stm32/stm32_vectors.S.  With RIDE, I have to build NuttX
+  one time from the Cygwin command line in order to obtain the pre-built
+  startup object needed by RIDE.
 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -291,10 +293,10 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_STM32_TIM3_FULL_REMAP
 	CONFIG_STM32_TIM3_PARTIAL_REMAP
 	CONFIG_STM32_TIM4_REMAP
-    CONFIG_STM32_USART1_REMAP
-    CONFIG_STM32_USART2_REMAP
-    CONFIG_STM32_USART3_FULL_REMAP
-    CONFIG_STM32_USART3_PARTIAL_REMAP
+	CONFIG_STM32_USART1_REMAP
+	CONFIG_STM32_USART2_REMAP
+	CONFIG_STM32_USART3_FULL_REMAP
+	CONFIG_STM32_USART3_PARTIAL_REMAP
 	CONFIG_STM32_SPI1_REMAP
 	CONFIG_STM32_SPI3_REMAP
 	CONFIG_STM32_I2C1_REMAP
