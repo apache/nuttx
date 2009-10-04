@@ -87,11 +87,12 @@ CONFIG_ARCH_LEDS=y
 CONFIG_ARCH_CALIBRATION=n
 
 #
-# Identify toolchain
+# Identify toolchain and liner options
 CONFIG_STM32_CODESOURCERY=n
 CONFIG_STM32_DEVKITARM=n
 CONFIG_STM32_RAISONANCE=n
 CONFIG_STM32_BUILDROOT=y
+CONFIG_STM32_DFU=n
 
 #
 #  Individual subsystems can be enabled:

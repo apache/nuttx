@@ -7,7 +7,7 @@ Development Environment
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
   toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment because the Raisonance R-Link emulate and some RIDE7 development tools
+  environment because the Raisonance R-Link emulatator and some RIDE7 development tools
   were used and those tools works only under Windows.
 
 GNU Toolchain Options
@@ -78,6 +78,25 @@ GNU Toolchain Options
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
   path or will get the wrong version of make.
 
+IDEs
+^^^^
+
+  NuttX is built using command-line make.  It can be used with an IDE, but some
+  effort will be required to create the project (There is a simple RIDE project
+  in the RIDE subdirectory).  Here are a few tip before you start that effort:
+
+  1) Select the toolchain that you will be using in your .config file
+  2) Start the NuttX build at least one time from the Cygwin command line
+     before trying to create your project.  This is necessary to create
+     certain auto-generated files and directories that will be needed.
+  3) Set up include pathes:  You will need include/, arch/arm/src/stm32,
+     arch/arm/src/common, arch/arm/src/cortexm3, and sched/.
+  4) All assembly files need to have the definition option -D __ASSEMBLY__
+     on the command line.
+
+  Startup files will probably cause you some headaches.  The NuttX startup file
+  is arch/arm/src/stm32/stm32_vectors.S
+
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -118,11 +137,16 @@ NuttX buildroot Toolchain
 DFU
 ^^^
 
-  The linker files in these projects assume that you will be loading code
-  using STMicro built-in USB DFU loader.  In this case, the code will not
+  The linker files in these projects can be configured to indicate that you
+  will be loading code using STMicro built-in USB DFU loader.  You can specify
+  that by adding:
+
+    CONFIG_STM32_DFU=y
+
+  To you .config file. If CONFIG_STM32_DFU is defined, the code will not
   be positioned at the beginning of FLASH (0x08000000) but will be offset
-  to 0x08003000.  If you need to change that origin, you will need to
-  edit the file(s) ld.script for each configuration.
+  to 0x08003000.  If you need to change that origin for some other bootloader,
+  you will need to edit the file(s) ld.script.dfu for each configuration.
 
   The DFU SE PC-based software is available from the STMicro website,
   http://www.st.com.  General usage instructions:
