@@ -346,4 +346,7 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
+  RIDE
+    This configuration builds a trivial bring-up binary.  It is
+    useful only because it words with the RIDE7 IDE and R-Link debugger.
 

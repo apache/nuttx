@@ -72,7 +72,7 @@
 #define GPIO_ALT                      (0)
 
 /* These bits set the primary function of the pin:
- * .... .... .... .... FFF. .... .... ....
+ * .... .... .... .... .FF. .... .... ....
  */
 
 #define GPIO_CNF_SHIFT                13                         /* Bits 13-14: GPIO function */
