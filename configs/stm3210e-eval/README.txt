@@ -140,15 +140,20 @@ DFU
 ^^^
 
   The linker files in these projects can be configured to indicate that you
-  will be loading code using STMicro built-in USB DFU loader.  You can specify
-  that by adding:
+  will be loading code using STMicro built-in USB DFU loader or via some JTAG
+  emulator.  You can specify the DFU bootloader by adding the following line:
 
     CONFIG_STM32_DFU=y
 
-  To you .config file. If CONFIG_STM32_DFU is defined, the code will not
-  be positioned at the beginning of FLASH (0x08000000) but will be offset
-  to 0x08003000.  If you need to change that origin for some other bootloader,
-  you will need to edit the file(s) ld.script.dfu for each configuration.
+  to your .config file. Most of the configurations in this directory are set
+  up to use the DFU loader.
+
+  If CONFIG_STM32_DFU is defined, the code will not be positioned at the beginning
+  of FLASH (0x08000000) but will be offset to 0x08003000.  This offset is needed
+  to make space for the DFU loader and 0x08003000 is where the DFU loader expects
+  to find new applications at boot time.  If you need to change that origin for some
+  other bootloader, you will need to edit the file(s) ld.script.dfu for each
+  configuration.
 
   The DFU SE PC-based software is available from the STMicro website,
   http://www.st.com.  General usage instructions:
@@ -344,7 +349,8 @@ Where <subdir> is one of the following:
 
   ostest:
     This configuration directory, performs a simple OS test using
-    examples/ostest.
+    examples/ostest.  By default, this project assumes that you are
+    using the DFU bootloader.
 
   RIDE
     This configuration builds a trivial bring-up binary.  It is
