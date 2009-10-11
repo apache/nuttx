@@ -125,6 +125,7 @@
 
 /* Other registers */
 
+#define STM32_SCS_BASE      0xe000e000
 #define STM32_NVIC_BASE     0xe000e000     /* 0xe000e00-0xe000efff: Nested Vectored Interrupt Controller */
 #define STM32_DEBUGMCU_BASE 0xe0042000
 

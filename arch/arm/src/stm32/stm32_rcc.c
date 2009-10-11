@@ -48,6 +48,7 @@
 
 #include "chip.h"
 #include "stm32_rcc.h"
+#include "stm32_flash.h"
 #include "stm32_internal.h"
 
 /****************************************************************************
@@ -356,11 +357,12 @@ void stm32_clockconfig(void)
 
   if( timeout > 0)
     {
-#if 0
-      /* Enable Prefetch Buffer */
+    /* Enable FLASH prefetch buffer and 2 wait states */
 
-      /* Flash 2 wait state */
-#endif
+    regval  = getreg32(STM32_FLASH_ACR);
+    regval &= ~ACR_LATENCY_MASK;
+    regval |= (ACR_LATENCY_2|ACR_PRTFBE);
+    putreg32(regval, STM32_FLASH_ACR);
 
     /* Set the HCLK source/divider */
  

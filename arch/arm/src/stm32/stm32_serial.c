@@ -325,27 +325,18 @@ static uart_dev_t g_usart3port =
  * Name: up_serialin
  ****************************************************************************/
 
-static inline uint16 up_serialin(struct up_dev_s *priv, int offset)
+static inline uint32 up_serialin(struct up_dev_s *priv, int offset)
 {
-  return getreg16(priv->usartbase + offset);
+  return getreg32(priv->usartbase + offset);
 }
 
 /****************************************************************************
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint16 value)
+static inline void up_serialout(struct up_dev_s *priv, int offset, uint32 value)
 {
   putreg16(value, priv->usartbase + offset);
-}
-
-/****************************************************************************
- * Name: up_serialout32
- ****************************************************************************/
-
-static inline void up_serialout32(struct up_dev_s *priv, int offset, uint32 value)
-{
-  putreg32(value, priv->usartbase + offset);
 }
 
 /****************************************************************************
@@ -356,8 +347,8 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16 *ie)
 {
   if (ie)
     {
-      uint16 cr1;
-      uint16 cr3;
+      uint32 cr1;
+      uint32 cr3;
 
       /* USART interrupts:
        *
@@ -399,7 +390,7 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16 *ie)
 
 static inline void up_restoreusartint(struct up_dev_s *priv, uint16 ie)
 {
-  uint16 cr;
+  uint32 cr;
 
   /* Save the interrupt mask */
 
@@ -435,7 +426,7 @@ static int up_setup(struct uart_dev_s *dev)
   uint32 mantissa;
   uint32 fraction;
   uint32 brr;
-  uint16 regval;
+  uint32 regval;
 
   /* Note: The logic here depends on the fact that that the USART module
    * was enabled and the pins were configured in stm32_lowsetup().
@@ -517,7 +508,7 @@ static int up_setup(struct uart_dev_s *dev)
 
    fraction   = (usartdiv32 - (mantissa << 5) + 1) >> 1;
    brr       |= fraction << USART_BRR_FRAC_SHIFT;
-   up_serialout32(priv, STM32_USART1_BRR, brr);
+   up_serialout(priv, STM32_USART1_BRR, brr);
 
   /* Enable Rx, Tx, and the USART */
 
@@ -544,7 +535,7 @@ static int up_setup(struct uart_dev_s *dev)
 static void up_shutdown(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint16 regval;
+  uint32 regval;
 
   /* Disable all interrupts */
 
@@ -786,7 +777,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int up_receive(struct uart_dev_s *dev, uint32 *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint16 dr;
+  uint32 dr;
 
   /* Get the Rx byte */
 
@@ -794,7 +785,7 @@ static int up_receive(struct uart_dev_s *dev, uint32 *status)
 
   /* Get the Rx byte plux error information.  Return those in status */
 
-  *status  = (uint32)priv->sr << 16 | dr;
+  *status  = priv->sr << 16 | dr;
   priv->sr = 0;
 
   /* Then return the actual received byte */
@@ -880,7 +871,7 @@ static boolean up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, STM32_USART_DR_OFFSET, (uint16)ch);
+  up_serialout(priv, STM32_USART_DR_OFFSET, (uint32)ch);
 }
 
 /****************************************************************************

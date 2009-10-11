@@ -220,11 +220,11 @@ void up_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   /* Wait until the TX FIFO is not full */
 
-  while ((getreg16(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_TXE) != 0);
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_TXE) == 0);
 
   /* Then send the character */
 
-  putreg16((uint16)ch, STM32_CONSOLE_BASE + STM32_USART_DR_OFFSET);
+  putreg32((uint32)ch, STM32_CONSOLE_BASE + STM32_USART_DR_OFFSET);
 #endif
 }
 
@@ -330,24 +330,24 @@ void stm32_lowsetup(void)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_USART_CONFIG)
   /* Configure CR2 */
 
-  cr  = getreg16(STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
   cr &= ~USART_CR2_CLRBITS;
   cr |= USART_CR2_SETBITS;
-  putreg16(cr, STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
 
   /* Configure CR1 */
 
-  cr  = getreg16(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
   cr &= ~USART_CR1_CLRBITS;
   cr |= USART_CR1_SETBITS;
-  putreg16(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
   /* Configure CR3 */
 
-  cr  = getreg16(STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
   cr &= ~USART_CR3_CLRBITS;
   cr |= USART_CR3_SETBITS;
-  putreg16(cr, STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
 
   /* Configure the USART Baud Rate */
 
@@ -355,9 +355,9 @@ void stm32_lowsetup(void)
 
   /* Enable Rx, Tx, and the USART */
 
-  cr  = getreg16(STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
   cr |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
-  putreg16(cr, STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 #endif
 #endif /* CONFIG_STM32_USART1 || CONFIG_STM32_USART2 || CONFIG_STM32_USART3 */
 }
