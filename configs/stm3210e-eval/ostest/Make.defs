@@ -37,7 +37,7 @@ include ${TOPDIR}/.config
 
 # Setup for the selected toolchain
 
-ifeq ($(CONFIG_STM32_DFU)y)
+ifeq ($(CONFIG_STM32_DFU),y)
   LDSCRIPT		= ld.script.dfu
 else
   LDSCRIPT		= ld.script

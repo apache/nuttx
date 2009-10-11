@@ -1,11 +1,11 @@
 
 <Debug>
-	<Views/>
+	<FindStrings/>
+	<ReplaceStrings/>
 	<nuttx>
-		<MemoryView Focus="4294967294" TopRow="0" NbPerLine="8" />
-		<MemoryView Focus="4294967294" TopRow="0" NbPerLine="8" />
-		<CodeView Focus="4294967294" TopRow="0" NbPerLine="8" />
-		<CodeView Focus="4294967294" TopRow="0" NbPerLine="8" />
+		<CodeView TopRow="134220190" Focus="4294967295" />
+		<CodeView TopRow="134220190" Focus="4294967295" />
+						
 	</nuttx>
 	<Flags>
 		<Report>
@@ -18,8 +18,23 @@
 				<Col Type="PT_STRING" Header="Condition" sizeCache="DDDDDDDDDDDDDDDDDDDDDDDD" AutoSize="1" Edit="0" Sortable="0" />
 				<Col Type="PT_STRING" Header="Line" sizeCache="DDDDDD" AutoSize="1" Edit="0" Sortable="1" Visible="1" />
 				<Col Type="PT_STRING" Header="Path" sizeCache="DDDDDDDDDDDDDDDDDDDD" AutoSize="1" Edit="0" Sortable="1" Visible="1" />
+							
 			</Def>
-			<Rows/>
+			<Rows>
+				<Row Check="True" Kind="Breakpoint" KindID="0" Space="code" SpaceID="0" Condition="" Line="L:148" Path="C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\stm32\stm32_start.c" />
+							
+			</Rows>
+					
+		</Report>
+			
+	</Flags>
+	<Views/>
+</Debug>AutoSize="1" Edit="0" Sortable="1" Visible="1" />
+				<Col Type="PT_STRING" Header="Path" sizeCache="DDDDDDDDDDDDDDDDDDDD" AutoSize="1" Edit="0" Sortable="1" Visible="1" />
+			</Def>
+			<Rows>
+				<Row Check="True" Kind="Breakpoint" KindID="0" Space="code" SpaceID="0" Condition="" Line="L:148" Path="C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\stm32\stm32_start.c" />
+			</Rows>
 		</Report>
 	</Flags>
 </Debug>
