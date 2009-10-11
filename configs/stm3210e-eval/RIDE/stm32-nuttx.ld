@@ -34,7 +34,10 @@
  ****************************************************************************/
 
 /* The STM32F103ZET6 has 512Kb of FLASH beginning at address 0x0800:0000 and
- * 64Kb of SRAM beginning at address 0x2000:0000.
+ * 64Kb of SRAM beginning at address 0x2000:0000.  When booting from FLASH,
+ * FLASH memory is aliased to address 0x0000:0000 where the code expects to
+ * begin execution by jumping to the entry point in the 0x0800:0000 address
+ * range.
  */
 
 MEMORY

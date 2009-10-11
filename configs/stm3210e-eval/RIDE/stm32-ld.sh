@@ -10,9 +10,9 @@ SIZE=arm-none-eabi-size.exe
 DWF2XML=dwf2xml.exe
 
 SCRIPT="C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\nuttx.elf.ld"
-LDFLAGS="-mcpu=cortex-m3 -mthumb  -u _start -Wl,-static -Wl,--gc-sections -nostartfiles -Wl,--warn-once -nostdlib"
+LDFLAGS="-mcpu=cortex-m3 -mthumb  -u _start -Wl,-static -nostartfiles -Wl,--warn-once -nostdlib"
 
-${LD} "${LDFLAGS}" -Wl,-T -Xlinker "${SCRIPT}"
+${LD} ${LDFLAGS} -Wl,-T -Xlinker "${SCRIPT}"
 ${OBJCOPY} nuttx.elf --target=ihex nuttx.hex
 ${REXRDR} nuttx.elf.sizetmp 0 ${SIZE} nuttx.elf
 ${DWF2XML} nuttx.dbi nuttx-globals.Standard.xml nuttx.Standard.xml ARM

@@ -14,5 +14,6 @@ INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\up_h
 INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\up_leds.o")
 INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\up_boot.o")
 INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\irq_unexpectedisr.o")
+INPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\lib_memcpy.o")
 OUTPUT("C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\nuttx.elf")
 INCLUDE "C:\cygwin\home\Owner\projects\nuttx\nuttx\configs\stm3210e-eval\RIDE\stm32-nuttx.ld"
