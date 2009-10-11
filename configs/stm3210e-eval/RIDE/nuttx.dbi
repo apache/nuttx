@@ -9,6 +9,7 @@ DataOffset=0x0
 LoaderTool=ARM
 Target=ARM
 DebugTool=RLINK_CORTEX
+ApplicationComponents=
 [Device]
 Name=STM32F101VET6
 [ARMSigDrv options]
