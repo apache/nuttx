@@ -336,7 +336,7 @@ void up_irqinitialize(void)
   irq_attach(LM3S_IRQ_RESERVED, lm3s_reserved);
 #endif
 
-  lm3s_dumpnvic("inital", NR_IRQS);
+  lm3s_dumpnvic("initial", NR_IRQS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
