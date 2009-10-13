@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 2, 2009</p>
+      <p>Last Updated: October 13, 2009</p>
     </td>
   </tr>
 </table>
@@ -965,7 +965,7 @@
   <td><br></td>
   <td>
     <p>
-      <b>STMIcro STM32F103x</b>.
+      <b>STMicro STM32F103x</b>.
       This port uses the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL
 	  development board that features the STM32F103ZET6 MCU.
 	  This port uses a GNU arm-elf toolchain* under either Linux or Cygwin (with native Windows GNU
@@ -974,14 +974,19 @@
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing, the basic code is in place for boot-up, serial port and
-        timer interrupt, but lots of debug work remains (and a few more drivers are
-        needed) before it is released in 0.4.12.
+        As of this writing, the STM32 port is well along and already passes the basic NuttX
+        OS test at examples/ostest.  The rest should be a piece of cake.
+      </p>
+      <p>
+	    Things left to do:  interrupt driver USART console driver, NSH bring-up,
+	    USB driver, LCD driver and NX bringup on the eval board's display, SPI driver,
+	    and MicroSD support.  I will probably release 0.4.12 at the point where NSH
+	    is working properly; LCD and SPI will wait for 0.4.13.
       </p>
       <p>
         <b>Development Environments:</b>
         1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
-        with Windows native toolchain (RIDT, CodeSourcery or devkitARM).  A DIY toolchain for Linux
+        with Windows native toolchain (RIDE7, CodeSourcery or devkitARM).  A DIY toolchain for Linux
         or Cygwin is provided by the NuttX
         <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
         package.
@@ -1600,10 +1605,16 @@ nuttx-0.4.12 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* arch/arm/src/stm32 and configs/stm3210e-eval.  Added basic support for the
 	  STMicro STM32, Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL
 	  development board based around the STM32F103ZET6 MCU.
+	* configs/stm3210e-eval/RIDE.  Added a basic STMicro RIDE7 project that can be
+	  used to perform basic STM32 board bring-up (due to RIDE7 size limitations, it
+	  cannot be used for the full NuttX bring-up).
+	* configs/stm3210e-eval/ostest.  The STM32 now passes the basic NuttX OS test
+	  at examples/ostest.  The rest should be a piece of cake.
 
-	  As of this writing, the basic code is in place for boot-up, serial port and
-	  timer interrupt, but lots of debug work remains (and a few more drivers are
-	  needed) before it is released in 0.4.12.
+	  STM32: Things left to do:  interrupt driver USART console driver, NSH bring-up,
+	  USB driver, LCD driver and NX bringup on the eval board's display, SPI driver,
+	  and MicroSD support.  I will probably release 0.4.12 at the point where NSH
+	  is working properly; LCD and SPI will wait for 0.4.13.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
