@@ -47,9 +47,10 @@
 
 /* Memory Map:
  *
- * 0x0000:0000 - Beginning of FLASH. Address of vectors (if not using bootloader)
- * 0x0002:0000 - Address of vectors if using bootloader
- * 0x0003:ffff - End of flash
+ * 0x0800:0000 - Beginning of FLASH. Address of vectors (if not using bootloader)
+ *               Mapped to address 0x0000:0000 at boot time.
+ * 0x0800:3000 - Address of vectors if using bootloader
+ * 0x0803:ffff - End of flash
  * 0x2000:0000 - Start of SRAM and start of .data (_sdata)
  *             - End of .data (_edata) abd start of .bss (_sbss)
  *             - End of .bss (_ebss) and bottom of idle stack

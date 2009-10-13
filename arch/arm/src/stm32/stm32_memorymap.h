@@ -123,10 +123,11 @@
 #define STM32_ETHERNET_BASE 0x40028000     /* 0x40028000 - 0x40029fff: Ethernet */
                                            /* 0x40030000 - 0x4fffffff: Reserved */
 
-/* Other registers */
+/* Other registers -- see cortexm3/nvic.h for standard Cortex-M3 registers in this
+ * address range
+ */
 
 #define STM32_SCS_BASE      0xe000e000
-#define STM32_NVIC_BASE     0xe000e000     /* 0xe000e00-0xe000efff: Nested Vectored Interrupt Controller */
 #define STM32_DEBUGMCU_BASE 0xe0042000
 
 /************************************************************************************

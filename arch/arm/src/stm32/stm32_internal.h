@@ -397,67 +397,76 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+/* This symbol references the Cortex-M3 vector table (as positioned by the the linker
+ * script, ld.script or ld.script.dfu.  The standard location for the vector table is
+ * at the beginning of FLASH at address 0x0800:0000.  If we are using the STMicro DFU
+ * bootloader, then the vector table will be offset to a different location in FLASH
+ * and we will need to set the NVIC vector location to this alternative location.
+ */
 
-/****************************************************************************
+extern uint32 stm32_vectors[];	/* See stm32_vectors.S */
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+/************************************************************************************
  * Name: stm32_lowsetup
  *
  * Description:
  *   Called at the very beginning of _start.  Performs low level initialization.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 EXTERN void stm32_lowsetup(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_clockconfig
  *
  * Description:
  *   Called to change to new clock based on settings in board.h
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 EXTERN void stm32_clockconfig(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 EXTERN int stm32_configgpio(uint32 cfgset);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 EXTERN void stm32_gpiowrite(uint32 pinset, boolean value);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 EXTERN boolean stm32_gpioread(uint32 pinset);
 
-/****************************************************************************
+/************************************************************************************
  * Function:  stm32_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_DEBUG
 EXTERN int stm32_dumpgpio(uint32 pinset, const char *msg);
@@ -465,17 +474,7 @@ EXTERN int stm32_dumpgpio(uint32 pinset, const char *msg);
 #  define stm32_dumpgpio(p,m)
 #endif
 
-/****************************************************************************
- * Name: gpio_irqinitialize
- *
- * Description:
- *   Initialize all vectors to the unexpected interrupt handler
- *
- ****************************************************************************/
-
-EXTERN int weak_function gpio_irqinitialize(void);
-
-/****************************************************************************
+/************************************************************************************
  * Function: stm32_ethinitialize
  *
  * Description:
@@ -492,13 +491,13 @@ EXTERN int weak_function gpio_irqinitialize(void);
  *
  * Assumptions:
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #if STM32_NTHERNET > 1
 EXTERN int stm32_ethinitialize(int intf);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * The external functions, stm32_spi1/2select and stm32_spi1/2status must be
  * provided by board-specific logic.  They are implementations of the select
  * and status methods of the SPI interface defined by struct spi_ops_s (see
@@ -518,7 +517,7 @@ EXTERN int stm32_ethinitialize(int intf);
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 struct spi_dev_s;
 enum spi_dev_e;

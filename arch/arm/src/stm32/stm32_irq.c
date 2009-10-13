@@ -280,6 +280,16 @@ void up_irqinitialize(void)
   putreg32(0, NVIC_IRQ0_31_ENABLE);
   putreg32(0, NVIC_IRQ32_63_ENABLE);
 
+  /* The standard location for the vector table is at the beginning of FLASH
+   * at address 0x0800:0000.  If we are using the STMicro DFU bootloader, then
+   * the vector table will be offset to a different location in FLASH and we
+   * will need to set the NVIC vector location to this alternative location.
+   */
+
+#ifdef CONFIG_STM32_DFU
+  putreg32((uint32)stm32_vectors, NVIC_VECTAB);
+#endif
+
   /* Set all interrrupts (and exceptions) to the default priority */
 
   putreg32(DEFPRIORITY32, NVIC_SYSH4_7_PRIORITY);
@@ -308,17 +318,6 @@ void up_irqinitialize(void)
 
   current_regs = NULL;
 
-  /* Initialize support for GPIO interrupts if included in this build */
-
-#ifndef CONFIG_STM32_DISABLE_GPIO_IRQS
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (gpio_irqinitialize != NULL)
-#endif
-    {
-      gpio_irqinitialize();
-    }
-#endif
-
   /* Attach the SVCall and Hard Fault exception handlers.  The SVCall
    * exception is used for performing context switches; The Hard Fault
    * must also be caught because a SVCall may show up as a Hard Fault
@@ -346,7 +345,7 @@ void up_irqinitialize(void)
   irq_attach(STM32_IRQ_RESERVED, stm32_reserved);
 #endif
 
-  stm32_dumpnvic("inital", NR_IRQS);
+  stm32_dumpnvic("initial", NR_IRQS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
