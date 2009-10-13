@@ -898,8 +898,14 @@
 	* arch/arm/src/stm32 and configs/stm3210e-eval.  Added basic support for the
 	  STMicro STM32, Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL
 	  development board based around the STM32F103ZET6 MCU.
+	* configs/stm3210e-eval/RIDE.  Added a basic STMicro RIDE7 project that can be
+	  used to perform basic STM32 board bring-up (due to RIDE7 size limitations, it
+	  cannot be used for the full NuttX bring-up).
+	* configs/stm3210e-eval/ostest.  The STM32 now passes the basic NuttX OS test
+	  at examples/ostest.  The rest should be a piece of cake.
 
-	  As of this writing, the basic code is in place for boot-up, serial port and
-	  timer interrupt, but lots of debug work remains (and a few more drivers are
-	  needed) before it is released in 0.4.12.
+	  STM32: Things left to do:  interrupt driver USART console driver, NSH bring-up,
+	  USB driver, LCD driver and NX bringup on the eval board's display, SPI driver,
+	  and MicroSD support.  I will probably release 0.4.12 at the point where NSH
+	  is working properly; LCD and SPI will wait for 0.4.13.
 
