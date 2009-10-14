@@ -97,7 +97,7 @@
 #define STM32_GPIOC_BASE     0x40011000     /* 0x40011000 - 0x400113ff: GPIO Port C */
 #define STM32_GPIOD_BASE     0x40011400     /* 0x40011400 - 0x400117ff: GPIO Port D */
 #define STM32_GPIOE_BASE     0x40011800     /* 0x40011800 - 0x40011bff: GPIO Port E */
-#define STM32_GPIOF_BASE     0x4001c000     /* 0x4001c000 - 0x400111ff: GPIO Port F */
+#define STM32_GPIOF_BASE     0x40011c00     /* 0x4001c000 - 0x400111ff: GPIO Port F */
 #define STM32_GPIOG_BASE     0x40012000     /* 0x40012000 - 0x400123ff: GPIO Port G */
 #define STM32_ADC1_BASE      0x40012400     /* 0x40012400 - 0x400127ff: ADC1 */
 #define STM32_ADC2_BASE      0x40012800     /* 0x40012800 - 0x40012bff: ADC2 */
