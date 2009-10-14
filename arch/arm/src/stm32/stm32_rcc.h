@@ -236,6 +236,7 @@
 /* APB2 Peripheral Clock enable register */
 
 #define RCC_APB2ENR_AFIOEN          (1 << 0)  /* Bit 0: Alternate Function I/O clock enable */
+#define RCC_APB2ENR_IOPEN(n)        (1 << ((n)+2))
 #define RCC_APB2ENR_IOPAEN          (1 << 2)  /* Bit 2: I/O port A clock enable */
 #define RCC_APB2ENR_IOPBEN          (1 << 3)  /* Bit 3: I/O port B clock enable */
 #define RCC_APB2ENR_IOPCEN          (1 << 4)  /* Bit 4: I/O port C clock enable */

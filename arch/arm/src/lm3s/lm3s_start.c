@@ -136,9 +136,7 @@ void __start(void)
 
   /* Initialize onboard resources */
 
-#ifdef CONFIG_ARCH_LEDS
   lm3s_boardinitialize();
-#endif
   showprogress('E');
 
   /* Then start NuttX */
