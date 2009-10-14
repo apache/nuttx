@@ -182,6 +182,31 @@ DFU
   in order to find it with the DFU File Manager. You will end up with
   a file called nuttx.dfu that you can use with the STMicro DFU SE program.
 
+LEDs
+^^^^
+
+The STM3210E-EVAL board has four LEDs labeled LD1, LD2, LD3 and LD4 on the
+the board.  Usage of these LEDs is defined in include/board.h and src/up_leds.c.
+They are encoded as follows:
+
+	SYMBOL				Meaning					LED1*	LED2	LED3	LED4
+	-------------------	-----------------------	-------	-------	-------	------
+	LED_STARTED			NuttX has been started	ON		OFF		OFF		OFF
+	LED_HEAPALLOCATE	Heap has been allocated	OFF		ON		OFF		OFF
+	LED_IRQSENABLED		Interrupts enabled		ON		ON		OFF		OFF
+	LED_STACKCREATED	Idle stack created		OFF		OFF		ON		OFF
+	LED_INIRQ			In an interrupt**		ON		N/C		N/C		OFF
+	LED_SIGNAL			In a signal handler***  N/C		ON		N/C		OFF
+	LED_ASSERTION		An assertion failed		ON		ON		N/C		OFF
+	LED_PANIC			The system has crashed	N/C		N/C		N/C		ON
+
+  * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
+    and these LEDs will give you some indication of where the failure was
+ ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
+    is because of timer interupts that result in the LED being illuminated
+    on a small proportion of the time.
+*** LED2 may also flicker normally if signals are processed.
+
 STM3210E-EVAL-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

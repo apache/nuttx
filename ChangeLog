@@ -903,6 +903,8 @@
 	  cannot be used for the full NuttX bring-up).
 	* configs/stm3210e-eval/ostest.  The STM32 now passes the basic NuttX OS test
 	  at examples/ostest.  The rest should be a piece of cake.
+	* configs/stm3210e-eval/nsh.  Added NuttShell (NSH) example.
+	* configs/stm3210e-eval/src/stm32102e-internal.h.  Fix on-board LED GPIO definitions.
 
 	  STM32: Things left to do:  interrupt driver USART console driver, NSH bring-up,
 	  USB driver, LCD driver and NX bringup on the eval board's display, SPI driver,
