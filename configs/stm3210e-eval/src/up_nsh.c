@@ -102,6 +102,7 @@
 
 int nsh_archinitialize(void)
 {
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
   FAR struct spi_dev_s *spi;
   int ret;
 
@@ -136,5 +137,6 @@ int nsh_archinitialize(void)
 
   message("nsh_archinitialize: Successfuly bound SPI port %d to MMC/SD slot %d\n",
           CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+#endif
   return OK;
 }
