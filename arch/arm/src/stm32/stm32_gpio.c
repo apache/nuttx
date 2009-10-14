@@ -59,27 +59,27 @@
  * Private Data
  ****************************************************************************/
 
-static const uint32 g_gpiobase[STM32_NGPIO] =
+static const uint32 g_gpiobase[STM32_NGPIO_PORTS] =
 {
-#if STM32_NGPIO > 0
+#if STM32_NGPIO_PORTS > 0
 	STM32_GPIOA_BASE,
 #endif
-#if STM32_NGPIO > 1
+#if STM32_NGPIO_PORTS > 1
 	STM32_GPIOB_BASE,
 #endif
-#if STM32_NGPIO > 2
+#if STM32_NGPIO_PORTS > 2
 	STM32_GPIOC_BASE,
 #endif
-#if STM32_NGPIO > 3
+#if STM32_NGPIO_PORTS > 3
 	STM32_GPIOD_BASE,
 #endif
-#if STM32_NGPIO > 4
+#if STM32_NGPIO_PORTS > 4
 	STM32_GPIOE_BASE,
 #endif
-#if STM32_NGPIO > 5
+#if STM32_NGPIO_PORTS > 5
 	STM32_GPIOF_BASE,
 #endif
-#if STM32_NGPIO > 6
+#if STM32_NGPIO_PORTS > 6
 	STM32_GPIOG_BASE,
 #endif
 };
@@ -119,7 +119,7 @@ int stm32_configgpio(uint32 cfgset)
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32_NGPIO)
+  if (port < STM32_NGPIO_PORTS)
     {
       /* Get the port base address */
 
@@ -252,7 +252,7 @@ void stm32_gpiowrite(uint32 pinset, boolean value)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32_NGPIO)
+  if (port < STM32_NGPIO_PORTS)
     {
       /* Get the port base address */
 
@@ -291,7 +291,7 @@ boolean stm32_gpioread(uint32 pinset)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32_NGPIO)
+  if (port < STM32_NGPIO_PORTS)
     {
       /* Get the port base address */
 
@@ -329,17 +329,25 @@ int stm32_dumpgpio(uint32 pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags   = irqsave();
+  flags = irqsave();
   lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
-  lldbg("  CR: %08x %08x IDR: %04x ODR: %04x LCKR: %04x\n",
-        getreg32(base + STM32_GPIO_CRH_OFFSET), getreg32(base + STM32_GPIO_CRL_OFFSET),
-        getreg32(base + STM32_GPIO_IDR_OFFSET), getreg32(base + STM32_GPIO_ODR_OFFSET),
-        getreg32(base + STM32_GPIO_LCKR_OFFSET));
-  lldbg("  EVCR: %02x MAPR: %08x CR: %04x %04x %04x %04x\n",
-        getreg32(STM32_AFIO_EVCR), getreg32(STM32_AFIO_MAPR),
-        getreg32(STM32_AFIO_EXTICR1), getreg32(STM32_AFIO_EXTICR2),
-        getreg32(STM32_AFIO_EXTICR3), getreg32(STM32_AFIO_EXTICR4));
+  if ((getreg32(STM32_RCC_APB2ENR) & RCC_APB2ENR_IOPEN(port)) != 0)
+    {
+      lldbg("  CR: %08x %08x IDR: %04x ODR: %04x LCKR: %04x\n",
+            getreg32(base + STM32_GPIO_CRH_OFFSET), getreg32(base + STM32_GPIO_CRL_OFFSET),
+            getreg32(base + STM32_GPIO_IDR_OFFSET), getreg32(base + STM32_GPIO_ODR_OFFSET),
+            getreg32(base + STM32_GPIO_LCKR_OFFSET));
+      lldbg("  EVCR: %02x MAPR: %08x CR: %04x %04x %04x %04x\n",
+            getreg32(STM32_AFIO_EVCR), getreg32(STM32_AFIO_MAPR),
+            getreg32(STM32_AFIO_EXTICR1), getreg32(STM32_AFIO_EXTICR2),
+            getreg32(STM32_AFIO_EXTICR3), getreg32(STM32_AFIO_EXTICR4));
+    }
+  else
+    {
+      lldbg("  GPIO%c not enabled: APB2ENR: %08x\n",
+            g_portchar[port], getreg32(STM32_RCC_APB2ENR));
+    }
   irqrestore(flags);
   return OK;
 }

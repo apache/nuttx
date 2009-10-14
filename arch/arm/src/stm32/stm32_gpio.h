@@ -48,6 +48,8 @@
  * Definitions
  ************************************************************************************/
 
+#define STM32_NGPIO_PORTS            ((STM32_NGPIO + 15) >> 4)
+
 /* Register Offsets *****************************************************************/
 
 #define STM32_GPIO_CRL_OFFSET        0x0000  /* Port configuration register low */
@@ -67,7 +69,7 @@
 
 /* Register Addresses ***************************************************************/
 
-#if STM32_NGPIO > 0
+#if STM32_NGPIO_PORTS > 0
 #  define STM32_GPIOA_CRL            (STM32_GPIOA_BASE+STM32_GPIO_CRL_OFFSET)
 #  define STM32_GPIOA_CRH            (STM32_GPIOA_BASE+STM32_GPIO_CRH_OFFSET)
 #  define STM32_GPIOA_IDR            (STM32_GPIOA_BASE+STM32_GPIO_IDR_OFFSET)
@@ -77,7 +79,7 @@
 #  define STM32_GPIOA_LCKR           (STM32_GPIOA_BASE+STM32_GPIO_LCKR_OFFSET)
 #endif
 
-#if STM32_NGPIO > 1
+#if STM32_NGPIO_PORTS > 1
 #  define STM32_GPIOB_CRL            (STM32_GPIOB_BASE+STM32_GPIO_CRL_OFFSET)
 #  define STM32_GPIOB_CRH            (STM32_GPIOB_BASE+STM32_GPIO_CRH_OFFSET)
 #  define STM32_GPIOB_IDR            (STM32_GPIOB_BASE+STM32_GPIO_IDR_OFFSET)
@@ -87,7 +89,7 @@
 #  define STM32_GPIOB_LCKR           (STM32_GPIOB_BASE+STM32_GPIO_LCKR_OFFSET)
 #endif
 
-#if STM32_NGPIO > 2
+#if STM32_NGPIO_PORTS > 2
 #  define STM32_GPIOC_CRL            (STM32_GPIOC_BASE+STM32_GPIO_CRL_OFFSET)
 #  define STM32_GPIOC_CRH            (STM32_GPIOC_BASE+STM32_GPIO_CRH_OFFSET)
 #  define STM32_GPIOC_IDR            (STM32_GPIOC_BASE+STM32_GPIO_IDR_OFFSET)
@@ -97,7 +99,7 @@
 #  define STM32_GPIOC_LCKR           (STM32_GPIOC_BASE+STM32_GPIO_LCKR_OFFSET)
 #endif
 
-#if STM32_NGPIO > 3
+#if STM32_NGPIO_PORTS > 3
 #  define STM32_GPIOD_CRL            (STM32_GPIOD_BASE+STM32_GPIO_CRL_OFFSET)
 #  define STM32_GPIOD_CRH            (STM32_GPIOD_BASE+STM32_GPIO_CRH_OFFSET)
 #  define STM32_GPIOD_IDR            (STM32_GPIOD_BASE+STM32_GPIO_IDR_OFFSET)
@@ -107,7 +109,7 @@
 #  define STM32_GPIOD_LCKR           (STM32_GPIOD_BASE+STM32_GPIO_LCKR_OFFSET)
 #endif
 
-#if STM32_NGPIO > 4
+#if STM32_NGPIO_PORTS > 4
 #  define STM32_GPIOE_CRL            (STM32_GPIOE_BASE+STM32_GPIO_CRL_OFFSET)
 #  define STM32_GPIOE_CRH            (STM32_GPIOE_BASE+STM32_GPIO_CRH_OFFSET)
 #  define STM32_GPIOE_IDR            (STM32_GPIOE_BASE+STM32_GPIO_IDR_OFFSET)
@@ -117,7 +119,7 @@
 #  define STM32_GPIOE_LCKR           (STM32_GPIOE_BASE+STM32_GPIO_LCKR_OFFSET)
 #endif
 
-#if STM32_NGPIO > 5
+#if STM32_NGPIO_PORTS > 5
 #  define STM32_GPIOF_CRL            (STM32_GPIOF_BASE+STM32_GPIO_CRL_OFFSET)
 #  define STM32_GPIOF_CRH            (STM32_GPIOF_BASE+STM32_GPIO_CRH_OFFSET)
 #  define STM32_GPIOF_IDR            (STM32_GPIOF_BASE+STM32_GPIO_IDR_OFFSET)
@@ -127,7 +129,7 @@
 #  define STM32_GPIOF_LCKR           (STM32_GPIOF_BASE+STM32_GPIO_LCKR_OFFSET)
 #endif
 
-#if STM32_NGPIO > 6
+#if STM32_NGPIO_PORTS > 6
 #  define STM32_GPIOG_CRL            (STM32_GPIOG_BASE+STM32_GPIO_CRL_OFFSET)
 #  define STM32_GPIOG_CRH            (STM32_GPIOG_BASE+STM32_GPIO_CRH_OFFSET)
 #  define STM32_GPIOG_IDR            (STM32_GPIOG_BASE+STM32_GPIO_IDR_OFFSET)
