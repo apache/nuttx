@@ -134,8 +134,14 @@ arch/arm - ARM-based micro-controllers
     the following subdirectories:
 
     arch/arm/include and arch/arm/src/common
-        Common ARM logic.
+        Common ARM/Cortex-M3 logic.
 
+    arch/arm/src/arm and arch/arm/include/arm
+        Common ARM-specific logic
+
+    arch/arm/src/cortexm3 and arch/arm/include/cortexm3
+        Common Cortex-M3 logic
+        
     arch/arm/include/c5471 and arch/arm/src/c5471
         TI TMS320C5471 (also called TMS320DM180 or just C5471).
         NuttX operates on the ARM7 of this dual core processor. This port
@@ -146,12 +152,25 @@ arch/arm - ARM-based micro-controllers
         NuttX operates on the ARM9EJS of this dual core processor.  This port
         complete, verified, and included in the NuttX release 0.2.1.
 
+    arch/arm/include/lm3s and arch/arm/src/lm3s
+        These directories contain support for the Luminary LMS family, particularly
+        for the LM3S6918. The initial, release of this port was included in NuttX version
+        0.4.6. The current port includes timer, serial console, Ethernet, SSI, and microSD
+        support. There are working configurations the NuttX OS test, to run the NuttShell
+        (NSH), the NuttX networking test, and the uIP web server.
+
     arch/arm/include/lpc214x and arch/arm/src/lpc214x
         These directories provide support for NXP LPC214x family of
         processors.  This port boots and passes the OS test (examples/ostest).
         The port is complete and verifed.  As of NuttX 0.3.17, the port includes:
         timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
         support.  A verifed NuttShell (NSH) configuration is also available.
+
+    arch/arm/include/stm32 and arch/arm/src/stm32
+        These directories contain support for the STMicro STM32 family, particularly
+        for the STM32F103ZET6. The initial, release of this port was included in NuttX version
+        0.4.12. The current port includes timer, and serial console.  Work is underway for
+        USB, SPI, microSD, and LCD.
 
     arch/arm/include/str71x and arch/arm/src/str71x
         These directories provide support for the STMicro STR71x processors.
@@ -213,8 +232,4 @@ arch/c5471
 
 arch/dm320
     Replaced with arch/arm/include/dm320 and arch/arm/src/dm320
-
-Other ports for the for the TI TMS320DM270 and for MIPS are in various states
-of progress
-
 
