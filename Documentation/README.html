@@ -1,0 +1,136 @@
+<html>
+<head>
+<title>README Files</title>
+</head>
+<body background="backgd.gif">
+<base href="http://nuttx.cvs.sourceforge.net/viewvc/*checkout*/nuttx/nuttx/" TARGET="_self">
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec"><i>NuttX README Files</i></font></big></h1>
+      <p>Last Updated: October 14, 2009</p>
+    </td>
+  </tr>
+</table>
+<p>
+  Additional information can be found in the <code>Documentation/</code> directory and
+  also in <code>README</code> files that are scattered throughout the source tree.
+  Below is a guide to the available <code>README</code> files.
+  Some <code>README</code> files contain more important information than others.
+  The key <code>README</code> files are shown in <code><i><b>BOLDFACE/ITALIC</i></b></code> below.
+</p>
+<ul><pre>
+ .
+ |
+ |- arch/
+ |   |
+ |   |- arm
+ |   |   `- src
+ |   |       `- <a href="arch/arm/src/lpc214x/README.txt">lpc214x/README.txt</a>
+ |   |- sh/
+ |   |   |- include/
+ |   |   |   |-<a href="arch/sh/include/m16c/README.txt">m16c/README.txt</a>
+ |   |   |   |-<a href="arch/sh/include/sh1/README.txt">sh1/README.txt</a>
+ |   |   |   `-<a href="arch/sh/include/README.txt">README.txt</a>
+ |   |   |- src/
+ |   |   |   |-<a href="arch/sh/src/common/README.txt">common/README.txt</a>
+ |   |   |   |-<a href="arch/sh/src/m16c/README.txt">m16c/README.txt</a>
+ |   |   |   |-<a href="arch/sh/src/sh1/README.txt">sh1/README.txt</a>
+ |   |   |   `-<a href="arch/sh/src/README.txt">README.txt</a>
+ |   `- z80/
+ |   |   `- src/
+ |   |       `- <a href="arch/z80/src/z80/README.txt">z80/README.txt</a>
+ |   `- <a href="arch/README.txt"><b><i>README.txt</i></b></a>
+ |- configs/
+ |   |- c5471evm/
+ |   |   |- <a href="configs/c5471evm/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/c5471evm/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/c5471evm/README.txt"><b><i>README.txt</i></b></a>
+ |   |- eagle100/
+ |   |   |- <a href="configs/eagle100/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/eagle100/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/eagle100/README.txt"><b><i>README.txt</i></b></a>
+ |   |- ez80f910200kitg/
+ |   |   |- <a href="configs/ez80f910200kitg/ostest/README.txt">ostest/README.txt</a>
+ |   |   `- <a href="configs/ez80f910200kitg/README.txt"><b><i>README.txt</i></b></a>
+ |   |- ez80f910200zco/
+ |   |   |- <a href="configs/ez80f910200zco/ostest/README.txt">dhcpd/README.txt</a>
+ |   |   |- <a href="configs/ez80f910200zco/httpd/README.txt">httpd/README.txt</a>
+ |   |   |- <a href="configs/ez80f910200zco/nettest/README.txt">nettest/README.txt</a>
+ |   |   |- <a href="configs/ez80f910200zco/nsh/README.txt">nsh/README.txt</a>
+ |   |   |- <a href="configs/ez80f910200zco/ostest/README.txt">ostest/README.txt</a>
+ |   |   |- <a href="configs/ez80f910200zco/poll/README.txt">poll/README.txt</a>
+ |   |   `- <a href="configs/ez80f910200zco/README.txt"><b><i>README.txt</i></b></a>
+ |   |- m68332evb/
+ |   |   |- <a href="configs/m68332evb/include/README.txt">include/README.txt</a>
+ |   |   `- <a href="configs/m68332evb/src/README.txt">src/README.txt</a>
+ |   |- mcu123-lpc214x/
+ |   |   |- <a href="configs/mcu123-lpc214x/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/mcu123-lpc214x/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/mcu123-lpc214x/README.txt"><b><i>README.txt</i></b></a>
+ |   |- mx1ads/
+ |   |   |- <a href="configs/mx1ads/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/mx1ads/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/mx1ads/README.txt"><b><i>README.txt</i></b></a>
+ |   |- ntosd-dm320/
+ |   |   |- <a href="configs/ntosd-dm320/doc/README.txt">doc/README.txt</a>
+ |   |   |- <a href="configs/ntosd-dm320/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/ntosd-dm320/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/ntosd-dm320/README.txt"><b><i>README.txt</i></b></a>
+ |   |- olimex-strp711/
+ |   |   |- <a href="configs/olimex-strp711/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/olimex-strp711/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/olimex-strp711/README.txt"><b><i>README.txt</i></b></a>
+ |   |- pjrc-8051/
+ |   |   |- <a href="configs/pjrc-8051/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/pjrc-8051/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/pjrc-8051/README.txt"><b><i>README.txt</i></b></a>
+ |   |- sim/
+ |   |   |- <a href="configs/sim/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/sim/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/sim/README.txt"><b><i>README.txt</i></b></a>
+ |   |- skp16c26/
+ |   |   |- <a href="configs/skp16c26/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/skp16c26/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/skp16c26/README.txt"><b><i>README.txt</i></b></a>
+ |   |- stm3210e-eval/
+ |   |   |- <a href="configs/stm3210e-eval/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/stm3210e-eval/RIDE/README.txt">RIDE/README.txt</a>
+ |   |   |- <a href="configs/stm3210e-eval/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/stm3210e-eval/README.txt"><b><i>README.txt</i></b></a>
+ |   |- us7032evb1/
+ |   |   |- <a href="configs/us7032evb1/bin/README.txt">bin/README.txt</a>
+ |   |   |- <a href="configs/us7032evb1/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/us7032evb1/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/us7032evb1/README.txt"><b><i>README.txt</i></b></a>
+ |   |- xtrs/
+ |   |   |- <a href="configs/xtrs/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/xtrs/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/xtrs/README.txt"><b><i>README.txt</i></b></a>
+ |   |- z16f2800100zcog/
+ |   |   |- <a href="configs/xtrs/ostest/README.txt">ostest/README.txt</a>
+ |   |   |- <a href="configs/xtrs/pashello/README.txt">pashello/README.txt</a>
+ |   |   `- <a href="configs/xtrs/README.txt"><b><i>README.txt</i></b></a>
+ |   |- z80sim/
+ |   |   |- <a href="configs/z80sim/include/README.txt">include/README.txt</a>
+ |   |   |- <a href="configs/z80sim/src/README.txt">src/README.txt</a>
+ |   |   `- <a href="configs/z80sim/README.txt"><b><i>README.txt</i></b></a>
+ |   |- z8encore000zco/
+ |   |   |- <a href="configs/z8encore000zco/ostest/README.txt">ostest/README.txt</a>
+ |   |   `- <a href="configs/z8encore000zco/README.txt"><b><i>README.txt</i></b></a>
+ |   |- z8f64200100kit/
+ |   |   |- <a href="configs/z8f64200100kit/ostest/README.txt">ostest/README.txt</a>
+ |   |   `- <a href="configs/z8f64200100kit/README.txt"><b><i>README.txt</i></b></a>
+ |   `- <a href="configs/README.txt"><b><i>README.txt</i></b></a>
+ |- examples/
+ |   |- <a href="examples/nsh/README.txt"><b><i>nsh/README.txt</i></b></a>
+ |   |- <a href="examples/pashello/README.txt">pashello/README.txt</a>
+ |   `- <a href="examples/README.txt"><b><i>README.txt</i></b></a>
+ |- graphics/
+ |   `- <a href="graphics/README.txt"><b><i>README.txt</i></b></a>
+ |- libxx/
+ |   `- <a href="libxx/README.txt"><b><i>README.txt</i></b></a>
+ `- netutils/
+     |- <a href="netutils/telnetd/README.txt">telnetd/README.txt</a>
+     `- <a href="netutils/README"><b><i>README</a></a>
