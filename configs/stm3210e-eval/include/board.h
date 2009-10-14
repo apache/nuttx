@@ -91,7 +91,7 @@
 
 /* LED definitions ******************************************************************/
 
-/* The STM3210E-EVAL board has 4 LEDs that we will encode as */
+/* The STM3210E-EVAL board has 4 LEDs that we will encode as: */
 
 #define LED_STARTED       0  /* LED1 */
 #define LED_HEAPALLOCATE  1  /* LED2 */
