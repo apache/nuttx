@@ -340,6 +340,31 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32 value)
 }
 
 /****************************************************************************
+ * Name: up_restoreusartint
+ ****************************************************************************/
+
+static void up_restoreusartint(struct up_dev_s *priv, uint16 ie)
+{
+  uint32 cr;
+
+  /* Save the interrupt mask */
+
+  priv->ie = ie;
+
+  /* And restore the interrupt state (see the interrupt enable/usage table above) */
+
+  cr = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  cr &= ~(USART_CR1_RXNEIE|USART_CR1_TXEIE|USART_CR1_PEIE);
+  cr |= (ie & (USART_CR1_RXNEIE|USART_CR1_TXEIE|USART_CR1_PEIE));
+  up_serialout(priv, STM32_USART_CR1_OFFSET, cr);
+
+  cr = up_serialin(priv, STM32_USART_CR3_OFFSET);
+  cr &= ~USART_CR3_EIE;
+  cr |= (ie & USART_CR3_EIE);
+  up_serialout(priv, STM32_USART_CR3_OFFSET, cr);
+}
+
+/****************************************************************************
  * Name: up_disableusartint
  ****************************************************************************/
 
@@ -382,31 +407,6 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16 *ie)
   /* Disable all interrupts */
 
   up_restoreusartint(priv, 0);
-}
-
-/****************************************************************************
- * Name: up_restoreusartint
- ****************************************************************************/
-
-static inline void up_restoreusartint(struct up_dev_s *priv, uint16 ie)
-{
-  uint32 cr;
-
-  /* Save the interrupt mask */
-
-  priv->ie = ie;
-
-  /* And restore the interrupt state (see the interrupt enable/usage table above) */
-
-  cr = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  cr &= ~(USART_CR1_RXNEIE|USART_CR1_TXEIE|USART_CR1_PEIE);
-  cr |= (cr1 & (USART_CR1_RXNEIE|USART_CR1_TXEIE|USART_CR1_PEIE));
-  up_serialout((priv, STM32_USART_CR1_OFFSET, cr)
-
-  cr = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  cr &= ~USART_CR3_EIE;
-  cr |= (cr1 & USART_CR3_EIE);
-  up_serialout((priv, STM32_USART_CR3_OFFSET, cr)
 }
 
 /****************************************************************************
@@ -544,7 +544,7 @@ static void up_shutdown(struct uart_dev_s *dev)
   /* Disable Rx, Tx, and the UART */
 
   regval      = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval     &= ~(USART_CR1_UE|USART_CR1_TE|USART_CR1_RE
+  regval     &= ~(USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 }
 
@@ -886,7 +886,6 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
-  uint16 ie;
 
   /* USART transmit interrupts:
    *
@@ -987,17 +986,17 @@ void up_serialinit(void)
   /* Register the console */
 
 #ifdef HAVE_CONSOLE
-  (void)usart_register("/dev/console", &CONSOLE_DEV);
+  (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
   /* Register all USARTs */
 
-  (void)usart_register("/dev/ttyS0", &TTYS0_DEV);
+  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  (void)usart_register("/dev/ttyS1", &TTYS1_DEV);
+  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  (void)usart_register("/dev/ttyS2", &TTYS2_DEV);
+  (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
 #endif
 }
 
