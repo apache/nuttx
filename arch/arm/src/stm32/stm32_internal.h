@@ -498,18 +498,24 @@ EXTERN int stm32_ethinitialize(int intf);
 #endif
 
 /************************************************************************************
- * The external functions, stm32_spi1/2select and stm32_spi1/2status must be
- * provided by board-specific logic.  They are implementations of the select
- * and status methods of the SPI interface defined by struct spi_ops_s (see
- * include/nuttx/spi.h). All other methods (including up_spiinitialize())
- * are provided by common STM32 logic.  To use this common SPI logic on your
- * board:
+ * Name:  stm32_spi1/2/3select and stm32_spi1/2/3status
+ *
+ * Description:
+ *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
+ *   provided by board-specific logic.  They are implementations of the select
+ *   and status methods of the SPI interface defined by struct spi_ops_s (see
+ *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
+ *   are provided by common STM32 logic.  To use this common SPI logic on your
+ *   board:
  *
  *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide stm32_spi1/2select() and stm32_spi1/2status() functions in your
+ *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
+ *      The select() methods must call stm32_spitake() when the chip is selected
+ *      and stm32_spigive() when the chip is deselected.  This assures mutually
+ *      exclusive access to the SPI for the duration while a chip is selected.
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
@@ -525,6 +531,22 @@ EXTERN void  stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, b
 EXTERN ubyte stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 EXTERN void  stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
 EXTERN ubyte stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN void  stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
+EXTERN ubyte stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+
+/************************************************************************************
+ * Name: stm32_spitake() and stm32_spigive()
+ *
+ * Description:
+ *   The stm32_spi1/2/3select() and stm32_spi1/2/3status() methods must call
+ *   stm32_spitake() when the chip is selected and stm32_spigive() when the chip is
+ *   deselected.  This assures mutually exclusive access to the SPI for the duration
+ *   while a chip is selected.
+ *
+ ************************************************************************************/
+
+EXTERN void stm32_spitake(FAR struct spi_dev_s *dev);
+EXTERN void stm32_spigive(FAR struct spi_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)
