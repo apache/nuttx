@@ -34,23 +34,25 @@
  ************************************************************************************/
 
 /************************************************************************************
- * The external functions, stm32_spi1/2/3select and stm32_spi1//3status must
- * be provided by board-specific logic.  They are implementations of the
- * select and status methods of the SPI interface defined by struct spi_ops_s
- * (see include/nuttx/spi.h). All other methods (including up_spiinitialize())
+ * The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
+ * provided by board-specific logic.  They are implementations of the select
+ * and status methods of the SPI interface defined by struct spi_ops_s (see
+ * include/nuttx/spi.h). All other methods (including up_spiinitialize())
  * are provided by common STM32 logic.  To use this common SPI logic on your
  * board:
  *
  *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions
- *      in your board-specific logic.  These functions will perform chip
- *      selection and status operations using GPIOs in the way your board
- *      is configured.
+ *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
+ *      board-specific logic.  These functions will perform chip selection and
+ *      status operations using GPIOs in the way your board is configured.
+ *      The select() methods must call stm32_spitake() when the chip is selected
+ *      and stm32_spigive() when the chip is deselected.  This assures mutually
+ *      exclusive access to the SPI for the duration while a chip is selected.
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind
- *      the SPI driver to higher level logic (e.g., calling 
+ *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling 
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -62,6 +64,10 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
+#include <errno.h>
+#include <debug.h>
+
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
@@ -71,6 +77,7 @@
 
 #include "chip.h"
 #include "stm32_internal.h"
+#include "stm32_gpio.h"
 #include "stm32_spi.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
@@ -97,6 +104,7 @@ struct stm32_spidev_s
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   uint8            spiirq;     /* SPI IRQ number */
 #endif
+  sem_t            spisem;
 };
 
 /************************************************************************************
@@ -140,12 +148,12 @@ static const struct spi_ops_s g_sp1iops =
 {
   .select            = stm32_spi1select,
   .setfrequency      = spi_setfrequency,
-  .setmode           = spi_setmode;
-  .setbits           = spi_setbits;
+  .setmode           = spi_setmode,
+  .setbits           = spi_setbits,
   .status            = stm32_spi1status,
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = spi_exchange;
+  .exchange          = spi_exchange,
 #else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
@@ -157,7 +165,7 @@ static struct stm32_spidev_s g_spi1dev =
 {
   .spidev   = { &g_sp1iops },
   .spibase  = STM32_SPI1_BASE,
-  .spiclock = STM32_PCLK2_FREQUENCY;
+  .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI1,
 #endif
@@ -169,12 +177,12 @@ static const struct spi_ops_s g_sp2iops =
 {
   .select            = stm32_spi2select,
   .setfrequency      = spi_setfrequency,
-  .setmode           = spi_setmode;
-  .setbits           = spi_setbits;
+  .setmode           = spi_setmode,
+  .setbits           = spi_setbits,
   .status            = stm32_spi2status,
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = spi_exchange;
+  .exchange          = spi_exchange,
 #else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
@@ -186,7 +194,7 @@ static struct stm32_spidev_s g_spi2dev =
 {
   .spidev   = { &g_sp2iops },
   .spibase  = STM32_SPI2_BASE,
-  .spiclock = STM32_PCLK1_FREQUENCY;
+  .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI2,
 #endif
@@ -198,12 +206,12 @@ static const struct spi_ops_s g_sp3iops =
 {
   .select            = stm32_spi3select,
   .setfrequency      = spi_setfrequency,
-  .setmode           = spi_setmode;
-  .setbits           = spi_setbits;
+  .setmode           = spi_setmode,
+  .setbits           = spi_setbits,
   .status            = stm32_spi3status,
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = spi_exchange;
+  .exchange          = spi_exchange,
 #else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
@@ -215,7 +223,7 @@ static struct stm32_spidev_s g_spi3dev =
 {
   .spidev   = { &g_sp3iops },
   .spibase  = STM32_SPI2_BASE,
-  .spiclock = STM32_PCLK1_FREQUENCY;
+  .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI3,
 #endif
@@ -289,11 +297,11 @@ static inline uint16 spi_readword(FAR struct stm32_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while (spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) != 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) != 0);
 
   /* Then return the received byte */
 
-  return spi_regreg(priv, STM32_SPI_DR_OFFSET);
+  return spi_getreg(priv, STM32_SPI_DR_OFFSET);
 }
 
 /************************************************************************************
@@ -315,7 +323,7 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16 word)
 {
   /* Wait until the transmit buffer is empty */
 
-  while (spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) != 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) != 0);
 
   /* Then send the byte */
 
@@ -395,7 +403,7 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
     {
       /* Between fPCLCK/8 and fPCLCK/16, pick the slower */
 
-     setbits = SPI_CR1_FPCLCKd1; /* 011: fPCLK/16 */
+     setbits = SPI_CR1_FPCLCKd16; /* 011: fPCLK/16 */
       actual = priv->spiclock >> 4;
     }
   else if (frequency >= priv->spiclock >> 5)
@@ -449,7 +457,6 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-  uint16 cr1;
   uint16 setbits;
   uint16 clrbits;
 
@@ -500,11 +507,10 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-  uint16 cr1;
   uint16 setbits;
   uint16 clrbits;
 
-  switch (mode)
+  switch (nbits)
     {
     case 8:
       setbits = 0;
@@ -575,6 +581,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
 
+#  warning "TODO:  Need to incorporate DMA to get good SPI performance"
+
   /* 8- or 16-bit mode? */
 
   if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_DFF) != 0)
@@ -611,8 +619,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* 8-bit mode */
 
-      const uint8 *src  = (const uint16*)txbuffer;;
-            uint8 *dest = (uint16*)rxbuffer;
+      const uint8 *src  = (const uint8*)txbuffer;;
+            uint8 *dest = (uint8*)rxbuffer;
             uint8  word;
 
       /* Get the next word to write.  Is there a source buffer? */
@@ -720,7 +728,7 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
    */
 
   clrbits = SPI_CR1_CPHA|SPI_CR1_CPOL|SPI_CR1_BR_MASK|SPI_CR1_LSBFIRST|SPI_CR1_SSI|
-            SPI_CR1_SSM|SPI_CR1_RXONLY|SPI_CR1_DFF|SPI_CR1_BIDIOE|SPI_CR1_BIDIMODE);
+            SPI_CR1_SSM|SPI_CR1_RXONLY|SPI_CR1_DFF|SPI_CR1_BIDIOE|SPI_CR1_BIDIMODE;
   setbits = SPI_CR1_MSTR;
   spi_modifycr1(priv, setbits, clrbits);
 
@@ -731,6 +739,10 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
   /* CRCPOLY configuration */
 
   spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
+
+  /* Enable the SPI semaphore that enforces mutually exclusive access */
+
+  sem_init(&priv->spisem, 0, 1);
 
   /* Enable spi */
 
@@ -787,7 +799,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       /* Set up default configuration: Master, 8-bit, etc. */
 
-      spi_portinitialize(priv)
+      spi_portinitialize(priv);
     }
   else
 #endif
@@ -800,7 +812,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       /* Set up default configuration: Master, 8-bit, etc. */
 
-      spi_portinitialize(priv)
+      spi_portinitialize(priv);
     }
   else
 #endif
@@ -817,7 +829,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 #  error "Available only in connectivity devices"
 #endif
 
-      /* Configure SPI1 pins: SCK, MISO, and MOSI */
+      /* Configure SPI3 pins: SCK, MISO, and MOSI */
 
       stm32_configgpio(GPIO_SPI3_SCK);
       stm32_configgpio(GPIO_SPI3_MISO);
@@ -825,12 +837,45 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       /* Set up default configuration: Master, 8-bit, etc. */
 
-      spi_portinitialize(priv)
+      spi_portinitialize(priv);
     }
 #endif
 
   irqrestore(flags);
   return (FAR struct spi_dev_s *)priv;
+}
+
+/************************************************************************************
+ * Name: stm32_spitake() and stm32_spigive()
+ *
+ * Description:
+ *   The stm32_spi1/2/3select() and stm32_spi1/2/3status() methods must call
+ *   stm32_spitake() when the chip is selected and stm32_spigive() when the chip is
+ *   deselected.  This assures mutually exclusive access to the SPI for the duration
+ *   while a chip is selected.
+ *
+ ************************************************************************************/
+
+void stm32_spitake(FAR struct spi_dev_s *dev)
+{
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(&priv->spisem) != 0)
+    {
+      /* The only case that an error should occur here is if the wait was awakened
+       * by a signal.
+       */
+
+      ASSERT(*get_errno_ptr() == EINTR);
+    }
+}
+
+void stm32_spigive(FAR struct spi_dev_s *dev)
+{
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  (void)sem_post(&priv->spisem);
 }
 
 #endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 || CONFIG_STM32_SPI3 */
