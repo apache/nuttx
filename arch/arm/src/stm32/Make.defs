@@ -46,5 +46,6 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 
 CHIP_ASRCS	= 
 CHIP_CSRCS	= stm32_start.c stm32_rcc.c stm32_gpio.c stm32_irq.c \
-		  stm32_timerisr.c stm32_lowputc.c stm32_serial.c
+		  stm32_timerisr.c stm32_lowputc.c stm32_serial.c \
+		  stm32_spi.c
 
