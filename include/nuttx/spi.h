@@ -102,7 +102,7 @@
  *
  ****************************************************************************/
 
-#define SPI_SETMODE(d,m) ((d)->ops->mode ? (d)->ops->mode(d,m) : (void))
+#define SPI_SETMODE(d,m) ((d)->ops->setmode ? (d)->ops->setmode(d,m) : (void))
 
 /****************************************************************************
  * Name: SPI_SETBITS
@@ -222,7 +222,7 @@
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   buffer   - A pointer to the buffer of data to be sent
+ *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to the buffer in which to recieve data
  *   nwords   - the length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
