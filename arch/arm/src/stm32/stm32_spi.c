@@ -771,12 +771,13 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct stm32_spidev_s *priv = NULL;
   irqstate_t flags;
-  uint32 mapr;
 
   flags = irqsave();
 #ifdef CONFIG_STM32_SPI1
   if (port == 0)
     {
+      uint32 mapr;
+
       /* Select SPI1 */
 
       priv = &g_spi1dev;
