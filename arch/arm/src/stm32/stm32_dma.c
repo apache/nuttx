@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -71,20 +72,13 @@
  * Private Types
  ****************************************************************************/
 
-/* Pinch a byte if is possible if there are not very many DMA channels */
-
-#if DMA_NCHANNELS > 8
-typedef uint16 dma_bitset_t;
-#else
-typedef uint8 dma_bitset_t;
-#endif
-
 /* This structure descibes one DMA channel */
 
 struct stm32_dma_s
 {
   ubyte          chan;     /* DMA channel number */
   ubyte          irq;      /* DMA channel IRQ number */
+  sem_t          sem;      /* Used to wait for DMA channel to become available */
   uint32         base;     /* DMA register channel base address */
   dma_callback_t callback; /* Callback invoked when the DMA completes */
 };
@@ -92,11 +86,6 @@ struct stm32_dma_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* This bitset indicates which DMA channels have been allocated */
-
-static dma_bitset_t g_dmaallocated;
-static sem_t        g_allocsem;
 
 /* This array describes the state of each DMA */
 
@@ -203,6 +192,33 @@ static inline void dmachan_putreg(struct stm32_dma_s *dmach, uint32 offset, uint
 }
 
 /************************************************************************************
+ * Name: stm32_dmatake() and stm32_dmagive()
+ *
+ * Description:
+ *   Used to get exclusive access to a DMA channel.
+ *
+ ************************************************************************************/
+
+static void stm32_dmatake(FAR struct stm32_dma_s *dmach)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(&dmach->sem) != 0)
+    {
+      /* The only case that an error should occur here is if the wait was awakened
+       * by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
+
+static inline void stm32_dmagive(FAR struct stm32_dma_s *dmach)
+{
+  (void)sem_post(&dmach->sem);
+}
+
+/************************************************************************************
  * Name: stm32_dmainterrupt
  *
  * Description:
@@ -275,6 +291,7 @@ void weak_function stm32_dmainitialize(void)
 
   for (chan = 0; chan < DMA_NCHANNELS; chan++)
     {
+      sem_init(&g_dma[chan].sem, 0, 1);	
       irq_attach(g_dma[chan].irq, stm32_dmainterrupt);
     }
 }
@@ -292,33 +309,45 @@ void weak_function stm32_dmainitialize(void)
 
 DMA_HANDLE stm32_dmachannel(int chan)
 {
-  struct stm32_dma_s *dmach = NULL;
-  irqstate_t          flags;
-  dma_bitset_t        before;
-  int                 bit = (1 << chan);
+  struct stm32_dma_s *dmach = &g_dma[chan];
 
   DEBUGASSERT(chan < DMA_NCHANNELS);
 
-  /* This is essentially a test and set.  We simply disable interrupts to
-   * create the critical section.  This is brutal (but very quich) and assures
-   * that we have exclusive access to the allocation bitset
+  /* Get exclusive access to the DMA channel -- OR wait until the channel
+   * is available if it is currently being used by another driver
    */
 
-  flags           = irqsave();
-  before          = g_dmaallocated;
-  g_dmaallocated |= bit;
-  irq_restore(flags);
+  stm32_dmatake(dmach);
 
-  /* Was this channel been available? */
+  /* The caller now has exclusive use of the DMA channel */
 
-  if ((before & bit) == 0)
-    {
-      /* Yes.. then the caller has it, return it */
-
-      dmach = &g_dma[chan];
-    }
-     
   return (DMA_HANDLE)dmach;
+}
+
+/****************************************************************************
+ * Name: stm32_dmarelease
+ *
+ * Description:
+ *   Release a DMA channel
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   - The caller holds the DMA channel.
+ *   - There is no DMA in progress
+ *
+ ****************************************************************************/
+
+void stm32_dmafree(DMA_HANDLE handle)
+{
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
+
+  DEBUGASSERT(handle != NULL);
+
+  /* Release the channel */
+
+  stm32_dmagive(dmach);
 }
 
 /****************************************************************************
