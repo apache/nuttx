@@ -81,6 +81,7 @@ struct stm32_dma_s
   sem_t          sem;      /* Used to wait for DMA channel to become available */
   uint32         base;     /* DMA register channel base address */
   dma_callback_t callback; /* Callback invoked when the DMA completes */
+  void          *arg;      /* Argument passed to callback function */
 };
 
 /****************************************************************************
@@ -263,7 +264,7 @@ static int stm32_dmainterrupt(int irq, void *context)
 
   if (dmach->callback)
     {
-      dmach->callback(dmach, isr >> DMA_ISR_CHAN_SHIFT(chan));
+      dmach->callback(dmach, isr >> DMA_ISR_CHAN_SHIFT(chan), dmach->arg);
     }
   return OK;
 }
@@ -403,9 +404,13 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr, size_t ntrans
  * Description:
  *   Start the DMA transfer
  *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *   - No DMA in progress
+ *
  ****************************************************************************/
 
-void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, boolean half)
+void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, boolean half)
 {
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   int irq;
@@ -413,9 +418,10 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, boolean half)
 
   DEBUGASSERT(handle != NULL);
 
-  /* Save the callback.  This will be invoked whent the DMA commpletes */
+  /* Save the callback info.  This will be invoked whent the DMA commpletes */
 
   dmach->callback = callback;
+  dmach->arg      = arg;
 
   /* Activate the channel by setting the ENABLE bit in the DMA_CCRx register.
    * As soon as the channel is enabled, it can serve any DMA request from the

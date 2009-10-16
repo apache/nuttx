@@ -113,12 +113,14 @@ struct stm32_spidev_s
   ubyte            spiirq;     /* SPI IRQ number */
 #endif
 #ifdef CONFIG_STM32_SPI_DMA
+  volatile ubyte   result;     /* Result of the DMA */
   ubyte            rxch;       /* The RX DMA channel number */
   ubyte            txch;       /* The TX DMA channel number */
   DMA_HANDLE       rxdma;      /* DMA channel handle for RX transfers */
   DMA_HANDLE       txdma;      /* DMA channel handle for TX transfers */
+  sem_t            dmasem;     /* Wait for DMA to complete */
 #endif
-  sem_t            spisem;
+  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
 };
 
 /************************************************************************************
@@ -133,6 +135,20 @@ static inline void   spi_putreg(FAR struct stm32_spidev_s *priv, ubyte offset,
 static inline uint16 spi_readword(FAR struct stm32_spidev_s *priv);
 static inline void   spi_writeword(FAR struct stm32_spidev_s *priv, uint16 byte);
 
+/* DMA support */
+
+#ifdef CONFIG_STM32_SPI_DMA
+static void          spi_dmawait(FAR struct stm32_spidev_s *priv);
+static inline void   spi_dmawakeup(FAR struct stm32_spidev_s *priv);
+static void          spi_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg);
+static void          spi_dmaexchange(FAR struct stm32_spidev_s *priv,
+                                     FAR const void *txbuffer, FAR void *rxbuffer,
+                                     size_t nwords);
+static void          spi_dmasend(FAR struct stm32_spidev_s *priv,
+                                 FAR const void *txbuffer, size_t nwords);
+static void          spi_dmarecv(FAR struct stm32_spidev_s *priv,
+                                 FAR void *rxbuffer, size_t nwords);
+#endif
 
 /* SPI methods */
 
@@ -143,9 +159,9 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd);
 static void   spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                            FAR void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
-static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                            size_t nwords);
-static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
                             size_t nwords);
 #endif
 
@@ -355,6 +371,143 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16 word)
 
   spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
 }
+
+/************************************************************************************
+ * Name: spi_dmawait
+ *
+ * Description:
+ *   Wait for DMA to complete.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_SPI_DMA
+static void spi_dmawait(FAR struct stm32_spidev_s *priv)
+{
+  /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
+   * must not really have completed???
+   */
+
+  while (sem_wait(&priv->dmasem) != 0 && priv->result == 0)
+    {
+      /* The only case that an error should occur here is if the wait was awakened
+       * by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
+#endif
+
+/************************************************************************************
+ * Name: spi_dmawakeup
+ *
+ * Description:
+ *   Signal that DMA is complete
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_SPI_DMA
+static inline void spi_dmawakeup(FAR struct stm32_spidev_s *priv)
+{
+  (void)sem_post(&priv->dmasem);
+}
+#endif
+
+/************************************************************************************
+ * Name: spi_dmacallback
+ *
+ * Description:
+ *   Called when the DMA complets
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_SPI_DMA
+static void spi_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg)
+{
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)arg;
+  priv->result = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
+  spi_dmawakeup(priv);
+}
+#endif
+
+/************************************************************************************
+ * Name: spi_dmaexchange
+ *
+ * Description:
+ *   Perform concurrent RX and TX DMA transfers
+ *
+ *   priv     - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to a buffer in which to receive data
+ *   nwords   - the length of data to be exchaned in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into ubytes; if nbits >8, the data is packed into uint16's
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_SPI_DMA
+static void spi_dmaexchange(FAR struct stm32_spidev_s *priv, FAR const void *txbuffer,
+                            FAR void *rxbuffer, size_t nwords)
+{
+# error "To be provided"
+}
+#endif
+
+/************************************************************************************
+ * Name: spi_dmasend
+ *
+ * Description:
+ *   Perform TX only DMA transfer
+ *
+ *   priv     - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   nwords   - the length of data to be exchaned in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into ubytes; if nbits >8, the data is packed into uint16's
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_SPI_DMA
+static void spi_dmasend(FAR struct stm32_spidev_s *priv, FAR const void *txbuffer,
+                        size_t nwords)
+{
+# error "To be provided"
+}
+#endif
+
+/************************************************************************************
+ * Name: spi_dmarecv
+ *
+ * Description:
+ *   Perform RX only DMA transfer
+ *
+ *   priv     - Device-specific state data
+ *   rxbuffer - A pointer to a buffer in which to receive data
+ *   nwords   - the length of data to be exchaned in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into ubytes; if nbits >8, the data is packed into uint16's
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_SPI_DMA
+static void spi_dmarecv(FAR struct stm32_spidev_s *priv, FAR void *rxbuffer,
+                        size_t nwords)
+{
+# error "To be provided"
+}
+#endif
 
 /************************************************************************************
  * Name: spi_modifycr1
@@ -588,13 +741,13 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
  *   Exchange a block of data on SPI
  *
  * Input Parameters:
- *   dev -    Device-specific state data
+ *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   txbuffer - A pointer to a buffer in which to receive data
- *   nwords - the length of data to be exchaned in units of words.
- *            The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *   rxbuffer - A pointer to a buffer in which to receive data
+ *   nwords   - the length of data to be exchaned in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into ubytes; if nbits >8, the data is packed into uint16's
  *
  * Returned Value:
  *   None
@@ -680,12 +833,12 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   Send a block of data on SPI
  *
  * Input Parameters:
- *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer of data to be sent
- *   nwords - the length of data to send from the buffer in number of words.
- *            The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   nwords   - the length of data to send from the buffer in number of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into ubytes; if nbits >8, the data is packed into uint16's
  *
  * Returned Value:
  *   None
@@ -693,9 +846,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, size_t nwords)
 {
-  return spi_exchange(dev, buffer, NULL, nwords);
+  return spi_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
 
@@ -706,12 +859,12 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   Revice a block of data from SPI
  *
  * Input Parameters:
- *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
- *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *   dev      - Device-specific state data
+ *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   nwords   - the length of data that can be received in the buffer in number
+ *              of words.  The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into ubytes; if nbits >8, the data is packed into uint16's
  *
  * Returned Value:
  *   None
@@ -719,9 +872,9 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t nwords)
 {
-  return spi_exchange(dev, NULL, buffer, nwords);
+  return spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
 
@@ -768,15 +921,19 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
 
   /* Enable the SPI semaphore that enforces mutually exclusive access */
 
-  sem_init(&priv->spisem, 0, 1);
+  sem_init(&priv->exclsem, 0, 1);
 
-  /* Get DMA channels.  Note that if we fail to get a DMA channel, we will fall
-   * back to dumb I/O.
-   */
+  /* Enable the SPI semaphore that is used to wait for DMA completion */
 
 #ifdef CONFIG_STM32_SPI_DMA
-  priv->rxdma = dma_dmachannel(priv->rxch);
-  priv->txdma = dma_dmachannel(priv->txch);
+  sem_init(&priv->exclsem, 0, 0);
+
+  /* Get DMA channels.  Note that if we fail to get a DMA channel, we will just
+   * fall back to dumb I/O.
+   */
+
+  priv->rxdma = stm32_dmachannel(priv->rxch);
+  priv->txdma = stm32_dmachannel(priv->txch);
 #endif
   
   /* Enable spi */
@@ -898,7 +1055,7 @@ void stm32_spitake(FAR struct spi_dev_s *dev)
 
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&priv->spisem) != 0)
+  while (sem_wait(&priv->exclsem) != 0)
     {
       /* The only case that an error should occur here is if the wait was awakened
        * by a signal.
@@ -911,7 +1068,7 @@ void stm32_spitake(FAR struct spi_dev_s *dev)
 void stm32_spigive(FAR struct spi_dev_s *dev)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-  (void)sem_post(&priv->spisem);
+  (void)sem_post(&priv->exclsem);
 }
 
 #endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 || CONFIG_STM32_SPI3 */
