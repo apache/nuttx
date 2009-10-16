@@ -347,13 +347,11 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_U[S]ARTn_2STOP - Two stop bits
 
-	CONFIG_SPI_POLLWAIT - Select to disable interrupt driven SPI support.
-	  Poll-waiting is recommended if the interrupt rate would be to
-	  high in the interrupt driven case.
-	CONFIG_SPI_TXLIMIT - Write this many words to the Tx FIFO before
-	  emptying the Rx FIFO.  If the SPI frequency is high and this
-	  value is large, then larger values of this setting may cause
-	  Rx FIFO overrun errors.  Default: half of the Tx FIFO size (4).
+	CONFIG_STM32_SPI_INTERRUPT - Select to enable interrupt driven SPI
+	  support. Non-interrupt-driven, poll-waiting is recommended if the
+	  interrupt rate would be to high in the interrupt driven case.
+	CONFIG_STM32_SPI_DMA - Use DMA to improve SPI transfer performance.
+	  Cannot be used with CONFIG_STM32_SPI_INTERRUPT.
 
 Configurations
 ^^^^^^^^^^^^^^
