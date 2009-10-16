@@ -78,6 +78,7 @@
 #include "chip.h"
 #include "stm32_internal.h"
 #include "stm32_gpio.h"
+#include "stm32_dma.h"
 #include "stm32_spi.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
@@ -91,6 +92,13 @@
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
 #  error "Interrupt driven SPI not yet supported"
 #endif
+#ifdef CONFIG_STM32_SPI_DMA
+#  error "SPI DMA not yet supported"
+#endif
+
+#if defined(CONFIG_STM32_SPI_INTERRUPTS) && defined(CONFIG_STM32_SPI_DMA)
+#  error "Cannot enable both interrupt mode and DMA mode for SPI"
+#endif
 
 /************************************************************************************
  * Private Types
@@ -102,7 +110,13 @@ struct stm32_spidev_s
   uint32           spibase;    /* SPIn base address */
   uint32           spiclock;   /* Clocking for the SPI module */
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
-  uint8            spiirq;     /* SPI IRQ number */
+  ubyte            spiirq;     /* SPI IRQ number */
+#endif
+#ifdef CONFIG_STM32_SPI_DMA
+  ubyte            rxch;       /* The RX DMA channel number */
+  ubyte            txch;       /* The TX DMA channel number */
+  DMA_HANDLE       rxdma;      /* DMA channel handle for RX transfers */
+  DMA_HANDLE       txdma;      /* DMA channel handle for TX transfers */
 #endif
   sem_t            spisem;
 };
@@ -169,6 +183,10 @@ static struct stm32_spidev_s g_spi1dev =
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI1,
 #endif
+#ifdef CONFIG_STM32_SPI_DMA
+  .rxch     = DMACHAN_SPI1_RX,
+  .txch     = DMACHAN_SPI1_TX,
+#endif
 };
 #endif
 
@@ -198,6 +216,10 @@ static struct stm32_spidev_s g_spi2dev =
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI2,
 #endif
+#ifdef CONFIG_STM32_SPI_DMA
+  .rxch     = DMACHAN_SPI2_RX,
+  .txch     = DMACHAN_SPI2_TX,
+#endif
 };
 #endif
 
@@ -226,6 +248,10 @@ static struct stm32_spidev_s g_spi3dev =
   .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI3,
+#endif
+#ifdef CONFIG_STM32_SPI_DMA
+  .rxch     = DMACHAN_SPI3_RX,
+  .txch     = DMACHAN_SPI3_TX,
 #endif
 };
 #endif
@@ -619,9 +645,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* 8-bit mode */
 
-      const uint8 *src  = (const uint8*)txbuffer;;
-            uint8 *dest = (uint8*)rxbuffer;
-            uint8  word;
+      const ubyte *src  = (const ubyte*)txbuffer;;
+            ubyte *dest = (ubyte*)rxbuffer;
+            ubyte  word;
 
       /* Get the next word to write.  Is there a source buffer? */
 
@@ -636,7 +662,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Exchange one word */
  
-      word = (uint8)spi_send(dev, (uint16)word);
+      word = (ubyte)spi_send(dev, (uint16)word);
 
       /* Is there a buffer to receive the return value? */
 
@@ -744,6 +770,15 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
 
   sem_init(&priv->spisem, 0, 1);
 
+  /* Get DMA channels.  Note that if we fail to get a DMA channel, we will fall
+   * back to dumb I/O.
+   */
+
+#ifdef CONFIG_STM32_SPI_DMA
+  priv->rxdma = dma_dmachannel(priv->rxch);
+  priv->txdma = dma_dmachannel(priv->txch);
+#endif
+  
   /* Enable spi */
 
   spi_modifycr1(priv, SPI_CR1_SPE, 0);
