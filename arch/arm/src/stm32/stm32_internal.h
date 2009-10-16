@@ -380,6 +380,7 @@
  ************************************************************************************/
 
 typedef FAR void *DMA_HANDLE;
+typedef void (*dma_callback_t)(DMA_HANDLE handle, ubyte isr);
 
 /************************************************************************************
  * Inline Functions
@@ -477,6 +478,19 @@ EXTERN int stm32_dumpgpio(uint32 pinset, const char *msg);
 #endif
 
 /****************************************************************************
+ * Name: stm32_dmainitialize
+ *
+ * Description:
+ *   Initialize the DMA subsystem
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void weak_function stm32_dmainitialize(void);
+
+/****************************************************************************
  * Name: stm32_dmachannel
  *
  * Description:
@@ -488,6 +502,27 @@ EXTERN int stm32_dumpgpio(uint32 pinset, const char *msg);
  ****************************************************************************/
 
 EXTERN DMA_HANDLE stm32_dmachannel(void);
+
+/****************************************************************************
+ * Name: stm32_dmasetup
+ *
+ * Description:
+ *   Configure DMA before using
+ *
+ ****************************************************************************/
+
+EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr,
+                           size_t ntransfers, uint32 ccr);
+
+/****************************************************************************
+ * Name: stm32_dmastart
+ *
+ * Description:
+ *   Start the DMA transfer
+ *
+ ****************************************************************************/
+
+EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, boolean half);
 
 /************************************************************************************
  * Function: stm32_ethinitialize
