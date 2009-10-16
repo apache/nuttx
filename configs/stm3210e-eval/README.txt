@@ -347,7 +347,7 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_U[S]ARTn_2STOP - Two stop bits
 
-	CONFIG_STM32_SPI_INTERRUPT - Select to enable interrupt driven SPI
+	CONFIG_STM32_SPI_INTERRUPTS - Select to enable interrupt driven SPI
 	  support. Non-interrupt-driven, poll-waiting is recommended if the
 	  interrupt rate would be to high in the interrupt driven case.
 	CONFIG_STM32_SPI_DMA - Use DMA to improve SPI transfer performance.
