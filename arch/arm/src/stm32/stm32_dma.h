@@ -268,6 +268,90 @@
 #define DMA_CNDTR_NDT_SHIFT       (0)       /* Bits 15-0: Number of data to Transfer */
 #define DMA_CNDTR_NDT_MASK       (0xffff << DMA_CNDTR_NDT_SHIFT)
 
+/* DMA Channel mapping.  Each DMA channel has a mapping to several possible
+ * sources/sinks of data.  The requests from peripherals assigned to a channel
+ * are simply OR'ed together before entering the DMA block.  This means that only
+ * one request on a given channel can be enabled at once.
+ */
+
+#define STM32_DMA1_CHAN1          (0)
+#define STM32_DMA1_CHAN2          (1)
+#define STM32_DMA1_CHAN3          (2)
+#define STM32_DMA1_CHAN4          (3)
+#define STM32_DMA1_CHAN5          (4)
+#define STM32_DMA1_CHAN6          (5)
+#define STM32_DMA1_CHAN7          (6)
+
+#define STM32_DMA2_CHAN1          (7)
+#define STM32_DMA2_CHAN2          (8)
+#define STM32_DMA2_CHAN3          (1)
+#define STM32_DMA2_CHAN4          (10)
+#define STM32_DMA2_CHAN5          (11)
+
+#define DMACHAN_ADC1              STM32_DMA1_CHAN1
+#define DMACHAN_TIM2_CH3          STM32_DMA1_CHAN1
+#define DMACHAN_TIM4_CH1          STM32_DMA1_CHAN1
+#define DMACHAN_SPI1_RX           STM32_DMA1_CHAN2
+#define DMACHAN_USART3_TX         STM32_DMA1_CHAN2
+#define DMACHAN_TIM1_CH1          STM32_DMA1_CHAN2
+#define DMACHAN_TIM2_UP           STM32_DMA1_CHAN2
+#define DMACHAN_TIM3_CH3          STM32_DMA1_CHAN2
+#define DMACHAN_SPI1_TX           STM32_DMA1_CHAN3
+#define DMACHAN_USART3_RX         STM32_DMA1_CHAN3
+#define DMACHAN_TIM1_CH2          STM32_DMA1_CHAN3
+#define DMACHAN_TIM3_CH4          STM32_DMA1_CHAN3
+#define DMACHAN_TIM3_UP           STM32_DMA1_CHAN3
+#define DMACHAN_SPI2_RX           STM32_DMA1_CHAN4
+#define DMACHAN_I2S2_RX           STM32_DMA1_CHAN4
+#define DMACHAN_USART1_TX         STM32_DMA1_CHAN4
+#define DMACHAN_I2C2_TX           STM32_DMA1_CHAN4
+#define DMACHAN_TIM1_CH4          STM32_DMA1_CHAN4
+#define DMACHAN_TIM1_TRIG         STM32_DMA1_CHAN4
+#define DMACHAN_TIM1_COM          STM32_DMA1_CHAN4
+#define DMACHAN_TIM4_CH2          STM32_DMA1_CHAN4
+#define DMACHAN_SPI2_TX           STM32_DMA1_CHAN5
+#define DMACHAN_I2S2_TX           STM32_DMA1_CHAN5
+#define DMACHAN_USART1_RX         STM32_DMA1_CHAN5
+#define DMACHAN_I2C2_RX           STM32_DMA1_CHAN5
+#define DMACHAN_TIM1_UP           STM32_DMA1_CHAN5
+#define DMACHAN_TIM2_CH1          STM32_DMA1_CHAN5
+#define DMACHAN_TIM4_CH3          STM32_DMA1_CHAN5
+#define DMACHAN_USART2_RX         STM32_DMA1_CHAN6
+#define DMACHAN_I2C1_TX           STM32_DMA1_CHAN6
+#define DMACHAN_TIM1_CH3          STM32_DMA1_CHAN6
+#define DMACHAN_TIM3_CH1          STM32_DMA1_CHAN6
+#define DMACHAN_TIM3_TRIG         STM32_DMA1_CHAN6
+#define DMACHAN_USART2_TX         STM32_DMA1_CHAN7
+#define DMACHAN_I2C1_RX           STM32_DMA1_CHAN7
+#define DMACHAN_TIM2_CH2          STM32_DMA1_CHAN7
+#define DMACHAN_TIM2_CH4          STM32_DMA1_CHAN7
+#define DMACHAN_TIM4_UP           STM32_DMA1_CHAN7
+#define DMACHAN_SPI3_RX           STM32_DMA2_CHAN1
+#define DMACHAN_I2S3_RX           STM32_DMA2_CHAN1
+#define DMACHAN_TIM5_CH4          STM32_DMA2_CHAN1
+#define DMACHAN_TIM5_TRIG         STM32_DMA2_CHAN1
+#define DMACHAN_TIM8_CH3          STM32_DMA2_CHAN1
+#define DMACHAN_TIM8_UP           STM32_DMA2_CHAN1
+#define DMACHAN_SPI3_TX           STM32_DMA2_CHAN2
+#define DMACHAN_I2S3_TX           STM32_DMA2_CHAN2
+#define DMACHAN_TIM5_CH3          STM32_DMA2_CHAN2
+#define DMACHAN_TIM5_UP           STM32_DMA2_CHAN2
+#define DMACHAN_TIM5_UP           STM32_DMA2_CHAN2
+#define DMACHAN_TIM8_TRIG         STM32_DMA2_CHAN2
+#define DMACHAN_TIM8_COM          STM32_DMA2_CHAN2
+#define DMACHAN_UART4_RX          STM32_DMA2_CHAN3
+#define DMACHAN_TIM6_UP           STM32_DMA2_CHAN3
+#define DMACHAN_DAC_CHAN1         STM32_DMA2_CHAN3
+#define DMACHAN_TIM8_CH1          STM32_DMA2_CHAN3
+#define DMACHAN_SDIO              STM32_DMA2_CHAN4
+#define DMACHAN_TIM5_CH2          STM32_DMA2_CHAN4
+#define DMACHAN_TIM7_UP           STM32_DMA2_CHAN4
+#define DMACHAN_DAC_CHAN2         STM32_DMA2_CHAN4
+#define DMACHAN_ADC3              STM32_DMA2_CHAN5
+#define DMACHAN_UART4_TX          STM32_DMA2_CHAN5
+#define DMACHAN_TIM5_CH1          STM32_DMA2_CHAN5
+#define DMACHAN_TIM8_CH2          STM32_DMA2_CHAN5
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

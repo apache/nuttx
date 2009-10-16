@@ -501,7 +501,7 @@ EXTERN void weak_function stm32_dmainitialize(void);
  *
  ****************************************************************************/
 
-EXTERN DMA_HANDLE stm32_dmachannel(void);
+EXTERN DMA_HANDLE stm32_dmachannel(int chan);
 
 /****************************************************************************
  * Name: stm32_dmasetup

@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -104,63 +103,63 @@ static sem_t        g_allocsem;
 static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 {
   {
-	.chan     = 0,
+	.chan     = STM32_DMA1_CHAN1,
 	.irq      = STM32_IRQ_DMA1CH1,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(0),
   },
   {
-	.chan     = 1,
+	.chan     = STM32_DMA1_CHAN2,
 	.irq      = STM32_IRQ_DMA1CH2,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(1),
   },
   {
-	.chan     = 2,
+	.chan     = STM32_DMA1_CHAN3,
 	.irq      = STM32_IRQ_DMA1CH3,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(2),
   },
   {
-	.chan     = 3,
+	.chan     = STM32_DMA1_CHAN4,
 	.irq      = STM32_IRQ_DMA1CH4,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(3),
   },
   {
-	.chan     = 4,
+	.chan     = STM32_DMA1_CHAN5,
 	.irq      = STM32_IRQ_DMA1CH5,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(4),
   },
   {
-	.chan     = 5,
+	.chan     = STM32_DMA1_CHAN6,
 	.irq      = STM32_IRQ_DMA1CH6,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(5),
   },
   {
-	.chan     = 6,
+	.chan     = STM32_DMA1_CHAN7,
 	.irq      = STM32_IRQ_DMA1CH7,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(6),
   },
 #if STM32_NDMA > 1
   {
-	.chan     = 7,
+	.chan     = STM32_DMA2_CHAN1,
 	.irq      = STM32_IRQ_DMA2CH1,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(0),
   },
   {
-	.chan     = 8,
+	.chan     = STM32_DMA2_CHAN2,
 	.irq      = STM32_IRQ_DMA2CH2,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(1),
   },
   {
-	.chan     = 9,
+	.chan     = STM32_DMA2_CHAN3,
 	.irq      = STM32_IRQ_DMA2CH3,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(2),
   },
   {
-	.chan     = 10,
+	.chan     = STM32_DMA2_CHAN4,
 	.irq      = STM32_IRQ_DMA2CH4,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(3),
   },
   {
-	.chan     = 11,
+	.chan     = STM32_DMA2_CHAN5,
 	.irq      = STM32_IRQ_DMA2CH5,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(4),
   },
@@ -201,33 +200,6 @@ static inline uint32 dmachan_getreg(struct stm32_dma_s *dmach, uint32 offset)
 static inline void dmachan_putreg(struct stm32_dma_s *dmach, uint32 offset, uint32 value)
 {
   putreg32(value, dmach->base + offset);
-}
-
-/************************************************************************************
- * Name: stm32_dmatake() and stm32_dmagive()
- *
- * Description:
- *  Take/give semaphore that protects the channel allocation bitset
- *
- ************************************************************************************/
-
-static void stm32_dmatake(void)
-{
-  /* Take the semaphore (perhaps waiting) */
-
-  while (sem_wait(&g_allocsem) != 0)
-    {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
-       */
-
-      ASSERT(errno == EINTR);
-    }
-}
-
-static inline void stm32_dmagive(void)
-{
-  (void)sem_post(&g_allocsem);
 }
 
 /************************************************************************************
@@ -299,10 +271,6 @@ void weak_function stm32_dmainitialize(void)
 {
   int chan;
 
-  /* Initialize the semaphore used to protect the allocation bitset */
-
-  sem_init(&g_allocsem, 0, 1);
-
   /* Attach DMA interrupt vectors */
 
   for (chan = 0; chan < DMA_NCHANNELS; chan++)
@@ -322,33 +290,34 @@ void weak_function stm32_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE stm32_dmachannel(void)
+DMA_HANDLE stm32_dmachannel(int chan)
 {
   struct stm32_dma_s *dmach = NULL;
-  int chan;
-  int bit;
+  irqstate_t          flags;
+  dma_bitset_t        before;
+  int                 bit = (1 << chan);
 
-  /* Make sure that we exclusive access to the DMA bitset */
+  DEBUGASSERT(chan < DMA_NCHANNELS);
 
-  stm32_dmatake();
+  /* This is essentially a test and set.  We simply disable interrupts to
+   * create the critical section.  This is brutal (but very quich) and assures
+   * that we have exclusive access to the allocation bitset
+   */
 
-  /* Try each possible channel */
+  flags           = irqsave();
+  before          = g_dmaallocated;
+  g_dmaallocated |= bit;
+  irq_restore(flags);
 
-  for (chan = 0, bit = 1; chan < DMA_NCHANNELS; chan++, bit <<= 1)
+  /* Was this channel been available? */
+
+  if ((before & bit) == 0)
     {
-      /* Has this channel been allocated? */
+      /* Yes.. then the caller has it, return it */
 
-      if ((g_dmaallocated & bit) == 0)
-        {
-          /* No.. grab it and return */
-
-          g_dmaallocated |= bit;
-          dmach = &g_dma[chan];
-          break;
-        }
+      dmach = &g_dma[chan];
     }
      
-  stm32_dmagive();
   return (DMA_HANDLE)dmach;
 }
 
