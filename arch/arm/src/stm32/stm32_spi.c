@@ -869,7 +869,7 @@ void stm32_spitake(FAR struct spi_dev_s *dev)
        * by a signal.
        */
 
-      ASSERT(*get_errno_ptr() == EINTR);
+      ASSERT(errno == EINTR);
     }
 }
 
