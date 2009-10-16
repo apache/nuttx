@@ -379,6 +379,8 @@
  * Public Types
  ************************************************************************************/
 
+typedef FAR void *DMA_HANDLE;
+
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
@@ -473,6 +475,19 @@ EXTERN int stm32_dumpgpio(uint32 pinset, const char *msg);
 #else
 #  define stm32_dumpgpio(p,m)
 #endif
+
+/****************************************************************************
+ * Name: stm32_dmachannel
+ *
+ * Description:
+ *   Allocate a DMA channel
+ *
+ * Returned Value:
+ *   On success, a void* DMA channel handle; NULL on failure
+ *
+ ****************************************************************************/
+
+EXTERN DMA_HANDLE stm32_dmachannel(void);
 
 /************************************************************************************
  * Function: stm32_ethinitialize
