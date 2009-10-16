@@ -380,7 +380,7 @@
  ************************************************************************************/
 
 typedef FAR void *DMA_HANDLE;
-typedef void (*dma_callback_t)(DMA_HANDLE handle, ubyte isr);
+typedef void (*dma_callback_t)(DMA_HANDLE handle, ubyte isr, void *arg);
 
 /************************************************************************************
  * Inline Functions
@@ -533,9 +533,14 @@ EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr,
  * Description:
  *   Start the DMA transfer
  *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *   - No DMA in progress
+ *
  ****************************************************************************/
 
-EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, boolean half);
+EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
+                           void *arg, boolean half);
 
 /************************************************************************************
  * Function: stm32_ethinitialize
