@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 16, 2009</p>
+      <p>Last Updated: October 17, 2009</p>
     </td>
   </tr>
 </table>
@@ -732,29 +732,28 @@
 <p><b>nuttx-0.4.11</b>.
 
 <p>
-  This 43<sup>rd</sup> release of NuttX was made on September 16, 2009 and is available for download from the
+  This 44<sup>th</sup> release of NuttX was made on October 17, 2009 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
-  This release of NuttX incorporates the verified port of Jeff Poskanzer's <a href="http://acme.com/software/thttpd">THTTPD</a> HTTP server.
-  Many of the key features of THTTPD have been tested on the Micromint Eagle-100 development board (Cortex-M3).
-  These tests verify:
-</p>
-<ul>
-  <li>Serving of files from any file system, and </li>
-  <li>Execution of CGI executable.
-    This release supports execution of <a href="http://www.nuttx.org/NuttXNxFlat.html">NXFLAT executables</a> residing on a ROMFS file system.
-</ul>
-<p>
-  A standard CGI interface is used:  Information is pasted to the CGI program via POST commands and via environment variables.
-  CGI socket I/O is redirected to <code>stdin</code> and <code>stdout</code> so that the CGI program only need to <code>printf()</code> to send its content back to the HTTP client.
 </p>
 <p>
-  Another value to this THTTPD integration effort has been that THTTPD has provided a very good test bed for finding NuttX networking bugs.
-  Several very critical networking bugs have been fixed with this 0.4.11 release (see the <a href="#currentrelease">ChangeLog</a> for details).
-  Networking throughput has also been greatly improved.
-  Anyone using NuttX networking should consider upgrading to this release.
+  This release adds basic support for the STMicro STM32, Cortex-M3 MCU.
+  The specific port is to the STMicro STM3210E-EVAL development board based around the STM32F103ZET6 MCU.
+  Some highlights of this port:
+  <ul>
+    <li>This basic port includes boot-up logic, interrupt driven serial console, and system timer interrupts.<li>
+    <li>The port includes a basic STMicro RIDE7 project that can be used to perform basic STM32 board bring-up
+       (due to RIDE7 size limitations, it cannot be used for the full NuttX testing, unfortunately).<li>
+	<li>Working, Tested Configurations:  the NuttX OS test and the NuttShell (NSH) example.<li>
+  </ul>
+</p>
+<p>
+  It is planned to extend this basic STM32 port for the 0.4.12 NuttX release.
+  Additional functionality needed for complete STM32 support includes:
+  USB device driver, LCD driver and NX bringup on the development board's display and MicroSD support.
+  An SPI driver and a DMA support was included in this 0.4.11 release, but is not yet tested.
 </p>
 
 <table width ="100%">
@@ -974,14 +973,13 @@
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing, the STM32 port is well along and already passes the basic NuttX
-        OS test at examples/ostest.  The rest should be a piece of cake.
-      </p>
-      <p>
-	    Things left to do:  interrupt driver USART console driver, NSH bring-up,
-	    USB driver, LCD driver and NX bringup on the eval board's display, SPI driver,
-	    and MicroSD support.  I will probably release 0.4.12 at the point where NSH
-	    is working properly; LCD and SPI will wait for 0.4.13.
+        The basic STM32 port was released in NuttX version 0.4.11. This basic port includes boot-up
+        logic, interrupt driven serial console, and system timer interrupts.
+        Verified configurations are available for NuttX OS test and the NuttShell (NSH) example.
+        This basic STM32 port will be extended in the 0.4.12 NuttX release.  Functionality needed
+        for complete STM32 support includes:  USB device driver, LCD driver and NX bringup on the
+        development board's display and MicroSD support.  An SPI driver and a DMA support was included
+        in the 0.4.11 release, but is not yet tested.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1520,58 +1518,25 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-0.4.11 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+0.4.12 2009-10-17 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* fs/fs_read.c and fs/fs_write.c.  read() and write() to socket is the
-	  same as recv() and send() with flags = 0.  Fixed!
-	* net/recvfrom.c: Fix errors in return value from non-blocking socket read.
-	* lib/lib_strcasecmp.c and lib/lib_strncasecmp.c.  Use of post-incremented
-	  argument to macro caused strcasecmp() and strncasecmp() to fail.
-	* lib/lib_strstr.c:  Length of substring off by one causes false alarm
-	  sub-string matches.
-	* arch/arm/src/lm3s/lm3s_ethernet.c: Fix errors in LMS6918 FIFO length
-	  handling.  (1) The incorrect size of the ethernet header was being
-	  subtracted on outgoing messages (4 vs 14), which caused outgoing messages to
-	  be a little too long.  (2) The size of incoming FIFO messages is 6 bytes
-	  larger than it expected (2 for the length and 4 for the FCS).  The unhandled
-	  extra two bytes of length cause the driver to sometimes read one too many
-	  words from the received FIFO (corrupting the next queued receive packet,
-	  if any).
-	* net/net_poll.c and net/uip/uip_tcpbacklog.c.  Fixed an important race condition
-	  bug in polling for connections.  The logic worked if the poll was inplace
-	  before the connection was received; but the poll failed to awaken if the
-	  connection was already pending in the backlog when poll() was called.
-	* net/net_close.c.  Fixed another important TCP/IP race condition bug:  If
-	  the host closes the TCP connection just before the target calls close(), then
-	  the close operation may hang indefinitely!
-	* net/net_tcppoll.c.  Removed an unnecessary check for outstanding, un-ACKed
-	  data.  The NuttX socket layer keeps track of ACKs and doesn't need this check;
-	  removing the check should improve write throughput
-	* Add DEBUG configuration option to enable debug console output without disabling
-	  optimization (and vice versa)
-	* Changed lots of occurrents of debug macro dbg() to lldbg().  dbg() uses
-	  stdout to output debug data.  That works fine unless (1) the dbg() macro
-	  is interrupt logic and the interrupted task has redirected stdout!  Most
-	* net/uip/uip_tcpinput.c.  Connection reference count was not being set correctly
-	  when a socket is created by accepting a new connection.  Since the reference
-	  count is bad, such sockets are not successfully duplicated when being passed
-	  to new tasks.
-	* net/net_clone.c.  Similarly, after a socket is cloned, its reference count
-	  was not being initialized.
-	* lib/lib_strstr.c.  Improperly incremented pointer could cause comparison
-	  failures.
-	* net/.  Connection reference count must always be set to zero before calling
-	  uip_tcpfree() or it could trigger a DEBUGASSERT that verifies that the
-	  reference count is zero before freeing a connection structure.
-	* net/uip/uip_listen.c.  uip_accept() consulted the wrong list to find the
-	  listener on a socket.  The previous logic worked most of the time, but
-	  occasionally picked the wrong listener.
-	* net/net_close.c and net/net_sockets.c.  Sockets were not being closed
-	  when a task exits.  If many server tasks are created and exit without closing
-	  sockets (such as with CGI tasks), then eventually, you will run out of sockets.
-	* netutils/thttpd.  Basic functionality of THTTPD is complete.  This includes
-	  serving up files from a file system and executing NXFLAT-based CGI programs
-	  and pipe the stdout back to the HTTP client.
+	* arch/arm/src/stm32 and configs/stm3210e-eval.  Added basic support for the
+	  STMicro STM32, Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL
+	  development board based around the STM32F103ZET6 MCU.
+	* configs/stm3210e-eval/RIDE.  Added a basic STMicro RIDE7 project that can be
+	  used to perform basic STM32 board bring-up (due to RIDE7 size limitations, it
+	  cannot be used for the full NuttX bring-up).
+	* configs/stm3210e-eval/ostest.  The STM32 now passes the basic NuttX OS test
+	  at examples/ostest.  The rest should be a piece of cake.
+	* configs/stm3210e-eval/nsh.  Added NuttShell (NSH) example.
+	* configs/stm3210e-eval/src/stm32102e-internal.h.  Fix on-board LED GPIO definitions.
+	* arch/arm/src/stm32/src/stm32/stm32_dma.c.  Added DMA channel support for the STM32
+	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
+	* arch/arm/src/stm32/src/stm32/stm32_serial.c.  Finished interrupt-drivent,
+	  USART console driver.  This makes NSH work perfectly.
+    * Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
+	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
+	  driver was included in the 0.4.12 release, but is not yet tested.
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1600,25 +1565,7 @@ buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-0.4.12 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* arch/arm/src/stm32 and configs/stm3210e-eval.  Added basic support for the
-	  STMicro STM32, Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL
-	  development board based around the STM32F103ZET6 MCU.
-	* configs/stm3210e-eval/RIDE.  Added a basic STMicro RIDE7 project that can be
-	  used to perform basic STM32 board bring-up (due to RIDE7 size limitations, it
-	  cannot be used for the full NuttX bring-up).
-	* configs/stm3210e-eval/ostest.  The STM32 now passes the basic NuttX OS test
-	  at examples/ostest.  The rest should be a piece of cake.
-	* configs/stm3210e-eval/nsh.  Added NuttShell (NSH) example.
-	* configs/stm3210e-eval/src/stm32102e-internal.h.  Fix on-board LED GPIO definitions.
-	* arch/arm/src/stm32/src/stm32/stm32_dma.c.  Added DMA channel support for the STM32
-	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
-
-	  STM32: Things left to do:  interrupt driver USART console driver, NSH bring-up,
-	  USB driver, LCD driver and NX bringup on the eval board's display, SPI driver,
-	  and MicroSD support.  I will probably release 0.4.12 at the point where NSH
-	  is working properly; LCD and SPI will wait for 0.4.13.
+nuttx-0.4.13 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
