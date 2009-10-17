@@ -61,7 +61,7 @@
  * bringup
  */
 
-#undef LM2S_IRQ_DEBUG
+#undef LM3S_IRQ_DEBUG
 
 /* Get a 32-bit version of the default priority */
 
@@ -93,7 +93,7 @@ uint32 *current_regs;
  *
  ****************************************************************************/
 
-#if defined(LM2S_IRQ_DEBUG) && defined (CONFIG_DEBUG)
+#if defined(LM3S_IRQ_DEBUG) && defined (CONFIG_DEBUG)
 static void lm3s_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
@@ -197,7 +197,7 @@ static int lm3s_reserved(int irq, FAR void *context)
 #endif
 
 /****************************************************************************
- * Name: lml3s_irqinfo
+ * Name: lm3s_irqinfo
  *
  * Description:
  *   Given an IRQ number, provide the register and bit setting to enable or
@@ -205,7 +205,7 @@ static int lm3s_reserved(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int lml3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
+static int lm3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
 {
   DEBUGASSERT(irq >= LM3S_IRQ_NMI && irq < NR_IRQS);
 
@@ -367,7 +367,7 @@ void up_disable_irq(int irq)
   uint32 regval;
   uint32 bit;
 
-  if (lml3s_irqinfo(irq, &regaddr, &bit) == 0)
+  if (lm3s_irqinfo(irq, &regaddr, &bit) == 0)
     {
       /* Clear the appropriate bit in the register to enable the interrupt */
 
@@ -392,7 +392,7 @@ void up_enable_irq(int irq)
   uint32 regval;
   uint32 bit;
 
-  if (lml3s_irqinfo(irq, &regaddr, &bit) == 0)
+  if (lm3s_irqinfo(irq, &regaddr, &bit) == 0)
     {
       /* Set the appropriate bit in the register to enable the interrupt */
 

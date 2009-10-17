@@ -218,7 +218,7 @@
 void up_lowputc(char ch)
 {
 #ifdef HAVE_CONSOLE
-  /* Wait until the TX FIFO is not full */
+  /* Wait until the TX data register is empty */
 
   while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_TXE) == 0);
 

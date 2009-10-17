@@ -413,8 +413,8 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16 *ie)
  * Name: up_setup
  *
  * Description:
- *   Configure the USART baud, bits, parity, fifos, etc. This method is
- *   called the first time that the serial port is opened.
+ *   Configure the USART baud, bits, parity, etc. This method is called the
+ *   first time that the serial port is opened.
  *
  ****************************************************************************/
 
@@ -824,8 +824,8 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
   ie = priv->ie;
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx FIFO (or an Rx
-       * timeout occurs.
+      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
+       * timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -850,7 +850,7 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
  * Name: up_rxavailable
  *
  * Description:
- *   Return TRUE if the receive fifo is not empty
+ *   Return TRUE if the receive register is not empty
  *
  ****************************************************************************/
 
@@ -899,7 +899,7 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
   flags = irqsave();
   if (enable)
     {
-      /* Set to receive an interrupt when the TX fifo is half emptied */
+      /* Set to receive an interrupt when the TX data register is empty */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       up_restoreusartint(priv, priv->ie | USART_CR1_TXEIE);
@@ -924,7 +924,7 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
  * Name: up_txready
  *
  * Description:
- *   Return TRUE if the tranmsit fifo is not full
+ *   Return TRUE if the tranmsit data register is empty
  *
  ****************************************************************************/
 
