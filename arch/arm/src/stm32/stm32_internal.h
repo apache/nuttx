@@ -494,23 +494,52 @@ EXTERN void weak_function stm32_dmainitialize(void);
  * Name: stm32_dmachannel
  *
  * Description:
- *   Allocate a DMA channel
+ *   Allocate a DMA channel.  This function gives the caller mutually
+ *   exclusive access to the DMA channel specified by the 'chan' argument.
+ *   DMA channels are shared on the STM32:  Devices sharing the same DMA
+ *   channel cannot do DMA concurrently!  See the DMACHAN_* definitions in
+ *   stm32_dma.h.
+ *
+ *   If the DMA channel is not available, then stm32_dmachannel() will wait
+ *   until the holder of the channel relinquishes the channel by calling
+ *   stm32_dmafree().  WARNING: If you have two devices sharing a DMA
+ *   channel and the code never releases the channel, the stm32_dmachannel
+ *   call for the other will hang forever in this function!  Don't let your
+ *   design do that!
+ *
+ *   Hmm.. I suppose this interface could be extended to make a non-blocking
+ *   version.  Feel free to do that if that is what you need.
  *
  * Returned Value:
- *   On success, a void* DMA channel handle; NULL on failure
+ *   Provided that 'chan' is valid, this function ALWAYS returns a non-NULL,
+ *   void* DMA channel handle.  (If 'chan' is invalid, the function will
+ *   assert if debug is enabled or do something ignorant otherwise).
+ *
+ * Assumptions:
+ *   - The caller does not hold he DMA channel.
+ *   - The caller can wait for the DMA channel to be freed if it is no
+ *     available.
  *
  ****************************************************************************/
 
 EXTERN DMA_HANDLE stm32_dmachannel(int chan);
 
 /****************************************************************************
- * Name: stm32_dmarelease
+ * Name: stm32_dmafree
  *
  * Description:
- *   Release a DMA channel
+ *   Release a DMA channel.  If another thread is waiting for this DMA channel
+ *   in a call to stm32_dmachannel, then this function will re-assign the
+ *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
+ *   in this argument must NEVER be used again until stm32_dmachannel() is
+ *   called again to re-gain access to the channel.
  *
  * Returned Value:
  *   None
+ *
+ * Assumptions:
+ *   - The caller holds the DMA channel.
+ *   - There is no DMA in progress
  *
  ****************************************************************************/
 
