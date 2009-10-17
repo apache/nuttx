@@ -729,7 +729,7 @@
   </tr>
 </table>
 
-<p><b>nuttx-0.4.11</b>.
+<p><b>nuttx-0.4.12</b>.
 
 <p>
   This 44<sup>th</sup> release of NuttX was made on October 17, 2009 and is available for download from the
@@ -750,10 +750,10 @@
   </ul>
 </p>
 <p>
-  It is planned to extend this basic STM32 port for the 0.4.12 NuttX release.
+  It is planned to extend this basic STM32 port for the 0.4.13 NuttX release.
   Additional functionality needed for complete STM32 support includes:
   USB device driver, LCD driver and NX bringup on the development board's display and MicroSD support.
-  An SPI driver and a DMA support was included in this 0.4.11 release, but is not yet tested.
+  An SPI driver and a DMA support was included in this 0.4.12 release, but is not yet tested.
 </p>
 
 <table width ="100%">
@@ -973,13 +973,13 @@
     <ul>
       <p>
         <b>STATUS:</b>
-        The basic STM32 port was released in NuttX version 0.4.11. This basic port includes boot-up
+        The basic STM32 port was released in NuttX version 0.4.12. This basic port includes boot-up
         logic, interrupt driven serial console, and system timer interrupts.
         Verified configurations are available for NuttX OS test and the NuttShell (NSH) example.
-        This basic STM32 port will be extended in the 0.4.12 NuttX release.  Functionality needed
+        This basic STM32 port will be extended in the 0.4.13 NuttX release.  Functionality needed
         for complete STM32 support includes:  USB device driver, LCD driver and NX bringup on the
         development board's display and MicroSD support.  An SPI driver and a DMA support was included
-        in the 0.4.11 release, but is not yet tested.
+        in the 0.4.12 release, but is not yet tested.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1534,7 +1534,7 @@ Other memory:
 	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
 	* arch/arm/src/stm32/src/stm32/stm32_serial.c.  Finished interrupt-drivent,
 	  USART console driver.  This makes NSH work perfectly.
-    * Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
+	* Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
 	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
 	  driver was included in the 0.4.12 release, but is not yet tested.
 
