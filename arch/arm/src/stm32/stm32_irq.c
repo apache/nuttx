@@ -61,7 +61,7 @@
  * bringup
  */
 
-#undef LM2S_IRQ_DEBUG
+#undef STM32_IRQ_DEBUG
 
 /* Get a 32-bit version of the default priority */
 
@@ -93,7 +93,7 @@ uint32 *current_regs;
  *
  ****************************************************************************/
 
-#if defined(LM2S_IRQ_DEBUG) && defined (CONFIG_DEBUG)
+#if defined(STM32_IRQ_DEBUG) && defined (CONFIG_DEBUG)
 static void stm32_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
@@ -107,8 +107,9 @@ static void stm32_dumpnvic(const char *msg, int irq)
          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  slldbg("  IRQ ENABLE: %08x %08x\n",
-         getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE));
+  slldbg("  IRQ ENABLE: %08x %08x %08x\n",
+         getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+         getreg32(NVIC_IRQ64_95_ENABLE));
   slldbg("  SYSH_PRIO:  %08x %08x %08x\n",
          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
          getreg32(NVIC_SYSH12_15_PRIORITY));
@@ -121,6 +122,11 @@ static void stm32_dumpnvic(const char *msg, int irq)
   slldbg("              %08x %08x %08x %08x\n", 
         getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
         getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+  slldbg("              %08x %08x %08x %08x\n", 
+        getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
+        getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+  slldbg("              %08x\n", 
+        getreg32(NVIC_IRQ64_67_PRIORITY));
   irqrestore(flags);
 }
 #else
@@ -197,7 +203,7 @@ static int stm32_reserved(int irq, FAR void *context)
 #endif
 
 /****************************************************************************
- * Name: lml3s_irqinfo
+ * Name: stm32_irqinfo
  *
  * Description:
  *   Given an IRQ number, provide the register and bit setting to enable or
@@ -205,7 +211,7 @@ static int stm32_reserved(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int lml3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
+static int stm32_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
 {
   DEBUGASSERT(irq >= STM32_IRQ_NMI && irq < NR_IRQS);
 
@@ -220,8 +226,8 @@ static int lml3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
         }
       if (irq < STM32_IRQ_INTERRUPTS + 64)
         {
-           *regaddr = NVIC_IRQ0_31_ENABLE;
-           *bit     = 1 << (irq - STM32_IRQ_INTERRUPTS);
+           *regaddr = NVIC_IRQ32_63_ENABLE;
+           *bit     = 1 << (irq - STM32_IRQ_INTERRUPTS - 32);
         }
       else if (irq < NR_IRQS)
         {
@@ -376,7 +382,7 @@ void up_disable_irq(int irq)
   uint32 regval;
   uint32 bit;
 
-  if (lml3s_irqinfo(irq, &regaddr, &bit) == 0)
+  if (stm32_irqinfo(irq, &regaddr, &bit) == 0)
     {
       /* Clear the appropriate bit in the register to enable the interrupt */
 
@@ -401,7 +407,7 @@ void up_enable_irq(int irq)
   uint32 regval;
   uint32 bit;
 
-  if (lml3s_irqinfo(irq, &regaddr, &bit) == 0)
+  if (stm32_irqinfo(irq, &regaddr, &bit) == 0)
     {
       /* Set the appropriate bit in the register to enable the interrupt */
 
