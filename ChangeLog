@@ -893,7 +893,7 @@
 	  serving up files from a file system and executing NXFLAT-based CGI programs
 	  and pipe the stdout back to the HTTP client.
 
-0.4.12 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.12 2009-10-17 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/stm32 and configs/stm3210e-eval.  Added basic support for the
 	  STMicro STM32, Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL
@@ -907,9 +907,11 @@
 	* configs/stm3210e-eval/src/stm32102e-internal.h.  Fix on-board LED GPIO definitions.
 	* arch/arm/src/stm32/src/stm32/stm32_dma.c.  Added DMA channel support for the STM32
 	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
+	* arch/arm/src/stm32/src/stm32/stm32_serial.c.  Finished interrupt-drivent,
+	  USART console driver.  This makes NSH work perfectly.
+    * Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
+	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
+	  driver was included in the 0.4.12 release, but is not yet tested.
 
-	  STM32: Things left to do:  interrupt driver USART console driver, NSH bring-up,
-	  USB driver, LCD driver and NX bringup on the eval board's display, SPI driver,
-	  and MicroSD support.  I will probably release 0.4.12 at the point where NSH
-	  is working properly; LCD and SPI will wait for 0.4.13.
+0.4.13 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
