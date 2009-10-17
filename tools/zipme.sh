@@ -50,7 +50,8 @@ GARBAGEDIRS="\
   configs/sim/doc/include\
   configs/sim/doc/src\
   arch/c5471\
-  arch/dm320
+  arch/dm320\
+  netutils/thttpd/extras
 "
 
 # Make sure we know what is going on
