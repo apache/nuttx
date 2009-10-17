@@ -67,7 +67,14 @@
  * register.
  */
 
-#define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
+#undef CONFIG_STM32_SYSTICK_HCLKd8 /* Power up default is HCLK, not HCLK/8 */
+                                   /* And I don't know now to re-configure it yet */
+
+#if CONFIG_STM32_SYSTICK_HCLKd8
+#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
+#else
+#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
+#endif
 
 /* The size of the reload field is 24 bits.  Verify taht the reload value
  * will fit in the reload register.
@@ -125,6 +132,18 @@ void up_timerinit(void)
   regval &= ~NVIC_SYSH_PRIORITY_PR15_MASK;
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
+
+  /* Make sure that the SYSTICK clock source is set correctly */
+
+#if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
+  regval = getreg32(NVIC_SYSTICK_CTRL);
+#if CONFIG_STM32_SYSTICK_HCLKd8
+  regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
+#else
+  regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
+#endif
+  putreg32(regval, NVIC_SYSTICK_CTRL);
+#endif
 
   /* Configure SysTick to interrupt at the requested rate */
 
