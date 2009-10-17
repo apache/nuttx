@@ -909,7 +909,7 @@
 	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
 	* arch/arm/src/stm32/src/stm32/stm32_serial.c.  Finished interrupt-drivent,
 	  USART console driver.  This makes NSH work perfectly.
-    * Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
+	* Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
 	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
 	  driver was included in the 0.4.12 release, but is not yet tested.
 
