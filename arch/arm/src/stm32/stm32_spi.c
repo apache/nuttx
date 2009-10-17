@@ -163,14 +163,6 @@ static void           spi_dmatxsetup(FAR struct stm32_spidev_s *priv,
                                       FAR const void *txbuffer, FAR const void *txdummy, size_t nwords);
 static inline void    spi_dmarxstart(FAR struct stm32_spidev_s *priv);
 static inline void    spi_dmatxstart(FAR struct stm32_spidev_s *priv);
-static inline void    spi_dmaexchange(FAR struct stm32_spidev_s *priv,
-                                      FAR const void *txbuffer, FAR void *rxbuffer,
-                                      size_t nwords);
-static inline void    spi_dmatxexchange(FAR struct stm32_spidev_s *priv,
-                                        FAR const void *txbuffer,  FAR void *rxbuffer,
-                                        size_t nwords);
-static inline void    spi_dmarxexchange(FAR struct stm32_spidev_s *priv, FAR const void *txbuffer,
-                                        FAR void *rxbuffer, size_t nwords);
 #endif
 
 /* SPI methods */
@@ -179,13 +171,8 @@ static uint32         spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequen
 static void           spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void           spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16         spi_send(FAR struct spi_dev_s *dev, uint16 wd);
-#ifdef CONFIG_STM32_SPI_DMA
-static void           spi_copyexchange(FAR struct spi_dev_s *dev,
-                                       FAR const void *txbuffer, FAR void *rxbuffer,
-                                       size_t nwords);
-#endif
-static void          spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                                  FAR void *rxbuffer, size_t nwords);
+static void           spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                                   FAR void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void           spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                    size_t nwords);
@@ -653,226 +640,6 @@ static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
 #endif
 
 /************************************************************************************
- * Name: spi_dmaexchange
- *
- * Description:
- *   Perform concurrent RX and TX DMA transfers
- *
- *   priv     - Device-specific state data
- *   txbuffer - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into ubytes; if nbits >8, the data is packed into uint16's
- *
- * Returned Value:
- *   None
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32_SPI_DMA
-static inline void spi_dmaexchange(FAR struct stm32_spidev_s *priv,
-                                   FAR const void *txbuffer, FAR void *rxbuffer,
-                                   size_t nwords)
-{
-  uint16 rxdummy = 0xffff;
-  uint16 txdummy;
-
-  /* Setup DMAs */
-
-  spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
-  spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
-
-  /* Start the DMAs */
-
-  spi_dmarxstart(priv);
-  spi_dmatxstart(priv);
-
-  /* Then wait for each to complete */
-
-  spi_dmarxwait(priv);
-  spi_dmatxwait(priv);
-}
-#endif
-
-/************************************************************************************
- * Name: spi_dmatxexchange
- *
- * Description:
- *   Perform SPI exchange using DMA on the TX side only
- *
- *   priv     - Device-specific state data
- *   txbuffer - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into ubytes; if nbits >8, the data is packed into uint16's
- *
- * Returned Value:
- *  None
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32_SPI_DMA
-static inline void spi_dmatxexchange(FAR struct stm32_spidev_s *priv,
-                                     FAR const void *txbuffer, FAR void *rxbuffer,
-                                     size_t nwords)
-{
-  uint16 txdummy;
-
-  /* Setup and start the TX DMA */
-
-  spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
-  spi_dmatxstart(priv);
-
-  /* Then read the RX data via a polling loop */
-
-   /* 8- or 16-bit mode? */
-
-  if (spi_16bitmode(priv))
-    {
-      /* 16-bit mode */
-
-      uint16 *dest = (uint16*)rxbuffer;
-      uint16  word;
-
-      while (nwords-- > 0)
-        {
-          /* Read one word */
- 
-          word = spi_readword(priv);
-
-          /* Is there a buffer to receive the return value? */
-
-          if (dest)
-            {
-              *dest++ = word;
-            }
-        } 
-    }
-  else
-    {
-      /* 8-bit mode */
-
-      ubyte *dest = (ubyte*)rxbuffer;
-      ubyte  word;
-
-      while (nwords-- > 0)
-        {
-          /* Read one word */
- 
-          word = (ubyte)spi_readword(priv);
-
-          /* Is there a buffer to receive the return value? */
-
-          if (dest)
-            {
-              *dest++ = word;
-            } 
-        }
-    }
-
-  /* Then wait for the TX DMA to complete (should already be finished) */
-
-  spi_dmatxwait(priv);
-}
-#endif
-
-/************************************************************************************
- * Name: spi_dmarxexchange
- *
- * Description:
- *   Perform SPI exchange using DMA on the RX side only
- *
- *   priv     - Device-specific state data
- *   txbuffer - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into ubytes; if nbits >8, the data is packed into uint16's
- *
- * Returned Value:
- *  None
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32_SPI_DMA
-static inline void spi_dmarxexchange(FAR struct stm32_spidev_s *priv,
-                                     FAR const void *txbuffer, FAR void *rxbuffer,
-                                     size_t nwords)
-{
-  uint16 rxdummy = 0xffff;
-
-  /* Setup and start the RX DMA */
-
-  spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
-  spi_dmarxstart(priv);
-
-  /* Then send all of the TX data via a copy loop */
-
-  /* 8- or 16-bit mode? */
-
-  if (spi_16bitmode(priv))
-    {
-      /* 16-bit mode */
-
-      const uint16 *src  = (const uint16*)txbuffer;;
-            uint16  word;
-
-      while (nwords-- > 0)
-        {
-          /* Get the next word to write.  Is there a source buffer? */
-
-          if (src)
-            {
-              word = *src++;
-            }
-          else
-          {
-	          word = 0xffff;
-          }
-
-          /* Write  one word */
-
-          spi_writeword(priv, word);
-        } 
-    }
-  else
-    {
-      /* 8-bit mode */
-
-      const ubyte *src  = (const ubyte*)txbuffer;;
-            ubyte  word;
-
-      while (nwords-- > 0)
-        {
-          /* Get the next word to write.  Is there a source buffer? */
-
-          if (src)
-            {
-              word = *src++;
-            }
-          else
-          {
-	          word = 0xff;
-          }
-
-          /* Write  one word */
-
-          spi_writeword(priv, (uint16)word);
-        }
-    }
-
-  /* Then wait for the RX DMA to complete */
-
-  spi_dmarxwait(priv);
-}
-#endif
-
-/************************************************************************************
  * Name: spi_modifycr1
  *
  * Description:
@@ -1098,10 +865,10 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
 }
 
 /*************************************************************************
- * Name: spi_exchange (no DMA) or spi_copyexchange (with DMA capability)
+ * Name: spi_exchange (no DMA)
  *
  * Description:
- *   Exchange a block of data on SPI
+ *   Exchange a block of data on SPI without using DMA
  *
  * Input Parameters:
  *   dev      - Device-specific state data
@@ -1117,14 +884,9 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_SPI_DMA
-static void spi_copyexchange(FAR struct spi_dev_s *dev,
-                             FAR const void *txbuffer, FAR void *rxbuffer,
-                             size_t nwords)
-#else
+#ifndef CONFIG_STM32_SPI_DMA
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
-#endif
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
@@ -1198,12 +960,13 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         }
     }
 }
+#endif
 
 /*************************************************************************
  * Name: spi_exchange (with DMA capability)
  *
  * Description:
- *   Exchange a block of data on SPI
+ *   Exchange a block of data on SPI using DMA
  *
  * Input Parameters:
  *   dev      - Device-specific state data
@@ -1224,42 +987,25 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  uint16 rxdummy = 0xffff;
+  uint16 txdummy;
+
   DEBUGASSERT(priv && priv->spibase);
 
-  /* Do we have a TX dma channel? */
+  /* Setup DMAs */
 
-  if (priv->txdma)
-    {
-      /* Yes..  Do we have an RX dma channel too? */
+  spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
+  spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
 
-      if (priv->rxdma)
-        {
-          /* Yes.. do the full DMA exchange */
+  /* Start the DMAs */
 
-          spi_dmaexchange(priv, txbuffer, rxbuffer, nwords);
-        }
-      else
-        {
-          /* No... do the exchange with only TX DMA */
+  spi_dmarxstart(priv);
+  spi_dmatxstart(priv);
 
-          spi_dmatxexchange(priv, txbuffer, rxbuffer, nwords);
-        }
-    }
+  /* Then wait for each to complete */
 
-  /* Do we have an RX dma channel? */
-
-  else if (priv->rxdma)
-    {
-      /* Yes... do the exchange with only RX DMA */
-
-      spi_dmarxexchange(priv, txbuffer, rxbuffer, nwords);
-    }
-  else
-    {
-      /* No... do the exchange with no DMA */
-
-      spi_copyexchange(dev, txbuffer, rxbuffer, nwords);
-    }
+  spi_dmarxwait(priv);
+  spi_dmatxwait(priv);
 }
 #endif
 
@@ -1366,12 +1112,17 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
   sem_init(&priv->rxsem, 0, 0);
   sem_init(&priv->txsem, 0, 0);
 
-  /* Get DMA channels.  Note that if we fail to get a DMA channel, we will just
-   * fall back to dumb I/O.
+  /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the DMA channel.
+   * if the channel is not available, then stm32_dmachannel() will block and wait
+   * until the channel becomes available.  WARNING: If you have another device sharing
+   * a DMA channel with SPI and the code never releases that channel, then the call
+   * to stm32_dmachannel()  will hang forever in this function!  Don't let your
+   * design do that!
    */
 
   priv->rxdma = stm32_dmachannel(priv->rxch);
   priv->txdma = stm32_dmachannel(priv->txch);
+  DEBUGASSERT(priv->rxdma && priv->txdma);
 #endif
   
   /* Enable spi */
