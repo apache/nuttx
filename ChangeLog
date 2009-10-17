@@ -905,6 +905,8 @@
 	  at examples/ostest.  The rest should be a piece of cake.
 	* configs/stm3210e-eval/nsh.  Added NuttShell (NSH) example.
 	* configs/stm3210e-eval/src/stm32102e-internal.h.  Fix on-board LED GPIO definitions.
+	* arch/arm/src/stm32/src/stm32/stm32_dma.c.  Added DMA channel support for the STM32
+	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
 
 	  STM32: Things left to do:  interrupt driver USART console driver, NSH bring-up,
 	  USB driver, LCD driver and NX bringup on the eval board's display, SPI driver,
