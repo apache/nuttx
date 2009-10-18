@@ -1085,13 +1085,13 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
    *   Master:                        MSTR=1
    *   8-bit:                         DFF=0
    *   MSB tranmitted first:          LSBFIRST=0
-   *   No software slave management:  SSI=0 SSM=0
+   *   Replace NSS with SSI & SSI=1:  SSI=1 SSM=1 (prevents MODF error)
    *   Two lines full duplex:         BIDIMODE=0 BIDIOIE=(Don't care) and RXONLY=0
    */
 
-  clrbits = SPI_CR1_CPHA|SPI_CR1_CPOL|SPI_CR1_BR_MASK|SPI_CR1_LSBFIRST|SPI_CR1_SSI|
-            SPI_CR1_SSM|SPI_CR1_RXONLY|SPI_CR1_DFF|SPI_CR1_BIDIOE|SPI_CR1_BIDIMODE;
-  setbits = SPI_CR1_MSTR;
+  clrbits = SPI_CR1_CPHA|SPI_CR1_CPOL|SPI_CR1_BR_MASK|SPI_CR1_LSBFIRST|
+            SPI_CR1_RXONLY|SPI_CR1_DFF|SPI_CR1_BIDIOE|SPI_CR1_BIDIMODE;
+  setbits = SPI_CR1_MSTR|SPI_CR1_SSI|SPI_CR1_SSM;
   spi_modifycr1(priv, setbits, clrbits);
 
   /* Select a default frequency of approx. 400KHz */
