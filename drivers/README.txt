@@ -39,6 +39,16 @@ mmcsd/
 	Support for MMC/SD block drivers.  At present, only SPI-based
 	MMC/SD is supported. See include/nuttx/mmcsd.h.
 
+mtd/
+	Memory Technology Device (MTD) drivers.  Some simple drivers for
+	memory technologies like FLASH, EEPROM, NVRAM, etc.  See
+	include/nuttx/mtd.h
+
+	(Note: This is a simple memory interface and should not be
+	confused with the "real" MTD developed at infradead.org.  This
+	logic is unrelated; I just used the name MTD because I am not
+	aware of any other common way to refer to this class of devices).
+
 net/
 	Network interface drivers.  See also include/nuttx/net.h
 

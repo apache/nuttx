@@ -915,3 +915,8 @@
 
 0.4.13 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* include/nuttx/mtd.h.  Added a simple interface definition to support some
+	  FLASH, EEPROM, NVRAM, etc. devices.
+	* driver/mtd/m25px.c.  Added a driver for SPI based FLASH parts M25P64 and M25P128.
+
+

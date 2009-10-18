@@ -78,17 +78,23 @@ CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/driv
 endif
 endif
 
-ASRCS		= $(SERIAL_ASRCS) $(NET_ASRCS) $(PIPE_ASRCS) $(USBDEV_ASRCS) $(MMCSD_ASRCS) $(BCH_ASRCS)
+include mtd/Make.defs
+ROOTDEPPATH	= --dep-path .
+MTDDEPPATH	= --dep-path mtd
+
+ASRCS		= $(SERIAL_ASRCS) $(NET_ASRCS) $(PIPE_ASRCS) $(USBDEV_ASRCS) \
+			  $(MMCSD_ASRCS) $(BCH_ASRCS) $(MTD_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		=
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 CSRCS		+= dev_null.c dev_zero.c loop.c  can.c
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-CSRCS           += ramdisk.c
+CSRCS		+= ramdisk.c
 endif
 endif
-CSRCS		+= $(SERIAL_CSRCS) $(NET_CSRCS) $(PIPE_CSRCS) $(USBDEV_CSRCS) $(MMCSD_CSRCS) $(BCH_CSRCS)
+CSRCS		+= $(SERIAL_CSRCS) $(NET_CSRCS) $(PIPE_CSRCS) $(USBDEV_CSRCS) \
+			   $(MMCSD_CSRCS) $(BCH_CSRCS) $(MTD_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -96,7 +102,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libdrivers$(LIBEXT)
 
-VPATH		= serial:net:pipes:usbdev:mmcsd:bch
+VPATH		= serial:net:pipes:usbdev:mmcsd:bch:mtd
 
 all:	$(BIN)
 
@@ -112,7 +118,8 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) $(SERIALDEPPATH) $(NETDEPPATH) $(PIPEDEPPATH)$(USBDEVDEPPATH) $(MMCSDDEPPATH) $(BCHDEPPATH) \
+	@$(MKDEP) $(ROOTDEPPATH) $(SERIALDEPPATH) $(NETDEPPATH) $(PIPEDEPPATH) \
+	  $(USBDEVDEPPATH) $(MMCSDDEPPATH) $(BCHDEPPATH) $(MTDDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

@@ -102,7 +102,8 @@
  *
  ****************************************************************************/
 
-#define SPI_SETMODE(d,m) ((d)->ops->setmode ? (d)->ops->setmode(d,m) : (void))
+#define SPI_SETMODE(d,m) \
+  do { if ((d)->ops->setmode) (d)->ops->setmode(d,m); } while (0)
 
 /****************************************************************************
  * Name: SPI_SETBITS
@@ -119,7 +120,8 @@
  *
  ****************************************************************************/
 
-#define SPI_SETBITS(d,b) ((d)->ops->setbits ? (d)->ops->setbits(d,b) : (void))
+#define SPI_SETBITS(d,b) \
+  do { if ((d)->ops->setbits) (d)->ops->setmode(d,b); } while (0)
 
 /****************************************************************************
  * Name: SPI_STATUS

@@ -97,7 +97,8 @@
 #define _BIOCVALID(c)   (_IOC_TYPE(c)==_BIOCBASE)
 #define _BIOC(nr)       _IOC(_BIOCBASE,nr)
 
-#define BIOC_XIPBASE    _BIOC(0x0001)     /* IN:  None
+#define BIOC_XIPBASE    _BIOC(0x0001)     /* IN:  Pointer to pointer to void in
+                                           *      which to received the XIP base.
                                            * OUT: If media is directly acccesible,
                                            *      return (void*) base address
                                            *      of device memory */
@@ -108,10 +109,12 @@
 #define _MTDIOC(nr)       _IOC(_MTDIOCBASE,nr)
 
 #define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
-                                           *      mtd_geometry_s (see mtd.h)
+                                           *      mtd_geometry_s in which to receive
+                                           *      receive geometry data (see mtd.h)
                                            * OUT: Geometry structure is populated
                                            *      with data for the MTD */
-#define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  None
+#define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  Pointer to pointer to void in
+                                           *      which to received the XIP base.
                                            * OUT: If media is directly acccesible,
                                            *      return (void*) base address
                                            *      of device memory */
