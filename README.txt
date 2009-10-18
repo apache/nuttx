@@ -103,6 +103,8 @@ is a guide to the available README files:
  |   |   |- ostest/README.txt
  |   |   `- README.txt
  |   `- README.txt
+ |- drivers/
+ |   `- README.txt
  |- examples/
  |   |- nsh/README.txt
  |   |- pashello/README.txt

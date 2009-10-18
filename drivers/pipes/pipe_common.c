@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/pipe_common.c
+ * drivers/pipes/pipe_common.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

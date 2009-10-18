@@ -1,5 +1,5 @@
 /************************************************************************************
- * drivers/serial.c
+ * drivers/serial/serial.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

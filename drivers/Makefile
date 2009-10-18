@@ -39,10 +39,22 @@ ifeq ($(WINTOOL),y)
 INCDIROPT	= -w
 endif
 
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+include serial/Make.defs
+ROOTDEPPATH	= --dep-path .
+SERIALDEPPATH	= --dep-path serial
+endif
+
 ifeq ($(CONFIG_NET),y)
 include net/Make.defs
 ROOTDEPPATH	= --dep-path .
 NETDEPPATH	= --dep-path net
+endif
+
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+include pipes/Make.defs
+ROOTDEPPATH	= --dep-path .
+PIPEDEPPATH	= --dep-path pipes
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
@@ -66,18 +78,17 @@ CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/driv
 endif
 endif
 
-ASRCS		= $(NET_ASRCS) $(USBDEV_ASRCS) $(MMCSD_ASRCS) $(BCH_ASRCS)
+ASRCS		= $(SERIAL_ASRCS) $(NET_ASRCS) $(PIPE_ASRCS) $(USBDEV_ASRCS) $(MMCSD_ASRCS) $(BCH_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		=
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-CSRCS		+= dev_null.c dev_zero.c pipe.c fifo.c pipe_common.c \
-		   loop.c serial.c serialirq.c lowconsole.c can.c
+CSRCS		+= dev_null.c dev_zero.c loop.c  can.c
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 CSRCS           += ramdisk.c
 endif
 endif
-CSRCS		+= $(NET_CSRCS) $(USBDEV_CSRCS) $(MMCSD_CSRCS) $(BCH_CSRCS)
+CSRCS		+= $(SERIAL_CSRCS) $(NET_CSRCS) $(PIPE_CSRCS) $(USBDEV_CSRCS) $(MMCSD_CSRCS) $(BCH_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -85,7 +96,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libdrivers$(LIBEXT)
 
-VPATH		= net:usbdev:mmcsd:bch
+VPATH		= serial:net:pipes:usbdev:mmcsd:bch
 
 all:	$(BIN)
 
@@ -101,7 +112,7 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) $(NETDEPPATH) $(USBDEVDEPPATH) $(MMCSDDEPPATH) $(BCHDEPPATH) \
+	@$(MKDEP) $(ROOTDEPPATH) $(SERIALDEPPATH) $(NETDEPPATH) $(PIPEDEPPATH)$(USBDEVDEPPATH) $(MMCSDDEPPATH) $(BCHDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

@@ -55,8 +55,9 @@
 #define _FIOCBASE       (0x8700) /* File system ioctl commands */
 #define _DIOCBASE       (0x8800) /* Character driver ioctl commands */
 #define _BIOCBASE       (0x8900) /* Block driver ioctl commands */
-#define _SIOCBASE       (0x8a00) /* Socket ioctl commandss */
-#define _ARPBASE        (0x8b00) /* ARP ioctl commandss */
+#define _MTDIOCBASE     (0x8a00) /* MTD ioctl commands */
+#define _SIOCBASE       (0x8b00) /* Socket ioctl commandss */
+#define _ARPBASE        (0x8c00) /* ARP ioctl commandss */
 
 /* Macros used to manage ioctl commands */
 
@@ -71,35 +72,49 @@
 #define _FIOCVALID(c)   (_IOC_TYPE(c)==_FIOCBASE)
 #define _FIOC(nr)       _IOC(_FIOCBASE,nr)
 
-#define FIOC_MMAP       _FIOC(0x0001)  /* IN:  Location to return address (void **)
-                                        * OUT: If media is directly acccesible,
-                                        *      return (void*) base address
-                                        *      of file
-                                        */
+#define FIOC_MMAP       _FIOC(0x0001)     /* IN:  Location to return address (void **)
+                                           * OUT: If media is directly acccesible,
+                                           *      return (void*) base address
+                                           *      of file
+                                           */
 /* NuttX file system ioctl definitions */
 
 #define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)
 #define _DIOC(nr)       _IOC(_DIOCBASE,nr)
 
-#define DIOC_GETPRIV    _DIOC(0x0001)  /* IN: Location to return handle (void **)
-                                        * OUT: Reference to internal data
-                                        *      structure.  May have a reference
-                                        *      incremented.
-                                        */
-#define DIOC_RELPRIV    _DIOC(0x0003)  /* IN: None
-                                        * OUT: None, reference obtained by
-                                        *      FIOC_GETPRIV released.
-                                        */
+#define DIOC_GETPRIV    _DIOC(0x0001)     /* IN: Location to return handle (void **)
+                                           * OUT: Reference to internal data
+                                           *      structure.  May have a reference
+                                           *      incremented.
+                                           */
+#define DIOC_RELPRIV    _DIOC(0x0003)     /* IN: None
+                                           * OUT: None, reference obtained by
+                                           *      FIOC_GETPRIV released.
+                                           */
 
 /* NuttX block driver ioctl definitions */
 
 #define _BIOCVALID(c)   (_IOC_TYPE(c)==_BIOCBASE)
 #define _BIOC(nr)       _IOC(_BIOCBASE,nr)
 
-#define BIOC_XIPBASE    _BIOC(0x0001)  /* IN:  None
-                                        * OUT: If media is directly acccesible,
-                                        *      return (void*) base address
-                                        *      of device memory */
+#define BIOC_XIPBASE    _BIOC(0x0001)     /* IN:  None
+                                           * OUT: If media is directly acccesible,
+                                           *      return (void*) base address
+                                           *      of device memory */
+
+/* NuttX MTD driver ioctl definitions */
+
+#define _MTDIOCVALID(c)   (_IOC_TYPE(c)==_MTDIOCBASE)
+#define _MTDIOC(nr)       _IOC(_MTDIOCBASE,nr)
+
+#define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
+                                           *      mtd_geometry_s (see mtd.h)
+                                           * OUT: Geometry structure is populated
+                                           *      with data for the MTD */
+#define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  None
+                                           * OUT: If media is directly acccesible,
+                                           *      return (void*) base address
+                                           *      of device memory */
 
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) */
 
