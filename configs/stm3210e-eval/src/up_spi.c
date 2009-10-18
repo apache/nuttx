@@ -132,6 +132,7 @@ void weak_function stm32_spiinitialize(void)
 #ifdef CONFIG_STM32_SPI1
   /* Configure the SPI-based microSD and FLASH CS GPIO */
 
+#warning "MicoSD is on SDIO port, not SPI"
   stm32_configgpio(GPIO_MMCSD_CS);
   stm32_configgpio(GPIO_FLASH_CS);
 #endif
@@ -159,7 +160,7 @@ void weak_function stm32_spiinitialize(void)
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
