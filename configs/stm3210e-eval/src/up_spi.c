@@ -169,7 +169,6 @@ void weak_function stm32_spiinitialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  uint32 pinset;
 
   if (devid == SPIDEV_MMCSD)
   {

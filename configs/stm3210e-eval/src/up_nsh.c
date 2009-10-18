@@ -62,6 +62,25 @@
 #  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #endif
 
+/* MMC/SD is on SPI1 */
+
+#ifndef CONFIG_STM32_SPI1
+#  undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
+#  undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
+#endif
+
+#if defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) && CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 0
+#  error MMC/SD is on SPI1
+#  undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
+#  undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
+#endif
+
+#if defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) && CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
+#  error "Only one MMC/SD slot"
+#  undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
+#  undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
+#endif
+
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
@@ -102,7 +121,7 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
+#ifdef CONFIG_STM32_SPI1
   FAR struct spi_dev_s *spi;
   int ret;
 
