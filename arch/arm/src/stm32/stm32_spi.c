@@ -354,7 +354,7 @@ static inline uint16 spi_readword(FAR struct stm32_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) != 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
 
   /* Then return the received byte */
 
@@ -380,7 +380,7 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16 word)
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) != 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
 
   /* Then send the byte */
 
@@ -657,11 +657,11 @@ static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
 
 static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16 setbits, uint16 clrbits)
 {
-	uint16 cr1;
-    cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
-    cr1 &= ~clrbits;
-    cr1 |= setbits;
-    spi_putreg(priv, STM32_SPI_CR1_OFFSET, cr1);
+  uint16 cr1;
+  cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
+  cr1 &= ~clrbits;
+  cr1 |= setbits;
+  spi_putreg(priv, STM32_SPI_CR1_OFFSET, cr1);
 }
 
 /************************************************************************************
