@@ -72,10 +72,12 @@ struct skel_dev_s
 /* MTD driver methods */
 
 static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static int skel_read(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                     FAR ubyte *buf);
-static int skel_write(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                      FAR const ubyte *buf);
+static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                          FAR ubyte *buf);
+static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                           FAR const ubyte *buf);
+static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                         FAR ubyte *buffer);
 static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -84,7 +86,7 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 static struct skel_dev_s g_skeldev =
 {
-  { skel_erase, skel_read, skel_write, skel_ioctl },
+  { skel_erase, skel_rbead, skel_bwrite, skel_read, skel_ioctl },
   /* Initialization of any other implemenation specific data goes here */
 };
 
@@ -111,11 +113,11 @@ static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
 }
 
 /****************************************************************************
- * Name: skel_read
+ * Name: skel_bread
  ****************************************************************************/
 
-static int skel_read(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                     FAR ubyte *buf)
+static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                          FAR ubyte *buf)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 
@@ -125,18 +127,18 @@ static int skel_read(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks
    */
 
   /* Read the specified blocks into the provided user buffer and return status
-   * (The positive, number of blocks actually read or a negated errno)
+   * (The positive, number of blocks actually read or a negated errno). 
    */
 
   return 0;
 }
 
 /****************************************************************************
- * Name: skel_write
+ * Name: skel_bwrite
  ****************************************************************************/
 
-static int skel_write(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                      FAR const ubyte *buf)
+static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                           FAR const ubyte *buf)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 
@@ -147,6 +149,35 @@ static int skel_write(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
 
   /* Write the specified blocks from the provided user buffer and return status
    * (The positive, number of blocks actually written or a negated errno)
+   */
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: skel_read
+ ****************************************************************************/
+
+static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                         FAR ubyte *buffer)
+{
+  FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
+
+  /* Some devices may support byte oriented read (optional).  Byte-oriented
+   * writing is inherently block oriented on most MTD devices and is not supported.
+   * It is recommended that low-level drivers not support read() if it requires
+   * buffering -- let the higher level logic handle that.  If the read method is
+   * not implemented, just set the method pointer to NULL in the struct mtd_dev_s
+   * instance.
+   */
+
+  /* The interface definition assumes that all read/write blocks ar the same size.
+   * If that is not true for this particular device, then transform the
+   * start block and nblocks as necessary.
+   */
+
+  /* Read the specified blocks into the provided user buffer and return status
+   * (The positive, number of blocks actually read or a negated errno)
    */
 
   return 0;
@@ -202,6 +233,14 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case MTDIOC_BULKERASE
+        {
+	        /* Erase the entire device */
+
+	        ret = OK;
+        }
+        break;
+ 
       default:
         ret = -ENOTTY; /* Bad command */
         break;

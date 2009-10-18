@@ -118,6 +118,8 @@
                                            * OUT: If media is directly acccesible,
                                            *      return (void*) base address
                                            *      of device memory */
+#define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
+                                           * OUT: None */
 
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) */
 

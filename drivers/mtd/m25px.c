@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/ioctl.h>
 #include <nuttx/spi.h>
@@ -141,17 +142,20 @@ struct m25p_dev_s
 static inline int m25p_readid(struct m25p_dev_s *priv);
 static void m25p_waitwritecomplete(struct m25p_dev_s *priv);
 static void m25p_writeenable(struct m25p_dev_s *priv);
-static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t address);
+static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t offset);
+static inline int  m25p_bulkerase(struct m25p_dev_s *priv);
 static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buffer,
-                                  off_t address);
+                                  off_t offset);
 
 /* MTD driver methods */
 
 static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static int m25p_read(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                     FAR ubyte *buf);
-static int m25p_write(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                      FAR const ubyte *buf);
+static int m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                      FAR ubyte *buf);
+static int m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                       FAR const ubyte *buf);
+static int m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                     FAR ubyte *buffer);
 static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
@@ -172,6 +176,8 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
   uint16 memory;
   uint16 capacity;
 
+  fvdbg("priv: %p\n", priv);
+
   /* Select this FLASH part.  This is a blocking call and will not return
    * until we have exclusiv access to the SPI buss.  We will retain that
    * exclusive access until the chip is de-selected.
@@ -185,6 +191,9 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
   manufacturer = SPI_SEND(priv->dev, M25P_DUMMY);
   memory       = SPI_SEND(priv->dev, M25P_DUMMY);
   capacity     = SPI_SEND(priv->dev, M25P_DUMMY);
+
+  fvdbg("manufacturer: %02x memory: %02x capacity: %02x\n",
+        manufacturer, memory, capacity);
 
   /* Deselect the FLASH */
 
@@ -251,6 +260,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  fvdbg("Complete\n");
 }
 
 /************************************************************************************
@@ -273,6 +283,7 @@ static void m25p_writeenable(struct m25p_dev_s *priv)
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  fvdbg("Enabled\n");
 }
 
 /************************************************************************************
@@ -281,7 +292,9 @@ static void m25p_writeenable(struct m25p_dev_s *priv)
 
 static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
 {
-  off_t address = sector << priv->sectorshift;
+  off_t offset = sector << priv->sectorshift;
+
+  fvdbg("sector: %08lx\n", (long)sector);
 
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
@@ -306,18 +319,57 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
 
   (void)SPI_SEND(priv->dev, M25P_SE);
 
-  /* Send the sector address high byte first.  For all of the supported
+  /* Send the sector offset high byte first.  For all of the supported
    * parts, the sector number is completely contained in the first byte
    * and the values used in the following two bytes don't really matter.
    */
 
-  (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, address & 0xff);
+  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  (void)SPI_SEND(priv->dev, offset & 0xff);
 
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  fvdbg("Erased\n");
+}
+
+/************************************************************************************
+ * Name:  m25p_bulkerase
+ ************************************************************************************/
+
+static inline int  m25p_bulkerase(struct m25p_dev_s *priv)
+{
+  fvdbg("priv: %p\n", priv);
+
+  /* Wait for any preceding write to complete.  We could simplify things by
+   * perform this wait at the end of each write operation (rather than at
+   * the beginning of ALL operations), but have the wait first will slightly
+   * improve performance.
+   */
+
+  m25p_waitwritecomplete(priv);
+
+  /* Send write enable instruction */
+
+  m25p_writeenable(priv);
+
+  /* Select this FLASH part.  This is a blocking call and will not return
+   * until we have exclusiv access to the SPI buss.  We will retain that
+   * exclusive access until the chip is de-selected.
+   */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
+
+  /* Send the "Bulk Erase (BE)" instruction */
+
+  (void)SPI_SEND(priv->dev, M25P_BE);
+
+  /* Deselect the FLASH */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  fvdbg("Return: OK\n");
+  return OK;
 }
 
 /************************************************************************************
@@ -327,7 +379,9 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
 static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buffer,
                                   off_t page)
 {
-  off_t address = page << priv->pageshift;
+  off_t offset = page << priv->pageshift;
+
+  fvdbg("page: %08lx offset: %08lx\n", (long)page, (long)offset);
 
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
@@ -352,11 +406,11 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buff
 
   (void)SPI_SEND(priv->dev, M25P_PP);
 
-  /* Send the page address high byte first. */
+  /* Send the page offset high byte first. */
 
-  (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, address & 0xff);
+  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  (void)SPI_SEND(priv->dev, offset & 0xff);
 
   /* Then write the specified number of bytes */
 
@@ -365,6 +419,7 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buff
   /* Deselect the FLASH: Chip Select high */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  fvdbg("Written\n");
 }
 
 /************************************************************************************
@@ -376,6 +431,8 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
   size_t blocksleft = nblocks;
 
+  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+
   while (blocksleft-- > 0)
     {
 		m25p_sectorerase(priv, startblock);
@@ -386,19 +443,61 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
 }
 
 /************************************************************************************
+ * Name: m25p_bread
+ ************************************************************************************/
+
+static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                          FAR ubyte *buffer)
+{
+  FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
+  off_t nbytes;
+
+  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+
+  /* On this device, we can handle the block read just like the byte-oriented read */
+
+  nbytes = m25p_read(dev, startblock << priv->pageshift, nblocks << priv->pageshift, buffer);
+  if (nbytes > 0)
+    {
+	    return nbytes >> priv->pageshift;
+    }
+  return nbytes;
+}
+
+/************************************************************************************
+ * Name: m25p_bwrite
+ ************************************************************************************/
+
+static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                           FAR const ubyte *buffer)
+{
+  FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
+  size_t blocksleft = nblocks;
+
+  fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+
+  /* Write each page to FLASH */
+
+  while (blocksleft-- > 0)
+    {
+      m25p_pagewrite(priv, buffer, startblock);
+      startblock++;
+   }
+
+  return nblocks;
+}
+
+/************************************************************************************
  * Name: m25p_read
  ************************************************************************************/
 
-static int m25p_read(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                     FAR ubyte *buffer)
+static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                         FAR ubyte *buffer)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
-  off_t  address;
- 
-  /* Convert the sector address and count to byte-oriented values */
 
-  address = startblock << priv->pageshift;
- 
+  fvdbg("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
    * the beginning of ALL operations), but have the wait first will slightly
@@ -418,41 +517,21 @@ static int m25p_read(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks
 
   (void)SPI_SEND(priv->dev, M25P_READ);
 
-  /* Send the page address high byte first. */
+  /* Send the page offset high byte first. */
 
-  (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, address & 0xff);
+  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  (void)SPI_SEND(priv->dev, offset & 0xff);
 
   /* Then read all of the requested bytes */
 
-  SPI_RECVBLOCK(priv->dev, buffer, nblocks << priv->pageshift);
+  SPI_RECVBLOCK(priv->dev, buffer, nbytes);
 
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
-  return nblocks;
-}
-
-/************************************************************************************
- * Name: m25p_write
- ************************************************************************************/
-
-static int m25p_write(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                     FAR const ubyte *buffer)
-{
-  FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
-  size_t blocksleft = nblocks;
-
-  /* Write each page to FLASH */
-
-  while (blocksleft-- > 0)
-    {
-      m25p_pagewrite(priv, buffer, startblock);
-      startblock++;
-   }
-
-  return nblocks;
+  fvdbg("return nbytes: %d\n", (int)nbytes);
+  return nbytes;
 }
 
 /************************************************************************************
@@ -463,6 +542,8 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
+
+  fvdbg("cmd: %d \n", cmd);
 
   switch (cmd)
     {
@@ -484,16 +565,28 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->erasesize    = (1 << priv->sectorshift);
               geo->neraseblocks = priv->nsectors;
               ret               = OK;
-          }
+
+              fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
+                    geo->blocksize, geo->erasesize, geo->neraseblocks);
+            }
         }
         break;
 
+      case MTDIOC_BULKERASE:
+        {
+	        /* Erase the entire device */
+
+	        ret = m25p_bulkerase(priv);
+        }
+        break;
+ 
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;
     }
 
+  fvdbg("return %d\n", ret);
   return ret;
 }
 
@@ -516,6 +609,8 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
   FAR struct m25p_dev_s *priv;
   int ret;
 
+  fvdbg("dev: %p\n", dev);
+
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
@@ -528,11 +623,12 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
     {
       /* Initialize the allocated structure */
 
-      priv->mtd.erase = m25p_erase;
-      priv->mtd.read  = m25p_read;
-      priv->mtd.write = m25p_write;
-      priv->mtd.ioctl = m25p_ioctl;
-      priv->dev       = dev;
+      priv->mtd.erase  = m25p_erase;
+      priv->mtd.bread  = m25p_bread;
+      priv->mtd.bwrite = m25p_bwrite;
+      priv->mtd.read   = m25p_read;
+      priv->mtd.ioctl  = m25p_ioctl;
+      priv->dev        = dev;
 
       /* Deselect the FLASH */
 
@@ -551,6 +647,7 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
+          fdbg("Unrecognized\n");
           free(priv);
           priv = NULL;
         }
@@ -558,5 +655,6 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
 
   /* Return the implementation-specific state structure as the MTD device */
 
+  fvdbg("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 }

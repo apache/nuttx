@@ -2,7 +2,7 @@
  * include/nuttx/mtd.h
  * Memory Technology Device (MTD) interface
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,11 @@
 
 /* Macros to hide implementation */
 
-#define MTD_ERASE(d,s,n)   ((d)->erase ? (d)->erase(d,s,n)   : (-ENOSYS))
-#define MTD_READ(d,s,n,b)  ((d)->read  ? (d)->read(d,s,n,b)  : (-ENOSYS))
-#define MTD_WRITE(d,s,n,b) ((d)->write ? (d)->write(d,s,n,b) : (-ENOSYS))
-#define MTD_IOCTL(d,c,a)   ((d)->ioctl ? (d)->ioctl(d,c,a)   : (-ENOSYS))
+#define MTD_ERASE(d,s,n)   ((d)->erase  ? (d)->erase(d,s,n)    : (-ENOSYS))
+#define MTD_BREAD(d,s,n,b) ((d)->bread  ? (d)->bread(d,s,n,b)  : (-ENOSYS))
+#define MTD_READ(d,a,n,b)  ((d)->read   ? (d)->read(d,s,n,b)   : (-ENOSYS))
+#define MTD_BWRITE(d,s,n,b)((d)->bwrite ? (d)->bwrite(d,s,n,b) : (-ENOSYS))
+#define MTD_IOCTL(d,c,a)   ((d)->ioctl  ? (d)->ioctl(d,c,a)    : (-ENOSYS))
 
 /****************************************************************************
  * Public Types
@@ -88,14 +89,24 @@ struct mtd_dev_s
 
   /* Read/write from the specified read/write blocks */
 
-  int (*read)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+  int (*bread)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+               FAR ubyte *buffer);
+  int (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                FAR const ubyte *buffer);
+
+  /* Some devices may support byte oriented read (optional).  Byte-oriented
+   * writing is inherently block oriented on most MTD devices and is not supported.
+   * It is recommended that low-level drivers not support read() if it requires
+   * buffering.
+   */
+
+  int (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
               FAR ubyte *buffer);
-  int (*write)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-               FAR const ubyte *buffer);
 
   /* Support other, less frequently used commands:
-   *  - MTDIOC_GEOMETRY: Get MTD geometry
-   *  - MTDIOC_XIPBASE:  Convert block to physical address for eXecute-In-Place
+   *  - MTDIOC_GEOMETRY:  Get MTD geometry
+   *  - MTDIOC_XIPBASE:   Convert block to physical address for eXecute-In-Place
+   *  - MTDIOC_BULKERASE: Erase the entire device
    * (see include/nuttx/ioctl.h) 
    */
 
@@ -118,6 +129,10 @@ extern "C" {
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/* MTD drivers available in drivers/mtd */
+
+EXTERN FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus
