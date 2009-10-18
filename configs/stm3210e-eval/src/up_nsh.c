@@ -63,6 +63,7 @@
 #endif
 
 /* MMC/SD is on SPI1 */
+#warning "MicoSD is on SDIO port, not SPI"
 
 #ifndef CONFIG_STM32_SPI1
 #  undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO

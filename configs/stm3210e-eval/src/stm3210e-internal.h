@@ -72,11 +72,12 @@
 
 /* MMC/SD SPI1 chip select: PC.12 */
 
+#warning "MicoSD is on SDIO port, not SPI"
 #define GPIO_MMCSD_CS (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN12)
 
 /* SPI FLASH chip select:  PA.4 */
 
-#define GPIO_FLASH_CS (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+#define GPIO_FLASH_CS (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN2)
 
 /************************************************************************************
  * Public Functions
