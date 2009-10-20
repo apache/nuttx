@@ -226,7 +226,7 @@
 /* AHB Peripheral Clock enable register */
 
 #define RCC_AHBENR_DMA1EN           (1 << 0)  /* Bit 0: DMA1 clock enable */
-#define RCC_AHBENR_DMA2EN           (1 << 0)  /* Bit 0: DMA2 clock enable */
+#define RCC_AHBENR_DMA2EN           (1 << 1)  /* Bit 1: DMA2 clock enable */
 #define RCC_AHBENR_SRAMEN           (1 << 2)  /* Bit 2: SRAM interface clock enable */
 #define RCC_AHBENR_FLITFEN          (1 << 4)  /* Bit 4: FLITF clock enable */
 #define RCC_AHBENR_CRCEN            (1 << 6)  /* Bit 6: CRC clock enable */

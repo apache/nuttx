@@ -197,8 +197,8 @@
 
 #define GPIO_CR_CNF_OUTPP            (0)       /* 00: General purpose output push-pull */
 #define GPIO_CR_CNF_OUTOD            (1)       /* 01: General purpose output Open-drain */
-#define GPIO_CR_CNF_OUTALTPP         (3)       /* 10: Alternate function output Push-pull */
-#define GPIO_CR_CNF_OUTALTOD         (6)       /* 11: Alternate function output Open-drain */
+#define GPIO_CR_CNF_ALTPP            (3)       /* 10: Alternate function output Push-pull */
+#define GPIO_CR_CNF_ALTOD            (6)       /* 11: Alternate function output Open-drain */
 
 #define GPIO_CR_MODE_INRST           (0)       /* 00: Input mode (reset state) */
 #define GPIO_CR_MODE_OUT10MHz        (1)       /* 01: Output mode, max speed 10 MHz */

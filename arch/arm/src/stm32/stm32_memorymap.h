@@ -50,8 +50,9 @@
 
 /* FLASH and SRAM *******************************************************************/
 
-#define STM32_FLASH_BASE    0x08000000     /* 0x08000000 - Up to 512Kb */
-#define STM32_SRAM_BASE     0x20000000     /* 0x20000000 - 64Kb SRAM */
+#define STM32_FLASH_BASE     0x08000000     /* 0x08000000 - Up to 512Kb */
+#define STM32_SRAM_BASE      0x20000000     /* 0x20000000 - 64Kb SRAM */
+#define STM32_SRAMBB_BASE    0x22000000
 
 /* Register Base Address ************************************************************/
 
@@ -122,6 +123,14 @@
                                            /* 0x40023400 - 0x40027fff: Reserved */
 #define STM32_ETHERNET_BASE 0x40028000     /* 0x40028000 - 0x40029fff: Ethernet */
                                            /* 0x40030000 - 0x4fffffff: Reserved */
+
+/* Peripheral BB base */
+
+#define STM32_PERIPHBB_BASE 0x42000000
+
+/* Flexible SRAM controller (FSMC) */
+
+#define STM32_FSMC_BASE     0xa0000000
 
 /* Other registers -- see cortexm3/nvic.h for standard Cortex-M3 registers in this
  * address range
