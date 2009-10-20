@@ -1805,6 +1805,7 @@ extern void up_ledoff(int led);
     Each SPI device driver must implement an instance of <code>struct spi_ops_s</code>.
     That structure defines a call table with the following methods:
     <ul>
+     <p><code>void lock(FAR struct spi_dev_s *dev);</code></p>
      <p><code>void select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);</code><br>
      <code>uint32 setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);</code><br>
      <code>void setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);</code><br>
