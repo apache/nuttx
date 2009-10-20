@@ -142,678 +142,145 @@
 
 /* Register Bitfield Definitions ****************************************************/
 
-#define FSMC_BCR1_MBKEN          (1 << 0)   /* Memory bank enable bit */
-#define FSMC_BCR1_MUXEN          (1 << 1)   /* Address/data multiplexing enable bit */
-#define FSMC_BCR1_MTYP_MASK      0x0000000c /* Memory type */
-#  define FSMC_BCR1_MTYP0        (1 << 2)
-#  define FSMC_BCR1_MTYP1        (1 << 3)
-#define FSMC_BCR1_MWID_MASK      0x00000030 /* Memory data bus width */
-#  define FSMC_BCR1_MWID0        (1 << 4)
-#  define FSMC_BCR1_MWID1        (1 << 5)
-#define FSMC_BCR1_FACCEN         (1 << 6)   /* Flash access enable */
-#define FSMC_BCR1_BURSTEN        (1 << 8)   /* Burst enable bit */
-#define FSMC_BCR1_WAITPOL        (1 << 9)   /* Wait signal polarity bit */
-#define FSMC_BCR1_WRAPMOD        (1 << 10)  /* Wrapped burst mode support */
-#define FSMC_BCR1_WAITCFG        (1 << 11)  /* Wait timing configuration */
-#define FSMC_BCR1_WREN           (1 << 12)  /* Write enable bit */
-#define FSMC_BCR1_WAITEN         (1 << 13)  /* Wait enable bit */
-#define FSMC_BCR1_EXTMOD         (1 << 14)  /* Extended mode enable */
-#define FSMC_BCR1_CBURSTRW       (1 << 19)  /* Write burst enable */
+#define FSMC_BCR_MBKEN           (1 << 0)   /* Memory bank enable bit */
+#define FSMC_BCR_MUXEN           (1 << 1)   /* Address/data multiplexing enable bit */
+#define FSMC_BCR_MTYP_SHIFT      (2)        /* Memory type */
+#define FSMC_BCR_MTYP_MASK       (3 << FSMC_BCR_MTYP_SHIFT)
+#  define FSMC_BCR_SRAM          (0 << FSMC_BCR_MTYP_SHIFT)
+#  define FSMC_BCR_ROM           (0 << FSMC_BCR_MTYP_SHIFT)
+#  define FSMC_BCR_PSRAM         (1 << FSMC_BCR_MTYP_SHIFT)
+#  define FSMC_BCR_CRAM          (1 << FSMC_BCR_MTYP_SHIFT)
+#  define FSMC_BCR_NOR           (2 << FSMC_BCR_MTYP_SHIFT)
+#define FSMC_BCR_MWID_SHIFT      (4)        /* Memory data bus width */
+#define FSMC_BCR_MWID_MASK       (3 <<  FSMC_BCR_MWID_SHIFT)
+#  define FSMC_BCR_MWID8         (0 << FSMC_BCR_MWID_SHIFT)
+#  define FSMC_BCR_MWID16        (1 << FSMC_BCR_MWID_SHIFT)
+#define FSMC_BCR_FACCEN          (1 << 6)   /* Flash access enable */
+#define FSMC_BCR_BURSTEN         (1 << 8)   /* Burst enable bit */
+#define FSMC_BCR_WAITPOL         (1 << 9)   /* Wait signal polarity bit */
+#define FSMC_BCR_WRAPMOD         (1 << 10)  /* Wrapped burst mode support */
+#define FSMC_BCR_WAITCFG         (1 << 11)  /* Wait timing configuration */
+#define FSMC_BCR_WREN            (1 << 12)  /* Write enable bit */
+#define FSMC_BCR_WAITEN          (1 << 13)  /* Wait enable bit */
+#define FSMC_BCR_EXTMOD          (1 << 14)  /* Extended mode enable */
+#define FSMC_BCR_CBURSTRW        (1 << 19)  /* Write burst enable */
 
-#define FSMC_BCR2_MBKEN          (1 << 0)   /* Memory bank enable bit */
-#define FSMC_BCR2_MUXEN          (1 << 1)   /* Address/data multiplexing enable bit */
-#define FSMC_BCR2_MTYP_MASK      0x0000000c /* Memory type */
-#  define FSMC_BCR2_MTYP0        (1 << 2)
-#  define FSMC_BCR2_MTYP1        (1 << 3)
-#define FSMC_BCR2_MWID_MASK      0x00000030 /* Memory data bus width */
-#  define FSMC_BCR2_MWID0        (1 << 4)
-#  define FSMC_BCR2_MWID1        (1 << 5)
-#define FSMC_BCR2_FACCEN         (1 << 6)   /* Flash access enable */
-#define FSMC_BCR2_BURSTEN        (1 << 8)   /* Burst enable bit */
-#define FSMC_BCR2_WAITPOL        (1 << 9)   /* Wait signal polarity bit */
-#define FSMC_BCR2_WRAPMOD        (1 << 10)  /* Wrapped burst mode support */
-#define FSMC_BCR2_WAITCFG        (1 << 11)  /* Wait timing configuration */
-#define FSMC_BCR2_WREN           (1 << 12)  /* Write enable bit */
-#define FSMC_BCR2_WAITEN         (1 << 13)  /* Wait enable bit */
-#define FSMC_BCR2_EXTMOD         (1 << 14)  /* Extended mode enable */
-#define FSMC_BCR2_CBURSTRW       (1 << 19)  /* Write burst enable */
+#define FSMC_BTR_ADDSET_SHIFT    (0)        /* Address setup phase duration */
+#define FSMC_BTR_ADDSET_MASK     (15 << FSMC_BTR_ADDSET_SHIFT)
+#  define FSMC_BTR_ADDSET(n)     ((n-1) << FSMC_BTR_ADDSET_SHIFT)  /* (n)xHCLK n=1..16 */
+#define FSMC_BTR_ADDHLD_SHIFT    (4)        /* Address-hold phase duration */
+#define FSMC_BTR_ADDHLD_MASK     (15 << FSMC_BTR_ADDHLD_SHIFT)
+#  define FSMC_BTR_ADDHLD(n)     ((n-1) << FSMC_BTR_ADDHLD_SHIFT)  /* (n)xHCLK n=2..16*/
+#define FSMC_BTR_DATAST_SHIFT    (8)        /* Data-phase duration */
+#define FSMC_BTR_DATAST_MASK     (255 << FSMC_BTR_DATAST_SHIFT)
+#  define FSMC_BTR_DATAST(n)     ((n-1) << FSMC_BTR_DATAST_SHIFT)  /* (n)xHCLK n=2..256 */
+#define FSMC_BTR_BUSTURN_SHIFT   (16)       /* Bus turnaround phase duration */
+#define FSMC_BTR_BUSTURN_MASK    (15 << FSMC_BTR1_BUSTURN_SHIFT)
+#  define FSMC_BTR_BUSTRUN(n)    ((n-1) << FSMC_BTR_BUSTURN_SHIFT) /* (n)xHCLK n=1..16 */
+#define FSMC_BTR_CLKDIV_SHIFT    (20)       /* Clock divide ratio */
+#define FSMC_BTR_CLKDIV_MASK     (15 << FSMC_BTR_CLKDIV_SHIFT)
+#  define FSMC_BTR_CLKDIV(n)     ((n-1) << FSMC_BTR_CLKDIV_SHIFT)  /* (n)xHCLK n=2..16 */
+#define FSMC_BTR_DATLAT_SHIFT    (24)      /* Data latency */
+#define FSMC_BTR_DATLAT_MASK     (15 << FSMC_BTR_DATLAT_SHIFT)
+#  define FSMC_BTR_DATLAT(n)     ((n-2) << FSMC_BTR_DATLAT_SHIFT)  /* (n)xHCLK n=2..17 */
+#define FSMC_BTR_ACCMOD_SHIFT    (28)      /* Access mode */
+#define FSMC_BTR_ACCMOD_MASK     (3 << FSMC_BTR_ACCMOD_SHIFT)
+#  define FSMC_BTR_ACCMODA       (0 << FSMC_BTR_ACCMOD_SHIFT)
+#  define FSMC_BTR_ACCMODB       (1 << FSMC_BTR_ACCMOD_SHIFT)
+#  define FSMC_BTR_ACCMODC       (2 << FSMC_BTR_ACCMOD_SHIFT)
+#  define FSMC_BTR_ACCMODD       (3 << FSMC_BTR_ACCMOD_SHIFT)
 
-#define FSMC_BCR3_MBKEN          (1 << 0)   /* Memory bank enable bit */
-#define FSMC_BCR3_MUXEN          (1 << 1)   /* Address/data multiplexing enable bit */
-#define FSMC_BCR3_MTYP_MASK      0x0000000c /* Memory type */
-#  define FSMC_BCR3_MTYP0        (1 << 2)
-#  define FSMC_BCR3_MTYP1        (1 << 3)
-#define FSMC_BCR3_MWID_MASK      0x00000030 /* Memory data bus width */
-#  define FSMC_BCR3_MWID0        (1 << 4)
-#  define FSMC_BCR3_MWID1        (1 << 5)
-#define FSMC_BCR3_FACCEN         (1 << 6)   /* Flash access enable */
-#define FSMC_BCR3_BURSTEN        (1 << 8)   /* Burst enable bit */
-#define FSMC_BCR3_WAITPOL        (1 << 9)   /* Wait signal polarity bit. */
-#define FSMC_BCR3_WRAPMOD        (1 << 10)  /* Wrapped burst mode support */
-#define FSMC_BCR3_WAITCFG        (1 << 11)  /* Wait timing configuration */
-#define FSMC_BCR3_WREN           (1 << 12)  /* Write enable bit */
-#define FSMC_BCR3_WAITEN         (1 << 13)  /* Wait enable bit */
-#define FSMC_BCR3_EXTMOD         (1 << 14)  /* Extended mode enable */
-#define FSMC_BCR3_CBURSTRW       (1 << 19)  /* Write burst enable */
+#define FSMC_BWTR_ADDSET_SHIFT   (0)        /* Address setup phase duration */
+#define FSMC_BWTR_ADDSET_MASK    (15 << FSMC_BWTR_ADDSET_SHIFT)
+#  define FSMC_BWTR_ADDSET(n)    ((n-1) << FSMC_BWTR_ADDSET_SHIFT)  /* (n)xHCLK n=1..16 */
+#define FSMC_BWTR_ADDHLD_SHIFT   (4)        /* Address-hold phase duration */
+#define FSMC_BWTR_ADDHLD_MASK    (15 << FSMC_BWTR_ADDHLD_SHIFT)
+#  define FSMC_BWTR_ADDHLD(n)    ((n-1) << FSMC_BWTR_ADDHLD_SHIFT)  /* (n)xHCLK n=2..16*/
+#define FSMC_BWTR_DATAST_SHIFT   (8)        /* Data-phase duration */
+#define FSMC_BWTR_DATAST_MASK    (255 << FSMC_BWTR_DATAST_SHIFT)
+#  define FSMC_BWTR_DATAST(n)    ((n-1) << FSMC_BWTR_DATAST_SHIFT)  /* (n)xHCLK n=2..256 */
+#define FSMC_BWTR_CLKDIV_SHIFT   (20)       /* Clock divide ratio */
+#define FSMC_BWTR_CLKDIV_MASK    (15 << FSMC_BWTR_CLKDIV_SHIFT)
+#  define FSMC_BWTR_CLKDIV(n)    ((n-1) << FSMC_BWTR_CLKDIV_SHIFT)  /* (n)xHCLK n=2..16 */
+#define FSMC_BWTR_DATLAT_SHIFT   (24)      /* Data latency */
+#define FSMC_BWTR_DATLAT_MASK    (15 << FSMC_BWTR_DATLAT_SHIFT)
+#  define FSMC_BWTR_DATLAT(n)    ((n-2) << FSMC_BWTR_DATLAT_SHIFT)  /* (n)xHCLK n=2..17 */
+#define FSMC_BWTR_ACCMOD_SHIFT   (28)      /* Access mode */
+#define FSMC_BWTR_ACCMOD_MASK    (3 << FSMC_BWTR_ACCMOD_SHIFT)
+#  define FSMC_BWTR_ACCMODA      (0 << FSMC_BWTR_ACCMOD_SHIFT)
+#  define FSMC_BWTR_ACCMODB      (1 << FSMC_BWTR_ACCMOD_SHIFT)
+#  define FSMC_BWTR_ACCMODC      (2 << FSMC_BWTR_ACCMOD_SHIFT)
+#  define FSMC_BWTR_ACCMODD      (3 << FSMC_BTR_ACCMOD_SHIFT)
 
-#define FSMC_BCR4_MBKEN          (1 << 0)   /* Memory bank enable bit */
-#define FSMC_BCR4_MUXEN          (1 << 1)   /* Address/data multiplexing enable bit */
-#define FSMC_BCR4_MTYP_MASK      0x0000000c /* Memory type */
-#  define FSMC_BCR4_MTYP0        (1 << 2)
-#  define FSMC_BCR4_MTYP1        (1 << 3)
-#define FSMC_BCR4_MWID_MASK      0x00000030 /* Memory data bus width */
-#  define FSMC_BCR4_MWID0        (1 << 4)
-#  define FSMC_BCR4_MWID1        (1 << 5)
-#define FSMC_BCR4_FACCEN         (1 << 6)   /* Flash access enable */
-#define FSMC_BCR4_BURSTEN        (1 << 8)   /* Burst enable bit */
-#define FSMC_BCR4_WAITPOL        (1 << 9)   /* Wait signal polarity bit */
-#define FSMC_BCR4_WRAPMOD        (1 << 10)  /* Wrapped burst mode support */
-#define FSMC_BCR4_WAITCFG        (1 << 11)  /* Wait timing configuration */
-#define FSMC_BCR4_WREN           (1 << 12)  /* Write enable bit */
-#define FSMC_BCR4_WAITEN         (1 << 13)  /* Wait enable bit */
-#define FSMC_BCR4_EXTMOD         (1 << 14)  /* Extended mode enable */
-#define FSMC_BCR4_CBURSTRW       (1 << 19)  /* Write burst enable */
+#define FSMC_PCR_PWAITEN         (1 << 1)  /* Wait feature enable bit */
+#define FSMC_PCR_PBKEN           (1 << 2)  /* PC Card/NAND Flash memory bank enable bit */
+#define FSMC_PCR_PTYP            (1 << 3)  /* Memory type */
+#define FSMC_PCR_PWID_SHIFT      (4)       /* NAND Flash databus width */
+#define FSMC_PCR_PWID_MASK       (3 <<  FSMC_PCR_PWID_SHIFT)
+#  define FSMC_PCR_PWID8         (0 <<  FSMC_PCR_PWID_SHIFT)
+#  define FSMC_PCR_PWID16        (1 <<  FSMC_PCR_PWID_SHIFT)
+#define FSMC_PCR_ECCEN           (1 << 6)  /* ECC computation logic enable bit */
+#define FSMC_PCR_TCLR_SHIFT      (9)       /* CLE to RE delay */
+#define FSMC_PCR_TCLR_MASK       (15 << FSMC_PCR_TCLR_SHIFT)
+#  define FSMC_PCR_TCLR(n)       ((n-1) << FSMC_PCR_TCLR_SHIFT) /* (n)xHCLK n=1..16 */
+#define FSMC_PCR_TAR_SHIFT       (13)      /* ALE to RE delay */
+#define FSMC_PCR_TAR_MASK        (15 <<  FSMC_PCR_TAR_MASK)
+#  define FSMC_PCR_TAR(n)        ((n-1) << FSMC_PCR_TAR_SHIFT)  /* (n)xHCLK n=1..16 */
+#define FSMC_PCR_ECCPS_SHIFT     (17)      /* ECC page size */
+#define FSMC_PCR_ECCPS_MASK      (7 << FSMC_PCR_ECCPS_SHIFT)
+#  define FSMC_PCR_ECCPS256      (0 << FSMC_PCR_ECCPS_SHIFT) /* 256 bytes */
+#  define FSMC_PCR_ECCPS512      (1 << FSMC_PCR_ECCPS_SHIFT) /* 512 bytes */
+#  define FSMC_PCR_ECCPS1024     (2 << FSMC_PCR_ECCPS_SHIFT) /* 1024 bytes */
+#  define FSMC_PCR_ECCPS2048     (3 << FSMC_PCR_ECCPS_SHIFT) /* 2048 bytes */
+#  define FSMC_PCR_ECCPS4096     (4 << FSMC_PCR_ECCPS_SHIFT) /* 8192 bytes */
+#  define FSMC_PCR_ECCPS8192     (5 << FSMC_PCR_ECCPS_SHIFT) /* 1024 bytes */
 
-#define FSMC_BTR1_ADDSET_MASK    0x0000000f /* Address setup phase duration */
-#  define FSMC_BTR1_ADDSET0      (1 << 0)
-#  define FSMC_BTR1_ADDSET1      (1 << 1)
-#  define FSMC_BTR1_ADDSET2      (1 << 2)
-#  define FSMC_BTR1_ADDSET3      (1 << 3)
-#define FSMC_BTR1_ADDHLD_MASK    0x000000f0 /* Address-hold phase duration */
-#  define FSMC_BTR1_ADDHLD0      (1 << 4)
-#  define FSMC_BTR1_ADDHLD1      (1 << 5)
-#  define FSMC_BTR1_ADDHLD2      (1 << 6)
-#  define FSMC_BTR1_ADDHLD3      (1 << 7)
-#define FSMC_BTR1_DATAST_MASK    0x0000ff00 /* Data-phase duration */
-#  define FSMC_BTR1_DATAST0      (1 << 8)
-#  define FSMC_BTR1_DATAST1      (1 << 9)
-#  define FSMC_BTR1_DATAST2      (1 << 10)
-#  define FSMC_BTR1_DATAST3      (1 << 11)
-#define FSMC_BTR1_BUSTURN_MASK   0x000f0000 /* Bus turnaround phase duration */
-#  define FSMC_BTR1_BUSTURN0     (1 << 16)
-#  define FSMC_BTR1_BUSTURN1     (1 << 17)
-#  define FSMC_BTR1_BUSTURN2     (1 << 18)
-#  define FSMC_BTR1_BUSTURN3     (1 << 19)
-#define FSMC_BTR1_CLKDIV_MASK    0x00f00000 /* Clock divide ratio */
-#  define FSMC_BTR1_CLKDIV0      (1 << 20)
-#  define FSMC_BTR1_CLKDIV1      (1 << 21)
-#  define FSMC_BTR1_CLKDIV2      (1 << 22)
-#  define FSMC_BTR1_CLKDIV3      (1 << 23)
-#define FSMC_BTR1_DATLAT_MASK    0x0f000000 /* Data latency */
-#  define FSMC_BTR1_DATLAT0      (1 << 24)
-#  define FSMC_BTR1_DATLAT1      (1 << 25)
-#  define FSMC_BTR1_DATLAT2      (1 << 26)
-#  define FSMC_BTR1_DATLAT3      (1 << 27)
-#define FSMC_BTR1_ACCMOD_MASK    0x30000000 /* Access mode */
-#  define FSMC_BTR1_ACCMOD0      (1 << 28)
-#  define FSMC_BTR1_ACCMOD1      (1 << 29)
+#define FSMC_SR_IRS              (1 << 0)  /* Interrupt Rising Edge status */
+#define FSMC_SR_ILS              (1 << 1)  /* Interrupt Level status */
+#define FSMC_SR_IFS              (1 << 2)  /* Interrupt Falling Edge status */
+#define FSMC_SR_IREN             (1 << 3)  /* Interrupt Rising Edge detection Enable bit */
+#define FSMC_SR_ILEN             (1 << 4)  /* Interrupt Level detection Enable bit */
+#define FSMC_SR_IFEN             (1 << 5)  /* Interrupt Falling Edge detection Enable bit */
+#define FSMC_SR_FEMPT            (1 << 6)  /* FIFO empty */
 
-#define FSMC_BTR2_ADDSET_MASK    0x0000000f /* Address setup phase duration */
-#  define FSMC_BTR2_ADDSET0      (1 << 0)
-#  define FSMC_BTR2_ADDSET1      (1 << 1)
-#  define FSMC_BTR2_ADDSET2      (1 << 2)
-#  define FSMC_BTR2_ADDSET3      (1 << 3)
-#define FSMC_BTR2_ADDHLD_MASK    0x000000f0 /* Address-hold phase duration */
-#  define FSMC_BTR2_ADDHLD0      (1 << 4)
-#  define FSMC_BTR2_ADDHLD1      (1 << 5)
-#  define FSMC_BTR2_ADDHLD2      (1 << 6)
-#  define FSMC_BTR2_ADDHLD3      (1 << 7)
-#define FSMC_BTR2_DATAST_MASK    0x0000ff00 /* Data-phase duration */
-#  define FSMC_BTR2_DATAST0      (1 << 8)
-#  define FSMC_BTR2_DATAST1      (1 << 9)
-#  define FSMC_BTR2_DATAST2      (1 << 10)
-#  define FSMC_BTR2_DATAST3      (1 << 11)
-#define FSMC_BTR2_BUSTURN_MASK   0x000f0000 /* Bus turnaround phase duration */
-#  define FSMC_BTR2_BUSTURN0     (1 << 16)
-#  define FSMC_BTR2_BUSTURN1     (1 << 17)
-#  define FSMC_BTR2_BUSTURN2     (1 << 18)
-#  define FSMC_BTR2_BUSTURN3     (1 << 19)
-#  define FSMC_BTR2_CLKDIV_MASK  0x00f00000 /* Clock divide ratio */
-#  define FSMC_BTR2_CLKDIV0      (1 << 20)
-#  define FSMC_BTR2_CLKDIV1      (1 << 21)
-#  define FSMC_BTR2_CLKDIV2      (1 << 22)
-#  define FSMC_BTR2_CLKDIV3      (1 << 23)
-#define FSMC_BTR2_DATLAT_MASK    0x0f000000 /* Data latency */
-#  define FSMC_BTR2_DATLAT0      (1 << 24)
-#  define FSMC_BTR2_DATLAT1      (1 << 25)
-#  define FSMC_BTR2_DATLAT2      (1 << 26)
-#  define FSMC_BTR2_DATLAT3      (1 << 27)
-#define FSMC_BTR2_ACCMOD_MASK    0x30000000 /* Access mode */
-#  define FSMC_BTR2_ACCMOD0      (1 << 28)
-#  define FSMC_BTR2_ACCMOD1      (1 << 29)
+#define FSMC_PMEM_MEMSET_SHIFT   (0)       /* Common memory setup time */
+#define FSMC_PMEM_MEMSET_MASK    (255 << FSMC_PMEM_MEMSET_SHIFT)
+#  define FSMC_PMEM_MEMSET(n)    ((n-1) << FSMC_PMEM_MEMSET_SHIFT) /* (n)xHCLK n=1..256 */
+#define FSMC_PMEM_MEMWAIT_SHIFT  (8)       /* Common memory wait time */
+#define FSMC_PMEM_MEMWAIT_MASK   (255 << FSMC_PMEM_MEMWAIT_SHIFT)
+#  define FSMC_PMEM_MEMWAIT(n)   ((n-1) << FSMC_PMEM_MEMWAIT_SHIFT) /* (n)xHCLK n=2..256 */
+#define FSMC_PMEM_MEMHOLD_SHIFT  (16)      /* Common memoryhold time */
+#define FSMC_PMEM_MEMHOLD_MASK   (255 << FSMC_PMEM_MEMHOLD_SHIFT)
+#  define FSMC_PMEM_MEMHOLD(n)   ((n) <<  FSMC_PMEM_MEMHOLD_SHIFT) /* (n)xHCLK n=1..255 */
+#define FSMC_PMEM_MEMHIZ_SHIFT   (24)       /* Common memory databus HiZ time */
+#define FSMC_PMEM_MEMHIZ_MASK    (255 << FSMC_PMEM_MEMHIZ_SHIFT)
+#  define FSMC_PMEM_MEMHIZ(n)    ((n) << FSMC_PMEM_MEMHIZ_SHIFT) /* (n)xHCLK n=0..255 */
 
-#define FSMC_BTR3_ADDSET_MASK    0x0000000f /* Address setup phase duration */
-#  define FSMC_BTR3_ADDSET0      (1 << 0)
-#  define FSMC_BTR3_ADDSET1      (1 << 1)
-#  define FSMC_BTR3_ADDSET2      (1 << 2)
-#  define FSMC_BTR3_ADDSET3      (1 << 3)
-#define FSMC_BTR3_ADDHLD_MASK    0x000000f0 /* Address-hold phase duration */
-#  define FSMC_BTR3_ADDHLD0      (1 << 4)
-#  define FSMC_BTR3_ADDHLD1      (1 << 5)
-#  define FSMC_BTR3_ADDHLD2      (1 << 6)
-#  define FSMC_BTR3_ADDHLD3      (1 << 7)
-#define FSMC_BTR3_DATAST_MASK    0x0000ff00 /* Data-phase duration */
-#  define FSMC_BTR3_DATAST0      (1 << 8)
-#  define FSMC_BTR3_DATAST1      (1 << 9)
-#  define FSMC_BTR3_DATAST2      (1 << 10)
-#  define FSMC_BTR3_DATAST3      (1 << 11)
-#define FSMC_BTR3_BUSTURN_MASK   0x000f0000 /* Bus turnaround phase duration */
-#  define FSMC_BTR3_BUSTURN0     (1 << 16)
-#  define FSMC_BTR3_BUSTURN1     (1 << 17)
-#  define FSMC_BTR3_BUSTURN2     (1 << 18)
-#  define FSMC_BTR3_BUSTURN3     (1 << 19)
-#define FSMC_BTR3_CLKDIV_MASK    0x00f00000 /* Clock divide ratio */
-#  define FSMC_BTR3_CLKDIV0      (1 << 20)
-#  define FSMC_BTR3_CLKDIV1      (1 << 21)
-#  define FSMC_BTR3_CLKDIV2      (1 << 22)
-#  define FSMC_BTR3_CLKDIV3      (1 << 23)
-#define FSMC_BTR3_DATLAT_MASK    0x0f000000 /* Data latency */
-#  define FSMC_BTR3_DATLAT0      (1 << 24)
-#  define FSMC_BTR3_DATLAT1      (1 << 25)
-#  define FSMC_BTR3_DATLAT2      (1 << 26)
-#  define FSMC_BTR3_DATLAT3      (1 << 27)
-#define FSMC_BTR3_ACCMOD_MASK    0x30000000 /* Access mode */
-#  define FSMC_BTR3_ACCMOD0      (1 << 28)
-#  define FSMC_BTR3_ACCMOD1      (1 << 29)
+#define FSMC_PATT_ATTSET_SHIFT   (0)       /* Attribute memory setup time */
+#define FSMC_PATT_ATTSET_MASK    (255 << FSMC_PATT_ATTSET_SHIFT)
+#  define FSMC_PATT_ATTSET(n)    ((n-1) << FSMC_PATT_ATTSET_SHIFT) /* (n)xHCLK n=1..256 */
+#define FSMC_PATT_ATTWAIT_SHIFT  (8)       /* Attribute memory wait time */
+#define FSMC_PATT_ATTWAIT_MASK   (255 << FSMC_PATT_ATTWAIT_SHIFT)
+#  define FSMC_PATT_ATTWAIT(n)   ((n-1) << FSMC_PATT_ATTWAIT_SHIFT) /* (n)xHCLK n=2..256 */
+#define FSMC_PATT_ATTHOLD_SHIFT  (16)      /* Attribute memory hold time */
+#define FSMC_PATT_ATTHOLD_MASK   (255 << FSMC_PATT_ATTHOLD_SHIFT)
+#  define FSMC_PATT_ATTHOLD(n)   ((n) <<  FSMC_PATT_ATTHOLD_SHIFT) /* (n)xHCLK n=1..255 */
+#define FSMC_PATT_ATTHIZ_SHIFT   (24)       /* Attribute memory databus HiZ time */
+#define FSMC_PATT_ATTHIZ_MASK    (255 << FSMC_PATT_ATTHIZ_SHIFT)
+#  define FSMC_PATT_ATTHIZ(n)    ((n) << FSMC_PATT_ATTHIZ_SHIFT) /* (n)xHCLK n=0..255 */
 
-#define FSMC_BTR4_ADDSET_MASK    0x0000000f /* Address setup phase duration */
-#  define FSMC_BTR4_ADDSET0     (1 << 0)
-#  define FSMC_BTR4_ADDSET1     (1 << 1)
-#  define FSMC_BTR4_ADDSET2     (1 << 2)
-#  define FSMC_BTR4_ADDSET3     (1 << 3)
-#define FSMC_BTR4_ADDHLD_MASK    0x000000f0 /* Address-hold phase duration */
-#  define FSMC_BTR4_ADDHLD0     (1 << 4)
-#  define FSMC_BTR4_ADDHLD1     (1 << 5)
-#  define FSMC_BTR4_ADDHLD2     (1 << 6)
-#  define FSMC_BTR4_ADDHLD3     (1 << 7)
-#define FSMC_BTR4_DATAST_MASK   0x0000ff00 /* Data-phase duration */
-#  define FSMC_BTR4_DATAST0     (1 << 8)
-#  define FSMC_BTR4_DATAST1     (1 << 9)
-#  define FSMC_BTR4_DATAST2     (1 << 10)
-#  define FSMC_BTR4_DATAST3     (1 << 11)
-#define FSMC_BTR4_BUSTURN_MASK  0x000f0000 /* Bus turnaround phase duration */
-#  define FSMC_BTR4_BUSTURN0    (1 << 16)
-#  define FSMC_BTR4_BUSTURN1    (1 << 17)
-#  define FSMC_BTR4_BUSTURN2    (1 << 18)
-#  define FSMC_BTR4_BUSTURN3    (1 << 19)
-#define FSMC_BTR4_CLKDIV_MASK   0x00f00000 /* Clock divide ratio */
-#  define FSMC_BTR4_CLKDIV0     (1 << 20)
-#  define FSMC_BTR4_CLKDIV1     (1 << 21)
-#  define FSMC_BTR4_CLKDIV2     (1 << 22)
-#  define FSMC_BTR4_CLKDIV3     (1 << 23)
-#define FSMC_BTR4_DATLAT_MASK   0x0f000000 /* Data latency */
-#  define FSMC_BTR4_DATLAT0     (1 << 24)
-#  define FSMC_BTR4_DATLAT1     (1 << 25)
-#  define FSMC_BTR4_DATLAT2     (1 << 26)
-#  define FSMC_BTR4_DATLAT3     (1 << 27)
-#define FSMC_BTR4_ACCMOD_MASK   0x30000000 /* Access mode */
-#  define FSMC_BTR4_ACCMOD0     (1 << 28)
-#  define FSMC_BTR4_ACCMOD1     (1 << 29)
-
-#define FSMC_BWTR1_ADDSET_MASK  0x0000000f /* Address setup phase duration */
-#  define FSMC_BWTR1_ADDSET0    (1 << 0)
-#  define FSMC_BWTR1_ADDSET1    (1 << 1)
-#  define FSMC_BWTR1_ADDSET2    (1 << 2)
-#  define FSMC_BWTR1_ADDSET3    (1 << 3)
-#define FSMC_BWTR1_ADDHLD_MASK  0x000000f0 /* Address-hold phase duration */
-#  define FSMC_BWTR1_ADDHLD0    (1 << 4)
-#  define FSMC_BWTR1_ADDHLD1    (1 << 5)
-#  define FSMC_BWTR1_ADDHLD2    (1 << 6)
-#  define FSMC_BWTR1_ADDHL3     (1 << 7)
-#define FSMC_BWTR1_DATAST_MASK  0x0000ff00 /* Data-phase duration */
-#  define FSMC_BWTR1_DATAST0    (1 << 8)
-#  define FSMC_BWTR1_DATAST1    (1 << 9)
-#  define FSMC_BWTR1_DATAST2    (1 << 10)
-#  define FSMC_BWTR1_DATAST3    (1 << 11)
-#define FSMC_BWTR1_CLKDIV_MASK  0x00f00000 /* Clock divide ratio */
-#  define FSMC_BWTR1_CLKDIV0    (1 << 20)
-#  define FSMC_BWTR1_CLKDIV1    (1 << 21)
-#  define FSMC_BWTR1_CLKDIV2    (1 << 22)
-#  define FSMC_BWTR1_CLKDIV3    (1 << 23)
-#define FSMC_BWTR1_DATLAT_MASK  0x0f000000 /* Data latency */
-#  define FSMC_BWTR1_DATLAT0    (1 << 24)
-#  define FSMC_BWTR1_DATLAT1    (1 << 25)
-#  define FSMC_BWTR1_DATLAT2    (1 << 26)
-#  define FSMC_BWTR1_DATLAT3    (1 << 27)
-#define FSMC_BWTR1_ACCMOD_MASK  0x30000000 /* Access mode */
-#  define FSMC_BWTR1_ACCMOD0    (1 << 28)
-#  define FSMC_BWTR1_ACCMOD1    (1 << 29)
-
-#define FSMC_BWTR2_ADDSET_MASK  0x0000000f /* Address setup phase duration */
-#  define FSMC_BWTR2_ADDSET0    (1 << 0)
-#  define FSMC_BWTR2_ADDSET1    (1 << 1)
-#  define FSMC_BWTR2_ADDSET2    (1 << 2)
-#  define FSMC_BWTR2_ADDSET3    (1 << 3)
-#define FSMC_BWTR2_ADDHLD_MASK  0x000000f0 /* Address-hold phase duration */
-#  define FSMC_BWTR2_ADDHLD0    (1 << 4)
-#  define FSMC_BWTR2_ADDHLD1    (1 << 5)
-#  define FSMC_BWTR2_ADDHLD2    (1 << 6)
-#  define FSMC_BWTR2_ADDHLD3    (1 << 7)
-#define FSMC_BWTR2_DATAST_MASK  0x0000ff00 /* Data-phase duration */
-#  define FSMC_BWTR2_DATAST0    (1 << 8)
-#  define FSMC_BWTR2_DATAST1    (1 << 9)
-#  define FSMC_BWTR2_DATAST2    (1 << 10)
-#  define FSMC_BWTR2_DATAST3    (1 << 11)
-#define FSMC_BWTR2_CLKDIV_MASK  0x00f00000 /* Clock divide ratio */
-#  define FSMC_BWTR2_CLKDIV0    (1 << 20)
-#  define FSMC_BWTR2_CLKDIV1    (1 << 21)
-#  define FSMC_BWTR2_CLKDIV2    (1 << 22)
-#  define FSMC_BWTR2_CLKDIV3    (1 << 23)
-#define FSMC_BWTR2_DATLAT_MASK  0x0f000000 /* Data latency */
-#  define FSMC_BWTR2_DATLAT0    (1 << 24)
-#  define FSMC_BWTR2_DATLAT1    (1 << 25)
-#  define FSMC_BWTR2_DATLAT2    (1 << 26)
-#  define FSMC_BWTR2_DATLAT3    (1 << 27)
-#define FSMC_BWTR2_ACCMOD_MASK  0x30000000 /* Access mode */
-#  define FSMC_BWTR2_ACCMOD0    (1 << 28)
-#  define FSMC_BWTR2_ACCMOD1    (1 << 29)
-
-#define FSMC_BWTR3_ADDSET_MASK  0x0000000f /* Address setup phase duration */
-#  define FSMC_BWTR3_ADDSET0    (1 << 0)
-#  define FSMC_BWTR3_ADDSET1    (1 << 1)
-#  define FSMC_BWTR3_ADDSET2    (1 << 2)
-#  define FSMC_BWTR3_ADDSET3    (1 << 3)
-#define FSMC_BWTR3_ADDHLD_MASK  0x000000f0 /* Address-hold phase duration */
-#  define FSMC_BWTR3_ADDHLD0    (1 << 4)
-#  define FSMC_BWTR3_ADDHLD1    (1 << 5)
-#  define FSMC_BWTR3_ADDHLD2    (1 << 6)
-#  define FSMC_BWTR3_ADDHLD3    (1 << 7)
-#define FSMC_BWTR3_DATAST_MASK  0x0000ff00 /* Data-phase duration */
-#  define FSMC_BWTR3_DATAST0    (1 << 8)
-#  define FSMC_BWTR3_DATAST1    (1 << 9)
-#  define FSMC_BWTR3_DATAST2    (1 << 10)
-#  define FSMC_BWTR3_DATAST3    (1 << 11)
-#define FSMC_BWTR3_CLKDIV_MASK  0x00f00000 /* Clock divide ratio */
-#  define FSMC_BWTR3_CLKDIV0    (1 << 20)
-#  define FSMC_BWTR3_CLKDIV1    (1 << 21)
-#  define FSMC_BWTR3_CLKDIV2    (1 << 22)
-#  define FSMC_BWTR3_CLKDIV3    (1 << 23)
-#define FSMC_BWTR3_DATLAT_MASK  0x0f000000 /* Data latency */
-#  define FSMC_BWTR3_DATLAT0    (1 << 24)
-#  define FSMC_BWTR3_DATLAT1    (1 << 25)
-#  define FSMC_BWTR3_DATLAT2    (1 << 26)
-#  define FSMC_BWTR3_DATLAT3    (1 << 27)
-#define FSMC_BWTR3_ACCMOD_MASK  0x30000000 /* Access mode */
-#  define FSMC_BWTR3_ACCMOD0    (1 << 28)
-#  define FSMC_BWTR3_ACCMOD1    (1 << 29)
-
-#define FSMC_BWTR4_ADDSET_MASK  0x0000000f /* Address setup phase duration */
-#  define FSMC_BWTR4_ADDSET0    (1 << 0)
-#  define FSMC_BWTR4_ADDSET1    (1 << 1)
-#  define FSMC_BWTR4_ADDSET2    (1 << 2)
-#  define FSMC_BWTR4_ADDSET3    (1 << 3)
-#define FSMC_BWTR4_ADDHLD_MASK  0x000000f0 /* Address-hold phase duration */
-#  define FSMC_BWTR4_ADDHLD0    (1 << 4)
-#  define FSMC_BWTR4_ADDHLD1    (1 << 5)
-#  define FSMC_BWTR4_ADDHLD2    (1 << 6)
-#  define FSMC_BWTR4_ADDHLD3    (1 << 7)
-#define FSMC_BWTR4_DATAST_MASK  0x0000ff00 /* Data-phase duration */
-#  define FSMC_BWTR4_DATAST0    (1 << 8)
-#  define FSMC_BWTR4_DATAST1    (1 << 9)
-#  define FSMC_BWTR4_DATAST2    (1 << 10)
-#  define FSMC_BWTR4_DATAST3    (1 << 11)
-#define FSMC_BWTR4_CLKDIV_MASK  0x00f00000 /* Clock divide ratio */
-#  define FSMC_BWTR4_CLKDIV0    (1 << 20)
-#  define FSMC_BWTR4_CLKDIV1    (1 << 21)
-#  define FSMC_BWTR4_CLKDIV2    (1 << 22)
-#  define FSMC_BWTR4_CLKDIV3    (1 << 23)
-#define FSMC_BWTR4_DATLAT_MASK  0x0f000000 /* Data latency */
-#  define FSMC_BWTR4_DATLAT0    (1 << 24)
-#  define FSMC_BWTR4_DATLAT1    (1 << 25)
-#  define FSMC_BWTR4_DATLAT2    (1 << 26)
-#  define FSMC_BWTR4_DATLAT3    (1 << 27)
-#define FSMC_BWTR4_ACCMOD_MASK  0x30000000 /* Access mode */
-#  define FSMC_BWTR4_ACCMOD0    (1 << 28)
-#  define FSMC_BWTR4_ACCMOD1    (1 << 29)
-
-#define FSMC_PCR2_PWAITEN       (1 << 1)   /* Wait feature enable bit */
-#  define FSMC_PCR2_PBKEN       (1 << 2)   /* PC Card/NAND Flash memory bank enable bit */
-#  define FSMC_PCR2_PTYP        (1 << 3)   /* Memory type */
-#define FSMC_PCR2_PWID_MASK     0x00000030 /* NAND Flash databus width */
-#  define FSMC_PCR2_PWID0       (1 << 4)
-#  define FSMC_PCR2_PWID1       (1 << 5)
-#define FSMC_PCR2_ECCEN         (1 << 6)   /* ECC computation logic enable bit */
-#define FSMC_PCR2_TCLR_MASK     0x00001e00 /* CLE to RE delay */
-#  define FSMC_PCR2_TCLR0       (1 << 9)
-#  define FSMC_PCR2_TCLR1       (1 << 10)
-#  define FSMC_PCR2_TCLR2       (1 << 11)
-#  define FSMC_PCR2_TCLR3       (1 << 12)
-#define FSMC_PCR2_TAR_MASK      0x0001e000 /* ALE to RE delay */
-#  define FSMC_PCR2_TAR0        (1 << 13)
-#  define FSMC_PCR2_TAR1        (1 << 14)
-#  define FSMC_PCR2_TAR2        (1 << 15)
-#  define FSMC_PCR2_TAR3        (1 << 16)
-#define FSMC_PCR2_ECCPS_MASK    0x000e0000 /* ECC page size */
-#  define FSMC_PCR2_ECCPS0      (1 << 17)
-#  define FSMC_PCR2_ECCPS1      (1 << 18)
-#  define FSMC_PCR2_ECCPS2      (1 << 19)
-
-#define FSMC_PCR3_PWAITEN       (1 << 1)   /* Wait feature enable bit */
-#  define FSMC_PCR3_PBKEN       (1 << 2)   /* PC Card/NAND Flash memory bank enable bit */
-#  define FSMC_PCR3_PTYP        (1 << 3)   /* Memory type */
-#define FSMC_PCR3_PWID_MASK     0x00000030 /* NAND Flash databus width */
-#  define FSMC_PCR3_PWID0       (1 << 4)
-#  define FSMC_PCR3_PWID1       (1 << 5)
-#define FSMC_PCR3_ECCEN         (1 << 6)   /* ECC computation logic enable bit */
-#define FSMC_PCR3_TCLR_MASK     0x00001e00 /* CLE to RE delay */
-#  define FSMC_PCR3_TCLR0       (1 << 9)
-#  define FSMC_PCR3_TCLR1       (1 << 10)
-#  define FSMC_PCR3_TCLR2       (1 << 11)
-#  define FSMC_PCR3_TCLR3       (1 << 12)
-#define FSMC_PCR3_TAR_MASK      0x0001e000 /* ALE to RE delay */
-#  define FSMC_PCR3_TAR0        (1 << 13)
-#  define FSMC_PCR3_TAR1        (1 << 14)
-#  define FSMC_PCR3_TAR2        (1 << 15)
-#  define FSMC_PCR3_TAR3        (1 << 16)
-#define FSMC_PCR3_ECCPS_MASK    0x000e0000 /* ECC page size */
-#  define FSMC_PCR3_ECCPS0      (1 << 17)
-#  define FSMC_PCR3_ECCPS1      (1 << 18)
-#  define FSMC_PCR3_ECCPS2      (1 << 19)
-
-#define FSMC_PCR4_PWAITEN       (1 << 1)   /* Wait feature enable bit */
-#  define FSMC_PCR4_PBKEN       (1 << 2)   /* PC Card/NAND Flash memory bank enable bit */
-#  define FSMC_PCR4_PTYP        (1 << 3)   /* Memory type */
-#define FSMC_PCR4_PWID_MASK     0x00000030 /* NAND Flash databus width */
-#  define FSMC_PCR4_PWID0       (1 << 4)
-#  define FSMC_PCR4_PWID1       (1 << 5)
-#define FSMC_PCR4_ECCEN         (1 << 6)   /* ECC computation logic enable bit */
-#define FSMC_PCR4_TCLR_MASK     0x00001e00 /* CLE to RE delay */
-#  define FSMC_PCR4_TCLR0       (1 << 9)
-#  define FSMC_PCR4_TCLR1       (1 << 10)
-#  define FSMC_PCR4_TCLR2       (1 << 11)
-#  define FSMC_PCR4_TCLR3       (1 << 12)
-#define FSMC_PCR4_TAR_MASK      0x0001e000 /* ALE to RE delay */
-#  define FSMC_PCR4_TAR0        (1 << 13)
-#  define FSMC_PCR4_TAR1        (1 << 14)
-#  define FSMC_PCR4_TAR2        (1 << 15)
-#  define FSMC_PCR4_TAR3        (1 << 16)
-#define FSMC_PCR4_ECCPS_MASK    0x000e0000 /* ECC page size */
-#  define FSMC_PCR4_ECCPS0      (1 << 17)
-#  define FSMC_PCR4_ECCPS1      (1 << 18)
-#  define FSMC_PCR4_ECCPS2      (1 << 19)
-
-#define FSMC_SR2_IRS            (1 << 0)  /* Interrupt Rising Edge status */
-#define FSMC_SR2_ILS            (1 << 1)  /* Interrupt Level status */
-#define FSMC_SR2_IFS            (1 << 2)  /* Interrupt Falling Edge status */
-#define FSMC_SR2_IREN           (1 << 3)  /* Interrupt Rising Edge detection Enable bit */
-#define FSMC_SR2_ILEN           (1 << 4)  /* Interrupt Level detection Enable bit */
-#define FSMC_SR2_IFEN           (1 << 5)  /* Interrupt Falling Edge detection Enable bit */
-#define FSMC_SR2_FEMPT          (1 << 6)  /* FIFO empty */
-
-#define FSMC_SR3_IRS            (1 << 0)  /* Interrupt Rising Edge status */
-#define FSMC_SR3_ILS            (1 << 1)  /* Interrupt Level status */
-#define FSMC_SR3_IFS            (1 << 2)  /* Interrupt Falling Edge status */
-#define FSMC_SR3_IREN           (1 << 3)  /* Interrupt Rising Edge detection Enable bit */
-#define FSMC_SR3_ILEN           (1 << 4)  /* Interrupt Level detection Enable bit */
-#define FSMC_SR3_IFEN           (1 << 5)  /* Interrupt Falling Edge detection Enable bit */
-#define FSMC_SR3_FEMPT          (1 << 6)  /* FIFO empty */
-
-#define FSMC_SR4_IRS            (1 << 0)  /* Interrupt Rising Edge status */
-#define FSMC_SR4_ILS            (1 << 1)  /* Interrupt Level status */
-#define FSMC_SR4_IFS            (1 << 2)  /* Interrupt Falling Edge status */
-#define FSMC_SR4_IREN           (1 << 3)  /* Interrupt Rising Edge detection Enable bit */
-#define FSMC_SR4_ILEN           (1 << 4)  /* Interrupt Level detection Enable bit */
-#define FSMC_SR4_IFEN           (1 << 5)  /* Interrupt Falling Edge detection Enable bit */
-#define FSMC_SR4_FEMPT          (1 << 6)  /* FIFO empty */
-
-#define FSMC_PMEM2_MEMSET2_MASK 0x000000ff /* Common memory 2 setup time */
-#  define FSMC_PMEM2_MEMSET20   (1 << 0)
-#  define FSMC_PMEM2_MEMSET21   (1 << 1)
-#  define FSMC_PMEM2_MEMSET22   (1 << 2)
-#  define FSMC_PMEM2_MEMSET23   (1 << 3)
-#  define FSMC_PMEM2_MEMSET24   (1 << 4)
-#  define FSMC_PMEM2_MEMSET25   (1 << 5)
-#  define FSMC_PMEM2_MEMSET26   (1 << 6)
-#  define FSMC_PMEM2_MEMSET27   (1 << 7)
-#define FSMC_PMEM2_MEMWAIT2     0x0000ff00 /* Common memory 2 wait time */
-#  define FSMC_PMEM2_MEMWAIT20  (1 << 8)
-#  define FSMC_PMEM2_MEMWAIT21  (1 << 9)
-#  define FSMC_PMEM2_MEMWAIT22  (1 << 10)
-#  define FSMC_PMEM2_MEMWAIT23  (1 << 11)
-#  define FSMC_PMEM2_MEMWAIT24  (1 << 12)
-#  define FSMC_PMEM2_MEMWAIT25  (1 << 13)
-#  define FSMC_PMEM2_MEMWAIT26  (1 << 14)
-#  define FSMC_PMEM2_MEMWAIT27  (1 << 15)
-#define FSMC_PMEM2_MEMHOLD2     0x00ff0000 /* Common memory 2 hold time */
-#  define FSMC_PMEM2_MEMHOLD20  (1 << 16)
-#  define FSMC_PMEM2_MEMHOLD21  (1 << 17)
-#  define FSMC_PMEM2_MEMHOLD22  (1 << 18)
-#  define FSMC_PMEM2_MEMHOLD23  (1 << 19)
-#  define FSMC_PMEM2_MEMHOLD24  (1 << 20)
-#  define FSMC_PMEM2_MEMHOLD25  (1 << 21)
-#  define FSMC_PMEM2_MEMHOLD26  (1 << 22)
-#  define FSMC_PMEM2_MEMHOLD27  (1 << 23)
-#define FSMC_PMEM2_MEMHIZ2_MASK  0xff000000 /* Common memory 2 databus HiZ time */
-#  define FSMC_PMEM2_MEMHIZ20   (1 << 24)
-#  define FSMC_PMEM2_MEMHIZ21   (1 << 25)
-#  define FSMC_PMEM2_MEMHIZ22   (1 << 26)
-#  define FSMC_PMEM2_MEMHIZ23   (1 << 27)
-#  define FSMC_PMEM2_MEMHIZ24   (1 << 28)
-#  define FSMC_PMEM2_MEMHIZ25   (1 << 29)
-#  define FSMC_PMEM2_MEMHIZ26   (1 << 30)
-#  define FSMC_PMEM2_MEMHIZ27   (1 << 31)
-
-#define FSMC_PMEM3_MEMSET3_MASK 0x000000ff /* Common memory 3 setup time */
-#  define FSMC_PMEM3_MEMSET30   (1 << 0)
-#  define FSMC_PMEM3_MEMSET31   (1 << 1)
-#  define FSMC_PMEM3_MEMSET32   (1 << 2)
-#  define FSMC_PMEM3_MEMSET33   (1 << 3)
-#  define FSMC_PMEM3_MEMSET34   (1 << 4)
-#  define FSMC_PMEM3_MEMSET35   (1 << 5)
-#  define FSMC_PMEM3_MEMSET36   (1 << 6)
-#  define FSMC_PMEM3_MEMSET37   (1 << 7)
-#define FSMC_PMEM3_MEMWAIT3     0x0000ff00 /* Common memory 3 wait time */
-#  define FSMC_PMEM3_MEMWAIT30  (1 << 8)
-#  define FSMC_PMEM3_MEMWAIT31  (1 << 9)
-#  define FSMC_PMEM3_MEMWAIT32  (1 << 10)
-#  define FSMC_PMEM3_MEMWAIT33  (1 << 11)
-#  define FSMC_PMEM3_MEMWAIT34  (1 << 12)
-#  define FSMC_PMEM3_MEMWAIT35  (1 << 13)
-#  define FSMC_PMEM3_MEMWAIT36  (1 << 14)
-#  define FSMC_PMEM3_MEMWAIT37  (1 << 15)
-#define FSMC_PMEM3_MEMHOLD3     0x00ff0000 /* Common memory 3 hold time */
-#  define FSMC_PMEM3_MEMHOLD30  (1 << 16)
-#  define FSMC_PMEM3_MEMHOLD31  (1 << 17)
-#  define FSMC_PMEM3_MEMHOLD32  (1 << 18)
-#  define FSMC_PMEM3_MEMHOLD33  (1 << 19)
-#  define FSMC_PMEM3_MEMHOLD34  (1 << 20)
-#  define FSMC_PMEM3_MEMHOLD35  (1 << 21)
-#  define FSMC_PMEM3_MEMHOLD36  (1 << 22)
-#  define FSMC_PMEM3_MEMHOLD37  (1 << 23)
-#define FSMC_PMEM3_MEMHIZ3_MASK 0xff000000 /* Common memory 3 databus HiZ time */
-#  define FSMC_PMEM3_MEMHIZ30   (1 << 24)
-#  define FSMC_PMEM3_MEMHIZ31   (1 << 25)
-#  define FSMC_PMEM3_MEMHIZ32   (1 << 26)
-#  define FSMC_PMEM3_MEMHIZ33   (1 << 27)
-#  define FSMC_PMEM3_MEMHIZ34   (1 << 28)
-#  define FSMC_PMEM3_MEMHIZ35   (1 << 29)
-#  define FSMC_PMEM3_MEMHIZ36   (1 << 30)
-#  define FSMC_PMEM3_MEMHIZ37   (1 << 31)
-
-#define FSMC_PMEM4_MEMSET4_MASK 0x000000ff /* Common memory 4 setup time */
-#  define FSMC_PMEM4_MEMSET40   (1 << 0)
-#  define FSMC_PMEM4_MEMSET41   (1 << 1)
-#  define FSMC_PMEM4_MEMSET42   (1 << 2)
-#  define FSMC_PMEM4_MEMSET43   (1 << 3)
-#  define FSMC_PMEM4_MEMSET44   (1 << 4)
-#  define FSMC_PMEM4_MEMSET45   (1 << 5)
-#  define FSMC_PMEM4_MEMSET46   (1 << 6)
-#  define FSMC_PMEM4_MEMSET47   (1 << 7)
-#define FSMC_PMEM4_MEMWAIT4     0x0000ff00 /* Common memory 4 wait time */
-#  define FSMC_PMEM4_MEMWAIT40  (1 << 8)
-#  define FSMC_PMEM4_MEMWAIT41  (1 << 9)
-#  define FSMC_PMEM4_MEMWAIT42  (1 << 10)
-#  define FSMC_PMEM4_MEMWAIT43  (1 << 11)
-#  define FSMC_PMEM4_MEMWAIT44  (1 << 12)
-#  define FSMC_PMEM4_MEMWAIT45  (1 << 13)
-#  define FSMC_PMEM4_MEMWAIT46  (1 << 14)
-#  define FSMC_PMEM4_MEMWAIT47  (1 << 15)
-#define FSMC_PMEM4_MEMHOLD4     0x00ff0000 /* Common memory 4 hold time */
-#  define FSMC_PMEM4_MEMHOLD40  (1 << 16)
-#  define FSMC_PMEM4_MEMHOLD41  (1 << 17)
-#  define FSMC_PMEM4_MEMHOLD42  (1 << 18)
-#  define FSMC_PMEM4_MEMHOLD43  (1 << 19)
-#  define FSMC_PMEM4_MEMHOLD44  (1 << 20)
-#  define FSMC_PMEM4_MEMHOLD45  (1 << 21)
-#  define FSMC_PMEM4_MEMHOLD46  (1 << 22)
-#  define FSMC_PMEM4_MEMHOLD47  (1 << 23)
-#define FSMC_PMEM4_MEMHIZ4_MASK 0xff000000 /* Common memory 4 databus HiZ time */
-#  define FSMC_PMEM4_MEMHIZ40   (1 << 24)
-#  define FSMC_PMEM4_MEMHIZ41   (1 << 25)
-#  define FSMC_PMEM4_MEMHIZ42   (1 << 26)
-#  define FSMC_PMEM4_MEMHIZ43   (1 << 27)
-#  define FSMC_PMEM4_MEMHIZ44   (1 << 28)
-#  define FSMC_PMEM4_MEMHIZ45   (1 << 29)
-#  define FSMC_PMEM4_MEMHIZ46   (1 << 30)
-#  define FSMC_PMEM4_MEMHIZ47   (1 << 31)
-
-#define FSMC_PATT2_ATTSET2_MASK 0x000000ff /* Attribute memory 2 setup time */
-#  define FSMC_PATT2_ATTSET20   (1 << 0)
-#  define FSMC_PATT2_ATTSET21   (1 << 1)
-#  define FSMC_PATT2_ATTSET22   (1 << 2)
-#  define FSMC_PATT2_ATTSET23   (1 << 3)
-#  define FSMC_PATT2_ATTSET24   (1 << 4)
-#  define FSMC_PATT2_ATTSET25   (1 << 5)
-#  define FSMC_PATT2_ATTSET26   (1 << 6)
-#  define FSMC_PATT2_ATTSET27   (1 << 7)
-#define FSMC_PATT2_ATTWAIT2     0x0000ff00 /* Attribute memory 2 wait time */
-#  define FSMC_PATT2_ATTWAIT20  (1 << 8)
-#  define FSMC_PATT2_ATTWAIT21  (1 << 9)
-#  define FSMC_PATT2_ATTWAIT22  (1 << 10)
-#  define FSMC_PATT2_ATTWAIT23  (1 << 11)
-#  define FSMC_PATT2_ATTWAIT24  (1 << 12)
-#  define FSMC_PATT2_ATTWAIT25  (1 << 13)
-#  define FSMC_PATT2_ATTWAIT26  (1 << 14)
-#  define FSMC_PATT2_ATTWAIT27  (1 << 15)
-#define FSMC_PATT2_ATTHOLD2     0x00ff0000 /* Attribute memory 2 hold time */
-#  define FSMC_PATT2_ATTHOLD20  (1 << 16)
-#  define FSMC_PATT2_ATTHOLD21  (1 << 17)
-#  define FSMC_PATT2_ATTHOLD22  (1 << 18)
-#  define FSMC_PATT2_ATTHOLD23  (1 << 19)
-#  define FSMC_PATT2_ATTHOLD24  (1 << 20)
-#  define FSMC_PATT2_ATTHOLD25  (1 << 21)
-#  define FSMC_PATT2_ATTHOLD26  (1 << 22)
-#  define FSMC_PATT2_ATTHOLD27  (1 << 23)
-#define FSMC_PATT2_ATTHIZ2_MASK 0xff000000 /* Attribute memory 2 databus HiZ time */
-#  define FSMC_PATT2_ATTHIZ20   (1 << 24)
-#  define FSMC_PATT2_ATTHIZ21   (1 << 25)
-#  define FSMC_PATT2_ATTHIZ22   (1 << 26)
-#  define FSMC_PATT2_ATTHIZ23   (1 << 27)
-#  define FSMC_PATT2_ATTHIZ24   (1 << 28)
-#  define FSMC_PATT2_ATTHIZ25   (1 << 29)
-#  define FSMC_PATT2_ATTHIZ26   (1 << 30)
-#  define FSMC_PATT2_ATTHIZ27   (1 << 31)
-
-#define FSMC_PATT3_ATTSET3_MASK 0x000000ff /* Attribute memory 3 setup time */
-#  define FSMC_PATT3_ATTSET30   (1 << 0)
-#  define FSMC_PATT3_ATTSET31   (1 << 1)
-#  define FSMC_PATT3_ATTSET32   (1 << 2)
-#  define FSMC_PATT3_ATTSET33   (1 << 3)
-#  define FSMC_PATT3_ATTSET34   (1 << 4)
-#  define FSMC_PATT3_ATTSET35   (1 << 5)
-#  define FSMC_PATT3_ATTSET36   (1 << 6)
-#  define FSMC_PATT3_ATTSET37   (1 << 7)
-#define FSMC_PATT3_ATTWAIT3     0x0000ff00 /* Attribute memory 3 wait time */
-#  define FSMC_PATT3_ATTWAIT30  (1 << 8)
-#  define FSMC_PATT3_ATTWAIT31  (1 << 9)
-#  define FSMC_PATT3_ATTWAIT32  (1 << 10)
-#  define FSMC_PATT3_ATTWAIT33  (1 << 11)
-#  define FSMC_PATT3_ATTWAIT34  (1 << 12)
-#  define FSMC_PATT3_ATTWAIT35  (1 << 13)
-#  define FSMC_PATT3_ATTWAIT36  (1 << 14)
-#  define FSMC_PATT3_ATTWAIT37  (1 << 15)
-#define FSMC_PATT3_ATTHOLD3     0x00ff0000 /* Attribute memory 3 hold time */
-#  define FSMC_PATT3_ATTHOLD30  (1 << 16)
-#  define FSMC_PATT3_ATTHOLD31  (1 << 17)
-#  define FSMC_PATT3_ATTHOLD32  (1 << 18)
-#  define FSMC_PATT3_ATTHOLD33  (1 << 19)
-#  define FSMC_PATT3_ATTHOLD34  (1 << 20)
-#  define FSMC_PATT3_ATTHOLD35  (1 << 21)
-#  define FSMC_PATT3_ATTHOLD36  (1 << 22)
-#  define FSMC_PATT3_ATTHOLD37  (1 << 23)
-#define FSMC_PATT3_ATTHIZ3_MASK 0xff000000 /* Attribute memory 3 databus HiZ time */
-#  define FSMC_PATT3_ATTHIZ30   (1 << 24)
-#  define FSMC_PATT3_ATTHIZ31   (1 << 25)
-#  define FSMC_PATT3_ATTHIZ32   (1 << 26)
-#  define FSMC_PATT3_ATTHIZ33   (1 << 27)
-#  define FSMC_PATT3_ATTHIZ34   (1 << 28)
-#  define FSMC_PATT3_ATTHIZ35   (1 << 29)
-#  define FSMC_PATT3_ATTHIZ36   (1 << 30)
-#  define FSMC_PATT3_ATTHIZ37   (1 << 31)
-
-#define FSMC_PATT4_ATTSET4_MASK 0x000000ff /* Attribute memory 4 setup time */
-#  define FSMC_PATT4_ATTSET40   (1 << 0)
-#  define FSMC_PATT4_ATTSET41   (1 << 1)
-#  define FSMC_PATT4_ATTSET42   (1 << 2)
-#  define FSMC_PATT4_ATTSET43   (1 << 3)
-#  define FSMC_PATT4_ATTSET44   (1 << 4)
-#  define FSMC_PATT4_ATTSET45   (1 << 5)
-#  define FSMC_PATT4_ATTSET46   (1 << 6)
-#  define FSMC_PATT4_ATTSET47   (1 << 7)
-#define FSMC_PATT4_ATTWAIT4     0x0000ff00 /* Attribute memory 4 wait time */
-#  define FSMC_PATT4_ATTWAIT40  (1 << 8)
-#  define FSMC_PATT4_ATTWAIT41  (1 << 9)
-#  define FSMC_PATT4_ATTWAIT42  (1 << 10)
-#  define FSMC_PATT4_ATTWAIT43  (1 << 11)
-#  define FSMC_PATT4_ATTWAIT44  (1 << 12)
-#  define FSMC_PATT4_ATTWAIT45  (1 << 13)
-#  define FSMC_PATT4_ATTWAIT46  (1 << 14)
-#  define FSMC_PATT4_ATTWAIT47  (1 << 15)
-#define FSMC_PATT4_ATTHOLD4     0x00ff0000 /* Attribute memory 4 hold time */
-#  define FSMC_PATT4_ATTHOLD40  (1 << 16)
-#  define FSMC_PATT4_ATTHOLD41  (1 << 17)
-#  define FSMC_PATT4_ATTHOLD42  (1 << 18)
-#  define FSMC_PATT4_ATTHOLD43  (1 << 19)
-#  define FSMC_PATT4_ATTHOLD44  (1 << 20)
-#  define FSMC_PATT4_ATTHOLD45  (1 << 21)
-#  define FSMC_PATT4_ATTHOLD46  (1 << 22)
-#  define FSMC_PATT4_ATTHOLD47  (1 << 23)
-#define FSMC_PATT4_ATTHIZ4_MASK 0xff000000 /* Attribute memory 4 databus HiZ time */
-#  define FSMC_PATT4_ATTHIZ40   (1 << 24)
-#  define FSMC_PATT4_ATTHIZ41   (1 << 25)
-#  define FSMC_PATT4_ATTHIZ42   (1 << 26)
-#  define FSMC_PATT4_ATTHIZ43   (1 << 27)
-#  define FSMC_PATT4_ATTHIZ44   (1 << 28)
-#  define FSMC_PATT4_ATTHIZ45   (1 << 29)
-#  define FSMC_PATT4_ATTHIZ46   (1 << 30)
-#  define FSMC_PATT4_ATTHIZ47   (1 << 31)
-
-#define FSMC_PIO4_IOSET4_MASK   0x000000ff /* I/O 4 setup time */
-#  define FSMC_PIO4_IOSET40     (1 << 0)
-#  define FSMC_PIO4_IOSET41     (1 << 1)
-#  define FSMC_PIO4_IOSET42     (1 << 2)
-#  define FSMC_PIO4_IOSET43     (1 << 3)
-#  define FSMC_PIO4_IOSET44     (1 << 4)
-#  define FSMC_PIO4_IOSET45     (1 << 5)
-#  define FSMC_PIO4_IOSET46     (1 << 6)
-#  define FSMC_PIO4_IOSET47     (1 << 7)
-#define FSMC_PIO4_IOWAIT4_MASK  0x0000ff00 /* I/O 4 wait time */
-#  define FSMC_PIO4_IOWAIT40    (1 << 8)
-#  define FSMC_PIO4_IOWAIT41    (1 << 9)
-#  define FSMC_PIO4_IOWAIT42    (1 << 10)
-#  define FSMC_PIO4_IOWAIT43    (1 << 11)
-#  define FSMC_PIO4_IOWAIT44    (1 << 12)
-#  define FSMC_PIO4_IOWAIT45    (1 << 13)
-#  define FSMC_PIO4_IOWAIT46    (1 << 14)
-#  define FSMC_PIO4_IOWAIT47    (1 << 15)
-#define FSMC_PIO4_IOHOLD4_MASK  0x00ff0000 /* I/O 4 hold time */
-#  define FSMC_PIO4_IOHOLD40    (1 << 16)
-#  define FSMC_PIO4_IOHOLD41    (1 << 17)
-#  define FSMC_PIO4_IOHOLD42    (1 << 18)
-#  define FSMC_PIO4_IOHOLD43    (1 << 19)
-#  define FSMC_PIO4_IOHOLD44    (1 << 20)
-#  define FSMC_PIO4_IOHOLD45    (1 << 21)
-#  define FSMC_PIO4_IOHOLD46    (1 << 22)
-#  define FSMC_PIO4_IOHOLD47    (1 << 23)
-#define FSMC_PIO4_IOHIZ4_MASK   0xff000000 /* I/O 4 databus HiZ time */
-#  define FSMC_PIO4_IOHIZ40     (1 << 24)
-#  define FSMC_PIO4_IOHIZ41     (1 << 25)
-#  define FSMC_PIO4_IOHIZ42     (1 << 26)
-#  define FSMC_PIO4_IOHIZ43     (1 << 27)
-#  define FSMC_PIO4_IOHIZ44     (1 << 28)
-#  define FSMC_PIO4_IOHIZ45     (1 << 29)
-#  define FSMC_PIO4_IOHIZ46     (1 << 30)
-#  define FSMC_PIO4_IOHIZ47     (1 << 31)
+#define FSMC_PIO4_IOSET_SHIFT    (0)       /* IOribute memory setup time */
+#define FSMC_PIO4_IOSET_MASK     (255 << FSMC_PIO4_IOSET_SHIFT)
+#  define FSMC_PIO4_IOSET(n)     ((n-1) << FSMC_PIO4_IOSET_SHIFT) /* (n)xHCLK n=1..256 */
+#define FSMC_PIO4_IOWAIT_SHIFT   (8)       /* IOribute memory wait time */
+#define FSMC_PIO4_IOWAIT_MASK    (255 << FSMC_PIO4_IOWAIT_SHIFT)
+#  define FSMC_PIO4_IOWAIT(n)    ((n-1) << FSMC_PIO4_IOWAIT_SHIFT) /* (n)xHCLK n=2..256 */
+#define FSMC_PIO4_IOHOLD_SHIFT   (16)      /* IOribute memory hold time */
+#define FSMC_PIO4_IOHOLD_MASK    (255 << FSMC_PIO4_IOHOLD_SHIFT)
+#  define FSMC_PIO4_IOHOLD(n)    ((n) <<  FSMC_PIO4_IOHOLD_SHIFT) /* (n)xHCLK n=1..255 */
+#define FSMC_PIO4_IOHIZ_SHIFT    (24)       /* IOribute memory databus HiZ time */
+#define FSMC_PIO4_IOHIZ_MASK     (255 << FSMC_PIO4_IOHIZ_SHIFT)
+#  define FSMC_PIO4_IOHIZ(n)     ((n) << FSMC_PIO4_IOHIZ_SHIFT) /* (n)xHCLK n=0..255 */
 
 /************************************************************************************
  * Public Types

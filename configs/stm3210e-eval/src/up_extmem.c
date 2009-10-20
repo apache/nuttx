@@ -275,16 +275,18 @@ void stm32_selectnor(struct extmem_save_s *save)
 
   /* Bank1 NOR/SRAM control register configuration */
 
-  putreg32(FSMC_BCR2_MTYP1|FSMC_BCR2_FACCEN|FSMC_BCR2_MWID0|FSMC_BCR2_WREN, STM32_FSMC_BCR2);
+  putreg32(FSMC_BCR_NOR|FSMC_BCR_FACCEN|FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR2);
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BTR2_ADDSET1|FSMC_BTR2_DATAST0|FSMC_BTR2_DATAST2| FSMC_BTR2_DATLAT0, STM32_FSMC_BTR2);
+  putreg32(FSMC_BTR_ADDSET(3)|FSMC_BTR_ADDHLD(1)|FSMC_BTR_DATAST(6)|FSMC_BTR_BUSTRUN(1)|
+           FSMC_BTR_CLKDIV(1)|FSMC_BTR_DATLAT(2)|FSMC_BTR_ACCMODB, STM32_FSMC_BTR2);
+
   putreg32(0x0fffffff, STM32_FSMC_BCR3);
 
   /* Enable the bank */
 
-  putreg32(FSMC_BCR3_MBKEN|FSMC_BCR2_MTYP1|FSMC_BCR2_FACCEN|FSMC_BCR2_MWID0|FSMC_BCR2_WREN, STM32_FSMC_BCR2);
+  putreg32(FSMC_BCR_MBKEN|FSMC_BCR_NOR|FSMC_BCR_FACCEN|FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR2);
 }
 
 /************************************************************************************
@@ -339,18 +341,21 @@ void stm32_selectsram(struct extmem_save_s *save)
 
   /* Bank1 NOR/SRAM control register configuration */
 
-  putreg32(FSMC_BCR3_MWID0|FSMC_BCR3_WREN, STM32_FSMC_BCR3);
+  putreg32(FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR3);
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BCR3_WAITPOL, STM32_FSMC_BTR3);
+  putreg32(FSMC_BTR_ADDSET(1)|FSMC_BTR_ADDHLD(1)|FSMC_BTR_DATAST(3)|FSMC_BTR_BUSTRUN(1)|
+           FSMC_BTR_CLKDIV(1)|FSMC_BTR_DATLAT(2)|FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
+
   putreg32(0xffffffff, STM32_FSMC_BCR3);
 
   /* Enable the bank */
 
-  putreg32(FSMC_BCR3_MBKEN|FSMC_BCR3_MWID0|FSMC_BCR3_WREN, STM32_FSMC_BCR3);
+  putreg32(FSMC_BCR_MBKEN|FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR3);
 }
-/************************************************************************************
+
+/************************************************************************************
  * Name: stm32_deselectsram
  *
  * Description:
