@@ -283,7 +283,16 @@ STM3210E-EVAL-specific Configuration Options
 	   the delay actually is 100 seconds.
 
   Individual subsystems can be enabled:
+	AHB
+	---
+	CONFIG_STM32_DMA1
+	CONFIG_STM32_DMA2
+	CONFIG_STM32_CRC
+	CONFIG_STM32_FSMC
+	CONFIG_STM32_SDIO
 
+	APB1
+	----
 	CONFIG_STM32_TIM2
 	CONFIG_STM32_TIM3
 	CONFIG_STM32_TIM4
@@ -305,6 +314,9 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_STM32_PWR
 	CONFIG_STM32_DAC
 	CONFIG_STM32_USB
+
+	APB2
+	----
 	CONFIG_STM32_ADC1
 	CONFIG_STM32_ADC2
 	CONFIG_STM32_TIM1

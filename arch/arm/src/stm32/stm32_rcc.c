@@ -100,6 +100,47 @@ static inline void rcc_reset(void)
   putreg32(0, STM32_RCC_CIR);				/* Disable all interrupts */
 }
 
+static inline void rcc_enableahb(void)
+{
+  uint32 regval;
+
+  /* Always enable FLITF clock and SRAM clock */
+
+  regval = RCC_AHBENR_FLITFEN|RCC_AHBENR_SRAMEN;
+
+#if CONFIG_STM32_DMA1
+  /* DMA 1 clock enable */
+
+  regval |= RCC_AHBENR_DMA1EN;
+#endif
+
+#if CONFIG_STM32_DMA2
+  /* DMA 2 clock enable */
+
+  regval |= RCC_AHBENR_DMA2EN;
+#endif
+
+#if CONFIG_STM32_CRC
+  /* CRC clock enable */
+
+  regval |= RCC_AHBENR_CRCEN;
+#endif
+
+#if CONFIG_STM32_FSMC
+  /* FSMC clock enable */
+
+  regval |=  RCC_AHBENR_FSMCEN;
+#endif
+
+#if CONFIG_STM32_SDIO
+  /* SDIO clock enable */
+
+  regval |=  RCC_AHBENR_SDIOEN;
+#endif
+
+  putreg32(regval, STM32_RCC_AHBENR);	/* Enable peripherals */
+}
+
 static inline void rcc_enableapb1(void)
 {
   uint32 regval;
@@ -414,8 +455,9 @@ void stm32_clockconfig(void)
     while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
   }
 
-  /* Enable periperal clocking */
+  /* Enable peripheral clocking */
 
+  rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();
 }

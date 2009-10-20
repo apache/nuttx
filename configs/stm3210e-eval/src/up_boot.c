@@ -76,10 +76,12 @@ void stm32_boardinitialize(void)
    * brought into the build
    */
 
+#if defined(CONFIG_STM32_DMA1) || defined(CONFIG_STM32_DMA2)
   if (stm32_dmainitialize)
     {
       stm32_dmainitialize();
     }
+#endif
 
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * stm32_spiinitialize() has been brought into the link.
