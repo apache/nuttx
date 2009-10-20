@@ -93,11 +93,18 @@ struct extmem_save_s
 };
 
 /************************************************************************************
- * Public Functions
+ * Public data
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
 
+/* GPIO configurations common to SRAM and NOR Flash */
+
+#define NCOMMON_CONFIG 37
+extern const uint16 g_commonconfig[NCOMMON_CONFIG];
+
+/************************************************************************************
+ * Public Functions ************************************************************************************/
 /************************************************************************************
  * Name: stm32_spiinitialize
  *
@@ -109,6 +116,57 @@ struct extmem_save_s
 extern void weak_function stm32_spiinitialize(void);
 
 /************************************************************************************
+ * Name: stm32_extcontextsave
+ *
+ * Description:
+ *  Save current GPIOs that will used by external memory configurations
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_FSMC
+extern void stm32_extcontextsave(struct extmem_save_s *save);
+
+/************************************************************************************
+ * Name: stm32_extcontextrestore
+ *
+ * Description:
+ *  Restore GPIOs that were used by external memory configurations
+ *
+ ************************************************************************************/
+
+extern void stm32_extcontextrestore(struct extmem_save_s *restore);
+
+/************************************************************************************
+ * Name: stm32_extmemgpios
+ *
+ * Description:
+ *   Initialize GPIOs for NOR or SRAM
+ *
+ ************************************************************************************/
+
+extern void stm32_extmemgpios(const uint16 *gpios, int ngpios);
+
+/************************************************************************************
+ * Name: stm32_enablefsmc
+ *
+ * Description:
+ *  enable clocking to the FSMC module
+ *
+ ************************************************************************************/
+
+extern void stm32_enablefsmc(void);
+
+/************************************************************************************
+ * Name: stm32_disablefsmc
+ *
+ * Description:
+ *  enable clocking to the FSMC module
+ *
+ ************************************************************************************/
+
+extern void stm32_disablefsmc(void);
+
+/************************************************************************************
  * Name: stm32_selectnor
  *
  * Description:
@@ -116,7 +174,7 @@ extern void weak_function stm32_spiinitialize(void);
  *
  ************************************************************************************/
 
-extern void stm32_selectnor(struct extmem_save_s *save);
+extern void stm32_selectnor(void);
 
 /************************************************************************************
  * Name: stm32_deselectnor
@@ -126,7 +184,7 @@ extern void stm32_selectnor(struct extmem_save_s *save);
  *
  ************************************************************************************/
 
-extern void stm32_deselectnor(struct extmem_save_s *restore);
+extern void stm32_deselectnor(void);
 
 /************************************************************************************
  * Name: stm32_selectsram
@@ -136,16 +194,17 @@ extern void stm32_deselectnor(struct extmem_save_s *restore);
  *
  ************************************************************************************/
 
-extern void stm32_selectsram(struct extmem_save_s *save);
+extern void stm32_selectsram(void);
 /************************************************************************************
  * Name: stm32_deselectsram
  *
  * Description:
- *   Disable NOR FLASH
+ *   Disable external SRAM
  *
  ************************************************************************************/
 
-extern void stm32_deselectsram(struct extmem_save_s *restore);
+extern void stm32_deselectsram(void);
+#endif /* CONFIG_STM32_FSMC */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM3210E_EVAL_SRC_STM3210E_INTERNAL_H */

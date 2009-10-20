@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_extmem.c
- * arch/arm/src/board/up_extmem.c
+ * configs/stm3210e-eval/src/up_selectsram.c
+ * arch/arm/src/board/up_selectsram.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,25 +41,18 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <assert.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
-
 #include "up_arch.h"
-#include "chip.h"
 #include "stm32_fsmc.h"
 #include "stm32_gpio.h"
-#include "stm32_internal.h"
 #include "stm3210e-internal.h"
+
+#ifdef CONFIG_STM32_FSMC
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-#ifndef CONFIG_STM32_FSMC
-#  warning "FSMC is not enabled"
-#endif
 
 #if STM32_NGPIO_PORTS < 6
 #  error "Required GPIO ports not enabled"
@@ -67,6 +60,10 @@
 
 /************************************************************************************
  * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Data
  ************************************************************************************/
 
 /* 512Kx16 SRAM is connected to bank2 of the FSMC interface and both 8- and 16-bit
@@ -89,38 +86,6 @@
  *   *JP7 will switch to PD6
  */
 
-/* It would be much more efficient to brute force these all into the
- * the appropriate registers.  Just a little tricky.
- */
-
-/* GPIO configurations common to SRAM and NOR Flash */
-
-const uint16 g_commonconfig[NCOMMON_CONFIG] =
-{
-  /* A0... A18 */
-
-  GPIO_NPS_A0,  GPIO_NPS_A1,  GPIO_NPS_A2,  GPIO_NPS_A3,
-  GPIO_NPS_A4,  GPIO_NPS_A5,  GPIO_NPS_A6,  GPIO_NPS_A7,
-  GPIO_NPS_A8,  GPIO_NPS_A9,  GPIO_NPS_A10, GPIO_NPS_A11,
-  GPIO_NPS_A12, GPIO_NPS_A13, GPIO_NPS_A14, GPIO_NPS_A15,
-  GPIO_NPS_A16, GPIO_NPS_A17, GPIO_NPS_A18,
-
-  /* D0... D15 */
-
-  GPIO_NPS_D0,  GPIO_NPS_D1,  GPIO_NPS_D2,  GPIO_NPS_D3,
-  GPIO_NPS_D4,  GPIO_NPS_D5,  GPIO_NPS_D6,  GPIO_NPS_D7,
-  GPIO_NPS_D8,  GPIO_NPS_D9,  GPIO_NPS_D10, GPIO_NPS_D11,
-  GPIO_NPS_D12, GPIO_NPS_D13, GPIO_NPS_D14, GPIO_NPS_D15,
-
-  /* NOE, NWE, NE3  */
-
-  GPIO_NPS_NOE, GPIO_NPS_NWE
-};
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
 /* GPIO configurations unique to SRAM  */
 
 static const uint16 g_sramconfig[] =
@@ -140,88 +105,40 @@ static const uint16 g_sramconfig[] =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_extmemgpios
+ * Name: stm32_selectsram
  *
  * Description:
- *   Initialize GPIOs for NOR or SRAM
+ *   Initialize to access external SRAM
  *
  ************************************************************************************/
 
-void stm32_extmemgpios(const uint16 *gpios, int ngpios)
+void stm32_selectsram(void)
 {
-  int i;
+  /* Configure new GPIO state */
 
-  /* Configure GPIOs */
-
-  for (i = 0; i < ngpios; i++)
-    {
-      stm32_configgpio(gpios[i]);
-    }
-}
-
-/************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_enablefsmc(void)
-{
-  uint32 regval;
+  stm32_extmemgpios(g_commonconfig, NCOMMON_CONFIG);
+  stm32_extmemgpios(g_sramconfig, NSRAM_CONFIG);
 
   /* Enable AHB clocking to the FSMC */
 
-  regval  = getreg32( STM32_RCC_AHBENR);
-  regval |= RCC_AHBENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHBENR);
-}
+  stm32_enablefsmc();
 
-/************************************************************************************
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
+  /* Bank1 NOR/SRAM control register configuration */
 
-void stm32_disablefsmc(void)
-{
-  uint32 regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHBENR);
-  regval &= ~RCC_AHBENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHBENR);
-}
-
-/************************************************************************************
- * Name: stm32_deselectsram
- *
- * Description:
- *   Disable NOR FLASH
- *
- ************************************************************************************/
-
-void stm32_deselectsram(struct extmem_save_s *restore)
-{
-  /* Restore registers to their power up settings */
-
-  putreg32(0x000030d2, STM32_FSMC_BCR3);
+  putreg32(FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR3);
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(0x0fffffff, STM32_FSMC_BTR3);
- 
-  /* Disable AHB clocking to the FSMC */
+  putreg32(FSMC_BTR_ADDSET(1)|FSMC_BTR_ADDHLD(1)|FSMC_BTR_DATAST(3)|FSMC_BTR_BUSTRUN(1)|
+           FSMC_BTR_CLKDIV(1)|FSMC_BTR_DATLAT(2)|FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
 
-  stm32_disableclocks();
+  putreg32(0xffffffff, STM32_FSMC_BCR3);
 
-  /* Restore GPIOs */
+  /* Enable the bank */
 
-  stm32_restoregpios(restore);
+  putreg32(FSMC_BCR_MBKEN|FSMC_BCR_MWID16|FSMC_BCR_WREN, STM32_FSMC_BCR3);
 }
+
+#endif /* CONFIG_STM32_FSMC */
 
 
