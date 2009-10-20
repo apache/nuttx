@@ -46,9 +46,6 @@
  *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *      The select() methods must call stm32_spitake() when the chip is selected
- *      and stm32_spigive() when the chip is deselected.  This assures mutually
- *      exclusive access to the SPI for the duration while a chip is selected.
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
@@ -119,6 +116,10 @@ struct stm32_spidev_s
   struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
   uint32           spibase;    /* SPIn base address */
   uint32           spiclock;   /* Clocking for the SPI module */
+  uint32           frequency;  /* Requested clock frequency */
+  uint32           actual;     /* Actual clock frequency */
+  ubyte            nbits;      /* Width of work in bits (8 or 16) */
+  ubyte            mode;       /* Mode 0,1,2,3 */
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   ubyte            spiirq;     /* SPI IRQ number */
 #endif
@@ -167,6 +168,7 @@ static inline void    spi_dmatxstart(FAR struct stm32_spidev_s *priv);
 
 /* SPI methods */
 
+static int            spi_lock(FAR struct spi_dev_s *dev, boolean lock);
 static uint32         spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
 static void           spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void           spi_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -191,6 +193,7 @@ static void           spi_portinitialize(FAR struct stm32_spidev_s *priv);
 #ifdef CONFIG_STM32_SPI1
 static const struct spi_ops_s g_sp1iops =
 {
+  .lock              = spi_lock,
   .select            = stm32_spi1select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -224,6 +227,7 @@ static struct stm32_spidev_s g_spi1dev =
 #ifdef CONFIG_STM32_SPI2
 static const struct spi_ops_s g_sp2iops =
 {
+  .lock              = spi_lock,
   .select            = stm32_spi2select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -257,6 +261,7 @@ static struct stm32_spidev_s g_spi2dev =
 #ifdef CONFIG_STM32_SPI3
 static const struct spi_ops_s g_sp3iops =
 {
+  .lock              = spi_lock,
   .select            = stm32_spi3select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -664,6 +669,51 @@ static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16 setbits, uint1
   spi_putreg(priv, STM32_SPI_CR1_OFFSET, cr1);
 }
 
+/****************************************************************************
+ * Name: spi_lock
+ *
+ * Description:
+ *   On SPI busses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the busses for a sequence of
+ *   transfers.  The bus should be locked before the chip is selected. After
+ *   locking the SPI bus, the caller should then also call the setfrequency,
+ *   setbits, and setmode methods to make sure that the SPI is properly
+ *   configured for the device.  If the SPI buss is being shared, then it
+ *   may have been left in an incompatible state.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   lock - TRUE: Lock spi bus, FALSE: unlock SPI bus
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static int spi_lock(FAR struct spi_dev_s *dev, boolean lock)
+{
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+
+  if (lock)
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      while (sem_wait(&priv->exclsem) != 0)
+        {
+          /* The only case that an error should occur here is if the wait was awakened
+           * by a signal.
+           */
+
+          ASSERT(errno == EINTR);
+        }
+    }
+  else
+    {
+      (void)sem_post(&priv->exclsem);
+    }
+  return OK;
+}
+
 /************************************************************************************
  * Name: spi_setfrequency
  *
@@ -685,67 +735,74 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
   uint16 setbits;
   uint32 actual;
 
-  /* Choices are limited by PCLK frequency with a set of divisors */
+  /* Has the frequency changed? */
 
-  if (frequency >= priv->spiclock >> 1)
+  if (frequency != priv->frequency)
     {
-      /* More than fPCLK/2.  This is as fast as we can go */
+      /* Choices are limited by PCLK frequency with a set of divisors */
 
-      setbits = SPI_CR1_FPCLCKd2; /* 000: fPCLK/2 */
-      actual = priv->spiclock >> 1;
-    }
-  else if (frequency >= priv->spiclock >> 2)
-    {
-      /* Between fPCLCK/2 and fPCLCK/4, pick the slower */
+      if (frequency >= priv->spiclock >> 1)
+        {
+          /* More than fPCLK/2.  This is as fast as we can go */
 
-      setbits = SPI_CR1_FPCLCKd4; /* 001: fPCLK/4 */
-      actual = priv->spiclock >> 2;
-    }
-  else if (frequency >= priv->spiclock >> 3)
-    {
-      /* Between fPCLCK/4 and fPCLCK/8, pick the slower */
+          setbits = SPI_CR1_FPCLCKd2; /* 000: fPCLK/2 */
+          actual = priv->spiclock >> 1;
+        }
+      else if (frequency >= priv->spiclock >> 2)
+        {
+          /* Between fPCLCK/2 and fPCLCK/4, pick the slower */
 
-      setbits = SPI_CR1_FPCLCKd8; /* 010: fPCLK/8 */
-      actual = priv->spiclock >> 3;
-    }
-  else if (frequency >= priv->spiclock >> 4)
-    {
-      /* Between fPCLCK/8 and fPCLCK/16, pick the slower */
+          setbits = SPI_CR1_FPCLCKd4; /* 001: fPCLK/4 */
+          actual = priv->spiclock >> 2;
+       }
+      else if (frequency >= priv->spiclock >> 3)
+        {
+          /* Between fPCLCK/4 and fPCLCK/8, pick the slower */
 
-     setbits = SPI_CR1_FPCLCKd16; /* 011: fPCLK/16 */
-      actual = priv->spiclock >> 4;
-    }
-  else if (frequency >= priv->spiclock >> 5)
-    {
-      /* Between fPCLCK/16 and fPCLCK/32, pick the slower */
+          setbits = SPI_CR1_FPCLCKd8; /* 010: fPCLK/8 */
+          actual = priv->spiclock >> 3;
+        }
+      else if (frequency >= priv->spiclock >> 4)
+        {
+          /* Between fPCLCK/8 and fPCLCK/16, pick the slower */
 
-      setbits = SPI_CR1_FPCLCKd32; /* 100: fPCLK/32 */
-      actual = priv->spiclock >> 5;
-    }
-  else if (frequency >= priv->spiclock >> 6)
-    {
-      /* Between fPCLCK/32 and fPCLCK/64, pick the slower */
+          setbits = SPI_CR1_FPCLCKd16; /* 011: fPCLK/16 */
+          actual = priv->spiclock >> 4;
+        }
+      else if (frequency >= priv->spiclock >> 5)
+        {
+          /* Between fPCLCK/16 and fPCLCK/32, pick the slower */
 
-      setbits = SPI_CR1_FPCLCKd64; /*  101: fPCLK/64 */
-      actual = priv->spiclock >> 6;
-    }
-  else if (frequency >= priv->spiclock >> 7)
-    {
-      /* Between fPCLCK/64 and fPCLCK/128, pick the slower */
+          setbits = SPI_CR1_FPCLCKd32; /* 100: fPCLK/32 */
+          actual = priv->spiclock >> 5;
+        }
+      else if (frequency >= priv->spiclock >> 6)
+        {
+          /* Between fPCLCK/32 and fPCLCK/64, pick the slower */
 
-      setbits = SPI_CR1_FPCLCKd128; /* 110: fPCLK/128 */
-      actual = priv->spiclock >> 7;
-    }
-  else
-    {
-      /* Less than fPCLK/128.  This is as slow as we can go */
+          setbits = SPI_CR1_FPCLCKd64; /*  101: fPCLK/64 */
+          actual = priv->spiclock >> 6;
+        }
+      else if (frequency >= priv->spiclock >> 7)
+        {
+          /* Between fPCLCK/64 and fPCLCK/128, pick the slower */
+
+          setbits = SPI_CR1_FPCLCKd128; /* 110: fPCLK/128 */
+          actual = priv->spiclock >> 7;
+        }
+      else
+        {
+          /* Less than fPCLK/128.  This is as slow as we can go */
  
-      setbits = SPI_CR1_FPCLCKd256; /* 111: fPCLK/256 */
-      actual = priv->spiclock >> 8;
-    }
+          setbits = SPI_CR1_FPCLCKd256; /* 111: fPCLK/256 */
+          actual = priv->spiclock >> 8;
+        }
 
-  spi_modifycr1(priv, setbits, SPI_CR1_BR_MASK);
-  return actual;
+      spi_modifycr1(priv, setbits, SPI_CR1_BR_MASK);
+      priv->frequency = frequency;
+      priv->actual    = actual;
+    }
+  return priv->actual;
 }
 
 /************************************************************************************
@@ -769,33 +826,41 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   uint16 setbits;
   uint16 clrbits;
 
-  switch (mode)
-    {
-    case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-      setbits = 0;
-      clrbits = SPI_CR1_CPOL|SPI_CR1_CPHA;
-      break;
- 
-    case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-      setbits = SPI_CR1_CPHA;
-      clrbits = SPI_CR1_CPOL;
-      break;
- 
-    case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-      setbits = SPI_CR1_CPOL;
-      clrbits = SPI_CR1_CPHA;
-      break;
- 
-    case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-      setbits = SPI_CR1_CPOL|SPI_CR1_CPHA;
-      clrbits = 0;
-      break;
- 
-    default:
-      return;
-    }
+  /* Has the mode changed? */
 
-    spi_modifycr1(priv, setbits, clrbits);
+  if (mode != priv->mode)
+    {
+      /* Yes... Set CR1 appropriately */
+
+      switch (mode)
+        {
+        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+          setbits = 0;
+          clrbits = SPI_CR1_CPOL|SPI_CR1_CPHA;
+          break;
+ 
+        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+          setbits = SPI_CR1_CPHA;
+          clrbits = SPI_CR1_CPOL;
+          break;
+ 
+        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+          setbits = SPI_CR1_CPOL;
+          clrbits = SPI_CR1_CPHA;
+          break;
+ 
+        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+          setbits = SPI_CR1_CPOL|SPI_CR1_CPHA;
+          clrbits = 0;
+          break;
+ 
+        default:
+          return;
+        }
+
+        spi_modifycr1(priv, setbits, clrbits);
+        priv->mode = mode;
+    }
 }
 
 /************************************************************************************
@@ -819,23 +884,31 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   uint16 setbits;
   uint16 clrbits;
 
-  switch (nbits)
+  /* Has the number of bits changed? */
+
+  if (nbits != priv->nbits)
     {
-    case 8:
-      setbits = 0;
-      clrbits = SPI_CR1_DFF;
-      break;
+      /* Yes... Set CR1 appropriately */
+
+      switch (nbits)
+        {
+        case 8:
+          setbits = 0;
+          clrbits = SPI_CR1_DFF;
+          break;
  
-    case 16:
-      setbits = SPI_CR1_DFF;
-      clrbits = 0;
-      break;
+        case 16:
+          setbits = SPI_CR1_DFF;
+          clrbits = 0;
+          break;
 
-    default:
-      return;
+        default:
+          return;
+        }
+
+        spi_modifycr1(priv, setbits, clrbits);
+        priv->nbits = nbits;
     }
-
-    spi_modifycr1(priv, setbits, clrbits);
 }
 
 /************************************************************************************
@@ -1094,8 +1167,12 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
   setbits = SPI_CR1_MSTR|SPI_CR1_SSI|SPI_CR1_SSM;
   spi_modifycr1(priv, setbits, clrbits);
 
+  priv->nbits = 8;
+  priv->mode  = SPIDEV_MODE0;
+
   /* Select a default frequency of approx. 400KHz */
 
+  priv->frequency = 0;
   spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
 
   /* CRCPOLY configuration */
@@ -1225,39 +1302,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   irqrestore(flags);
   return (FAR struct spi_dev_s *)priv;
-}
-
-/************************************************************************************
- * Name: stm32_spitake() and stm32_spigive()
- *
- * Description:
- *   The stm32_spi1/2/3select() and stm32_spi1/2/3status() methods must call
- *   stm32_spitake() when the chip is selected and stm32_spigive() when the chip is
- *   deselected.  This assures mutually exclusive access to the SPI for the duration
- *   while a chip is selected.
- *
- ************************************************************************************/
-
-void stm32_spitake(FAR struct spi_dev_s *dev)
-{
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-
-  /* Take the semaphore (perhaps waiting) */
-
-  while (sem_wait(&priv->exclsem) != 0)
-    {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
-       */
-
-      ASSERT(errno == EINTR);
-    }
-}
-
-void stm32_spigive(FAR struct spi_dev_s *dev)
-{
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-  (void)sem_post(&priv->exclsem);
 }
 
 #endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 || CONFIG_STM32_SPI3 */

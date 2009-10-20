@@ -184,6 +184,7 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t 
 
 static const struct spi_ops_s g_spiops =
 {
+  .lock         = 0,                /* Not yet implemented */
   .select       = imx_spiselect,    /* Provided externally by board logic */
   .setfrequency = spi_setfrequency,
   .setmode      = spi_setmode,

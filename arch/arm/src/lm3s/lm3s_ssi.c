@@ -251,6 +251,7 @@ static void   ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t 
 
 static const struct spi_ops_s g_spiops =
 {
+  .lock         = 0,                 /* Not yet implemented */
   .select       = lm3s_spiselect,    /* Provided externally by board logic */
   .setfrequency = ssi_setfrequency,
   .setmode      = ssi_setmode,
