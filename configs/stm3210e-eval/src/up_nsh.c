@@ -45,7 +45,10 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/spi.h>
+#ifdef CONFIG_STM32_SPI1
+#  include <nuttx/spi.h>
+#  include <nuttx/mtd.h>
+#endif
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
@@ -53,6 +56,10 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
+/* For now, don't build in any SPI1 support -- NSH is not using it */
+
+#undef CONFIG_STM32_SPI1
 
 /* PORT and SLOT number probably depend on the board configuration */
 
@@ -62,23 +69,8 @@
 #  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #endif
 
-/* MMC/SD is on SPI1 */
-#warning "MicoSD is on SDIO port, not SPI"
-
-#ifndef CONFIG_STM32_SPI1
-#  undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
-#  undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#endif
-
-#if defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) && CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 0
-#  error MMC/SD is on SPI1
-#  undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
-#  undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#endif
-
 #if defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) && CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
 #  error "Only one MMC/SD slot"
-#  undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
 #  undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
 #endif
 
@@ -124,39 +116,44 @@ int nsh_archinitialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
   FAR struct spi_dev_s *spi;
-  int ret;
+  FAR struct mtd_dev_s *mtd;
+#endif
 
+  /* Configure SPI-based devices */
+
+#ifdef CONFIG_STM32_SPI1
   /* Get the SPI port */
 
-  message("nsh_archinitialize: Initializing SPI port %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
-
-  spi = up_spiinitialize(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+  message("nsh_archinitialize: Initializing SPI port 0\n");
+  spi = up_spiinitialize(0);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+      message("nsh_archinitialize: Failed to initialize SPI port 0\n");
       return -ENODEV;
     }
+  message("nsh_archinitialize: Successfully initialized SPI port 0\n");
 
-  message("nsh_archinitialize: Successfully initialized SPI port %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+  /* Now bind the SPI interface to the M25P64/128 SPI FLASH driver */
 
-  /* Bind the SPI port to the slot */
-
-  message("nsh_archinitialize: Binding SPI port %d to MMC/SD slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
-
-  ret = mmcsd_spislotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, spi);
-  if (ret < 0)
+  message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
+  mtd = m25p_initialize(spi);
+  if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ret);
-      return ret;
+      message("nsh_archinitialize: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+      return -ENODEV;
     }
-
-  message("nsh_archinitialize: Successfuly bound SPI port %d to MMC/SD slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+  message("nsh_archinitialize: Successfully bound SPI port 0 to the SPI FLASH driver\n");
+#warning "Now what are we going to do with this SPI FLASH driver?"
 #endif
+
+  /* Create the SPI FLASH MTD instance */
+
+  /* Here we will eventually need to
+   * 1. Get the SDIO interface instance, and 
+   * 2. Bind it to the MMC/SD driver (slot CONFIG_EXAMPLES_NSH_MMCSDSLOTNO,
+   *    CONFIG_EXAMPLES_NSH_MMCSDMINOR).
+   */
+
+#warning "Missing MMC/SD device configuration"
   return OK;
 }

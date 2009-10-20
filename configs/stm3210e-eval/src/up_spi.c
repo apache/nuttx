@@ -79,36 +79,6 @@
  * Private Functions
  ************************************************************************************/
 
-static void stm32_chipselect(FAR struct spi_dev_s *dev, uint32 pinset, boolean pinval, boolean selected)
-{
-  spidbg("devid: %d CS: %s pinset: %08x pinval: %s\n",
-         (int)devid, selected ? "assert" : "de-assert", pinset, pinval ? "HIGH" : "LOW");
-
-  /* If we are selecting the chip, then we must call stm32_spitake to assure that we
-   * have mutually exclusive access to the SPI bus while the chip is selected.
-   */
-
-  if (selected)
-    {
-      stm32_spitake(dev);
-    }
-
-  /* Then set the CHIP select.  Usually the chip select is LOW to select and HIGH, but
-   * that can vary from part to part.
-   */
-
-  stm32_gpiowrite(pinset, pinval);
-
-  /* If we just de-selected the chip, then we must call stm32_spigive to to relinquish
-   * our exclusive access to the SPI bus.  Now, any waiting threads can have the SPI.
-   */
-
-  if (!selected)
-    {
-      stm32_spigive(dev);
-    }
-}
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -130,10 +100,8 @@ void weak_function stm32_spiinitialize(void)
    */
 
 #ifdef CONFIG_STM32_SPI1
-  /* Configure the SPI-based microSD and FLASH CS GPIO */
+  /* Configure the SPI-based FLASH CS GPIO */
 
-#warning "MicoSD is on SDIO port, not SPI"
-  stm32_configgpio(GPIO_MMCSD_CS);
   stm32_configgpio(GPIO_FLASH_CS);
 #endif
 }
@@ -154,9 +122,6 @@ void weak_function stm32_spiinitialize(void)
  *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *      The select() methods must call stm32_spitake() when the chip is selected
- *      and stm32_spigive() when the chip is deselected.  This assures mutually
- *      exclusive access to the SPI for the duration while a chip is selected.
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
@@ -171,17 +136,11 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean s
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_FLASH)
   {
     /* Set the GPIO low to select and high to de-select */
 
-    stm32_chipselect(dev, GPIO_MMCSD_CS,!selected, selected);
-  }
-  else if (devid == SPIDEV_FLASH)
-  {
-    /* Set the GPIO low to select and high to de-select */
-
-    stm32_chipselect(dev, GPIO_FLASH_CS,!selected, selected);
+    stm32_gpiowrite(GPIO_FLASH_CS, !selected);
   }
 }
 

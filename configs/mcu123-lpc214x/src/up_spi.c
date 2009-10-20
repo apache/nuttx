@@ -133,12 +133,14 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t 
 
 static const struct spi_ops_s g_spiops =
 {
+  .lock              = 0,                 /* Not yet implemented */
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
   .status            = spi_status,
   .send              = spi_send,
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
+  .registercallback  = 0,                 /* Not implemented */
 };
 
 static struct spi_dev_s g_spidev = { &g_spiops };
