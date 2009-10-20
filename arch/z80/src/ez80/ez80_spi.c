@@ -77,6 +77,7 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t
 
 static const struct spi_ops_s g_spiops =
 {
+  0,                 /* lock() method not yet implemented */
   ez80_spiselect,    /* Provided externally by board logic */
   spi_setfrequency,
   spi_setmode,
@@ -85,6 +86,7 @@ static const struct spi_ops_s g_spiops =
   spi_send,
   spi_sndblock,
   spi_recvblock,
+  0                  /* registercallback not yet implemented */
 };
 
 /* This supports is only a single SPI bus/port.  If you port this to an

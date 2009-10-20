@@ -65,7 +65,7 @@
  *  (32768 pages) * (256 bytes per page)
  */
 
-#define M25P_M25P64_SECTOR_SHIFT  16	/* Sector size 1 << 16 = 65,536 */
+#define M25P_M25P64_SECTOR_SHIFT  16    /* Sector size 1 << 16 = 65,536 */
 #define M25P_M25P64_NSECTORS      128
 #define M25P_M25P64_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
 #define M25P_M25P64_NPAGES        32768
@@ -75,7 +75,7 @@
  *  (65536 pages) * (256 bytes per page)
  */
 
-#define M25P_M25P128_SECTOR_SHIFT 18	/* Sector size 1 << 18 = 262,144 */
+#define M25P_M25P128_SECTOR_SHIFT 18    /* Sector size 1 << 18 = 262,144 */
 #define M25P_M25P128_NSECTORS     64
 #define M25P_M25P128_PAGE_SHIFT   8     /* Page size 1 << 8 = 256 */
 #define M25P_M25P128_NPAGES       65536
@@ -129,7 +129,7 @@ struct m25p_dev_s
   FAR struct spi_dev_s *dev; /* Saved SPI interface instance */
   ubyte  sectorshift;        /* 16 or 18 */
   ubyte  pageshift;          /* 8 */
-  uint16 nsectors;			 /* 128 or 64 */
+  uint16 nsectors;           /* 128 or 64 */
   uint32 npages;             /* 32,768 or 65,536 */
 };
 
@@ -139,6 +139,8 @@ struct m25p_dev_s
 
 /* Helpers */
 
+static void m25p_lock(FAR struct spi_dev_s *dev);
+static inline void m25p_unlock(FAR struct spi_dev_s *dev);
 static inline int m25p_readid(struct m25p_dev_s *priv);
 static void m25p_waitwritecomplete(struct m25p_dev_s *priv);
 static void m25p_writeenable(struct m25p_dev_s *priv);
@@ -167,6 +169,42 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: m25p_lock
+ ************************************************************************************/
+
+static void m25p_lock(FAR struct spi_dev_s *dev)
+{
+  /* On SPI busses where there are multiple devices, it will be necessary to
+   * lock SPI to have exclusive access to the busses for a sequence of
+   * transfers.  The bus should be locked before the chip is selected.
+   *
+   * This is a blocking call and will not return until we have exclusiv access to
+   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   */
+
+  (void)SPI_LOCK(dev, TRUE);
+
+  /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
+   * setmode methods to make sure that the SPI is properly configured for the device.
+   * If the SPI buss is being shared, then it may have been left in an incompatible
+   * state.
+   */
+
+  SPI_SETMODE(dev, SPIDEV_MODE3);
+  SPI_SETBITS(dev, 8);
+  (void)SPI_SETFREQUENCY(dev, 20000000);
+}
+
+/************************************************************************************
+ * Name: m25p_unlock
+ ************************************************************************************/
+
+static inline void m25p_unlock(FAR struct spi_dev_s *dev)
+{
+  (void)SPI_LOCK(dev, FALSE);
+}
+
+/************************************************************************************
  * Name: m25p_readid
  ************************************************************************************/
 
@@ -178,11 +216,9 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
 
   fvdbg("priv: %p\n", priv);
 
-  /* Select this FLASH part.  This is a blocking call and will not return
-   * until we have exclusiv access to the SPI buss.  We will retain that
-   * exclusive access until the chip is de-selected.
-   */
+  /* Lock the SPI bus, configure the bus, and select this FLASH part. */
 
+  m25p_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
@@ -192,12 +228,13 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
   memory       = SPI_SEND(priv->dev, M25P_DUMMY);
   capacity     = SPI_SEND(priv->dev, M25P_DUMMY);
 
-  fvdbg("manufacturer: %02x memory: %02x capacity: %02x\n",
-        manufacturer, memory, capacity);
-
-  /* Deselect the FLASH */
+  /* Deselect the FLASH and unlock the bus */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  m25p_unlock(priv->dev);
+
+  fvdbg("manufacturer: %02x memory: %02x capacity: %02x\n",
+        manufacturer, memory, capacity);
 
   /* Check for a valid manufacturer and memory type */
 
@@ -236,10 +273,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 {
   ubyte status;
 
-  /* Select this FLASH part.  This is a blocking call and will not return
-   * until we have exclusiv access to the SPI buss.  We will retain that
-   * exclusive access until the chip is de-selected.
-   */
+  /* Select this FLASH part */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
 
@@ -269,10 +303,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 
 static void m25p_writeenable(struct m25p_dev_s *priv)
 {
-  /* Select this FLASH part.  This is a blocking call and will not return
-   * until we have exclusiv access to the SPI buss.  We will retain that
-   * exclusive access until the chip is de-selected.
-   */
+  /* Select this FLASH part */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
 
@@ -308,10 +339,7 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
 
   m25p_writeenable(priv);
 
-  /* Select this FLASH part.  This is a blocking call and will not return
-   * until we have exclusiv access to the SPI buss.  We will retain that
-   * exclusive access until the chip is de-selected.
-   */
+  /* Select this FLASH part */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
 
@@ -338,7 +366,7 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
  * Name:  m25p_bulkerase
  ************************************************************************************/
 
-static inline int  m25p_bulkerase(struct m25p_dev_s *priv)
+static inline int m25p_bulkerase(struct m25p_dev_s *priv)
 {
   fvdbg("priv: %p\n", priv);
 
@@ -354,10 +382,7 @@ static inline int  m25p_bulkerase(struct m25p_dev_s *priv)
 
   m25p_writeenable(priv);
 
-  /* Select this FLASH part.  This is a blocking call and will not return
-   * until we have exclusiv access to the SPI buss.  We will retain that
-   * exclusive access until the chip is de-selected.
-   */
+  /* Select this FLASH part */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
 
@@ -395,10 +420,7 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buff
 
   m25p_writeenable(priv);
   
-  /* Select this FLASH part.  This is a blocking call and will not return
-   * until we have exclusiv access to the SPI buss.  We will retain that
-   * exclusive access until the chip is de-selected.
-   */
+  /* Select this FLASH part */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
 
@@ -433,12 +455,17 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
+  /* Lock access to the SPI bus until we complete the erase */
+
+  m25p_lock(priv->dev);
   while (blocksleft-- > 0)
     {
-		m25p_sectorerase(priv, startblock);
-		startblock++;
-    }
+      /* Erase each sector */
 
+      m25p_sectorerase(priv, startblock);
+      startblock++;
+    }
+  m25p_unlock(priv->dev);
   return (int)nblocks;
 }
 
@@ -459,7 +486,7 @@ static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
   nbytes = m25p_read(dev, startblock << priv->pageshift, nblocks << priv->pageshift, buffer);
   if (nbytes > 0)
     {
-	    return nbytes >> priv->pageshift;
+        return nbytes >> priv->pageshift;
     }
   return nbytes;
 }
@@ -476,13 +503,15 @@ static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  /* Write each page to FLASH */
+  /* Lock the SPI bus and write each page to FLASH */
 
+  m25p_lock(priv->dev);
   while (blocksleft-- > 0)
     {
       m25p_pagewrite(priv, buffer, startblock);
       startblock++;
    }
+  m25p_unlock(priv->dev);
 
   return nblocks;
 }
@@ -506,11 +535,9 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   m25p_waitwritecomplete(priv);
 
-  /* Select this FLASH part.  This is a blocking call and will not return
-   * until we have exclusiv access to the SPI buss.  We will retain that
-   * exclusive access until the chip is de-selected.
-   */
+  /* Lock the SPI bus and select this FLASH part */
 
+  m25p_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
 
   /* Send "Read from Memory " instruction */
@@ -527,9 +554,10 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   SPI_RECVBLOCK(priv->dev, buffer, nbytes);
 
-  /* Deselect the FLASH */
+  /* Deselect the FLASH and unlock the SPI bus */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  m25p_unlock(priv->dev);
   fvdbg("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
@@ -574,9 +602,11 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_BULKERASE:
         {
-	        /* Erase the entire device */
+            /* Erase the entire device */
 
-	        ret = m25p_bulkerase(priv);
+            m25p_lock(priv->dev);
+            ret = m25p_bulkerase(priv);
+            m25p_unlock(priv->dev);
         }
         break;
  
@@ -633,12 +663,6 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
       /* Deselect the FLASH */
 
       SPI_SELECT(dev, SPIDEV_FLASH, FALSE);
-
-      /* Make sure that SPI is correctly configured from this FLASH */
-
-      SPI_SETMODE(dev, SPIDEV_MODE3);
-      SPI_SETBITS(dev, 8);
-      SPI_SETFREQUENCY(dev, 20000000);
 
       /* Identify the FLASH chip and get its capacity */
 

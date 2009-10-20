@@ -26,6 +26,7 @@ NuttX TODO List (Last updated September 16, 2009)
   (8)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (3)  ARM/LM3S6918 (arch/arm/src/lm3s/)
+  (5)  ARM/STM32 (arch/arm/src/stm32/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -640,6 +641,29 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
                Windows dependencies needed to be quoted in the Make.dep files.
   Status:      Open
   Priority:    Low -- unless some dependency-related build issues is discovered.
+
+o ARM/STM32 (arch/arm/src/stm32/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: DMA subsystem is untested.
+  Status:      Open
+  Priority:    Low -- for now
+
+  Description: NOR Flash driver and FTL layer to support a file system.
+  Status:      Open
+  Priority:    Low
+
+  Description: MMC/SD SDIO driver needed.
+  Status:      Open
+  Priority:    Medium
+
+  Description  USB device-side driver
+  Status:      Open
+  Priority:    Medium-High
+  
+  Description: Framebuffer driver needed.
+  Status:      Open
+  Priority:    High
 
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

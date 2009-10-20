@@ -50,6 +50,29 @@
 /* Access macros */
 
 /****************************************************************************
+ * Name: SPI_LOCK
+ *
+ * Description:
+ *   On SPI busses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the busses for a sequence of
+ *   transfers.  The bus should be locked before the chip is selected. After
+ *   locking the SPI bus, the caller should then also call the setfrequency,
+ *   setbits, and setmode methods to make sure that the SPI is properly
+ *   configured for the device.  If the SPI buss is being shared, then it
+ *   may have been left in an incompatible state.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   lock - TRUE: Lock spi bus, FALSE: unlock SPI bus
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define SPI_LOCK(d,l) ((d)->ops->lock ? (d)->ops->lock(d,l) : OK)
+
+/****************************************************************************
  * Name: SPI_SELECT
  *
  * Description:
@@ -296,6 +319,7 @@ enum spi_mode_e
 struct spi_dev_s;
 struct spi_ops_s
 {
+  int    (*lock)(FAR struct spi_dev_s *dev, boolean lock);
   void   (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
   uint32 (*setfrequency)(FAR struct spi_dev_s *dev, uint32 frequency);
   void   (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
