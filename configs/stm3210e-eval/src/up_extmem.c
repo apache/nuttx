@@ -197,7 +197,7 @@ static void stm32_savegpios(struct extmem_save_s *save)
 
 static void stm32_restoregpios(struct extmem_save_s *restore)
 {
-  DEBUGASSERT(save != NULL);
+  DEBUGASSERT(restore != NULL);
   putreg32(restore->gpiod_crl, STM32_GPIOE_CRL);
   putreg32(restore->gpiod_crh, STM32_GPIOE_CRH);
   putreg32(restore->gpioe_crl, STM32_GPIOD_CRL);
