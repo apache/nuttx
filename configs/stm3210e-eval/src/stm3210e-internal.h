@@ -75,6 +75,24 @@
 #define GPIO_FLASH_CS (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN2)
 
 /************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/* GPIO settings that will be altered when external memory is selected */
+
+struct extmem_save_s
+{
+  uint32 gpiod_crl;
+  uint32 gpiod_crh;
+  uint32 gpioe_crl;
+  uint32 gpioe_crh;
+  uint32 gpiof_crl;
+  uint32 gpiof_crh;
+  uint32 gpiog_crl;
+  uint32 gpiog_crh;
+};
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -89,6 +107,45 @@
  ************************************************************************************/
 
 extern void weak_function stm32_spiinitialize(void);
+
+/************************************************************************************
+ * Name: stm32_selectnor
+ *
+ * Description:
+ *   Initialize to access NOR flash
+ *
+ ************************************************************************************/
+
+extern void stm32_selectnor(struct extmem_save_s *save);
+
+/************************************************************************************
+ * Name: stm32_deselectnor
+ *
+ * Description:
+ *   Disable NOR FLASH
+ *
+ ************************************************************************************/
+
+extern void stm32_deselectnor(struct extmem_save_s *restore);
+
+/************************************************************************************
+ * Name: stm32_selectsram
+ *
+ * Description:
+ *   Initialize to access external SRAM
+ *
+ ************************************************************************************/
+
+extern void stm32_selectsram(struct extmem_save_s *save);
+/************************************************************************************
+ * Name: stm32_deselectsram
+ *
+ * Description:
+ *   Disable NOR FLASH
+ *
+ ************************************************************************************/
+
+extern void stm32_deselectsram(struct extmem_save_s *restore);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM3210E_EVAL_SRC_STM3210E_INTERNAL_H */
