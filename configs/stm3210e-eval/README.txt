@@ -78,6 +78,23 @@ GNU Toolchain Options
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
   path or will get the wrong version of make.
 
+CodeSourcery on Linux
+^^^^^^^^^^^^^^^^^^^^^
+
+  If you select the CodeSourcery toolchain, the make system will assume that you
+  are running a Windows version of the toolchain.  If you are running under Linux,
+  the the make will probably fail.  The fix is to edit your Make.defs file and
+  use something like:
+
+    CROSSDEV = arm-none-eabi-
+    WINTOOL = n
+    MKDEP = $(TOPDIR)/tools/mkdeps.sh
+    ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+    ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
+    ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+    ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
+    MAXOPTIMIZATION = -O2
+
 IDEs
 ^^^^
 

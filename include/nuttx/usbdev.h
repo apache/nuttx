@@ -140,7 +140,7 @@
 
 #define DEV_DISCONNECT(dev)        (dev)->ops->pullup ? (dev)->ops->pullup(dev,FALSE) : -EOPNOTSUPP
 
-/* USB Class Driver Helpsers ********************************************************/
+/* USB Class Driver Helpers *********************************************************/
 /* All may be called from interupt handling logic except bind() and unbind() */
 
 /* Invoked when the driver is bound to a USB device driver. */
