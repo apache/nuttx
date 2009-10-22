@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated September 16, 2009)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated October 20, 2009)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (2)  Memory Managment (mm/)
@@ -661,9 +661,14 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Status:      Open
   Priority:    Medium-High
   
-  Description: Framebuffer driver needed.
+  Description: Framebuffer/LCD driver needed (I don't know if it can handle a 
+               framebuffer or not).
   Status:      Open
   Priority:    High
+
+  Description: FSMC externmal memory support is untested
+  Status:      Opon
+  Priority:    Low
 
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

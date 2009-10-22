@@ -95,6 +95,11 @@ CodeSourcery on Linux
     ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
     MAXOPTIMIZATION = -O2
 
+  Where LDSCRIPT is defined to be either ld.script or ld.script.dfu.  The values
+  for TOPDIR is provided by the make system; the value for CONFIG_ARCH_BOARD is
+  provided in your defconfig file. 'ostest' refers to the ostest/ configuration;
+  this would be different for other configurations.
+
 IDEs
 ^^^^
 

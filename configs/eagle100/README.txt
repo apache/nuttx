@@ -95,8 +95,12 @@ CodeSourcery on Linux
     ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
     ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
     ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-    ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
+    ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
     MAXOPTIMIZATION = -O2
+
+  The values for TOPDIR is provided by the make system; the value for CONFIG_ARCH_BOARD
+  is provided in your defconfig file.  'ostest' refers to the ostest/ configuration;
+  this would be different for other configurations.
 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
