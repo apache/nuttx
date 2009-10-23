@@ -102,6 +102,9 @@ CodeSourcery on Linux
   is provided in your defconfig file.  'ostest' refers to the ostest/ configuration;
   this would be different for other configurations.
 
+  For an example of a CodeSourcery-under-Linux Make.defs file, see
+  configs/stm3210e-eval/nsh/Make.defs.
+
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 

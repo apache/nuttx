@@ -27,18 +27,19 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_STM32_CODESOURCERY=y
-    CONFIG_STM32_DEVKITARM=y
-    CONFIG_STM32_RAISONANCE=y
-    CONFIG_STM32_BUILDROOT=y	(default)
+    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_STM32_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
+    CONFIG_STM32_BUILDROOT=y	  : NuttX buildroot under Windows or Cygwin (default)
 
   If you are not using CONFIG_STM32_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery, devkitARM, and Raisonance toolchains are Windows native
-  toolchains.  The NuttX buildroot toolchain is a Cygwin or Linux native toolchain.
-  There are several limitations to using a Windows based toolchain in a Cygwin
-  environment.  The three biggest are:
+  NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
+  Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
+  toolchains are Cygwin and/or Linux native toolchains. There are several limitations
+  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -77,28 +78,6 @@ GNU Toolchain Options
   NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
   path or will get the wrong version of make.
-
-CodeSourcery on Linux
-^^^^^^^^^^^^^^^^^^^^^
-
-  If you select the CodeSourcery toolchain, the make system will assume that you
-  are running a Windows version of the toolchain.  If you are running under Linux,
-  the the make will probably fail.  The fix is to edit your Make.defs file and
-  use something like:
-
-    CROSSDEV = arm-none-eabi-
-    WINTOOL = n
-    MKDEP = $(TOPDIR)/tools/mkdeps.sh
-    ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-    ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-    ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-    ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
-    MAXOPTIMIZATION = -O2
-
-  Where LDSCRIPT is defined to be either ld.script or ld.script.dfu.  The values
-  for TOPDIR is provided by the make system; the value for CONFIG_ARCH_BOARD is
-  provided in your defconfig file. 'ostest' refers to the ostest/ configuration;
-  this would be different for other configurations.
 
 IDEs
 ^^^^
