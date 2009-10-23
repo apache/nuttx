@@ -38,88 +38,103 @@ include ${TOPDIR}/.config
 # Setup for the selected toolchain
 
 ifeq ($(CONFIG_STM32_DFU),y)
-  LDSCRIPT		= ld.script.dfu
+  LDSCRIPT = ld.script.dfu
 else
-  LDSCRIPT		= ld.script
+  LDSCRIPT = ld.script
 endif
 
-ifneq ($(CONFIG_STM32_BUILDROOT),y)
-  # Windows-native toolchains
+ifeq ($(CONFIG_STM32_CODESOURCERYW),y)
+  # CodeSourcery under Windows
+  CROSSDEV = arm-none-eabi-
+  WINTOOL = y
+  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+endif
+ifeq ($(CONFIG_STM32_CODESOURCERYL),y)
+  # CodeSourcery under Linux
+  CROSSDEV = arm-none-eabi-
+  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+endif
 ifeq ($(CONFIG_STM32_DEVKITARM),y)
-  CROSSDEV		= arm-eabi-
-else
-  CROSSDEV		= arm-none-eabi-
+  # devkitARM under Windows
+  CROSSDEV = arm-eabi-
+  WINTOOL = y
+  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
 endif
-  WINTOOL		= y
-  DIRLINK 		= $(TOPDIR)/tools/winlink.sh
-  DIRUNLINK		= $(TOPDIR)/tools/unlink.sh
-  MKDEP			= $(TOPDIR)/tools/mknulldeps.sh
-  ARCHCPUFLAGS		= -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-  ARCHINCLUDES		= -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
-  ARCHXXINCLUDES	= -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT		= -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/$(LDSCRIPT)}"
-  MAXOPTIMIZATION	= -O2
-# The NuttX buildroot toolchain
-else
-  # Linux/Cygwin-native toolchain (assumed from the NuttX buildroot)
-  CROSSDEV			= arm-elf-
-  MKDEP			= $(TOPDIR)/tools/mkdeps.sh
-  ARCHCPUFLAGS		= -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
-  ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
-  ARCHXXINCLUDES	= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-  ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/$(LDSCRIPT)
-  MAXOPTIMIZATION	= -Os
+ifeq ($(CONFIG_STM32_RAISONANCE),y)
+  # Raisonance RIDE7 under Windows
+  CROSSDEV = arm-none-eabi-
+  WINTOOL = y
+  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+endif
+ifeq ($(CONFIG_STM32_BUILDROOT),y)
+  # NuttX buildroot under Linux or Cygwin
+  CROSSDEV = arm-elf-
+  ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
 endif
 
-CC			= $(CROSSDEV)gcc
-CXX			= $(CROSSDEV)g++
-CPP			= $(CROSSDEV)gcc -E
-LD			= $(CROSSDEV)ld
-AR			= $(CROSSDEV)ar rcs
-NM			= $(CROSSDEV)nm
-OBJCOPY			= $(CROSSDEV)objcopy
-OBJDUMP			= $(CROSSDEV)objdump
+ifeq ($(WINTOOL),y)
+  # Windows-native toolchains
+  DIRLINK = $(TOPDIR)/tools/winlink.sh
+  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+  MKDEP = $(TOPDIR)/tools/mknulldeps.sh
+  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
+  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/$(LDSCRIPT)}"
+  MAXOPTIMIZATION = -O2
+else
+  # Linux/Cygwin-native toolchain 
+  MKDEP = $(TOPDIR)/tools/mkdeps.sh
+  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
+  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/$(LDSCRIPT)
+  MAXOPTIMIZATION = -Os
+endif
 
-ARCHCCVERSION		= ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
-ARCHCCMAJOR		= ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E
+LD = $(CROSSDEV)ld
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
+
+ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
+ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
-  ARCHOPTIMIZATION	= -g
+  ARCHOPTIMIZATION = -g
 else
-  ARCHOPTIMIZATION	= $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION = $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
-ARCHCFLAGS		= -fno-builtin
-ARCHCXXFLAGS		= -fno-builtin -fno-exceptions
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
-ARCHWARNINGSXX		= -Wall -Wshadow
-ARCHDEFINES		=
-ARCHPICFLAGS		= -fpic -msingle-pic-base -mpic-register=r10
+ARCHCFLAGS = -fno-builtin
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGSXX = -Wall -Wshadow
+ARCHDEFINES =
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
-CFLAGS			= $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
-CPICFLAGS		= $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS		= $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) -pipe
-CXXPICFLAGS		= $(ARCHPICFLAGS) $(CXXFLAGS)
-CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES)
-AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
+CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES)
+AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 
-NXFLATLDFLAGS1		= -r -d -warn-common
-NXFLATLDFLAGS2		= $(NXFLATLDFLAGS1) \
-			  -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat.ld \
-			  -no-check-sections
-LDNXFLATFLAGS		= -e main -s 2048
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat.ld -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048
 
-OBJEXT			= .o
-LIBEXT			= .a
-EXEEXT			=
+OBJEXT = .o
+LIBEXT = .a
+EXEEXT =
 
 ifneq ($(CROSSDEV),arm-elf-)
-  LDFLAGS		+= -nostartfiles -nodefaultlibs
+  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS		+= -g
+  LDFLAGS += -g
 endif
 
 define PREPROCESS
@@ -151,8 +166,8 @@ define CLEAN
 	@rm -f *.o *.a
 endef
 
-HOSTCC			= gcc
-HOSTINCLUDES		= -I.
-HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -g -pipe
-HOSTLDFLAGS		=
+HOSTCC = gcc
+HOSTINCLUDES = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
+HOSTLDFLAGS =
 
