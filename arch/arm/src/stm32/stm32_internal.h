@@ -825,6 +825,21 @@ EXTERN ubyte stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 EXTERN void  stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
 EXTERN ubyte stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
+/************************************************************************************
+ * Name:  stm32_pullup
+ *
+ * Description:
+ *   If USB is supported and the board supports a pullup via GPIO (for USB software
+ *   connect and disconnect), then the board software must provide stm32_pullup.
+ *   See include/nuttx/usbdev.h for additional description of this method.
+ *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
+ *   NULL.
+ *
+ ************************************************************************************/
+
+struct usbdev_s;
+EXTERN int stm32_pullup(FAR struct usbdev_s *dev,  boolean enable);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
