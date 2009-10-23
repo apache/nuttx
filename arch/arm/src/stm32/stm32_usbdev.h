@@ -73,15 +73,15 @@
 /* Buffer Descriptor Table (Relatative to BTABLE address) */
 
 #define STM32_USB_ADDR_TX_WOFFSET   (0)     /* Transmission buffer address n (16-bits) */
-#define STM32_USB_COUNT_TX_WOFFSET) (2)     /* Transmission byte count n (16-bits) */
+#define STM32_USB_COUNT_TX_WOFFSET  (2)     /* Transmission byte count n (16-bits) */
 #define STM32_USB_ADDR_RX_WOFFSET   (4)     /* Reception buffer address n (16-bits) */
 #define STM32_USB_COUNT_RX_WOFFSET  (6)     /* Reception byte count n (16-bits) */
 
-#define STM32_USB_BTABLE_OFFSET(ep,o) ((((uint32)getreg16(STM32_USB_BTABLE) + ((ep) << 3)) + (o))  << 1)
-#define STM32_USB_ADDR_TX_OFFSET(ep)  STM32_USB_BTABLE_OFFSET(ep,STM32_USB_ADDR_TX_WOFFSET)
-#define STM32_USB_COUNT_TX_OFFSET(ep) STM32_USB_BTABLE_OFFSET(ep,STM32_USB_COUNT_TX_WOFFSET)
-#define STM32_USB_ADDR_RX_OFFSET(ep)  STM32_USB_BTABLE_OFFSET(ep,STM32_USB_ADDR_RX_WOFFSET)
-#define STM32_USB_COUNT_RX_OFFSET(ep) STM32_USB_BTABLE_OFFSET(ep,STM32_USB_COUNT_RX_WOFFSET)
+#define STM32_USB_BTABLE_RADDR(ep,o) ((((uint32)getreg16(STM32_USB_BTABLE) + ((ep) << 3)) + (o))  << 1)
+#define STM32_USB_ADDR_TX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_TX_WOFFSET)
+#define STM32_USB_COUNT_TX_OFFSET(ep) STM32_USB_BTABLE_RADDR(ep,STM32_USB_COUNT_TX_WOFFSET)
+#define STM32_USB_ADDR_RX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_RX_WOFFSET)
+#define STM32_USB_COUNT_RX_OFFSET(ep) STM32_USB_BTABLE_RADDR(ep,STM32_USB_COUNT_RX_WOFFSET)
 
 /* Register Addresses ***************************************************************/
 
@@ -107,7 +107,7 @@
 
 /* Buffer Descriptor Table (Relatative to BTABLE address) */
 
-#define STM32_USB_BTABLE_ADDR(ep,o)  (STM32_USBCANRAM_BASE+STM32_USB_BTABLE_OFFSET(ep,o))
+#define STM32_USB_BTABLE_ADDR(ep,o)  (STM32_USBCANRAM_BASE+STM32_USB_BTABLE_RADDR(ep,o))
 #define STM32_USB_ADDR_TX(ep)        STM32_USB_BTABLE_ADDR(ep,STM32_USB_ADDR_TX_WOFFSET)
 #define STM32_USB_COUNT_TX(ep)       STM32_USB_BTABLE_ADDR(ep,STM32_USB_COUNT_TX_WOFFSET)
 #define STM32_USB_ADDR_RX(ep)        STM32_USB_BTABLE_ADDR(ep,STM32_USB_ADDR_RX_WOFFSET)
@@ -121,12 +121,12 @@
 #define USB_EPR_EA_MASK              (0X0f << USB_EPR_EA_SHIFT)
 #define USB_EPR_STATTX_SHIFT         (4)       /* Bits 5-4: Status bits, for transmission transfers */
 #define USB_EPR_STATTX_MASK          (3 << USB_EPR_STATTX_SHIFT)
-#  define USB_EPR_STATTX_DIS         (0 << USB_EPR_STATTX_SHIFT)) /* EndPoint TX DISabled */
-#  define USB_EPR_STATTX_STALL       (1 << USB_EPR_STATTX_SHIFT)) /* EndPoint TX STALLed */
-#  define USB_EPR_STATTX_NAK         (2 << USB_EPR_STATTX_SHIFT)) /* EndPoint TX NAKed */
-#  define USB_EPR_STATTX_VALID       (3 << USB_EPR_STATTX_SHIFT)) /* EndPoint TX VALID */
-#  define USB_EPR_STATTX_DTOG1       (1 << USB_EPR_STATTX_SHIFT)) /* EndPoint TX Data Toggle bit1 */
-#  define USB_EPR_STATTX_DTOG2       (2 << USB_EPR_STATTX_SHIFT)) /* EndPoint TX Data Toggle bit2 */
+#  define USB_EPR_STATTX_DIS         (0 << USB_EPR_STATTX_SHIFT) /* EndPoint TX DISabled */
+#  define USB_EPR_STATTX_STALL       (1 << USB_EPR_STATTX_SHIFT) /* EndPoint TX STALLed */
+#  define USB_EPR_STATTX_NAK         (2 << USB_EPR_STATTX_SHIFT) /* EndPoint TX NAKed */
+#  define USB_EPR_STATTX_VALID       (3 << USB_EPR_STATTX_SHIFT) /* EndPoint TX VALID */
+#  define USB_EPR_STATTX_DTOG1       (1 << USB_EPR_STATTX_SHIFT) /* EndPoint TX Data Toggle bit1 */
+#  define USB_EPR_STATTX_DTOG2       (2 << USB_EPR_STATTX_SHIFT) /* EndPoint TX Data Toggle bit2 */
 #define USB_EPR_DTOG_TX              (1 << 6)  /* Bit 6: Data Toggle, for transmission transfers */
 #define USB_EPR_CTR_TX               (1 << 7)  /* Bit 7: Correct Transfer for transmission */
 #define USB_EPR_EP_KIND              (1 << 8)  /* Bit 8: Endpoint Kind */
@@ -139,12 +139,12 @@
 #define USB_EPR_SETUP                (1 << 11) /* Bit 11: Setup transaction completed */
 #define USB_EPR_STATRX_SHIFT         (12)      /* Bits 13-12: Status bits, for reception transfers */
 #define USB_EPR_STATRX_MASK          (3 << USB_EPR_STATRX_SHIFT)
-#  define USB_EPR_STATRX_DIS         (0 << USB_EPR_STATRX_SHIFT)) /* EndPoint RX DISabled */
-#  define USB_EPR_STATRX_STALL       (1 << USB_EPR_STATRX_SHIFT)) /* EndPoint RX STALLed */
-#  define USB_EPR_STATRX_NAK         (2 << USB_EPR_STATRX_SHIFT)) /* EndPoint RX NAKed */
-#  define USB_EPR_STATRX_VALID       (3 << USB_EPR_STATRX_SHIFT)) /* EndPoint RX VALID */
-#  define USB_EPR_STATRX_DTOG1       (1 << USB_EPR_STATRX_SHIFT)) /* EndPoint RX Data TOGgle bit1 */
-#  define USB_EPR_STATRX_DTOG2       (2 << USB_EPR_STATRX_SHIFT)) /* EndPoint RX Data TOGgle bit1 */
+#  define USB_EPR_STATRX_DIS         (0 << USB_EPR_STATRX_SHIFT) /* EndPoint RX DISabled */
+#  define USB_EPR_STATRX_STALL       (1 << USB_EPR_STATRX_SHIFT) /* EndPoint RX STALLed */
+#  define USB_EPR_STATRX_NAK         (2 << USB_EPR_STATRX_SHIFT) /* EndPoint RX NAKed */
+#  define USB_EPR_STATRX_VALID       (3 << USB_EPR_STATRX_SHIFT) /* EndPoint RX VALID */
+#  define USB_EPR_STATRX_DTOG1       (1 << USB_EPR_STATRX_SHIFT) /* EndPoint RX Data TOGgle bit1 */
+#  define USB_EPR_STATRX_DTOG2       (2 << USB_EPR_STATRX_SHIFT) /* EndPoint RX Data TOGgle bit1 */
 #define USB_EPR_DTOG_RX              (1 << 14) /* Bit 14: Data Toggle, for reception transfers */
 #define USB_EPR_CTR_RX               (1 << 15) /* Bit 15: Correct Transfer for reception */
 
