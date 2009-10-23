@@ -356,7 +356,7 @@ CONFIG_NOPRINTF_FIELDWIDTH=n
 # Allow for architecture optimized implementations
 #
 # The architecture can provide optimized versions of the
-# following to improve sysem performance
+# following to improve system performance
 #
 CONFIG_ARCH_MEMCPY=n
 CONFIG_ARCH_MEMCMP=n
@@ -500,6 +500,109 @@ CONFIG_NET_DHCP_LIGHT=n
 CONFIG_NET_RESOLV_ENTRIES=4
 
 #
+# USB Device Configuration
+#
+# CONFIG_USBDEV
+#   Enables USB device support
+# CONFIG_USBDEV_ISOCHRONOUS
+#   Build in extra support for isochronous endpoints
+# CONFIG_USBDEV_DUALSPEED
+#   Hardware handles high and full speed operation (USB 2.0)
+# CONFIG_USBDEV_SELFPOWERED
+#   Will cause USB features to indicate that the device is
+#   self-powered
+# CONFIG_USBDEV_MAXPOWER
+#   Maximum power consumption in mA
+# CONFIG_USBDEV_TRACE
+#   Enables USB tracing for debug
+# CONFIG_USBDEV_TRACE_NRECORDS
+#   Number of trace entries to remember
+#
+CONFIG_USBDEV=n
+CONFIG_USBDEV_ISOCHRONOUS=n
+CONFIG_USBDEV_DUALSPEED=n
+CONFIG_USBDEV_SELFPOWERED=y
+CCONFIG_USBDEV_REMOTEWAKEUP=n
+CONFIG_USBDEV_MAXPOWER=100
+CONFIG_USBDEV_TRACE=n
+CONFIG_USBDEV_TRACE_NRECORDS=128
+
+#
+# USB Serial Device Configuration
+#
+# CONFIG_USBSER
+#   Enable compilation of the USB serial driver
+# CONFIG_USBSER_EPINTIN
+#   The logical 7-bit address of a hardware endpoint that supports
+#   interrupt IN operation
+# CONFIG_USBSER_EPBULKOUT
+#   The logical 7-bit address of a hardware endpoint that supports
+#   bulk OUT operation
+# CONFIG_USBSER_EPBULKIN
+#   The logical 7-bit address of a hardware endpoint that supports
+#   bulk IN operation
+# # CONFIG_USBSER_NWRREQS and CONFIG_USBSER_NRDREQS
+#   The number of write/read requests that can be in flight
+# CONFIG_USBSER_VENDORID and CONFIG_USBSER_VENDORSTR
+#   The vendor ID code/string
+# CONFIG_USBSER_PRODUCTID and CONFIG_USBSER_PRODUCTSTR
+#   The product ID code/string
+# CONFIG_USBSER_RXBUFSIZE and CONFIG_USBSER_TXBUFSIZE
+#   Size of the serial receive/transmit buffers
+#
+CONFIG_USBSER=n
+CONFIG_USBSER_EPINTIN=1
+CONFIG_USBSER_EPBULKOUT=2
+CONFIG_USBSER_EPBULKIN=5
+CONFIG_USBSER_NWRREQS=4
+CONFIG_USBSER_NRDREQS=4
+CONFIG_USBSER_VENDORID=0x067b
+CONFIG_USBSER_PRODUCTID=0x2303
+CONFIG_USBSER_VENDORSTR="Nuttx"
+CONFIG_USBSER_PRODUCTSTR="USBdev Serial"
+CONFIG_USBSER_RXBUFSIZE=512
+CONFIG_USBSER_TXBUFSIZE=512
+CONFIG_NXFLAT=n
+
+#
+# USB Storage Device Configuration
+#
+# CONFIG_USBSTRG
+#   Enable compilation of the USB storage driver
+# CONFIG_USBSTRG_EP0MAXPACKET
+#   Max packet size for endpoint 0
+# CONFIG_USBSTRG_EPBULKOUT and CONFIG_USBSTRG_EPBULKIN
+#   The logical 7-bit address of a hardware endpoints that support
+#   bulk OUT and IN operations
+# CONFIG_USBSTRG_NWRREQS and CONFIG_USBSTRG_NRDREQS
+#   The number of write/read requests that can be in flight
+# CONFIG_USBSTRG_BULKINREQLEN and CONFIG_USBSTRG_BULKOUTREQLEN
+#   The size of the buffer in each write/read request.  This
+#   value needs to be at least as large as the endpoint
+#   maxpacket and ideally as large as a block device sector.
+# CONFIG_USBSTRG_VENDORID and CONFIG_USBSTRG_VENDORSTR
+#   The vendor ID code/string
+# CONFIG_USBSTRG_PRODUCTID and CONFIG_USBSTRG_PRODUCTSTR
+#   The product ID code/string
+# CONFIG_USBSTRG_REMOVABLE
+#   Select if the media is removable
+#
+CONFIG_USBSTRG=n
+CONFIG_USBSTRG_EP0MAXPACKET=64
+CONFIG_USBSTRG_EPBULKOUT=2
+CONFIG_USBSTRG_EPBULKIN=5
+CONFIG_USBSTRG_NRDREQS=2
+CONFIG_USBSTRG_NWRREQS=2
+CONFIG_USBSTRG_BULKINREQLEN=256
+CONFIG_USBSTRG_BULKOUTREQLEN=256
+CONFIG_USBSTRG_VENDORID=0x584e
+CONFIG_USBSTRG_VENDORSTR="NuttX"
+CONFIG_USBSTRG_PRODUCTID=0x5342
+CONFIG_USBSTRG_PRODUCTSTR="USBdev Storage"
+CONFIG_USBSTRG_VERSIONNO=0x0399
+CONFIG_USBSTRG_REMOVABLE=y
+
+#
 # Settings for examples/uip
 #
 CONFIG_EXAMPLE_UIP_IPADDR=(10<<24|0<<16|0<<8|2)
@@ -590,6 +693,23 @@ CONFIG_EXAMPLES_NSH_FATMOUNTPT=/tmp
 CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO=0
 CONFIG_EXAMPLES_NSH_MMCSDSLOTNO=0
 CONFIG_EXAMPLES_NSH_MMCSDMINOR=0
+
+#
+# Settings for examples/usbserial
+#
+# CONFIG_EXAMPLES_USBSERIAL_INONLY
+#    Only verify IN (device-to-host) data transfers.  Default: both
+# CONFIG_EXAMPLES_USBSERIAL_OUTONLY
+#    Only verify OUT (host-to-device) data transfers.  Default: both
+# CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL
+#    Send only small, single packet messages.  Default: Send large and small.
+# CONFIG_EXAMPLES_USBSERIAL_ONLYBIG
+#    Send only large, multi-packet messages.  Default: Send large and small.
+#
+CONFIG_EXAMPLES_USBSERIAL_INONLY=n
+CONFIG_EXAMPLES_USBSERIAL_OUTONLY=n
+CONFIG_EXAMPLES_USBSERIAL_ONLYSMALL=n
+CONFIG_EXAMPLES_USBSERIAL_ONLYBIG=n
 
 #
 # Stack and heap information

@@ -315,7 +315,7 @@ CONFIG_NOPRINTF_FIELDWIDTH=n
 # Allow for architecture optimized implementations
 #
 # The architecture can provide optimized versions of the
-# following to improve sysem performance
+# following to improve system performance
 #
 CONFIG_ARCH_MEMCPY=n
 CONFIG_ARCH_MEMCMP=n
