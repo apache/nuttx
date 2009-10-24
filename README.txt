@@ -1,6 +1,77 @@
+README
+^^^^^^
+
+  o Configuring NuttX
+  o Building NuttX
+  o Documentation
+
+CONFIGURING NUTTX
+^^^^^^^^^^^^^^^^^
+
+"Canned" NuttX configuration files are retained in:
+
+  configs/<board-name>/<config-dir>
+
+Where <board-name> is the name of your development board and <config-dir>.
+Configuring NuttX requires only copying three files from the <config-dir>
+to the directly where you installed NuttX (TOPDIR):
+
+  Copy configs/<board-name>/<config-dir>/Make.def to ${TOPDIR}/Make.defs
+    Make.defs describes the rules needed by you tool chain to compile
+    and link code.  You may need to modify this file to match the
+    specific needs of your toolchain.
+
+  Copy configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
+    setenv.sh is an optional convenience file that I use to set
+    the PATH variable to the toolchain binaries.  You may chose to
+    use setenv.sh or not.  If you use it, then it may need to be
+    modified to include the path to your toolchain binaries.
+
+  Copy configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
+    The defconfig file holds the actual build configuration.  This
+    file is included by all other make files to determine what is
+    included in the build and what is not.  This file is also used
+    to generate a C configuration header at include/nuttx/config.h.
+
+General information about configuring NuttX can be found in:
+
+  ${TOPDIR}/configs/README.txt
+  ${TOPDIR}/configs/<board-name>/README.txt
+
+There is a configuration script in the tools/ directory that makes this
+easier.  It is used as follows:
+
+  cd ${TOPDIR}/tools
+  ./configure.sh <board-name>/<config-dir>
+
+BUILDING NUTTX
+^^^^^^^^^^^^^^
+
+NuttX builds in-place in the source tree.  You do not need to create
+any special build directories.  Assuming that your Make.defs is setup
+properly for your tool chain, the following steps are all that are
+required to build NuttX:
+
+  cd ${TOPDIR}
+  make
+
+At least one configuration (eagle100) requires additional command line
+arguments on the make command.  Read ${TOPDIR}/configs/<board-name>/README.txt
+to see if that applies to your target.
+
+DOCUMENTATION
+^^^^^^^^^^^^^
+
 Additional information can be found in the Documentation/ directory and
-also in README files that are scattered throughout the source tree.  Below
-is a guide to the available README files:
+also in README files that are scattered throughout the source tree.  The
+documentation is in HTML and can be access by loading the following file
+into your Web browser:
+
+  Documentation/index.html
+
+NuttX documentation is also available online at http://www.nuttx.org.
+
+Below is a guide to the available README files in the NuttX source tree:
 
  |
  |- arch/
