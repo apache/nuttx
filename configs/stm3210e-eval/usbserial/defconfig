@@ -87,7 +87,8 @@ CONFIG_ARCH_LEDS=y
 CONFIG_ARCH_CALIBRATION=n
 
 #
-# Identify toolchain and liner options
+# Identify toolchain and linker options
+#
 CONFIG_STM32_CODESOURCERYW=n
 CONFIG_STM32_CODESOURCERYL=n
 CONFIG_STM32_DEVKITARM=n
