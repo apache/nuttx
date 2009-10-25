@@ -81,50 +81,98 @@
 
 int up_svcall(int irq, FAR void *context)
 {
-  uint32 *svregs  = (uint32*)context;
-  uint32 *tcbregs = (uint32*)svregs[REG_R1];
+  uint32 *regs   = (uint32*)context;
 
-  DEBUGASSERT(svregs && svregs == current_regs && tcbregs);
+  DEBUGASSERT(regs && regs == current_regs);
+  DEBUGASSERT(regs[REG_R1] != 0);
 
   /* The SVCall software interrupt is called with R0 = SVC command and R1 = 
    * the TCB register save area.
    */
 
-  sllvdbg("Command: %d svregs: %p tcbregs: %08x\n", svregs[REG_R0], svregs, tcbregs);
+  sllvdbg("Command: %d regs: %p R1: %08x R2: %08x\n",
+          regs[REG_R0], regs, regs[REG_R1], regs[REG_R2]);
 
 #ifdef DEBUG_SVCALL
   lldbg("SVCall Entry:\n");
   lldbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        svregs[REG_R0],  svregs[REG_R1],  svregs[REG_R2],  svregs[REG_R3],
-        svregs[REG_R4],  svregs[REG_R5],  svregs[REG_R6],  svregs[REG_R7]);
+        regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+        regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
   lldbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        svregs[REG_R8],  svregs[REG_R9],  svregs[REG_R10], svregs[REG_R11],
-        svregs[REG_R12], svregs[REG_R13], svregs[REG_R14], svregs[REG_R15]);
-  lldbg("  PSR=%08x\n", svregs[REG_XPSR]);
+        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  lldbg("  PSR=%08x\n", regs[REG_XPSR]);
 #endif
 
   /* Handle the SVCall according to the command in R0 */
 
-  switch (svregs[REG_R0])
+  switch (regs[REG_R0])
     {
-      /* R0=0:  This is a save context command.  In this case, we simply need
-       * to copy the svregs to the tdbregs and return.
+      /* R0=0:  This is a save context command:
+       *
+       *   int up_saveusercontext(uint32 *saveregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = 0
+       *   R1 = saveregs
+       *
+       * In this case, we simply need to copy the current regsters to the
+       * save regiser space references in the saved R1 and return.
        */
 
       case 0:
-        memcpy(tcbregs, svregs, XCPTCONTEXT_SIZE);
+        {
+          memcpy((uint32*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+        }
         break;
 
-      /* R1=1: This a restore context command.  In this case, we simply need to
-       * set current_regs to tcbrgs.  svregs == current_regs is the normal exception
-       * turn.  By setting current_regs = tcbregs, we force the return through
-       * the saved context.
+      /* R0=1: This a restore context command:
+       *
+       *   void up_fullcontextrestore(uint32 *restoreregs) __attribute__ ((noreturn));
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = 1
+       *   R1 = restoreregs
+       *
+       * In this case, we simply need to set current_regs to restore register
+       * area referenced in the saved R1. context == current_regs is the normal
+       * exception return.  By setting current_regs = context[R1], we force
+       * the return to the saved context referenced in R1.
        */
 
       case 1:
-        current_regs = tcbregs;
+        {
+          current_regs = (uint32*)regs[REG_R1];
+        }
         break;
 
+      /* R0=2: This a switch context command:
+       *
+       *   void up_switchcontext(uint32 *saveregs, uint32 *restoreregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = 1
+       *   R1 = saveregs
+       *   R2 = restoreregs
+       *
+       * In this case, we do both: We save the context registers to the save
+       * register area reference by the saved contents of R1 nad then set
+       * current_regs to to the save register area referenced by the saved
+       * contents of R2.
+       */
+
+      case 2:
+        {
+          DEBUGASSERT(regs[REG_R2] != 0);
+          memcpy((uint32*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+          current_regs = (uint32*)regs[REG_R2];
+        }
+        break;
+
+        
       default:
         PANIC(OSERR_INTERNAL);
         break;

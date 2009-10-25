@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/up_sigdeliver.c
+ *  arch/arm/src/arm/up_releasepending.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,22 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
 #include <sched.h>
 #include <debug.h>
-
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-
 #include "os_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
-
-#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -69,75 +62,70 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: up_release_pending
  *
  * Description:
- *   This is the a signal handling trampoline.  When a
- *   signal action was posted.  The task context was mucked
- *   with and forced to branch to this location with interrupts
- *   disabled.
+ *   Release and ready-to-run tasks that have
+ *   collected in the pending task list.  This can call a
+ *   context switch if a new task is placed at the head of
+ *   the ready to run list.
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void up_release_pending(void)
 {
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32 regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
 
-  /* Save the errno.  This must be preserved throughout the
-   * signal handling so that the user code final gets
-   * the correct errno value (probably EINTR).
-   */
+  slldbg("From TCB=%p\n", rtcb);
 
-  int saved_errno = rtcb->pterrno;
+  /* Merge the g_pendingtasks list into the g_readytorun task list */
 
-  up_ledon(LED_SIGNAL);
+  /* sched_lock(); */
+  if (sched_mergepending())
+    {
+      /* The currently active task has changed!  We will need to
+       * switch contexts.  First check if we are operating in
+       * interrupt context:
+       */
 
-  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
+      if (current_regs)
+        {
+          /* Yes, then we have to do things differently.
+           * Just copy the current_regs into the OLD rtcb.
+           */
 
-  /* Save the real return state on the stack. */
+           up_savestate(rtcb->xcp.regs);
 
-  up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-  regs[REG_CPSR]       = rtcb->xcp.saved_cpsr;
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
 
-  /* Get a local copy of the sigdeliver function pointer.
-   * we do this so that we can nullify the sigdeliver
-   * function point in the TCB and accept more signal
-   * deliveries while processing the current pending
-   * signals.
-   */
+          rtcb = (_TCB*)g_readytorun.head;
+          slldbg("New Active Task TCB=%p\n", rtcb);
 
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
+          /* Then switch contexts */
 
-  /* Then restore the task interrupt state */
+          up_restorestate(rtcb->xcp.regs);
+        }
 
-  irqrestore(regs[REG_CPSR]);
+      /* Copy the exception context into the TCB of the task that
+       * was currently active. if up_saveusercontext returns a non-zero
+       * value, then this is really the previously running task 
+       * restarting!
+       */
 
-  /* Deliver the signals */
+      else if (!up_saveusercontext(rtcb->xcp.regs))
+        {
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
 
-  sigdeliver(rtcb);
+          rtcb = (_TCB*)g_readytorun.head;
+          slldbg("New Active Task TCB=%p\n", rtcb);
 
-  /* Output any debug messaged BEFORE restoreing errno
-   * (becuase they may alter errno), then restore the
-   * original errno that is needed by the user logic
-   * (it is probably EINTR).
-   */
+           /* Then switch contexts */
 
-  sdbg("Resuming\n");
-  rtcb->pterrno = saved_errno;
-
-  /* Then restore the correct state for this thread of
-   * execution.
-   */
-
-  up_ledoff(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+          up_fullcontextrestore(rtcb->xcp.regs);
+        }
+    }
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */
-

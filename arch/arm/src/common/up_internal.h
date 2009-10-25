@@ -155,9 +155,10 @@ extern uint32 _ebss;            /* End+1 of .bss */
 extern void up_boot(void);
 extern void up_copystate(uint32 *dest, uint32 *src);
 extern void up_decodeirq(uint32 *regs);
-extern void up_fullcontextrestore(uint32 *regs) __attribute__ ((noreturn));
 extern void up_irqinitialize(void);
-extern int  up_saveusercontext(uint32 *regs);
+extern int  up_saveusercontext(uint32 *saveregs);
+extern void up_fullcontextrestore(uint32 *restoreregs) __attribute__ ((noreturn));
+extern void up_switchcontext(uint32 *saveregs, uint32 *restoreregs);
 extern void up_sigdeliver(void);
 extern int  up_timerisr(int irq, uint32 *regs);
 extern void up_lowputc(char ch);
