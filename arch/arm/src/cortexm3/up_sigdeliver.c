@@ -115,7 +115,7 @@ void up_sigdeliver(void)
   sigdeliver           = rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
-  /* Then restore the task interrupt statat. */
+  /* Then restore the task interrupt state */
 
   irqrestore((uint16)regs[REG_PRIMASK]);
 

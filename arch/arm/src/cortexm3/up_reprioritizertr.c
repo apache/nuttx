@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/up_blocktask.c
+ *  arch/arm/src/cortexm3/up_reprioritizertr.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,12 +39,9 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-
 #include <sched.h>
 #include <debug.h>
-
 #include <nuttx/arch.h>
-
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -65,66 +62,79 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_block_task
+ * Name: up_reprioritize_rtr
  *
  * Description:
- *   The currently executing task at the head of
- *   the ready to run list must be stopped.  Save its context
- *   and move it to the inactive list specified by task_state.
+ *   Called when the priority of a running or
+ *   ready-to-run task changes and the reprioritization will 
+ *   cause a context switch.  Two cases:
+ *
+ *   1) The priority of the currently running task drops and the next
+ *      task in the ready to run list has priority.
+ *   2) An idle, ready to run task's priority has been raised above the
+ *      the priority of the current, running task and it now has the
+ *      priority.
  *
  * Inputs:
- *   tcb: Refers to a task in the ready-to-run list (normally
- *     the task at the head of the list).  It most be
- *     stopped, its context saved and moved into one of the
- *     waiting task lists.  It it was the task at the head
- *     of the ready-to-run list, then a context to the new
- *     ready to run task must be performed.
- *   task_state: Specifies which waiting task list should be
- *     hold the blocked task TCB.
+ *   tcb: The TCB of the task that has been reprioritized
+ *   priority: The new task priority
  *
  ****************************************************************************/
 
-void up_block_task(_TCB *tcb, tstate_t task_state)
+void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
 {
-  /* Verify that the context switch can be performed */
+  /* Verify that the caller is sane */
 
-  if ((tcb->task_state < FIRST_READY_TO_RUN_STATE) ||
-      (tcb->task_state > LAST_READY_TO_RUN_STATE))
+  if (tcb->task_state < FIRST_READY_TO_RUN_STATE ||
+      tcb->task_state > LAST_READY_TO_RUN_STATE ||
+      priority < SCHED_PRIORITY_MIN || 
+      priority > SCHED_PRIORITY_MAX)
     {
-      PANIC(OSERR_BADBLOCKSTATE);
+       PANIC(OSERR_BADREPRIORITIZESTATE);
     }
   else
     {
       _TCB *rtcb = (_TCB*)g_readytorun.head;
       boolean switch_needed;
 
-      /* Remove the tcb task from the ready-to-run list.  If we
-       * are blocking the task at the head of the task list (the
-       * most likely case), then a context switch to the next
-       * ready-to-run task is needed. In this case, it should
-       * also be true that rtcb == tcb.
+      slldbg("TCB=%p PRI=%d\n", tcb, priority);
+
+      /* Remove the tcb task from the ready-to-run list.
+       * sched_removereadytorun will return TRUE if we just
+       * remove the head of the ready to run list.
        */
 
       switch_needed = sched_removereadytorun(tcb);
 
-      /* Add the task to the specified blocked task list */
+      /* Setup up the new task priority */
 
-      sched_addblocked(tcb, (tstate_t)task_state);
+      tcb->sched_priority = (ubyte)priority;
 
-      /* If there are any pending tasks, then add them to the g_readytorun
-       * task list now
+      /* Return the task to the specified blocked task list.
+       * sched_addreadytorun will return TRUE if the task was
+       * added to the new list.  We will need to perform a context
+       * switch only if the EXCLUSIVE or of the two calls is non-zero
+       * (i.e., one and only one the calls changes the head of the
+       * ready-to-run list).
        */
 
-      if (g_pendingtasks.head)
-        {
-          switch_needed |= sched_mergepending();
-        }
+      switch_needed ^= sched_addreadytorun(tcb);
 
       /* Now, perform the context switch if one is needed */
 
       if (switch_needed)
         {
-          /* Are we in an interrupt handler? */
+          /* If we are going to do a context switch, then now is the right
+           * time to add any pending tasks back into the ready-to-run list.
+           * task list now
+           */
+
+          if (g_pendingtasks.head)
+            {
+              sched_mergepending();
+            }
+
+         /* Are we in an interrupt handler? */
 
           if (current_regs)
             {
@@ -139,28 +149,29 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
                */
 
               rtcb = (_TCB*)g_readytorun.head;
+              slldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 
               up_restorestate(rtcb->xcp.regs);
             }
 
-          /* Copy the user C context into the TCB at the (old) head of the
-           * g_readytorun Task list. if up_saveusercontext returns a non-zero
-           * value, then this is really the previously running task restarting!
-           */
+          /* No, then we will need to perform the user context switch */
 
-          else if (!up_saveusercontext(rtcb->xcp.regs))
+          else
             {
-              /* Restore the exception context of the rtcb at the (new) head 
-               * of the g_readytorun task list.
+              /* Switch context to the context of the task at the head of the
+               * ready to run list.
                */
 
-              rtcb = (_TCB*)g_readytorun.head;
+              _TCB *nexttcb = (_TCB*)g_readytorun.head;
+              up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
-              /* Then switch contexts */
-
-              up_fullcontextrestore(rtcb->xcp.regs);
+              /* up_switchcontext forces a context switch to the task at the
+               * head of the ready-to-run list.  It does not 'return' in the
+               * normal sense.  When it does return, it is because the blocked
+               * task is again ready to run and has execution priority.
+               */
             }
         }
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/common/up_reprioritizertr.c
+ *  arch/arm/src/arm/up_unblocktask.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 #include "os_internal.h"
+#include "clock_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -62,79 +63,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_reprioritize_rtr
+ * Name: up_unblock_task
  *
  * Description:
- *   Called when the priority of a running or
- *   ready-to-run task changes and the reprioritization will 
- *   cause a context switch.  Two cases:
- *
- *   1) The priority of the currently running task drops and the next
- *      task in the ready to run list has priority.
- *   2) An idle, ready to run task's priority has been raised above the
- *      the priority of the current, running task and it now has the
- *      priority.
+ *   A task is currently in an inactive task list
+ *   but has been prepped to execute.  Move the TCB to the
+ *   ready-to-run list, restore its context, and start execution.
  *
  * Inputs:
- *   tcb: The TCB of the task that has been reprioritized
- *   priority: The new task priority
+ *   tcb: Refers to the tcb to be unblocked.  This tcb is
+ *     in one of the waiting tasks lists.  It must be moved to
+ *     the ready-to-run list and, if it is the highest priority
+ *     ready to run taks, executed.
  *
  ****************************************************************************/
 
-void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
+void up_unblock_task(_TCB *tcb)
 {
-  /* Verify that the caller is sane */
+  /* Verify that the context switch can be performed */
 
-  if (tcb->task_state < FIRST_READY_TO_RUN_STATE ||
-      tcb->task_state > LAST_READY_TO_RUN_STATE ||
-      priority < SCHED_PRIORITY_MIN || 
-      priority > SCHED_PRIORITY_MAX)
+  if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
+      (tcb->task_state > LAST_BLOCKED_STATE))
     {
-       PANIC(OSERR_BADREPRIORITIZESTATE);
+      PANIC(OSERR_BADUNBLOCKSTATE);
     }
   else
     {
       _TCB *rtcb = (_TCB*)g_readytorun.head;
-      boolean switch_needed;
 
-      slldbg("TCB=%p PRI=%d\n", tcb, priority);
+      /* Remove the task from the blocked task list */
 
-      /* Remove the tcb task from the ready-to-run list.
-       * sched_removereadytorun will return TRUE if we just
-       * remove the head of the ready to run list.
+      sched_removeblocked(tcb);
+
+      /* Reset its timeslice.  This is only meaningful for round
+       * robin tasks but it doesn't here to do it for everything
        */
 
-      switch_needed = sched_removereadytorun(tcb);
+#if CONFIG_RR_INTERVAL > 0
+      tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+#endif
 
-      /* Setup up the new task priority */
-
-      tcb->sched_priority = (ubyte)priority;
-
-      /* Return the task to the specified blocked task list.
-       * sched_addreadytorun will return TRUE if the task was
-       * added to the new list.  We will need to perform a context
-       * switch only if the EXCLUSIVE or of the two calls is non-zero
-       * (i.e., one and only one the calls changes the head of the
-       * ready-to-run list).
+      /* Add the task in the correct location in the prioritized
+       * g_readytorun task list
        */
 
-      switch_needed ^= sched_addreadytorun(tcb);
-
-      /* Now, perform the context switch if one is needed */
-
-      if (switch_needed)
+      if (sched_addreadytorun(tcb))
         {
-          /* If we are going to do a context switch, then now is the right
-           * time to add any pending tasks back into the ready-to-run list.
-           * task list now
+          /* The currently active task has changed! We need to do
+           * a context switch to the new task.
+           *
+           * Are we in an interrupt handler? 
            */
-
-          if (g_pendingtasks.head)
-            {
-              sched_mergepending();
-            }
-
-         /* Are we in an interrupt handler? */
 
           if (current_regs)
             {
@@ -149,26 +128,26 @@ void up_reprioritize_rtr(_TCB *tcb, ubyte priority)
                */
 
               rtcb = (_TCB*)g_readytorun.head;
-              slldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 
               up_restorestate(rtcb->xcp.regs);
             }
 
-          /* Copy the exception context into the TCB at the (old) head of the
-           * g_readytorun Task list. if up_saveusercontext returns a non-zero
-           * value, then this is really the previously running task restarting!
+          /* We are not in an interrupt handler.  Copy the user C context
+           * into the TCB of the task that was previously active.  if 
+           * up_saveusercontext returns a non-zero value, then this is really the
+           * previously running task restarting!
            */
 
           else if (!up_saveusercontext(rtcb->xcp.regs))
             {
-              /* Restore the exception context of the rtcb at the (new) head 
-               * of the g_readytorun task list.
+              /* Restore the exception context of the new task that is ready to
+               * run (probably tcb).  This is the new rtcb at the head of the
+               * g_readytorun task list.
                */
 
               rtcb = (_TCB*)g_readytorun.head;
-              slldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
 

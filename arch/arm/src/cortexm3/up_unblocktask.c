@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/common/up_releasepending.c
+ *  arch/arm/src/cortexm3/up_unblocktask.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 #include "os_internal.h"
+#include "clock_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -62,70 +63,94 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_release_pending
+ * Name: up_unblock_task
  *
  * Description:
- *   Release and ready-to-run tasks that have
- *   collected in the pending task list.  This can call a
- *   context switch if a new task is placed at the head of
- *   the ready to run list.
+ *   A task is currently in an inactive task list
+ *   but has been prepped to execute.  Move the TCB to the
+ *   ready-to-run list, restore its context, and start execution.
+ *
+ * Inputs:
+ *   tcb: Refers to the tcb to be unblocked.  This tcb is
+ *     in one of the waiting tasks lists.  It must be moved to
+ *     the ready-to-run list and, if it is the highest priority
+ *     ready to run taks, executed.
  *
  ****************************************************************************/
 
-void up_release_pending(void)
+void up_unblock_task(_TCB *tcb)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  /* Verify that the context switch can be performed */
 
-  slldbg("From TCB=%p\n", rtcb);
-
-  /* Merge the g_pendingtasks list into the g_readytorun task list */
-
-  /* sched_lock(); */
-  if (sched_mergepending())
+  if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
+      (tcb->task_state > LAST_BLOCKED_STATE))
     {
-      /* The currently active task has changed!  We will need to
-       * switch contexts.  First check if we are operating in
-       * interrupt context:
+      PANIC(OSERR_BADUNBLOCKSTATE);
+    }
+  else
+    {
+      _TCB *rtcb = (_TCB*)g_readytorun.head;
+
+      /* Remove the task from the blocked task list */
+
+      sched_removeblocked(tcb);
+
+      /* Reset its timeslice.  This is only meaningful for round
+       * robin tasks but it doesn't here to do it for everything
        */
 
-      if (current_regs)
-        {
-          /* Yes, then we have to do things differently.
-           * Just copy the current_regs into the OLD rtcb.
-           */
+#if CONFIG_RR_INTERVAL > 0
+      tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+#endif
 
-           up_savestate(rtcb->xcp.regs);
-
-          /* Restore the exception context of the rtcb at the (new) head 
-           * of the g_readytorun task list.
-           */
-
-          rtcb = (_TCB*)g_readytorun.head;
-          slldbg("New Active Task TCB=%p\n", rtcb);
-
-          /* Then switch contexts */
-
-          up_restorestate(rtcb->xcp.regs);
-        }
-
-      /* Copy the exception context into the TCB of the task that
-       * was currently active. if up_saveusercontext returns a non-zero
-       * value, then this is really the previously running task 
-       * restarting!
+      /* Add the task in the correct location in the prioritized
+       * g_readytorun task list
        */
 
-      else if (!up_saveusercontext(rtcb->xcp.regs))
+      if (sched_addreadytorun(tcb))
         {
-          /* Restore the exception context of the rtcb at the (new) head 
-           * of the g_readytorun task list.
+          /* The currently active task has changed! We need to do
+           * a context switch to the new task.
+           *
+           * Are we in an interrupt handler? 
            */
 
-          rtcb = (_TCB*)g_readytorun.head;
-          slldbg("New Active Task TCB=%p\n", rtcb);
+          if (current_regs)
+            {
+              /* Yes, then we have to do things differently.
+               * Just copy the current_regs into the OLD rtcb.
+               */
 
-           /* Then switch contexts */
+               up_savestate(rtcb->xcp.regs);
 
-          up_fullcontextrestore(rtcb->xcp.regs);
+              /* Restore the exception context of the rtcb at the (new) head 
+               * of the g_readytorun task list.
+               */
+
+              rtcb = (_TCB*)g_readytorun.head;
+
+              /* Then switch contexts */
+
+              up_restorestate(rtcb->xcp.regs);
+            }
+
+          /* No, then we will need to perform the user context switch */
+
+          else
+            {
+              /* Switch context to the context of the task at the head of the
+               * ready to run list.
+               */
+
+               _TCB *nexttcb = (_TCB*)g_readytorun.head;
+               up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+
+              /* up_switchcontext forces a context switch to the task at the
+               * head of the ready-to-run list.  It does not 'return' in the
+               * normal sense.  When it does return, it is because the blocked
+               * task is again ready to run and has execution priority.
+               */
+           }
         }
     }
 }
