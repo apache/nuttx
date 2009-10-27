@@ -58,12 +58,16 @@
 
 /* USB directions (in endpoint addresses) */
 
+#define USB_DIR_MASK                            (0x80)
+#define USB_EPNO_MASK                           (0x7f)
 #define USB_DIR_OUT                             (0x00) /* host-to-device */
 #define USB_DIR_IN                              (0x80) /* device-to-host */
 
-#define USB_EPNO(addr)                          ((addr)&0x7f)
-#define USB_EPOUT(addr)                         ((addr)|USB_DIR_OUT)
-#define USB_EPIN(addr)                          ((addr)|USB_DIR_IN)
+#define USB_EPNO(addr)                          ((addr) & USB_EPNO_MASK)
+#define USB_EPOUT(addr)                         ((addr) | USB_DIR_OUT)
+#define USB_EPIN(addr)                          ((addr) | USB_DIR_IN)
+#define USB_ISEPIN(addr)                        (((addr) & USB_DIR_MASK) == USB_DIR_IN)
+#define USB_ISEPOUT(addr)                       (((addr) & USB_DIR_MASK) == USB_DIR_OUT)
 
 /* Control Setup Packet.  Byte 0=Request */
 

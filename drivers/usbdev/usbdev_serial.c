@@ -300,10 +300,10 @@ struct usbser_alloc_s
 /* Transfer helpers *********************************************************/
 
 static uint16  usbclass_fillrequest(FAR struct usbser_dev_s *priv,
-                 char *reqbuf, uint16 reqlen);
+                 ubyte *reqbuf, uint16 reqlen);
 static int     usbclass_sndpacket(FAR struct usbser_dev_s *priv);
 static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
-                 char *reqbuf, uint16 reqlen);
+                 ubyte *reqbuf, uint16 reqlen);
 
 /* Request helpers *********************************************************/
 
@@ -502,7 +502,7 @@ static const struct usb_qualdesc_s g_qualdesc =
  *
  ************************************************************************************/
 
-static uint16 usbclass_fillrequest(FAR struct usbser_dev_s *priv, char *reqbuf, uint16 reqlen)
+static uint16 usbclass_fillrequest(FAR struct usbser_dev_s *priv, ubyte *reqbuf, uint16 reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
   FAR struct uart_buffer_s *xmit = &serdev->xmit;
@@ -646,7 +646,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
  ************************************************************************************/
 
 static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
-                                      char *reqbuf, uint16 reqlen)
+                                      ubyte *reqbuf, uint16 reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
   FAR struct uart_buffer_s *recv = &serdev->recv;
