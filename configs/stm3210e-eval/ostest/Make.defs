@@ -53,6 +53,7 @@ ifeq ($(CONFIG_STM32_CODESOURCERYL),y)
   # CodeSourcery under Linux
   CROSSDEV = arm-none-eabi-
   ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  MAXOPTIMIZATION = -O2
 endif
 ifeq ($(CONFIG_STM32_DEVKITARM),y)
   # devkitARM under Windows
@@ -70,6 +71,7 @@ ifeq ($(CONFIG_STM32_BUILDROOT),y)
   # NuttX buildroot under Linux or Cygwin
   CROSSDEV = arm-elf-
   ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
+  MAXOPTIMIZATION = -Os
 endif
 
 ifeq ($(WINTOOL),y)
@@ -87,7 +89,6 @@ else
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
-  MAXOPTIMIZATION = -Os
 endif
 
 CC = $(CROSSDEV)gcc
