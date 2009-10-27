@@ -53,7 +53,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Debug output from this file may interfere with context switching! */
+
 #undef DEBUG_SVCALL         /* Define to debug SVCall */
+#ifdef DEBUG_HARDFAULTS
+# define svcdbg(format, arg...) lldbg(format, ##arg)
+#else
+# define svcdbg(x...)
+#endif
 
 /****************************************************************************
  * Private Data
@@ -90,19 +97,17 @@ int up_svcall(int irq, FAR void *context)
    * the TCB register save area.
    */
 
-  sllvdbg("Command: %d regs: %p R1: %08x R2: %08x\n",
-          regs[REG_R0], regs, regs[REG_R1], regs[REG_R2]);
+  svcdbg("Command: %d regs: %p R1: %08x R2: %08x\n",
+         regs[REG_R0], regs, regs[REG_R1], regs[REG_R2]);
 
-#ifdef DEBUG_SVCALL
-  lldbg("SVCall Entry:\n");
-  lldbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-        regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  lldbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  lldbg("  PSR=%08x\n", regs[REG_XPSR]);
-#endif
+  svcdbg("SVCall Entry:\n");
+  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcdbg("  PSR=%08x\n", regs[REG_XPSR]);
 
   /* Handle the SVCall according to the command in R0 */
 
@@ -178,16 +183,14 @@ int up_svcall(int irq, FAR void *context)
         break;
     }
     
-#ifdef DEBUG_SVCALL
-  lldbg("SVCall Return:\n");
-  lldbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
-        current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
-  lldbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
-        current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
-  lldbg("  PSR=%08x\n", current_regs[REG_XPSR]);
-#endif
+  svcdbg("SVCall Return:\n");
+  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+         current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
+         current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
+  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+         current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
+         current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
+  svcdbg("  PSR=%08x\n", current_regs[REG_XPSR]);
 
   return OK;
 }
