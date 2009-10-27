@@ -55,7 +55,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Debug output from this file may interfere with context switching! */
+
 #undef DEBUG_HARDFAULTS         /* Define to debug hard faults */
+
+#ifdef DEBUG_HARDFAULTS
+# define hfdbg(format, arg...) lldbg(format, ##arg)
+#else
+# define hfdbg(x...)
+#endif
 
 #define INSN_SVC0        0xdf00 /* insn: svc 0 */
 
@@ -98,10 +106,7 @@ int up_hardfault(int irq, FAR void *context)
       /* Fetch the instruction that caused the Hard fault */
 
       insn = *pc;
-
-#ifdef DEBUG_HARDFAULTS
-      lldbg("  PC: %p INSN: %04x\n", pc, insn);
-#endif
+      hfdbg("  PC: %p INSN: %04x\n", pc, insn);
 
       /* If this was the instruction 'svc 0', then forward processing
        * to the SVCall handler
@@ -109,30 +114,28 @@ int up_hardfault(int irq, FAR void *context)
 
       if (insn == INSN_SVC0)
         {
-          sllvdbg("Forward SVCall\n");
+          hfdbg("Forward SVCall\n");
           return up_svcall(irq, context);
         }
     }
 
   /* Dump some hard fault info */
 
-#ifdef DEBUG_HARDFAULTS
-  lldbg("\nHard Fault:\n");
-  lldbg("  IRQ: %d regs: %p\n", irq, regs);
-  lldbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x\n",
+  hfdbg("\nHard Fault:\n");
+  hfdbg("  IRQ: %d regs: %p\n", irq, regs);
+  hfdbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x\n",
         getbasepri(), getprimask(), getipsr());
-  lldbg("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
+  hfdbg("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
         getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
         getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
         getreg32(NVIC_AFAULTS));
-  lldbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  hfdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  lldbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  hfdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  lldbg("  PSR=%08x\n", regs[REG_XPSR]);
-#endif
+  hfdbg("  PSR=%08x\n", regs[REG_XPSR]);
 
   (void)irqsave();
   lldbg("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
