@@ -3216,7 +3216,7 @@ void up_usbinitialize(void)
       goto errout;
     }
 
-  if (irq_attach STM32_IRQ_USBLPCANRX0, stm32_lpinterrupt) != 0)
+  if (irq_attach(STM32_IRQ_USBLPCANRX0, stm32_lpinterrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_IRQREGISTRATION),
                (uint16)STM32_IRQ_USBLPCANRX0);
