@@ -71,33 +71,33 @@ static inline void rcc_reset(void)
 {
   uint32 regval;
 
-  putreg32(0, STM32_RCC_APB2RSTR);			/* Disable APB2 Peripheral Reset */
-  putreg32(0, STM32_RCC_APB1RSTR);			/* Disable APB1 Peripheral Reset */
-  putreg32(RCC_AHBENR_FLITFEN|RCC_AHBENR_SRAMEN, STM32_RCC_AHBENR);	/* FLITF and SRAM Clock ON */
-  putreg32(0, STM32_RCC_APB2ENR);			/* Disable APB2 Peripheral Clock */
-  putreg32(0, STM32_RCC_APB1ENR);			/* Disable APB1 Peripheral Clock */
+  putreg32(0, STM32_RCC_APB2RSTR);          /* Disable APB2 Peripheral Reset */
+  putreg32(0, STM32_RCC_APB1RSTR);          /* Disable APB1 Peripheral Reset */
+  putreg32(RCC_AHBENR_FLITFEN|RCC_AHBENR_SRAMEN, STM32_RCC_AHBENR); /* FLITF and SRAM Clock ON */
+  putreg32(0, STM32_RCC_APB2ENR);           /* Disable APB2 Peripheral Clock */
+  putreg32(0, STM32_RCC_APB1ENR);           /* Disable APB1 Peripheral Clock */
 
-  regval  = getreg32(STM32_RCC_CR);			/* Set the HSION bit */
+  regval  = getreg32(STM32_RCC_CR);         /* Set the HSION bit */
   regval |= RCC_CR_HSION;
   putreg32(regval, STM32_RCC_CR);
 
-  regval  = getreg32(STM32_RCC_CFGR);		/* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
+  regval  = getreg32(STM32_RCC_CFGR);       /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
   regval &= ~(RCC_CFGR_SW_MASK|RCC_CFGR_HPRE_MASK|RCC_CFGR_PPRE1_MASK|RCC_CFGR_PPRE2_MASK|RCC_CFGR_ADCPRE_MASK|RCC_CFGR_MCO_MASK);
   putreg32(regval, STM32_RCC_CFGR);
 
-  regval  = getreg32(STM32_RCC_CR);			/* Reset HSEON, CSSON and PLLON bits */
+  regval  = getreg32(STM32_RCC_CR);         /* Reset HSEON, CSSON and PLLON bits */
   regval &= ~(RCC_CR_HSEON|RCC_CR_CSSON|RCC_CR_PLLON);
   putreg32(regval, STM32_RCC_CR);
 
-  regval  = getreg32(STM32_RCC_CR);			/* Reset HSEBYP bit */
+  regval  = getreg32(STM32_RCC_CR);         /* Reset HSEBYP bit */
   regval &= ~RCC_CR_HSEBYP;
   putreg32(regval, STM32_RCC_CR);
  
-  regval  = getreg32(STM32_RCC_CFGR);		/* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE bits */
+  regval  = getreg32(STM32_RCC_CFGR);       /* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE bits */
   regval &= ~(RCC_CFGR_PLLSRC|RCC_CFGR_PLLXTPRE|RCC_CFGR_PLLMUL_MASK|RCC_CFGR_USBPRE);
   putreg32(regval, STM32_RCC_CFGR);
 
-  putreg32(0, STM32_RCC_CIR);				/* Disable all interrupts */
+  putreg32(0, STM32_RCC_CIR);               /* Disable all interrupts */
 }
 
 static inline void rcc_enableahb(void)
@@ -138,7 +138,7 @@ static inline void rcc_enableahb(void)
   regval |=  RCC_AHBENR_SDIOEN;
 #endif
 
-  putreg32(regval, STM32_RCC_AHBENR);	/* Enable peripherals */
+  putreg32(regval, STM32_RCC_AHBENR);   /* Enable peripherals */
 }
 
 static inline void rcc_enableapb1(void)
@@ -380,7 +380,7 @@ static inline void rcc_enableapb2(void)
 void stm32_clockconfig(void)
 {
   uint32 regval;
-  sint32 timeout;
+  volatile sint32 timeout;
 
   /* Make sure that we are starting in the reset state */
 
@@ -389,8 +389,8 @@ void stm32_clockconfig(void)
   /* Enable External High-Speed Clock (HSE) */
  
   regval  = getreg32(STM32_RCC_CR);
-  regval &= ~RCC_CR_HSEBYP;			/* Disable HSE clock bypass */
-  regval |= RCC_CR_HSEON;			/* Enable HSE */
+  regval &= ~RCC_CR_HSEBYP;         /* Disable HSE clock bypass */
+  regval |= RCC_CR_HSEON;           /* Enable HSE */
   putreg32(regval, STM32_RCC_CR);
    
   /* Wait until the HSE is ready (or until a timeout elapsed) */
