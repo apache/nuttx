@@ -931,4 +931,8 @@
 	  waiting to happen in any other configuration.
 	* arch/arm/src/stm32/ - You have to configure CTS/RTS function pins for USART
 	  2 and USART 3 even if you are not using flow control.
+	* arch/arm/src/stm32/stm32_usbdev.c - Added a USB device-side driver for the
+	  STM32.
+
+		NOTE: This USB driver is completely untested as of the initial check-in
 

@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/up_boot.c
+ * configs/stm3210e-eval/src/up_usbdev.c
  * arch/arm/src/board/up_boot.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
@@ -43,9 +43,10 @@
 
 #include <debug.h>
 
-#include <arch/board/board.h>
+#include <nuttx/usbdev.h>
 
 #include "up_arch.h"
+#include "stm32_internal.h"
 #include "stm3210e-internal.h"
 
 /************************************************************************************
@@ -61,54 +62,51 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called to setup USB-related GPIO pins for the STM3210E-EVAL board.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+void stm32_usbinitialize(void)
 {
-  /* Initialize the DMA subsystem if the weak function stm32_dmainitialize has been
-   * brought into the build
-   */
+  /* USB Soft Connect Pullup: PB.14 */
 
-#if defined(CONFIG_STM32_DMA1) || defined(CONFIG_STM32_DMA2)
-  if (stm32_dmainitialize)
-    {
-      stm32_dmainitialize();
-    }
-#endif
-
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
-   */
-
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
-  if (stm32_spiinitialize)
-    {
-      stm32_spiinitialize();
-    }
-#endif
-
-   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-    * into the build.
-    */
-
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
-  if (stm32_usbinitialize)
-    {
-      stm32_usbinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
-#endif
+  stm32_configgpio(GPIO_USB_PULLUP);
 }
+
+/************************************************************************************
+ * Name:  stm32_usbpullup
+ *
+ * Description:
+ *   If USB is supported and the board supports a pullup via GPIO (for USB software
+ *   connect and disconnect), then the board software must provide stm32_pullup.
+ *   See include/nuttx/usbdev.h for additional description of this method.
+ *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
+ *   NULL.
+ *
+ ************************************************************************************/
+
+int stm32_usbpullup(FAR struct usbdev_s *dev,  boolean enable)
+{
+  stm32_gpiowrite(GPIO_USB_PULLUP, !enable);
+  return OK;
+}
+
+/************************************************************************************
+ * Name:  stm32_usbsuspend
+ *
+ * Description:
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
+ *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power, etc.
+ *   while the USB is suspended.
+ *
+ ************************************************************************************/
+
+void stm32_usbsuspend(FAR struct usbdev_s *dev, boolean resume)
+{
+  ulldbg("resume: %d\n", resume);
+}
+

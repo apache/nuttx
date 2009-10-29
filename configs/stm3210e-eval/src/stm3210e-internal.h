@@ -65,14 +65,24 @@
 
 /* LEDs */
 
-#define GPIO_LED1     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN6)
-#define GPIO_LED2     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN7)
-#define GPIO_LED3     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN8)
-#define GPIO_LED4     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN9)
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN6)
+#define GPIO_LED2       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN7)
+#define GPIO_LED3       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN8)
+#define GPIO_LED4       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN9)
 
 /* SPI FLASH chip select:  PA.4 */
 
-#define GPIO_FLASH_CS (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN2)
+#define GPIO_FLASH_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN2)
+
+/* USB Soft Connect Pullup: PB.14 */
+
+#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN14)
 
 /************************************************************************************
  * Public Types
@@ -114,6 +124,16 @@ extern const uint16 g_commonconfig[NCOMMON_CONFIG];
  ************************************************************************************/
 
 extern void weak_function stm32_spiinitialize(void);
+
+/************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called to setup USB-related GPIO pins for the STM3210E-EVAL board.
+ *
+ ************************************************************************************/
+
+extern void weak_function stm32_usbinitialize(void);
 
 /************************************************************************************
  * Name: stm32_extcontextsave

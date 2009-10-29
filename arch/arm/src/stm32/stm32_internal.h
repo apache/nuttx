@@ -826,7 +826,7 @@ EXTERN void  stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, b
 EXTERN ubyte stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
 /************************************************************************************
- * Name:  stm32_pullup
+ * Name:  stm32_usbpullup
  *
  * Description:
  *   If USB is supported and the board supports a pullup via GPIO (for USB software
@@ -838,7 +838,21 @@ EXTERN ubyte stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
  ************************************************************************************/
 
 struct usbdev_s;
-EXTERN int stm32_pullup(FAR struct usbdev_s *dev,  boolean enable);
+EXTERN int stm32_usbpullup(FAR struct usbdev_s *dev,  boolean enable);
+
+/************************************************************************************
+ * Name:  stm32_usbsuspend
+ *
+ * Description:
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
+ *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power, etc.
+ *   while the USB is suspended.
+ *
+ ************************************************************************************/
+
+struct usbdev_s;
+EXTERN void stm32_usbsuspend(FAR struct usbdev_s *dev, boolean resume);
 
 #undef EXTERN
 #if defined(__cplusplus)
