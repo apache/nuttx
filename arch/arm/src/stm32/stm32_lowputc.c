@@ -298,6 +298,8 @@ void stm32_lowsetup(void)
 
   stm32_configgpio(GPIO_USART2_TX);
   stm32_configgpio(GPIO_USART2_RX);
+  stm32_configgpio(GPIO_USART2_CTS);
+  stm32_configgpio(GPIO_USART2_RTS);
 #endif /* CONFIG_STM32_USART2 */
 
 #ifdef CONFIG_STM32_USART3
@@ -323,6 +325,8 @@ void stm32_lowsetup(void)
 
   stm32_configgpio(GPIO_USART3_TX);
   stm32_configgpio(GPIO_USART3_RX);
+  stm32_configgpio(GPIO_USART3_CTS);
+  stm32_configgpio(GPIO_USART3_RTS);
 #endif /* CONFIG_STM32_USART3 */
 
   /* Enable and configure the selected console device */
