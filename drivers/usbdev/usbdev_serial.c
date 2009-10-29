@@ -1348,7 +1348,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       reqcontainer->req = usbclass_allocreq(priv->epbulkout, reqlen);
       if (reqcontainer->req == NULL)
         {
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), (uint16)-ret);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), -ENOMEM);
           ret = -ENOMEM;
           goto errout;
         }
@@ -1370,7 +1370,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       reqcontainer->req = usbclass_allocreq(priv->epbulkin, reqlen);
       if (reqcontainer->req == NULL)
         {
-          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRALLOCREQ), (uint16)-ret);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRALLOCREQ), -ENOMEM);
           ret = -ENOMEM;
           goto errout;
         }

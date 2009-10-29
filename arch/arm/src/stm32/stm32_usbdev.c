@@ -181,16 +181,18 @@
 #define STM32_TRACEERR_BADSETFEATURE        0x000c
 #define STM32_TRACEERR_BINDFAILED           0x000d
 #define STM32_TRACEERR_DISPATCHSTALL        0x000e
-#define STM32_TRACEERR_DRIVERREGISTERED     0x000f
-#define STM32_TRACEERR_EP0SETUPSTALLED      0x0010
-#define STM32_TRACEERR_EPBUFFER             0x0011
-#define STM32_TRACEERR_EPDISABLED           0x0012
-#define STM32_TRACEERR_EPOUTNULLPACKET      0x0013
-#define STM32_TRACEERR_EPRESERVE            0x0014
-#define STM32_TRACEERR_INVALIDCTRLREQ       0x0015
-#define STM32_TRACEERR_IRQREGISTRATION      0x0016
-#define STM32_TRACEERR_NOTCONFIGURED        0x0017
-#define STM32_TRACEERR_REQABORTED           0x0018
+#define STM32_TRACEERR_DRIVER               0x000f
+#define STM32_TRACEERR_DRIVERREGISTERED     0x0010
+#define STM32_TRACEERR_EP0SETUPSTALLED      0x0011
+#define STM32_TRACEERR_EPBUFFER             0x0012
+#define STM32_TRACEERR_EPDISABLED           0x0013
+#define STM32_TRACEERR_EPOUTNULLPACKET      0x0014
+#define STM32_TRACEERR_EPRESERVE            0x0015
+#define STM32_TRACEERR_INVALIDCTRLREQ       0x0016
+#define STM32_TRACEERR_INVALIDPARMS         0x0017
+#define STM32_TRACEERR_IRQREGISTRATION      0x0018
+#define STM32_TRACEERR_NOTCONFIGURED        0x0019
+#define STM32_TRACEERR_REQABORTED           0x001a
 
 /* Trace interrupt codes */
 
@@ -2460,7 +2462,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
   /* Get the maxpacket size of the endpoint. */
 
   maxpacket = GETUINT16(desc->mxpacketsize);
-  DEBUGASSERT(maxpacketsize <= STM32_MAXPACKET_SIZE);
+  DEBUGASSERT(maxpacket <= STM32_MAXPACKET_SIZE);
   ep->maxpacket = maxpacket;
 
   /* Get the subset matching the requested direction */
@@ -2904,7 +2906,7 @@ static void stm32_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
   if (!dev || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      return -EINVAL;
+      return;
     }
 #endif
   priv   = (struct stm32_usbdev_s *)dev;
@@ -3123,6 +3125,11 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
 
 void up_usbinitialize(void) 
 {
+  /* For now there is only one USB controller, but we will always refer to
+   * it using a pointer to make any future ports to multiple USB controllers
+   * easier.
+   */
+
   struct stm32_usbdev_s *priv = &g_usbdev;
   int epno;
 
@@ -3210,6 +3217,11 @@ errout:
 
 void up_usbuninitialize(void) 
 {
+  /* For now there is only one USB controller, but we will always refer to
+   * it using a pointer to make any future ports to multiple USB controllers
+   * easier.
+   */
+
   struct stm32_usbdev_s *priv = &g_usbdev;
   uint16 regval;
   irqstate_t flags;
@@ -3261,6 +3273,12 @@ void up_usbuninitialize(void)
 
 int usbdev_register(struct usbdevclass_driver_s *driver)
 {
+  /* For now there is only one USB controller, but we will always refer to
+   * it using a pointer to make any future ports to multiple USB controllers
+   * easier.
+   */
+
+  struct stm32_usbdev_s *priv = &g_usbdev;
   int ret;
 
   usbtrace(TRACE_DEVREGISTER, 0);
@@ -3282,15 +3300,15 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   /* First hook up the driver */
 
-   g_usbdev.driver = driver;
+   priv->driver = driver;
 
   /* Then bind the class driver */
 
-  ret = CLASS_BIND(driver, &g_usbdev.usbdev);
+  ret = CLASS_BIND(driver, &priv->usbdev);
   if (ret)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BINDFAILED), (uint16)-ret);
-       g_usbdev.driver = NULL;
+       priv->driver = NULL;
     }
   else
     {
@@ -3319,6 +3337,12 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
 int usbdev_unregister(struct usbdevclass_driver_s *driver)
 {
+  /* For now there is only one USB controller, but we will always refer to
+   * it using a pointer to make any future ports to multiple USB controllers
+   * easier.
+   */
+
+  struct stm32_usbdev_s *priv = &g_usbdev;
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
 #ifdef CONFIG_DEBUG
@@ -3331,7 +3355,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Unbind the class driver */
 
-  CLASS_UNBIND(driver, &g_usbdev.usbdev);
+  CLASS_UNBIND(driver, &priv->usbdev);
 
   /* Disable USB controller interrupts */
 
@@ -3340,9 +3364,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Unhook the driver */
 
-  g_usbdev.driver = NULL;
+  priv->driver = NULL;
   return OK;
 }
 
 #endif /* CONFIG_USBDEV && CONFIG_STM32_USB */
-
