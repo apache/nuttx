@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 24, 2009</p>
+      <p>Last Updated: October 28, 2009</p>
     </td>
   </tr>
 </table>
@@ -1577,6 +1577,10 @@ nuttx-0.4.13 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  context switches and background/user context switches.  This change should
 	  improve the performance of those background/user context switches by a factor
 	  of about two.
+	* arch/arm/src/stm32/ - fix several typos in the serial logic.  It turns out
+	  that these typose don't make any difference as long as you use only one
+	  serial port and all uarts are configured the same.  But the typos are bugs
+	  waiting to happen in any other configuration.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
