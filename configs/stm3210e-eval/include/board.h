@@ -85,7 +85,7 @@
 #define STM32_RCC_CFGR_PPRE1   RCC_CFGR_PPRE1_HCLKd2
 #define STM32_PCLK1_FREQUENCY  (STM32_HCLK_FREQUENCY/2)
 
-/* USB divider */
+/* USB divider -- Divide PLL clock by 1.5 */
 
 #define STM32_CFGR_USBPRE      0
 
