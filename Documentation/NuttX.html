@@ -1588,6 +1588,13 @@ nuttx-0.4.13 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 		NOTE: This USB driver is completely untested as of the initial check-in
 
+	* arch/arm/src/stm32/stm32_rcc.c - Fixed an error in clock initialization.
+	  On some boards (none of mine), the HSE (high speed external clock) delay
+	  loop times out if the optimization level is high. The STM32 then falls
+	  back to the HSI (internal clock), and the system clock is too slow by a
+	  factor of 11.1%.  This was fixed by simply add the volatile storage class
+	  to the timeout loop counter
+
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-0.1.8 2009-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
