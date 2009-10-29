@@ -335,9 +335,11 @@ struct stm32_usbdev_s
 #if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
 static uint16 stm32_getreg(uint32 addr);
 static void stm32_putreg(uint16 val, uint32 addr);
+static void stm32_checksetup(void);
 #else
 # define stm32_getreg(addr)     getreg16(addr)
 # define stm32_putreg(val,addr) putreg16(val,addr)
+# define stm32_checksetup()
 #endif
 
 /* Low-Level Helpers ********************************************************/
@@ -563,6 +565,27 @@ static void stm32_putreg(uint16 val, uint32 addr)
   /* Write the value */
 
   putreg32(val, addr);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_checksetup
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+static void stm32_checksetup(void)
+{
+  uint32 cfgr = getreg32(STM32_RCC_CFGR);
+  uint32 apb1rstr = getreg32(STM32_RCC_APB1RSTR);
+  uint32 apb1enr  = getreg32(STM32_RCC_APB1ENR);
+
+  lldbg("CFGR: %08x APB1RSTR: %08x APB1ENR: %08x\n", cfgr, apb1rstr, apb1enr);
+
+  if ((apb1rstr & RCC_APB1RSTR_USBRST) != 0 ||
+      (apb1enr & RCC_APB1ENR_USBEN) == 0)
+    {
+      lldbg("ERROR: USB is NOT setup correctly\n");
+    }
 }
 #endif
 
@@ -1106,7 +1129,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   bytesleft         = privreq->req.len - privreq->req.xfrd;
   nbytes            = bytesleft;
 
-#warning REVISIT... If the EP supports double buffering, then we can do better
+#warning "REVISIT: If the EP supports double buffering, then we can do better"
 
   /* Send the next packet */
 
@@ -2440,6 +2463,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
       break;
 
     case USB_EP_ATTR_XFER_ISOC: /* Isochronous endpoint */
+#warning "REVISIT: Need to review isochronous EP setup"
       setting = USB_EPR_EPTYPE_ISOC;
       break;
 
@@ -2456,7 +2480,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
 
   /* Get the address of the PMA buffer allocated for this endpoint */
 
-#warning "Should configure BULK EPs using double buffer feature"
+#warning "REVISIT: Should configure BULK EPs using double buffer feature"
   pma = STM32_BUFNO2BUF(privep->bufno);
 
   /* Get the maxpacket size of the endpoint. */
@@ -2877,7 +2901,7 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev, ubyte epno,
 
   /* Allocate a PMA buffer for this endpoint */
 
-#warning "Should configure BULK EPs using double buffer feature"
+#warning "REVISIT: Should configure BULK EPs using double buffer feature"
   bufno = stm32_allocpma(priv);
   if (bufno < 0)
     {
@@ -3134,6 +3158,7 @@ void up_usbinitialize(void)
   int epno;
 
   usbtrace(TRACE_DEVINIT, 0);
+  stm32_checksetup();
 
   /* Disable the USB controller, disable all USB interrupts */
 

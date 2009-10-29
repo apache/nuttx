@@ -153,6 +153,7 @@
 #  define RCC_CFGR_PLLMUL_CLKx14    (12 << RCC_CFGR_PLLMUL_SHIFT) /* 1100: PLL input clock x 14 */
 #  define RCC_CFGR_PLLMUL_CLKx15    (13 << RCC_CFGR_PLLMUL_SHIFT) /* 1101: PLL input clock x 15 */
 #  define RCC_CFGR_PLLMUL_CLKx16    (14 << RCC_CFGR_PLLMUL_SHIFT) /* 111x: PLL input clock x 16 */
+#define RCC_CFGR_USBPRE             (1 << 22) /* Bit 22: USB prescaler */
 #define RCC_CFGR_MCO_SHIFT          (24)      /* Bits 26-24: Microcontroller Clock Output */
 #define RCC_CFGR_MCO_MASK           (7 << RCC_CFGR_MCO_SHIFT)
 #  define RCC_CFGR_NOCLK            (0 << RCC_CFGR_MCO_SHIFT) /* 0xx: No clock */
@@ -160,7 +161,6 @@
 #  define RCC_CFGR_INTCLK           (5 << RCC_CFGR_MCO_SHIFT) /* 101: Internal 8 MHz RC oscillator clock selected */
 #  define RCC_CFGR_EXTCLK           (6 << RCC_CFGR_MCO_SHIFT) /* 110: External 1-25 MHz oscillator clock selected */
 #  define RCC_CFGR_PLLCLKd2         (7 << RCC_CFGR_MCO_SHIFT) /* 111: PLL clock divided by 2 selected */
-#define RCC_CFGR_USBPRE             (1 << 22) /* Bit 22: USB prescaler */
 
 /* Clock interrupt register */
 
