@@ -3216,10 +3216,10 @@ void up_usbinitialize(void)
       goto errout;
     }
 
-  if (irq_attach( STM32_IRQ_USBLPCANRX0, stm32_lpinterrupt) != 0)
+  if (irq_attach STM32_IRQ_USBLPCANRX0, stm32_lpinterrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_IRQREGISTRATION),
-               (uint16) STM32_IRQ_USBLPCANRX0);
+               (uint16)STM32_IRQ_USBLPCANRX0);
       goto errout;
     }
   return;
@@ -3267,7 +3267,7 @@ void up_usbuninitialize(void)
   up_disable_irq(STM32_IRQ_USBHPCANTX);
   up_disable_irq(STM32_IRQ_USBLPCANRX0);
   irq_detach(STM32_IRQ_USBHPCANTX);
-  irq_detach( STM32_IRQ_USBLPCANRX0);
+  irq_detach(STM32_IRQ_USBLPCANRX0);
 
   /* Disable all ints and force USB reset */ 
 
@@ -3340,12 +3340,12 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       /* Enable USB controller interrupts */
 
       up_enable_irq(STM32_IRQ_USBHPCANTX);
-      up_enable_irq( STM32_IRQ_USBLPCANRX0);
+      up_enable_irq(STM32_IRQ_USBLPCANRX0);
 
       /* Set the interrrupt priority */
 
       up_prioritize_irq(STM32_IRQ_USBHPCANTX, CONFIG_USB_PRI);
-      up_prioritize_irq( STM32_IRQ_USBLPCANRX0, CONFIG_USB_PRI);
+      up_prioritize_irq(STM32_IRQ_USBLPCANRX0, CONFIG_USB_PRI);
    }
   return ret;
 }
