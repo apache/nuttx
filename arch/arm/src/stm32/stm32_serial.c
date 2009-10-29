@@ -81,7 +81,7 @@
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART3)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #else
 #  warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
@@ -508,7 +508,7 @@ static int up_setup(struct uart_dev_s *dev)
 
    fraction   = (usartdiv32 - (mantissa << 5) + 1) >> 1;
    brr       |= fraction << USART_BRR_FRAC_SHIFT;
-   up_serialout(priv, STM32_USART1_BRR, brr);
+   up_serialout(priv, STM32_USART_BRR_OFFSET, brr);
 
   /* Enable Rx, Tx, and the USART */
 
