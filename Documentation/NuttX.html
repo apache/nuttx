@@ -1581,6 +1581,8 @@ nuttx-0.4.13 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  that these typose don't make any difference as long as you use only one
 	  serial port and all uarts are configured the same.  But the typos are bugs
 	  waiting to happen in any other configuration.
+	* arch/arm/src/stm32/ - You have to configure CTS/RTS function pins for USART
+	  2 and USART 3 even if you are not using flow control.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
