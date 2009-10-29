@@ -925,5 +925,7 @@
 	  context switches and background/user context switches.  This change should
 	  improve the performance of those background/user context switches by a factor
 	  of about two.
-
-
+	* arch/arm/src/stm32/ - fix several typos in the serial logic.  It turns out
+	  that these typose don't make any difference as long as you use only one
+	  serial port and all uarts are configured the same.  But the typos are bugs
+	  waiting to happen in any other configuration.
