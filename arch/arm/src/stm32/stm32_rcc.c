@@ -145,6 +145,22 @@ static inline void rcc_enableapb1(void)
 {
   uint32 regval;
 
+#if CONFIG_STM32_USB
+  /* USB clock divider. This bit must be valid before enabling the USB
+   * clock in the RCC_APB1ENR register. This bit can’t be reset if the USB
+   * clock is enabled.
+   */
+
+  regval  = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_USBPRE;
+  regval |= STM32_CFGR_USBPRE;
+  putreg32(regval, STM32_RCC_CFGR);
+#endif
+
+  /* Set the appropriate bits in the APB1ENR register to enabled the
+   * selected APB1 peripherals.
+   */
+
   regval  = getreg32(STM32_RCC_APB1ENR);
 #if CONFIG_STM32_TIM2
   /* Timer 2 clock enable */
@@ -266,20 +282,15 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_DACEN;
 #endif
   putreg32(regval, STM32_RCC_APB1ENR);
-
-#if CONFIG_STM32_USB
-  /* USB clock divider */
-
-  regval  = getreg32(STM32_RCC_CFGR);
-  regval &= ~RCC_CFGR_USBPRE;
-  regval |= STM32_CFGR_USBPRE;
-  putreg32(regval, STM32_RCC_CFGR);
-#endif
 }
 
 static inline void rcc_enableapb2(void)
 {
   uint32 regval;
+
+  /* Set the appropriate bits in the APB2ENR register to enabled the
+   * selected APB2 peripherals.
+   */
 
   /* Enable GPIOA, GPIOB, ... and AFIO clocks */
 
