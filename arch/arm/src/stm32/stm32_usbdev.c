@@ -82,7 +82,7 @@
 #endif
 
 #ifndef CONFIG_USB_PRI
-#  define CONFIG_USB_PRI 2
+#  define CONFIG_USB_PRI NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
 /* Extremely detailed register debug that you would normally never want
@@ -3333,7 +3333,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   if (ret)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BINDFAILED), (uint16)-ret);
-       priv->driver = NULL;
+      priv->driver = NULL;
     }
   else
     {
