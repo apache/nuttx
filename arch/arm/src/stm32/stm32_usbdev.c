@@ -514,7 +514,7 @@ static uint16 stm32_getreg(uint32 addr)
    * Are we polling the register?  If so, suppress some of the output.
    */
 
-  if (addr == prevaddr || val == preval)
+  if (addr == prevaddr && val == preval)
     {
       if (count == 0xffffffff || ++count > 3)
         {
@@ -673,7 +673,7 @@ static inline void stm32_setepaddress(ubyte epno, ubyte addr)
   regval  = stm32_getreg(epaddr);
   regval &= EPR_NOTOG_MASK;
   regval &= ~USB_EPR_EA_MASK;
-  regval |= USB_EPR_EA_SHIFT;
+  regval |= (addr << USB_EPR_EA_SHIFT);
   stm32_putreg(regval, epaddr);
 } 
 
@@ -703,7 +703,7 @@ static inline void stm32_setstatusout(ubyte epno)
   uint16 regval;
 
   /* For a BULK endpoint the EP_KIND bit is used to enabled double buffering;
-   * for a CONTROL endpoint, it is set to indicatate that a status OUT
+   * for a CONTROL endpoint, it is set to indicate that a status OUT
    * transaction is expected.  The bit is not used with out endpoint types.
    */
 
@@ -723,7 +723,7 @@ static inline void stm32_clrstatusout(ubyte epno)
   uint16 regval;
 
   /* For a BULK endpoint the EP_KIND bit is used to enabled double buffering;
-   * for a CONTROL endpoint, it is set to indicatate that a status OUT
+   * for a CONTROL endpoint, it is set to indicate that a status OUT
    * transaction is expected.  The bit is not used with out endpoint types.
    */
 
@@ -858,14 +858,14 @@ static void stm32_seteprxstatus(ubyte epno, uint16 state)
 
   /* Toggle first bit */
 
-  if ((USB_EPR_STATTX_DTOG1 & state) != 0)
+  if ((USB_EPR_STATRX_DTOG1 & state) != 0)
     {
       regval ^= USB_EPR_STATRX_DTOG1;
     }
 
   /* Toggle second bit */
 
-  if ((USB_EPR_STATTX_DTOG2 & state) != 0)
+  if ((USB_EPR_STATRX_DTOG2 & state) != 0)
     {
       regval ^= USB_EPR_STATRX_DTOG2;
     }
@@ -3127,7 +3127,7 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
 
   /* Clear pending interrupts */
 
-  stm32_putreg((uint16)~USB_ISTR_ALLINTS, STM32_USB_ISTR);
+  stm32_putreg(0, STM32_USB_ISTR);
 
   /* Set the STM32 BTABLE address */
 
@@ -3184,7 +3184,9 @@ void up_usbinitialize(void)
 
   stm32_putreg(USB_CNTR_FRES|USB_CNTR_PDWN, STM32_USB_CNTR);
 
-  /* Disconnect the device / disable the pull-up */ 
+  /* Disconnect the device / disable the pull-up.  We don't want the
+   * host to enumerate us until the class driver is registered.
+   */ 
 
   stm32_usbpullup(&priv->usbdev, FALSE);
   
@@ -3299,7 +3301,7 @@ void up_usbuninitialize(void)
   
   /* Clear pending interrupts */ 
 
-  stm32_putreg(~USB_ISTR_ALLINTS, STM32_USB_ISTR);
+  stm32_putreg(0, STM32_USB_ISTR);
   
   /* Disconnect the device / disable the pull-up */ 
 
@@ -3371,7 +3373,9 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       up_prioritize_irq(STM32_IRQ_USBHPCANTX, CONFIG_USB_PRI);
       up_prioritize_irq(STM32_IRQ_USBLPCANRX0, CONFIG_USB_PRI);
 
-      /* Enable pull-up to connect the device */
+      /* Enable pull-up to connect the device.  The host should enumerate us
+       * some time after this
+       */
 
       stm32_usbpullup(&priv->usbdev, TRUE);
    }

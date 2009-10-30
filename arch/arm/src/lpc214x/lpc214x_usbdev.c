@@ -528,7 +528,7 @@ static uint32 lpc214x_getreg(uint32 addr)
    * we polling the register?  If so, suppress some of the output.
    */
 
-  if (addr == prevaddr || val == preval)
+  if (addr == prevaddr && val == preval)
     {
       if (count == 0xffffffff || ++count > 3)
         {
