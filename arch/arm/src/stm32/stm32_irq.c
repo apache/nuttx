@@ -224,7 +224,7 @@ static int stm32_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
            *regaddr = NVIC_IRQ0_31_ENABLE;
            *bit     = 1 << (irq - STM32_IRQ_INTERRUPTS);
         }
-      if (irq < STM32_IRQ_INTERRUPTS + 64)
+      else if (irq < STM32_IRQ_INTERRUPTS + 64)
         {
            *regaddr = NVIC_IRQ32_63_ENABLE;
            *bit     = 1 << (irq - STM32_IRQ_INTERRUPTS - 32);
