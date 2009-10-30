@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 29, 2009</p>
+      <p>Last Updated: October 30, 2009</p>
     </td>
   </tr>
 </table>
@@ -1594,6 +1594,10 @@ nuttx-0.4.13 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  back to the HSI (internal clock), and the system clock is too slow by a
 	  factor of 11.1%.  This was fixed by simply add the volatile storage class
 	  to the timeout loop counter
+	* arch/arm/src/stm32/stm32_irq.c - Fixed a critical bug in the interrupt
+	  control logic.  The wrong register was being used for interrupts in a
+	  certain range.  Worked fine until you try to use an interrupt in that
+	  range!
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
