@@ -161,8 +161,11 @@
 #define USB_CNTR_SUSPM               (1 << 11) /* Bit 11: Suspend mode Interrupt Mask */
 #define USB_CNTR_WKUPM               (1 << 12) /* Bit 12: Wakeup Interrupt Mask */
 #define USB_CNTR_ERRM                (1 << 13) /* Bit 13: Error Interrupt Mask */
-#define USB_CNTR_DMAOVRN             (1 << 14) /* Bit 14: Packet Memory Area Over / Underrun Interrupt Mask */
+#define USB_CNTR_DMAOVRNM            (1 << 14) /* Bit 14: Packet Memory Area Over / Underrun Interrupt Mask */
 #define USB_CNTR_CTRM                (1 << 15) /* Bit 15: Correct Transfer Interrupt Mask */
+
+#define USB_CNTR_ALLINTS             (USB_CNTR_ESOFM|USB_CNTR_SOFM|USB_CNTR_RESETM|USB_CNTR_SUSPM|\
+                                      USB_CNTR_WKUPM|USB_CNTR_ERRM|USB_CNTR_DMAOVRNM|USB_CNTR_CTRM)
 
 /* USB interrupt status register */
 
@@ -177,6 +180,9 @@
 #define USB_ISTR_ERR                 (1 << 13) /* Bit 13: Error */
 #define USB_ISTR_DMAOVRN             (1 << 14) /* Bit 14: Packet Memory Area Over / Underrun */
 #define USB_ISTR_CTR                 (1 << 15) /* Bit 15: Correct Transfer */
+
+#define USB_ISTR_ALLINTS             (USB_ISTR_ESOF|USB_ISTR_SOF|USB_ISTR_RESET|USB_ISTR_SUSP|\
+                                      USB_ISTR_WKUP|USB_ISTR_ERR|USB_ISTR_DMAOVRN|USB_ISTR_CTR)
 
 /* USB frame number register */
 
