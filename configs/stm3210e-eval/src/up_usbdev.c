@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/usbdev.h>
+#include <nuttx/usbdev_trace.h>
 
 #include "up_arch.h"
 #include "stm32_internal.h"
@@ -90,6 +91,7 @@ void stm32_usbinitialize(void)
 
 int stm32_usbpullup(FAR struct usbdev_s *dev,  boolean enable)
 {
+  usbtrace(TRACE_DEVPULLUP, (uint16)enable);
   stm32_gpiowrite(GPIO_USB_PULLUP, !enable);
   return OK;
 }
