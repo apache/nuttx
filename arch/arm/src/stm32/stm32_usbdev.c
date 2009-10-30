@@ -93,9 +93,9 @@
 #  undef CONFIG_STM32_USBDEV_REGDEBUG
 #endif
 
-/* Initial interrupt mask */
+/* Initial interrupt mask: Reset + Suspend + Correct Transfer */
 
-#define STM32_CNTR_SETUP     (USB_CNTR_RESETM|USB_CNTR_SUSPM|USB_CNTR_WKUPM|USB_CNTR_CTRM)
+#define STM32_CNTR_SETUP     (USB_CNTR_RESETM|USB_CNTR_SUSPM|USB_CNTR_CTRM)
 
 /* Endpoint identifiers. The STM32 supports up to 16 mono-directional or 8
  * bidirectional endpoints.  However, when you take into account PMA buffer
@@ -373,6 +373,8 @@ static inline uint16
               stm32_geteprxstatus(ubyte epno);
 static uint16 stm32_eptxstalled(ubyte epno);
 static uint16 stm32_eprxstalled(ubyte epno);
+static void   stm32_setimask(struct stm32_usbdev_s *priv, uint16 setbits,
+                uint16 clrbits);
 static void   stm32_suspend(struct stm32_usbdev_s *priv);
 static void   stm32_initresume(struct stm32_usbdev_s *priv);
 static void   stm32_esofpoll(struct stm32_usbdev_s *priv) ;
@@ -1890,7 +1892,7 @@ static void stm32_lptransfer(struct stm32_usbdev_s *priv)
   uint16 epval;
   uint16 istr;
 
-  /* Etay in loop while pending ints */
+  /* Stay in loop while LP interrupts are pending */
 
   while (((istr = stm32_getreg(STM32_USB_ISTR)) & USB_ISTR_CTR) != 0)
     {
@@ -2041,8 +2043,9 @@ static int stm32_hpinterrupt(int irq, void *context)
    * for isochronous and double-buffer bulk transfers.
    */
 
-  usbtrace(TRACE_INTENTRY(STM32_TRACEINTID_HPINTERRUPT), irq);
-  while (((istr = stm32_getreg(STM32_USB_ISTR)) & USB_ISTR_CTR) != 0)
+  istr = stm32_getreg(STM32_USB_ISTR);
+  usbtrace(TRACE_INTENTRY(STM32_TRACEINTID_HPINTERRUPT), istr);
+  while ((istr & USB_ISTR_CTR) != 0)
     {
       stm32_putreg((uint16)~USB_ISTR_CTR, STM32_USB_ISTR);
       
@@ -2090,6 +2093,10 @@ static int stm32_hpinterrupt(int irq, void *context)
           privep->txbusy = 0;
           stm32_wrrequest(priv, privep);
         }
+
+      /* Fetch the status again for the next time through the loop */
+
+      istr = stm32_getreg(STM32_USB_ISTR);
     }
 
   usbtrace(TRACE_INTEXIT(STM32_TRACEINTID_HPINTERRUPT), 0);
@@ -2110,7 +2117,7 @@ static int stm32_lpinterrupt(int irq, void *context)
   struct stm32_usbdev_s *priv = &g_usbdev;
   uint16 istr = stm32_getreg(STM32_USB_ISTR);
 
-  usbtrace(TRACE_INTENTRY(STM32_TRACEINTID_LPINTERRUPT), irq);
+  usbtrace(TRACE_INTENTRY(STM32_TRACEINTID_LPINTERRUPT), istr);
 
   /* Handle Reset interrupts.  When this event occurs, the peripheral is left
    * in the same conditions it is left by the system reset (but with the
@@ -2124,10 +2131,12 @@ static int stm32_lpinterrupt(int irq, void *context)
       stm32_putreg(~USB_ISTR_RESET, STM32_USB_ISTR);
       usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_RESET), 0);
 
-      /* Restore our power-up state and exit now. */
+      /* Restore our power-up state and exit now because istr is no longer
+       * valid.
+       */
 
       stm32_reset(priv);
-      return OK;
+      goto exit_lpinterrupt;
     }
 
   /* Handle Wakeup interrupts.  This interrupt is only enable while the USB is
@@ -2161,12 +2170,12 @@ static int stm32_lpinterrupt(int irq, void *context)
 
   if ((istr & USB_ISTR_SUSP & priv->imask) != 0)
     {
+        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SUSP), 0);
         stm32_suspend(priv);
 
         /* Clear of the ISTR bit must be done after setting of USB_CNTR_FSUSP */ 
 
         stm32_putreg(~USB_ISTR_SUSP, STM32_USB_ISTR);
-        usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SUSP), 0);
     }
 
   if ((istr & USB_ISTR_ESOF & priv->imask) != 0)
@@ -2187,8 +2196,33 @@ static int stm32_lpinterrupt(int irq, void *context)
       stm32_lptransfer(priv);
     }
 
+exit_lpinterrupt:
   usbtrace(TRACE_INTEXIT(STM32_TRACEINTID_LPINTERRUPT), 0);
   return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_setimask
+ ****************************************************************************/
+
+static void
+stm32_setimask(struct stm32_usbdev_s *priv, uint16 setbits, uint16 clrbits)
+{
+  uint16 regval;
+
+  /* Adjust the interrupt mask bits in the shadow copy first */
+
+  priv->imask &= ~clrbits;
+  priv->imask |= setbits;
+
+  /* Then make the interrupt mask bits in the CNTR register match the shadow
+   * register (Hmmm... who is shadowing whom?)
+   */
+
+  regval  = stm32_getreg(STM32_USB_CNTR);
+  regval &= ~USB_CNTR_ALLINTS;
+  regval |= priv->imask;
+  stm32_putreg(regval, STM32_USB_CNTR);
 }
 
 /****************************************************************************
@@ -2199,17 +2233,12 @@ static void stm32_suspend(struct stm32_usbdev_s *priv)
 {
   uint16 regval;
   
-  /* Disable ESOF polling, disable the SUSP interrupt, and
-   * enable the WKUP interrupt.
+  /* Disable ESOF polling, disable the SUSP interrupt, and enable the WKUP
+   * interrupt.  Clear any pending WKUP interrupt.
    */
 
-  priv->imask &= ~(USB_CNTR_ESOFM|USB_CNTR_SUSPM);
-  priv->imask |= USB_CNTR_WKUPM;
-  stm32_putreg(priv->imask, STM32_USB_CNTR);
-
-  /* Clear any pending interrupts that we just enabled */
-
-  stm32_putreg(~USB_CNTR_WKUPM, STM32_USB_ISTR);
+  stm32_setimask(priv, USB_CNTR_WKUPM, USB_CNTR_ESOFM|USB_CNTR_SUSPM);
+  stm32_putreg(~USB_ISTR_WKUP, STM32_USB_ISTR);
 
   /* Enter suspend mode */
 
@@ -2288,17 +2317,12 @@ static void stm32_esofpoll(struct stm32_usbdev_s *priv)
           stm32_putreg(regval, STM32_USB_CNTR);
           priv->rsmstate = RSMSTATE_IDLE;
 
-          /* Disable ESOF polling, disable the SUSP interrupt, and
-           * enable the WKUP interrupt.
+          /* Disable ESOF polling, disable the SUSP interrupt, and enable
+           * the WKUP interrupt.  Clear any pending WKUP interrupt.
            */
 
-          priv->imask &= ~(USB_CNTR_ESOFM|USB_CNTR_SUSPM);
-          priv->imask |= USB_CNTR_WKUPM;
-          stm32_putreg(priv->imask, STM32_USB_CNTR);
-
-          /* Clear any pending interrupts that we just enabled */
-
-          stm32_putreg(~USB_CNTR_WKUPM, STM32_USB_ISTR);
+          stm32_setimask(priv, USB_CNTR_WKUPM, USB_CNTR_ESOFM|USB_CNTR_SUSPM);
+          stm32_putreg(~USB_ISTR_WKUP, STM32_USB_ISTR);
         }
       break;
 
@@ -3000,16 +3024,12 @@ static int stm32_wakeup(struct usbdev_s *dev)
 
   /* Disable the SUSP interrupt (until we are fully resumed), disable
    * the WKUP interrupt (we are already waking up), and enable the
-   * ESOF interrupt that will drive the resume operations.
+   * ESOF interrupt that will drive the resume operations.  Clear any
+   * pending ESOF interrupt.
    */
 
-  priv->imask &= ~(USB_CNTR_WKUPM|USB_CNTR_SUSPM);
-  priv->imask |= USB_CNTR_ESOFM;
-  stm32_putreg(priv->imask, STM32_USB_CNTR);
-
-  /* Clear any pending interrupts that we just enabled */
-
-  stm32_putreg(~USB_CNTR_ESOFM, STM32_USB_ISTR);
+  stm32_setimask(priv, USB_CNTR_ESOFM, USB_CNTR_WKUPM|USB_CNTR_SUSPM);
+  stm32_putreg(~USB_ISTR_ESOF, STM32_USB_ISTR);
   irqrestore(flags);
   return OK;
 }
@@ -3087,7 +3107,7 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
   /* Set the interrrupt priority */
 
   up_prioritize_irq(STM32_IRQ_USBHPCANTX, CONFIG_USB_PRI);
-  up_prioritize_irq( STM32_IRQ_USBLPCANRX0, CONFIG_USB_PRI);
+  up_prioritize_irq(STM32_IRQ_USBLPCANRX0, CONFIG_USB_PRI);
 } 
 
 /****************************************************************************
@@ -3096,17 +3116,18 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
 
 static void stm32_hwreset(struct stm32_usbdev_s *priv)
 {
-  /* Enable pull-up to connect the device */
+  /* Put the USB controller into reset */
 
-  stm32_usbpullup(&priv->usbdev, TRUE);
   stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
-  
+
+  /* Disable interrupts (and perhaps take the USB controller out of reset) */
+
   priv->imask = 0;
   stm32_putreg(priv->imask, STM32_USB_CNTR);
 
   /* Clear pending interrupts */
 
-  stm32_putreg(0, STM32_USB_ISTR);
+  stm32_putreg((uint16)~USB_ISTR_ALLINTS, STM32_USB_ISTR);
 
   /* Set the STM32 BTABLE address */
 
@@ -3128,8 +3149,7 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
 
   /* Enable interrupts at the USB controllr */
 
-  priv->imask = STM32_CNTR_SETUP;
-  stm32_putreg(priv->imask, STM32_USB_CNTR);
+  stm32_setimask(priv, STM32_CNTR_SETUP, (USB_CNTR_ALLINTS & ~STM32_CNTR_SETUP));
 }
 
 /****************************************************************************
@@ -3164,6 +3184,10 @@ void up_usbinitialize(void)
 
   stm32_putreg(USB_CNTR_FRES|USB_CNTR_PDWN, STM32_USB_CNTR);
 
+  /* Disconnect the device / disable the pull-up */ 
+
+  stm32_usbpullup(&priv->usbdev, FALSE);
+  
   /* Initialize the device state structure.  NOTE: many fields
    * have the initial value of zero and, hence, are not explicitly
    * initialized here.
@@ -3275,7 +3299,7 @@ void up_usbuninitialize(void)
   
   /* Clear pending interrupts */ 
 
-  stm32_putreg(0, STM32_USB_ISTR);
+  stm32_putreg(~USB_ISTR_ALLINTS, STM32_USB_ISTR);
   
   /* Disconnect the device / disable the pull-up */ 
 
@@ -3346,6 +3370,10 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       up_prioritize_irq(STM32_IRQ_USBHPCANTX, CONFIG_USB_PRI);
       up_prioritize_irq(STM32_IRQ_USBLPCANRX0, CONFIG_USB_PRI);
+
+      /* Enable pull-up to connect the device */
+
+      stm32_usbpullup(&priv->usbdev, TRUE);
    }
   return ret;
 }
