@@ -942,4 +942,8 @@
 	  back to the HSI (internal clock), and the system clock is too slow by a
 	  factor of 11.1%.  This was fixed by simply add the volatile storage class
 	  to the timeout loop counter
-	  
+	* arch/arm/src/stm32/stm32_irq.c - Fixed a critical bug in the interrupt
+	  control logic.  The wrong register was being used for interrupts in a
+	  certain range.  Worked fine until you try to use an interrupt in that
+	  range!
+
