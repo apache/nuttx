@@ -354,18 +354,22 @@ static void stm32_dumpep(int epno);
 static inline void
               stm32_seteptxcount(ubyte epno, uint16 count);
 static inline void
-              stm32_seteptxaddr(ubyte epno, ubyte addr);
+              stm32_seteptxaddr(ubyte epno, uint16 addr);
+static inline uint16
+              stm32_geteptxaddr(ubyte epno);
 static void   stm32_seteprxcount(ubyte epno, uint16 count);
 static inline uint16
               stm32_geteprxcount(ubyte epno);
 static inline void
-              stm32_seteprxaddr(ubyte epno, ubyte addr);
+              stm32_seteprxaddr(ubyte epno, uint16 addr);
+static inline uint16
+              stm32_geteprxaddr(ubyte epno);
 static inline void
-              stm32_setepaddress(ubyte epno, ubyte addr);
+              stm32_setepaddress(ubyte epno, uint16 addr);
 static inline void
               stm32_seteptype(ubyte epno, uint16 type);
 static inline void
-              stm32_seteptxaddr(ubyte epno, ubyte addr);
+              stm32_seteptxaddr(ubyte epno, uint16 addr);
 static inline void
               stm32_setstatusout(ubyte epno);
 static inline void
@@ -393,9 +397,9 @@ static void   stm32_esofpoll(struct stm32_usbdev_s *priv) ;
 
 /* Request Helpers **********************************************************/
 
-static void   stm32_copytopma(const ubyte *buffer, uint16 pmaoffset, uint16 nbytes);
+static void   stm32_copytopma(const ubyte *buffer, uint16 pma, uint16 nbytes);
 static inline void
-              stm32_copyfrompma(ubyte *buffer, uint16 pmaoffset, uint16 nbytes);
+              stm32_copyfrompma(ubyte *buffer, uint16 pma, uint16 nbytes);
 static struct stm32_req_s *
               stm32_rqdequeue(struct stm32_ep_s *privep);
 static void   stm32_rqenqueue(struct stm32_ep_s *privep,
@@ -661,10 +665,20 @@ static inline void stm32_seteptxcount(ubyte epno, uint16 count)
  * Name: stm32_seteptxaddr
  ****************************************************************************/
 
-static inline void stm32_seteptxaddr(ubyte epno, ubyte addr)
+static inline void stm32_seteptxaddr(ubyte epno, uint16 addr)
 {
   volatile uint32 *txaddr = (uint32*)STM32_USB_ADDR_TX(epno);
   *txaddr = addr;
+}
+
+/****************************************************************************
+ * Name: stm32_geteptxaddr
+ ****************************************************************************/
+
+static inline uint16 stm32_geteptxaddr(ubyte epno)
+{
+  volatile uint32 *txaddr = (uint32*)STM32_USB_ADDR_TX(epno);
+  return (uint16)*txaddr;
 }
 
 /****************************************************************************
@@ -726,17 +740,27 @@ static inline uint16 stm32_geteprxcount(ubyte epno)
  * Name: stm32_seteprxaddr
  ****************************************************************************/
 
-static inline void stm32_seteprxaddr(ubyte epno, ubyte addr)
+static inline void stm32_seteprxaddr(ubyte epno, uint16 addr)
 {
   volatile uint32 *rxaddr = (uint32*)STM32_USB_ADDR_RX(epno);
   *rxaddr = addr;
 }
 
 /****************************************************************************
+ * Name: stm32_seteprxaddr
+ ****************************************************************************/
+
+static inline uint16 stm32_geteprxaddr(ubyte epno)
+{
+  volatile uint32 *rxaddr = (uint32*)STM32_USB_ADDR_RX(epno);
+  return (uint16)*rxaddr;
+}
+
+/****************************************************************************
  * Name: stm32_setepaddress
  ****************************************************************************/
 
-static inline void stm32_setepaddress(ubyte epno, ubyte addr) 
+static inline void stm32_setepaddress(ubyte epno, uint16 addr) 
 {
   uint32 epaddr = STM32_USB_EPR(epno);
   uint16 regval;
@@ -969,7 +993,7 @@ static inline uint16 stm32_eprxstalled(ubyte epno)
  * Name: stm32_copytopma
  ****************************************************************************/
 
-static void stm32_copytopma(const ubyte *buffer, uint16 pmaoffset, uint16 nbytes) 
+static void stm32_copytopma(const ubyte *buffer, uint16 pma, uint16 nbytes) 
 {
   uint16 *dest;
   uint16  ms;
@@ -977,9 +1001,11 @@ static void stm32_copytopma(const ubyte *buffer, uint16 pmaoffset, uint16 nbytes
   int     nwords = (nbytes + 1) >> 1;
   int     i;
 
+  ullvdbg("pma=%08x, nbytes=%d\n", pma, nbytes);
+
   /* Copy loop.  Source=user buffer, Dest=packet memory */
 
-  dest = (uint16*)((pmaoffset << 1) + STM32_USBCANRAM_BASE);
+  dest = (uint16*)(STM32_USBCANRAM_BASE + ((uint32)pma << 1));
   for (i = nwords; i != 0; i--)
     {
       /* Read two bytes and pack into on 16-bit word */
@@ -1001,15 +1027,17 @@ static void stm32_copytopma(const ubyte *buffer, uint16 pmaoffset, uint16 nbytes
  ****************************************************************************/
 
 static inline void
-stm32_copyfrompma(ubyte *buffer, uint16 pmaoffset, uint16 nbytes) 
+stm32_copyfrompma(ubyte *buffer, uint16 pma, uint16 nbytes) 
 {
   uint32 *src;
   int     nwords = (nbytes + 1) >> 1;
   int     i;
 
+  ullvdbg("pma=%08x, nbytes=%d\n", pma, nbytes);
+
   /* Copy loop.  Source=packet memory, Dest=user buffer */
 
-  src = (uint32*)((pmaoffset << 1) + STM32_USBCANRAM_BASE);
+  src = (uint32*)(STM32_USBCANRAM_BASE + ((uint32)pma << 1));
   for (i = nwords; i != 0; i--)
     {
       /* Copy 16-bits from packet memory to user buffer. */
@@ -1019,6 +1047,7 @@ stm32_copyfrompma(ubyte *buffer, uint16 pmaoffset, uint16 nbytes)
       /* Source address increments by 1*sizeof(uint32) = 4; Dest address
        * increments by 2*sizeof(ubyte) = 2.
        */
+
       buffer += 2;
     }
 }
@@ -1144,7 +1173,7 @@ static void stm32_epwrite(struct stm32_usbdev_s *priv,
        * endpoint
        */
 
-      stm32_copytopma(buf, (uint16)STM32_USB_ADDR_RX(epno), nbytes);
+      stm32_copytopma(buf, stm32_geteptxaddr(epno), nbytes);
     }
 
   /* Send the packet (might be a null packet nbytes == 0) */
@@ -1261,7 +1290,8 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
 static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep)
 {
   struct stm32_req_s *privreq;
-  ubyte *buf;
+  uint32 src;
+  ubyte *dest;
   ubyte epno;
   int pmalen;
   int readlen;
@@ -1295,16 +1325,20 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
 
   usbtrace(TRACE_READ(USB_EPNO(privep->ep.eplog)), privreq->req.xfrd);
 
+  /* Get the source and desintion transfer addresses */
+
+  dest    = privreq->req.buf + privreq->req.xfrd;
+  src     = stm32_geteprxaddr(epno);
+
   /* Get the number of bytes to read from packet memory */
 #warning "Doesn't this length include 2 bytes for the CRC?"
 
-  pmalen     = stm32_geteprxcount(epno);
+  pmalen  = stm32_geteprxcount(epno);
+  readlen = MIN(privreq->req.len,  pmalen);
 
   /* Receive the next packet */
 
-  buf     = privreq->req.buf + privreq->req.xfrd;
-  readlen = MIN(privreq->req.len,  pmalen);
-  stm32_copyfrompma(buf, (uint16)STM32_USB_ADDR_TX(EP0), readlen);
+  stm32_copyfrompma(dest, src, readlen);
 
   /* If the receive buffer is full then we are finished with the transfer */
 
@@ -1390,7 +1424,6 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   union wb_u           len;
   union wb_u           response;
   boolean              handled = FALSE;
-  ubyte               *buf;
   ubyte                epno;
   int                  nbytes = 0;
   int                  ret;
@@ -1413,23 +1446,9 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
   ep0->stalled  = 0;
 
-  /* Get a 32-bit PMA address */
+  /* Get a 32-bit PMA address and use that to get the 8-byte setup request */
 
-  buf = (ubyte*)(STM32_USBCANRAM_BASE + ((uint16)STM32_USB_ADDR_RX(EP0) << 1));
-
-  /* Extract the request from PMA */
-
-  priv->ctrl.type     = *buf++;    /* bmRequestType */
-  priv->ctrl.req      = *buf++;    /* bRequest */
-  buf                += 2;         /* Skip for 32 bits addressing */
-  priv->ctrl.value[0] = *buf++;   /* wValue */
-  priv->ctrl.value[1] = *buf++;   /* "    " */
-  buf                += 2;         /* Skip for 32 bits addressing */
-  priv->ctrl.index[0] = *buf++;   /* wIndex */
-  priv->ctrl.index[1] = *buf++;   /* "    " */
-  buf                += 2;         /* Skip for 32 bits addressing */
-  priv->ctrl.len[0]   = *buf++;   /* wLength */
-  priv->ctrl.len[1]   = *buf++;   /* "     " */
+  stm32_copyfrompma((ubyte*)&priv->ctrl, stm32_geteprxaddr(EP0), USB_SIZEOF_CTRLREQ);
 
   /* And extract the little-endian 16-bit values to host order */
 
@@ -1437,7 +1456,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   index.w = GETUINT16(priv->ctrl.index);
   len.w   = GETUINT16(priv->ctrl.len);
 
-  ullvdbg("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
+  ullvdbg("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
 
   priv->devstate = DEVSTATE_INIT;
@@ -2561,6 +2580,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
+      ulldbg("ERROR: ep=%p desc=%p\n");
       return -EINVAL;
     }
 #endif
@@ -2658,6 +2678,7 @@ static int stm32_epdisable(struct usbdev_ep_s *ep)
   if (!ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
+      ulldbg("ERROR: ep=%p\n", ep);
       return -EINVAL;
     }
 #endif
@@ -2744,7 +2765,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (!req || !req->callback || !req->buf || !ep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_INVALIDPARMS), 0);
-      ullvdbg("req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
+      ulldbg("ERROR: req=%p callback=%p buf=%p ep=%p\n", req, req->callback, req->buf, ep);
       return -EINVAL;
     }
 #endif
@@ -2752,11 +2773,17 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPSUBMIT, USB_EPNO(ep->eplog));
   priv = privep->dev;
 
-  if (!priv->driver || priv->usbdev.speed == USB_SPEED_UNKNOWN)
+#ifdef CONFIG_DEBUG
+  if (!priv->driver)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
+      ulldbg("ERROR: driver=%p\n", priv->driver);
       return -ESHUTDOWN;
     }
+#endif
+
+  usbtrace(TRACE_EPSUBMIT, USB_EPNO(ep->eplog));
+  priv = privep->dev;
 
   /* Handle the request from the class driver */
 
@@ -2769,6 +2796,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   if (privep->stalled)
     {
       stm32_abortrequest(privep, privreq, -EBUSY);
+      ulldbg("ERROR: stalled\n");
       ret = -EBUSY;
     }
 
@@ -3198,6 +3226,7 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
   /* Re-configure the USB controller in its initial, unconnected state */
 
   stm32_hwreset(priv);
+  priv->usbdev.speed = USB_SPEED_FULL;
 } 
 
 /****************************************************************************
@@ -3321,6 +3350,16 @@ void up_usbinitialize(void)
 #if STM32_EP0MAXPACKET < STM32_MAXPACKET_SIZE
   priv->eplist[EP0].ep.maxpacket = STM32_EP0MAXPACKET;
 #endif
+  /* Configure the USB controller.  USB uses the following GPIO pins:
+   *
+   *   PA9  - VBUS
+   *   PA10 - ID
+   *   PA11 - DM
+   *   PA12 - DP
+   *
+   * "As soon as the USB is enabled, these pins [DM and DP] are connected to
+   * the USB internal transceiver automatically."
+   */
 
   /* Power up the USB controller, holding it in reset.  There is a delay of
    * about 1uS after applying power before the USB will behave predictably.
@@ -3485,6 +3524,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
        */
 
       stm32_usbpullup(&priv->usbdev, TRUE);
+      priv->usbdev.speed = USB_SPEED_FULL;
    }
   return ret;
 }
