@@ -289,7 +289,7 @@ void usbtrace(uint16 event, uint16 value)
               break;
 
             case TRACE_INTENTRY_ID:        /* Interrupt handler entry */
-              lldbg("Interrrupt %d entry: %04x\n", TRACE_DATA(event), value);
+              lldbg("Interrupt %d entry: %04x\n", TRACE_DATA(event), value);
               break;
 
             case TRACE_INTDECODE_ID:       /* Decoded interrupt event */
