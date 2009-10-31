@@ -336,10 +336,12 @@ struct stm32_usbdev_s
 static uint16 stm32_getreg(uint32 addr);
 static void stm32_putreg(uint16 val, uint32 addr);
 static void stm32_checksetup(void);
+static void stm32_dumpep(int epno);
 #else
-# define stm32_getreg(addr)     getreg16(addr)
-# define stm32_putreg(val,addr) putreg16(val,addr)
+# define stm32_getreg(addr)      getreg16(addr)
+# define stm32_putreg(val,addr)  putreg16(val,addr)
 # define stm32_checksetup()
+# define stm32_dumpep(epno)
 #endif
 
 /* Low-Level Helpers ********************************************************/
@@ -548,7 +550,7 @@ static uint16 stm32_getreg(uint32 addr)
 
   /* Show the register value read */
 
-  lldbg("%08x->%08x\n", addr, val);
+  lldbg("%08x->%04x\n", addr, val);
   return val;
 }
 #endif
@@ -562,7 +564,7 @@ static void stm32_putreg(uint16 val, uint32 addr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  lldbg("%08x<-%04x\n", addr, val);
 
   /* Write the value */
 
@@ -571,13 +573,54 @@ static void stm32_putreg(uint16 val, uint32 addr)
 #endif
 
 /****************************************************************************
+ * Name: stm32_dumpep
+ ****************************************************************************/
+
+static void stm32_dumpep(int epno)
+{
+  uint32 addr;
+
+  /* Common registers */
+
+  lldbg("CNTR:   %04x\n", getreg16(STM32_USB_CNTR));
+  lldbg("ISTR:   %04x\n", getreg16(STM32_USB_ISTR));
+  lldbg("FNR:    %04x\n", getreg16(STM32_USB_FNR));
+  lldbg("DADDR:  %04x\n", getreg16(STM32_USB_DADDR));
+  lldbg("BTABLE: %04x\n", getreg16(STM32_USB_BTABLE));
+
+  /* Endpoint register */
+
+  addr = STM32_USB_EPR(epno);
+  lldbg("EPR%02d:  [%08x] %04x\n", epno, addr, getreg16(addr));
+
+  /* Endpoint descriptor */
+
+  addr = STM32_USB_BTABLE_ADDR(epno, 0);
+  lldbg("DESC:   %08x\n", addr);
+
+  /* Endpoint buffer descriptor */
+
+  addr = STM32_USB_ADDR_TX(epno);
+  lldbg("  TX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+
+  addr = STM32_USB_COUNT_TX(epno);
+  lldbg("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+
+  addr = STM32_USB_ADDR_RX(epno);
+  lldbg("  RX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+
+  addr = STM32_USB_COUNT_RX(epno);
+  lldbg("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+}
+
+/****************************************************************************
  * Name: stm32_checksetup
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
 static void stm32_checksetup(void)
 {
-  uint32 cfgr = getreg32(STM32_RCC_CFGR);
+  uint32 cfgr     = getreg32(STM32_RCC_CFGR);
   uint32 apb1rstr = getreg32(STM32_RCC_APB1RSTR);
   uint32 apb1enr  = getreg32(STM32_RCC_APB1ENR);
 
@@ -623,31 +666,39 @@ static void stm32_epsetrxcount(ubyte epno, uint16 count)
   uint32 *epaddr = (uint32*)STM32_USB_COUNT_RX(epno);
   uint16  nblocks;
 
+  /* The upper bits of the RX COUNT value contain the size of allocated
+   * RX buffer.  This is based on a block size of 2 or 32:
+   *
+   * USB_COUNT_RX_BL_SIZE not set:
+   *   nblocks is in units of 2 bytes.
+   *     00000 - not allowed
+   *     00001 - 2 bytes
+   *     ....
+   *     11111 - 62 bytes
+   *
+   * USB_COUNT_RX_BL_SIZE set:
+   *     00000 - 32 bytes
+   *     00001 - 64 bytes
+   *     ...
+   *     01111 - 512 bytes
+   *     1xxxx - Not allowed
+   */
+
   if (count > 62)
     {
-      /* Blocks of 32 */
+      /* Blocks of 32 (with 0 meaning one block of 32) */
 
-      nblocks = count >> 5;
-
-      if((count & 0x1f) == 0)
-        {
-          nblocks--;
-        }
-
-      *epaddr = (uint32)((nblocks << 10) | 0x8000);
+      nblocks = (count >> 5) - 1 ;
+      DEBUGASSERT(nblocks <= 0x0f);
+      *epaddr = (uint32)((nblocks << USB_COUNT_RX_NUM_BLOCK_SHIFT) | USB_COUNT_RX_BL_SIZE);
     }
   else
     {
-      /* Blocks of 2 */
+      /* Blocks of 2 (with 1 meaning one block of 2) */
 
-      nblocks = count >> 1;
-
-      if((count & 0x1) != 0)
-        {
-          nblocks++;
-        }
-
-      *epaddr = (uint32)(nblocks << 10);
+      nblocks = (count + 1) >> 1;
+      DEBUGASSERT(nblocks > 0 && nblocks < 0x1f);
+      *epaddr = (uint32)(nblocks << USB_COUNT_RX_NUM_BLOCK_SHIFT);
     }
 } 
 
@@ -2542,6 +2593,8 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
       stm32_seteprxstatus(epno, USB_EPR_STATRX_VALID);
       stm32_seteptxstatus(epno, USB_EPR_STATTX_DIS);
     }
+
+   stm32_dumpep(epno);
    return OK;
 }
 
@@ -3059,6 +3112,7 @@ static int stm32_selfpowered(struct usbdev_s *dev, boolean selfpowered)
 /****************************************************************************
  * Initialization
  ****************************************************************************/
+
 /****************************************************************************
  * Name: stm32_reset
  ****************************************************************************/
@@ -3067,9 +3121,9 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
 {
   int epno;
 
-  /* Disable the USB controller, disable all USB interrupts */
+  /* Put the USB controller in reset, disable all interrupts */
 
-  stm32_putreg(USB_CNTR_FRES|USB_CNTR_PDWN, STM32_USB_CNTR);
+  stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
 
   /* Reset the device state structure */
 
@@ -3098,16 +3152,6 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
   /* Re-configure the USB controller in its initial, unconnected state */
 
   stm32_hwreset(priv);
-
-  /* Enable USB controller interrupts */
-
-  up_enable_irq(STM32_IRQ_USBHPCANTX);
-  up_enable_irq(STM32_IRQ_USBLPCANRX0);
-
-  /* Set the interrrupt priority */
-
-  up_prioritize_irq(STM32_IRQ_USBHPCANTX, CONFIG_USB_PRI);
-  up_prioritize_irq(STM32_IRQ_USBLPCANRX0, CONFIG_USB_PRI);
 } 
 
 /****************************************************************************
@@ -3116,7 +3160,7 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
 
 static void stm32_hwreset(struct stm32_usbdev_s *priv)
 {
-  /* Put the USB controller into reset */
+  /* Put the USB controller into reset, clear all interrupt enables */
 
   stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
 
@@ -3125,7 +3169,7 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
   priv->imask = 0;
   stm32_putreg(priv->imask, STM32_USB_CNTR);
 
-  /* Clear pending interrupts */
+  /* Clear any pending interrupts */
 
   stm32_putreg(0, STM32_USB_ISTR);
 
@@ -3147,9 +3191,10 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
 
   stm32_setdevaddr(priv, 0);
 
-  /* Enable interrupts at the USB controllr */
+  /* Enable interrupts at the USB controller */
 
   stm32_setimask(priv, STM32_CNTR_SETUP, (USB_CNTR_ALLINTS & ~STM32_CNTR_SETUP));
+  stm32_dumpep(EP0);
 }
 
 /****************************************************************************
@@ -3180,7 +3225,9 @@ void up_usbinitialize(void)
   usbtrace(TRACE_DEVINIT, 0);
   stm32_checksetup();
 
-  /* Disable the USB controller, disable all USB interrupts */
+  /* Power the USB controller, put the USB controller into reset, disable
+   * all USB interrupts
+   */
 
   stm32_putreg(USB_CNTR_FRES|USB_CNTR_PDWN, STM32_USB_CNTR);
 
@@ -3223,17 +3270,27 @@ void up_usbinitialize(void)
       priv->eplist[epno].ep.maxpacket = STM32_MAXPACKET_SIZE;
     }
 
-  /* Select a smallest endpoint size for EP0 */
+  /* Select a smaller endpoint size for EP0 */
 
 #if STM32_EP0MAXPACKET < STM32_MAXPACKET_SIZE
   priv->eplist[EP0].ep.maxpacket = STM32_EP0MAXPACKET;
 #endif
 
+  /* Power up the USB controller, holding it in reset.  There is a delay of
+   * about 1uS after applying power before the USB will behave predictably.
+   * One millisecond is more than enough.
+   */
+
+  stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
+  up_mdelay(1);
+
   /* Setup the USB controller */
 
   stm32_hwreset(priv);
 
-  /* Attach USB controller interrupt handlers */
+  /* Attach USB controller interrupt handlers.  Interrupts will not be
+   * enabled until the class device is registered
+   */
 
   if (irq_attach(STM32_IRQ_USBHPCANTX, stm32_hpinterrupt) != 0)
     {
@@ -3295,11 +3352,11 @@ void up_usbuninitialize(void)
   irq_detach(STM32_IRQ_USBHPCANTX);
   irq_detach(STM32_IRQ_USBLPCANRX0);
 
-  /* Disable all ints and force USB reset */ 
+  /* Disable all interrupts and force the USB controller into reset */ 
 
   stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
   
-  /* Clear pending interrupts */ 
+  /* Clear any pending interrupts */ 
 
   stm32_putreg(0, STM32_USB_ISTR);
   
@@ -3307,7 +3364,7 @@ void up_usbuninitialize(void)
 
   stm32_usbpullup(&priv->usbdev, FALSE);
   
-  /* Disable USB */
+  /* Power down the USB controller */
 
   stm32_putreg(USB_CNTR_FRES|USB_CNTR_PDWN, STM32_USB_CNTR);
   irqrestore(flags);
