@@ -124,14 +124,15 @@
 
 #define STM32_EP0MAXPACKET    STM32_MAXPACKET_SIZE 
 
-/* Buffer description table.  We assume that USB has excluse use of the buffer
- * table.  The buffer table is positioned at the beginning of the 512-byte
+/* Buffer descriptor table.  We assume that USB has exclusive use of CAN/USB
+ * memory.  The buffer table is positioned at the beginning of the 512-byte
  * CAN/USB memory.  We will use the first STM32_NENDPOINTS*4 words for the buffer
- * table.
+ * table.  That is exactly 64 bytes, leaving 7*64 bytes for endpoint buffers.
  */
 
-#define STM32_BTABLE_ADDRESS  (0x00)
-#define STM32_BTABLE_SIZE     (0x18)
+#define STM32_BTABLE_ADDRESS  (0x00)   /* Start at the beginning of USB/CAN RAM */
+#define STM32_DESC_SIZE       (8)      /* Each descriptor is 4*2=8 bytes in size */
+#define STM32_BTABLE_SIZE     (STM32_NENDPOINTS*STM32_DESC_SIZE)
 
 /* Buffer layout.  Assume that all buffers are 64-bytes (maxpacketsize), then
  * we have space for only 7 buffers; endpoint 0 will require two buffers, leaving
