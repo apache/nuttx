@@ -228,7 +228,7 @@
 #define USB_COUNT_RX_NUM_BLOCK_SHIFT (10)      /* Bits 14-10: Number of blocks */
 #define USB_COUNT_RX_NUM_BLOCK_MASK  (0x1f << USB_COUNT_RX_NUM_BLOCK_SHIFT)
 #define USB_COUNT_RX_SHIFT           (0)       /* Bits 9-0: Reception Byte Count */
-#define USB_COUNT_RX_MASK            (0x03ff << USB_COUNT_RX_COUNT_RX_SHIFT)
+#define USB_COUNT_RX_MASK            (0x03ff << USB_COUNT_RX_SHIFT)
 
 /************************************************************************************
  * Public Types
