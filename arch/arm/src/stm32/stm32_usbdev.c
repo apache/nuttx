@@ -1857,8 +1857,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
    * 1. The setup request was successfully handled above and a response packet
    *    must be sent (may be a zero length packet).
    * 2. The request was successfully handled by the class implementation.  In
-   *    case, the response has already been sent and the local variable 'handled'
-   *    will be set to TRUE;
+   *    case, the EP0 IN response has already been queued and the local variable
+   *    'handled' will be set to TRUE;
    * 3. An error was detected in either the above logic or by the class implementation
    *    logic.  In either case, priv->state will be set DEVSTATE_STALLED
    *    to indicate this case.
@@ -1872,9 +1872,13 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
     }
   else if ((priv->ctrl.type & USB_REQ_DIR_IN) != 0)
     {
+      /* Check if the class driver already handled the IN response */
+
       if (!handled)
         {
-          /* Restrict the data length to requested length */
+          /* NO.. Then we will respond.  First, restrict the data length to
+           * the length requested in the setup packet
+           */
 
           if (nbytes > len.w)
             {
@@ -2800,9 +2804,12 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       ret = -EBUSY;
     }
 
-  /* Handle IN (device-to-host) requests */
+  /* Handle IN (device-to-host) requests.  NOTE:  If the class device is
+   * using the bi-directional EP0, then we assume that they intend the EP0
+   * IN functionality.
+   */
 
-  else if (USB_ISEPIN(ep->eplog))
+  else if (USB_ISEPIN(ep->eplog) || USB_EPNO(ep->eplog) == EP0)
     {
       /* Add the new request to the request queue for the IN endpoint */
 
