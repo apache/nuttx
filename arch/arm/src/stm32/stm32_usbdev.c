@@ -100,7 +100,9 @@
 /* Endpoint identifiers. The STM32 supports up to 16 mono-directional or 8
  * bidirectional endpoints.  However, when you take into account PMA buffer
  * usage (see below) and the fact that EP0 is bidirectional, then there is
- * a functional limitation of EP0 + 5 mono-directional endpoints = 6.
+ * a functional limitation of EP0 + 5 mono-directional endpoints = 6.  We'll
+ * define STM32_NENDPOINTS to be 8, however, because that is how many
+ * endpoint register sets there are.
  */
 
 #define STM32_NENDPOINTS      (8)
@@ -142,6 +144,8 @@
 #define STM32_BUFFER_START    STM32_BTABLE_SIZE
 #define STM32_EP0_RXADDR      STM32_BUFFER_START
 #define STM32_EP0_TXADDR      (STM32_EP0_RXADDR+STM32_EP0MAXPACKET)
+
+#warning "Doesn't the buffer size need to include 2 bytes for the CRC?"
 
 #define STM32_BUFFER_EP0      0x03
 #define STM32_NBUFFERS        7
@@ -348,10 +352,12 @@ static void stm32_dumpep(int epno);
 /* Low-Level Helpers ********************************************************/
 
 static inline void
-              stm32_epsettxcount(ubyte epno, uint16 count);
+              stm32_seteptxcount(ubyte epno, uint16 count);
 static inline void
               stm32_seteptxaddr(ubyte epno, ubyte addr);
-static void   stm32_epsetrxcount(ubyte epno, uint16 count);
+static void   stm32_seteprxcount(ubyte epno, uint16 count);
+static inline uint16
+              stm32_geteprxcount(ubyte epno);
 static inline void
               stm32_seteprxaddr(ubyte epno, ubyte addr);
 static inline void
@@ -378,6 +384,9 @@ static uint16 stm32_eptxstalled(ubyte epno);
 static uint16 stm32_eprxstalled(ubyte epno);
 static void   stm32_setimask(struct stm32_usbdev_s *priv, uint16 setbits,
                 uint16 clrbits);
+
+/* Suspend/Resume Helpers ***************************************************/
+
 static void   stm32_suspend(struct stm32_usbdev_s *priv);
 static void   stm32_initresume(struct stm32_usbdev_s *priv);
 static void   stm32_esofpoll(struct stm32_usbdev_s *priv) ;
@@ -415,15 +424,15 @@ static int    stm32_lpinterrupt(int irq, void *context);
 /* Endpoint helpers *********************************************************/
 
 static inline struct stm32_ep_s *
-              stm32_reserveep(struct stm32_usbdev_s *priv, ubyte epset);
+              stm32_epreserve(struct stm32_usbdev_s *priv, ubyte epset);
 static inline void
-              stm32_unreserveep(struct stm32_usbdev_s *priv,
+              stm32_epunreserve(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
 static inline boolean
               stm32_epreserved(struct stm32_usbdev_s *priv, int epno);
-static int    stm32_allocpma(struct stm32_usbdev_s *priv);
+static int    stm32_epallocpma(struct stm32_usbdev_s *priv);
 static inline void
-              stm32_freepma(struct stm32_usbdev_s *priv,
+              stm32_epfreepma(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
 
 /* Endpoint operations ******************************************************/
@@ -451,7 +460,7 @@ static int    stm32_getframe(struct usbdev_s *dev);
 static int    stm32_wakeup(struct usbdev_s *dev);
 static int    stm32_selfpowered(struct usbdev_s *dev, boolean selfpowered);
 
-/* Initialization ***********************************************************/
+/* Initialization/Reset *****************************************************/
 
 static void   stm32_reset(struct stm32_usbdev_s *priv);
 static void   stm32_hwreset(struct stm32_usbdev_s *priv);
@@ -592,7 +601,7 @@ static void stm32_dumpep(int epno)
   /* Endpoint register */
 
   addr = STM32_USB_EPR(epno);
-  lldbg("EPR%02d:  [%08x] %04x\n", epno, addr, getreg16(addr));
+  lldbg("EPR%d:   [%08x] %04x\n", epno, addr, getreg16(addr));
 
   /* Endpoint descriptor */
 
@@ -639,13 +648,13 @@ static void stm32_checksetup(void)
  * Low-Level Helpers
  ****************************************************************************/
 /****************************************************************************
- * Name: stm32_epsettxcount
+ * Name: stm32_seteptxcount
  ****************************************************************************/
 
-static inline void stm32_epsettxcount(ubyte epno, uint16 count) 
+static inline void stm32_seteptxcount(ubyte epno, uint16 count) 
 {
-  uint32 *epaddr = (uint32*)STM32_USB_COUNT_TX(epno);
-  *epaddr        = count;
+  volatile uint32 *epaddr = (uint32*)STM32_USB_COUNT_TX(epno);
+  *epaddr = count;
 } 
 
 /****************************************************************************
@@ -654,17 +663,17 @@ static inline void stm32_epsettxcount(ubyte epno, uint16 count)
 
 static inline void stm32_seteptxaddr(ubyte epno, ubyte addr)
 {
-  uint32 *txaddr = (uint32*)STM32_USB_ADDR_TX(epno);
-  *txaddr        = addr;
+  volatile uint32 *txaddr = (uint32*)STM32_USB_ADDR_TX(epno);
+  *txaddr = addr;
 }
 
 /****************************************************************************
- * Name: stm32_epsetrxcount
+ * Name: stm32_seteprxcount
  ****************************************************************************/
 
-static void stm32_epsetrxcount(ubyte epno, uint16 count) 
+static void stm32_seteprxcount(ubyte epno, uint16 count) 
 {
-  uint32 *epaddr = (uint32*)STM32_USB_COUNT_RX(epno);
+  volatile uint32 *epaddr = (uint32*)STM32_USB_COUNT_RX(epno);
   uint16  nblocks;
 
   /* The upper bits of the RX COUNT value contain the size of allocated
@@ -704,13 +713,23 @@ static void stm32_epsetrxcount(ubyte epno, uint16 count)
 } 
 
 /****************************************************************************
+ * Name: stm32_geteprxcount
+ ****************************************************************************/
+
+static inline uint16 stm32_geteprxcount(ubyte epno)
+{
+  volatile uint32 *epaddr = (uint32*)STM32_USB_COUNT_RX(epno);
+  return (*epaddr) & USB_COUNT_RX_MASK;
+}
+
+/****************************************************************************
  * Name: stm32_seteprxaddr
  ****************************************************************************/
 
 static inline void stm32_seteprxaddr(ubyte epno, ubyte addr)
 {
-  uint32 *rxaddr = (uint32*)STM32_USB_ADDR_RX(epno);
-  *rxaddr        = addr;
+  volatile uint32 *rxaddr = (uint32*)STM32_USB_ADDR_RX(epno);
+  *rxaddr = addr;
 }
 
 /****************************************************************************
@@ -1130,7 +1149,7 @@ static void stm32_epwrite(struct stm32_usbdev_s *priv,
 
   /* Send the packet (might be a null packet nbytes == 0) */
 
-  stm32_epsettxcount(epno, nbytes);
+  stm32_seteptxcount(epno, nbytes);
   priv->txstatus = USB_EPR_STATTX_VALID;
 
   /* Indicate that there is data in the TX packet memory.  This will be cleared
@@ -1243,10 +1262,13 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
 {
   struct stm32_req_s *privreq;
   ubyte *buf;
+  ubyte epno;
+  int pmalen;
   int readlen;
 
   /* Check the request from the head of the endpoint request queue */
 
+  epno    = USB_EPNO(privep->ep.eplog);
   privreq = stm32_rqpeek(privep);
   if (!privreq)
     {
@@ -1255,13 +1277,12 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
        * soon.
        */
 
-      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTQEMPTY), 0);
+      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTQEMPTY), epno);
       priv->rxpending = TRUE;
       return OK;
     }
 
-  ullvdbg("len=%d xfrd=%d nullpkt=%d\n",
-          privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
+  ullvdbg("EP%d: len=%d xfrd=%d\n", epno, privreq->req.len, privreq->req.xfrd);
 
   /* Ignore any attempt to receive a zero length packet */
 
@@ -1274,10 +1295,15 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
 
   usbtrace(TRACE_READ(USB_EPNO(privep->ep.eplog)), privreq->req.xfrd);
 
+  /* Get the number of bytes to read from packet memory */
+#warning "Doesn't this length include 2 bytes for the CRC?"
+
+  pmalen     = stm32_geteprxcount(epno);
+
   /* Receive the next packet */
 
-  buf        = privreq->req.buf + privreq->req.xfrd;
-  readlen    = MIN(privreq->req.len,  privep->ep.maxpacket);
+  buf     = privreq->req.buf + privreq->req.xfrd;
+  readlen = MIN(privreq->req.len,  pmalen);
   stm32_copyfrompma(buf, (uint16)STM32_USB_ADDR_TX(EP0), readlen);
 
   /* If the receive buffer is full then we are finished with the transfer */
@@ -1285,7 +1311,7 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   privreq->req.xfrd += readlen;
   if (privreq->req.xfrd >= privreq->req.len)
     {
-      usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)), privreq->req.xfrd);
+      usbtrace(TRACE_COMPLETE(epno), privreq->req.xfrd);
       priv->devstate = DEVSTATE_IDLE;
       priv->rxstatus = USB_EPR_STATRX_VALID; /* Re-enable for next data reception */
       stm32_reqcomplete(privep, OK);
@@ -1342,7 +1368,7 @@ static int stm32_dispatchrequest(struct stm32_usbdev_s *priv)
 
 static void stm32_ep0post(struct stm32_usbdev_s *priv)
 {
-  stm32_epsetrxcount(EP0, STM32_EP0MAXPACKET);
+  stm32_seteprxcount(EP0, STM32_EP0MAXPACKET);
   if (priv->devstate == DEVSTATE_STALLED)
     {
       priv->rxstatus = USB_EPR_STATRX_STALL;
@@ -2178,10 +2204,12 @@ static int stm32_lpinterrupt(int irq, void *context)
 
   if ((istr & USB_ISTR_RESET) != 0)
     {
-      /* Wakeup interrupt received. Clear the WKUP interrupt status. */
+      /* Wakeup interrupt received. Clear the WKUP interrupt status. The cause of
+       * the wakeup is indicated in the FNR register
+       */
 
       stm32_putreg(~USB_ISTR_RESET, STM32_USB_ISTR);
-      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_RESET), 0);
+      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_RESET), stm32_getreg(STM32_USB_FNR));
 
       /* Restore our power-up state and exit now because istr is no longer
        * valid.
@@ -2208,15 +2236,11 @@ static int stm32_lpinterrupt(int irq, void *context)
       priv->rsmstate = RSMSTATE_IDLE;
 
       /* Disable ESOF polling, disable the wakeup interrupt, and
-       * re-enable the suspend interrupt.
+       * re-enable the suspend interrupt.  Clear any pending SUSP
+       * interrupts.
        */
 
-      priv->imask &= ~(USB_CNTR_ESOFM|USB_CNTR_WKUPM);
-      priv->imask |= USB_CNTR_SUSPM;
-      stm32_putreg(priv->imask, STM32_USB_CNTR);
-
-      /* Clear any pending interrupts that we just enabled */
-
+      stm32_setimask(priv, USB_CNTR_SUSPM, USB_CNTR_ESOFM|USB_CNTR_WKUPM);
       stm32_putreg(~USB_CNTR_SUSPM, STM32_USB_ISTR);
     }
 
@@ -2278,6 +2302,9 @@ stm32_setimask(struct stm32_usbdev_s *priv, uint16 setbits, uint16 clrbits)
 }
 
 /****************************************************************************
+ * Suspend/Resume Helpers
+ ****************************************************************************/
+/****************************************************************************
  * Name: stm32_suspend
  ****************************************************************************/
 
@@ -2292,20 +2319,31 @@ static void stm32_suspend(struct stm32_usbdev_s *priv)
   stm32_setimask(priv, USB_CNTR_WKUPM, USB_CNTR_ESOFM|USB_CNTR_SUSPM);
   stm32_putreg(~USB_ISTR_WKUP, STM32_USB_ISTR);
 
-  /* Enter suspend mode */
+  /* Set the FSUSP bit in the CNTR register.  This activates suspend mode
+   * within the USB peripheral and disables further SUSP interrupts.
+   */
 
   regval  = stm32_getreg(STM32_USB_CNTR);
   regval |= USB_CNTR_FSUSP;
   stm32_putreg(regval, STM32_USB_CNTR);
 
-  /* Only works with bus-powered devices */
-  /* Force low-power mode in the macrocell */
+  /* If we are not a self-powered device, the got to low-power mode */
 
-  regval = stm32_getreg(STM32_USB_CNTR);
-  regval |= USB_CNTR_LPMODE;
-  stm32_putreg(regval, STM32_USB_CNTR);
-  
-  /* Enter reduce-power consumption mode */ 
+  if (!priv->selfpowered)
+    {
+      /* Setting LPMODE in the CNTR register removes static power
+       * consumption in the USB analog transceivers but keeps them
+       * able to detect resume activity
+       */
+
+      regval = stm32_getreg(STM32_USB_CNTR);
+      regval |= USB_CNTR_LPMODE;
+      stm32_putreg(regval, STM32_USB_CNTR);
+    }
+
+  /* Let the board-specific logic know that we have entered the suspend
+   * state
+   */ 
 
   stm32_usbsuspend((struct usbdev_s *)priv, FALSE);
 } 
@@ -2318,18 +2356,25 @@ static void stm32_initresume(struct stm32_usbdev_s *priv)
 {
   uint16 regval;
 
-  /* Only works on bus-powered devices */
-  /* USB_CNTR_LPMODE = 0 */ 
+  /* This function is called when either (1) a WKUP interrupt is received from
+   * the host PC, or (2) the class device implementation calls the wakeup()
+   * method.
+   */
+
+  /* Clear the USB low power mode (lower power mode was not set if this is
+   * a self-powered device.  Also, low power mode is automatically cleared by
+   * hardware when a WKUP interrupt event occurs). 
+   */
 
   regval = stm32_getreg(STM32_USB_CNTR);
   regval &= (~USB_CNTR_LPMODE);
   stm32_putreg(regval, STM32_USB_CNTR);
   
-  /* Restore full power */ 
+  /* Restore full power -- whatever that means for this particular board */ 
 
   stm32_usbsuspend((struct usbdev_s *)priv, TRUE);
   
-  /* Reset FSUSP bit */
+  /* Reset FSUSP bit and enable normal interrupt handling */
 
   stm32_putreg(STM32_CNTR_SETUP, STM32_USB_CNTR);
 } 
@@ -2389,11 +2434,11 @@ static void stm32_esofpoll(struct stm32_usbdev_s *priv)
  * Endpoint Helpers
  ****************************************************************************/
 /****************************************************************************
- * Name: stm32_reserveep
+ * Name: stm32_epreserve
  ****************************************************************************/
 
 static inline struct stm32_ep_s *
-stm32_reserveep(struct stm32_usbdev_s *priv, ubyte epset)
+stm32_epreserve(struct stm32_usbdev_s *priv, ubyte epset)
 {
   struct stm32_ep_s *privep = NULL;
   irqstate_t flags;
@@ -2429,11 +2474,11 @@ stm32_reserveep(struct stm32_usbdev_s *priv, ubyte epset)
 }
 
 /****************************************************************************
- * Name: stm32_unreserveep
+ * Name: stm32_epunreserve
  ****************************************************************************/
 
 static inline void
-stm32_unreserveep(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep)
+stm32_epunreserve(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep)
 {
   irqstate_t flags = irqsave();
   priv->epavail   |= STM32_ENDP_BIT(USB_EPNO(privep->ep.eplog));
@@ -2451,10 +2496,10 @@ stm32_epreserved(struct stm32_usbdev_s *priv, int epno)
 }
 
 /****************************************************************************
- * Name: stm32_allocpma
+ * Name: stm32_epallocpma
  ****************************************************************************/
 
-static int stm32_allocpma(struct stm32_usbdev_s *priv)
+static int stm32_epallocpma(struct stm32_usbdev_s *priv)
 {
   irqstate_t flags;
   int bufno = ERROR;
@@ -2484,11 +2529,11 @@ static int stm32_allocpma(struct stm32_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32_freepma
+ * Name: stm32_epfreepma
  ****************************************************************************/
 
 static inline void
-stm32_freepma(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep)
+stm32_epfreepma(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep)
 {
   irqstate_t flags = irqsave();
   priv->epavail   |= STM32_ENDP_BIT(privep->bufno);
@@ -2590,7 +2635,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
       /* Set up RX; disable TX */
 
       stm32_seteprxaddr(epno, pma);
-      stm32_epsetrxcount(epno, maxpacket);
+      stm32_seteprxcount(epno, maxpacket);
       stm32_seteprxstatus(epno, USB_EPR_STATRX_VALID);
       stm32_seteptxstatus(epno, USB_EPR_STATTX_DIS);
     }
@@ -2627,7 +2672,7 @@ static int stm32_epdisable(struct usbdev_ep_s *ep)
 
   /* Disable TX; disable RX */
 
-  stm32_epsetrxcount(epno, 0);
+  stm32_seteprxcount(epno, 0);
   stm32_seteprxstatus(epno, USB_EPR_STATRX_DIS);
   stm32_seteptxstatus(epno, USB_EPR_STATTX_DIS);
 
@@ -2870,7 +2915,7 @@ static int stm32_epstall(struct usbdev_ep_s *ep, boolean resume)
                 {
                   /* After clear the STALL, enable the default endpoint receiver */
 
-                  stm32_epsetrxcount(epno, ep->maxpacket);
+                  stm32_seteprxcount(epno, ep->maxpacket);
                   stm32_seteprxstatus(epno, USB_EPR_STATRX_VALID);
                 }
               else
@@ -2969,7 +3014,7 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev, ubyte epno,
 
   /* Check if the selected endpoint number is available */
 
-  privep = stm32_reserveep(priv, epset);
+  privep = stm32_epreserve(priv, epset);
   if (!privep)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EPRESERVE), (uint16)epset);
@@ -2980,7 +3025,7 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev, ubyte epno,
   /* Allocate a PMA buffer for this endpoint */
 
 #warning "REVISIT: Should configure BULK EPs using double buffer feature"
-  bufno = stm32_allocpma(priv);
+  bufno = stm32_epallocpma(priv);
   if (bufno < 0)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EPBUFFER), 0);
@@ -2990,7 +3035,7 @@ static struct usbdev_ep_s *stm32_allocep(struct usbdev_s *dev, ubyte epno,
   return &privep->ep;
 
 errout_with_ep:
-  stm32_unreserveep(priv, privep);
+  stm32_epunreserve(priv, privep);
 errout:
   return NULL;
 }
@@ -3019,11 +3064,11 @@ static void stm32_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
     {
       /* Free the PMA buffer assigned to this endpoint */
 
-      stm32_freepma(priv, privep);
+      stm32_epfreepma(priv, privep);
 
       /* Mark the endpoint as available */
 
-      stm32_unreserveep(priv, privep);
+      stm32_epunreserve(priv, privep);
     }
 }
 
@@ -3111,7 +3156,7 @@ static int stm32_selfpowered(struct usbdev_s *dev, boolean selfpowered)
 }
 
 /****************************************************************************
- * Initialization
+ * Initialization/Reset
  ****************************************************************************/
 
 /****************************************************************************
@@ -3170,10 +3215,6 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
   priv->imask = 0;
   stm32_putreg(priv->imask, STM32_USB_CNTR);
 
-  /* Clear any pending interrupts */
-
-  stm32_putreg(0, STM32_USB_ISTR);
-
   /* Set the STM32 BTABLE address */
 
   stm32_putreg(STM32_BTABLE_ADDRESS & 0xfff8, STM32_USB_BTABLE);
@@ -3183,7 +3224,7 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
   stm32_seteptype(EP0, USB_EPR_EPTYPE_CONTROL);
   stm32_seteptxstatus(EP0, USB_EPR_STATTX_NAK);
   stm32_seteprxaddr(EP0, STM32_EP0_RXADDR);
-  stm32_epsetrxcount(EP0, STM32_EP0MAXPACKET);
+  stm32_seteprxcount(EP0, STM32_EP0MAXPACKET);
   stm32_seteptxaddr(EP0, STM32_EP0_TXADDR);
   stm32_clrstatusout(EP0);
   stm32_seteprxstatus(EP0, USB_EPR_STATRX_VALID);
@@ -3191,6 +3232,10 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
   /* Set the device to respond on default address */
 
   stm32_setdevaddr(priv, 0);
+
+  /* Clear any pending interrupts */
+
+  stm32_putreg(0, STM32_USB_ISTR);
 
   /* Enable interrupts at the USB controller */
 
@@ -3279,18 +3324,18 @@ void up_usbinitialize(void)
 
   /* Power up the USB controller, holding it in reset.  There is a delay of
    * about 1uS after applying power before the USB will behave predictably.
-   * One millisecond is more than enough.
+   * A 5MS delay is more than enough.  NOTE that we leave the USB controller
+   * in the reset state; the hardware will not be initialized until the
+   * class driver has been bound.
    */
 
   stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
-  up_mdelay(1);
+  up_mdelay(5);
 
-  /* Setup the USB controller */
-
-  stm32_hwreset(priv);
-
-  /* Attach USB controller interrupt handlers.  Interrupts will not be
-   * enabled until the class device is registered
+  /* Attach USB controller interrupt handlers.  The hardware will not be
+   * initialized and interrupts will not be enabled until the class device
+   * driver is bound.  Getting the IRQs here only makes sure that we have
+   * them when we need them later.
    */
 
   if (irq_attach(STM32_IRQ_USBHPCANTX, stm32_hpinterrupt) != 0)
@@ -3421,7 +3466,11 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
     }
   else
     {
-      /* Enable USB controller interrupts */
+      /* Setup the USB controller -- enabling interrupts at the USB controller */
+
+      stm32_hwreset(priv);
+
+      /* Enable USB controller interrupts at the NVIC */
 
       up_enable_irq(STM32_IRQ_USBHPCANTX);
       up_enable_irq(STM32_IRQ_USBLPCANRX0);
