@@ -1571,7 +1571,7 @@ nuttx-0.4.13 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  FLASH, EEPROM, NVRAM, etc. devices.
 	* driver/mtd/m25px.c.  Added a driver for SPI based FLASH parts M25P64 and M25P128.
 	* configs/stm3210e-eval/usbserial.  Add a USB serial configuration for the STM32.
-	  This is for test and development; the STM32 has not yet been checked in.
+	  Depends on the STM32 USB driver.
 	* arch/arm/src/cortexm3/up_switchcontext.S & up_svccall.c.  Made an improvement
 	  to context switching.  There are two types of context switches:  interrupt
 	  context switches and background/user context switches.  This change should
@@ -1586,7 +1586,7 @@ nuttx-0.4.13 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* arch/arm/src/stm32/stm32_usbdev.c - Added a USB device-side driver for the
 	  STM32.
 
-		NOTE: This USB driver is completely untested as of the initial check-in
+		NOTE: This STM32 USB driver is not yet fully tested
 
 	* arch/arm/src/stm32/stm32_rcc.c - Fixed an error in clock initialization.
 	  On some boards (none of mine), the HSE (high speed external clock) delay
