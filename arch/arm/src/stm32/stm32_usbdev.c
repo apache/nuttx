@@ -269,7 +269,7 @@ enum stm32_devstate_e
   DEVSTATE_INIT,
   DEVSTATE_RDREQUEST,       /* Read request in progress */
   DEVSTATE_WRREQUEST,       /* Write request in progress */
-  DEVSTATE_IDLE,            /* No transfer in progress */
+  DEVSTATE_IDLE,            /* No request in progress */
   DEVSTATE_STALLED          /* We are stalled */
 };
 
@@ -417,7 +417,8 @@ static void   stm32_esofpoll(struct stm32_usbdev_s *priv) ;
 
 /* Request Helpers **********************************************************/
 
-static void   stm32_copytopma(const ubyte *buffer, uint16 pma, uint16 nbytes);
+static void   stm32_copytopma(const ubyte *buffer, uint16 pma,
+                uint16 nbytes);
 static inline void
               stm32_copyfrompma(ubyte *buffer, uint16 pma, uint16 nbytes);
 static struct stm32_req_s *
@@ -428,17 +429,20 @@ static inline void
               stm32_abortrequest(struct stm32_ep_s *privep,
                 struct stm32_req_s *privreq, sint16 result);
 static void   stm32_reqcomplete(struct stm32_ep_s *privep, sint16 result);
-static void   stm32_epwrite(struct stm32_usbdev_s *buf, struct stm32_ep_s *privep,
-                const ubyte *data, uint32 nbytes);
-static int    stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep);
-static int    stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep);
+static void   stm32_epwrite(struct stm32_usbdev_s *buf,
+                struct stm32_ep_s *privep, const ubyte *data, uint32 nbytes);
+static int    stm32_wrrequest(struct stm32_usbdev_s *priv,
+                struct stm32_ep_s *privep);
+static int    stm32_rdrequest(struct stm32_usbdev_s *priv,
+                struct stm32_ep_s *privep);
 
 /* Interrupt level processing ***********************************************/
 
 static int    stm32_dispatchrequest(struct stm32_usbdev_s *priv);
 static void   stm32_ep0post(struct stm32_usbdev_s *priv);
 static void   stm32_ep0setup(struct stm32_usbdev_s *priv);
-static void   stm32_ep0out(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep);
+static void   stm32_ep0out(struct stm32_usbdev_s *priv,
+                struct stm32_ep_s *privep);
 static void   stm32_ep0in(struct stm32_usbdev_s *priv);
 static void   stm32_setdevaddr(struct stm32_usbdev_s *priv, ubyte value);
 static void   stm32_lptransfer(struct stm32_usbdev_s *priv);
@@ -1185,7 +1189,7 @@ static void stm32_epwrite(struct stm32_usbdev_s *priv,
   ubyte epno = USB_EPNO(privep->ep.eplog);
   usbtrace(TRACE_WRITE(epno), nbytes);
 
-  /* Check for NULL packet */
+  /* Check for a zero-length packet */
 
   if (nbytes > 0)
     {
@@ -1206,7 +1210,6 @@ static void stm32_epwrite(struct stm32_usbdev_s *priv,
    */
 
   privep->txbusy = 1;
-  priv->devstate = DEVSTATE_WRREQUEST;
 }
 
 /****************************************************************************
@@ -1267,8 +1270,8 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
           nbytes =  privep->ep.maxpacket;
 
           /* Handle the case where this packet is exactly the
-	   * maxpacketsize.  Do we need to send a NULL packet
-	   * in this case?
+           * maxpacketsize.  Do we need to send a zero-length packet
+           * in this case?
            */
 
           if (bytesleft ==  privep->ep.maxpacket &&
@@ -1283,6 +1286,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
 
   buf = privreq->req.buf + privreq->req.xfrd;
   stm32_epwrite(priv, privep, buf, nbytes);
+  priv->devstate = DEVSTATE_WRREQUEST;
 
   /* Update for the next data IN interrupt */
 
@@ -1298,6 +1302,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
       usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)), privreq->req.xfrd);
       privep->txnullpkt = 0;
       stm32_reqcomplete(privep, OK);
+      priv->devstate = DEVSTATE_IDLE;
     }
 
   return OK;
@@ -1359,6 +1364,7 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   /* Receive the next packet */
 
   stm32_copyfrompma(dest, src, readlen);
+  priv->devstate = DEVSTATE_RDREQUEST;
 
   /* If the receive buffer is full then we are finished with the transfer */
 
@@ -1366,9 +1372,9 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   if (privreq->req.xfrd >= privreq->req.len)
     {
       usbtrace(TRACE_COMPLETE(epno), privreq->req.xfrd);
-      priv->devstate = DEVSTATE_IDLE;
       priv->rxstatus = USB_EPR_STATRX_VALID; /* Re-enable for next data reception */
       stm32_reqcomplete(privep, OK);
+      priv->devstate = DEVSTATE_IDLE;
     }
 
   return OK;
@@ -1425,6 +1431,7 @@ static void stm32_ep0post(struct stm32_usbdev_s *priv)
   stm32_seteprxcount(EP0, STM32_EP0MAXPACKET);
   if (priv->devstate == DEVSTATE_STALLED)
     {
+      usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EP0SETUPSTALLED), priv->devstate);
       priv->rxstatus = USB_EPR_STATRX_STALL;
       priv->txstatus = USB_EPR_STATTX_STALL;
     }
@@ -1445,7 +1452,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   union wb_u           response;
   boolean              handled = FALSE;
   ubyte                epno;
-  int                  nbytes = 0;
+  int                  nbytes = 0; /* Assume zero-length packet */
   int                  ret;
 
   /* Terminate any pending requests */
@@ -1719,8 +1726,9 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
             priv->devstate = DEVSTATE_STALLED;
           }
 
-        /* Note that setting of the device address will be deferred until the
-         * EP0IN complete interrupt
+        /* Note that setting of the device address will be deferred.  A zero-length
+         * packet will be sent and the device address will be set when the zero-
+         * length packet transfer completes.
          */
       }
       break;
@@ -1888,38 +1896,21 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
    *    to indicate this case.
    */
 
-  if (priv->devstate == DEVSTATE_STALLED)
+  if (priv->devstate != DEVSTATE_STALLED && !handled)
     {
-      usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EP0SETUPSTALLED), priv->devstate);
-      stm32_epstall(priv->usbdev.ep0, FALSE);
-      stm32_epstall(priv->usbdev.ep0, FALSE);
-    }
-  else if ((priv->ctrl.type & USB_REQ_DIR_IN) != 0)
-    {
-      /* Check if the class driver already handled the IN response */
+      /* We will response.  First, restrict the data length to the length
+       * requested in the setup packet
+       */
 
-      if (!handled)
+      if (nbytes > len.w)
         {
-          /* NO.. Then we will respond.  First, restrict the data length to
-           * the length requested in the setup packet
-           */
-
-          if (nbytes > len.w)
-            {
-              nbytes = len.w;
-            }
-
-          /* Send the response (might be a zero-length packet) */
-
-          stm32_epwrite(priv, ep0, response.b, nbytes);
+          nbytes = len.w;
         }
-    }
-  else
-    {
-      /* Setup for next data reception */
 
+      /* Send the response (might be a zero-length packet) */
+
+      stm32_epwrite(priv, ep0, response.b, nbytes);
       priv->devstate = DEVSTATE_IDLE;
-      priv->rxstatus = USB_EPR_STATRX_VALID;
     }
 
   stm32_ep0post(priv);
@@ -1931,14 +1922,23 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
 static void stm32_ep0in(struct stm32_usbdev_s *priv)
 {
-  uint32 devstate = priv->devstate;
+  /* Are we processing the completion of one packet of an outgoing request
+   * from the class driver?
+   */
+
   if (priv->devstate == DEVSTATE_WRREQUEST)
     {
        stm32_wrrequest(priv, &priv->eplist[EP0]);
-       devstate = priv->devstate;
     }
-  else if (devstate == DEVSTATE_IDLE)
+
+  /* No.. Are we processing the completion of a status response? */
+
+  else if (priv->devstate == DEVSTATE_IDLE)
     {
+      /* Look at the saved SETUP command.  Was it a SET ADDRESS request?
+       * If so, then now is the time to set the address.
+       */
+
       if (priv->ctrl.req == USB_REQ_SETADDRESS && 
           (priv->ctrl.type & REQRECIPIENT_MASK) == (USB_REQ_TYPE_STANDARD | USB_REQ_RECIPIENT_DEVICE))
         {
@@ -1946,15 +1946,12 @@ static void stm32_ep0in(struct stm32_usbdev_s *priv)
           value.w = GETUINT16(priv->ctrl.value);
           stm32_setdevaddr(priv, value.b[LSB]);
         }
-
-      devstate = DEVSTATE_STALLED;
     }
   else
     {
-      devstate = DEVSTATE_STALLED;
+      priv->devstate = DEVSTATE_STALLED;
     }
 
-  priv->devstate = devstate;
   stm32_ep0post(priv);
 }
 
@@ -2972,7 +2969,7 @@ static int stm32_epstall(struct usbdev_ep_s *ep, boolean resume)
       /* Resuming a stalled endpoint */
 
       usbtrace(TRACE_EPRESUME, epno);
-      privep->stalled = 0;
+      privep->stalled = FALSE;
 
       if (USB_ISEPIN(ep->eplog))
         {
@@ -3011,7 +3008,7 @@ static int stm32_epstall(struct usbdev_ep_s *ep, boolean resume)
   else
     {
       usbtrace(TRACE_EPSTALL, epno);
-      privep->stalled = 1;
+      privep->stalled = TRUE;
 
       if (USB_ISEPIN(ep->eplog))
         {
