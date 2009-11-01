@@ -614,6 +614,7 @@ static void stm32_putreg(uint16 val, uint32 addr)
  * Name: stm32_dumpep
  ****************************************************************************/
 
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
 static void stm32_dumpep(int epno)
 {
   uint32 addr;
@@ -650,6 +651,7 @@ static void stm32_dumpep(int epno)
   addr = STM32_USB_COUNT_RX(epno);
   lldbg("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
 }
+#endif
 
 /****************************************************************************
  * Name: stm32_checksetup
