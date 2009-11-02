@@ -436,7 +436,7 @@ static int    stm32_rdrequest(struct stm32_usbdev_s *priv,
 
 /* Interrupt level processing ***********************************************/
 
-static int    stm32_dispatchrequest(struct stm32_usbdev_s *priv);
+static void   stm32_dispatchrequest(struct stm32_usbdev_s *priv);
 static void   stm32_epdone(struct stm32_usbdev_s *priv, ubyte epno);
 static void   stm32_setdevaddr(struct stm32_usbdev_s *priv, ubyte value);
 static void   stm32_ep0setup(struct stm32_usbdev_s *priv);
@@ -1400,9 +1400,9 @@ static void stm32_cancelrequests(struct stm32_ep_s *privep)
  * Name: stm32_dispatchrequest
  ****************************************************************************/
 
-static int stm32_dispatchrequest(struct stm32_usbdev_s *priv)
+static void stm32_dispatchrequest(struct stm32_usbdev_s *priv)
 {
-  int ret = OK;
+  int ret;
 
   usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_DISPATCH), 0);
   if (priv && priv->driver)
@@ -1418,7 +1418,6 @@ static int stm32_dispatchrequest(struct stm32_usbdev_s *priv)
           priv->devstate = DEVSTATE_STALLED;
         }
     }
-  return ret;
 }
 
 /****************************************************************************
@@ -1572,15 +1571,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
       /* Let the class implementation handle all non-standar requests */
 
-      if (stm32_dispatchrequest(priv) == OK)
-        {
-          /* stm32_dispatchrequest will return OK if the class implementation
-           * handled the request and will request a stall if the class
-           * implementation failed to handle the request.
-           */
-
-          handled = TRUE;
-        }
+      stm32_dispatchrequest(priv);
+      handled = TRUE;
     }
 
   /* Handle standard request.  Pick off the things of interest to the
@@ -1704,15 +1696,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
              * endpoint recipient)
              */
 
-            if (stm32_dispatchrequest(priv) == OK)
-              {
-                /* stm32_dispatchrequest will return OK if the class implementation
-                 * handled the request and will request a stall if the class
-                 * implementation failed to handle the request.
-                 */
-
-                handled = TRUE;
-              }
+            stm32_dispatchrequest(priv);
+            handled = TRUE;
           }
         else
           {
@@ -1755,15 +1740,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
           {
             /* The class driver handles all recipients except recipient=endpoint */
 
-            if (stm32_dispatchrequest(priv) == OK)
-              {
-                /* stm32_dispatchrequest will return OK if the class implementation
-                 * handled the request and will request a stall if the class
-                 * implementation failed to handle the request.
-                 */
-
-                handled = TRUE;
-              }
+            stm32_dispatchrequest(priv);
+            handled = TRUE;
           }
         else
           {
@@ -1828,15 +1806,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
           {
             /* The request seems valid... let the class implementation handle it */
 
-            if (stm32_dispatchrequest(priv) == OK)
-              {
-                /* stm32_dispatchrequest will return OK if the class implementation
-                 * handled the request and will request a stall if the class
-                 * implementation failed to handle the request.
-                 */
-
-                handled = TRUE;
-              }
+            stm32_dispatchrequest(priv);
+            handled = TRUE;
           }
         else
           {
@@ -1860,15 +1831,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
           {
             /* The request seems valid... let the class implementation handle it */
 
-            if (stm32_dispatchrequest(priv) == OK)
-              {
-                /* stm32_dispatchrequest will return OK if the class implementation
-                 * handled the request and will request a stall if the class
-                 * implementation failed to handle the request.
-                 */
-
-                handled = TRUE;
-              }
+            stm32_dispatchrequest(priv);
+            handled = TRUE;
           }
         else
           {
@@ -1892,15 +1856,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
           {
              /* The request seems valid... let the class implementation handle it */
 
-           if (stm32_dispatchrequest(priv) == OK)
-              {
-                /* stm32_dispatchrequest will return OK if the class implementation
-                 * handled the request and will request a stall if the class
-                 * implementation failed to handle the request.
-                 */
-
-                handled = TRUE;
-              }
+             stm32_dispatchrequest(priv);
+             handled = TRUE;
           }
         else
           {
@@ -1927,15 +1884,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
         /* Let the class implementation handle the request */
 
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETIF), priv->ctrl.type);
-        if (stm32_dispatchrequest(priv) == OK)
-          {
-            /* stm32_dispatchrequest will return OK if the class implementation
-             * handled the request and will request a stall if the class
-             * implementation failed to handle the request.
-             */
-
-            handled = TRUE;
-          }
+        stm32_dispatchrequest(priv);
+        handled = TRUE;
       }
       break;
 
@@ -1966,7 +1916,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
    *    must be sent (may be a zero length packet).
    * 2. The request was successfully handled by the class implementation.  In
    *    case, the EP0 IN response has already been queued and the local variable
-   *    'handled' will be set to TRUE;
+   *    'handled' will be set to TRUE and devstate != DEVSTATE_STALLED;
    * 3. An error was detected in either the above logic or by the class implementation
    *    logic.  In either case, priv->state will be set DEVSTATE_STALLED
    *    to indicate this case.
