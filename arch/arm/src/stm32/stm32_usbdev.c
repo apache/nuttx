@@ -1572,7 +1572,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
       /* Let the class implementation handle all non-standar requests */
 
       stm32_dispatchrequest(priv);
-      handled = TRUE;
+      return;
     }
 
   /* Handle standard request.  Pick off the things of interest to the
@@ -1920,6 +1920,10 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
    * 3. An error was detected in either the above logic or by the class implementation
    *    logic.  In either case, priv->state will be set DEVSTATE_STALLED
    *    to indicate this case.
+   *
+   * NOTE: Non-standard requests are a special case.  They are handled by the
+   * class implementation and this function returned early above, skipping this
+   * logic altogether.
    */
 
   if (priv->devstate != DEVSTATE_STALLED && !handled)
