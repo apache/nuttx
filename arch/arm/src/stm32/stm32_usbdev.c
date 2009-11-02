@@ -192,16 +192,17 @@
 #define STM32_TRACEERR_DISPATCHSTALL        0x000e
 #define STM32_TRACEERR_DRIVER               0x000f
 #define STM32_TRACEERR_DRIVERREGISTERED     0x0010
-#define STM32_TRACEERR_EP0SETUPSTALLED      0x0011
-#define STM32_TRACEERR_EPBUFFER             0x0012
-#define STM32_TRACEERR_EPDISABLED           0x0013
-#define STM32_TRACEERR_EPOUTNULLPACKET      0x0014
-#define STM32_TRACEERR_EPRESERVE            0x0015
-#define STM32_TRACEERR_INVALIDCTRLREQ       0x0016
-#define STM32_TRACEERR_INVALIDPARMS         0x0017
-#define STM32_TRACEERR_IRQREGISTRATION      0x0018
-#define STM32_TRACEERR_NOTCONFIGURED        0x0019
-#define STM32_TRACEERR_REQABORTED           0x001a
+#define STM32_TRACEERR_EP0BADCTR            0x0011
+#define STM32_TRACEERR_EP0SETUPSTALLED      0x0012
+#define STM32_TRACEERR_EPBUFFER             0x0013
+#define STM32_TRACEERR_EPDISABLED           0x0014
+#define STM32_TRACEERR_EPOUTNULLPACKET      0x0015
+#define STM32_TRACEERR_EPRESERVE            0x0016
+#define STM32_TRACEERR_INVALIDCTRLREQ       0x0017
+#define STM32_TRACEERR_INVALIDPARMS         0x0018
+#define STM32_TRACEERR_IRQREGISTRATION      0x0019
+#define STM32_TRACEERR_NOTCONFIGURED        0x001a
+#define STM32_TRACEERR_REQABORTED           0x001b
 
 /* Trace interrupt codes */
 
@@ -266,10 +267,9 @@
 
 enum stm32_devstate_e 
 {
-  DEVSTATE_INIT,
+  DEVSTATE_IDLE = 0,        /* No request in progress */
   DEVSTATE_RDREQUEST,       /* Read request in progress */
   DEVSTATE_WRREQUEST,       /* Write request in progress */
-  DEVSTATE_IDLE,            /* No request in progress */
   DEVSTATE_STALLED          /* We are stalled */
 };
 
@@ -439,7 +439,6 @@ static int    stm32_rdrequest(struct stm32_usbdev_s *priv,
 /* Interrupt level processing ***********************************************/
 
 static int    stm32_dispatchrequest(struct stm32_usbdev_s *priv);
-static void   stm32_ep0post(struct stm32_usbdev_s *priv);
 static void   stm32_ep0setup(struct stm32_usbdev_s *priv);
 static void   stm32_ep0out(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
@@ -1027,8 +1026,6 @@ static void stm32_copytopma(const ubyte *buffer, uint16 pma, uint16 nbytes)
   int     nwords = (nbytes + 1) >> 1;
   int     i;
 
-  ullvdbg("pma=%08x, nbytes=%d\n", pma, nbytes);
-
   /* Copy loop.  Source=user buffer, Dest=packet memory */
 
   dest = (uint16*)(STM32_USBCANRAM_BASE + ((uint32)pma << 1));
@@ -1058,8 +1055,6 @@ stm32_copyfrompma(ubyte *buffer, uint16 pma, uint16 nbytes)
   uint32 *src;
   int     nwords = (nbytes + 1) >> 1;
   int     i;
-
-  ullvdbg("pma=%08x, nbytes=%d\n", pma, nbytes);
 
   /* Copy loop.  Source=packet memory, Dest=user buffer */
 
@@ -1243,7 +1238,6 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
 
       usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPINQEMPTY), 0);
       priv->devstate = DEVSTATE_IDLE;
-      priv->txstatus = USB_EPR_STATTX_STALL;
       return OK;
     }
 
@@ -1373,8 +1367,11 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   privreq->req.xfrd += readlen;
   if (privreq->req.xfrd >= privreq->req.len)
     {
+      /* Complete the transfer and mark the state IDLE.  The endpoint
+       * RX will be marked valid when the data phase completes.
+       */
+
       usbtrace(TRACE_COMPLETE(epno), privreq->req.xfrd);
-      priv->rxstatus = USB_EPR_STATRX_VALID; /* Re-enable for next data reception */
       stm32_reqcomplete(privep, OK);
       priv->devstate = DEVSTATE_IDLE;
     }
@@ -1422,21 +1419,6 @@ static int stm32_dispatchrequest(struct stm32_usbdev_s *priv)
         }
     }
   return ret;
-}
-
-/****************************************************************************
- * Name: stm32_ep0post
- ****************************************************************************/
-
-static void stm32_ep0post(struct stm32_usbdev_s *priv)
-{
-  stm32_seteprxcount(EP0, STM32_EP0MAXPACKET);
-  if (priv->devstate == DEVSTATE_STALLED)
-    {
-      usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EP0SETUPSTALLED), priv->devstate);
-      priv->rxstatus = USB_EPR_STATRX_STALL;
-      priv->txstatus = USB_EPR_STATTX_STALL;
-    }
 }
 
 /****************************************************************************
@@ -1488,7 +1470,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   ullvdbg("SETUP: type=%02x req=%02x value=%04x index=%04x len=%04x\n",
           priv->ctrl.type, priv->ctrl.req, value.w, index.w, len.w);
 
-  priv->devstate = DEVSTATE_INIT;
+  priv->devstate = DEVSTATE_IDLE;
 
   /* Dispatch any non-standard requests */
 
@@ -1914,8 +1896,6 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
       stm32_epwrite(priv, ep0, response.b, nbytes);
       priv->devstate = DEVSTATE_IDLE;
     }
-
-  stm32_ep0post(priv);
 }
 
 /****************************************************************************
@@ -1953,8 +1933,6 @@ static void stm32_ep0in(struct stm32_usbdev_s *priv)
     {
       priv->devstate = DEVSTATE_STALLED;
     }
-
-  stm32_ep0post(priv);
 }
 
 /****************************************************************************
@@ -1978,8 +1956,6 @@ static void stm32_ep0out(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep)
         priv->devstate = DEVSTATE_STALLED;
         break;
     }
-
-  stm32_ep0post(priv);
 }
 
 /****************************************************************************
@@ -2033,12 +2009,14 @@ static void stm32_lptransfer(struct stm32_usbdev_s *priv)
         {
           /* Decode and service control endpoint interrupt */ 
 
-          /* Save RX & TX status */ 
+          /* Initialize RX and TX status.  For EP0 SETUP these should
+           * both by set to NAK by the hardware
+           */ 
 
           priv->rxstatus = stm32_geteprxstatus(EP0);
           priv->txstatus = stm32_geteptxstatus(EP0);
 
-          /* Then set both to NAK */ 
+          /* Then set both to NAK (possibly unnecessary) */ 
 
           stm32_seteprxstatus(EP0, USB_EPR_STATRX_NAK);
           stm32_seteptxstatus(EP0, USB_EPR_STATTX_NAK);
@@ -2054,63 +2032,95 @@ static void stm32_lptransfer(struct stm32_usbdev_s *priv)
               usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EP0IN), istr);
               stm32_clrepctrtx(EP0);
               stm32_ep0in(priv);
-              
-              /* Set TX and RX status */ 
-
-              stm32_seteprxstatus(EP0, priv->rxstatus);
-              stm32_seteptxstatus(EP0, priv->txstatus);
             }
           else
             {
               /* EP0 OUT: host-to-device (DIR=1) */
 
               epval = stm32_getreg(STM32_USB_EPR(EP0));
+
+              /* CTR_TX is set when an IN transaction successfully
+               * completes on an endpoint
+               */
+
               if ((epval & USB_EPR_CTR_TX) != 0)
                 {
-                  /* CTR_TX is set when an IN transaction successfully
-                   * completes on an endpoint
-                   */
-
                   usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EP0INDONE), epval);
                   stm32_clrepctrtx(EP0);
                   stm32_ep0in(priv);
-
-                  /* Set TX and RX status */ 
-
-                  stm32_seteprxstatus(EP0, priv->rxstatus);
-                  stm32_seteptxstatus(EP0, priv->txstatus);
                 }
+
+              /* SETUP is set by the hardware when the last completed
+               * transaction was a control endpoint SETUP
+               */
+ 
               else if ((epval & USB_EPR_SETUP) != 0)
                 {
-                  /* SETUP is set by the hardware when the last completed
-                   * transaction was a control endpoint SETUP
-                   */
- 
                   usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EP0SETUPDONE), epval);
                   stm32_clrepctrrx(EP0);
                   stm32_ep0setup(priv);
-
-                  /* Set TX and RX status */ 
-
-                  stm32_seteprxstatus(EP0, priv->rxstatus);
-                  stm32_seteptxstatus(EP0, priv->txstatus);
                 }
+
+              /* Set by the hardware when an OUT/SETUP transaction successfully
+               * completed on this endpoint.
+               */
+
               else if ((epval & USB_EPR_CTR_RX) != 0)
                 {
-                  /* Set by the hardware when an OUT/SETUP transaction successfully
-                   * completed on this endpoint.
-                   */
-
                   usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EP0OUTDONE), epval);
                   stm32_clrepctrrx(EP0);
                   stm32_ep0out(priv, privep);
+                }
 
-                  /* Set TX and RX status */ 
+              /* None of the above */
 
-                  stm32_seteprxstatus(EP0, priv->rxstatus);
-                  stm32_seteptxstatus(EP0, priv->txstatus);
+              else
+                {
+                 usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EP0BADCTR), epval);
+                 return; /* Does this ever happen? */
                 }
             }
+
+          /* Make sure that the EP0 packet size is still OK (superstitious?) */
+
+          stm32_seteprxcount(EP0, STM32_EP0MAXPACKET);
+
+          /* Now figure out the new RX/TX status.  Here are all possible
+           * consequences of the above EP0 operations:
+           *
+           * rxstatus txstatus devstate  MEANING
+           * -------- -------- --------- ---------------------------------
+           * NAK      NAK      IDLE      Nothing happened
+           * NAK      VALID    IDLE      EP0 response sent from USBDEV driver
+           * NAK      VALID    WRREQUEST EP0 response sent from class driver
+           * NAK      ---      STALL     Some protocol error occurred
+           *
+           * First handle the STALL condition:
+           */
+
+          if (priv->devstate == DEVSTATE_STALLED)
+            {
+              usbtrace(TRACE_DEVERROR(STM32_TRACEERR_EP0SETUPSTALLED), priv->devstate);
+              priv->rxstatus = USB_EPR_STATRX_STALL;
+              priv->txstatus = USB_EPR_STATTX_STALL;
+            }
+
+          /* Was a transmission started?  If so, txstatus will be VALID.  The
+           * only special case to handle is when both are set to NAK.  In that
+           * case, we need to for RX status to VALID in order to accept the next
+           * SETUP request.
+           */
+
+          else if (priv->rxstatus == USB_EPR_STATRX_NAK &&
+                   priv->txstatus == USB_EPR_STATTX_NAK)
+            {
+              priv->rxstatus = USB_EPR_STATRX_VALID;
+            }
+
+          /* Now set the new TX and RX status */ 
+
+          stm32_seteprxstatus(EP0, priv->rxstatus);
+          stm32_seteptxstatus(EP0, priv->txstatus);
         }
       else
         {
@@ -2339,7 +2349,7 @@ static int stm32_lpinterrupt(int irq, void *context)
     }
 
 exit_lpinterrupt:
-  usbtrace(TRACE_INTEXIT(STM32_TRACEINTID_LPINTERRUPT), 0);
+  usbtrace(TRACE_INTEXIT(STM32_TRACEINTID_LPINTERRUPT), stm32_getreg(STM32_USB_EP0R));
   return OK;
 }
 
@@ -3251,7 +3261,7 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
 
   /* Reset the device state structure */
 
-  priv->devstate  = DEVSTATE_INIT;
+  priv->devstate  = DEVSTATE_IDLE;
   priv->rsmstate  = RSMSTATE_IDLE;
   priv->rxpending = FALSE;
 
