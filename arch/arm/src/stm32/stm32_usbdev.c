@@ -2598,7 +2598,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
 
   /* Set the requested type */
 
-  switch (desc->type)
+  switch (desc->attr & USB_EP_ATTR_XFERTYPE_MASK)
    {
     case USB_EP_ATTR_XFER_INT: /* Interrupt endpoint */
       setting = USB_EPR_EPTYPE_INTERRUPT;
