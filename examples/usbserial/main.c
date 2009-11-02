@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/usbdev.h>
+#include <nuttx/usbdev_trace.h>
 
 /****************************************************************************
  * Definitions
@@ -66,18 +67,57 @@
 #    define COUNTER_NEEDED 1
 #  endif
 #endif
+#ifdef CONFIG_EXAMPLES_USBSERIAL_TRACEINIT
+#  define TRACE_INIT_BITS       (TRACE_INIT_BIT)
+#else
+#  define TRACE_INIT_BITS       (0)
+#endif
+
+#define TRACE_ERROR_BITS        (TRACE_DEVERROR_BIT|TRACE_CLSERROR_BIT)
+
+#ifdef CONFIG_EXAMPLES_USBSERIAL_TRACECLASS
+#  define TRACE_CLASS_BITS      (TRACE_CLASS_BIT|TRACE_CLASSAPI_BIT|TRACE_CLASSSTATE_BIT)
+#else
+#  define TRACE_CLASS_BITS      (0)
+#endif
+
+#ifdef CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS
+#  define TRACE_TRANSFER_BITS   (TRACE_OUTREQQUEUED_BIT|TRACE_INREQQUEUED_BIT|TRACE_READ_BIT|\
+                                 TRACE_WRITE_BIT|TRACE_COMPLETE_BIT)
+#else
+#  define TRACE_TRANSFER_BITS   (0)
+#endif
+
+#ifdef CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER
+#  define TRACE_CONTROLLER_BITS (TRACE_EP_BIT|TRACE_DEV_BIT)
+#else
+#  define TRACE_CONTROLLER_BITS (0)
+#endif
+
+#ifdef CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS
+#  define TRACE_INTERRUPT_BITS  (TRACE_INTENTRY_BIT|TRACE_INTDECODE_BIT|TRACE_INTEXIT_BIT)
+#else
+#  define TRACE_INTERRUPT_BITS  (0)
+#endif
+
+#define TRACE_BITSET            (TRACE_INIT_BITS|TRACE_ERROR_BITS|TRACE_CLASS_BITS|\
+                                 TRACE_TRANSFER_BITS|TRACE_CONTROLLER_BITS|TRACE_INTERRUPT_BITS)
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG
 #    define message(...) lib_lowprintf(__VA_ARGS__)
+#    define trmessage    lib_lowprintf
 #  else
 #    define message(...) printf(__VA_ARGS__)
+#    define trmessage    printf
 #  endif
 #else
 #  ifdef CONFIG_DEBUG
-#    define message lib_lowprintf
+#    define message      lib_lowprintf
+#    define trmessage    lib_lowprintf
 #  else
-#    define message printf
+#    define message      printf
+#    define trmessage    printf
 #  endif
 #endif
 
@@ -122,6 +162,25 @@ static const char g_longmsg[] =
 
 #ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
 static char g_iobuffer[IOBUFFER_SIZE];
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_TRACE
+static int trace_callback(struct usbtrace_s *trace, void *arg)
+{
+  usbtrace_trprintf((trprintf_t)trmessage, trace->event, trace->value);
+  return 0;
+}
+
+static void dumptrace(void)
+{
+  (void)usbtrace_enumerate(trace_callback, NULL);
+}
+#else
+#  define dumptrace()
 #endif
 
 /****************************************************************************
@@ -173,6 +232,17 @@ int user_start(int argc, char *argv[])
     }
   message("user_start: Successfully registered the serial driver\n");
 
+#ifdef CONFIG_USBDEV_TRACE
+#if CONFIG_USBDEV_TRACE_INITIALIDSET != 0
+  /* If USB tracing is enabled, then dump all collected trace data to stdout */
+
+  sleep(5);
+  dumptrace();
+#else
+  usbtrace_enable(TRACE_BITSET);
+#endif
+#endif
+
   /* Open the USB serial device for writing (blocking) */
 
 #ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
@@ -200,6 +270,10 @@ int user_start(int argc, char *argv[])
               return 2;
             }
         }
+
+      /* If USB tracing is enabled, then dump all collected trace data to stdout */
+
+      dumptrace();
     }
   while (outfd < 0);
 #endif
@@ -239,6 +313,10 @@ int user_start(int argc, char *argv[])
               return 3;
             }
         }
+
+      /* If USB tracing is enabled, then dump all collected trace data to stdout */
+
+      dumptrace();
     }
   while (infd < 0);
 #endif
@@ -250,7 +328,6 @@ int user_start(int argc, char *argv[])
 
   for (;;)
     {
-
      /* Test IN (device-to-host) messages */
 
 #ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
@@ -368,6 +445,10 @@ int user_start(int argc, char *argv[])
       message("user_start: Waiting\n");
       sleep(5);
 #endif /* CONFIG_EXAMPLES_USBSERIAL_INONLY */
+
+      /* If USB tracing is enabled, then dump all collected trace data to stdout */
+
+      dumptrace();
     }
 
   /* Won't get here, but if we did this what we would have to do */

@@ -385,6 +385,10 @@ typedef int (*trace_callback_t)(struct usbtrace_s *trace, void *arg);
 
 typedef uint16 usbtrace_idset_t;
 
+/* Print routine to use for usbdev_trprint() output */
+
+typedef int (*trprintf_t)(const char *fmt, ...);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -454,6 +458,16 @@ EXTERN int usbtrace_enumerate(trace_callback_t callback, void *arg);
 #else
 #  define usbtrace_enumerate(event)
 #endif
+
+/*******************************************************************************
+ * Name: usbtrace_trprint
+ *
+ * Description:
+ *   Print the trace record using the supplied printing function
+ *
+ *******************************************************************************/
+
+EXTERN void usbtrace_trprintf(trprintf_t trprintf, uint16 event, uint16 value);
 
 #undef EXTERN
 #if defined(__cplusplus)
