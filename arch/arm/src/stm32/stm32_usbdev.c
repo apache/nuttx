@@ -72,19 +72,6 @@
 #  define CONFIG_USBDEV_EP0_MAXSIZE 64
 #endif
 
-#ifndef  CONFIG_USBDEV_MAXPOWER
-#  define CONFIG_USBDEV_MAXPOWER 100  /* mA */
-#endif
-
-#define USB_SLOW_INT USBDEV_DEVINT_EPSLOW
-#define USB_DEVSTATUS_INT USBDEV_DEVINT_DEVSTAT
-
-#ifdef CONFIG_STM32_USBDEV_EPFAST_INTERRUPT
-#  define USB_FAST_INT USBDEV_DEVINT_EPFAST
-#else
-#  define USB_FAST_INT 0
-#endif
-
 #ifndef CONFIG_USB_PRI
 #  define CONFIG_USB_PRI NVIC_SYSH_PRIORITY_DEFAULT
 #endif
@@ -1479,10 +1466,10 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, ubyte epno)
           
       /* Handle write requests */ 
 
-      priv->rxstatus = USB_EPR_STATRX_NAK;
+      priv->txstatus = USB_EPR_STATTX_NAK;
       stm32_wrrequest(priv, privep);
 
-      /* Set the new RX status */
+      /* Set the new TX status */
 
       stm32_seteptxstatus(epno, priv->txstatus);
     }  
@@ -1529,7 +1516,9 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   int                  nbytes = 0; /* Assume zero-length packet */
   int                  ret;
 
-  /* Terminate any pending requests */
+  /* Terminate any pending requests (doesn't work if the pending request
+   * was a zero-length transfer!)
+   */
 
   while (!stm32_rqempty(ep0))
     {
@@ -1960,7 +1949,7 @@ static void stm32_ep0in(struct stm32_usbdev_s *priv)
 
   if (priv->devstate == DEVSTATE_WRREQUEST)
     {
-       stm32_wrrequest(priv, &priv->eplist[EP0]);
+      stm32_wrrequest(priv, &priv->eplist[EP0]);
     }
 
   /* No.. Are we processing the completion of a status response? */
@@ -2643,9 +2632,7 @@ static int stm32_epconfigure(struct usbdev_ep_s *ep,
 
   if (USB_ISEPIN(desc->addr))
     {
-      /* The full, logical EP number includes direction (which is zero
-       * for IN endpoints.
-       */
+      /* The full, logical EP number includes direction */
  
       ep->eplog = USB_EPIN(epno);
 
@@ -2768,6 +2755,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   struct stm32_ep_s *privep = (struct stm32_ep_s *)ep;
   struct stm32_usbdev_s *priv;
   irqstate_t flags;
+  ubyte epno;
   int ret = OK;
 
 #ifdef CONFIG_DEBUG
@@ -2793,6 +2781,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
   /* Handle the request from the class driver */
 
+  epno        = USB_EPNO(ep->eplog);
   req->result = -EINPROGRESS;
   req->xfrd   = 0;
   flags       = irqsave();
@@ -2811,18 +2800,23 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
    * IN functionality.
    */
 
-  else if (USB_ISEPIN(ep->eplog) || USB_EPNO(ep->eplog) == EP0)
+  else if (USB_ISEPIN(ep->eplog) || epno == EP0)
     {
       /* Add the new request to the request queue for the IN endpoint */
 
       stm32_rqenqueue(privep, privreq);
-      usbtrace(TRACE_INREQQUEUED(USB_EPNO(ep->eplog)), req->len);
+      usbtrace(TRACE_INREQQUEUED(epno), req->len);
 
       /* If the IN endpoint FIFO is available, then transfer the data now */
 
       if (!privep->txbusy)
         {
-          ret = stm32_wrrequest(priv, privep);
+          priv->txstatus = USB_EPR_STATTX_NAK;
+          ret            = stm32_wrrequest(priv, privep);
+
+          /* Set the new TX status */
+
+          stm32_seteptxstatus(epno, priv->txstatus);
         }
     }
 
@@ -2834,14 +2828,19 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       privep->txnullpkt = 0;
       stm32_rqenqueue(privep, privreq);
-      usbtrace(TRACE_OUTREQQUEUED(USB_EPNO(ep->eplog)), req->len);
+      usbtrace(TRACE_OUTREQQUEUED(epno), req->len);
 
       /* This there a incoming data pending the availability of a request? */
 
       if (priv->rxpending)
         {
-          ret = stm32_rdrequest(priv, privep);
+          priv->rxstatus  = USB_EPR_STATRX_VALID;
+          ret             = stm32_rdrequest(priv, privep);
           priv->rxpending = 0;
+
+          /* Set the new RX status */
+
+          stm32_seteprxstatus(epno, priv->rxstatus);
         }
     }
 
