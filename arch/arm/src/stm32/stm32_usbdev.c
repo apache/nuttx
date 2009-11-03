@@ -1479,7 +1479,6 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, ubyte epno)
           
       /* Handle write requests */ 
 
-      privep->txbusy = FALSE;
       priv->rxstatus = USB_EPR_STATRX_NAK;
       stm32_wrrequest(priv, privep);
 
@@ -1544,9 +1543,10 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
       stm32_reqcomplete(ep0, result);
     }
 
-  /* Assume NOT stalled */
+  /* Assume NOT stalled; no TX in progress */
 
   ep0->stalled  = 0;
+  ep0->txbusy   = 0;
 
   /* Get a 32-bit PMA address and use that to get the 8-byte setup request */
 
@@ -2944,7 +2944,6 @@ static int stm32_epstall(struct usbdev_ep_s *ep, boolean resume)
 
               if (!stm32_rqempty(privep))
                 {
-                  privep->txbusy = FALSE;
                   (void)stm32_wrrequest(priv, privep);
                   stm32_seteptxstatus(epno, USB_EPR_STATTX_VALID);
                 }
