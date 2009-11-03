@@ -1,6 +1,21 @@
 README
 ^^^^^^
 
+This README discusses issues unique to NuttX configurations for the
+STMicro STM3210E-EVAL development board.
+
+Contents
+^^^^^^^^
+
+  - Development Environment
+  - GNU Toolchain Options
+  - IDEs
+  - NuttX buildroot Toolchain
+  - DFU
+  - LEDs
+  - STM3210E-EVAL-specific Configuration Options
+  - Configurations
+
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -141,8 +156,9 @@ DFU
 ^^^
 
   The linker files in these projects can be configured to indicate that you
-  will be loading code using STMicro built-in USB DFU loader or via some JTAG
-  emulator.  You can specify the DFU bootloader by adding the following line:
+  will be loading code using STMicro built-in USB Device Firmware Upgrade (DFU)
+  loader or via some JTAG emulator.  You can specify the DFU bootloader by
+  adding the following line:
 
     CONFIG_STM32_DFU=y
 
@@ -392,3 +408,7 @@ Where <subdir> is one of the following:
     This configuration builds a trivial bring-up binary.  It is
     useful only because it words with the RIDE7 IDE and R-Link debugger.
 
+  usbserial:
+    This configuration directory exercises the USB serial class
+    driver at examples/usbserial.  See examples/README.txt for
+    more information.

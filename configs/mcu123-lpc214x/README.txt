@@ -1,6 +1,9 @@
 README
 ^^^^^^
 
+This README discusses issues unique to NuttX configurations for the
+MCU-123 LPC2148 development board.
+
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -293,17 +296,23 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
-ostest
-^^^^^^
+ostest:
+  This configuration directory, performs a simple OS test using
+  examples/ostest.
 
-This configuration directory, performs a simple OS test using
-examples/ostest.
+nsh:
+  Configures the NuttShell (nsh) located at examples/nsh.  The
+  Configuration enables only the serial NSH interfaces.
 
-nsh
-^^^
+usbserial:
+  This configuration directory exercises the USB serial class
+  driver at examples/usbserial.  See examples/README.txt for
+  more information.
 
-Configures the NuttShell (nsh) located at examples/nsh.  The
-Configuration enables only the serial NSH interfaces.
+usbstorage:
+  This configuration directory exercises the USB mass storage
+  class driver at examples/usbstorage.  See examples/README.txt for
+  more information.
 
 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^
