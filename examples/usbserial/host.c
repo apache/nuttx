@@ -239,7 +239,7 @@ int main(int argc, char **argv, char **envp)
         }
       else if (nbytes == 0)
         {
-          printf("main: End-of-file encountereDs\n");
+          printf("main: End-of-file encountered\n");
           break;
         }
 
