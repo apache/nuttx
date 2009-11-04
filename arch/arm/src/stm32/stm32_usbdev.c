@@ -136,8 +136,6 @@
 #define STM32_EP0_RXADDR      STM32_BUFFER_START
 #define STM32_EP0_TXADDR      (STM32_EP0_RXADDR+STM32_EP0MAXPACKET)
 
-#warning "Doesn't the buffer size need to include 2 bytes for the CRC?"
-
 #define STM32_BUFFER_EP0      0x03
 #define STM32_NBUFFERS        7
 #define STM32_BUFFER_BIT(bn)  (1 << (bn))
@@ -1316,7 +1314,6 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
        */
 
       usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTQEMPTY), epno);
-      priv->rxpending = TRUE;
       return OK;
     }
 
@@ -1339,20 +1336,21 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   src     = stm32_geteprxaddr(epno);
 
   /* Get the number of bytes to read from packet memory */
-#warning "Doesn't this length include 2 bytes for the CRC?"
 
   pmalen  = stm32_geteprxcount(epno);
-  readlen = MIN(privreq->req.len,  pmalen);
+  readlen = MIN(privreq->req.len, pmalen);
 
   /* Receive the next packet */
 
   stm32_copyfrompma(dest, src, readlen);
   priv->devstate = DEVSTATE_RDREQUEST;
 
-  /* If the receive buffer is full then we are finished with the transfer */
+  /* If the receive buffer is full or this is a partial packet,
+   * then we are finished with the transfer
+   */
 
   privreq->req.xfrd += readlen;
-  if (privreq->req.xfrd >= privreq->req.len)
+  if (pmalen < privep->ep.maxpacket || privreq->req.xfrd >= privreq->req.len)
     {
       /* Complete the transfer and mark the state IDLE.  The endpoint
        * RX will be marked valid when the data phase completes.
@@ -1428,10 +1426,7 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, ubyte epno)
 
   if ((epr & USB_EPR_CTR_RX) != 0)
     {
-      /* Clear interrupt status */
-
-      stm32_clrepctrrx(epno);
-      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTDONE), epno);
+      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTDONE), epr);
 
       /* Handle read requests: Read host data into the current read request */
 
@@ -1439,15 +1434,24 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, ubyte epno)
       if (!stm32_rqempty(privep))
         {
           stm32_rdrequest(priv, privep);
+
+          /* Clear the interrupt status */
+
+          stm32_clrepctrrx(epno);
         }
       else
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTPENDING), (uint16)epno);
+
+          /* Mark the RX processing as pending and NAK any OUT actions
+           * on this endpoint
+           */
+
           priv->rxstatus  = USB_EPR_STATRX_NAK;
-          priv->rxpending = 1;
+          priv->rxpending = TRUE;
         }
 
-      /* Set the new RX status */
+      /* Clear the interrupt status and set the new RX status */
 
       stm32_seteprxstatus(epno, priv->rxstatus);
     }
@@ -2836,7 +2840,11 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
         {
           priv->rxstatus  = USB_EPR_STATRX_VALID;
           ret             = stm32_rdrequest(priv, privep);
-          priv->rxpending = 0;
+
+          /* Clear the pending interrupt status */
+
+          stm32_clrepctrrx(epno);
+          priv->rxpending = FALSE;
 
           /* Set the new RX status */
 
@@ -3357,6 +3365,7 @@ void up_usbinitialize(void)
 #if STM32_EP0MAXPACKET < STM32_MAXPACKET_SIZE
   priv->eplist[EP0].ep.maxpacket = STM32_EP0MAXPACKET;
 #endif
+
   /* Configure the USB controller.  USB uses the following GPIO pins:
    *
    *   PA9  - VBUS
