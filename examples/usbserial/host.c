@@ -237,6 +237,11 @@ int main(int argc, char **argv, char **envp)
           close(fd);
           return 2;
         }
+      else if (nbytes == 0)
+        {
+          printf("main: End-of-file encountereDs\n");
+          break;
+        }
 
       g_iobuffer[nbytes] = '\0';
       printf("main: Received %d bytes:\n", nbytes);
@@ -281,8 +286,6 @@ int main(int argc, char **argv, char **envp)
       printf("main: %d bytes sent\n", nbytes);
 #endif /* CONFIG_EXAMPLES_USBSERIAL_INONLY */
     }
-
-  /* Won't get here, but if we did this what we would have to do */
 
   close(fd);
   return 0;
