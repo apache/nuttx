@@ -913,7 +913,7 @@
 	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
 	  driver was included in the 0.4.12 release, but is not yet tested.
 
-0.4.13 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.13 2009-11-04 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* include/nuttx/mtd.h.  Added a simple interface definition to support some
 	  FLASH, EEPROM, NVRAM, etc. devices.
@@ -932,10 +932,9 @@
 	* arch/arm/src/stm32/ - You have to configure CTS/RTS function pins for USART
 	  2 and USART 3 even if you are not using flow control.
 	* arch/arm/src/stm32/stm32_usbdev.c - Added a USB device-side driver for the
-	  STM32.
-
-		NOTE: This STM32 USB driver is not yet fully untested
-
+	  STM32.  NOTE: This is an early release of the USB driver.  There is at least
+	  one known issue. The examples/usbserial test only executes correctly under
+	  certain conditions (see the full bug description in the TODO list).
 	* arch/arm/src/stm32/stm32_rcc.c - Fixed an error in clock initialization.
 	  On some boards (none of mine), the HSE (high speed external clock) delay
 	  loop times out if the optimization level is high. The STM32 then falls
@@ -947,3 +946,4 @@
 	  certain range.  Worked fine until you try to use an interrupt in that
 	  range!
 
+0.4.14 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

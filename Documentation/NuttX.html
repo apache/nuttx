@@ -732,28 +732,43 @@
 <p><b>nuttx-0.4.12</b>.
 
 <p>
-  This 44<sup>th</sup> release of NuttX was made on October 17, 2009 and is available for download from the
+  This 45<sup>th</sup> release of NuttX was made on November 4, 2009 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release adds basic support for the STMicro STM32, Cortex-M3 MCU.
-  The specific port is to the STMicro STM3210E-EVAL development board based around the STM32F103ZET6 MCU.
-  Some highlights of this port:
+  The release extends the support for the STMicro STM32 microcontroller.
+  Minimul support for the STM3210E-EVAL development board based around the STM32F103ZET6
+  MCU was released in NuttX-0.4.12.
+  This release adds:
   <ul>
-    <li>This basic port includes boot-up logic, interrupt driven serial console, and system timer interrupts.<li>
-    <li>The port includes a basic STMicro RIDE7 project that can be used to perform basic STM32 board bring-up
-       (due to RIDE7 size limitations, it cannot be used for the full NuttX testing, unfortunately).<li>
-	<li>Working, Tested Configurations:  the NuttX OS test and the NuttShell (NSH) example.<li>
+	<li>A simple interface definition to support some FLASH, EEPROM, NVRAM, etc. devices.</li>
+    <li>Verified SPI operation using driver for SPI based FLASH parts M25P64 and M25P128.</li>
+    <li>Improved Cortex-M3 context switching.
+      This should improve context switching performance be 2x in certain cases.</li>
+    <li>Added a USB device-side driver for the STM32.
+      This is an early release of a very complex driver; some bugs are expected.</li> 
+    <li>The USB driver has been verified against the USB serial device class driver.
+	  There is at least one known outstanding issue (see the full bug description in
+	  the TODO list).</li>
   </ul>
 </p>
 <p>
-  It is planned to extend this basic STM32 port for the 0.4.13 NuttX release.
-  Additional functionality needed for complete STM32 support includes:
-  USB device driver, LCD driver and NX bringup on the development board's display and MicroSD support.
-  An SPI driver and a DMA support was included in this 0.4.12 release, but is not yet tested.
+  This release also corrects some important bugs in the early STM32 release:
+  <ul>
+    <li>Fixed several errors the prevented operation of NuttX on an STM32 development
+	  board using USART2 as the serial console.</li>
+    <li>Fixed and optimization-dependent race condition in the clock initialization.</li>
+    <li>Fixed a critical bug in the interrupt control logic that could cause interrupt
+	  operations to failed used for interrupts in a certain range.</li>
+  </ul>
+<p>
+<p>
+  DMA and external memory support are included in the 0.4.13 release, but is not yet tested.
+  This basic STM32 port will be further extended in the 0.4.14 NuttX release to include
+  MicroSD support and verified USB mass storage class support.
 </p>
 
 <table width ="100%">
@@ -973,13 +988,14 @@
     <ul>
       <p>
         <b>STATUS:</b>
-        The basic STM32 port was released in NuttX version 0.4.12. This basic port includes boot-up
+        The basic STM32 port was released in NuttX version 0.4.12. The basic port includes boot-up
         logic, interrupt driven serial console, and system timer interrupts.
-        Verified configurations are available for NuttX OS test and the NuttShell (NSH) example.
-        This basic STM32 port will be extended in the 0.4.13 NuttX release.  Functionality needed
-        for complete STM32 support includes:  USB device driver, LCD driver and NX bringup on the
-        development board's display and MicroSD support.  An SPI driver and a DMA support was included
-        in the 0.4.12 release, but is not yet tested.
+        The 0.4.13 release added support for SPI, serial FLASH, and USB device.
+        Verified configurations are available for NuttX OS test, the NuttShell (NSH) example,
+        and a USB serial device class.
+        DMA and external memory support are included in the 0.4.13 release, but is not yet tested.
+        This basic STM32 port will be further extended in the 0.4.14 NuttX release to include
+        MicroSD support and verified USB mass storage class support.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1518,25 +1534,38 @@ Other memory:
 </table>
 
 <ul><pre>
-0.4.12 2009-10-17 Gregory Nutt <spudmonkey@racsa.co.cr>
+nuttx-0.4.13 2009-11-04 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* arch/arm/src/stm32 and configs/stm3210e-eval.  Added basic support for the
-	  STMicro STM32, Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL
-	  development board based around the STM32F103ZET6 MCU.
-	* configs/stm3210e-eval/RIDE.  Added a basic STMicro RIDE7 project that can be
-	  used to perform basic STM32 board bring-up (due to RIDE7 size limitations, it
-	  cannot be used for the full NuttX bring-up).
-	* configs/stm3210e-eval/ostest.  The STM32 now passes the basic NuttX OS test
-	  at examples/ostest.  The rest should be a piece of cake.
-	* configs/stm3210e-eval/nsh.  Added NuttShell (NSH) example.
-	* configs/stm3210e-eval/src/stm32102e-internal.h.  Fix on-board LED GPIO definitions.
-	* arch/arm/src/stm32/src/stm32/stm32_dma.c.  Added DMA channel support for the STM32
-	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
-	* arch/arm/src/stm32/src/stm32/stm32_serial.c.  Finished interrupt-drivent,
-	  USART console driver.  This makes NSH work perfectly.
-	* Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
-	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
-	  driver was included in the 0.4.12 release, but is not yet tested.
+	* include/nuttx/mtd.h.  Added a simple interface definition to support some
+	  FLASH, EEPROM, NVRAM, etc. devices.
+	* driver/mtd/m25px.c.  Added a driver for SPI based FLASH parts M25P64 and M25P128.
+	* configs/stm3210e-eval/usbserial.  Add a USB serial configuration for the STM32.
+	  Depends on the STM32 USB driver.
+	* arch/arm/src/cortexm3/up_switchcontext.S & up_svccall.c.  Made an improvement
+	  to context switching.  There are two types of context switches:  interrupt
+	  context switches and background/user context switches.  This change should
+	  improve the performance of those background/user context switches by a factor
+	  of about two.
+	* arch/arm/src/stm32/ - fix several typos in the serial logic.  It turns out
+	  that these typose don't make any difference as long as you use only one
+	  serial port and all uarts are configured the same.  But the typos are bugs
+	  waiting to happen in any other configuration.
+	* arch/arm/src/stm32/ - You have to configure CTS/RTS function pins for USART
+	  2 and USART 3 even if you are not using flow control.
+	* arch/arm/src/stm32/stm32_usbdev.c - Added a USB device-side driver for the
+	  STM32.  NOTE: This is an early release of the USB driver.  There is at least
+	  one known issue. The examples/usbserial test only executes correctly under
+	  certain conditions (see the full bug description in the TODO list).
+	* arch/arm/src/stm32/stm32_rcc.c - Fixed an error in clock initialization.
+	  On some boards (none of mine), the HSE (high speed external clock) delay
+	  loop times out if the optimization level is high. The STM32 then falls
+	  back to the HSI (internal clock), and the system clock is too slow by a
+	  factor of 11.1%.  This was fixed by simply add the volatile storage class
+	  to the timeout loop counter
+	* arch/arm/src/stm32/stm32_irq.c - Fixed a critical bug in the interrupt
+	  control logic.  The wrong register was being used for interrupts in a
+	  certain range.  Worked fine until you try to use an interrupt in that
+	  range!
 
 pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1565,39 +1594,7 @@ buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-0.4.13 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* include/nuttx/mtd.h.  Added a simple interface definition to support some
-	  FLASH, EEPROM, NVRAM, etc. devices.
-	* driver/mtd/m25px.c.  Added a driver for SPI based FLASH parts M25P64 and M25P128.
-	* configs/stm3210e-eval/usbserial.  Add a USB serial configuration for the STM32.
-	  Depends on the STM32 USB driver.
-	* arch/arm/src/cortexm3/up_switchcontext.S & up_svccall.c.  Made an improvement
-	  to context switching.  There are two types of context switches:  interrupt
-	  context switches and background/user context switches.  This change should
-	  improve the performance of those background/user context switches by a factor
-	  of about two.
-	* arch/arm/src/stm32/ - fix several typos in the serial logic.  It turns out
-	  that these typose don't make any difference as long as you use only one
-	  serial port and all uarts are configured the same.  But the typos are bugs
-	  waiting to happen in any other configuration.
-	* arch/arm/src/stm32/ - You have to configure CTS/RTS function pins for USART
-	  2 and USART 3 even if you are not using flow control.
-	* arch/arm/src/stm32/stm32_usbdev.c - Added a USB device-side driver for the
-	  STM32.
-
-		NOTE: This STM32 USB driver is not yet fully tested
-
-	* arch/arm/src/stm32/stm32_rcc.c - Fixed an error in clock initialization.
-	  On some boards (none of mine), the HSE (high speed external clock) delay
-	  loop times out if the optimization level is high. The STM32 then falls
-	  back to the HSI (internal clock), and the system clock is too slow by a
-	  factor of 11.1%.  This was fixed by simply add the volatile storage class
-	  to the timeout loop counter
-	* arch/arm/src/stm32/stm32_irq.c - Fixed a critical bug in the interrupt
-	  control logic.  The wrong register was being used for interrupts in a
-	  certain range.  Worked fine until you try to use an interrupt in that
-	  range!
+nuttx-0.4.14 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

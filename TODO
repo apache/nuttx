@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 20, 2009)
+NuttX TODO List (Last updated November 4, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -657,16 +657,28 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Status:      Open
   Priority:    Medium
 
-  Description  USB device-side driver
+  Description  A USB device-side driver is in place but not well tested.  At
+               present, the examples/usbserial test sometimes fails.  The situation
+               that causes the failure is:
+
+               - Host-side of the test started after the target side sends the
+                 first serial message.
+
+               The general failure is as follows:
+
+               - The target message pends in the endpoint packet memory
+               - When the host-side of the test is stated, it correctly
+                 reads this pending data.
+               - an EP correct transfer interrupt occurs and the next
+                 pending outgoing message is setup
+               - But, the host never receives the next message
+
+               If the host-side driver is started before the first target message
+               is sent, the driver works fine.
   Status:      Open
   Priority:    Medium-High
   
-  Description: Framebuffer/LCD driver needed (I don't know if it can handle a 
-               framebuffer or not).
-  Status:      Open
-  Priority:    High
-
-  Description: FSMC externmal memory support is untested
+  Description: FSMC external memory support is untested
   Status:      Opon
   Priority:    Low
 
