@@ -159,7 +159,7 @@ static void show_usage(const char *progname, int exitcode)
 int main(int argc, char **argv, char **envp)
 {
   struct termios tty;
-#ifndef CONFIG_EXAMPLES_USBSERIAL_INONLY
+#ifndef CONFIG_EXAMPLES_USBSERIAL_OUTONLY
   ssize_t nbytes;
 #endif
 #ifdef COUNTER_NEEDED
