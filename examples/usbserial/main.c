@@ -232,16 +232,18 @@ int user_start(int argc, char *argv[])
     }
   message("user_start: Successfully registered the serial driver\n");
 
-#ifdef CONFIG_USBDEV_TRACE
-#if CONFIG_USBDEV_TRACE_INITIALIDSET != 0
-  /* If USB tracing is enabled, then dump all collected trace data to stdout */
+#if CONFIG_USBDEV_TRACE && CONFIG_USBDEV_TRACE_INITIALIDSET != 0
+  /* If USB tracing is enabled and tracing of initial USB events is specified,
+   * then dump all collected trace data to stdout
+   */
 
   sleep(5);
   dumptrace();
-#else
+#endif
+
+  /* Then, in any event, configure trace data collection as configured */
+
   usbtrace_enable(TRACE_BITSET);
-#endif
-#endif
 
   /* Open the USB serial device for writing (blocking) */
 
