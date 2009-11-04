@@ -365,7 +365,7 @@ int user_start(int argc, char *argv[])
           close(outfd);
           return 4;
         }
-      message("user_start:%d bytes sent\n", nbytes);
+      message("user_start: %d bytes sent\n", nbytes);
 #endif /* CONFIG_EXAMPLES_USBSERIAL_OUTONLY */
 
       /* Test OUT (host-to-device) messages */
