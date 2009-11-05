@@ -1599,6 +1599,10 @@ nuttx-0.4.14 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* arch/arm/src/stm32/stm32_gpio.c - Add support for configure an input GPIO
 	  to generate an EXTI interrupt.
 	* config/stm3210e-eval/src/up_buttons.c - Add support for on-board buttons.
+	* include/nuttx/rwbuffer.h -- Add generic support for read-ahead buffering
+	  and write buffering that can be used in any block driver.
+	* include/nuttx/wqueue.h -- Added a generic worker thread that can used to
+	  defer processing from an interrupt to a task.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
