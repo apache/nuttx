@@ -102,12 +102,51 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
+/* The STM3210E-EVAL supports several buttons
+ *
+ * Reset           -- Connected to NRST
+ * Wakeup          -- Connected to PA.0
+ * Tamper          -- Connected to PC.13
+ * Key             -- Connected to PG.8
+ *
+ * And a Joystick
+ *
+ * Joystick center -- Connected to PG.7
+ * Joystick down   -- Connected to PD.3
+ * Joystick left   -- Connected to PG.14
+ * Joystick right  -- Connected to PG.13
+ * Joystick up     -- Connected to PG.15
+ */
+
+#define BUTTON_WAKEUP  (1 << 0)
+#define BUTTON_TAMPER  (1 << 1)
+#define BUTTON_KEY     (1 << 2)
+
+#define JOYSTICK_SEL   (1 << 3)
+#define JOYSTICK_DOWN  (1 << 4)
+#define JOYSTICK_LEFT  (1 << 5)
+#define JOYSTICK_RIGHT (1 << 6)
+#define JOYSTICK_UP    (1 << 7)
+
+#define NUM_BUTTONS     8
+
 /************************************************************************************
- * Public Function Prototypes
+ * Public Data
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
 /************************************************************************************
  * Name: stm32_boardinitialize
  *
@@ -118,7 +157,28 @@
  *
  ************************************************************************************/
 
-extern void stm32_boardinitialize(void);
+EXTERN void stm32_boardinitialize(void);
+
+/************************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   up_buttoninit() must be called to initialize button resources.  After that,
+ *   up_buttons() may be called to collect the state of all buttons.  up_buttons()
+ *   returns an 8-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_* and JOYSTICK_* definitions above for the meaning of each bit.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+EXTERN void up_buttoninit(void);
+EXTERN ubyte up_buttons(void);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_BOARD_BOARD_H */
