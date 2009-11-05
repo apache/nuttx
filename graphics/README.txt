@@ -59,7 +59,7 @@ graphics/nxsu
   single user front-end is selected when CONFIG_NX_MULTIUSER is not defined in the
   NuttX configuration file.
 
-graphics/nxsu
+graphics/nxmu
   This is the NX multi user "front end".  When combined with the generic "back-end"
   (nxbe), it implements a multi-threaded, multi-user windowing system.  The files
   in this directory present the window APIs described in include/nuttx/nx.h.  The

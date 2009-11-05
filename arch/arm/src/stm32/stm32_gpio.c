@@ -203,9 +203,24 @@ int stm32_configgpio(uint32 cfgset)
         }
       else
         {
-          /* It is an input pin... If it is pull-down or pull up,
-           * then we need to set the ODR appropriately for that
-           * function.
+          /* It is an input pin... Should it configured as an EXTI interrupt? */
+
+          if ((cfgset & GPIO_EXTI) != 0)
+            {
+               int shift;
+
+               /* Yes.. Set the bits in the EXTI CR register */
+
+               regaddr = STM32_AFIO_EXTICR(pin);
+               regval  = getreg32(regaddr);
+               shift   = AFIO_EXTICR_EXTI_SHIFT(pin);
+               regval &= ~(AFIO_EXTICR_PORT_MASK << shift);
+               regval |= (((uint32)port) << shift);
+               putreg32(regval, regaddr);
+            }
+
+          /* If it is pull-down or pull up, then we need to set the ODR
+           * appropriately for that function.
            */
         
           if ((cfgset & GPIO_CNF_MASK) == GPIO_CNF_INPULLUP)

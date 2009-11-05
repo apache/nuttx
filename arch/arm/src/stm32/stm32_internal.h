@@ -59,7 +59,7 @@
 /* Bit-encoded input to stm32_configgpio() *******************************************/
 
 /* 16-bit Encoding:
- * OFFS S... VPPP BBBB
+ * OFFS SX.. VPPP BBBB
  */
 
 /* Output mode:
@@ -98,6 +98,12 @@
 #  define GPIO_MODE_10MHz             (1 << GPIO_MODE_SHIFT)     /* Output mode, max speed 10 MHz */
 #  define GPIO_MODE_2MHz              (2 << GPIO_MODE_SHIFT)     /* Output mode, max speed 2 MHz */
 #  define GPIO_MODE_50MHz             (3 << GPIO_MODE_SHIFT)     /* Output mode, max speed 50 MHz */
+
+/* External interrupt selection (GPIO inputs only):
+ * .... .X.. .... ....
+ */
+
+#define GPIO_EXTI                     (1 << 10)                   /* Bit 10: Configure as EXTI interrupt */
 
 /* If the pin is an GPIO digital output, then this identifies the initial output value:
  * .... .... V... ....

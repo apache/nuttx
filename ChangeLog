@@ -947,3 +947,8 @@
 	  range!
 
 0.4.14 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* arch/arm/src/stm32/stm32_gpio.c - Add support for configure an input GPIO
+	  to generate an EXTI interrupt.
+	* config/stm3210e-eval/src/up_buttons.c - Add support for on-board buttons.
+

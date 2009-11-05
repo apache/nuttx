@@ -62,6 +62,7 @@
 
 #define STM32_AFIO_EVCR_OFFSET       0x0000  /* Event control register */
 #define STM32_AFIO_MAPR_OFFSET       0x0004  /* AF remap and debug I/O configuration register */
+#define STM32_AFIO_EXTICR_OFFSET(p)  (0x0008 + ((p) >> 2))
 #define STM32_AFIO_EXTICR1_OFFSET    0x0008  /* External interrupt configuration register 1 */
 #define STM32_AFIO_EXTICR2_OFFSET    0x000c  /* External interrupt configuration register 2 */
 #define STM32_AFIO_EXTICR3_OFFSET    0x0010  /* External interrupt configuration register 3 */
@@ -141,6 +142,7 @@
 
 #define STM32_AFIO_EVCR              (STM32_AFIO_BASE+STM32_AFIO_EVCR_OFFSET)
 #define STM32_AFIO_MAPR              (STM32_AFIO_BASE+STM32_AFIO_MAPR_OFFSET)
+#define STM32_AFIO_EXTICR(p)         (STM32_AFIO_BASE+STM32_AFIO_EXTICR_OFFSET(p))
 #define STM32_AFIO_EXTICR1           (STM32_AFIO_BASE+STM32_AFIO_EXTICR1_OFFSET)
 #define STM32_AFIO_EXTICR2           (STM32_AFIO_BASE+STM32_AFIO_EXTICR3_OFFSET)
 #define STM32_AFIO_EXTICR3           (STM32_AFIO_BASE+STM32_AFIO_EXTICR3_OFFSET)
@@ -312,53 +314,59 @@
 
 /* External interrupt configuration register 1 */
 
+#define AFIO_EXTICR_PORT_MASK        (0x0f)
+#define AFIO_EXTICR_EXTI_SHIFT(g)    (((g) & 3) << 2)
+#define AFIO_EXTICR_EXTI_MASK(g)     (AFIO_EXTICR_PORT_MASK << (AFIO_EXTICR_EXTI_SHIFT(g)))
+
 #define AFIO_EXTICR1_EXTI0_SHIFT     (0)       /* Bits 3-0: EXTI 0 configuration */
-#define AFIO_EXTICR1_EXTI0_MASK      (0x0f << AFIO_EXTICR1_EXTI0_SHIFT)
+#define AFIO_EXTICR1_EXTI0_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR1_EXTI0_SHIFT)
 #define AFIO_EXTICR1_EXTI1_SHIFT     (4)       /* Bits 7-4: EXTI 1 configuration */
-#define AFIO_EXTICR1_EXTI1_MASK      (0x0f << AFIO_EXTICR1_EXTI1_SHIFT)
+#define AFIO_EXTICR1_EXTI1_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR1_EXTI1_SHIFT)
 #define AFIO_EXTICR1_EXTI2_SHIFT     (8)       /* Bits 11-8: EXTI 2 configuration */
-#define AFIO_EXTICR1_EXTI2_MASK      (0x0f << AFIO_EXTICR1_EXTI2_SHIFT)
+#define AFIO_EXTICR1_EXTI2_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR1_EXTI2_SHIFT)
 #define AFIO_EXTICR1_EXTI3_SHIFT     (12)      /* Bits 15-12: EXTI 3 configuration */
-#define AFIO_EXTICR1_EXTI3_MASK      (0x0f << AFIO_EXTICR1_EXTI3_SHIFT)
+#define AFIO_EXTICR1_EXTI3_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR1_EXTI3_SHIFT)
 
 #define AFIO_EXTICR_PORTA            (0)       /* 0000: PA[x] pin */
 #define AFIO_EXTICR_PORTB            (1)       /* 0001: PB[x] pin */
 #define AFIO_EXTICR_PORTC            (2)       /* 0010: PC[x] pin */
 #define AFIO_EXTICR_PORTD            (3)       /* 0011: PD[x] pin */
 #define AFIO_EXTICR_PORTE            (4)       /* 0100: PE[x] pin */
+#define AFIO_EXTICR_PORTF            (5)       /* 0101: PF[x] pin */
+#define AFIO_EXTICR_PORTG            (6)       /* 0110: PG[x] pin */
 
 /* External interrupt configuration register 2 */
 
 #define AFIO_EXTICR2_EXTI4_SHIFT     (0)       /* Bits 3-0: EXTI 4 configuration */
-#define AFIO_EXTICR2_EXTI4_MASK      (0x0f << AFIO_EXTICR2_EXTI4_SHIFT)
+#define AFIO_EXTICR2_EXTI4_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR2_EXTI4_SHIFT)
 #define AFIO_EXTICR2_EXTI5_SHIFT     (4)       /* Bits 7-4: EXTI 5 configuration */
-#define AFIO_EXTICR2_EXTI5_MASK      (0x0f << AFIO_EXTICR2_EXTI5_SHIFT)
+#define AFIO_EXTICR2_EXTI5_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR2_EXTI5_SHIFT)
 #define AFIO_EXTICR2_EXTI6_SHIFT     (8)       /* Bits 11-8: EXTI 6 configuration */
-#define AFIO_EXTICR2_EXTI6_MASK      (0x0f << AFIO_EXTICR2_EXTI6_SHIFT)
+#define AFIO_EXTICR2_EXTI6_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR2_EXTI6_SHIFT)
 #define AFIO_EXTICR2_EXTI7_SHIFT     (12)      /* Bits 15-12: EXTI 7 configuration */
-#define AFIO_EXTICR2_EXTI7_MASK      (0x0f << AFIO_EXTICR2_EXTI7_SHIFT)
+#define AFIO_EXTICR2_EXTI7_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR2_EXTI7_SHIFT)
 
 /* External interrupt configuration register 3 */
 
 #define AFIO_EXTICR3_EXTI8_SHIFT     (0)       /* Bits 3-0: EXTI 8 configuration */
-#define AFIO_EXTICR3_EXTI8_MASK      (0x0f << AFIO_EXTICR3_EXTI8_SHIFT)
+#define AFIO_EXTICR3_EXTI8_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR3_EXTI8_SHIFT)
 #define AFIO_EXTICR3_EXTI9_SHIFT     (4)       /* Bits 7-4: EXTI 9 configuration */
-#define AFIO_EXTICR3_EXTI9_MASK      (0x0f << AFIO_EXTICR3_EXTI9_SHIFT)
+#define AFIO_EXTICR3_EXTI9_MASK      (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR3_EXTI9_SHIFT)
 #define AFIO_EXTICR3_EXTI10_SHIFT    (8)       /* Bits 11-8: EXTI 10 configuration */
-#define AFIO_EXTICR3_EXTI10_MASK     (0x0f << AFIO_EXTICR3_EXTI10_SHIFT)
+#define AFIO_EXTICR3_EXTI10_MASK     (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR3_EXTI10_SHIFT)
 #define AFIO_EXTICR3_EXTI11_SHIFT    (12)      /* Bits 15-12: EXTI 11 configuration */
-#define AFIO_EXTICR3_EXTI11_MASK     (0x0f << AFIO_EXTICR3_EXTI11_SHIFT)
+#define AFIO_EXTICR3_EXTI11_MASK     (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR3_EXTI11_SHIFT)
 
 /* External interrupt configuration register 4 */
 
 #define AFIO_EXTICR4_EXTI12_SHIFT    (0)       /* Bits 3-0: EXTI 12 configuration */
-#define AFIO_EXTICR4_EXTI12_MASK     (0x0f << AFIO_EXTICR4_EXTI12_SHIFT)
+#define AFIO_EXTICR4_EXTI12_MASK     (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR4_EXTI12_SHIFT)
 #define AFIO_EXTICR4_EXTI13_SHIFT    (4)       /* Bits 7-4: EXTI 13 configuration */
-#define AFIO_EXTICR4_EXTI13_MASK     (0x0f << AFIO_EXTICR4_EXTI13_SHIFT)
+#define AFIO_EXTICR4_EXTI13_MASK     (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR4_EXTI13_SHIFT)
 #define AFIO_EXTICR4_EXTI14_SHIFT    (8)       /* Bits 11-8: EXTI 14 configuration */
-#define AFIO_EXTICR4_EXTI14_MASK     (0x0f << AFIO_EXTICR4_EXTI14_SHIFT)
+#define AFIO_EXTICR4_EXTI14_MASK     (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR4_EXTI14_SHIFT)
 #define AFIO_EXTICR4_EXTI15_SHIFT    (12)      /* Bits 15-12: EXTI 15 configuration */
-#define AFIO_EXTICR4_EXTI15_MASK     (0x0f << AFIO_EXTICR4_EXTI15_SHIFT)
+#define AFIO_EXTICR4_EXTI15_MASK     (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR4_EXTI15_SHIFT)
 
 /************************************************************************************
  * Public Types
