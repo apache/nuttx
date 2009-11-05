@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: September 15, 2009</p>
+      <p>Last Updated: November 5, 2009</p>
     </td>
   </tr>
 </table>
@@ -2124,11 +2124,39 @@ extern void up_ledoff(int led);
     <code>CONFIG_SDCLONE_DISABLE</code>: Disable cloning of all socket
     desciptors by task_create() when a new task is started.
     If set, all sockets will appear to be closed in the new task.
-  </li>: 
+  </li>
   <li>
     <code>CONFIG_NXFLAT</code>: Enable support for the NXFLAT binary format.
     This format will support execution of NuttX binaries located
     in a ROMFS filesystem (see <code>examples/nxflat</code>).
+  </li>
+  <li>
+    <code>CONFIG_SCHED_WORKQUEUE</code>: Create a dedicated "worker" thread to
+    handle delayed processing from interrupt handlers.  This feature
+    is required for some drivers but, if there are not complaints,
+    can be safely disabled.  The worker thread also performs
+    garbage collection -- completing any delayed memory deallocations
+    from interrupt handlers.  If the worker thread is disabled,
+    then that clean will be performed by the IDLE thread instead
+    (which runs at the lowest of priority and may not be appropriate
+    if memory reclamation is of high priority).  If CONFIG_SCHED_WORKQUEUE
+    is enabled, then the following options can also be used:
+  </li>
+  <li>
+    <code>CONFIG_SCHED_WORKPRIORITY</code>: The execution priority of the worker
+    thread.  Default: 50
+  </li>
+  <li>
+    <code>CONFIG_SCHED_WORKPERIOD</code>: How often the worker thread checks for
+    work.  Default: 50 MS.
+  </li>
+  <li>
+    <code>CONFIG_SCHED_WORKSTACKSIZE</code>: The stack size allocated for the worker
+    thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
+  </li>
+  <li>
+    <code>CONFIG_SIG_SIGWORK</code>: The signal number that will be used to wake-up
+    the worker thread.  Default: 4
   </li>
 </ul>
 
