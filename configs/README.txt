@@ -243,6 +243,24 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NXFLAT. Enable support for the NXFLAT binary format.
 		  This format will support execution of NuttX binaries located
 		  in a ROMFS filesystem (see examples/nxflat).
+		CONFIG_SCHED_WORKQUEUE.  Create a dedicated "worker" thread to
+		  handle delayed processing from interrupt handlers.  This feature
+		  is required for some drivers but, if there are not complaints,
+		  can be safely disabled.  The worker thread also performs
+		  garbage collection -- completing any delayed memory deallocations
+		  from interrupt handlers.  If the worker thread is disabled,
+		  then that clean will be performed by the IDLE thread instead
+		  (which runs at the lowest of priority and may not be appropriate
+		  if memory reclamation is of high priority).  If CONFIG_SCHED_WORKQUEUE
+		  is enabled, then the following options can also be used:
+		CONFIG_SCHED_WORKPRIORITY - The execution priority of the worker
+		  thread.  Default: 50
+		CONFIG_SCHED_WORKPERIOD - How often the worker thread checks for
+		  work.  Default: 50 MS.
+		CONFIG_SCHED_WORKSTACKSIZE - The stack size allocated for the worker
+		  thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
+		CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
+		  the worker thread.  Default: 4
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it

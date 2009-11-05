@@ -64,6 +64,10 @@
 #  define CONFIG_SCHED_WORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
 #endif
 
+#ifdef CONFIG_DISABLE_SIGNALS
+#  warning "Worker thread support requires signals"
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
