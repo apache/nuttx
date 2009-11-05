@@ -1,7 +1,7 @@
-/************************************************************
- * sched_free.c
+/************************************************************************
+ * sched/sched_free.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,55 +31,59 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
-#include <nuttx/kmalloc.h>
+
 #include <queue.h>
 #include <assert.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/mm.h>
+
 #include "os_internal.h"
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Variables
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Variables
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Name: sched_free
  *
  * Description:
- *   This function performs deallocations that
- *   the operating system may need to make.  This special
- *   interface to free is used to handling corner cases
- *   where the operating system may have to perform deallocations
- *   from within an interrupt handler.
+ *   This function performs deallocations that the operating system may
+ *   need to make.  This special interface to free is used to handling
+ *   corner cases where the operating system may have to perform
+ *   deallocations from within an interrupt handler.
  *
- ************************************************************/
+ ************************************************************************/
 
 void sched_free(FAR void *address)
 {
@@ -95,6 +99,12 @@ void sched_free(FAR void *address)
 
       irqstate_t saved_state = irqsave();
       sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayeddeallocations);
+
+      /* Signal the worker thread that is has some clean up to do */
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+      work_signal();
+#endif
       irqrestore(saved_state);
     }
   else

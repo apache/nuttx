@@ -59,6 +59,10 @@
 
 /* Configuration ************************************************************/
 
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#endif
+
 #ifndef CONFIG_FS_WRDELAY
 #  define CONFIG_FS_WRDELAY 350
 #endif

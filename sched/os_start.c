@@ -61,6 +61,9 @@
 #include  "clock_internal.h"
 #include  "timer_internal.h"
 #include  "irq_internal.h"
+#ifdef CONFIG_SCHED_WORKQUEUE
+# include "work_internal.h"
+#endif
 
 /****************************************************************************
  * Definitions
@@ -155,6 +158,12 @@ volatile pid_t g_lastpid;
  */
 
 pidhash_t g_pidhash[CONFIG_MAX_TASKS];
+
+/* The task ID of the worker thread */
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+pid_t g_worker;
+#endif
 
 /* This is a table of task lists.  This table is indexed by
  * the task state enumeration type (tstate_t) and provides
@@ -423,6 +432,15 @@ void os_start(void)
 
   (void)sched_setupidlefiles(&g_idletcb);
 
+  /* Start the worker thread that will perform misc garbage clean-up */
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+  g_worker = task_create("work", CONFIG_SCHED_WORKPRIORITY,
+                         CONFIG_SCHED_WORKSTACKSIZE,
+                         (main_t)work_thread, (const char **)NULL);
+#endif
+  ASSERT(g_worker != ERROR);
+
   /* Once the operating system has been initialized, the system must be
    * started by spawning the user init thread of execution.
    */
@@ -443,33 +461,14 @@ void os_start(void)
   sdbg("Beginning Idle Loop\n");
   for (;;)
     {
-      /* Check if there is anything in the delayed deallocation list.
-       * If there is deallocate it now.  We must have exclusive access
-       * to the memory manager to do this BUT the idle task cannot
-       * wait on a semaphore.  So we only do the cleanup now if we
-       * can get the semaphore -- and this should be possible because
-       * since we are running, no other task is!
+      /* Peform garbage collection (if it is not being done by the worker
+       * thread.  This cleans-up memory de-allocations that was queued
+       * because it could not be freed in that execution context (for
+       * example, if the memory was freed from an interrupt handler).
        */
-
-      if (mm_trysemaphore() == 0)
-        {
-          while (g_delayeddeallocations.head)
-            {
-              /* Remove the first delayed deallocation. */
-
-              irqstate_t saved_state = irqsave();
-              void *address = (void*)sq_remfirst((FAR sq_queue_t*)&g_delayeddeallocations);
-              irqrestore(saved_state);
-
-              /* Then deallocate it */
-
-              if (address)
-                {
-                  free(address);
-                }
-            }
-          mm_givesemaphore();
-        }
+#ifndef CONFIG_SCHED_WORKQEUE
+      sched_garbagecollection();
+#endif
 
       /* Perform any processor-specific idle state operations */
 

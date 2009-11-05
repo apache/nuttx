@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <queue.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
@@ -131,6 +132,22 @@ EXTERN int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint3
  ****************************************************************************/
 
 EXTERN int work_cancel(struct work_s *work);
+
+/****************************************************************************
+ * Name: work_signal
+ *
+ * Description:
+ *   Signal the worker thread to process the work queue now.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success, a negated errno on failure
+ *
+ ****************************************************************************/
+
+#define work_signal() kill(g_worker, SIGWORK)
 
 #undef EXTERN
 #ifdef __cplusplus

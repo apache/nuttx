@@ -67,16 +67,45 @@
 #define SIGRTMIN        0  /* First real time signal */
 #define SIGRTMAX        31 /* Last real time signal */
 
-/* A few of the real time signals are used within the OS.  The reset are all
- * user signals:
+/* A few of the real time signals are used within the OS.  They have
+ * default values that can be overridden from the configuration file. The
+ * rest are all user signals:
  */
 
+#ifndef CONFIG_SIG_SIGUSR1
 #define SIGUSR1         0  /* User signal 1 */
+#else
+#define SIGUSR1         CONFIG_SIG_SIGUSR1
+#endif
+
+#ifndef CONFIG_SIG_SIGUSR2
 #define SIGUSR2         1  /* User signal 2 */
+#else
+#define SIGUSR2         CONFIG_SIG_SIGUSR2
+#endif
+
+#ifndef CONFIG_SIG_SIGALARM
 #define SIGALRM         2  /* Default signal used with POSIX timers (used only */
                            /* no other signal is provided) */
-#define SIGCONDTIMEDOUT 3  /* Used in the implementation of */
-                           /* pthread_cond_timedwait */
+#else
+#define SIGALRM         CONFIG_SIG_SIGALARM
+#endif
+
+#ifndef CONFIG_DISABLE_PTHREAD
+#ifndef CONFIG_SIG_SIGCONDTIMEDOUT
+#define SIGCONDTIMEDOUT 3  /* Used in the implementation of pthread_cond_timedwait */
+#else
+#define SIGCONDTIMEDOUT CONFIG_SIG_SIGCONDTIMEDOUT
+#endif
+#endif
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+#ifndef CONFIG_SIG_SIGWORK
+#define SIGWORK         4  /* Used to wake up the work queue */
+#else
+#define SIGWORK         CONFIG_SIG_SIGWORK
+#endif
+#endif
 
 /* sigprocmask() "how" definitions. Only one of the following can be specified: */
 

@@ -50,6 +50,20 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_SCHED_WORKPRIORITY
+#  define CONFIG_SCHED_WORKPRIORITY 50
+#endif
+
+#ifndef CONFIG_SCHED_WORKPERIODUS
+#  define CONFIG_SCHED_WORKPERIOD (50*1000) /* 50 milliseconds */
+#endif
+
+#ifndef CONFIG_SCHED_WORKSTACKSIZE
+#  define CONFIG_SCHED_WORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -67,6 +81,24 @@ extern struct dq_queue_s g_work;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_thread
+ *
+ * Description:
+ *   This is the main worker thread that performs actions placed on the work
+ *   queue.  It also performs periodic garbage collection (that is performed
+ *   by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
+ *
+ * Input parameters:
+ *   argc, argv (not used)
+ *
+ * Returned Value:
+ *   Does not return
+ *
+ ****************************************************************************/
+
+extern int work_thread(int argc, char *argv[]);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_SCHED_WORKQUEUE */

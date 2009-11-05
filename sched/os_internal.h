@@ -273,5 +273,6 @@ extern int     sched_releasefiles(FAR _TCB *tcb);
 #endif
 
 extern int     sched_releasetcb(FAR _TCB *tcb);
+extern void    sched_garbagecollection(void);
 
 #endif /* __OS_INTERNAL_H */

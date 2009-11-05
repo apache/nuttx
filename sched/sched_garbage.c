@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/work_queue.c
+ * sched/work_garbage.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,18 +40,11 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <queue.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
+#include <stdlib.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
-#include <nuttx/wqueue.h>
+#include <nuttx/mm.h>
 
-#include "work_internal.h"
-
-#ifdef CONFIG_SCHED_WORKQUEUE
+#include "os_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,48 +70,58 @@
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: work_queue
+ * Name: sched_garbagecollection
  *
  * Description:
- *   Queue work to be performed at a later time.  All queued work will be
- *   performed on the worker thread of of execution (not the caller's).
+ *   Clean-up memory de-allocations that we queued because they could not
+ *   be freed in that execution context (for example, if the memory was freed
+ *   from an interrupt handler).
+ *
+ *   This logic may be called from the worker thread (see work_thread.c).
+ *   If, however, CONFIG_SCHED_WORKQUEUE is not defined, then this logic will
+ *   be called from the IDLE thread.  It is less optimal for the garbage
+ *   collection to be called from the IDLE thread because it runs at a very
+ *   low priority and could cause false memory out conditions.
  *
  * Input parameters:
- *   work   - The work structure to queue
- *   worker - The worker callback to be invoked.  The callback will invoked
- *            on the worker thread of execution.
- *   arg    - The argument that will be passed to the workder callback when
- *            int is invoked.
- *   delay  - Delay (in clock ticks) from the time queue until the worker
- *            is invoked. Zero means to perform the work immediately.
+ *   None
  *
  * Returned Value:
- *   Zero on success, a negated errno on failure
+ *   None
  *
  ****************************************************************************/
 
-int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint32 delay)
+void sched_garbagecollection(void)
 {
-  irqstate_t flags;
-
-  DEBUGASSERT(work != NULL);
-
-  /* First, initialize the work structure */
-
-  work->worker = worker;         /* Work callback */
-  work->arg    = arg;            /* Callback argument */
-  work->delay  = delay;          /* Delay until work performed */
-
-  /* Now, time-tag that entry and put it in the work queue.  This must be
-   * done with interrupts disabled.  This permits this function to be called
-   * from with task logic or interrupt handlers.
+  /* Check if there is anything in the delayed deallocation list. If there
+   * is deallocate it now.  We must have exclusive access to the memory manager
+   * to do this BUT the idle task cannot wait on a semaphore.  So we only do
+   * the cleanup now if we can get the semaphore -- and this should be possible
+   * because if the IDLE thread is running, no other task is!
    */
 
-  flags        = irqsave();
-  work->qtime  = g_system_timer; /* Time work queued */
-  dq_addlast((FAR dq_entry_t *)work, &g_work);
-  work_signal();                 /* Wake up the worker thread */
-  irqrestore(flags);
-  return OK;
+#ifdef CONFIG_SCHED_WORKQUEUE
+  mm_takesemaphore();
+#else
+  if (mm_trysemaphore() == 0)
+#endif
+    {
+      while (g_delayeddeallocations.head)
+        {
+          /* Remove the first delayed deallocation. */
+
+          irqstate_t saved_state = irqsave();
+          void *address = (void*)sq_remfirst((FAR sq_queue_t*)&g_delayeddeallocations);
+          irqrestore(saved_state);
+
+          /* Then deallocate it */
+
+          if (address)
+            {
+              free(address);
+            }
+        }
+      mm_givesemaphore();
+    }
 }
-#endif /* CONFIG_SCHED_WORKQUEUE */
+

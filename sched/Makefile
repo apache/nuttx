@@ -38,7 +38,7 @@
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-MISC_SRCS	= os_start.c get_errno_ptr.c \
+MISC_SRCS	= os_start.c get_errno_ptr.c sched_garbage.c \
 		  sched_setupstreams.c sched_getfiles.c sched_getsockets.c sched_getstreams.c \
 		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
 		  sched_releasefiles.c
@@ -136,7 +136,7 @@ TIMER_SRCS	= timer_initialize.c timer_create.c timer_delete.c timer_getoverrun.c
 endif
 
 ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
-WORK_SRCS	= work_queue.c work_cancel.c
+WORK_SRCS	= work_thread.c work_queue.c work_cancel.c
 endif
 
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
