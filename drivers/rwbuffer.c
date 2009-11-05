@@ -43,11 +43,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 #include <semaphore.h>
 #include <errno.h>
-#include <wdog.h>
 #include <debug.h>
 
+#include <nuttx/wqueue.h>
 #include <nuttx/rwbuffer.h>
 
 #if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
@@ -176,43 +177,42 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
  * Name: rwb_wrtimeout
  ****************************************************************************/
 
-static void rwb_wrtimeout(int argc, uint32 irwb)
+static void rwb_wrtimeout(FAR void *arg)
 {
   /* The following assumes that the size of a pointer is 4-bytes or less */
 
-  FAR struct rwbuffer_s *rwb = (struct rwbuffer_s *)irwb;
+  FAR struct rwbuffer_s *rwb = (struct rwbuffer_s *)arg;
+  DEBUGASSERT(rwb != NULL);
 
   /* If a timeout elpases with with write buffer activity, this watchdog
-   * handler function will be evoked.  This function will schedule to flush
-   * the write buffer.  NOTE:  This function runs in the context of the timer
-   * interrupt handler!
+   * handler function will be evoked on the thread of execution of the
+   * worker thread.
    */
 
-  DEBUGASSERT(argc == 1);
-#warning "REVISIT: Missing logic"
+  rwb_wrflush(rwb);
 }
 
 /****************************************************************************
- * Name: rwb_wrstarttimer
+ * Name: rwb_wrstarttimeout
  ****************************************************************************/
 
-static void rwb_wrstarttimer(FAR struct rwbuffer_s *rwb)
+static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb)
 {
   /* CONFIG_FS_WRDELAY provides the delay period in milliseconds. CLK_TCK
    * provides the clock tick of the system (frequency in Hz).
    */
 
   int ticks = (CONFIG_FS_WRDELAY + CLK_TCK/2) / CLK_TCK;
-  (void)wd_start(rwb->wdog, ticks, (wdentry_t)rwb_wrtimeout, 1, (uint32)rwb);
+  (void)work_queue(&rwb->work, rwb_wrtimeout, (FAR void *)rwb, ticks);
 }
 
 /****************************************************************************
- * Name: rwb_wrcanceltimer
+ * Name: rwb_wrcanceltimeout
  ****************************************************************************/
 
-static inline void rwb_wrcanceltimer(struct rwbuffer_s *rwb)
+static inline void rwb_wrcanceltimeout(struct rwbuffer_s *rwb)
 {
-  wd_cancel(rwb->wdog);
+  (void)work_cancel(&rwb->work);
 }
 
 /****************************************************************************
@@ -228,7 +228,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
 
   /* Write writebuffer Logic */
 
-  rwb_wrcanceltimer(rwb);
+  rwb_wrcanceltimeout(rwb);
   
   /* First: Should we flush out our cache? */
 
@@ -266,7 +266,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
 
   rwb->wrnbytes        += nbytes;
   rwb->wrexpectedblock = rwb->wrblockstart + rwb->wrnbytes;
-  rwb_wrstarttimer(rwb);
+  rwb_wrstarttimeout(rwb);
   return nbytes;
 }
 #endif
@@ -395,12 +395,6 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
 
   sem_init(&rwb->wrsem, 0, 1);
 
-  /* Create a timer that will be used to flush buffered write data
-   * after a delay with no activity.
-   */
-
-  rwb->wdog = wd_create();
-
   /* Initialize write buffer parameters */
 
   rwb_resetwrbuffer(rwb);
@@ -451,8 +445,8 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
 void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
 {
 #ifdef CONFIG_FS_WRITEBUFFER
+  rwb_wrcanceltimeout(rwb);
   sem_destroy(&rwb->wrsem);
-  wd_delete(rwb->wdog);
   if (rwb->wrbuffer)
     {
       free(rwb->wrbuffer);

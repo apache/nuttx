@@ -48,7 +48,7 @@
 #include <sys/types.h>
 
 #include <semaphore.h>
-#include <wdog.h>
+#include <nuttx/wqueue.h>
 
 #if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
 
@@ -102,17 +102,17 @@ struct rwbuffer_s
 
   /* Supported geometry */
 
-  uint16      blocksize;       /* The size of one block */
-  size_t      nblocks;         /* The total number blocks supported */
-  void       *dev;             /* Device state passed to callout functions */
+  uint16        blocksize;       /* The size of one block */
+  size_t        nblocks;         /* The total number blocks supported */
+  void         *dev;             /* Device state passed to callout functions */
 
 #ifdef CONFIG_FS_WRITEBUFFER
-  uint16      wrblocks;        /* The number of blocks to buffer in memory */
-  rwbflush_t  wrflush;         /* Callout to flush the write buffer */
+  uint16        wrblocks;        /* The number of blocks to buffer in memory */
+  rwbflush_t    wrflush;         /* Callout to flush the write buffer */
 #endif
 #ifdef CONFIG_FS_READAHEAD
-  uint16      rhblocks;        /* The number of blocks to buffer in memory */
-  rwbreload_t rhreload;        /* Callout to reload the read-ahead buffer */
+  uint16        rhblocks;        /* The number of blocks to buffer in memory */
+  rwbreload_t   rhreload;        /* Callout to reload the read-ahead buffer */
 #endif
 
   /********************************************************************/
@@ -121,23 +121,23 @@ struct rwbuffer_s
   /* This is the state of the write buffer */
 
 #ifdef CONFIG_FS_WRITEBUFFER
-  sem_t       wrsem;           /* Enforces exclusive access to the write buffer */
-  WDOG_ID     wdog;            /* Watchdog fires after delay with no activity */
-  ubyte      *wrbuffer;        /* Allocated write buffer */
-  size_t      wrnbytes;        /* Bytes in write buffer */
-  off_t       wrblockstart;    /* First block in write buffer */
-  off_t       wrexpectedblock; /* Next block expected */
-  size_t      wrallocsize;     /* Size of allocated write buffer */
+  sem_t         wrsem;           /* Enforces exclusive access to the write buffer */
+  struct work_s work;            /* Delayed work to flush buffer after adelay with no activity */
+  ubyte        *wrbuffer;        /* Allocated write buffer */
+  size_t        wrnbytes;        /* Bytes in write buffer */
+  off_t         wrblockstart;    /* First block in write buffer */
+  off_t         wrexpectedblock; /* Next block expected */
+  size_t        wrallocsize;     /* Size of allocated write buffer */
 #endif
 
   /* This is the state of the read-ahead buffer */
 
 #ifdef CONFIG_FS_READAHEAD
-  sem_t       rhsem;           /* Enforces exclusive access to the write buffer */
-  ubyte      *rhbuffer;        /* Allocated read-ahead buffer */
-  size_t      rhnbytes;        /* Blocks in read-ahead buffer */
-  off_t       rhblockstart;    /* First block in read-ahead buffer */
-  size_t      rhallocsize;     /* Size of allocated read-ahead buffer */
+  sem_t         rhsem;           /* Enforces exclusive access to the write buffer */
+  ubyte        *rhbuffer;        /* Allocated read-ahead buffer */
+  size_t        rhnbytes;        /* Blocks in read-ahead buffer */
+  off_t         rhblockstart;    /* First block in read-ahead buffer */
+  size_t        rhallocsize;     /* Size of allocated read-ahead buffer */
 #endif
 };
 
