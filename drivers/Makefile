@@ -90,7 +90,7 @@ CSRCS		=
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 CSRCS		+= dev_null.c dev_zero.c loop.c  can.c
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-CSRCS		+= ramdisk.c
+CSRCS		+= ramdisk.c rwbuffer.c
 endif
 endif
 CSRCS		+= $(SERIAL_CSRCS) $(NET_CSRCS) $(PIPE_CSRCS) $(USBDEV_CSRCS) \
