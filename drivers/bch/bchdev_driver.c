@@ -137,7 +137,7 @@ static int bch_close(FAR struct file *filp)
 {
   FAR struct inode *inode = filp->f_inode;
   FAR struct bchlib_s *bch;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(inode && inode->i_private);
   bch = (FAR struct bchlib_s *)inode->i_private;

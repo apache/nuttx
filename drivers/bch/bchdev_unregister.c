@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_unregister.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,10 +105,10 @@ int bchdev_unregister(const char *chardev)
   /* Open the character driver associated with chardev */
 
   fd = open(chardev, O_RDONLY);
-  if (ret < 0)
+  if (fd < 0)
     {
-      dbg("Failed to open %s: %d\n", chardev, -ret);
-      return ret;
+      dbg("Failed to open %s: %d\n", chardev, errno);
+      return -errno;
     }
 
   /* Get a reference to the internal data structure.  On success, we

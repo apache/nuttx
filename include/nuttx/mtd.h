@@ -89,10 +89,10 @@ struct mtd_dev_s
 
   /* Read/write from the specified read/write blocks */
 
-  int (*bread)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-               FAR ubyte *buffer);
-  int (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                FAR const ubyte *buffer);
+  ssize_t (*bread)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                   FAR ubyte *buffer);
+  ssize_t (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+                    FAR const ubyte *buffer);
 
   /* Some devices may support byte oriented read (optional).  Byte-oriented
    * writing is inherently block oriented on most MTD devices and is not supported.
@@ -100,8 +100,8 @@ struct mtd_dev_s
    * buffering.
    */
 
-  int (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-              FAR ubyte *buffer);
+  ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                  FAR ubyte *buffer);
 
   /* Support other, less frequently used commands:
    *  - MTDIOC_GEOMETRY:  Get MTD geometry

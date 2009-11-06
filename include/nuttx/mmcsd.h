@@ -464,7 +464,7 @@ enum mmcsd_clock_e
   CLOCK_MMC_SLOW,           /* MMC initialization clocking */
   CLOCK_SD_SLOW,            /* SD initialization clocking */
   CLOCK_MMC_FAST,           /* MMC normal operation clocking */
-  CLOCK_SD_FAST,            /* SD normal operation clocking */
+  CLOCK_SD_FAST             /* SD normal operation clocking */
 };
 
 /* This structure defines the interface between the NuttX MMC/SD

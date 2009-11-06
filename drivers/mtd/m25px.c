@@ -152,12 +152,12 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buff
 /* MTD driver methods */
 
 static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static int m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                      FAR ubyte *buf);
-static int m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                       FAR const ubyte *buf);
-static int m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                     FAR ubyte *buffer);
+static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                          size_t nblocks, FAR ubyte *buf);
+static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, FAR const ubyte *buf);
+static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                         FAR ubyte *buffer);
 static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
@@ -477,7 +477,7 @@ static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
                           FAR ubyte *buffer)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
-  off_t nbytes;
+  ssize_t nbytes;
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -488,7 +488,7 @@ static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
     {
         return nbytes >> priv->pageshift;
     }
-  return nbytes;
+  return (int)nbytes;
 }
 
 /************************************************************************************

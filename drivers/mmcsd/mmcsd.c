@@ -153,7 +153,9 @@ static ssize_t mmcsd_doread(FAR void *dev, FAR ubyte *buffer,
                             off_t startblock, size_t nblocks)
 {
   struct mmcsd_state_s *priv = (struct mmcsd_state_s *)dev;
+#ifdef CONFIG_CPP_HAVE_WARNING
 #  warning "Not implemented"
+#endif
   return -ENOSYS;
 }
 
@@ -169,7 +171,9 @@ static ssize_t mmcsd_dowrite(FAR void *dev, FAR const ubyte *buffer,
                              off_t startblock, size_t nblocks)
 {
   struct mmcsd_state_s *priv = (struct mmcsd_state_s *)dev;
+#ifdef CONFIG_CPP_HAVE_WARNING
 #  warning "Not implemented"
+#endif
   return -ENOSYS;
 }
 #endif
@@ -289,7 +293,9 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   if (geometry)
     {
       priv = (struct mmcsd_state_s *)inode->i_private;
-#warning "Not implemented"
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning "Not implemented"
+#endif
       return -ENOSYS;
     }
   return -EINVAL;
@@ -310,7 +316,9 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   DEBUGASSERT(inode && inode->i_private);
   priv  = (struct mmcsd_state_s *)inode->i_private;
 
-#warning "Not implemented"
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning "Not implemented"
+#endif
   return -ENOTTY;
 }
 
@@ -326,7 +334,9 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
 static int mmcsd_hwinitialize(struct mmcsd_state_s *priv)
 {
-#warning "Not implemented"
+#ifdef CONFIG_CPP_HAVE_WARNING
+#  warning "Not implemented"
+#endif
   return -ENODEV;
 }
 
