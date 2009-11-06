@@ -66,9 +66,9 @@
  */
 
 typedef ssize_t (*rwbreload_t)(FAR void *dev, FAR ubyte *buffer,
-                               off_t start_sector, size_t nsectors);
+                               off_t startblock, size_t nblocks);
 typedef ssize_t (*rwbflush_t)(FAR void *dev, FAR const ubyte *buffer,
-                              off_t start_sector, size_t nsectors);
+                              off_t startblockr, size_t nblocks);
 
 /* This structure holds the state of the buffers.  In typical usage,
  * an instance of this structure is declared within each block driver
@@ -90,15 +90,17 @@ typedef ssize_t (*rwbflush_t)(FAR void *dev, FAR const ubyte *buffer,
  *
  *  struct foo_dev_s *priv;
  *  ...
- *  ... [Setup blocksize, nblocks, dev, wrblocks, wrflush, rhblocks, rhreload] ...
+ *  ... [Setup blocksize, nblocks, dev, wrmaxblocks, wrflush,
+ *       rhmaxblocks, rhreload] ...
  *  ret = rwb_initialize(&priv->rwbuffer);
  */
 
 struct rwbuffer_s
 {
   /********************************************************************/
-  /* These values must be provided by the user prior to calling rwb_initialize */
-
+  /* These values must be provided by the user prior to calling
+   * rwb_initialize()
+   */
 
   /* Supported geometry */
 
@@ -106,12 +108,23 @@ struct rwbuffer_s
   size_t        nblocks;         /* The total number blocks supported */
   void         *dev;             /* Device state passed to callout functions */
 
+  /* Write buffer setup.  If CONFIG_FS_WRITEBUFFER is defined, but you
+   * want read-ahead-only operation, (1) set wrmaxblocks to zero and do
+   * not use rwb_write().
+   */
+
 #ifdef CONFIG_FS_WRITEBUFFER
-  uint16        wrblocks;        /* The number of blocks to buffer in memory */
+  uint16        wrmaxblocks;     /* The number of blocks to buffer in memory */
   rwbflush_t    wrflush;         /* Callout to flush the write buffer */
 #endif
+
+  /* Read-ahead buffer setup.  If CONFIG_FS_READAHEAD is defined but you
+   * want write-buffer-only operation, then (1) set rhmaxblocks to zero and
+   * do not use rwb_read().
+   */
+
 #ifdef CONFIG_FS_READAHEAD
-  uint16        rhblocks;        /* The number of blocks to buffer in memory */
+  uint16        rhmaxblocks;     /* The number of blocks to buffer in memory */
   rwbreload_t   rhreload;        /* Callout to reload the read-ahead buffer */
 #endif
 
@@ -124,10 +137,9 @@ struct rwbuffer_s
   sem_t         wrsem;           /* Enforces exclusive access to the write buffer */
   struct work_s work;            /* Delayed work to flush buffer after adelay with no activity */
   ubyte        *wrbuffer;        /* Allocated write buffer */
-  size_t        wrnbytes;        /* Bytes in write buffer */
+  uint16        wrnblocks;       /* Number of blocks in write buffer */
   off_t         wrblockstart;    /* First block in write buffer */
   off_t         wrexpectedblock; /* Next block expected */
-  size_t        wrallocsize;     /* Size of allocated write buffer */
 #endif
 
   /* This is the state of the read-ahead buffer */
@@ -135,9 +147,8 @@ struct rwbuffer_s
 #ifdef CONFIG_FS_READAHEAD
   sem_t         rhsem;           /* Enforces exclusive access to the write buffer */
   ubyte        *rhbuffer;        /* Allocated read-ahead buffer */
-  size_t        rhnbytes;        /* Blocks in read-ahead buffer */
+  uint16        rhnblocks;       /* Number of blocks in read-ahead buffer */
   off_t         rhblockstart;    /* First block in read-ahead buffer */
-  size_t        rhallocsize;     /* Size of allocated read-ahead buffer */
 #endif
 };
 
