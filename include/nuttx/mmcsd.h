@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mmcsd.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@
  * Name: MMCSD_RESET
  *
  * Description:
- *   Reset the MMC/SD controller
+ *   Reset the MMC/SD controller.  Undo all setup and initialization.
  *
  * Input Parameters:
  *   dev    - An instance of the MMC/SD device interface
@@ -558,7 +558,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int mmcsd_slotinitialize(int minor, int slotno, FAR FAR struct mmcsd_dev_s *dev);
+EXTERN int mmcsd_slotinitialize(int minor, int slotno, FAR struct mmcsd_dev_s *dev);
 
 /****************************************************************************
  * Name: mmcsd_spislotinitialize

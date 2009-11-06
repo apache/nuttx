@@ -34,5 +34,5 @@
 ############################################################################
 
 MMCSD_ASRCS  =
-MMCSD_CSRCS  = mmcsd_spi.c mmcsd_debug.c
+MMCSD_CSRCS  = mmcsd.c mmcsd_spi.c mmcsd_debug.c
 
