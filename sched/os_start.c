@@ -438,8 +438,8 @@ void os_start(void)
   g_worker = task_create("work", CONFIG_SCHED_WORKPRIORITY,
                          CONFIG_SCHED_WORKSTACKSIZE,
                          (main_t)work_thread, (const char **)NULL);
-#endif
   ASSERT(g_worker != ERROR);
+#endif
 
   /* Once the operating system has been initialized, the system must be
    * started by spawning the user init thread of execution.
