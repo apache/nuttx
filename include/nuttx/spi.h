@@ -153,11 +153,11 @@
  *   Get SPI/MMC status.  Optional.
  *
  * Input Parameters:
- *   dev -   Device-specific state data
+ *   dev   - Device-specific state data
  *   devid - Identifies the device to report status on
  *
  * Returned Value:
- *   Returns a bitset of status values (see SPI_STATUS_* defines
+ *   Returns a bitset of status values (see SPI_STATUS_* defines)
  *
  ****************************************************************************/
 
