@@ -101,6 +101,8 @@ struct dq_queue_s g_work;
 int work_thread(int argc, char *argv[])
 {
   volatile FAR struct work_s *work;
+  worker_t  worker;
+  FAR void *arg;
   irqstate_t flags;
 
   /* Loop forever */
@@ -130,37 +132,44 @@ int work_thread(int argc, char *argv[])
       work  = (FAR struct work_s *)g_work.head;
       while (work)
         {
-           /* Is this work ready?  It is ready if there is no delay or if
-            * the delay has elapsed.
-            */
+          /* Is this work ready?  It is ready if there is no delay or if
+           * the delay has elapsed.
+           */
 
-           if (work->delay == 0 || g_system_timer - work->qtime > work->delay)
-             {
-               /* Remove the ready-to-execute work from the list */
+          if (work->delay == 0 || g_system_timer - work->qtime > work->delay)
+            {
+              /* Remove the ready-to-execute work from the list */
 
-               (void)dq_rem((struct dq_entry_s *)work, &g_work);
+              (void)dq_rem((struct dq_entry_s *)work, &g_work);
 
-               /* Do the work.  Re-enable interrupts while the work is being
-                * performed... we don't have any idea how long that will take!
-                */
+              /* Extract the work description from the entry (in case the work
+               * instance by the re-used after it has been de-queued).
+               */
 
-               irqrestore(flags);
-               work->worker(work->arg);
+              worker = work->worker;
+              arg    = work->arg;
 
-               /* Now, unfortunately, since we re-enabled interrupts we don't
-                * the state of the work list and we will have to start back at
-                * the head of the list.
-                */
+              /* Do the work.  Re-enable interrupts while the work is being
+               * performed... we don't have any idea how long that will take!
+               */
 
-               flags = irqsave();
-               work  = (FAR struct work_s *)g_work.head;
-             }
-           else
-             {
-               /* This one is not ready, try the next in the list. */
+              irqrestore(flags);
+              worker(arg);
 
-               work = (FAR struct work_s *)work->dq.flink;
-             }
+              /* Now, unfortunately, since we re-enabled interrupts we don't
+               * know the state of the work list and we will have to start
+               * back at the head of the list.
+               */
+
+              flags = irqsave();
+              work  = (FAR struct work_s *)g_work.head;
+            }
+          else
+            {
+              /* This one is not ready, try the next in the list. */
+
+              work = (FAR struct work_s *)work->dq.flink;
+            }
         }
       irqrestore(flags);
     }

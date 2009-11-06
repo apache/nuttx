@@ -79,7 +79,9 @@
  * Name: work_cancel
  *
  * Description:
- *   Cancel previously queued work.
+ *   Cancel previously queued work.  This removes work from the work queue.
+ *   After work has been canceled, it may be re-queue by calling work_queue()
+ *   again.
  *
  * Input parameters:
  *   work   - The previously queue work structure to cancel

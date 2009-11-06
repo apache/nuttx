@@ -83,6 +83,13 @@
  *   Queue work to be performed at a later time.  All queued work will be
  *   performed on the worker thread of of execution (not the caller's).
  *
+ *   The work structure is allocated by caller, but completely managed by
+ *   the work queue logic.  The caller should never modify the contents of
+ *   the work queue structure; the caller should not call work_queue()
+ *   again until either (1) the previous work has been performed and removed
+ *   from the queue, or (2) work_cancel() has been called to cancel the work
+ *   and remove it from the work queue.
+ *
  * Input parameters:
  *   work   - The work structure to queue
  *   worker - The worker callback to be invoked.  The callback will invoked

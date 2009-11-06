@@ -101,6 +101,13 @@ EXTERN pid_t g_worker;
  *   Queue work to be performed at a later time.  All queued work will be
  *   performed on the worker thread of of execution (not the caller's).
  *
+ *   The work structure is allocated by caller, but completely managed by
+ *   the work queue logic.  The caller should never modify the contents of
+ *   the work queue structure; the caller should not call work_queue()
+ *   again until either (1) the previous work has been performed and removed
+ *   from the queue, or (2) work_cancel() has been called to cancel the work
+ *   and remove it from the work queue.
+ *
  * Input parameters:
  *   work   - The work structure to queue
  *   worker - The worker callback to be invoked.  The callback will invoked
@@ -121,7 +128,9 @@ EXTERN int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint3
  * Name: work_cancel
  *
  * Description:
- *   Cancel previously queued work.
+ *   Cancel previously queued work.  This removes work from the work queue.
+ *   After work has been canceled, it may be re-queue by calling work_queue()
+ *   again.
  *
  * Input parameters:
  *   work   - The previously queue work structure to cancel
@@ -137,7 +146,9 @@ EXTERN int work_cancel(struct work_s *work);
  * Name: work_signal
  *
  * Description:
- *   Signal the worker thread to process the work queue now.
+ *   Signal the worker thread to process the work queue now.  This function
+ *   is used internally by the work logic but could also be used by the
+ *   user to force an immediate re-assessment of pending work.
  *
  * Input parameters:
  *   None
