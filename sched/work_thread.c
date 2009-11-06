@@ -113,7 +113,12 @@ int work_thread(int argc, char *argv[])
 
       usleep(CONFIG_SCHED_WORKPERIOD);
 
-      /* First, clean-up any delayed memory deallocations */
+      /* First, perform garbage collection.  This cleans-up memory de-allocations
+       * that were queued because they could not be freed in that execution
+       * context (for example, if the memory was freed from an interrupt handler).
+       * NOTE: If the work thread is disabled, this clean-up is performed by
+       * the IDLE thread (at a very, very lower priority).
+       */
 
       sched_garbagecollection();
 
@@ -131,21 +136,20 @@ int work_thread(int argc, char *argv[])
 
            if (work->delay == 0 || g_system_timer - work->qtime > work->delay)
              {
-               /* Remove the work at the head of the list.  And re-enable
-                * interrupts while the work is performed.
-                */
+               /* Remove the ready-to-execute work from the list */
 
-               (void)dq_remfirst(&g_work);
+               (void)dq_rem((struct dq_entry_s *)work, &g_work);
 
                /* Do the work.  Re-enable interrupts while the work is being
-                * performed... we don't have any idea how long that will take
+                * performed... we don't have any idea how long that will take!
                 */
 
                irqrestore(flags);
                work->worker(work->arg);
 
-               /* Now, unfortunately, since we re-enabled interrupts we have
-                * to start back at the head of the list.
+               /* Now, unfortunately, since we re-enabled interrupts we don't
+                * the state of the work list and we will have to start back at
+                * the head of the list.
                 */
 
                flags = irqsave();

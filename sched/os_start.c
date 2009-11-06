@@ -461,13 +461,24 @@ void os_start(void)
   sdbg("Beginning Idle Loop\n");
   for (;;)
     {
-      /* Peform garbage collection (if it is not being done by the worker
-       * thread.  This cleans-up memory de-allocations that was queued
-       * because it could not be freed in that execution context (for
+      /* Perform garbage collection (if it is not being done by the worker
+       * thread).  This cleans-up memory de-allocations that were queued
+       * because they could not be freed in that execution context (for
        * example, if the memory was freed from an interrupt handler).
        */
-#ifndef CONFIG_SCHED_WORKQEUE
-      sched_garbagecollection();
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+      /* We must have exclusive access to the memory manager to do this
+       * BUT the idle task cannot wait on a semaphore.  So we only do
+       * the cleanup now if we can get the semaphore -- this should be
+       * possible because if the IDLE thread is running, no other task is!
+       */
+
+      if (mm_trysemaphore() == 0)
+        {
+          sched_garbagecollection();
+          mm_givesemaphore();
+        }
 #endif
 
       /* Perform any processor-specific idle state operations */

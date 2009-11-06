@@ -101,8 +101,8 @@ int work_cancel(struct work_s *work)
    */
 
   flags = irqsave();
-  DEBUGASSERT(work->flink || (FAR dq_entry_t *)work == g_work.head);
-  DEBUGASSERT(work->blink || (FAR dq_entry_t *)work == g_work.tail);
+  DEBUGASSERT(work->dq.flink || (FAR dq_entry_t *)work == g_work.head);
+  DEBUGASSERT(work->dq.blink || (FAR dq_entry_t *)work == g_work.tail);
   dq_rem((FAR dq_entry_t *)work, &g_work);
   irqrestore(flags);
   return OK;

@@ -387,7 +387,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
   rwb->wrbuffer = NULL;
 #endif
 #ifdef CONFIG_FS_READAHEAD
-  DEBUGASSERT(rwb->rhnblocks > 0);
+  DEBUGASSERT(rwb->rhblocks > 0);
   DEBUGASSERT(rwb->rhreload != NULL);
   rwb->rhbuffer = NULL;
 #endif

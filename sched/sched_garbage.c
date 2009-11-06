@@ -42,8 +42,6 @@
 
 #include <stdlib.h>
 
-#include <nuttx/mm.h>
-
 #include "os_internal.h"
 
 /****************************************************************************
@@ -93,35 +91,29 @@
 
 void sched_garbagecollection(void)
 {
-  /* Check if there is anything in the delayed deallocation list. If there
-   * is deallocate it now.  We must have exclusive access to the memory manager
-   * to do this BUT the idle task cannot wait on a semaphore.  So we only do
-   * the cleanup now if we can get the semaphore -- and this should be possible
-   * because if the IDLE thread is running, no other task is!
-   */
+   irqstate_t flags;
+   void *address;
 
-#ifdef CONFIG_SCHED_WORKQUEUE
-  mm_takesemaphore();
-#else
-  if (mm_trysemaphore() == 0)
-#endif
+   /* Test if the delayed deallocation queue is empty.  No special protection
+    * is needed because this is an atomic test.
+    */
+ 
+   while (g_delayeddeallocations.head)
     {
-      while (g_delayeddeallocations.head)
+      /* Remove the first delayed deallocation.  This is not atomic and so
+       * we must disable interrupts around the queue operation.
+       */
+
+      flags = irqsave();
+      address = (void*)sq_remfirst((FAR sq_queue_t*)&g_delayeddeallocations);
+      irqrestore(flags);
+
+      /* Then deallocate it. */
+
+      if (address)
         {
-          /* Remove the first delayed deallocation. */
-
-          irqstate_t saved_state = irqsave();
-          void *address = (void*)sq_remfirst((FAR sq_queue_t*)&g_delayeddeallocations);
-          irqrestore(saved_state);
-
-          /* Then deallocate it */
-
-          if (address)
-            {
-              free(address);
-            }
+          free(address);
         }
-      mm_givesemaphore();
     }
 }
 
