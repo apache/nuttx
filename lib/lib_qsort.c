@@ -87,9 +87,9 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline char *med3(char *, char *, char *,
-                           int (*)(const void *, const void *));
-static inline void swapfunc(char *, char *, int, int);
+static inline void swapfunc(char *a, char *b, int n, int swaptype);
+static inline char *med3(char *a, char *b, char *c,
+                         int (*compar)(const void *, const void *));
 
 /****************************************************************************
  * Private Functions
@@ -108,7 +108,7 @@ static inline void swapfunc(char *a, char *b, int n, int swaptype)
 }
 
 static inline char *med3(char *a, char *b, char *c,
-                           int (*compar)(const void *, const void *))
+                         int (*compar)(const void *, const void *))
 {
   return compar(a, b) < 0 ?
          (compar(b, c) < 0 ? b : (compar(a, c) < 0 ? c : a ))

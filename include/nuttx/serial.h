@@ -142,7 +142,7 @@ struct uart_ops_s
    * the return 'status'.
    */
 
-  CODE int (*receive)(FAR struct uart_dev_s *dev, unsigned int *status);
+  CODE int (*receive)(FAR struct uart_dev_s *dev, FAR unsigned int *status);
 
   /* Call to enable or disable RX interrupts */
 
