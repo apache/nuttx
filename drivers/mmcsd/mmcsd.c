@@ -49,6 +49,7 @@
 
 #include <nuttx/fs.h>
 #include <nuttx/rwbuffer.h>
+#include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
@@ -66,14 +67,14 @@
 
 struct mmcsd_state_s
 {
-  struct mmcsd_dev_s *dev;         /* The MMCSD device bound to this instance */
+  struct sdio_dev_s *dev;         /* The MMCSD device bound to this instance */
   ubyte  crefs;                    /* Open references on the driver */
 
   /* Status flags */
 
   ubyte widebus:1;                 /* TRUE: Wide 4-bit bus selected */
   ubyte mediachange:1;             /* TRUE: Media changed since last check */
-#ifdef CONFIG_MMCSD_DMA
+#ifdef CONFIG_SDIO_DMA
   ubyte dma:1;                     /* TRUE: hardware supports DMA */
 #endif
 
@@ -349,7 +350,7 @@ static int mmcsd_hwinitialize(struct mmcsd_state_s *priv)
 
 static inline void mmcsd_hwuninitialize(struct mmcsd_state_s *priv)
 {
-  MMCSD_RESET(priv->dev);
+  SDIO_RESET(priv->dev);
 }
 
 /****************************************************************************
@@ -373,7 +374,7 @@ static inline void mmcsd_hwuninitialize(struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-int mmcsd_slotinitialize(int minor, int slotno, FAR struct mmcsd_dev_s *dev)
+int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
 {
   struct mmcsd_state_s *priv;
   char devname[16];
