@@ -955,5 +955,13 @@
 	  and write buffering that can be used in any block driver.
 	* include/nuttx/wqueue.h -- Added a generic worker thread that can used to
 	  defer processing from an interrupt to a task.
+	* include/nuttx/sdio.h -- Defines a generic SD/SDIO interface can can be
+	  bound to a MMC/SD driver to provide SDIO-based MMC/SD support.
+	* drivers/mmcsd/mmcsd_sdio.c -- Provides a an SDIO-based MMC/SD driver.
+	* arch/arm/src/stm32/stm32_sdio.c -- Provides an STM32 implementation of
+	  the SDIO interface defined in include/nuttx/sdio.h.
+
+	  NOTE: On initial check-in, mmcsd_sdio.c and stm32_sdio.c are merely
+	  skeleton frameworks for the driver.
 
 

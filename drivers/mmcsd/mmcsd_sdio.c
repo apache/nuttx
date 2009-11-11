@@ -67,7 +67,7 @@
 
 struct mmcsd_state_s
 {
-  struct sdio_dev_s *dev;         /* The MMCSD device bound to this instance */
+  struct sdio_dev_s *dev;          /* The SDIO device bound to this instance */
   ubyte  crefs;                    /* Open references on the driver */
 
   /* Status flags */
