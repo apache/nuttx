@@ -55,6 +55,25 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* Friendly CLKCR bit re-definitions ****************************************/
+
+#define SDIO_CLKCR_RISINGEDGE    (0)
+#define SDIO_CLKCR_FALLINGEDGE   SDIO_CLKCR_NEGEDGE
+
+/* HCLK=72MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(178+2)=400 KHz */
+  
+#define SDIO_INIT_CLKDIV         (178 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define STM32_CLCKCR_INIT \
+  (SDIO_INIT_CLKDIV|SDIO_CLKCR_RISINGEDGE|SDIO_CLKCR_WIDBUS_D1)
+
+/* HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(1+2)=24 MHz */
+
+#define SDIO_TRANSFER_CLKDIV     (1 << SDIO_CLKCR_CLKDIV_SHIFT) 
+#define STM32_CLCKCR_TRANSFER \
+  (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|SDIO_CLKCR_WIDBUS_D1)
+#define STM32_CLKCR_WIDETRANSFER \
+  (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|SDIO_CLKCR_WIDBUS_D4)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -66,11 +85,19 @@ struct stm32_dev_s
   struct sdio_dev_s dev; /* Standard, base MMC/SD interface */
   
   /* STM32-specific extensions */
+
+  ubyte type;            /* Card type (see MMCSD_CARDTYPE_ definitions) */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* Low-level helpers ********************************************************/
+
+static inline void stm32_setclkcr(uint32 clkcr);
+static inline void stm32_enableint(uint32 bitset);
+static inline void stm32_disableint(uint32 bitset);
 
 /* SDIO interface methods ***************************************************/
 
@@ -87,7 +114,7 @@ static int   stm32_attach(FAR struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
-static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, ubyte cmd,
+static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd,
                uint32 arg, FAR const ubyte *data);
 static int   stm32_senddata(FAR struct sdio_dev_s *dev,
                FAR const ubyte *buffer);
@@ -175,6 +202,91 @@ struct stm32_dev_s g_mmcsd =
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Low-level Helpers
+ ****************************************************************************/
+/****************************************************************************
+ * Name: stm32_setclkcr
+ *
+ * Description:
+ *   Modify oft-changed bits in the CLKCR register.  Only the following bit-
+ *   fields are changed:
+ *
+ *   CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, and HWFC_EN
+ *
+ * Input Parameters:
+ *   clkcr - A new CLKCR setting for the above mentions bits (other bits
+ *           are ignored.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void stm32_setclkcr(uint32 clkcr)
+{
+  uint32 regval = getreg32(STM32_SDIO_CLKCR);
+    
+  /* Clear CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, HWFC_EN bits */
+
+  regval &= ~(SDIO_CLKCR_CLKDIV_MASK|SDIO_CLKCR_PWRSAV|SDIO_CLKCR_BYPASS|
+              SDIO_CLKCR_WIDBUS_MASK|SDIO_CLKCR_NEGEDGE|SDIO_CLKCR_HWFC_EN);
+
+  /* Replace with user provided settings */
+
+  clkcr  &=  (SDIO_CLKCR_CLKDIV_MASK|SDIO_CLKCR_PWRSAV|SDIO_CLKCR_BYPASS|
+              SDIO_CLKCR_WIDBUS_MASK|SDIO_CLKCR_NEGEDGE|SDIO_CLKCR_HWFC_EN);
+  regval |=  clkcr;
+  putreg32(regval, STM32_SDIO_CLKCR);
+}
+
+/****************************************************************************
+ * Name: stm32_enableint
+ *
+ * Description:
+ *   Enable SDIO interrupts
+ *
+ * Input Parameters:
+ *   bitset - The set of bits in the SDIO MASK register to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void stm32_enableint(uint32 bitset)
+{
+  uint32 regval;
+  regval  = getreg32(STM32_SDIO_MASK);
+  regval |= bitset;
+  putreg32(regval, STM32_SDIO_MASK);
+}
+
+/****************************************************************************
+ * Name: stm32_disableint
+ *
+ * Description:
+ *   Disable SDIO interrupts
+ *
+ * Input Parameters:
+ *   bitset - The set of bits in the SDIO MASK register to clear
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void stm32_disableint(uint32 bitset)
+{
+  uint32 regval;
+  regval  = getreg32(STM32_SDIO_MASK);
+  regval &= ~bitset;
+  putreg32(regval, STM32_SDIO_MASK);
+}
+
+/****************************************************************************
+ * SDIO Interface Methods
+ ****************************************************************************/
 /****************************************************************************
  * Name: stm32_reset
  *
@@ -300,7 +412,7 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
  *
  * Input Parameters:
  *   dev  - An instance of the MMC/SD device interface
- *   cmd  - The command to send
+ *   cmd  - The command to send (32-bits, encoded)
  *   arg  - 32-bit argument required with some commands
  *   data - A reference to data required with some commands
  *
@@ -309,9 +421,53 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_sendcmd(FAR struct sdio_dev_s *dev, ubyte cmd,
+static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd,
                           uint32 arg, FAR const ubyte *data)
 {
+  uint32 regval;
+  uint32 cmdidx = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
+
+  /* Set the SDIO Argument value */
+
+  putreg32(arg, STM32_SDIO_ARG);
+
+  /* Clear CMDINDEX, WAITRESP, WAITINT, WAITPEND, CPSMEN bits */
+
+  regval = getreg32(STM32_SDIO_CMD);
+  regval &= ~(SDIO_CMD_CMDINDEX_MASK|SDIO_CMD_WAITRESP_MASK|
+              SDIO_CMD_WAITINT|SDIO_CMD_WAITPEND|SDIO_CMD_CPSMEN);
+
+  /* Set WAITRESP bits */
+#warning VERIFY
+  switch ((cmd & MMCSD_RESPONSE_MASK) >> MMCSD_RESPONSE_SHIFT)
+    {
+    case MMCSD_NO_RESPONSE:
+      regval |= SDIO_CMD_NORESPONSE;
+      break;
+
+    case MMCSD_R1_RESPONSE:
+    case MMCSD_R1B_RESPONSE:
+    case MMCSD_R3_RESPONSE:
+    case MMCSD_R4_RESPONSE:
+    case MMCSD_R5_RESPONSE:
+    case MMCSD_R6_RESPONSE:
+    case MMCSD_R7_RESPONSE:
+      regval |= SDIO_CMD_SHORTRESPONSE;
+      break;
+
+    case MMCSD_R2_RESPONSE:
+      regval |= SDIO_CMD_LONGRESPONSE;
+      break;
+    }
+
+  /* Set CPSMEN and the command index */
+
+  cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
+  regval |= cmdidx | SDIO_CMD_CPSMEN;
+  
+  /* Write the SDIO CMD */
+
+  putreg32(regval, STM32_SDIO_CMD);
 }
 
 /****************************************************************************
@@ -618,7 +774,17 @@ static int stm32_dmastop(FAR struct sdio_dev_s *dev)
 #ifdef CONFIG_SDIO_DMA
 static int stm32_dmastatus(FAR struct sdio_dev_s *dev, size_t *remaining)
 {
-  return -ENOSYS;
+#ifdef CONFIG_DEBUG
+  if (remaining)
+    {
+      *remaining = getreg32(STM32_SDIO_DCOUNT);
+      return OK;
+    }
+  return -EINVAL;
+#else
+  *remaining = getreg32(STM32_SDIO_DCOUNT);
+  return OK;
+#endif
 }
 #endif
 
