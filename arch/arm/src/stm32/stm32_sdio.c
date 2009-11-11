@@ -431,14 +431,14 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd,
 
   putreg32(arg, STM32_SDIO_ARG);
 
-  /* Clear CMDINDEX, WAITRESP, WAITINT, WAITPEND, CPSMEN bits */
+  /* Clear CMDINDEX, WAITRESP, WAITINT, WAITPEND, and CPSMEN bits */
 
   regval = getreg32(STM32_SDIO_CMD);
   regval &= ~(SDIO_CMD_CMDINDEX_MASK|SDIO_CMD_WAITRESP_MASK|
               SDIO_CMD_WAITINT|SDIO_CMD_WAITPEND|SDIO_CMD_CPSMEN);
 
   /* Set WAITRESP bits */
-#warning VERIFY
+
   switch ((cmd & MMCSD_RESPONSE_MASK) >> MMCSD_RESPONSE_SHIFT)
     {
     case MMCSD_NO_RESPONSE:
