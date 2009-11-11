@@ -104,18 +104,20 @@
  * Name: SDIO_WIDEBUS
  *
  * Description:
- *   Enable/disable wide (4-bit) data bus
+ *   Called after change in Bus width has been selected (via ACMD6).  Most
+ *   controllers will need to perform some special operations to work
+ *   correctly in the new bus mode.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
- *   enable - TRUE: enable wide bus
+ *   dev  - An instance of the MMC/SD device interface
+ *   wide - TRUE: wide bus (4-bit) bus mode enabled
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#define SDIO_WIDEBUS(dev,enable) ((dev)->widebus(dev,enable))
+#define SDIO_WIDEBUS(dev,wide) ((dev)->widebus(dev,wide))
 
 /****************************************************************************
  * Name: SDIO_CLOCK

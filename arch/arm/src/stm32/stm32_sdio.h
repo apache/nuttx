@@ -101,6 +101,8 @@
 #  define SDIO_POWER_PWRCTRL_RSVDPWRUP (2 << POWER_PWRCTRL_SHIFT) /* 10: Reserved power-up */
 #  define SDIO_POWER_PWRCTRL_ON        (3 << POWER_PWRCTRL_SHIFT) /* 11: Power-on: card is clocked */
 
+#define SDIO_POWER_RESET               (0)       /* Reset value */
+
 #define SDIO_CLKCR_CLKDIV_SHIFT        (0)       /* Bits 7-0: Clock divide factor */
 #define SDIO_CLKCR_CLKDIV_MASK         (0xff << SDIO_CLKCR_CLKDIV_SHIFT)
 #define SDIO_CLKCR_CLKEN               (1 << 8)  /* Bit 8: Clock enable bit */
@@ -113,6 +115,9 @@
 #  define SDIO_CLKCR_WIDBUS_D8         (2 << SDIO_CLKCR_WIDBUS_SHIFT) /* 10: 8-wide (SDIO_D[7:0]) */
 #define SDIO_CLKCR_NEGEDGE             (1 << 13) /* Bit 13: SDIO_CK dephasing selection bit */
 #define SDIO_CLKCR_HWFC_EN             (1 << 14) /* Bit 14: HW Flow Control enable */
+
+#define SDIO_CLKCR_RESET               (0)       /* Reset value */
+#define SDIO_ARG_RESET                 (0)       /* Reset value */
 
 #define SDIO_CMD_CMDINDEX_SHIFT        (0)
 #define SDIO_CMD_CMDINDEX_MASK         (0x3f << SDIO_CMD_CMDINDEX_SHIFT)
@@ -129,11 +134,17 @@
 #define SDIO_CMD_NIEN                  (1 << 13) /* Bit 13: not Interrupt Enable */
 #define SDIO_CMD_ATACMD                (1 << 14) /* Bit 14: CE-ATA command */
 
+#define SDIO_CMD_RESET                 (0)       /* Reset value */
+
 #define SDIO_RESPCMD_SHIFT             (0)
 #define SDIO_RESPCMD_MASK              (0x3f << SDIO_RESPCMD_SHIFT)
 
+#define SDIO_DTIMER_RESET              (0)       /* Reset value */
+
 #define SDIO_DLEN_SHIFT                (0)
 #define SDIO_DLEN_MASK                 (0x01ffffff << SDIO_DLEN_SHIFT)
+
+#define SDIO_DLEN_RESET                (0)       /* Reset value */
 
 #define SDIO_DCTRL_DTEN                (1 << 0)  /* Bit 0: Data transfer enabled bit */
 #define SDIO_DCTRL_DTDIR               (1 << 1)  /* Bit 1: Data transfer direction */
@@ -160,6 +171,8 @@
 #define SDIO_DCTRL_RWSTOP              (1 << 9)  /* Bit 9: Read wait stop */
 #define SDIO_DCTRL_RWMOD               (1 << 10) /* Bit 10: Read wait mode */
 #define SDIO_DCTRL_SDIOEN              (1 << 11) /* Bit 11: SD I/O enable functions */
+
+#define SDIO_DCTRL_RESET               (0)       /* Reset value */
 
 #define SDIO_DATACOUNT_SHIFT           (0)
 #define SDIO_DATACOUNT_MASK            (0x01ffffff << SDIO_DATACOUNT_SHIFT)
@@ -203,6 +216,8 @@
 #define SDIO_ICR_SDIOITC               (1 << 22) /* Bit 22: SDIOIT flag clear bit */
 #define SDIO_ICR_CEATAENDC             (1 << 23) /* Bit 23: CEATAEND flag clear bit */
 
+#define SDIO_ICR_RESET                 0x00c007ff
+
 #define SDIO_MASK_CCRCFAILIE           (1 << 0)  /* Bit 0: Command CRC fail interrupt enable */
 #define SDIO_MASK_DCRCFAILIE           (1 << 1)  /* Bit 1: Data CRC fail interrupt enable */
 #define SDIO_MASK_CTIMEOUTIE           (1 << 2)  /* Bit 2: Command timeout interrupt enable */
@@ -227,6 +242,8 @@
 #define SDIO_MASK_RXDAVLIE             (1 << 21) /* Bit 21: Data available in Rx FIFO interrupt enable */
 #define SDIO_MASK_SDIOITIE             (1 << 22) /* Bit 22: SDIO mode interrupt received interrupt enable */
 #define SDIO_MASK_CEATAENDIE           (1 << 23) /* Bit 23: CE-ATA command completion interrupt enable */
+
+#define SDIO_MASK_RESET                (0)
 
 #define SDIO_FIFOCNT_SHIFT             (0)
 #define SDIO_FIFOCNT_MASK              (0x01ffffff << SDIO_FIFOCNT_SHIFT)

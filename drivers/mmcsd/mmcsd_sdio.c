@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/mmcsd/mmcsd.c
+ * drivers/mmcsd/mmcsd_sdio.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
