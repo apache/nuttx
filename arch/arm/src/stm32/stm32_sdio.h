@@ -123,7 +123,7 @@
 #define SDIO_CMD_CMDINDEX_MASK         (0x3f << SDIO_CMD_CMDINDEX_SHIFT)
 #define SDIO_CMD_WAITRESP_SHIFT        (6)       /* Bits 7-6: Wait for response bits */
 #define SDIO_CMD_WAITRESP_MASK         (3 << SDIO_CMD_WAITRESP_SHIFT)
-#  define SDIO_CMD_NORESPONSE1         (0 << SDIO_CMD_WAITRESP_SHIFT) /* 00/10: No response */
+#  define SDIO_CMD_NORESPONSE          (0 << SDIO_CMD_WAITRESP_SHIFT) /* 00/10: No response */
 #  define SDIO_CMD_SHORTRESPONSE       (1 << SDIO_CMD_WAITRESP_SHIFT) /* 01: Short response */
 #  define SDIO_CMD_LONGRESPONSE        (3 << SDIO_CMD_WAITRESP_SHIFT) /* 11: Long response */
 #define SDIO_CMD_WAITINT               (1 << 8)  /* Bit 8: CPSM waits for interrupt request */
@@ -217,6 +217,7 @@
 #define SDIO_ICR_CEATAENDC             (1 << 23) /* Bit 23: CEATAEND flag clear bit */
 
 #define SDIO_ICR_RESET                 0x00c007ff
+#define SDIO_ICR_STATICFLAGS           0x000005ff
 
 #define SDIO_MASK_CCRCFAILIE           (1 << 0)  /* Bit 0: Command CRC fail interrupt enable */
 #define SDIO_MASK_DCRCFAILIE           (1 << 1)  /* Bit 1: Data CRC fail interrupt enable */
