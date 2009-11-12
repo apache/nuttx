@@ -51,9 +51,18 @@
 #include "stm32_internal.h"
 #include "stm32_sdio.h"
 
+#if CONFIG_STM32_SDIO
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_STM32_DMA2)
+#  warning "CONFIG_SDIO_DMA support requires CONFIG_STM32_DMA2"
+#  undef CONFIG_SDIO_DMA
+#endif
 
 /* Friendly CLKCR bit re-definitions ****************************************/
 
@@ -1049,6 +1058,22 @@ static void stm32_default(void)
 
 int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
 {
+  /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
+   * 8-bit wide bus operation but D4-D7 are not configured).
+   */
+
+  stm32_configgpio(GPIO_SDIO_D0);
+  stm32_configgpio(GPIO_SDIO_D1);
+  stm32_configgpio(GPIO_SDIO_D2);
+  stm32_configgpio(GPIO_SDIO_D3);
+  stm32_configgpio(GPIO_SDIO_CK);
+  stm32_configgpio(GPIO_SDIO_CMD);
+
+  /* Put SDIO registers in their default, reset state */
+
+  stm32_default();
+
   return -ENOSYS;
 }
 
+#endif /* CONFIG_STM32_SDIO */
