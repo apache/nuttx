@@ -411,7 +411,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_SENDCMD(dev,cmd,arg,data) ((dev)->sendcmd(dev,cmd,arg,data))
+#define SDIO_SENDCMD(dev,cmd,arg) ((dev)->sendcmd(dev,cmd,arg))
 
 /****************************************************************************
  * Name: SDIO_SENDDATA
@@ -434,23 +434,27 @@
  * Name: SDIO_RECVRx
  *
  * Description:
- *   Receive response to MMC/SD command
+ *   Receive response to MMC/SD command.  Only the critical payload is
+ *   returned -- that is 32 bits for 48 bit status and 128 bits for 136 bit
+ *   status.  The driver implementation should verify the correctness of
+ *   the remaining, non-returned bits (CRCs, CMD index, etc.).
  *
  * Input Parameters:
  *   dev    - An instance of the MMC/SD device interface
- *   buffer - Buffer in which to receive the response
+ *   Rx - Buffer in which to receive the response
  *
  * Returned Value:
- *   Number of bytes sent on succes; a negated errno on failure
+ *   Number of bytes sent on success; a negated errno on failure
  *
  ****************************************************************************/
 
-#define SDIO_RECVR1(dev,buffer) ((dev)->recvR1(dev,buffer)) /* 48-bit */
-#define SDIO_RECVR2(dev,buffer) ((dev)->recvR2(dev,buffer)) /* 128-bit */
-#define SDIO_RECVR3(dev,buffer) ((dev)->recvR3(dev,buffer)) /* 48-bit */
-#define SDIO_RECVR4(dev,buffer) ((dev)->recvR4(dev,buffer)) /* 48-bit */
-#define SDIO_RECVR5(dev,buffer) ((dev)->recvR5(dev,buffer)) /* 48-bit */
-#define SDIO_RECVR6(dev,buffer) ((dev)->recvR6(dev,buffer)) /* 48-bit */
+#define SDIO_RECVR1(dev,cmd,R1) ((dev)->recvR1(dev,cmd,R1)) /* 48-bit */
+#define SDIO_RECVR2(dev,cmd,R2) ((dev)->recvR2(dev,cmd,R2)) /* 136-bit */
+#define SDIO_RECVR3(dev,cmd,R3) ((dev)->recvR3(dev,cmd,R3)) /* 48-bit */
+#define SDIO_RECVR4(dev,cmd,R4) ((dev)->recvR4(dev,cmd,R4)) /* 48-bit */
+#define SDIO_RECVR5(dev,cmd,R5) ((dev)->recvR5(dev,cmd,R5)) /* 48-bit */
+#define SDIO_RECVR6(dev,cmd,R6) ((dev)->recvR6(dev,cmd,R6)) /* 48-bit */
+#define SDIO_RECVR7(dev,cmd,R7) ((dev)->recvR6(dev,cmd,R7)) /* 48-bit */
 
 /****************************************************************************
  * Name: SDIO_RECVDATA
@@ -717,15 +721,16 @@ struct sdio_dev_s
 
   /* Command/Status/Data Transfer */
 
-  void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg, FAR const ubyte *data);
+  void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
   int   (*senddata)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer);
 
-  int   (*recvR1)(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
-  int   (*recvR2)(FAR struct sdio_dev_s *dev, uint16 buffer[8]);
-  int   (*recvR3)(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
-  int   (*recvR4)(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
-  int   (*recvR5)(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
-  int   (*recvR6)(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
+  int   (*recvR1)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);
+  int   (*recvR2)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4]);
+  int   (*recvR3)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3);
+  int   (*recvR4)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R4);
+  int   (*recvR5)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5);
+  int   (*recvR6)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);
+  int   (*recvR7)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);
   int   (*recvdata)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
 
   /* EVENT handler */

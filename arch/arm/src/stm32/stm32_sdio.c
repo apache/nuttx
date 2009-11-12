@@ -98,6 +98,8 @@ struct stm32_dev_s
 static inline void stm32_setclkcr(uint32 clkcr);
 static inline void stm32_enableint(uint32 bitset);
 static inline void stm32_disableint(uint32 bitset);
+static void   stm32_setpwrctrl(uint32 pwrctrl);
+static inline uint32 stm32_getpwrctrl(void);
 
 /* SDIO interface methods ***************************************************/
 
@@ -114,17 +116,17 @@ static int   stm32_attach(FAR struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
-static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd,
-               uint32 arg, FAR const ubyte *data);
+static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
 static int   stm32_senddata(FAR struct sdio_dev_s *dev,
                FAR const ubyte *buffer);
 
-static int   stm32_recvR1(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
-static int   stm32_recvR2(FAR struct sdio_dev_s *dev, uint16 buffer[8]);
-static int   stm32_recvR3(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
-static int   stm32_recvR4(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
-static int   stm32_recvR5(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
-static int   stm32_recvR6(FAR struct sdio_dev_s *dev, uint16 buffer[3]);
+static int   stm32_recvR1(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);
+static int   stm32_recvR2(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4]);
+static int   stm32_recvR3(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3);
+static int   stm32_recvR4(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R4);
+static int   stm32_recvR5(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5);
+static int   stm32_recvR6(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);
+static int   stm32_recvR7(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);
 static int   stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
 
 /* EVENT handler */
@@ -179,6 +181,7 @@ struct stm32_dev_s g_mmcsd =
     .recvR4        = stm32_recvR4,
     .recvR5        = stm32_recvR5,
     .recvR6        = stm32_recvR6,
+    .recvR7        = stm32_recvR7,
     .recvdata      = stm32_recvdata,
     .eventenable   = stm32_eventenable,
     .eventwait     = stm32_eventwait,
@@ -282,6 +285,52 @@ static inline void stm32_disableint(uint32 bitset)
   regval  = getreg32(STM32_SDIO_MASK);
   regval &= ~bitset;
   putreg32(regval, STM32_SDIO_MASK);
+}
+
+/****************************************************************************
+ * Name: stm32_setpwrctrl
+ *
+ * Description:
+ *   Change the PWRCTRL field of the SDIO POWER register to turn the SDIO
+ *   ON or OFF
+ *
+ * Input Parameters:
+ *   clkcr - A new PWRCTRL setting
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32_setpwrctrl(uint32 pwrctrl)
+{
+  uint32 regval;
+
+  regval  = getreg32(STM32_SDIO_POWER);
+  regval &= ~SDIO_POWER_PWRCTRL_MASK;
+  regval |= pwrctrl;
+  putreg32(regval, STM32_SDIO_POWER);
+}
+
+/****************************************************************************
+ * Name: stm32_getpwrctrl
+ *
+ * Description:
+ *   Return the current value of the  the PWRCTRL field of the SDIO POWER
+ *   register.  This function can be used to see the the SDIO is power ON
+ *   or OFF
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The current value of the  the PWRCTRL field of the SDIO POWER register.
+ *
+ ****************************************************************************/
+
+static inline uint32 stm32_getpwrctrl(void)
+{
+  return getreg32(STM32_SDIO_POWER) & SDIO_POWER_PWRCTRL_MASK;
 }
 
 /****************************************************************************
@@ -414,15 +463,13 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
  *   dev  - An instance of the MMC/SD device interface
  *   cmd  - The command to send (32-bits, encoded)
  *   arg  - 32-bit argument required with some commands
- *   data - A reference to data required with some commands
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd,
-                          uint32 arg, FAR const ubyte *data)
+static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
 {
   uint32 regval;
   uint32 cmdidx = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
@@ -494,43 +541,52 @@ static int stm32_senddata(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer)
  * Name: stm32_recvRx
  *
  * Description:
- *   Receive response to MMC/SD command
+ *   Receive response to MMC/SD command.  Only the critical payload is
+ *   returned -- that is 32 bits for 48 bit status and 128 bits for 136 bit
+ *   status.  The driver implementation should verify the correctness of
+ *   the remaining, non-returned bits (CRCs, CMD index, etc.).
  *
  * Input Parameters:
  *   dev    - An instance of the MMC/SD device interface
- *   buffer - Buffer in which to receive the response
+ *   Rx - Buffer in which to receive the response
  *
  * Returned Value:
- *   Number of bytes sent on succes; a negated errno on failure
+ *   Number of bytes sent on success; a negated errno on failure
+ *
  *
  ****************************************************************************/
 
-static int stm32_recvR1(FAR struct sdio_dev_s *dev, uint16 buffer[3])
+static int stm32_recvR1(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1)
 {
   return -ENOSYS;
 }
 
-static int stm32_recvR2(FAR struct sdio_dev_s *dev, uint16 buffer[8])
+static int stm32_recvR2(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4])
 {
   return -ENOSYS;
 }
 
-static int stm32_recvR3(FAR struct sdio_dev_s *dev, uint16 buffer[3])
+static int stm32_recvR3(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3)
 {
   return -ENOSYS;
 }
 
-static int stm32_recvR4(FAR struct sdio_dev_s *dev, uint16 buffer[3])
+static int stm32_recvR4(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R4)
 {
   return -ENOSYS;
 }
 
-static int stm32_recvR5(FAR struct sdio_dev_s *dev, uint16 buffer[3])
+static int stm32_recvR5(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5)
 {
   return -ENOSYS;
 }
 
-static int stm32_recvR6(FAR struct sdio_dev_s *dev, uint16 buffer[3])
+static int stm32_recvR6(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6)
+{
+  return -ENOSYS;
+}
+
+static int stm32_recvR7(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7)
 {
   return -ENOSYS;
 }

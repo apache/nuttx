@@ -96,10 +96,10 @@
 /* Register Bitfield Definitions ****************************************************/
 
 #define SDIO_POWER_PWRCTRL_SHIFT       (0)       /* Bits 0-1: Power supply control bits */
-#define SDIO_POWER_PWRCTRL_MASK        (3 << POWER_PWRCTRL_SHIFT)
-#  define SDIO_POWER_PWRCTRL_OFF       (0 << POWER_PWRCTRL_SHIFT) /* 00: Power-off: card clock stopped */
-#  define SDIO_POWER_PWRCTRL_PWRUP     (2 << POWER_PWRCTRL_SHIFT) /* 10: Reserved power-up */
-#  define SDIO_POWER_PWRCTRL_ON        (3 << POWER_PWRCTRL_SHIFT) /* 11: Power-on: card is clocked */
+#define SDIO_POWER_PWRCTRL_MASK        (3 << SDIO_POWER_PWRCTRL_SHIFT)
+#  define SDIO_POWER_PWRCTRL_OFF       (0 << SDIO_POWER_PWRCTRL_SHIFT) /* 00: Power-off: card clock stopped */
+#  define SDIO_POWER_PWRCTRL_PWRUP     (2 << SDIO_POWER_PWRCTRL_SHIFT) /* 10: Reserved power-up */
+#  define SDIO_POWER_PWRCTRL_ON        (3 << SDIO_POWER_PWRCTRL_SHIFT) /* 11: Power-on: card is clocked */
 
 #define SDIO_POWER_RESET               (0)       /* Reset value */
 
