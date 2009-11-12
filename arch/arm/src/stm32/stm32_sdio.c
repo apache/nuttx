@@ -120,13 +120,10 @@ static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
 static int   stm32_senddata(FAR struct sdio_dev_s *dev,
                FAR const ubyte *buffer);
 
-static int   stm32_recvR1(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);
-static int   stm32_recvR2(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4]);
-static int   stm32_recvR3(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3);
-static int   stm32_recvR4(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R4);
-static int   stm32_recvR5(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5);
-static int   stm32_recvR6(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);
-static int   stm32_recvR7(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);
+static int   stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort);
+static int   stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 rlong[4]);
+static int   stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort);
+static int   stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rnotimpl);
 static int   stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
 
 /* EVENT handler */
@@ -175,13 +172,13 @@ struct stm32_dev_s g_mmcsd =
     .attach        = stm32_attach,
     .sendcmd       = stm32_sendcmd,
     .senddata      = stm32_senddata,
-    .recvR1        = stm32_recvR1,
-    .recvR2        = stm32_recvR2,
-    .recvR3        = stm32_recvR3,
-    .recvR4        = stm32_recvR4,
-    .recvR5        = stm32_recvR5,
-    .recvR6        = stm32_recvR6,
-    .recvR7        = stm32_recvR7,
+    .recvR1        = stm32_recvshortcrc,
+    .recvR2        = stm32_recvlong,
+    .recvR3        = stm32_recvshort,
+    .recvR4        = stm32_recvnotimpl,
+    .recvR5        = stm32_recvnotimpl,
+    .recvR6        = stm32_recvshortcrc,
+    .recvR7        = stm32_recvshort,
     .recvdata      = stm32_recvdata,
     .eventenable   = stm32_eventenable,
     .eventwait     = stm32_eventwait,
@@ -551,42 +548,203 @@ static int stm32_senddata(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer)
  *   Rx - Buffer in which to receive the response
  *
  * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
+ *   Number of bytes sent on success; a negated errno on failure.  Here a
+ *   failure means only a faiure to obtain the requested reponse (due to
+ *   transport problem -- timeout, CRC, etc.).  The implementation only
+ *   assures that the response is returned intacta and does not check errors
+ *   within the response itself.
  *
  ****************************************************************************/
 
-static int stm32_recvR1(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1)
+static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort)
 {
-  return -ENOSYS;
+#ifdef CONFIG_DEBUG
+  uint32 respcmd;
+#endif
+  uint32 regval;
+
+  /* R1  Command response (48-bit)
+   *     47        0               Start bit
+   *     46        0               Transmission bit (0=from card)
+   *     45:40     bit5   - bit0   Command index (0-63)
+   *     39:8      bit31  - bit0   32-bit card status
+   *     7:1       bit6   - bit0   CRC7
+   *     0         1               End bit
+   *
+   * R1b Identical to R1 with the additional busy signaling via the data
+   *     line.
+   *
+   * R6  Published RCA Response (48-bit, SD card only)
+   *     47        0               Start bit
+   *     46        0               Transmission bit (0=from card)
+   *     45:40     bit5   - bit0   Command index (0-63)
+   *     39:8      bit31  - bit0   32-bit Argument Field, consisting of:
+   *                               [31:16] New published RCA of card
+   *                               [15:0]  Card status bits {23,22,19,12:0}
+   *     7:1       bit6   - bit0   CRC7
+   *     0         1               End bit
+   */
+
+
+#ifdef CONFIG_DEBUG
+  if (!rshort)
+    {
+      fdbg("ERROR: rshort=NULL\n");
+      return -EINVAL;
+    }
+
+  /* Check that this is the correct response to this command */
+
+  if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1_RESPONSE &&
+      (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
+       cmd & MMCSD_RESPONSE_MASK  |= MMCSD_R6_RESPONSE)
+    {
+      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      return -EINVAL;
+    }
+#endif
+
+  /* Verify that the response is available */
+ 
+  regval = getreg32(STM32_SDIO_STA);
+  if ((regval & SDIO_STA_CTIMEOUT) != 0)
+    {
+      fdbg("ERROR: Command timeout: %08x\n", regval);
+      putreg32(SDIO_ICR_CTIMEOUTC, STM32_SDIO_ICR);
+      return -ETIMEDOUT;
+    }
+  else if ((regval & SDIO_STA_CCRCFAIL) != 0)
+    {
+      fdbg("ERROR: CRC failuret: %08x\n", regval);
+      putreg32(SDIO_ICR_CCRCFAILC, STM32_SDIO_ICR);
+      return -EIO;
+    }
+  else if ((regval & SDIO_STA_CMDREND) == 0)
+    {
+      fdbg("ERROR: Status is not yet available: %08x\n", regval);
+      return -EBUSY;
+    }
+
+  /* Check response received is of desired command */
+
+#ifdef CONFIG_DEBUG
+  respcmd = getreg32(STM32_SDIO_RESPCMD);
+  if ((ubyte)(respcmd & SDIO_RESPCMD_MASK) != (cmd & MMCSD_CMDIDX_MASK))
+    {
+      fdbg("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
+      return -EINVAL;
+    }
+#endif
+
+  /* Return the R1 response */
+
+  putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+  *rshort = getreg32(STM32_SDIO_RESP1);
+  return OK;
 }
 
-static int stm32_recvR2(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4])
+static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 rlong[4])
 {
-  return -ENOSYS;
+  uint32 regval;
+
+ /* R2  CID, CSD register (136-bit)
+  *     135       0               Start bit
+  *     134       0               Transmission bit (0=from card)
+  *     133:128   bit5   - bit0   Reserved
+  *     127:1     bit127 - bit1   127-bit CID or CSD register
+  *                               (including internal CRC)
+  *     0         1               End bit
+  */
+
+#ifdef CONFIG_DEBUG
+  /* Check that R1 is the correct response to this command */
+
+  if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
+    {
+      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      return -EINVAL;
+    }
+#endif
+
+  /* Verify that the response is available */
+ 
+  regval = getreg32(STM32_SDIO_STA);
+  if (regval & SDIO_STA_CTIMEOUT)
+    {
+      putreg32(SDIO_ICR_CTIMEOUTC, STM32_SDIO_ICR);
+      return -ETIMEDOUT;
+    }
+  else if (regval & SDIO_STA_CCRCFAIL)
+    {
+      putreg32(SDIO_ICR_CCRCFAILC, STM32_SDIO_ICR);
+      return -EIO;
+    }
+  else if ((regval & SDIO_STA_CMDREND) == 0)
+    {
+      fdbg("ERROR: Status is not yet available: %08x\n", regval);
+      return -EBUSY;
+    }
+
+  /* Return the long response */
+
+  putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+  if (rlong)
+    {
+      rlong[0] = getreg32(STM32_SDIO_RESP1);
+      rlong[1] = getreg32(STM32_SDIO_RESP2);
+      rlong[2] = getreg32(STM32_SDIO_RESP3);
+      rlong[3] = getreg32(STM32_SDIO_RESP4);
+    }
+  return OK;
 }
 
-static int stm32_recvR3(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3)
+static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort)
 {
-  return -ENOSYS;
+  uint32 regval;
+
+ /* R3  OCR (48-bit)
+  *     47        0               Start bit
+  *     46        0               Transmission bit (0=from card)
+  *     45:40     bit5   - bit0   Reserved
+  *     39:8      bit31  - bit0   32-bit OCR register
+  *     7:1       bit6   - bit0   Reserved
+  *     0         1               End bit
+  */
+
+  /* Check that this is the correct response to this command */
+
+#ifdef CONFIG_DEBUG
+  if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
+       cmd & MMCSD_RESPONSE_MASK  |= MMCSD_R7_RESPONSE)
+    {
+      fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
+      return -EINVAL;
+    }
+#endif
+
+   regval = getreg32(STM32_SDIO_STA);
+  if (regval & SDIO_STA_CTIMEOUT)
+    {
+       putreg32(SDIO_ICR_CTIMEOUTC, STM32_SDIO_ICR);
+       return -ETIMEDOUT;
+    }
+  else if ((regval & SDIO_STA_CMDREND) == 0)
+    {
+      fdbg("ERROR: Status is not yet available: %08x\n", regval);
+      return -EBUSY;
+    }
+
+ /* Return the short response */
+
+  putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+  if (rshort)
+    {
+      *rshort = getreg32(STM32_SDIO_RESP1);
+    }
+  return OK;
 }
 
-static int stm32_recvR4(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R4)
-{
-  return -ENOSYS;
-}
-
-static int stm32_recvR5(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5)
-{
-  return -ENOSYS;
-}
-
-static int stm32_recvR6(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6)
-{
-  return -ENOSYS;
-}
-
-static int stm32_recvR7(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7)
+static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rnotimpl)
 {
   return -ENOSYS;
 }
