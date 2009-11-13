@@ -127,6 +127,10 @@ struct mmcsd_state_s
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Command/response helpers *************************************************/
+
+static int     mmcsd_sendcmdpoll(struct mmcsd_state_s *priv, uint32 cmd, uint32 arg);
+
 /* Transfer helpers *********************************************************/
 
 static ssize_t mmcsd_doread(FAR void *dev, FAR ubyte *buffer,
@@ -184,6 +188,36 @@ static const struct block_operations g_bops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Command/Response Helpers
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mmcsd_sendcmdpoll
+ *
+ * Description:
+ *   send a command and poll-wait for the response.
+ *
+ ****************************************************************************/
+
+static int mmcsd_sendcmdpoll(struct mmcsd_state_s *priv, uint32 cmd, uint32 arg)
+{
+  int ret;
+
+  /* Send the command */
+
+  SDIO_SENDCMD(priv->dev, cmd, arg);
+
+  /* Then poll-wait until the response is available */
+
+  ret = SDIO_WAITRESPONSE(priv->dev, cmd);
+  if (ret != OK)
+    {
+      fdbg("ERROR: Wait for response to cmd=%08x failed: %d\n", cmd, ret);
+    }
+  return ret;
+}
 
 /****************************************************************************
  * Transfer Helpers
@@ -516,9 +550,8 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
 
   /* Then send CMD0 (twice just to be sure) */
 
-  SDIO_SENDCMD(priv->dev, MMCSD_CMD0, 0);
-  SDIO_WAITRESPONSE(priv->dev, MMCSD_CMD0);
-  SDIO_SENDCMD(priv->dev, MMCSD_CMD0, 0);
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0);
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0);
   up_udelay(MMCSD_IDLE_DELAY);
 
   /* Check for SDHC Version 2.x.  Send CMD8 to verify SD card interface
@@ -530,7 +563,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
    * CMD8 Response: R7
    */
 
-  SDIO_SENDCMD(priv->dev, SD_CMD8, MMCSD_CMD8CHECKPATTERN|MMCSD_CMD8VOLTAGE_27);
+  mmcsd_sendcmdpoll(priv, SD_CMD8, MMCSD_CMD8CHECKPATTERN|MMCSD_CMD8VOLTAGE_27);
   ret = SDIO_RECVR7(priv->dev, SD_CMD8, &response);
   if (ret == OK)
   {
@@ -564,7 +597,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
     {
       /* Send CMD55 */
 
-      SDIO_SENDCMD(priv->dev, SD_CMD55, 0);
+      mmcsd_sendcmdpoll(priv, SD_CMD55, 0);
       ret = SDIO_RECVR1(priv->dev, SD_CMD55, &response);
       if (ret != OK)
         {
@@ -602,7 +635,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
 
           /* Send ACMD41 */
 
-          SDIO_SENDCMD(priv->dev, SD_ACMD41, MMCD_ACMD41_VOLTAGEWINDOW|sdcapacity);
+          mmcsd_sendcmdpoll(priv, SD_ACMD41, MMCD_ACMD41_VOLTAGEWINDOW|sdcapacity);
           ret = SDIO_RECVR3(priv->dev, SD_CMD55, &response);
           if (ret != OK)
             {
