@@ -53,6 +53,7 @@
 #define STM32_FLASH_BASE     0x08000000     /* 0x08000000 - Up to 512Kb */
 #define STM32_SRAM_BASE      0x20000000     /* 0x20000000 - 64Kb SRAM */
 #define STM32_SRAMBB_BASE    0x22000000
+#define STM32_PERIPH_BASE    0x40000000
 
 /* Register Base Address ************************************************************/
 

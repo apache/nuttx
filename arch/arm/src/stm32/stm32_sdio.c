@@ -109,6 +109,17 @@ static inline void stm32_enableint(uint32 bitset);
 static inline void stm32_disableint(uint32 bitset);
 static void   stm32_setpwrctrl(uint32 pwrctrl);
 static inline uint32 stm32_getpwrctrl(void);
+static inline void stm32_clkenable(void)
+static inline void stm32_clkdisable(void)
+
+/* DMA Helpers **************************************************************/
+
+static inline void stm32_dmaenable(void);
+
+/* Data Transfer Helpers ****************************************************/
+
+static void  stm32_dataconfig(uint32 timeout, uint32 dlen, uint32 dctrl);
+static void  stm32_datadisable(void);
 
 /* SDIO interface methods ***************************************************/
 
@@ -337,6 +348,81 @@ static void stm32_setpwrctrl(uint32 pwrctrl)
 static inline uint32 stm32_getpwrctrl(void)
 {
   return getreg32(STM32_SDIO_POWER) & SDIO_POWER_PWRCTRL_MASK;
+}
+
+static inline void stm32_clkenable(void)
+{
+  putreg32(1, SDIO_CLKCR_CLKEN_BB);
+}
+
+static inline void stm32_clkdisable(void)
+{
+  putreg32(0, SDIO_CLKCR_CLKEN_BB);
+}
+
+/****************************************************************************
+ * DMA Helpers
+ ****************************************************************************/
+static inline void stm32_dmaenable(void)
+{
+  putreg32(1, SDIO_DCTRL_DMAEN_BB);
+}
+
+/****************************************************************************
+ * Data Transfer Helpers
+ ****************************************************************************/
+/****************************************************************************
+ * Name: stm32_dataconfig
+ *
+ * Description:
+ *   Configure the SDIO data path for the next data transfer
+ *
+ ****************************************************************************/
+
+static void stm32_dataconfig(uint32 timeout, uint32 dlen, uint32 dctrl)
+{
+  uint32 regval = 0;
+
+  /* Enable data path */
+
+  putreg32(timeout, STM32_SDIO_DTIMER); /* Set DTIMER */
+  putreg32(dlen,    STM32_SDIO_DLEN);   /* Set DLEN */
+
+  /* Configure DCTRL DTDIR, DTMODE, and DBLOCKSIZE fields and set the DTEN
+   * field
+   */
+
+  regval  =  getreg32(STM32_SDIO_DCTRL);
+  regval &= ~(SDIO_DCTRL_DTDIR|SDIO_DCTRL_DTMODE|SDIO_DCTRL_DBLOCKSIZE_MASK);
+  dctrl  &=  (SDIO_DCTRL_DTDIR|SDIO_DCTRL_DTMODE|SDIO_DCTRL_DBLOCKSIZE_MASK);
+  regval |=  (dctrl|DIO_DCTRL_DTEN);
+  putreg32(regval, STM32_SDIO_DCTRL);
+}
+
+/****************************************************************************
+ * Name: stm32_datadisable
+ *
+ * Description:
+ *   Disable the the SDIO data path setup by stm32_dataconfig() and
+ *   disable DMA.
+ *
+ ****************************************************************************/
+
+static void stm32_datadisable(void)
+{
+  uint32 regval;
+
+  /* Disable the data path */
+
+  putreg32(SD_DATATIMEOUT, STM32_SDIO_DTIMER); /* Reset DTIMER */
+  putreg32(0,              STM32_SDIO_DLEN);   /* Reset DLEN */
+
+  /* Reset DCTRL DTEN, DTDIR, DTMODE, DMAEN, and DBLOCKSIZE fields */
+
+  regval  = getreg32(STM32_SDIO_DCTRL);
+  regval &= ~(SDIO_DCTRL_DTEN|SDIO_DCTRL_DTDIR|SDIO_DCTRL_DTMODE|
+              SDIO_DCTRL_DMAEN|SDIO_DCTRL_DBLOCKSIZE_MASK);
+  putreg32(regval, STM32_SDIO_DCTRL);
 }
 
 /****************************************************************************
@@ -753,6 +839,8 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshor
   return OK;
 }
 
+/* MMC responses not supported */
+
 static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rnotimpl)
 {
   return -ENOSYS;
@@ -858,7 +946,7 @@ static ubyte stm32_events(FAR struct sdio_dev_s *dev)
 #ifdef CONFIG_SDIO_DMA
 static boolean stm32_dmasupported(FAR struct sdio_dev_s *dev)
 {
-  return FALSE;
+  return TRUE;
 }
 #endif
 
@@ -1072,6 +1160,12 @@ int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
   /* Put SDIO registers in their default, reset state */
 
   stm32_default();
+
+  /* Configure the SDIO peripheral */
+
+  stm32_setclkcr(STM32_CLCKCR_INIT);
+  stm32_setpwrctrl(SDIO_POWER_PWRCTRL_ON);
+  stm32_clkenable(ENABLE);
 
   return -ENOSYS;
 }
