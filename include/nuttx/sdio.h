@@ -313,7 +313,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_STATUS(dev)        ((d)->status(dev))
+#define SDIO_STATUS(dev)        ((dev)->status(dev))
 
 /* MMC/SD status bits */
 
@@ -429,6 +429,23 @@
  ****************************************************************************/
 
 #define SDIO_SENDDATA(dev,data) ((dev)->senddata(dev,data))
+
+/****************************************************************************
+ * Name: SDIO_WAITRESPONSE
+ *
+ * Description:
+ *   Poll-wait for the response to the last command to be ready.
+ *
+ * Input Parameters:
+ *   dev  - An instance of the MMC/SD device interface
+ *   cmd  - The command that was sent.  See 32-bit command definitions above.
+ *
+ * Returned Value:
+ *   OK is success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#define SDIO_WAITRESPONSE(dev,cmd) ((dev)->waitresponse(dev,cmd))
 
 /****************************************************************************
  * Name: SDIO_RECVRx
@@ -694,10 +711,11 @@
 enum sdio_clock_e
 {
   CLOCK_SDIO_DISABLED = 0, /* Clock is disabled */
-  CLOCK_MMC_SLOW,           /* MMC initialization clocking */
-  CLOCK_SD_SLOW,            /* SD initialization clocking */
-  CLOCK_MMC_FAST,           /* MMC normal operation clocking */
-  CLOCK_SD_FAST             /* SD normal operation clocking */
+  CLOCK_IDMODE,            /* Initial ID mode clocking (<400KHz) */
+  CLOCK_MMC_SLOW,          /* MMC initialization clocking */
+  CLOCK_SD_SLOW,           /* SD initialization clocking */
+  CLOCK_MMC_FAST,          /* MMC normal operation clocking */
+  CLOCK_SD_FAST            /* SD normal operation clocking */
 };
 
 /* This structure defines the interface between the NuttX MMC/SD
@@ -728,6 +746,7 @@ struct sdio_dev_s
   void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
   int   (*senddata)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer);
 
+  int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32 cmd);
   int   (*recvR1)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);
   int   (*recvR2)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4]);
   int   (*recvR3)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3);

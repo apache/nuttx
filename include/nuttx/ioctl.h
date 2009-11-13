@@ -97,12 +97,21 @@
 #define _BIOCVALID(c)   (_IOC_TYPE(c)==_BIOCBASE)
 #define _BIOC(nr)       _IOC(_BIOCBASE,nr)
 
-#define BIOC_XIPBASE    _BIOC(0x0001)     /* IN:  Pointer to pointer to void in
+#define BIOC_XIPBASE    _BIOC(0x0001)     /* Perform mapping to random access memory.
+                                           * IN:  Pointer to pointer to void in
                                            *      which to received the XIP base.
                                            * OUT: If media is directly acccesible,
                                            *      return (void*) base address
                                            *      of device memory */
-
+#define BIOC_PROBE      _BIOC(0x0002)     /* Re-probe and interface; check for media
+                                           * in the slot
+                                           * IN:  None
+                                           * OUT: None (ioctl return value provides
+                                           *      success/failure indication). */
+#define BIOC_EJECT      _BIOC(0x0003)     /* Eject/disable media in the slot
+                                           * IN:  None
+                                           * OUT: None (ioctl return value provides
+                                           *      success/failure indication). */
 /* NuttX MTD driver ioctl definitions */
 
 #define _MTDIOCVALID(c)   (_IOC_TYPE(c)==_MTDIOCBASE)

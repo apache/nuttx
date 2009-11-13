@@ -83,6 +83,11 @@
 #define STM32_CLKCR_WIDETRANSFER \
   (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|SDIO_CLKCR_WIDBUS_D4)
 
+/* Timing */
+
+#define SDIO_CMDTIMEOUT  100000
+#define SDIO_LONGTIMEOUT 0x7fffffff
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -140,6 +145,7 @@ static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
 static int   stm32_senddata(FAR struct sdio_dev_s *dev,
                FAR const ubyte *buffer);
 
+static int   stm32_waitresponseFAR struct sdio_dev_s *dev, uint32 cmd);
 static int   stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort);
 static int   stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 rlong[4]);
 static int   stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort);
@@ -192,6 +198,7 @@ struct stm32_dev_s g_mmcsd =
     .attach        = stm32_attach,
     .sendcmd       = stm32_sendcmd,
     .senddata      = stm32_senddata,
+    .waitresponse  = stm32_waitresponse,
     .recvR1        = stm32_recvshortcrc,
     .recvR2        = stm32_recvlong,
     .recvR3        = stm32_recvshort,
@@ -630,6 +637,71 @@ static int stm32_senddata(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer)
 }
 
 /****************************************************************************
+ * Name: stm32_waitresponse
+ *
+ * Description:
+ *   Poll-wait for the response to the last command to be ready.
+ *
+ * Input Parameters:
+ *   dev  - An instance of the MMC/SD device interface
+ *   cmd  - The command that was sent.  See 32-bit command definitions above.
+ *
+ * Returned Value:
+ *   OK is success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int stm32_waitresponseFAR struct sdio_dev_s *dev, uint32 cmd)
+{
+  sint32 timeout = SDIO_LONGTIMEOUT;
+  uint32 events;
+
+  switch (cmd & MMCSD_RESPONSE_MASK)
+    {
+    case MMCSD_NO_RESPONSE:
+      timeout = SDIO_CMDTIMEOUT;
+      events  = SDIO_STA_CMDSENT;
+      break;
+
+    case MMCSD_R1_RESPONSE:
+    case MMCSD_R1B_RESPONSE:
+    case MMCSD_R2_RESPONSE:
+    case MMCSD_R6_RESPONSE:
+      events  = SDIO_STA_CTIMEOUT|SDIO_STA_CCRCFAIL|SDIO_STA_CMDREND;
+      break;
+
+    case MMCSD_R4_RESPONSE:
+    case MMCSD_R5_RESPONSE:
+      return -ENOSYS;
+
+    case MMCSD_R3_RESPONSE:
+    case MMCSD_R7_RESPONSE:
+      events  = SDIO_STA_CTIMEOUT|SDIO_STA_CMDREND;
+      timeout = SDIO_CMDTIMEOUT;
+      break;
+
+    default:
+      return -EINVAL;
+    }
+
+  /* Then wait for the response (or timeout) */
+
+  while ((getreg32(STM32_SDIO_STA) & events) == 0)
+    {
+      if (--timeout <= 0)
+        {
+          fdbg("ERROR: Timeout cmd=%04x\n", cmd);
+          return -ETIMEDOUT;
+        }
+    }
+
+  /* Clear all the static flags */
+
+  putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+  return OK;
+}
+
+/****************************************************************************
  * Name: stm32_recvRx
  *
  * Description:
@@ -817,7 +889,7 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshor
     }
 #endif
 
-   regval = getreg32(STM32_SDIO_STA);
+  regval = getreg32(STM32_SDIO_STA);
   if (regval & SDIO_STA_CTIMEOUT)
     {
        putreg32(SDIO_ICR_CTIMEOUTC, STM32_SDIO_ICR);
