@@ -664,6 +664,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
 static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
 {
+#ifdef CONFIG_MMCSD_MMCSUPPORT
   uint32 cid[4];
   uint32 csd[4];
   int ret;
@@ -745,7 +746,7 @@ static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
 
   SDIO_CLOCK(priv->dev, CLOCK_MMC_TRANSFER);
   up_udelay( MMCSD_CLK_DELAY);
-
+#endif
   return OK;
 }
 
@@ -862,7 +863,9 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
        * skip the SD-specific commands.
        */
 
+#ifdef CONFIG_MMCSD_MMCSUPPORT
       if (priv->type != MMCSD_CARDTYPE_MMC)
+#endif
         {
           /* Send CMD55 */
 
@@ -938,7 +941,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
        * MMC card.  We can send the CMD1 to find out for sure.  CMD1 is supported
        * by MMC cards, but not by SD cards.
        */
-
+#ifdef CONFIG_MMCSD_MMCSUPPORT
       if (priv->type == MMCSD_CARDTYPE_UNKNOWN || priv->type == MMCSD_CARDTYPE_MMC)
         {
           /* Send the MMC CMD1 to specify the operating voltage. CMD1 causes
@@ -985,7 +988,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
                 }
             }
         }
-
+#endif
       /* Check the elapsed time.  We won't keep trying this forever! */
 
       elapsed = g_system_timer - start;
@@ -1065,18 +1068,22 @@ static int mmcsd_probe(struct mmcsd_state_s *priv)
 
           switch (priv->type)
             {
-            case MMCSD_CARDTYPE_MMC:                       /* MMC card */
-              ret = mmcsd_mmcinitialize(priv);
-
             case MMCSD_CARDTYPE_SDV1:                      /* Bit 1: SD version 1.x */
             case MMCSD_CARDTYPE_SDV2:                      /* SD version 2.x with byte addressing */
             case MMCSD_CARDTYPE_SDV2|MMCSD_CARDTYPE_BLOCK: /* SD version 2.x with block addressing */
               ret = mmcsd_sdinitialize(priv);
+              break;
 
+            case MMCSD_CARDTYPE_MMC:                       /* MMC card */
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+              ret = mmcsd_mmcinitialize(priv);
+              break;
+#endif
             case MMCSD_CARDTYPE_UNKNOWN:                   /* Unknown card type */
             default:
               fdbg("ERROR: Internal confusion: %d\n", priv->type);
               ret = -EPERM;
+              break;
             };
 
             /* Was the card configured successfully? */
