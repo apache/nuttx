@@ -103,7 +103,7 @@
 #define MMCSD_R1_READYFORDATA       (1 << 8)   /* Buffer empty */
 #define MMCSD_R1_APPCMD             (1 << 5)   /* Next CMD is ACMD */
 #define MMCSD_R1_AKESEQERROR        (1 << 3)   /* Authentication error */
-#define MMCSD_R1_ERRORMASK          0xfdff0008 /* Error mask */
+#define MMCSD_R1_ERRORMASK          0xfdffe008 /* Error mask */
 
 #define IS_STATE(v,s)               (((v)&MMCSD_R1_CURRENTSTATE_MASK)==(s))
 
@@ -151,6 +151,25 @@
 
 /********************************************************************************************
  * Public Types
+ ********************************************************************************************/
+
+/* Decoded CID register */
+
+struct mmcsd_cid_s
+{
+  ubyte  mid;       /* 127:120  8-bit Manufacturer ID */
+  uint16 oid;       /* 119:104 16-bit OEM/Application ID (ascii) */
+  ubyte  pnm[6];    /* 103:64  40-bit Product Name (ascii) + null terminator */
+  ubyte  prv;       /*  63:56   8-bit Product revision */
+  uint32 psn;       /*  55:24  32-bit Product serial number */
+                    /*  23:20   4-bit (reserved) */
+  uint16 mdt;       /*  19:8   12-bit Manufacturing date */
+  ubyte  crc;       /*   7:1    7-bit CRC7 */
+                    /*   0:0    1-bit (not used) */
+};
+
+/********************************************************************************************
+ * Public Data
  ********************************************************************************************/
 
 #undef EXTERN

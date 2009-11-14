@@ -69,10 +69,12 @@
 
 #define MAX_CREFS               0xff
 
-/* Timing */
+/* Timing (all in units of microseconds) */
 
-#define MMCSD_POWERUP_DELAY     250     /* 74 clock cycles @ 400KHz = 185uS */
-#define MMCSD_IDLE_DELAY        50      /* Short delay to allow change to IDLE state */
+#define MMCSD_POWERUP_DELAY     250        /* 74 clock cycles @ 400KHz = 185uS */
+#define MMCSD_IDLE_DELAY        (50*1000)  /* Short delay to allow change to IDLE state */
+#define MMCSD_DSR_DELAY         (100*1000) /* Time to wait after setting DSR */
+#define MMCSD_CLK_DELAY         (500*1000) /* Delay after changing clock speeds */
 
 #define IS_EMPTY(priv) (priv->type == MMCSD_CARDTYPE_UNKNOWN)
 
@@ -100,12 +102,13 @@ struct mmcsd_state_s
   ubyte mediachanged:1;            /* TRUE: Media changed since last check */
   ubyte wrprotect:1;               /* TRUE: Media is write protected */
   ubyte selected:1;                /* TRUE: card is selected */
+  ubyte dsrimp:1;                  /* TRUE: card supports CMD4/DSR setting (from CSD) */
 #ifdef CONFIG_SDIO_DMA
   ubyte dma:1;                     /* TRUE: hardware supports DMA */
 #endif
 
-  ubyte type;                      /* Card type (See MMCSD_CARDTYPE_* definitions) */
-  ubyte mode;                      /* (See MMCSDMODE_* definitions) */
+  ubyte mode:2;                    /* (See MMCSDMODE_* definitions) */
+  ubyte type:4;                    /* Card type (See MMCSD_CARDTYPE_* definitions) */
   uint16 selblocklen;              /* The currently selected block length */
   uint16 rca;                      /* Relative Card Address (RCS) register */
 
@@ -130,6 +133,16 @@ struct mmcsd_state_s
 /* Command/response helpers *************************************************/
 
 static int     mmcsd_sendcmdpoll(struct mmcsd_state_s *priv, uint32 cmd, uint32 arg);
+
+static int     mmcsd_recvR1(struct mmcsd_state_s *priv, uint32 cmd);
+static void    mmcsd_decodecsd(struct mmcsd_state_s *priv, uint32 csd[4]);
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+static void    mmcsd_decodecid(uint32 cid[4]);
+#else
+#  define mmcsd_decodecid(cid)
+#endif
+
+static int     mmcsd_verifystandby(struct mmcsd_state_s *priv);
 
 /* Transfer helpers *********************************************************/
 
@@ -197,7 +210,7 @@ static const struct block_operations g_bops =
  * Name: mmcsd_sendcmdpoll
  *
  * Description:
- *   send a command and poll-wait for the response.
+ *   Send a command and poll-wait for the response.
  *
  ****************************************************************************/
 
@@ -217,6 +230,175 @@ static int mmcsd_sendcmdpoll(struct mmcsd_state_s *priv, uint32 cmd, uint32 arg)
       fdbg("ERROR: Wait for response to cmd=%08x failed: %d\n", cmd, ret);
     }
   return ret;
+}
+
+/****************************************************************************
+ * Name: mmcsd_sendcmdpoll
+ *
+ * Description:
+ *   Set the Driver Stage Register (DSR) if (1) a CONFIG_MMCSD_DSR has been
+ *   provided and (2) the card supports a DSR register.  If no DSR value
+ *   the card default value (0x0404) will be used.
+ *
+ ****************************************************************************/
+
+static inline int mmcsd_sendcmd4(struct mmcsd_state_s *priv)
+{
+  int ret = OK;
+
+#ifdef CONFIG_MMCSD_DSR
+  /* The dsr_imp bit from the CSD will tell us if the card supports setting
+   * the DSR via CMD4 or not.
+   */
+
+  if (priv->dsrimp != FALSE)
+    {
+      /* CMD4 = SET_DSR will set the cards DSR register. The DSR and CMD4
+       * support are optional.  However, since this is a broadcast command
+       * with no response (like CMD0), we will never know if the DSR was
+       * set correctly or not
+       */
+
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD4, CONFIG_MMCSD_DSR << 16);
+      up_udelay(MMCSD_DSR_DELAY);
+
+      /* Send it again to have more confidence */
+
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD4, CONFIG_MMCSD_DSR << 16);
+      up_udelay(MMCSD_DSR_DELAY);
+    }
+#endif
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mmcsd_recvR1
+ *
+ * Description:
+ *   Receive R1 response and check for errors.
+ *
+ ****************************************************************************/
+
+static int mmcsd_recvR1(struct mmcsd_state_s *priv, uint32 cmd)
+{
+  uint32 r1;
+  int ret;
+
+  /* Get the R1 response from the hardware */
+
+  ret = SDIO_RECVR1(priv->dev, cmd, &r1);
+  if (ret == OK)
+    {
+      /* Check if R1 reports an error */
+
+      if ((r1 & MMCSD_R1_ERRORMASK) != 0)
+        {
+          ret = -EIO;
+        }
+    }
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mmcsd_decodecsd
+ *
+ * Description:
+ *   Decode and extract necessary information from the CSD. If debug is
+ *   enabled, then decode and show the full contents of the CSD.
+ *
+ * Returned Value:
+ *   OK on success; a negated ernno on failure.  On success, the following
+ *   values will be set in the driver state structure:
+ *
+ *   priv->dsrimp      TRUE: card supports CMD4/DSR setting (from CSD)
+ *   priv->rdblocklen  Read block length (== block size)
+ *   priv->wrblocklen  Write block length
+ *   priv->nblocks     Number of blocks
+ *   priv->capacity    Total capacity of volume
+ *
+ ****************************************************************************/
+
+static void mmcsd_decodecsd(struct mmcsd_state_s *priv, uint32 csd[4])
+{
+#warning "Not Implemented"
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: mmcsd_decodecid
+ *
+ * Description:
+ *   Show the contents of the CID (for debug purposes only)
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+static void mmcsd_decodecid(uint32 cid[4])
+{
+  struct mmcsd_cid_s decoded;
+
+  /* Word 1: Bits 127-96:
+   *   mid - 127-120  8-bit Manufacturer ID
+   *   oid - 119-104 16-bit OEM/Application ID (ascii)
+   *   pnm - 103-64  40-bit Product Name (ascii) + null terminator
+   *         pnm[0] 103:96
+   */
+
+  decoded.mid    =  cid[0] >> 24;
+  decoded.oid    = (cid[0] >> 8) & 0xffff;
+  decoded.pnm[0] =  cid[0] & 0xff;
+
+  /* Word 2: Bits 64:95
+   *   pnm - 103-64  40-bit Product Name (ascii) + null terminator
+   *         pnm[1] 95:88
+   *         pnm[2] 87:80
+   *         pnm[3] 79:72
+   *         pnm[4] 71:64
+   */
+
+  decoded.pnm[1] =  cid[1] >> 24;
+  decoded.pnm[2] = (cid[1] >> 16) & 0xff;
+  decoded.pnm[3] = (cid[1] >> 8) & 0xff;
+  decoded.pnm[4] =  cid[1] & 0xff;
+  decoded.pnm[5] = '\0';
+
+  /* Word 3: Bits 32-63
+   *   prv -  63-56   8-bit Product revision
+   *   psn -  55-24  32-bit Product serial number
+   */
+
+  decoded.prv    = cid[2] >> 24;
+  decoded.psn    = cid[2] << 8;
+
+  /* Word 4: Bits 0-31
+   *   psn -  55-24  32-bit Product serial number
+   *          23-20   4-bit (reserved)
+   *   mdt -  19:8   12-bit Manufacturing date
+   *   crc -   7:1    7-bit CRC7
+   */
+
+  decoded.psn   |= cid[3] >> 24;
+  decoded.mdt    = (cid[3] >> 8) & 0x0fff;
+  decoded.crc    = (cid[3] >> 1) & 0x7f;
+
+  fvdbg("mid=%02x oid=%04x pnm=%s prv=%d psn=%d mdt=%02x crc=%02x\n",
+      priv->cid.mid, priv->cid.oid, priv->cid.pnm, priv->cid.prv,
+      priv->cid.psn, priv->cid.mdt, priv->cid.crc);
+}
+#endif
+
+/****************************************************************************
+ * Name: mmcsd_verifystandby
+ *
+ * Description:
+ *   Verify that the card is in standby state
+ *
+ ****************************************************************************/
+
+static int mmcsd_verifystandby(struct mmcsd_state_s *priv)
+{
+#warning "Not implemented"
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -482,7 +664,89 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
 static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
 {
-  return -ENOSYS;
+  uint32 cid[4];
+  uint32 csd[4];
+  int ret;
+
+  /* At this point, slow, ID mode clocking has been supplied to the card
+   * and CMD0 has been sent successfully. CMD1 succeeded and ACMD41 failed
+   * so there is good evidence that we have an MMC card inserted into the
+   * slot.
+   *
+   * Send CMD2 = ALL_SEND_CID. This implementation supports only one MMC slot.
+   * If mulitple cards were installed, each card would respond to CMD2 by
+   * sending its CID (only one card completes the response at a time).  The
+   * driver should send CMD2 and assign an RCAs until no response to
+   * ALL_SEND_CID is received. CMD2 causes transition to identification state/
+   * card-identification mode */
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD2, 0);
+  ret = SDIO_RECVR2(priv->dev, MMCSD_CMD2, cid);
+  if (ret != OK)
+    {
+      fdbg("ERROR: SDIO_RECVR2 for MMC CID failed: %d\n", ret);
+      return ret;
+    }
+  mmcsd_decodecid(cid);
+
+  /* Send CMD3 = SET_RELATIVE_ADDR.  This command is used to assign a logical
+   * address to the card.  For MMC, the host assigns the address. CMD3 causes
+   * transition to standby state/data-transfer mode
+   */
+
+  priv->rca = 1;  /* There is only one card */
+  mmcsd_sendcmdpoll(priv, MMC_CMD3, priv->rca << 16);
+  ret = mmcsd_recvR1(priv, MMC_CMD3);
+  if (ret != 0)
+    {
+      fdbg("ERROR: mmcsd_recvR1(CMD3) failed: %d\n", ret);
+      return ret;
+    }
+
+  /* This should have caused a transition to standby state. However, this will
+   * not be reflected in the present R1 status.  R1/6 contains the state of the 
+   * card when the command was received, not when it completed execution.
+   *
+   * Verify that we are in standby state/data-transfer mode
+   */
+
+  ret = mmcsd_verifystandby(priv);
+  if (ret != 0)
+    {
+      fdbg("ERROR: Failed to enter standby state\n");
+      return ret;
+    }
+
+  /* Send CMD9 = SEND_CSD in standby state/data-transfer mode to obtain the
+   * Card Specific Data (CSD) register, e.g., block length, card storage
+   * capacity, etc. (Stays in standy state/data-transfer mode)
+   */
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD9, priv->rca << 16);
+  ret = SDIO_RECVR2(priv->dev, MMCSD_CMD9, csd);
+  if (ret != 0)
+    {
+      fdbg("ERROR: Could not get SD CSD register: %d\n", ret);
+      return ret;
+    }
+  mmcsd_decodecsd(priv, csd);
+
+  fvdbg("Capacity: %dKb, Block size: %db, nblocks=%d\n",
+         priv->capacity / 1024, priv->rdblocklen, priv->nblocks);
+
+  /* Set the Driver Stage Register (DSR) if (1) a CONFIG_MMCSD_DSR has been
+   * provided and (2) the card supports a DSR register.  If no DSR value
+   * the card default value (0x0404) will be used.
+   */
+
+  (void)mmcsd_sendcmd4(priv);
+
+  /* Select high speed MMC clocking (which may depend on the DSR setting) */
+
+  SDIO_CLOCK(priv->dev, CLOCK_MMC_TRANSFER);
+  up_udelay( MMCSD_CLK_DELAY);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -513,9 +777,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
   uint32  response;
   uint32  start;
   uint32  elapsed;
-  uint32  state;
   uint32  sdcapacity = MMCD_ACMD41_STDCAPACITY;
-  boolean cardbusy;
   int     ret;
 
   /* Assume failure to identify the card */
@@ -595,79 +857,146 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
   elapsed = 0;
   do
     {
-      /* Send CMD55 */
+      /* We may have already determined that his card is an MMC card from
+       * an earlier pass through through this loop.  In that case, we should
+       * skip the SD-specific commands.
+       */
 
-      mmcsd_sendcmdpoll(priv, SD_CMD55, 0);
-      ret = SDIO_RECVR1(priv->dev, SD_CMD55, &response);
-      if (ret != OK)
+      if (priv->type != MMCSD_CARDTYPE_MMC)
         {
-          /* If the error is a timeout, then it is an MMC card */
+          /* Send CMD55 */
 
-          if (ret == -ETIMEDOUT)
-            {
-              fvdbg("ERROR: CMD55 timeout, assuming MMC card\n");
-              priv->type = MMCSD_CARDTYPE_MMC;
-              break;        
-            }
-          else
-            {
-              fdbg("ERROR: CMD55 RECVR1: %d\n", ret);
-              return -EIO;
-            }
-        }
-      else
-        {
-          /* CMD55 succeeded.  CMD55 is supported by SD V1.x and SD V2.x,
-           * but not MMC.  If we did not previoulsy determine that this is
-           * an SD V2.x (via CMD8), then this must be SD V1.x
-           */
-
-          if (priv->type == MMCSD_CARDTYPE_UNKNOWN)
-            {
-              fvdbg("SD V1.x card\n");
-              priv->type = MMCSD_CARDTYPE_SDV1;
-            }
-
-          /* Save the state from CMD55 R1 response */
-
-          state = response & MMCSD_R1_STATE_MASK;
-          fvdbg("CMD55 R1: %08x\n", response);
-
-          /* Send ACMD41 */
-
-          mmcsd_sendcmdpoll(priv, SD_ACMD41, MMCD_ACMD41_VOLTAGEWINDOW|sdcapacity);
-          ret = SDIO_RECVR3(priv->dev, SD_CMD55, &response);
+          mmcsd_sendcmdpoll(priv, SD_CMD55, 0);
+          ret = mmcsd_recvR1(priv, SD_CMD55);
           if (ret != OK)
             {
-              fdbg("ERROR: ACMD41 RECVR1: %d\n", ret);
-              return -EIO;
+              /* I am a little confused.. I think both SD and MMC cards support
+               * CMD55 (but maybe only SD cards support CMD55).  We'll make the
+               * the MMC vs. SD decision based on CMD1 and ACMD41.
+               */
+
+              fdbg("ERROR: mmcsd_recvR1(CMD55) failed: %d\n", ret);
             }
           else
             {
-              /* Check if the card is busy */
+              /* Send ACMD41 */
 
-              cardbusy = ((response >> 31) == 1);
-              if (!cardbusy)
+              mmcsd_sendcmdpoll(priv, SD_ACMD41, MMCD_ACMD41_VOLTAGEWINDOW|sdcapacity);
+              ret = SDIO_RECVR3(priv->dev, SD_CMD55, &response);
+              if (ret != OK)
                 {
-                  /* Check if this is a SD V2.x card that supports block addressing */
+                  /* If the error is a timeout, then it is probably an MMC card,
+                   * but we will make the decision based on CMD1 below
+                   */
 
-                  if ((response & MMCD_R3_HIGHCAPACITY) != 0)
+                  fdbg("ERROR: ACMD41 RECVR3: %d\n", ret);
+                }
+              else
+                {
+                  /* ACMD41 succeeded.  ACMD41 is supported by SD V1.x and SD V2.x,
+                   * but not MMC.  If we did not previously determine that this is
+                   * an SD V2.x (via CMD8), then this must be SD V1.x
+                   */
+
+                  if (priv->type == MMCSD_CARDTYPE_UNKNOWN)
                     {
-                      fvdbg("SD V2.x card with block addressing\n");
-                      DEBUGASSERT(priv->type == MMCSD_CARDTYPE_SDV2);
-                      priv->type |= MMCSD_CARDTYPE_BLOCK;
+                      fvdbg("SD V1.x card\n");
+                      priv->type = MMCSD_CARDTYPE_SDV1;
+                    }
+
+                  /* Check if the card is busy */
+
+                  if ((response &  MMCSD_CARD_BUSY) == 0)
+                    {
+                      /* No.. We really should check the current state to see if
+                       * the SD card successfully made it to the IDLE state, but
+                       * at least for now, we will simply assume that that is the
+                       * case.
+                       *
+                       * Now, check if this is a SD V2.x card that supports block
+                       * addressing
+                       */
+
+                      if ((response & MMCD_R3_HIGHCAPACITY) != 0)
+                        {
+                          fvdbg("SD V2.x card with block addressing\n");
+                          DEBUGASSERT(priv->type == MMCSD_CARDTYPE_SDV2);
+                          priv->type |= MMCSD_CARDTYPE_BLOCK;
+                        }
+
+                      /* And break out of the loop with an SD card identified */
+
+                      break;
                     }
                 }
             }
         }
+
+      /* If we get here then either (1) CMD55 failed, (2) CMD41 failed, or (3)
+       * and SD or MMC card has been identified, but it is not yet in the IDLE state.
+       * If SD card has not been identified, then we might be looking at an
+       * MMC card.  We can send the CMD1 to find out for sure.  CMD1 is supported
+       * by MMC cards, but not by SD cards.
+       */
+
+      if (priv->type == MMCSD_CARDTYPE_UNKNOWN || priv->type == MMCSD_CARDTYPE_MMC)
+        {
+          /* Send the MMC CMD1 to specify the operating voltage. CMD1 causes
+           * transition to ready state/ card-identification mode.  NOTE: If the
+           * card does not support this voltage range, it will go the inactive
+           * state.
+           *
+           * NOTE: An MMC card will only respond once to CMD1 (unless it is busy).
+           * This is part of the logic used to determine how  many MMC cards are
+           * connected (This implementation supports only a single MMC card).  So
+           * we cannot re-send CMD1 without first placing the card back into
+           * stand-by state (if the card is busy, it will automatically
+           * go back to the the standby state).
+           */
+
+          mmcsd_sendcmdpoll(priv, MMC_CMD1, MMCSD_VDD_33_34);
+          ret = SDIO_RECVR3(priv->dev, MMC_CMD1, &response);
+
+          /* Was the operating range set successfully */
+
+          if (ret != OK)
+            {
+              fdbg("ERROR: CMD1 RECVR3: %d\n", ret);
+            }
+          else
+            {
+              /* CMD1 succeeded... this must be an MMC card */
+
+              fdbg("CMD1 succeeded, assuming MMC card\n");
+              priv->type = MMCSD_CARDTYPE_MMC;
+
+              /* Check if the card is busy */
+
+              if ((response &  MMCSD_CARD_BUSY) == 0)
+                {
+                  /* NO.. We really should check the current state to see if the
+                   * MMC successfully made it to the IDLE state, but at least for now,
+                   * we will simply assume that that is the case.
+                   *
+                   * Then break out of the look with an MMC card identified
+                   */
+
+                  break;
+                }
+            }
+        }
+
+      /* Check the elapsed time.  We won't keep trying this forever! */
+
       elapsed = g_system_timer - start;
     }
-  while (elapsed < TICK_PER_SEC && (ret != OK || state != MMCSD_R1_STATE_IDLE || cardbusy));
+  while (elapsed < TICK_PER_SEC && ret != OK);
 
-  /* We get here when the above loop completes, either (1) because this is 
-   * an MMC card, (2) we could not communicate properly with the card due to
-   * errors (and the loop times out), or (3) it is an SD card that has successfully
-   * transitioned to the IDLE state.
+  /* We get here when the above loop completes, either (1) we could not
+   * communicate properly with the card due to errors (and the loop times
+   * out), or (3) it is an MMC or SD card that has successfully transitioned
+   * to the IDLE state (well, at least, it provided its OCR saying that it
+   * it is no longer busy).
    */
 
   if (elapsed >= TICK_PER_SEC || priv->type == MMCSD_CARDTYPE_UNKNOWN)

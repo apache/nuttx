@@ -712,10 +712,8 @@ enum sdio_clock_e
 {
   CLOCK_SDIO_DISABLED = 0, /* Clock is disabled */
   CLOCK_IDMODE,            /* Initial ID mode clocking (<400KHz) */
-  CLOCK_MMC_SLOW,          /* MMC initialization clocking */
-  CLOCK_SD_SLOW,           /* SD initialization clocking */
-  CLOCK_MMC_FAST,          /* MMC normal operation clocking */
-  CLOCK_SD_FAST            /* SD normal operation clocking */
+  CLOCK_MMC_TRANSFER,      /* MMC normal operation clocking */
+  CLOCK_SD_TRANSFER        /* SD normal operation clocking */
 };
 
 /* This structure defines the interface between the NuttX MMC/SD
