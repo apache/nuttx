@@ -168,6 +168,102 @@ struct mmcsd_cid_s
                     /*   0:0    1-bit (not used) */
 };
 
+/* Decoded CSD register */
+
+struct mmcsd_csd_s
+{
+  ubyte csdstructure;          /* 127:126 CSD structure */
+  ubyte mmcspecvers;           /* 125:122 MMC Spec version (MMC only) */
+
+  struct
+  {
+    ubyte timeunit;            /*   2:0   Time exponent */
+    ubyte timevalue;           /*   6:3   Time mantissa */
+  } taac;                      /* 119:112 Data read access-time-1 */
+
+  ubyte nsac;                  /* 111:104 Data read access-time-2 in CLK cycle(NSAC*100) */
+
+  struct
+  {
+    ubyte transferrateunit;    /*   2:0   Rate exponent */
+    ubyte timevalue;           /*   6:3   Rate mantissa */
+  } transpeed;                 /* 103:96  Max. data transfer rate */
+
+  uint16 ccc;                  /*  95:84  Card command classes */
+  ubyte readbllen;             /*  83:80  Max. read data block length */
+  ubyte readblpartial;         /*  79:79  Partial blocks for read allowed */
+  ubyte writeblkmisalign;      /*  78:78  Write block misalignment */
+  ubyte readblkmisalign;       /*  77:77  Read block misalignment */
+  ubyte dsrimp;                /*  76:76  DSR implemented */
+
+  union
+  {
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+    struct
+    {
+      uint16 csize;            /*  73:62  Device size */
+      ubyte vddrcurrmin;       /*  61:59  Max. read current at Vdd min */
+      ubyte vddrcurrmax;       /*  58:56  Max. read current at Vdd max */
+      ubyte vddwcurrmin;       /*  55:53  Max. write current at Vdd min */
+      ubyte vddwcurrmax;       /*  52:50  Max. write current at Vdd max */
+      ubyte csizemult;         /*  49:47  Device size multiplier */
+
+      union
+      {
+        struct                 /* MMC system specification version 3.1 */
+        {
+          ubyte ergrpsize;     /*  46:42  Erase group size (MMC 3.1) */
+          ubyte ergrpmult;     /*  41:37  Erase group multiplier (MMC 3.1) */
+        } mmc31;
+        struct                 /* MMC system specification version 2.2 */
+        {
+          ubyte sectorsize;    /*  46:42  Erase sector size (MMC 2.2) */
+          ubyte ergrpsize;     /*  41:37  Erase group size (MMC 2.2) */
+        } mmc22;
+      } er;
+
+      ubyte mmcwpgrpsize;      /*  36:32  Write protect group size (MMC) */
+    } mmc;
+#endif
+    struct
+    {
+      uint16 csize;            /*  73:62  Device size */
+      ubyte vddrcurrmin;       /*  61:59  Max. read current at Vdd min */
+      ubyte vddrcurrmax;       /*  58:56  Max. read current at Vdd max */
+      ubyte vddwcurrmin;       /*  55:53  Max. write current at Vdd min */
+      ubyte vddwcurrmax;       /*  52:50  Max. write current at Vdd max */
+      ubyte csizemult;         /*  49:47  Device size multiplier */
+      ubyte sderblen;          /*  46:46  Erase single block enable (SD) */
+      ubyte sdsectorsize;      /*  45:39  Erase sector size (SD) */
+      ubyte sdwpgrpsize;       /*  38:32  Write protect group size (SD) */
+    } sdbyte;
+
+    struct
+    {
+                               /*  73:70  (reserved) */
+      uint32 csize;            /*  69:48  Device size */
+                               /*  47:47  (reserved) */
+      ubyte sderblen;          /*  46:46  Erase single block enable (SD) */
+      ubyte sdsectorsize;      /*  45:39  Erase sector size (SD) */
+      ubyte sdwpgrpsize;       /*  38:32  Write protect group size (SD) */
+    } sdblock;
+  } u;
+
+  ubyte wpgrpen;               /*  31:31  Write protect group enable */
+  ubyte mmcdfltecc;            /*  30:29  Manufacturer default ECC (MMC) */
+  ubyte r2wfactor;             /*  28:26  Write speed factor */
+  ubyte writebllen;            /*  25:22  Max. write data block length */
+  ubyte writeblpartial;        /*  21:21  Partial blocks for write allowed */
+  ubyte fileformatgrp;         /*  15:15  File format group */
+  ubyte copy;                  /*  14:14  Copy flag (OTP) */
+  ubyte permwriteprotect;      /*  13:13  Permanent write protection */
+  ubyte tmpwriteprotect;       /*  12:12  Temporary write protection */
+  ubyte fileformat;            /*  10:11  File format */
+  ubyte mmcecc;                /*   9:8   ECC (MMC) */
+  ubyte crc;                   /*   7:1   CRC */
+                               /*   0:0   Not used */
+};
+
 /********************************************************************************************
  * Public Data
  ********************************************************************************************/

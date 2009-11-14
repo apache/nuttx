@@ -66,6 +66,7 @@
 
 #define IS_MMC(t)   (((t) & MMCSD_CARDTYPE_MMC) != 0)
 #define IS_SD(t)    (((t) & (MMCSD_CARDTYPE_SDV1|MMCSD_CARDTYPE_SDV2)) != 0)
+#define IS_SDV1(t)  (((t) & MMCSD_CARDTYPE_SDV1) != 0)
 #define IS_SDV2(t)  (((t) & MMCSD_CARDTYPE_SDV2) != 0)
 #define IS_BLOCK(t) (((t) & MMCSD_CARDTYPE_BLOCK) != 0)
 

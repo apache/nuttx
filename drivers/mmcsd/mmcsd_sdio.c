@@ -114,8 +114,7 @@ struct mmcsd_state_s
 
   /* Memory card geometry (extracted from the CSD) */
 
-  uint16 rdblocklen;               /* Read block length (== block size) */
-  uint16 wrblocklen;               /* Write block length */
+  uint16 blocksize;                /* Read block length (== block size) */
   size_t nblocks;                  /* Number of blocks */
   size_t capacity;                 /* Total capacity of volume */
 
@@ -137,9 +136,9 @@ static int     mmcsd_sendcmdpoll(struct mmcsd_state_s *priv, uint32 cmd, uint32 
 static int     mmcsd_recvR1(struct mmcsd_state_s *priv, uint32 cmd);
 static void    mmcsd_decodecsd(struct mmcsd_state_s *priv, uint32 csd[4]);
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-static void    mmcsd_decodecid(uint32 cid[4]);
+static void    mmcsd_decodecid(struct mmcsd_state_s *priv, uint32 cid[4]);
 #else
-#  define mmcsd_decodecid(cid)
+#  define mmcsd_decodecid(priv,cid)
 #endif
 
 static int     mmcsd_verifystandby(struct mmcsd_state_s *priv);
@@ -227,7 +226,7 @@ static int mmcsd_sendcmdpoll(struct mmcsd_state_s *priv, uint32 cmd, uint32 arg)
   ret = SDIO_WAITRESPONSE(priv->dev, cmd);
   if (ret != OK)
     {
-      fdbg("ERROR: Wait for response to cmd=%08x failed: %d\n", cmd, ret);
+      fdbg("ERROR: Wait for response to cmd: %08x failed: %d\n", cmd, ret);
     }
   return ret;
 }
@@ -311,8 +310,7 @@ static int mmcsd_recvR1(struct mmcsd_state_s *priv, uint32 cmd)
  *   values will be set in the driver state structure:
  *
  *   priv->dsrimp      TRUE: card supports CMD4/DSR setting (from CSD)
- *   priv->rdblocklen  Read block length (== block size)
- *   priv->wrblocklen  Write block length
+ *   priv->blocksize   Read block length (== block size)
  *   priv->nblocks     Number of blocks
  *   priv->capacity    Total capacity of volume
  *
@@ -320,8 +318,248 @@ static int mmcsd_recvR1(struct mmcsd_state_s *priv, uint32 cmd)
 
 static void mmcsd_decodecsd(struct mmcsd_state_s *priv, uint32 csd[4])
 {
-#warning "Not Implemented"
-  return -ENOSYS;
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  struct mmcsd_csd_s decoded;
+#endif
+  unsigned int readbllen;
+
+  /* Word 1: Bits 127-96:
+   *
+   * CSD_STRUCTURE      127:126 CSD structure
+   * SPEC_VERS          125:122 (MMC) Spec version
+   * TAAC               119:112 Data read access-time-1
+   *   TIME_VALUE         6:3   Time mantissa
+   *   TIME_UNIT          2:0   Time exponent
+   * NSAC               111:104 Data read access-time-2 in CLK cycle(NSAC*100)
+   * TRAN_SPEED         103:96 Max. data transfer rate
+   *   TIME_VALUE         6:3  Rate exponent
+   *   TRANSFER_RATE_UNIT 2:0 Rate mantissa
+   */
+
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  decoded.csdstructure               =  csd[0] >> 30;
+  decoded.mmcspecvers                = (csd[0] >> 26) & 0x0f;
+  decoded.taac.timevalue             = (csd[0] >> 19) & 0x0f;
+  decoded.taac.timeunit              = (csd[0] >> 16) & 7;
+  decoded.nsac                       = (csd[0] >> 8)  & 0xff;
+  decoded.transpeed.timevalue        = (csd[0] >> 3)  & 0x0f;
+  decoded.transpeed.transferrateunit =  csd[0]        & 7;
+#endif
+
+  /* Word 2: Bits 64:95
+   *   CCC                95:84 Card command classes
+   *   READ_BL_LEN        83:80 Max. read data block length
+   *   READ_BL_PARTIAL    79:79 Partial blocks for read allowed
+   *   WRITE_BLK_MISALIGN 78:78 Write block misalignment
+   *   READ_BLK_MISALIGN  77:77 Read block misalignment
+   *   DSR_IMP            76:76 DSR implemented
+   * Byte addressed SD and MMC:
+   *   C_SIZE             73:62 Device size
+   * Block addressed SD:
+   *                      75:70 (reserved)
+   *   C_SIZE             48:69 Device size
+   */
+
+  priv->dsrimp             = (csd[1] >> 12) & 1;
+  readbllen                = (csd[1] >> 16) & 0x0f;
+
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  decoded.ccc              = (csd[1] >> 20) & 0x0fff;
+  decoded.readbllen        = (csd[1] >> 16) & 0x0f;
+  decoded.readblpartial    = (csd[1] >> 15) & 1;
+  decoded.writeblkmisalign = (csd[1] >> 14) & 1;
+  decoded.readblkmisalign  = (csd[1] >> 13) & 1;
+  decoded.dsrimp           = priv->dsrimp;
+#endif
+
+  /* Word 3: Bits 32-63
+   * 
+   * Byte addressed SD:
+   *   C_SIZE             73:62 Device size
+   *   VDD_R_CURR_MIN     61:59 Max. read current at Vcc min
+   *   VDD_R_CURR_MAX     58:56 Max. read current at Vcc max
+   *   VDD_W_CURR_MIN     55:53 Max. write current at Vcc min
+   *   VDD_W_CURR_MAX     52:50 Max. write current at Vcc max
+   *   C_SIZE_MULT        49:47 Device size multiplier
+   *   SD_ER_BLK_EN       46:46 Erase single block enable (SD only)
+   *   SD_SECTOR_SIZE     45:39 Erase sector size
+   *   SD_WP_GRP_SIZE     38:32 Write protect group size
+   * Block addressed SD:
+   *                      75:70 (reserved)
+   *   C_SIZE             48:69 Device size
+   *                      47:47 (reserved)
+   *   SD_ER_BLK_EN       46:46 Erase single block enable (SD only)
+   *   SD_SECTOR_SIZE     45:39 Erase sector size
+   *   SD_WP_GRP_SIZE     38:32 Write protect group size
+   * MMC:
+   *   C_SIZE             73:62 Device size
+   *   VDD_R_CURR_MIN     61:59 Max. read current at Vcc min
+   *   VDD_R_CURR_MAX     58:56 Max. read current at Vcc max
+   *   VDD_W_CURR_MIN     55:53 Max. write current at Vcc min
+   *   VDD_W_CURR_MAX     52:50 Max. write current at Vcc max
+   *   C_SIZE_MULT        49:47 Device size multiplier
+   *   MMC_SECTOR_SIZE    46:42 Erase sector size
+   *   MMC_ER_GRP_SIZE    41:37 Erase group size (MMC)
+   *   MMC_WP_GRP_SIZE    36:32 Write protect group size
+   */
+
+  if (IS_BLOCK(priv->type))
+    {
+      /* C_SIZE: 69:64 from Word 2 and 63:48 from Word 3
+       *
+       *   512      = (1 << 9)
+       *   1024     = (1 << 10)
+       *   512*1024 = (1 << 19)
+       */
+
+      uint32 csize                   = ((csd[1] & 0x3f) << 16) | (csd[2] >> 16);
+      priv->capacity                 = (csize + 1) << 19;
+      priv->blocksize                = 1 << 9;
+      priv->nblocks                  = priv->capacity >> 9;
+
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+      decoded.u.sdblock.csize        = csize; 
+      decoded.u.sdblock.sderblen     = (csd[2] >> 14) & 1;
+      decoded.u.sdblock.sdsectorsize = (csd[2] >> 7) & 0x7f;
+      decoded.u.sdblock.sdwpgrpsize  =  csd[2] & 0x7f;
+#endif
+    }
+  else
+    {
+      /* C_SIZE: 73:64 from Word 2 and 63:62 from Word 3 */
+
+      uint16 csize                   = ((csd[1] & 0x03ff) << 2) | ((csd[2] >> 30) & 3);
+      ubyte  csizemult               = (csd[2] >> 15) & 7;
+
+      priv->nblocks                  = ((uint32)csize + 1) * (1 << (csizemult + 2));
+      priv->blocksize                = (1 << readbllen);
+      priv->capacity                 = priv->nblocks * priv->blocksize;
+
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+      if (IS_SD(priv->type))
+        {
+          decoded.u.sdbyte.csize            = csize; 
+          decoded.u.sdbyte.vddrcurrmin      = (csd[2] >> 27) & 7;
+          decoded.u.sdbyte.vddrcurrmax      = (csd[2] >> 24) & 7;
+          decoded.u.sdbyte.vddwcurrmin      = (csd[2] >> 21) & 7;
+          decoded.u.sdbyte.vddwcurrmax      = (csd[2] >> 18) & 7;
+          decoded.u.sdbyte.csizemult        = csizemult;
+          decoded.u.sdbyte.sderblen         = (csd[2] >> 14) & 1;
+          decoded.u.sdbyte.sdsectorsize     = (csd[2] >> 7) & 0x7f;
+          decoded.u.sdbyte.sdwpgrpsize      =  csd[2] & 0x7f;
+        }
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+      else if (IS_MMC(priv->type))
+        {
+          decoded.u.mmc.csize               = csize; 
+          decoded.u.mmc.vddrcurrmin         = (csd[2] >> 27) & 7;
+          decoded.u.mmc.vddrcurrmax         = (csd[2] >> 24) & 7;
+          decoded.u.mmc.vddwcurrmin         = (csd[2] >> 21) & 7;
+          decoded.u.mmc.vddwcurrmax         = (csd[2] >> 18) & 7;
+          decoded.u.mmc.csizemult           = csizemult;
+          decoded.u.mmc.er.mmc22.sectorsize = (csd[2] >> 10) & 0x1f;
+          decoded.u.mmc.er.mmc22.ergrpsize  = (csd[2] >> 5) & 0x1f;
+          decoded.u.mmc.mmcwpgrpsize        =  csd[2] & 0x1f;
+        }
+#endif
+#endif
+    }
+
+  /* Word 4: Bits 0-31
+   *   WP_GRP_EN           31:31 Write protect group enable
+   *   MMC DFLT_ECC        30:29 Manufacturer default ECC (MMC only)
+   *   R2W_FACTOR          28:26 Write speed factor
+   *   WRITE_BL_LEN        25:22 Max. write data block length
+   *   WRITE_BL_PARTIAL    21:21 Partial blocks for write allowed
+   *   FILE_FORMAT_GROUP   15:15 File format group
+   *   COPY                14:14 Copy flag (OTP)
+   *   PERM_WRITE_PROTECT  13:13 Permanent write protection
+   *   TMP_WRITE_PROTECT   12:12 Temporary write protection
+   *   FILE_FORMAT         10:11 File format
+   *   ECC                  9:8  ECC (MMC only)
+   *   CRC                  7:1  CRC
+   *   Not used             0:0 
+   */
+
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  decoded.wpgrpen          =  csd[3] >> 31;
+  decoded.mmcdfltecc       = (csd[3] >> 29) & 3;
+  decoded.r2wfactor        = (csd[3] >> 26) & 7;
+  decoded.writebllen       = (csd[3] >> 22) & 0x0f;
+  decoded.writeblpartial   = (csd[3] >> 21) & 1;
+  decoded.fileformatgrp    = (csd[3] >> 15) & 1;
+  decoded.copy             = (csd[3] >> 14) & 1;
+  decoded.permwriteprotect = (csd[3] >> 13) & 1;
+  decoded.tmpwriteprotect  = (csd[3] >> 12) & 1;
+  decoded.fileformat       = (csd[3] >> 10) & 3;
+  decoded.mmcecc           = (csd[3] >> 8)  & 3;
+  decoded.crc              = (csd[3] >> 1)  & 0x7f;
+ 
+  fvdbg("CSD:\n");
+  fvdbg("  CSD_STRUCTURE: %d SPEC_VERS: %d (MMC)\n",
+        decoded.csdstructure, decoded.mmcspecvers);
+  fvdbg("  TAAC {TIME_UNIT: %d TIME_UNIT: %d} NSAC: %d\n",
+        decoded.taac.timeunit, decoded.taac.timevalue, decoded.nsac);
+  fvdbg("  TRAN_SPEED {TRANSFER_RATE_UNIT: %d TIME_VALUE: %d}\n",
+        decoded.transpeed.transferrateunit, decoded.transpeed.timevalue);
+  fvdbg("  CCC: %d\n", decoded.ccc);
+  fvdbg("  READ_BL_LEN: %d READ_BL_PARTIAL: %d\n",
+        decoded.readbllen, decoded.readblpartial);
+  fvdbg("  WRITE_BLK_MISALIGN: %d READ_BLK_MISALIGN: %d\n",
+        decoded.writeblkmisalign, decoded.readblkmisalign);
+  fvdbg("  DSR_IMP: %d\n",
+        decoded.dsrimp);
+
+  if (IS_BLOCK(priv->type))
+    {
+      fvdbg("  SD Block Addressing:\n");
+      fvdbg("    C_SIZE: %d SD_ER_BLK_EN: %d\n",
+            decoded.u.sdblock.csize, decoded.u.sdblock.sderblen);
+      fvdbg("    SD_SECTOR_SIZE: %d SD_WP_GRP_SIZE: %d\n",
+            decoded.u.sdblock.sdsectorsize, decoded.u.sdblock.sdwpgrpsize);
+    }
+  else if (IS_SD(priv->type))
+    {
+      fvdbg("  SD Byte Addressing:\n");
+      fvdbg("    C_SIZE: %d C_SIZE_MULT: %d\n",
+            decoded.u.sdbyte.csize, decoded.u.sdbyte.csizemult);
+      fvdbg("    VDD_R_CURR_MIN: %d VDD_R_CURR_MAX: %d\n",
+            decoded.u.sdbyte.vddrcurrmin, decoded.u.sdbyte.vddrcurrmax);
+      fvdbg("    VDD_W_CURR_MIN: %d VDD_W_CURR_MAX: %d\n",
+            decoded.u.sdbyte.vddwcurrmin, decoded.u.sdbyte.vddwcurrmax);
+      fvdbg("    SD_ER_BLK_EN: %d SD_SECTOR_SIZE: %d (SD) SD_WP_GRP_SIZE: %d\n",
+            decoded.u.sdbyte.sderblen, decoded.u.sdbyte.sdsectorsize, decoded.u.sdbyte.sdwpgrpsize);
+    }
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+  else if (IS_MMC(priv->type))
+    {
+      fvdbg("  MMC:\n");
+      fvdbg("    C_SIZE: %d C_SIZE_MULT: %d\n",
+            decoded.u.mmc.csize, decoded.u.mmc.csizemult);
+      fvdbg("    VDD_R_CURR_MIN: %d VDD_R_CURR_MAX: %d\n",
+            decoded.u.mmc.vddrcurrmin, decoded.u.mmc.vddrcurrmax);
+      fvdbg("    VDD_W_CURR_MIN: %d VDD_W_CURR_MAX: %d\n",
+            decoded.u.mmc.vddwcurrmin, decoded.u.mmc.vddwcurrmax);
+      fvdbg("    MMC_SECTOR_SIZE: %d MMC_ER_GRP_SIZE: %d MMC_WP_GRP_SIZE: %d\n",
+            decoded.u.mmc.er.mmc22.sectorsize, decoded.u.mmc.er.mmc22.ergrpsize,
+            decoded.u.mmc.mmcwpgrpsize);
+    }
+#endif
+
+  fvdbg("  WP_GRP_EN: %d MMC DFLT_ECC: %d (MMC) R2W_FACTOR: %d\n",
+        decoded.wpgrpen, decoded.mmcdfltecc, decoded.r2wfactor);
+  fvdbg("  WRITE_BL_LEN: %d WRITE_BL_PARTIAL: %d\n",
+        decoded.writebllen, decoded.writeblpartial);
+  fvdbg("  FILE_FORMAT_GROUP: %d COPY: %d\n",
+        decoded.fileformatgrp, decoded.copy);
+  fvdbg("  PERM_WRITE_PROTECT: %d TMP_WRITE_PROTECT: %d\n",
+        decoded.permwriteprotect, decoded.tmpwriteprotect);
+  fvdbg("  FILE_FORMAT: %d ECC: %d (MMC) CRC: %d\n",
+        decoded.fileformat, decoded.mmcecc, decoded.crc);
+
+  fvdbg("Capacity: %dKb, Block size: %db, nblocks: %d\n",
+         priv->capacity / 1024, priv->blocksize, priv->nblocks);
+#endif
 }
 
 /****************************************************************************
@@ -333,7 +571,7 @@ static void mmcsd_decodecsd(struct mmcsd_state_s *priv, uint32 csd[4])
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-static void mmcsd_decodecid(uint32 cid[4])
+static void mmcsd_decodecid(struct mmcsd_state_s *priv, uint32 cid[4])
 {
   struct mmcsd_cid_s decoded;
 
@@ -345,7 +583,7 @@ static void mmcsd_decodecid(uint32 cid[4])
    */
 
   decoded.mid    =  cid[0] >> 24;
-  decoded.oid    = (cid[0] >> 8) & 0xffff;
+  decoded.oid    = (cid[0] >> 16) & 0xffff;
   decoded.pnm[0] =  cid[0] & 0xff;
 
   /* Word 2: Bits 64:95
@@ -377,13 +615,13 @@ static void mmcsd_decodecid(uint32 cid[4])
    *   crc -   7:1    7-bit CRC7
    */
 
-  decoded.psn   |= cid[3] >> 24;
+  decoded.psn   |=  cid[3] >> 24;
   decoded.mdt    = (cid[3] >> 8) & 0x0fff;
   decoded.crc    = (cid[3] >> 1) & 0x7f;
 
-  fvdbg("mid=%02x oid=%04x pnm=%s prv=%d psn=%d mdt=%02x crc=%02x\n",
-      priv->cid.mid, priv->cid.oid, priv->cid.pnm, priv->cid.prv,
-      priv->cid.psn, priv->cid.mdt, priv->cid.crc);
+  fvdbg("mid: %02x oid: %04x pnm: %s prv: %d psn: %d mdt: %02x crc: %02x\n",
+      decoded.mid, decoded.oid, decoded.pnm, decoded.prv,
+      decoded.psn, decoded.mdt, decoded.crc);
 }
 #endif
 
@@ -578,7 +816,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
           geometry->geo_writeenabled  = FALSE;
 #endif
           geometry->geo_nsectors      = priv->nblocks;
-          geometry->geo_sectorsize    = priv->rdblocklen;
+          geometry->geo_sectorsize    = priv->blocksize;
 
           fvdbg("available: TRUE mediachanged: %s writeenabled: %s\n",
                  geometry->geo_mediachanged ? "TRUE" : "FALSE",
@@ -688,7 +926,7 @@ static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
       fdbg("ERROR: SDIO_RECVR2 for MMC CID failed: %d\n", ret);
       return ret;
     }
-  mmcsd_decodecid(cid);
+  mmcsd_decodecid(priv, cid);
 
   /* Send CMD3 = SET_RELATIVE_ADDR.  This command is used to assign a logical
    * address to the card.  For MMC, the host assigns the address. CMD3 causes
@@ -731,9 +969,6 @@ static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
       return ret;
     }
   mmcsd_decodecsd(priv, csd);
-
-  fvdbg("Capacity: %dKb, Block size: %db, nblocks=%d\n",
-         priv->capacity / 1024, priv->rdblocklen, priv->nblocks);
 
   /* Set the Driver Stage Register (DSR) if (1) a CONFIG_MMCSD_DSR has been
    * provided and (2) the card supports a DSR register.  If no DSR value
@@ -843,7 +1078,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
       }
     else
       {
-        fdbg("ERROR: R7: %08x\n", r7);
+        fdbg("ERROR: R7: %08x\n", response);
         return -EIO;
       }
   }
@@ -1026,7 +1261,7 @@ static int mmcsd_probe(struct mmcsd_state_s *priv)
 {
   int ret;
 
-  fvdbg("type=%d probed=%d\n", priv->type, priv->probed);
+  fvdbg("type: %d probed: %d\n", priv->type, priv->probed);
 
   /* If we have reliable card detection events and if we have
    * already probed the card, then we don't need to do anything
@@ -1134,15 +1369,14 @@ static int mmcsd_removed(struct mmcsd_state_s *priv)
    * be), and that the card has never been initialized.
    */
 
-  priv->capacity    = 0; /* Capacity=0 sometimes means no media */
-  priv->rdblocklen  = 0;
-  priv->wrblocklen  = 0;
+  priv->capacity     = 0; /* Capacity=0 sometimes means no media */
+  priv->blocksize    = 0;
   priv->mediachanged = FALSE;
-  priv->type        = MMCSD_CARDTYPE_UNKNOWN;
-  priv->probed      = FALSE;
-  priv->selected    = FALSE;
-  priv->rca         = 0;
-  priv->selblocklen = 0;
+  priv->type         = MMCSD_CARDTYPE_UNKNOWN;
+  priv->probed       = FALSE;
+  priv->selected     = FALSE;
+  priv->rca          = 0;
+  priv->selblocklen  = 0;
 
   /* Go back to the default 1-bit data bus. */
 
