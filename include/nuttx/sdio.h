@@ -360,25 +360,6 @@
 #define SDIO_CLOCK(dev,rate) ((dev)->clock(dev,rate))
 
 /****************************************************************************
- * Name: SDIO_SETBLOCKLEN
- *
- * Description:
- *   Set the MMC/SD block length and block count
- *
- * Input Parameters:
- *   dev      - An instance of the MMC/SD device interface
- *   blocklen - The block length
- *   nblocks  - The block count
- *
- * Returned Value:
- *   OK on success; negated errno on failure
- *
- ****************************************************************************/
-
-#define SDIO_SETBLOCKLEN(dev,blocklen,nblocks) \
-  ((dev)->setblocklen(dev,blocklen,nblocks))
-
-/****************************************************************************
  * Name: SDIO_ATTACH
  *
  * Description:
@@ -414,6 +395,26 @@
 #define SDIO_SENDCMD(dev,cmd,arg) ((dev)->sendcmd(dev,cmd,arg))
 
 /****************************************************************************
+ * Name: SDIO_SENDSETUP
+ *
+ * Description:
+ *   Setup hardware in preparation for data trasfer from the card.  This method
+ *   will do whatever controller setup is necessary.  This would be called
+ *   for SD memory just AFTER sending CMD24 (WRITE_BLOCK), CMD25
+ *   (WRITE_MULTIPLE_BLOCK), ... and before SDIO_SENDDATA is called.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the MMC/SD device interface
+ *   nbytes - The number of bytes in the transfer
+ *
+ * Returned Value:
+ *   Number of bytes sent on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#define SDIO_SENDSETUP(dev,nbytes) ((dev)->sendsetup(dev,nbytes))
+
+/****************************************************************************
  * Name: SDIO_SENDDATA
  *
  * Description:
@@ -424,7 +425,7 @@
  *   data - Data to be sent
  *
  * Returned Value:
- *   Number of bytes sent on succes; a negated errno on failure
+ *   Number of bytes sent on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -475,7 +476,28 @@
 #define SDIO_RECVR4(dev,cmd,R4) ((dev)->recvR4(dev,cmd,R4)) /* 48-bit */
 #define SDIO_RECVR5(dev,cmd,R5) ((dev)->recvR5(dev,cmd,R5)) /* 48-bit */
 #define SDIO_RECVR6(dev,cmd,R6) ((dev)->recvR6(dev,cmd,R6)) /* 48-bit */
-#define SDIO_RECVR7(dev,cmd,R7) ((dev)->recvR6(dev,cmd,R7)) /* 48-bit */
+#define SDIO_RECVR7(dev,cmd,R7) ((dev)->recvR7(dev,cmd,R7)) /* 48-bit */
+
+/****************************************************************************
+ * Name: SDIO_RECVSETUP
+ *
+ * Description:
+ *   Setup hardware in preparation for data trasfer from the card.  This method
+ *   will do whatever controller setup is necessary.  This would be called
+ *   for SD memory just BEFORE sending CMD13 (SEND_STATUS), CMD17
+ *   (READ_SINGLE_BLOCK), CMD18 (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), ...
+ *   and before SDIO_RECVDATA is called.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the MMC/SD device interface
+ *   nbytes - The number of bytes in the transfer
+ *
+ * Returned Value:
+ *   Number of bytes sent on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#define SDIO_RECVSETUP(dev,nbytes) ((dev)->recvsetup(dev,nbytes))
 
 /****************************************************************************
  * Name: SDIO_RECVDATA
@@ -488,7 +510,7 @@
  *   buffer - Buffer in which to receive the data
  *
  * Returned Value:
- *   Number of bytes sent on succes; a negated errno on failure
+ *   Number of bytes sent on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -502,18 +524,15 @@
  *
  * Input Parameters:
  *   dev      - An instance of the MMC/SD device interface
- *   eventset - A bitset of events to enable or disable (see SDIOEVENT_*
- *              definitions
- *   enable   - TRUE: enable event; FALSE: disable events
+ *   eventset - A bitset of events to enable or disable (see MMCSDEVENT_*
+ *              definitions). 0=disable; 1=enable.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#define SDIO_EVENTENABLE(dev,eventset)  ((dev)->eventenable(dev,eventset,TRUE))
-#define SDIO_EVENTDISABLE(dev,eventset) ((dev)->eventenable(dev,eventset,FALSE))
-#define SDIO_EVENTDISABLEALL(dev)       ((dev)->eventenable(dev,SDIOEVENT_ALLEVENTS,FALSE))
+#define SDIO_EVENTENABLE(dev,eventset)  ((dev)->eventenable(dev,eventset))
 
 /****************************************************************************
  * Name: SDIO_EVENTWAIT
@@ -528,6 +547,7 @@
  * Returned Value:
  *   Event set containing the event(s) that ended the wait.  If no events the
  *   returned event set is zero, then the wait was terminated by the timeout.
+ *   All events are cleared disabled after the wait concludes.
  *
  ****************************************************************************/
 
@@ -538,13 +558,14 @@
  *
  * Description:
  *   Return the current event set.  This supports polling for MMC/SD (vs.
- *   waiting).
+ *   waiting).  Only enabled events need be reported.
  *
  * Input Parameters:
- *   dev     - An instance of the MMC/SD device interface
+ *   dev - An instance of the MMC/SD device interface
  *
  * Returned Value:
- *   Event set containing the current events (cleared after reading).
+ *   Event set containing the current events (All pending events are cleared
+ *   after reading).
  *
  ****************************************************************************/
 
@@ -609,7 +630,7 @@
  *   buffer - The memory to DMA from
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -630,7 +651,7 @@
  *   buffer - The memory to DMA into
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -650,7 +671,7 @@
  *   dev - An instance of the MMC/SD device interface
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -670,7 +691,7 @@
  *   dev - An instance of the MMC/SD device interface
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -692,7 +713,7 @@
  *               remaining in the transfer.
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -713,8 +734,15 @@ enum sdio_clock_e
   CLOCK_SDIO_DISABLED = 0, /* Clock is disabled */
   CLOCK_IDMODE,            /* Initial ID mode clocking (<400KHz) */
   CLOCK_MMC_TRANSFER,      /* MMC normal operation clocking */
-  CLOCK_SD_TRANSFER        /* SD normal operation clocking */
+  CLOCK_SD_TRANSFER_1BIT,  /* SD normal operation clocking (narrow 1-bit mode) */
+  CLOCK_SD_TRANSFER_4BIT   /* SD normal operation clocking (wide 4-bit mode) */
 };
+
+/* Event set.  A ubyte is big enough to hold a set of 8-events.  If more are
+ * needed, change this to a uint16.
+ */
+
+typedef ubyte sdio_eventset_t;
 
 /* This structure defines the interface between the NuttX MMC/SD
  * driver and the chip- or board-specific MMC/SD interface.  This
@@ -736,12 +764,12 @@ struct sdio_dev_s
   ubyte (*status)(FAR struct sdio_dev_s *dev);
   void  (*widebus)(FAR struct sdio_dev_s *dev, boolean enable);
   void  (*clock)(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate);
-  int   (*setblocklen)(FAR struct sdio_dev_s *dev, int blocklen, int nblocks);
   int   (*attach)(FAR struct sdio_dev_s *dev);
 
   /* Command/Status/Data Transfer */
 
   void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
+  int   (*sendsetup)(FAR struct sdio_dev_s *dev, uint32 nbytes);
   int   (*senddata)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer);
 
   int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32 cmd);
@@ -752,11 +780,12 @@ struct sdio_dev_s
   int   (*recvR5)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5);
   int   (*recvR6)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);
   int   (*recvR7)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);
+  int   (*recvsetup)(FAR struct sdio_dev_s *dev, uint32 nbytes);
   int   (*recvdata)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
 
   /* EVENT handler */
 
-  void  (*eventenable)(FAR struct sdio_dev_s *dev, ubyte eventset, boolean enable);
+  void  (*eventenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
   ubyte (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);
   ubyte (*events)(FAR struct sdio_dev_s *dev);
 

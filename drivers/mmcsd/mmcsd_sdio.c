@@ -76,6 +76,10 @@
 #define MMCSD_DSR_DELAY         (100*1000) /* Time to wait after setting DSR */
 #define MMCSD_CLK_DELAY         (500*1000) /* Delay after changing clock speeds */
 
+/* Event delays (all in units of milliseconds) */
+
+#define MMCSD_SCR_DATADELAY     (100)      /* Wait up to 100MS to get SCR */
+
 #define IS_EMPTY(priv) (priv->type == MMCSD_CARDTYPE_UNKNOWN)
 
 /* Transfer mode */
@@ -109,6 +113,7 @@ struct mmcsd_state_s
 
   ubyte mode:2;                    /* (See MMCSDMODE_* definitions) */
   ubyte type:4;                    /* Card type (See MMCSD_CARDTYPE_* definitions) */
+  ubyte buswidth:4;                /* Bus widthes supported (SD only) */
   uint16 selblocklen;              /* The currently selected block length */
   uint16 rca;                      /* Relative Card Address (RCS) register */
 
@@ -131,17 +136,21 @@ struct mmcsd_state_s
 
 /* Command/response helpers *************************************************/
 
-static int     mmcsd_sendcmdpoll(struct mmcsd_state_s *priv, uint32 cmd, uint32 arg);
-
+static int     mmcsd_sendcmdpoll(struct mmcsd_state_s *priv, uint32 cmd,
+                 uint32 arg);
 static int     mmcsd_recvR1(struct mmcsd_state_s *priv, uint32 cmd);
-static void    mmcsd_decodecsd(struct mmcsd_state_s *priv, uint32 csd[4]);
+static int     mmcsd_getSCR(struct mmcsd_state_s *priv, uint32 scr[2]);
+
+static void    mmcsd_decodeCSD(struct mmcsd_state_s *priv, uint32 csd[4]);
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-static void    mmcsd_decodecid(struct mmcsd_state_s *priv, uint32 cid[4]);
+static void    mmcsd_decodeCID(struct mmcsd_state_s *priv, uint32 cid[4]);
 #else
-#  define mmcsd_decodecid(priv,cid)
+#  define mmcsd_decodeCID(priv,cid)
 #endif
+static void    mmcsd_decodeSCR(struct mmcsd_state_s *priv, uint32 scr[2]);
 
 static int     mmcsd_verifystandby(struct mmcsd_state_s *priv);
+static int     mmcsd_verifyidle(struct mmcsd_state_s *priv);
 
 /* Transfer helpers *********************************************************/
 
@@ -167,17 +176,14 @@ static int     mmcsd_ioctl(FAR struct inode *inode, int cmd,
 
 /* Initialization/uninitialization/reset ************************************/
 
-static inline int
-               mmcsd_mmcinitialize(struct mmcsd_state_s *priv);
-static inline int
-               mmcsd_sdinitialize(struct mmcsd_state_s *priv);
-static inline int
-               mmcsd_cardidentify(struct mmcsd_state_s *priv);
+static int     mmcsd_widebus(struct mmcsd_state_s *priv);
+static int     mmcsd_mmcinitialize(struct mmcsd_state_s *priv);
+static int     mmcsd_sdinitialize(struct mmcsd_state_s *priv);
+static int     mmcsd_cardidentify(struct mmcsd_state_s *priv);
 static int     mmcsd_probe(struct mmcsd_state_s *priv);
 static int     mmcsd_removed(struct mmcsd_state_s *priv);
 static int     mmcsd_hwinitialize(struct mmcsd_state_s *priv);
-static inline void
-               mmcsd_hwuninitialize(struct mmcsd_state_s *priv);
+static void    mmcsd_hwuninitialize(struct mmcsd_state_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -299,7 +305,75 @@ static int mmcsd_recvR1(struct mmcsd_state_s *priv, uint32 cmd)
 }
 
 /****************************************************************************
- * Name: mmcsd_decodecsd
+ * Name: mmcsd_getSCR
+ *
+ * Description:
+ *   Obtain the SD card's Configuration Register (SCR)
+ *
+ * Returned Value:
+ *   OK on success; a negated ernno on failure.
+ *
+ ****************************************************************************/
+
+static int mmcsd_getSCR(struct mmcsd_state_s *priv, uint32 scr[2])
+{
+  int ret;
+
+  /* Set Block Size To 8 Bytes */
+  /* Send CMD55 APP_CMD with argument as card's RCA */
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD16, 8);
+  ret = mmcsd_recvR1(priv, MMCSD_CMD16);
+  if (ret != OK)
+    {
+      fdbg("ERROR: RECVR1 for CMD16 failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Send CMD55 APP_CMD with argument as card's RCA */
+
+  mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32)priv->rca << 16);
+  ret = mmcsd_recvR1(priv, SD_CMD55);
+  if (ret != OK)
+    {
+      fdbg("ERROR: RECVR1 for CMD55 failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Setup up to receive data */
+
+  SDIO_RECVSETUP(priv->dev, 8);
+
+  /* Send ACMD51 SD_APP_SEND_SCR with argument as 0 to start data receipt */
+
+  (void)SDIO_EVENTENABLE(priv->dev, SDIOEVENT_READDATADONE);
+  mmcsd_sendcmdpoll(priv, SD_ACMD51, 0);
+  ret = mmcsd_recvR1(priv, SD_ACMD51);
+  if (ret != OK)
+    {
+      fdbg("ERROR: RECVR1 for ACMD51 failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Wait for data available */
+
+  ret = SDIO_EVENTWAIT(priv->dev, MMCSD_SCR_DATADELAY);
+  if (ret != OK)
+    {
+      fdbg("ERROR: WAITEVENT for READ DATA failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Receive the SCR data from the SD card.  Card data is sent big-endian;
+   * if we are running on a little-endian machine, then we need to swap
+   * some bytes (should this be a configuration option?)
+   */
+
+  return SDIO_RECVDATA(priv->dev, (FAR ubyte *)scr);
+}
+
+/****************************************************************************
+ * Name: mmcsd_decodeCSD
  *
  * Description:
  *   Decode and extract necessary information from the CSD. If debug is
@@ -316,7 +390,7 @@ static int mmcsd_recvR1(struct mmcsd_state_s *priv, uint32 cmd)
  *
  ****************************************************************************/
 
-static void mmcsd_decodecsd(struct mmcsd_state_s *priv, uint32 csd[4])
+static void mmcsd_decodeCSD(struct mmcsd_state_s *priv, uint32 csd[4])
 {
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
   struct mmcsd_csd_s decoded;
@@ -563,15 +637,16 @@ static void mmcsd_decodecsd(struct mmcsd_state_s *priv, uint32 csd[4])
 }
 
 /****************************************************************************
- * Name: mmcsd_decodecid
+ * Name: mmcsd_decodeCID
  *
  * Description:
- *   Show the contents of the CID (for debug purposes only)
+ *   Show the contents of the Card Indentification Data (CID) (for debug
+ *   purposes only)
  *
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-static void mmcsd_decodecid(struct mmcsd_state_s *priv, uint32 cid[4])
+static void mmcsd_decodeCID(struct mmcsd_state_s *priv, uint32 cid[4])
 {
   struct mmcsd_cid_s decoded;
 
@@ -626,14 +701,83 @@ static void mmcsd_decodecid(struct mmcsd_state_s *priv, uint32 cid[4])
 #endif
 
 /****************************************************************************
+ * Name: mmcsd_decodeSCR
+ *
+ * Description:
+ *   Show the contents of the SD Configuration Register (SCR).  The only
+ *   value retained is:  priv->buswidth;
+ *
+ ****************************************************************************/
+
+static void mmcsd_decodeSCR(struct mmcsd_state_s *priv, uint32 scr[2])
+{
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+struct mmcsd_scr_s decoded;
+#endif
+
+  /* Word 1, bits 63:32
+   *   SCR_STRUCTURE          63:60 4-bit SCR structure version
+   *   SD_VERSION             59:56 4-bit SD memory spec. version
+   *   DATA_STATE_AFTER_ERASE 55:55 1-bit erase status
+   *   SD_SECURITY            54:52 3-bit SD security support level
+   *   SD_BUS_WIDTHS          51:48 4-bit bus width indicator
+   *   Reserved               47:32 16-bit SD reserved space
+   * usage.
+   *   
+   */
+
+  priv->buswidth     = (scr[0] >> 16) & 15;
+
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  decoded.scrversion =  scr[0] >> 28;
+  decoded.sdversion  = (scr[0] >> 24) & 15;
+  decoded.erasestate = (scr[0] >> 23) & 1;
+  decoded.security   = (scr[0] >> 20) & 7;
+  decoded.buswidth   = priv->buswidth;
+#endif
+
+  /* Word 1, bits 63:32
+   *   Reserved               31:0  32-bits reserved for manufacturing
+   * usage.
+   *   
+   */
+
+#if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  decoded.mfgdata   = scr[1];
+
+  fvdbg("SCR:\n");
+  fvdbg("  SCR_STRUCTURE: %d SD_VERSION: %d\n",
+        decoded.scrversion,decoded.sdversion);
+  fvdbg("  DATA_STATE_AFTER_ERASE: %d SD_SECURITY: %d SD_BUS_WIDTHS: %x\n",
+        decoded.erasestate, decoded.security, decoded.buswidth);
+  fvdbg("  Manufacturing data: %08x\n",
+        decoded.mfgdata);
+#endif
+}
+
+/****************************************************************************
  * Name: mmcsd_verifystandby
  *
  * Description:
- *   Verify that the card is in standby state
+ *   Verify that the card is in STANDBY state
  *
  ****************************************************************************/
 
 static int mmcsd_verifystandby(struct mmcsd_state_s *priv)
+{
+#warning "Not implemented"
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: mmcsd_verifystandby
+ *
+ * Description:
+ *   Verify that the card is in IDLE state
+ *
+ ****************************************************************************/
+
+static int mmcsd_verifyidle(struct mmcsd_state_s *priv)
 {
 #warning "Not implemented"
   return -ENOSYS;
@@ -892,6 +1036,93 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mmcsd_widebus
+ *
+ * Description:
+ *  An SD card has been inserted and its SCR has been obtained.  Select wide
+ *  (4-bit) bus operation if the card supports it.
+ *
+ * Assumptions:
+ *   This function is called only once per card insertion as part of the SD
+ *   card initialization sequence.  It is not necessary to reselect the card
+ *   there is not need to check if wide bus operation has already been
+ *   selected.
+ *
+ ****************************************************************************/
+
+static int mmcsd_widebus(struct mmcsd_state_s *priv)
+{
+  int ret;
+
+  /* Check if the SD card supports this feature (as reported in the SCR) */
+
+  if ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0)
+    {
+       /* Disconnect any CD/DAT3 pull up using ACMD42.  ACMD42 is optional and
+        * need not be supported by all SD calls.
+        *
+        * First end CMD55 APP_CMD with argument as card's RCA.
+        */
+
+        mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32)priv->rca << 16);
+        ret = mmcsd_recvR1(priv, SD_CMD55);
+        if (ret != OK)
+          {
+            fdbg("ERROR: RECVR1 for CMD55 of ACMD42: %d\n", ret);
+            return ret;
+          }
+
+        /* Then send ACMD42 with the argument to disconnect the CD/DAT3
+         * pullup
+         */
+
+        mmcsd_sendcmdpoll(priv, SD_ACMD42, MMCSD_ACMD42_CD_DISCONNECT);
+        ret = mmcsd_recvR1(priv, SD_ACMD42);
+        if (ret != OK)
+          {
+            fvdbg("WARNING: SD card does not support ACMD42: %d\n", ret);
+            return ret;
+          }
+
+        /* Now send ACMD6 to select wide, 4-bit bus operation, beginning
+         * with CMD55, APP_CMD:
+         */
+
+        mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32)priv->rca << 16);
+        ret = mmcsd_recvR1(priv, SD_CMD55);
+        if (ret != OK)
+          {
+            fdbg("ERROR: RECVR1 for CMD55 of ACMD6: %d\n", ret);
+            return ret;
+          }
+
+        /* Then send ACMD6 */
+
+        mmcsd_sendcmdpoll(priv, SD_ACMD6, MMCSD_ACMD6_BUSWIDTH_4);
+        ret = mmcsd_recvR1(priv, SD_ACMD6);
+        if (ret != OK)
+          {
+            return ret;
+          }
+
+      /* Configure the SDIO peripheral */
+
+      fvdbg("Wide bus operation selected\n");
+      SDIO_WIDEBUS(priv->dev, TRUE);
+      priv->widebus = TRUE;
+
+      SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_4BIT);
+      up_udelay(MMCSD_CLK_DELAY);
+      return OK;
+    }
+
+  /* Wide bus operation not supported */
+
+  fdbg("WARNING: Card does not support wide-bus operation\n");
+  return -ENOSYS;
+}
+
+/****************************************************************************
  * Name: mmcsd_mmcinitialize
  *
  * Description:
@@ -900,7 +1131,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
+static int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
 {
 #ifdef CONFIG_MMCSD_MMCSUPPORT
   uint32 cid[4];
@@ -912,7 +1143,7 @@ static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
    * so there is good evidence that we have an MMC card inserted into the
    * slot.
    *
-   * Send CMD2 = ALL_SEND_CID. This implementation supports only one MMC slot.
+   * Send CMD2, ALL_SEND_CID. This implementation supports only one MMC slot.
    * If mulitple cards were installed, each card would respond to CMD2 by
    * sending its CID (only one card completes the response at a time).  The
    * driver should send CMD2 and assign an RCAs until no response to
@@ -926,9 +1157,9 @@ static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
       fdbg("ERROR: SDIO_RECVR2 for MMC CID failed: %d\n", ret);
       return ret;
     }
-  mmcsd_decodecid(priv, cid);
+  mmcsd_decodeCID(priv, cid);
 
-  /* Send CMD3 = SET_RELATIVE_ADDR.  This command is used to assign a logical
+  /* Send CMD3, SET_RELATIVE_ADDR.  This command is used to assign a logical
    * address to the card.  For MMC, the host assigns the address. CMD3 causes
    * transition to standby state/data-transfer mode
    */
@@ -936,7 +1167,7 @@ static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
   priv->rca = 1;  /* There is only one card */
   mmcsd_sendcmdpoll(priv, MMC_CMD3, priv->rca << 16);
   ret = mmcsd_recvR1(priv, MMC_CMD3);
-  if (ret != 0)
+  if (ret != OK)
     {
       fdbg("ERROR: mmcsd_recvR1(CMD3) failed: %d\n", ret);
       return ret;
@@ -950,25 +1181,25 @@ static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
    */
 
   ret = mmcsd_verifystandby(priv);
-  if (ret != 0)
+  if (ret != OK)
     {
       fdbg("ERROR: Failed to enter standby state\n");
       return ret;
     }
 
-  /* Send CMD9 = SEND_CSD in standby state/data-transfer mode to obtain the
+  /* Send CMD9, SEND_CSD in standby state/data-transfer mode to obtain the
    * Card Specific Data (CSD) register, e.g., block length, card storage
    * capacity, etc. (Stays in standy state/data-transfer mode)
    */
 
   mmcsd_sendcmdpoll(priv, MMCSD_CMD9, priv->rca << 16);
   ret = SDIO_RECVR2(priv->dev, MMCSD_CMD9, csd);
-  if (ret != 0)
+  if (ret != OK)
     {
       fdbg("ERROR: Could not get SD CSD register: %d\n", ret);
       return ret;
     }
-  mmcsd_decodecsd(priv, csd);
+  mmcsd_decodeCSD(priv, csd);
 
   /* Set the Driver Stage Register (DSR) if (1) a CONFIG_MMCSD_DSR has been
    * provided and (2) the card supports a DSR register.  If no DSR value
@@ -994,9 +1225,120 @@ static inline int mmcsd_mmcinitialize(struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static inline int mmcsd_sdinitialize(struct mmcsd_state_s *priv)
+static int mmcsd_sdinitialize(struct mmcsd_state_s *priv)
 {
-  return -ENOSYS;
+  uint32 cid[4];
+  uint32 csd[4];
+  uint32 scr[2];
+  uint32 rca;
+  int ret;
+
+  /* At this point, clocking has been supplied to the card, both CMD0 and
+   * ACMD41 (with OCR=0) have been sent successfully, the card is no longer
+   * busy and (presumably) in the IDLE state so there is good evidence
+   * that we have an SD card inserted into the slot.
+   *
+   * Send CMD2, ALL_SEND_CID.  The SD CMD2 is similar to the MMC CMD2 except
+   * that the buffer type used to transmit to response of the card (SD Memory
+   * Card: Push-Pull, MMC: Open-Drain). This implementation supports only a
+   * single SD card.  If multiple cards were installed in the slot, each card
+   * would respond to CMD2 by sending its CID (only one card completes the
+   * response at a time).  The driver should send CMD2 and obtain RCAs until
+   * no response to ALL_SEND_CID is received.
+   *
+   * When an SD card receives the CMD2 command it should transition to the
+   * identification state/card-identification mode
+   */
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD2, 0);
+  ret = SDIO_RECVR2(priv->dev, MMCSD_CMD2, cid);
+  if (ret != OK)
+    {
+      fdbg("ERROR: SDIO_RECVR2 for SD CID failed: %d\n", ret);
+      return ret;
+    }
+  mmcsd_decodeCID(priv, cid);
+
+  /* Send CMD3, SET_RELATIVE_ADDR.  In both protocols, this command is used
+   * to assign a logical address to the card.  For MMC, the host assigns the
+   * address; for SD, the memory card has this responsibility. CMD3 causes
+   * transition to standby state/data-transfer mode
+   * 
+   * Send CMD3 with argument 0, SD card publishes its RCA in the response.
+   */
+
+  mmcsd_sendcmdpoll(priv, SD_CMD3, 0);
+  ret = SDIO_RECVR6(priv->dev, SD_CMD3, &rca);
+  if (ret != OK)
+  {
+    return ret;
+  }
+
+  priv->rca = (uint16)rca;
+  fvdbg("RCA: %04x\n", priv->rca);
+
+  /* This should have caused a transition to standby state. However, this will
+   * not be reflected in the present R1 status.  R1/6 contains the state of 
+   * the card when the command was received, not when it completed execution.
+   *
+   * Verify that we are in standby state/data-transfer mode
+   */
+
+  ret = mmcsd_verifystandby(priv);
+  if (ret != OK)
+    {
+      fdbg("ERROR: Failed to enter standby state\n");
+      return ret;
+    }
+
+  /* Send CMD9, SEND_CSD, in standby state/data-transfer mode to obtain the
+   * Card Specific Data (CSD) register.  The argument is the RCA that we
+   * just obtained from CMD3.  The card stays in standy state/data-transfer
+   * mode.
+   */
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD9, priv->rca << 16);
+  ret = SDIO_RECVR2(priv->dev, MMCSD_CMD9, csd);
+  if (ret != OK)
+    {
+      fdbg("ERROR: Could not get SD CSD register(%d)\n", ret);
+      return ret;
+    }
+  mmcsd_decodeCSD(priv, csd);
+
+  /* Set the Driver Stage Register (DSR) if (1) a CONFIG_MMCSD_DSR has been
+   * provided and (2) the card supports a DSR register.  If no DSR value
+   * the card default value (0x0404) will be used.
+   */
+
+  (void)mmcsd_sendcmd4(priv);
+
+  /* Select high speed SD clocking (which may depend on the DSR setting) */
+
+  SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_1BIT);
+  up_udelay(MMCSD_CLK_DELAY);
+
+  /* Get the SD card Configuration Register (SCR).  We need this now because
+   * that configuration register contains the indication whether or not
+   * this card supports wide bus operation.\
+   */
+
+  ret = mmcsd_getSCR(priv, scr);
+  if (ret != OK)
+    {
+      fdbg("ERROR: Could not get SD SCR register(%d)\n", ret);
+      return ret;
+    }
+  mmcsd_decodeSCR(priv, scr);
+
+  /* Select width (4-bit) bus operation (if the card supports it) */
+
+  ret = mmcsd_widebus(priv);
+  if (ret != OK)
+    {
+      fdbg("WARN: Failed to set wide bus operation: %d\n", ret);
+    }
+  return OK;
 }
 
 /****************************************************************************
@@ -1008,12 +1350,12 @@ static inline int mmcsd_sdinitialize(struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
+static int mmcsd_cardidentify(struct mmcsd_state_s *priv)
 {
   uint32  response;
   uint32  start;
   uint32  elapsed;
-  uint32  sdcapacity = MMCD_ACMD41_STDCAPACITY;
+  uint32  sdcapacity = MMCSD_ACMD41_STDCAPACITY;
   int     ret;
 
   /* Assume failure to identify the card */
@@ -1074,7 +1416,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
       {
         fvdbg("SD V2.x card\n");
         priv->type = MMCSD_CARDTYPE_SDV2;
-        sdcapacity = MMCD_ACMD41_HIGHCAPACITY;
+        sdcapacity = MMCSD_ACMD41_HIGHCAPACITY;
       }
     else
       {
@@ -1119,7 +1461,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
             {
               /* Send ACMD41 */
 
-              mmcsd_sendcmdpoll(priv, SD_ACMD41, MMCD_ACMD41_VOLTAGEWINDOW|sdcapacity);
+              mmcsd_sendcmdpoll(priv, SD_ACMD41, MMCSD_ACMD41_VOLTAGEWINDOW|sdcapacity);
               ret = SDIO_RECVR3(priv->dev, SD_CMD55, &response);
               if (ret != OK)
                 {
@@ -1155,7 +1497,7 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
                        * addressing
                        */
 
-                      if ((response & MMCD_R3_HIGHCAPACITY) != 0)
+                      if ((response & MMCSD_R3_HIGHCAPACITY) != 0)
                         {
                           fvdbg("SD V2.x card with block addressing\n");
                           DEBUGASSERT(priv->type == MMCSD_CARDTYPE_SDV2);
@@ -1241,6 +1583,15 @@ static inline int mmcsd_cardidentify(struct mmcsd_state_s *priv)
     {
       fdbg("ERROR: Failed to identify card\n");
       return -EIO;
+    }
+
+  /* Verify that we are in IDLE state */
+
+  ret = mmcsd_verifyidle(priv);
+  if (ret != OK)
+    {
+      fdbg("ERROR: Failed to enter IDLE state\n");
+      return ret;
     }
 
   return OK;
@@ -1417,7 +1768,7 @@ static int mmcsd_hwinitialize(struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static inline void mmcsd_hwuninitialize(struct mmcsd_state_s *priv)
+static void mmcsd_hwuninitialize(struct mmcsd_state_s *priv)
 {
   if (priv)
     {
@@ -1498,7 +1849,7 @@ int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
           else
             {
               fdbg("ERROR: Failed to initialize MMC/SD slot %d: %d\n",
-                   slotno, -ret);
+                   slotno, ret);
               goto errout_with_alloc;
             }
         }
@@ -1510,7 +1861,7 @@ int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
       ret = rwb_initialize(&priv->rwbuffer);
       if (ret < 0)
         {
-          fdbg("ERROR: Buffer setup failed: %d\n", -ret);
+          fdbg("ERROR: Buffer setup failed: %d\n", ret);
           goto errout_with_hwinit;
         }
 #endif
@@ -1524,7 +1875,7 @@ int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
       ret = register_blockdriver(devname, &g_bops, 0, priv);
       if (ret < 0)
         {
-          fdbg("ERROR: register_blockdriver failed: %d\n", -ret);
+          fdbg("ERROR: register_blockdriver failed: %d\n", ret);
           goto errout_with_buffers;
         }
     }

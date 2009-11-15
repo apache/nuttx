@@ -60,11 +60,21 @@
 #define MMCSD_CMD8ECHO_MASK         (0xff << MMCSD_CMD8ECHO_SHIFT)
 #  define MMCSD_CMD8CHECKPATTERN    (0xaa << MMCSD_CMD8ECHO_SHIFT)
 
+/* ACMD6 argument */
+
+#define MMCSD_ACMD6_BUSWIDTH_1       (0)       /* Bus width = 1-bit */
+#define MMCSD_ACMD6_BUSWIDTH_4       (2)       /* Bus width = 4-bit */
+
 /* ACMD41 argument */
 
-#define MMCD_ACMD41_VOLTAGEWINDOW   0x80100000
-#define MMCD_ACMD41_HIGHCAPACITY    (1 << 30)
-#define MMCD_ACMD41_STDCAPACITY     (0)
+#define MMCSD_ACMD41_VOLTAGEWINDOW   0x80100000
+#define MMCSD_ACMD41_HIGHCAPACITY    (1 << 30)
+#define MMCSD_ACMD41_STDCAPACITY     (0)
+
+/* ACMD42 argument */
+
+#define MMCSD_ACMD42_CD_DISCONNECT   (0)  /* Disconnect card detection logic */
+#define MMCSD_ACMD42_CD_CONNECT      (1)  /* Connect card detection logic */
 
 /* R1 Card Status bit definitions */
 
@@ -135,8 +145,15 @@
 #define MMCSD_VDD_33_34             (1 << 21)  /* VDD voltage 3.3-3.4 */
 #define MMCSD_VDD_34_35             (1 << 22)  /* VDD voltage 3.4-3.5 */
 #define MMCSD_VDD_35_36             (1 << 23)  /* VDD voltage 3.5-3.6 */
-#define MMCD_R3_HIGHCAPACITY        (1 << 30)  /* TRUE: Card supports block addressing */
+#define MMCSD_R3_HIGHCAPACITY       (1 << 30)  /* TRUE: Card supports block addressing */
 #define MMCSD_CARD_BUSY             (1 << 31)  /* Card power-up busy bit */
+
+/* SD Configuration Register (SCR) encoding */
+
+#define MMCSD_SCR_BUSWIDTH_1BIT     (1)
+#define MMCSD_SCR_BUSWIDTH_2BIT     (2)
+#define MMCSD_SCR_BUSWIDTH_4BIT     (4)
+#define MMCSD_SCR_BUSWIDTH_8BIT     (8)
 
 /* Last 4 bytes of the 48-bit R7 response */
 
@@ -153,7 +170,7 @@
  * Public Types
  ********************************************************************************************/
 
-/* Decoded CID register */
+/* Decoded Card Identification (CID) register */
 
 struct mmcsd_cid_s
 {
@@ -168,7 +185,7 @@ struct mmcsd_cid_s
                     /*   0:0    1-bit (not used) */
 };
 
-/* Decoded CSD register */
+/* Decoded Card Specific Data (CSD) register */
 
 struct mmcsd_csd_s
 {
@@ -262,6 +279,17 @@ struct mmcsd_csd_s
   ubyte mmcecc;                /*   9:8   ECC (MMC) */
   ubyte crc;                   /*   7:1   CRC */
                                /*   0:0   Not used */
+};
+
+struct mmcsd_scr_s
+{
+  ubyte  scrversion;           /* 63:60 Version of SCR structure */
+  ubyte  sdversion;            /* 59:56 SD memory card physical layer version */
+  ubyte  erasestate;           /* 55:55 Data state after erase (1 or 0) */
+  ubyte  security;             /* 54:52 SD security support */
+  ubyte  buswidth;             /* 51:48 DAT bus widthes supported */
+                               /* 47:32 SD reserved space */
+  uint32 mfgdata;              /* 31:0  Reserved for manufacturing data */
 };
 
 /********************************************************************************************
