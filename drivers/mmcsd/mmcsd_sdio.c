@@ -975,12 +975,12 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   fvdbg("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
 
-  mmcsd_takesem(priv);
   if (geometry)
     {
       /* Is there a (supported) card inserted in the slot? */
 
       priv = (struct mmcsd_state_s *)inode->i_private;
+      mmcsd_takesem(priv);
       if (IS_EMPTY(priv))
         {
           /* No.. return ENODEV */
@@ -1011,9 +1011,9 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
           priv->mediachanged = FALSE;
           ret = OK;
         }
+      mmcsd_givesem(priv);
     }
 
-  mmcsd_givesem(priv);
   return ret;
 }
 
@@ -1794,6 +1794,7 @@ static int mmcsd_probe(struct mmcsd_state_s *priv)
 
       fvdbg("No card\n");
       SDIO_EVENTENABLE(priv->dev, SDIOEVENT_INSERTED);
+      ret = -ENODEV;
     }
 
   return ret;
