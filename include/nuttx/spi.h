@@ -290,7 +290,7 @@
 
 /* The type of the media change callback function */
 
-typedef void (*mediachange_t)(void *arg);
+typedef void (*spi_mediachange_t)(FAR void *arg);
 
 /* If the board supports multiple SPI devices, this enumeration identifies
  * which is selected or de-seleted.
@@ -332,7 +332,7 @@ struct spi_ops_s
   void   (*sndblock)(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
   void   (*recvblock)(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
 #endif
-  int    (*registercallback)(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);
+  int    (*registercallback)(FAR struct spi_dev_s *dev, spi_mediachange_t callback, void *arg);
 };
 
 /* SPI private data.  This structure only defines the initial fields of the

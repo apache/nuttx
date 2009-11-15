@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -98,6 +99,7 @@ struct mmcsd_state_s
 {
   struct sdio_dev_s *dev;          /* The SDIO device bound to this instance */
   ubyte  crefs;                    /* Open references on the driver */
+  sem_t  sem;                      /* Assures mutually exclusive access to the slot */
 
   /* Status flags */
 
@@ -133,6 +135,11 @@ struct mmcsd_state_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* Misc Helpers *************************************************************/
+
+static void    mmcsd_takesem(struct mmcsd_state_s *priv);
+#define mmcsd_givesem(p) sem_post(&priv->sem);
 
 /* Command/response helpers *************************************************/
 
@@ -176,6 +183,7 @@ static int     mmcsd_ioctl(FAR struct inode *inode, int cmd,
 
 /* Initialization/uninitialization/reset ************************************/
 
+static void    mmcsd_mediachange(FAR void *arg);
 static int     mmcsd_widebus(struct mmcsd_state_s *priv);
 static int     mmcsd_mmcinitialize(struct mmcsd_state_s *priv);
 static int     mmcsd_sdinitialize(struct mmcsd_state_s *priv);
@@ -206,6 +214,24 @@ static const struct block_operations g_bops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Misc Helpers
+ ****************************************************************************/
+
+static void mmcsd_takesem(struct mmcsd_state_s *priv)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(&priv->sem) != 0)
+    {
+      /* The only case that an error should occr here is if the wait was
+       * awakened by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
 
 /****************************************************************************
  * Command/Response Helpers
@@ -844,7 +870,9 @@ static int mmcsd_open(FAR struct inode *inode)
   /* Just increment the reference count on the driver */
 
   DEBUGASSERT(priv->crefs < MAX_CREFS);
+  mmcsd_takesem(priv);
   priv->crefs++;
+  mmcsd_givesem(priv);
   return OK;
 }
 
@@ -866,7 +894,9 @@ static int mmcsd_close(FAR struct inode *inode)
   /* Decrement the reference count on the block driver */
 
   DEBUGASSERT(priv->crefs > 0);
+  mmcsd_takesem(priv);
   priv->crefs--;
+  mmcsd_givesem(priv);
   return OK;
 }
 
@@ -883,16 +913,20 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
                           size_t start_sector, unsigned int nsectors)
 {
   struct mmcsd_state_s *priv;
+  int ret;
 
   fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (struct mmcsd_state_s *)inode->i_private;
 
+  mmcsd_takesem(priv);
 #ifdef CONFIG_FS_READAHEAD
-  return rwb_read(&priv->rwbuffer, start_sector, nsectors, buffer);
+  ret = rwb_read(&priv->rwbuffer, start_sector, nsectors, buffer);
 #else
-  return mmcsd_doread(priv, buffer, start_sector, nsectors);
+  ret = mmcsd_doread(priv, buffer, start_sector, nsectors);
 #endif
+  mmcsd_givesem(priv);
+  return ret;
 }
 
 /****************************************************************************
@@ -909,16 +943,20 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
                            size_t start_sector, unsigned int nsectors)
 {
   struct mmcsd_state_s *priv;
+  int ret;
 
   fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (struct mmcsd_state_s *)inode->i_private;
 
+  mmcsd_takesem(priv);
 #ifdef CONFIG_FS_WRITEBUFFER
-  return rwb_write(&priv->rwbuffer, start_sector, nsectors, buffer);
+  ret = rwb_write(&priv->rwbuffer, start_sector, nsectors, buffer);
 #else
-  return mmcsd_dowrite(priv, buffer, start_sector, nsectors);
+  ret = mmcsd_dowrite(priv, buffer, start_sector, nsectors);
 #endif
+  mmcsd_givesem(priv);
+  return ret;
 }
 #endif
 
@@ -936,6 +974,8 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
   fvdbg("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
+
+  mmcsd_takesem(priv);
   if (geometry)
     {
       /* Is there a (supported) card inserted in the slot? */
@@ -972,6 +1012,8 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
           ret = OK;
         }
     }
+
+  mmcsd_givesem(priv);
   return ret;
 }
 
@@ -993,6 +1035,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   /* Process the IOCTL by command */
 
+  mmcsd_takesem(priv);
   switch (cmd)
     {
     case BIOC_PROBE: /* Check for media in the slot */
@@ -1028,12 +1071,55 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
       break;
     }
 
+  mmcsd_givesem(priv);
   return ret;
 }
 
 /****************************************************************************
  * Initialization/uninitialization/reset
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mmcsd_mediachange
+ *
+ * Description:
+ *  This is a callback function from the SDIO driver that indicates that
+ *  there has been a change in the slot... either a card has been inserted
+ *  or a card has been removed.  
+ *
+ * Assumptions:
+ *   This callback is NOT supposd to run in the context of an interrupt
+ *   handler; it is probably running in the context of work thread.
+ *
+ ****************************************************************************/
+
+static void mmcsd_mediachange(FAR void *arg)
+{
+  struct mmcsd_state_s *priv = (struct mmcsd_state_s *)arg;
+
+  DEBUGASSERT(priv);
+
+  /* Is there a card present in the slot? */
+
+  mmcsd_takesem(priv);
+  if (SDIO_PRESENT(priv->dev))
+    {
+      /* No... process the card insertion.  This could cause chaos if we think
+       * that a card is already present and there are mounted filesystms!
+       */
+
+      (void)mmcsd_probe(priv);
+    }
+  else
+    {
+      /* No... process the card removal.  This could have very bad implications
+       * for any mounted file systems!
+       */
+
+      (void)mmcsd_removed(priv);
+    }
+  mmcsd_givesem(priv);
+}
 
 /****************************************************************************
  * Name: mmcsd_widebus
@@ -1274,7 +1360,18 @@ static int mmcsd_sdinitialize(struct mmcsd_state_s *priv)
     return ret;
   }
 
-  priv->rca = (uint16)rca;
+  /* R6  Published RCA Response (48-bit, SD card only)
+   *     47        0               Start bit
+   *     46        0               Transmission bit (0=from card)
+   *     45:40     bit5   - bit0   Command index (0-63)
+   *     39:8      bit31  - bit0   32-bit Argument Field, consisting of:
+   *                               [31:16] New published RCA of card
+   *                               [15:0]  Card status bits {23,22,19,12:0}
+   *     7:1       bit6   - bit0   CRC7
+   *     0         1               End bit
+   */
+
+  priv->rca = (uint16)(rca >> 16);
   fvdbg("RCA: %04x\n", priv->rca);
 
   /* This should have caused a transition to standby state. However, this will
@@ -1754,10 +1851,84 @@ static int mmcsd_removed(struct mmcsd_state_s *priv)
 
 static int mmcsd_hwinitialize(struct mmcsd_state_s *priv)
 {
-#ifdef CONFIG_CPP_HAVE_WARNING
-#  warning "Not implemented"
+  int ret;
+
+  mmcsd_takesem(priv);
+
+#ifdef CONFIG_SDIO_DMA
+  /* Does this architecture support DMA with the MMC/SD device? */
+
+  priv->dma = SDIO_DMASUPPORTED(priv->dev);
+  fvdbg("DMA supported: %d\n", priv->dma);
 #endif
-  return -ENODEV;
+
+  /* Attach and prepare MMC/SD interrupts */
+
+  if (SDIO_ATTACH(priv->dev))
+    {
+      fdbg("ERROR: Unable to attach MMC/SD interrupts\n");
+      mmcsd_givesem(priv);
+      return -EBUSY;
+    }
+  fvdbg("Successfully attached MMC/SD interrupts\n");
+
+  /* Register a callback so that we get informed if media is inserted or
+   * removed from the slot.
+   */
+
+  SDIO_REGISTERCALLBACK(priv->dev, mmcsd_mediachange, (FAR void *)priv);
+
+  /* Is there a card in the slot now? For an MMC/SD card, there are three
+   * possible card detect mechanisms:
+   *
+   *  1. Mechanical insertion that can be detected using the WP switch
+   *     that is closed when a card is inserted into then SD slot (SD
+   *     "hot insertion capable" card conector only)
+   *  2. Electrical insertion that can be sensed using the pull-up resistor
+   *     on CD/DAT3 (both SD/MMC),
+   *  3. Or by periodic attempts to initialize the card from software.
+   * 
+   * The behavior of SDIO_PRESENT() is to use whatever information is available 
+   * on the particular platform.  If no card insertion information is available
+   * (polling only), then SDIO_PRESENT() will always return true and we will
+   * try to initialize the card.
+   */
+
+  if (SDIO_PRESENT(priv->dev))
+    {
+      /* Yes... probe for a card in the slot */
+
+      ret = mmcsd_probe(priv);
+      if (ret != OK)
+        {
+          fvdbg("Slot not empty, but initialization failed: %d\n", ret);
+
+          /* NOTE: The failure to initialize a card does not mean that
+           * initialization has failed! A card could be installed in the slot
+           * at a later time. ENODEV is return in this case, but should not be
+           * interpreted as an error.
+           */
+
+          ret = -ENODEV;
+        }
+    }
+  else
+    {
+      /* No... Setup to receive the media inserted event */
+
+      SDIO_EVENTENABLE(priv->dev, SDIOEVENT_INSERTED);
+
+      /* ENODEV is returned to indicate that no card is inserted in the slot. */
+
+      ret = -ENODEV;
+    }
+
+  /* OK is returned only if the slot initialized correctly AND the card in
+   * the slot was successfully configured.
+   */
+
+  mmcsd_givesem(priv);
+  return ret;
 }
 
 /****************************************************************************
@@ -1824,6 +1995,7 @@ int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
       /* Initialize the MMC/SD state structure */
 
       memset(priv, 0, sizeof(struct mmcsd_state_s));
+      sem_init(&priv->sem, 0, 1);
 
       /* Bind the MMCSD driver to the MMCSD state structure */
 
@@ -1884,8 +2056,8 @@ int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
 errout_with_buffers:
 #if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
   rwb_uninitialize(&priv->rwbuffer);
-#endif
 errout_with_hwinit:
+#endif
   mmcsd_hwuninitialize(priv);
 errout_with_alloc:
   free(priv);

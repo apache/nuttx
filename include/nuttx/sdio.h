@@ -572,6 +572,27 @@
 #define SDIO_EVENTS(dev)  ((dev)->events(dev))
 
 /****************************************************************************
+ * Name: SDIO_REGISTERCALLBACK
+ *
+ * Description:
+ *   Register a callback that that will be invoked on any media status
+ *   change.  Callbacks should not be made from interrupt handlers, rather
+ *   interrupt level events should be handled by calling back on the work
+ *   thread.
+ *
+ * Input Parameters:
+ *   dev -      Device-specific state data
+ *   callback - The funtion to call on the media change
+ *   arg -      A caller provided value to return with the callback
+ *
+ * Returned Value:
+ *   0 on success; negated errno on failure.
+ *
+ ****************************************************************************/
+
+#define SDIO_REGISTERCALLBACK(d,c,a) ((d)->registercallback(d,c,a))
+
+/****************************************************************************
  * Name: SDIO_DMASUPPORTED
  *
  * Description:
@@ -727,6 +748,10 @@
  * Public Types
  ****************************************************************************/
 
+/* The type of the media change callback function */
+
+typedef void (*sdio_mediachange_t)(FAR void *arg);
+
 /* Various clocking used by the MMC/SD driver */
 
 enum sdio_clock_e
@@ -788,6 +813,7 @@ struct sdio_dev_s
   void  (*eventenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
   ubyte (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);
   ubyte (*events)(FAR struct sdio_dev_s *dev);
+  int   (*registercallback)(FAR struct sdio_dev_s *dev, sdio_mediachange_t callback, void *arg);
 
   /* DMA */
 
