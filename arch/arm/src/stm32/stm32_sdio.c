@@ -123,6 +123,7 @@ static inline void stm32_dmaenable(void);
 
 /* Data Transfer Helpers ****************************************************/
 
+static ubyte stm32_log2(uint16 value);
 static void  stm32_dataconfig(uint32 timeout, uint32 dlen, uint32 dctrl);
 static void  stm32_datadisable(void);
 
@@ -135,13 +136,12 @@ static ubyte stm32_status(FAR struct sdio_dev_s *dev);
 static void  stm32_widebus(FAR struct sdio_dev_s *dev, boolean enable);
 static void  stm32_clock(FAR struct sdio_dev_s *dev,
               enum sdio_clock_e rate);
-static int   stm32_setblocklen(FAR struct sdio_dev_s *dev, int blocklen,
-              int nblocks);
 static int   stm32_attach(FAR struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
 static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
+static int   stm32_sendsetup(FAR struct sdio_dev_s *dev, uint32 nbytes);
 static int   stm32_senddata(FAR struct sdio_dev_s *dev,
                FAR const ubyte *buffer);
 
@@ -150,11 +150,12 @@ static int   stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *
 static int   stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 rlong[4]);
 static int   stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort);
 static int   stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rnotimpl);
+static int   stm32_recvsetup(FAR struct sdio_dev_s *dev, uint32 nbytes);
 static int   stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
 
 /* EVENT handler */
 
-static void  stm32_eventenable(FAR struct sdio_dev_s *dev, ubyte eventset,
+static void  stm32_eventenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset,
                boolean enable);
 static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout);
 static ubyte stm32_events(FAR struct sdio_dev_s *dev);
@@ -194,9 +195,9 @@ struct stm32_dev_s g_mmcsd =
     .status        = stm32_status,
     .widebus       = stm32_widebus,
     .clock         = stm32_clock,
-    .setblocklen   = stm32_setblocklen,
     .attach        = stm32_attach,
     .sendcmd       = stm32_sendcmd,
+    .sendsetup     = stm32_sendsetup,
     .senddata      = stm32_senddata,
     .waitresponse  = stm32_waitresponse,
     .recvR1        = stm32_recvshortcrc,
@@ -206,6 +207,7 @@ struct stm32_dev_s g_mmcsd =
     .recvR5        = stm32_recvnotimpl,
     .recvR6        = stm32_recvshortcrc,
     .recvR7        = stm32_recvshort,
+    .recvsetup     = stm32_recvsetup,
     .recvdata      = stm32_recvdata,
     .eventenable   = stm32_eventenable,
     .eventwait     = stm32_eventwait,
@@ -378,6 +380,37 @@ static inline void stm32_dmaenable(void)
 /****************************************************************************
  * Data Transfer Helpers
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_log2
+ *
+ * Description:
+ *   Take (approximate) log base 2 of the provided number (Only works if the
+ *   provided number is a power of 2).
+ *
+ ****************************************************************************/
+
+static ubyte stm32_log2(uint16 value)
+{
+  ubyte log2 = 0;
+
+  /* 0000 0000 0000 0001 -> return 0,
+   * 0000 0000 0000 001x -> return 1,
+   * 0000 0000 0000 01xx -> return 2,
+   * 0000 0000 0000 1xxx -> return 3,
+   * ...
+   * 1xxx xxxx xxxx xxxx -> return 15,
+   */
+
+  DEBUGASSERT(value > 0);
+  while (value != 1)
+  {
+    value >>= 1;
+    log2++;
+  }
+  return log2;
+}
+
 /****************************************************************************
  * Name: stm32_dataconfig
  *
@@ -491,6 +524,10 @@ static ubyte stm32_status(FAR struct sdio_dev_s *dev)
 
 static void stm32_widebus(FAR struct sdio_dev_s *dev, boolean wide)
 {
+  if (wide)
+    {
+      priv->mode = MMCSDMODE_DMA;
+    }
 }
 
 /****************************************************************************
@@ -510,27 +547,6 @@ static void stm32_widebus(FAR struct sdio_dev_s *dev, boolean wide)
 
 static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
-}
-
-/****************************************************************************
- * Name: stm32_setblocklen
- *
- * Description:
- *   Set the MMC/SD block length and block count
- *
- * Input Parameters:
- *   dev      - An instance of the MMC/SD device interface
- *   blocklen - The block length
- *   nblocks  - The block count
- *
- * Returned Value:
- *   OK on success; negated errno on failure
- *
- ****************************************************************************/
-
-static int stm32_setblocklen(FAR struct sdio_dev_s *dev, int blocklen, int nblocks)
-{
-  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -617,6 +633,31 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
 }
 
 /****************************************************************************
+ * Name: stm32_sendsetup
+ *
+ * Description:
+ *   Setup hardware in preparation for data trasfer from the card.  This method
+ *   will do whatever controller setup is necessary.  This would be called
+ *   for SD memory just AFTER sending CMD24 (WRITE_BLOCK), CMD25
+ *   (WRITE_MULTIPLE_BLOCK), ... and before SDIO_SENDDATA is called.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the MMC/SD device interface
+ *   nbytes - The number of bytes in the transfer
+ *
+ * Returned Value:
+ *   Number of bytes sent on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int stm32_sendsetup(FAR struct sdio_dev_s *dev, uint32 nbytes)
+{
+  uint32 dctrl = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT);
+  stm32_dataconfig(SD_DATATIMEOUT, nbytes, dctrl);
+  return OK;
+}
+
+/****************************************************************************
  * Name: stm32_senddata
  *
  * Description:
@@ -627,7 +668,7 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
  *   data - Data to be sent
  *
  * Returned Value:
- *   Number of bytes sent on succes; a negated errno on failure
+ *   Number of bytes sent on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -919,6 +960,32 @@ static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rno
 }
 
 /****************************************************************************
+ * Name: stm32_recvsetup
+ *
+ * Description:
+ *   Setup hardware in preparation for data trasfer from the card.  This method
+ *   will do whatever controller setup is necessary.  This would be called
+ *   for SD memory just BEFORE sending CMD13 (SEND_STATUS), CMD17
+ *   (READ_SINGLE_BLOCK), CMD18 (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), ...
+ *   and before SDIO_RECVDATA is called.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the MMC/SD device interface
+ *   nbytes - The number of bytes in the transfer
+ *
+ * Returned Value:
+ *   Number of bytes sent on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int stm32_recvsetup(FAR struct sdio_dev_s *dev, uint32 nbytes)
+{
+  uint32 dctrl = (stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT)) | SDIO_DCTRL_DTDIR;
+  stm32_dataconfig(SD_DATATIMEOUT, nbytes, dctrl);
+  return OK;
+}
+
+/****************************************************************************
  * Name: stm32_recvdata
  *
  * Description:
@@ -929,7 +996,7 @@ static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rno
  *   buffer - Buffer in which to receive the data
  *
  * Returned Value:
- *   Number of bytes sent on succes; a negated errno on failure
+ *   Number of bytes sent on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -947,16 +1014,14 @@ static int stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
  * Input Parameters:
  *   dev      - An instance of the MMC/SD device interface
  *   eventset - A bitset of events to enable or disable (see MMCSDEVENT_*
- *              definitions
- *   enable   - TRUE: enable event; FALSE: disable events
+ *              definitions). 0=disable; 1=enable.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void stm32_eventenable(FAR struct sdio_dev_s *dev, ubyte eventset,
-                              boolean enable)
+static void stm32_eventenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
 {
 }
 
@@ -973,6 +1038,7 @@ static void stm32_eventenable(FAR struct sdio_dev_s *dev, ubyte eventset,
  * Returned Value:
  *   Event set containing the event(s) that ended the wait.  If no events the
  *   returned event set is zero, then the wait was terminated by the timeout.
+ *   All events are cleared disabled after the wait concludes.
  *
  ****************************************************************************/
 
@@ -986,13 +1052,14 @@ static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
  *
  * Description:
  *   Return the current event set.  This supports polling for MMC/SD (vs.
- *   waiting).
+ *   waiting). Only enabled events need be reported.
  *
  * Input Parameters:
- *   dev     - An instance of the MMC/SD device interface
+ *   dev - An instance of the MMC/SD device interface
  *
  * Returned Value:
- *   Event set containing the current events (cleared after reading).
+ *   Event set containing the current events (All pending events are cleared
+ *   after reading).
  *
  ****************************************************************************/
 
@@ -1062,7 +1129,7 @@ static void stm32_coherent(FAR struct sdio_dev_s *dev, FAR void *addr,
  *   buffer - The memory to DMA from
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -1084,7 +1151,7 @@ static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
  *   buffer - The memory to DMA into
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -1106,7 +1173,7 @@ static int stm32_dmawritesetup(FAR struct sdio_dev_s *dev,
  *   dev - An instance of the MMC/SD device interface
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -1127,7 +1194,7 @@ static int stm32_dmastart(FAR struct sdio_dev_s *dev)
  *   dev - An instance of the MMC/SD device interface
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
@@ -1150,7 +1217,7 @@ static int stm32_dmastop(FAR struct sdio_dev_s *dev)
  *               remaining in the transfer.
  *
  * Returned Value:
- *   OK on succes; a negated errno on failure
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
