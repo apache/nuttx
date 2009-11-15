@@ -159,6 +159,8 @@ static void  stm32_eventenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset
                boolean enable);
 static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout);
 static ubyte stm32_events(FAR struct sdio_dev_s *dev);
+static int   stm32_registercallback(FAR struct sdio_dev_s *dev,
+               sdio_mediachange_t callback, void *arg)
 
 /* DMA */
 
@@ -1066,6 +1068,31 @@ static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
 static ubyte stm32_events(FAR struct sdio_dev_s *dev)
 {
   return 0;
+}
+
+/****************************************************************************
+ * Name: stm32_registercallback
+ *
+ * Description:
+ *   Register a callback that that will be invoked on any media status
+ *   change.  Callbacks should not be made from interrupt handlers, rather
+ *   interrupt level events should be handled by calling back on the work
+ *   thread.
+ *
+ * Input Parameters:
+ *   dev -      Device-specific state data
+ *   callback - The funtion to call on the media change
+ *   arg -      A caller provided value to return with the callback
+ *
+ * Returned Value:
+ *   0 on success; negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_registercallback(FAR struct sdio_dev_s *dev,
+                                  sdio_mediachange_t callback, void *arg)
+{
+  return -ENOSYS;
 }
 
 /****************************************************************************
