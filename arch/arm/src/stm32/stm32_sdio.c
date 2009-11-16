@@ -49,6 +49,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_internal.h"
+#include "stm32_dma.h"
 #include "stm32_sdio.h"
 
 #if CONFIG_STM32_SDIO
@@ -62,6 +63,10 @@
 #if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_STM32_DMA2)
 #  warning "CONFIG_SDIO_DMA support requires CONFIG_STM32_DMA2"
 #  undef CONFIG_SDIO_DMA
+#endif
+
+#ifndef CONFIG_SDIO_DMAPRIO
+#  define CONFIG_SDIO_DMAPRIO DMA_CCR_PRIMED
 #endif
 
 /* Friendly CLKCR bit re-definitions ****************************************/
@@ -88,6 +93,13 @@
 #define SDIO_CMDTIMEOUT  100000
 #define SDIO_LONGTIMEOUT 0x7fffffff
 
+/* DMA CCR register settings */
+
+#define SDIO_RXDMA16_CONFIG   (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_16BITS|\
+                               DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC)
+#define SDIO_TXDMA16_CONFIG   (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_16BITS|\
+                               DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -96,11 +108,21 @@
 
 struct stm32_dev_s
 {
-  struct sdio_dev_s dev; /* Standard, base MMC/SD interface */
+  struct sdio_dev_s     dev;        /* Standard, base MMC/SD interface */
   
   /* STM32-specific extensions */
 
-  ubyte type;            /* Card type (see MMCSD_CARDTYPE_ definitions) */
+  sem_t                 eventsem;   /* Implements event waiting */
+  sdio_event_t          waitevents; /* Set of events to be waited for */
+  volatile sdio_event_t wkupevents; /* Set of events that caused the wakeup */
+  sdio_event_t          cbevents;   /* Set of events to be cause callbacks */
+  sdio_mediachange_t    callback;   /* Registered callback function */
+
+  /* DMA support */
+
+#ifdef CONFIG_SDIO_DMA
+  DMA_HANDLE            dma;        /* Handle for DMA channel */
+#endif
 };
 
 /****************************************************************************
@@ -109,6 +131,8 @@ struct stm32_dev_s
 
 /* Low-level helpers ********************************************************/
 
+static void   stm32_takesem(struct stm32_dev_s *priv);
+#define       stm32_givesem(priv) (sem_post(&priv->waitsem))
 static inline void stm32_setclkcr(uint32 clkcr);
 static inline void stm32_enableint(uint32 bitset);
 static inline void stm32_disableint(uint32 bitset);
@@ -119,7 +143,9 @@ static inline void stm32_clkdisable(void)
 
 /* DMA Helpers **************************************************************/
 
-static inline void stm32_dmaenable(void);
+#ifdef CONFIG_SDIO_DMA
+static void  stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg);
+#endif
 
 /* Data Transfer Helpers ****************************************************/
 
@@ -155,10 +181,11 @@ static int   stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
 
 /* EVENT handler */
 
-static void  stm32_eventenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset,
+static void  stm32_waitenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset,
                boolean enable);
 static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout);
 static ubyte stm32_events(FAR struct sdio_dev_s *dev);
+static void  stm32_callbackenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset);
 static int   stm32_registercallback(FAR struct sdio_dev_s *dev,
                sdio_mediachange_t callback, void *arg)
 
@@ -166,23 +193,18 @@ static int   stm32_registercallback(FAR struct sdio_dev_s *dev,
 
 #ifdef CONFIG_SDIO_DMA
 static boolean stm32_dmasupported(FAR struct sdio_dev_s *dev);
-#ifdef CONFIG_DATA_CACHE
-static void  stm32_coherent(FAR struct sdio_dev_s *dev, FAR void *addr,
-               size_t len, boolean write);
-#endif
 static int   stm32_dmareadsetup(FAR struct sdio_dev_s *dev,
-               FAR ubyte *buffer);
+               FAR ubyte *buffer, size_t buflen);
 static int   stm32_dmawritesetup(FAR struct sdio_dev_s *dev,
-               FAR const ubyte *buffer);
-static int   stm32_dmaenable(FAR struct sdio_dev_s *dev);
+               FAR const ubyte *buffer, size_t buflen);
 static int   stm32_dmastart(FAR struct sdio_dev_s *dev);
-static int   stm32_dmastop(FAR struct sdio_dev_s *dev);
 static int   stm32_dmastatus(FAR struct sdio_dev_s *dev,
                size_t *remaining);
 #endif
 
 /* Initialization/uninitialization/reset ************************************/
 
+static void  stm32_callback(void *arg);
 static void  stm32_default(void);
 
 /****************************************************************************
@@ -193,38 +215,35 @@ struct stm32_dev_s g_mmcsd =
 {
   .dev =
   {
-    .reset         = stm32_reset,
-    .status        = stm32_status,
-    .widebus       = stm32_widebus,
-    .clock         = stm32_clock,
-    .attach        = stm32_attach,
-    .sendcmd       = stm32_sendcmd,
-    .sendsetup     = stm32_sendsetup,
-    .senddata      = stm32_senddata,
-    .waitresponse  = stm32_waitresponse,
-    .recvR1        = stm32_recvshortcrc,
-    .recvR2        = stm32_recvlong,
-    .recvR3        = stm32_recvshort,
-    .recvR4        = stm32_recvnotimpl,
-    .recvR5        = stm32_recvnotimpl,
-    .recvR6        = stm32_recvshortcrc,
-    .recvR7        = stm32_recvshort,
-    .recvsetup     = stm32_recvsetup,
-    .recvdata      = stm32_recvdata,
-    .eventenable   = stm32_eventenable,
-    .eventwait     = stm32_eventwait,
-    .events        = stm32_events,
+    .reset            = stm32_reset,
+    .status           = stm32_status,
+    .widebus          = stm32_widebus,
+    .clock            = stm32_clock,
+    .attach           = stm32_attach,
+    .sendcmd          = stm32_sendcmd,
+    .sendsetup        = stm32_sendsetup,
+    .senddata         = stm32_senddata,
+    .waitresponse     = stm32_waitresponse,
+    .recvR1           = stm32_recvshortcrc,
+    .recvR2           = stm32_recvlong,
+    .recvR3           = stm32_recvshort,
+    .recvR4           = stm32_recvnotimpl,
+    .recvR5           = stm32_recvnotimpl,
+    .recvR6           = stm32_recvshortcrc,
+    .recvR7           = stm32_recvshort,
+    .recvsetup        = stm32_recvsetup,
+    .recvdata         = stm32_recvdata,
+    .waitenable       = stm32_waitenable,
+    .eventwait        = stm32_eventwait,
+    .events           = stm32_events,
+    .callbackenable   = stm32_callbackenable,
+    .registercallback = stm32_registercallback,
 #ifdef CONFIG_SDIO_DMA
-    .dmasupported  = stm32_dmasupported,
-#ifdef CONFIG_DATA_CACHE
-    .coherent      = stm32_coherent,
-#endif
-    .dmareadsetup  = stm32_dmareadsetup,
-    .dmawritesetup = stm32_dmawritesetup,
-    .dmaenable     = stm32_dmaenable,
-    .dmastart      = stm32_dmastart,
-    .dmastop       = stm32_dmastop,
-    .dmastatus     = stm32_dmastatus,
+    .dmasupported     = stm32_dmasupported,
+    .dmareadsetup     = stm32_dmareadsetup,
+    .dmawritesetup    = stm32_dmawritesetup,
+    .dmastart         = stm32_dmastart,
+    .dmastatus        = stm32_dmastatus,
 #endif
   },
 };
@@ -236,6 +255,35 @@ struct stm32_dev_s g_mmcsd =
 /****************************************************************************
  * Low-level Helpers
  ****************************************************************************/
+/****************************************************************************
+ * Name: stm32_takesem
+ *
+ * Description:
+ *   Take the wait semaphore (handling false alarm wakeups due to the receipt
+ *   of signals).
+ *
+ * Input Parameters:
+ *   dev - Instance of the SDIO device driver state structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32_takesem(struct stm32_dev_s *priv)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(&priv->waitsem) != 0)
+    {
+      /* The only case that an error should occr here is if the wait was
+       * awakened by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
+
 /****************************************************************************
  * Name: stm32_setclkcr
  *
@@ -374,10 +422,31 @@ static inline void stm32_clkdisable(void)
 /****************************************************************************
  * DMA Helpers
  ****************************************************************************/
-static inline void stm32_dmaenable(void)
+
+/****************************************************************************
+ * Name: stm32_dmacallback
+ *
+ * Description:
+ *   Called when SDIO DMA completes
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_DMA
+static void stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg)
 {
-  putreg32(1, SDIO_DCTRL_DMAEN_BB);
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)arg;
+
+  /* Is a data transfer complete event expected? */
+
+  if ((priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
+    {
+      /* Yes, wake up the waiting thread */
+
+      priv->wkupevent = SDIOWAIT_TRANSFERDONE;
+      sdio_semgive(priv);
+    }
 }
+#endif
 
 /****************************************************************************
  * Data Transfer Helpers
@@ -1008,14 +1077,22 @@ static int stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
 }
 
 /****************************************************************************
- * Name: stm32_eventenable
+ * Name: stm32_waitenable
  *
  * Description:
- *   Enable/disable notification of a set of MMC/SD events
+ *   Enable/disable of a set of MMC/SD wait events.  This is part of the
+ *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
+ *   configured before calling stm32_waitevent.  This is done in this way
+ *   to help the driver to eliminate race conditions between the command
+ *   setup and the subsequent events.
+ *
+ *   The enabled events persist until either (1) SDIO_WAITENABLE is called
+ *   again specifying a different set of wait events, or (2) SDIO_EVENTWAIT
+ *   returns.
  *
  * Input Parameters:
  *   dev      - An instance of the MMC/SD device interface
- *   eventset - A bitset of events to enable or disable (see MMCSDEVENT_*
+ *   eventset - A bitset of events to enable or disable (see SDIOWAIT_*
  *              definitions). 0=disable; 1=enable.
  *
  * Returned Value:
@@ -1023,15 +1100,26 @@ static int stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
  *
  ****************************************************************************/
 
-static void stm32_eventenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
+static void stm32_waitenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
 {
+  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+
+  /* This odd sequence avoids race conditions */
+
+  DEBUGASSERT(priv != NULL);
+  priv->waitevents = 0;
+  priv->wkupevents = 0;
+  priv->waitevents = eventset;
 }
 
 /****************************************************************************
  * Name: stm32_eventwait
  *
  * Description:
- *   Wait for one of the enabled events to occur (or a timeout)
+ *   Wait for one of the enabled events to occur (or a timeout).  Note that
+ *   all events enabled by SDIO_WAITEVENTS are disabled when stm32_eventwait
+ *   returns.  SDIO_WAITEVENTS must be called again before stm32_eventwait
+ *   can be used again.
  *
  * Input Parameters:
  *   dev     - An instance of the MMC/SD device interface
@@ -1046,7 +1134,41 @@ static void stm32_eventenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
 
 static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
 {
-  return 0;
+  ubyte wkupevents = 0;
+
+  DEBUGASSERT(priv->waitevents != 0);
+
+  /* Loop until the event (or the timeout occurs). Race conditions are avoided
+   * by calling stm32_waitenable prior to triggering the logic that will cause
+   * the wait to terminate.  Under certain race conditions, the waited-for
+   * may have already occurred before this function was called!
+   */
+#warning "Timeout logic not implemented"
+  for (;;)
+    {
+      /* Wait for an event in event set to occur.  If this the event has already
+       * occurred, then the semaphore will already have been incremented and
+       * there will be no wait.
+       */
+
+      stm32_takesem(priv);
+
+      /* Check if the event has occurred. */
+
+      wkupevents = (ubyte)(priv->wkupevents & priv->waitevents)
+      if (wkupevents != 0)
+        {
+          /* Yes... break out of the loop with wkupevents non-zero */
+
+          break;
+        }
+    }
+
+  /* Clear all enabled wait events before returning */
+
+  priv->waitevents = 0;
+  priv->wkupevents = 0;
+  return wkupevents;
 }
 
 /****************************************************************************
@@ -1071,6 +1193,36 @@ static ubyte stm32_events(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: stm32_callbackenable
+ *
+ * Description:
+ *   Enable/disable of a set of MMC/SD callback events.  This is part of the
+ *   the SDIO callback sequence.  The set of events is configured to enabled
+ *   callbacks to the function provided in stm32_registercallback.
+ *
+ *   Events are automatically disabled once the callback is performed and no
+ *   further callback events will occur until they are again enabled by
+ *   calling this methos.
+ *
+ * Input Parameters:
+ *   dev      - An instance of the MMC/SD device interface
+ *   eventset - A bitset of events to enable or disable (see SDIOMEDIA_*
+ *              definitions). 0=disable; 1=enable.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32_callbackenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+  DEBUGASSERT(priv != NULL);
+  priv->cbevents = eventset;
+  stm32_callback(priv);
+}
+
+/****************************************************************************
  * Name: stm32_registercallback
  *
  * Description:
@@ -1078,6 +1230,9 @@ static ubyte stm32_events(FAR struct sdio_dev_s *dev)
  *   change.  Callbacks should not be made from interrupt handlers, rather
  *   interrupt level events should be handled by calling back on the work
  *   thread.
+ *
+ *   When this method is called, all callbacks should be disabled until they
+ *   are enabled via a call to SDIO_CALLBACKENABLE
  *
  * Input Parameters:
  *   dev -      Device-specific state data
@@ -1092,7 +1247,15 @@ static ubyte stm32_events(FAR struct sdio_dev_s *dev)
 static int stm32_registercallback(FAR struct sdio_dev_s *dev,
                                   sdio_mediachange_t callback, void *arg)
 {
-  return -ENOSYS;
+  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+
+  /* Disable callbacks and register this callback and is argument */
+
+  DEBUGASSERT(priv != NULL);
+  priv->cbevents = 0;
+  priv->cbarg    = arg;
+  priv->callback = callback;
+  return OK;
 }
 
 /****************************************************************************
@@ -1117,43 +1280,18 @@ static boolean stm32_dmasupported(FAR struct sdio_dev_s *dev)
 #endif
 
 /****************************************************************************
- * Name: stm32_coherent
- *
- * Description:
- *   If the processor supports a data cache, then this method will make sure
- *   that the contents of the DMA memory and the data cache are coherent in
- *   preparation for the DMA transfer.  For write transfers, this may mean
- *   flushing the data cache, for read transfers this may mean invalidating
- *   the data cache.
- *
- * Input Parameters:
- *   dev   - An instance of the MMC/SD device interface
- *   addr  - The beginning address of the DMA
- *   len   - The length of the DMA
- *   write - TRUE: A write DMA will be performed; FALSE: a read DMA will be
- *           performed.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_DATA_CACHE)
-static void stm32_coherent(FAR struct sdio_dev_s *dev, FAR void *addr,
-                           size_t len, boolean write)
-{
-}
-#endif
-
-/****************************************************************************
  * Name: stm32_dmareadsetup
  *
  * Description:
- *   Setup to perform a read DMA
+ *   Setup to perform a read DMA.  If the processor supports a data cache,
+ *   then this method will also make sure that the contents of the DMA memory
+ *   and the data cache are coherent.  For read transfers this may mean
+ *   invalidating the data cache.
  *
  * Input Parameters:
  *   dev    - An instance of the MMC/SD device interface
  *   buffer - The memory to DMA from
+ *   buflen - The size of the DMA transfer in bytes
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -1161,9 +1299,12 @@ static void stm32_coherent(FAR struct sdio_dev_s *dev, FAR void *addr,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
+static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, size_t buflen)
 {
-  return -ENOSYS;
+  /* Configure the RX DMA */
+
+  stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
+                 (buflen + 3) >> 2, SDIO_RXDMA16_CONFIG);
 }
 #endif
 
@@ -1171,11 +1312,15 @@ static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
  * Name: stm32_dmawritesetup
  *
  * Description:
- *   Setup to perform a write DMA
+ *   Setup to perform a write DMA.  If the processor supports a data cache,
+ *   then this method will also make sure that the contents of the DMA memory
+ *   and the data cache are coherent.  For write transfers, this may mean
+ *   flushing the data cache.
  *
  * Input Parameters:
  *   dev    - An instance of the MMC/SD device interface
  *   buffer - The memory to DMA into
+ *   buflen - The size of the DMA transfer in bytes
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -1184,9 +1329,12 @@ static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
 
 #ifdef CONFIG_SDIO_DMA
 static int stm32_dmawritesetup(FAR struct sdio_dev_s *dev,
-                               FAR const ubyte *buffer)
+                               FAR const ubyte *buffer, size_t buflen)
 {
-  return -ENOSYS;
+  /* Configure the RX DMA */
+
+  stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
+                 (buflen + 3) >> 2, SDIO_TXDMA16_CONFIG);
 }
 #endif
 
@@ -1207,28 +1355,7 @@ static int stm32_dmawritesetup(FAR struct sdio_dev_s *dev,
 #ifdef CONFIG_SDIO_DMA
 static int stm32_dmastart(FAR struct sdio_dev_s *dev)
 {
-  return -ENOSYS;
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_dmastop
- *
- * Description:
- *   Stop the DMA
- *
- * Input Parameters:
- *   dev - An instance of the MMC/SD device interface
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-static int stm32_dmastop(FAR struct sdio_dev_s *dev)
-{
-  return -ENOSYS;
+   stm32_dmastart(priv->dma, sdio_dmacallback, priv, FALSE);
 }
 #endif
 
@@ -1236,7 +1363,7 @@ static int stm32_dmastop(FAR struct sdio_dev_s *dev)
  * Name: stm32_dmastatus
  *
  * Description:
- *   Returnt the number of bytes remaining in the DMA transfer
+ *   Return the number of bytes remaining in the DMA transfer
  *
  * Input Parameters:
  *   dev       - An instance of the MMC/SD device interface
@@ -1269,6 +1396,63 @@ static int stm32_dmastatus(FAR struct sdio_dev_s *dev, size_t *remaining)
  * Initialization/uninitialization/reset
  ****************************************************************************/
 /****************************************************************************
+ * Name: stm32_callback
+ *
+ * Description:
+ *   Perform callback.
+ *
+ * Assumptions:
+ *   This function does not execute in the context of an interrupt handler.
+ *   It may be invoked on any user thread or scheduled on the work thread
+ *   from an interrupt handler.
+ *
+ ****************************************************************************/
+
+static void stm32_callback(void *arg)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s*)arg;
+
+  /* Is a callback registered? */
+
+  DEBUGASSERT(priv != NULL);
+  if (priv->callback)
+    {
+      /* Yes.. Check for enabled callback events */
+
+      if ((stm32_status(&priv->dev) & SDIO_STATUS_PRESENT) != 0)
+        {
+          /* Media is present.  Is the media inserted event enabled? */
+
+          if ((priv->cbevents & SDIOMEDIA_INSERTED) == 0)
+           {
+             /* No... return without performing the callback */
+
+              return;
+            }
+        }
+      else
+        {
+          /* Media is not present.  Is the media eject event enabled? */
+
+          if ((priv->cbevents & SDIOMEDIA_EJECTED) == 0)
+            {
+              /* No... return without performing the callback */
+
+              return;
+            }
+        }
+
+      /* Perform the callback, disabling further callbacks.  Of course, the
+       * the callback can (and probably should) re-enable callbacks.
+       */
+
+      priv->cbevents = 0;
+      priv->callback(priv->cbarg);
+      
+    }
+}
+
+/****************************************************************************
  * Name: stm32_default
  *
  * Description:
@@ -1294,24 +1478,35 @@ static void stm32_default(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mmcsd_slotinitialize
+ * Name: sdio_initialize
  *
  * Description:
- *   Initialize one slot for operation using the MMC/SD interface
+ *   Initialize SDIO for operation.
  *
  * Input Parameters:
- *   minor - The MMC/SD minor device number.  The MMC/SD device will be
- *     registered as /dev/mmcsdN where N is the minor number
- *   slotno - The slot number to use.  This is only meaningful for architectures
- *     that support multiple MMC/SD slots.  This value must be in the range
- *     {0, ..., CONFIG_MMCSD_NSLOTS}.
- *   dev - And instance of an MMC/SD interface.  The MMC/SD hardware should
- *     be initialized and ready to use.
+ *   slotno - Not used.
+ *
+ * Returned Values:
+ *   A reference to an SDIO interface structure.  NULL is returned on failures.
  *
  ****************************************************************************/
 
-int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
+FAR sdio_dev_s *mmcsd_slotinitialize(int slotno)
 {
+  /* There is only one, slot */
+
+  struct stm32_dev_s *priv = &g_sdiodev;
+
+  /* Initialize the SDIO slot structure */
+
+  sem_init(&priv->eventsem, 0, 0);
+
+  /* Allocate a DMA channel */
+
+#ifdef CONFIG_SDIO_DMA
+  priv->dma = stm32_dmachannel(DMACHAN_SDIO);
+#endif
+
   /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
    * 8-bit wide bus operation but D4-D7 are not configured).
    */
@@ -1333,7 +1528,7 @@ int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
   stm32_setpwrctrl(SDIO_POWER_PWRCTRL_ON);
   stm32_clkenable(ENABLE);
 
-  return -ENOSYS;
+  return &g_sdiodev.dev;
 }
 
 #endif /* CONFIG_STM32_SDIO */
