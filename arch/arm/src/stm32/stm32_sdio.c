@@ -1303,8 +1303,11 @@ static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, siz
 {
   /* Configure the RX DMA */
 
-  stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
-                 (buflen + 3) >> 2, SDIO_RXDMA16_CONFIG);
+ stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|SDIO_MASK_DATAENDIE|
+                    SDIO_MASK_RXOVERRIE|SDIO_MASK_STBITERRIE);
+ putreg32(1, SDIO_DCTRL_DMAEN_BB)
+ stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
+                (buflen + 3) >> 2, SDIO_RXDMA16_CONFIG);
 }
 #endif
 
@@ -1331,10 +1334,13 @@ static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, siz
 static int stm32_dmawritesetup(FAR struct sdio_dev_s *dev,
                                FAR const ubyte *buffer, size_t buflen)
 {
-  /* Configure the RX DMA */
+  /* Configure the TX DMA */
 
+  stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|SDIO_MASK_DATAENDIE|
+                  SDIO_MASK_TXUNDERRIE|SDIO_MASK_STBITERRIE);
   stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
                  (buflen + 3) >> 2, SDIO_TXDMA16_CONFIG);
+  putreg32(1, SDIO_DCTRL_DMAEN_BB)
 }
 #endif
 
