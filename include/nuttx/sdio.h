@@ -47,7 +47,7 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* MMC/SD events needed by the driver
+/* SDIO events needed by the driver
  *
  * Wait events are used for event-waiting by SDIO_WAITENABLE and SDIO_EVENTWAIT
  */
@@ -290,10 +290,10 @@
  * Name: SDIO_RESET
  *
  * Description:
- *   Reset the MMC/SD controller.  Undo all setup and initialization.
+ *   Reset the SDIO controller.  Undo all setup and initialization.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *
  * Returned Value:
  *   None
@@ -306,7 +306,7 @@
  * Name: SDIO_STATUS
  *
  * Description:
- *   Get MMC/SD status.
+ *   Get SDIO status.
  *
  * Input Parameters:
  *   dev   - Device-specific state data
@@ -318,10 +318,10 @@
 
 #define SDIO_STATUS(dev)        ((dev)->status(dev))
 
-/* MMC/SD status bits */
+/* SDIO status bits */
 
-#define SDIO_STATUS_PRESENT     0x01 /* Bit 0=1: MMC/SD card present */
-#define SDIO_STATUS_WRPROTECTED 0x02 /* Bit 1=1: MMC/SD card write protected */
+#define SDIO_STATUS_PRESENT     0x01 /* Bit 0=1: SDIO card present */
+#define SDIO_STATUS_WRPROTECTED 0x02 /* Bit 1=1: SDIO card write protected */
 
 #define SDIO_PRESENT(dev)       ((SDIO_STATUS(dev) & SDIO_STATUS_PRESENT) != 0)
 #define SDIO_WRPROTECTED(dev)   ((SDIO_STATUS(dev) & SDIO_STATUS_WRPROTECTED) != 0)
@@ -335,7 +335,7 @@
  *   correctly in the new bus mode.
  *
  * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
+ *   dev  - An instance of the SDIO device interface
  *   wide - TRUE: wide bus (4-bit) bus mode enabled
  *
  * Returned Value:
@@ -349,10 +349,10 @@
  * Name: SDIO_CLOCK
  *
  * Description:
- *   Enable/disable MMC/SD clocking
+ *   Enable/disable SDIO clocking
  *
  * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
+ *   dev  - An instance of the SDIO device interface
  *   rate - Specifies the clocking to use (see enum sdio_clock_e)
  *
  * Returned Value:
@@ -369,7 +369,7 @@
  *   Attach and prepare interrupts
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *
  * Returned Value:
  *   OK on success; A negated errno on failure.
@@ -382,10 +382,10 @@
  * Name: SDIO_SENDCMD
  *
  * Description:
- *   Send the MMC/SD command
+ *   Send the SDIO command
  *
  * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
+ *   dev  - An instance of the SDIO device interface
  *   cmd  - The command to send.  See 32-bit command definitions above.
  *   arg  - 32-bit argument required with some commands
  *   data - A reference to data required with some commands
@@ -398,6 +398,29 @@
 #define SDIO_SENDCMD(dev,cmd,arg) ((dev)->sendcmd(dev,cmd,arg))
 
 /****************************************************************************
+ * Name: SDIO_RECVSETUP
+ *
+ * Description:
+ *   Setup hardware in preparation for data trasfer from the card in non-DMA
+ *   (interrupt driven mode).  This method will do whatever controller setup
+ *   is necessary.  This would be called for SD memory just BEFORE sending
+ *   CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
+ *   (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), etc.  Normally, SDIO_WAITEVENT
+ *   will be called to receive the indication that the transfer is complete.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - Address of the buffer in which to receive the data
+ *   nbytes - The number of bytes in the transfer
+ *
+ * Returned Value:
+ *   Number of bytes sent on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#define SDIO_RECVSETUP(dev,buffer,nbytes) ((dev)->recvsetup(dev,buffer,nbytes))
+
+/****************************************************************************
  * Name: SDIO_SENDSETUP
  *
  * Description:
@@ -407,7 +430,8 @@
  *   (WRITE_MULTIPLE_BLOCK), ... and before SDIO_SENDDATA is called.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - Address of the buffer containing the data to send
  *   nbytes - The number of bytes in the transfer
  *
  * Returned Value:
@@ -415,24 +439,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_SENDSETUP(dev,nbytes) ((dev)->sendsetup(dev,nbytes))
-
-/****************************************************************************
- * Name: SDIO_SENDDATA
- *
- * Description:
- *   Send more MMC/SD data
- *
- * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
- *   data - Data to be sent
- *
- * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#define SDIO_SENDDATA(dev,data) ((dev)->senddata(dev,data))
+#define SDIO_SENDSETUP(dev,buffer,nbytes) ((dev)->sendsetup(dev,buffer,nbytes))
 
 /****************************************************************************
  * Name: SDIO_WAITRESPONSE
@@ -441,7 +448,7 @@
  *   Poll-wait for the response to the last command to be ready.
  *
  * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
+ *   dev  - An instance of the SDIO device interface
  *   cmd  - The command that was sent.  See 32-bit command definitions above.
  *
  * Returned Value:
@@ -455,13 +462,13 @@
  * Name: SDIO_RECVRx
  *
  * Description:
- *   Receive response to MMC/SD command.  Only the critical payload is
+ *   Receive response to SDIO command.  Only the critical payload is
  *   returned -- that is 32 bits for 48 bit status and 128 bits for 136 bit
  *   status.  The driver implementation should verify the correctness of
  *   the remaining, non-returned bits (CRCs, CMD index, etc.).
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *   Rx - Buffer in which to receive the response
  *
  * Returned Value:
@@ -482,48 +489,10 @@
 #define SDIO_RECVR7(dev,cmd,R7) ((dev)->recvR7(dev,cmd,R7)) /* 48-bit */
 
 /****************************************************************************
- * Name: SDIO_RECVSETUP
- *
- * Description:
- *   Setup hardware in preparation for data trasfer from the card.  This method
- *   will do whatever controller setup is necessary.  This would be called
- *   for SD memory just BEFORE sending CMD13 (SEND_STATUS), CMD17
- *   (READ_SINGLE_BLOCK), CMD18 (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), ...
- *   and before SDIO_RECVDATA is called.
- *
- * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
- *   nbytes - The number of bytes in the transfer
- *
- * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#define SDIO_RECVSETUP(dev,nbytes) ((dev)->recvsetup(dev,nbytes))
-
-/****************************************************************************
- * Name: SDIO_RECVDATA
- *
- * Description:
- *   Receive data from MMC/SD
- *
- * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
- *   buffer - Buffer in which to receive the data
- *
- * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#define SDIO_RECVDATA(dev,buffer) ((dev)->recvdata(dev,buffer))
-
-/****************************************************************************
  * Name: SDIO_WAITENABLE
  *
  * Description:
- *   Enable/disable of a set of MMC/SD wait events.  This is part of the
+ *   Enable/disable of a set of SDIO wait events.  This is part of the
  *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
  *   configured before calling SDIO_EVENTWAIT.  This is done in this way
  *   to help the driver to eliminate race conditions between the command
@@ -534,7 +503,7 @@
  *   returns.
  *
  * Input Parameters:
- *   dev      - An instance of the MMC/SD device interface
+ *   dev      - An instance of the SDIO device interface
  *   eventset - A bitset of events to enable or disable (see SDIOWAIT_*
  *              definitions). 0=disable; 1=enable.
  *
@@ -555,7 +524,7 @@
  *   can be used again.
  *
  * Input Parameters:
- *   dev     - An instance of the MMC/SD device interface
+ *   dev     - An instance of the SDIO device interface
  *   timeout - Maximum time in milliseconds to wait.  Zero means no timeout.
  *
  * Returned Value:
@@ -571,11 +540,11 @@
  * Name: SDIO_EVENTS
  *
  * Description:
- *   Return the current event set.  This supports polling for MMC/SD (vs.
+ *   Return the current event set.  This supports polling for SDIO (vs.
  *   waiting).  Only enabled events need be reported.
  *
  * Input Parameters:
- *   dev - An instance of the MMC/SD device interface
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   Event set containing the current events (All pending events are cleared
@@ -589,7 +558,7 @@
  * Name: SDIO_CALLBACKENABLE
  *
  * Description:
- *   Enable/disable of a set of MMC/SD callback events.  This is part of the
+ *   Enable/disable of a set of SDIO callback events.  This is part of the
  *   the SDIO callback sequence.  The set of events is configured to enabled
  *   callbacks to the function provided in SDIO_REGISTERCALLBACK.
  *
@@ -598,7 +567,7 @@
  *   calling this methos.
  *
  * Input Parameters:
- *   dev      - An instance of the MMC/SD device interface
+ *   dev      - An instance of the SDIO device interface
  *   eventset - A bitset of events to enable or disable (see SDIOMEDIA_*
  *              definitions). 0=disable; 1=enable.
  *
@@ -640,7 +609,7 @@
  *   Return TRUE if the hardware can support DMA
  *
  * Input Parameters:
- *   dev - An instance of the MMC/SD device interface
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   TRUE if DMA is supported.
@@ -654,7 +623,7 @@
 #endif
 
 /****************************************************************************
- * Name: SDIO_DMAREADSETUP
+ * Name: SDIO_DMARECVSETUP
  *
  * Description:
  *   Setup to perform a read DMA.  If the processor supports a data cache,
@@ -663,7 +632,7 @@
  *   invalidating the data cache.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *   buffer - The memory to DMA from
  *   buflen - The size of the DMA transfer in bytes
  *
@@ -673,13 +642,13 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-#  define SDIO_DMAREADSETUP(dev,buffer,len) ((dev)->dmareadsetup(dev,buffer,len))
+#  define SDIO_DMARECVSETUP(dev,buffer,len) ((dev)->dmarecvsetup(dev,buffer,len))
 #else
-#  define SDIO_DMAREADSETUP(dev,buffer,len) (-ENOSYS)
+#  define SDIO_DMARECVSETUP(dev,buffer,len) (-ENOSYS)
 #endif
 
 /****************************************************************************
- * Name: SDIO_DMAWRITESETUP
+ * Name: SDIO_DMASENDSETUP
  *
  * Description:
  *   Setup to perform a write DMA.  If the processor supports a data cache,
@@ -688,7 +657,7 @@
  *   flushing the data cache.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *   buffer - The memory to DMA into
  *   buflen - The size of the DMA transfer in bytes
  *
@@ -698,9 +667,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-#  define SDIO_DMAWRITESETUP(dev,buffer,len) ((dev)->dmawritesetup(dev,buffer,len))
+#  define SDIO_DMASENDSETUP(dev,buffer,len) ((dev)->dmasendsetup(dev,buffer,len))
 #else
-#  define SDIO_DMAWRITESETUP(dev,buffer,len) (-ENOSYS)
+#  define SDIO_DMASENDSETUP(dev,buffer,len) (-ENOSYS)
 #endif
 
 /****************************************************************************
@@ -710,7 +679,7 @@
  *   Start the DMA
  *
  * Input Parameters:
- *   dev - An instance of the MMC/SD device interface
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -724,28 +693,6 @@
 #endif
 
 /****************************************************************************
- * Name: SDIO_DMASTATUS
- *
- * Description:
- *   Return the number of bytes remaining in the DMA transfer
- *
- * Input Parameters:
- *   dev       - An instance of the MMC/SD device interface
- *   remaining - A pointer to location in which to return the number of bytes
- *               remaining in the transfer.
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-#  define SDIO_DMASTATUS(dev,remaining) ((dev)->dmastatus(dev,remaining))
-#else
-#  define SDIO_DMASTATUS(dev,remaining) (-ENOSYS)
-#endif
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -753,7 +700,7 @@
 
 typedef void (*sdio_mediachange_t)(FAR void *arg);
 
-/* Various clocking used by the MMC/SD driver */
+/* Various clocking used by the SDIO driver */
 
 enum sdio_clock_e
 {
@@ -770,11 +717,11 @@ enum sdio_clock_e
 
 typedef ubyte sdio_eventset_t;
 
-/* This structure defines the interface between the NuttX MMC/SD
- * driver and the chip- or board-specific MMC/SD interface.  This
+/* This structure defines the interface between the NuttX SDIO
+ * driver and the chip- or board-specific SDIO interface.  This
  * interface is only used in architectures that support SDIO
- * 1- or 4-bit data busses.  For MMC/SD support this interface is
- * registered with the NuttX MMC/SD driver by calling
+ * 1- or 4-bit data busses.  For SDIO support this interface is
+ * registered with the NuttX SDIO driver by calling
  * sdio_slotinitialize().
  */
 
@@ -795,8 +742,10 @@ struct sdio_dev_s
   /* Command/Status/Data Transfer */
 
   void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
-  int   (*sendsetup)(FAR struct sdio_dev_s *dev, uint32 nbytes);
-  int   (*senddata)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer);
+  int   (*recvsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
+          size_t nbytes);
+  int   (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
+          size_t nbytes);
 
   int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32 cmd);
   int   (*recvR1)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);
@@ -806,26 +755,24 @@ struct sdio_dev_s
   int   (*recvR5)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5);
   int   (*recvR6)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);
   int   (*recvR7)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);
-  int   (*recvsetup)(FAR struct sdio_dev_s *dev, uint32 nbytes);
-  int   (*recvdata)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
 
   /* EVENT handler */
 
   void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
   ubyte (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);
   ubyte (*events)(FAR struct sdio_dev_s *dev);
+  void  (*callbackenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
   int   (*registercallback)(FAR struct sdio_dev_s *dev, sdio_mediachange_t callback, void *arg);
 
   /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
   boolean (*dmasupported)(FAR struct sdio_dev_s *dev);
-  int   (*dmareadsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
+  int   (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
           size_t buflen);
-  int   (*dmawritesetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
+  int   (*dmasendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
           size_t buflen);
   int   (*dmastart)(FAR struct sdio_dev_s *dev);
-  int   (*dmastatus)(FAR struct sdio_dev_s *dev, size_t *remaining);
 #endif
 };
 

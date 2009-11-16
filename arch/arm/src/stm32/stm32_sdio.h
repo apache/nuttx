@@ -224,8 +224,8 @@
 #define SDIO_DATACOUNT_SHIFT           (0)
 #define SDIO_DATACOUNT_MASK            (0x01ffffff << SDIO_DATACOUNT_SHIFT)
 
-#define SDIO_STA_CCRCFAIL              (1 << 0)  /* Bit 0: Command response received (CRC fail) */
-#define SDIO_STA_DCRCFAIL              (1 << 1)  /* Bit 1: Data block sent/received */
+#define SDIO_STA_CCRCFAIL              (1 << 0)  /* Bit 0: Command response CRC fail */
+#define SDIO_STA_DCRCFAIL              (1 << 1)  /* Bit 1: Data block CRC fail */
 #define SDIO_STA_CTIMEOUT              (1 << 2)  /* Bit 2: Command response timeout */
 #define SDIO_STA_DTIMEOUT              (1 << 3)  /* Bit 3: Data timeout */
 #define SDIO_STA_TXUNDERR              (1 << 4)  /* Bit 4: Transmit FIFO underrun error */

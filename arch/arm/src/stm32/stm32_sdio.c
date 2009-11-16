@@ -40,11 +40,15 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <semaphore.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/arch.h>
+#include <arch/irq.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -65,8 +69,12 @@
 #  undef CONFIG_SDIO_DMA
 #endif
 
+#ifndef CONFIG_SDIO_PRI
+#  define CONFIG_SDIO_PRI        DMA_CCR_PRIMED
+#endif
+
 #ifndef CONFIG_SDIO_DMAPRIO
-#  define CONFIG_SDIO_DMAPRIO DMA_CCR_PRIMED
+#  define CONFIG_SDIO_DMAPRIO    DMA_CCR_PRIMED
 #endif
 
 /* Friendly CLKCR bit re-definitions ****************************************/
@@ -83,22 +91,31 @@
 /* HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(1+2)=24 MHz */
 
 #define SDIO_TRANSFER_CLKDIV     (1 << SDIO_CLKCR_CLKDIV_SHIFT) 
-#define STM32_CLCKCR_TRANSFER \
-  (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|SDIO_CLKCR_WIDBUS_D1)
-#define STM32_CLKCR_WIDETRANSFER \
-  (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|SDIO_CLKCR_WIDBUS_D4)
+#define STM32_CLCKCR_TRANSFER    (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
+                                  SDIO_CLKCR_WIDBUS_D1)
+#define STM32_CLKCR_WIDETRANSFER (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
+                                  SDIO_CLKCR_WIDBUS_D4)
 
 /* Timing */
 
-#define SDIO_CMDTIMEOUT  100000
-#define SDIO_LONGTIMEOUT 0x7fffffff
+#define SDIO_CMDTIMEOUT          (100000)
+#define SDIO_LONGTIMEOUT         (0x7fffffff)
+
+/* Big DTIMER setting */
+
+#define SDIO_DTIMER_DATATIMEOUT  (0x000fffff)
 
 /* DMA CCR register settings */
 
-#define SDIO_RXDMA16_CONFIG   (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_16BITS|\
-                               DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC)
-#define SDIO_TXDMA16_CONFIG   (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_16BITS|\
-                               DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
+#define SDIO_RXDMA16_CONFIG      (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_16BITS|\
+                                  DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC)
+#define SDIO_TXDMA16_CONFIG      (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_16BITS|\
+                                  DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
+
+/* FIFO sizes */
+
+#define SDIO_HALFFIFO_WORDS      (8)
+#define SDIO_HALFFIFO_BYTES      (8*4)
 
 /****************************************************************************
  * Private Types
@@ -108,20 +125,30 @@
 
 struct stm32_dev_s
 {
-  struct sdio_dev_s     dev;        /* Standard, base MMC/SD interface */
+  struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
   
   /* STM32-specific extensions */
 
-  sem_t                 eventsem;   /* Implements event waiting */
-  sdio_event_t          waitevents; /* Set of events to be waited for */
-  volatile sdio_event_t wkupevents; /* Set of events that caused the wakeup */
-  sdio_event_t          cbevents;   /* Set of events to be cause callbacks */
-  sdio_mediachange_t    callback;   /* Registered callback function */
+  sem_t              waitsem;    /* Implements event waiting */
+  sdio_eventset_t    waitevents; /* Set of events to be waited for */
+  volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
+  sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
+  sdio_mediachange_t callback;   /* Registered callback function */
+  void              *cbarg;      /* Registered callback argument */
 
-  /* DMA support */
+  /* Interrupt mode data transfer support */
 
+  uint32            *buffer;     /* Address of current R/W buffer */
+  size_t             remaining;  /* Number of bytes remaining in the transfer */
+  int                result;     /* Result of the transfer */
+  boolean            stopxfr;    /* TRUE: Send STOP_TRANSMISSION */
+
+  /* DMA data transfer support */
+
+  boolean            widebus;    /* Required for DMA support */
 #ifdef CONFIG_SDIO_DMA
-  DMA_HANDLE            dma;        /* Handle for DMA channel */
+  boolean            dmamode;    /* TRUE: DMA mode transfer */
+  DMA_HANDLE         dma;        /* Handle for DMA channel */
 #endif
 };
 
@@ -138,8 +165,8 @@ static inline void stm32_enableint(uint32 bitset);
 static inline void stm32_disableint(uint32 bitset);
 static void   stm32_setpwrctrl(uint32 pwrctrl);
 static inline uint32 stm32_getpwrctrl(void);
-static inline void stm32_clkenable(void)
-static inline void stm32_clkdisable(void)
+static inline void stm32_clkenable(void);
+static inline void stm32_clkdisable(void);
 
 /* DMA Helpers **************************************************************/
 
@@ -152,6 +179,14 @@ static void  stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg);
 static ubyte stm32_log2(uint16 value);
 static void  stm32_dataconfig(uint32 timeout, uint32 dlen, uint32 dctrl);
 static void  stm32_datadisable(void);
+static void  stm32_sendfifo(struct stm32_dev_s *priv);
+static void  stm32_recvfifo(struct stm32_dev_s *priv);
+static int   stm32_stoptransmission(struct stm32_dev_s *priv);
+static void  stm32_endtransfer(struct stm32_dev_s *priv, int result);
+
+/* Interrupt Handling *******************************************************/
+
+static int    stm32_interrupt(int irq, void *context);
 
 /* SDIO interface methods ***************************************************/
 
@@ -166,40 +201,43 @@ static int   stm32_attach(FAR struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
-static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
-static int   stm32_sendsetup(FAR struct sdio_dev_s *dev, uint32 nbytes);
-static int   stm32_senddata(FAR struct sdio_dev_s *dev,
-               FAR const ubyte *buffer);
+static void  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd,
+               uint32 arg);
+static int   stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
+               size_t nbytes);
+static int   stm32_sendsetup(FAR struct sdio_dev_s *dev,
+               FAR const ubyte *buffer, uint32 nbytes);
 
-static int   stm32_waitresponseFAR struct sdio_dev_s *dev, uint32 cmd);
-static int   stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort);
-static int   stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 rlong[4]);
-static int   stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort);
-static int   stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rnotimpl);
-static int   stm32_recvsetup(FAR struct sdio_dev_s *dev, uint32 nbytes);
-static int   stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
+static int   stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32 cmd);
+static int   stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd,
+               uint32 *rshort);
+static int   stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd,
+               uint32 rlong[4]);
+static int   stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd,
+               uint32 *rshort);
+static int   stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd,
+               uint32 *rnotimpl);
 
 /* EVENT handler */
 
-static void  stm32_waitenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset,
-               boolean enable);
+static void  stm32_waitenable(FAR struct sdio_dev_s *dev,
+               sdio_eventset_t eventset);
 static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout);
 static ubyte stm32_events(FAR struct sdio_dev_s *dev);
-static void  stm32_callbackenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset);
+static void  stm32_callbackenable(FAR struct sdio_dev_s *dev,
+               sdio_eventset_t eventset);
 static int   stm32_registercallback(FAR struct sdio_dev_s *dev,
-               sdio_mediachange_t callback, void *arg)
+               sdio_mediachange_t callback, void *arg);
 
 /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
 static boolean stm32_dmasupported(FAR struct sdio_dev_s *dev);
-static int   stm32_dmareadsetup(FAR struct sdio_dev_s *dev,
+static int   stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
                FAR ubyte *buffer, size_t buflen);
-static int   stm32_dmawritesetup(FAR struct sdio_dev_s *dev,
+static int   stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
                FAR const ubyte *buffer, size_t buflen);
-static int   stm32_dmastart(FAR struct sdio_dev_s *dev);
-static int   stm32_dmastatus(FAR struct sdio_dev_s *dev,
-               size_t *remaining);
+static int   stm32_sdiodmastart(FAR struct sdio_dev_s *dev);
 #endif
 
 /* Initialization/uninitialization/reset ************************************/
@@ -211,7 +249,7 @@ static void  stm32_default(void);
  * Private Data
  ****************************************************************************/
 
-struct stm32_dev_s g_mmcsd =
+struct stm32_dev_s g_sdiodev =
 {
   .dev =
   {
@@ -221,8 +259,8 @@ struct stm32_dev_s g_mmcsd =
     .clock            = stm32_clock,
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
+    .recvsetup        = stm32_recvsetup,
     .sendsetup        = stm32_sendsetup,
-    .senddata         = stm32_senddata,
     .waitresponse     = stm32_waitresponse,
     .recvR1           = stm32_recvshortcrc,
     .recvR2           = stm32_recvlong,
@@ -231,8 +269,6 @@ struct stm32_dev_s g_mmcsd =
     .recvR5           = stm32_recvnotimpl,
     .recvR6           = stm32_recvshortcrc,
     .recvR7           = stm32_recvshort,
-    .recvsetup        = stm32_recvsetup,
-    .recvdata         = stm32_recvdata,
     .waitenable       = stm32_waitenable,
     .eventwait        = stm32_eventwait,
     .events           = stm32_events,
@@ -240,10 +276,9 @@ struct stm32_dev_s g_mmcsd =
     .registercallback = stm32_registercallback,
 #ifdef CONFIG_SDIO_DMA
     .dmasupported     = stm32_dmasupported,
-    .dmareadsetup     = stm32_dmareadsetup,
-    .dmawritesetup    = stm32_dmawritesetup,
-    .dmastart         = stm32_dmastart,
-    .dmastatus        = stm32_dmastatus,
+    .dmarecvsetup     = stm32_dmarecvsetup,
+    .dmasendsetup     = stm32_dmasendsetup,
+    .dmastart         = stm32_sdiodmastart,
 #endif
   },
 };
@@ -436,15 +471,9 @@ static void stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)arg;
 
-  /* Is a data transfer complete event expected? */
-
-  if ((priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
-    {
-      /* Yes, wake up the waiting thread */
-
-      priv->wkupevent = SDIOWAIT_TRANSFERDONE;
-      sdio_semgive(priv);
-    }
+  /* We don't really do anything at the completion of DMA.  The termination
+   * of the transfer is driven by the SDIO interrupts.
+   */
 }
 #endif
 
@@ -506,7 +535,7 @@ static void stm32_dataconfig(uint32 timeout, uint32 dlen, uint32 dctrl)
   regval  =  getreg32(STM32_SDIO_DCTRL);
   regval &= ~(SDIO_DCTRL_DTDIR|SDIO_DCTRL_DTMODE|SDIO_DCTRL_DBLOCKSIZE_MASK);
   dctrl  &=  (SDIO_DCTRL_DTDIR|SDIO_DCTRL_DTMODE|SDIO_DCTRL_DBLOCKSIZE_MASK);
-  regval |=  (dctrl|DIO_DCTRL_DTEN);
+  regval |=  (dctrl|SDIO_DCTRL_DTEN);
   putreg32(regval, STM32_SDIO_DCTRL);
 }
 
@@ -525,7 +554,7 @@ static void stm32_datadisable(void)
 
   /* Disable the data path */
 
-  putreg32(SD_DATATIMEOUT, STM32_SDIO_DTIMER); /* Reset DTIMER */
+  putreg32(SDIO_DTIMER_DATATIMEOUT, STM32_SDIO_DTIMER); /* Reset DTIMER */
   putreg32(0,              STM32_SDIO_DLEN);   /* Reset DLEN */
 
   /* Reset DCTRL DTEN, DTDIR, DTMODE, DMAEN, and DBLOCKSIZE fields */
@@ -537,16 +566,346 @@ static void stm32_datadisable(void)
 }
 
 /****************************************************************************
+ * Name: stm32_sendfifo
+ *
+ * Description:
+ *   Send SDIO data in interrupt mode
+ *
+ * Input Parameters:
+ *   priv - An instance of the SDIO device interface
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32_sendfifo(struct stm32_dev_s *priv)
+{
+  union
+  {
+    uint32 w;
+    ubyte  b[2];
+  } data;
+
+  /* Loop while there is more data to be sent and the RX FIFO is not full */
+
+  while (priv->remaining > 0 &&
+         (getreg32(STM32_SDIO_STA) & SDIO_STA_TXFIFOF) == 0)
+    {
+      /* Is there a full word remaining in the user buffer? */
+
+      if (priv->remaining >= sizeof(uint32))
+        {
+          /* Yes, transfer the word to the TX FIFO */
+
+          data.w           = *priv->buffer++;
+          priv->remaining -= sizeof(uint32);
+        }
+      else
+        {
+           /* No.. transfer just the bytes remaining in the user buffer,
+            * padding with zero as necessary to extend to a full word.
+            */
+
+           ubyte *ptr = (ubyte *)priv->remaining;
+           int i;
+
+           data.w = 0;
+           for (i = 0; i < priv->remaining; i++)
+             {
+                data.b[i] = *ptr++;
+             }
+ 
+           /* Now the transfer is finished */
+
+           priv->remaining = 0;
+         }
+
+       /* Put the word in the FIFO */
+
+       putreg32(data.w, STM32_SDIO_FIFO);
+    }
+}
+
+/****************************************************************************
+ * Name: stm32_recvfifo
+ *
+ * Description:
+ *   Receive SDIO data in interrupt mode
+ *
+ * Input Parameters:
+ *   priv - An instance of the SDIO device interface
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32_recvfifo(struct stm32_dev_s *priv)
+{
+  union
+  {
+    uint32 w;
+    ubyte  b[2];
+  } data;
+
+  /* Loop while there is space to store the data and there is more
+   * data available in the RX FIFO.
+   */
+
+  while (priv->remaining > 0 &&
+         (getreg32(STM32_SDIO_STA) & SDIO_STA_RXDAVL) == 0)
+    {
+      /* Read the next word from the RX FIFO */
+
+      data.w = getreg32(STM32_SDIO_FIFO);
+      if (priv->remaining >= sizeof(uint32))
+        {
+          /* Transfer the whole word to the user buffer */
+
+          *priv->buffer++  = data.w;
+          priv->remaining -= sizeof(uint32);
+        }
+      else
+        {
+          /* Transfer any trailing fractional word */
+
+          ubyte *ptr = (ubyte*)priv->buffer;
+          int i;
+
+          for (i = 0; i < priv->remaining; i++)
+            {
+               *ptr++ = data.b[i];
+            }
+
+          /* Now the transfer is finished */
+
+          priv->remaining = 0;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: stm32_stoptransmission
+ *
+ * Description:
+ *   Send STOP_TRANSMISSION
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *
+ * Returned Value:
+ *   OK on success; A negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int stm32_stoptransmission(struct stm32_dev_s *priv)
+{
+# warning "Not implemented"
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: stm32_endtransfer
+ *
+ * Description:
+ *   Terminate a transfer with the provided status
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   result - The result status of the transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32_endtransfer(struct stm32_dev_s *priv, int result)
+{
+  /* Disable interrupts */
+
+  stm32_disableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
+                   SDIO_MASK_DATAENDIE|SDIO_MASK_TXFIFOHEIE|
+                   SDIO_MASK_RXFIFOHFIE|SDIO_MASK_TXUNDERRIE|
+                   SDIO_MASK_RXOVERRIE|SDIO_MASK_STBITERRIE);
+
+  /* Mark the transfer finished with the provided status */
+
+  priv->remaining = 0;
+  priv->result    = result;
+
+  /* Is a data transfer complete event expected? */
+
+  if ((priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
+    {
+      /* Yes, wake up the waiting thread */
+
+      priv->wkupevent = SDIOWAIT_TRANSFERDONE;
+      stm32_givesem(priv);
+    }
+}
+
+/****************************************************************************
+ * Interrrupt Handling
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_interrupt
+ *
+ * Description:
+ *   SDIO interrupt handler
+ *
+ * Input Parameters:
+ *   dev - An instance of the SDIO device interface
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static int stm32_interrupt(int irq, void *context)
+{
+  struct stm32_dev_s *priv = &g_sdiodev;
+  uint32 sta;
+
+  /* Loop while there are pending interrupts.  Check the SDIO status
+   * register.  Mask out all bits that don't correspond to enabled
+   * interrupts.  (This depends on the fact that bits are ordered
+   * the same in both the STA and MASK register).  If there are non-zero
+   * bits remaining, then we have work to do here.
+   */
+
+  while ((sta = getreg32(STM32_SDIO_STA) & getreg32(STM32_SDIO_MASK)) != 0)
+    {
+      /* Handle in progress, interrupt driven data transfers */
+
+#ifdef CONFIG_SDIO_DMA
+      if (!priv->dmamode)
+#endif
+       {
+         /* Is the RX FIFO half full or more?  Is so then we must be
+          * processing a receive transaction.
+          */
+
+         if ((sta & SDIO_STA_RXFIFOHF) != 0)
+           {
+             /* Receive data from the RX FIFO */
+
+             stm32_recvfifo(priv);
+           }
+
+         /* Otherwise, Is the transmit FIFO half empty or less?  If so we must
+          * be processing a send transaction.  NOTE:  We can't be processing
+          * both!
+          */
+
+         else if ((sta & SDIO_STA_TXFIFOHE) != 0)
+           {
+             /* Send data via the TX FIFO */
+
+             stm32_sendfifo(priv);
+           }
+       }
+
+      /* Handle data end events */
+
+      if ((sta & SDIO_STA_DATAEND) != 0)
+        {
+          int result;
+
+          /* Handle any data remaining the RX FIFO.  If the RX FIFO is
+           * less than half full at the end of the transfer, then no
+           * half-full interrupt will be received.
+           */
+
+#ifdef CONFIG_SDIO_DMA
+          if (!priv->dmamode)
+#endif
+            {
+              /* Receive data from the RX FIFO */
+
+              stm32_recvfifo(priv);
+            }
+
+          /* Check if we are supposed to send STOP_TRANSMISSION now */
+
+          result = OK;
+          if (priv->stopxfr)
+            {
+              result = stm32_stoptransmission(priv);
+            }
+
+          /* Then terminate the transfer */
+
+          putreg32(SDIO_ICR_DATAENDC, STM32_SDIO_ICR);
+          stm32_endtransfer(priv, result);
+        }
+
+      /* Handler data block send/receive CRC failure */
+
+      else if ((sta & SDIO_STA_DCRCFAIL) != 0)
+        {
+          /* Terminate the transfer with an error */
+
+          putreg32(SDIO_ICR_DCRCFAILC, STM32_SDIO_ICR);
+          stm32_endtransfer(priv, -EIO);
+        }
+
+      /* Handle data timeout error */
+
+      else if ((sta & SDIO_STA_DTIMEOUT) != 0)
+        {
+          /* Terminate the transfer with an error */
+
+          putreg32(SDIO_ICR_DTIMEOUTC, STM32_SDIO_ICR);
+          stm32_endtransfer(priv, -ETIMEDOUT);
+        }
+
+      /* Handle RX FIFO overrun error */
+
+      else if ((sta & SDIO_STA_RXOVERR) != 0)
+        {
+          /* Terminate the transfer with an error */
+
+          putreg32(SDIO_ICR_RXOVERRC, STM32_SDIO_ICR);
+          stm32_endtransfer(priv, -EOVERFLOW);
+        }
+
+      /* Handle TX FIFO underrun error */
+
+      else if ((sta & SDIO_STA_TXUNDERR) != 0)
+        {
+          /* Terminate the transfer with an error */
+
+          putreg32(SDIO_ICR_TXUNDERRC, STM32_SDIO_ICR);
+          stm32_endtransfer(priv, -EOVERFLOW);
+        }
+
+      /* Handle start bit error */
+
+      else if ((sta & SDIO_STA_STBITERR) != 0)
+        {
+          /* Terminate the transfer with an error */
+
+          putreg32(SDIO_ICR_STBITERRC, STM32_SDIO_ICR);
+          stm32_endtransfer(priv, -EIO);
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * SDIO Interface Methods
  ****************************************************************************/
 /****************************************************************************
  * Name: stm32_reset
  *
  * Description:
- *   Reset the MMC/SD controller.  Undo all setup and initialization.
+ *   Reset the SDIO controller.  Undo all setup and initialization.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *
  * Returned Value:
  *   None
@@ -561,7 +920,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
  * Name: stm32_status
  *
  * Description:
- *   Get MMC/SD status.
+ *   Get SDIO status.
  *
  * Input Parameters:
  *   dev   - Device-specific state data
@@ -585,7 +944,7 @@ static ubyte stm32_status(FAR struct sdio_dev_s *dev)
  *   correctly in the new bus mode.
  *
  * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
+ *   dev  - An instance of the SDIO device interface
  *   wide - TRUE: wide bus (4-bit) bus mode enabled
  *
  * Returned Value:
@@ -595,20 +954,18 @@ static ubyte stm32_status(FAR struct sdio_dev_s *dev)
 
 static void stm32_widebus(FAR struct sdio_dev_s *dev, boolean wide)
 {
-  if (wide)
-    {
-      priv->mode = MMCSDMODE_DMA;
-    }
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  priv->widebus = wide;
 }
 
 /****************************************************************************
  * Name: stm32_clock
  *
  * Description:
- *   Enable/disable MMC/SD clocking
+ *   Enable/disable SDIO clocking
  *
  * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
+ *   dev  - An instance of the SDIO device interface
  *   rate - Specifies the clocking to use (see enum sdio_clock_e)
  *
  * Returned Value:
@@ -627,7 +984,7 @@ static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
  *   Attach and prepare interrupts
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   OK on success; A negated errno on failure.
@@ -636,17 +993,43 @@ static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
 static int stm32_attach(FAR struct sdio_dev_s *dev)
 {
-  return -ENOSYS;
+  int ret;
+
+  /* Attach the SDIO interrupt handler */
+
+  ret = irq_attach(STM32_IRQ_SDIO, stm32_interrupt);
+  if (ret == OK)
+    {
+
+      /* Disable all interrupts at the SDIO controller and clear static
+       * interrupt flags
+       */
+
+      putreg32(SDIO_MASK_RESET,      STM32_SDIO_MASK);
+      putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+
+      /* Enable SDIO interrupts at the NVIC.  They can now be enabled at
+       * the SDIO controller as needed.
+       */
+
+      up_enable_irq(STM32_IRQ_SDIO);
+
+      /* Set the interrrupt priority */
+
+      up_prioritize_irq(STM32_IRQ_SDIO, CONFIG_SDIO_PRI);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
  * Name: stm32_sendcmd
  *
  * Description:
- *   Send the MMC/SD command
+ *   Send the SDIO command
  *
  * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
+ *   dev  - An instance of the SDIO device interface
  *   cmd  - The command to send (32-bits, encoded)
  *   arg  - 32-bit argument required with some commands
  *
@@ -704,6 +1087,58 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
 }
 
 /****************************************************************************
+ * Name: stm32_recvsetup
+ *
+ * Description:
+ *   Setup hardware in preparation for data trasfer from the card in non-DMA
+ *   (interrupt driven mode).  This method will do whatever controller setup
+ *   is necessary.  This would be called for SD memory just BEFORE sending
+ *   CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
+ *   (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), etc.  Normally, SDIO_WAITEVENT
+ *   will be called to receive the indication that the transfer is complete.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - Address of the buffer in which to receive the data
+ *   nbytes - The number of bytes in the transfer
+ *
+ * Returned Value:
+ *   Number of bytes sent on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
+                           size_t nbytes)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  uint32 dblocksize;
+
+  DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
+  DEBUGASSERT(((uint32)buffer & 3) == 0);
+
+  /* Save the destination buffer information for use by the interrupt handler */
+
+  priv->buffer    = (uint32*)buffer;
+  priv->remaining = nbytes;
+  priv->result    = -EBUSY;
+#ifdef CONFIG_SDIO_DMA
+  priv->dmamode   = FALSE;
+#endif
+
+  /* Then set up the SDIO data path */
+
+  dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes, dblocksize|SDIO_DCTRL_DTDIR);
+
+  /* And enable interrupts */
+
+  stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
+                  SDIO_MASK_DATAENDIE|SDIO_MASK_RXOVERRIE|
+                  SDIO_MASK_RXFIFOHFIE|SDIO_MASK_STBITERRIE);
+  return OK;
+}
+
+/****************************************************************************
  * Name: stm32_sendsetup
  *
  * Description:
@@ -713,7 +1148,8 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
  *   (WRITE_MULTIPLE_BLOCK), ... and before SDIO_SENDDATA is called.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - Address of the buffer containing the data to send
  *   nbytes - The number of bytes in the transfer
  *
  * Returned Value:
@@ -721,31 +1157,35 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
  *
  ****************************************************************************/
 
-static int stm32_sendsetup(FAR struct sdio_dev_s *dev, uint32 nbytes)
+static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
+                           size_t nbytes)
 {
-  uint32 dctrl = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT);
-  stm32_dataconfig(SD_DATATIMEOUT, nbytes, dctrl);
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  uint32 dblocksize;
+
+  DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
+  DEBUGASSERT(((uint32)buffer & 3) == 0);
+
+  /* Save the source buffer information for use by the interrupt handler */
+
+  priv->buffer    = (uint32*)buffer;
+  priv->remaining = nbytes;
+  priv->result    = -EBUSY;
+#ifdef CONFIG_SDIO_DMA
+  priv->dmamode   = FALSE;
+#endif
+
+  /* Then set up the SDIO data path */
+
+  dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes, dblocksize);
+
+  /* Enable TX interrrupts */
+
+  stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
+                  SDIO_MASK_DATAENDIE|SDIO_MASK_TXUNDERRIE|
+                  SDIO_MASK_TXFIFOHEIE|SDIO_MASK_STBITERRIE);
   return OK;
-}
-
-/****************************************************************************
- * Name: stm32_senddata
- *
- * Description:
- *   Send more MMC/SD data
- *
- * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
- *   data - Data to be sent
- *
- * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int stm32_senddata(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer)
-{
-  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -755,7 +1195,7 @@ static int stm32_senddata(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer)
  *   Poll-wait for the response to the last command to be ready.
  *
  * Input Parameters:
- *   dev  - An instance of the MMC/SD device interface
+ *   dev  - An instance of the SDIO device interface
  *   cmd  - The command that was sent.  See 32-bit command definitions above.
  *
  * Returned Value:
@@ -763,7 +1203,7 @@ static int stm32_senddata(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer)
  *
  ****************************************************************************/
 
-static int stm32_waitresponseFAR struct sdio_dev_s *dev, uint32 cmd)
+static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32 cmd)
 {
   sint32 timeout = SDIO_LONGTIMEOUT;
   uint32 events;
@@ -817,13 +1257,13 @@ static int stm32_waitresponseFAR struct sdio_dev_s *dev, uint32 cmd)
  * Name: stm32_recvRx
  *
  * Description:
- *   Receive response to MMC/SD command.  Only the critical payload is
+ *   Receive response to SDIO command.  Only the critical payload is
  *   returned -- that is 32 bits for 48 bit status and 128 bits for 136 bit
  *   status.  The driver implementation should verify the correctness of
  *   the remaining, non-returned bits (CRCs, CMD index, etc.).
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *   Rx - Buffer in which to receive the response
  *
  * Returned Value:
@@ -876,7 +1316,7 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rs
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
-       cmd & MMCSD_RESPONSE_MASK  |= MMCSD_R6_RESPONSE)
+      (cmd & MMCSD_RESPONSE_MASK)  != MMCSD_R6_RESPONSE)
     {
       fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
       return -EINVAL;
@@ -994,7 +1434,7 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshor
 
 #ifdef CONFIG_DEBUG
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
-       cmd & MMCSD_RESPONSE_MASK  |= MMCSD_R7_RESPONSE)
+      (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
       fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
       return -EINVAL;
@@ -1031,56 +1471,10 @@ static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rno
 }
 
 /****************************************************************************
- * Name: stm32_recvsetup
- *
- * Description:
- *   Setup hardware in preparation for data trasfer from the card.  This method
- *   will do whatever controller setup is necessary.  This would be called
- *   for SD memory just BEFORE sending CMD13 (SEND_STATUS), CMD17
- *   (READ_SINGLE_BLOCK), CMD18 (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), ...
- *   and before SDIO_RECVDATA is called.
- *
- * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
- *   nbytes - The number of bytes in the transfer
- *
- * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int stm32_recvsetup(FAR struct sdio_dev_s *dev, uint32 nbytes)
-{
-  uint32 dctrl = (stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT)) | SDIO_DCTRL_DTDIR;
-  stm32_dataconfig(SD_DATATIMEOUT, nbytes, dctrl);
-  return OK;
-}
-
-/****************************************************************************
- * Name: stm32_recvdata
- *
- * Description:
- *   Receive data from MMC/SD
- *
- * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
- *   buffer - Buffer in which to receive the data
- *
- * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
-{
-  return -ENOSYS;
-}
-
-/****************************************************************************
  * Name: stm32_waitenable
  *
  * Description:
- *   Enable/disable of a set of MMC/SD wait events.  This is part of the
+ *   Enable/disable of a set of SDIO wait events.  This is part of the
  *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
  *   configured before calling stm32_waitevent.  This is done in this way
  *   to help the driver to eliminate race conditions between the command
@@ -1091,7 +1485,7 @@ static int stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
  *   returns.
  *
  * Input Parameters:
- *   dev      - An instance of the MMC/SD device interface
+ *   dev      - An instance of the SDIO device interface
  *   eventset - A bitset of events to enable or disable (see SDIOWAIT_*
  *              definitions). 0=disable; 1=enable.
  *
@@ -1100,7 +1494,8 @@ static int stm32_recvdata(FAR struct sdio_dev_s *dev, FAR ubyte *buffer)
  *
  ****************************************************************************/
 
-static void stm32_waitenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
+static void stm32_waitenable(FAR struct sdio_dev_s *dev,
+                             sdio_eventset_t eventset)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
 
@@ -1108,7 +1503,7 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
 
   DEBUGASSERT(priv != NULL);
   priv->waitevents = 0;
-  priv->wkupevents = 0;
+  priv->wkupevent  = 0;
   priv->waitevents = eventset;
 }
 
@@ -1122,7 +1517,7 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
  *   can be used again.
  *
  * Input Parameters:
- *   dev     - An instance of the MMC/SD device interface
+ *   dev     - An instance of the SDIO device interface
  *   timeout - Maximum time in milliseconds to wait.  Zero means no timeout.
  *
  * Returned Value:
@@ -1134,7 +1529,8 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
 
 static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
 {
-  ubyte wkupevents = 0;
+  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+  ubyte wkupevent = 0;
 
   DEBUGASSERT(priv->waitevents != 0);
 
@@ -1155,10 +1551,10 @@ static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
 
       /* Check if the event has occurred. */
 
-      wkupevents = (ubyte)(priv->wkupevents & priv->waitevents)
-      if (wkupevents != 0)
+      wkupevent = (ubyte)(priv->wkupevent & priv->waitevents);
+      if (wkupevent != 0)
         {
-          /* Yes... break out of the loop with wkupevents non-zero */
+          /* Yes... break out of the loop with wkupevent non-zero */
 
           break;
         }
@@ -1167,19 +1563,19 @@ static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
   /* Clear all enabled wait events before returning */
 
   priv->waitevents = 0;
-  priv->wkupevents = 0;
-  return wkupevents;
+  priv->wkupevent = 0;
+  return wkupevent;
 }
 
 /****************************************************************************
  * Name: stm32_events
  *
  * Description:
- *   Return the current event set.  This supports polling for MMC/SD (vs.
+ *   Return the current event set.  This supports polling for SDIO (vs.
  *   waiting). Only enabled events need be reported.
  *
  * Input Parameters:
- *   dev - An instance of the MMC/SD device interface
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   Event set containing the current events (All pending events are cleared
@@ -1196,7 +1592,7 @@ static ubyte stm32_events(FAR struct sdio_dev_s *dev)
  * Name: stm32_callbackenable
  *
  * Description:
- *   Enable/disable of a set of MMC/SD callback events.  This is part of the
+ *   Enable/disable of a set of SDIO callback events.  This is part of the
  *   the SDIO callback sequence.  The set of events is configured to enabled
  *   callbacks to the function provided in stm32_registercallback.
  *
@@ -1205,7 +1601,7 @@ static ubyte stm32_events(FAR struct sdio_dev_s *dev)
  *   calling this methos.
  *
  * Input Parameters:
- *   dev      - An instance of the MMC/SD device interface
+ *   dev      - An instance of the SDIO device interface
  *   eventset - A bitset of events to enable or disable (see SDIOMEDIA_*
  *              definitions). 0=disable; 1=enable.
  *
@@ -1214,7 +1610,8 @@ static ubyte stm32_events(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_callbackenable(FAR struct sdio_dev_s *dev, sdio_event_t eventset)
+static void stm32_callbackenable(FAR struct sdio_dev_s *dev,
+                                 sdio_eventset_t eventset)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
   DEBUGASSERT(priv != NULL);
@@ -1265,7 +1662,7 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
  *   Return TRUE if the hardware can support DMA
  *
  * Input Parameters:
- *   dev - An instance of the MMC/SD device interface
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   TRUE if DMA is supported.
@@ -1280,7 +1677,7 @@ static boolean stm32_dmasupported(FAR struct sdio_dev_s *dev)
 #endif
 
 /****************************************************************************
- * Name: stm32_dmareadsetup
+ * Name: stm32_dmarecvsetup
  *
  * Description:
  *   Setup to perform a read DMA.  If the processor supports a data cache,
@@ -1289,7 +1686,7 @@ static boolean stm32_dmasupported(FAR struct sdio_dev_s *dev)
  *   invalidating the data cache.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *   buffer - The memory to DMA from
  *   buflen - The size of the DMA transfer in bytes
  *
@@ -1299,20 +1696,49 @@ static boolean stm32_dmasupported(FAR struct sdio_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, size_t buflen)
+static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
+                              size_t buflen)
 {
-  /* Configure the RX DMA */
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  uint32 dblocksize;
+  int ret = -EINVAL;
 
- stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|SDIO_MASK_DATAENDIE|
-                    SDIO_MASK_RXOVERRIE|SDIO_MASK_STBITERRIE);
- putreg32(1, SDIO_DCTRL_DMAEN_BB)
- stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
-                (buflen + 3) >> 2, SDIO_RXDMA16_CONFIG);
+  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(((uint32)buffer & 3) == 0);
+
+  /* Wide bus operation is required for DMA */
+
+  if (priv->widebus)
+    {
+      /* Save the destination buffer information for use by the interrupt handler */
+
+      priv->buffer    = (uint32*)buffer;
+      priv->remaining = buflen;
+      priv->result    = -EBUSY;
+      priv->dmamode   = TRUE;
+
+      /* Then set up the SDIO data path */
+
+      dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+      stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize|SDIO_DCTRL_DTDIR);
+
+      /* Configure the RX DMA */
+
+      stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
+                      SDIO_MASK_DATAENDIE|SDIO_MASK_RXOVERRIE|
+                      SDIO_MASK_STBITERRIE);
+
+      putreg32(1, SDIO_DCTRL_DMAEN_BB);
+      stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
+                     (buflen + 3) >> 2, SDIO_RXDMA16_CONFIG);
+      ret = OK;
+    }
+  return ret;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_dmawritesetup
+ * Name: stm32_dmasendsetup
  *
  * Description:
  *   Setup to perform a write DMA.  If the processor supports a data cache,
@@ -1321,7 +1747,7 @@ static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, siz
  *   flushing the data cache.
  *
  * Input Parameters:
- *   dev    - An instance of the MMC/SD device interface
+ *   dev    - An instance of the SDIO device interface
  *   buffer - The memory to DMA into
  *   buflen - The size of the DMA transfer in bytes
  *
@@ -1331,27 +1757,57 @@ static int  tm32_dmareadsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, siz
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int stm32_dmawritesetup(FAR struct sdio_dev_s *dev,
+static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
                                FAR const ubyte *buffer, size_t buflen)
 {
-  /* Configure the TX DMA */
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  uint32 dblocksize;
+  int ret = -EINVAL;
 
-  stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|SDIO_MASK_DATAENDIE|
-                  SDIO_MASK_TXUNDERRIE|SDIO_MASK_STBITERRIE);
-  stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
-                 (buflen + 3) >> 2, SDIO_TXDMA16_CONFIG);
-  putreg32(1, SDIO_DCTRL_DMAEN_BB)
+  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(((uint32)buffer & 3) == 0);
+
+  /* Wide bus operation is required for DMA */
+
+  if (priv->widebus)
+    {
+      /* Save the source buffer information for use by the interrupt handler */
+
+      priv->buffer    = (uint32*)buffer;
+      priv->remaining = buflen;
+      priv->result    = -EBUSY;
+      priv->dmamode   = TRUE;
+
+      /* Then set up the SDIO data path */
+
+      dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
+      stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize);
+
+      /* Enable TX interrrupts */
+
+      stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
+                      SDIO_MASK_DATAENDIE|SDIO_MASK_TXUNDERRIE|
+                      SDIO_MASK_STBITERRIE);
+
+      /* Configure the TX DMA */
+
+      stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
+                     (buflen + 3) >> 2, SDIO_TXDMA16_CONFIG);
+      putreg32(1, SDIO_DCTRL_DMAEN_BB);
+      ret = OK;
+    }
+  return ret;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_dmastart
+ * Name: stm32_sdiodmastart
  *
  * Description:
  *   Start the DMA
  *
  * Input Parameters:
- *   dev - An instance of the MMC/SD device interface
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -1359,42 +1815,11 @@ static int stm32_dmawritesetup(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int stm32_dmastart(FAR struct sdio_dev_s *dev)
+static int stm32_sdiodmastart(FAR struct sdio_dev_s *dev)
 {
-   stm32_dmastart(priv->dma, sdio_dmacallback, priv, FALSE);
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_dmastatus
- *
- * Description:
- *   Return the number of bytes remaining in the DMA transfer
- *
- * Input Parameters:
- *   dev       - An instance of the MMC/SD device interface
- *   remaining - A pointer to location in which to return the number of bytes
- *               remaining in the transfer.
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-static int stm32_dmastatus(FAR struct sdio_dev_s *dev, size_t *remaining)
-{
-#ifdef CONFIG_DEBUG
-  if (remaining)
-    {
-      *remaining = getreg32(STM32_SDIO_DCOUNT);
-      return OK;
-    }
-  return -EINVAL;
-#else
-  *remaining = getreg32(STM32_SDIO_DCOUNT);
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
   return OK;
-#endif
 }
 #endif
 
@@ -1497,7 +1922,7 @@ static void stm32_default(void)
  *
  ****************************************************************************/
 
-FAR sdio_dev_s *mmcsd_slotinitialize(int slotno)
+FAR struct sdio_dev_s *sdio_initialize(int slotno)
 {
   /* There is only one, slot */
 
@@ -1505,7 +1930,7 @@ FAR sdio_dev_s *mmcsd_slotinitialize(int slotno)
 
   /* Initialize the SDIO slot structure */
 
-  sem_init(&priv->eventsem, 0, 0);
+  sem_init(&priv->waitsem, 0, 0);
 
   /* Allocate a DMA channel */
 
@@ -1532,7 +1957,7 @@ FAR sdio_dev_s *mmcsd_slotinitialize(int slotno)
 
   stm32_setclkcr(STM32_CLCKCR_INIT);
   stm32_setpwrctrl(SDIO_POWER_PWRCTRL_ON);
-  stm32_clkenable(ENABLE);
+  stm32_clkenable();
 
   return &g_sdiodev.dev;
 }

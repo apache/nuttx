@@ -366,9 +366,9 @@ static int mmcsd_getSCR(struct mmcsd_state_s *priv, uint32 scr[2])
       return ret;
     }
 
-  /* Setup up to receive data */
+  /* Setup up to receive data with interrupt mode */
 
-  SDIO_RECVSETUP(priv->dev, 8);
+  SDIO_RECVSETUP(priv->dev, (FAR ubyte*)scr, 8);
 
   /* Send ACMD51 SD_APP_SEND_SCR with argument as 0 to start data receipt */
 
@@ -381,21 +381,14 @@ static int mmcsd_getSCR(struct mmcsd_state_s *priv, uint32 scr[2])
       return ret;
     }
 
-  /* Wait for data available */
+  /* Wait for data to be transferred */
 
   ret = SDIO_EVENTWAIT(priv->dev, MMCSD_SCR_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: WAITEVENT for READ DATA failed: %d\n", ret);
-      return ret;
     }
-
-  /* Receive the SCR data from the SD card.  Card data is sent big-endian;
-   * if we are running on a little-endian machine, then we need to swap
-   * some bytes (should this be a configuration option?)
-   */
-
-  return SDIO_RECVDATA(priv->dev, (FAR ubyte *)scr);
+  return ret;
 }
 
 /****************************************************************************
