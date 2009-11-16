@@ -372,7 +372,7 @@ static int mmcsd_getSCR(struct mmcsd_state_s *priv, uint32 scr[2])
 
   /* Send ACMD51 SD_APP_SEND_SCR with argument as 0 to start data receipt */
 
-  (void)SDIO_EVENTENABLE(priv->dev, SDIOEVENT_READDATADONE);
+  (void)SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE);
   mmcsd_sendcmdpoll(priv, SD_ACMD51, 0);
   ret = mmcsd_recvR1(priv, SD_ACMD51);
   if (ret != OK)
@@ -1063,6 +1063,10 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
           {
             fdbg("ERROR: mmcsd_removed failed: %d\n", ret);
           }
+ 
+        /* Enable logic to detect if a card is re-inserted */
+
+        SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
       }
       break;
 
@@ -1117,6 +1121,10 @@ static void mmcsd_mediachange(FAR void *arg)
        */
 
       (void)mmcsd_removed(priv);
+
+      /* Enable logic to detect if a card is re-inserted */
+
+      SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
     }
   mmcsd_givesem(priv);
 }
@@ -1743,7 +1751,7 @@ static int mmcsd_probe(struct mmcsd_state_s *priv)
       if (ret != OK)
         {
           fdbg("ERROR: Failed to initialize card: %d\n");
-          SDIO_EVENTENABLE(priv->dev, SDIOEVENT_INSERTED);
+          SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
         }
       else
         {
@@ -1780,7 +1788,7 @@ static int mmcsd_probe(struct mmcsd_state_s *priv)
 
                 /* Set up to receive asynchronous, media removal events */
 
-                SDIO_EVENTENABLE(priv->dev, SDIOEVENT_EJECTED);
+                SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_EJECTED);
               }
         }
 
@@ -1793,7 +1801,7 @@ static int mmcsd_probe(struct mmcsd_state_s *priv)
       /* There is no card in the slot */
 
       fvdbg("No card\n");
-      SDIO_EVENTENABLE(priv->dev, SDIOEVENT_INSERTED);
+      SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
       ret = -ENODEV;
     }
 
@@ -1835,10 +1843,6 @@ static int mmcsd_removed(struct mmcsd_state_s *priv)
   /* Disable clocking to the card */
 
   (void)SDIO_CLOCK(priv->dev, CLOCK_SDIO_DISABLED);
-
-  /* Enable logic to detect if a card is re-inserted */
-
-  SDIO_EVENTENABLE(priv->dev, SDIOEVENT_INSERTED);
   return OK;
 }
 
@@ -1874,7 +1878,7 @@ static int mmcsd_hwinitialize(struct mmcsd_state_s *priv)
   fvdbg("Successfully attached MMC/SD interrupts\n");
 
   /* Register a callback so that we get informed if media is inserted or
-   * removed from the slot.
+   * removed from the slot (Initially all callbacks are disabled).
    */
 
   SDIO_REGISTERCALLBACK(priv->dev, mmcsd_mediachange, (FAR void *)priv);
@@ -1917,7 +1921,7 @@ static int mmcsd_hwinitialize(struct mmcsd_state_s *priv)
     {
       /* No... Setup to receive the media inserted event */
 
-      SDIO_EVENTENABLE(priv->dev, SDIOEVENT_INSERTED);
+      SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 
       /* ENODEV is returned to indicate that no card is inserted in the slot. */
 

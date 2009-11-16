@@ -47,18 +47,21 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* MMC/SD events needed by the driver */
+/* MMC/SD events needed by the driver
+ *
+ * Wait events are used for event-waiting by SDIO_WAITENABLE and SDIO_EVENTWAIT
+ */
 
-#define SDIOEVENT_EJECTED       (1 << 0) /* Bit 0: CD/DAT3 transition low, media removed */
-#define SDIOEVENT_INSERTED      (1 << 1) /* Bit 1: CD/DAT3 transition high, media inserted */
-#define SDIOEVENT_CMDDONE       (1 << 2) /* Bit 2: Command+response complete */
-#define SDIOEVENT_READCMDDONE   (1 << 3) /* Bit 3: Read command done */
-#define SDIOEVENT_WRITECMDDONE  (1 << 4) /* Bit 4: Write command done */
-#define SDIOEVENT_READDATADONE  (1 << 5) /* Bit 5: Read data done */
-#define SDIOEVENT_WRITEDATADONE (1 << 6) /* Bit 6: Write data done */
-#define SDIOEVENT_CMDBUSYDONE   (1 << 7) /* Bit 7: Command with transition to not busy */
+#define SDIOWAIT_CMDDONE       (1 << 0) /* Bit 0: Command+response complete */
+#define SDIOWAIT_CMDBUSYDONE   (1 << 1) /* Bit 1: Command with transition to not busy */
+#define SDIOWAIT_TRANSFERDONE  (1 << 2) /* Bit 2: Data transfer/DMA done */
 
-#define SDIOEVENT_ALLEVENTS     0xff
+#define SDIOWAIT_ALLEVENTS     0x03
+
+/* Media events are used for enable/disable registered event callbacks */
+
+#define SDIOMEDIA_EJECTED       (1 << 0) /* Bit 0: Mmedia removed */
+#define SDIOMEDIA_INSERTED      (1 << 1) /* Bit 1: Media inserted */
 
 /* Commands are bit-encoded to provide as much information to the SDIO driver as
  * possible in 32-bits.  The encoding is as follows:
@@ -517,14 +520,22 @@
 #define SDIO_RECVDATA(dev,buffer) ((dev)->recvdata(dev,buffer))
 
 /****************************************************************************
- * Name: SDIO_EVENTENABLE
+ * Name: SDIO_WAITENABLE
  *
  * Description:
- *   Enable/disable notification of a set of MMC/SD events
+ *   Enable/disable of a set of MMC/SD wait events.  This is part of the
+ *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
+ *   configured before calling SDIO_EVENTWAIT.  This is done in this way
+ *   to help the driver to eliminate race conditions between the command
+ *   setup and the subsequent events.
+ *
+ *   The enabled events persist until either (1) SDIO_WAITENABLE is called
+ *   again specifying a different set of wait events, or (2) SDIO_EVENTWAIT
+ *   returns.
  *
  * Input Parameters:
  *   dev      - An instance of the MMC/SD device interface
- *   eventset - A bitset of events to enable or disable (see MMCSDEVENT_*
+ *   eventset - A bitset of events to enable or disable (see SDIOWAIT_*
  *              definitions). 0=disable; 1=enable.
  *
  * Returned Value:
@@ -532,13 +543,16 @@
  *
  ****************************************************************************/
 
-#define SDIO_EVENTENABLE(dev,eventset)  ((dev)->eventenable(dev,eventset))
+#define SDIO_WAITENABLE(dev,eventset)  ((dev)->waitenable(dev,eventset))
 
 /****************************************************************************
  * Name: SDIO_EVENTWAIT
  *
  * Description:
- *   Wait for one of the enabled events to occur (or a timeout)
+ *   Wait for one of the enabled events to occur (or a timeout).  Note that
+ *   all events enabled by SDIO_WAITEVENTS are disabled when SDIO_EVENTWAIT
+ *   returns.  SDIO_WAITEVENTS must be called again before SDIO_EVENTWAIT
+ *   can be used again.
  *
  * Input Parameters:
  *   dev     - An instance of the MMC/SD device interface
@@ -572,6 +586,30 @@
 #define SDIO_EVENTS(dev)  ((dev)->events(dev))
 
 /****************************************************************************
+ * Name: SDIO_CALLBACKENABLE
+ *
+ * Description:
+ *   Enable/disable of a set of MMC/SD callback events.  This is part of the
+ *   the SDIO callback sequence.  The set of events is configured to enabled
+ *   callbacks to the function provided in SDIO_REGISTERCALLBACK.
+ *
+ *   Events are automatically disabled once the callback is performed and no
+ *   further callback events will occur until they are again enabled by
+ *   calling this methos.
+ *
+ * Input Parameters:
+ *   dev      - An instance of the MMC/SD device interface
+ *   eventset - A bitset of events to enable or disable (see SDIOMEDIA_*
+ *              definitions). 0=disable; 1=enable.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define SDIO_CALLBACKENABLE(dev,eventset)  ((dev)->waitenable(dev,eventset))
+
+/****************************************************************************
  * Name: SDIO_REGISTERCALLBACK
  *
  * Description:
@@ -579,6 +617,9 @@
  *   change.  Callbacks should not be made from interrupt handlers, rather
  *   interrupt level events should be handled by calling back on the work
  *   thread.
+ *
+ *   When this method is called, all callbacks should be disabled until they
+ *   are enabled via a call to SDIO_CALLBACKENABLE
  *
  * Input Parameters:
  *   dev -      Device-specific state data
@@ -613,42 +654,18 @@
 #endif
 
 /****************************************************************************
- * Name: SDIO_COHERENT
- *
- * Description:
- *   If the processor supports a data cache, then this method will make sure
- *   that the contents of the DMA memory and the data cache are coherent in
- *   preparation for the DMA transfer.  For write transfers, this may mean
- *   flushing the data cache, for read transfers this may mean invalidating
- *   the data cache.
- *
- * Input Parameters:
- *   dev   - An instance of the MMC/SD device interface
- *   addr  - The beginning address of the DMA
- *   len   - The length of the DMA
- *   write - TRUE: A write DMA will be performed; FALSE: a read DMA will be
- *           performed.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_DATA_CACHE)
-#  define SDIO_COHERENT(dev,addr,len,write) ((dev)->coherent(dev,addr,len,write))
-#else
-#  define SDIO_COHERENT(dev,addr,len,write)
-#endif
-
-/****************************************************************************
  * Name: SDIO_DMAREADSETUP
  *
  * Description:
- *   Setup to perform a read DMA
+ *   Setup to perform a read DMA.  If the processor supports a data cache,
+ *   then this method will also make sure that the contents of the DMA memory
+ *   and the data cache are coherent.  For read transfers this may mean
+ *   invalidating the data cache.
  *
  * Input Parameters:
  *   dev    - An instance of the MMC/SD device interface
  *   buffer - The memory to DMA from
+ *   buflen - The size of the DMA transfer in bytes
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -656,20 +673,24 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-#  define SDIO_DMAREADSETUP(dev,buffer) ((dev)->dmareadsetup(dev,buffer))
+#  define SDIO_DMAREADSETUP(dev,buffer,len) ((dev)->dmareadsetup(dev,buffer,len))
 #else
-#  define SDIO_DMAREADSETUP(dev,buffer) (-ENOSYS)
+#  define SDIO_DMAREADSETUP(dev,buffer,len) (-ENOSYS)
 #endif
 
 /****************************************************************************
  * Name: SDIO_DMAWRITESETUP
  *
  * Description:
- *   Setup to perform a write DMA
+ *   Setup to perform a write DMA.  If the processor supports a data cache,
+ *   then this method will also make sure that the contents of the DMA memory
+ *   and the data cache are coherent.  For write transfers, this may mean
+ *   flushing the data cache.
  *
  * Input Parameters:
  *   dev    - An instance of the MMC/SD device interface
  *   buffer - The memory to DMA into
+ *   buflen - The size of the DMA transfer in bytes
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -677,9 +698,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-#  define SDIO_DMAWRITESETUP(dev,buffer) ((dev)->dmawritesetup(dev,buffer))
+#  define SDIO_DMAWRITESETUP(dev,buffer,len) ((dev)->dmawritesetup(dev,buffer,len))
 #else
-#  define SDIO_DMAWRITESETUP(dev,buffer) (-ENOSYS)
+#  define SDIO_DMAWRITESETUP(dev,buffer,len) (-ENOSYS)
 #endif
 
 /****************************************************************************
@@ -703,30 +724,10 @@
 #endif
 
 /****************************************************************************
- * Name: SDIO_DMASTOP
- *
- * Description:
- *   Stop the DMA
- *
- * Input Parameters:
- *   dev - An instance of the MMC/SD device interface
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-#  define SDIO_DMASTOP(dev) ((dev)->dmastop(dev))
-#else
-#  define SDIO_DMASTOP(dev) (-ENOSYS)
-#endif
-
-/****************************************************************************
  * Name: SDIO_DMASTATUS
  *
  * Description:
- *   Returnt the number of bytes remaining in the DMA transfer
+ *   Return the number of bytes remaining in the DMA transfer
  *
  * Input Parameters:
  *   dev       - An instance of the MMC/SD device interface
@@ -810,7 +811,7 @@ struct sdio_dev_s
 
   /* EVENT handler */
 
-  void  (*eventenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
+  void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
   ubyte (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);
   ubyte (*events)(FAR struct sdio_dev_s *dev);
   int   (*registercallback)(FAR struct sdio_dev_s *dev, sdio_mediachange_t callback, void *arg);
@@ -819,13 +820,11 @@ struct sdio_dev_s
 
 #ifdef CONFIG_SDIO_DMA
   boolean (*dmasupported)(FAR struct sdio_dev_s *dev);
-#ifdef CONFIG_DATA_CACHE
-  void  (*coherent)(FAR struct sdio_dev_s *dev, FAR void *addr, size_t len, boolean write);
-#endif
-  int   (*dmareadsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer);
-  int   (*dmawritesetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer);
-  int   (*dmaenable)(FAR struct sdio_dev_s *dev);
-  int   (*dmastop)(FAR struct sdio_dev_s *dev);
+  int   (*dmareadsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
+          size_t buflen);
+  int   (*dmawritesetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
+          size_t buflen);
+  int   (*dmastart)(FAR struct sdio_dev_s *dev);
   int   (*dmastatus)(FAR struct sdio_dev_s *dev, size_t *remaining);
 #endif
 };
