@@ -97,7 +97,6 @@
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
-#error OUCH
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
 #endif
 
