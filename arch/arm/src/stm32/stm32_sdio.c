@@ -49,6 +49,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
 #include <nuttx/sdio.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>
 #include <arch/irq.h>
 
@@ -69,6 +70,10 @@
 #if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_STM32_DMA2)
 #  warning "CONFIG_SDIO_DMA support requires CONFIG_STM32_DMA2"
 #  undef CONFIG_SDIO_DMA
+#endif
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
 
 #ifndef CONFIG_SDIO_PRI
@@ -184,8 +189,9 @@ struct stm32_dev_s
 
   ubyte              cdstatus;   /* Card status */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
-  sdio_mediachange_t callback;   /* Registered callback function */
+  worker_t           callback;   /* Registered callback function */
   void              *cbarg;      /* Registered callback argument */
+  struct work_s      cbwork;     /* Callback work queue structure */
 
   /* Interrupt mode data transfer support */
 
@@ -278,7 +284,7 @@ static sdio_eventset_t
 static void  stm32_callbackenable(FAR struct sdio_dev_s *dev,
                sdio_eventset_t eventset);
 static int   stm32_registercallback(FAR struct sdio_dev_s *dev,
-               sdio_mediachange_t callback, void *arg);
+               worker_t callback, void *arg);
 
 /* DMA */
 
@@ -1877,7 +1883,7 @@ static void stm32_callbackenable(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 static int stm32_registercallback(FAR struct sdio_dev_s *dev,
-                                  sdio_mediachange_t callback, void *arg)
+                                  worker_t callback, void *arg)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
 
@@ -2100,9 +2106,25 @@ static void stm32_callback(void *arg)
       /* Perform the callback, disabling further callbacks.  Of course, the
        * the callback can (and probably should) re-enable callbacks.
        */
-
       priv->cbevents = 0;
-      priv->callback(priv->cbarg);
+
+      /* Callbacks cannot be performed in the context of an interrupt handler.
+       * If we are in an interrupt handler, then queue the callback to be
+       * performed later on the work thread.
+       */
+
+      if (up_interrupt_context())
+        {
+          /* Yes.. queue it */
+
+          (void)work_queue(&priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
+        }
+      else
+        {
+          /* No.. then just call the callback here */
+
+          priv->callback(priv->cbarg);
+        }
     }
 }
 
