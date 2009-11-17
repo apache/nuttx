@@ -425,13 +425,11 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
   int ret;
 
   /* Set Block Size To 8 Bytes */
-  /* Send CMD55 APP_CMD with argument as card's RCA */
 
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD16, 8);
-  ret = mmcsd_recvR1(priv, MMCSD_CMD16);
+  ret = mmcsd_setblocklen(priv, 8);
   if (ret != OK)
     {
-      fdbg("ERROR: RECVR1 for CMD16 failed: %d\n", ret);
+      fdbg("ERROR: mmcsd_setblocklen failed: %d\n", ret);
       return ret;
     }
 

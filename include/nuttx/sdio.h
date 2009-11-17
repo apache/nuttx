@@ -52,11 +52,11 @@
  * Wait events are used for event-waiting by SDIO_WAITENABLE and SDIO_EVENTWAIT
  */
 
-#define SDIOWAIT_CMDDONE       (1 << 0) /* Bit 0: Command+response complete */
-#define SDIOWAIT_CMDBUSYDONE   (1 << 1) /* Bit 1: Command with transition to not busy */
+#define SDIOWAIT_CMDDONE       (1 << 0) /* Bit 0: Command complete */
+#define SDIOWAIT_RESPONSEDONE  (1 << 1) /* Bit 1: Response to command available */
 #define SDIOWAIT_TRANSFERDONE  (1 << 2) /* Bit 2: Data transfer/DMA done */
 
-#define SDIOWAIT_ALLEVENTS     0x03
+#define SDIOWAIT_ALLEVENTS     0x07
 
 /* Media events are used for enable/disable registered event callbacks */
 
