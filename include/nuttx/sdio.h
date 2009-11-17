@@ -55,8 +55,9 @@
 #define SDIOWAIT_CMDDONE       (1 << 0) /* Bit 0: Command complete */
 #define SDIOWAIT_RESPONSEDONE  (1 << 1) /* Bit 1: Response to command available */
 #define SDIOWAIT_TRANSFERDONE  (1 << 2) /* Bit 2: Data transfer/DMA done */
+#define SDIOWAIT_TIMEOUT       (1 << 3) /* Bit 3: Timeout */
 
-#define SDIOWAIT_ALLEVENTS     0x07
+#define SDIOWAIT_ALLEVENTS     0x0f
 
 /* Media events are used for enable/disable registered event callbacks */
 
@@ -525,34 +526,17 @@
  *
  * Input Parameters:
  *   dev     - An instance of the SDIO device interface
- *   timeout - Maximum time in milliseconds to wait.  Zero means no timeout.
+ *   timeout - Maximum time in milliseconds to wait.  Zero means immediate
+ *             timeout with no wait.  The timeout value is ignored if
+ *             SDIOWAIT_TIMEOUT is not included in the waited-for eventset.
  *
  * Returned Value:
- *   Event set containing the event(s) that ended the wait.  If no events the
- *   returned event set is zero, then the wait was terminated by the timeout.
- *   All events are cleared disabled after the wait concludes.
+ *   Event set containing the event(s) that ended the wait.  Should always
+ *   be non-zero.  All events are disabled after the wait concludes.
  *
  ****************************************************************************/
 
 #define SDIO_EVENTWAIT(dev,timeout)  ((dev)->eventwait(dev,timeout))
-
-/****************************************************************************
- * Name: SDIO_EVENTS
- *
- * Description:
- *   Return the current event set.  This supports polling for SDIO (vs.
- *   waiting).  Only enabled events need be reported.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   Event set containing the current events (All pending events are cleared
- *   after reading).
- *
- ****************************************************************************/
-
-#define SDIO_EVENTS(dev)  ((dev)->events(dev))
 
 /****************************************************************************
  * Name: SDIO_CALLBACKENABLE
@@ -736,13 +720,14 @@ struct sdio_dev_s
   int   (*recvR6)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);
   int   (*recvR7)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);
 
-  /* EVENT handler */
+  /* Event/Callback support */
 
   void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
-  ubyte (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);
-  ubyte (*events)(FAR struct sdio_dev_s *dev);
-  void  (*callbackenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
-  int   (*registercallback)(FAR struct sdio_dev_s *dev, sdio_mediachange_t callback, void *arg);
+  sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);
+  void  (*callbackenable)(FAR struct sdio_dev_s *dev,
+          sdio_eventset_t eventset);
+  int   (*registercallback)(FAR struct sdio_dev_s *dev,
+          sdio_mediachange_t callback, void *arg);
 
   /* DMA */
 

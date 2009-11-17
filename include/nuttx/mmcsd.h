@@ -72,16 +72,13 @@ extern "C" {
  * Input Parameters:
  *   minor - The MMC/SD minor device number.  The MMC/SD device will be
  *     registered as /dev/mmcsdN where N is the minor number
- *   slotno - The slot number to use.  This is only meaningful for architectures
- *     that support multiple MMC/SD slots.  This value must be in the range
- *     {0, ..., CONFIG_MMCSD_NSLOTS}.
  *   dev - And instance of an MMC/SD interface.  The MMC/SD hardware should
  *     be initialized and ready to use.
  *
  ****************************************************************************/
 
 struct sdio_dev_s; /* See nuttx/sdio.h */
-EXTERN int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev);
+EXTERN int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
 
 /****************************************************************************
  * Name: mmcsd_spislotinitialize

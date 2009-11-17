@@ -161,11 +161,13 @@ static void    mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32 cid[4]);
 static void    mmcsd_decodeSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2]);
 
 static int     mmcsd_getR1(FAR struct mmcsd_state_s *priv, FAR uint32 *r1);
-static int     mmcsd_verifystandby(FAR struct mmcsd_state_s *priv);
-static int     mmcsd_verifyidle(FAR struct mmcsd_state_s *priv);
+static int     mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32 status);
 
 /* Transfer helpers *********************************************************/
 
+static boolean mmcsd_wrprotected(FAR struct mmcsd_state_s *priv);
+static int     mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
+                 sdio_eventset_t failevents, uint32 timeout);
 static int     mmcsd_transferready(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_stoptransmission(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_setblocklen(FAR struct mmcsd_state_s *priv,
@@ -449,7 +451,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
 
   /* Send ACMD51 SD_APP_SEND_SCR with argument as 0 to start data receipt */
 
-  (void)SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE);
+  (void)SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
   mmcsd_sendcmdpoll(priv, SD_ACMD51, 0);
   ret = mmcsd_recvR1(priv, SD_ACMD51);
   if (ret != OK)
@@ -460,7 +462,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
 
   /* Wait for data to be transferred */
 
-  ret = SDIO_EVENTWAIT(priv->dev, MMCSD_SCR_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, MMCSD_SCR_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: EVENTWAIT for READ DATA failed: %d\n", ret);
@@ -905,36 +907,99 @@ static int mmcsd_getR1(FAR struct mmcsd_state_s *priv, FAR uint32 *r1)
 }
 
 /****************************************************************************
- * Name: mmcsd_verifystandby
+ * Name: mmcsd_verifystate
  *
  * Description:
  *   Verify that the card is in STANDBY state
  *
  ****************************************************************************/
 
-static int mmcsd_verifystandby(FAR struct mmcsd_state_s *priv)
+static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32 state)
 {
-#warning "Not implemented"
-  return -ENOSYS;
-}
+  uint32 r1;
+  int ret;
 
-/****************************************************************************
- * Name: mmcsd_verifyidle
- *
- * Description:
- *   Verify that the card is in IDLE state
- *
- ****************************************************************************/
+  /* Get the current R1 status from the card */
 
-static int mmcsd_verifyidle(FAR struct mmcsd_state_s *priv)
-{
-#warning "Not implemented"
-  return -ENOSYS;
+  ret = mmcsd_getR1(priv, &r1);
+  if (ret != OK)
+    {
+      fdbg("ERROR: mmcsd_getR1 failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Now check if the card is in the expected state. */
+
+  if (IS_STATE(r1, state))
+    {
+      /* Yes.. return Success */
+
+      priv->wrbusy = FALSE;
+      return OK;
+    }
+  return -EINVAL;
 }
 
 /****************************************************************************
  * Transfer Helpers
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mmcsd_wrprotected
+ *
+ * Description:
+ *   Return true if the the card is unlocked an not write protected.  The
+ *   
+ *
+ ****************************************************************************/
+
+static boolean mmcsd_wrprotected(FAR struct mmcsd_state_s *priv)
+{
+  /* Check if the card is locked (priv->locked) or write protected either (1)
+   * via software as reported via the CSD and retained in priv->wrprotect or
+   * (2) via the mechanical write protect on the card (which we get from the
+   * SDIO driver via SDIO_WRPROTECTED)
+   */
+
+  return (priv->wrprotect || priv->locked || SDIO_WRPROTECTED(priv->dev));
+}
+
+/****************************************************************************
+ * Name: mmcsd_eventwait
+ *
+ * Description:
+ *   Wait for the specified events to occur.  Check for wakeup on error events.
+ *
+ ****************************************************************************/
+
+static int mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
+                           sdio_eventset_t failevents, uint32 timeout)
+{
+  sdio_eventset_t wkupevent;
+
+  /* Wait for the set of events enabled by SDIO_EVENTENABLE. */
+
+  wkupevent = SDIO_EVENTWAIT(priv->dev, timeout);
+
+  /* SDIO_EVENTWAIT returns the event set containing the event(s) that ended
+   * the wait.  It should always be non-zero, but may contain failure as
+   * well as success events.  Check if it contains any failure events.
+   */
+
+  if ((wkupevent & failevents) != 0)
+    {
+      /* Yes.. the failure event is probably SDIOWAIT_TIMEOUT */
+
+      fdbg("ERROR: Awakened with %02\n", wkupevent);
+      return wkupevent & SDIOWAIT_TIMEOUT ? -ETIMEDOUT : -EIO;
+    }
+
+  /* Since there are no failure events, we must have been awaked by one
+   * (or more) success events.
+   */
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: mmcsd_transferready
@@ -989,7 +1054,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_getR1(priv, &r1);
       if (ret != OK)
         {
-          fdbg("ERROR: mmcsd_recvR1 for CMD12 failed: %d\n", ret);
+          fdbg("ERROR: mmcsd_getR1 failed: %d\n", ret);
           return ret;
         }
 
@@ -1038,7 +1103,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_stoptransmission(FAR struct mmcsd_state_s *priv)
+static int mmcsd_stoptransmission(FAR struct mmcsd_state_s *priv)
 {
   int ret;
 
@@ -1153,7 +1218,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the read transfer */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1181,7 +1246,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   /* Then wait for the data transfer to complete */
 
-  ret = SDIO_EVENTWAIT(priv->dev, MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, MMCSD_BLOCK_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD17 transfer failed: %d\n", ret);
@@ -1256,7 +1321,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the read transfer */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1282,7 +1347,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  ret = SDIO_EVENTWAIT(priv->dev, nblocks * MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, nblocks * MMCSD_BLOCK_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD18 transfer failed: %d\n", ret);
@@ -1346,9 +1411,11 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
   fvdbg("startblock=%d\n", startblock);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
-  /* Check if the card is locked or write protected */
+  /* Check if the card is locked or write protected (either via software or
+   * via the mechanical write protect on the card)
+   */
 
-  if (priv->locked || priv->wrprotect)
+  if (mmcsd_wrprotected(priv))
   {
     fdbg("ERROR: Card is locked or write protected\n");
     return -EPERM;
@@ -1403,7 +1470,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the write transfer */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1417,7 +1484,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  ret = SDIO_EVENTWAIT(priv->dev, MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, MMCSD_BLOCK_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD24 transfer failed: %d\n", ret);
@@ -1450,9 +1517,11 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   fvdbg("startblockr=%d nblocks=%d\n", startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 1);
 
-  /* Check if the card is locked or write protected */
+  /* Check if the card is locked or write protected (either via software or
+   * via the mechanical write protect on the card)
+   */
 
-  if (priv->locked || priv->wrprotect)
+  if (mmcsd_wrprotected(priv))
   {
     fdbg("ERROR: Card is locked or write protected\n");
     return -EPERM;
@@ -1539,7 +1608,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the write transfer */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1553,7 +1622,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  ret = SDIO_EVENTWAIT(priv->dev, nblocks * MMCSD_BLOCK_DATADELAY);
+  ret =mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, nblocks * MMCSD_BLOCK_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD18 transfer failed: %d\n", ret);
@@ -1768,7 +1837,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
           geometry->geo_available     = TRUE;
           geometry->geo_mediachanged  = priv->mediachanged;
 #ifdef CONFIG_FS_WRITABLE
-          geometry->geo_writeenabled  = !priv->wrprotect && !priv->locked;
+          geometry->geo_writeenabled  = !mmcsd_wrprotected(priv);
 #else
           geometry->geo_writeenabled  = FALSE;
 #endif
@@ -2047,7 +2116,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
    * Verify that we are in standby state/data-transfer mode
    */
 
-  ret = mmcsd_verifystandby(priv);
+  ret = mmcsd_verifystate(priv, MMCSD_R1_STATE_STBY);
   if (ret != OK)
     {
       fdbg("ERROR: Failed to enter standby state\n");
@@ -2149,7 +2218,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
    * Verify that we are in standby state/data-transfer mode
    */
 
-  ret = mmcsd_verifystandby(priv);
+  ret = mmcsd_verifystate(priv, MMCSD_R1_STATE_STBY);
   if (ret != OK)
     {
       fdbg("ERROR: Failed to enter standby state\n");
@@ -2452,7 +2521,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
   /* Verify that we are in IDLE state */
 
-  ret = mmcsd_verifyidle(priv);
+  ret = mmcsd_verifystate(priv, MMCSD_R1_STATE_IDLE);
   if (ret != OK)
     {
       fdbg("ERROR: Failed to enter IDLE state\n");
@@ -2726,26 +2795,23 @@ static void mmcsd_hwuninitialize(FAR struct mmcsd_state_s *priv)
  * Input Parameters:
  *   minor - The MMC/SD minor device number.  The MMC/SD device will be
  *     registered as /dev/mmcsdN where N is the minor number
- *   slotno - The slot number to use.  This is only meaningful for architectures
- *     that support multiple MMC/SD slots.  This value must be in the range
- *     {0, ..., CONFIG_MMCSD_NSLOTS}.
  *   dev - And instance of an MMC/SD interface.  The MMC/SD hardware should
  *     be initialized and ready to use.
  *
  ****************************************************************************/
 
-int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
+int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 {
   FAR struct mmcsd_state_s *priv;
   char devname[16];
   int ret = -ENOMEM;
 
-  fvdbg("minor: %d slotno: %d\n", minor, slotno);
+  fvdbg("minor: %d\n", minor);
 
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG
-  if ((unsigned)slotno >= CONFIG_MMCSD_NSLOTS || minor < 0 || minor > 255 || !dev)
+  if (minor < 0 || minor > 255 || !dev)
     {
       return -EINVAL;
     }
@@ -2780,12 +2846,11 @@ int mmcsd_slotinitialize(int minor, int slotno, FAR struct sdio_dev_s *dev)
 
           if (ret == -ENODEV)
             {
-              fdbg("MMC/SD slot %d is empty\n", slotno);
+              fdbg("MMC/SD slot is empty\n");
             }
           else
             {
-              fdbg("ERROR: Failed to initialize MMC/SD slot %d: %d\n",
-                   slotno, ret);
+              fdbg("ERROR: Failed to initialize MMC/SD slot: %d\n", ret);
               goto errout_with_alloc;
             }
         }

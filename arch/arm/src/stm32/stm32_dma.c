@@ -414,7 +414,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr, size_t ntrans
    * half and/or full transfer in the DMA_CCRx register.
    */
 
-  regval  = dmachan_gettreg(dmach, STM32_DMACHAN_CCR_OFFSET);
+  regval  = dmachan_getreg(dmach, STM32_DMACHAN_CCR_OFFSET);
   regval &= ~(DMA_CCR_MEM2MEM|DMA_CCR_PL_MASK|DMA_CCR_MSIZE_MASK|DMA_CCR_PSIZE_MASK|
               DMA_CCR_MINC|DMA_CCR_PINC|DMA_CCR_CIRC|DMA_CCR_DIR);
   ccr    &=  (DMA_CCR_MEM2MEM|DMA_CCR_PL_MASK|DMA_CCR_MSIZE_MASK|DMA_CCR_PSIZE_MASK|
@@ -453,7 +453,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, boole
    * peripheral connected on the channel.
    */
 
-  ccr  = dmachan_gettreg(dmach, STM32_DMACHAN_CCR_OFFSET);
+  ccr  = dmachan_getreg(dmach, STM32_DMACHAN_CCR_OFFSET);
   ccr |= DMA_CCR_EN;
 
   /* Once half of the bytes are transferred, the half-transfer flag (HTIF) is
