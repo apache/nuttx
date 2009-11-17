@@ -49,7 +49,13 @@
 #  include <nuttx/spi.h>
 #  include <nuttx/mtd.h>
 #endif
-#include <nuttx/mmcsd.h>
+
+#ifdef CONFIG_STM32_SDIO
+#  include <nuttx/sdio.h>
+#  include <nuttx/mmcsd.h>
+#endif
+
+#include "stm32_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -63,20 +69,35 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
+#ifdef CONFIG_ARCH_BOARD_STM3210E_EVAL
+#  define CONFIG_EXAMPLES_NSH_HAVEUSBDEV 1
+#  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
+#  if defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) && CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
+#    error "Only one MMC/SD slot"
+#    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
+#  endif
+#  ifndef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
+#    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
+#  endif
+#else
+   /* Add configuration for new STM32 boards here */
+#  error "Unrecognized STM32 board"
+#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
+#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#endif
+
 /* Can't support USB features if USB is not enabled */
 
 #ifndef CONFIG_USBDEV
 #  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #endif
 
-#if defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) && CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
-#  error "Only one MMC/SD slot"
-#  undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#endif
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
+ * is not enabled.
+ */
 
-/* Can't support MMC/SD features if mountpoints are disabled */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
+#error OUCH
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
 #endif
 
@@ -118,6 +139,10 @@ int nsh_archinitialize(void)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
 #endif
+#ifdef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+  FAR struct sdio_dev_s *sdio;
+  int ret;
+#endif
 
   /* Configure SPI-based devices */
 
@@ -147,13 +172,36 @@ int nsh_archinitialize(void)
 #endif
 
   /* Create the SPI FLASH MTD instance */
-
-  /* Here we will eventually need to
-   * 1. Get the SDIO interface instance, and 
-   * 2. Bind it to the MMC/SD driver (slot CONFIG_EXAMPLES_NSH_MMCSDSLOTNO,
-   *    CONFIG_EXAMPLES_NSH_MMCSDMINOR).
+  /* The M25Pxx is not a give media to implement a file system..
+   * its block sizes are too large
    */
 
-#warning "Missing MMC/SD device configuration"
+  /* Mount the SDIO-based MMC/SD block driver */
+
+#ifdef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+  /* First, get an instance of the SDIO interface */
+
+  message("nsh_archinitialize: Initializing SDIO slot %d\n",
+          CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+  sdio = sdio_initialize(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+  if (!sdio)
+    {
+      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
+              CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SPI interface to the MMC/SD driver */
+
+  message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
+          CONFIG_EXAMPLES_NSH_MMCSDMINOR);
+  ret = mmcsd_slotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR, sdio);
+  if (ret != OK)
+    {
+      message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      return ret;
+    }
+  message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
+#endif
   return OK;
 }
