@@ -141,7 +141,6 @@ struct stm32_dev_s
   uint32            *buffer;     /* Address of current R/W buffer */
   size_t             remaining;  /* Number of bytes remaining in the transfer */
   int                result;     /* Result of the transfer */
-  boolean            stopxfr;    /* TRUE: Send STOP_TRANSMISSION */
 
   /* DMA data transfer support */
 
@@ -181,7 +180,6 @@ static void  stm32_dataconfig(uint32 timeout, uint32 dlen, uint32 dctrl);
 static void  stm32_datadisable(void);
 static void  stm32_sendfifo(struct stm32_dev_s *priv);
 static void  stm32_recvfifo(struct stm32_dev_s *priv);
-static int   stm32_stoptransmission(struct stm32_dev_s *priv);
 static void  stm32_endtransfer(struct stm32_dev_s *priv, int result);
 
 /* Interrupt Handling *******************************************************/
@@ -237,7 +235,6 @@ static int   stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
                FAR ubyte *buffer, size_t buflen);
 static int   stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
                FAR const ubyte *buffer, size_t buflen);
-static int   stm32_sdiodmastart(FAR struct sdio_dev_s *dev);
 #endif
 
 /* Initialization/uninitialization/reset ************************************/
@@ -278,7 +275,6 @@ struct stm32_dev_s g_sdiodev =
     .dmasupported     = stm32_dmasupported,
     .dmarecvsetup     = stm32_dmarecvsetup,
     .dmasendsetup     = stm32_dmasendsetup,
-    .dmastart         = stm32_sdiodmastart,
 #endif
   },
 };
@@ -469,7 +465,7 @@ static inline void stm32_clkdisable(void)
 #ifdef CONFIG_SDIO_DMA
 static void stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg)
 {
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)arg;
+  /* FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)arg; */
 
   /* We don't really do anything at the completion of DMA.  The termination
    * of the transfer is driven by the SDIO interrupts.
@@ -686,26 +682,6 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32_stoptransmission
- *
- * Description:
- *   Send STOP_TRANSMISSION
- *
- * Input Parameters:
- *   dev    - An instance of the SDIO device interface
- *
- * Returned Value:
- *   OK on success; A negated errno on failure.
- *
- ****************************************************************************/
-
-static int stm32_stoptransmission(struct stm32_dev_s *priv)
-{
-# warning "Not implemented"
-  return -ENOSYS;
-}
-
-/****************************************************************************
  * Name: stm32_endtransfer
  *
  * Description:
@@ -811,8 +787,6 @@ static int stm32_interrupt(int irq, void *context)
 
       if ((sta & SDIO_STA_DATAEND) != 0)
         {
-          int result;
-
           /* Handle any data remaining the RX FIFO.  If the RX FIFO is
            * less than half full at the end of the transfer, then no
            * half-full interrupt will be received.
@@ -827,18 +801,10 @@ static int stm32_interrupt(int irq, void *context)
               stm32_recvfifo(priv);
             }
 
-          /* Check if we are supposed to send STOP_TRANSMISSION now */
-
-          result = OK;
-          if (priv->stopxfr)
-            {
-              result = stm32_stoptransmission(priv);
-            }
-
           /* Then terminate the transfer */
 
           putreg32(SDIO_ICR_DATAENDC, STM32_SDIO_ICR);
-          stm32_endtransfer(priv, result);
+          stm32_endtransfer(priv, OK);
         }
 
       /* Handler data block send/receive CRC failure */
@@ -1116,6 +1082,10 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32)buffer & 3) == 0);
 
+  /* Reset the DPSM configuration */
+
+  stm32_datadisable();
+
   /* Save the destination buffer information for use by the interrupt handler */
 
   priv->buffer    = (uint32*)buffer;
@@ -1165,6 +1135,10 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32)buffer & 3) == 0);
+
+  /* Reset the DPSM configuration */
+
+  stm32_datadisable();
 
   /* Save the source buffer information for use by the interrupt handler */
 
@@ -1706,6 +1680,10 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32)buffer & 3) == 0);
 
+  /* Reset the DPSM configuration */
+
+  stm32_datadisable();
+
   /* Wide bus operation is required for DMA */
 
   if (priv->widebus)
@@ -1731,6 +1709,10 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
       putreg32(1, SDIO_DCTRL_DMAEN_BB);
       stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
                      (buflen + 3) >> 2, SDIO_RXDMA16_CONFIG);
+ 
+     /* Start the DMA */
+
+      stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
       ret = OK;
     }
   return ret;
@@ -1767,6 +1749,10 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32)buffer & 3) == 0);
 
+  /* Reset the DPSM configuration */
+
+  stm32_datadisable();
+
   /* Wide bus operation is required for DMA */
 
   if (priv->widebus)
@@ -1794,32 +1780,13 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
       stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
                      (buflen + 3) >> 2, SDIO_TXDMA16_CONFIG);
       putreg32(1, SDIO_DCTRL_DMAEN_BB);
+
+      /* Start the DMA */
+
+      stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
       ret = OK;
     }
   return ret;
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_sdiodmastart
- *
- * Description:
- *   Start the DMA
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-static int stm32_sdiodmastart(FAR struct sdio_dev_s *dev)
-{
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
-  return OK;
 }
 #endif
 
