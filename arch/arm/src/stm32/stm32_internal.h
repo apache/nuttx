@@ -445,6 +445,62 @@ EXTERN int stm32_usbpullup(FAR struct usbdev_s *dev,  boolean enable);
 struct usbdev_s;
 EXTERN void stm32_usbsuspend(FAR struct usbdev_s *dev, boolean resume);
 
+/****************************************************************************
+ * Name: sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO for operation.
+ *
+ * Input Parameters:
+ *   slotno - Not used.
+ *
+ * Returned Values:
+ *   A reference to an SDIO interface structure.  NULL is returned on failures.
+ *
+ ****************************************************************************/
+
+struct sdio_dev_s; /* See include/nuttx/sdio.h */
+EXTERN FAR struct sdio_dev_s *sdio_initialize(int slotno);
+
+/****************************************************************************
+ * Name: sdio_mediachange
+ *
+ * Description:
+ *   Called by board-specific logic -- posssible from an interrupt handler --
+ *   in order to signal to the driver that a card has been inserted or
+ *   removed from the slot
+ *
+ * Input Parameters:
+ *   dev        - An instance of the SDIO driver device state structure.
+ *   cardinslot - TRUE is a card has been detected in the slot; FALSE if a 
+ *                card has been removed from the slot.  Only transitions
+ *                (inserted->removed or removed->inserted should be reported)
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void sdio_mediachange(FAR struct sdio_dev_s *dev, boolean cardinslot);
+
+/****************************************************************************
+ * Name: sdio_wrprotect
+ *
+ * Description:
+ *   Called by board-specific logic to report if the card in the slot is
+ *   mechanically write protected.
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO driver device state structure.
+ *   wrprotect - TRUE is a card is writeprotected.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void sdio_wrprotect(FAR struct sdio_dev_s *dev, boolean wrprotect);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

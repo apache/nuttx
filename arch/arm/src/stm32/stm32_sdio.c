@@ -43,11 +43,13 @@
 #include <semaphore.h>
 #include <assert.h>
 #include <debug.h>
+#include <wdog.h>
 #include <errno.h>
 
+#include <nuttx/clock.h>
+#include <nuttx/arch.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
-#include <nuttx/arch.h>
 #include <arch/irq.h>
 
 #include "chip.h"
@@ -85,15 +87,21 @@
 /* HCLK=72MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(178+2)=400 KHz */
   
 #define SDIO_INIT_CLKDIV         (178 << SDIO_CLKCR_CLKDIV_SHIFT)
-#define STM32_CLCKCR_INIT \
-  (SDIO_INIT_CLKDIV|SDIO_CLKCR_RISINGEDGE|SDIO_CLKCR_WIDBUS_D1)
+#define STM32_CLCKCR_INIT        (SDIO_INIT_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
+                                  SDIO_CLKCR_WIDBUS_D1)
+
+/* HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(2+2)=18 MHz */
+
+#define SDIO_MMCXFR_CLKDIV       (2 << SDIO_CLKCR_CLKDIV_SHIFT) 
+#define SDIO_CLKCR_MMCXFR        (SDIO_SDXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
+                                  SDIO_CLKCR_WIDBUS_D1)
 
 /* HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(1+2)=24 MHz */
 
-#define SDIO_TRANSFER_CLKDIV     (1 << SDIO_CLKCR_CLKDIV_SHIFT) 
-#define STM32_CLCKCR_TRANSFER    (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
+#define SDIO_SDXFR_CLKDIV        (1 << SDIO_CLKCR_CLKDIV_SHIFT) 
+#define SDIO_CLCKR_SDXFR         (SDIO_SDXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
                                   SDIO_CLKCR_WIDBUS_D1)
-#define STM32_CLKCR_WIDETRANSFER (SDIO_TRANSFER_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
+#define SDIO_CLCKR_SDWIDEXFR     (SDIO_SDXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
                                   SDIO_CLKCR_WIDBUS_D4)
 
 /* Timing */
@@ -164,11 +172,17 @@ struct stm32_dev_s
   struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
   
   /* STM32-specific extensions */
+  /* Event support */
 
   sem_t              waitsem;    /* Implements event waiting */
   sdio_eventset_t    waitevents; /* Set of events to be waited for */
   uint32             waitmask;   /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
+  WDOG_ID            waitwdog;   /* Watchdog that handles event timeouts */
+
+  /* Callback support */
+
+  ubyte              cdstatus;   /* Card status */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
   sdio_mediachange_t callback;   /* Registered callback function */
   void              *cbarg;      /* Registered callback argument */
@@ -199,12 +213,10 @@ static void   stm32_takesem(struct stm32_dev_s *priv);
 #define       stm32_givesem(priv) (sem_post(&priv->waitsem))
 static inline void stm32_setclkcr(uint32 clkcr);
 static void   stm32_configwaitints(struct stm32_dev_s *priv, uint32 waitmask,
-                ubyte waitevents, ubyte wkupevents);
+                sdio_eventset_t waitevents, sdio_eventset_t wkupevents);
 static void   stm32_configxfrints(struct stm32_dev_s *priv, uint32 xfrmask);
 static void   stm32_setpwrctrl(uint32 pwrctrl);
 static inline uint32 stm32_getpwrctrl(void);
-static inline void stm32_clkenable(void);
-static inline void stm32_clkdisable(void);
 
 /* DMA Helpers **************************************************************/
 
@@ -219,7 +231,8 @@ static void  stm32_dataconfig(uint32 timeout, uint32 dlen, uint32 dctrl);
 static void  stm32_datadisable(void);
 static void  stm32_sendfifo(struct stm32_dev_s *priv);
 static void  stm32_recvfifo(struct stm32_dev_s *priv);
-static void  stm32_endwait(struct stm32_dev_s *priv, uint32 eventset);
+static void  stm32_eventtimeout(int argc, uint32 arg);
+static void  stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent);
 static void  stm32_endtransfer(struct stm32_dev_s *priv, int result);
 
 /* Interrupt Handling *******************************************************/
@@ -260,8 +273,8 @@ static int   stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd,
 
 static void  stm32_waitenable(FAR struct sdio_dev_s *dev,
                sdio_eventset_t eventset);
-static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout);
-static ubyte stm32_events(FAR struct sdio_dev_s *dev);
+static sdio_eventset_t
+             stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout);
 static void  stm32_callbackenable(FAR struct sdio_dev_s *dev,
                sdio_eventset_t eventset);
 static int   stm32_registercallback(FAR struct sdio_dev_s *dev,
@@ -308,7 +321,6 @@ struct stm32_dev_s g_sdiodev =
     .recvR7           = stm32_recvshort,
     .waitenable       = stm32_waitenable,
     .eventwait        = stm32_eventwait,
-    .events           = stm32_events,
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
 #ifdef CONFIG_SDIO_DMA
@@ -397,10 +409,10 @@ static inline void stm32_setclkcr(uint32 clkcr)
  *   Enable/disable SDIO interrupts needed to suport the wait function
  *
  * Input Parameters:
- *   priv      - A reference to the SDIO device state structure
- *   waitmask  - The set of bits in the SDIO MASK register to set
- *   waitevent - Waited for events
- *   wkupevent - Wake-up events
+ *   priv       - A reference to the SDIO device state structure
+ *   waitmask   - The set of bits in the SDIO MASK register to set
+ *   waitevents - Waited for events
+ *   wkupevent  - Wake-up events
  *
  * Returned Value:
  *   None
@@ -408,7 +420,8 @@ static inline void stm32_setclkcr(uint32 clkcr)
  ****************************************************************************/
 
 static void stm32_configwaitints(struct stm32_dev_s *priv, uint32 waitmask,
-                                 ubyte waitevents, ubyte wkupevent)
+                                 sdio_eventset_t waitevents,
+                                 sdio_eventset_t wkupevent)
 {
   irqstate_t flags;
   flags = irqsave();
@@ -487,16 +500,6 @@ static void stm32_setpwrctrl(uint32 pwrctrl)
 static inline uint32 stm32_getpwrctrl(void)
 {
   return getreg32(STM32_SDIO_POWER) & SDIO_POWER_PWRCTRL_MASK;
-}
-
-static inline void stm32_clkenable(void)
-{
-  putreg32(1, SDIO_CLKCR_CLKEN_BB);
-}
-
-static inline void stm32_clkdisable(void)
-{
-  putreg32(0, SDIO_CLKCR_CLKEN_BB);
 }
 
 /****************************************************************************
@@ -731,6 +734,42 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: stm32_eventtimeout
+ *
+ * Description:
+ *   The watchdog timeout setup when the event wait start has expired without
+ *   any other waited-for event occurring.
+ *
+ * Input Parameters:
+ *   argc   - The number of arguments (should be 1)
+ *   arg    - The argument (state structure reference cast to uint32)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Always called from the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+static void stm32_eventtimeout(int argc, uint32 arg)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
+
+  DEBUGASSERT(argc == 1 && priv != NULL);
+  DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0);
+
+  /* Is a data transfer complete event expected? */
+
+  if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
+    {
+      /* Yes.. wake up any waiting threads */
+
+      stm32_endwait(priv, SDIOWAIT_TIMEOUT);
+    }
+}
+
+/****************************************************************************
  * Name: stm32_endwait
  *
  * Description:
@@ -743,13 +782,20 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
  * Returned Value:
  *   None
  *
+ * Assumptions:
+ *   Always called from the interrupt level with interrupts disabled.
+ *
  ****************************************************************************/
 
-static void stm32_endwait(struct stm32_dev_s *priv, uint32 eventset)
+static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
 {
-  /* Yes.. Disable event-related interrupts */
+  /* Cancel the watchdog timeout */
 
-  stm32_configwaitints(priv, 0, 0, eventset);
+  (void)wd_cancel(priv->waitwdog);
+
+  /* Disable event-related interrupts */
+
+  stm32_configwaitints(priv, 0, 0, wkupevent);
 
   /* Wake up the waiting thread */
 
@@ -768,6 +814,9 @@ static void stm32_endwait(struct stm32_dev_s *priv, uint32 eventset)
  *
  * Returned Value:
  *   None
+ *
+ * Assumptions:
+ *   Always called from the interrupt level with interrupts disabled.
  *
  ****************************************************************************/
 
@@ -992,6 +1041,48 @@ static int stm32_interrupt(int irq, void *context)
 
 static void stm32_reset(FAR struct sdio_dev_s *dev)
 {
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+  irqstate_t flags;
+
+  /* Disable clocking */
+
+  flags = irqsave();
+  putreg32(0, SDIO_CLKCR_CLKEN_BB);
+  stm32_setpwrctrl(SDIO_POWER_PWRCTRL_OFF);
+
+  /* Put SDIO registers in their default, reset state */
+
+  stm32_default();
+
+  /* Reset data */
+
+  priv->waitevents = 0;      /* Set of events to be waited for */
+  priv->waitmask   = 0;      /* Interrupt enables for event waiting */
+  priv->wkupevent  = 0;      /* The event that caused the wakeup */
+  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+
+  /* Interrupt mode data transfer support */
+
+  priv->buffer     = 0;      /* Address of current R/W buffer */
+  priv->remaining  = 0;      /* Number of bytes remaining in the transfer */
+  priv->result     = 0;      /* Result of the transfer */
+  priv->xfrmask    = 0;      /* Interrupt enables for data transfer */
+
+  /* DMA data transfer support */
+
+  priv->widebus    = FALSE;  /* Required for DMA support */
+#ifdef CONFIG_SDIO_DMA
+  priv->dmamode    = FALSE;  /* TRUE: DMA mode transfer */
+#endif
+
+  /* Configure the SDIO peripheral */
+
+  stm32_setclkcr(STM32_CLCKCR_INIT);
+  stm32_setpwrctrl(SDIO_POWER_PWRCTRL_ON);
+
+  /* (Re-)enable clocking */
+
+  putreg32(1, SDIO_CLKCR_CLKEN_BB);
 }
 
 /****************************************************************************
@@ -1010,7 +1101,8 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
 static ubyte stm32_status(FAR struct sdio_dev_s *dev)
 {
-  return 0;
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  return priv->cdstatus;
 }
 
 /****************************************************************************
@@ -1053,6 +1145,36 @@ static void stm32_widebus(FAR struct sdio_dev_s *dev, boolean wide)
 
 static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
+  uint32 clckr;
+
+  switch (rate)
+    {
+    case CLOCK_SDIO_DISABLED:     /* Clock is disabled */
+      putreg32(0, SDIO_CLKCR_CLKEN_BB);
+      break;
+
+    default:
+    case CLOCK_IDMODE:            /* Initial ID mode clocking (<400KHz) */
+      clckr = STM32_CLCKCR_INIT;
+      break;
+
+    case CLOCK_MMC_TRANSFER:      /* MMC normal operation clocking */
+      clckr = SDIO_CLKCR_MMCXFR;
+      break;
+
+    case CLOCK_SD_TRANSFER_1BIT:  /* SD normal operation clocking (narrow 1-bit mode) */
+      clckr = SDIO_CLCKR_SDXFR;
+      break;
+
+    case CLOCK_SD_TRANSFER_4BIT:  /* SD normal operation clocking (wide 4-bit mode) */
+      clckr = SDIO_CLCKR_SDWIDEXFR;
+      break;
+    };
+
+  /* Set the new clock frequency and make sure that the clock is enabled */
+
+  stm32_setclkcr(STM32_CLCKCR_INIT);
+  putreg32(1, SDIO_CLKCR_CLKEN_BB);
 }
 
 /****************************************************************************
@@ -1559,7 +1681,7 @@ static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rno
  * Description:
  *   Enable/disable of a set of SDIO wait events.  This is part of the
  *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
- *   configured before calling stm32_waitevent.  This is done in this way
+ *   configured before calling stm32_eventwait.  This is done in this way
  *   to help the driver to eliminate race conditions between the command
  *   setup and the subsequent events.
  *
@@ -1626,28 +1748,55 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
  *
  * Input Parameters:
  *   dev     - An instance of the SDIO device interface
- *   timeout - Maximum time in milliseconds to wait.  Zero means no timeout.
+ *   timeout - Maximum time in milliseconds to wait.  Zero means immediate
+ *             timeout with no wait.  The timeout value is ignored if
+ *             SDIOWAIT_TIMEOUT is not included in the waited-for eventset.
  *
  * Returned Value:
- *   Event set containing the event(s) that ended the wait.  If no events the
- *   returned event set is zero, then the wait was terminated by the timeout.
- *   All events are cleared disabled after the wait concludes.
+ *   Event set containing the event(s) that ended the wait.  Should always
+ *   be non-zero.  All events are disabled after the wait concludes.
  *
  ****************************************************************************/
 
-static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
+static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
+                                       uint32 timeout)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
-  ubyte wkupevent = 0;
+  sdio_eventset_t wkupevent = 0;
+  int ret;
 
   DEBUGASSERT(priv->waitevents != 0);
+
+  /* Check if the timeout event is specified in the event set */
+
+  if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
+    {
+      int delay;
+
+      /* Yes.. Handle a cornercase */
+
+      if (!timeout)
+        {
+           return SDIOWAIT_TIMEOUT;
+        }
+
+      /* Start the watchdog timer */
+
+      delay = (timeout + (MSEC_PER_TICK-1)) / MSEC_PER_TICK;
+      ret   = wd_start(priv->waitwdog, delay, (wdentry_t)stm32_eventtimeout,
+                       1, (uint32)priv);
+      if (ret != OK)
+        {
+           fdbg("ERROR: wd_start failed: %d\n", ret);
+         }
+    }
 
   /* Loop until the event (or the timeout occurs). Race conditions are avoided
    * by calling stm32_waitenable prior to triggering the logic that will cause
    * the wait to terminate.  Under certain race conditions, the waited-for
    * may have already occurred before this function was called!
    */
-#warning "Timeout logic not implemented"
+
   for (;;)
     {
       /* Wait for an event in event set to occur.  If this the event has already
@@ -1672,27 +1821,6 @@ static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
 
   stm32_configwaitints(priv, 0, 0, 0);
   return wkupevent;
-}
-
-/****************************************************************************
- * Name: stm32_events
- *
- * Description:
- *   Return the current event set.  This supports polling for SDIO (vs.
- *   waiting). Only enabled events need be reported.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   Event set containing the current events (All pending events are cleared
- *   after reading).
- *
- ****************************************************************************/
-
-static ubyte stm32_events(FAR struct sdio_dev_s *dev)
-{
-  return 0;
 }
 
 /****************************************************************************
@@ -1975,7 +2103,6 @@ static void stm32_callback(void *arg)
 
       priv->cbevents = 0;
       priv->callback(priv->cbarg);
-      
     }
 }
 
@@ -2020,13 +2147,15 @@ static void stm32_default(void)
 
 FAR struct sdio_dev_s *sdio_initialize(int slotno)
 {
-  /* There is only one, slot */
+  /* There is only one slot */
 
   struct stm32_dev_s *priv = &g_sdiodev;
 
   /* Initialize the SDIO slot structure */
 
   sem_init(&priv->waitsem, 0, 0);
+  priv->waitwdog = wd_create();
+  DEBUGASSERT(priv->waitwdog);
 
   /* Allocate a DMA channel */
 
@@ -2045,17 +2174,93 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   stm32_configgpio(GPIO_SDIO_CK);
   stm32_configgpio(GPIO_SDIO_CMD);
 
-  /* Put SDIO registers in their default, reset state */
+  /* Reset the card and assure that it is in the initial, unconfigured
+   * state.
+   */
 
-  stm32_default();
-
-  /* Configure the SDIO peripheral */
-
-  stm32_setclkcr(STM32_CLCKCR_INIT);
-  stm32_setpwrctrl(SDIO_POWER_PWRCTRL_ON);
-  stm32_clkenable();
-
+  stm32_reset(&priv->dev);
   return &g_sdiodev.dev;
 }
 
+/****************************************************************************
+ * Name: sdio_mediachange
+ *
+ * Description:
+ *   Called by board-specific logic -- posssible from an interrupt handler --
+ *   in order to signal to the driver that a card has been inserted or
+ *   removed from the slot
+ *
+ * Input Parameters:
+ *   dev        - An instance of the SDIO driver device state structure.
+ *   cardinslot - TRUE is a card has been detected in the slot; FALSE if a 
+ *                card has been removed from the slot.  Only transitions
+ *                (inserted->removed or removed->inserted should be reported)
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void sdio_mediachange(FAR struct sdio_dev_s *dev, boolean cardinslot)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  ubyte cdstatus;
+  irqstate_t flags;
+
+  /* Update card status */
+
+  flags = irqsave();
+  cdstatus = priv->cdstatus;
+  if (cardinslot)
+    {
+      priv->cdstatus |= SDIO_STATUS_PRESENT;
+    }
+  else
+    {
+      priv->cdstatus &= ~SDIO_STATUS_PRESENT;
+    }
+
+  /* Perform any requested callback if the status has changed */
+
+  if (cdstatus != priv->cdstatus)
+    {
+      stm32_callback(priv);
+    }
+  irqrestore(flags);
+}
+
+/****************************************************************************
+ * Name: sdio_wrprotect
+ *
+ * Description:
+ *   Called by board-specific logic to report if the card in the slot is
+ *   mechanically write protected.
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO driver device state structure.
+ *   wrprotect - TRUE is a card is writeprotected.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void sdio_wrprotect(FAR struct sdio_dev_s *dev, boolean wrprotect)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  irqstate_t flags;
+
+  /* Update card status */
+
+  flags = irqsave();
+  if (wrprotect)
+    {
+      priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
+    }
+  else
+    {
+      priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
+    }
+  irqrestore(flags);
+}
 #endif /* CONFIG_STM32_SDIO */
