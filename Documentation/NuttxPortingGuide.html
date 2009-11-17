@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: November 5, 2009</p>
+      <p>Last Updated: November 17, 2009</p>
     </td>
   </tr>
 </table>
@@ -2285,6 +2285,25 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <code>CONFIG_MMCSD_SPICLOCK</code>: Maximum SPI clock to drive MMC/SD card. Default is 20MHz.
+  </li>
+</ul>
+
+<h2>SDIO-based MMC/SD driver</h2>
+<ul>
+  <li>
+    <code>CONFIG_FS_READAHEAD</code>: Enable read-ahead buffering
+  </li>
+  <li>
+    <code>CONFIG_FS_WRITEBUFFER</code>: Enable write buffering
+  </li>
+  <li>
+    <code>CONFIG_SDIO_DMA</code>: SDIO driver supports DMA
+  </li>
+  <li>
+    <code>CONFIG_MMCSD_MMCSUPPORT</code>: Enable support for MMC cards
+  </li>
+  <li>
+    <code>CONFIG_MMCSD_HAVECARDDETECT</code>: SDIO driver card detection is 100% accurate
   </li>
 </ul>
 
