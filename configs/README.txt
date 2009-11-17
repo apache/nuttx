@@ -333,6 +333,14 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_MMCSD_SPICLOCK - Maximum SPI clock to drive MMC/SD card.
 		  Default is 20MHz.
 
+	SDIO-based MMC/SD driver
+		CONFIG_FS_READAHEAD - Enable read-ahead buffering
+		CONFIG_FS_WRITEBUFFER - Enable write buffering
+		CONFIG_SDIO_DMA - SDIO driver supports DMA
+		CONFIG_MMCSD_MMCSUPPORT - Enable support for MMC cards
+		CONFIG_MMCSD_HAVECARDDETECT - SDIO driver card detection is
+		  100% accurate
+
 	TCP/IP and UDP support via uIP
 		CONFIG_NET - Enable or disable all network features
 		CONFIG_NET_IPv6 - Build in support for IPv6

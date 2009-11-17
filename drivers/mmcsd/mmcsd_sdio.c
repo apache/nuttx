@@ -1951,7 +1951,8 @@ static void mmcsd_mediachange(FAR void *arg)
   if (SDIO_PRESENT(priv->dev))
     {
       /* No... process the card insertion.  This could cause chaos if we think
-       * that a card is already present and there are mounted filesystms!
+       * that a card is already present and there are mounted filesystems!
+       * NOTE that mmcsd_probe() will always re-enable callbacks appropriately.
        */
 
       (void)mmcsd_probe(priv);
@@ -1959,7 +1960,8 @@ static void mmcsd_mediachange(FAR void *arg)
   else
     {
       /* No... process the card removal.  This could have very bad implications
-       * for any mounted file systems!
+       * for any mounted file systems!  NOTE that mmcsd_removed() does NOT
+       * re-enable callbacks so we will need to do that here.
        */
 
       (void)mmcsd_removed(priv);

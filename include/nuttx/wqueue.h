@@ -45,8 +45,6 @@
 #include <signal.h>
 #include <queue.h>
 
-#ifdef CONFIG_SCHED_WORKQUEUE
-
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -166,5 +164,4 @@ EXTERN int work_cancel(struct work_s *work);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_SCHED_WORKQUEUE */
 #endif /* __INCLUDE_NUTTX_WQUEUE_H */

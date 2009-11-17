@@ -56,7 +56,7 @@
 #  define CONFIG_SCHED_WORKPRIORITY 50
 #endif
 
-#ifndef CONFIG_SCHED_WORKPERIODUS
+#ifndef CONFIG_SCHED_WORKPERIOD
 #  define CONFIG_SCHED_WORKPERIOD (50*1000) /* 50 milliseconds */
 #endif
 

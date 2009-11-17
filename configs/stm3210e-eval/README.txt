@@ -382,6 +382,12 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_STM32_SPI_DMA - Use DMA to improve SPI transfer performance.
 	  Cannot be used with CONFIG_STM32_SPI_INTERRUPT.
 
+	CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
+	  and CONFIG_STM32_DMA2.
+	CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: Medium
+	CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. 
+	  Default:  Medium
+
 Configurations
 ^^^^^^^^^^^^^^
 

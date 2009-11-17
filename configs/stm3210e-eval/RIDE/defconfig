@@ -294,6 +294,24 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_NXFLAT. Enable support for the NXFLAT binary format.
 #  This format will support execution of NuttX binaries located
 #  in a ROMFS filesystem (see examples/nxflat).
+# CONFIG_SCHED_WORKQUEUE.  Create a dedicated "worker" thread to
+#  handle delayed processing from interrupt handlers.  This feature
+#  is required for some drivers but, if there are not complaints,
+#  can be safely disabled.  The worker thread also performs
+#  garbage collection -- completing any delayed memory deallocations
+#  from interrupt handlers.  If the worker thread is disabled,
+#  then that clean will be performed by the IDLE thread instead
+#  (which runs at the lowest of priority and may not be appropriate
+#  if memory reclamation is of high priority).  If CONFIG_SCHED_WORKQUEUE
+#  is enabled, then the following options can also be used:
+# CONFIG_SCHED_WORKPRIORITY - The execution priority of the worker
+#  thread.  Default: 50
+# CONFIG_SCHED_WORKPERIOD - How often the worker thread checks for
+#  work.  Default: 50 MS.
+# CONFIG_SCHED_WORKSTACKSIZE - The stack size allocated for the worker
+#  thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
+# CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
+#  the worker thread.  Default: 4
 #
 CONFIG_EXAMPLE=null
 CONFIG_DEBUG=n
@@ -320,6 +338,11 @@ CONFIG_FDCLONE_DISABLE=n
 CONFIG_FDCLONE_STDIO=n
 CONFIG_SDCLONE_DISABLE=y
 CONFIG_NXFLAT=n
+CONFIG_SCHED_WORKQUEUE=n
+CONFIG_SCHED_WORKPRIORITY=50
+CONFIG_SCHED_WORKPERIOD=50
+CONFIG_SCHED_WORKSTACKSIZE=1024
+CONFIG_SIG_SIGWORK=4
 
 #
 # The following can be used to disable categories of
@@ -445,6 +468,31 @@ CONFIG_MMCSD_READONLY=n
 CONFIG_MMCSD_SPICLOCK=12500000
 
 #
+# Block driver buffering
+#
+# CONFIG_FS_READAHEAD
+#   Enable read-ahead buffering
+# CONFIG_FS_WRITEBUFFER
+#   Enable write buffering
+#
+CONFIG_FS_READAHEAD=n
+CONFIG_FS_WRITEBUFFER=n
+
+#
+# SDIO-based MMC/SD driver
+#
+# CONFIG_SDIO_DMA
+#   SDIO driver supports DMA
+# CONFIG_MMCSD_MMCSUPPORT
+#   Enable support for MMC cards
+# CONFIG_MMCSD_HAVECARDDETECT
+#   SDIO driver card detection is 100% accurate
+#
+CONFIG_SDIO_DMA=n
+CONFIG_MMCSD_MMCSUPPORT=n
+CONFIG_MMCSD_HAVECARDDETECT=n
+
+#
 # TCP/IP and UDP support via uIP
 # CONFIG_NET - Enable or disable all network features
 # CONFIG_NET_IPv6 - Build in support for IPv6
@@ -563,7 +611,6 @@ CONFIG_USBSER_VENDORSTR="Nuttx"
 CONFIG_USBSER_PRODUCTSTR="USBdev Serial"
 CONFIG_USBSER_RXBUFSIZE=512
 CONFIG_USBSER_TXBUFSIZE=512
-CONFIG_NXFLAT=n
 
 #
 # USB Storage Device Configuration

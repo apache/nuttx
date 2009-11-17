@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <nuttx/wqueue.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -660,10 +661,6 @@
  * Public Types
  ****************************************************************************/
 
-/* The type of the media change callback function */
-
-typedef void (*sdio_mediachange_t)(FAR void *arg);
-
 /* Various clocking used by the SDIO driver */
 
 enum sdio_clock_e
@@ -727,7 +724,7 @@ struct sdio_dev_s
   void  (*callbackenable)(FAR struct sdio_dev_s *dev,
           sdio_eventset_t eventset);
   int   (*registercallback)(FAR struct sdio_dev_s *dev,
-          sdio_mediachange_t callback, void *arg);
+          worker_t callback, void *arg);
 
   /* DMA */
 
