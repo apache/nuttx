@@ -117,6 +117,42 @@
 #define SDIO_HALFFIFO_WORDS      (8)
 #define SDIO_HALFFIFO_BYTES      (8*4)
 
+/* Data transfer interrupt mask bits */
+
+#define SDIO_RECV_MASK     (SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|\
+                            SDIO_MASK_DATAENDIE|SDIO_MASK_RXOVERRIE|\
+                            SDIO_MASK_RXFIFOHFIE|SDIO_MASK_STBITERRIE)
+#define SDIO_SEND_MASK     (SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|\
+                            SDIO_MASK_DATAENDIE|SDIO_MASK_TXUNDERRIE|\
+                            SDIO_MASK_TXFIFOHEIE|SDIO_MASK_STBITERRIE)
+#define SDIO_DMARECV_MASK  (SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|\
+                            SDIO_MASK_DATAENDIE|SDIO_MASK_RXOVERRIE|\
+                            SDIO_MASK_STBITERRIE)
+#define SDIO_DMASEND_MASK  (SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|\
+                            SDIO_MASK_DATAENDIE|SDIO_MASK_TXUNDERRIE|\
+                            SDIO_MASK_STBITERRIE)
+
+/* Event waiting interrupt mask bits */
+
+#define SDIO_CMDDONE_STA   (SDIO_STA_CMDSENT)
+#define SDIO_CRCRESP_STA   (SDIO_STA_CTIMEOUT|SDIO_STA_CCRCFAIL|SDIO_STA_CMDREND)
+#define SDIO_RESPDONE_STA  (SDIO_STA_CTIMEOUT|SDIO_STA_CMDREND)
+#define SDIO_XFRDONE_STA   (0)
+
+#define SDIO_CMDDONE_MASK  (SDIO_MASK_CMDSENTIE)
+#define SDIO_CRCRESP_MASK  (SDIO_MASK_CCRCFAILIE|SDIO_MASK_CTIMEOUTIE|\
+                            SDIO_MASK_CMDRENDIE)
+#define SDIO_RESPDONE_MASK (SDIO_MASK_CTIMEOUTIE|SDIO_MASK_CMDRENDIE)
+#define SDIO_XFRDONE_MASK  (0)
+
+#define SDIO_CMDDONE_ICR   (SDIO_ICR_CMDSENTC)
+#define SDIO_CRCRESP_ICR   (SDIO_ICR_CTIMEOUTC|SDIO_ICR_CCRCFAILC|SDIO_ICR_CMDRENDC)
+#define SDIO_RESPDONE_ICR  (SDIO_ICR_CTIMEOUTC|SDIO_ICR_CMDRENDC)
+#define SDIO_XFRDONE_ICR   (0)
+
+#define SDIO_WAITALL_ICR   (SDIO_ICR_CMDSENTC|SDIO_ICR_CTIMEOUTC|\
+                            SDIO_ICR_CCRCFAILC|SDIO_ICR_CMDRENDC)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -131,6 +167,7 @@ struct stm32_dev_s
 
   sem_t              waitsem;    /* Implements event waiting */
   sdio_eventset_t    waitevents; /* Set of events to be waited for */
+  uint32             waitmask;   /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
   sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
   sdio_mediachange_t callback;   /* Registered callback function */
@@ -141,6 +178,7 @@ struct stm32_dev_s
   uint32            *buffer;     /* Address of current R/W buffer */
   size_t             remaining;  /* Number of bytes remaining in the transfer */
   int                result;     /* Result of the transfer */
+  uint32             xfrmask;    /* Interrupt enables for data transfer */
 
   /* DMA data transfer support */
 
@@ -160,8 +198,9 @@ struct stm32_dev_s
 static void   stm32_takesem(struct stm32_dev_s *priv);
 #define       stm32_givesem(priv) (sem_post(&priv->waitsem))
 static inline void stm32_setclkcr(uint32 clkcr);
-static inline void stm32_enableint(uint32 bitset);
-static inline void stm32_disableint(uint32 bitset);
+static void   stm32_configwaitints(struct stm32_dev_s *priv, uint32 waitmask,
+                ubyte waitevents, ubyte wkupevents);
+static void   stm32_configxfrints(struct stm32_dev_s *priv, uint32 xfrmask);
 static void   stm32_setpwrctrl(uint32 pwrctrl);
 static inline uint32 stm32_getpwrctrl(void);
 static inline void stm32_clkenable(void);
@@ -180,6 +219,7 @@ static void  stm32_dataconfig(uint32 timeout, uint32 dlen, uint32 dctrl);
 static void  stm32_datadisable(void);
 static void  stm32_sendfifo(struct stm32_dev_s *priv);
 static void  stm32_recvfifo(struct stm32_dev_s *priv);
+static void  stm32_endwait(struct stm32_dev_s *priv, uint32 eventset);
 static void  stm32_endtransfer(struct stm32_dev_s *priv, int result);
 
 /* Interrupt Handling *******************************************************/
@@ -351,47 +391,56 @@ static inline void stm32_setclkcr(uint32 clkcr)
 }
 
 /****************************************************************************
- * Name: stm32_enableint
+ * Name: stm32_configwaitints
  *
  * Description:
- *   Enable SDIO interrupts
+ *   Enable/disable SDIO interrupts needed to suport the wait function
  *
  * Input Parameters:
- *   bitset - The set of bits in the SDIO MASK register to set
+ *   priv      - A reference to the SDIO device state structure
+ *   waitmask  - The set of bits in the SDIO MASK register to set
+ *   waitevent - Waited for events
+ *   wkupevent - Wake-up events
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void stm32_enableint(uint32 bitset)
+static void stm32_configwaitints(struct stm32_dev_s *priv, uint32 waitmask,
+                                 ubyte waitevents, ubyte wkupevent)
 {
-  uint32 regval;
-  regval  = getreg32(STM32_SDIO_MASK);
-  regval |= bitset;
-  putreg32(regval, STM32_SDIO_MASK);
+  irqstate_t flags;
+  flags = irqsave();
+  priv->waitevents = waitevents;
+  priv->wkupevent  = wkupevent;
+  priv->waitmask   = waitmask;
+  putreg32(priv->xfrmask | priv->waitmask, STM32_SDIO_MASK);
+  irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: stm32_disableint
+ * Name: stm32_configxfrints
  *
  * Description:
- *   Disable SDIO interrupts
+ *   Enable SDIO interrupts needed to support the data transfer event
  *
  * Input Parameters:
- *   bitset - The set of bits in the SDIO MASK register to clear
+ *   priv    - A reference to the SDIO device state structure
+ *   xfrmask - The set of bits in the SDIO MASK register to set
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void stm32_disableint(uint32 bitset)
+static void stm32_configxfrints(struct stm32_dev_s *priv, uint32 xfrmask)
 {
-  uint32 regval;
-  regval  = getreg32(STM32_SDIO_MASK);
-  regval &= ~bitset;
-  putreg32(regval, STM32_SDIO_MASK);
+  irqstate_t flags;
+  flags = irqsave();
+  priv->xfrmask = xfrmask;
+  putreg32(priv->xfrmask | priv->waitmask, STM32_SDIO_MASK);
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -682,13 +731,39 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: stm32_endwait
+ *
+ * Description:
+ *   Wake up a waiting thread if the waited-for event has occurred.
+ *
+ * Input Parameters:
+ *   priv   - An instance of the SDIO device interface
+ *   result - The result status of the transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32_endwait(struct stm32_dev_s *priv, uint32 eventset)
+{
+  /* Yes.. Disable event-related interrupts */
+
+  stm32_configwaitints(priv, 0, 0, eventset);
+
+  /* Wake up the waiting thread */
+
+  stm32_givesem(priv);
+}
+
+/****************************************************************************
  * Name: stm32_endtransfer
  *
  * Description:
  *   Terminate a transfer with the provided status
  *
  * Input Parameters:
- *   dev    - An instance of the SDIO device interface
+ *   priv   - An instance of the SDIO device interface
  *   result - The result status of the transfer
  *
  * Returned Value:
@@ -698,12 +773,9 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
 
 static void stm32_endtransfer(struct stm32_dev_s *priv, int result)
 {
-  /* Disable interrupts */
+  /* Disable all transfer related interrupts */
 
-  stm32_disableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
-                   SDIO_MASK_DATAENDIE|SDIO_MASK_TXFIFOHEIE|
-                   SDIO_MASK_RXFIFOHFIE|SDIO_MASK_TXUNDERRIE|
-                   SDIO_MASK_RXOVERRIE|SDIO_MASK_STBITERRIE);
+  stm32_configxfrints(priv, 0);
 
   /* Mark the transfer finished with the provided status */
 
@@ -714,10 +786,9 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, int result)
 
   if ((priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
     {
-      /* Yes, wake up the waiting thread */
+      /* Yes.. wake up any waiting threads */
 
-      priv->wkupevent = SDIOWAIT_TRANSFERDONE;
-      stm32_givesem(priv);
+      stm32_endwait(priv, SDIOWAIT_TRANSFERDONE);
     }
 }
 
@@ -742,7 +813,8 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, int result)
 static int stm32_interrupt(int irq, void *context)
 {
   struct stm32_dev_s *priv = &g_sdiodev;
-  uint32 sta;
+  uint32 enabled;
+  uint32 pending;
 
   /* Loop while there are pending interrupts.  Check the SDIO status
    * register.  Mask out all bits that don't correspond to enabled
@@ -751,110 +823,150 @@ static int stm32_interrupt(int irq, void *context)
    * bits remaining, then we have work to do here.
    */
 
-  while ((sta = getreg32(STM32_SDIO_STA) & getreg32(STM32_SDIO_MASK)) != 0)
+  while ((enabled = getreg32(STM32_SDIO_STA) & getreg32(STM32_SDIO_MASK)) != 0)
     {
-      /* Handle in progress, interrupt driven data transfers */
+      /* Handle in progress, interrupt driven data transfers ****************/
 
-#ifdef CONFIG_SDIO_DMA
-      if (!priv->dmamode)
-#endif
-       {
-         /* Is the RX FIFO half full or more?  Is so then we must be
-          * processing a receive transaction.
-          */
-
-         if ((sta & SDIO_STA_RXFIFOHF) != 0)
-           {
-             /* Receive data from the RX FIFO */
-
-             stm32_recvfifo(priv);
-           }
-
-         /* Otherwise, Is the transmit FIFO half empty or less?  If so we must
-          * be processing a send transaction.  NOTE:  We can't be processing
-          * both!
-          */
-
-         else if ((sta & SDIO_STA_TXFIFOHE) != 0)
-           {
-             /* Send data via the TX FIFO */
-
-             stm32_sendfifo(priv);
-           }
-       }
-
-      /* Handle data end events */
-
-      if ((sta & SDIO_STA_DATAEND) != 0)
+      pending  = enabled & priv->xfrmask;
+      if (pending != 0)
         {
-          /* Handle any data remaining the RX FIFO.  If the RX FIFO is
-           * less than half full at the end of the transfer, then no
-           * half-full interrupt will be received.
-           */
-
 #ifdef CONFIG_SDIO_DMA
           if (!priv->dmamode)
 #endif
-            {
-              /* Receive data from the RX FIFO */
+           {
+             /* Is the RX FIFO half full or more?  Is so then we must be
+              * processing a receive transaction.
+             */
 
-              stm32_recvfifo(priv);
+             if ((pending & SDIO_STA_RXFIFOHF) != 0)
+               {
+                 /* Receive data from the RX FIFO */
+
+                 stm32_recvfifo(priv);
+               }
+
+             /* Otherwise, Is the transmit FIFO half empty or less?  If so we must
+              * be processing a send transaction.  NOTE:  We can't be processing
+              * both!
+              */
+
+             else if ((pending & SDIO_STA_TXFIFOHE) != 0)
+               {
+                 /* Send data via the TX FIFO */
+
+                 stm32_sendfifo(priv);
+               }
+           }
+
+          /* Handle data end events */
+
+          if ((pending & SDIO_STA_DATAEND) != 0)
+            {
+              /* Handle any data remaining the RX FIFO.  If the RX FIFO is
+               * less than half full at the end of the transfer, then no
+               * half-full interrupt will be received.
+               */
+
+#ifdef CONFIG_SDIO_DMA
+              if (!priv->dmamode)
+#endif
+                {
+                  /* Receive data from the RX FIFO */
+
+                  stm32_recvfifo(priv);
+                }
+
+              /* Then terminate the transfer */
+
+              putreg32(SDIO_ICR_DATAENDC, STM32_SDIO_ICR);
+              stm32_endtransfer(priv, OK);
             }
 
-          /* Then terminate the transfer */
+          /* Handler data block send/receive CRC failure */
 
-          putreg32(SDIO_ICR_DATAENDC, STM32_SDIO_ICR);
-          stm32_endtransfer(priv, OK);
+          else if ((pending & SDIO_STA_DCRCFAIL) != 0)
+            {
+              /* Terminate the transfer with an error */
+
+              putreg32(SDIO_ICR_DCRCFAILC, STM32_SDIO_ICR);
+              stm32_endtransfer(priv, -EIO);
+            }
+
+          /* Handle data timeout error */
+
+          else if ((pending & SDIO_STA_DTIMEOUT) != 0)
+            {
+              /* Terminate the transfer with an error */
+
+              putreg32(SDIO_ICR_DTIMEOUTC, STM32_SDIO_ICR);
+              stm32_endtransfer(priv, -ETIMEDOUT);
+            }
+
+          /* Handle RX FIFO overrun error */
+
+          else if ((pending & SDIO_STA_RXOVERR) != 0)
+            {
+              /* Terminate the transfer with an error */
+
+              putreg32(SDIO_ICR_RXOVERRC, STM32_SDIO_ICR);
+              stm32_endtransfer(priv, -EOVERFLOW);
+            }
+
+          /* Handle TX FIFO underrun error */
+
+          else if ((pending & SDIO_STA_TXUNDERR) != 0)
+            {
+              /* Terminate the transfer with an error */
+
+              putreg32(SDIO_ICR_TXUNDERRC, STM32_SDIO_ICR);
+              stm32_endtransfer(priv, -EOVERFLOW);
+            }
+
+          /* Handle start bit error */
+
+          else if ((pending & SDIO_STA_STBITERR) != 0)
+            {
+              /* Terminate the transfer with an error */
+
+              putreg32(SDIO_ICR_STBITERRC, STM32_SDIO_ICR);
+              stm32_endtransfer(priv, -EIO);
+            }
         }
 
-      /* Handler data block send/receive CRC failure */
+      /* Handle wait events *************************************************/
 
-      else if ((sta & SDIO_STA_DCRCFAIL) != 0)
+      pending  = enabled & priv->waitmask;
+      if (pending != 0)
         {
-          /* Terminate the transfer with an error */
+          /* Is this a response completion event? */
 
-          putreg32(SDIO_ICR_DCRCFAILC, STM32_SDIO_ICR);
-          stm32_endtransfer(priv, -EIO);
-        }
+          if ((pending & SDIO_CRCRESP_STA) != 0)
+            {
+              /* Yes.. Is their a thread waiting for response done? */
 
-      /* Handle data timeout error */
+              if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
+                {
+                  /* Yes.. wake the thread up */
 
-      else if ((sta & SDIO_STA_DTIMEOUT) != 0)
-        {
-          /* Terminate the transfer with an error */
+                  putreg32(SDIO_CRCRESP_ICR, STM32_SDIO_ICR);
+                  stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
+                }
+            }
 
-          putreg32(SDIO_ICR_DTIMEOUTC, STM32_SDIO_ICR);
-          stm32_endtransfer(priv, -ETIMEDOUT);
-        }
+          /* Is this a command completion event? */
 
-      /* Handle RX FIFO overrun error */
+          if ((pending & SDIO_CMDDONE_STA) != 0)
+            {
+              /* Yes.. Is their a thread waiting for command done? */
 
-      else if ((sta & SDIO_STA_RXOVERR) != 0)
-        {
-          /* Terminate the transfer with an error */
+              if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
+                {
+                  /* Yes.. wake the thread up */
 
-          putreg32(SDIO_ICR_RXOVERRC, STM32_SDIO_ICR);
-          stm32_endtransfer(priv, -EOVERFLOW);
-        }
-
-      /* Handle TX FIFO underrun error */
-
-      else if ((sta & SDIO_STA_TXUNDERR) != 0)
-        {
-          /* Terminate the transfer with an error */
-
-          putreg32(SDIO_ICR_TXUNDERRC, STM32_SDIO_ICR);
-          stm32_endtransfer(priv, -EOVERFLOW);
-        }
-
-      /* Handle start bit error */
-
-      else if ((sta & SDIO_STA_STBITERR) != 0)
-        {
-          /* Terminate the transfer with an error */
-
-          putreg32(SDIO_ICR_STBITERRC, STM32_SDIO_ICR);
-          stm32_endtransfer(priv, -EIO);
+                  putreg32(SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
+                  stm32_endwait(priv, SDIOWAIT_CMDDONE);
+                }
+            }
         }
     }
 
@@ -1102,9 +1214,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
   /* And enable interrupts */
 
-  stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
-                  SDIO_MASK_DATAENDIE|SDIO_MASK_RXOVERRIE|
-                  SDIO_MASK_RXFIFOHFIE|SDIO_MASK_STBITERRIE);
+  stm32_configxfrints(priv, SDIO_RECV_MASK);
   return OK;
 }
 
@@ -1156,9 +1266,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
 
   /* Enable TX interrrupts */
 
-  stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
-                  SDIO_MASK_DATAENDIE|SDIO_MASK_TXUNDERRIE|
-                  SDIO_MASK_TXFIFOHEIE|SDIO_MASK_STBITERRIE);
+  stm32_configxfrints(priv, SDIO_SEND_MASK);
   return OK;
 }
 
@@ -1179,21 +1287,22 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
 
 static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32 cmd)
 {
-  sint32 timeout = SDIO_LONGTIMEOUT;
+  sint32 timeout;
   uint32 events;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
     case MMCSD_NO_RESPONSE:
+      events  = SDIO_CMDDONE_STA;
       timeout = SDIO_CMDTIMEOUT;
-      events  = SDIO_STA_CMDSENT;
       break;
 
     case MMCSD_R1_RESPONSE:
     case MMCSD_R1B_RESPONSE:
     case MMCSD_R2_RESPONSE:
     case MMCSD_R6_RESPONSE:
-      events  = SDIO_STA_CTIMEOUT|SDIO_STA_CCRCFAIL|SDIO_STA_CMDREND;
+      events  = SDIO_CRCRESP_STA;
+      timeout = SDIO_LONGTIMEOUT;
       break;
 
     case MMCSD_R4_RESPONSE:
@@ -1202,7 +1311,7 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32 cmd)
 
     case MMCSD_R3_RESPONSE:
     case MMCSD_R7_RESPONSE:
-      events  = SDIO_STA_CTIMEOUT|SDIO_STA_CMDREND;
+      events  = SDIO_RESPDONE_STA;
       timeout = SDIO_CMDTIMEOUT;
       break;
 
@@ -1472,13 +1581,38 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
                              sdio_eventset_t eventset)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
-
-  /* This odd sequence avoids race conditions */
-
+  uint32 waitmask;
+ 
   DEBUGASSERT(priv != NULL);
-  priv->waitevents = 0;
-  priv->wkupevent  = 0;
-  priv->waitevents = eventset;
+
+  /* Disable event-related interrupts */
+
+  stm32_configwaitints(priv, 0, 0, 0);
+
+  /* Select the interrupt mask that will give us the appropriate wakeup
+   * interrupts.
+   */
+
+  waitmask = 0;
+  if ((eventset & SDIOWAIT_CMDDONE) != 0)
+    {
+      waitmask |= SDIO_CMDDONE_MASK;
+    }
+
+  if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
+    {
+      waitmask |= SDIO_CRCRESP_MASK;
+    }
+
+  if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
+    {
+      waitmask |= SDIO_XFRDONE_MASK;
+    }
+
+  /* Enable event-related interrupts */
+
+  putreg32(SDIO_WAITALL_ICR, STM32_SDIO_ICR);
+  stm32_configwaitints(priv, waitmask, eventset, 0);
 }
 
 /****************************************************************************
@@ -1534,10 +1668,9 @@ static ubyte stm32_eventwait(FAR struct sdio_dev_s *dev, uint32 timeout)
         }
     }
 
-  /* Clear all enabled wait events before returning */
+  /* Disable event-related interrupts */
 
-  priv->waitevents = 0;
-  priv->wkupevent = 0;
+  stm32_configwaitints(priv, 0, 0, 0);
   return wkupevent;
 }
 
@@ -1702,9 +1835,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
       /* Configure the RX DMA */
 
-      stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
-                      SDIO_MASK_DATAENDIE|SDIO_MASK_RXOVERRIE|
-                      SDIO_MASK_STBITERRIE);
+      stm32_configxfrints(priv, SDIO_DMARECV_MASK);
 
       putreg32(1, SDIO_DCTRL_DMAEN_BB);
       stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
@@ -1771,9 +1902,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Enable TX interrrupts */
 
-      stm32_enableint(SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|
-                      SDIO_MASK_DATAENDIE|SDIO_MASK_TXUNDERRIE|
-                      SDIO_MASK_STBITERRIE);
+      stm32_configxfrints(priv, SDIO_DMASEND_MASK);
 
       /* Configure the TX DMA */
 
