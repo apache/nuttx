@@ -115,7 +115,7 @@
 #define MMCSD_R1_AKESEQERROR        (1 << 3)   /* Authentication error */
 #define MMCSD_R1_ERRORMASK          0xfdffe008 /* Error mask */
 
-#define IS_STATE(v,s)               (((v)&MMCSD_R1_CURRENTSTATE_MASK)==(s))
+#define IS_STATE(v,s)               (((v)&MMCSD_R1_STATE_MASK)==(s))
 
 /* R3 (OCR) */
 
@@ -147,6 +147,28 @@
 #define MMCSD_VDD_35_36             (1 << 23)  /* VDD voltage 3.5-3.6 */
 #define MMCSD_R3_HIGHCAPACITY       (1 << 30)  /* TRUE: Card supports block addressing */
 #define MMCSD_CARD_BUSY             (1 << 31)  /* Card power-up busy bit */
+
+/* R6 Card Status bit definitions */
+
+#define MMCSD_R6_RCA_SHIFT          (16)       /* New published RCA */
+#define MMCSD_R6_RCA_MASK           (0xffff << MMCSD_R6_RCA_SHIFT)
+#define MMCSD_R6_COMCRCERROR        (1 << 15)  /* CRC error */
+#define MMCSD_R6_ILLEGALCOMMAND     (1 << 14)  /* Bad command */
+#define MMCSD_R6_ERROR              (1 << 13)  /* General error */
+#define MMCSD_R6_STATE_SHIFT        (9)        /* Current card state */
+#define MMCSD_R6_STATE_MASK         (15 << MMCSD_R6_STATE_SHIFT)
+                                                                /* Card identification mode states */
+#  define MMCSD_R6_STATE_IDLE       (0 << MMCSD_R6_STATE_SHIFT) /* 0=Idle state */
+#  define MMCSD_R6_STATE_READY      (1 << MMCSD_R6_STATE_SHIFT) /* 1=Ready state */
+#  define MMCSD_R6_STATE_IDENT      (2 << MMCSD_R6_STATE_SHIFT) /* 2=Identification state */
+                                                                /* Data transfer states */
+#  define MMCSD_R6_STATE_STBY       (3 << MMCSD_R6_STATE_SHIFT) /* 3=Standby state */
+#  define MMCSD_R6_STATE_TRAN       (4 << MMCSD_R6_STATE_SHIFT) /* 4=Transfer state */
+#  define MMCSD_R6_STATE_DATA       (5 << MMCSD_R6_STATE_SHIFT) /* 5=Sending data state */
+#  define MMCSD_R6_STATE_RCV        (6 << MMCSD_R6_STATE_SHIFT) /* 6=Receiving data state */
+#  define MMCSD_R6_STATE_PRG        (7 << MMCSD_R6_STATE_SHIFT) /* 7=Programming state */
+#  define MMCSD_R6_STATE_DIS        (8 << MMCSD_R6_STATE_SHIFT) /* 8=Disconnect state */
+#define MMCSD_R6_ERRORMASK          0x0000e000 /* Error mask */
 
 /* SD Configuration Register (SCR) encoding */
 

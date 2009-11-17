@@ -629,7 +629,7 @@
  *   Setup to perform a read DMA.  If the processor supports a data cache,
  *   then this method will also make sure that the contents of the DMA memory
  *   and the data cache are coherent.  For read transfers this may mean
- *   invalidating the data cache.
+ *   invalidating the data cache.  Upon return, DMA is enable and waiting.
  *
  * Input Parameters:
  *   dev    - An instance of the SDIO device interface
@@ -654,7 +654,7 @@
  *   Setup to perform a write DMA.  If the processor supports a data cache,
  *   then this method will also make sure that the contents of the DMA memory
  *   and the data cache are coherent.  For write transfers, this may mean
- *   flushing the data cache.
+ *   flushing the data cache.  Upon return, DMA is enable and waiting.
  *
  * Input Parameters:
  *   dev    - An instance of the SDIO device interface
@@ -670,26 +670,6 @@
 #  define SDIO_DMASENDSETUP(dev,buffer,len) ((dev)->dmasendsetup(dev,buffer,len))
 #else
 #  define SDIO_DMASENDSETUP(dev,buffer,len) (-ENOSYS)
-#endif
-
-/****************************************************************************
- * Name: SDIO_DMASTART
- *
- * Description:
- *   Start the DMA
- *
- * Input Parameters:
- *   dev - An instance of the SDIO device interface
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-#  define SDIO_DMASTART(dev) ((dev)->dmastart(dev))
-#else
-#  define SDIO_DMASTART(dev) (-ENOSYS)
 #endif
 
 /****************************************************************************
@@ -772,7 +752,6 @@ struct sdio_dev_s
           size_t buflen);
   int   (*dmasendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
           size_t buflen);
-  int   (*dmastart)(FAR struct sdio_dev_s *dev);
 #endif
 };
 
