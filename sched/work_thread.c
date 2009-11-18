@@ -103,17 +103,24 @@ int work_thread(int argc, char *argv[])
   volatile FAR struct work_s *work;
   worker_t  worker;
   FAR void *arg;
+  uint32 elapsed;
+  uint32 remaining;
+  uint32 next;
+  int usec;
   irqstate_t flags;
 
   /* Loop forever */
 
+  usec = CONFIG_SCHED_WORKPERIOD;
+  flags = irqsave();
   for (;;)
     {
       /* Wait awhile to check the work list.  We will wait here until either
        * the time elapses or until we are awakened by a signal.
        */
 
-      usleep(CONFIG_SCHED_WORKPERIOD);
+      usleep(usec);
+      irqrestore(flags);
 
       /* First, perform garbage collection.  This cleans-up memory de-allocations
        * that were queued because they could not be freed in that execution
@@ -128,15 +135,19 @@ int work_thread(int argc, char *argv[])
        * we process items in the work list.
        */
 
+      next  = CONFIG_SCHED_WORKPERIOD / USEC_PER_TICK;
       flags = irqsave();
       work  = (FAR struct work_s *)g_work.head;
       while (work)
         {
           /* Is this work ready?  It is ready if there is no delay or if
-           * the delay has elapsed.
+           * the delay has elapsed. qtime is the time that the work was added
+           * to the work queue.  It will always be greater than or equal to
+           * zero.  Therefore a delay of zero will always execute immediately.
            */
 
-          if (work->delay == 0 || g_system_timer - work->qtime > work->delay)
+          elapsed = g_system_timer - work->qtime;
+          if (elapsed >= work->delay)
             {
               /* Remove the ready-to-execute work from the list */
 
@@ -166,12 +177,27 @@ int work_thread(int argc, char *argv[])
             }
           else
             {
-              /* This one is not ready, try the next in the list. */
+              /* This one is not ready.. will it be ready before the next
+               * scheduled wakeup interval?
+               */
+
+              remaining = elapsed - work->delay;
+              if (remaining < next)
+                {
+                  /* Yes.. Then schedule to wake up when the work is ready */
+
+                  next = remaining;
+                }
+              
+              /* Then try the next in the list. */
 
               work = (FAR struct work_s *)work->dq.flink;
             }
         }
-      irqrestore(flags);
+
+      /* Now calculate the microsecond delay we should wait */
+
+      usec = next * USEC_PER_TICK;
     }
 
   return OK; /* To keep some compilers happy */

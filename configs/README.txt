@@ -256,7 +256,7 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_SCHED_WORKPRIORITY - The execution priority of the worker
 		  thread.  Default: 50
 		CONFIG_SCHED_WORKPERIOD - How often the worker thread checks for
-		  work.  Default: 50 MS.
+		  work in units of microseconds.  Default: 50*1000 (50 MS).
 		CONFIG_SCHED_WORKSTACKSIZE - The stack size allocated for the worker
 		  thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
 		CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
