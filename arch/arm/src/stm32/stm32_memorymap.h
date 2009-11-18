@@ -111,7 +111,7 @@
                                             /* 0x40014000 - 0x40017fff: Reserved */
 /* AHB bus */
 
-#define STM32_SDIO_BASE     0x40020000     /* 0x40018000 - 0x400183ff: SDIO  */
+#define STM32_SDIO_BASE     0x40018000     /* 0x40018000 - 0x400183ff: SDIO  */
                                            /* 0x40018400 - 0x40017fff: Reserved */
 #define STM32_DMA1_BASE     0x40020000     /* 0x40020000 - 0x400203ff: DMA1  */
 #define STM32_DMA2_BASE     0x40020400     /* 0x40020000 - 0x400207ff: DMA2  */

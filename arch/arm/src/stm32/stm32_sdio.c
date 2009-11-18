@@ -148,19 +148,16 @@
 /* Event waiting interrupt mask bits */
 
 #define SDIO_CMDDONE_STA   (SDIO_STA_CMDSENT)
-#define SDIO_CRCRESP_STA   (SDIO_STA_CTIMEOUT|SDIO_STA_CCRCFAIL|SDIO_STA_CMDREND)
-#define SDIO_RESPDONE_STA  (SDIO_STA_CTIMEOUT|SDIO_STA_CMDREND)
+#define SDIO_RESPDONE_STA  (SDIO_STA_CTIMEOUT|SDIO_STA_CCRCFAIL|SDIO_STA_CMDREND)
 #define SDIO_XFRDONE_STA   (0)
 
 #define SDIO_CMDDONE_MASK  (SDIO_MASK_CMDSENTIE)
-#define SDIO_CRCRESP_MASK  (SDIO_MASK_CCRCFAILIE|SDIO_MASK_CTIMEOUTIE|\
+#define SDIO_RESPDONE_MASK (SDIO_MASK_CCRCFAILIE|SDIO_MASK_CTIMEOUTIE|\
                             SDIO_MASK_CMDRENDIE)
-#define SDIO_RESPDONE_MASK (SDIO_MASK_CTIMEOUTIE|SDIO_MASK_CMDRENDIE)
 #define SDIO_XFRDONE_MASK  (0)
 
 #define SDIO_CMDDONE_ICR   (SDIO_ICR_CMDSENTC)
-#define SDIO_CRCRESP_ICR   (SDIO_ICR_CTIMEOUTC|SDIO_ICR_CCRCFAILC|SDIO_ICR_CMDRENDC)
-#define SDIO_RESPDONE_ICR  (SDIO_ICR_CTIMEOUTC|SDIO_ICR_CMDRENDC)
+#define SDIO_RESPDONE_ICR  (SDIO_ICR_CTIMEOUTC|SDIO_ICR_CCRCFAILC|SDIO_ICR_CMDRENDC)
 #define SDIO_XFRDONE_ICR   (0)
 
 #define SDIO_WAITALL_ICR   (SDIO_ICR_CMDSENTC|SDIO_ICR_CTIMEOUTC|\
@@ -406,6 +403,7 @@ static inline void stm32_setclkcr(uint32 clkcr)
               SDIO_CLKCR_WIDBUS_MASK|SDIO_CLKCR_NEGEDGE|SDIO_CLKCR_HWFC_EN);
   regval |=  clkcr;
   putreg32(regval, STM32_SDIO_CLKCR);
+  fvdbg("CLKCR: %08x\n", getreg32(STM32_SDIO_CLKCR));
 }
 
 /****************************************************************************
@@ -995,7 +993,7 @@ static int stm32_interrupt(int irq, void *context)
         {
           /* Is this a response completion event? */
 
-          if ((pending & SDIO_CRCRESP_STA) != 0)
+          if ((pending & SDIO_RESPDONE_STA) != 0)
             {
               /* Yes.. Is their a thread waiting for response done? */
 
@@ -1003,7 +1001,7 @@ static int stm32_interrupt(int irq, void *context)
                 {
                   /* Yes.. wake the thread up */
 
-                  putreg32(SDIO_CRCRESP_ICR, STM32_SDIO_ICR);
+                  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
                   stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
                 }
             }
@@ -1089,6 +1087,8 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
   /* (Re-)enable clocking */
 
   putreg32(1, SDIO_CLKCR_CLKEN_BB);
+  fvdbg("CLCKR: %08x POWER: %08x\n",
+        getreg32(STM32_SDIO_CLKCR), getreg32(STM32_SDIO_POWER));
 }
 
 /****************************************************************************
@@ -1261,7 +1261,7 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
 
   /* Set WAITRESP bits */
 
-  switch ((cmd & MMCSD_RESPONSE_MASK) >> MMCSD_RESPONSE_SHIFT)
+  switch (cmd & MMCSD_RESPONSE_MASK)
     {
     case MMCSD_NO_RESPONSE:
       regval |= SDIO_CMD_NORESPONSE;
@@ -1289,7 +1289,10 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
   
   /* Write the SDIO CMD */
 
+  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   putreg32(regval, STM32_SDIO_CMD);
+  fvdbg("cmd: %08x arg: %08x regval: %08x\n",
+        cmd, arg, getreg32(STM32_SDIO_CMD));
 }
 
 /****************************************************************************
@@ -1429,7 +1432,7 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32 cmd)
     case MMCSD_R1B_RESPONSE:
     case MMCSD_R2_RESPONSE:
     case MMCSD_R6_RESPONSE:
-      events  = SDIO_CRCRESP_STA;
+      events  = SDIO_RESPDONE_STA;
       timeout = SDIO_LONGTIMEOUT;
       break;
 
@@ -1453,14 +1456,14 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32 cmd)
     {
       if (--timeout <= 0)
         {
-          fdbg("ERROR: Timeout cmd=%04x\n", cmd);
+          fdbg("ERROR: Timeout cmd: %08x events: %08x STA: %08x\n",
+               cmd, events, getreg32(STM32_SDIO_STA));
+
           return -ETIMEDOUT;
         }
     }
 
-  /* Clear all the static flags */
-
-  putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+  putreg32(SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   return OK;
 }
 
@@ -1492,6 +1495,7 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rs
   uint32 respcmd;
 #endif
   uint32 regval;
+  int ret = OK;
 
   /* R1  Command response (48-bit)
    *     47        0               Start bit
@@ -1520,62 +1524,60 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rs
   if (!rshort)
     {
       fdbg("ERROR: rshort=NULL\n");
-      return -EINVAL;
+      ret = -EINVAL;
     }
 
   /* Check that this is the correct response to this command */
 
-  if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1_RESPONSE &&
-      (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
-      (cmd & MMCSD_RESPONSE_MASK)  != MMCSD_R6_RESPONSE)
+  else if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1_RESPONSE &&
+           (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
+           (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
       fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
-      return -EINVAL;
+      ret = -EINVAL;
     }
+  else
 #endif
-
-  /* Verify that the response is available */
- 
-  regval = getreg32(STM32_SDIO_STA);
-  if ((regval & SDIO_STA_CTIMEOUT) != 0)
     {
-      fdbg("ERROR: Command timeout: %08x\n", regval);
-      putreg32(SDIO_ICR_CTIMEOUTC, STM32_SDIO_ICR);
-      return -ETIMEDOUT;
-    }
-  else if ((regval & SDIO_STA_CCRCFAIL) != 0)
-    {
-      fdbg("ERROR: CRC failuret: %08x\n", regval);
-      putreg32(SDIO_ICR_CCRCFAILC, STM32_SDIO_ICR);
-      return -EIO;
-    }
-  else if ((regval & SDIO_STA_CMDREND) == 0)
-    {
-      fdbg("ERROR: Status is not yet available: %08x\n", regval);
-      return -EBUSY;
-    }
+      /* Check if a timeout or CRC error occurred */
 
-  /* Check response received is of desired command */
-
+      regval = getreg32(STM32_SDIO_STA);
+      if ((regval & SDIO_STA_CTIMEOUT) != 0)
+        {
+          fdbg("ERROR: Command timeout: %08x\n", regval);
+          ret = -ETIMEDOUT;
+        }
+      else if ((regval & SDIO_STA_CCRCFAIL) != 0)
+        {
+          fdbg("ERROR: CRC failuret: %08x\n", regval);
+          ret = -EIO;
+        }
 #ifdef CONFIG_DEBUG
-  respcmd = getreg32(STM32_SDIO_RESPCMD);
-  if ((ubyte)(respcmd & SDIO_RESPCMD_MASK) != (cmd & MMCSD_CMDIDX_MASK))
-    {
-      fdbg("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
-      return -EINVAL;
-    }
+      else
+        {
+          /* Check response received is of desired command */
+
+          respcmd = getreg32(STM32_SDIO_RESPCMD);
+          if ((ubyte)(respcmd & SDIO_RESPCMD_MASK) != (cmd & MMCSD_CMDIDX_MASK))
+            {
+              fdbg("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
+              ret = -EINVAL;
+            }
+        }
 #endif
+    }
 
-  /* Return the R1 response */
+  /* Clear all pending message completion events and return the R1/R6 response */
 
-  putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   *rshort = getreg32(STM32_SDIO_RESP1);
-  return OK;
+  return ret;
 }
 
 static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 rlong[4])
 {
   uint32 regval;
+  int ret = OK;
 
  /* R2  CID, CSD register (136-bit)
   *     135       0               Start bit
@@ -1592,32 +1594,29 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 rlong[4
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
       fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
-      return -EINVAL;
+      ret = -EINVAL;
     }
+  else
 #endif
+    {
+      /* Check if a timeout or CRC error occurred */
 
-  /* Verify that the response is available */
- 
-  regval = getreg32(STM32_SDIO_STA);
-  if (regval & SDIO_STA_CTIMEOUT)
-    {
-      putreg32(SDIO_ICR_CTIMEOUTC, STM32_SDIO_ICR);
-      return -ETIMEDOUT;
+      regval = getreg32(STM32_SDIO_STA);
+      if (regval & SDIO_STA_CTIMEOUT)
+        {
+          fdbg("ERROR: Timeout STA: %08x\n", regval);
+          ret = -ETIMEDOUT;
+        }
+      else if (regval & SDIO_STA_CCRCFAIL)
+        {
+          fdbg("ERROR: CRC fail STA: %08x\n", regval);
+          ret = -EIO;
+        }
     }
-  else if (regval & SDIO_STA_CCRCFAIL)
-    {
-      putreg32(SDIO_ICR_CCRCFAILC, STM32_SDIO_ICR);
-      return -EIO;
-    }
-  else if ((regval & SDIO_STA_CMDREND) == 0)
-    {
-      fdbg("ERROR: Status is not yet available: %08x\n", regval);
-      return -EBUSY;
-    }
-
+    
   /* Return the long response */
 
-  putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   if (rlong)
     {
       rlong[0] = getreg32(STM32_SDIO_RESP1);
@@ -1625,12 +1624,13 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 rlong[4
       rlong[2] = getreg32(STM32_SDIO_RESP3);
       rlong[3] = getreg32(STM32_SDIO_RESP4);
     }
-  return OK;
+  return ret;
 }
 
 static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshort)
 {
   uint32 regval;
+  int ret = OK;
 
  /* R3  OCR (48-bit)
   *     47        0               Start bit
@@ -1648,36 +1648,38 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rshor
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
       fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
-      return -EINVAL;
+      ret = -EINVAL;
     }
+  else
 #endif
-
-  regval = getreg32(STM32_SDIO_STA);
-  if (regval & SDIO_STA_CTIMEOUT)
     {
-       putreg32(SDIO_ICR_CTIMEOUTC, STM32_SDIO_ICR);
-       return -ETIMEDOUT;
-    }
-  else if ((regval & SDIO_STA_CMDREND) == 0)
-    {
-      fdbg("ERROR: Status is not yet available: %08x\n", regval);
-      return -EBUSY;
+      /* Check if a timeout occurred (Apparently a CRC error can terminate
+       * a good response)
+       */
+
+      regval = getreg32(STM32_SDIO_STA);
+      if (regval & SDIO_STA_CTIMEOUT)
+        {
+          fdbg("ERROR: Timeout STA: %08x\n", regval);
+          ret = -ETIMEDOUT;
+        }
+
+      /* Return the short response */
     }
 
- /* Return the short response */
-
-  putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   if (rshort)
     {
       *rshort = getreg32(STM32_SDIO_RESP1);
     }
-  return OK;
+  return ret;
 }
 
 /* MMC responses not supported */
 
 static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *rnotimpl)
 {
+  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   return -ENOSYS;
 }
 
@@ -1729,7 +1731,7 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
 
   if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
     {
-      waitmask |= SDIO_CRCRESP_MASK;
+      waitmask |= SDIO_RESPDONE_MASK;
     }
 
   if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
