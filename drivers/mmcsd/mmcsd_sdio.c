@@ -84,12 +84,6 @@
 
 #define IS_EMPTY(priv) (priv->type == MMCSD_CARDTYPE_UNKNOWN)
 
-/* Transfer mode */
-
-#define MMCSDMODE_POLLED        0
-#define MMCSDMODE_INTERRUPT     1
-#define MMCSDMODE_DMA           2
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -355,6 +349,7 @@ static int mmcsd_recvR1(FAR struct mmcsd_state_s *priv, uint32 cmd)
            * indication for later use.
            */
 
+          fvdbg("ERROR: R1=%08x\n", r1);
           priv->locked = ((r1 & MMCSD_R1_CARDISLOCKED) != 0);
           ret = -EIO;
         }
@@ -2298,7 +2293,6 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
   /* Assume failure to identify the card */
 
   priv->type = MMCSD_CARDTYPE_UNKNOWN;
-  priv->mode = MMCSDMODE_POLLED;
 
   /* Check if there is a card present in the slot.  This is normally a matter is
    * of GPIO sensing.
@@ -2309,11 +2303,6 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
       fvdbg("No card present\n");
       return -ENODEV;
     }
-
-  /* Initialize device state structure */
-
-  priv->type = MMCSD_CARDTYPE_SDV1;
-  priv->mode = MMCSDMODE_POLLED;
 
   /* Set ID mode clocking (<400KHz) */
 
@@ -2381,7 +2370,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
       if (priv->type != MMCSD_CARDTYPE_MMC)
 #endif
         {
-          /* Send CMD55 */
+          /* Send CMD55 with argument = 0 */
 
           mmcsd_sendcmdpoll(priv, SD_CMD55, 0);
           ret = mmcsd_recvR1(priv, SD_CMD55);
@@ -2399,7 +2388,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
               /* Send ACMD41 */
 
               mmcsd_sendcmdpoll(priv, SD_ACMD41, MMCSD_ACMD41_VOLTAGEWINDOW|sdcapacity);
-              ret = SDIO_RECVR3(priv->dev, SD_CMD55, &response);
+              ret = SDIO_RECVR3(priv->dev, SD_ACMD41, &response);
               if (ret != OK)
                 {
                   /* If the error is a timeout, then it is probably an MMC card,
@@ -2582,7 +2571,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
       ret = mmcsd_cardidentify(priv);
       if (ret != OK)
         {
-          fdbg("ERROR: Failed to initialize card: %d\n");
+          fdbg("ERROR: Failed to initialize card: %d\n", ret);
           SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
         }
       else
