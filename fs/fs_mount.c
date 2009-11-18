@@ -227,9 +227,13 @@ int mount(const char *source, const char *target,
   status = mops->bind(blkdrvr_inode, data, &fshandle);
   if (status != 0)
   {
-      /* The inode is unhappy with the blkdrvr for some reason */
+      /* The inode is unhappy with the blkdrvr for some reason.  Back out
+       * the count for the reference we failed to pass and exit with an
+       * error.
+       */
 
       fdbg("Bind method failed: %d\n", status);
+      blkdrvr_inode->i_crefs--;
       errcode = -status;
       goto errout_with_mountpt;
   }
@@ -257,6 +261,8 @@ int mount(const char *source, const char *target,
   /* A lot of goto's!  But they make the error handling much simpler */
 
 errout_with_mountpt:
+  mountpt_inode->i_crefs = 0;
+  inode_remove(target);
   inode_semgive();
   inode_release(blkdrvr_inode);
   inode_release(mountpt_inode);

@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 11, 2009</p>
+      <p>Last Updated: November 18, 2009</p>
     </td>
   </tr>
 </table>
@@ -1611,6 +1611,12 @@ nuttx-0.4.14 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	  NOTE: On initial check-in, mmcsd_sdio.c and stm32_sdio.c are merely
 	  skeleton frameworks for the driver.
+
+	* fs/fs_mount.c -- Correct error handling logic.  If the bind() method
+	  fails, then a reserved node is left in the tree.  This causes subsequent
+	  attempts to mount at the location to fail (reporting that the node
+	  already exists).  This is a probably for block drivers for removable
+	  media: The bind method could fail repeatedly until media is asserted.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
