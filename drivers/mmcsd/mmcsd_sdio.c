@@ -1943,6 +1943,7 @@ static void mmcsd_mediachange(FAR void *arg)
 {
   FAR struct mmcsd_state_s *priv = (FAR struct mmcsd_state_s *)arg;
 
+  fvdbg("arg: %p\n", arg);
   DEBUGASSERT(priv);
 
   /* Is there a card present in the slot? */
@@ -2303,7 +2304,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
    * of GPIO sensing.
    */
 
-  if (SDIO_PRESENT(priv->dev))
+  if (!SDIO_PRESENT(priv->dev))
     {
       fvdbg("No card present\n");
       return -ENODEV;
@@ -2680,7 +2681,7 @@ static int mmcsd_removed(FAR struct mmcsd_state_s *priv)
  * Name: mmcsd_hwinitialize
  *
  * Description:
- *   One-time hardware initialization
+ *   One-time hardware initialization.  Called only from sdio_slotinitialize.
  *
  ****************************************************************************/
 
@@ -2705,7 +2706,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
       mmcsd_givesem(priv);
       return -EBUSY;
     }
-  fvdbg("Successfully attached MMC/SD interrupts\n");
+  fvdbg("Attached MMC/SD interrupts\n");
 
   /* Register a callback so that we get informed if media is inserted or
    * removed from the slot (Initially all callbacks are disabled).
@@ -2740,8 +2741,9 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
 
           /* NOTE: The failure to initialize a card does not mean that
            * initialization has failed! A card could be installed in the slot
-           * at a later time. ENODEV is return in this case, but should not be
-           * interpreted as an error.
+           * at a later time. ENODEV is return in this case,
+           * sdio_slotinitialize will use this return value to set up the
+           * card inserted callback event.
            */
 
           ret = -ENODEV;
@@ -2749,11 +2751,10 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
     }
   else
     {
-      /* No... Setup to receive the media inserted event */
-
-      SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
-
-      /* ENODEV is returned to indicate that no card is inserted in the slot. */
+      /* ENODEV is returned to indicate that no card is inserted in the slot.
+       * sdio_slotinitialize will use this return value to set up the card
+       * inserted callback event.
+       */
 
       ret = -ENODEV;
     }
@@ -2767,10 +2768,11 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
 }
 
 /****************************************************************************
- * Name: mmcsd_hwinitialize
+ * Name: mmcsd_hwuninitialize
  *
  * Description:
- *   Restore the MMC/SD slot to the uninitialized state
+ *   Restore the MMC/SD slot to the uninitialized state.  Called only from
+ *   sdio_slotinitialize on a failure to initialize.
  *
  ****************************************************************************/
 
@@ -2848,10 +2850,18 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 
           if (ret == -ENODEV)
             {
+              /* No card in the slot (or if there is, we could not recognize
+               * it).. Setup to receive the media inserted event 
+               */
+
+              SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
+
               fdbg("MMC/SD slot is empty\n");
             }
           else
             {
+              /* Some other non-recoverable bad thing happened */
+
               fdbg("ERROR: Failed to initialize MMC/SD slot: %d\n", ret);
               goto errout_with_alloc;
             }

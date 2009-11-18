@@ -561,7 +561,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_CALLBACKENABLE(dev,eventset)  ((dev)->waitenable(dev,eventset))
+#define SDIO_CALLBACKENABLE(dev,eventset)  ((dev)->callbackenable(dev,eventset))
 
 /****************************************************************************
  * Name: SDIO_REGISTERCALLBACK

@@ -77,7 +77,7 @@
 #endif
 
 #ifndef CONFIG_SDIO_PRI
-#  define CONFIG_SDIO_PRI        DMA_CCR_PRIMED
+#  define CONFIG_SDIO_PRI        NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
 #ifndef CONFIG_SDIO_DMAPRIO
@@ -1855,7 +1855,10 @@ static void stm32_callbackenable(FAR struct sdio_dev_s *dev,
                                  sdio_eventset_t eventset)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+
+  fvdbg("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
+
   priv->cbevents = eventset;
   stm32_callback(priv);
 }
@@ -1889,7 +1892,9 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
 
   /* Disable callbacks and register this callback and is argument */
 
+  fvdbg("Register %p(%p)\n", callback, arg);
   DEBUGASSERT(priv != NULL);
+
   priv->cbevents = 0;
   priv->cbarg    = arg;
   priv->callback = callback;
@@ -2076,11 +2081,14 @@ static void stm32_callback(void *arg)
   /* Is a callback registered? */
 
   DEBUGASSERT(priv != NULL);
+  fvdbg("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
+        priv->callback, priv->cbarg, priv->cbevents, priv->cdstatus);
+
   if (priv->callback)
     {
       /* Yes.. Check for enabled callback events */
 
-      if ((stm32_status(&priv->dev) & SDIO_STATUS_PRESENT) != 0)
+      if ((priv->cdstatus & SDIO_STATUS_PRESENT) != 0)
         {
           /* Media is present.  Is the media inserted event enabled? */
 
@@ -2106,6 +2114,7 @@ static void stm32_callback(void *arg)
       /* Perform the callback, disabling further callbacks.  Of course, the
        * the callback can (and probably should) re-enable callbacks.
        */
+
       priv->cbevents = 0;
 
       /* Callbacks cannot be performed in the context of an interrupt handler.
@@ -2117,12 +2126,14 @@ static void stm32_callback(void *arg)
         {
           /* Yes.. queue it */
 
+           fvdbg("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
           (void)work_queue(&priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
         }
       else
         {
           /* No.. then just call the callback here */
 
+          fvdbg("Callback to %p(%p)\n", priv->callback, priv->cbarg);
           priv->callback(priv->cbarg);
         }
     }
@@ -2241,6 +2252,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, boolean cardinslot)
     {
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
+  fvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 
@@ -2283,6 +2295,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, boolean wrprotect)
     {
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
+  fvdbg("cdstatus: %02x\n", priv->cdstatus);
   irqrestore(flags);
 }
 #endif /* CONFIG_STM32_SDIO */
