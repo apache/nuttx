@@ -2252,7 +2252,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
 
   /* Get the SD card Configuration Register (SCR).  We need this now because
    * that configuration register contains the indication whether or not
-   * this card supports wide bus operation.\
+   * this card supports wide bus operation.
    */
 
   ret = mmcsd_getSCR(priv, scr);
@@ -2404,15 +2404,19 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
                    * an SD V2.x (via CMD8), then this must be SD V1.x
                    */
 
+                  fvdbg("R3: %08x\n", response);
                   if (priv->type == MMCSD_CARDTYPE_UNKNOWN)
                     {
                       fvdbg("SD V1.x card\n");
                       priv->type = MMCSD_CARDTYPE_SDV1;
                     }
 
-                  /* Check if the card is busy */
+                  /* Check if the card is busy.  Very confusing, BUSY is set LOW
+                   * if the card has not finished its initialization, so it really
+                   * means NOT busy.
+                   */
 
-                  if ((response &  MMCSD_CARD_BUSY) == 0)
+                  if ((response & MMCSD_CARD_BUSY) != 0)
                     {
                       /* No.. We really should check the current state to see if
                        * the SD card successfully made it to the IDLE state, but
@@ -2476,9 +2480,12 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
               fdbg("CMD1 succeeded, assuming MMC card\n");
               priv->type = MMCSD_CARDTYPE_MMC;
 
-              /* Check if the card is busy */
+              /* Check if the card is busy.  Very confusing, BUSY is set LOW
+               * if the card has not finished its initialization, so it really
+               * means NOT busy.
+               */
 
-              if ((response &  MMCSD_CARD_BUSY) == 0)
+              if ((response & MMCSD_CARD_BUSY) != 0)
                 {
                   /* NO.. We really should check the current state to see if the
                    * MMC successfully made it to the IDLE state, but at least for now,
@@ -2496,7 +2503,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
       elapsed = g_system_timer - start;
     }
-  while (elapsed < TICK_PER_SEC && ret != OK);
+  while (elapsed < TICK_PER_SEC || ret != OK);
 
   /* We get here when the above loop completes, either (1) we could not
    * communicate properly with the card due to errors (and the loop times
@@ -2509,15 +2516,6 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
     {
       fdbg("ERROR: Failed to identify card\n");
       return -EIO;
-    }
-
-  /* Verify that we are in IDLE state */
-
-  ret = mmcsd_verifystate(priv, MMCSD_R1_STATE_IDLE);
-  if (ret != OK)
-    {
-      fdbg("ERROR: Failed to enter IDLE state\n");
-      return ret;
     }
 
   return OK;
