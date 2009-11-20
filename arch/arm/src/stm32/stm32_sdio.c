@@ -428,6 +428,11 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32 waitmask,
                                  sdio_eventset_t wkupevent)
 {
   irqstate_t flags;
+
+  /* Save all of the data and set the new interrupt mask in one, atomic
+   * operation.
+   */
+
   flags = irqsave();
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
@@ -1152,35 +1157,39 @@ static void stm32_widebus(FAR struct sdio_dev_s *dev, boolean wide)
 static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   uint32 clckr;
+  uint32 enable = 1;
 
   switch (rate)
     {
-    case CLOCK_SDIO_DISABLED:     /* Clock is disabled */
-      putreg32(0, SDIO_CLKCR_CLKEN_BB);
-      break;
-
     default:
+    case CLOCK_SDIO_DISABLED:     /* Clock is disabled */
+      clckr  = STM32_CLCKCR_INIT;
+      enable = 0;
+      return;
+
     case CLOCK_IDMODE:            /* Initial ID mode clocking (<400KHz) */
-      clckr = STM32_CLCKCR_INIT;
+      clckr  = STM32_CLCKCR_INIT;
       break;
 
     case CLOCK_MMC_TRANSFER:      /* MMC normal operation clocking */
-      clckr = SDIO_CLKCR_MMCXFR;
+      clckr  = SDIO_CLKCR_MMCXFR;
       break;
 
     case CLOCK_SD_TRANSFER_1BIT:  /* SD normal operation clocking (narrow 1-bit mode) */
-      clckr = SDIO_CLCKR_SDXFR;
+      clckr  = SDIO_CLCKR_SDXFR;
       break;
 
     case CLOCK_SD_TRANSFER_4BIT:  /* SD normal operation clocking (wide 4-bit mode) */
-      clckr = SDIO_CLCKR_SDWIDEXFR;
+      clckr  = SDIO_CLCKR_SDWIDEXFR;
       break;
     };
 
-  /* Set the new clock frequency and make sure that the clock is enabled */
+  /* Set the new clock frequency and make sure that the clock is enabled or
+   * disabled, whatever the case.
+   */
 
-  stm32_setclkcr(STM32_CLCKCR_INIT);
-  putreg32(1, SDIO_CLKCR_CLKEN_BB);
+  stm32_setclkcr(clckr);
+  putreg32(enable, SDIO_CLKCR_CLKEN_BB);
 }
 
 /****************************************************************************
@@ -1773,7 +1782,13 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
   sdio_eventset_t wkupevent = 0;
   int ret;
 
-  DEBUGASSERT(priv->waitevents != 0);
+  /* There is a race condition here... the event may have completed before
+   * we get here.  In this case waitevents will be zero, but wkupevents will
+   * be non-zero (and, hopefully, the semaphore count will also be non-zero.
+   */
+ 
+  DEBUGASSERT((priv->waitevents != 0 && priv->wkupevent == 0) ||
+              (priv->waitevents == 0 && priv->wkupevent != 0));
 
   /* Check if the timeout event is specified in the event set */
 
@@ -1814,10 +1829,11 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
 
       stm32_takesem(priv);
 
-      /* Check if the event has occurred. */
+      /* Check if the event has occurred.  When the event has occurred, then
+       * evenset will be set to 0 and wkupevent will be set to a nonzero value.
+       */
 
-      wkupevent = (ubyte)(priv->wkupevent & priv->waitevents);
-      if (wkupevent != 0)
+      if (priv->wkupevent != 0)
         {
           /* Yes... break out of the loop with wkupevent non-zero */
 

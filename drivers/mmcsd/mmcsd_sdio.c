@@ -824,8 +824,6 @@ struct mmcsd_scr_s decoded;
    *   SD_SECURITY            54:52 3-bit SD security support level
    *   SD_BUS_WIDTHS          51:48 4-bit bus width indicator
    *   Reserved               47:32 16-bit SD reserved space
-   * usage.
-   *   
    */
 
   priv->buswidth     = (scr[0] >> 16) & 15;
@@ -839,9 +837,7 @@ struct mmcsd_scr_s decoded;
 #endif
 
   /* Word 1, bits 63:32
-   *   Reserved               31:0  32-bits reserved for manufacturing
-   * usage.
-   *   
+   *   Reserved               31:0  32-bits reserved for manufacturing usage.
    */
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
@@ -1134,7 +1130,7 @@ static int mmcsd_setblocklen(FAR struct mmcsd_state_s *priv, uint32 blocklen)
        * block length is specified in the CSD.
        */
 
-      mmcsd_sendcmdpoll(priv, MMCSD_CMD16, priv->blocksize);
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD16, blocklen);
       ret = mmcsd_recvR1(priv, MMCSD_CMD16);
       if (ret == OK)
         {
@@ -2237,6 +2233,19 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
       return ret;
     }
   mmcsd_decodeCSD(priv, csd);
+
+  /* Send CMD7 with the argument == RCA in order to select the card.
+   * Since we are supporting only a single card, we just leave the
+   * card selected all of the time.
+   */
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD7S, priv->rca << 16);
+  ret = mmcsd_recvR1(priv, MMCSD_CMD7S);
+  if (ret != OK)
+    {
+      fdbg("ERROR: mmcsd_recvR1 for CMD7 failed: %d\n", ret);
+      return ret;
+    }
 
   /* Set the Driver Stage Register (DSR) if (1) a CONFIG_MMCSD_DSR has been
    * provided and (2) the card supports a DSR register.  If no DSR value
