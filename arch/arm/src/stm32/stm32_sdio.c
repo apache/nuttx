@@ -711,7 +711,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
    */
 
   while (priv->remaining > 0 &&
-         (getreg32(STM32_SDIO_STA) & SDIO_STA_RXDAVL) == 0)
+         (getreg32(STM32_SDIO_STA) & SDIO_STA_RXDAVL) != 0)
     {
       /* Read the next word from the RX FIFO */
 
@@ -775,6 +775,7 @@ static void stm32_eventtimeout(int argc, uint32 arg)
       /* Yes.. wake up any waiting threads */
 
       stm32_endwait(priv, SDIOWAIT_TIMEOUT);
+      flldbg("Timeout: remaining: %d\n", priv->remaining);
     }
 }
 
@@ -1786,7 +1787,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
    * we get here.  In this case waitevents will be zero, but wkupevents will
    * be non-zero (and, hopefully, the semaphore count will also be non-zero.
    */
- 
+
   DEBUGASSERT((priv->waitevents != 0 && priv->wkupevent == 0) ||
               (priv->waitevents == 0 && priv->wkupevent != 0));
 

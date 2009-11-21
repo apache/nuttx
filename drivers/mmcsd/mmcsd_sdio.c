@@ -674,7 +674,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32 csd[4])
   fvdbg("CSD:\n");
   fvdbg("  CSD_STRUCTURE: %d SPEC_VERS: %d (MMC)\n",
         decoded.csdstructure, decoded.mmcspecvers);
-  fvdbg("  TAAC {TIME_UNIT: %d TIME_UNIT: %d} NSAC: %d\n",
+  fvdbg("  TAAC {TIME_UNIT: %d TIME_VALUE: %d} NSAC: %d\n",
         decoded.taac.timeunit, decoded.taac.timevalue, decoded.nsac);
   fvdbg("  TRAN_SPEED {TRANSFER_RATE_UNIT: %d TIME_VALUE: %d}\n",
         decoded.transpeed.transferrateunit, decoded.transpeed.timevalue);
@@ -826,13 +826,28 @@ struct mmcsd_scr_s decoded;
    *   Reserved               47:32 16-bit SD reserved space
    */
 
+#ifdef CONFIG_ENDIAN_BIG	/* Card transfers SCR in big-endian order */
   priv->buswidth     = (scr[0] >> 16) & 15;
+#else
+  priv->buswidth     = (scr[0] >> 8) & 15;
+#endif
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+#ifdef CONFIG_ENDIAN_BIG	/* Card SCR is big-endian order / CPU also big-endian
+                             *   60   56   52   48   44   40   36   32
+                             * VVVV SSSS ESSS BBBB RRRR RRRR RRRR RRRR */
   decoded.scrversion =  scr[0] >> 28;
   decoded.sdversion  = (scr[0] >> 24) & 15;
   decoded.erasestate = (scr[0] >> 23) & 1;
   decoded.security   = (scr[0] >> 20) & 7;
+#else                       /* Card SCR is big-endian order / CPU is little-endian
+                             *   36   32   44   40   52   48   60   56
+                             * RRRR RRRR RRRR RRRR ESSS BBBB VVVV SSSS */
+  decoded.scrversion = (scr[0] >> 4)  & 15;
+  decoded.sdversion  =  scr[0]        & 15;
+  decoded.erasestate = (scr[0] >> 15) & 1;
+  decoded.security   = (scr[0] >> 12) & 7;
+#endif
   decoded.buswidth   = priv->buswidth;
 #endif
 
@@ -841,7 +856,7 @@ struct mmcsd_scr_s decoded;
    */
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-  decoded.mfgdata   = scr[1];
+  decoded.mfgdata   = scr[1];  /* Might be byte reversed! */
 
   fvdbg("SCR:\n");
   fvdbg("  SCR_STRUCTURE: %d SD_VERSION: %d\n",
@@ -1731,9 +1746,10 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   FAR struct mmcsd_state_s *priv;
   ssize_t ret = 0;
 
-  fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
+  fvdbg("startsector: %d nsectors: %d sectorsize: %d\n",
+        startsector, nsectors, priv->blocksize);
 
   if (nsectors > 0)
     {
