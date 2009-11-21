@@ -145,12 +145,20 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
   {
 	.chan     = STM32_DMA2_CHAN4,
+#ifdef CONFIG_STM32_CONNECTIVITY_LINE
 	.irq      = STM32_IRQ_DMA2CH4,
+#else
+    .irq      = STM32_IRQ_DMA2CH45,
+#endif
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(3),
   },
   {
 	.chan     = STM32_DMA2_CHAN5,
+#ifdef CONFIG_STM32_CONNECTIVITY_LINE
 	.irq      = STM32_IRQ_DMA2CH5,
+#else
+    .irq      = STM32_IRQ_DMA2CH45,
+#endif
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(4),
   },
 #endif
@@ -241,7 +249,11 @@ static int stm32_dmainterrupt(int irq, void *context)
     }
   else
 #if STM32_NDMA > 1
+#ifdef CONFIG_STM32_CONNECTIVITY_LINE
   if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
+#else
+  if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH45)
+#endif
     {
       chan = irq - STM32_IRQ_DMA2CH1 + DMA1_NCHANNELS;
     }
