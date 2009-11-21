@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 18, 2009</p>
+      <p>Last Updated: November 21, 2009</p>
     </td>
   </tr>
 </table>
@@ -1617,6 +1617,8 @@ nuttx-0.4.14 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  attempts to mount at the location to fail (reporting that the node
 	  already exists).  This is a probably for block drivers for removable
 	  media: The bind method could fail repeatedly until media is asserted.
+	* arch/arm/src/stm32/chip.h & stm32_dma.c -- Fixed several definitions
+	  that can cause compilation errors when DMA2 is enabled.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
