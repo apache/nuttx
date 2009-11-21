@@ -969,6 +969,8 @@
 	  attempts to mount at the location to fail (reporting that the node
 	  already exists).  This is a probably for block drivers for removable
 	  media: The bind method could fail repeatedly until media is asserted.
+	* arch/arm/src/stm32/chip.h & stm32_dma.c -- Fixed several definitions
+	  that can cause compilation errors when DMA2 is enabled.
 
 
 

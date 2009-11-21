@@ -57,11 +57,12 @@
 #  define STM32_NATIM                   1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                   4   /* General timers TIM2,3,4,5 */
 #  define STM32 NBTIM                   0   /* No basic timers */
+#  define STM32_NDMA                    2   /* DMA1-2 */
 #  define STM32_NSPI                    2   /* SPI1-2 */
 #  define STM32_NUSART                  3   /* USART1-3 */
 #  define STM32_NI2C                    2   /* I2C1-2 */
 #  define STM32_NCAN                    1   /* bxCAN1 */
-#  define STM32_NSDIO                   1   /* 1 */
+#  define STM32_NSDIO                   1   /* SDIO */
 #  define STM32_NGPIO                   112 /* GPIOA-G */
 #  define STM32_NADC                    1   /* ADC1 */
 #  define STM32_NDAC                    0   /* No DAC */

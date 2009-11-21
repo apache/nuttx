@@ -72,6 +72,10 @@
 #  undef CONFIG_SDIO_DMA
 #endif
 
+#ifndef CONFIG_SDIO_DMA
+#  warning "Large Non-DMA transfer may result in RX overrun failures"
+#endif
+
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
@@ -941,13 +945,14 @@ static int stm32_interrupt(int irq, void *context)
               stm32_endtransfer(priv, OK);
             }
 
-          /* Handler data block send/receive CRC failure */
+          /* Handle data block send/receive CRC failure */
 
           else if ((pending & SDIO_STA_DCRCFAIL) != 0)
             {
               /* Terminate the transfer with an error */
 
               putreg32(SDIO_ICR_DCRCFAILC, STM32_SDIO_ICR);
+              flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, -EIO);
             }
 
@@ -958,6 +963,7 @@ static int stm32_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               putreg32(SDIO_ICR_DTIMEOUTC, STM32_SDIO_ICR);
+              flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, -ETIMEDOUT);
             }
 
@@ -968,6 +974,7 @@ static int stm32_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               putreg32(SDIO_ICR_RXOVERRC, STM32_SDIO_ICR);
+              flldbg("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, -EOVERFLOW);
             }
 
@@ -978,6 +985,7 @@ static int stm32_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               putreg32(SDIO_ICR_TXUNDERRC, STM32_SDIO_ICR);
+              flldbg("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, -EOVERFLOW);
             }
 
@@ -988,6 +996,7 @@ static int stm32_interrupt(int irq, void *context)
               /* Terminate the transfer with an error */
 
               putreg32(SDIO_ICR_STBITERRC, STM32_SDIO_ICR);
+              flldbg("ERROR: Start bit, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, -EIO);
             }
         }
@@ -1297,12 +1306,12 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDIO_CMD_CPSMEN;
   
+  fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, getreg32(STM32_SDIO_CMD));
+
   /* Write the SDIO CMD */
 
   putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   putreg32(regval, STM32_SDIO_CMD);
-  fvdbg("cmd: %08x arg: %08x regval: %08x\n",
-        cmd, arg, getreg32(STM32_SDIO_CMD));
 }
 
 /****************************************************************************
