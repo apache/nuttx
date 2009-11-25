@@ -93,21 +93,15 @@
 #define SDIO_CLKCR_RISINGEDGE    (0)
 #define SDIO_CLKCR_FALLINGEDGE   SDIO_CLKCR_NEGEDGE
 
-/* HCLK=72MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(178+2)=400 KHz */
+/* Mode dependent settings.  These depend on clock devisor settings that must
+ * be defined in the board-specific board.h header file: SDIO_INIT_CLKDIV,
+ * SDIO_MMCXFR_CLKDIV, and SDIO_SDXFR_CLKDIV.
+ */
   
-#define SDIO_INIT_CLKDIV         (178 << SDIO_CLKCR_CLKDIV_SHIFT)
 #define STM32_CLCKCR_INIT        (SDIO_INIT_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
                                   SDIO_CLKCR_WIDBUS_D1)
-
-/* HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(2+2)=18 MHz */
-
-#define SDIO_MMCXFR_CLKDIV       (2 << SDIO_CLKCR_CLKDIV_SHIFT) 
 #define SDIO_CLKCR_MMCXFR        (SDIO_MMCXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
                                   SDIO_CLKCR_WIDBUS_D1)
-
-/* HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(1+2)=24 MHz */
-
-#define SDIO_SDXFR_CLKDIV        (1 << SDIO_CLKCR_CLKDIV_SHIFT) 
 #define SDIO_CLCKR_SDXFR         (SDIO_SDXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
                                   SDIO_CLKCR_WIDBUS_D1)
 #define SDIO_CLCKR_SDWIDEXFR     (SDIO_SDXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
@@ -198,7 +192,6 @@ struct stm32_dev_s
 
   uint32            *buffer;     /* Address of current R/W buffer */
   size_t             remaining;  /* Number of bytes remaining in the transfer */
-  int                result;     /* Result of the transfer */
   uint32             xfrmask;    /* Interrupt enables for data transfer */
 
   /* DMA data transfer support */
@@ -240,7 +233,7 @@ static void  stm32_sendfifo(struct stm32_dev_s *priv);
 static void  stm32_recvfifo(struct stm32_dev_s *priv);
 static void  stm32_eventtimeout(int argc, uint32 arg);
 static void  stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent);
-static void  stm32_endtransfer(struct stm32_dev_s *priv, int result);
+static void  stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupevent);
 
 /* Interrupt Handling *******************************************************/
 
@@ -790,8 +783,8 @@ static void stm32_eventtimeout(int argc, uint32 arg)
  *   Wake up a waiting thread if the waited-for event has occurred.
  *
  * Input Parameters:
- *   priv   - An instance of the SDIO device interface
- *   result - The result status of the transfer
+ *   priv      - An instance of the SDIO device interface
+ *   wkupevent - The event that caused the wait to end
  *
  * Returned Value:
  *   None
@@ -824,7 +817,7 @@ static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
  *
  * Input Parameters:
  *   priv   - An instance of the SDIO device interface
- *   result - The result status of the transfer
+ *   wkupevent - The event that caused the transfer to end
  *
  * Returned Value:
  *   None
@@ -834,7 +827,7 @@ static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
  *
  ****************************************************************************/
 
-static void stm32_endtransfer(struct stm32_dev_s *priv, int result)
+static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Disable all transfer related interrupts */
 
@@ -843,15 +836,14 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, int result)
   /* Mark the transfer finished with the provided status */
 
   priv->remaining = 0;
-  priv->result    = result;
 
   /* Is a data transfer complete event expected? */
 
-  if ((priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
+  if ((priv->waitevents & wkupevent) != 0)
     {
       /* Yes.. wake up any waiting threads */
 
-      stm32_endwait(priv, SDIOWAIT_TRANSFERDONE);
+      stm32_endwait(priv, wkupevent);
     }
 }
 
@@ -942,7 +934,7 @@ static int stm32_interrupt(int irq, void *context)
               /* Then terminate the transfer */
 
               putreg32(SDIO_ICR_DATAENDC, STM32_SDIO_ICR);
-              stm32_endtransfer(priv, OK);
+              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
             }
 
           /* Handle data block send/receive CRC failure */
@@ -953,7 +945,7 @@ static int stm32_interrupt(int irq, void *context)
 
               putreg32(SDIO_ICR_DCRCFAILC, STM32_SDIO_ICR);
               flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, -EIO);
+              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
             }
 
           /* Handle data timeout error */
@@ -964,7 +956,7 @@ static int stm32_interrupt(int irq, void *context)
 
               putreg32(SDIO_ICR_DTIMEOUTC, STM32_SDIO_ICR);
               flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, -ETIMEDOUT);
+              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
             }
 
           /* Handle RX FIFO overrun error */
@@ -975,7 +967,7 @@ static int stm32_interrupt(int irq, void *context)
 
               putreg32(SDIO_ICR_RXOVERRC, STM32_SDIO_ICR);
               flldbg("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, -EOVERFLOW);
+              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
             }
 
           /* Handle TX FIFO underrun error */
@@ -986,7 +978,7 @@ static int stm32_interrupt(int irq, void *context)
 
               putreg32(SDIO_ICR_TXUNDERRC, STM32_SDIO_ICR);
               flldbg("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, -EOVERFLOW);
+              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
             }
 
           /* Handle start bit error */
@@ -997,8 +989,8 @@ static int stm32_interrupt(int irq, void *context)
 
               putreg32(SDIO_ICR_STBITERRC, STM32_SDIO_ICR);
               flldbg("ERROR: Start bit, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, -EIO);
-            }
+              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+           }
         }
 
       /* Handle wait events *************************************************/
@@ -1084,7 +1076,6 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
   priv->buffer     = 0;      /* Address of current R/W buffer */
   priv->remaining  = 0;      /* Number of bytes remaining in the transfer */
-  priv->result     = 0;      /* Result of the transfer */
   priv->xfrmask    = 0;      /* Interrupt enables for data transfer */
 
   /* DMA data transfer support */
@@ -1352,7 +1343,6 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
   priv->buffer    = (uint32*)buffer;
   priv->remaining = nbytes;
-  priv->result    = -EBUSY;
 #ifdef CONFIG_SDIO_DMA
   priv->dmamode   = FALSE;
 #endif
@@ -1404,7 +1394,6 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
 
   priv->buffer    = (uint32*)buffer;
   priv->remaining = nbytes;
-  priv->result    = -EBUSY;
 #ifdef CONFIG_SDIO_DMA
   priv->dmamode   = FALSE;
 #endif
@@ -1838,12 +1827,13 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
        */
 
       stm32_takesem(priv);
-
+      wkupevent = priv->wkupevent;
+ 
       /* Check if the event has occurred.  When the event has occurred, then
        * evenset will be set to 0 and wkupevent will be set to a nonzero value.
        */
 
-      if (priv->wkupevent != 0)
+      if (wkupevent != 0)
         {
           /* Yes... break out of the loop with wkupevent non-zero */
 
@@ -1992,7 +1982,6 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
       priv->buffer    = (uint32*)buffer;
       priv->remaining = buflen;
-      priv->result    = -EBUSY;
       priv->dmamode   = TRUE;
 
       /* Then set up the SDIO data path */
@@ -2059,7 +2048,6 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       priv->buffer    = (uint32*)buffer;
       priv->remaining = buflen;
-      priv->result    = -EBUSY;
       priv->dmamode   = TRUE;
 
       /* Then set up the SDIO data path */
