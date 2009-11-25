@@ -162,12 +162,15 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
       fvdbg("Flushing: blockstart=0x%08lx nblocks=%d from buffer=%p\n",
       (long)rwb->wrblockstart, rwb->wrnblocks, rwb->wrbuffer);
 
-      /* Flush cache */
+      /* Flush cache.  On success, the flush method will return the number
+       * of blocks written.  Anything other than the number requested is
+       * an error.
+       */
 
       ret = rwb->wrflush(rwb->dev, rwb->wrbuffer, rwb->wrblockstart, rwb->wrnblocks);
-      if (ret < 0)
+      if (ret != rwb->wrnblocks)
         {
-          fdbg("ERROR: Error flushing write buffer: %d\n", -ret);
+          fdbg("ERROR: Error flushing write buffer: %d\n", ret);
         }
       
       rwb_resetwrbuffer(rwb);
@@ -281,7 +284,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
 #endif
 
 /****************************************************************************
- * Name: 
+ * Name: rwb_resetrhbuffer
  ****************************************************************************/
 
 #ifdef CONFIG_FS_READAHEAD
@@ -295,7 +298,7 @@ static inline void rwb_resetrhbuffer(struct rwbuffer_s *rwb)
 #endif
 
 /****************************************************************************
- * Name: 
+ * Name: rwb_bufferread
  ****************************************************************************/
 
 #ifdef CONFIG_FS_READAHEAD
@@ -329,7 +332,7 @@ rwb_bufferread(struct rwbuffer_s *rwb,  off_t startblock,
 #endif
 
 /****************************************************************************
- * Name: 
+ * Name: rwb_rhreload
  ****************************************************************************/
 
 #ifdef CONFIG_FS_READAHEAD
@@ -358,14 +361,19 @@ static int rwb_rhreload(struct rwbuffer_s *rwb, off_t startblock)
   /* Now perform the read */
 
   ret = rwb->rhreload(rwb->dev, rwb->rhbuffer, startblock, nblocks);
-  if (ret == 0)
+  if (ret == nblocks)
     {
       /* Update information about what is in the read-ahead buffer */
 
       rwb->rhnblocks    = nblocks;
       rwb->rhblockstart = startblock;
+
+      /* The return value is not the number of blocks we asked to be loaded. */
+
+      return nblocks;
     }
-  return ret;
+
+  return -EIO;
 }
 #endif
 
@@ -481,12 +489,14 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
 }
 
 /****************************************************************************
- * Name: 
+ * Name: rwb_read
  ****************************************************************************/
 
 int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32 nblocks,
              FAR ubyte *rdbuffer)
 {
+  uint32 remaining;
+ 
   fvdbg("startblock=%ld nblocks=%ld rdbuffer=%p\n",
         (long)startblock, (long)nblocks, rdbuffer);
 
@@ -516,17 +526,17 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32 nblocks,
   /* Loop until we have read all of the requested blocks */
 
   rwb_semtake(&rwb->rhsem);
-  while (nblocks > 0)
+  for (remaining = nblocks; remaining > 0;)
     {
       /* Is there anything in the read-ahead buffer? */
 
       if (rwb->rhnblocks > 0)
         {
           off_t  startblock = startblock;
-          size_t nblocks    = 0;
+          size_t nbufblocks = 0;
           off_t  bufferend;
 
-          /* Loop for each block we find in the read-head buffer.   Count the
+          /* Loop for each block we find in the read-head buffer.  Count the
            * number of buffers that we can read from read-ahead buffer.
            */
 
@@ -534,28 +544,28 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32 nblocks,
 
           while ((startblock >= rwb->rhblockstart) &&
                  (startblock < bufferend) &&
-                 (nblocks > 0))
+                 (remaining > 0))
             {
               /* This is one more that we will read from the read ahead buffer */
 
-              nblocks++;
+              nbufblocks++;
 
               /* And one less that we will read from the media */
 
               startblock++;
-              nblocks--;
+              remaining--;
             }
 
           /* Then read the data from the read-ahead buffer */
 
-          rwb_bufferread(rwb, startblock, nblocks, &rdbuffer);
+          rwb_bufferread(rwb, startblock, nbufblocks, &rdbuffer);
         }
 
       /* If we did not get all of the data from the buffer, then we have to refill
        * the buffer and try again.
        */
 
-      if (nblocks > 0)
+      if (remaining > 0)
         {
           int ret = rwb_rhreload(rwb, startblock);
           if (ret < 0)
@@ -565,6 +575,11 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32 nblocks,
             }
         }
     }
+
+  /* On success, return the number of blocks that we were requested to read.
+   * This is for compatibility with the normal return of a block driver read
+   * method
+   */
 
   rwb_semgive(&rwb->rhsem);
   return 0;
@@ -620,6 +635,12 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
 
       ret = rwb_writebuffer(rwb, startblock, nblocks, wrbuffer);
     }
+
+  /* On success, return the number of blocks that we were requested to write.
+   * This is for compatibility with the normal return of a block driver write
+   * method
+   */
+
   return ret;
 
 #else

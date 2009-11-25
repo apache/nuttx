@@ -77,7 +77,14 @@
 #define MMCSD_DSR_DELAY         (100*1000) /* Time to wait after setting DSR */
 #define MMCSD_CLK_DELAY         (500*1000) /* Delay after changing clock speeds */
 
-/* Event delays (all in units of milliseconds) */
+/* Data delays (all in units of milliseconds).
+ *
+ *   For MMC & SD V1.x, these should be based on Nac = TAAC + NSAC; The maximum
+ *   value of TAAC is 80MS and the maximum value of NSAC is 25.5K clock cycle.
+ *   For SD V2.x, a fixed delay of 100MS is recommend which is preety close to
+ *   the worst case SD V1.x Nac.  Here we just use 100MS delay for all data
+ *   transfers.
+ */
 
 #define MMCSD_SCR_DATADELAY     (100)      /* Wait up to 100MS to get SCR */
 #define MMCSD_BLOCK_DATADELAY   (100)      /* Wait up to 100MS to get one data block */
@@ -446,7 +453,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
 
   /* Send ACMD51 SD_APP_SEND_SCR with argument as 0 to start data receipt */
 
-  (void)SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+  (void)SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
   mmcsd_sendcmdpoll(priv, SD_ACMD51, 0);
   ret = mmcsd_recvR1(priv, SD_ACMD51);
   if (ret != OK)
@@ -457,10 +464,10 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
 
   /* Wait for data to be transferred */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, MMCSD_SCR_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, MMCSD_SCR_DATADELAY);
   if (ret != OK)
     {
-      fdbg("ERROR: EVENTWAIT for READ DATA failed: %d\n", ret);
+      fdbg("ERROR: mmcsd_eventwait for READ DATA failed: %d\n", ret);
     }
   return ret;
 }
@@ -996,11 +1003,11 @@ static int mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
     {
       /* Yes.. the failure event is probably SDIOWAIT_TIMEOUT */
 
-      fdbg("ERROR: Awakened with %02\n", wkupevent);
+      fdbg("ERROR: Awakened with %02x\n", wkupevent);
       return wkupevent & SDIOWAIT_TIMEOUT ? -ETIMEDOUT : -EIO;
     }
 
-  /* Since there are no failure events, we must have been awaked by one
+  /* Since there are no failure events, we must have been awakened by one
    * (or more) success events.
    */
 
@@ -1224,7 +1231,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the read transfer */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1252,12 +1259,16 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   /* Then wait for the data transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, MMCSD_BLOCK_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD17 transfer failed: %d\n", ret);
+      return ret;
     }
-  return ret;
+
+  /* Return value:  One sector read */
+
+  return 1;
 }
 
 /****************************************************************************
@@ -1327,7 +1338,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the read transfer */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1353,7 +1364,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, nblocks * MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, nblocks * MMCSD_BLOCK_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD18 transfer failed: %d\n", ret);
@@ -1367,7 +1378,10 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
     {
       fdbg("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
     }
-  return ret;
+
+  /* On success, return the number of blocks read */
+
+  return nblocks;
 }
 
 /****************************************************************************
@@ -1396,6 +1410,9 @@ static ssize_t mmcsd_reload(FAR void *dev, FAR ubyte *buffer,
     {
       ret = mmcsd_readmultiple(priv, buffer, startblock, nblocks);
     }
+
+  /* On success, return the number of blocks read */
+
   return ret;
 }
 #endif
@@ -1476,7 +1493,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the write transfer */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1488,20 +1505,24 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       SDIO_SENDSETUP(priv->dev, buffer, priv->blocksize);
     }
 
-  /* Wait for the transfer to complete */
-
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, MMCSD_BLOCK_DATADELAY);
-  if (ret != OK)
-    {
-      fdbg("ERROR: CMD24 transfer failed: %d\n", ret);
-    }
-
   /* Flag that a write transfer is pending that we will have to check for
    * write complete at the beginning of the next transfer.
    */
 
   priv->wrbusy = TRUE;
-  return ret;
+
+  /* Wait for the transfer to complete */
+
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, MMCSD_BLOCK_DATADELAY);
+  if (ret != OK)
+    {
+      fdbg("ERROR: CMD24 transfer failed: %d\n", ret);
+      return ret;
+    }
+
+  /* On success, return the number of blocks written */
+
+  return 1;
 }
 
 /****************************************************************************
@@ -1614,7 +1635,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the write transfer */
 
-  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+  SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1626,9 +1647,15 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       SDIO_SENDSETUP(priv->dev, buffer, nbytes);
     }
 
+  /* Flag that a write transfer is pending that we will have to check for
+   * write complete at the beginning of the next transfer.
+   */
+
+  priv->wrbusy = TRUE;
+
   /* Wait for the transfer to complete */
 
-  ret =mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT, nblocks * MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, nblocks * MMCSD_BLOCK_DATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD18 transfer failed: %d\n", ret);
@@ -1641,14 +1668,12 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       fdbg("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
+      return ret;
     }
 
-  /* Flag that a write transfer is pending that we will have to check for
-   * write complete at the beginning of the next transfer.
-   */
+  /* On success, return the number of blocks read */
 
-  priv->wrbusy = TRUE;
-  return ret;
+  return nblocks;
 }
 
 /****************************************************************************
@@ -1676,6 +1701,9 @@ static ssize_t mmcsd_flush(FAR void *dev, FAR const ubyte *buffer,
     {
       ret = mmcsd_writemultiple(priv, buffer, startblock, nblocks);
     }
+
+  /* On success, return the number of blocks written */
+
   return ret;
 }
 #endif
@@ -1768,6 +1796,9 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 #endif
       mmcsd_givesem(priv);
     }
+
+  /* On success, return the number of blocks read */
+
   return ret;
 }
 
@@ -1805,6 +1836,9 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
     }
 #endif
   mmcsd_givesem(priv);
+
+  /* On success, return the number of blocks written */
+
   return ret;
 }
 #endif

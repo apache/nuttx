@@ -57,8 +57,9 @@
 #define SDIOWAIT_RESPONSEDONE  (1 << 1) /* Bit 1: Response to command available */
 #define SDIOWAIT_TRANSFERDONE  (1 << 2) /* Bit 2: Data transfer/DMA done */
 #define SDIOWAIT_TIMEOUT       (1 << 3) /* Bit 3: Timeout */
+#define SDIOWAIT_ERROR         (1 << 4) /* Bit 4: Some other error occurred */
 
-#define SDIOWAIT_ALLEVENTS     0x0f
+#define SDIOWAIT_ALLEVENTS     0x1f
 
 /* Media events are used for enable/disable registered event callbacks */
 
