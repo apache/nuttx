@@ -156,6 +156,9 @@ extern void up_boot(void);
 extern void up_copystate(uint32 *dest, uint32 *src);
 extern void up_decodeirq(uint32 *regs);
 extern void up_irqinitialize(void);
+#ifdef CONFIG_ARCH_DMA
+extern void weak_function up_dmainitialize(void);
+#endif
 extern int  up_saveusercontext(uint32 *saveregs);
 extern void up_fullcontextrestore(uint32 *restoreregs) __attribute__ ((noreturn));
 extern void up_switchcontext(uint32 *saveregs, uint32 *restoreregs);

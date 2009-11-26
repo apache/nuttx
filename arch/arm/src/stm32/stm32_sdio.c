@@ -118,10 +118,10 @@
 
 /* DMA CCR register settings */
 
-#define SDIO_RXDMA16_CONFIG      (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_16BITS|\
-                                  DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC)
-#define SDIO_TXDMA16_CONFIG      (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_16BITS|\
-                                  DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
+#define SDIO_RXDMA32_CONFIG      (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
+                                  DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC)
+#define SDIO_TXDMA32_CONFIG      (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
+                                  DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
 
 /* FIFO sizes */
 
@@ -528,6 +528,8 @@ static void stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg)
   /* We don't really do anything at the completion of DMA.  The termination
    * of the transfer is driven by the SDIO interrupts.
    */
+
+  stm32_dmadump(handle, "DMA Callback");
 }
 #endif
 
@@ -836,6 +838,15 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
   /* Mark the transfer finished with the provided status */
 
   priv->remaining = 0;
+
+  /* DMA debug instrumentation */
+
+#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_DEBUG_DMA)
+  if (priv->dmamode)
+    {
+      stm32_dmadump(priv->dma, "End of Transfer");
+    }
+#endif
 
   /* Is a data transfer complete event expected? */
 
@@ -1978,6 +1989,8 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
   if (priv->widebus)
     {
+      stm32_dmadump(priv->dma, "Before RECV Setup");
+
       /* Save the destination buffer information for use by the interrupt handler */
 
       priv->buffer    = (uint32*)buffer;
@@ -1995,11 +2008,12 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
       putreg32(1, SDIO_DCTRL_DMAEN_BB);
       stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
-                     (buflen + 3) >> 2, SDIO_RXDMA16_CONFIG);
+                     (buflen + 3) >> 2, SDIO_RXDMA32_CONFIG);
  
      /* Start the DMA */
 
       stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
+      stm32_dmadump(priv->dma, "After RECV Setup");
       ret = OK;
     }
   return ret;
@@ -2027,7 +2041,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
 #ifdef CONFIG_SDIO_DMA
 static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
-                               FAR const ubyte *buffer, size_t buflen)
+                              FAR const ubyte *buffer, size_t buflen)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   uint32 dblocksize;
@@ -2044,6 +2058,8 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   if (priv->widebus)
     {
+      stm32_dmadump(priv->dma, "Before SEND Setup");
+
       /* Save the source buffer information for use by the interrupt handler */
 
       priv->buffer    = (uint32*)buffer;
@@ -2062,12 +2078,13 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
       /* Configure the TX DMA */
 
       stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
-                     (buflen + 3) >> 2, SDIO_TXDMA16_CONFIG);
+                     (buflen + 3) >> 2, SDIO_TXDMA32_CONFIG);
       putreg32(1, SDIO_DCTRL_DMAEN_BB);
 
       /* Start the DMA */
 
       stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
+      stm32_dmadump(priv->dma, "After SEND Setup");
       ret = OK;
     }
   return ret;

@@ -124,6 +124,19 @@ void up_initialize(void)
 
   up_irqinitialize();
 
+  /* Initialize the DMA subsystem if the weak function stm32_dmainitialize has been
+   * brought into the build
+   */
+
+#ifdef CONFIG_ARCH_DMA
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (up_dmainitialize)
+#endif
+    {
+      up_dmainitialize();
+    }
+#endif
+
   /* Initialize the system timer interrupt */
 
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
