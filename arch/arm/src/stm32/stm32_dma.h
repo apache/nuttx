@@ -229,6 +229,7 @@
 #define DMA_IFCR_CHAN6_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN6_SHIFT)
 #define DMA_IFCR_CHAN7_SHIFT      (24)      /* Bits 27-24:  DMA Channel 7 interrupt flag clear */
 #define DMA_IFCR_CHAN7_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN7_SHIFT)
+#define DMA_IFCR_ALLCHANNELS      (0x0fffffff)
 
 #define DMA_IFCR_CGIF(n)          (DMA_CHAN_GIF_BIT << DMA_IFCR_CHAN_SHIFT(n))
 #define DMA_IFCR_CTCIF(n)         (DMA_CHAN_TCIF_BIT << DMA_IFCR_CHAN_SHIFT(n))
@@ -262,6 +263,8 @@
 #define DMA_CCR_HTIE              (1 << 2)  /* Bit 2: Half Transfer interrupt enable */
 #define DMA_CCR_TCIE              (1 << 1)  /* Bit 1: Transfer complete interrupt enable */
 #define DMA_CCR_EN                (1 << 0)  /* Bit 0: Channel enable */
+
+#define DMA_CCR_ALLINTS           (DMA_CCR_TEIE|DMA_CCR_HTIE|DMA_CCR_TCIE)
 
 /* DMA channel number of data register */
 

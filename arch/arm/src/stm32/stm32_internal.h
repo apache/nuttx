@@ -50,6 +50,12 @@
  * Definitions
  ************************************************************************************/
 
+/* Configuration ********************************************************************/
+
+#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_VERBOSE)
+#  undef CONFIG_DEBUG_DMA
+#endif
+
 /* NVIC priority levels *************************************************************/
 
 #define NVIC_SYSH_PRIORITY_MIN     0xff /* All bits set in minimum priority */
@@ -266,19 +272,6 @@ EXTERN int stm32_dumpgpio(uint32 pinset, const char *msg);
 #endif
 
 /****************************************************************************
- * Name: stm32_dmainitialize
- *
- * Description:
- *   Initialize the DMA subsystem
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-EXTERN void weak_function stm32_dmainitialize(void);
-
-/****************************************************************************
  * Name: stm32_dmachannel
  *
  * Description:
@@ -358,6 +351,23 @@ EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr,
 
 EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
                            void *arg, boolean half);
+
+/****************************************************************************
+ * Name: stm32_dmadump
+ *
+ * Description:
+ *   Dump DMA register contents
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_DMA
+EXTERN void stm32_dmadump(DMA_HANDLE handle, const char *msg);
+#else
+#  define stm32_dmadump(handle)
+#endif
 
 /************************************************************************************
  * Function: stm32_ethinitialize

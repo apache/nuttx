@@ -946,7 +946,7 @@
 	  certain range.  Worked fine until you try to use an interrupt in that
 	  range!
 
-0.4.14 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+4.14 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/stm32/stm32_gpio.c - Add support for configure an input GPIO
 	  to generate an EXTI interrupt.
@@ -971,6 +971,8 @@
 	  media: The bind method could fail repeatedly until media is asserted.
 	* arch/arm/src/stm32/chip.h & stm32_dma.c -- Fixed several definitions
 	  that can cause compilation errors when DMA2 is enabled.
+	* arch/arm/src/stm32/stm32_dma.c - Integrated and debugged STM32 DMA
+	  functionality that was added in 0.4.12.
 
 
 

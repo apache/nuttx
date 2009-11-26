@@ -41,6 +41,7 @@
  * Included Files
  ************************************************************************************/
 
+#include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <sys/types.h>
 #endif

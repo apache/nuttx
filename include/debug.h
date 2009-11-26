@@ -163,6 +163,18 @@
 # define sllvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_DMA
+# define dmadbg(format, arg...)    dbg(format, ##arg)
+# define dmalldbg(format, arg...)  lldbg(format, ##arg)
+# define dmavdbg(format, arg...)   vdbg(format, ##arg)
+# define dmallvdbg(format, arg...) llvdbg(format, ##arg)
+#else
+# define dmadbg(x...)
+# define dmalldbg(x...)
+# define dmavdbg(x...)
+# define dmallvdbg(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_NET
 # define ndbg(format, arg...)    dbg(format, ##arg)
 # define nlldbg(format, arg...)  lldbg(format, ##arg)
@@ -284,6 +296,18 @@
 # define sllvdbg (void)
 #endif
 
+#ifdef CONFIG_DEBUG_DMA
+# define dmadbg    dbg
+# define dmalldbg  lldbg
+# define dmavdbg   vdbg
+# define dmallvdbg llvdbg
+#else
+# define dmadbg    (void)
+# define dmalldbg  (void)
+# define dmavdbg   (void)
+# define dmallvdbg (void)
+#endif
+
 #ifdef CONFIG_DEBUG_NET
 # define ndbg    dbg
 # define nlldbg  lldbg
@@ -388,6 +412,14 @@
 #else
 #  define sdbgdumpbuffer(m,b,n)
 #  define svdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_DMA
+#  define dmadbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define dmavdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define dmadbgdumpbuffer(m,b,n)
+#  define dmavdbgdumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_NET

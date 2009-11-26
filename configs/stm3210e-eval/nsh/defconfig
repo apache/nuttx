@@ -67,6 +67,7 @@
 #   CONFIG_BOARD_LOOPSPERMSEC.  You simply use a stop watch to measure
 #   the 100 second delay then adjust CONFIG_BOARD_LOOPSPERMSEC until
 #   the delay actually is 100 seconds.
+# CONFIG_ARCH_DMA - Support DMA initialization
 #
 CONFIG_ARCH=arm
 CONFIG_ARCH_ARM=y
@@ -86,6 +87,7 @@ CONFIG_ARCH_BOOTLOADER=n
 CONFIG_ARCH_LEDS=y
 CONFIG_ARCH_BUTTONS=n
 CONFIG_ARCH_CALIBRATION=n
+CONFIG_ARCH_DMA=y
 
 #
 # Identify toolchain and linker options
