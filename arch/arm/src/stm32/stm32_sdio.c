@@ -41,6 +41,7 @@
 #include <sys/types.h>
 
 #include <semaphore.h>
+#include <string.h>
 #include <assert.h>
 #include <debug.h>
 #include <wdog.h>
@@ -161,6 +162,17 @@
 #define SDIO_WAITALL_ICR   (SDIO_ICR_CMDSENTC|SDIO_ICR_CTIMEOUTC|\
                             SDIO_ICR_CCRCFAILC|SDIO_ICR_CMDRENDC)
 
+/* DMA Debug Support */
+
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+#  define DMANDX_BEFORE_SETUP  0
+#  define DMANDX_BEFORE_ENABLE 1
+#  define DMANDX_AFTER_SETUP   2
+#  define DMANDX_END_TRANSFER  3
+#  define DMANDX_DMA_CALLBACK  4
+#  define DMA_NSAMPLES         5
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -221,6 +233,13 @@ static inline uint32 stm32_getpwrctrl(void);
 /* DMA Helpers **************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_DEBUG_DMA
+static void  stm32_dmasampleinit(void);
+static void  stm32_dmadumpsamples(struct stm32_dev_s *priv);
+#else
+#  define    stm32_dmasampleinit()
+#  define    stm32_dmadumpsamples(priv)
+#endif
 static void  stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg);
 #endif
 
@@ -258,6 +277,7 @@ static int   stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
                size_t nbytes);
 static int   stm32_sendsetup(FAR struct sdio_dev_s *dev,
                FAR const ubyte *buffer, uint32 nbytes);
+static int   stm32_cancel(FAR struct sdio_dev_s *dev);
 
 static int   stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32 cmd);
 static int   stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32 cmd,
@@ -311,6 +331,7 @@ struct stm32_dev_s g_sdiodev =
     .sendcmd          = stm32_sendcmd,
     .recvsetup        = stm32_recvsetup,
     .sendsetup        = stm32_sendsetup,
+    .cancel           = stm32_cancel,
     .waitresponse     = stm32_waitresponse,
     .recvR1           = stm32_recvshortcrc,
     .recvR2           = stm32_recvlong,
@@ -330,6 +351,12 @@ struct stm32_dev_s g_sdiodev =
 #endif
   },
 };
+
+/* DMA Debug Support */
+
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+static struct stm32_dmaregs_s g_dmaregs[DMA_NSAMPLES];
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -513,6 +540,40 @@ static inline uint32 stm32_getpwrctrl(void)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_dmasampleinit
+ *
+ * Description:
+ *   Setup prior to collecting DMA samples
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+static void  stm32_dmasampleinit(void)
+{
+   memset(g_dmaregs, 0xff, DMA_NSAMPLES * sizeof(struct stm32_dmaregs_s));
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_dmadumpsamples
+ *
+ * Description:
+ *   Dump sampled DMA data
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+static void  stm32_dmadumpsamples(struct stm32_dev_s *priv)
+{
+  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_BEFORE_SETUP],  "Before DMA setup");
+  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_BEFORE_ENABLE], "Before DMA enable");
+  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_AFTER_SETUP],   "After DMA setup");
+  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_END_TRANSFER],  "End of transfer");
+  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_DMA_CALLBACK],  "DMA Callback");
+}
+#endif
+
+/****************************************************************************
  * Name: stm32_dmacallback
  *
  * Description:
@@ -527,9 +588,14 @@ static void stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg)
 
   /* We don't really do anything at the completion of DMA.  The termination
    * of the transfer is driven by the SDIO interrupts.
+   *
+   * In fact, we won't normally get the DMA callback at all!  The SDIO
+   * appears to handle the End-Of-Transfer interrupt first and it will can
+   * stm32_dmastop() which will disable and clear the interrupt that performs
+   * this callback.
    */
 
-  stm32_dmadump(handle, "DMA Callback");
+  stm32_dmasample(handle, &g_dmaregs[DMANDX_DMA_CALLBACK]);
 }
 #endif
 
@@ -835,20 +901,29 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
 
   stm32_configxfrints(priv, 0);
 
-  /* Mark the transfer finished with the provided status */
+  /* If this was a DMA transfer, make sure that DMA is stopped */
 
-  priv->remaining = 0;
-
-  /* DMA debug instrumentation */
-
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_DEBUG_DMA)
+#ifdef CONFIG_SDIO_DMA
   if (priv->dmamode)
     {
-      stm32_dmadump(priv->dma, "End of Transfer");
+      /* DMA debug instrumentation */
+
+      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_END_TRANSFER]);
+
+      /* Make sure that the DMA is stopped (it will be stopped automatically
+       * on normal transfers, but not necessarily when the transfer terminates
+       * on an error condition.
+       */
+
+      stm32_dmastop(priv->dma);
     }
 #endif
 
-  /* Is a data transfer complete event expected? */
+  /* Mark the transfer finished */
+
+  priv->remaining = 0;
+
+  /* Is a thread wait for these data transfer complete events? */
 
   if ((priv->waitevents & wkupevent) != 0)
     {
@@ -1308,7 +1383,7 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg)
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDIO_CMD_CPSMEN;
   
-  fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, getreg32(STM32_SDIO_CMD));
+  fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
 
   /* Write the SDIO CMD */
 
@@ -1417,6 +1492,56 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
   /* Enable TX interrrupts */
 
   stm32_configxfrints(priv, SDIO_SEND_MASK);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_cancel
+ *
+ * Description:
+ *   Cancel the data transfer setup of SDIO_RECVSETUP, SDIO_SENDSETUP,
+ *   SDIO_DMARECVSETUP or SDIO_DMASENDSETUP.  This must be called to cancel
+ *   the data transfer setup if, for some reason, you cannot perform the
+ *   transfer.
+ *
+ * Input Parameters:
+ *   dev  - An instance of the SDIO device interface
+ *
+ * Returned Value:
+ *   OK is success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int stm32_cancel(FAR struct sdio_dev_s *dev)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+
+  /* Disable all transfer- and event- related interrupts */
+
+  stm32_configxfrints(priv, 0);
+  stm32_configwaitints(priv, 0, 0, 0);
+
+  /* Cancel any watchdog timeout */
+
+  (void)wd_cancel(priv->waitwdog);
+
+  /* If this was a DMA transfer, make sure that DMA is stopped */
+
+#ifdef CONFIG_SDIO_DMA
+  if (priv->dmamode)
+    {
+      /* Make sure that the DMA is stopped (it will be stopped automatically
+       * on normal transfers, but not necessarily when the transfer terminates
+       * on an error condition.
+       */
+
+      stm32_dmastop(priv->dma);
+    }
+#endif
+
+  /* Mark no transfer in progress */
+
+  priv->remaining = 0;
   return OK;
 }
 
@@ -1855,6 +1980,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
   /* Disable event-related interrupts */
 
   stm32_configwaitints(priv, 0, 0, 0);
+  stm32_dmadumpsamples(priv);
   return wkupevent;
 }
 
@@ -1989,7 +2115,8 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
   if (priv->widebus)
     {
-      stm32_dmadump(priv->dma, "Before RECV Setup");
+      stm32_dmasampleinit();
+      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_BEFORE_SETUP]);
 
       /* Save the destination buffer information for use by the interrupt handler */
 
@@ -2012,8 +2139,9 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
  
      /* Start the DMA */
 
+      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_BEFORE_ENABLE]);
       stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
-      stm32_dmadump(priv->dma, "After RECV Setup");
+      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_AFTER_SETUP]);
       ret = OK;
     }
   return ret;
@@ -2049,7 +2177,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32)buffer & 3) == 0);
-
+flldbg("buffer: %p buflen: %d\n", buffer, buflen); // REMOVE ME
   /* Reset the DPSM configuration */
 
   stm32_datadisable();
@@ -2058,7 +2186,8 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   if (priv->widebus)
     {
-      stm32_dmadump(priv->dma, "Before SEND Setup");
+      stm32_dmasampleinit();
+      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_BEFORE_SETUP]);
 
       /* Save the source buffer information for use by the interrupt handler */
 
@@ -2071,20 +2200,23 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
       dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
       stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize);
 
-      /* Enable TX interrrupts */
-
-      stm32_configxfrints(priv, SDIO_DMASEND_MASK);
-
       /* Configure the TX DMA */
 
       stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
                      (buflen + 3) >> 2, SDIO_TXDMA32_CONFIG);
+
+      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_BEFORE_ENABLE]);
       putreg32(1, SDIO_DCTRL_DMAEN_BB);
 
       /* Start the DMA */
 
       stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
-      stm32_dmadump(priv->dma, "After SEND Setup");
+      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_AFTER_SETUP]);
+
+      /* Enable TX interrrupts */
+
+      stm32_configxfrints(priv, SDIO_DMASEND_MASK);
+
       ret = OK;
     }
   return ret;
