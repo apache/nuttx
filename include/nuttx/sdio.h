@@ -445,6 +445,25 @@
 #define SDIO_SENDSETUP(dev,buffer,nbytes) ((dev)->sendsetup(dev,buffer,nbytes))
 
 /****************************************************************************
+ * Name: SDIO_CANCEL
+ *
+ * Description:
+ *   Cancel the data transfer setup of SDIO_RECVSETUP, SDIO_SENDSETUP,
+ *   SDIO_DMARECVSETUP or SDIO_DMASENDSETUP.  This must be called to cancel
+ *   the data transfer setup if, for some reason, you cannot perform the
+ *   transfer.
+ *
+ * Input Parameters:
+ *   dev  - An instance of the SDIO device interface
+ *
+ * Returned Value:
+ *   OK is success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#define SDIO_CANCEL(dev) ((dev)->cancel(dev))
+
+/****************************************************************************
  * Name: SDIO_WAITRESPONSE
  *
  * Description:
@@ -708,6 +727,7 @@ struct sdio_dev_s
           size_t nbytes);
   int   (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
           size_t nbytes);
+  int   (*cancel)(FAR struct sdio_dev_s *dev);
 
   int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32 cmd);
   int   (*recvR1)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);

@@ -459,6 +459,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
   if (ret != OK)
     {
       fdbg("ERROR: RECVR1 for ACMD51 failed: %d\n", ret);
+      SDIO_CANCEL(priv->dev);
       return ret;
     }
 
@@ -1254,6 +1255,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       fdbg("ERROR: mmcsd_recvR1 for CMD17 failed: %d\n", ret);
+      SDIO_CANCEL(priv->dev);
       return ret;
     }
 
@@ -1359,6 +1361,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
   if (ret != OK)
     {
       fdbg("ERROR: mmcsd_recvR1 for CMD18 failed: %d\n", ret);
+      SDIO_CANCEL(priv->dev);
       return ret;
     }
 
