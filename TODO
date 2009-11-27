@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 4, 2009)
+NuttX TODO List (Last updated November 25, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -26,7 +26,7 @@ NuttX TODO List (Last updated November 4, 2009)
   (8)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (3)  ARM/LM3S6918 (arch/arm/src/lm3s/)
-  (5)  ARM/STM32 (arch/arm/src/stm32/)
+  (4)  ARM/STM32 (arch/arm/src/stm32/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -645,17 +645,9 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
 o ARM/STM32 (arch/arm/src/stm32/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: DMA subsystem is untested.
-  Status:      Open
-  Priority:    Low -- for now
-
   Description: NOR Flash driver and FTL layer to support a file system.
   Status:      Open
   Priority:    Low
-
-  Description: MMC/SD SDIO driver needed.
-  Status:      Open
-  Priority:    Medium
 
   Description  A USB device-side driver is in place but not well tested.  At
                present, the examples/usbserial test sometimes fails.  The situation
@@ -679,8 +671,14 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Priority:    Medium-High
   
   Description: FSMC external memory support is untested
-  Status:      Opon
+  Status:      Open
   Priority:    Low
+
+  Description: DMA logic needs to be extended.  DMA2, Channel 5, will not work
+               because the DMA2 channels 4 & 5 share the same interrupt.
+  Status:      Open
+  Priority:    Low until someone needs DMA1, Channel 5 (ADC3, UART4_TX, TIM5_CH1, or
+               TIM8_CH2).
 
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
