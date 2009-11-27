@@ -298,7 +298,7 @@ static int stm32_dmainterrupt(int irq, void *context)
     }
   dmach = &g_dma[chndx];
 
-  /* Get the interrupt status (for this channel only) */
+  /* Get the interrupt status (for this channel only) -- not currently used */
 
   isr = dmabase_getreg(dmach, STM32_DMA_ISR_OFFSET) & DMA_ISR_CHAN_MASK(dmach->chan);
 
@@ -531,10 +531,29 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, boole
 }
 
 /****************************************************************************
- * Name: stm32_dmadump
+ * Name: stm32_dmastop
  *
  * Description:
- *   Dump DMA register contents
+ *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
+ *   reset and stm32_dmasetup() must be called before stm32_dmastart() can be
+ *   called again
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *
+ ****************************************************************************/
+
+void stm32_dmastop(DMA_HANDLE handle)
+{
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
+  stm32_dmachandisable(dmach);
+}
+
+/****************************************************************************
+ * Name: stm32_dmasample
+ *
+ * Description:
+ *   Sample DMA register contents
  *
  * Assumptions:
  *   - DMA handle allocated by stm32_dmachannel()
@@ -542,31 +561,45 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, boole
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void stm32_dmadump(DMA_HANDLE handle, const char *msg)
+void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs)
+{
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
+  irqstate_t flags;
+
+  flags       = irqsave();
+  regs->isr   = dmabase_getreg(dmach, STM32_DMA_ISR_OFFSET);
+  regs->ccr   = dmachan_getreg(dmach, STM32_DMACHAN_CCR_OFFSET);
+  regs->cndtr = dmachan_getreg(dmach, STM32_DMACHAN_CNDTR_OFFSET);
+  regs->cpar  = dmachan_getreg(dmach, STM32_DMACHAN_CPAR_OFFSET);
+  regs->cmar  = dmachan_getreg(dmach, STM32_DMACHAN_CMAR_OFFSET);
+  irqrestore(flags);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_dmadump
+ *
+ * Description:
+ *   Dump previously sampled DMA register contents
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_DMA
+void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
+                   const char *msg)
 {
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   uint32 dmabase = DMA_BASE(dmach->base);
-  irqstate_t flags;
-  uint32 addr;
 
-  dmalldbg("%s: base: %08x Channel base: %08x \n", msg, dmabase, dmach->base);
-
-  flags = irqsave();
-  addr = dmabase + STM32_DMA_ISR_OFFSET;
-  dmalldbg("  ISRC[%08x]: %08x\n", addr, getreg32(addr));
-
-  addr = dmach->base + STM32_DMACHAN_CCR_OFFSET;
-  dmalldbg("   CCR[%08x]: %08x\n", addr, getreg32(addr));
-
-  addr = dmach->base + STM32_DMACHAN_CNDTR_OFFSET;
-  dmalldbg(" CNDTR[%08x]: %08x\n", addr, getreg32(addr));
-
-  addr = dmach->base + STM32_DMACHAN_CPAR_OFFSET;
-  dmalldbg("  CPAR[%08x]: %08x\n", addr, getreg32(addr));
-
-  addr = dmach->base + STM32_DMACHAN_CMAR_OFFSET;
-  dmalldbg("  CMAR[%08x]: %08x\n", addr, getreg32(addr));
-  irqrestore(flags);
+  dmadbg("%s: base: %08x Channel base: %08x \n", msg, dmabase, dmach->base);
+  dmadbg("  ISRC[%08x]: %08x\n", dmabase + STM32_DMA_ISR_OFFSET, regs->isr);
+  dmadbg("   CCR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CCR_OFFSET, regs->ccr);
+  dmadbg(" CNDTR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CNDTR_OFFSET, regs->cndtr);
+  dmadbg("  CPAR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CPAR_OFFSET, regs->cpar);
+  dmadbg("  CMAR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CMAR_OFFSET, regs->cmar);
 }
 #endif
 

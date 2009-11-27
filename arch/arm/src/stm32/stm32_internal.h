@@ -176,6 +176,17 @@
 typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, ubyte isr, void *arg);
 
+#ifdef CONFIG_DEBUG_DMA
+struct stm32_dmaregs_s
+{
+  uint32 isr;
+  uint32 ccr;
+  uint32 cndtr;
+  uint32 cpar;
+  uint32 cmar;
+};
+#endif
+
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
@@ -353,10 +364,25 @@ EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
                            void *arg, boolean half);
 
 /****************************************************************************
- * Name: stm32_dmadump
+ * Name: stm32_dmastop
  *
  * Description:
- *   Dump DMA register contents
+ *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
+ *   reset and stm32_dmasetup() must be called before stm32_dmastart() can be
+ *   called again
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *
+ ****************************************************************************/
+
+EXTERN void stm32_dmastop(DMA_HANDLE handle);
+
+/****************************************************************************
+ * Name: stm32_dmasample
+ *
+ * Description:
+ *   Sample DMA register contents
  *
  * Assumptions:
  *   - DMA handle allocated by stm32_dmachannel()
@@ -364,9 +390,27 @@ EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void stm32_dmadump(DMA_HANDLE handle, const char *msg);
+EXTERN void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
 #else
-#  define stm32_dmadump(handle)
+#  define stm32_dmasample(handle,regs)
+#endif
+
+/****************************************************************************
+ * Name: stm32_dmadump
+ *
+ * Description:
+ *   Dump previously sampled DMA register contents
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_DMA
+EXTERN void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
+                          const char *msg);
+#else
+#  define stm32_dmadump(handle,regs,msg)
 #endif
 
 /************************************************************************************
