@@ -162,15 +162,22 @@
 #define SDIO_WAITALL_ICR   (SDIO_ICR_CMDSENTC|SDIO_ICR_CTIMEOUTC|\
                             SDIO_ICR_CCRCFAILC|SDIO_ICR_CMDRENDC)
 
-/* DMA Debug Support */
+/* Register logging support */
 
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-#  define DMANDX_BEFORE_SETUP  0
-#  define DMANDX_BEFORE_ENABLE 1
-#  define DMANDX_AFTER_SETUP   2
-#  define DMANDX_END_TRANSFER  3
-#  define DMANDX_DMA_CALLBACK  4
-#  define DMA_NSAMPLES         5
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#  if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+#    define SAMPLENDX_BEFORE_SETUP  0
+#    define SAMPLENDX_BEFORE_ENABLE 1
+#    define SAMPLENDX_AFTER_SETUP   2
+#    define SAMPLENDX_END_TRANSFER  3
+#    define SAMPLENDX_DMA_CALLBACK  4
+#    define DEBUG_NSAMPLES          5
+#  else
+#    define SAMPLENDX_BEFORE_SETUP  0
+#    define SAMPLENDX_AFTER_SETUP   1
+#    define SAMPLENDX_END_TRANSFER  2
+#    define DEBUG_NSAMPLES          3
+#  endif
 #endif
 
 /****************************************************************************
@@ -215,6 +222,31 @@ struct stm32_dev_s
 #endif
 };
 
+/* Register logging support */
+
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+struct stm32_sdioregs_s
+{
+  ubyte  power;
+  uint16 clkcr;
+  uint16 dctrl;
+  uint32 dtimer;
+  uint32 dlen;
+  uint32 dcount;
+  uint32 sta;
+  uint32 mask;
+  uint32 fifocnt;
+};
+
+struct stm32_sampleregs_s
+{
+  struct stm32_sdioregs_s sdio;
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+  struct stm32_dmaregs_s  dma;
+#endif
+};
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -232,16 +264,22 @@ static inline uint32 stm32_getpwrctrl(void);
 
 /* DMA Helpers **************************************************************/
 
-#define       stm32_dmasampleinit()
-#define       stm32_dmadumpsamples(priv)
+
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+static void   stm32_sampleinit(void);
+static void   stm32_sdiosample(struct stm32_sdioregs_s *regs);
+static void   stm32_sample(struct stm32_dev_s *priv, int index);
+static void   stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg);
+static void   stm32_dumpsample(struct stm32_dev_s *priv,
+                struct stm32_sampleregs_s *regs, const char *msg);
+static void   stm32_dumpsamples(struct stm32_dev_s *priv);
+#else
+#  define     stm32_sampleinit()
+#  define     smt32_sample(priv,index)
+#  define     stm32_dumpsamples(priv)
+#endif
 
 #ifdef CONFIG_SDIO_DMA
-#ifdef CONFIG_DEBUG_DMA
-# undef      stm32_dmasampleinit
-# undef      stm32_dmadumpsamples
-static void  stm32_dmasampleinit(void);
-static void  stm32_dmadumpsamples(struct stm32_dev_s *priv);
-#endif
 static void  stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg);
 #endif
 
@@ -354,10 +392,10 @@ struct stm32_dev_s g_sdiodev =
   },
 };
 
-/* DMA Debug Support */
+/* Register logging support */
 
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-static struct stm32_dmaregs_s g_dmaregs[DMA_NSAMPLES];
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
 #endif
 
 /****************************************************************************
@@ -542,36 +580,137 @@ static inline uint32 stm32_getpwrctrl(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_dmasampleinit
+ * Name: stm32_sampleinit
  *
  * Description:
  *   Setup prior to collecting DMA samples
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-static void  stm32_dmasampleinit(void)
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+static void stm32_sampleinit(void)
 {
-   memset(g_dmaregs, 0xff, DMA_NSAMPLES * sizeof(struct stm32_dmaregs_s));
+  memset(g_sampleregs, 0xff, DEBUG_NSAMPLES * sizeof(struct stm32_sampleregs_s));
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_dmadumpsamples
+ * Name: stm32_sdiosample
  *
  * Description:
- *   Dump sampled DMA data
+ *   Sample SDIO registers
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-static void  stm32_dmadumpsamples(struct stm32_dev_s *priv)
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+static void stm32_sdiosample(struct stm32_sdioregs_s *regs)
 {
-  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_BEFORE_SETUP],  "Before DMA setup");
-  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_BEFORE_ENABLE], "Before DMA enable");
-  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_AFTER_SETUP],   "After DMA setup");
-  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_END_TRANSFER],  "End of transfer");
-  stm32_dmadump(priv->dma, &g_dmaregs[DMANDX_DMA_CALLBACK],  "DMA Callback");
+  regs->power   = (ubyte)getreg32(STM32_SDIO_POWER);
+  regs->clkcr   = (uint16)getreg32(STM32_SDIO_CLKCR);
+  regs->dctrl   = (uint16)getreg32(STM32_SDIO_DCTRL);
+  regs->dtimer  = getreg32(STM32_SDIO_DTIMER);
+  regs->dlen    = getreg32(STM32_SDIO_DLEN);
+  regs->dcount  = getreg32(STM32_SDIO_DCOUNT);
+  regs->sta     = getreg32(STM32_SDIO_STA);
+  regs->mask    = getreg32(STM32_SDIO_MASK);
+  regs->fifocnt = getreg32(STM32_SDIO_FIFOCNT);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_sample
+ *
+ * Description:
+ *   Sample SDIO/DMA registers
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+static void stm32_sample(struct stm32_dev_s *priv, int index)
+{
+  struct stm32_sampleregs_s *regs = &g_sampleregs[index];
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+  if (priv->dmamode)
+    {
+      stm32_dmasample(priv->dma, &regs->dma);
+    }
+#endif
+  stm32_sdiosample(&regs->sdio);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdiodump
+ *
+ * Description:
+ *   Dump one register sample
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
+{
+  fdbg("SDIO Registers: %s\n", msg);
+  fdbg("  POWER[%08x]: %08x\n", STM32_SDIO_POWER,   regs->power);
+  fdbg("  CLKCR[%08x]: %08x\n", STM32_SDIO_CLKCR,   regs->clkcr);
+  fdbg("  DCTRL[%08x]: %08x\n", STM32_SDIO_DCTRL,   regs->dctrl);
+  fdbg(" DTIMER[%08x]: %08x\n", STM32_SDIO_DTIMER,  regs->dtimer);
+  fdbg("   DLEN[%08x]: %08x\n", STM32_SDIO_DLEN,    regs->dlen);
+  fdbg(" DCOUNT[%08x]: %08x\n", STM32_SDIO_DCOUNT,  regs->dcount);
+  fdbg("    STA[%08x]: %08x\n", STM32_SDIO_STA,     regs->sta);
+  fdbg("   MASK[%08x]: %08x\n", STM32_SDIO_MASK,    regs->mask);
+  fdbg("FIFOCNT[%08x]: %08x\n", STM32_SDIO_FIFOCNT, regs->fifocnt);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_dumpsample
+ *
+ * Description:
+ *   Dump one register sample
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+static void stm32_dumpsample(struct stm32_dev_s *priv,
+                             struct stm32_sampleregs_s *regs, const char *msg)
+{
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+  if (priv->dmamode)
+    {
+      stm32_dmadump(priv->dma, &regs->dma, msg);
+    }
+#endif
+  stm32_sdiodump(&regs->sdio, msg);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_dumpsamples
+ *
+ * Description:
+ *   Dump all sampled register data
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+static void  stm32_dumpsamples(struct stm32_dev_s *priv)
+{
+  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+  if (priv->dmamode)
+    {
+      stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
+    }
+#endif
+  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
+  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+  if (priv->dmamode)
+    {
+      stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
+    }
+#endif
 }
 #endif
 
@@ -597,7 +736,7 @@ static void stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg)
    * this callback.
    */
 
-  stm32_dmasample(handle, &g_dmaregs[DMANDX_DMA_CALLBACK]);
+  stm32_sample((struct stm32_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
 }
 #endif
 
@@ -679,7 +818,7 @@ static void stm32_datadisable(void)
   /* Disable the data path */
 
   putreg32(SDIO_DTIMER_DATATIMEOUT, STM32_SDIO_DTIMER); /* Reset DTIMER */
-  putreg32(0,              STM32_SDIO_DLEN);   /* Reset DLEN */
+  putreg32(0,                       STM32_SDIO_DLEN);   /* Reset DLEN */
 
   /* Reset DCTRL DTEN, DTDIR, DTMODE, DMAEN, and DBLOCKSIZE fields */
 
@@ -910,7 +1049,7 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
     {
       /* DMA debug instrumentation */
 
-      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_END_TRANSFER]);
+      stm32_sample(priv, SAMPLENDX_END_TRANSFER);
 
       /* Make sure that the DMA is stopped (it will be stopped automatically
        * on normal transfers, but not necessarily when the transfer terminates
@@ -1426,6 +1565,8 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
   /* Reset the DPSM configuration */
 
   stm32_datadisable();
+  stm32_sampleinit();
+  stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
   /* Save the destination buffer information for use by the interrupt handler */
 
@@ -1443,6 +1584,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
   /* And enable interrupts */
 
   stm32_configxfrints(priv, SDIO_RECV_MASK);
+  stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
 
@@ -1477,6 +1619,8 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
   /* Reset the DPSM configuration */
 
   stm32_datadisable();
+  stm32_sampleinit();
+  stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
   /* Save the source buffer information for use by the interrupt handler */
 
@@ -1494,6 +1638,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
   /* Enable TX interrrupts */
 
   stm32_configxfrints(priv, SDIO_SEND_MASK);
+  stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
 
@@ -1982,7 +2127,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
   /* Disable event-related interrupts */
 
   stm32_configwaitints(priv, 0, 0, 0);
-  stm32_dmadumpsamples(priv);
+  stm32_dumpsamples(priv);
   return wkupevent;
 }
 
@@ -2117,8 +2262,8 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
 
   if (priv->widebus)
     {
-      stm32_dmasampleinit();
-      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_BEFORE_SETUP]);
+      stm32_sampleinit();
+      stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
       /* Save the destination buffer information for use by the interrupt handler */
 
@@ -2141,9 +2286,9 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
  
      /* Start the DMA */
 
-      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_BEFORE_ENABLE]);
+      stm32_sample(priv, SAMPLENDX_BEFORE_ENABLE);
       stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
-      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_AFTER_SETUP]);
+      stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
       ret = OK;
     }
   return ret;
@@ -2179,7 +2324,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32)buffer & 3) == 0);
-flldbg("buffer: %p buflen: %d\n", buffer, buflen); // REMOVE ME
+
   /* Reset the DPSM configuration */
 
   stm32_datadisable();
@@ -2188,8 +2333,8 @@ flldbg("buffer: %p buflen: %d\n", buffer, buflen); // REMOVE ME
 
   if (priv->widebus)
     {
-      stm32_dmasampleinit();
-      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_BEFORE_SETUP]);
+      stm32_sampleinit();
+      stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
       /* Save the source buffer information for use by the interrupt handler */
 
@@ -2207,13 +2352,13 @@ flldbg("buffer: %p buflen: %d\n", buffer, buflen); // REMOVE ME
       stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32)buffer,
                      (buflen + 3) >> 2, SDIO_TXDMA32_CONFIG);
 
-      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_BEFORE_ENABLE]);
+      stm32_sample(priv, SAMPLENDX_BEFORE_ENABLE);
       putreg32(1, SDIO_DCTRL_DMAEN_BB);
 
       /* Start the DMA */
 
       stm32_dmastart(priv->dma, stm32_dmacallback, priv, FALSE);
-      stm32_dmasample(priv->dma, &g_dmaregs[DMANDX_AFTER_SETUP]);
+      stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
 
       /* Enable TX interrrupts */
 
