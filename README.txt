@@ -1,9 +1,24 @@
 README
 ^^^^^^
 
+  o Installation
   o Configuring NuttX
   o Building NuttX
   o Documentation
+
+INSTALLATION
+^^^^^^^^^^^^
+
+Download and unpack the NuttX tarball.  If you are reading this, then you
+have probably already done that.  After unpacking, you will end up with a
+directory called nuttx-version (where version is the NuttX version number).
+You might want to rename that directory nuttx to match the various instructions
+in the documentation and some scripts in the source tree.
+
+That nuttx build directory should reside in a path that contains no spaces
+in the higher level directory names.  For example, under Cygwin, your home
+directory might be formed from your first and last names like: "/home/First Last".
+That will cause strange errors when the make system tries to build.
 
 CONFIGURING NUTTX
 ^^^^^^^^^^^^^^^^^
