@@ -232,13 +232,15 @@ static inline uint32 stm32_getpwrctrl(void);
 
 /* DMA Helpers **************************************************************/
 
+#define       stm32_dmasampleinit()
+#define       stm32_dmadumpsamples(priv)
+
 #ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_DEBUG_DMA
+# undef      stm32_dmasampleinit
+# undef      stm32_dmadumpsamples
 static void  stm32_dmasampleinit(void);
 static void  stm32_dmadumpsamples(struct stm32_dev_s *priv);
-#else
-#  define    stm32_dmasampleinit()
-#  define    stm32_dmadumpsamples(priv)
 #endif
 static void  stm32_dmacallback(DMA_HANDLE handle, ubyte isr, void *arg);
 #endif
