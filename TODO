@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 25, 2009)
+NuttX TODO List (Last updated November 29, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -26,7 +26,7 @@ NuttX TODO List (Last updated November 25, 2009)
   (8)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (3)  ARM/LM3S6918 (arch/arm/src/lm3s/)
-  (4)  ARM/STM32 (arch/arm/src/stm32/)
+  (5)  ARM/STM32 (arch/arm/src/stm32/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -679,6 +679,14 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Status:      Open
   Priority:    Low until someone needs DMA1, Channel 5 (ADC3, UART4_TX, TIM5_CH1, or
                TIM8_CH2).
+
+  Desription:  I am unable to access a 2Gb SanDisk microSD card (in adaptor) on the
+               the STM3210E-EVAL board.  The card reports that it is a SDV1.x card
+               with a 1Kb block size, but the CMD16 to set the block length to
+               1024 fails.
+  Status:      Open
+  Priority:    Uncertain.  I don't this is a bug, I think I just don't understand
+               how to work with this type of SD card.
 
 o pjrc-8052 / MCS51 (arch/pjrc-8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

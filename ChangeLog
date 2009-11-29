@@ -960,10 +960,6 @@
 	* drivers/mmcsd/mmcsd_sdio.c -- Provides a an SDIO-based MMC/SD driver.
 	* arch/arm/src/stm32/stm32_sdio.c -- Provides an STM32 implementation of
 	  the SDIO interface defined in include/nuttx/sdio.h.
-
-	  NOTE: On initial check-in, mmcsd_sdio.c and stm32_sdio.c are merely
-	  skeleton frameworks for the driver.
-
 	* fs/fs_mount.c -- Correct error handling logic.  If the bind() method
 	  fails, then a reserved node is left in the tree.  This causes subsequent
 	  attempts to mount at the location to fail (reporting that the node

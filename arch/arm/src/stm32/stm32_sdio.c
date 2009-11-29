@@ -89,6 +89,10 @@
 #  define CONFIG_SDIO_DMAPRIO    DMA_CCR_PRIMED
 #endif
 
+#if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
+#  undef CONFIG_SDIO_XFRDEBUG
+#endif
+
 /* Friendly CLKCR bit re-definitions ****************************************/
 
 #define SDIO_CLKCR_RISINGEDGE    (0)
@@ -147,7 +151,8 @@
 /* Event waiting interrupt mask bits */
 
 #define SDIO_CMDDONE_STA   (SDIO_STA_CMDSENT)
-#define SDIO_RESPDONE_STA  (SDIO_STA_CTIMEOUT|SDIO_STA_CCRCFAIL|SDIO_STA_CMDREND)
+#define SDIO_RESPDONE_STA  (SDIO_STA_CTIMEOUT|SDIO_STA_CCRCFAIL|\
+                            SDIO_STA_CMDREND)
 #define SDIO_XFRDONE_STA   (0)
 
 #define SDIO_CMDDONE_MASK  (SDIO_MASK_CMDSENTIE)
@@ -156,15 +161,18 @@
 #define SDIO_XFRDONE_MASK  (0)
 
 #define SDIO_CMDDONE_ICR   (SDIO_ICR_CMDSENTC)
-#define SDIO_RESPDONE_ICR  (SDIO_ICR_CTIMEOUTC|SDIO_ICR_CCRCFAILC|SDIO_ICR_CMDRENDC)
-#define SDIO_XFRDONE_ICR   (0)
+#define SDIO_RESPDONE_ICR  (SDIO_ICR_CTIMEOUTC|SDIO_ICR_CCRCFAILC|\
+                            SDIO_ICR_CMDRENDC)
+#define SDIO_XFRDONE_ICR   (SDIO_ICR_DATAENDC|SDIO_ICR_DCRCFAILC|\
+                            SDIO_ICR_DTIMEOUTC|SDIO_ICR_RXOVERRC|\
+                            SDIO_ICR_TXUNDERRC|SDIO_ICR_STBITERRC)
 
-#define SDIO_WAITALL_ICR   (SDIO_ICR_CMDSENTC|SDIO_ICR_CTIMEOUTC|\
-                            SDIO_ICR_CCRCFAILC|SDIO_ICR_CMDRENDC)
+#define SDIO_WAITALL_ICR   (SDIO_CMDDONE_ICR|SDIO_RESPDONE_ICR|\
+                            SDIO_XFRDONE_ICR)
 
 /* Register logging support */
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 #  if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_BEFORE_ENABLE 1
@@ -224,7 +232,7 @@ struct stm32_dev_s
 
 /* Register logging support */
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 struct stm32_sdioregs_s
 {
   ubyte  power;
@@ -265,7 +273,7 @@ static inline uint32 stm32_getpwrctrl(void);
 /* DMA Helpers **************************************************************/
 
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 static void   stm32_sampleinit(void);
 static void   stm32_sdiosample(struct stm32_sdioregs_s *regs);
 static void   stm32_sample(struct stm32_dev_s *priv, int index);
@@ -275,7 +283,7 @@ static void   stm32_dumpsample(struct stm32_dev_s *priv,
 static void   stm32_dumpsamples(struct stm32_dev_s *priv);
 #else
 #  define     stm32_sampleinit()
-#  define     smt32_sample(priv,index)
+#  define     stm32_sample(priv,index)
 #  define     stm32_dumpsamples(priv)
 #endif
 
@@ -394,7 +402,7 @@ struct stm32_dev_s g_sdiodev =
 
 /* Register logging support */
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
 #endif
 
@@ -587,7 +595,7 @@ static inline uint32 stm32_getpwrctrl(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 static void stm32_sampleinit(void)
 {
   memset(g_sampleregs, 0xff, DEBUG_NSAMPLES * sizeof(struct stm32_sampleregs_s));
@@ -602,7 +610,7 @@ static void stm32_sampleinit(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 static void stm32_sdiosample(struct stm32_sdioregs_s *regs)
 {
   regs->power   = (ubyte)getreg32(STM32_SDIO_POWER);
@@ -625,7 +633,7 @@ static void stm32_sdiosample(struct stm32_sdioregs_s *regs)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 static void stm32_sample(struct stm32_dev_s *priv, int index)
 {
   struct stm32_sampleregs_s *regs = &g_sampleregs[index];
@@ -647,7 +655,7 @@ static void stm32_sample(struct stm32_dev_s *priv, int index)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
 {
   fdbg("SDIO Registers: %s\n", msg);
@@ -671,7 +679,7 @@ static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 static void stm32_dumpsample(struct stm32_dev_s *priv,
                              struct stm32_sampleregs_s *regs, const char *msg)
 {
@@ -693,7 +701,7 @@ static void stm32_dumpsample(struct stm32_dev_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FS) && defined(CONFIG_DEBUG_VERBOSE)
+#ifdef CONFIG_SDIO_XFRDEBUG
 static void  stm32_dumpsamples(struct stm32_dev_s *priv)
 {
   stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
@@ -1022,7 +1030,9 @@ static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
  * Name: stm32_endtransfer
  *
  * Description:
- *   Terminate a transfer with the provided status
+ *   Terminate a transfer with the provided status.  This function is called
+ *   only from the SDIO interrupt handler when end-of-transfer conditions
+ *   are detected.
  *
  * Input Parameters:
  *   priv   - An instance of the SDIO device interface
@@ -1041,6 +1051,10 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
   /* Disable all transfer related interrupts */
 
   stm32_configxfrints(priv, 0);
+
+  /* Clearing pending interrupt status on all transfer related interrupts */
+ 
+  putreg32(SDIO_XFRDONE_ICR, STM32_SDIO_ICR);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -1160,7 +1174,6 @@ static int stm32_interrupt(int irq, void *context)
 
               /* Then terminate the transfer */
 
-              putreg32(SDIO_ICR_DATAENDC, STM32_SDIO_ICR);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
             }
 
@@ -1170,7 +1183,6 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              putreg32(SDIO_ICR_DCRCFAILC, STM32_SDIO_ICR);
               flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
             }
@@ -1181,7 +1193,6 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              putreg32(SDIO_ICR_DTIMEOUTC, STM32_SDIO_ICR);
               flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
             }
@@ -1192,7 +1203,6 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              putreg32(SDIO_ICR_RXOVERRC, STM32_SDIO_ICR);
               flldbg("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
             }
@@ -1203,7 +1213,6 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              putreg32(SDIO_ICR_TXUNDERRC, STM32_SDIO_ICR);
               flldbg("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
             }
@@ -1214,7 +1223,6 @@ static int stm32_interrupt(int irq, void *context)
             {
               /* Terminate the transfer with an error */
 
-              putreg32(SDIO_ICR_STBITERRC, STM32_SDIO_ICR);
               flldbg("ERROR: Start bit, remaining: %d\n", priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
            }
@@ -1667,6 +1675,12 @@ static int stm32_cancel(FAR struct sdio_dev_s *dev)
 
   stm32_configxfrints(priv, 0);
   stm32_configwaitints(priv, 0, 0, 0);
+
+  /* Clearing pending interrupt status on all transfer- and event- related
+   * interrupts
+   */
+ 
+  putreg32(SDIO_WAITALL_ICR, STM32_SDIO_ICR);
 
   /* Cancel any watchdog timeout */
 
