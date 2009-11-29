@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 25, 2009</p>
+      <p>Last Updated: November 29, 2009</p>
     </td>
   </tr>
 </table>
@@ -1608,10 +1608,6 @@ nuttx-4.14 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* drivers/mmcsd/mmcsd_sdio.c -- Provides a an SDIO-based MMC/SD driver.
 	* arch/arm/src/stm32/stm32_sdio.c -- Provides an STM32 implementation of
 	  the SDIO interface defined in include/nuttx/sdio.h.
-
-	  NOTE: On initial check-in, mmcsd_sdio.c and stm32_sdio.c are merely
-	  skeleton frameworks for the driver.
-
 	* fs/fs_mount.c -- Correct error handling logic.  If the bind() method
 	  fails, then a reserved node is left in the tree.  This causes subsequent
 	  attempts to mount at the location to fail (reporting that the node
