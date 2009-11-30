@@ -1611,8 +1611,8 @@ nuttx-4.14 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* fs/fs_mount.c -- Correct error handling logic.  If the bind() method
 	  fails, then a reserved node is left in the tree.  This causes subsequent
 	  attempts to mount at the location to fail (reporting that the node
-	  already exists).  This is a probably for block drivers for removable
-	  media: The bind method could fail repeatedly until media is asserted.
+	  already exists).  This is a problem for block drivers for removable
+	  media: The bind method could fail repeatedly until media is inserted.
 	* arch/arm/src/stm32/chip.h & stm32_dma.c -- Fixed several definitions
 	  that can cause compilation errors when DMA2 is enabled.
 	* arch/arm/src/stm32/stm32_dma.c - Integrated and debugged STM32 DMA
@@ -1620,6 +1620,10 @@ nuttx-4.14 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* configs/stm3210e-eval/usbstorage - Add a configuration to exercise
 	  the STM32 with the USB mass storage device class example
 	  (examples/usbstorage).
+	* configs/mcu123-lpc214x/up_usbstrg - Move LPC-specific code from
+	  examples/usbstorage to configs/mcu123-lpc214x.
+	* configs/stm321e-eval/up_usbstrg - Add STM32-specific logic for the
+	  examples/usbstorage test.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
