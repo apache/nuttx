@@ -969,6 +969,9 @@
 	  that can cause compilation errors when DMA2 is enabled.
 	* arch/arm/src/stm32/stm32_dma.c - Integrated and debugged STM32 DMA
 	  functionality that was added in 0.4.12.
+	* configs/stm3210e-eval/usbstorage - Add a configuration to exercise
+	  the STM32 with the USB mass storage device class example
+	  (examples/usbstorage).
 
 
 
