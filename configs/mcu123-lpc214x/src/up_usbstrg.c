@@ -1,7 +1,7 @@
 /****************************************************************************
- * examples/usbstorage/usbstrg_lpc214x.c
+ * configs/mcu123-lpc214x/src/up_usbstrg.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Configure and register the LPC214x MMC/SD SPI block driver.
@@ -49,13 +49,15 @@
 #include <nuttx/spi.h>
 #include <nuttx/mmcsd.h>
 
-#include "usbstrg.h"
-
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
+#ifndef CONFIG_EXAMPLES_USBSTRG_DEVMINOR1
+#  define CONFIG_EXAMPLES_USBSTRG_DEVMINOR1 0
+#endif
 
 /* PORT and SLOT number probably depend on the board configuration */
 
@@ -68,6 +70,27 @@
    /* Add configuration for new LPC214x boards here */
 #  error "Unrecognized LPC214x board"
 #endif
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) lib_lowprintf(__VA_ARGS__)
+#    define msgflush()
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#    define msgflush() fflush(stdout)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG
+#    define message lib_lowprintf
+#    define msgflush()
+#  else
+#    define message printf
+#    define msgflush() fflush(stdout)
+#  endif
+#endif
+
 
 /****************************************************************************
  * Public Functions

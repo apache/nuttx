@@ -39,10 +39,6 @@
 ASRCS	= 
 CSRCS	= usbstrg_main.c
 
-ifeq ($(CONFIG_ARCH_CHIP),lpc214x)
-CSRCS	+= usbstrg_lpc214x.c
-endif
-
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
 COBJS	= $(CSRCS:.c=$(OBJEXT))
 

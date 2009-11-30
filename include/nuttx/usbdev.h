@@ -278,6 +278,7 @@ struct usbdev_s
 
 /* USB Device Class Implementations *************************************************/
 
+struct usbdevclass_driver_s;
 struct usbdevclass_driverops_s
 {
   int  (*bind)(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_s *driver);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/usbstorage/usbstrg.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+#ifndef __EXAMPLES_USBSTORAGE_USBSTRG_H
+#define __EXAMPLES_USBSTORAGE_USBSTRG_H
 
 /****************************************************************************
  * Included Files
@@ -106,8 +109,12 @@
  * Name: usbstrg_archinitialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform architecture specific initialization.  This function must
+ *   configure the block device to export via USB.  This function must be
+ *   provided by architecture-specific logic in order to use this example.
  *
  ****************************************************************************/
 
 extern int usbstrg_archinitialize(void);
+
+#endif /* __EXAMPLES_USBSTORAGE_USBSTRG_H */
