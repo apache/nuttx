@@ -418,3 +418,8 @@ Where <subdir> is one of the following:
     This configuration directory exercises the USB serial class
     driver at examples/usbserial.  See examples/README.txt for
     more information.
+
+  usbstorage:
+    This configuration directory exercises the USB mass storage
+    class driver at examples/usbstorage.  See examples/README.txt for
+    more information.
