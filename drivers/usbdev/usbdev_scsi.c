@@ -2544,12 +2544,12 @@ void *usbstrg_workerthread(void *arg)
               usbstrg_resetconfig(priv);
             }
 
-         /* These events require that a new configuration be established */
+          /* These events require that a new configuration be established */
 
-         if ((eventset & (USBSTRG_EVENT_CFGCHANGE|USBSTRG_EVENT_IFCHANGE)) != 0)
-           {
-             usbstrg_setconfig(priv, priv->thvalue);
-           }
+          if ((eventset & (USBSTRG_EVENT_CFGCHANGE|USBSTRG_EVENT_IFCHANGE)) != 0)
+            {
+              usbstrg_setconfig(priv, priv->thvalue);
+            }
 
           /* These events required that we send a deferred EP0 setup response */
 

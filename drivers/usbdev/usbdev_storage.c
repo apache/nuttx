@@ -1073,7 +1073,7 @@ static void usbstrg_lununinitialize(struct usbstrg_lun_s *lun)
  *
  * Description:
  *   Set the device configuration by allocating and configuring endpoints and
- *   by allocating and queue read and write requests.
+ *   by allocating and queuing read and write requests.
  *
  ****************************************************************************/
 
@@ -1101,7 +1101,7 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
       /* Already configured -- Do nothing */
 
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_ALREADYCONFIGURED), 0);
-      return 0;
+      return OK;
     }
 
   /* Discard the previous configuration data */
@@ -1113,7 +1113,7 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
   if (config == USBSTRG_CONFIGIDNONE)
     {
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_CONFIGNONE), 0);
-      return 0;
+      return OK;
     }
 
   /* We only accept one configuration */
