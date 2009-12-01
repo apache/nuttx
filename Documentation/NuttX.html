@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 30, 2009</p>
+      <p>Last Updated: December 1, 2009</p>
     </td>
   </tr>
 </table>
@@ -1624,6 +1624,9 @@ nuttx-4.14 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  examples/usbstorage to configs/mcu123-lpc214x.
 	* configs/stm321e-eval/up_usbstrg - Add STM32-specific logic for the
 	  examples/usbstorage test.
+	* arch/arm/src/stm32/stm32_usbdev.c - Fix bugs in STM32 USB device-side
+	  driver:  (1) Need to disconnect after reset received, (2) Status setup
+	  to recover from stall on TX endpoint.
 
 pascal-0.1.3 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
