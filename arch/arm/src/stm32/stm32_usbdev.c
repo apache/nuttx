@@ -418,7 +418,7 @@ static int    stm32_wrrequest(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
 static int    stm32_rdrequest(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
-static void   stm32_cancelrequests(struct stm32_ep_s *privep, int status);
+static void   stm32_cancelrequests(struct stm32_ep_s *privep);
 
 /* Interrupt level processing ***********************************************/
 
@@ -699,7 +699,8 @@ static inline uint16 stm32_geteptxaddr(ubyte epno)
 static void stm32_seteprxcount(ubyte epno, uint16 count) 
 {
   volatile uint32 *epaddr = (uint32*)STM32_USB_COUNT_RX(epno);
-  uint16  nblocks;
+  uint32 rxcount = 0;
+  uint16 nblocks;
 
   /* The upper bits of the RX COUNT value contain the size of allocated
    * RX buffer.  This is based on a block size of 2 or 32:
@@ -725,16 +726,17 @@ static void stm32_seteprxcount(ubyte epno, uint16 count)
 
       nblocks = (count >> 5) - 1 ;
       DEBUGASSERT(nblocks <= 0x0f);
-      *epaddr = (uint32)((nblocks << USB_COUNT_RX_NUM_BLOCK_SHIFT) | USB_COUNT_RX_BL_SIZE);
+      rxcount = (uint32)((nblocks << USB_COUNT_RX_NUM_BLOCK_SHIFT) | USB_COUNT_RX_BL_SIZE);
     }
-  else
+  else if (count > 0)
     {
       /* Blocks of 2 (with 1 meaning one block of 2) */
 
       nblocks = (count + 1) >> 1;
       DEBUGASSERT(nblocks > 0 && nblocks < 0x1f);
-      *epaddr = (uint32)(nblocks << USB_COUNT_RX_NUM_BLOCK_SHIFT);
+      rxcount = (uint32)(nblocks << USB_COUNT_RX_NUM_BLOCK_SHIFT);
     }
+  *epaddr = rxcount;
 } 
 
 /****************************************************************************
@@ -1219,7 +1221,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
   if (!privreq)
     {
       /* There is no TX transfer in progress and no new pending TX
-       * requests to send... STALL the TX status.
+       * requests to send.
        */
 
       usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPINQEMPTY), 0);
@@ -1369,13 +1371,13 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
  * Name: stm32_cancelrequests
  ****************************************************************************/
 
-static void stm32_cancelrequests(struct stm32_ep_s *privep, int status)
+static void stm32_cancelrequests(struct stm32_ep_s *privep)
 {
   while (!stm32_rqempty(privep))
     {
       usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)),
                (stm32_rqpeek(privep))->req.xfrd);
-      stm32_reqcomplete(privep, status);
+      stm32_reqcomplete(privep, -ESHUTDOWN);
     }
 }
 
@@ -2690,7 +2692,7 @@ static int stm32_epdisable(struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity */
 
   flags = irqsave();
-  stm32_cancelrequests(privep, -ESHUTDOWN);
+  stm32_cancelrequests(privep);
 
   /* Disable TX; disable RX */
 
@@ -2878,7 +2880,7 @@ static int stm32_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   priv = privep->dev;
 
   flags = irqsave();
-  stm32_cancelrequests(privep, -ESHUTDOWN);
+  stm32_cancelrequests(privep);
   irqrestore(flags);
   return OK;
 }
@@ -2950,11 +2952,12 @@ static int stm32_epstall(struct usbdev_ep_s *ep, boolean resume)
 
               /* Restart any queued write requests */
 
-              if (!stm32_rqempty(privep))
-                {
-                  (void)stm32_wrrequest(priv, privep);
-                  stm32_seteptxstatus(epno, USB_EPR_STATTX_VALID);
-                }
+              priv->txstatus = USB_EPR_STATTX_NAK;
+              (void)stm32_wrrequest(priv, privep);
+
+              /* Set the new TX status */
+
+              stm32_seteptxstatus(epno, priv->txstatus);
             }
         }
       else
@@ -2973,6 +2976,8 @@ static int stm32_epstall(struct usbdev_ep_s *ep, boolean resume)
                 {
                   stm32_clrrxdtog(epno);
                 }
+
+              priv->rxstatus = USB_EPR_STATRX_VALID;
               stm32_seteprxstatus(epno, USB_EPR_STATRX_VALID);
             }
         }  
@@ -2989,12 +2994,14 @@ static int stm32_epstall(struct usbdev_ep_s *ep, boolean resume)
         {
           /* IN endpoint */ 
 
+          priv->txstatus = USB_EPR_STATTX_STALL;
           stm32_seteptxstatus(epno, USB_EPR_STATTX_STALL);
         }
       else
         {
           /* OUT endpoint */ 
 
+          priv->rxstatus = USB_EPR_STATRX_STALL;
           stm32_seteprxstatus(epno, USB_EPR_STATRX_STALL);
         }
     }
@@ -3215,6 +3222,12 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
 
   stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
 
+  /* Tell the class driver that we are disconnected.  The class driver
+   * should then accept any new configurations.
+   */
+
+  CLASS_DISCONNECT(priv->driver, &priv->usbdev);
+
   /* Reset the device state structure */
 
   priv->devstate  = DEVSTATE_IDLE;
@@ -3227,12 +3240,15 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
     {
       struct stm32_ep_s *privep = &priv->eplist[epno];
 
-      /* Cancel any queued write requests */
+      /* Cancel any queued requests.  Since they are canceled
+       * with status -ESHUTDOWN, then will not be requeued
+       * until the configuration is reset.  NOTE:  This should
+       * not be necessary... the CLASS_DISCONNECT above should
+       * result in the class implementation calling stm32_epdisable
+       * for each of its configured endpoints.
+       */
 
-      if (USB_ISEPIN(privep->ep.eplog))
-        {
-          stm32_cancelrequests(privep, -EPIPE);
-        }
+      stm32_cancelrequests(privep);
 
       /* Reset endpoint status */
 

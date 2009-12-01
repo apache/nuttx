@@ -976,3 +976,6 @@
 	  examples/usbstorage to configs/mcu123-lpc214x.
 	* configs/stm321e-eval/up_usbstrg - Add STM32-specific logic for the
 	  examples/usbstorage test.
+	* arch/arm/src/stm32/stm32_usbdev.c - Fix bugs in STM32 USB device-side
+	  driver:  (1) Need to disconnect after reset received, (2) Status setup
+	  to recover from stall on TX endpoint.
