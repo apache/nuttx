@@ -418,6 +418,7 @@ static int    stm32_wrrequest(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
 static int    stm32_rdrequest(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
+static void   stm32_cancelrequests(struct stm32_ep_s *privep, int status);
 
 /* Interrupt level processing ***********************************************/
 
@@ -1368,13 +1369,13 @@ static int stm32_rdrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
  * Name: stm32_cancelrequests
  ****************************************************************************/
 
-static void stm32_cancelrequests(struct stm32_ep_s *privep)
+static void stm32_cancelrequests(struct stm32_ep_s *privep, int status)
 {
   while (!stm32_rqempty(privep))
     {
       usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)),
                (stm32_rqpeek(privep))->req.xfrd);
-      stm32_reqcomplete(privep, -ESHUTDOWN);
+      stm32_reqcomplete(privep, status);
     }
 }
 
@@ -2225,12 +2226,10 @@ static int stm32_lpinterrupt(int irq, void *context)
 
   if ((istr & USB_ISTR_RESET) != 0)
     {
-      /* Wakeup interrupt received. Clear the WKUP interrupt status. The cause of
-       * the wakeup is indicated in the FNR register
-       */
+      /* Reset interrupt received. Clear the RESET interrupt status. */
 
       stm32_putreg(~USB_ISTR_RESET, STM32_USB_ISTR);
-      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_RESET), stm32_getreg(STM32_USB_FNR));
+      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_RESET), istr);
 
       /* Restore our power-up state and exit now because istr is no longer
        * valid.
@@ -2246,10 +2245,12 @@ static int stm32_lpinterrupt(int irq, void *context)
 
   if ((istr & USB_ISTR_WKUP & priv->imask) != 0)
     {
-      /* Wakeup interrupt received. Clear the WKUP interrupt status. */
+      /* Wakeup interrupt received. Clear the WKUP interrupt status.  The
+       * cause of the resume is indicated in the FNR register
+       */
 
       stm32_putreg(~USB_ISTR_WKUP, STM32_USB_ISTR);
-      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_WKUP), 0);
+      usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_WKUP), stm32_getreg(STM32_USB_FNR));
 
       /* Perform the wakeup action */
 
@@ -2689,7 +2690,7 @@ static int stm32_epdisable(struct usbdev_ep_s *ep)
   /* Cancel any ongoing activity */
 
   flags = irqsave();
-  stm32_cancelrequests(privep);
+  stm32_cancelrequests(privep, -ESHUTDOWN);
 
   /* Disable TX; disable RX */
 
@@ -2877,7 +2878,7 @@ static int stm32_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   priv = privep->dev;
 
   flags = irqsave();
-  stm32_cancelrequests(privep);
+  stm32_cancelrequests(privep, -ESHUTDOWN);
   irqrestore(flags);
   return OK;
 }
@@ -3226,9 +3227,12 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
     {
       struct stm32_ep_s *privep = &priv->eplist[epno];
 
-      /* Cancel any queue requests */
+      /* Cancel any queued write requests */
 
-      stm32_cancelrequests(privep);
+      if (USB_ISEPIN(privep->ep.eplog))
+        {
+          stm32_cancelrequests(privep, -EPIPE);
+        }
 
       /* Reset endpoint status */
 
