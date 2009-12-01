@@ -404,7 +404,18 @@ examples/usbstorage
 ^^^^^^^^^^^^^^^^^^^
 
   This example registers a block device driver, then exports the block
-  the device using the USB storage class driver.  Configuration options:
+  the device using the USB storage class driver.  In order to use this
+  example, your board-specific logic must provide the function:
+
+    void usbstrg_archinitialize(void);
+
+  This function will be called by the example/usbstorage in order to
+  do the actual registration of the block device drivers.  For examples
+  of the implementation of usbstrg_archinitialize() see
+  configs/mcu123-lpc124x/src/up_usbstrg.c or
+  configs/stm3210e-eval/src/usbstrg.c
+
+  Configuration options:
 
   CONFIG_EXAMPLES_USBSTRG_NLUNS
     Defines the number of logical units (LUNs) exported by the USB storage
