@@ -584,10 +584,14 @@ configs/c5471evm
     NuttX runs on the ARM core and is built with a GNU arm-elf toolchain*.
     This port is complete, verified, and included in the NuttX release.
 
+configs/demo9s12ne64
+    Feescale DMO9S12NE64 board based on the MC9S12NE64 hc12 cpu.  This
+    port uses the m68hc12 GCC toolchain.  STATUS:  Under development.
+
 configs/eagle100
     Micromint Eagle-100 Development board.  This board is based on the 
     an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
-    arm-elf toolchain*.  STATUS:  This port is currently under development.
+    arm-elf toolchain*.  STATUS:  This port is complete and mature.
 
 configs/ez80f0910200kitg
     ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
