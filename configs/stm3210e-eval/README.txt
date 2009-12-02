@@ -423,3 +423,9 @@ Where <subdir> is one of the following:
     This configuration directory exercises the USB mass storage
     class driver at examples/usbstorage.  See examples/README.txt for
     more information.
+
+    NOTE: The default usbstorage configuration exports a read-only
+    file system.  That is due to logic in include/nuttx/config.h that
+    is, perhaps, a little too clever and if there is no write-able
+    file systrem in the configuration, it forces read-only block
+    drivers to save space.
