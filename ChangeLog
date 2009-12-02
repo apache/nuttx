@@ -10,7 +10,7 @@
 	  for C5471
 	* Added fgets() and gets() logic; verified c5471 console read.
 	* Corrected error in reading from the C5471 serial port:
-          Improper use of semaphore can cause deadlock.
+	  Improper use of semaphore can cause deadlock.
 	* Fixed an error in the memory cleanup:  The idle task
 	  cannot take sempahores (because it must always be ready
 	  to run).
@@ -28,7 +28,7 @@
 	* Added strtok() and strtok_r()
 	* Added a simple shell called nsh (see examples/nsh).
 	* Platform support for 8052 is complete but not stable
-	  when the timer interrupt is enabled.  Seems to be an
+	  when the timer interrupt is enabled.	Seems to be an
 	  issue when SP enters indirect address space.
 	* Documentation updates
 
@@ -42,7 +42,7 @@
 	  Can't do this; the caller must be able to wait for access
 	  to memory.
 	* Fixed bugs associated with debug output:
-          Cannot do dbg() in middle of context switch logic.
+		  Cannot do dbg() in middle of context switch logic.
 	  because it may require use of semaphores and cause
 	  additional context switches. lldbg() is safe.
 	* Interrupt must be disabled throughout all context switches.
@@ -51,8 +51,8 @@
 	  serial.h defines the interface.
 	* Fixed mq_receive() and mq_send() -- bad memcpy()
 	* Fixed C5471 signal deliver logic: use of dbg() and
-          other actions by use signal handler can alter errno.
-          need to protect errno during signal handling.
+		  other actions by use signal handler can alter errno.
+		  need to protect errno during signal handling.
 	* Fixed uninitialized variable in filesystem that could
 	  cause various problems
 	* Added a test for roundrobin scheduler.
@@ -206,7 +206,7 @@
 	* Adding socket(), bind(), connect()
 	* Added snprintf()
 	* Added send() and sendto(); integrate write() and close() with socket descriptors.
-        * Added recv() and recvfrom().
+	* Added recv() and recvfrom().
 	* Added getsockopt() and setsockopt()
 	* Documentation updated to address socket interfaces.
 	* Implemented receive timeouts via setsockopt(SO_RCVTIMEO).
@@ -308,7 +308,7 @@
 	  interrupt architecture (like the Z16F)
 	* Added a "dumb" serial console driver to simplify OS bringup
 	* Corrected a bug that caused the errno value of one task to be clobbered
-	  when a different task exits.  Effects all architectures.
+	  when a different task exits.	Effects all architectures.
 
 0.3.8 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
@@ -317,16 +317,16 @@
 	* 'errno' is now defined to be *get_errno_ptr() with no name conflicts
 	* Added lseek() and fseek()
 	* Integrated Pascal interpreter test case on the simulation platform.  Needs
-          pascal-0.1.1.
+		  pascal-0.1.1.
 	* Add Pascal test case on the z16f platform.  Needs pascal-0.1.2 (does not
-          yet work due to some tool issues).
+		  yet work due to some tool issues).
 	* C buffered I/O fixes:
 	  - Fix fflush() return value,
 	  - Add correct fflush behavior when the FILE argument is null.
 	  - Add logic to a correctly handle read/write access on the same FILE
 	  - fseek() flushes read/write data when before moving the file pointer
 	  - When read data is flushed, reposition the file pointer to account for
-	    buffered, but unread data
+		buffered, but unread data
 	* Pascal P-Code files are now standardized to big-endian for portability
 	* Fix a build problem with z80 and SDCC 2.7.0 (format of a map file changed)
 	  (see bug 1887170)
@@ -384,7 +384,7 @@
 	* Fixed error in dup and dup2: Must call open/close methods in fs/driver so that
 	  driver can correctly maintain open reference counts.
 	* Same issue on closing file descriptors in exit()
-	* Fixed in error in stdio flush logic.  Needed ssize_t vs size_t for error
+	* Fixed in error in stdio flush logic.	Needed ssize_t vs size_t for error
 	  check.
 	* Moved all FAT related files from fs to fs/fat
 	* Implemented mkfatfs(), a non-standard API to create a FAT filesystem on a
@@ -514,7 +514,7 @@
 	* Added USB storage class device side driver (BBB)
 	* Fixed a bug in the LPC214x USB driver: It was not properly handling request buffers
 	  larger then the endpoint's max packet (DM320 driver also fixed, untested)
-	* Added logic to the USB device interface:  A bit is needed to force the driver to
+	* Added logic to the USB device interface:	A bit is needed to force the driver to
 	  to terminate an IN transfer with a short packet (zero-length if necessary).
 	* Fix an error in the NXP LPC214x USB device driver that was causing corruption of
 	  the request queue (M320 driver also fixed, untested)
@@ -543,24 +543,24 @@
 	  CMON debugger.  At any rate, I have exhausted all of the energy that I am willing to put
 	  into this cool old processor for the time being.
 	* Renamed configuration item CONFIG_PROC_STACK_SIZE as CONFIG_IDLETHREAD_STACKSIZE:  It now
-	  only controls the size of the stack for the IDLE thread.  Added CONFIG_USERMAIN_STACKSIZE:
+	  only controls the size of the stack for the IDLE thread.	Added CONFIG_USERMAIN_STACKSIZE:
 	  This is the size of stack used with the user_start() thread is created.  The two stacks
 	  no longer have to be the same.
 	* Add a loop device that converts a file into a block device.
 	* Each NSH command can not be disabled through a configuration setting. All of these
 	 settings make the configuration of NSH potentially complex but also allow it to squeeze
 	  into very small memory footprints.
-	* Added a block to character (BCH) driver.  This is kind of the reverse of the loop
+	* Added a block to character (BCH) driver.	This is kind of the reverse of the loop
 	  device; it allows you access a block device like a character device.
 	* Added strcasecmp() and strncasecmp()
 	* NSH: Added the 'dd' command
 	* NSH: Added the 'losetup' command
-	* Fixed a FAT bug:  After recent changes, it would mount a (invalid) FAT file system
+	* Fixed a FAT bug:	After recent changes, it would mount a (invalid) FAT file system
 	  even if the medium is not formatted!
 	* Corrected two important errors in FAT lseek implementation: (1) the sectors-per-cluster
 	  value was being reset to "1" and (2) important lseek logic was omitted when the seek
 	  position was zero.
-	* Fixed a bug in getopt().  It would fail if on certain combinations of terminal argument
+	* Fixed a bug in getopt().	It would fail if on certain combinations of terminal argument
 	  types.
 
 0.3.19 2008-11-26 Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -574,7 +574,7 @@
 	* Implement poll() and select() support for TCP/IP sockets
 	* Fixed an important bug in the TCP/IP buffering logic.  When TCP/IP read-ahead is enabled
 	  and not recv() is in-place when a TCP/IP packet is received, the packet is placed into
-	  a read-ahead buffer.  However, the old contents of the read-ahead buffer were not being
+	  a read-ahead buffer.	However, the old contents of the read-ahead buffer were not being
 	  cleared and old data would contaminate the newly received buffer.
 	* Implemented support for connection backlog.  The size of the backlog is specified by the
 	  second argument of the standard listen() API.  Hooks are provided to support poll()/select()
@@ -617,15 +617,15 @@
 	  the target cannot be built because the GNU m16c-elf-ld link fails with 
 	  the following message:
 
-	    m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
+		m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
 
 	  Where the reference line is:
 
-	    /* If the symbol is out of range for a 16-bit address,
-	       we must have allocated a plt entry.  */
-	     BFD_ASSERT (*plt_offset != (bfd_vma) -1);
+		/* If the symbol is out of range for a 16-bit address,
+		   we must have allocated a plt entry.	*/
+		 BFD_ASSERT (*plt_offset != (bfd_vma) -1);
 
-	  No workaround is known at this time.  This is a show stopper for M16C.
+	  No workaround is known at this time.	This is a show stopper for M16C.
 
 	* eZ80Acclaim!: Fix interrupt vectors positioning; they were being positioned
 	  wrong by 64 bytes (Kevin Franzen).
@@ -633,7 +633,7 @@
 	   context save and restore (Kevin Franzen).
 	* eZ80Acclaim!: Corrected vector intialization logic (Kevin Franzen).
 	* eZ80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
-	    divisor, the system timer divisor, and the EMAC poll timer.
+		divisor, the system timer divisor, and the EMAC poll timer.
 	* eZ80Acclaim!: Fixed GPIO pin configuration get serial output
 	* eZ80Acclaim!: Correct stack overflow in ostest example configuration
 	* eZ80Acclaim!: Fixed restoration of interrupts state on interrupt level context swith.
@@ -648,9 +648,9 @@
 	* eZ80Acclaim!: Added and verified a NuttShell (NSH) configuration.
 	* eZ80Acclaim!: Correct endian-ness; defconfig files said BIG endian.
 	* Restructured parts of the uIP port for correct compilation with ZDS-II
-	* eZ80Acclaim!: Complete basic integration of the eZ80F91 EMAC driver.  The
+	* eZ80Acclaim!: Complete basic integration of the eZ80F91 EMAC driver.	The
 	  driver is basically functional and should mature prior to the 0.4.3 release.
-	* Implemented priority inheritance logic for POSIX semaphores.  Because the pthread
+	* Implemented priority inheritance logic for POSIX semaphores.	Because the pthread
 	  mutexes are built on semaphores, they will have this property as well.
 
 0.4.4 2009-03-29 Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -678,7 +678,7 @@
 	* examples/sendmail: A simple sendmail example (untested -- see NOTE)
 
 	NOTE: Features related to wget and sendmail are not tested on the target platform
-	in this release and, hence, most likely have problems.  I don't have the correct network
+	in this release and, hence, most likely have problems.	I don't have the correct network
 	network setup to perform that testing now (I'm in a hotel).
 
 0.4.5 2009-04-19 Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -756,19 +756,19 @@
 
 	* lib/lib_*stream.c: Extend internal stream logic to support incoming streams.
 	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
-	  working.  The test at configs/olimex-strp711/ostest passes.  This means that
+	  working.	The test at configs/olimex-strp711/ostest passes.  This means that
 	  the basic STR-P711 port is complete.
 	* configs/olimex-strp711/nsh:  Add and verifed a NuttShell (NSH) configuration
 	  for the STR-P711.
-	* arch/arm/str71x/str71x_serial.c:  The STR711 interrupt driven serial driver
+	* arch/arm/str71x/str71x_serial.c:	The STR711 interrupt driven serial driver
 	  finally works after some extradinary measures to handle missed interrupts.
 	  NSH is fully functional on the Olimex STR-P711 board.
 	* example/nsh: Moved architecture specific files from NSH directory to board-
 	  specific directories.
 	* config/olimex-strp711/src/up_nsh.c:  Add an NSH board specific directory for
 	  for the Olimex STR7P11 board.
-	* Fixed build of LM3X6918 using the CodeSourcery Windows native toolchain.  There
-	  were lots of issues with Cygwin paths and Cygwin symbolic links.  These changes
+	* Fixed build of LM3X6918 using the CodeSourcery Windows native toolchain.	There
+	  were lots of issues with Cygwin paths and Cygwin symbolic links.	These changes
 	  may work with the devarmKIT as well, but that remains untested.
 	* The NXP LPC2148 and STR711 targets can now also be built using the CodeSourcery
 	  or devkitARM Windows native toolchains.
@@ -795,7 +795,7 @@
 	  include paths for Cygwin-based GCC were being converted to windows
 	  native paths.  That causes many problems -- breaking dependencies
 	  for one.
-	* Fixed an important bug in ROMFS.  The initial XIP offset was set
+	* Fixed an important bug in ROMFS.	The initial XIP offset was set
 	  incorrectly so if sector zero was read first, there was a bad read.
 	  I don't know how it worked before.
 	* arch/arm/src/common/up_use_stack.c.  Fixed a fatal stack setup error.
@@ -811,13 +811,13 @@
 	* sched/: Added gettimeofday().  This implementation is simply a thin
 	  wrapper around clock_gettimer().
 	* lib/: Add gmtime(), localtime(), and strftime()
-	* binfmt/: Add exec().  This is just a wrapper that executes both
+	* binfmt/: Add exec().	This is just a wrapper that executes both
 	  load_ and exec_module() in a more familiar manner.  It is not consistent
 	  with more standard exec() functions, however, because (1) it returns
 	  and (2) it requires symbol table arguments.
 	* lib/: Add fileno()
 	* examples/ostest: Several of the tests used a big, hard-coded stack size
-	  when creating test threads (16Kb stacksize).  The stack size should
+	  when creating test threads (16Kb stacksize).	The stack size should
 	  be controlled by the .config file or the OSTest won't work on platforms
 	  with memory constraints.
 	* netutils/thttpd: An initial port of Jeff Poskanzer's THTTPD HTTP server.
@@ -834,7 +834,7 @@
 	  connection backlog is enabled.
 	* fs/fs_fcntl.c and net/net_vfcntl.c: Minimal support provided for fcntl().
 	  It can, at least, be used to mark sockets as blocking or non-blocking.
-	* net/net_close.c: Fix bug in close().  If reference count not set to zero
+	* net/net_close.c: Fix bug in close().	If reference count not set to zero
 	  then uip_tcpfree() will assert when DEBUG is enabled.
 	* net/accept.c: Fix bug in accept().  The logic expected parts of the
 	  return address structure to be initialized or it would return an error.
@@ -856,11 +856,11 @@
 	  extra two bytes of length cause the driver to sometimes read one too many
 	  words from the received FIFO (corrupting the next queued receive packet,
 	  if any).
-	* net/net_poll.c and net/uip/uip_tcpbacklog.c.  Fixed an important race condition
+	* net/net_poll.c and net/uip/uip_tcpbacklog.c.	Fixed an important race condition
 	  bug in polling for connections.  The logic worked if the poll was inplace
 	  before the connection was received; but the poll failed to awaken if the
 	  connection was already pending in the backlog when poll() was called.
-	* net/net_close.c.  Fixed another important TCP/IP race condition bug:  If
+	* net/net_close.c.	Fixed another important TCP/IP race condition bug:	If
 	  the host closes the TCP connection just before the target calls close(), then
 	  the close operation may hang indefinitely!
 	* net/net_tcppoll.c.  Removed an unnecessary check for outstanding, un-ACKed
@@ -869,14 +869,14 @@
 	* Add DEBUG configuration option to enable debug console output without disabling
 	  optimization (and vice versa)
 	* Changed lots of occurrents of debug macro dbg() to lldbg().  dbg() uses
-	  stdout to output debug data.  That works fine unless (1) the dbg() macro
+	  stdout to output debug data.	That works fine unless (1) the dbg() macro
 	  is interrupt logic and the interrupted task has redirected stdout!  Most
 	  changes were in uIP.
 	* net/uip/uip_tcpinput.c.  Connection reference count was not being set correctly
 	  when a socket is created by accepting a new connection.  Since the reference
 	  count is bad, such sockets are not successfully duplicated when being passed
 	  to new tasks.
-	* net/net_clone.c.  Similarly, after a socket is cloned, its reference count
+	* net/net_clone.c.	Similarly, after a socket is cloned, its reference count
 	  was not being initialized.
 	* lib/lib_strstr.c.  Improperly incremented pointer could cause comparison
 	  failures.
@@ -889,7 +889,7 @@
 	* net/net_close.c and net/net_sockets.c.  Sockets were not being closed
 	  when a task exits.  If many server tasks are created and exit without closing
 	  sockets (such as with CGI tasks), then eventually, you will run out of sockets.
-	* netutils/thttpd.  Basic functionality of THTTPD is complete.  This includes
+	* netutils/thttpd.	Basic functionality of THTTPD is complete.	This includes
 	  serving up files from a file system and executing NXFLAT-based CGI programs
 	  and pipe the stdout back to the HTTP client.
 
@@ -907,7 +907,7 @@
 	* configs/stm3210e-eval/src/stm32102e-internal.h.  Fix on-board LED GPIO definitions.
 	* arch/arm/src/stm32/src/stm32/stm32_dma.c.  Added DMA channel support for the STM32
 	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
-	* arch/arm/src/stm32/src/stm32/stm32_serial.c.  Finished interrupt-drivent,
+	* arch/arm/src/stm32/src/stm32/stm32_serial.c.	Finished interrupt-drivent,
 	  USART console driver.  This makes NSH work perfectly.
 	* Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
 	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
@@ -915,17 +915,17 @@
 
 0.4.13 2009-11-04 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* include/nuttx/mtd.h.  Added a simple interface definition to support some
+	* include/nuttx/mtd.h.	Added a simple interface definition to support some
 	  FLASH, EEPROM, NVRAM, etc. devices.
 	* driver/mtd/m25px.c.  Added a driver for SPI based FLASH parts M25P64 and M25P128.
-	* configs/stm3210e-eval/usbserial.  Add a USB serial configuration for the STM32.
+	* configs/stm3210e-eval/usbserial.	Add a USB serial configuration for the STM32.
 	  Depends on the STM32 USB driver.
-	* arch/arm/src/cortexm3/up_switchcontext.S & up_svccall.c.  Made an improvement
+	* arch/arm/src/cortexm3/up_switchcontext.S & up_svccall.c.	Made an improvement
 	  to context switching.  There are two types of context switches:  interrupt
 	  context switches and background/user context switches.  This change should
 	  improve the performance of those background/user context switches by a factor
 	  of about two.
-	* arch/arm/src/stm32/ - fix several typos in the serial logic.  It turns out
+	* arch/arm/src/stm32/ - fix several typos in the serial logic.	It turns out
 	  that these typose don't make any difference as long as you use only one
 	  serial port and all uarts are configured the same.  But the typos are bugs
 	  waiting to happen in any other configuration.
@@ -939,14 +939,14 @@
 	  On some boards (none of mine), the HSE (high speed external clock) delay
 	  loop times out if the optimization level is high. The STM32 then falls
 	  back to the HSI (internal clock), and the system clock is too slow by a
-	  factor of 11.1%.  This was fixed by simply add the volatile storage class
+	  factor of 11.1%.	This was fixed by simply add the volatile storage class
 	  to the timeout loop counter
 	* arch/arm/src/stm32/stm32_irq.c - Fixed a critical bug in the interrupt
 	  control logic.  The wrong register was being used for interrupts in a
 	  certain range.  Worked fine until you try to use an interrupt in that
 	  range!
 
-4.14 2009-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+4.14 2009-12-02 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/stm32/stm32_gpio.c - Add support for configure an input GPIO
 	  to generate an EXTI interrupt.
@@ -961,9 +961,9 @@
 	* arch/arm/src/stm32/stm32_sdio.c -- Provides an STM32 implementation of
 	  the SDIO interface defined in include/nuttx/sdio.h.
 	* fs/fs_mount.c -- Correct error handling logic.  If the bind() method
-	  fails, then a reserved node is left in the tree.  This causes subsequent
+	  fails, then a reserved node is left in the tree.	This causes subsequent
 	  attempts to mount at the location to fail (reporting that the node
-	  already exists).  This is a problem for block drivers for removable
+	  already exists).	This is a problem for block drivers for removable
 	  media: The bind method could fail repeatedly until media is inserted.
 	* arch/arm/src/stm32/chip.h & stm32_dma.c -- Fixed several definitions
 	  that can cause compilation errors when DMA2 is enabled.
@@ -979,3 +979,5 @@
 	* arch/arm/src/stm32/stm32_usbdev.c - Fix bugs in STM32 USB device-side
 	  driver:  (1) Need to disconnect after reset received, (2) Status setup
 	  to recover from stall on TX endpoint.
+
+2010.1 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
