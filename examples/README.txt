@@ -451,12 +451,6 @@ examples/usbstorage
 
   Error results are always shown in the trace output
 
-  NOTE: The default usbstorage configuration may exports only a read-only
-  file system if no write-able file system is included in the configuration.
-  That is due to logic in include/nuttx/config.h that is, perhaps, a little
-  too clever and if there is no write-able file systrem in the configuration,
-  it forces read-only block    drivers to save space.
-
 examples/wget
 ^^^^^^^^^^^^^
 

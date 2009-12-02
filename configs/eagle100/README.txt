@@ -114,7 +114,7 @@ NuttX buildroot Toolchain
 
   If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
   SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).
-  This GNU toolchain builds and executes in the Cygwin environment.
+  This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 

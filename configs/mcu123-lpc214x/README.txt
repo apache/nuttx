@@ -84,7 +84,7 @@ NuttX buildroot Toolchain
 
   If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
   SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).
-  This GNU toolchain builds and executes in the Cygwin environment.
+  This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
@@ -111,36 +111,6 @@ NuttX buildroot Toolchain
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
-
-Toolchain
-^^^^^^^^^
-
-  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the SH toolchain (if
-  different from the default).
-
-  If you have no SH toolchain, one can be downloaded from the NuttX
-  SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).
-
-  1. You must have already configured Nuttx in <some-dir>nuttx.
-
-     cd tools
-     ./configure.sh mcu123-lpc214x/<sub-dir>
-
-  2. Download the latest buildroot package into <some-dir>
-
-  3. unpack
-
-  4. cd <some-dir>/buildroot
-
-  5. cp configs/arm-defconfig .config
-
-  6. make oldconfig
-
-  7. make
-
-  8. Edit setenv.h so that the PATH variable includes the path to the
-     newly built binaries.
 
 Flash Tools
 ^^^^^^^^^^^
@@ -172,7 +142,6 @@ Here are the detailed steps I use:
 4. reset the board
 
 
-
 ARM/LPC214X-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -191,20 +160,20 @@ ARM/LPC214X-specific Configuration Options
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=c5471
+	   CONFIG_ARCH_CHIP=lpc214x
 
 	CONFIG_ARCH_CHIP_name - For use in C code
 
-	   CONFIG_ARCH_CHIP_C5471
+	   CONFIG_ARCH_CHIP_LPC214X
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=c5471evm (for the Spectrum Digital C5471 EVM)
+	   CONFIG_ARCH_BOARD=mcu123-lpc214x
 
 	CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_C5471EVM (for the Spectrum Digital C5471 EVM)
+	   CONFIG_ARCH_BOARD_MCU123 (for the Spectrum Digital C5471 EVM)
 
 	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
 	   of delay loops
@@ -212,9 +181,9 @@ ARM/LPC214X-specific Configuration Options
 	CONFIG_ENDIAN_BIG - define if big endian (default is little
 	   endian)
 
-	CONFIG_DRAM_SIZE - Describes the installed DRAM.
+	CONFIG_DRAM_SIZE - Describes the installed RAM.
 
-	CONFIG_DRAM_START - The start address of installed DRAM
+	CONFIG_DRAM_START - The start address of installed RAM
 
 	CONFIG_DRAM_END - Should be (CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 
@@ -313,63 +282,3 @@ usbstorage:
   This configuration directory exercises the USB mass storage
   class driver at examples/usbstorage.  See examples/README.txt for
   more information.
-
-Configuration Options
-^^^^^^^^^^^^^^^^^^^^^
-
-In additional to the common configuration options listed in the
-file configs/README.txt, there are other configuration options
-specific to the LPC214x:
-
- CONFIG_ARCH - identifies the arch subdirectory and, hence, the
-   processor architecture.
- CONFIG_ARCH_name - for use in C code.  This identifies the
-   particular chip or SoC that the architecture is implemented
-   in.
- CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
- CONFIG_ARCH_CHIP_name - For use in C code
- CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
-   the board that supports the particular chip or SoC.
- CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
- CONFIG_ARCH_BOARD_name - for use in C code
- CONFIG_BOARD_LOOPSPERMSEC - for delay loops
- CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to lpc2148.
- CONFIG_DRAM_SIZE - Describes the internal DRAM.
- CONFIG_DRAM_START - The start address of internal DRAM
- CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
-
-LPC2148 specific chip initialization
-
- CONFIG_EXTMEM_MODE, CONFIG_RAM_MODE. CONFIG_CODE_BASE, CONFIG_PLL_SETUP,
- CONFIG_MAM_SETUP, CONFIG_APBDIV_SETUP, CONFIG_EMC_SETUP,. CONFIG_BCFG0_SETUP,
- CONFIG_BCFG1_SETUP, CONFIG_BCFG2_SETUP, CONFIG_BCFG3_SETUP, CONFIG_ADC_SETUP
-
-LPC214X UART device driver settings
-
- CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
-   console and ttys0 (default is the UART0).
- CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
-   This specific the size of the receive buffer
- CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
-   being sent.  This specific the size of the transmit buffer
- CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
- CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
- CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
- CONFIG_UARTn_2STOP - Two stop bits
-
-LPC214X USB Configuration
-
- CONFIG_LPC214X_USBDEV_FRAME_INTERRUPT
-   Handle USB Start-Of-Frame events.
-   Enable reading SOF from interrupt handler vs. simply reading on demand.
-   Probably a bad idea... Unless there is some issue with sampling the SOF
-   from hardware asynchronously.
- CONFIG_LPC214X_USBDEV_EPFAST_INTERRUPT
-   Enable high priority interrupts.  I have no idea why you might want to
-   do that
- CONFIG_LPC214X_USBDEV_NDMADESCRIPTORS
-   Number of DMA descriptors to allocate in the 8Kb USB RAM.  This is a
-   tradeoff between the number of DMA channels that can be supported vs
-   the size of the DMA buffers available.
- CONFIG_LPC214X_USBDEV_DMA
-   Enable lpc214x-specific DMA support
