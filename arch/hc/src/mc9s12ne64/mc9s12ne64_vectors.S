@@ -64,7 +64,7 @@
  * Vectors
  ************************************************************************************/
 
-	.section	.vectors, "rd"
+	.section	.vectors, "x"
 	.align		2
 	.globl		hc12_vectors
 	.type		hc12_vectors, function

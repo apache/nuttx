@@ -552,7 +552,7 @@ __start:
 	 * as possible.  Modifies r0, r1, r2, and r14.
 	 */
 
-        bl	up_lowsetup
+	bl	up_lowsetup
 	showprogress 'A'
 
 	/* Setup system stack (and get the BSS range) */
