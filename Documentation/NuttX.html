@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 2, 2009</p>
+      <p>Last Updated: December 3, 2009</p>
     </td>
   </tr>
 </table>
@@ -1608,9 +1608,22 @@ buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+	* arch/hc: Adding framework to support m68hc11/12
+	* configs/demo9s12ne64: Configuration to support Freescale DEMO9S12NE64
+	  development board (MC9S12NE64 m68hcs12 processor).
+
 pascal-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-2010.1 2010-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
+
+	* configs/cortexm3-defconfig-4.3.3: Added support for NuttX NXFLAT
+	  tools.
+	* configs/arm7tdmi-defconfig-4.3.3: Update to arm7tdmi-defconfig-4.2.4.
+	  Also builds NuttX NXFLAT tools.
+	* configs/m68hc12-defconfig-4.3.3: Update to m68ch11-defconfig.
+	* configs/m68hc12-defconfig-3.4.6: There are problems building GCC
+	  4.3.3 for the hc12.
+
 </pre></ul>
 
 <table width ="100%">

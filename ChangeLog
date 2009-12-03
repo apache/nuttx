@@ -981,3 +981,8 @@
 	  to recover from stall on TX endpoint.
 
 2010.1 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* arch/hc: Adding framework to support m68hc11/12
+	* configs/demo9s12ne64: Configuration to support Freescale DEMO9S12NE64
+	  development board (MC9S12NE64 m68hcs12 processor).
+

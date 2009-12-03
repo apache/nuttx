@@ -20,6 +20,10 @@ in the higher level directory names.  For example, under Cygwin, your home
 directory might be formed from your first and last names like: "/home/First Last".
 That will cause strange errors when the make system tries to build.
 
+[Actually, that is probably not to difficult to fix.  Some Makefiles probably
+just need some pathes within double quotes]
+
+
 CONFIGURING NUTTX
 ^^^^^^^^^^^^^^^^^
 
