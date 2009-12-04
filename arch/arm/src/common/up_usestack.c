@@ -92,7 +92,7 @@ STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 
   tcb->stack_alloc_ptr = stack;
 
-  /* The Arm7Tdmi uses a push-down stack:  the stack grows
+  /* The ARM uses a push-down stack:  the stack grows
    * toward loweraddresses in memory.  The stack pointer
    * register, points to the lowest, valid work address
    * (the "top" of the stack).  Items on the stack are
@@ -101,7 +101,7 @@ STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 
   top_of_stack = (uint32)tcb->stack_alloc_ptr + stack_size - 4;
 
-  /* The Arm7Tdmi stack must be aligned at word (4 byte)
+  /* The ARM stack must be aligned at word (4 byte)
    * boundaries. If necessary top_of_stack must be rounded
    * down to the next boundary
    */
