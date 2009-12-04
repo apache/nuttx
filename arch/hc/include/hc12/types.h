@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/include/types.h
+ * arch/hc/include/hc12/types.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
  * through sys/types.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_TYPES_H
-#define __ARCH_ARM_INCLUDE_TYPES_H
+#ifndef __ARCH_HC_INCLUDE_HC12_TYPES_H
+#define __ARCH_HC_INCLUDE_HC12_TYPES_H
 
 /****************************************************************************
  * Included Files
@@ -62,25 +62,30 @@ typedef unsigned char uint8;
 typedef unsigned char boolean;
 typedef short sint16;
 typedef unsigned short uint16;
+
+/* Normally, mc68hc1x code is compiled with the -mshort option
+ * which results in a 16-bit integer.  If -mnoshort is defined
+ * then an integer is 32-bits.  GCC will defined __INT__ accordingly:
+ */
+
+# if __INT__ == 16
+typedef long sint32;
+typedef unsigned long uint32;
+#else
 typedef int sint32;
 typedef unsigned int uint32;
+#endif
+
 typedef long long sint64;
 typedef unsigned long long uint64;
 
-/* A pointer is 4 bytes */
+/* A pointer is two bytes */
 
-typedef unsigned int uintptr;
+typedef unsigned short uintptr;
 
-/* This is the size of the interrupt state save returned by irqsave().  For
- * ARM, a 32 register value is returned, for the thumb2, Cortex-M3, the 16-bit
- * primask register value is returned,
- */
+/* This is the size of the interrupt state save returned by irqsave()*/
 
-#ifdef __thumb2__
-typedef unsigned short irqstate_t;
-#else /* __thumb2__ */
 typedef unsigned int irqstate_t;
-#endif /* __thumb2__ */
 
 #endif /* __ASSEMBLY__ */
 
@@ -88,4 +93,4 @@ typedef unsigned int irqstate_t;
  * Global Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_TYPES_H */
+#endif /* __ARCH_HC_INCLUDE_HC12_TYPES_H */

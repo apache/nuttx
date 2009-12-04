@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/include/types.h
+ * arch/hc/src/common/up_modifyreg32.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,59 +33,53 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through sys/types.h
- */
-
-#ifndef __ARCH_ARM_INCLUDE_TYPES_H
-#define __ARCH_ARM_INCLUDE_TYPES_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <debug.h>
+
+#include <arch/irq.h>
+#include <nuttx/arch.h>
+
+#include "up_arch.h"
+
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Type Declarations
+ * Private Data
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/* These are the sizes of the standard GNU types */
-
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef short sint16;
-typedef unsigned short uint16;
-typedef int sint32;
-typedef unsigned int uint32;
-typedef long long sint64;
-typedef unsigned long long uint64;
-
-/* A pointer is 4 bytes */
-
-typedef unsigned int uintptr;
-
-/* This is the size of the interrupt state save returned by irqsave().  For
- * ARM, a 32 register value is returned, for the thumb2, Cortex-M3, the 16-bit
- * primask register value is returned,
- */
-
-#ifdef __thumb2__
-typedef unsigned short irqstate_t;
-#else /* __thumb2__ */
-typedef unsigned int irqstate_t;
-#endif /* __thumb2__ */
-
-#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Global Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_TYPES_H */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: modifyreg32
+ *
+ * Description:
+ *   Atomically modify the specified bits in a memory mapped register
+ *
+ ****************************************************************************/
+
+void modifyreg32(unsigned int addr, uint32 clearbits, uint32 setbits)
+{
+  irqstate_t flags;
+  uint32     regval;
+
+  flags   = irqsave();
+  regval  = getreg32(addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg32(regval, addr);
+  irqrestore(flags);
+}

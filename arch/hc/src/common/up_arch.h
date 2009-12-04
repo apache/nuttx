@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/include/types.h
+ * arch/hc/src/common/up_arch.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,59 +33,60 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through sys/types.h
- */
-
-#ifndef __ARCH_ARM_INCLUDE_TYPES_H
-#define __ARCH_ARM_INCLUDE_TYPES_H
+#ifndef ___ARCH_HC_SRC_COMMON_UP_ARCH_H
+#define ___ARCH_HC_SRC_COMMON_UP_ARCH_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <nuttx/config.h>
+#ifndef __ASSEMBLY__
+# include <sys/types.h>
+#endif
+
+#include <arch/board/board.h>
+#include "chip.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Type Declarations
+ * Inline Functions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/* These are the sizes of the standard GNU types */
-
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef short sint16;
-typedef unsigned short uint16;
-typedef int sint32;
-typedef unsigned int uint32;
-typedef long long sint64;
-typedef unsigned long long uint64;
-
-/* A pointer is 4 bytes */
-
-typedef unsigned int uintptr;
-
-/* This is the size of the interrupt state save returned by irqsave().  For
- * ARM, a 32 register value is returned, for the thumb2, Cortex-M3, the 16-bit
- * primask register value is returned,
- */
-
-#ifdef __thumb2__
-typedef unsigned short irqstate_t;
-#else /* __thumb2__ */
-typedef unsigned int irqstate_t;
-#endif /* __thumb2__ */
-
-#endif /* __ASSEMBLY__ */
+# define getreg8(a)           (*(volatile ubyte *)(a))
+# define putreg8(v,a)         (*(volatile ubyte *)(a) = (v))
+# define getreg16(a)          (*(volatile uint16 *)(a))
+# define putreg16(v,a)        (*(volatile uint16 *)(a) = (v))
+# define getreg32(a)          (*(volatile uint32 *)(a))
+# define putreg32(v,a)        (*(volatile uint32 *)(a) = (v))
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_TYPES_H */
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/* Atomic modification of registers */
+
+EXTERN void modifyreg8(unsigned int addr, ubyte clearbits, ubyte setbits);
+EXTERN void modifyreg16(unsigned int addr, uint16 clearbits, uint16 setbits);
+EXTERN void modifyreg32(unsigned int addr, uint32 clearbits, uint32 setbits);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif  /* ___ARCH_HC_SRC_COMMON_UP_ARCH_H */
