@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/compiler.h
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@
 # define DSEG
 # define CODE
 
-#ifdef __m32c__
+#if defined(__m32c__)
 /* Select the small, 16-bit addressing model */
 
 # define  CONFIG_SMALL_MEMORY 1
@@ -112,16 +112,44 @@
 
 # undef  CONFIG_PTR_IS_NOT_INT
 
+#elif defined(__m32c__)
+/* Select the small, 16-bit addressing model */
+
+# define  CONFIG_SMALL_MEMORY 1
+
+/* Normally, mc68hc1x code is compiled with the -mshort option
+ * which results in a 16-bit integer.  If -mnoshort is defined
+ * then an integer is 32-bits.  GCC will defined __INT__ accordingly:
+ */
+
+# if __INT__ == 16
+/* int is 16-bits, long is 32-bits */
+
+#   define  CONFIG_LONG_IS_NOT_INT 1
+
+/*  Pointers and int are the same size (16-bits) */
+
+#   undef  CONFIG_PTR_IS_NOT_INT
+#else
+/* int and long are both 32-bits */
+
+#   undef  CONFIG_LONG_IS_NOT_INT
+
+/*  Pointers and int are NOT the same size */
+
+#   define  CONFIG_PTR_IS_NOT_INT 1
+#endif
+
 #else
 /* Select the large, 32-bit addressing model */
 
 # undef  CONFIG_SMALL_MEMORY
 
-/* Long and int are (probably) the same size */
+/* Long and int are (probably) the same size (32-bits) */
 
 # undef  CONFIG_LONG_IS_NOT_INT
 
-/* Pointers and int are the same size */
+/* Pointers and int are the same size (32-bits) */
 
 # undef  CONFIG_PTR_IS_NOT_INT
 #endif

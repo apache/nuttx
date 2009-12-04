@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/include/types.h
+ * arch/hc/include/hc12/limits.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,8 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through sys/types.h
- */
-
-#ifndef __ARCH_ARM_INCLUDE_TYPES_H
-#define __ARCH_ARM_INCLUDE_TYPES_H
+#ifndef __ARCH_HC_INCLUDE_HC12_LIMITS_H
+#define __ARCH_HC_INCLUDE_HC12_LIMITS_H
 
 /****************************************************************************
  * Included Files
@@ -48,44 +44,43 @@
  * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Type Declarations
- ****************************************************************************/
+#define CHAR_BIT    8
+#define SCHAR_MIN   0x80
+#define SCHAR_MAX   0x7f
+#define UCHAR_MAX   0xff
 
-#ifndef __ASSEMBLY__
+/* These could be different on machines where char is unsigned */
 
-/* These are the sizes of the standard GNU types */
+#define CHAR_MIN    SCHAR_MIN
+#define CHAR_MAX    SCHAR_MAX
 
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef short sint16;
-typedef unsigned short uint16;
-typedef int sint32;
-typedef unsigned int uint32;
-typedef long long sint64;
-typedef unsigned long long uint64;
+#define SHRT_MIN    0x8000
+#define SHRT_MAX    0x7fff
+#define USHRT_MAX   0xffff
 
-/* A pointer is 4 bytes */
-
-typedef unsigned int uintptr;
-
-/* This is the size of the interrupt state save returned by irqsave().  For
- * ARM, a 32 register value is returned, for the thumb2, Cortex-M3, the 16-bit
- * primask register value is returned,
+/* The size of an integer is controlled with the -mshort or -mnoshort GCC
+ * options.  Here we assume that -mshort is applied and that the size of
+ * and integer is 2-bytes (unless CONFIG_HC12_INT32 is defined)
  */
 
-#ifdef __thumb2__
-typedef unsigned short irqstate_t;
-#else /* __thumb2__ */
-typedef unsigned int irqstate_t;
-#endif /* __thumb2__ */
+#ifdef CONFIG_HC12_INT32
+#  define INT_MIN   0x80000000
+#  define INT_MAX   0x7fffffff
+#  define UINT_MAX  0xffffffff
+#else
+#  define INT_MIN   0x8000
+#  define INT_MAX   0x7fff
+#  define UINT_MAX  0xffff
+#endif
 
-#endif /* __ASSEMBLY__ */
+/* Long is 4-bytes and long long is 8 bytes in any case */
 
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
+#define LONG_MAX    0x80000000
+#define LONG_MIN    0x7fffffff
+#define ULONG_MAX   0xffffffff
 
-#endif /* __ARCH_ARM_INCLUDE_TYPES_H */
+#define LLONG_MAX   0x8000000000000000
+#define LLONG_MIN   0x7fffffffffffffff
+#define ULLONG_MAX  0xffffffffffffffff
+
+#endif /* __ARCH_HC_INCLUDE_HC12_LIMITS_H */

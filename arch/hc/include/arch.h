@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/include/types.h
+ * arch/hc/include/arch.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,59 +33,49 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through sys/types.h
+/* This file should never be included directed but, rather,
+ * only indirectly through nuttx/arch.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_TYPES_H
-#define __ARCH_ARM_INCLUDE_TYPES_H
+#ifndef __ARCH_HC_INCLUDE_ARCH_H
+#define __ARCH_HC_INCLUDE_ARCH_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Type Declarations
+ * Inline functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/* These are the sizes of the standard GNU types */
-
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef short sint16;
-typedef unsigned short uint16;
-typedef int sint32;
-typedef unsigned int uint32;
-typedef long long sint64;
-typedef unsigned long long uint64;
-
-/* A pointer is 4 bytes */
-
-typedef unsigned int uintptr;
-
-/* This is the size of the interrupt state save returned by irqsave().  For
- * ARM, a 32 register value is returned, for the thumb2, Cortex-M3, the 16-bit
- * primask register value is returned,
- */
-
-#ifdef __thumb2__
-typedef unsigned short irqstate_t;
-#else /* __thumb2__ */
-typedef unsigned int irqstate_t;
-#endif /* __thumb2__ */
-
-#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Types
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_TYPES_H */
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __ARCH_HC_INCLUDE_ARCH_H */
