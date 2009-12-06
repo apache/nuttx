@@ -106,7 +106,7 @@ struct rwbuffer_s
 
   uint16        blocksize;       /* The size of one block */
   size_t        nblocks;         /* The total number blocks supported */
-  void         *dev;             /* Device state passed to callout functions */
+  FAR void     *dev;             /* Device state passed to callout functions */
 
   /* Write buffer setup.  If CONFIG_FS_WRITEBUFFER is defined, but you
    * want read-ahead-only operation, (1) set wrmaxblocks to zero and do

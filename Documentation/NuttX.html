@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 3, 2009</p>
+      <p>Last Updated: December 5 2009</p>
     </td>
   </tr>
 </table>
@@ -1611,6 +1611,11 @@ nuttx-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* arch/hc: Adding framework to support m68hc11/12
 	* configs/demo9s12ne64: Configuration to support Freescale DEMO9S12NE64
 	  development board (MC9S12NE64 m68hcs12 processor).
+	* drivers/mtd/ftl.c - A FLASH translation layer (FTL) has been implemented.
+	  This layer will convert a FLASH MTD interface into a block driver that
+	  can be used with any file system.  Good performance of this layer will
+	  depend upon functioning write buffer support!
+	  NOTE: FTL support is untested as of the initial check-in.
 
 pascal-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

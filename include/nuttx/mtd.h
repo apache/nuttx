@@ -71,7 +71,7 @@ struct mtd_geometry_s
   uint16 blocksize;     /* Size of one read/write block */
   uint16 erasesize;     /* Size of one erase blocks -- must be a multiple
                          * of blocksize. */
-  size_t neraseblocks; /* Number of erase blocks */
+  size_t neraseblocks;  /* Number of erase blocks */
 };
 
 /* This structure defines the interface to a simple memory technology device.
@@ -83,7 +83,7 @@ struct mtd_dev_s
 {
   /* The following methods operate on the MTD: */
 
-  /* Erase the specified erase blocks */
+  /* Erase the specified erase blocks (units are erase blocks) */
 
   int (*erase)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
 

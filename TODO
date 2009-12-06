@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 29, 2009)
+NuttX TODO List (Last updated December 5, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -11,7 +11,7 @@ NuttX TODO List (Last updated November 29, 2009)
   (4)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
-  (8)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -356,6 +356,25 @@ o File system / Generic drivers (fs/, drivers/)
                be shared on later mmap()'s on the same inode.  Reference counting
                would be required so that the multiply mmap()'ed region persists
                until the last munmap().
+  Status:      Open
+  Priority:    Low
+
+  Description: Block driver read-ahead buffer and write buffer support is
+               implemented but not yet tested.
+  Status:      Open
+  Priority:    Low
+
+  Description: The drivers/mmcsd/mmcsd_sdio.c driver has hooks in place to
+               support read-ahead buffering and write buffering, but the logic
+               is incomplete and untested.
+  Status:      Open
+  Priority:    Low
+
+  Description: A FLASH translation layer (FTL) has been implemented at
+               drivers/mtd/ftl.c but has not yet been tested.  This layer
+               will convert a FLASH MTD interface into a block driver that
+               can be used with any file system.  Good performance of this
+               layer will depend upon functioning write buffer support!
   Status:      Open
   Priority:    Low
 
