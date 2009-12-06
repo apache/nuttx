@@ -130,7 +130,25 @@ extern "C" {
  * Public Function Prototypes
  ****************************************************************************/
 
-/* MTD drivers available in drivers/mtd */
+/****************************************************************************
+ * Name: ftl_initialize
+ *
+ * Description:
+ *   Initialize to provide a block driver wrapper around an MTD interface
+ *
+ ****************************************************************************/
+
+EXTERN int ftl_initialize(int minor, ubyte *buffer, FAR struct mtd_dev_s *mtd);
+
+/************************************************************************************
+ * Name: m25p_initialize
+ *
+ * Description:
+ *   Create an initialize MTD device instance.  MTD devices are not registered
+ *   in the file system, but are created as instances that can be bound to
+ *   other functions (such as a block or character driver front end).
+ *
+ ************************************************************************************/
 
 EXTERN FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
 
