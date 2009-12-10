@@ -165,8 +165,10 @@
  * from the chip datasheet.
  */
 
-#ifdef CONFIG_ARCH_CHIP_STM32F103ZET6
+#if defined(CONFIG_ARCH_CHIP_STM32F103ZET6)
 #  include "stm32f103ze_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
+#  include "stm32f107vc_pinmap.h"
 #endif
 
 /************************************************************************************
