@@ -253,12 +253,18 @@ HCS12/DEMO9S12NEC64-specific Configuration Options
 	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
 	   the delay actually is 100 seconds.
 
-  HCS12 specific chip initialization
-
-  HCS12 specific device driver settings
+  HCS12 build options:
 
 	CONFIG_HCS12_SERIALMON - Indicates that the target systems uses
 	  the Freescale serial bootloader.
+
+	CONFIG_HCS12_NONBANKED - Indicates that the target systems does not
+	  support banking.  Only short calls are made; one fixed page is
+	  presented the the paging window.  Only 48Kb of FLASH is usable
+	  in this configuration: pages 3e, 3d, then 3f will appear as a
+	  contiguous address space in memory.
+
+  HCS12 specific device driver settings:
 
 	CONFIG_SCIO_SERIAL_CONSOLE - selects the SCIO for the
 	   console and ttys0 (default is the UART0).
