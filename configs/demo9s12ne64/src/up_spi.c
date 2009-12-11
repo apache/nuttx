@@ -48,7 +48,7 @@
 
 #include "demo9s12ne64.h"
 
-#if defined(CONFIG_HC12_SPI)
+#if defined(CONFIG_HCS12_SPI)
 
 /************************************************************************************
  * Definitions
@@ -81,31 +81,31 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: hc12_spiinitialize
+ * Name: hcs12_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the HC1210E-EVAL board.
+ *   Called to configure SPI chip select GPIO pins for the DEMO9S12NE64 board.
  *
  ************************************************************************************/
 
-void weak_function hc12_spiinitialize(void)
+void weak_function hcs12_spiinitialize(void)
 {
 }
 
 /****************************************************************************
- * Name:  hc12_spiselect and hc12_spistatus
+ * Name:  hcs12_spiselect and hcs12_spistatus
  *
  * Description:
- *   The external functions, hc12_spiselect and hc12_spistatus must be
+ *   The external functions, hcs12_spiselect and hcs12_spistatus must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common HC12 logic.  To use this common SPI logic on your
+ *   are provided by common HCS12 logic.  To use this common SPI logic on your
  *   board:
  *
- *   1. Provide logic in hc12_boardinitialize() to configure SPI chip select
+ *   1. Provide logic in hcs12_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide hc12_spiselect() and hc12_spistatus() functions in your
+ *   2. Provide hcs12_spiselect() and hcs12_spistatus() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   3. Add a calls to up_spiinitialize() in your low level application
@@ -117,13 +117,13 @@ void weak_function hc12_spiinitialize(void)
  *
  ****************************************************************************/
 
-void hc12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
+void hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
 {
 }
 
-ubyte hc12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+ubyte hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return SPI_STATUS_PRESENT;
 }
 
-#endif /* CONFIG_HC12_SPI */
+#endif /* CONFIG_HCS12_SPI */

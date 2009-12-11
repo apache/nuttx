@@ -43,7 +43,7 @@ MEMORY
     sram (rwx) : ORIGIN = 0x3800, LENGTH = 8K
 }
 
-OUTPUT_ARCH(m68hc12)
+OUTPUT_ARCH(m68hcs12)
 ENTRY(_stext)
 SECTIONS
 {

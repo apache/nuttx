@@ -50,7 +50,7 @@ NuttX buildroot Toolchain
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
 
-HC12/DEMO9S12NEC64-specific Configuration Options
+HCS12/DEMO9S12NEC64-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -64,7 +64,7 @@ HC12/DEMO9S12NEC64-specific Configuration Options
 
 	CONFIG_ARCH_architecture - For use in C code:
 
-	   CONFIG_ARCH_HC12=y
+	   CONFIG_ARCH_HCS12=y
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
@@ -112,31 +112,34 @@ HC12/DEMO9S12NEC64-specific Configuration Options
 	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
 	   the delay actually is 100 seconds.
 
-  HC12 specific chip initialization
+  HCS12 specific chip initialization
 
-  HC12 specific device driver settings
+  HCS12 specific device driver settings
 
-	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
+	CONFIG_HCS12_SERIALMON - Indicates that the target systems uses
+	  the Freescale serial bootloader.
+
+	CONFIG_SCIO_SERIAL_CONSOLE - selects the SCIO for the
 	   console and ttys0 (default is the UART0).
 
-	CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+	CONFIG_SCIO_RXBUFSIZE - Characters are buffered as received.
 	   This specific the size of the receive buffer
 
-	CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+	CONFIG_SCIO_TXBUFSIZE - Characters are buffered before
 	   being sent.  This specific the size of the transmit buffer
 
-	CONFIG_UARTn_BAUD - The configure BAUD of the UART.
+	CONFIG_SCIO_BAUD - The configure BAUD of the UART.
 
-	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_SCIO_BITS - The number of bits.  Must be either 7 or 8.
 
-	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
+	CONFIG_SCIO_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
 
-	CONFIG_UARTn_2STOP - Two stop bits
+	CONFIG_SCIO_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Freescale HC12 configuration is maintained in a sudirectory and
+Each Freescale HCS12 configuration is maintained in a sudirectory and
 can be selected as follow:
 
 	cd tools
