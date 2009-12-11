@@ -197,6 +197,9 @@ vcommon:
 	.size	handlers, .-handlers
 
 /************************************************************************************
+ * .bss
+ ************************************************************************************/
+/************************************************************************************
  *	Name: up_interruptstack/g_userstack
  *
  * Description:
@@ -212,26 +215,5 @@ up_interruptstack:
 up_interruptstack_base:
 		.size	up_interruptstack, .-up_interruptstack
 #endif
-
-/************************************************************************************
- * .rodata
- ************************************************************************************/
-
-	.section	.rodata, "a"
-
-/* Variables: _sbss is the start of the BSS region (see ld.script) _ebss is the end
- * of the BSS regsion (see ld.script). The idle task stack starts at the end of BSS
- * and is of size CONFIG_IDLETHREAD_STACKSIZE.	The IDLE thread is the thread that
- * the system boots on and, eventually, becomes the idle, do nothing task that runs
- * only when there is nothing else to run.	The heap continues from there until the
- * end of memory.  See g_heapbase below.
- */
-
-		.globl	g_heapbase
-		.type	g_heapbase, object
-g_heapbase:
-		.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
-		.size	g_heapbase, .-g_heapbase
-
 		.end
 

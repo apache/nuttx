@@ -94,6 +94,15 @@
 
 	movb	#INITRM_MAP, HCS12_MMC_INITRM	/* Set RAM position to 0x2000-0x3fff */
 	movb	#INITEE_EE, HCS12_MMC_INITEE	/* Set EEPROM position to 0x0800 */
+
+	/* In the non-banked mode, PPAGE is set to 0x3d to create a contiguous, 48Kb
+	 * .text address space.
+	 */
+
+#ifdef CONFIG_HCS12_NONBANKED
+	movb	#0x3d, HCS12_MMC_PPAGE
+#endif
+
 	movb	#MMC_MISC_ROMON, HCS12_MMC_MISC	/* MISC: EXSTR1=0 EXSTR0=0 ROMHM=0 ROMON=1 */
 	.endm
 
@@ -188,7 +197,11 @@ __start:
 	/* Now, start the OS */
 
 	showprogress '\n'
+#ifdef CONFIG_HCS12_NONBANKED
+	jsr		os_start
+#else
 	call	os_start
+#endif
 	bra		__start
 
 	/* Variables:
@@ -201,32 +214,37 @@ __start:
 	 */
 
 .Lsbss:
-	.long	_sbss
+	.hword	_sbss
 .Lebss:
-	.long	_ebss
+	.hword	_ebss
 .Lstackbase:
 	.hword	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 .Leronly:
-	.long	_eronly /* Where .data defaults are stored in FLASH */
+	.hword	_eronly /* Where .data defaults are stored in FLASH */
 .Lsdata:
-	.long	_sdata	/* Where .data needs to reside in SDRAM */
+	.hword	_sdata	/* Where .data needs to reside in SDRAM */
 .Ledata:
-	.long	_edata
+	.hword	_edata
 	.size	__start, .-__start
 
-	/* This global variable is unsigned long g_heapbase and is
-	 * exported from here only because of its coupling to LCO
-	 * above.
-	 */
 
-	.data
-	.align	4
+/************************************************************************************
+ * .rodata
+ ************************************************************************************/
+
+	.section	.rodata, "a"
+
+/* Variables: _sbss is the start of the BSS region (see ld.script) _ebss is the end
+ * of the BSS regsion (see ld.script). The idle task stack starts at the end of BSS
+ * and is of size CONFIG_IDLETHREAD_STACKSIZE.	The IDLE thread is the thread that
+ * the system boots on and, eventually, becomes the idle, do nothing task that runs
+ * only when there is nothing else to run.	The heap continues from there until the
+ * end of memory.  See g_heapbase below.
+ */
+
 	.globl	g_heapbase
 	.type	g_heapbase, object
 g_heapbase:
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
+	.hword	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 	.size	g_heapbase, .-g_heapbase
-
-	.end
-
 	.end
