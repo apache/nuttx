@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/hc/include/limits.h
+ * arch/hc/include/hcs12/limits.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,23 +33,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_HC_INCLUDE_LIMITS_H
-#define __ARCH_HC_INCLUDE_LIMITS_H
+#ifndef __ARCH_HC_INCLUDE_HCS12_LIMITS_H
+#define __ARCH_HC_INCLUDE_HCS12_LIMITS_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include architecture-specific limits definitions */
-
-#if defined(CONFIG_ARCH_HC12)
-# include <arch/hc12/limits.h>
-#elif defined(CONFIG_ARCH_HCS12)
-# include <arch/hcs12/limits.h>
-#endif
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#endif /* __ARCH_HC_INCLUDE_LIMITS_H */
+#define CHAR_BIT    8
+#define SCHAR_MIN   0x80
+#define SCHAR_MAX   0x7f
+#define UCHAR_MAX   0xff
+
+/* These could be different on machines where char is unsigned */
+
+#define CHAR_MIN    SCHAR_MIN
+#define CHAR_MAX    SCHAR_MAX
+
+#define SHRT_MIN    0x8000
+#define SHRT_MAX    0x7fff
+#define USHRT_MAX   0xffff
+
+/* The size of an integer is controlled with the -mshort or -mnoshort GCC
+ * options.  GCC will set the pre-defined symbol __INT__ to indicate the size
+ * of an integer
+ */
+
+#if __INT__ == 32
+#  define INT_MIN   0x80000000
+#  define INT_MAX   0x7fffffff
+#  define UINT_MAX  0xffffffff
+#else
+#  define INT_MIN   0x8000
+#  define INT_MAX   0x7fff
+#  define UINT_MAX  0xffff
+#endif
+
+/* Long is 4-bytes and long long is 8 bytes in any case */
+
+#define LONG_MAX    0x80000000
+#define LONG_MIN    0x7fffffff
+#define ULONG_MAX   0xffffffff
+
+#define LLONG_MAX   0x8000000000000000
+#define LLONG_MIN   0x7fffffffffffffff
+#define ULLONG_MAX  0xffffffffffffffff
+
+#endif /* __ARCH_HC_INCLUDE_HCS12_LIMITS_H */

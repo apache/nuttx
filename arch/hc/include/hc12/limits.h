@@ -59,11 +59,11 @@
 #define USHRT_MAX   0xffff
 
 /* The size of an integer is controlled with the -mshort or -mnoshort GCC
- * options.  Here we assume that -mshort is applied and that the size of
- * and integer is 2-bytes (unless CONFIG_HC12_INT32 is defined)
+ * options.  GCC will set the pre-defined symbol __INT__ to indicate the size
+ * of an integer
  */
 
-#ifdef CONFIG_HC12_INT32
+#if __INT__ == 32
 #  define INT_MIN   0x80000000
 #  define INT_MAX   0x7fffffff
 #  define UINT_MAX  0xffffffff

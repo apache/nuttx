@@ -38,5 +38,5 @@ HEAD_ASRC	= mc9s12ne64_vectors.S
 CMN_ASRCS	= 
 CMN_CSRCS	= 
 
-CHIP_ASRCS	= mc9s12ne64_start.S
+CHIP_ASRCS	= mc9s12ne64_start.S mc9s12ne64_lowputc.S
 CHIP_CSRCS	= 

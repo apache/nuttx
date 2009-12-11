@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/chip.h
+ * arch/hc/include/hcs12/irq.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,12 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_HC_SRC_MC9S12NE64_CHIP_H
-#define __ARCH_HC_SRC_MC9S12NE64_CHIP_H
+/* This file should never be included directed but, rather,
+ * only indirectly through nuttx/irq.h
+ */
+
+#ifndef __ARCH_HC_INCLUDE_HCS12_IRQ_H
+#define __ARCH_HC_INCLUDE_HCS12_IRQ_H
 
 /************************************************************************************
  * Included Files
@@ -42,23 +46,67 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <nuttx/irq.h>
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-#define HCS12_MODULE_BASE 0x0000
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+
+/* This structure defines the way the registers are stored. */
+
+#ifndef __ASSEMBLY__
+struct xcptcontext
+{
+  int dummy; /* For now */
+};
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/* Save the current interrupt enable state & disable IRQs */
+
+static inline irqstate_t irqsave(void)
+{
+  /* To be provided */
+}
+
+/* Restore saved IRQ & FIQ state */
+
+static inline void irqrestore(irqstate_t flags)
+{
+  /* To be provided */
+}
+
+static inline void system_call(swint_t func, int parm1,
+                               int parm2, int parm3)
+{
+  /* To be provided */
+}
 
 /************************************************************************************
  * Public Data
  ************************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_HC_SRC_MC9S12NE64_CHIP_H */
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_HC_INCLUDE_HCS12_IRQ_H */
