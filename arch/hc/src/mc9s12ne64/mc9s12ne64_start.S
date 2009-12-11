@@ -44,14 +44,19 @@
 #include "mc9s12ne64_internal.h"
 #include "mc9s12ne64_mmc.h"
 #include "mc9s12ne64_crg.h"
+#include "mc9s12ne64_flash.h"
 
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
 
-/************************************************************************************
+#define INITRG_REG (MMC_INITRG_REG(HCS12_REG_BASE))
+#define INITRM_MAP (MMC_INITRM_RAM(HCS12_SRAM_BASE)|MMC_INITRM_RAMHAL)
+#define INITEE_EE  (MMC_INITEE_EE(HCS12_EEPROM_BASE)|MMC_INITEE_EEON)
+
+/****************************************************************************
  * Global Symbols
- ************************************************************************************/
+ ****************************************************************************/
 
 	.globl		__start
 	.globl		os_start
@@ -71,19 +76,24 @@
 #endif
 	.endm
 
-/* Memory map initialization */
-
+/* Memory map initialization.
+ *
+ * The MC9S12NE64 has 64K bytes of FLASH EEPROM and 8K bytes of RAM.
+ */
+ 
 	.macro	MMCINIT
-	movb	#0x00, HCS12_MMC_INITRG			/* Set the register map position to 0x0000*/
+	/* Registers are always positioned at address 0x0000 */
+
+	movb	#INITRG_REG, HCS12_MMC_INITRG	/* Set the register map position to 0x0000*/
 	nop
 
-#ifdef CONFIG_HCS12_SERIALMON
-	movb	#0x39, HCS12_MMC_INITRM			/* Set RAM position to 0x3800 to end at 0x3fff */
-#else
-	movb	#0x20, HCS12_MMC_INITRM			/* Set RAM position to 0x2000*/
-#endif
+	/* Position SRAM so that is ends at address 0x3fff.  This is required
+	 * because the Freescale serial monitor initializes its stack to the
+	 * end+1 of SRAM which it expects to be at address 0x4000
+ 	 */
 
-	movb	#0x09, HCS12_MMC_INITEE			/* Set EEPROM position to 0x0800 */
+	movb	#INITRM_MAP, HCS12_MMC_INITRM	/* Set RAM position to 0x2000-0x3fff */
+	movb	#INITEE_EE, HCS12_MMC_INITEE	/* Set EEPROM position to 0x0800 */
 	movb	#MMC_MISC_ROMON, HCS12_MMC_MISC	/* MISC: EXSTR1=0 EXSTR0=0 ROMHM=0 ROMON=1 */
 	.endm
 

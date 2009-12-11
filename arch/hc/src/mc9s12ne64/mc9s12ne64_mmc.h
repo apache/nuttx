@@ -50,21 +50,24 @@
 
 /* MMC Sub-block */
 
-#define HCS12_MMC_INITRM            0x0010  /* Internal RAM Position Register */
+#define HCS12_MMC_INITRM           0x0010   /* Internal RAM Position Register */
 #  define MMC_INITRM_RAMHAL        (1 << 0) /* Bit 0: RAM High-Align */
 #  define MMC_INITRM_RAM_SHIFT     (3)      /* Bits 3-7: Internal RAM Map Position */
 #  define MMC_INITRM_RAM_MASK      (0x1f << MMC_INITRM_RAM_SHIFT)
+#  define MMC_INITRM_RAM(addr)     (((addr) >> (11-MMC_INITRM_RAM_SHIFT)) & MMC_INITRM_RAM_MASK)
 
-#define HCS12_MMC_INITRG            0x0011  /* Internal Registers Position Register */
+#define HCS12_MMC_INITRG           0x0011   /* Internal Registers Position Register */
 #  define MMC_INITRG_REG_SHIFT     (3)      /* Bits 3-6: Internal RAM Map Position */
 #  define MMC_INITRG_REG_MASK      (0x0f << MMC_INITRG_REG_SHIFT)
+#  define MMC_INITRG_REG(addr)     (((addr) >> (11-MMC_INITRG_REG_SHIFT)) & MMC_INITRG_REG_SHIFT)
 
-#define HCS12_MMC_INITEE            0x0012  /* Internal EEPROM Position Register */
-#  define MMC_INITEE_EEON         (1 << 0)  /* Bit 0: Enable EEPROM */
-#  define MMC_INITEE_EE_SHIFT     (3)       /* Bits 3-7: Internal EEPROM Map Position */
-#  define MMC_INITEE_EE_MASK      (0x1f << MMC_INITEE_EE_SHIFT)
+#define HCS12_MMC_INITEE           0x0012    /* Internal EEPROM Position Register */
+#  define MMC_INITEE_EEON          (1 << 0)  /* Bit 0: Enable EEPROM */
+#  define MMC_INITEE_EE_SHIFT      (3)       /* Bits 3-7: Internal EEPROM Map Position */
+#  define MMC_INITEE_EE_MASK       (0x1f << MMC_INITEE_EE_SHIFT)
+#  define MMC_INITEE_EE(addr)      (((addr) >> (11-MMC_INITRG_REG_SHIFT)) & MMC_INITRG_REG_SHIFT)
 
-#define HCS12_MMC_MISC              0x0013  /* Miscellaneous System Control Register */
+#define HCS12_MMC_MISC             0x0013   /* Miscellaneous System Control Register */
 #  define MMC_MISC_ROMON           (1 << 0) /* Bit 0: Enable FLASH EEPROM or ROM */
 #  define MMC_MISC_ROMHM           (1 << 1) /* Bit 1: FLASH EEPROM or ROM Only in Second Half of Memory Map */
 #  define MMC_MISC_EXSTR_SHIFT     (3)      /* Bits 3-7: External Access Stretch Bits */
@@ -74,10 +77,10 @@
 #    define MISC_EXSTR_CLKS2       (2 << MMC_MISC_EXSTR_SHIFT)
 #    define MISC_EXSTR_CLKS3       (3 << MMC_MISC_EXSTR_SHIFT)
 
-#define HCS12_MMC_TESTREG0          0x0014  /* Reserved Test Register 0 */
-#define HCS12_MMC_TESTREG1          0x0017  /* Reserved Test Register 1 */
+#define HCS12_MMC_TESTREG0         0x0014   /* Reserved Test Register 0 */
+#define HCS12_MMC_TESTREG1         0x0017   /* Reserved Test Register 1 */
 
-#define HCS12_MMC_MEMSIZ0           0x001c  /* Memory Size Register 0 */
+#define HCS12_MMC_MEMSIZ0          0x001c   /* Memory Size Register 0 */
 #  define MMC_MEMSIZ0_RAMSW_SHIFT (0)       /* Bits 0-2: Allocated System RAM Memory Space */
 #  define MMC_MEMSIZ0_RAMSW_MASK  (7 << MMC_MEMSIZ0_RAMSW_SHIFT)
 #    define MEMSIZ0_RAMSW_2KB     (0 << MMC_MEMSIZ0_RAMSW_SHIFT)
@@ -96,7 +99,7 @@
 #    define MEMSIZ0_EEPSW_5KB     (3 << MMC_MEMSIZ0_EEPSW_MASK)
 #  define MMC_MEMSIZ0_REGSW       (1 << 7)  /* Bits 7: Allocated System Register Space */
 
-#define HCS12_MMC_MEMSIZ1           0x001d  /* Memory Size Register 1 */
+#define HCS12_MMC_MEMSIZ1         0x001d    /* Memory Size Register 1 */
 #  define MMC_MEMSIZ1_PAGSW_SHIFT (0)       /* Bits 0-1: Allocated System RAM Memory Space */
 #  define MMC_MEMSIZ1_PAGSW_MASK  (3 << MMC_MEMSIZ1_PAGSW_SHIFT)
 #    define MEMSIZ1_PAGSW_128KB   (0 << MMC_MEMSIZ1_PAGSW_SHIFT)
@@ -110,7 +113,7 @@
 #    define MEMSIZ1_ROMSW_48KB    (2 << MMC_MEMSIZ1_ROMSW_SHIFT)
 #    define MEMSIZ1_ROMSW_64KB    (3 << MMC_MEMSIZ1_ROMSW_SHIFT)
 
-#define HCS12_MMC_PPAGE            0x0030   /* Program Page Index Register */
+#define HCS12_MMC_PPAGE           0x0030    /* Program Page Index Register */
 #  define MMC_PPAGE_PIX_SHIFT     (0)       /* Bits 0-5 Program Page Index Bits 5–0 */
 #  define MMC_PPAGE_PIX_MASK      (0x3f << MMC_PPAGE_PIX_SHIFT)
 
