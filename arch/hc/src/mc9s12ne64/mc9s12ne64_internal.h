@@ -52,15 +52,6 @@
 
 /* Configuration ********************************************************************/
 
-/* User-Accessible utility subroutines provided by the serial monitor */
-
-#define PutChar     0xfee6 /* Sends the character in A out SCI0 */
-#define GetChar     0xfee9 /* Return character received from SCIO in A */
-#define EraseAllCmd 0xfeec /* Erase all flash (except bootloader) */
-#define DoOnStack   0xfeef /* Copy to stack and execute from RAM */
-#define WriteD2IX   0xfef2 /* Write the data in D (word) to the address in IX.
-                            * The location may be RAM, FLASH, EEPROM, or a register */
-
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/

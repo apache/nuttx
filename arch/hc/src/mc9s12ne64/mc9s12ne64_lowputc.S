@@ -38,10 +38,10 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
-#include "up_internal.h"
 
-#include "up_arch.h"
+#include "up_internal.h"
 #include "mc9s12ne64_internal.h"
+#include "mc9s12ne64_flash.h"
 
 /**************************************************************************
  * Private Definitions
@@ -95,7 +95,7 @@ up_lowsetup:
 	.type	up_lowputc, function
 up_lowputc:
 #ifdef CONFIG_HCS12_SERIALMON
-	bra		PutChar
+	jmp		PutChar
 #else
 # error "up_lowputc not implemented"
 #endif
