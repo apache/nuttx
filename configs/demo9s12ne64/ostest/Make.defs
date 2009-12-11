@@ -36,11 +36,19 @@
 include ${TOPDIR}/.config
 
 # Setup for the selected toolchain
+# NuttX buildroot under Linux or Cygwin
 
-  # NuttX buildroot under Linux or Cygwin
-  CROSSDEV = m68hc12-elf-
-  ARCHCPUFLAGS = -m68hcs12 -mshort
-  MAXOPTIMIZATION = -Os
+CROSSDEV = m68hc12-elf-
+MAXOPTIMIZATION = -Os
+WINTOOL = n
+
+ifeq ($(CONFIG_HCS12_NONBANKED),y)
+  ARCHCPUFLAGS = -m68hcs12 -mshort -mnolong-calls
+  LDSCRIPT = ld.script.nonbanked
+else
+  ARCHCPUFLAGS = -m68hcs12 -mshort -mlong-calls
+  LDSCRIPT = ld.script.banked
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
@@ -49,14 +57,14 @@ ifeq ($(WINTOOL),y)
   MKDEP = $(TOPDIR)/tools/mknulldeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)}"
   MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
+  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/$(LDSCRIPT)
 endif
 
 CC = $(CROSSDEV)gcc
