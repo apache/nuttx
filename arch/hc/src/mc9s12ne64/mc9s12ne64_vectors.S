@@ -50,7 +50,7 @@
  ************************************************************************************/
 
 	.globl		__start
-	.file		"mc9shc12ne64_vectors.S"
+	.file		"mc9s12ne64_vectors.S"
 
 /************************************************************************************
  * Macros
@@ -64,12 +64,12 @@
  * Vectors
  ************************************************************************************/
 
-	.section	.vectors, "x"
+	.section	vectors, "x"
 	.align		2
-	.globl		hc12_vectors
-	.type		hc12_vectors, function
+	.globl		hcs12_vectors
+	.type		hcs12_vectors, function
 
-hc12_vectors:
+hcs12_vectors:
 											/* ff80-ff9f: Reserved */
 	.hword		villegal					/* ff80: Reserved*/
 	.hword		villegal					/* ff82: Reserved */
@@ -136,7 +136,7 @@ hc12_vectors:
 	.hword		vclkmon 					/* fffc: Clock monitor fail reset */
 	.hword		__start 					/* fffe: Reset vector */
 
-	.size	hc12_vectors, .-hc12_vectors
+	.size	hcs12_vectors, .-hcs12_vectors
 
 /************************************************************************************
  * .text
@@ -146,44 +146,44 @@ hc12_vectors:
 	.type	handlers, function
 handlers:
 
-	HANDLER vemacec, HC12_IRQ_VEMACEC			/* EMAC excessive collision */
-	HANDLER vemaclc, HC12_IRQ_VEMACLC			/* EMAC late collision */
-	HANDLER vemacbrxerr, HC12_IRQ_VEMACBRXERR	/* EMAC babbling receive error */
-	HANDLER vemacrxbbo, HC12_IRQ_VEMACRXBBO 	/* EMAC receive buffer B overrun */
-	HANDLER vemacrxbao, HC12_IRQ_VEMACRXBAO 	/* EMAC receive buffer A overrun */
-	HANDLER vemacrxerr, HC12_IRQ_VEMACRXERR 	/* EMAC receive error */
-	HANDLER vemacmii, HC12_IRQ_VEMACMII 		/* EMAC MII management transfer complete */
-	HANDLER vemacrxfc, HC12_IRQ_VEMACRXFC		/* EMAC receive flow control */
-	HANDLER vemactxc, HC12_IRQ_VEMACTXC 		/* EMAC frame transmission complete */
-	HANDLER vemaccrxbbc, HC12_IRQ_VEMACCRXBBC	/* EMAC receive buffer B complete */
-	HANDLER vemaccrxbac, HC12_IRQ_VEMACCRXBAC	/* EMAC receive buffer A complete */
-	HANDLER vephy, HC12_IRQ_VEPHY				/* EPHY interrupt */
-	HANDLER vflash, HC12_IRQ_VFLASH 			/* FLASH */
-	HANDLER viic, HC12_IRQ_VIIC 				/* IIC bus */
-	HANDLER vcrgscm, HC12_IRQ_VCRGSCM			/* CRG self clock mode */
-	HANDLER vcrgplllck, HC12_IRQ_VCRGPLLLCK 	/* CRG PLL lock */
-	HANDLER vportg, HC12_IRQ_VPORTG 			/* Port G */
-	HANDLER vporth, HC12_IRQ_VPORTH 			/* Port H */
-	HANDLER vportj, HC12_IRQ_VPORTJ 			/* Port J */
-	HANDLER vatd, HC12_IRQ_VATD 				/* ATD */
-	HANDLER vsci1, HC12_IRQ_VSCI1				/* SCI1 */
-	HANDLER vsci0, HC12_IRQ_VSCI0				/* SCI0 */
-	HANDLER vspi, HC12_IRQ_VSPI 				/* SPI */
-	HANDLER vtimpaie, HC12_IRQ_VTIMPAIE 		/* Pulse accumulator input edge */
-	HANDLER vtimpaovf, HC12_IRQ_VTIMPAOVF		/* Pulse accumulator overflow */
-	HANDLER vtimovf, HC12_IRQ_VTIMOVF			/* Standard timer overflow */
-	HANDLER vtimch7, HC12_IRQ_VTIMCH7			/* Standard timer channel 7 */
-	HANDLER vtimch6, HC12_IRQ_VTIMCH6			/* Standard timer channel 6 */
-	HANDLER vtimch5, HC12_IRQ_VTIMCH5			/* Standard timer channel 5 */
-	HANDLER vtimch4, HC12_IRQ_VTIMCH4			/* Standard timer channel 4 */
-	HANDLER vrti, HC12_IRQ_VRTI 				/* Real-time interrupt */
-	HANDLER virq, HC12_IRQ_VIRQ 				/* IRQ */
-	HANDLER vxirq, HC12_IRQ_VXIRQ				/* XIRQ */
-	HANDLER vswi, HC12_IRQ_VSWI 				/* SWI */
-	HANDLER vtrap, HC12_IRQ_VTRAP				/* Unimplemented instruction trap */
-	HANDLER vcop, HC12_IRQ_VCOP 				/* COP failure reset*/
-	HANDLER vclkmon, HC12_IRQ_VCLKMON			/* Clock monitor fail reset */
-	HANDLER villegal, HC12_IRQ_VILLEGAL 		/* Any reserved vector */
+	HANDLER vemacec, HCS12_IRQ_VEMACEC			/* EMAC excessive collision */
+	HANDLER vemaclc, HCS12_IRQ_VEMACLC			/* EMAC late collision */
+	HANDLER vemacbrxerr, HCS12_IRQ_VEMACBRXERR	/* EMAC babbling receive error */
+	HANDLER vemacrxbbo, HCS12_IRQ_VEMACRXBBO 	/* EMAC receive buffer B overrun */
+	HANDLER vemacrxbao, HCS12_IRQ_VEMACRXBAO 	/* EMAC receive buffer A overrun */
+	HANDLER vemacrxerr, HCS12_IRQ_VEMACRXERR 	/* EMAC receive error */
+	HANDLER vemacmii, HCS12_IRQ_VEMACMII 		/* EMAC MII management transfer complete */
+	HANDLER vemacrxfc, HCS12_IRQ_VEMACRXFC		/* EMAC receive flow control */
+	HANDLER vemactxc, HCS12_IRQ_VEMACTXC 		/* EMAC frame transmission complete */
+	HANDLER vemaccrxbbc, HCS12_IRQ_VEMACCRXBBC	/* EMAC receive buffer B complete */
+	HANDLER vemaccrxbac, HCS12_IRQ_VEMACCRXBAC	/* EMAC receive buffer A complete */
+	HANDLER vephy, HCS12_IRQ_VEPHY				/* EPHY interrupt */
+	HANDLER vflash, HCS12_IRQ_VFLASH 			/* FLASH */
+	HANDLER viic, HCS12_IRQ_VIIC 				/* IIC bus */
+	HANDLER vcrgscm, HCS12_IRQ_VCRGSCM			/* CRG self clock mode */
+	HANDLER vcrgplllck, HCS12_IRQ_VCRGPLLLCK 	/* CRG PLL lock */
+	HANDLER vportg, HCS12_IRQ_VPORTG 			/* Port G */
+	HANDLER vporth, HCS12_IRQ_VPORTH 			/* Port H */
+	HANDLER vportj, HCS12_IRQ_VPORTJ 			/* Port J */
+	HANDLER vatd, HCS12_IRQ_VATD 				/* ATD */
+	HANDLER vsci1, HCS12_IRQ_VSCI1				/* SCI1 */
+	HANDLER vsci0, HCS12_IRQ_VSCI0				/* SCI0 */
+	HANDLER vspi, HCS12_IRQ_VSPI 				/* SPI */
+	HANDLER vtimpaie, HCS12_IRQ_VTIMPAIE 		/* Pulse accumulator input edge */
+	HANDLER vtimpaovf, HCS12_IRQ_VTIMPAOVF		/* Pulse accumulator overflow */
+	HANDLER vtimovf, HCS12_IRQ_VTIMOVF			/* Standard timer overflow */
+	HANDLER vtimch7, HCS12_IRQ_VTIMCH7			/* Standard timer channel 7 */
+	HANDLER vtimch6, HCS12_IRQ_VTIMCH6			/* Standard timer channel 6 */
+	HANDLER vtimch5, HCS12_IRQ_VTIMCH5			/* Standard timer channel 5 */
+	HANDLER vtimch4, HCS12_IRQ_VTIMCH4			/* Standard timer channel 4 */
+	HANDLER vrti, HCS12_IRQ_VRTI 				/* Real-time interrupt */
+	HANDLER virq, HCS12_IRQ_VIRQ 				/* IRQ */
+	HANDLER vxirq, HCS12_IRQ_VXIRQ				/* XIRQ */
+	HANDLER vswi, HCS12_IRQ_VSWI 				/* SWI */
+	HANDLER vtrap, HCS12_IRQ_VTRAP				/* Unimplemented instruction trap */
+	HANDLER vcop, HCS12_IRQ_VCOP 				/* COP failure reset*/
+	HANDLER vclkmon, HCS12_IRQ_VCLKMON			/* Clock monitor fail reset */
+	HANDLER villegal, HCS12_IRQ_VILLEGAL 		/* Any reserved vector */
 
 /************************************************************************************
  *	Common IRQ handling logic

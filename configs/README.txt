@@ -585,7 +585,7 @@ configs/c5471evm
     This port is complete, verified, and included in the NuttX release.
 
 configs/demo9s12ne64
-    Feescale DMO9S12NE64 board based on the MC9S12NE64 hc12 cpu.  This
+    Feescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
     port uses the m68hc12 GCC toolchain.  STATUS:  Under development.
 
 configs/eagle100

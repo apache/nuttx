@@ -56,8 +56,10 @@
  * save structure and irqsave()/irqrestore() macros
  */
 
-#ifdef CONFIG_ARCH_HC12
+#if defined(CONFIG_ARCH_HC12)
 # include <arch/hc12/irq.h>
+#elif defined(CONFIG_ARCH_HCS12)
+# include <arch/hcs12/irq.h>
 #endif
 
 /****************************************************************************

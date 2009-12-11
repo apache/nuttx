@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include "mc9s12ne64_internal.h"
 #include "mc9s12ne64_mmc.h"
 #include "mc9s12ne64_crg.h"
 
@@ -60,49 +61,59 @@
  * Macros
  ****************************************************************************/
 
+/* Print a character on the UART to show boot status. This macro will
+ * modify r0, r1, r2 and r14
+ */
+
+	.macro	showprogress, code
+#if defined(CONFIG_DEBUG) && defined(CONFIG_HCS12_SERIALMON)
+	jsr		#PutChar
+#endif
+	.endm
+
 /* Memory map initialization */
 
 	.macro	MMCINIT
-	clr		HC12_MMC_INITRG			/* Set the register map position to 0x0000*/
+	movb	#0x00, HCS12_MMC_INITRG			/* Set the register map position to 0x0000*/
 	nop
 
-	ldab	#0x09
-	stab	*HC12_MMC_INITEE		/* Set EEPROM position to 0x0800 */
-
-#ifdef CONFIG_HC12_SERIALMON
-	ldab	#0x39					/* Set RAM position to 0x3800 */
+#ifdef CONFIG_HCS12_SERIALMON
+	movb	#0x39, HCS12_MMC_INITRM			/* Set RAM position to 0x3800 to end at 0x3fff */
 #else
-	ldab	#0x20					/* Set RAM position to 0x2000*/
+	movb	#0x20, HCS12_MMC_INITRM			/* Set RAM position to 0x2000*/
 #endif
-	stab	*HC12_MMC_INITRM
-	ldaa	#MMC_MISC_ROMON			/* MISC: EXSTR1=0 EXSTR0=0 ROMHM=0 ROMON=1 */
-	staa	*HC12_MMC_MISC		
+
+	movb	#0x09, HCS12_MMC_INITEE			/* Set EEPROM position to 0x0800 */
+	movb	#MMC_MISC_ROMON, HCS12_MMC_MISC	/* MISC: EXSTR1=0 EXSTR0=0 ROMHM=0 ROMON=1 */
 	.endm
 
-/* System clock initialization */
+/* System clock initialization.  If the serial monitor is used, then clocking will have
+ * already been configured at 24 MHz
+ */
 
 	.macro	PLLINIT 
-
+#ifndef CONFIG_HCS12_SERIALMON
 	/* Select the clock source from crystal */
 
-	clr 	HC12_CRG_CLKSEL
+	clr 	HCS12_CRG_CLKSEL
 
 	/* Set the multipler and divider and enable the PLL */
 
-	bclr	*HC12_CRG_PLLCTL #CRG_PLLCTL_PLLON
+	bclr	*HCS12_CRG_PLLCTL #CRG_PLLCTL_PLLON
 	ldab	#15
-	stab	HC12_CRG_SYNR
-	stab	HC12_CRG_REFDV
-	bset	*HC12_CRG_PLLCTL #CRG_PLLCTL_PLLON
+	stab	HCS12_CRG_SYNR
+	stab	HCS12_CRG_REFDV
+	bset	*HCS12_CRG_PLLCTL #CRG_PLLCTL_PLLON
 
 	/* Wait for the PLL to lock on */
 
 .Lpll_lock:
-	brclr	*HC12_CRG_CRGFLG #CRG_CRGFLG_LOCK .Lpll_lock
+	brclr	*HCS12_CRG_CRGFLG #CRG_CRGFLG_LOCK .Lpll_lock
 
 	/* Then select the PLL clock source */
 
-	bset	*HC12_CRG_CLKSEL #CRG_CLKSEL_PLLSEL
+	bset	*HCS12_CRG_CLKSEL #CRG_CLKSEL_PLLSEL
+#endif
 	.endm
 
 
@@ -129,6 +140,7 @@ __start:
 	/* Setup the stack pointer */
 
 	lds		.Lstackbase
+	showprogress 'A'
 
 	/* Clear BSS */
 
@@ -144,6 +156,7 @@ __start:
 	inx								/* Address the next byte */
 	bra 	.Lclearbss				/* And loop until all cleared */
 .Lbsscleared:
+	showprogress 'B'
 
 	/* Initialize the data section */
 
@@ -160,9 +173,11 @@ __start:
 	inx								/* Increment the destination address */
 	bra 	.Linitdata				/* And loop until all of .DATA is initialized */
 .Ldatainitialized:
+	showprogress 'C'
 
 	/* Now, start the OS */
 
+	showprogress '\n'
 	call	os_start
 	bra		__start
 

@@ -60,25 +60,25 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: hc12_boardinitialize
+ * Name: hcs12_boardinitialize
  *
  * Description:
- *   All HC12 architectures must provide the following entry point.  This entry point
+ *   All INCLUDE_HCS12_ARCH architectures must provide the following entry point.  This entry point
  *   is called early in the intitialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void hc12_boardinitialize(void)
+void hcs12_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * hc12_spiinitialize() has been brought into the link.
+   * hcs12_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_HC12_SPI)
-  if (hc12_spiinitialize)
+#if defined(CONFIG_INCLUDE_HCS12_ARCH_SPI)
+  if (hcs12_spiinitialize)
     {
-      hc12_spiinitialize();
+      hcs12_spiinitialize();
     }
 #endif
 

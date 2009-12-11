@@ -40,6 +40,9 @@ ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(CONFIG_ARCH_HC12),y)
 ARCH_SUBDIR	= hc12
 endif
+ifeq ($(CONFIG_ARCH_HCS12),y)
+ARCH_SUBDIR	= hcs12
+endif
 
 ifeq ($(WINTOOL),y)
   NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx}"

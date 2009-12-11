@@ -87,16 +87,16 @@ extern "C" {
  * Public Function Prototypes
  ************************************************************************************/
 /************************************************************************************
- * Name: hc12_boardinitialize
+ * Name: hcs12_boardinitialize
  *
  * Description:
- *   All HC12 architectures must provide the following entry point.  This entry point
+ *   All HCS12 architectures must provide the following entry point.  This entry point
  *   is called early in the intitialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-EXTERN void hc12_boardinitialize(void);
+EXTERN void hcs12_boardinitialize(void);
 
 /************************************************************************************
  * Button support.

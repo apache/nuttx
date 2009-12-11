@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/hc/include/limits.h
+ * arch/hc/include/hcs12/types.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,23 +33,64 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_HC_INCLUDE_LIMITS_H
-#define __ARCH_HC_INCLUDE_LIMITS_H
+/* This file should never be included directed but, rather, only indirectly
+ * through sys/types.h
+ */
+
+#ifndef __ARCH_HC_INCLUDE_HCS12_TYPES_H
+#define __ARCH_HC_INCLUDE_HCS12_TYPES_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include architecture-specific limits definitions */
-
-#if defined(CONFIG_ARCH_HC12)
-# include <arch/hc12/limits.h>
-#elif defined(CONFIG_ARCH_HCS12)
-# include <arch/hcs12/limits.h>
-#endif
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#endif /* __ARCH_HC_INCLUDE_LIMITS_H */
+/****************************************************************************
+ * Type Declarations
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* These are the sizes of the standard GNU types */
+
+typedef char sbyte;
+typedef unsigned char ubyte;
+typedef unsigned char uint8;
+typedef unsigned char boolean;
+typedef short sint16;
+typedef unsigned short uint16;
+
+/* Normally, mc68hc1x code is compiled with the -mshort option
+ * which results in a 16-bit integer.  If -mnoshort is defined
+ * then an integer is 32-bits.  GCC will defined __INT__ accordingly:
+ */
+
+# if __INT__ == 16
+typedef long sint32;
+typedef unsigned long uint32;
+#else
+typedef int sint32;
+typedef unsigned int uint32;
+#endif
+
+typedef long long sint64;
+typedef unsigned long long uint64;
+
+/* A pointer is two bytes */
+
+typedef unsigned short uintptr;
+
+/* This is the size of the interrupt state save returned by irqsave()*/
+
+typedef unsigned int irqstate_t;
+
+#endif /* __ASSEMBLY__ */
+
+/****************************************************************************
+ * Global Function Prototypes
+ ****************************************************************************/
+
+#endif /* __ARCH_HC_INCLUDE_HCS12_TYPES_H */

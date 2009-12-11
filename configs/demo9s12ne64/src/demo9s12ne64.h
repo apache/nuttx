@@ -65,14 +65,26 @@
  * Public Functions
  ************************************************************************************/
 /************************************************************************************
- * Name: hc12_spiinitialize
+ * Name: up_ledinit
+ *
+ * Description:
+ *   Configure and initialize on-board LEDs
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+extern void up_ledinit(void);
+#endif
+
+/************************************************************************************
+ * Name: hcs12_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the STM3210E-EVAL board.
  *
  ************************************************************************************/
 
-extern void weak_function hc12_spiinitialize(void);
+extern void weak_function hcs12_spiinitialize(void);
 
 
 #endif /* __ASSEMBLY__ */

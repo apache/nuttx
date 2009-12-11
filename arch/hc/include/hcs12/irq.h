@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/demo9s12ne64/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * arch/hc/include/hcs12/irq.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,96 +33,80 @@
  *
  ************************************************************************************/
 
+/* This file should never be included directed but, rather,
+ * only indirectly through nuttx/irq.h
+ */
+
+#ifndef __ARCH_HC_INCLUDE_HCS12_IRQ_H
+#define __ARCH_HC_INCLUDE_HCS12_IRQ_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-
-#include <debug.h>
-
-#include <nuttx/spi.h>
-#include <arch/board/board.h>
-
-#include "demo9s12ne64.h"
-
-#if defined(CONFIG_HCS12_SPI)
+#include <nuttx/irq.h>
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
 
-#undef SPI_DEBUG   /* Define to enable debug */
-#undef SPI_VERBOSE /* Define to enable verbose debug */
+/* This structure defines the way the registers are stored. */
 
-#ifdef SPI_DEBUG
-#  define spidbg  lldbg
-#  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  undef SPI_VERBOSE
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
+#ifndef __ASSEMBLY__
+struct xcptcontext
+{
+  int dummy; /* For now */
+};
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/* Save the current interrupt enable state & disable IRQs */
+
+static inline irqstate_t irqsave(void)
+{
+  /* To be provided */
+}
+
+/* Restore saved IRQ & FIQ state */
+
+static inline void irqrestore(irqstate_t flags)
+{
+  /* To be provided */
+}
+
+static inline void system_call(swint_t func, int parm1,
+                               int parm2, int parm3)
+{
+  /* To be provided */
+}
 
 /************************************************************************************
- * Private Functions
+ * Public Data
  ************************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: hcs12_spiinitialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the DEMO9S12NE64 board.
- *
- ************************************************************************************/
-
-void weak_function hcs12_spiinitialize(void)
-{
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-/****************************************************************************
- * Name:  hcs12_spiselect and hcs12_spistatus
- *
- * Description:
- *   The external functions, hcs12_spiselect and hcs12_spistatus must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common HCS12 logic.  To use this common SPI logic on your
- *   board:
- *
- *   1. Provide logic in hcs12_boardinitialize() to configure SPI chip select
- *      pins.
- *   2. Provide hcs12_spiselect() and hcs12_spistatus() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
- *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
- *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
- *      the SPI MMC/SD driver).
- *
- ****************************************************************************/
-
-void hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
-{
-}
-
-ubyte hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  return SPI_STATUS_PRESENT;
-}
-
-#endif /* CONFIG_HCS12_SPI */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_HC_INCLUDE_HCS12_IRQ_H */

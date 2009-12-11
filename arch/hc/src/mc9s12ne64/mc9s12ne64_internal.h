@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/demo9s12ne64/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * arch/hc/src/mc9s12ne64/mc9x12ne64_internal.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,6 +33,9 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_HC_SRC_MC9S12NE64_MC9S12NE64_INTERNAL_H
+#define __ARCH_HC_SRC_MC9S12NE64_MC9S12NE64_INTERNAL_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
@@ -41,58 +43,70 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include <debug.h>
-
-#include <nuttx/spi.h>
-#include <arch/board/board.h>
-
-#include "demo9s12ne64.h"
-
-#if defined(CONFIG_HCS12_SPI)
+#include "up_internal.h"
+#include "chip.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* Configuration ********************************************************************/
 
-#undef SPI_DEBUG   /* Define to enable debug */
-#undef SPI_VERBOSE /* Define to enable verbose debug */
+/* User-Accessible utility subroutines provided by the serial monitor */
 
-#ifdef SPI_DEBUG
-#  define spidbg  lldbg
-#  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
+#define PutChar     0xfee6 /* Sends the character in A out SCI0 */
+#define GetChar     0xfee9 /* Return character received from SCIO in A */
+#define EraseAllCmd 0xfeec /* Erase all flash (except bootloader) */
+#define DoOnStack   0xfeef /* Copy to stack and execute from RAM */
+#define WriteD2IX   0xfef2 /* Write the data in D (word) to the address in IX.
+                            * The location may be RAM, FLASH, EEPROM, or a register */
+
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
 #else
-#  undef SPI_VERBOSE
-#  define spidbg(x...)
-#  define spivdbg(x...)
+#define EXTERN extern
 #endif
 
 /************************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Name: hcs12_spiinitialize
+ * Function: hcs12_ethinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the DEMO9S12NE64 board.
+ *   Initialize the Ethernet driver for one interface.  If the STM32 chip
+ *   supports multiple Ethernet controllers, then bould specific logic
+ *   must implement up_netinitialize() and call this function to initialize
+ *   the desiresed interfaces.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
  *
  ************************************************************************************/
 
-void weak_function hcs12_spiinitialize(void)
-{
-}
+#if STM32_NTHERNET > 1
+EXTERN int hcs12_ethinitialize(int intf);
+#endif
 
-/****************************************************************************
+/************************************************************************************
  * Name:  hcs12_spiselect and hcs12_spistatus
  *
  * Description:
@@ -100,7 +114,7 @@ void weak_function hcs12_spiinitialize(void)
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common HCS12 logic.  To use this common SPI logic on your
+ *   are provided by common STM32 logic.  To use this common SPI logic on your
  *   board:
  *
  *   1. Provide logic in hcs12_boardinitialize() to configure SPI chip select
@@ -111,19 +125,21 @@ void weak_function hcs12_spiinitialize(void)
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      SPI driver to higher level logic (e.g., calling 
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-void hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
-{
+struct spi_dev_s;
+enum spi_dev_e;
+EXTERN void  hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
+EXTERN ubyte hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-ubyte hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  return SPI_STATUS_PRESENT;
-}
-
-#endif /* CONFIG_HCS12_SPI */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_HC_SRC_MC9S12NE64_MC9S12NE64_INTERNAL_H */

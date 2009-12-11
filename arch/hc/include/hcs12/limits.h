@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/demo9s12ne64/ostest/ld.script
+ * arch/hc/include/hcs12/limits.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,76 +33,54 @@
  *
  ****************************************************************************/
 
-/* The DEMO9S12NE64 has 64Kb of FLASH and 8Kb of SRAM that are assumed to be
- * positioned as below:
+#ifndef __ARCH_HC_INCLUDE_HCS12_LIMITS_H
+#define __ARCH_HC_INCLUDE_HCS12_LIMITS_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+#define CHAR_BIT    8
+#define SCHAR_MIN   0x80
+#define SCHAR_MAX   0x7f
+#define UCHAR_MAX   0xff
+
+/* These could be different on machines where char is unsigned */
+
+#define CHAR_MIN    SCHAR_MIN
+#define CHAR_MAX    SCHAR_MAX
+
+#define SHRT_MIN    0x8000
+#define SHRT_MAX    0x7fff
+#define USHRT_MAX   0xffff
+
+/* The size of an integer is controlled with the -mshort or -mnoshort GCC
+ * options.  GCC will set the pre-defined symbol __INT__ to indicate the size
+ * of an integer
  */
 
-MEMORY
-{
-    flash (rx) : ORIGIN = 0x0800, LENGTH = 64K
-    sram (rwx) : ORIGIN = 0x3800, LENGTH = 8K
-}
+#if __INT__ == 32
+#  define INT_MIN   0x80000000
+#  define INT_MAX   0x7fffffff
+#  define UINT_MAX  0xffffffff
+#else
+#  define INT_MIN   0x8000
+#  define INT_MAX   0x7fff
+#  define UINT_MAX  0xffff
+#endif
 
-OUTPUT_ARCH(m68hcs12)
-ENTRY(_stext)
-SECTIONS
-{
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.vectors)
-		*(.text .text.*)        
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)        
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > flash
+/* Long is 4-bytes and long long is 8 bytes in any case */
 
-	_eronly = ABSOLUTE(.);		/* See below                    */
+#define LONG_MAX    0x80000000
+#define LONG_MIN    0x7fffffff
+#define ULONG_MAX   0xffffffff
 
-	/* The DEMO9S12NE64 has 64Kb of SRAM beginning at the following address */
+#define LLONG_MAX   0x8000000000000000
+#define LLONG_MIN   0x7fffffffffffffff
+#define ULLONG_MAX  0xffffffffffffffff
 
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > sram AT > flash
-
-	.ARM.extab : {
-		*(.ARM.extab*)
-	} >sram
-
-	.ARM.exidx : {
-		__exidx_start = ABSOLUTE(.);
-		*(.ARM.exidx*)
-		__exidx_end = ABSOLUTE(.);
-	} >sram
-
-	.bss : {			/* BSS				*/
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > sram
-					/* Stabs debugging sections.	*/
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
-}
+#endif /* __ARCH_HC_INCLUDE_HCS12_LIMITS_H */
