@@ -1,15 +1,101 @@
 README
 ^^^^^^
 
-This README discusses issues unique to NuttX configurations for the
-Freescale DEMO9S12NE64 development board.
+  This README discusses issues unique to NuttX configurations for the
+  Freescale DEMO9S12NE64 development board.
+
+MC9S12NE64 Features
+^^^^^^^^^^^^^^^^^^^
+
+  • 16-bit HCS12 core
+    - HCS12 CPU
+    - Upward compatible with M68HC11 instruction set
+    - Interrupt stacking and programmer’s model identical to M68HC11
+    - Instruction queue
+    - Enhanced indexed addressing
+    - Memory map and interface (MMC)
+    - Interrupt control (INT)
+    - Background debug mode (BDM)
+    - Enhanced debug12 module, including breakpoints and change-of-flow
+      trace buffer (DBG)
+    - Multiplexed expansion bus interface (MEBI) - available only in
+      112-pin package version
+  • Wakeup interrupt inputs
+    - Up to 21 port bits available for wakeup interrupt function with
+      digital filtering
+  • Memory
+    - 64K bytes of FLASH EEPROM
+    - 8K bytes of RAM
+  • Analog-to-digital converter (ATD)
+    - One 8-channel module with 10-bit resolution
+    - External conversion trigger capability
+  • Timer module (TIM)
+    - 4-channel timer
+    - Each channel configurable as either input capture or output
+      compare
+    - Simple PWM mode
+    - Modulo reset of timer counter
+    - 16-bit pulse accumulator
+    - External event counting
+    - Gated time accumulation
+  • Serial interfaces
+    - Two asynchronous serial communications interface (SCI)
+    - One synchronous serial peripheral interface (SPI)
+    - One inter-IC bus (IIC)
+  • Ethernet Media access controller (EMAC)
+    - IEEE 802.3 compliant
+    - Medium-independent interface (MII)
+    - Full-duplex and half-duplex modes
+    - Flow control using pause frames
+    - MII management function
+    - Address recognition
+    - Frames with broadcast address are always accepted or always
+      rejected
+    - Exact match for single 48-bit individual (unicast) address
+    - Hash (64-bit hash) check of group (multicast) addresses
+    - Promiscuous mode
+  • Ethertype filter
+  • Loopback mode
+  • Two receive and one transmit Ethernet buffer interfaces
+  • Ethernet 10/100 Mbps transceiver (EPHY)
+    - IEEE 802.3 compliant
+    - Digital adaptive equalization
+    - Half-duplex and full-duplex
+    - Auto-negotiation next page ability
+    - Baseline wander (BLW) correction
+    - 125-MHz clock generator and timing recovery
+    - Integrated wave-shaping circuitry
+    - Loopback modes
+  • CRG (clock and reset generator module)
+    - Windowed COP watchdog
+    - Real-time interrupt
+    - Clock monitor
+    - Pierce oscillator
+    - Phase-locked loop clock frequency multiplier
+    - Limp home mode in absence of external clock
+    - 25-MHz crystal oscillator reference clock
+  • Operating frequency
+    - 50 MHz equivalent to 25 MHz bus speed for single chip
+    - 32 MHz equivalent to 16 MHz bus speed in expanded bus modes
+  • Internal 2.5-V regulator
+    - Supports an input voltage range from 3.3 V ± 5%
+    - Low-power mode capability
+    - Includes low-voltage reset (LVR) circuitry
+  • 80-pin TQFP-EP or 112-pin LQFP package
+    - Up to 70 I/O pins with 3.3 V input and drive capability (112-pin
+      package)
+    - Up to two dedicated 3.3 V input only lines (IRQ, XIRQ)
+  • Development support
+    - Single-wire background debug™ mode (BDM)
+    - On-chip hardware breakpoints
+    - Enhanced DBG debug features
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-  Either Linux or Cygwin on Windows can be used for the development environment.
-  The source has been built only using the GNU toolchain (see below).  Other
-  toolchains will likely cause problems.
+  Either Linux or Cygwin on Windows can be used for the development
+  environment. The source has been built only using the GNU toolchain
+  (see below).  Other toolchains will likely cause problems.
 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,6 +135,61 @@ NuttX buildroot Toolchain
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
+FreeScale HCS12 Serial Monitor
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  General:
+    The NuttX HCS12 port is configured to use the Freescale HCS serial
+    monitor.  This monitor supports primitive debug commands that allow
+    FLASH/EEPROM programming and debugging through an RS-232 serial
+    interface.  The serial monior is 2Kb in size and resides in FLASH at
+    addresses 0xf800-0xffff.  The monitor does not use any RAM other than
+    the stack itself.
+
+  AN2458
+    The serial monitor is described in detail in Freescale Application
+    Note AN2458.pdf.
+
+  COP:
+    The serial monitor uses the COP for the cold reset function and should
+    not be used by the application without some precautions (see AN2458).
+
+  Clocking:
+    The serial monitor sets the operating frequency to 24 MHz.  This is
+    not altered by the NuttX start-up; doing so would interfere with the
+    operation of the serial monitor.
+
+  Memory Configuration:
+    Registers:
+    • Register space is located at 0x0000–0x03ff.
+    FLASH:
+    • FLASH memory is any address greater than 0x4000. All paged
+      addresses are assumed to be FLASH memory.
+    • Application code should exclude the 0xf780–0xff7f memory.
+    SRAM:
+    • RAM ends at 0x3FFF and builds down to the limit of the device’s
+      available RAM.
+    • The serial monitor's stack pointer is set to the end of RAM+1
+      (0x4000).
+    EEPROM:
+    • EEPROM (if the target device has any) is limited to the available
+      space between the registers and the RAM (0x0400–to start of RAM).
+    External Devices:
+    • External devices attached to the multiplexed external bus
+      interface are not supported
+
+  Serial Communications:
+    The serial monitor uses RS-232 serial communications through SCI0 at
+    115,200 baud. The monitor must have exclusive use of this interface.
+    Access to the serial port is available through a monitor jump table.
+
+  Interrrupts:
+    The serial monitor redirects interrupt vectors to an unprotected
+    portion of FLASH just before the protected monitor program
+    (0xf780–0xf7fe).  The monitor will automatically redirect vector
+    programming operations to these user vectors.  The user code should
+    therefore keep the normal (non-monitor) vector locations
+    (0xff80–0xfffe).
 
 HCS12/DEMO9S12NEC64-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
