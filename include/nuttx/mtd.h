@@ -94,9 +94,9 @@ struct mtd_dev_s
   ssize_t (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
                     FAR const ubyte *buffer);
 
-  /* Some devices may support byte oriented read (optional).  Byte-oriented
-   * writing is inherently block oriented on most MTD devices and is not supported.
-   * It is recommended that low-level drivers not support read() if it requires
+  /* Some devices may support byte oriented reads (optional).  Most MTD devices
+   * are inherently block oriented so byte-oriented writing is not supported. It
+   * is recommended that low-level drivers not support read() if it requires
    * buffering.
    */
 

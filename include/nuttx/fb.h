@@ -298,13 +298,13 @@ struct fb_vtable_s
   int (*getvideoinfo)(FAR struct fb_vtable_s *vtable, FAR struct fb_videoinfo_s *vinfo);
   int (*getplaneinfo)(FAR struct fb_vtable_s *vtable, int planeno, FAR struct fb_planeinfo_s *pinfo);
 
-  /* The following is provided only if the video hardware supports RGB color mapping */
+  /* The following are provided only if the video hardware supports RGB color mapping */
 
 #ifdef CONFIG_FB_CMAP
   int (*getcmap)(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap);
   int (*putcmap)(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap);
 #endif
-  /* The following is provided only if the video hardware supports a hardware cursor */
+  /* The following are provided only if the video hardware supports a hardware cursor */
 
 #ifdef CONFIG_FB_HWCURSOR
   int (*getcursor)(FAR struct fb_vtable_s *vtable, FAR struct fb_cursorattrib_s *attrib);

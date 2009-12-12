@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: November 17, 2009</p>
+      <p>Last Updated: December 12, 2009</p>
     </td>
   </tr>
 </table>
@@ -115,7 +115,9 @@
        <a href="#ethdrivers">6.3.1 Ethernet Device Drivers</a><br>
        <a href="#spidrivers">6.3.2 SPI Device Drivers</a><br>
        <a href="#i2cdrivers">6.3.3 I2C Device Drivers</a><br>
-       <a href="#serialdrivers">6.3.4 Serial Device Drivers</a>
+       <a href="#serialdrivers">6.3.4 Serial Device Drivers</a><br>
+       <a href="#fbdrivers">6.3.5 Frame Buffer Drivers</a><br>
+       <a href="#mtddrivers">6.3.6 Memory Technology Device Drivers</a>
     </ul>
   </ul>
   <a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a><br>
@@ -1906,6 +1908,191 @@ extern void up_ledoff(int led);
   <li>
     <b>Examples</b>:
     <code>arch/arm/src/chip/lm3s_serial.c</code>, <code>arch/arm/src/lpc214x/lpc214x_serial.c</code>, <code>arch/z16/src/z16f/z16f_serial.c</code>, etc.
+  </li>
+</ul>
+
+<h3><a name="fbdrivers">6.3.5 Frame Buffer Drivers</a></h3>
+
+<ul>
+  <li>
+    <b><code>include/nuttx/fb.h</code></b>.
+    All structures and APIs needed to work with serial drivers are provided in this header file.
+  </li>
+  <li>
+    <b><code>struct fb_vtable_s</code></b>.
+    Each frame buffer device driver must implement an instance of <code>struct fb_vtable_s</code>.
+    That structure defines a call table with the following methods:
+    <p>
+      Get information about the video controller configuration and the configuration of each color plane.
+    </p>
+    <ul>
+     <p><code>int (*getvideoinfo)(FAR struct fb_vtable_s *vtable, FAR struct fb_videoinfo_s *vinfo);</code><br>
+     <code>int (*getplaneinfo)(FAR struct fb_vtable_s *vtable, int planeno, FAR struct fb_planeinfo_s *pinfo);</code></p>
+    </ul>
+    <p>
+      The following are provided only if the video hardware supports RGB color mapping:
+    </p?
+    <ul>
+     <p><code>int (*getcmap)(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap);</code><br>
+     <code>int (*putcmap)(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap);</code></p>
+    </ul>
+    <p>
+      The following are provided only if the video hardware supports a hardware cursor:
+    </p>
+    <ul>
+     <p><code>int (*getcursor)(FAR struct fb_vtable_s *vtable, FAR struct fb_cursorattrib_s *attrib);</code><br>
+     <code>int (*setcursor)(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_s *settings);</code></p>
+    </ul>
+  </li>
+  <li>
+    <b>Binding Frame Buffer Drivers</b>.
+    Frame buffer drivers are not normally directly accessed by user code, but are usually bound to another,
+    higher level device driver.
+    In general, the binding sequence is:
+    <ul>
+      <li>Get an instance of <code>struct fb_vtable_s</code> from the hardware-specific frame buffer device driver, and </li>
+      <li>Provide that instance to the initialization method of the higher level device driver.</li>
+    </ul>
+  </li>
+  <li>
+    <b>Examples</b>:
+    <code>arch/sim/src/up_framebuffer.c</code>.
+    See also the usage of the frame buffer driver in the <code>graphics/</code> directory.
+  </li>
+</ul>
+
+<h3><a name="mtddrivers">6.3.6 Memory Technology Device Drivers</a></h3>
+
+<ul>
+  <li>
+    <b><code>include/nuttx/mtd.h</code></b>.
+    All structures and APIs needed to work with serial drivers are provided in this header file.
+  </li>
+  <li>
+    <b><code>struct mtd_dev_s</code></b>.
+    Each MTD device driver must implement an instance of <code>struct mtd_dev_s</code>.
+    That structure defines a call table with the following methods:
+    <p>
+      Erase the specified erase blocks (units are erase blocks):
+    </p>
+    <ul>
+     <p><code>int (*erase)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);</code></p>
+    </ul>
+    <p>
+      Read/write from the specified read/write blocks:
+    </p?
+    <ul>
+     <p><code>ssize_t (*bread)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks, FAR ubyte *buffer);</code><br>
+     <code>ssize_t (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks, FAR const ubyte *buffer);</code></p>
+    </ul>
+    <p>
+      Some devices may support byte oriented reads (optional).
+      Most MTD devices are inherently block oriented so byte-oriented writing is not supported.
+      It is recommended that low-level drivers not support read() if it requires buffering.
+    </p>
+    <ul>
+     <p><code>ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes, FAR ubyte *buffer);</code></p>
+    </ul>
+    <p>
+      Support other, less frequently used commands:
+    </p>
+    <ul>
+      <li><code>MTDIOC_GEOMETRY</code>:  Get MTD geometry</li>
+      <li><code>MTDIOC_XIPBASE:</code>: Convert block to physical address for eXecute-In-Place</li>
+      <li><code>MTDIOC_BULKERASE</code>: Erase the entire device</li>
+    </ul>
+    <p>
+      is provided via a sinble <code>ioctl</code> method (see <code>include/nuttx/ioctl.h</code>):
+    </p>
+    <ul>
+     <p><code>int (*ioctl)(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);</code></p>
+    </ul>
+  </li>
+  <li>
+    <b>Binding MTD Drivers</b>.
+    MTD drivers are not normally directly accessed by user code, but are usually bound to another,
+    higher level device driver.
+    In general, the binding sequence is:
+    <ul>
+      <li>Get an instance of <code>struct mtd_dev_s</code> from the hardware-specific MTD device driver, and </li>
+      <li>Provide that instance to the initialization method of the higher level device driver.</li>
+    </ul>
+  </li>
+  <li>
+    <b>Examples</b>:
+    <code>drivers/mtd/m25px.c</code> and <code>drivers/mtd/ftl.c</code>
+  </li>
+</ul>
+
+<h3><a name="sdiodrivers">6.3.7 SDIO Device Drivers</a></h3>
+
+<ul>
+  <li>
+    <b><code>include/nuttx/sdio.h</code></b>.
+    All structures and APIs needed to work with serial drivers are provided in this header file.
+  </li>
+  <li>
+    <b><code>struct sdio_dev_s</code></b>.
+    Each MTD device driver must implement an instance of <code>struct sdio_dev_s</code>.
+    That structure defines a call table with the following methods:
+    <p>
+      Initialization/setup:
+    </p>
+    <ul>
+     <p><code>void (*reset)(FAR struct sdio_dev_s *dev);</code><br>
+     <code>ubyte (*status)(FAR struct sdio_dev_s *dev);</code><br>
+     <code>void (*widebus)(FAR struct sdio_dev_s *dev, boolean enable);</code><br>
+     <code>void (*clock)(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate);</code><br>
+     <code>int (*attach)(FAR struct sdio_dev_s *dev);</code></p>
+    </ul>
+    <p>
+      Command/Status/Data Transfer:
+    </p?
+    <ul>
+     <p><code>void (*sendcmd)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);</code><br>
+     <code>int (*recvsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, size_t nbytes);</code><br>
+     <code>int (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer, size_t nbytes);</code><br>
+     <code>int (*cancel)(FAR struct sdio_dev_s *dev);</code><br>
+     <code>int (*waitresponse)(FAR struct sdio_dev_s *dev, uint32 cmd);</code><br>
+     <code>int (*recvR1)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);</code><br>
+     <code>int (*recvR2)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4]);</code><br>
+     <code>int (*recvR3)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3);</code><br>
+     <code>int (*recvR4)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R4);</code><br>
+     <code>int (*recvR5)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5);</code><br>
+     <code>int (*recvR6)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);</code><br>
+     <code>int (*recvR7)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);</code></p>
+    </ul>
+    <p>
+      Event/Callback support:
+    </p>
+    <ul>
+     <p><code>void (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);</code><br>
+     <code>sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);</code><br>
+     <code>void (*callbackenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);</code><br>
+     <code>int (*registercallback)(FAR struct sdio_dev_s *dev, worker_t callback, void *arg);</code></p>
+    </ul>
+    <p>
+      DMA support:
+    </p>
+    <ul>
+     <p><code>boolean (*dmasupported)(FAR struct sdio_dev_s *dev);</code><br>
+     <code>int (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, size_t buflen);</code><br>
+     <code>int (*dmasendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,  size_t buflen);</code></p>
+    </ul>
+  </li>
+  <li>
+    <b>Binding SDIO Drivers</b>.
+    SDIO drivers are not normally directly accessed by user code, but are usually bound to another,
+    higher level device driver.
+    In general, the binding sequence is:
+    <ul>
+      <li>Get an instance of <code>struct sdio_dev_s</code> from the hardware-specific SDIO device driver, and </li>
+      <li>Provide that instance to the initialization method of the higher level device driver.</li>
+    </ul>
+  </li>
+  <li>
+    <b>Examples</b>:
+    <code>arch/arm/src/stm32/stm32_sdio.c</code> and <code>drivers/mmcsd/mmcsd_sdio.c</code>
   </li>
 </ul>
 
