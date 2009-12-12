@@ -50,6 +50,10 @@
  * Definitions
  ****************************************************************************/
 
+#define SEC_PER_MIN  ((time_t)60)
+#define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
+#define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
+
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -310,14 +314,14 @@ struct tm *gmtime_r(const time_t *clock, struct tm *result)
 
   /* Convert to days, hours, minutes, and seconds since the EPOCH */
 
-  jdn   = time / (24*60*60);
-  time -= (24*60*60) * jdn;
+  jdn   = time / SEC_PER_DAY;
+  time -= SEC_PER_DAY * jdn;
 
-  hour  = time / (60*60);
-  time -= (60*60) * hour;
+  hour  = time / SEC_PER_HOUR;
+  time -= SEC_PER_HOUR * hour;
 
-  min   = time / 60;
-  time -= 60 * min;
+  min   = time / SEC_PER_MIN;
+  time -= SEC_PER_MIN * min;
 
   sec   = time;
 

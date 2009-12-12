@@ -189,8 +189,8 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
                if (tm->tm_mon < 12)
                  {
                    str = g_abbrevmonthname[tm->tm_mon];
+                   len = snprintf(dest, chleft, "%s", str);
                  }
-               len = snprintf(dest, chleft, "%s", str);
              }
              break;
 
@@ -201,8 +201,8 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
                if (tm->tm_mon < 12)
                  {
                    str = g_monthname[tm->tm_mon];
+                   len = snprintf(dest, chleft, "%s", str);
                  }
-               len = snprintf(dest, chleft, "%s", str);
              }
              break;
 
@@ -259,8 +259,8 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
                if (tm->tm_mon < 12)
                  {
                    value = clock_daysbeforemonth(tm->tm_mon, clock_isleapyear(tm->tm_year)) + tm->tm_mday;
+                   len   = snprintf(dest, chleft, "%03d", value);
                  }
-               len = snprintf(dest, chleft, "%03d", value);
              }
              break;
 
