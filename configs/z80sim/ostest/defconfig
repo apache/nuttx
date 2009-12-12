@@ -210,7 +210,7 @@ CONFIG_NOPRINTF_FIELDWIDTH=y
 # Allow for architecture optimized implementations
 #
 # The architecture can provide optimized versions of the
-# following to improve sysem performance
+# following to improve system performance
 #
 CONFIG_ARCH_MEMCPY=n
 CONFIG_ARCH_MEMCMP=n
@@ -229,7 +229,7 @@ CONFIG_ARCH_KFREE=n
 # Sizes of configurable things (0 disables)
 #
 # CONFIG_MAX_TASKS - The maximum number of simultaneously
-#   actived tasks.  This value must be a power of two.
+#   active tasks.  This value must be a power of two.
 # CONFIG_MAX_TASK_ARGS - This controls the maximum number of
 #   of parameters that a task may receive (i.e., maxmum value
 #   of 'argc')
@@ -300,6 +300,7 @@ CONFIG_PREALLOC_TIMERS=0
 # CONFIG_NET_BROADCAST - Broadcast support
 # CONFIG_NET_LLH_LEN - The link level header length
 # CONFIG_NET_FWCACHE_SIZE - number of packets to remember when looking for duplicates
+#
 CONFIG_NET=n
 CONFIG_NET_IPv6=n
 CONFIG_NSOCKET_DESCRIPTORS=0

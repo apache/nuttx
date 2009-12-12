@@ -264,24 +264,29 @@ HCS12/DEMO9S12NEC64-specific Configuration Options
 	  in this configuration: pages 3e, 3d, then 3f will appear as a
 	  contiguous address space in memory.
 
+  HCS12 Sub-system support
+
+	CONFIG_HCS12_SCI0
+	CONFIG_HCS12_SCI1
+
   HCS12 specific device driver settings:
 
-	CONFIG_SCIO_SERIAL_CONSOLE - selects the SCIO for the
-	   console and ttys0 (default is the UART0).
+	CONFIG_SCIn_SERIAL_CONSOLE - selects SCIn for the console and ttys0
+	  (default is the SCI0).
 
-	CONFIG_SCIO_RXBUFSIZE - Characters are buffered as received.
+	CONFIG_SCIn_RXBUFSIZE - Characters are buffered as received.
 	   This specific the size of the receive buffer
 
-	CONFIG_SCIO_TXBUFSIZE - Characters are buffered before
+	CONFIG_SCIn_TXBUFSIZE - Characters are buffered before
 	   being sent.  This specific the size of the transmit buffer
 
-	CONFIG_SCIO_BAUD - The configure BAUD of the UART.
+	CONFIG_SCIn_BAUD - The configure BAUD of the UART.
 
-	CONFIG_SCIO_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_SCIn_BITS - The number of bits.  Must be either 7 or 8.
 
-	CONFIG_SCIO_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
+	CONFIG_SCIn_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
 
-	CONFIG_SCIO_2STOP - Two stop bits
+	CONFIG_SCIn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
