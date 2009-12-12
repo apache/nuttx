@@ -98,6 +98,7 @@ up_lowputc:
 	jmp		PutChar
 #else
 # error "up_lowputc not implemented"
+	rts
 #endif
 	.size	up_lowputc, . - up_lowputc
 	.end

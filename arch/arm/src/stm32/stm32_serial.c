@@ -939,12 +939,12 @@ static boolean up_txready(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_earlyserialinit
  *
  * Description:
- *   Performs the low level USART initialization early in 
- *   debug so that the serial console will be available
- *   during bootup.  This must be called before up_serialinit.
+ *   Performs the low level USART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before up_serialinit.
  *
  ****************************************************************************/
 
