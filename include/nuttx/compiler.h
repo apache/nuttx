@@ -112,7 +112,7 @@
 
 # undef  CONFIG_PTR_IS_NOT_INT
 
-#elif defined(__m32c__)
+#elif defined(__mc68hc1x__)
 /* Select the small, 16-bit addressing model */
 
 # define  CONFIG_SMALL_MEMORY 1
