@@ -564,13 +564,13 @@ static void mmcsd_setblklen(FAR struct mmcsd_slot_s *slot, uint32 length)
 
 static uint32 mmcsd_nsac(FAR struct mmcsd_slot_s *slot, ubyte *csd, uint32 frequency)
 {
-  /* NSAC is 8-bits width and is in units of 100 clock cycles.  Therefore, the
+  /* NSAC is 8-bits wide and is in units of 100 clock cycles.  Therefore, the
    * maximum value is 25.5K clock cycles.
    */
 
-  uint32 nsac = MMCSD_CSD_NSAC(csd) * (100*1000); /* 1,000 * NSAC */
-  uint32 fhkz = (frequency + 500) / 1000;         /* frequency / 1,000 */
-  return (nsac + (fhkz >> 1)) / fhkz;             /* 1,000,000 * NSAC / frequency */
+  uint32 nsac = MMCSD_CSD_NSAC(csd) * ((uint32)100*1000); /* 1,000 * NSAC */
+  uint32 fhkz = (frequency + 500) / 1000;                 /* frequency / 1,000 */
+  return (nsac + (fhkz >> 1)) / fhkz;                     /* 1,000,000 * NSAC / frequency */
 }
 
 /****************************************************************************
@@ -1699,7 +1699,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
    * of 1024 or 2048.
    */
  
-  if (!IS_SDV2(slot->type) && slot->nsectors <= 4096*12)
+  if (!IS_SDV2(slot->type) && slot->nsectors <= ((uint32)4096*12))
     {
       /* Don't set the block len on high capacity cards (ver1.x or ver2.x) */
 

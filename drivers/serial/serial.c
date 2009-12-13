@@ -65,6 +65,9 @@
 
 #define uart_putc(ch) up_putc(ch)
 
+#define HALF_SECOND_MSEC 500
+#define HALF_SECOND_USEC 500000L
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -543,9 +546,9 @@ static int uart_close(FAR struct file *filep)
   while (dev->xmit.head != dev->xmit.tail)
     {
 #ifndef CONFIG_DISABLE_SIGNALS
-      usleep(500*1000);
+      usleep(HALF_SECOND_USEC);
 #else
-      up_mdelay(500);
+      up_mdelay(HALF_SECOND_MSEC);
 #endif
     }
 
@@ -554,9 +557,9 @@ static int uart_close(FAR struct file *filep)
   while (!uart_txempty(dev))
     {
 #ifndef CONFIG_DISABLE_SIGNALS
-      usleep(500*1000);
+      usleep(HALF_SECOND_USEC);
 #else
-      up_mdelay(500);
+      up_mdelay(HALF_SECOND_MSEC);
 #endif
     }
 

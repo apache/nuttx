@@ -1,5 +1,5 @@
 /****************************************************************************
- * ostest/main.c
+ * examples/ostest/main.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -51,8 +51,9 @@
  * Definitions
  ****************************************************************************/
 
-#define PRIORITY   100
-#define NARGS        4
+#define PRIORITY         100
+#define NARGS              4
+#define HALF_SECOND_USEC 500000L
 
 /****************************************************************************
  * Private Data
@@ -133,7 +134,7 @@ static void check_test_memory_usage(void)
 {
   /* Wait a little bit to let any threads terminate */
 
-  usleep(500*1000);
+  usleep(HALF_SECOND_USEC);
 
   /* Get the current memory usage */
 
@@ -224,7 +225,7 @@ static int user_main(int argc, char *argv[])
   /* Sample the memory usage now */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  usleep(500*1000);
+  usleep(HALF_SECOND_USEC);
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
   g_mmbefore = mallinfo();
@@ -405,7 +406,7 @@ static int user_main(int argc, char *argv[])
        */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-      usleep(500*1000);
+      usleep(HALF_SECOND_USEC);
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
       g_mmafter = mallinfo();

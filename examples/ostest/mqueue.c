@@ -73,6 +73,8 @@
 # define TEST_RECEIVE_NMSGS (10)
 #endif
 
+#define HALF_SECOND_USEC_USEC 500000L
+
 /**************************************************************************
  * Private Types
  **************************************************************************/
@@ -370,7 +372,7 @@ void mqueue_test(void)
 
   /* Wait a bit to see if the thread exits on its own */
 
-  usleep(500*1000);
+  usleep(HALF_SECOND_USEC_USEC);
 #endif
 
   /* Then cancel the thread and see if it did */

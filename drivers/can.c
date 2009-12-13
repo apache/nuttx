@@ -61,6 +61,9 @@
  * Definitions
  ****************************************************************************/
 
+#define HALF_SECOND_MSEC 500
+#define HALF_SECOND_USEC 500000L
+
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
@@ -214,9 +217,9 @@ static int can_close(FAR struct file *filep)
           while (dev->cd_xmit.cf_head != dev->cd_xmit.cf_tail)
             {
 #ifndef CONFIG_DISABLE_SIGNALS
-               usleep(500*1000);
+               usleep(HALF_SECOND_USEC);
 #else
-               up_mdelay(500);
+               up_mdelay(HALF_SECOND_MSEC);
 #endif
             }
 
@@ -225,9 +228,9 @@ static int can_close(FAR struct file *filep)
           while (!dev_txempty(dev))
             {
 #ifndef CONFIG_DISABLE_SIGNALS
-              usleep(500*1000);
+              usleep(HALF_SECOND_USEC);
 #else
-              up_mdelay(500);
+              up_mdelay(HALF_SECOND_MSEC);
 #endif
             }
 
@@ -554,11 +557,13 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       /* CANIOCTL_RTR: Send the remote transmission request and wait for the response.
-       * Argument is a reference to struct canioctl_rtr_s
+       * Argument is a reference to struct canioctl_rtr_s (casting to uintptr first
+       * eliminates complaints on some architectures where the sizeof long is different
+       * from the size of a pointer).
        */
 
       case CANIOCTL_RTR:
-        ret = can_rtrread(dev, (struct canioctl_rtr_s*)arg);
+        ret = can_rtrread(dev, (struct canioctl_rtr_s*)((uintptr)arg));
         break;
 
       /* Not a "built-in" ioctl command.. perhaps it is unique to this device driver */

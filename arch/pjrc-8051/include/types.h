@@ -1,7 +1,7 @@
 /************************************************************
- * types.h
+ * arch/types.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -58,9 +58,6 @@
  *
  * For SDCC, sizeof(int) is 16 and sizeof(long) is 32.
  * long long and double are not supported.
- *
- * Generic pointers are 3 bytes in length with the
- * first byte holding data space intformation.
  */
 
 typedef char sbyte;
@@ -71,6 +68,12 @@ typedef int sint16;
 typedef unsigned int uint16;
 typedef long sint32;
 typedef unsigned long uint32;
+
+/* For SDCC, a Generic pointer is 3 bytes in length with the
+ * first byte holding data space information.
+ */
+
+typedef unsigned long uintptr;
 
 /* This is the size of the interrupt state save returned by
  * irqsave()

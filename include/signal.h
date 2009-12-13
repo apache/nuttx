@@ -59,7 +59,7 @@
 #define ALL_SIGNAL_SET  ((sigset_t)0xffffffff)
 #define MIN_SIGNO       0
 #define MAX_SIGNO       31
-#define GOOD_SIGNO(s)   (((s)>=MIN_SIGNO)&&((s)<=MAX_SIGNO))
+#define GOOD_SIGNO(s)   ((((unsigned)(s))<=MAX_SIGNO))
 #define SIGNO2SET(s)    ((sigset_t)1 << (s))
 
 /* All signals are "real time" signals */

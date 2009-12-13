@@ -135,6 +135,15 @@ typedef int          STATUS;
 typedef unsigned int socklen_t;
 typedef uint16       sa_family_t;
 
+/* The type useconds_t shall be an unsigned integer type capable of storing
+ * values at least in the range [0, 1000000]. The type suseconds_t shall be
+ * a signed integer type capable of storing values at least in the range
+ * [-1, 1000000].
+ */
+
+typedef uint32       useconds_t;
+typedef sint32       suseconds_t;
+
 /* Task entry point */
 
 typedef int (*main_t)(int argc, char *argv[]);

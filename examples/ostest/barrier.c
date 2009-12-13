@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/ostest/barrier.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,8 @@
  * Definitions
  ****************************************************************************/
 
+#define HALF_SECOND 500000L
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -69,7 +71,7 @@ static void *barrier_func(void *parameter)
 
   printf("barrier_func: Thread %d started\n",  id);
 #ifndef CONFIG_DISABLE_SIGNALS
-  usleep(500*1000);
+  usleep(HALF_SECOND);
 #endif
 
   /* Wait at the barrier until all threads are synchronized. */
@@ -96,7 +98,7 @@ static void *barrier_func(void *parameter)
     }
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  usleep(500*1000);
+  usleep(HALF_SECOND);
 #endif
   printf("barrier_func: Thread %d done\n",  id);
   return NULL;

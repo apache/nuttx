@@ -146,10 +146,12 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
    * only option supported
    *
    * Perform the ioctl to get the base address of the file in 'mapped'
-   * in memory.
+   * in memory. (casting to uintptr first eliminates complaints on some
+   * architectures where the sizeof long is different from the size of
+   * a pointer).
    */
 
-  ret = ioctl(fd, FIOC_MMAP, (unsigned long)&addr);
+  ret = ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr)&addr));
   if (ret < 0)
     {
       fdbg("ioctl(FIOC_MMAP) failed: %d\n", errno);

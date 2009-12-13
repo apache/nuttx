@@ -577,7 +577,7 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know

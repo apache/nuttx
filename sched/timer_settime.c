@@ -200,7 +200,11 @@ static void timer_timeout(int argc, uint32 itimer)
       timer_restart(u.timer, itimer);
     }
 #else
-  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
+  /* (casting to uintptr first eliminates complaints on some architectures
+   *  where the sizeof uint32 is different from the size of a pointer).
+   */
+
+  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)((uintptr)itimer);
 
   /* Send the specified signal to the specified task.   Increment the reference
    * count on the timer first so that will not be deleted until after the
@@ -379,7 +383,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
   if (delay > 0)
     {
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, timer->pt_delay, (wdentry_t)timer_timeout, 1, (uint32)timer);
+      ret = wd_start(timer->pt_wdog, timer->pt_delay, (wdentry_t)timer_timeout, 1, (uint32)((uintptr)timer));
     }
 
   irqrestore(state);

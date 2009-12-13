@@ -473,9 +473,12 @@ int ftl_initialize(int minor, ubyte *buffer, FAR struct mtd_dev_s *mtd)
 
       dev->mtd = mtd;
 
-      /* Get the device geometry */
+      /* Get the device geometry. (casting to uintptr first eliminates
+       * complaints on some architectures where the sizeof long is different
+       * from the size of a pointer).
+       */
 
-      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)&dev->geo);
+      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr)&dev->geo));
       if (ret < 0)
         {
           fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);

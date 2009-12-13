@@ -82,7 +82,7 @@
  *
  ****************************************************************************/
 
-void usleep(unsigned long usec)
+void usleep(useconds_t usec)
 {
   sigset_t set;
   struct timespec ts;

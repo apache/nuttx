@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/types.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,10 @@ typedef short sint16;
 typedef unsigned short uint16;
 typedef int sint32;
 typedef unsigned int uint32;
+
+/* A pointer is 4 bytes */
+
+typedef unsigned int uintptr;
 
 /* This is the size of the interrupt state save returned by
  * irqsave()
