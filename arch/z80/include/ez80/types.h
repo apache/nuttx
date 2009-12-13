@@ -2,7 +2,7 @@
  * arch/z80/include/ez80/types.h
  * include/arch/chip/types.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -15,7 +15,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -62,11 +62,6 @@
  *   long   - 32-bits
  *   char   - 8-bits
  *   float  - 32-bits
- *
- * Pointers:
- *
- *   Z80 mode - 16 bits
- *   ADL mode - 24 bits
  */
 
 typedef char sbyte;
@@ -79,6 +74,19 @@ typedef int sint24;
 typedef unsigned int uint24;
 typedef long sint32;
 typedef unsigned long uint32;
+
+/* A pointer is 2 or 3 bytes, depending upon if the ez80 is in z80
+ * compatibility mode or not
+ *
+ *   Z80 mode - 16 bits
+ *   ADL mode - 24 bits
+ */
+
+#ifdef CONFIG_EZ80_Z80MODE
+typedef unsigned short uintptr;
+#else
+typedef unsigned int uintptr;
+#endif
 
 /* This is the size of the interrupt state save returned by irqsave().
  * It holds the AF regiser pair + a zero pad byte
