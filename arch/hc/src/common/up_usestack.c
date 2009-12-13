@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
+int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 {
   size_t top_of_stack;
   size_t size_of_stack;

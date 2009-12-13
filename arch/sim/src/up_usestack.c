@@ -1,7 +1,7 @@
 /****************************************************************************
- * up_usestack.c
+ * arch/sim/src/up_usestack.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-STATUS up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
+int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 {
   /* Move up to next even word boundary if necessary */
 
