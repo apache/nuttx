@@ -1,5 +1,5 @@
 /************************************************************
- * arch/types.h
+ * arch/pjrc-8051/include/types.h
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,8 +37,8 @@
  * only indirectly through sys/types.h
  */
 
-#ifndef __ARCH_TYPES_H
-#define __ARCH_TYPES_H
+#ifndef __ARCH_PJRC8051_INCLUDE_TYPES_H 
+#define __ARCH_PJRC8051_INCLUDE_TYPES_H 
 
 /************************************************************
  * Included Files
@@ -87,4 +87,4 @@ typedef unsigned char irqstate_t;
  * Global Function Prototypes
  ************************************************************/
 
-#endif /* __ARCH_TYPES_H */
+#endif /* __ARCH_PJRC8051_INCLUDE_TYPES_H  */

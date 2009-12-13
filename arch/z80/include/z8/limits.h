@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/include/limits.h
+ * arch/z80/include/z8/limits.h
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,17 +33,44 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_LIMITS_H
-#define __ARCH_LIMITS_H
+#ifndef __ARCH_Z80_INCLUDE_Z8_LIMITS_H 
+#define __ARCH_Z80_INCLUDE_Z8_LIMITS_H 
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <arch/chip/limits.h>
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#endif /* __ARCH_LIMITS_H */
+#define CHAR_BIT    8
+#define SCHAR_MIN   0x80
+#define SCHAR_MAX   0x7f
+#define UCHAR_MAX   0xff
+
+/* These could be different on machines where char is unsigned */
+
+#define CHAR_MIN    SCHAR_MIN
+#define CHAR_MAX    SCHAR_MAX
+
+#define SHRT_MIN    0x8000
+#define SHRT_MAX    0x7fff
+#define USHRT_MAX   0xffff
+
+#define INT_MIN     0x8000
+#define INT_MAX     0x7fff
+#define UINT_MAX    0xffff
+
+/* These change on 32-bit and 64-bit platforms */
+
+#define LONG_MAX    0x80000000
+#define LONG_MIN    0x7fffffff
+#define ULONG_MAX   0xffffffff
+
+/* A pointer is 2 bytes */
+
+#define PTR_MIN     0x0000
+#define PTR_MAX     0xffff
+
+#endif /* __ARCH_Z80_INCLUDE_Z8_LIMITS_H  */

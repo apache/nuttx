@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/limits.h
+ * arch/z16/include/limits.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_LIMITS_H
-#define __ARCH_LIMITS_H
+#ifndef __ARCH_Z16_INCLUDE_LIMITS_H 
+#define __ARCH_Z16_INCLUDE_LIMITS_H 
 
 /****************************************************************************
  * Included Files
@@ -44,30 +44,35 @@
  * Definitions
  ****************************************************************************/
 
-#define CHAR_BIT       8
-#define SCHAR_MIN	0x80
-#define SCHAR_MAX	0x7f
-#define UCHAR_MAX	0xff
+#define CHAR_BIT    8
+#define SCHAR_MIN   0x80
+#define SCHAR_MAX   0x7f
+#define UCHAR_MAX   0xff
 
 /* These could be different on machines where char is unsigned */
 
-#define CHAR_MIN	SCHAR_MIN
-#define CHAR_MAX	SCHAR_MAX
+#define CHAR_MIN    SCHAR_MIN
+#define CHAR_MAX    SCHAR_MAX
 
-#define SHRT_MIN	0x8000
-#define SHRT_MAX	0x7fff
-#define USHRT_MAX	0xffff
+#define SHRT_MIN    0x8000
+#define SHRT_MAX    0x7fff
+#define USHRT_MAX   0xffff
 
 #define INT_MIN     0x80000000
 #define INT_MAX     0x7fffffff
-#define UINT_MAX	0xffffffff
+#define UINT_MAX    0xffffffff
 
-#define LONG_MAX	0x80000000
-#define LONG_MIN	0x7fffffff
-#define ULONG_MAX	0xffffffff
+#define LONG_MAX    0x80000000
+#define LONG_MIN    0x7fffffff
+#define ULONG_MAX   0xffffffff
 
-#define LLONG_MAX	0x80000000
-#define LLONG_MIN	0x7fffffff
-#define ULLONG_MAX	0xffffffff
+#define LLONG_MAX   0x80000000
+#define LLONG_MIN   0x7fffffff
+#define ULLONG_MAX  0xffffffff
 
-#endif /* __ARCH_LIMITS_H */
+/* A pointer is 4 bytes */
+
+#define PTR_MIN     0x00000000
+#define PTR_MAX     0xffffffff
+
+#endif /* __ARCH_Z16_INCLUDE_LIMITS_H  */

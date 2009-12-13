@@ -44,34 +44,39 @@
  * Definitions
  ****************************************************************************/
 
-#define CHAR_BIT        8
-#define SCHAR_MIN	0x80
-#define SCHAR_MAX	0x7f
-#define UCHAR_MAX	0xff
+#define CHAR_BIT    8
+#define SCHAR_MIN   0x80
+#define SCHAR_MAX   0x7f
+#define UCHAR_MAX   0xff
 
 /* These could be different on machines where char is unsigned */
 
-#define CHAR_MIN	SCHAR_MIN
-#define CHAR_MAX	SCHAR_MAX
+#define CHAR_MIN    SCHAR_MIN
+#define CHAR_MAX    SCHAR_MAX
 
-#define SHRT_MIN	0x8000
-#define SHRT_MAX	0x7fff
-#define USHRT_MAX	0xffff
+#define SHRT_MIN    0x8000
+#define SHRT_MAX    0x7fff
+#define USHRT_MAX   0xffff
 
 /* On SH-1, type 'int' is 32-bits */
 
-#define INT_MIN         0x80000000
-#define INT_MAX         0x7fffffff
-#define UINT_MAX	0xffffffff
+#define INT_MIN     0x80000000
+#define INT_MAX     0x7fffffff
+#define UINT_MAX    0xffffffff
 
 /* On SH-1, type 'long' is the same size as type 'int', 32-bits */
 
-#define LONG_MAX	INT_MIN
-#define LONG_MIN	INT_MAX
-#define ULONG_MAX	UINT_MAX
+#define LONG_MAX    INT_MIN
+#define LONG_MIN    INT_MAX
+#define ULONG_MAX   UINT_MAX
 
-#define LLONG_MAX	0x8000000000000000
-#define LLONG_MIN	0x7fffffffffffffff
-#define ULLONG_MAX	0xffffffffffffffff
+#define LLONG_MAX   0x8000000000000000
+#define LLONG_MIN   0x7fffffffffffffff
+#define ULLONG_MAX  0xffffffffffffffff
+
+/* A pointer is 4 bytes */
+
+#define PTR_MIN     0x00000000
+#define PTR_MAX     0xffffffff
 
 #endif /* __ARCH_SH_INCLUDE_SH1_LIMITS_H */
