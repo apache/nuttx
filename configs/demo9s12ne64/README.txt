@@ -191,6 +191,48 @@ FreeScale HCS12 Serial Monitor
     therefore keep the normal (non-monitor) vector locations
     (0xff80–0xfffe).
 
+Soft Registers
+^^^^^^^^^^^^^^
+
+  The mc68hcs12 compilation is prone to errors like the following:
+
+    CC:  lib_b16sin.c
+    lib_b16sin.c: In function `b16sin':
+    lib_b16sin.c:110: error: unable to find a register to spill in class `S_REGS'
+    lib_b16sin.c:110: error: this is the insn:
+    (insn:HI 41 46 44 8 (parallel [
+                (set (subreg:SI (reg:DI 58 [ rad ]) 4)
+                    (reg/v:SI 54 [ rad ]))
+                (clobber (scratch:HI))
+            ]) 20 {movsi_internal} (insn_list 46 (nil))
+        (expr_list:REG_UNUSED (scratch:HI)
+            (expr_list:REG_NO_CONFLICT (reg/v:SI 54 [ rad ])
+                (nil))))
+    lib_b16sin.c:110: confused by earlier errors, bailing out
+
+  There are several ways that this error could be fixed:
+
+  1. Increase the number of soft regiaters (i.e., "fake" registers defined
+     at fixed memory locations).  This can be done by adding something like
+     -msoft-reg-count=4 to the CFLAGS.  This approach was not taken
+     because:
+
+     - This slows hcs12 performance
+     - All of these soft registers wouil have to be saved and restored
+       on every interrupt and context switch.
+
+  2. Lowering the optimization level.  Also not desireable becauase 99% of the
+     files that do not have this problem also increase in size.  Special case
+     compilation with reduced optimization levels just for the files that need
+     it could be done, but this would complicate the make system.
+
+  3. Restructuring files to reduce the complexity.  If you add local variables
+     to hold intermediate computational results, this error can be eliminated.
+     This is the approach taken in NuttX.  It has disadvantages only in that
+     (1) it takes some effort and good guessing to eliminate the problem, and (2)
+     the problem is not really eliminated -- it can and will re-occur when files
+     are changed or new files are added.
+
 HCS12/DEMO9S12NEC64-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
