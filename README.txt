@@ -9,20 +9,36 @@ README
 INSTALLATION
 ^^^^^^^^^^^^
 
-Download and unpack the NuttX tarball.  If you are reading this, then you
-have probably already done that.  After unpacking, you will end up with a
-directory called nuttx-version (where version is the NuttX version number).
-You might want to rename that directory nuttx to match the various instructions
-in the documentation and some scripts in the source tree.
+Download and Unpack:
 
-That nuttx build directory should reside in a path that contains no spaces
-in the higher level directory names.  For example, under Cygwin, your home
-directory might be formed from your first and last names like: "/home/First Last".
-That will cause strange errors when the make system tries to build.
+  Download and unpack the NuttX tarball.  If you are reading this, then
+  you have probably already done that.  After unpacking, you will end
+  up with a directory called nuttx-version (where version is the NuttX
+  version number). You might want to rename that directory nuttx to
+  match the various instructions in the documentation and some scripts
+  in the source tree.
 
-[Actually, that is probably not to difficult to fix.  Some Makefiles probably
-just need some pathes within double quotes]
+  That nuttx build directory should reside in a path that contains no
+  spaces in the higher level directory names.  For example, under
+  Cygwin, your home directory might be formed from your first and last
+  names like: "/home/First Last". That will cause strange errors when
+  the make system tries to build.
 
+  [Actually, that problem is probably not to difficult to fix.  Some
+   Makefiles probably just need some pathes within double quotes]
+
+A Note about Header Files:
+
+  NuttX compiles without using the standard header files that are
+  distributed with your toolchain.  That is correct behavior in most
+  cases because the header files bundled with your toolchain (such as
+  stdio.h) are probably not correct for use with NuttX.  Certain
+  header files, such as setjmp.h, may be needed from your toolchain.
+  In that case, one solution is to copy that file from your toolchain
+  into the NuttX include directory.  If you prefer to use the stdint.h
+  and stdbool.h header files from your toolchain, those could be copied
+  too.  Using most other header files from your toolchain would probably
+  cause errors.
 
 CONFIGURING NUTTX
 ^^^^^^^^^^^^^^^^^

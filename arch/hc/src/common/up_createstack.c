@@ -82,7 +82,7 @@
  *
  ****************************************************************************/
 
-STATUS up_create_stack(_TCB *tcb, size_t stack_size)
+int up_create_stack(_TCB *tcb, size_t stack_size)
 {
   if (tcb->stack_alloc_ptr && tcb->adj_stack_size != stack_size)
     {

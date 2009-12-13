@@ -96,11 +96,11 @@
  *
  ****************************************************************************/
 
-STATUS task_restart(pid_t pid)
+int task_restart(pid_t pid)
 {
   FAR _TCB  *rtcb;
   FAR _TCB  *tcb;
-  STATUS     status;
+  int        status;
   irqstate_t state;
 
   /* Make sure this task does not become ready-to-run while

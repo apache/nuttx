@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated December 5, 2009)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated December 13, 2009)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (2)  Memory Managment (mm/)
@@ -32,6 +32,7 @@ NuttX TODO List (Last updated December 5, 2009)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
   (8)  z80/z8/ez80 (arch/z80/)
   (8)  z16 (arch/z16/)
+  (0)  mc68hc1x (arch/hc)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -734,7 +735,10 @@ o pjrc-8052 / MCS51 (arch/pjrc-8051/)
                examples/ostest/barrier.c around lines 53 and 74
                examples/ostest/sighand.c at 225 and 244
                driver/serial.c in usleep calls around 347 and 354
-  Status:      Open
+  Status:      Open.  Update:  These were reviewed during the hcs12 port.  The
+               hcs12 also has 16-bit integer types (if -mshort is in the CFLAGS).
+               I believe that the warnings in most of the above have been fixed
+               but this has not been verified on this platform).
   Priority:    Medium
 
   Description  Global data is not being initialized.  Logic like that of SDCCs
@@ -805,10 +809,11 @@ o Renesas M16C/26 (arch/sh/src/m16c)
 o z80/z8/ez80 (arch/z80)
  ^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: The SDCC version the same problems with interger overflow during
+  Description: The SDCC version the same problems with integer overflow during
                compilation as described for pjrc-8051.  At typical cause is code like
-               usleep(500*1000) which exceeds the range of a 16-bit integer
-  Status:      See pjrc-8051
+               usleep(500*1000) which exceeds the range of a 16-bit integer.
+  Status:      See pjrc-8051.  These have probably been fixed but have not yet
+               been verified on these platforms.
   Priority:    See pjrc-8051
 
   Description: The simulated Z80 serial console (configs/z80sim/src/z80_serial.c +
@@ -976,5 +981,5 @@ o z16 (arch/z16)
   Status:      Open
   Priority:    Low
 
-
-
+o mc68hc1x (arch/hc)
+  ^^^^^^^^^^^^^^^^^^

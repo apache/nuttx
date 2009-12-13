@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_inoderemove.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@ static void inode_unlink(struct inode *node,
  * NOTE: Caller must hold the inode semaphore
  ****************************************************************************/
 
-STATUS inode_remove(const char *path)
+int inode_remove(const char *path)
 {
   const char       *name = path;
   FAR struct inode *node;

@@ -125,7 +125,7 @@ typedef void (*wdentry4_t)(int argc, uint32 arg1, uint32 arg2,
  *
  ****************************************************************************/
 
-STATUS wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
+int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 {
   va_list    ap;
   FAR wdog_t *curr;

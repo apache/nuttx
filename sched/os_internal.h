@@ -239,11 +239,11 @@ extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
  ****************************************************************************/
 
 extern void    task_start(void);
-extern STATUS  task_schedsetup(FAR _TCB *tcb, int priority,
+extern int     task_schedsetup(FAR _TCB *tcb, int priority,
                                start_t start, main_t main);
-extern STATUS  task_argsetup(FAR _TCB *tcb, const char *name,
+extern int     task_argsetup(FAR _TCB *tcb, const char *name,
                              const char *argv[]);
-extern STATUS  task_deletecurrent(void);
+extern int     task_deletecurrent(void);
 
 extern boolean sched_addreadytorun(FAR _TCB *rtrtcb);
 extern boolean sched_removereadytorun(FAR _TCB *rtrtcb);

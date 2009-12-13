@@ -1,5 +1,5 @@
 /****************************************************************************
- * task_create.c
+ * sched/task_create.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -116,7 +116,7 @@ int task_create(const char *name, int priority,
 #endif
 {
   FAR _TCB *tcb;
-  STATUS status;
+  int status;
   pid_t pid;
 
   /* Allocate a TCB for the new task. */

@@ -247,7 +247,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 {
   FAR _TCB *ptcb;
   FAR join_t *pjoin;
-  STATUS status;
+  int status;
   int priority;
 #if CONFIG_RR_INTERVAL > 0
   int policy;

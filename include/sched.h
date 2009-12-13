@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/sched.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,41 +87,41 @@ extern "C" {
 /* Task Control Interfaces (non-standard) */
 
 #ifndef CONFIG_CUSTOM_STACK
-EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
-                         FAR uint32 *stack, uint32 stack_size,
-                         main_t entry, const char *argv[]);
+EXTERN int    task_init(FAR _TCB *tcb, const char *name, int priority,
+                        FAR uint32 *stack, uint32 stack_size,
+                        main_t entry, const char *argv[]);
 #else
-EXTERN STATUS  task_init(FAR _TCB *tcb, const char *name, int priority,
-                         main_t entry, const char *argv[]);
+EXTERN int    task_init(FAR _TCB *tcb, const char *name, int priority,
+                        main_t entry, const char *argv[]);
 #endif
-EXTERN STATUS  task_activate(FAR _TCB *tcb);
+EXTERN int    task_activate(FAR _TCB *tcb);
 #ifndef CONFIG_CUSTOM_STACK
-EXTERN int     task_create(const char *name, int priority, int stack_size,
-                           main_t entry, const char *argv[]);
+EXTERN int    task_create(const char *name, int priority, int stack_size,
+                          main_t entry, const char *argv[]);
 #else
-EXTERN int     task_create(const char *name, int priority,
-                           main_t entry, const char *argv[]);
+EXTERN int    task_create(const char *name, int priority,
+                          main_t entry, const char *argv[]);
 #endif
-EXTERN STATUS  task_delete(pid_t pid);
-EXTERN STATUS  task_restart(pid_t pid);
+EXTERN int    task_delete(pid_t pid);
+EXTERN int    task_restart(pid_t pid);
 
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 
-EXTERN int     sched_setparam(pid_t pid, const struct sched_param *param);
-EXTERN int     sched_getparam(pid_t pid, struct sched_param *param);
-EXTERN int     sched_setscheduler(pid_t pid, int policy,
-                                  const struct sched_param *param);
-EXTERN int     sched_getscheduler(pid_t pid);
-EXTERN int     sched_yield(void);
-EXTERN int     sched_get_priority_max(int policy);
-EXTERN int     sched_get_priority_min(int policy);
-EXTERN int     sched_rr_get_interval(pid_t pid, struct timespec *interval);
+EXTERN int    sched_setparam(pid_t pid, const struct sched_param *param);
+EXTERN int    sched_getparam(pid_t pid, struct sched_param *param);
+EXTERN int    sched_setscheduler(pid_t pid, int policy,
+                                 const struct sched_param *param);
+EXTERN int    sched_getscheduler(pid_t pid);
+EXTERN int    sched_yield(void);
+EXTERN int    sched_get_priority_max(int policy);
+EXTERN int    sched_get_priority_min(int policy);
+EXTERN int    sched_rr_get_interval(pid_t pid, struct timespec *interval);
 
 /* Task Switching Interfaces (non-standard) */
 
-EXTERN STATUS  sched_lock(void);
-EXTERN STATUS  sched_unlock(void);
-EXTERN sint32  sched_lockcount(void);
+EXTERN int    sched_lock(void);
+EXTERN int    sched_unlock(void);
+EXTERN sint32 sched_lockcount(void);
 
 /* If instrumentation of the scheduler is enabled, then some
  * outboard logic must provide the following interfaces.
@@ -129,9 +129,9 @@ EXTERN sint32  sched_lockcount(void);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
-EXTERN void    sched_note_start(FAR _TCB *tcb );
-EXTERN void    sched_note_stop(FAR _TCB *tcb );
-EXTERN void    sched_note_switch(FAR _TCB *pFromTcb, FAR _TCB *pToTcb);
+EXTERN void   sched_note_start(FAR _TCB *tcb );
+EXTERN void   sched_note_stop(FAR _TCB *tcb );
+EXTERN void   sched_note_switch(FAR _TCB *pFromTcb, FAR _TCB *pToTcb);
 
 #else
 # define sched_note_start(t)

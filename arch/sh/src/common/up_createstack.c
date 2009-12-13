@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/common/up_createstack.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@
  *     must be allocated.
  ****************************************************************************/
 
-STATUS up_create_stack(_TCB *tcb, size_t stack_size)
+int up_create_stack(_TCB *tcb, size_t stack_size)
 {
   if (tcb->stack_alloc_ptr &&
       tcb->adj_stack_size != stack_size)

@@ -101,7 +101,7 @@
 int sem_post(FAR sem_t *sem)
 {
   FAR _TCB  *stcb = NULL;
-  STATUS     ret = ERROR;
+  int        ret = ERROR;
   irqstate_t saved_state;
 
   /* Make sure we were supplied with a valid semaphore. */

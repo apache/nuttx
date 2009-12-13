@@ -1,5 +1,5 @@
 /****************************************************************************
- * wd_cancel.c
+ * sched/wd_cancel.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -85,12 +85,12 @@
  *
  ****************************************************************************/
 
-STATUS wd_cancel (WDOG_ID wdid)
+int wd_cancel (WDOG_ID wdid)
 {
   wdog_t    *curr;
   wdog_t    *prev;
   irqstate_t saved_state;
-  STATUS     ret = ERROR;
+  int        ret = ERROR;
 
   /* Prohibit timer interactions with the timer queue until the
    * cancellation is complete

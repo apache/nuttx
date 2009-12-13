@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task_delete.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,12 +93,12 @@
  *
  ****************************************************************************/
 
-STATUS task_delete(pid_t pid)
+int task_delete(pid_t pid)
 {
   FAR _TCB  *rtcb;
   FAR _TCB  *dtcb;
   irqstate_t saved_state;
-  STATUS     ret = ERROR;
+  int        ret = ERROR;
 
    /* Check if the task to delete is the calling task */
 

@@ -88,7 +88,7 @@
  *
  ****************************************************************************/
 
-STATUS task_activate(FAR _TCB *tcb)
+int task_activate(FAR _TCB *tcb)
 {
   irqstate_t flags = irqsave();
 

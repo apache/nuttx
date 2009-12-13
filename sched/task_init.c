@@ -1,5 +1,5 @@
 /****************************************************************************
- * task_init.c
+ * sched/task_init.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -108,15 +108,15 @@
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 FAR uint32 *stack, uint32 stack_size,
-                 main_t entry, const char *argv[])
+int task_init(FAR _TCB *tcb, const char *name, int priority,
+              FAR uint32 *stack, uint32 stack_size,
+              main_t entry, const char *argv[])
 #else
-STATUS task_init(FAR _TCB *tcb, const char *name, int priority,
-                 main_t entry, const char *argv[])
+int task_init(FAR _TCB *tcb, const char *name, int priority,
+              main_t entry, const char *argv[])
 #endif
 {
-  STATUS ret;
+  int ret;
 
  /* Associate file descriptors with the new task */
 

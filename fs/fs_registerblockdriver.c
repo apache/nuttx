@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs_registerblockdriver.c
+ * fs/fs_registerblockdriver.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -67,12 +67,12 @@
  * Name: register_driver
  ****************************************************************************/
 
-STATUS register_blockdriver(const char *path,
+int register_blockdriver(const char *path,
                             const struct block_operations *bops,
                             mode_t mode, void *priv)
 {
   struct inode *node;
-  STATUS ret = -ENOMEM;
+  int ret = -ENOMEM;
 
   /* Insert an inode for the device driver -- we need to hold the inode semaphore
    * to prevent access to the tree while we this.  This is because we will have a

@@ -67,11 +67,11 @@
  * Name: register_driver
  ****************************************************************************/
 
-STATUS register_driver(const char *path, const struct file_operations *fops,
+int register_driver(const char *path, const struct file_operations *fops,
                        mode_t mode, void *priv)
 {
   struct inode *node;
-  STATUS ret = ERROR;
+  int ret = ERROR;
 
   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.

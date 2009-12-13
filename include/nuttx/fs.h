@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_FS_H
-#define __NUTTX_FS_H
+#ifndef __INCLUDE_NUTTX_FS_H
+#define __INCLUDE_NUTTX_FS_H
 
 /****************************************************************************
  * Included Files
@@ -312,27 +312,27 @@ EXTERN void   weak_function fs_initialize(void);
 
 /* fs_registerdriver.c ******************************************************/
 
-EXTERN STATUS register_driver(const char *path,
-                              const struct file_operations *fops,
-                              mode_t mode, void *priv);
+EXTERN int register_driver(const char *path,
+                           const struct file_operations *fops,
+                           mode_t mode, void *priv);
 
 /* fs_registerdriver.c ******************************************************/
 
-EXTERN STATUS register_blockdriver(const char *path,
-                                   const struct block_operations *bops,
-                                   mode_t mode, void *priv);
+EXTERN int register_blockdriver(const char *path,
+                                const struct block_operations *bops,
+                                mode_t mode, void *priv);
 
 /* fs_unregisterdriver.c ****************************************************/
 
-EXTERN STATUS unregister_driver(const char *path);
+EXTERN int unregister_driver(const char *path);
 
 /* fs_unregisterblockdriver.c ***********************************************/
 
-EXTERN STATUS unregister_blockdriver(const char *path);
+EXTERN int unregister_blockdriver(const char *path);
 
 /* fs_open.c ****************************************************************/
 
-EXTERN int   inode_checkflags(FAR struct inode *inode, int oflags);
+EXTERN int inode_checkflags(FAR struct inode *inode, int oflags);
 
 /* fs_files.c ***************************************************************/
 
@@ -429,4 +429,4 @@ EXTERN ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t off
 }
 #endif
 
-#endif /* __NUTTX_FS_H */
+#endif /* __INCLUDE_NUTTX_FS_H */

@@ -107,30 +107,61 @@ typedef double float64;
 
 /* Misc. scalar types */
 
-typedef unsigned int mode_t; /* Needs at least 16-bits but must be */
-                               /* sizeof(int) because it is passed */
-                               /* via varargs. */
+/* mode_t is an integer type used for file attributes.  mode_t needs
+ * to be at least 16-bits but, in fact must be sizeof(int) because it is
+ * pased via varargs.
+ */
+
+typedef unsigned int mode_t;
+
+/* size_t is used for sizes of objects.
+ * ssize_t is used for a count of bytes or an error indication.
+ */
+
 #ifdef CONFIG_SMALL_MEMORY
 typedef uint16       size_t;
 typedef sint16       ssize_t;
-typedef sint16       off_t;
-typedef uint16       blksize_t;
-typedef uint16       blkcnt_t;
 #else
 typedef uint32       size_t;
 typedef sint32       ssize_t;
-typedef sint32       off_t;
-typedef uint16       blksize_t;
-typedef uint32       blkcnt_t;
 #endif
-typedef off_t        fpos_t;
+
+/* uid_t is used for user IDs
+ * gid_t is used for group IDs.
+ */
+
 typedef sint16       uid_t;
 typedef sint16       gid_t;
+
+/* dev_t is used for device IDs */
+
 typedef uint16       dev_t;
+
+/* ino_t is used for file serial numbers */
+
 typedef uint16       ino_t;
-typedef unsigned int sig_atomic_t;
+
+/* pid_t is used for process IDs and process group IDs */
+
 typedef int          pid_t;
-typedef int          STATUS;
+
+/* blkcnt_t and off_t are signed integer types.
+ *
+ *   blkcnt_t is used for file block counts.
+ *   off_t is used for file sizes.
+ *
+ * Hence, both should be independent of processor architecture.
+ */
+
+typedef uint32       blkcnt_t;
+typedef sint32       off_t;
+typedef off_t        fpos_t;
+
+/* blksize_t is a signed integer value used for file block sizes */
+
+typedef sint16       blksize_t;
+
+/* Network related */
 
 typedef unsigned int socklen_t;
 typedef uint16       sa_family_t;

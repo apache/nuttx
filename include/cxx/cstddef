@@ -87,7 +87,6 @@ namespace std
   using ::gid_t;
   using ::dev_t;
   using ::ino_t;
-  using ::sig_atomic_t;
   using ::pid_t;
 
   using ::socklen_t;

@@ -70,7 +70,7 @@ static const char g_noname[] = "<noname>";
  * Private Function Prototypes
  ****************************************************************************/
 
-static STATUS task_assignpid(FAR _TCB* tcb);
+static int task_assignpid(FAR _TCB* tcb);
 
 /****************************************************************************
  * Private Functions
@@ -90,7 +90,7 @@ static STATUS task_assignpid(FAR _TCB* tcb);
  *
  ****************************************************************************/
 
-static STATUS task_assignpid(FAR _TCB *tcb)
+static int task_assignpid(FAR _TCB *tcb)
 {
   pid_t next_pid;
   int   hash_ndx;
@@ -207,10 +207,9 @@ static inline void task_dupdspace(FAR _TCB *tcb)
  *
  ****************************************************************************/
 
-STATUS task_schedsetup(FAR _TCB *tcb, int priority,
-                       start_t start, main_t main)
+int task_schedsetup(FAR _TCB *tcb, int priority, start_t start, main_t main)
 {
-  STATUS ret;
+  int ret;
 
   /* Assign a unique task ID to the task. */
 
@@ -289,7 +288,7 @@ STATUS task_schedsetup(FAR _TCB *tcb, int priority,
  *
  ****************************************************************************/
 
-STATUS task_argsetup(FAR _TCB *tcb, const char *name, const char *argv[])
+int task_argsetup(FAR _TCB *tcb, const char *name, const char *argv[])
 {
   int i;
 

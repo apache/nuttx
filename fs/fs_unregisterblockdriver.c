@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_unregisterblockdriver.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,9 +71,9 @@
  * Name: unregister_blockdriver()
  ****************************************************************************/
 
-STATUS unregister_blockdriver(const char *path)
+int unregister_blockdriver(const char *path)
 {
-  STATUS ret;
+  int ret;
   inode_semtake();
   ret = inode_remove(path);
   inode_semgive();

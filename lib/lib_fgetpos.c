@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_fgetpos.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,6 +118,6 @@ int fgetpos(FAR FILE *stream, FAR fpos_t *pos)
       return ERROR;
     }
 
-  *pos = (fpos_t)pos;
+  *pos = (fpos_t)position;
   return OK;
 }

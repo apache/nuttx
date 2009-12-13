@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/arch.h
+ * include/nuttx/arch.h
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -152,7 +152,7 @@ EXTERN void up_initial_state(FAR _TCB *tcb);
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-EXTERN STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);
+EXTERN int up_create_stack(FAR _TCB *tcb, size_t stack_size);
 #endif
 
 /****************************************************************************
@@ -177,7 +177,7 @@ EXTERN STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-EXTERN STATUS up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);
+EXTERN int up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);
 #endif
 
 /****************************************************************************
