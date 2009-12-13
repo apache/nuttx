@@ -51,6 +51,10 @@
  * Definitions
  ****************************************************************************/
 
+#define SEC_PER_MIN  ((time_t)60)
+#define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
+#define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
+
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -108,7 +112,7 @@ void clock_initialize(void)
 
   /* Set the base time as seconds into this julian day. */
 
-  g_basetime.tv_sec  = jdn * (24*60*60);
+  g_basetime.tv_sec  = jdn * SEC_PER_DAY;
   g_basetime.tv_nsec = 0;
 
   /* These is no time bias from this time. */
