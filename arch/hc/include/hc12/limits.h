@@ -83,4 +83,9 @@
 #define LLONG_MIN   0x7fffffffffffffff
 #define ULLONG_MAX  0xffffffffffffffff
 
+/* A pointer is 2 bytes */
+
+#define PTR_MIN     0x0000
+#define PTR_MAX     0xffff
+
 #endif /* __ARCH_HC_INCLUDE_HC12_LIMITS_H */
