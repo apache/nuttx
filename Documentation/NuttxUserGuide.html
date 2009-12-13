@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: May 22, 2009</p>
+      <p>Last Updated: December 13, 2009</p>
     </td>
   </tr>
 </table>
@@ -296,8 +296,8 @@ VxWorks provides the following similar interface:
 <b>Function Prototype:</b> 
 <pre>
    #include &lt;sched.h&gt;
-   STATUS task_init(_TCB *tcb, char *name, int priority, uint32 *stack, uint32 stack_size,
-                    maint_t entry, const char *argv[]);
+   int task_init(_TCB *tcb, char *name, int priority, uint32 *stack, uint32 stack_size,
+                 maint_t entry, const char *argv[]);
 </pre>
 
 <p>
@@ -368,7 +368,7 @@ VxWorks provides the following similar interface:
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;sched.h&gt;
-    STATUS task_activate( _TCB *tcb );
+    int task_activate( _TCB *tcb );
 </pre>
 
 <p>
@@ -418,7 +418,7 @@ the pointer to the WIND_TCB cast to an integer.
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;sched.h&gt;
-    STATUS task_delete( pid_t pid );
+    int task_delete( pid_t pid );
 </pre>
 
 <p>
@@ -514,7 +514,7 @@ And the UNIX interface:
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;sched.h&gt;
-    STATUS task_restart( pid_t pid );
+    int task_restart( pid_t pid );
 </pre>
 
 <p>
@@ -974,7 +974,7 @@ priority of the calling task is returned.
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;sched.h&gt;
-    STATUS sched_lock( void );
+    int sched_lock( void );
 </pre>
 
 <p>
@@ -994,7 +994,7 @@ number of times) or until it blocks itself.
 <p>
 <b>Assumptions/Limitations:</b> 
 <p>
-<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
+<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the comparable interface:
 <pre>
     STATUS taskLock( void );
@@ -1006,7 +1006,7 @@ VxWorks provides the comparable interface:
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;sched.h&gt;
-    STATUS sched_unlock( void );
+    int sched_unlock( void );
 </pre>
 
 <p>
@@ -1027,7 +1027,7 @@ eligible to preempt the current task will execute.
 <p>
 <b>Assumptions/Limitations:</b> 
 <p>
-<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
+<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the comparable interface:
 <pre>
     STATUS taskUnlock( void );
@@ -2296,7 +2296,7 @@ initialization time).
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;wdog.h&gt;
-    STATUS wd_delete (WDOG_ID wdog);
+    int wd_delete (WDOG_ID wdog);
 </pre>
 
 <p>
@@ -2321,7 +2321,7 @@ pointer to a watchdog structure.
 caller to assure that the watchdog is inactive before deleting
 it.
 <p>
-<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
+<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <pre>
     STATUS wdDelete (WDOG_ID wdog);
@@ -2340,7 +2340,7 @@ before deallocating it (i.e., never returns ERROR).
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;wdog.h&gt;
-    STATUS wd_start( WDOG_ID wdog, int delay, wdentry_t wdentry,
+    int wd_start( WDOG_ID wdog, int delay, wdentry_t wdentry,
                      intt argc, ....);
 </pre>
 
@@ -2378,7 +2378,7 @@ wd_start() on a given watchdog ID has any effect.
 context of the timer interrupt handler and is subject to all ISR
 restrictions.
 <p>
-<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
+<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <pre>
     STATUS wdStart (WDOG_ID wdog, int delay, FUNCPTR wdentry, int parameter);
@@ -2397,7 +2397,7 @@ number of parameters is determined by
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;wdog.h&gt;
-    STATUS wd_cancel (WDOG_ID wdog);
+    int wd_cancel (WDOG_ID wdog);
 </pre>
 
 <p>
@@ -2419,7 +2419,7 @@ level.
 <p>
 <b>Assumptions/Limitations:</b> 
 <p>
-<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
+<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
 VxWorks provides the following comparable interface:
 <pre>
     STATUS wdCancel (WDOG_ID wdog);
@@ -7392,7 +7392,6 @@ interface include:
 <li>pid_t
 <li>size_t
 <li>sigset_t
-<li>STATUS
 <li>time_t
 </ul>
 

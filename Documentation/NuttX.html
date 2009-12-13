@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 5 2009</p>
+      <p>Last Updated: December 13, 2009</p>
     </td>
   </tr>
 </table>
@@ -1616,6 +1616,11 @@ nuttx-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  can be used with any file system.  Good performance of this layer will
 	  depend upon functioning write buffer support!
 	  NOTE: FTL support is untested as of the initial check-in.
+	* Numerous minor changes for m68hc12 to eliminate compilation errors and
+	  warnings due to the fact that it uses 16-bit integer types and for casts
+	  between uint32 (32-bits) and an mc68hc12 pointer (16-bits).
+	* sys/types:  Size of off_t and blkcnt_t should not depend on size of
+	  int in the architecture;  Removed non-standard type STATUS
 
 pascal-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

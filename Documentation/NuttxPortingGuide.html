@@ -438,8 +438,10 @@
       <li><code>arch/arm/include/lpc214x</code> and <code>arch/arm/src/lpc214x</code>:
         These directories provide support for NXP LPC214x family of
         processors.
-        STATUS: This port is in progress and should be available in the
-        nuttx-0.2.5 release.
+        STATUS: This port boots and passes the OS test (examples/ostest).
+        The port is complete and verified.  As of NuttX 0.3.17, the port includes:
+        timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
+        support.  A verified NuttShell configuration is also available.
       </li>
 
     </ul>
@@ -700,7 +702,14 @@
 
   <li><code>configs/us7032evb1</code>:
     This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
-    STATUS:  Work has just began on this port.
+    STATUS:  This port is available as of release 0.3.18 of NuttX.  The port is basically
+    complete and many examples run correctly.  However, there are remaining instabilities
+    that make the port un-usable.  The nature of these is not understood; the behavior is
+    that certain SH-1 instructions stop working as advertised.  This could be a silicon
+    problem, some pipeline issue that is not handled properly by the gcc 3.4.5 toolchain
+    (which has very limited SH-1 support to begin with), or perhaps with the CMON debugger.
+    At any rate, I have exhausted all of the energy that I am willing to put into this cool
+    old processor for the time being.
   </li>
 
   <li><code>configs/xtrs</code>:
