@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <stdint.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
@@ -47,6 +48,7 @@
 #include <errno.h>
 #include <wdog.h>
 #include <debug.h>
+
 #include "os_internal.h"
 #include "pthread_internal.h"
 #include "clock_internal.h"

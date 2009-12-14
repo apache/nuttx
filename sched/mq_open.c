@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <mqueue.h>
 #include <fcntl.h>
@@ -47,7 +48,9 @@
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/kmalloc.h>
+
 #include "os_internal.h"
 #include "mq_internal.h"
 

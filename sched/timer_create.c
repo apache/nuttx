@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer_create.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,15 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
 #include <wdog.h>
 #include <errno.h>
+
 #include "timer_internal.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS

@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <pthread.h>
 #include <string.h>
 #include <debug.h>

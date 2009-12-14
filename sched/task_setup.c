@@ -38,12 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 
 /****************************************************************************

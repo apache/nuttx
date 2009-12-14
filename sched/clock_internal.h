@@ -41,6 +41,8 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
 #include <nuttx/clock.h>
 #include <nuttx/compiler.h>
 

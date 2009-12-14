@@ -1,7 +1,7 @@
-/************************************************************
- * sched_getfiles.c
+/************************************************************************
+ * sched/sched_getfiles.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,25 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
 #include <sched.h>
 #include "os_internal.h"
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Function:  sched_getfiles
  *
  * Description:
@@ -63,7 +63,7 @@
  *
  * Assumptions:
  *
- ************************************************************/
+ ************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 

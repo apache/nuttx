@@ -1,7 +1,7 @@
 /****************************************************************************
- * mq_send.c
+ * sched/mq_send.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -38,15 +38,19 @@
  ****************************************************************************/
 
 #include  <nuttx/config.h>
-#include  <nuttx/kmalloc.h>
+
 #include  <sys/types.h>
+#include  <sigint.h>
 #include  <fcntl.h>
 #include  <mqueue.h>
 #include  <string.h>
 #include  <errno.h>
 #include  <sched.h>
 #include  <debug.h>
+
+#include  <nuttx/kmalloc.h>
 #include  <nuttx/arch.h>
+
 #include  "os_internal.h"
 #ifndef CONFIG_DISABLE_SIGNALS
 # include "sig_internal.h"

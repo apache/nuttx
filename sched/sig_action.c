@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <signal.h>
 #include <queue.h>
 #include <sched.h>

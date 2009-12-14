@@ -1,7 +1,7 @@
 /****************************************************************************
- * mq_internal.h
+ * sched/mq_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,25 +33,24 @@
  *
  ****************************************************************************/
 
-#ifndef __MQ_INTERNAL_H
-#define __MQ_INTERNAL_H
+#ifndef __SCHED_MQ_INTERNAL_H
+#define __SCHED_MQ_INTERNAL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <limits.h>
 #include <mqueue.h>
 #include <sched.h>
 #include <signal.h>
-#include <nuttx/compiler.h>
 
 #if CONFIG_MQ_MAXMSGSIZE > 0
-
-/****************************************************************************
- * Compilations Switches
- ****************************************************************************/
 
 /****************************************************************************
  * Definitions
@@ -213,5 +212,5 @@ EXTERN int          mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg,
 #endif
 
 #endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
-#endif /* __MQ_INTERNAL_H */
+#endif /* __SCHED_MQ_INTERNAL_H */
 

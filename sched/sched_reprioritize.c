@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <sched.h>
 #include <errno.h>
 
