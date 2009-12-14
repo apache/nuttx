@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/net/uip/tftp.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdbool.h>
 #include <arpa/inet.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -62,8 +62,8 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binary);
-EXTERN int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binary);
+EXTERN int tftpget(const char *remote, const char *local, in_addr_t addr, bool binary);
+EXTERN int tftpput(const char *local, const char *remote, in_addr_t addr, bool binary);
 
 #undef EXTERN
 #ifdef __cplusplus

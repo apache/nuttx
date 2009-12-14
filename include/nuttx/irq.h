@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/irq.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-# include <sys/types.h>
 # include <assert.h>
 #endif
 
@@ -61,8 +60,7 @@
 
 #ifndef __ASSEMBLY__
 typedef int (*xcpt_t)(int irq, FAR void *context);
-typedef int (*swint_t)(int code, int parm2, int parm3,
-                       FAR void *context);
+typedef int (*swint_t)(int code, int parm2, int parm3, FAR void *context);
 #endif
 
 /* Now include architecture-specific types */

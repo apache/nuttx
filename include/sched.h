@@ -41,10 +41,13 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdint.h>
 #include <nuttx/sched.h>
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /* Task Management Definitins ***************************************************/
@@ -88,7 +91,7 @@ extern "C" {
 
 #ifndef CONFIG_CUSTOM_STACK
 EXTERN int    task_init(FAR _TCB *tcb, const char *name, int priority,
-                        FAR uint32 *stack, uint32 stack_size,
+                        FAR uint32_t *stack, uint32_t stack_size,
                         main_t entry, const char *argv[]);
 #else
 EXTERN int    task_init(FAR _TCB *tcb, const char *name, int priority,
@@ -121,7 +124,7 @@ EXTERN int    sched_rr_get_interval(pid_t pid, struct timespec *interval);
 
 EXTERN int    sched_lock(void);
 EXTERN int    sched_unlock(void);
-EXTERN sint32 sched_lockcount(void);
+EXTERN int32_t sched_lockcount(void);
 
 /* If instrumentation of the scheduler is enabled, then some
  * outboard logic must provide the following interfaces.

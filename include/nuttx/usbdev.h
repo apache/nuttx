@@ -47,10 +47,13 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Endpoint helpers *****************************************************************/
@@ -60,7 +63,7 @@
  *
  * ep   - the struct usbdev_ep_s instance obtained from allocep()
  * desc - A struct usb_epdesc_s instance describing the endpoint
- * last - TRUE if this this last endpoint to be configured.  Some hardware needs
+ * last - true if this this last endpoint to be configured.  Some hardware needs
  *        to take special action when all of the endpoints have been configured.
  */
 
@@ -95,8 +98,8 @@
 
 /* Stall or resume an endpoint */
 
-#define EP_STALL(ep)               (ep)->ops->stall(ep,FALSE)
-#define EP_RESUME(ep)              (ep)->ops->stall(ep,TRUE)
+#define EP_STALL(ep)               (ep)->ops->stall(ep,false)
+#define EP_RESUME(ep)              (ep)->ops->stall(ep,true)
 
 /* USB Device Driver Helpers ********************************************************/
 
@@ -105,7 +108,7 @@
  *   ep     - 7-bit logical endpoint number (direction bit ignored).  Zero means
  *            that any endpoint matching the other requirements will suffice.  The
  *            assigned endpoint can be found in the eplog field.
- *   in     - TRUE: IN (device-to-host) endpoint requested
+ *   in     - true: IN (device-to-host) endpoint requested
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
  *            USB_EP_ATTR_XFER_INT}
  */
@@ -126,19 +129,19 @@
 
 /* Sets the device selfpowered feature */
 
-#define DEV_SETSELFPOWERED(dev)    (dev)->ops->selfpowered(dev,TRUE)
+#define DEV_SETSELFPOWERED(dev)    (dev)->ops->selfpowered(dev,true)
 
 /* Clears the device selfpowered feature */
 
-#define DEV_CLRSELFPOWERED(dev)    (dev)->ops->selfpowered(dev, FALSE)
+#define DEV_CLRSELFPOWERED(dev)    (dev)->ops->selfpowered(dev, false)
 
 /* Software-controlled connect to USB host */
 
-#define DEV_CONNECT(dev)           (dev)->ops->pullup ? (dev)->ops->pullup(dev,TRUE) : -EOPNOTSUPP
+#define DEV_CONNECT(dev)           (dev)->ops->pullup ? (dev)->ops->pullup(dev,true) : -EOPNOTSUPP
 
 /* Software-controlled disconnect from USB host */
 
-#define DEV_DISCONNECT(dev)        (dev)->ops->pullup ? (dev)->ops->pullup(dev,FALSE) : -EOPNOTSUPP
+#define DEV_DISCONNECT(dev)        (dev)->ops->pullup ? (dev)->ops->pullup(dev,false) : -EOPNOTSUPP
 
 /* USB Class Driver Helpers *********************************************************/
 /* All may be called from interupt handling logic except bind() and unbind() */
@@ -190,16 +193,16 @@
 struct usbdev_ep_s;
 struct usbdev_req_s
 {
-  ubyte  *buf;     /* Call: Buffer used for data; Return: Unchanged */
-  ubyte   flags;   /* See USBDEV_REQFLAGS_* definitions */
-  uint16  len;     /* Call: Total length of data in buf; Return: Unchanged */
-  uint16  xfrd;    /* Call: zero; Return: Bytes transferred so far */
-  sint16  result;  /* Call: zero; Return: Result of transfer (O or -errno) */
+  uint8_t *buf;    /* Call: Buffer used for data; Return: Unchanged */
+  uint8_t  flags;  /* See USBDEV_REQFLAGS_* definitions */
+  uint16_t len;    /* Call: Total length of data in buf; Return: Unchanged */
+  uint16_t xfrd;   /* Call: zero; Return: Bytes transferred so far */
+  int16_t  result; /* Call: zero; Return: Result of transfer (O or -errno) */
 
   /* Callback when the transfer completes */
 
-  void  (*callback)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
-  void   *priv;    /* Used only by callee */
+  void   (*callback)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
+  void    *priv;    /* Used only by callee */
 };
 
 /* Endpoint-specific interface to USB controller hardware. */
@@ -208,7 +211,8 @@ struct usbdev_epops_s
 {
   /* Configure/enable and disable endpoint */
 
-  int (*configure)(FAR struct usbdev_ep_s *ep, FAR const struct usb_epdesc_s *desc, boolean last);
+  int (*configure)(FAR struct usbdev_ep_s *ep, FAR const struct usb_epdesc_s *desc,
+                   bool last);
   int (*disable)(FAR struct usbdev_ep_s *ep);
 
   /* Allocate and free I/O requests */
@@ -219,7 +223,7 @@ struct usbdev_epops_s
   /* Allocate and free I/O buffers */
 
 #ifdef CONFIG_ARCH_USBDEV_DMA
-  FAR void *(*allocbuffer)(FAR struct usbdev_ep_s *ep, uint16 nbytes);
+  FAR void *(*allocbuffer)(FAR struct usbdev_ep_s *ep, uint16_t nbytes);
   void (*freebuffer)(FAR struct usbdev_ep_s *ep, FAR void *buf);
 #endif
 
@@ -230,7 +234,7 @@ struct usbdev_epops_s
 
   /* Stall or resume an endpoint */
 
-  int (*stall)(FAR struct usbdev_ep_s *ep, boolean resume);
+  int (*stall)(FAR struct usbdev_ep_s *ep, bool resume);
 };
 
 /* Representation of one USB endpoint */
@@ -238,9 +242,9 @@ struct usbdev_epops_s
 struct usbdev_ep_s
 {
   const struct usbdev_epops_s *ops; /* Endpoint operations */
-  ubyte  eplog;                     /* Logical endpoint address */
-  uint16 maxpacket;                 /* Maximum packet size for this endpoint */
-  void  *priv;                      /* For use by class driver */
+  uint8_t  eplog;                   /* Logical endpoint address */
+  uint16_t maxpacket;               /* Maximum packet size for this endpoint */
+  void    *priv;                    /* For use by class driver */
 };
 
 /* struct usbdev_s represents a usb device */
@@ -250,7 +254,7 @@ struct usbdev_ops_s
 {
   /* Allocate and free endpoints */
 
-  FAR struct usbdev_ep_s *(*allocep)(FAR struct usbdev_s *dev, ubyte epphy, boolean in, ubyte eptype);
+  FAR struct usbdev_ep_s *(*allocep)(FAR struct usbdev_s *dev, uint8_t epphy, bool in, uint8_t eptype);
   void (*freeep)(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
 
   /* Get the frame number from the last SOF */
@@ -260,8 +264,8 @@ struct usbdev_ops_s
   /* Hardware specific features */
 
   int (*wakeup)(FAR struct usbdev_s *dev);
-  int (*selfpowered)(FAR struct usbdev_s *dev, boolean selfpowered);
-  int (*pullup)(FAR struct usbdev_s *dev,  boolean enable);
+  int (*selfpowered)(FAR struct usbdev_s *dev, bool selfpowered);
+  int (*pullup)(FAR struct usbdev_s *dev,  bool enable);
 
   /* Device-specific I/O command support */
 
@@ -272,8 +276,8 @@ struct usbdev_s
 {
   const struct usbdev_ops_s *ops; /* Access to hardware specific features */
   struct usbdev_ep_s *ep0;        /* Endpoint zero */
-  ubyte  speed;                   /* Current speed of host connection */
-  ubyte  dualspeed:1;             /* 1:supports high and full speed operation */
+  uint8_t  speed;                 /* Current speed of host connection */
+  uint8_t  dualspeed:1;           /* 1:supports high and full speed operation */
 };
 
 /* USB Device Class Implementations *************************************************/
@@ -292,7 +296,7 @@ struct usbdevclass_driverops_s
 struct usbdevclass_driver_s
 {
   const struct usbdevclass_driverops_s *ops;
-  ubyte speed;                    /* Highest speed that the driver handles */
+  uint8_t speed;                  /* Highest speed that the driver handles */
 };
 
 /************************************************************************************
@@ -390,7 +394,7 @@ EXTERN int usbstrg_configure(unsigned int nluns, void **handle);
 
 EXTERN int usbstrg_bindlun(FAR void *handle, FAR const char *drvrpath,
                            unsigned int lunno, off_t startsector, size_t nsectors,
-                            boolean readonly);
+                            bool readonly);
 
 /****************************************************************************
  * Name: usbstrg_unbindlun

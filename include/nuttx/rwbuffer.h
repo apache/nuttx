@@ -45,8 +45,9 @@
  **********************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <semaphore.h>
 #include <nuttx/wqueue.h>
 
@@ -65,9 +66,9 @@
  * reload the read-ahead buffer, when appropriate.
  */
 
-typedef ssize_t (*rwbreload_t)(FAR void *dev, FAR ubyte *buffer,
+typedef ssize_t (*rwbreload_t)(FAR void *dev, FAR uint8_t *buffer,
                                off_t startblock, size_t nblocks);
-typedef ssize_t (*rwbflush_t)(FAR void *dev, FAR const ubyte *buffer,
+typedef ssize_t (*rwbflush_t)(FAR void *dev, FAR const uint8_t *buffer,
                               off_t startblock, size_t nblocks);
 
 /* This structure holds the state of the buffers.  In typical usage,
@@ -104,7 +105,7 @@ struct rwbuffer_s
 
   /* Supported geometry */
 
-  uint16        blocksize;       /* The size of one block */
+  uint16_t      blocksize;       /* The size of one block */
   size_t        nblocks;         /* The total number blocks supported */
   FAR void     *dev;             /* Device state passed to callout functions */
 
@@ -114,7 +115,7 @@ struct rwbuffer_s
    */
 
 #ifdef CONFIG_FS_WRITEBUFFER
-  uint16        wrmaxblocks;     /* The number of blocks to buffer in memory */
+  uint16_t      wrmaxblocks;     /* The number of blocks to buffer in memory */
   rwbflush_t    wrflush;         /* Callout to flush the write buffer */
 #endif
 
@@ -124,7 +125,7 @@ struct rwbuffer_s
    */
 
 #ifdef CONFIG_FS_READAHEAD
-  uint16        rhmaxblocks;     /* The number of blocks to buffer in memory */
+  uint16_t      rhmaxblocks;     /* The number of blocks to buffer in memory */
   rwbreload_t   rhreload;        /* Callout to reload the read-ahead buffer */
 #endif
 
@@ -136,8 +137,8 @@ struct rwbuffer_s
 #ifdef CONFIG_FS_WRITEBUFFER
   sem_t         wrsem;           /* Enforces exclusive access to the write buffer */
   struct work_s work;            /* Delayed work to flush buffer after adelay with no activity */
-  ubyte        *wrbuffer;        /* Allocated write buffer */
-  uint16        wrnblocks;       /* Number of blocks in write buffer */
+  uint8_t      *wrbuffer;        /* Allocated write buffer */
+  uint16_t      wrnblocks;       /* Number of blocks in write buffer */
   off_t         wrblockstart;    /* First block in write buffer */
   off_t         wrexpectedblock; /* Next block expected */
 #endif
@@ -146,8 +147,8 @@ struct rwbuffer_s
 
 #ifdef CONFIG_FS_READAHEAD
   sem_t         rhsem;           /* Enforces exclusive access to the write buffer */
-  ubyte        *rhbuffer;        /* Allocated read-ahead buffer */
-  uint16        rhnblocks;       /* Number of blocks in read-ahead buffer */
+  uint8_t      *rhbuffer;        /* Allocated read-ahead buffer */
+  uint16_t      rhnblocks;       /* Number of blocks in read-ahead buffer */
   off_t         rhblockstart;    /* First block in read-ahead buffer */
 #endif
 };
@@ -176,10 +177,10 @@ EXTERN void rwb_uninitialize(FAR struct rwbuffer_s *rwb);
 /* Buffer transfers */
 
 EXTERN ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
-                        size_t blockcount, FAR ubyte *rdbuffer);
+                        size_t blockcount, FAR uint8_t *rdbuffer);
 EXTERN ssize_t rwb_write(FAR struct rwbuffer_s *rwb,
                          off_t startblock, size_t blockcount,
-                         FAR const ubyte *wrbuffer);
+                         FAR const uint8_t *wrbuffer);
 EXTERN int rwb_mediaremoved(FAR struct rwbuffer_s *rwb);
 
 #undef EXTERN

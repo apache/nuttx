@@ -52,7 +52,7 @@
 #include <sys/types.h>
 
 /****************************************************************************
- * Pre-processor definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_WEBCLIENT_MAXHTTPLINE

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/statfs.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -100,14 +102,14 @@
 
 struct statfs
 {
-  uint32 f_type;     /* Type of filesystem (see definitions above) */
-  size_t f_bsize;    /* Optimal block size for transfers */
-  size_t f_blocks;   /* Total data blocks in the file system of this size */
-  size_t f_bfree;    /* Free blocks in the file system */
-  size_t f_bavail;   /* Free blocks avail to non-superuser */
-  size_t f_files;    /* Total file nodes in the file system */
-  size_t f_ffree;    /* Free file nodes in the file system */
-  uint32 f_namelen;  /* Maximum length of filenames */
+  uint32_t f_type;     /* Type of filesystem (see definitions above) */
+  size_t   f_bsize;    /* Optimal block size for transfers */
+  size_t   f_blocks;   /* Total data blocks in the file system of this size */
+  size_t   f_bfree;    /* Free blocks in the file system */
+  size_t   f_bavail;   /* Free blocks avail to non-superuser */
+  size_t   f_files;    /* Total file nodes in the file system */
+  size_t   f_ffree;    /* Free file nodes in the file system */
+  uint32_t f_namelen;  /* Maximum length of filenames */
 };
 
 /****************************************************************************

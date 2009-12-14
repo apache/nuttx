@@ -40,10 +40,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <stdint.h>
 
 /****************************************************************************
- * Public Macro Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Values for protocol argument to socket() */
@@ -79,7 +82,7 @@
 
 /* IPv4 Internet address */
 
-typedef uint32 in_addr_t;
+typedef uint32_t in_addr_t;
 struct in_addr
 {
   in_addr_t    s_addr;        /* Address (network byte order) */

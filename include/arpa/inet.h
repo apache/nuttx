@@ -1,7 +1,7 @@
 /****************************************************************************
- * arpa/inet.h
+ * include/arpa/inet.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <netinet/in.h>
 
 /****************************************************************************
@@ -89,10 +91,10 @@ extern "C" {
 
 /* Functions to convert between nost and network byte ordering */
 
-EXTERN uint32      ntohl (uint32 nl);
-EXTERN uint16      ntohs (uint16 ns);
-EXTERN uint32      htonl (uint32 hl);
-EXTERN uint16      htons (uint16 hs);
+EXTERN uint32_t    ntohl(uint32_t nl);
+EXTERN uint16_t    ntohs(uint16_t ns);
+EXTERN uint32_t    htonl(uint32_t hl);
+EXTERN uint16_t    htons(uint16_t hs);
 
 /* Functions to manipulate address representations */
 

@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/can.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,19 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <nuttx/fs.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Default configuration settings that may be overridden in the board configuration.
- * file.  The configured size is limited to 255 to fit into a ubyte.
+ * file.  The configured size is limited to 255 to fit into a uint8_t.
  */
 
 #if !defined(CONFIG_CAN_FIFOSIZE)
@@ -82,7 +85,7 @@
 /* CAN message support */
 
 #define CAN_MAXDATALEN 8
-#define CAN_ID(hdr)               ((uint16)(hdr) >> 5)
+#define CAN_ID(hdr)               ((uint16_t)(hdr) >> 5)
 #define CAN_RTR(hdr)              (((hdr) & 0x0010) != 0)
 #define CAN_DLC(hdr)              ((hdr) & 0x0f)
 #define CAN_MSGLEN(hdr)           (sizeof(struct can_msg_s) - (CAN_MAXDATALEN - CAN_DLC(hdr)))
@@ -122,8 +125,8 @@
 
 struct can_msg_s
 {
-  uint16        cm_hdr;                  /* The 16-bit CAN header */
-  ubyte         cm_data[CAN_MAXDATALEN]; /* CAN message data (0-8 byte) */
+  uint16_t      cm_hdr;                  /* The 16-bit CAN header */
+  uint8_t       cm_data[CAN_MAXDATALEN]; /* CAN message data (0-8 byte) */
 };
 
 /* This structure defines a CAN message FIFO. */
@@ -131,8 +134,8 @@ struct can_msg_s
 struct can_fifo_s
 {
   sem_t         cf_sem;                  /* Counting semaphore */
-  ubyte         cf_head;                 /* Index to the head [IN] index in the circular buffer */
-  ubyte         cf_tail;                 /* Index to the tail [OUT] index in the circular buffer */
+  uint8_t       cf_head;                 /* Index to the head [IN] index in the circular buffer */
+  uint8_t       cf_tail;                 /* Index to the tail [OUT] index in the circular buffer */
                                          /* Circular buffer of CAN messages */
   struct can_msg_s cf_buffer[CONFIG_CAN_FIFOSIZE];
 };
@@ -142,7 +145,7 @@ struct can_fifo_s
 struct can_rtrwait_s
 {
   sem_t         cr_sem;                  /* Wait for RTR response */
-  uint16        cr_id;                   /* The ID that is waited for */
+  uint16_t      cr_id;                   /* The ID that is waited for */
   FAR struct can_msg_s *cr_msg;          /* This is where the RTR reponse goes */
 };
 
@@ -176,11 +179,11 @@ struct can_ops_s
 
   /* Call to enable or disable RX interrupts */
 
-  CODE void (*co_rxint)(FAR struct can_dev_s *dev, boolean enable);
+  CODE void (*co_rxint)(FAR struct can_dev_s *dev, bool enable);
 
   /* Call to enable or disable TX interrupts */
 
-  CODE void (*co_txint)(FAR struct can_dev_s *dev, boolean enable);
+  CODE void (*co_txint)(FAR struct can_dev_s *dev, bool enable);
 
   /* All ioctl calls will be routed through this method */
 
@@ -188,19 +191,19 @@ struct can_ops_s
 
   /* Send a remote request */
 
-  CODE int (*co_remoterequest)(FAR struct can_dev_s *dev, uint16 id);
+  CODE int (*co_remoterequest)(FAR struct can_dev_s *dev, uint16_t id);
 
   /* This method will send one message on the CAN */
 
   CODE int (*co_send)(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
 
-  /* Return TRUE if all message have been sent.  If for example, the CAN
+  /* Return true if all message have been sent.  If for example, the CAN
    * hardware implements FIFOs, then this would mean the transmit FIFO is
    * empty.  This method is called when the driver needs to make sure that
    * all characters are "drained" from the TX hardware before calling co_shutdown().
    */
 
-  CODE boolean (*co_txempty)(FAR struct can_dev_s *dev);
+  CODE bool (*co_txempty)(FAR struct can_dev_s *dev);
 };
 
 /* This is the device structure used by the driver.  The caller of
@@ -214,8 +217,8 @@ struct can_ops_s
 
 struct can_dev_s
 {
-  ubyte                cd_ocount;        /* The number of times the device has been opened */
-  ubyte                cd_npendrtr;      /* Number of pending RTR messages */
+  uint8_t              cd_ocount;        /* The number of times the device has been opened */
+  uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
   sem_t                cd_recvsem;       /* Used to wakeup user waiting for space in cd_recv.buffer */
   struct can_fifo_s    cd_xmit;          /* Describes transmit FIFO */
@@ -230,7 +233,7 @@ struct can_dev_s
 
 struct canioctl_rtr_s
 {
-  uint16                ci_id;           /* The 11-bit ID to use in the RTR message */
+  uint16_t              ci_id;           /* The 11-bit ID to use in the RTR message */
   FAR struct can_msg_s *ci_msg;          /* The location to return the RTR response */
 };
 
@@ -276,7 +279,7 @@ EXTERN int can_register(FAR const char *path, FAR struct can_dev_s *dev);
  *
  ************************************************************************************/
 
-EXTERN int can_receive(FAR struct can_dev_s *dev, uint16 hdr, FAR ubyte *data);
+EXTERN int can_receive(FAR struct can_dev_s *dev, uint16_t hdr, FAR uint8_t *data);
 
 /************************************************************************************
  * Name: can_txdone

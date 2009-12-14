@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <stddef.h>
 
 //***************************************************************************
@@ -50,22 +51,6 @@
 
 namespace std
 {
-  // NuttX specific types
-
-  using ::sbyte;
-  using ::ubyte;
-  using ::uint8;
-  using ::boolean;
-  using ::sint16;
-  using ::uint16;
-  using ::sint32;
-  using ::uint32;
-#ifdef CONFIG_HAVE_LONG_LONG
-  using ::sint64;
-  using ::uint64;
-#endif
-  using ::irqstate_t;
-
   // Standard types
 
   using ::float32;

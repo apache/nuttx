@@ -40,7 +40,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <limits.h>
 
 #ifdef __cplusplus
@@ -51,7 +53,7 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -66,8 +68,8 @@ struct semholder_s
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   struct semholder_s *flink;    /* Implements singly linked list */
 #endif
-  void  *holder;                /* Holder TCB (actual type is _TCB) */
-  sint16 counts;                /* Number of counts owned by this holder */
+  void   *holder;               /* Holder TCB (actual type is _TCB) */
+  int16_t counts;               /* Number of counts owned by this holder */
 };
 #endif
 
@@ -75,7 +77,7 @@ struct semholder_s
 
 struct sem_s
 {
-  sint16 semcount;              /* >0 -> Num counts available */
+  int16_t semcount;              /* >0 -> Num counts available */
                                 /* <0 -> Num tasks waiting for semaphore */
 #ifdef CONFIG_PRIORITY_INHERITANCE
   struct semholder_s hlist;     /* List of holders of semaphore counts */

@@ -42,7 +42,10 @@
 
 #include <nuttx/config.h>   /* Default settings */
 #include <nuttx/compiler.h> /* Compiler settings */
+
 #include <sys/types.h>      /* Needed for general types */
+#include <stdint.h>         /* C99 fixed width integer types */
+#include <stdbool.h>        /* C99 boolean types */
 #include <semaphore.h>      /* Needed for sem_t */
 #include <signal.h>         /* Needed for sigset_t */
 #include <time.h>           /* Needed for struct timespec */
@@ -127,7 +130,7 @@
 
 /* Used to initialize a pthread_once_t */
 
-#define PTHREAD_ONCE_INIT             (FALSE)
+#define PTHREAD_ONCE_INIT             (false)
 
 /* This is returned by pthread_wait.  It must not match any errno in errno.h */
 
@@ -157,10 +160,10 @@ typedef pthread_startroutine_t  pthread_func_t;
 
 struct pthread_attr_s
 {
-  size_t stacksize;    /* Size of the stack allocated for the pthead */
-  sint16 priority;     /* Priority of the pthread */
-  ubyte  policy;       /* Pthread scheduler policy */
-  ubyte  inheritsched; /* Inherit parent prio/policy? */
+  size_t  stacksize;    /* Size of the stack allocated for the pthead */
+  int16_t priority;     /* Priority of the pthread */
+  uint8_t policy;       /* Pthread scheduler policy */
+  uint8_t  nheritsched; /* Inherit parent prio/policy? */
 };
 typedef struct pthread_attr_s pthread_attr_t;
 
@@ -177,9 +180,9 @@ typedef struct pthread_cond_s pthread_cond_t;
 
 struct pthread_mutexattr_s
 {
-  ubyte pshared;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
+  uint8_t pshared;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
 #ifdef CONFIG_MUTEX_TYPES
-  ubyte type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
+  uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
 #endif
 };
 typedef struct pthread_mutexattr_s pthread_mutexattr_t;
@@ -189,7 +192,7 @@ struct pthread_mutex_s
   int   pid;      /* ID of the holder of the mutex */
   sem_t sem;      /* Semaphore underlying the implementation of the mutex */
 #ifdef CONFIG_MUTEX_TYPES
-  ubyte type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
+  uint8_t type;   /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
   int   nlocks;   /* The number of recursive locks held */
 #endif
 };
@@ -214,7 +217,7 @@ struct pthread_barrier_s
 };
 typedef struct pthread_barrier_s pthread_barrier_t;
 
-typedef boolean pthread_once_t;
+typedef bool pthread_once_t;
 
 /* Forware references */
 

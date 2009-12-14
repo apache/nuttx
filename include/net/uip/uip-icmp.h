@@ -46,11 +46,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <net/uip/uipopt.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* ICMP/ICMP6 definitions */
@@ -115,12 +116,12 @@ struct uip_icmpip_hdr
 
   /* IPv6 Ip header */
 
-  uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
-  uint8  tcf;               /* Bits 0-3: traffic class (LS), bits 4-7: flow label (MS) */
-  uint16 flow;              /* 16-bit flow label (LS) */
-  uint8  len[2];            /* 16-bit Payload length */
-  uint8  proto;             /*  8-bit Next header (same as IPv4 protocol field) */
-  uint8  ttl;               /*  8-bit Hop limit (like IPv4 TTL field) */
+  uint8_t  vtc;             /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  uint8_t  tcf;             /* Bits 0-3: traffic class (LS), bits 4-7: flow label (MS) */
+  uint16_t flow;            /* 16-bit flow label (LS) */
+  uint8_t  len[2];          /* 16-bit Payload length */
+  uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
+  uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
   uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
   uip_ip6addr_t destipaddr; /* 128-bit Destination address */
 
@@ -128,24 +129,24 @@ struct uip_icmpip_hdr
 
   /* IPv4 IP header */
 
-  uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
-  uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8  len[2];           /* 16-bit Total length */
-  uint8  ipid[2];          /* 16-bit Identification */
-  uint8  ipoffset[2];      /* 16-bit IP flags + fragment offset */
-  uint8  ttl;              /*  8-bit Time to Live */
-  uint8  proto;            /*  8-bit Protocol */
-  uint16 ipchksum;         /* 16-bit Header checksum */
-  uint16 srcipaddr[2];     /* 32-bit Source IP address */
-  uint16 destipaddr[2];    /* 32-bit Destination IP address */
+  uint8_t  vhl;             /*  8-bit Version (4) and header length (5 or 6) */
+  uint8_t  tos;             /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8_t  len[2];          /* 16-bit Total length */
+  uint8_t  ipid[2];         /* 16-bit Identification */
+  uint8_t  ipoffset[2];     /* 16-bit IP flags + fragment offset */
+  uint8_t  ttl;             /*  8-bit Time to Live */
+  uint8_t  proto;           /*  8-bit Protocol */
+  uint16_t ipchksum;        /* 16-bit Header checksum */
+  uint16_t srcipaddr[2];    /* 32-bit Source IP address */
+  uint16_t destipaddr[2];   /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 
   /* ICMP header */
 
-  uint8  type;             /* Defines the format of the ICMP message */
-  uint8  icode;            /* Further qualifies the ICMP messsage */
-  uint16 icmpchksum;       /* Checksum of ICMP header and data */
+  uint8_t  type;            /* Defines the format of the ICMP message */
+  uint8_t  icode;           /* Further qualifies the ICMP messsage */
+  uint16_t icmpchksum;      /* Checksum of ICMP header and data */
 
   /* Data following the ICMP header contains the data specific to the
    * message type indicated by the Type and Code fields.
@@ -155,19 +156,19 @@ struct uip_icmpip_hdr
 
   /* ICMP_ECHO_REQUEST and ICMP_ECHO_REPLY data */
 
-  uint16 id;               /* Used to match requests with replies */
-  uint16 seqno;            /* "  " "" "   " "      " "  " "     " */
+  uint16_t id;               /* Used to match requests with replies */
+  uint16_t seqno;            /* "  " "" "   " "      " "  " "     " */
 
 #else /* !CONFIG_NET_IPv6 */
 
   /* ICMP6_ECHO_REQUEST and ICMP6_ECHO_REPLY data */
 
-  uint8 flags;
-  uint8 reserved1;
-  uint8 reserved2;
-  uint8 reserved3;
-  uint8 icmp6data[16];
-  uint8 options[1];
+  uint8_t flags;
+  uint8_t reserved1;
+  uint8_t reserved2;
+  uint8_t reserved3;
+  uint8_t icmp6data[16];
+  uint8_t options[1];
 
 #endif /* !CONFIG_NET_IPv6 */
 };
@@ -201,7 +202,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dsecs);
+EXTERN int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen, int dsecs);
 
 #undef EXTERN
 #ifdef __cplusplus

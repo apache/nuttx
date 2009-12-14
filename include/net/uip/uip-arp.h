@@ -46,8 +46,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 #include <nuttx/compiler.h>
+
+#include <stdint.h>
 #include <net/ethernet.h>
 #include <net/uip/uip.h>
 
@@ -72,9 +73,9 @@
 
 struct uip_eth_hdr
 {
-  uint8  dest[6]; /* Ethernet destination address (6 bytes) */
-  uint8  src[6];  /* Ethernet source address (6 bytes) */
-  uint16 type;    /* Type code (2 bytes) */
+  uint8_t  dest[6]; /* Ethernet destination address (6 bytes) */
+  uint8_t  src[6];  /* Ethernet source address (6 bytes) */
+  uint16_t type;    /* Type code (2 bytes) */
 };
 
 /* One entry in the ARP table (volatile!) */
@@ -83,7 +84,7 @@ struct arp_entry
 {
   in_addr_t         at_ipaddr;   /* IP address */
   struct ether_addr at_ethaddr;  /* Hardware address */
-  uint8             at_time;
+  uint8_t           at_time;
 };
 
 /****************************************************************************
@@ -181,15 +182,15 @@ EXTERN void uip_arp_timer(void);
  *   address of an existing association.
  *
  * Input parameters:
- *   pipaddr - Refers to an IP address uint16[2] in network order
- *   ethaddr - Refers to a HW address uint8[IFHWADDRLEN]
+ *   pipaddr - Refers to an IP address uint16_t[2] in network order
+ *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
  *
  * Assumptions
  *   Interrupts are disabled
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr);
+EXTERN void uip_arp_update(uint16_t *pipaddr, uint8_t *ethaddr);
 
 /****************************************************************************
  * Name: uip_arp_find

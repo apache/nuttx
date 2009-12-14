@@ -41,10 +41,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Access macros */
@@ -63,7 +66,7 @@
  *
  * Input Parameters:
  *   dev  - Device-specific state data
- *   lock - TRUE: Lock spi bus, FALSE: unlock SPI bus
+ *   lock - true: Lock spi bus, false: unlock SPI bus
  *
  * Returned Value:
  *   None
@@ -84,7 +87,7 @@
  * Input Parameters:
  *   dev -      Device-specific state data
  *   devid -    Identifies the device to select
- *   selected - TRUE: slave selected, FALSE: slave de-selected
+ *   selected - true: slave selected, false: slave de-selected
  *
  * Returned Value:
  *   None
@@ -187,7 +190,7 @@
  *
  ****************************************************************************/
 
-#define SPI_SEND(d,wd) ((d)->ops->send(d,(uint16)wd))
+#define SPI_SEND(d,wd) ((d)->ops->send(d,(uint16_t)wd))
 
 /****************************************************************************
  * Name: SPI_SNDBLOCK
@@ -201,7 +204,8 @@
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -224,9 +228,10 @@
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
  *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            of words.  The wordsize is determined by the number of bits-
+ *            per-word selected for the SPI interface.  If nbits <= 8, the
+ *            data is packed into uint8_t's; if nbits >8, the data is packed
+ *            into uint16_t's
  *
  * Returned Value:
  *   None
@@ -252,7 +257,8 @@
  *   nwords   - the length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into ubytes; if nbits >8, the data is packed into uint16's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -319,20 +325,25 @@ enum spi_mode_e
 struct spi_dev_s;
 struct spi_ops_s
 {
-  int    (*lock)(FAR struct spi_dev_s *dev, boolean lock);
-  void   (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-  uint32 (*setfrequency)(FAR struct spi_dev_s *dev, uint32 frequency);
-  void   (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-  void   (*setbits)(FAR struct spi_dev_s *dev, int nbits);
-  ubyte  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-  uint16 (*send)(FAR struct spi_dev_s *dev, uint16 wd);
+  int      (*lock)(FAR struct spi_dev_s *dev, bool lock);
+  void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                     bool selected);
+  uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
+  void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+  void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
+  uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+  uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-  void   (*exchange)(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);
+  void     (*exchange)(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                       FAR void *rxbuffer, size_t nwords);
 #else
-  void   (*sndblock)(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
-  void   (*recvblock)(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+  void     (*sndblock)(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                       size_t nwords);
+  void     (*recvblock)(FAR struct spi_dev_s *dev, FAR void *buffer,
+                        size_t nwords);
 #endif
-  int    (*registercallback)(FAR struct spi_dev_s *dev, spi_mediachange_t callback, void *arg);
+  int     (*registercallback)(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                              void *arg);
 };
 
 /* SPI private data.  This structure only defines the initial fields of the

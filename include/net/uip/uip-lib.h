@@ -50,12 +50,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <netinet/in.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* SOCK_DGRAM is the preferred socket type to use when we just want a
@@ -89,12 +91,12 @@
  * Return: Non-zero If the IP address was parsed.
  */
 
-extern boolean uiplib_ipaddrconv(const char *addrstr, ubyte *addr);
+extern bool uiplib_ipaddrconv(const char *addrstr, uint8_t *addr);
 
 /* Get and set IP/MAC addresses */
 
-extern int uip_setmacaddr(const char *ifname, const uint8 *macaddr);
-extern int uip_getmacaddr(const char *ifname, uint8 *macaddr);
+extern int uip_setmacaddr(const char *ifname, const uint8_t *macaddr);
+extern int uip_getmacaddr(const char *ifname, uint8_t *macaddr);
 
 #ifdef CONFIG_NET_IPv6
 extern int uip_gethostaddr(const char *ifname, struct in6_addr *addr);
@@ -110,12 +112,12 @@ extern int uip_setnetmask(const char *ifname, const struct in_addr *addr);
 
 /* HTTP support */
 
-extern int  uip_parsehttpurl(const char *url, uint16 *port,
+extern int  uip_parsehttpurl(const char *url, uint16_t *port,
                              char *hostname, int hostlen,
                              char *filename, int namelen);
 
 /* Generic server logic */
 
-extern void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize);
+extern void uip_server(uint16_t portno, pthread_startroutine_t handler, int stacksize);
 
 #endif /* __NET_UIP_UIP_LIB_H */

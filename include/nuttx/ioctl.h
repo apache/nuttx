@@ -41,13 +41,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Each NuttX ioctl commands are uint16's consisting of an 8-bit type
+/* Each NuttX ioctl commands are uint16_t's consisting of an 8-bit type
  * identifier and an 8-bit command number.  All comman type identifiers are
  * defined below:
  */

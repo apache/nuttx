@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/assert.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
 #include <nuttx/compiler.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Macro Name: ASSERT, ASSERTCODE, et al. */
@@ -57,27 +57,27 @@
 #ifdef CONFIG_HAVE_FILENAME
 
 #  define ASSERT(f) \
-     { if (!(f)) up_assert((const ubyte *)__FILE__, (int)__LINE__); }
+     { if (!(f)) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
 
-#  define ASSERTCODE(f, errCode) \
-     { if (!(f)) up_assert_code((const ubyte *)__FILE__, (int)__LINE__, errCode); }
+#  define ASSERTCODE(f, code) \
+     { if (!(f)) up_assert_code((const uint8_t *)__FILE__, (int)__LINE__, code); }
 
 #  ifdef CONFIG_DEBUG
 #    define DEBUGASSERT(f) \
-       { if (!(f)) up_assert((const ubyte *)__FILE__, (int)__LINE__); }
+       { if (!(f)) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
 #  else
 #    define DEBUGASSERT(f)
 #  endif /* CONFIG_DEBUG */
 
-#  define PANIC(errCode) \
-      up_assert_code((const ubyte *)__FILE__, (int)__LINE__, (errCode)|0x8000)
+#  define PANIC(code) \
+      up_assert_code((const uint8_t *)__FILE__, (int)__LINE__, (code)|0x8000)
 
 #else
 #  define ASSERT(f) \
      { if (!(f)) up_assert(); }
 
-#  define ASSERTCODE(f, errCode) \
-     { if (!(f)) up_assert_code(errCode); }
+#  define ASSERTCODE(f, code) \
+     { if (!(f)) up_assert_code(code); }
 
 #  ifdef CONFIG_DEBUG
 #    define DEBUGASSERT(f) \
@@ -86,8 +86,8 @@
 #    define DEBUGASSERT(f)
 #  endif /* CONFIG_DEBUG */
 
-#  define PANIC(errCode) \
-      up_assert_code((errCode)|0x8000)
+#  define PANIC(code) \
+      up_assert_code((code)|0x8000)
 
 #endif
 
@@ -107,12 +107,12 @@ extern "C" {
 #endif
 
 #ifdef CONFIG_HAVE_FILENAME
-EXTERN void   up_assert(const ubyte *filename, int linenum);
-EXTERN void   up_assert_code(const ubyte *filename, int linenum,
-                             int error_code);
+EXTERN void   up_assert(FAR const uint8_t *filename, int linenum);
+EXTERN void   up_assert_code(FAR const uint8_t *filename, int linenum,
+                             int errcode);
 #else
 EXTERN void   up_assert(void);
-EXTERN void   up_assert_code(int error_code);
+EXTERN void   up_assert_code(int errcode);
 #endif
 
 #undef EXTERN

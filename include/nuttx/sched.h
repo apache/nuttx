@@ -41,17 +41,21 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdint.h>
 #include <queue.h>
 #include <signal.h>
 #include <semaphore.h>
 #include <pthread.h>
 #include <mqueue.h>
 #include <time.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/net.h>
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /* Task Management Definitins ***************************************************/
@@ -77,7 +81,7 @@
 
 /* This is the type of the task_state field of the TCB. NOTE: the order and
  * content of this enumeration is critical since there are some OS tables indexed
- * by these values.  The range of values is assumed to fit into a ubyte in _TCB.
+ * by these values.  The range of values is assumed to fit into a uint8_t in _TCB.
  */
 
 enum tstate_e
@@ -165,10 +169,9 @@ typedef struct environ_s environ_t;
 
 struct dspace_s
 {
-  uint32 crefs;               /* This is the number of pthreads that shared the
-                               * the same D-Space.
-                               */
-  ubyte  region[1];           /* Beginning of the allocated region */
+  uint32_t crefs;             /* This is the number of pthreads that shared the
+                               * the same D-Space */
+  uint8_t  region[1];         /* Beginning of the allocated region */
 };
 
 #define SIZEOF_DSPACE_S(n) (sizeof(struct dspace_s) - 1 + (n))
@@ -188,17 +191,17 @@ struct _TCB
   start_t  start;                        /* Thread start function               */
   entry_t  entry;                        /* Entry Point into the thread         */
   exitfunc_t exitfunc;                   /* Called if exit is called.           */
-  ubyte    sched_priority;               /* Current priority of the thread      */
+  uint8_t  sched_priority;               /* Current priority of the thread      */
 #ifdef CONFIG_PRIORITY_INHERITANCE
 #  if CONFIG_SEM_NNESTPRIO > 0
-  ubyte    npend_reprio;                 /* Number of nested reprioritizations  */
-  ubyte    pend_reprios[CONFIG_SEM_NNESTPRIO];
+  uint8_t  npend_reprio;                 /* Number of nested reprioritizations  */
+  uint8_t  pend_reprios[CONFIG_SEM_NNESTPRIO];
 #  endif
-  ubyte    base_priority;                /* "Normal" priority of the thread     */
+  uint8_t  base_priority;                /* "Normal" priority of the thread     */
 #endif
-  ubyte    task_state;                   /* Current state of the thread         */
-  uint16   flags;                        /* Misc. general status flags          */
-  sint16   lockcount;                    /* 0=preemptable (not-locked)          */
+  uint8_t  task_state;                   /* Current state of the thread         */
+  uint16_t flags;                        /* Misc. general status flags          */
+  int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
 #ifndef CONFIG_DISABLE_PTHREAD
   FAR void *joininfo;                    /* Detach-able info to support join    */
 #endif
@@ -208,7 +211,7 @@ struct _TCB
 
   /* Values needed to restart a task ********************************************/
 
-  ubyte    init_priority;                /* Initial priority of the task        */
+  uint8_t  init_priority;                /* Initial priority of the task        */
   char    *argv[CONFIG_MAX_TASK_ARGS+1]; /* Name+start-up parameters            */
 #ifndef CONFIG_DISABLE_ENVIRON
   FAR environ_t *envp;                   /* Environment variables               */

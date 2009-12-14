@@ -44,6 +44,7 @@
 #ifdef CONFIG_NET
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdarg.h>
 #include <semaphore.h>
 
@@ -104,8 +105,8 @@ struct socket
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 struct socketlist
 {
-  sem_t  sl_sem;          /* Manage access to the socket list */
-  sint16 sl_crefs;        /* Reference count */
+  sem_t   sl_sem;            /* Manage access to the socket list */
+  int16_t sl_crefs;          /* Reference count */
   struct socket sl_sockets[CONFIG_NSOCKET_DESCRIPTORS];
 };
 #endif
@@ -162,7 +163,7 @@ EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
 
 #ifndef CONFIG_DISABLE_POLL
 struct pollfd; /* Forward reference -- see poll.h */
-EXTERN int net_poll(int sockfd, struct pollfd *fds, boolean setup);
+EXTERN int net_poll(int sockfd, struct pollfd *fds, bool setup);
 #endif
 
 /* net_dup.c *****************************************************************/

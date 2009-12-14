@@ -41,7 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <nuttx/wqueue.h>
 
 /****************************************************************************
@@ -339,7 +342,7 @@
  *
  * Input Parameters:
  *   dev  - An instance of the SDIO device interface
- *   wide - TRUE: wide bus (4-bit) bus mode enabled
+ *   wide - true: wide bus (4-bit) bus mode enabled
  *
  * Returned Value:
  *   None
@@ -611,20 +614,20 @@
  * Name: SDIO_DMASUPPORTED
  *
  * Description:
- *   Return TRUE if the hardware can support DMA
+ *   Return true if the hardware can support DMA
  *
  * Input Parameters:
  *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
- *   TRUE if DMA is supported.
+ *   true if DMA is supported.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
 #  define SDIO_DMASUPPORTED(dev) ((dev)->dmasupported(dev))
 #else
-#  define SDIO_DMASUPPORTED(dev) (FALSE)
+#  define SDIO_DMASUPPORTED(dev) (false)
 #endif
 
 /****************************************************************************
@@ -692,11 +695,11 @@ enum sdio_clock_e
   CLOCK_SD_TRANSFER_4BIT   /* SD normal operation clocking (wide 4-bit mode) */
 };
 
-/* Event set.  A ubyte is big enough to hold a set of 8-events.  If more are
- * needed, change this to a uint16.
+/* Event set.  A uint8_t is big enough to hold a set of 8-events.  If more are
+ * needed, change this to a uint16_t.
  */
 
-typedef ubyte sdio_eventset_t;
+typedef uint8_t sdio_eventset_t;
 
 /* This structure defines the interface between the NuttX SDIO
  * driver and the chip- or board-specific SDIO interface.  This
@@ -715,33 +718,33 @@ struct sdio_dev_s
   /* Initialization/setup */
 
   void  (*reset)(FAR struct sdio_dev_s *dev);
-  ubyte (*status)(FAR struct sdio_dev_s *dev);
-  void  (*widebus)(FAR struct sdio_dev_s *dev, boolean enable);
+  uint8_t (*status)(FAR struct sdio_dev_s *dev);
+  void  (*widebus)(FAR struct sdio_dev_s *dev, bool enable);
   void  (*clock)(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate);
   int   (*attach)(FAR struct sdio_dev_s *dev);
 
   /* Command/Status/Data Transfer */
 
-  void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);
-  int   (*recvsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
+  void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);
+  int   (*recvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
           size_t nbytes);
-  int   (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
+  int   (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
           size_t nbytes);
   int   (*cancel)(FAR struct sdio_dev_s *dev);
 
-  int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32 cmd);
-  int   (*recvR1)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);
-  int   (*recvR2)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4]);
-  int   (*recvR3)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3);
-  int   (*recvR4)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R4);
-  int   (*recvR5)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5);
-  int   (*recvR6)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);
-  int   (*recvR7)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);
+  int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32_t cmd);
+  int   (*recvR1)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R1);
+  int   (*recvR2)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t R2[4]);
+  int   (*recvR3)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R3);
+  int   (*recvR4)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R4);
+  int   (*recvR5)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R5);
+  int   (*recvR6)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R6);
+  int   (*recvR7)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R7);
 
   /* Event/Callback support */
 
   void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
-  sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);
+  sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32_t timeout);
   void  (*callbackenable)(FAR struct sdio_dev_s *dev,
           sdio_eventset_t eventset);
   int   (*registercallback)(FAR struct sdio_dev_s *dev,
@@ -750,10 +753,10 @@ struct sdio_dev_s
   /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
-  boolean (*dmasupported)(FAR struct sdio_dev_s *dev);
-  int   (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer,
+  bool  (*dmasupported)(FAR struct sdio_dev_s *dev);
+  int   (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
           size_t buflen);
-  int   (*dmasendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,
+  int   (*dmasendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
           size_t buflen);
 #endif
 };

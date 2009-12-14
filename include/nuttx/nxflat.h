@@ -41,6 +41,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
 #include <nxflat.h>
 #include <nuttx/sched.h>
 
@@ -63,9 +65,9 @@ struct nxflat_loadinfo_s
    * text section instance in the system for each module.
    */
 
-  uint32 ispace;           /* Address where hdr/text is loaded */
-  uint32 entryoffs;        /* Offset from ispace to entry point */
-  uint32 isize;            /* Size of ispace. */
+  uint32_t ispace;         /* Address where hdr/text is loaded */
+  uint32_t entryoffs;      /* Offset from ispace to entry point */
+  uint32_t isize;          /* Size of ispace. */
 
   /* Data Space (DSpace): This region contains all information that in referenced
    * as data (other than the stack which is separately allocated).  There will be
@@ -73,15 +75,15 @@ struct nxflat_loadinfo_s
    */
 
   struct dspace_s *dspace; /* Allocated D-Space (data/bss/etc) */
-  uint32 datasize;         /* Size of data segment in dspace */
-  uint32 bsssize;          /* Size of bss segment in dspace */
-  uint32 stacksize;        /* Size of stack (not allocated) */
-  uint32 dsize;            /* Size of dspace (may be large than parts) */
+  uint32_t datasize;       /* Size of data segment in dspace */
+  uint32_t bsssize;        /* Size of bss segment in dspace */
+  uint32_t stacksize;      /* Size of stack (not allocated) */
+  uint32_t dsize;          /* Size of dspace (may be large than parts) */
 
   /* This is temporary memory where relocation records will be loaded. */
 
-  uint32 relocstart;       /* Start of array of struct flat_reloc */
-  uint16 reloccount;       /* Number of elements in reloc array */
+  uint32_t relocstart;     /* Start of array of struct flat_reloc */
+  uint16_t reloccount;     /* Number of elements in reloc array */
 
   /* File descriptors */
 
@@ -137,7 +139,7 @@ EXTERN int nxflat_verifyheader(const struct nxflat_hdr_s *header);
  ***********************************************************************/
 
 EXTERN int nxflat_init(const char *filename,
-	               struct nxflat_loadinfo_s *loadinfo);
+	                   struct nxflat_loadinfo_s *loadinfo);
 
 /***********************************************************************
  * Name: nxflat_uninit

@@ -41,10 +41,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* I2C address calculation.  Convert 7- and 10-bit address to 8-bit and
@@ -160,10 +161,10 @@
 struct i2c_dev_s;
 struct i2c_ops_s
 {
-  uint32 (*setfrequency)(FAR struct i2c_dev_s *dev, uint32 frequency);
+  uint32_t (*setfrequency)(FAR struct i2c_dev_s *dev, uint32_t frequency);
   int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
-  int    (*write)(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen);
-  int    (*read)(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);
+  int    (*write)(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
+  int    (*read)(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
 };
 
 /* I2C private data.  This structure only defines the initial fields of the

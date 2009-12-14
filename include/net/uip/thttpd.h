@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <nuttx/symtab.h>
 
 /****************************************************************************
@@ -69,7 +69,7 @@ extern "C" {
  */
 
 EXTERN FAR const struct symtab_s *g_thttpdsymtab;
-EXTERN int                         g_thttpdnsymbols;
+EXTERN int                        g_thttpdnsymbols;
 
 /****************************************************************************
  * Public Function Prototypes

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/net/ethernet.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -54,14 +54,14 @@
 
 struct ether_addr
 {
-  uint8 ether_addr_octet[6];            /* 48-bit Ethernet address */
+  uint8_t ether_addr_octet[6];            /* 48-bit Ethernet address */
 };
 
 struct ether_header
 {
-  uint8  ether_dhost[ETHER_ADDR_LEN];   /* Destination Ethernet address */
-  uint8  ether_shost[ETHER_ADDR_LEN];   /* Source Ethernet address */
-  uint16 ether_type;                    /* Ethernet packet type*/
+  uint8_t  ether_dhost[ETHER_ADDR_LEN];   /* Destination Ethernet address */
+  uint8_t  ether_shost[ETHER_ADDR_LEN];   /* Source Ethernet address */
+  uint16_t ether_type;                    /* Ethernet packet type*/
 };
 
 /****************************************************************************

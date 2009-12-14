@@ -6,7 +6,7 @@
  * of C macros that are used by uIP programs as well as internal uIP
  * structures, TCP/IP header structures and function declarations.
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -52,11 +52,12 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET_TCP
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <net/uip/uipopt.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* TCP definitions */
@@ -124,25 +125,25 @@ struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host */
-  uint16 lport;           /* The local TCP port, in network byte order */
-  uint16 rport;           /* The remoteTCP port, in network byte order */
-  uint8  rcv_nxt[4];      /* The sequence number that we expect to
+  uint16_t lport;         /* The local TCP port, in network byte order */
+  uint16_t rport;         /* The remoteTCP port, in network byte order */
+  uint8_t  rcv_nxt[4];    /* The sequence number that we expect to
                            * receive next */
-  uint8  snd_nxt[4];      /* The sequence number that was last sent by us */
-  uint16 len;             /* Length of the data that was previously sent */
-  uint16 mss;             /* Current maximum segment size for the
+  uint8_t  snd_nxt[4];    /* The sequence number that was last sent by us */
+  uint16_t len;           /* Length of the data that was previously sent */
+  uint16_t mss;           /* Current maximum segment size for the
                            * connection */
-  uint16 initialmss;      /* Initial maximum segment size for the
+  uint16_t initialmss;    /* Initial maximum segment size for the
                            * connection */
-  uint8  crefs;           /* Reference counts on this instance */
-  uint8  sa;              /* Retransmission time-out calculation state
+  uint8_t  crefs;         /* Reference counts on this instance */
+  uint8_t  sa;            /* Retransmission time-out calculation state
                            * variable */
-  uint8  sv;              /* Retransmission time-out calculation state
+  uint8_t  sv;            /* Retransmission time-out calculation state
                            * variable */
-  uint8  rto;             /* Retransmission time-out */
-  uint8  tcpstateflags;   /* TCP state and flags */
-  uint8  timer;           /* The retransmission timer (units: half-seconds) */
-  uint8  nrtx;            /* The number of retransmissions for the last
+  uint8_t  rto;           /* Retransmission time-out */
+  uint8_t  tcpstateflags; /* TCP state and flags */
+  uint8_t  timer;         /* The retransmission timer (units: half-seconds) */
+  uint8_t  nrtx;          /* The number of retransmissions for the last
                            * segment sent */
 
   /* Read-ahead buffering.
@@ -204,7 +205,7 @@ struct uip_conn
   /* connection_event() is called on any of the subset of connection-related events */
 
   FAR void *connection_private;
-  void (*connection_event)(FAR struct uip_conn *conn, uint16 flags);
+  void (*connection_event)(FAR struct uip_conn *conn, uint16_t flags);
 };
 
 /* The following structure is used to handle read-ahead buffering for TCP
@@ -217,8 +218,8 @@ struct uip_conn
 struct uip_readahead_s
 {
   sq_entry_t rh_node;      /* Supports a singly linked list */
-  uint16 rh_nbytes;        /* Number of bytes available in this buffer */
-  uint8  rh_buffer[CONFIG_NET_TCP_READAHEAD_BUFSIZE];
+  uint16_t rh_nbytes;      /* Number of bytes available in this buffer */
+  uint8_t  rh_buffer[CONFIG_NET_TCP_READAHEAD_BUFSIZE];
 };
 #endif
 
@@ -271,12 +272,12 @@ struct uip_tcpip_hdr
 
   /* IPv6 Ip header */
 
-  uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
-  uint8  tcf;               /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
-  uint16 flow;              /* 16-bit flow label (LS) */
-  uint8  len[2];            /* 16-bit Payload length */
-  uint8  proto;             /*  8-bit Next header (same as IPv4 protocol field) */
-  uint8  ttl;               /*  8-bit Hop limit (like IPv4 TTL field) */
+  uint8_t  vtc;             /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  uint8_t  tcf;             /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
+  uint16_t flow;            /* 16-bit flow label (LS) */
+  uint8_t  len[2];          /* 16-bit Payload length */
+  uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
+  uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
   uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
   uip_ip6addr_t destipaddr; /* 128-bit Destination address */
 
@@ -284,31 +285,31 @@ struct uip_tcpip_hdr
 
   /* IPv4 IP header */
 
-  uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
-  uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8  len[2];           /* 16-bit Total length */
-  uint8  ipid[2];          /* 16-bit Identification */
-  uint8  ipoffset[2];      /* 16-bit IP flags + fragment offset */
-  uint8  ttl;              /*  8-bit Time to Live */
-  uint8  proto;            /*  8-bit Protocol */
-  uint16 ipchksum;         /* 16-bit Header checksum */
-  uint16 srcipaddr[2];     /* 32-bit Source IP address */
-  uint16 destipaddr[2];    /* 32-bit Destination IP address */
+  uint8_t  vhl;             /*  8-bit Version (4) and header length (5 or 6) */
+  uint8_t  tos;             /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8_t  len[2];          /* 16-bit Total length */
+  uint8_t  ipid[2];         /* 16-bit Identification */
+  uint8_t  ipoffset[2];     /* 16-bit IP flags + fragment offset */
+  uint8_t  ttl;             /*  8-bit Time to Live */
+  uint8_t  proto;           /*  8-bit Protocol */
+  uint16_t ipchksum;        /* 16-bit Header checksum */
+  uint16_t srcipaddr[2];    /* 32-bit Source IP address */
+  uint16_t destipaddr[2];   /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 
   /* TCP header */
 
-  uint16 srcport;
-  uint16 destport;
-  uint8  seqno[4];
-  uint8  ackno[4];
-  uint8  tcpoffset;
-  uint8  flags;
-  uint8  wnd[2];
-  uint16 tcpchksum;
-  uint8  urgp[2];
-  uint8  optdata[4];
+  uint16_t srcport;
+  uint16_t destport;
+  uint8_t  seqno[4];
+  uint8_t  ackno[4];
+  uint8_t  tcpoffset;
+  uint8_t  flags;
+  uint8_t  wnd[2];
+  uint16_t tcpchksum;
+  uint8_t  urgp[2];
+  uint8_t  optdata[4];
 };
 
 /****************************************************************************
@@ -401,9 +402,9 @@ extern int uip_backlogdestroy(FAR struct uip_conn *conn);
 
 extern int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
 #ifndef CONFIG_DISABLE_POLL
-extern boolean uip_backlogavailable(FAR struct uip_conn *conn);
+extern bool uip_backlogavailable(FAR struct uip_conn *conn);
 #else
-#  define uip_backlogavailable(conn)   (FALSE);
+#  define uip_backlogavailable(conn)   (false);
 #endif
 extern FAR struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn);
 extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
@@ -412,7 +413,7 @@ extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blc
 #  define uip_backlogcreate(conn,nblg) (-ENOSYS)
 #  define uip_backlogdestroy(conn)     (-ENOSYS)
 #  define uip_backlogadd(conn,blconn)  (-ENOSYS)
-#  define uip_backlogavailable(conn)   (FALSE);
+#  define uip_backlogavailable(conn)   (false);
 #  define uip_backlogremove(conn)      (NULL)
 #endif
 

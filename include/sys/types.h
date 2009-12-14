@@ -41,11 +41,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
 #include <nuttx/compiler.h>
 
+#include <stdint.h>
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Alternative alues for type bool (for historic reasons) */
@@ -84,7 +85,7 @@
 #define PRIOR_OTHER_MAX 255
 
 /* Scheduling Priorities.  NOTE:  Only the idle task can take
- * the TRUE minimum priority. */
+ * the true minimum priority. */
 
 #define SCHED_PRIORITY_MAX     255
 #define SCHED_PRIORITY_DEFAULT 100

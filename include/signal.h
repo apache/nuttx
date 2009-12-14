@@ -42,15 +42,12 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <time.h>      /* Needed for struct timespec */
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <time.h>
 
 /********************************************************************************
- * Compilations Switches
- ********************************************************************************/
-
-/********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /* Signal set management definitions and macros. */
@@ -164,8 +161,8 @@ union sigval
 
 struct sigevent
 {
-  ubyte        sigev_notify; /* Notification method: SIGEV_SIGNAL or SIGEV_NONE */
-  ubyte        sigev_signo;  /* Notification signal */
+  uint8_t      sigev_notify; /* Notification method: SIGEV_SIGNAL or SIGEV_NONE */
+  uint8_t      sigev_signo;  /* Notification signal */
   union sigval sigev_value;  /* Data passed with notification */
 };
 
@@ -173,8 +170,8 @@ struct sigevent
 
 struct siginfo
 {
-  ubyte        si_signo;     /* Identifies signal */
-  ubyte        si_code;      /* Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ */
+  uint8_t      si_signo;     /* Identifies signal */
+  uint8_t      si_code;      /* Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ */
   union sigval si_value;     /* Data passed with signal */
 };
 

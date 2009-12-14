@@ -42,7 +42,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -68,8 +70,8 @@
 
 struct mtd_geometry_s
 {
-  uint16 blocksize;     /* Size of one read/write block */
-  uint16 erasesize;     /* Size of one erase blocks -- must be a multiple
+  uint16_t blocksize;   /* Size of one read/write block */
+  uint16_t erasesize;   /* Size of one erase blocks -- must be a multiple
                          * of blocksize. */
   size_t neraseblocks;  /* Number of erase blocks */
 };
@@ -90,9 +92,9 @@ struct mtd_dev_s
   /* Read/write from the specified read/write blocks */
 
   ssize_t (*bread)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                   FAR ubyte *buffer);
+                   FAR uint8_t *buffer);
   ssize_t (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                    FAR const ubyte *buffer);
+                    FAR const uint8_t *buffer);
 
   /* Some devices may support byte oriented reads (optional).  Most MTD devices
    * are inherently block oriented so byte-oriented writing is not supported. It
@@ -101,7 +103,7 @@ struct mtd_dev_s
    */
 
   ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                  FAR ubyte *buffer);
+                  FAR uint8_t *buffer);
 
   /* Support other, less frequently used commands:
    *  - MTDIOC_GEOMETRY:  Get MTD geometry
@@ -138,7 +140,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int ftl_initialize(int minor, ubyte *buffer, FAR struct mtd_dev_s *mtd);
+EXTERN int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd);
 
 /************************************************************************************
  * Name: m25p_initialize

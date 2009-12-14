@@ -44,8 +44,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-
 #include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
 

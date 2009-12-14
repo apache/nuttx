@@ -41,7 +41,9 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 
 /********************************************************************************
  * Definitions
@@ -113,11 +115,11 @@
 
 struct flock
 {
-  sint16 l_type;    /* Type of lock: F_RDLCK, F_WRLCK, F_UNLCK */
-  sint16 l_whence;  /* How to interpret l_start: SEEK_SET, SEEK_CUR, SEEK_END */
-  off_t  l_start;   /* Starting offset for lock */
-  off_t  l_len;     /* Number of bytes to lock */
-  pid_t  l_pid;     /* PID of process blocking our lock (F_GETLK only) */
+  int16_t l_type;    /* Type of lock: F_RDLCK, F_WRLCK, F_UNLCK */
+  int16_t l_whence;  /* How to interpret l_start: SEEK_SET, SEEK_CUR, SEEK_END */
+  off_t   l_start;   /* Starting offset for lock */
+  off_t   l_len;     /* Number of bytes to lock */
+  pid_t   l_pid;     /* PID of process blocking our lock (F_GETLK only) */
 };
 
 /********************************************************************************

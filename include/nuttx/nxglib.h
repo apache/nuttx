@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+#include <stdbool.h>
 #include <fixedmath.h>
 #include <nuttx/fb.h>
 
@@ -97,7 +99,7 @@ typedef uint8_t  nxgl_mxpixel_t;
  * to change:
  */
 
-typedef sint16 nxgl_coord_t;
+typedef int16_t nxgl_coord_t;
 
 /* Describes a point on the display */
 
@@ -171,7 +173,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v);
+EXTERN void nxgl_rgb2yuv(uint8_t r, uint8_t g, uint8_t b,
+                         uint8_t *y, uint8_t *u, uint8_t *v);
 
 /****************************************************************************
  * Name: nxgl_yuv2rgb
@@ -181,7 +184,8 @@ EXTERN void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v
  *
  ****************************************************************************/
 
-EXTERN void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b);
+EXTERN void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
+                         uint8_t *r, uint8_t *g, uint8_t *b);
 
 /* Rasterizers **************************************************************/
 
@@ -421,23 +425,23 @@ EXTERN void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
  * Name: nxgl_rectoverlap
  *
  * Description:
- *   Return TRUE if the two rectangles overlap
+ *   Return true if the two rectangles overlap
  *
  ****************************************************************************/
 
-EXTERN boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
-                                FAR struct nxgl_rect_s *rect2);
+EXTERN bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
+                             FAR struct nxgl_rect_s *rect2);
 
 /****************************************************************************
  * Name: nxgl_rectinside
  *
  * Description:
- *   Return TRUE if the point pt lies within rect.
+ *   Return true if the point pt lies within rect.
  *
  ****************************************************************************/
 
-EXTERN boolean nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
-                               FAR const struct nxgl_point_s *pt);
+EXTERN bool nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
+                            FAR const struct nxgl_point_s *pt);
 
 /****************************************************************************
  * Name: nxgl_rectsize
@@ -454,11 +458,11 @@ EXTERN void nxgl_rectsize(FAR struct nxgl_size_s *size,
  * Name: nxgl_nullrect
  *
  * Description:
- *   Return TRUE if the area of the retangle is <= 0.
+ *   Return true if the area of the retangle is <= 0.
  *
  ****************************************************************************/
 
-EXTERN boolean nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
+EXTERN bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
  * Name: nxgl_runoffset

@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,14 +97,14 @@ struct nxflat_hdr_s
    * The bss segment is data_end through bss_end.
    */
 
-  uint32 h_entry;
-  uint32 h_datastart;
-  uint32 h_dataend;
-  uint32 h_bssend;
+  uint32_t h_entry;
+  uint32_t h_datastart;
+  uint32_t h_dataend;
+  uint32_t h_bssend;
 
   /* Size of stack, in bytes */
 
-  uint32 h_stacksize;
+  uint32_t h_stacksize;
 
   /* Relocation entries:
    *
@@ -111,7 +113,7 @@ struct nxflat_hdr_s
    *                relative to the start of the file
    */
 
-  uint32 h_relocstart;       /* Offset of relocation records */
+  uint32_t h_relocstart;       /* Offset of relocation records */
 
   /* Imported symbol table (NOTE no symbols are exported):
    *
@@ -119,12 +121,12 @@ struct nxflat_hdr_s
    *                   symbol structures (struct nxflat_import_s).  The
    *                   h_importsymbols offset is relative to the
    *                   beginning of the file.  Each entry of the
-   *                   array contains an uint32 offset (again from
+   *                   array contains an uint32_t offset (again from
    *                   the beginning of the file) to the name of
    *                   a symbol string.  This string is null-terminated.
    */
 
-  uint32 h_importsymbols;    /* Offset to list of imported symbols */
+  uint32_t h_importsymbols;    /* Offset to list of imported symbols */
 
   /* 16-bit counts
    *
@@ -132,8 +134,8 @@ struct nxflat_hdr_s
    * h_importcount - The number of records in the h_importsymbols array.
    */
 
-  uint16 h_reloccount;       /* Number of relocation records */
-  uint16 h_importcount;      /* Number of imported symbols */
+  uint16_t h_reloccount;       /* Number of relocation records */
+  uint16_t h_importcount;      /* Number of imported symbols */
 };
 
 /****************************************************************************
@@ -144,24 +146,24 @@ struct nxflat_hdr_s
 
 struct nxflat_reloc_s
 {
-  uint32 r_info;             /* Bit-encoded relocation info */
+  uint32_t r_info;             /* Bit-encoded relocation info */
 };
 
 /* Pack the type and the offset into one 32-bit value */
 
-#define NXFLAT_RELOC(t,o)       (((u_int32_t)((t) & 3) << 30) | ((o) & 0x3fffffff))
+#define NXFLAT_RELOC(t,o)       (((uint32_t)((t) & 3) << 30) | ((o) & 0x3fffffff))
 
 /* The top three bits of the relocation info is the relocation type (see the
  * NXFLAT_RELOC_TYPE_* definitions below.  This is an unsigned value.
  */
 
-#define NXFLAT_RELOC_TYPE(r)    ((uint32)(r) >> 30)
+#define NXFLAT_RELOC_TYPE(r)    ((uint32_t)(r) >> 30)
 
 /* The bottom 28 bits of the relocation info is the (non-negative) offset into
  * the D-Space that needs the fixup.
  */
 
-#define NXFLAT_RELOC_OFFSET(r)  ((uint32)(r) & 0x3fffffff)
+#define NXFLAT_RELOC_OFFSET(r)  ((uint32_t)(r) & 0x3fffffff)
 
 /* These are possible values for the relocation type:
  *
@@ -195,8 +197,8 @@ struct nxflat_reloc_s
 
 struct nxflat_import_s
 {
-  uint32 i_funcname;    /* Offset to name of imported function */
-  uint32 i_funcaddress; /* Resolved address of imported function */
+  uint32_t i_funcname;    /* Offset to name of imported function */
+  uint32_t i_funcaddress; /* Resolved address of imported function */
 };
 
 #endif /* __INCLUDE_NXFLAT_H */

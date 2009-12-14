@@ -41,11 +41,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <semaphore.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Poll event definitions:
@@ -98,7 +99,7 @@ typedef unsigned int nfds_t;
  * poll events.
  */
 
-typedef ubyte pollevent_t;
+typedef uint8_t pollevent_t;
 
 /* This is the Nuttx variant of the standard pollfd structure. */
 

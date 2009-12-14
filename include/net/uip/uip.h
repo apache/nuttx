@@ -50,14 +50,15 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <queue.h>
 #include <arpa/inet.h>
 
 #include <net/uip/uipopt.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The following flags may be set in the set of flags before calling the
@@ -350,9 +351,9 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
 /* Convert an IPv4 address of the form uint16_t[2] to an in_addr_t */
 
 #ifdef CONFIG_ENDIAN_BIG
-#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16_t*)addr)[0] << 16) | (in_addr_t)((uint16*)addr)[1])
+#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16_t*)addr)[0] << 16) | (in_addr_t)((uint16_t*)addr)[1])
 #else
-#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[1] << 16) | (in_addr_t)((uint16_t*)addr)[0])
+#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16_t*)addr)[1] << 16) | (in_addr_t)((uint16_t*)addr)[0])
 #endif
 
 /* Construct an IPv6 address from eight 16-bit words.
@@ -452,8 +453,8 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
   (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
    ((in_addr_t)(addr2) & (in_addr_t)(mask)))
 #else
-extern boolean uip_ipaddr_maskcmp(uip_addr_t addr1, uip_addr_t addr2,
-                                  uip_addr_t mask);
+extern bool uip_ipaddr_maskcmp(uip_addr_t addr1, uip_addr_t addr2,
+                               uip_addr_t mask);
 #endif
 
 /* Mask out the network part of an IP address.

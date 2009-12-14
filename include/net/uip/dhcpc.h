@@ -42,10 +42,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -54,7 +54,7 @@
 
 struct dhcpc_state
 {
-  uint16 lease_time[2];
+  uint16_t       lease_time[2];
   struct in_addr serverid;
   struct in_addr ipaddr;
   struct in_addr netmask;

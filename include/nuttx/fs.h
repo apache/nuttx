@@ -40,9 +40,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-#include <semaphore.h>
+#include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <semaphore.h>
 
 /****************************************************************************
  * Definitions
@@ -76,7 +80,7 @@ struct file_operations
   off_t   (*seek)(FAR struct file *filp, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filp, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-  int     (*poll)(FAR struct file *filp, struct pollfd *fds, boolean setup);
+  int     (*poll)(FAR struct file *filp, struct pollfd *fds, bool setup);
 #endif
 
   /* The two structures need not be common after this point */
@@ -87,11 +91,11 @@ struct file_operations
 #ifndef CONFIG_DISABLE_MOUNTPOUNT
 struct geometry
 {
-  boolean geo_available;    /* TRUE: The device is vailable */
-  boolean geo_mediachanged; /* TRUE: The media has changed since last query */
-  boolean geo_writeenabled; /* TRUE: It is okay to write to this device */
-  size_t  geo_nsectors;     /* Number of sectors on the device */
-  size_t  geo_sectorsize;   /* Size of one sector */
+  bool   geo_available;    /* true: The device is vailable */
+  bool   geo_mediachanged; /* true: The media has changed since last query */
+  bool   geo_writeenabled; /* true: It is okay to write to this device */
+  size_t geo_nsectors;     /* Number of sectors on the device */
+  size_t geo_sectorsize;   /* Size of one sector */
 };
 
 /* This structure is provided by block devices when they register with the
@@ -201,8 +205,8 @@ struct inode
 {
   FAR struct inode *i_peer;       /* Pointer to same level inode */
   FAR struct inode *i_child;      /* Pointer to lower level inode */
-  sint16            i_crefs;      /* References to inode */
-  uint16            i_flags;      /* Flags for inode */
+  int16_t           i_crefs;      /* References to inode */
+  uint16_t          i_flags;      /* Flags for inode */
   union inode_ops_u u;            /* Inode operations */
 #ifdef CONFIG_FILE_MODE
   mode_t            i_mode;       /* Access mode flags */
@@ -230,8 +234,8 @@ struct file
 #if CONFIG_NFILE_DESCRIPTORS > 0
 struct filelist
 {
-  sem_t  fl_sem;          /* Manage access to the file list */
-  sint16 fl_crefs;        /* Reference count */
+  sem_t   fl_sem;             /* Manage access to the file list */
+  int16_t fl_crefs;           /* Reference count */
   struct file fl_files[CONFIG_NFILE_DESCRIPTORS];
 };
 #endif
@@ -268,7 +272,7 @@ struct file_struct
   int                fs_filedes;   /* File descriptor associated with stream */
   mode_t             fs_oflags;    /* Open mode flags */
 #if CONFIG_NUNGET_CHARS > 0
-  uint8              fs_nungotten; /* The number of characters buffered for ungetc */
+  uint8_t            fs_nungotten; /* The number of characters buffered for ungetc */
   unsigned char      fs_ungotten[CONFIG_NUNGET_CHARS];
 #endif
 #if CONFIG_STDIO_BUFFER_SIZE > 0
@@ -402,8 +406,8 @@ EXTERN void devzero_register(void);
  * as a block device.
  */
 
-EXTERN int losetup(const char *devname, const char *filename, uint16 sectsize,
-                   off_t offset, boolean readonly);
+EXTERN int losetup(const char *devname, const char *filename, uint16_t sectsize,
+                   off_t offset, bool readonly);
 EXTERN int loteardown(const char *devname);
 
 /* Setup so that the block driver referenced by 'blkdev' can be accessed
@@ -412,14 +416,14 @@ EXTERN int loteardown(const char *devname);
  * Access via a character device:
  */
 
-EXTERN int bchdev_register(const char *blkdev, const char *chardev, boolean readonly);
+EXTERN int bchdev_register(const char *blkdev, const char *chardev, bool readonly);
 EXTERN int bchdev_unregister(const char *chardev);
 
 /* Low level, direct access.  NOTE:  low-level access and character driver access
  * are incompatible.  One and only one access method should be implemented.
  */
 
-EXTERN int bchlib_setup(const char *blkdev, boolean readonly, FAR void **handle);
+EXTERN int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle);
 EXTERN int bchlib_teardown(FAR void *handle);
 EXTERN ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t len);
 EXTERN ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, size_t len);

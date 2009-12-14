@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/ramdisk.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
- * Type Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Type Definitions
@@ -68,17 +69,17 @@ extern "C" {
  *   minor:         Selects suffix of device named /dev/ramN, N={1,2,3...}
  *   nsectors:      Number of sectors on device
  *   sectize:       The size of one sector
- *   writeenabled:  TRUE: can write to ram disk
+ *   writeenabled:  true: can write to ram disk
  *   buffer:        RAM disk backup memory
  */
 
 #ifdef CONFIG_FS_WRITABLE
-EXTERN int ramdisk_register(int minor, ubyte *buffer, uint32 nsectors,
-                            uint16 sectize, boolean writeenabled);
+EXTERN int ramdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
+                            uint16_t sectize, bool writeenabled);
 #define romdisk_register(m,b,n,s) ramdisk_register(m,b,n,s,0)
 #else
-EXTERN int romdisk_register(int minor, ubyte *buffer, uint32 nsectors,
-                            uint16 sectize);
+EXTERN int romdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
+                            uint16_t sectize);
 #endif
 
 #undef EXTERN

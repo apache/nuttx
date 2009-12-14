@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
@@ -100,7 +102,7 @@ struct nx_callback_s
    *   hwnd - Window handle
    *   rect - The rectangle that needs to be re-drawn (in window relative
    *          coordinates)
-   *   more - TRUE:  More re-draw requests will follow
+   *   more - true:  More re-draw requests will follow
    *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
    *
    * Returned Value:
@@ -109,7 +111,7 @@ struct nx_callback_s
    **************************************************************************/
 
   void (*redraw)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                 boolean more, FAR void *arg);
+                 bool more, FAR void *arg);
 
   /**************************************************************************
    * Name: position
@@ -156,7 +158,7 @@ struct nx_callback_s
 
 #ifdef CONFIG_NX_MOUSE
   void (*mousein)(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                  ubyte buttons, FAR void *arg);
+                  uint8_t buttons, FAR void *arg);
 #endif
 
   /**************************************************************************
@@ -177,7 +179,7 @@ struct nx_callback_s
    **************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-  void (*kbdin)(NXWINDOW hwnd, ubyte nch, FAR const ubyte *ch, FAR void *arg);
+  void (*kbdin)(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch, FAR void *arg);
 #endif
 };
 
@@ -685,8 +687,8 @@ EXTERN int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-EXTERN int nx_kbdchin(NXHANDLE handle, ubyte ch);
-EXTERN int nx_kbdin(NXHANDLE handle, ubyte nch, FAR const ubyte *ch);
+EXTERN int nx_kbdchin(NXHANDLE handle, uint8_t ch);
+EXTERN int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
 #endif
 
 /****************************************************************************
@@ -700,7 +702,7 @@ EXTERN int nx_kbdin(NXHANDLE handle, ubyte nch, FAR const ubyte *ch);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MOUSE
-EXTERN int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, ubyte buttons);
+EXTERN int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons);
 #endif
 
 #undef EXTERN

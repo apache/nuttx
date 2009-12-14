@@ -40,7 +40,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <wdog.h>
  
 /****************************************************************************
@@ -52,21 +53,21 @@
 #ifdef CONFIG_C89x0_STATISTICS
 struct cs89x0_statistics_s
 {
-  uint32 tx_packets;
-  uint32 tx_errors;
-  uint32 tx_carriererrors;
-  uint32 tx_heartbeaterrors;
-  uint32 tx_windowerrors;
-  uint32 tx_abortederrors;
-  uint32 rx_missederrors;
-  uint32 rx_packets;
-  uint32 rx_errors;
-  uint32 rx_lengtherrors;
-  uint32 rx_crcerrors;
-  uint32 rx_frameerrors;
-  uint32 rx_dropped;
-  uint32 rx_missederrors;
-  uint32 collisions;
+  uint32_t tx_packets;
+  uint32_t tx_errors;
+  uint32_t tx_carriererrors;
+  uint32_t tx_heartbeaterrors;
+  uint32_t tx_windowerrors;
+  uint32_t tx_abortederrors;
+  uint32_t rx_missederrors;
+  uint32_t rx_packets;
+  uint32_t rx_errors;
+  uint32_t rx_lengtherrors;
+  uint32_t rx_crcerrors;
+  uint32_t rx_frameerrors;
+  uint32_t rx_dropped;
+  uint32_t rx_missederrors;
+  uint32_t collisions;
 };
 #endif
 
@@ -91,20 +92,20 @@ struct cs89x0_driver_s
 #ifdef CONFIG_CS89x0_MEMMODE
   FAR void *cs_ppbase;         /* CS89x0 page packet base address */
 #endif
-  ubyte     cs_irq;            /* CS89x00 IRQ number */
+  uint8_t   cs_irq;            /* CS89x00 IRQ number */
 
   /* Driver internal state fields.  These must be zeroed by before the
    * instance of this structure is passed to cs89x0_initialize
    */
 #ifdef CONFIG_CS89x0_XMITEARLY
-  ubyte     txstart;           /* Bits 6-7 of TxCMD controls Tx race */
+  uint8_t   txstart;           /* Bits 6-7 of TxCMD controls Tx race */
 #endif
-  boolean   cs_memmode;        /* TRUE:memory mode FALSE: I/O mode */
-  boolean   cs_bifup;          /* TRUE:ifup FALSE:ifdown */
+  bool      cs_memmode;        /* true:memory mode false: I/O mode */
+  bool      cs_bifup;          /* true:ifup false:ifdown */
   WDOG_ID   cs_txpoll;         /* TX poll timer */
   WDOG_ID   cs_txtimeout;      /* TX timeout timer */
 #ifdef CONFIG_CS89x0_XMITEARLY
-  uint32    cs_txunderrun;     /* Count of Tx underrun errors */
+  uint32_t  cs_txunderrun;     /* Count of Tx underrun errors */
 #endif
 
   /* This holds the information visible to uIP/NuttX */

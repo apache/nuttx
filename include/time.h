@@ -41,15 +41,12 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdint.h>
 
 /********************************************************************************
- * Compilations Switches
- ********************************************************************************/
-
-/********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /* Clock tick of the system (frequency Hz).  The default value is 100Hz, but this
@@ -83,7 +80,7 @@
  * Global Type Declarations
  ********************************************************************************/
 
-typedef uint32_   time_t;         /* Holds time in seconds */
+typedef uint32_t  time_t;         /* Holds time in seconds */
 typedef uint8_t   clockid_t;      /* Identifies one time base source */
 typedef FAR void *timer_t;        /* Represents one POSIX timer */
 

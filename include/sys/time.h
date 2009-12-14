@@ -41,13 +41,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <time.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Public Type Definitions
@@ -65,7 +64,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN int gettimeofday(struct timeval *tp, void *tzp);
+EXTERN int gettimeofday(struct timeval *tp, FAR void *tzp);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <stdint.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -62,10 +64,10 @@
  ****************************************************************************/
 
 /* A byte is the smallest address memory element (at least in architectures
- * that do not support bit banding.  We select ubyte versus the more standard
+ * that do not support bit banding.  We select uint8_t versus the more standard
  * int as the underlying type to minimize the RAM footprint of the executable.
  */
 
-typedef ubyte _Bool;
+typedef uint8_t _Bool;
 
 #endif /* __INCLUDE_STDBOOL_H */

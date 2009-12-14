@@ -41,11 +41,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/ioctl.h>
 
 /****************************************************************************
- * Public Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Three ioctls are available on all PF_INET sockets, but only if the NuttX
@@ -59,12 +60,12 @@
 
 /* Values for the FLAGS field in struct arpreq */
 
-#define ATF_COM         0x01      /* Lookup complete */
-#define ATF_PERM	0x02      /* Permanent entry */
-#define ATF_PUBL	0x04      /* Publish entry */
-#define ATF_USETRAILERS	0x10      /* Trailers requested */
-#define ATF_NETMASK	0x20      /* Use a netmask */
-#define ATF_DONTPUB	0x40      /* Don't answer */
+#define ATF_COM         0x01       /* Lookup complete */
+#define ATF_PERM        0x02       /* Permanent entry */
+#define ATF_PUBL        0x04       /* Publish entry */
+#define ATF_USETRAILERS 0x10       /* Trailers requested */
+#define ATF_NETMASK     0x20       /* Use a netmask */
+#define ATF_DONTPUB     0x40       /* Don't answer */
 
 /****************************************************************************
  * Public Type Definitions
@@ -74,11 +75,11 @@
 
 struct arpreq
 {
-  struct sockaddr arp_pa;      /* Protocol address */
-  struct sockaddr arp_ha;      /* Hardware address */
-  struct sockaddr arp_netmask; /* Netmask of protocol address */
-  ubyte  arp_flags;            /* Flags */
-  ubyte  arp_dev[IFNAMSIZ+1];  /* Device name (zero terminated)*/
+  struct sockaddr arp_pa;          /* Protocol address */
+  struct sockaddr arp_ha;          /* Hardware address */
+  struct sockaddr arp_netmask;     /* Netmask of protocol address */
+  uint8_t         arp_flags;       /* Flags */
+  uint8_t         arp_dev[IFNAMSIZ+1]; /* Device name (zero terminated)*/
 };
 
 /****************************************************************************

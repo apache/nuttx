@@ -41,7 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <sched.h>
 #include <arch/arch.h>
 
@@ -284,7 +287,7 @@ EXTERN void up_release_pending(void);
  *
  ****************************************************************************/
 
-EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);
+EXTERN void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority);
 
 /****************************************************************************
  * Name: _exit
@@ -383,12 +386,12 @@ EXTERN void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
  * Name: up_interrupt_context
  *
  * Description:
- *   Return TRUE is we are currently executing in
+ *   Return true is we are currently executing in
  *   the interrupt handler context.
  *
  ****************************************************************************/
 
-EXTERN boolean up_interrupt_context(void);
+EXTERN bool up_interrupt_context(void);
 
 /****************************************************************************
  * Name: up_enable_irq

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/usbdev_trace.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
 
 /****************************************************************************
@@ -380,7 +381,7 @@ struct usbtrace_s
 typedef int (*trace_callback_t)(struct usbtrace_s *trace, void *arg);
 
 /* Bit mask input type for usbtrace_enable().  If  TRACE_NIDS grows beyond
- * 16, then this will have to be changed to uint32
+ * 16, then this will have to be changed to uint32_t
  */
 
 typedef uint16_t usbtrace_idset_t;

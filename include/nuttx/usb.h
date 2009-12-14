@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,20 +41,21 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ************************************************************************************/
 
 /* All 16-bit values must be little-endian */
 
-#define MSBYTE(u16)                             ((u16) >> 8)     /* Get MS byte from uint16 */
-#define LSBYTE(u16)                             ((u16) & 0xff)   /* Get LS byte from uint16 */
+#define MSBYTE(u16)                             ((u16) >> 8)     /* Get MS byte from uint16_t */
+#define LSBYTE(u16)                             ((u16) & 0xff)   /* Get LS byte from uint16_t */
 
-#define GETUINT16(p)                            (((uint16)p[1]<<8)|(uint16)p[0])
-#define GETUINT32(p)                            (((uint32)p[3]<<24)|((uint32)p[2]<<16)|\
-                                                 ((uint32)p[1]<<8)|(uint32)p[0])
+#define GETUINT16(p)                            (((uint16_t)p[1]<<8)|(uint16_t)p[0])
+#define GETUINT32(p)                            (((uint32_t)p[3]<<24)|((uint32_t)p[2]<<16)|\
+                                                 ((uint32_t)p[1]<<8)|(uint32_t)p[0])
 
 /* USB directions (in endpoint addresses) */
 
@@ -201,11 +202,11 @@
 
 struct usb_ctrlreq_s
 {
-  ubyte type;                /* Matches request type */
-  ubyte req;                 /* Matches request field */
-  ubyte value[2];
-  ubyte index[2];
-  ubyte len[2];
+  uint8_t type;                /* Matches request type */
+  uint8_t req;                 /* Matches request field */
+  uint8_t value[2];
+  uint8_t index[2];
+  uint8_t len[2];
 };
 #define USB_SIZEOF_CTRLREQ 8
 
@@ -213,28 +214,28 @@ struct usb_ctrlreq_s
 
 struct usb_desc_s
 {
-  ubyte len;               /* Descriptor length */
-  ubyte type;              /* Descriptor type */
+  uint8_t len;               /* Descriptor length */
+  uint8_t type;              /* Descriptor type */
 };
 
 /* Device descriptor */
 
 struct usb_devdesc_s
 {
-  ubyte len;               /* Descriptor length */
-  ubyte type;              /* Descriptor type */
-  ubyte usb[2];            /* USB version */
-  ubyte class;             /* Device class */
-  ubyte subclass;          /* Device sub-class */
-  ubyte protocol;          /* Device protocol */
-  ubyte mxpacketsize;      /* Max packet size (ep0) */
-  ubyte vender[2];         /* Vendor ID */
-  ubyte product[2];        /* Product ID */
-  ubyte device[2];         /* Device ID */
-  ubyte imfgr;             /* Manufacturer */
-  ubyte iproduct;          /* Product */
-  ubyte serno;             /* Serial number */
-  ubyte nconfigs;          /* Number of configurations */
+  uint8_t len;               /* Descriptor length */
+  uint8_t type;              /* Descriptor type */
+  uint8_t usb[2];            /* USB version */
+  uint8_t class;             /* Device class */
+  uint8_t subclass;          /* Device sub-class */
+  uint8_t protocol;          /* Device protocol */
+  uint8_t mxpacketsize;      /* Max packet size (ep0) */
+  uint8_t vender[2];         /* Vendor ID */
+  uint8_t product[2];        /* Product ID */
+  uint8_t device[2];         /* Device ID */
+  uint8_t imfgr;             /* Manufacturer */
+  uint8_t iproduct;          /* Product */
+  uint8_t serno;             /* Serial number */
+  uint8_t nconfigs;          /* Number of configurations */
 };
 #define USB_SIZEOF_DEVDESC 18
 
@@ -242,27 +243,27 @@ struct usb_devdesc_s
 
 struct usb_cfgdesc_s
 {
-  ubyte len;               /* Descriptor length */
-  ubyte type;              /* Descriptor type */
-  ubyte totallen[2];       /* Total length */
-  ubyte ninterfaces;       /* Number of interfaces */
-  ubyte cfgvalue;          /* Configuration value */
-  ubyte icfg;              /* Configuration */
-  ubyte attr;              /* Attributes */
-  ubyte mxpower;           /* Max power (mA/2) */
+  uint8_t len;               /* Descriptor length */
+  uint8_t type;              /* Descriptor type */
+  uint8_t totallen[2];       /* Total length */
+  uint8_t ninterfaces;       /* Number of interfaces */
+  uint8_t cfgvalue;          /* Configuration value */
+  uint8_t icfg;              /* Configuration */
+  uint8_t attr;              /* Attributes */
+  uint8_t mxpower;           /* Max power (mA/2) */
 };
 #define USB_SIZEOF_CFGDESC 9
 
 struct usb_otherspeedconfigdesc_s
 {
-  ubyte  len;               /* Descriptor length */
-  ubyte  type;              /* Descriptor type */
-  ubyte  totallen[2];       /* Total length */
-  ubyte  ninterfaces;       /* Number of interfaces */
-  ubyte  cfgvalue;          /* Configuration value */
-  ubyte  icfg;              /* Configuration */
-  ubyte  attr;              /* Attributes */
-  ubyte  mxpower;           /* Max power (mA/2) */
+  uint8_t  len;               /* Descriptor length */
+  uint8_t  type;              /* Descriptor type */
+  uint8_t  totallen[2];       /* Total length */
+  uint8_t  ninterfaces;       /* Number of interfaces */
+  uint8_t  cfgvalue;          /* Configuration value */
+  uint8_t  icfg;              /* Configuration */
+  uint8_t  attr;              /* Attributes */
+  uint8_t  mxpower;           /* Max power (mA/2) */
 };
 #define USB_SIZEOF_OTHERSPEEDCONFIGDESC 9
 
@@ -270,24 +271,24 @@ struct usb_otherspeedconfigdesc_s
 
 struct usb_strdesc_s
 {
-  ubyte len;               /* Descriptor length */
-  ubyte type;              /* Descriptor type */
-  ubyte data[2];
+  uint8_t len;               /* Descriptor length */
+  uint8_t type;              /* Descriptor type */
+  uint8_t data[2];
 };
 
 /* Interface descriptor */
 
 struct usb_ifdesc_s
 {
-  ubyte len;               /* Descriptor length */
-  ubyte type;              /* Descriptor type */
-  ubyte ifno;              /* Interface number */
-  ubyte alt;               /* Alternate setting */
-  ubyte neps;              /* Number of endpoints */
-  ubyte class;             /* Interface class */
-  ubyte subclass;          /* Interface sub-class */
-  ubyte protocol;          /* Interface protocol */
-  ubyte iif;               /* iInterface */
+  uint8_t len;               /* Descriptor length */
+  uint8_t type;              /* Descriptor type */
+  uint8_t ifno;              /* Interface number */
+  uint8_t alt;               /* Alternate setting */
+  uint8_t neps;              /* Number of endpoints */
+  uint8_t class;             /* Interface class */
+  uint8_t subclass;          /* Interface sub-class */
+  uint8_t protocol;          /* Interface protocol */
+  uint8_t iif;               /* iInterface */
 };
 #define USB_SIZEOF_IFDESC 9
 
@@ -295,20 +296,20 @@ struct usb_ifdesc_s
 
 struct usb_epdesc_s
 {
-  ubyte  len;               /* Descriptor length */
-  ubyte  type;              /* Descriptor type */
-  ubyte  addr;              /* Endpoint address */
-  ubyte  attr;              /* Endpoint attributes */
-  ubyte  mxpacketsize[2];   /* Maximum packet size */
-  ubyte  interval;          /* Interval */
+  uint8_t  len;               /* Descriptor length */
+  uint8_t  type;              /* Descriptor type */
+  uint8_t  addr;              /* Endpoint address */
+  uint8_t  attr;              /* Endpoint attributes */
+  uint8_t  mxpacketsize[2];   /* Maximum packet size */
+  uint8_t  interval;          /* Interval */
 };
 #define USB_SIZEOF_EPDESC 7
 
 struct usb_audioepdesc_s
 {
   struct usb_epdesc_s ep;
-  ubyte  refresh;
-  ubyte  synchaddr;
+  uint8_t  refresh;
+  uint8_t  synchaddr;
 };
 #define USB_SIZEOF_AUDIOEPDESC 9
 
@@ -316,15 +317,15 @@ struct usb_audioepdesc_s
 
 struct usb_qualdesc_s
 {
-  ubyte  len;               /* Descriptor length */
-  ubyte  type;              /* Descriptor type */
-  ubyte  usb[2];            /* USB version */
-  ubyte  class;             /* Qualifier class */
-  ubyte  subclass;          /* Qualifier sub-class */
-  ubyte  protocol;          /* Qualifier protocol */
-  ubyte  mxpacketsize;      /* Max packet size (ep0) */
-  ubyte  nconfigs;          /* Number of configurations */
-  ubyte  reserved;
+  uint8_t  len;               /* Descriptor length */
+  uint8_t  type;              /* Descriptor type */
+  uint8_t  usb[2];            /* USB version */
+  uint8_t  class;             /* Qualifier class */
+  uint8_t  subclass;          /* Qualifier sub-class */
+  uint8_t  protocol;          /* Qualifier protocol */
+  uint8_t  mxpacketsize;      /* Max packet size (ep0) */
+  uint8_t  nconfigs;          /* Number of configurations */
+  uint8_t  reserved;
 };
 #define USB_SIZEOF_QUALDESC 10
 

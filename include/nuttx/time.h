@@ -41,7 +41,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdbool.h>
 #include <time.h>
 
 /****************************************************************************
@@ -96,7 +97,7 @@ EXTERN int clock_isleapyear(int year);
  *
  ****************************************************************************/
 
-EXTERN int clock_daysbeforemonth(int month, boolean leapyear);
+EXTERN int clock_daysbeforemonth(int month, bool leapyear);
 
 /****************************************************************************
  * Function:  clock_calendar2utc

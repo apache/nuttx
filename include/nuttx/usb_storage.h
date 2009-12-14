@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb_storage.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -48,10 +48,10 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Mass storage requests */
@@ -101,23 +101,23 @@
 
 struct usbstrg_cbw_s
 {
-  ubyte signature[4];           /* 'USBC' = 0x43425355 */
-  ubyte tag[4];                 /* Depends on command id */
-  ubyte datlen[4];              /* Number of bytes that host expects to transfer */
-  ubyte flags;                  /* Bit 7: Direction=IN (other obsolete or reserved) */
-  ubyte lun;                    /* LUN (normally 0) */
-  ubyte cdblen;                 /* len of cdb[] */
-  ubyte cdb[USBSTRG_MAXCDBLEN]; /* Command Data Block */
+  uint8_t signature[4];           /* 'USBC' = 0x43425355 */
+  uint8_t tag[4];                 /* Depends on command id */
+  uint8_t datlen[4];              /* Number of bytes that host expects to transfer */
+  uint8_t flags;                  /* Bit 7: Direction=IN (other obsolete or reserved) */
+  uint8_t lun;                    /* LUN (normally 0) */
+  uint8_t cdblen;                 /* len of cdb[] */
+  uint8_t cdb[USBSTRG_MAXCDBLEN]; /* Command Data Block */
 };
 
 /* Command Status Wrapper (CSW) */
 
 struct usbstrg_csw_s
 {
-  ubyte signature[4];           /* 'USBS' = 0x53425355 */
-  ubyte tag[4];                 /* Same tag as original command */
-  ubyte residue[4];             /* Amount not transferred */
-  ubyte status;                 /* Status of transfer */
+  uint8_t signature[4];           /* 'USBS' = 0x53425355 */
+  uint8_t tag[4];                 /* Same tag as original command */
+  uint8_t residue[4];             /* Amount not transferred */
+  uint8_t status;                 /* Status of transfer */
 };
 
 /************************************************************************************

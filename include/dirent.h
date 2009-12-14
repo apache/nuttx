@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/dirent.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <limits.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* File type code for the d_type field in dirent struct.
@@ -75,7 +77,7 @@
 
 struct dirent
 {
-  ubyte     d_type;             /* type of file */
+  uint8_t   d_type;             /* type of file */
   char      d_name[NAME_MAX+1]; /* filename */
 };
 

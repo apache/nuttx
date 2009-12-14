@@ -41,7 +41,10 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <nuttx/fs.h>
 
@@ -61,10 +64,10 @@
 #define uart_shutdown(dev)       dev->ops->shutdown(dev)
 #define uart_attach(dev)         dev->ops->attach(dev)
 #define uart_detach(dev)         dev->ops->detach(dev)
-#define uart_enabletxint(dev)    dev->ops->txint(dev, TRUE)
-#define uart_disabletxint(dev)   dev->ops->txint(dev, FALSE)
-#define uart_enablerxint(dev)    dev->ops->rxint(dev, TRUE)
-#define uart_disablerxint(dev)   dev->ops->rxint(dev, FALSE)
+#define uart_enabletxint(dev)    dev->ops->txint(dev, true)
+#define uart_disabletxint(dev)   dev->ops->txint(dev, false)
+#define uart_enablerxint(dev)    dev->ops->rxint(dev, true)
+#define uart_disablerxint(dev)   dev->ops->rxint(dev, false)
 #define uart_rxavailable(dev)    dev->ops->rxavailable(dev)
 #define uart_txready(dev)        dev->ops->txready(dev)
 #define uart_txempty(dev)        dev->ops->txempty(dev)
@@ -82,11 +85,11 @@
 
 struct uart_buffer_s
 {
-  sem_t           sem;    /* Used to control exclusive access to the buffer */
-  volatile sint16 head;   /* Index to the head [IN] index in the buffer */
-  volatile sint16 tail;   /* Index to the tail [OUT] index in the buffer */
-  sint16          size;   /* The allocated size of the buffer */
-  FAR char       *buffer; /* Pointer to the allocated buffer memory */
+  sem_t            sem;    /* Used to control exclusive access to the buffer */
+  volatile int16_t head;   /* Index to the head [IN] index in the buffer */
+  volatile int16_t tail;   /* Index to the tail [OUT] index in the buffer */
+  int16_t          size;   /* The allocated size of the buffer */
+  FAR char        *buffer; /* Pointer to the allocated buffer memory */
 };
 
 /* This structure defines all of the operations providd by the architecture specific
@@ -146,11 +149,11 @@ struct uart_ops_s
 
   /* Call to enable or disable RX interrupts */
 
-  CODE void (*rxint)(FAR struct uart_dev_s *dev, boolean enable);
+  CODE void (*rxint)(FAR struct uart_dev_s *dev, bool enable);
 
-  /* Return TRUE if the receive data is available */
+  /* Return true if the receive data is available */
 
-  CODE boolean (*rxavailable)(FAR struct uart_dev_s *dev);
+  CODE bool (*rxavailable)(FAR struct uart_dev_s *dev);
 
   /* This method will send one byte on the UART */
 
@@ -158,21 +161,21 @@ struct uart_ops_s
 
   /* Call to enable or disable TX interrupts */
 
-  CODE void (*txint)(FAR struct uart_dev_s *dev, boolean enable);
+  CODE void (*txint)(FAR struct uart_dev_s *dev, bool enable);
 
-  /* Return TRUE if the tranmsit hardware is ready to send another byte.  This
+  /* Return true if the tranmsit hardware is ready to send another byte.  This
    * is used to determine if send() method can be called.
    */
 
-  CODE boolean (*txready)(FAR struct uart_dev_s *dev);
+  CODE bool (*txready)(FAR struct uart_dev_s *dev);
 
-  /* Return TRUE if all characters have been sent.  If for example, the UART
+  /* Return true if all characters have been sent.  If for example, the UART
    * hardware implements FIFOs, then this would mean the transmit FIFO is
    * empty.  This method is called when the driver needs to make sure that
    * all characters are "drained" from the TX hardware.
    */
 
-  CODE boolean (*txempty)(FAR struct uart_dev_s *dev);
+  CODE bool (*txempty)(FAR struct uart_dev_s *dev);
 };
 
 /* This is the device structure used by the driver.  The caller of
@@ -187,10 +190,10 @@ struct uart_ops_s
 
 struct uart_dev_s
 {
-  ubyte                open_count;  /* Number of times the device has been opened */
-  volatile boolean     xmitwaiting; /* TRUE: User waiting for space in xmit.buffer */
-  volatile boolean     recvwaiting; /* TRUE: User waiting for data in recv.buffer */
-  boolean              isconsole;   /* TRUE: This is the serial console */
+  uint8_t              open_count;  /* Number of times the device has been opened */
+  volatile bool        xmitwaiting; /* true: User waiting for space in xmit.buffer */
+  volatile bool        recvwaiting; /* true: User waiting for data in recv.buffer */
+  bool                 isconsole;   /* true: This is the serial console */
   sem_t                closesem;    /* Locks out new open while close is in progress */
   sem_t                xmitsem;     /* Wakeup user waiting for space in xmit.buffer */
   sem_t                recvsem;     /* Wakeup user waiting for data in recv.buffer */

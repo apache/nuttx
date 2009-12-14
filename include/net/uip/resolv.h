@@ -33,7 +33,6 @@
 #ifndef __UIP_RESOLV_H__
 #define __UIP_RESOLV_H__
 
-#include <sys/types.h>
 #include <net/uip/uipopt.h>
 
 #undef EXTERN

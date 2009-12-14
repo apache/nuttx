@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fb.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@
 /* Packed YUV Formats *******************************************************/
 
 #define FB_FMT_AYUV        19          /* BPP=32  Combined YUV and alpha */
-#define FB_FMT_CLJR        20          /* BPP=8   4 pixels packed into a uint32.
+#define FB_FMT_CLJR        20          /* BPP=8   4 pixels packed into a uint32_t.
                                         * YUV 4:1:1 with l< 8 bits per YUV sample */
 #define FB_FMT_CYUV        21          /* BPP=16  UYVY except that height is reversed */
 #define FB_FMT_IRAW        22          /* BPP=?   Intel uncompressed YUV.
@@ -196,7 +196,7 @@ struct fb_videoinfo_s
 struct fb_planeinfo_s
 {
   FAR void  *fbmem;       /* Start of frame buffer memory */
-  uint32     fblen;       /* Length of frame buffer memory in bytes */
+  uint32_t   fblen;       /* Length of frame buffer memory in bytes */
   fb_coord_t stride;      /* Length of a line in bytes */
   uint8_t    bpp;         /* Bits per pixel */
 };

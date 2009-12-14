@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/clock.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pro-processor Definitions
  ****************************************************************************/
 
 /* Timing constants */
@@ -103,7 +104,7 @@
 /* Access to raw system clock ***********************************************/
 
 #ifndef CONFIG_DISABLE_CLOCK
-extern volatile uint32 g_system_timer;
+extern volatile uint32_t g_system_timer;
 #endif
 
 /****************************************************************************

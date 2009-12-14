@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nxfonts.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/nxglib.h>
 
 /****************************************************************************
@@ -56,12 +57,12 @@
 
 struct nx_fontmetic_s
 {
-  uint32 stride   : 2;      /* Width of one font row in bytes */
-  uint32 width    : 6;      /* Width of the font in bits */
-  uint32 height   : 6;      /* Height of the font in rows */
-  uint32 xoffset  : 6;      /* Top, left-hand corner X-offset in pixels */
-  uint32 yoffset  : 6;      /* Top, left-hand corner y-offset in pixels */
-  uint32 unused   : 6;
+  uint32_t stride   : 2;    /* Width of one font row in bytes */
+  uint32_t width    : 6;    /* Width of the font in bits */
+  uint32_t height   : 6;    /* Height of the font in rows */
+  uint32_t xoffset  : 6;    /* Top, left-hand corner X-offset in pixels */
+  uint32_t yoffset  : 6;    /* Top, left-hand corner y-offset in pixels */
+  uint32_t unused   : 6;
 };
 
 /* This structure binds the glyph metrics to the glyph bitmap */
@@ -69,7 +70,7 @@ struct nx_fontmetic_s
 struct nx_fontbitmap_s
 {
   struct nx_fontmetic_s metric; /* Character metrics */
-  FAR const ubyte *bitmap;      /* Pointer to the character bitmap */
+  FAR const uint8_t *bitmap;      /* Pointer to the character bitmap */
 };
 
 /* This structure describes one contiguous grouping of glyphs that
@@ -79,8 +80,8 @@ struct nx_fontbitmap_s
 
 struct nx_fontset_s
 {
-  ubyte  first;             /* First bitmap character code */
-  ubyte  nchars;            /* Number of bitmap character codes */
+  uint8_t  first;           /* First bitmap character code */
+  uint8_t  nchars;          /* Number of bitmap character codes */
   FAR const struct nx_fontbitmap_s *bitmap;
 };
 
@@ -88,10 +89,10 @@ struct nx_fontset_s
 
 struct nx_font_s
 {
-  ubyte  mxheight;          /* Max height of one glyph in rows */
-  ubyte  mxwidth;           /* Max width of any glyph in pixels */
-  ubyte  mxbits;            /* Max number of bits per character code */
-  ubyte  spwidth;           /* The width of a space in pixels */
+  uint8_t  mxheight;        /* Max height of one glyph in rows */
+  uint8_t  mxwidth;         /* Max width of any glyph in pixels */
+  uint8_t  mxbits;          /* Max number of bits per character code */
+  uint8_t  spwidth;         /* The width of a space in pixels */
 };
 
 /****************************************************************************
@@ -137,7 +138,7 @@ EXTERN FAR const struct nx_font_s *nxf_getfontset(void);
  *
  ****************************************************************************/
 
-EXTERN FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch);
+EXTERN FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch);
 
 /****************************************************************************
  * Name: nxf_convert_*bpp
@@ -160,28 +161,28 @@ EXTERN FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch);
  *
  ****************************************************************************/
 
-EXTERN int nxf_convert_2bpp(FAR ubyte *dest, uint16 height,
-                            uint16 width, uint16 stride,
+EXTERN int nxf_convert_2bpp(FAR uint8_t *dest, uint16_t height,
+                            uint16_t width, uint16_t stride,
                             FAR const struct nx_fontbitmap_s *bm,
                             nxgl_mxpixel_t color);
-EXTERN int nxf_convert_4bpp(FAR ubyte *dest, uint16 height,
-                            uint16 width, uint16 stride,
+EXTERN int nxf_convert_4bpp(FAR uint8_t *dest, uint16_t height,
+                            uint16_t width, uint16_t stride,
                             FAR const struct nx_fontbitmap_s *bm,
                             nxgl_mxpixel_t color);
-EXTERN int nxf_convert_8bpp(FAR ubyte *dest, uint16 height,
-                            uint16 width, uint16 stride,
+EXTERN int nxf_convert_8bpp(FAR uint8_t *dest, uint16_t height,
+                            uint16_t width, uint16_t stride,
                             FAR const struct nx_fontbitmap_s *bm,
                             nxgl_mxpixel_t color);
-EXTERN int nxf_convert_16bpp(FAR uint16 *dest, uint16 height,
-                             uint16 width, uint16 stride,
+EXTERN int nxf_convert_16bpp(FAR uint16_t *dest, uint16_t height,
+                             uint16_t width, uint16_t stride,
                              FAR const struct nx_fontbitmap_s *bm,
                              nxgl_mxpixel_t color);
-EXTERN int nxf_convert_24bpp(FAR uint32 *dest, uint16 height,
-                             uint16 width, uint16 stride,
+EXTERN int nxf_convert_24bpp(FAR uint32_t *dest, uint16_t height,
+                             uint16_t width, uint16_t stride,
                              FAR const struct nx_fontbitmap_s *bm,
                              nxgl_mxpixel_t color);
-EXTERN int nxf_convert_32bpp(FAR uint32 *dest, uint16 height,
-                             uint16 width, uint16 stride,
+EXTERN int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
+                             uint16_t width, uint16_t stride,
                              FAR const struct nx_fontbitmap_s *bm,
                              nxgl_mxpixel_t color);
 

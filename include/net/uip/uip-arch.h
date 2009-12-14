@@ -43,8 +43,9 @@
 #define __UIP_ARCH_H
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <sys/ioctl.h>
+#include <stdint.h>
 #include <net/if.h>
 #include <net/uip/uip.h>
 
@@ -56,7 +57,7 @@
 #include <net/ethernet.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -121,30 +122,30 @@ struct uip_driver_s
    *    }
    */
 
-  uint8 d_buf[CONFIG_NET_BUFSIZE + 2];
+  uint8_t d_buf[CONFIG_NET_BUFSIZE + 2];
 
   /* d_appdata points to the location where application data can be read from
    * or written into a packet.
    */
 
-  uint8 *d_appdata;
+  uint8_t *d_appdata;
 
   /* This is a pointer into d_buf where a user application may append
    * data to be sent.
    */
 
-  uint8 *d_snddata;
+  uint8_t *d_snddata;
 
 #ifdef CONFIG_NET_TCPURGDATA
   /* This pointer points to any urgent TCP data that has been received. Only
    * present if compiled with support for urgent data (CONFIG_NET_TCPURGDATA).
    */
 
-  uint8 *d_urgdata;
+  uint8_t *d_urgdata;
 
   /* Length of the (received) urgent data */
 
-  uint16 d_urglen;
+  uint16_t d_urglen;
 #endif
 
 /* The length of the packet in the d_buf buffer.
@@ -160,13 +161,13 @@ struct uip_driver_s
  * packet.
  */
 
-  uint16 d_len;
+  uint16_t d_len;
 
   /* When d_buf contains outgoing xmit data, xmtlen is nonzero and represents
    * the amount of appllcation data after d_snddata
    */
 
-  uint16 d_sndlen;
+  uint16_t d_sndlen;
 
   /* Driver callbacks */
 
@@ -315,8 +316,8 @@ extern int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int
  *   uip_add32 only.
  */
 
-extern void uip_add32(const uint8 *op32, uint16 op16, uint8 *sum);
-extern void uip_incr32(uint8 *op32, uint16 op16);
+extern void uip_add32(const uint8_t *op32, uint16_t op16, uint8_t *sum);
+extern void uip_incr32(uint8_t *op32, uint16_t op16);
 
 /* Calculate the Internet checksum over a buffer.
  *
@@ -337,7 +338,7 @@ extern void uip_incr32(uint8 *op32, uint16 op16);
  * Return:  The Internet checksum of the buffer.
  */
 
-extern uint16 uip_chksum(uint16 *buf, uint16 len);
+extern uint16_t uip_chksum(uint16_t *buf, uint16_t len);
 
 /* Calculate the IP header checksum of the packet header in d_buf.
  *
@@ -348,7 +349,7 @@ extern uint16 uip_chksum(uint16 *buf, uint16 len);
  * buffer.
  */
 
-extern uint16 uip_ipchksum(struct uip_driver_s *dev);
+extern uint16_t uip_ipchksum(struct uip_driver_s *dev);
 
 /* Calculate the TCP checksum of the packet in d_buf and d_appdata.
  *
@@ -363,10 +364,10 @@ extern uint16 uip_ipchksum(struct uip_driver_s *dev);
  * to by d_appdata.
  */
 
-extern uint16 uip_tcpchksum(struct uip_driver_s *dev);
+extern uint16_t uip_tcpchksum(struct uip_driver_s *dev);
 
-extern uint16 uip_udpchksum(struct uip_driver_s *dev);
-extern uint16 uip_icmpchksum(struct uip_driver_s *dev, int len);
+extern uint16_t uip_udpchksum(struct uip_driver_s *dev);
+extern uint16_t uip_icmpchksum(struct uip_driver_s *dev, int len);
 
 #endif /* __UIP_ARCH_H */
 

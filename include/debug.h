@@ -42,10 +42,11 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Debug macros to runtime filter the debug messages sent to the console.  In
@@ -496,15 +497,16 @@ extern "C" {
  * on or the other of the following.
  */
 
-EXTERN int lib_rawprintf(const char *format, ...);
+EXTERN int lib_rawprintf(FAR const char *format, ...);
 
 #ifdef CONFIG_ARCH_LOWPUTC
-EXTERN int lib_lowprintf(const char *format, ...);
+EXTERN int lib_lowprintf(FAR const char *format, ...);
 #endif
 
 /* Dump a buffer of data */
 
-EXTERN void lib_dumpbuffer(FAR const char *msg, FAR const ubyte *buffer, unsigned int buflen);
+EXTERN void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
+                           unsigned int buflen);
 
 /* If the cross-compiler's pre-processor does not support variable
  * length arguments, then these additional APIs will be built.

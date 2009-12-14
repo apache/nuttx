@@ -44,7 +44,7 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The number of functions that may be registerd to be called

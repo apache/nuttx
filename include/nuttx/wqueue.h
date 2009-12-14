@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <signal.h>
 #include <queue.h>
 
@@ -69,8 +71,8 @@ struct work_s
   struct dq_entry_s dq; /* Implements a doubly linked list */
   worker_t  worker;     /* Work callback */
   FAR void *arg;        /* Callback argument */
-  uint32    qtime;      /* Time work queued */
-  uint32    delay;      /* Delay until work performed */
+  uint32_t  qtime;      /* Time work queued */
+  uint32_t  delay;      /* Delay until work performed */
 };
 
 /****************************************************************************
@@ -120,7 +122,7 @@ EXTERN pid_t g_worker;
  *
  ****************************************************************************/
 
-EXTERN int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint32 delay);
+EXTERN int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint32_t delay);
 
 /****************************************************************************
  * Name: work_cancel

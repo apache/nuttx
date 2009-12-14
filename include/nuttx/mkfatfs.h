@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mkfat.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define MKFATFS_DEFAULT_NFATS        2     /* 2: Default number of FATs */
@@ -82,16 +82,16 @@
 
 struct fat_format_s
 {
-   ubyte   ff_nfats;           /* Number of FATs */
-   ubyte   ff_fattype;         /* FAT size: 0 (autoselect), 12, 16, or 32 */
-   ubyte   ff_clustshift;      /* Log2 of sectors per cluster: 0-5, 0xff (autoselect) */
-   ubyte   ff_volumelabel[11]; /* Volume label */
-   uint16  ff_backupboot;      /* Sector number of the backup boot sector (0=use default)*/
-   uint16  ff_rootdirentries;  /* Number of root directory entries */
-   uint16  ff_rsvdseccount;    /* Reserved sectors */
-   uint32  ff_hidsec;          /* Count of hidden sectors preceding fat */
-   uint32  ff_volumeid;        /* FAT volume id */
-   uint32  ff_nsectors;        /* Number of sectors from device to use: 0: Use all */
+   uint8_t  ff_nfats;           /* Number of FATs */
+   uint8_t  ff_fattype;         /* FAT size: 0 (autoselect), 12, 16, or 32 */
+   uint8_t  ff_clustshift;      /* Log2 of sectors per cluster: 0-5, 0xff (autoselect) */
+   uint8_t  ff_volumelabel[11]; /* Volume label */
+   uint16_t ff_backupboot;      /* Sector number of the backup boot sector (0=use default)*/
+   uint16_t ff_rootdirentries;  /* Number of root directory entries */
+   uint16_t ff_rsvdseccount;    /* Reserved sectors */
+   uint32_t ff_hidsec;          /* Count of hidden sectors preceding fat */
+   uint32_t ff_volumeid;        /* FAT volume id */
+   uint32_t ff_nsectors;        /* Number of sectors from device to use: 0: Use all */
 };
 
 /****************************************************************************
