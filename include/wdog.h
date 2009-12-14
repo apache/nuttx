@@ -1,7 +1,7 @@
 /****************************************************************************
- * wdog.h
+ * include/wdog.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,15 @@
  *
  ****************************************************************************/
 
-#ifndef __WDOG_H
-#define __WDOG_H
+#ifndef __INCLUDE_WDOG_H
+#define __INCLUDE_WDOG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
 #include <sched.h>
 
 /****************************************************************************
@@ -55,20 +56,20 @@
  * Global Type Declarations
  ****************************************************************************/
 
-/* The arguments are passed as uint32 values.  For systems
- * where the sizeof(pointer) < sizeof(uint32), the following
+/* The arguments are passed as uint32_t values.  For systems
+ * where the sizeof(pointer) < sizeof(uint32_t), the following
  * union defines the alignment of the pointer within the
- * uint32.  For example, the SDCC MCS51 general pointer is
- * 24-bits, but uint32 is 32-bits (of course).
+ * uint32_t.  For example, the SDCC MCS51 general pointer is
+ * 24-bits, but uint32_t is 32-bits (of course).
  *
- * For systems where sizeof(pointer) > sizeof(uint32), we will
+ * For systems where sizeof(pointer) > sizeof(uint32_t), we will
  * have to do some redesign.
  */
 
 union wdparm_u
 {
-  FAR void   *pvarg;
-  FAR uint32 *dwarg;
+  FAR void     *pvarg;
+  FAR uint32_t *dwarg;
 };
 typedef union wdparm_u wdparm_t;
 
@@ -76,7 +77,7 @@ typedef union wdparm_u wdparm_t;
  * watchdog function expires.  Up to four parameters may be passed.
  */
 
-typedef CODE void (*wdentry_t)(int argc, uint32 arg1, ...);
+typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, ...);
 
 /* Watchdog 'handle' */
 

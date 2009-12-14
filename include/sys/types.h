@@ -1,7 +1,7 @@
 /****************************************************************************
- * sys/types.h
+ * include/sys/types.h
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,24 +33,24 @@
  *
  ****************************************************************************/
 
-#ifndef __SYS_TYPES_H
-#define __SYS_TYPES_H
+#ifndef __INCLUDE_SYS_TYPES_H
+#define __INCLUDE_SYS_TYPES_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/types.h>
+#include <stdint.h>
 #include <nuttx/compiler.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* Values for type boolean */
+/* Alternative alues for type bool (for historic reasons) */
 
-#define TRUE 1
+#define TRUE  1
 #define FALSE 0
 
 /* NULL is usually defined in stddef.h (which includes this file) */
@@ -119,27 +119,27 @@ typedef unsigned int mode_t;
  */
 
 #ifdef CONFIG_SMALL_MEMORY
-typedef uint16       size_t;
-typedef sint16       ssize_t;
+typedef uint16_t     size_t;
+typedef int16_t      ssize_t;
 #else
-typedef uint32       size_t;
-typedef sint32       ssize_t;
+typedef uint32_t     size_t;
+typedef int32_t      ssize_t;
 #endif
 
 /* uid_t is used for user IDs
  * gid_t is used for group IDs.
  */
 
-typedef sint16       uid_t;
-typedef sint16       gid_t;
+typedef int16_t      uid_t;
+typedef int16_t      gid_t;
 
 /* dev_t is used for device IDs */
 
-typedef uint16       dev_t;
+typedef uint16_t     dev_t;
 
 /* ino_t is used for file serial numbers */
 
-typedef uint16       ino_t;
+typedef uint16_t     ino_t;
 
 /* pid_t is used for process IDs and process group IDs */
 
@@ -153,18 +153,18 @@ typedef int          pid_t;
  * Hence, both should be independent of processor architecture.
  */
 
-typedef uint32       blkcnt_t;
-typedef sint32       off_t;
+typedef uint32_t     blkcnt_t;
+typedef int32_t      off_t;
 typedef off_t        fpos_t;
 
 /* blksize_t is a signed integer value used for file block sizes */
 
-typedef sint16       blksize_t;
+typedef int16_t      blksize_t;
 
 /* Network related */
 
 typedef unsigned int socklen_t;
-typedef uint16       sa_family_t;
+typedef uint16_t     sa_family_t;
 
 /* The type useconds_t shall be an unsigned integer type capable of storing
  * values at least in the range [0, 1000000]. The type suseconds_t shall be
@@ -172,8 +172,8 @@ typedef uint16       sa_family_t;
  * [-1, 1000000].
  */
 
-typedef uint32       useconds_t;
-typedef sint32       suseconds_t;
+typedef uint32_t     useconds_t;
+typedef int32_t      suseconds_t;
 
 /* Task entry point */
 
@@ -185,4 +185,4 @@ typedef int (*main_t)(int argc, char *argv[]);
  * Global Function Prototypes
  ****************************************************************************/
 
-#endif /* __SYS_TYPES_H */
+#endif /* __INCLUDE_SYS_TYPES_H */

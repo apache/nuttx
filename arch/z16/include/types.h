@@ -37,8 +37,8 @@
  * only indirectly through sys/types.h
  */
 
-#ifndef __ARCH_Z16_INCLUDE_TYPE_H 
-#define __ARCH_Z16_INCLUDE_TYPE_H 
+#ifndef __ARCH_Z16_INCLUDE_TYPES_H 
+#define __ARCH_Z16_INCLUDE_TYPES_H 
 
 /****************************************************************************
  * Included Files
@@ -54,26 +54,34 @@
 
 #ifndef __ASSEMBLY__
 
-/* These are the sizes of the standard GNU types */
+/* These are the sizes of the standard integer types.  NOTE that these type
+ * names have a leading underscore character.  This file will be included
+ * (indirectly) by include/stdint.h and typedef'ed to the final name without
+ * the underscore character.  This roundabout way of doings things allows
+ * the stdint.h to be removed from the include/ directory in the event that
+ * the user prefers to use the definitions provided by their toolchain header
+ * files
+ */
 
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef short sint16;
-typedef unsigned short uint16;
-typedef int sint32;
-typedef unsigned int uint32;
+typedef char               _int8_t;
+typedef unsigned char      _uint8_t;
+
+typedef short              _int16_t;
+typedef unsigned short     _uint16_t;
+
+typedef int                _int32_t;
+typedef unsigned int       _uint32_t;
 
 /* A pointer is 4 bytes */
 
-typedef unsigned int uintptr;
+typedef int               _intptr_t;
+typedef unsigned int      _uintptr_t;
 
 /* This is the size of the interrupt state save returned by
  * irqsave()
  */
 
-typedef unsigned short irqstate_t;
+typedef unsigned short    irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 
@@ -81,4 +89,4 @@ typedef unsigned short irqstate_t;
  * Global Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_Z16_INCLUDE_TYPE_H  */
+#endif /* __ARCH_Z16_INCLUDE_TYPES_H  */

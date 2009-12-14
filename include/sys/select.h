@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
 #include <time.h>
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
@@ -54,7 +55,7 @@
 #define __SELECT_NDESCRIPTORS (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS)
 
 /* We will use a 32-bit bitsets to represent the set of descriptors.  How
- * many uint32's do we need to span all descriptors?
+ * many uint32_t's do we need to span all descriptors?
  */
 
 #if __SELECT_NDESCRIPTORS <= 32
@@ -84,16 +85,16 @@
 
 /* Standard helper macros */
 
-#define FD_CLR(fd,set)    (((uint32*)(set))[_FD_NDX(fd)] &= ~(1 << _FD_BIT(fd)))
-#define FD_SET(fd,set)    (((uint32*)(set))[_FD_NDX(fd)] |= (1 << _FD_BIT(fd)))
-#define FD_ISSET(fd,set)  ((((uint32*)(set))[_FD_NDX(fd)] & (1 << _FD_BIT(fd))) != 0)
+#define FD_CLR(fd,set)    (((uint32_t*)(set))[_FD_NDX(fd)] &= ~(1 << _FD_BIT(fd)))
+#define FD_SET(fd,set)    (((uint32_t*)(set))[_FD_NDX(fd)] |= (1 << _FD_BIT(fd)))
+#define FD_ISSET(fd,set)  ((((uint32_t*)(set))[_FD_NDX(fd)] & (1 << _FD_BIT(fd))) != 0)
 #define FD_ZERO(set)      memset(set, 0, sizeof(fd_set))
 
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
 
-typedef uint32 fd_set[__SELECT_NUINT32];
+typedef uint32_t fd_set[__SELECT_NUINT32];
 
 /****************************************************************************
  * Public Function Prototypes

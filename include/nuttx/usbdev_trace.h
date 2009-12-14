@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Preprocessor definitions
@@ -49,7 +49,7 @@
 
 /* Event encoding/decoding macros *******************************************/
 
-#define TRACE_EVENT(id,data)     ((uint16)(id)|(data))
+#define TRACE_EVENT(id,data)     ((uint16_t)(id)|(data))
 #define TRACE_ID(event)          ((event)&0xff00)
 #define TRACE_DATA(event)        ((event)&0x00ff)
 
@@ -371,8 +371,8 @@
 
 struct usbtrace_s
 {
-  uint16 event;
-  uint16 value;
+  uint16_t event;
+  uint16_t value;
 };
 
 /* Enumeration callback function signature */
@@ -383,7 +383,7 @@ typedef int (*trace_callback_t)(struct usbtrace_s *trace, void *arg);
  * 16, then this will have to be changed to uint32
  */
 
-typedef uint16 usbtrace_idset_t;
+typedef uint16_t usbtrace_idset_t;
 
 /* Print routine to use for usbdev_trprint() output */
 
@@ -437,7 +437,7 @@ EXTERN usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
  *******************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
-EXTERN void usbtrace(uint16 event, uint16 value);
+EXTERN void usbtrace(uint16_t event, uint16_t value);
 #else
 #  define usbtrace(event, value)
 #endif
@@ -467,7 +467,7 @@ EXTERN int usbtrace_enumerate(trace_callback_t callback, void *arg);
  *
  *******************************************************************************/
 
-EXTERN void usbtrace_trprintf(trprintf_t trprintf, uint16 event, uint16 value);
+EXTERN void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value);
 
 #undef EXTERN
 #if defined(__cplusplus)

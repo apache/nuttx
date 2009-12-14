@@ -147,7 +147,7 @@
 
 /* This defines a set of 32 signals (numbered 0 through 31). */
 
-typedef uint32 sigset_t;     /* Bit set of 32 signals */
+typedef uint32_t sigset_t;   /* Bit set of 32 signals */
 
 /* This defines the type of the siginfo si_value field */
 

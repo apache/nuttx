@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
+#include <stdint.h>
 #include <stdarg.h>
 #include <semaphore.h>
 
@@ -69,7 +70,7 @@
 
 /* This defines a bitmap big enough for one bit for each socket option */
 
-typedef uint16 sockopt_t;
+typedef uint16_t sockopt_t;
 
 /* This defines the storage size of a timeout value.  This effects only
  * range of supported timeout values.  With an LSB in seciseconds, the
@@ -77,7 +78,7 @@ typedef uint16 sockopt_t;
  * resolution.
  */
 
-typedef uint16 socktimeo_t;
+typedef uint16_t socktimeo_t;
 
 /* This is the internal representation of a socket reference by a file
  * descriptor.
@@ -86,8 +87,8 @@ typedef uint16 socktimeo_t;
 struct socket
 {
   int           s_crefs;     /* Reference count on the socket */
-  uint8         s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
-  uint8         s_flags;     /* See _SF_* definitions */
+  uint8_t       s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+  uint8_t       s_flags;     /* See _SF_* definitions */
 #ifdef CONFIG_NET_SOCKOPTS
   sockopt_t     s_options;   /* Selected socket options */
 #ifndef CONFIG_DISABLE_CLOCK
@@ -111,7 +112,7 @@ struct socketlist
 
 /* This defines a bitmap big enough for one bit for each socket option */
 
-typedef uint16 sockopt_t;
+typedef uint16_t sockopt_t;
 
 /* Callback from netdev_foreach() */
 

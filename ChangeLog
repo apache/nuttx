@@ -995,4 +995,6 @@
 	  between uint32 (32-bits) and an mc68hc12 pointer (16-bits).
 	* sys/types:  Size of off_t and blkcnt_t should not depend on size of
 	  int in the architecture;  Removed non-standard type STATUS
+	* include/ - Added header files stdint.h, stdbool.h, cxx/cstdint, and
+	  cxx/cstdbool
 

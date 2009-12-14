@@ -155,7 +155,7 @@
 /* Representation of an IP address */
 
 typedef in_addr_t uip_ip4addr_t;
-typedef uint16 uip_ip6addr_t[8];
+typedef uint16_t uip_ip6addr_t[8];
 
 #ifdef CONFIG_NET_IPv6
 typedef uip_ip6addr_t uip_ipaddr_t;
@@ -171,12 +171,12 @@ struct uip_ip_hdr
 
   /* IPv6 Ip header */
 
-  uint8  vtc;               /* Bits 0-3: version, bits 4-7: traffic class (MS) */
-  uint8  tcf;               /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
-  uint16 flow;              /* 16-bit flow label (LS) */
-  uint8  len[2];            /* 16-bit Payload length */
-  uint8  proto;             /*  8-bit Next header (same as IPv4 protocol field) */
-  uint8  ttl;               /*  8-bit Hop limit (like IPv4 TTL field) */
+  uint8_t  vtc;             /* Bits 0-3: version, bits 4-7: traffic class (MS) */
+  uint8_t  tcf;             /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
+  uint16_t flow;            /* 16-bit flow label (LS) */
+  uint8_t  len[2];          /* 16-bit Payload length */
+  uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
+  uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
   uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
   uip_ip6addr_t destipaddr; /* 128-bit Destination address */
 
@@ -184,16 +184,16 @@ struct uip_ip_hdr
 
   /* IPv4 IP header */
 
-  uint8  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
-  uint8  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8  len[2];           /* 16-bit Total length */
-  uint8  ipid[2];          /* 16-bit Identification */
-  uint8  ipoffset[2];      /* 16-bit IP flags + fragment offset */
-  uint8  ttl;              /*  8-bit Time to Live */
-  uint8  proto;            /*  8-bit Protocol */
-  uint16 ipchksum;         /* 16-bit Header checksum */
-  uint16 srcipaddr[2];     /* 32-bit Source IP address */
-  uint16 destipaddr[2];    /* 32-bit Destination IP address */
+  uint8_t  vhl;             /*  8-bit Version (4) and header length (5 or 6) */
+  uint8_t  tos;             /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8_t  len[2];          /* 16-bit Total length */
+  uint8_t  ipid[2];         /* 16-bit Identification */
+  uint8_t  ipoffset[2];     /* 16-bit IP flags + fragment offset */
+  uint8_t  ttl;             /*  8-bit Time to Live */
+  uint8_t  proto;           /*  8-bit Protocol */
+  uint16_t ipchksum;        /* 16-bit Header checksum */
+  uint16_t srcipaddr[2];    /* 32-bit Source IP address */
+  uint16_t destipaddr[2];   /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
 };
@@ -213,9 +213,9 @@ struct uip_driver_s;       /* Forward reference */
 struct uip_callback_s
 {
   FAR struct uip_callback_s *flink;
-  uint16 (*event)(struct uip_driver_s *dev, void *pvconn, void *pvpriv, uint16 flags);
+  uint16_t (*event)(struct uip_driver_s *dev, void *pvconn, void *pvpriv, uint1_t flags);
   void *priv;
-  uint16 flags;
+  uint16_t flags;
 };
 
 /* Protocol-specific support */
@@ -292,7 +292,7 @@ extern void uip_initialize(void);
 
 /* This function may be used at boot time to set the initial ip_id.*/
 
-extern void uip_setipid(uint16 id);
+extern void uip_setipid(uint16_t id);
 
 /* uIP application functions
  *
@@ -347,12 +347,12 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
     addr = HTONL((addr0) << 24 | (addr1) << 16 | (addr2) << 8 | (addr3)); \
   } while(0)
 
-/* Convert an IPv4 address of the form uint16[2] to an in_addr_t */
+/* Convert an IPv4 address of the form uint16_t[2] to an in_addr_t */
 
 #ifdef CONFIG_ENDIAN_BIG
-#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[0] << 16) | (in_addr_t)((uint16*)addr)[1])
+#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16_t*)addr)[0] << 16) | (in_addr_t)((uint16*)addr)[1])
 #else
-#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[1] << 16) | (in_addr_t)((uint16*)addr)[0])
+#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16*)addr)[1] << 16) | (in_addr_t)((uint16_t*)addr)[0])
 #endif
 
 /* Construct an IPv6 address from eight 16-bit words.
@@ -362,14 +362,14 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
 
 #define uip_ip6addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
   do { \
-    ((uint16*)(addr))[0] = HTONS((addr0)); \
-    ((uint16*)(addr))[1] = HTONS((addr1)); \
-    ((uint16*)(addr))[2] = HTONS((addr2)); \
-    ((uint16*)(addr))[3] = HTONS((addr3)); \
-    ((uint16*)(addr))[4] = HTONS((addr4)); \
-    ((uint16*)(addr))[5] = HTONS((addr5)); \
-    ((uint16*)(addr))[6] = HTONS((addr6)); \
-    ((uint16*)(addr))[7] = HTONS((addr7)); \
+    ((uint16_t*)(addr))[0] = HTONS((addr0)); \
+    ((uint16_t*)(addr))[1] = HTONS((addr1)); \
+    ((uint16_t*)(addr))[2] = HTONS((addr2)); \
+    ((uint16_t*)(addr))[3] = HTONS((addr3)); \
+    ((uint16_t*)(addr))[4] = HTONS((addr4)); \
+    ((uint16_t*)(addr))[5] = HTONS((addr5)); \
+    ((uint16_t*)(addr))[6] = HTONS((addr6)); \
+    ((uint16_t*)(addr))[7] = HTONS((addr7)); \
   } while(0)
 
 /* Copy an IP address to another IP address.
@@ -394,8 +394,8 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
    } while(0)
 #  define uiphdr_ipaddr_copy(dest, src) \
    do { \
-     ((uint16*)(dest))[0] = ((uint16*)(src))[0]; \
-     ((uint16*)(dest))[1] = ((uint16*)(src))[1]; \
+     ((uint16_t*)(dest))[0] = ((uint16_t*)(src))[0]; \
+     ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
    } while(0)
 #else /* !CONFIG_NET_IPv6 */
 #  define uip_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(uip_ip6addr_t))

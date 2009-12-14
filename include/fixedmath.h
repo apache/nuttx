@@ -40,7 +40,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /**************************************************************************
  * Definitions
@@ -185,13 +185,13 @@
  * Public Types
  **************************************************************************/
 
-typedef sint16 b8_t;
-typedef uint16 ub8_t;
-typedef sint32 b16_t;
-typedef uint32 ub16_t;
+typedef int16_t  b8_t;
+typedef uint16_t ub8_t;
+typedef int32_t  b16_t;
+typedef uint32_t ub16_t;
 #ifdef CONFIG_HAVE_LONG_LONG
-typedef sint64 b32_t;
-typedef uint64 ub32_t;
+typedef int64_t  b32_t;
+typedef uint64_t ub32_t;
 #endif
 
 /**************************************************************************

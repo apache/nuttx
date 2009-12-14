@@ -40,7 +40,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Public Macro Definitions
@@ -88,7 +88,7 @@ struct in_addr
 struct sockaddr_in
 {
   sa_family_t sin_family;     /* Address family: AF_INET */
-  uint16      sin_port;       /* Port in network byte order */
+  uint16_t    sin_port;       /* Port in network byte order */
   struct in_addr sin_addr;    /* Internet address */
 };
 
@@ -98,16 +98,16 @@ struct in6_addr
 {
   union
   {
-    uint8     u6_addr8[16];
-    uint16    u6_addr16[8];
-    uint32    u6_addr32[4];
+    uint8_t   u6_addr8[16];
+    uint16_t  u6_addr16[8];
+    uint32_t  u6_addr32[4];
   } in6_u;
 };
 
 struct sockaddr_in6
 {
   sa_family_t sin_family;     /* Address family: AF_INET */
-  uint16      sin_port;       /* Port in network byte order */
+  uint16_t    sin_port;       /* Port in network byte order */
   struct in6_addr sin6_addr;  /* IPv6 internet address */
 };
 

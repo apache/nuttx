@@ -54,14 +54,19 @@
 
 #ifndef __ASSEMBLY__
 
-/* These are the sizes of the standard GNU types */
+/* These are the sizes of the standard integer types.  NOTE that these type
+ * names have a leading underscore character.  This file will be included
+ * (indirectly) by include/stdint.h and typedef'ed to the final name without
+ * the underscore character.  This roundabout way of doings things allows
+ * the stdint.h to be removed from the include/ directory in the event that
+ * the user prefers to use the definitions provided by their toolchain header
+ * files
+ */
 
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef short sint16;
-typedef unsigned short uint16;
+typedef char               _int8_t;
+typedef unsigned char      _uint8_t;
+typedef short              _int16_t;
+typedef unsigned short     _uint16_t;
 
 /* Normally, mc68hc1x code is compiled with the -mshort option
  * which results in a 16-bit integer.  If -mnoshort is defined
@@ -69,23 +74,25 @@ typedef unsigned short uint16;
  */
 
 # if __INT__ == 16
-typedef long sint32;
-typedef unsigned long uint32;
+typedef long               _int32_t;
+typedef unsigned long      _uint32_t;
 #else
-typedef int sint32;
-typedef unsigned int uint32;
+typedef int                _int32_t;
+typedef unsigned int       _uint32_t;
 #endif
 
-typedef long long sint64;
-typedef unsigned long long uint64;
+typedef long long          _int64_t;
+typedef unsigned long long _uint64_t;
+#define __INT64_DEFINED
 
 /* A pointer is two bytes */
 
-typedef unsigned short uintptr;
+typedef short              _intptr_t;
+typedef unsigned short     _uintptr_t;
 
 /* This is the size of the interrupt state save returned by irqsave()*/
 
-typedef unsigned int irqstate_t;
+typedef unsigned int       irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 

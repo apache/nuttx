@@ -39,10 +39,10 @@
 
 #ifdef CONFIG_NETUTILS_DHCPD_HOST
 # include <stdio.h>
-typedef unsigned char uint8;
-typedef unsigned short uint16;
-typedef unsigned int  uint32;
-typedef unsigned char boolean;
+typedef unsigned char  uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int   uint32_t;
+typedef unsigned char  bool;
 
 # define HTONS(a) htons(a)
 # define HTONL(a) htonl(a)
@@ -66,10 +66,10 @@ typedef unsigned char boolean;
 # include <net/uip/dhcpd.h>   /* Advertised DHCPD APIs */
 #endif
 
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
@@ -201,8 +201,8 @@ typedef unsigned char boolean;
 
 struct lease_s
 {
-  uint8    mac[DHCP_HLEN_ETHERNET]; /* MAC address (network order) -- could be larger! */
-  boolean  allocated;               /* true: IP address is allocated */
+  uint8_t  mac[DHCP_HLEN_ETHERNET]; /* MAC address (network order) -- could be larger! */
+  bool     allocated;               /* true: IP address is allocated */
 #ifdef HAVE_LEASE_TIME
   time_t   expiry;                  /* Lease expiration time (seconds past Epoch) */
 #endif
@@ -210,46 +210,46 @@ struct lease_s
 
 struct dhcpmsg_s
 {
-  uint8  op;
-  uint8  htype;
-  uint8  hlen;
-  uint8  hops;
-  uint8  xid[4];
-  uint16 secs;
-  uint16 flags;
-  uint8  ciaddr[4];
-  uint8  yiaddr[4];
-  uint8  siaddr[4];
-  uint8  giaddr[4];
-  uint8  chaddr[16];
+  uint8_t  op;
+  uint8_t  htype;
+  uint8_t  hlen;
+  uint8_t  hops;
+  uint8_t  xid[4];
+  uint16_t secs;
+  uint16_t flags;
+  uint8_t  ciaddr[4];
+  uint8_t  yiaddr[4];
+  uint8_t  siaddr[4];
+  uint8_t  giaddr[4];
+  uint8_t  chaddr[16];
 #ifndef CONFIG_NET_DHCP_LIGHT
-  uint8  sname[64];
-  uint8  file[128];
+  uint8_t  sname[64];
+  uint8_t  file[128];
 #endif
-  uint8  options[312];
+  uint8_t  options[312];
 };
 
 struct dhcpd_state_s
 {
   /* Server configuration */
 
-  in_addr_t        ds_serverip;   /* The server IP address */
+  in_addr_t        ds_serverip;     /* The server IP address */
 
   /* Message buffers */
 
-  struct dhcpmsg_s ds_inpacket;   /* Holds the incoming DHCP client message */
-  struct dhcpmsg_s ds_outpacket;  /* Holds the outgoing DHCP server message */
+  struct dhcpmsg_s ds_inpacket;     /* Holds the incoming DHCP client message */
+  struct dhcpmsg_s ds_outpacket;    /* Holds the outgoing DHCP server message */
 
   /* Parsed options from the incoming DHCP client message */
 
-  uint8            ds_optmsgtype;   /* Incoming DHCP message type */
+  uint8_t          ds_optmsgtype;   /* Incoming DHCP message type */
   in_addr_t        ds_optreqip;     /* Requested IP address (host order) */
   in_addr_t        ds_optserverip;  /* Serverip IP address (host order) */
   time_t           ds_optleasetime; /* Requested lease time (host order) */
 
   /* End option pointer for outgoing DHCP server message */
 
-  uint8           *ds_optend;
+  uint8_t         *ds_optend;
 
   /* Leases */
 
@@ -260,8 +260,8 @@ struct dhcpd_state_s
  * Private Data
  ****************************************************************************/
 
-static const uint8          g_magiccookie[4] = {99, 130, 83, 99};
-static const uint8          g_anyipaddr[4] = {0, 0, 0, 0};
+static const uint8_t        g_magiccookie[4] = {99, 130, 83, 99};
+static const uint8_t        g_anyipaddr[4] = {0, 0, 0, 0};
 static struct dhcpd_state_s g_state;
 
 /****************************************************************************
@@ -273,7 +273,7 @@ static struct dhcpd_state_s g_state;
  ****************************************************************************/
 
 #ifndef CONFIG_NETUTILS_DHCPD_HOST
-static inline void dhcpd_arpupdate(uint16 *pipaddr, uint8 *phwaddr)
+static inline void dhcpd_arpupdate(uint16_t *pipaddr, uint8_t *phwaddr)
 {
   irqstate_t flags;
 
@@ -316,7 +316,7 @@ static time_t dhcpd_time(void)
  ****************************************************************************/
 
 #ifdef HAVE_LEASE_TIME
-static inline boolean dhcpd_leaseexpired(struct lease_s *lease)
+static inline bool dhcpd_leaseexpired(struct lease_s *lease)
 {
   if (lease->expiry < dhcpd_time())
     {
@@ -336,7 +336,7 @@ static inline boolean dhcpd_leaseexpired(struct lease_s *lease)
  * Name: dhcpd_setlease
  ****************************************************************************/
 
-struct lease_s *dhcpd_setlease(const uint8 *mac, in_addr_t ipaddr, time_t expiry)
+struct lease_s *dhcpd_setlease(const uint8_t *mac, in_addr_t ipaddr, time_t expiry)
 {
   int ndx = ntohl(ipaddr) - CONFIG_NETUTILS_DHCPD_STARTIP;
   struct lease_s *ret = NULL;
@@ -366,7 +366,7 @@ static inline in_addr_t dhcp_leaseipaddr( struct lease_s *lease)
  * Name: dhcpd_findbymac
  ****************************************************************************/
 
-static struct lease_s *dhcpd_findbymac(const uint8 *mac)
+static struct lease_s *dhcpd_findbymac(const uint8_t *mac)
 {
   int i;
 
@@ -438,12 +438,12 @@ in_addr_t dhcpd_allocipaddr(void)
  * Name: dhcpd_parseoptions
  ****************************************************************************/
 
-static inline boolean dhcpd_parseoptions(void)
+static inline bool dhcpd_parseoptions(void)
 {
-  uint32 tmp;
-  uint8 *ptr;
-  uint8 overloaded;
-  uint8 currfield;
+  uint32_t tmp;
+  uint8_t *ptr;
+  uint8_t overloaded;
+  uint8_t currfield;
   int optlen = 0;
   int remaining;
 
@@ -594,7 +594,7 @@ static inline boolean dhcpd_parseoptions(void)
  * Name: dhcpd_verifyreqip
  ****************************************************************************/
 
-static inline boolean dhcpd_verifyreqip(void)
+static inline bool dhcpd_verifyreqip(void)
 {
   struct lease_s *lease;
 
@@ -621,9 +621,9 @@ static inline boolean dhcpd_verifyreqip(void)
  * Name: dhcpd_verifyreqleasetime
  ****************************************************************************/
 
-static inline boolean dhcpd_verifyreqleasetime(uint32 *leasetime)
+static inline bool dhcpd_verifyreqleasetime(uint32_t *leasetime)
 {
-  uint32 tmp = g_state.ds_optleasetime;
+  uint32_t tmp = g_state.ds_optleasetime;
 
   /* Did the client request a specific lease time? */
 
@@ -652,7 +652,7 @@ static inline boolean dhcpd_verifyreqleasetime(uint32 *leasetime)
  * Name: dhcpd_addoption
  ****************************************************************************/
 
-static int dhcpd_addoption(uint8 *option)
+static int dhcpd_addoption(uint8_t *option)
 {
   int offset;
   int len = 4;
@@ -680,9 +680,9 @@ static int dhcpd_addoption(uint8 *option)
  * Name: dhcpd_addoption8
  ****************************************************************************/
 
-static int dhcpd_addoption8(uint8 code, uint8 value)
+static int dhcpd_addoption8(uint8_t code, uint8_t value)
 {
-  uint8 option[3];
+  uint8_t option[3];
 
   /* Construct the option sequence */
 
@@ -699,9 +699,9 @@ static int dhcpd_addoption8(uint8 code, uint8 value)
  * Name: dhcpd_addoption32
  ****************************************************************************/
 
-static int dhcpd_addoption32(uint8 code, uint32 value)
+static int dhcpd_addoption32(uint8_t code, uint32_t value)
 {
-  uint8 option[6];
+  uint8_t option[6];
 
   /* Construct the option sequence */
 
@@ -806,9 +806,9 @@ static inline int dhcpd_openresponder(void)
  * Name: dhcpd_initpacket
  ****************************************************************************/
 
-static void dhcpd_initpacket(uint8 mtype)
+static void dhcpd_initpacket(uint8_t mtype)
 {
-  uint32 nulladdr = 0;
+  uint32_t nulladdr = 0;
   
   /* Set up the generic parts of the DHCP server message */
 
@@ -882,7 +882,7 @@ static int dhcpd_sendpacket(int bbroadcast)
     }
   else if (memcmp(g_state.ds_outpacket.ciaddr, g_anyipaddr, 4) != 0)
     {
-      dhcpd_arpupdate((uint16*)g_state.ds_outpacket.ciaddr, g_state.ds_outpacket.chaddr);
+      dhcpd_arpupdate((uint16_t*)g_state.ds_outpacket.ciaddr, g_state.ds_outpacket.chaddr);
       memcpy(&ipaddr, g_state.ds_outpacket.ciaddr, 4);
     }
   else if (g_state.ds_outpacket.flags & HTONS(BOOTP_BROADCAST))
@@ -891,7 +891,7 @@ static int dhcpd_sendpacket(int bbroadcast)
     }
   else
     {
-      dhcpd_arpupdate((uint16*)g_state.ds_outpacket.yiaddr, g_state.ds_outpacket.chaddr);
+      dhcpd_arpupdate((uint16_t*)g_state.ds_outpacket.yiaddr, g_state.ds_outpacket.chaddr);
       memcpy(&ipaddr, g_state.ds_outpacket.yiaddr, 4);
     }
 #endif
@@ -912,7 +912,7 @@ static int dhcpd_sendpacket(int bbroadcast)
 
       /* Send the minimum sized packet that includes the END option */
 
-      len = (g_state.ds_optend - (uint8*)&g_state.ds_outpacket) + 1;
+      len = (g_state.ds_optend - (uint8_t*)&g_state.ds_outpacket) + 1;
       nvdbg("sendto %08lx:%04x len=%d\n",
             (long)addr.sin_addr.s_addr, addr.sin_port, len);
  
@@ -927,7 +927,7 @@ static int dhcpd_sendpacket(int bbroadcast)
  * Name: dhcpd_sendoffer
  ****************************************************************************/
 
-static inline int dhcpd_sendoffer(in_addr_t ipaddr, uint32 leasetime)
+static inline int dhcpd_sendoffer(in_addr_t ipaddr, uint32_t leasetime)
 {
   nvdbg("Sending offer: %08lx\n", (long)ipaddr);
 
@@ -971,7 +971,7 @@ static int dhcpd_sendnak(void)
 
 int dhcpd_sendack(in_addr_t ipaddr)
 {
-  uint32 leasetime = CONFIG_NETUTILS_DHCPD_LEASETIME;
+  uint32_t leasetime = CONFIG_NETUTILS_DHCPD_LEASETIME;
 
   /* Initialize the ACK response */
 
@@ -1011,7 +1011,7 @@ static inline int dhcpd_discover(void)
 {
   struct lease_s *lease;
   in_addr_t ipaddr;
-  uint32 leasetime = CONFIG_NETUTILS_DHCPD_LEASETIME;
+  uint32_t leasetime = CONFIG_NETUTILS_DHCPD_LEASETIME;
 
   /* Check if the client is aleady in the lease table */
 
@@ -1088,7 +1088,7 @@ static inline int dhcpd_request(void)
 {
   struct lease_s *lease;
   in_addr_t ipaddr;
-  uint8 response = 0;
+  uint8_t response = 0;
 
   /* Check if this client already holds a lease.  This can happen when the client (1)
    * the IP is reserved for the client from a previous offer, or (2) the client is

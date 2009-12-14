@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <fixedmath.h>
 #include <nuttx/fb.h>
 
@@ -83,11 +83,11 @@
  */
 
 #if !defined(CONFIG_NX_DISABLE_32BPP) || !defined(CONFIG_NX_DISABLE_24BPP)
-typedef uint32 nxgl_mxpixel_t;
+typedef uint32_t nxgl_mxpixel_t;
 #elif !defined(CONFIG_NX_DISABLE_16BPP)
-typedef uint16 nxgl_mxpixel_t;
+typedef uint16_t nxgl_mxpixel_t;
 #else
-typedef ubyte  nxgl_mxpixel_t;
+typedef uint8_t  nxgl_mxpixel_t;
 #endif
 
 /* Graphics structures ******************************************************/

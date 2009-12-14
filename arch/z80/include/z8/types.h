@@ -38,8 +38,8 @@
  * through sys/types.h
  */
 
-#ifndef __ARCH_CHIP_TYPES_H
-#define __ARCH_CHIP_TYPES_H
+#ifndef __ARCH_Z80_INCLUDE_Z8_IRQ_H
+#define __ARCH_Z80_INCLUDE_Z8_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -55,7 +55,15 @@
 
 #ifndef __ASSEMBLY__
 
-/* These are the sizes of the types supported by the ZiLOG Z8Encore! compiler:
+/* These are the sizes of the standard integer types.  NOTE that these type
+ * names have a leading underscore character.  This file will be included
+ * (indirectly) by include/stdint.h and typedef'ed to the final name without
+ * the underscore character.  This roundabout way of doings things allows
+ * the stdint.h to be removed from the include/ directory in the event that
+ * the user prefers to use the definitions provided by their toolchain header
+ * files
+ *
+ * These are the sizes of the types supported by the ZiLOG Z8Encore! compiler:
  *
  *   int    - 16-bits
  *   short  - 16-bits
@@ -71,22 +79,23 @@
  *   rom pointer - 16-bits
  */
 
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef int sint16;
-typedef unsigned int uint16;
-typedef long sint32;
-typedef unsigned long uint32;
+typedef char               _int8_t;
+typedef unsigned char      _uint8_t;
+
+typedef int                _int16_t;
+typedef unsigned int       _uint16_t;
+
+typedef long               _int32_t;
+typedef unsigned long      _uint32_t;
 
 /* A pointer is 2 bytes */
 
-typedef unsigned int uintptr;
+typedef unsigned int       _intptr_t;
+typedef unsigned int       _uintptr_t;
 
 /* This is the size of the interrupt state save returned by irqsave() */
 
-typedef ubyte irqstate_t;
+typedef _uint8_t           irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 
@@ -94,4 +103,4 @@ typedef ubyte irqstate_t;
  * Global Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_CHIP_TYPES_H */
+#endif /* __ARCH_Z80_INCLUDE_Z8_IRQ_H */

@@ -38,8 +38,8 @@
  * only indirectly through nuttx/irq.h (via arch/irq.h)
  */
 
-#ifndef __ARCH_EZ80_IRQ_H
-#define __ARCH_EZ80_IRQ_H
+#ifndef __ARCH_Z80_INCLUDE_EZ80_IRQ_H
+#define __ARCH_Z80_INCLUDE_EZ80_IRQ_H
 
 #ifndef _EZ80F91
 #  error "Only the EZ80F91 is currently supported"
@@ -197,9 +197,9 @@
 /* This is the type of the register save array */
 
 #ifdef CONFIG_EZ80_Z80MODE
-typedef uint16 chipreg_t;
+typedef uint16_t chipreg_t;
 #else
-typedef uint24 chipreg_t;
+typedef uint24_t chipreg_t;
 #endif
 
 /* This struct defines the way the registers are stored. */
@@ -254,5 +254,5 @@ EXTERN void irqrestore(irqstate_t flags);
 #endif
 #endif
 
-#endif /* __ARCH_EZ80_IRQ_H */
+#endif /* __ARCH_Z80_INCLUDE_EZ80_IRQ_H */
 

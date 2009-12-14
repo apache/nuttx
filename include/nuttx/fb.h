@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -177,16 +177,16 @@
  * type will need to change:
  */
 
-typedef uint16 fb_coord_t;
+typedef uint16_t fb_coord_t;
 
 /* This structure describes the overall video controller */
 
 struct fb_videoinfo_s
 {
- ubyte      fmt;          /* see FB_FMT_*  */
+ uint8_t      fmt;        /* see FB_FMT_*  */
  fb_coord_t xres;         /* Resolution in pixels */
  fb_coord_t yres;
- ubyte      nplanes;      /* Number of color planes supported */
+ uint8_t      nplanes;    /* Number of color planes supported */
 };
 
 /* This structure describes one color plane.  Some YUV formats may support
@@ -198,7 +198,7 @@ struct fb_planeinfo_s
   FAR void  *fbmem;       /* Start of frame buffer memory */
   uint32     fblen;       /* Length of frame buffer memory in bytes */
   fb_coord_t stride;      /* Length of a line in bytes */
-  ubyte      bpp;         /* Bits per pixel */
+  uint8_t    bpp;         /* Bits per pixel */
 };
 
 /* On video controllers that support mapping of a pixel palette value
@@ -209,16 +209,16 @@ struct fb_planeinfo_s
 #ifdef CONFIG_FB_CMAP
 struct fb_cmap_s
 {
- uint16  first;            /* Offset offset first color entry in tables */
- uint16  len;              /* Number of color entries  in tables */
+ uint16_t  first;         /* Offset offset first color entry in tables */
+ uint16_t  len;           /* Number of color entries  in tables */
 
  /* Tables of  color component.  Any may be NULL if not used */
 
- ubyte *red;               /* Table of 8-bit red values */
- ubyte *green;             /* Table of 8-bit green values */
- ubyte *blue;              /* Table of 8-bit blue values */
+ uint8_t *red;            /* Table of 8-bit red values */
+ uint8_t *green;          /* Table of 8-bit green values */
+ uint8_t *blue;           /* Table of 8-bit blue values */
 #ifdef CONFIG_FB_TRANSPARENCY
- ubyte *transp;            /* Table of 8-bit transparency */
+ uint8_t *transp;         /* Table of 8-bit transparency */
 #endif
 };
 #endif
@@ -234,7 +234,7 @@ struct fb_cursorimage_s
 {
  fb_coord_t   width;       /* Width of the cursor image in pixels */
  fb_coord_t   height       /* Height of the curor image in pixels */
- const ubyte *image;       /* Pointer to image data */
+ const uint8_t *image;     /* Pointer to image data */
 };
 #endif
 
@@ -263,7 +263,7 @@ struct fb_cursorsize_s
 struct fb_cursorattrib_s
 {
 #ifdef CONFIG_FB_HWCURSORIMAGE
-  ubyte fmt;                     /* Video format of cursor */
+  uint8_t fmt;                   /* Video format of cursor */
 #endif
   struct fb_cursorpos_s  pos;    /* Current cursor position */
 #ifdef CONFIG_FB_HWCURSORSIZE
@@ -274,7 +274,7 @@ struct fb_cursorattrib_s
 
 struct fb_setcursor_s
 {
-  ubyte flags;                  /* See FB_CUR_* definitions */
+  uint8_t flags;                /* See FB_CUR_* definitions */
   struct fb_cursorpos_s pos;    /* Cursor position */
 #ifdef CONFIG_FB_HWCURSORSIZE
   struct fb_cursorsize_s  size; /* Cursor size */

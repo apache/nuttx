@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/irq.h
+ * arch/z80/include/irq.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
  * only indirectly through nuttx/irq.h
  */
 
-#ifndef __ARCH_IRQ_H
-#define __ARCH_IRQ_H
+#ifndef __ARCH_Z80_INCLUDE_IRQ_H
+#define __ARCH_Z80_INCLUDE_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -77,5 +77,5 @@ extern "C" {
 #endif
 #endif
 
-#endif /* __ARCH_IRQ_H */
+#endif /* __ARCH_Z80_INCLUDE_IRQ_H */
 

@@ -29,16 +29,21 @@ Download and Unpack:
 
 A Note about Header Files:
 
-  NuttX compiles without using the standard header files that are
-  distributed with your toolchain.  That is correct behavior in most
-  cases because the header files bundled with your toolchain (such as
-  stdio.h) are probably not correct for use with NuttX.  Certain
-  header files, such as setjmp.h, may be needed from your toolchain.
-  In that case, one solution is to copy that file from your toolchain
-  into the NuttX include directory.  If you prefer to use the stdint.h
-  and stdbool.h header files from your toolchain, those could be copied
-  too.  Using most other header files from your toolchain would probably
-  cause errors.
+  Some toolchains are built with header files extracted from a C-library
+  distribution (such as newlib).  For those toolchains, NuttX must be
+  compiled without using the standard header files that are distributed
+  with your toolchain.  This prevents including conflicting, incompatible
+  header files (such as stdio.h).
+
+  Certain header files, such as setjmp.h and varargs.h, may still be
+  needed from your toolchain, however.  If that is the case, one solution
+  is to copy those header file from your toolchain into the NuttX include
+  directory.
+
+  Also, if you prefer to use the stdint.h and stdbool.h header files from
+  your toolchain, those could be copied into the include/ directory too.
+  Using most other header files from your toolchain would probably cause
+  errors.
 
 CONFIGURING NUTTX
 ^^^^^^^^^^^^^^^^^

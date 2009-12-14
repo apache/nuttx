@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
+#include <stdint.h>
 #include <poll.h>
 
 #ifndef CONFIG_DEV_PIPE_SIZE
@@ -71,11 +73,11 @@
 /* Make the buffer index as small as possible for the configured pipe size */
  
 #if CONFIG_DEV_PIPE_SIZE > 65535
-typedef uint32 pipe_ndx_t;  /* 32-bit index */
+typedef uint32_t pipe_ndx_t;  /* 32-bit index */
 #elif CONFIG_DEV_PIPE_SIZE > 255
-typedef uint16 pipe_ndx_t;  /* 16-bit index */
+typedef uint16_t pipe_ndx_t;  /* 16-bit index */
 #else
-typedef ubyte pipe_ndx_t;   /*  8-bit index */
+typedef uint8_t pipe_ndx_t;   /*  8-bit index */
 #endif
 
 /* This structure represents the state of one pipe.  A reference to this
@@ -90,10 +92,10 @@ struct pipe_dev_s
   sem_t      d_wrsem;       /* Full buffer - Writer waits for data read */
   pipe_ndx_t d_wrndx;       /* Index in d_buffer to save next byte written */
   pipe_ndx_t d_rdndx;       /* Index in d_buffer to return the next byte read */
-  ubyte      d_refs;        /* References counts on pipe (limited to 255) */
-  ubyte      d_nwriters;    /* Number of reference counts for write access */
-  ubyte      d_pipeno;      /* Pipe minor number */
-  ubyte     *d_buffer;      /* Buffer allocated when device opened */
+  uint8_t    d_refs;        /* References counts on pipe (limited to 255) */
+  uint8_t    d_nwriters;    /* Number of reference counts for write access */
+  uint8_t    d_pipeno;      /* Pipe minor number */
+  uint8_t   *d_buffer;      /* Buffer allocated when device opened */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also

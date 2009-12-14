@@ -58,7 +58,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <nuttx/config.h>
 
 /****************************************************************************
@@ -274,6 +274,6 @@
  * uIP.
  */
 
-typedef uint16 uip_stats_t;
+typedef uint16_t uip_stats_t;
 
 #endif /* __UIPOPT_H__ */

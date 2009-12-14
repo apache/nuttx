@@ -1,5 +1,5 @@
-/************************************************************
- * types.h
+/************************************************************************
+ * arch/sim/include/types.h
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,56 +31,66 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
 /* This file should never be included directed but, rather,
  * only indirectly through sys/types.h
  */
 
-#ifndef __ARCH_TYPES_H
-#define __ARCH_TYPES_H
+#ifndef __ARCH_SIM_INCLUDE_TYPES_H
+#define __ARCH_SIM_INCLUDE_TYPES_H
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Type Declarations
- ************************************************************/
+ ************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/* These are the sizes of the standard GNU types */
+/* These are the sizes of the standard integer types.  NOTE that these type
+ * names have a leading underscore character.  This file will be included
+ * (indirectly) by include/stdint.h and typedef'ed to the final name without
+ * the underscore character.  This roundabout way of doings things allows
+ * the stdint.h to be removed from the include/ directory in the event that
+ * the user prefers to use the definitions provided by their toolchain header
+ * files
+ */
 
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef short sint16;
-typedef unsigned short uint16;
-typedef int sint32;
-typedef unsigned int uint32;
-typedef long long sint64;
-typedef unsigned long long uint64;
+typedef char               _int8_t;
+typedef unsigned char      _uint8_t;
+
+typedef short              _int16_t;
+typedef unsigned short     _uint16_t;
+
+typedef int                _int32_t;
+typedef unsigned int       _uint32_t;
+
+typedef long long          _int64_t;
+typedef unsigned long long _uint64_t;
+#define __INT64_DEFINED
 
 /* A pointer is 4 bytes */
 
-typedef unsigned int uintptr;
+typedef unsigned int       _intptr_t;
+typedef unsigned int       _uintptr_t;
 
 /* This is the size of the interrupt state save returned by
  * irqsave()
  */
 
-typedef unsigned int irqstate_t;
+typedef unsigned int       irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 
-/************************************************************
+/************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
-#endif /* __ARCH_TYPES_H */
+#endif /* __ARCH_SIM_INCLUDE_TYPES_H */
