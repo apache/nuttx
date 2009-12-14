@@ -38,10 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <sched.h>
 #include <errno.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 
 /****************************************************************************
@@ -140,7 +141,7 @@ int sched_setpriority(FAR _TCB *tcb, int sched_priority)
            {
              /* A context switch will occur. */
 
-             up_reprioritize_rtr(tcb, (ubyte)sched_priority);
+             up_reprioritize_rtr(tcb, (uint8_t)sched_priority);
            }
 
          /* Otherwise, we can just change priority since it has no effect */
@@ -149,7 +150,7 @@ int sched_setpriority(FAR _TCB *tcb, int sched_priority)
            {
              /* Change the task priority */
 
-             tcb->sched_priority = (ubyte)sched_priority;
+             tcb->sched_priority = (uint8_t)sched_priority;
            }
          break;
 
@@ -167,7 +168,7 @@ int sched_setpriority(FAR _TCB *tcb, int sched_priority)
            {
              /* A context switch will occur. */
 
-             up_reprioritize_rtr(tcb, (ubyte)sched_priority);
+             up_reprioritize_rtr(tcb, (uint8_t)sched_priority);
            }
 
          /* Otherwise, we can just change priority and re-schedule (since it
@@ -182,7 +183,7 @@ int sched_setpriority(FAR _TCB *tcb, int sched_priority)
 
              /* Change the task priority */
 
-             tcb->sched_priority = (ubyte)sched_priority;
+             tcb->sched_priority = (uint8_t)sched_priority;
 
              /* Put it back into the ready-to-run task list */
 
@@ -205,7 +206,7 @@ int sched_setpriority(FAR _TCB *tcb, int sched_priority)
 
             /* Change the task priority */
 
-            tcb->sched_priority = (ubyte)sched_priority;
+            tcb->sched_priority = (uint8_t)sched_priority;
 
             /* Put it back into the prioritized list at the correct
              * position
@@ -220,7 +221,7 @@ int sched_setpriority(FAR _TCB *tcb, int sched_priority)
           {
             /* Just change the task's priority */
 
-            tcb->sched_priority = (ubyte)sched_priority;
+            tcb->sched_priority = (uint8_t)sched_priority;
           }
         break;
     }

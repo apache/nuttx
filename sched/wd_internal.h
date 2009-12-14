@@ -1,7 +1,7 @@
-/************************************************************
- * wd_internal.h
+/************************************************************************
+ * sched/d_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,31 +31,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-#ifndef __WD_INTERNAL_H
-#define __WD_INTERNAL_H
+#ifndef __SCHED_WD_INTERNAL_H
+#define __SCHED_WD_INTERNAL_H
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <wdog.h>
 #include <nuttx/compiler.h>
 
-/************************************************************
+/************************************************************************
  * Compilations Switches
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Public Type Declarations
- ************************************************************/
+ ************************************************************************/
 
 /* This is the watchdog structure.  The WDOG_ID is a pointer to
  * a watchdog structure.
@@ -70,14 +70,14 @@ struct wdog_s
 #endif
   int                lag;        /* Timer associated with the delay */
   boolean            active;     /* TRUE if the watchdog is actively timing */
-  ubyte              argc;       /* The number of parameters to pass */
-  uint32             parm[CONFIG_MAX_WDOGPARMS];
+  uint8_t            argc;       /* The number of parameters to pass */
+  uint32_t           parm[CONFIG_MAX_WDOGPARMS];
 };
 typedef struct wdog_s wdog_t;
 
-/************************************************************
+/************************************************************************
  * Public Variables
- ************************************************************/
+ ************************************************************************/
 
 /* The g_wdfreelist data structure is a singly linked list
  * of watchdogs available to the system for delayed function
@@ -101,9 +101,9 @@ extern FAR wdog_t *g_wdpool;
 
 extern sq_queue_t g_wdactivelist;
 
-/************************************************************
+/************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -120,4 +120,4 @@ EXTERN void weak_function wd_timer(void);
 }
 #endif
 
-#endif /* __WD_INTERNAL_H */
+#endif /* __SCHED_WD_INTERNAL_H */

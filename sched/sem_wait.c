@@ -37,7 +37,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>

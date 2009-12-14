@@ -76,7 +76,7 @@ static struct posix_timer_s *timer_allocate(void)
 {
   struct posix_timer_s *ret;
   irqstate_t            flags;
-  ubyte                 pt_flags;
+  uint8_t               pt_flags;
 
   /* Try to get a preallocated timer from the free list */
 

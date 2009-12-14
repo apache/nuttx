@@ -37,9 +37,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <limits.h>
 #include <semaphore.h>
+
 #include "sem_internal.h"
 
 /****************************************************************************
@@ -97,7 +99,7 @@ int sem_init (FAR sem_t *sem, int pshared, unsigned int value)
 
   if (sem && value <= SEM_VALUE_MAX)
     {
-      sem->semcount     = (sint16)value;
+      sem->semcount     = (int16_t)value;
 #ifdef CONFIG_PRIORITY_INHERITANCE
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
       sem->hlist.flink  = NULL;

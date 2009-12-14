@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <sched.h>
 #include <errno.h>
 
@@ -115,7 +115,7 @@ int sched_reprioritize(FAR _TCB *tcb, int sched_priority)
         * to once it posts the semaphore.
         */
 
-       tcb->base_priority  = (ubyte)sched_priority;
+       tcb->base_priority  = (uint8_t)sched_priority;
 
        /* Discard any pending reprioritizations as well */
 

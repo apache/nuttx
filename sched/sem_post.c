@@ -37,11 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <limits.h>
 #include <semaphore.h>
 #include <sched.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "sem_internal.h"
 

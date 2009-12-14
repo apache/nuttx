@@ -37,7 +37,8 @@
  * Included Files
  ************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <time.h>
 #include <errno.h>
 #include <debug.h>

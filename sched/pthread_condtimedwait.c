@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread_condtimedwait.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <sys/types.h>
+
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
@@ -89,7 +90,7 @@
  *
  ****************************************************************************/
 
-static void pthread_condtimedout(int argc, uint32 pid, uint32 signo)
+static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
 {
 #ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;
@@ -233,7 +234,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                       /* Start the watchdog */
 
                       wd_start(wdog, ticks, (wdentry_t)pthread_condtimedout,
-                               2, (uint32)mypid, (uint32)SIGCONDTIMEDOUT);
+                               2, (uint32_t)mypid, (uint32_t)SIGCONDTIMEDOUT);
 
                       /* Take the condition semaphore.  Do not restore interrupts
                        * until we return from the wait.  This is necessary to

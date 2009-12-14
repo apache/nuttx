@@ -61,9 +61,9 @@ struct posix_timer_s
 {
   FAR struct posix_timer_s *flink;
 
-  ubyte           pt_flags;        /* See PT_FLAGS_* definitions */
-  ubyte           pt_crefs;        /* Reference count */
-  ubyte           pt_signo;        /* Notification signal */
+  uint8_t         pt_flags;        /* See PT_FLAGS_* definitions */
+  uint8_t         pt_crefs;        /* Reference count */
+  uint8_t         pt_signo;        /* Notification signal */
   pid_t           pt_owner;        /* Creator of timer */
   int             pt_delay;        /* If non-zero, used to reset repetitive timers */
   int             pt_last;         /* Last value used to set watchdog */

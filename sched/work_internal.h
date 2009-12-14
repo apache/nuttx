@@ -41,7 +41,6 @@
  ****************************************************************************/
  
 #include <nuttx/config.h>
-#include <sys/types.h>
 #include <queue.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE

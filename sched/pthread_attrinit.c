@@ -1,7 +1,7 @@
 /****************************************************************************
- * pthread_attrinit.c
+ * sched/pthread_attrinit.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <pthread.h>
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
+
 #include "pthread_internal.h"
 
 /****************************************************************************

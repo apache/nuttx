@@ -38,6 +38,8 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
 #include <time.h>
 #include <string.h>
 #include <errno.h>
@@ -66,8 +68,8 @@
  ********************************************************************************/
 
 static void inline timer_sigqueue(FAR struct posix_timer_s *timer);
-static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer);
-static void timer_timeout(int argc, uint32 itimer);
+static void inline timer_restart(FAR struct posix_timer_s *timer, uint32_t itimer);
+static void timer_timeout(int argc, uint32_t itimer);
 
 /********************************************************************************
  * Private Functions
@@ -135,7 +137,7 @@ static void inline timer_sigqueue(FAR struct posix_timer_s *timer)
  *
  ********************************************************************************/
 
-static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer)
+static void inline timer_restart(FAR struct posix_timer_s *timer, uint32_t itimer)
 {
   /* If this is a repetitive timer, then restart the watchdog */
 
@@ -166,17 +168,17 @@ static void inline timer_restart(FAR struct posix_timer_s *timer, uint32 itimer)
  *
  ********************************************************************************/
 
-static void timer_timeout(int argc, uint32 itimer)
+static void timer_timeout(int argc, uint32_t itimer)
 {
 #ifndef CONFIG_CAN_PASS_STRUCTS
   /* On many small machines, pointers are encoded and cannot be simply cast from
-   * uint32 to _TCB*.  The following union works around this (see wdogparm_t).
+   * uint32_t to _TCB*.  The following union works around this (see wdogparm_t).
    */
 
   union
   {
     FAR struct posix_timer_s *timer;
-    uint32                    itimer;
+    uint32_t                  itimer;
   } u;
 
   u.itimer = itimer;
@@ -200,11 +202,11 @@ static void timer_timeout(int argc, uint32 itimer)
       timer_restart(u.timer, itimer);
     }
 #else
-  /* (casting to uintptr first eliminates complaints on some architectures
-   *  where the sizeof uint32 is different from the size of a pointer).
+  /* (casting to uintptr_t first eliminates complaints on some architectures
+   *  where the sizeof uint32_t is different from the size of a pointer).
    */
 
-  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)((uintptr)itimer);
+  FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)((uintptr_t)itimer);
 
   /* Send the specified signal to the specified task.   Increment the reference
    * count on the timer first so that will not be deleted until after the
@@ -383,7 +385,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
   if (delay > 0)
     {
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, timer->pt_delay, (wdentry_t)timer_timeout, 1, (uint32)((uintptr)timer));
+      ret = wd_start(timer->pt_wdog, timer->pt_delay, (wdentry_t)timer_timeout, 1, (uint32_t)((uintptr_t)timer));
     }
 
   irqrestore(state);

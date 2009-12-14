@@ -218,10 +218,10 @@ int task_schedsetup(FAR _TCB *tcb, int priority, start_t start, main_t main)
     {
       /* Save task priority and entry point in the TCB */
 
-      tcb->init_priority  = (ubyte)priority;
-      tcb->sched_priority = (ubyte)priority;
+      tcb->init_priority  = (uint8_t)priority;
+      tcb->sched_priority = (uint8_t)priority;
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      tcb->base_priority  = (ubyte)priority;
+      tcb->base_priority  = (uint8_t)priority;
 #endif
       tcb->start          = start;
       tcb->entry.main     = main;

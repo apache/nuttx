@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sig_timedwait.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <string.h>
 #include <signal.h>
 #include <time.h>
@@ -78,10 +80,10 @@
  *
  ****************************************************************************/
 
-static void sig_timeout(int argc, uint32 itcb)
+static void sig_timeout(int argc, uint32_t itcb)
 {
   /* On many small machines, pointers are encoded and cannot be simply cast
-   * from uint32 to _TCB*.  The following union works around this
+   * from uint32_t to _TCB*.  The following union works around this
    * (see wdogparm_t).  This odd logic could be conditioned on
    * CONFIG_CAN_CAST_POINTERS, but it is not too bad in any case.
    */
@@ -89,7 +91,7 @@ static void sig_timeout(int argc, uint32 itcb)
   union
     {
       FAR _TCB *wtcb;
-      uint32    itcb;
+      uint32_t  itcb;
     } u;
 
    u.itcb = itcb;
@@ -163,7 +165,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   FAR sigpendq_t *sigpend;
   WDOG_ID         wdog;
   irqstate_t      saved_state;
-  sint32          waitticks;
+  int32_t         waitticks;
   int             ret = ERROR;
 
   sched_lock();  /* Not necessary */
@@ -234,7 +236,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           if (wdog)
             {
               /* This little of nonsense is necessary for some
-               * processors where sizeof(pointer) < sizeof(uint32).
+               * processors where sizeof(pointer) < sizeof(uint32_t).
                * see wdog.h.
                */
 

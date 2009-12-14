@@ -90,14 +90,14 @@ typedef enum mqalloc_e mqalloc_t;
 struct mqmsg
 {
   FAR struct mqmsg  *next;    /* Forward link to next message */
-  ubyte        type;          /* (Used to manage allocations) */
-  ubyte        priority;      /* priority of message          */
+  uint8_t      type;          /* (Used to manage allocations) */
+  uint8_t      priority;      /* priority of message          */
 #if MQ_MAX_BYTES < 256
-  ubyte        msglen;        /* Message data length          */
+  uint8_t      msglen;        /* Message data length          */
 #else
-  uint16       msglen;        /* Message data length          */
+  uint16_t     msglen;        /* Message data length          */
 #endif
-  ubyte        mail[MQ_MAX_BYTES]; /* Message data            */
+  uint8_t      mail[MQ_MAX_BYTES]; /* Message data            */
 };
 typedef struct mqmsg mqmsg_t;
 
@@ -109,12 +109,12 @@ struct msgq_s
 {
   FAR struct msgq_s *flink;   /* Forward link to next message queue */
   sq_queue_t   msglist;       /* Prioritized message list */
-  sint16       maxmsgs;       /* Maximum number of messages in the queue */
-  sint16       nmsgs;         /* Number of message in the queue */
-  sint16       nconnect;      /* Number of connections to message queue */
-  sint16       nwaitnotfull;  /* Number tasks waiting for not full */
-  sint16       nwaitnotempty; /* Number tasks waiting for not empty */
-  ubyte        maxmsgsize;    /* Max size of message in message queue */
+  int16_t      maxmsgs;       /* Maximum number of messages in the queue */
+  int16_t      nmsgs;         /* Number of message in the queue */
+  int16_t      nconnect;      /* Number of connections to message queue */
+  int16_t      nwaitnotfull;  /* Number tasks waiting for not full */
+  int16_t      nwaitnotempty; /* Number tasks waiting for not empty */
+  uint8_t      maxmsgsize;    /* Max size of message in message queue */
   boolean      unlinked;      /* TRUE if the msg queue has been unlinked */
 #ifndef CONFIG_DISABLE_SIGNALS
   FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */

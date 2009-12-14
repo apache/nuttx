@@ -1,7 +1,7 @@
-/************************************************************
- * sig_initialize.c
+/************************************************************************
+ * sched/sig_initialize.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,29 +31,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <queue.h>
 #include <nuttx/kmalloc.h>
+
 #include "os_internal.h"
 #include "sig_internal.h"
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Variables
- ************************************************************/
+ ************************************************************************/
 
 /* The g_sigfreeaction data structure is a list of available
  * signal action structures. */
@@ -86,9 +89,9 @@ sq_queue_t  g_sigpendingsignal;
 
 sq_queue_t  g_sigpendingirqsignal;
 
-/************************************************************
+/************************************************************************
  * Private Variables
- ************************************************************/
+ ************************************************************************/
 
 /* g_sigactionalloc is a pointer to the start of the
  * allocated blocks of signal actions.
@@ -120,30 +123,30 @@ static sigpendq_t *g_sigpendingsignalalloc;
 
 static sigpendq_t *g_sigpendingirqsignalalloc;
 
-/************************************************************
+/************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
-static sigq_t     *sig_allocateblock(sq_queue_t *siglist, uint16 nsigs,
-                                     ubyte sigtype);
+static sigq_t     *sig_allocateblock(sq_queue_t *siglist, uint16_t nsigs,
+                                     uint8_t sigtype);
 static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
-                                                  uint16 nsigs, ubyte sigtype);
+                                                  uint16_t nsigs, uint8_t sigtype);
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Function: sig_allocateblock
  *
  * Description:
  *   Allocate a block of pending signal actions and place them
  *   on the free list.
  *
- ************************************************************/
+ ************************************************************************/
 
-static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16 nsigs,
-                                 ubyte sigtype)
+static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16_t nsigs,
+                                 uint8_t sigtype)
 {
   sigq_t *sigqalloc;
   sigq_t *sigq;
@@ -163,16 +166,16 @@ static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16 nsigs,
   return sigqalloc;
 }
 
-/************************************************************
+/************************************************************************
  * Function:  sig_allocatependingsignalblock
  *
  * Description:
  * Allocate a block of pending signal structures  and place them
  * on the free list.
- ************************************************************/
+ ************************************************************************/
 
 static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
-                                           uint16 nsigs, ubyte sigtype)
+                                           uint16_t nsigs, uint8_t sigtype)
 {
   sigpendq_t *sigpendalloc;
   sigpendq_t *sigpend;
@@ -193,16 +196,16 @@ static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
   return sigpendalloc;
 }
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Function:  sig_initialize
  *
  * Description:
  * Perform one-time power-up initialization
- ************************************************************/
+ ************************************************************************/
 
 void sig_initialize(void)
 {
@@ -234,13 +237,13 @@ void sig_initialize(void)
                              SIG_ALLOC_IRQ);
 }
 
-/************************************************************
+/************************************************************************
  * Function: sig_allocateactionblock
  *
  * Description:
  *   Allocate a block of signal actions and place them
  *   on the free list.
- ************************************************************/
+ ************************************************************************/
 
 void sig_allocateactionblock(void)
 {

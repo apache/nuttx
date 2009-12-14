@@ -1,7 +1,7 @@
-/************************************************************
- * sched_addprioritized.c
+/************************************************************************
+ * sched/sched_addprioritized.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,42 +31,45 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <queue.h>
 #include <assert.h>
+
 #include "os_internal.h"
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Variables
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Variables
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Function: sched_addprioritized
  *
  * Description:
@@ -89,13 +92,13 @@
  *   the head of the task list is changed.
  * - The caller must set the task_state field of the TCB to
  *   match the state associated with the list.
- ************************************************************/
+ ************************************************************************/
 
 boolean sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
 {
   FAR _TCB *next;
   FAR _TCB *prev;
-  ubyte sched_priority = tcb->sched_priority;
+  uint8_t sched_priority = tcb->sched_priority;
   boolean ret = FALSE;
 
   /* Lets do a sanity check before we get started. */

@@ -40,6 +40,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <sys/types.h>
 #include <queue.h>
 #include <sched.h>
 #include <nuttx/kmalloc.h>

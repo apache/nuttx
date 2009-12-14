@@ -37,8 +37,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <semaphore.h>
+
 #include "sem_internal.h"
 
 /****************************************************************************

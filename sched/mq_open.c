@@ -1,7 +1,7 @@
 /****************************************************************************
- * mq_open.c
+ * sched/mq_open.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>      /* uint32, etc. */
-#include <stdarg.h>         /* va_list */
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdarg.h>
 #include <mqueue.h>
 #include <fcntl.h>
 #include <string.h>
@@ -173,10 +175,10 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
                       sq_init(&msgq->msglist);
                       if (attr)
                         {
-                          msgq->maxmsgs = (sint16)attr->mq_maxmsg;
+                          msgq->maxmsgs = (int16_t)attr->mq_maxmsg;
                           if (attr->mq_msgsize <= MQ_MAX_BYTES)
                             {
-                              msgq->maxmsgsize = (sint16)attr->mq_msgsize;
+                              msgq->maxmsgsize = (int16_t)attr->mq_msgsize;
                             }
                           else
                             {

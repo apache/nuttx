@@ -1,5 +1,5 @@
 /****************************************************************************
- * clock_initialize.c
+ * sched/clock_initialize.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
@@ -71,9 +71,9 @@
  * Public Variables
  ****************************************************************************/
 
-volatile uint32 g_system_timer = 0;
-struct timespec g_basetime     = {0,0};
-uint32 g_tickbias               = 0;
+volatile uint32_t g_system_timer = 0;
+struct timespec   g_basetime     = {0,0};
+uint32_t          g_tickbias     = 0;
 
 /**************************************************************************
  * Private Variables

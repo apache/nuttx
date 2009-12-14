@@ -1,7 +1,7 @@
 /****************************************************************************
- * pthread_attrsetinheritsched.c
+ * sched/pthread_attrsetinheritsched.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -37,11 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <pthread.h>
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
+
 #include "pthread_internal.h"
 
 /****************************************************************************
@@ -102,7 +104,7 @@ int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
     }
   else
     {
-      attr->inheritsched = (ubyte)inheritsched;
+      attr->inheritsched = (uint8_t)inheritsched;
       ret = OK;
     }
 

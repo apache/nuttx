@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <unistd.h>
 #include <queue.h>
 #include <assert.h>
@@ -103,9 +103,9 @@ int work_thread(int argc, char *argv[])
   volatile FAR struct work_s *work;
   worker_t  worker;
   FAR void *arg;
-  uint32 elapsed;
-  uint32 remaining;
-  uint32 next;
+  uint32_t elapsed;
+  uint32_t remaining;
+  uint32_t next;
   int usec;
   irqstate_t flags;
 

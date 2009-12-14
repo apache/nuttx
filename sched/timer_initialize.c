@@ -38,10 +38,13 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
+#include <sys/types.h>
 #include <time.h>
 #include <queue.h>
 #include <errno.h>
-#include <nuttx/compiler.h>
+
 #include "timer_internal.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS

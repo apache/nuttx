@@ -1,7 +1,7 @@
 /****************************************************************************
  * pthread_internal.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <pthread.h>
 #include <nuttx/compiler.h>
 
@@ -64,7 +65,7 @@
 struct join_s 
 {
   FAR struct join_s *next;       /* Implements link list */
-  ubyte          crefs;          /* Reference count */
+  uint8_t        crefs;          /* Reference count */
   boolean        started;        /* TRUE: pthread started. */
   boolean        detached;       /* TRUE: pthread_detached'ed */
   boolean        terminated;     /* TRUE: detach'ed+exit'ed */
@@ -97,7 +98,7 @@ extern sem_t g_join_semaphore;
  * allocated.
  */
 
-extern ubyte g_pthread_num_keys;
+extern uint8_t g_pthread_num_keys;
 
 /* Default pthread attributes */
 

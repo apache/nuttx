@@ -39,7 +39,6 @@
 
 #include  <nuttx/config.h>
 
-#include  <sys/types.h>
 #include  <sched.h>
 #include  "os_internal.h"
 #ifndef CONFIG_DISABLE_SIGNALS

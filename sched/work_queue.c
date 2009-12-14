@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <queue.h>
 #include <assert.h>
 #include <errno.h>
@@ -104,7 +104,7 @@
  *
  ****************************************************************************/
 
-int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint32 delay)
+int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint32_t delay)
 {
   irqstate_t flags;
 

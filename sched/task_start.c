@@ -1,5 +1,5 @@
 /****************************************************************************
- * task_start.c
+ * sched/task_start.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,10 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <stdlib.h>
 #include <sched.h>
 #include <debug.h>
+
 #include "os_internal.h"
 
 /****************************************************************************

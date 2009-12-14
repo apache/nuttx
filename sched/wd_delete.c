@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
 
 #include <wdog.h>
 #include <queue.h>

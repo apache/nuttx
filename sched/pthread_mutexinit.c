@@ -1,7 +1,7 @@
 /****************************************************************************
- * pthread_mutexinit.c
+ * sched/pthread_mutexinit.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <pthread.h>
 #include <errno.h>
 #include <debug.h>
+
 #include "pthread_internal.h"
 
 /****************************************************************************
@@ -87,9 +90,9 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR pthread_mutexattr_t *attr
 {
   int pshared = 0;
 #ifdef CONFIG_MUTEX_TYPES
-  ubyte type  = PTHREAD_MUTEX_DEFAULT;
+  uint8_t type  = PTHREAD_MUTEX_DEFAULT;
 #endif
-  int ret     = OK;
+  int ret       = OK;
   int status;
 
   sdbg("mutex=0x%p attr=0x%p\n", mutex, attr);

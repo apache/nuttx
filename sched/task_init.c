@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <nuttx/arch.h>
 
@@ -109,7 +111,7 @@
 
 #ifndef CONFIG_CUSTOM_STACK
 int task_init(FAR _TCB *tcb, const char *name, int priority,
-              FAR uint32 *stack, uint32 stack_size,
+              FAR uint32_t *stack, uint32_t stack_size,
               main_t entry, const char *argv[])
 #else
 int task_init(FAR _TCB *tcb, const char *name, int priority,

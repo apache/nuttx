@@ -37,7 +37,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <queue.h>
 
 #include "sem_internal.h"

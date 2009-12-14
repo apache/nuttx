@@ -41,7 +41,6 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 #include <nuttx/clock.h>
 #include <nuttx/compiler.h>
 
@@ -58,7 +57,7 @@
  ********************************************************************************/
 
 extern struct timespec g_basetime;
-extern uint32          g_tickbias;
+extern uint32_t        g_tickbias;
 
 /********************************************************************************
  * Public Function Prototypes

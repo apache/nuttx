@@ -1,7 +1,7 @@
-/************************************************************
- * sched_releasetcb.c
+/************************************************************************
+ * sched/sched_releasetcb.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,33 +31,33 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
- * Compilation Switches
- ************************************************************/
-
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "timer_internal.h"
 #include "env_internal.h"
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Name:  sched_releasepid
  *
  * Description:  When a task is destroyed, this function must
  * be called to make its process ID available for re-use.
- ************************************************************/
+ ************************************************************************/
 
 static void sched_releasepid(pid_t pid)
 {
@@ -72,11 +72,11 @@ static void sched_releasepid(pid_t pid)
    g_pidhash[hash_ndx].pid = INVALID_PROCESS_ID;
 }
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Function:  sched_releasetcb
  *
  * Description:
@@ -91,7 +91,7 @@ static void sched_releasepid(pid_t pid)
  * Assumptions:
  *   Interrupts are disabled.
  *
- ************************************************************/
+ ************************************************************************/
 
 int sched_releasetcb(FAR _TCB *tcb)
 {

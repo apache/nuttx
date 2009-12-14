@@ -37,7 +37,8 @@
  * Included Files
  ************************************************************/
 
-#include <sys/types.h>      /* uint32, etc. */
+#include <nuttx/config.h>
+
 #include <mqueue.h>
 #include <sched.h>
 #include "os_internal.h"

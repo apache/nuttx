@@ -38,9 +38,10 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <sched.h>
 #include <assert.h>
+
 #include <nuttx/arch.h>
 #include "os_internal.h"
 

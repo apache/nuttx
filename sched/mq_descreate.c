@@ -1,7 +1,7 @@
 /****************************************************************************
- * mq_descreate.c
+ * sched/mq_descreate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdarg.h>         /* va_list */
 #include <unistd.h>
 #include <string.h>
@@ -48,7 +50,6 @@
 #include "os_internal.h"
 #include "sig_internal.h"
 
-#include <sys/types.h>      /* uint32, etc. */
 #include <queue.h>
 #include <nuttx/kmalloc.h>
 #include "mq_internal.h"

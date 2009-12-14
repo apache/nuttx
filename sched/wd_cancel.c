@@ -37,10 +37,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <assert.h>
 #include <wdog.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "wd_internal.h"
 

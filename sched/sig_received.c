@@ -1,7 +1,7 @@
-/************************************************************
- * sig_received.c
+/************************************************************************
+ * sched/sig_received.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,15 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
@@ -52,33 +51,33 @@
 #include "sig_internal.h"
 #include "mq_internal.h"
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Type Declarations
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Variables
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Variables
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Function:  sig_queueaction
  *
  * Description:
  *   Queue a signal action for delivery to a task.
  *
- ************************************************************/
+ ************************************************************************/
 
 static int sig_queueaction(FAR _TCB *stcb, siginfo_t *info)
 {
@@ -125,13 +124,13 @@ static int sig_queueaction(FAR _TCB *stcb, siginfo_t *info)
   return ret;
 }
 
-/************************************************************
+/************************************************************************
  * Function: sig_findpendingsignal
  *
  * Description:
  *   Find a specified element in the pending signal list
  *
- ************************************************************/
+ ************************************************************************/
 
 static FAR sigpendq_t *sig_findpendingsignal(FAR _TCB *stcb, int signo)
 {
@@ -157,13 +156,13 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR _TCB *stcb, int signo)
   return sigpend;
 }
 
-/************************************************************
+/************************************************************************
  * Function: sig_allocatependingsignal
  *
  * Description:
  *   Allocate a pending signal list entry
  *
- ************************************************************/
+ ************************************************************************/
 
 static FAR sigpendq_t *sig_allocatependingsignal(void)
 {
@@ -219,7 +218,7 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
   return sigpend;
 }
 
-/************************************************************
+/************************************************************************
  * Function:  sig_addpendingsignal
  *
  * Description:
@@ -227,7 +226,7 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
  * NOTE:  This function will queue only one entry for each
  * pending signal.  This was done intentionally so that a
  * run-away sender cannot consume all of memory.
- ************************************************************/
+ ************************************************************************/
 
 static FAR sigpendq_t *sig_addpendingsignal(FAR _TCB *stcb, siginfo_t *info)
 {
@@ -268,11 +267,11 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR _TCB *stcb, siginfo_t *info)
   return sigpend;
 }
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Function: sig_received
  *
  * Description:
@@ -285,7 +284,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR _TCB *stcb, siginfo_t *info)
  *   - Unblocking tasks that are waiting for signals
  *   - Queuing pending signals.
  *
- ************************************************************/
+ ************************************************************************/
 
 int sig_received(FAR _TCB *stcb, siginfo_t *info)
 {
@@ -300,7 +299,7 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
     {
       ret = OK;
 
-      /****** MASKED SIGNAL HANDLING ******/
+      /****************** MASKED SIGNAL HANDLING ******************/
 
       /* Check if the signal is masked -- if it is, it will be added to the
        * list of pending signals.
@@ -337,7 +336,7 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
             }
         }
 
-      /****** UNMASKED SIGNAL HANDLING ******/
+      /****************** UNMASKED SIGNAL HANDLING ******************/
 
       else
         {
@@ -370,7 +369,7 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
            * simply to ignore the signal
            */
 
-          /****** OTHER SIGNAL HANDLING ******/
+          /****************** OTHER SIGNAL HANDLING ******************/
 
          /* If the task is blocked waiting for a semaphore, then that
           * task must be unblocked when a signal is received.

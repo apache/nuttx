@@ -77,7 +77,7 @@ struct sigactq
 {
   FAR struct sigactq *flink;     /* Forward link */
   struct sigaction act;          /* Sigaction data */
-  ubyte     signo;               /* Signal associated with action */
+  uint8_t   signo;               /* Signal associated with action */
 };
 typedef struct sigactq  sigactq_t;
 
@@ -91,7 +91,7 @@ struct sigpendq
 {
   FAR struct sigpendq *flink;    /* Forward link */
   siginfo_t info;                /* Signal information */
-  ubyte     type;                /* (Used to manage allocations) */
+  uint8_t   type;                /* (Used to manage allocations) */
 };
 typedef struct sigpendq sigpendq_t;
 
@@ -109,7 +109,7 @@ struct sigq_s
   sigset_t  mask;                /* Additional signals to mask while the
 				  * the signal-catching functin executes */
   siginfo_t info;                /* Signal information */
-  ubyte     type;                /* (Used to manage allocations) */
+  uint8_t   type;                /* (Used to manage allocations) */
 };
 typedef struct sigq_s sigq_t;
 

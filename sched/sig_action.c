@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sig_action.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <signal.h>
 #include <queue.h>
 #include <sched.h>
+
 #include "os_internal.h"
 #include "sig_internal.h"
 
@@ -216,7 +218,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
             {
               /* Put the signal number in the queue entry */
 
-              sigact->signo = (ubyte)signo;
+              sigact->signo = (uint8_t)signo;
 
               /* Add the new sigaction to sigactionq */
 

@@ -41,6 +41,7 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
+#include <sys/types.h>
 #include <sched.h>
 #include <stdlib.h>
 #include "os_internal.h"

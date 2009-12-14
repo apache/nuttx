@@ -37,9 +37,13 @@
  * Included Files
  **************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
+
 #include "os_internal.h"
 #include "pthread_internal.h"
 

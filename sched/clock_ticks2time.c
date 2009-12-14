@@ -38,7 +38,7 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <time.h>
 #include "clock_internal.h"
 

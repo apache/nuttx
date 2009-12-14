@@ -208,7 +208,7 @@ FAR mqmsg_t *mq_msgalloc(void)
           else
             {
               sdbg("Out of messages\n");
-              PANIC((uint32)OSERR_OUTOFMESSAGES);
+              PANIC((uint32_t)OSERR_OUTOFMESSAGES);
             }
         }
     }

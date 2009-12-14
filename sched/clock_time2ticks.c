@@ -1,7 +1,7 @@
 /********************************************************************************
- * clock_time2ticks.c
+ * sched/clock_time2ticks.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -38,8 +38,10 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <time.h>
+
 #include "clock_internal.h"
 
 /********************************************************************************
@@ -87,7 +89,7 @@
 
 int clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks)
 {
-  sint32 relusec;
+  int32_t relusec;
 
   /* Convert the relative time into microseconds.*/
 

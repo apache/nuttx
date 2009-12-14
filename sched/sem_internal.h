@@ -33,18 +33,19 @@
  *
  ****************************************************************************/
 
-#ifndef __SEM_INTERNAL_H
-#define __SEM_INTERNAL_H
+#ifndef __SCHED_SEM_INTERNAL_H
+#define __SCHED_SEM_INTERNAL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #include <semaphore.h>
 #include <sched.h>
 #include <queue.h>
-#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Definitions
@@ -60,7 +61,7 @@ struct nsem_s
 {
   FAR struct nsem_s *flink;     /* Forward link */
   FAR struct nsem_s *blink;     /* Backward link */
-  uint16             nconnect;  /* Number of connections to semaphore */
+  uint16_t           nconnect;  /* Number of connections to semaphore */
   FAR char          *name;      /* Semaphore name (NULL if un-named) */
   boolean            unlinked;  /* TRUE if the semaphore has been unlinked */
   sem_t              sem;       /* The semaphore itself */
@@ -113,5 +114,5 @@ EXTERN void sem_canceled(FAR sem_t *sem);
 }
 #endif
 
-#endif /* __SEM_INTERNAL_H */
+#endif /* __SCHED_SEM_INTERNAL_H */
 
