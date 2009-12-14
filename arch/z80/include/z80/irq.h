@@ -38,8 +38,8 @@
  * only indirectly through nuttx/irq.h (via arch/irq.h)
  */
 
-#ifndef __ARCH_Z80_IRQ_H
-#define __ARCH_Z80_IRQ_H
+#ifndef __ARCH_Z80_INCLUDE_Z80_IRQ_H
+#define __ARCH_Z80_INCLUDE_Z80_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -90,7 +90,7 @@
 
 /* This is the type of the register save array */
 
-typedef uint16 chipreg_t;
+typedef uint16_t chipreg_t;
 
 /* This struct defines the way the registers are stored. */
 
@@ -144,5 +144,5 @@ EXTERN void       irqrestore(irqstate_t flags) __naked;
 #endif
 #endif
 
-#endif /* __ARCH_Z80_IRQ_H */
+#endif /* __ARCH_Z80_INCLUDE_Z80_IRQ_H */
 

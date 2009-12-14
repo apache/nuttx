@@ -1,4 +1,4 @@
-/************************************************************
+/************************************************************************
  * arch/pjrc-8051/include/types.h
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
 /* This file should never be included directed but, rather,
  * only indirectly through sys/types.h
@@ -40,51 +40,59 @@
 #ifndef __ARCH_PJRC8051_INCLUDE_TYPES_H 
 #define __ARCH_PJRC8051_INCLUDE_TYPES_H 
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Type Declarations
- ************************************************************/
+ ************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/* These are the sizes of the standard SDCC types
+/* These are the sizes of the standard integer types.  NOTE that these type
+ * names have a leading underscore character.  This file will be included
+ * (indirectly) by include/stdint.h and typedef'ed to the final name without
+ * the underscore character.  This roundabout way of doings things allows
+ * the stdint.h to be removed from the include/ directory in the event that
+ * the user prefers to use the definitions provided by their toolchain header
+ * files
+ *
  *
  * For SDCC, sizeof(int) is 16 and sizeof(long) is 32.
  * long long and double are not supported.
  */
 
-typedef char sbyte;
-typedef unsigned char ubyte;
-typedef unsigned char uint8;
-typedef unsigned char boolean;
-typedef int sint16;
-typedef unsigned int uint16;
-typedef long sint32;
-typedef unsigned long uint32;
+typedef char               _int8_t;
+typedef unsigned char      _uint8_t;
+
+typedef int                _int16_t;
+typedef unsigned int       _uint16_t;
+
+typedef long               _int32_t;
+typedef unsigned long      _uint32_t;
 
 /* For SDCC, a Generic pointer is 3 bytes in length with the
  * first byte holding data space information.
  */
 
-typedef unsigned long uintptr;
+typedef long               _intptr_t;
+typedef unsigned long      _uintptr_t;
 
 /* This is the size of the interrupt state save returned by
  * irqsave()
  */
 
-typedef unsigned char irqstate_t;
+typedef unsigned char      irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 
-/************************************************************
+/************************************************************************
  * Global Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
 #endif /* __ARCH_PJRC8051_INCLUDE_TYPES_H  */

@@ -306,7 +306,7 @@
 
 /* This is the type of the register save array */
 
-typedef uint16 chipreg_t;
+typedef uint16_t chipreg_t;
 
 /* This struct defines the way the registers are stored. */
 
