@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_fflush.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,16 +34,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -53,7 +49,7 @@
 #include "lib_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -109,7 +105,7 @@ int fflush(FAR FILE *stream)
 
       return lib_flushall(sched_getstreams());
     }
-  else if (lib_fflush(stream, TRUE) != 0)
+  else if (lib_fflush(stream, true) != 0)
     {
       /* An error occurred during the flush AND/OR we were unable to flush all
        * of the buffered write data.  Return EOF on failure.

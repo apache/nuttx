@@ -38,11 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <nuttx/time.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,7 +64,7 @@
  * Public Variables
  ****************************************************************************/
 
-uint16 g_daysbeforemonth[13] =
+uint16_t g_daysbeforemonth[13] =
 {
   0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
 };
@@ -86,7 +89,7 @@ uint16 g_daysbeforemonth[13] =
  *
  ****************************************************************************/
 
-int clock_daysbeforemonth(int month, boolean leapyear)
+int clock_daysbeforemonth(int month, bool leapyear)
 {
   int retval = g_daysbeforemonth[month];
   if (month >= 2 && leapyear)

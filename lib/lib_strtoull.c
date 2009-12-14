@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <sys/types.h>
+
 #include <stdlib.h>
+
 #include "lib_internal.h"
 
 #ifdef CONFIG_HAVE_LONG_LONG

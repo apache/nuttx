@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib_strtol.c
+ * lib/lib_strtol.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdbool.h>
 #include <stdlib.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -65,7 +67,7 @@
 long strtol(const char *nptr, char **endptr, int base)
 {
   unsigned long accum = 0;
-  boolean negate = FALSE;
+  bool negate = false;
 
   if (nptr)
     {
@@ -77,7 +79,7 @@ long strtol(const char *nptr, char **endptr, int base)
 
       if (*nptr == '-')
         {
-          negate = TRUE;
+          negate = true;
           nptr++;
         }
       else if (*nptr == '+')

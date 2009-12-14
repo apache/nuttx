@@ -1,7 +1,7 @@
-/************************************************************
- * lib_filesem.c
+/************************************************************************
+ * lib/lib_filesem.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,37 +31,39 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
+
 #include "lib_internal.h"
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
 
-/************************************************************
- * Definitions
- ************************************************************/
+/************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Data
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * lib_sem_initialize
- ************************************************************/
+ ************************************************************************/
 
 void lib_sem_initialize(FAR struct file_struct *stream)
 {
@@ -75,9 +77,9 @@ void lib_sem_initialize(FAR struct file_struct *stream)
   stream->fs_counts = 0;
 }
 
-/************************************************************
+/************************************************************************
  * lib_take_semaphore
- ************************************************************/
+ ************************************************************************/
 
 void lib_take_semaphore(FAR struct file_struct *stream)
 {
@@ -111,9 +113,9 @@ void lib_take_semaphore(FAR struct file_struct *stream)
     }
 }
 
-/************************************************************
+/************************************************************************
  * lib_give_semaphore
- ************************************************************/
+ ************************************************************************/
 
 void lib_give_semaphore(FAR struct file_struct *stream)
 {

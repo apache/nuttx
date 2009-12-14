@@ -33,14 +33,17 @@
  *
  ****************************************************************************/
 
-#ifndef __LIB_INTERNAL_H
-#define __LIB_INTERNAL_H
+#ifndef __LIB_LIB_INTERNAL_H
+#define __LIB_LIB_INTERNAL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <limits.h>
 #include <semaphore.h>
@@ -109,7 +112,7 @@ extern ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream);
 
 /* Defined in lib_libfflush.c */
 
-extern ssize_t lib_fflush(FAR FILE *stream, boolean bforce);
+extern ssize_t lib_fflush(FAR FILE *stream, bool bforce);
 
 /* Defined in lib_rdflush.c */
 
@@ -137,10 +140,10 @@ extern void lib_skipspace(const char **pptr);
 
 /* Defined in lib_isbasedigit.c */
 
-extern boolean lib_isbasedigit(int ch, int base, int *value);
+extern bool lib_isbasedigit(int ch, int base, int *value);
 
 /* Defined in lib_checkbase.c */
 
 extern int lib_checkbase(int base, const char **pptr);
 
-#endif /* __LIB_INTERNAL_H */
+#endif /* __LIB_LIB_INTERNAL_H */

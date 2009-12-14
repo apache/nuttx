@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 
@@ -59,7 +60,7 @@ int optopt = '?'; /* unrecognized option character */
  ****************************************************************************/
 
 static FAR char *g_optptr       = NULL;
-static boolean   g_binitialized = FALSE;
+static bool      g_binitialized = false;
 
 /****************************************************************************
  * Global Functions
@@ -120,7 +121,7 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
         {
           optind         = 1;     /* Skip over the program name */
           g_optptr       = NULL;  /* Start at the beginning of the first argument */
-          g_binitialized = TRUE;  /* Now we are initialized */
+          g_binitialized = true;  /* Now we are initialized */
         }
 
       /* If the first character of opstring s ':', then ':' is in the event of
@@ -160,7 +161,7 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
             {
               /* There are no more arguments, we are finished */
 
-              g_binitialized = FALSE;
+              g_binitialized = false;
 
               /* Return -1 with optind == all of the arguments */
 
@@ -176,7 +177,7 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
               /* The argument does not start with '-', we are finished */
 
               g_optptr       = NULL;
-              g_binitialized = FALSE;
+              g_binitialized = false;
 
               /* Return the -1 with optind set to the non-option argument */
 

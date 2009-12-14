@@ -38,9 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -61,17 +63,17 @@
  *
  ****************************************************************************/
 
-boolean lib_isbasedigit(int ch, int base, int *value)
+bool lib_isbasedigit(int ch, int base, int *value)
 {
-  boolean ret = FALSE;
-  int    tmp = 0;
+  bool ret = false;
+  int  tmp = 0;
 
   if (base <= 10)
     {
       if (ch >= '0' && ch <= base + '0' - 1)
         {
           tmp = ch - '0';
-          ret = TRUE;
+          ret = true;
         }
     }
   else if (base <= 36)
@@ -79,17 +81,17 @@ boolean lib_isbasedigit(int ch, int base, int *value)
       if (ch >= '0' && ch <= '9')
         {
           tmp = ch - '0';
-          ret =TRUE;
+          ret = true;
         }
       else if (ch >= 'a' && ch <= 'a' + base - 11)
         {
           tmp = ch - 'a' + 10;
-          ret = TRUE;
+          ret = true;
         }
       else if (ch >= 'A' && ch <= 'A' + base - 11)
         {
           tmp = ch - 'A' + 10;
-          ret = TRUE;
+          ret = true;
         }
     }
 

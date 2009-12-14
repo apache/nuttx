@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_wrflush.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,23 +34,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdbool.h>
 #include <fcntl.h>
 #include <errno.h>
 
 #include "lib_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -103,7 +99,7 @@ int lib_wrflush(FAR FILE *stream)
        */
 
       if ((stream->fs_oflags & O_WROK) == 0 ||
-          lib_fflush(stream, TRUE) == 0)
+          lib_fflush(stream, true) == 0)
        {
          /* Return success if there is no buffered write data -- i.e., that
           * the stream is not opened for writing or, if it is, that all of

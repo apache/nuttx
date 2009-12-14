@@ -1,5 +1,5 @@
 /************************************************************
- * lib_ntohl.c
+ * lib/lib_ntohl.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,21 +34,19 @@
  ************************************************************/
 
 /************************************************************
- * Compilation Switches
- ************************************************************/
-
-/************************************************************
  * Included Files
  ************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
 #include <arpa/inet.h>
 
 /************************************************************
  * Global Functions
  ************************************************************/
 
-uint32 htonl(uint32 hl)
+uint32_t htonl(uint32_t hl)
 {
 #ifdef CONFIG_ENDIAN_BIG
   return hl;
@@ -60,7 +58,7 @@ uint32 htonl(uint32 hl)
 #endif
 }
 
-uint32 ntohl(uint32 nl)
+uint32_t ntohl(uint32_t nl)
 {
 #ifdef CONFIG_ENDIAN_BIG
   return nl;

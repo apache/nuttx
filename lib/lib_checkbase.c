@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib_checkbase.c
+ * lib/lib_checkbase.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,9 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <string.h>
 #include <ctype.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************

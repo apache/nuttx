@@ -38,8 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdbool.h>
 #include <stdlib.h>
+
 #include "lib_internal.h"
 
 #ifdef CONFIG_HAVE_LONG_LONG
@@ -67,7 +69,7 @@
 long long strtoll(const char *nptr, char **endptr, int base)
 {
   unsigned long long accum = 0;
-  boolean negate = FALSE;
+  bool negate = false;
 
   if (nptr)
     {
@@ -79,7 +81,7 @@ long long strtoll(const char *nptr, char **endptr, int base)
 
       if (*nptr == '-')
         {
-          negate = TRUE;
+          negate = true;
           nptr++;
         }
       else if (*nptr == '+')

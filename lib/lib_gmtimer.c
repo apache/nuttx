@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdbool.h>
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
@@ -171,11 +171,11 @@ static void clock_utc2julian(time_t jd, int *year, int *month, int *day)
 
 static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
 {
-  int     value;
-  int     min;
-  int     max;
-  int     tmp;
-  boolean leapyear;
+  int  value;
+  int  min;
+  int  max;
+  int  tmp;
+  bool leapyear;
 
   /* There is one leap year every four years, so we can get close with the
    * following:

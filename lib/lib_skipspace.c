@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <string.h>
 #include <ctype.h>
 #include "lib_internal.h"

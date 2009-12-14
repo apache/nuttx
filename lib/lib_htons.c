@@ -1,7 +1,7 @@
 /***************************************************************************
- * lib_htons.c
+ * lib/lib_htons.c
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,18 +42,20 @@
  ***************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
 #include <arpa/inet.h>
 
 /***************************************************************************
  * Global Functions
  ***************************************************************************/
 
-uint16 htons(uint16 hs)
+uint16_t htons(uint16_t hs)
 {
   return HTONS(hs);
 }
 
-uint16 ntohs(uint16 ns)
+uint16_t ntohs(uint16_t ns)
 {
 #ifdef CONFIG_ENDIAN_BIG
   return ns;

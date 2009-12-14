@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -154,10 +156,10 @@ static inline void _lib_consoleputs(FAR const char *str)
 char *fgets(FAR char *buf, int buflen, FILE *stream)
 {
 #ifdef CONFIG_FGETS_ECHO
-  boolean console;
+  bool console;
 #endif
-  int     escape = 0;
-  int     nch = 0;
+  int  escape = 0;
+  int  nch = 0;
 
   /* Sanity checks */
 

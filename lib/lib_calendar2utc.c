@@ -38,15 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdbool.h>
 #include <time.h>
 #include <debug.h>
 
 #include <nuttx/time.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -129,7 +129,7 @@ time_t clock_calendar2utc(int year, int month, int day)
 {
   int dyear;
 #ifdef CONFIG_JULIAN_TIME
-  int isgreg;
+  bool isgreg;
 #endif /* CONFIG_JULIAN_TIME */
 
   /* Correct year & month ranges.  Shift month into range 1-12 */
@@ -149,19 +149,19 @@ time_t clock_calendar2utc(int year, int month, int day)
 
   if (year > GREG_YEAR)
     {
-      isgreg = TRUE;
+      isgreg = true;
     }
   else if (year < GREG_YEAR)
     {
-      isgreg = FALSE;
+      isgreg = false;
     }
   else if (month > GREG_MONTH)
     {
-      isgreg = TRUE;
+      isgreg = true;
     }
   else if (month < GREG_MONTH)
     {
-      isgreg = FALSE;
+      isgreg = false;
     }
   else
     {

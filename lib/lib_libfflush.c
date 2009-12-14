@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -102,7 +103,7 @@
  *
  ****************************************************************************/
 
-ssize_t lib_fflush(FAR FILE *stream, boolean bforce)
+ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 {
 #if CONFIG_STDIO_BUFFER_SIZE > 0
   FAR const unsigned char *src;
