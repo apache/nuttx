@@ -39,13 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <pthread.h>
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /********************************************************************************
@@ -104,7 +105,7 @@ int pthread_once(FAR pthread_once_t *once_control, CODE void (*init_routine)(voi
       sched_lock();
       if (!*once_control)
         {
-          *once_control = TRUE;
+          *once_control = true;
 
           /* Call the init_routine with pre-emption enabled. */
 

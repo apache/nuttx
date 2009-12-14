@@ -37,15 +37,19 @@
  * Included Files
  ************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <errno.h>
 #include <debug.h>
+
 #include "os_internal.h"
 #include "pthread_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -74,7 +78,7 @@
  *
  ************************************************************************/
 
-static boolean pthread_notifywaiters(FAR join_t *pjoin)
+static bool pthread_notifywaiters(FAR join_t *pjoin)
 {
   int ntasks_waiting;
   int status;
@@ -111,9 +115,9 @@ static boolean pthread_notifywaiters(FAR join_t *pjoin)
        */
 
       (void)pthread_takesemaphore(&pjoin->data_sem);
-      return TRUE;
+      return true;
     }
-  return FALSE;
+  return false;
 }
 
 /************************************************************************
@@ -158,11 +162,11 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
     }
   else
     {
-      boolean waiters;
+      bool waiters;
 
       /* Save the return exit value in the thread structure. */
 
-      pjoin->terminated = TRUE;
+      pjoin->terminated = true;
       pjoin->exit_value = exit_value;
 
       /* Notify waiters of the availability of the exit value */

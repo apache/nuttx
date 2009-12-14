@@ -38,15 +38,18 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <mqueue.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+
 #include "mq_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -119,7 +122,7 @@ ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
   irqstate_t   saved_state;
   ssize_t      ret = ERROR;
 
-  DEBUGASSERT(up_interrupt_context() == FALSE);
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.

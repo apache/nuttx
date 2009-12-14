@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <wdog.h>
 #include <queue.h>
 #include <nuttx/arch.h>
@@ -46,7 +47,7 @@
 #include "wd_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -101,7 +102,7 @@ WDOG_ID wd_create (void)
   if (wdog)
     {
       wdog->next = NULL;
-      wdog->active = FALSE;
+      wdog->active = false;
     }
   return (WDOG_ID)wdog;
 }

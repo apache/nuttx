@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <sched.h>
 
 #include "os_internal.h"
@@ -71,12 +72,12 @@
  * Name: sched_verifytcb
  *
  * Description:
- *   Return TRUE if the tcb refers to an active task; FALSE if it is a stale
+ *   Return true if the tcb refers to an active task; false if it is a stale
  *   TCB handle.
  *
  ****************************************************************************/
 
-boolean sched_verifytcb(FAR _TCB *tcb)
+bool sched_verifytcb(FAR _TCB *tcb)
 {
   /* Return true if the PID hashes to this TCB. */
 

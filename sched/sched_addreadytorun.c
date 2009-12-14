@@ -39,13 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <queue.h>
 #include <assert.h>
 
 #include "os_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -83,7 +84,7 @@
  *   btcb - Points to the blocked TCB that is ready-to-run
  *
  * Return Value:
- *   TRUE if the currently active task (the head of the 
+ *   true if the currently active task (the head of the 
  *     g_readytorun list) has changed.
  *
  * Assumptions:
@@ -97,10 +98,10 @@
  *
  ****************************************************************************/
 
-boolean sched_addreadytorun(FAR _TCB *btcb)
+bool sched_addreadytorun(FAR _TCB *btcb)
 {
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-  boolean ret;
+  bool ret;
 
   /* Check if pre-emption is disabled for the current running
    * task and if the new ready-to-run task  would cause the
@@ -115,7 +116,7 @@ boolean sched_addreadytorun(FAR _TCB *btcb)
 
       sched_addprioritized(btcb, (FAR dq_queue_t*)&g_pendingtasks);
       btcb->task_state = TSTATE_TASK_PENDING;
-      ret = FALSE;
+      ret = false;
     }
 
   /* Otherwise, add the new task to the g_readytorun task list */
@@ -134,14 +135,14 @@ boolean sched_addreadytorun(FAR _TCB *btcb)
 
       btcb->task_state = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;
-      ret = TRUE;
+      ret = true;
     }
   else
     {
       /* The new btcb was added in the middle of the g_readytorun list */
 
       btcb->task_state = TSTATE_TASK_READYTORUN;
-      ret = FALSE;
+      ret = false;
     }
 
   return ret;

@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <mqueue.h>
 #include <wdog.h>
@@ -53,7 +54,7 @@
 #include "mq_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -192,7 +193,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
   irqstate_t   saved_state;
   int          ret = ERROR;
 
-  DEBUGASSERT(up_interrupt_context() == FALSE);
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.

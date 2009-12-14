@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <errno.h>
 #include <debug.h>
@@ -48,7 +49,7 @@
 #include "pthread_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -121,7 +122,7 @@ int pthread_detach(pthread_t thread)
            * thread exits
            */
 
-          pjoin->detached = TRUE;
+          pjoin->detached = true;
         }
 
       /* Either case is successful */

@@ -43,11 +43,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <wdog.h>
 #include <nuttx/compiler.h>
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -66,7 +67,7 @@ struct wdog_s
   FAR void          *picbase;    /* PIC base address */
 #endif
   int                lag;        /* Timer associated with the delay */
-  boolean            active;     /* TRUE if the watchdog is actively timing */
+  bool               active;     /* true if the watchdog is actively timing */
   uint8_t            argc;       /* The number of parameters to pass */
   uint32_t           parm[CONFIG_MAX_WDOGPARMS];
 };

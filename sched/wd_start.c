@@ -40,6 +40,7 @@
 #include <sys/types.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdarg.h>
 #include <wdog.h>
 #include <unistd.h>
@@ -52,7 +53,7 @@
 #include "wd_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -267,7 +268,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   /* Put the lag into the watchdog structure and mark it as active. */
 
   wdog->lag = delay;
-  wdog->active = TRUE;
+  wdog->active = true;
 
   irqrestore(saved_state);
   return OK;
@@ -330,7 +331,7 @@ void wd_timer(void)
 
               /* Indicate that the watchdog is no longer active. */
 
-              wdog->active = FALSE;
+              wdog->active = false;
 
               /* Get the current task's process ID.  We'll need this later to
                * see if the watchdog function caused a context switch.

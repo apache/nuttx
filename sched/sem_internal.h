@@ -44,12 +44,13 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <sched.h>
 #include <queue.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,7 +65,7 @@ struct nsem_s
   FAR struct nsem_s *blink;     /* Backward link */
   uint16_t           nconnect;  /* Number of connections to semaphore */
   FAR char          *name;      /* Semaphore name (NULL if un-named) */
-  boolean            unlinked;  /* TRUE if the semaphore has been unlinked */
+  bool               unlinked;  /* true if the semaphore has been unlinked */
   sem_t              sem;       /* The semaphore itself */
 };
 typedef struct nsem_s nsem_t;

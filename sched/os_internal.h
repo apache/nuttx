@@ -41,13 +41,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdbool.h>
 #include <queue.h>
 #include <sched.h>
 #include <nuttx/kmalloc.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* OS CRASH CODES */
@@ -136,7 +138,7 @@ typedef struct pidhash_s  pidhash_t;
 struct tasklist_s
 {
   DSEG volatile dq_queue_t *list; /* Pointer to the task list */
-  boolean prioritized;            /* TRUE if the list is prioritized */
+  bool prioritized;               /* true if the list is prioritized */
 };
 typedef struct tasklist_s tasklist_t;
 
@@ -240,41 +242,39 @@ extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
  * Public Function Prototypes
  ****************************************************************************/
 
-extern void    task_start(void);
-extern int     task_schedsetup(FAR _TCB *tcb, int priority,
-                               start_t start, main_t main);
-extern int     task_argsetup(FAR _TCB *tcb, const char *name,
-                             const char *argv[]);
-extern int     task_deletecurrent(void);
+extern void task_start(void);
+extern int  task_schedsetup(FAR _TCB *tcb, int priority, start_t start,
+                            main_t main);
+extern int  task_argsetup(FAR _TCB *tcb, const char *name, const char *argv[]);
+extern int  task_deletecurrent(void);
 
-extern boolean sched_addreadytorun(FAR _TCB *rtrtcb);
-extern boolean sched_removereadytorun(FAR _TCB *rtrtcb);
-extern boolean sched_addprioritized(FAR _TCB *newTcb,
-                                    DSEG dq_queue_t *list);
-extern boolean sched_mergepending(void);
-extern void    sched_addblocked(FAR _TCB *btcb, tstate_t task_state);
-extern void    sched_removeblocked(FAR _TCB *btcb);
-extern int     sched_setpriority(FAR _TCB *tcb, int sched_priority);
+extern bool sched_addreadytorun(FAR _TCB *rtrtcb);
+extern bool sched_removereadytorun(FAR _TCB *rtrtcb);
+extern bool sched_addprioritized(FAR _TCB *newTcb, DSEG dq_queue_t *list);
+extern bool sched_mergepending(void);
+extern void sched_addblocked(FAR _TCB *btcb, tstate_t task_state);
+extern void sched_removeblocked(FAR _TCB *btcb);
+extern int  sched_setpriority(FAR _TCB *tcb, int sched_priority);
 #ifdef CONFIG_PRIORITY_INHERITANCE
-extern int     sched_reprioritize(FAR _TCB *tcb, int sched_priority);
+extern int  sched_reprioritize(FAR _TCB *tcb, int sched_priority);
 #else
 #  define sched_reprioritize(tcb,sched_priority) sched_setpriority(tcb,sched_priority)
 #endif
 extern FAR _TCB *sched_gettcb(pid_t pid);
-extern boolean sched_verifytcb(FAR _TCB *tcb);
+extern bool sched_verifytcb(FAR _TCB *tcb);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-extern int     sched_setupidlefiles(FAR _TCB *tcb);
-extern int     sched_setuptaskfiles(FAR _TCB *tcb);
-extern int     sched_setuppthreadfiles(FAR _TCB *tcb);
+extern int  sched_setupidlefiles(FAR _TCB *tcb);
+extern int  sched_setuptaskfiles(FAR _TCB *tcb);
+extern int  sched_setuppthreadfiles(FAR _TCB *tcb);
 #if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
-extern int     sched_setupstreams(FAR _TCB *tcb);
-extern int     sched_flushfiles(FAR _TCB *tcb);
+extern int  sched_setupstreams(FAR _TCB *tcb);
+extern int  sched_flushfiles(FAR _TCB *tcb);
 #endif
-extern int     sched_releasefiles(FAR _TCB *tcb);
+extern int  sched_releasefiles(FAR _TCB *tcb);
 #endif
 
-extern int     sched_releasetcb(FAR _TCB *tcb);
-extern void    sched_garbagecollection(void);
+extern int  sched_releasetcb(FAR _TCB *tcb);
+extern void sched_garbagecollection(void);
 
 #endif /* __OS_INTERNAL_H */

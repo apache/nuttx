@@ -39,13 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <queue.h>
 #include <assert.h>
 
 #include "os_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -79,7 +80,7 @@
  *   None
  *
  * Return Value:
- *   TRUE if the head of the g_readytorun task list has changed.
+ *   true if the head of the g_readytorun task list has changed.
  *
  * Assumptions:
  * - The caller has established a critical section before
@@ -90,13 +91,13 @@
  *
  ************************************************************************/
 
-boolean sched_mergepending(void)
+bool sched_mergepending(void)
 {
   FAR _TCB *pndtcb;
   FAR _TCB *pndnext;
   FAR _TCB *rtrtcb;
   FAR _TCB *rtrprev;
-  boolean ret = FALSE;
+  bool ret = false;
 
   /* Initialize the inner search loop */
 
@@ -142,7 +143,7 @@ boolean sched_mergepending(void)
               g_readytorun.head = (FAR dq_entry_t*)pndtcb;
               rtrtcb->task_state = TSTATE_TASK_READYTORUN;
               pndtcb->task_state = TSTATE_TASK_RUNNING;
-              ret = TRUE;
+              ret = true;
             }
           else
             {

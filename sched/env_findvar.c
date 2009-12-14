@@ -41,6 +41,7 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
+#include <stdbool.h>
 #include <string.h>
 #include <sched.h>
 
@@ -56,7 +57,7 @@
  * Function: env_cmpname
  ****************************************************************************/
 
-static boolean env_cmpname(const char *pszname, const char *peqname)
+static bool env_cmpname(const char *pszname, const char *peqname)
 {
   /* Search until we find anything different in the two names */
 
@@ -66,9 +67,9 @@ static boolean env_cmpname(const char *pszname, const char *peqname)
 
   if ( *pszname == '\0' && *peqname == '=' )
     {
-      return TRUE;
+      return true;
     }
-  return FALSE;
+  return false;
 }
 
 /****************************************************************************

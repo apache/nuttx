@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <wdog.h>
 #include <nuttx/arch.h>
@@ -47,7 +48,7 @@
 #include "wd_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -156,7 +157,7 @@ int wd_cancel (WDOG_ID wdid)
 
       /* Mark the watchdog inactive */
 
-      wdid->active = FALSE;
+      wdid->active = false;
     }
   irqrestore(saved_state);
   return ret;

@@ -40,13 +40,14 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <queue.h>
 #include <assert.h>
 
 #include "os_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -80,7 +81,7 @@
  *   list - Points to the prioritized list to add tcb to
  *
  * Return Value:
- *   TRUE if the head of the list has changed.
+ *   true if the head of the list has changed.
  *
  * Assumptions:
  * - The caller has established a critical section before
@@ -94,12 +95,12 @@
  *   match the state associated with the list.
  ************************************************************************/
 
-boolean sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
+bool sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
 {
   FAR _TCB *next;
   FAR _TCB *prev;
   uint8_t sched_priority = tcb->sched_priority;
-  boolean ret = FALSE;
+  bool ret = false;
 
   /* Lets do a sanity check before we get started. */
 
@@ -131,7 +132,7 @@ boolean sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
           tcb->blink = NULL;
           list->head = (FAR dq_entry_t*)tcb;
           list->tail = (FAR dq_entry_t*)tcb;
-          ret = TRUE;
+          ret = true;
         }
       else
         {
@@ -156,7 +157,7 @@ boolean sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
           tcb->blink  = NULL;
           next->blink = tcb;
           list->head  = (FAR dq_entry_t*)tcb;
-          ret = TRUE;
+          ret = true;
         }
       else
         {

@@ -39,13 +39,15 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <mqueue.h>
 #include <sched.h>
+
 #include "os_internal.h"
 #include "mq_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -131,7 +133,7 @@ int mq_unlink(const char *mq_name)
 
           else
             {
-              msgq->unlinked = TRUE;
+              msgq->unlinked = true;
             }
 
           ret = OK;

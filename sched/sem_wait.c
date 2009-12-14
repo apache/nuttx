@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
@@ -48,7 +49,7 @@
 #include "sem_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -101,7 +102,7 @@ int sem_wait(FAR sem_t *sem)
 
   /* This API should not be called from interrupt handlers */
 
-  DEBUGASSERT(up_interrupt_context() == FALSE)
+  DEBUGASSERT(up_interrupt_context() == false)
 
   /* Assume any errors reported are due to invalid arguments. */
 

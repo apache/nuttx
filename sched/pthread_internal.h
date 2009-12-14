@@ -40,13 +40,16 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <nuttx/compiler.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -66,9 +69,9 @@ struct join_s
 {
   FAR struct join_s *next;       /* Implements link list */
   uint8_t        crefs;          /* Reference count */
-  boolean        started;        /* TRUE: pthread started. */
-  boolean        detached;       /* TRUE: pthread_detached'ed */
-  boolean        terminated;     /* TRUE: detach'ed+exit'ed */
+  bool           started;        /* true: pthread started. */
+  bool           detached;       /* true: pthread_detached'ed */
+  bool           terminated;     /* true: detach'ed+exit'ed */
   pthread_t      thread;         /* Includes pid */
   sem_t          exit_sem;       /* Implements join */
   sem_t          data_sem;       /* Implements join */

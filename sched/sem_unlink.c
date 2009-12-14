@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <semaphore.h>
 #include <sched.h>
 #include <queue.h>
@@ -47,7 +48,7 @@
 #include "sem_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -126,7 +127,7 @@ int sem_unlink(FAR const char *name)
 
           else
             {
-              psem->unlinked = TRUE;
+              psem->unlinked = true;
             }
           ret = OK;
         }

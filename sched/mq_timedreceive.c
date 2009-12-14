@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
 #include <mqueue.h>
@@ -53,7 +54,7 @@
 #include "mq_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -196,7 +197,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
   irqstate_t   saved_state;
   int          ret = ERROR;
 
-  DEBUGASSERT(up_interrupt_context() == FALSE);
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.

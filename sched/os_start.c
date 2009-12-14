@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include  <sys/types.h>
+#include  <stdbool.h>
 #include  <debug.h>
 #include  <string.h>
 
@@ -66,7 +67,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -174,18 +175,18 @@ pid_t g_worker;
 
 const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
 {
-  { NULL,                    FALSE },  /* TSTATE_TASK_INVALID */
-  { &g_pendingtasks,         TRUE  },  /* TSTATE_TASK_PENDING */
-  { &g_readytorun,           TRUE  },  /* TSTATE_TASK_READYTORUN */
-  { &g_readytorun,           TRUE  },  /* TSTATE_TASK_RUNNING */
-  { &g_inactivetasks,        FALSE },  /* TSTATE_TASK_INACTIVE */
-  { &g_waitingforsemaphore,  TRUE  },  /* TSTATE_WAIT_SEM */
+  { NULL,                    false },  /* TSTATE_TASK_INVALID */
+  { &g_pendingtasks,         true  },  /* TSTATE_TASK_PENDING */
+  { &g_readytorun,           true  },  /* TSTATE_TASK_READYTORUN */
+  { &g_readytorun,           true  },  /* TSTATE_TASK_RUNNING */
+  { &g_inactivetasks,        false },  /* TSTATE_TASK_INACTIVE */
+  { &g_waitingforsemaphore,  true  },  /* TSTATE_WAIT_SEM */
 #ifndef CONFIG_DISABLE_SIGNALS
-  { &g_waitingforsignal,     FALSE },  /* TSTATE_WAIT_SIG */
+  { &g_waitingforsignal,     false },  /* TSTATE_WAIT_SIG */
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
-  { &g_waitingformqnotempty, TRUE  },  /* TSTATE_WAIT_MQNOTEMPTY */
-  { &g_waitingformqnotfull,  TRUE  }   /* TSTATE_WAIT_MQNOTFULL */
+  { &g_waitingformqnotempty, true  },  /* TSTATE_WAIT_MQNOTEMPTY */
+  { &g_waitingformqnotfull,  true  }   /* TSTATE_WAIT_MQNOTFULL */
 #endif
 };
 

@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdbool.h>
 #include <string.h>
 #include <pthread.h>
 #include <sched.h>
@@ -47,13 +49,14 @@
 #include <queue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "clock_internal.h"
 #include "env_internal.h"
 #include "pthread_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -204,7 +207,7 @@ static void pthread_start(void)
 
   /* Report to the spawner that we successfully started. */
 
-  pjoin->started = TRUE;
+  pjoin->started = true;
   (void)pthread_givesemaphore(&pjoin->data_sem);
 
   /* Pass control to the thread entry point.  The argument is

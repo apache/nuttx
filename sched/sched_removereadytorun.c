@@ -39,13 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <queue.h>
 #include <assert.h>
 
 #include "os_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -78,7 +79,7 @@
  *   rtcb - Points to the TCB that is ready-to-run
  *
  * Return Value:
- *   TRUE if the currently active task (the head of the 
+ *   true if the currently active task (the head of the 
  *     g_readytorun list) has changed.
  *
  * Assumptions:
@@ -87,11 +88,12 @@
  *   a good idea -- use irqsave()).
  * - The caller handles the condition that occurs if the
  *   the head of the g_readytorun list is changed.
+ *
  ****************************************************************************/
 
-boolean sched_removereadytorun(FAR _TCB *rtcb)
+bool sched_removereadytorun(FAR _TCB *rtcb)
 {
-  boolean ret = FALSE;
+  bool ret = false;
 
   /* Check if the TCB to be removed is at the head of the ready
    * to run list.  In this case, we are removing the currently
@@ -109,7 +111,7 @@ boolean sched_removereadytorun(FAR _TCB *rtcb)
       sched_note_switch(rtcb, rtcb->flink);
 
       rtcb->flink->task_state = TSTATE_TASK_RUNNING;
-      ret = TRUE;
+      ret = true;
     }
 
   /* Remove the TCB from the ready-to-run list */

@@ -37,7 +37,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdbool.h>
 #include <stdarg.h>
 #include <limits.h>
 #include <fcntl.h>
@@ -48,7 +51,7 @@
 #include "sem_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -178,7 +181,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflag, ...)
                       sem_init(sem, 0, value);
 
                       psem->nconnect = 1;
-                      psem->unlinked = FALSE;
+                      psem->unlinked = false;
                       psem->name = (FAR char*)psem + sizeof(nsem_t);
                       strcpy(psem->name, name);
 

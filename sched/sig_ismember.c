@@ -40,7 +40,7 @@
 #include <signal.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -75,7 +75,7 @@
  *   signo - Signal to test for
  *
  * Return Value:
- *   1 (TRUE), if the specified signal is a member of the set,
+ *   1 (true), if the specified signal is a member of the set,
  *   0 (OK or FALSE), if it is not, or
  *  -1 (ERROR) if the signal number is invalid.
  *
