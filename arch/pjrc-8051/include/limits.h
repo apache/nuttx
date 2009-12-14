@@ -72,7 +72,8 @@
  * first byte holding data space information.
  */
 
-#define PTR_MIN     0x000000
-#define PTR_MAX     0xffffff
+#define PTR_MIN     0x800000
+#define PTR_MAX     0x7fffff
+#define UPTR_MAX    0xffffff
 
 #endif /* __ARCH_PJRC8051_INCLUDE_LIMITS_H  */

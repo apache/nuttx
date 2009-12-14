@@ -76,11 +76,13 @@
  */
 
 #ifdef CONFIG_EZ80_Z80MODE
-#define PTR_MIN     0x0000
-#define PTR_MAX     0xffff
+#define PTR_MIN     0x8000
+#define PTR_MAX     0x7fff
+#define UPTR_MAX    0xffff
 #else
-#define PTR_MIN     0x000000
-#define PTR_MAX     0xffffff
+#define PTR_MIN     0x800000
+#define PTR_MAX     0x7fffff
+#define UPTR_MAX    0xffffff
 #endif
 
 #endif /* __ARCH_Z80_INCLUDE_EZ80_LIMITS_H */

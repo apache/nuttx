@@ -72,7 +72,8 @@
 
 /* A pointer is 4 bytes */
 
-#define PTR_MIN     0x00000000
-#define PTR_MAX     0xffffffff
+#define PTR_MIN     0x80000000
+#define PTR_MAX     0x7fffffff
+#define UPTR_MAX    0xffffffff
 
 #endif /* __ARCH_Z16_INCLUDE_LIMITS_H  */

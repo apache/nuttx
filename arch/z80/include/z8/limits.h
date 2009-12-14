@@ -70,7 +70,8 @@
 
 /* A pointer is 2 bytes */
 
-#define PTR_MIN     0x0000
-#define PTR_MAX     0xffff
+#define PTR_MIN     0x8000
+#define PTR_MAX     0x7fff
+#define UPTR_MAX    0xffff
 
 #endif /* __ARCH_Z80_INCLUDE_Z8_LIMITS_H  */
