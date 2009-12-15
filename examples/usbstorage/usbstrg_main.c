@@ -155,11 +155,11 @@ static int usbstrg_enumerate(struct usbtrace_s *trace, void *arg)
       break;
 
     case TRACE_EPSTALL:
-      message("Endpoint stall(TRUE): %04x\n", trace->value);
+      message("Endpoint stall(true): %04x\n", trace->value);
       break;
 
     case TRACE_EPRESUME:
-      message("Endpoint stall(FALSE): %04x\n", trace->value);
+      message("Endpoint stall(false): %04x\n", trace->value);
       break;
 
     case TRACE_DEVALLOCEP:
@@ -332,7 +332,7 @@ int user_start(int argc, char *argv[])
   message("user_start: handle=%p\n", handle);
 
   message("user_start: Bind LUN=0 to %s\n", CONFIG_EXAMPLES_USBSTRG_DEVPATH1);
-  ret = usbstrg_bindlun(handle, CONFIG_EXAMPLES_USBSTRG_DEVPATH1, 0, 0, 0, FALSE);
+  ret = usbstrg_bindlun(handle, CONFIG_EXAMPLES_USBSTRG_DEVPATH1, 0, 0, 0, false);
   if (ret < 0)
     {
       message("user_start: usbstrg_bindlun failed for LUN 1 using %s: %d\n",
@@ -344,7 +344,7 @@ int user_start(int argc, char *argv[])
 #if CONFIG_EXAMPLES_USBSTRG_NLUNS > 1
 
   message("user_start: Bind LUN=1 to %s\n", CONFIG_EXAMPLES_USBSTRG_DEVPATH2);
-  ret = usbstrg_bindlun(handle, CONFIG_EXAMPLES_USBSTRG_DEVPATH2, 1, 0, 0, FALSE);
+  ret = usbstrg_bindlun(handle, CONFIG_EXAMPLES_USBSTRG_DEVPATH2, 1, 0, 0, false);
   if (ret < 0)
     {
       message("user_start: usbstrg_bindlun failed for LUN 2 using %s: %d\n",
@@ -356,7 +356,7 @@ int user_start(int argc, char *argv[])
 #if CONFIG_EXAMPLES_USBSTRG_NLUNS > 2
 
   message("user_start: Bind LUN=2 to %s\n", CONFIG_EXAMPLES_USBSTRG_DEVPATH3);
-  ret = usbstrg_bindlun(handle, CONFIG_EXAMPLES_USBSTRG_DEVPATH3, 2, 0, 0, FALSE);
+  ret = usbstrg_bindlun(handle, CONFIG_EXAMPLES_USBSTRG_DEVPATH3, 2, 0, 0, false);
   if (ret < 0)
     {
       message("user_start: usbstrg_bindlun failed for LUN 3 using %s: %d\n",

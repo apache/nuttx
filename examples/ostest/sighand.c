@@ -34,6 +34,7 @@
  ***********************************************************************/
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <semaphore.h>
@@ -50,8 +51,8 @@
 #define SIGVALUE_INT  42
 
 static sem_t sem;
-static boolean sigreceived = FALSE;
-static boolean threadexited = FALSE;
+static bool sigreceived = false;
+static bool threadexited = false;
 
 static void wakeup_action(int signo, siginfo_t *info, void *ucontext)
 {
@@ -61,7 +62,7 @@ static void wakeup_action(int signo, siginfo_t *info, void *ucontext)
 
   printf("wakeup_action: Received signal %d\n" , signo);
 
-  sigreceived = TRUE;
+  sigreceived = true;
 
   /* Check signo */
 
@@ -185,7 +186,7 @@ static int waiter_main(int argc, char *argv[])
   fflush(stdout);
 #endif
 
-  threadexited = TRUE;
+  threadexited = true;
   return 0;
 }
 

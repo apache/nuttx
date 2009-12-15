@@ -39,9 +39,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <sys/types.h>
-#include <sys/mount.h>
 
+#include <sys/mount.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

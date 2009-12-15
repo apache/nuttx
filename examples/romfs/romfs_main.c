@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/romfs/romfs_main.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
-
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -126,8 +126,8 @@
 struct node_s
 {
   struct node_s *peer;      /* Next node in this directory */
-  boolean        directory; /* True: directory */
-  boolean        found;     /* True: found and verified */
+  bool           directory; /* True: directory */
+  bool           found;     /* True: found and verified */
   const char    *name;      /* Node name */
   mode_t         mode;      /* Expected permissions */
   size_t         size;      /* Expected size */
@@ -174,56 +174,56 @@ static char g_scratchbuffer[SCRATCHBUFFER_SIZE];
 static void connectem(void)
 {
   g_adir.peer                  = &g_afile;
-  g_adir.directory             = TRUE;
-  g_adir.found                 = FALSE;
+  g_adir.directory             = true;
+  g_adir.found                 = false;
   g_adir.name                  = "adir";
   g_adir.mode                  = DIRECTORY_MODE;
   g_adir.size                  = 0;
   g_adir.u.child               = &g_anotherfile;
 
   g_afile.peer                 = &g_hfile;
-  g_afile.directory            = FALSE;
-  g_afile.found                = FALSE;
+  g_afile.directory            = false;
+  g_afile.found                = false;
   g_afile.name                 = "afile.txt";
   g_afile.mode                 = FILE_MODE;
   g_afile.size                 = strlen(g_afilecontent);
   g_afile.u.filecontent        = g_afilecontent;
 
   g_hfile.peer                 = NULL;
-  g_hfile.directory            = FALSE; /* Actually a hard link */
-  g_hfile.found                = FALSE;
+  g_hfile.directory            = false; /* Actually a hard link */
+  g_hfile.found                = false;
   g_hfile.name                 = "hfile";
   g_hfile.mode                 = FILE_MODE;
   g_hfile.size                 = strlen(g_hfilecontent);
   g_hfile.u.filecontent        = g_hfilecontent;
 
   g_anotherfile.peer           = &g_yafile;
-  g_anotherfile.directory      = FALSE;
-  g_anotherfile.found          = FALSE;
+  g_anotherfile.directory      = false;
+  g_anotherfile.found          = false;
   g_anotherfile.name           = "anotherfile.txt";
   g_anotherfile.mode           = FILE_MODE;
   g_anotherfile.size           = strlen(g_anotherfilecontent);
   g_anotherfile.u.filecontent  = g_anotherfilecontent;
 
   g_yafile.peer                = &g_subdir;
-  g_yafile.directory           = FALSE;
-  g_yafile.found               = FALSE;
+  g_yafile.directory           = false;
+  g_yafile.found               = false;
   g_yafile.name                = "yafile.txt";
   g_yafile.mode                = FILE_MODE;
   g_yafile.size                = strlen(g_yafilecontent);
   g_yafile.u.filecontent       = g_yafilecontent;
 
   g_subdir.peer                = NULL;
-  g_subdir.directory           = TRUE;
-  g_subdir.found               = FALSE;
+  g_subdir.directory           = true;
+  g_subdir.found               = false;
   g_subdir.name                = "subdir";
   g_subdir.mode                = DIRECTORY_MODE;
   g_subdir.size                = 0;
   g_subdir.u.child             = &g_subdirfile;
 
   g_subdirfile.peer            = NULL;
-  g_subdirfile.directory       = FALSE;
-  g_subdirfile.found           = FALSE;
+  g_subdirfile.directory       = false;
+  g_subdirfile.found           = false;
   g_subdirfile.name            = "subdirfile.txt";
   g_subdirfile.mode            = FILE_MODE;
   g_subdirfile.size            = strlen(g_subdirfilecontent);
@@ -240,7 +240,7 @@ static struct node_s *findindirectory(struct node_s *entry, const char *name)
     {
       if (!entry->found && strcmp(entry->name, name) == 0)
         {
-          entry->found = TRUE;
+          entry->found = true;
           return entry;
         }
     }

@@ -41,7 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -93,8 +93,8 @@ void *poll_listener(pthread_addr_t pvarg)
   struct pollfd fds[NPOLLFDS];
   char buffer[64];
   ssize_t nbytes;
-  boolean timeout;
-  boolean pollin;
+  bool timeout;
+  bool pollin;
   int nevents;
   int fd;
   int ret;
@@ -128,8 +128,8 @@ void *poll_listener(pthread_addr_t pvarg)
       fds[FIFONDX].events  = POLLIN;
       fds[FIFONDX].revents = 0;
 
-      timeout              = FALSE;
-      pollin               = FALSE;
+      timeout              = false;
+      pollin               = false;
 
       ret = poll(fds, NPOLLFDS, POLL_LISTENER_DELAY);
 
@@ -141,7 +141,7 @@ void *poll_listener(pthread_addr_t pvarg)
       else if (ret == 0)
         {
           message("poll_listener: Timeout\n");
-          timeout = TRUE;
+          timeout = true;
         }
       else if (ret > NPOLLFDS)
         {
@@ -149,7 +149,7 @@ void *poll_listener(pthread_addr_t pvarg)
         }
       else
         {
-          pollin = TRUE;
+          pollin = true;
         }
 
       nevents = 0;

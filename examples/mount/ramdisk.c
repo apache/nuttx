@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/mount/ramdisk.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -116,7 +116,7 @@ int create_ramdisk(void)
                     pbuffer,
                     CONFIG_EXAMPLES_MOUNT_NSECTORS,
                     CONFIG_EXAMPLES_MOUNT_SECTORSIZE,
-                    TRUE);
+                    true);
   if (ret < 0)
     {
       printf("create_ramdisk: Failed to register ramdisk at %s: %d\n",

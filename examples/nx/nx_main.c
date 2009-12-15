@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nx/nx_main.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -78,8 +80,8 @@ static int g_exitcode = NXEXIT_SUCCESS;
 static struct nxeg_state_s g_wstate[2];
 
 #ifdef CONFIG_NX_KBD
-static const ubyte g_kbdmsg1[] = "NuttX is cool!";
-static const ubyte g_kbdmsg2[] = "NuttX is fun!";
+static const uint8_t g_kbdmsg1[] = "NuttX is cool!";
+static const uint8_t g_kbdmsg2[] = "NuttX is fun!";
 #endif
 
 /****************************************************************************
@@ -95,9 +97,9 @@ NXHANDLE g_hnx = NULL;
 nxgl_coord_t g_xres;
 nxgl_coord_t g_yres;
 
-boolean b_haveresolution = FALSE;
+bool b_haveresolution = false;
 #ifdef CONFIG_NX_MULTIUSER
-boolean g_connected = FALSE;
+bool g_connected = false;
 #endif
 sem_t g_semevent = {0};
 

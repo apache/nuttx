@@ -40,8 +40,9 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
 #include <sys/stat.h>    /* Needed for open */
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -94,8 +95,8 @@
 #if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
 struct tftpc_args_s
 {
-  boolean     binary;    /* TRUE:binary ("octect") FALSE:text ("netascii") */
-  boolean     allocated; /* TRUE: destpath is allocated */
+  bool        binary;    /* true:binary ("octect") false:text ("netascii") */
+  bool        allocated; /* true: destpath is allocated */
   char       *destpath;  /* Path at destination */
   const char *srcpath;   /* Path at src */
   in_addr_t   ipaddr;    /* Host IP address */
@@ -112,7 +113,7 @@ struct tftpc_args_s
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
-static uint16 g_pingid = 0;
+static uint16_t g_pingid = 0;
 #endif
 
 /****************************************************************************
@@ -129,10 +130,10 @@ static uint16 g_pingid = 0;
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING) && \
    !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_DISABLE_SIGNALS)
-static inline uint16 ping_newid(void)
+static inline uint16_t ping_newid(void)
 {
   irqstate_t save = irqsave();
-  uint16 ret = ++g_pingid;
+  uint16_t ret = ++g_pingid;
   irqrestore(save);
   return ret;
 }
@@ -290,11 +291,11 @@ int tftpc_parseargs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
       switch (option)
         {
           case 'b':
-            args->binary = TRUE;
+            args->binary = true;
             break;
 
           case 'n':
-            args->binary = FALSE;
+            args->binary = false;
             break;
 
           case 'f':
@@ -378,7 +379,7 @@ int tftpc_parseargs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
         {
           goto errout;
         }
-      args->allocated = TRUE;
+      args->allocated = true;
     }
 
   return OK;
@@ -473,14 +474,14 @@ int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   FAR const char *fmt = g_fmtarginvalid;
   const char *staddr;
   uip_ipaddr_t ipaddr;
-  uint32 start;
-  uint32 next;
-  uint32 dsec  = 10;
-  uint16 id;
-  int count    = 10;
+  uint32_t start;
+  uint32_t next;
+  uint32_t dsec = 10;
+  uint16_t id;
+  int count = 10;
   int option;
   int seqno;
-  int replies  = 0;
+  int replies = 0;
   int elapsed;
   int tmp;
   int i;

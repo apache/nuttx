@@ -44,7 +44,8 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -96,11 +97,11 @@
 
 struct telnetio_s
 {
-  sem_t  tio_sem;
-  int    tio_sockfd;
-  uint8  tio_bufndx;
-  uint8  tio_state;
-  char   tio_inbuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
+  sem_t   tio_sem;
+  int     tio_sockfd;
+  uint8_t tio_bufndx;
+  uint8_t tio_state;
+  char    tio_inbuffer[CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE];
 };
 
 struct redirect_s
@@ -111,7 +112,7 @@ struct redirect_s
 
 struct telnetsave_s
 {
-  boolean ts_redirected;
+  bool ts_redirected;
   union
     {
       struct telnetio_s *tn;
@@ -122,8 +123,8 @@ struct telnetsave_s
 struct telnetd_s
 {
   struct nsh_vtbl_s tn_vtbl;
-  uint16            tn_sndlen;
-  boolean           tn_redirected;
+  uint16_t          tn_sndlen;
+  bool              tn_redirected;
   union
     {
       struct telnetio_s *tn;
@@ -145,8 +146,8 @@ static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl);
 static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static int nsh_redirectoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static FAR char *nsh_telnetlinebuffer(FAR struct nsh_vtbl_s *vtbl);
-static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);
-static void nsh_telnetundirect(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save);
+static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save);
+static void nsh_telnetundirect(FAR struct nsh_vtbl_s *vtbl, FAR uint8_t *save);
 static void nsh_telnetexit(FAR struct nsh_vtbl_s *vtbl);
 
 /****************************************************************************
@@ -263,7 +264,7 @@ static void nsh_closeifnotclosed(struct telnetd_s *pstate)
  *
  ****************************************************************************/
 
-static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
+static void nsh_putchar(struct telnetd_s *pstate, uint8_t ch)
 {
   struct telnetio_s *tio = pstate->u.tn;
 
@@ -284,7 +285,7 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
     {
       pstate->tn_cmd[tio->tio_bufndx] = '\0';
       nsh_telnetdump(&pstate->tn_vtbl, "TELNET CMD",
-                     (ubyte*)pstate->tn_cmd, strlen(pstate->tn_cmd));
+                     (uint8_t*)pstate->tn_cmd, strlen(pstate->tn_cmd));
       nsh_parse(&pstate->tn_vtbl, pstate->tn_cmd);
       tio->tio_bufndx = 0;
     }
@@ -302,10 +303,10 @@ static void nsh_putchar(struct telnetd_s *pstate, uint8 ch)
  *
  ****************************************************************************/
 
-static void nsh_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
+static void nsh_sendopt(struct telnetd_s *pstate, uint8_t option, uint8_t value)
 {
   struct telnetio_s *tio = pstate->u.tn;
-  uint8 optbuf[4];
+  uint8_t optbuf[4];
   optbuf[0] = TELNET_IAC;
   optbuf[1] = option;
   optbuf[2] = value;
@@ -335,7 +336,7 @@ static void nsh_flush(FAR struct telnetd_s *pstate)
   if (pstate->tn_sndlen > 0)
     {
       nsh_telnetdump(&pstate->tn_vtbl, "Shell output",
-                     (ubyte*)pstate->tn_outbuffer, pstate->tn_sndlen);
+                     (uint8_t*)pstate->tn_outbuffer, pstate->tn_sndlen);
       tio_semtake(tio); /* Only one call to send at a time */
       if (send(tio->tio_sockfd, pstate->tn_outbuffer, pstate->tn_sndlen, 0) < 0)
         {
@@ -358,7 +359,7 @@ static int nsh_receive(struct telnetd_s *pstate, size_t len)
 {
   struct telnetio_s *tio = pstate->u.tn;
   char              *ptr = tio->tio_inbuffer;
-  uint8 ch;
+  uint8_t ch;
 
   while (len > 0)
     {
@@ -504,7 +505,7 @@ static void *nsh_connection(void *arg)
               /* Process the received TELNET data */
 
               nsh_telnetdump(vtbl, "Received buffer",
-                             (ubyte*)tio->tio_inbuffer, ret);
+                             (uint8_t*)tio->tio_inbuffer, ret);
               ret = nsh_receive(pstate, ret);
             }
         }
@@ -655,7 +656,7 @@ static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl)
     {
       if (pstate->tn_redirected)
         {
-          pclone->tn_redirected  = TRUE;
+          pclone->tn_redirected  = true;
           pclone->tn_vtbl.output = nsh_redirectoutput;
           pclone->u.rd.rd_fd     = pstate->u.rd.rd_fd;
           pclone->u.rd.rd_stream = NULL;
@@ -703,7 +704,7 @@ static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl)
  *
  ****************************************************************************/
 
-static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save)
+static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save)
 {
   FAR struct telnetd_s    *pstate = (FAR struct telnetd_s *)vtbl;
   FAR struct telnetsave_s *ssave  = (FAR struct telnetsave_s *)save;
@@ -724,7 +725,7 @@ static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *s
       memcpy(&ssave->u.rd, &pstate->u.rd, sizeof(struct redirect_s));
     }
 
-  pstate->tn_redirected  = TRUE;
+  pstate->tn_redirected  = true;
   pstate->u.rd.rd_fd     = fd;
   pstate->u.rd.rd_stream = NULL;  
 }
@@ -737,7 +738,7 @@ static void nsh_telnetredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *s
  *
  ****************************************************************************/
 
-static void nsh_telnetundirect(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save)
+static void nsh_telnetundirect(FAR struct nsh_vtbl_s *vtbl, FAR uint8_t *save)
 {
   FAR struct telnetd_s *pstate = (FAR struct telnetd_s *)vtbl;
   FAR struct telnetsave_s *ssave  = (FAR struct telnetsave_s *)save;
@@ -782,7 +783,7 @@ int nsh_telnetmain(int argc, char *argv[])
 {
  struct in_addr addr;
 #if defined(CONFIG_EXAMPLES_NSH_DHCPC) || defined(CONFIG_EXAMPLES_NSH_NOMAC)
- uint8 mac[IFHWADDRLEN];
+ uint8_t mac[IFHWADDRLEN];
 #endif
 
 /* Many embedded network interfaces must have a software assigned MAC */

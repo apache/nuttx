@@ -40,35 +40,29 @@
  * Included Files
  *****************************************************************************/
 
-# include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 /****************************************************************************
  * Preprocessor Defintiions
  *****************************************************************************/
 
-# define HTONS(a) htons(a)
-# define HTONL(a) htonl(a)
-# define CONFIG_CPP_HAVE_WARNING   1
-# define CONFIG_HAVE_GETHOSTBYNAME 1
-# define FAR
+#define HTONS(a) htons(a)
+#define HTONL(a) htonl(a)
+#define CONFIG_CPP_HAVE_WARNING   1
+#define CONFIG_HAVE_GETHOSTBYNAME 1
+#define FAR
 
-# define ndbg(...) printf(__VA_ARGS__)
-# define nvdbg(...) printf(__VA_ARGS__)
+#define ndbg(...) printf(__VA_ARGS__)
+#define nvdbg(...) printf(__VA_ARGS__)
 
-# define TRUE  (1)
-# define FALSE (0)
-# define ERROR (-1)
-# define OK    (0)
+#define ERROR (-1)
+#define OK    (0)
 
 /****************************************************************************
  * Type Definitions
  *****************************************************************************/
-
-typedef unsigned char uint8;
-typedef unsigned char ubyte;
-typedef unsigned short uint16;
-typedef unsigned int  uint32;
-typedef unsigned char boolean;
 
 typedef void *(*pthread_startroutine_t)(void *);
 

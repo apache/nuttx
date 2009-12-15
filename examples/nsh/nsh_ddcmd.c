@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_ddcmd.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -119,16 +120,16 @@ struct dd_s
     int fd;            /* File descriptor of the character device */
   } outf;
 #else
-  int outfd;          /* File descriptor of the output device */ 
+  int outfd;           /* File descriptor of the output device */ 
 #endif
 
-  uint32  nsectors;    /* Number of sectors to transfer */
-  uint32  sector;      /* The current sector number */
-  uint32  skip;        /* The number of sectors skipped on input */
-  boolean eof;         /* TRUE:  The of the input or output file has been hit */
-  uint16  sectsize;    /* Size of one sector */
-  uint16  nbytes;      /* Number of valid bytes in the buffer */
-  ubyte  *buffer;      /* Buffer of data to write to the output file */
+  uint32_t nsectors;   /* Number of sectors to transfer */
+  uint32_t sector;     /* The current sector number */
+  uint32_t skip;       /* The number of sectors skipped on input */
+  bool     eof;        /* true:  The of the input or output file has been hit */
+  uint16_t sectsize;   /* Size of one sector */
+  uint16_t nbytes;     /* Number of valid bytes in the buffer */
+  uint8_t *buffer;     /* Buffer of data to write to the output file */
 
   /* Function pointers to handle differences between block and character devices */
 
@@ -220,7 +221,7 @@ static int dd_writeblk(struct dd_s *dd)
 
       if (nbytes == -EFBIG)
         {
-          dd->eof = TRUE; /* Set end-of-file */
+          dd->eof = true; /* Set end-of-file */
         }
       else
         {
@@ -240,8 +241,8 @@ static int dd_writeblk(struct dd_s *dd)
 
 static int dd_writech(struct dd_s *dd)
 {
-  ubyte *buffer = dd->buffer;
-  uint16 written ;
+  uint8_t *buffer = dd->buffer;
+  uint16_t written ;
   ssize_t nbytes;
 
   /* Is the out buffer full (or is this the last one)? */
@@ -297,7 +298,7 @@ static int dd_readblk(struct dd_s *dd)
 
 static int dd_readch(struct dd_s *dd)
 {
-  ubyte *buffer = dd->buffer;
+  uint8_t *buffer = dd->buffer;
   ssize_t nbytes;
 
   dd->nbytes = 0;
@@ -338,7 +339,7 @@ static int dd_filetype(const char *filename)
       return ERROR;  /* Return -1 on failure */
     }
 
-  return S_ISBLK(sb.st_mode); /* Return TRUE(1) if block, FALSE(0) if char */
+  return S_ISBLK(sb.st_mode); /* Return true(1) if block, false(0) if char */
 }
 #endif
 
@@ -378,7 +379,7 @@ static inline int dd_infopen(const char *name, struct dd_s *dd)
     }
   else
     {
-      ret = bchlib_setup(name, TRUE, &DD_INHANDLE);
+      ret = bchlib_setup(name, true, &DD_INHANDLE);
       if (ret < 0)
         {
           return ERROR;
@@ -419,9 +420,9 @@ static inline int dd_outfopen(const char *name, struct dd_s *dd)
 
   /* Open the block driver for input */
 
-  if (type == TRUE)
+  if (type == true)
     {
-      ret = bchlib_setup(name, TRUE, &DD_OUTHANDLE);
+      ret = bchlib_setup(name, true, &DD_OUTHANDLE);
       if (ret < 0)
         {
           return ERROR;

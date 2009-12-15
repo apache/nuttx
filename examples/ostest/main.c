@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -166,11 +168,11 @@ static void check_test_memory_usage(void)
 #endif
 
 /****************************************************************************
- * Name: show_environment
+ * Name: show_variable
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_ENVIRON
-static void show_variable(const char *var_name, const char *exptd_value, boolean var_valid)
+static void show_variable(const char *var_name, const char *exptd_value, bool var_valid)
 {
   char *actual_value = getenv(var_name);
   if (actual_value)
@@ -204,11 +206,11 @@ static void show_variable(const char *var_name, const char *exptd_value, boolean
     }
 }
 
-static void show_environment(boolean var1_valid, boolean var2_valid, boolean var3_valid)
+static void show_environment(bool var1_valid, bool var2_valid, bool var3_valid)
 {
-  show_variable( g_var1_name, g_var1_value, var1_valid);
-  show_variable( g_var2_name, g_var2_value, var2_valid);
-  show_variable( g_var3_name, g_var3_value, var3_valid);
+  show_variable(g_var1_name, g_var1_value, var1_valid);
+  show_variable(g_var2_name, g_var2_value, var2_valid);
+  show_variable(g_var3_name, g_var3_value, var3_valid);
 }
 #else
 # define show_environment()
@@ -264,14 +266,14 @@ static int user_main(int argc, char *argv[])
 
   /* Check environment variables */
 #ifndef CONFIG_DISABLE_ENVIRON
-  show_environment(TRUE, TRUE, TRUE);
+  show_environment(true, true, true);
 
   unsetenv(g_var1_name);
-  show_environment(FALSE, TRUE, TRUE);
+  show_environment(false, true, true);
   check_test_memory_usage();
 
   clearenv();
-  show_environment(FALSE, FALSE, FALSE);
+  show_environment(false, false, false);
   check_test_memory_usage();
 #endif
 
@@ -497,7 +499,7 @@ int user_start(int argc, char *argv[])
   setenv(g_var3_name, g_var3_value, FALSE); /* Variable3=GoodValue3 */
   printf("user_start: setenv(%s, %s, FALSE)\n", g_var3_name, g_var3_name);
   setenv(g_var3_name, g_bad_value2, FALSE); /* Variable3=GoodValue3 */
-  show_environment(TRUE, TRUE, TRUE);
+  show_environment(true, true, true);
 #endif
 
   /* Verify that we can spawn a new task */

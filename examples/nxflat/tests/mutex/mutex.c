@@ -37,6 +37,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -50,7 +51,7 @@ static pthread_mutex_t mut;
 static volatile int my_mutex = 0;
 static unsigned long nloops[2] = {0, 0};
 static unsigned long nerrors[2] = {0, 0};
-static volatile boolean bendoftest;
+static volatile bool bendoftest;
 
 /****************************************************************************
  * Private Functions
@@ -116,7 +117,7 @@ int main(int argc, char **argv)
   /* Start two thread instances */
 
   printf("Starting thread 1\n");
-  bendoftest = FALSE;
+  bendoftest = false;
   if ((pthread_create(&thread1, NULL, (void*)thread_func, (void*)1)) != 0)
     {
       fprintf(stderr, "Error in thread#1 creation\n");
@@ -135,7 +136,7 @@ int main(int argc, char **argv)
   /* Then ask them politely to stop running */
 
   printf("Stopping threads\n");
-  bendoftest = TRUE;
+  bendoftest = true;
   pthread_join(thread1, NULL);
   pthread_join(thread2, NULL);
 

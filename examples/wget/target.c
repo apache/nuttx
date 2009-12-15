@@ -39,7 +39,7 @@
  
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <unistd.h>
 
 #include <netinet/in.h>
@@ -124,7 +124,7 @@ int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
 #if defined(CONFIG_EXAMPLE_WGET_NOMAC)
-  uint8 mac[IFHWADDRLEN];
+  uint8_t mac[IFHWADDRLEN];
 #endif
 
 /* Many embedded network interfaces must have a software assigned MAC */

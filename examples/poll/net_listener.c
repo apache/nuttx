@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/poll/net_listener.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -89,7 +90,7 @@ struct net_listener_s
  * Name: net_closeclient
  ****************************************************************************/
 
-static boolean net_closeclient(struct net_listener_s *nls, int sd)
+static bool net_closeclient(struct net_listener_s *nls, int sd)
 {
   message("net_listener: Closing host side connection sd=%d\n", sd);
   close(sd);
@@ -97,18 +98,18 @@ static boolean net_closeclient(struct net_listener_s *nls, int sd)
 
   /* If we just closed the max SD, then search downward for the next biggest SD. */
 
-  while (FD_ISSET(nls->mxsd, &nls->master) == FALSE)
+  while (FD_ISSET(nls->mxsd, &nls->master) == false)
     {
       nls->mxsd -= 1;
     }
-  return TRUE;
+  return true;
 }
 
 /****************************************************************************
  * Name: net_incomingdata
  ****************************************************************************/
 
-static inline boolean net_incomingdata(struct net_listener_s *nls, int sd)
+static inline bool net_incomingdata(struct net_listener_s *nls, int sd)
 {
   char *ptr;
   int nbytes;
@@ -130,7 +131,7 @@ static inline boolean net_incomingdata(struct net_listener_s *nls, int sd)
               if (errno != EAGAIN)
                 {
                   net_closeclient(nls, sd);
-                  return FALSE;
+                  return false;
                 }
             }
         }
@@ -138,7 +139,7 @@ static inline boolean net_incomingdata(struct net_listener_s *nls, int sd)
         {
           message("net_listener: Client connection lost sd=%d\n", sd);
           net_closeclient(nls, sd);
-          return FALSE;
+          return false;
         }
       else
         {
@@ -156,7 +157,7 @@ static inline boolean net_incomingdata(struct net_listener_s *nls, int sd)
                     {
                        message("net_listener: Send failed sd=%d: \n", sd, errno);
                        net_closeclient(nls, sd);
-                       return FALSE;
+                       return false;
                     }
                 }
               else
@@ -174,7 +175,7 @@ static inline boolean net_incomingdata(struct net_listener_s *nls, int sd)
  * Name: net_connection
  ****************************************************************************/
 
-static inline boolean net_connection(struct net_listener_s *nls)
+static inline bool net_connection(struct net_listener_s *nls)
 {
   int sd;
 
@@ -193,7 +194,7 @@ static inline boolean net_connection(struct net_listener_s *nls)
 
           if (errno != EINTR)
             {
-              return FALSE;
+              return false;
             }
         }
       else
@@ -207,17 +208,17 @@ static inline boolean net_connection(struct net_listener_s *nls)
             {
                nls->mxsd = sd;
             }
-          return TRUE;
+          return true;
         }
     }
-  return FALSE;
+  return false;
 }
 
 /****************************************************************************
  * Name: net_mksocket
  ****************************************************************************/
 
-static inline boolean net_mksocket(struct net_listener_s *nls)
+static inline bool net_mksocket(struct net_listener_s *nls)
 {
   int value;
   int ret;
@@ -229,7 +230,7 @@ static inline boolean net_mksocket(struct net_listener_s *nls)
   if (nls->listensd < 0)
     {
       message("net_listener: socket failed: %d\n", errno);
-      return FALSE;
+      return false;
     }
 
   /* Configure the socket */
@@ -240,7 +241,7 @@ static inline boolean net_mksocket(struct net_listener_s *nls)
     {
       message("net_listener: setsockopt failed: %d\n", errno);
       close(nls->listensd);
-      return FALSE;
+      return false;
     }
 
   /* Set the socket to non-blocking */
@@ -251,7 +252,7 @@ static inline boolean net_mksocket(struct net_listener_s *nls)
     {
       message("net_listener: ioctl failed: %d\n", errno);
       close(nls->listensd);
-      return FALSE;
+      return false;
     }
 #endif
 
@@ -266,7 +267,7 @@ static inline boolean net_mksocket(struct net_listener_s *nls)
     {
       message("net_listener: bind failed: %d\n", errno);
       close(nls->listensd);
-      return FALSE;
+      return false;
     }
 
   /* Mark the socket as a listener */
@@ -276,10 +277,10 @@ static inline boolean net_mksocket(struct net_listener_s *nls)
     {
       message("net_listener: bind failed: %d\n", errno);
       close(nls->listensd);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /****************************************************************************
@@ -290,7 +291,7 @@ static void net_configure(void)
 {
   struct in_addr addr;
 #if defined(CONFIG_EXAMPLE_POLL_NOMAC)
-  ubyte mac[IFHWADDRLEN];
+  uint8_t mac[IFHWADDRLEN];
 #endif
 
   /* Configure uIP */

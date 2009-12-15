@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 #ifdef CONFIG_EXAMPLES_NSH_CONSOLE
 # include <stdio.h>
 #endif
@@ -179,7 +184,7 @@
 
 /* Size of info to be saved in call to nsh_redirect */
 
-#define SAVE_SIZE (sizeof(int) + sizeof(FILE*) + sizeof(boolean))
+#define SAVE_SIZE (sizeof(int) + sizeof(FILE*) + sizeof(bool))
 
 /* Stubs used when working directory is not supported */
 
@@ -202,24 +207,24 @@ enum nsh_parser_e
 
 struct nsh_state_s
 {
-  ubyte     ns_ifcond   : 1; /* Value of command in 'if' statement */
-  ubyte     ns_disabled : 1; /* TRUE: Unconditionally disabled */
-  ubyte     ns_unused   : 4;
-  ubyte     ns_state    : 2; /* Parser state (see enum nsh_parser_e) */
+  uint8_t   ns_ifcond   : 1; /* Value of command in 'if' statement */
+  uint8_t   ns_disabled : 1; /* TRUE: Unconditionally disabled */
+  uint8_t   ns_unused   : 4;
+  uint8_t   ns_state    : 2; /* Parser state (see enum nsh_parser_e) */
 };
 
 struct nsh_parser_s
 {
 #ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
-  boolean   np_bg;       /* TRUE: The last command executed in background */
+  bool    np_bg;       /* true: The last command executed in background */
 #endif
-  boolean   np_redirect; /* TRUE: Output from the last command was re-directed */
-  boolean   np_fail;     /* TRUE: The last command failed */
+  bool    np_redirect; /* true: Output from the last command was re-directed */
+  bool    np_fail;     /* true: The last command failed */
 #ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
-  ubyte     np_ndx;      /* Current index into np_st[] */
+  uint8_t np_ndx;      /* Current index into np_st[] */
 #endif
 #ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
-  int       np_nice;     /* "nice" value applied to last background cmd */
+  int     np_nice;     /* "nice" value applied to last background cmd */
 #endif
 
   /* This is a stack of parser state information.  It supports nested
@@ -246,8 +251,8 @@ struct nsh_vtbl_s
 #endif
   int (*output)(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
   FAR char *(*linebuffer)(FAR struct nsh_vtbl_s *vtbl);
-  void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);
-  void (*undirect)(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save);
+  void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save);
+  void (*undirect)(FAR struct nsh_vtbl_s *vtbl, FAR uint8_t *save);
   void (*exit)(FAR struct nsh_vtbl_s *vtbl);
 
   /* Parser state data */
@@ -325,7 +330,7 @@ extern void nsh_freefullpath(char *relpath);
 /* Debug */
 
 extern void nsh_dumpbuffer(FAR struct nsh_vtbl_s *vtbl, const char *msg,
-                           const ubyte *buffer, ssize_t nbytes);
+                           const uint8_t *buffer, ssize_t nbytes);
 
 /* Shell command handlers */
 

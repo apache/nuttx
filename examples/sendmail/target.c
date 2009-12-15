@@ -37,6 +37,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -117,7 +118,7 @@ int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
 #if defined(CONFIG_EXAMPLE_SENDMAIL_NOMAC)
-  uint8 mac[IFHWADDRLEN];
+  uint8_t mac[IFHWADDRLEN];
 #endif
   void *handle;
 

@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -138,7 +138,8 @@ static void nxeg_fillchar(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  ****************************************************************************/
 
 static inline FAR const struct nxeg_glyph_s *
-nxeg_renderglyph(FAR struct nxeg_state_s *st, FAR const struct nx_fontbitmap_s *bm, ubyte ch)
+nxeg_renderglyph(FAR struct nxeg_state_s *st,
+                 FAR const struct nx_fontbitmap_s *bm, uint8_t ch)
 {
   FAR struct nxeg_glyph_s *glyph = NULL;
   FAR nxgl_mxpixel_t *ptr;
@@ -166,7 +167,7 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, FAR const struct nx_fontbitmap_s *
 
       glyph->stride = (glyph->width * CONFIG_EXAMPLES_NX_BPP + 7) / 8;
       bmsize        =  glyph->stride * glyph->height;
-      glyph->bitmap = (FAR ubyte *)malloc(bmsize);
+      glyph->bitmap = (FAR uint8_t *)malloc(bmsize);
 
       if (glyph->bitmap)
         {
@@ -215,7 +216,7 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st, FAR const struct nx_fontbitmap_s *
  ****************************************************************************/
 
 static inline FAR const struct nxeg_glyph_s *
-nxeg_addspace(FAR struct nxeg_state_s *st, ubyte ch)
+nxeg_addspace(FAR struct nxeg_state_s *st, uint8_t ch)
 {
   FAR struct nxeg_glyph_s *glyph = NULL;
 
@@ -241,7 +242,7 @@ nxeg_addspace(FAR struct nxeg_state_s *st, ubyte ch)
  ****************************************************************************/
 
 static FAR const struct nxeg_glyph_s *
-nxeg_findglyph(FAR struct nxeg_state_s *st, ubyte ch)
+nxeg_findglyph(FAR struct nxeg_state_s *st, uint8_t ch)
 {
   int i;
 
@@ -262,7 +263,7 @@ nxeg_findglyph(FAR struct nxeg_state_s *st, ubyte ch)
  ****************************************************************************/
 
 static FAR const struct nxeg_glyph_s *
-nxeg_getglyph(FAR struct nxeg_state_s *st, ubyte ch)
+nxeg_getglyph(FAR struct nxeg_state_s *st, uint8_t ch)
 {
   FAR const struct nxeg_glyph_s *glyph;
   FAR const struct nx_fontbitmap_s *bm;
@@ -300,7 +301,7 @@ nxeg_getglyph(FAR struct nxeg_state_s *st, ubyte ch)
  ****************************************************************************/
 
 static FAR const struct nxeg_bitmap_s *
-nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
+nxeg_addchar(FAR struct nxeg_state_s *st, uint8_t ch)
 {
   FAR struct nxeg_bitmap_s *bm = NULL;
   FAR struct nxeg_bitmap_s *bmleft;
@@ -353,7 +354,7 @@ nxeg_addchar(FAR struct nxeg_state_s *st, ubyte ch)
  ****************************************************************************/
 
 static inline void nxeg_addchars(NXWINDOW hwnd, FAR struct nxeg_state_s *st,
-                                 ubyte nch, FAR const ubyte *ch)
+                                 uint8_t nch, FAR const uint8_t *ch)
 {
   FAR const struct nxeg_bitmap_s *bm;
 
@@ -375,7 +376,8 @@ static inline void nxeg_addchars(NXWINDOW hwnd, FAR struct nxeg_state_s *st,
  * Name: nxeg_kbdin
  ****************************************************************************/
 
-void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, FAR const ubyte *ch, FAR void *arg)
+void nxeg_kbdin(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch,
+                FAR void *arg)
 {
   FAR struct nxeg_state_s *st = (FAR struct nxeg_state_s *)arg;
   message("nxeg_kbdin%d: hwnd=%p nch=%d\n", st->wnum, hwnd, nch);
@@ -387,7 +389,7 @@ void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, FAR const ubyte *ch, FAR void *arg)
  ****************************************************************************/
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
-void nxeg_tbkbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg)
+void nxeg_tbkbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch, FAR void *arg)
 {
   FAR struct nxeg_state_s *st = (FAR struct nxeg_state_s *)arg;
   message("nxeg_tbkbdin: ERROR -- toolbar should not received keyboard input\n");

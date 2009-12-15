@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/serloop/main.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -90,7 +91,7 @@ int user_start(int argc, char *argv[])
       putchar(ch);
     }
 #else
-  ubyte ch;
+  uint8_t ch;
   int ret;
 
   for (;;)

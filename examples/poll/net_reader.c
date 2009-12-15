@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/poll/net_reader.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -83,7 +84,7 @@ static void net_configure(void)
 {
   struct in_addr addr;
 #if defined(CONFIG_EXAMPLE_POLL_NOMAC)
-  ubyte mac[IFHWADDRLEN];
+  uint8_t mac[IFHWADDRLEN];
 #endif
 
   /* Configure uIP */

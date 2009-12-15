@@ -42,7 +42,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
-
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -83,8 +83,8 @@ void *select_listener(pthread_addr_t pvarg)
   struct timeval tv;
   char buffer[64];
   ssize_t nbytes;
-  boolean timeout;
-  boolean ready;
+  bool timeout;
+  bool ready;
   int fd;
   int ret;
 
@@ -112,8 +112,8 @@ void *select_listener(pthread_addr_t pvarg)
       tv.tv_sec  = SELECT_LISTENER_DELAY;
       tv.tv_usec = 0;
 
-      timeout     = FALSE;
-      ready      = FALSE;
+      timeout    = false;
+      ready      = false;
 
       ret = select(fd+1, (FAR fd_set*)&rfds, (FAR fd_set*)NULL, (FAR fd_set*)NULL, &tv);
       message("\nselect_listener: select returned: %d\n", ret);
@@ -125,7 +125,7 @@ void *select_listener(pthread_addr_t pvarg)
       else if (ret == 0)
         {
           message("select_listener: Timeout\n");
-          timeout = TRUE;
+          timeout = true;
         }
       else
         {
@@ -135,7 +135,7 @@ void *select_listener(pthread_addr_t pvarg)
             }
           else
             {
-              ready = TRUE;
+              ready = true;
             }
 
           if (!FD_ISSET(fd, rfds))
@@ -176,8 +176,8 @@ void *select_listener(pthread_addr_t pvarg)
               message("select_listener: Read '%s' (%d bytes)\n", buffer, nbytes);
             }
 
-          timeout = FALSE;
-          ready  = FALSE;
+          timeout = false;
+          ready   = false;
         }
       while (nbytes > 0);
 

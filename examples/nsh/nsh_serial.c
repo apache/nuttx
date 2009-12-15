@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_serial.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -49,7 +49,7 @@
 #include "nsh.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -80,8 +80,8 @@ static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl);
 #endif
 static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl);
-static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save);
-static void nsh_consoleundirect(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save);
+static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save);
+static void nsh_consoleundirect(FAR struct nsh_vtbl_s *vtbl, FAR uint8_t *save);
 static void nsh_consoleexit(FAR struct nsh_vtbl_s *vtbl);
 
 /****************************************************************************
@@ -269,7 +269,7 @@ static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl)
  *
  ****************************************************************************/
 
-static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *save)
+static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save)
 {
   FAR struct serial_s     *pstate = (FAR struct serial_s *)vtbl;
   FAR struct serialsave_s *ssave  = (FAR struct serialsave_s *)save;
@@ -298,7 +298,7 @@ static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR ubyte *
  *
  ****************************************************************************/
 
-static void nsh_consoleundirect(FAR struct nsh_vtbl_s *vtbl, FAR ubyte *save)
+static void nsh_consoleundirect(FAR struct nsh_vtbl_s *vtbl, FAR uint8_t *save)
 {
   FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
   FAR struct serialsave_s *ssave  = (FAR struct serialsave_s *)save;

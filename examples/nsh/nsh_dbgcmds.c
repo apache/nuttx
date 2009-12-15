@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/dbg_proccmds.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -57,9 +59,9 @@
 
 struct dbgmem_s
 {
-  boolean      dm_write;  /* TRUE: perfrom write operation */
+  bool         dm_write;  /* true: perfrom write operation */
   void        *dm_addr;   /* Address to access */
-  uint32       dm_value;  /* Value to write */
+  uint32_t     dm_value;  /* Value to write */
   unsigned int dm_count;  /* The number of bytes to access */
 };
 
@@ -102,12 +104,12 @@ int mem_parse(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
           return -EINVAL;
         }
 
-      mem->dm_write = TRUE;
-      mem->dm_value = (uint32)lvalue;
+      mem->dm_write = true;
+      mem->dm_value = (uint32_t)lvalue;
     }
   else
     {
-      mem->dm_write = FALSE;
+      mem->dm_write = false;
       mem->dm_value = 0;
     }
 
@@ -140,7 +142,7 @@ int mem_parse(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
 int cmd_mb(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct dbgmem_s mem;
-  volatile ubyte *ptr;
+  volatile uint8_t *ptr;
   int ret;
   int i;
 
@@ -149,7 +151,7 @@ int cmd_mb(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     {
       /* Loop for the number of requested bytes */
 
-      for (i = 0, ptr = (volatile ubyte*)mem.dm_addr; i < mem.dm_count; i++, ptr++)
+      for (i = 0, ptr = (volatile uint8_t*)mem.dm_addr; i < mem.dm_count; i++, ptr++)
 	{
 	  /* Print the value at the address */
 
@@ -172,7 +174,7 @@ int cmd_mb(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 	       * value read might not necessarily be the value written).
 	       */
 
-	      *ptr = (ubyte)mem.dm_value;
+	      *ptr = (uint8_t)mem.dm_value;
 	      nsh_output(vtbl, " -> 0x%02x", *ptr);
 	    }
 
@@ -193,7 +195,7 @@ int cmd_mb(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct dbgmem_s mem;
-  volatile uint16 *ptr;
+  volatile uint16_t *ptr;
   int ret;
   int i;
 
@@ -202,7 +204,7 @@ int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     {
       /* Loop for the number of requested bytes */
 
-      for (i = 0, ptr = (volatile uint16*)mem.dm_addr; i < mem.dm_count; i += 2, ptr++)
+      for (i = 0, ptr = (volatile uint16_t*)mem.dm_addr; i < mem.dm_count; i += 2, ptr++)
 	{
 	  /* Print the value at the address */
 
@@ -225,7 +227,7 @@ int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 	       * value read might not necessarily be the value written).
 	       */
 
-	      *ptr = (uint16)mem.dm_value;
+	      *ptr = (uint16_t)mem.dm_value;
 	      nsh_output(vtbl, " -> 0x%04x", *ptr);
 	    }
 
@@ -246,7 +248,7 @@ int cmd_mh(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   struct dbgmem_s mem;
-  volatile uint32 *ptr;
+  volatile uint32_t *ptr;
   int ret;
   int i;
 
@@ -255,7 +257,7 @@ int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
     {
       /* Loop for the number of requested bytes */
 
-      for (i = 0, ptr = (volatile uint32*)mem.dm_addr; i < mem.dm_count; i += 4, ptr++)
+      for (i = 0, ptr = (volatile uint32_t*)mem.dm_addr; i < mem.dm_count; i += 4, ptr++)
 	{
 	  /* Print the value at the address */
 
@@ -312,7 +314,7 @@ int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
  ****************************************************************************/
 
 void nsh_dumpbuffer(FAR struct nsh_vtbl_s *vtbl, const char *msg,
-                    const ubyte *buffer, ssize_t nbytes)
+                    const uint8_t *buffer, ssize_t nbytes)
 {
   char line[128];
   int ch;
@@ -371,7 +373,7 @@ int cmd_xd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
       return ERROR;
     }
 
-  nsh_dumpbuffer(vtbl, "Hex dump", (ubyte*)addr, nbytes);
+  nsh_dumpbuffer(vtbl, "Hex dump", (uint8_t*)addr, nbytes);
   return OK;
 }
 #endif

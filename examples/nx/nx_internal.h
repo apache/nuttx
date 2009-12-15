@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nx/nx_internal.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <nuttx/nx.h>
 #include <nuttx/nxtk.h>
@@ -207,11 +209,11 @@ enum exitcode_e
 
 struct nxeg_glyph_s
 {
-  ubyte code;                        /* Character code */
-  ubyte height;                      /* Height of this glyph (in rows) */
-  ubyte width;                       /* Width of this glyph (in pixels) */
-  ubyte stride;                      /* Width of the glyph row (in bytes) */
-  FAR ubyte *bitmap;                 /* Allocated bitmap memory */
+  uint8_t code;                        /* Character code */
+  uint8_t height;                      /* Height of this glyph (in rows) */
+  uint8_t width;                       /* Width of this glyph (in pixels) */
+  uint8_t stride;                      /* Width of the glyph row (in bytes) */
+  FAR uint8_t *bitmap;                 /* Allocated bitmap memory */
 };
 
 /* Describes on character on the display */
@@ -226,16 +228,16 @@ struct nxeg_bitmap_s
 
 struct nxeg_state_s
 {
-  ubyte wnum;                        /* Window number */
+  uint8_t wnum;                        /* Window number */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Window color */
 
 #ifdef CONFIG_NX_KBD
-  ubyte height;                      /* Max height of a font in pixels */
-  ubyte width;                       /* Max width of a font in pixels */
-  ubyte spwidth;                     /* The width of a space */
+  uint8_t height;                      /* Max height of a font in pixels */
+  uint8_t width;                       /* Max width of a font in pixels */
+  uint8_t spwidth;                     /* The width of a space */
 
-  ubyte nchars;                      /* Number of KBD chars received */
-  ubyte nglyphs;                     /* Number of glyphs cached */
+  uint8_t nchars;                      /* Number of KBD chars received */
+  uint8_t nglyphs;                     /* Number of glyphs cached */
 
   struct nxeg_bitmap_s bm[NXTK_MAXKBDCHARS];
   struct nxeg_glyph_s  glyph[NXTK_MAXKBDCHARS];
@@ -262,9 +264,9 @@ extern const struct nx_callback_s g_tbcb;
 nxgl_coord_t g_xres;
 nxgl_coord_t g_yres;
 
-extern boolean b_haveresolution;
+extern bool b_haveresolution;
 #ifdef CONFIG_NX_MULTIUSER
-extern boolean g_connected;
+extern bool g_connected;
 #endif
 extern sem_t g_semevent;
 
@@ -286,9 +288,9 @@ extern FAR void *nx_listenerthread(FAR void *arg);
 #endif
 
 #ifdef CONFIG_NX_KBD
-extern void nxeg_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
+extern void nxeg_kbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch, FAR void *arg);
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
-extern void nxeg_tbkbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
+extern void nxeg_tbkbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch, FAR void *arg);
 #endif
 extern void nxeg_filltext(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                           FAR struct nxeg_state_s *st);

@@ -44,7 +44,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/ioctl.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -118,7 +120,7 @@ int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
 #if defined(CONFIG_EXAMPLE_UIP_DHCPC) || defined(CONFIG_EXAMPLE_UIP_NOMAC)
-  uint8 mac[IFHWADDRLEN];
+  uint8_t mac[IFHWADDRLEN];
 #endif
 #ifdef CONFIG_EXAMPLE_UIP_DHCPC
   void *handle;

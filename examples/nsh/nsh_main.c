@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_main.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
+#include <sys/stat.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -92,8 +93,8 @@ struct cmdmap_s
 {
   const char *cmd;        /* Name of the command */
   cmd_t       handler;    /* Function that handles the command */
-  ubyte       minargs;    /* Minimum number of arguments (including command) */
-  ubyte       maxargs;    /* Maximum number of arguments (including command) */
+  uint8_t     minargs;    /* Minimum number of arguments (including command) */
+  uint8_t     maxargs;    /* Maximum number of arguments (including command) */
   const char *usage;      /* Usage instructions for 'help' command */
 };
 
@@ -574,7 +575,7 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
   char *pend   = NULL;
   const char *term;
 #ifndef CONFIG_DISABLE_ENVIRON
-  boolean quoted = FALSE;
+  bool quoted = false;
 #endif
 
   /* Find the beginning of the next token */
@@ -632,7 +633,7 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
           pbegin++;
           term = "\"";
 #ifndef CONFIG_DISABLE_ENVIRON
-          quoted = TRUE;
+          quoted = true;
 #endif
         }
       else
@@ -710,10 +711,10 @@ char *nsh_argument(FAR struct nsh_vtbl_s *vtbl, char **saveptr)
  ****************************************************************************/
 
 #ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
-static inline boolean nsh_cmdenabled(FAR struct nsh_vtbl_s *vtbl)
+static inline bool nsh_cmdenabled(FAR struct nsh_vtbl_s *vtbl)
 {
   struct nsh_parser_s *np = &vtbl->np;
-  boolean ret = !np->np_st[np->np_ndx].ns_disabled;
+  bool ret = !np->np_st[np->np_ndx].ns_disabled;
   if (ret)
     {
       switch (np->np_st[np->np_ndx].ns_state)
@@ -745,7 +746,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
 {
   struct nsh_parser_s *np = &vtbl->np;
   FAR char *cmd = *ppcmd;
-  boolean disabled;
+  bool disabled;
 
   if (cmd)
     {
@@ -786,7 +787,7 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
           np->np_ndx++;
           np->np_st[np->np_ndx].ns_state    = NSH_PARSER_IF;
           np->np_st[np->np_ndx].ns_disabled = disabled;
-          np->np_st[np->np_ndx].ns_ifcond   = FALSE;
+          np->np_st[np->np_ndx].ns_ifcond   = false;
         }
       else if (strcmp(cmd, "then") == 0)
         {
@@ -869,8 +870,8 @@ static inline int nsh_ifthenelse(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, 
 errout:
   np->np_ndx               = 0;
   np->np_st[0].ns_state    = NSH_PARSER_NORMAL;
-  np->np_st[0].ns_disabled = FALSE;
-  np->np_st[0].ns_ifcond   = FALSE;
+  np->np_st[0].ns_disabled = false;
+  np->np_st[0].ns_ifcond   = false;
   return ERROR;
 }
 #endif
@@ -879,14 +880,14 @@ errout:
  * Name: nsh_saveresult
  ****************************************************************************/
 
-static inline int nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, boolean result)
+static inline int nsh_saveresult(FAR struct nsh_vtbl_s *vtbl, bool result)
 {
   struct nsh_parser_s *np = &vtbl->np;
 
 #ifndef CONFIG_EXAMPLES_NSH_DISABLESCRIPT
   if (np->np_st[np->np_ndx].ns_state == NSH_PARSER_IF)
     {
-      np->np_fail = FALSE;
+      np->np_fail = false;
       np->np_st[np->np_ndx].ns_ifcond = result;
       return OK;
     }
@@ -1041,9 +1042,9 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
   memset(argv, 0, MAX_ARGV_ENTRIES*sizeof(FAR char *));
 #ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
-  vtbl->np.np_bg       = FALSE;
+  vtbl->np.np_bg       = false;
 #endif
-  vtbl->np.np_redirect = FALSE;
+  vtbl->np.np_redirect = false;
 
   /* Parse out the command at the beginning of the line */
 
@@ -1115,7 +1116,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 #ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
   if (argc > 1 && strcmp(argv[argc-1], "&") == 0)
     {
-      vtbl->np.np_bg = TRUE;
+      vtbl->np.np_bg = true;
       argv[argc-1] = NULL;
       argc--;
     }
@@ -1129,7 +1130,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
       if (strcmp(argv[argc-2], g_redirect1) == 0)
         {
-          vtbl->np.np_redirect = TRUE;
+          vtbl->np.np_redirect = true;
           oflags               = O_WRONLY|O_CREAT|O_TRUNC;
           redirfile            = nsh_getfullpath(vtbl, argv[argc-1]);
           argc                -= 2;
@@ -1139,7 +1140,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
 
       else if (strcmp(argv[argc-2], g_redirect2) == 0)
         {
-          vtbl->np.np_redirect = TRUE;
+          vtbl->np.np_redirect = true;
           oflags               = O_WRONLY|O_CREAT|O_APPEND;
           redirfile            = nsh_getfullpath(vtbl, argv[argc-1]);
           argc                -= 2;
@@ -1268,7 +1269,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
   else
 #endif
     {
-      ubyte save[SAVE_SIZE];
+      uint8_t save[SAVE_SIZE];
 
       /* Handle redirection of output via a file descriptor */
 
@@ -1302,7 +1303,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
    * command task succeeded).
    */
 
-  return nsh_saveresult(vtbl, FALSE);
+  return nsh_saveresult(vtbl, false);
 
 #ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
 errout_with_redirect:
@@ -1312,5 +1313,5 @@ errout_with_redirect:
     }
 #endif
 errout:
-  return nsh_saveresult(vtbl, TRUE);
+  return nsh_saveresult(vtbl, true);
 }

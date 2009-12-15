@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nx/nx_events.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <semaphore.h>
 #include <debug.h>
@@ -62,26 +63,26 @@
  ****************************************************************************/
 
 static void nxeg_redraw(NXEGWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                        boolean morem, FAR void *arg);
+                        bool morem, FAR void *arg);
 static void nxeg_position(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
                           FAR const struct nxgl_point_s *pos,
                           FAR const struct nxgl_rect_s *bounds,
                           FAR void *arg);
 #ifdef CONFIG_NX_MOUSE
 static void nxeg_mousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                         ubyte buttons, FAR void *arg);
+                         uint8_t buttons, FAR void *arg);
 #endif
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 static void nxeg_tbredraw(NXEGWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                          boolean morem, FAR void *arg);
+                          bool morem, FAR void *arg);
 static void nxeg_tbposition(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
                             FAR const struct nxgl_point_s *pos,
                             FAR const struct nxgl_rect_s *bounds,
                             FAR void *arg);
 #ifdef CONFIG_NX_MOUSE
 static void nxeg_tbmousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                            ubyte buttons, FAR void *arg);
+                            uint8_t buttons, FAR void *arg);
 #endif
 #endif
 
@@ -175,13 +176,13 @@ static inline void nxeg_filltoolbar(NXTKWINDOW htb,
  ****************************************************************************/
 
 static void nxeg_redraw(NXEGWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                        boolean more, FAR void *arg)
+                        bool more, FAR void *arg)
 {
   FAR struct nxeg_state_s *st = (FAR struct nxeg_state_s *)arg;
   message("nxeg_redraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
            st->wnum, hwnd,
            rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-           more ? "TRUE" : "FALSE");
+           more ? "true" : "false");
 
   nxeg_fillwindow(hwnd, rect, st);
 }
@@ -212,7 +213,7 @@ static void nxeg_position(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
       g_xres = bounds->pt2.x;
       g_yres = bounds->pt2.y;
 
-      b_haveresolution = TRUE;
+      b_haveresolution = true;
       sem_post(&g_semevent);
       message("nxeg_position2: Have xres=%d yres=%d\n", g_xres, g_yres);
     }
@@ -224,7 +225,7 @@ static void nxeg_position(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
 
 #ifdef CONFIG_NX_MOUSE
 static void nxeg_mousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                         ubyte buttons, FAR void *arg)
+                         uint8_t buttons, FAR void *arg)
 {
   FAR struct nxeg_state_s *st = (FAR struct nxeg_state_s *)arg;
   message("nxeg_mousein%d: hwnd=%p pos=(%d,%d) button=%02x\n",
@@ -238,13 +239,13 @@ static void nxeg_mousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 static void nxeg_tbredraw(NXEGWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                          boolean more, FAR void *arg)
+                          bool more, FAR void *arg)
 {
   FAR struct nxeg_state_s *st = (FAR struct nxeg_state_s *)arg;
   message("nxeg_tbredraw%d: hwnd=%p rect={(%d,%d),(%d,%d)} more=%s\n",
            st->wnum, hwnd,
            rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-           more ? "TRUE" : "FALSE");
+           more ? "true" : "false");
   nxeg_filltoolbar(hwnd, rect, g_tbcolor);
 }
 #endif
@@ -276,7 +277,7 @@ static void nxeg_tbposition(NXEGWINDOW hwnd, FAR const struct nxgl_size_s *size,
 #ifndef CONFIG_EXAMPLES_NX_RAWWINDOWS
 #ifdef CONFIG_NX_MOUSE
 static void nxeg_tbmousein(NXEGWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg)
+                          uint8_t buttons, FAR void *arg)
 {
   FAR struct nxeg_state_s *st = (FAR struct nxeg_state_s *)arg;
 
@@ -326,7 +327,7 @@ FAR void *nx_listenerthread(FAR void *arg)
 
       if (!g_connected)
         {
-          g_connected = TRUE;
+          g_connected = true;
           sem_post(&g_semevent);
           message("nx_listenerthread: Connected\n");
         }

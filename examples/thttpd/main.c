@@ -38,10 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <sys/ioctl.h>
 #include <sys/mount.h>
-
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -155,7 +155,7 @@ int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
 #ifdef CONFIG_EXAMPLE_UIP_NOMAC
-  uint8 mac[IFHWADDRLEN];
+  uint8_t mac[IFHWADDRLEN];
 #endif
   char *thttpd_argv = "thttpd";
   int ret;
@@ -203,7 +203,7 @@ int user_start(int argc, char *argv[])
   /* Create a ROM disk for the ROMFS filesystem */
 
   message("Registering romdisk\n");
-  ret = romdisk_register(0, (ubyte*)romfs_img, NSECTORS(romfs_img_len), SECTORSIZE);
+  ret = romdisk_register(0, (uint8_t*)romfs_img, NSECTORS(romfs_img_len), SECTORSIZE);
   if (ret < 0)
     {
       message("ERROR: romdisk_register failed: %d\n", ret);

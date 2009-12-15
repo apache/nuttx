@@ -38,7 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 # include <sys/stat.h>
@@ -655,13 +658,13 @@ errout:
 #ifndef CONFIG_EXAMPLES_NSH_DISABLE_LOSETUP
 int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-  char   *loopdev  = NULL;
-  char   *filepath = NULL;
-  boolean teardown = FALSE;
-  boolean readonly = FALSE;
-  off_t   offset   = 0;
-  int     ret      = ERROR;
-  int     option;
+  char *loopdev  = NULL;
+  char *filepath = NULL;
+  bool  teardown = false;
+  bool  readonly = false;
+  off_t offset   = 0;
+  int   ret      = ERROR;
+  int   option;
 
   /* Get the losetup options:  Two forms are supported:
    *
@@ -678,7 +681,7 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
         {
         case 'd':
           loopdev  = nsh_getfullpath(vtbl, optarg);
-          teardown = TRUE;
+          teardown = true;
           break;
 
         case 'o':
@@ -686,7 +689,7 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
           break;
 
         case 'r':
-          readonly = TRUE;
+          readonly = true;
           break;
 
         case '?':
@@ -938,8 +941,8 @@ int cmd_mkfifo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
   const char *fmt;
-  ubyte *buffer;
-  uint32 nsectors;
+  uint8_t *buffer;
+  uint32_t nsectors;
   int sectsize = 512;
   int minor = 0;
   int ret;
@@ -984,7 +987,7 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   if (optind == argc-1)
     {
-      nsectors = (uint32)atoi(argv[optind]);
+      nsectors = (uint32_t)atoi(argv[optind]);
     }
   else if (optind >= argc)
     {
@@ -999,7 +1002,7 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   /* Allocate the memory backing up the ramdisk */
 
-  buffer = (ubyte*)malloc(sectsize * nsectors);
+  buffer = (uint8_t*)malloc(sectsize * nsectors);
   if (!buffer)
     {
       fmt = g_fmtcmdoutofmemory;
@@ -1013,7 +1016,7 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   /* Then register the ramdisk */
 
-  ret = ramdisk_register(minor, buffer, nsectors, sectsize, TRUE);
+  ret = ramdisk_register(minor, buffer, nsectors, sectsize, true);
   if (ret < 0)
     {
       nsh_output(vtbl, g_fmtcmdfailed, argv[0], "ramdisk_register", NSH_ERRNO_OF(-ret));

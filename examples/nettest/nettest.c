@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
 #include <stdio.h>
 #include <debug.h>
 
@@ -80,7 +82,7 @@ int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
 #if defined(CONFIG_EXAMPLE_NETTEST_NOMAC)
-  uint8 mac[IFHWADDRLEN];
+  uint8_t mac[IFHWADDRLEN];
 #endif
 
 /* Many embedded network interfaces must have a software assigned MAC */
