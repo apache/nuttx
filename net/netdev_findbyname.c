@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <sys/types.h>
 #include <string.h>
 #include <errno.h>
 
@@ -49,7 +48,7 @@
 #include "net_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

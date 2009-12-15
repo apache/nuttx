@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -71,12 +72,12 @@ struct tcp_connect_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static void connection_event(struct uip_conn *conn, uint16 flags);
+static void connection_event(struct uip_conn *conn, uint16_t flags);
 static inline int tcp_setup_callbacks(FAR struct socket *psock,
                                       FAR struct tcp_connect_s *pstate);
 static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate, int status);
-static uint16 tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
-                                    void *pvpriv, uint16 flags);
+static uint16_t tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
+                                    void *pvpriv, uint16_t flags);
 #ifdef CONFIG_NET_IPv6
 static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in6 *inaddr);
 #else
@@ -107,7 +108,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static void connection_event(struct uip_conn *conn, uint16 flags)
+static void connection_event(struct uip_conn *conn, uint16_t flags)
 {
   FAR struct socket *psock = (FAR struct socket *)conn->connection_private;
 
@@ -222,8 +223,8 @@ static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate, int stat
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint16 tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
-                                    void *pvpriv, uint16 flags)
+static uint16_t tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
+                                      void *pvpriv, uint16_t flags)
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
 

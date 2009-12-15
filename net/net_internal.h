@@ -43,7 +43,10 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <time.h>
+
 #include <nuttx/net.h>
 #include <net/uip/uip.h>
 
@@ -159,9 +162,9 @@ EXTERN int net_closesocket(FAR struct socket *psock);
 /* sockopt support ***********************************************************/
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-EXTERN int net_timeo(uint32 start_time, socktimeo_t timeo);
+EXTERN int net_timeo(uint32_t start_time, socktimeo_t timeo);
 EXTERN socktimeo_t net_timeval2dsec(struct timeval *tv);
-EXTERN void net_dsec2timeval(uint16 dsec, struct timeval *tv);
+EXTERN void net_dsec2timeval(uint16_t dsec, struct timeval *tv);
 #endif
 
 /* net_register.c ************************************************************/

@@ -38,9 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 
+#include <sys/socket.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <fcntl.h>
 #include <errno.h>

@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <sys/types.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -50,7 +50,7 @@
 #include "net_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,9 +73,9 @@
  * Function: netdev_maskcmp
  ****************************************************************************/
 
-static inline boolean netdev_maskcmp(const uip_ipaddr_t *ipaddr,
-                                     const uip_ipaddr_t *raddr,
-                                     const uip_ipaddr_t *netmask)
+static inline bool netdev_maskcmp(const uip_ipaddr_t *ipaddr,
+                                  const uip_ipaddr_t *raddr,
+                                  const uip_ipaddr_t *netmask)
 {
 #ifndef CONFIG_NET_IPv6
   return (*ipaddr & *netmask) == (*raddr & *netmask);

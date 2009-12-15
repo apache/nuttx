@@ -42,7 +42,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -73,13 +73,13 @@ struct send_s
   FAR struct socket         *snd_sock;    /* Points to the parent socket structure */
   FAR struct uip_callback_s *snd_cb;      /* Reference to callback instance */
   sem_t                      snd_sem;     /* Used to wake up the waiting thread */
-  FAR const uint8           *snd_buffer;  /* Points to the buffer of data to send */
+  FAR const uint8_t         *snd_buffer;  /* Points to the buffer of data to send */
   size_t                     snd_buflen;  /* Number of bytes in the buffer to send */
   ssize_t                    snd_sent;    /* The number of bytes sent */
-  uint32                     snd_isn;     /* Initial sequence number */
-  uint32                     snd_acked;   /* The number of bytes acked */
+  uint32_t                   snd_isn;     /* Initial sequence number */
+  uint32_t                   snd_acked;   /* The number of bytes acked */
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  uint32                     snd_time;    /* last send time for determining timeout */
+  uint32_t                   snd_time;    /* last send time for determining timeout */
 #endif
 };
 
@@ -104,9 +104,9 @@ struct send_s
  *
  ****************************************************************************/
 
-static uint32 send_getisn(struct uip_conn *conn)
+static uint32_t send_getisn(struct uip_conn *conn)
 {
-   uint32 tmp;
+   uint32_t tmp;
    memcpy(&tmp, conn->snd_nxt, 4);
    return ntohl(tmp);
 }
@@ -128,9 +128,9 @@ static uint32 send_getisn(struct uip_conn *conn)
  *
  ****************************************************************************/
 
-static uint32 send_getackno(struct uip_driver_s *dev)
+static uint32_t send_getackno(struct uip_driver_s *dev)
 {
-   uint32 tmp;
+   uint32_t tmp;
    memcpy(&tmp, TCPBUF->ackno, 4);
    return ntohl(tmp);
 }
@@ -195,8 +195,8 @@ static inline int send_timeout(struct send_s *pstate)
  *
  ****************************************************************************/
 
-static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
-                             void *pvpriv, uint16 flags)
+static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
+                               void *pvpriv, uint16_t flags)
 {
   struct uip_conn *conn = (struct uip_conn*)pvconn;
   struct send_s *pstate = (struct send_s *)pvpriv;
@@ -283,7 +283,7 @@ static uint16 send_interrupt(struct uip_driver_s *dev, void *pvconn,
     {
       /* Get the amount of data that we can send in the next packet */
 
-      uint32 sndlen = pstate->snd_buflen - pstate->snd_sent;
+      uint32_t sndlen = pstate->snd_buflen - pstate->snd_sent;
       if (sndlen > uip_mss(conn))
         {
           sndlen = uip_mss(conn);

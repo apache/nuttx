@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -63,7 +64,7 @@ struct sendto_s
 {
   FAR struct uip_callback_s *st_cb; /* Reference to callback instance */
   sem_t       st_sem;        /* Semaphore signals sendto completion */
-  uint16      st_buflen;     /* Length of send buffer (error if <0) */
+  uint16_t    st_buflen;     /* Length of send buffer (error if <0) */
   const char *st_buffer;     /* Pointer to send buffer */
   int         st_sndlen;     /* Result of the send (length sent or negated errno) */
 };
@@ -94,7 +95,8 @@ struct sendto_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static uint16 sendto_interrupt(struct uip_driver_s *dev, void *conn, void *pvpriv, uint16 flags)
+static uint16_t sendto_interrupt(struct uip_driver_s *dev, void *conn,
+                                 void *pvpriv, uint16_t flags)
 {
   struct sendto_s *pstate = (struct sendto_s *)pvpriv;
 

@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <stdint.h>
 #include <errno.h>
 #include <nuttx/clock.h>
 
@@ -70,7 +70,7 @@
 
 socktimeo_t net_timeval2dsec(struct timeval *tv)
 {
-  return (uint16)(tv->tv_sec* DSEC_PER_SEC + tv->tv_usec / USEC_PER_DSEC);
+  return (uint16_t)(tv->tv_sec* DSEC_PER_SEC + tv->tv_usec / USEC_PER_DSEC);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */

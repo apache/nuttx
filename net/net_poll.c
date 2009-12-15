@@ -40,9 +40,9 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_POLL)
 
-#include <sys/types.h>
 #include <sys/socket.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <poll.h>
 #include <errno.h>
@@ -101,8 +101,8 @@
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static uint16 poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
-                             FAR void *pvpriv, uint16 flags)
+static uint16_t poll_interrupt(struct uip_driver_s *dev, FAR void *conn,
+                               FAR void *pvpriv, uint16_t flags)
 {
   FAR struct pollfd *fds = (FAR struct pollfd *)pvpriv;
 
@@ -293,7 +293,7 @@ static inline int net_pollteardown(FAR struct socket *psock, struct pollfd *fds)
  *   fd    - The socket descriptor of interest
  *   fds   - The structure describing the events to be monitored, OR NULL if
  *           this is a request to stop monitoring events.
- *   setup - TRUE: Setup up the poll; FALSE: Teardown the poll
+ *   setup - true: Setup up the poll; false: Teardown the poll
  *
  * Returned Value:
  *  0: Success; Negated errno on failure
@@ -301,7 +301,7 @@ static inline int net_pollteardown(FAR struct socket *psock, struct pollfd *fds)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int net_poll(int sockfd, struct pollfd *fds, boolean setup)
+int net_poll(int sockfd, struct pollfd *fds, bool setup)
 {
 #ifndef HAVE_NETPOLL
   return -ENOSYS;

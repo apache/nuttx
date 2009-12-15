@@ -42,7 +42,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -72,7 +72,7 @@ struct recvfrom_s
 {
   FAR struct socket         *rf_sock;      /* The parent socket structure */
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  uint32                     rf_starttime; /* rcv start time for determining timeout */
+  uint32_t                   rf_starttime; /* rcv start time for determining timeout */
 #endif
   FAR struct uip_callback_s *rf_cb;        /* Reference to callback instance */
   sem_t                      rf_sem;       /* Semaphore signals recv completion */
@@ -358,8 +358,8 @@ static inline void recvfrom_tcpsender(struct uip_driver_s *dev, struct recvfrom_
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint16 recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
-                                    void *pvpriv, uint16 flags)
+static uint16_t recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
+                                      void *pvpriv, uint16_t flags)
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
 
@@ -541,8 +541,8 @@ static inline void recvfrom_udpsender(struct uip_driver_s *dev, struct recvfrom_
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static uint16 recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
-                                    void *pvpriv, uint16 flags)
+static uint16_t recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
+                                      void *pvpriv, uint16_t flags)
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
 

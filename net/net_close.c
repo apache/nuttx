@@ -42,7 +42,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -87,8 +87,8 @@ struct tcp_close_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint16 netclose_interrupt(struct uip_driver_s *dev, void *pvconn,
-                                 void *pvpriv, uint16 flags)
+static uint16_t netclose_interrupt(struct uip_driver_s *dev, void *pvconn,
+                                   void *pvpriv, uint16_t flags)
 {
   struct tcp_close_s *pstate = (struct tcp_close_s *)pvpriv;
 

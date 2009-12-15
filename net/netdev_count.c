@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev_count.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <sys/types.h>
 #include <string.h>
 #include <errno.h>
 
@@ -49,7 +48,7 @@
 #include "net_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

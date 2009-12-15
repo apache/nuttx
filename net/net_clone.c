@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
 #include <debug.h>

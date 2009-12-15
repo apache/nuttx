@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_arptimer.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
+#include <stdint.h>
 #include <time.h>
 #include <wdog.h>
 #include <debug.h>
@@ -49,7 +50,7 @@
 #include "net_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* ARP timer interval = 10 seconds. CLK_TCK is the number of clock ticks
@@ -85,7 +86,7 @@ static WDOG_ID g_arptimer;           /* ARP timer */
  *
  ****************************************************************************/
 
-static void arptimer_poll(int argc, uint32 arg, ...)
+static void arptimer_poll(int argc, uint32_t arg, ...)
 {
   /* Call the ARP timer function every 10 seconds. */
 
