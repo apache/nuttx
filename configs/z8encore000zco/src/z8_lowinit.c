@@ -1,7 +1,7 @@
 /***************************************************************************
  * configs/z8encore000zco/src/z8_lowinit.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based upon sample code included with the Zilog ZDS-II toolchain.
@@ -40,7 +40,6 @@
  ***************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
 #include "chip/chip.h"
 

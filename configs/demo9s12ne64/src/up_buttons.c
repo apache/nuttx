@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 #include <arch/board/board.h>
 #include "demo9s12ne64.h"
@@ -73,7 +74,7 @@ void up_buttoninit(void)
  * Name: up_buttons
  ****************************************************************************/
 
-ubyte up_buttons(void)
+uint8_t up_buttons(void)
 {
   return 0;
 }

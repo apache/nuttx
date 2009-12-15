@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include "up_arch.h"
@@ -80,7 +80,7 @@
 
 /* GPIO configurations unique to NOR Flash  */
 
-static const uint16 g_norconfig[] =
+static const uint16_t g_norconfig[] =
 {
   /* A19... A22 */
 
@@ -90,7 +90,7 @@ static const uint16 g_norconfig[] =
 
   GPIO_NPS_NE2
 };
-#define NNOR_CONFIG (sizeof(g_norconfig)/sizeof(uint16))
+#define NNOR_CONFIG (sizeof(g_norconfig)/sizeof(uint16_t))
 
 /************************************************************************************
  * Private Functions

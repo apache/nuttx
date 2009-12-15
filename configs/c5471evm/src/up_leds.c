@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_leds.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,21 +38,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define CS2  *(volatile uint32*)0xffff2e08
-#define LEDS *(volatile uint32*)0x01000000
+#define CS2  *(volatile uint32_t*)0xffff2e08
+#define LEDS *(volatile uint32_t*)0x01000000
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static uint32 g_ledstate;
+static uint32_t g_ledstate;
 
 /****************************************************************************
  * Private Functions

@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
@@ -207,7 +207,7 @@ int nsh_archinitialize(void)
    * the slot.
    */
 
-   sdio_mediachange(sdio, TRUE);
+   sdio_mediachange(sdio, true);
 #endif
   return OK;
 }

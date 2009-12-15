@@ -39,8 +39,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
@@ -135,7 +136,7 @@
  * Private Data
  ****************************************************************************/
 
-static const uint16 g_ledbits[8] =
+static const uint16_t g_ledbits[8] =
 {
   (LED_STARTED_ON_SETBITS       | LED_STARTED_ON_CLRBITS |
    LED_STARTED_OFF_SETBITS      | LED_STARTED_OFF_CLRBITS),
@@ -170,22 +171,22 @@ static inline void led_clrbits(unsigned int clrbits)
 {
   if ((clrbits & STM3210E_LED1) != 0)
     {
-      stm32_gpiowrite(GPIO_LED1, FALSE);
+      stm32_gpiowrite(GPIO_LED1, false);
     }
 
   if ((clrbits & STM3210E_LED2) != 0)
     {
-      stm32_gpiowrite(GPIO_LED2, FALSE);
+      stm32_gpiowrite(GPIO_LED2, false);
     }
 
   if ((clrbits & STM3210E_LED3) != 0)
     {
-      stm32_gpiowrite(GPIO_LED3, FALSE);
+      stm32_gpiowrite(GPIO_LED3, false);
     }
 
   if ((clrbits & STM3210E_LED4) != 0)
     {
-      stm32_gpiowrite(GPIO_LED4, FALSE);
+      stm32_gpiowrite(GPIO_LED4, false);
     }
 }
 
@@ -193,22 +194,22 @@ static inline void led_setbits(unsigned int setbits)
 {
   if ((setbits & STM3210E_LED1) != 0)
     {
-      stm32_gpiowrite(GPIO_LED1, TRUE);
+      stm32_gpiowrite(GPIO_LED1, true);
     }
 
   if ((setbits & STM3210E_LED2) != 0)
     {
-      stm32_gpiowrite(GPIO_LED2, TRUE);
+      stm32_gpiowrite(GPIO_LED2, true);
     }
 
   if ((setbits & STM3210E_LED3) != 0)
     {
-      stm32_gpiowrite(GPIO_LED3, TRUE);
+      stm32_gpiowrite(GPIO_LED3, true);
     }
 
   if ((setbits & STM3210E_LED4) != 0)
     {
-      stm32_gpiowrite(GPIO_LED4, TRUE);
+      stm32_gpiowrite(GPIO_LED4, true);
     }
 }
 

@@ -43,9 +43,8 @@
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
-# include <sys/types.h>
+# include <stdint.h>
 #endif
-
 
 /************************************************************************************
  * Definitions
@@ -110,7 +109,7 @@ EXTERN void hcs12_boardinitialize(void);
 
 #ifdef CONFIG_ARCH_BUTTONS
 EXTERN void up_buttoninit(void);
-EXTERN ubyte up_buttons(void);
+EXTERN uint8_t up_buttons(void);
 #endif
 
 #undef EXTERN

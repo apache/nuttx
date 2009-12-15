@@ -1,7 +1,7 @@
 /**************************************************************************
  * pjrc.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
  * Included Files
  **************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /**************************************************************************
  * Public Definitions
@@ -135,14 +135,14 @@
  */
 
 #ifndef __ASSEMBLY__
-xdata at 0xF800 ubyte p82c55_port_a;
-xdata at 0xF801 ubyte p82c55_port_b;
-xdata at 0xF802 ubyte p82c55_port_c;
-xdata at 0xF803 ubyte p82c55_abc_config;
-xdata at 0xF900 ubyte p82c55_port_d;
-xdata at 0xF901 ubyte p82c55_port_e;
-xdata at 0xF902 ubyte p82c55_port_f;
-xdata at 0xF903 ubyte p82c55_def_config;
+xdata at 0xF800 uint8_t p82c55_port_a;
+xdata at 0xF801 uint8_t p82c55_port_b;
+xdata at 0xF802 uint8_t p82c55_port_c;
+xdata at 0xF803 uint8_t p82c55_abc_config;
+xdata at 0xF900 uint8_t p82c55_port_d;
+xdata at 0xF901 uint8_t p82c55_port_e;
+xdata at 0xF902 uint8_t p82c55_port_f;
+xdata at 0xF903 uint8_t p82c55_def_config;
 #endif
 
 /* LED (Port E) bit definitions */

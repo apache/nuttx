@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 #include <arch/board/board.h>
 #include "stm3210e-internal.h"
@@ -53,7 +54,7 @@
  * Private Data
  ****************************************************************************/
 
-static const uint16 g_buttons[NUM_BUTTONS] =
+static const uint16_t g_buttons[NUM_BUTTONS] =
 {
   GPIO_BTN_WAKEUP, GPIO_BTN_TAMPER, GPIO_BTN_KEY,   GPIO_JOY_KEY,
   GPIO_JOY_DOWN,   GPIO_JOY_LEFT,   GPIO_JOY_RIGHT, GPIO_JOY_UP
@@ -89,9 +90,9 @@ void up_buttoninit(void)
  * Name: up_buttons
  ****************************************************************************/
 
-ubyte up_buttons(void)
+uint8_t up_buttons(void)
 {
-  ubyte ret = 0;
+  uint8_t ret = 0;
   int i;
 
   /* Check that state of each key */

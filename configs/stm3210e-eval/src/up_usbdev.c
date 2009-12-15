@@ -39,8 +39,10 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <nuttx/usbdev.h>
@@ -89,9 +91,9 @@ void stm32_usbinitialize(void)
  *
  ************************************************************************************/
 
-int stm32_usbpullup(FAR struct usbdev_s *dev,  boolean enable)
+int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
 {
-  usbtrace(TRACE_DEVPULLUP, (uint16)enable);
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
   stm32_gpiowrite(GPIO_USB_PULLUP, !enable);
   return OK;
 }
@@ -107,7 +109,7 @@ int stm32_usbpullup(FAR struct usbdev_s *dev,  boolean enable)
  *
  ************************************************************************************/
 
-void stm32_usbsuspend(FAR struct usbdev_s *dev, boolean resume)
+void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
   ulldbg("resume: %d\n", resume);
 }

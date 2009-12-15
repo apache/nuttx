@@ -39,8 +39,9 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <nuttx/spi.h>
@@ -129,7 +130,7 @@ void weak_function lm3s_ssiinitialize(void)
  *
  ****************************************************************************/
 
-void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
+void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
@@ -142,7 +143,7 @@ void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean sel
     }
 }
 
-ubyte lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
 #warning "Need to check schematic"
   ssidbg("Returning SPI_STATUS_PRESENT\n");

@@ -41,7 +41,6 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_CS8900)
 
-#include <sys/types.h>
 #include <debug.h>
 #include <arch/board/board.h>
 

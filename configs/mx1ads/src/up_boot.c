@@ -39,7 +39,8 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 #include <arch/board/board.h>
 
@@ -69,7 +70,7 @@
 
 void imx_boardinitialize(void)
 {
-  uint32 regval;
+  uint32_t regval;
 
   putreg32(0x000003ab, IMX_SC_GPCR); /* I/O pad driving strength */
   putreg32(IMX_MPCTL0_VALUE, IMX_PLL_MPCTL0);

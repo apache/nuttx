@@ -38,7 +38,9 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <ctype.h>
 
 #include "up_arch.h"
@@ -77,8 +79,8 @@
  * Private Data
  ************************************************************************************/
 
-static ubyte g_nchars;              /* Number of characters in lines 2 */
-static ubyte g_line[LCD_NCHARS];    /* The content of lines 2 */
+static uint8_t g_nchars;              /* Number of characters in lines 2 */
+static uint8_t g_line[LCD_NCHARS];    /* The content of lines 2 */
 
 /************************************************************************************
  * Private Functions
@@ -88,9 +90,9 @@ static ubyte g_line[LCD_NCHARS];    /* The content of lines 2 */
  * Name: up_lcddelay
  ************************************************************************************/
 
-static void up_lcddelay(uint16 count)
+static void up_lcddelay(uint16_t count)
 {
-  uint32 counter = (uint16)count << 8;
+  uint32_t counter = (uint16_t)count << 8;
   while(counter--)
     {
       asm("\tnop\n\tnop\n\tnop\n" : :); /* 3 NOPs */
@@ -101,11 +103,11 @@ static void up_lcddelay(uint16 count)
  * Name: up_setrs
  ************************************************************************************/
 
-static inline void up_setrs(boolean data)
+static inline void up_setrs(bool data)
 {
   /* Set/clear bit 1 of port 6 */
 
-  register ubyte regval = getreg8(M16C_P6);
+  register uint8_t regval = getreg8(M16C_P6);
   if (data)
     {
       regval |= (1 << 0);  /* High = data */
@@ -125,7 +127,7 @@ static inline void up_seten(void)
 {
   /* Set bit 1 of port 6 */
 
-  register ubyte regval = getreg8(M16C_P6);
+  register uint8_t regval = getreg8(M16C_P6);
   regval = (1 << 1);
   putreg8(regval, M16C_P6);
 }
@@ -138,7 +140,7 @@ static inline void up_clren(void)
 {
   /* Clear bit 1 of port 6 */
 
-  register ubyte regval = getreg8(M16C_P6);
+  register uint8_t regval = getreg8(M16C_P6);
   regval &= ~(1 << 1);
   putreg8(regval, M16C_P6);
 }
@@ -147,7 +149,7 @@ static inline void up_clren(void)
  * Name: up_enpluse
  ************************************************************************************/
 
-static inline void up_enpulse(boolean data)
+static inline void up_enpulse(bool data)
 {
   up_seten();                 /* EN enable chip (HIGH) */
   up_lcddelay(0);             /* Short delay */
@@ -160,7 +162,7 @@ static inline void up_enpulse(boolean data)
  * Name: up_lcdwrite
  ************************************************************************************/
 
-void up_lcdwrite(boolean data, ubyte ch)
+void up_lcdwrite(bool data, uint8_t ch)
 {
   up_setrs(data);				/* Set RS appropriately */
 
@@ -187,19 +189,19 @@ static void up_scroll(void)
 
   /* Clear the display and position the cursor at the beginning of line 1 */
 
-  up_lcdwrite(FALSE, LCD_CLEAR);
-  up_lcdwrite(FALSE, LCD_HOME_L1);
+  up_lcdwrite(false, LCD_CLEAR);
+  up_lcdwrite(false, LCD_HOME_L1);
 
   /* Copy line 2 to line 1 */
 
   for (i = 0; i < g_nchars; i++)
     {
-      up_lcdwrite(TRUE, g_line[i]);
+      up_lcdwrite(true, g_line[i]);
     }
 
   /* Position the cursor at the beginning of line 2 */
 
-  up_lcdwrite(FALSE, LCD_HOME_L2);
+  up_lcdwrite(false, LCD_HOME_L2);
   g_nchars = 0;
 }
 
@@ -213,7 +215,7 @@ static void up_scroll(void)
 
 void up_lcdinit(void)
 {
-  ubyte regval;
+  uint8_t regval;
 
   /* Enable writing to PD9 by selecting bit 2 in the protection register */
 
@@ -241,15 +243,15 @@ void up_lcdinit(void)
 
   /* Write the reset sequence */
 
-  up_lcdwrite(FALSE, 0x33);
+  up_lcdwrite(false, 0x33);
   up_lcddelay(20);
-  up_lcdwrite(FALSE, 0x32);
+  up_lcdwrite(false, 0x32);
   up_lcddelay(20);
-  up_lcdwrite(FALSE, FUNCTION_SET);	/* reset sequence */
-  up_lcdwrite(FALSE, FUNCTION_SET);
-  up_lcdwrite(FALSE, LCD_CURSOR_OFF);
-  up_lcdwrite(FALSE, LCD_CLEAR);
-  up_lcdwrite(FALSE, LCD_HOME_L1);
+  up_lcdwrite(false, FUNCTION_SET);	/* reset sequence */
+  up_lcdwrite(false, FUNCTION_SET);
+  up_lcdwrite(false, LCD_CURSOR_OFF);
+  up_lcdwrite(false, LCD_CLEAR);
+  up_lcdwrite(false, LCD_HOME_L1);
 }
 
 /************************************************************************************
@@ -271,7 +273,7 @@ void up_lcdputc(char ch)
 
   else if (g_nchars < LCD_NCHARS && isprint(ch))
     {
-      up_lcdwrite(TRUE, ch);
+      up_lcdwrite(true, ch);
       g_line[g_nchars] = ch;
       g_nchars++;
     }

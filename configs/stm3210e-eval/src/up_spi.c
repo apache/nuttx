@@ -39,8 +39,9 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <nuttx/spi.h>
@@ -132,7 +133,7 @@ void weak_function stm32_spiinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
@@ -144,31 +145,31 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean s
   }
 }
 
-ubyte stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return SPI_STATUS_PRESENT;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
+void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
-ubyte stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return SPI_STATUS_PRESENT;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
+void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
-ubyte stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return SPI_STATUS_PRESENT;
 }

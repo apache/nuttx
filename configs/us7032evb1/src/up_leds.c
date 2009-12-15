@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/us7032evb1/src/up_leds.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -76,7 +76,7 @@
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-  uint16 reg16;
+  uint16_t reg16;
 
   /* Setup port B, pin 15 as an output */
 
@@ -103,7 +103,7 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  uint16 reg16;
+  uint16_t reg16;
 
   if (led)
     {
@@ -121,7 +121,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  uint16 reg16;
+  uint16_t reg16;
 
   if (led)
     {

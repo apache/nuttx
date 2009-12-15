@@ -62,7 +62,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
@@ -120,10 +123,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
-static ubyte  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 ch);
+static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static uint8_t  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
 
@@ -164,16 +167,16 @@ static struct spi_dev_s g_spidev = { &g_spiops };
  * Input Parameters:
  *   dev -      Device-specific state data
  *   devid -    Identifies the device to select
- *   selected - TRUE: slave selected, FALSE: slave de-selected
+ *   selected - true: slave selected, false: slave de-selected
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
+static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  uint32 bit = 1 << 20;
+  uint32_t bit = 1 << 20;
 
   if (selected)
     {
@@ -227,9 +230,9 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean 
  *
  ****************************************************************************/
 
-static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
-  uint32 divisor = LPC214X_PCLKFREQ / frequency;
+  uint32_t divisor = LPC214X_PCLKFREQ / frequency;
 
   if (divisor < 2)
     {
@@ -262,7 +265,7 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
  *
  ****************************************************************************/
 
-static ubyte spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   /* I don't think there is anyway to determine these things on the mcu123.com
    * board.
@@ -288,9 +291,9 @@ static ubyte spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *
  ****************************************************************************/
 
-static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
-  register uint16 regval;
+  register uint16_t regval;
 
   /* Wait while the TX FIFO is full */
 
@@ -298,7 +301,7 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
 
   /* Write the byte to the TX FIFO */
 
-  putreg16((ubyte)wd, LPC214X_SPI1_DR);
+  putreg16((uint8_t)wd, LPC214X_SPI1_DR);
 
   /* Wait for the RX FIFO not empty */
 
@@ -323,7 +326,7 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -332,8 +335,8 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
 
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
-  FAR const ubyte *ptr = (FAR const ubyte *)buffer;
-  ubyte sr;
+  FAR const uint8_t *ptr = (FAR const uint8_t *)buffer;
+  uint8_t sr;
 
   /* Loop while thre are bytes remaining to be sent */
 
@@ -346,7 +349,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
         {
           /* Send the data */
 
-          putreg16((uint16)*ptr, LPC214X_SPI1_DR);
+          putreg16((uint16_t)*ptr, LPC214X_SPI1_DR);
           ptr++;
           nwords--;
         }
@@ -367,7 +370,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
           (void)getreg16(LPC214X_SPI1_DR);
         }
 
-      /* There is a race condition where TFE may go TRUE just before
+      /* There is a race condition where TFE may go true just before
        * RNE goes true and this loop terminates prematurely.  The nasty little
        * delay in the following solves that (it could probably be tuned
        * to improve performance).
@@ -394,7 +397,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -403,8 +406,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
-  FAR ubyte *ptr = (FAR ubyte*)buffer;
-  uint32 rxpending = 0;
+  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  uint32_t rxpending = 0;
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
 
@@ -431,7 +434,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
       spivdbg("RX: rxpending: %d\n", rxpending);
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE)
         {
-          *ptr++ = (ubyte)getreg16(LPC214X_SPI1_DR);
+          *ptr++ = (uint8_t)getreg16(LPC214X_SPI1_DR);
           rxpending--;
         }
     }
@@ -457,8 +460,8 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
-  uint32 regval32;
-  ubyte regval8;
+  uint32_t regval32;
+  uint8_t regval8;
   int i;
 
   /* Only the SPI1 interface is supported */

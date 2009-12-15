@@ -38,6 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <nuttx/spi.h>
 
 #include <arch/board/board.h>
@@ -248,8 +253,8 @@
 struct str71x_spidev_s
 {
   struct spi_dev_s spidev;  /* Externally visible part of the SPI interface */
-  uint32           spibase; /* BSPIn base address */
-  uint16           csbit;   /* BSPIn SS bit int GPIO0 */
+  uint32_t         spibase; /* BSPIn base address */
+  uint16_t         csbit;   /* BSPIn SS bit int GPIO0 */
 };
 
 /****************************************************************************
@@ -258,15 +263,15 @@ struct str71x_spidev_s
 
 /* Helpers */
 
-static inline uint16 spi_getreg(FAR struct str71x_spidev_s *priv, ubyte offset);
-static inline void   spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, uint16 value);
+static inline uint16_t spi_getreg(FAR struct str71x_spidev_s *priv, uint8_t offset);
+static inline void   spi_putreg(FAR struct str71x_spidev_s *priv, uint8_t offset, uint16_t value);
 
 /* SPI methods */
 
-static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
-static ubyte  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd);
+static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static uint8_t  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen);
 
@@ -327,7 +332,7 @@ static struct str71x_spidev_s g_spidev1 =
  *
  ****************************************************************************/
 
-static inline uint16 spi_getreg(FAR struct str71x_spidev_s *priv, ubyte offset)
+static inline uint16_t spi_getreg(FAR struct str71x_spidev_s *priv, uint8_t offset)
 {
   return getreg16(priv->spibase + offset);
 }
@@ -348,7 +353,7 @@ static inline uint16 spi_getreg(FAR struct str71x_spidev_s *priv, ubyte offset)
  *
  ****************************************************************************/
 
-static inline void spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, uint16 value)
+static inline void spi_putreg(FAR struct str71x_spidev_s *priv, uint8_t offset, uint16_t value)
 {
   putreg16(value, priv->spibase + offset);
 }
@@ -364,17 +369,17 @@ static inline void spi_putreg(FAR struct str71x_spidev_s *priv, ubyte offset, ui
  * Input Parameters:
  *   dev -      Device-specific state data
  *   devid -    Identifies the device to select
- *   selected - TRUE: slave selected, FALSE: slave de-selected
+ *   selected - true: slave selected, false: slave de-selected
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
+static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
-  uint16 reg16;
+  uint16_t reg16;
 
   DEBUGASSERT(priv && priv->spibase);
 
@@ -439,11 +444,11 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean 
  *
  ****************************************************************************/
 
-static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
-  uint32 divisor;
-  uint32 cr1;
+  uint32_t divisor;
+  uint32_t cr1;
 
   DEBUGASSERT(priv && priv->spibase);
 
@@ -476,7 +481,7 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
   cr1 = spi_getreg(priv, STR71X_BSPI_CSR1_OFFSET);
   cr1 &= ~(STR71X_BSPICSR1_BSPE|STR71X_BSPICSR1_MSTR);
   spi_putreg(priv, STR71X_BSPI_CSR1_OFFSET, cr1);
-  spi_putreg(priv, STR71X_BSPI_CLK_OFFSET, (uint16)divisor);
+  spi_putreg(priv, STR71X_BSPI_CLK_OFFSET, (uint16_t)divisor);
 
   /* Now we can enable the BSP in master mode */
 
@@ -501,10 +506,10 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
  *
  ****************************************************************************/
 
-static ubyte spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  ubyte ret = 0;
-  uint16 reg16 = getreg16(STR71X_GPIO1_PD);
+  uint8_t ret = 0;
+  uint16_t reg16 = getreg16(STR71X_GPIO1_PD);
 
   if ((reg16 & MMCSD_GPIO1_WPIN) != 0)
     {
@@ -535,7 +540,7 @@ static ubyte spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *
  ****************************************************************************/
 
-static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
 
@@ -561,7 +566,7 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
 
   /* Get the received value from the RX FIFO and return it */
 
-  return (ubyte)(spi_getreg(priv, STR71X_BSPI_RXR_OFFSET) >> 8);
+  return (uint8_t)(spi_getreg(priv, STR71X_BSPI_RXR_OFFSET) >> 8);
 }
 
 /*************************************************************************
@@ -576,7 +581,7 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
  *   buflen - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -586,8 +591,8 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
-  FAR const ubyte *ptr = (FAR const ubyte *)buffer;
-  uint16 csr2;
+  FAR const uint8_t *ptr = (FAR const uint8_t *)buffer;
+  uint16_t csr2;
 
   DEBUGASSERT(priv && priv->spibase);
 
@@ -601,7 +606,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
         {
           /* Send the data */
 
-          spi_putreg(priv, STR71X_BSPI_TXR_OFFSET, ((uint16)*ptr) << 8);
+          spi_putreg(priv, STR71X_BSPI_TXR_OFFSET, ((uint16_t)*ptr) << 8);
           ptr++;
           buflen--;
         }
@@ -621,8 +626,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
           (void)spi_getreg(priv, STR71X_BSPI_RXR_OFFSET);
         }
 
-      /* There is a race condition where TFNE may go FALSE just before
-       * RFNE goes TRUE and this loop terminates prematurely.  The nasty little
+      /* There is a race condition where TFNE may go false just before
+       * RFNE goes true and this loop terminates prematurely.  The nasty little
        * delay in the following solves that (it could probably be tuned to
        * improve performance).
        */
@@ -648,7 +653,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   buflen - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -658,8 +663,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
-  FAR ubyte *ptr = (FAR ubyte*)buffer;
-  uint32 fifobytes = 0;
+  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  uint32_t fifobytes = 0;
 
   DEBUGASSERT(priv && priv->spibase);
 
@@ -685,7 +690,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
 
       while ((spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET) & STR71X_BSPICSR2_RFNE) != 0)
         {
-          *ptr++ = (ubyte)(spi_getreg(priv, STR71X_BSPI_RXR_OFFSET) >> 8);
+          *ptr++ = (uint8_t)(spi_getreg(priv, STR71X_BSPI_RXR_OFFSET) >> 8);
           fifobytes--;
         }
     }
@@ -713,7 +718,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct spi_dev_s *ret;
   irqstate_t flags;
-  uint16 reg16;
+  uint16_t reg16;
 
   flags = irqsave();
 #ifdef CONFIG_STR71X_BSPI0
