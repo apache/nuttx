@@ -46,7 +46,7 @@ GNU Toolchain Options
     CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
     CONFIG_STM32_DEVKITARM=y      : devkitARM under Windows
     CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_STM32_BUILDROOT=y	  : NuttX buildroot under Windows or Cygwin (default)
+    CONFIG_STM32_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin (default)
 
   If you are not using CONFIG_STM32_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
