@@ -60,7 +60,7 @@
 // NOTE:
 //   This should take a type of size_t, which for ARM GCC is unsigned long.
 //   but size_t may actually be a different different type, in sys/include.h,
-//   it is typed as uint32.  Need to REVISIT this.
+//   it is typed as uint32_t.  Need to REVISIT this.
 //
 //***************************************************************************
 
