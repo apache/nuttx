@@ -88,9 +88,9 @@ static const struct file_operations pipe_fops =
 #endif
 };
 
-static sem_t  g_pipesem     = { 1 };
-static uint32 g_pipeset     = 0;
-static uint32 g_pipecreated = 0;
+static sem_t  g_pipesem       = { 1 };
+static uint32_t g_pipeset     = 0;
+static uint32_t g_pipecreated = 0;
 
 /****************************************************************************
  * Private Functions

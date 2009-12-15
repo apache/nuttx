@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_CS89x0)
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 #include <string.h>
 #include <debug.h>
@@ -104,12 +106,12 @@ static FAR struct cs89x0_driver_s *g_cs89x0[CONFIG_CS89x0_NINTERFACES];
 
 /* CS89x0 register access */
 
-static uint16 cs89x0_getreg(struct cs89x0_driver_s *cs89x0, int offset);
+static uint16_t cs89x0_getreg(struct cs89x0_driver_s *cs89x0, int offset);
 static void cs89x0_putreg(struct cs89x0_driver_s *cs89x0, int offset,
-                          uint16 value);
-static uint16 cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr);
+                          uint16_t value);
+static uint16_t cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr);
 static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr,
-                            uint16 value);
+                            uint16_t value);
 
 /* Common TX logic */
 
@@ -119,7 +121,7 @@ static int  cs89x0_uiptxpoll(struct uip_driver_s *dev);
 /* Interrupt handling */
 
 static void cs89x0_receive(struct cs89x0_driver_s *cs89x0);
-static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16 isq);
+static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq);
 #if CONFIG_CS89x0_NINTERFACES > 1
 static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq);
 #endif
@@ -127,8 +129,8 @@ static int  cs89x0_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void cs89x0_polltimer(int argc, uint32 arg, ...);
-static void cs89x0_txtimeout(int argc, uint32 arg, ...);
+static void cs89x0_polltimer(int argc, uint32_t arg, ...);
+static void cs89x0_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -157,21 +159,21 @@ static int cs89x0_txavail(struct uip_driver_s *dev);
  *
  ****************************************************************************/
 
-static uint16 cs89x0_getreg(struct cs89x0_driver_s *cs89x0, int offset)
+static uint16_t cs89x0_getreg(struct cs89x0_driver_s *cs89x0, int offset)
 {
 #ifdef CONFIG_CS89x0_ALIGN16
   return getreg16(s89x0->cs_base + offset);
 #else
-  return (uint16)getreg32(s89x0->cs_base + offset);
+  return (uint16_t)getreg32(s89x0->cs_base + offset);
 #endif
 }
 
-static void cs89x0_putreg(struct cs89x0_driver_s *cs89x0, int offset, uint16 value)
+static void cs89x0_putreg(struct cs89x0_driver_s *cs89x0, int offset, uint16_t value)
 {
 #ifdef CONFIG_CS89x0_ALIGN16
   return putreg16(value, s89x0->cs_base + offset);
 #else
-  return (uint16)putreg32((uint32)value, s89x0->cs_base + offset);
+  return (uint16_t)putreg32((uint32_t)value, s89x0->cs_base + offset);
 #endif
 }
 
@@ -192,7 +194,7 @@ static void cs89x0_putreg(struct cs89x0_driver_s *cs89x0, int offset, uint16 val
  *
  ****************************************************************************/
 
-static uint16 cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr)
+static uint16_t cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr)
 {
   /* In memory mode, the CS89x0's internal registers and frame buffers are mapped
    * into a contiguous 4kb block providing direct access to the internal registers
@@ -205,7 +207,7 @@ static uint16 cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr)
 #ifdef CONFIG_CS89x0_ALIGN16
       return getreg16(s89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
 #else
-      return (uint16)getreg32(s89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
+      return (uint16_t)getreg32(s89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
 #endif
     }
 
@@ -217,16 +219,16 @@ static uint16 cs89x0_getppreg(struct cs89x0_driver_s *cs89x0, int addr)
 #endif
     {
 #ifdef CONFIG_CS89x0_ALIGN16
-      putreg16((uint16)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
+      putreg16((uint16_t)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
       return getreg16(s89x0->cs_base + CS89x0_PDATA_OFFSET);
 #else
-      putreg32((uint32)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
-      return (uint16)getreg32(s89x0->cs_base + CS89x0_PDATA_OFFSET);
+      putreg32((uint32_t)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
+      return (uint16_t)getreg32(s89x0->cs_base + CS89x0_PDATA_OFFSET);
 #endif
     }
 }
 
-static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr, uint16 value)
+static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr, uint16_t value)
 {
   /* In memory mode, the CS89x0's internal registers and frame buffers are mapped
    * into a contiguous 4kb block providing direct access to the internal registers
@@ -239,7 +241,7 @@ static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr, uint16 val
 #ifdef CONFIG_CS89x0_ALIGN16
       putreg16(value), cs89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
 #else
-      putreg32((uint32)value, cs89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
+      putreg32((uint32_t)value, cs89x0->cs_ppbase + (CS89x0_PDATA_OFFSET << ??));
 #endif
     }
 
@@ -251,11 +253,11 @@ static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr, uint16 val
 #endif
     {
 #ifdef CONFIG_CS89x0_ALIGN16
-      putreg16((uint16)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
+      putreg16((uint16_t)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
       putreg16(value, cs89x0->cs_base + CS89x0_PDATA_OFFSET);
 #else
-      putreg32((uint32)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
-      putreg32((uint32)value, cs89x0->cs_base + CS89x0_PDATA_OFFSET);
+      putreg32((uint32_t)addr, cs89x0->cs_base + CS89x0_PPTR_OFFSET);
+      putreg32((uint32_t)value, cs89x0->cs_base + CS89x0_PDATA_OFFSET);
 #endif
     }
 }
@@ -296,7 +298,7 @@ static int cs89x0_transmit(struct cs89x0_driver_s *cs89x0)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(cs89x0->cs_txtimeout, CS89x0_TXTIMEOUT, cs89x0_txtimeout, 1, (uint32)cs89x0);
+  (void)wd_start(cs89x0->cs_txtimeout, CS89x0_TXTIMEOUT, cs89x0_txtimeout, 1, (uint32_t)cs89x0);
   return OK;
 }
 
@@ -364,10 +366,10 @@ static int cs89x0_uiptxpoll(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16 isq)
+static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 {
-  uint16 *dest;
-  uint16 rxlength;
+  uint16_t *dest;
+  uint16_t rxlength;
   int nbytes;
 
   /* Check for errors and update statistics */
@@ -415,8 +417,8 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16 isq)
    * amount of data in cs89x0->cs_dev.d_len
    */
 
-  dest = (uint16*)cs89x0->cs_dev.d_buf;
-  for (nbytes = 0; nbytes < rxlength; nbytes += sizeof(uint16))
+  dest = (uint16_t*)cs89x0->cs_dev.d_buf;
+  for (nbytes = 0; nbytes < rxlength; nbytes += sizeof(uint16_t))
     {
       *dest++ = cs89x0_getreg(PPR_RXFRAMELOCATION);
     }  
@@ -476,7 +478,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16 isq)
  *
  ****************************************************************************/
 
-static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16 isq)
+static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 {
   /* Check for errors and update statistics.  The lower 6-bits of the ISQ
    * hold the register address causing the interrupt.  We got here because
@@ -569,7 +571,7 @@ static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq)
 static int cs89x0_interrupt(int irq, FAR void *context)
 {
   register struct cs89x0_driver_s *cs89x0 = s89x0_mapirq(irq);
-  uint16 isq;
+  uint16_t isq;
   
 #ifdef CONFIG_DEBUG
   if (!cs89x0)
@@ -645,7 +647,7 @@ static int cs89x0_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static void cs89x0_txtimeout(int argc, uint32 arg, ...)
+static void cs89x0_txtimeout(int argc, uint32_t arg, ...)
 {
   struct cs89x0_driver_s *cs89x0 = (struct cs89x0_driver_s *)arg;
 
@@ -677,7 +679,7 @@ static void cs89x0_txtimeout(int argc, uint32 arg, ...)
  *
  ****************************************************************************/
 
-static void cs89x0_polltimer(int argc, uint32 arg, ...)
+static void cs89x0_polltimer(int argc, uint32_t arg, ...)
 {
   struct cs89x0_driver_s *cs89x0 = (struct cs89x0_driver_s *)arg;
 
@@ -723,11 +725,11 @@ static int cs89x0_ifup(struct uip_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1, (uint32)cs89x0);
+  (void)wd_start(cs89x0->cs_txpoll, CS89x0_WDDELAY, cs89x0_polltimer, 1, (uint32_t)cs89x0);
 
   /* Enable the Ethernet interrupt */
 
-  cs89x0->cs_bifup = TRUE;
+  cs89x0->cs_bifup = true;
   up_enable_irq(CONFIG_CS89x0_IRQ);
   return OK;
 }
@@ -765,7 +767,7 @@ static int cs89x0_ifdown(struct uip_driver_s *dev)
 
   /* Reset the device */
 
-  cs89x0->cs_bifup = FALSE;
+  cs89x0->cs_bifup = false;
   irqrestore(flags);
   return OK;
 }

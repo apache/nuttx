@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_setup.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -46,6 +42,8 @@
 #include <sys/types.h>
 #include <sys/mount.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <assert.h>
@@ -84,7 +82,7 @@
  *
  ****************************************************************************/
 
-int bchlib_setup(const char *blkdev, boolean readonly, FAR void **handle)
+int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
 {
   FAR struct bchlib_s *bch;
   struct geometry geo;
@@ -143,7 +141,7 @@ int bchlib_setup(const char *blkdev, boolean readonly, FAR void **handle)
 
   /* Allocate the sector I/O buffer */
 
-  bch->buffer = (FAR ubyte *)malloc(bch->sectsize);
+  bch->buffer = (FAR uint8_t *)malloc(bch->sectsize);
   if (!bch->buffer)
     {
       fdbg("Failed to allocate sector buffer\n");

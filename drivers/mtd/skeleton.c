@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 
 #include <nuttx/ioctl.h>
@@ -73,11 +74,11 @@ struct skel_dev_s
 
 static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
 static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR ubyte *buf);
+                          FAR uint8_t *buf);
 static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const ubyte *buf);
+                           FAR const uint8_t *buf);
 static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR ubyte *buffer);
+                         FAR uint8_t *buffer);
 static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -117,7 +118,7 @@ static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
  ****************************************************************************/
 
 static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR ubyte *buf)
+                          FAR uint8_t *buf)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 
@@ -138,7 +139,7 @@ static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
  ****************************************************************************/
 
 static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const ubyte *buf)
+                           FAR const uint8_t *buf)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 
@@ -159,7 +160,7 @@ static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
  ****************************************************************************/
 
 static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR ubyte *buffer)
+                         FAR uint8_t *buffer)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 

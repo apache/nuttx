@@ -59,8 +59,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -80,7 +82,7 @@
 #include "usbdev_storage.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -112,14 +114,14 @@ struct usbstrg_alloc_s
 static void   usbstrg_ep0incomplete(FAR struct usbdev_ep_s *ep,
                 FAR struct usbdev_req_s *req);
 static struct usbdev_req_s *usbstrg_allocreq(FAR struct usbdev_ep_s *ep,
-                uint16 len);
+                uint16_t len);
 static void   usbstrg_freereq(FAR struct usbdev_ep_s *ep,
                 FAR struct usbdev_req_s *req);
-static int    usbstrg_mkstrdesc(ubyte id, struct usb_strdesc_s *strdesc);
+static int    usbstrg_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 #ifdef CONFIG_USBDEV_DUALSPEED
-static sint16 usbstrg_mkcfgdesc(ubyte *buf, ubyte speed);
+static int16_t usbstrg_mkcfgdesc(uint8_t *buf, uint8_t speed);
 #else
-static sint16 usbstrg_mkcfgdesc(ubyte *buf);
+static int16_t usbstrg_mkcfgdesc(uint8_t *buf);
 #endif
 
 /* Class Driver Operations (most at interrupt level) ************************/
@@ -296,7 +298,8 @@ static void usbstrg_ep0incomplete(FAR struct usbdev_ep_s *ep,
 {
   if (req->result || req->xfrd != req->len)
     {
-      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_REQRESULT), (uint16)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_REQRESULT),
+               (uint16_t)-req->result);
     }
 }
 
@@ -308,7 +311,8 @@ static void usbstrg_ep0incomplete(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static struct usbdev_req_s *usbstrg_allocreq(FAR struct usbdev_ep_s *ep, uint16 len)
+static struct usbdev_req_s *usbstrg_allocreq(FAR struct usbdev_ep_s *ep,
+                                             uint16_t len)
 {
   FAR struct usbdev_req_s *req;
 
@@ -354,7 +358,7 @@ static void usbstrg_freereq(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req
  *
  ****************************************************************************/
 
-static int usbstrg_mkstrdesc(ubyte id, struct usb_strdesc_s *strdesc)
+static int usbstrg_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
 {
   const char *str;
   int len;
@@ -419,18 +423,18 @@ static int usbstrg_mkstrdesc(ubyte id, struct usb_strdesc_s *strdesc)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static sint16 usbstrg_mkcfgdesc(ubyte *buf, ubyte speed)
+static int16_t usbstrg_mkcfgdesc(uint8_t *buf, uint8_t speed)
 #else
-static sint16 usbstrg_mkcfgdesc(ubyte *buf)
+static int16_t usbstrg_mkcfgdesc(uint8_t *buf)
 #endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = (struct usb_cfgdesc_s*)buf;
 #ifdef CONFIG_USBDEV_DUALSPEED
   FAR struct usb_epdesc_s *epdesc;
-  boolean hispeed = (speed == USB_SPEED_HIGH);
-  uint16 bulkmxpacket;
+  bool hispeed = (speed == USB_SPEED_HIGH);
+  uint16_t bulkmxpacket;
 #endif
-  uint16 totallen;
+  uint16_t totallen;
 
   /* This is the total length of the configuration (not necessarily the
    * size that we will be sending now.
@@ -534,7 +538,7 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
 
   /* Pre-allocate the IN bulk endpoint */
 
-  priv->epbulkin = DEV_ALLOCEP(dev, USBSTRG_EPINBULK_ADDR, TRUE, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkin = DEV_ALLOCEP(dev, USBSTRG_EPINBULK_ADDR, true, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_EPBULKINALLOCFAIL), 0);
@@ -545,7 +549,7 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
 
   /* Pre-allocate the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, USBSTRG_EPOUTBULK_ADDR, FALSE, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkout = DEV_ALLOCEP(dev, USBSTRG_EPOUTBULK_ADDR, false, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_EPBULKOUTALLOCFAIL), 0);
@@ -562,7 +566,8 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
       reqcontainer->req = usbstrg_allocreq(priv->epbulkout, CONFIG_USBSTRG_BULKOUTREQLEN);
       if (reqcontainer->req == NULL)
         {
-          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDALLOCREQ), (uint16)-ret);
+          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDALLOCREQ),
+                   (uint16_t)-ret);
           ret = -ENOMEM;
           goto errout;
         }
@@ -578,7 +583,8 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
       reqcontainer->req = usbstrg_allocreq(priv->epbulkin, CONFIG_USBSTRG_BULKINREQLEN);
       if (reqcontainer->req == NULL)
         {
-          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_WRALLOCREQ), (uint16)-ret);
+          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_WRALLOCREQ),
+                   (uint16_t)-ret);
           ret = -ENOMEM;
           goto errout;
         }
@@ -723,13 +729,14 @@ static void usbstrg_unbind(FAR struct usbdev_s *dev)
  *
  ****************************************************************************/
 
-static int usbstrg_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *ctrl)
+static int usbstrg_setup(FAR struct usbdev_s *dev,
+                         FAR const struct usb_ctrlreq_s *ctrl)
 {
   FAR struct usbstrg_dev_s *priv;
   FAR struct usbdev_req_s *ctrlreq;
-  uint16 value;
-  uint16 index;
-  uint16 len;
+  uint16_t value;
+  uint16_t index;
+  uint16_t len;
   int ret = -EOPNOTSUPP;
 
 #ifdef CONFIG_DEBUG
@@ -980,7 +987,7 @@ static int usbstrg_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *c
       ret            = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)
         {
-          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_EPRESPQ), (uint16)-ret);
+          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_EPRESPQ), (uint16_t)-ret);
 #if 0 /* Not necessary */
           ctrlreq->result = OK;
           usbstrg_ep0incomplete(dev->ep0, ctrlreq);
@@ -1077,13 +1084,13 @@ static void usbstrg_lununinitialize(struct usbstrg_lun_s *lun)
  *
  ****************************************************************************/
 
-int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
+int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, uint8_t config)
 {
   FAR struct usbstrg_req_s *privreq;
   FAR struct usbdev_req_s *req;
 #ifdef CONFIG_USBDEV_DUALSPEED
   struct usb_epdesc_s *epdesc;
-  uint16 bulkmxpacket;
+  uint16_t bulkmxpacket;
 #endif
   int i;
   int ret = 0;
@@ -1129,9 +1136,9 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   bulkmxpacket = USBSTRG_BULKMAXPACKET(hispeed);
   epdesc       = USBSTRG_EPBULKINDESC(hispeed);
-  ret          = EP_CONFIGURE(priv->epbulkin, epdesc, FALSE);
+  ret          = EP_CONFIGURE(priv->epbulkin, epdesc, false);
 #else
-  ret          = EP_CONFIGURE(priv->epbulkin, &g_fsepbulkindesc, FALSE);
+  ret          = EP_CONFIGURE(priv->epbulkin, &g_fsepbulkindesc, false);
 #endif
   if (ret < 0)
     {
@@ -1145,9 +1152,9 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
 
 #ifdef CONFIG_USBDEV_DUALSPEED
   epdesc       = USBSTRG_EPBULKINDESC(hispeed);
-  ret          = EP_CONFIGURE(priv->epbulkout, epdesc, TRUE);
+  ret          = EP_CONFIGURE(priv->epbulkout, epdesc, true);
 #else
-  ret          = EP_CONFIGURE(priv->epbulkout, &g_fsepbulkoutdesc, TRUE);
+  ret          = EP_CONFIGURE(priv->epbulkout, &g_fsepbulkoutdesc, true);
 #endif
   if (ret < 0)
     {
@@ -1169,7 +1176,7 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config)
       ret           = EP_SUBMIT(priv->epbulkout, req);
       if (ret < 0)
         {
-          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDSUBMIT), (uint16)-ret);
+          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDSUBMIT), (uint16_t)-ret);
           goto errout;
         }
     }
@@ -1258,7 +1265,8 @@ void usbstrg_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
       break;
 
     default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_WRUNEXPECTED), (uint16)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_WRUNEXPECTED),
+               (uint16_t)-req->result);
       break;
     };
 
@@ -1330,7 +1338,8 @@ void usbstrg_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
 
     default: /* Some other error occurred */
       {
-        usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDUNEXPECTED), (uint16)-req->result);
+        usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDUNEXPECTED),
+                 (uint16_t)-req->result);
 
         /* Return the read request to the bulk out endpoint for re-filling */
 
@@ -1341,7 +1350,8 @@ void usbstrg_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
         ret = EP_SUBMIT(priv->epbulkout, req);
         if (ret != OK)
           {
-            usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDCOMPLETERDSUBMIT), (uint16)-ret);
+            usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_RDCOMPLETERDSUBMIT),
+                     (uint16_t)-ret);
           }
       }
       break;
@@ -1366,11 +1376,11 @@ void usbstrg_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req
  *
  * Input parameters:
  *   priv  - Private state structure for this USB storage instance
- *   stall - TRUE is the action failed and a stall is required
+ *   stall - true is the action failed and a stall is required
  *
  ****************************************************************************/
 
-void usbstrg_deferredresponse(FAR struct usbstrg_dev_s *priv, boolean failed)
+void usbstrg_deferredresponse(FAR struct usbstrg_dev_s *priv, bool failed)
 {
   FAR struct usbdev_s *dev;
   FAR struct usbdev_req_s *ctrlreq;
@@ -1398,7 +1408,8 @@ void usbstrg_deferredresponse(FAR struct usbstrg_dev_s *priv, boolean failed)
       ret            = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)
         {
-          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_DEFERREDRESPSUBMIT), (uint16)-ret);
+          usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_DEFERREDRESPSUBMIT),
+                   (uint16_t)-ret);
 #if 0 /* Not necessary */
           ctrlreq->result = OK;
           usbstrg_ep0incomplete(dev->ep0, ctrlreq);
@@ -1526,7 +1537,7 @@ errout:
 
 int usbstrg_bindlun(FAR void *handle, FAR const char *drvrpath,
                     unsigned int lunno, off_t startsector, size_t nsectors,
-                    boolean readonly)
+                    bool readonly)
 {
   FAR struct usbstrg_alloc_s *alloc = (FAR struct usbstrg_alloc_s *)handle;
   FAR struct usbstrg_dev_s *priv;
@@ -1616,7 +1627,7 @@ int usbstrg_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   if (!priv->iobuffer)
     {
-      priv->iobuffer = (ubyte*)malloc(geo.geo_sectorsize);
+      priv->iobuffer = (uint8_t*)malloc(geo.geo_sectorsize);
       if (!priv->iobuffer)
         {
           usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_ALLOCIOBUFFER), geo.geo_sectorsize);
@@ -1627,14 +1638,14 @@ int usbstrg_bindlun(FAR void *handle, FAR const char *drvrpath,
   else if (priv->iosize < geo.geo_sectorsize)
     {
       void *tmp;
-      tmp = (ubyte*)realloc(priv->iobuffer, geo.geo_sectorsize);
+      tmp = (uint8_t*)realloc(priv->iobuffer, geo.geo_sectorsize);
       if (!tmp)
         {
           usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_REALLOCIOBUFFER), geo.geo_sectorsize);
           return -ENOMEM;
         }
 
-      priv->iobuffer = (ubyte*)tmp;
+      priv->iobuffer = (uint8_t*)tmp;
       priv->iosize   = geo.geo_sectorsize;
     }
 
@@ -1647,7 +1658,7 @@ int usbstrg_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   if (!inode->u.i_bops->write)
     {
-      lun->readonly = TRUE;
+      lun->readonly = true;
     }
   return OK;
 }
@@ -1772,7 +1783,7 @@ int usbstrg_exportluns(FAR void *handle)
 #endif
   if (ret != OK)
     {
-      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_THREADCREATE), (uint16)-ret);
+      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_THREADCREATE), (uint16_t)-ret);
       goto errout_with_mutex;
     }
 
@@ -1781,7 +1792,7 @@ int usbstrg_exportluns(FAR void *handle)
   ret = usbdev_register(&drvr->drvr);
   if (ret != OK)
     {
-      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_DEVREGISTER), (uint16)-ret);
+      usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_DEVREGISTER), (uint16_t)-ret);
       goto errout_with_mutex;
     }
 

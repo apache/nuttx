@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/usbdev_trace.h>
@@ -76,7 +77,7 @@
  *
  *******************************************************************************/
 
-void usbtrace_trprintf(trprintf_t trprintf, uint16 event, uint16 value)
+void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value)
 {
   switch (event)
     {
@@ -129,11 +130,11 @@ void usbtrace_trprintf(trprintf_t trprintf, uint16 event, uint16 value)
       break;
 
     case TRACE_EPSTALL:
-      trprintf("Endpoint stall(TRUE): %04x\n", value);
+      trprintf("Endpoint stall(true): %04x\n", value);
       break;
 
     case TRACE_EPRESUME:
-      trprintf("Endpoint stall(FALSE): %04x\n", value);
+      trprintf("Endpoint stall(false): %04x\n", value);
       break;
 
     case TRACE_DEVALLOCEP:

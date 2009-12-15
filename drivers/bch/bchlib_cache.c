@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_cache.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-
+#include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -97,7 +93,7 @@ int bchlib_flushsector(FAR struct bchlib_s *bch)
         {
           fdbg("Write failed: %d\n");
         }
-      bch->dirty = FALSE;
+      bch->dirty = false;
     }
   return (int)ret;
 }

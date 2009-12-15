@@ -38,8 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -111,8 +113,8 @@ static void rwb_semtake(sem_t *sem)
  * Name: rwb_overlap
  ****************************************************************************/
 
-static inline boolean rwb_overlap(off_t blockstart1, size_t nblocks1,
-                                  off_t blockstart2, size_t nblocks2)
+static inline bool rwb_overlap(off_t blockstart1, size_t nblocks1,
+                               off_t blockstart2, size_t nblocks2)
 {
   off_t blockend1 = blockstart1 + nblocks1;
   off_t blockend2 = blockstart2 + nblocks2;
@@ -122,11 +124,11 @@ static inline boolean rwb_overlap(off_t blockstart1, size_t nblocks1,
   if ((blockend1   < blockstart2) || /* Wholly "below" */
       (blockstart1 > blockend2))     /* Wholly "above" */
     {
-      return FALSE;
+      return false;
     }
   else
     {
-      return TRUE;
+      return true;
     }
 }
 
@@ -228,8 +230,8 @@ static inline void rwb_wrcanceltimeout(struct rwbuffer_s *rwb)
 
 #ifdef CONFIG_FS_WRITEBUFFER
 static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
-                               off_t startblock, uint32 nblocks,
-                               FAR const ubyte *wrbuffer)
+                               off_t startblock, uint32_t nblocks,
+                               FAR const uint8_t *wrbuffer)
 {
   int ret;
 
@@ -304,7 +306,7 @@ static inline void rwb_resetrhbuffer(struct rwbuffer_s *rwb)
 #ifdef CONFIG_FS_READAHEAD
 static inline void
 rwb_bufferread(struct rwbuffer_s *rwb,  off_t startblock,
-               size_t nblocks, ubyte **rdbuffer)
+               size_t nblocks, uint8_t **rdbuffer)
 {
   /* We assume that (1) the caller holds the readAheadBufferSemphore, and (2)
    * that the caller already knows that all of the blocks are in the
@@ -319,7 +321,7 @@ rwb_bufferread(struct rwbuffer_s *rwb,  off_t startblock,
 
   /* Get the byte address in the read-ahead buffer */
 
-  ubyte *rhbuffer    = rwb->rhbuffer + byteoffset;
+  uint8_t *rhbuffer    = rwb->rhbuffer + byteoffset;
 
   /* Copy the data from the read-ahead buffer into the IO buffer */
 
@@ -386,7 +388,7 @@ static int rwb_rhreload(struct rwbuffer_s *rwb, off_t startblock)
 
 int rwb_initialize(FAR struct rwbuffer_s *rwb)
 {
-  uint32 allocsize;
+  uint32_t allocsize;
 
   /* Sanity checking */
 
@@ -492,10 +494,10 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
  * Name: rwb_read
  ****************************************************************************/
 
-int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32 nblocks,
-             FAR ubyte *rdbuffer)
+int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
+             FAR uint8_t *rdbuffer)
 {
-  uint32 remaining;
+  uint32_t remaining;
  
   fvdbg("startblock=%ld nblocks=%ld rdbuffer=%p\n",
         (long)startblock, (long)nblocks, rdbuffer);
@@ -593,7 +595,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32 nblocks,
  ****************************************************************************/
 
 int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
-              size_t nblocks, FAR const ubyte *wrbuffer)
+              size_t nblocks, FAR const uint8_t *wrbuffer)
 {
   int ret;
 

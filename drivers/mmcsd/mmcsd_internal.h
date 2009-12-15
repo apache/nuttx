@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 /****************************************************************************
@@ -93,7 +93,7 @@ extern "C" {
 #endif
 
 #if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-EXTERN void mmcsd_dmpcsd(FAR const ubyte *csd, ubyte cardtype);
+EXTERN void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype);
 #else
 #  define mmcsd_dmpcsd(csd,cadtype)
 #endif

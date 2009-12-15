@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/can.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
@@ -58,7 +60,7 @@
 #include <arch/irq.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define HALF_SECOND_MSEC 500
@@ -113,7 +115,7 @@ static int can_open(FAR struct file *filep)
 {
   FAR struct inode     *inode = filep->f_inode;
   FAR struct can_dev_s *dev   = inode->i_private;
-  ubyte                 tmp;
+  uint8_t               tmp;
   int                   ret   = OK;
 
   /* If the port is the middle of closing, wait until the close is finished */
@@ -132,7 +134,7 @@ static int can_open(FAR struct file *filep)
       tmp = dev->cd_ocount + 1;
       if (tmp == 0)
         {
-          /* More than 255 opens; ubyte overflows to zero */
+          /* More than 255 opens; uint8_t overflows to zero */
 
           ret = -EMFILE;
         }
@@ -157,7 +159,7 @@ static int can_open(FAR struct file *filep)
 
                   /* Finally, Enable the CAN RX interrupt */
 
-                  dev_rxint(dev, TRUE);
+                  dev_rxint(dev, true);
 
                   /* Save the new open count on success */
 
@@ -210,7 +212,7 @@ static int can_close(FAR struct file *filep)
 
           /* Stop accepting input */
 
-          dev_rxint(dev, FALSE);
+          dev_rxint(dev, false);
 
           /* Now we wait for the transmit FIFO to clear */
 
@@ -347,7 +349,7 @@ return_with_irqdisabled:
 
 static int can_xmit(FAR struct can_dev_s *dev)
 {
-  boolean enable = FALSE;
+  bool enable = false;
   int ret = OK;
 
   /* Check if the xmit FIFO is empty */
@@ -360,7 +362,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
 
       /* Make sure the TX done interrupts are enabled */
 
-      enable = (ret == OK ? TRUE : FALSE);
+      enable = (ret == OK ? true : false);
     }
   dev_txint(dev, enable);
   return ret;
@@ -376,7 +378,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer, size_t 
   FAR struct can_dev_s  *dev   = inode->i_private;
   FAR struct can_fifo_s *fifo  = &dev->cd_xmit;
   FAR struct can_msg_s  *msg;
-  boolean                empty = FALSE;
+  bool                   empty = false;
   ssize_t                nsent = 0;
   irqstate_t             flags;
   int                    nexttail;
@@ -632,10 +634,10 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
  *
  ************************************************************************************/
 
-int can_receive(FAR struct can_dev_s *dev, uint16 hdr, FAR ubyte *data)
+int can_receive(FAR struct can_dev_s *dev, uint16_t hdr, FAR uint8_t *data)
 {
   FAR struct can_fifo_s *fifo = &dev->cd_recv;
-  FAR ubyte             *dest;
+  FAR uint8_t           *dest;
   int                    nexttail;
   int                    err = -ENOMEM;
   int                    i;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_register.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-
+#include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -52,7 +47,7 @@
 #include "bch_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -80,7 +75,7 @@
  *
  ****************************************************************************/
 
-int bchdev_register(const char *blkdev, const char *chardev, boolean readonly)
+int bchdev_register(const char *blkdev, const char *chardev, bool readonly)
 {
   FAR void *handle;
   int ret;

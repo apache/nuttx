@@ -42,6 +42,8 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,7 +66,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The maximum number of references on the driver (because a ubyte is used.
+/* The maximum number of references on the driver (because a uint8_t is used.
  * Use a larger type if more references are needed.
  */
 
@@ -100,32 +102,32 @@
 struct mmcsd_state_s
 {
   FAR struct sdio_dev_s *dev;      /* The SDIO device bound to this instance */
-  ubyte  crefs;                    /* Open references on the driver */
+  uint8_t  crefs;                  /* Open references on the driver */
   sem_t  sem;                      /* Assures mutually exclusive access to the slot */
 
   /* Status flags */
 
-  ubyte probed:1;                  /* TRUE: mmcsd_probe() discovered a card */
-  ubyte widebus:1;                 /* TRUE: Wide 4-bit bus selected */
-  ubyte mediachanged:1;            /* TRUE: Media changed since last check */
-  ubyte wrbusy:1;                  /* TRUE: Last transfer was a write, card may be busy */
-  ubyte wrprotect:1;               /* TRUE: Card is write protected (from CSD) */
-  ubyte locked:1;                  /* TRUE: Media is locked (from R1) */
-  ubyte dsrimp:1;                  /* TRUE: card supports CMD4/DSR setting (from CSD) */
+  uint8_t probed:1;                /* true: mmcsd_probe() discovered a card */
+  uint8_t widebus:1;               /* true: Wide 4-bit bus selected */
+  uint8_t mediachanged:1;          /* true: Media changed since last check */
+  uint8_t wrbusy:1;                /* true: Last transfer was a write, card may be busy */
+  uint8_t wrprotect:1;             /* true: Card is write protected (from CSD) */
+  uint8_t locked:1;                /* true: Media is locked (from R1) */
+  uint8_t dsrimp:1;                /* true: card supports CMD4/DSR setting (from CSD) */
 #ifdef CONFIG_SDIO_DMA
-  ubyte dma:1;                     /* TRUE: hardware supports DMA */
+  uint8_t dma:1;                   /* true: hardware supports DMA */
 #endif
 
-  ubyte mode:2;                    /* (See MMCSDMODE_* definitions) */
-  ubyte type:4;                    /* Card type (See MMCSD_CARDTYPE_* definitions) */
-  ubyte buswidth:4;                /* Bus widthes supported (SD only) */
-  uint16 selblocklen;              /* The currently selected block length */
-  uint16 rca;                      /* Relative Card Address (RCS) register */
+  uint8_t mode:2;                  /* (See MMCSDMODE_* definitions) */
+  uint8_t type:4;                  /* Card type (See MMCSD_CARDTYPE_* definitions) */
+  uint8_t buswidth:4;              /* Bus widthes supported (SD only) */
+  uint16_t selblocklen;            /* The currently selected block length */
+  uint16_t rca;                    /* Relative Card Address (RCS) register */
 
   /* Memory card geometry (extracted from the CSD) */
 
-  ubyte  blockshift;               /* Log2 of blocksize */
-  uint16 blocksize;                /* Read block length (== block size) */
+  uint8_t  blockshift;               /* Log2 of blocksize */
+  uint16_t blocksize;              /* Read block length (== block size) */
   size_t nblocks;                  /* Number of blocks */
   size_t capacity;                 /* Total capacity of volume */
 
@@ -147,47 +149,51 @@ static void    mmcsd_takesem(FAR struct mmcsd_state_s *priv);
 
 /* Command/response helpers *************************************************/
 
-static int     mmcsd_sendcmdpoll(FAR struct mmcsd_state_s *priv, uint32 cmd,
-                 uint32 arg);
-static int     mmcsd_recvR1(FAR struct mmcsd_state_s *priv, uint32 cmd);
-static int     mmcsd_recvR6(FAR struct mmcsd_state_s *priv, uint32 cmd);
-static int     mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2]);
+static int     mmcsd_sendcmdpoll(FAR struct mmcsd_state_s *priv,
+                 uint32_t cmd, uint32_t arg);
+static int     mmcsd_recvR1(FAR struct mmcsd_state_s *priv, uint32_t cmd);
+static int     mmcsd_recvR6(FAR struct mmcsd_state_s *priv, uint32_t cmd);
+static int     mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2]);
 
-static void    mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32 csd[4]);
+static void    mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv,
+                 uint32_t csd[4]);
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-static void    mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32 cid[4]);
+static void    mmcsd_decodeCID(FAR struct mmcsd_state_s *priv,
+                 uint32_t cid[4]);
 #else
 #  define mmcsd_decodeCID(priv,cid)
 #endif
-static void    mmcsd_decodeSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2]);
+static void    mmcsd_decodeSCR(FAR struct mmcsd_state_s *priv,
+                uint32_t scr[2]);
 
-static int     mmcsd_getR1(FAR struct mmcsd_state_s *priv, FAR uint32 *r1);
-static int     mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32 status);
+static int     mmcsd_getR1(FAR struct mmcsd_state_s *priv, FAR uint32_t *r1);
+static int     mmcsd_verifystate(FAR struct mmcsd_state_s *priv,
+                 uint32_t status);
 
 /* Transfer helpers *********************************************************/
 
-static boolean mmcsd_wrprotected(FAR struct mmcsd_state_s *priv);
+static bool    mmcsd_wrprotected(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
-                 sdio_eventset_t failevents, uint32 timeout);
+                 sdio_eventset_t failevents, uint32_t timeout);
 static int     mmcsd_transferready(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_stoptransmission(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_setblocklen(FAR struct mmcsd_state_s *priv,
-                 uint32 blocklen);
+                 uint32_t blocklen);
 static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
-                 FAR ubyte *buffer, off_t startblock);
+                 FAR uint8_t *buffer, off_t startblock);
 static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
-                 FAR ubyte *buffer, off_t startblock, size_t nblocks);
+                 FAR uint8_t *buffer, off_t startblock, size_t nblocks);
 #ifdef CONFIG_FS_READAHEAD
-static ssize_t mmcsd_reload(FAR void *dev, FAR ubyte *buffer,
+static ssize_t mmcsd_reload(FAR void *dev, FAR uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 #endif
 #ifdef CONFIG_FS_WRITABLE
 static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
-                 FAR const ubyte *buffer, off_t startblock);
+                 FAR const uint8_t *buffer, off_t startblock);
 static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
-                 FAR const ubyte *buffer, off_t startblock, size_t nblocks);
+                 FAR const uint8_t *buffer, off_t startblock, size_t nblocks);
 #ifdef CONFIG_FS_WRITEBUFFER
-static ssize_t mmcsd_flush(FAR void *dev, FAR const ubyte *buffer,
+static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 #endif
 #endif
@@ -272,8 +278,8 @@ static void mmcsd_takesem(FAR struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static int mmcsd_sendcmdpoll(FAR struct mmcsd_state_s *priv, uint32 cmd,
-                             uint32 arg)
+static int mmcsd_sendcmdpoll(FAR struct mmcsd_state_s *priv, uint32_t cmd,
+                             uint32_t arg)
 {
   int ret;
 
@@ -310,7 +316,7 @@ static inline int mmcsd_sendcmd4(FAR struct mmcsd_state_s *priv)
    * the DSR via CMD4 or not.
    */
 
-  if (priv->dsrimp != FALSE)
+  if (priv->dsrimp != false)
     {
       /* CMD4 = SET_DSR will set the cards DSR register. The DSR and CMD4
        * support are optional.  However, since this is a broadcast command
@@ -338,9 +344,9 @@ static inline int mmcsd_sendcmd4(FAR struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static int mmcsd_recvR1(FAR struct mmcsd_state_s *priv, uint32 cmd)
+static int mmcsd_recvR1(FAR struct mmcsd_state_s *priv, uint32_t cmd)
 {
-  uint32 r1;
+  uint32_t r1;
   int ret;
 
   /* Get the R1 response from the hardware */
@@ -373,9 +379,9 @@ static int mmcsd_recvR1(FAR struct mmcsd_state_s *priv, uint32 cmd)
  *
  ****************************************************************************/
 
-static int mmcsd_recvR6(FAR struct mmcsd_state_s *priv, uint32 cmd)
+static int mmcsd_recvR6(FAR struct mmcsd_state_s *priv, uint32_t cmd)
 {
-  uint32 r6 = 0;
+  uint32_t r6 = 0;
   int ret;
 
   /* R6  Published RCA Response (48-bit, SD card only)
@@ -400,7 +406,7 @@ static int mmcsd_recvR6(FAR struct mmcsd_state_s *priv, uint32 cmd)
         {
           /* No, save the RCA and return success */
 
-          priv->rca = (uint16)(r6 >> 16);
+          priv->rca = (uint16_t)(r6 >> 16);
           return OK;
         }
 
@@ -424,7 +430,7 @@ static int mmcsd_recvR6(FAR struct mmcsd_state_s *priv, uint32 cmd)
  *
  ****************************************************************************/
 
-static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
+static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 {
   int ret;
 
@@ -439,7 +445,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
 
   /* Send CMD55 APP_CMD with argument as card's RCA */
 
-  mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32)priv->rca << 16);
+  mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32_t)priv->rca << 16);
   ret = mmcsd_recvR1(priv, SD_CMD55);
   if (ret != OK)
     {
@@ -449,7 +455,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
 
   /* Setup up to receive data with interrupt mode */
 
-  SDIO_RECVSETUP(priv->dev, (FAR ubyte*)scr, 8);
+  SDIO_RECVSETUP(priv->dev, (FAR uint8_t*)scr, 8);
 
   /* Send ACMD51 SD_APP_SEND_SCR with argument as 0 to start data receipt */
 
@@ -484,22 +490,22 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
  *   OK on success; a negated ernno on failure.  On success, the following
  *   values will be set in the driver state structure:
  *
- *   priv->dsrimp      TRUE: card supports CMD4/DSR setting (from CSD)
- *   priv->wrprotect   TRUE: card is write protected (from CSD)
+ *   priv->dsrimp      true: card supports CMD4/DSR setting (from CSD)
+ *   priv->wrprotect   true: card is write protected (from CSD)
  *   priv->blocksize   Read block length (== block size)
  *   priv->nblocks     Number of blocks
  *   priv->capacity    Total capacity of volume
  *
  ****************************************************************************/
 
-static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32 csd[4])
+static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
 {
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
   struct mmcsd_csd_s decoded;
 #endif
   unsigned int readbllen;
-  boolean permwriteprotect;
-  boolean tmpwriteprotect;
+  bool permwriteprotect;
+  bool tmpwriteprotect;
 
   /* Word 1: Bits 127-96:
    *
@@ -590,7 +596,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32 csd[4])
        *   512*1024 = (1 << 19)
        */
 
-      uint32 csize                   = ((csd[1] & 0x3f) << 16) | (csd[2] >> 16);
+      uint32_t csize                 = ((csd[1] & 0x3f) << 16) | (csd[2] >> 16);
       priv->capacity                 = (csize + 1) << 19;
       priv->blockshift               = 9;
       priv->blocksize                = 1 << 9;
@@ -607,10 +613,10 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32 csd[4])
     {
       /* C_SIZE: 73:64 from Word 2 and 63:62 from Word 3 */
 
-      uint16 csize                   = ((csd[1] & 0x03ff) << 2) | ((csd[2] >> 30) & 3);
-      ubyte  csizemult               = (csd[2] >> 15) & 7;
+      uint16_t csize                 = ((csd[1] & 0x03ff) << 2) | ((csd[2] >> 30) & 3);
+      uint8_t  csizemult               = (csd[2] >> 15) & 7;
 
-      priv->nblocks                  = ((uint32)csize + 1) * (1 << (csizemult + 2));
+      priv->nblocks                  = ((uint32_t)csize + 1) * (1 << (csizemult + 2));
       priv->blockshift               = readbllen;
       priv->blocksize                = (1 << readbllen);
       priv->capacity                 = (priv->nblocks << readbllen);
@@ -756,7 +762,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32 csd[4])
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32 cid[4])
+static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
 {
   struct mmcsd_cid_s decoded;
 
@@ -819,7 +825,7 @@ static void mmcsd_decodeCID(FAR struct mmcsd_state_s *priv, uint32 cid[4])
  *
  ****************************************************************************/
 
-static void mmcsd_decodeSCR(FAR struct mmcsd_state_s *priv, uint32 scr[2])
+static void mmcsd_decodeSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 {
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
 struct mmcsd_scr_s decoded;
@@ -884,9 +890,9 @@ struct mmcsd_scr_s decoded;
  *
  ****************************************************************************/
 
-static int mmcsd_getR1(FAR struct mmcsd_state_s *priv, FAR uint32 *r1)
+static int mmcsd_getR1(FAR struct mmcsd_state_s *priv, FAR uint32_t *r1)
 {
-  uint32 localR1;
+  uint32_t localR1;
   int ret;
 
   DEBUGASSERT(priv != NULL && r1 != NULL);
@@ -928,9 +934,9 @@ static int mmcsd_getR1(FAR struct mmcsd_state_s *priv, FAR uint32 *r1)
  *
  ****************************************************************************/
 
-static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32 state)
+static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32_t state)
 {
-  uint32 r1;
+  uint32_t r1;
   int ret;
 
   /* Get the current R1 status from the card */
@@ -948,7 +954,7 @@ static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32 state)
     {
       /* Yes.. return Success */
 
-      priv->wrbusy = FALSE;
+      priv->wrbusy = false;
       return OK;
     }
   return -EINVAL;
@@ -967,7 +973,7 @@ static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32 state)
  *
  ****************************************************************************/
 
-static boolean mmcsd_wrprotected(FAR struct mmcsd_state_s *priv)
+static bool mmcsd_wrprotected(FAR struct mmcsd_state_s *priv)
 {
   /* Check if the card is locked (priv->locked) or write protected either (1)
    * via software as reported via the CSD and retained in priv->wrprotect or
@@ -987,7 +993,7 @@ static boolean mmcsd_wrprotected(FAR struct mmcsd_state_s *priv)
  ****************************************************************************/
 
 static int mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
-                           sdio_eventset_t failevents, uint32 timeout)
+                           sdio_eventset_t failevents, uint32_t timeout)
 {
   sdio_eventset_t wkupevent;
 
@@ -1027,10 +1033,10 @@ static int mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
 
 static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
 {
-  uint32 starttime;
-  uint32 elapsed;
-  uint32 r1;
-  int ret;
+  uint32_t starttime;
+  uint32_t elapsed;
+  uint32_t r1;
+  int      ret;
 
   /* First, check if the card has been removed. */
 
@@ -1078,7 +1084,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
         {
           /* Yes.. return Success */
 
-          priv->wrbusy = FALSE;
+          priv->wrbusy = false;
           return OK;
         }
 
@@ -1140,7 +1146,7 @@ static int mmcsd_stoptransmission(FAR struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
-static int mmcsd_setblocklen(FAR struct mmcsd_state_s *priv, uint32 blocklen)
+static int mmcsd_setblocklen(FAR struct mmcsd_state_s *priv, uint32_t blocklen)
 {
   int ret = OK;
 
@@ -1177,7 +1183,7 @@ static int mmcsd_setblocklen(FAR struct mmcsd_state_s *priv, uint32 blocklen)
  ****************************************************************************/
 
 static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
-                                FAR ubyte *buffer, off_t startblock)
+                                FAR uint8_t *buffer, off_t startblock)
 {
   off_t offset;
   int ret;
@@ -1282,7 +1288,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
  ****************************************************************************/
 
 static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
-                                  FAR ubyte *buffer, off_t startblock,
+                                  FAR uint8_t *buffer, off_t startblock,
                                   size_t nblocks)
 {
   size_t nbytes;
@@ -1397,7 +1403,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_FS_READAHEAD
-static ssize_t mmcsd_reload(FAR void *dev, FAR ubyte *buffer,
+static ssize_t mmcsd_reload(FAR void *dev, FAR uint8_t *buffer,
                             off_t startblock, size_t nblocks)
 {
   FAR struct mmcsd_state_s *priv = (FAR struct mmcsd_state_s *)dev;
@@ -1429,7 +1435,7 @@ static ssize_t mmcsd_reload(FAR void *dev, FAR ubyte *buffer,
  ****************************************************************************/
 
 static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
-                                 FAR const ubyte *buffer, off_t startblock)
+                                 FAR const uint8_t *buffer, off_t startblock)
 {
   off_t offset;
   int ret;
@@ -1512,7 +1518,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
    * write complete at the beginning of the next transfer.
    */
 
-  priv->wrbusy = TRUE;
+  priv->wrbusy = true;
 
   /* Wait for the transfer to complete */
 
@@ -1537,7 +1543,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
  ****************************************************************************/
 
 static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
-                                   FAR const ubyte *buffer, off_t startblock,
+                                   FAR const uint8_t *buffer, off_t startblock,
                                    size_t nblocks)
 {
   off_t  offset;
@@ -1654,7 +1660,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
    * write complete at the beginning of the next transfer.
    */
 
-  priv->wrbusy = TRUE;
+  priv->wrbusy = true;
 
   /* Wait for the transfer to complete */
 
@@ -1688,7 +1694,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
  ****************************************************************************/
 
 #if defined(CONFIG_FS_WRITABLE) && defined(CONFIG_FS_WRITEBUFFER)
-static ssize_t mmcsd_flush(FAR void *dev, FAR const ubyte *buffer,
+static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
                            off_t startblock, size_t nblocks)
 {
   FAR struct mmcsd_state_s *priv = (FAR struct mmcsd_state_s *)dev;
@@ -1878,23 +1884,23 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
         {
           /* Yes.. return the geometry of the card */
 
-          geometry->geo_available     = TRUE;
+          geometry->geo_available     = true;
           geometry->geo_mediachanged  = priv->mediachanged;
 #ifdef CONFIG_FS_WRITABLE
           geometry->geo_writeenabled  = !mmcsd_wrprotected(priv);
 #else
-          geometry->geo_writeenabled  = FALSE;
+          geometry->geo_writeenabled  = false;
 #endif
           geometry->geo_nsectors      = priv->nblocks;
           geometry->geo_sectorsize    = priv->blocksize;
 
-          fvdbg("available: TRUE mediachanged: %s writeenabled: %s\n",
-                 geometry->geo_mediachanged ? "TRUE" : "FALSE",
-                 geometry->geo_writeenabled ? "TRUE" : "FALSE");
+          fvdbg("available: true mediachanged: %s writeenabled: %s\n",
+                 geometry->geo_mediachanged ? "true" : "false",
+                 geometry->geo_writeenabled ? "true" : "false");
           fvdbg("nsectors: %ld sectorsize: %d\n",
                  (long)geometry->geo_nsectors, geometry->geo_sectorsize);
 
-          priv->mediachanged = FALSE;
+          priv->mediachanged = false;
           ret = OK;
         }
       mmcsd_givesem(priv);
@@ -2047,7 +2053,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
         * First end CMD55 APP_CMD with argument as card's RCA.
         */
 
-        mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32)priv->rca << 16);
+        mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32_t)priv->rca << 16);
         ret = mmcsd_recvR1(priv, SD_CMD55);
         if (ret != OK)
           {
@@ -2071,7 +2077,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
          * with CMD55, APP_CMD:
          */
 
-        mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32)priv->rca << 16);
+        mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32_t)priv->rca << 16);
         ret = mmcsd_recvR1(priv, SD_CMD55);
         if (ret != OK)
           {
@@ -2091,8 +2097,8 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
       /* Configure the SDIO peripheral */
 
       fvdbg("Wide bus operation selected\n");
-      SDIO_WIDEBUS(priv->dev, TRUE);
-      priv->widebus = TRUE;
+      SDIO_WIDEBUS(priv->dev, true);
+      priv->widebus = true;
 
       SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_4BIT);
       up_udelay(MMCSD_CLK_DELAY);
@@ -2117,8 +2123,8 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 {
 #ifdef CONFIG_MMCSD_MMCSUPPORT
-  uint32 cid[4];
-  uint32 csd[4];
+  uint32_t cid[4];
+  uint32_t csd[4];
   int ret;
 
   /* At this point, slow, ID mode clocking has been supplied to the card
@@ -2210,9 +2216,9 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 
 static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
 {
-  uint32 cid[4];
-  uint32 csd[4];
-  uint32 scr[2];
+  uint32_t cid[4];
+  uint32_t csd[4];
+  uint32_t scr[2];
   int ret;
 
   /* At this point, clocking has been supplied to the card, both CMD0 and
@@ -2346,11 +2352,11 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
 
 static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 {
-  uint32  response;
-  uint32  start;
-  uint32  elapsed;
-  uint32  sdcapacity = MMCSD_ACMD41_STDCAPACITY;
-  int     ret;
+  uint32_t response;
+  uint32_t start;
+  uint32_t elapsed;
+  uint32_t sdcapacity = MMCSD_ACMD41_STDCAPACITY;
+  int      ret;
 
   /* Assume failure to identify the card */
 
@@ -2665,7 +2671,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
                 /* Yes...  */
 
                 fvdbg("Capacity: %d Kbytes\n", priv->capacity / 1024);
-                priv->mediachanged = TRUE;
+                priv->mediachanged = true;
 
                 /* Set up to receive asynchronous, media removal events */
 
@@ -2675,7 +2681,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 
       /* In any event, we have probed this card */
 
-      priv->probed = TRUE;
+      priv->probed = true;
     }
   else
     {
@@ -2709,16 +2715,16 @@ static int mmcsd_removed(FAR struct mmcsd_state_s *priv)
 
   priv->capacity     = 0; /* Capacity=0 sometimes means no media */
   priv->blocksize    = 0;
-  priv->mediachanged = FALSE;
+  priv->mediachanged = false;
   priv->type         = MMCSD_CARDTYPE_UNKNOWN;
-  priv->probed       = FALSE;
+  priv->probed       = false;
   priv->rca          = 0;
   priv->selblocklen  = 0;
 
   /* Go back to the default 1-bit data bus. */
 
-  SDIO_WIDEBUS(priv->dev, FALSE);
-  priv->widebus     = FALSE;
+  SDIO_WIDEBUS(priv->dev, false);
+  priv->widebus     = false;
 
   /* Disable clocking to the card */
 

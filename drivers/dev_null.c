@@ -34,16 +34,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
@@ -57,7 +54,7 @@ static ssize_t devnull_read(FAR struct file *, FAR char *, size_t);
 static ssize_t devnull_write(FAR struct file *, FAR const char *, size_t);
 #ifndef CONFIG_DISABLE_POLL
 static int     devnull_poll(FAR struct file *filp, FAR struct pollfd *fds,
-                            boolean setup);
+                            bool setup);
 #endif
 
 /****************************************************************************
@@ -105,7 +102,7 @@ static ssize_t devnull_write(FAR struct file *filp, FAR const char *buffer, size
 
 #ifndef CONFIG_DISABLE_POLL
 static int devnull_poll(FAR struct file *filp, FAR struct pollfd *fds,
-                        boolean setup)
+                        bool setup)
 {
   if (setup)
     {

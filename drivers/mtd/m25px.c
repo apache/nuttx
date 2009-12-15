@@ -41,6 +41,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
@@ -127,10 +129,10 @@ struct m25p_dev_s
 {
   struct mtd_dev_s mtd;      /* MTD interface */
   FAR struct spi_dev_s *dev; /* Saved SPI interface instance */
-  ubyte  sectorshift;        /* 16 or 18 */
-  ubyte  pageshift;          /* 8 */
-  uint16 nsectors;           /* 128 or 64 */
-  uint32 npages;             /* 32,768 or 65,536 */
+  uint8_t  sectorshift;      /* 16 or 18 */
+  uint8_t  pageshift;        /* 8 */
+  uint16_t nsectors;         /* 128 or 64 */
+  uint32_t npages;           /* 32,768 or 65,536 */
 };
 
 /************************************************************************************
@@ -146,18 +148,18 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv);
 static void m25p_writeenable(struct m25p_dev_s *priv);
 static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t offset);
 static inline int  m25p_bulkerase(struct m25p_dev_s *priv);
-static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buffer,
+static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
                                   off_t offset);
 
 /* MTD driver methods */
 
 static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
 static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, FAR ubyte *buf);
+                          size_t nblocks, FAR uint8_t *buf);
 static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR const ubyte *buf);
+                           size_t nblocks, FAR const uint8_t *buf);
 static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR ubyte *buffer);
+                         FAR uint8_t *buffer);
 static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
@@ -182,7 +184,7 @@ static void m25p_lock(FAR struct spi_dev_s *dev)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, TRUE);
+  (void)SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -201,7 +203,7 @@ static void m25p_lock(FAR struct spi_dev_s *dev)
 
 static inline void m25p_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, FALSE);
+  (void)SPI_LOCK(dev, false);
 }
 
 /************************************************************************************
@@ -210,16 +212,16 @@ static inline void m25p_unlock(FAR struct spi_dev_s *dev)
 
 static inline int m25p_readid(struct m25p_dev_s *priv)
 {
-  uint16 manufacturer;
-  uint16 memory;
-  uint16 capacity;
+  uint16_t manufacturer;
+  uint16_t memory;
+  uint16_t capacity;
 
   fvdbg("priv: %p\n", priv);
 
   /* Lock the SPI bus, configure the bus, and select this FLASH part. */
 
   m25p_lock(priv->dev);
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
@@ -230,7 +232,7 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
 
   /* Deselect the FLASH and unlock the bus */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   m25p_unlock(priv->dev);
 
   fvdbg("manufacturer: %02x memory: %02x capacity: %02x\n",
@@ -271,11 +273,11 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
 
 static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 {
-  ubyte status;
+  uint8_t status;
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
   /* Send "Read Status Register (RDSR)" command */
 
@@ -293,7 +295,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   fvdbg("Complete\n");
 }
 
@@ -305,7 +307,7 @@ static void m25p_writeenable(struct m25p_dev_s *priv)
 {
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
   /* Send "Write Enable (WREN)" command */
 
@@ -313,7 +315,7 @@ static void m25p_writeenable(struct m25p_dev_s *priv)
   
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   fvdbg("Enabled\n");
 }
 
@@ -341,7 +343,7 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
   /* Send the "Sector Erase (SE)" instruction */
 
@@ -358,7 +360,7 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   fvdbg("Erased\n");
 }
 
@@ -384,7 +386,7 @@ static inline int m25p_bulkerase(struct m25p_dev_s *priv)
 
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
   /* Send the "Bulk Erase (BE)" instruction */
 
@@ -392,7 +394,7 @@ static inline int m25p_bulkerase(struct m25p_dev_s *priv)
 
   /* Deselect the FLASH */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   fvdbg("Return: OK\n");
   return OK;
 }
@@ -401,7 +403,7 @@ static inline int m25p_bulkerase(struct m25p_dev_s *priv)
  * Name:  m25p_pagewrite
  ************************************************************************************/
 
-static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buffer,
+static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
                                   off_t page)
 {
   off_t offset = page << priv->pageshift;
@@ -422,7 +424,7 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buff
   
   /* Select this FLASH part */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
   /* Send "Page Program (PP)" command */
 
@@ -440,7 +442,7 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const ubyte *buff
   
   /* Deselect the FLASH: Chip Select high */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   fvdbg("Written\n");
 }
 
@@ -474,7 +476,7 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
  ************************************************************************************/
 
 static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR ubyte *buffer)
+                          FAR uint8_t *buffer)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
   ssize_t nbytes;
@@ -496,7 +498,7 @@ static ssize_t m25p_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
  ************************************************************************************/
 
 static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const ubyte *buffer)
+                           FAR const uint8_t *buffer)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
   size_t blocksleft = nblocks;
@@ -521,7 +523,7 @@ static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
  ************************************************************************************/
 
 static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR ubyte *buffer)
+                         FAR uint8_t *buffer)
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
 
@@ -538,7 +540,7 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
   /* Lock the SPI bus and select this FLASH part */
 
   m25p_lock(priv->dev);
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, TRUE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
   /* Send "Read from Memory " instruction */
 
@@ -556,7 +558,7 @@ static ssize_t m25p_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   /* Deselect the FLASH and unlock the SPI bus */
 
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, FALSE);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   m25p_unlock(priv->dev);
   fvdbg("return nbytes: %d\n", (int)nbytes);
   return nbytes;
@@ -662,7 +664,7 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(dev, SPIDEV_FLASH, FALSE);
+      SPI_SELECT(dev, SPIDEV_FLASH, false);
 
       /* Identify the FLASH chip and get its capacity */
 

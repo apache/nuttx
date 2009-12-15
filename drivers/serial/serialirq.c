@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serialirq.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,15 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <semaphore.h>
 #include <debug.h>
 #include <nuttx/serial.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -80,7 +82,7 @@
 
 void uart_xmitchars(FAR uart_dev_t *dev)
 {
-  uint16 nbytes = 0;
+  uint16_t nbytes = 0;
 
   /* Send while we still have data & room in the fifo */
 
@@ -133,7 +135,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 {
   unsigned int status;
   int nexthead = dev->recv.head + 1;
-  uint16 nbytes = 0;
+  uint16_t nbytes = 0;
 
   if (nexthead >= dev->recv.size)
     {

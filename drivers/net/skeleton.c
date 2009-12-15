@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_skeleton_NET)
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 #include <string.h>
 #include <debug.h>
@@ -88,7 +90,7 @@
 
 struct skel_driver_s
 {
-  boolean sk_bifup;            /* TRUE:ifup FALSE:ifdown */
+  bool sk_bifup;               /* true:ifup false:ifdown */
   WDOG_ID sk_txpoll;           /* TX poll timer */
   WDOG_ID sk_txtimeout;        /* TX timeout timer */
 
@@ -120,8 +122,8 @@ static int  skel_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void skel_polltimer(int argc, uint32 arg, ...);
-static void skel_txtimeout(int argc, uint32 arg, ...);
+static void skel_polltimer(int argc, uint32_t arg, ...);
+static void skel_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -164,7 +166,7 @@ static int skel_transmit(struct skel_driver_s *skel)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(skel->sk_txtimeout, skeleton_TXTIMEOUT, skel_txtimeout, 1, (uint32)skel);
+  (void)wd_start(skel->sk_txtimeout, skeleton_TXTIMEOUT, skel_txtimeout, 1, (uint32_t)skel);
   return OK;
 }
 
@@ -370,7 +372,7 @@ static int skel_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static void skel_txtimeout(int argc, uint32 arg, ...)
+static void skel_txtimeout(int argc, uint32_t arg, ...)
 {
   struct skel_driver_s *skel = (struct skel_driver_s *)arg;
 
@@ -400,7 +402,7 @@ static void skel_txtimeout(int argc, uint32 arg, ...)
  *
  ****************************************************************************/
 
-static void skel_polltimer(int argc, uint32 arg, ...)
+static void skel_polltimer(int argc, uint32_t arg, ...)
 {
   struct skel_driver_s *skel = (struct skel_driver_s *)arg;
 
@@ -444,11 +446,11 @@ static int skel_ifup(struct uip_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_polltimer, 1, (uint32)skel);
+  (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_polltimer, 1, (uint32_t)skel);
 
   /* Enable the Ethernet interrupt */
 
-  skel->sk_bifup = TRUE;
+  skel->sk_bifup = true;
   up_enable_irq(CONFIG_skeleton_IRQ);
   return OK;
 }
@@ -486,7 +488,7 @@ static int skel_ifdown(struct uip_driver_s *dev)
 
   /* Reset the device */
 
-  skel->sk_bifup = FALSE;
+  skel->sk_bifup = false;
   irqrestore(flags);
   return OK;
 }

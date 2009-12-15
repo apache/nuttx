@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bch_internal.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -41,16 +41,19 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <nuttx/fs.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define bchlib_semgive(d) sem_post(&(d)->sem)  /* To match bchlib_semtake */
-#define MAX_OPENCNT     (255)                  /* Limit of ubyte */
+#define MAX_OPENCNT     (255)                  /* Limit of uint8_t */
 
 /****************************************************************************
  * Public Types
@@ -58,15 +61,15 @@
 
 struct bchlib_s
 {
-  struct  inode *inode; /* I-node of the block driver */
-  sem_t   sem;          /* For atomic accesses to this structure */
-  size_t  nsectors;     /* Number of sectors supported by the device */
-  size_t  sector;       /* The current sector in the buffer */
-  uint16  sectsize;     /* The size of one sector on the device */
-  ubyte   refs;         /* Number of references */
-  boolean dirty;        /* Data has been written to the buffer */
-  boolean readonly;     /* TRUE:  Only read operations are supported */
-  FAR ubyte *buffer;    /* One sector buffer */
+  struct inode *inode; /* I-node of the block driver */
+  sem_t    sem;        /* For atomic accesses to this structure */
+  size_t   nsectors;   /* Number of sectors supported by the device */
+  size_t   sector;     /* The current sector in the buffer */
+  uint16_t sectsize;   /* The size of one sector on the device */
+  uint8_t  refs;       /* Number of references */
+  bool  dirty;         /* Data has been written to the buffer */
+  bool  readonly;      /* true:  Only read operations are supported */
+  FAR uint8_t *buffer; /* One sector buffer */
 };
 
 /****************************************************************************

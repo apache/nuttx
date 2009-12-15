@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -75,8 +76,8 @@
 
 #ifdef CONFIG_USBDEV_TRACE
 static struct usbtrace_s g_trace[CONFIG_USBDEV_TRACE_NRECORDS];
-static uint16 g_head = 0;
-static uint16 g_tail = 0;
+static uint16_t g_head = 0;
+static uint16_t g_tail = 0;
 #endif
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
@@ -137,7 +138,7 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
  *******************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
-void usbtrace(uint16 event, uint16 value)
+void usbtrace(uint16_t event, uint16_t value)
 {
   irqstate_t flags;
 
@@ -190,8 +191,8 @@ void usbtrace(uint16 event, uint16 value)
 #ifdef CONFIG_USBDEV_TRACE
 int usbtrace_enumerate(trace_callback_t callback, void *arg)
 {
-  uint16 ndx;
-  uint32 idset;
+  uint16_t ndx;
+  uint32_t idset;
   int ret = OK;
 
   /* Temporarily disable tracing */

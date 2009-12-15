@@ -52,6 +52,8 @@
 #undef  CONFIG_DM9X_NINTERFACES
 #define CONFIG_DM9X_NINTERFACES 1
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 #include <string.h>
 #include <debug.h>
@@ -237,14 +239,14 @@
  */
 
 #if defined(CONFIG_DM9X_BUSWIDTH8)
-#  define DM9X_INDEX *(volatile uint8*)(CONFIG_DM9X_BASE)
-#  define DM9X_DATA  *(volatile uint8*)(CONFIG_DM9X_BASE + 2)
+#  define DM9X_INDEX *(volatile uint8_t*)(CONFIG_DM9X_BASE)
+#  define DM9X_DATA  *(volatile uint8_t*)(CONFIG_DM9X_BASE + 2)
 #elif defined(CONFIG_DM9X_BUSWIDTH16)
-#  define DM9X_INDEX *(volatile uint16*)(CONFIG_DM9X_BASE)
-#  define DM9X_DATA  *(volatile uint16*)(CONFIG_DM9X_BASE + 2)
+#  define DM9X_INDEX *(volatile uint16_t*)(CONFIG_DM9X_BASE)
+#  define DM9X_DATA  *(volatile uint16_t*)(CONFIG_DM9X_BASE + 2)
 #elif defined(CONFIG_DM9X_BUSWIDTH32)
-#  define DM9X_INDEX *(volatile uint32*)(CONFIG_DM9X_BASE)
-#  define DM9X_DATA  *(volatile uint32*)(CONFIG_DM9X_BASE + 2)
+#  define DM9X_INDEX *(volatile uint32_t*)(CONFIG_DM9X_BASE)
+#  define DM9X_DATA  *(volatile uint32_t*)(CONFIG_DM9X_BASE + 2)
 #endif
 
 /* Phy operating mode.  Default is AUTO, but this setting can be overridden
@@ -285,7 +287,7 @@ union rx_desc_u
   {
     uint8  rx_byte;
     uint8  rx_status;
-    uint16 rx_len;
+    uint16_t rx_len;
   } desc;
 };
 
@@ -295,12 +297,12 @@ union rx_desc_u
 
 struct dm9x_driver_s
 {
-  boolean dm_bifup;            /* TRUE:ifup FALSE:ifdown */
-  boolean dm_b100M;            /* TRUE:speed == 100M; FALSE:speed == 10M */
+  bool dm_bifup;               /* true:ifup false:ifdown */
+  bool dm_b100M;               /* true:speed == 100M; false:speed == 10M */
   WDOG_ID dm_txpoll;           /* TX poll timer */
   WDOG_ID dm_txtimeout;        /* TX timeout timer */
-  uint8   dm_ntxpending;       /* Count of packets pending transmission */
-  uint8   ncrxpackets;         /* Number of continuous rx packets  */
+  uint8_t dm_ntxpending;       /* Count of packets pending transmission */
+  uint8_t ncrxpackets;         /* Number of continuous rx packets  */
 
   /* Mode-dependent function to move data in 8/16/32 I/O modes */
 
@@ -309,17 +311,17 @@ struct dm9x_driver_s
   void (*dm_discard)(int len);
 
 #if defined(CONFIG_DM9X_STATS)
-  uint32 dm_ntxpackets;        /* Count of packets sent */
-  uint32 dm_ntxbytes;          /* Count of bytes sent */
-  uint32 dm_ntxerrors;         /* Count of TX errors */
-  uint32 dm_nrxpackets;        /* Count of packets received */
-  uint32 dm_nrxbytes;          /* Count of bytes received */
-  uint32 dm_nrxfifoerrors;     /* Count of RX FIFO overflow errors */
-  uint32 dm_nrxcrcerrors;      /* Count of RX CRC errors */
-  uint32 dm_nrxlengtherrors;   /* Count of RX length errors */
-  uint32 dm_nphyserrors;       /* Count of physical layer errors */
-  uint32 dm_nresets;           /* Counts number of resets */
-  uint32 dm_ntxtimeouts;       /* Counts resets caused by TX timeouts */
+  uint32_t dm_ntxpackets;      /* Count of packets sent */
+  uint32_t dm_ntxbytes;        /* Count of bytes sent */
+  uint32_t dm_ntxerrors;       /* Count of TX errors */
+  uint32_t dm_nrxpackets;      /* Count of packets received */
+  uint32_t dm_nrxbytes;        /* Count of bytes received */
+  uint32_t dm_nrxfifoerrors;   /* Count of RX FIFO overflow errors */
+  uint32_t dm_nrxcrcerrors;    /* Count of RX CRC errors */
+  uint32_t dm_nrxlengtherrors; /* Count of RX length errors */
+  uint32_t dm_nphyserrors;     /* Count of physical layer errors */
+  uint32_t dm_nresets;         /* Counts number of resets */
+  uint32_t dm_ntxtimeouts;     /* Counts resets caused by TX timeouts */
 #endif
 
   /* This holds the information visible to uIP/NuttX */
@@ -353,9 +355,9 @@ static void write8(const uint8 *ptr, int len);
 static void write16(const uint8 *ptr, int len);
 static void write32(const uint8 *ptr, int len);
 
-/* static uint16 dm9x_readsrom(struct dm9x_driver_s *dm9x, int offset); */
-static uint16 dm9x_phyread(struct dm9x_driver_s *dm9x, int reg);
-static void dm9x_phywrite(struct dm9x_driver_s *dm9x, int reg, uint16 value);
+/* static uint16_t dm9x_readsrom(struct dm9x_driver_s *dm9x, int offset); */
+static uint16_t dm9x_phyread(struct dm9x_driver_s *dm9x, int reg);
+static void dm9x_phywrite(struct dm9x_driver_s *dm9x, int reg, uint16_t value);
 
 #if defined(CONFIG_DM9X_STATS)
 static void dm9x_resetstatistics(struct dm9x_driver_s *dm9x);
@@ -370,7 +372,7 @@ static void dm9x_dumpstatistics(struct dm9x_driver_s *dm9x);
 #endif
 
 #if defined(CONFIG_DM9X_CHECKSUM)
-static boolean dm9x_rxchecksumready(uint8);
+static bool dm9x_rxchecksumready(uint8_t);
 #else
 #  define dm9x_rxchecksumready(a) ((a) == 0x01)
 #endif
@@ -388,8 +390,8 @@ static int  dm9x_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void dm9x_polltimer(int argc, uint32 arg, ...);
-static void dm9x_txtimeout(int argc, uint32 arg, ...);
+static void dm9x_polltimer(int argc, uint32_t arg, ...);
+static void dm9x_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -463,9 +465,9 @@ static void read8(uint8 *ptr, int len)
 
 static void read16(uint8 *ptr, int len)
 {
-  register uint16 *ptr16 = (uint16*)ptr;
+  register uint16_t *ptr16 = (uint16_t*)ptr;
   nvdbg("Read %d bytes (16-bit mode)\n", len);
-  for (; len > 0; len -= sizeof(uint16))
+  for (; len > 0; len -= sizeof(uint16_t))
     {
       *ptr16++ = DM9X_DATA;
     }
@@ -473,9 +475,9 @@ static void read16(uint8 *ptr, int len)
 
 static void read32(uint8 *ptr, int len)
 {
-  register uint32 *ptr32 = (uint32*)ptr;
+  register uint32_t *ptr32 = (uint32_t*)ptr;
   nvdbg("Read %d bytes (32-bit mode)\n", len);
-  for (; len > 0; len -= sizeof(uint32))
+  for (; len > 0; len -= sizeof(uint32_t))
     {
       *ptr32++ = DM9X_DATA;
     }
@@ -510,7 +512,7 @@ static void discard8(int len)
 static void discard16(int len)
 {
   nvdbg("Discard %d bytes (16-bit mode)\n", len);
-  for (; len > 0; len -= sizeof(uint16))
+  for (; len > 0; len -= sizeof(uint16_t))
     {
       DM9X_DATA;
     }
@@ -519,7 +521,7 @@ static void discard16(int len)
 static void discard32(int len)
 {
   nvdbg("Discard %d bytes (32-bit mode)\n", len);
-  for (; len > 0; len -= sizeof(uint32))
+  for (; len > 0; len -= sizeof(uint32_t))
     {
       DM9X_DATA;
     }
@@ -553,10 +555,10 @@ static void write8(const uint8 *ptr, int len)
 
 static void write16(const uint8 *ptr, int len)
 {
-  register uint16 *ptr16 = (uint16*)ptr;
+  register uint16_t *ptr16 = (uint16_t*)ptr;
   nvdbg("Write %d bytes (16-bit mode)\n", len);
 
-  for (; len > 0; len -= sizeof(uint16))
+  for (; len > 0; len -= sizeof(uint16_t))
     {
        DM9X_DATA = *ptr16++;
     }
@@ -564,9 +566,9 @@ static void write16(const uint8 *ptr, int len)
 
 static void write32(const uint8 *ptr, int len)
 {
-  register uint32 *ptr32 = (uint32*)ptr;
+  register uint32_t *ptr32 = (uint32_t*)ptr;
   nvdbg("Write %d bytes (32-bit mode)\n", len);
-  for (; len > 0; len -= sizeof(uint32))
+  for (; len > 0; len -= sizeof(uint32_t))
     {
       DM9X_DATA = *ptr32++;
     }
@@ -590,7 +592,7 @@ static void write32(const uint8 *ptr, int len)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static uint16 dm9x_readsrom(struct dm9x_driver_s *dm9x, int offset)
+static uint16_t dm9x_readsrom(struct dm9x_driver_s *dm9x, int offset)
 {
   putreg(DM9X_EEPHYA, offset);
   putreg(DM9X_EEPHYC, DM9X_EEPHYC_ERPRR);
@@ -618,7 +620,7 @@ static uint16 dm9x_readsrom(struct dm9x_driver_s *dm9x, int offset)
  *
  ****************************************************************************/
 
-static uint16 dm9x_phyread(struct dm9x_driver_s *dm9x, int reg)
+static uint16_t dm9x_phyread(struct dm9x_driver_s *dm9x, int reg)
 {
   /* Setup DM9X_EEPHYA, the EEPROM/PHY address register */
 
@@ -632,10 +634,10 @@ static uint16 dm9x_phyread(struct dm9x_driver_s *dm9x, int reg)
 
   /* Return the data from the EEPROM/PHY data register pair */
 
-  return (((uint16)getreg(DM9X_EEPHYDH)) << 8) | (uint16)getreg(DM9X_EEPHYDL);
+  return (((uint16_t)getreg(DM9X_EEPHYDH)) << 8) | (uint16_t)getreg(DM9X_EEPHYDL);
 }
 
-static void dm9x_phywrite(struct dm9x_driver_s *dm9x, int reg, uint16 value)
+static void dm9x_phywrite(struct dm9x_driver_s *dm9x, int reg, uint16_t value)
 {
   /* Setup DM9X_EEPHYA, the EEPROM/PHY address register */
 
@@ -723,24 +725,24 @@ static void dm9x_dumpstatistics(struct dm9x_driver_s *dm9x)
  * Function: dm9x_rxchecksumready
  *
  * Description:
- *   Return TRUE if the RX checksum is available
+ *   Return true if the RX checksum is available
  *
  * Parameters:
  *   rxbyte
  *
  * Returned Value:
- *   TRUE: checksum is ready
+ *   true: checksum is ready
  *
  * Assumptions:
  *
  ****************************************************************************/
 
 #if defined(CONFIG_DM9X_CHECKSUM)
-static inline boolean dm9x_rxchecksumready(uint8 rxbyte)
+static inline bool dm9x_rxchecksumready(uint8 rxbyte)
 {
   if ((rxbyte & 0x01) == 0)
     {
-      return FALSE;
+      return false;
     }
 
   return ((rxbyte >> 4) | 0x01) != 0;
@@ -810,7 +812,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      (void)wd_start(dm9x->dm_txtimeout, DM6X_TXTIMEOUT, dm9x_txtimeout, 1, (uint32)dm9x);
+      (void)wd_start(dm9x->dm_txtimeout, DM6X_TXTIMEOUT, dm9x_txtimeout, 1, (uint32_t)dm9x);
       return OK;
     }
   return -EBUSY;
@@ -888,10 +890,10 @@ static int dm9x_uiptxpoll(struct uip_driver_s *dev)
 static void dm9x_receive(struct dm9x_driver_s *dm9x)
 {
   union rx_desc_u rx;
-  boolean bchecksumready;
-  uint8   mdrah;
-  uint8   mdral;
-  uint8   rxbyte;
+  bool bchecksumready;
+  uint8_t mdrah;
+  uint8_t mdral;
+  uint8_t rxbyte;
 
   nvdbg("Packet received\n");
 
@@ -903,7 +905,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
       mdral = getreg(DM9X_MDRAL);
 
       getreg(DM9X_MRCMDX);       /* Dummy read */
-      rxbyte = (uint8)DM9X_DATA; /* Get the most up-to-date data */
+      rxbyte = (uint8_t)DM9X_DATA; /* Get the most up-to-date data */
 
       /* Packet ready for receive check */
 
@@ -919,7 +921,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 
       /* Read packet status & length */
 
-      dm9x->dm_read((uint8*)&rx, 4);
+      dm9x->dm_read((uint8_t*)&rx, 4);
 
       /* Check if any errors were reported by the hardware */
 
@@ -1117,7 +1119,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
 
   /* Save previous register address */
 
-  save = (uint8)DM9X_INDEX;
+  save = (uint8_t)DM9X_INDEX;
 
   /* Disable all DM90x0 interrupts */
 
@@ -1151,11 +1153,11 @@ static int dm9x_interrupt(int irq, FAR void *context)
 
               if (dm9x_phyread(dm9x, 0) & 0x2000)
                 {
-                  dm9x->dm_b100M = TRUE;
+                  dm9x->dm_b100M = true;
                 }
               else
                 {
-                  dm9x->dm_b100M = FALSE;
+                  dm9x->dm_b100M = false;
                 }
               break;
             }
@@ -1219,7 +1221,7 @@ static int dm9x_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static void dm9x_txtimeout(int argc, uint32 arg, ...)
+static void dm9x_txtimeout(int argc, uint32_t arg, ...)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)arg;
 
@@ -1267,7 +1269,7 @@ static void dm9x_txtimeout(int argc, uint32 arg, ...)
  *
  ****************************************************************************/
 
-static void dm9x_polltimer(int argc, uint32 arg, ...)
+static void dm9x_polltimer(int argc, uint32_t arg, ...)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)arg;
 
@@ -1315,8 +1317,8 @@ static void dm9x_polltimer(int argc, uint32 arg, ...)
 
 static inline void dm9x_phymode(struct dm9x_driver_s *dm9x)
 {
-  uint16 phyreg0;
-  uint16 phyreg4;
+  uint16_t phyreg0;
+  uint16_t phyreg4;
 
 #if CONFIG_DM9X_MODE == DM9X_MODE_AUTO
   phyreg0 = 0x1200;  /* Auto-negotiation & Restart Auto-negotiation */
@@ -1374,7 +1376,7 @@ static int dm9x_ifup(struct uip_driver_s *dev)
 
   /* Check link state and media speed (waiting up to 3s for link OK) */
 
-  dm9x->dm_b100M = FALSE;
+  dm9x->dm_b100M = false;
   for (i = 0; i < 3000; i++)
     {
       netstatus = getreg(DM9X_NETS);
@@ -1386,7 +1388,7 @@ static int dm9x_ifup(struct uip_driver_s *dev)
           netstatus = getreg(DM9X_NETS);
           if ((netstatus & DM9X_NETS_SPEED) == 0)
             {
-              dm9x->dm_b100M = TRUE;
+              dm9x->dm_b100M = true;
             }
           break;
         }
@@ -1398,11 +1400,11 @@ static int dm9x_ifup(struct uip_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(dm9x->dm_txpoll, DM6X_WDDELAY, dm9x_polltimer, 1, (uint32)dm9x);
+  (void)wd_start(dm9x->dm_txpoll, DM6X_WDDELAY, dm9x_polltimer, 1, (uint32_t)dm9x);
 
   /* Enable the DM9X interrupt */
 
-  dm9x->dm_bifup = TRUE;
+  dm9x->dm_bifup = true;
   up_enable_irq(CONFIG_DM9X_IRQ);
   return OK;
 }
@@ -1448,7 +1450,7 @@ static int dm9x_ifdown(struct uip_driver_s *dev)
   putreg(DM9X_RXC, 0x00);             /* Disable RX */
   putreg(DM9X_ISR, DM9X_INT_ALL);     /* Clear interrupt status */
 
-  dm9x->dm_bifup = FALSE;
+  dm9x->dm_bifup = false;
   irqrestore(flags);
 
   /* Dump statistics */
@@ -1629,7 +1631,7 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
 
   /* Save previous register address */
 
-  save = (uint8)DM9X_INDEX;
+  save = (uint8_t)DM9X_INDEX;
 
 #if defined(CONFIG_DM9X_STATS)
   dm9x->dm_nresets++;
@@ -1638,14 +1640,14 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
 
   /* Wait up to 1 second for the link to be OK */
 
-  dm9x->dm_b100M = FALSE;
+  dm9x->dm_b100M = false;
   for (i = 0; i < 1000; i++)
     {
       if (dm9x_phyread(dm9x,0x1) & 0x4)
         {
           if (dm9x_phyread(dm9x, 0) &0x2000)
             {
-              dm9x->dm_b100M = TRUE;
+              dm9x->dm_b100M = true;
             }
           break;
         }
@@ -1682,15 +1684,15 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
 int dm9x_initialize(void)
 {
   uint8 *mptr;
-  uint16 vid;
-  uint16 pid;
+  uint16_t vid;
+  uint16_t pid;
   int i;
   int j;
 
   /* Get the chip vendor ID and product ID */
 
-  vid = (((uint16)getreg(DM9X_VIDH)) << 8) | (uint16)getreg(DM9X_VIDL);
-  pid = (((uint16)getreg(DM9X_PIDH)) << 8) | (uint16)getreg(DM9X_PIDL);
+  vid = (((uint16_t)getreg(DM9X_VIDH)) << 8) | (uint16_t)getreg(DM9X_VIDL);
+  pid = (((uint16_t)getreg(DM9X_PIDH)) << 8) | (uint16_t)getreg(DM9X_PIDL);
   nlldbg("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
 
   /* Check if a DM90x0 chip is recognized at this I/O base */

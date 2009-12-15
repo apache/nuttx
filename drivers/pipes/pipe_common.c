@@ -38,9 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sched.h>
@@ -198,7 +200,7 @@ int pipecommon_open(FAR struct file *filep)
 
       if (dev->d_refs == 0)
         {
-          dev->d_buffer = (ubyte*)malloc(CONFIG_DEV_PIPE_SIZE);
+          dev->d_buffer = (uint8_t*)malloc(CONFIG_DEV_PIPE_SIZE);
           if (!dev->d_buffer)
             {
               (void)sem_post(&dev->d_bfsem);
@@ -330,7 +332,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   struct inode      *inode  = filep->f_inode;
   struct pipe_dev_s *dev    = inode->i_private;
 #ifdef CONFIG_DEV_PIPEDUMP
-  FAR ubyte         *start  = (ubyte*)buffer;
+  FAR uint8_t       *start  = (uint8_t*)buffer;
 #endif
   ssize_t            nread  = 0;
   int                sval;
@@ -434,7 +436,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
       return -ENODEV;
     }
 #endif
-  pipe_dumpbuffer("To PIPE:", (ubyte*)buffer, len);
+  pipe_dumpbuffer("To PIPE:", (uint8_t*)buffer, len);
 
   /* At present, this method cannot be called from interrupt handlers.  That is
    * because it calls sem_wait (via pipecommon_semtake below) and sem_wait cannot
@@ -448,7 +450,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
    * of taking semaphores so that pipes can be written from interupt handlers
    */
 
-  DEBUGASSERT(up_interrupt_context() == FALSE)
+  DEBUGASSERT(up_interrupt_context() == false)
 
   /* Make sure that we have exclusive access to the device structure */
 
@@ -544,7 +546,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
 #ifndef CONFIG_DISABLE_POLL
 int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                    boolean setup)
+                    bool setup)
 {
   FAR struct inode      *inode    = filep->f_inode;
   FAR struct pipe_dev_s *dev      = inode->i_private;

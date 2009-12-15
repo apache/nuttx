@@ -41,6 +41,8 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,9 +73,9 @@ struct ftl_struct_s
 #ifdef CONFIG_FTL_RWBUFFER
   struct rwbuffer_s     rwb;     /* Read-ahead/write buffer support */
 #endif
-  uint16                blkper;  /* R/W blocks per erase block */
+  uint16_t              blkper;  /* R/W blocks per erase block */
 #ifdef CONFIG_FS_WRITABLE
-  FAR ubyte            *eblock;  /* One, in-memory erase block */
+  FAR uint8_t          *eblock;  /* One, in-memory erase block */
 #endif
 };
 
@@ -83,12 +85,12 @@ struct ftl_struct_s
 
 static int     ftl_open(FAR struct inode *inode);
 static int     ftl_close(FAR struct inode *inode);
-static ssize_t ftl_reload(FAR void *priv, FAR ubyte *buffer,
+static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
                  size_t start_sector, unsigned int nsectors);
 #ifdef CONFIG_FS_WRITABLE
-static ssize_t ftl_flush(FAR void *priv, FAR const ubyte *buffer,
+static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 static ssize_t ftl_write(FAR struct inode *inode, const unsigned char *buffer,
                  size_t start_sector, unsigned int nsectors);
@@ -151,7 +153,7 @@ static int ftl_close(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-static ssize_t ftl_reload(FAR void *priv, FAR ubyte *buffer,
+static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
                           off_t startblock, size_t nblocks)
 {
   struct ftl_struct_s *dev = (struct ftl_struct_s *)priv;
@@ -199,7 +201,7 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
  ****************************************************************************/
 
 #ifdef CONFIG_FS_WRITABLE
-static ssize_t ftl_flush(FAR void *priv, FAR const ubyte *buffer,
+static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
                          off_t startblock, size_t nblocks)
 {
   struct ftl_struct_s *dev = (struct ftl_struct_s *)priv;
@@ -387,18 +389,18 @@ static int ftl_geometry(FAR struct inode *inode, struct geometry *geometry)
   if (geometry)
     {
       dev = (struct ftl_struct_s *)inode->i_private;
-      geometry->geo_available     = TRUE;
-      geometry->geo_mediachanged  = FALSE;
+      geometry->geo_available     = true;
+      geometry->geo_mediachanged  = false;
 #ifdef CONFIG_FS_WRITABLE
-      geometry->geo_writeenabled  = TRUE;
+      geometry->geo_writeenabled  = true;
 #else
-      geometry->geo_writeenabled  = FALSE;
+      geometry->geo_writeenabled  = false;
 #endif
       geometry->geo_nsectors      = dev->geo.neraseblocks * dev->blkper;
       geometry->geo_sectorsize    = dev->geo.blocksize;
 
-      fvdbg("available: TRUE mediachanged: FALSE writeenabled: %s\n",
-            geometry->geo_writeenabled ? "TRUE" : "FALSE");
+      fvdbg("available: true mediachanged: false writeenabled: %s\n",
+            geometry->geo_writeenabled ? "true" : "false");
       fvdbg("nsectors: %d sectorsize: %d\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
  
@@ -449,7 +451,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int ftl_initialize(int minor, ubyte *buffer, FAR struct mtd_dev_s *mtd)
+int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
 {
   struct ftl_struct_s *dev;
   char devname[16];
@@ -489,7 +491,7 @@ int ftl_initialize(int minor, ubyte *buffer, FAR struct mtd_dev_s *mtd)
       /* Allocate one, in-memory erase block buffer */
 
 #ifdef CONFIG_FS_WRITABLE
-      dev->eblock  = (FAR ubyte *)malloc(dev->geo.erasesize);
+      dev->eblock  = (FAR uint8_t *)malloc(dev->geo.erasesize);
       if (!dev->eblock)
         {
           fdbg("Failed to allocate an erase block buffer\n");

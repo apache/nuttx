@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
@@ -82,7 +84,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 static int     uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup);
+static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
 #endif
 
 /************************************************************************************
@@ -179,7 +181,7 @@ static void uart_putxmitchar(FAR uart_dev_t *dev, int ch)
         {
           /* Inform the interrupt level logic that we are waiting */
 
-          dev->xmitwaiting = TRUE;
+          dev->xmitwaiting = true;
 
           /* Wait for some characters to be sent from the buffer
            * with the TX interrupt enabled.  When the TX interrupt
@@ -374,7 +376,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
            * with the TX interrupt re-enabled.
            */
 
-          dev->recvwaiting = TRUE;
+          dev->recvwaiting = true;
           uart_enablerxint(dev);
           uart_takesem(&dev->recvsem);
           uart_disablerxint(dev);
@@ -403,7 +405,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, boolean setup)
+int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
@@ -589,7 +591,7 @@ static int uart_open(FAR struct file *filep)
 {
   struct inode *inode = filep->f_inode;
   uart_dev_t   *dev   = inode->i_private;
-  ubyte         tmp;
+  uint8_t       tmp;
   int           ret   = OK;
 
   /* If the port is the middle of closing, wait until the close is finished */
@@ -602,7 +604,7 @@ static int uart_open(FAR struct file *filep)
   tmp = dev->open_count + 1;
   if (tmp == 0)
     {
-      /* More than 255 opens; ubyte overflows to zero */
+      /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
       goto errout_with_sem;
@@ -707,7 +709,7 @@ void uart_datareceived(FAR uart_dev_t *dev)
 
   if (dev->recvwaiting)
     {
-      dev->recvwaiting = FALSE;
+      dev->recvwaiting = false;
       (void)sem_post(&dev->recvsem);
     }
 
@@ -732,7 +734,7 @@ void uart_datasent(FAR uart_dev_t *dev)
 {
   if (dev->xmitwaiting)
     {
-      dev->xmitwaiting = FALSE;
+      dev->xmitwaiting = false;
       (void)sem_post(&dev->xmitsem);
     }
 

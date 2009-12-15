@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_write.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -86,12 +83,12 @@
 ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, size_t len)
 {
   FAR struct bchlib_s *bch = (FAR struct bchlib_s *)handle;
-  size_t nsectors;
-  size_t sector;
-  uint16 sectoffset;
-  size_t nbytes;
-  size_t byteswritten;
-  int    ret;
+  size_t   nsectors;
+  size_t   sector;
+  uint16_t sectoffset;
+  size_t   nbytes;
+  size_t   byteswritten;
+  int      ret;
 
   /* Get rid of this special case right away */
 
@@ -131,7 +128,7 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
         }
 
       memcpy(&bch->buffer[sectoffset], buffer, nbytes);
-      bch->dirty = TRUE;
+      bch->dirty = true;
 
       /* Adjust pointers and counts */
 
@@ -195,7 +192,7 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
       /* Copy the head end of the sector from the user buffer */
 
       memcpy(bch->buffer, buffer, len);
-      bch->dirty = TRUE;
+      bch->dirty = true;
 
       /* Adjust counts */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/dev_null.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,16 +34,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
@@ -57,7 +54,7 @@ static ssize_t devzero_read(FAR struct file *, FAR char *, size_t);
 static ssize_t devzero_write(FAR struct file *, FAR const char *, size_t);
 #ifndef CONFIG_DISABLE_POLL
 static int     devzero_poll(FAR struct file *filp, FAR struct pollfd *fds,
-                            boolean setup);
+                            bool setup);
 #endif
 
 /****************************************************************************
@@ -106,7 +103,7 @@ static ssize_t devzero_write(FAR struct file *filp, FAR const char *buffer, size
 
 #ifndef CONFIG_DISABLE_POLL
 static int devzero_poll(FAR struct file *filp, FAR struct pollfd *fds,
-                        boolean setup)
+                        bool setup)
 {
   if (setup)
     {

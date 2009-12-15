@@ -41,7 +41,7 @@
  ********************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /********************************************************************************************
  * Pre-Processor Definitions
@@ -145,7 +145,7 @@
 #define MMCSD_VDD_33_34             (1 << 21)  /* VDD voltage 3.3-3.4 */
 #define MMCSD_VDD_34_35             (1 << 22)  /* VDD voltage 3.4-3.5 */
 #define MMCSD_VDD_35_36             (1 << 23)  /* VDD voltage 3.5-3.6 */
-#define MMCSD_R3_HIGHCAPACITY       (1 << 30)  /* TRUE: Card supports block addressing */
+#define MMCSD_R3_HIGHCAPACITY       (1 << 30)  /* true: Card supports block addressing */
 #define MMCSD_CARD_BUSY             (1 << 31)  /* Card power-up busy bit */
 
 /* R6 Card Status bit definitions */
@@ -196,14 +196,14 @@
 
 struct mmcsd_cid_s
 {
-  ubyte  mid;       /* 127:120  8-bit Manufacturer ID */
-  uint16 oid;       /* 119:104 16-bit OEM/Application ID (ascii) */
-  ubyte  pnm[6];    /* 103:64  40-bit Product Name (ascii) + null terminator */
-  ubyte  prv;       /*  63:56   8-bit Product revision */
-  uint32 psn;       /*  55:24  32-bit Product serial number */
+  uint8_t  mid;     /* 127:120  8-bit Manufacturer ID */
+  uint16_t oid;     /* 119:104 16-bit OEM/Application ID (ascii) */
+  uint8_t  pnm[6];  /* 103:64  40-bit Product Name (ascii) + null terminator */
+  uint8_t  prv;     /*  63:56   8-bit Product revision */
+  uint32_t psn;     /*  55:24  32-bit Product serial number */
                     /*  23:20   4-bit (reserved) */
-  uint16 mdt;       /*  19:8   12-bit Manufacturing date */
-  ubyte  crc;       /*   7:1    7-bit CRC7 */
+  uint16_t mdt;     /*  19:8   12-bit Manufacturing date */
+  uint8_t  crc;     /*   7:1    7-bit CRC7 */
                     /*   0:0    1-bit (not used) */
 };
 
@@ -211,107 +211,107 @@ struct mmcsd_cid_s
 
 struct mmcsd_csd_s
 {
-  ubyte csdstructure;          /* 127:126 CSD structure */
-  ubyte mmcspecvers;           /* 125:122 MMC Spec version (MMC only) */
+  uint8_t csdstructure;          /* 127:126 CSD structure */
+  uint8_t mmcspecvers;           /* 125:122 MMC Spec version (MMC only) */
 
   struct
   {
-    ubyte timeunit;            /*   2:0   Time exponent */
-    ubyte timevalue;           /*   6:3   Time mantissa */
+    uint8_t timeunit;          /*   2:0   Time exponent */
+    uint8_t timevalue;         /*   6:3   Time mantissa */
   } taac;                      /* 119:112 Data read access-time-1 */
 
-  ubyte nsac;                  /* 111:104 Data read access-time-2 in CLK cycle(NSAC*100) */
+  uint8_t nsac;                /* 111:104 Data read access-time-2 in CLK cycle(NSAC*100) */
 
   struct
   {
-    ubyte transferrateunit;    /*   2:0   Rate exponent */
-    ubyte timevalue;           /*   6:3   Rate mantissa */
+    uint8_t transferrateunit;  /*   2:0   Rate exponent */
+    uint8_t timevalue;         /*   6:3   Rate mantissa */
   } transpeed;                 /* 103:96  Max. data transfer rate */
 
-  uint16 ccc;                  /*  95:84  Card command classes */
-  ubyte readbllen;             /*  83:80  Max. read data block length */
-  ubyte readblpartial;         /*  79:79  Partial blocks for read allowed */
-  ubyte writeblkmisalign;      /*  78:78  Write block misalignment */
-  ubyte readblkmisalign;       /*  77:77  Read block misalignment */
-  ubyte dsrimp;                /*  76:76  DSR implemented */
+  uint16_t ccc;                /*  95:84  Card command classes */
+  uint8_t readbllen;           /*  83:80  Max. read data block length */
+  uint8_t readblpartial;       /*  79:79  Partial blocks for read allowed */
+  uint8_t writeblkmisalign;    /*  78:78  Write block misalignment */
+  uint8_t readblkmisalign;     /*  77:77  Read block misalignment */
+  uint8_t dsrimp;              /*  76:76  DSR implemented */
 
   union
   {
 #ifdef CONFIG_MMCSD_MMCSUPPORT
     struct
     {
-      uint16 csize;            /*  73:62  Device size */
-      ubyte vddrcurrmin;       /*  61:59  Max. read current at Vdd min */
-      ubyte vddrcurrmax;       /*  58:56  Max. read current at Vdd max */
-      ubyte vddwcurrmin;       /*  55:53  Max. write current at Vdd min */
-      ubyte vddwcurrmax;       /*  52:50  Max. write current at Vdd max */
-      ubyte csizemult;         /*  49:47  Device size multiplier */
+      uint16_t csize;          /*  73:62  Device size */
+      uint8_t vddrcurrmin;     /*  61:59  Max. read current at Vdd min */
+      uint8_t vddrcurrmax;     /*  58:56  Max. read current at Vdd max */
+      uint8_t vddwcurrmin;     /*  55:53  Max. write current at Vdd min */
+      uint8_t vddwcurrmax;     /*  52:50  Max. write current at Vdd max */
+      uint8_t csizemult;       /*  49:47  Device size multiplier */
 
       union
       {
         struct                 /* MMC system specification version 3.1 */
         {
-          ubyte ergrpsize;     /*  46:42  Erase group size (MMC 3.1) */
-          ubyte ergrpmult;     /*  41:37  Erase group multiplier (MMC 3.1) */
+          uint8_t ergrpsize;   /*  46:42  Erase group size (MMC 3.1) */
+          uint8_t ergrpmult;   /*  41:37  Erase group multiplier (MMC 3.1) */
         } mmc31;
         struct                 /* MMC system specification version 2.2 */
         {
-          ubyte sectorsize;    /*  46:42  Erase sector size (MMC 2.2) */
-          ubyte ergrpsize;     /*  41:37  Erase group size (MMC 2.2) */
+          uint8_t sectorsize;  /*  46:42  Erase sector size (MMC 2.2) */
+          uint8_t ergrpsize;   /*  41:37  Erase group size (MMC 2.2) */
         } mmc22;
       } er;
 
-      ubyte mmcwpgrpsize;      /*  36:32  Write protect group size (MMC) */
+      uint8_t mmcwpgrpsize;    /*  36:32  Write protect group size (MMC) */
     } mmc;
 #endif
     struct
     {
-      uint16 csize;            /*  73:62  Device size */
-      ubyte vddrcurrmin;       /*  61:59  Max. read current at Vdd min */
-      ubyte vddrcurrmax;       /*  58:56  Max. read current at Vdd max */
-      ubyte vddwcurrmin;       /*  55:53  Max. write current at Vdd min */
-      ubyte vddwcurrmax;       /*  52:50  Max. write current at Vdd max */
-      ubyte csizemult;         /*  49:47  Device size multiplier */
-      ubyte sderblen;          /*  46:46  Erase single block enable (SD) */
-      ubyte sdsectorsize;      /*  45:39  Erase sector size (SD) */
-      ubyte sdwpgrpsize;       /*  38:32  Write protect group size (SD) */
+      uint16_t csize;          /*  73:62  Device size */
+      uint8_t vddrcurrmin;     /*  61:59  Max. read current at Vdd min */
+      uint8_t vddrcurrmax;     /*  58:56  Max. read current at Vdd max */
+      uint8_t vddwcurrmin;     /*  55:53  Max. write current at Vdd min */
+      uint8_t vddwcurrmax;     /*  52:50  Max. write current at Vdd max */
+      uint8_t csizemult;       /*  49:47  Device size multiplier */
+      uint8_t sderblen;        /*  46:46  Erase single block enable (SD) */
+      uint8_t sdsectorsize;    /*  45:39  Erase sector size (SD) */
+      uint8_t sdwpgrpsize;     /*  38:32  Write protect group size (SD) */
     } sdbyte;
 
     struct
     {
                                /*  73:70  (reserved) */
-      uint32 csize;            /*  69:48  Device size */
+      uint32_t csize;          /*  69:48  Device size */
                                /*  47:47  (reserved) */
-      ubyte sderblen;          /*  46:46  Erase single block enable (SD) */
-      ubyte sdsectorsize;      /*  45:39  Erase sector size (SD) */
-      ubyte sdwpgrpsize;       /*  38:32  Write protect group size (SD) */
+      uint8_t sderblen;        /*  46:46  Erase single block enable (SD) */
+      uint8_t sdsectorsize;    /*  45:39  Erase sector size (SD) */
+      uint8_t sdwpgrpsize;     /*  38:32  Write protect group size (SD) */
     } sdblock;
   } u;
 
-  ubyte wpgrpen;               /*  31:31  Write protect group enable */
-  ubyte mmcdfltecc;            /*  30:29  Manufacturer default ECC (MMC) */
-  ubyte r2wfactor;             /*  28:26  Write speed factor */
-  ubyte writebllen;            /*  25:22  Max. write data block length */
-  ubyte writeblpartial;        /*  21:21  Partial blocks for write allowed */
-  ubyte fileformatgrp;         /*  15:15  File format group */
-  ubyte copy;                  /*  14:14  Copy flag (OTP) */
-  ubyte permwriteprotect;      /*  13:13  Permanent write protection */
-  ubyte tmpwriteprotect;       /*  12:12  Temporary write protection */
-  ubyte fileformat;            /*  10:11  File format */
-  ubyte mmcecc;                /*   9:8   ECC (MMC) */
-  ubyte crc;                   /*   7:1   CRC */
+  uint8_t wpgrpen;             /*  31:31  Write protect group enable */
+  uint8_t mmcdfltecc;          /*  30:29  Manufacturer default ECC (MMC) */
+  uint8_t r2wfactor;           /*  28:26  Write speed factor */
+  uint8_t writebllen;          /*  25:22  Max. write data block length */
+  uint8_t writeblpartial;      /*  21:21  Partial blocks for write allowed */
+  uint8_t fileformatgrp;       /*  15:15  File format group */
+  uint8_t copy;                /*  14:14  Copy flag (OTP) */
+  uint8_t permwriteprotect;    /*  13:13  Permanent write protection */
+  uint8_t tmpwriteprotect;     /*  12:12  Temporary write protection */
+  uint8_t fileformat;          /*  10:11  File format */
+  uint8_t mmcecc;              /*   9:8   ECC (MMC) */
+  uint8_t crc;                 /*   7:1   CRC */
                                /*   0:0   Not used */
 };
 
 struct mmcsd_scr_s
 {
-  ubyte  scrversion;           /* 63:60 Version of SCR structure */
-  ubyte  sdversion;            /* 59:56 SD memory card physical layer version */
-  ubyte  erasestate;           /* 55:55 Data state after erase (1 or 0) */
-  ubyte  security;             /* 54:52 SD security support */
-  ubyte  buswidth;             /* 51:48 DAT bus widthes supported */
+  uint8_t  scrversion;         /* 63:60 Version of SCR structure */
+  uint8_t  sdversion;          /* 59:56 SD memory card physical layer version */
+  uint8_t  erasestate;         /* 55:55 Data state after erase (1 or 0) */
+  uint8_t  security;           /* 54:52 SD security support */
+  uint8_t  buswidth;           /* 51:48 DAT bus widthes supported */
                                /* 47:32 SD reserved space */
-  uint32 mfgdata;              /* 31:0  Reserved for manufacturing data */
+  uint32_t mfgdata;            /* 31:0  Reserved for manufacturing data */
 };
 
 /********************************************************************************************

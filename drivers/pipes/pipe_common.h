@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipe/pipe_common.h
  *
- *   Copyright (C) 2008i-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <sys/types.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <poll.h>
 
 #ifndef CONFIG_DEV_PIPE_SIZE
@@ -53,7 +54,7 @@
 #if CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Maximum number of threads than can be waiting for POLL events */
@@ -126,7 +127,7 @@ EXTERN ssize_t pipecommon_read(FAR struct file *, FAR char *, size_t);
 EXTERN ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
 #ifndef CONFIG_DISABLE_POLL
 EXTERN int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                               boolean setup);
+                               bool setup);
 #endif
 
 #undef EXTERN

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/ramdisk.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,13 +62,13 @@
 
 struct rd_struct_s
 {
-  uint32       rd_nsectors;     /* Number of sectors on device */
-  uint16       rd_sectsize;     /* The size of one sector */
+  uint32_t       rd_nsectors;     /* Number of sectors on device */
+  uint16_t       rd_sectsize;     /* The size of one sector */
 #ifdef CONFIG_FS_WRITABLE
-  boolean      rd_writeenabled; /* TRUE: can write to ram disk */
-  ubyte       *rd_buffer;       /* RAM disk backup memory */
+  bool           rd_writeenabled; /* true: can write to ram disk */
+  uint8_t       *rd_buffer;       /* RAM disk backup memory */
 #else
-  const ubyte *rd_buffer;       /* ROM disk backup memory */
+  const uint8_t *rd_buffer;       /* ROM disk backup memory */
 #endif
 };
 
@@ -218,18 +220,18 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
   if (geometry)
     {
       dev = (struct rd_struct_s *)inode->i_private;
-      geometry->geo_available     = TRUE;
-      geometry->geo_mediachanged  = FALSE;
+      geometry->geo_available     = true;
+      geometry->geo_mediachanged  = false;
 #ifdef CONFIG_FS_WRITABLE
       geometry->geo_writeenabled  = dev->rd_writeenabled;
 #else
-      geometry->geo_writeenabled  = FALSE;
+      geometry->geo_writeenabled  = false;
 #endif
       geometry->geo_nsectors      = dev->rd_nsectors;
       geometry->geo_sectorsize    = dev->rd_sectsize;
 
-      fvdbg("available: TRUE mediachanged: FALSE writeenabled: %s\n",
-            geometry->geo_writeenabled ? "TRUE" : "FALSE");
+      fvdbg("available: true mediachanged: false writeenabled: %s\n",
+            geometry->geo_writeenabled ? "true" : "false");
       fvdbg("nsectors: %d sectorsize: %d\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
  
@@ -279,10 +281,11 @@ static int rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifdef CONFIG_FS_WRITABLE
-int ramdisk_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize,
-                     boolean writeenabled)
+int ramdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
+                     uint16_t sectsize, bool writeenabled)
 #else
-int romdisk_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize)
+int romdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
+                     uint16_t sectsize)
 #endif
 {
   struct rd_struct_s *dev;
@@ -310,7 +313,7 @@ int romdisk_register(int minor, ubyte *buffer, uint32 nsectors, uint16 sectsize)
       dev->rd_nsectors     = nsectors;     /* Number of sectors on device */
       dev->rd_sectsize     = sectsize;     /* The size of one sector */
 #ifdef CONFIG_FS_WRITABLE
-      dev->rd_writeenabled = writeenabled; /* TRUE: can write to ram disk */
+      dev->rd_writeenabled = writeenabled; /* true: can write to ram disk */
 #endif
       dev->rd_buffer       = buffer;       /* RAM disk backup memory */
 

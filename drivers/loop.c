@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/loop.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -57,11 +59,11 @@
 #include <nuttx/fs.h>
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define loop_semgive(d) sem_post(&(d)->sem)  /* To match loop_semtake */
-#define MAX_OPENCNT     (255)                /* Limit of ubyte */
+#define MAX_OPENCNT     (255)                /* Limit of uint8_t */
 
 /****************************************************************************
  * Private Types
@@ -70,12 +72,12 @@
 struct loop_struct_s
 {
   sem_t        sem;          /* For safe read-modify-write operations */
-  uint32       nsectors;     /* Number of sectors on device */
+  uint32_t     nsectors;     /* Number of sectors on device */
   off_t        offset;       /* Offset (in bytes) to the first sector */
-  uint16       sectsize;     /* The size of one sector */
-  ubyte        opencnt;      /* Count of open references to the loop device */
+  uint16_t     sectsize;     /* The size of one sector */
+  uint8_t      opencnt;      /* Count of open references to the loop device */
 #ifdef CONFIG_FS_WRITABLE
-  boolean      writeenabled; /* TRUE: can write to device */
+  bool         writeenabled; /* true: can write to device */
 #endif
   int          fd;           /* Descriptor of char device/file */
 };
@@ -313,12 +315,12 @@ static int loop_geometry(FAR struct inode *inode, struct geometry *geometry)
   if (geometry)
     {
       dev = (FAR struct loop_struct_s *)inode->i_private;
-      geometry->geo_available     = TRUE;
-      geometry->geo_mediachanged  = FALSE;
+      geometry->geo_available     = true;
+      geometry->geo_mediachanged  = false;
 #ifdef CONFIG_FS_WRITABLE
       geometry->geo_writeenabled  = dev->writeenabled;
 #else
-      geometry->geo_writeenabled  = FALSE;
+      geometry->geo_writeenabled  = false;
 #endif
       geometry->geo_nsectors      = dev->nsectors;
       geometry->geo_sectorsize    = dev->sectsize;
@@ -340,8 +342,8 @@ static int loop_geometry(FAR struct inode *inode, struct geometry *geometry)
  *
  ****************************************************************************/
 
-int losetup(const char *devname, const char *filename, uint16 sectsize,
-            off_t offset, boolean readonly)
+int losetup(const char *devname, const char *filename, uint16_t sectsize,
+            off_t offset, bool readonly)
 {
   FAR struct loop_struct_s *dev;
   struct stat sb;
@@ -391,7 +393,7 @@ int losetup(const char *devname, const char *filename, uint16 sectsize,
   /* Open the file. */
 
 #ifdef CONFIG_FS_WRITABLE
-  dev->writeenabled = FALSE; /* Assume failure */
+  dev->writeenabled = false; /* Assume failure */
   dev->fd           = -1;
 
   /* First try to open the device R/W access (unless we are asked
@@ -405,7 +407,7 @@ int losetup(const char *devname, const char *filename, uint16 sectsize,
 
   if (dev->fd >= 0)
     {
-      dev->writeenabled = TRUE; /* Success */
+      dev->writeenabled = true; /* Success */
     }
   else
 #endif

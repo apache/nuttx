@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_debug.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -90,10 +90,10 @@
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
-void mmcsd_dmpcsd(FAR const ubyte *csd, ubyte cardtype)
+void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
 {
-  boolean mmc = (cardtype == MMCSD_CARDTYPE_MMC);
-  boolean sd2 = (MMCSD_CSD_CSDSTRUCT(csd) == 1);
+  bool mmc = (cardtype == MMCSD_CARDTYPE_MMC);
+  bool sd2 = (MMCSD_CSD_CSDSTRUCT(csd) == 1);
 
   fvdbg("CSD\n");
   fvdbg("  CSD_STRUCTURE:           1.%d\n",   MMCSD_CSD_CSDSTRUCT(csd));

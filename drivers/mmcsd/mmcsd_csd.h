@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -252,7 +252,7 @@
 
 /* CCC 84-95 = Card command classes */
 
-#define MMCSD_CSD_CCC(csd) (((uint16)csd[4] << 4) | ((uint16)csd[5] >> 4))
+#define MMCSD_CSD_CCC(csd) (((uint16_t)csd[4] << 4) | ((uint16_t)csd[5] >> 4))
 #define SD20_CSD_CCC(csd) MMCSD_CSD_CCC(csd)
 
  /* READ_BL_LEN 80-83 = Max. read data block length */

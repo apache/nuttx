@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_storage.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -43,8 +43,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <queue.h>
 
@@ -351,12 +353,12 @@ struct usbstrg_req_s
 struct usbstrg_lun_s
 {
   struct inode    *inode;             /* Inode structure of open'ed block driver */
-  ubyte            readonly:1;        /* Media is read-only */
-  ubyte            locked:1;          /* Media removal is prevented */
-  uint16           sectorsize;        /* The size of one sector */
-  uint32           sd;                /* Sense data */
-  uint32           sdinfo;            /* Sense data information */
-  uint32           uad;               /* Unit needs attention data */
+  uint8_t          readonly:1;        /* Media is read-only */
+  uint8_t          locked:1;          /* Media removal is prevented */
+  uint16_t         sectorsize;        /* The size of one sector */
+  uint32_t         sd;                /* Sense data */
+  uint32_t         sdinfo;            /* Sense data information */
+  uint32_t         uad;               /* Unit needs attention data */
   off_t            startsector;       /* Sector offset to start of partition */
   size_t           nsectors;          /* Number of sectors in the partition */
 };
@@ -372,14 +374,14 @@ struct usbstrg_dev_s
   pthread_t        thread;            /* The worker thread */
   pthread_mutex_t  mutex;             /* Mutually exclusive access to resources*/
   pthread_cond_t   cond;              /* Used to signal worker thread */
-  volatile ubyte   thstate;           /* State of the worker thread */
-  volatile uint16  theventset;        /* Set of pending events signaled to worker thread */
-  volatile ubyte   thvalue;           /* Value passed with the event (must persist) */
+  volatile uint8_t  thstate;          /* State of the worker thread */
+  volatile uint16_t theventset;       /* Set of pending events signaled to worker thread */
+  volatile uint8_t  thvalue;          /* Value passed with the event (must persist) */
 
   /* Storage class configuration and state */
 
-  ubyte            nluns:4;           /* Number of LUNs */
-  ubyte            config;            /* Configuration number */
+  uint8_t          nluns:4;           /* Number of LUNs */
+  uint8_t          config;            /* Configuration number */
 
   /* Endpoints */
 
@@ -391,25 +393,25 @@ struct usbstrg_dev_s
 
   struct usbstrg_lun_s    *lun;       /* Currently selected LUN */
   struct usbstrg_lun_s    *luntab;    /* Allocated table of all LUNs */
-  ubyte cdb[USBSTRG_MAXCDBLEN];       /* Command data (cdb[]) from CBW */
-  ubyte            phaseerror:1;      /* Need to send phase sensing status */
-  ubyte            shortpacket:1;     /* Host transmission stopped unexpectedly */
-  ubyte            cbwdir:2;          /* Direction from CBW. See USBSTRG_FLAGS_DIR* definitions */
-  ubyte            cdblen;            /* Length of cdb[] from CBW */
-  ubyte            cbwlun;            /* LUN from the CBW */
-  uint16           nsectbytes;        /* Bytes buffered in iobuffer[] */
-  uint16           nreqbytes;         /* Bytes buffered in head write requests */
-  uint16           iosize;            /* Size of iobuffer[] */
-  uint32           cbwlen;            /* Length of data from CBW */
-  uint32           cbwtag;            /* Tag from the CBW */
+  uint8_t cdb[USBSTRG_MAXCDBLEN];     /* Command data (cdb[]) from CBW */
+  uint8_t          phaseerror:1;      /* Need to send phase sensing status */
+  uint8_t          shortpacket:1;     /* Host transmission stopped unexpectedly */
+  uint8_t          cbwdir:2;          /* Direction from CBW. See USBSTRG_FLAGS_DIR* definitions */
+  uint8_t          cdblen;            /* Length of cdb[] from CBW */
+  uint8_t          cbwlun;            /* LUN from the CBW */
+  uint16_t         nsectbytes;        /* Bytes buffered in iobuffer[] */
+  uint16_t         nreqbytes;         /* Bytes buffered in head write requests */
+  uint16_t         iosize;            /* Size of iobuffer[] */
+  uint32_t         cbwlen;            /* Length of data from CBW */
+  uint32_t         cbwtag;            /* Tag from the CBW */
   union
     {
-      uint32       xfrlen;            /* Read/Write: Sectors remaining to be transferred */
-      uint32       alloclen;          /* Other device-to-host: Host allocation length */
+      uint32_t     xfrlen;            /* Read/Write: Sectors remaining to be transferred */
+      uint32_t     alloclen;          /* Other device-to-host: Host allocation length */
     } u;
-  uint32           sector;            /* Current sector (relative to lun->startsector) */
-  uint32           residue;           /* Untransferred amount reported in the CSW */
-  ubyte           *iobuffer;          /* Buffer for data transfers */
+  uint32_t         sector;            /* Current sector (relative to lun->startsector) */
+  uint32_t         residue;           /* Untransferred amount reported in the CSW */
+  uint8_t         *iobuffer;          /* Buffer for data transfers */
 
   /* Write request list */
 
@@ -468,7 +470,7 @@ EXTERN void *usbstrg_workerthread(void *arg);
  *
  ****************************************************************************/
 
-EXTERN int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, ubyte config);
+EXTERN int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, uint8_t config);
 
 /****************************************************************************
  * Name: usbstrg_resetconfig
@@ -522,11 +524,11 @@ EXTERN void usbstrg_rdcomplete(FAR struct usbdev_ep_s *ep,
  *
  * Input parameters:
  *   priv  - Private state structure for this USB storage instance
- *   stall - TRUE is the action failed and a stall is required
+ *   stall - true is the action failed and a stall is required
  *
  ****************************************************************************/
 
-EXTERN void usbstrg_deferredresponse(FAR struct usbstrg_dev_s *priv, boolean failed);
+EXTERN void usbstrg_deferredresponse(FAR struct usbstrg_dev_s *priv, bool failed);
 
 #undef EXTERN
 #if defined(__cplusplus)
