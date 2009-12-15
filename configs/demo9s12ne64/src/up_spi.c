@@ -39,8 +39,9 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <nuttx/spi.h>
@@ -117,11 +118,11 @@ void weak_function hcs12_spiinitialize(void)
  *
  ****************************************************************************/
 
-void hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected)
+void hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
 }
 
-ubyte hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return SPI_STATUS_PRESENT;
 }

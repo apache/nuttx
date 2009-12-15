@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <arch/board/board.h>
 #include "up_internal.h"
 

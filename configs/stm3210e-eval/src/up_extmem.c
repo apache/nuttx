@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -95,7 +95,7 @@
 
 /* GPIO configurations common to SRAM and NOR Flash */
 
-const uint16 g_commonconfig[NCOMMON_CONFIG] =
+const uint16_t g_commonconfig[NCOMMON_CONFIG] =
 {
   /* A0... A18 */
 
@@ -123,13 +123,13 @@ const uint16 g_commonconfig[NCOMMON_CONFIG] =
 
 /* GPIO configurations unique to SRAM  */
 
-static const uint16 g_sramconfig[] =
+static const uint16_t g_sramconfig[] =
 {
   /* NE3, NBL0, NBL1,  */
 
   GPIO_NPS_NE3, GPIO_NPS_NBL0, GPIO_NPS_NBL1
 };
-#define NSRAM_CONFIG (sizeof(g_sramconfig)/sizeof(uint16))
+#define NSRAM_CONFIG (sizeof(g_sramconfig)/sizeof(uint16_t))
 
 /************************************************************************************
  * Private Functions
@@ -147,7 +147,7 @@ static const uint16 g_sramconfig[] =
  *
  ************************************************************************************/
 
-void stm32_extmemgpios(const uint16 *gpios, int ngpios)
+void stm32_extmemgpios(const uint16_t *gpios, int ngpios)
 {
   int i;
 
@@ -169,7 +169,7 @@ void stm32_extmemgpios(const uint16 *gpios, int ngpios)
 
 void stm32_enablefsmc(void)
 {
-  uint32 regval;
+  uint32_t regval;
 
   /* Enable AHB clocking to the FSMC */
 
@@ -188,7 +188,7 @@ void stm32_enablefsmc(void)
 
 void stm32_disablefsmc(void)
 {
-  uint32 regval;
+  uint32_t regval;
 
   /* Enable AHB clocking to the FSMC */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/ez80f910200zco/include/board.h
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <stdint.h>
 
 /****************************************************************************
  * Definitions
@@ -80,7 +82,7 @@ extern "C" {
 
 #ifdef CONFIG_ARCH_BUTTONS
 EXTERN void up_buttoninit(void);
-EXTERN ubyte up_buttons(void);
+EXTERN uint8_t up_buttons(void);
 #endif
 
 #undef EXTERN

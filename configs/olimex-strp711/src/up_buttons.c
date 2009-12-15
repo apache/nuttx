@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/olimex-strp711/src/up_leds.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -76,7 +76,7 @@
 #ifdef CONFIG_ARCH_BUTTONS
 void up_buttoninit(void)
 {
-  uint16 reg16;
+  uint16_t reg16;
 
   /* Configure the GPIO0 & 1 pins as inputs */
 
@@ -109,9 +109,9 @@ void up_buttoninit(void)
  * Name: up_buttons
  ****************************************************************************/
 
-ubyte up_buttons(void)
+uint8_t up_buttons(void)
 {
-  ubyte ret    = 0;
+  uint8_t ret    = 0;
 
   if ((getreg16(STR71X_GPIO0_PD) & STR71X_WAKEUPBUTTON_GPIO0) != 0)
     {

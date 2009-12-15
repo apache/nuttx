@@ -40,7 +40,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
 #include <stdio.h>
 #include <debug.h>
@@ -147,7 +146,7 @@ int usbstrg_archinitialize(void)
    * the slot.
    */
 
-   sdio_mediachange(sdio, TRUE);
+   sdio_mediachange(sdio, true);
    return OK;
 }
 

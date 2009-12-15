@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/z8encore000zco/src/z8_leds.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <arch/board/board.h>
 #include "up_internal.h"
 
@@ -114,8 +114,8 @@
 
 struct z8_ledbits_s
 {
-  ubyte anode;
-  ubyte cathode;
+  uint8_t anode;
+  uint8_t cathode;
 };
 
 /****************************************************************************
@@ -145,9 +145,9 @@ static const struct z8_ledbits_s g_ledarray[10][4] =
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-static void z8_putled134(FAR const struct z8_ledbits_s *bits, ubyte addr)
+static void z8_putled134(FAR const struct z8_ledbits_s *bits, uint8_t addr)
 {
-  ubyte porte;
+  uint8_t porte;
   
   porte = bits->cathode;
   putreg8(porte, PEOD);          /* Load porte data */
@@ -163,9 +163,9 @@ static void z8_putled134(FAR const struct z8_ledbits_s *bits, ubyte addr)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-static void z8_putled2(FAR const struct z8_ledbits_s *bits, ubyte addr)
+static void z8_putled2(FAR const struct z8_ledbits_s *bits, uint8_t addr)
 {
-  ubyte portg;
+  uint8_t portg;
 
   putreg8(bits->cathode, PEOD);  /* Load porte data */
   portg = bits->anode;

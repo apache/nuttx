@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_DM90x0)
 
-#include <sys/types.h>
 #include <debug.h>
 #include <arch/board/board.h>
 

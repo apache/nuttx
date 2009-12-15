@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ez80f910200zco/src/ez80_leds.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 #include <nuttx/irq.h>
 
@@ -69,7 +70,7 @@
 #if 0
 void up_PBinterrupt(void)
 {
-  ubyte regval;
+  uint8_t regval;
 
   regval = inp(EZ80_PB_DR); /* Clear interrupt flag for eZ80F91 date codes before 0611 */
   regval |= 7;
@@ -82,7 +83,7 @@ void up_PBinterrupt(void)
 
 void up_pb1interrupt(void)
 {
-  ubyte regval;
+  uint8_t regval;
 
   regval = inp(EZ80_PB_DR); /* Clear interrupt flag for eZ80F91 date codes before 0611 */
   regval |= 7;
@@ -95,7 +96,7 @@ void up_pb1interrupt(void)
 
 void up_pb2interrupt(void)
 {
-  ubyte regval;
+  uint8_t regval;
 
   regval = inp(EZ80_PB_DR); /* Clear interrupt flag for eZ80F91 date codes before 0611 */
   regval |= 7;
@@ -118,7 +119,7 @@ void up_pb2interrupt(void)
 #ifdef CONFIG_ARCH_BUTTONS
 void up_buttoninit(void)
 {
-  ubyte regval;
+  uint8_t regval;
 
 #if 0 /* Interrupts are not used */
 
@@ -166,7 +167,7 @@ void up_buttoninit(void)
  * Name: up_buttons
  ****************************************************************************/
 
-ubyte up_buttons(void)
+uint8_t up_buttons(void)
 {
   return inp(EZ80_PB_DDR) & 7;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/olimex-strp711/src/up_leds.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -62,8 +62,8 @@
  * Private Data
  ****************************************************************************/
 
-static uint16 g_led2set;
-static uint16 g_led2clr;
+static uint16_t g_led2set;
+static uint16_t g_led2clr;
 
 /****************************************************************************
  * Private Functions
@@ -73,9 +73,9 @@ static uint16 g_led2clr;
  * Name: up_setleds
  ****************************************************************************/
 
-static void up_setleds(uint16 setbits, uint16 clearbits)
+static void up_setleds(uint16_t setbits, uint16_t clearbits)
 {
-  uint16 reg16;
+  uint16_t reg16;
 
   /* Save the state of LED2 for later */
 
@@ -101,7 +101,7 @@ static void up_setleds(uint16 setbits, uint16 clearbits)
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-  uint16 reg16;
+  uint16_t reg16;
 
   /* Set normal function output */
 

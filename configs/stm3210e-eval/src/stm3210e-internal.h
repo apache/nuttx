@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /************************************************************************************
  * Definitions
@@ -111,14 +111,14 @@
 
 struct extmem_save_s
 {
-  uint32 gpiod_crl;
-  uint32 gpiod_crh;
-  uint32 gpioe_crl;
-  uint32 gpioe_crh;
-  uint32 gpiof_crl;
-  uint32 gpiof_crh;
-  uint32 gpiog_crl;
-  uint32 gpiog_crh;
+  uint32_t gpiod_crl;
+  uint32_t gpiod_crh;
+  uint32_t gpioe_crl;
+  uint32_t gpioe_crh;
+  uint32_t gpiof_crl;
+  uint32_t gpiof_crh;
+  uint32_t gpiog_crl;
+  uint32_t gpiog_crh;
 };
 
 /************************************************************************************
@@ -130,7 +130,7 @@ struct extmem_save_s
 /* GPIO configurations common to SRAM and NOR Flash */
 
 #define NCOMMON_CONFIG 37
-extern const uint16 g_commonconfig[NCOMMON_CONFIG];
+extern const uint16_t g_commonconfig[NCOMMON_CONFIG];
 
 /************************************************************************************
  * Public Functions
@@ -185,7 +185,7 @@ extern void stm32_extcontextrestore(struct extmem_save_s *restore);
  *
  ************************************************************************************/
 
-extern void stm32_extmemgpios(const uint16 *gpios, int ngpios);
+extern void stm32_extmemgpios(const uint16_t *gpios, int ngpios);
 
 /************************************************************************************
  * Name: stm32_enablefsmc

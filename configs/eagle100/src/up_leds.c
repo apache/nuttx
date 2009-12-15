@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdbool.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
@@ -89,7 +89,7 @@
  * Public Functions
  ****************************************************************************/
 
-static boolean g_nest;
+static uint8_t g_nest;
 
 /****************************************************************************
  * Name: up_ledinit
@@ -129,7 +129,7 @@ void up_ledon(int led)
       case LED_IRQSENABLED:
       case LED_STACKCREATED:
         led_dumpgpio("up_ledon: before lm3s_gpiowrite()");
-        lm3s_gpiowrite(LED_GPIO, FALSE);
+        lm3s_gpiowrite(LED_GPIO, false);
         led_dumpgpio("up_ledon: after lm3s_gpiowrite()");
         break;
     }
@@ -157,7 +157,7 @@ void up_ledoff(int led)
         if (--g_nest <= 0)
           {
             led_dumpgpio("up_ledoff: before lm3s_gpiowrite()");
-            lm3s_gpiowrite(LED_GPIO, TRUE);
+            lm3s_gpiowrite(LED_GPIO, true);
             led_dumpgpio("up_ledoff: after lm3s_gpiowrite()");
           }
         break;

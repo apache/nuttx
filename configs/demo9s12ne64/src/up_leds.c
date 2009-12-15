@@ -39,7 +39,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
 #include <debug.h>
 
@@ -48,7 +47,7 @@
 #include "demo9s12ne64.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG with

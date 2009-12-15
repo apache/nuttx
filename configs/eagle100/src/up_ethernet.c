@@ -39,8 +39,8 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <debug.h>
 #include <assert.h>
 
@@ -75,8 +75,8 @@
 #ifdef CONFIG_LM3S_BOARDMAC
 void lm3s_ethernetmac(struct ether_addr *ethaddr)
 {
-  uint32 user0;
-  uint32 user1;
+  uint32_t user0;
+  uint32_t user1;
 
   /* Get the current value of the user registers */
 

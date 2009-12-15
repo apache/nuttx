@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -75,7 +75,7 @@
 #ifdef CONFIG_ARCH_BUTTONS
 void up_buttoninit(void)
 {
-  ubyte regval;
+  uint8_t regval;
 
   regval  = getreg8(M16C_PD8);
   regval |= (SW1_BIT | SW2_BIT | SW3_BIT);
@@ -86,10 +86,10 @@ void up_buttoninit(void)
  * Name: up_buttons
  ****************************************************************************/
 
-ubyte up_buttons(void)
+uint8_t up_buttons(void)
 {
-  ubyte swset  = 0;
-  ubyte regval = getreg8(M16C_P8);
+  uint8_t swset  = 0;
+  uint8_t regval = getreg8(M16C_P8);
 
   if (SW_PRESSED(regval, SW1_BIT))
     {

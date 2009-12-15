@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include "up_arch.h"
@@ -88,13 +88,13 @@
 
 /* GPIO configurations unique to SRAM  */
 
-static const uint16 g_sramconfig[] =
+static const uint16_t g_sramconfig[] =
 {
   /* NE3, NBL0, NBL1,  */
 
   GPIO_NPS_NE3, GPIO_NPS_NBL0, GPIO_NPS_NBL1
 };
-#define NSRAM_CONFIG (sizeof(g_sramconfig)/sizeof(uint16))
+#define NSRAM_CONFIG (sizeof(g_sramconfig)/sizeof(uint16_t))
 
 /************************************************************************************
  * Private Functions

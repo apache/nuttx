@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <nuttx/irq.h>
 #include "up_internal.h"
 
@@ -9,7 +9,7 @@ void os_start(void)
 	for (;;);
 }
 
-void up_assert_code(const ubyte *filename, int lineno, int errorcode)
+void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
 {
 	up_lowputc('?');
 	up_lowputc('\n');
@@ -23,7 +23,7 @@ int irq_attach(int irq, xcpt_t isr)
 	for (;;);
 }
 
-uint32 *up_doirq(int irq, uint32 *regs)
+uint32 *up_doirq(int irq, uint32_t *regs)
 {
 	up_lowputc('I');
 	up_lowputc('\n');

@@ -40,7 +40,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <debug.h>
 
 #include "up_arch.h"

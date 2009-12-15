@@ -38,7 +38,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include <arch/board/board.h>
 #include "up_arch.h"
@@ -85,7 +85,7 @@
  * Private Data Definitions
  ************************************************************************************/
 
-static const ubyte g_ledstate[7] =
+static const uint8_t g_ledstate[7] =
 {
   (GREEN_LED_OFF | YELLOW_LED_OFF | RED_LED_OFF), /* LED_STARTED */
   (GREEN_LED_ON  | YELLOW_LED_OFF | RED_LED_OFF), /* LED_HEAPALLOCATE */
@@ -97,8 +97,8 @@ static const ubyte g_ledstate[7] =
   (GREEN_LED_ON  | YELLOW_LED_ON  | RED_LED_ON )  /* LED_ASSERTION */
 };
 
-static ubyte g_prevled[3];
-static ubyte g_nestlevel;
+static uint8_t g_prevled[3];
+static uint8_t g_nestlevel;
 
 /************************************************************************************
  * Private Functions
@@ -108,9 +108,9 @@ static ubyte g_nestlevel;
  * Name: up_ledinit
  ************************************************************************************/
 
-static void up_setleds(ubyte gybits, ubyte rbit)
+static void up_setleds(uint8_t gybits, uint8_t rbit)
 {
-  ubyte regval;
+  uint8_t regval;
 
   regval  = getreg8(GREENYELLOW_LED_PORT);
   regval &= ~GREENYELLOW_LED_MASK;
@@ -133,7 +133,7 @@ static void up_setleds(ubyte gybits, ubyte rbit)
 
 void up_ledinit(void)
 {
-  register ubyte regval;
+  register uint8_t regval;
 
   /* Make sure that the LEDs are in the OFF state */
 
@@ -162,7 +162,7 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  ubyte ledset;
+  uint8_t ledset;
 
   /* If this is the ASSERTION led, preserve the Y&G bits from the last setting and
    * set the RED LED on.
@@ -198,7 +198,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  ubyte ledset;
+  uint8_t ledset;
 
   /* If this is the ASSERTION led then what we do depends on the previous state */
 

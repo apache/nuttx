@@ -40,6 +40,10 @@
  * Included Files
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+# include <stdint.h>
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -64,8 +68,8 @@
 #define EZ80_TRIGGERS     EZ80_LEDCATHODE
 #define EZ80_GPIODATA     0x800002 /* RD/WR: GPIO data */
 
-#define ez80_getmmreg8(a)   (*(ubyte*)(a))
-#define ez80_putmmreg8(v,a) (*(ubyte*)(a) = (v))
+#define ez80_getmmreg8(a)   (*(uint8_t*)(a))
+#define ez80_putmmreg8(v,a) (*(uint8_t*)(a) = (v))
 
 /* LED anode/GPIO port output control bit definitions */
 
