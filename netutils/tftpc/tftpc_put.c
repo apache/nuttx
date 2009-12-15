@@ -1,7 +1,7 @@
 /****************************************************************************
  * netuils/tftp/tftpc_put.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -57,7 +58,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define TFTP_RETRIES 3
@@ -74,7 +75,7 @@
  * Name: tftp_read
  ****************************************************************************/
 
-static inline ssize_t tftp_read(int fd, ubyte *buf, size_t buflen)
+static inline ssize_t tftp_read(int fd, uint8_t *buf, size_t buflen)
 {
   ssize_t nbytesread;
   ssize_t totalread = 0;
@@ -139,7 +140,7 @@ static inline ssize_t tftp_read(int fd, ubyte *buf, size_t buflen)
  *
  ****************************************************************************/
 
-int tftp_mkdatapacket(int fd, off_t offset, ubyte *packet, uint16 blockno)
+int tftp_mkdatapacket(int fd, off_t offset, uint8_t *packet, uint16_t blockno)
 {
   off_t tmp;
   int nbytesread;
@@ -191,13 +192,13 @@ int tftp_mkdatapacket(int fd, off_t offset, ubyte *packet, uint16 blockno)
  *
  ****************************************************************************/
 
-static int tftp_rcvack(int sd, ubyte *packet, struct sockaddr_in *server,
-                       uint16 *port, uint16 *blockno)
+static int tftp_rcvack(int sd, uint8_t *packet, struct sockaddr_in *server,
+                       uint16_t *port, uint16_t *blockno)
 {
   struct sockaddr_in from;     /* The address the last UDP message recv'd from */
   ssize_t nbytes;              /* The number of bytes received. */
-  uint16 opcode;               /* The received opcode */
-  uint16 rblockno;             /* The received block number */
+  uint16_t opcode;             /* The received opcode */
+  uint16_t rblockno;           /* The received block number */
   int packetlen;               /* Packet length */
   int retry;                   /* Retry counter */
 
@@ -253,8 +254,8 @@ static int tftp_rcvack(int sd, ubyte *packet, struct sockaddr_in *server,
 
               /* Parse the error message */
 
-               opcode   = (uint16)packet[0] << 8 | (uint16)packet[1];
-               rblockno = (uint16)packet[2] << 8 | (uint16)packet[3];
+               opcode   = (uint16_t)packet[0] << 8 | (uint16_t)packet[1];
+               rblockno = (uint16_t)packet[2] << 8 | (uint16_t)packet[3];
 
               /* Verify that the message that we received is an ACK for the
                * expected block number.
@@ -312,14 +313,14 @@ static int tftp_rcvack(int sd, ubyte *packet, struct sockaddr_in *server,
  *
  ****************************************************************************/
 
-int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binary)
+int tftpput(const char *local, const char *remote, in_addr_t addr, bool binary)
 {
   struct sockaddr_in server;         /* The address of the TFTP server */
-  ubyte *packet;                     /* Allocated memory to hold one packet */
+  uint8_t *packet;                   /* Allocated memory to hold one packet */
   off_t offset;                      /* Offset into source file */
-  uint16 blockno;                    /* The current transfer block number */
-  uint16 rblockno;                   /* The ACK'ed block number */
-  uint16 port = 0;                   /* This is the port number for the transfer */
+  uint16_t blockno;                  /* The current transfer block number */
+  uint16_t rblockno;                 /* The ACK'ed block number */
+  uint16_t port = 0;                 /* This is the port number for the transfer */
   int packetlen;                     /* The length of the data packet */
   int sd;                            /* Socket descriptor for socket I/O */
   int fd;                            /* File descriptor for file I/O */
@@ -329,7 +330,7 @@ int tftpput(const char *local, const char *remote, in_addr_t addr, boolean binar
 
   /* Allocate the buffer to used for socket/disk I/O */
 
-  packet = (ubyte*)zalloc(TFTP_IOBUFSIZE);
+  packet = (uint8_t*)zalloc(TFTP_IOBUFSIZE);
   if (!packet)
     {
       ndbg("packet memory allocation failure\n");

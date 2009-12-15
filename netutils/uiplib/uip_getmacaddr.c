@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/uiplib/uip_getmacaddr.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,10 +40,9 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
-
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 
@@ -71,7 +70,7 @@
  *
  ****************************************************************************/
 
-int uip_getmacaddr(const char *ifname, uint8 *macaddr)
+int uip_getmacaddr(const char *ifname, uint8_t *macaddr)
 {
   int ret = ERROR;
   if (ifname && macaddr)

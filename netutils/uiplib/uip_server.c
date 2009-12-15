@@ -37,15 +37,17 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
 #include <debug.h>
+#include <netinet/in.h>
 
 #include <net/uip/uip-lib.h>
 
@@ -74,7 +76,7 @@
  *
  ****************************************************************************/
 
-void uip_server(uint16 portno, pthread_startroutine_t handler, int stacksize)
+void uip_server(uint16_t portno, pthread_startroutine_t handler, int stacksize)
 {
   struct sockaddr_in myaddr;
 #ifdef CONFIG_NET_HAVE_SOLINGER

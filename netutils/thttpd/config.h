@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -165,7 +166,7 @@
 #  endif
 
 #  if CONFIG_THTTPD_IOBUFFERSIZE > 65535
-#    error "Can't use uint16 for buffer size"
+#    error "Can't use uint16_t for buffer size"
 #  endif
 
 /* A list of index filenames to check. The files are searched for in this order. */

@@ -47,8 +47,9 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <sys/socket.h>
-
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -65,7 +66,7 @@
 #include "httpd_cgi.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define ISO_nl      0x0a
@@ -121,7 +122,7 @@ static void httpd_dumpbuffer(FAR const char *msg, FAR const char *buffer, unsign
    * defined or the following does nothing.
    */
     
-  nvdbgdumpbuffer(msg, (FAR const ubyte*)buffer, nbytes);
+  nvdbgdumpbuffer(msg, (FAR const uint8_t*)buffer, nbytes);
 }
 #else
 # define httpd_dumpbuffer(msg,buffer,nbytes)

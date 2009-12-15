@@ -41,7 +41,8 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -59,7 +60,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -74,7 +75,7 @@
  * Name: tftp_mode
  ****************************************************************************/
 
-static inline const char *tftp_mode(boolean binary)
+static inline const char *tftp_mode(bool binary)
 {
   return binary ? "octet" : "netascii";
 }
@@ -143,7 +144,7 @@ int tftp_sockinit(struct sockaddr_in *server, in_addr_t addr)
  *
  ****************************************************************************/
 
-int tftp_mkreqpacket(ubyte *buffer, int opcode, const char *path, boolean binary)
+int tftp_mkreqpacket(uint8_t *buffer, int opcode, const char *path, bool binary)
 {
   buffer[0] = opcode >> 8;
   buffer[1] = opcode & 0xff;
@@ -161,7 +162,7 @@ int tftp_mkreqpacket(ubyte *buffer, int opcode, const char *path, boolean binary
  *
  ****************************************************************************/
 
-int tftp_mkackpacket(ubyte *buffer, uint16 blockno)
+int tftp_mkackpacket(uint8_t *buffer, uint16_t blockno)
 {
   buffer[0] = TFTP_ACK >> 8;
   buffer[1] = TFTP_ACK & 0xff;
@@ -183,7 +184,7 @@ int tftp_mkackpacket(ubyte *buffer, uint16 blockno)
  *
  ****************************************************************************/
 
-int tftp_mkerrpacket(ubyte *buffer, uint16 errorcode, const char *errormsg)
+int tftp_mkerrpacket(uint8_t *buffer, uint16_t errorcode, const char *errormsg)
 {
   buffer[0] = TFTP_ERR >> 8;
   buffer[1] = TFTP_ERR & 0xff;
@@ -207,10 +208,10 @@ int tftp_mkerrpacket(ubyte *buffer, uint16 errorcode, const char *errormsg)
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-int tftp_parseerrpacket(const ubyte *buffer)
+int tftp_parseerrpacket(const uint8_t *buffer)
 {
-  uint16 opcode       = (uint16)buffer[0] << 8 | (uint16)buffer[1];
-  uint16 errcode      = (uint16)buffer[2] << 8 | (uint16)buffer[3];
+  uint16_t opcode       = (uint16_t)buffer[0] << 8 | (uint16_t)buffer[1];
+  uint16_t errcode      = (uint16_t)buffer[2] << 8 | (uint16_t)buffer[3];
   const char *errmsg  = (const char *)&buffer[4];
 
   if (opcode == TFTP_ERR)

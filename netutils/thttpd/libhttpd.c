@@ -39,10 +39,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -145,7 +147,7 @@ static int httpd_tilde_map2(httpd_conn *hc);
 #ifdef CONFIG_THTTPD_VHOST
 static int  vhost_map(httpd_conn *hc);
 #endif
-static char *expand_filename(char *path, char **restP, boolean tildemapped);
+static char *expand_filename(char *path, char **restP, bool tildemapped);
 static char *bufgets(httpd_conn *hc);
 static void de_dotdot(char *file);
 static void init_mime(void);
@@ -333,7 +335,7 @@ static void send_mime(httpd_conn *hc, int status, const char *title, const char 
       else
         {
           partial_content = 0;
-          hc->got_range = FALSE;
+          hc->got_range = false;
         }
 
       gettimeofday(&now, NULL);
@@ -536,7 +538,7 @@ static void send_authenticate(httpd_conn *hc, char *realm)
 
   if (hc->method == METHOD_POST)
     {
-      hc->should_linger = TRUE;
+      hc->should_linger = true;
     }
 }
 
@@ -952,7 +954,7 @@ static int httpd_tilde_map2(httpd_conn *hc)
       (void)strcat(hc->altdir, postfix);
     }
 
-  alt = expand_filename(hc->altdir, &rest, TRUE);
+  alt = expand_filename(hc->altdir, &rest, true);
   if (rest[0] != '\0')
     {
      return 0;
@@ -968,7 +970,7 @@ static int httpd_tilde_map2(httpd_conn *hc)
 
   /* For this type of tilde mapping, we want to defeat vhost mapping. */
 
-  hc->tildemapped = TRUE;
+  hc->tildemapped = true;
   return 1;
 }
 #endif
@@ -1092,7 +1094,7 @@ static int vhost_map(httpd_conn *hc)
  * parts of the path that don't exist.
  */
 
-static char *expand_filename(char *path, char **restP, boolean tildemapped)
+static char *expand_filename(char *path, char **restP, bool tildemapped)
 {
   static char *checked;
   static char *rest;
@@ -1783,7 +1785,7 @@ static void ls_child(int argc, char **argv)
       /* And print. */
 
       (void)fprintf(fp, "%s %3ld  %10lld  %s  <A HREF=\"/%.500s%s\">%s</A>%s%s%s\n",
-                    modestr, (long)lsb.st_nlink, (sint16) lsb.st_size,
+                    modestr, (long)lsb.st_nlink, (int16_t) lsb.st_size,
                     timestr, encrname, S_ISDIR(sb.st_mode) ? "/" : "",
                     nameptrs[i], linkprefix, link, fileclass);
     }
@@ -1890,7 +1892,7 @@ static int ls(httpd_conn *hc)
 #endif
 
       hc->bytes_sent = CONFIG_THTTPD_CGI_BYTECOUNT;
-      hc->should_linger = FALSE;
+      hc->should_linger = false;
     }
   else
     {
@@ -2372,14 +2374,14 @@ int httpd_get_conn(httpd_server *hs, int listen_fd, httpd_conn *hc)
 #ifdef CONFIG_THTTPD_VHOST
   hc->vhostname         = NULL;
 #endif
-  hc->mime_flag         = TRUE;
-  hc->one_one           = FALSE;
-  hc->got_range         = FALSE;
-  hc->tildemapped       = FALSE;
+  hc->mime_flag         = true;
+  hc->one_one           = false;
+  hc->got_range         = false;
+  hc->tildemapped       = false;
   hc->range_start       = 0;
   hc->range_end         = -1;
-  hc->keep_alive        = FALSE;
-  hc->should_linger     = FALSE;
+  hc->keep_alive        = false;
+  hc->should_linger     = false;
   hc->file_fd           = -1;
 
   nvdbg("New connection accepted on %d\n", hc->conn_fd);
@@ -2631,7 +2633,7 @@ int httpd_parse_request(httpd_conn *hc)
   if (!protocol)
     {
       protocol      = "HTTP/0.9";
-      hc->mime_flag = FALSE;
+      hc->mime_flag = false;
     }
   else
     {
@@ -2647,7 +2649,7 @@ int httpd_parse_request(httpd_conn *hc)
 
           if (strcasecmp(protocol, "HTTP/1.0") != 0)
             {
-              hc->one_one = TRUE;
+              hc->one_one = true;
             }
         }
     }
@@ -2868,7 +2870,7 @@ int httpd_parse_request(httpd_conn *hc)
                       if (cp_dash != NULL && cp_dash != cp + 1)
                         {
                           *cp_dash = '\0';
-                          hc->got_range = TRUE;
+                          hc->got_range = true;
                           hc->range_start = atoll(cp + 1);
                           if (hc->range_start < 0)
                             {
@@ -2918,7 +2920,7 @@ int httpd_parse_request(httpd_conn *hc)
               cp += strspn(cp, " \t");
               if (strcasecmp(cp, "keep-alive") == 0)
                {
-                 hc->keep_alive = TRUE;
+                 hc->keep_alive = true;
                }
            }
 #ifdef LOG_UNKNOWN_HEADERS
@@ -2980,7 +2982,7 @@ int httpd_parse_request(httpd_conn *hc)
 
       if (hc->keep_alive)
         {
-          hc->should_linger = TRUE;
+          hc->should_linger = true;
         }
     }
 

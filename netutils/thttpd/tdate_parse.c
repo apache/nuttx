@@ -38,7 +38,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/telnetd/telnetd.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -44,7 +44,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -107,11 +107,11 @@
 
 struct telnetd_s
 {
-  int   tn_sockfd;
-  char  tn_iobuffer[CONFIG_NETUTILS_IOBUFFER_SIZE];
-  char  tn_cmd[CONFIG_NETUTILS_CMD_SIZE];
-  uint8 tn_bufndx;
-  uint8 tn_state;
+  int     tn_sockfd;
+  char    tn_iobuffer[CONFIG_NETUTILS_IOBUFFER_SIZE];
+  char    tn_cmd[CONFIG_NETUTILS_CMD_SIZE];
+  uint8_t tn_bufndx;
+  uint8_t tn_state;
 };
 
 /****************************************************************************
@@ -133,7 +133,7 @@ static inline void telnetd_dumpbuffer(FAR const char *msg, FAR const char *buffe
   * defined or the following does nothing.
   */
     
-  nvdbgdumpbuffer(msg, (FAR const ubyte*)buffer, nbytes);
+  nvdbgdumpbuffer(msg, (FAR const uint8_t*)buffer, nbytes);
 }
 #else
 # define telnetd_dumpbuffer(msg,buffer,nbytes)
@@ -147,7 +147,7 @@ static inline void telnetd_dumpbuffer(FAR const char *msg, FAR const char *buffe
  *
  ****************************************************************************/
 
-static void telnetd_putchar(struct telnetd_s *pstate, uint8 ch)
+static void telnetd_putchar(struct telnetd_s *pstate, uint8_t ch)
 {
   /* Ignore carriage returns */
 
@@ -187,9 +187,9 @@ static void telnetd_putchar(struct telnetd_s *pstate, uint8 ch)
  *
  ****************************************************************************/
 
-static void telnetd_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
+static void telnetd_sendopt(struct telnetd_s *pstate, uint8_t option, uint8_t value)
 {
-  uint8 optbuf[4];
+  uint8_t optbuf[4];
   optbuf[0] = TELNET_IAC;
   optbuf[1] = option;
   optbuf[2] = value;
@@ -213,7 +213,7 @@ static void telnetd_sendopt(struct telnetd_s *pstate, uint8 option, uint8 value)
 static int telnetd_receive(struct telnetd_s *pstate, size_t len)
 {
   char *ptr = pstate->tn_iobuffer;
-  uint8 ch;
+  uint8_t ch;
 
   while (len > 0)
     {

@@ -38,7 +38,7 @@
  *****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <net/uip/uip-lib.h>
@@ -58,7 +58,7 @@ const char g_http[] = "http://";
  * Name: uip_parsehttpurl
  ****************************************************************************/
 
-int uip_parsehttpurl(const char *url, uint16 *port,
+int uip_parsehttpurl(const char *url, uint16_t *port,
                      char *hostname, int hostlen,
                      char *filename, int namelen)
 {
@@ -108,7 +108,7 @@ int uip_parsehttpurl(const char *url, uint16 *port,
 
       if (*src == ':')
         {
-          uint16 accum = 0;
+          uint16_t accum = 0;
           src++; /* Skip over the colon */
  
           while (*src >= '0' && *src <= '9')

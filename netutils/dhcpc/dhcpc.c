@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/dhcpc/dhcpc.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based heavily on portions of uIP:
@@ -45,6 +45,7 @@
 #include <sys/socket.h>
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
@@ -100,23 +101,23 @@
 
 struct dhcp_msg
 {
-  uint8  op;
-  uint8  htype;
-  uint8  hlen;
-  uint8  hops;
-  uint8  xid[4];
-  uint16 secs;
-  uint16 flags;
-  uint8  ciaddr[4];
-  uint8  yiaddr[4];
-  uint8  siaddr[4];
-  uint8  giaddr[4];
-  uint8  chaddr[16];
+  uint8_t  op;
+  uint8_t  htype;
+  uint8_t  hlen;
+  uint8_t  hops;
+  uint8_t  xid[4];
+  uint16_t secs;
+  uint16_t flags;
+  uint8_t  ciaddr[4];
+  uint8_t  yiaddr[4];
+  uint8_t  siaddr[4];
+  uint8_t  giaddr[4];
+  uint8_t  chaddr[16];
 #ifndef CONFIG_NET_DHCP_LIGHT
-  uint8  sname[64];
-  uint8  file[128];
+  uint8_t  sname[64];
+  uint8_t  file[128];
 #endif
-  uint8  options[312];
+  uint8_t  options[312];
 };
 
 struct dhcpc_state_s
@@ -134,8 +135,8 @@ struct dhcpc_state_s
  * Private Data
  ****************************************************************************/
 
-static const uint8 xid[4]          = {0xad, 0xde, 0x12, 0x23};
-static const uint8 magic_cookie[4] = {99, 130, 83, 99};
+static const uint8_t xid[4]          = {0xad, 0xde, 0x12, 0x23};
+static const uint8_t magic_cookie[4] = {99, 130, 83, 99};
 
 /****************************************************************************
  * Private Functions
@@ -145,7 +146,7 @@ static const uint8 magic_cookie[4] = {99, 130, 83, 99};
  * Name: dhcpc_add<option>
  ****************************************************************************/
 
-static uint8 *dhcpc_addmsgtype(uint8 *optptr, uint8 type)
+static uint8_t *dhcpc_addmsgtype(uint8_t *optptr, uint8_t type)
 {
   *optptr++ = DHCP_OPTION_MSG_TYPE;
   *optptr++ = 1;
@@ -153,7 +154,7 @@ static uint8 *dhcpc_addmsgtype(uint8 *optptr, uint8 type)
   return optptr;
 }
 
-static uint8 *dhcpc_addserverid(struct in_addr *serverid, uint8 *optptr)
+static uint8_t *dhcpc_addserverid(struct in_addr *serverid, uint8_t *optptr)
 {
   *optptr++ = DHCP_OPTION_SERVER_ID;
   *optptr++ = 4;
@@ -161,7 +162,7 @@ static uint8 *dhcpc_addserverid(struct in_addr *serverid, uint8 *optptr)
   return optptr + 4;
 }
 
-static uint8 *dhcpc_addreqipaddr(struct in_addr *ipaddr, uint8 *optptr)
+static uint8_t *dhcpc_addreqipaddr(struct in_addr *ipaddr, uint8_t *optptr)
 {
   *optptr++ = DHCP_OPTION_REQ_IPADDR;
   *optptr++ = 4;
@@ -169,7 +170,7 @@ static uint8 *dhcpc_addreqipaddr(struct in_addr *ipaddr, uint8 *optptr)
   return optptr + 4;
 }
 
-static uint8 *dhcpc_addreqoptions(uint8 *optptr)
+static uint8_t *dhcpc_addreqoptions(uint8_t *optptr)
 {
   *optptr++ = DHCP_OPTION_REQ_LIST;
   *optptr++ = 3;
@@ -179,7 +180,7 @@ static uint8 *dhcpc_addreqoptions(uint8 *optptr)
   return optptr;
 }
 
-static uint8 *dhcpc_addend(uint8 *optptr)
+static uint8_t *dhcpc_addend(uint8_t *optptr)
 {
   *optptr++ = DHCP_OPTION_END;
   return optptr;
@@ -193,7 +194,7 @@ static int dhcpc_sendmsg(struct dhcpc_state_s *pdhcpc,
                          struct dhcpc_state *presult, int msgtype)
 {
   struct sockaddr_in addr;
-  uint8 *pend;
+  uint8_t *pend;
   in_addr_t serverid = INADDR_BROADCAST;
   int len;
 
@@ -246,7 +247,7 @@ static int dhcpc_sendmsg(struct dhcpc_state_s *pdhcpc,
     }
 
   pend = dhcpc_addend(pend);
-  len  = pend - (uint8*)&pdhcpc->packet;
+  len  = pend - (uint8_t*)&pdhcpc->packet;
 
   /* Send the request */
 
@@ -262,10 +263,10 @@ static int dhcpc_sendmsg(struct dhcpc_state_s *pdhcpc,
  * Name: dhcpc_parseoptions
  ****************************************************************************/
 
-static uint8 dhcpc_parseoptions(struct dhcpc_state *presult, uint8 *optptr, int len)
+static uint8_t dhcpc_parseoptions(struct dhcpc_state *presult, uint8_t *optptr, int len)
 {
-  uint8 *end = optptr + len;
-  uint8 type = 0;
+  uint8_t *end = optptr + len;
+  uint8_t type = 0;
 
   while (optptr < end)
     {
@@ -302,7 +303,7 @@ static uint8 dhcpc_parseoptions(struct dhcpc_state *presult, uint8 *optptr, int 
  * Name: dhcpc_parsemsg
  ****************************************************************************/
 
-static uint8 dhcpc_parsemsg(struct dhcpc_state_s *pdhcpc, int buflen,
+static uint8_t dhcpc_parsemsg(struct dhcpc_state_s *pdhcpc, int buflen,
                             struct dhcpc_state *presult)
 {
   if (pdhcpc->packet.op == DHCP_REPLY &&
@@ -330,8 +331,8 @@ void *dhcpc_open(const void *macaddr, int maclen)
   struct timeval tv;
 
   dbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-      ((uint8*)macaddr)[0], ((uint8*)macaddr)[1], ((uint8*)macaddr)[2],
-      ((uint8*)macaddr)[3], ((uint8*)macaddr)[4], ((uint8*)macaddr)[5]);
+      ((uint8_t*)macaddr)[0], ((uint8_t*)macaddr)[1], ((uint8_t*)macaddr)[2],
+      ((uint8_t*)macaddr)[3], ((uint8_t*)macaddr)[4], ((uint8_t*)macaddr)[5]);
 
   /* Allocate an internal DHCP structure */
 
@@ -404,7 +405,7 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
   struct in_addr oldaddr;
   struct in_addr newaddr;
   ssize_t result;
-  uint8   msgtype;
+  uint8_t msgtype;
   int     retries;
   int     state;
 

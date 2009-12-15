@@ -43,7 +43,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <net/uip/uip.h>
 
 /****************************************************************************
@@ -53,12 +53,12 @@
 struct httpd_fsdata_file
 {
   const struct httpd_fsdata_file *next;
-  FAR const ubyte *name;
-  FAR const ubyte *data;
+  FAR const uint8_t *name;
+  FAR const uint8_t *data;
   int len;
 #ifdef CONFIG_NETUTILS_HTTPDFSSTATS
 #if CONFIG_NETUTILS_HTTPDFSSTATS == 1
-  uint16 count;
+  uint16_t count;
 #endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 #endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 };
@@ -71,7 +71,7 @@ struct httpd_fsdata_file_noconst
   int len;
 #ifdef CONFIG_NETUTILS_HTTPDFSSTATS
 #if CONFIG_NETUTILS_HTTPDFSSTATS == 1
-  uint16 count;
+  uint16_t count;
 #endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 #endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 };

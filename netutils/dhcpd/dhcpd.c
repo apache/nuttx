@@ -39,10 +39,6 @@
 
 #ifdef CONFIG_NETUTILS_DHCPD_HOST
 # include <stdio.h>
-typedef unsigned char  uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int   uint32_t;
-typedef unsigned char  bool;
 
 # define HTONS(a) htons(a)
 # define HTONL(a) htonl(a)
@@ -53,8 +49,6 @@ typedef unsigned char  bool;
 # define ndbg(...) printf(__VA_ARGS__)
 # define nvdbg(...) printf(__VA_ARGS__)
 
-# define TRUE  (1)
-# define FALSE (0)
 # define ERROR (-1)
 # define OK    (0)
 #else
@@ -70,6 +64,7 @@ typedef unsigned char  bool;
 #include <sys/ioctl.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
@@ -320,16 +315,16 @@ static inline bool dhcpd_leaseexpired(struct lease_s *lease)
 {
   if (lease->expiry < dhcpd_time())
     {
-      return FALSE;
+      return false;
     }
   else
     {
       memset(lease, 0, sizeof(struct lease_s));
-      return TRUE;
+      return true;
     }
 }
 #else
-# define dhcpd_leaseexpired(lease) (FALSE)
+# define dhcpd_leaseexpired(lease) (false)
 #endif
 
 /****************************************************************************
@@ -345,7 +340,7 @@ struct lease_s *dhcpd_setlease(const uint8_t *mac, in_addr_t ipaddr, time_t expi
     {
         ret = &g_state.ds_leases[ndx];
         memcpy(ret->mac, mac, DHCP_HLEN_ETHERNET);
-        ret->allocated = TRUE;
+        ret->allocated = true;
 #ifdef HAVE_LEASE_TIME
         ret->expiry = dhcpd_time() + expiry;
 #endif
@@ -424,7 +419,7 @@ in_addr_t dhcpd_allocipaddr(void)
 #  warning "       to verify that there is no other user of this IP address"
 #endif
           memset(g_state.ds_leases[ipaddr - CONFIG_NETUTILS_DHCPD_STARTIP].mac, 0, DHCP_HLEN_ETHERNET);
-          g_state.ds_leases[ipaddr - CONFIG_NETUTILS_DHCPD_STARTIP].allocated = TRUE;
+          g_state.ds_leases[ipaddr - CONFIG_NETUTILS_DHCPD_STARTIP].allocated = true;
 #ifdef HAVE_LEASE_TIME
           g_state.ds_leases[ipaddr - CONFIG_NETUTILS_DHCPD_STARTIP].expiry = dhcpd_time() + CONFIG_NETUTILS_DHCPD_OFFERTIME;
 #endif
@@ -455,7 +450,7 @@ static inline bool dhcpd_parseoptions(void)
       /* Bad magic number... skip g_state.ds_outpacket */
 
       ndbg("Bad magic: %d,%d,%d,%d\n", ptr[0], ptr[1], ptr[2], ptr[3]);
-      return FALSE;
+      return false;
     }
 
   /* Set up to parse the options */
@@ -532,11 +527,11 @@ static inline bool dhcpd_parseoptions(void)
               }
             else
               {
-                return TRUE;
+                return true;
               }
             break;
 #else
-            return TRUE;
+            return true;
 #endif
 
           case DHCP_OPTION_REQ_IPADDR: /* Requested IP Address */
@@ -587,7 +582,7 @@ static inline bool dhcpd_parseoptions(void)
       remaining -= optlen;
     }
   while (remaining > 0);
-  return FALSE;
+  return false;
 }
 
 /****************************************************************************
@@ -611,10 +606,10 @@ static inline bool dhcpd_verifyreqip(void)
       lease = dhcpd_findbyipaddr(g_state.ds_optreqip);
       if (!lease || dhcpd_leaseexpired(lease))
         {
-          return TRUE;
+          return true;
         }
     }
-  return FALSE;
+  return false;
 }
 
 /****************************************************************************
@@ -643,9 +638,9 @@ static inline bool dhcpd_verifyreqleasetime(uint32_t *leasetime)
       /* Return the clipped lease time */
 
       *leasetime = tmp;
-      return TRUE;
+      return true;
     }
-  return FALSE;
+  return false;
 }
 
 /****************************************************************************
@@ -946,9 +941,9 @@ static inline int dhcpd_sendoffer(in_addr_t ipaddr, uint32_t leasetime)
   /* Send the offer response */
 
 #ifdef CONFIG_NETUTILS_DHCPD_IGNOREBROADCAST
-  return dhcpd_sendpacket(TRUE);
+  return dhcpd_sendpacket(true);
 #else
-  return dhcpd_sendpacket(FALSE);
+  return dhcpd_sendpacket(false);
 #endif
 }
 
@@ -962,7 +957,7 @@ static int dhcpd_sendnak(void)
 
   dhcpd_initpacket(DHCPNAK);
   memcpy(g_state.ds_outpacket.ciaddr, g_state.ds_inpacket.ciaddr, 4);
-  return dhcpd_sendpacket(TRUE);
+  return dhcpd_sendpacket(true);
 }
 
 /****************************************************************************
@@ -991,9 +986,9 @@ int dhcpd_sendack(in_addr_t ipaddr)
   dhcpd_addoption32(DHCP_OPTION_LEASE_TIME, htonl(leasetime));
 
 #ifdef CONFIG_NETUTILS_DHCPD_IGNOREBROADCAST
-  if (dhcpd_sendpacket(TRUE) < 0)
+  if (dhcpd_sendpacket(true) < 0)
 #else
-  if (dhcpd_sendpacket(FALSE) < 0)
+  if (dhcpd_sendpacket(false) < 0)
 #endif
     {
       return ERROR;

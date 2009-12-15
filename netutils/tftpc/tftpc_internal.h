@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/tftoc/tftpc_internal.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 #include <nuttx/compiler.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <net/uip/uipopt.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Verify TFTP configuration settings ***************************************/
@@ -150,11 +154,11 @@
 /* Defined in tftp_packet.c *************************************************/
 
 extern int tftp_sockinit(struct sockaddr_in *server, in_addr_t addr);
-extern int tftp_mkreqpacket(ubyte *buffer, int opcode, const char *path, boolean binary);
-extern int tftp_mkackpacket(ubyte *buffer, uint16 blockno);
-extern int tftp_mkerrpacket(ubyte *buffer, uint16 errorcode, const char *errormsg);
+extern int tftp_mkreqpacket(uint8_t *buffer, int opcode, const char *path, bool binary);
+extern int tftp_mkackpacket(uint8_t *buffer, uint16_t blockno);
+extern int tftp_mkerrpacket(uint8_t *buffer, uint16_t errorcode, const char *errormsg);
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-extern int tftp_parseerrpacket(const ubyte *packet);
+extern int tftp_parseerrpacket(const uint8_t *packet);
 #endif
 
 extern ssize_t tftp_recvfrom(int sd, void *buf, size_t len, struct sockaddr_in *from);

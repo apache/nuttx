@@ -1,7 +1,7 @@
 /****************************************************************************
  * netuils/tftp/tftpc_get.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -57,7 +58,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define TFTP_RETRIES 3
@@ -70,7 +71,7 @@
  * Name: tftp_write
  ****************************************************************************/
 
-static inline ssize_t tftp_write(int fd, const ubyte *buf, size_t len)
+static inline ssize_t tftp_write(int fd, const uint8_t *buf, size_t len)
 {
   size_t left = len;
   ssize_t nbyteswritten;
@@ -108,13 +109,13 @@ static inline ssize_t tftp_write(int fd, const ubyte *buf, size_t len)
  * Name: tftp_parsedatapacket
  ****************************************************************************/
 
-static inline int tftp_parsedatapacket(const ubyte *packet,
-                                       uint16 *opcode, uint16 *blockno)
+static inline int tftp_parsedatapacket(const uint8_t *packet,
+                                       uint16_t *opcode, uint16_t *blockno)
 {
-  *opcode = (uint16)packet[0] << 8 | (uint16)packet[1];
+  *opcode = (uint16_t)packet[0] << 8 | (uint16_t)packet[1];
   if (*opcode == TFTP_DATA)
     {
-       *blockno = (uint16)packet[2] << 8 | (uint16)packet[3];
+       *blockno = (uint16_t)packet[2] << 8 | (uint16_t)packet[3];
        return OK;
     }
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
@@ -143,14 +144,14 @@ static inline int tftp_parsedatapacket(const ubyte *packet,
  *
  ****************************************************************************/
 
-int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binary)
+int tftpget(const char *remote, const char *local, in_addr_t addr, bool binary)
 {
   struct sockaddr_in server;  /* The address of the TFTP server */
   struct sockaddr_in from;    /* The address the last UDP message recv'd from */
-  ubyte *packet;              /* Allocated memory to hold one packet */
-  uint16 blockno = 0;         /* The current transfer block number */
-  uint16 opcode;              /* Received opcode */
-  uint16 rblockno;            /* Received block number */
+  uint8_t *packet;            /* Allocated memory to hold one packet */
+  uint16_t blockno = 0;       /* The current transfer block number */
+  uint16_t opcode;            /* Received opcode */
+  uint16_t rblockno;          /* Received block number */
   int len;                    /* Generic length */
   int sd;                     /* Socket descriptor for socket I/O */
   int fd;                     /* File descriptor for file I/O */
@@ -162,7 +163,7 @@ int tftpget(const char *remote, const char *local, in_addr_t addr, boolean binar
 
   /* Allocate the buffer to used for socket/disk I/O */
 
-  packet = (ubyte*)zalloc(TFTP_IOBUFSIZE);
+  packet = (uint8_t*)zalloc(TFTP_IOBUFSIZE);
   if (!packet)
     {
       ndbg("packet memory allocation failure\n");

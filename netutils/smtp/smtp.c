@@ -2,7 +2,7 @@
  * smtp.c
  * smtp SMTP E-mail sender
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Heavily leveraged from uIP 1.0 which also has a BSD-like license:
@@ -46,7 +46,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -81,8 +84,8 @@
 
 struct smtp_state
 {
-  uint8        state;
-  boolean      connected;
+  uint8_t      state;
+  bool         connected;
   sem_t        sem;
   uip_ipaddr_t smtpserver;
   const char  *localhostname;
@@ -308,7 +311,7 @@ int smtp_send(void *handle, const char *to, const char *cc, const char *from,
 
   /* Setup */
 
-  psmtp->connected = TRUE;
+  psmtp->connected = true;
   psmtp->to        = to;
   psmtp->cc        = cc;
   psmtp->from      = from;

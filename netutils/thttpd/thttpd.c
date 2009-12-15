@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -97,7 +98,7 @@ struct connect_s
   Timer *linger_timer;
   off_t end_offset;            /* The final offset+1 of the file to send */
   off_t offset;                /* The current offset into the file to send */
-  boolean eof;                 /* Set TRUE when length==0 read from file */
+  bool eof;                    /* Set true when length==0 read from file */
 };
 
 /****************************************************************************
@@ -331,7 +332,7 @@ static void handle_read(struct connect_s *conn, struct timeval *tv)
 
   /* Set up the file offsets to read */
 
-  conn->eof            = FALSE;
+  conn->eof            = false;
   if (hc->got_range)
     {
       conn->offset     = hc->range_start;
@@ -407,7 +408,7 @@ static inline int read_buffer(struct connect_s *conn)
           /* Reading zero bytes means we are at the end of file */
 
           conn->end_offset = conn->offset;
-          conn->eof        = TRUE;
+          conn->eof        = true;
         }
       else if (nread > 0)
         {
@@ -542,7 +543,7 @@ static void clear_connection(struct connect_s *conn, struct timeval *tv)
 
       tmr_cancel(conn->linger_timer);
       conn->linger_timer      = NULL;
-      conn->hc->should_linger = FALSE;
+      conn->hc->should_linger = false;
     }
   else if (conn->hc->should_linger)
     {

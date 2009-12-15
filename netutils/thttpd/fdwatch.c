@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <debug.h>
 #include <poll.h>
@@ -180,7 +180,7 @@ struct fdwatch_s *fdwatch_initialize(int nfds)
       goto errout_with_allocations;
     }
 
-  fw->ready = (uint8*)httpd_malloc(sizeof(uint8) * nfds);
+  fw->ready = (uint8_t*)httpd_malloc(sizeof(uint8_t) * nfds);
   if (!fw->ready)
     {
       goto errout_with_allocations;

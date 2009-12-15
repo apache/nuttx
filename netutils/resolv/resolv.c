@@ -12,7 +12,7 @@
  * the resolver code calls a callback function called resolv_found()
  * that must be implemented by the module that uses the resolver.
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based heavily on portions of uIP:
@@ -51,7 +51,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
@@ -110,12 +112,12 @@
 
 struct dns_hdr
 {
-  uint16 id;
-  uint8 flags1, flags2;
-  uint16 numquestions;
-  uint16 numanswers;
-  uint16 numauthrr;
-  uint16 numextrarr;
+  uint16_t id;
+  uint8_t  flags1, flags2;
+  uint16_t numquestions;
+  uint16_t numanswers;
+  uint16_t numauthrr;
+  uint16_t numextrarr;
 };
 
 /* The DNS answer message structure */
@@ -126,10 +128,10 @@ struct dns_answer
    * to a name already present somewhere in the packet.
    */
 
-  uint16 type;
-  uint16 class;
-  uint16 ttl[2];
-  uint16 len;
+  uint16_t type;
+  uint16_t class;
+  uint16_t ttl[2];
+  uint16_t len;
 #ifdef CONFIG_NET_IPv6
   struct in6_addr ipaddr;
 #else
@@ -139,11 +141,11 @@ struct dns_answer
 
 struct namemap
 {
-  uint8 state;
-  uint8 tmr;
-  uint8 retries;
-  uint8 seqno;
-  uint8 err;
+  uint8_t state;
+  uint8_t tmr;
+  uint8_t retries;
+  uint8_t seqno;
+  uint8_t err;
   char name[32];
 #ifdef CONFIG_NET_IPv6
   struct in6_addr ipaddr;
@@ -156,7 +158,7 @@ struct namemap
  * Private Data
  ****************************************************************************/
 
-static uint8 g_seqno;
+static uint8_t g_seqno;
 static int g_sockfd = -1;
 #ifdef CONFIG_NET_IPv6
 static struct sockaddr_in6 g_dnsserver;
@@ -202,7 +204,7 @@ static int send_query(const char *name, struct sockaddr_in *addr)
   char *query;
   char *nptr;
   const char *nameptr;
-  uint8 seqno = g_seqno++;
+  uint8_t seqno = g_seqno++;
   static unsigned char endquery[] = {0, 0, 1, 0, 1};
   char buffer[SEND_BUFFER_SIZE];
   int n;
@@ -246,8 +248,8 @@ int recv_response(struct sockaddr_in *addr)
   char buffer[RECV_BUFFER_SIZE];
   struct dns_answer *ans;
   struct dns_hdr *hdr;
-  uint8 nquestions;
-  uint8 nanswers;
+  uint8_t nquestions;
+  uint8_t nanswers;
   int ret;
 
   /* Receive the response */

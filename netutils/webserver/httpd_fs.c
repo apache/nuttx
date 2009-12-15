@@ -41,7 +41,7 @@
  * Included Header Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #include <net/uip/httpd.h>
 
@@ -63,14 +63,14 @@
 #include "httpd_fsdata.c"
 
 #if CONFIG_NETUTILS_HTTPDFSSTATS
-static uint16 count[HTTPD_FS_NUMFILES];
+static uint16_t count[HTTPD_FS_NUMFILES];
 #endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static uint8 httpd_fs_strcmp(const char *str1, const char *str2)
+static uint8_t httpd_fs_strcmp(const char *str1, const char *str2)
 {
   int i;
 
@@ -98,7 +98,7 @@ static uint8 httpd_fs_strcmp(const char *str1, const char *str2)
 int httpd_fs_open(const char *name, struct httpd_fs_file *file)
 {
 #if CONFIG_NETUTILS_HTTPDFSSTATS
-  uint16 i = 0;
+  uint16_t i = 0;
 #endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
   struct httpd_fsdata_file_noconst *f;
 
@@ -125,7 +125,7 @@ int httpd_fs_open(const char *name, struct httpd_fs_file *file)
 void httpd_fs_init(void)
 {
 #if CONFIG_NETUTILS_HTTPDFSSTATS
-  uint16 i;
+  uint16_t i;
   for(i = 0; i < HTTPD_FS_NUMFILES; i++)
     {
       count[i] = 0;
@@ -134,10 +134,10 @@ void httpd_fs_init(void)
 }
 
 #if CONFIG_NETUTILS_HTTPDFSSTATS
-uint16 httpd_fs_count(char *name)
+uint16_t httpd_fs_count(char *name)
 {
   struct httpd_fsdata_file_noconst *f;
-  uint16 i;
+  uint16_t i;
 
   i = 0;
   for(f = (struct httpd_fsdata_file_noconst *)HTTPD_FS_ROOT;

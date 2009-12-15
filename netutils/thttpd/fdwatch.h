@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -63,11 +63,11 @@ struct fdwatch_s
 {
   struct pollfd *pollfds;          /* Poll data (allocated) */
   void         **client;           /* Client data (allocated) */
-  uint8         *ready;            /* The list of fds with activity (allocated) */
-  uint8          nfds;             /* The configured maximum number of fds */
-  uint8          nwatched;         /* The number of fds currently watched */
-  uint8          nactive;          /* The number of fds with activity */
-  uint8          next;             /* The index to the next client data */
+  uint8_t       *ready;            /* The list of fds with activity (allocated) */
+  uint8_t        nfds;             /* The configured maximum number of fds */
+  uint8_t        nwatched;         /* The number of fds currently watched */
+  uint8_t        nactive;          /* The number of fds with activity */
+  uint8_t        next;             /* The index to the next client data */
 };
 
 /****************************************************************************

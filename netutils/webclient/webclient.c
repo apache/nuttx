@@ -54,8 +54,9 @@
 #  include <debug.h>
 #endif
 
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
@@ -99,10 +100,10 @@ struct wget_s
 {
   /* Internal status */
 
-  ubyte state;
-  ubyte httpstatus;
+  uint8_t state;
+  uint8_t httpstatus;
 
-  uint16 port;       /* The port number to use in the connection */
+  uint16_t port;     /* The port number to use in the connection */
 
   /* These describe the just-received buffer of data */
 
@@ -184,7 +185,7 @@ static inline int wget_resolvehost(const char *hostname, in_addr_t *ipaddr)
       return ERROR;
     }
 
-  nvdbg("Using IP address %04x%04x\n", (uint16)he->h_addr[1], (uint16)he->h_addr[0]);
+  nvdbg("Using IP address %04x%04x\n", (uint16_t)he->h_addr[1], (uint16_t)he->h_addr[0]);
   memcpy(ipaddr, he->h_addr, sizeof(in_addr_t));
   return OK;
 
@@ -198,7 +199,7 @@ static inline int wget_resolvehost(const char *hostname, in_addr_t *ipaddr)
 
   /* First check if the host is an IP address. */
 
-  if (!uiplib_ipaddrconv(hostname, (ubyte*)ipaddr))
+  if (!uiplib_ipaddrconv(hostname, (uint8_t*)ipaddr))
     {
       /* 'host' does not point to a valid address string.  Try to resolve
        *  the host name to an IP address.
@@ -409,7 +410,7 @@ int wget(FAR const char *url, FAR char *buffer, int buflen,
 {
   struct sockaddr_in server;
   struct wget_s ws;
-  boolean redirected;
+  bool redirected;
   char *dest;
   int sockfd;
   int len;
@@ -513,7 +514,7 @@ int wget(FAR const char *url, FAR char *buffer, int buflen,
        */
 
       ws.state   = WEBCLIENT_STATE_STATUSLINE;
-      redirected = FALSE;
+      redirected = false;
       for(;;)
         {
           ws.datend = recv(sockfd, ws.buffer, ws.buflen, 0);
@@ -564,7 +565,7 @@ int wget(FAR const char *url, FAR char *buffer, int buflen,
                 }
               else
                 {
-                  redirected = TRUE;
+                  redirected = true;
                   close(sockfd);            
                   break;
                 }

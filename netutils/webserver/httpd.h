@@ -45,12 +45,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <net/uip/uip.h>
 #include <net/uip/uipopt.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* As threads are created to handle each request, a stack must be allocated
@@ -91,13 +91,13 @@ struct httpd_fs_file
 
 struct httpd_state
 {
-  char   ht_buffer[HTTPD_IOBUFFER_SIZE];  /* recv()/send() buffer */
-  char   ht_filename[HTTPD_MAX_FILENAME]; /* filename from GET command */
-  struct httpd_fs_file ht_file;           /* Fake file data to send */
-  int    ht_sockfd;                       /* The socket descriptor from accept() */
-  char  *ht_scriptptr;
-  uint16 ht_scriptlen;
-  uint16 ht_sndlen;
+  char     ht_buffer[HTTPD_IOBUFFER_SIZE];  /* recv()/send() buffer */
+  char     ht_filename[HTTPD_MAX_FILENAME]; /* filename from GET command */
+  struct httpd_fs_file ht_file;             /* Fake file data to send */
+  int      ht_sockfd;                       /* The socket descriptor from accept() */
+  char    *ht_scriptptr;
+  uint16_t ht_scriptlen;
+  uint16_t ht_sndlen;
 };
 
 /****************************************************************************
@@ -106,7 +106,7 @@ struct httpd_state
 
 #ifdef CONFIG_NETUTILS_HTTPDFSSTATS
 #if CONFIG_NETUTILS_HTTPDFSSTATS == 1
-extern uint16 httpd_fs_count(char *name);
+extern uint16_t httpd_fs_count(char *name);
 #endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 #endif /* CONFIG_NETUTILS_HTTPDFSSTATS */
 

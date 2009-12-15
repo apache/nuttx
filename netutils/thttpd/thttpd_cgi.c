@@ -39,9 +39,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -71,7 +73,7 @@
 /* CONFIG_THTTPD_CGIDUMP will dump the contents of each transfer to and from the CGI task. */
 
 #ifdef CONFIG_THTTPD_CGIDUMP
-#  define cgi_dumpbuffer(m,a,n) lib_dumpbuffer(m,(FAR const ubyte*)a,n)
+#  define cgi_dumpbuffer(m,a,n) lib_dumpbuffer(m,(FAR const uint8_t*)a,n)
 #else
 #  define cgi_dumpbuffer(m,a,n)
 #endif
@@ -697,8 +699,8 @@ static int cgi_child(int argc, char **argv)
   FAR struct fdwatch_s *fw;
   FAR char  *directory;
   FAR char  *dupname;
-  boolean    indone;
-  boolean    outdone;
+  bool       indone;
+  bool       outdone;
   int        child;
   int        pipefd[2];
   int        nbytes;
@@ -897,8 +899,8 @@ static int cgi_child(int argc, char **argv)
 
   /* Then perform the interposition */
 
-  indone  = FALSE;
-  outdone = FALSE;
+  indone  = false;
+  outdone = false;
 
   nllvdbg("Interposing\n");
   cgi_semgive();  /* Not safe to reference hc after this point */
@@ -941,7 +943,7 @@ static int cgi_child(int argc, char **argv)
       else if (kill(child, 0) != 0)
         {
           nllvdbg("CGI no longer running: %d\n", errno);
-          outdone = TRUE;
+          outdone = true;
         }
   }
   while (!outdone);
@@ -1041,7 +1043,7 @@ int cgi(httpd_conn *hc)
       cgi_semtake();
 
       hc->bytes_sent    = CONFIG_THTTPD_CGI_BYTECOUNT;
-      hc->should_linger = FALSE;
+      hc->should_linger = false;
     }
   else
     {

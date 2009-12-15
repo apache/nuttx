@@ -42,8 +42,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -213,12 +216,12 @@ typedef struct
 #ifdef CONFIG_THTTPD_VHOST
   char *vhostname;             /* not malloc()ed */
 #endif
-  boolean mime_flag;
-  boolean one_one;             /* HTTP/1.1 or better */
-  boolean got_range;
-  boolean tildemapped;         /* this connection got tilde-mapped */
-  boolean keep_alive;
-  boolean should_linger;
+  bool mime_flag;
+  bool one_one;                /* HTTP/1.1 or better */
+  bool got_range;
+  bool tildemapped;            /* this connection got tilde-mapped */
+  bool keep_alive;
+  bool should_linger;
   int conn_fd;                 /* Connection to the client */
   int file_fd;                 /* Descriptor for open, outgoing file */
   off_t range_start;           /* File range start from Range= */
@@ -227,8 +230,8 @@ typedef struct
 
   /* This is the I/O buffer that is used to buffer portions of outgoing files */
 
-  uint16 buflen;               /* Index to first valid data in buffer */
-  ubyte buffer[CONFIG_THTTPD_IOBUFFERSIZE];
+  uint16_t buflen;             /* Index to first valid data in buffer */
+  uint8_t buffer[CONFIG_THTTPD_IOBUFFERSIZE];
 } httpd_conn;
 
 /****************************************************************************

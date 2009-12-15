@@ -42,7 +42,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
 #include "config.h"
 #include "libhttpd.h"
