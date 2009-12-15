@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/nxsglib_nulloverlap.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdbool.h>
+
 #include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
@@ -71,20 +72,20 @@
  * Name: nxgl_rectoverlap
  *
  * Description:
- *   Return TRUE if the two rectangles overlap
+ *   Return true if the two rectangles overlap
  *
  ****************************************************************************/
 
-boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
-                         FAR struct nxgl_rect_s *rect2)
+bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
+                      FAR struct nxgl_rect_s *rect2)
 {
   /* The neither is wholly above, below, right, or left of the other, then
    * the two rectangles overlap in some fashion.
    */
 
-  return (rect1->pt1.x <= rect2->pt2.x) &&  /* FALSE: rect1 is wholly to the right */
-         (rect2->pt1.x <= rect1->pt2.x) &&  /* FALSE: rect2 is wholly to the right */
-         (rect1->pt1.y <= rect2->pt2.y) &&  /* FALSE: rect1 is wholly below rect2 */
-         (rect2->pt1.y <= rect1->pt2.y);    /* FALSE: rect2 is wholly below rect1 */
+  return (rect1->pt1.x <= rect2->pt2.x) &&  /* false: rect1 is wholly to the right */
+         (rect2->pt1.x <= rect1->pt2.x) &&  /* false: rect2 is wholly to the right */
+         (rect1->pt1.y <= rect2->pt2.y) &&  /* false: rect1 is wholly below rect2 */
+         (rect2->pt1.y <= rect1->pt2.y);    /* false: rect2 is wholly below rect1 */
 }
 

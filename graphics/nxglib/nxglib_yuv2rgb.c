@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/color/nxglib_yuv2rgb.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 #include <fixedmath.h>
 
@@ -83,7 +83,8 @@
  *
  ****************************************************************************/
 
-void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b)
+void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
+                  uint8_t *r, uint8_t *g, uint8_t *b)
 {
   b16_t vm128 = itob16(v) - b16_128P0;
   b16_t um128 = itob16(u) - b16_128P0;
@@ -95,7 +96,7 @@ void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b)
    * B = Y + 1.77200 * (U - 128.0)
    */
 
-  *r = (ubyte)b16toi(itob16(y) +                             b16muli(b16_1P402, vm128));
-  *g = (ubyte)b16toi(itob16(y) - b16muli(b16_P3441, um128) - b16muli(b16_P7141, vm128));
-  *b = (ubyte)b16toi(itob16(y) + b16muli(b16_1P772, um128));
+  *r = (uint8_t)b16toi(itob16(y) +                             b16muli(b16_1P402, vm128));
+  *g = (uint8_t)b16toi(itob16(y) - b16muli(b16_P3441, um128) - b16muli(b16_P7141, vm128));
+  *b = (uint8_t)b16toi(itob16(y) + b16muli(b16_1P772, um128));
 }

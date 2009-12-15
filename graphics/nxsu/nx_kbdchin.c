@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nx_kbdchin.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -82,7 +82,7 @@
  *
  ****************************************************************************/
 
-int nx_kbdchin(NXHANDLE handle, ubyte ch)
+int nx_kbdchin(NXHANDLE handle, uint8_t ch)
 {
   FAR struct nxfe_state_s  *fe = (FAR struct nxfe_state_s *)handle;
   FAR struct nxbe_window_s *wnd = fe->be.topwnd;

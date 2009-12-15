@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/nxglib_filltrapezoid.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <fixedmath.h>
+
 #include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
@@ -92,7 +93,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 {
   unsigned int stride;
   unsigned int width;
-  FAR ubyte *line;
+  FAR uint8_t *line;
   int nrows;
   b16_t x1;
   b16_t x2;
@@ -102,9 +103,9 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
   b16_t dx2dy;
 
 #if NXGLIB_BITSPERPIXEL < 8
-  FAR ubyte *dest;
-  ubyte mpixel = NXGL_MULTIPIXEL(color);
-  ubyte mask;
+  FAR uint8_t *dest;
+  uint8_t mpixel = NXGL_MULTIPIXEL(color);
+  uint8_t mask;
   int lnlen;
 #endif
 
@@ -196,9 +197,9 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
           /* Handle masking of the fractional initial byte */
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
-          mask  = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(ix1));
+          mask  = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(ix1));
 #else
-          mask  = (ubyte)(0xff << (8 - NXGL_REMAINDERX(ix1)));
+          mask  = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(ix1)));
 #endif
           dest  = line;
           lnlen = width;
@@ -214,9 +215,9 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
           /* Handle masking of the fractional final byte */
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
-          mask &= (ubyte)(0xff << (8 - NXGL_REMAINDERX(ix2)));
+          mask &= (uint8_t)(0xff << (8 - NXGL_REMAINDERX(ix2)));
 #else
-          mask &= (ubyte)(0xff >> (8 - NXGL_REMAINDERX(ix2)));
+          mask &= (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(ix2)));
 #endif
           if (lnlen > 0 && mask)
             {

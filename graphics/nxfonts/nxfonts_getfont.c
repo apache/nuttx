@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxfonts/nxfonts_getfont.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/nxfonts.h>
@@ -73,7 +74,7 @@
  *
  ****************************************************************************/
 
-static inline FAR const struct nx_fontset_s *nxf_getglyphset(uint16 ch)
+static inline FAR const struct nx_fontset_s *nxf_getglyphset(uint16_t ch)
 {
   if (ch < 128)
     {
@@ -133,7 +134,7 @@ FAR const struct nx_font_s *nxf_getfontset(void)
  *
  ****************************************************************************/
 
-FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch)
+FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch)
 {
   FAR const struct nx_fontset_s *set = nxf_getglyphset(ch);
   FAR struct nx_fontbitmap_s *bm = NULL;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/nxsglib_copyrectangle.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+
 #include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
@@ -83,18 +84,18 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
  FAR const void *src, FAR const struct nxgl_point_s *origin,
  unsigned int srcstride)
 {
-  FAR const ubyte *sline;
-  FAR ubyte *dline;
+  FAR const uint8_t *sline;
+  FAR uint8_t *dline;
   unsigned int width;
   unsigned int deststride;
   unsigned int rows;
 
 #if NXGLIB_BITSPERPIXEL < 8
-  FAR const ubyte *sptr;
-  FAR ubyte *dptr;
-  ubyte leadmask;
-  ubyte tailmask;
-  ubyte mask;
+  FAR const uint8_t *sptr;
+  FAR uint8_t *dptr;
+  uint8_t leadmask;
+  uint8_t tailmask;
+  uint8_t mask;
   int lnlen;
 #endif
 
@@ -116,21 +117,21 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
    * MS byte down.
    */
 
-  leadmask = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (ubyte)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x-1)));
+  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
+  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x-1)));
 # else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
-  leadmask = (ubyte)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x-1)));
+  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
+  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x-1)));
 # endif
 #endif
 
   /* Then copy the image */
 
-  sline = (const ubyte*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
+  sline = (const uint8_t*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
   dline = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
 
   while (rows--)

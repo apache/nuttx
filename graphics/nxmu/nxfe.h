@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxfe.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <mqueue.h>
 #include <semaphore.h>
 
@@ -103,17 +104,17 @@ struct nxfe_conn_s
 {
   /* This number uniquely identifies the client */
 
-  int   cid;                          /* Client ID (CID) */
-  ubyte state;                        /* See enum nx_clistate_e */
+  int   cid;              /* Client ID (CID) */
+  uint8_t state;          /* See enum nx_clistate_e */
 
   /* These are only usable on the client side of the connection */
 
-  mqd_t crdmq;                        /* MQ to read from the server (may be non-blocking) */
-  mqd_t cwrmq;                        /* MQ to write to the server (blocking) */
+  mqd_t crdmq;            /* MQ to read from the server (may be non-blocking) */
+  mqd_t cwrmq;            /* MQ to write to the server (blocking) */
 
   /* These are only usable on the server side of the connection */
 
-  mqd_t swrmq;                        /* MQ to write to the client */
+  mqd_t swrmq;            /* MQ to write to the client */
 };
 
 /* Server state structure ***************************************************/
@@ -182,21 +183,21 @@ enum nxmsg_e
 
 struct nxclimsg_s
 {
-  uint32 msgid;                  /* Any of nxclimsg_e */
+  uint32_t msgid;                  /* Any of nxclimsg_e */
 };
 
 /* The server is now connected */
 
 struct nxclimsg_connected_s
 {
-  uint32 msgid;                  /* NX_CLIMSG_REDRAW_CONNECTED */
+  uint32_t msgid;                  /* NX_CLIMSG_REDRAW_CONNECTED */
 };
 
 /* The server is now disconnected */
 
 struct nxclimsg_disconnected_s
 {
-  uint32 msgid;                  /* NX_CLIMSG_REDRAW_DISCONNECTED */
+  uint32_t msgid;                  /* NX_CLIMSG_REDRAW_DISCONNECTED */
 };
 
 /* This message is received when a requested window has been opened.  If wnd is NULL
@@ -205,17 +206,17 @@ struct nxclimsg_disconnected_s
 
 struct nxclimsg_redraw_s
 {
-  uint32 msgid;                  /* NX_CLIMSG_REDRAW */
+  uint32_t msgid;                /* NX_CLIMSG_REDRAW */
   FAR struct nxbe_window_s *wnd; /* The handle to the window to redraw in */
   FAR struct nxgl_rect_s rect;   /* The rectangle to be redrawn */
-  boolean more;                  /* TRUE: more redraw messages follow */
+  bool more;                     /* true: more redraw messages follow */
 };
 
 /* This message informs the client of the new size or position of the window  */
 
 struct nxclimsg_newposition_s
 {
-  uint32 msgid;                  /* NX_CLIMSG_NEWPOSITION */
+  uint32_t msgid;                /* NX_CLIMSG_NEWPOSITION */
   FAR struct nxbe_window_s *wnd; /* The window whose position/size has changed */
   FAR struct nxgl_size_s size;   /* The current window size */
   FAR struct nxgl_point_s pos;   /* The current window position */
@@ -227,10 +228,10 @@ struct nxclimsg_newposition_s
 #ifdef CONFIG_NX_MOUSE
 struct nxclimsg_mousein_s
 {
-  uint32 msgid;                  /* NX_SVRMSG_MOUSEIN */
+  uint32_t msgid;                /* NX_SVRMSG_MOUSEIN */
   FAR struct nxbe_window_s *wnd; /* The handle of window receiving mouse input */
   struct nxgl_point_s pos;       /* Mouse X/Y position */
-  ubyte buttons;                 /* Mouse button set */
+  uint8_t buttons;               /* Mouse button set */
 };
 #endif
 
@@ -239,10 +240,10 @@ struct nxclimsg_mousein_s
 #ifdef CONFIG_NX_KBD
 struct nxclimsg_kbdin_s
 {
-  uint32 msgid;                  /* NX_CLIMSG_KBDIN */
+  uint32_t msgid;                /* NX_CLIMSG_KBDIN */
   FAR struct nxbe_window_s *wnd; /* The handle of window receiving keypad input */
-  ubyte nch;                     /* Number of characters received */
-  ubyte ch[1];                   /* Array of received characters */
+  uint8_t nch;                   /* Number of characters received */
+  uint8_t ch[1];                 /* Array of received characters */
 };
 #endif
 
@@ -253,94 +254,94 @@ struct nxclimsg_kbdin_s
  * NX_SVRMSG_CONNECT and NX_SVRMSG_DISCONNECT.
  */
 
-struct nxsvrmsg_s                    /* Generic server message */
+struct nxsvrmsg_s                 /* Generic server message */
 {
-  uint32 msgid;                      /* One of enum nxsvrmsg_e */
-  FAR struct nxfe_conn_s *conn;      /* The specific connection sending the message */
+  uint32_t msgid;                 /* One of enum nxsvrmsg_e */
+  FAR struct nxfe_conn_s *conn;   /* The specific connection sending the message */
 };
 
 /* This message requests the server to create a new window */
 
 struct nxsvrmsg_openwindow_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_OPENWINDOW */
-  FAR struct nxbe_window_s *wnd;     /* The pre-allocated window structure */
+  uint32_t msgid;                 /* NX_SVRMSG_OPENWINDOW */
+  FAR struct nxbe_window_s *wnd;  /* The pre-allocated window structure */
 };
 
 /* This message informs the server that client wishes to close a window */
 
 struct nxsvrmsg_closewindow_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_CLOSEWINDOW */
-  FAR struct nxbe_window_s *wnd;     /* The window to be closed */
+  uint32_t msgid;                  /* NX_SVRMSG_CLOSEWINDOW */
+  FAR struct nxbe_window_s *wnd;   /* The window to be closed */
 };
 
 /* This message requests the server to create a new window */
 
 struct nxsvrmsg_requestbkgd_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_REQUESTBKGD */
-  FAR struct nxfe_conn_s *conn;      /* The specific connection sending the message */
+  uint32_t msgid;                  /* NX_SVRMSG_REQUESTBKGD */
+  FAR struct nxfe_conn_s *conn;    /* The specific connection sending the message */
   FAR const struct nx_callback_s *cb; /* Event handling callbacks */
-  FAR void *arg;                     /* Client argument used with callbacks */
+  FAR void *arg;                   /* Client argument used with callbacks */
 };
 
 /* This message informs the server that client wishes to close a window */
 
 struct nxsvrmsg_releasebkgd_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_RELEASEBKGD */
+  uint32_t msgid;                  /* NX_SVRMSG_RELEASEBKGD */
 };
 
 /* This message informs the server that the size or position of the window has changed */
 
 struct nxsvrmsg_setposition_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_SETPOSITION */
-  FAR struct nxbe_window_s *wnd;     /* The window whose position/size has changed */
-  FAR struct nxgl_point_s pos;       /* The new window position */
+  uint32_t msgid;                  /* NX_SVRMSG_SETPOSITION */
+  FAR struct nxbe_window_s *wnd;   /* The window whose position/size has changed */
+  FAR struct nxgl_point_s pos;     /* The new window position */
 };
 
 /* This message informs the server that the size or position of the window has changed */
 
 struct nxsvrmsg_setsize_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_SETSIZE */
-  FAR struct nxbe_window_s *wnd;     /* The window whose position/size has changed */
-  FAR struct nxgl_size_s  size;      /* The new window size */
+  uint32_t msgid;                  /* NX_SVRMSG_SETSIZE */
+  FAR struct nxbe_window_s *wnd;   /* The window whose position/size has changed */
+  FAR struct nxgl_size_s  size;    /* The new window size */
 };
 
 /* This message informs the server that the size or position of the window has changed */
 
 struct nxsvrmsg_getposition_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_FETPOSITION */
-  FAR struct nxbe_window_s *wnd;     /* The window whose position/size has changed */
+  uint32_t msgid;                  /* NX_SVRMSG_FETPOSITION */
+  FAR struct nxbe_window_s *wnd;   /* The window whose position/size has changed */
 };
 
 /* This message informs the server to raise this window to the top of the display */
 
 struct nxsvrmsg_raise_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_RAISE */
-  FAR struct nxbe_window_s *wnd;     /* The window to be raised */
+  uint32_t msgid;                  /* NX_SVRMSG_RAISE */
+  FAR struct nxbe_window_s *wnd;   /* The window to be raised */
 };
 
 /* This message informs the server to lower this window to the bottom of the display */
 
 struct nxsvrmsg_lower_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_LOWER */
-  FAR struct nxbe_window_s *wnd;     /* The window to be lowered  */
+  uint32_t msgid;                  /* NX_SVRMSG_LOWER */
+  FAR struct nxbe_window_s *wnd;   /* The window to be lowered  */
 };
 
 /* Fill a rectangle in the window with a color */
 
 struct nxsvrmsg_fill_s
 {
-  uint32  msgid;                     /* NX_SVRMSG_FILL */
-  FAR struct nxbe_window_s *wnd;     /* The window to fill  */
-  struct nxgl_rect_s rect;           /* The rectangle in the window to fill */
+  uint32_t  msgid;                 /* NX_SVRMSG_FILL */
+  FAR struct nxbe_window_s *wnd;   /* The window to fill  */
+  struct nxgl_rect_s rect;         /* The rectangle in the window to fill */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
 };
 
@@ -348,10 +349,10 @@ struct nxsvrmsg_fill_s
 
 struct nxsvrmsg_filltrapezoid_s
 {
-  uint32  msgid;                     /* NX_SVRMSG_FILLTRAP */
-  FAR struct nxbe_window_s *wnd;     /* The window to fill  */
-  FAR struct nxgl_rect_s clip;       /* The clipping window */
-  struct nxgl_trapezoid_s trap;      /* The trapezoidal region in the window to fill */
+  uint32_t  msgid;                 /* NX_SVRMSG_FILLTRAP */
+  FAR struct nxbe_window_s *wnd;   /* The window to fill  */
+  FAR struct nxgl_rect_s clip;     /* The clipping window */
+  struct nxgl_trapezoid_s trap;    /* The trapezoidal region in the window to fill */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
 };
 
@@ -359,29 +360,29 @@ struct nxsvrmsg_filltrapezoid_s
 
 struct nxsvrmsg_move_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_MOVE */
-  FAR struct nxbe_window_s *wnd;     /* The window within which the move is done  */
-  struct nxgl_rect_s rect;           /* Describes the rectangular region to move */
-  struct nxgl_point_s offset;        /* The offset to move the region */
+  uint32_t msgid;                  /* NX_SVRMSG_MOVE */
+  FAR struct nxbe_window_s *wnd;   /* The window within which the move is done  */
+  struct nxgl_rect_s rect;         /* Describes the rectangular region to move */
+  struct nxgl_point_s offset;      /* The offset to move the region */
 };
 
 /* Copy a rectangular bitmap into the window */
 
 struct nxsvrmsg_bitmap_s
 {
-  uint32 msgid;                     /* NX_SVRMSG_BITMAP */
-  FAR struct nxbe_window_s *wnd;    /* The window with will receive the bitmap image  */
-  struct nxgl_rect_s dest;          /* Destination location of the bitmap in the window */
+  uint32_t msgid;                 /* NX_SVRMSG_BITMAP */
+  FAR struct nxbe_window_s *wnd;  /* The window with will receive the bitmap image  */
+  struct nxgl_rect_s dest;        /* Destination location of the bitmap in the window */
   FAR const void *src[CONFIG_NX_NPLANES]; /* The start of the source image. */
-  struct nxgl_point_s origin;       /* Offset into the source image data */
-  unsigned int stride;              /* The width of the full source image in pixels. */
+  struct nxgl_point_s origin;     /* Offset into the source image data */
+  unsigned int stride;            /* The width of the full source image in pixels. */
 };
 
 /* Set the color of the background */
 
 struct nxsvrmsg_setbgcolor_s
 {
-  uint32  msgid;                     /* NX_SVRMSG_SETBGCOLOR */
+  uint32_t  msgid;                 /* NX_SVRMSG_SETBGCOLOR */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the background */
 };
 
@@ -393,9 +394,9 @@ struct nxsvrmsg_setbgcolor_s
 #ifdef CONFIG_NX_MOUSE
 struct nxsvrmsg_mousein_s
 {
-  uint32 msgid;                      /* NX_SVRMSG_MOUSEIN */
-  struct nxgl_point_s pt;            /* Mouse X/Y position */
-  ubyte buttons;                     /* Mouse button set */
+  uint32_t msgid;                  /* NX_SVRMSG_MOUSEIN */
+  struct nxgl_point_s pt;          /* Mouse X/Y position */
+  uint8_t buttons;                 /* Mouse button set */
 };
 #endif
 
@@ -407,9 +408,9 @@ struct nxsvrmsg_mousein_s
 #ifdef CONFIG_NX_KBD
 struct nxsvrmsg_kbdin_s
 {
-  uint32     msgid;                  /* NX_SVRMSG_KBDIN */
-  ubyte      nch ;                   /* Number of characters received */
-  ubyte      ch[1];                  /* Array of received characters */
+  uint32_t   msgid;                /* NX_SVRMSG_KBDIN */
+  uint8_t    nch ;                 /* Number of characters received */
+  uint8_t    ch[1];                /* Array of received characters */
 };
 #endif
 
@@ -613,7 +614,7 @@ EXTERN int nxmu_mousein(FAR struct nxfe_state_s *fe,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-EXTERN void nxmu_kbdin(FAR struct nxfe_state_s *fe, ubyte nch, FAR ubyte *ch);
+EXTERN void nxmu_kbdin(FAR struct nxfe_state_s *fe, uint8_t nch, FAR uint8_t *ch);
 #endif
 
 #undef EXTERN

@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
@@ -411,8 +413,8 @@ EXTERN void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
  *
  ****************************************************************************/
 
-EXTERN boolean nxbe_visible(FAR struct nxbe_window_s *wnd,
-                            FAR const struct nxgl_point_s *pos);
+EXTERN bool nxbe_visible(FAR struct nxbe_window_s *wnd,
+                         FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxbe_clipper
@@ -437,7 +439,7 @@ EXTERN boolean nxbe_visible(FAR struct nxbe_window_s *wnd,
  ****************************************************************************/
 
 EXTERN void nxbe_clipper(FAR struct nxbe_window_s *wnd,
-                         FAR const struct nxgl_rect_s *dest, ubyte order,
+                         FAR const struct nxgl_rect_s *dest, uint8_t order,
                          FAR struct nxbe_clipops_s *cops,
                          FAR struct nxbe_plane_s *plane);
 

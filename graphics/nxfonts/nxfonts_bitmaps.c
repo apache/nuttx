@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxfonts/nxfonts_bitmap.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/nxfonts.h>
 
 #include "nxfonts_internal.h"
@@ -60,7 +61,7 @@
 
 #define NXFONT_CONCAT(a,b) a##b
 #define NXFONT_DEFBITMAP(n) \
-static const ubyte NXFONT_CONCAT(g_bitmap_,n)[] = NXFONT_CONCAT(NXFONT_BITMAP_,n)
+static const uint8_t NXFONT_CONCAT(g_bitmap_,n)[] = NXFONT_CONCAT(NXFONT_BITMAP_,n)
 #define NXFONT_DEFMETRIC(n) \
   { NXFONT_CONCAT(NXFONT_METRICS_,n), NXFONT_CONCAT(g_bitmap_,n) }
 

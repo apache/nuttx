@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nx_kbdin.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
@@ -83,7 +83,7 @@
  *
  ****************************************************************************/
 
-int nx_kbdin(NXHANDLE handle, ubyte nch, FAR const ubyte *ch)
+int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch)
 {
   FAR struct nxfe_conn_s  *conn = (FAR struct nxfe_conn_s *)handle;
   FAR struct nxsvrmsg_kbdin_s *outmsg;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nx_mousein.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -64,7 +64,7 @@
 
 static struct nxgl_point_s g_mpos;
 static struct nxgl_point_s g_mrange;
-static ubyte               g_mbutton;
+static uint8_t             g_mbutton;
 
 /****************************************************************************
  * Public Data
@@ -144,7 +144,7 @@ int nxsu_mousereport(struct nxbe_window_s *wnd)
  *
  ****************************************************************************/
 
-int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, ubyte buttons)
+int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
 {
   FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
   struct nxbe_window_s *wnd;

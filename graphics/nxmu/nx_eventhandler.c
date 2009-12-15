@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nx_eventhandler.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <mqueue.h>
 #include <assert.h>
@@ -135,7 +135,7 @@ int nx_eventhandler(NXHANDLE handle)
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
   struct nxsvrmsg_s      *msg;
   struct nxbe_window_s   *wnd;
-  ubyte                   buffer[NX_MXCLIMSGLEN];
+  uint8_t                 buffer[NX_MXCLIMSGLEN];
   int                     nbytes;
 
   /* Get the next message from our incoming message queue */

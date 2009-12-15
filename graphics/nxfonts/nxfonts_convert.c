@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxfonts/nxfonts_convert.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/nxglib.h>
@@ -62,35 +63,35 @@
 
 #  define NXF_PIXELMASK           0x03
 #  define NXF_SCALEX(x)           ((x) >> 2)
-#  define NXF_PIXEL_T             ubyte
-#  define NXF_MULTIPIXEL(p)       ((ubyte)(p) << 6 | (ubyte)(p) << 4 | (ubyte)(p) << 2 | (p))
+#  define NXF_PIXEL_T             uint8_t
+#  define NXF_MULTIPIXEL(p)       ((uint8_t)(p) << 6 | (uint8_t)(p) << 4 | (uint8_t)(p) << 2 | (p))
 
 #elif NXFONTS_BITSPERPIXEL == 4
 
 #  define NXF_PIXELMASK           0x0f
 #  define NXF_SCALEX(x)           ((x) >> 1)
-#  define NXF_PIXEL_T             ubyte
-#  define NXF_MULTIPIXEL(p)       ((ubyte)(p) << 4 | (p))
+#  define NXF_PIXEL_T             uint8_t
+#  define NXF_MULTIPIXEL(p)       ((uint8_t)(p) << 4 | (p))
 
 #elif NXFONTS_BITSPERPIXEL == 8
 
 #  define NXF_SCALEX(x)           (x)
-#  define NXF_PIXEL_T             ubyte
+#  define NXF_PIXEL_T             uint8_t
 
 #elif NXFONTS_BITSPERPIXEL == 16
 
 #  define NXF_SCALEX(x)           ((x) << 1)
-#  define NXF_PIXEL_T             uint16
+#  define NXF_PIXEL_T             uint16_t
 
 #elif NXFONTS_BITSPERPIXEL == 24
 
 #  define NXF_SCALEX(x)           (((x) << 1) + (x))
-#  define NXF_PIXEL_T             uint32
+#  define NXF_PIXEL_T             uint32_t
 
 #elif NXFONTS_BITSPERPIXEL == 32
 
 #  define NXF_SCALEX(x)           ((x) << 2)
-#  define NXF_PIXEL_T             uint32
+#  define NXF_PIXEL_T             uint32_t
 
 #endif
 
@@ -137,14 +138,14 @@
  ****************************************************************************/
 
 int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
-(FAR NXF_PIXEL_T *dest, uint16 height, uint16 width, uint16 stride,
+(FAR NXF_PIXEL_T *dest, uint16_t height, uint16_t width, uint16_t stride,
  FAR const struct nx_fontbitmap_s *bm, nxgl_mxpixel_t color)
 {
-  FAR ubyte *line;
+  FAR uint8_t *line;
   FAR NXF_PIXEL_T *dptr;
-  FAR const ubyte *sptr;
-  ubyte bmbyte;
-  ubyte bmbit;
+  FAR const uint8_t *sptr;
+  uint8_t bmbyte;
+  uint8_t bmbit;
   int row;
   int col;
   int bmndx;
@@ -158,7 +159,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
 
   /* Get the starting position */
 
-  line = (ubyte*)dest + bm->metric.yoffset * stride + NXF_SCALEX(bm->metric.xoffset);
+  line = (uint8_t*)dest + bm->metric.yoffset * stride + NXF_SCALEX(bm->metric.xoffset);
 
   /* Then copy the font */
 

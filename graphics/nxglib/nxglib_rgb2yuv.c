@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 #include <fixedmath.h>
 
@@ -87,7 +87,8 @@
  *
  ****************************************************************************/
 
-void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v)
+void nxgl_rgb2yuv(uint8_t r, uint8_t g, uint8_t b,
+                  uint8_t *y, uint8_t *u, uint8_t *v)
 {
   /* Per the JFIF specification:
    *
@@ -96,7 +97,7 @@ void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v)
    * V = 128 + (0.5000 * R) - (0.4187 * G) - (0.0813 * B);
    */
 
-  *y = (ubyte)b16toi(b16muli(b16_P2990, r) + b16muli(b16_P5870, g) + b16muli(b16_P1140, b));
-  *u = (ubyte)b16toi(b16_128P0 - b16muli(b16_P1687, r) - b16muli(b16_P3313, g) + b16muli(b16_P5000, b));
-  *v = (ubyte)b16toi(b16_128P0 + b16muli(b16_P5000, r) - b16muli(b16_P4187, g) - b16muli(b16_P0813, b));
+  *y = (uint8_t)b16toi(b16muli(b16_P2990, r) + b16muli(b16_P5870, g) + b16muli(b16_P1140, b));
+  *u = (uint8_t)b16toi(b16_128P0 - b16muli(b16_P1687, r) - b16muli(b16_P3313, g) + b16muli(b16_P5000, b));
+  *v = (uint8_t)b16toi(b16_128P0 + b16muli(b16_P5000, r) - b16muli(b16_P4187, g) - b16muli(b16_P0813, b));
 }

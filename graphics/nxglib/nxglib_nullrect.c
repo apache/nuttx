@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/nxsglib_nullrect.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdbool.h>
+
 #include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
@@ -71,11 +72,11 @@
  * Name: nxgl_nullrect
  *
  * Description:
- *   Return TRUE if the area of the retangle is <= 0.
+ *   Return true if the area of the retangle is <= 0.
  *
  ****************************************************************************/
 
-boolean nxgl_nullrect(FAR const struct nxgl_rect_s *rect)
+bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect)
 {
   return (rect->pt1.x > rect->pt2.x || rect->pt1.y > rect->pt2.y);
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_colormap.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -85,12 +85,12 @@
 int nxbe_colormap(FAR struct fb_vtable_s *fb)
 {
   struct fb_cmap_s cmap;
-  ubyte  *alloc;
-  ubyte  *red;
-  ubyte  *green;
-  ubyte  *blue;
-  ubyte   rval;
-  ubyte   gval;
+  uint8_t *alloc;
+  uint8_t *red;
+  uint8_t *green;
+  uint8_t *blue;
+  uint8_t rval;
+  uint8_t gval;
   int     size;
   int     ndx;
   int     ret;
@@ -98,8 +98,8 @@ int nxbe_colormap(FAR struct fb_vtable_s *fb)
 
   /* Allocate the color map tables */
 
-  size  = 3 * CONFIG_NX_NCOLORS * sizeof(uint16);
-  alloc = (ubyte*)malloc(size);
+  size  = 3 * CONFIG_NX_NCOLORS * sizeof(uint16_t);
+  alloc = (uint8_t*)malloc(size);
   if (alloc < 0)
     {
       return -ENOMEM;

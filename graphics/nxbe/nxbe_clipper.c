@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_clipper.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <debug.h>
 
@@ -70,8 +71,8 @@ struct nxbe_cliprect_s
 
 struct nxbe_clipstack_s
 {
-  uint16                  npushed; /* Number of deferred rectangles in stack */
-  uint16                  mxrects; /* The capacity of the stack */
+  uint16_t                npushed; /* Number of deferred rectangles in stack */
+  uint16_t                mxrects; /* The capacity of the stack */
   struct nxbe_cliprect_s   *stack;   /* The stack of deferred rectangles */
 };
 
@@ -79,7 +80,7 @@ struct nxbe_clipstack_s
  * Private Data
  ****************************************************************************/
 
-static const ubyte g_nxcliporder[4][4] =
+static const uint8_t g_nxcliporder[4][4] =
 {
   { NX_TOP_NDX,    NX_LEFT_NDX,  NX_RIGHT_NDX, NX_BOTTOM_NDX }, /* index = NX_CLIPORDER_TLRB */
   { NX_TOP_NDX,    NX_RIGHT_NDX, NX_LEFT_NDX,  NX_BOTTOM_NDX }, /*         NX_CLIPORDER_TRLB */
@@ -134,18 +135,18 @@ static inline void nxbe_pushrectangle(FAR struct nxbe_clipstack_s *stack,
  * Name: nxbe_poprectangle
  ****************************************************************************/
 
-static inline boolean nxbe_poprectangle(struct nxbe_clipstack_s *stack,
-                                        FAR struct nxbe_window_s **wnd,
-                                        struct nxgl_rect_s *rect)
+static inline bool nxbe_poprectangle(struct nxbe_clipstack_s *stack,
+                                     FAR struct nxbe_window_s **wnd,
+                                     struct nxgl_rect_s *rect)
 {
   if(stack->npushed > 0)
     {
       stack->npushed--;
       *wnd = stack->stack[stack->npushed].wnd;
       nxgl_rectcopy(rect, &stack->stack[stack->npushed].rect);
-      return TRUE;
+      return true;
     }
-  return FALSE;
+  return false;
 }
 
 /****************************************************************************
@@ -175,7 +176,7 @@ static inline boolean nxbe_poprectangle(struct nxbe_clipstack_s *stack,
  ****************************************************************************/
 
 void nxbe_clipper(FAR struct nxbe_window_s *wnd,
-                  FAR const struct nxgl_rect_s *dest, ubyte order,
+                  FAR const struct nxgl_rect_s *dest, uint8_t order,
                   FAR struct nxbe_clipops_s *cops,
                   FAR struct nxbe_plane_s *plane)
 {

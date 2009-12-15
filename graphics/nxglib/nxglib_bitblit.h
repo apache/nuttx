@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/nxglib_bitblit.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 #include <nuttx/nxglib.h>
 
@@ -64,41 +65,41 @@
 #  define NXGL_PIXELSHIFT          3
 #  define NXGL_PIXELMASK           7
 #  define NXGL_MULTIPIXEL(p)       ((p) ? 0xff : 0x00)
-#  define NXGL_PIXEL_T             ubyte
+#  define NXGL_PIXEL_T             uint8_t
 
 #elif NXGLIB_BITSPERPIXEL == 2
 
 #  define NXGL_PIXELSHIFT          2
 #  define NXGL_PIXELMASK           3
-#  define NXGL_MULTIPIXEL(p)       ((ubyte)(p) << 6 | (ubyte)(p) << 4 | (ubyte)(p) << 2 | (p))
-#  define NXGL_PIXEL_T             ubyte
+#  define NXGL_MULTIPIXEL(p)       ((uint8_t)(p) << 6 | (uint8_t)(p) << 4 | (uint8_t)(p) << 2 | (p))
+#  define NXGL_PIXEL_T             uint8_t
 
 #elif NXGLIB_BITSPERPIXEL == 4
 
 #  define NXGL_PIXELSHIFT          1
 #  define NXGL_PIXELMASK           1
-#  define NXGL_MULTIPIXEL(p)       ((ubyte)(p) << 4 | (p))
-#  define NXGL_PIXEL_T             ubyte
+#  define NXGL_MULTIPIXEL(p)       ((uint8_t)(p) << 4 | (p))
+#  define NXGL_PIXEL_T             uint8_t
 
 #elif NXGLIB_BITSPERPIXEL == 8
 
 #  define NXGL_SCALEX(x)           (x)
-#  define NXGL_PIXEL_T             ubyte
+#  define NXGL_PIXEL_T             uint8_t
 
 #elif NXGLIB_BITSPERPIXEL == 16
 
 #  define NXGL_SCALEX(x)           ((x) << 1)
-#  define NXGL_PIXEL_T             uint16
+#  define NXGL_PIXEL_T             uint16_t
 
 #elif NXGLIB_BITSPERPIXEL == 24
 
 #  define NXGL_SCALEX(x)           (((x) << 1) + (x))
-#  define NXGL_PIXEL_T             uint32
+#  define NXGL_PIXEL_T             uint32_t
 
 #elif NXGLIB_BITSPERPIXEL == 32
 
 #  define NXGL_SCALEX(x)           ((x) << 2)
-#  define NXGL_PIXEL_T             uint32
+#  define NXGL_PIXEL_T             uint32_t
 
 #endif
 
@@ -110,7 +111,7 @@
 
 #  define NXGL_MEMSET(dest,value,width) \
    { \
-     FAR ubyte *_ptr = (FAR ubyte*)dest; \
+     FAR uint8_t *_ptr = (FAR uint8_t*)dest; \
      int        _nby = NXGL_SCALEX(width); \
      while (_nby--) \
        { \
@@ -119,8 +120,8 @@
    }
 #  define NXGL_MEMCPY(dest,src,width) \
    { \
-     FAR ubyte *_dptr = (FAR ubyte*)dest; \
-     FAR ubyte *_sptr = (FAR ubyte*)src; \
+     FAR uint8_t *_dptr = (FAR uint8_t*)dest; \
+     FAR uint8_t *_sptr = (FAR uint8_t*)src; \
      int        _nby  = NXGL_SCALEX(width); \
      while (_nby--) \
        { \
@@ -131,7 +132,7 @@
 #elif NXGLIB_BITSPERPIXEL == 24
 #  define NXGL_MEMSET(dest,value,width) \
    { \
-     FAR ubyte   *_ptr  = (FAR ubyte*)dest; \
+     FAR uint8_t *_ptr  = (FAR uint8_t*)dest; \
      nxgl_coord_t _npix = width; \
      while (_npix--) \
        { \
@@ -142,8 +143,8 @@
    }
 #  define NXGL_MEMCPY(dest,src,width) \
    { \
-     FAR ubyte   *_dptr = (FAR ubyte*)dest; \
-     FAR ubyte   *_sptr = (FAR ubyte*)src; \
+     FAR uint8_t *_dptr = (FAR uint8_t*)dest; \
+     FAR uint8_t *_sptr = (FAR uint8_t*)src; \
      nxgl_coord_t _npix = width; \
      while (_npix--) \
        { \

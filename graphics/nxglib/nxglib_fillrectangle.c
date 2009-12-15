@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/nxglib_fillrectangle.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+
 #include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
@@ -84,17 +85,17 @@
 void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 (FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, nxgl_mxpixel_t color)
 {
-  FAR ubyte *line;
+  FAR uint8_t *line;
   unsigned int width;
   unsigned int stride;
   int rows;
 
 #if NXGLIB_BITSPERPIXEL < 8
-  FAR ubyte *dest;
-  ubyte mpixel = NXGL_MULTIPIXEL(color);
-  ubyte leadmask;
-  ubyte tailmask;
-  ubyte mask;
+  FAR uint8_t *dest;
+  uint8_t mpixel = NXGL_MULTIPIXEL(color);
+  uint8_t leadmask;
+  uint8_t tailmask;
+  uint8_t mask;
   int lnlen;
 #endif
 
@@ -118,15 +119,15 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
    * MS byte down.
    */
 
-  leadmask = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (ubyte)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
+  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
+  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
 # else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
-  leadmask = (ubyte)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (ubyte)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
+  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
+  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
 # endif
 #endif
 

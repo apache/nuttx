@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_server.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <semaphore.h>
@@ -301,7 +301,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
 {
   struct nxfe_state_s     fe;
   FAR struct nxsvrmsg_s *msg;
-  ubyte                  buffer[NX_MXSVRMSGLEN];
+  uint8_t                buffer[NX_MXSVRMSGLEN];
   int                    nbytes;
   int                    ret;
 

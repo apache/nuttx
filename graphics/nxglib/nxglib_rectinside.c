@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/nxsglib_rectinside.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdbool.h>
+
 #include <nuttx/fb.h>
 #include <nuttx/nxglib.h>
 
@@ -71,12 +72,12 @@
  * Name: nxgl_rectinside
  *
  * Description:
- *   Return TRUE if the point pt lies within rect.
+ *   Return true if the point pt lies within rect.
  *
  ****************************************************************************/
 
-boolean nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
-                        FAR const struct nxgl_point_s *pt)
+bool nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
+                     FAR const struct nxgl_point_s *pt)
 {
   return (pt->x >= rect->pt1.x && pt->x <= rect->pt2.x &&
           pt->y >= rect->pt1.y && pt->y <= rect->pt2.y);

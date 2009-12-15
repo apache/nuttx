@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxtk/nxtk_events.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <semaphore.h>
 #include <debug.h>
@@ -62,17 +63,18 @@
  ****************************************************************************/
 
 static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                        boolean morem, FAR void *arg);
+                        bool morem, FAR void *arg);
 static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
                           FAR const struct nxgl_point_s *pos,
                           FAR const struct nxgl_rect_s *bounds,
                           FAR void *arg);
 #ifdef CONFIG_NX_MOUSE
 static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                         ubyte buttons, FAR void *arg);
+                         uint8_t buttons, FAR void *arg);
 #endif
 #ifdef CONFIG_NX_KBD
-static void nxtk_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg);
+static void nxtk_kbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch,
+                       FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -104,7 +106,7 @@ const struct nx_callback_s g_nxtkcb =
  ****************************************************************************/
 
 static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                         boolean more, FAR void *arg)
+                        bool more, FAR void *arg)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
   struct nxgl_rect_s intersection;
@@ -135,7 +137,7 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
       if (!nxgl_nullrect(&intersection))
         {
-          fwnd->fwcb->redraw((NXTKWINDOW)fwnd, &intersection, FALSE, fwnd->fwarg);
+          fwnd->fwcb->redraw((NXTKWINDOW)fwnd, &intersection, false, fwnd->fwarg);
         }
     }
 
@@ -158,7 +160,7 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
       if (!nxgl_nullrect(&intersection))
         {
-          fwnd->tbcb->redraw((NXTKWINDOW)fwnd, &intersection, FALSE, fwnd->tbarg);
+          fwnd->tbcb->redraw((NXTKWINDOW)fwnd, &intersection, false, fwnd->tbarg);
         }
     }
 
@@ -212,7 +214,7 @@ static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
 
 #ifdef CONFIG_NX_MOUSE
 static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          ubyte buttons, FAR void *arg)
+                          uint8_t buttons, FAR void *arg)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
   struct nxgl_point_s relpos;
@@ -252,7 +254,8 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-static void nxtk_kbdin(NXWINDOW hwnd, ubyte nch, const ubyte *ch, FAR void *arg)
+static void nxtk_kbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch,
+                       FAR void *arg)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
 

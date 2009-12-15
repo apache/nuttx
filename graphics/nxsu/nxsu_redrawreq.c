@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nxsu_redrawreq.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -97,7 +97,7 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s 
 
       /* And request the redraw */
 
-      wnd->cb->redraw((NXWINDOW)wnd, &relrect, FALSE, wnd->arg);
+      wnd->cb->redraw((NXWINDOW)wnd, &relrect, false, wnd->arg);
     }
 }
 

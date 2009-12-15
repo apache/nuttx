@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nx_connect.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -71,8 +71,8 @@
  * NOTE: that client ID 0 is reserved for the server(s) themselves
  */
 
-static sem_t  g_nxlibsem = { 1 };
-static uint32 g_nxcid    = 1;
+static sem_t    g_nxlibsem = { 1 };
+static uint32_t g_nxcid    = 1;
 
 /****************************************************************************
  * Public Data

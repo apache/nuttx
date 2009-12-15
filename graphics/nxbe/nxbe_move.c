@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_move.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 
 #include <nuttx/nxglib.h>
 
@@ -59,7 +60,7 @@ struct nxbe_move_s
   struct nxgl_point_s       offset;
   FAR struct nxbe_window_s *wnd;
   struct nxgl_rect_s        srcrect;
-  ubyte                     order;
+  uint8_t                   order;
 };
 
 /****************************************************************************
