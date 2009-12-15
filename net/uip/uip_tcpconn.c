@@ -47,7 +47,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -82,11 +82,11 @@ static dq_queue_t g_active_tcp_connections;
 
 /* Last port used by a TCP connection connection. */
 
-static uint16 g_last_tcp_port;
+static uint16_t g_last_tcp_port;
 
 /* g_tcp_sequence[] is used to generate TCP sequence numbers */
 
-static uint8 g_tcp_sequence[4];
+static uint8_t g_tcp_sequence[4];
 
 /****************************************************************************
  * Private Functions
@@ -117,7 +117,7 @@ static uint8 g_tcp_sequence[4];
  *
  ****************************************************************************/
 
-static int uip_selectport(uint16 portno)
+static int uip_selectport(uint16_t portno)
 {
   if (portno == 0)
     {
@@ -418,7 +418,7 @@ struct uip_conn *uip_nexttcpconn(struct uip_conn *conn)
  *
  ****************************************************************************/
 
-struct uip_conn *uip_tcplistener(uint16 portno)
+struct uip_conn *uip_tcplistener(uint16_t portno)
 {
   struct uip_conn *conn;
   int i;
@@ -634,7 +634,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   conn->rto        = UIP_RTO;
   conn->sa         = 0;
   conn->sv         = 16;   /* Initial value of the RTT variance. */
-  conn->lport      = htons((uint16)port);
+  conn->lport      = htons((uint16_t)port);
 
   /* The sockaddr port is 16 bits and already in network order */
 

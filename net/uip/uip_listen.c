@@ -44,7 +44,8 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>
@@ -74,7 +75,7 @@ static struct uip_conn *uip_listenports[CONFIG_NET_MAX_LISTENPORTS];
  *
  ****************************************************************************/
 
-struct uip_conn *uip_findlistener(uint16 portno)
+struct uip_conn *uip_findlistener(uint16_t portno)
 {
   int ndx;
 
@@ -221,14 +222,14 @@ int uip_listen(struct uip_conn *conn)
  * Function: uip_islistener
  *
  * Description:
- *   Return TRUE is there is a listener for the specified port
+ *   Return true is there is a listener for the specified port
  *
  * Assumptions:
  *   Called at interrupt level
  *
  ****************************************************************************/
 
-boolean uip_islistener(uint16 portno)
+bool uip_islistener(uint16_t portno)
 {
   return uip_findlistener(portno) != NULL;
 }
@@ -244,7 +245,8 @@ boolean uip_islistener(uint16 portno)
  *
  ****************************************************************************/
 
-int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16 portno)
+int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn,
+               uint16_t portno)
 {
   struct uip_conn *listener;
   int ret = ERROR;

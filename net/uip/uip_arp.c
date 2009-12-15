@@ -55,9 +55,8 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
 #include <sys/ioctl.h>
-
+#include <stdint.h>
 #include <string.h>
 #include <debug.h>
 
@@ -67,7 +66,7 @@
 #include <net/uip/uip-arp.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define ARP_REQUEST 1
@@ -87,32 +86,32 @@
 
 struct arp_hdr
 {
-  uint16 ah_hwtype;        /* 16-bit Hardware type (Ethernet=0x001) */
-  uint16 ah_protocol;      /* 16-bit Protocol type (IP=0x0800) */
-  uint8  ah_hwlen;         /*  8-bit Hardware address size (6) */
-  uint8  ah_protolen;      /*  8-bit Procotol address size (4) */
-  uint16 ah_opcode;        /* 16-bit Operation */
-  uint8  ah_shwaddr[6];    /* 48-bit Sender hardware address */   
-  uint16 ah_sipaddr[2];    /* 32-bit Sender IP adress */
-  uint8  ah_dhwaddr[6];    /* 48-bit Target hardware address */
-  uint16 ah_dipaddr[2];    /* 32-bit Target IP address */
+  uint16_t ah_hwtype;        /* 16-bit Hardware type (Ethernet=0x001) */
+  uint16_t ah_protocol;      /* 16-bit Protocol type (IP=0x0800) */
+  uint8_t  ah_hwlen;         /*  8-bit Hardware address size (6) */
+  uint8_t  ah_protolen;      /*  8-bit Procotol address size (4) */
+  uint16_t ah_opcode;        /* 16-bit Operation */
+  uint8_t  ah_shwaddr[6];    /* 48-bit Sender hardware address */   
+  uint16_t ah_sipaddr[2];    /* 32-bit Sender IP adress */
+  uint8_t  ah_dhwaddr[6];    /* 48-bit Target hardware address */
+  uint16_t ah_dipaddr[2];    /* 32-bit Target IP address */
 };
 
 /* IP header -- Size 20 or 24 bytes */
 
 struct ethip_hdr
 {
-  uint8  eh_vhl;           /*  8-bit Version (4) and header length (5 or 6) */
-  uint8  eh_tos;           /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8  eh_len[2];        /* 16-bit Total length */
-  uint8  eh_ipid[2];       /* 16-bit Identification */
-  uint8  eh_ipoffset[2];   /* 16-bit IP flags + fragment offset */
-  uint8  eh_ttl;           /*  8-bit Time to Live */
-  uint8  eh_proto;         /*  8-bit Protocol */
-  uint16 eh_ipchksum;      /* 16-bit Header checksum */
-  uint16 eh_srcipaddr[2];  /* 32-bit Source IP address */
-  uint16 eh_destipaddr[2]; /* 32-bit Destination IP address */
-  uint16 eh_ipoption[2];   /* (optional) */
+  uint8_t  eh_vhl;           /*  8-bit Version (4) and header length (5 or 6) */
+  uint8_t  eh_tos;           /*  8-bit Type of service (e.g., 6=TCP) */
+  uint8_t  eh_len[2];        /* 16-bit Total length */
+  uint8_t  eh_ipid[2];       /* 16-bit Identification */
+  uint8_t  eh_ipoffset[2];   /* 16-bit IP flags + fragment offset */
+  uint8_t  eh_ttl;           /*  8-bit Time to Live */
+  uint8_t  eh_proto;         /*  8-bit Protocol */
+  uint16_t eh_ipchksum;      /* 16-bit Header checksum */
+  uint16_t eh_srcipaddr[2];  /* 32-bit Source IP address */
+  uint16_t eh_destipaddr[2]; /* 32-bit Destination IP address */
+  uint16_t eh_ipoption[2];   /* (optional) */
 };
 
 /****************************************************************************
@@ -123,7 +122,7 @@ struct ethip_hdr
 
 static const struct ether_addr g_broadcast_ethaddr =
   {{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
-static const uint16 g_broadcast_ipaddr[2] = {0xffff, 0xffff};
+static const uint16_t g_broadcast_ipaddr[2] = {0xffff, 0xffff};
 
 /* Support for IGMP multicast addresses.
  *
@@ -142,7 +141,7 @@ static const uint16 g_broadcast_ipaddr[2] = {0xffff, 0xffff};
  */
 
 #if defined(CONFIG_NET_MULTICAST) && !defined(CONFIG_NET_IPv6)
-static const ubyte g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
+static const uint8_t g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
 #endif
 
 /****************************************************************************
@@ -325,7 +324,7 @@ void uip_arp_out(struct uip_driver_s *dev)
       * last three bytes of the IP address.
       */
 
-     const ubyte *ip = ((ubyte*)pip->eh_destipaddr) + 1;
+     const uint8_t *ip = ((uint8_t*)pip->eh_destipaddr) + 1;
      memcpy(peth->dest,  g_multicast_ethaddr, 3);
      memcpy(&peth->dest[3], ip, 3);
    }

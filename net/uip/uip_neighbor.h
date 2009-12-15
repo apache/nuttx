@@ -1,10 +1,15 @@
-/* uip_neighbor.h
+/* net/uip/uip_neighbor.h
  * Header file for database of link-local neighbors, used by IPv6 code and
  * to be used by future ARP code.
- * Author: Adam Dunkels <adam@sics.se>
  *
- * Copyright (c) 2006, Swedish Institute of Computer Science.
- * All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * A direct leverage of logic from uIP which also has b BSD style license
+ *
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2006, Swedish Institute of Computer Science.
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +39,7 @@
 #ifndef __UIP_NEIGHBOR_H__
 #define __UIP_NEIGHBOR_H__
 
+#include <stdint.h>
 #include <net/uip/uip.h>
 #include <net/ethernet.h>
 

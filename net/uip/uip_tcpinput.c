@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <debug.h>
 
@@ -56,7 +56,7 @@
 #include "uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define BUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
@@ -98,12 +98,12 @@ void uip_tcpinput(struct uip_driver_s *dev)
 {
   struct uip_conn *conn = NULL;
   struct uip_tcpip_hdr *pbuf = BUF;
-  uint16 tmp16;
-  uint16 flags;
-  uint8  opt;
-  uint8  result;
-  int    len;
-  int    i;
+  uint16_t tmp16;
+  uint16_t flags;
+  uint8_t  opt;
+  uint8_t  result;
+  int      len;
+  int      i;
 
   dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
   dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
@@ -220,8 +220,8 @@ void uip_tcpinput(struct uip_driver_s *dev)
                     {
                       /* An MSS option with the right option length. */
 
-                      tmp16 = ((uint16)dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + i] << 8) |
-                               (uint16)dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + 3 + i];
+                      tmp16 = ((uint16_t)dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + i] << 8) |
+                               (uint16_t)dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + 3 + i];
                       conn->initialmss = conn->mss =
                               tmp16 > UIP_TCP_MSS? UIP_TCP_MSS: tmp16;
 
@@ -330,7 +330,7 @@ found:
     {
       /* Temporary variables. */
 
-      uint8 acc32[4];
+      uint8_t acc32[4];
       uip_add32(conn->snd_nxt, conn->len, acc32);
 
       if (memcmp(pbuf->ackno, acc32, 4) == 0)
@@ -570,7 +570,7 @@ found:
             dev->d_urglen   = 0;
 #else /* CONFIG_NET_TCPURGDATA */
             dev->d_appdata =
-              ((uint8*)dev->d_appdata) + ((pbuf->urgp[0] << 8) | pbuf->urgp[1]);
+              ((uint8_t*)dev->d_appdata) + ((pbuf->urgp[0] << 8) | pbuf->urgp[1]);
             dev->d_len    -=
               (pbuf->urgp[0] << 8) | pbuf->urgp[1];
 #endif /* CONFIG_NET_TCPURGDATA */
@@ -602,7 +602,7 @@ found:
          * "persistent timer" and uses the retransmission mechanim.
          */
 
-        tmp16 = ((uint16)pbuf->wnd[0] << 8) + (uint16)pbuf->wnd[1];
+        tmp16 = ((uint16_t)pbuf->wnd[0] << 8) + (uint16_t)pbuf->wnd[1];
         if (tmp16 > conn->initialmss || tmp16 == 0)
           {
             tmp16 = conn->initialmss;

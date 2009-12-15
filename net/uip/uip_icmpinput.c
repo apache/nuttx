@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <net/if.h>
@@ -58,7 +58,7 @@
 #ifdef CONFIG_NET_ICMP
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
@@ -146,7 +146,7 @@ void uip_icmpinput(struct uip_driver_s *dev)
       /* The slow way... sum over the ICMP message */
 
       picmp->icmpchksum = 0;
-      picmp->icmpchksum = ~uip_icmpchksum(dev, (((uint16)picmp->len[0] << 8) | (uint16)picmp->len[1]) - UIP_IPH_LEN);
+      picmp->icmpchksum = ~uip_icmpchksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - UIP_IPH_LEN);
       if (picmp->icmpchksum == 0)
         {
           picmp->icmpchksum = 0xffff;
@@ -264,7 +264,7 @@ typeerr:
 #ifdef CONFIG_NET_ICMP_PING
   else if (picmp->type == ICMP6_ECHO_REPLY && g_echocallback)
     {
-      uint16 flags = UIP_ECHOREPLY;
+      uint16_t flags = UIP_ECHOREPLY;
 
       if (g_echocallback)
         {

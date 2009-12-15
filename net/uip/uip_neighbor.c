@@ -49,7 +49,7 @@ struct neighbor_entry
 {
   uip_ipaddr_t ipaddr;
   struct uip_neighbor_addr addr;
-  uint8 time;
+  uint8_t time;
 };
 static struct neighbor_entry entries[ENTRIES];
 
@@ -78,8 +78,9 @@ void uip_neighbor_periodic(void)
 
 void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr)
 {
-  int i, oldest;
-  uint8 oldest_time;
+  uint8_t oldest_time;
+  int     oldest;
+  int     i;
 
   nlldbg("Add neighbor: %02x:%02x:%02x:%02x:%02x:%02x\n",
          addr->addr.ether_addr_octet[0], addr->addr.ether_addr_octet[1],

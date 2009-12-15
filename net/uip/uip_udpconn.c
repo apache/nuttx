@@ -47,7 +47,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <semaphore.h>
 #include <assert.h>
@@ -81,7 +81,7 @@ static dq_queue_t g_active_udp_connections;
 
 /* Last port used by a UDP connection connection. */
 
-static uint16 g_last_udp_port;
+static uint16_t g_last_udp_port;
 
 /****************************************************************************
  * Private Functions
@@ -120,7 +120,7 @@ static inline void _uip_semtake(sem_t *sem)
  *
  ****************************************************************************/
 
-static struct uip_udp_conn *uip_find_conn(uint16 portno)
+static struct uip_udp_conn *uip_find_conn(uint16_t portno)
 {
   int i;
 
@@ -157,9 +157,9 @@ static struct uip_udp_conn *uip_find_conn(uint16 portno)
  *
  ****************************************************************************/
 
-static uint16 uip_selectport(void)
+static uint16_t uip_selectport(void)
 {
-  uint16 portno;
+  uint16_t portno;
 
   /* Find an unused local port number.  Loop until we find a valid
    * listen port number that is not being used by any other connection.

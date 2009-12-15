@@ -41,7 +41,7 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>
@@ -51,7 +51,7 @@
 #include "uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define BUF ((struct uip_ip_hdr *)&dev->d_buf[UIP_LLH_LEN])
@@ -66,11 +66,11 @@
  ****************************************************************************/
 
 #if !UIP_ARCH_CHKSUM
-static uint16 chksum(uint16 sum, const uint8 *data, uint16 len)
+static uint16_t chksum(uint16_t sum, const uint8_t *data, uint16_t len)
 {
-  uint16 t;
-  const uint8 *dataptr;
-  const uint8 *last_byte;
+  uint16_t t;
+  const uint8_t *dataptr;
+  const uint8_t *last_byte;
 
   dataptr = data;
   last_byte = data + len - 1;
@@ -103,16 +103,16 @@ static uint16 chksum(uint16 sum, const uint8 *data, uint16 len)
   return sum;
 }
 
-static uint16 upper_layer_chksum(struct uip_driver_s *dev, uint8 proto)
+static uint16_t upper_layer_chksum(struct uip_driver_s *dev, uint8_t proto)
 {
   struct uip_ip_hdr *pbuf = BUF;
-  uint16 upper_layer_len;
-  uint16 sum;
+  uint16_t upper_layer_len;
+  uint16_t sum;
 
 #ifdef CONFIG_NET_IPv6
-  upper_layer_len = (((uint16)(pbuf->len[0]) << 8) + pbuf->len[1]);
+  upper_layer_len = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]);
 #else /* CONFIG_NET_IPv6 */
-  upper_layer_len = (((uint16)(pbuf->len[0]) << 8) + pbuf->len[1]) - UIP_IPH_LEN;
+  upper_layer_len = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]) - UIP_IPH_LEN;
 #endif /* CONFIG_NET_IPv6 */
 
   /* First sum pseudoheader. */
@@ -123,7 +123,7 @@ static uint16 upper_layer_chksum(struct uip_driver_s *dev, uint8 proto)
 
   /* Sum IP source and destination addresses. */
 
-  sum = chksum(sum, (uint8 *)&pbuf->srcipaddr, 2 * sizeof(uip_ipaddr_t));
+  sum = chksum(sum, (uint8_t *)&pbuf->srcipaddr, 2 * sizeof(uip_ipaddr_t));
 
   /* Sum TCP header and data. */
 
@@ -133,7 +133,7 @@ static uint16 upper_layer_chksum(struct uip_driver_s *dev, uint8 proto)
 }
 
 #ifdef CONFIG_NET_IPv6
-static uint16 uip_icmp6chksum(struct uip_driver_s *dev)
+static uint16_t uip_icmp6chksum(struct uip_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_ICMP6);
 }
@@ -148,7 +148,7 @@ static uint16 uip_icmp6chksum(struct uip_driver_s *dev)
 /* Calculate the Internet checksum over a buffer. */
 
 #if !UIP_ARCH_ADD32
-static void uip_carry32(uint8 *sum, uint16 op16)
+static void uip_carry32(uint8_t *sum, uint16_t op16)
 {
   if (sum[2] < (op16 >> 8))
     {
@@ -173,7 +173,7 @@ static void uip_carry32(uint8 *sum, uint16 op16)
     }
 }
 
-void uip_add32(const uint8 *op32, uint16 op16, uint8 *sum)
+void uip_add32(const uint8_t *op32, uint16_t op16, uint8_t *sum)
 {
   /* op32 and the sum are in network order (big-endian); op16 is host order. */
 
@@ -184,7 +184,7 @@ void uip_add32(const uint8 *op32, uint16 op16, uint8 *sum)
   uip_carry32(sum, op16);
 }
 
-void uip_incr32(uint8 *op32, uint16 op16)
+void uip_incr32(uint8_t *op32, uint16_t op16)
 {
   op32[3] += (op16 & 0xff);
   op32[2] += (op16 >> 8);
@@ -194,17 +194,17 @@ void uip_incr32(uint8 *op32, uint16 op16)
 #endif /* UIP_ARCH_ADD32 */
 
 #if !UIP_ARCH_CHKSUM
-uint16 uip_chksum(uint16 *data, uint16 len)
+uint16_t uip_chksum(uint16_t *data, uint16_t len)
 {
-  return htons(chksum(0, (uint8 *)data, len));
+  return htons(chksum(0, (uint8_t *)data, len));
 }
 
 /* Calculate the IP header checksum of the packet header in d_buf. */
 
 #ifndef UIP_ARCH_IPCHKSUM
-uint16 uip_ipchksum(struct uip_driver_s *dev)
+uint16_t uip_ipchksum(struct uip_driver_s *dev)
 {
-  uint16 sum;
+  uint16_t sum;
 
   sum = chksum(0, &dev->d_buf[UIP_LLH_LEN], UIP_IPH_LEN);
   return (sum == 0) ? 0xffff : htons(sum);
@@ -213,7 +213,7 @@ uint16 uip_ipchksum(struct uip_driver_s *dev)
 
 /* Calculate the TCP checksum of the packet in d_buf and d_appdata. */
 
-uint16 uip_tcpchksum(struct uip_driver_s *dev)
+uint16_t uip_tcpchksum(struct uip_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_TCP);
 }
@@ -221,7 +221,7 @@ uint16 uip_tcpchksum(struct uip_driver_s *dev)
 /* Calculate the UDP checksum of the packet in d_buf and d_appdata. */
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-uint16 uip_udpchksum(struct uip_driver_s *dev)
+uint16_t uip_udpchksum(struct uip_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_UDP);
 }
@@ -230,10 +230,10 @@ uint16 uip_udpchksum(struct uip_driver_s *dev)
 /* Calculate the checksum of the ICMP message */
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-uint16 uip_icmpchksum(struct uip_driver_s *dev, int len)
+uint16_t uip_icmpchksum(struct uip_driver_s *dev, int len)
 {
   struct uip_icmpip_hdr *picmp = ICMPBUF;
-  return uip_chksum((uint16*)&picmp->type, len);
+  return uip_chksum((uint16_t*)&picmp->type, len);
 }
 #endif
 

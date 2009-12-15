@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>

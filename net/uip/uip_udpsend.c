@@ -44,7 +44,6 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
-#include <sys/types.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>
@@ -54,7 +53,7 @@
 #include "uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define UDPBUF ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])

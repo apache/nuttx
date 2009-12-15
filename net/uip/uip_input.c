@@ -80,9 +80,8 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
 #include <sys/ioctl.h>
-
+#include <stdint.h>
 #include <debug.h>
 #include <string.h>
 
@@ -97,7 +96,7 @@
 #include "uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Macros. */
@@ -120,11 +119,11 @@
  ****************************************************************************/
 
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-static uint8 uip_reassbuf[UIP_REASS_BUFSIZE];
-static uint8 uip_reassbitmap[UIP_REASS_BUFSIZE / (8 * 8)];
-static const uint8 bitmap_bits[8] = {0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
-static uint16 uip_reasslen;
-static uint8 uip_reassflags;
+static uint8_t uip_reassbuf[UIP_REASS_BUFSIZE];
+static uint8_t uip_reassbitmap[UIP_REASS_BUFSIZE / (8 * 8)];
+static const uint8_t bitmap_bits[8] = {0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+static uint16_t uip_reasslen;
+static uint8_t uip_reassflags;
 #endif /* UIP_REASSEMBLY */
 
 /****************************************************************************
@@ -142,13 +141,13 @@ static uint8 uip_reassflags;
  ****************************************************************************/
 
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-static uint8 uip_reass(void)
+static uint8_t uip_reass(void)
 {
   struct uip_ip_hdr *pbuf  = BUF;
   struct uip_ip_hdr *pfbuf = FBUF;
-  uint16 offset;
-  uint16 len;
-  uint16 i;
+  uint16_t offset;
+  uint16_t len;
+  uint16_t i;
 
   /* If uip_reasstmr is zero, no packet is present in the buffer, so we
    * write the IP header of the fragment into the reassembly
@@ -250,7 +249,7 @@ static uint8 uip_reass(void)
          * right amount of bits.
          */
 
-        if (uip_reassbitmap[uip_reasslen / (8 * 8)] != (uint8)~bitmap_bits[uip_reasslen / 8 & 7])
+        if (uip_reassbitmap[uip_reasslen / (8 * 8)] != (uint8_t)~bitmap_bits[uip_reasslen / 8 & 7])
           {
             goto nullreturn;
           }

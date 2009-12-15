@@ -42,6 +42,8 @@
     defined(CONFIG_NET_ICMP_PING) && !defined(CONFIG_DISABLE_CLOCK)
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <debug.h>
 
@@ -55,7 +57,7 @@
 #include "../net_internal.h" /* Should not include this! */
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
@@ -75,14 +77,14 @@ struct icmp_ping_s
   FAR struct uip_callback_s *png_cb; /* Reference to callback instance */
 
   sem_t        png_sem;     /* Use to manage the wait for the response */
-  uint32       png_time;    /* Start time for determining timeouts */
-  uint32       png_ticks;   /* System clock ticks to wait */
+  uint32_t     png_time;    /* Start time for determining timeouts */
+  uint32_t     png_ticks;   /* System clock ticks to wait */
   int          png_result;  /* 0: success; <0:negated errno on fail */
   uip_ipaddr_t png_addr;    /* The peer to be ping'ed */
-  uint16       png_id;      /* Used to match requests with replies */
-  uint16       png_seqno;   /* IN: seqno to send; OUT: seqno recieved */
-  uint16       png_datlen;  /* The length of data to send in the ECHO request */
-  boolean      png_sent;    /* TRUE... the PING request has been sent */
+  uint16_t     png_id;      /* Used to match requests with replies */
+  uint16_t     png_seqno;   /* IN: seqno to send; OUT: seqno recieved */
+  uint16_t     png_datlen;  /* The length of data to send in the ECHO request */
+  bool         png_sent;    /* true... the PING request has been sent */
 };
 
 /****************************************************************************
@@ -116,7 +118,7 @@ struct icmp_ping_s
 
 static inline int ping_timeout(struct icmp_ping_s *pstate)
 {
-  uint32 elapsed =  g_system_timer - pstate->png_time;
+  uint32_t elapsed =  g_system_timer - pstate->png_time;
   if (elapsed >= pstate->png_ticks)
     {
       return TRUE;
@@ -145,11 +147,11 @@ static inline int ping_timeout(struct icmp_ping_s *pstate)
  *
  ****************************************************************************/
 
-static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
-                             void *pvpriv, uint16 flags)
+static uint16_t ping_interrupt(struct uip_driver_s *dev, void *conn,
+                             void *pvpriv, uint16_t flags)
 {
   struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvpriv;
-  ubyte *ptr;
+  uint8_t *ptr;
   int failcode = -ETIMEDOUT;
   int i;
 
@@ -243,7 +245,7 @@ static uint16 ping_interrupt(struct uip_driver_s *dev, void *conn,
               nlldbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
               dev->d_sndlen= pstate->png_datlen + 4;
               uip_icmpsend(dev, &pstate->png_addr);
-              pstate->png_sent = TRUE;
+              pstate->png_sent = true;
               return flags;
             }
         }
@@ -309,7 +311,8 @@ end_wait:
  *
  ****************************************************************************/
 
-int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dsecs)
+int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
+             uint16_t datalen, int dsecs)
 {
   struct icmp_ping_s state;
   irqstate_t save;
@@ -323,7 +326,7 @@ int uip_ping(uip_ipaddr_t addr, uint16 id, uint16 seqno, uint16 datalen, int dse
   state.png_id     = id;               /* The ID to use in the ECHO request */
   state.png_seqno  = seqno;            /* The seqno to use int the ECHO request */
   state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
-  state.png_sent   = FALSE;            /* ECHO request not yet sent */
+  state.png_sent   = false;            /* ECHO request not yet sent */
 
   save             = irqsave();
   state.png_time   = g_system_timer;

@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <debug.h>
 
@@ -206,8 +206,8 @@ void uip_callbackfree(FAR struct uip_callback_s *cb, FAR struct uip_callback_s *
  *
  ****************************************************************************/
 
-uint16 uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn, uint16 flags,
-                           FAR struct uip_callback_s *list)
+uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
+                             uint16_t flags, FAR struct uip_callback_s *list)
 {
   FAR struct uip_callback_s *next;
   irqstate_t save;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_initialize.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -44,12 +44,13 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
+#include <stdint.h>
 #include <net/uip/uip.h>
 
 #include "uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,7 +65,7 @@ struct uip_stats uip_stat;
 
 /* Increasing number used for the IP ID field. */
 
-uint16 g_ipid;
+uint16_t g_ipid;
 
 const uip_ipaddr_t g_alloneaddr =
 #ifdef CONFIG_NET_IPv6
@@ -83,7 +84,7 @@ const uip_ipaddr_t g_allzeroaddr =
 /* Reassembly timer (units: deci-seconds) */
 
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-uint8 uip_reasstmr;
+uint8_t uip_reasstmr;
 #endif
 
 /****************************************************************************

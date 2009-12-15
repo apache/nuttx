@@ -45,9 +45,8 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
 #include <sys/ioctl.h>
-
+#include <stdint.h>
 #include <string.h>
 #include <debug.h>
 
@@ -57,7 +56,7 @@
 #include <net/uip/uip-arp.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,7 +70,7 @@
 /* The table of known address mappings */
 
 static struct arp_entry g_arptable[CONFIG_NET_ARPTAB_SIZE];
-static uint8 g_arptime;
+static uint8_t g_arptime;
 
 /****************************************************************************
  * Private Functions
@@ -134,15 +133,15 @@ void uip_arp_timer(void)
  *   address of an existing association.
  *
  * Input parameters:
- *   pipaddr - Refers to an IP address uint16[2]
- *   ethaddr - Refers to a HW address uint8[IFHWADDRLEN]
+ *   pipaddr - Refers to an IP address uint16_t[2]
+ *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
  *
  * Assumptions
  *   Interrupts are disabled
  *
  ****************************************************************************/
 
-void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
+void uip_arp_update(uint16_t *pipaddr, uint8_t *ethaddr)
 {
   struct arp_entry *tabptr = NULL;
   in_addr_t         ipaddr = uip_ip4addr_conv(pipaddr);
@@ -195,7 +194,7 @@ void uip_arp_update(uint16 *pipaddr, uint8 *ethaddr)
 
   if (i == CONFIG_NET_ARPTAB_SIZE)
     {
-      uint8 tmpage = 0;
+      uint8_t tmpage = 0;
       int   j      = 0;
       for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
         {

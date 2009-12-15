@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_setipid.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  *
@@ -41,7 +41,7 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <net/uip/uip.h>
@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-void uip_setipid(uint16 id)
+void uip_setipid(uint16_t id)
 {
   g_ipid = id;
 }

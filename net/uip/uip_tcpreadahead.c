@@ -40,7 +40,6 @@
 #include <net/uip/uipopt.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && (CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0)
 
-#include <sys/types.h>
 #include <queue.h>
 #include <debug.h>
 

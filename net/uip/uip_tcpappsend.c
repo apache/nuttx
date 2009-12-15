@@ -44,7 +44,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>
@@ -92,7 +92,8 @@
  *
  ****************************************************************************/
 
-void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 result)
+void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
+                    uint16_t result)
 {
   /* Handle the result based on the application response */
 
@@ -200,7 +201,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 resu
  *
  ****************************************************************************/
 
-void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn, uint16 result)
+void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
+                   uint16_t result)
 {
   nllvdbg("result: %04x\n", result);
 

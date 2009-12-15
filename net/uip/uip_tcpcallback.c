@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <debug.h>
 
@@ -70,7 +70,8 @@
  ****************************************************************************/
 
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
-static int uip_readahead(struct uip_readahead_s *readahead, uint8 *buf, int len)
+static int uip_readahead(struct uip_readahead_s *readahead, uint8_t *buf,
+                         int len)
 {
   int available = CONFIG_NET_TCP_READAHEAD_BUFSIZE - readahead->rh_nbytes;
   int recvlen   = 0;
@@ -111,10 +112,10 @@ static int uip_readahead(struct uip_readahead_s *readahead, uint8 *buf, int len)
  *
  ****************************************************************************/
 
-static inline uint16
-uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
+static inline uint16_t
+uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16_t flags)
 {
-  uint16 ret;
+  uint16_t ret;
 
   /* Assume that we will ACK the data.  The data will be ACKed if it is
    * placed in the read-ahead buffer -OR- if it zero length
@@ -131,9 +132,9 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
       struct uip_readahead_s *readahead1;
       struct uip_readahead_s *readahead2 = NULL;
-      uint16 recvlen = 0;
-      uint8 *buf     = dev->d_appdata;
-      int    buflen  = dev->d_len;
+      uint16_t recvlen = 0;
+      uint8_t *buf     = dev->d_appdata;
+      int    buflen    = dev->d_len;
 #endif
 
       nllvdbg("No listener on connection\n");
@@ -223,7 +224,8 @@ uip_dataevent(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
  *
  ****************************************************************************/
 
-uint16 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags)
+uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
+                         uint16_t flags)
 {
   /* Preserve the UIP_ACKDATA, UIP_CLOSE, and UIP_ABORT in the response.
    * These is needed by uIP to handle responses and buffer state.  The
@@ -231,7 +233,7 @@ uint16 uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn, uint16 f
    * explicitly set in the callback.
    */
 
-  uint16 ret = flags;
+  uint16_t ret = flags;
 
   nllvdbg("flags: %04x\n", flags);
 

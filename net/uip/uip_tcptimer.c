@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>
@@ -55,7 +55,7 @@
 #include "uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -95,7 +95,7 @@
 
 void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
 {
-  uint8 result;
+  uint8_t result;
 
   dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
   dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];

@@ -44,7 +44,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <debug.h>
 
@@ -55,7 +55,7 @@
 #include "uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define BUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
@@ -232,7 +232,8 @@ static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
  *
  ****************************************************************************/
 
-void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn, uint16 flags, uint16 len)
+void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
+                 uint16_t flags, uint16_t len)
 {
   struct uip_tcpip_hdr *pbuf = BUF;
 
@@ -263,8 +264,8 @@ void uip_tcpreset(struct uip_driver_s *dev)
 {
   struct uip_tcpip_hdr *pbuf = BUF;
 
-  uint16 tmp16;
-  uint8  seqbyte;
+  uint16_t tmp16;
+  uint8_t  seqbyte;
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.tcp.rst++;
@@ -343,7 +344,7 @@ void uip_tcpreset(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn, uint8 ack)
+void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn, uint8_t ack)
 {
   struct uip_tcpip_hdr *pbuf = BUF;
 

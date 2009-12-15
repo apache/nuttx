@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <net/uip/uipopt.h>
@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 void uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
-                     uint16 flags)
+                     uint16_t flags)
 {
   nllvdbg("flags: %04x\n", flags);
 

@@ -40,8 +40,8 @@
 #include <net/uip/uipopt.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCPBACKLOG)
 
-#include <sys/types.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <queue.h>
 #include <debug.h>
@@ -122,7 +122,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
 
       /* Then add all of the pre-allocated containers to the free list */
 
-      blc = (FAR struct uip_blcontainer_s*)(((FAR ubyte*)bls) + offset);
+      blc = (FAR struct uip_blcontainer_s*)(((FAR uint8_t*)bls) + offset);
       for (i = 0; i < nblg; i++)
         {
           sq_addfirst(&blc->bc_node, &bls->bl_free);
@@ -275,7 +275,7 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-boolean uip_backlogavailable(FAR struct uip_conn *conn)
+bool uip_backlogavailable(FAR struct uip_conn *conn)
 {
   return (conn && conn->backlog && !sq_empty(&conn->backlog->bl_pending));
 }
