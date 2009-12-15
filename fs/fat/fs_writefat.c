@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_writefat.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 
@@ -111,7 +112,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
     }
   else
     {
-      MBR_PUTTOTSEC16(var->fv_sect, (uint16)fmt->ff_nsectors);
+      MBR_PUTTOTSEC16(var->fv_sect, (uint16_t)fmt->ff_nsectors);
     }
 
   /* 1@21: Media code: f0, f8, f9-fa, fc-ff */ 
@@ -137,7 +138,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
     {
       /* 2@22: FAT12/16: Must be 0, see BS32_FATSZ32 */
 
-      MBR_PUTFATSZ16(var->fv_sect, (uint16)var->fv_nfatsects);
+      MBR_PUTFATSZ16(var->fv_sect, (uint16_t)var->fv_nfatsects);
 
       /* The following fields are only valid for FAT12/16 */
       /*  1@36: Drive number for MSDOS bootstrap -- left zero */
@@ -314,6 +315,7 @@ static inline void mkfatfs_initrootdir(FAR struct fat_format_s *fmt,
  *    Zero on success; negated errno on failure
  *
  ****************************************************************************/
+
 static inline int mkfatfs_writembr(FAR struct fat_format_s *fmt,
                                    FAR struct fat_var_s *var)
 {
@@ -382,6 +384,7 @@ static inline int mkfatfs_writembr(FAR struct fat_format_s *fmt,
  *    Zero on success; negated errno on failure
  *
  ****************************************************************************/
+
 static inline int mkfatfs_writefat(FAR struct fat_format_s *fmt,
                                    FAR struct fat_var_s *var)
 {
@@ -464,6 +467,7 @@ static inline int mkfatfs_writefat(FAR struct fat_format_s *fmt,
  *    Zero on success; negated errno on failure
  *
  ****************************************************************************/
+
 static inline int mkfatfs_writerootdir(FAR struct fat_format_s *fmt,
                                        FAR struct fat_var_s *var)
 {
@@ -512,6 +516,7 @@ static inline int mkfatfs_writerootdir(FAR struct fat_format_s *fmt,
  *    Zero on success; negated errno on failure
  *
  ****************************************************************************/
+
 int mkfatfs_writefatfs(FAR struct fat_format_s *fmt,
                        FAR struct fat_var_s *var)
 {

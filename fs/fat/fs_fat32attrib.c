@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32attrib.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <errno.h>
 
 #include <nuttx/fs.h>
@@ -61,10 +62,10 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
   FAR struct inode     *inode;
-  const char             *relpath = NULL;
-  ubyte                   oldattributes;
-  ubyte                   newattributes;
-  int                     ret;
+  const char           *relpath = NULL;
+  uint8_t               oldattributes;
+  uint8_t               newattributes;
+  int                   ret;
 
   /* Get an inode for this file */
 
@@ -133,7 +134,7 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
   if (newattributes != oldattributes)
     {
       DIR_PUTATTRIBUTES(dirinfo.fd_entry, newattributes);
-      fs->fs_dirty = TRUE;
+      fs->fs_dirty = true;
       ret = fat_updatefsinfo(fs);
       if (ret != OK)
         {

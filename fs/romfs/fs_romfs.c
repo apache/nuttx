@@ -45,6 +45,8 @@
 #include <sys/statfs.h>
 #include <sys/stat.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -223,7 +225,7 @@ static int romfs_open(FAR struct file *filep, const char *relpath,
    * non-zero elements)
    */
 
-  rf->rf_open        = TRUE;
+  rf->rf_open        = true;
   rf->rf_size        = dirinfo.rd_size;
 
   /* Get the start of the file data */
@@ -325,10 +327,10 @@ static ssize_t romfs_read(FAR struct file *filep, char *buffer, size_t buflen)
   unsigned int            bytesread;
   unsigned int            readsize;
   unsigned int            nsectors;
-  uint32                  offset;
+  uint32_t                offset;
   size_t                  bytesleft;
   off_t                   sector;
-  ubyte                  *userbuffer = (ubyte*)buffer;
+  uint8_t                *userbuffer = (uint8_t*)buffer;
   int                     sectorndx;
   int                     ret;
 
@@ -654,10 +656,10 @@ errout_with_semaphore:
 static int romfs_readdir(struct inode *mountpt, struct internal_dir_s *dir)
 {
   struct romfs_mountpt_s *rm;
-  uint32                  linkoffset;
-  uint32                  next;
-  uint32                  info;
-  uint32                  size;
+  uint32_t                linkoffset;
+  uint32_t                next;
+  uint32_t                info;
+  uint32_t                size;
   int                     ret;
 
   fvdbg("Entry\n");

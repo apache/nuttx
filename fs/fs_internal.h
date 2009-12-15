@@ -33,20 +33,24 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_INTERNAL_H
-#define __FS_INTERNAL_H
+#ifndef __FS_FS_INTERNAL_H
+#define __FS_FS_INTERNAL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs.h>
+
+#include <sys/types.h>
+#include <stdint.h>
 #include <dirent.h>
+
+#include <nuttx/fs.h>
 #include <nuttx/compiler.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define FSNODEFLAG_TYPE_MASK      0x00000003
@@ -102,8 +106,8 @@ struct fs_psuedodir_s
 
 struct fs_fatdir_s
 {
-  uint32       fd_startcluster;        /* Start cluster number of the directory */
-  uint32       fd_currcluster;         /* Current cluster number being read */
+  uint32_t     fd_startcluster;        /* Start cluster number of the directory */
+  uint32_t     fd_currcluster;         /* Current cluster number being read */
   size_t       fd_currsector;          /* Current sector being read */
   unsigned int fd_index;               /* Current index of the directory entry to read */
 };
@@ -116,8 +120,8 @@ struct fs_fatdir_s
 
 struct fs_romfsdir_s
 {
-  uint32       fr_firstoffset;         /* Offset to the first entry in the directory */
-  uint32       fr_curroffset;          /* Current offset into the directory contents */
+  uint32_t     fr_firstoffset;         /* Offset to the first entry in the directory */
+  uint32_t     fr_curroffset;          /* Current offset into the directory contents */
 };
 #endif /* CONFIG_FS_ROMFS */
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
@@ -239,4 +243,4 @@ EXTERN int find_blockdriver(FAR const char *pathname, int mountflags,
 }
 #endif
 
-#endif /* __FS_INTERNAL_H */
+#endif /* __FS_FS_INTERNAL_H */

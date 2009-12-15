@@ -48,6 +48,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -196,7 +197,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
   if (ret == OK)
     {
-      boolean readonly;
+      bool readonly;
 
       /* The name exists -- but is it a file or a directory? */
 
@@ -293,7 +294,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
   /* Create a file buffer to support partial sector accesses */
 
-  ff->ff_buffer = (ubyte*)malloc(fs->fs_hwsectorsize);
+  ff->ff_buffer = (uint8_t*)malloc(fs->fs_hwsectorsize);
   if (!ff->ff_buffer)
     {
       ret = -ENOMEM;
@@ -302,7 +303,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
   /* Initialize the file private data (only need to initialize non-zero elements) */
 
-  ff->ff_open             = TRUE;
+  ff->ff_open             = true;
   ff->ff_oflags           = oflags;
 
   /* Save information that can be used later to recover the directory entry */
@@ -313,7 +314,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
   /* File cluster/size info */
 
   ff->ff_startcluster     =
-    ((uint32)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
+    ((uint32_t)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
       DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
 
   ff->ff_currentcluster   = ff->ff_startcluster;
@@ -423,8 +424,8 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
   unsigned int          readsize;
   unsigned int          nsectors;
   size_t                bytesleft;
-  sint32                cluster;
-  ubyte                 *userbuffer = (ubyte*)buffer;
+  int32_t               cluster;
+  uint8_t               *userbuffer = (uint8_t*)buffer;
   int                   sectorindex;
   int                   ret;
 
@@ -618,11 +619,11 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
-  sint32                cluster;
+  int32_t               cluster;
   unsigned int          byteswritten;
   unsigned int          writesize;
   unsigned int          nsectors;
-  ubyte                *userbuffer = (ubyte*)buffer;
+  uint8_t              *userbuffer = (uint8_t*)buffer;
   int                   sectorindex;
   int                   ret;
 
@@ -856,7 +857,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
-  sint32                cluster;
+  int32_t               cluster;
   ssize_t               position;
   unsigned int          clustersize;
   int                   ret;
@@ -1125,8 +1126,8 @@ static int fat_sync(FAR struct file *filep)
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
-  uint32                wrttime;
-  ubyte                *direntry;
+  uint32_t              wrttime;
+  uint8_t              *direntry;
   int                   ret;
 
   /* Sanity checks */
@@ -1201,7 +1202,7 @@ static int fat_sync(FAR struct file *filep)
        * appropriate.
        */
 
-      fs->fs_dirty = TRUE;
+      fs->fs_dirty = true;
       ret          = fat_updatefsinfo(fs);
     }
 
@@ -1275,7 +1276,7 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct intern
        /* The entry is a directory */
 
       dir->u.fat.fd_startcluster = 
-          ((uint32)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
+          ((uint32_t)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
                    DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
       dir->u.fat.fd_currcluster  = dir->u.fat.fd_startcluster;
       dir->u.fat.fd_currsector   = fat_cluster2sector(fs, dir->u.fat.fd_currcluster);
@@ -1301,9 +1302,9 @@ static int fat_readdir(struct inode *mountpt, struct internal_dir_s *dir)
 {
   struct fat_mountpt_s *fs;
   unsigned int          dirindex;
-  ubyte                *direntry;
-  ubyte                 ch;
-  ubyte                 attribute;
+  uint8_t              *direntry;
+  uint8_t               ch;
+  uint8_t               attribute;
   int                   ret = OK;
 
   /* Sanity checks */
@@ -1507,7 +1508,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
    * by this block driver.
    */
 
-  ret = fat_mount(fs, TRUE);
+  ret = fat_mount(fs, true);
   if (ret != 0)
     {
       sem_destroy(&fs->fs_sem);
@@ -1678,7 +1679,7 @@ static int fat_unlink(struct inode *mountpt, const char *relpath)
 
       /* Remove the file */
 
-      ret = fat_remove(fs, relpath, FALSE);
+      ret = fat_remove(fs, relpath, false);
     }
 
   fat_semgive(fs);
@@ -1696,13 +1697,13 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 {
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
-  ubyte       *direntry;
-  ubyte       *direntry2;
+  uint8_t     *direntry;
+  uint8_t     *direntry2;
   size_t       parentsector;
   ssize_t      dirsector;
-  sint32       dircluster;
-  uint32       parentcluster;
-  uint32       crtime;
+  int32_t      dircluster;
+  uint32_t     parentcluster;
+  uint32_t     crtime;
   unsigned int i;
   int          ret;
 
@@ -1849,7 +1850,7 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
    *  the parentsector
    */
 
-  fs->fs_dirty = TRUE;
+  fs->fs_dirty = true;
   ret = fat_fscacheread(fs, parentsector);
   if (ret < 0)
     {
@@ -1881,7 +1882,7 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 
   /* Now update the FAT32 FSINFO sector */
 
-  fs->fs_dirty = TRUE;
+  fs->fs_dirty = true;
   ret = fat_updatefsinfo(fs);
   if (ret < 0)
     {
@@ -1933,7 +1934,7 @@ int fat_rmdir(struct inode *mountpt, const char *relpath)
 
       /* Remove the directory */
 
-      ret = fat_remove(fs, relpath, TRUE);
+      ret = fat_remove(fs, relpath, true);
     }
 
   fat_semgive(fs);
@@ -1953,9 +1954,9 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
   size_t                oldsector;
-  ubyte                *olddirentry;
-  ubyte                *newdirentry;
-  ubyte                 dirstate[32-11];
+  uint8_t              *olddirentry;
+  uint8_t              *newdirentry;
+  uint8_t               dirstate[32-11];
   int                   ret;
 
   /* Sanity checks */
@@ -2045,7 +2046,7 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
 #else
   DIR_PUTNTRES(newdirentry, 0);
 #endif
-  fs->fs_dirty = TRUE;
+  fs->fs_dirty = true;
 
   /* Now flush the new directory entry to disk and read the sector
    * containing the old directory entry.
@@ -2060,7 +2061,7 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
   /* Remove the old entry */
 
   olddirentry[DIR_NAME] = DIR0_EMPTY;
-  fs->fs_dirty = TRUE;
+  fs->fs_dirty = true;
 
   /* Write the old entry to disk and update FSINFO if necessary */
 
@@ -2089,10 +2090,10 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
 {
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
-  uint16                date;
-  uint16                date2;
-  uint16                time;
-  ubyte                 attribute;
+  uint16_t              date;
+  uint16_t              date2;
+  uint16_t              time;
+  uint8_t               attribute;
   int                   ret;
 
   /* Sanity checks */

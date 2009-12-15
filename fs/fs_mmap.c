@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_mmap.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -146,12 +147,12 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
    * only option supported
    *
    * Perform the ioctl to get the base address of the file in 'mapped'
-   * in memory. (casting to uintptr first eliminates complaints on some
+   * in memory. (casting to uintptr_t first eliminates complaints on some
    * architectures where the sizeof long is different from the size of
    * a pointer).
    */
 
-  ret = ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr)&addr));
+  ret = ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
   if (ret < 0)
     {
       fdbg("ioctl(FIOC_MMAP) failed: %d\n", errno);
@@ -160,7 +161,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 
   /* Return the offset address */
 
-  return (void*)(((ubyte*)addr) + offset);
+  return (void*)(((uint8_t*)addr) + offset);
 
 #ifdef CONFIG_DEBUG
 errout_with_ret:

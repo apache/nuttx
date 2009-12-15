@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_writefat.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <debug.h>
@@ -277,7 +277,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
 
   /* Allocate a buffer that will be working sector memory */
 
-  var.fv_sect = (ubyte*)malloc(var.fv_sectorsize);
+  var.fv_sect = (uint8_t*)malloc(var.fv_sectorsize);
   if (!var.fv_sect)
     {
       fdbg("Failed to allocate working buffers\n");

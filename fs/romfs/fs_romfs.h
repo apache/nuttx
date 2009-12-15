@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/romfs/fs_romfs.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -43,7 +43,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "../fs_internal.h"
 
 /****************************************************************************
@@ -90,7 +93,7 @@
 #define RFNEXT_FIFO        7    /* rf_info = Unused, must be zero */
 #define RFNEXT_EXEC        8    /* Modifier of RFNEXT_DIRECTORY and RFNEXT_FILE */
 
-#define IS_MODE(rfn,mode)  ((((uint32)(rfn))&RFNEXT_MODEMASK)==(mode))
+#define IS_MODE(rfn,mode)  ((((uint32_t)(rfn))&RFNEXT_MODEMASK)==(mode))
 #define IS_HARDLINK(rfn)   IS_MODE(rfn,RFNEXT_HARDLINK)
 #define IS_DIRECTORY(rfn)  IS_MODE(rfn,RFNEXT_DIRECTORY)
 #define IS_FILE(rfn)       IS_MODE(rfn,RFNEXT_FILE)
@@ -105,8 +108,8 @@
 #define ROMFS_ALIGNMENT       16
 #define ROMFS_MAXPADDING      (ROMFS_ALIGNMENT-1)
 #define ROMFS_ALIGNMASK       (~ROMFS_MAXPADDING)
-#define ROMFS_ALIGNUP(addr)   ((((uint32)(addr))+ROMFS_MAXPADDING)&ROMFS_ALIGNMASK)
-#define ROMFS_ALIGNDOWN(addr) (((uint32)(addr))&ROMFS_ALIGNMASK)
+#define ROMFS_ALIGNUP(addr)   ((((uint32_t)(addr))+ROMFS_MAXPADDING)&ROMFS_ALIGNMASK)
+#define ROMFS_ALIGNDOWN(addr) (((uint32_t)(addr))&ROMFS_ALIGNMASK)
 
 /* Offset and sector conversions */
 
@@ -135,15 +138,15 @@ struct romfs_mountpt_s
   struct inode        *rm_blkdriver; /* The block driver inode that hosts the FAT32 fs */
   struct romfs_file_s *rm_head;      /* A list to all files opened on this mountpoint */
 
-  boolean  rm_mounted;              /* TRUE: The file system is ready */
-  uint16   rm_hwsectorsize;         /* HW: Sector size reported by block driver*/
+  bool     rm_mounted;              /* true: The file system is ready */
+  uint16_t rm_hwsectorsize;         /* HW: Sector size reported by block driver*/
   sem_t    rm_sem;                  /* Used to assume thread-safe access */
-  uint32   rm_rootoffset;           /* Saved offset to the first root directory entry */
-  uint32   rm_hwnsectors;           /* HW: The number of sectors reported by the hardware */
-  uint32   rm_volsize;              /* Size of the ROMFS volume */
-  uint32   rm_cachesector;          /* Current sector in the rm_buffer */
-  ubyte   *rm_xipbase;              /* Base address of directly accessible media */
-  ubyte   *rm_buffer;               /* Device sector buffer, allocated if rm_xipbase==0 */
+  uint32_t rm_rootoffset;           /* Saved offset to the first root directory entry */
+  uint32_t rm_hwnsectors;           /* HW: The number of sectors reported by the hardware */
+  uint32_t rm_volsize;              /* Size of the ROMFS volume */
+  uint32_t rm_cachesector;          /* Current sector in the rm_buffer */
+  uint8_t *rm_xipbase;              /* Base address of directly accessible media */
+  uint8_t *rm_buffer;               /* Device sector buffer, allocated if rm_xipbase==0 */
 };
 
 /* This structure represents on open file under the mountpoint.  An instance
@@ -154,11 +157,11 @@ struct romfs_mountpt_s
 struct romfs_file_s
 {
   struct romfs_file_s *rf_next;     /* Retained in a singly linked list */
-  boolean  rf_open;                 /* TRUE: The file is (still) open */
-  uint32   rf_startoffset;          /* Offset to the start of the file data */
-  uint32   rf_size;                 /* Size of the file in bytes */
-  uint32   rf_cachesector;          /* Current sector in the rf_buffer */
-  ubyte   *rf_buffer;               /* File sector buffer, allocated if rm_xipbase==0 */
+  bool     rf_open;                 /* true: The file is (still) open */
+  uint32_t rf_startoffset;          /* Offset to the start of the file data */
+  uint32_t rf_size;                 /* Size of the file in bytes */
+  uint32_t rf_cachesector;          /* Current sector in the rf_buffer */
+  uint8_t *rf_buffer;               /* File sector buffer, allocated if rm_xipbase==0 */
 };
 
 /* This structure is used internally for describing the result of
@@ -172,12 +175,12 @@ struct romfs_dirinfo_s
    * a directory.
    */
 
-  struct fs_romfsdir_s rd_dir;      /* Describes directory. */
+  struct fs_romfsdir_s rd_dir;    /* Describes directory. */
 
   /* Values from the ROMFS file entry */
 
-  uint32 rd_next;                   /* Offset of the next file header+flags */
-  uint32 rd_size;                   /* Size (if file) */
+  uint32_t rd_next;               /* Offset of the next file header+flags */
+  uint32_t rd_size;               /* Size (if file) */
 };
 
 /****************************************************************************
@@ -198,10 +201,10 @@ extern "C" {
 
 EXTERN void romfs_semtake(struct romfs_mountpt_s *rm);
 EXTERN void romfs_semgive(struct romfs_mountpt_s *rm);
-EXTERN int  romfs_hwread(struct romfs_mountpt_s *rm, ubyte *buffer,
-                  uint32 sector, unsigned int nsectors);
+EXTERN int  romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer,
+                  uint32_t sector, unsigned int nsectors);
 EXTERN int  romfs_filecacheread(struct romfs_mountpt_s *rm,
-                  struct romfs_file_s *rf, uint32 sector);
+                  struct romfs_file_s *rf, uint32_t sector);
 EXTERN int  romfs_hwconfigure(struct romfs_mountpt_s *rm);
 EXTERN int  romfs_fsconfigure(struct romfs_mountpt_s *rm);
 EXTERN int  romfs_fileconfigure(struct romfs_mountpt_s *rm,
@@ -211,12 +214,12 @@ EXTERN int  romfs_finddirentry(struct romfs_mountpt_s *rm,
                   struct romfs_dirinfo_s *dirinfo,
                   const char *path);
 EXTERN int  romfs_parsedirentry(struct romfs_mountpt_s *rm,
-                  uint32 offset, uint32 *poffset, uint32 *pnext,
-                  uint32 *pinfo, uint32 *psize);
-EXTERN int  romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset,
+                  uint32_t offset, uint32_t *poffset, uint32_t *pnext,
+                  uint32_t *pinfo, uint32_t *psize);
+EXTERN int  romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset,
                   char *pname);
-EXTERN int  romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset,
-                  uint32 *start);
+EXTERN int  romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset,
+                  uint32_t *start);
 
 #undef EXTERN
 #if defined(__cplusplus)

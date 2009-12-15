@@ -38,11 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
+
 #include "fs_internal.h"
 
 /* This logic in this applies only when both socket and file descriptors are
@@ -53,7 +52,7 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

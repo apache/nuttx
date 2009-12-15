@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
 
@@ -49,7 +48,7 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define DUP_ISOPEN(fd, list) \

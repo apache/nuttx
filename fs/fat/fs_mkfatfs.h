@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_mkfat.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Only the "hard drive" media type is used */
@@ -95,18 +95,18 @@
 
 struct fat_var_s
 {
-   struct inode *fv_inode;          /* The block driver "handle" */
-   ubyte         fv_jump[3];        /* 3-byte boot jump instruction */
-   ubyte         fv_sectshift;      /* Log2 of fv_sectorsize */
-   ubyte         fv_nrootdirsects;  /* Number of root directory sectors */
-   ubyte         fv_fattype;        /* FAT size: 0 (not determined), 12, 16, or 32 */
-   uint16        fv_bootcodesize;   /* Size of array at fv_bootcode */
-   uint32        fv_createtime;     /* Creation time */
-   uint32        fv_sectorsize;     /* Size of one hardware sector */
-   uint32        fv_nfatsects;      /* Number of sectors in each FAT */
-   uint32        fv_nclusters;      /* Number of clusters */
-   ubyte        *fv_sect;           /* Allocated working sector buffer */
-   const ubyte  *fv_bootcode;       /* Points to boot code to put into MBR */
+   struct inode  *fv_inode;          /* The block driver "handle" */
+   uint8_t        fv_jump[3];        /* 3-byte boot jump instruction */
+   uint8_t        fv_sectshift;      /* Log2 of fv_sectorsize */
+   uint8_t        fv_nrootdirsects;  /* Number of root directory sectors */
+   uint8_t        fv_fattype;        /* FAT size: 0 (not determined), 12, 16, or 32 */
+   uint16_t       fv_bootcodesize;   /* Size of array at fv_bootcode */
+   uint32_t       fv_createtime;     /* Creation time */
+   uint32_t       fv_sectorsize;     /* Size of one hardware sector */
+   uint32_t       fv_nfatsects;      /* Number of sectors in each FAT */
+   uint32_t       fv_nclusters;      /* Number of clusters */
+   uint8_t       *fv_sect;           /* Allocated working sector buffer */
+   const uint8_t *fv_bootcode;       /* Points to boot code to put into MBR */
 };
 
 /****************************************************************************

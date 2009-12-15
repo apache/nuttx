@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32.h
  *
- *   Copyright (C) 2007, 200, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <time.h>
 
@@ -247,17 +250,17 @@
 /****************************************************************************
  * Access to data in raw sector data */
 
-#define UBYTE_VAL(p,o)            (((ubyte*)(p))[o])
+#define UBYTE_VAL(p,o)            (((uint8_t*)(p))[o])
 #define UBYTE_PTR(p,o)            &UBYTE_VAL(p,o)
-#define UBYTE_PUT(p,o,v)          (UBYTE_VAL(p,o)=(ubyte)(v))
+#define UBYTE_PUT(p,o,v)          (UBYTE_VAL(p,o)=(uint8_t)(v))
 
-#define UINT16_PTR(p,o)           ((uint16*)UBYTE_PTR(p,o))
+#define UINT16_PTR(p,o)           ((uint16_t*)UBYTE_PTR(p,o))
 #define UINT16_VAL(p,o)           (*UINT16_PTR(p,o))
-#define UINT16_PUT(p,o,v)         (UINT16_VAL(p,o)=(uint16)(v))
+#define UINT16_PUT(p,o,v)         (UINT16_VAL(p,o)=(uint16_t)(v))
 
-#define UINT32_PTR(p,o)           ((uint32*)UBYTE_PTR(p,o))
+#define UINT32_PTR(p,o)           ((uint32_t*)UBYTE_PTR(p,o))
 #define UINT32_VAL(p,o)           (*UINT32_PTR(p,o))
-#define UINT32_PUT(p,o,v)         (UINT32_VAL(p,o)=(uint32)(v))
+#define UINT32_PUT(p,o,v)         (UINT32_VAL(p,o)=(uint32_t)(v))
 
 /* Regardless of the endian-ness of the target or alignment of the data, no
  * special operations are required for byte, string or byte array accesses.
@@ -518,20 +521,20 @@ struct fat_mountpt_s
   size_t   fs_database;            /* Logical block of start data sectors */
   size_t   fs_fsinfo;              /* MBR: Sector number of FSINFO sector */
   size_t   fs_currentsector;       /* The sector number buffered in fs_buffer */
-  uint32   fs_nclusters;           /* Maximum number of data clusters */
-  uint32   fs_nfatsects;           /* MBR: Count of sectors occupied by one fat */
-  uint32   fs_fattotsec;           /* MBR: Total count of sectors on the volume */
-  uint32   fs_fsifreecount;        /* FSI: Last free cluster count on volume */
-  uint32   fs_fsinextfree;         /* FSI: Cluster number of 1st free cluster */
-  uint16   fs_fatresvdseccount;    /* MBR: The total number of reserved sectors */
-  uint16   fs_rootentcnt;          /* MBR: Count of 32-bit root directory entries */
-  boolean  fs_mounted;             /* TRUE: The file system is ready */
-  boolean  fs_dirty;               /* TRUE: fs_buffer is dirty */
-  boolean  fs_fsidirty;            /* TRUE: FSINFO sector must be written to disk */
-  ubyte    fs_type;                /* FSTYPE_FAT12, FSTYPE_FAT16, or FSTYPE_FAT32 */
-  ubyte    fs_fatnumfats;          /* MBR: Number of FATs (probably 2) */
-  ubyte    fs_fatsecperclus;       /* MBR: Sectors per allocation unit: 2**n, n=0..7 */
-  ubyte   *fs_buffer;              /* This is an allocated buffer to hold one sector
+  uint32_t fs_nclusters;           /* Maximum number of data clusters */
+  uint32_t fs_nfatsects;           /* MBR: Count of sectors occupied by one fat */
+  uint32_t fs_fattotsec;           /* MBR: Total count of sectors on the volume */
+  uint32_t fs_fsifreecount;        /* FSI: Last free cluster count on volume */
+  uint32_t fs_fsinextfree;         /* FSI: Cluster number of 1st free cluster */
+  uint16_t fs_fatresvdseccount;    /* MBR: The total number of reserved sectors */
+  uint16_t fs_rootentcnt;          /* MBR: Count of 32-bit root directory entries */
+  bool     fs_mounted;             /* true: The file system is ready */
+  bool     fs_dirty;               /* true: fs_buffer is dirty */
+  bool     fs_fsidirty;            /* true: FSINFO sector must be written to disk */
+  uint8_t  fs_type;                /* FSTYPE_FAT12, FSTYPE_FAT16, or FSTYPE_FAT32 */
+  uint8_t  fs_fatnumfats;          /* MBR: Number of FATs (probably 2) */
+  uint8_t  fs_fatsecperclus;       /* MBR: Sectors per allocation unit: 2**n, n=0..7 */
+  uint8_t *fs_buffer;              /* This is an allocated buffer to hold one sector
                                     * from the device */
 };
 
@@ -543,30 +546,30 @@ struct fat_mountpt_s
 struct fat_file_s
 {
   struct fat_file_s *ff_next;      /* Retained in a singly linked list */
-  boolean  ff_open;                /* TRUE: The file is (still) open */
-  ubyte    ff_bflags;              /* The file buffer flags */
-  ubyte    ff_oflags;              /* Flags provided when file was opened */
-  ubyte    ff_sectorsincluster;    /* Sectors remaining in cluster */
-  uint16   ff_dirindex;            /* Index into ff_dirsector to directory entry */
-  uint32   ff_currentcluster;      /* Current cluster being accessed */
+  bool     ff_open;                /* true: The file is (still) open */
+  uint8_t  ff_bflags;              /* The file buffer flags */
+  uint8_t  ff_oflags;              /* Flags provided when file was opened */
+  uint8_t  ff_sectorsincluster;    /* Sectors remaining in cluster */
+  uint16_t ff_dirindex;            /* Index into ff_dirsector to directory entry */
+  uint32_t ff_currentcluster;      /* Current cluster being accessed */
   size_t   ff_dirsector;           /* Sector containing the directory entry */
   off_t    ff_size;                /* Size of the file in bytes */
   size_t   ff_startcluster;        /* Start cluster of file on media */
   size_t   ff_currentsector;       /* Current sector being operated on */
   size_t   ff_cachesector;         /* Current sector in the file buffer */
-  ubyte   *ff_buffer;              /* File buffer (for partial sector accesses) */
+  uint8_t *ff_buffer;              /* File buffer (for partial sector accesses) */
 };
 
 /* This structure is used internally for describing directory entries */
 
 struct fat_dirinfo_s
 {
-  ubyte    fd_name[8+3];           /* Filename -- directory format*/
+  uint8_t  fd_name[8+3];           /* Filename -- directory format*/
 #ifdef CONFIG_FAT_LCNAMES
-  ubyte    fd_ntflags;             /* NTRes lower case flags */
+  uint8_t  fd_ntflags;             /* NTRes lower case flags */
 #endif
   struct fs_fatdir_s dir;          /* Used with opendir, readdir, etc. */
-  ubyte   *fd_entry;               /* A pointer to the raw 32-byte entry */
+  uint8_t *fd_entry;               /* A pointer to the raw 32-byte entry */
 };
 
 /****************************************************************************
@@ -587,10 +590,10 @@ extern "C" {
 
 /* Utitilies to handle unaligned or byte swapped accesses */
 
-EXTERN uint16 fat_getuint16(ubyte *ptr);
-EXTERN uint32 fat_getuint32(ubyte *ptr);
-EXTERN void   fat_putuint16(ubyte *ptr, uint16 value16);
-EXTERN void   fat_putuint32(ubyte *ptr, uint32 value32);
+EXTERN uint16_t fat_getuint16(uint8_t *ptr);
+EXTERN uint32_t fat_getuint32(uint8_t *ptr);
+EXTERN void   fat_putuint16(uint8_t *ptr, uint16_t value16);
+EXTERN void   fat_putuint32(uint8_t *ptr, uint32_t value32);
 
 /* Manage the per-mount semaphore that protects access to shared resources */
 
@@ -599,29 +602,29 @@ EXTERN void   fat_semgive(struct fat_mountpt_s *fs);
 
 /* Get the current time for FAT creation and write times */
 
-EXTERN uint32 fat_systime2fattime(void);
-EXTERN time_t fat_fattime2systime(uint16 time, uint16 date);
+EXTERN uint32_t fat_systime2fattime(void);
+EXTERN time_t fat_fattime2systime(uint16_t time, uint16_t date);
 
 /* Handle hardware interactions for mounting */
 
-EXTERN int    fat_mount(struct fat_mountpt_s *fs, boolean writeable);
+EXTERN int    fat_mount(struct fat_mountpt_s *fs, bool writeable);
 EXTERN int    fat_checkmount(struct fat_mountpt_s *fs);
 
 /* low-level hardware access */
 
-EXTERN int    fat_hwread(struct fat_mountpt_s *fs, ubyte *buffer,
+EXTERN int    fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,
                          size_t sector, unsigned int nsectors);
-EXTERN int    fat_hwwrite(struct fat_mountpt_s *fs, ubyte *buffer,
+EXTERN int    fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer,
                           size_t sector, unsigned int nsectors);
 
 /* Cluster / cluster chain access helpers */
 
-EXTERN ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32 cluster);
-EXTERN ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32 clusterno);
-EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, uint32 clusterno,
+EXTERN ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32_t cluster);
+EXTERN ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno);
+EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
                              size_t startsector);
-EXTERN int    fat_removechain(struct fat_mountpt_s *fs, uint32 cluster);
-EXTERN sint32 fat_extendchain(struct fat_mountpt_s *fs, uint32 cluster);
+EXTERN int    fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster);
+EXTERN int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster);
 
 #define fat_createchain(fs) fat_extendchain(fs, 0)
 
@@ -632,13 +635,13 @@ EXTERN int    fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *d
                                const char *path);
 EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 
-EXTERN int    fat_dirname2path(char *path, ubyte *direntry);
+EXTERN int    fat_dirname2path(char *path, uint8_t *direntry);
 
 /* File creation and removal helpers */
 
 EXTERN int    fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
-EXTERN int    fat_remove(struct fat_mountpt_s *fs, const char *relpath, boolean directory);
+EXTERN int    fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory);
 
 /* Mountpoint and file buffer cache (for partial sector accesses) */
 

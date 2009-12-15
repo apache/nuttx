@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_configfat.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
@@ -53,7 +53,7 @@
 #include "fs_mkfatfs.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define NDX12 0
@@ -77,10 +77,10 @@
 
 struct fat_config_s
 {
-  uint32 fc_navailsects;  /* The number of available sectors */
-  uint32 fc_nfatsects;    /* The number of sectors in one FAT */
-  uint32 fc_nclusters;    /* The number of clusters in the filesystem */
-  uint32 fc_rsvdseccount; /* The number of reserved sectors */
+  uint32_t fc_navailsects;  /* The number of available sectors */
+  uint32_t fc_nfatsects;    /* The number of sectors in one FAT */
+  uint32_t fc_nclusters;    /* The number of clusters in the filesystem */
+  uint32_t fc_rsvdseccount; /* The number of reserved sectors */
 };
 
 /****************************************************************************
@@ -92,7 +92,7 @@ struct fat_config_s
  * offset 3.
  */
  
-static ubyte g_bootcodeblob[] =
+static uint8_t g_bootcodeblob[] =
 {
   0x0e, 0x1f, 0xbe, 0x00, 0x7c, 0xac, 0x22, 0xc0, 0x74, 0x0b, 0x56,
   0xb4, 0x0e, 0xbb, 0x07, 0x00, 0xcd, 0x10, 0x5e, 0xeb, 0xf0, 0x32,
@@ -132,16 +132,16 @@ static ubyte g_bootcodeblob[] =
  *  >0: The size of one FAT in sectors.
  *
  ****************************************************************************/
-static inline uint32
+static inline uint32_t
 mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
-                   uint32 navailsects)
+                   uint32_t navailsects)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
    uint64 denom;
    uint64 numer;
 #else
-   uint32 denom;
-   uint32 numer;
+   uint32_t denom;
+   uint32_t numer;
 #endif
 
   /* For FAT12, the cluster number is held in a 12-bit number or 1.5 bytes per
@@ -161,7 +161,7 @@ mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
    *   nfatsects  = (3 * navailsects + 6 * clustersize) / 
    *                (3 * nfats + 2 * sectorsize * clustersize)
    *
-   * The numerator would overflow uint32 if:
+   * The numerator would overflow uint32_t if:
    *
    *   3 * navailsects + 6 * clustersize > 0xffffffff
    *
@@ -179,7 +179,7 @@ mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
             + (var->fv_sectorsize << (fmt->ff_clustshift + 1));
       numer = (navailsects << 1) + navailsects
             + (1 << (fmt->ff_clustshift + 2)) + (1 << (fmt->ff_clustshift + 1));
-      return (uint32)((numer + denom - 1) / denom);
+      return (uint32_t)((numer + denom - 1) / denom);
 
 #ifndef CONFIG_HAVE_LONG_LONG
     }
@@ -209,16 +209,16 @@ mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
  *    The size of one FAT in sectors.
  *
  ****************************************************************************/
-static inline uint32
+static inline uint32_t
 mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
-                   uint32 navailsects)
+                   uint32_t navailsects)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
    uint64 denom;
    uint64 numer;
 #else
-   uint32 denom;
-   uint32 numer;
+   uint32_t denom;
+   uint32_t numer;
 #endif
 
   /* For FAT16, the cluster number is held in a 16-bit number or 2 bytes per
@@ -253,7 +253,7 @@ mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       denom = fmt->ff_nfats + (var->fv_sectorsize << (fmt->ff_clustshift - 1));
       numer = navailsects + (1 << (fmt->ff_clustshift + 1));
     }
-   return (uint32)((numer + denom - 1) / denom);
+   return (uint32_t)((numer + denom - 1) / denom);
 }
 
 /****************************************************************************
@@ -275,16 +275,16 @@ mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
  *   The size of one FAT in sectors.
  *
  ****************************************************************************/
-static inline uint32
+static inline uint32_t
 mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
-                   uint32 navailsects)
+                   uint32_t navailsects)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
    uint64 denom;
    uint64 numer;
 #else
-   uint32 denom;
-   uint32 numer;
+   uint32_t denom;
+   uint32_t numer;
 #endif
 
   /* For FAT32, the cluster number is held in a 32-bit number or 4 bytes per
@@ -324,7 +324,7 @@ mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       denom = fmt->ff_nfats + (var->fv_sectorsize << (fmt->ff_clustshift - 2));
       numer = navailsects + (1 << (fmt->ff_clustshift + 1)) + (1 << fmt->ff_clustshift);
     }
-   return (uint32)((numer + denom - 1) / denom);
+   return (uint32_t)((numer + denom - 1) / denom);
 }
 
 /****************************************************************************
@@ -344,10 +344,10 @@ mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
  *   size is the returned value.
  *
  ****************************************************************************/
-static inline ubyte
+static inline uint8_t
 mkfatfs_clustersearchlimits(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 {
-  ubyte mxclustshift;
+  uint8_t mxclustshift;
   
   /* Did the caller already pick the cluster size?  If not, the clustshift value
    * will be 0xff
@@ -427,7 +427,7 @@ static inline int
 mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                  FAR struct fat_config_s *config)
 {
-  uint32 maxnclusters;
+  uint32_t maxnclusters;
 
   /* Calculate the number sectors in one FAT required to access all of the
    * available sectors.
@@ -493,7 +493,7 @@ static inline int
 mkfatfs_tryfat16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                  FAR struct fat_config_s *config)
 {
-  uint32 maxnclusters;
+  uint32_t maxnclusters;
 
   /* Calculate the number sectors in one FAT required to access all of the
    * available sectors.
@@ -564,7 +564,7 @@ static inline int
 mkfatfs_tryfat32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                  FAR struct fat_config_s *config)
 {
-  uint32 maxnclusters;
+  uint32_t maxnclusters;
 
   /* Calculate the number sectors in one FAT required to access all of the
    * available sectors.
@@ -659,7 +659,7 @@ static inline int
 mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 {
   struct fat_config_s fatconfig[3];
-  ubyte  mxclustshift;
+  uint8_t  mxclustshift;
 
   memset(fatconfig, 0, 3*sizeof(struct fat_config_s));
 

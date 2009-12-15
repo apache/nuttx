@@ -42,6 +42,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -82,7 +84,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ENDIAN_BIG
-static inline uint32 romfs_swap32(uint32 value)
+static inline uint32_t romfs_swap32(uint32_t value)
 {
   return ((((value) & 0x000000ff) << 24) | (((value) & 0x0000ff00) << 8) |
           (((value) & 0x00ff0000) >>  8) | (((value) & 0xff000000) >> 24));
@@ -100,11 +102,11 @@ static inline uint32 romfs_swap32(uint32 value)
  *
  ****************************************************************************/
 
-static uint32 romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
+static uint32_t romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
 {
   /* Extract the value */
 
-  uint32 value = *(uint32*)&rm->rm_buffer[ndx];
+  uint32_t value = *(uint32_t*)&rm->rm_buffer[ndx];
 
   /* Value is begin endian -- return the native host endian-ness. */
 #ifdef CONFIG_ENDIAN_BIG
@@ -122,15 +124,15 @@ static uint32 romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
  *
  ****************************************************************************/
 
-static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32 offset,
+static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32_t offset,
                                    const char *entryname, int entrylen,
                                    struct romfs_dirinfo_s *dirinfo)
 {
   char name[NAME_MAX+1];
-  uint32 linkoffset;
-  uint32 next;
-  uint32 info;
-  uint32 size;
+  uint32_t linkoffset;
+  uint32_t next;
+  uint32_t info;
+  uint32_t size;
   int ret;
 
   /* Parse the directory entry at this offset (which may be re-directed
@@ -197,10 +199,10 @@ static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32 offset,
  *
  ****************************************************************************/
 
-sint16 romfs_devcacheread(struct romfs_mountpt_s *rm, uint32 offset)
+int16_t romfs_devcacheread(struct romfs_mountpt_s *rm, uint32_t offset)
 {
-  uint32 sector;
-  int ret;
+  uint32_t sector;
+  int      ret;
 
   /* rm->rm_cachesector holds the current sector that is buffer in or referenced
    * by rm->tm_buffer. If the requested sector is the same as this sector,
@@ -227,7 +229,7 @@ sint16 romfs_devcacheread(struct romfs_mountpt_s *rm, uint32 offset)
           ret = romfs_hwread(rm, rm->rm_buffer, sector, 1);
           if (ret < 0)
             {
-               return (sint16)ret;
+               return (int16_t)ret;
             }
         }
 
@@ -251,12 +253,12 @@ sint16 romfs_devcacheread(struct romfs_mountpt_s *rm, uint32 offset)
  *
  ****************************************************************************/
 
-static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32 offset,
-                                 uint32 *poffset)
+static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32_t offset,
+                                 uint32_t *poffset)
 {
-  uint32 next;
-  sint16 ndx;
-  int i;
+  uint32_t next;
+  int16_t  ndx;
+  int      i;
 
   /* Loop while we are redirected by hardlinks */
 
@@ -300,10 +302,10 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
                                   const char *entryname, int entrylen,
                                   struct romfs_dirinfo_s *dirinfo)
 {
-  uint32 offset;
-  uint32 next;
-  sint16 ndx;
-  int    ret;
+  uint32_t offset;
+  uint32_t next;
+  int16_t  ndx;
+  int      ret;
 
   /* Then loop through the current directory until the directory
    * with the matching name is found.  Or until all of the entries
@@ -391,7 +393,7 @@ void romfs_semgive(struct romfs_mountpt_s *rm)
  *
  ****************************************************************************/
 
-int romfs_hwread(struct romfs_mountpt_s *rm, ubyte *buffer, uint32 sector,
+int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer, uint32_t sector,
                  unsigned int nsectors)
 {
   int ret = -ENODEV;
@@ -441,7 +443,7 @@ int romfs_hwread(struct romfs_mountpt_s *rm, ubyte *buffer, uint32 sector,
  *
  ****************************************************************************/
 
-int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf, uint32 sector)
+int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf, uint32_t sector)
 {
   int ret;
 
@@ -532,7 +534,7 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 
   /* Determine if block driver supports the XIP mode of operation */
 
-  rm->rm_cachesector  = (uint32)-1;
+  rm->rm_cachesector  = (uint32_t)-1;
 
   if (inode->u.i_bops->ioctl)
     {
@@ -552,7 +554,7 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 
   /* Allocate the device cache buffer for normal sector accesses */
 
-  rm->rm_buffer = (ubyte*)malloc(rm->rm_hwsectorsize);
+  rm->rm_buffer = (uint8_t*)malloc(rm->rm_hwsectorsize);
   if (!rm->rm_buffer)
     {
       return -ENOMEM;
@@ -575,7 +577,7 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 int romfs_fsconfigure(struct romfs_mountpt_s *rm)
 {
   const char *name;
-  sint16 ndx;
+  int16_t     ndx;
 
   /* Then get information about the ROMFS filesystem on the devices managed
    * by this block driver.  Read sector zero which contains the volume header.
@@ -605,7 +607,7 @@ int romfs_fsconfigure(struct romfs_mountpt_s *rm)
 
   /* and return success */
 
-  rm->rm_mounted      = TRUE;
+  rm->rm_mounted      = true;
   return OK;
 }
 
@@ -636,11 +638,11 @@ int romfs_fileconfigure(struct romfs_mountpt_s *rm, struct romfs_file_s *rf)
     {
       /* Nothing in the cache buffer */
 
-      rf->rf_cachesector = (uint32)-1;
+      rf->rf_cachesector = (uint32_t)-1;
 
       /* Create a file buffer to support partial sector accesses */
 
-      rf->rf_buffer = (ubyte*)malloc(rm->rm_hwsectorsize);
+      rf->rf_buffer = (uint8_t*)malloc(rm->rm_hwsectorsize);
       if (!rf->rf_buffer)
         {
           return -ENOMEM;
@@ -665,7 +667,7 @@ int romfs_checkmount(struct romfs_mountpt_s *rm)
   struct geometry geo;
   int ret;
 
-  /* If the fs_mounted flag is FALSE, then we have already handled the loss
+  /* If the fs_mounted flag is false, then we have already handled the loss
    * of the mount.
    */
 
@@ -688,13 +690,13 @@ int romfs_checkmount(struct romfs_mountpt_s *rm)
 
       /* If we get here, the mount is NOT healthy */
 
-      rm->rm_mounted = FALSE;
+      rm->rm_mounted = false;
 
       /* Make sure that this is flagged in every opened file */
 
       for (file = rm->rm_head; file; file = file->rf_next)
         {
-          file->rf_open = FALSE;
+          file->rf_open = false;
         }
     }
   return -ENODEV;
@@ -808,13 +810,13 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm, struct romfs_dirinfo_s *dirin
  *
  ****************************************************************************/
 
-int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32 offset, uint32 *poffset,
-                        uint32 *pnext, uint32 *pinfo, uint32 *psize)
+int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset, uint32_t *poffset,
+                        uint32_t *pnext, uint32_t *pinfo, uint32_t *psize)
 {
-  uint32 save;
-  uint32 next;
-  sint16 ndx;
-  int ret;
+  uint32_t save;
+  uint32_t next;
+  int16_t  ndx;
+  int      ret;
 
   /* Read the sector into memory */
 
@@ -859,19 +861,19 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32 offset, uint32 *poffs
  *
  ****************************************************************************/
 
-int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
+int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset, char *pname)
 {
-  sint16  ndx;
-  uint16  namelen;
-  uint16  chunklen;
-  boolean done;
+  int16_t  ndx;
+  uint16_t namelen;
+  uint16_t chunklen;
+  bool     done;
 
   /* Loop until the whole name is obtained or until NAME_MAX characters
    * of the name have been parsed.
    */
 
   offset += ROMFS_FHDR_NAME;
-  for (namelen = 0, done = FALSE; namelen < NAME_MAX && !done;)
+  for (namelen = 0, done = false; namelen < NAME_MAX && !done;)
     {
       /* Read the sector into memory */
 
@@ -888,7 +890,7 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
           /* Yes.. then this chunk is less than 16 */
 
           chunklen = strlen((char*)&rm->rm_buffer[ndx]);
-          done     = TRUE;
+          done     = true;
         }
       else
         {
@@ -902,7 +904,7 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
       if (namelen + chunklen > NAME_MAX)
         {
           chunklen = NAME_MAX - namelen;
-          done     = TRUE;
+          done     = true;
         }
 
       /* Copy the chunk */
@@ -926,10 +928,10 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32 offset, char *pname)
  *
  ****************************************************************************/
 
-int romfs_datastart(struct romfs_mountpt_s *rm, uint32 offset, uint32 *start)
+int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset, uint32_t *start)
 {
-  sint16 ndx;
-  int ret;
+  int16_t ndx;
+  int     ret;
 
   /* Traverse hardlinks as necesssary to get to the real file header */
 

@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <string.h>
 #include <semaphore.h>
 #include <assert.h>
@@ -45,10 +47,11 @@
 #include <errno.h>
 #include <nuttx/fs.h>
 #include <nuttx/kmalloc.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

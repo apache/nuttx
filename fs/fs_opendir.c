@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_opendir.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <dirent.h>
 #include <string.h>
 #include <assert.h>
@@ -91,7 +91,7 @@ FAR DIR *opendir(FAR const char *path)
   FAR struct inode *inode = NULL;
   FAR struct internal_dir_s *dir;
   FAR const char *relpath;
-  boolean isroot = FALSE;
+  bool isroot = false;
   int ret;
 
   /* If we are given 'nothing' then we will interpret this as
@@ -102,7 +102,7 @@ FAR DIR *opendir(FAR const char *path)
   if (!path || *path == 0 || strcmp(path, "/") == 0)
     {
        inode = root_inode;
-       isroot = TRUE;
+       isroot = true;
     }
   else
     {

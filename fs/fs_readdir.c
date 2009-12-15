@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_readdir.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,11 +38,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
 #include <nuttx/fs.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************

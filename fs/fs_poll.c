@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <poll.h>
 #include <wdog.h>
 #include <errno.h>
@@ -55,7 +56,7 @@
 #ifndef CONFIG_DISABLE_POLL
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define poll_semgive(sem) sem_post(sem)
@@ -93,7 +94,7 @@ static void poll_semtake(FAR sem_t *sem)
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static int poll_fdsetup(int fd, FAR struct pollfd *fds, boolean setup)
+static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 {
   FAR struct filelist *list;
   FAR struct file     *this_file;
@@ -169,7 +170,7 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 
       /* Set up the poll */
 
-      ret = poll_fdsetup(fds[i].fd, &fds[i], TRUE);
+      ret = poll_fdsetup(fds[i].fd, &fds[i], true);
       if (ret < 0)
         {
           return ret;
@@ -202,7 +203,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
     {
       /* Teardown the poll */
 
-      status = poll_fdsetup(fds[i].fd, &fds[i], FALSE);
+      status = poll_fdsetup(fds[i].fd, &fds[i], false);
       if (status < 0)
         {
           ret = status;
@@ -231,7 +232,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
  *
  ****************************************************************************/
 
-static void poll_timeout(int argc, uint32 isem, ...)
+static void poll_timeout(int argc, uint32_t isem, ...)
 {
   /* Wake up the poller */
 
@@ -293,7 +294,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
            */
 
           wdog = wd_create();
-          wd_start(wdog,  MSEC2TICK(timeout), poll_timeout, 1, (uint32)&sem);
+          wd_start(wdog,  MSEC2TICK(timeout), poll_timeout, 1, (uint32_t)&sem);
           poll_semtake(&sem);
           wd_delete(wdog);
         }
