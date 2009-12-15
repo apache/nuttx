@@ -1,7 +1,7 @@
-/************************************************************
- * mm_addfreechunk.c
+/************************************************************************
+ * mm/mm_addfreechunk.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,35 +31,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include "mm_environment.h"
 #include "mm_internal.h"
 
-/************************************************************
- * Definitions
- ************************************************************/
+/************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * mm_addfreechunk
  *
  * Description:
  *   Add a free chunk to the node next
  *   It is assumed that the caller holds the mm semaphore
  *
- ************************************************************/
+ ************************************************************************/
 
 void mm_addfreechunk(FAR struct mm_freenode_s *node)
 {

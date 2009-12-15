@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm_environment.h
+ * mm/mm_environment.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __MM_ENVIRONMENT_H
-#define __MM_ENVIRONMENT_H
+#ifndef __MM_MM_ENVIRONMENT_H
+#define __MM_MM_ENVIRONMENT_H
 
 /****************************************************************************
  * Included Files
@@ -62,7 +62,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Special definitions used when the memory mnager is built
@@ -125,4 +125,4 @@ extern void mm_addregion(FAR void *heapstart, size_t heapsize);
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __MM_ENVIRONMENT_H */
+#endif /* __MM_MM_ENVIRONMENT_H */

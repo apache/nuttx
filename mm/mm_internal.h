@@ -1,7 +1,7 @@
-/************************************************************
- * mm_internal.h
+/************************************************************************
+ * mm/mm_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,18 +31,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-#ifndef __MM_INTERNAL_H
-#define __MM_INTERNAL_H
+#ifndef __MM_MM_INTERNAL_H
+#define __MM_MM_INTERNAL_H
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
- * Definitions
- ************************************************************/
+/************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************/
 
 /* These definitions define the characteristics of allocator
  *
@@ -92,9 +92,9 @@
 #define MM_IS_ALLOCATED(n) \
   ((int)((struct mm_allocnode_s*)(n)->preceding) < 0))
 
-/************************************************************
+/************************************************************************
  * Public Types
- ************************************************************/
+ ************************************************************************/
 
 /* This describes an allocated chunk.  An allocated chunk is
  * distinguished from a free chunk by bit 31 of the 'precding'
@@ -150,9 +150,9 @@ struct mallinfo
 };
 #endif
 
-/************************************************************
+/************************************************************************
  * Global Variables
- ************************************************************/
+ ************************************************************************/
 
 /* This is the size of the heap provided to mm */
 
@@ -176,9 +176,9 @@ extern int g_nregions;
 
 extern FAR struct mm_freenode_s g_nodelist[MM_NNODES];
 
-/************************************************************
+/************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
 /* Normally defined in malloc.h */
 
@@ -207,4 +207,4 @@ extern void       mm_givesemaphore(void);
  extern int       mm_getsemaphore(void);
 #endif
 
-#endif /* __MM_INTERNAL_H */
+#endif /* __MM_MM_INTERNAL_H */

@@ -1,7 +1,7 @@
-/************************************************************
- * mm_shrinkchunk.c
+/************************************************************************
+ * mm/mm_shrinkchunk.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,24 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include "mm_environment.h"
 #include "mm_internal.h"
 
-/************************************************************
- * Definitions
- ************************************************************/
+/************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * mm_shrinkchunk
  *
  * Description:
@@ -62,7 +62,7 @@
  *     (1) size is the whole chunk size (payload and header)
  *     (2) the caller must hold the MM semaphore.
  *
- ************************************************************/
+ ************************************************************************/
 
 void  mm_shrinkchunk(FAR struct mm_allocnode_s *node, size_t size)
 {
