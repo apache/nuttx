@@ -38,8 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <sched.h>
 #include <debug.h>
@@ -88,13 +89,13 @@
 
 int exec_module(FAR const struct binary_s *bin, int priority)
 {
-  FAR _TCB   *tcb;
+  FAR _TCB     *tcb;
 #ifndef CONFIG_CUSTOM_STACK
-  FAR uint32 *stack;
+  FAR uint32_t *stack;
 #endif
-  pid_t       pid;
-  int         err;
-  int         ret;
+  pid_t         pid;
+  int           err;
+  int           ret;
 
   /* Sanity checking */
 
@@ -120,7 +121,7 @@ int exec_module(FAR const struct binary_s *bin, int priority)
   /* Allocate the stack for the new task */
 
 #ifndef CONFIG_CUSTOM_STACK
-  stack = (FAR uint32*)malloc(bin->stacksize);
+  stack = (FAR uint32_t*)malloc(bin->stacksize);
   if (!tcb)
     {
       err = ENOMEM;

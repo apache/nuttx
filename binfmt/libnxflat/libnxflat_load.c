@@ -38,9 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sys/mman.h>
-
+#include <stdint.h>
 #include <stdlib.h>
 #include <nxflat.h>
 #include <debug.h>
@@ -105,11 +106,11 @@ static const char *g_reloctype[] =
 
 int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
 {
-  off_t   doffset;     /* Offset to .data in the NXFLAT file */
-  uint32  dreadsize;   /* Total number of bytes of .data to be read */
-  uint32  relocsize;   /* Memory needed to hold relocations */
-  uint32  extrasize;   /* MAX(BSS size, relocsize) */
-  int     ret = OK;
+  off_t    doffset;     /* Offset to .data in the NXFLAT file */
+  uint32_t dreadsize;   /* Total number of bytes of .data to be read */
+  uint32_t relocsize;   /* Memory needed to hold relocations */
+  uint32_t extrasize;   /* MAX(BSS size, relocsize) */
+  int      ret = OK;
 
   /* Calculate the extra space we need to allocate.  This extra space will be
    * the size of the BSS section.  This extra space will also be used
@@ -159,9 +160,9 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    * resides as long as it is fully initialized and ready to execute.
    */
 
-  loadinfo->ispace = (uint32)mmap(NULL, loadinfo->isize, PROT_READ,
+  loadinfo->ispace = (uint32_t)mmap(NULL, loadinfo->isize, PROT_READ,
                                   MAP_SHARED|MAP_FILE, loadinfo->filfd, 0);
-  if (loadinfo->ispace == (uint32)MAP_FAILED)
+  if (loadinfo->ispace == (uint32_t)MAP_FAILED)
     {
       bdbg("Failed to map NXFLAT ISpace: %d\n", errno);
       return -errno;

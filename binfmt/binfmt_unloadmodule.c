@@ -38,9 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <sys/mman.h>
 
+#include <sys/mman.h>
 #include <stdlib.h>
 #include <sched.h>
 #include <debug.h>

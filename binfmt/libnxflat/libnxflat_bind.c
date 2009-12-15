@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <nxflat.h>
 #include <errno.h>
@@ -96,18 +96,18 @@
  ****************************************************************************/
 
 static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
-                                      uint32 offset)
+                                    uint32_t offset)
 {
-  uint32 *addr;
+  uint32_t *addr;
 
   bvdbg("NXFLAT_RELOC_TYPE_REL32I Offset: %08x I-Space: %p\n",
         offset, loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
   if (offset < loadinfo->dsize)
     {
-      addr = (uint32*)(offset + loadinfo->dspace->region);
+      addr = (uint32_t*)(offset + loadinfo->dspace->region);
       bvdbg("  Before: %08x\n", *addr);
-     *addr += (uint32)(loadinfo->ispace + sizeof(struct nxflat_hdr_s));
+     *addr += (uint32_t)(loadinfo->ispace + sizeof(struct nxflat_hdr_s));
       bvdbg("  After: %08x\n", *addr);
       return OK;
     }
@@ -135,18 +135,18 @@ static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 static inline int nxflat_bindrel32d(FAR struct nxflat_loadinfo_s *loadinfo,
-                                      uint32 offset)
+                                    uint32_t offset)
 {
-  uint32 *addr;
+  uint32_t *addr;
 
   bvdbg("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
         offset, loadinfo->dspace->region);
 
   if (offset < loadinfo->dsize)
     {
-      addr = (uint32*)(offset + loadinfo->dspace->region);
+      addr = (uint32_t*)(offset + loadinfo->dspace->region);
       bvdbg("  Before: %08x\n", *addr);
-     *addr += (uint32)(loadinfo->dspace->region);
+     *addr += (uint32_t)(loadinfo->dspace->region);
       bvdbg("  After: %08x\n", *addr);
       return OK;
     }
@@ -177,18 +177,18 @@ static inline int nxflat_bindrel32d(FAR struct nxflat_loadinfo_s *loadinfo,
 
 #ifdef NXFLAT_RELOC_TYPE_REL32ID
 static inline int nxflat_bindrel32id(FAR struct nxflat_loadinfo_s *loadinfo,
-                                       uint32 offset)
+                                     uint32_t offset)
 {
-  uint32 *addr;
+  uint32_t *addr;
 
   bvdbg("NXFLAT_RELOC_TYPE_REL32D Offset: %08x D-Space: %p\n",
         offset, loadinfo->dspace->region);
 
   if (offset < loadinfo->dsize)
     {
-      addr = (uint32*)(offset + loadinfo->dspace->region);
+      addr = (uint32_t*)(offset + loadinfo->dspace->region);
       bvdbg("  Before: %08x\n", *addr);
-     *addr += ((uint32)loadinfo->ispace - (uint32)(loadinfo->dspace->region));
+     *addr += ((uint32_t)loadinfo->ispace - (uint32_t)(loadinfo->dspace->region));
       bvdbg("  After: %08x\n", *addr);
       return OK;
     }
@@ -219,11 +219,11 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
   FAR struct nxflat_reloc_s *relocs;
   FAR struct nxflat_reloc_s  reloc;
   FAR struct nxflat_hdr_s   *hdr;
-  uint32  offset;
-  uint16  nrelocs;
-  int     ret;
-  int     result;
-  int     i;
+  uint32_t offset;
+  uint16_t nrelocs;
+  int      ret;
+  int      result;
+  int      i;
 
   /* The NXFLAT header is the first thing at the beginning of the ISpace. */
 
@@ -326,7 +326,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
   if (ret == OK && nrelocs > 0)
     {
       relocs = (FAR struct nxflat_reloc_s*)(offset - loadinfo->isize + loadinfo->dspace->region);
-      nxflat_dumpbuffer("GOT", (FAR const ubyte*)relocs, nrelocs * sizeof(struct nxflat_reloc_s));
+      nxflat_dumpbuffer("GOT", (FAR const uint8_t*)relocs, nrelocs * sizeof(struct nxflat_reloc_s));
     }
 #endif
   return ret;
@@ -353,10 +353,10 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
   FAR struct nxflat_hdr_s    *hdr;
   FAR const struct symtab_s *symbol;
 
-  char   *symname;
-  uint32  offset;
-  uint16  nimports;
-  int     i;
+  char    *symname;
+  uint32_t offset;
+  uint16_t nimports;
+  int      i;
 
   /* The NXFLAT header is the first thing at the beginning of the ISpace. */
 
@@ -426,7 +426,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 
 	  /* And put this into the module's import structure. */
 
-	  imports[i].i_funcaddress =  (uint32)symbol->sym_value;
+	  imports[i].i_funcaddress =  (uint32_t)symbol->sym_value;
 
 	  bvdbg("Bound import[%d] (%08p) to export '%s' (%08x)\n",
 	        i, &imports[i], symname, imports[i].i_funcaddress);
@@ -438,7 +438,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
   if (nimports > 0)
     {
-      nxflat_dumpbuffer("Imports", (FAR const ubyte*)imports, nimports * sizeof(struct nxflat_import_s));
+      nxflat_dumpbuffer("Imports", (FAR const uint8_t*)imports, nimports * sizeof(struct nxflat_import_s));
     }
 #endif
   return OK;

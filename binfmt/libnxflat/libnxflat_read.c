@@ -38,8 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <string.h>
 #include <nxflat.h>
@@ -72,14 +73,14 @@
 #if defined(NXFLAT_DUMP_READDATA)
 static inline void nxflat_dumpreaddata(char *buffer, int buflen)
 {
-  uint32 *buf32 = (uint32*)buffer;
+  uint32 *buf32 = (uint32_t*)buffer;
   int i;
   int j;
 
   for (i = 0; i < buflen; i += 32)
     {
       DUMPER("%04x:", i);
-      for (j = 0; j < 32; j += sizeof(uint32))
+      for (j = 0; j < 32; j += sizeof(uint32_t))
         {
           DUMPER("  %08x", *buf32++);
         }

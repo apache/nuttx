@@ -38,9 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
+#include <sys/stat.h>
+#include <stdint.h>
 #include <string.h>
 #include <fcntl.h>
 #include <nxflat.h>
@@ -95,11 +95,11 @@
 
 int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
 {
-  uint32 datastart;
-  uint32 dataend;
-  uint32 bssstart;
-  uint32 bssend;
-  int   ret;
+  uint32_t datastart;
+  uint32_t dataend;
+  uint32_t bssstart;
+  uint32_t bssend;
+  int      ret;
 
   bvdbg("filename: %s loadinfo: %p\n", filename, loadinfo);
 
@@ -125,7 +125,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
       bdbg("Failed to read NXFLAT header: %d\n", ret);
       return ret;
     }
-  nxflat_dumpbuffer("NXFLAT header", (FAR const ubyte*)&loadinfo->header,
+  nxflat_dumpbuffer("NXFLAT header", (FAR const uint8_t*)&loadinfo->header,
                     sizeof(struct nxflat_hdr_s));
 
   /* Verify the NXFLAT header */

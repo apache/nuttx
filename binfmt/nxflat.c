@@ -38,8 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <nxflat.h>
 #include <debug.h>
@@ -188,7 +189,7 @@ static int nxflat_loadbinary(struct binary_s *binp)
   binp->isize     = loadinfo.isize;
   binp->stacksize = loadinfo.stacksize;
 
-  nxflat_dumpbuffer("Entry code", (FAR const ubyte*)binp->entrypt,
+  nxflat_dumpbuffer("Entry code", (FAR const uint8_t*)binp->entrypt,
                     MIN(binp->isize - loadinfo.entryoffs,512));
 
   nxflat_uninit(&loadinfo);
