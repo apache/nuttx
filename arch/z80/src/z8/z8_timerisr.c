@@ -1,7 +1,7 @@
 /***************************************************************************
  * arch/z80/src/z8/z8_timerisr.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 #include <ez8.h>
 
@@ -67,7 +67,7 @@
 
 /* This function is normally prototyped int the ZiLOG header file sio.h */
 
-extern uint32 get_freq(void);
+extern uint32_t get_freq(void);
 
 /***************************************************************************
  * Function:  up_timerisr
@@ -78,7 +78,7 @@ extern uint32 get_freq(void);
  *
  ***************************************************************************/
 
-int up_timerisr(int irq, uint32 *regs)
+int up_timerisr(int irq, uint32_t *regs)
 {
    /* Process timer interrupt */
 
@@ -97,7 +97,7 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
-  uint32 reload;
+  uint32_t reload;
  
   up_disable_irq(Z8_IRQ_SYSTIMER);
 
@@ -129,7 +129,7 @@ void up_timerinit(void)
    */
 
    reload = get_freq() / 400;
-   putreg16((uint16)reload, T0R);
+   putreg16((uint16_t)reload, T0R);
 
   /* Write to the timer control register to enable the timer and to
    * initiate counting

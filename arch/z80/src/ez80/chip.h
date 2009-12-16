@@ -2,7 +2,7 @@
  * arch/z80/src/ez80/chip.h
  * arch/z80/src/chip/chip.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,10 @@
  * Included Files
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -78,7 +82,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN uint32 ez80_systemclock;
+EXTERN uint32_t ez80_systemclock;
 
 /************************************************************************************
  * Public Function Prototypes

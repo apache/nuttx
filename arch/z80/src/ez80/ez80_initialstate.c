@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_initialstate.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <nuttx/arch.h>
 
@@ -85,7 +85,7 @@ void up_initial_state(_TCB *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  ((ubyte*)xcp->regs)[XCPT_IF_OFFSET]  = EZ80_PV_FLAG; /* Parity/Overflow flag will enable interrupts */
+  ((uint8_t*)xcp->regs)[XCPT_IF_OFFSET]  = EZ80_PV_FLAG; /* Parity/Overflow flag will enable interrupts */
 #endif
   xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
   xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;

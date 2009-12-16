@@ -2,7 +2,7 @@
  * arch/z80/src/ez80/ez80f91_emac.h
  * arch/z80/src/chip/ez80f91_emac.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,10 @@
 /************************************************************************************
  * Included Files
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /************************************************************************************
  * Definitions
@@ -249,11 +253,11 @@
 #ifndef __ASSEMBLY__
 struct ez80emac_desc_s
 {
-  uint24 np;      /* Pointer to the start of the next packet */
-  uint16 pktsize; /* Number of bytes in the packet, including the 4 CRC
-                   * bytes, but excluding the 7 descriptor table bytes. */
-  uint16 stat;    /* Status of the packet. Differs for TX and RX packets
-                   * (see EMAC_RX/TXDESC_* definitions) */
+  uint24_t np;      /* Pointer to the start of the next packet */
+  uint16_t pktsize; /* Number of bytes in the packet, including the 4 CRC
+                     * bytes, but excluding the 7 descriptor table bytes. */
+  uint16_t stat;    /* Status of the packet. Differs for TX and RX packets
+                     * (see EMAC_RX/TXDESC_* definitions) */
 };
 #endif
 

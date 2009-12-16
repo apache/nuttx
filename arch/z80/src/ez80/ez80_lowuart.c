@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_loweruart.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <arch/io.h>
@@ -140,8 +140,8 @@
 #if defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 static void ez80_setbaud(void)
 {
-  uint32 brg_divisor;
-  ubyte lctl;
+  uint32_t brg_divisor;
+  uint8_t lctl;
 
   /* The resulting BAUD and depends on the system clock frequency and the
    * BRG divisor as follows:
@@ -163,8 +163,8 @@ static void ez80_setbaud(void)
    lctl |= EZ80_UARTLCTL_DLAB;
    ez80_outp(EZ80_UART_LCTL, lctl);
 
-   ez80_outp(EZ80_UART_BRGL, (ubyte)(brg_divisor & 0xff));
-   ez80_outp(EZ80_UART_BRGH, (ubyte)(brg_divisor >> 8));
+   ez80_outp(EZ80_UART_BRGL, (uint8_t)(brg_divisor & 0xff));
+   ez80_outp(EZ80_UART_BRGH, (uint8_t)(brg_divisor >> 8));
 
    lctl &= ~EZ80_UARTLCTL_DLAB;
    ez80_outp(EZ80_UART_LCTL, lctl);
@@ -182,7 +182,7 @@ static void ez80_setbaud(void)
 void up_lowuartinit(void)
 {
 #ifdef HAVE_SERIAL
-  ubyte regval;
+  uint8_t regval;
 
   /* Configure pins for usage of UARTs (whether or not we have a console) */
 

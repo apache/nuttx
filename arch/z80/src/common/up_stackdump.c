@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_stackdump.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include "up_arch.h"
@@ -80,9 +80,9 @@
 static void up_stackdump(void)
 {
   _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  uint16 sp         = up_getsp();
-  uint16 stack_base = (uint16)rtcb->adj_stack_ptr;
-  uint16 stack_size = (uint16)rtcb->adj_stack_size;
+  uint16_t) sp         = up_getsp();
+  uint16_t) stack_base = (uint16_t))rtcb->adj_stack_ptr;
+  uint16_t) stack_size = (uint16_t))rtcb->adj_stack_size;
 
   lldbg("stack_base: %04x\n", stack_base);
   lldbg("stack_size: %04x\n", stack_size);
@@ -95,11 +95,11 @@ static void up_stackdump(void)
     }
   else
     {
-      uint16 stack = sp & ~0x0f;
+      uint16_t) stack = sp & ~0x0f;
 
-      for (stack = sp & ~0x0f; stack < stack_base; stack += 8*sizeof(uint16))
+      for (stack = sp & ~0x0f; stack < stack_base; stack += 8*sizeof(uint16_t)))
         {
-          uint16 *ptr = (uint16*)stack;
+          uint16_t) *ptr = (uint16_t)*)stack;
           lldbg("%04x: %04x %04x %04x %04x %04x %04x %04x %04x\n",
                  stack, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);

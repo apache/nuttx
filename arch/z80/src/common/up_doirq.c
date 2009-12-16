@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_doirq.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <assert.h>
 #include "up_arch.h"
 
@@ -70,7 +70,7 @@
  * Public Functions
  ****************************************************************************/
 
-FAR chipreg_t *up_doirq(ubyte irq, FAR chipreg_t *regs)
+FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs)
 {
   up_ledon(LED_INIRQ);
 

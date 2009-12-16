@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_saveirqcontext.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <arch/irq.h>
 
 #include "chip/switch.h"
@@ -93,8 +93,8 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
     {
       /* Calculate the source address based on the saved RP value */
 
-      uint16         rp  = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS] >> 8;
-      FAR chipreg_t *src = (FAR uint16*)(rp & 0xf0);
+      uint16_t       rp  = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS] >> 8;
+      FAR chipreg_t *src = (FAR uint16_t*)(rp & 0xf0);
       FAR chipreg_t *dest = &regs[XCPT_RR0];
 
       /* Copy the interrupted tasks register into the TCB register save area. */

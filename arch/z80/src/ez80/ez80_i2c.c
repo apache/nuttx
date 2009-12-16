@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -64,9 +65,9 @@
 struct ez80_i2cdev_s
 {
   const struct i2c_ops_s *ops; /* I2C vtable */
-  uint16 ccr;                  /* Clock control register value */
-  uint16 addr;                 /* 7- or 10-bit address */
-  ubyte  addr10 : 1;           /* 1=Address is 10-bit */
+  uint16_t ccr;                /* Clock control register value */
+  uint16_t addr;               /* 7- or 10-bit address */
+  uint8_t  addr10 : 1;         /* 1=Address is 10-bit */
 };
 
 /****************************************************************************
@@ -75,20 +76,20 @@ struct ez80_i2cdev_s
 
 /* Misc. Helpers */
 
-static void i2c_setccr(uint16 ccr);
-static uint16 i2c_getccr(uint32 frequency);
-static ubyte i2c_waitiflg(void);
+static void i2c_setccr(uint16_t ccr);
+static uint16_t i2c_getccr(uint32_t frequency);
+static uint8_t i2c_waitiflg(void);
 static void i2c_clriflg(void);
 static void i2c_start(void);
 static void i2c_stop(void);
-static int i2c_sendaddr(struct ez80_i2cdev_s *priv, ubyte readbit);
+static int  i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit);
 
 /* I2C methods */
 
-static uint32 i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32 frequency);
-static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
-static int i2c_write(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen);
-static int i2c_read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);
+static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency);
+static int  i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
+static int  i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
+static int  i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -96,14 +97,14 @@ static int i2c_read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);
 
 /* This function is normally prototyped int the ZiLOG header file sio.h */
 
-extern uint32 get_freq(void);
+extern uint32_t get_freq(void);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static ubyte   g_currccr;      /* Current setting of I2C CCR register */
-static boolean g_initialized;  /* TRUE:I2C has been initialized */
+static uint8_t g_currccr;      /* Current setting of I2C CCR register */
+static bool    g_initialized;  /* true:I2C has been initialized */
 static sem_t   g_i2csem;       /* Serialize I2C transfers */
 
 const struct i2c_ops_s g_ops =
@@ -161,7 +162,7 @@ static void i2c_semtake(void)
  *
  ****************************************************************************/
 
-static void i2c_setccr(uint16 ccr)
+static void i2c_setccr(uint16_t ccr)
 {
   if (g_currccr != ccr)
     {
@@ -184,12 +185,12 @@ static void i2c_setccr(uint16 ccr)
  *
  ****************************************************************************/
 
-static uint16 i2c_getccr(uint32 fscl)
+static uint16_t i2c_getccr(uint32_t fscl)
 {
-  uint32 fsamp;
-  uint32 ftmp;
-  ubyte  n;
-  ubyte  m;
+  uint32_t fsamp;
+  uint32_t ftmp;
+  uint8_t  n;
+  uint8_t  m;
 
   /* The sampling frequency is given by:
    *
@@ -296,7 +297,7 @@ static uint16 i2c_getccr(uint32 fscl)
  *
  ****************************************************************************/
 
-static ubyte i2c_waitiflg(void)
+static uint8_t i2c_waitiflg(void)
 {
   while ((inp(EZ80_I2C_CTL) & I2C_CTL_IFLG) != 0);
   return inp(EZ80_I2C_SR);
@@ -319,7 +320,7 @@ static ubyte i2c_waitiflg(void)
 
 static void i2c_clriflg(void)
 {
-  ubyte regval = inp(EZ80_I2C_CTL);
+  uint8_t regval = inp(EZ80_I2C_CTL);
   regval &= ~I2C_CTL_IFLG;
   outp(EZ80_I2C_CTL, regval);
 }
@@ -341,7 +342,7 @@ static void i2c_clriflg(void)
  
 static void i2c_start(void)
 {
-  ubyte regval  = inp(EZ80_I2C_CTL);
+  uint8_t regval  = inp(EZ80_I2C_CTL);
   regval |= I2C_CTL_STA;
   outp(EZ80_I2C_CTL, regval);
 }
@@ -363,7 +364,7 @@ static void i2c_start(void)
  
 static void i2c_stop(void)
 {
-  ubyte regval  = inp(EZ80_I2C_CTL);
+  uint8_t regval  = inp(EZ80_I2C_CTL);
   regval |= I2C_CTL_STP;
   outp(EZ80_I2C_CTL, regval);
 }
@@ -388,9 +389,9 @@ static void i2c_stop(void)
  *
  ****************************************************************************/
 
-static int i2c_sendaddr(struct ez80_i2cdev_s *priv, ubyte readbit)
+static int i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
 {
-  ubyte sr;
+  uint8_t sr;
   int ret = OK;
 
   /* Wait for the IFLG bit to transition to 1.  At this point, we should
@@ -417,7 +418,7 @@ static int i2c_sendaddr(struct ez80_i2cdev_s *priv, ubyte readbit)
        * IFLG.  Clearing the IFLAG will cause the address to be transferred.
        */
 
-      outp(EZ80_I2C_DR, (ubyte)I2C_ADDR8(priv->addr) | readbit);
+      outp(EZ80_I2C_DR, (uint8_t)I2C_ADDR8(priv->addr) | readbit);
       i2c_clriflg();
  
       /* And wait for the address transfer to complete */
@@ -436,7 +437,7 @@ static int i2c_sendaddr(struct ez80_i2cdev_s *priv, ubyte readbit)
        * be transferred.
        */
 
-      outp(EZ80_I2C_DR, (ubyte)I2C_ADDR10H(priv->addr) | readbit);
+      outp(EZ80_I2C_DR, (uint8_t)I2C_ADDR10H(priv->addr) | readbit);
       i2c_clriflg();
 
       /* And wait for the address transfer to complete */
@@ -450,7 +451,7 @@ static int i2c_sendaddr(struct ez80_i2cdev_s *priv, ubyte readbit)
 
       /* Now send the lower 8 bits of the 10-bit address */
 
-      outp(EZ80_I2C_DR, (ubyte)I2C_ADDR10L(priv->addr));
+      outp(EZ80_I2C_DR, (uint8_t)I2C_ADDR10L(priv->addr));
       i2c_clriflg();
 
       /* And wait for the address transfer to complete */
@@ -506,7 +507,7 @@ failure:
  *
  ****************************************************************************/
 
-static uint32 i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32 frequency)
+static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
 {
   FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
 
@@ -583,11 +584,11 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int i2c_write(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen)
+static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
 {
   FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
-  const ubyte *ptr;
-  ubyte sr;
+  const uint8_t *ptr;
+  uint8_t sr;
   int retry;
   int count;
   int ret;
@@ -717,11 +718,11 @@ failure:
  *
  ****************************************************************************/
 
-static int i2c_read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen)
+static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 {
   FAR struct ez80_i2cdev_s *priv = (FAR struct ez80_i2cdev_s *)dev;
-  ubyte *ptr;
-  ubyte regval;
+  uint8_t *ptr;
+  uint8_t regval;
   int retry;
   int count;
   int ret;
@@ -894,8 +895,8 @@ failure:
 FAR struct i2c_dev_s *up_i2cinitialize(int port)
 {
   FAR struct ez80_i2cdev_s *i2c;
-  uint16 ccr;
-  ubyte  regval;
+  uint16_t ccr;
+  uint8_t  regval;
  
   if (!g_initialized)
     {

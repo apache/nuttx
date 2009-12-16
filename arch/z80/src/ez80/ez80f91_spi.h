@@ -42,7 +42,8 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <nuttx/spi.h>
 
 /************************************************************************************
@@ -113,8 +114,8 @@ extern "C" {
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
 
-EXTERN void ez80_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-EXTERN ubyte ez80_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN void ez80_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t ez80_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
 #undef EXTERN
 #ifdef __cplusplus

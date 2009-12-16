@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 #include <nuttx/arch.h>
 
 #include "up_internal.h"

@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi.h>
+
+#include <sys/types.h>
+#include <stdint.h>
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
@@ -65,11 +67,14 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                uint32_t frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd);
-static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const ubyte *buffer, size_t buflen);
-static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR ubyte *buffer, size_t buflen);
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static void   spi_sndblock(FAR struct spi_dev_s *dev,
+                FAR const uint8_t *buffer, size_t buflen);
+static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR uint8_t *buffer,
+                size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -119,7 +124,7 @@ static struct spi_dev_s g_spidev = { &g_spiops };
  *
  ****************************************************************************/
 
-static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   /* We want select divisor to provide the highest frequency (SPIR) that does NOT
    * exceed the requested frequency.:
@@ -131,7 +136,7 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
    *   BRG >= System Clock Frequency / (2 * SPIR)
    */
  
-  uint32 brg = ((EZ80_SYS_CLK_FREQ+1)/2 + frequency - 1) / frequency;
+  uint32_t brg = ((EZ80_SYS_CLK_FREQ+1)/2 + frequency - 1) / frequency;
 
   /* "When configured as a Master, the 16-bit divisor value must be between
    * 0003h and FFFFh, inclusive. When configured as a Slave, the 16-bit
@@ -170,8 +175,8 @@ static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  ubyte modebits;
-  ubyte regval;
+  uint8_t modebits;
+  uint8_t regval;
 
   /* Select the CTL register bits based on the selected mode */
 
@@ -220,9 +225,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ****************************************************************************/
 
-static ubyte spi_waitspif(void)
+static uint8_t spi_waitspif(void)
 {
-  ubyte status;
+  uint8_t status;
 
   /* Wait for the device to be ready to accept another byte (or for an error
    * to be reported
@@ -250,9 +255,9 @@ static ubyte spi_waitspif(void)
  *
  ****************************************************************************/
 
-static ubyte spi_transfer(ubyte ch)
+static uint8_t spi_transfer(uint8_t ch)
 {
-   ubyte status;
+   uint8_t status;
 
   /* Send the byte, repeating if some error occurs */
 
@@ -286,9 +291,9 @@ static ubyte spi_transfer(ubyte ch)
  *
  ****************************************************************************/
 
-static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
-  return spi_transfer((ubyte)wd);
+  return spi_transfer((uint8_t)wd);
 }
 
 /*************************************************************************
@@ -303,17 +308,19 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
  *   buflen - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t buflen)
 {
-  FAR const ubyte *ptr = (FAR const ubyte*)buffer;
-  ubyte response;
+  FAR const uint8_t *ptr = (FAR const uint8_t*)buffer;
+  uint8_t response;
 
   /* Loop while thre are bytes remaining to be sent */
 
@@ -335,7 +342,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   buflen - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -344,8 +352,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
 {
-  FAR ubyte *ptr = (FAR ubyte*)buffer;
-  ubyte response;
+  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  uint8_t response;
 
   /* Loop while thre are bytes remaining to be sent */
 
@@ -383,7 +391,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
 
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
-  ubyte regval;
+  uint8_t regval;
 
   /* Only the SPI1 interface is supported */
 

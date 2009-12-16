@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_loweruart.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <ez8.h>
 
@@ -51,7 +51,7 @@
 
 #ifdef CONFIG_USE_LOWUARTINIT
 
-extern uint32 get_freq(void);
+extern uint32_t get_freq(void);
 
 /****************************************************************************
  * Private Definitions
@@ -75,13 +75,13 @@ extern uint32 get_freq(void);
 
 void up_lowuartinit(void)
 {
-  uint32 freq = get_freq();
-  uint16 brg;
-  ubyte  val;
+  uint32_t freq = get_freq();
+  uint16_t brg;
+  uint8_t  val;
 
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
 
-  brg = (freq +(uint32)CONFIG_UART0_BAUD * 8) /((uint32)CONFIG_UART0_BAUD * 16) ;
+  brg = (freq +(uint32_t)CONFIG_UART0_BAUD * 8) /((uint32_t)CONFIG_UART0_BAUD * 16) ;
 
   /* Set the baudrate */
 

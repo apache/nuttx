@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_registerdump.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -78,7 +78,8 @@ static inline void z8_dumpregs(FAR chipret_t *regs)
          regs[XCPT_RR8], regs[XCPT_RR10], regs[XCPT_RR12], regs[XCPT_RR14]);
 }
 
-static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, ubyte irqctl, chipreg_t rpflags)
+static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, uint8_t irqctl,
+                                chipreg_t rpflags)
 {
   lldbg("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
         sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
@@ -100,7 +101,7 @@ void z8_registerdump(void)
   FAR chipret_t *regs;
   FAR chipret_t *state;
   chipreg_t      sp;
-  uint16         rp;
+  uint16_t       rp;
 
   switch (g_z8irqstate.state)
     {
@@ -108,7 +109,7 @@ void z8_registerdump(void)
         /* Calculate the source address based on the saved RP value */
 
         rp   = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS] >> 8;
-        regs = (FAR uint16*)(rp & 0xf0);
+        regs = (FAR uint16_t*)(rp & 0xf0);
 
         /* Then dump the register values */
 

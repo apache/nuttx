@@ -2,7 +2,7 @@
  * arch/z8/include/z8/irq.h
  * arch/chip/irq.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,10 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
  * Definitions
@@ -321,12 +325,12 @@ struct xcptcontext
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  CODE void *sigdeliver; /* Actual type is sig_deliver_t */
+  CODE void *sigdeliver; 	/* Actual type is sig_deliver_t */
 
   /* The following retains that state during signal execution */
 
-  uint16 saved_pc;	/* Saved return address */
-  uint16 saved_irqctl;	/* Saved interrupt state */
+  uint16_t saved_pc;		/* Saved return address */
+  uint16_t saved_irqctl;	/* Saved interrupt state */
 #endif
 };
 #endif

@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "arch/board/board.h"
 
@@ -54,7 +54,7 @@
  * Private Data
  ****************************************************************************/
 
-uint32 ez80_systemclock = EZ80_SYS_CLK_FREQ;
+uint32_t ez80_systemclock = EZ80_SYS_CLK_FREQ;
 
 /****************************************************************************
  * Private Functions

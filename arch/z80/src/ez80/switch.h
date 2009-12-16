@@ -2,7 +2,7 @@
  * arch/z80/src/ez80/switch.h
  * arch/z80/src/chip/switch.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@
  * Included Files
  ************************************************************************************/
 
-#include <sys/types.h>
 #ifndef __ASSEMBLY__
 #  include <nuttx/sched.h>
 #  include <nuttx/arch.h>
@@ -62,7 +61,7 @@
 
 #define INIT_IRQCONTEXT()        current_regs = NULL
 
-/* IN_INTERRUPT returns TRUE if the system is current operating in the interrupt
+/* IN_INTERRUPT returns true if the system is current operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 
