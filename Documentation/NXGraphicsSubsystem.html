@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: December 5, 2008</p>
+      <p>Last Updated: December 16, 2008</p>
     </td>
   </tr>
 </table>
@@ -422,8 +422,8 @@
   Holds one device pixel.
   NXGLIB will select the smallest size for the <code>nxgl_mxpixel_t</code>
   that just contains the pixel:  <code>byte</code> if 16, 24, and 32 resolution
-  support is disabled, <code>uint16</code> if 24, and 32 resolution
-  support is disabled, or <code>uint32</code>.
+  support is disabled, <code>uint16_t</code> if 24, and 32 resolution
+  support is disabled, or <code>uint32_t</code>.
 </p>
 
 <p>
@@ -433,7 +433,7 @@
   to change:
 </p>
 <ul><pre>
-typedef sint16 nxgl_coord_t;
+typedef int16_t nxgl_coord_t;
 </pre></ul>
 
 <p>
@@ -501,7 +501,7 @@ struct nxgl_trapezoid_s
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
-void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v);
+void nxgl_rgb2yuv(uint8_t r, uint8_t g, uint8_t b, uint8_t *y, uint8_t *u, uint8_t *v);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -512,7 +512,7 @@ void nxgl_rgb2yuv(ubyte r, ubyte g, ubyte b, ubyte *y, ubyte *u, ubyte *v);
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
-void nxgl_yuv2rgb(ubyte y, ubyte u, ubyte v, ubyte *r, ubyte *g, ubyte *b);
+void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v, uint8_t *r, uint8_t *g, uint8_t *b);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -617,24 +617,24 @@ nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
-boolean nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
-                         FAR struct nxgl_rect_s *rect2);
+bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
+                      FAR struct nxgl_rect_s *rect2);
 </pre></ul>
 <p>
   <b>Description:</b>
-  Return TRUE if the two rectangles overlap.
+  Return true if the two rectangles overlap.
 </p>
 
 <h3>2.2.11 <a name="nxglrectinside"><code>nxgl_rectinside()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
-boolean nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
-                        FAR const struct nxgl_point_s *pt);
+bool nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
+                     FAR const struct nxgl_point_s *pt);
 </pre></ul>
 <p>
   <b>Description:</b>
-  Return TRUE if the point <code>pt</code> lies within <code>rect</code>.
+  Return true if the point <code>pt</code> lies within <code>rect</code>.
 </p>
 
 <h3>2.2.12 <a name="nxglrectsize"><code>nxgl_rectsize()</code></a></h3>
@@ -653,11 +653,11 @@ void nxgl_rectsize(FAR struct nxgl_size_s *size,
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
-boolean nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
+bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
 </pre></ul>
 <p>
   <b>Description:</b>
-   Return TRUE if the area of the retangle is &lt;= 0.
+   Return true if the area of the retangle is &lt;= 0.
 </p>
 
 <h3>2.2.14 <a name="nxglrunoffset"><code>nxgl_runoffset()</code></a></h3>
@@ -775,17 +775,17 @@ typedef FAR void *NXWINDOW;
 struct nx_callback_s
 {
   void (*redraw)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                 boolean more, FAR void *arg);
+                 bool more, FAR void *arg);
   void (*position)(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
                    FAR const struct nxgl_point_s *pos,
                    FAR const struct nxgl_rect_s *bounds,
                    FAR void *arg);
 #ifdef CONFIG_NX_MOUSE
   void (*mousein)(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                  ubyte buttons, FAR void *arg);
+                  uint8_t buttons, FAR void *arg);
 #endif
 #ifdef CONFIG_NX_KBD
-  void (*kbdin)(NXWINDOW hwnd, ubyte nch, FAR const ubyte *ch, FAR void *arg);
+  void (*kbdin)(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch, FAR void *arg);
 #endif
 };
 </pre></ul>
@@ -796,7 +796,7 @@ struct nx_callback_s
 <p><b>Callback Function Prototype:</b></p>
 <ul><pre>
 void redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-            boolean more, FAR void *arg);
+            bool more, FAR void *arg);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -812,7 +812,7 @@ void redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
     <dt><code>rect</code>
     <dd>The rectangle that needs to be re-drawn (in window relative coordinates)
     <dt><code>more</code>
-    <dd>TRUE: More re-draw requests will follow
+    <dd>true: More re-draw requests will follow
     <dt><code>arg</code>
     <dd>User provided argument (see <a href="#nxopenwindow"><code>nx_openwindow()</code></a>)
   </dl></ul>
@@ -860,7 +860,7 @@ void position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
 <ul><pre>
 #ifdef CONFIG_NX_MOUSE
 void mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-             ubyte buttons, FAR void *arg);
+             uint8_t buttons, FAR void *arg);
 #endif
 </pre></ul>
 <p>
@@ -889,7 +889,7 @@ void mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 <p><b>Callback Function Prototype:</b></p>
 <ul><pre>
 #ifdef CONFIG_NX_KBD
-void (*kbdin)(NXWINDOW hwnd, ubyte nch, FAR const ubyte *ch, FAR void *arg);
+void (*kbdin)(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch, FAR void *arg);
 #endif
 </pre></ul>
 <p>
@@ -1677,8 +1677,8 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 #include &lt;nuttx/nx.h&gt;
 
 #ifdef CONFIG_NX_KBD
-int nx_kbdchin(NXHANDLE handle, ubyte ch);
-int nx_kbdin(NXHANDLE handle, ubyte nch, FAR const ubyte *ch);
+int nx_kbdchin(NXHANDLE handle, uint8_t ch);
+int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
 #endif
 </pre></ul>
 <p>
@@ -1700,7 +1700,7 @@ int nx_kbdin(NXHANDLE handle, ubyte nch, FAR const ubyte *ch);
 #include &lt;nuttx/nx.h&gt;
 
 #ifdef CONFIG_NX_MOUSE
-int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, ubyte buttons);
+int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons);
 #endif
 </pre></ul>
 <p>
@@ -2341,12 +2341,12 @@ int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd,
 <ul><pre>
 struct nx_fontmetic_s
 {
-  uint32 stride   : 2;      /* Width of one font row in bytes */
-  uint32 width    : 6;      /* Width of the font in bits */
-  uint32 height   : 6;      /* Height of the font in rows */
-  uint32 xoffset  : 6;      /* Top, left-hand corner X-offset in pixels */
-  uint32 yoffset  : 6;      /* Top, left-hand corner y-offset in pixels */
-  uint32 unused   : 6;
+  uint32_t stride   : 2;      /* Width of one font row in bytes */
+  uint32_t width    : 6;      /* Width of the font in bits */
+  uint32_t height   : 6;      /* Height of the font in rows */
+  uint32_t xoffset  : 6;      /* Top, left-hand corner X-offset in pixels */
+  uint32_t yoffset  : 6;      /* Top, left-hand corner y-offset in pixels */
+  uint32_t unused   : 6;
 };
 </pre></ul>
 
@@ -2357,7 +2357,7 @@ struct nx_fontmetic_s
 struct nx_fontbitmap_s
 {
   struct nx_fontmetic_s metric; /* Character metrics */
-  FAR const ubyte *bitmap;      /* Pointer to the character bitmap */
+  FAR const uint8_t *bitmap;    /* Pointer to the character bitmap */
 };
 </pre></ul>
 
@@ -2369,8 +2369,8 @@ struct nx_fontbitmap_s
 <ul><pre>
 struct nx_fontset_s
 {
-  ubyte  first;             /* First bitmap character code */
-  ubyte  nchars;            /* Number of bitmap character codes */
+  uint8_t  first;             /* First bitmap character code */
+  uint8_t  nchars;            /* Number of bitmap character codes */
   FAR const struct nx_fontbitmap_s *bitmap;
 };
 </pre></ul>
@@ -2381,10 +2381,10 @@ struct nx_fontset_s
 <ul><pre>
 struct nx_font_s
 {
-  ubyte  mxheight;          /* Max height of one glyph in rows */
-  ubyte  mxwidth;           /* Max width of any glyph in pixels */
-  ubyte  mxbits;            /* Max number of bits per character code */
-  ubyte  spwidth;           /* The width of a space in pixels */
+  uint8_t  mxheight;          /* Max height of one glyph in rows */
+  uint8_t  mxwidth;           /* Max width of any glyph in pixels */
+  uint8_t  mxbits;            /* Max number of bits per character code */
+  uint8_t  spwidth;           /* The width of a space in pixels */
 };
 </pre></ul>
 
@@ -2414,7 +2414,7 @@ FAR const struct nx_font_s *nxf_getfontset(void);
 #include &lt;nuttx/nxglib.h&gt;
 #include &lt;nuttx/nxfonts.h&gt;
 
-FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch);
+FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -2438,28 +2438,28 @@ FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16 ch);
 #include &lt;nuttx/nxglib.h&gt;
 #include &lt;nuttx/nxfonts.h&gt;
 
-int nxf_convert_2bpp(FAR ubyte *dest, uint16 height,
-                     uint16 width, uint16 stride,
+int nxf_convert_2bpp(FAR uint8_t *dest, uint16_t height,
+                     uint16_t width, uint16_t stride,
                      FAR const struct nx_fontbitmap_s *bm,
                      nxgl_mxpixel_t color);
-int nxf_convert_4bpp(FAR ubyte *dest, uint16 height,
-                     uint16 width, uint16 stride,
+int nxf_convert_4bpp(FAR uint8_t *dest, uint16_t height,
+                     uint16_t width, uint16_t stride,
                      FAR const struct nx_fontbitmap_s *bm,
                      nxgl_mxpixel_t color);
-int nxf_convert_8bpp(FAR ubyte *dest, uint16 height,
-                     uint16 width, uint16 stride,
+int nxf_convert_8bpp(FAR uint8_t *dest, uint16_t height,
+                     uint16_t width, uint16_t stride,
                      FAR const struct nx_fontbitmap_s *bm,
                      nxgl_mxpixel_t color);
-int nxf_convert_16bpp(FAR uint16 *dest, uint16 height,
-                      uint16 width, uint16 stride,
+int nxf_convert_16bpp(FAR uint16_t *dest, uint16_t height,
+                      uint16_t width, uint16_t stride,
                       FAR const struct nx_fontbitmap_s *bm,
                       nxgl_mxpixel_t color);
-int nxf_convert_24bpp(FAR uint32 *dest, uint16 height,
-                      uint16 width, uint16 stride,
+int nxf_convert_24bpp(FAR uint32_t *dest, uint16_t height,
+                      uint16_t width, uint16_t stride,
                       FAR const struct nx_fontbitmap_s *bm,
                       nxgl_mxpixel_t color);
-int nxf_convert_32bpp(FAR uint32 *dest, uint16 height,
-                      uint16 width, uint16 stride,
+int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
+                      uint16_t width, uint16_t stride,
                       FAR const struct nx_fontbitmap_s *bm,
                       nxgl_mxpixel_t color);
 </pre></ul>

@@ -79,13 +79,18 @@ include/types.h
   This provides architecture/toolchain-specific definitions for
   standard types.  This file should typedef:
 
-    sbyte, ubyte, uint8, boolean, sint16, uint16, sint32, uint32
+    _int8_t, _uint8_t, _int16_t, _uint16_t, _int32_t, _uint32_t
 
-  and
+  and if the architecture supports 64-bit integers.
 
-    sint64, uint64
+    _int24_t, _uint24_t, int64_t, uint64_t
 
-  if the architecture supports 64-bit integers.
+  NOTE that these type names have a leading underscore character.  This
+  file will be included(indirectly) by include/stdint.h and typedef'ed to
+  the final name without the underscore character.  This roundabout way of
+  doings things allows the stdint.h to be removed from the include/
+  directory in the event that the user prefers to use the definitions
+  provided by their toolchain header files
 
     irqstate_t
 
