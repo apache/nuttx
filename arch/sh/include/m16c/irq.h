@@ -45,7 +45,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /************************************************************************************
  * Definitions
@@ -249,13 +249,13 @@ struct xcptcontext
 
   /* These are saved copies of LR and SR used during signal processing. */
 
-  ubyte saved_pc[2];
-  ubyte saved_flg;
+  uint8_t saved_pc[2];
+  uint8_t saved_flg;
 #endif
 
   /* Register save area */
 
-  ubyte regs[XCPTCONTEXT_SIZE];
+  uint8_t regs[XCPTCONTEXT_SIZE];
 };
 #endif
 

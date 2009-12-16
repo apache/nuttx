@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/sh1/up_copystate.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "os_internal.h"
 #include "up_internal.h"
@@ -66,7 +66,7 @@
 
 /* A little faster than most memcpy's */
 
-void up_copystate(uint32 *dest, uint32 *src)
+void up_copystate(uint32_t *dest, uint32_t *src)
 {
   int i;
   for (i = 0; i < XCPTCONTEXT_REGS; i++)

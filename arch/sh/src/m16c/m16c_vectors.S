@@ -389,7 +389,7 @@ _m16c_commonvector:
 	reit					/* Return from interrupt */
 
 /************************************************************************************
- * Name: int up_saveusercontext(uint32 *regs)
+ * Name: int up_saveusercontext(uint32_t *regs)
  *
  * Description:
  *   Save the context of the calling function at the point of the return from the
@@ -456,7 +456,7 @@ _m16c_contextsave:
 	.size	_up_saveusercontext, .-_up_saveusercontext
 	
 /************************************************************************************
- * Name: void up_fullcontextrestore(uint32 *regs)
+ * Name: void up_fullcontextrestore(uint32_t *regs)
  *
  * Description:
  *   Restore the context of the using the provided register save array.

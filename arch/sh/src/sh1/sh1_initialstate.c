@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/sh/src/sh1/sh1_initialstate.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <nuttx/arch.h>
 #include "up_internal.h"
@@ -99,8 +99,8 @@ void up_initial_state(_TCB *tcb)
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
-  xcp->regs[REG_SP] = (uint32)tcb->adj_stack_ptr;
-  xcp->regs[REG_PC] = (uint32)tcb->start;
+  xcp->regs[REG_SP] = (uint32_t)tcb->adj_stack_ptr;
+  xcp->regs[REG_PC] = (uint32_t)tcb->start;
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   xcp->regs[REG_SR] = up_getsr() | 0x000000f0;
 #else

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/sh1/sh1_assert.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -76,9 +76,9 @@
  * Name: sh1_getsp
  ****************************************************************************/
 
-static inline uint32 sh1_getsp(void)
+static inline uint32_t sh1_getsp(void)
 {
-  uint32 sp;
+  uint32_t sp;
 
   __asm__ __volatile__
     (
@@ -94,13 +94,13 @@ static inline uint32 sh1_getsp(void)
  * Name: sh1_stackdump
  ****************************************************************************/
 
-static void sh1_stackdump(uint32 sp, uint32 stack_base)
+static void sh1_stackdump(uint32_t sp, uint32_t stack_base)
 {
-  uint32 stack ;
+  uint32_t stack ;
 
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
-      uint32 *ptr = (uint32*)stack;
+      uint32_t *ptr = (uint32_t*)stack;
       lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
@@ -113,7 +113,7 @@ static void sh1_stackdump(uint32 sp, uint32 stack_base)
 
 static inline void sh1_registerdump(void)
 {
-  uint32 *ptr = current_regs;
+  uint32_t *ptr = current_regs;
 
   /* Are user registers available from interrupt processing? */
 
@@ -147,13 +147,13 @@ static inline void sh1_registerdump(void)
 
 void up_dumpstate(void)
 {
-  _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  uint32 sp         = sh1_getsp();
-  uint32 ustackbase;
-  uint32 ustacksize;
+  _TCB    *rtcb     = (_TCB*)g_readytorun.head;
+  uint32_t sp       = sh1_getsp();
+  uint32_t ustackbase;
+  uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  uint32 istackbase;
-  uint32 istacksize;
+  uint32_t istackbase;
+  uint32_t istacksize;
 #endif
 
   /* Get the limits on the user stack memory */
@@ -165,14 +165,14 @@ void up_dumpstate(void)
     }
   else
     {
-      ustackbase = (uint32)rtcb->adj_stack_ptr;
-      ustacksize = (uint32)rtcb->adj_stack_size;
+      ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+      ustacksize = (uint32_t)rtcb->adj_stack_size;
     }
 
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32)&g_userstack;
+  istackbase = (uint32_t)&g_userstack;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
 
   /* Show interrupt stack info */

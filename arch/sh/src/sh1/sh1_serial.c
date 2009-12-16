@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/sh1/sh1_serial.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
@@ -137,31 +141,31 @@
 
 struct up_dev_s
 {
-          uint32 scibase;   /* Base address of SCI registers */
-          uint32 baud;      /* Configured baud */
-  volatile ubyte scr;       /* Saved SCR value */
-  volatile ubyte ssr;       /* Saved SR value (only used during interrupt processing) */
-           ubyte irq;       /* Base IRQ associated with this SCI */
-           ubyte parity;    /* 0=none, 1=odd, 2=even */
-           ubyte bits;      /* Number of bits (7 or 8) */
-         boolean stopbits2; /* TRUE: Configure with 2 stop bits instead of 1 */
+          uint32_t scibase;   /* Base address of SCI registers */
+          uint32_t baud;      /* Configured baud */
+ volatile  uint8_t scr;       /* Saved SCR value */
+ volatile  uint8_t ssr;       /* Saved SR value (only used during interrupt processing) */
+           uint8_t irq;       /* Base IRQ associated with this SCI */
+           uint8_t parity;    /* 0=none, 1=odd, 2=even */
+           uint8_t bits;      /* Number of bits (7 or 8) */
+              bool stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     up_setup(struct uart_dev_s *dev);
-static void    up_shutdown(struct uart_dev_s *dev);
-static int     up_attach(struct uart_dev_s *dev);
-static void    up_detach(struct uart_dev_s *dev);
-static int     up_interrupt(int irq, void *context);
-static int     up_receive(struct uart_dev_s *dev, uint32 *status);
-static void    up_rxint(struct uart_dev_s *dev, boolean enable);
-static boolean up_rxavailable(struct uart_dev_s *dev);
-static void    up_send(struct uart_dev_s *dev, int ch);
-static void    up_txint(struct uart_dev_s *dev, boolean enable);
-static boolean up_txready(struct uart_dev_s *dev);
+static int  up_setup(struct uart_dev_s *dev);
+static void up_shutdown(struct uart_dev_s *dev);
+static int  up_attach(struct uart_dev_s *dev);
+static void up_detach(struct uart_dev_s *dev);
+static int  up_interrupt(int irq, void *context);
+static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static void up_rxint(struct uart_dev_s *dev, bool enable);
+static bool up_rxavailable(struct uart_dev_s *dev);
+static void up_send(struct uart_dev_s *dev, int ch);
+static void up_txint(struct uart_dev_s *dev, bool enable);
+static bool up_txready(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -261,7 +265,7 @@ static uart_dev_t g_sci1port =
  * Name: up_serialin
  ****************************************************************************/
 
-static inline ubyte up_serialin(struct up_dev_s *priv, int offset)
+static inline uint8_t up_serialin(struct up_dev_s *priv, int offset)
 {
   return getreg8(priv->scibase + offset);
 }
@@ -270,7 +274,7 @@ static inline ubyte up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, ubyte value)
+static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value)
 {
   putreg8(value, priv->scibase + offset);
 }
@@ -279,7 +283,7 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, ubyte value)
  * Name: up_disablesciint
  ****************************************************************************/
 
-static inline void up_disablesciint(struct up_dev_s *priv, ubyte *scr)
+static inline void up_disablesciint(struct up_dev_s *priv, uint8_t *scr)
 {
   /* Return a copy of the current scr settings */
 
@@ -298,7 +302,7 @@ static inline void up_disablesciint(struct up_dev_s *priv, ubyte *scr)
  * Name: up_restoresciint
  ****************************************************************************/
 
-static inline void up_restoresciint(struct up_dev_s *priv, ubyte scr)
+static inline void up_restoresciint(struct up_dev_s *priv, uint8_t scr)
 {
   /* Set the interrupt bits in the scr value */
 
@@ -368,8 +372,8 @@ static inline void up_setbrr(struct up_dev_s *priv, unsigned int baud)
    *       = 32
    */
 
-  uint32 brr = ((((SH1_CLOCK + 16) / 32) + (baud >> 1)) / baud) - 1;
-  up_serialout(priv, SH1_SCI_BRR_OFFSET, (uint16)brr);
+  uint32_t brr = ((((SH1_CLOCK + 16) / 32) + (baud >> 1)) / baud) - 1;
+  up_serialout(priv, SH1_SCI_BRR_OFFSET, (uint16_t))brr);
 }
 
 /****************************************************************************
@@ -386,7 +390,7 @@ static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_SCI_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  ubyte smr;
+  uint8_t smr;
 
   /* Disable the transmitter and receiver */
 
@@ -651,8 +655,8 @@ static int up_interrupt(int irq, void *context)
 static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  ubyte rdr;
-  ubyte ssr;
+  uint8_t rdr;
+  uint8_t ssr;
 
   /* Read the character from the RDR port */
 
@@ -668,7 +672,7 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 
   /* For status, return the SSR at the time that the interrupt was received */
 
-  *status = (uint32)priv->ssr << 8 | rdr;
+  *status = (uint32_t)priv->ssr << 8 | rdr;
 
   /* Return the received character */
 
@@ -683,7 +687,7 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
  *
  ****************************************************************************/
 
-static void up_rxint(struct uart_dev_s *dev, boolean enable)
+static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
@@ -719,11 +723,11 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
  * Name: up_rxavailable
  *
  * Description:
- *   Return TRUE if the RDR is not empty
+ *   Return true if the RDR is not empty
  *
  ****************************************************************************/
 
-static boolean up_rxavailable(struct uart_dev_s *dev)
+static bool up_rxavailable(struct uart_dev_s *dev)
 {
   /* Return true if the RDR full bit is set in the SSR */
 
@@ -742,11 +746,11 @@ static boolean up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  ubyte ssr;
+  uint8_t ssr;
 
   /* Write the data to the TDR */
 
-  up_serialout(priv, SH1_SCI_TDR_OFFSET, (ubyte)ch);
+  up_serialout(priv, SH1_SCI_TDR_OFFSET, (uint8_t)ch);
 
   /* Clear the TDRE bit in the SSR */
 
@@ -763,7 +767,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void up_txint(struct uart_dev_s *dev, boolean enable)
+static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
@@ -814,11 +818,11 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
  * Name: up_txready
  *
  * Description:
- *   Return TRUE if the TDR is empty
+ *   Return true if the TDR is empty
  *
  ****************************************************************************/
 
-static boolean up_txready(struct uart_dev_s *dev)
+static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return (up_serialin(priv, SH1_SCI_SSR_OFFSET) & SH1_SCISSR_TDRE) != 0;
@@ -856,7 +860,7 @@ void up_earlyconsoleinit(void)
   /* Configuration whichever one is the console */
 
 #ifdef HAVE_CONSOLE
-  CONSOLE_DEV.isconsole = TRUE;
+  CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 #endif
 }
@@ -900,7 +904,7 @@ int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  ubyte  scr;
+  uint8_t  scr;
 
   up_disablesciint(priv, &scr);
 
@@ -915,7 +919,7 @@ int up_putc(int ch)
     }
 
   up_waittxready(priv);
-  up_serialout(priv, SH1_SCI_TDR_OFFSET, (ubyte)ch);
+  up_serialout(priv, SH1_SCI_TDR_OFFSET, (uint8_t)ch);
 
   up_waittxready(priv);
   up_restoresciint(priv, scr);

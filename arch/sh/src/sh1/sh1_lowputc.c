@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/sh/src/sh1/sh1_lowputc.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <nuttx/arch.h>
 
 #include "up_internal.h"
@@ -197,7 +197,7 @@ static inline int up_txready(void)
 void up_lowputc(char ch)
 {
 #ifdef HAVE_CONSOLE
-  ubyte ssr;
+  uint8_t ssr;
 
   /* Wait until the TDR is avaible */
 
@@ -228,7 +228,7 @@ void up_lowputc(char ch)
 void up_lowsetup(void)
 {
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_SCI_CONFIG)
-  ubyte scr;
+  uint8_t scr;
 
   /* Disable the transmitter and receiver */
 

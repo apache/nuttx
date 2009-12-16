@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/sh/include/sh1/irq.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /************************************************************************************
  * Definitions
@@ -264,7 +264,7 @@
  * of the corresponding vector in the vector table.
  *
  * These offsets are specified as a vector number (suitably for indexing an array
- * of uint32) but would have to by multiplied by 4 to get an addressable, byte
+ * of uint32_t) but would have to by multiplied by 4 to get an addressable, byte
  * offset.
  */
 
@@ -468,13 +468,13 @@ struct xcptcontext
 
   /* These are saved copies of LR and SR used during signal processing. */
 
-  uint32 saved_pc;
-  uint32 saved_sr;
+  uint32_t saved_pc;
+  uint32_t saved_sr;
 #endif
 
   /* Register save area */
 
-  uint32 regs[XCPTCONTEXT_REGS];
+  uint32_t regs[XCPTCONTEXT_REGS];
 };
 #endif
 
@@ -526,14 +526,14 @@ static inline irqstate_t irqsave(void)
 
 static inline void irqdisable(void)
 {
-  uint32 flags = __getsr();
+  uint32_t flags = __getsr();
   __setsr(flags | 0x000000f0);
 }
 /* Enable IRQs */
 
 static inline void irqenable(void)
 {
-  uint32 flags = __getsr();
+  uint32_t flags = __getsr();
   __setsr(flags & ~0x000000f0);
 }
 

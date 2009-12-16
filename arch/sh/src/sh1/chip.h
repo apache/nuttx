@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/sh/src/sh1/chip.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #ifdef CONFIG_ARCH_SH7032
 #  include "sh1_703x.h"
@@ -63,7 +63,7 @@
 
 #ifndef __ASSEMBLY__
 #  if CONFIG_ARCH_INTERRUPTSTACK > 3
-     extern uint32 g_userstack;
+     extern uint32_t g_userstack;
 #  endif
 #endif
 

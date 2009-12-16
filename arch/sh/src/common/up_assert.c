@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/common/up_assert.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
@@ -107,7 +107,7 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const ubyte *filename, int lineno)
+void up_assert(const uint8_t *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
   _TCB *rtcb = (_TCB*)g_readytorun.head;
@@ -129,7 +129,7 @@ void up_assert(const ubyte *filename, int lineno)
  * Name: up_assert_code
  ****************************************************************************/
 
-void up_assert_code(const ubyte *filename, int lineno, int errorcode)
+void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
   _TCB *rtcb = (_TCB*)g_readytorun.head;

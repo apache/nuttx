@@ -38,8 +38,8 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <nuttx/arch.h>
 
 #include "up_internal.h"
@@ -221,7 +221,7 @@ static inline int up_txready(void)
 #if defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 static inline void up_lowserialsetup(void)
 {
-  ubyte regval;
+  uint8_t regval;
 
   /* Set the baud rate generator */
 
@@ -282,7 +282,7 @@ static inline void up_lowserialsetup(void)
 
   /* Read any data left in the RX fifo */
 
-  regval = (ubyte)getreg16(M16C_UART_BASE + M16C_UART_RB);
+  regval = (uint8_t)getreg16(M16C_UART_BASE + M16C_UART_RB);
 }
 #endif /* HAVE_SERIALCONFIG && !CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -308,7 +308,7 @@ void up_lowputc(char ch)
 
   /* Write the data to the transmit buffer */
 
-  putreg16((uint16)ch, M16C_UART_BASE + M16C_UART_TB);
+  putreg16((uint16_t))ch, M16C_UART_BASE + M16C_UART_TB);
 #endif
 }
 #endif

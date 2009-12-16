@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -155,8 +155,8 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              current_regs[REG_PC]   = (uint32)up_sigdeliver >> 8;
-              current_regs[REG_PC+1] = (uint32)up_sigdeliver;
+              current_regs[REG_PC]   = (uint32_t)up_sigdeliver >> 8;
+              current_regs[REG_PC+1] = (uint32_t)up_sigdeliver;
               current_regs[REG_FLG] &= ~M16C_FLG_I;
 
               /* And make sure that the saved context in the TCB
@@ -189,8 +189,8 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]   = (uint32)up_sigdeliver >> 8;
-          tcb->xcp.regs[REG_PC+1] = (uint32)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]   = (uint32_t)up_sigdeliver >> 8;
+          tcb->xcp.regs[REG_PC+1] = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_FLG] &= ~M16C_FLG_I;
         }
 
