@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -94,13 +94,13 @@
 
 int up_hardfault(int irq, FAR void *context)
 {
-  uint32 *regs = (uint32*)context;
-  uint16 *pc;
-  uint16 insn;
+  uint32_t *regs = (uint32_t*)context;
+  uint16_t *pc;
+  uint16_t insn;
 
   /* Get the value of the program counter where the fault occurred */
 
-  pc = (uint16*)regs[REG_PC] - 1;
+  pc = (uint16_t*)regs[REG_PC] - 1;
   if ((void*)pc >= (void*)&_stext && (void*)pc < (void*)&_etext)
     {
       /* Fetch the instruction that caused the Hard fault */

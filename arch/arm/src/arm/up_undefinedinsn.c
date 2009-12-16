@@ -38,14 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Output debug info if stack dump is selected -- even if 
@@ -73,7 +73,7 @@
  * Name: up_undefinedinsn
  ****************************************************************************/
 
-void up_undefinedinsn(uint32 *regs)
+void up_undefinedinsn(uint32_t *regs)
 {
   lldbg("Undefined instruction at 0x%x\n", regs[REG_PC]);
   current_regs = regs;

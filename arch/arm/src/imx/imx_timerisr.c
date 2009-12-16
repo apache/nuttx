@@ -39,7 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
 #include <errno.h>
 #include <nuttx/arch.h>
@@ -49,7 +50,7 @@
 #include "up_arch.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,9 +74,9 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32 *regs)
+int up_timerisr(int irq, uint32_t *regs)
 {
-  uint32 tstat;
+  uint32_t tstat;
   int    ret = -EIO;
 
   /* Get and clear the interrupt status */
@@ -107,7 +108,7 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
-  uint32 tctl;
+  uint32_t tctl;
 
   /* Make sure the timer interrupts are disabled */
 

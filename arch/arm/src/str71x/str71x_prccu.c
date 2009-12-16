@@ -38,8 +38,8 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -51,7 +51,7 @@
 #include "str71x_internal.h"
 
 /********************************************************************************
- * Definitions
+ * Pre-procesor Definitions
  ********************************************************************************/
 
 /* Select set of peripherals to be enabled */
@@ -359,8 +359,8 @@
 
 void str71x_prccuinit(void)
 {
-  uint32 reg32;
-  uint16 reg16;
+  uint32_t reg32;
+  uint16_t reg16;
 
   /* Divide RCLK to obtain PCLK1 & 2 clock for the APB1 & 2 peripherals.  The divider
    * values are provided in board.h

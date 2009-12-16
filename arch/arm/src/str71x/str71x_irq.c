@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <errno.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -49,14 +50,14 @@
 #include "chip.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-procesor Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-uint32 *current_regs;
+uint32_t *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -116,7 +117,7 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  uint32 reg32;
+  uint32_t reg32;
 
   if ((unsigned)irq < NR_IRQS)
     {
@@ -138,7 +139,7 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  uint32 reg32;
+  uint32_t reg32;
 
   if ((unsigned)irq < NR_IRQS)
     {
@@ -160,7 +161,7 @@ void up_enable_irq(int irq)
 
 void up_maskack_irq(int irq)
 {
-  uint32 reg32;
+  uint32_t reg32;
 
   if ((unsigned)irq < NR_IRQS)
     {
@@ -190,8 +191,8 @@ void up_maskack_irq(int irq)
 
 int up_prioritize_irq(int irq, int priority)
 {
-  uint32 addr;
-  uint32 reg32;
+  uint32_t addr;
+  uint32_t reg32;
 
   /* The current interrupt priority (CIP) is always zero, so a minimum prioriy
    * of one is enforced to prevent disabling the interrupt.

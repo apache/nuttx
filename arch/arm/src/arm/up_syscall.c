@@ -38,14 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
+
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Output debug info if stack dump is selected -- even if 
@@ -86,7 +88,7 @@
  *
  ****************************************************************************/
 
-void up_syscall(uint32 *regs)
+void up_syscall(uint32_t *regs)
 {
   lldbg("Syscall from 0x%x\n", regs[REG_PC]);
   current_regs = regs;

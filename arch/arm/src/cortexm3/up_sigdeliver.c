@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -53,7 +53,7 @@
 #ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -82,7 +82,7 @@
 void up_sigdeliver(void)
 {
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32 regs[XCPTCONTEXT_REGS];
+  uint32_t regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the
@@ -117,7 +117,7 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state */
 
-  irqrestore((uint16)regs[REG_PRIMASK]);
+  irqrestore((uint16_t)regs[REG_PRIMASK]);
 
   /* Deliver the signals */
 

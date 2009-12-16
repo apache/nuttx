@@ -38,14 +38,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Output debug info if stack dump is selected -- even if 
@@ -73,7 +76,7 @@
  * Name: up_dataabort
  ****************************************************************************/
 
-void up_dataabort(uint32 *regs)
+void up_dataabort(uint32_t *regs)
 {
   lldbg("Data abort at 0x%x\n", regs[REG_PC]);
   current_regs = regs;

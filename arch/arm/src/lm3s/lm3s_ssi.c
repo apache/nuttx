@@ -38,8 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
@@ -57,7 +59,7 @@
 #include "lm3s_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Enables debug output from this file (needs CONFIG_DEBUG with
@@ -150,8 +152,8 @@ struct lm3s_ssidev_s
 
   /* These following are the source and destination buffers of the transfer.
    * they are retained in this structure so that they will be accessible
-   * from an interrupt handler.  The actual type of the buffer is ubyte is
-   * nbits <=8 and uint16 is nbits >8.
+   * from an interrupt handler.  The actual type of the buffer is uint8_t is
+   * nbits <=8 and uint16_t is nbits >8.
    */
 
   void  *txbuffer;              /* Source buffer */
@@ -168,19 +170,19 @@ struct lm3s_ssidev_s
   void  (*rxword)(struct lm3s_ssidev_s *priv);
 
 #if NSSI_ENABLED > 1
-  uint32 base;                  /* SSI register base address */
+  uint32_t base;                /* SSI register base address */
 #endif
-  uint32 frequency;             /* Current desired SCLK frequency */
-  uint32 actual;                /* Current actual SCLK frequency */
+  uint32_t frequency;           /* Current desired SCLK frequency */
+  uint32_t actual;              /* Current actual SCLK frequency */
 
-  int    ntxwords;              /* Number of words left to transfer on the Tx FIFO */
-  int    nrxwords;              /* Number of words received on the Rx FIFO */
-  int    nwords;                /* Number of words to be exchanged */
+  int      ntxwords;            /* Number of words left to transfer on the Tx FIFO */
+  int      nrxwords;            /* Number of words received on the Rx FIFO */
+  int      nwords;              /* Number of words to be exchanged */
 
-  ubyte  mode;                  /* Current mode */
-  ubyte  nbits;                 /* Current number of bits per word */
+  uint8_t  mode;                /* Current mode */
+  uint8_t  nbits;               /* Current number of bits per word */
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
-  ubyte  irq;                   /* SSI IRQ number */
+  uint8_t  irq;                 /* SSI IRQ number */
 #endif
 };
 
@@ -190,57 +192,64 @@ struct lm3s_ssidev_s
 
 /* SSI register access */
 
-static inline uint32 ssi_getreg(struct lm3s_ssidev_s *priv, unsigned int offset);
-static inline void ssi_putreg(struct lm3s_ssidev_s *priv, unsigned int offset, uint32 value);
+static inline uint32_t ssi_getreg(struct lm3s_ssidev_s *priv,
+              unsigned int offset);
+static inline void ssi_putreg(struct lm3s_ssidev_s *priv, unsigned int offset,
+              uint32_t value);
 
 /* Misc helpers */
 
-static uint32 ssi_disable(struct lm3s_ssidev_s *priv);
-static void ssi_enable(struct lm3s_ssidev_s *priv, uint32 enable);
+static uint32_t ssi_disable(struct lm3s_ssidev_s *priv);
+static void ssi_enable(struct lm3s_ssidev_s *priv, uint32_t enable);
 static void ssi_semtake(sem_t *sem);
 #define ssi_semgive(s) sem_post(s);
 
 /* SSI data transfer */
 
-static void   ssi_txnull(struct lm3s_ssidev_s *priv);
-static void   ssi_txuint16(struct lm3s_ssidev_s *priv);
-static void   ssi_txubyte(struct lm3s_ssidev_s *priv);
-static void   ssi_rxnull(struct lm3s_ssidev_s *priv);
-static void   ssi_rxuint16(struct lm3s_ssidev_s *priv);
-static void   ssi_rxubyte(struct lm3s_ssidev_s *priv);
-static inline boolean ssi_txfifofull(struct lm3s_ssidev_s *priv);
-static inline boolean ssi_rxfifoempty(struct lm3s_ssidev_s *priv);
+static void ssi_txnull(struct lm3s_ssidev_s *priv);
+static void ssi_txuint16(struct lm3s_ssidev_s *priv);
+static void ssi_txuint8(struct lm3s_ssidev_s *priv);
+static void ssi_rxnull(struct lm3s_ssidev_s *priv);
+static void ssi_rxuint16(struct lm3s_ssidev_s *priv);
+static void ssi_rxuint8(struct lm3s_ssidev_s *priv);
+static inline bool ssi_txfifofull(struct lm3s_ssidev_s *priv);
+static inline bool ssi_rxfifoempty(struct lm3s_ssidev_s *priv);
 #if CONFIG_SSI_TXLIMIT == 1 && defined(CONFIG_SSI_POLLWAIT)
 static inline int ssi_performtx(struct lm3s_ssidev_s *priv);
 #else
-static int    ssi_performtx(struct lm3s_ssidev_s *priv);
+static int  ssi_performtx(struct lm3s_ssidev_s *priv);
 #endif
 static inline void ssi_performrx(struct lm3s_ssidev_s *priv);
-static int    ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
-                           void *rxbuffer, unsigned int nwords);
+static int  ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
+                         void *rxbuffer, unsigned int nwords);
 
 /* Interrupt handling */
 
 #ifndef CONFIG_SSI_POLLWAIT
 static inline struct lm3s_ssidev_s *ssi_mapirq(int irq);
-static int    ssi_interrupt(int irq, void *context);
+static int  ssi_interrupt(int irq, void *context);
 #endif
 
 /* SPI methods */
 
-static void   ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32 frequency);
-static uint32 ssi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
-static void   ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode);
-static void   ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void   ssi_setbitsinternal(struct lm3s_ssidev_s *priv, int nbits);
-static void   ssi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16 ssi_send(FAR struct spi_dev_s *dev, uint16 wd);
+static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv,
+              uint32_t frequency);
+static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
+              uint32_t frequency);
+static void ssi_setmodeinternal(struct lm3s_ssidev_s *priv,
+              enum spi_mode_e mode);
+static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+static void ssi_setbitsinternal(struct lm3s_ssidev_s *priv, int nbits);
+static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits);
+static uint16_t ssi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void   ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                           FAR void *rxbuffer, size_t nwords);
+static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                         FAR void *rxbuffer, size_t nwords);
 #else
-static void   ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
-static void   ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+              size_t nwords);
+static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+              size_t nwords);
 #endif
 
 /****************************************************************************
@@ -317,7 +326,7 @@ static struct lm3s_ssidev_s g_ssidev[] =
  *
  ****************************************************************************/
 
-static inline uint32 ssi_getreg(struct lm3s_ssidev_s *priv, unsigned int offset)
+static inline uint32_t ssi_getreg(struct lm3s_ssidev_s *priv, unsigned int offset)
 {
 #if NSSI_ENABLED > 1
   return getreg32(priv->base + offset);
@@ -342,7 +351,7 @@ static inline uint32 ssi_getreg(struct lm3s_ssidev_s *priv, unsigned int offset)
  *
  ****************************************************************************/
 
-static inline void ssi_putreg(struct lm3s_ssidev_s *priv, unsigned int offset, uint32 value)
+static inline void ssi_putreg(struct lm3s_ssidev_s *priv, unsigned int offset, uint32_t value)
 {
 #if NSSI_ENABLED > 1
   putreg32(value, priv->base + offset);
@@ -366,10 +375,10 @@ static inline void ssi_putreg(struct lm3s_ssidev_s *priv, unsigned int offset, u
  *
  ****************************************************************************/
 
-static uint32 ssi_disable(struct lm3s_ssidev_s *priv)
+static uint32_t ssi_disable(struct lm3s_ssidev_s *priv)
 {
-  uint32 retval;
-  uint32 regval;
+  uint32_t retval;
+  uint32_t regval;
 
   retval = ssi_getreg(priv, LM3S_SSI_CR1_OFFSET);
   regval = (retval & ~SSI_CR1_SSE);
@@ -392,9 +401,9 @@ static uint32 ssi_disable(struct lm3s_ssidev_s *priv)
  *
  ****************************************************************************/
 
-static void ssi_enable(struct lm3s_ssidev_s *priv, uint32 enable)
+static void ssi_enable(struct lm3s_ssidev_s *priv, uint32_t enable)
 {
-  uint32 regval = ssi_getreg(priv, LM3S_SSI_CR1_OFFSET);
+  uint32_t regval = ssi_getreg(priv, LM3S_SSI_CR1_OFFSET);
   regval &= ~SSI_CR1_SSE;
   regval  |= (enable & SSI_CR1_SSE);
   ssi_putreg(priv, LM3S_SSI_CR1_OFFSET, regval);
@@ -427,10 +436,10 @@ static void ssi_semtake(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: ssi_txnull, ssi_txuint16, and ssi_txubyte
+ * Name: ssi_txnull, ssi_txuint16, and ssi_txuint8
  *
  * Description:
- *   Transfer all ones, a ubyte, or uint16 to Tx FIFO and update the txbuffer
+ *   Transfer all ones, a uint8_t, or uint16_t to Tx FIFO and update the txbuffer
  *   pointer appropriately.  The selected function dependes on (1) if there
  *   is a source txbuffer provided, and (2) if the number of bits per
  *   word is <=8 or >8.
@@ -451,25 +460,25 @@ static void ssi_txnull(struct lm3s_ssidev_s *priv)
 
 static void ssi_txuint16(struct lm3s_ssidev_s *priv)
 {
-  uint16 *ptr    = (uint16*)priv->txbuffer;
+  uint16_t *ptr    = (uint16_t*)priv->txbuffer;
   ssivdbg("TX: %p->%04x\n", ptr, *ptr);
-  ssi_putreg(priv, LM3S_SSI_DR_OFFSET, (uint32)(*ptr++));
+  ssi_putreg(priv, LM3S_SSI_DR_OFFSET, (uint32_t)(*ptr++));
   priv->txbuffer = (void*)ptr;
 }
 
-static void ssi_txubyte(struct lm3s_ssidev_s *priv)
+static void ssi_txuint8(struct lm3s_ssidev_s *priv)
 {
-  ubyte *ptr     = (ubyte*)priv->txbuffer;
+  uint8_t *ptr   = (uint8_t*)priv->txbuffer;
   ssivdbg("TX: %p->%02x\n", ptr, *ptr);
-  ssi_putreg(priv, LM3S_SSI_DR_OFFSET, (uint32)(*ptr++));
+  ssi_putreg(priv, LM3S_SSI_DR_OFFSET, (uint32_t)(*ptr++));
   priv->txbuffer = (void*)ptr;
 }
 
 /****************************************************************************
- * Name: ssi_rxnull, ssi_rxuint16, and ssi_rxubyte
+ * Name: ssi_rxnull, ssi_rxuint16, and ssi_rxuint8
  *
  * Description:
- *   Discard input, save a ubyte, or or save a uint16 from Tx FIFO in the
+ *   Discard input, save a uint8_t, or or save a uint16_t from Tx FIFO in the
  *   user rxvbuffer and update the rxbuffer pointer appropriately.  The
  *   selected function dependes on (1) if there is a desination rxbuffer
  *   provided, and (2) if the number of bits per word is <=8 or >8.
@@ -485,7 +494,7 @@ static void ssi_txubyte(struct lm3s_ssidev_s *priv)
 static void ssi_rxnull(struct lm3s_ssidev_s *priv)
 {
 #if defined(SSI_DEBUG) && defined(CONFIG_DEBUG_VERBOSE)
-  uint32 regval  = ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
+  uint32_t regval  = ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
   ssivdbg("RX: discard %04x\n", regval);
 #else
   (void)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
@@ -494,16 +503,16 @@ static void ssi_rxnull(struct lm3s_ssidev_s *priv)
 
 static void ssi_rxuint16(struct lm3s_ssidev_s *priv)
 {
-  uint16 *ptr    = (uint16*)priv->rxbuffer;
-  *ptr           = (uint16)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
+  uint16_t *ptr    = (uint16_t*)priv->rxbuffer;
+  *ptr           = (uint16_t)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
   ssivdbg("RX: %p<-%04x\n", ptr, *ptr);
   priv->rxbuffer = (void*)(++ptr);
 }
 
-static void ssi_rxubyte(struct lm3s_ssidev_s *priv)
+static void ssi_rxuint8(struct lm3s_ssidev_s *priv)
 {
-  ubyte *ptr     = (ubyte*)priv->rxbuffer;
-  *ptr           = (ubyte)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
+  uint8_t *ptr   = (uint8_t*)priv->rxbuffer;
+  *ptr           = (uint8_t)ssi_getreg(priv, LM3S_SSI_DR_OFFSET);
   ssivdbg("RX: %p<-%02x\n", ptr, *ptr);
   priv->rxbuffer = (void*)(++ptr);
 }
@@ -512,17 +521,17 @@ static void ssi_rxubyte(struct lm3s_ssidev_s *priv)
  * Name: ssi_txfifofull
  *
  * Description:
- *   Return TRUE if the Tx FIFO is full
+ *   Return true if the Tx FIFO is full
  *
  * Input Parameters:
  *   priv   - Device-specific state data
  *
  * Returned Value:
- *   TRUE: Not full
+ *   true: Not full
  *
  ****************************************************************************/
 
-static inline boolean ssi_txfifofull(struct lm3s_ssidev_s *priv)
+static inline bool ssi_txfifofull(struct lm3s_ssidev_s *priv)
 {
   return (ssi_getreg(priv, LM3S_SSI_SR_OFFSET) & SSI_SR_TNF) == 0;
 }
@@ -531,17 +540,17 @@ static inline boolean ssi_txfifofull(struct lm3s_ssidev_s *priv)
  * Name: ssi_rxfifoempty
  *
  * Description:
- *   Return TRUE if the Rx FIFO is empty
+ *   Return true if the Rx FIFO is empty
  *
  * Input Parameters:
  *   priv   - Device-specific state data
  *
  * Returned Value:
- *   TRUE: Not empty
+ *   true: Not empty
  *
  ****************************************************************************/
 
-static inline boolean ssi_rxfifoempty(struct lm3s_ssidev_s *priv)
+static inline bool ssi_rxfifoempty(struct lm3s_ssidev_s *priv)
 {
   return (ssi_getreg(priv, LM3S_SSI_SR_OFFSET) & SSI_SR_RNE) == 0;
 }
@@ -583,7 +592,7 @@ static inline int ssi_performtx(struct lm3s_ssidev_s *priv)
 static int ssi_performtx(struct lm3s_ssidev_s *priv)
 {
 #ifndef CONFIG_SSI_POLLWAIT
-  uint32 regval;
+  uint32_t regval;
 #endif
   int ntxd = 0;  /* Number of words written to Tx FIFO */
 
@@ -666,7 +675,7 @@ static int ssi_performtx(struct lm3s_ssidev_s *priv)
 static inline void ssi_performrx(struct lm3s_ssidev_s *priv)
 {
 #ifndef CONFIG_SSI_POLLWAIT
-  uint32 regval;
+  uint32_t regval;
 #endif
 
   /* Loop while data is available in the Rx FIFO */
@@ -728,9 +737,9 @@ static inline void ssi_performrx(struct lm3s_ssidev_s *priv)
  *   txbuffer - The buffer of data to send to the device (may be NULL).
  *   rxbuffer - The buffer to receive data from the device (may be NULL).
  *   nwords   - The total number of words to be exchanged.  If the interface
- *              uses <= 8 bits per word, then this is the number of ubytes;
+ *              uses <= 8 bits per word, then this is the number of uint8_t's;
  *              if the interface uses >8 bits per word, then this is the
- *              number of uint16's
+ *              number of uint16_t's
  *
  * Returned Value:
  *   0: success, <0:Negated error number on failure
@@ -750,11 +759,11 @@ static int ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
 
   /* Set up to perform the transfer */
 
-  priv->txbuffer     = (ubyte*)txbuffer; /* Source buffer */
-  priv->rxbuffer     = (ubyte*)rxbuffer; /* Destination buffer */
-  priv->ntxwords     = nwords;           /* Number of words left to send */
-  priv->nrxwords     = 0;                /* Number of words received */
-  priv->nwords       = nwords;           /* Total number of exchanges */
+  priv->txbuffer     = (uint8_t*)txbuffer; /* Source buffer */
+  priv->rxbuffer     = (uint8_t*)rxbuffer; /* Destination buffer */
+  priv->ntxwords     = nwords;             /* Number of words left to send */
+  priv->nrxwords     = 0;                  /* Number of words received */
+  priv->nwords       = nwords;             /* Total number of exchanges */
 
   /* Set up the low-level data transfer function pointers */
 
@@ -765,8 +774,8 @@ static int ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
     }
   else
     {
-      priv->txword = ssi_txubyte;
-      priv->rxword = ssi_rxubyte;
+      priv->txword = ssi_txuint8;
+      priv->rxword = ssi_rxuint8;
     }
 
   if (!txbuffer)
@@ -893,9 +902,9 @@ static inline struct lm3s_ssidev_s *ssi_mapirq(int irq)
  *   txbuffer - The buffer of data to send to the device (may be NULL).
  *   rxbuffer - The buffer to receive data from the device (may be NULL).
  *   nwords   - The total number of words to be exchanged.  If the interface
- *              uses <= 8 bits per word, then this is the number of ubytes;
+ *              uses <= 8 bits per word, then this is the number of uint8_t's;
  *              if the interface uses >8 bits per word, then this is the
- *              number of uint16's
+ *              number of uint16_t's
  *
  * Returned Value:
  *   0: success, <0:Negated error number on failure
@@ -906,7 +915,7 @@ static inline struct lm3s_ssidev_s *ssi_mapirq(int irq)
 static int ssi_interrupt(int irq, void *context)
 {
   struct lm3s_ssidev_s *priv = ssi_mapirq(irq);
-  uint32 regval;
+  uint32_t regval;
   int ntxd;
 
   DEBUGASSERT(priv != NULL);
@@ -974,12 +983,12 @@ static int ssi_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32 frequency)
+static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32_t frequency)
 {
-  uint32 maxdvsr;
-  uint32 cpsdvsr;
-  uint32 regval;
-  uint32 scr;
+  uint32_t maxdvsr;
+  uint32_t cpsdvsr;
+  uint32_t regval;
+  uint32_t scr;
 
   ssidbg("frequency: %d\n", frequency);
   if (priv && frequency != priv->frequency)
@@ -1055,10 +1064,10 @@ static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32 frequenc
     }
 }
 
-static uint32 ssi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
+static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
-  uint32 enable;
+  uint32_t enable;
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
 
@@ -1087,8 +1096,8 @@ static uint32 ssi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
 
 static void ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode)
 {
-  uint32 modebits;
-  uint32 regval;
+  uint32_t modebits;
+  uint32_t regval;
 
   ssidbg("mode: %d\n", mode);
   if (priv && mode != priv->mode)
@@ -1130,7 +1139,7 @@ static void ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode
 static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
-  uint32 enable;
+  uint32_t enable;
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
 
@@ -1158,7 +1167,7 @@ static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
 static void ssi_setbitsinternal(struct lm3s_ssidev_s *priv, int nbits)
 {
-  uint32 regval;
+  uint32_t regval;
 
   ssidbg("nbits: %d\n", nbits);
   if (priv && nbits != priv->nbits && nbits >=4 && nbits <= 16)
@@ -1176,7 +1185,7 @@ static void ssi_setbitsinternal(struct lm3s_ssidev_s *priv, int nbits)
 static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
-  uint32 enable;
+  uint32_t enable;
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
 
@@ -1203,10 +1212,10 @@ static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16 ssi_send(FAR struct spi_dev_s *dev, uint16 wd)
+static uint16_t ssi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
   struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s*)dev;
-  uint16 response = 0;
+  uint16_t response = 0;
 
   (void)ssi_transfer(priv, &wd, &response, 1);
   return response;
@@ -1225,7 +1234,7 @@ static uint16 ssi_send(FAR struct spi_dev_s *dev, uint16 wd)
  *   nwords   - the length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into ubytes; if nbits >8, the data is packed into uint16's
+ *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -1253,7 +1262,7 @@ static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -1280,7 +1289,7 @@ static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -1325,7 +1334,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   struct lm3s_ssidev_s *priv;
   irqstate_t flags;
-  ubyte regval;
+  uint8_t regval;
 
   ssidbg("port: %d\n", port);
  

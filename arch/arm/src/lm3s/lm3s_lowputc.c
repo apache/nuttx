@@ -38,7 +38,7 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -47,7 +47,7 @@
 #include "lm3s_internal.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 /* Configuration **********************************************************/
@@ -204,7 +204,7 @@ void up_lowputc(char ch)
 
   /* Then send the character */
 
-  putreg32((uint32)ch, LM3S_CONSOLE_BASE+LM3S_UART_DR_OFFSET);
+  putreg32((uint32_t)ch, LM3S_CONSOLE_BASE+LM3S_UART_DR_OFFSET);
 #endif
 }
 
@@ -220,9 +220,9 @@ void up_lowputc(char ch)
 
 void up_lowsetup(void)
 {
-  uint32 regval;
+  uint32_t regval;
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
-  uint32 ctl;
+  uint32_t ctl;
 #endif
 
   /* Enable the selected UARTs and configure GPIO pins to need by the

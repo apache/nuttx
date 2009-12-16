@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <nuttx/arch.h>
@@ -48,7 +50,7 @@
 #include "psr.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -87,11 +89,11 @@ void up_initial_state(_TCB *tcb)
 
   /* Save the initial stack pointer */
 
-  xcp->regs[REG_SP]      = (uint32)tcb->adj_stack_ptr;
+  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
 
   /* Save the task entry point (stripping off the thumb bit) */
 
-  xcp->regs[REG_PC]      = (uint32)tcb->start & ~1;
+  xcp->regs[REG_PC]      = (uint32_t)tcb->start & ~1;
   
   /* Specify thumb mode */
 
@@ -108,7 +110,7 @@ void up_initial_state(_TCB *tcb)
        * alloacated D-Space region.
        */
 
-      xcp->regs[REG_PIC] = (uint32)tcb->dspace->region;
+      xcp->regs[REG_PIC] = (uint32_t)tcb->dspace->region;
     }
 
   /* Make certain that bit 0 is set in the main entry address.  This
@@ -118,7 +120,7 @@ void up_initial_state(_TCB *tcb)
    */
 
 #ifdef CONFIG_NXFLAT
-  tcb->entry.main = (main_t)((uint32)tcb->entry.main | 1);
+  tcb->entry.main = (main_t)((uint32_t)tcb->entry.main | 1);
 #endif
 #endif
 

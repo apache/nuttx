@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 #include <arch/irq.h>
 
@@ -59,7 +61,7 @@
  * Private Data
  ****************************************************************************/
 
-static const uint32 g_gpiobase[STM32_NGPIO_PORTS] =
+static const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
 {
 #if STM32_NGPIO_PORTS > 0
 	STM32_GPIOA_BASE,
@@ -104,17 +106,17 @@ static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
  *
  ****************************************************************************/
 
-int stm32_configgpio(uint32 cfgset)
+int stm32_configgpio(uint32_t cfgset)
 {
-  uint32 base;
-  uint32 cr;
-  uint32 regval;
-  uint32 regaddr;
+  uint32_t base;
+  uint32_t cr;
+  uint32_t regval;
+  uint32_t regaddr;
   unsigned int port;
   unsigned int pin;
   unsigned int pos;
   unsigned int modecnf;
-  boolean input;
+  bool input;
  
   /* Verify that this hardware supports the select GPIO port */
 
@@ -215,7 +217,7 @@ int stm32_configgpio(uint32 cfgset)
                regval  = getreg32(regaddr);
                shift   = AFIO_EXTICR_EXTI_SHIFT(pin);
                regval &= ~(AFIO_EXTICR_PORT_MASK << shift);
-               regval |= (((uint32)port) << shift);
+               regval |= (((uint32_t)port) << shift);
                putreg32(regval, regaddr);
             }
 
@@ -259,10 +261,10 @@ int stm32_configgpio(uint32 cfgset)
  *
  ****************************************************************************/
 
-void stm32_gpiowrite(uint32 pinset, boolean value)
+void stm32_gpiowrite(uint32_t pinset, bool value)
 {
-  uint32 base;
-  uint32 offset;
+  uint32_t base;
+  uint32_t offset;
   unsigned int port;
   unsigned int pin;
 
@@ -299,9 +301,9 @@ void stm32_gpiowrite(uint32 pinset, boolean value)
  *
  ****************************************************************************/
 
-boolean stm32_gpioread(uint32 pinset)
+bool stm32_gpioread(uint32_t pinset)
 {
-  uint32 base;
+  uint32_t base;
   unsigned int port;
   unsigned int pin;
 
@@ -329,10 +331,10 @@ boolean stm32_gpioread(uint32 pinset)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-int stm32_dumpgpio(uint32 pinset, const char *msg)
+int stm32_dumpgpio(uint32_t pinset, const char *msg)
 {
   irqstate_t   flags;
-  uint32       base;
+  uint32_t     base;
   unsigned int port;
   unsigned int pin;
 

@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_LM3S_ETHERNET)
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 #include <string.h>
 #include <debug.h>
@@ -58,7 +60,7 @@
 #include "lm3s_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Half duplex can be forced if CONFIG_LM3S_ETHHDUPLEX is defined. */
@@ -159,18 +161,18 @@
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 struct ez80mac_statistics_s
 {
-  uint32 rx_int;         /* Number of Rx interrupts received */
-  uint32 rx_packets;     /* Number of packets received (sum of the following): */
-  uint32   rx_ip;        /*   Number of Rx IP packets received */
-  uint32   rx_arp;       /*   Number of Rx ARP packets received */
-  uint32   rx_dropped;   /*   Number of dropped, unsupported Rx packets */
-  uint32   rx_pktsize;   /*   Number of dropped, too small or too bigr */
-  uint32 rx_errors;      /* Number of Rx errors (reception error) */
-  uint32 rx_ovrerrors;   /* Number of Rx FIFO overrun errors */
-  uint32 tx_int;         /* Number of Tx interrupts received */
-  uint32 tx_packets;     /* Number of Tx packets queued */
-  uint32 tx_errors;      /* Number of Tx errors (transmission error)*/
-  uint32 tx_timeouts;    /* Number of Tx timeout errors */
+  uint32_t rx_int;         /* Number of Rx interrupts received */
+  uint32_t rx_packets;     /* Number of packets received (sum of the following): */
+  uint32_t rx_ip;          /*   Number of Rx IP packets received */
+  uint32_t rx_arp;         /*   Number of Rx ARP packets received */
+  uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
+  uint32_t rx_pktsize;     /*   Number of dropped, too small or too bigr */
+  uint32_t rx_errors;      /* Number of Rx errors (reception error) */
+  uint32_t rx_ovrerrors;   /* Number of Rx FIFO overrun errors */
+  uint32_t tx_int;         /* Number of Tx interrupts received */
+  uint32_t tx_packets;     /* Number of Tx packets queued */
+  uint32_t tx_errors;      /* Number of Tx errors (transmission error)*/
+  uint32_t tx_timeouts;    /* Number of Tx timeout errors */
 };
 #  define EMAC_STAT(priv,name) priv->ld_stat.name++
 #else
@@ -188,13 +190,13 @@ struct lm3s_driver_s
    */
 
 #if LM3S_NETHCONTROLLERS > 1
-  uint32  ld_base;             /* Ethernet controller base address */
-  int     ld-irq;              /* Ethernet controller IRQ */
+  uint32_t ld_base;             /* Ethernet controller base address */
+  int      ld-irq;              /* Ethernet controller IRQ */
 #endif
 
-  boolean ld_bifup;            /* TRUE:ifup FALSE:ifdown */
-  WDOG_ID ld_txpoll;           /* TX poll timer */
-  WDOG_ID ld_txtimeout;        /* TX timeout timer */
+  bool     ld_bifup;           /* true:ifup false:ifdown */
+  WDOG_ID  ld_txpoll;          /* TX poll timer */
+  WDOG_ID  ld_txtimeout;       /* TX timeout timer */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
   struct ez80mac_statistics_s ld_stat;
@@ -218,39 +220,39 @@ static struct lm3s_driver_s g_lm3sdev[LM3S_NETHCONTROLLERS];
 /* Miscellaneous low level helpers */
 
 #if LM3S_NETHCONTROLLERS > 1
-static uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset);
-static void   lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32 value);
+static uint32_t lm3s_ethin(struct lm3s_driver_s *priv, int offset);
+static void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32_t value);
 #else
-static inline uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset);
-static inline void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32 value);
+static inline uint32_t lm3s_ethin(struct lm3s_driver_s *priv, int offset);
+static inline void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32_t value);
 #endif
-static void   lm3s_ethreset(struct lm3s_driver_s *priv);
+static void lm3s_ethreset(struct lm3s_driver_s *priv);
 #if 0 /* Not used */
-static void   lm3s_phywrite(struct lm3s_driver_s *priv, int regaddr, uint16 value);
+static void lm3s_phywrite(struct lm3s_driver_s *priv, int regaddr, uint16_t value);
 #endif
-static uint16 lm3s_phyread(struct lm3s_driver_s *priv, int regaddr);
+static uint16_t lm3s_phyread(struct lm3s_driver_s *priv, int regaddr);
 
 /* Common TX logic */
 
-static int    lm3s_transmit(struct lm3s_driver_s *priv);
-static int    lm3s_uiptxpoll(struct uip_driver_s *dev);
+static int  lm3s_transmit(struct lm3s_driver_s *priv);
+static int  lm3s_uiptxpoll(struct uip_driver_s *dev);
 
 /* Interrupt handling */
 
-static void   lm3s_receive(struct lm3s_driver_s *priv);
-static void   lm3s_txdone(struct lm3s_driver_s *priv);
-static int    lm3s_interrupt(int irq, FAR void *context);
+static void lm3s_receive(struct lm3s_driver_s *priv);
+static void lm3s_txdone(struct lm3s_driver_s *priv);
+static int  lm3s_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void   lm3s_polltimer(int argc, uint32 arg, ...);
-static void   lm3s_txtimeout(int argc, uint32 arg, ...);
+static void lm3s_polltimer(int argc, uint32_t arg, ...);
+static void lm3s_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int   lm3s_ifup(struct uip_driver_s *dev);
-static int   lm3s_ifdown(struct uip_driver_s *dev);
-static int   lm3s_txavail(struct uip_driver_s *dev);
+static int  lm3s_ifup(struct uip_driver_s *dev);
+static int  lm3s_ifdown(struct uip_driver_s *dev);
+static int  lm3s_txavail(struct uip_driver_s *dev);
 
 /****************************************************************************
  * Private Functions
@@ -272,12 +274,12 @@ static int   lm3s_txavail(struct uip_driver_s *dev);
  ****************************************************************************/
 
 #if LM3S_NETHCONTROLLERS > 1
-static uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset)
+static uint32_t lm3s_ethin(struct lm3s_driver_s *priv, int offset)
 {
   return getreg32(priv->ld_base + offset);
 }
 #else
-static inline uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset)
+static inline uint32_t lm3s_ethin(struct lm3s_driver_s *priv, int offset)
 {
   return getreg32(LM3S_ETHCON_BASE + offset);
 }
@@ -300,12 +302,12 @@ static inline uint32 lm3s_ethin(struct lm3s_driver_s *priv, int offset)
  ****************************************************************************/
 
 #if LM3S_NETHCONTROLLERS > 1
-static void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32 value)
+static void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32_t value)
 {
   putreg32(value, priv->ld_base + offset);
 }
 #else
-static inline void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32 value)
+static inline void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32_t value)
 {
   putreg32(value, LM3S_ETHCON_BASE + offset);
 }
@@ -330,7 +332,7 @@ static inline void lm3s_ethout(struct lm3s_driver_s *priv, int offset, uint32 va
 static void lm3s_ethreset(struct lm3s_driver_s *priv)
 {
   irqstate_t flags;
-  uint32 regval;
+  uint32_t regval;
 
 #if LM3S_NETHCONTROLLERS > 1
 #  error "If multiple interfaces are supported, this function would have to be redesigned"
@@ -399,7 +401,7 @@ static void lm3s_ethreset(struct lm3s_driver_s *priv)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static void lm3s_phywrite(struct lm3s_driver_s *priv, int regaddr, uint16 value)
+static void lm3s_phywrite(struct lm3s_driver_s *priv, int regaddr, uint16_t value)
 {
   /* Wait for any MII transactions in progress to complete */
 
@@ -438,7 +440,7 @@ static void lm3s_phywrite(struct lm3s_driver_s *priv, int regaddr, uint16 value)
  *
  ****************************************************************************/
 
-static uint16 lm3s_phyread(struct lm3s_driver_s *priv, int regaddr)
+static uint16_t lm3s_phyread(struct lm3s_driver_s *priv, int regaddr)
 {
   /* Wait for any MII transactions in progress to complete */
 
@@ -456,7 +458,7 @@ static uint16 lm3s_phyread(struct lm3s_driver_s *priv, int regaddr)
 
   /* Read and return the PHY data */
 
-  return (uint16)(lm3s_ethin(priv, LM3S_MAC_MRXD_OFFSET) & MAC_MTRD_MASK);
+  return (uint16_t)(lm3s_ethin(priv, LM3S_MAC_MRXD_OFFSET) & MAC_MTRD_MASK);
 }
 
 /****************************************************************************
@@ -477,8 +479,8 @@ static uint16 lm3s_phyread(struct lm3s_driver_s *priv, int regaddr)
 static int lm3s_transmit(struct lm3s_driver_s *priv)
 {
   irqstate_t flags;
-  uint32     regval;
-  ubyte     *dbuf;
+  uint32_t   regval;
+  uint8_t   *dbuf;
   int        pktlen;
   int        bytesleft;
   int        ret = -EBUSY;
@@ -504,9 +506,9 @@ static int lm3s_transmit(struct lm3s_driver_s *priv)
       DEBUGASSERT(pktlen > UIP_LLH_LEN);
 
       dbuf       = priv->ld_dev.d_buf;
-      regval     = (uint32)(pktlen - 14);
-      regval    |= ((uint32)(*dbuf++) << 16);
-      regval    |= ((uint32)(*dbuf++) << 24);
+      regval     = (uint32_t)(pktlen - 14);
+      regval    |= ((uint32_t)(*dbuf++) << 16);
+      regval    |= ((uint32_t)(*dbuf++) << 24);
       lm3s_ethout(priv, LM3S_MAC_DATA_OFFSET, regval);
 
       /* Write all of the whole, 32-bit values in the middle of the packet */
@@ -517,7 +519,7 @@ static int lm3s_transmit(struct lm3s_driver_s *priv)
            * buffer may be un-aligned.
            */
 
-          lm3s_ethout(priv, LM3S_MAC_DATA_OFFSET, *(uint32*)dbuf);
+          lm3s_ethout(priv, LM3S_MAC_DATA_OFFSET, *(uint32_t*)dbuf);
         }
 
       /* Write the last, partial word in the FIFO */
@@ -534,11 +536,11 @@ static int lm3s_transmit(struct lm3s_driver_s *priv)
                 break;
 
               case 3:
-                regval |= ((uint32)dbuf[2] << 16);
+                regval |= ((uint32_t)dbuf[2] << 16);
               case 2:
-                regval |= ((uint32)dbuf[1] << 8);
+                regval |= ((uint32_t)dbuf[1] << 8);
               case 1:
-                regval |= (uint32)dbuf[0];
+                regval |= (uint32_t)dbuf[0];
                 break;
             }
           lm3s_ethout(priv, LM3S_MAC_DATA_OFFSET, regval);
@@ -550,7 +552,7 @@ static int lm3s_transmit(struct lm3s_driver_s *priv)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      (void)wd_start(priv->ld_txtimeout, LM3S_TXTIMEOUT, lm3s_txtimeout, 1, (uint32)priv);
+      (void)wd_start(priv->ld_txtimeout, LM3S_TXTIMEOUT, lm3s_txtimeout, 1, (uint32_t)priv);
       ret = OK;
     }
 
@@ -625,10 +627,10 @@ static int lm3s_uiptxpoll(struct uip_driver_s *dev)
 
 static void lm3s_receive(struct lm3s_driver_s *priv)
 {
-  uint32 regval;
-  ubyte *dbuf;
-  int    pktlen;
-  int    bytesleft;
+  uint32_t regval;
+  uint8_t *dbuf;
+  int      pktlen;
+  int      bytesleft;
 
   /* Loop while there are incoming packets to be processed */
 
@@ -690,8 +692,8 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 
       /* Save the first two bytes from the first word */
 
-      *dbuf++   = (ubyte)((regval >> 16) & 0xff);
-      *dbuf++   = (ubyte)((regval >> 24) & 0xff);
+      *dbuf++   = (uint8_t)((regval >> 16) & 0xff);
+      *dbuf++   = (uint8_t)((regval >> 24) & 0xff);
 
       /* Read all of the whole, 32-bit values in the middle of the packet.
        * We've already read the length (2 bytes) plus the first two bytes
@@ -704,7 +706,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
            * buffer may be un-aligned.
            */
 
-          *(uint32*)dbuf = lm3s_ethin(priv, LM3S_MAC_DATA_OFFSET);
+          *(uint32_t*)dbuf = lm3s_ethin(priv, LM3S_MAC_DATA_OFFSET);
         }
 
       /* Handle the last, partial word in the FIFO */
@@ -845,7 +847,7 @@ static void lm3s_txdone(struct lm3s_driver_s *priv)
 static int lm3s_interrupt(int irq, FAR void *context)
 {
   register struct lm3s_driver_s *priv;
-  uint32 ris;
+  uint32_t ris;
 
 #if LM3S_NETHCONTROLLERS > 1
 # error "A mechanism to associate and interface with an IRQ is needed"
@@ -929,7 +931,7 @@ static int lm3s_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static void lm3s_txtimeout(int argc, uint32 arg, ...)
+static void lm3s_txtimeout(int argc, uint32_t arg, ...)
 {
   struct lm3s_driver_s *priv = (struct lm3s_driver_s *)arg;
 
@@ -966,7 +968,7 @@ static void lm3s_txtimeout(int argc, uint32 arg, ...)
  *
  ****************************************************************************/
 
-static void lm3s_polltimer(int argc, uint32 arg, ...)
+static void lm3s_polltimer(int argc, uint32_t arg, ...)
 {
   struct lm3s_driver_s *priv = (struct lm3s_driver_s *)arg;
 
@@ -1011,9 +1013,9 @@ static int lm3s_ifup(struct uip_driver_s *dev)
 {
   struct lm3s_driver_s *priv = (struct lm3s_driver_s *)dev->d_private;
   irqstate_t flags;
-  uint32 regval;
-  uint32 div;
-  uint16 phyreg;
+  uint32_t regval;
+  uint32_t div;
+  uint16_t phyreg;
 
   nlldbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
@@ -1127,21 +1129,21 @@ static int lm3s_ifup(struct uip_driver_s *dev)
 
   /* Program the hardware with it's MAC address (for filtering) */
 
-  regval = (uint32)priv->ld_dev.d_mac.ether_addr_octet[3] << 24 |
-           (uint32)priv->ld_dev.d_mac.ether_addr_octet[2] << 16 |
-           (uint32)priv->ld_dev.d_mac.ether_addr_octet[1] << 8 |
-           (uint32)priv->ld_dev.d_mac.ether_addr_octet[0];
+  regval = (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[3] << 24 |
+           (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[2] << 16 |
+           (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[1] << 8 |
+           (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[0];
   lm3s_ethout(priv, LM3S_MAC_IA0_OFFSET, regval);
 
-  regval = (uint32)priv->ld_dev.d_mac.ether_addr_octet[5] << 8 |
-           (uint32)priv->ld_dev.d_mac.ether_addr_octet[4];
+  regval = (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[5] << 8 |
+           (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[4];
   lm3s_ethout(priv, LM3S_MAC_IA1_OFFSET, regval);
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->ld_txpoll, LM3S_WDDELAY, lm3s_polltimer, 1, (uint32)priv);
+  (void)wd_start(priv->ld_txpoll, LM3S_WDDELAY, lm3s_polltimer, 1, (uint32_t)priv);
 
-  priv->ld_bifup = TRUE;
+  priv->ld_bifup = true;
   irqrestore(flags);
   return OK;
 }
@@ -1167,7 +1169,7 @@ static int lm3s_ifdown(struct uip_driver_s *dev)
 {
   struct lm3s_driver_s *priv = (struct lm3s_driver_s *)dev->d_private;
   irqstate_t flags;
-  uint32 regval;
+  uint32_t regval;
 
   nlldbg("Taking down: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
@@ -1224,7 +1226,7 @@ static int lm3s_ifdown(struct uip_driver_s *dev)
 
   /* The interface is now DOWN */
 
-  priv->ld_bifup = FALSE;
+  priv->ld_bifup = false;
   irqrestore(flags);
   return OK;
 }

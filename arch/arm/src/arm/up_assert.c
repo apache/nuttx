@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
@@ -52,7 +52,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Output debug info if stack dump is selected -- even if 
@@ -78,9 +78,9 @@
 
 /* I don't know if the builtin to get SP is enabled */
 
-static inline uint32 up_getsp(void)
+static inline uint32_t up_getsp(void)
 {
-  uint32 sp;
+  uint32_t sp;
   __asm__
   (
     "\tmov %0, sp\n\t"
@@ -94,13 +94,13 @@ static inline uint32 up_getsp(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(uint32 sp, uint32 stack_base)
+static void up_stackdump(uint32_t sp, uint32_t stack_base)
 {
-  uint32 stack ;
+  uint32_t stack ;
 
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
-      uint32 *ptr = (uint32*)stack;
+      uint32_t *ptr = (uint32_t*)stack;
       lldbg("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
@@ -127,7 +127,7 @@ static inline void up_registerdump(void)
 
       for (regs = REG_R0; regs <= REG_R15; regs += 8)
         {
-          uint32 *ptr = (uint32*)&current_regs[regs];
+          uint32_t *ptr = (uint32_t*)&current_regs[regs];
           lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
                  regs, ptr[0], ptr[1], ptr[2], ptr[3],
                  ptr[4], ptr[5], ptr[6], ptr[7]);
@@ -147,13 +147,13 @@ static inline void up_registerdump(void)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  uint32 sp         = up_getsp();
-  uint32 ustackbase;
-  uint32 ustacksize;
+  _TCB    *rtcb = (_TCB*)g_readytorun.head;
+  uint32_t sp   = up_getsp();
+  uint32_t ustackbase;
+  uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  uint32 istackbase;
-  uint32 istacksize;
+  uint32_t istackbase;
+  uint32_t istacksize;
 #endif
 
   /* Get the limits on the user stack memory */
@@ -165,14 +165,14 @@ static void up_dumpstate(void)
     }
   else
     {
-      ustackbase = (uint32)rtcb->adj_stack_ptr;
-      ustacksize = (uint32)rtcb->adj_stack_size;
+      ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+      ustacksize = (uint32_t)rtcb->adj_stack_size;
     }
 
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32)&g_userstack;
+  istackbase = (uint32_t)&g_userstack;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
 
   /* Show interrupt stack info */
@@ -269,7 +269,7 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const ubyte *filename, int lineno)
+void up_assert(const uint8_t *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
   _TCB *rtcb = (_TCB*)g_readytorun.head;
@@ -291,7 +291,7 @@ void up_assert(const ubyte *filename, int lineno)
  * Name: up_assert_code
  ****************************************************************************/
 
-void up_assert_code(const ubyte *filename, int lineno, int errorcode)
+void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
   _TCB *rtcb = (_TCB*)g_readytorun.head;

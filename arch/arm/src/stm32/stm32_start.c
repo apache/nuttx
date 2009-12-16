@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -94,8 +94,8 @@
 
 void __start(void)
 {
-  const uint32 *src;
-  uint32 *dest;
+  const uint32_t *src;
+  uint32_t *dest;
 
   /* Configure the uart so that we can get debug output as soon as possible */
 

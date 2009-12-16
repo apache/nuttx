@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -56,7 +58,7 @@
 #include "imx_cspi.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The i.MX1/L supports 2 SPI interfaces.  Which have been enabled? */
@@ -101,8 +103,8 @@ struct imx_spidev_s
 
   /* These following are the source and destination buffers of the transfer.
    * they are retained in this structure so that they will be accessible
-   * from an interrupt handler.  The actual type of the buffer is ubyte is
-   * nbits <=8 and uint16 is nbits >8.
+   * from an interrupt handler.  The actual type of the buffer is uint8_t is
+   * nbits <=8 and uint16_t is nbits >8.
    */
 
   void  *txbuffer;              /* Source buffer */
@@ -118,18 +120,18 @@ struct imx_spidev_s
   void  (*txword)(struct imx_spidev_s *priv);
   void  (*rxword)(struct imx_spidev_s *priv);
 
-  uint32 base;                  /* SPI register base address */
-  uint32 frequency;             /* Current desired SCLK frequency */
-  uint32 actual;                /* Current actual SCLK frequency */
+  uint32_t base;                /* SPI register base address */
+  uint32_t frequency;           /* Current desired SCLK frequency */
+  uint32_t actual;              /* Current actual SCLK frequency */
 
   int    ntxwords;              /* Number of words left to transfer on the Tx FIFO */
   int    nrxwords;              /* Number of words received on the Rx FIFO */
   int    nwords;                /* Number of words to be exchanged */
 
-  ubyte  mode;                  /* Current mode */
-  ubyte  nbits;                 /* Current number of bits per word */
+  uint8_t  mode;                /* Current mode */
+  uint8_t  nbits;               /* Current number of bits per word */
 #ifndef CONFIG_SPI_POLLWAIT
-  ubyte  irq;                   /* SPI IRQ number */
+  uint8_t  irq;                 /* SPI IRQ number */
 #endif
 };
 
@@ -139,17 +141,17 @@ struct imx_spidev_s
 
  /* SPI register access */
  
-static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
-static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value);
+static inline uint32_t spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
+static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32_t value);
 
 /* SPI data transfer */
 
 static void   spi_txnull(struct imx_spidev_s *priv);
 static void   spi_txuint16(struct imx_spidev_s *priv);
-static void   spi_txubyte(struct imx_spidev_s *priv);
+static void   spi_txuint8(struct imx_spidev_s *priv);
 static void   spi_rxnull(struct imx_spidev_s *priv);
-static void   spi_rxuint16(struct imx_spidev_s *priv);
-static void   spi_rxubyte(struct imx_spidev_s *priv);
+static void  spi_rxuint16(struct imx_spidev_s *priv);
+static void   spi_rxuint8(struct imx_spidev_s *priv);
 static int    spi_performtx(struct imx_spidev_s *priv);
 static inline void spi_performrx(struct imx_spidev_s *priv);
 static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
@@ -164,10 +166,10 @@ static int    spi_interrupt(int irq, void *context);
 
 /* SPI methods */
 
-static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void   spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd);
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
 static void   spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                            FAR void *rxbuffer, size_t nwords);
@@ -246,7 +248,7 @@ static struct imx_spidev_s g_spidev[] =
  *
  ****************************************************************************/
 
-static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset)
+static inline uint32_t spi_getreg(struct imx_spidev_s *priv, unsigned int offset)
 {
   return getreg32(priv->base + offset);
 }
@@ -267,16 +269,16 @@ static inline uint32 spi_getreg(struct imx_spidev_s *priv, unsigned int offset)
  *
  ****************************************************************************/
 
-static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32 value)
+static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
 /****************************************************************************
- * Name: spi_txnull, spi_txuint16, and spi_txubyte
+ * Name: spi_txnull, spi_txuint16, and spi_txuint8
  *
  * Description:
- *   Transfer all ones, a ubyte, or uint16 to Tx FIFO and update the txbuffer
+ *   Transfer all ones, a uint8_t, or uint16_t to Tx FIFO and update the txbuffer
  *   pointer appropriately.  The selected function dependes on (1) if there
  *   is a source txbuffer provided, and (2) if the number of bits per
  *   word is <=8 or >8.
@@ -296,23 +298,23 @@ static void spi_txnull(struct imx_spidev_s *priv)
 
 static void spi_txuint16(struct imx_spidev_s *priv)
 {
-  uint16 *ptr = (uint16*)priv->txbuffer;
+  uint16_t *ptr = (uint16_t*)priv->txbuffer;
   spi_putreg(priv, CSPI_TXD_OFFSET, *ptr++);
   priv->txbuffer = (void*)ptr;
 }
 
-static void spi_txubyte(struct imx_spidev_s *priv)
+static void spi_txuint8(struct imx_spidev_s *priv)
 {
-  ubyte *ptr = (ubyte*)priv->txbuffer;
+  uint8_t *ptr = (uint8_t*)priv->txbuffer;
   spi_putreg(priv, CSPI_TXD_OFFSET, *ptr++);
   priv->txbuffer = (void*)ptr;
 }
 
 /****************************************************************************
- * Name: spi_rxnull, spi_rxuint16, and spi_rxubyte
+ * Name: spi_rxnull,spi_rxuint16, and spi_rxuint8
  *
  * Description:
- *   Discard input, save a ubyte, or or save a uint16 from Tx FIFO in the
+ *   Discard input, save a uint8_t, or or save a uint16_t from Tx FIFO in the
  *   user rxvbuffer and update the rxbuffer pointer appropriately.  The
  *   selected function dependes on (1) if there is a desination rxbuffer
  *   provided, and (2) if the number of bits per word is <=8 or >8.
@@ -330,17 +332,17 @@ static void spi_rxnull(struct imx_spidev_s *priv)
   (void)spi_getreg(priv, CSPI_RXD_OFFSET);
 }
 
-static void spi_rxuint16(struct imx_spidev_s *priv)
+static voidspi_rxuint16(struct imx_spidev_s *priv)
 {
-  uint16 *ptr = (uint16*)priv->rxbuffer;
-  *ptr++ = (uint16)spi_getreg(priv, CSPI_TXD_OFFSET);
+  uint16_t *ptr = (uint16_t*)priv->rxbuffer;
+  *ptr++ = (uint16_t)spi_getreg(priv, CSPI_TXD_OFFSET);
   priv->rxbuffer = (void*)ptr;
 }
 
-static void spi_rxubyte(struct imx_spidev_s *priv)
+static void spi_rxuint8(struct imx_spidev_s *priv)
 {
-  ubyte *ptr = (ubyte*)priv->rxbuffer;
-  *ptr++ = (ubyte)spi_getreg(priv, CSPI_TXD_OFFSET);
+  uint8_t *ptr = (uint8_t*)priv->rxbuffer;
+  *ptr++ = (uint8_t)spi_getreg(priv, CSPI_TXD_OFFSET);
   priv->rxbuffer = (void*)ptr;
 }
 
@@ -362,7 +364,7 @@ static void spi_rxubyte(struct imx_spidev_s *priv)
 
 static int spi_performtx(struct imx_spidev_s *priv)
 {
-  uint32 regval;
+  uint32_t regval;
   int ntxd = 0;  /* Number of words written to Tx FIFO */
 
   /* Check if the Tx FIFO is empty */
@@ -448,7 +450,7 @@ static inline void spi_performrx(struct imx_spidev_s *priv)
 
 static void spi_startxfr(struct imx_spidev_s *priv, int ntxd)
 {
-  uint32 regval;
+  uint32_t regval;
 
   /* The XCH bit initiates an exchange in master mode.  It remains set
    * remains set while the exchange is in progress but is automatically
@@ -476,9 +478,9 @@ static void spi_startxfr(struct imx_spidev_s *priv, int ntxd)
  *   txbuffer - The buffer of data to send to the device (may be NULL).
  *   rxbuffer - The buffer to receive data from the device (may be NULL).
  *   nwords   - The total number of words to be exchanged.  If the interface
- *              uses <= 8 bits per word, then this is the number of ubytes;
+ *              uses <= 8 bits per word, then this is the number of uint8_t's;
  *              if the interface uses >8 bits per word, then this is the
- *              number of uint16's
+ *              number of uint16_t's
  *
  * Returned Value:
  *   0: success, <0:Negated error number on failure
@@ -491,14 +493,14 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 #ifndef CONFIG_SPI_POLLWAIT
   irqstate_t flags;
 #endif
-  uint32 regval;
+  uint32_t regval;
   int ntxd;
   int ret;
 
   /* Set up to perform the transfer */
 
-  priv->txbuffer     = (ubyte*)txbuffer; /* Source buffer */
-  priv->rxbuffer     = (ubyte*)rxbuffer; /* Destination buffer */
+  priv->txbuffer     = (uint8_t*)txbuffer; /* Source buffer */
+  priv->rxbuffer     = (uint8_t*)rxbuffer; /* Destination buffer */
   priv->ntxwords     = nwords;           /* Number of words left to send */
   priv->nrxwords     = 0;                /* Number of words received */
   priv->nwords       = nwords;           /* Total number of exchanges */
@@ -508,12 +510,12 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
   if (priv->nbits > 8)
     {
       priv->txword = spi_txuint16;
-      priv->rxword = spi_rxuint16;
+      priv->rxword =spi_rxuint16;
     }
   else
     {
-      priv->txword = spi_txubyte;
-      priv->rxword = spi_rxubyte;
+      priv->txword = spi_txuint8;
+      priv->rxword = spi_rxuint8;
     }
 
   if (!txbuffer)
@@ -629,9 +631,9 @@ static inline struct imx_spidev_s *spi_mapirq(int irq)
  *   txbuffer - The buffer of data to send to the device (may be NULL).
  *   rxbuffer - The buffer to receive data from the device (may be NULL).
  *   nwords   - The total number of words to be exchanged.  If the interface
- *              uses <= 8 bits per word, then this is the number of ubytes;
+ *              uses <= 8 bits per word, then this is the number of uint8_t's;
  *              if the interface uses >8 bits per word, then this is the
- *              number of uint16's
+ *              number of uint16_t's
  *
  * Returned Value:
  *   0: success, <0:Negated error number on failure
@@ -685,15 +687,15 @@ static int spi_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static uint32 spi_setfrequency(FAR struct spi_dev_s *dev, uint32 frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  uint32 actual = priv->actual;
+  uint32_t actual = priv->actual;
 
   if (priv && frequency != priv->frequency)
     {
-      uint32 freqbits;
-      uint32 regval;
+      uint32_t freqbits;
+      uint32_t regval;
 
       if (frequency >= IMX_PERCLK2_FREQ / 4)
         {
@@ -770,8 +772,8 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   if (priv && mode != priv->mode)
     {
-      uint32 modebits;
-      uint32 regval;
+      uint32_t modebits;
+      uint32_t regval;
 
       /* Select the CTL register bits based on the selected mode */
 
@@ -826,7 +828,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   if (priv && nbits != priv->nbits && nbits > 0 && nbits <= 16)
     {
-      uint32 regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
+      uint32_t regval = spi_getreg(priv, CSPI_CTRL_OFFSET);
       regval       &= ~CSPI_CTRL_BITCOUNT_MASK;
       regval       |= ((nbits - 1) << CSPI_CTRL_BITCOUNT_SHIFT);
       spi_putreg(priv, CSPI_CTRL_OFFSET, regval);
@@ -850,10 +852,10 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s*)dev;
-  uint16 response = 0;
+  uint16_t response = 0;
 
   (void)spi_transfer(priv, &wd, &response, 1);
   return response;
@@ -872,7 +874,7 @@ static uint16 spi_send(FAR struct spi_dev_s *dev, uint16 wd)
  *   nwords   - the length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into ubytes; if nbits >8, the data is packed into uint16's
+ *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -900,7 +902,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -927,7 +929,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into ubytes; if nbits >8, the data is packed into uint16's
+ *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -971,7 +973,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   struct imx_spidev_s *priv;
-  ubyte regval;
+  uint8_t regval;
 
   /* Only the SPI1 interface is supported */
 

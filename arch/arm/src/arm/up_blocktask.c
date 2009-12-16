@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdbool.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -49,7 +49,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -96,7 +96,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
   else
     {
       _TCB *rtcb = (_TCB*)g_readytorun.head;
-      boolean switch_needed;
+      bool switch_needed;
 
       /* Remove the tcb task from the ready-to-run list.  If we
        * are blocking the task at the head of the task list (the

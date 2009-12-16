@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -53,7 +53,7 @@
 #ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -162,7 +162,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              current_regs[REG_PC]      = (uint32)up_sigdeliver;
+              current_regs[REG_PC]      = (uint32_t)up_sigdeliver;
               current_regs[REG_PRIMASK] = 1;
               current_regs[REG_XPSR]    = CORTEXM3_XPSR_T;
 
@@ -196,7 +196,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]      = (uint32)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_PRIMASK] = 1;
           tcb->xcp.regs[REG_XPSR]    = CORTEXM3_XPSR_T;
         }

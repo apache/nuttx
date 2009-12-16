@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -53,7 +53,7 @@
 #ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -161,7 +161,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              current_regs[REG_PC]      = (uint32)up_sigdeliver;
+              current_regs[REG_PC]      = (uint32_t)up_sigdeliver;
               current_regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
 
               /* And make sure that the saved context in the TCB
@@ -193,7 +193,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]      = (uint32)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
         }
 

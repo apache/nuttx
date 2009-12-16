@@ -45,6 +45,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
  * Definitions
@@ -60,14 +63,14 @@
 #define PIC_REG_STRING "r10"
 
 /* Macros to get and set the PIC base register.  picbase is assumed to be
- * of type (void*) and that it will fit into a uint32.  These must be
+ * of type (void*) and that it will fit into a uint32_t.  These must be
  * inline so that they will be compatible with the ABIs rules for
  * preserving the PIC register
  */
 
 #define up_getpicbase(ppicbase) \
 do { \
-  uint32 picbase; \
+  uint32_t picbase; \
   __asm__ \
   ( \
     "\tmov %0, " PIC_REG_STRING "\n\t" \
@@ -78,7 +81,7 @@ do { \
 
 #define up_setpicbase(picbase) \
 do { \
-  uint32 _picbase = (uint32)picbase; \
+  uint32_t _picbase = (uint32_t)picbase; \
   __asm__ \
   ( \
     "\tmov " PIC_REG_STRING ", %0\n\t" \

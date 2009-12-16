@@ -38,8 +38,10 @@
  *******************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -212,8 +214,8 @@
  * assocated DMA buffer.
  */
 
-#define USB_UDCA           (uint32*)LPC214X_USBDEV_RAMBASE)
-#define USB_USCASIZE       (LPC214X_NPHYSENDPOINTS*sizeof(uint32))
+#define USB_UDCA           (uint32_t*)LPC214X_USBDEV_RAMBASE)
+#define USB_USCASIZE       (LPC214X_NPHYSENDPOINTS*sizeof(uint32_t))
 
 /* Each descriptor must be aligned to a 128 address boundary */
 
@@ -224,9 +226,9 @@
 #define USB_DDESC  ((struct lpc214x_dmadesc_s*)(LPC214X_USBDEV_RAMBASE+USB_USCASIZE))
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
-#  define USB_DDESCSIZE (5*sizeof(uint32))
+#  define USB_DDESCSIZE (5*sizeof(uint32_t))
 #else
-#  define USB_DDESCSIZE (4*sizeof(uint32))
+#  define USB_DDESCSIZE (4*sizeof(uint32_t))
 #endif
 
 /* Endpoints ******************************************************************/
@@ -241,8 +243,8 @@
 #define LPC214X_EPPHYIN(epphy)       (((epphy)&1)!=0)
 #define LPC214X_EPPHYOUT(epphy)      (((epphy)&1)==0)
 
-#define LPC214X_EPPHYIN2LOG(epphy)   (((ubyte)(epphy)>>1)|USB_DIR_IN)
-#define LPC214X_EPPHYOUT2LOG(epphy)  (((ubyte)(epphy)>>1)|USB_DIR_OUT)
+#define LPC214X_EPPHYIN2LOG(epphy)   (((uint8_t)(epphy)>>1)|USB_DIR_IN)
+#define LPC214X_EPPHYOUT2LOG(epphy)  (((uint8_t)(epphy)>>1)|USB_DIR_OUT)
 
 /* Each endpoint has somewhat different characteristics */
 
@@ -306,11 +308,11 @@ struct lpc214x_ep_s
   struct lpc214x_usbdev_s *dev;          /* Reference to private driver data */
   struct lpc214x_req_s    *head;         /* Request list for this endpoint */
   struct lpc214x_req_s    *tail;
-  ubyte                   epphy;         /* Physical EP address */
-  ubyte                   stalled:1;     /* 1: Endpoint is stalled */
-  ubyte                   halted:1;      /* 1: Endpoint feature halted */
-  ubyte                   txbusy:1;      /* 1: TX endpoint FIFO full */
-  ubyte                   txnullpkt:1;   /* Null packet needed at end of transfer */
+  uint8_t                 epphy;         /* Physical EP address */
+  uint8_t                 stalled:1;     /* 1: Endpoint is stalled */
+  uint8_t                 halted:1;      /* 1: Endpoint feature halted */
+  uint8_t                 txbusy:1;      /* 1: TX endpoint FIFO full */
+  uint8_t                 txnullpkt:1;   /* Null packet needed at end of transfer */
 };
 
 /* This represents a DMA descriptor */
@@ -318,14 +320,14 @@ struct lpc214x_ep_s
 #ifdef CONFIG_LPC214X_USBDEV_DMA
 struct lpc214x_dmadesc_s
 {
-  uint32                  nextdesc;      /* Address of the next DMA descripto in RAM */
-  uint32                  config;        /* Misc. bit encoded configuration information */
-  uint32                  start;         /* DMA start address */
-  uint32                  status;        /* Misc. bit encoded status inforamation */
+  uint32_t                nextdesc;      /* Address of the next DMA descripto in RAM */
+  uint32_t                config;        /* Misc. bit encoded configuration information */
+  uint32_t                start;         /* DMA start address */
+  uint32_t                status;        /* Misc. bit encoded status inforamation */
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
-  uint32                  size;          /* Isochronous packet size address */
+  uint32_t                size;          /* Isochronous packet size address */
 #endif
-  ubyte                   buffer[USB_DDSIZE-USB_DDESCSIZE];
+  uint8_t                 buffer[USB_DDSIZE-USB_DDESCSIZE];
 };
 #endif
 
@@ -346,18 +348,18 @@ struct lpc214x_usbdev_s
 
   /* LPC214X-specific fields */
 
-  ubyte                   devstatus;     /* Last response to device status command */
-  ubyte                   ep0state;      /* State of certain EP0 operations */
-  ubyte                   paddr;         /* Address assigned by SETADDRESS */
-  ubyte                   stalled:1;     /* 1: Protocol stalled */
-  ubyte                   selfpowered:1; /* 1: Device is self powered */
-  ubyte                   paddrset:1;    /* 1: Peripheral addr has been set */
-  ubyte                   attached:1;    /* 1: Host attached */
-  ubyte                   rxpending:1;   /* 1: RX pending */
-  uint32                  softprio;      /* Bitset of high priority interrupts */
-  uint32                  epavail;       /* Bitset of available endpoints */
+  uint8_t                 devstatus;     /* Last response to device status command */
+  uint8_t                 ep0state;      /* State of certain EP0 operations */
+  uint8_t                 paddr;         /* Address assigned by SETADDRESS */
+  uint8_t                 stalled:1;     /* 1: Protocol stalled */
+  uint8_t                 selfpowered:1; /* 1: Device is self powered */
+  uint8_t                 paddrset:1;    /* 1: Peripheral addr has been set */
+  uint8_t                 attached:1;    /* 1: Host attached */
+  uint8_t                 rxpending:1;   /* 1: RX pending */
+  uint32_t                softprio;      /* Bitset of high priority interrupts */
+  uint32_t                epavail;       /* Bitset of available endpoints */
 #ifdef CONFIG_LPC214X_USBDEV_FRAME_INTERRUPT
-  uint32                  sof;           /* Last start-of-frame */
+  uint32_t                sof;           /* Last start-of-frame */
 #endif
 
   /* Allocated DMA descriptor */
@@ -378,8 +380,8 @@ struct lpc214x_usbdev_s
 /* Register operations ********************************************************/
 
 #if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
-static uint32 lpc214x_getreg(uint32 addr);
-static void lpc214x_putreg(uint32 val, uint32 addr);
+static uint32_t lpc214x_getreg(uint32_t addr);
+static void lpc214x_putreg(uint32_t val, uint32_t addr);
 #else
 # define lpc214x_getreg(addr)     getreg32(addr)
 # define lpc214x_putreg(val,addr) putreg32(val,addr)
@@ -387,7 +389,7 @@ static void lpc214x_putreg(uint32 val, uint32 addr);
 
 /* Command operations **********************************************************/
 
-static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data);
+static uint32_t lpc214x_usbcmd(uint16_t cmd, uint8_t data);
 
 /* Request queue operations ****************************************************/
 
@@ -397,11 +399,11 @@ static void lpc214x_rqenqueue(FAR struct lpc214x_ep_s *privep,
 
 /* Low level data transfers and request operations *****************************/
 
-static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes);
-static int  lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes);
+static void lpc214x_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes);
+static int  lpc214x_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes);
 static inline void lpc214x_abortrequest(struct lpc214x_ep_s *privep,
-              struct lpc214x_req_s *privreq, sint16 result);
-static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, sint16 result);
+              struct lpc214x_req_s *privreq, int16_t result);
+static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, int16_t result);
 static int  lpc214x_wrrequest(struct lpc214x_ep_s *privep);
 static int  lpc214x_rdrequest(struct lpc214x_ep_s *privep);
 static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep);
@@ -409,13 +411,13 @@ static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep);
 /* Interrupt handling **********************************************************/
 
 static struct lpc214x_ep_s *lpc214x_epfindbyaddr(struct lpc214x_usbdev_s *priv,
-              uint16 eplog);
-static void lpc214x_eprealize(struct lpc214x_ep_s *privep, boolean prio,
-              uint32 packetsize);
-static ubyte lpc214x_epclrinterrupt(ubyte epphy);
+              uint16_t eplog);
+static void lpc214x_eprealize(struct lpc214x_ep_s *privep, bool prio,
+              uint32_t packetsize);
+static uint8_t lpc214x_epclrinterrupt(uint8_t epphy);
 static inline void lpc214x_ep0configure(struct lpc214x_usbdev_s *priv);
 #ifdef CONFIG_LPC214X_USBDEV_DMA
-static inline void lpc214x_dmareset(uint32 enable);
+static inline void lpc214x_dmareset(uint32_t enable);
 #endif
 static void lpc214x_usbreset(struct lpc214x_usbdev_s *priv);
 static void lpc214x_dispatchrequest(struct lpc214x_usbdev_s *priv,
@@ -426,41 +428,41 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv);
 static int lpc214x_usbinterrupt(int irq, FAR void *context);
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
-static int  lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, ubyte epphy,
-              uint32 epmaxsize, uint32 nbytes, uint32 *isocpacket,
-              boolean isochronous);
-static void lpc214x_dmarestart(ubyte epphy, uint32 descndx);
-static void lpc214x_dmadisable(ubyte epphy);
+static int  lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, uint8_t epphy,
+              uint32_t epmaxsize, uint32_t nbytes, uint32_t *isocpacket,
+              bool isochronous);
+static void lpc214x_dmarestart(uint8_t epphy, uint32_t descndx);
+static void lpc214x_dmadisable(uint8_t epphy);
 #endif /* CONFIG_LPC214X_USBDEV_DMA */
 
 /* Endpoint operations *********************************************************/
 
 static int  lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
-              const struct usb_epdesc_s *desc, boolean last);
+              const struct usb_epdesc_s *desc, bool last);
 static int  lpc214x_epdisable(FAR struct usbdev_ep_s *ep);
 static FAR struct usbdev_req_s *lpc214x_epallocreq(FAR struct usbdev_ep_s *ep);
 static void lpc214x_epfreereq(FAR struct usbdev_ep_s *ep,
               FAR struct usbdev_req_s *);
 #ifdef CONFIG_LPC214X_USBDEV_DMA
 static FAR void *lpc214x_epallocbuffer(FAR struct usbdev_ep_s *ep,
-              uint16 nbytes);
+              uint16_t nbytes);
 static void lpc214x_epfreebuffer(FAR struct usbdev_ep_s *ep, void *buf);
 #endif
 static int  lpc214x_epsubmit(FAR struct usbdev_ep_s *ep,
               struct usbdev_req_s *req);
 static int  lpc214x_epcancel(FAR struct usbdev_ep_s *ep,
               struct usbdev_req_s *req);
-static int  lpc214x_epstall(FAR struct usbdev_ep_s *ep, boolean resume);
+static int  lpc214x_epstall(FAR struct usbdev_ep_s *ep, bool resume);
 
 /* USB device controller operations ********************************************/
 
 static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev,
-              ubyte epno, boolean in, ubyte eptype);
+              uint8_t epno, bool in, uint8_t eptype);
 static void lpc214x_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
 static int  lpc214x_getframe(struct usbdev_s *dev);
 static int  lpc214x_wakeup(struct usbdev_s *dev);
-static int  lpc214x_selfpowered(struct usbdev_s *dev, boolean selfpowered);
-static int  lpc214x_pullup(struct usbdev_s *dev, boolean enable);
+static int  lpc214x_selfpowered(struct usbdev_s *dev, bool selfpowered);
+static int  lpc214x_pullup(struct usbdev_s *dev, bool enable);
 
 /*******************************************************************************
  * Private Data
@@ -514,15 +516,15 @@ static const struct usbdev_ops_s g_devops =
  *******************************************************************************/
 
 #if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
-static uint32 lpc214x_getreg(uint32 addr)
+static uint32_t lpc214x_getreg(uint32_t addr)
 {
-  static uint32 prevaddr = 0;
-  static uint32 preval = 0;
-  static uint32 count = 0;
+  static uint32_t prevaddr = 0;
+  static uint32_t preval = 0;
+  static uint32_t count = 0;
 
   /* Read the value from the register */
 
-  uint32 val = getreg32(addr);
+  uint32_t val = getreg32(addr);
 
   /* Is this the same value that we read from the same registe last time?  Are
    * we polling the register?  If so, suppress some of the output.
@@ -576,7 +578,7 @@ static uint32 lpc214x_getreg(uint32 addr)
  *******************************************************************************/
 
 #if defined(CONFIG_LPC214X_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
-static void lpc214x_putreg(uint32 val, uint32 addr)
+static void lpc214x_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
@@ -596,10 +598,10 @@ static void lpc214x_putreg(uint32 val, uint32 addr)
  *
  *******************************************************************************/
 
-static uint32 lpc214x_usbcmd(uint16 cmd, ubyte data)
+static uint32_t lpc214x_usbcmd(uint16_t cmd, uint8_t data)
 {
   irqstate_t flags;
-  uint32 tmp = 0;
+  uint32_t tmp = 0;
 
   /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
 
@@ -782,10 +784,10 @@ static void lpc214x_rqenqueue(FAR struct lpc214x_ep_s *privep,
  *
  *******************************************************************************/
 
-static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
+static void lpc214x_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes)
 {
-  uint32 value;
-  boolean aligned = (((uint32)data & 3) == 0);
+  uint32_t value;
+  bool aligned = (((uint32_t)data & 3) == 0);
 
   /* Set the write enable bit for this physical EP address. Bits 2-5 are
    * the logical endpoint number (0-15)
@@ -808,12 +810,12 @@ static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
         {
           if (aligned)
             {
-              value = *(uint32*)data;
+              value = *(uint32_t*)data;
             }
           else
             {
-              value =  (uint32)data[0]        | ((uint32)data[1] << 8) |
-                      ((uint32)data[2] << 16) | ((uint32)data[3] << 24);
+              value =  (uint32_t)data[0]        | ((uint32_t)data[1] << 8) |
+                      ((uint32_t)data[2] << 16) | ((uint32_t)data[3] << 24);
             }
 
           lpc214x_putreg(value, LPC214X_USBDEV_TXDATA);
@@ -843,12 +845,12 @@ static void lpc214x_epwrite(ubyte epphy, const ubyte *data, uint32 nbytes)
  *
  *******************************************************************************/
 
-static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
+static int lpc214x_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
 {
-  uint32 pktlen;
-  uint32 result;
-  uint32 value;
-  ubyte  aligned = 0;
+  uint32_t pktlen;
+  uint32_t result;
+  uint32_t value;
+  uint8_t  aligned = 0;
 
   /* If data is NULL, then we are being asked to read but discard the data.
    * For most cases, the resulting buffer will be aligned and we will be
@@ -857,7 +859,7 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
 
   if (data)
     {
-       if (((uint32)data & 3) == 0)
+       if (((uint32_t)data & 3) == 0)
         {
           aligned = 1;
         }
@@ -889,15 +891,15 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
       value = lpc214x_getreg(LPC214X_USBDEV_RXDATA);
       if (aligned == 1)
         {
-          *(uint32*)data = value;
+          *(uint32_t*)data = value;
           data += 4;
         }
       else if (aligned == 2)
         {
-          *data++ = (ubyte)value;
-          *data++ = (ubyte)(value >> 8);
-          *data++ = (ubyte)(value >> 16);
-          *data++ = (ubyte)(value >> 24);
+          *data++ = (uint8_t)value;
+          *data++ = (uint8_t)(value >> 8);
+          *data++ = (uint8_t)(value >> 16);
+          *data++ = (uint8_t)(value >> 24);
         }
     }
 
@@ -931,9 +933,9 @@ static int lpc214x_epread(ubyte epphy, ubyte *data, uint32 nbytes)
 
 static inline void lpc214x_abortrequest(struct lpc214x_ep_s *privep,
                                         struct lpc214x_req_s *privreq,
-                                        sint16 result)
+                                        int16_t result)
 {
-  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_REQABORTED), (uint16)privep->epphy);
+  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_REQABORTED), (uint16_t)privep->epphy);
 
   /* Save the result in the request structure */
 
@@ -952,7 +954,7 @@ static inline void lpc214x_abortrequest(struct lpc214x_ep_s *privep,
  *
  *******************************************************************************/
 
-static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, sint16 result)
+static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, int16_t result)
 {
   struct lpc214x_req_s *privreq;
   int stalled = privep->stalled;
@@ -1001,7 +1003,7 @@ static void lpc214x_reqcomplete(struct lpc214x_ep_s *privep, sint16 result)
 static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
 {
   struct lpc214x_req_s *privreq;
-  ubyte *buf;
+  uint8_t *buf;
   int nbytes;
   int bytesleft;
 
@@ -1111,7 +1113,7 @@ static int lpc214x_wrrequest(struct lpc214x_ep_s *privep)
 static int lpc214x_rdrequest(struct lpc214x_ep_s *privep)
 {
   struct lpc214x_req_s *privreq;
-  ubyte *buf;
+  uint8_t *buf;
   int nbytesread;
 
   /* Check the request from the head of the endpoint request queue */
@@ -1189,7 +1191,7 @@ static void lpc214x_cancelrequests(struct lpc214x_ep_s *privep)
  *******************************************************************************/
 
 static struct lpc214x_ep_s *lpc214x_epfindbyaddr(struct lpc214x_usbdev_s *priv,
-              uint16 eplog)
+              uint16_t eplog)
 {
   struct lpc214x_ep_s *privep;
   int i;
@@ -1230,11 +1232,11 @@ static struct lpc214x_ep_s *lpc214x_epfindbyaddr(struct lpc214x_usbdev_s *priv,
  *
  *******************************************************************************/
 
-static void lpc214x_eprealize(struct lpc214x_ep_s *privep, boolean prio, uint32 packetsize)
+static void lpc214x_eprealize(struct lpc214x_ep_s *privep, bool prio, uint32_t packetsize)
 {
   struct lpc214x_usbdev_s *priv = privep->dev;
-  uint32 mask;
-  uint32 reg;
+  uint32_t mask;
+  uint32_t reg;
 
   /* Initialize endpoint software priority */
 
@@ -1280,7 +1282,7 @@ static void lpc214x_eprealize(struct lpc214x_ep_s *privep, boolean prio, uint32 
  *
  *******************************************************************************/
 
-static ubyte lpc214x_epclrinterrupt(ubyte epphy)
+static uint8_t lpc214x_epclrinterrupt(uint8_t epphy)
 {
   /* Clear the endpoint interrupt */
 
@@ -1305,7 +1307,7 @@ static ubyte lpc214x_epclrinterrupt(ubyte epphy)
 
 static inline void lpc214x_ep0configure(struct lpc214x_usbdev_s *priv)
 {
-  uint32 inten;
+  uint32_t inten;
 
   /* EndPoint 0 initialization */
 
@@ -1327,7 +1329,7 @@ static inline void lpc214x_ep0configure(struct lpc214x_usbdev_s *priv)
  *******************************************************************************/
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
-static inline void lpc214x_dmareset(uint32 enable)
+static inline void lpc214x_dmareset(uint32_t enable)
 {
   int i;
 
@@ -1364,7 +1366,7 @@ static inline void lpc214x_dmareset(uint32 enable)
 
   /* Set USB UDCA Head register */
 
-  lpc214x_putreg((uint32)USB_UDCA, LPC214X_USBDEV_UDCAH);
+  lpc214x_putreg((uint32_t)USB_UDCA, LPC214X_USBDEV_UDCAH);
 
   /* Invalidate all DMA descriptors */
 
@@ -1474,10 +1476,10 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
   struct lpc214x_ep_s *privep;
   struct lpc214x_req_s *privreq = lpc214x_rqpeek(ep0);
   struct usb_ctrlreq_s ctrl;
-  uint16 value;
-  uint16 index;
-  uint16 len;
-  ubyte  response[2];
+  uint16_t value;
+  uint16_t index;
+  uint16_t len;
+  uint8_t  response[2];
   int    ret;
 
   /* Starting a control request? */
@@ -1492,7 +1494,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
   while (!lpc214x_rqempty(ep0))
     {
-      sint16 result = OK;
+      int16_t result = OK;
       if (privreq->req.xfrd != privreq->req.len)
         {
           result = -EPROTO;
@@ -1509,7 +1511,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 
   /* Read EP0 data */
 
-  ret = lpc214x_epread(LPC214X_EP0_OUT, (ubyte*)&ctrl, USB_SIZEOF_CTRLREQ);
+  ret = lpc214x_epread(LPC214X_EP0_OUT, (uint8_t*)&ctrl, USB_SIZEOF_CTRLREQ);
   if (ret <= 0)
     {
       return;
@@ -1642,7 +1644,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
                  (privep = lpc214x_epfindbyaddr(priv, index)) != NULL)
           {
             privep->halted = 0;
-            ret = lpc214x_epstall(&privep->ep, TRUE);
+            ret = lpc214x_epstall(&privep->ep, true);
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->ep0state = LPC214X_EP0STATUSIN;
           }
@@ -1835,8 +1837,8 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
   if (priv->stalled)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EP0SETUPSTALLED), priv->ep0state);
-      lpc214x_epstall(&ep0->ep, FALSE);
-      lpc214x_epstall(&ep0->ep, FALSE);
+      lpc214x_epstall(&ep0->ep, false);
+      lpc214x_epstall(&ep0->ep, false);
     }
 }
 
@@ -1853,7 +1855,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
 static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
 {
   struct lpc214x_ep_s *ep0;
-  uint32 pktlen;
+  uint32_t pktlen;
 
   /* Copy new setup packet into setup buffer */
 
@@ -1898,8 +1900,8 @@ static inline void lpc214x_ep0dataoutinterrupt(struct lpc214x_usbdev_s *priv)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EP0OUTSTALLED), priv->ep0state);
       ep0 = &priv->eplist[LPC214X_EP0_OUT];
-      lpc214x_epstall(&ep0->ep, FALSE);
-      lpc214x_epstall(&ep0->ep, FALSE);
+      lpc214x_epstall(&ep0->ep, false);
+      lpc214x_epstall(&ep0->ep, false);
     }
   return;
 }
@@ -1936,7 +1938,7 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
          * default phase, and begins the address phase (still not fully configured)
          */
 
-        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0INSETADDRESS), (uint16)priv->paddr);
+        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0INSETADDRESS), (uint16_t)priv->paddr);
         lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
         if (priv->paddr)
           {
@@ -1965,8 +1967,8 @@ static inline void lpc214x_ep0dataininterrupt(struct lpc214x_usbdev_s *priv)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_EP0INSTALLED), priv->ep0state);
       ep0 = &priv->eplist[LPC214X_EP0_IN];
-      lpc214x_epstall(&ep0->ep, FALSE);
-      lpc214x_epstall(&ep0->ep, FALSE);
+      lpc214x_epstall(&ep0->ep, false);
+      lpc214x_epstall(&ep0->ep, false);
     }
 }
 
@@ -1983,15 +1985,15 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
   struct lpc214x_usbdev_s *priv = &g_usbdev;
   struct lpc214x_ep_s *privep ;
 
-  uint32 devintstatus;  /* Sampled state of the device interrupt status register */
-  uint32 epintstatus;   /* Sampled state of the endpoint interrupt status register */
+  uint32_t devintstatus;  /* Sampled state of the device interrupt status register */
+  uint32_t epintstatus;   /* Sampled state of the endpoint interrupt status register */
 #ifdef CONFIG_LPC214X_USBDEV_DMA
-  uint32 dmaintstatus;  /* Sampled state of dma interrupt status register */
+  uint32_t dmaintstatus;  /* Sampled state of dma interrupt status register */
 #endif
-  uint32 softprio;      /* Current priority interrupt bitset */
-  uint32 pending;       /* Pending subset of priority interrupt bitset */
-  ubyte  epphy;         /* Physical endpoint number being processed */
-  int    i;
+  uint32_t softprio;      /* Current priority interrupt bitset */
+  uint32_t pending;       /* Pending subset of priority interrupt bitset */
+  uint8_t  epphy;         /* Physical endpoint number being processed */
+  int      i;
 
   usbtrace(TRACE_INTENTRY(LPC214X_TRACEINTID_USB), 0);
 
@@ -2025,7 +2027,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
       if ((devintstatus & USBDEV_DEVINT_EPRINT))
         {
-          ubyte errcode;
+          uint8_t errcode;
 
           /* Clear the error interrupt */
 
@@ -2033,8 +2035,8 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
           /* And show what error occurred */
 
-          errcode  = (ubyte)lpc214x_usbcmd(CMD_USB_DEV_READERRORSTATUS, 0) & 0x0f;
-          usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPRINT), (uint16)errcode);
+          errcode  = (uint8_t)lpc214x_usbcmd(CMD_USB_DEV_READERRORSTATUS, 0) & 0x0f;
+          usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPRINT), (uint16_t)errcode);
         }
 #endif
 
@@ -2050,7 +2052,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
           /* Then read the start of frame value */
 
-          priv->sof = (uint16)lpc214x_usbcmd(CMD_USB_DEV_READFRAMENO, 0);
+          priv->sof = (uint16_t)lpc214x_usbcmd(CMD_USB_DEV_READFRAMENO, 0);
         }
 #endif
 
@@ -2064,15 +2066,15 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
 
           /* Get device status */
 
-          g_usbdev.devstatus = (ubyte)lpc214x_usbcmd(CMD_USB_DEV_GETSTATUS, 0);
-          usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DEVSTAT), (uint16)g_usbdev.devstatus);
+          g_usbdev.devstatus = (uint8_t)lpc214x_usbcmd(CMD_USB_DEV_GETSTATUS, 0);
+          usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DEVSTAT), (uint16_t)g_usbdev.devstatus);
 
           /* Device connection status */
 
           if (DEVSTATUS_CONNCHG(g_usbdev.devstatus))
             {
               usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_CONNECTCHG),
-                       (uint16)g_usbdev.devstatus);
+                       (uint16_t)g_usbdev.devstatus);
               if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
                 {
                    /* Host is connected */
@@ -2082,7 +2084,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                        /* We have a transition from unattached to attached */
 
                        usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_CONNECTED),
-                                (uint16)g_usbdev.devstatus);
+                                (uint16_t)g_usbdev.devstatus);
                        priv->usbdev.speed = USB_SPEED_UNKNOWN;
                        lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
                        priv->attached     = 1;
@@ -2094,7 +2096,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                else if (priv->attached)
                  {
                    usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DISCONNECTED),
-                            (uint16)g_usbdev.devstatus);
+                            (uint16_t)g_usbdev.devstatus);
                    priv->usbdev.speed = USB_SPEED_UNKNOWN;
                    lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
                    priv->attached = 0;
@@ -2107,7 +2109,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
           if (DEVSTATUS_SUSPCHG(g_usbdev.devstatus))
             {
               usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_SUSPENDCHG),
-                       (uint16)g_usbdev.devstatus);
+                       (uint16_t)g_usbdev.devstatus);
             }
 
           /* Device reset */
@@ -2115,7 +2117,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
           if (DEVSTATUS_RESET(g_usbdev.devstatus))
             {
               usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_DEVRESET),
-                       (uint16)g_usbdev.devstatus);
+                       (uint16_t)g_usbdev.devstatus);
               lpc214x_usbreset(priv);
             }
         }
@@ -2157,10 +2159,10 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                     {
                       /* Clear the endpoint interrupt */
 
-                      uint32 result = lpc214x_epclrinterrupt(LPC214X_CTRLEP_OUT);
+                      uint32_t result = lpc214x_epclrinterrupt(LPC214X_CTRLEP_OUT);
                       if (result & USBDEV_EPSETUPPACKET)
                         {
-                          usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0SETUP), (uint16)result);
+                          usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0SETUP), (uint16_t)result);
                           lpc214x_ep0setup(priv);
                         }
                       else
@@ -2209,7 +2211,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                             {
                               /* IN: device-to-host */
 
-                              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPOUT), (uint16)epphy);
+                              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPOUT), (uint16_t)epphy);
                               if (priv->usbdev.speed == USB_SPEED_UNKNOWN)
                                 {
                                   priv->usbdev.speed = USB_SPEED_FULL;
@@ -2225,7 +2227,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
                             {
                               /* OUT: host-to-device */
 
-                              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPIN), (uint16)epphy);
+                              usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPIN), (uint16_t)epphy);
 
                               /* Read host data into the current read request */
 
@@ -2254,7 +2256,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
     {
       /* First Software High priority and then low priority */
 
-      uint32 tmp;
+      uint32_t tmp;
 
       /* Collect the DMA interrupt sources */
 
@@ -2299,7 +2301,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
             {
               if ((pending & 1) != 0)
                 {
-                  usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPDMA), (uint16)epphy);
+                  usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EPDMA), (uint16_t)epphy);
 #warning DO WHAT?
                 }
             }
@@ -2319,12 +2321,12 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context)
  *******************************************************************************/
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
-static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, ubyte epphy,
-                            uint32 epmaxsize, uint32 nbytes, uint32 *isocpacket,
-                            boolean isochronous);
+static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, uint8_t epphy,
+                            uint32_t epmaxsize, uint32_t nbytes, uint32_t *isocpacket,
+                            bool isochronous);
 {
   struct lpc214x_dmadesc_s *dmadesc = priv;
-  uint32 reg;
+  uint32_t reg;
 
 #ifdef CONFIG_DEBUG
   if (!priv || epphy < 2)
@@ -2366,11 +2368,11 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, ubyte epphy,
     }
 #endif
 
-  dmadesc->start = (uint32)&dmadesc->buffer;
+  dmadesc->start = (uint32_t)&dmadesc->buffer;
   dmadesc->status = 0;
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
-  dmadesc->size = (uint32)packet;
+  dmadesc->size = (uint32_t)packet;
 #endif
 
   /* Enable DMA tranfer for this endpoint */
@@ -2407,9 +2409,9 @@ static int lpc214x_dmasetup(struct lpc214x_usbdev_s *priv, ubyte epphy,
  *******************************************************************************/
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
-static void lpc214x_dmarestart(ubyte epphy, uint32 descndx)
+static void lpc214x_dmarestart(uint8_t epphy, uint32_t descndx)
 {
-  uint32 reg;
+  uint32_t reg;
 
   /* Clear DMA descriptor status */
 
@@ -2421,7 +2423,7 @@ static void lpc214x_dmarestart(ubyte epphy, uint32 descndx)
 
   /* Check the state of IN/OUT EP buffer */
 
-  uint32 reg = lpc214x_usbcmd(CMD_USB_EP_SELECT | epphy, 0);
+  uint32_t reg = lpc214x_usbcmd(CMD_USB_EP_SELECT | epphy, 0);
   if ((LPC214X_EPPHYIN(epphy) &&  (reg & 0x60) == 0) ||
       (LPC214X_EPPHYIN(epphy) &&  (reg & 0x60) == 0x60))
     {
@@ -2442,7 +2444,7 @@ static void lpc214x_dmarestart(ubyte epphy, uint32 descndx)
  *******************************************************************************/
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
-static void lpc214x_dmadisable(ubyte epphy)
+static void lpc214x_dmadisable(uint8_t epphy)
 {
   EPDMADIS = 1 << epphy;
 }
@@ -2461,7 +2463,7 @@ static void lpc214x_dmadisable(ubyte epphy)
  * Input Parameters:
  *   ep   - the struct usbdev_ep_s instance obtained from allocep()
  *   desc - A struct usb_epdesc_s instance describing the endpoint
- *   last - TRUE if this this last endpoint to be configured.  Some hardware
+ *   last - true if this this last endpoint to be configured.  Some hardware
  *          needs to take special action when all of the endpoints have been
  *          configured.
  *
@@ -2469,10 +2471,10 @@ static void lpc214x_dmadisable(ubyte epphy)
 
 static int lpc214x_epconfigure(FAR struct usbdev_ep_s *ep,
                                FAR const struct usb_epdesc_s *desc,
-                               boolean last)
+                               bool last)
 {
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
-  uint32 inten;
+  uint32_t inten;
 
   usbtrace(TRACE_EPCONFIGURE, privep->epphy);
   DEBUGASSERT(desc->addr == ep->eplog);
@@ -2521,8 +2523,8 @@ static int lpc214x_epdisable(FAR struct usbdev_ep_s *ep)
 {
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
   irqstate_t flags;
-  uint32 mask = (1 << privep->epphy);
-  uint32 reg;
+  uint32_t mask = (1 << privep->epphy);
+  uint32_t reg;
 
 #ifdef CONFIG_DEBUG
   if (!ep)
@@ -2619,7 +2621,7 @@ static void lpc214x_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_
  *******************************************************************************/
 
 #ifdef CONFIG_LPC214X_USBDEV_DMA
-static FAR void *lpc214x_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16 nbytes)
+static FAR void *lpc214x_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t nbytes)
 {
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
   int descndx;
@@ -2788,7 +2790,7 @@ static int lpc214x_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
  *
  *******************************************************************************/
 
-static int lpc214x_epstall(FAR struct usbdev_ep_s *ep, boolean resume)
+static int lpc214x_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 {
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
   irqstate_t flags;
@@ -2823,21 +2825,21 @@ static int lpc214x_epstall(FAR struct usbdev_ep_s *ep, boolean resume)
  *   eplog  - 7-bit logical endpoint number (direction bit ignored).  Zero means
  *            that any endpoint matching the other requirements will suffice.  The
  *            assigned endpoint can be found in the eplog field.
- *   in     - TRUE: IN (device-to-host) endpoint requested
+ *   in     - true: IN (device-to-host) endpoint requested
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
  *            USB_EP_ATTR_XFER_INT}
  *
  *******************************************************************************/
 
-static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte eplog,
-                                               boolean in, ubyte eptype)
+static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, uint8_t eplog,
+                                               bool in, uint8_t eptype)
 {
   FAR struct lpc214x_usbdev_s *priv = (FAR struct lpc214x_usbdev_s *)dev;
-  uint32 epset = LPC214X_EPALLSET & ~LPC214X_EPCTRLSET;
+  uint32_t epset = LPC214X_EPALLSET & ~LPC214X_EPCTRLSET;
   irqstate_t flags;
   int epndx = 0;
 
-  usbtrace(TRACE_DEVALLOCEP, (uint16)eplog);
+  usbtrace(TRACE_DEVALLOCEP, (uint16_t)eplog);
 
   /* Ignore any direction bits in the logical address */
 
@@ -2856,7 +2858,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
 
       if (eplog >= LPC214X_NLOGENDPOINTS)
         {
-          usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPNO), (uint16)eplog);
+          usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPNO), (uint16_t)eplog);
           return NULL;
         }
 
@@ -2897,7 +2899,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
 
     case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint -- not a valid choice */
     default:
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPTYPE), (uint16)eptype);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BADEPTYPE), (uint16_t)eptype);
       return NULL;
     }
 
@@ -2915,7 +2917,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
 
           for (epndx = 2; epndx < LPC214X_NPHYSENDPOINTS; epndx++)
             {
-              uint32 bit = 1 << epndx;
+              uint32_t bit = 1 << epndx;
               if ((epset & bit) != 0)
                 {
                   /* Mark the IN/OUT endpoint no longer available */
@@ -2933,7 +2935,7 @@ static FAR struct usbdev_ep_s *lcp214x_allocep(FAR struct usbdev_s *dev, ubyte e
       irqrestore(flags);
     }
 
-  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), (uint16)eplog);
+  usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_NOEP), (uint16_t)eplog);
   return NULL;
 }
 
@@ -2951,7 +2953,7 @@ static void lpc214x_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
   FAR struct lpc214x_ep_s *privep = (FAR struct lpc214x_ep_s *)ep;
   irqstate_t flags;
 
-  usbtrace(TRACE_DEVFREEEP, (uint16)privep->epphy);
+  usbtrace(TRACE_DEVFREEEP, (uint16_t)privep->epphy);
 
   if (priv && privep)
     {
@@ -2978,7 +2980,7 @@ static int lpc214x_getframe(struct usbdev_s *dev)
 
   /* Return last valid value of SOF read by the interrupt handler */
 
-  usbtrace(TRACE_DEVGETFRAME, (uint16)priv->sof);
+  usbtrace(TRACE_DEVGETFRAME, (uint16_t)priv->sof);
   return priv->sof;
 #else
   /* Return the last frame number detected by the hardware */
@@ -2998,10 +3000,10 @@ static int lpc214x_getframe(struct usbdev_s *dev)
 
 static int lpc214x_wakeup(struct usbdev_s *dev)
 {
-  ubyte arg = USBDEV_DEVSTATUS_SUSPEND;
+  uint8_t arg = USBDEV_DEVSTATUS_SUSPEND;
   irqstate_t flags;
 
-  usbtrace(TRACE_DEVWAKEUP, (uint16)g_usbdev.devstatus);
+  usbtrace(TRACE_DEVWAKEUP, (uint16_t)g_usbdev.devstatus);
 
   flags = irqsave();
   if (DEVSTATUS_CONNECT(g_usbdev.devstatus))
@@ -3022,11 +3024,11 @@ static int lpc214x_wakeup(struct usbdev_s *dev)
  *
  *******************************************************************************/
 
-static int lpc214x_selfpowered(struct usbdev_s *dev, boolean selfpowered)
+static int lpc214x_selfpowered(struct usbdev_s *dev, bool selfpowered)
 {
   FAR struct lpc214x_usbdev_s *priv = (FAR struct lpc214x_usbdev_s *)dev;
 
-  usbtrace(TRACE_DEVSELFPOWERED, (uint16)selfpowered);
+  usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
 #ifdef CONFIG_DEBUG
   if (!dev)
@@ -3048,9 +3050,9 @@ static int lpc214x_selfpowered(struct usbdev_s *dev, boolean selfpowered)
  *
  *******************************************************************************/
 
-static int lpc214x_pullup(struct usbdev_s *dev, boolean enable)
+static int lpc214x_pullup(struct usbdev_s *dev, bool enable)
 {
-  usbtrace(TRACE_DEVPULLUP, (uint16)enable);
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
   /* The USBDEV_DEVSTATUS_CONNECT bit in the CMD_USB_DEV_SETSTATUS command
    * controls the LPC214x SoftConnect_N output pin that is used for SoftConnect.
@@ -3082,7 +3084,7 @@ static int lpc214x_pullup(struct usbdev_s *dev, boolean enable)
 void up_usbinitialize(void)
 {
   struct lpc214x_usbdev_s *priv = &g_usbdev;
-  uint32 reg;
+  uint32_t reg;
   int i;
 
   usbtrace(TRACE_DEVINIT, 0);
@@ -3102,7 +3104,7 @@ void up_usbinitialize(void)
 
   for (i = 0; i < LPC214X_NPHYSENDPOINTS; i++)
     {
-      uint32 bit = 1 << i;
+      uint32_t bit = 1 << i;
 
       /* Set endpoint operations, reference to driver structure (not
        * really necessary because there is only one controller), and
@@ -3157,7 +3159,7 @@ void up_usbinitialize(void)
   if (irq_attach(LPC214X_USB_IRQ, lpc214x_usbinterrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_IRQREGISTRATION),
-               (uint16)LPC214X_USB_IRQ);
+               (uint16_t)LPC214X_USB_IRQ);
       goto errout;
     }
 
@@ -3170,7 +3172,7 @@ void up_usbinitialize(void)
 
   /* Disconnect device */
 
-  lpc214x_pullup(&priv->usbdev, FALSE);
+  lpc214x_pullup(&priv->usbdev, false);
 
   /* Enable EP0 for OUT (host-to-device) */
 
@@ -3197,7 +3199,7 @@ errout:
 void up_usbuninitialize(void)
 {
   struct lpc214x_usbdev_s *priv = &g_usbdev;
-  uint32 reg;
+  uint32_t reg;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVUNINIT, 0);
@@ -3211,7 +3213,7 @@ void up_usbuninitialize(void)
   /* Disconnect device */
 
   flags = irqsave();
-  lpc214x_pullup(&priv->usbdev, FALSE);
+  lpc214x_pullup(&priv->usbdev, false);
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
   lpc214x_usbcmd(CMD_USB_DEV_CONFIG, 0);
 
@@ -3267,7 +3269,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   ret = CLASS_BIND(driver, &g_usbdev.usbdev);
   if (ret)
     {
-      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BINDFAILED), (uint16)-ret);
+      usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_BINDFAILED), (uint16_t)-ret);
       g_usbdev.driver = NULL;
     }
   else

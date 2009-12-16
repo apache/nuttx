@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -52,7 +52,7 @@
 #include "lm3s_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define RCC_OSCMASK   (SYSCON_RCC_IOSCDIS|SYSCON_RCC_MOSCDIS)
@@ -86,7 +86,7 @@
  *
  ****************************************************************************/
 
-static inline void lm3s_delay(uint32 delay)
+static inline void lm3s_delay(uint32_t delay)
 {
   __asm__ __volatile__("1:\n"
                        "\tsubs  %0, #1\n"
@@ -104,19 +104,19 @@ static inline void lm3s_delay(uint32 delay)
  *
  ****************************************************************************/
 
-static inline void lm3s_oscdelay(uint32 rcc, uint32 rcc2)
+static inline void lm3s_oscdelay(uint32_t rcc, uint32_t rcc2)
 {
   /* Wait for the oscillator  to stabilize.  A smaller delay is used if the
    * current clock rate is very slow.
    */
 
-  uint32 delay   = FAST_OSCDELAY;
+  uint32_t delay   = FAST_OSCDELAY;
 
   /* Are we currently using RCC2? */
 
   if ((rcc2 & SYSCON_RCC2_USERCC2) != 0)
     {
-      uint32 rcc2src = rcc2 & SYSCON_RCC2_OSCSRC2_MASK;
+      uint32_t rcc2src = rcc2 & SYSCON_RCC2_OSCSRC2_MASK;
       if ((rcc2src == SYSCON_RCC2_OSCSRC2_30KHZ) ||
           (rcc2src == SYSCON_RCC2_OSCSRC2_32KHZ))
         {
@@ -128,7 +128,7 @@ static inline void lm3s_oscdelay(uint32 rcc, uint32 rcc2)
 
   else
     {
-      uint32 rccsrc  = rcc  & SYSCON_RCC_OSCSRC_MASK;
+      uint32_t rccsrc  = rcc  & SYSCON_RCC_OSCSRC_MASK;
       if (rccsrc == SYSCON_RCC_OSCSRC_30KHZ)
         {
           delay = SLOW_OSCDELAY;
@@ -150,7 +150,7 @@ static inline void lm3s_oscdelay(uint32 rcc, uint32 rcc2)
 
 static inline void lm3s_plllock(void)
 {
-  uint32 delay;
+  uint32_t delay;
 
   /* Loop until the lock is achieved or until a timeout occurs */
 
@@ -183,10 +183,10 @@ static inline void lm3s_plllock(void)
  *
  ****************************************************************************/
 
-void lm3s_clockconfig(uint32 newrcc, uint32 newrcc2)
+void lm3s_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 {
-  uint32 rcc;
-  uint32 rcc2;
+  uint32_t rcc;
+  uint32_t rcc2;
 
   /* Get the current values of the RCC and RCC2 registers */
 

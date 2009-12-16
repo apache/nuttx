@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <time.h>
 #include <debug.h>
 #include <nuttx/arch.h>
@@ -52,7 +53,7 @@
 #include "str71x_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-procesor Definitions
  ****************************************************************************/
 
 /* Configuration */
@@ -131,9 +132,9 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32 *regs)
+int up_timerisr(int irq, uint32_t *regs)
 {
-  uint16 ocar;
+  uint16_t ocar;
 
   /* Clear all the output compare A interrupt status bit */
 

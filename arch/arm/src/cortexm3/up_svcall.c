@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -88,7 +88,7 @@
 
 int up_svcall(int irq, FAR void *context)
 {
-  uint32 *regs   = (uint32*)context;
+  uint32_t *regs   = (uint32_t*)context;
 
   DEBUGASSERT(regs && regs == current_regs);
   DEBUGASSERT(regs[REG_R1] != 0);
@@ -115,7 +115,7 @@ int up_svcall(int irq, FAR void *context)
     {
       /* R0=0:  This is a save context command:
        *
-       *   int up_saveusercontext(uint32 *saveregs);
+       *   int up_saveusercontext(uint32_t *saveregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -128,13 +128,13 @@ int up_svcall(int irq, FAR void *context)
 
       case 0:
         {
-          memcpy((uint32*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+          memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
         }
         break;
 
       /* R0=1: This a restore context command:
        *
-       *   void up_fullcontextrestore(uint32 *restoreregs) __attribute__ ((noreturn));
+       *   void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
        *
        * At this point, the following values are saved in context:
        *
@@ -149,13 +149,13 @@ int up_svcall(int irq, FAR void *context)
 
       case 1:
         {
-          current_regs = (uint32*)regs[REG_R1];
+          current_regs = (uint32_t*)regs[REG_R1];
         }
         break;
 
       /* R0=2: This a switch context command:
        *
-       *   void up_switchcontext(uint32 *saveregs, uint32 *restoreregs);
+       *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -172,8 +172,8 @@ int up_svcall(int irq, FAR void *context)
       case 2:
         {
           DEBUGASSERT(regs[REG_R2] != 0);
-          memcpy((uint32*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-          current_regs = (uint32*)regs[REG_R2];
+          memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+          current_regs = (uint32_t*)regs[REG_R2];
         }
         break;
 

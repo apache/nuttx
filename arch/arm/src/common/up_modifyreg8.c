@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <arch/irq.h>
@@ -48,7 +48,7 @@
 #include "up_arch.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,10 +71,10 @@
  *
  ****************************************************************************/
 
-void modifyreg8(unsigned int addr, ubyte clearbits, ubyte setbits)
+void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits)
 {
   irqstate_t flags;
-  ubyte      regval;
+  uint8_t    regval;
 
   flags   = irqsave();
   regval  = getreg8(addr);

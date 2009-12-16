@@ -67,7 +67,7 @@
  * Description:
  *   Restore the current thread context.  Full prototype is:
  *
- *   void up_fullcontextrestore(uint32 *restoreregs) __attribute__ ((noreturn));
+ *   void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
  *
  * Return:
  *   None

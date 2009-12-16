@@ -38,8 +38,8 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -224,7 +224,7 @@ void up_lowputc(char ch)
 
   /* Then send the character */
 
-  putreg32((uint32)ch, STM32_CONSOLE_BASE + STM32_USART_DR_OFFSET);
+  putreg32((uint32_t)ch, STM32_CONSOLE_BASE + STM32_USART_DR_OFFSET);
 #endif
 }
 
@@ -241,9 +241,9 @@ void up_lowputc(char ch)
 void stm32_lowsetup(void)
 {
 #if defined(CONFIG_STM32_USART1) || defined(CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3)
-  uint32 mapr;
+  uint32_t mapr;
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_USART_CONFIG)
-  uint32 cr;
+  uint32_t cr;
 #endif
 
   /* Enable the selected USARTs and configure GPIO pins need byed the

@@ -39,15 +39,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+
 #include "clock_internal.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* DM320 Timers
@@ -114,7 +116,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32 *regs)
+int up_timerisr(int irq, uint32_t *regs)
 {
    /* Process timer interrupt */
 

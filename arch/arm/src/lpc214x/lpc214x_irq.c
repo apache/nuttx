@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
 #include <nuttx/irq.h>
 
@@ -56,7 +57,7 @@
  * Public Data
  ****************************************************************************/
 
-uint32 *current_regs;
+uint32_t *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -91,7 +92,7 @@ void up_irqinitialize(void)
 
   /* Set the default vector */
 
-  vic_putreg((uint32)up_decodeirq, LPC214X_VIC_DEFVECTADDR_OFFSET);
+  vic_putreg((uint32_t)up_decodeirq, LPC214X_VIC_DEFVECTADDR_OFFSET);
 
   /* Disable all vectored interrupts */
 
@@ -157,7 +158,7 @@ void up_enable_irq(int irq)
        * Interrupt Enable register.
        */
 
-      uint32 val = vic_getreg(LPC214X_VIC_INTENABLE_OFFSET);
+      uint32_t val = vic_getreg(LPC214X_VIC_INTENABLE_OFFSET);
       vic_putreg(val | (1 << irq), LPC214X_VIC_INTENABLE_OFFSET);
       irqrestore(flags);
     }
@@ -186,7 +187,7 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
 
       /* Save the vector address */
 
-      vic_putreg((uint32)handler, LPC214X_VIC_VECTADDR0_OFFSET + offset);
+      vic_putreg((uint32_t)handler, LPC214X_VIC_VECTADDR0_OFFSET + offset);
 
       /* Enable the vectored interrupt */
 

@@ -1,7 +1,7 @@
 /**************************************************************************
  * c5471/c5471_watchdog.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -38,13 +38,18 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
 #include <nuttx/irq.h>
 #include <arch/watchdog.h>
+
 #include "up_arch.h"
 
 /**************************************************************************
@@ -72,8 +77,8 @@
 
 /* Macros to manage access to to watchdog timer macros */
 
-#define c5471_wdt_cntl  (*(volatile uint32*)C5471_TIMER0_CTRL)
-#define c5471_wdt_count (*(volatile uint32*)C5471_TIMER0_CNT)
+#define c5471_wdt_cntl  (*(volatile uint32_t*)C5471_TIMER0_CTRL)
+#define c5471_wdt_count (*(volatile uint32_t*)C5471_TIMER0_CNT)
 
 /**************************************************************************
  * Private Types
@@ -87,20 +92,20 @@
 
 static inline unsigned int wdt_prescaletoptv(unsigned int prescale);
 
-static int     wdt_setusec(uint32 usec);
+static int     wdt_setusec(uint32_t usec);
 static int     wdt_interrupt(int irq, void *context);
 
 static int     wdt_open(struct file *filep);
 static int     wdt_close(struct file *filep);
 static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen);
 static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen);
-static int     wdt_ioctl(struct file *filep, int cmd, uint32 arg);
+static int     wdt_ioctl(struct file *filep, int cmd, uint32_t arg);
 
 /**************************************************************************
  * Private Data
  **************************************************************************/
 
-static boolean g_wdtopen;
+static bool g_wdtopen;
 
 static const struct file_operations g_wdtops =
 {
@@ -156,15 +161,15 @@ static inline unsigned int wdt_prescaletoptv(unsigned int prescale)
  * Name: wdt_setusec
  **************************************************************************/
 
-static int wdt_setusec(uint32 usec)
+static int wdt_setusec(uint32_t usec)
 {
   /* prescaler: clock / prescaler = #clock ticks per counter in ptv
    * divisor:   #counts until the interrupt comes.
    */
 
-  uint32 prescaler = MAX_PRESCALER;
-  uint32 divisor   = 1;
-  uint32 mode;
+  uint32_t prescaler = MAX_PRESCALER;
+  uint32_t divisor   = 1;
+  uint32_t mode;
 
   dbg("usec=%d\n", usec);
 
@@ -283,7 +288,7 @@ static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen)
  * Name: wdt_ioctl
  **************************************************************************/
 
-static int wdt_ioctl(struct file *filep, int cmd, uint32 arg)
+static int wdt_ioctl(struct file *filep, int cmd, uint32_t arg)
 {
   dbg("ioctl Call: cmd=0x%x arg=0x%x", cmd, arg);
 
@@ -323,7 +328,7 @@ static int wdt_open(struct file *filep)
   c5471_wdt_cntl = C5471_DISABLE_VALUE1;
   c5471_wdt_cntl = C5471_DISABLE_VALUE2;
 
-  g_wdtopen = TRUE;
+  g_wdtopen = true;
   return OK;
 }
 
@@ -345,7 +350,7 @@ static int wdt_close(struct file *filep)
   c5471_wdt_cntl = C5471_TIMER_MODE;
 #endif
 
-  g_wdtopen = FALSE;
+  g_wdtopen = false;
   return 0;
 }
 

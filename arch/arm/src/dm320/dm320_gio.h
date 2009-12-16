@@ -1,7 +1,7 @@
 /************************************************************************************
  * dm320/dm320_gio.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -41,11 +41,11 @@
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-# include <sys/types.h>
+# include <stdint.h>
 #endif
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* General I/O Registers */
@@ -77,7 +77,7 @@
 
 #define _GIO_READ_REG(pin, reg0, reg1, reg2, bval) \
   do { \
-    register uint32 _reg; register int _pin; \
+    register uint32_t _reg; register int _pin; \
     if ((pin) < 16) { _reg = (reg0); _pin = (pin); } \
     else if ((pin) < 32) { _reg = (reg1); _pin = ((pin) - 16); } \
     else { _reg = (reg2); _pin = ((pin) - 32); } \
@@ -86,7 +86,7 @@
 
 #define _GIO_SET_REG(pin, reg0, reg1, reg2) \
   do { \
-    register uint32 _reg; register int _pin; \
+    register uint32_t _reg; register int _pin; \
     if ((pin) < 16) { _reg = (reg0); _pin = (pin); } \
     else if ((pin) < 32) { _reg = (reg1); _pin = ((pin) - 16); } \
     else { _reg = (reg2); _pin = ((pin) - 32); } \
@@ -95,7 +95,7 @@
 
 #define _GIO_CLEAR_REG(pin, reg0, reg1, reg2) \
   do { \
-    register uint32 _reg; register int _pin; \
+    register uint32_t _reg; register int _pin; \
     if ((pin) < 16) { _reg = (reg0); _pin = (pin); } \
     else if ((pin) < 32) { _reg = (reg1); _pin = ((pin) - 16); } \
     else { _reg = (reg2); _pin = ((pin) - 32); } \

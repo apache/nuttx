@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_timerisr.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
@@ -91,9 +92,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
-int up_timerisr(uint32 *regs)
+int up_timerisr(uint32_t *regs)
 #else
-int up_timerisr(int irq, uint32 *regs)
+int up_timerisr(int irq, uint32_t *regs)
 #endif
 {
    /* Process timer interrupt */
@@ -123,7 +124,7 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
-  uint16 mcr;
+  uint16_t mcr;
 
   /* Clear all match and capture event interrupts */
 

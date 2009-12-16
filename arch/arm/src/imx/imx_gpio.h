@@ -41,10 +41,13 @@
  * Included Files
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 #include "up_arch.h"                     /* getreg32(), putreg32() */
  
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* GPIO Register Offsets ************************************************************/
@@ -197,14 +200,14 @@
 
 static inline void imxgpio_dirout(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_DDIR(port));
+  uint32_t regval = getreg32(IMX_GPIO_DDIR(port));
   regval |= (1 << bit);
   putreg32(regval, IMX_GPIO_DDIR(port));
 }
 
 static inline void imxgpio_dirin(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_DDIR(port));
+  uint32_t regval = getreg32(IMX_GPIO_DDIR(port));
   regval &= ~(1 << bit);
   putreg32(regval, IMX_GPIO_DDIR(port));
 }
@@ -213,9 +216,9 @@ static inline void imxgpio_dirin(int port, int bit)
 
 static inline void imxgpio_ocrain(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -235,9 +238,9 @@ static inline void imxgpio_ocrain(int port, int bit)
 
 static inline void imxgpio_ocrbin(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -258,9 +261,9 @@ static inline void imxgpio_ocrbin(int port, int bit)
 
 static inline void imxgpio_ocrcin(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -281,9 +284,9 @@ static inline void imxgpio_ocrcin(int port, int bit)
 
 static inline void imxgpio_ocrodrin(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -305,9 +308,9 @@ static inline void imxgpio_ocrodrin(int port, int bit)
 
 static inline void imxgpio_aoutgpio(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -327,9 +330,9 @@ static inline void imxgpio_aoutgpio(int port, int bit)
 
 static inline void imxgpio_aoutisr(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -350,9 +353,9 @@ static inline void imxgpio_aoutisr(int port, int bit)
 
 static inline void imxgpio_aout0(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -373,9 +376,9 @@ static inline void imxgpio_aout0(int port, int bit)
 
 static inline void imxgpio_aout1(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -395,9 +398,9 @@ static inline void imxgpio_aout1(int port, int bit)
 
 static inline void imxgpio_boutgpio(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -417,9 +420,9 @@ static inline void imxgpio_boutgpio(int port, int bit)
 
 static inline void imxgpio_boutisr(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -440,9 +443,9 @@ static inline void imxgpio_boutisr(int port, int bit)
 
 static inline void imxgpio_bout0(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -463,9 +466,9 @@ static inline void imxgpio_bout0(int port, int bit)
 
 static inline void imxgpio_bout1(int port, int bit)
 {
-  uint32 regval;
-  uint32 regaddr;
-  int    shift;
+  uint32_t regval;
+  uint32_t regaddr;
+  int      shift;
 
   if (bit < 16)
     {
@@ -490,28 +493,28 @@ static inline void imxgpio_bout1(int port, int bit)
 
 static inline void imxgpio_gpiofunc(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_GIUS(port));
+  uint32_t regval = getreg32(IMX_GPIO_GIUS(port));
   regval |= (1 << bit);
   putreg32(regval, IMX_GPIO_GIUS(port));
 }
 
 static inline void imxgpio_peripheralfunc(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_GIUS(port));
+  uint32_t regval = getreg32(IMX_GPIO_GIUS(port));
   regval &= ~(1 << bit);
   putreg32(regval, IMX_GPIO_GIUS(port));
 }
 
 static inline void imxgpio_altperipheralfunc(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_GPR(port));
+  uint32_t regval = getreg32(IMX_GPIO_GPR(port));
   regval |= (1 << bit);
   putreg32(regval, IMX_GPIO_GPR(port));
 }
 
 static inline void imxgpio_primaryperipheralfunc(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_GPR(port));
+  uint32_t regval = getreg32(IMX_GPIO_GPR(port));
   regval &= ~(1 << bit);
   putreg32(regval, IMX_GPIO_GPR(port));
 }
@@ -520,28 +523,28 @@ static inline void imxgpio_primaryperipheralfunc(int port, int bit)
 
 static inline void imxgpio_pullupenable(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_PUEN(port));
+  uint32_t regval = getreg32(IMX_GPIO_PUEN(port));
   regval |= (1 << bit);
   putreg32(regval, IMX_GPIO_PUEN(port));
 }
 
 static inline void imxgpio_pullupdisable(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_PUEN(port));
+  uint32_t regval = getreg32(IMX_GPIO_PUEN(port));
   regval &= ~(1 << bit);
   putreg32(regval, IMX_GPIO_PUEN(port));
 }
 
 static inline void imxgpio_setoutput(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_DR(port));
+  uint32_t regval = getreg32(IMX_GPIO_DR(port));
   regval |= (1 << bit);
   putreg32(regval, IMX_GPIO_DR(port));
 }
 
 static inline void imxgpio_clroutput(int port, int bit)
 {
-  uint32 regval = getreg32(IMX_GPIO_DR(port));
+  uint32_t regval = getreg32(IMX_GPIO_DR(port));
   regval &= ~(1 << bit);
   putreg32(regval, IMX_GPIO_DR(port));
 }

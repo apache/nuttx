@@ -41,13 +41,14 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "up_internal.h"
 #include "chip.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* The LM3S6918 only supports 8 priority levels.  The hardware priority mechanism
@@ -236,7 +237,7 @@ EXTERN void up_lowsetup(void);
  *
  ****************************************************************************/
 
-EXTERN void lm3s_clockconfig(uint32 newrcc, uint32 newrcc2);
+EXTERN void lm3s_clockconfig(uint32_t newrcc, uint32_t newrcc2);
 
 /****************************************************************************
  * Name: up_clockconfig
@@ -257,7 +258,7 @@ EXTERN void up_clockconfig(void);
  *
  ****************************************************************************/
 
-EXTERN int lm3s_configgpio(uint32 cfgset);
+EXTERN int lm3s_configgpio(uint32_t cfgset);
 
 /****************************************************************************
  * Name: lm3s_gpiowrite
@@ -267,7 +268,7 @@ EXTERN int lm3s_configgpio(uint32 cfgset);
  *
  ****************************************************************************/
 
-EXTERN void lm3s_gpiowrite(uint32 pinset, boolean value);
+EXTERN void lm3s_gpiowrite(uint32_t pinset, bool value);
 
 /****************************************************************************
  * Name: lm3s_gpioread
@@ -277,7 +278,7 @@ EXTERN void lm3s_gpiowrite(uint32 pinset, boolean value);
  *
  ****************************************************************************/
 
-EXTERN boolean lm3s_gpioread(uint32 pinset, boolean value);
+EXTERN bool lm3s_gpioread(uint32_t pinset, bool value);
 
 /****************************************************************************
  * Function:  lm3s_dumpgpio
@@ -287,7 +288,7 @@ EXTERN boolean lm3s_gpioread(uint32 pinset, boolean value);
  *
  ****************************************************************************/
 
-EXTERN int lm3s_dumpgpio(uint32 pinset, const char *msg);
+EXTERN int lm3s_dumpgpio(uint32_t pinset, const char *msg);
 
 /****************************************************************************
  * Name: gpio_irqinitialize
@@ -345,8 +346,8 @@ EXTERN int lm3s_ethinitialize(int intf);
 
 struct spi_dev_s;
 enum spi_dev_e;
-EXTERN void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-EXTERN ubyte lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -15,7 +15,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -39,13 +39,13 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
 
 /************************************************************************************
- * Private Types
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -54,18 +54,18 @@
 
 struct section_mapping_s
 {
-  uint32 physbase;   /* Physical address of the region to be mapped */
-  uint32 virtbase;   /* Virtual address of the region to be mapped */
-  uint32 mmuflags;   /* MMU settings for the region (e.g., cache-able) */
-  uint32 nsections;  /* Number of mappings in the region */
+  uint32_t physbase;   /* Physical address of the region to be mapped */
+  uint32_t virtbase;   /* Virtual address of the region to be mapped */
+  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
+  uint32_t nsections;  /* Number of mappings in the region */
 };
 
 /************************************************************************************
  * Public Variables
  ************************************************************************************/
 
-extern uint32 _vector_start; /* Beginning of vector block */
-extern uint32 _vector_end;   /* End+1 of vector block */
+extern uint32_t _vector_start; /* Beginning of vector block */
+extern uint32_t _vector_end;   /* End+1 of vector block */
 
 /************************************************************************************
  * Private Variables
@@ -114,10 +114,10 @@ extern void imx_boardinitialize(void);
  * Name: up_setlevel1entry
  ************************************************************************************/
 
-static inline void up_setlevel1entry(uint32 paddr, uint32 vaddr, uint32 mmuflags)
+static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32 *pgtable = (uint32*)PGTABLE_VBASE;
-  uint32  index   = vaddr >> 20;
+  uint32_t *pgtable = (uint32_t*)PGTABLE_VBASE;
+  uint32_t  index   = vaddr >> 20;
 
   /* Save the page table entry */
 
@@ -134,9 +134,9 @@ static void up_setupmappings(void)
 
   for (i = 0; i < NMAPPINGS; i++)
     {
-      uint32 sect_paddr = section_mapping[i].physbase;
-      uint32 sect_vaddr = section_mapping[i].virtbase;
-      uint32 mmuflags   = section_mapping[i].mmuflags;
+      uint32_t sect_paddr = section_mapping[i].physbase;
+      uint32_t sect_vaddr = section_mapping[i].virtbase;
+      uint32_t mmuflags   = section_mapping[i].mmuflags;
 
       for (j = 0; j < section_mapping[i].nsections; j++)
         {
@@ -178,9 +178,9 @@ static void up_copyvectorblock(void)
    */
 
 #if !defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_COPYTORAM)
-  uint32 *src  = (uint32*)&_vector_start;
-  uint32 *end  = (uint32*)&_vector_end;
-  uint32 *dest = (uint32*)VECTOR_BASE;
+  uint32_t *src  = (uint32_t*)&_vector_start;
+  uint32_t *end  = (uint32_t*)&_vector_end;
+  uint32_t *dest = (uint32_t*)VECTOR_BASE;
 
   while (src < end)
     {
