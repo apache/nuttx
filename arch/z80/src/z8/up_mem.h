@@ -44,7 +44,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* For the ZiLOG ZDS-II toolchain(s), the heap will be set using linker-
@@ -59,12 +59,12 @@
 
 #ifndef CONFIG_HEAP1_BASE
    extern far unsigned long far_heapbot;
-#  define CONFIG_HEAP1_BASE ((uint16_t))&far_heapbot)
+#  define CONFIG_HEAP1_BASE ((uint16_t)&far_heapbot)
 #endif
 
 #ifndef CONFIG_HEAP1_END
    extern far unsigned long far_stacktop;
-#  define CONFIG_HEAP1_END (((uint16_t))&far_stacktop) - CONFIG_IDLETHREAD_STACKSIZE + 1)
+#  define CONFIG_HEAP1_END (((uint16_t)&far_stacktop) - CONFIG_IDLETHREAD_STACKSIZE + 1)
 #endif
 
 /************************************************************************************

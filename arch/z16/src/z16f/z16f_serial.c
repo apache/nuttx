@@ -316,7 +316,7 @@ static int z16f_setup(struct uart_dev_s *dev)
    */
 
   brg = (_DEFCLK + (priv->baud << 3))/(priv->baud << 4);
-  putreg16((uint16_t))brg, priv->uartbase + Z16F_UART_BR);
+  putreg16((uint16_t)brg, priv->uartbase + Z16F_UART_BR);
 
   /* Configure STOP bits */
 

@@ -836,7 +836,7 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 static void m16c_rxint(struct up_dev_s *dev, bool enable)
 {
   irqstate_t flags;
-  uint16_t)_t   regaddr;
+  uint16_t   regaddr;
   uint8_t    regvalue;
 
   /* Disable interrupts to prevent asynchronous accesses */
@@ -991,7 +991,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 static void m16c_txint(struct up_dev_s *dev, bool enable)
 {
   irqstate_t flags;
-  uint16_t)_t   regaddr;
+  uint16_t   regaddr;
   uint8_t    regvalue;
 
   /* Disable interrupts to prevent asynchronous accesses */

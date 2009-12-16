@@ -123,7 +123,7 @@ static void ez80_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t
 
 void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 {
-  sdbg("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t))sigdeliver);
+  sdbg("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
 
   /* Refuse to handle nested signal actions */
 

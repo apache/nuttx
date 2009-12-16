@@ -373,7 +373,7 @@ static inline void up_setbrr(struct up_dev_s *priv, unsigned int baud)
    */
 
   uint32_t brr = ((((SH1_CLOCK + 16) / 32) + (baud >> 1)) / baud) - 1;
-  up_serialout(priv, SH1_SCI_BRR_OFFSET, (uint16_t))brr);
+  up_serialout(priv, SH1_SCI_BRR_OFFSET, (uint16_t)brr);
 }
 
 /****************************************************************************

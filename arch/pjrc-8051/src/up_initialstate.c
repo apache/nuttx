@@ -96,8 +96,8 @@ void up_initial_state(FAR _TCB *tcb)
    *     (SP)   <- (SP) -1
    */
 
-   frame[FRAME_RETLS] = (((uint16_t))tcb->start) & 0xff);
-   frame[FRAME_RETMS] = (((uint16_t))tcb->start) >> 8);
+   frame[FRAME_RETLS] = (((uint16_t)tcb->start) & 0xff);
+   frame[FRAME_RETMS] = (((uint16_t)tcb->start) >> 8);
 
   /* The context save area for registers a, ie, and dpstr
    * follows the return address in the stack frame.

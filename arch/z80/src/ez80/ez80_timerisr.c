@@ -112,7 +112,7 @@ int up_timerisr(int irq, chipreg_t *regs)
 
 void up_timerinit(void)
 {
-  uint16_t) reload;
+  uint16_t reload;
   uint8_t  reg;
 
   /* Disable the timer */
@@ -142,7 +142,7 @@ void up_timerinit(void)
    * NOTE: The system clock frequency value is defined in the board.h file
    */
 
-  reload = (uint16_t))(ez80_systemclock / 1600);
+  reload = (uint16_t)(ez80_systemclock / 1600);
   outp(EZ80_TMR0_RRH, (uint8_t)(reload >> 8));
   outp(EZ80_TMR0_RRL, (uint8_t)(reload));
 

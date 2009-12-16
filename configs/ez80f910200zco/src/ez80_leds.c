@@ -201,7 +201,7 @@ static const uint8_t *g_prevglyph = g_chspace;
 
 static uint8_t g_anodecol         = 1;
 static uint8_t g_cathoderow       = 0;
-static sbyte g_intcount         = 0;
+static int8_t  g_intcount         = 0;
 
 /****************************************************************************
  * Private Functions

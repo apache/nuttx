@@ -77,9 +77,9 @@
  * Name: m16c_getsp
  ****************************************************************************/
 
-static inline uint16_t) m16c_getsp(void)
+static inline uint16_t m16c_getsp(void)
 {
-  uint16_t) sp;
+  uint16_t sp;
 
   __asm__ __volatile__
     (
@@ -96,10 +96,10 @@ static inline uint16_t) m16c_getsp(void)
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-static inline uint16_t) m16c_getusersp(void)
+static inline uint16_t m16c_getusersp(void)
 {
   uint8_t *ptr = (uint8_t*) current_regs;
-  return (uint16_t))ptr[REG_SP] << 8 | ptr[REG_SP+1];
+  return (uint16_t)ptr[REG_SP] << 8 | ptr[REG_SP+1];
 }
 #endif
 
@@ -107,9 +107,9 @@ static inline uint16_t) m16c_getusersp(void)
  * Name: m16c_stackdump
  ****************************************************************************/
 
-static void m16c_stackdump(uint16_t) sp, uint16_t) stack_base)
+static void m16c_stackdump(uint16_t sp, uint16_t stack_base)
 {
-  uint16_t) stack;
+  uint16_t stack;
 
   for (stack = sp & ~7; stack < stack_base; stack += 8)
     {
@@ -158,13 +158,13 @@ static inline void m16c_registerdump(void)
 
 void up_dumpstate(void)
 {
-  _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  uint16_t) sp         = m16c_getsp();
-  uint16_t) ustackbase;
-  uint16_t) ustacksize;
+  _TCB    *rtcb = (_TCB*)g_readytorun.head;
+  uint16_t sp   = m16c_getsp();
+  uint16_t ustackbase;
+  uint16_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  uint16_t) istackbase;
-  uint16_t) istacksize;
+  uint16_t istackbase;
+  uint16_t istacksize;
 #endif
 
   /* Get the limits on the user stack memory */
@@ -176,8 +176,8 @@ void up_dumpstate(void)
     }
   else
     {
-      ustackbase = (uint16_t))rtcb->adj_stack_ptr;
-      ustacksize = (uint16_t))rtcb->adj_stack_size;
+      ustackbase = (uint16_t)rtcb->adj_stack_ptr;
+      ustacksize = (uint16_t)rtcb->adj_stack_size;
     }
 
   /* Get the limits on the interrupt stack memory. The near RAM memory map is as follows:

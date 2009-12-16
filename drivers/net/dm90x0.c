@@ -282,11 +282,11 @@
 
 union rx_desc_u
 {
-  uint8 rx_buf[4];
+  uint8_t rx_buf[4];
   struct
   {
-    uint8  rx_byte;
-    uint8  rx_status;
+    uint8_t  rx_byte;
+    uint8_t  rx_status;
     uint16_t rx_len;
   } desc;
 };
@@ -306,8 +306,8 @@ struct dm9x_driver_s
 
   /* Mode-dependent function to move data in 8/16/32 I/O modes */
 
-  void (*dm_read)(uint8 *ptr, int len);
-  void (*dm_write)(const uint8 *ptr, int len);
+  void (*dm_read)(uint8_t *ptr, int len);
+  void (*dm_write)(const uint8_t *ptr, int len);
   void (*dm_discard)(int len);
 
 #if defined(CONFIG_DM9X_STATS)
@@ -343,17 +343,17 @@ static struct dm9x_driver_s g_dm9x[CONFIG_DM9X_NINTERFACES];
 
 /* Utility functions */
 
-static uint8 getreg(int reg);
-static void putreg(int reg, uint8 value);
-static void read8(uint8 *ptr, int len);
-static void read16(uint8 *ptr, int len);
-static void read32(uint8 *ptr, int len);
+static uint8_t getreg(int reg);
+static void putreg(int reg, uint8_t value);
+static void read8(uint8_t *ptr, int len);
+static void read16(uint8_t *ptr, int len);
+static void read32(uint8_t *ptr, int len);
 static void discard8(int len);
 static void discard16(int len);
 static void discard32(int len);
-static void write8(const uint8 *ptr, int len);
-static void write16(const uint8 *ptr, int len);
-static void write32(const uint8 *ptr, int len);
+static void write8(const uint8_t *ptr, int len);
+static void write16(const uint8_t *ptr, int len);
+static void write32(const uint8_t *ptr, int len);
 
 /* static uint16_t dm9x_readsrom(struct dm9x_driver_s *dm9x, int offset); */
 static uint16_t dm9x_phyread(struct dm9x_driver_s *dm9x, int reg);
@@ -425,13 +425,13 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x);
  *
  ****************************************************************************/
 
-static uint8 getreg(int reg)
+static uint8_t getreg(int reg)
 {
   DM9X_INDEX = reg;
   return DM9X_DATA & 0xff;
 }
 
-static void putreg(int reg, uint8 value)
+static void putreg(int reg, uint8_t value)
 {
   DM9X_INDEX = reg;
   DM9X_DATA  = value & 0xff;
@@ -454,7 +454,7 @@ static void putreg(int reg, uint8 value)
  *
  ****************************************************************************/
 
-static void read8(uint8 *ptr, int len)
+static void read8(uint8_t *ptr, int len)
 {
   nvdbg("Read %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
@@ -463,7 +463,7 @@ static void read8(uint8 *ptr, int len)
     }
 }
 
-static void read16(uint8 *ptr, int len)
+static void read16(uint8_t *ptr, int len)
 {
   register uint16_t *ptr16 = (uint16_t*)ptr;
   nvdbg("Read %d bytes (16-bit mode)\n", len);
@@ -473,7 +473,7 @@ static void read16(uint8 *ptr, int len)
     }
 }
 
-static void read32(uint8 *ptr, int len)
+static void read32(uint8_t *ptr, int len)
 {
   register uint32_t *ptr32 = (uint32_t*)ptr;
   nvdbg("Read %d bytes (32-bit mode)\n", len);
@@ -544,7 +544,7 @@ static void discard32(int len)
  *
  ****************************************************************************/
 
-static void write8(const uint8 *ptr, int len)
+static void write8(const uint8_t *ptr, int len)
 {
   nvdbg("Write %d bytes (8-bit mode)\n", len);
   for (; len > 0; len--)
@@ -553,7 +553,7 @@ static void write8(const uint8 *ptr, int len)
     }
 }
 
-static void write16(const uint8 *ptr, int len)
+static void write16(const uint8_t *ptr, int len)
 {
   register uint16_t *ptr16 = (uint16_t*)ptr;
   nvdbg("Write %d bytes (16-bit mode)\n", len);
@@ -564,7 +564,7 @@ static void write16(const uint8 *ptr, int len)
     }
 }
 
-static void write32(const uint8 *ptr, int len)
+static void write32(const uint8_t *ptr, int len)
 {
   register uint32_t *ptr32 = (uint32_t*)ptr;
   nvdbg("Write %d bytes (32-bit mode)\n", len);
@@ -738,7 +738,7 @@ static void dm9x_dumpstatistics(struct dm9x_driver_s *dm9x)
  ****************************************************************************/
 
 #if defined(CONFIG_DM9X_CHECKSUM)
-static inline bool dm9x_rxchecksumready(uint8 rxbyte)
+static inline bool dm9x_rxchecksumready(uint8_t rxbyte)
 {
   if ((rxbyte & 0x01) == 0)
     {
@@ -1113,8 +1113,8 @@ static int dm9x_interrupt(int irq, FAR void *context)
 #else
 # error "Additional logic needed to support multiple interfaces"
 #endif
-  uint8 isr;
-  uint8 save;
+  uint8_t isr;
+  uint8_t save;
   int i;
 
   /* Save previous register address */
@@ -1363,7 +1363,7 @@ static inline void dm9x_phymode(struct dm9x_driver_s *dm9x)
 static int dm9x_ifup(struct uip_driver_s *dev)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
-  uint8 netstatus;
+  uint8_t netstatus;
   int i;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
@@ -1621,7 +1621,7 @@ static void dm9x_bringup(struct dm9x_driver_s *dm9x)
 
 static void dm9x_reset(struct dm9x_driver_s *dm9x)
 {
-  uint8 save;
+  uint8_t save;
   int i;
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -1683,7 +1683,7 @@ static void dm9x_reset(struct dm9x_driver_s *dm9x)
 
 int dm9x_initialize(void)
 {
-  uint8 *mptr;
+  uint8_t *mptr;
   uint16_t vid;
   uint16_t pid;
   int i;
