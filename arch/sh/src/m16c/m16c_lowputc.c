@@ -308,7 +308,7 @@ void up_lowputc(char ch)
 
   /* Write the data to the transmit buffer */
 
-  putreg16((uint16_t))ch, M16C_UART_BASE + M16C_UART_TB);
+  putreg16((uint16_t)ch, M16C_UART_BASE + M16C_UART_TB);
 #endif
 }
 #endif
