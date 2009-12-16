@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdbool.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
@@ -60,12 +60,12 @@
 /****************************************************************************
  * Name: up_interrupt_context
  *
- * Description: Return TRUE is we are currently executing in the interrupt
+ * Description: Return true is we are currently executing in the interrupt
  * handler context.
  *
  ****************************************************************************/
 
-boolean up_interrupt_context(void)
+bool up_interrupt_context(void)
 {
    return current_regs != NULL;
 }

@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
-# include <sys/types.h>
+# include <stdint.h>
 #endif
 
 #include <arch/board/board.h>
@@ -58,12 +58,12 @@
 
 #ifndef __ASSEMBLY__
 
-# define getreg8(a)           (*(volatile ubyte *)(a))
-# define putreg8(v,a)         (*(volatile ubyte *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16 *)(a))
-# define putreg16(v,a)        (*(volatile uint16 *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32 *)(a))
-# define putreg32(v,a)        (*(volatile uint32 *)(a) = (v))
+# define getreg8(a)           (*(volatile uint8_t *)(a))
+# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
+# define getreg16(a)          (*(volatile uint16_t *)(a))
+# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
+# define getreg32(a)          (*(volatile uint32_t *)(a))
+# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
 
 /****************************************************************************
  * Public Function Prototypes
@@ -79,9 +79,9 @@ extern "C" {
 
 /* Atomic modification of registers */
 
-EXTERN void modifyreg8(unsigned int addr, ubyte clearbits, ubyte setbits);
-EXTERN void modifyreg16(unsigned int addr, uint16 clearbits, uint16 setbits);
-EXTERN void modifyreg32(unsigned int addr, uint32 clearbits, uint32 setbits);
+EXTERN void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
+EXTERN void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
+EXTERN void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 #undef EXTERN
 #if defined(__cplusplus)

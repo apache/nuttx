@@ -38,11 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -111,7 +114,7 @@ int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 
   /* Save the adjusted stack values in the _TCB */
 
-  tcb->adj_stack_ptr  = (uint32*)top_of_stack;
+  tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
   tcb->adj_stack_size = size_of_stack;
   return OK;
 }

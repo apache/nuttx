@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
