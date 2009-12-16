@@ -1,7 +1,7 @@
-/************************************************************
+/************************************************************************
  * up_initialize.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,25 +31,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
+
 #include "up_internal.h"
 
-/************************************************************
+/************************************************************************
  * Private Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Data
- ************************************************************/
+ ************************************************************************/
 
 /* This is the top of the stack containing the interrupt
  * stack frame.  It is set when processing an interrupt.  It
@@ -58,7 +61,7 @@
  * interrupt.
  */
 
-ubyte g_irqtos;
+uint8_t g_irqtos;
 
 /* Registers are saved in the following global array during
  * interrupt processing.  If a context switch is performed
@@ -68,7 +71,7 @@ ubyte g_irqtos;
  * directly into (_TCB*)g_readytorun.head->xcp.regs).
  */
 
-ubyte g_irqregs[REGS_SIZE];
+uint8_t g_irqregs[REGS_SIZE];
 
 /* If during execution of an interrup handler, a context
  * switch must be performed, the follwing will be set to
@@ -83,18 +86,18 @@ FAR struct xcptcontext *g_irqcontext;
  * to comput them.
  */
 
-const ubyte g_ntobit[8] = 
+const uint8_t g_ntobit[8] = 
   { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Name: up_initialize
  *
  * Description:
@@ -112,7 +115,7 @@ const ubyte g_ntobit[8] =
  *   libraries have been initialized.  OS services and driver
  *   services are available.
  *
- ************************************************************/
+ ************************************************************************/
 
 void up_initialize(void)
 {

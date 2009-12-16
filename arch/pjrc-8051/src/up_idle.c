@@ -1,7 +1,7 @@
 /************************************************************
  * up_idle.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,36 +31,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
 /************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
 
 /************************************************************
  * Private Definitions
- ************************************************************/
+ ************************************************************************/
 
 /************************************************************
  * Private Data
- ************************************************************/
+ ************************************************************************/
 
 #if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
-static ubyte g_ledtoggle = 0;
+static /**************** g_ledtoggle = 0;
 #endif
 
 /************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
 /************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
 /************************************************************
  * Name: up_idle
@@ -75,7 +77,7 @@ static ubyte g_ledtoggle = 0;
  *   this is where power management operations might be
  *   performed.
  *
- ************************************************************/
+ ************************************************************************/
 
 void up_idle(void)
 {

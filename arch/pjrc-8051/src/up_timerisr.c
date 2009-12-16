@@ -1,7 +1,7 @@
-/************************************************************
+/************************************************************************
  * up_timerisr.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,46 +31,49 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 #include <8052.h>
+
 #include "clock_internal.h"
 #include "up_internal.h"
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Types
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Function:  up_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for
  *   various portions of the systems.
  *
- ************************************************************/
+ ************************************************************************/
 
-int up_timerisr(int irq, FAR ubyte *frame)
+int up_timerisr(int irq, FAR uint8_t *frame)
 {
    /* Process timer interrupt */
 
@@ -78,14 +81,14 @@ int up_timerisr(int irq, FAR ubyte *frame)
    return 0;
 }
 
-/************************************************************
+/************************************************************************
  * Function:  up_timerinit
  *
  * Description:
  *   This function is called during start-up to initialize
  *   the timer interrupt.
  *
- ************************************************************/
+ ************************************************************************/
 
 void up_timerinit(void)
 {

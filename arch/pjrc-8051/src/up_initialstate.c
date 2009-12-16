@@ -1,7 +1,7 @@
-/************************************************************
+/************************************************************************
  * up_initialstate.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,34 +31,36 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <sched.h>
+
 #include "up_internal.h"
 
-/************************************************************
+/************************************************************************
  * Private Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Data
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Name: up_initial_state
  *
  * Description:
@@ -70,12 +72,12 @@
  *   and/or  stack so that execution will begin at tcb->start
  *   on the next context switch.
  *
- ************************************************************/
+ ************************************************************************/
 
 void up_initial_state(FAR _TCB *tcb)
 {
-  FAR ubyte *frame = tcb->xcp.stack;
-  FAR ubyte *regs  = tcb->xcp.regs;
+  FAR uint8_t *frame = tcb->xcp.stack;
+  FAR uint8_t *regs  = tcb->xcp.regs;
 
   /* This is the form of initial stack frame
    *
@@ -94,8 +96,8 @@ void up_initial_state(FAR _TCB *tcb)
    *     (SP)   <- (SP) -1
    */
 
-   frame[FRAME_RETLS] = (((uint16)tcb->start) & 0xff);
-   frame[FRAME_RETMS] = (((uint16)tcb->start) >> 8);
+   frame[FRAME_RETLS] = (((uint16_t))tcb->start) & 0xff);
+   frame[FRAME_RETMS] = (((uint16_t))tcb->start) >> 8);
 
   /* The context save area for registers a, ie, and dpstr
    * follows the return address in the stack frame.

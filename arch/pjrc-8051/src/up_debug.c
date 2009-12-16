@@ -1,7 +1,7 @@
-/************************************************************
+/************************************************************************
  * up_assert.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,32 +31,36 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
+
 #include <8052.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
+
 #include "up_internal.h"
 #include "up_mem.h"
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Data
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
 #if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
 static void up_putspace(void) __naked
@@ -75,7 +79,7 @@ static void _up_putcolon(void) __naked
   _endasm;
 }
 
-static void _up_dump16(__code char *ptr, ubyte msb, ubyte lsb)
+static void _up_dump16(__code char *ptr, uint8_t msb, uint8_t lsb)
 {
   up_puts(ptr);
   up_puthex(msb);
@@ -83,7 +87,7 @@ static void _up_dump16(__code char *ptr, ubyte msb, ubyte lsb)
   up_putnl();
 }
 
-static void _up_dump8(__code char *ptr, ubyte b)
+static void _up_dump8(__code char *ptr, uint8_t b)
 {
   up_puts(ptr);
   up_puthex(b);
@@ -91,16 +95,16 @@ static void _up_dump8(__code char *ptr, ubyte b)
 }
 #endif
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Name: up_puthex, up_puthex16, up_putnl, up_puts
- ************************************************************/
+ ************************************************************************/
 
 #if defined(CONFIG_ARCH_BRINGUP)
-void up_puthex(ubyte hex) __naked
+void up_puthex(uint8_t hex) __naked
 {
   hex; /* To avoid unreferenced argument warning */
   _asm
@@ -133,26 +137,26 @@ void up_puts(__code char *ptr)
 }
 #endif
 
-/************************************************************
+/************************************************************************
  * Name: up_dumpstack
- ************************************************************/
+ ************************************************************************/
 
 #if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
 void up_dumpstack(void)
 {
-  NEAR ubyte *start = (NEAR ubyte *)(STACK_BASE & 0xf0);
-  NEAR ubyte *end   = (NEAR ubyte *)SP;
-  ubyte i;
+  NEAR uint8_t *start = (NEAR uint8_t *)(STACK_BASE & 0xf0);
+  NEAR uint8_t *end   = (NEAR uint8_t *)SP;
+  uint8_t i;
 
   while (start < end)
     {
-      up_puthex((ubyte)start);
+      up_puthex((uint8_t)start);
       _up_putcolon();
 
       for (i = 0; i < 8; i++)
         {
           up_putspace();
-          if (start < (NEAR ubyte *)(STACK_BASE) ||
+          if (start < (NEAR uint8_t *)(STACK_BASE) ||
               start > end)
             {
               up_putspace();
@@ -169,16 +173,16 @@ void up_dumpstack(void)
 }
 #endif
 
-/************************************************************
+/************************************************************************
  * Name: up_dumpframe
- ************************************************************/
+ ************************************************************************/
 
 #if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
 void up_dumpframe(FAR struct xcptcontext *context)
 {
 #ifdef CONFIG_FRAME_DUMP_SHORT
-  FAR ubyte *stack = &context->stack[context->nbytes - FRAME_SIZE];
-  FAR ubyte *regs  = context->regs;
+  FAR uint8_t *stack = &context->stack[context->nbytes - FRAME_SIZE];
+  FAR uint8_t *regs  = context->regs;
 
   _up_dump16(" RET  ", stack[FRAME_RETMS], stack[FRAME_RETLS]);
   _up_dump8 (" IE   ", stack[FRAME_IE]);
@@ -186,9 +190,9 @@ void up_dumpframe(FAR struct xcptcontext *context)
   _up_dump8 (" PSW  ", regs[REGS_PSW]);
   _up_dump8 (" SP   ", context->nbytes + (STACK_BASE-1));
 #else
-  FAR ubyte *stack = &context->stack[context->nbytes - FRAME_SIZE];
-  FAR ubyte *regs  = context->regs;
-  ubyte i, j, k;
+  FAR uint8_t *stack = &context->stack[context->nbytes - FRAME_SIZE];
+  FAR uint8_t *regs  = context->regs;
+  uint8_t i, j, k;
 
   _up_dump8 ("  NBYTES ", context->nbytes);
 
@@ -225,9 +229,9 @@ void up_dumpframe(FAR struct xcptcontext *context)
 }
 #endif
 
-/************************************************************
+/************************************************************************
  * Name: up_dumpframe
- ************************************************************/
+ ************************************************************************/
 
 /* The 805x family has a tiny, 256 stack and can be easily
  * overflowed. The following macro can be used to instrument
@@ -235,7 +239,7 @@ void up_dumpframe(FAR struct xcptcontext *context)
  */
 
 #ifdef CONFIG_ARCH_PJRC
-void up_showsp(ubyte ch) __naked
+void up_showsp(uint8_t ch) __naked
 {
   ch;
   _asm
