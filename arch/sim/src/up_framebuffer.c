@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_framebuffer.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -135,7 +135,7 @@ extern int up_x11cmap(unsigned short first, unsigned short len,
 /* The simulated framebuffer memory */
 
 #ifndef CONFIG_SIM_X11FB
-static ubyte g_fb[FB_SIZE];
+static uint8_t g_fb[FB_SIZE];
 #endif
 
 /* This structure describes the simulated video controller */

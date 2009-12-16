@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_uipdriver.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on code from uIP which also has a BSD-like license:
@@ -45,7 +45,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sched.h>
 #include <nuttx/net.h>
@@ -69,8 +71,8 @@
 
 struct timer
 {
-  uint32 interval;
-  uint32 start;
+  uint32_t interval;
+  uint32_t start;
 };
 
 /****************************************************************************
@@ -94,7 +96,7 @@ static void timer_set(struct timer *t, unsigned int interval)
   t->start    = up_getwalltime();
 }
 
-static boolean timer_expired( struct timer *t )
+static bool timer_expired( struct timer *t )
 {
   return (up_getwalltime() - t->start) >= t->interval;
 }
@@ -107,7 +109,7 @@ void timer_reset(struct timer *t)
 #ifdef CONFIG_NET_PROMISCUOUS
 # define up_comparemac(a,b) (0)
 #else
-static inline int up_comparemac(uint8 *paddr1, struct ether_addr *paddr2)
+static inline int up_comparemac(uint8_t *paddr1, struct ether_addr *paddr2)
 {
   return memcmp(paddr1, paddr2->ether_addr_octet, ETHER_ADDR_LEN);
 }

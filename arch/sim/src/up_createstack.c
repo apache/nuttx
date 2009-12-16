@@ -38,9 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -92,7 +96,7 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
 
   /* Allocate the memory for the stack */
 
-  uint32 *stack_alloc_ptr = (uint32*)kmalloc(adj_stack_size);
+  uint32 *stack_alloc_ptr = (uint32_t*)kmalloc(adj_stack_size);
   if (stack_alloc_ptr)
     {
       /* This is the address of the last word in the allocation */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_devconsole.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdbool.h>
+
 #include <nuttx/fs.h>
 
 #include "up_internal.h"
@@ -55,7 +58,7 @@ static ssize_t devconsole_read(struct file *, char *, size_t);
 static ssize_t devconsole_write(struct file *, const char *, size_t);
 #ifndef CONFIG_DISABLE_POLL
 static int     devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                               boolean setup);
+                               bool setup);
 #endif
 
 /****************************************************************************
@@ -87,7 +90,7 @@ static ssize_t devconsole_write(struct file *filp, const char *buffer, size_t le
 
 #ifndef CONFIG_DISABLE_POLL
 static int devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                           boolean setup)
+                           bool setup)
 {
   return OK;
 }

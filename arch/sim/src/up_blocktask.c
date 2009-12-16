@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_blocktask.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdbool.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -92,7 +95,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
   else
     {
       _TCB *rtcb = (_TCB*)g_readytorun.head;
-      boolean switch_needed;
+      bool switch_needed;
 
       sdbg("Blocking TCB=%p\n", tcb);
 

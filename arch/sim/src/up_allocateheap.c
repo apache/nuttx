@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_allocateheap.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -53,7 +57,7 @@
  * Private Data
  ****************************************************************************/
 
-static ubyte sim_heap[SIM_HEAP_SIZE];
+static uint8_t sim_heap[SIM_HEAP_SIZE];
 
 /****************************************************************************
  * Private Functions

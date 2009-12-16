@@ -2,7 +2,7 @@
 /****************************************************************************
  * up_tapdev.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on code from uIP which also has a BSD-like license:
