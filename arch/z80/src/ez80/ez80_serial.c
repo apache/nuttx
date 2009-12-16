@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez08/ez80_serial.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
@@ -68,31 +70,31 @@
 
 struct ez80_dev_s
 {
-  uint16               uartbase;	/* Base address of UART registers */
-  unsigned int         baud;		/* Configured baud */
-  ubyte                irq;		/* IRQ associated with this UART */
-  ubyte                parity;		/* 0=none, 1=odd, 2=even */
-  ubyte                bits;		/* Number of bits (7 or 8) */
-  boolean              stopbits2;	/* TRUE: Configure with 2 (vs 1) */
+  uint16_t     uartbase;	/* Base address of UART registers */
+  unsigned int baud;		/* Configured baud */
+  uint8_t      irq;			/* IRQ associated with this UART */
+  uint8_t      parity;		/* 0=none, 1=odd, 2=even */
+  uint8_t      bits;		/* Number of bits (7 or 8) */
+  bool         stopbits2;	/* true: Configure with 2 (vs 1) */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     ez80_setup(struct uart_dev_s *dev);
-static void    ez80_shutdown(struct uart_dev_s *dev);
-static int     ez80_attach(struct uart_dev_s *dev);
-static void    ez80_detach(struct uart_dev_s *dev);
-static int     ez80_interrrupt(int irq, void *context);
-static int     ez80_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int     ez80_receive(struct uart_dev_s *dev, unsigned int *status);
-static void    ez80_rxint(struct uart_dev_s *dev, boolean enable);
-static boolean ez80_rxavailable(struct uart_dev_s *dev);
-static void    ez80_send(struct uart_dev_s *dev, int ch);
-static void    ez80_txint(struct uart_dev_s *dev, boolean enable);
-static boolean ez80_txready(struct uart_dev_s *dev);
-static boolean ez80_txempty(struct uart_dev_s *dev);
+static int  ez80_setup(struct uart_dev_s *dev);
+static void ez80_shutdown(struct uart_dev_s *dev);
+static int  ez80_attach(struct uart_dev_s *dev);
+static void ez80_detach(struct uart_dev_s *dev);
+static int  ez80_interrrupt(int irq, void *context);
+static int  ez80_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  ez80_receive(struct uart_dev_s *dev, unsigned int *status);
+static void ez80_rxint(struct uart_dev_s *dev, bool enable);
+static bool ez80_rxavailable(struct uart_dev_s *dev);
+static void ez80_send(struct uart_dev_s *dev, int ch);
+static void ez80_txint(struct uart_dev_s *dev, bool enable);
+static bool ez80_txready(struct uart_dev_s *dev);
+static bool ez80_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -141,12 +143,12 @@ static struct ez80_dev_s g_uart0priv =
 static uart_dev_t g_uart0port =
 {
   0,                        /* open_count */
-  FALSE,                    /* xmitwaiting */
-  FALSE,                    /* recvwaiting */
+  false,                    /* xmitwaiting */
+  false,                    /* recvwaiting */
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
-  TRUE,                     /* isconsole */
+  true,                     /* isconsole */
 #else
-  FALSE,                    /* isconsole */
+  false,                    /* isconsole */
 #endif
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
@@ -186,12 +188,12 @@ static struct ez80_dev_s g_uart1priv =
 static uart_dev_t g_uart1port =
 {
   0,                        /* open_count */
-  FALSE,                    /* xmitwaiting */
-  FALSE,                    /* recvwaiting */
+  false,                    /* xmitwaiting */
+  false,                    /* recvwaiting */
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-  TRUE,                     /* isconsole */
+  true,                     /* isconsole */
 #else
-  FALSE,                    /* isconsole */
+  false,                    /* isconsole */
 #endif
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
@@ -246,7 +248,7 @@ static uart_dev_t g_uart1port =
  * Name: ez80_serialin
  ****************************************************************************/
 
-static inline ubyte ez80_serialin(struct ez80_dev_s *priv, ubyte offset)
+static inline uint8_t ez80_serialin(struct ez80_dev_s *priv, uint8_t offset)
 {
   return inp(priv->uartbase + offset);
 }
@@ -255,7 +257,8 @@ static inline ubyte ez80_serialin(struct ez80_dev_s *priv, ubyte offset)
  * Name: ez80_serialout
  ****************************************************************************/
 
-static inline void ez80_serialout(struct ez80_dev_s *priv, ubyte offset, ubyte value)
+static inline void ez80_serialout(struct ez80_dev_s *priv, uint8_t offset,
+                                  uint8_t value)
 {
   outp(priv->uartbase + offset, value);
 }
@@ -266,7 +269,7 @@ static inline void ez80_serialout(struct ez80_dev_s *priv, ubyte offset, ubyte v
 
 static inline void ez80_disableuartint(struct ez80_dev_s *priv)
 {
-  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
+  uint8_t ier = ez80_serialin(priv, EZ80_UART_IER);
   ier &= ~EZ80_UARTEIR_INTMASK;
   ez80_serialout(priv, EZ80_UART_IER, ier);
 }
@@ -275,9 +278,9 @@ static inline void ez80_disableuartint(struct ez80_dev_s *priv)
  * Name: ez80_restoreuartint
  ****************************************************************************/
 
-static inline void ez80_restoreuartint(struct ez80_dev_s *priv, ubyte bits)
+static inline void ez80_restoreuartint(struct ez80_dev_s *priv, uint8_t bits)
 {
-  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
+  uint8_t ier = ez80_serialin(priv, EZ80_UART_IER);
   ier |= bits & (EZ80_UARTEIR_TIE|EZ80_UARTEIR_RIE);
   ez80_serialout(priv, EZ80_UART_IER, ier);
 }
@@ -303,10 +306,10 @@ static inline void ez80_waittxready(struct ez80_dev_s *priv)
  * Name: ez80_setbaud
  ****************************************************************************/
 
-static inline void ez80_setbaud(struct ez80_dev_s *priv, uint24 baud)
+static inline void ez80_setbaud(struct ez80_dev_s *priv, uint24_t baud)
 {
-  uint32 brg_divisor;
-  ubyte lctl;
+  uint32_t brg_divisor;
+  uint8_t lctl;
 
   /* The resulting BAUD and depends on the system clock frequency and the
    * BRG divisor as follows:
@@ -326,8 +329,8 @@ static inline void ez80_setbaud(struct ez80_dev_s *priv, uint24 baud)
    lctl |= EZ80_UARTLCTL_DLAB;
    ez80_serialout(priv, EZ80_UART_LCTL, lctl);
 
-   ez80_serialout(priv, EZ80_UART_BRGL, (ubyte)(brg_divisor & 0xff));
-   ez80_serialout(priv, EZ80_UART_BRGH, (ubyte)(brg_divisor >> 8));
+   ez80_serialout(priv, EZ80_UART_BRGL, (uint8_t)(brg_divisor & 0xff));
+   ez80_serialout(priv, EZ80_UART_BRGH, (uint8_t)(brg_divisor >> 8));
 
    lctl &= ~EZ80_UARTLCTL_DLAB;
    ez80_serialout(priv, EZ80_UART_LCTL, lctl);
@@ -346,8 +349,8 @@ static int ez80_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct ez80_dev_s *priv = dev->priv;
-  ubyte reg;
-  ubyte cval;
+  uint8_t reg;
+  uint8_t cval;
 
   if (priv->bits == 7)
     {
@@ -441,8 +444,8 @@ static int ez80_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The exception
+ *   is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -470,7 +473,7 @@ static int ez80_interrrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct ez80_dev_s   *priv;
-  volatile uint32    cause;
+  volatile uint32_t  cause;
 
 #ifndef CONFIG_UART0_DISABLE
   if (g_uart0priv.irq == irq)
@@ -539,8 +542,8 @@ static int ez80_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int ez80_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
-  ubyte rbr = ez80_serialin(priv, EZ80_UART_RBR);
-  ubyte lsr = ez80_serialin(priv, EZ80_UART_LSR);
+  uint8_t rbr = ez80_serialin(priv, EZ80_UART_RBR);
+  uint8_t lsr = ez80_serialin(priv, EZ80_UART_LSR);
 
   *status = (unsigned int)lsr;
   return rbr;
@@ -554,10 +557,10 @@ static int ez80_receive(struct uart_dev_s *dev, unsigned int *status)
  *
  ****************************************************************************/
 
-static void ez80_rxint(struct uart_dev_s *dev, boolean enable)
+static void ez80_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
-  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
+  uint8_t ier = ez80_serialin(priv, EZ80_UART_IER);
   
   if (enable)
     {
@@ -577,11 +580,11 @@ static void ez80_rxint(struct uart_dev_s *dev, boolean enable)
  * Name: ez80_rxavailable
  *
  * Description:
- *   Return TRUE if the receive fifo is not empty
+ *   Return true if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static boolean ez80_rxavailable(struct uart_dev_s *dev)
+static bool ez80_rxavailable(struct uart_dev_s *dev)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
   return (ez80_serialin(priv, EZ80_UART_LSR) & EZ80_UARTLSR_DR) != 0;
@@ -598,7 +601,7 @@ static boolean ez80_rxavailable(struct uart_dev_s *dev)
 static void ez80_send(struct uart_dev_s *dev, int ch)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
-  ez80_serialout(priv, EZ80_UART_THR, (ubyte)ch);
+  ez80_serialout(priv, EZ80_UART_THR, (uint8_t)ch);
 }
 
 /****************************************************************************
@@ -609,10 +612,10 @@ static void ez80_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void ez80_txint(struct uart_dev_s *dev, boolean enable)
+static void ez80_txint(struct uart_dev_s *dev, bool enable)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
-  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
+  uint8_t ier = ez80_serialin(priv, EZ80_UART_IER);
 
   if (enable)
     {
@@ -632,11 +635,11 @@ static void ez80_txint(struct uart_dev_s *dev, boolean enable)
  * Name: ez80_txready
  *
  * Description:
- *   Return TRUE if the tranmsit fifo is not full
+ *   Return true if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static boolean ez80_txready(struct uart_dev_s *dev)
+static bool ez80_txready(struct uart_dev_s *dev)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
   return (ez80_serialin(priv, EZ80_UART_LSR) & EZ80_UARTLSR_THRE) != 0;
@@ -646,11 +649,11 @@ static boolean ez80_txready(struct uart_dev_s *dev)
  * Name: ez80_txempty
  *
  * Description:
- *   Return TRUE if the transmit fifo is empty
+ *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static boolean ez80_txempty(struct uart_dev_s *dev)
+static bool ez80_txempty(struct uart_dev_s *dev)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
   return (ez80_serialin(priv, EZ80_UART_LSR) & EZ80_UARTLSR_TEMT) != 0;
@@ -670,7 +673,7 @@ static boolean ez80_txempty(struct uart_dev_s *dev)
 
 void up_serialinit(void)
 {
-  ubyte regval;
+  uint8_t regval;
 
   /* Make sure that all UART interrupts are disabled */
 
@@ -716,7 +719,7 @@ void up_serialinit(void)
   /* If there is a console, then configure the console now */
 
 #ifdef CONSOLE_DEV
-  CONSOLE_DEV.isconsole = TRUE;
+  CONSOLE_DEV.isconsole = true;
   ez80_setup(&CONSOLE_DEV);
 #endif
 
@@ -744,7 +747,7 @@ int up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct ez80_dev_s *priv = (struct ez80_dev_s*)CONSOLE_DEV.priv;
-  ubyte ier = ez80_serialin(priv, EZ80_UART_IER);
+  uint8_t ier = ez80_serialin(priv, EZ80_UART_IER);
 
   ez80_disableuartint(priv);
 
@@ -761,7 +764,7 @@ int up_putc(int ch)
   /* Output the character */
 
   ez80_waittxready(priv);
-  ez80_serialout(priv, EZ80_UART_THR, (ubyte)ch);
+  ez80_serialout(priv, EZ80_UART_THR, (uint8_t)ch);
 
   /* Wait for the character to be sent before re-enabling interrupts */
  

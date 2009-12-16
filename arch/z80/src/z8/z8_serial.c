@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_serial.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
@@ -58,7 +60,7 @@
 
 #ifdef CONFIG_USE_SERIALDRIVER
 
-extern uint32 get_freq(void);
+extern uint32_t get_freq(void);
 
 /****************************************************************************
  * Definitions
@@ -76,35 +78,35 @@ extern uint32 get_freq(void);
 
 struct z8_uart_s
 {
-  ubyte volatile far* uartbase;		/* Base address of UART registers */
-  uint32              baud;		/* Configured baud */
-  boolean             rxenabled;	/* RX interrupt enabled */
-  boolean             txenabled;	/* TX interrupt enabled */
-  ubyte               rxirq;		/* RX IRQ associated with this UART */
-  ubyte               txirq;		/* RX IRQ associated with this UART */
-  ubyte               parity;		/* 0=none, 1=odd, 2=even */
-  boolean             stopbits2;	/* TRUE: Configure with 2 stop bits
-					 * (instead of 1) */
+  uint8_t volatile far* uartbase;		/* Base address of UART registers */
+  uint32_t     baud;		/* Configured baud */
+  bool         rxenabled;	/* RX interrupt enabled */
+  bool         txenabled;	/* TX interrupt enabled */
+  uint8_t      rxirq;		/* RX IRQ associated with this UART */
+  uint8_t      txirq;		/* RX IRQ associated with this UART */
+  uint8_t      parity;		/* 0=none, 1=odd, 2=even */
+  bool         stopbits2;	/* true: Configure with 2 stop bits
+							 * (instead of 1) */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     z8_setup(FAR struct uart_dev_s *dev);
-static void    z8_shutdown(FAR struct uart_dev_s *dev);
-static int     z8_attach(FAR struct uart_dev_s *dev);
-static void    z8_detach(FAR struct uart_dev_s *dev);
-static int     z8_rxinterrupt(int irq, FAR void *context);
-static int     z8_txinterrupt(int irq, FAR void *context);
-static int     z8_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int     z8_receive(FAR struct uart_dev_s *dev, FAR uint32 *status);
-static void    z8_rxint(FAR struct uart_dev_s *dev, boolean enable);
-static boolean z8_rxavailable(FAR struct uart_dev_s *dev);
-static void    z8_send(FAR struct uart_dev_s *dev, int ch);
-static void    z8_txint(FAR struct uart_dev_s *dev, boolean enable);
-static boolean z8_txready(FAR struct uart_dev_s *dev);
-static boolean z8_txempty(FAR struct uart_dev_s *dev);
+static int  z8_setup(FAR struct uart_dev_s *dev);
+static void z8_shutdown(FAR struct uart_dev_s *dev);
+static int  z8_attach(FAR struct uart_dev_s *dev);
+static void z8_detach(FAR struct uart_dev_s *dev);
+static int  z8_rxinterrupt(int irq, FAR void *context);
+static int  z8_txinterrupt(int irq, FAR void *context);
+static int  z8_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int  z8_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status);
+static void z8_rxint(FAR struct uart_dev_s *dev, bool enable);
+static bool z8_rxavailable(FAR struct uart_dev_s *dev);
+static void z8_send(FAR struct uart_dev_s *dev, int ch);
+static void z8_txint(FAR struct uart_dev_s *dev, bool enable);
+static bool z8_txready(FAR struct uart_dev_s *dev);
+static bool z8_txempty(FAR struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -139,8 +141,8 @@ static struct z8_uart_s g_uart0priv =
 {
   Z8_UART0_BASE,            /* uartbase */
   CONFIG_UART0_BAUD,        /* baud */
-  FALSE,                    /* rxenabled */
-  FALSE,                    /* txenabled */
+  false,                    /* rxenabled */
+  false,                    /* txenabled */
   Z8_UART0_RX_IRQ,          /* rxirq */
   Z8_UART0_TX_IRQ,          /* txirq */
   CONFIG_UART0_PARITY,      /* parity */
@@ -150,12 +152,12 @@ static struct z8_uart_s g_uart0priv =
 static uart_dev_t g_uart0port =
 {
   0,                        /* open_count */
-  FALSE,                    /* xmitwaiting */
-  FALSE,                    /* recvwaiting */
+  false,                    /* xmitwaiting */
+  false,                    /* recvwaiting */
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
-  TRUE,                     /* isconsole */
+  true,                     /* isconsole */
 #else
-  FALSE,                    /* isconsole */
+  false,                    /* isconsole */
 #endif
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
@@ -184,8 +186,8 @@ static struct z8_uart_s g_uart1priv =
 {
   Z8_UART1_BASE,            /* uartbase */
   CONFIG_UART1_BAUD,        /* baud */
-  FALSE,                    /* rxenabled */
-  FALSE,                    /* txenabled */
+  false,                    /* rxenabled */
+  false,                    /* txenabled */
   Z8_UART1_RX_IRQ,          /* rxirq */
   Z8_UART1_TX_IRQ,          /* txirq */
   CONFIG_UART1_PARITY,      /* parity */
@@ -195,12 +197,12 @@ static struct z8_uart_s g_uart1priv =
 static uart_dev_t g_uart1port =
 {
   0,                        /* open_count */
-  FALSE,                    /* xmitwaiting */
-  FALSE,                    /* recvwaiting */
+  false,                    /* xmitwaiting */
+  false,                    /* recvwaiting */
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-  TRUE,                     /* isconsole */
+  true,                     /* isconsole */
 #else
-  FALSE,                    /* isconsole */
+  false,                    /* isconsole */
 #endif
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
@@ -243,7 +245,8 @@ static uart_dev_t g_uart1port =
  * Name: z8_putuart
  ****************************************************************************/
  
-static inline void z8_putuart(FAR struct z8_uart_s *priv, ubyte value, ubyte offset)
+static inline void z8_putuart(FAR struct z8_uart_s *priv, uint8_t value,
+                              uint8_t offset)
 {
   putreg8(value, *(priv->uartbase + offset));
 }
@@ -252,7 +255,7 @@ static inline void z8_putuart(FAR struct z8_uart_s *priv, ubyte value, ubyte off
  * Name: z8_getuart
  ****************************************************************************/
  
-static inline ubyte z8_getuart(FAR struct z8_uart_s *priv, ubyte offset)
+static inline uint8_t z8_getuart(FAR struct z8_uart_s *priv, uint8_t offset)
 {
   return getreg8(*(priv->uartbase + offset));
 }
@@ -261,15 +264,15 @@ static inline ubyte z8_getuart(FAR struct z8_uart_s *priv, ubyte offset)
  * Name: z8_disableuartirq
  ****************************************************************************/
 
-static ubyte z8_disableuartirq(FAR struct uart_dev_s *dev)
+static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 {
   struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
-  ubyte               state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
+  uint8_t             state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
                               priv->txenabled ? STATE_TXENABLED : STATE_DISABLED;
 
-  z8_txint(dev, FALSE);
-  z8_rxint(dev, FALSE);
+  z8_txint(dev, false);
+  z8_rxint(dev, false);
 
   irqrestore(flags);
   return state;
@@ -279,13 +282,13 @@ static ubyte z8_disableuartirq(FAR struct uart_dev_s *dev)
  * Name: z8_restoreuartirq
  ****************************************************************************/
 
-static void z8_restoreuartirq(FAR struct uart_dev_s *dev, ubyte state)
+static void z8_restoreuartirq(FAR struct uart_dev_s *dev, uint8_t state)
 {
   struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
 
-  z8_txint(dev, (state & STATE_TXENABLED) ? TRUE : FALSE);
-  z8_rxint(dev, (state & STATE_RXENABLED) ? TRUE : FALSE);
+  z8_txint(dev, (state & STATE_TXENABLED) ? true : false);
+  z8_rxint(dev, (state & STATE_RXENABLED) ? true : false);
 
   irqrestore(flags);
 }
@@ -294,7 +297,7 @@ static void z8_restoreuartirq(FAR struct uart_dev_s *dev, ubyte state)
  * Name: z8_consoleput
  ****************************************************************************/
 
-static void z8_consoleput(ubyte ch)
+static void z8_consoleput(uint8_t ch)
 {
   struct z8_uart_s *priv = (struct z8_uart_s*)CONSOLE_DEV.priv;
   int tmp;
@@ -319,8 +322,8 @@ static void z8_consoleput(ubyte ch)
 
 void z8_uartconfigure(void)
 {
-  uint16 brg;
-  ubyte  val;
+  uint16_t brg;
+  uint8_t  val;
 
   /* Configure GPIO Port A pins 4 & 5 for alternate function */
 
@@ -364,10 +367,10 @@ static int z8_setup(FAR struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  uint32 freq = get_freq();
-  uint16 brg;
-  ubyte ctl0;
-  ubyte ctl1;
+  uint32_t freq = get_freq();
+  uint16_t brg;
+  uint8_t ctl0;
+  uint8_t ctl1;
 
   /* Calculate and set the baud rate generation register.
    * BRG = (freq + baud * 8)/(baud * 16)
@@ -490,7 +493,7 @@ static int z8_rxinterrupt(int irq, FAR void *context)
 {
   struct uart_dev_s  *dev = NULL;
   struct z8_uart_s *priv;
-  ubyte              status;
+  uint8_t            status;
 
   if (g_uart1priv.rxirq == irq)
     {
@@ -539,7 +542,7 @@ static int z8_txinterrupt(int irq, FAR void *context)
 {
   struct uart_dev_s  *dev = NULL;
   struct z8_uart_s *priv;
-  ubyte              status;
+  uint8_t            status;
 
   if (g_uart1priv.txirq == irq)
     {
@@ -592,15 +595,15 @@ static int z8_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32 *status)
+static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status)
 {
   struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
-  ubyte  rxd;
-  ubyte  stat0;
+  uint8_t  rxd;
+  uint8_t  stat0;
 
   rxd     = z8_getuart(priv, Z8_UART_RXD);
   stat0   = z8_getuart(priv, Z8_UART_STAT0);
-  *status = (uint32)rxd | (((uint32)stat0) << 8);
+  *status = (uint32_t)rxd | (((uint32_t)stat0) << 8);
   return rxd;
 }
 
@@ -612,7 +615,7 @@ static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32 *status)
  *
  ****************************************************************************/
 
-static void z8_rxint(FAR struct uart_dev_s *dev, boolean enable)
+static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
 {
   struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
@@ -636,11 +639,11 @@ static void z8_rxint(FAR struct uart_dev_s *dev, boolean enable)
  * Name: z8_rxavailable
  *
  * Description:
- *   Return TRUE if the receive fifo is not empty
+ *   Return true if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static boolean z8_rxavailable(FAR struct uart_dev_s *dev)
+static bool z8_rxavailable(FAR struct uart_dev_s *dev)
 {
   struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
   return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_RDA) != 0);
@@ -668,7 +671,7 @@ static void z8_send(FAR struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void z8_txint(FAR struct uart_dev_s *dev, boolean enable)
+static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
 {
   struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
@@ -692,11 +695,11 @@ static void z8_txint(FAR struct uart_dev_s *dev, boolean enable)
  * Name: z8_txready
  *
  * Description:
- *   Return TRUE if the tranmsit fifo is not full
+ *   Return true if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static boolean z8_txready(FAR struct uart_dev_s *dev)
+static bool z8_txready(FAR struct uart_dev_s *dev)
 {
   struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
   return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_TDRE) != 0);
@@ -706,11 +709,11 @@ static boolean z8_txready(FAR struct uart_dev_s *dev)
  * Name: z8_txempty
  *
  * Description:
- *   Return TRUE if the transmit fifo is empty
+ *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static boolean z8_txempty(FAR struct uart_dev_s *dev)
+static bool z8_txempty(FAR struct uart_dev_s *dev)
 {
   struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
   return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_TXE) != 0);
@@ -736,7 +739,7 @@ void up_serialinit(void)
   (void)z8_disableuartirq(&TTYS1_DEV);
 
   /* Initialize the console for early use */
-  CONSOLE_DEV.isconsole = TRUE;
+  CONSOLE_DEV.isconsole = true;
   z8_setup(&CONSOLE_DEV);
 
   /* Reigster console and tty devices */
@@ -757,7 +760,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  ubyte  state;
+  uint8_t  state;
 
   /* Keep interrupts disabled so that we do not interfere with normal
    * driver operation 
@@ -776,7 +779,7 @@ int up_putc(int ch)
 
   /* Output the character */
 
-  z8_consoleput((ubyte)ch);
+  z8_consoleput((uint8_t)ch);
 
   /* It is important to restore the TX interrupt while the send is pending.
    * otherwise, TRDE interrupts can be lost since they do not pend after the
@@ -797,12 +800,12 @@ int up_putc(int ch)
 # define z8_contrde() \
   ((getreg8(*(Z8_UART1_BASE+Z8_UART_STAT0)) & Z8_UARTSTAT0_TDRE) != 0)
 # define z8_contxd(ch) \
-  putreg8((ubyte)(ch), *(Z8_UART1_BASE+Z8_UART_TXD))
+  putreg8((uint8_t)(ch), *(Z8_UART1_BASE+Z8_UART_TXD))
 #else
 # define z8_contrde() \
   ((getreg8(*(Z8_UART0_BASE+Z8_UART_STAT0)) & Z8_UARTSTAT0_TDRE) != 0)
 # define z8_contxd(ch) \
-  putreg8((ubyte)(ch), *(Z8_UART0_BASE+Z8_UART_TXD))
+  putreg8((uint8_t)(ch), *(Z8_UART0_BASE+Z8_UART_TXD))
 #endif
 
 /****************************************************************************

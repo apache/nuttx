@@ -39,7 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -63,8 +64,8 @@
 struct z8_i2cdev_s
 {
   const struct i2c_ops_s *ops; /* I2C vtable */
-  uint16 brg;                  /* Baud rate generator value */
-  ubyte  addr;                 /* 8-bit address */
+  uint16_t brg;                /* Baud rate generator value */
+  uint8_t  addr;               /* 8-bit address */
 };
 
 /****************************************************************************
@@ -75,15 +76,15 @@ struct z8_i2cdev_s
 
 static void i2c_waittxempty(void);
 static void i2c_waitrxavail(void);
-static void i2c_setbrg(uint16 brg);
-static uint16 i2c_getbrg(uint32 frequency);
+static void i2c_setbrg(uint16_t brg);
+static uint16_t i2c_getbrg(uint32_t frequency);
 
 /* I2C methods */
 
-static uint32 i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32 frequency);
+static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency);
 static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);
-static int i2c_write(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen);
-static int i2c_read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);
+static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
+static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -91,15 +92,15 @@ static int i2c_read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);
 
 /* This function is normally prototyped int the ZiLOG header file sio.h */
 
-extern uint32 get_freq(void);
+extern uint32_t get_freq(void);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static uint16  g_currbrg;      /* Current BRG setting */
-static boolean g_initialized;  /* TRUE:I2C has been initialized */
-static sem_t   g_i2csem;       /* Serialize I2C transfers */
+static uint16_t g_currbrg;      /* Current BRG setting */
+static bool     g_initialized;  /* true:I2C has been initialized */
+static sem_t    g_i2csem;       /* Serialize I2C transfers */
 
 const struct i2c_ops_s g_ops =
 {
@@ -196,12 +197,12 @@ static void i2c_waitrxavail(void)
  *
  ****************************************************************************/
 
-static void i2c_setbrg(uint16 brg)
+static void i2c_setbrg(uint16_t brg)
 {
   if (g_currbrg != brg)
     {
-      I2CBRH    = (ubyte)(brg >> 8);
-      I2CBRL    = (ubyte)(brg & 0xff);
+      I2CBRH    = (uint8_t)(brg >> 8);
+      I2CBRL    = (uint8_t)(brg & 0xff);
       g_currbrg = brg;
     }
 }
@@ -220,9 +221,9 @@ static void i2c_setbrg(uint16 brg)
  *
  ****************************************************************************/
 
-static uint16 i2c_getbrg(uint32 frequency)
+static uint16_t i2c_getbrg(uint32_t frequency)
 {
-  uint32 sysclock = get_freq();
+  uint32_t sysclock = get_freq();
 
   /* Max is 400 Kb/sec */
 
@@ -253,7 +254,7 @@ static uint16 i2c_getbrg(uint32 frequency)
  *
  ****************************************************************************/
 
-static uint32 i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32 frequency)
+static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
 
@@ -307,7 +308,7 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
   /* Save the 7-bit address (10-bit address not yet supported) */
 
   DEBUGASSERT(nbits == 7);
-  priv->addr = (ubyte)addr;
+  priv->addr = (uint8_t)addr;
   return OK;
 }
 
@@ -330,10 +331,10 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ****************************************************************************/
 
-static int i2c_write(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen)
+static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
-  const ubyte *ptr;
+  const uint8_t *ptr;
   int retry;
   int count;
 
@@ -443,10 +444,10 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen)
  *
  ****************************************************************************/
 
-static int i2c_read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen)
+static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 {
   FAR struct z8_i2cdev_s *priv = (FAR struct z8_i2cdev_s *)dev;
-  ubyte *ptr;
+  uint8_t *ptr;
   int retry;
   int count;
 
@@ -570,7 +571,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
     {
       /* Set up some initial BRG value */
 
-      uint16 brg = i2c_getbrg(100*1000);
+      uint16_t brg = i2c_getbrg(100*1000);
       i2c_setbrg(brg);
 
       /* Make sure that GPIOs are configured for the alternate function (this

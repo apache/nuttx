@@ -2,7 +2,7 @@
  * arch/z80/src/z8/up_mem.h
  * arch/z80/src/chip/up_mem.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@
  * Included Files
  ************************************************************************************/
 
+#include <stdint.h>
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -57,12 +59,12 @@
 
 #ifndef CONFIG_HEAP1_BASE
    extern far unsigned long far_heapbot;
-#  define CONFIG_HEAP1_BASE ((uint16)&far_heapbot)
+#  define CONFIG_HEAP1_BASE ((uint16_t))&far_heapbot)
 #endif
 
 #ifndef CONFIG_HEAP1_END
    extern far unsigned long far_stacktop;
-#  define CONFIG_HEAP1_END (((uint16)&far_stacktop) - CONFIG_IDLETHREAD_STACKSIZE + 1)
+#  define CONFIG_HEAP1_END (((uint16_t))&far_stacktop) - CONFIG_IDLETHREAD_STACKSIZE + 1)
 #endif
 
 /************************************************************************************

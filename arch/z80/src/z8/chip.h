@@ -41,6 +41,10 @@
  * Included Files
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -118,11 +122,11 @@
 /* UART0/1 Base Register Addresses **************************************************/
 
 #ifdef EZ8_UART0
-#  define Z8_UART0_BASE       ((ubyte volatile far*)0xf40)
+#  define Z8_UART0_BASE       ((uint8_t volatile far*)0xf40)
 #endif
 
 #ifdef EZ8_UART1
-#  define Z8_UART1_BASE       ((ubyte volatile far*)0xf48)
+#  define Z8_UART1_BASE       ((uint8_t volatile far*)0xf48)
 #endif
 
 /* UART0/1 Status 0 Register Bit Definitions ****************************************/

@@ -2,7 +2,7 @@
  * arch/z80/src/z8/switch.h
  * arch/z80/src/chip/switch.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,8 @@
  * Included Files
  ************************************************************************************/
 
-#include <sys/types.h>
 #ifndef __ASSEMBLY__
+#  include <stdint.h>
 #  include <nuttx/sched.h>
 #  include <nuttx/arch.h>
 #endif
@@ -63,7 +63,7 @@
 #define Z8_IRQSTATE_SAVED 2 /* In interrupt, context has been saved */
 
 /* The information saved on interrupt entry can be retained in a array of two
- * uint16 values.  These are
+ * uint24_t values.  These are
  *
  *   value[0] = RP (MS byte) and Flags (LS) byte
  *   value[1] = PC
@@ -105,7 +105,7 @@
     g_z8irqstate.state = Z8_IRQSTATE_NONE; \
   } while (0)
 
-/* IN_INTERRUPT returns TRUE if the system is current operating in the interrupt
+/* IN_INTERRUPT returns true if the system is current operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 
@@ -189,7 +189,7 @@
 #ifndef __ASSEMBLY__
 struct z8_irqstate_s
 {
-  ubyte      state; /* See Z8_IRQSTATE_* definitions above */
+  uint8_t    state; /* See Z8_IRQSTATE_* definitions above */
   chipreg_t *regs;  /* Saved register information */
 };
 #endif

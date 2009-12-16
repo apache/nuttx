@@ -2,7 +2,7 @@
  * arch/z80/include/ez80/io.h
  * arch/chip/io.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Definitions
@@ -75,8 +75,8 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN void outp(uint16 p, ubyte c);
-EXTERN ubyte inp(uint16 p);
+EXTERN void outp(uint16_t p, uint8_t c);
+EXTERN uint8_t inp(uint16_t p);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_assert.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
@@ -109,7 +109,7 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_FILENAME
-void up_assert(const ubyte *filename, int lineno)
+void up_assert(const uint8_t *filename, int lineno)
 #else
 void up_assert(void)
 #endif
@@ -146,7 +146,7 @@ void up_assert(void)
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_FILENAME
-void up_assert_code(const ubyte *filename, int lineno, int errorcode)
+void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
 #else
 void up_assert_code(int errorcode)
 #endif

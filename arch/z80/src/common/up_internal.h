@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_internal.h
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,9 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <stdint.h>
+#include <stdbool.h>
 
 #include <arch/irq.h>
 #include "chip/chip.h"
@@ -108,7 +111,7 @@ EXTERN void up_lowuartinit(void);
 
 /* Defined in up_doirq.c */
 
-EXTERN FAR chipreg_t *up_doirq(ubyte irq, FAR chipreg_t *regs);
+EXTERN FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs);
 
 /* Define in up_sigdeliver */
 
@@ -168,7 +171,7 @@ EXTERN void up_timerhook(void);
 EXTERN int  up_netinitialize(void);
 EXTERN void up_netuninitialize(void);
 # ifdef CONFIG_ARCH_MCFILTER
-EXTERN int up_multicastfilter(FAR struct uip_driver_s *dev, FAR ubyte *mac, boolean enable);
+EXTERN int up_multicastfilter(FAR struct uip_driver_s *dev, FAR uint8_t *mac, bool enable);
 # else
 #   define up_multicastfilter(dev, mac, enable)
 # endif
@@ -180,7 +183,7 @@ EXTERN int up_multicastfilter(FAR struct uip_driver_s *dev, FAR ubyte *mac, bool
 
 /* Return the current value of the stack pointer (used in stack dump logic) */
 
-EXTERN uint16 up_getsp(void);
+EXTERN uint16_t up_getsp(void);
 
 /* Dump stack and registers */
 

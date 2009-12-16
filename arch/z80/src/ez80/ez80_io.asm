@@ -1,7 +1,7 @@
 ;**************************************************************************
 ; arch/z80/src/ze80/ez80_io.c
 ;
-;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@
 	.assume ADL=1
 
 ;**************************************************************************
-; Name: void outp(uint16 p, ubyte c)
+; Name: void outp(uint16_t p, uint8_t c)
 ;
 ; Description:
 ;   Output byte c on port p
@@ -108,7 +108,7 @@ _outp:
 	ret
 
 ;**************************************************************************
-; Name: ubyte inp(uint16 p)
+; Name: uint8_t inp(uint16_t p)
 ;
 ; Description:
 ;   Input byte from port p

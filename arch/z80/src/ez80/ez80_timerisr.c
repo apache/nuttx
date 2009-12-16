@@ -1,7 +1,7 @@
 /***************************************************************************
  * arch/z80/src/ez80/ez80_timerisr.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <arch/io.h>
@@ -76,7 +76,7 @@
 
 int up_timerisr(int irq, chipreg_t *regs)
 {
-  volatile ubyte reg;
+  volatile uint8_t reg;
 
   /* Read the appropropriate timer0 registr to clear the interrupt */
   
@@ -112,8 +112,8 @@ int up_timerisr(int irq, chipreg_t *regs)
 
 void up_timerinit(void)
 {
-  uint16 reload;
-  ubyte  reg;
+  uint16_t) reload;
+  uint8_t  reg;
 
   /* Disable the timer */
 
@@ -142,9 +142,9 @@ void up_timerinit(void)
    * NOTE: The system clock frequency value is defined in the board.h file
    */
 
-  reload = (uint16)(ez80_systemclock / 1600);
-  outp(EZ80_TMR0_RRH, (ubyte)(reload >> 8));
-  outp(EZ80_TMR0_RRL, (ubyte)(reload));
+  reload = (uint16_t))(ez80_systemclock / 1600);
+  outp(EZ80_TMR0_RRH, (uint8_t)(reload >> 8));
+  outp(EZ80_TMR0_RRL, (uint8_t)(reload));
 
   /* Clear any pending timer interrupts */
   

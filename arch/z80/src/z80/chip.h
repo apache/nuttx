@@ -2,7 +2,7 @@
  * z80/chip.h
  * chip/chip.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,10 @@
  * Included Files
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -58,12 +62,12 @@
 
 #ifndef __ASSEMBLY__
 
-# define getreg8(a)           (*(volatile ubyte *)(a))
-# define putreg8(v,a)         (*(volatile ubyte *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16 *)(a))
-# define putreg16(v,a)        (*(volatile uint16 *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32 *)(a))
-# define putreg32(v,a)        (*(volatile uint32 *)(a) = (v))
+# define getreg8(a)           (*(volatile uint8_t *)(a))
+# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
+# define getreg16(a)          (*(volatile uint16_t *)(a))
+# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
+# define getreg32(a)          (*(volatile uint32_t *)(a))
+# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
 
 #endif
 

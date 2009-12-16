@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_schedulesigaction.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -123,7 +123,7 @@ static void ez80_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t
 
 void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 {
-  sdbg("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16)sigdeliver);
+  sdbg("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t))sigdeliver);
 
   /* Refuse to handle nested signal actions */
 

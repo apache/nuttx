@@ -2,7 +2,7 @@
  * arch/z80/include/z80/irq.h
  * arch/chip/irq.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,10 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
  * Definitions
@@ -109,8 +113,8 @@ struct xcptcontext
 
   /* The following retains that state during signal execution */
 
-  uint16 saved_pc;	/* Saved return address */
-  uint16 saved_i;	/* Saved interrupt state */
+  uint16_t saved_pc;	/* Saved return address */
+  uint16_t saved_i;		/* Saved interrupt state */
 #endif
 };
 #endif

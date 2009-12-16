@@ -41,9 +41,9 @@
  * Included Files
  ************************************************************************************/
 
-#include <sys/types.h>
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
 
 /************************************************************************************
@@ -60,7 +60,7 @@
 
 #define INIT_IRQCONTEXT()        current_regs = NULL
 
-/* IN_INTERRUPT returns TRUE if the system is currently operating in the interrupt
+/* IN_INTERRUPT returns true if the system is currently operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 
