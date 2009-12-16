@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_head.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,14 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
 #include <assert.h>
+
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 
@@ -64,13 +67,13 @@ int main(int argc, char **argv, char **envp)
   return 0;
 }
 
-void up_assert(const ubyte *filename, int line)
+void up_assert(const uint8_t *filename, int line)
 {
   fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
   longjmp(sim_abort, 1);
 }
 
-void up_assert_code(const ubyte *filename, int line, int code)
+void up_assert_code(const uint8_t *filename, int line, int code)
 {
   fprintf(stderr, "Assertion failed at file:%s line: %d error code: %d\n", filename, line, code);
   longjmp(sim_abort, 1);

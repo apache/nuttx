@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_initialstate.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <string.h>
+
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -76,6 +79,6 @@
 void up_initial_state(_TCB *tcb)
 {
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
-  tcb->xcp.regs[JB_SP] = (uint32)tcb->adj_stack_ptr;
-  tcb->xcp.regs[JB_PC] = (uint32)tcb->start;
+  tcb->xcp.regs[JB_SP] = (uint32_t)tcb->adj_stack_ptr;
+  tcb->xcp.regs[JB_PC] = (uint32_t)tcb->start;
 }
