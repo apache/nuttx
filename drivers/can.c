@@ -559,13 +559,13 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       /* CANIOCTL_RTR: Send the remote transmission request and wait for the response.
-       * Argument is a reference to struct canioctl_rtr_s (casting to uintptr first
+       * Argument is a reference to struct canioctl_rtr_s (casting to uintptr_t first
        * eliminates complaints on some architectures where the sizeof long is different
        * from the size of a pointer).
        */
 
       case CANIOCTL_RTR:
-        ret = can_rtrread(dev, (struct canioctl_rtr_s*)((uintptr)arg));
+        ret = can_rtrread(dev, (struct canioctl_rtr_s*)((uintptr_t)arg));
         break;
 
       /* Not a "built-in" ioctl command.. perhaps it is unique to this device driver */

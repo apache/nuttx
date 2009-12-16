@@ -43,16 +43,22 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <stdint.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Alternative alues for type bool (for historic reasons) */
+/* Alternative values for type bool (for historic reasons) */
 
-#define TRUE  1
-#define FALSE 0
+#ifndef TRUE
+#  define TRUE  1
+#endif
+#ifndef FALSE
+#  define FALSE 0
+#endif
 
 /* NULL is usually defined in stddef.h (which includes this file) */
 

@@ -163,7 +163,7 @@ struct pthread_attr_s
   size_t  stacksize;    /* Size of the stack allocated for the pthead */
   int16_t priority;     /* Priority of the pthread */
   uint8_t policy;       /* Pthread scheduler policy */
-  uint8_t  nheritsched; /* Inherit parent prio/policy? */
+  uint8_t inheritsched; /* Inherit parent prio/policy? */
 };
 typedef struct pthread_attr_s pthread_attr_t;
 

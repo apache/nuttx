@@ -40,6 +40,8 @@
  * Included Files
  ************************************************************************/
 
+#include <nuttx/compiler.h>
+
 /************************************************************************
  * Definitions
  ************************************************************************/
@@ -317,7 +319,7 @@ extern "C" {
 
 /* Return a pointer to the thread specifid errno */
 
-extern FAR int *get_errno_ptr(void);
+EXTERN FAR int *get_errno_ptr(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

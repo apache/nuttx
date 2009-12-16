@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <arch/types.h>
 #include <limits.h>
 
 /****************************************************************************

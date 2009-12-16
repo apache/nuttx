@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <config/nuttx.h>
+#include <nuttx/config.h>
 
 #include <pthread.h>
 #include <debug.h>

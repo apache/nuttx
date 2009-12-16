@@ -137,8 +137,8 @@ mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32_t navailsects)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
-   uint64 denom;
-   uint64 numer;
+   uint64_t denom;
+   uint64_t numer;
 #else
    uint32_t denom;
    uint32_t numer;
@@ -214,8 +214,8 @@ mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32_t navailsects)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
-   uint64 denom;
-   uint64 numer;
+   uint64_t denom;
+   uint64_t numer;
 #else
    uint32_t denom;
    uint32_t numer;
@@ -280,8 +280,8 @@ mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32_t navailsects)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
-   uint64 denom;
-   uint64 numer;
+   uint64_t denom;
+   uint64_t numer;
 #else
    uint32_t denom;
    uint32_t numer;

@@ -218,7 +218,9 @@ static int     mmcsd_ioctl(FAR struct inode *inode, int cmd,
 
 static void    mmcsd_mediachange(FAR void *arg);
 static int     mmcsd_widebus(FAR struct mmcsd_state_s *priv);
+#ifdef CONFIG_MMCSD_MMCSUPPORT
 static int     mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv);
+#endif
 static int     mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_cardidentify(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_probe(FAR struct mmcsd_state_s *priv);
@@ -2120,9 +2122,9 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MMCSD_MMCSUPPORT
 static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 {
-#ifdef CONFIG_MMCSD_MMCSUPPORT
   uint32_t cid[4];
   uint32_t csd[4];
   int ret;
@@ -2201,9 +2203,9 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 
   SDIO_CLOCK(priv->dev, CLOCK_MMC_TRANSFER);
   up_udelay( MMCSD_CLK_DELAY);
-#endif
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: mmcsd_sdinitialize

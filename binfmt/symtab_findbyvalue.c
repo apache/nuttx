@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stddef.h>
 #include <debug.h>
 #include <assert.h>
 #include <errno.h>

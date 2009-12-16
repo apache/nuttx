@@ -475,12 +475,12 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
 
       dev->mtd = mtd;
 
-      /* Get the device geometry. (casting to uintptr first eliminates
+      /* Get the device geometry. (casting to uintptr_t first eliminates
        * complaints on some architectures where the sizeof long is different
        * from the size of a pointer).
        */
 
-      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr)&dev->geo));
+      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&dev->geo));
       if (ret < 0)
         {
           fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
@@ -503,7 +503,7 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
       /* Get the number of R/W blocks per erase block */
 
       dev->blkper = dev->geo.erasesize / dev->geo.blocksize;
-      DEBUGASSERT(dev->blkper * dev->geo.blocksize = dev->geo.erasesize);
+      DEBUGASSERT(dev->blkper * dev->geo.blocksize == dev->geo.erasesize);
 
       /* Configure read-ahead/write buffering */
 
