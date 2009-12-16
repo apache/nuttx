@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: December 12, 2009</p>
+      <p>Last Updated: December 16, 2009</p>
     </td>
   </tr>
 </table>
@@ -330,14 +330,22 @@
     This provides architecture/toolchain-specific definitions for
     standard types.  This file should <code>typedef</code>:
     <ul><code>
-      sbyte, ubyte, uint8, boolean, sint16, uint16, sint32, uint32
+      _int8_t, _uint8_t, _int16_t, _uint16_t, _int32_t, _uint32_t_t
     </code></ul>
-    <p>and if the architecture supports 64-bit integers</p>
+    <p>and if the architecture supports 24- or 64-bit integers</p>
     <ul><code>
-      sint64, uint64
+      _int24_t, _uint24_t, int64_t, uint64_t
     </code></ul>
     <p>
-      and finally
+      NOTE that these type names have a leading underscore character.  This
+      file will be included(indirectly) by include/stdint.h and typedef'ed to
+      the final name without the underscore character.  This roundabout way of
+      doings things allows the stdint.h to be removed from the include/
+      directory in the event that the user prefers to use the definitions
+      provided by their toolchain header files
+    </p>
+    <p>
+      And finally
     </p>
     <ul><code>
       irqstate_t
@@ -1239,7 +1247,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upreprioritizertr">4.1.10 <code>up_reprioritize_rtr()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority);</code></p>
+<p><b>Prototype</b>: <code>void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority);</code></p>
 
 <p><b>Description</b>.
   Called when the priority of a running or
@@ -1289,8 +1297,8 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 <h3><a name="upassert">4.1.12 <code>up_assert()</code></a></h3>
 <p><b>Prototype</b>:<br>
-  <code>void up_assert(FAR const ubyte *filename, int linenum);</code></br>
-  <code>void up_assert_code(FAR const ubyte *filename, int linenum, int error_code);</code></br>
+  <code>void up_assert(FAR const uint8_t *filename, int linenum);</code></br>
+  <code>void up_assert_code(FAR const uint8_t *filename, int linenum, int error_code);</code></br>
 </p>
 
 <p><b>Description</b>.
@@ -1360,11 +1368,10 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upinterruptcontext">4.1.15 <code>up_interrupt_context()</code></a></h3>
-<p><b>Prototype</b>: <code>boolean up_interrupt_context(void)</code></p>
+<p><b>Prototype</b>: <code>bool up_interrupt_context(void)</code></p>
 
 <p><b>Description</b>.
-  Return TRUE is we are currently executing in
-  the interrupt handler context.
+  Return true if we are currently executing in the interrupt handler context.
 </p>
 
 <h3><a name="updisableirq">4.1.16 <code>up_disable_irq()</code></a></h3>
@@ -1710,7 +1717,7 @@ extern void up_ledoff(int led);
      <code>ssize_t write(FAR struct file *filp, FAR const char *buffer, size_t buflen);</code><br>
      <code>off_t seek(FAR struct file *filp, off_t offset, int whence);</code><br>
      <code>int ioctl(FAR struct file *filp, int cmd, unsigned long arg);</code><br>
-     <code>int poll(FAR struct file *filp, struct pollfd *fds, boolean setup);</code></p>
+     <code>int poll(FAR struct file *filp, struct pollfd *fds, bool setup);</code></p>
     </ul>
   </li>
   <li>
@@ -1818,12 +1825,12 @@ extern void up_ledoff(int led);
     That structure defines a call table with the following methods:
     <ul>
      <p><code>void lock(FAR struct spi_dev_s *dev);</code></p>
-     <p><code>void select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);</code><br>
-     <code>uint32 setfrequency(FAR struct spi_dev_s *dev, uint32 frequency);</code><br>
+     <p><code>void select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);</code><br>
+     <code>uint32_t setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);</code><br>
      <code>void setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);</code><br>
      <code>void setbits(FAR struct spi_dev_s *dev, int nbits);</code><br>
-     <code>ubyte status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);</code><br>
-     <code>uint16 send(FAR struct spi_dev_s *dev, uint16 wd);</code><br>
+     <code>uint8_t status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);</code><br>
+     <code>uint16_t send(FAR struct spi_dev_s *dev, uint16_t wd);</code><br>
      <code>void exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);</code><br>
      <p><code>int registercallback(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);</code></p>
   </ul>
@@ -1856,10 +1863,10 @@ extern void up_ledoff(int led);
     Each I2C device driver must implement an instance of <code>struct i2c_ops_s</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>uint32 setfrequency(FAR struct i2c_dev_s *dev, uint32 frequency);</code><br>
+     <p><code>uint32_t setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency);</code><br>
      <code>int setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits);</code><br>
-     <code>int write(FAR struct i2c_dev_s *dev, const ubyte *buffer, int buflen);</code><br>
-     <code>int read(FAR struct i2c_dev_s *dev, ubyte *buffer, int buflen);</code></p>
+     <code>int write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);</code><br>
+     <code>int read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);</code></p>
   </ul>
   <li>
     <b>Binding I2C Drivers</b>.
@@ -1895,12 +1902,12 @@ extern void up_ledoff(int led);
      <code>void detach(FAR struct uart_dev_s *dev);</code><br>
      <code>int ioctl(FAR struct file *filep, int cmd, unsigned long arg);</code><br>
      <code>int receive(FAR struct uart_dev_s *dev, unsigned int *status);</code><br>
-     <code>void rxint(FAR struct uart_dev_s *dev, boolean enable);</code><br>
-     <code>boolean rxavailable(FAR struct uart_dev_s *dev);</code><br>
+     <code>void rxint(FAR struct uart_dev_s *dev, bool enable);</code><br>
+     <code>bool rxavailable(FAR struct uart_dev_s *dev);</code><br>
      <code>void send(FAR struct uart_dev_s *dev, int ch);</code><br>
-     <code>void txint(FAR struct uart_dev_s *dev, boolean enable);</code><br>
-     <code>boolean txready(FAR struct uart_dev_s *dev);</code><br>
-     <code>boolean txempty(FAR struct uart_dev_s *dev);</code></p>
+     <code>void txint(FAR struct uart_dev_s *dev, bool enable);</code><br>
+     <code>bool txready(FAR struct uart_dev_s *dev);</code><br>
+     <code>bool txempty(FAR struct uart_dev_s *dev);</code></p>
     </ul>
   </li>
   <li>
@@ -1992,8 +1999,8 @@ extern void up_ledoff(int led);
       Read/write from the specified read/write blocks:
     </p?
     <ul>
-     <p><code>ssize_t (*bread)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks, FAR ubyte *buffer);</code><br>
-     <code>ssize_t (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks, FAR const ubyte *buffer);</code></p>
+     <p><code>ssize_t (*bread)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks, FAR uint8_t *buffer);</code><br>
+     <code>ssize_t (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks, FAR const uint8_t *buffer);</code></p>
     </ul>
     <p>
       Some devices may support byte oriented reads (optional).
@@ -2001,7 +2008,7 @@ extern void up_ledoff(int led);
       It is recommended that low-level drivers not support read() if it requires buffering.
     </p>
     <ul>
-     <p><code>ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes, FAR ubyte *buffer);</code></p>
+     <p><code>ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes, FAR uint8_t *buffer);</code></p>
     </ul>
     <p>
       Support other, less frequently used commands:
@@ -2050,8 +2057,8 @@ extern void up_ledoff(int led);
     </p>
     <ul>
      <p><code>void (*reset)(FAR struct sdio_dev_s *dev);</code><br>
-     <code>ubyte (*status)(FAR struct sdio_dev_s *dev);</code><br>
-     <code>void (*widebus)(FAR struct sdio_dev_s *dev, boolean enable);</code><br>
+     <code>uint8_t (*status)(FAR struct sdio_dev_s *dev);</code><br>
+     <code>void (*widebus)(FAR struct sdio_dev_s *dev, bool enable);</code><br>
      <code>void (*clock)(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate);</code><br>
      <code>int (*attach)(FAR struct sdio_dev_s *dev);</code></p>
     </ul>
@@ -2059,25 +2066,25 @@ extern void up_ledoff(int led);
       Command/Status/Data Transfer:
     </p?
     <ul>
-     <p><code>void (*sendcmd)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 arg);</code><br>
-     <code>int (*recvsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, size_t nbytes);</code><br>
-     <code>int (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer, size_t nbytes);</code><br>
+     <p><code>void (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);</code><br>
+     <code>int (*recvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer, size_t nbytes);</code><br>
+     <code>int (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer, size_t nbytes);</code><br>
      <code>int (*cancel)(FAR struct sdio_dev_s *dev);</code><br>
-     <code>int (*waitresponse)(FAR struct sdio_dev_s *dev, uint32 cmd);</code><br>
-     <code>int (*recvR1)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R1);</code><br>
-     <code>int (*recvR2)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 R2[4]);</code><br>
-     <code>int (*recvR3)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R3);</code><br>
-     <code>int (*recvR4)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R4);</code><br>
-     <code>int (*recvR5)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R5);</code><br>
-     <code>int (*recvR6)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R6);</code><br>
-     <code>int (*recvR7)(FAR struct sdio_dev_s *dev, uint32 cmd, uint32 *R7);</code></p>
+     <code>int (*waitresponse)(FAR struct sdio_dev_s *dev, uint32_t cmd);</code><br>
+     <code>int (*recvR1)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R1);</code><br>
+     <code>int (*recvR2)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t R2[4]);</code><br>
+     <code>int (*recvR3)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R3);</code><br>
+     <code>int (*recvR4)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R4);</code><br>
+     <code>int (*recvR5)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R5);</code><br>
+     <code>int (*recvR6)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R6);</code><br>
+     <code>int (*recvR7)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R7);</code></p>
     </ul>
     <p>
       Event/Callback support:
     </p>
     <ul>
      <p><code>void (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);</code><br>
-     <code>sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32 timeout);</code><br>
+     <code>sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32_t timeout);</code><br>
      <code>void (*callbackenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);</code><br>
      <code>int (*registercallback)(FAR struct sdio_dev_s *dev, worker_t callback, void *arg);</code></p>
     </ul>
@@ -2085,9 +2092,9 @@ extern void up_ledoff(int led);
       DMA support:
     </p>
     <ul>
-     <p><code>boolean (*dmasupported)(FAR struct sdio_dev_s *dev);</code><br>
-     <code>int (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR ubyte *buffer, size_t buflen);</code><br>
-     <code>int (*dmasendsetup)(FAR struct sdio_dev_s *dev, FAR const ubyte *buffer,  size_t buflen);</code></p>
+     <p><code>bool (*dmasupported)(FAR struct sdio_dev_s *dev);</code><br>
+     <code>int (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer, size_t buflen);</code><br>
+     <code>int (*dmasendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,  size_t buflen);</code></p>
     </ul>
   </li>
   <li>

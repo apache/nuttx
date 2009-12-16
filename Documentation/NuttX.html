@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 13, 2009</p>
+      <p>Last Updated: December 16, 2009</p>
     </td>
   </tr>
 </table>
@@ -1623,6 +1623,10 @@ nuttx-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  int in the architecture;  Removed non-standard type STATUS
 	* include/ - Added header files stdint.h, stdbool.h, cxx/cstdint, and
 	  cxx/cstdbool
+	* Changed ALL references to non-standard fixed-size types (like uint32,
+	  ubyte, etc.) to standard types (like uint32_t, uint8_t, etc.) from
+	  stdint.h.  Use type bool and {true, false} from stdbool.  This effected
+	  most of the files in the system!
 
 pascal-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
