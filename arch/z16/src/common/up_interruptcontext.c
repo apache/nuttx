@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_interruptcontext.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -58,11 +61,11 @@
 /****************************************************************************
  * Name: up_interrupt_context
  *
- * Description: Return TRUE is we are currently executing in
+ * Description: Return true is we are currently executing in
  * the interrupt handler context.
  ****************************************************************************/
 
-boolean up_interrupt_context(void)
+bool up_interrupt_context(void)
 {
    return current_regs != NULL;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  * z16f/z16f_sysexec.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -81,7 +81,7 @@
 void z16f_sysexec(FAR chipreg_t *regs)
 {
   int errcode = OSERR_ERREXCEPTION;
-  uint16 excp;
+  uint16_t excp;
   
   /* Save that register reference so that it can be used for built-in
    * diagnostics.

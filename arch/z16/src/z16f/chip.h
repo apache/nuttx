@@ -2,7 +2,7 @@
  * arch/z16/src/z16f/chip.h
  * include/arch/chip/chip.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,9 @@
  * Included Files
  ************************************************************************************/
 
+#ifdef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 #include <nuttx/config.h>
 #include <arch/irq.h>
 #include "common/up_internal.h"
@@ -518,12 +521,12 @@
 /* Register access macros ***********************************************************/
 
 #ifndef __ASSEMBLY__
-# define getreg8(a)           (*(ubyte volatile _Near*)(a))
-# define putreg8(v,a)         (*(ubyte volatile _Near*)(a) = (v))
-# define getreg16(a)          (*(uint16 volatile _Near*)(a))
-# define putreg16(v,a)        (*(uint16 volatile _Near*)(a) = (v))
-# define getreg32(a)          (*(uint32 volatile _Near*)(a))
-# define putreg32(v,a)        (*(uint32 volatile _Near*)(a) = (v))
+# define getreg8(a)           (*(uint8_t volatile _Near*)(a))
+# define putreg8(v,a)         (*(uint8_t volatile _Near*)(a) = (v))
+# define getreg16(a)          (*(uint16_t volatile _Near*)(a))
+# define putreg16(v,a)        (*(uint16_t volatile _Near*)(a) = (v))
+# define getreg32(a)          (*(uint32_t volatile _Near*)(a))
+# define putreg32(v,a)        (*(uint32_t volatile _Near*)(a) = (v))
 #endif /* __ASSEMBLY__ */
 
 /************************************************************************************

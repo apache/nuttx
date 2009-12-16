@@ -1,7 +1,7 @@
 /***************************************************************************
  * z16f/z16f_clkinit.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based upon sample code included with the Zilog ZDS-II toolchain.
@@ -39,7 +39,6 @@
  * Included Files
  ***************************************************************************/
 
-#include <sys/types.h>
 #include "chip/chip.h"
 
 /***************************************************************************

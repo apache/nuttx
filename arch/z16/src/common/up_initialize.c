@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_initialize.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>

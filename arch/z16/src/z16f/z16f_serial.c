@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z16/src/z16f/z16f_serial.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
@@ -76,36 +78,36 @@ extern _Erom unsigned long SYS_CLK_FREQ;
 
 struct z16f_uart_s
 {
-  uint32               uartbase;	/* Base address of UART
-					 * registers */
-  uint32               baud;		/* Configured baud */
-  boolean              rxenabled;	/* RX interrupt enabled */
-  boolean              txenabled;	/* TX interrupt enabled */
-  ubyte                rxirq;		/* RX IRQ associated with this UART */
-  ubyte                txirq;		/* RX IRQ associated with this UART */
-  ubyte                parity;		/* 0=none, 1=odd, 2=even */
-  boolean              stopbits2;	/* TRUE: Configure with 2
-					 * stop bits instead of 1 */
+  uint32_t     uartbase;	/* Base address of UART
+							 * registers */
+  uint32_t     baud;		/* Configured baud */
+  bool         rxenabled;	/* RX interrupt enabled */
+  bool         txenabled;	/* TX interrupt enabled */
+  uint8_t      rxirq;		/* RX IRQ associated with this UART */
+  uint8_t      txirq;		/* RX IRQ associated with this UART */
+  uint8_t      parity;		/* 0=none, 1=odd, 2=even */
+  bool         stopbits2;	/* true: Configure with 2
+							 * stop bits instead of 1 */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     z16f_setup(struct uart_dev_s *dev);
-static void    z16f_shutdown(struct uart_dev_s *dev);
-static int     z16f_attach(struct uart_dev_s *dev);
-static void    z16f_detach(struct uart_dev_s *dev);
-static int     z16f_rxinterrupt(int irq, void *context);
-static int     z16f_txinterrupt(int irq, void *context);
-static int     z16f_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int     z16f_receive(struct uart_dev_s *dev, uint32 *status);
-static void    z16f_rxint(struct uart_dev_s *dev, boolean enable);
-static boolean z16f_rxavailable(struct uart_dev_s *dev);
-static void    z16f_send(struct uart_dev_s *dev, int ch);
-static void    z16f_txint(struct uart_dev_s *dev, boolean enable);
-static boolean z16f_txready(struct uart_dev_s *dev);
-static boolean z16f_txempty(struct uart_dev_s *dev);
+static int  z16f_setup(struct uart_dev_s *dev);
+static void z16f_shutdown(struct uart_dev_s *dev);
+static int  z16f_attach(struct uart_dev_s *dev);
+static void z16f_detach(struct uart_dev_s *dev);
+static int  z16f_rxinterrupt(int irq, void *context);
+static int  z16f_txinterrupt(int irq, void *context);
+static int  z16f_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  z16f_receive(struct uart_dev_s *dev, uint32_t *status);
+static void z16f_rxint(struct uart_dev_s *dev, bool enable);
+static bool z16f_rxavailable(struct uart_dev_s *dev);
+static void z16f_send(struct uart_dev_s *dev, int ch);
+static void z16f_txint(struct uart_dev_s *dev, bool enable);
+static bool z16f_txready(struct uart_dev_s *dev);
+static bool z16f_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -140,8 +142,8 @@ static struct z16f_uart_s g_uart0priv =
 {
   Z16F_UART0_BASE,          /* uartbase */
   CONFIG_UART0_BAUD,        /* baud */
-  FALSE,                    /* rxenabled */
-  FALSE,                    /* txenabled */
+  false,                    /* rxenabled */
+  false,                    /* txenabled */
   Z16F_IRQ_UART0RX,         /* rxirq */
   Z16F_IRQ_UART0TX,         /* txirq */
   CONFIG_UART0_PARITY,      /* parity */
@@ -151,12 +153,12 @@ static struct z16f_uart_s g_uart0priv =
 static uart_dev_t g_uart0port =
 {
   0,                        /* open_count */
-  FALSE,                    /* xmitwaiting */
-  FALSE,                    /* recvwaiting */
+  false,                    /* xmitwaiting */
+  false,                    /* recvwaiting */
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
-  TRUE,                     /* isconsole */
+  true,                     /* isconsole */
 #else
-  FALSE,                    /* isconsole */
+  false,                    /* isconsole */
 #endif
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
@@ -185,8 +187,8 @@ static struct z16f_uart_s g_uart1priv =
 {
   Z16F_UART1_BASE,          /* uartbase */
   CONFIG_UART1_BAUD,        /* baud */
-  FALSE,                    /* rxenabled */
-  FALSE,                    /* txenabled */
+  false,                    /* rxenabled */
+  false,                    /* txenabled */
   Z16F_IRQ_UART1RX,         /* rxirq */
   Z16F_IRQ_UART1TX,         /* txirq */
   CONFIG_UART1_PARITY,      /* parity */
@@ -196,12 +198,12 @@ static struct z16f_uart_s g_uart1priv =
 static uart_dev_t g_uart1port =
 {
   0,                        /* open_count */
-  FALSE,                    /* xmitwaiting */
-  FALSE,                    /* recvwaiting */
+  false,                    /* xmitwaiting */
+  false,                    /* recvwaiting */
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-  TRUE,                     /* isconsole */
+  true,                     /* isconsole */
 #else
-  FALSE,                    /* isconsole */
+  false,                    /* isconsole */
 #endif
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
@@ -244,15 +246,15 @@ static uart_dev_t g_uart1port =
  * Name: z16f_disableuartirq
  ****************************************************************************/
 
-static ubyte z16f_disableuartirq(struct uart_dev_s *dev)
+static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
-  ubyte               state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
+  uint8_t             state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
                               priv->txenabled ? STATE_TXENABLED : STATE_DISABLED;
 
-  z16f_txint(dev, FALSE);
-  z16f_rxint(dev, FALSE);
+  z16f_txint(dev, false);
+  z16f_rxint(dev, false);
 
   irqrestore(flags);
   return state;
@@ -262,13 +264,13 @@ static ubyte z16f_disableuartirq(struct uart_dev_s *dev)
  * Name: z16f_restoreuartirq
  ****************************************************************************/
 
-static void z16f_restoreuartirq(struct uart_dev_s *dev, ubyte state)
+static void z16f_restoreuartirq(struct uart_dev_s *dev, uint8_t state)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
 
-  z16f_txint(dev, (state & STATE_TXENABLED) ? TRUE : FALSE);
-  z16f_rxint(dev, (state & STATE_RXENABLED) ? TRUE : FALSE);
+  z16f_txint(dev, (state & STATE_TXENABLED) ? true : false);
+  z16f_rxint(dev, (state & STATE_RXENABLED) ? true : false);
 
   irqrestore(flags);
 }
@@ -277,7 +279,7 @@ static void z16f_restoreuartirq(struct uart_dev_s *dev, ubyte state)
  * Name: z16f_consoleput
  ****************************************************************************/
 
-static void z16f_consoleput(ubyte ch)
+static void z16f_consoleput(uint8_t ch)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)CONSOLE_DEV.priv;
   int tmp;
@@ -305,16 +307,16 @@ static int z16f_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-  uint32 brg;
-  ubyte ctl0;
-  ubyte ctl1;
+  uint32_t brg;
+  uint8_t ctl0;
+  uint8_t ctl1;
 
   /* Calculate and set the baud rate generation register.
    * BRG = (freq + baud * 8)/(baud * 16)
    */
 
   brg = (_DEFCLK + (priv->baud << 3))/(priv->baud << 4);
-  putreg16((uint16)brg, priv->uartbase + Z16F_UART_BR);
+  putreg16((uint16_t))brg, priv->uartbase + Z16F_UART_BR);
 
   /* Configure STOP bits */
 
@@ -429,7 +431,7 @@ static int z16f_rxinterrupt(int irq, void *context)
 {
   struct uart_dev_s  *dev = NULL;
   struct z16f_uart_s *priv;
-  ubyte              status;
+  uint8_t            status;
 
   if (g_uart1priv.rxirq == irq)
     {
@@ -478,7 +480,7 @@ static int z16f_txinterrupt(int irq, void *context)
 {
   struct uart_dev_s  *dev = NULL;
   struct z16f_uart_s *priv;
-  ubyte              status;
+  uint8_t            status;
 
   if (g_uart1priv.txirq == irq)
     {
@@ -531,15 +533,15 @@ static int z16f_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int z16f_receive(struct uart_dev_s *dev, uint32 *status)
+static int z16f_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-  ubyte  rxd;
-  ubyte  stat0;
+  uint8_t rxd;
+  uint8_t stat0;
 
   rxd     = getreg8(priv->uartbase + Z16F_UART_RXD);
   stat0   = getreg8(priv->uartbase + Z16F_UART_STAT0);
-  *status = (uint32)rxd | (((uint32)stat0) << 8);
+  *status = (uint32_t)rxd | (((uint32_t)stat0) << 8);
   return rxd;
 }
 
@@ -551,7 +553,7 @@ static int z16f_receive(struct uart_dev_s *dev, uint32 *status)
  *
  ****************************************************************************/
 
-static void z16f_rxint(struct uart_dev_s *dev, boolean enable)
+static void z16f_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
@@ -575,11 +577,11 @@ static void z16f_rxint(struct uart_dev_s *dev, boolean enable)
  * Name: z16f_rxavailable
  *
  * Description:
- *   Return TRUE if the receive fifo is not empty
+ *   Return true if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static boolean z16f_rxavailable(struct uart_dev_s *dev)
+static bool z16f_rxavailable(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
   return ((getreg8(priv->uartbase + Z16F_UART_STAT0) & Z16F_UARTSTAT0_RDA) != 0);
@@ -607,7 +609,7 @@ static void z16f_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void z16f_txint(struct uart_dev_s *dev, boolean enable)
+static void z16f_txint(struct uart_dev_s *dev, bool enable)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
   irqstate_t          flags = irqsave();
@@ -631,11 +633,11 @@ static void z16f_txint(struct uart_dev_s *dev, boolean enable)
  * Name: z16f_txready
  *
  * Description:
- *   Return TRUE if the tranmsit fifo is not full
+ *   Return true if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static boolean z16f_txready(struct uart_dev_s *dev)
+static bool z16f_txready(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
   return ((getreg8(priv->uartbase + Z16F_UART_STAT0) & Z16F_UARTSTAT0_TDRE) != 0);
@@ -645,11 +647,11 @@ static boolean z16f_txready(struct uart_dev_s *dev)
  * Name: z16f_txempty
  *
  * Description:
- *   Return TRUE if the transmit fifo is empty
+ *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static boolean z16f_txempty(struct uart_dev_s *dev)
+static bool z16f_txempty(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
   return ((getreg8(priv->uartbase + Z16F_UART_STAT0) & Z16F_UARTSTAT0_TXE) != 0);
@@ -674,7 +676,7 @@ void up_earlyserialinit(void)
   (void)z16f_disableuartirq(&TTYS0_DEV);
   (void)z16f_disableuartirq(&TTYS1_DEV);
 
-  CONSOLE_DEV.isconsole = TRUE;
+  CONSOLE_DEV.isconsole = true;
   z16f_setup(&CONSOLE_DEV);
 }
 
@@ -705,7 +707,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  ubyte  state;
+  uint8_t  state;
 
   /* Keep interrupts disabled so that we do not interfere with normal
    * driver operation 
@@ -724,7 +726,7 @@ int up_putc(int ch)
 
   /* Output the character */
 
-  z16f_consoleput((ubyte)ch);
+  z16f_consoleput((uint8_t)ch);
 
   /* It is important to restore the TX interrupt while the send is pending.
    * otherwise, TRDE interrupts can be lost since they do not pend after the
@@ -745,12 +747,12 @@ int up_putc(int ch)
 # define z16f_contrde() \
   ((getreg8(Z16F_UART1_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
 # define z16f_contxd(ch) \
-  putreg8((ubyte)(ch), Z16F_UART1_TXD)
+  putreg8((uint8_t)(ch), Z16F_UART1_TXD)
 #else
 # define z16f_contrde() \
   ((getreg8(Z16F_UART0_STAT0) & Z16F_UARTSTAT0_TDRE) != 0)
 # define z16f_contxd(ch) \
-  putreg8((ubyte)(ch), Z16F_UART0_TXD)
+  putreg8((uint8_t)(ch), Z16F_UART0_TXD)
 #endif
 
 /****************************************************************************

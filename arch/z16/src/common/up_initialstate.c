@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_initialstate.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <nuttx/arch.h>
 
@@ -78,14 +78,14 @@
 
 void up_initial_state(_TCB *tcb)
 {
-  uint32 *reg32           = (uint32*)tcb->xcp.regs;
+  uint32 *reg32           = (uint32_t*)tcb->xcp.regs;
 
   /* Initialize the initial exception register context structure */
 
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  tcb->xcp.regs[REG_FLAGS] = (uint16)Z16F_CNTRL_FLAGS_IRQE; /* IRQE flag will enable interrupts */
+  tcb->xcp.regs[REG_FLAGS] = (uint16_t))Z16F_CNTRL_FLAGS_IRQE; /* IRQE flag will enable interrupts */
 #endif
-  reg32[REG_SP/2]          = (uint32)tcb->adj_stack_ptr;
-  reg32[REG_PC/2]          = (uint32)tcb->start;
+  reg32[REG_SP/2]          = (uint32_t)tcb->adj_stack_ptr;
+  reg32[REG_PC/2]          = (uint32_t)tcb->start;
 }

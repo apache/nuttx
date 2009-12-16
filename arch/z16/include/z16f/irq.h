@@ -45,6 +45,10 @@
  * Included Files
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -165,7 +169,7 @@
 
 /* This is the type of the register save array */
 
-typedef uint16 chipreg_t;
+typedef uint16_t chipreg_t;
 
 /* This struct defines the way the registers are stored. */
 
@@ -173,7 +177,7 @@ struct xcptcontext
 {
   /* Register save area */
 
-  uint16 regs[XCPTCONTEXT_REGS];
+  uint16_t regs[XCPTCONTEXT_REGS];
 
   /* The following function pointer is non-zero if there
    * are pending signals to be processed.
@@ -184,8 +188,8 @@ struct xcptcontext
 
   /* The following retains that state during signal execution */
 
-  uint32 saved_pc;	/* Saved return address */
-  uint16 saved_i;	/* Saved interrupt state */
+  uint32_t saved_pc;	/* Saved return address */
+  uint16_t saved_i;		/* Saved interrupt state */
 #endif
 };
 #endif

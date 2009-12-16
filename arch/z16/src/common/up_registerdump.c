@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_registerdump.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -76,7 +76,7 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_registerdump(void)
 {
-  FAR uint32 *regs32 = (FAR uint32*)current_regs;
+  FAR uint32 *regs32 = (FAR uint32_t*)current_regs;
   lldbg("R0 :%08x R1 :%08x R2 :%08x R3 :%08x "
         "R4 :%08x R5 :%08x R6 :%08x R7 :%08x\n"
         regs32[REG_R0/2],  regs32[REG_R1/2], regs32[REG_R2/2], regs32[REG_R3/2],
