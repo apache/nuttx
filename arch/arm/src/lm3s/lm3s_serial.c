@@ -38,8 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
@@ -57,7 +59,7 @@
 #include "os_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
@@ -132,32 +134,32 @@
 
 struct up_dev_s
 {
-  uint32  uartbase;  /* Base address of UART registers */
-  uint32  baud;      /* Configured baud */
-  uint32  im;        /* Saved IM value */
-  ubyte   irq;       /* IRQ associated with this UART */
-  ubyte   parity;    /* 0=none, 1=odd, 2=even */
-  ubyte   bits;      /* Number of bits (7 or 8) */
-  boolean stopbits2; /* TRUE: Configure with 2 stop bits instead of 1 */
+  uint32_t uartbase; /* Base address of UART registers */
+  uint32_t baud;     /* Configured baud */
+  uint32_t im;       /* Saved IM value */
+  uint8_t  irq;      /* IRQ associated with this UART */
+  uint8_t  parity;   /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;     /* Number of bits (7 or 8) */
+  bool    stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     up_setup(struct uart_dev_s *dev);
-static void    up_shutdown(struct uart_dev_s *dev);
-static int     up_attach(struct uart_dev_s *dev);
-static void    up_detach(struct uart_dev_s *dev);
-static int     up_interrupt(int irq, void *context);
-static int     up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int     up_receive(struct uart_dev_s *dev, uint32 *status);
-static void    up_rxint(struct uart_dev_s *dev, boolean enable);
-static boolean up_rxavailable(struct uart_dev_s *dev);
-static void    up_send(struct uart_dev_s *dev, int ch);
-static void    up_txint(struct uart_dev_s *dev, boolean enable);
-static boolean up_txready(struct uart_dev_s *dev);
-static boolean up_txempty(struct uart_dev_s *dev);
+static int  up_setup(struct uart_dev_s *dev);
+static void up_shutdown(struct uart_dev_s *dev);
+static int  up_attach(struct uart_dev_s *dev);
+static void up_detach(struct uart_dev_s *dev);
+static int  up_interrupt(int irq, void *context);
+static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static void up_rxint(struct uart_dev_s *dev, bool enable);
+static bool up_rxavailable(struct uart_dev_s *dev);
+static void up_send(struct uart_dev_s *dev, int ch);
+static void up_txint(struct uart_dev_s *dev, bool enable);
+static bool up_txready(struct uart_dev_s *dev);
+static bool up_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -258,7 +260,7 @@ static uart_dev_t g_uart1port =
  * Name: up_serialin
  ****************************************************************************/
 
-static inline uint32 up_serialin(struct up_dev_s *priv, int offset)
+static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
 {
   return getreg32(priv->uartbase + offset);
 }
@@ -267,7 +269,7 @@ static inline uint32 up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32 value)
+static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -276,7 +278,7 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32 value)
  * Name: up_disableuartint
  ****************************************************************************/
 
-static inline void up_disableuartint(struct up_dev_s *priv, uint32 *im)
+static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *im)
 {
   /* Return the current interrupt mask value */
 
@@ -295,7 +297,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint32 *im)
  * Name: up_restoreuartint
  ****************************************************************************/
 
-static inline void up_restoreuartint(struct up_dev_s *priv, uint32 im)
+static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t im)
 {
   priv->im = im;
   up_serialout(priv, LM3S_UART_IM_OFFSET, im);
@@ -343,13 +345,13 @@ static inline void up_waittxnotfull(struct up_dev_s *priv)
 static int up_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint32 lcrh;
-  uint32 ctl;
+  uint32_t lcrh;
+  uint32_t ctl;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  uint32 den;
-  uint32 brdi;
-  uint32 remainder;
-  uint32 divfrac;
+  uint32_t den;
+  uint32_t brdi;
+  uint32_t remainder;
+  uint32_t divfrac;
 
   /* Note:  The logic here depends on the fact that that the UART module
    * was enabled and the GPIOs were configured in up_lowsetup().
@@ -568,9 +570,9 @@ static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
-  uint32             mis;
+  uint32_t           mis;
   int                passes;
-  boolean            handled;
+  bool               handled;
 
 #ifndef CONFIG_UART0_DISABLE
   if (g_uart0priv.irq == irq)
@@ -595,10 +597,10 @@ static int up_interrupt(int irq, void *context)
    * until we have been looping for a long time.
    */
 
-  handled = TRUE;
+  handled = true;
   for (passes = 0; passes < 256 && handled; passes++)
     {
-      handled = FALSE;
+      handled = false;
 
       /* Get the masked UART status and clear the pending interrupts. */
 
@@ -612,7 +614,7 @@ static int up_interrupt(int irq, void *context)
            /* Rx buffer not empty ... process incoming bytes */
 
            uart_recvchars(dev);
-           handled = TRUE;
+           handled = true;
         }
 
       /* Handle outgoing, transmit bytes */
@@ -622,7 +624,7 @@ static int up_interrupt(int irq, void *context)
            /* Tx FIFO not full ... process outgoing bytes */
 
            uart_xmitchars(dev);
-           handled = TRUE;
+           handled = true;
         }
     }
     return OK;
@@ -678,10 +680,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32 *status)
+static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint32 rxd;
+  uint32_t rxd;
 
   /* Get the Rx byte + 4 bits of error information.  Return those in status */
 
@@ -701,7 +703,7 @@ static int up_receive(struct uart_dev_s *dev, uint32 *status)
  *
  ****************************************************************************/
 
-static void up_rxint(struct uart_dev_s *dev, boolean enable)
+static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   if (enable)
@@ -725,11 +727,11 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
  * Name: up_rxavailable
  *
  * Description:
- *   Return TRUE if the receive fifo is not empty
+ *   Return true if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static boolean up_rxavailable(struct uart_dev_s *dev)
+static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LM3S_UART_FR_OFFSET) & UART_FR_RXFE) == 0);
@@ -746,7 +748,7 @@ static boolean up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, LM3S_UART_DR_OFFSET, (uint32)ch);
+  up_serialout(priv, LM3S_UART_DR_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -757,7 +759,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void up_txint(struct uart_dev_s *dev, boolean enable)
+static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
@@ -798,11 +800,11 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
  * Name: up_txready
  *
  * Description:
- *   Return TRUE if the tranmsit fifo is not full
+ *   Return true if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static boolean up_txready(struct uart_dev_s *dev)
+static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LM3S_UART_FR_OFFSET) & UART_FR_TXFF) == 0);
@@ -812,11 +814,11 @@ static boolean up_txready(struct uart_dev_s *dev)
  * Name: up_txempty
  *
  * Description:
- *   Return TRUE if the transmit fifo is empty
+ *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static boolean up_txempty(struct uart_dev_s *dev)
+static bool up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LM3S_UART_FR_OFFSET) & UART_FR_TXFE) != 0);
@@ -852,7 +854,7 @@ void up_earlyserialinit(void)
   /* Configuration whichever one is the console */
 
 #ifdef HAVE_CONSOLE
-  CONSOLE_DEV.isconsole = TRUE;
+  CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 #endif
 }
@@ -894,11 +896,11 @@ int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  uint32 im;
+  uint32_t im;
 
   up_disableuartint(priv, &im);
   up_waittxnotfull(priv);
-  up_serialout(priv, LM3S_UART_DR_OFFSET, (uint32)ch);
+  up_serialout(priv, LM3S_UART_DR_OFFSET, (uint32_t)ch);
 
   /* Check for LF */
 
@@ -907,7 +909,7 @@ int up_putc(int ch)
       /* Add CR */
 
       up_waittxnotfull(priv);
-      up_serialout(priv, LM3S_UART_DR_OFFSET, (uint32)'\r');
+      up_serialout(priv, LM3S_UART_DR_OFFSET, (uint32_t)'\r');
     }
 
   up_waittxnotfull(priv);

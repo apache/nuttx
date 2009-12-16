@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/dm320/dm320_framebuffer.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -53,7 +53,7 @@
 #include "dm320_osd.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /* Configuration ********************************************************/
@@ -592,34 +592,34 @@ static struct fb_vtable_s g_osd1vtable =
  * Private Functions
  ****************************************************************************/
 
-static inline void dm320_blankscreen(ubyte *buffer, int len)
+static inline void dm320_blankscreen(uint8_t *buffer, int len)
 {
   memset(buffer, 0xff, len);
 }
 
-static inline uint32 dm320_physaddr(FAR void *fb_vaddr)
+static inline uint32_t dm320_physaddr(FAR void *fb_vaddr)
 {
-  return (uint32)fb_vaddr - DM320_SDRAM_VADDR;
+  return (uint32_t)fb_vaddr - DM320_SDRAM_VADDR;
 }
 
 #ifndef CONFIG_DM320_VID0_DISABLE
-static inline uint32 dm320_vid0upperoffset(void)
+static inline uint32_t dm320_vid0upperoffset(void)
 {
   return (((dm320_physaddr(g_vid0base) / 32) >> 16) & 0xff);
 }
 
-static inline uint32 dm320_vid0loweroffset(void)
+static inline uint32_t dm320_vid0loweroffset(void)
 {
   return ((dm320_physaddr(g_vid0base) / 32) & 0xffff);
 }
 
 #ifndef CONFIG_DM320_DISABLE_PINGPONG
-static inline uint32 dm320_vid0ppupperoffset(void)
+static inline uint32_t dm320_vid0ppupperoffset(void)
 {
   return (((dm320_physaddr(g_vid0ppbase) / 32) >> 16) & 0xff);
 }
 
-static inline uint32 dm320_vid0pploweroffset(void)
+static inline uint32_t dm320_vid0pploweroffset(void)
 {
   return ((dm320_physaddr(g_vid0ppbase) / 32) & 0xffff);
 }
@@ -627,36 +627,36 @@ static inline uint32 dm320_vid0pploweroffset(void)
 #endif
 
 #ifndef CONFIG_DM320_VID1_DISABLE
-static inline uint32 dm320_vid1upperoffset(void)
+static inline uint32_t dm320_vid1upperoffset(void)
 {
   return (((dm320_physaddr(g_vid1base) / 32) >> 16) & 0xff);
 }
 
-static inline uint32 dm320_vid1loweroffset(void)
+static inline uint32_t dm320_vid1loweroffset(void)
 {
   return ((dm320_physaddr(g_vid1base) / 32) & 0xffff);
 }
 #endif
 
 #ifndef CONFIG_DM320_OSD0_DISABLE
-static inline uint32 dm320_osd0upperoffset(void)
+static inline uint32_t dm320_osd0upperoffset(void)
 {
   return (((dm320_physaddr(g_osd0base) / 32) >> 16) & 0xff);
 }
 
-static inline uint32 dm320_osd0loweroffset(void)
+static inline uint32_t dm320_osd0loweroffset(void)
 {
   return ((dm320_physaddr(g_osd0base) / 32) & 0xffff);
 }
 #endif
 
 #ifndef CONFIG_DM320_OSD1_DISABLE
-static inline uint32 dm320_osd1upperoffset(void)
+static inline uint32_t dm320_osd1upperoffset(void)
 {
   return (((dm320_physaddr(g_osd1base) / 32) >> 16) & 0xff);
 }
 
-static inline uint32 dm320_osd1loweroffset(void)
+static inline uint32_t dm320_osd1loweroffset(void)
 {
   return ((dm320_physaddr(g_osd1base) / 32) & 0xffff);
 }
@@ -823,7 +823,7 @@ static void dm320_hwinitialize(void)
 
   gvdbg("DM320_OSD_VIDWINADH:   %04x\n", getreg16(DM320_OSD_VIDWINADH));
   gvdbg("DM320_OSD_VIDWIN0ADL:  %04x\n", getreg16(DM320_OSD_VIDWIN0ADL));
-  dm320_blankscreen((ubyte *)g_vid0base, DM320_VID0_FBLEN);
+  dm320_blankscreen((uint8_t *)g_vid0base, DM320_VID0_FBLEN);
 
 #ifndef CONFIG_DM320_DISABLE_PINGPONG
   putreg16(dm320_vid0ppupperoffset(), DM320_OSD_PPVWIN0ADH);
@@ -831,7 +831,7 @@ static void dm320_hwinitialize(void)
 
   gvdbg("DM320_OSD_PPVWIN0ADH:  %04x\n", getreg16(DM320_OSD_PPVWIN0ADH));
   gvdbg("DM320_OSD_PPVWIN0ADL:  %04x\n", getreg16(DM320_OSD_PPVWIN0ADL));
-  dm320_blankscreen((ubyte *)g_vid0ppbase, DM320_VID0_FBLEN);
+  dm320_blankscreen((uint8_t *)g_vid0ppbase, DM320_VID0_FBLEN);
 #endif
 
   putreg16(CONFIG_DM320_VID0_XPOS, DM320_OSD_VIDWIN0XP);
@@ -855,7 +855,7 @@ static void dm320_hwinitialize(void)
 
   gvdbg("DM320_OSD_VIDWINADH:   %04x\n", getreg16(DM320_OSD_VIDWINADH));
   gvdbg("DM320_OSD_VIDWIN1ADL:  %04x\n", getreg16(DM320_OSD_VIDWIN1ADL));
-  dm320_blankscreen((ubyte *)g_vid1base, DM320_VID1_FBLEN);
+  dm320_blankscreen((uint8_t *)g_vid1base, DM320_VID1_FBLEN);
 
   putreg16(CONFIG_DM320_VID1_XPOS, DM320_OSD_VIDWIN1XP);
   putreg16(CONFIG_DM320_VID1_XPOS, DM320_OSD_VIDWIN1YP);
@@ -877,7 +877,7 @@ static void dm320_hwinitialize(void)
 
 #ifndef CONFIG_DM320_OSD0_DISABLE
   gvdbg("Initialize OSD win0:\n");
-  dm320_blankscreen((ubyte *)g_osd0base, DM320_OSD0_FBLEN);
+  dm320_blankscreen((uint8_t *)g_osd0base, DM320_OSD0_FBLEN);
 
   putreg16(CONFIG_DM320_OSD0_XPOS, DM320_OSD_OSDWIN0XP);
   putreg16(CONFIG_DM320_OSD0_YPOS, DM320_OSD_OSDWIN0YP);
@@ -902,7 +902,7 @@ static void dm320_hwinitialize(void)
 
 #ifndef CONFIG_DM320_OSD1_DISABLE
   gvdbg("Initialize OSD win1\n");
-  dm320_blankscreen((ubyte *)g_osd1base, DM320_OSD1_FBLEN);
+  dm320_blankscreen((uint8_t *)g_osd1base, DM320_OSD1_FBLEN);
 
   putreg16(CONFIG_DM320_OSD1_XPOS, DM320_OSD_OSDWIN1XP);
   putreg16(CONFIG_DM320_OSD1_YPOS, DM320_OSD_OSDWIN1YP);
@@ -1183,12 +1183,12 @@ static int dm320_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *c
 static int dm320_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap)
 {
   irqstate_t flags;
-  uint16 regval;
-  ubyte y;
-  ubyte u;
-  ubyte v;
-  int   len
-  int   i;
+  uint16_t regval;
+  uint8_t y;
+  uint8_t u;
+  uint8_t v;
+  int len
+  int i;
 
 #ifdef CONFIG_DEBUG
   if (!vtable || !cmap || !cmap->read || !cmap->green || !cmap->blue)
@@ -1207,8 +1207,8 @@ static int dm320_putcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *c
        /* Program the CLUT */
 
        while (getreg16(DM320_OSD_MISCCTL) & 0x8);
-       putreg16(((uint16)y) << 8 | uint16(u)), DM320_OSD_CLUTRAMYCB);
-       putreg16(((uint16)v << 8 | i), DM320_OSD_CLUTRAMCR);
+       putreg16(((uint16_t)y) << 8 | uint16_t(u)), DM320_OSD_CLUTRAMYCB);
+       putreg16(((uint16_t)v << 8 | i), DM320_OSD_CLUTRAMCR);
     }
 
   /* Select RAM clut */
@@ -1279,7 +1279,7 @@ static int dm320_getcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_cursora
 static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_s *settings)
 {
   irqstate_t flags;
-  uint16 regval;
+  uint16_t regval;
 
 #ifdef CONFIG_DEBUG
   if (!vtable || !settings)

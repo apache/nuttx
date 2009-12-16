@@ -45,7 +45,10 @@
  ****************************************************************************/
 
 #include <nuttx/irq.h>
-#include <sys/types.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
+
 
 /****************************************************************************
  * Definitions
@@ -137,14 +140,14 @@ struct xcptcontext
    * signal processing.
    */
 
-  uint32 saved_pc;
-  uint32 saved_primask;
-  uint32 saved_xpsr;
+  uint32_t saved_pc;
+  uint32_t saved_primask;
+  uint32_t saved_xpsr;
 #endif
 
   /* Register save area */
 
-  uint32 regs[XCPTCONTEXT_REGS];
+  uint32_t regs[XCPTCONTEXT_REGS];
 };
 #endif
 
@@ -195,19 +198,19 @@ static inline void irqrestore(irqstate_t primask)
 
 /* Get/set the primask register */
 
-static inline ubyte getprimask(void)
+static inline uint8_t getprimask(void)
 {
-  uint32 primask;
+  uint32_t primask;
   __asm__ __volatile__
     (
      "\tmrs  %0, primask\n"
      : "=r" (primask)
      :
      : "memory");
-  return (ubyte)primask;
+  return (uint8_t)primask;
 }
 
-static inline void setprimask(uint32 primask)
+static inline void setprimask(uint32_t primask)
 {
   __asm__ __volatile__
     (
@@ -219,19 +222,19 @@ static inline void setprimask(uint32 primask)
 
 /* Get/set the basepri register */
 
-static inline ubyte getbasepri(void)
+static inline uint8_t getbasepri(void)
 {
-  uint32 basepri;
+  uint32_t basepri;
   __asm__ __volatile__
     (
      "\tmrs  %0, basepri\n"
      : "=r" (basepri)
      :
      : "memory");
-  return (ubyte)basepri;
+  return (uint8_t)basepri;
 }
 
-static inline void setbasepri(uint32 basepri)
+static inline void setbasepri(uint32_t basepri)
 {
   __asm__ __volatile__
     (
@@ -243,9 +246,9 @@ static inline void setbasepri(uint32 basepri)
 
 /* Get IPSR */
 
-static inline uint32 getipsr(void)
+static inline uint32_t getipsr(void)
 {
-  uint32 ipsr;
+  uint32_t ipsr;
   __asm__ __volatile__
     (
      "\tmrs  %0, ipsr\n"
@@ -257,7 +260,7 @@ static inline uint32 getipsr(void)
 
 /* SVC system call */
 
-static inline void svcall(uint32 cmd, uint32 arg)
+static inline void svcall(uint32_t cmd, uint32_t arg)
 {
   __asm__ __volatile__
     (

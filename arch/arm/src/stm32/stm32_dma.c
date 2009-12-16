@@ -38,8 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
@@ -83,10 +84,10 @@
 
 struct stm32_dma_s
 {
-  ubyte          chan;     /* DMA channel number (0-6) */
-  ubyte          irq;      /* DMA channel IRQ number */
+  uint8_t        chan;     /* DMA channel number (0-6) */
+  uint8_t        irq;      /* DMA channel IRQ number */
   sem_t          sem;      /* Used to wait for DMA channel to become available */
-  uint32         base;     /* DMA register channel base address */
+  uint32_t       base;     /* DMA register channel base address */
   dma_callback_t callback; /* Callback invoked when the DMA completes */
   void          *arg;      /* Argument passed to callback function */
 };
@@ -181,28 +182,28 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 
 /* Get non-channel register from DMA1 or DMA2 */
 
-static inline uint32 dmabase_getreg(struct stm32_dma_s *dmach, uint32 offset)
+static inline uint32_t dmabase_getreg(struct stm32_dma_s *dmach, uint32_t offset)
 {
   return getreg32(DMA_BASE(dmach->base) + offset);
 }
 
 /* Write to non-channel register in DMA1 or DMA2 */
 
-static inline void dmabase_putreg(struct stm32_dma_s *dmach, uint32 offset, uint32 value)
+static inline void dmabase_putreg(struct stm32_dma_s *dmach, uint32_t offset, uint32_t value)
 {
   putreg32(value, DMA_BASE(dmach->base) + offset);
 }
 
 /* Get channel register from DMA1 or DMA2 */
 
-static inline uint32 dmachan_getreg(struct stm32_dma_s *dmach, uint32 offset)
+static inline uint32_t dmachan_getreg(struct stm32_dma_s *dmach, uint32_t offset)
 {
   return getreg32(dmach->base + offset);
 }
 
 /* Write to channel register in DMA1 or DMA2 */
 
-static inline void dmachan_putreg(struct stm32_dma_s *dmach, uint32 offset, uint32 value)
+static inline void dmachan_putreg(struct stm32_dma_s *dmach, uint32_t offset, uint32_t value)
 {
   putreg32(value, dmach->base + offset);
 }
@@ -244,7 +245,7 @@ static inline void stm32_dmagive(FAR struct stm32_dma_s *dmach)
 
 static void stm32_dmachandisable(struct stm32_dma_s *dmach)
 {
-  uint32 regval;
+  uint32_t regval;
 
   /* Disable all interrupts at the DMA controller */
 
@@ -272,7 +273,7 @@ static void stm32_dmachandisable(struct stm32_dma_s *dmach)
 static int stm32_dmainterrupt(int irq, void *context)
 {
   struct stm32_dma_s *dmach;
-  uint32 isr;
+  uint32_t isr;
   int chndx;
 
   /* Get the channel structure from the interrupt number */
@@ -447,10 +448,10 @@ void stm32_dmafree(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr, size_t ntransfers, uint32 ccr)
+void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t ntransfers, uint32_t ccr)
 {
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
-  uint32 regval;
+  uint32_t regval;
 
   /* Set the peripheral register address in the DMA_CPARx register. The data
    * will be moved from/to this address to/from the memory after the
@@ -498,11 +499,11 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr, size_t ntrans
  *
  ****************************************************************************/
 
-void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, boolean half)
+void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool half)
 {
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   int irq;
-  uint32 ccr;
+  uint32_t ccr;
 
   DEBUGASSERT(handle != NULL);
 
@@ -592,7 +593,7 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
                    const char *msg)
 {
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
-  uint32 dmabase = DMA_BASE(dmach->base);
+  uint32_t dmabase = DMA_BASE(dmach->base);
 
   dmadbg("DMA Registers: %s\n", msg);
   dmadbg("   ISRC[%08x]: %08x\n", dmabase + STM32_DMA_ISR_OFFSET, regs->isr);

@@ -41,11 +41,11 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
 #include "chip.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #if defined(CONFIG_STM32_HIGHDENSITY) || defined(CONFIG_STM32_CONNECTIVITYLINE)

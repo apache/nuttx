@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -38,7 +38,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "arm.h"
 #include "up_internal.h"
@@ -54,18 +54,18 @@
 
 struct section_mapping_s
 {
-  uint32 physbase;   /* Physical address of the region to be mapped */
-  uint32 virtbase;   /* Virtual address of the region to be mapped */
-  uint32 mmuflags;   /* MMU settings for the region (e.g., cache-able) */
-  uint32 nsections;  /* Number of mappings in the region */
+  uint32_t physbase;   /* Physical address of the region to be mapped */
+  uint32_t virtbase;   /* Virtual address of the region to be mapped */
+  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
+  uint32_t nsections;  /* Number of mappings in the region */
 };
 
 /************************************************************************************
  * Public Variables
  ************************************************************************************/
 
-extern uint32 _vector_start; /* Beginning of vector block */
-extern uint32 _vector_end;   /* End+1 of vector block */
+extern uint32_t _vector_start; /* Beginning of vector block */
+extern uint32_t _vector_end;   /* End+1 of vector block */
 
 /************************************************************************************
  * Private Variables
@@ -100,10 +100,10 @@ static const struct section_mapping_s section_mapping[] =
  * Name: up_setlevel1entry
  ************************************************************************************/
 
-static inline void up_setlevel1entry(uint32 paddr, uint32 vaddr, uint32 mmuflags)
+static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32 *pgtable = (uint32*)PGTABLE_BASE_VADDR;
-  uint32  index   = vaddr >> 20;
+  uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
+  uint32_t  index   = vaddr >> 20;
 
   /* Save the page table entry */
 
@@ -114,11 +114,11 @@ static inline void up_setlevel1entry(uint32 paddr, uint32 vaddr, uint32 mmuflags
  * Name: up_setlevel2coarseentry
  ************************************************************************************/
 
-static inline void up_setlevel2coarseentry(uint32 ctabvaddr, uint32 paddr,
-                                           uint32 vaddr, uint32 mmuflags)
+static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
+                                           uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32 *ctable  = (uint32*)ctabvaddr;
-  uint32  index;
+  uint32_t *ctable  = (uint32_t*)ctabvaddr;
+  uint32_t  index;
 
   /* The coarse table divides a 1Mb address space up into 256 entries, each
    * corresponding to 4Kb of address space.  The coarse page table index is
@@ -142,9 +142,9 @@ static void up_setupmappings(void)
 
   for (i = 0; i < NMAPPINGS; i++)
     {
-      uint32 sect_paddr = section_mapping[i].physbase;
-      uint32 sect_vaddr = section_mapping[i].virtbase;
-      uint32 mmuflags   = section_mapping[i].mmuflags;
+      uint32_t sect_paddr = section_mapping[i].physbase;
+      uint32_t sect_vaddr = section_mapping[i].virtbase;
+      uint32_t mmuflags   = section_mapping[i].mmuflags;
 
       for (j = 0; j < section_mapping[i].nsections; j++)
         {
@@ -161,9 +161,9 @@ static void up_setupmappings(void)
 
 static void up_vectormapping(void)
 {
-  uint32 vector_paddr = DM320_IRAM_PADDR;
-  uint32 vector_vaddr = DM320_VECTOR_VADDR;
-  uint32 end_paddr    = vector_paddr + DM320_IRAM_SIZE;
+  uint32_t vector_paddr = DM320_IRAM_PADDR;
+  uint32_t vector_vaddr = DM320_VECTOR_VADDR;
+  uint32_t end_paddr    = vector_paddr + DM320_IRAM_SIZE;
 
   /* We want to keep our interrupt vectors and interrupt-related logic in zero-wait
    * state internal RAM (IRAM).  The DM320 has 16Kb of IRAM positioned at physical
@@ -193,9 +193,9 @@ static void up_vectormapping(void)
 
 static void up_copyvectorblock(void)
 {
-  uint32 *src  = (uint32*)&_vector_start;
-  uint32 *end  = (uint32*)&_vector_end;
-  uint32 *dest = (uint32*)VECTOR_BASE;
+  uint32_t *src  = (uint32_t*)&_vector_start;
+  uint32_t *end  = (uint32_t*)&_vector_end;
+  uint32_t *dest = (uint32_t*)VECTOR_BASE;
 
   while (src < end)
     {

@@ -41,7 +41,10 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "up_internal.h"
 #include "chip.h"
@@ -176,16 +179,16 @@
  ************************************************************************************/
 
 typedef FAR void *DMA_HANDLE;
-typedef void (*dma_callback_t)(DMA_HANDLE handle, ubyte isr, void *arg);
+typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t isr, void *arg);
 
 #ifdef CONFIG_DEBUG_DMA
 struct stm32_dmaregs_s
 {
-  uint32 isr;
-  uint32 ccr;
-  uint32 cndtr;
-  uint32 cpar;
-  uint32 cmar;
+  uint32_t isr;
+  uint32_t ccr;
+  uint32_t cndtr;
+  uint32_t cpar;
+  uint32_t cmar;
 };
 #endif
 
@@ -214,7 +217,7 @@ extern "C" {
  * and we will need to set the NVIC vector location to this alternative location.
  */
 
-extern uint32 stm32_vectors[];	/* See stm32_vectors.S */
+extern uint32_t stm32_vectors[];	/* See stm32_vectors.S */
 
 /************************************************************************************
  * Public Function Prototypes
@@ -248,7 +251,7 @@ EXTERN void stm32_clockconfig(void);
  *
  ************************************************************************************/
 
-EXTERN int stm32_configgpio(uint32 cfgset);
+EXTERN int stm32_configgpio(uint32_t cfgset);
 
 /************************************************************************************
  * Name: stm32_gpiowrite
@@ -258,7 +261,7 @@ EXTERN int stm32_configgpio(uint32 cfgset);
  *
  ************************************************************************************/
 
-EXTERN void stm32_gpiowrite(uint32 pinset, boolean value);
+EXTERN void stm32_gpiowrite(uint32_t pinset, bool value);
 
 /************************************************************************************
  * Name: stm32_gpioread
@@ -268,7 +271,7 @@ EXTERN void stm32_gpiowrite(uint32 pinset, boolean value);
  *
  ************************************************************************************/
 
-EXTERN boolean stm32_gpioread(uint32 pinset);
+EXTERN bool stm32_gpioread(uint32_t pinset);
 
 /************************************************************************************
  * Function:  stm32_dumpgpio
@@ -279,7 +282,7 @@ EXTERN boolean stm32_gpioread(uint32 pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG
-EXTERN int stm32_dumpgpio(uint32 pinset, const char *msg);
+EXTERN int stm32_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define stm32_dumpgpio(p,m)
 #endif
@@ -347,8 +350,8 @@ EXTERN void stm32_dmafree(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr,
-                           size_t ntransfers, uint32 ccr);
+EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                           size_t ntransfers, uint32_t ccr);
 
 /****************************************************************************
  * Name: stm32_dmastart
@@ -363,7 +366,7 @@ EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32 paddr, uint32 maddr,
  ****************************************************************************/
 
 EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
-                           void *arg, boolean half);
+                           void *arg, bool half);
 
 /****************************************************************************
  * Name: stm32_dmastop
@@ -465,12 +468,12 @@ EXTERN int stm32_ethinitialize(int intf);
 
 struct spi_dev_s;
 enum spi_dev_e;
-EXTERN void  stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-EXTERN ubyte stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-EXTERN void  stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-EXTERN ubyte stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-EXTERN void  stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-EXTERN ubyte stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN void  stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN void  stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN void  stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
 /************************************************************************************
  * Name:  stm32_usbpullup
@@ -485,7 +488,7 @@ EXTERN ubyte stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
  ************************************************************************************/
 
 struct usbdev_s;
-EXTERN int stm32_usbpullup(FAR struct usbdev_s *dev,  boolean enable);
+EXTERN int stm32_usbpullup(FAR struct usbdev_s *dev,  bool enable);
 
 /************************************************************************************
  * Name:  stm32_usbsuspend
@@ -499,7 +502,7 @@ EXTERN int stm32_usbpullup(FAR struct usbdev_s *dev,  boolean enable);
  ************************************************************************************/
 
 struct usbdev_s;
-EXTERN void stm32_usbsuspend(FAR struct usbdev_s *dev, boolean resume);
+EXTERN void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 
 /****************************************************************************
  * Name: sdio_initialize
@@ -528,7 +531,7 @@ EXTERN FAR struct sdio_dev_s *sdio_initialize(int slotno);
  *
  * Input Parameters:
  *   dev        - An instance of the SDIO driver device state structure.
- *   cardinslot - TRUE is a card has been detected in the slot; FALSE if a 
+ *   cardinslot - true is a card has been detected in the slot; false if a 
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *
@@ -537,7 +540,7 @@ EXTERN FAR struct sdio_dev_s *sdio_initialize(int slotno);
  *
  ****************************************************************************/
 
-EXTERN void sdio_mediachange(FAR struct sdio_dev_s *dev, boolean cardinslot);
+EXTERN void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
 
 /****************************************************************************
  * Name: sdio_wrprotect
@@ -548,14 +551,14 @@ EXTERN void sdio_mediachange(FAR struct sdio_dev_s *dev, boolean cardinslot);
  *
  * Input Parameters:
  *   dev       - An instance of the SDIO driver device state structure.
- *   wrprotect - TRUE is a card is writeprotected.
+ *   wrprotect - true is a card is writeprotected.
  *
  * Returned Values:
  *   None
  *
  ****************************************************************************/
 
-EXTERN void sdio_wrprotect(FAR struct sdio_dev_s *dev, boolean wrprotect);
+EXTERN void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 
 #undef EXTERN
 #if defined(__cplusplus)

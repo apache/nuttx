@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -51,7 +51,7 @@
 #include "lm3s_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -96,8 +96,8 @@ extern void lm3s_vectors(void);
 
 void __start(void)
 {
-  const uint32 *src;
-  uint32 *dest;
+  const uint32_t *src;
+  uint32_t *dest;
 
   /* Configure the uart so that we can get debug output as soon as possible */
 

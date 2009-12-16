@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -54,7 +54,7 @@
 #include "lm3s_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Enable NVIC debug features that are probably only desireable during
@@ -75,7 +75,7 @@
  * Public Data
  ****************************************************************************/
 
-uint32 *current_regs;
+uint32_t *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -205,7 +205,7 @@ static int lm3s_reserved(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int lm3s_irqinfo(int irq, uint32 *regaddr, uint32 *bit)
+static int lm3s_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 {
   DEBUGASSERT(irq >= LM3S_IRQ_NMI && irq < NR_IRQS);
 
@@ -363,9 +363,9 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  uint32 regaddr;
-  uint32 regval;
-  uint32 bit;
+  uint32_t regaddr;
+  uint32_t regval;
+  uint32_t bit;
 
   if (lm3s_irqinfo(irq, &regaddr, &bit) == 0)
     {
@@ -388,9 +388,9 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  uint32 regaddr;
-  uint32 regval;
-  uint32 bit;
+  uint32_t regaddr;
+  uint32_t regval;
+  uint32_t bit;
 
   if (lm3s_irqinfo(irq, &regaddr, &bit) == 0)
     {
@@ -430,8 +430,8 @@ void up_maskack_irq(int irq)
 #ifdef CONFIG_ARCH_IRQPRIO
 int up_prioritize_irq(int irq, int priority)
 {
-  uint32 regaddr;
-  uint32 regval;
+  uint32_t regaddr;
+  uint32_t regval;
   int shift;
 
   DEBUGASSERT(irq >= LM3S_IRQ_MPU && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);

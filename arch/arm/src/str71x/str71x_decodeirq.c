@@ -38,7 +38,8 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <assert.h>
@@ -50,7 +51,7 @@
 #include "chip.h"
 
 /********************************************************************************
- * Definitions
+ * Pre-procesor Definitions
  ********************************************************************************/
 
 /********************************************************************************
@@ -84,7 +85,7 @@
  *
  ********************************************************************************/
 
-void up_decodeirq(uint32 *regs)
+void up_decodeirq(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   up_ledon(LED_INIRQ);

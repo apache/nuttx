@@ -38,8 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -50,7 +51,7 @@
 #include "lm3s_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -59,7 +60,7 @@
 
 /* NOTE: this is duplicated in lm3s_gpio.c */
 
-static const uint32 g_gpiobase[8] =
+static const uint32_t g_gpiobase[8] =
 {
   LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
   LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE, LM3S_GPIOH_BASE,
@@ -80,7 +81,7 @@ static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
  *
  ****************************************************************************/
 
-static inline uint32 lm3s_gpiobaseaddress(int port)
+static inline uint32_t lm3s_gpiobaseaddress(int port)
 {
   return g_gpiobase[port & 7];
 }
@@ -94,7 +95,7 @@ static inline uint32 lm3s_gpiobaseaddress(int port)
  *
  ****************************************************************************/
 
-static inline ubyte lm3s_gpioport(int port)
+static inline uint8_t lm3s_gpioport(int port)
 {
   return g_portchar[port & 7];
 }
@@ -111,13 +112,13 @@ static inline ubyte lm3s_gpioport(int port)
  *
  ****************************************************************************/
 
-int lm3s_dumpgpio(uint32 pinset, const char *msg)
+int lm3s_dumpgpio(uint32_t pinset, const char *msg)
 {
   irqstate_t   flags;
   unsigned int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  uint32       base;
-  uint32       rcgc2;
-  boolean      enabled;
+  uint32_t     base;
+  uint32_t     rcgc2;
+  bool         enabled;
 
   /* Get the base address associated with the GPIO port */
 

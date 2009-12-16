@@ -45,7 +45,9 @@
  ****************************************************************************/
 
 #include <nuttx/irq.h>
-#include <sys/types.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
  * Definitions
@@ -147,13 +149,13 @@ struct xcptcontext
    * signal processing.
    */
 
-  uint32 saved_pc;
-  uint32 saved_cpsr;
+  uint32_t saved_pc;
+  uint32_t saved_cpsr;
 #endif
 
   /* Register save area */
 
-  uint32 regs[XCPTCONTEXT_REGS];
+  uint32_t regs[XCPTCONTEXT_REGS];
 };
 #endif
 

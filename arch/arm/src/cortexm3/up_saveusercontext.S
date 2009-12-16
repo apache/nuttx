@@ -42,7 +42,7 @@
 #include "nvic.h"
 
 /************************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -67,7 +67,7 @@
  * Description:
  *   Save the current thread context.  Full prototype is:
  *
- *   int  up_saveusercontext(uint32 *saveregs);
+ *   int  up_saveusercontext(uint32_t *saveregs);
  *
  * Return:
  *   0: Normal return

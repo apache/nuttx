@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include "chip.h"
 
 /************************************************************************************
@@ -77,7 +77,7 @@
 #define STM32_USB_ADDR_RX_WOFFSET   (4)     /* Reception buffer address n (16-bits) */
 #define STM32_USB_COUNT_RX_WOFFSET  (6)     /* Reception byte count n (16-bits) */
 
-#define STM32_USB_BTABLE_RADDR(ep,o) ((((uint32)getreg16(STM32_USB_BTABLE) + ((ep) << 3)) + (o))  << 1)
+#define STM32_USB_BTABLE_RADDR(ep,o) ((((uint32_t)getreg16(STM32_USB_BTABLE) + ((ep) << 3)) + (o))  << 1)
 #define STM32_USB_ADDR_TX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_TX_WOFFSET)
 #define STM32_USB_COUNT_TX_OFFSET(ep) STM32_USB_BTABLE_RADDR(ep,STM32_USB_COUNT_TX_WOFFSET)
 #define STM32_USB_ADDR_RX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_RX_WOFFSET)

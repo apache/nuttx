@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_serial.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
@@ -68,32 +71,32 @@
 
 struct up_dev_s
 {
-  uint32  uartbase;  /* Base address of UART registers */
-  uint32  baud;      /* Configured baud */
-  ubyte   ier;       /* Saved IER value */
-  ubyte   irq;       /* IRQ associated with this UART */
-  ubyte   parity;    /* 0=none, 1=odd, 2=even */
-  ubyte   bits;      /* Number of bits (7 or 8) */
-  boolean stopbits2; /* TRUE: Configure with 2 stop bits instead of 1 */
+  uint32_t uartbase;  /* Base address of UART registers */
+  uint32_t baud;      /* Configured baud */
+  uint8_t  ier;       /* Saved IER value */
+  uint8_t  irq;       /* IRQ associated with this UART */
+  uint8_t  parity;    /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;      /* Number of bits (7 or 8) */
+  bool     stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     up_setup(struct uart_dev_s *dev);
-static void    up_shutdown(struct uart_dev_s *dev);
-static int     up_attach(struct uart_dev_s *dev);
-static void    up_detach(struct uart_dev_s *dev);
-static int     up_interrupt(int irq, void *context);
-static int     up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int     up_receive(struct uart_dev_s *dev, uint32 *status);
-static void    up_rxint(struct uart_dev_s *dev, boolean enable);
-static boolean up_rxavailable(struct uart_dev_s *dev);
-static void    up_send(struct uart_dev_s *dev, int ch);
-static void    up_txint(struct uart_dev_s *dev, boolean enable);
-static boolean up_txready(struct uart_dev_s *dev);
-static boolean up_txempty(struct uart_dev_s *dev);
+static int  up_setup(struct uart_dev_s *dev);
+static void up_shutdown(struct uart_dev_s *dev);
+static int  up_attach(struct uart_dev_s *dev);
+static void up_detach(struct uart_dev_s *dev);
+static int  up_interrupt(int irq, void *context);
+static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static void up_rxint(struct uart_dev_s *dev, bool enable);
+static bool up_rxavailable(struct uart_dev_s *dev);
+static void up_send(struct uart_dev_s *dev, int ch);
+static void up_txint(struct uart_dev_s *dev, bool enable);
+static bool up_txready(struct uart_dev_s *dev);
+static bool up_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -200,7 +203,7 @@ static uart_dev_t g_uart1port =
  * Name: up_serialin
  ****************************************************************************/
 
-static inline ubyte up_serialin(struct up_dev_s *priv, int offset)
+static inline uint8_t up_serialin(struct up_dev_s *priv, int offset)
 {
   return getreg8(priv->uartbase + offset);
 }
@@ -209,7 +212,7 @@ static inline ubyte up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, ubyte value)
+static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value)
 {
   putreg8(value, priv->uartbase + offset);
 }
@@ -218,7 +221,7 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, ubyte value)
  * Name: up_disableuartint
  ****************************************************************************/
 
-static inline void up_disableuartint(struct up_dev_s *priv, ubyte *ier)
+static inline void up_disableuartint(struct up_dev_s *priv, uint8_t *ier)
 {
   if (ier)
     {
@@ -233,7 +236,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, ubyte *ier)
  * Name: up_restoreuartint
  ****************************************************************************/
 
-static inline void up_restoreuartint(struct up_dev_s *priv, ubyte ier)
+static inline void up_restoreuartint(struct up_dev_s *priv, uint8_t ier)
 {
   priv->ier |= ier & LPC214X_IER_ALLIE;
   up_serialout(priv, LPC214X_UART_IER_OFFSET, priv->ier);
@@ -263,9 +266,9 @@ static inline void up_waittxready(struct up_dev_s *priv)
  * Name: up_enablebreaks
  ****************************************************************************/
 
-static inline void up_enablebreaks(struct up_dev_s *priv, boolean enable)
+static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 {
-  ubyte lcr = up_serialin(priv, LPC214X_UART_LCR_OFFSET);
+  uint8_t lcr = up_serialin(priv, LPC214X_UART_LCR_OFFSET);
   if (enable)
     {
       lcr |= LPC214X_LCR_BREAK_ENABLE;
@@ -291,8 +294,8 @@ static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_LPC214X_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint16 baud;
-  ubyte lcr;
+  uint16_t baud;
+  uint8_t lcr;
 
   /* Clear fifos */
 
@@ -451,7 +454,7 @@ static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
-  ubyte              status;
+  uint8_t            status;
   int                passes;
 
   if (g_uart1priv.irq == irq)
@@ -583,7 +586,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags = irqsave();
-        up_enablebreaks(priv, TRUE);
+        up_enablebreaks(priv, true);
         irqrestore(flags);
       }
       break;
@@ -592,7 +595,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       {
         irqstate_t flags;
         flags = irqsave();
-        up_enablebreaks(priv, FALSE);
+        up_enablebreaks(priv, false);
         irqrestore(flags);
       }
       break;
@@ -616,10 +619,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32 *status)
+static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  ubyte rbr;
+  uint8_t rbr;
 
   *status = up_serialin(priv, LPC214X_UART_LSR_OFFSET);
   rbr     = up_serialin(priv, LPC214X_UART_RBR_OFFSET);
@@ -634,7 +637,7 @@ static int up_receive(struct uart_dev_s *dev, uint32 *status)
  *
  ****************************************************************************/
 
-static void up_rxint(struct uart_dev_s *dev, boolean enable)
+static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   if (enable)
@@ -654,11 +657,11 @@ static void up_rxint(struct uart_dev_s *dev, boolean enable)
  * Name: up_rxavailable
  *
  * Description:
- *   Return TRUE if the receive fifo is not empty
+ *   Return true if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static boolean up_rxavailable(struct uart_dev_s *dev)
+static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_RDR) != 0);
@@ -675,7 +678,7 @@ static boolean up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, LPC214X_UART_THR_OFFSET, (ubyte)ch);
+  up_serialout(priv, LPC214X_UART_THR_OFFSET, (uint8_t)ch);
 }
 
 /****************************************************************************
@@ -686,7 +689,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void up_txint(struct uart_dev_s *dev, boolean enable)
+static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   if (enable)
@@ -706,11 +709,11 @@ static void up_txint(struct uart_dev_s *dev, boolean enable)
  * Name: up_txready
  *
  * Description:
- *   Return TRUE if the tranmsit fifo is not full
+ *   Return true if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static boolean up_txready(struct uart_dev_s *dev)
+static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
@@ -720,11 +723,11 @@ static boolean up_txready(struct uart_dev_s *dev)
  * Name: up_txempty
  *
  * Description:
- *   Return TRUE if the transmit fifo is empty
+ *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static boolean up_txempty(struct uart_dev_s *dev)
+static bool up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) & LPC214X_LSR_THRE) != 0);
@@ -748,7 +751,7 @@ void up_earlyserialinit(void)
 {
   /* Enable UART0 and 1 */
 
-  uint32 pinsel = getreg32(LPC214X_PINSEL0);
+  uint32_t pinsel = getreg32(LPC214X_PINSEL0);
   pinsel &= ~(LPC214X_UART0_PINMASK|LPC214X_UART1_PINMASK);
   pinsel |= (LPC214X_UART0_PINSEL|LPC214X_UART1_PINSEL);
   putreg32(pinsel, LPC214X_PINSEL0);
@@ -760,7 +763,7 @@ void up_earlyserialinit(void)
 
   /* Configuration whichever one is the console */
 
-  CONSOLE_DEV.isconsole = TRUE;
+  CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 }
 
@@ -791,11 +794,11 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  ubyte  ier;
+  uint8_t ier;
 
   up_disableuartint(priv, &ier);
   up_waittxready(priv);
-  up_serialout(priv, LPC214X_UART_THR_OFFSET, (ubyte)ch);
+  up_serialout(priv, LPC214X_UART_THR_OFFSET, (uint8_t)ch);
 
   /* Check for LF */
 

@@ -39,7 +39,8 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <assert.h>
@@ -50,7 +51,7 @@
 #include "up_internal.h"
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /********************************************************************************
@@ -69,7 +70,7 @@
  * Public Funtions
  ********************************************************************************/
 
-void up_decodeirq(uint32* regs)
+void up_decodeirq(uint32_t* regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lib_lowprintf("Unexpected IRQ\n");
@@ -78,7 +79,7 @@ void up_decodeirq(uint32* regs)
 #else
   /* Decode the interrupt.  First, fetch the interrupt id register. */
 
-  uint16 irqentry = getreg16(DM320_INTC_IRQENTRY0);
+  uint16_t irqentry = getreg16(DM320_INTC_IRQENTRY0);
 
   /* The irqentry value is an offset into a table.  Zero means no interrupt. */
 

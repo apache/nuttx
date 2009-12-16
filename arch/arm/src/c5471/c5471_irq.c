@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <nuttx/irq.h>
 
 #include "arm.h"
@@ -48,7 +48,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define ILR_EDGESENSITIVE 0x00000020
@@ -58,7 +58,7 @@
  * Public Data
  ****************************************************************************/
 
-uint32 *current_regs;
+uint32_t *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -107,7 +107,7 @@ static up_vector_t g_vectorinittab[] =
 
 static inline void up_ackirq(unsigned int irq)
 {
-  uint32 reg;
+  uint32_t reg;
   reg = getreg32(SRC_IRQ_REG);              /* Insure appropriate IT_REG bit clears */
   putreg32(reg | 0x00000001, INT_CTRL_REG); /* write the NEW_IRQ_AGR bit. */
 }
@@ -125,7 +125,7 @@ static inline void up_ackirq(unsigned int irq)
 
 static inline void up_ackfiq(unsigned int irq)
 {
-  uint32 reg;
+  uint32_t reg;
   reg = getreg32(SRC_FIQ_REG);              /* Insure appropriate IT_REG bit clears */
   putreg32(reg | 0x00000002, INT_CTRL_REG); /* write the NEW_FIQ_AGR bit. */
 }
@@ -197,7 +197,7 @@ void up_disable_irq(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      uint32 reg = getreg32(MASK_IT_REG);
+      uint32_t reg = getreg32(MASK_IT_REG);
       putreg32(reg | (1 << irq), MASK_IT_REG);
     }
 }
@@ -214,7 +214,7 @@ void up_enable_irq(int irq)
 {
   if ((unsigned)irq < NR_IRQS)
     {
-      uint32 reg = getreg32(MASK_IT_REG);
+      uint32_t reg = getreg32(MASK_IT_REG);
       putreg32(reg & ~(1 << irq), MASK_IT_REG);
     }
 }
@@ -229,7 +229,7 @@ void up_enable_irq(int irq)
 
 void up_maskack_irq(int irq)
 {
-  uint32 reg = getreg32(INT_CTRL_REG);
+  uint32_t reg = getreg32(INT_CTRL_REG);
 
   /* Mask the interrupt */
 

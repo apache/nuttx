@@ -40,8 +40,12 @@
  * Included Files
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Bring-up debug configurations.  These are here (vs defconfig)
@@ -103,7 +107,7 @@ typedef void (*up_vector_t)(void);
  * interrupt processing.
  */
 
-extern uint32 *current_regs;
+extern uint32_t *current_regs;
 
 /* This is the beginning of heap as provided from up_head.S.
  * This is the first address in DRAM after the loaded
@@ -111,33 +115,33 @@ extern uint32 *current_regs;
  * CONFIG_DRAM_END
  */
 
-extern uint32 g_heapbase;
+extern uint32_t g_heapbase;
 
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-extern uint32 g_userstack;
+extern uint32_t g_userstack;
 #endif
 
 /* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32 storage locations! They are only used meaningfully in the
+ * not actual uint32_t storage locations! They are only used meaningfully in the
  * following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
- *  - The declareion extern uint32 _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32 variable _data (it is
+ *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
+ *    that the value _sdata is the address of a uint32_t variable _data (it is
  *    not!).
  *  - We can recoved the linker value then by simply taking the address of
- *    of _data.  like:  uint32 *pdata = &_sdata;
+ *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
-extern uint32 _stext;           /* Start of .text */
-extern uint32 _etext;           /* End_1 of .text + .rodata */
-extern const uint32 _eronly;    /* End+1 of read only section (.text + .rodata) */
-extern uint32 _sdata;           /* Start of .data */
-extern uint32 _edata;           /* End+1 of .data */
-extern uint32 _sbss;            /* Start of .bss */
-extern uint32 _ebss;            /* End+1 of .bss */
+extern uint32_t _stext;           /* Start of .text */
+extern uint32_t _etext;           /* End_1 of .text + .rodata */
+extern const uint32_t _eronly;    /* End+1 of read only section (.text + .rodata) */
+extern uint32_t _sdata;           /* Start of .data */
+extern uint32_t _edata;           /* End+1 of .data */
+extern uint32_t _sbss;            /* Start of .bss */
+extern uint32_t _ebss;            /* End+1 of .bss */
 #endif
 
 /****************************************************************************
@@ -153,31 +157,31 @@ extern uint32 _ebss;            /* End+1 of .bss */
 /* Defined in files with the same name as the function */
 
 extern void up_boot(void);
-extern void up_copystate(uint32 *dest, uint32 *src);
-extern void up_decodeirq(uint32 *regs);
+extern void up_copystate(uint32_t *dest, uint32_t *src);
+extern void up_decodeirq(uint32_t *regs);
 extern void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
 extern void weak_function up_dmainitialize(void);
 #endif
-extern int  up_saveusercontext(uint32 *saveregs);
-extern void up_fullcontextrestore(uint32 *restoreregs) __attribute__ ((noreturn));
-extern void up_switchcontext(uint32 *saveregs, uint32 *restoreregs);
+extern int  up_saveusercontext(uint32_t *saveregs);
+extern void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
+extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 extern void up_sigdeliver(void);
-extern int  up_timerisr(int irq, uint32 *regs);
+extern int  up_timerisr(int irq, uint32_t *regs);
 extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
 
 #ifdef CONFIG_ARCH_CORTEXM3
-extern uint32 *up_doirq(int irq, uint32 *regs);
+extern uint32_t *up_doirq(int irq, uint32_t *regs);
 extern int  up_svcall(int irq, FAR void *context);
 extern int  up_hardfault(int irq, FAR void *context);
 #else
-extern void up_doirq(int irq, uint32 *regs);
-extern void up_dataabort(uint32 *regs);
-extern void up_prefetchabort(uint32 *regs);
-extern void up_syscall(uint32 *regs);
-extern void up_undefinedinsn(uint32 *regs);
+extern void up_doirq(int irq, uint32_t *regs);
+extern void up_dataabort(uint32_t *regs);
+extern void up_prefetchabort(uint32_t *regs);
+extern void up_syscall(uint32_t *regs);
+extern void up_undefinedinsn(uint32_t *regs);
 #endif
 
 /* Defined in up_vectors.S */

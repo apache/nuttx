@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/arm/src/str71x/str71x_lowputc.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -47,7 +47,7 @@
 #include "str71x_internal.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-procesor Definitions
  **************************************************************************/
 
 /* Configuration **********************************************************/
@@ -259,7 +259,7 @@ void up_lowputc(char ch)
 
   /* Then send the character */
 
-  putreg16((uint16)ch, STR71X_UART_TXBUFR(STR71X_UART_BASE));
+  putreg16((uint16_t)ch, STR71X_UART_TXBUFR(STR71X_UART_BASE));
 #endif
 }
 
@@ -277,12 +277,12 @@ void up_lowsetup(void)
 {
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 
-  uint16 reg16;
+  uint16_t reg16;
 
   /* Enable the selected console device */
   /* Set the UART baud rate */
 
-  putreg16((uint16)UART_BAUDRATE, STR71X_UART_BR(STR71X_UART_BASE));
+  putreg16((uint16_t)UART_BAUDRATE, STR71X_UART_BR(STR71X_UART_BASE));
 
   /* Configure the UART control registers */
 

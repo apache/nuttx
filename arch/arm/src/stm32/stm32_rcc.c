@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <debug.h>
 #include <arch/board/board.h>
 
@@ -69,7 +69,7 @@
 
 static inline void rcc_reset(void)
 {
-  uint32 regval;
+  uint32_t regval;
 
   putreg32(0, STM32_RCC_APB2RSTR);          /* Disable APB2 Peripheral Reset */
   putreg32(0, STM32_RCC_APB1RSTR);          /* Disable APB1 Peripheral Reset */
@@ -102,7 +102,7 @@ static inline void rcc_reset(void)
 
 static inline void rcc_enableahb(void)
 {
-  uint32 regval;
+  uint32_t regval;
 
   /* Always enable FLITF clock and SRAM clock */
 
@@ -143,7 +143,7 @@ static inline void rcc_enableahb(void)
 
 static inline void rcc_enableapb1(void)
 {
-  uint32 regval;
+  uint32_t regval;
 
 #if CONFIG_STM32_USB
   /* USB clock divider. This bit must be valid before enabling the USB
@@ -286,7 +286,7 @@ static inline void rcc_enableapb1(void)
 
 static inline void rcc_enableapb2(void)
 {
-  uint32 regval;
+  uint32_t regval;
 
   /* Set the appropriate bits in the APB2ENR register to enabled the
    * selected APB2 peripherals.
@@ -379,8 +379,8 @@ static inline void rcc_enableapb2(void)
 
 void stm32_clockconfig(void)
 {
-  uint32 regval;
-  volatile sint32 timeout;
+  uint32_t regval;
+  volatile int32_t timeout;
 
   /* Make sure that we are starting in the reset state */
 

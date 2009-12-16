@@ -38,11 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -99,7 +103,7 @@ int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
    * referenced as positive word offsets from sp.
    */
 
-  top_of_stack = (uint32)tcb->stack_alloc_ptr + stack_size - 4;
+  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
   /* The ARM stack must be aligned at word (4 byte)
    * boundaries. If necessary top_of_stack must be rounded
@@ -107,11 +111,11 @@ int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
    */
 
   top_of_stack &= ~3;
-  size_of_stack = top_of_stack - (uint32)tcb->stack_alloc_ptr + 4;
+  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
 
   /* Save the adjusted stack values in the _TCB */
 
-  tcb->adj_stack_ptr  = (uint32*)top_of_stack;
+  tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
   tcb->adj_stack_size = size_of_stack;
 
   return OK;

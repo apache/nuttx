@@ -41,11 +41,13 @@
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
+#  include <stdint.h>
+#  include <stdbool.h>
 #  include <nuttx/spi.h>
 #endif
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* CSPI Register Offsets ************************************************************/
@@ -189,8 +191,8 @@ extern "C" {
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
 
-EXTERN void imx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-EXTERN ubyte imx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN void imx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t imx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
 #undef EXTERN
 #ifdef __cplusplus

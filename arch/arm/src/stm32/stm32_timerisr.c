@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <time.h>
 #include <debug.h>
 #include <nuttx/arch.h>
@@ -105,7 +106,7 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32 *regs)
+int up_timerisr(int irq, uint32_t *regs)
 {
    /* Process timer interrupt */
 
@@ -124,7 +125,7 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
-  uint32 regval;
+  uint32_t regval;
 
   /* Set the SysTick interrupt to the default priority */
 

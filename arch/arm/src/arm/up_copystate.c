@@ -39,13 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -66,7 +66,7 @@
 
 /* A little faster than most memcpy's */
 
-void up_copystate(uint32 *dest, uint32 *src)
+void up_copystate(uint32_t *dest, uint32_t *src)
 {
   int i;
 

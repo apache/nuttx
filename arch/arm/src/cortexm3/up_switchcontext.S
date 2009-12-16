@@ -42,7 +42,7 @@
 #include "nvic.h"
 
 /************************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -68,7 +68,7 @@
  *   Save the current thread context and restore the specified context.
  *   Full prototype is:
  *
- *   void up_switchcontext(uint32 *saveregs, uint32 *restoreregs);
+ *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  *
  * Return:
  *   None

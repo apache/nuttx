@@ -39,7 +39,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 #include <nuttx/mm.h>
 #include <nuttx/arch.h>
@@ -48,7 +50,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -98,8 +100,8 @@ void up_addregion(void)
 
 #if !defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_COPYTORAM)
 #  if (CONFIG_DRAM_NUTTXENTRY & 0xffff0000) != CONFIG_DRAM_VSTART
-  uint32 start = CONFIG_DRAM_VSTART + 0x1000;
-  uint32 end   = (CONFIG_DRAM_NUTTXENTRY & 0xffff0000);
+  uint32_t start = CONFIG_DRAM_VSTART + 0x1000;
+  uint32_t end   = (CONFIG_DRAM_NUTTXENTRY & 0xffff0000);
   mm_addregion((FAR void*)start, end - start);
 #  endif
 #endif

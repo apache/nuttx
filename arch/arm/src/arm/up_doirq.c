@@ -38,16 +38,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <assert.h>
+
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -66,7 +68,7 @@
  * Public Functions
  ****************************************************************************/
 
-void up_doirq(int irq, uint32 *regs)
+void up_doirq(int irq, uint32_t *regs)
 {
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS

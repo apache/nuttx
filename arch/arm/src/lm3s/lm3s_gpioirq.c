@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -53,7 +53,7 @@
 #include "lm3s_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,7 +68,7 @@ static FAR xcpt_t g_gpioirqvector[NR_GPIO_IRQS];
  * be we support disabling interrupt support for arbitrary ports
  */
 
-static const uint32 g_gpiobase[] =
+static const uint32_t g_gpiobase[] =
 {
 #ifndef CONFIG_LM3S_DISABLE_GPIOA_IRQS
    LM3S_GPIOA_BASE,
@@ -113,7 +113,7 @@ static const uint32 g_gpiobase[] =
  *
  ****************************************************************************/
 
-static inline uint32 lm3s_gpiobaseaddress(unsigned int port)
+static inline uint32_t lm3s_gpiobaseaddress(unsigned int port)
 {
   return g_gpiobase[port >> 3];
 }
@@ -126,9 +126,9 @@ static inline uint32 lm3s_gpiobaseaddress(unsigned int port)
  *
  ****************************************************************************/
 
-static int lm3s_gpiohandler(uint32 regbase, int irqbase, void *context)
+static int lm3s_gpiohandler(uint32_t regbase, int irqbase, void *context)
 {
-  uint32 mis;
+  uint32_t mis;
   int irq;
   int pin;
 
@@ -322,8 +322,8 @@ void gpio_irqenable(int irq)
 {
   irqstate_t flags;
   int        gpioirq = irq - NR_IRQS;
-  uint32     base;
-  uint32     regval;
+  uint32_t   base;
+  uint32_t   regval;
   int        pin;
   int        ret     = ERROR;
 
@@ -363,8 +363,8 @@ void gpio_irqdisable(int irq)
 {
   irqstate_t flags;
   int        gpioirq = irq - NR_IRQS;
-  uint32     base;
-  uint32     regval;
+  uint32_t   base;
+  uint32_t   regval;
   int        pin;
   int        ret     = ERROR;
 

@@ -39,7 +39,8 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <assert.h>
@@ -50,7 +51,7 @@
 #include "up_internal.h"
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /********************************************************************************
@@ -69,15 +70,15 @@
  * Public Funtions
  ********************************************************************************/
 
-void up_decodeirq(uint32* regs)
+void up_decodeirq(uint32_t* regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lib_lowprintf("Unexpected IRQ\n");
   current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 #else
-  uint32 regval;
-  int    irq;
+  uint32_t regval;
+  int irq;
 
   /* Current regs non-zero indicates that we are processing an interrupt;
    * current_regs is also used to manage interrupt level context switches.

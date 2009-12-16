@@ -38,7 +38,8 @@
  ********************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <assert.h>
@@ -68,7 +69,7 @@
 /* This array maps 4 bits into the bit number of the lowest bit that it set */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-static uint8 g_nibblemap[16] = { 0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0 };
+static uint8_t g_nibblemap[16] = { 0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0 };
 #endif
 
 /********************************************************************************
@@ -103,9 +104,9 @@ static uint8 g_nibblemap[16] = { 0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0 
  ********************************************************************************/
 
 #ifndef CONFIG_VECTORED_INTERRUPTS
-void up_decodeirq(uint32 *regs)
+void up_decodeirq(uint32_t *regs)
 #else
-static void lpc214x_decodeirq( uint32 *regs)
+static void lpc214x_decodeirq( uint32_t *regs)
 #endif
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -118,7 +119,7 @@ static void lpc214x_decodeirq( uint32 *regs)
    * non-zero bit in the interrupt status register.
    */
 
-  uint32 pending = vic_getreg(LPC214X_VIC_IRQSTATUS_OFFSET) & 0x007fffff;
+  uint32_t pending = vic_getreg(LPC214X_VIC_IRQSTATUS_OFFSET) & 0x007fffff;
   unsigned int nibble;
   unsigned int irq_base;
   unsigned int irq = NR_IRQS;
@@ -160,7 +161,7 @@ static void lpc214x_decodeirq( uint32 *regs)
 }
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
-void up_decodeirq(uint32 *regs)
+void up_decodeirq(uint32_t *regs)
 {
   vic_vector_t vector = (vic_vector_t)vic_getreg(LPC214X_VIC_VECTADDR_OFFSET);
   vector(regs);

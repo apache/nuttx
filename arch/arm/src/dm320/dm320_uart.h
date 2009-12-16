@@ -1,7 +1,7 @@
 /************************************************************************************
  * dm320/dm320_uart.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -41,11 +41,11 @@
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-# include <sys/types.h>
+# include <stdint.h>
 #endif
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* UART definitions *****************************************************************/
@@ -80,18 +80,18 @@
 
 /* And baud = UART_REFCLK / (brsr+1) */
 
-#define UART_BAUD_2400        ((uint16)((UART_REFCLK / 2400  ) - 1))
-#define UART_BAUD_4800        ((uint16)((UART_REFCLK / 4800  ) - 1))
-#define UART_BAUD_9600        ((uint16)((UART_REFCLK / 9600  ) - 1))
-#define UART_BAUD_14400       ((uint16)((UART_REFCLK / 14400 ) - 1))
-#define UART_BAUD_19200       ((uint16)((UART_REFCLK / 19200 ) - 1))
-#define UART_BAUD_28800       ((uint16)((UART_REFCLK / 28800 ) - 1))
-#define UART_BAUD_38400       ((uint16)((UART_REFCLK / 38400 ) - 1))
-#define UART_BAUD_57600       ((uint16)((UART_REFCLK / 57600 ) - 1))
-#define UART_BAUD_115200      ((uint16)((UART_REFCLK / 115200) - 1))
-#define UART_BAUD_230400      ((uint16)((UART_REFCLK / 230400) - 1))
-#define UART_BAUD_460800      ((uint16)((UART_REFCLK / 460800) - 1))
-#define UART_BAUD_921600      ((uint16)((UART_REFCLK / 921600) - 1))
+#define UART_BAUD_2400        ((uint16_t)((UART_REFCLK / 2400  ) - 1))
+#define UART_BAUD_4800        ((uint16_t)((UART_REFCLK / 4800  ) - 1))
+#define UART_BAUD_9600        ((uint16_t)((UART_REFCLK / 9600  ) - 1))
+#define UART_BAUD_14400       ((uint16_t)((UART_REFCLK / 14400 ) - 1))
+#define UART_BAUD_19200       ((uint16_t)((UART_REFCLK / 19200 ) - 1))
+#define UART_BAUD_28800       ((uint16_t)((UART_REFCLK / 28800 ) - 1))
+#define UART_BAUD_38400       ((uint16_t)((UART_REFCLK / 38400 ) - 1))
+#define UART_BAUD_57600       ((uint16_t)((UART_REFCLK / 57600 ) - 1))
+#define UART_BAUD_115200      ((uint16_t)((UART_REFCLK / 115200) - 1))
+#define UART_BAUD_230400      ((uint16_t)((UART_REFCLK / 230400) - 1))
+#define UART_BAUD_460800      ((uint16_t)((UART_REFCLK / 460800) - 1))
+#define UART_BAUD_921600      ((uint16_t)((UART_REFCLK / 921600) - 1))
 
 /* UART MSR register bit definitions */
 
