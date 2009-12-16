@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_sigdeliver.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -83,7 +83,7 @@ void up_sigdeliver(void)
 {
 #ifndef CONFIG_DISABLE_SIGNALS
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32 regs[XCPTCONTEXT_REGS];
+  uint32_t regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the

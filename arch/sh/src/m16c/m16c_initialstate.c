@@ -38,7 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <string.h>
 
 #include <nuttx/arch.h>
@@ -79,7 +80,7 @@
 void up_initial_state(FAR _TCB *tcb)
 {
   FAR struct xcptcontext *xcp  = &tcb->xcp;
-  FAR ubyte              *regs = xcp->regs;
+  FAR uint8_t            *regs = xcp->regs;
 
   /* Initialize the initial exception register context structure */
 
@@ -87,7 +88,7 @@ void up_initial_state(FAR _TCB *tcb)
 
   /* Offset 0: FLG (bits 12-14) PC (bits 16-19) as would be present by an interrupt */
 
-  *regs++ = ((M16C_DEFAULT_IPL << 4) | ((uint32)tcb->start >> 16));
+  *regs++ = ((M16C_DEFAULT_IPL << 4) | ((uint32_t)tcb->start >> 16));
 
   /* Offset 1: FLG (bits 0-7) */
 
@@ -99,12 +100,12 @@ void up_initial_state(FAR _TCB *tcb)
 
   /* Offset 2-3: 16-bit PC [0]:bits8-15 [1]:bits 0-7 */
 
-  *regs++ = (uint32)tcb->start >> 8;  /* Bits 8-15 of PC */
-  *regs++ = (uint32)tcb->start;       /* Bits 0-7 of PC */
+  *regs++ = (uint32_t)tcb->start >> 8;  /* Bits 8-15 of PC */
+  *regs++ = (uint32_t)tcb->start;       /* Bits 0-7 of PC */
 
   /* Offset 18-20: User stack pointer */
 
    regs   = &xcp->regs[REG_SP];
-  *regs++ = (uint32)tcb->adj_stack_ptr >> 8;  /* Bits 8-15 of SP */
-  *regs   = (uint32)tcb->adj_stack_ptr;       /* Bits 0-7 of SP */
+  *regs++ = (uint32_t)tcb->adj_stack_ptr >> 8;  /* Bits 8-15 of SP */
+  *regs   = (uint32_t)tcb->adj_stack_ptr;       /* Bits 0-7 of SP */
 }

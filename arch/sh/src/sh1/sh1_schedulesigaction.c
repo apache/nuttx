@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/sh1/sh1_schedulesigaction.c
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -154,7 +154,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              current_regs[REG_PC]  = (uint32)up_sigdeliver;
+              current_regs[REG_PC]  = (uint32_t)up_sigdeliver;
               current_regs[REG_SR] |= 0x000000f0;
 
               /* And make sure that the saved context in the TCB
@@ -186,7 +186,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]  = (uint32)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]  = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_SR] |= 0x000000f0 ;
         }
 

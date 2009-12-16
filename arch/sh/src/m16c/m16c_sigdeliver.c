@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -83,7 +83,7 @@ void up_sigdeliver(void)
 {
 #ifndef CONFIG_DISABLE_SIGNALS
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  ubyte regs[XCPTCONTEXT_SIZE];
+  uint8_t regs[XCPTCONTEXT_SIZE];
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the

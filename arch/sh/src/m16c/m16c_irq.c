@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
@@ -57,7 +57,7 @@
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-uint32 *current_regs; /* Actually a pointer to the beginning or a ubyte array */
+uint32_t *current_regs; /* Actually a pointer to the beginning of a uint8_t array */
 
 /****************************************************************************
  * Private Data

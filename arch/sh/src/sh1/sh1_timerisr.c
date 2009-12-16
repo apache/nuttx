@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/sh1/sh1_timerisr.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
 #include <time.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -131,9 +133,9 @@
  *
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32 *regs)
+int up_timerisr(int irq, uint32_t *regs)
 {
-   ubyte reg8;
+   uint8_t reg8;
 
    /* Process timer interrupt */
 
@@ -159,7 +161,7 @@ int up_timerisr(int irq, uint32 *regs)
 
 void up_timerinit(void)
 {
-  ubyte reg8;
+  uint8_t reg8;
 
   /* Clear timer counter 0 */
 

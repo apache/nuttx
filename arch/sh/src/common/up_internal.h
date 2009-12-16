@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/common/up_internal.h
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,10 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
  * Definitions
@@ -94,7 +98,7 @@ typedef void (*up_vector_t)(void);
  * interrupt processing.
  */
 
-extern uint32 *current_regs;
+extern uint32_t *current_regs;
 
 /* This is the beginning of heap as provided from up_head.S.
  * This is the first address in DRAM after the loaded
@@ -102,7 +106,7 @@ extern uint32 *current_regs;
  * CONFIG_DRAM_END
  */
 
-extern uint32 g_heapbase;
+extern uint32_t g_heapbase;
 #endif
 
 /****************************************************************************
@@ -118,18 +122,18 @@ extern uint32 g_heapbase;
 /* Defined in files with the same name as the function */
 
 extern void up_boot(void);
-extern void up_copystate(uint32 *dest, uint32 *src);
-extern void up_dataabort(uint32 *regs);
-extern void up_decodeirq(uint32 *regs);
-extern uint32 *up_doirq(int irq, uint32 *regs);
-extern void up_fullcontextrestore(uint32 *regs) __attribute__ ((noreturn));
+extern void up_copystate(uint32_t *dest, uint32_t *src);
+extern void up_dataabort(uint32_t *regs);
+extern void up_decodeirq(uint32_t *regs);
+extern uint32_t *up_doirq(int irq, uint32_t *regs);
+extern void up_fullcontextrestore(uint32_t *regs) __attribute__ ((noreturn));
 extern void up_irqinitialize(void);
-extern void up_prefetchabort(uint32 *regs);
-extern int  up_saveusercontext(uint32 *regs);
+extern void up_prefetchabort(uint32_t *regs);
+extern int  up_saveusercontext(uint32_t *regs);
 extern void up_sigdeliver(void);
-extern void up_syscall(uint32 *regs);
-extern int  up_timerisr(int irq, uint32 *regs);
-extern void up_undefinedinsn(uint32 *regs);
+extern void up_syscall(uint32_t *regs);
+extern int  up_timerisr(int irq, uint32_t *regs);
+extern void up_undefinedinsn(uint32_t *regs);
 extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
