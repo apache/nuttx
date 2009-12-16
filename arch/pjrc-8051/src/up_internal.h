@@ -1,7 +1,7 @@
 /**************************************************************************
  * up_internal.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -41,6 +41,8 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <arch/irq.h>
 
 #if defined(CONFIG_ARCH_BOARD_PJRC_87C52)
@@ -70,7 +72,7 @@
  * interrupt.
  */
 
-extern ubyte g_irqtos;
+extern uint8_t g_irqtos;
 
 /* Registers are saved in the following global array during
  * interrupt processing.  If a context switch is performed
@@ -80,7 +82,7 @@ extern ubyte g_irqtos;
  * directly into (_TCB*)g_readytorun.head->xcp.regs).
  */
 
-extern ubyte g_irqregs[REGS_SIZE];
+extern uint8_t g_irqregs[REGS_SIZE];
 
 /* If during execution of an interrup handler, a context
  * switch must be performed, the follwing will be set to
@@ -95,7 +97,7 @@ extern FAR struct xcptcontext *g_irqcontext;
  * to comput them.
  */
 
-extern const ubyte g_ntobit[8];
+extern const uint8_t g_ntobit[8];
 
 #endif /* __ASSEMBLY */
 
@@ -106,21 +108,21 @@ extern const ubyte g_ntobit[8];
 #ifndef __ASSEMBLY__
 
 #if CONFIG_MM_REGIONS > 1
-extern void  up_addregion(void);
+extern void up_addregion(void);
 #endif
-extern void  up_delay(ubyte milliseconds) __naked;
-extern void  up_irqinitialize(void);
-extern void  up_restorecontext(FAR struct xcptcontext *context) _naked;
-extern void  up_restoreregisters(FAR ubyte *regs) _naked;
-extern ubyte up_savecontext(FAR struct xcptcontext *context) __naked;
-extern void  up_saveregisters(FAR ubyte *regs) _naked;
-extern void  up_saveirqcontext(FAR struct xcptcontext *context);
-extern void  up_timerinit(void);
+extern void up_delay(uint8_t milliseconds) __naked;
+extern void up_irqinitialize(void);
+extern void up_restorecontext(FAR struct xcptcontext *context) _naked;
+extern void up_restoreregisters(FAR uint8_t *regs) _naked;
+extern uint8_t up_savecontext(FAR struct xcptcontext *context) __naked;
+extern void up_saveregisters(FAR uint8_t *regs) _naked;
+extern void up_saveirqcontext(FAR struct xcptcontext *context);
+extern void up_timerinit(void);
 
 /* Defined in up_debug.c */
 
 #if defined(CONFIG_ARCH_BRINGUP)
-extern void up_puthex(ubyte hex) __naked;
+extern void up_puthex(uint8_t hex) __naked;
 extern void up_puthex16(int hex) __naked;
 extern void up_putnl(void) __naked;
 extern void up_puts(__code char *ptr);
@@ -138,8 +140,8 @@ extern void up_dumpframe(FAR struct xcptcontext *context);
 
 #ifdef CONFIG_ARCH_LEDS
 extern void up_ledinit(void);
-extern void up_ledon(ubyte led);
-extern void up_ledoff(ubyte led);
+extern void up_ledon(uint8_t led);
+extern void up_ledoff(uint8_t led);
 #else
 # define up_ledinit()
 # define up_ledon(led)

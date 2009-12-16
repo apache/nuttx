@@ -1,7 +1,7 @@
-/************************************************************
+/************************************************************************
  * irq.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
 /* This file should never be included directed but, rather,
  * only indirectly through nuttx/irq.h
@@ -40,15 +40,18 @@
 #ifndef __ARCH_IRQ_H
 #define __ARCH_IRQ_H
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
 #define EXT_INT0_IRQ 0
 #define TIMER0_IRQ   1
@@ -141,9 +144,9 @@
 
 #define XCPT_SIZE   (STACK_SIZE+REGS_SIZE+1)
 
-/************************************************************
+/************************************************************************
  * Public Types
- ************************************************************/
+ ************************************************************************/
 
 /* This struct defines the way the registers are stored */
 
@@ -155,31 +158,31 @@ struct xcptcontext
     * the top-of-stack pointer can be derived from this size.
     */
 
-   ubyte nbytes;
+   uint8_t nbytes;
 
    /* This is the saved stack.  Space is allocated for the 
     * entire 256 byte IRAM (minus register and bit usage at
     * the beginning).
     */
 
-   ubyte stack[STACK_SIZE];
+   uint8_t stack[STACK_SIZE];
 
    /* These are save 8051/2 registers.  These are saved
     * separately from the stack to increase the effective
     * stack size.
     */
 
-   ubyte regs[REGS_SIZE];
+   uint8_t regs[REGS_SIZE];
 };
 #endif /* __ASSEMBLY */
 
-/************************************************************
+/************************************************************************
  * Public Variables
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Public Function Prototypes
- ************************************************************/
+ ************************************************************************/
 
 #ifndef __ASSEMBLY__
 

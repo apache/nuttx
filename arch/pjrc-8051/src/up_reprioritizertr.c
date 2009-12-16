@@ -38,10 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #include <sched.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
 
@@ -81,7 +85,7 @@
  *
  ****************************************************************************/
 
-void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
+void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority)
 {
   /* Verify that the caller is sane */
 
@@ -95,12 +99,12 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
   else
     {
       FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-      boolean switch_needed;
+      bool switch_needed;
 
       dbg("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
-       * sched_removereadytorun will return TRUE if we just
+       * sched_removereadytorun will return true if we just
        * remove the head of the ready to run list.
        */
 
@@ -108,10 +112,10 @@ void up_reprioritize_rtr(FAR _TCB *tcb, ubyte priority)
 
       /* Setup up the new task priority */
 
-      tcb->sched_priority = (ubyte)priority;
+      tcb->sched_priority = (uint8_t)priority;
 
       /* Return the task to the specified blocked task list.
-       * sched_addreadytorun will return TRUE if the task was
+       * sched_addreadytorun will return true if the task was
        * added to the new list.  We will need to perform a context
        * switch only if the EXCLUSIVE or of the two calls is non-zero
        * (i.e., one and only one the calls changes the head of the

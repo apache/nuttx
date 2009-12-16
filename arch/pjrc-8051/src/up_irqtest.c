@@ -1,5 +1,5 @@
-/************************************************************
- * up_putc.c
+/************************************************************************
+ * up_irqtest.c
  *
  *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,21 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <nuttx/arch.h>
 #include <8052.h>
+
 #include "up_internal.h"
 
-/************************************************************
+/************************************************************************
  * Definitions
- ************************************************************/
+ ************************************************************************/
 
 #define up_extint0 ((vector_t)PM2_VECTOR_EXTINT0)
 #define up_timer0  ((vector_t)PM2_VECTOR_TIMER0)
@@ -54,31 +58,31 @@
 #define up_uart    ((vector_t)PM2_VECTOR_UART)
 #define up_timer2  ((vector_t)PM2_VECTOR_TIMER2)
 
-/************************************************************
+/************************************************************************
  * Private Types
- ************************************************************/
+ ************************************************************************/
 
 typedef void (*vector_t)(void);
 
-/************************************************************
+/************************************************************************
  * Public Variables
- ************************************************************/
+ ************************************************************************/
 
-boolean g_irqtest;
-ubyte g_irqtos;
-ubyte g_irqregs[REGS_SIZE];
-int g_nirqs;
+bool    g_irqtest;
+uint8_t g_irqtos;
+uint8_t g_irqregs[REGS_SIZE];
+int     g_nirqs;
 FAR struct xcptcontext *g_irqcontext; 
 
-/************************************************************
+/************************************************************************
  * Private Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Name: utility functions
- ************************************************************/
+ ************************************************************************/
 
-static void _up_putc(ubyte ch) __naked
+static void _up_putc(uint8_t ch) __naked
 {
   ch; /* To avoid unreferenced argument warning */
   _asm
@@ -87,7 +91,7 @@ static void _up_putc(ubyte ch) __naked
   _endasm;
 }
 
-void _up_puthex(ubyte hex) __naked
+void _up_puthex(uint8_t hex) __naked
 {
   hex; /* To avoid unreferenced argument warning */
   _asm
@@ -119,7 +123,7 @@ void _up_puts(__code char *ptr)
     }
 }
 
-void _up_delay(ubyte milliseconds) __naked
+void _up_delay(uint8_t milliseconds) __naked
 {
   _asm
 	mov	r0, dpl
@@ -136,17 +140,17 @@ void _up_delay(ubyte milliseconds) __naked
   _endasm;
 }
 
-/************************************************************
+/************************************************************************
  * Public Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Name: os_start
  *
  * Description:
  *   "Fake" OS entry point.
  *
- ************************************************************/
+ ************************************************************************/
 
 void os_start(void)
 {
@@ -158,7 +162,7 @@ void os_start(void)
 
   /* Then verify all of the interrupt */
 
-  g_irqtest = FALSE;
+  g_irqtest = false;
 
   up_extint0();
   up_timer0();
@@ -183,7 +187,7 @@ void os_start(void)
 
   /* Start timer interrupts */
 
-  g_irqtest = TRUE;
+  g_irqtest = true;
   g_nirqs   = 0;
   IE        = 0x82;    /* Enable interrupts */
 
@@ -207,13 +211,13 @@ void os_start(void)
   for(;;);
 }
 
-/************************************************************
+/************************************************************************
  * Name: irq_dispatch
  *
  * Description:
  *   "Fake" IRQ dispatcher
  *
- ***********************************************************/
+ ***********************************************************************/
 
 void irq_dispatch(int irq, FAR void *context)
 {
@@ -230,13 +234,13 @@ void irq_dispatch(int irq, FAR void *context)
     }
 }
 
-/************************************************************
+/************************************************************************
  * Name: up_dumpstack / up_dumpframe
  *
  * Description:
  *   "Fake" debug routines if needed.
  *
- ************************************************************/
+ ************************************************************************/
 
 void up_dumpstack(void)
 {
@@ -246,24 +250,24 @@ void up_dumpframe(FAR struct xcptcontext *context)
 {
 }
 
-/************************************************************
+/************************************************************************
  * Name: up_ledinit, up_ledon, up_ledoff
  *
  * Description:
  *   "Fake" LED routines if needed
  *
- ************************************************************/
+ ************************************************************************/
 
 void up_ledinit(void)
 {
 }
 
-void up_ledon(ubyte led)
+void up_ledon(uint8_t led)
 {
   led;
 }
 
-void up_ledoff(ubyte led)
+void up_ledoff(uint8_t led)
 {
   led;
 }

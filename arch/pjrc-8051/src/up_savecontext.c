@@ -1,7 +1,7 @@
 /**************************************************************************
  * up_savecontext.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Gregory Nutt nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -38,7 +38,7 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <nuttx/irq.h>
 #include "up_internal.h"
 
@@ -84,13 +84,13 @@
  *
  **************************************************************************/
 
-static void up_savestack(FAR struct xcptcontext *context, ubyte tos)
+static void up_savestack(FAR struct xcptcontext *context, uint8_t tos)
 {
   /* Copy the current stack frame from internal RAM to XRAM. */
 
-  ubyte nbytes     = tos - (STACK_BASE-1);
-  NEAR ubyte *src  = (NEAR ubyte*)STACK_BASE;
-  FAR  ubyte *dest = context->stack;
+  uint8_t nbytes     = tos - (STACK_BASE-1);
+  NEAR uint8_t *src  = (NEAR uint8_t*)STACK_BASE;
+  FAR  uint8_t *dest = context->stack;
 
   context->nbytes = nbytes;
   while (nbytes--)
@@ -116,13 +116,13 @@ static void up_savestack(FAR struct xcptcontext *context, ubyte tos)
  *
  **************************************************************************/
 
-static void up_saveregs(FAR struct xcptcontext *context, ubyte tos)
+static void up_saveregs(FAR struct xcptcontext *context, uint8_t tos)
 {
   /* Copy the irq register save area into the TCB */
 
-  FAR ubyte *src  = g_irqregs;
-  FAR ubyte *dest = context->regs;
-  ubyte nbytes    = REGS_SIZE;
+  FAR uint8_t *src  = g_irqregs;
+  FAR uint8_t *dest = context->regs;
+  uint8_t nbytes    = REGS_SIZE;
 
   while (nbytes--)
     {
@@ -154,7 +154,7 @@ static void up_saveregs(FAR struct xcptcontext *context, ubyte tos)
  *
  **************************************************************************/
 
-void up_saveregisters(FAR ubyte *regs) _naked
+void up_saveregisters(FAR uint8_t *regs) _naked
 {
  _asm
 	mov	a, b
@@ -210,7 +210,7 @@ void up_saveregisters(FAR ubyte *regs) _naked
  *
  **************************************************************************/
 
-ubyte up_savecontext(FAR struct xcptcontext *context) _naked
+uint8_t up_savecontext(FAR struct xcptcontext *context) _naked
 {
  _asm
 	/* Create the stack frame that we want when it is time to restore
