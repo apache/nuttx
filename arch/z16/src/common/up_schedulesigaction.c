@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_schedulesigaction.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -104,7 +104,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 {
   /* Refuse to handle nested signal actions */
 
-  dbg("tcb=0x%p sigdeliver=0x%06x\n", tcb, (uint32)sigdeliver);
+  dbg("tcb=0x%p sigdeliver=0x%06x\n", tcb, (uint32_t)sigdeliver);
 
   if (!tcb->xcp.sigdeliver)
     {
@@ -141,7 +141,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 
           else
             {
-              FAR uint32 *current_pc  = (FAR uint32*)&current_regs[REG_PC];
+              FAR uint32 *current_pc  = (FAR uint32_t*)&current_regs[REG_PC];
 
               /* Save the return address and interrupt state. These will be
                * restored by the signal trampoline after the signals have
@@ -156,7 +156,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
                * disabled
                */
 
-              *current_pc             = (uint32)up_sigdeliver;
+              *current_pc             = (uint32_t)up_sigdeliver;
               current_regs[REG_FLAGS] = 0;
 
               /* And make sure that the saved context in the TCB is the
@@ -174,7 +174,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 
       else
         {
-          FAR uint32 *saved_pc     = (FAR uint32*)&tcb->xcp.regs[REG_PC];
+          FAR uint32 *saved_pc     = (FAR uint32_t*)&tcb->xcp.regs[REG_PC];
 
           /* Save the return lr and cpsr and one scratch register
            * These will be restored by the signal trampoline after
@@ -189,7 +189,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          *saved_pc                = (uint32)up_sigdeliver;
+          *saved_pc                = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_FLAGS] = 0;
         }
 

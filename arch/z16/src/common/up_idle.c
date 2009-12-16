@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_idle.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
-static ubyte g_ledtoggle = 0;
+static uint8_t g_ledtoggle = 0;
 #endif
 
 /****************************************************************************
