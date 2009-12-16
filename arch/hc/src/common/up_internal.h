@@ -40,6 +40,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <stdint.h>
+ 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -96,19 +99,19 @@ typedef void (*up_vector_t)(void);
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-extern uint16 *current_regs;
+extern uint16_t *current_regs;
 
 /* This is the beginning of heap as provided from processor-specific logic.
  * This is the first address in RAM after the loaded program+bss+idle stack.
  * The end of the heap is CONFIG_DRAM_END
  */
 
-extern uint16 g_heapbase;
+extern uint16_t g_heapbase;
 
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 1
-extern uint32 g_userstack;
+extern uint32_t g_userstack;
 #endif
 
 /****************************************************************************
@@ -125,16 +128,16 @@ extern void up_boot(void);
 
 /* Context switching functions */
 
-extern void up_copystate(uint32 *dest, uint32 *src);
-extern void up_decodeirq(uint32 *regs);
+extern void up_copystate(uint32_t *dest, uint32_t *src);
+extern void up_decodeirq(uint32_t *regs);
 extern void up_irqinitialize(void);
-extern int  up_saveusercontext(uint32 *saveregs);
-extern void up_fullcontextrestore(uint32 *restoreregs) __attribute__ ((noreturn));
-extern void up_switchcontext(uint32 *saveregs, uint32 *restoreregs);
+extern int  up_saveusercontext(uint32_t *saveregs);
+extern void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
+extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
 /* Interrupt handling */
 
-extern uint16 *up_doirq(int irq, uint32 *regs);
+extern uint16_t *up_doirq(int irq, uint32_t *regs);
 extern void up_maskack_irq(int irq);
 
 /* Signal handling */
@@ -144,7 +147,7 @@ extern void up_sigdeliver(void);
 /* System timer initialization */
 
 extern void up_timerinit(void);
-extern int  up_timerisr(int irq, uint32 *regs);
+extern int  up_timerisr(int irq, uint32_t *regs);
 
 /* Debug output */
 

@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -92,7 +93,7 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
 
    if (!tcb->stack_alloc_ptr)
      {
-       tcb->stack_alloc_ptr = (uint32 *)malloc(stack_size);
+       tcb->stack_alloc_ptr = (uint32_t *)malloc(stack_size);
      }
 
    if (tcb->stack_alloc_ptr)
@@ -119,7 +120,7 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
 
        /* Save the adjusted stack values in the _TCB */
 
-       tcb->adj_stack_ptr  = (uint32*)top_of_stack;
+       tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
        tcb->adj_stack_size = size_of_stack;
 
        up_ledon(LED_STACKCREATED);

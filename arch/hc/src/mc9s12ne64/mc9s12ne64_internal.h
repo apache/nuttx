@@ -41,7 +41,9 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "up_internal.h"
 #include "chip.h"
@@ -124,8 +126,8 @@ EXTERN int hcs12_ethinitialize(int intf);
 
 struct spi_dev_s;
 enum spi_dev_e;
-EXTERN void  hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boolean selected);
-EXTERN ubyte hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN void  hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
 #undef EXTERN
 #if defined(__cplusplus)

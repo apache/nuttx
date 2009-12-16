@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <arch/irq.h>
@@ -71,10 +71,10 @@
  *
  ****************************************************************************/
 
-void modifyreg32(unsigned int addr, uint32 clearbits, uint32 setbits)
+void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits)
 {
   irqstate_t flags;
-  uint32     regval;
+  uint32_t   regval;
 
   flags   = irqsave();
   regval  = getreg32(addr);
