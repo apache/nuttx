@@ -78,7 +78,7 @@
 
 void up_initial_state(_TCB *tcb)
 {
-  uint32 *reg32           = (uint32_t*)tcb->xcp.regs;
+  uint32_t *reg32          = (uint32_t*)tcb->xcp.regs;
 
   /* Initialize the initial exception register context structure */
 

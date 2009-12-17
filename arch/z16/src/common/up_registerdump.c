@@ -76,7 +76,7 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_registerdump(void)
 {
-  FAR uint32 *regs32 = (FAR uint32_t*)current_regs;
+  FAR uint32_t *regs32 = (FAR uint32_t*)current_regs;
   lldbg("R0 :%08x R1 :%08x R2 :%08x R3 :%08x "
         "R4 :%08x R5 :%08x R6 :%08x R7 :%08x\n"
         regs32[REG_R0/2],  regs32[REG_R1/2], regs32[REG_R2/2], regs32[REG_R3/2],

@@ -23,7 +23,7 @@ int irq_attach(int irq, xcpt_t isr)
 	for (;;);
 }
 
-uint32 *up_doirq(int irq, uint32_t *regs)
+uint32_t *up_doirq(int irq, uint32_t *regs)
 {
 	up_lowputc('I');
 	up_lowputc('\n');

@@ -73,7 +73,7 @@
 #if defined(NXFLAT_DUMP_READDATA)
 static inline void nxflat_dumpreaddata(char *buffer, int buflen)
 {
-  uint32 *buf32 = (uint32_t*)buffer;
+  uint32_t *buf32 = (uint32_t*)buffer;
   int i;
   int j;
 
