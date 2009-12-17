@@ -83,7 +83,7 @@ void up_sigdeliver(void)
 #ifndef CONFIG_DISABLE_SIGNALS
   FAR _TCB  *rtcb = (_TCB*)g_readytorun.head;
   chipreg_t regs[XCPTCONTEXT_REGS];
-  FAR uint32 *regs32 = (FAR uint32_t*)regs;
+  FAR uint32_t *regs32 = (FAR uint32_t*)regs;
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
