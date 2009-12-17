@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stddef.h>
 #include <debug.h>
 
 #include <nuttx/nxglib.h>
@@ -145,7 +146,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
   FAR NXF_PIXEL_T *dptr;
   FAR const uint8_t *sptr;
   uint8_t bmbyte;
-  uint8_t bmbit;
+  int bmbit;
   int row;
   int col;
   int bmndx;

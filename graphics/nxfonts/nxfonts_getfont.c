@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stddef.h>
 #include <debug.h>
 
 #include <nuttx/nxfonts.h>
@@ -136,8 +137,8 @@ FAR const struct nx_font_s *nxf_getfontset(void)
 
 FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch)
 {
-  FAR const struct nx_fontset_s *set = nxf_getglyphset(ch);
-  FAR struct nx_fontbitmap_s *bm = NULL;
+  FAR const struct nx_fontset_s    *set = nxf_getglyphset(ch);
+  FAR const struct nx_fontbitmap_s *bm  = NULL;
 
   if (set)
     {

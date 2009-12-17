@@ -94,6 +94,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch)
     {
       wnd->cb->kbdin(wnd, nch, ch, wnd->arg);
     }
+  return OK;
 }
 
 #endif /* CONFIG_NX_KBD */

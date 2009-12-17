@@ -194,6 +194,7 @@ int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
             }
         }
     }
+  return OK;
 }
 
 #endif /* CONFIG_NX_MOUSE */

@@ -1000,5 +1000,10 @@
 	* Changed ALL references to non-standard fixed-size types (like uint32,
 	  ubyte, etc.) to standard types (like uint32_t, uint8_t, etc.) from
 	  stdint.h.  Use type bool and {true, false} from stdbool.  This effected
-	  most of the files in the system!
+	  most of the files in the system!  Almost all configurations have been
+	  re-built and many have been re-verified in order to get confidence in
+	  these changes.
+	* graphics/ and examples/nx - Fix numerous build errors that have been
+	  introduced lately.  NXGL has suffered some bit-rot from not being used
+	  in some of the most recent ports.
 
