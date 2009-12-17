@@ -39,8 +39,13 @@
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS	= 
+CSRCS	= nx_main.c nx_events.c nx_kbdin.c
+ifeq ($(CONFIG_NX_MULTIUSER),y)
+CSRCS	+= nx_server.c
+endif
+
 COBJS	= $(CSRCS:.c=$(OBJEXT))
+
 
 SRCS	= $(ASRCS) $(CSRCS)
 OBJS	= $(AOBJS) $(COBJS)
