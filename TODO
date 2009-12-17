@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 13, 2009)
+NuttX TODO List (Last updated December 17, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -7,7 +7,7 @@ NuttX TODO List (Last updated December 13, 2009)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (13)  Network (net/, netutils/)
+ (14)  Network (net/, netutils/)
   (4)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
@@ -31,7 +31,7 @@ NuttX TODO List (Last updated December 13, 2009)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
   (8)  z80/z8/ez80 (arch/z80/)
-  (8)  z16 (arch/z16/)
+  (9)  z16 (arch/z16/)
   (0)  mc68hc1x (arch/hc)
 
 o Task/Scheduler (sched/)
@@ -266,6 +266,12 @@ o Network Utilities (netutils/)
                and overwritten by ARP packets if the destination IP has not been mapped to a MAC."
   Status:      Open
   Priority:    Medium
+
+  Description: If the network is enabled, but THTTPD is not configured, it spews out lots
+               of pointless warnings.  This is kind of annoying and unprofessional; needs to
+               be fixed someday.
+  Status:      Open.  An annoyance, but not a real problem.
+  Priority:    Low
 
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
@@ -980,6 +986,17 @@ o z16 (arch/z16)
   Description: Upgrade to the ZDS-II ZNEO 4.11.1 toolchain
   Status:      Open
   Priority:    Low
+
+  Description: The file drivers/mmcsd/mmcsd_sdio.c generates an internal compiler
+               error like:
+ 
+               mmcsd\mmcsd_sdio.c
+               Internal Error(0503) On line 2504 of "MMCSD\MMCSD_SDIO.C"
+                   File <c3>, Args(562,46)
+
+  Status:     Open.  Recommended workaround: remove mmcsd_sdio.c from
+              drivers/mmcsd/Make.defs.  There is no SDIO support for the Z16 anyway
+  Priority:   Low
 
 o mc68hc1x (arch/hc)
   ^^^^^^^^^^^^^^^^^^
