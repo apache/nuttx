@@ -99,7 +99,7 @@ static int     wdt_open(struct file *filep);
 static int     wdt_close(struct file *filep);
 static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen);
 static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen);
-static int     wdt_ioctl(struct file *filep, int cmd, uint32_t arg);
+static int     wdt_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
 
 /**************************************************************************
  * Private Data
@@ -288,7 +288,7 @@ static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen)
  * Name: wdt_ioctl
  **************************************************************************/
 
-static int wdt_ioctl(struct file *filep, int cmd, uint32_t arg)
+static int wdt_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 {
   dbg("ioctl Call: cmd=0x%x arg=0x%x", cmd, arg);
 
