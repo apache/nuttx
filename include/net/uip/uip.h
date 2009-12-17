@@ -214,7 +214,7 @@ struct uip_driver_s;       /* Forward reference */
 struct uip_callback_s
 {
   FAR struct uip_callback_s *flink;
-  uint16_t (*event)(struct uip_driver_s *dev, void *pvconn, void *pvpriv, uint1_t flags);
+  uint16_t (*event)(struct uip_driver_s *dev, void *pvconn, void *pvpriv, uint16_t flags);
   void *priv;
   uint16_t flags;
 };
