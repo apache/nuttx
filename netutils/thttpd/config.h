@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NETUTILS_THTTPD_VERSION_H
-#define __NETUTILS_THTTPD_VERSION_H
+#ifndef __NETUTILS_THTTPD_CONFIG_H
+#define __NETUTILS_THTTPD_CONFIG_H
 
 /****************************************************************************
  * Included files
@@ -249,5 +249,5 @@
 #  endif
 #endif  /* Dependencies not provided */
 
-#endif /* __NETUTILS_THTTPD_VERSION_H */
+#endif /* __NETUTILS_THTTPD_CONFIG_H */
 

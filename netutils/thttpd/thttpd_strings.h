@@ -34,6 +34,9 @@
  *
  ****************************************************************************/
 
+#ifndef __NETUTILS_THTTPD_THTTPD_STRINGS_H
+#define __NETUTILS_THTTPD_THTTPD_STRINGS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -117,3 +120,4 @@ extern void httpd_strencode(char *to, int tosize, char *from);
 #endif
 
 #endif /* CONFIG_THTTPD */
+#endif /* __NETUTILS_THTTPD_THTTPD_STRINGS_H */
