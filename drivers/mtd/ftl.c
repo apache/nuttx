@@ -512,7 +512,7 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
       dev->rwb.nblocks     = dev->geo.neraseblocks * dev->blkper;
       dev->rwb.dev         = (FAR void *)dev;
 
-#ifdef defined(CONFIG_FS_WRITABLE) && defined(CONFIG_FS_WRITEBUFFER)
+#if defined(CONFIG_FS_WRITABLE) && defined(CONFIG_FS_WRITEBUFFER)
       dev->rwb.wrmaxblocks = dev->blkper;
       dev->rwb.wrflush     = ftl_flush;
 #endif
