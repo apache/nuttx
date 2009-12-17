@@ -194,9 +194,11 @@ int user_start(int argc, char *argv[])
     }
 #endif
 
+#ifdef CONFIG_NET_TCP
   printf("Starting webserver\n");
   httpd_init();
   httpd_listen();
+#endif
 
   while(1)
     {

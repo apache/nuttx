@@ -1875,10 +1875,10 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
       putreg32(pbuf, desc);
       desc += sizeof(uint32_t);
 
-      putreg(0, pbuf);
+      putreg32(0, pbuf);
       pbuf += EIM_PACKET_BYTES;
 
-      putreg(0, pbuf);
+      putreg32(0, pbuf);
       pbuf += sizeof(uint32_t); /* Ether Module's "Buffer Usage Word" */
   }
 
