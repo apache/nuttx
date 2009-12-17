@@ -172,7 +172,9 @@ static int     mmcsd_verifystate(FAR struct mmcsd_state_s *priv,
 
 /* Transfer helpers *********************************************************/
 
+#ifdef CONFIG_FS_WRITABLE
 static bool    mmcsd_wrprotected(FAR struct mmcsd_state_s *priv);
+#endif
 static int     mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
                  sdio_eventset_t failevents, uint32_t timeout);
 static int     mmcsd_transferready(FAR struct mmcsd_state_s *priv);
@@ -975,6 +977,7 @@ static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32_t state)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_WRITABLE
 static bool mmcsd_wrprotected(FAR struct mmcsd_state_s *priv)
 {
   /* Check if the card is locked (priv->locked) or write protected either (1)
@@ -985,6 +988,7 @@ static bool mmcsd_wrprotected(FAR struct mmcsd_state_s *priv)
 
   return (priv->wrprotect || priv->locked || SDIO_WRPROTECTED(priv->dev));
 }
+#endif
 
 /****************************************************************************
  * Name: mmcsd_eventwait
@@ -1436,6 +1440,7 @@ static ssize_t mmcsd_reload(FAR void *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_WRITABLE
 static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
                                  FAR const uint8_t *buffer, off_t startblock)
 {
@@ -1535,6 +1540,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   return 1;
 }
+#endif
 
 /****************************************************************************
  * Name: mmcsd_writemultiple
@@ -1544,6 +1550,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_WRITABLE
 static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
                                    FAR const uint8_t *buffer, off_t startblock,
                                    size_t nblocks)
@@ -1686,6 +1693,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   return nblocks;
 }
+#endif
 
 /****************************************************************************
  * Name: mmcsd_flush

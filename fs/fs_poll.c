@@ -279,7 +279,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
   WDOG_ID wdog;
   sem_t sem;
-  int count;
+  int count = 0;
   int ret;
 
   sem_init(&sem, 0, 0);
