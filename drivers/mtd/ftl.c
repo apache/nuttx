@@ -292,7 +292,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd = MTD_BWRITE(dev->mtd, alignedblock, dev->blkper, buffer);
       if (nxfrd != dev->blkper)
         {
-          fdbg("Write erase block %d failed: %d\n", , alignedblock, nxfrd);
+          fdbg("Write erase block %d failed: %d\n", alignedblock, nxfrd);
           return -EIO;
         }
 
