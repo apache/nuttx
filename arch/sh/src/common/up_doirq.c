@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdin.h>
+#include <stdint.h>
 #include <assert.h>
 
 #include <nuttx/irq.h>
