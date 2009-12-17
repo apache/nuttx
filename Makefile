@@ -71,6 +71,7 @@ ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR)
 
 NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(ADDON_DIRS)
 FSDIRS		= fs drivers binfmt
+CONTEXTDIRS	=
 
 ifeq ($(CONFIG_NET),y)
 NONFSDIRS	+= net netutils
@@ -78,6 +79,7 @@ endif
 
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS	+= graphics
+CONTEXTDIRS	+= graphics
 endif
 
 # CLEANDIRS are the directories that will clean in.  These are
@@ -189,6 +191,9 @@ endif
 dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip
 
 context: check_context include/nuttx/config.h dirlinks
+	@for dir in $(CONTEXTDIRS) ; do \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context ; \
+	done
 
 clean_context:
 	@rm -f include/nuttx/config.h

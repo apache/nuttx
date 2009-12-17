@@ -86,7 +86,7 @@ VPATH		= nxglib:nxbe:nxsu:nxtk:nxfonts
 endif
 
 all:	mklibgraphics
-.PHONY : depend clean distclean mklibgraphics gensources gen1bppsources \
+.PHONY : context depend clean distclean mklibgraphics gensources gen1bppsources \
 	 gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource \
 	 gen32bppsources
 
@@ -138,6 +138,8 @@ mklibgraphics: gensources $(BIN)
 
 depend: .depend
 
+context: gensources
+
 clean:
 	@make -C nxglib -f Makefile.sources clean TOPDIR=$(TOPDIR)
 	@make -C nxfonts -f Makefile.sources clean TOPDIR=$(TOPDIR)
@@ -150,3 +152,4 @@ distclean: clean
 	@rm -f Make.dep .depend
 
 -include Make.dep
+
