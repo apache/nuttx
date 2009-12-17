@@ -41,10 +41,10 @@
  * Included Files
  ************************************************************************************/
 
-#ifdef __ASSEMBLY__
+#include <nuttx/config.h>
+#ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
-#include <nuttx/config.h>
 #include <arch/irq.h>
 #include "common/up_internal.h"
 
