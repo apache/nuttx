@@ -658,12 +658,13 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
       pktlen = (int)(regval & 0x0000ffff);
       nllvdbg("Receiving packet, pktlen: %d\n", pktlen);
 
-      /* Check if the pktlen is valid.  It should be large enough to
-       * hold an Ethernet header and small enough to fit entirely in
-       * the I/O buffer.
+      /* Check if the pktlen is valid.  It should be large enough to hold
+       * an Ethernet header and small enough to fit entirely in the I/O
+       * buffer.  Six is subtracted to acount for the 2-byte length/type
+       * and 4 byte FCS that are not copied into the uIP packet.
        */
 
-      if (pktlen > CONFIG_NET_BUFSIZE || pktlen <= UIP_LLH_LEN)
+      if (pktlen > (CONFIG_NET_BUFSIZE + 6) || pktlen <= (UIP_LLH_LEN + 6))
         {
           int wordlen;
 
@@ -697,10 +698,10 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
 
       /* Read all of the whole, 32-bit values in the middle of the packet.
        * We've already read the length (2 bytes) plus the first two bytes
-       * of data
+       * of data.
        */
 
-      for (bytesleft = pktlen - 4; bytesleft > 3; bytesleft -= 4, dbuf += 4)
+      for (bytesleft = pktlen - 4; bytesleft > 7; bytesleft -= 4, dbuf += 4)
         {
           /* Transfer a whole word to the user buffer.  Note, the user
            * buffer may be un-aligned.
@@ -709,36 +710,38 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
           *(uint32_t*)dbuf = lm3s_ethin(priv, LM3S_MAC_DATA_OFFSET);
         }
 
-      /* Handle the last, partial word in the FIFO */
+      /* Handle the last, partial word in the FIFO (0-3 bytes) and discard
+       * the 4-byte FCS.
+       */
 
-      if (bytesleft > 0)
+      for (; bytesleft > 0; bytesleft -= 4)
         {
-          /* Read the last word */
+          /* Read the last word.  And transfer all but the last four
+           * bytes of the FCS into the user buffer.
+           */
 
           regval = lm3s_ethin(priv, LM3S_MAC_DATA_OFFSET);
           switch (bytesleft)
             {
-              case 0:
               default:
                 break;
 
-              case 3:
+              case 7:
                 dbuf[2] = (regval >> 16) & 0xff;
-              case 2:
+              case 6:
                 dbuf[1] = (regval >> 8) & 0xff;
-              case 1:
+              case 5:
                 dbuf[0] = regval & 0xff;
                 break;
             }
         }
-
-      lm3s_dumppacket("Received packet", priv->ld_dev.d_buf, pktlen);
 
       /* Pass the packet length to uIP MINUS 2 bytes for the length and
        * 4 bytes for the FCS.
        */
 
       priv->ld_dev.d_len = pktlen - 6;
+      lm3s_dumppacket("Received packet", priv->ld_dev.d_buf, priv->ld_dev.d_len);
 
       /* We only accept IP packets of the configured type and ARP packets */
 
