@@ -40,14 +40,8 @@ ifeq ($(WINTOOL),y)
 INCDIROPT	= -w
 endif
 
-COMPILER	= ${shell basename $(CC)}
-USRINCLUDES	= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$CC" $(TOPDIR)/pcode/include $(TOPDIR)/pcode/insn/include}
-ifneq ($(ARCHSTDINCLUDES),)
-INCLUDES        = $(ARCHSTDINCLUDES) $(USRINCLUDES)
-else
-INCLUDES        = $(ARCHINCLUDES) $(USRINCLUDES)
-endif
-CFLAGS          = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
+CFLAGS	+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/pcode/include }
+CFLAGS	+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/pcode/insn/include}
 
 ASRCS	= 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))

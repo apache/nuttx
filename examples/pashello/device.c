@@ -69,7 +69,9 @@ static const struct file_operations hello_fops =
   0,             /* write */
   0,             /* seek */
   0,             /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
   0              /* poll */
+#endif
 };
 
 /****************************************************************************
