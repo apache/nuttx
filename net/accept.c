@@ -158,10 +158,9 @@ static int accept_interrupt(struct uip_conn *listener, struct uip_conn *conn)
       pstate->acpt_newconn     = conn;
       pstate->acpt_result      = OK;
 
-      /* Set a reference of one on the new connection */
+      /* There should be a reference of one on the new connection */
 
-      DEBUGASSERT(conn->crefs == 0);
-      conn->crefs              = 1;
+      DEBUGASSERT(conn->crefs == 1);
 
       /* Wake-up the waiting caller thread */
 
