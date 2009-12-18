@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 17, 2009)
+NuttX TODO List (Last updated December 18, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -32,7 +32,7 @@ NuttX TODO List (Last updated December 17, 2009)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
   (8)  z80/z8/ez80 (arch/z80/)
   (9)  z16 (arch/z16/)
-  (0)  mc68hc1x (arch/hc)
+  (1)  mc68hc1x (arch/hc)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1000,3 +1000,10 @@ o z16 (arch/z16)
 
 o mc68hc1x (arch/hc)
   ^^^^^^^^^^^^^^^^^^
+
+  Description: There is no script for building in banked mode (more correctly, there
+               is a script, but logic inside the script has not yet been implemented).
+               It would be necessary to implement banked mode to able to access more
+               the 48Kb of FLASH.
+  Status:      Open.
+  Priority:    Medium/Low.
