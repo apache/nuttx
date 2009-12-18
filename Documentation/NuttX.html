@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 17, 2009</p>
+      <p>Last Updated: December 18, 2009</p>
     </td>
   </tr>
 </table>
@@ -1606,7 +1606,7 @@ buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.0 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* arch/hc: Adding framework to support m68hc11/12
 	* configs/demo9s12ne64: Configuration to support Freescale DEMO9S12NE64
@@ -1632,10 +1632,24 @@ nuttx-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* graphics/ and examples/nx - Fix numerous build errors that have been
 	  introduced lately.  NXGL has suffered some bit-rot from not being used
 	  in some of the most recent ports.
+	* The misc/pascal NuttX add-on package has been updated to use the new
+	  standard types from stdint.h and stdbool.h and re-integrated with NuttX.
+	  The released pascal-2.0 will be the first version that contains the
+	  compatible changes.
+	* arch/arm/src/lm3s/lm3s_ethernet.c - Fixed an important bug in the LM3S
+	  ethernet driver:  If full packet is received, the packet-too-big check
+	  will fail because it needs to subtract 6 from the packet size (to
+	  account for the 2-byte packet length and the 4-byte packet FCS in the
+	  FIFO).
+	* net/accept.c - Fixed a bad assertion (only happens when debug is enabled).
 
-pascal-2010.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+pascal-2.0 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-buildroot-2010.1 2010-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
+	* Updated to use standard C99 types in stdint.h and
+	  stdbool.h.  This change was necessary for compatibility
+	  with NuttX-5.0.
+
+buildroot-1.8 2010-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 
 	* configs/cortexm3-defconfig-4.3.3: Added support for NuttX NXFLAT
 	  tools.
