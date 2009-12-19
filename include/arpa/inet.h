@@ -76,7 +76,7 @@
 #endif
 
 #define NTOHS(hs) HTONS(hs)
-#define NTOHL(hl) NTOHL(hl)
+#define NTOHL(hl) HTONL(hl)
 
 /****************************************************************************
  * Public Function Prototypes

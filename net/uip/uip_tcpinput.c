@@ -328,16 +328,28 @@ found:
 
   if ((pbuf->flags & TCP_ACK) && uip_outstanding(conn))
     {
-      /* Temporary variables. */
+      uint32_t seqno;
+      uint32_t ackno;
 
-      uint8_t acc32[4];
-      uip_add32(conn->snd_nxt, conn->len, acc32);
+      /* The next sequence number is equal to the current sequence
+       * number (snd_nxt) plus the size of the oustanding data (len).
+       */
 
-      if (memcmp(pbuf->ackno, acc32, 4) == 0)
+      seqno = uip_tcpaddsequence(conn->snd_nxt, conn->len);
+
+      /* Check if all of the outstanding bytes have been acknowledged. For
+       * a "generic" send operation, this should always be true.  However,
+       * the send() API sends data ahead when it can without waiting for
+       * the ACK.  In this case, the 'ackno' could be less than then the
+       * new sequence number.
+       */
+
+      ackno = uip_tcpgetsequence(pbuf->ackno);
+      if (ackno <= seqno)
         {
           /* Update sequence number. */
 
-          memcpy(conn->snd_nxt, acc32, 4);
+          uip_tcpsetsequence(conn->snd_nxt, seqno);
 
           /* Do RTT estimation, unless we have done retransmissions. */
 

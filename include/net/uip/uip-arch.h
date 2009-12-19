@@ -295,28 +295,19 @@ typedef int (*uip_poll_callback_t)(struct uip_driver_s *dev);
 extern int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback);
 extern int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec);
 
-/* By defining UIP_ARCH_CHKSUM, the architecture can replace the following
- * functions with hardware assisted solutions.
+/* By defining UIP_ARCH_CHKSUM, the architecture can replace up_incr32
+ * with hardware assisted solutions.
  */
 
 /* Carry out a 32-bit addition.
  *
  * op32 - A pointer to a 4-byte array representing a 32-bit
  *   integer in network byte order (big endian).  This value may not
- *   be word aligned.
+ *   be word aligned. The value pointed to by op32 is modified in place
  *
- *   For uip_incr32, the value pointed to by op32 is modified in place
- *   For uip_add32, the value pointed to by op32 is unmodified 
-*
  * op16 - A 16-bit integer in host byte order.
- *
- * sum - The location to return the result (32-bit, network byte order,
- *   possibly unaligned).
- *
- *   uip_add32 only.
  */
 
-extern void uip_add32(const uint8_t *op32, uint16_t op16, uint8_t *sum);
 extern void uip_incr32(uint8_t *op32, uint16_t op16);
 
 /* Calculate the Internet checksum over a buffer.

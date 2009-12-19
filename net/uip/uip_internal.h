@@ -110,6 +110,13 @@ EXTERN struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
 EXTERN struct uip_conn *uip_nexttcpconn(struct uip_conn *conn);
 EXTERN struct uip_conn *uip_tcplistener(uint16_t portno);
 EXTERN struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
+
+/* Defined in uip_tcpseqno.c ************************************************/
+
+EXTERN void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value);
+EXTERN uint32_t uip_tcpgetsequence(FAR uint8_t *seqno);
+EXTERN uint32_t uip_tcpaddsequence(FAR uint8_t *seqno, uint16_t len);
+EXTERN void uip_tcpinitsequence(FAR uint8_t *seqno);
 EXTERN void uip_tcpnextsequence(void);
 
 /* Defined in uip_tcppoll.c *************************************************/

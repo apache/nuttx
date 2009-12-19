@@ -85,10 +85,6 @@ static dq_queue_t g_active_tcp_connections;
 
 static uint16_t g_last_tcp_port;
 
-/* g_tcp_sequence[] is used to generate TCP sequence numbers */
-
-static uint8_t g_tcp_sequence[4];
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -469,7 +465,7 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
       uip_ipaddr_copy(conn->ripaddr, uip_ip4addr_conv(buf->srcipaddr));
       conn->tcpstateflags = UIP_SYN_RCVD;
 
-      memcpy(conn->snd_nxt, g_tcp_sequence, 4);
+      uip_tcpinitsequence(conn->snd_nxt);
       conn->len           = 1;
 
       /* rcv_nxt should be the seqno from the incoming packet + 1. */
@@ -489,33 +485,6 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
       dq_addlast(&conn->node, &g_active_tcp_connections);
     }
   return conn;
-}
-
-/****************************************************************************
- * Name: uip_tcpnextsequence()
- *
- * Description:
- *   Increment the TCP/IP sequence number
- *
- * Assumptions:
- *   This function is called from the interrupt level
- *
- ****************************************************************************/
-
-void uip_tcpnextsequence(void)
-{
-  /* This inplements a byte-by-byte big-endian increment */
-
-  if (++g_tcp_sequence[3] == 0)
-    {
-      if (++g_tcp_sequence[2] == 0)
-        {
-          if (++g_tcp_sequence[1] == 0)
-            {
-              ++g_tcp_sequence[0];
-            }
-        }
-    }
 }
 
 /****************************************************************************
@@ -626,7 +595,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   /* Initialize and return the connection structure, bind it to the port number */
 
   conn->tcpstateflags = UIP_SYN_SENT;
-  memcpy(conn->snd_nxt, g_tcp_sequence, 4);
+  uip_tcpinitsequence(conn->snd_nxt);
 
   conn->initialmss = conn->mss = UIP_TCP_MSS;
   conn->len        = 1;    /* TCP length of the SYN is one. */

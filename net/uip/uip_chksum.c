@@ -148,7 +148,7 @@ static uint16_t uip_icmp6chksum(struct uip_driver_s *dev)
 /* Calculate the Internet checksum over a buffer. */
 
 #if !UIP_ARCH_ADD32
-static void uip_carry32(uint8_t *sum, uint16_t op16)
+static inline void uip_carry32(uint8_t *sum, uint16_t op16)
 {
   if (sum[2] < (op16 >> 8))
     {
@@ -171,17 +171,6 @@ static void uip_carry32(uint8_t *sum, uint16_t op16)
             }
         }
     }
-}
-
-void uip_add32(const uint8_t *op32, uint16_t op16, uint8_t *sum)
-{
-  /* op32 and the sum are in network order (big-endian); op16 is host order. */
-
-  sum[3] = op32[3] + (op16 & 0xff);
-  sum[2] = op32[2] + (op16 >> 8);
-  sum[1] = op32[1];
-  sum[0] = op32[0];
-  uip_carry32(sum, op16);
 }
 
 void uip_incr32(uint8_t *op32, uint16_t op16)

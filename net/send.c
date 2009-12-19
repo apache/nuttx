@@ -88,54 +88,6 @@ struct send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: send_getisn
- *
- * Description:
- *   Get the next initial sequence number from the connection stucture
- *
- * Parameters:
- *   conn     The connection structure associated with the socket
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Running at the interrupt level
- *
- ****************************************************************************/
-
-static uint32_t send_getisn(struct uip_conn *conn)
-{
-   uint32_t tmp;
-   memcpy(&tmp, conn->snd_nxt, 4);
-   return ntohl(tmp);
-}
-
-/****************************************************************************
- * Function: send_getackno
- *
- * Description:
- *   Extract the current acknowledgement sequence number from the incoming packet
- *
- * Parameters:
- *   dev - The sructure of the network driver that caused the interrupt
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Running at the interrupt level
- *
- ****************************************************************************/
-
-static uint32_t send_getackno(struct uip_driver_s *dev)
-{
-   uint32_t tmp;
-   memcpy(&tmp, TCPBUF->ackno, 4);
-   return ntohl(tmp);
-}
-
-/****************************************************************************
  * Function: send_timeout
  *
  * Description:
@@ -216,7 +168,7 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
        * is the number of bytes to be acknowledged.
        */
 
-      pstate->snd_acked = send_getackno(dev) - pstate->snd_isn;
+      pstate->snd_acked = uip_tcpgetsequence(TCPBUF->ackno) - pstate->snd_isn;
       nllvdbg("ACK: acked=%d sent=%d buflen=%d\n",
               pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
@@ -259,7 +211,7 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
     }
 
    /* Check if the outgoing packet is available (it may have been claimed
-    * by a sendto interrupt serving a different thread.
+    * by a sendto interrupt serving a different thread).
     */
 
 #if 0 /* We can't really support multiple senders on the same TCP socket */
@@ -288,6 +240,10 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
         {
           sndlen = uip_mss(conn);
         }
+
+      /* Set the sequence number for this packet */
+
+      uip_tcpsetsequence(conn->snd_nxt, pstate->snd_sent + pstate->snd_isn);
 
       /* Then send that amount of data */
 
@@ -459,7 +415,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
         {
           /* Get the initial sequence number that will be used */
 
-          state.snd_isn         = send_getisn(conn); /* Initial sequence number */
+          state.snd_isn         = uip_tcpgetsequence(conn->snd_nxt);
 
           /* Update the initial time for calculating timeouts */
 
