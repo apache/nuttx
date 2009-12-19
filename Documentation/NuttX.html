@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 18, 2009</p>
+      <p>Last Updated: December 19, 2009</p>
     </td>
   </tr>
 </table>
@@ -1642,6 +1642,13 @@ nuttx-5.0 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  account for the 2-byte packet length and the 4-byte packet FCS in the
 	  FIFO).
 	* net/accept.c - Fixed a bad assertion (only happens when debug is enabled).
+	* net/send.c net/uip/uip_tcpseqno.c - Fixed a critical error in the TCP/IP
+	  logic.  The NuttX port of uIP imcludes logic to send data ahead without
+	  waiting for ACKs from the recipient; this greatly improves throughput.
+	  However, the packet sequence number was not being updated correctly and,
+	  as a result, packets were not be ACKed by the recipient and transfers
+	  would sometimes stall.  This is a very important bug fix (in fact, I
+	  don't understand how TCP/IP worked at all without this fix???)
 
 pascal-2.0 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
