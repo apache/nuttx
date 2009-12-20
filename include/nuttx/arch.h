@@ -460,7 +460,7 @@ EXTERN int up_prioritize_irq(int irq, int priority);
  ***************************************************************************/
 
 EXTERN void up_mdelay(unsigned int milliseconds);
-EXTERN void up_udelay(unsigned int microseconds);
+EXTERN void up_udelay(useconds_t microseconds);
 
 /****************************************************************************
  * Name: up_fbinitialize, up_fbuninitialize, up_fbgetvplane
