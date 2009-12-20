@@ -46,6 +46,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
 #include <debug.h>
@@ -74,10 +75,11 @@
 
 /* Timing (all in units of microseconds) */
 
-#define MMCSD_POWERUP_DELAY     250        /* 74 clock cycles @ 400KHz = 185uS */
-#define MMCSD_IDLE_DELAY        (50*1000)  /* Short delay to allow change to IDLE state */
-#define MMCSD_DSR_DELAY         (100*1000) /* Time to wait after setting DSR */
-#define MMCSD_CLK_DELAY         (500*1000) /* Delay after changing clock speeds */
+#define MMCSD_
+#define MMCSD_POWERUP_DELAY     ((useconds_t)250)    /* 74 clock cycles @ 400KHz = 185uS */
+#define MMCSD_IDLE_DELAY        ((useconds_t)50000)  /* Short delay to allow change to IDLE state */
+#define MMCSD_DSR_DELAY         ((useconds_t)100000) /* Time to wait after setting DSR */
+#define MMCSD_CLK_DELAY         ((useconds_t)500000) /* Delay after changing clock speeds */
 
 /* Data delays (all in units of milliseconds).
  *
@@ -905,7 +907,7 @@ static int mmcsd_getR1(FAR struct mmcsd_state_s *priv, FAR uint32_t *r1)
    * R1 card status register.
    */
 
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD13, priv->rca << 16);
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD13, (uint32_t)priv->rca << 16);
   ret = SDIO_RECVR1(priv->dev, MMCSD_CMD13, &localR1);
   if (ret == OK)
     {
@@ -2210,7 +2212,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   /* Select high speed MMC clocking (which may depend on the DSR setting) */
 
   SDIO_CLOCK(priv->dev, CLOCK_MMC_TRANSFER);
-  up_udelay( MMCSD_CLK_DELAY);
+  up_udelay(MMCSD_CLK_DELAY);
   return OK;
 }
 #endif
@@ -2294,7 +2296,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
    * mode.
    */
 
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD9, priv->rca << 16);
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD9, (uint32_t)priv->rca << 16);
   ret = SDIO_RECVR2(priv->dev, MMCSD_CMD9, csd);
   if (ret != OK)
     {
@@ -2308,7 +2310,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
    * card selected all of the time.
    */
 
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD7S, priv->rca << 16);
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD7S, (uint32_t)priv->rca << 16);
   ret = mmcsd_recvR1(priv, MMCSD_CMD7S);
   if (ret != OK)
     {

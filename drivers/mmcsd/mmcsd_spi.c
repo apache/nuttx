@@ -1570,7 +1570,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
               result = mmcsd_sendcmd(slot, &g_cmd55, 0);
               if (result == MMCSD_SPIR1_IDLESTATE || result == MMCSD_SPIR1_OK)
                 {
-                  result = mmcsd_sendcmd(slot, &g_acmd41, 1 << 30);
+                  result = mmcsd_sendcmd(slot, &g_acmd41, (uint32_t)1 << 30);
                   if (result == MMCSD_SPIR1_OK)
                     {
                       break;

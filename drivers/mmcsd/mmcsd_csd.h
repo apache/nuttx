@@ -283,7 +283,7 @@
 /* C_SIZE 62-73 Device size */
 
 #define MMCSD_CSD_CSIZE(csd) (((csd[6] & 3) << 10) | (csd[7] << 2) | (csd[8] >> 6))
-#define SD20_CSD_CSIZE(csd)  (((csd[7] & 0x3f) << 16) | (csd[8] << 8) | csd[9])
+#define SD20_CSD_CSIZE(csd)  ((((uint32_t)csd[7] & 0x3f) << 16) | (csd[8] << 8) | csd[9])
 
 /* VDD_R_CURR_MIN 59-61 = Max. read current at Vcc min */
 
