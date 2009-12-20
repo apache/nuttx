@@ -994,7 +994,7 @@ int cgi(httpd_conn *hc)
 
   /* Set up a semaphore to hold off the make THTTPD thread until the CGI
    * threads are configured (basically until the file descriptors are all
-   * dup'ed and can be closed by the main thread.
+   * dup'ed and can be closed by the main thread).
    */
 
   sem_init(&g_cgisem, 0, 0);
