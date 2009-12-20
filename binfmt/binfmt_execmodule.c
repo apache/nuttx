@@ -139,7 +139,7 @@ int exec_module(FAR const struct binary_s *bin, int priority)
   if (ret < 0)
     {
       err = errno;
-      dbg("task_init() failed: %d\n", err);
+      bdbg("task_init() failed: %d\n", err);
       goto errout_with_stack;
     }
 
@@ -163,7 +163,7 @@ int exec_module(FAR const struct binary_s *bin, int priority)
   if (ret < 0)
     {
       err = errno;
-      dbg("task_activate() failed: %d\n", err);
+      bdbg("task_activate() failed: %d\n", err);
       goto errout_with_stack;
     }
   return (int)pid;
@@ -182,7 +182,7 @@ errout_with_tcb:
   free(tcb);
 errout:
   errno = err;
-  dbg("returning errno: %d\n", err);
+  bdbg("returning errno: %d\n", err);
   return ERROR;
 }
 
