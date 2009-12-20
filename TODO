@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 18, 2009)
+NuttX TODO List (Last updated December 20, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -8,7 +8,7 @@ NuttX TODO List (Last updated December 18, 2009)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
  (14)  Network (net/, netutils/)
-  (4)  Network Utilities (netutils/)
+  (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
  (11)  File system/Generic drivers (fs/, drivers/)
@@ -25,7 +25,7 @@ NuttX TODO List (Last updated December 18, 2009)
   (2)  ARM/i.MX (arch/arm/src/imx/)
   (8)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
-  (3)  ARM/LM3S6918 (arch/arm/src/lm3s/)
+  (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (5)  ARM/STM32 (arch/arm/src/stm32/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
@@ -266,6 +266,15 @@ o Network Utilities (netutils/)
                and overwritten by ARP packets if the destination IP has not been mapped to a MAC."
   Status:      Open
   Priority:    Medium
+
+  Description: There are some lingering bugs in THTTPD, possibly race conditions.  When debug
+               is enabled, it works.  But with debug disabled, there are sometimes
+               mysterious hangs or crashes in the CGI.  Of course, this is hard to fix
+               when the problem goes away with debug output enabled (and also since
+               output from the CGI program is re-directed; you can redefine bdbg to
+               be lldbg in include/debug.h to get non-re-directed debug output).
+  Status:      Open
+  Priority:    High
 
   Description: If the network is enabled, but THTTPD is not configured, it spews out lots
                of pointless warnings.  This is kind of annoying and unprofessional; needs to
@@ -667,6 +676,12 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
                Windows dependencies needed to be quoted in the Make.dep files.
   Status:      Open
   Priority:    Low -- unless some dependency-related build issues is discovered.
+
+  Description: There are some lingering bugs in THTTPD, possibly race conditions.  This
+               is covered above under Network Utilities, but is duplicated here
+               to point out that the LM3S suffers from this bug.
+  Status:      Open
+  Priority:    High
 
 o ARM/STM32 (arch/arm/src/stm32/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
