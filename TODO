@@ -273,8 +273,11 @@ o Network Utilities (netutils/)
                when the problem goes away with debug output enabled (and also since
                output from the CGI program is re-directed; you can redefine bdbg to
                be lldbg in include/debug.h to get non-re-directed debug output).
-  Status:      Open
-  Priority:    High
+  Status:      Open.
+               UPDATE: I have found that increasing the size of the CGI program stack
+               from 1024 to 2048 (on the LM3S) eliminates the problem.  So the most
+               likely cause is probably a stack overflow, not a hard sofware bug.
+  Priority:    Probably Low
 
   Description: If the network is enabled, but THTTPD is not configured, it spews out lots
                of pointless warnings.  This is kind of annoying and unprofessional; needs to
@@ -680,8 +683,11 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
   Description: There are some lingering bugs in THTTPD, possibly race conditions.  This
                is covered above under Network Utilities, but is duplicated here
                to point out that the LM3S suffers from this bug.
-  Status:      Open
-  Priority:    High
+  Status:      Open.
+               UPDATE: I have found that increasing the size of the CGI program stack
+               from 1024 to 2048 (on the LM3S) eliminates the problem.  So the most
+               likely cause is probably a stack overflow, not a hard sofware bug.
+  Priority:    Probably Low
 
 o ARM/STM32 (arch/arm/src/stm32/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
