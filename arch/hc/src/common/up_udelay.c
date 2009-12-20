@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 #include <nuttx/arch.h>
 
 /****************************************************************************
@@ -84,7 +85,7 @@
  *
  ****************************************************************************/
 
-void up_udelay(unsigned int microseconds)
+void up_udelay(useconds_t microseconds)
 {
   volatile int i;
 
