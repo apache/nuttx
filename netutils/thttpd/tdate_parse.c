@@ -53,6 +53,13 @@
  * Private Types
  ****************************************************************************/
 
+#undef TDATE_PARSE_WORKS /* tdate_parse() doesn't work */
+#undef HAVE_DAY_OF_WEEK  /* Day of week not yet supported by NuttX */
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
 struct strlong
 {
   char *s;
@@ -63,6 +70,7 @@ struct strlong
  * Private Functions
  ****************************************************************************/
 
+#ifdef HAVE_DAY_OF_WEEK /* Day of week not yet supported by NuttX */
 static void pound_case(char *str)
 {
   for (; *str != '\0'; ++str)
@@ -73,12 +81,16 @@ static void pound_case(char *str)
         }
     }
 }
+#endif
 
+#ifdef HAVE_DAY_OF_WEEK /* Day of week not yet supported by NuttX */
 static int strlong_compare(const void *v1, const void *v2)
 {
   return strcmp(((struct strlong *)v1)->s, ((struct strlong *)v2)->s);
 }
+#endif
 
+#ifdef HAVE_DAY_OF_WEEK /* Day of week not yet supported by NuttX */
 static int strlong_search(char *str, struct strlong *tab, int n, long *lP)
 {
   int i, h, l, r;
@@ -109,8 +121,9 @@ static int strlong_search(char *str, struct strlong *tab, int n, long *lP)
         }
     }
 }
+#endif
 
-#if 0 /* Day of week not yet supported by NuttX */
+#ifdef HAVE_DAY_OF_WEEK /* Day of week not yet supported by NuttX */
 static int scan_wday(char *str_wday, long *tm_wdayP)
 {
   static struct strlong wday_tab[] = {
@@ -136,6 +149,7 @@ static int scan_wday(char *str_wday, long *tm_wdayP)
 }
 #endif /* Day of week not yet supported by NuttX */
 
+#ifdef TDATE_PARSE_WORKS
 static int scan_mon(char *str_mon, long *tm_monP)
 {
   static struct strlong mon_tab[] = {
@@ -164,14 +178,14 @@ static int scan_mon(char *str_mon, long *tm_monP)
   return strlong_search(str_mon, mon_tab,
                         sizeof(mon_tab) / sizeof(struct strlong), tm_monP);
 }
-
+#endif
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 time_t tdate_parse(char *str)
 {
-#if 0 // REVISIT -- doesn't work
+#ifdef TDATE_PARSE_WORKS /* REVISIT -- doesn't work */
   struct tm tm;
   char *cp;
   char str_mon[32];
@@ -181,7 +195,7 @@ time_t tdate_parse(char *str)
   int tm_min;
   int tm_sec;
   long tm_mon;
-#if 0 /* Day of week not yet supported by NuttX */
+#ifdef HAVE_DAY_OF_WEEK /* Day of week not yet supported by NuttX */
   char str_wday[32];
   long tm_wday;
 #endif
@@ -255,7 +269,7 @@ time_t tdate_parse(char *str)
       tm.tm_year = tm_year;
     }
 
-#if 0 /* Day of week not yet supported by NuttX */
+#ifdef HAVE_DAY_OF_WEEK /* Day of week not yet supported by NuttX */
   /* wdy, DD-mth-YY HH:MM:SS GMT */
   else if (sscanf(cp, "%400[a-zA-Z], %d-%400[a-zA-Z]-%d %d:%d:%d GMT",
                   str_wday, &tm_mday, str_mon, &tm_year, &tm_hour, &tm_min,
@@ -272,7 +286,7 @@ time_t tdate_parse(char *str)
     }
 #endif /* Day of week not yet supported by NuttX */
 
-#if 0 /* Day of week not yet supported by NuttX */
+#ifdef HAVE_DAY_OF_WEEK /* Day of week not yet supported by NuttX */
   /* wdy, DD mth YY HH:MM:SS GMT */
   else if (sscanf(cp, "%400[a-zA-Z], %d %400[a-zA-Z] %d %d:%d:%d GMT",
                   str_wday, &tm_mday, str_mon, &tm_year, &tm_hour, &tm_min,
@@ -289,7 +303,7 @@ time_t tdate_parse(char *str)
     }
 #endif /* Day of week not yet supported by NuttX */
 
-#if 0 /* Day of week not yet supported by NuttX */
+#ifdef HAVE_DAY_OF_WEEK /* Day of week not yet supported by NuttX */
   /* wdy mth DD HH:MM:SS GMT YY */
   else if (sscanf(cp, "%400[a-zA-Z] %400[a-zA-Z] %d %d:%d:%d GMT %d",
                   str_wday, str_mon, &tm_mday, &tm_hour, &tm_min, &tm_sec,
