@@ -109,7 +109,7 @@
                                    /* 0x00000280    Reserved */
 
 #define LPC313X_APB4_DMA_OFFSET       0x00000000 /* DMA */
-#define LPC313X_APB4_NAND_OFFSET      0x0000080  /* NAND FLASH Controller */
+#define LPC313X_APB4_NAND_OFFSET      0x00000800 /* NAND FLASH Controller */
                                    /* 0x00001000    Reserved */
 
 /************************************************************************************
