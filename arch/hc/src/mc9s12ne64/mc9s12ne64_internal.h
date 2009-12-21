@@ -42,8 +42,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#  include <stdbool.h>
+#endif
 
 #include "up_internal.h"
 #include "chip.h"
