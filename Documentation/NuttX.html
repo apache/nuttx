@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 19, 2009</p>
+      <p>Last Updated: December 21, 2009</p>
     </td>
   </tr>
 </table>
@@ -729,59 +729,76 @@
   </tr>
 </table>
 
-<p><b>nuttx-4.14</b>.
+<p><b>nuttx-5.0 Release Notes</b>:
 
 <p>
-  This 46<sup>th</sup> release of NuttX was made on December 2, 2009 and is available for download from the
+  This 47<sup>th</sup> release of NuttX was made on December 21, 2009 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The release extends the support for the STMicro STM32 microcontroller.
-  Minimal support for the STM3210E-EVAL development board based around the STM32F103ZET6
-  MCU was released in NuttX-0.4.12 and extended in Nuttx-0.4.13 to include initial USB support.
-  This completes the STM32F103ZET6 support and adds:
+  The previous NuttX release was 4.14.
+  The major revision number has been incremented to indicate that an
+  incompatibility with previous nuttx releases has been introduced.
+  This version adopts standard fixed width integer names as specified by the
+  ANSII C99 standard.
+  The core logic of NuttX is older than that standard and did not conform to it.
 </p>
 <p>
-  New Generic RTOS Features:
+  If you have applications running on nuttx-4.14, those applications should continue
+  to build and execute without problem on nuttx-5.0.
+  However, if you have device drivers or other OS-internal logic, you will probably
+  have to make some minor changes to your code to use this version.
+  Below is a summary of those changes:
   <ul>
-	<li>Added generic support that can be included in any block driver to provide
-	    read-ahead buffering and write buffering for improved driver performance.</li>
-    <li>Added a generic worker thread that can used to defer processing from an
-	    interrupt to a task.</li>
-    <li>Defined a generic SD/SDIO interface can can be bound to a MMC/SD or SDIO
-	    driver to orovide SDIO support.</li>
-    <li>Implemented a an SDIO-based MMC/SD driver using this new SDIO interface</li> 
+    <li>If you include <code>sys/types.h</code> to get the non-standard, fixed width
+      integer types (<code>uint32</code>, <code>uint16</code>, <code>ubyte</code>, etc.),
+      that is no longer necessary.
+    <li>Instead, you will need to include <code>stdint.h</code> where the new fixed width
+      integer types are defined (<code>uint32_t</code>, <code>uint16_t</code>, <code>uint8_t</code>, etc.).
+    <li>You will have to change all occurrences of the following types:
+    <ul><pre>
+uint32 -> uint32_t
+uint16 -> uint16_t
+ubyte  -> uint8_t
+uint8  -> uint8_t
+sint32 -> int32_t
+sint16 -> int16_t
+sint8  -> int8_t
+</pre></ul>
+    <li>In addition, the non-standard type <code>boolean</code> must replaced with the
+      standard type <code>bool</code>. 
+      The type definition for <code>bool</code> is in <code>stdbool.h</code>.
   </ul>
 </p>
 <p>
-  New STM32-specific Features:
+  This change in typing caused small changes to many, many files.
+  The changes was verified that all configurations in the release still build correctly
+  (other than the SDCC-based configurations).
+  Regression testing was performed on a few configurations, but it is possible that minor build
+  issues still exist (if you encounter any, please let me know and I will
+  help you to fix them).
+</p>
+<p>
+  In the course of the regression testing, several important bugs unrelated
+  to the type changes were found and corrected.
+  Two of these are critical bugs:
   <ul>
-	<li>Add support to configure an STM32 input GPIO to generate an EXTI interrupt.</li>
-    <li>Added support for buttons on the STM3210E-EVAL board.</li>
-    <li>Implemented an STM32 version of the common the SDIO interface.</li>
-    <li>Added a configuration to exercise the STM32 with the USB mass storage
-	    device class example.</li> 
+    <li>Fixed an important error in the RX FIFO handling logic of the LM3S6918
+      Ethernet driver.
+    <li>Corrected the handling of TCP sequence numbers in the TCP stack.
   </ul>
 </p>
 <p>
-  This release also corrects some important bugs in the earlier STM32 releases:
-  <ul>
-	<li>Correct error handling in the mount() logic.</li>
-    <li> Fixed several STM32 DMA-related issues. Integrated and debugged STM32 DMA
-	    functionality that was added in 0.4.12.</li>
-    <li>Fixed several bugs in the STM32 USB device-side driver.</li>
-  </ul>
+  And other less important bug fixes as detailed in the <a href="#currentrelease">ChangeLog</a>.
 </p>
 <p>
-  NOTE:  This version, 4.14, is equivalent to what would have been called 0.4.14
-  to follow 0.4.13.  The zero has been eliminated from the front of the version
-  number to avoid confusion about the state of development:  Some have interpreted
-  the leading zero to mean that the code is in some way unstable.  That was not
-  the intent.  Beginning in January 2010, I will switch to the 2010.nn versioning
-  as many others have done to avoid such confusion.
+  The primary focus of this release was standards compatibility, but a few new
+  features were added including a (1) Flash Translation Layer (FTL) that will
+  support filesystems on a FLASH device and (2) partial ports for the STM32F107VC
+  and HCS12 M9S12NE64 MCUs.  Those ports are very incomplete as of this writing.
 </p>
 
 <table width ="100%">
@@ -1041,6 +1058,29 @@
         address space during interrupt handling.
         This architecture has not been built in some time will likely have some compilation
         problems because of SDCC compiler differences.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Frescale M68HSC12</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>MC9S12NE64</b>.
+      This port uses the Freescale DEMO9S12NE64 Evaluation Board with a GNU arm-elf toolchain* under Linux or Cygwin.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+        This port only fragmentary as of NuttX-5.0.  Some initial pieces appear in that
+        release, but much more is needed.  Time permitting, the HCS12 port may be available
+        int NuttX5.1.
       </p>
     </ul>
   </td>
@@ -1525,7 +1565,7 @@ Other memory:
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
    <td>
-      <a href="#currentrelease">ChangeLog for Current Releases</a><br>
+      <a href="#currentrelease">ChangeLog for the Current Releases</a><br>
    </td>
 </tr>
 <tr>
@@ -1539,74 +1579,13 @@ Other memory:
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="currentrelease">ChangeLog for Current Release</a>
+    <a name="currentrelease">ChangeLog for the Current Release</a>
   </td>
   </tr>
 </table>
 
 <ul><pre>
-nuttx-4.14 2009-12-02 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* arch/arm/src/stm32/stm32_gpio.c - Add support for configure an input GPIO
-	  to generate an EXTI interrupt.
-	* config/stm3210e-eval/src/up_buttons.c - Add support for on-board buttons.
-	* include/nuttx/rwbuffer.h -- Add generic support for read-ahead buffering
-	  and write buffering that can be used in any block driver.
-	* include/nuttx/wqueue.h -- Added a generic worker thread that can used to
-	  defer processing from an interrupt to a task.
-	* include/nuttx/sdio.h -- Defines a generic SD/SDIO interface can can be
-	  bound to a MMC/SD driver to provide SDIO-based MMC/SD support.
-	* drivers/mmcsd/mmcsd_sdio.c -- Provides a an SDIO-based MMC/SD driver.
-	* arch/arm/src/stm32/stm32_sdio.c -- Provides an STM32 implementation of
-	  the SDIO interface defined in include/nuttx/sdio.h.
-	* fs/fs_mount.c -- Correct error handling logic.  If the bind() method
-	  fails, then a reserved node is left in the tree.  This causes subsequent
-	  attempts to mount at the location to fail (reporting that the node
-	  already exists).  This is a problem for block drivers for removable
-	  media: The bind method could fail repeatedly until media is inserted.
-	* arch/arm/src/stm32/chip.h & stm32_dma.c -- Fixed several definitions
-	  that can cause compilation errors when DMA2 is enabled.
-	* arch/arm/src/stm32/stm32_dma.c - Integrated and debugged STM32 DMA
-	  functionality that was added in 0.4.12.
-	* configs/stm3210e-eval/usbstorage - Add a configuration to exercise
-	  the STM32 with the USB mass storage device class example
-	  (examples/usbstorage).
-	* configs/mcu123-lpc214x/up_usbstrg - Move LPC-specific code from
-	  examples/usbstorage to configs/mcu123-lpc214x.
-	* configs/stm321e-eval/up_usbstrg - Add STM32-specific logic for the
-	  examples/usbstorage test.
-	* arch/arm/src/stm32/stm32_usbdev.c - Fix bugs in STM32 USB device-side
-	  driver:  (1) Need to disconnect after reset received, (2) Status setup
-	  to recover from stall on TX endpoint.
-
-pascal-0.1.2 2008-02-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Add logic to build and link with the ZDS-II toolchain
-	  use with the z16f.
-	* Make sure that POFF header structures are aligned
-	* Standardized POFF file format to big-endian
-	* Break up large switch statements to lower complexity
-	  and eliminate a compiler bug
-	* Changes so that runtime compiles with SDCC.
-
-buildroot-0.1.7 2009-06-26 &lt;spudmonkey@racsa.co.cr&gt;
-
-	* configs/avr-defconfig-4.3.3: Added support for AVR to support a NuttX
-	  port of the ATmega128.
-	* toolchain/nxflat:  Added logic to build NuttX NXFLAT binding support tools
-	* toolchain/genromfs:  Added support for the genromfs tool
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
-nuttx-5.0 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* arch/hc: Adding framework to support m68hc11/12
 	* configs/demo9s12ne64: Configuration to support Freescale DEMO9S12NE64
@@ -1649,14 +1628,19 @@ nuttx-5.0 2009-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  as a result, packets were not be ACKed by the recipient and transfers
 	  would sometimes stall.  This is a very important bug fix (in fact, I
 	  don't understand how TCP/IP worked at all without this fix???)
+	* include/nuttx/arch.h and arch/*/common/up_udelay.c - Change argument
+	  of up_udelay() to type useconds_t to avoid warnings when sizeof(int)
+	  is 16-bits.
+	* drivers/mmcsd/* - Add casts in contant expressions to avoid warnings
+	  when sizeof(int) is 16-bits.
 
-pascal-2.0 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Updated to use standard C99 types in stdint.h and
 	  stdbool.h.  This change was necessary for compatibility
-	  with NuttX-5.0.
+	  with NuttX-5.0 (any beyond).
 
-buildroot-1.8 2010-xx-xx <spudmonkey@racsa.co.cr>
+buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 
 	* configs/cortexm3-defconfig-4.3.3: Added support for NuttX NXFLAT
 	  tools.
@@ -1667,6 +1651,22 @@ buildroot-1.8 2010-xx-xx <spudmonkey@racsa.co.cr>
 	  4.3.3 for the hc12.
 	* configs/m32c-defconfig-4.2.4: Added genromfs
 	* configs/m32c-defconfig-4.3.3: Update to m32c-defconfig-4.2.4
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<ul><pre>
+nuttx-5.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+buildroot-1.9 2010-xx-xx <spudmonkey@racsa.co.cr>
 </pre></ul>
 
 <table width ="100%">
