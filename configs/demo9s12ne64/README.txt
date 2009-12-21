@@ -212,7 +212,7 @@ Soft Registers
 
   There are several ways that this error could be fixed:
 
-  1. Increase the number of soft regiaters (i.e., "fake" registers defined
+  1. Increase the number of soft registers (i.e., "fake" registers defined
      at fixed memory locations).  This can be done by adding something like
      -msoft-reg-count=4 to the CFLAGS.  This approach was not taken
      because:
@@ -221,7 +221,8 @@ Soft Registers
      - All of these soft registers wouil have to be saved and restored
        on every interrupt and context switch.
 
-  2. Lowering the optimization level.  Also not desireable becauase 99% of the
+  2. Lowering the optimization level by dropping -Os to -O2 or, more likely,
+     by removing -fomit-frame-pointer.  Also not desireable becauase 99% of the
      files that do not have this problem also increase in size.  Special case
      compilation with reduced optimization levels just for the files that need
      it could be done, but this would complicate the make system.
@@ -232,6 +233,10 @@ Soft Registers
      (1) it takes some effort and good guessing to eliminate the problem, and (2)
      the problem is not really eliminated -- it can and will re-occur when files
      are changed or new files are added.
+
+  4. Many files are built that are needed by DEM09S12NE64.  Another very simple
+     option if those problem files are needed is to just remove the offending
+     files from the Make.defs file so that they no longer cause a problem.
 
 HCS12/DEMO9S12NEC64-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
