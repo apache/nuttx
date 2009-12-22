@@ -58,7 +58,7 @@
 #define LPC313X_NAND_IRQMASK1_OFFSET      0x04 /* Interrupt mask register (first 32-bits) */
 #define LPC313X_NAND_IRQSTATUSRAW1_OFFSET 0x08 /* Unmasked register status (first 32-bits) */
 #define LPC313X_NAND_CONFIG_OFFSET        0x0c /* NAND Flash controller configuration register */
-#define LPC313X_NAND_IOCONFIG_OFFSET	  0x10 /* Default value settings for IO signals */
+#define LPC313X_NAND_IOCONFIG_OFFSET      0x10 /* Default value settings for IO signals */
 #define LPC313X_NAND_TIMING1_OFFSET       0x14 /* First NAND FLASH controller timing register */
 #define LPC313X_NAND_TIMING2_OFFSET       0x18 /* Second NAND FLASH controller timing register */
 #define LPC313X_NAND_SETCMD_OFFSET        0x20 /* NAND FLASH device command register */
