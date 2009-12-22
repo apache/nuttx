@@ -183,6 +183,14 @@ arch/arm - ARM-based micro-controllers
         but no testing has been performed due to some problems I am having with my
         JTAG wiggler and OpenOCD on Linux.
 
+arch/hc
+    This directory is dedicated to ports to the Freescale HC family.
+
+    arch/arm/include/hcs12 and arch/arm/src/hcs12
+      These directories provide support for the Freescale m68hcs12 family.
+      STATUS:  Fragments of this port were released in nuttx-5.0, but porting effort
+      has been stalled because of higher priority tasks.
+
 arch/m68322
     A work in progress.
     STATUS:  Stalled for the moment.
