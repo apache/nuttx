@@ -50,6 +50,7 @@
 
 /* LPC313X Interrupts */
 
+                                /* IRQ0: Reserved */
 #define LPC313X_IRQ_IRQ0      0 /* IRQ1:  Event router cascaded IRQ0 */
 #define LPC313X_IRQ_IRQ1      1 /* IRQ2:  Event router cascaded IRQ1 */
 #define LPC313X_IRQ_IRQ2      2 /* IRQ3:  Event router cascaded IRQ2 */
