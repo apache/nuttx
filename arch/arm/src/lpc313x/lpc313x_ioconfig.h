@@ -204,6 +204,143 @@
 #define LPC313X_IOCONFIG_UART_MODE1RESET      (LPC313X_IOCONFIG_UART+LPC313X_IOCONFIG_MODE1RESET_OFFSET)
 
 /* IOCONFIG register bit definitions ************************************************************/
+/* EBI_MCI register bit definitions (all registers) */
+
+
+#define IOCONFIG_EBIMCI_MGPIO9                (1 << 0)
+#define IOCONFIG_EBIMCI_MGPIO6                (1 << 1)
+#define IOCONFIG_EBIMCI_MLCDDB7               (1 << 2)
+#define IOCONFIG_EBIMCI_MLCDDB4               (1 << 3)
+#define IOCONFIG_EBIMCI_MLCDDB2               (1 << 4)
+#define IOCONFIG_EBIMCI_MNANDRYBN0            (1 << 5)
+#define IOCONFIG_EBIMCI_MI2STXCLK0            (1 << 6)
+#define IOCONFIG_EBIMCI_MI2STXBCK0            (1 << 7)
+#define IOCONFIG_EBIMCI_EBIA1CLE              (1 << 8)
+#define IOCONFIG_EBIMCI_EBINCASBLOUT0         (1 << 9)
+#define IOCONFIG_EBIMCI_MLCDDB0               (1 << 10)
+#define IOCONFIG_EBIMCI_EBIDQM0NOE            (1 << 11)
+#define IOCONFIG_EBIMCI_MLCDCSB               (1 << 12)
+#define IOCONFIG_EBIMCI_MLCDDB1               (1 << 13)
+#define IOCONFIG_EBIMCI_MLCDERD               (1 << 14)
+#define IOCONFIG_EBIMCI_MLCDRS                (1 << 15)
+#define IOCONFIG_EBIMCI_MLCDRWWR              (1 << 16)
+#define IOCONFIG_EBIMCI_MLCDDB3               (1 << 17)
+#define IOCONFIG_EBIMCI_MLCDDB5               (1 << 18)
+#define IOCONFIG_EBIMCI_MLCDDB6               (1 << 19)
+#define IOCONFIG_EBIMCI_MLCDDB8               (1 << 20)
+#define IOCONFIG_EBIMCI_MLCDDB9               (1 << 21)
+#define IOCONFIG_EBIMCI_MLCDDB10              (1 << 22)
+#define IOCONFIG_EBIMCI_MLCDDB11              (1 << 23)
+#define IOCONFIG_EBIMCI_MLCDDB12              (1 << 24)
+#define IOCONFIG_EBIMCI_MLCDDB13              (1 << 25)
+#define IOCONFIG_EBIMCI_MLCDDB14              (1 << 26)
+#define IOCONFIG_EBIMCI_MLCDDB15              (1 << 27)
+#define IOCONFIG_EBIMCI_MGPIO5                (1 << 28)
+#define IOCONFIG_EBIMCI_MGPIO7                (1 << 29)
+#define IOCONFIG_EBIMCI_MGPIO8                (1 << 30)
+#define IOCONFIG_EBIMCI_MGPIO10               (1 << 31)
+
+/* EBI_I2STX_0 register bit definitions (all registers) */
+
+#define IOCONFIG_EBII2STX0_MNANDRYBN1         (1 << 0)
+#define IOCONFIG_EBII2STX0_MNANDRYBN2         (1 << 1)
+#define IOCONFIG_EBII2STX0_MNANDRYBN3         (1 << 2)
+#define IOCONFIG_EBII2STX0_MUARTCTSN          (1 << 3)
+#define IOCONFIG_EBII2STX0_MUARTRTSN          (1 << 4)
+#define IOCONFIG_EBII2STX0_MI2STXDATA0        (1 << 5)
+#define IOCONFIG_EBII2STX0_MI2STXWS0          (1 << 6)
+#define IOCONFIG_EBII2STX0_EBINRASBLOUT1      (1 << 7)
+#define IOCONFIG_EBII2STX0_EBIA0ALE           (1 << 8)
+#define IOCONFIG_EBII2STX0_EBINWE             (1 << 9)
+
+/* CGU register bit definitions (all registers) */
+
+#define IOCONFIG_CGU_SYSCLKO                  (1 << 0)
+
+/* I2SRX_0 register bit definitions (all registers) */
+
+#define IOCONFIG_I2SRX0_BCK                   (1 << 0)
+#define IOCONFIG_I2SRX0_DATA                  (1 << 1)
+#define IOCONFIG_I2SRX0_WS                    (1 << 2)
+
+/* I2SRX_1 register bit definitions (all registers) */
+
+#define IOCONFIG_I2SRX1_DATA                  (1 << 0)
+#define IOCONFIG_I2SRX1_BCK                   (1 << 1)
+#define IOCONFIG_I2SRX1_WS                    (1 << 2)
+
+/* I2STX_1 register bit definitions (all registers) */
+
+#define IOCONFIG_I2STX1_DATA                  (1 << 0)
+#define IOCONFIG_I2STX1_BCK                   (1 << 1)
+#define IOCONFIG_I2STX1_WS                    (1 << 2)
+#define IOCONFIG_I2STX1_256FSO                (1 << 3)
+
+/* EBI register bit definitions (all registers) */
+
+#define IOCONFIG_EBI_D9                       (1 << 0)
+#define IOCONFIG_EBI_D10                      (1 << 1)
+#define IOCONFIG_EBI_D11                      (1 << 2)
+#define IOCONFIG_EBI_D12                      (1 << 3)
+#define IOCONFIG_EBI_D13                      (1 << 4)
+#define IOCONFIG_EBI_D14                      (1 << 5)
+#define IOCONFIG_EBI_D4                       (1 << 6)
+#define IOCONFIG_EBI_D0                       (1 << 7)
+#define IOCONFIG_EBI_D1                       (1 << 8)
+#define IOCONFIG_EBI_D2                       (1 << 9)
+#define IOCONFIG_EBI_D3                       (1 << 10)
+#define IOCONFIG_EBI_D5                       (1 << 11)
+#define IOCONFIG_EBI_D6                       (1 << 12)
+#define IOCONFIG_EBI_D7                       (1 << 13)
+#define IOCONFIG_EBI_D8                       (1 << 14)
+#define IOCONFIG_EBI_D15                      (1 << 15)
+
+/* GPIO register bit definitions (all registers) */
+
+#define IOCONFIG_GPIO_GPIO1                   (1 << 0)
+#define IOCONFIG_GPIO_GPIO0                   (1 << 1)
+#define IOCONFIG_GPIO_GPIO2                   (1 << 2)
+#define IOCONFIG_GPIO_GPIO3                   (1 << 3)
+#define IOCONFIG_GPIO_GPIO4                   (1 << 4)
+#define IOCONFIG_GPIO_GPIO11                  (1 << 5)
+#define IOCONFIG_GPIO_GPIO12                  (1 << 6)
+#define IOCONFIG_GPIO_GPIO13                  (1 << 7)
+#define IOCONFIG_GPIO_GPIO14                  (1 << 8)
+#define IOCONFIG_GPIO_GPIO15                  (1 << 9)
+#define IOCONFIG_GPIO_GPIO16                  (1 << 10)
+#define IOCONFIG_GPIO_GPIO17                  (1 << 11)
+#define IOCONFIG_GPIO_GPIO18                  (1 << 12)
+#define IOCONFIG_GPIO_GPIO19                  (1 << 13)
+#define IOCONFIG_GPIO_GPIO20                  (1 << 14)
+
+/* I2C1 register bit definitions (all registers) */
+
+#define IOCONFIG_I2C1_SDA1                    (1 << 0)
+#define IOCONFIG_I2C1_SCL1                    (1 << 1)
+
+/* SPI register bit definitions (all registers) */
+
+#define IOCONFIG_SPI_MISO                     (1 << 0)
+#define IOCONFIG_SPI_MOSI                     (1 << 1)
+#define IOCONFIG_SPI_CSIN                     (1 << 2)
+#define IOCONFIG_SPI_SCK                      (1 << 3)
+#define IOCONFIG_SPI_CSOUT0                   (1 << 4)
+
+/* NAND register bit definitions (all registers) */
+
+#define IOCONFIG_NAND_NCS3                    (1 << 0)
+#define IOCONFIG_NAND_NCS0                    (1 << 1)
+#define IOCONFIG_NAND_NCS1                    (1 << 2)
+#define IOCONFIG_NAND_NCS2                    (1 << 3)
+
+/* PWM register bit definitions (all registers) */
+
+#define IOCONFIG_PWM_DATA                     (1 << 0)
+
+/* UART register bit definitions (all registers) */
+
+#define IOCONFIG_UART_RXD                     (1 << 0)
+#define IOCONFIG_UART_TXD                     (1 << 1)
 
 /************************************************************************************************
  * Public Types
