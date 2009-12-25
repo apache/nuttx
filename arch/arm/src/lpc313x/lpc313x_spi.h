@@ -122,7 +122,7 @@
 /* SPI Configuration register CONFIG, address 0x15002000 */
 
 #define SPI_CONFIG_INTERSLVDELAY_SHIFT   (16)      /* Bits 16-31: Delay between xfrs to different slaves  */
-#define SPI_CONFIG_NTERSLVDELAY_MASK     (0xffff < SPI_CONFIG_INTERSLVDELAY_SHIFT)
+#define SPI_CONFIG_NTERSLVDELAY_MASK     (0xffff << SPI_CONFIG_INTERSLVDELAY_SHIFT)
 #define SPI_CONFIG_UPDENABLE             (1 << 7)  /* Bit 7:  7 W Update enable bit */
 #define SPI_CONFIG_SOFTRST               (1 << 6)  /* Bit 6:  6 Software reset bit */
 #define SPI_CONFIG_SLVDISABLE            (1 << 4)  /* Bit 4:  4 Slave output disable (slave mode) */
@@ -156,7 +156,7 @@
 /* FIFO data register FIFODATA, address 0x1500200c */
 
 #define SPI_FIFODATA_SHIFT               (0)       /* Bits 0-15: FIFO data */
-#define SPI_FIFODATA_MASK                (0xffff < SPI_FIFODATA_SHIFT)
+#define SPI_FIFODATA_MASK                (0xffff << SPI_FIFODATA_SHIFT)
 
 /* NHP POP register NHPPOP, address 0x15002010 */
 
@@ -184,44 +184,44 @@
 
 #define SPI_HWINFO_FIFOIMPLT             (1 << 30) /* Bit 30:  FIFO memory implementation */
 #define SPI_HWINFO_NSLAVES_SHIFT         (26)      /* Bits 26-29: Maximum number of slaves (minus 1) */
-#define SPI_HWINFO_NSLAVES_MASK          (0x0f < SPI_HWINFO_NSLAVES_SHIFT)
+#define SPI_HWINFO_NSLAVES_MASK          (0x0f << SPI_HWINFO_NSLAVES_SHIFT)
 #define SPI_HWINFO_TXFIFOWIDTH_SHIFT     (21)      /* Bits 21-25: Width transmit FIFO (minus 1) */
-#define SPI_HWINFO_TXFIFOWIDTH_MASK      (0x1f < SPI_HWINFO_TXFIFOWIDTH_SHIFT)
+#define SPI_HWINFO_TXFIFOWIDTH_MASK      (0x1f << SPI_HWINFO_TXFIFOWIDTH_SHIFT)
 #define SPI_HWINFO_RXFIFOWIDTH_SHIFT     (16)      /* Bits 16-20: Width receive FIFO (minus 1) */
-#define SPI_HWINFO_RXFIFOWIDTH_MASK      (0x1f < SPI_HWINFO_RXFIFOWIDTH_SHIFT)
+#define SPI_HWINFO_RXFIFOWIDTH_MASK      (0x1f << SPI_HWINFO_RXFIFOWIDTH_SHIFT)
 #define SPI_HWINFO_TXFIFODEPTH_SHIFT     (8)       /* Bits 8-15:  64 */
-#define SPI_HWINFO_TXFIFODEPTH_MASK      (0x0ff < SPI_HWINFO_TXFIFODEPTH_SHIFT)
+#define SPI_HWINFO_TXFIFODEPTH_MASK      (0x0ff << SPI_HWINFO_TXFIFODEPTH_SHIFT)
 #define SPI_HWINFO_RXFIFODEPTH_SHIFT     (0)       /* Bits 0-7:   64 */
-#define SPI_HWINFO_RXFIFODEPTH_MASK      (0xff < SPI_HWINFO_RXFIFODEPTH_SHIFT)
+#define SPI_HWINFO_RXFIFODEPTH_MASK      (0xff << SPI_HWINFO_RXFIFODEPTH_SHIFT)
 
 /* Slave settings 1 SLV0-2_1, addresses 0x15002024, 0x1500202c, and 0x15002034 */
 
 #define SPI_SLV_1_INTERXFRDLY_SHIFT      (24)      /* Bits 24-31: Delay between slave xfrs (master mode) */
-#define SPI_SLV_1_INTERXFRDLY_MASK       (0xff < SPI_SLV_1_INTERXFRDLY_SHIFT)
+#define SPI_SLV_1_INTERXFRDLY_MASK       (0xff << SPI_SLV_1_INTERXFRDLY_SHIFT)
 #define SPI_SLV_1_NWORDS_SHIFT           (16)      /* Bits 16-23: Number words to send in SMS mode (master mode) */
-#define SPI_SLV_1_NWORDS_MASK            (0xff < SPI_SLV_1_NWORDS_SHIFT)
+#define SPI_SLV_1_NWORDS_MASK            (0xff << SPI_SLV_1_NWORDS_SHIFT)
 #define SPI_SLV_1_CLKDIV2_SHIFT          (8)       /* Bits 8-15: Serial clock divisor 2 */
-#define SPI_SLV_1_CLKDIV2_MASK           (0xff < SPI_SLV_1_CLKDIV2_SHIFT)
+#define SPI_SLV_1_CLKDIV2_MASK           (0xff << SPI_SLV_1_CLKDIV2_SHIFT)
 #define SPI_SLV_1_CLKDIV1_SHIFT          (0)       /* Bits 0-7: Serial clock rate divisor 1 */
-#define SPI_SLV_1_CLKDIV1_MASK           (0xff < SPI_SLV_1_CLKDIV1_SHIFT)
+#define SPI_SLV_1_CLKDIV1_MASK           (0xff << SPI_SLV_1_CLKDIV1_SHIFT)
 
 /* Slave settings 2 SLV0-2_2, addresses 0x15002028, 0x15002030, and0x15002038 */
 
 #define SPI_SLV_2_DELAY_SHIFT            (9)       /* Bits 9-16: Programmable delay */
-#define SPI_SLV_2_DELAY_MASK             (0xff < SPI_SLV_2_DELAY_SHIFT)
+#define SPI_SLV_2_DELAY_MASK             (0xff << SPI_SLV_2_DELAY_SHIFT)
 #define SPI_SLV_2_CSVAL                  (1 << 8)  /* Bit 8:  Chip select value between transfers */
 #define SPI_SLV_2_XFRFMT                 (1 << 7)  /* Bit 7:  Format of transfer */
 #define SPI_SLV_2_SPO                    (1 << 6)  /* Bit 6:  Serial clock polarity */
 #define SPI_SLV_2_SPH                    (1 << 5)  /* Bit 5:  Serial clock phase */
 #define SPI_SLV_2_WDSIZE_SHIFT           (0)       /* Bits 0-4: Word size of transfers slave (minus 1) */
-#define SPI_SLV_2_WDSIZE_MASK            (0x1f < SPI_SLV_2_WDSIZE_SHIFT)
+#define SPI_SLV_2_WDSIZE_MASK            (0x1f << SPI_SLV_2_WDSIZE_SHIFT)
 
 /* Interrupt threshold register INTTHR, address 0x15002fd4 */
 
 #define SPI_INTTHR_TX_SHIFT              (8)       /* Bits 8-15: Interrupt when less than this in TX FIFO */
-#define SPI_INTTHR_TX_MASK               (0xff < SPI_INTTHR_TX_SHIFT)
+#define SPI_INTTHR_TX_MASK               (0xff << SPI_INTTHR_TX_SHIFT)
 #define SPI_INTTHR_RX_SHIFT              (0)       /* Bits 0-7: Interrupt when more than this in RX FIFO */
-#define SPI_INTTHR_RX_MASK               (0xff < SPI_INTTHR_TX_SHIFT)
+#define SPI_INTTHR_RX_MASK               (0xff << SPI_INTTHR_TX_SHIFT)
 
 /* Interrupt clear enable register INTCLRENABLE, address 0x15002fd8,
  * Interrupt set enable register   INTSETENABLE, address 0x15002fdc,

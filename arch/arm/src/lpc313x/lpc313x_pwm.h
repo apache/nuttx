@@ -67,7 +67,7 @@
 /* Timer register TMR, address 0x13009000 */
 
 #define PWM_TMR_SHIFT                   (0)    /* Bits 0-11: Timer used for PWM and PDM */
-#define PWM_TMR_MASK                    (0xfff < PWM_TMR_SHIFT)
+#define PWM_TMR_MASK                    (0xfff << PWM_TMR_SHIFT)
 
 /* Control register CNTL, address 0x13009004 */
 
