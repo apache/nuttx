@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Physical (unmapped) memory map */
+/* LPC313X Physical (unmapped) Memory Map */
 
 #define LPC313X_SHADOWSPACE_PSECTION  0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
                                                  /* 0x00001000-0xff027fff: Reserved */
@@ -111,6 +111,19 @@
 #define LPC313X_APB4_DMA_OFFSET       0x00000000 /* DMA */
 #define LPC313X_APB4_NAND_OFFSET      0x00000800 /* NAND FLASH Controller */
                                    /* 0x00001000    Reserved */
+
+/* Sizes of sections/regions */
+/* To be provided */
+
+/* LPC313X Virtual (mapped) Memory Map */
+/* To be provided */
+
+/* The NuttX entry point starts at an offset from the virtual beginning of DRAM.
+ * This offset reserves space for the MMU page cache.
+ */
+
+/* For now, just to get through the compilation */
+#define NUTTX_START_VADDR            0x00000000
 
 /************************************************************************************
  * Public Types

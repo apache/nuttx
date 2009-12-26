@@ -1,5 +1,6 @@
 /************************************************************************************
- * arch/arm/src/lpc313x/chip.h
+ * configs/ea3131/include/board.h
+ * include/arch/board/board.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,30 +34,86 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC313X_CHIP_H
-#define __ARCH_ARM_SRC_LPC313X_CHIP_H
+#ifndef __ARCH_BOARD_BOARD_H
+#define __ARCH_BOARD_BOARD_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "lpc313x_memorymap.h"
+#ifndef __ASSEMBLY__
+# include <stdint.h>
+#endif
 
 /************************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/* Clocking *************************************************************************/
+
+/* LED definitions ******************************************************************/
+
+#define LED_STARTED       0
+#define LED_HEAPALLOCATE  1
+#define LED_IRQSENABLED   2
+#define LED_STACKCREATED  3
+#define LED_INIRQ         4
+#define LED_SIGNAL        5
+#define LED_ASSERTION     6
+#define LED_PANIC         7
+
+/* Button definitions ***************************************************************/
 
 /************************************************************************************
  * Public Data
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
+ ************************************************************************************/
+/************************************************************************************
+ * Name: lpc313x_boardinitialize
+ *
+ * Description:
+ *   All LPC313X architectures must provide the following entry point.  This entry
+ *   point is called early in the intitialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
+ *
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC313X_CHIP_H */
+EXTERN void lpc313x_boardinitialize(void);
+
+/************************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   up_buttoninit() must be called to initialize button resources.  After that,
+ *   up_buttons() may be called to collect the state of all buttons.  up_buttons()
+ *   returns an 8-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_* definitions above for the meaning of each bit.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+EXTERN void up_buttoninit(void);
+EXTERN uint8_t up_buttons(void);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif  /* __ARCH_BOARD_BOARD_H */
