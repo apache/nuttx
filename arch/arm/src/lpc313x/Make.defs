@@ -46,4 +46,4 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_undefinedinsn.c up_usestack.c
 
 CHIP_ASRCS	= 
-CHIP_CSRCS	= lpc313x_allocateheap.c
+CHIP_CSRCS	= lpc313x_irq.c lpc313x_allocateheap.c

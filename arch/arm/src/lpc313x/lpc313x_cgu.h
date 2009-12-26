@@ -493,8 +493,8 @@
 #define LPC313X_CGU_AHB2INTCRST_OFFSET   0x034 /* Reset AHB_TO_INTC */
 #define LPC313X_CGU_AHB0RST_OFFSET       0x038 /* Reset AHB0 */
 #define LPC313X_CGU_EBIRST_OFFSET        0x03c /* Reset EBI */
-#define LPC313X_CGU_PCMRST_OFFSET        0x040 /* Reset APB domain of PCM */
-#define LPC313X_CGU_PCMRST_OFFSET        0x044 /* Reset synchronous clk_ip domain of PCM */
+#define LPC313X_CGU_PCMAPBRST_OFFSET     0x040 /* Reset APB domain of PCM */
+#define LPC313X_CGU_PCMCLKIPRST_OFFSET   0x044 /* Reset synchronous clk_ip domain of PCM */
 #define LPC313X_CGU_PCMRSTASYNC_OFFSET   0x048 /* Reset asynchronous clk_ip domain of PCM */
 #define LPC313X_CGU_TIMER0RST_OFFSET     0x04c /* Reset Timer0 */
 #define LPC313X_CGU_TIMER1RST_OFFSET     0x050 /* Reset Timer1 */
@@ -995,8 +995,8 @@
 #define LPC313X_CGU_AHB2INTCRST          (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_AHB2INTCRST_OFFSET)
 #define LPC313X_CGU_AHB0RST              (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_AHB0RST_OFFSET)
 #define LPC313X_CGU_EBIRST               (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_EBIRST_OFFSET)
-#define LPC313X_CGU_PCMRST               (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_PCMRST_OFFSET)
-#define LPC313X_CGU_PCMRST               (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_PCMRST_OFFSET)
+#define LPC313X_CGU_PCMAPBRST            (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_PCMAPBRST_OFFSET)
+#define LPC313X_CGU_PCMCLKIPRST          (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_PCMCLKIPRST_OFFSET)
 #define LPC313X_CGU_PCMRSTASYNC          (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_PCMRSTASYNC_OFFSET)
 #define LPC313X_CGU_TIMER0RST            (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_TIMER0RST_OFFSET)
 #define LPC313X_CGU_TIMER1RST            (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_TIMER1RST_OFFSET)
@@ -1284,11 +1284,11 @@
 
 /* PCM_PNRES_SOFT UNIT register, address 0x13004c40 */
 
-#define CGU_PCMRST_RESET                 (1 << 0)  /* Bit 0:  Reset for APB domain of PCM */
+#define CGU_PCMAPBRST_RESET              (1 << 0)  /* Bit 0:  Reset for APB domain of PCM */
 
 /* PCM_RESET_N_SOFT register, address 0x13004c44 */
 
-#define CGU_PCMRST_RESET                 (1 << 0)  /* Bit 0:  Reset for synchronous clk_ip domain of PCM */
+#define CGU_PCMCLKIPRST_RESET            (1 << 0)  /* Bit 0:  Reset for synchronous clk_ip domain of PCM */
 
 /* PCM_RESET_ASYNC_N_SOFT register, address 0x13004c48 */
 
@@ -1360,11 +1360,11 @@
 
 /* I2STX_IF_1_RST_N_SOFT register, address 0x13004c8c */
 
-#define CGU_I2STXIF1RST_RESET            (1 << 0)  /* Bit 0:  Reset for I2STX_IF_1
+#define CGU_I2STXIF1RST_RESET            (1 << 0)  /* Bit 0:  Reset for I2STX_IF_1 */
 
 /* I2SRX_FIFO_0_RST_N_SOFT register, address 0x13004c90 */
 
-#define CGU_I2SRXFF0RST_RESET            (1 << 0)  /* Bit 0:  Reset for I2SRX_FIFO_0
+#define CGU_I2SRXFF0RST_RESET            (1 << 0)  /* Bit 0:  Reset for I2SRX_FIFO_0 */
 
 /* I2SRX_IF_0_RST_N_SOFT register, address 0x13004c94 */
 
@@ -1601,16 +1601,205 @@
 #define CGU_HP1SELP_SHIFT                (0)      /* Bits 0-4: Bandwidth selection register of HP1 PLL */
 #define CGU_HP1IELP_MASK                 (31 << CGU_HP1SELP_SHIFT)
 
+/* Clock ID ranges (see enum lpc313x_clockid_e) *************************************************/
+
+#define CLKID_SYSBASE_FIRST               CLKID_APB0CLK           /* Domain 0: SYS_BASE */
+#define CLKID_SYSBASE_LAST                CLKID_INTCCLK
+#define CLKID_AHB0APB0_FIRST              CLKID_AHB2APB0ASYNCPCLK /* Domain 1: AHB0APB0_BASE */
+#define CLKID_AHB0APB0_LAST               CLKID_RNGPCLK
+#define CLKID_AHB0APB1_FIRST              CLKID_AHB2APB1ASYNCPCLK /* Domain 2: AHB0APB1_BASE */
+#define CLKID_AHB0APB1_LAST               CLKID_I2C1PCLK
+#define CLKID_AHB0APB2_FIRST              CLKID_AHB2APB2ASYNCPCLK /* Domain 3: AHB0APB2_BASE */
+#define CLKID_AHB0APB2_LAST               CLKID_SPIPCLKGATED
+#define CLKID_AHB0APB3_FIRST              CLKID_AHB2APB3PCLK      /* Domain 4: AHB0APB3_BASE */
+#define CLKID_AHB0APB3_LAST               CLKID_RESERVED70
+#define CLKID_PCM_FIRST                   CLKID_PCMCLKIP          /* Domain 5: PCM_BASE */
+#define CLKID_PCM_LAST                    CLKID_PCMCLKIP
+#define CLKID_UART_FIRST                  CLKID_UARTUCLK          /* Domain 6: UART_BASE */
+#define CLKID_UART_LAST                   CLKID_UARTUCLK
+#define CLKID_CLK1024FS_FIRST             CLKID_I2SEDGEDETECTCLK  /* Domain 7: CLK1024FS_BASE */
+#define CLKID_CLK1024FS_LAST              CLKID_RESERVED86
+#define CLKID_I2SRXBCK0_FIRST             CLKID_I2SRXBCK0         /* Domain 8: BCK0_BASE */
+#define CLKID_I2SRXBCK0_LAST              CLKID_I2SRXBCK0
+#define CLKID_I2SRXBCK1_FIRST             CLKID_I2SRXBCK1         /* Domain 9: BCK1_BASE */
+#define CLKID_I2SRXBCK1_LAST              CLKID_I2SRXBCK1
+#define CLKID_SPI_FIRST                   CLKID_SPICLK            /* Domain 10: SPI_BASE */
+#define CLKID_SPI_LAST                    CLKID_SPICLKGATED
+#define CLKID_SYSCLKO_FIRST               CLKID_SYSCLKO           /* Domain 11: SYSCLKO_BASE */
+#define CLKID_SYSCLKO_LAST                CLKID_SYSCLKO
+#define CLKID_INVALIDCLK                  -1
+
 /************************************************************************************************
  * Public Types
  ************************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* Clock IDs -- These are indices corresponding to the register offsets above */
+
+enum lpc313x_clockid_e
+{
+  /* Domain 0: SYS_BASE */
+
+  CLKID_APB0CLK = 0,      /*  0 APB0_CLK */
+  CLKID_SBAPB1CLK,        /*  1 APB1_CLK */
+  CLKID_APB2CLK,          /*  2 APB2_CLK */
+  CLKID_APB3CLK,          /*  3 APB3_CLK */
+  CLKID_APB4CLK,          /*  4 APB4_CLK */
+  CLKID_AHB2INTCCLK,      /*  5 AHB_TO_INTC_CLK */
+  CLKID_AHB0CLK,          /*  6 AHB0_CLK */
+  CLKID_EBICLK,           /*  7 EBI_CLK */
+  CLKID_DMAPCLK,          /*  8 DMA_PCLK */
+  CLKID_DMACLKGATED,      /*  9 DMA_CLK_GATED */
+  CLKID_NANDFLASHS0CLK,   /* 10 NANDFLASH_S0_CLK */
+  CLKID_NANDFLASHECCCLK,  /* 11 NANDFLASH_ECC_CLK */
+  CLKID_NANDFLASHAESCLK,  /* 12 NANDFLASH_AES_CLK (Reserved on LPC313x) */ 
+  CLKID_NANDFLASHNANDCLK, /* 13 NANDFLASH_NAND_CLK */
+  CLKID_NANDFLASHPCLK,    /* 14 NANDFLASH_PCLK */
+  CLKID_CLOCKOUT,         /* 15 CLOCK_OUT */
+  CLKID_ARM926CORECLK,    /* 16 ARM926_CORE_CLK */
+  CLKID_ARM926BUSIFCLK,   /* 17 ARM926_BUSIF_CLK */
+  CLKID_ARM926RETIMECLK,  /* 18 ARM926_RETIME_CLK */
+  CLKID_SDMMCHCLK,        /* 19 SD_MMC_HCLK */
+  CLKID_SDMMCCCLKIN,      /* 20 SD_MMC_CCLK_IN */
+  CLKID_USBOTGAHBCLK,     /* 21 USB_OTG_AHB_CLK */
+  CLKID_ISRAM0CLK,        /* 22 ISRAM0_CLK */
+  CLKID_REDCTLRSCLK,      /* 23 RED_CTL_RSCLK */
+  CLKID_ISRAM1CLK,        /* 24 ISRAM1_CLK (LPC313x only) */
+  CLKID_ISROMCLK,         /* 25 ISROM_CLK */
+  CLKID_MPMCCFGCLK,       /* 26 MPMC_CFG_CLK */
+  CLKID_MPMCCFGCLK2,      /* 27 MPMC_CFG_CLK2 */
+  CLKID_MPMCCFGCLK3,      /* 28 MPMC_CFG_CLK3 */
+  CLKID_INTCCLK,          /* 29 INTC_CLK */
+
+  /* Domain 1: AHB0APB0BASE */
+
+  CLKID_AHB2APB0PCLK,     /* 30 AHB_TO_APB0_PCLK */
+  CLKID_EVENTROUTERPCLK,  /* 31 EVENT_ROUTER_PCLK */
+  CLKID_ADCPCLK,          /* 32 ADC_PCLK */
+  CLKID_ADCCLK,           /* 33 ADC_CLK */
+  CLKID_WDOGPCLK,         /* 34 WDOG_PCLK */
+  CLKID_IOCONFPCLK,       /* 35 IOCONF_PCLK */
+  CLKID_CGUPCLK,          /* 36 CGU_PCLK */
+  CLKID_SYSCREGPCLK,      /* 37 SYSCREG_PCLK */
+  CLKID_OTPPCLK,          /* 38 OTP_PCLK (Reserved on LPC313X) */
+  CLKID_RNGPCLK,          /* 39 RNG_PCLK */
+
+  /* Domain 2: AHB0APB1BASE */
+
+  CLKID_AHB2APB1PCLK,     /* 40 AHB_TO_APB1_PCLK */
+  CLKID_TIMER0PCLK,       /* 41 TIMER0_PCLK */
+  CLKID_TIMER1PCLK,       /* 42 TIMER1_PCLK */
+  CLKID_TIMER2PCLK,       /* 43 TIMER2_PCLK */
+  CLKID_TIMER3PCLK,       /* 44 TIMER3_PCLK */
+  CLKID_PWMPCLK,          /* 45 PWM_PCLK */
+  CLKID_PWMPCLKREGS,      /* 46 PWM_PCLK_REGS */
+  CLKID_PWMCLK,           /* 47 PWM_CLK */
+  CLKID_I2C0PCLK,         /* 48 I2C0_PCLK */
+  CLKID_I2C1PCLK,         /* 49 I2C1_PCLK */
+
+  /* Domain 3: AHB0APB2BASE */
+
+  CLKID_AHB2APB2PCLK,     /* 50 AHB_TO_APB2_PCLK */
+  CLKID_PCMPCLK,          /* 51 PCM_PCLK */
+  CLKID_PCMAPBPCLK,       /* 52 PCM_APB_PCLK */
+  CLKID_UARTAPBCLK,       /* 53 UART_APB_CLK */
+  CLKID_LCDPCLK,          /* 54 LCD_PCLK */
+  CLKID_LCDCLK,           /* 55 LCD_CLK */
+  CLKID_SPIPCLK,          /* 56 SPI_PCLK */
+  CLKID_SPIPCLKGATED,     /* 57 SPI_PCLK_GATED */
+
+  /* Domain 4: AHB0APB3BASE */
+  CLKID_AHB2APB3PCLK,     /* 58 AHB_TO_APB3_PCLK */
+  CLKID_I2SCFGPCLK,       /* 59 I2S_CFG_PCLK */
+  CLKID_EDGEDETPCLK,      /* 60 EDGE_DET_PCLK */
+  CLKID_I2STXFIFO0PCLK,   /* 61 I2STX_FIFO_0_PCLK */
+  CLKID_I2STXIF0PCLK,     /* 62 I2STX_IF_0_PCLK */
+  CLKID_I2STXFIFO1PCLK,   /* 63 I2STX_FIFO_1_PCLK */
+  CLKID_I2STXIF1PCLK,     /* 64 I2STX_IF_1_PCLK */
+  CLKID_I2SRXFIFO0PCLK,   /* 65 I2SRX_FIFO_0_PCLK */
+  CLKID_I2SRXIF0PCLK,     /* 66 I2SRX_IF_0_PCLK */
+  CLKID_I2SRXFIFO1PCLK,   /* 67 I2SRX_FIFO_1_PCLK */
+  CLKID_I2SRXIF1PCLK,     /* 68 I2SRX_IF_1_PCLK */
+  CLKID_RESERVED69,       /* 69 Reserved */
+  CLKID_RESERVED70,       /* 70 Reserved */
+
+  /* Domain 5: PCM_BASE */
+
+  CLKID_PCMCLKIP,         /* 71 PCM_CLK_IP */
+
+  /* Domain 6: UART_BASE */
+
+  CLKID_UARTUCLK,         /* 72 UART_U_CLK */
+  
+  /* Domain 7: CLK1024FS_BASE */
+
+  CLKID_I2SEDGEDETECTCLK, /* 73 I2S_EDGE_DETECT_CLK */
+  CLKID_I2STXBCK0N,       /* 74 I2STX_BCK0_N */
+  CLKID_I2STXWS0,         /* 75 I2STX_WS0 */
+  CLKID_I2STXCLK0,        /* 76 I2STX_CLK0 */
+  CLKID_I2STXBCK1N,       /* 77 I2STX_BCK1_N */
+  CLKID_I2STXWS1,         /* 78 I2STX_WS1 */
+  CLKID_CLK256FS,         /* 79 CLK_256FS */
+  CLKID_I2SRXBCK0N,       /* 80 I2SRX_BCK0_N */
+  CLKID_I2SRXWS0,         /* 81 I2SRX_WS0 */
+  CLKID_I2SRXBCK1N,       /* 82 I2SRX_BCK1_N */
+  CLKID_I2SRXWS1,         /* 83 I2SRX_WS1 */
+  CLKID_RESERVED84,       /* 84 Reserved */
+  CLKID_RESERVED85,       /* 85 Reserved */
+  CLKID_RESERVED86,       /* 86 Reserved */
+
+  /* Domain 8: BCK0_BASE */
+
+  CLKID_I2SRXBCK0,        /* 87 I2SRX_BCK0 */
+
+  /* Domain 9: BCK1_BASE */
+
+  CLKID_I2SRXBCK1,        /* 88 I2SRX_BCK1 */
+
+  /* Domain 10: SPI_BASE */
+
+  CLKID_SPICLK,           /* 89 SPI_CLK */
+  CLKID_SPICLKGATED,      /* 90 SPI_CLK_GATED */
+
+  /* Domain 11: SYSCLKO_BASE */
+
+  CLKID_SYSCLKO           /* 91 SYSCLK_O */
+};
 
 /************************************************************************************************
  * Public Data
  ************************************************************************************************/
 
 /************************************************************************************************
+ * Inline Functions
+ ************************************************************************************************/
+
+/* Enable the specified clock */
+
+static inline void lpc313x_enableclock(enum lpc313x_clockid_e clkid)
+{
+  uint32_t address = LPC313X_CGU_PCR((int)clkid);
+  uint32_t regval  = getreg32(address);
+
+  regval          |= CGU_PCR_RUN;
+  putreg32(regval, address);
+}
+
+/* Disable the specified clock */
+
+static inline void lpc313x_disableclock(enum lpc313x_clockid_e clkid)
+{
+  uint32_t address = LPC313X_CGU_PCR((int)clkid);
+  uint32_t regval  = getreg32(address);
+
+  regval          &= ~CGU_PCR_RUN;
+  putreg32(regval, address);
+}
+
+/************************************************************************************************
  * Public Functions
  ************************************************************************************************/
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LPC313X_CGU_H */
