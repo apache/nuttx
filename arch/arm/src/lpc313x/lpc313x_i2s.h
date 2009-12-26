@@ -260,6 +260,45 @@
 #define LPC313X_I2SRX1_ILVD7              (LPC313X_I2SRX1_VBASE+LPC313X_I2S_ILVD7_OFFSET)
 
 /* I2S register bit definitions *****************************************************************/
+/* I2S configuration module offset */
+
+/* I2SCONFIG_FORMAT address 0x16000000 */
+
+#define I2SCONFIG_FORMAT_I2SRX1_SHIFT     (9)       /* Bits 9-11: I2SRX1 I2S output format */
+#define I2SCONFIG_FORMAT_I2SRX1_MASK      (7 << I2SCONFIG_FORMAT_I2SRX1_SHIFT)
+#  define I2SCONFIG_FORMAT_I2SRX1_I2S     (3 << I2SCONFIG_FORMAT_I2SRX1_SHIFT) /* I2S */
+#  define I2SCONFIG_FORMAT_I2SRX1_16BIT   (4 << I2SCONFIG_FORMAT_I2SRX1_SHIFT) /* LSB justified 16 bits */
+#  define I2SCONFIG_FORMAT_I2SRX1_18BIT   (5 << I2SCONFIG_FORMAT_I2SRX1_SHIFT) /* LSB justified 18 bits */
+#  define I2SCONFIG_FORMAT_I2SRX1_20BIT   (6 << I2SCONFIG_FORMAT_I2SRX1_SHIFT) /* LSB justified 20 bits */
+#  define I2SCONFIG_FORMAT_I2SRX1_24BIT   (7 << I2SCONFIG_FORMAT_I2SRX1_SHIFT) /* LSB justified 24 bits */
+#define I2SCONFIG_FORMAT_I2SRX0_SHIFT     (6)       /* Bits 6-8: I2SRX0 I2S output format */
+#define I2SCONFIG_FORMAT_I2SRX0_MASK      (7 << I2SCONFIG_FORMAT_I2SRX0_SHIFT)
+#  define I2SCONFIG_FORMAT_I2SRX0_I2S     (3 << I2SCONFIG_FORMAT_I2SRX0_SHIFT) /* I2S */
+#  define I2SCONFIG_FORMAT_I2SRX0_16BIT   (4 << I2SCONFIG_FORMAT_I2SRX0_SHIFT) /* LSB justified 16 bits */
+#  define I2SCONFIG_FORMAT_I2SRX0_18BIT   (5 << I2SCONFIG_FORMAT_I2SRX0_SHIFT) /* LSB justified 18 bits */
+#  define I2SCONFIG_FORMAT_I2SRX0_20BIT   (6 << I2SCONFIG_FORMAT_I2SRX0_SHIFT) /* LSB justified 20 bits */
+#  define I2SCONFIG_FORMAT_I2SRX0_24BIT   (7 << I2SCONFIG_FORMAT_I2SRX0_SHIFT) /* LSB justified 24 bits */
+#define I2SCONFIG_FORMAT_I2STX1_SHIFT     (3)       /* Bits 3-5: 2STX1 I2S input format */
+#define I2SCONFIG_FORMAT_I2STX1_MASK      (7 << I2SCONFIG_FORMAT_I2STX1_SHIFT)
+#  define I2SCONFIG_FORMAT_I2STX1_I2S     (3 << I2SCONFIG_FORMAT_I2STX1_SHIFT) /* I2S */
+#  define I2SCONFIG_FORMAT_I2STX1_16BIT   (4 << I2SCONFIG_FORMAT_I2STX1_SHIFT) /* LSB justified 16 bits */
+#  define I2SCONFIG_FORMAT_I2STX1_18BIT   (5 << I2SCONFIG_FORMAT_I2STX1_SHIFT) /* LSB justified 18 bits */
+#  define I2SCONFIG_FORMAT_I2STX1_20BIT   (6 << I2SCONFIG_FORMAT_I2STX1_SHIFT) /* LSB justified 20 bits */
+#  define I2SCONFIG_FORMAT_I2STX1_24BIT   (7 << I2SCONFIG_FORMAT_I2STX1_SHIFT) /* LSB justified 24 bits */
+#define I2SCONFIG_FORMAT_I2STX0_SHIFT     (0)       /* Bits 0-2: I2STX0 I2S input format */
+#define I2SCONFIG_FORMAT_I2STX0_MASK      (7 << I2SCONFIG_FORMAT_I2STX0_SHIFT)
+#  define I2SCONFIG_FORMAT_I2STX0_I2S     (3 << I2SCONFIG_FORMAT_I2STX0_SHIFT) /* I2S */
+#  define I2SCONFIG_FORMAT_I2STX0_16BIT   (4 << I2SCONFIG_FORMAT_I2STX0_SHIFT) /* LSB justified 16 bits */
+#  define I2SCONFIG_FORMAT_I2STX0_18BIT   (5 << I2SCONFIG_FORMAT_I2STX0_SHIFT) /* LSB justified 18 bits */
+#  define I2SCONFIG_FORMAT_I2STX0_20BIT   (6 << I2SCONFIG_FORMAT_I2STX0_SHIFT) /* LSB justified 20 bits */
+#  define I2SCONFIG_FORMAT_I2STX0_24BIT   (7 << I2SCONFIG_FORMAT_I2STX0_SHIFT) /* LSB justified 24 bits */
+
+/* II2SCONFIG_CFGMUX address 0x16000004 */
+
+#define I2SCONFIG_CFGMUX_I2SRX1OEN        (1 << 2)  /* Bit 2:  Selects faster mode for I2SRX1 */
+#define I2SCONFIG_CFGMUX_I2SRX0OEN        (1 << 1)  /* Bit 1:  Slects master mode for I2SRX0 */
+
+/* I2SCONFIG_NSOFCNT address 0x16000010 */
 
 /************************************************************************************************
  * Public Types
