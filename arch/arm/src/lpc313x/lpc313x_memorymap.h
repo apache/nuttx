@@ -116,7 +116,26 @@
 /* To be provided */
 
 /* LPC313X Virtual (mapped) Memory Map */
-/* To be provided */
+/* Temporary for now, just to get through compilation */
+
+#define LPC313X_SHADOWSPACE_VSECTION  0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
+#define LPC313X_INTSRAM0_VSECTION     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
+#define LPC313X_INTSRAM1_VSECTION     0x11040000 /* 0x11040000-0x11057fff: Internal SRAM 1 96Kb */
+#  define LPC313X_SRAM_VADDR          LPC313X_INTSRAM0_VSECTION
+#define LPC313X_INTSROM0_VSECTION     0x12000000 /* 0x12000000-0x1201ffff: Internal SROM 0 128Kb */
+#define LPC313X_APB0_VSECTION         0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
+#define LPC313X_APB1_VSECTION         0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
+#define LPC313X_APB2_VSECTION         0x15000000 /* 0x15000000-0x15003fff: APB2 16Kb */
+#define LPC313X_APB3_VSECTION         0x16000000 /* 0x16000000-0x160003ff: APB3 1Kb */
+#define LPC313X_APB4_VSECTION         0x17000000 /* 0x17000000-0x17000fff: APB4 4Kb */
+#define LPC313X_MPMC_VSECTION         0x17008000 /* 0x17008000-0x17008fff: MPMC cfg 4Kb */
+#define LPC313X_MCI_VSECTION          0x18000000 /* 0x18000000 0x180003ff: MCI/SD/SDIO 1Kb */
+#define LPC313X_USBOTG_VSECTION       0x19000000 /* 0x19000000-0x19000fff: USB OTG 4Kb */
+#define LPC313X_EXTSRAM0_VSECTION     0x20000000 /* 0x20000000-0x2001ffff: External SRAM 0 64-128Kb */
+#define LPC313X_EXTSRAM1_VSECTION     0x20020000 /* 0x20020000-0x2003ffff: External SRAM 1 64-128Kb */
+#define LPC313X_EXTSDRAM0_VSECTION    0x30000000 /* 0x30000000-0x37ffffff: External SDRAM 0 128Mb */
+#define LPC313X_INTC_VSECTION         0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
+#define LPC313X_NAND_VSECTION         0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
 
 /* The NuttX entry point starts at an offset from the virtual beginning of DRAM.
  * This offset reserves space for the MMU page cache.
