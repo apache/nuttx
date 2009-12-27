@@ -1071,6 +1071,18 @@
 #define LPC313X_CGU_HP1SELP              (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_HP1SELP_OFFSET)
 
 /* CGU register bit definitions *****************************************************************/
+
+/* Frequency inputs */
+
+#define CGU_FREQIN_FFAST                 0 /* ffast 12 MHz */
+#define CGU_FREQIN_I2SRXBCK0             1 /* I2SRX_BCK0 */
+#define CGU_FREQIN_I2SRXWS0              2 /* I2SRX_WS0 */
+#define CGU_FREQIN_I2SRXBCK1             3 /* I2SRX_BCK1 */
+#define CGU_FREQIN_I2SRXWS1              4 /* I2SRX_WS1 */
+#define CGU_FREQIN_HPPLL0                5 /* HPPLL0 (Audio/I2S PLL) */
+#define CGU_FREQIN_HPPLL1                6 /* HPPLL1 (System PLL) */
+#define CGU_NFREQIN                      7 
+
 /* CGU clock switchbox register bit definitions *************************************************/
 
 /* Switch configuration register SCR0 to SCR11, addresses 0x13004000 to 0x1300402c */
@@ -1084,30 +1096,37 @@
 
 #define CGU_FS1_SHIFT                    (0)      /* Bits 0-2: Selects input frequency for side #1 of frequency switch */
 #define CGU_FS1_MASK                     (7 << CGU_FS1_SHIFT)
-#  define CGU_FS1_FFAST                  (0 << CGU_FS1_SHIFT) /* ffast 12 MHz */
-#  define CGU_FS1_I2SRXBCK0              (1 << CGU_FS1_SHIFT) /* I2SRX_BCK0 */
-#  define CGU_FS1_I2SRXWS0               (2 << CGU_FS1_SHIFT) /* I2SRX_WS0 */
-#  define CGU_FS1_I2SRXBCK1              (3 << CGU_FS1_SHIFT) /* I2SRX_BCK1 */
-#  define CGU_FS1_I2SRXWS1               (4 << CGU_FS1_SHIFT) /* I2SRX_WS1 */
-#  define CGU_FS1_HPPLL0                 (5 << CGU_FS1_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
-#  define CGU_FS1_HPPLL1                 (6 << CGU_FS1_SHIFT) /* HPPLL1 (System PLL) */
+#  define CGU_FS1_FFAST                  (CGU_FREQIN_FFAST     << CGU_FS1_SHIFT) /* ffast 12 MHz */
+#  define CGU_FS1_I2SRXBCK0              (CGU_FREQIN_I2SRXBCK0 << CGU_FS1_SHIFT) /* I2SRX_BCK0 */
+#  define CGU_FS1_I2SRXWS0               (CGU_FREQIN_I2SRXWS0  << CGU_FS1_SHIFT) /* I2SRX_WS0 */
+#  define CGU_FS1_I2SRXBCK1              (CGU_FREQIN_I2SRXBCK1 << CGU_FS1_SHIFT) /* I2SRX_BCK1 */
+#  define CGU_FS1_I2SRXWS1               (CGU_FREQIN_I2SRXWS1  << CGU_FS1_SHIFT) /* I2SRX_WS1 */
+#  define CGU_FS1_HPPLL0                 (CGU_FREQIN_HPPLL0    << CGU_FS1_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
+#  define CGU_FS1_HPPLL1                 (CGU_FREQIN_HPPLL1    << CGU_FS1_SHIFT) /* HPPLL1 (System PLL) */
 
 /* Frequency Select register 2 FS2_0 to FS2_11, addresses 0x13004060 to 0x1300408c */
 
 #define CGU_FS2_SHIFT                    (0)      /* Bits 0-2: Selects input frequency for side #2 of frequency switch */
 #define CGU_FS2_MASK                     (7 << CGU_FS2_SHIFT)
-#  define CGU_FS2_FFAST                  (0 << CGU_FS2_SHIFT) /* ffast 12 MHz */
-#  define CGU_FS2_I2SRXBCK0              (1 << CGU_FS2_SHIFT) /* I2SRX_BCK0 */
-#  define CGU_FS2_I2SRXWS0               (2 << CGU_FS2_SHIFT) /* I2SRX_WS0 */
-#  define CGU_FS2_I2SRXBCK1              (3 << CGU_FS2_SHIFT) /* I2SRX_BCK1 */
-#  define CGU_FS2_I2SRXWS1               (4 << CGU_FS2_SHIFT) /* I2SRX_WS1 */
-#  define CGU_FS2_HPPLL0                 (5 << CGU_FS2_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
-#  define CGU_FS2_HPPLL1                 (6 << CGU_FS2_SHIFT) /* HPPLL1 (System PLL) */
+#  define CGU_FS2_FFAST                  (CGU_FREQIN_FFAST     << CGU_FS2_SHIFT) /* ffast 12 MHz */
+#  define CGU_FS2_I2SRXBCK0              (CGU_FREQIN_I2SRXBCK0 << CGU_FS2_SHIFT) /* I2SRX_BCK0 */
+#  define CGU_FS2_I2SRXWS0               (CGU_FREQIN_I2SRXWS0  << CGU_FS2_SHIFT) /* I2SRX_WS0 */
+#  define CGU_FS2_I2SRXBCK1              (CGU_FREQIN_I2SRXBCK1 << CGU_FS2_SHIFT) /* I2SRX_BCK1 */
+#  define CGU_FS2_I2SRXWS1               (CGU_FREQIN_I2SRXWS1  << CGU_FS2_SHIFT) /* I2SRX_WS1 */
+#  define CGU_FS2_HPPLL0                 (CGU_FREQIN_HPPLL0    << CGU_FS2_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
+#  define CGU_FS2_HPPLL1                 (CGU_FREQIN_HPPLL1    << CGU_FS2_SHIFT) /* HPPLL1 (System PLL) */
 
 /* Switch Status register SSR0 to SSR11, addresses 0x13004090 to 0x1300 40bc */
 
 #define CGU_SSR_FS_SHIFT                 (2)       /* Bits 2-4: Feedback of current frequency selection */
 #define CGU_SSR_FS_MASK                  (7 << CGU_SSR_FS_SHIFT)
+#  define CGU_SSR_FFAST                  (CGU_FREQIN_FFAST     << CGU_SSR_FS_SHIFT) /* ffast 12 MHz */
+#  define CGU_SSR_I2SRXBCK0              (CGU_FREQIN_I2SRXBCK0 << CGU_SSR_FS_SHIFT) /* I2SRX_BCK0 */
+#  define CGU_SSR_I2SRXWS0               (CGU_FREQIN_I2SRXWS0  << CGU_SSR_FS_SHIFT) /* I2SRX_WS0 */
+#  define CGU_SSR_I2SRXBCK1              (CGU_FREQIN_I2SRXBCK1 << CGU_SSR_FS_SHIFT) /* I2SRX_BCK1 */
+#  define CGU_SSR_I2SRXWS1               (CGU_FREQIN_I2SRXWS1  << CGU_SSR_FS_SHIFT) /* I2SRX_WS1 */
+#  define CGU_SSR_HPPLL0                 (CGU_FREQIN_HPPLL0    << CGU_SSR_FS_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
+#  define CGU_SSR_HPPLL1                 (CGU_FREQIN_HPPLL1    << CGU_SSR_FS_SHIFT) /* HPPLL1 (System PLL) */
 #define CGU_SSR_FS2STAT                  (1 << 1)  /* Bit 1:  Enable side #2 of the frequency switch */
 #define CGU_SSR_F1STAT                   (1 << 0)  /* Bit 0:  Enable side #1 of the frequency switch */
 
@@ -1438,12 +1457,12 @@
 
 #define CGU_HP0FINSEL_SHIFT              (0)       /* Bits 0-3: Select input to high HPPLL0 */
 #define CGU_HP0FINSEL_MASK               (15 << CGU_HP0FINSEL_SHIFT)
-#  define CGU_HP0FINSEL_FFAST            (0 << CGU_HP0FINSEL_SHIFT) /* ffast (12 Mhz) */
-#  define CGU_HP0FINSEL_I2SRXBCK0        (1 << CGU_HP0FINSEL_SHIFT) /* I2SRX_BCK0 */
-#  define CGU_HP0FINSEL_I2SRXWS0         (2 << CGU_HP0FINSEL_SHIFT) /* I2SRX_WS0 */
-#  define CGU_HP0FINSEL_I2SRXBCK1        (3 << CGU_HP0FINSEL_SHIFT) /* I2SRX_BCK1 */
-#  define CGU_HP0FINSEL_I2SRXWS1         (4 << CGU_HP0FINSEL_SHIFT) /* I2SRX_WS1 */
-#  define CGU_HP0FINSEL_HP1FOUT          (6 << CGU_HP0FINSEL_SHIFT) /* HP1_FOUT */
+#  define CGU_HP0FINSEL_FFAST            (CGU_FREQIN_FFAST     << CGU_HP0FINSEL_SHIFT) /* ffast (12 Mhz) */
+#  define CGU_HP0FINSEL_I2SRXBCK0        (CGU_FREQIN_I2SRXBCK0 << CGU_HP0FINSEL_SHIFT) /* I2SRX_BCK0 */
+#  define CGU_HP0FINSEL_I2SRXWS0         (CGU_FREQIN_I2SRXWS0  << CGU_HP0FINSEL_SHIFT) /* I2SRX_WS0 */
+#  define CGU_HP0FINSEL_I2SRXBCK1        (CGU_FREQIN_I2SRXBCK1 << CGU_HP0FINSEL_SHIFT) /* I2SRX_BCK1 */
+#  define CGU_HP0FINSEL_I2SRXWS1         (CGU_FREQIN_I2SRXWS1  << CGU_HP0FINSEL_SHIFT) /* I2SRX_WS1 */
+#  define CGU_HP0FINSEL_HP1FOUT          (CGU_FREQIN_HPPLL1    << CGU_HP0FINSEL_SHIFT) /* HP1_FOUT */
 
 /* HP0 M-divider register HP0_MDEC, address 0x13004cF4 */
 
@@ -1523,12 +1542,12 @@
 
 #define CGU_HP1FINSEL_SHIFT              (0)       /* Bits 0-3: Select input to high HPPLL0 */
 #define CGU_HP1FINSEL_MASK               (15 << CGU_HP1FINSEL_SHIFT)
-#  define CGU_HP1FINSEL_FFAST            (0 << CGU_HP1FINSEL_SHIFT) /* ffast (12 Mhz) */
-#  define CGU_HP1FINSEL_I2SRXBCK0        (1 << CGU_HP1FINSEL_SHIFT) /* I2SRX_BCK0 */
-#  define CGU_HP1FINSEL_I2SRXWS0         (2 << CGU_HP1FINSEL_SHIFT) /* I2SRX_WS0 */
-#  define CGU_HP1FINSEL_I2SRXBCK1        (3 << CGU_HP1FINSEL_SHIFT) /* I2SRX_BCK1 */
-#  define CGU_HP1FINSEL_I2SRXWS1         (4 << CGU_HP1FINSEL_SHIFT) /* I2SRX_WS1 */
-#  define CGU_HP1FINSEL_HP0FOUT          (5 << CGU_HP1FINSEL_SHIFT) /* HP0_FOUT */
+#  define CGU_HP1FINSEL_FFAST            (CGU_FREQIN_FFAST     << CGU_HP1FINSEL_SHIFT) /* ffast (12 Mhz) */
+#  define CGU_HP1FINSEL_I2SRXBCK0        (CGU_FREQIN_I2SRXBCK0 << CGU_HP1FINSEL_SHIFT) /* I2SRX_BCK0 */
+#  define CGU_HP1FINSEL_I2SRXWS0         (CGU_FREQIN_I2SRXWS0  << CGU_HP1FINSEL_SHIFT) /* I2SRX_WS0 */
+#  define CGU_HP1FINSEL_I2SRXBCK1        (CGU_FREQIN_I2SRXBCK1 << CGU_HP1FINSEL_SHIFT) /* I2SRX_BCK1 */
+#  define CGU_HP1FINSEL_I2SRXWS1         (CGU_FREQIN_I2SRXWS1  << CGU_HP1FINSEL_SHIFT) /* I2SRX_WS1 */
+#  define CGU_HP1FINSEL_HP0FOUT          (CGU_FREQIN_HPPLL0    << CGU_HP1FINSEL_SHIFT) /* HP0_FOUT */
 
 /* HP1 M-divider register HP1_MDEC, address 0x13004d2C */
 

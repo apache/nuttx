@@ -69,6 +69,7 @@
  * Description:
  *   Given a clock ID, return the ID of the domain in which the clock
  *   resides.
+ *
  ************************************************************************/
 
 enum lpc313x_domainid_e lpc313x_clkdomain(enum lpc313x_clockid_e clkid)
