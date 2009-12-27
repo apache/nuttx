@@ -97,7 +97,7 @@
  */
 
 #define TIMER_CTRL_ENABLE                (1 << 7)  /* Bit 7:  Timer enable */
-#define TIMER_CTRL_MODE                  (1 << 6)  /* Bit 6:  Periodic timer mode */
+#define TIMER_CTRL_PERIODIC              (1 << 6)  /* Bit 6:  Periodic timer mode */
 #define TIMER_CTRL_PRESCALE_SHIFT        (2)       /* Bits 2-3: Timer pre-scale */
 #define TIMER_CTRL_PRESCALE_MASK         (3 << TIMER_CTRL_PRESCALE_SHIFT)
 #  define TIMER_CTRL_PRESCALE_DIV1       (0 << TIMER_CTRL_PRESCALE_SHIFT) /* Divider=1 Stages=0 */

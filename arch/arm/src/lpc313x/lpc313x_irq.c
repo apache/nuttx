@@ -47,12 +47,13 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
+#include "arm.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
 #include "lpc313x_intc.h"
-#include "lpc313x_cgu.h"
+#include "lpc313x_cgudrvr.h"
 #include "lpc313x_internal.h"
 
 /****************************************************************************
@@ -115,6 +116,16 @@ void up_irqinitialize(void)
                INTC_REQUEST_PRIOLEVEL(1)|INTC_REQUEST_WEPRIO, address);
 
     }
+
+  /* currents_regs is non-NULL only while processing an interrupt */
+
+  current_regs = NULL;
+
+  /* And finally, enable interrupts */
+
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  irqrestore(SVC_MODE | PSR_F_BIT);
+#endif
 }
 
 /****************************************************************************
