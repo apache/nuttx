@@ -105,68 +105,69 @@
 #define CLKID_SYSCLKO_LAST                CLKID_SYSCLKO
 #define _D11B(id)                         _RBIT(id,CLKID_SYSCLKO_FIRST)
 
-#define CGU_NDOMAINS                      12
-#define CLKID_INVALIDCLK                  -1
-#define CLKID_INVALIDDOMAIN               -1
+#define CGU_NDOMAINS                      12 /* The number of clock domains */
+#define CLKID_INVALIDCLK                  -1 /* Indicates and invalid clock ID */
+#define DOMAINID_INVALID                  -1 /* Indicates an invalid domain ID */
+#define ESRNDX_INVALID                    -1 /* Indicates an invalid ESR register index */
 
-/* The number of fractional dividers available for each base frequency,
- * their bit widths and extractions for sub elements from the fractional
- * divider configuration register
+/* There are 24 fractional dividers, indexed 0 to 23.  The following definitions
+ * provide (1) the number of fractional dividers available for each base frequency,
+ * (2) start and end indices, and (3) extraction info for sub elements from the
+ * fractional divider configuration register
  */
 
-#define FRACDIV_BASE0_CNT                 7
-#define FRACDIV_BASE0_LOW                 0
-#define FRACDIV_BASE0_HIGH                6
+#define FRACDIV_BASE0_CNT                 7  /* 7 fractional dividers available */
+#define FRACDIV_BASE0_LOW                 0  /* First is index 0 */
+#define FRACDIV_BASE0_HIGH                6  /* Last is index 6 */
 #define FRACDIV_BASE0_FDIV0W              8
 
-#define FRACDIV_BASE1_CNT                 2
-#define FRACDIV_BASE1_LOW                 7
-#define FRACDIV_BASE1_HIGH                8
+#define FRACDIV_BASE1_CNT                 2  /* 2 fractional dividers available */
+#define FRACDIV_BASE1_LOW                 7  /* First is index 7 */
+#define FRACDIV_BASE1_HIGH                8  /* Last is index 8 */
 #define FRACDIV_BASE1_FDIV0W              8
 
-#define FRACDIV_BASE2_CNT                 2
-#define FRACDIV_BASE2_LOW                 9
-#define FRACDIV_BASE2_HIGH                10
+#define FRACDIV_BASE2_CNT                 2  /* 2 fractional dividers available */
+#define FRACDIV_BASE2_LOW                 9  /* First is index 9 */
+#define FRACDIV_BASE2_HIGH                10 /* Last is index 10 */
 #define FRACDIV_BASE2_FDIV0W              8
 
-#define FRACDIV_BASE3_CNT                 3
-#define FRACDIV_BASE3_LOW                 11
-#define FRACDIV_BASE3_HIGH                13
+#define FRACDIV_BASE3_CNT                 3  /* 3 fractional dividers available */
+#define FRACDIV_BASE3_LOW                 11 /* First is index 11 */
+#define FRACDIV_BASE3_HIGH                13 /* Last is index 12 */
 #define FRACDIV_BASE3_FDIV0W              8
 
-#define FRACDIV_BASE4_CNT                 1
-#define FRACDIV_BASE4_LOW                 14
-#define FRACDIV_BASE4_HIGH                14
+#define FRACDIV_BASE4_CNT                 1  /* 1 fractional divider available */
+#define FRACDIV_BASE4_LOW                 14 /* First is index 14 */
+#define FRACDIV_BASE4_HIGH                14 /* Last is index 14 */
 #define FRACDIV_BASE4_FDIV0W              8
 
-#define FRACDIV_BASE5_CNT                 1
-#define FRACDIV_BASE5_LOW                 15
-#define FRACDIV_BASE5_HIGH                15
+#define FRACDIV_BASE5_CNT                 1  /* 1 fractional divider available */
+#define FRACDIV_BASE5_LOW                 15 /* First is index 15 */
+#define FRACDIV_BASE5_HIGH                15 /* Last is index 15 */
 #define FRACDIV_BASE5_FDIV0W              8
 
-#define FRACDIV_BASE6_CNT                 1
-#define FRACDIV_BASE6_LOW                 16
-#define FRACDIV_BASE6_HIGH                16
+#define FRACDIV_BASE6_CNT                 1  /* 1 fractional divider available */
+#define FRACDIV_BASE6_LOW                 16 /* First is index 16 */
+#define FRACDIV_BASE6_HIGH                16 /* Last is index 16 */
 #define FRACDIV_BASE6_FDIV0W              8
 
-#define FRACDIV_BASE7_CNT                 6
-#define FRACDIV_BASE7_LOW                 17
-#define FRACDIV_BASE7_HIGH                22
+#define FRACDIV_BASE7_CNT                 6  /* 6 fractional dividers available */
+#define FRACDIV_BASE7_LOW                 17 /* First is index 17 */
+#define FRACDIV_BASE7_HIGH                22 /* Last is index 22 */
 #define FRACDIV_BASE7_FDIV0W              13
 
-#define FRACDIV_BASE8_CNT                 0
-#define FRACDIV_BASE9_CNT                 0
+#define FRACDIV_BASE8_CNT                 0  /* No fractional divider available */
+#define FRACDIV_BASE9_CNT                 0  /* No fractional divider available */
 
-#define FRACDIV_BASE10_CNT                1
-#define FRACDIV_BASE10_LOW                23
-#define FRACDIV_BASE10_HIGH               23
+#define FRACDIV_BASE10_CNT                1  /* 1 fractional divider available */
+#define FRACDIV_BASE10_LOW                23 /* First is index 23 */
+#define FRACDIV_BASE10_HIGH               23 /* Last is index 23 */
 #define FRACDIV_BASE10_FDIV0W             8
 
-#define FRACDIV_BASE11_CNT                0
+#define FRACDIV_BASE11_CNT                0  /* No fractional divider available */
 
-#define CGU_NDOMAINS                      12
-#define CLKID_INVALIDCLK                  -1
-#define CLKID_INVALIDDOMAIN               -1
+#define FDCNDX_INVALID                   -1 /* Indicates an invalid fractional
+                                              * divider index */
 
 /************************************************************************
  * Public Types
@@ -375,6 +376,41 @@ static inline void lpc313x_disableclock(enum lpc313x_clockid_e clkid)
  ************************************************************************/
 
 EXTERN enum lpc313x_domainid_e lpc313x_clkdomain(enum lpc313x_clockid_e clkid);
+
+/************************************************************************
+ * Name: lp313x_esrndx
+ *
+ * Description:
+ *   Given a clock ID, return the index of the corresponding ESR
+ *   register (or ESRNDX_INVALID if there is no ESR associated with
+ *   this clock ID).  Indexing of ESRs differs slightly from the clock
+ *   ID:  There are 92 clock IDs but only 89 ESR regisers. There are no
+ *  ESR registers for :
+ *
+ *
+ *  CLKID_I2SRXBCK0         Clock ID 87: I2SRX_BCK0
+ *  CLKID_I2SRXBCK1,        Clock ID 88: I2SRX_BCK1
+ *
+ * and
+ *
+ *  CLKID_SYSCLKO           Clock ID 91: SYSCLK_O
+ *
+ ************************************************************************/
+
+EXTERN int lp313x_esrndx(enum lpc313x_clockid_e clkid);
+
+/************************************************************************
+ * Name: lpc313x_fdcndx
+ *
+ * Description:
+ *   Given a clock ID and its domain ID, return the index of the
+ *   corresponding fractional divider register (or FDCNDX_INVALID if
+ *   there is no fractional divider associated with this clock).
+ *
+ ************************************************************************/
+
+EXTERN int lpc313x_fdcndx(enum lpc313x_clockid_e clkid,
+                          enum lpc313x_domainid_e dmnid);
 
 #undef EXTERN
 #ifdef __cplusplus
