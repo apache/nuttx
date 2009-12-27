@@ -45,6 +45,7 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+#include "up_arch.h"
 #include "lpc313x_cgu.h"
 
 /************************************************************************
@@ -238,7 +239,7 @@ enum lpc313x_clockid_e
   CLKID_MPMCCFGCLK3,      /* 28 MPMC_CFG_CLK3 */
   CLKID_INTCCLK,          /* 29 INTC_CLK */
 
-  /* Domain 1: AHB0APB0BASE */
+  /* Domain 1: AHB0APB0_BASE */
 
   CLKID_AHB2APB0PCLK,     /* 30 AHB_TO_APB0_PCLK */
   CLKID_EVENTROUTERPCLK,  /* 31 EVENT_ROUTER_PCLK */
@@ -251,7 +252,7 @@ enum lpc313x_clockid_e
   CLKID_OTPPCLK,          /* 38 OTP_PCLK (Reserved on LPC313X) */
   CLKID_RNGPCLK,          /* 39 RNG_PCLK */
 
-  /* Domain 2: AHB0APB1BASE */
+  /* Domain 2: AHB0APB1_BASE */
 
   CLKID_AHB2APB1PCLK,     /* 40 AHB_TO_APB1_PCLK */
   CLKID_TIMER0PCLK,       /* 41 TIMER0_PCLK */
@@ -264,7 +265,7 @@ enum lpc313x_clockid_e
   CLKID_I2C0PCLK,         /* 48 I2C0_PCLK */
   CLKID_I2C1PCLK,         /* 49 I2C1_PCLK */
 
-  /* Domain 3: AHB0APB2BASE */
+  /* Domain 3: AHB0APB2_BASE */
 
   CLKID_AHB2APB2PCLK,     /* 50 AHB_TO_APB2_PCLK */
   CLKID_PCMPCLK,          /* 51 PCM_PCLK */
@@ -331,6 +332,68 @@ enum lpc313x_clockid_e
   /* Domain 11: SYSCLKO_BASE */
 
   CLKID_SYSCLKO           /* 91 SYSCLK_O */
+};
+
+/* Indices into the CGU configuration reset control registers */
+
+enum lpc313x_resetid_e
+{
+  RESETID_APB0RST,        /*  4 AHB part of AHB_TO_APB0 bridge (Reserved) */
+  RESETID_AHB2APB0RST,    /*  5 APB part of AHB_TO_APB0 bridge (Reserved) */
+  RESETID_APB1RST,        /*  6 AHB part of AHB_TO_APB1 bridge */
+  RESETID_AHB2PB1RST,     /*  7 APB part of AHB_TO_APB1 bridge */
+  RESETID_APB2RST,        /*  8 AHB part of AHB_TO_APB2 bridge */
+  RESETID_AHB2APB2RST,    /*  9 APB part of AHB_TO_APB2 bridge */
+  RESETID_APB3RST,        /* 10 AHB part of AHB_TO_APB3 bridge */
+  RESETID_AHB2APB3RST,    /* 11 APB part of AHB_TO_APB3 bridge */
+  RESETID_APB4RST,        /* 12 AHB_TO_APB4 bridge */
+  RESETID_AHB2INTCRST,    /* 13 AHB_TO_INTC */
+  RESETID_AHB0RST,        /* 14 AHB0 */
+  RESETID_EBIRST,         /* 15 EBI */
+  RESETID_PCMAPBRST,      /* 16 APB domain of PCM */
+  RESETID_PCMCLKIPRST,    /* 17 synchronous clk_ip domain of PCM */
+  RESETID_PCMRSTASYNC,    /* 18 asynchronous clk_ip domain of PCM */
+  RESETID_TIMER0RST,      /* 19 Timer0 */
+  RESETID_TIMER1RST,      /* 20 Timer1 */
+  RESETID_TIMER2RST,      /* 21 Timer2 */
+  RESETID_TIMER3RST,      /* 22 Timer3 */
+  RESETID_ADCPRST,        /* 23 controller of 10 bit ADC Interface */
+  RESETID_ADCRST,         /* 24 A/D converter of ADC Interface */
+  RESETID_PWMRST,         /* 25 PWM */
+  RESETID_UARTRST,        /* 26 UART/IrDA */
+  RESETID_I2C0RST,        /* 27 I2C0 */
+  RESETID_I2C1RST,        /* 28 I2C1 */
+  RESETID_I2SCFGRST,      /* 29 I2S_Config */
+  RESETID_I2SNSOFRST,     /* 30 NSOF counter of I2S_CONFIG */
+  RESETID_EDGEDETRST,     /* 31 Edge_det */
+  RESETID_I2STXFF0RST,    /* 32 I2STX_FIFO_0 */
+  RESETID_I2STXIF0RST,    /* 33 I2STX_IF_0 */
+  RESETID_I2STXFF1RST,    /* 34 I2STX_FIFO_1 */
+  RESETID_I2STXIF1RST,    /* 35 I2STX_IF_1 */
+  RESETID_I2SRXFF0RST,    /* 36 I2SRX_FIFO_0 */
+  RESETID_I2SRXIF0RST,    /* 37 I2SRX_IF_0 */
+  RESETID_I2SRXFF1RST,    /* 38 I2SRX_FIFO_1 */
+  RESETID_I2SRXIF1RST,    /* 39 I2SRX_IF_1 */
+  RESETID_RESERVED40,     /* 40 Reserved */    
+  RESETID_RESERVED41,     /* 41 Reserved */    
+  RESETID_RESERVED42,     /* 42 Reserved */    
+  RESETID_RESERVED43,     /* 43 Reserved */    
+  RESETID_RESERVED44,     /* 44 Reserved */ 
+  RESETID_LCDRST,         /* 45 LCD Interface */
+  RESETID_SPIRSTAPB,      /* 46 apb_clk domain of SPI */
+  RESETID_SPIRSTIP,       /* 47 ip_clk domain of SPI */
+  RESETID_DMARST,         /* 48 DMA */
+  RESETID_NANDECCRST,     /* 49 Nandflash Controller ECC clock */
+  RESETID_NANDAESRST,     /* 50 Nandflash Controller AES clock (reserved for lpc313x) */
+  RESETID_NANDCTRLRST,    /* 51 Nandflash Controller */
+  RESETID_RNG,            /* 52 RNG */
+  RESETID_SDMMCRST,       /* 53 MCI (on AHB clock) */
+  RESETID_SDMMCRSTCKIN,   /* 54 CI synchronous (on IP clock) */
+  RESETID_USBOTGAHBRST,   /* 55 USB_OTG */
+  RESETID_REDCTLRST,      /* 56 Redundancy Controller */
+  RESETID_AHBMPMCHRST,    /* 57 MPMC */
+  RESETID_AHBMPMCRFRST,   /* 58 refresh generator used for MPMC */
+  RESETID_INTCRST,        /* 59 Interrupt Controller */
 };
 
 /************************************************************************
@@ -410,6 +473,16 @@ static inline void lpc313x_disableclock(enum lpc313x_clockid_e clkid)
 /************************************************************************
  * Public Functions
  ************************************************************************/
+
+/************************************************************************
+ * Name: lpc313x_softreset
+ *
+ * Description:
+ *   Perform a soft reset on the specified module.
+ *
+ ************************************************************************/
+
+EXTERN void lpc313x_softreset(enum lpc313x_resetid_e resetid);
 
 /************************************************************************
  * Name: lpc313x_clkdomain
