@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
+# include "lpc313x_cgudrvr.h"
 #endif
 
 /************************************************************************************
@@ -51,6 +52,26 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* The following 3 bitsets determine which clocks will be enabled at initialization
+ * time.
+ */
+ 
+#define BOARD_CLKS_0_31 \
+ (_RBIT(CLKID_APB0CLK,0)|_RBIT(CLKID_APB1CLK,0)|_RBIT(CLKID_APB2CLK,0)|\
+  _RBIT(CLKID_APB3CLK,0)|_RBIT(CLKID_APB4CLK,0)|_RBIT(CLKID_AHB2INTCCLK,0)|\
+  _RBIT(CLKID_AHB0CLK,0)|_RBIT(CLKID_ARM926CORECLK,0)|_RBIT(CLKID_ARM926BUSIFCLK,0)|\
+  _RBIT(CLKID_ARM926RETIMECLK,0)|_RBIT(CLKID_ISRAM0CLK,0)|_RBIT(CLKID_ISRAM1CLK,0)|\
+  _RBIT(CLKID_ISROMCLK,0)|_RBIT(CLKID_INTCCLK,0)|_RBIT(CLKID_AHB2APB0ASYNCPCLK,0)|\
+  _RBIT(CLKID_EVENTROUTERPCLK,0)|_RBIT(CLKID_CLOCKOUT,0))
+
+#define BOARD_CLKS_32_63 \
+ (_RBIT(CLKID_IOCONFPCLK,32)|_RBIT(CLKID_CGUPCLK,32)|_RBIT(CLKID_SYSCREGPCLK,32)|\
+  _RBIT(CLKID_OTPPCLK,32)|_RBIT(CLKID_AHB2APB1ASYNCPCLK,32)|_RBIT(CLKID_AHB2APB2ASYNCPCLK,32)|\
+  _RBIT(CLKID_AHB2APB3ASYNCPCLK,32)|_RBIT(CLKID_EDGEDETPCLK,32))
+
+#define BOARD_CLKS_64_92 \
+ (0)
+
 
 /* LED definitions ******************************************************************/
 
