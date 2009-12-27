@@ -337,11 +337,49 @@ enum lpc313x_clockid_e
  * Public Data
  ************************************************************************/
 
+/* This array must be provided by the board-specific logic to provide
+ * the programmed frequency of every input source.
+ */
+
+EXTERN int32_t g_boardfreqin[CGU_NFREQIN];
+
 /************************************************************************
  * Inline Functions
  ************************************************************************/
 
-/* Enable the specified clock */
+/************************************************************************
+ * Name: lpc313x_basefreq
+ *
+ * Description:
+ *   Return the base frequency associated with a clock domain
+ *
+ ************************************************************************/
+
+static inline int32_t lpc313x_basefreq(enum lpc313x_domainid_e dmnid)
+{
+  uint32_t regval;
+  int     ndx;
+
+  /* Fetch the SSR register associated with this clock domain */
+
+  regval = getreg32(LPC313X_CGU_SSR_OFFSET((int)dmnid));
+
+  /* Extract the last frequency input selection */
+
+  ndx    = (regval & CGU_SSR_FS_MASK) >> CGU_SSR_FS_SHIFT;
+
+  /* And return the user-supplied value for that frequency input */
+
+  return g_boardfreqin[ndx];
+}
+
+/************************************************************************
+ * Name: lpc313x_enableclock
+ *
+ * Description:
+ *   Enable the specified clock
+ *
+ ************************************************************************/
 
 static inline void lpc313x_enableclock(enum lpc313x_clockid_e clkid)
 {
@@ -352,7 +390,13 @@ static inline void lpc313x_enableclock(enum lpc313x_clockid_e clkid)
   putreg32(regval, address);
 }
 
-/* Disable the specified clock */
+/************************************************************************
+ * Name: lpc313x_disableclock
+ *
+ * Description:
+ *   Disable the specified clock
+ *
+ ************************************************************************/
 
 static inline void lpc313x_disableclock(enum lpc313x_clockid_e clkid)
 {
@@ -373,6 +417,7 @@ static inline void lpc313x_disableclock(enum lpc313x_clockid_e clkid)
  * Description:
  *   Given a clock ID, return the ID of the domain in which the clock
  *   resides.
+ *
  ************************************************************************/
 
 EXTERN enum lpc313x_domainid_e lpc313x_clkdomain(enum lpc313x_clockid_e clkid);
