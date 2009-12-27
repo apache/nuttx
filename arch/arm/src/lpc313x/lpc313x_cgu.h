@@ -484,6 +484,10 @@
 #define LPC313X_CGU_WDBARK_OFFSET        0x004 /* Watch dog bark register */
 #define LPC313X_CGU_FFASTON_OFFSET       0x008 /* Activate fast oscillator register */
 #define LPC313X_CGU_FFASTBYP_OFFSET      0x00c /* Bypass comparator register fast oscillator reset */
+
+/* Reset control */
+
+#define LPC313X_CGU_SOFTRST_OFFSET(n)    (0x010+((n)<<2))
 #define LPC313X_CGU_APB0RST_OFFSET       0x010 /* Reset AHB part of AHB_TO_APB0 bridge */
 #define LPC313X_CGU_AHB2APB0RST_OFFSET   0x014 /* Reset APB part of AHB_TO_APB0 bridge */
 #define LPC313X_CGU_APB1RST_OFFSET       0x018 /* Reset AHB part of AHB_TO_APB1 bridge */
@@ -524,10 +528,11 @@
 #define LPC313X_CGU_LCDRST_OFFSET        0x0b4 /* Reset LCD Interface */
 #define LPC313X_CGU_SPIRSTAPB_OFFSET     0x0b8 /* Reset apb_clk domain of SPI */
 #define LPC313X_CGU_SPIRSTIP_OFFSET      0x0bc /* Reset ip_clk domain of SPI */
-#define LPC313X_CGU_DMA_RST_OFFSET       0x0c0 /* Reset DMA */
+#define LPC313X_CGU_DMARST_OFFSET        0x0c0 /* Reset DMA */
 #define LPC313X_CGU_NANDECCRST_OFFSET    0x0c4 /* Reset Nandflash Controller ECC clock */
                                                /* 0x0c8: Reserved */
 #define LPC313X_CGU_NANDCTRLRST_OFFSET   0x0cc /* Reset of Nandflash Controller */
+#define LPC313X_CGU_RNGRST_OFFSET        0x0d0 /* Reset of RNG */
 #define LPC313X_CGU_SDMMCRST_OFFSET      0x0d4 /* Reset MCI (on AHB clock) */
 #define LPC313X_CGU_SDMMCRSTCKIN_OFFSET  0x0d8 /* Reset MCI synchronous (on IP clock) */
 #define LPC313X_CGU_USBOTGAHBRST_OFFSET  0x0dc /* Reset USB_OTG */
@@ -986,6 +991,10 @@
 #define LPC313X_CGU_WDBARK               (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_WDBARK_OFFSET)
 #define LPC313X_CGU_FFASTON              (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_FFASTON_OFFSET)
 #define LPC313X_CGU_FFASTBYP             (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_FFASTBYP_OFFSET)
+
+/* Reset control */
+
+#define LPC313X_CGU_SOFTRST(n)           (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_SOFTRST_OFFSET(n))
 #define LPC313X_CGU_APB0RST              (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_APB0RST_OFFSET)
 #define LPC313X_CGU_AHB2APB0RST          (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_AHB2APB0RST_OFFSET)
 #define LPC313X_CGU_APB1RST              (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_APB1RST_OFFSET)
@@ -1025,7 +1034,7 @@
 #define LPC313X_CGU_LCDRST               (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_LCDRST_OFFSET)
 #define LPC313X_CGU_SPIRSTAPB            (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_SPIRSTAPB_OFFSET)
 #define LPC313X_CGU_SPIRSTIP             (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_SPIRSTIP_OFFSET)
-#define LPC313X_CGU_DMA_RST              (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_DMA_RST_OFFSET)
+#define LPC313X_CGU_DMARST               (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_DMARST_OFFSET)
 #define LPC313X_CGU_NANDECCRST           (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_NANDECCRST_OFFSET)
 #define LPC313X_CGU_NANDCTRLRST          (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_NANDCTRLRST_OFFSET)
 #define LPC313X_CGU_SDMMCRST             (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_SDMMCRST_OFFSET)
@@ -1256,6 +1265,9 @@
 #define CGU_FFASTBYP_TESTMODE            (1 << 0)  /* Bit 0: Oscillator test mode */
 
 /* Reset control registers */
+
+#define CGU_SOFTRESET                    (1 << 0)  /* Bit 0: in all of the reset control registers */
+
 /* APB0_RESETN_SOFT register, address 0x13004c10 */
 
 #define CGU_APB0RST_RESET                (1 << 0)  /* Bit 0: Reserved */
@@ -1414,7 +1426,7 @@
 
 /* DMA_PNRES_SOFT register, address 0x13004cc0 */
 
-#define CGU_DMA_RST_RESET                (1 << 0)  /* Bit 0:  Reset for DMA */
+#define CGU_DMARST_RESET                 (1 << 0)  /* Bit 0:  Reset for DMA */
 
 /* NANDFLASH_CTRL_ECC_RESET_N_SOFT register, address 0x13004cc4 */
 
@@ -1628,6 +1640,7 @@
  ************************************************************************************************/
 
 #ifndef __ASSEMBLY__
+
 /************************************************************************************************
  * Public Data
  ************************************************************************************************/
