@@ -46,7 +46,8 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_undefinedinsn.c up_usestack.c
 
 CGU_ASRCS	= 
-CGU_CSRCS	= lpc313x_clkdomain.c lpc313x_fdcndx.c lpc313x_esrndx.c
+CGU_CSRCS	= lpc313x_clkdomain.c lpc313x_clkfreq.c lpc313x_esrndx.c \
+		  lpc313x_fdcndx.c
 
 CHIP_ASRCS	= $(CGU_ASRCS)
 CHIP_CSRCS	= lpc313x_irq.c lpc313x_allocateheap.c $(CGU_CSRCS)
