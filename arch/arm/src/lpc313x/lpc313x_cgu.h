@@ -1197,7 +1197,7 @@
 
 #define CGU_FDC_MSUB_SHIFT               (11)      /* Bits 11-18: Modulo subtraction value */
 #define CGU_FDC_MSUB_MASK                (255 << CGU_FDC_MSUB_SHIFT)
-#define CGU_FDC_MADD_SHIFT               (3)      /* Bits 3-10: Modulo addition value */
+#define CGU_FDC_MADD_SHIFT               (3)       /* Bits 3-10: Modulo addition value */
 #define CGU_FDC_MADD_MASK                (255 << CGU_FDC_MADD_SHIFT)
 #define CGU_FDC_STRETCH                  (1 << 2)  /* Bit 2:  Enables the stretching option */
 #define CGU_FDC_RESET                    (1 << 1)  /* Bit 1:  Reset fractional divider */
@@ -1205,7 +1205,7 @@
 
 #define CGU_FDC17_MSUB_SHIFT             (16)      /* Bits 16-28: Modulo subtraction value */
 #define CGU_FDC17_MSUB_MASK              (0x1fff << CGU_FDC17_MSUB_SHIFT)
-#define CGU_FDC17_MADD_SHIFT             (3)      /* Bits 3-15: Modulo addition value */
+#define CGU_FDC17_MADD_SHIFT             (3)       /* Bits 3-15: Modulo addition value */
 #define CGU_FDC17_MADD_MASK              (0x1fff << CGU_FDC17_MADD_SHIFT)
 #define CGU_FDC17_STRETCH                (1 << 2)  /* Bit 2:  Enables the stretching option */
 #define CGU_FDC17_RESET                  (1 << 1)  /* Bit 1:  Reset fractional divider */

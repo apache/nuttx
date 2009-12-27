@@ -457,6 +457,18 @@ EXTERN int lp313x_esrndx(enum lpc313x_clockid_e clkid);
 EXTERN int lpc313x_fdcndx(enum lpc313x_clockid_e clkid,
                           enum lpc313x_domainid_e dmnid);
 
+/************************************************************************
+ * Name: lpc313x_fdcndx
+ *
+ * Description:
+ *   Given a clock ID and its domain ID, return the frequency of the
+ *   clock.
+ *
+ ************************************************************************/
+
+EXTERN uint32_t lpc313x_clkfreq(enum lpc313x_clockid_e clkid,
+                                enum lpc313x_domainid_e dmnid);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
