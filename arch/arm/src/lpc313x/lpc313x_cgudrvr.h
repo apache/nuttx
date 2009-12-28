@@ -404,7 +404,7 @@ enum lpc313x_resetid_e
  * the programmed frequency of every input source.
  */
 
-EXTERN int32_t g_boardfreqin[CGU_NFREQIN];
+EXTERN const int32_t g_boardfreqin[CGU_NFREQIN];
 
 /************************************************************************
  * Inline Functions
