@@ -99,6 +99,6 @@ void lpc313x_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  /* up_ledinit(); Currently called in up_head.S */
+  up_ledinit();
 #endif
 }

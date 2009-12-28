@@ -44,6 +44,7 @@
 
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
 #include "imx_gpio.h"
 
