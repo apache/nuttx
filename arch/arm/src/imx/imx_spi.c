@@ -332,7 +332,7 @@ static void spi_rxnull(struct imx_spidev_s *priv)
   (void)spi_getreg(priv, CSPI_RXD_OFFSET);
 }
 
-static voidspi_rxuint16(struct imx_spidev_s *priv)
+static void spi_rxuint16(struct imx_spidev_s *priv)
 {
   uint16_t *ptr = (uint16_t*)priv->rxbuffer;
   *ptr++ = (uint16_t)spi_getreg(priv, CSPI_TXD_OFFSET);

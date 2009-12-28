@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
+#include "chip.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -210,4 +211,15 @@ void up_boot(void)
   /* Perform board-specific initialiation */
 
   imx_boardinitialize();
+
+  /* Set up the board-specific LEDs */
+
+#ifdef CONFIG_ARCH_LEDS
+  up_ledinit();
+#endif
+  /* Perform early serial initialization */
+
+#ifdef CONFIG_USE_EARLYSERIALINIT
+  up_earlyserialinit();
+#endif
 }
