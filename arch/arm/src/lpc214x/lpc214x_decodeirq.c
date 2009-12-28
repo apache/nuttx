@@ -45,9 +45,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include "chip.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
+
 #include "lpc214x_vic.h"
 
 /********************************************************************************

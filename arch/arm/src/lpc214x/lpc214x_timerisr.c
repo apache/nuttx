@@ -44,9 +44,10 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
+#include "up_arch.h"
 #include "clock_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
 
 #include "lpc214x_timer.h"
 #include "lpc214x_vic.h"

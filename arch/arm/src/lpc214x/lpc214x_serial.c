@@ -52,6 +52,7 @@
 #include <nuttx/serial.h>
 #include <arch/serial.h>
 
+#include "chip.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"

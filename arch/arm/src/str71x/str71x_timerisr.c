@@ -45,11 +45,11 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
+#include "up_arch.h"
 #include "clock_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
 
-#include "chip.h"
 #include "str71x_internal.h"
 
 /****************************************************************************
