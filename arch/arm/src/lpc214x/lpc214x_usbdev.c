@@ -55,8 +55,10 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+
 #include "lpc214x_usbdev.h"
 #include "lpc214x_pll.h"
 #include "lpc214x_power.h"

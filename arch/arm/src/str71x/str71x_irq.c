@@ -45,9 +45,9 @@
 #include <nuttx/arch.h>
 
 #include "arm.h"
+#include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip.h"
 
 /****************************************************************************
  * Pre-procesor Definitions
