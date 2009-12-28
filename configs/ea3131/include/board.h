@@ -52,6 +52,10 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* Frequency of the installed crystal */
+
+#define LPC313X_XTALIN (12000000)
+
 /* The following 3 bitsets determine which clocks will be enabled at initialization
  * time.
  */
