@@ -338,62 +338,62 @@ enum lpc313x_clockid_e
 
 enum lpc313x_resetid_e
 {
-  RESETID_APB0RST,        /*  4 AHB part of AHB_TO_APB0 bridge (Reserved) */
-  RESETID_AHB2APB0RST,    /*  5 APB part of AHB_TO_APB0 bridge (Reserved) */
-  RESETID_APB1RST,        /*  6 AHB part of AHB_TO_APB1 bridge */
-  RESETID_AHB2PB1RST,     /*  7 APB part of AHB_TO_APB1 bridge */
-  RESETID_APB2RST,        /*  8 AHB part of AHB_TO_APB2 bridge */
-  RESETID_AHB2APB2RST,    /*  9 APB part of AHB_TO_APB2 bridge */
-  RESETID_APB3RST,        /* 10 AHB part of AHB_TO_APB3 bridge */
-  RESETID_AHB2APB3RST,    /* 11 APB part of AHB_TO_APB3 bridge */
-  RESETID_APB4RST,        /* 12 AHB_TO_APB4 bridge */
-  RESETID_AHB2INTCRST,    /* 13 AHB_TO_INTC */
-  RESETID_AHB0RST,        /* 14 AHB0 */
-  RESETID_EBIRST,         /* 15 EBI */
-  RESETID_PCMAPBRST,      /* 16 APB domain of PCM */
-  RESETID_PCMCLKIPRST,    /* 17 synchronous clk_ip domain of PCM */
-  RESETID_PCMRSTASYNC,    /* 18 asynchronous clk_ip domain of PCM */
-  RESETID_TIMER0RST,      /* 19 Timer0 */
-  RESETID_TIMER1RST,      /* 20 Timer1 */
-  RESETID_TIMER2RST,      /* 21 Timer2 */
-  RESETID_TIMER3RST,      /* 22 Timer3 */
-  RESETID_ADCPRST,        /* 23 controller of 10 bit ADC Interface */
-  RESETID_ADCRST,         /* 24 A/D converter of ADC Interface */
-  RESETID_PWMRST,         /* 25 PWM */
-  RESETID_UARTRST,        /* 26 UART/IrDA */
-  RESETID_I2C0RST,        /* 27 I2C0 */
-  RESETID_I2C1RST,        /* 28 I2C1 */
-  RESETID_I2SCFGRST,      /* 29 I2S_Config */
-  RESETID_I2SNSOFRST,     /* 30 NSOF counter of I2S_CONFIG */
-  RESETID_EDGEDETRST,     /* 31 Edge_det */
-  RESETID_I2STXFF0RST,    /* 32 I2STX_FIFO_0 */
-  RESETID_I2STXIF0RST,    /* 33 I2STX_IF_0 */
-  RESETID_I2STXFF1RST,    /* 34 I2STX_FIFO_1 */
-  RESETID_I2STXIF1RST,    /* 35 I2STX_IF_1 */
-  RESETID_I2SRXFF0RST,    /* 36 I2SRX_FIFO_0 */
-  RESETID_I2SRXIF0RST,    /* 37 I2SRX_IF_0 */
-  RESETID_I2SRXFF1RST,    /* 38 I2SRX_FIFO_1 */
-  RESETID_I2SRXIF1RST,    /* 39 I2SRX_IF_1 */
-  RESETID_RESERVED40,     /* 40 Reserved */    
-  RESETID_RESERVED41,     /* 41 Reserved */    
-  RESETID_RESERVED42,     /* 42 Reserved */    
-  RESETID_RESERVED43,     /* 43 Reserved */    
-  RESETID_RESERVED44,     /* 44 Reserved */ 
-  RESETID_LCDRST,         /* 45 LCD Interface */
-  RESETID_SPIRSTAPB,      /* 46 apb_clk domain of SPI */
-  RESETID_SPIRSTIP,       /* 47 ip_clk domain of SPI */
-  RESETID_DMARST,         /* 48 DMA */
-  RESETID_NANDECCRST,     /* 49 Nandflash Controller ECC clock */
-  RESETID_NANDAESRST,     /* 50 Nandflash Controller AES clock (reserved for lpc313x) */
-  RESETID_NANDCTRLRST,    /* 51 Nandflash Controller */
-  RESETID_RNG,            /* 52 RNG */
-  RESETID_SDMMCRST,       /* 53 MCI (on AHB clock) */
-  RESETID_SDMMCRSTCKIN,   /* 54 CI synchronous (on IP clock) */
-  RESETID_USBOTGAHBRST,   /* 55 USB_OTG */
-  RESETID_REDCTLRST,      /* 56 Redundancy Controller */
-  RESETID_AHBMPMCHRST,    /* 57 MPMC */
-  RESETID_AHBMPMCRFRST,   /* 58 refresh generator used for MPMC */
-  RESETID_INTCRST,        /* 59 Interrupt Controller */
+  RESETID_APB0RST,        /*  0 AHB part of AHB_TO_APB0 bridge (Reserved) */
+  RESETID_AHB2APB0RST,    /*  1 APB part of AHB_TO_APB0 bridge (Reserved) */
+  RESETID_APB1RST,        /*  2 AHB part of AHB_TO_APB1 bridge */
+  RESETID_AHB2PB1RST,     /*  3 APB part of AHB_TO_APB1 bridge */
+  RESETID_APB2RST,        /*  4 AHB part of AHB_TO_APB2 bridge */
+  RESETID_AHB2APB2RST,    /*  5 APB part of AHB_TO_APB2 bridge */
+  RESETID_APB3RST,        /*  6 AHB part of AHB_TO_APB3 bridge */
+  RESETID_AHB2APB3RST,    /*  7 APB part of AHB_TO_APB3 bridge */
+  RESETID_APB4RST,        /*  8 AHB_TO_APB4 bridge */
+  RESETID_AHB2INTCRST,    /*  9 AHB_TO_INTC */
+  RESETID_AHB0RST,        /* 10 AHB0 */
+  RESETID_EBIRST,         /* 11 EBI */
+  RESETID_PCMAPBRST,      /* 12 APB domain of PCM */
+  RESETID_PCMCLKIPRST,    /* 13 synchronous clk_ip domain of PCM */
+  RESETID_PCMRSTASYNC,    /* 14 asynchronous clk_ip domain of PCM */
+  RESETID_TIMER0RST,      /* 15 Timer0 */
+  RESETID_TIMER1RST,      /* 16 Timer1 */
+  RESETID_TIMER2RST,      /* 17 Timer2 */
+  RESETID_TIMER3RST,      /* 18 Timer3 */
+  RESETID_ADCPRST,        /* 19 controller of 10 bit ADC Interface */
+  RESETID_ADCRST,         /* 20 A/D converter of ADC Interface */
+  RESETID_PWMRST,         /* 21 PWM */
+  RESETID_UARTRST,        /* 22 UART/IrDA */
+  RESETID_I2C0RST,        /* 23 I2C0 */
+  RESETID_I2C1RST,        /* 24 I2C1 */
+  RESETID_I2SCFGRST,      /* 25 I2S_Config */
+  RESETID_I2SNSOFRST,     /* 26 NSOF counter of I2S_CONFIG */
+  RESETID_EDGEDETRST,     /* 27 Edge_det */
+  RESETID_I2STXFF0RST,    /* 28 I2STX_FIFO_0 */
+  RESETID_I2STXIF0RST,    /* 29 I2STX_IF_0 */
+  RESETID_I2STXFF1RST,    /* 30 I2STX_FIFO_1 */
+  RESETID_I2STXIF1RST,    /* 31 I2STX_IF_1 */
+  RESETID_I2SRXFF0RST,    /* 32 I2SRX_FIFO_0 */
+  RESETID_I2SRXIF0RST,    /* 33 I2SRX_IF_0 */
+  RESETID_I2SRXFF1RST,    /* 34 I2SRX_FIFO_1 */
+  RESETID_I2SRXIF1RST,    /* 35 I2SRX_IF_1 */
+  RESETID_RESERVED40,     /* 36 Reserved */    
+  RESETID_RESERVED41,     /* 37 Reserved */    
+  RESETID_RESERVED42,     /* 38 Reserved */    
+  RESETID_RESERVED43,     /* 39 Reserved */    
+  RESETID_RESERVED44,     /* 40 Reserved */ 
+  RESETID_LCDRST,         /* 41 LCD Interface */
+  RESETID_SPIRSTAPB,      /* 42 apb_clk domain of SPI */
+  RESETID_SPIRSTIP,       /* 43 ip_clk domain of SPI */
+  RESETID_DMARST,         /* 44 DMA */
+  RESETID_NANDECCRST,     /* 45 Nandflash Controller ECC clock */
+  RESETID_NANDAESRST,     /* 46 Nandflash Controller AES clock (reserved for lpc313x) */
+  RESETID_NANDCTRLRST,    /* 47 Nandflash Controller */
+  RESETID_RNG,            /* 48 RNG */
+  RESETID_SDMMCRST,       /* 49 MCI (on AHB clock) */
+  RESETID_SDMMCRSTCKIN,   /* 50 CI synchronous (on IP clock) */
+  RESETID_USBOTGAHBRST,   /* 51 USB_OTG */
+  RESETID_REDCTLRST,      /* 52 Redundancy Controller */
+  RESETID_AHBMPMCHRST,    /* 53 MPMC */
+  RESETID_AHBMPMCRFRST,   /* 54 refresh generator used for MPMC */
+  RESETID_INTCRST,        /* 55 Interrupt Controller */
 };
 
 /************************************************************************
