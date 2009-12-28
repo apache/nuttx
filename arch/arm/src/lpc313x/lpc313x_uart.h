@@ -134,6 +134,7 @@
 #define UART_IER_RLSINTEN                 (1 << 2)  /* Bit 2:  Receiver Line Status interrupt enable */
 #define UART_IER_THREINTEN                (1 << 1)  /* Bit 1:  Transmitter Holding Register Empty interrupt enable */
 #define UART_IER_RDAINTEN                 (1 << 0)  /* Bit 0:  Receive Data Available interrupt enable */
+#define UART_IER_ALLINTS                  (0x1f)
 
 /* Interrupt Identification Register IIR, address 0x15001008 */
 
@@ -141,21 +142,21 @@
 #define UART_IIR_FIFOEN_MASK              (3 << UART_IIR_FIFOEN_SHIFT)
 #define UART_IIR_INTID_SHIFT              (1)       /* Bits 1-3: Interrupt identification */
 #define UART_IIR_INTID_MASK               (7 << UART_IIR_INTID_SHIFT)
-#  define UART_IIR_INTID_MODEMSTATUS      (0 << UART_IIR_INTID_SHIFT) /* Modem status */
-#  define UART_IIR_INTID_THREMPTY         (1 << UART_IIR_INTID_SHIFT) /* Transmitter Holding Register empty */
-#  define UART_IIR_INTID_REVCDATA         (2 << UART_IIR_INTID_SHIFT) /* Received Data Available */
-#  define UART_IIR_INTID_LINESTATUS       (3 << UART_IIR_INTID_SHIFT) /* Receiver Line Status */
+#  define UART_IIR_INTID_MS               (0 << UART_IIR_INTID_SHIFT) /* Modem status */
+#  define UART_IIR_INTID_THRE             (1 << UART_IIR_INTID_SHIFT) /* Transmitter Holding Register empty */
+#  define UART_IIR_INTID_RDA              (2 << UART_IIR_INTID_SHIFT) /* Received Data Available */
+#  define UART_IIR_INTID_RLS              (3 << UART_IIR_INTID_SHIFT) /* Receiver Line Status */
 #  define UART_IIR_INTID_TIMEOUT          (6 << UART_IIR_INTID_SHIFT) /* Character time-out */
-#define UART_IIR_INTSTATUS                (1 << 0)  /* Bit 0:  0 Interrupt status */
+#define UART_IIR_NOINT                    (1 << 0)  /* Bit 0:  Interrupt status, 1=no interrupt */
 
 /* FIFO Control Register FCR, address 0x15001008 */
 
 #define UART_FCR_RXTRIGLEVEL_SHIFT        (6)       /* Bits 6-7: 7:6 Receiver trigger level selection */
 #define UART_FCR_RXTRIGLEVEL_MASK         (3 << UART_FCR_RXTRIGLEVEL_SHIFT)
-#define UART_FCR_RXTRIGLEVEL              (0 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 1 */
-#define UART_FCR_RXTRIGLEVEL              (1 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 16 */
-#define UART_FCR_RXTRIGLEVEL              (2 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 32 */
-#define UART_FCR_RXTRIGLEVEL              (3 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 56 */
+#  define UART_FCR_RXTRIGLEVEL_1          (0 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 1 */
+#  define UART_FCR_RXTRIGLEVEL_16         (1 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 16 */
+#  define UART_FCR_RXTRIGLEVEL_32         (2 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 32 */
+#  define UART_FCR_RXTRIGLEVEL_56         (3 << UART_FCR_RXTRIGLEVEL_SHIFT) /* Rx trigger at character 56 */
 #define UART_FCR_DMAMODE                  (1 << 3)  /* Bit 3:  DMA mode select */
 #define UART_FCR_TXFIFORST                (1 << 2)  /* Bit 2:  Transmitter FIFO reset */
 #define UART_FCR_RXFIFORST                (1 << 1)  /* Bit 1:  Receiver FIFO reset */
@@ -171,10 +172,10 @@
 #define UART_LCR_NSTOPBITS                (1 << 2)  /* Bit 2: Number of stop bits selector */
 #define UART_LCR_WDLENSEL_SHIFT           (0)       /* Bits 0-1: Word length selector */
 #define UART_LCR_WDLENSEL_MASK            (3 << UART_LCR_WDLENSEL_SHIFT)
-#define UART_LCR_WDLENSEL_5BITS           (0 << UART_LCR_WDLENSEL_SHIFT) /* Char length=5 stopbits=1 or 1.5*/
-#define UART_LCR_WDLENSEL_6BITS           (1 << UART_LCR_WDLENSEL_SHIFT) /* Char length=6 stopbits=1 or 2 */
-#define UART_LCR_WDLENSEL_7BITS           (2 << UART_LCR_WDLENSEL_SHIFT) /* Char length=7 stopbits=1 or 2 */
-#define UART_LCR_WDLENSEL_8BITS           (3 << UART_LCR_WDLENSEL_SHIFT) /* Char length=8 stopbits=1 or 2 */
+#  define UART_LCR_WDLENSEL_5BITS         (0 << UART_LCR_WDLENSEL_SHIFT) /* Char length=5 stopbits=1 or 1.5*/
+#  define UART_LCR_WDLENSEL_6BITS         (1 << UART_LCR_WDLENSEL_SHIFT) /* Char length=6 stopbits=1 or 2 */
+#  define UART_LCR_WDLENSEL_7BITS         (2 << UART_LCR_WDLENSEL_SHIFT) /* Char length=7 stopbits=1 or 2 */
+#  define UART_LCR_WDLENSEL_8BITS         (3 << UART_LCR_WDLENSEL_SHIFT) /* Char length=8 stopbits=1 or 2 */
 
 /* Modem Control Register MCR, address 0x15001010 */
 
@@ -192,7 +193,7 @@
 #define UART_LSR_FE                       (1 << 3)  /* Bit 3:  Framing error */
 #define UART_LSR_PE                       (1 << 2)  /* Bit 2:  Parity error */
 #define UART_LSR_OE                       (1 << 1)  /* Bit 1:  Overrun error */
-#define UART_LSR_DR                       (1 << 0)  /* Bit 0:  Data ready */
+#define UART_LSR_RDR                      (1 << 0)  /* Bit 0:  Read Data ready */
 
 /* Modem Status Register MSR, address 0x15001018 */
 
