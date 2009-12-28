@@ -45,6 +45,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/board/board.h>
+
 #include "chip.h"
 #include "up_arch.h"
 #include "os_internal.h"
