@@ -57,7 +57,7 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-#include "lpc313x_cgudriver.h"
+#include "lpc313x_cgudrvr.h"
 #include "lpc313x_uart.h"
 
 #ifdef CONFIG_USE_SERIALDRIVER
@@ -78,6 +78,12 @@ struct up_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static inline void up_disableuartint(struct up_dev_s *priv, uint8_t *ier);
+static inline void up_restoreuartint(struct up_dev_s *priv, uint8_t ier);
+static inline void up_enablebreaks(void);
+static inline void up_disablebreaks(void);
+static inline void up_configbaud(void);
 
 static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
@@ -167,43 +173,24 @@ static inline void up_restoreuartint(struct up_dev_s *priv, uint8_t ier)
 }
 
 /****************************************************************************
- * Name: up_waittxready
- ****************************************************************************/
-
-static inline void up_waittxready(struct up_dev_s *priv)
-{
-  int tmp;
-
-  /* Limit how long we will wait for the TX available condition */
-
-  for (tmp = 1000 ; tmp > 0 ; tmp--)
-    {
-      /* Check if the tranmitter holding register (THR) is empty */
- 
-      if ((getreg32(LPC313X_UART_LSR) & UART_LSR_THRE) != 0)
-        {
-          /* The THR is empty, return */
-
-          break;
-        }
-    }
-}
-
-/****************************************************************************
  * Name: up_enablebreaks
  ****************************************************************************/
 
-static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
+static inline void up_enablebreaks(void)
 {
-  uint32_t_t lcr = getreg32(LPC313X_UART_LCR);
-  if (enable)
-    {
-      lcr |= UART_LCR_BRKCTRL;
-    }
-  else
-    {
-      lcr &= ~UART_LCR_BRKCTRL;
-    }
+  uint32_t lcr = getreg32(LPC313X_UART_LCR);
+  lcr |= UART_LCR_BRKCTRL;
+  putreg32(lcr, LPC313X_UART_LCR);
+}
+
+/****************************************************************************
+ * Name: up_disablebreaks
+ ****************************************************************************/
+
+static inline void up_disablebreaks(void)
+{
+  uint32_t lcr = getreg32(LPC313X_UART_LCR);
+  lcr &= ~UART_LCR_BRKCTRL;
   putreg32(lcr, LPC313X_UART_LCR);
 }
 
@@ -305,43 +292,43 @@ static inline void up_configbaud(void)
 
     /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
 
-    regval  = getreg32(LPV313X_UART_LCR);
-    regval |= UART_LCR_DLAB
-    putreg32(regval, LPV313X_UART_LCR);
+    regval  = getreg32(LPC313X_UART_LCR);
+    regval |= UART_LCR_DLAB;
+    putreg32(regval, LPC313X_UART_LCR);
 
     /* Configure the MS and LS DLAB registers */
 
     putreg32(div & UART_DLL_MASK, LPC313X_UART_DLL);
-    putreg32((div >> 8) & UART_DLL_MASK, LPC313X_UART_DLM);\
+    putreg32((div >> 8) & UART_DLL_MASK, LPC313X_UART_DLM);
 
-    regval &~= UART_LCR_DLAB
-    putreg32(regval, LPV313X_UART_LCR);
+    regval &= ~UART_LCR_DLAB;
+    putreg32(regval, LPC313X_UART_LCR);
 
     /* Configure the Fractional Divider Register (FDR) */
 
     putreg32((mulval    << UART_FDR_MULVAL_SHIFT) |
              (divaddval << UART_FDR_DIVADDVAL_SHIFT),
-             LPC313X_UART_FRD);
+             LPC313X_UART_FDR);
 #else
     /* Set the Divisor Latch Access Bit (DLAB) to enable DLL/DLM access */
 
-    regval  = getreg32(LPV313X_UART_LCR);
-    regval |= UART_LCR_DLAB
-    putreg32(regval, LPV313X_UART_LCR);
+    regval  = getreg32(LPC313X_UART_LCR);
+    regval |= UART_LCR_DLAB;
+    putreg32(regval, LPC313X_UART_LCR);
 
     /* Configure the MS and LS DLAB registers */
 
     putreg32(CONFIG_LPC313X_UART_DIVISOR & UART_DLL_MASK, LPC313X_UART_DLL);
-    putreg32((CONFIG_LPC313X_UART_DIVISOR >> 8) & UART_DLL_MASK, LPC313X_UART_DLM);\
+    putreg32((CONFIG_LPC313X_UART_DIVISOR >> 8) & UART_DLL_MASK, LPC313X_UART_DLM);
 
-    regval &~= UART_LCR_DLAB
-    putreg32(regval, LPV313X_UART_LCR);
+    regval &= ~UART_LCR_DLAB;
+    putreg32(regval, LPC313X_UART_LCR);
 
     /* Configure the Fractional Divider Register (FDR) */
 
     putreg32((CONFIG_LPC313X_UART_MULVAL    << UART_FDR_MULVAL_SHIFT) |
              (CONFIG_LPC313X_UART_DIVADDVAL << UART_FDR_DIVADDVAL_SHIFT),
-             LPC313X_UART_FRD);
+             LPC313X_UART_FDR);
 #endif
 }
 
@@ -392,10 +379,10 @@ static int up_setup(struct uart_dev_s *dev)
 
 #if CONFIG_UART_PARITY == 1
   regval |= UART_LCR_PAREN;
-#elif CONFIG_UART_PARITY == 2)
+#elif CONFIG_UART_PARITY == 2
   regval |= (UART_LCR_PAREVEN|UART_LCR_PAREN);
 #endif
-  putreg32(regval, LPV313X_UART_LCR);
+  putreg32(regval, LPC313X_UART_LCR);
 
   /* Set the BAUD divisor */
 
@@ -403,7 +390,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Configure the FIFOs */
 
-  putreg32((UART_FCR_RXTRIGLEVEL_16|UART_FCR_TXFIFORST|\
+  putreg32((UART_FCR_RXTRIGLEVEL_16|UART_FCR_TXFIFORST|
             UART_FCR_RXFIFORST|UART_FCR_FIFOENABLE),
            LPC313X_UART_FCR);
 
@@ -496,7 +483,6 @@ static void up_detach(struct uart_dev_s *dev)
 static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev   = &g_uartport;
-  struct up_dev_s   *priv  = &g_uartpriv;
   uint8_t            status;
   int                passes;
 
@@ -592,7 +578,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
-  struct up_dev_s   *priv  = (struct up_dev_s*)dev->priv;
   int                ret    = OK;
 
   switch (cmd)
@@ -614,7 +599,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags = irqsave();
-        up_enablebreaks(priv, true);
+        up_enablebreaks();
         irqrestore(flags);
       }
       break;
@@ -623,7 +608,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       {
         irqstate_t flags;
         flags = irqsave();
-        up_enablebreaks(priv, false);
+        up_disablebreaks();
         irqrestore(flags);
       }
       break;
@@ -690,7 +675,6 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((getreg32(LPC313X_UART_LSR) & UART_LSR_RDR) != 0);
 }
 
@@ -704,7 +688,6 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   putreg32((uint32_t)ch, LPC313X_UART_THR);
 }
 
@@ -742,7 +725,6 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 static bool up_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((getreg32(LPC313X_UART_LSR) & UART_LSR_THRE) != 0);
 }
 
@@ -756,12 +738,11 @@ static bool up_txready(struct uart_dev_s *dev)
 
 static bool up_txempty(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   return ((getreg32(LPC313X_UART_LSR) & UART_LSR_TEMT) != 0);
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -820,12 +801,14 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-  struct up_dev_s *priv = g_uartpriv;
+  struct up_dev_s *priv = &g_uartpriv;
   uint8_t ier;
 
+  /* Keep UART interrupts disabled so that we do not interfere with the
+   * serial driver.
+   */
+
   up_disableuartint(priv, &ier);
-  up_waittxready(priv);
-  putreg32((uint32_t)ch, LPC313X_UART_THR);
 
   /* Check for LF */
 
@@ -833,11 +816,12 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_waittxready(priv);
-      putreg32('\r', LPC313X_UART_THR);
+      up_lowputc('\r');
     }
 
-  up_waittxready(priv);
+  /* Output the character */
+
+  up_lowputc(ch);
   up_restoreuartint(priv, ier);
   return ch;
 }
@@ -862,6 +846,8 @@ int up_putc(int ch)
 
       up_lowputc('\r');
     }
+
+  /* Output the character */
 
   up_lowputc(ch);
   return ch;
