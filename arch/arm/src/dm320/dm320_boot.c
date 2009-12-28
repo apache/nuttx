@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
+#include "chip.h"
 #include "arm.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -226,4 +227,15 @@ void up_boot(void)
    */
 
   up_copyvectorblock();
+
+  /* Set up the board-specific LEDs */
+
+#ifdef CONFIG_ARCH_LEDS
+  up_ledinit();
+#endif
+  /* Perform early serial initialization */
+
+#ifdef CONFIG_USE_EARLYSERIALINIT
+  up_earlyserialinit();
+#endif
 }
