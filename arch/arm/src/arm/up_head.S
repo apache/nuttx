@@ -321,20 +321,9 @@ __start:
 	strcc	fp, [r0],#4
 	bcc	.Lbssinit
 
-	/* Perform early C-level initialization */
+	/* Perform early C-level, platform-specific initialization */
 
 	bl	up_boot
-
-	/* Set up the LEDs */
-
-#ifdef CONFIG_ARCH_LEDS
-	bl	up_ledinit
-#endif
-	/* Perform early serial initialization */
-
-#ifdef CONFIG_USE_EARLYSERIALINIT
-	bl      up_earlyserialinit
-#endif
 
 	/* Finally branch to the OS entry point */
 

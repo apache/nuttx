@@ -50,6 +50,7 @@
 #include <nuttx/irq.h>
 #include <arch/watchdog.h>
 
+#include "chip.h"
 #include "up_arch.h"
 
 /**************************************************************************
