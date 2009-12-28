@@ -43,8 +43,10 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <debug.h>
+
 #include <nuttx/mm.h>
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
