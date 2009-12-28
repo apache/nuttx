@@ -142,6 +142,7 @@
  */
 
 /* For now, just to get through the compilation */
+
 #define NUTTX_START_VADDR            0x00000000
 
 /************************************************************************************
