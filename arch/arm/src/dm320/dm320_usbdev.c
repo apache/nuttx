@@ -55,6 +55,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "dm320_usb.h"
