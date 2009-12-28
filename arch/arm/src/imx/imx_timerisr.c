@@ -44,10 +44,12 @@
 #include <debug.h>
 #include <errno.h>
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
+#include "chip.h"
+#include "up_arch.h"
 #include "clock_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
 
 /****************************************************************************
  * Pre-processor Definitions
