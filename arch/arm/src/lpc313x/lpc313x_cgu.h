@@ -541,6 +541,29 @@
 #define LPC313X_CGU_AHBMPMCRFRST_OFFSET  0x0e8 /* Reset refresh generator used for MPMC */
 #define LPC313X_CGU_INTCRST_OFFSET       0x0ec /* Reset Interrupt Controller */
 
+/* HP PLL controls */
+
+#define LPC313x_CGU_HP0PLL_OFFSET        0x0f0 /* Base offset to HP0 PLL registers */
+#define LPC313x_CGU_HP1PLL_OFFSET        0x128 /* Base offset to HP1 PLL registers */
+#define CGU_HP0PLL                       0     /* HP0 PLL selector */
+#define CGU_HP1PLL                       1     /* HP1 PLL selector */
+#define LPC313x_CGU_HPPLL_OFFSET(n)      ((n) ? LPC313x_CGU_HP1PLL_OFFSET : LPC313x_CGU_HP0PLL_OFFSET)
+
+#define LPC313X_CGU_HPFINSEL_OFFSET      0x000 /* Register for selecting input to high HPPLL0/1 */
+#define LPC313X_CGU_HPMDEC_OFFSET        0x004 /* M-divider register of HP0/1 PLL */
+#define LPC313X_CGU_HPNDEC_OFFSET        0x008 /* N-divider register of HP0/1 PLL */
+#define LPC313X_CGU_HPPDEC_OFFSET        0x00c /* P-divider register of HP0/1 PLL */
+#define LPC313X_CGU_HPMODE_OFFSET        0x010 /* Mode register of HP0/1 PLL */
+#define LPC313X_CGU_HPSTATUS_OFFSET      0x014 /* Status register of HP0/1 PLL */
+#define LPC313X_CGU_HPACK_OFFSET         0x018 /* Ratio change acknowledge register of HP0/1 PLL */
+#define LPC313X_CGU_HPREQ_OFFSET         0x01c /* Ratio change request register of HP0/1 PLL */
+#define LPC313X_CGU_HPINSELR_OFFSET      0x020 /* Bandwidth selection register of HP0/1 PLL */
+#define LPC313X_CGU_HPINSELI_OFFSET      0x024 /* Bandwidth selection register of HP0/1 PLL */
+#define LPC313X_CGU_HPINSELP_OFFSET      0x028 /* Bandwidth selection register of HP0/1 PLL */
+#define LPC313X_CGU_HPSELR_OFFSET        0x02c /* Bandwidth selection register of HP0/1 PLL */
+#define LPC313X_CGU_HPSELI_OFFSET        0x030 /* Bandwidth selection register of HP0/1 PLL */
+#define LPC313X_CGU_HPSELP_OFFSET        0x034 /* Bandwidth selection register of HP0/1 PLL */
+
 /* HP0 PLL control (audio PLL) */
 
 #define LPC313X_CGU_HP0FINSEL_OFFSET     0x0f0 /* Register for selecting input to high HPPLL0 */
@@ -1045,6 +1068,12 @@
 #define LPC313X_CGU_AHBMPMCRFRST         (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_AHBMPMCRFRST_OFFSET)
 #define LPC313X_CGU_INTCRST              (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_INTCRST_OFFSET)
 
+/* HP PLL controls */
+
+#define LPC313x_CGU_HP0PLL               (LPC313X_CGU_CFG_VBASE+LPC313x_CGU_HP0PLL_OFFSET)
+#define LPC313x_CGU_HP1PLL               (LPC313X_CGU_CFG_VBASE+LPC313x_CGU_HP1PLL_OFFSET)
+#define LPC313x_CGU_HPPLL(n)             ((n) ? LPC313x_CGU_HP1PLL : LPC313x_CGU_HP0PLL)
+
 /* HPO PLL control (audio PLL) */
 
 #define LPC313X_CGU_HP0FINSEL            (LPC313X_CGU_CFG_VBASE+LPC313X_CGU_HP0FINSEL_OFFSET)
@@ -1101,29 +1130,19 @@
 #define CGU_SCR_ENF2                     (1 << 1)  /* Bit 1:  Enable side #2 of switch */
 #define CGU_SCR_ENF1                     (1 << 0)  /* Bit 0:  Enable side #1 of switch */
 
-/* Frequency select register 1 FS1_0 to FS1_11, addresses 0x13004030 to 0x1300405c */
+/* Frequency select register 1 FS1_0 to FS1_11, addresses 0x13004030 to 0x1300405c,
+ * Frequency Select register 2 FS2_0 to FS2_11, addresses 0x13004060 to 0x1300408c
+ */
 
-#define CGU_FS1_SHIFT                    (0)      /* Bits 0-2: Selects input frequency for side #1 of frequency switch */
-#define CGU_FS1_MASK                     (7 << CGU_FS1_SHIFT)
-#  define CGU_FS1_FFAST                  (CGU_FREQIN_FFAST     << CGU_FS1_SHIFT) /* ffast 12 MHz */
-#  define CGU_FS1_I2SRXBCK0              (CGU_FREQIN_I2SRXBCK0 << CGU_FS1_SHIFT) /* I2SRX_BCK0 */
-#  define CGU_FS1_I2SRXWS0               (CGU_FREQIN_I2SRXWS0  << CGU_FS1_SHIFT) /* I2SRX_WS0 */
-#  define CGU_FS1_I2SRXBCK1              (CGU_FREQIN_I2SRXBCK1 << CGU_FS1_SHIFT) /* I2SRX_BCK1 */
-#  define CGU_FS1_I2SRXWS1               (CGU_FREQIN_I2SRXWS1  << CGU_FS1_SHIFT) /* I2SRX_WS1 */
-#  define CGU_FS1_HPPLL0                 (CGU_FREQIN_HPPLL0    << CGU_FS1_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
-#  define CGU_FS1_HPPLL1                 (CGU_FREQIN_HPPLL1    << CGU_FS1_SHIFT) /* HPPLL1 (System PLL) */
-
-/* Frequency Select register 2 FS2_0 to FS2_11, addresses 0x13004060 to 0x1300408c */
-
-#define CGU_FS2_SHIFT                    (0)      /* Bits 0-2: Selects input frequency for side #2 of frequency switch */
-#define CGU_FS2_MASK                     (7 << CGU_FS2_SHIFT)
-#  define CGU_FS2_FFAST                  (CGU_FREQIN_FFAST     << CGU_FS2_SHIFT) /* ffast 12 MHz */
-#  define CGU_FS2_I2SRXBCK0              (CGU_FREQIN_I2SRXBCK0 << CGU_FS2_SHIFT) /* I2SRX_BCK0 */
-#  define CGU_FS2_I2SRXWS0               (CGU_FREQIN_I2SRXWS0  << CGU_FS2_SHIFT) /* I2SRX_WS0 */
-#  define CGU_FS2_I2SRXBCK1              (CGU_FREQIN_I2SRXBCK1 << CGU_FS2_SHIFT) /* I2SRX_BCK1 */
-#  define CGU_FS2_I2SRXWS1               (CGU_FREQIN_I2SRXWS1  << CGU_FS2_SHIFT) /* I2SRX_WS1 */
-#  define CGU_FS2_HPPLL0                 (CGU_FREQIN_HPPLL0    << CGU_FS2_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
-#  define CGU_FS2_HPPLL1                 (CGU_FREQIN_HPPLL1    << CGU_FS2_SHIFT) /* HPPLL1 (System PLL) */
+#define CGU_FS_SHIFT                     (0)      /* Bits 0-2: Selects input frequency for either side of frequency switch */
+#define CGU_FS_MASK                      (7 << CGU_FS_SHIFT)
+#  define CGU_FS_FFAST                   (CGU_FREQIN_FFAST     << CGU_FS_SHIFT) /* ffast 12 MHz */
+#  define CGU_FS_I2SRXBCK0               (CGU_FREQIN_I2SRXBCK0 << CGU_FS_SHIFT) /* I2SRX_BCK0 */
+#  define CGU_FS_I2SRXWS0                (CGU_FREQIN_I2SRXWS0  << CGU_FS_SHIFT) /* I2SRX_WS0 */
+#  define CGU_FS_I2SRXBCK1               (CGU_FREQIN_I2SRXBCK1 << CGU_FS_SHIFT) /* I2SRX_BCK1 */
+#  define CGU_FS_I2SRXWS1                (CGU_FREQIN_I2SRXWS1  << CGU_FS_SHIFT) /* I2SRX_WS1 */
+#  define CGU_FS_HPPLL0                  (CGU_FREQIN_HPPLL0    << CGU_FS_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
+#  define CGU_FS_HPPLL1                  (CGU_FREQIN_HPPLL1    << CGU_FS_SHIFT) /* HPPLL1 (System PLL) */
 
 /* Switch Status register SSR0 to SSR11, addresses 0x13004090 to 0x1300 40bc */
 
@@ -1137,7 +1156,7 @@
 #  define CGU_SSR_HPPLL0                 (CGU_FREQIN_HPPLL0    << CGU_SSR_FS_SHIFT) /* HPPLL0 (Audio/I2S PLL) */
 #  define CGU_SSR_HPPLL1                 (CGU_FREQIN_HPPLL1    << CGU_SSR_FS_SHIFT) /* HPPLL1 (System PLL) */
 #define CGU_SSR_FS2STAT                  (1 << 1)  /* Bit 1:  Enable side #2 of the frequency switch */
-#define CGU_SSR_F1STAT                   (1 << 0)  /* Bit 0:  Enable side #1 of the frequency switch */
+#define CGU_SSR_FS1STAT                  (1 << 0)  /* Bit 0:  Enable side #1 of the frequency switch */
 
 /* Power Control register PCR0 to PCR91, addresses 0x130040c0 to 0x1300422c */
 
@@ -1465,175 +1484,120 @@
 #define CGU_INTCRST_RESET                (1 << 0)  /* Bit 0:  Reset for Interrupt Controller */
 
 /* PLL control registers */
-/* HP0 Frequency Input Select register HP0_FIN_SELECT, address 0x13004cf0 */
+/* HP0 Frequency Input Select register HP0_FIN_SELECT, address 0x13004cf0,
+ * HP1 Frequency Input Select register HP1_FIN_SELECT, address 0x13004d28
+ */
 
-#define CGU_HP0FINSEL_SHIFT              (0)       /* Bits 0-3: Select input to high HPPLL0 */
-#define CGU_HP0FINSEL_MASK               (15 << CGU_HP0FINSEL_SHIFT)
-#  define CGU_HP0FINSEL_FFAST            (CGU_FREQIN_FFAST     << CGU_HP0FINSEL_SHIFT) /* ffast (12 Mhz) */
-#  define CGU_HP0FINSEL_I2SRXBCK0        (CGU_FREQIN_I2SRXBCK0 << CGU_HP0FINSEL_SHIFT) /* I2SRX_BCK0 */
-#  define CGU_HP0FINSEL_I2SRXWS0         (CGU_FREQIN_I2SRXWS0  << CGU_HP0FINSEL_SHIFT) /* I2SRX_WS0 */
-#  define CGU_HP0FINSEL_I2SRXBCK1        (CGU_FREQIN_I2SRXBCK1 << CGU_HP0FINSEL_SHIFT) /* I2SRX_BCK1 */
-#  define CGU_HP0FINSEL_I2SRXWS1         (CGU_FREQIN_I2SRXWS1  << CGU_HP0FINSEL_SHIFT) /* I2SRX_WS1 */
-#  define CGU_HP0FINSEL_HP1FOUT          (CGU_FREQIN_HPPLL1    << CGU_HP0FINSEL_SHIFT) /* HP1_FOUT */
+#define CGU_HPFINSEL_SHIFT               (0)       /* Bits 0-3: Select input to high HPPLL0 */
+#define CGU_HPFINSEL_MASK                (15 << CGU_HPFINSEL_SHIFT)
+#  define CGU_HPFINSEL_FFAST             (CGU_FREQIN_FFAST     << CGU_HPFINSEL_SHIFT) /* ffast (12 Mhz) */
+#  define CGU_HPFINSEL_I2SRXBCK0         (CGU_FREQIN_I2SRXBCK0 << CGU_HPFINSEL_SHIFT) /* I2SRX_BCK0 */
+#  define CGU_HPFINSEL_I2SRXWS0          (CGU_FREQIN_I2SRXWS0  << CGU_HPFINSEL_SHIFT) /* I2SRX_WS0 */
+#  define CGU_HPFINSEL_I2SRXBCK1         (CGU_FREQIN_I2SRXBCK1 << CGU_HPFINSEL_SHIFT) /* I2SRX_BCK1 */
+#  define CGU_HPFINSEL_I2SRXWS1          (CGU_FREQIN_I2SRXWS1  << CGU_HPFINSEL_SHIFT) /* I2SRX_WS1 */
+#  define CGU_HPFINSEL_HP0FOUT           (CGU_FREQIN_HPPLL0    << CGU_HPFINSEL_SHIFT) /* HP0_FOUT */
+#  define CGU_HPFINSEL_HP1FOUT           (CGU_FREQIN_HPPLL1    << CGU_HPFINSEL_SHIFT) /* HP1_FOUT */
 
-/* HP0 M-divider register HP0_MDEC, address 0x13004cF4 */
+/* HP0 M-divider register HP0_MDEC, address 0x13004cF4,
+ * HP1 M-divider register HP1_MDEC, address 0x13004d2C
+ */
 
-#define CGU_HP0MDEC_SHIFT                (0)       /* Bits 0-16: Decoded divider ratio for M-divider */
-#define CGU_HP0MDEC_MASK                 (0x1ffff << CGU_HP0MDEC_SHIFT)
+#define CGU_HPMDEC_SHIFT                 (0)       /* Bits 0-16: Decoded divider ratio for M-divider */
+#define CGU_HPMDEC_MASK                  (0x1ffff << CGU_HPMDEC_SHIFT)
 
-/* HP0 N-divider register HP0_NDEC, address 0x13004cf8 */
+/* HP0 N-divider register HP0_NDEC, address 0x13004cf8,
+ * HP1 N-divider register HP1_NDEC, address 0x13004D30
+ */
 
-#define CGU_HP0NDEC_SHIFT                (0)       /* Bits 0-9: Decoded divider ratio for N-divider */
-#define CGU_HP0NDEC_MASK                 (0x3ff << CGU_HP0NDEC_SHIFT)
+#define CGU_HPNDEC_SHIFT                 (0)       /* Bits 0-9: Decoded divider ratio for N-divider */
+#define CGU_HPNDEC_MASK                  (0x3ff << CGU_HPNDEC_SHIFT)
 
-/* HP0 P-divider register HP0_PDEC, address 0x13004cfc */
+/* HP0 P-divider register HP0_PDEC, address 0x13004cfc.
+ * HP1 P-divider register HP1_PDEC, address 0x13004D34
+ */
 
-#define CGU_HP0PDEC_SHIFT                (0)       /* Bits 0-6: Decoded divider ratio for P-divider */
-#define CGU_HP0PDEC_MASK                 (0x7F << CGU_HP0PDEC_SHIFT)
+#define CGU_HPPDEC_SHIFT                 (0)       /* Bits 0-6: Decoded divider ratio for P-divider */
+#define CGU_HPPDEC_MASK                  (0x7F << CGU_HPPDEC_SHIFT)
 
-/* HP0 Mode register HP0_MODE, address 0x13004d00 */
+/* HP0 Mode register HP0_MODE, address 0x13004d00,
+ * HP1 Mode register HP1_MODE, address 0x13004d38
+ */
 
-#define CGU_HP0MODE_BYPASS               (1 << 8)  /* Bit 8:  Bypass mode */
-#define CGU_HP0MODE_LIMUPOFF             (1 << 7)  /* Bit 7:  Up limiter */
-#define CGU_HP0MODE_BANDSEL              (1 << 6)  /* Bit 6:  Bandwidth adjustment pin */
-#define CGU_HP0MODE_FRM                  (1 << 5)  /* Bit 5:  Free Running Mode */
-#define CGU_HP0MODE_DIRECTI              (1 << 4)  /* Bit 4:  Normal operation with DIRECTO */
-#define CGU_HP0MODE_DIRECTO              (1 << 3)  /* Bit 3:  Normal operation with DIRECTI */
-#define CGU_HP0MODE_PD                   (1 << 2)  /* Bit 2:  Power down mode */
-#define CGU_HP0MODE_SKEWEN               (1 << 1)  /* Bit 1:  Skew mode */
-#define CGU_HP0MODE_CLKEN                (1 << 0)  /* Bit 0:  Enable mode */
+#define CGU_HPMODE_BYPASS                (1 << 8)  /* Bit 8:  Bypass mode */
+#define CGU_HPMODE_LIMUPOFF              (1 << 7)  /* Bit 7:  Up limiter */
+#define CGU_HPMODE_BANDSEL               (1 << 6)  /* Bit 6:  Bandwidth adjustment pin */
+#define CGU_HPMODE_FRM                   (1 << 5)  /* Bit 5:  Free Running Mode */
+#define CGU_HPMODE_DIRECTI               (1 << 4)  /* Bit 4:  Normal operation with DIRECTO */
+#define CGU_HPMODE_DIRECTO               (1 << 3)  /* Bit 3:  Normal operation with DIRECTI */
+#define CGU_HPMODE_PD                    (1 << 2)  /* Bit 2:  Power down mode */
+#define CGU_HPMODE_SKEWEN                (1 << 1)  /* Bit 1:  Skew mode */
+#define CGU_HPMODE_CLKEN                 (1 << 0)  /* Bit 0:  Enable mode */
 
-/* HP0 Status register HP0_STATUS, address 0x13004d04 */
+/* HP0 Status register HP0_STATUS, address 0x13004d04,
+ * HP1 Status register HP1_STATUS, address 0x13004d3c
+ */
 
-#define CGU_HP0STATUS_FR                 (1 << 1)  /* Bit 1:  Free running detector */
-#define CGU_HP0STATUS_LOCK               (1 << 0)  /* Bit 0:  Lock detector */
+#define CGU_HPSTATUS_FR                  (1 << 1)  /* Bit 1:  Free running detector */
+#define CGU_HPSTATUS_LOCK                (1 << 0)  /* Bit 0:  Lock detector */
 
-/* HP0 Acknowledge register HP0_ACK, address 0x13004d08 */
+/* HP0 Acknowledge register HP0_ACK, address 0x13004d08,
+ * HP1 Acknowledge register HP1_ACK, address 0x13004d40
+ */
 
-#define CGU_HP0ACK_P                     (1 << 2)  /* Bit 2:  Post-divider ratio change acknowledge */
-#define CGU_HP0ACK_N                     (1 << 1)  /* Bit 1:  Pre-divider ratio change acknowledge */
-#define CGU_HP0ACK_M                     (1 << 0)  /* Bit 0:  Feedback divider ratio change acknowledge */
+#define CGU_HPACK_P                      (1 << 2)  /* Bit 2:  Post-divider ratio change acknowledge */
+#define CGU_HPACK_N                      (1 << 1)  /* Bit 1:  Pre-divider ratio change acknowledge */
+#define CGU_HPACK_M                      (1 << 0)  /* Bit 0:  Feedback divider ratio change acknowledge */
 
-/* HP0 request register HP0_REQ, address 0x13004d0c */
+/* HP0 request register HP0_REQ, address 0x13004d0c,
+ * HP1 Request register HP1_REQ, address 0x13004d44
+ */
 
-#define CGU_HP0REQ_P                     (1 << 2)  /* Bit 2:  Post-divider ratio change request */
-#define CGU_HP0REQ_N                     (1 << 1)  /* Bit 1:  Pre-divider ratio change request */
-#define CGU_HP0REQ_M                     (1 << 0)  /* Bit 0:  Feedback divider ratio change request */
+#define CGU_HPREQ_P                      (1 << 2)  /* Bit 2:  Post-divider ratio change request */
+#define CGU_HPREQ_N                      (1 << 1)  /* Bit 1:  Pre-divider ratio change request */
+#define CGU_HPREQ_M                      (1 << 0)  /* Bit 0:  Feedback divider ratio change request */
 
-/* HP0 Bandwith Selection register HP0_INSELR, address 0x13004d10 */
+/* HP0 Bandwith Selection register HP0_INSELR, address 0x13004d10,
+ * HP1 bandwith Selection register HP1_INSELR, address 0x13004d48
+ */
+ 
+#define CGU_HPINSELR_SHIFT               (0)      /* Bits 0-3: Pins to select the bandwidth */
+#define CGU_HPINSELR_MASK                (15 << CGU_HPINSELR_SHIFT)
 
-#define CGU_HP0INSELR_SHIFT              (0)      /* Bits 0-3: Pins to select the bandwidth */
-#define CGU_HP0INSELR_MASK               (15 << CGU_HP0INSELR_SHIFT)
+/* HP0 Bandwith Selection register HP0_INSELI, address 0x13004d14,
+ * HP1 bandwith Selection register HP1_INSELI, address 0x13004d4c
+ */
 
-/* HP0 Bandwith Selection register HP0_INSELI, address 0x13004d14 */
+#define CGU_HPINSELI_SHIFT               (0)      /* Bits 0-5: Bandwidth selection register of HP0/1 PLL */
+#define CGU_HPINSELI_MASK                (63 << CGU_HPINSELI_SHIFT)
 
-#define CGU_HP0INSELI_SHIFT              (0)      /* Bits 0-5: Bandwidth selection register of HP0 PLL */
-#define CGU_HP0INSELI_MASK               (63 << CGU_HP0INSELI_SHIFT)
 
-/* HP0 Bandwith Selection register HP0_INSELP, address 0x13004d18 */
+/* HP0 Bandwith Selection register HP0_INSELP, address 0x13004d18,
+ * HP1 bandwith Selection register HP1_INSELP, address 0x13004d50
+ */
 
-#define CGU_HP0INSELP_SHIFT              (0)      /* Bits 0-4: Bandwidth selection register of HP0 PLL */
-#define CGU_HP0INSELP_MASK               (31 << CGU_HP0INSELP_SHIFT)
+#define CGU_HPINSELP_SHIFT               (0)      /* Bits 0-4: Bandwidth selection register of HP0/1 PLL */
+#define CGU_HPINSELP_MASK                (31 << CGU_HPINSELP_SHIFT)
 
-/* HP0 Bandwith Selection register HP0_INSELP, address 0x13004d18 */
+/* HP0 Bandwith Selection register HP0_SELR, address 0x13004d1c,
+ * HP1 bandwith Selection register HP1_SELR, address 0x13004d54
+ */
 
-#define CGU_HP0SELR_SHIFT                (0)      /* Bits 0-3: Bandwidth selection register of HP0 PLL */
-#define CGU_HP0SELR_MASK                 (15 << CGU_HP0SELR_SHIFT)
+#define CGU_HPSELR_SHIFT                 (0)      /* Bits 0-3: Bandwidth selection register of HP0/1 PLL */
+#define CGU_HPSELR_MASK                  (15 << CGU_HPSELR_SHIFT)
 
-/* HP0 Bandwith Selection register HP0_SELI, address 0x13004d20 */
+/* HP0 Bandwith Selection register HP0_SELI, address 0x13004d20
+ * HP1 bandwith Selection register HP1_SELI, address 0x13004d58
+ */
 
-#define CGU_HP0SELI_SHIFT                (0)      /* Bits 0-5: Bandwidth selection register of HP0 PLL */
-#define CGU_HP0SELI_MASK                 (63 << CGU_HP0SELI_SHIFT)
+#define CGU_HPSELI_SHIFT                 (0)      /* Bits 0-5: Bandwidth selection register of HP0/1 PLL */
+#define CGU_HPSELI_MASK                  (63 << CGU_HPSELI_SHIFT)
 
-/* HP0 Bandwith Selection register HP0_SELP, address 0x13004d24 */
+/* HP0 Bandwith Selection register HP0_SELP, address 0x13004d24,
+ * HP1 bandwith Selection register HP1_SELP, address 0x13004d5c
+ */
 
-#define CGU_HP0SELP_SHIFT                (0)      /* Bits 0-4: Bandwidth selection register of HP0 PLL */
-#define CGU_HP0IELP_MASK                 (31 << CGU_HP0SELP_SHIFT)
-
-/* HP1 Frequency Input Select register HP1_FIN_SELECT, address 0x13004d28 */
-
-#define CGU_HP1FINSEL_SHIFT              (0)       /* Bits 0-3: Select input to high HPPLL0 */
-#define CGU_HP1FINSEL_MASK               (15 << CGU_HP1FINSEL_SHIFT)
-#  define CGU_HP1FINSEL_FFAST            (CGU_FREQIN_FFAST     << CGU_HP1FINSEL_SHIFT) /* ffast (12 Mhz) */
-#  define CGU_HP1FINSEL_I2SRXBCK0        (CGU_FREQIN_I2SRXBCK0 << CGU_HP1FINSEL_SHIFT) /* I2SRX_BCK0 */
-#  define CGU_HP1FINSEL_I2SRXWS0         (CGU_FREQIN_I2SRXWS0  << CGU_HP1FINSEL_SHIFT) /* I2SRX_WS0 */
-#  define CGU_HP1FINSEL_I2SRXBCK1        (CGU_FREQIN_I2SRXBCK1 << CGU_HP1FINSEL_SHIFT) /* I2SRX_BCK1 */
-#  define CGU_HP1FINSEL_I2SRXWS1         (CGU_FREQIN_I2SRXWS1  << CGU_HP1FINSEL_SHIFT) /* I2SRX_WS1 */
-#  define CGU_HP1FINSEL_HP0FOUT          (CGU_FREQIN_HPPLL0    << CGU_HP1FINSEL_SHIFT) /* HP0_FOUT */
-
-/* HP1 M-divider register HP1_MDEC, address 0x13004d2C */
-
-#define CGU_HP1MDEC_SHIFT                (0)       /* Bits 0-16: Decoded divider ratio for M-divider */
-#define CGU_HP1MDEC_MASK                 (0x1ffff << CGU_HP1MDEC_SHIFT)
-
-/* HP1 N-divider register HP1_NDEC, address 0x13004D30 */
-
-#define CGU_HP1NDEC_SHIFT                (0)       /* Bits 0-9: Decoded divider ratio for N-divider */
-#define CGU_HP1NDEC_MASK                 (0x3ff << CGU_HP1NDEC_SHIFT)
-
-/* HP1 P-diver register HP1_PDEC, address 0x13004D34 */
-
-#define CGU_HP1PDEC_SHIFT                (0)       /* Bits 0-6: Decoded divider ratio for P-divider */
-#define CGU_HP1PDEC_MASK                 (0x7F << CGU_HP1PDEC_SHIFT)
-
-/* HP1 Mode register HP1_MODE, address 0x13004d38 */
-
-#define CGU_HP1MODE_BYPASS               (1 << 8)  /* Bit 8:  Bypass mode */
-#define CGU_HP1MODE_LIMUPOFF             (1 << 7)  /* Bit 7:  Up limiter */
-#define CGU_HP1MODE_BANDSEL              (1 << 6)  /* Bit 6:  Bandwidth adjustment pin */
-#define CGU_HP1MODE_FRM                  (1 << 5)  /* Bit 5:  Free Running Mode */
-#define CGU_HP1MODE_DIRECTI              (1 << 4)  /* Bit 4:  Normal operation with DIRECTO */
-#define CGU_HP1MODE_DIRECTO              (1 << 3)  /* Bit 3:  Normal operation with DIRECTI */
-#define CGU_HP1MODE_PD                   (1 << 2)  /* Bit 2:  Power down mode */
-#define CGU_HP1MODE_SKEWEN               (1 << 1)  /* Bit 1:  Skew mode */
-#define CGU_HP1MODE_CLKEN                (1 << 0)  /* Bit 0:  Enable mode */
-
-/* HP1 Status register HP1_STATUS, address 0x13004d3C */
-
-#define CGU_HP1STATUS_FR                 (1 << 1)  /* Bit 1:  Free running detector */
-#define CGU_HP1STATUS_LOCK               (1 << 0)  /* Bit 0:  Lock detector */
-
-/* HP1 Acknowledge register HP1_ACK, address 0x13004d40 */
-
-#define CGU_HP1ACK_P                     (1 << 2)  /* Bit 2:  Post-divider ratio change acknowledge */
-#define CGU_HP1ACK_N                     (1 << 1)  /* Bit 1:  Pre-divider ratio change acknowledge */
-#define CGU_HP1ACK_M                     (1 << 0)  /* Bit 0:  Feedback divider ratio change acknowledge */
-
-/* HP1 Request register HP1_REQ, address 0x13004d44 */
-
-#define CGU_HP1REQ_P                     (1 << 2)  /* Bit 2:  Post-divider ratio change request */
-#define CGU_HP1REQ_N                     (1 << 1)  /* Bit 1:  Pre-divider ratio change request */
-#define CGU_HP1REQ_M                     (1 << 0)  /* Bit 0:  Feedback divider ratio change request */
-
-/* HP1 bandwith Selection register HP1_INSELR, address 0x13004d48 */
-
-#define CGU_HP1INSELR_SHIFT              (0)      /* Bits 0-3: Pins to select the bandwidth */
-#define CGU_HP1INSELR_MASK               (15 << CGU_HP1INSELR_SHIFT)
-
-/* HP1 bandwith Selection register HP1_INSELI, address 0x13004d4c */
-
-#define CGU_HP1INSELI_SHIFT              (0)      /* Bits 0-5: Bandwidth selection register of HP1 PLL */
-#define CGU_HP1INSELI_MASK               (63 << CGU_HP1INSELI_SHIFT)
-
-/* HP1 bandwith Selection register HP1_INSELP, address 0x13004d50 */
-
-#define CGU_HP1INSELP_SHIFT              (0)      /* Bits 0-4: Bandwidth selection register of HP1 PLL */
-#define CGU_HP1INSELP_MASK               (31 << CGU_HP1INSELP_SHIFT)
-
-/* HP1 bandwith Selection register HP1_SELR, address 0x13004d54 */
-
-#define CGU_HP1SELR_SHIFT                (0)      /* Bits 0-3: Bandwidth selection register of HP1 PLL */
-#define CGU_HP1SELR_MASK                 (15 << CGU_HP1SELR_SHIFT)
-
-/* HP1 bandwith Selection register HP1_SELI, address 0x13004d58 */
-
-#define CGU_HP1SELI_SHIFT                (0)      /* Bits 0-5: Bandwidth selection register of HP1 PLL */
-#define CGU_HP1SELI_MASK                 (63 << CGU_HP1SELI_SHIFT)
-
-/* HP1 bandwith Selection register HP1_SELP, address 0x13004d5c */
-
-#define CGU_HP1SELP_SHIFT                (0)      /* Bits 0-4: Bandwidth selection register of HP1 PLL */
-#define CGU_HP1IELP_MASK                 (31 << CGU_HP1SELP_SHIFT)
+#define CGU_HPSELP_SHIFT                 (0)      /* Bits 0-4: Bandwidth selection register of HP0/1 PLL */
+#define CGU_HPIELP_MASK                  (31 << CGU_HPSELP_SHIFT)
 
 /************************************************************************************************
  * Public Types

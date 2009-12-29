@@ -52,15 +52,33 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* Frequency of the all inputs */
+/* Frequency of the FFAST input */
 
 #define BOARD_FREQIN_FFAST     (12000000) /* ffast (12 MHz crystal) */
-#define BOARD_FREQIN_I2SRXBCK0 0          /* I2SRX_BCK0 */
-#define BOARD_FREQIN_I2SRXWS0  0          /* I2SRX_WS0 */
-#define BOARD_FREQIN_I2SRXBCK1 0          /* I2SRX_BCK1 */
-#define BOARD_FREQIN_I2SRXWS1  0          /* I2SRX_WS1 */
-#define BOARD_FREQIN_HPPLL0    0          /* HPPLL0 (Audio/I2S PLL)) */
-#define BOARD_FREQIN_HPPLL1    0          /* HPPLL1 (System PLL */
+
+/* HPLL0 configuration */
+
+#define BOARD_HPLL0_FINSEL CGU_HPFINSEL_FFAST /* Frequency input selection */
+#define BOARD_HPLL0_NDEC   131                /* PLL N-divider value */
+#define BOARD_HPLL0_MDEC   29784              /* PLL M-divider value */
+#define BOARD_HPLL0_PDEC   7                  /* PLL P-divider value */
+#define BOARD_HPLL0_SELR   0                  /* SELR bandwidth selection */
+#define BOARD_HPLL0_SELI   8                  /* SELI bandwidth selection */
+#define BOARD_HPLL0_SELP   31                 /* SELP bandwidth selection */
+#define BOARD_HPLL0_MODE   0                  /* PLL mode */
+#define BOARD_HPLL0_FREQ   406425600          /* Frequency of the PLL in MHz */ 
+
+/* HPLL1 configuration */
+
+#define BOARD_HPLL1_FINSEL CGU_HPFINSEL_FFAST /* Frequency input selection */
+#define BOARD_HPLL1_NDEC   770                /* PLL N-divider value */
+#define BOARD_HPLL1_MDEC   8191               /* PLL M-divider value */
+#define BOARD_HPLL1_PDEC   98                 /* PLL P-divider value */
+#define BOARD_HPLL1_SELR   0                  /* SELR bandwidth selection */
+#define BOARD_HPLL1_SELI   16                 /* SELI bandwidth selection */
+#define BOARD_HPLL1_SELP   8                  /* SELP bandwidth selection */
+#define BOARD_HPLL1_MODE   0                  /* PLL mode */
+#define BOARD_HPLL1_FREQ  180000000           /* Frequency of the PLL in MHz */ 
 
 /* The following 3 bitsets determine which clocks will be enabled at initialization
  * time.

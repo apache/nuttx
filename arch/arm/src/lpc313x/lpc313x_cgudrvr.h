@@ -396,27 +396,45 @@ enum lpc313x_resetid_e
   RESETID_INTCRST,        /* 55 Interrupt Controller */
 };
 
+/* This structure is used to pass PLL configuration data to
+ * lpc313x_pllconfig()
+ */
+
+struct lpc313x_pllconfig_s
+{
+  uint8_t  hppll;         /* PLL selection: 0=HPLL0 1=HPLL1 */
+  uint8_t  pdec;          /* PLL P-divider value: 0-0x7f */
+  uint8_t  selr;          /* SELR bandwidth selection: 0-15 */
+  uint8_t  seli;          /* SELI bandwidth selection: 0-63 */
+  uint8_t  selp;          /* SELP bandwidth selection: 0-31 */
+  uint16_t ndec;          /* PLL N-divider value: 0-0x3ff */
+  uint16_t mode;          /* PLL mode: 9-bits */
+  uint32_t freq;          /* Frequency of the PLL in MHz */
+  uint32_t finsel;        /* Frequency input selection: CGU_HPFINSEL_* */
+  uint32_t mdec;          /* PLL M-divider value: 0-0x1ffff */
+};
+
 /************************************************************************
  * Public Data
  ************************************************************************/
 
 /* This array provides the programmed frequency of every input source */
 
-EXTERN const int32_t g_boardfreqin[CGU_NFREQIN];
+EXTERN uint32_t g_boardfreqin[CGU_NFREQIN];
 
 /************************************************************************
  * Inline Functions
  ************************************************************************/
 
 /************************************************************************
- * Name: lpc313x_basefreq
+ * Name: lpc313x_getbasefreq
  *
  * Description:
  *   Return the base frequency associated with a clock domain
  *
  ************************************************************************/
 
-static inline int32_t lpc313x_basefreq(enum lpc313x_domainid_e dmnid)
+static inline uint32_t lpc313x_getbasefreq(enum lpc313x_domainid_e dmnid)
 {
   uint32_t regval;
   int     ndx;
@@ -471,6 +489,36 @@ static inline void lpc313x_disableclock(enum lpc313x_clockid_e clkid)
 /************************************************************************
  * Public Functions
  ************************************************************************/
+
+/****************************************************************************
+ * Name: lpc313x_pllconfig
+ *
+ * Description:
+ *   Re-onfigure the PLL according to the provided selections.
+ *
+ ****************************************************************************/
+
+EXTERN void lpc313x_pllconfig(const struct lpc313x_pllconfig_s * const cfg);
+
+/************************************************************************
+ * Name: lpc313x_hp0pllconfig
+ *
+ * Description:
+ *   Configure the HP0 PLL according to the board.h default selections.
+ *
+ ************************************************************************/
+
+EXTERN void lpc313x_hp0pllconfig(void);
+
+/************************************************************************
+ * Name: lpc313x_hp1pllconfig
+ *
+ * Description:
+ *   Configure the HP1 PLL according to the board.h default selections.
+ *
+ ************************************************************************/
+
+EXTERN void lpc313x_hp1pllconfig(void);
 
 /************************************************************************
  * Name: lpc313x_softreset
@@ -529,7 +577,18 @@ EXTERN int lpc313x_fdcndx(enum lpc313x_clockid_e clkid,
                           enum lpc313x_domainid_e dmnid);
 
 /************************************************************************
- * Name: lpc313x_fdcndx
+ * Name: lpc313x_selectfreqin
+ *
+ * Description:
+ *   Set the base frequency source selection for with a clock domain
+ *
+ ************************************************************************/
+
+EXTERN void lpc313x_selectfreqin(enum lpc313x_domainid_e dmnid,
+                                 uint32_t finsel);
+
+/************************************************************************
+ * Name: lpc313x_clkfreq
  *
  * Description:
  *   Given a clock ID and its domain ID, return the frequency of the
