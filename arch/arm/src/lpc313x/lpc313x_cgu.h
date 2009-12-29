@@ -421,6 +421,7 @@
 
 /* Base control registers (BCR) for SYS base */
 
+#define LPC313X_CGU_BCR_OFFSET(n)        (0x504+((n)<<2))
 #define LPC313X_CGU_BCR0_OFFSET          0x504 /* SYS base */
 #define LPC313X_CGU_BCR1_OFFSET          0x508 /* AHB0_APB0 base */
 #define LPC313X_CGU_BCR2_OFFSET          0x50c /* AHB0_APB1 base */
@@ -951,6 +952,7 @@
 
 /* Base control registers (BCR) for SYS base */
 
+#define LPC313X_CGU_BCR(n)               (LPC313X_CGU_CSB_VBASE+LPC313X_CGU_BCR_OFFSET(n))
 #define LPC313X_CGU_BCR0                 (LPC313X_CGU_CSB_VBASE+LPC313X_CGU_BCR0_OFFSET)
 #define LPC313X_CGU_BCR1                 (LPC313X_CGU_CSB_VBASE+LPC313X_CGU_BCR1_OFFSET)
 #define LPC313X_CGU_BCR2                 (LPC313X_CGU_CSB_VBASE+LPC313X_CGU_BCR2_OFFSET)
@@ -1215,11 +1217,7 @@
 
 /* Base control registers 0 BCR0 to BCR7, addresses 0x13004504 to 0x13004514 */
 
-#define CGU_BCR0_FDRUN                   (1 << 0)  /* Bit 0: Enable fractional dividers in SYS base */
-#define CGU_BCR1_FDRUN                   (1 << 0)  /* Bit 0: Enable fractional dividers in AHB0_APB0 base */
-#define CGU_BCR2_FDRUN                   (1 << 0)  /* Bit 0: Enable fractional dividers in AHB0_APB1 base */
-#define CGU_BCR3_FDRUN                   (1 << 0)  /* Bit 0: Enable fractional dividers in AHB0_APB2 base */
-#define CGU_BCR7_FDRUN                   (1 << 0)  /* Bit 0: Enable fractional dividers in CLK1024FS */
+#define CGU_BCR_FDRUN                    (1 << 0)  /* Bit 0: Enable fractional dividers */
 
 /* Fractional divider register 0 to 23 FDC0 to FDC23 (except FDC17) addresses 0x13004518 to 0x13004574 */
 

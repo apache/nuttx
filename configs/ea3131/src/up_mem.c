@@ -296,7 +296,7 @@ static void lpc313x_sdraminitialize(void)
  * Name: lpc313x_meminitialize
  *
  * Description:
- *   Initialize memory
+ *   Initialize external memory resources (sram, sdram, nand, nor, etc.)
  *
  ****************************************************************************/
 
