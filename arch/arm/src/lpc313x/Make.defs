@@ -50,5 +50,6 @@ CGU_CSRCS	= lpc313x_clkdomain.c lpc313x_clkfreq.c lpc313x_esrndx.c \
 		  lpc313x_fdcndx.c lpc313x_softreset.c
 
 CHIP_ASRCS	= $(CGU_ASRCS)
-CHIP_CSRCS	= lpc313x_allocateheap.c lpc313x_irq.c lpc313x_lowputc.c \
-		  lpc313x_serial.c lpc313x_timerisr.c $(CGU_CSRCS)
+CHIP_CSRCS	= lpc313x_allocateheap.c lpc313x_boot.c lpc313x_irq.c \
+		  lpc313x_lowputc.c lpc313x_serial.c lpc313x_timerisr.c \
+		  $(CGU_CSRCS)
