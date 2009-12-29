@@ -274,7 +274,7 @@ static int stm32_dmainterrupt(int irq, void *context)
 {
   struct stm32_dma_s *dmach;
   uint32_t isr;
-  int chndx;
+  int chndx = 0;
 
   /* Get the channel structure from the interrupt number */
 
@@ -502,7 +502,6 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nt
 void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool half)
 {
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
-  int irq;
   uint32_t ccr;
 
   DEBUGASSERT(handle != NULL);

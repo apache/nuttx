@@ -40,10 +40,12 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include <arch/board/board.h>
 
 #include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
+
 #include "lm3s_internal.h"
 
 /**************************************************************************

@@ -40,9 +40,11 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <assert.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "os_internal.h"

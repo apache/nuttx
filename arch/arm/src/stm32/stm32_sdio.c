@@ -53,10 +53,13 @@
 #include <nuttx/sdio.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>
+
 #include <arch/irq.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
+
 #include "stm32_internal.h"
 #include "stm32_dma.h"
 #include "stm32_sdio.h"
