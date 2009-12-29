@@ -73,10 +73,10 @@
 
 void lpc313x_boardinitialize(void)
 {
-  /* Configure Micron MT48LC32M16A2 SDRAM on the EA3131 board */
+  /* Initialize configured, external memory resources */
 
 #ifdef CONFIG_LPC313X_EXTSDRAM
-  lpc313x_sdraminitialize();
+  lpc313x_meminitialize();
 #endif
 
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
