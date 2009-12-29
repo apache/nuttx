@@ -52,9 +52,15 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* Frequency of the installed crystal */
+/* Frequency of the all inputs */
 
-#define LPC313X_XTALIN (12000000)
+#define BOARD_FREQIN_FFAST     (12000000) /* ffast (12 MHz crystal) */
+#define BOARD_FREQIN_I2SRXBCK0 0          /* I2SRX_BCK0 */
+#define BOARD_FREQIN_I2SRXWS0  0          /* I2SRX_WS0 */
+#define BOARD_FREQIN_I2SRXBCK1 0          /* I2SRX_BCK1 */
+#define BOARD_FREQIN_I2SRXWS1  0          /* I2SRX_WS1 */
+#define BOARD_FREQIN_HPPLL0    0          /* HPPLL0 (Audio/I2S PLL)) */
+#define BOARD_FREQIN_HPPLL1    0          /* HPPLL1 (System PLL */
 
 /* The following 3 bitsets determine which clocks will be enabled at initialization
  * time.

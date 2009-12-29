@@ -43,25 +43,21 @@
 
 #include <arch/board/board.h>
 
-#include "lpc313x_internal.h"
-#
+#include "lpc313x_cgudrvr.h"
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* This array must be provided by the board-specific logic to provide
- * the programmed frequency of every input source.
- */
-
 const int32_t g_boardfreqin[CGU_NFREQIN] =
 {
-  LPC313X_XTALIN, /* CGU_FREQIN_FFAST (12 MHz) */
-  0,              /* CGU_FREQIN_I2SRXBCK0 */
-  0,              /* CGU_FREQIN_I2SRXWS0 */
-  0,              /* CGU_FREQIN_I2SRXBCK1 */
-  0,              /* CGU_FREQIN_I2SRXWS1 */
-  0,              /* CGU_FREQIN_HPPLL0 (Audio/I2S PLL) */
-  0               /* CGU_FREQIN_HPPLL1 (System PLL) */
+  BOARD_FREQIN_FFAST,       /* Index=CGU_FREQIN_FFAST */
+  BOARD_FREQIN_I2SRXBCK0,   /* Index=CGU_FREQIN_I2SRXBCK0 */
+  BOARD_FREQIN_I2SRXWS0,    /* Index=CGU_FREQIN_I2SRXWS0 */
+  BOARD_FREQIN_I2SRXBCK1,   /* Index=CGU_FREQIN_I2SRXBCK1 */
+  BOARD_FREQIN_I2SRXWS1,    /* Index=CGU_FREQIN_I2SRXWS1 */
+  BOARD_FREQIN_HPPLL0,      /* Index=CGU_FREQIN_HPPLL0 (Audio/I2S PLL) */
+  BOARD_FREQIN_HPPLL1       /* Index=CGU_FREQIN_HPPLL1 (System PLL) */
 };
 
 /****************************************************************************

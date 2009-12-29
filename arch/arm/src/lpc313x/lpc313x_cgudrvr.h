@@ -400,9 +400,7 @@ enum lpc313x_resetid_e
  * Public Data
  ************************************************************************/
 
-/* This array must be provided by the board-specific logic to provide
- * the programmed frequency of every input source.
- */
+/* This array provides the programmed frequency of every input source */
 
 EXTERN const int32_t g_boardfreqin[CGU_NFREQIN];
 
