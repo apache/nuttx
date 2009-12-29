@@ -78,7 +78,7 @@
  * Name: lpc313x_meminitialize
  *
  * Description:
- *   Initialize external memory resources
+ *   Initialize external memory resources (sram, sdram, nand, nor, etc.)
  *
  ************************************************************************************/
 
