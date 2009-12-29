@@ -85,7 +85,7 @@ uint32_t lpc313x_clkfreq(enum lpc313x_clockid_e clkid,
 
   /* Get base frequency for the domain */
 
-  freq = lpc313x_basefreq(dmnid);
+  freq = lpc313x_getbasefreq(dmnid);
 
   /* If there is no fractional divider associated with the clodk, then the
    * connection is directo and we just return the base frequency.

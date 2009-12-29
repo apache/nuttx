@@ -1,8 +1,12 @@
 /****************************************************************************
- * arch/arm/src/lpc313x/lpc313x_freqin.c
+ * arch/arm/src/lpc313x/lpc313x_setfreqin.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * References:
+ *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
+ *   - NXP lpc313x.cdl.drivers.zip example driver code
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,22 +61,6 @@
  * Public Data
  ****************************************************************************/
 
-/* This array provides the programmed frequency of every input source.  The
- * board FFAST input crystal frequency is the only value known initially.
- * Additional frequencies will be added to the table as they are determined
- */
-
-uint32_t g_boardfreqin[CGU_NFREQIN] =
-{
-  BOARD_FREQIN_FFAST,       /* Index=CGU_FREQIN_FFAST */
-  0,                        /* Index=CGU_FREQIN_I2SRXBCK0 */
-  0,                        /* Index=CGU_FREQIN_I2SRXWS0 */
-  0,                        /* Index=CGU_FREQIN_I2SRXBCK1 */
-  0,                        /* Index=CGU_FREQIN_I2SRXWS1 */
-  0,                        /* Index=CGU_FREQIN_HPPLL0 (Audio/I2S PLL) */
-  0                         /* Index=CGU_FREQIN_HPPLL1 (System PLL) */
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -80,3 +68,52 @@ uint32_t g_boardfreqin[CGU_NFREQIN] =
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc313x_selectfreqin
+ *
+ * Description:
+ *   Set the base frequency source selection for with a clock domain
+ *
+ ****************************************************************************/
+
+void lpc313x_selectfreqin(enum lpc313x_domainid_e dmnid, uint32_t finsel)
+{
+  uint32_t scraddr = LPC313X_CGU_SCR(dmnid);
+  uint32_t fs1addr = LPC313X_CGU_FS1(dmnid);
+  uint32_t fs2addr = LPC313X_CGU_FS2(dmnid);
+  uint32_t scrbits;
+
+  /* Get the frequency selection from the switch configuration register (SCR)
+   * for this domain.
+   */
+
+  scrbits = getreg32(scraddr) & ~(CGU_SCR_ENF1|CGU_SCR_ENF2);
+
+  /* If FS1 is currently enabled set the reference clock to FS2 and enable FS2 */
+
+  if (getreg32(LPC313X_CGU_SSR(dmnid) & CGU_SSR_FS1STAT) != 0)
+    {
+      /* Check if the selected frequency, FS1, is same as requested */
+
+      if ((getreg32(fs1addr) & CGU_FS_MASK) != finsel)
+        {
+          /* No.. Set up FS2 */
+
+          putreg32(finsel, fs2addr);
+          putreg32(scrbits | CGU_SCR_ENF2, scraddr);
+        }
+    }
+
+  /* FS1 is not currently enabled, check if the selected frequency, FS2,
+   * is same as requested
+   */
+
+  else if ((getreg32(fs2addr) & CGU_FS_MASK) != finsel)
+    {
+      /* No.. Set up FS1 */
+
+      putreg32(finsel, fs1addr);
+      putreg32(scrbits | CGU_SCR_ENF1, scraddr);
+    }
+}
