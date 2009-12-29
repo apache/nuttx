@@ -241,6 +241,28 @@
 #define MPMC_DYNCONFIG0_AM                (1 << 14) /* Bit 14: Address mapping */
 #define MPMC_DYNCONFIG0_AM_SHIFT          (7)       /* Bits 7-12: Address mapping */
 #define MPMC_DYNCONFIG0_AM_MASK           (0x3c << MPMC_DYNCONFIG0_AM_SHIFT)
+                                                                             /* 16-bit external bus high-performance address mapping */
+#  define MPMC_DYNCONFIG_HP16_2MX8        (0x00 << MPMC_DYNCONFIG0_AM_SHIFT) /* 16Mb (2Mx8), 2 banks, row length=11, column length=9 */
+#  define MPMC_DYNCONFIG_HP16_1MX16       (0x01 << MPMC_DYNCONFIG0_AM_SHIFT) /* 16Mb (1Mx16), 2 banks, row length=11, column length=8 */
+#  define MPMC_DYNCONFIG_HP16_8MX8        (0x04 << MPMC_DYNCONFIG0_AM_SHIFT) /* 64Mb (8Mx8), 4 banks, row length=12, column length=9 */
+#  define MPMC_DYNCONFIG_HP16_4MX16       (0x05 << MPMC_DYNCONFIG0_AM_SHIFT) /* 64Mb (4Mx16), 4 banks, row length=12, column length=8 */
+#  define MPMC_DYNCONFIG_HP16_16MX8       (0x08 << MPMC_DYNCONFIG0_AM_SHIFT) /* 128Mb (16Mx8), 4 banks, row length=12, column length=10 */
+#  define MPMC_DYNCONFIG_HP16_8MX16       (0x09 << MPMC_DYNCONFIG0_AM_SHIFT) /* 128Mb (8Mx16), 4 banks, row length=12, column length=9 */
+#  define MPMC_DYNCONFIG_HP16_32MX8       (0x0c << MPMC_DYNCONFIG0_AM_SHIFT) /* 256Mb (32Mx8), 4 banks, row length=13, column length=10 */
+#  define MPMC_DYNCONFIG_HP16_16MX16      (0x0d << MPMC_DYNCONFIG0_AM_SHIFT) /* 256Mb (16Mx16), 4 banks, row length=13, column length=9 */
+#  define MPMC_DYNCONFIG_HP16_64MX8       (0x10 << MPMC_DYNCONFIG0_AM_SHIFT) /* 512Mb (64Mx8), 4 banks, row length=13, column length=11 */
+#  define MPMC_DYNCONFIG_HP16_32MX16      (0x11 << MPMC_DYNCONFIG0_AM_SHIFT) /* 512Mb (32Mx16), 4 banks, row length=13, column length=10 */
+                                                                             /* 16-bit external bus low power SDRAM address mapping */
+#  define MPMC_DYNCONFIG_LP16_2MX8        (0x20 << MPMC_DYNCONFIG0_AM_SHIFT) /* 6Mb (2Mx8), 2 banks, row length=11, column length=9 */
+#  define MPMC_DYNCONFIG_LP16_1MX16       (0x21 << MPMC_DYNCONFIG0_AM_SHIFT) /* 16Mb (1Mx16), 2 banks, row length=11, column length=8 */
+#  define MPMC_DYNCONFIG_LP16_8MX8        (0x24 << MPMC_DYNCONFIG0_AM_SHIFT) /* 64Mb (8Mx8), 4 banks, row length=12, column length=9 */
+#  define MPMC_DYNCONFIG_LP16_4MX16       (0x25 << MPMC_DYNCONFIG0_AM_SHIFT) /* 64Mb (4Mx16), 4 banks, row length=12, column length=8 */
+#  define MPMC_DYNCONFIG_LP16_16MX8       (0x28 << MPMC_DYNCONFIG0_AM_SHIFT) /* 128Mb (16Mx8), 4 banks, row length=12, column length=10 */
+#  define MPMC_DYNCONFIG_LP16_8MX16       (0x29 << MPMC_DYNCONFIG0_AM_SHIFT) /* 128Mb (8Mx16), 4 banks, row length=12, column length=9 */
+#  define MPMC_DYNCONFIG_LP16_32MX8       (0x2c << MPMC_DYNCONFIG0_AM_SHIFT) /* 256Mb (32Mx8), 4 banks, row length=13, column length=10 */
+#  define MPMC_DYNCONFIG_LP16_16MX16      (0x2d << MPMC_DYNCONFIG0_AM_SHIFT) /* 256Mb (16Mx16), 4 banks, row length=13, column length=9 */
+#  define MPMC_DYNCONFIG_LP16_64MX8       (0x30 << MPMC_DYNCONFIG0_AM_SHIFT) /* 512Mb (64Mx8), 4 banks, row length=13, column length=11 */
+#  define MPMC_DYNCONFIG_LP16_32MX16      (0x31 << MPMC_DYNCONFIG0_AM_SHIFT) /* 512Mb (32Mx16), 4 banks, row length=13, column length=10 */
 #define MPMC_DYNCONFIG0_MD_SHIFT          (3)       /* Bits 3-4: Memory device */
 #define MPMC_DYNCONFIG0_MD_MASK           (3 << MPMC_DYNCONFIG0_MD_SHIFT)
 #  define MPMC_DYNCONFIG0_MDSDRAM         (0 << MPMC_DYNCONFIG0_MD_SHIFT) /* SDRAM */
