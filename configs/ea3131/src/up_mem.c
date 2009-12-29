@@ -1,11 +1,12 @@
 /****************************************************************************
- * configs/ea3131/src/up_sdram.c
- * arch/arm/src/board/up_sdram.c
+ * configs/ea3131/src/up_mem.c
+ * arch/arm/src/board/up_mem.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
+ *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
  *   - NXP lpc313x.cdl.drivers.zip example driver code
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,36 +45,31 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 
-#include "lpc313x_mpmc.h"
+#include "lpc313x_syscreg.h"
 #include "lpc313x_cgudrvr.h"
+#include "lpc313x_mpmc.h"
 #include "ea3131_internal.h"
 
 #ifdef CONFIG_LPC313X_EXTSDRAM
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* The MPMC delay based on trace lengths between SDRAM and the chip and on
+ * the delay strategy used for SDRAM.
  */
 
-#undef SDRAM_DEBUG  /* Define to enable debug */
-
-#ifdef SDRAM_DEBUG
-#  define sdramdbg  lldbg
-#  define sdramvdbg llvdbg
-#else
-#  define sdramdbg(x...)
-#  define sdramvdbg(x...)
-#endif
+#define EA3131_MPMC_DELAY           0x824
 
 /*Delay constants in nanosecondss for MT48LC32M16LF SDRAM on board */
 
@@ -104,10 +100,6 @@
 
 /****************************************************************************
  * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -163,7 +155,7 @@
  *
  ****************************************************************************/
 
-void lpc313x_sdraminitialize(void)
+static void lpc313x_sdraminitialize(void)
 {
   uint32_t tmp;
   uint32_t regval;
@@ -179,7 +171,7 @@ void lpc313x_sdraminitialize(void)
 # define HCLK hclk
 #endif
 
-  /* Check RTL for divide by 2 possible. If so change then enable the following logic */
+  /* Check RTL for divide by 2 possible. If so change then enable the followng logic */
 #if 0
   uint32_t hclk2 = hclk;
 
@@ -199,27 +191,41 @@ void lpc313x_sdraminitialize(void)
 
   /* Configure device config register nSDCE0 for proper width SDRAM */
 
-  putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16), LPC313X_MPMC_DYNCONFIG0);
-  putreg32((MPMC_DYNRASCAS0_RAS2CLK|MPMC_DYNRASCAS0_CAS2CLK), LPC313X_MPMC_DYNRASCAS0);
+  putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16),
+           LPC313X_MPMC_DYNCONFIG0);
+  putreg32((MPMC_DYNRASCAS0_RAS2CLK|MPMC_DYNRASCAS0_CAS2CLK),
+           LPC313X_MPMC_DYNRASCAS0);
 
   /* Min 20ns program 1 so that at least 2 HCLKs are used */
 
-  putreg32(NS2HCLKS(EA3131_SDRAM_TRP,  HCLK2, MPMC_DYNTRP_MASK),   LPC313X_MPMC_DYNTRP);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TRAS, HCLK2, MPMC_DYNTRAS_MASK),  LPC313X_MPMC_DYNTRAS);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TREX, HCLK2, MPMC_DYNTSREX_MASK), LPC313X_MPMC_DYNTSREX);
-  putreg32(EA3131_SDRAM_TARP,                                      LPC313X_MPMC_DYNTAPR);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TDAL, HCLK2, MPMC_DYNTDAL_MASK),  LPC313X_MPMC_DYNTDAL);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TWR,  HCLK2, MPMC_DYNTWR_MASK),   LPC313X_MPMC_DYNTWR);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TRC,  HCLK2, MPMC_DYNTRC_MASK),   LPC313X_MPMC_DYNTRC);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TRFC, HCLK2, MPMC_DYNTRFC_MASK),  LPC313X_MPMC_DYNTRFC);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TXSR, HCLK2, MPMC_DYNTXSR_MASK),  LPC313X_MPMC_DYNTXSR);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TRRD, HCLK2, MPMC_DYNTRRD_MASK),  LPC313X_MPMC_DYNTRRD);
-  putreg32(NS2HCLKS(EA3131_SDRAM_TMRD, HCLK2, MPMC_DYNTMRD_MASK),  LPC313X_MPMC_DYNTMRD);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TRP,  HCLK2, MPMC_DYNTRP_MASK),
+           LPC313X_MPMC_DYNTRP);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TRAS, HCLK2, MPMC_DYNTRAS_MASK),
+           LPC313X_MPMC_DYNTRAS);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TREX, HCLK2, MPMC_DYNTSREX_MASK),
+           LPC313X_MPMC_DYNTSREX);
+  putreg32(EA3131_SDRAM_TARP,
+           LPC313X_MPMC_DYNTAPR);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TDAL, HCLK2, MPMC_DYNTDAL_MASK),
+           LPC313X_MPMC_DYNTDAL);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TWR,  HCLK2, MPMC_DYNTWR_MASK),
+           LPC313X_MPMC_DYNTWR);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TRC,  HCLK2, MPMC_DYNTRC_MASK),
+           LPC313X_MPMC_DYNTRC);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TRFC, HCLK2, MPMC_DYNTRFC_MASK),
+           LPC313X_MPMC_DYNTRFC);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TXSR, HCLK2, MPMC_DYNTXSR_MASK),
+           LPC313X_MPMC_DYNTXSR);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TRRD, HCLK2, MPMC_DYNTRRD_MASK),
+           LPC313X_MPMC_DYNTRRD);
+  putreg32(NS2HCLKS(EA3131_SDRAM_TMRD, HCLK2, MPMC_DYNTMRD_MASK),
+           LPC313X_MPMC_DYNTMRD);
   up_udelay(100);
   
   /* Issue continuous NOP commands  */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INOP), LPC313X_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INOP),
+           LPC313X_MPMC_DYNCONTROL);
 
   /* Load ~200us delay value to timer1 */
 
@@ -227,37 +233,50 @@ void lpc313x_sdraminitialize(void)
   
   /* Issue a "pre-charge all" command */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IPALL), LPC313X_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IPALL),
+           LPC313X_MPMC_DYNCONTROL);
 
-  /* Minimum refresh pulse interval (tRFC) for MT48LC32M16A2=80nsec, 100nsec provides more than adequate interval.
+  /* Minimum refresh pulse interval (tRFC) for MT48LC32M16A2=80nsec,
+   * 100nsec provides more than adequate interval.
    */
 
-  putreg32(NS2HCLKS(EA3131_SDRAM_REFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK), LPC313X_MPMC_DYNREFRESH);
+  putreg32(NS2HCLKS(EA3131_SDRAM_REFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK),
+           LPC313X_MPMC_DYNREFRESH);
 
   /* Load ~250us delay value to timer1 */
 
   up_udelay(250);
   
-  /* Recommended refresh interval for normal operation of the Micron MT48LC16LFFG = 7.8125usec (128KHz rate). ((HCLK / 128000) - 1) = refresh counter interval rate, (subtract one for safety margin).
+  /* Recommended refresh interval for normal operation of the Micron
+   * MT48LC16LFFG = 7.8125usec (128KHz rate). ((HCLK / 128000) - 1) =
+    * refresh counter interval rate, (subtract one for safety margin).
    */
 
-  putreg32(NS2HCLKS(EA3131_SDRAM_OPERREFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK), LPC313X_MPMC_DYNREFRESH);
+  putreg32(NS2HCLKS(EA3131_SDRAM_OPERREFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK),
+           LPC313X_MPMC_DYNREFRESH);
 
   /* Select mode register update mode */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IMODE), LPC313X_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IMODE),
+           LPC313X_MPMC_DYNCONTROL);
 
-  /* Program the SDRAM internal mode registers on bank nSDCE0 and reconfigure the SDRAM chips.  Bus speeds up to 90MHz requires use of a CAS latency = 2. To get correct value on address bus CAS cycle, requires a shift by 13 for 16bit mode
+  /* Program the SDRAM internal mode registers on bank nSDCE0 and reconfigure
+   * the SDRAM chips.  Bus speeds up to 90MHz requires use of a CAS latency = 2.
+   * To get correct value on address bus CAS cycle, requires a shift by 13 for
+   * 16bit mode
    */
 
   tmp = getreg32(LPC313X_EXTSDRAM0_VSECTION | (0x23 << 13));
   
-  putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16), LPC313X_MPMC_DYNCONFIG0);
-  putreg32((MPMC_DYNRASCAS0_RAS2CLK|MPMC_DYNRASCAS0_CAS2CLK), LPC313X_MPMC_DYNRASCAS0);
+  putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16),
+           LPC313X_MPMC_DYNCONFIG0);
+  putreg32((MPMC_DYNRASCAS0_RAS2CLK|MPMC_DYNRASCAS0_CAS2CLK),
+           LPC313X_MPMC_DYNRASCAS0);
 
   /* Select normal operating mode */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INORMAL), LPC313X_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INORMAL),
+           LPC313X_MPMC_DYNCONTROL);
 
   /* Enable buffers */
 
@@ -265,6 +284,76 @@ void lpc313x_sdraminitialize(void)
   regval |= MPMC_DYNCONFIG0_B;
   putreg32(regval, LPC313X_MPMC_DYNCONFIG0);
 
-  putreg32((MPMC_DYNCONTROL_INORMAL|MPMC_DYNCONTROL_CS), LPC313X_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_INORMAL|MPMC_DYNCONTROL_CS),
+           LPC313X_MPMC_DYNCONTROL);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc313x_meminitialize
+ *
+ * Description:
+ *   Initialize memory
+ *
+ ****************************************************************************/
+
+void lpc313x_meminitialize(void)
+{
+  /* Configure the LCD pins in external bus interface (EBI/MPMC) memory mode.
+   * 
+   * LCD_CSB   -> MPMC_NSTCS_0
+   * LCD_DB_1  -> MPMC_NSTCS_1
+   * LCD_DB_0  -> MPMC_CLKOUT
+   * LCD_E_RD  -> MPMC_CKE
+   * LCD_RS    -> MPMC_NDYCS
+   * LCD_RW_WR -> MPMC_DQM_1
+   * LCD_DB_2  -> EBI_A_2
+   * LCD_DB_3  -> EBI_A_3 l
+   * LCD_DB_4  -> EBI_A_4 l
+   * LCD_DB_5  -> EBI_A_5 l
+   * LCD_DB_6  -> EBI_A_6
+   * LCD_DB_7  -> EBI_A_7
+   * LCD_DB_8  -> EBI_A_8
+   * LCD_DB_9  -> EBI_A_9
+   * LCD_DB_10 -> EBI_A_10
+   * LCD_DB_11 -> EBI_A_11
+   * LCD_DB_12 -> EBI_A_12
+   * LCD_DB_13 -> EBI_A_13
+   * LCD_DB_14 -> EBI_A_14
+   * LCD_DB_15 -> EBI_A_15
+   */
+
+  putreg32(SYSCREG_MUX_LCDEBISEL_EBIMPMC, LPC313X_SYSCREG_MUX_LCDEBISEL);
+
+  /* Enable EBI clock */
+
+  lpc313x_enableclock(CLKID_EBICLK);
+  
+  /* Enable MPMC controller clocks */
+
+  lpc313x_enableclock(CLKID_MPMCCFGCLK);
+  lpc313x_enableclock(CLKID_MPMCCFGCLK2);
+  lpc313x_enableclock(CLKID_MPMCCFGCLK3);
+
+  /* Enable the external memory controller */
+
+  putreg32(MPMC_CONTROL_E, LPC313X_MPMC_CONTROL);
+
+  /* Force HCLK to MPMC_CLK to 1:1 ratio, little-endian mode */
+
+  putreg32(0, LPC313X_MPMC_CONFIG);
+
+  /* Set MPMC delay based on trace lengths between SDRAM and the chip
+   * and on the delay strategy used for SDRAM.
+   */
+
+  putreg32(EA3131_MPMC_DELAY, LPC313X_SYSCREG_MPMC_DELAYMODES);
+  
+  /* Configure Micron MT48LC32M16A2 SDRAM on the EA3131 board */
+
+  lpc313x_sdraminitialize();
 }
 #endif /* CONFIG_LPC313X_EXTSDRAM */
