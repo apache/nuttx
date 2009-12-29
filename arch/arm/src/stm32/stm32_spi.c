@@ -68,9 +68,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
+
+#include <arch/board/board.h>
 
 #include "up_internal.h"
 #include "up_arch.h"

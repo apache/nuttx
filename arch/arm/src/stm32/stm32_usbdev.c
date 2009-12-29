@@ -3454,7 +3454,6 @@ void up_usbuninitialize(void)
    */
 
   struct stm32_usbdev_s *priv = &g_usbdev;
-  uint16_t regval;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVUNINIT, 0);

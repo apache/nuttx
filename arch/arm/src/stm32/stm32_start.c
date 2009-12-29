@@ -45,9 +45,11 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
+
 #include "stm32_internal.h"
 
 /****************************************************************************

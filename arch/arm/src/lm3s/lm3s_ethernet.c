@@ -50,13 +50,14 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-
+#include <arch/board/board.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
 #include <net/uip/uip-arch.h>
 
-#include "up_arch.h"
 #include "chip.h"
+#include "up_arch.h"
+
 #include "lm3s_internal.h"
 
 /****************************************************************************

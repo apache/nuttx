@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+
 #include <arch/board/board.h>
 
 #include "up_internal.h"
