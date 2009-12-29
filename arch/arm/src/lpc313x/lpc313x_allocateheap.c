@@ -53,6 +53,62 @@
  * Pre-processor Definitions
  ************************************************************************/
 
+/* Configuration ********************************************************/
+
+/* Some sanity checking.  If external memory regions are defined, verify
+ * that CONFIG_MM_REGIONS is set to match, exactly, the number of external
+ * memory regions that we have been asked to add to the heap.
+ */
+
+#if defined(CONFIG_LPC313X_EXTSRAM0) && defined(CONFIG_LPC313X_EXTSRAM0HEAP)
+#  if defined(CONFIG_LPC313X_EXTSRAM1) && defined(CONFIG_LPC313X_EXTSRAM1HEAP)
+#    if defined(CONFIG_LPC313X_EXTSDRAM) && defined(CONFIG_LPC313X_EXTSDRAMHEAP)
+#      /* SRAM+EXTSRAM0+EXTSRAM1+EXTSDRAM */
+#      define LPC313X_NEXT_REGIONS 4
+#    else
+#      /* SRAM+EXTSRAM0+EXTSRAM1 */
+#      define LPC313X_NEXT_REGIONS 3
+#    endif
+#  elif defined(CONFIG_LPC313X_EXTSDRAM) && defined(CONFIG_LPC313X_EXTSDRAMHEAP)
+#      /* SRAM+EXTSRAM0+EXTSDRAM */
+#      define LPC313X_NEXT_REGIONS 3
+#  else
+#      /* SRAM+EXTSRAM0 */
+#      define LPC313X_NEXT_REGIONS 2
+#  endif
+#elif defined(CONFIG_LPC313X_EXTSRAM1) && defined(CONFIG_LPC313X_EXTSRAM1HEAP)
+#  if defined(CONFIG_LPC313X_EXTSDRAM) && defined(CONFIG_LPC313X_EXTSDRAMHEAP)
+#      /* SRAM+EXTSRAM1+EXTSDRAM */
+#      define LPC313X_NEXT_REGIONS 3
+#  else
+#      /* SRAM+EXTSRAM1 */
+#      define LPC313X_NEXT_REGIONS 2
+#  endif
+#elif defined(CONFIG_LPC313X_EXTSDRAM) && defined(CONFIG_LPC313X_EXTSDRAMHEAP)
+#      /* SRAM+EXTSDRAM */
+#      define LPC313X_NEXT_REGIONS 2
+#else
+#      /* SRAM */
+#      define LPC313X_NEXT_REGIONS 1
+#endif
+
+#if CONFIG_MM_REGIONS != LPC313X_NEXT_REGIONS
+#  if CONFIG_MM_REGIONS < LPC313X_NEXT_REGIONS
+#    error "CONFIG_MM_REGIONS is large enough for the selected memory regions"
+#  else
+#    error "CONFIG_MM_REGIONS is too large for the selected memory regions"
+#  endif
+#  if defined(CONFIG_LPC313X_EXTSRAM0) && defined(CONFIG_LPC313X_EXTSRAM0HEAP)
+#    error "External SRAM0 is selected for heap"
+#  endif
+#  if defined(CONFIG_LPC313X_EXTSRAM1) && defined(CONFIG_LPC313X_EXTSRAM1HEAP)
+#    error "External SRAM1 is selected for heap"
+#  endif
+#  if defined(CONFIG_LPC313X_EXTSDRAM) && defined(CONFIG_LPC313X_EXTSDRAMHEAP)
+#    error "External SRAM1 is selected for heap"
+#  endif
+#endif
+
 /************************************************************************
  * Private Data
  ************************************************************************/
@@ -91,3 +147,29 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   *heap_start = (FAR void*)g_heapbase;
   *heap_size  = (LPC313X_SRAM_VADDR + CONFIG_DRAM_SIZE) - g_heapbase;
 }
+
+/************************************************************************
+ * Name: up_addregion
+ *
+ * Description:
+ *   Memory may be added in non-contiguous chunks.  Additional chunks are
+ *   added by calling this function.
+ *
+ ************************************************************************/
+
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void)
+{
+#if defined(CONFIG_LPC313X_EXTSRAM0) && defined(CONFIG_LPC313X_EXTSRAM0HEAP)
+  mm_addregion((FAR void*)LPC313X_EXTSRAM0_VSECTION, CONFIG_LPC313X_EXTSRAM0SIZE);
+#endif
+
+#if defined(CONFIG_LPC313X_EXTSRAM1) && defined(CONFIG_LPC313X_EXTSRAM1HEAP)
+  mm_addregion((FAR void*)LPC313X_EXTSRAM1_VSECTION, CONFIG_LPC313X_EXTSRAM1SIZE);
+#endif
+
+#if defined(CONFIG_LPC313X_EXTSDRAM) && defined(CONFIG_LPC313X_EXTSDRAMHEAP)
+  mm_addregion((FAR void*)LPC313X_EXTSDRAM_VSECTION, CONFIG_LPC313X_EXTSDRAMSIZE);
+#endif
+}
+#endif
