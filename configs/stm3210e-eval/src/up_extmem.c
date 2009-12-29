@@ -46,8 +46,9 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "chip.h"
+#include "up_arch.h"
+
 #include "stm32_fsmc.h"
 #include "stm32_gpio.h"
 #include "stm32_internal.h"
