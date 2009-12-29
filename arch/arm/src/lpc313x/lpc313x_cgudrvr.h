@@ -58,6 +58,7 @@
 
 /* Clock ID ranges (see enum lpc313x_clockid_e) *************************************************/
 
+#define CLKID_FIRST                       CLKID_APB0CLK
 #define CLKID_SYSBASE_FIRST               CLKID_APB0CLK           /* Domain 0: SYS_BASE */
 #define CLKID_SYSBASE_LAST                CLKID_INTCCLK
 #define _D0B(id)                          _RBIT(id,CLKID_SYSBASE_FIRST)
@@ -105,11 +106,13 @@
 #define CLKID_SYSCLKO_FIRST               CLKID_SYSCLKO           /* Domain 11: SYSCLKO_BASE */
 #define CLKID_SYSCLKO_LAST                CLKID_SYSCLKO
 #define _D11B(id)                         _RBIT(id,CLKID_SYSCLKO_FIRST)
+#define CLKID_LAST                        CLKID_SYSCLKO
 
 #define CGU_NDOMAINS                      12 /* The number of clock domains */
 #define CLKID_INVALIDCLK                  -1 /* Indicates and invalid clock ID */
 #define DOMAINID_INVALID                  -1 /* Indicates an invalid domain ID */
 #define ESRNDX_INVALID                    -1 /* Indicates an invalid ESR register index */
+#define BCRNDX_INVALID                    -1 /* Indicates an invalid BCR register index */
 
 /* There are 24 fractional dividers, indexed 0 to 23.  The following definitions
  * provide (1) the number of fractional dividers available for each base frequency,
@@ -167,7 +170,7 @@
 
 #define FRACDIV_BASE11_CNT                0  /* No fractional divider available */
 
-#define FDCNDX_INVALID                   -1 /* Indicates an invalid fractional
+#define FDCNDX_INVALID                   -1  /* Indicates an invalid fractional
                                               * divider index */
 
 /************************************************************************
@@ -562,6 +565,18 @@ EXTERN enum lpc313x_domainid_e lpc313x_clkdomain(enum lpc313x_clockid_e clkid);
  ************************************************************************/
 
 EXTERN int lp313x_esrndx(enum lpc313x_clockid_e clkid);
+
+/************************************************************************
+ * Name: lp313x_bcrndx
+ *
+ * Description:
+ *   Only 5 of the 12 domains have an associated BCR register.  This
+ *   function returns the index to the associated BCR register (if any)
+ *   or BCRNDX_INVALID otherwise.
+ *
+ ************************************************************************/
+
+EXTERN int lp313x_bcrndx(enum lpc313x_domainid_e dmnid);
 
 /************************************************************************
  * Name: lpc313x_fdcndx

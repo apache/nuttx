@@ -98,7 +98,7 @@ lpc313x_switchdomains(const struct lpc313x_pllconfig_s * const cfg)
         {
           /* Yes.. switch reference clock in to FFAST */
 
-          lpc313x_selectfreqin(i, CGU_FS_FFAST);
+          lpc313x_selectfreqin((enum lpc313x_domainid_e)i, CGU_FS_FFAST);
 
           /* Add the domain to the set to be restored after the PLL is configured */
 
@@ -135,7 +135,7 @@ lpc313x_restoredomains(const struct lpc313x_pllconfig_s * const cfg,
         {
           /* Switch input reference clock to newly configured HPLL */
 
-          lpc313x_selectfreqin(i, finsel);
+          lpc313x_selectfreqin((enum lpc313x_domainid_e)i, finsel);
         }
     }
 }
