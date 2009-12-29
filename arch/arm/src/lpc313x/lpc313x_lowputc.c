@@ -55,6 +55,38 @@
  * Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+/* Is the UART enabled? */
+
+#ifdef CONFIG_LPC313X_UART
+#  define HAVE_UART 1
+
+/* Is it a serial console? */
+
+#  ifdef CONFIG_UART_SERIAL_CONSOLE
+#    define HAVE_CONSOLE 1
+
+     /* Is initialization performed by up_earlyserialinit()?  Or is UART
+      * initialization suppressed?
+      */
+
+#    if defined(CONFIG_USE_EARLYSERIALINIT) || defined(CONFIG_SUPPRESS_LPC313X_UART_CONFIG)
+#      undef NEED_LOWSETUP
+#    else
+#      define NEED_LOWSETUP 1
+#    endif
+#  else
+#      undef HAVE_CONSOLE
+#      undef NEED_LOWSETUP
+#  endif
+
+#else
+#  undef HAVE_UART
+#  undef HAVE_CONSOLE
+#  undef NEED_LOWSETUP
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -71,6 +103,7 @@
  * Name: up_waittxready
  ****************************************************************************/
 
+#ifdef HAVE_CONSOLE
 static inline void up_waittxready(void)
 {
   int tmp;
@@ -89,12 +122,13 @@ static inline void up_waittxready(void)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Name: up_configbaud
  ****************************************************************************/
 
-#ifndef CONFIG_USE_EARLYSERIALINIT
+#ifdef NEED_LOWSETUP
 static inline void up_configbaud(void)
 {
   /* In a buckled-up, embedded system, there is no reason to constantly
@@ -228,22 +262,22 @@ static inline void up_configbaud(void)
              LPC313X_UART_FDR);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: up_lowsetup
+ * Name: lpc313x_lowsetup
  *
  * Description:
- *   Configure the UART baud, bits, parity, fifos, etc. This method is called
- *   the first time that the serial port is opened.
+ *   Called early in up_boot.  Performs chip-common low level initialization.
  *
  ****************************************************************************/
 
-void up_lowsetup(void)
+void lpc313x_lowsetup(void)
 {
-#ifndef CONFIG_SUPPRESS_LPC313X_UART_CONFIG
+#ifdef NEED_LOWSETUP
   uint32_t regval;
 
   /* Enable UART system clock */
@@ -304,7 +338,6 @@ void up_lowsetup(void)
   putreg32('\0', LPC313X_UART_THR);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -320,6 +353,8 @@ void up_lowsetup(void)
 
 void up_lowputc(char ch)
 {
+#ifdef HAVE_CONSOLE
   up_waittxready();
   putreg32((uint32_t)ch, LPC313X_UART_THR);
+#endif
 }
