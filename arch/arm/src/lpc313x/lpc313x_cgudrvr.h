@@ -5,8 +5,8 @@
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
- *   - UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
- *   - lpc313x.cdl.drivers.zip example driver code
+ *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
+ *   - NXP lpc313x.cdl.drivers.zip example driver code
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

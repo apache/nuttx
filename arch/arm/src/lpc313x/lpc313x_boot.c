@@ -46,6 +46,7 @@
 #include "arm.h"
 #include "up_internal.h"
 #include "up_arch.h"
+#include "lpc313x_internal.h"
 
 /************************************************************************************
  * Private Types
