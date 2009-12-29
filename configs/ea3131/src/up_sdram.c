@@ -55,6 +55,8 @@
 #include "lpc313x_cgudrvr.h"
 #include "ea3131_internal.h"
 
+#ifdef CONFIG_LPC313X_EXTSDRAM
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -265,3 +267,4 @@ void lpc313x_sdraminitialize(void)
 
   putreg32((MPMC_DYNCONTROL_INORMAL|MPMC_DYNCONTROL_CS), LPC313X_MPMC_DYNCONTROL);
 }
+#endif /* CONFIG_LPC313X_EXTSDRAM */
