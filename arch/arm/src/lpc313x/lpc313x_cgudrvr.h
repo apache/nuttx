@@ -646,13 +646,28 @@ EXTERN void lpc313x_clkinit(const struct lpc313x_clkinit_s* cfg);
  * Name: lpc313x_fdivinit
  *
  * Description:
- *   Enable and configure (or disable) a fractional divider.
+ *   Enable and configure (or disable) a fractional divider.  For
+ *   internal us only... see lpc313x_setfdiv() the externally usable
+ *   function.
  *
  ************************************************************************/
 
 EXTERN uint32_t lpc313x_fdivinit(int fdcndx,
                                  const struct lpc313x_fdivconfig_s *fdiv,
                                  bool enable);
+
+/************************************************************************
+ * Name: lpc313x_setfdiv
+ *
+ * Description:
+ *   Set/reset subdomain frequency containing the specified clock using
+ *   the provided divider settings
+ *
+ ************************************************************************/
+
+EXTERN void lpc313x_setfdiv(enum lpc313x_domainid_e dmnid,
+                            enum lpc313x_clockid_e clkid,
+                            const struct lpc313x_subdomainconfig_s *fdiv);
 
 /****************************************************************************
  * Name: lpc313x_pllconfig
