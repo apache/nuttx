@@ -45,6 +45,10 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "up_arch.h"
 #include "lpc313x_cgu.h"
 
@@ -170,6 +174,7 @@
 
 #define FRACDIV_BASE11_CNT                0  /* No fractional divider available */
 
+#define CGU_NFRACDIV                      24 /* Number of fractional dividers */
 #define FDCNDX_INVALID                   -1  /* Indicates an invalid fractional
                                               * divider index */
 
@@ -212,7 +217,7 @@ enum lpc313x_clockid_e
   /* Domain 0: SYS_BASE */
 
   CLKID_APB0CLK = 0,      /*  0 APB0_CLK */
-  CLKID_SBAPB1CLK,        /*  1 APB1_CLK */
+  CLKID_APB1CLK,          /*  1 APB1_CLK */
   CLKID_APB2CLK,          /*  2 APB2_CLK */
   CLKID_APB3CLK,          /*  3 APB3_CLK */
   CLKID_APB4CLK,          /*  4 APB4_CLK */
@@ -494,6 +499,27 @@ static inline void lpc313x_disableclock(enum lpc313x_clockid_e clkid)
  ************************************************************************/
 
 /****************************************************************************
+ * Name: lpc313x_defclk
+ *
+ * Description:
+ *   Enable the specified clock if it is one of the default clocks needed
+ *   by the board.
+ *
+ ****************************************************************************/
+
+EXTERN bool lpc313x_defclk(enum lpc313x_clockid_e clkid);
+
+/****************************************************************************
+ * Name: lpc313x_resetclks
+ *
+ * Description:
+ *   Put all clocks into a known, initial state
+ *
+ ****************************************************************************/
+
+EXTERN void lpc313x_resetclks(void);
+
+/****************************************************************************
  * Name: lpc313x_pllconfig
  *
  * Description:
@@ -613,6 +639,26 @@ EXTERN void lpc313x_selectfreqin(enum lpc313x_domainid_e dmnid,
 
 EXTERN uint32_t lpc313x_clkfreq(enum lpc313x_clockid_e clkid,
                                 enum lpc313x_domainid_e dmnid);
+
+/************************************************************************
+ * Name: lpc313x_enableexten
+ *
+ * Description:
+ *   Enable external enabling for the the specified possible clocks.
+ *
+ ************************************************************************/
+
+EXTERN void lpc313x_enableexten(enum lpc313x_clockid_e clkid);
+
+/************************************************************************
+ * Name: lpc313x_disableexten
+ *
+ * Description:
+ *   Disable external enabling for the the specified possible clocks.
+ *
+ ************************************************************************/
+
+EXTERN void lpc313x_disableexten(enum lpc313x_clockid_e clkid);
 
 #undef EXTERN
 #ifdef __cplusplus
