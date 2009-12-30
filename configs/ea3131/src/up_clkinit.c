@@ -399,6 +399,7 @@ const struct lpc313x_clkinit_s g_cgu_default_clks =
 
   /* Dynamic fractional divider configuration (7) */
 
+#if 0 /* Dynamic fractional divider initialization not implemented */
   {
     {
       CGU_DYNSEL_ALLBITS, {1, 1, 64}
@@ -422,6 +423,7 @@ const struct lpc313x_clkinit_s g_cgu_default_clks =
       CGU_DYNSEL_ALLBITS, {1, 1, 3}
     }
   }
+#endif
 };
 
 

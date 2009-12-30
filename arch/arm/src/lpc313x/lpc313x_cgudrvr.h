@@ -497,11 +497,13 @@ struct lpc313x_clkinit_s
     uint8_t finsel;
   } domain11;
 
+#if 0 /* Dynamic fractional divider initialization not implemented */
   struct
   {
     uint16_t  sel;
     struct lpc313x_fdivconfig_s cfg;
   } dynfdiv[CGU_NDYNFRACDIV];
+#endif
 };
 
 /* This structure is used to pass PLL configuration data to
@@ -618,6 +620,29 @@ EXTERN bool lpc313x_defclk(enum lpc313x_clockid_e clkid);
  ****************************************************************************/
 
 EXTERN void lpc313x_resetclks(void);
+
+/************************************************************************
+ * Name: lpc313x_clkinit
+ *
+ * Description:
+ *   Initialize all clock domains based on board-specific clock
+ *   configuration data
+ *
+ ************************************************************************/
+
+EXTERN void lpc313x_clkinit(const struct lpc313x_clkinit_s* cfg);
+
+/************************************************************************
+ * Name: lpc313x_fdivinit
+ *
+ * Description:
+ *   Enable and configure (or disable) a fractional divider.
+ *
+ ************************************************************************/
+
+EXTERN uint32_t lpc313x_fdivinit(int fdcndx,
+                                 const struct lpc313x_fdivconfig_s *fdiv,
+                                 bool enable);
 
 /****************************************************************************
  * Name: lpc313x_pllconfig

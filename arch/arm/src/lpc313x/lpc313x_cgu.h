@@ -1176,21 +1176,22 @@
 /* Enable Select register ESR0 to ESR88, addresses 0x130043a0 to 0x13004500 */
 /* The ESR_SEL varies according to the selected clock */
 
+#define CGU_ESR_ESRSEL_SHIFT             (1)       /* Bits 1-n: Common shift value */
 #define CGU_ESR0_29_ESRSEL_SHIFT         (1)       /* Bits 1-3: Selection of fractional dividers */
-#define CGU_ESR0_29_ESRSEL_MASK          (7 << CGU_ESR_SHIFT)
-#  define CGU_ESR0_29_ESRSEL_FDC0        (0 << CGU_ESR_SHIFT) /* Selects FDC0 */
-#  define CGU_ESR0_29_ESRSEL_FDC1        (1 << CGU_ESR_SHIFT) /* Selects FDC1 */
-#  define CGU_ESR0_29_ESRSEL_FDC2        (2 << CGU_ESR_SHIFT) /* Selects FDC2 */
-#  define CGU_ESR0_29_ESRSEL_FDC3        (3 << CGU_ESR_SHIFT) /* Selects FDC3 */
-#  define CGU_ESR0_29_ESRSEL_FDC4        (4 << CGU_ESR_SHIFT) /* Selects FDC4 */
-#  define CGU_ESR0_29_ESRSEL_FDC5        (5 << CGU_ESR_SHIFT) /* Selects FDC5 */
-#  define CGU_ESR0_29_ESRSEL_FDC6        (6 << CGU_ESR_SHIFT) /* Selects FDC6 */
+#define CGU_ESR0_29_ESRSEL_MASK          (7 << CGU_ESR0_29_ESRSEL_SHIFT)
+#  define CGU_ESR0_29_ESRSEL_FDC0        (0 << CGU_ESR0_29_ESRSEL_SHIFT) /* Selects FDC0 */
+#  define CGU_ESR0_29_ESRSEL_FDC1        (1 << CGU_ESR0_29_ESRSEL_SHIFT) /* Selects FDC1 */
+#  define CGU_ESR0_29_ESRSEL_FDC2        (2 << CGU_ESR0_29_ESRSEL_SHIFT) /* Selects FDC2 */
+#  define CGU_ESR0_29_ESRSEL_FDC3        (3 << CGU_ESR0_29_ESRSEL_SHIFT) /* Selects FDC3 */
+#  define CGU_ESR0_29_ESRSEL_FDC4        (4 << CGU_ESR0_29_ESRSEL_SHIFT) /* Selects FDC4 */
+#  define CGU_ESR0_29_ESRSEL_FDC5        (5 << CGU_ESR0_29_ESRSEL_SHIFT) /* Selects FDC5 */
+#  define CGU_ESR0_29_ESRSEL_FDC6        (6 << CGU_ESR0_29_ESRSEL_SHIFT) /* Selects FDC6 */
 
 #define CGU_ESR30_39_ESRSEL_FDC7         (0)       /* Bit 1=0 selects FDC7 */
-#define CGU_ESR30_39_ESRSEL_FDC8         (1 << 1)  /* Bit 1=01selects FDC8 */
+#define CGU_ESR30_39_ESRSEL_FDC8         (1 << 1)  /* Bit 1=1 selects FDC8 */
 
 #define CGU_ESR40_49_ESRSEL_FDC9         (0)       /* Bit 1=0 selects FDC9 */
-#define CGU_ESR40_49_ESRSEL_FDC10        (1 << 1)  /* Bit 1=01selects FDC10 */
+#define CGU_ESR40_49_ESRSEL_FDC10        (1 << 1)  /* Bit 1=1 selects FDC10 */
 
 #define CGU_ESR50_57_ESRSEL_SHIFT        (1)       /* Bits 1-3: Selection of fractional dividers */
 #define CGU_ESR50_57_ESRSEL_MASK         (3 << CGU_ESR50_57_ESRSEL_SHIFT)
