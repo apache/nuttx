@@ -46,6 +46,9 @@
 #include "arm.h"
 #include "up_internal.h"
 #include "up_arch.h"
+
+#include "lpc313x_syscreg.h"
+#include "lpc313x_cgudrvr.h"
 #include "lpc313x_internal.h"
 
 /************************************************************************************
@@ -237,7 +240,24 @@ void up_boot(void)
   up_copyvectorblock();
 #endif /* 0 */
 
-  /* Perform chip common initialization (might do nothing) */
+  /* Reset all clocks */
+
+  lpc313x_resetclks();
+
+  /* Initialize the PLLs */
+
+  lpc313x_hp1pllconfig();
+  lpc313x_hp0pllconfig();
+  
+  /* Initialize clocking to settings provided by board-specific logic */
+
+  lpc313x_clkinit(&g_boardclks);   
+
+  /* Map first 4KB of ARM space to ISRAM area */
+
+  putreg32(LPC313X_INTSRAM0_PSECTION, LPC313X_SYSCREG_ARM926SHADOWPTR);
+
+  /* Perform common, low-level chip initialization (might do nothing) */
 
   lpc313x_lowsetup();
 

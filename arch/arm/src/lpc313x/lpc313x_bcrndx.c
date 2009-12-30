@@ -64,26 +64,16 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: lp313x_esrndx
+ * Name: lp313x_bcrndx
  *
  * Description:
- *   Given a clock ID, return the index of the corresponding ESR
- *   register (or ESRNDX_INVALID if there is no ESR associated with
- *   this clock ID).  Indexing of ESRs differs slightly from the clock
- *   ID:  There are 92 clock IDs but only 89 ESR regisers. There are no
- *  ESR registers for :
- *
- *
- *  CLKID_I2SRXBCK0         Clock ID 87: I2SRX_BCK0
- *  CLKID_I2SRXBCK1,        Clock ID 88: I2SRX_BCK1
- *
- * and
- *
- *  CLKID_SYSCLKO           Clock ID 91: SYSCLK_O
+ *   Only 5 of the 12 domains have an associated BCR register.  This
+ *   function returns the index to the associated BCR register (if any)
+ *   or BCRNDX_INVALID otherwise.
  *
  ************************************************************************/
 
-int lp313x_ncrndx(enum lpc313x_domainid_e dmnid)
+int lp313x_bcrndx(enum lpc313x_domainid_e dmnid)
 {
   switch (dmnid)
     {
