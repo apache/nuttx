@@ -67,15 +67,15 @@
 #define CLKID_SYSBASE_LAST                CLKID_INTCCLK
 #define _D0B(id)                          _RBIT(id,CLKID_SYSBASE_FIRST)
 
-#define CLKID_AHB0APB0_FIRST              CLKID_AHB2APB0ASYNCPCLK /* Domain 1: AHB0APB0_BASE */
+#define CLKID_AHB0APB0_FIRST              CLKID_AHB2APB0PCLK     /* Domain 1: AHB0APB0_BASE */
 #define CLKID_AHB0APB0_LAST               CLKID_RNGPCLK
 #define _D1B(id)                          _RBIT(id,CLKID_AHB0APB0_FIRST)
 
-#define CLKID_AHB0APB1_FIRST              CLKID_AHB2APB1ASYNCPCLK /* Domain 2: AHB0APB1_BASE */
+#define CLKID_AHB0APB1_FIRST              CLKID_AHB2APB1PCLK     /* Domain 2: AHB0APB1_BASE */
 #define CLKID_AHB0APB1_LAST               CLKID_I2C1PCLK
 #define _D2B(id)                          _RBIT(id,CLKID_AHB0APB1_FIRST)
 
-#define CLKID_AHB0APB2_FIRST              CLKID_AHB2APB2ASYNCPCLK /* Domain 3: AHB0APB2_BASE */
+#define CLKID_AHB0APB2_FIRST              CLKID_AHB2APB2PCLK     /* Domain 3: AHB0APB2_BASE */
 #define CLKID_AHB0APB2_LAST               CLKID_SPIPCLKGATED
 #define _D3B(id)                          _RBIT(id,CLKID_AHB0APB2_FIRST)
 
@@ -174,7 +174,8 @@
 
 #define FRACDIV_BASE11_CNT                0  /* No fractional divider available */
 
-#define CGU_NFRACDIV                      24 /* Number of fractional dividers */
+#define CGU_NFRACDIV                      24 /* Number of fractional dividers: 0-23 */
+#define CGU_NDYNFRACDIV                   7  /* Number of dynamic fractional dividers: 0-6 */
 #define FDCNDX_INVALID                   -1  /* Indicates an invalid fractional
                                               * divider index */
 
@@ -402,6 +403,105 @@ enum lpc313x_resetid_e
   RESETID_AHBMPMCHRST,    /* 53 MPMC */
   RESETID_AHBMPMCRFRST,   /* 54 refresh generator used for MPMC */
   RESETID_INTCRST,        /* 55 Interrupt Controller */
+};
+
+/* This structure describes one CGU fractional divider configuration */
+
+struct lpc313x_fdivconfig_s
+{
+  uint8_t  stretch;       /* Fractional divider stretch enable. */
+  uint8_t  n;             /* Fractional divider nominal nominator */
+  uint16_t m;             /* Fractional divider nominal denominator */
+};
+
+/* The structure describes the configuration of one CGU sub-domain */
+
+struct lpc313x_subdomainconfig_s
+{
+  struct lpc313x_fdivconfig_s fdiv; /* Fractional divider settings */
+  uint32_t clkset;                  /* Bitset of all clocks in the sub-domain */
+};
+
+/* CGU clock initilization structure.  Describes the platform-specific
+ * configuration of every clock domain.
+ */
+
+struct lpc313x_clkinit_s
+{
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE0_CNT];
+  } domain0;
+
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE1_CNT];
+  } domain1;
+
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE2_CNT];
+  } domain2;
+
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE3_CNT];
+  } domain3;
+
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE4_CNT];
+  } domain4;
+
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE5_CNT];
+  } domain5;
+
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE6_CNT];
+  } domain6;
+
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE7_CNT];
+  } domain7;
+
+  struct
+  {
+    uint8_t finsel;
+  } domain8;
+
+  struct
+  {
+    uint8_t finsel;
+  } domain9;
+
+  struct
+  {
+    uint8_t finsel;
+    struct lpc313x_subdomainconfig_s sub[FRACDIV_BASE10_CNT];
+  } domain10;
+
+  struct
+  {
+    uint8_t finsel;
+  } domain11;
+
+  struct
+  {
+    uint16_t  sel;
+    struct lpc313x_fdivconfig_s cfg;
+  } dynfdiv[CGU_NDYNFRACDIV];
 };
 
 /* This structure is used to pass PLL configuration data to

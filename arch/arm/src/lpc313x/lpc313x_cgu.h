@@ -1259,6 +1259,7 @@
 #define CGU_DYNSEL_ARM926LPITRANS        (1 << 2)  /* Bit 2:  ARM926 instr transfers can enable high-speed */
 #define CGU_DYNSEL_DMAREADY              (1 << 1)  /* Bit 1:  dma last transfers can enable high-speed */
 #define CGU_DYNSEL_DMATRANS              (1 << 0)  /* Bit 0:  dma transfers can enable high-speed */
+#define CGU_DYNSEL_ALLBITS               (0x1ff)
 
 /* CGU configuration register bit definitions ***************************************************/
 /* Power and oscillator control registers */
