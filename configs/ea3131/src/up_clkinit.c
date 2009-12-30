@@ -234,13 +234,16 @@
  * Public Data
  ****************************************************************************/
 
-/* Default clock configuration for the EA3131 board
+/* Default clock configuration for the EA3131 board.  Every board must
+ * provide an implementation of g_boardclks.  This rather complex structure
+ * is used by the boot-up logic to configure initial lpc313x clocking.
  *
- * FFAST:           12MHz
- * MASTER PLL Freq: 180MHz;
- * AUDIOPLL Freq:   1024Fs, Fs = 44.1kHz
+ *   FFAST:           12MHz
+ *   MASTER PLL Freq: 180MHz;
+ *   AUDIOPLL Freq:   1024Fs, Fs = 44.1kHz
  *
  * Domain                   Input             Subdomain         Divider Ratio
+ * ------------------------ ----------------- ----------------- -------------
  * 0 - DOMAIN_SYS           MASTER PLL(HPLL1) DOMAIN0_DIV0      1/2
  *                                            DOMAIN0_DIV1      1
  *                                            DOMAIN0_DIV2      1/2
@@ -281,7 +284,7 @@
  * 11 - DOMAIN_SYSCLKO      FFAST             -                 -
  */
 
-const struct lpc313x_clkinit_s g_cgu_default_clks =
+const struct lpc313x_clkinit_s g_boardclks =
 {
   /* Domain 0 (DOMAINID_SYS), Clocks 0 - 29, Fraction dividers 0-6 */
 
