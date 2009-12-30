@@ -528,9 +528,19 @@ struct lpc313x_pllconfig_s
  * Public Data
  ************************************************************************/
 
-/* This array provides the programmed frequency of every input source */
+/* This array is managed by the chip-specific logic and provides the
+ * programmed frequency of every input source
+ */
 
 EXTERN uint32_t g_boardfreqin[CGU_NFREQIN];
+
+/* This instance of the lpc313x_clkinit_s structure provides the initial,
+ * default clock configuration for the board.  Every board must provide
+ * an implementation of g_boardclks.  This rather complex structure is
+ * used by the boot-up logic to configure initial lpc313x clocking.
+ */
+
+EXTERN const struct lpc313x_clkinit_s g_boardclks;
 
 /************************************************************************
  * Inline Functions

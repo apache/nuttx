@@ -1238,6 +1238,9 @@
 #define CGU_FDC17_RESET                  (1 << 1)  /* Bit 1:  Reset fractional divider */
 #define CGU_FDC17_RUN                    (1 << 0)  /* Bit 0:  Enable fractional divider */
 
+#define CGU_FDC_FIELDWIDTH               8         /* MSUB and MADD fields are 8-bits in width */
+#define CGU_FDC17_FIELDWIDTH             13        /* Exept for FDC17 which is 13-bits in width */
+
 /* Dynamic Fractional Divider registers DYNFDC0 to DYNFDC6, addresses 0x13004578 to 0x13004590 */
 
 #define CGU_DYNFDC_STOPAUTORST           (1 << 19) /* Bit 19: Disable auto reset of fractional divider */
