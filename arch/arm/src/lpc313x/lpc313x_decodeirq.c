@@ -92,8 +92,8 @@ void up_decodeirq(uint32_t *regs)
   index = getreg32(LPC313X_INTC_VECTOR0) & INTC_VECTOR_INDEX_MASK;
   if (index != 0)
     {
-      /* Shift the index so that the range of IRQ numbers are in bits 0-7 (up
-       * 0-127 and back off the IRQ number by 1 so that the numbering is zero-based
+      /* Shift the index so that the range of IRQ numbers are in bits 0-7 (values
+       * 1-127) and back off the IRQ number by 1 so that the numbering is zero-based
        */
 
       irq = (index >> INTC_VECTOR_INDEX_SHIFT) -1;

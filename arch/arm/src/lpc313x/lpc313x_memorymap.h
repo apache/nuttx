@@ -154,6 +154,7 @@
 #define LPC313X_SHADOWSPACE_NSECTIONS  1 /*         4Kb - <1 section  */
 #define LPC313X_INTSRAM_NSECTIONS      1 /* 96 or 192Kb - <1 section */
 #define LPC313X_APB0_NSECTIONS         1 /*        32Kb - <1 section */
+#define LPC313X_INTSROM0_NSECTIONS     1 /*       128Kb - <1 section */
 #define LPC313X_APB1_NSECTIONS         1 /*        16Kb - <1 section */
 #define LPC313X_APB2_NSECTIONS         1 /*        16Kb - <1 section */
 #define LPC313X_APB3_NSECTIONS         1 /*         1Kb - <1 section */
@@ -176,6 +177,7 @@
 
 #define LPC313X_SHADOWSPACE_MMUFLAGS   MMU_MEMFLAGS
 #define LPC313X_INTSRAM_MMUFLAGS       MMU_MEMFLAGS
+#define LPC313X_INTSROM_MMUFLAGS       MMU_MEMFLAGS
 #define LPC313X_APB0_MMUFLAGS          MMU_IOFLAGS
 #define LPC313X_APB1_MMUFLAGS          MMU_IOFLAGS
 #define LPC313X_APB2_MMUFLAGS          MMU_IOFLAGS
@@ -188,13 +190,20 @@
 #define LPC313X_INTC_MMUFLAGS          MMU_IOFLAGS
 #define LPC313X_NAND_MMUFLAGS          MMU_IOFLAGS
 
+/* board_memorymap.h contains special mappings that are needed when a ROM
+ * memory map is used.  It is included in this odd location becaue it depends
+ * on some the virtual address definitions provided above.
+ */
+
+#include <arch/board/board_memorymap.h>
+
 /* LPC313X Virtual (mapped) Memory Map.  These are the mappings that will
  * be created if the page table lies in RAM.  If the platform has another,
  * read-only, pre-initialized page table (perhaps in ROM), then the board.h
  * file must provide these definitions.
  */
 
-#ifndef CONFIG_ARM_ROMPGTABLE
+#ifndef CONFIG_ARCH_ROMPGTABLE
 #  define LPC313X_SHADOWSPACE_VSECTION 0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
 #  define LPC313X_INTSRAM_VSECTION     0x11028000 /*                        Internal SRAM 96Kb-192Kb */
 #    define LPC313X_INTSRAM0_VADDR     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
@@ -249,18 +258,19 @@
 #  endif
 
   /* A sanity check, if the configuration says that the page table is read-only
-   * and pre-initialized (maybe ROM), then it should have also defined CONFIG_PGTABLE_BASE
+   * and pre-initialized (maybe ROM), then it should have also defined both of
+   * the page table base addresses.
    */
 
-#  ifdef CONFIG_ARM_ROMPGTABLE
-#    error "CONFIG_ARM_ROMPGTABLE defined; CONFIG_PGTABLE_BASE not defined"
+#  ifdef CONFIG_ARCH_ROMPGTABLE
+#    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
 #  else
 
      /* We must declare the page table in ISRAM0 or 1.  We decide depending upon
       * where the vector table was place.
       */
 
-#    ifdef CONFIG_ARM_ROMPGTABLE  /* Vectors located at 0x0000:0000  */
+#    ifdef CONFIG_ARCH_ROMPGTABLE  /* Vectors located at 0x0000:0000  */
 
        /* In this case, ISRAM0 will be shadowed at address 0x0000:0000.  The page
         * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a LPC3130)
@@ -311,7 +321,7 @@
 /* Determine the base address of the vector table */
 
 #define VECTOR_TABLE_SIZE        0x00010000
-#ifdef CONFIG_ARM_LOWVECTORS  /* Vectors located at 0x0000:0000  */
+#ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 #  define LPC313X_VECTOR_PADDR   LPC313X_SHADOWSPACE_PSECTION
 #  define LPC313X_VECTOR_VADDR   0x00000000
 #  define LPC313X_VECTOR_VCOARSE 0x00000000

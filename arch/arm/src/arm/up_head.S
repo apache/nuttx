@@ -148,6 +148,7 @@ __start:
 	/* Clear the 16K level 1 page table */
 
 	ldr	r4, .LCppgtable			/* r4=phys. page table */
+#ifndef CONFIG_ARCH_ROMPGTABLE
 	mov	r0, r4
 	mov	r1, #0
 	add	r2, r0, #PGTABLE_SIZE
@@ -179,6 +180,7 @@ __start:
 	ldr	r2, .LCvpgtable			/* r2=virt. page table */
 	mksection r0, r2			/* r0=virt. base section */
 	str	r3, [r4, r0, lsr #18]		/* identity mapping */
+#endif /* CONFIG_ARCH_ROMPGTABLE */
 
 	/* The following logic will set up the ARM920/ARM926 for normal operation */
 
@@ -213,7 +215,7 @@ __start:
 
 	orr	r0, r0, #(CR_M|CR_P|CR_D)
 	
-	/* In most architectures, vectors are reloated to 0xffff0000.
+	/* In most architectures, vectors are relocated to 0xffff0000.
 	 * -- but not all
 	 */
 
@@ -253,15 +255,22 @@ __start:
 	.type	.LCvstart, %object
 .LCvstart:
 	.long	.Lvstart
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
 	.type	.LCmmuflags, %object
 .LCmmuflags:
 	.long	MMU_MEMFLAGS
+#endif
+
 	.type	.LCppagetable, %object
 .LCppgtable:
-	.long	CONFIG_DRAM_START		/* Physical start of DRAM */
+	.long	PGTABLE_BASE_PADDR		/* Physical start of DRAM */
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
 	.type	.LCvpagetable, %object
 .LCvpgtable:
-	.long	CONFIG_DRAM_VSTART		/* Virtual start of DRAM */
+	.long	PGTABLE_BASE_VADDR		/* Virtual start of DRAM */
+#endif
 	.size	_start, .-_start
 
 /****************************************************************************
@@ -278,6 +287,7 @@ __start:
 
 	/* Remove the temporary null mapping */
 
+#ifndef CONFIG_ARCH_ROMPGTABLE
 	ldr	r4, .LCvpgtable			/* r4=virtual page table */
 	ldr	r1, .LCppgtable			/* r1=phys. page table */
 	mksection r3, r1			/* r2=phys. base addr */
@@ -306,6 +316,7 @@ __start:
 	add	r3, r3, #SECTION_SIZE
 	str	r3, [r0], #4
 	.endr
+#endif /* CONFIG_ARCH_ROMPGTABLE */
 
 	/* Zero BSS and set up the stack pointer */
 
