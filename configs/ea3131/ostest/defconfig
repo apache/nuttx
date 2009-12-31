@@ -49,7 +49,11 @@
 # CONFIG_ARCH_BOARD_name - for use in C code
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
-# CONFIG_DRAM_SIZE - Describes the installed DRAM.
+# CONFIG_DRAM_SIZE - For most ARM9 architectures, this describes the
+#   size of installed DRAM.  For the LPC313X, it is used only to
+#   deterimine how to map the executable regions.  It is SDRAM size
+#   only if you are executing out of the external SDRAM; or it could
+#   be NOR FLASH size, external SRAM size, or internal SRAM size.
 # CONFIG_DRAM_START - The start address of DRAM (physical)
 # CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
 # CONFIG_ARCH_IRQPRIO - The LPC313x supports interrupt prioritization
@@ -78,9 +82,8 @@ CONFIG_ARCH_BOARD=ea3131
 CONFIG_ARCH_BOARD_EA3131=y
 CONFIG_BOARD_LOOPSPERMSEC=16945
 CONFIG_DRAM_SIZE=0x01000000
-CONFIG_DRAM_START=0x01000000
-CONFIG_DRAM_VSTART=0x00000000
-CONFIG_DRAM_NUTTXENTRY=0x01008000
+CONFIG_DRAM_START=0x11028000
+CONFIG_DRAM_VSTART=0x11028000
 CONFIG_ARCH_IRQPRIO=y
 CONFIG_ARCH_INTERRUPTSTACK=n
 CONFIG_ARCH_STACKDUMP=y
@@ -91,6 +94,20 @@ CONFIG_ARCH_CALIBRATION=n
 CONFIG_ARCH_DMA=n
 
 #
+# ARM-specific configuration
+#
+# CONFIG_ARM_LOWVECTORS - define if vectors reside at address 0x0000:00000
+#   Undefine if vectors reside at address 0xffff:0000
+# CONFIG_ARM_ROMPGTABLE - A pre-initialized, read-only page table is available
+#   CONFIG_PGTABLE_BASE must also be defined in this case.
+# CONFIG_PGTABLE_BASE - The (physical) base address of the pre-initialized
+#   read-only page table vector.  This must be provided if CONFIG_ARM_ROMPGTABLE
+#   is defined.
+#
+CONFIG_ARM_LOWVECTORS=y
+CONFIG_ARM_ROMPGTABLE=n
+#CONFIG_PGTABLE_BASE=
+
 # Identify toolchain and linker options
 #
 CONFIG_LPC313X_CODESOURCERYW=n
@@ -123,6 +140,9 @@ CONFIG_LPC313X_UART=y
 #   configured as part of the NuttX heap.
 # CONFIG_LPC313X_EXTSDRAMSIZE - Size (in bytes) of the installed
 #   external SDRAM memory
+# CONFIG_LPC313X_EXTNAND - Select if external NAND is present
+# CONFIG_LPC313X_EXTSDRAMSIZE - Size (in bytes) of the installed
+#   external NAND memory
 #
 CONFIG_LPC313X_EXTSRAM0=n
 CONFIG_LPC313X_EXTSRAM0HEAP=n
@@ -133,6 +153,8 @@ CONFIG_LPC313X_EXTSRAM1SIZE=(128*1024)
 CONFIG_LPC313X_EXTSDRAM=n
 CONFIG_LPC313X_EXTSDRAMHEAP=n
 CONFIG_LPC313X_EXTSDRAMSIZE=(64*1024*1024)
+CONFIG_LPC313X_EXTNAND=n
+CONFIG_LPC313X_EXTNANDSIZE=(64*1024*1024)
 
 #
 # LPC313X specific device driver settings
