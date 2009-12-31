@@ -33,14 +33,13 @@
  *
  ****************************************************************************/
 
-/* The EA3131 has 512Kb of FLASH beginning at virtual address 0x0800:0000.
- * The LPC3131 has 192Kb of SRAM beginning at virtual address 0x1102:8000.
+/* The LPC3131 has 192Kb of ISRAM beginning at virtual address 0x1102:8000.
+ * All program segments are configured to execute from ISRAM.
  */
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
-    sram (rwx) : ORIGIN = 0x11028000, LENGTH = 192K
+    isram (rwx) : ORIGIN = 0x11028000, LENGTH = 192K
 }
 
 OUTPUT_ARCH(arm)
@@ -61,7 +60,7 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > flash
+	} > isram
 
 	_eronly = ABSOLUTE(.);
 
@@ -71,17 +70,17 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+	} > isram AT > isram
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} >sram
+	} >isram
 
 	.ARM.exidx : {
 		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
 		__exidx_end = ABSOLUTE(.);
-	} > sram
+	} > isram
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -89,7 +88,7 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > sram
+	} > isram
 					/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }

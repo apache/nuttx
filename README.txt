@@ -140,6 +140,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   `- README.txt
  |   |- demo0s12ne64/
  |   |   `- README.txt
+ |   |- ea3131/
+ |   |   `- README.txt
  |   |- eagle100/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
