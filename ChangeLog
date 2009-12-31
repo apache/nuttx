@@ -1032,4 +1032,7 @@
 5.1 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/lpc313x and arch/arm/include/lpc313x: Added framework
-	  to support the NXP LPC3131 MCU
+	  to support the NXP LPC3131.
+	* Add configs/ea3131.  The LPC3131 port for the Embedded Artist EA3131
+	  (LPC3131) is code complete and waiting for me to get hardware in
+	  hand.

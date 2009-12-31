@@ -59,29 +59,33 @@
  * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case
  *    the boot logic must:
  *
- *    - Configure SDRAM and, 
- *    - Initialize the .data section in RAM.
+ *    - Configure SDRAM, 
+ *    - Initialize the .data section in RAM, and
+ *    - Clear .bss section
  */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
+#  error "Configuration not implemented"
 #  define CONFIGURE_SDRAM
 
 /* 2. We boot in FLASH but copy ourselves to DRAM from better performance.
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).  In this case
  *    the boot logic must:
  *
- *    - Configure SDRAM and, 
- *    - Copy ourself to DRAM (after mapping it)
+ *    - Configure SDRAM, 
+ *    - Copy ourself to DRAM (after mapping it), and
+ *    - Clear .bss section
  */
 
 #elif defined(CONFIG_BOOT_COPYTORAM)
+#  error "configuration not implemented
 #  define CONFIG_SDRAM
 
 /* 3. There is bootloader that copies us to DRAM (but probably not to the beginning)
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n). In this case the
  *    boot logic must:
  *
- *    - Nothing special.
+ *    - Clear .bss section
  */
 
 #endif
