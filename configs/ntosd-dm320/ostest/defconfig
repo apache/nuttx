@@ -76,17 +76,14 @@ CONFIG_ARCH_STACKDUMP=y
 #
 # ARM-specific configuration
 #
-# CONFIG_ARM_LOWVECTORS - define if vectors reside at address 0x0000:00000
+# CONFIG_ARCH_LOWVECTORS - define if vectors reside at address 0x0000:00000
 #   Undefine if vectors reside at address 0xffff:0000
-# CONFIG_ARM_ROMPGTABLE - A pre-initialized, read-only page table is available
-#   CONFIG_PGTABLE_BASE must also be defined in this case.
-# CONFIG_PGTABLE_BASE - The (physical) base address of the pre-initialized
-#   read-only page table vector.  This must be provided if CONFIG_ARM_ROMPGTABLE
-#   is defined.
+# CONFIG_ARCH_ROMPGTABLE - A pre-initialized, read-only page table is available.
+#   If defined, then board-specific logic must also define PGTABLE_BASE_PADDR,
+#   PGTABLE_BASE_VADDR, and all memory section mapping, possibly in board.h
 #
-CONFIG_ARM_LOWVECTORS=n
-CONFIG_ARM_ROMPGTABLE=n
-#CONFIG_PGTABLE_BASE=
+CONFIG_ARCH_LOWVECTORS=n
+CONFIG_ARCH_ROMPGTABLE=n
 
 #
 # DM320 specific device driver settings

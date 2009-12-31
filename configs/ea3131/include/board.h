@@ -100,7 +100,6 @@
 #define BOARD_CLKS_64_92 \
  (0)
 
-
 /* LED definitions ******************************************************************/
 
 #define LED_STARTED       0
