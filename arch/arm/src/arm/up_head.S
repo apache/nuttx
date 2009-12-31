@@ -166,8 +166,8 @@ __start:
 
 	mksection r0, r4			/* r0=phys. base section */
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
-	add	r3, r1, r0				/* r3=flags + base */
-	str	r3, [r4, r0, lsr #18]	/* identity mapping */
+	add	r3, r1, r0			/* r3=flags + base */
+	str	r3, [r4, r0, lsr #18]		/* identity mapping */
 
 	/* Create a "normal" single section mapping for the first
 	 * MB of memory.  Now, we have the first 1MB mapping to
@@ -178,13 +178,13 @@ __start:
 
 	ldr	r2, .LCvpgtable			/* r2=virt. page table */
 	mksection r0, r2			/* r0=virt. base section */
-	str	r3, [r4, r0, lsr #18]	/* identity mapping */
+	str	r3, [r4, r0, lsr #18]		/* identity mapping */
 
 	/* The following logic will set up the ARM920/ARM926 for normal operation */
 
 	mov	r0, #0
 	mcr	p15, 0, r0, c7, c7		/* Invalidate I,D caches */
-	mcr	p15, 0, r0, c7, c10, 4	/* Drain write buffer */
+	mcr	p15, 0, r0, c7, c10, 4		/* Drain write buffer */
 	mcr	p15, 0, r0, c8, c7		/* Invalidate I,D TLBs */
 	mcr	p15, 0, r4, c2, c0		/* Load page table pointer */
 
@@ -199,7 +199,7 @@ __start:
 
 	ldr	lr, .LCvstart			/* Abs. virtual address */
 
-	mov	r0, #0x1f				/* Domains 0, 1 = client */
+	mov	r0, #0x1f			/* Domains 0, 1 = client */
 	mcr	p15, 0, r0, c3, c0		/* Load domain access register */
 	mrc	p15, 0, r0, c1, c0		/* Get control register */
 	
@@ -281,15 +281,15 @@ __start:
 	ldr	r4, .LCvpgtable			/* r4=virtual page table */
 	ldr	r1, .LCppgtable			/* r1=phys. page table */
 	mksection r3, r1			/* r2=phys. base addr */
-	mov	r0, #0					/* flags + base = 0 */
-	str	r0, [r4, r3, lsr #18]	/* Undo identity mapping */
+	mov	r0, #0				/* flags + base = 0 */
+	str	r0, [r4, r3, lsr #18]		/* Undo identity mapping */
 
 	/* Now setup the pagetables for our normal SDRAM mappings mapped region.
 	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
 	 */
 
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
-	add	r3, r3, r1				/* r3=flags + base */
+	add	r3, r3, r1			/* r3=flags + base */
 
 	add	r0, r4, #(NUTTX_START_VADDR & 0xff000000) >> 18
 	bic	r2, r3, #0x00f00000
