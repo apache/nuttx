@@ -90,13 +90,14 @@
  * Definitions
  ****************************************************************************/
 
-/* The physical address of the beginning of SDRAM is provided by
- * CONFIG_DRAM_START.  The size of installed SDRAM is provided by
- * CONFIG_DRAM_SIZE.  The virtual address of SDRAM is provided by
- * CONFIG_DRAM_VSTART.
+/* EXE_NSECTIONS determines the number of 1Mb pages to map for the executable
+ * address region.  This is based on CONFIG_DRAM_SIZE.  For most ARM9
+ * architectures, CONFIG_DRAM_SIZE describes the size of installed SDRAM.
+ * But for other architectures, this might refer to the size of FLASH or
+ * SRAM regions. (bad choice of naming).
  */
 
-#define NSDRAM_SECTIONS (CONFIG_DRAM_SIZE >> 20)
+#define EXE_NSECTIONS ((CONFIG_DRAM_SIZE+0x000fffff) >> 20)
 
 /****************************************************************************
  * Assembly Macros
@@ -127,12 +128,11 @@
  * Name: __start
  ****************************************************************************/
 
-/* We assume the bootloader has already initialized most of the h/w for
- * us and that only leaves us having to do some os specific things
- * below.
+/* We assume the bootloader has already initialized most of the h/w for us
+ * and that only leaves us having to do some os specific things below.
  */
 	.text
-        .global __start
+	.global	__start
 	.type	__start, #function
 __start:
 	/* Make sure that we are in SVC mode with all IRQs disabled */
@@ -159,16 +159,15 @@ __start:
 	teq	r0, r2
 	bne	.Lpgtableclear
 
-	/* Create identity mapping for first MB section to support
-	 * this startup logic executing out of the physical address
-	 * space.  This identity mapping will be removed by .Lvstart
-	 * (see below).
+	/* Create identity mapping for first MB section to support this startup
+	 * logic executing out of the physical address space.  This identity
+	 * mapping will be removed by .Lvstart (see below).
 	 */
 
 	mksection r0, r4			/* r0=phys. base section */
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
-	add	r3, r1, r0			/* r3=flags + base */
-	str	r3, [r4, r0, lsr #18]		/* identity mapping */
+	add	r3, r1, r0				/* r3=flags + base */
+	str	r3, [r4, r0, lsr #18]	/* identity mapping */
 
 	/* Create a "normal" single section mapping for the first
 	 * MB of memory.  Now, we have the first 1MB mapping to
@@ -179,13 +178,13 @@ __start:
 
 	ldr	r2, .LCvpgtable			/* r2=virt. page table */
 	mksection r0, r2			/* r0=virt. base section */
-	str	r3, [r4, r0, lsr #18]		/* identity mapping */
+	str	r3, [r4, r0, lsr #18]	/* identity mapping */
 
 	/* The following logic will set up the ARM920/ARM926 for normal operation */
 
 	mov	r0, #0
 	mcr	p15, 0, r0, c7, c7		/* Invalidate I,D caches */
-	mcr	p15, 0, r0, c7, c10, 4		/* Drain write buffer */
+	mcr	p15, 0, r0, c7, c10, 4	/* Drain write buffer */
 	mcr	p15, 0, r0, c8, c7		/* Invalidate I,D TLBs */
 	mcr	p15, 0, r4, c2, c0		/* Load page table pointer */
 
@@ -200,7 +199,7 @@ __start:
 
 	ldr	lr, .LCvstart			/* Abs. virtual address */
 
-	mov	r0, #0x1f			/* Domains 0, 1 = client */
+	mov	r0, #0x1f				/* Domains 0, 1 = client */
 	mcr	p15, 0, r0, c3, c0		/* Load domain access register */
 	mrc	p15, 0, r0, c1, c0		/* Get control register */
 	
@@ -245,9 +244,9 @@ __start:
 
 	mov	pc, lr
 
-/**********************************************************************************
+/****************************************************************************
  * PC_Relative Data
- **********************************************************************************/
+ ****************************************************************************/
 
 	/* These addresses are all virtual address */
 	
@@ -265,9 +264,9 @@ __start:
 	.long	CONFIG_DRAM_VSTART		/* Virtual start of DRAM */
 	.size	_start, .-_start
 
-/**********************************************************************************
+/****************************************************************************
  * Name: .Lvstart
- **********************************************************************************/
+ ***************************************************************************/
 
 /* The following is executed after the MMU has been enabled. This uses
  * absolute addresses; this is not position independent.
@@ -282,16 +281,15 @@ __start:
 	ldr	r4, .LCvpgtable			/* r4=virtual page table */
 	ldr	r1, .LCppgtable			/* r1=phys. page table */
 	mksection r3, r1			/* r2=phys. base addr */
-	mov	r0, #0				/* flags + base = 0 */
-	str	r0, [r4, r3, lsr #18]		/* Undo identity mapping */
+	mov	r0, #0					/* flags + base = 0 */
+	str	r0, [r4, r3, lsr #18]	/* Undo identity mapping */
 
-	/* Now setup the pagetables for our normal SDRAM mappings
-	 * mapped region.  We round NUTTX_START_VADDR down to the
-	 * nearest megabyte boundary.
+	/* Now setup the pagetables for our normal SDRAM mappings mapped region.
+	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
 	 */
 
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
-	add	r3, r3, r1			/* r3=flags + base */
+	add	r3, r3, r1				/* r3=flags + base */
 
 	add	r0, r4, #(NUTTX_START_VADDR & 0xff000000) >> 18
 	bic	r2, r3, #0x00f00000
@@ -300,9 +298,11 @@ __start:
 	add	r0, r0, #(NUTTX_START_VADDR & 0x00f00000) >> 18
 	str	r3, [r0], #4
 
-	/* Now map the remaining NSDRAM_SECTIONS-1 SDRAM sections */
+	/* Now map the remaining EXE_NSECTIONS-1 sections of the executable
+	 * memory region.
+	 */
 
-	.rept	NSDRAM_SECTIONS-1
+	.rept	EXE_NSECTIONS-1
 	add	r3, r3, #SECTION_SIZE
 	str	r3, [r0], #4
 	.endr
@@ -331,12 +331,13 @@ __start:
 	b	os_start
 
 	/* Variables:
-	 * _sbss is the start of the BSS region (see ld.script)
-	 * _ebss is the end of the BSS regsion (see ld.script)
-	 * The idle task stack starts at the end of BSS and is
-	 * of size CONFIG_IDLETHREAD_STACKSIZE.  The heap continues
-	 * from there until the end of memory.  See g_heapbase
-	 * below.
+	 *
+	 *   _sbss is the start of the BSS region (see ld.script)
+	 *   _ebss is the end of the BSS regsion (see ld.script)
+	 *
+	 * The idle task stack starts at the end of BSS and is of size
+	 * CONFIG_IDLETHREAD_STACKSIZE.  The heap continues from there until the
+	 * end of memory.  See g_heapbase below.
 	 */
 
 .Linitparms:

@@ -49,8 +49,8 @@
 
 /* MPMC register base address offset into the MPMC domain ***************************************/
 
-#define LPC313X_MPMC_VBASE                (LPC313X_MPMC_VSECTION)
-#define LPC313X_MPMC_PBASE                (LPC313X_MPMC_PSECTION)
+#define LPC313X_MPMC_VBASE                (LPC313X_MPMC_VADDR)
+#define LPC313X_MPMC_PBASE                (LPC313X_MPMC_PADDR)
 
 /* MPMC register offsets (with respect to the base of the MPMC domain) **************************/
 

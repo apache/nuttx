@@ -78,28 +78,48 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
  * Private Variables
  ************************************************************************************/
 
-#warning "All MMU logic commented out"
-#if 0 /* Not ready yet */
+/* This table describes how to map a set of 1Mb pages to space the physical address
+ * space of the LPCD313x.
+ */
+
+#ifndef CONFIG_ARM_ROMPGTABLE
 static const struct section_mapping_s section_mapping[] =
 {
-  { DM320_PERIPHERALS_PSECTION, DM320_PERIPHERALS_VSECTION, 
-    DM320_PERIPHERALS_MMUFLAGS, DM320_PERIPHERALS_NSECTIONS},
-  { DM320_FLASH_PSECTION,       DM320_FLASH_VSECTION, 
-    DM320_FLASH_MMUFLAGS,       DM320_FLASH_NSECTIONS},
-  { DM320_CFI_PSECTION,         DM320_CFI_VSECTION, 
-    DM320_CFI_MMUFLAGS,         DM320_CFI_NSECTIONS},
-  { DM320_SSFDC_PSECTION,       DM320_SSFDC_VSECTION, 
-    DM320_SSFDC_MMUFLAGS,       DM320_SSFDC_NSECTIONS},
-  { DM320_CE1_PSECTION,         DM320_CE1_VSECTION, 
-    DM320_CE1_MMUFLAGS,         DM320_CE1_NSECTIONS},
-  { DM320_CE2_PSECTION,         DM320_CE2_VSECTION, 
-    DM320_CE2_MMUFLAGS,         DM320_CE2_NSECTIONS},
-  { DM320_VLYNQ_PSECTION,       DM320_VLYNQ_VSECTION, 
-    DM320_VLYNQ_MMUFLAGS,       DM320_VLYNQ_NSECTIONS},
-  { DM320_USBOTG_PSECTION,      DM320_USBOTG_VSECTION, 
-    DM320_USBOTG_MMUFLAGS,      DM320_USBOTG_NSECTIONS}
+  { LPC313X_SHADOWSPACE_PSECTION, LPC313X_SHADOWSPACE_VSECTION, 
+    LPC313X_SHADOWSPACE_MMUFLAGS, LPC313X_SHADOWSPACE_NSECTIONS},
+  { LPC313X_INTSRAM_PSECTION, LPC313X_INTSRAM_VSECTION, 
+    LPC313X_INTSRAM_MMUFLAGS, LPC313X_INTSRAM_NSECTIONS},
+  { LPC313X_APB0_PSECTION, LPC313X_APB0_VSECTION, 
+    LPC313X_APB0_MMUFLAGS, LPC313X_APB0_NSECTIONS},
+  { LPC313X_APB1_PSECTION, LPC313X_APB1_VSECTION, 
+    LPC313X_APB1_MMUFLAGS, LPC313X_APB1_NSECTIONS},
+  { LPC313X_APB2_PSECTION, LPC313X_APB2_VSECTION, 
+    LPC313X_APB2_MMUFLAGS, LPC313X_APB2_NSECTIONS},
+  { LPC313X_APB3_PSECTION, LPC313X_APB3_VSECTION, 
+    LPC313X_APB3_MMUFLAGS, LPC313X_APB3_NSECTIONS},
+  { LPC313X_APB4MPMC_PSECTION, LPC313X_APB4MPMC_VSECTION, 
+    LPC313X_APB4MPMC_MMUFLAGS, LPC313X_APB4MPMC_NSECTIONS},
+  { LPC313X_MCI_PSECTION, LPC313X_MCI_VSECTION, 
+    LPC313X_MCI_MMUFLAGS, LPC313X_MCI_NSECTIONS},
+  { LPC313X_USBOTG_PSECTION, LPC313X_USBOTG_VSECTION, 
+    LPC313X_USBOTG_MMUFLAGS, LPC313X_USBOTG_NSECTIONS},
+#if defined(CONFIG_LPC313X_EXTSRAM0) && CONFIG_LPC313X_EXTSRAM0SIZE > 0
+  { LPC313X_EXTSRAM_PSECTION, LPC313X_EXTSRAM_VSECTION, 
+    LPC313X_EXTSDRAM_MMUFLAGS, LPC313X_EXTSRAM_NSECTIONS},
+#endif
+#if defined(CONFIG_LPC313X_EXTSDRAM) && CONFIG_LPC313X_EXTSDRAMSIZE > 0
+  { LPC313X_EXTSDRAM0_PSECTION, LPC313X_EXTSDRAM0_VSECTION, 
+    LPC313X_EXTSDRAM_MMUFLAGS, LPC313X_EXTSDRAM0_NSECTIONS},
+#endif
+  { LPC313X_INTC_PSECTION, LPC313X_INTC_VSECTION, 
+    LPC313X_INTC_MMUFLAGS, LPC313X_INTC_NSECTIONS},
+#ifdef CONFIG_LPC313X_EXTNAND
+  { LPC313X_NAND_PSECTION, LPC313X_NAND_VSECTION 
+    LPC313X_NAND_MMUFLAGS, LPC313X_NAND_NSECTIONS},
+#endif
 };
 #define NMAPPINGS (sizeof(section_mapping) / sizeof(struct section_mapping_s))
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -109,6 +129,7 @@ static const struct section_mapping_s section_mapping[] =
  * Name: up_setlevel1entry
  ************************************************************************************/
 
+#ifndef CONFIG_ARM_ROMPGTABLE
 static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
   uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
@@ -118,6 +139,7 @@ static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mm
 
   pgtable[index]  = (paddr | mmuflags);
 }
+#endif
 
 /************************************************************************************
  * Name: up_setlevel2coarseentry
@@ -145,6 +167,7 @@ static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
  * Name: up_setupmappings
  ************************************************************************************/
 
+#ifndef CONFIG_ARM_ROMPGTABLE
 static void up_setupmappings(void)
 {
   int i, j;
@@ -163,16 +186,27 @@ static void up_setupmappings(void)
         }
     }
 }
+#endif
 
 /************************************************************************************
  * Name: up_vectormapping
+ *
+ * Description:
+ *   Setup a special mapping for the interrupt vectors when (1) the interrupt
+ *   vectors are not positioned in ROM, and when (2) the interrupt vectors are
+ *   located at the high address, 0xffff0000.  When the interrupt vectors are located
+ *   in ROM, we just have to assume that they were set up correctly;  When vectors
+ *   are located in low memory, 0x00000000, the shadow memory region will be mapped
+ *   to support them.
+ *
  ************************************************************************************/
 
+#if !defined(CONFIG_ARM_ROMPGTABLE) && !defined(CONFIG_ARM_LOWVECTORS)
 static void up_vectormapping(void)
 {
-  uint32_t vector_paddr = DM320_IRAM_PADDR;
-  uint32_t vector_vaddr = DM320_VECTOR_VADDR;
-  uint32_t end_paddr    = vector_paddr + DM320_IRAM_SIZE;
+  uint32_t vector_paddr = LPC313X_VECTOR_PADDR;
+  uint32_t vector_vaddr = LPC313X_VECTOR_VADDR;
+  uint32_t end_paddr    = vector_paddr + VECTOR_TABLE_SIZE;
 
   /* We want to keep our interrupt vectors and interrupt-related logic in zero-wait
    * state internal RAM (IRAM).  The DM320 has 16Kb of IRAM positioned at physical
@@ -181,20 +215,18 @@ static void up_vectormapping(void)
 
   while (vector_paddr < end_paddr)
     {
-      up_setlevel2coarseentry(PGTABLE_COARSE_BASE_VADDR,
-                                  vector_paddr,
-                                  vector_vaddr,
-                                  MMU_L2_VECTORFLAGS);
+      up_setlevel2coarseentry(PGTABLE_COARSE_BASE_VADDR,  vector_paddr,
+                              vector_vaddr, MMU_L2_VECTORFLAGS);
       vector_paddr += 4096;
       vector_vaddr += 4096;
     }
 
   /* Now set the level 1 descriptor to refer to the level 2 coarse page table. */
 
-  up_setlevel1entry(PGTABLE_COARSE_BASE_PADDR,
-                        DM320_VECTOR_VCOARSE,
-                        MMU_L1_VECTORFLAGS);
+  up_setlevel1entry(PGTABLE_COARSE_BASE_PADDR, LPC313X_VECTOR_VCOARSE,
+                    MMU_L1_VECTORFLAGS);
 }
+#endif
 
 /************************************************************************************
  * Name: up_copyvectorblock
@@ -204,14 +236,13 @@ static void up_copyvectorblock(void)
 {
   uint32_t *src  = (uint32_t*)&_vector_start;
   uint32_t *end  = (uint32_t*)&_vector_end;
-  uint32_t *dest = (uint32_t*)VECTOR_BASE;
+  uint32_t *dest = (uint32_t*)LPC313X_VECTOR_VADDR;
 
   while (src < end)
     {
       *dest++ = *src++;
     }
 }
-#endif /* 0 */
 
 /************************************************************************************
  * Public Functions
@@ -219,26 +250,27 @@ static void up_copyvectorblock(void)
 
 void up_boot(void)
 {
-#warning "All MMU logic commented out"
-#if 0 /* Not ready yet */
   /* __start provided the basic MMU mappings for SDRAM.  Now provide mappings for all
    * IO regions (Including the vector region).
    */
 
+#ifndef CONFIG_ARM_ROMPGTABLE
   up_setupmappings();
 
   /* Provide a special mapping for the IRAM interrupt vector positioned in high
    * memory.
    */
 
+#ifndef CONFIG_ARM_LOWVECTORS
   up_vectormapping();
+#endif
+#endif
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
    * up_vector.S
    */
 
   up_copyvectorblock();
-#endif /* 0 */
 
   /* Reset all clocks */
 
@@ -255,7 +287,7 @@ void up_boot(void)
 
   /* Map first 4KB of ARM space to ISRAM area */
 
-  putreg32(LPC313X_INTSRAM0_PSECTION, LPC313X_SYSCREG_ARM926SHADOWPTR);
+  putreg32(LPC313X_INTSRAM0_PADDR, LPC313X_SYSCREG_ARM926SHADOWPTR);
 
   /* Perform common, low-level chip initialization (might do nothing) */
 

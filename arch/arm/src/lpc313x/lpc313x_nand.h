@@ -49,8 +49,8 @@
 
 /* NAND FLASH controller register base address offset into the APB4 domain **********************/
 
-#define LPC313X_NAND_VBASE                (LPC313X_APB4_VSECTION+LPC313X_APB4_NAND_OFFSET)
-#define LPC313X_NAND_PBASE                (LPC313X_APB4_PSECTION+LPC313X_APB4_NAND_OFFSET)
+#define LPC313X_NAND_VBASE                (LPC313X_APB4_VADDR+LPC313X_APB4_NAND_OFFSET)
+#define LPC313X_NAND_PBASE                (LPC313X_APB4_PADDR+LPC313X_APB4_NAND_OFFSET)
 
 /* NAND FLASH controller register offsets (with respect to the base of the APB4 domain) *********/
 

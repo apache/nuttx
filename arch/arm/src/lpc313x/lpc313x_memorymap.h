@@ -48,102 +48,282 @@
 
 /* LPC313X Physical (unmapped) Memory Map */
 
-#define LPC313X_SHADOWSPACE_PSECTION  0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
-                                                 /* 0x00001000-0xff027fff: Reserved */
-#define LPC313X_INTSRAM0_PSECTION     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
-#define LPC313X_INTSRAM1_PSECTION     0x11040000 /* 0x11040000-0x11057fff: Internal SRAM 1 96Kb */
-                                                 /* 0x11058000-11ffffffff: Reserved */
-#define LPC313X_INTSROM0_PSECTION     0x12000000 /* 0x12000000-0x1201ffff: Internal SROM 0 128Kb */
-                                                 /* 0x12020000-0x12ffffff: Reserved */
-#define LPC313X_APB0_PSECTION         0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
-#define LPC313X_APB1_PSECTION         0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
-                                                 /* 0x1300c000-0x14ffffff: Reserved */
-#define LPC313X_APB2_PSECTION         0x15000000 /* 0x15000000-0x15003fff: APB2 16Kb */
-#define LPC313X_APB3_PSECTION         0x16000000 /* 0x16000000-0x160003ff: APB3 1Kb */
-#define LPC313X_APB4_PSECTION         0x17000000 /* 0x17000000-0x17000fff: APB4 4Kb */
-#define LPC313X_MPMC_PSECTION         0x17008000 /* 0x17008000-0x17008fff: MPMC cfg 4Kb */
-                                                 /* 0x17009000-0x17ffffff: Reserved */
-#define LPC313X_MCI_PSECTION          0x18000000 /* 0x18000000 0x180003ff: MCI/SD/SDIO 1Kb */
-                                                 /* 0x18000900-0x18ffffff: Reserved */
-#define LPC313X_USBOTG_PSECTION       0x19000000 /* 0x19000000-0x19000fff: USB OTG 4Kb */
-                                                 /* 0x19001000-0x1fffffff: Reserved */
-#define LPC313X_EXTSRAM0_PSECTION     0x20000000 /* 0x20000000-0x2001ffff: External SRAM 0 64-128Kb */
-#define LPC313X_EXTSRAM1_PSECTION     0x20020000 /* 0x20020000-0x2003ffff: External SRAM 1 64-128Kb */
-#define LPC313X_EXTSDRAM0_PSECTION    0x30000000 /* 0x30000000-0x37ffffff: External SDRAM 0 128Mb */
-                                                 /* 0x40000000-0x5fffffff: Reserved */
-#define LPC313X_INTC_PSECTION         0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
-                                                 /* 0x60001000-0x6fffffff: Reserved */
-#define LPC313X_NAND_PSECTION         0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
-                                                 /* 0x70000800-0xffffffff: Reserved */
+#define LPC313X_SHADOWSPACE_PSECTION   0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
+                                                  /* 0x00001000-0xff027fff: Reserved */
+#define LPC313X_INTSRAM_PSECTION       0x11028000 /*                        Internal SRAM 0+1 192Kb */
+#  define LPC313X_INTSRAM0_PADDR       0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
+#  define LPC313X_INTSRAM1_PADDR       0x11040000 /* 0x11040000-0x11057fff: Internal SRAM 1 96Kb */
+                                                  /* 0x11058000-11ffffffff: Reserved */
+#define LPC313X_INTSROM0_PSECTION      0x12000000 /* 0x12000000-0x1201ffff: Internal SROM 0 128Kb */
+                                                  /* 0x12020000-0x12ffffff: Reserved */
+#define LPC313X_APB0_PSECTION          0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
+#define LPC313X_APB1_PSECTION          0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
+                                                  /* 0x1300c000-0x14ffffff: Reserved */
+#define LPC313X_APB2_PSECTION          0x15000000 /* 0x15000000-0x15003fff: APB2 16Kb */
+#define LPC313X_APB3_PSECTION          0x16000000 /* 0x16000000-0x160003ff: APB3 1Kb */
+#define LPC313X_APB4MPMC_PSECTION      0x17000000 /*                        8Kb */
+#  define LPC313X_APB4_PADDR           0x17000000 /* 0x17000000-0x17000fff: APB4 4Kb */
+#  define LPC313X_MPMC_PADDR           0x17008000 /* 0x17008000-0x17008fff: MPMC cfg 4Kb */
+                                                  /* 0x17009000-0x17ffffff: Reserved */
+#define LPC313X_MCI_PSECTION           0x18000000 /* 0x18000000 0x180003ff: MCI/SD/SDIO 1Kb */
+                                                  /* 0x18000900-0x18ffffff: Reserved */
+#define LPC313X_USBOTG_PSECTION        0x19000000 /* 0x19000000-0x19000fff: USB OTG 4Kb */
+                                                  /* 0x19001000-0x1fffffff: Reserved */
+#define LPC313X_EXTSRAM_PSECTION       0x20000000 /*                        64-128Kb */
+#  define LPC313X_EXTSRAM0_PADDR       0x20000000 /* 0x20000000-0x2001ffff: External SRAM 0 64-128Kb */
+#  define LPC313X_EXTSRAM1_PADDR       0x20020000 /* 0x20020000-0x2003ffff: External SRAM 1 64-128Kb */
+#define LPC313X_EXTSDRAM0_PSECTION     0x30000000 /* 0x30000000-0x37ffffff: External SDRAM 0 128Mb */
+                                                  /* 0x40000000-0x5fffffff: Reserved */
+#define LPC313X_INTC_PSECTION          0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
+                                                  /* 0x60001000-0x6fffffff: Reserved */
+#define LPC313X_NAND_PSECTION          0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
+                                                  /* 0x70000800-0xffffffff: Reserved */
 /* APB0-4 Domain Offsets */
 
-#define LPC313X_APB0_EVNTRTR_OFFSET   0x00000000 /* Event Router */
-#define LPC313X_APB0_ADC_OFFSET       0x00002000 /* ADC 10-bit */
-#define LPC313X_APB0_WDT_OFFSET       0x00002400 /* WDT */
-#define LPC313X_APB0_SYSCREG_OFFSET   0x00002800 /* SYSCREG block */
-#define LPC313X_APB0_IOCONFIG_OFFSET  0x00003000 /* IOCONFIG */
-#define LPC313X_APB0_GCU_OFFSET       0x00004000 /* GCU */
-                                   /* 0x00005000    Reserved */
-#define LPC313X_APB0_RNG_OFFSET       0x00006000 /* RNG */
+#define LPC313X_APB0_EVNTRTR_OFFSET    0x00000000 /* Event Router */
+#define LPC313X_APB0_ADC_OFFSET        0x00002000 /* ADC 10-bit */
+#define LPC313X_APB0_WDT_OFFSET        0x00002400 /* WDT */
+#define LPC313X_APB0_SYSCREG_OFFSET    0x00002800 /* SYSCREG block */
+#define LPC313X_APB0_IOCONFIG_OFFSET   0x00003000 /* IOCONFIG */
+#define LPC313X_APB0_GCU_OFFSET        0x00004000 /* GCU */
+                                    /* 0x00005000    Reserved */
+#define LPC313X_APB0_RNG_OFFSET        0x00006000 /* RNG */
 
-#define LPC313X_APB1_TIMER0_OFFSET    0x00000000 /* TIMER0 */
-#define LPC313X_APB1_TIMER1_OFFSET    0x00000400 /* TIMER1 */
-#define LPC313X_APB1_TIMER2_OFFSET    0x00000800 /* TIMER2 */
-#define LPC313X_APB1_TIMER3_OFFSET    0x00000c00 /* TIMER3 */
-#define LPC313X_APB1_PWM_OFFSET       0x00001000 /* PWM */
-#define LPC313X_APB1_I2C0_OFFSET      0x00002000 /* I2C0 */
-#define LPC313X_APB1_I2C1_OFFSET      0x00002400 /* I2C1 */
+#define LPC313X_APB1_TIMER0_OFFSET     0x00000000 /* TIMER0 */
+#define LPC313X_APB1_TIMER1_OFFSET     0x00000400 /* TIMER1 */
+#define LPC313X_APB1_TIMER2_OFFSET     0x00000800 /* TIMER2 */
+#define LPC313X_APB1_TIMER3_OFFSET     0x00000c00 /* TIMER3 */
+#define LPC313X_APB1_PWM_OFFSET        0x00001000 /* PWM */
+#define LPC313X_APB1_I2C0_OFFSET       0x00002000 /* I2C0 */
+#define LPC313X_APB1_I2C1_OFFSET       0x00002400 /* I2C1 */
 
-#define LPC313X_APB2_PCM_OFFSET       0x00000000 /* PCM */
-#define LPC313X_APB2_LCD_OFFSET       0x00000400 /* LCD */
-                                   /* 0x00000800    Reserved */
-#define LPC313X_APB2_UART_OFFSET      0x00001000 /* UART */
-#define LPC313X_APB2_SPI_OFFSET       0x00002000 /* SPI */
-                                   /* 0x00003000    Reserved */
+#define LPC313X_APB2_PCM_OFFSET        0x00000000 /* PCM */
+#define LPC313X_APB2_LCD_OFFSET        0x00000400 /* LCD */
+                                    /* 0x00000800    Reserved */
+#define LPC313X_APB2_UART_OFFSET       0x00001000 /* UART */
+#define LPC313X_APB2_SPI_OFFSET        0x00002000 /* SPI */
+                                    /* 0x00003000    Reserved */
 
-#define LPC313X_APB3_I2SCONFIG_OFFSET 0x00000000 /* I2S System Configuration */
-#define LPC313X_APB3_I2STX0_OFFSET    0x00000080 /* I2S TX0 */
-#define LPC313X_APB3_I2STX1_OFFSET    0x00000100 /* I2S TX1 */
-#define LPC313X_APB3_I2SRX0_OFFSET    0x00000180 /* I2S RX0 */
-#define LPC313X_APB3_I2SRX1_OFFSET    0x00000200 /* I2S RX1 */
-                                   /* 0x00000280    Reserved */
+#define LPC313X_APB3_I2SCONFIG_OFFSET  0x00000000 /* I2S System Configuration */
+#define LPC313X_APB3_I2STX0_OFFSET     0x00000080 /* I2S TX0 */
+#define LPC313X_APB3_I2STX1_OFFSET     0x00000100 /* I2S TX1 */
+#define LPC313X_APB3_I2SRX0_OFFSET     0x00000180 /* I2S RX0 */
+#define LPC313X_APB3_I2SRX1_OFFSET     0x00000200 /* I2S RX1 */
+                                    /* 0x00000280    Reserved */
 
-#define LPC313X_APB4_DMA_OFFSET       0x00000000 /* DMA */
-#define LPC313X_APB4_NAND_OFFSET      0x00000800 /* NAND FLASH Controller */
-                                   /* 0x00001000    Reserved */
+#define LPC313X_APB4_DMA_OFFSET        0x00000000 /* DMA */
+#define LPC313X_APB4_NAND_OFFSET       0x00000800 /* NAND FLASH Controller */
+                                    /* 0x00001000    Reserved */
 
-/* Sizes of sections/regions */
-/* To be provided */
+/* Sizes of memory regions in bytes */
 
-/* LPC313X Virtual (mapped) Memory Map */
-/* Temporary for now, just to get through compilation */
+#define LPC313X_SHADOWSPACE_SIZE      (4*1024)
+#define LPC313X_INTSRAM0_SIZE         (96*1024)
+#define LPC313X_INTSRAM1_SIZE         (96*1024)
+#define LPC313X_INTSROM0_SIZE         (128*1024)
+#define LPC313X_APB0_SIZE             (32*1024)
+#define LPC313X_APB1_SIZE             (16*1024)
+#define LPC313X_APB2_SIZE             (16*1024)
+#define LPC313X_APB3_SIZE             (1*1024)
+#define LPC313X_APB4_SIZE             (4*1024)
+#define LPC313X_MPMC_SIZE             (4*1024)
+#define LPC313X_APB4MPMC_SIZE         (LPC313X_APB4_SIZE+LPC313X_MPMC_SIZE)
+#define LPC313X_MCI_SIZE              (1*1024)
+#define LPC313X_USBOTG_SIZE           (4*1024)
+#define LPC313X_INTC_SIZE             (4*1024)
+#define LPC313X_NAND_SIZE             (2*1024)
 
-#define LPC313X_SHADOWSPACE_VSECTION  0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
-#define LPC313X_INTSRAM0_VSECTION     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
-#define LPC313X_INTSRAM1_VSECTION     0x11040000 /* 0x11040000-0x11057fff: Internal SRAM 1 96Kb */
-#  define LPC313X_SRAM_VADDR          LPC313X_INTSRAM0_VSECTION
-#define LPC313X_INTSROM0_VSECTION     0x12000000 /* 0x12000000-0x1201ffff: Internal SROM 0 128Kb */
-#define LPC313X_APB0_VSECTION         0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
-#define LPC313X_APB1_VSECTION         0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
-#define LPC313X_APB2_VSECTION         0x15000000 /* 0x15000000-0x15003fff: APB2 16Kb */
-#define LPC313X_APB3_VSECTION         0x16000000 /* 0x16000000-0x160003ff: APB3 1Kb */
-#define LPC313X_APB4_VSECTION         0x17000000 /* 0x17000000-0x17000fff: APB4 4Kb */
-#define LPC313X_MPMC_VSECTION         0x17008000 /* 0x17008000-0x17008fff: MPMC cfg 4Kb */
-#define LPC313X_MCI_VSECTION          0x18000000 /* 0x18000000 0x180003ff: MCI/SD/SDIO 1Kb */
-#define LPC313X_USBOTG_VSECTION       0x19000000 /* 0x19000000-0x19000fff: USB OTG 4Kb */
-#define LPC313X_EXTSRAM0_VSECTION     0x20000000 /* 0x20000000-0x2001ffff: External SRAM 0 64-128Kb */
-#define LPC313X_EXTSRAM1_VSECTION     0x20020000 /* 0x20020000-0x2003ffff: External SRAM 1 64-128Kb */
-#define LPC313X_EXTSDRAM0_VSECTION    0x30000000 /* 0x30000000-0x37ffffff: External SDRAM 0 128Mb */
-#define LPC313X_INTC_VSECTION         0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
-#define LPC313X_NAND_VSECTION         0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
+#if defined(CONFIG_ARCH_CHIP_LPC3131)
+#  define LPC313X_ISRAM_SIZE        (LPC313X_INTSRAM0_SIZE+LPC313X_INTSRAM1_SIZE)
+#elif defined()
+#  define LPC313X_ISRAM_SIZE        LPC313X_INTSRAM0_SIZE
+#else
+#  error "Unsupported LPC313X architecture"
+#endif
 
-/* The NuttX entry point starts at an offset from the virtual beginning of DRAM.
- * This offset reserves space for the MMU page cache.
+/* Convert size in bytes to number of sections (in Mb). */
+
+#define _NSECTIONS(b)                 (((b)+0x000fffff) >> 20)
+
+/* Sizes of sections/regions.  The boot logic in lpc313x_boot.c, will select
+ * 1Mb level 1 MMU mappings to span the entire physical address space.
+ * The definitiions below specifiy the number of 1Mb entries that are
+ * required to span a particular address region.
  */
 
-/* For now, just to get through the compilation */
+#define LPC313X_SHADOWSPACE_NSECTIONS  1 /*         4Kb - <1 section  */
+#define LPC313X_INTSRAM_NSECTIONS      1 /* 96 or 192Kb - <1 section */
+#define LPC313X_APB0_NSECTIONS         1 /*        32Kb - <1 section */
+#define LPC313X_APB1_NSECTIONS         1 /*        16Kb - <1 section */
+#define LPC313X_APB2_NSECTIONS         1 /*        16Kb - <1 section */
+#define LPC313X_APB3_NSECTIONS         1 /*         1Kb - <1 section */
+#define LPC313X_APB4MPMC_NSECTIONS     1 /*         8Kb - <1 section */
+#define LPC313X_MCI_NSECTIONS          1 /*         1Kb - <1 section */
+#define LPC313X_USBOTG_NSECTIONS       1 /*         4Kb - <1 section */
+#define LPC313X_EXTSRAM_NSECTIONS      1 /*    64-128Kb - <1 section */
+#define LPC313X_INTC_NSECTIONS         1 /*         4Kb - <1 section */
+#define LPC313X_NAND_NSECTIONS         1 /*         2Kb - <1 section */
 
-#define NUTTX_START_VADDR            0x00000000
+/* External SDRAM is a special case -- the number of sections depends upon
+ * the size of the SDRAM installed.
+ */
+
+#if defined(CONFIG_LPC313X_EXTSDRAM) && CONFIG_LPC313X_EXTSDRAMSIZE > 0
+#  define LPC313X_EXTSDRAM0_NSECTIONS  _NSECTIONS(CONFIG_LPC313X_EXTSDRAMSIZE)
+#endif
+
+/* Section MMU Flags */
+
+#define LPC313X_SHADOWSPACE_MMUFLAGS   MMU_MEMFLAGS
+#define LPC313X_INTSRAM_MMUFLAGS       MMU_MEMFLAGS
+#define LPC313X_APB0_MMUFLAGS          MMU_IOFLAGS
+#define LPC313X_APB1_MMUFLAGS          MMU_IOFLAGS
+#define LPC313X_APB2_MMUFLAGS          MMU_IOFLAGS
+#define LPC313X_APB3_MMUFLAGS          MMU_IOFLAGS
+#define LPC313X_APB4MPMC_MMUFLAGS      MMU_IOFLAGS
+#define LPC313X_MCI_MMUFLAGS           MMU_IOFLAGS
+#define LPC313X_USBOTG_MMUFLAGS        MMU_IOFLAGS
+#define LPC313X_EXTSRAM_MMUFLAGS       MMU_MEMFLAGS
+#define LPC313X_EXTSDRAM_MMUFLAGS      MMU_MEMFLAGS
+#define LPC313X_INTC_MMUFLAGS          MMU_IOFLAGS
+#define LPC313X_NAND_MMUFLAGS          MMU_IOFLAGS
+
+/* LPC313X Virtual (mapped) Memory Map.  These are the mappings that will
+ * be created if the page table lies in RAM.  If the platform has another,
+ * read-only, pre-initialized page table (perhaps in ROM), then the board.h
+ * file must provide these definitions.
+ */
+
+#ifndef CONFIG_ARM_ROMPGTABLE
+#  define LPC313X_SHADOWSPACE_VSECTION 0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
+#  define LPC313X_INTSRAM_VSECTION     0x11028000 /*                        Internal SRAM 96Kb-192Kb */
+#    define LPC313X_INTSRAM0_VADDR     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
+#    define LPC313X_INTSRAM1_VADDR     0x11040000 /* 0x11040000-0x11057fff: Internal SRAM 1 96Kb */
+#  define LPC313X_INTSROM0_VSECTION    0x12000000 /* 0x12000000-0x1201ffff: Internal SROM 0 128Kb */
+#  define LPC313X_APB0_VSECTION        0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
+#  define LPC313X_APB1_VSECTION        0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
+#  define LPC313X_APB2_VSECTION        0x15000000 /* 0x15000000-0x15003fff: APB2 16Kb */
+#  define LPC313X_APB3_VSECTION        0x16000000 /* 0x16000000-0x160003ff: APB3 1Kb */
+#  define LPC313X_APB4MPMC_VSECTION    0x17000000 /*                        8Kb */
+#    define LPC313X_APB4_VADDR         0x17000000 /* 0x17000000-0x17000fff: APB4 4Kb */
+#    define LPC313X_MPMC_VADDR         0x17008000 /* 0x17008000-0x17008fff: MPMC cfg 4Kb */
+#  define LPC313X_MCI_VSECTION         0x18000000 /* 0x18000000 0x180003ff: MCI/SD/SDIO 1Kb */
+#  define LPC313X_USBOTG_VSECTION      0x19000000 /* 0x19000000-0x19000fff: USB OTG 4Kb */
+#  define LPC313X_EXTSRAM_VSECTION     0x20020000 /*                        64-128Kb */
+#    define LPC313X_EXTSRAM0_VADDR     0x20000000 /* 0x20000000-0x2001ffff: External SRAM 0 64-128Kb */
+#    define LPC313X_EXTSRAM1_VADDR     0x20020000 /* 0x20020000-0x2003ffff: External SRAM 1 64-128Kb */
+#  define LPC313X_EXTSDRAM0_VSECTION   0x30000000 /* 0x30000000-0x37ffffff: External SDRAM 0 128Mb */
+#  define LPC313X_INTC_VSECTION        0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
+#  define LPC313X_NAND_VSECTION        0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
+#endif
+
+/* The boot logic will create a temporarily mapping based on where NuttX is
+ * executing in memory.  In this case, NuttX could be running from NOR FLASH,
+ * SDRAM, external SRAM, or ISRAM.
+ */
+
+#if defined(CONFIG_BOOT_RUNFROMFLASH)
+#  define NUTTX_START_VADDR            LPC313X_MPMC_VADDR
+#elif defined(CONFIG_BOOT_RUNFROMSDRAM)
+#  define NUTTX_START_VADDR            LPC313X_EXTSDRAM0_VSECTION
+#elif defined(CONFIG_BOOT_RUNFROMEXTSRAM)
+#  define NUTTX_START_VADDR            LPC313X_EXTSRAM0_VADDR
+#else /* CONFIG_BOOT_RUNFROMISRAM */
+#  define NUTTX_START_VADDR            LPC313X_INTSRAM0_VADDR
+#endif
+
+/* Determine the address of the MMU page table.  We will try to place that page
+ * table at the beginng of ISRAM0 if the vectors are at the high address, 0xffff:0000
+ * or at the end of ISRAM1 (or ISRAM0 on a LPC3130) if the vectors are at 0x0000:0000
+ *
+ * Or... the user may specify the address of the page table explicitly be defining
+ * CONFIG_PGTABLE_VADDR and CONFIG_PGTABLE_PADDR in the configuration or board.h file.
+ */
+
+#if !defined(PGTABLE_BASE_PADDR) || !defined(PGTABLE_BASE_VADDR)
+
+  /* Sanity check.. if one is undefined, both should be undefined */
+
+#  if defined(PGTABLE_BASE_PADDR) || defined(PGTABLE_BASE_VADDR)
+#    error "One of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is defined"
+#  endif
+
+  /* A sanity check, if the configuration says that the page table is read-only
+   * and pre-initialized (maybe ROM), then it should have also defined CONFIG_PGTABLE_BASE
+   */
+
+#  ifdef CONFIG_ARM_ROMPGTABLE
+#    error "CONFIG_ARM_ROMPGTABLE defined; CONFIG_PGTABLE_BASE not defined"
+#  else
+
+     /* We must declare the page table in ISRAM0 or 1.  We decide depending upon
+      * where the vector table was place.
+      */
+
+#    ifdef CONFIG_ARM_ROMPGTABLE  /* Vectors located at 0x0000:0000  */
+
+       /* In this case, ISRAM0 will be shadowed at address 0x0000:0000.  The page
+        * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a LPC3130)
+        */
+
+#      ifndef PGTABLE_BASE_VADDR
+#        if CONFIG_ARCH_CHIP_LPC3131
+#          define PGTABLE_BASE_PADDR (LPC313X_INTSRAM1_PADDR+LPC313X_INTSRAM1_SIZE-PGTABLE_SIZE)
+#          define PGTABLE_BASE_VADDR (LPC313X_INTSRAM1_VADDR+LPC313X_INTSRAM1_SIZE-PGTABLE_SIZE)
+#        else
+#          define PGTABLE_BASE_PADDR (LPC313X_INTSRAM0_PADDR+LPC313X_INTSRAM0_SIZE-PGTABLE_SIZE)
+#          define PGTABLE_BASE_VADDR (LPC313X_INTSRAM0_VADDR+LPC313X_INTSRAM0_SIZE-PGTABLE_SIZE)
+#        endif
+#      endif
+#    else
+
+       /* Otherwise, ISRAM1 (or ISRAM0 for the LPC3130) will be mapped so that
+        * the end of the SRAM region will provide memory for the vectors.  The page
+        * table will then be places at the first 16Kb of ISRAM0 (which will be in
+        * the shadow memory region.
+        */
+
+#      define PGTABLE_BASE_PADDR LPC313X_SHADOWSPACE_PSECTION
+#      define PGTABLE_BASE_VADDR LPC313X_SHADOWSPACE_VSECTION
+#    endif
+#  endif
+#endif
+
+/* 16Kb of memory is reserved hold the page table for the virtual mappings.  A
+ * portion of this table is not accessible in the virtual address space (for
+ * normal operation). We will reuse this memory for coarse page tables as follows:
+ */
+
+#define PGTABLE_COARSE_BASE_PADDR   (PGTABLE_BASE_PADDR+0x00000800)
+#define PGTABLE_COARSE_END_PADDR    (PGTABLE_BASE_PADDR+0x00003000)
+#define PTTABLE_PERIPHERALS_PADDR   (PGTABLE_BASE_PADDR+0x00003000)
+#define PGTABLE_END_PADDR           (PGTABLE_BASE_PADDR+0x00004000)
+
+#define PGTABLE_COARSE_BASE_VADDR   (PGTABLE_BASE_VADDR+0x00000800)
+#define PGTABLE_COARSE_END_VADDR    (PGTABLE_BASE_VADDR+0x00003000)
+#define PTTABLE_PERIPHERALS_VADDR   (PGTABLE_BASE_VADDR+0x00003000)
+#define PGTABLE_END_VADDR           (PGTABLE_BASE_VADDR+0x00004000)
+
+#define PGTBALE_COARSE_TABLE_SIZE   (4*256)
+#define PGTABLE_COARSE_ALLOC        (PGTABLE_COARSE_END_VADDR-PGTABLE_COARSE_BASE_VADDR)
+#define PGTABLE_NCOARSE_TABLES      (PGTABLE_COARSE_SIZE / PGTBALE_COARSE_TABLE_ALLOC)
+
+/* Determine the base address of the vector table */
+
+#define VECTOR_TABLE_SIZE        0x00010000
+#ifdef CONFIG_ARM_LOWVECTORS  /* Vectors located at 0x0000:0000  */
+#  define LPC313X_VECTOR_PADDR   LPC313X_SHADOWSPACE_PSECTION
+#  define LPC313X_VECTOR_VADDR   0x00000000
+#  define LPC313X_VECTOR_VCOARSE 0x00000000
+#else  /* Vectors located at 0xffff:0000  */
+#  if CONFIG_ARCH_CHIP_LPC3131
+#    define LPC313X_VECTOR_PADDR (LPC313X_INTSRAM1_PADDR+LPC313X_INTSRAM1_SIZE-VECTOR_TABLE_SIZE)
+#  else
+#    define LPC313X_VECTOR_PADDR (LPC313X_INTSRAM0_PADDR+LPC313X_INTSRAM0_SIZE-VECTOR_TABLE_SIZE)
+#  endif
+#  define LPC313X_VECTOR_VADDR   0xffff0000
+#  define LPC313X_VECTOR_VCOARSE 0xfff00000
+#endif
 
 /************************************************************************************
  * Public Types
