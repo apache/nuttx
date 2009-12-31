@@ -667,7 +667,7 @@ EXTERN uint32_t lpc313x_fdivinit(int fdcndx,
 
 EXTERN void lpc313x_setfdiv(enum lpc313x_domainid_e dmnid,
                             enum lpc313x_clockid_e clkid,
-                            const struct lpc313x_subdomainconfig_s *fdiv);
+                            const struct lpc313x_fdivconfig_s *fdiv);
 
 /****************************************************************************
  * Name: lpc313x_pllconfig
