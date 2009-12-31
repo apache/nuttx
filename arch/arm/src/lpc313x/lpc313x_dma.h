@@ -49,8 +49,8 @@
 
 /* DMA register base address offset into the APB4 domain ****************************************/
 
-#define LPC313X_DMA_VBASE                (LPC313X_APB4_VSECTION+LPC313X_APB4_DMA_OFFSET)
-#define LPC313X_DMA_PBASE                (LPC313X_APB4_PSECTION+LPC313X_APB4_DMA_OFFSET)
+#define LPC313X_DMA_VBASE                (LPC313X_APB4_VADDR+LPC313X_APB4_DMA_OFFSET)
+#define LPC313X_DMA_PBASE                (LPC313X_APB4_PADDR+LPC313X_APB4_DMA_OFFSET)
 
 /* DMA channel offsets (with respect to the DMA register base address) **************************/
 

@@ -74,6 +74,21 @@ CONFIG_ARCH_INTERRUPTSTACK=0
 CONFIG_ARCH_STACKDUMP=y
 
 #
+# ARM-specific configuration
+#
+# CONFIG_ARM_LOWVECTORS - define if vectors reside at address 0x0000:00000
+#   Undefine if vectors reside at address 0xffff:0000
+# CONFIG_ARM_ROMPGTABLE - A pre-initialized, read-only page table is available
+#   CONFIG_PGTABLE_BASE must also be defined in this case.
+# CONFIG_PGTABLE_BASE - The (physical) base address of the pre-initialized
+#   read-only page table vector.  This must be provided if CONFIG_ARM_ROMPGTABLE
+#   is defined.
+#
+CONFIG_ARM_LOWVECTORS=n
+CONFIG_ARM_ROMPGTABLE=n
+#CONFIG_PGTABLE_BASE=
+
+#
 # DM320 specific device driver settings
 #
 # CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
