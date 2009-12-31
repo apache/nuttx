@@ -82,13 +82,17 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
  * space of the LPCD313x.
  */
 
-#ifndef CONFIG_ARM_ROMPGTABLE
+#ifndef CONFIG_ARCH_ROMPGTABLE
 static const struct section_mapping_s section_mapping[] =
 {
   { LPC313X_SHADOWSPACE_PSECTION, LPC313X_SHADOWSPACE_VSECTION, 
     LPC313X_SHADOWSPACE_MMUFLAGS, LPC313X_SHADOWSPACE_NSECTIONS},
   { LPC313X_INTSRAM_PSECTION, LPC313X_INTSRAM_VSECTION, 
     LPC313X_INTSRAM_MMUFLAGS, LPC313X_INTSRAM_NSECTIONS},
+#ifdef CONFIG_ARCH_ROMPGTABLE
+  { LPC313X_INTSROM0_PSECTION, LPC313X_INTSROM0_VSECTION, 
+    LPC313X_INTSROM_MMUFLAGS, LPC313X_INTSROM0_NSECTIONS},
+#endif
   { LPC313X_APB0_PSECTION, LPC313X_APB0_VSECTION, 
     LPC313X_APB0_MMUFLAGS, LPC313X_APB0_NSECTIONS},
   { LPC313X_APB1_PSECTION, LPC313X_APB1_VSECTION, 
@@ -129,7 +133,7 @@ static const struct section_mapping_s section_mapping[] =
  * Name: up_setlevel1entry
  ************************************************************************************/
 
-#ifndef CONFIG_ARM_ROMPGTABLE
+#ifndef CONFIG_ARCH_ROMPGTABLE
 static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
   uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
@@ -167,7 +171,7 @@ static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
  * Name: up_setupmappings
  ************************************************************************************/
 
-#ifndef CONFIG_ARM_ROMPGTABLE
+#ifndef CONFIG_ARCH_ROMPGTABLE
 static void up_setupmappings(void)
 {
   int i, j;
@@ -201,7 +205,7 @@ static void up_setupmappings(void)
  *
  ************************************************************************************/
 
-#if !defined(CONFIG_ARM_ROMPGTABLE) && !defined(CONFIG_ARM_LOWVECTORS)
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && !defined(CONFIG_ARCH_LOWVECTORS)
 static void up_vectormapping(void)
 {
   uint32_t vector_paddr = LPC313X_VECTOR_PADDR;
@@ -254,14 +258,14 @@ void up_boot(void)
    * IO regions (Including the vector region).
    */
 
-#ifndef CONFIG_ARM_ROMPGTABLE
+#ifndef CONFIG_ARCH_ROMPGTABLE
   up_setupmappings();
 
   /* Provide a special mapping for the IRAM interrupt vector positioned in high
    * memory.
    */
 
-#ifndef CONFIG_ARM_LOWVECTORS
+#ifndef CONFIG_ARCH_LOWVECTORS
   up_vectormapping();
 #endif
 #endif
