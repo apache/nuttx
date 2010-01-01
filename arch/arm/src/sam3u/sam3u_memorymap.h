@@ -70,6 +70,7 @@
 #  define SAM3U_TC0_BASE        0x40080000 /* 0x40080000-0x4008003f:   Timer Counter 0 */
 #  define SAM3U_TC1_BASE        0x40080040 /* 0x40080040-0x4008007f:   Timer Counter 1 */
 #  define SAM3U_TC2_BASE        0x40080080 /* 0x40080080-0x400800bf:   Timer Counter 2 */
+#  define SAM3U_TWI_BASE(n)     (0x40084000+((n)<<14))
 #  define SAM3U_TWI0_BASE       0x40084000 /* 0x40084000-0x40087fff:   Two-Wire Interface 0 */
 #  define SAM3U_TWI1_BASE       0x40088000 /* 0x40088000-0x4008bfff:   Two-Wire Interface 1 */
 #  define SAM3U_PWM_BASE        0x4008c000 /* 0x4008c000-0x4008ffff:   Pulse Width Modulation Controller */
