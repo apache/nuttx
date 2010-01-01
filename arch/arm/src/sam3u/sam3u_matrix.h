@@ -165,7 +165,7 @@
 #define MATRIX_PRAS_M2PR_MASK           (3 << MATRIX_PRAS_M2PR_SHIFT)
 #define MATRIX_PRAS_M3PR_SHIFT          (12)      /* Bits 12-13:  Master 3 Priority */
 #define MATRIX_PRAS_M3PR_MASK           (3 << MATRIX_PRAS_M3PR_SHIFT)
-#define MATRIX_PRAS_M4PR_SHIFT          (16)      /* Bits 16-bb17  Master 4 Priority */
+#define MATRIX_PRAS_M4PR_SHIFT          (16)      /* Bits 16-17  Master 4 Priority */
 #define MATRIX_PRAS_M4PR_MASK           (3 << MATRIX_PRAS_M4PR_SHIFT)
 
 #define MATRIX_MRCR_RCB(x)              (1 << (x))

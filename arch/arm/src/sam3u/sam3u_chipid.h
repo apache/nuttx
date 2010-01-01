@@ -95,7 +95,7 @@
 #  define CHIPID_CIDR_NVPSIZ2_1MB       (12 << CHIPID_CIDR_NVPSIZ_SHIFT) /* 1024K bytes */
 #  define CHIPID_CIDR_NVPSIZ2_2MB       (14 << CHIPID_CIDR_NVPSIZ_SHIFT) /* 2048K bytes */
 #define CHIPID_CIDR_SRAMSIZ_SHIFT       (16)      /* Bits 16-19:  Internal SRAM Size */
-#define CHIPID_CIDR_SRAMSIZ_MASK        (15 << bb)
+#define CHIPID_CIDR_SRAMSIZ_MASK        (15 << CHIPID_CIDR_SRAMSIZ_SHIFT)
 #  define CHIPID_CIDR_SRAMSIZ_48KB      (0  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 48K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_1KB       (1  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 1K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_2KB       (2  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 2K bytes */

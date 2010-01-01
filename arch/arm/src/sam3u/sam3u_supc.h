@@ -133,7 +133,7 @@
 #define SUPC_WUIR_WKUPEN_SHIFT         (0)       /* Bits 0-15:  Wake Up Input Enable 0 to 15 */
 #define SUPC_WUIR_WKUPEN_MASK          (0xffff << SUPC_WUIR_WKUPEN_SHIFT)
 #define SUPC_WUIR_WKUPEN(n)            ((1 << (n)) << SUPC_WUIR_WKUPEN_SHIFT)
-#define SUPC_WUIR_WKUPT_SHIFT          (16)      /* Bits 16-bb31  Wake Up Input Transition 0 to 15 */
+#define SUPC_WUIR_WKUPT_SHIFT          (16)      /* Bits 16-31  Wake Up Input Transition 0 to 15 */
 #define SUPC_WUIR_WKUPT_MASK           (0xffff << SUPC_WUIR_WKUPT_SHIFT)
 #define SUPC_WUIR_WKUPT(n)             ((1 << (n)) << SUPC_WUIR_WKUPT_SHIFT)
 
