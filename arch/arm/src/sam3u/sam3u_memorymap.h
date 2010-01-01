@@ -101,21 +101,21 @@
 /* System Controller Register Blocks:  0x400e0000-0x4007ffff */
 
 #define SAM3U_SMC_BASE          0x400e0000 /* 0x400e0000-0x400e01ff: Static Memory Controller */
-#define SAM3U_MATRIX_BASE       0x400e0000 /* 0x400e0200-0x400e03ff: MATRIX */
-#define SAM3U_PMC_BASE          0x400e0000 /* 0x400e0400-0x400e05ff: Power Management Controller */
-#define SAM3U_UART_BASE         0x400e0000 /* 0x400e0600-0x400e073f: UART */
-#define SAM3U_CHIPID_BASE       0x400e0000 /* 0x400e0740-0x400e07ff: CHIP ID */
-#define SAM3U_EFC0_BASE         0x400e0000 /* 0x400e0800-0x400e09ff: Enhanced Embedded Flash Controller 0 */
-#define SAM3U_EFC1_BASE         0x400e0000 /* 0x400e0a00-0x400e0bff: Enhanced Embedded Flash Controller 1 */
-#define SAM3U_PIOA_BASE         0x400e0000 /* 0x400e0c00-0x400e0dff: Parallel I/O Controller A */
-#define SAM3U_PIOB_BASE         0x400e0000 /* 0x400e0e00-0x400e0fff: Parallel I/O Controller B */
-#define SAM3U_PIOC_BASE         0x400e0000 /* 0x400e1000-0x400e11ff: Parallel I/O Controller C */
-#define SAM3U_RSTC_BASE         0x400e0000 /* 0x400e1200-0x400e120f: Reset Controller */
-#define SAM3U_SUPC_BASE         0x400e0000 /* 0x400e1210-0x400e122f: Supply Controller */
-#define SAM3U_RTT_BASE          0x400e0000 /* 0x400e1230-0x400e124f: Real Time Timer */
-#define SAM3U_WDT_BASE          0x400e0000 /* 0x400e1250-0x400e125f: Watchdog Timer */
-#define SAM3U_RTC_BASE          0x400e0000 /* 0x400e1260-0x400e128f: Real Time Clock */
-#define SAM3U_GPBR_BASE         0x400e0000 /* 0x400e1290-0x400e13ff: GPBR */
+#define SAM3U_MATRIX_BASE       0x400e0200 /* 0x400e0200-0x400e03ff: MATRIX */
+#define SAM3U_PMC_BASE          0x400e0400 /* 0x400e0400-0x400e05ff: Power Management Controller */
+#define SAM3U_UART_BASE         0x400e0600 /* 0x400e0600-0x400e073f: UART */
+#define SAM3U_CHIPID_BASE       0x400e0740 /* 0x400e0740-0x400e07ff: CHIP ID */
+#define SAM3U_EFC0_BASE         0x400e0800 /* 0x400e0800-0x400e09ff: Enhanced Embedded Flash Controller 0 */
+#define SAM3U_EFC1_BASE         0x400e0a00 /* 0x400e0a00-0x400e0bff: Enhanced Embedded Flash Controller 1 */
+#define SAM3U_PIOA_BASE         0x400e0c00 /* 0x400e0c00-0x400e0dff: Parallel I/O Controller A */
+#define SAM3U_PIOB_BASE         0x400e0e00 /* 0x400e0e00-0x400e0fff: Parallel I/O Controller B */
+#define SAM3U_PIOC_BASE         0x400e1000 /* 0x400e1000-0x400e11ff: Parallel I/O Controller C */
+#define SAM3U_RSTC_BASE         0x400e1200 /* 0x400e1200-0x400e120f: Reset Controller */
+#define SAM3U_SUPC_BASE         0x400e1210 /* 0x400e1210-0x400e122f: Supply Controller */
+#define SAM3U_RTT_BASE          0x400e1230 /* 0x400e1230-0x400e124f: Real Time Timer */
+#define SAM3U_WDT_BASE          0x400e1250 /* 0x400e1250-0x400e125f: Watchdog Timer */
+#define SAM3U_RTC_BASE          0x400e1260 /* 0x400e1260-0x400e128f: Real Time Clock */
+#define SAM3U_GPBR_BASE         0x400e1290 /* 0x400e1290-0x400e13ff: GPBR */
                                            /* 0x490e1400-0x4007ffff: Reserved */
 
 /************************************************************************************************
