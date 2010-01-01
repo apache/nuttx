@@ -63,9 +63,9 @@
                                            /* 0x24000000-0x3fffffff:   Undefined */
 #define SAM3U_PERIPHERALS_BASE  0x40000000 /* 0x40000000-0x5fffffff: Peripherals */
 #  define SAM3U_MCI_BASE        0x40000000 /* 0x40000000-0x400003ff:   High Speed Multimedia Card Interface */
-#  define SAM3U_SSC_BASE        0x40000400 /* 0x40000400-0x400007ff:   Synchronous Serial Controller */
-#  define SAM3U_SPI_BASE        0x40000800 /* 0x40000800-0x40000bff:   Serial Peripheral Interface */
-                                           /* 0x40000c00-0x4007ffff:   Reserved */
+#  define SAM3U_SSC_BASE        0x40004000 /* 0x40004000-0x40007fff:   Synchronous Serial Controller */
+#  define SAM3U_SPI_BASE        0x40008000 /* 0x40008000-0x4000bfff:   Serial Peripheral Interface */
+                                           /* 0x4000c000-0x4007ffff:   Reserved */
 #  define SAM3U_TC_BASE(n)      (0x40080000+((n)<<6))
 #  define SAM3U_TC0_BASE        0x40080000 /* 0x40080000-0x4008003f:   Timer Counter 0 */
 #  define SAM3U_TC1_BASE        0x40080040 /* 0x40080040-0x4008007f:   Timer Counter 1 */
