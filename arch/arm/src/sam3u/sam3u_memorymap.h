@@ -66,12 +66,14 @@
 #  define SAM3U_SSC_BASE        0x40000400 /* 0x40000400-0x400007ff:   Synchronous Serial Controller */
 #  define SAM3U_SPI_BASE        0x40000800 /* 0x40000800-0x40000bff:   Serial Peripheral Interface */
                                            /* 0x40000c00-0x4007ffff:   Reserved */
+#  define SAM3U_TC_BASE(n)      (0x40080000+((n)<<6))
 #  define SAM3U_TC0_BASE        0x40080000 /* 0x40080000-0x4008003f:   Timer Counter 0 */
 #  define SAM3U_TC1_BASE        0x40080040 /* 0x40080040-0x4008007f:   Timer Counter 1 */
 #  define SAM3U_TC2_BASE        0x40080080 /* 0x40080080-0x400800bf:   Timer Counter 2 */
 #  define SAM3U_TWI0_BASE       0x40084000 /* 0x40084000-0x40087fff:   Two-Wire Interface 0 */
 #  define SAM3U_TWI1_BASE       0x40088000 /* 0x40088000-0x4008bfff:   Two-Wire Interface 1 */
 #  define SAM3U_PWM_BASE        0x4008c000 /* 0x4008c000-0x4008ffff:   Pulse Width Modulation Controller */
+#  define SAM3U_USART_BASE(n)   (0x40090000+((n)<<14))
 #  define SAM3U_USART0_BASE     0x40090000 /* 0x40090000-0x40093fff:   USART0 */
 #  define SAM3U_USART1_BASE     0x40094000 /* 0x40094000-0x40097fff:   USART1 */
 #  define SAM3U_USART2_BASE     0x40098000 /* 0x40098000-0x4009bfff:   USART2 */
@@ -88,6 +90,7 @@
 #  define SAM3U_BBPERIPH__BASE  0x42000000 /* 0x42000000-0x43ffffff:   32Mb bit-band alias */
                                            /* 0x44000000-0x5fffffff:   Reserved */
 #define   SAM3U_EXTSRAM_BASE    0x60000000 /* 0x60000000-0x9fffffff: External SRAM */
+#  define SAM3U_EXTCS_BASE(n)   (0x60000000*((n)<<24))
 #  define SAM3U_EXTCS0_BASE     0x60000000 /* 0x60000000-0x60ffffff:   Chip select 0 */
 #  define SAM3U_EXTCS1_BASE     0x61000000 /* 0x61000000-0x601fffff:   Chip select 1 */
 #  define SAM3U_EXTCS2_BASE     0x62000000 /* 0x62000000-0x62ffffff:   Chip select 2 */
@@ -105,9 +108,10 @@
 #define SAM3U_PMC_BASE          0x400e0400 /* 0x400e0400-0x400e05ff: Power Management Controller */
 #define SAM3U_UART_BASE         0x400e0600 /* 0x400e0600-0x400e073f: UART */
 #define SAM3U_CHIPID_BASE       0x400e0740 /* 0x400e0740-0x400e07ff: CHIP ID */
-#define SAM3U_EEFC_BASE(n)      (0x400e0800+((n)*0x200)
+#define SAM3U_EEFC_BASE(n)      (0x400e0800+((n)<<9))
 #define SAM3U_EEFC0_BASE        0x400e0800 /* 0x400e0800-0x400e09ff: Enhanced Embedded Flash Controller 0 */
 #define SAM3U_EEFC1_BASE        0x400e0a00 /* 0x400e0a00-0x400e0bff: Enhanced Embedded Flash Controller 1 */
+#define SAM3U_PIO_BASE(n)       (0x400e0c00+((n)<<9))
 #define SAM3U_PIOA_BASE         0x400e0c00 /* 0x400e0c00-0x400e0dff: Parallel I/O Controller A */
 #define SAM3U_PIOB_BASE         0x400e0e00 /* 0x400e0e00-0x400e0fff: Parallel I/O Controller B */
 #define SAM3U_PIOC_BASE         0x400e1000 /* 0x400e1000-0x400e11ff: Parallel I/O Controller C */
