@@ -105,8 +105,9 @@
 #define SAM3U_PMC_BASE          0x400e0400 /* 0x400e0400-0x400e05ff: Power Management Controller */
 #define SAM3U_UART_BASE         0x400e0600 /* 0x400e0600-0x400e073f: UART */
 #define SAM3U_CHIPID_BASE       0x400e0740 /* 0x400e0740-0x400e07ff: CHIP ID */
-#define SAM3U_EFC0_BASE         0x400e0800 /* 0x400e0800-0x400e09ff: Enhanced Embedded Flash Controller 0 */
-#define SAM3U_EFC1_BASE         0x400e0a00 /* 0x400e0a00-0x400e0bff: Enhanced Embedded Flash Controller 1 */
+#define SAM3U_EEFC_BASE(n)      (0x400e0800+((n)*0x200)
+#define SAM3U_EEFC0_BASE        0x400e0800 /* 0x400e0800-0x400e09ff: Enhanced Embedded Flash Controller 0 */
+#define SAM3U_EEFC1_BASE        0x400e0a00 /* 0x400e0a00-0x400e0bff: Enhanced Embedded Flash Controller 1 */
 #define SAM3U_PIOA_BASE         0x400e0c00 /* 0x400e0c00-0x400e0dff: Parallel I/O Controller A */
 #define SAM3U_PIOB_BASE         0x400e0e00 /* 0x400e0e00-0x400e0fff: Parallel I/O Controller B */
 #define SAM3U_PIOC_BASE         0x400e1000 /* 0x400e1000-0x400e11ff: Parallel I/O Controller C */
