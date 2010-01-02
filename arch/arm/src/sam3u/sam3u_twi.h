@@ -67,17 +67,17 @@
 
 /* TWI register adresses ****************************************************************/
 
-#define SAM3U_TWI_CR(n)              (SAM3U_TWI_BASE(n)+SAM3U_TWI_CR_OFFSET)
-#define SAM3U_TWI_MMR(n)             (SAM3U_TWI_BASE(n)+SAM3U_TWI_MMR_OFFSET)
-#define SAM3U_TWI_SMR(n)             (SAM3U_TWI_BASE(n)+SAM3U_TWI_SMR_OFFSET)
-#define SAM3U_TWI_IADR(n)            (SAM3U_TWI_BASE(n)+SAM3U_TWI_IADR_OFFSET)
-#define SAM3U_TWI_CWGR(n)            (SAM3U_TWI_BASE(n)+SAM3U_TWI_CWGR_OFFSET)
-#define SAM3U_TWI_SR(n)              (SAM3U_TWI_BASE(n)+SAM3U_TWI_SR_OFFSET)
-#define SAM3U_TWI_IER(n)             (SAM3U_TWI_BASE(n)+SAM3U_TWI_IER_OFFSET)
-#define SAM3U_TWI_IDR(n)             (SAM3U_TWI_BASE(n)+SAM3U_TWI_IDR_OFFSET)
-#define SAM3U_TWI_IMR(n)             (SAM3U_TWI_BASE(n)+SAM3U_TWI_IMR_OFFSET)
-#define SAM3U_TWI_RHR(n)             (SAM3U_TWI_BASE(n)+SAM3U_TWI_RHR_OFFSET)
-#define SAM3U_TWI_THR(n)             (SAM3U_TWI_BASE(n)+SAM3U_TWI_THR_OFFSET)
+#define SAM3U_TWI_CR(n)              (SAM3U_TWIN_BASE(n)+SAM3U_TWI_CR_OFFSET)
+#define SAM3U_TWI_MMR(n)             (SAM3U_TWIN_BASE(n)+SAM3U_TWI_MMR_OFFSET)
+#define SAM3U_TWI_SMR(n)             (SAM3U_TWIN_BASE(n)+SAM3U_TWI_SMR_OFFSET)
+#define SAM3U_TWI_IADR(n)            (SAM3U_TWIN_BASE(n)+SAM3U_TWI_IADR_OFFSET)
+#define SAM3U_TWI_CWGR(n)            (SAM3U_TWIN_BASE(n)+SAM3U_TWI_CWGR_OFFSET)
+#define SAM3U_TWI_SR(n)              (SAM3U_TWIN_BASE(n)+SAM3U_TWI_SR_OFFSET)
+#define SAM3U_TWI_IER(n)             (SAM3U_TWIN_BASE(n)+SAM3U_TWI_IER_OFFSET)
+#define SAM3U_TWI_IDR(n)             (SAM3U_TWIN_BASE(n)+SAM3U_TWI_IDR_OFFSET)
+#define SAM3U_TWI_IMR(n)             (SAM3U_TWIN_BASE(n)+SAM3U_TWI_IMR_OFFSET)
+#define SAM3U_TWI_RHR(n)             (SAM3U_TWIN_BASE(n)+SAM3U_TWI_RHR_OFFSET)
+#define SAM3U_TWI_THR(n)             (SAM3U_TWIN_BASE(n)+SAM3U_TWI_THR_OFFSET)
 
 #define SAM3U_TWI0_CR                (SAM3U_TWI0_BASE+SAM3U_TWI_CR_OFFSET)
 #define SAM3U_TWI0_MMR               (SAM3U_TWI0_BASE+SAM3U_TWI_MMR_OFFSET)

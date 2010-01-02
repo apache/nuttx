@@ -53,19 +53,19 @@
 
 /* Timer channel offsets (with respect to timer base offset 0f 0x00, 0x40, or 0x80 */
 
-#define SAM3U_TCN_OFFSET(n)         (0x00 + ((n)<<6)) /* 0x00, 0x40, 0x80 */
-#define SAM3U_TCN_CCR_OFFSET        0x00 /* Channel Control Register */
-#define SAM3U_TCN_CMR_OFFSET        0x04 /* Channel Mode Register */
+#define SAM3U_TCN_OFFSET(n)            (0x00 + ((n)<<6)) /* 0x00, 0x40, 0x80 */
+#define SAM3U_TCN_CCR_OFFSET           0x00 /* Channel Control Register */
+#define SAM3U_TCN_CMR_OFFSET           0x04 /* Channel Mode Register */
                                             /* 0x08 Reserved */
                                             /* 0x0c Reserved */
-#define SAM3U_TCN_CV_OFFSET         0x10 /* Counter Value */
-#define SAM3U_TCN_RA_OFFSET         0x14 /* Register A */
-#define SAM3U_TCN_RB_OFFSET         0x18 /* Register B */
-#define SAM3U_TCN_RC_OFFSET         0x1c /* Register C */
-#define SAM3U_TCN_SR_OFFSET         0x20 /* Status Register */
-#define SAM3U_TCN_IER_OFFSET        0x24 /* Interrupt Enable Register */
-#define SAM3U_TCN_IDR_OFFSET        0x28 /* Interrupt Disable Register */
-#define SAM3U_TCN_IMR_OFFSET        0x2c /* Interrupt Mask Register */
+#define SAM3U_TCN_CV_OFFSET            0x10 /* Counter Value */
+#define SAM3U_TCN_RA_OFFSET            0x14 /* Register A */
+#define SAM3U_TCN_RB_OFFSET            0x18 /* Register B */
+#define SAM3U_TCN_RC_OFFSET            0x1c /* Register C */
+#define SAM3U_TCN_SR_OFFSET            0x20 /* Status Register */
+#define SAM3U_TCN_IER_OFFSET           0x24 /* Interrupt Enable Register */
+#define SAM3U_TCN_IDR_OFFSET           0x28 /* Interrupt Disable Register */
+#define SAM3U_TCN_IMR_OFFSET           0x2c /* Interrupt Mask Register */
 
 /* Timer common registers */
 
@@ -82,16 +82,16 @@
 
 /* Timer channel offsets (with respect to timer base offset 0f 0x00, 0x40, or 0x80 */
 
-#define SAM3U_TC_CCR(n)                (SAM3U_TC_BASE(n)+SAM3U_TCN_CCR_OFFSET)
-#define SAM3U_TC_CMR(n)                (SAM3U_TC_BASE(n)+SAM3U_TCN_CMR_OFFSET)
-#define SAM3U_TC_CV(n)                 (SAM3U_TC_BASE(n)+SAM3U_TCN_CV_OFFSET)
-#define SAM3U_TC_RA(n)                 (SAM3U_TC_BASE(n)+SAM3U_TCN_RA_OFFSET)
-#define SAM3U_TC_RB(n)                 (SAM3U_TC_BASE(n)+SAM3U_TCN_RB_OFFSET)
-#define SAM3U_TC_RC(n)                 (SAM3U_TC_BASE(n)+SAM3U_TCN_RC_OFFSET)
-#define SAM3U_TC_SR(n)                 (SAM3U_TC_BASE(n)+SAM3U_TCN_SR_OFFSET)
-#define SAM3U_TC_IER(n)                (SAM3U_TC_BASE(n)+SAM3U_TCN_IER_OFFSET)
-#define SAM3U_TC_IDR(n)                (SAM3U_TC_BASE(n)+SAM3U_TCN_IDR_OFFSET)
-#define SAM3U_TC_IMR(n)                (SAM3U_TC_BASE(n)+SAM3U_TCN_IMR_OFFSET)
+#define SAM3U_TC_CCR(n)                (SAM3U_TCN_BASE(n)+SAM3U_TCN_CCR_OFFSET)
+#define SAM3U_TC_CMR(n)                (SAM3U_TCN_BASE(n)+SAM3U_TCN_CMR_OFFSET)
+#define SAM3U_TC_CV(n)                 (SAM3U_TCN_BASE(n)+SAM3U_TCN_CV_OFFSET)
+#define SAM3U_TC_RA(n)                 (SAM3U_TCN_BASE(n)+SAM3U_TCN_RA_OFFSET)
+#define SAM3U_TC_RB(n)                 (SAM3U_TCN_BASE(n)+SAM3U_TCN_RB_OFFSET)
+#define SAM3U_TC_RC(n)                 (SAM3U_TCN_BASE(n)+SAM3U_TCN_RC_OFFSET)
+#define SAM3U_TC_SR(n)                 (SAM3U_TCN_BASE(n)+SAM3U_TCN_SR_OFFSET)
+#define SAM3U_TC_IER(n)                (SAM3U_TCN_BASE(n)+SAM3U_TCN_IER_OFFSET)
+#define SAM3U_TC_IDR(n)                (SAM3U_TCN_BASE(n)+SAM3U_TCN_IDR_OFFSET)
+#define SAM3U_TC_IMR(n)                (SAM3U_TCN_BASE(n)+SAM3U_TCN_IMR_OFFSET)
 
 #define SAM3U_TC0_CCR                  (SAM3U_TC0_BASE+SAM3U_TCN_CCR_OFFSET)
 #define SAM3U_TC0_CMR                  (SAM3U_TC0_BASE+SAM3U_TCN_CMR_OFFSET)
@@ -128,12 +128,12 @@
 
 /* Timer common registers */
 
-#define SAM3U_TC_BCR                   (SAM3U_TC0_BASE+SAM3U_TC_BCR_OFFSET)
-#define SAM3U_TC_BMR                   (SAM3U_TC0_BASE+SAM3U_TC_BMR_OFFSET)
-#define SAM3U_TC_QIER                  (SAM3U_TC0_BASE+SAM3U_TC_QIER_OFFSET)
-#define SAM3U_TC_QIDR                  (SAM3U_TC0_BASE+SAM3U_TC_QIDR_OFFSET)
-#define SAM3U_TC_QIMR                  (SAM3U_TC0_BASE+SAM3U_TC_QIMR_OFFSET)
-#define SAM3U_TC_QISR                  (SAM3U_TC0_BASE+SAM3U_TC_QISR_OFFSET)
+#define SAM3U_TC_BCR                   (SAM3U_TC_BASE+SAM3U_TC_BCR_OFFSET)
+#define SAM3U_TC_BMR                   (SAM3U_TC_BASE+SAM3U_TC_BMR_OFFSET)
+#define SAM3U_TC_QIER                  (SAM3U_TC_BASE+SAM3U_TC_QIER_OFFSET)
+#define SAM3U_TC_QIDR                  (SAM3U_TC_BASE+SAM3U_TC_QIDR_OFFSET)
+#define SAM3U_TC_QIMR                  (SAM3U_TC_BASE+SAM3U_TC_QIMR_OFFSET)
+#define SAM3U_TC_QISR                  (SAM3U_TC_BASE+SAM3U_TC_QISR_OFFSET)
 
 /* TC register bit definitions ******************************************************************/
 
