@@ -58,10 +58,10 @@
 
 /* EEFC register adresses ***************************************************************/
 
-#define SAM3U_EEFC_FMR(n)              (SAM3U_EEFC_BASE(n)+SAM3U_EEFC_FMR_OFFSET)
-#define SAM3U_EEFC_FCR(n)              (SAM3U_EEFC_BASE(n)+SAM3U_EEFC_FCR_OFFSET)
-#define SAM3U_EEFC_FSR(n)              (SAM3U_EEFC_BASE(n)+SAM3U_EEFC_FSR_OFFSET)
-#define SAM3U_EEFC_FRR(n)              (SAM3U_EEFC_BASE(n)+SAM3U_EEFC_FRR_OFFSET)
+#define SAM3U_EEFC_FMR(n)              (SAM3U_EEFCN_BASE(n)+SAM3U_EEFC_FMR_OFFSET)
+#define SAM3U_EEFC_FCR(n)              (SAM3U_EEFCN_BASE(n)+SAM3U_EEFC_FCR_OFFSET)
+#define SAM3U_EEFC_FSR(n)              (SAM3U_EEFCN_BASE(n)+SAM3U_EEFC_FSR_OFFSET)
+#define SAM3U_EEFC_FRR(n)              (SAM3U_EEFCN_BASE(n)+SAM3U_EEFC_FRR_OFFSET)
 
 #define SAM3U_EEFC0_FMR                (SAM3U_EEFC0_BASE+SAM3U_EEFC_FMR_OFFSET)
 #define SAM3U_EEFC0_FCR                (SAM3U_EEFC0_BASE+SAM3U_EEFC_FCR_OFFSET)
