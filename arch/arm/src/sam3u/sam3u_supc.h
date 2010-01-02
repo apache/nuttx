@@ -51,21 +51,21 @@
 
 /* SUPC register offsets ****************************************************************/
 
-#define SAM3U_SUPC_CR_OffSET           0x00 /* Supply Controller Control Register */
-#define SAM3U_SUPC_SMMR_OffSET         0x04 /* Supply Controller Supply Monitor Mode Register */
-#define SAM3U_SUPC_MR_OffSET           0x08 /* Supply Controller Mode Register */
-#define SAM3U_SUPC_WUMR_OffSET         0x0c /* Supply Controller Wake Up Mode Register */
-#define SAM3U_SUPC_WUIR_OffSET         0x10 /* Supply Controller Wake Up Inputs Register */
-#define SAM3U_SUPC_SR_OffSET           0x14 /* Supply Controller Status Register */
+#define SAM3U_SUPC_CR_OFFSET           0x00 /* Supply Controller Control Register */
+#define SAM3U_SUPC_SMMR_OFFSET         0x04 /* Supply Controller Supply Monitor Mode Register */
+#define SAM3U_SUPC_MR_OFFSET           0x08 /* Supply Controller Mode Register */
+#define SAM3U_SUPC_WUMR_OFFSET         0x0c /* Supply Controller Wake Up Mode Register */
+#define SAM3U_SUPC_WUIR_OFFSET         0x10 /* Supply Controller Wake Up Inputs Register */
+#define SAM3U_SUPC_SR_OFFSET           0x14 /* Supply Controller Status Register */
 
 /* SUPC register adresses ***************************************************************/
 
-#define SAM3U_SUPC_CR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_CR_OffSET)
-#define SAM3U_SUPC_SMMR                (SAM3U_SUPC_BASE+SAM3U_SUPC_SMMR_OffSET)
-#define SAM3U_SUPC_MR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_MR_OffSET)
-#define SAM3U_SUPC_WUMR                (SAM3U_SUPC_BASE+SAM3U_SUPC_WUMR_OffSET)
-#define SAM3U_SUPC_WUIR                (SAM3U_SUPC_BASE+SAM3U_SUPC_WUIR_OffSET)
-#define SAM3U_SUPC_SR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_SR_OffSET)
+#define SAM3U_SUPC_CR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_CR_OFFSET)
+#define SAM3U_SUPC_SMMR                (SAM3U_SUPC_BASE+SAM3U_SUPC_SMMR_OFFSET)
+#define SAM3U_SUPC_MR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_MR_OFFSET)
+#define SAM3U_SUPC_WUMR                (SAM3U_SUPC_BASE+SAM3U_SUPC_WUMR_OFFSET)
+#define SAM3U_SUPC_WUIR                (SAM3U_SUPC_BASE+SAM3U_SUPC_WUIR_OFFSET)
+#define SAM3U_SUPC_SR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_SR_OFFSET)
 
 /* SUPC register bit definitions ********************************************************/
 
