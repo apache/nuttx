@@ -105,7 +105,7 @@
 
 /* External interrupts (vectors >= 16) */
 
-#define SAM3U_IRQ_EXTINT        (16)
+#define SAM3U_IRQ_EXTINT        (16) /* Vector number of the first external interrupt */
 #define SAM3U_IRQ_SUPC          (SAM3U_IRQ_EXTINT+SAM3U_PID_SUPC)   /* Supply Controller */
 #define SAM3U_IRQ_RSTC          (SAM3U_IRQ_EXTINT+SAM3U_PID_RSTC)   /* Reset Controller */
 #define SAM3U_IRQ_RTC           (SAM3U_IRQ_EXTINT+SAM3U_PID_RTC)    /* Real Time Clock */
