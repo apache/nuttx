@@ -54,6 +54,16 @@
 
 #include "sam3u_memorymap.h"
 
+/* NVIC priority levels *************************************************************/
+/* Each priority field holds a priority value, 0-15. The lower the value, the greater
+ * the priority of the corresponding interrupt. The processor implements only
+ * bits[7:4] of each field, bits[3:0] read as zero and ignore writes.
+ */
+
+#define NVIC_SYSH_PRIORITY_MIN     0xf0 /* All bits[7:4] set is minimum priority */
+#define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
+#define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
