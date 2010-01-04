@@ -351,7 +351,7 @@
 
 /* PWM Enable Register, PWM Disable Register, and PWM Status Register common bit-field definitions */
 
-#define SAM3U_ENAB_CHIDN(n)            (1 << ((n))
+#define SAM3U_ENAB_CHID(n)             (1 << ((n))
 #define SAM3U_ENAB_CHID0               (1 << 0)  /* Bit 0:  Counter Event Channel 0 Interrupt */
 #define SAM3U_ENAB_CHID1               (1 << 1)  /* Bit 1:  Counter Event Channel 1 Interrupt */
 #define SAM3U_ENAB_CHID2               (1 << 2)  /* Bit 2:  Counter Event Channel 2 Interrupt */
@@ -361,12 +361,12 @@
  * Mask Register 1, and PWM Interrupt Status Register 1 common bit definitions
  */
 
-#define SAM3U_INT_CHIDN(n)             (1 << (n))
+#define SAM3U_INT_CHID(n)              (1 << (n))
 #define SAM3U_INT_CHID0                (1 << 0)  /* Bit 0:  Counter Event Channel 0 Interrupt */
 #define SAM3U_INT_CHID1                (1 << 1)  /* Bit 1:  Counter Event Channel 1 Interrupt */
 #define SAM3U_INT_CHID2                (1 << 2)  /* Bit 2:  Counter Event Channel 2 Interrupt */
 #define SAM3U_INT_CHID3                (1 << 3)  /* Bit 3:  Counter Event Channel 3 Interrupt */
-#define SAM3U_INT_FCHIDN(n)            (1 << ((n)+16))
+#define SAM3U_INT_FCHID(n)             (1 << ((n)+16))
 #define SAM3U_INT_FCHID0               (1 << 16) /* Bit 16: Fault Protection Trigger Channel 0 Interrupt */
 #define SAM3U_INT_FCHID1               (1 << 17) /* Bit 17: Fault Protection Trigger Channel 1 Interrupt */
 #define SAM3U_INT_FCHID2               (1 << 18) /* Bit 18: Fault Protection Trigger Channel 2 Interrupt */
@@ -374,7 +374,7 @@
 
 /* PWM Sync Channels Mode Register */
 
-#define PWM_SCM_SYNCN(n)               (1 << (n))
+#define PWM_SCM_SYNC(n)                (1 << (n))
 #define PWM_SCM_SYNC0                  (1 << 0)  /* Bit 0:  Synchronous Channel 0 */
 #define PWM_SCM_SYNC1                  (1 << 1)  /* Bit 1:  Synchronous Channel 1 */
 #define PWM_SCM_SYNC2                  (1 << 2)  /* Bit 2:  Synchronous Channel 2 */
@@ -410,7 +410,7 @@
 #define SAM3U_INT_ENDTX                (1 << 1)  /* Bit 1:  PDC End of TX Buffer Interrupt */
 #define SAM3U_INT_TXBUFE               (1 << 2)  /* Bit 2:  PDC TX Buffer Empty Interrupt */
 #define SAM3U_INT_UNRE                 (1 << 3)  /* Bit 3:  Synch Update Underrun Error Interrupt */
-#define SAM3U_INT_CMPMN(n)             (1 << ((n)+8))
+#define SAM3U_INT_CMPM(n)              (1 << ((n)+8))
 #define SAM3U_INT_CMPM0                (1 << 8)  /* Bit 8:  Comparison 0 Match Interrupt */
 #define SAM3U_INT_CMPM1                (1 << 9)  /* Bit 9:  Comparison 1 Match Interrupt */
 #define SAM3U_INT_CMPM2                (1 << 10) /* Bit 10: Comparison 2 Match Interrupt */
@@ -419,7 +419,7 @@
 #define SAM3U_INT_CMPM5                (1 << 13) /* Bit 13: Comparison 5 Match Interrupt */
 #define SAM3U_INT_CMPM6                (1 << 14) /* Bit 14: Comparison 6 Match Interrupt */
 #define SAM3U_INT_CMPM7                (1 << 15) /* Bit 15: Comparison 7 Match Interrupt */
-#define SAM3U_INT_CMPUN(n)             (1 << ((n)+16))
+#define SAM3U_INT_CMPU(n)              (1 << ((n)+16))
 #define SAM3U_INT_CMPU0                (1 << 16) /* Bit 16: Comparison o Update Interrupt */
 #define SAM3U_INT_CMPU1                (1 << 17) /* Bit 17: Comparison 1 Update Interrupt */
 #define SAM3U_INT_CMPU2                (1 << 18) /* Bit 18: Comparison 2 Update Interrupt */
@@ -435,12 +435,12 @@
  * definitions
  */
 
-#define PWM_OUT_OHN(n)                 (1 << (n))
+#define PWM_OUT_OH(n)                  (1 << (n))
 #define PWM_OUT_OH0                    (1 << 0)  /* Bit 0:  Value for PWMH output of the channel 0 */
 #define PWM_OUT_OH1                    (1 << 1)  /* Bit 1:  Value for PWMH output of the channel 1 */
 #define PWM_OUT_OH2                    (1 << 2)  /* Bit 2:  Value for PWMH output of the channel 2 */
 #define PWM_OUT_OH3                    (1 << 3)  /* Bit 3:  Value for PWMH output of the channel 3 */
-#define PWM_OUT_OLN(n)                 (1 << ((n)+16))
+#define PWM_OUT_OL(n)                  (1 << ((n)+16))
 #define PWM_OUT_OL0                    (1 << 16) /* Bit 16: Value for PWML output of the channel 0 */
 #define PWM_OUT_OL1                    (1 << 17) /* Bit 17: Value for PWML output of the channel 1 */
 #define PWM_OUT_OL2                    (1 << 18) /* Bit 18: Value for PWML output of the channel 2 */
@@ -448,17 +448,17 @@
 
 /* PWM Fault Mode Register */
 
-#define PWM_FMR_FPOLN(n)               (1 << (n))
+#define PWM_FMR_FPOL(n)                (1 << (n))
 #define PWM_FMR_FPOL0                  (1 << 0)  /* Bit 0:  Fault 0 Polarity */
 #define PWM_FMR_FPOL1                  (1 << 1)  /* Bit 1:  Fault 1 Polarity */
 #define PWM_FMR_FPOL2                  (1 << 2)  /* Bit 2:  Fault 2 Polarity */
 #define PWM_FMR_FPOL3                  (1 << 3)  /* Bit 3:  Fault 3 Polarity */
-#define PWM_FMR_FMODN(n)               (1 << ((n)+8))
+#define PWM_FMR_FMOD(n)                (1 << ((n)+8))
 #define PWM_FMR_FMOD0                  (1 << 8)  /* Bit 8:  Fault 0 Activation Mode */
 #define PWM_FMR_FMOD1                  (1 << 9)  /* Bit 9:  Fault 1 Activation Mode */
 #define PWM_FMR_FMOD2                  (1 << 10) /* Bit 10: Fault 2 Activation Mode */
 #define PWM_FMR_FMOD3                  (1 << 11) /* Bit 11: Fault 3 Activation Mode */
-#define PWM_FMR_FFILN(n)               (1 << ((n)+16))
+#define PWM_FMR_FFIL(n)                (1 << ((n)+16))
 #define PWM_FMR_FFIL0                  (1 << 16) /* Bit 16: Fault 0 Filter */
 #define PWM_FMR_FFIL1                  (1 << 17) /* Bit 17: Fault 1 Filter */
 #define PWM_FMR_FFIL2                  (1 << 18) /* Bit 18: Fault 2 Filter */
@@ -466,12 +466,12 @@
 
 /* PWM Fault Status Register */
 
-#define PWM_FSR_FIVN(n)                (1 << (n))
+#define PWM_FSR_FIV(n)                 (1 << (n))
 #define PWM_FSR_FIV0                   (1 << 0)  /* Bit 0:  Fault Input 0 Value */
 #define PWM_FSR_FIV1                   (1 << 1)  /* Bit 1:  Fault Input 1 Value */
 #define PWM_FSR_FIV2                   (1 << 2)  /* Bit 2:  Fault Input 2 Value */
 #define PWM_FSR_FIV3                   (1 << 3)  /* Bit 3:  Fault Input 3 Value */
-#define PWM_FSR_FSN(n)                 (1 << ((n)+8))
+#define PWM_FSR_FS(n)                  (1 << ((n)+8))
 #define PWM_FSR_FS0                    (1 << 8)  /* Bit 8:  Fault 0 Status */
 #define PWM_FSR_FS1                    (1 << 9)  /* Bit 9:  Fault 1 Status */
 #define PWM_FSR_FS2                    (1 << 10) /* Bit 10: Fault 2 Status */
@@ -479,7 +479,7 @@
 
 /* PWM Fault Clear Register */
 
-#define PWM_FCR_FCLRN(n)               (1 << (n))
+#define PWM_FCR_FCLR(n)                (1 << (n))
 #define PWM_FCR_FCLR0                  (1 << 0)  /* Bit 0:  Fault 0 Clear */
 #define PWM_FCR_FCLR1                  (1 << 1)  /* Bit 1:  Fault 1 Clear */
 #define PWM_FCR_FCLR2                  (1 << 2)  /* Bit 2:  Fault 2 Clear */
@@ -487,12 +487,12 @@
 
 /* PWM Fault Protection Value Register */
 
-#define PWM_FPV_FPVHN(n)               (1 << (n))
+#define PWM_FPV_FPVH(n)                (1 << (n))
 #define PWM_FPV_FPVH0                  (1 << 0)  /* Bit 0:  Fault Protection Value PWMH output channel 0 */
 #define PWM_FPV_FPVH1                  (1 << 1)  /* Bit 1:  Fault Protection Value PWMH output channel 1 */
 #define PWM_FPV_FPVH2                  (1 << 2)  /* Bit 2:  Fault Protection Value PWMH output channel 2 */
 #define PWM_FPV_FPVH3                  (1 << 3)  /* Bit 3:  Fault Protection Value PWMH output channel 3 */
-#define PWM_FPV_FPVLN(n)               (1 << ((n)+16))
+#define PWM_FPV_FPVL(n)                (1 << ((n)+16))
 #define PWM_FPV_FPVL0                  (1 << 16) /* Bit 16: Fault Protection Value PWML output channel 0 */
 #define PWM_FPV_FPVL1                  (1 << 17) /* Bit 17: Fault Protection Value PWML output channel 1 */
 #define PWM_FPV_FPVL2                  (1 << 18) /* Bit 18: Fault Protection Value PWML output channel 2 */
@@ -508,7 +508,7 @@
 
 /* PWM Event Line 1/2 Register */
 
-#define PWM_ELMR_CSELN(n)              (1 << (n))
+#define PWM_ELMR_CSEL(n)               (1 << (n))
 #define PWM_ELMR_CSEL0                 (1 << 0)  /* Bit 0:  Comparison 0 Selection */
 #define PWM_ELMR_CSEL1                 (1 << 1)  /* Bit 1:  Comparison 1 Selection */
 #define PWM_ELMR_CSEL2                 (1 << 2)  /* Bit 2:  Comparison 2 Selection */
@@ -522,7 +522,7 @@
 
 #define PWM_WPCR_WPCMD_SHIFT           (0)       /* Bits 0-1: Write Protect Command */
 #define PWM_WPCR_WPCMD_MASK            (3 << PWM_WPCR_WPCMD_SHIFT)
-#define PWM_WPCR_WPRGN(n)              (1 << ((n)+2))
+#define PWM_WPCR_WPRG(n)               (1 << ((n)+2))
 #define PWM_WPCR_WPRG0                 (1 << 2)  /* Bit 2:  Write Protect Register Group 0 */
 #define PWM_WPCR_WPRG1                 (1 << 3)  /* Bit 3:  Write Protect Register Group 1 */
 #define PWM_WPCR_WPRG2                 (1 << 4)  /* Bit 4:  Write Protect Register Group 2 */
@@ -534,7 +534,7 @@
 
 /* PWM Write Protect Status Register */
 
-#define PWM_WPSR_WPSWSN(n)             (1 << (n))
+#define PWM_WPSR_WPSWS(n)              (1 << (n))
 #define PWM_WPSR_WPSWS0                (1 << 0)  /* Bit 0:  Write Protect SW Status */
 #define PWM_WPSR_WPSWS1                (1 << 1)  /* Bit 1:  Write Protect SW Status */
 #define PWM_WPSR_WPSWS2                (1 << 2)  /* Bit 2:  Write Protect SW Status */
@@ -542,7 +542,7 @@
 #define PWM_WPSR_WPSWS4                (1 << 4)  /* Bit 4:  Write Protect SW Status */
 #define PWM_WPSR_WPSWS5                (1 << 5)  /* Bit 5:  Write Protect SW Status */
 #define PWM_WPSR_WPVS                  (1 << 7)  /* Bit 7:  Write Protect Violation Status */
-#define PWM_WPSR_WPHWSN(n)             (1 << ((n)+8))
+#define PWM_WPSR_WPHWS(n)              (1 << ((n)+8))
 #define PWM_WPSR_WPHWS0                (1 << 8)  /* Bit 8:  Write Protect HW Status */
 #define PWM_WPSR_WPHWS1                (1 << 9)  /* Bit 9:  Write Protect HW Status */
 #define PWM_WPSR_WPHWS2                (1 << 10) /* Bit 10: Write Protect HW Status */
