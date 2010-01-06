@@ -83,7 +83,7 @@
 #    define SAM3U_USART2_BASE    0x40098000 /* 0x40098000-0x4009bfff:     USART2 */
 #    define SAM3U_USART3_BASE    0x4009c000 /* 0x4009c000-0x4009ffff:     USART3 */
                                             /* 0x400a0000-0x400a3fff:   Reserved */
-#  define SAM3U_UDPHPS_BASE      0x400a4000 /* 0x400a4000-0x400a7fff:   USB Device High Speed */
+#  define SAM3U_UDPHS_BASE       0x400a4000 /* 0x400a4000-0x400a7fff:   USB Device High Speed */
 #  define SAM3U_ADC12B_BASE      0x400a8000 /* 0x400a8000-0x400abfff:   12-bit ADC Controller */
 #  define SAM3U_ADC_BASE         0x400ac000 /* 0x400ac000-0x400affff:   10-bit ADC Controller */
 #  define SAM3U_DMAC_BASE        0x400b0000 /* 0x400b0000-0x400b3fff:   DMA controller */
