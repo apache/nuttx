@@ -41,7 +41,7 @@ echo "LPCHDR: $LPCHDR"
 
 # Now get the path to the NuttX executable
 
-NUTTXPATH="$TOPDIR/nuttx"
+NUTTXPATH="$TOPDIR/nuttx.bin"
 
 if [ ! -f "$NUTTXPATH" ]; then
 	echo "NuttX binary does not exist at $NUTTXPATH"

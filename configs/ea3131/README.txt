@@ -12,6 +12,7 @@ Contents
   o IDEs
   o NuttX buildroot Toolchain
   o Boot Sequence
+  o Image Format
   o ARM/EA3131-specific Configuration Options
   o Configurations
 
@@ -157,6 +158,9 @@ Boot Sequence
 
   In all configurations, NuttX is loaded directly into ISRAM.  NuttX is linked
   to execute from ISRAM, regardless of the boot source.
+
+Image Format
+^^^^^^^^^^^^
 
 ARM/EA3131-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
