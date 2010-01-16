@@ -85,7 +85,7 @@
 
    /* Define the address of the page table within the ROM */
 
-#  define ROMPGTABLE_OFFSET            0x0001c00  /* Offset of the ROM page table in ROM */
+#  define ROMPGTABLE_OFFSET            0x0001c000  /* Offset of the ROM page table in ROM */
 #  define PGTABLE_BASE_PADDR           (LPC313X_INTSROM0_PSECTION+ROMPGTABLE_OFFSET)
 #  define PGTABLE_BASE_VADDR           (LPC313X_INTSROM0_VSECTION+ROMPGTABLE_OFFSET)
 #endif
