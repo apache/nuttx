@@ -1039,3 +1039,7 @@
 	* arch/arm/src/sam3u, arch/arm/include/sam3u, and configs/sam3u-ek -
 	  Added the basic framework needed to begin a port for the SAM3U-EK
 	  development board.
+	* lib/lib_crc32.c: Add CRC32 logic by Gary S. Brown to lib/.  This is
+	  the larger (but faster) table look-up version of the CRC32 algorithm.
+	* confgs/ea3131/tools: Added a tool to create a image suitable for
+	  use with the LPC313x bootloader.
