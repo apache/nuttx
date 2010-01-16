@@ -49,8 +49,12 @@
 #include "lpchdr.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+
+#define IO_BUF_SIZE  1024
+#define HDR_SIZE     0x80
+#define HDR_CRC_SIZE 0x6c
 
 /************************************************************************************
  * Private Data
@@ -108,10 +112,10 @@ static void parse_args(int argc, char **argv)
     }
 }
 
-static uint32_t infilecrc32(int infd, size_t len)
+static inline uint32_t infilecrc32(int infd, size_t len, size_t padlen)
 {
   off_t offset;
-  uint8_t buffer[1024];
+  uint8_t buffer[IO_BUF_SIZE];
   ssize_t nbytes;
   size_t bytesread;
   uint32_t crc;
@@ -126,7 +130,7 @@ static uint32_t infilecrc32(int infd, size_t len)
   crc = 0;
   for (bytesread = 0; bytesread < len; bytesread += nbytes)
     {
-      nbytes = read(infd, buffer, 1024);
+      nbytes = read(infd, buffer, IO_BUF_SIZE);
       if (nbytes < 0)
         {
           fprintf(stderr, "read failed: %s\n", strerror(errno));
@@ -142,13 +146,17 @@ static uint32_t infilecrc32(int infd, size_t len)
           crc = crc32part(buffer, nbytes, crc);
         }
     }
-  return crc;
+
+  /* Add the zero-padding at the end of the binary in the CRC */
+
+  memset(buffer, 0, IO_BUF_SIZE);
+  return crc32part(buffer, padlen, crc);
 }
 
-static void writefile(int infd, int outfd, size_t len)
+static inline void writefile(int infd, int outfd, size_t len, size_t padlen)
 {
   off_t offset;
-  uint8_t buffer[1024];
+  uint8_t buffer[IO_BUF_SIZE];
   ssize_t nbytesread;
   ssize_t nbyteswritten;
   size_t totalread;
@@ -162,7 +170,7 @@ static void writefile(int infd, int outfd, size_t len)
 
   for (totalread = 0; totalread < len; totalread += nbytesread)
     {
-      nbytesread = read(infd, buffer, 1024);
+      nbytesread = read(infd, buffer, IO_BUF_SIZE);
       if (nbytesread < 0)
         {
           fprintf(stderr, "read failed: %s\n", strerror(errno));
@@ -188,6 +196,21 @@ static void writefile(int infd, int outfd, size_t len)
             }
         }
     }
+
+  /* Write the zero-padding at the end of the binary */
+
+  memset(buffer, 0, IO_BUF_SIZE);
+  nbyteswritten = write(outfd, buffer, padlen);
+  if (nbyteswritten < 0)
+    {
+      fprintf(stderr, "write failed: %s\n", strerror(errno));
+      exit(4);
+    }
+  else if (nbyteswritten != padlen)
+    {
+      fprintf(stderr, "Short writes not handled\n");
+      exit(4);
+    }
 }
 
 /************************************************************************************
@@ -199,6 +222,7 @@ int main(int argc, char **argv, char **envp)
   struct lpc313x_header_s g_hdr;
   struct stat buf;
   ssize_t nbytes;
+  size_t padlen;
   int infd;
   int outfd;
   int ret;
@@ -239,12 +263,19 @@ int main(int argc, char **argv, char **envp)
   g_hdr.magic           = 0x41676d69;
   g_hdr.imageType       = 0x0000000b;
   g_hdr.imageLength     = (buf.st_size + sizeof(struct lpc313x_header_s) + 511) & ~0x1ff;
-  g_hdr.execution_crc32 = infilecrc32(infd, buf.st_size);
-  g_hdr.header_crc32    = crc32((const uint8_t*)&g_hdr, 0x6c);
+
+  /* This is how much we must pad at the end of the binary image. */
+
+  padlen                = g_hdr.imageLength - buf.st_size;
+
+  /* Calculate CRCs */
+ 
+  g_hdr.execution_crc32 = infilecrc32(infd, buf.st_size, padlen);
+  g_hdr.header_crc32    = crc32((const uint8_t*)&g_hdr, HDR_CRC_SIZE);
 
   /* Write the header */
 
-  nbytes = write(outfd, &g_hdr, 0x80);
+  nbytes = write(outfd, &g_hdr, HDR_SIZE);
   if (nbytes != 0x80)
     {
       fprintf(stderr, "write of header to of %s failed: %s\n", g_outfile, strerror(errno));
@@ -253,7 +284,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Copy the input file to the output */
 
-  writefile(infd, outfd, buf.st_size);
+  writefile(infd, outfd, buf.st_size, padlen);
   close(infd);
   close(outfd);
   return 0;
