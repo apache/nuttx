@@ -162,6 +162,38 @@ Boot Sequence
 Image Format
 ^^^^^^^^^^^^
 
+  In order to use the bootrom bootloader, a special header must be added to the
+  beginning of the binary image that includes information about the binary (things
+  like the entry point, the size, and CRC's to verify the image.
+
+  NXP provides a Windows program to append such a header to the binary image.
+  However, (1) that program won't run under Linux, and (2) when I try it under
+  WinXP, Symantec immediately claims that the program is misbehaving and deletes
+  it!
+
+  To work around both of these issues, I have created a small program under
+  configs/ea3131/tools to add the header.  This program can be built under
+  either Linux or Cygwin (and probably other tool environments as well).  That
+  tool can be built as follows:
+
+  - cd configs/ea3131/tools
+  - make
+
+  Then, to build the NuttX binary ready to load with the bootloader, just
+  following these steps:
+
+  - cd tools/				# Configure Nuttx
+  - ./configure.sh ea3131/ostest	# (using the ostest configuration for this example)
+  - cd ..				# Set up environment
+  - . ./setenv.sh			# (see notes below)
+  - make				# Make NuttX.  This will produce nuttx.bin
+  - mklpc.sh				# Make the bootloader binary (nuttx.lpc)
+
+  NOTE: setenv.sh just sets up pathes to the toolchain and also to
+  configs/ea3131/tools where mklpc.sh resides. Use of setenv.sh is optional.
+  If you don't use setenv.sh, then just set your PATH variable appropriately or
+  use the full path to mklpc.sh in the final step.
+
 ARM/EA3131-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
