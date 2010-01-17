@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sam3u/sam3u_internal.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,24 +84,31 @@ extern "C" {
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam3u_lowsetup
- *
- * Description:
- *   Called at the very beginning of _start.  Performs low level initialization.
- *
- ************************************************************************************/
-
-EXTERN void sam3u_lowsetup(void);
-
-/************************************************************************************
  * Name: sam3u_clockconfig
  *
  * Description:
- *   Called to change to new clock based on settings in board.h
+ *   Called to initialize the SAM3U.  This does whatever setup is needed to put the
+ *   SoC in a usable state.  This includes the initialization of clocking using the
+ *   settings in board.h.  (After power-on reset, the sam3u is initiallyrunning on
+ *   a 4MHz internal RC clock).  This function also performs other low-level chip
+ *   initialization of the chip including EFC, master clock, IRQ and watchdog
+ *   configuration.
  *
  ************************************************************************************/
 
 EXTERN void sam3u_clockconfig(void);
+
+/************************************************************************************
+ * Name: sam3u_lowsetup
+ *
+ * Description:
+ *   Called at the very beginning of _start.  Performs low level initialization
+ *   including setup of the console UART.  This UART done early so that the serial
+ *   console is available for debugging very early in the boot sequence.
+ *
+ ************************************************************************************/
+
+EXTERN void sam3u_lowsetup(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -53,17 +53,46 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
+ * definitions will configure clocking with MCK = 48MHz, PLLA = 96, and CPU=48MHz.
+ */
+
+/* Main oscillator register settings */
+
+#define BOARD_CKGR_MOR_MOSCXTST    (63 << CKGR_MOR_MOSCXTST_SHIFT) /* Start-up Time */
+
+/* PLLA configuration */
+
+#define BOARD_CKGR_PLLAR_MULA      (7 << CKGR_PLLAR_MULA_SHIFT)
+#define BOARD_CKGR_PLLAR_STMODE    CKGR_PLLAR_STMODE_FAST
+#define BOARD_CKGR_PLLAR_PLLACOUNT (63 << CKGR_PLLAR_PLLACOUNT_SHIFT)
+#define BOARD_CKGR_PLLAR_DIVA      CKGR_PLLAR_DIVA_BYPASS
+
+/* PMC master clock register settings */
+
+#define BOARD_PMC_MCKR_CSS         PMC_MCKR_CSS_PLLA
+#define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV2
+
+/* USB UTMI PLL start-up time */
+
+#define BOARD_CKGR_UCKR_UPLLCOUNT (3 << CKGR_UCKR_UPLLCOUNT_SHIFT)
+
+/* Resulting frequencies */
+
+#define SAM3U_MCK_FREQUENCY        (48000000)
+#define SAM3U_PLLA_FREQUENCY       (96000000)
+#define SAM3U_CPU_FREQUENCY        (48000000)
 
 /* LED definitions ******************************************************************/
 
-#define LED_STARTED       0
-#define LED_HEAPALLOCATE  1
-#define LED_IRQSENABLED   2
-#define LED_STACKCREATED  3
-#define LED_INIRQ         4
-#define LED_SIGNAL        5
-#define LED_ASSERTION     6
-#define LED_PANIC         7 
+#define LED_STARTED                0
+#define LED_HEAPALLOCATE           1
+#define LED_IRQSENABLED            2
+#define LED_STACKCREATED           3
+#define LED_INIRQ                  4
+#define LED_SIGNAL                 5
+#define LED_ASSERTION              6
+#define LED_PANIC                  7 
 
 /************************************************************************************
  * Public Data

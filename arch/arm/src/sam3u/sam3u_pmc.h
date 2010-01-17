@@ -196,8 +196,9 @@
 #define CKGR_PLLAR_STMODE_MASK        (3 << CKGR_PLLAR_STMODE_SHIFT)
 #  define CKGR_PLLAR_STMODE_FAST      (0 << CKGR_PLLAR_STMODE_SHIFT) /* Fast Startup */
 #  define CKGR_PLLAR_STMODE_NORMAL    (2 << CKGR_PLLAR_STMODE_SHIFT) /* Normal Startup */
-#define CKGR_PLLAR_MULA_SHIFT         (24)      /* Bits 24-26: PLLA Multiplier */
-#define CKGR_PLLAR_MULA_MASK          (7 << CKGR_PLLAR_MULA_SHIFT)
+#define CKGR_PLLAR_MULA_SHIFT         (16)      /* Bits 16-26: PLLA Multiplier */
+#define CKGR_PLLAR_MULA_MASK          (0x7ff << CKGR_PLLAR_MULA_SHIFT)
+#define CKGR_PLLAR_ONE                (1 << 29) /* Bit 29: Always one */
 
 /* PMC Master Clock Register */
 
@@ -244,7 +245,7 @@
 
 #define PMC_INT_MOSCXTS               (1 << 0)  /* Bit 0:  Main Crystal Oscillator Status Interrupt */
 #define PMC_INT_LOCKA                 (1 << 1)  /* Bit 1:  PLL A Lock Interrupt */
-#define PMC_INT_MCKRDY                (1 << 2)  /* Bit 3:  Master Clock Ready Interrupt */
+#define PMC_INT_MCKRDY                (1 << 3)  /* Bit 3:  Master Clock Ready Interrupt */
 #define PMC_INT_LOCKU                 (1 << 6)  /* Bit 6:  UTMI PLL Lock Interrupt */
 #define PMC_SR_OSCSELS                (1 << 7)  /* Bit 7: Slow Clock Oscillator Selection (SR only) */
 #define PMC_INT_PCKRDY(n)             (1<<((n)+8)
