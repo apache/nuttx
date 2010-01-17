@@ -94,8 +94,8 @@
 #  define SUPC_SMMR_SMTH_3p4V          (15 << SUPC_SMMR_SMTH_SHIFT) /* 3.4V */
 #define SUPC_SMMR_SMSMPL_SHIFT         (8)       /* Bits 8-10:  Supply Monitor Sampling Period */
 #define SUPC_SMMR_SMSMPL_MASK          (7 << SUPC_SMMR_SMSMPL_SHIFT)
-#  define SUPC_SMMR_SMSMPL_SMD         (0 << SUPC_SMMR_SMSMPL_SHIFT) /* Supply Monitor disabled */ */
-#  define SUPC_SMMR_SMSMPL_CSM         (1 << SUPC_SMMR_SMSMPL_SHIFT) /* Continuous Supply Monitor
+#  define SUPC_SMMR_SMSMPL_SMD         (0 << SUPC_SMMR_SMSMPL_SHIFT) /* Supply Monitor disabled */
+#  define SUPC_SMMR_SMSMPL_CSM         (1 << SUPC_SMMR_SMSMPL_SHIFT) /* Continuous Supply Monitor */
 #  define SUPC_SMMR_SMSMPL_32SLCK      (2 << SUPC_SMMR_SMSMPL_SHIFT) /* Eevery 32 SLCK periods */
 #  define SUPC_SMMR_SMSMPL_256SLCK     (3 << SUPC_SMMR_SMSMPL_SHIFT) /* Every 256 SLCK periods */
 #  define SUPC_SMMR_SMSMPL_2048SLCK    (4 << SUPC_SMMR_SMSMPL_SHIFT) /* Every 2,048 SLCK periods */
@@ -123,12 +123,12 @@
   #define SUPC_WUMR_FWUPDBC_32768SCLK  (5 << SUPC_WUMR_FWUPDBC_SHIFT) /* FWUP at least 32768 SLCK periods */
 #define SUPC_WUMR_WKUPDBC_SHIFT        (12)      /* Bits 12-14:  Wake Up Inputs Debouncer */
 #define SUPC_WUMR_WKUPDBC_MASK         (7 << SUPC_WUMR_WKUPDBC_SHIFT)
-#  define SUPC_WUMR_WKUPDBC_ 1SCLK     (0 << SUPC_WUMR_WKUPDBC_SHIFT) /* Immediate, no debouncing */
-#  define SUPC_WUMR_WKUPDBC_ 3SCLK     (1 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 3 SLCK periods */
-#  define SUPC_WUMR_WKUPDBC_ 32SCLK    (2 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 32 SLCK periods */
-#  define SUPC_WUMR_WKUPDBC_ 512SCLK   (3 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 512 SLCK periods */
-#  define SUPC_WUMR_WKUPDBC_ 4096SCLK  (4 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 4096 SLCK periods */
-#  define SUPC_WUMR_WKUPDBC_ 32768SCLK (5 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 32768 SLCK periods */
+#  define SUPC_WUMR_WKUPDBC_1SCLK      (0 << SUPC_WUMR_WKUPDBC_SHIFT) /* Immediate, no debouncing */
+#  define SUPC_WUMR_WKUPDBC_3SCLK      (1 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 3 SLCK periods */
+#  define SUPC_WUMR_WKUPDBC_32SCLK     (2 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 32 SLCK periods */
+#  define SUPC_WUMR_WKUPDBC_512SCLK    (3 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 512 SLCK periods */
+#  define SUPC_WUMR_WKUPDBC_4096SCLK   (4 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 4096 SLCK periods */
+#  define SUPC_WUMR_WKUPDBC_32768SCLK  (5 << SUPC_WUMR_WKUPDBC_SHIFT) /* Input active at least 32768 SLCK periods */
 
 #define SUPC_WUIR_WKUPEN_SHIFT         (0)       /* Bits 0-15:  Wake Up Input Enable 0 to 15 */
 #define SUPC_WUIR_WKUPEN_MASK          (0xffff << SUPC_WUIR_WKUPEN_SHIFT)

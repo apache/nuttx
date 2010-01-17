@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_start.c
- * arch/arm/src/chip/sam3u_start.c
+ * arch/arm/src/sam3u/sam3u_timerisr.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,111 +40,123 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <assert.h>
+#include <time.h>
 #include <debug.h>
-
-#include <nuttx/init.h>
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "nvic.h"
+#include "clock_internal.h"
 #include "up_internal.h"
+#include "up_arch.h"
 
+#include "chip.h"
 #include "sam3u_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
+/* The desired timer interrupt frequency is provided by the definition
+ * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
+ * system clock ticks per second.  That value is a user configurable setting
+ * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
+ * The SAM3U feeds the Cortex System Timer (SysTick) with the MCK clock or
+ * the MCK clock divided by 8, configurable with the CLKSOURCE bit in the
+ * SysTick Control and Status register.
+ */
 
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
+#undef CONFIG_SAM3U_SYSTICK_HCLKd8 /* Power up default is MCK, not MCK/8 */
+
+#if CONFIG_SAM3U_SYSTICK_HCLKd8
+#  define SYSTICK_RELOAD ((SAM3U_MCK_FREQUENCY / 8 / CLK_TCK) - 1)
 #else
-#  define showprogress(c)
+#  define SYSTICK_RELOAD ((SAM3U_MCK_FREQUENCY / CLK_TCK) - 1)
+#endif
+
+/* The size of the reload field is 24 bits.  Verify that the reload value
+ * will fit in the reload register.
+ */
+
+#if SYSTICK_RELOAD > 0x00ffffff
+#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  up_timerisr
  *
  * Description:
- *   This is the reset entry point.
+ *   The timer ISR will perform a variety of services for various portions
+ *   of the systems.
  *
  ****************************************************************************/
 
-void __start(void)
+int up_timerisr(int irq, uint32_t *regs)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+   /* Process timer interrupt */
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+   sched_process_timer();
+   return 0;
+}
 
-  sam3u_clockconfig();
-  sam3u_lowsetup();
-  showprogress('A');
+/****************************************************************************
+ * Function:  up_timerinit
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
+ ****************************************************************************/
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
+void up_timerinit(void)
+{
+  uint32_t regval;
 
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
+  /* Set the SysTick interrupt to the default priority */
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+  regval = getreg32(NVIC_SYSH12_15_PRIORITY);
+  regval &= ~NVIC_SYSH_PRIORITY_PR15_MASK;
+  regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
+  putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
+  /* Make sure that the SYSTICK clock source is set correctly */
 
-  /* Perform early serial initialization */
-
-#ifdef CONFIG_USE_EARLYSERIALINIT
-  up_earlyserialinit();
+#if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
+  regval = getreg32(NVIC_SYSTICK_CTRL);
+#if CONFIG_SAM3U_SYSTICK_HCLKd8
+  regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
+#else
+  regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
 #endif
-  showprogress('D');
+  putreg32(regval, NVIC_SYSTICK_CTRL);
+#endif
 
-  /* Initialize onboard resources */
+  /* Configure SysTick to interrupt at the requested rate */
 
-  sam3u_boardinitialize();
-  showprogress('E');
+  putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
 
-  /* Then start NuttX */
+  /* Attach the timer interrupt vector */
 
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
+  (void)irq_attach(SAM3U_IRQ_SYSTICK, (xcpt_t)up_timerisr);
 
-  /* Shouldn't get here */
+  /* Enable SysTick interrupts */
 
-  for(;;);
+  putreg32((NVIC_SYSTICK_CTRL_CLKSOURCE|NVIC_SYSTICK_CTRL_TICKINT|NVIC_SYSTICK_CTRL_ENABLE), NVIC_SYSTICK_CTRL);
+
+  /* And enable the timer interrupt */
+
+  up_enable_irq(SAM3U_IRQ_SYSTICK);
 }
