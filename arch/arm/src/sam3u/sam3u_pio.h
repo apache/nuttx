@@ -112,7 +112,7 @@
 
 #define PIOA                         (0)
 #define PIOB                         (1)
-#define PIOB                         (2)
+#define PIOC                         (2)
 
 #define SAM3U_PIO_PER(n)             (SAM3U_PIO_BASE(n)+SAM3U_PIO_PER_OFFSET)
 #define SAM3U_PIO_PDR(n)             (SAM3U_PIO_BASE(n)+SAM3U_PIO_PDR_OFFSET)
