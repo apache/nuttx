@@ -66,12 +66,12 @@
  * MM.. .... .... ....
  */
 
-#define GPIO_CFG_SHIFT             (14)        /* Bits 14-15: GPIO mode */
-#define GPIO_CFG_MASK              (3 << GPIO_CNF_SHIFT)
-#  define GPIO_INPUT               (0 << GPIO_CNF_SHIFT) /* Input */
-#  define GPIO_OUTPUT              (1 << GPIO_CNF_SHIFT) /* Output */
-#  define GPIO_PERIPHA             (2 << GPIO_CNF_SHIFT) /* Controlled by periph A signal */
-#  define GPIO_PERIPHB             (3 << GPIO_CNF_SHIFT) /* Controlled by periph B signal */
+#define GPIO_MODE_SHIFT            (14)        /* Bits 14-15: GPIO mode */
+#define GPIO_MODE_MASK             (3 << GPIO_MODE_SHIFT)
+#  define GPIO_INPUT               (0 << GPIO_MODE_SHIFT) /* Input */
+#  define GPIO_OUTPUT              (1 << GPIO_MODE_SHIFT) /* Output */
+#  define GPIO_PERIPHA             (2 << GPIO_MODE_SHIFT) /* Controlled by periph A signal */
+#  define GPIO_PERIPHB             (3 << GPIO_MODE_SHIFT) /* Controlled by periph B signal */
 
 /* These bits set the configuration of the pin:
  * ..CC C... .... ....
