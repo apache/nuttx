@@ -78,11 +78,11 @@
  */
 
 #define GPIO_CFG_SHIFT             (11)        /* Bits 11-13: GPIO configuration bits */
-#define GPIO_CFG_MASK              (3 << GPIO_CNF_SHIFT)
-#  define GPIO_CFG_DEFAULT         (0 << GPIO_CNF_SHIFT) /* Default, no attribute */
-#  define GPIO_CFG_PULLUP          (1 << GPIO_CNF_SHIFT) /* Bit 11: Internal pull-up */
-#  define GPIO_CFG_DEGLITCH        (2 << GPIO_CNF_SHIFT) /* Bit 12: Internal glitch filter */
-#  define GPIO_CFG_OPENDRAIN       (4 << GPIO_CNF_SHIFT) /* Bit 13: Open drain */
+#define GPIO_CFG_MASK              (3 << GPIO_CFG_SHIFT)
+#  define GPIO_CFG_DEFAULT         (0 << GPIO_CFG_SHIFT) /* Default, no attribute */
+#  define GPIO_CFG_PULLUP          (1 << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
+#  define GPIO_CFG_DEGLITCH        (2 << GPIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
+#  define GPIO_CFG_OPENDRAIN       (4 << GPIO_CFG_SHIFT) /* Bit 13: Open drain */
 
 /* If the pin is an GPIO output, then this identifies the initial output value:
  * .... .... V... ....
@@ -97,9 +97,9 @@
 
 #define GPIO_PORT_SHIFT            (5)         /* Bit 5-6:  Port number */
 #define GPIO_PORT_MASK             (3 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT_PIOA           (0 << GPIO_CNF_SHIFT)
-#  define GPIO_PORT_PIOB           (1 << GPIO_CNF_SHIFT)
-#  define GPIO_PORT_PIOC           (2 << GPIO_CNF_SHIFT)
+#  define GPIO_PORT_PIOA           (0 << GPIO_PORT_SHIFT)
+#  define GPIO_PORT_PIOB           (1 << GPIO_PORT_SHIFT)
+#  define GPIO_PORT_PIOC           (2 << GPIO_PORT_SHIFT)
 
 /* This identifies the bit in the port:
  * .... .... ...B BBBB
@@ -222,20 +222,6 @@ EXTERN void sam3u_gpiowrite(uint16_t pinset, bool value);
  ************************************************************************************/
 
 EXTERN bool sam3u_gpioread(uint16_t pinset);
-
-/************************************************************************************
- * Function:  sam3u_dumpgpio
- *
- * Description:
- *   Dump all GPIO registers associated with the port of the provided pin description.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_DEBUG
-EXTERN int sam3u_dumpgpio(uint16_t pinset, const char *msg);
-#else
-#  define sam3u_dumpgpio(p,m)
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
