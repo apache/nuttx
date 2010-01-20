@@ -63,101 +63,225 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Data
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+/****************************************************************************
+ * Name: sam3u_gpiobase
+ *
+ * Description:
+ *   Returun the base address of the GPIO register set
+ *
+ ****************************************************************************/
+
+static inline uintptr_t sam3u_gpiobase(uint16_t cfgset)
+{
+  int port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  return SAM3U_PION_BASE(port >> GPIO_PORT_SHIFT);
+}
+
+/****************************************************************************
+ * Name: sam3u_gpiopin
+ *
+ * Description:
+ *   Returun the base address of the GPIO register set
+ *
+ ****************************************************************************/
+
+static inline int sam3u_gpiopin(uint16_t cfgset)
+{
+  return 1 << ((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
+}
+
+/****************************************************************************
  * Name: sam3u_configinput
  *
  * Description:
  *   Configure a GPIO input pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline int sam3u_configinput(uint16_t cfgset)
+static inline int sam3u_configinput(uintptr_t base, uint32_t pin,
+                                    uint16_t cfgset)
 {
-#warning "Not implemented"
-return -ENOSYS;
+  /* Disable interrupts on the pin */
+
+  putreg32(pin, base+SAM3U_PIO_IDR_OFFSET);
+
+  /* Enable/disable the pull-up as requested */
+
+  if ((cfgset & GPIO_CFG_PULLUP) != 0)
+    {
+      putreg32(pin, base+SAM3U_PIO_PUER_OFFSET);
+    }
+  else
+    {
+      putreg32(pin, base+SAM3U_PIO_PUDR_OFFSET);
+    }
+
+  /* Check if filtering should be enabled */
+
+  if ((cfgset & GPIO_CFG_DEGLITCH) != 0)
+    {
+      putreg32(pin, base+SAM3U_PIO_IFER_OFFSET);
+    }
+  else
+    {
+      putreg32(pin, base+SAM3U_PIO_IFDR_OFFSET);
+    }
+
+  /* Configure the pin as an input and enable the GPIO function */
+
+  putreg32(pin, base+SAM3U_PIO_ODR_OFFSET);
+  putreg32(pin, base+SAM3U_PIO_PER_OFFSET);
+
+  /* To-Do:  If DEGLITCH is selected, need to configure DIFSR, SCIFSR, and
+   *         registers.  This would probably best be done with another, new
+   *         API... perhaps sam3u_configfilter()
+   */
+
+ return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam3u_configoutput
  *
  * Description:
  *   Configure a GPIO output pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline int sam3u_configoutput(uint16_t cfgset)
+static inline int sam3u_configoutput(uintptr_t base, uint32_t pin,
+                                     uint16_t cfgset)
 {
-#warning "Not implemented"
-return -ENOSYS;
+  /* Disable interrupts on the pin */
+
+  putreg32(pin, base+SAM3U_PIO_IDR_OFFSET);
+
+  /* Enable/disable the pull-up as requested */
+
+  if ((cfgset & GPIO_CFG_PULLUP) != 0)
+    {
+      putreg32(pin, base+SAM3U_PIO_PUER_OFFSET);
+    }
+  else
+    {
+      putreg32(pin, base+SAM3U_PIO_PUDR_OFFSET);
+    }
+
+  /* Enable the open drain driver if requrested */
+
+  if ((cfgset & GPIO_CFG_OPENDRAIN) != 0)
+    {
+      putreg32(pin, base+SAM3U_PIO_MDER_OFFSET);
+    }
+  else
+    {
+      putreg32(pin, base+SAM3U_PIO_MDDR_OFFSET);
+    }
+
+  /* Set default value */
+
+  if ((cfgset & GPIO_OUTPUT_SET) != 0)
+    {
+      putreg32(pin, base+SAM3U_PIO_SODR_OFFSET);
+    }
+  else
+    {
+      putreg32(pin, base+SAM3U_PIO_CODR_OFFSET);
+    }
+
+  /* Configure the pin as an input and enable the GPIO function */
+
+  putreg32(pin, base+SAM3U_PIO_OER_OFFSET);
+  putreg32(pin, base+SAM3U_PIO_PER_OFFSET);
+  return OK;
 }
 
-/************************************************************************************
- * Name: sam3u_configperipha
+/****************************************************************************
+ * Name: sam3u_configperiph
  *
  * Description:
- *   Configure a GPIO pin driven by a peripheral A signal based on bit-encoded
- *   description of the pin.
+ *   Configure a GPIO pin driven by a peripheral A or B signal based on
+ *   bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline int sam3u_configperipha(uint16_t cfgset)
+static inline int sam3u_configperiph(uintptr_t base, uint32_t pin,
+                                     uint16_t cfgset)
 {
-#warning "Not implemented"
-return -ENOSYS;
-}
+  uint32_t regval;
 
-/************************************************************************************
- * Name: sam3u_configperipha
- *
- * Description:
- *   Configure a GPIO pin driven by a peripheral A signal based on bit-encoded
- *   description of the pin.
- *
- ************************************************************************************/
+  /* Disable interrupts on the pin */
 
-static inline int sam3u_configperiphb(uint16_t cfgset)
-{
-#warning "Not implemented"
-return -ENOSYS;
+  putreg32(pin, base+SAM3U_PIO_IDR_OFFSET);
+
+  /* Enable/disable the pull-up as requested */
+
+  if ((cfgset & GPIO_CFG_PULLUP) != 0)
+    {
+      putreg32(pin, base+SAM3U_PIO_PUER_OFFSET);
+    }
+  else
+    {
+      putreg32(pin, base+SAM3U_PIO_PUDR_OFFSET);
+    }
+
+  /* Configure pin, depending upon the peripheral A or B*/
+
+  regval = getreg32(base+SAM3U_PIO_ABSR_OFFSET);
+  if ((cfgset & GPIO_MODE_MASK) == GPIO_PERIPHA)
+    {
+      regval &= ~pin;
+    }
+  else
+    {
+      regval |= pin;
+    }
+  putreg32(pin, base+SAM3U_PIO_ABSR_OFFSET);
+
+  /* Disable PIO functionality */
+
+  putreg32(pin, base+SAM3U_PIO_PDR_OFFSET);
+  return OK;
 }
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam3u_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam3u_configgpio(uint16_t cfgset)
 {
-  int ret;
+  uintptr_t base = sam3u_gpiobase(cfgset);
+  uint32_t  pin  = sam3u_gpiopin(cfgset);
+  int       ret;
 
   switch (cfgset & GPIO_MODE_MASK)
     {    
       case GPIO_INPUT:
-        ret = sam3u_configinput(cfgset);
+        ret = sam3u_configinput(base, pin, cfgset);
         break;
     
       case GPIO_OUTPUT:
-        ret = sam3u_configoutput(cfgset);
+        ret = sam3u_configoutput(base, pin, cfgset);
         break;
     
       case GPIO_PERIPHA:
-        ret = sam3u_configperipha(cfgset);
+      case GPIO_PERIPHB:
+        ret = sam3u_configperiph(base, pin, cfgset);
         break;
    
-      case GPIO_PERIPHB:
-        ret = sam3u_configperiphb(cfgset);
-        break;
-    
       default:
         ret = -EINVAL;
         break;
@@ -165,45 +289,51 @@ int sam3u_configgpio(uint16_t cfgset)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam3u_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam3u_gpiowrite(uint16_t pinset, bool value)
 {
-#warning "Not implemented"
+  uintptr_t base = sam3u_gpiobase(pinset);
+  uint32_t  pin  = sam3u_gpiopin(pinset);
+
+  if (value)
+    {
+      putreg32(pin, base+SAM3U_PIO_SODR_OFFSET);
+    }
+  else
+    {
+      putreg32(pin, base+SAM3U_PIO_CODR_OFFSET);
+    }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam3u_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool sam3u_gpioread(uint16_t pinset)
 {
-#warning "Not implemented"
-return false;
-}
+  uintptr_t base = sam3u_gpiobase(pinset);
+  uint32_t  pin  = sam3u_gpiopin(pinset);
+  uint32_t  regval;
 
-/************************************************************************************
- * Function:  sam3u_dumpgpio
- *
- * Description:
- *   Dump all GPIO registers associated with the port of the provided pin description.
- *
- ************************************************************************************/
+  if ((pinset & GPIO_MODE_MASK) == GPIO_OUTPUT)
+    {
+      regval = getreg32(base+SAM3U_PIO_ODSR_OFFSET);
+    }
+  else
+    {
+      regval = getreg32(base+SAM3U_PIO_PDSR_OFFSET);
+    }
 
-#ifdef CONFIG_DEBUG
-int sam3u_dumpgpio(uint16_t pinset, const char *msg)
-{
-#warning "Not implemented"
-return -ENOSYS;
+  return (regval & pin) != 0;
 }
-#endif
