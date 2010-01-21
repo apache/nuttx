@@ -111,7 +111,7 @@
 #    ifdef CONFIG_STM32_USART3
 #      define TTYS2_DEV   g_usart3port     /* USART3 is ttyS2 */
 #    else
-#      undef TTYS1_DEV                     /* No ttyS2 */
+#      undef TTYS2_DEV                     /* No ttyS2 */
 #    endif
 #  else
 #    ifdef CONFIG_STM32_USART3
@@ -129,7 +129,7 @@
 #    ifdef CONFIG_STM32_USART3
 #      define TTYS2_DEV   g_usart3port     /* USART3 is ttyS2 */
 #    else
-#      undef TTYS1_DEV                     /* No ttyS2 */
+#      undef TTYS2_DEV                     /* No ttyS2 */
 #    endif
 #  else
 #    ifdef CONFIG_STM32_USART3
@@ -147,7 +147,7 @@
 #    ifdef CONFIG_STM32_USART2
 #      define TTYS2_DEV   g_usart2port     /* USART2 is ttyS2 */
 #    else
-#      undef TTYS1_DEV                     /* No ttyS2 */
+#      undef TTYS2_DEV                     /* No ttyS2 */
 #    endif
 #  else
 #    ifdef CONFIG_STM32_USART2
