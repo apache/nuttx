@@ -123,50 +123,30 @@
 #  define SAM3U_CONSOLE_BITS     CONFIG_UART_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_UART_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_UART_2STOP
-#  define GPIO_CONSOLE_RXD       GPIO_UART_RXD
-#  define GPIO_CONSOLE_TXD       GPIO_UART_TXD
-#  undef  GPIO_CONSOLE_CTS
-#  undef  GPIO_CONSOLE_RTS
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_USART0_BASE
 #  define SAM3U_CONSOLE_BAUD     CONFIG_USART0_BAUD
 #  define SAM3U_CONSOLE_BITS     CONFIG_USART0_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_USART0_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_USART0_2STOP
-#  define GPIO_CONSOLE_RXD       GPIO_USART0_RXD
-#  define GPIO_CONSOLE_TXD       GPIO_USART0_TXD
-#  define GPIO_CONSOLE_CTS       GPIO_USART0_CTS
-#  define GPIO_CONSOLE_RTS       GPIO_USART0_RTS
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_USART1_BASE
 #  define SAM3U_CONSOLE_BAUD     CONFIG_USART1_BAUD
 #  define SAM3U_CONSOLE_BITS     CONFIG_USART1_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_USART1_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_USART1_2STOP
-#  define GPIO_CONSOLE_RXD       GPIO_USART1_RXD
-#  define GPIO_CONSOLE_TXD       GPIO_USART1_TXD
-#  define GPIO_CONSOLE_CTS       GPIO_USART1_CTS
-#  define GPIO_CONSOLE_RTS       GPIO_USART1_RTS
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_USART2_BASE
 #  define SAM3U_CONSOLE_BAUD     CONFIG_USART2_BAUD
 #  define SAM3U_CONSOLE_BITS     CONFIG_USART2_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_USART2_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_USART2_2STOP
-#  define GPIO_CONSOLE_RXD       GPIO_USART2_RXD
-#  define GPIO_CONSOLE_TXD       GPIO_USART2_TXD
-#  define GPIO_CONSOLE_CTS       GPIO_USART2_CTS
-#  define GPIO_CONSOLE_RTS       GPIO_USART2_RTS
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_USART3_BASE
 #  define SAM3U_CONSOLE_BAUD     CONFIG_USART3_BAUD
 #  define SAM3U_CONSOLE_BITS     CONFIG_USART3_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_USART3_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_USART3_2STOP
-#  define GPIO_CONSOLE_RXD       GPIO_USART3_RXD
-#  define GPIO_CONSOLE_TXD       GPIO_USART3_TXD
-#  define GPIO_CONSOLE_CTS       GPIO_USART3_CTS
-#  define GPIO_CONSOLE_RTS       GPIO_USART3_RTS
 #else
 #  error "No CONFIG_U[S]ARTn_SERIAL_CONSOLE Setting"
 #endif
@@ -260,7 +240,7 @@ void sam3u_lowsetup(void)
 {
   uint32_t regval;
 
-  /* Enable clocking for the selected UART/USARTs */
+  /* Enable clocking for all selected UART/USARTs */
 
   regval = getreg32(SAM3U_PMC_PCER);
 #ifdef CONFIG_SAM3U_USART
@@ -280,10 +260,38 @@ void sam3u_lowsetup(void)
 #endif
   putreg32(regval, SAM3U_PMC_PCER);
 
-  /* Configure UART pins */
+  /* Configure UART pins for all selected UART/USARTs */
+ 
+#ifdef CONFIG_SAM3U_USART
+  (void)sam3u_configgpio(GPIO_UART_RXD);
+  (void)sam3u_configgpio(GPIO_UART_TXD);
+#endif
+#ifdef CONFIG_SAM3U_USART0
+  (void)sam3u_configgpio(GPIO_USART0_RXD);
+  (void)sam3u_configgpio(GPIO_USART0_TXD);
+  (void)sam3u_configgpio(GPIO_USART0_CTS);
+  (void)sam3u_configgpio(GPIO_USART0_RTS);
+#endif
+#ifdef CONFIG_SAM3U_USART1
+  (void)sam3u_configgpio(GPIO_USART1_RXD);
+  (void)sam3u_configgpio(GPIO_USART1_TXD);
+  (void)sam3u_configgpio(GPIO_USART1_CTS);
+  (void)sam3u_configgpio(GPIO_USART1_RTS);
+#endif
+#ifdef CONFIG_SAM3U_USART2
+  (void)sam3u_configgpio(GPIO_USART2_RXD);
+  (void)sam3u_configgpio(GPIO_USART2_TXD);
+  (void)sam3u_configgpio(GPIO_USART2_CTS);
+  (void)sam3u_configgpio(GPIO_USART2_RTS);
+#endif
+#ifdef CONFIG_SAM3U_USART3
+  (void)sam3u_configgpio(GPIO_USART3_RXD);
+  (void)sam3u_configgpio(GPIO_USART3_TXD);
+  (void)sam3u_configgpio(GPIO_USART3_CTS);
+  (void)sam3u_configgpio(GPIO_USART3_RTS);
+#endif
 
 #ifdef GPIO_CONSOLE_RXD
-  (void)sam3u_configgpio(GPIO_CONSOLE_RXD);
 #endif
 #ifdef GPIO_CONSOLE_TXD
   (void)sam3u_configgpio(GPIO_CONSOLE_TXD);
