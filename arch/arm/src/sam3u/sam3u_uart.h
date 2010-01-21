@@ -232,12 +232,12 @@
 #define USART_MR_CPHA                  (1 << 8)  /* Bit 8: SPI Clock Phase (USART only) */
 #define UART_MR_PAR_SHIFT              (9)       /* Bits 9-11: Parity Type (Common) */
 #define UART_MR_PAR_MASK               (7 << UART_MR_PAR_SHIFT)
-#  define UART_MR_PAR_ EVEN            (0 << UART_MR_PAR_SHIFT) /* Even parity (Common) */
-#  define UART_MR_PAR_ ODD             (1 << UART_MR_PAR_SHIFT) /* Odd parity (Common) */
-#  define UART_MR_PAR_ SPACE           (2 << UART_MR_PAR_SHIFT) /* Space: parity forced to 0 (Common) */
-#  define UART_MR_PAR_ MARK            (3 << UART_MR_PAR_SHIFT) /* Mark: parity forced to 1 (Common) */
-#  define UART_MR_PAR_ NONE            (4 << UART_MR_PAR_SHIFT) /* No parity (Common) */
-#  define UART_MR_PAR_ MULTIDROP       (6 << UART_MR_PAR_SHIFT) /* Multidrop mode (USART only) */
+#  define UART_MR_PAR_EVEN             (0 << UART_MR_PAR_SHIFT) /* Even parity (Common) */
+#  define UART_MR_PAR_ODD              (1 << UART_MR_PAR_SHIFT) /* Odd parity (Common) */
+#  define UART_MR_PAR_SPACE            (2 << UART_MR_PAR_SHIFT) /* Space: parity forced to 0 (Common) */
+#  define UART_MR_PAR_MARK             (3 << UART_MR_PAR_SHIFT) /* Mark: parity forced to 1 (Common) */
+#  define UART_MR_PAR_NONE             (4 << UART_MR_PAR_SHIFT) /* No parity (Common) */
+#  define UART_MR_PAR_MULTIDROP        (6 << UART_MR_PAR_SHIFT) /* Multidrop mode (USART only) */
 #define USART_MR_NBSTOP_SHIFT          (12)      /* Bits 12-13: Number of Stop Bits (USART only) */
 #define USART_MR_NBSTOP_MASK           (3 << USART_MR_NBSTOP_SHIFT)
 #  define USART_MR_NBSTOP_1            (0 << USART_MR_NBSTOP_SHIFT) /* 1 stop bit 1 stop bit */
@@ -249,7 +249,8 @@
 #  define UART_MR_CHMODE_ECHO          (1 << UART_MR_CHMODE_SHIFT) /* Automatic Echo */
 #  define UART_MR_CHMODE_LLPBK         (2 << UART_MR_CHMODE_SHIFT) /* Local Loopback */
 #  define UART_MR_CHMODE_RLPBK         (3 << UART_MR_CHMODE_SHIFT) /* Remote Loopback */
-#define USART_MR_MSBF/CPOL             (1 << 16) /* Bit 16: Bit Order or SPI Clock Polarity (USART only) */
+#define USART_MR_MSBF                  (1 << 16) /* Bit 16: Bit Order or SPI Clock Polarity (USART only) */
+#define USART_MR_CPOL                  (1 << 16)
 #define USART_MR_MODE9                 (1 << 17) /* Bit 17: 9-bit Character Length (USART only) */
 #define USART_MR_CLKO                  (1 << 18) /* Bit 18: Clock Output Select (USART only) */
 #define USART_MR_OVER                  (1 << 19) /* Bit 19: Oversampling Mode (USART only) */

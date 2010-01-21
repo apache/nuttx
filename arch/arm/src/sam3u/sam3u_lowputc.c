@@ -49,12 +49,17 @@
 
 #include "sam3u_internal.h"
 #include "sam3u_pmc.h"
+#include "sam3u_uart.h"
 
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
 
 /* Configuration **********************************************************/
+
+/* If the USART is not being used as a UART, then it really isn't enabled
+ * for our purposes.
+ */
 
 #ifndef CONFIG_USART0_ISUART
 #  undef CONFIG_SAM3U_USART0
@@ -114,37 +119,89 @@
 
 #if defined(CONFIG_UART_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_UART_BASE
-#  define SAM3U_CONSOLE_BAUD     CONFIG_USART_BAUD
-#  define SAM3U_CONSOLE_BITS     CONFIG_USART_BITS
-#  define SAM3U_CONSOLE_PARITY   CONFIG_USART_PARITY
-#  define SAM3U_CONSOLE_2STOP    CONFIG_USART_2STOP
+#  define SAM3U_CONSOLE_BAUD     CONFIG_UART_BAUD
+#  define SAM3U_CONSOLE_BITS     CONFIG_UART_BITS
+#  define SAM3U_CONSOLE_PARITY   CONFIG_UART_PARITY
+#  define SAM3U_CONSOLE_2STOP    CONFIG_UART_2STOP
+#  define GPIO_CONSOLE_RXD       GPIO_UART_RXD
+#  define GPIO_CONSOLE_TXD       GPIO_UART_TXD
+#  undef  GPIO_CONSOLE_CTS
+#  undef  GPIO_CONSOLE_RTS
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_USART0_BASE
 #  define SAM3U_CONSOLE_BAUD     CONFIG_USART0_BAUD
 #  define SAM3U_CONSOLE_BITS     CONFIG_USART0_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_USART0_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_USART0_2STOP
+#  define GPIO_CONSOLE_RXD       GPIO_USART0_RXD
+#  define GPIO_CONSOLE_TXD       GPIO_USART0_TXD
+#  define GPIO_CONSOLE_CTS       GPIO_USART0_CTS
+#  define GPIO_CONSOLE_RTS       GPIO_USART0_RTS
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_USART1_BASE
 #  define SAM3U_CONSOLE_BAUD     CONFIG_USART1_BAUD
 #  define SAM3U_CONSOLE_BITS     CONFIG_USART1_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_USART1_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_USART1_2STOP
+#  define GPIO_CONSOLE_RXD       GPIO_USART1_RXD
+#  define GPIO_CONSOLE_TXD       GPIO_USART1_TXD
+#  define GPIO_CONSOLE_CTS       GPIO_USART1_CTS
+#  define GPIO_CONSOLE_RTS       GPIO_USART1_RTS
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_USART2_BASE
 #  define SAM3U_CONSOLE_BAUD     CONFIG_USART2_BAUD
 #  define SAM3U_CONSOLE_BITS     CONFIG_USART2_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_USART2_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_USART2_2STOP
+#  define GPIO_CONSOLE_RXD       GPIO_USART2_RXD
+#  define GPIO_CONSOLE_TXD       GPIO_USART2_TXD
+#  define GPIO_CONSOLE_CTS       GPIO_USART2_CTS
+#  define GPIO_CONSOLE_RTS       GPIO_USART2_RTS
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #  define SAM3U_CONSOLE_BASE     SAM3U_USART3_BASE
 #  define SAM3U_CONSOLE_BAUD     CONFIG_USART3_BAUD
 #  define SAM3U_CONSOLE_BITS     CONFIG_USART3_BITS
 #  define SAM3U_CONSOLE_PARITY   CONFIG_USART3_PARITY
 #  define SAM3U_CONSOLE_2STOP    CONFIG_USART3_2STOP
+#  define GPIO_CONSOLE_RXD       GPIO_USART3_RXD
+#  define GPIO_CONSOLE_TXD       GPIO_USART3_TXD
+#  define GPIO_CONSOLE_CTS       GPIO_USART3_CTS
+#  define GPIO_CONSOLE_RTS       GPIO_USART3_RTS
 #else
 #  error "No CONFIG_U[S]ARTn_SERIAL_CONSOLE Setting"
 #endif
+
+/* Select the settings for the mode register */
+
+#if SAM3U_CONSOLE_BITS == 5
+#  define MR_CHRL_VALUE USART_MR_CHRL_5BITS /* 5 bits */
+#elif SAM3U_CONSOLE_BITS == 6
+#  define MR_CHRL_VALUE USART_MR_CHRL_6BITS  /* 6 bits */
+#elif SAM3U_CONSOLE_BITS == 7
+#  define MR_CHRL_VALUE USART_MR_CHRL_7BITS /* 7 bits */
+#elif SAM3U_CONSOLE_BITS == 8
+#  define MR_CHRL_VALUE USART_MR_CHRL_8BITS /* 8 bits */
+#elif SAM3U_CONSOLE_BITS == 9 && !defined(CONFIG_UART_SERIAL_CONSOLE)
+#  define MR_CHRL_VALUE USART_MR_MODE9
+#else
+#  error "Invlaid number of bits"
+#endif
+
+#if SAM3U_CONSOLE_PARITY == 1
+#  define MR_PAR_VALUE UART_MR_PAR_ODD
+#elif SAM3U_CONSOLE_PARITY == 2
+#  define MR_PAR_VALUE UART_MR_PAR_EVEN
+#else
+#  define MR_PAR_VALUE UART_MR_PAR_NONE
+#endif
+
+#if SAM3U_CONSOLE_2STOP != 0
+#  define MR_NBSTOP_VALUE USART_MR_NBSTOP_2
+#else
+#  define MR_NBSTOP_VALUE USART_MR_NBSTOP_1
+#endif
+
+#define MR_VALUE (USART_MR_MODE_NORMAL|USART_MR_USCLKS_MCK|MR_CHRL_VALUE|MR_PAR_VALUE|MR_NBSTOP_VALUE)
 
 /**************************************************************************
  * Private Types
@@ -180,7 +237,13 @@
 
 void up_lowputc(char ch)
 {
-#warning "To be provided"
+  /* Wait for the transmitter to be available */
+
+  while ((getreg32(SAM3U_CONSOLE_BASE+SAM3U_UART_SR_OFFSET) & UART_INT_TXEMPTY) == 0);
+
+  /* Send the character */
+
+  putreg32((uint32_t)ch, SAM3U_CONSOLE_BASE+SAM3U_UART_THR_OFFSET);
 }
 
 /**************************************************************************
@@ -197,12 +260,66 @@ void sam3u_lowsetup(void)
 {
   uint32_t regval;
 
-#warning "To be provided"
-  /* Enable clocking for the UART */
+  /* Enable clocking for the selected UART/USARTs */
 
   regval = getreg32(SAM3U_PMC_PCER);
+#ifdef CONFIG_SAM3U_USART
   regval |= (1 << SAM3U_PID_UART);
+#endif
+#ifdef CONFIG_SAM3U_USART0
+  regval |= (1 << SAM3U_PID_USART0);
+#endif
+#ifdef CONFIG_SAM3U_USART1
+  regval |= (1 << SAM3U_PID_USART1);
+#endif
+#ifdef CONFIG_SAM3U_USART2
+  regval |= (1 << SAM3U_PID_USART2);
+#endif
+#ifdef CONFIG_SAM3U_USART3
+  regval |= (1 << SAM3U_PID_USART3);
+#endif
   putreg32(regval, SAM3U_PMC_PCER);
+
+  /* Configure UART pins */
+
+#ifdef GPIO_CONSOLE_RXD
+  (void)sam3u_configgpio(GPIO_CONSOLE_RXD);
+#endif
+#ifdef GPIO_CONSOLE_TXD
+  (void)sam3u_configgpio(GPIO_CONSOLE_TXD);
+#endif
+#ifdef GPIO_CONSOLE_CTS
+  (void)sam3u_configgpio(GPIO_CONSOLE_CTS);
+#endif
+#ifdef GPIO_CONSOLE_RTS
+  (void)sam3u_configgpio(GPIO_CONSOLE_RTS);
+#endif
+
+  /* Configure the console (only) */
+#ifdef HAVE_CONSOLE
+  /* Reset and disable receiver and transmitter */
+
+  putreg32((UART_CR_RSTRX|UART_CR_RSTTX|UART_CR_RXDIS|UART_CR_TXDIS),
+           SAM3U_CONSOLE_BASE+SAM3U_UART_CR_OFFSET);
+
+  /* Disable all interrupts */
+
+  putreg32(0xffffffff, SAM3U_CONSOLE_BASE+SAM3U_UART_IDR_OFFSET);
+
+  /* Set up the mode register */
+
+  putreg32(MR_VALUE, AM3U_CONSOLE_BASE+SAM3U_UART_MR_OFFSET);
+
+  /* Configure the console baud */
+
+  putreg32(((SAM3U_MCK_FREQUENCY + (SAM3U_CONSOLE_BAUD << 3))/(SAM3U_CONSOLE_BAUD << 4)),
+           SAM3U_CONSOLE_BASE+SAM3U_UART_BRGR_OFFSET);
+
+  /* Enable receiver & transmitter */
+
+  putreg32((UART_CR_RXEN|UART_CR_TXEN),
+           SAM3U_CONSOLE_BASE+SAM3U_UART_CR_OFFSET);
+#endif
 }
 
 
