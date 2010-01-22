@@ -86,23 +86,15 @@
 
 /* LED definitions ******************************************************************/
 
-#define LED_STARTED                0
-#define LED_HEAPALLOCATE           1
-#define LED_IRQSENABLED            2
-#define LED_STACKCREATED           3
-#define LED_INIRQ                  4
-#define LED_SIGNAL                 5
-#define LED_ASSERTION              6
-#define LED_PANIC                  7 
+#define LED_STARTED                0 /* LED0=OFF LED1=OFF LED2=OFF */
+#define LED_HEAPALLOCATE           1 /* LED0=OFF LED1=OFF LED2=ON */
+#define LED_IRQSENABLED            2 /* LED0=OFF LED1=ON  LED2=OFF */
+#define LED_STACKCREATED           3 /* LED0=OFF LED1=ON  LED2=ON */
 
-/* GPIO pin definitions *************************************************************/
-
-#define GPIO_LED0                 (GPIO_OUTPUT|GPIO_CFG_DEFAULT|GPIO_PORT_PIOB|GPIO_OUTPUT_CLEAR|GPIO_PIN0)
-#define GPIO_LED1                 (GPIO_OUTPUT|GPIO_CFG_DEFAULT|GPIO_PORT_PIOB|GPIO_OUTPUT_SET|GPIO_PIN1)
-#define GPIO_LED2                 (GPIO_OUTPUT|GPIO_CFG_DEFAULT|GPIO_PORT_PIOB|GPIO_OUTPUT_SET|GPIO_PIN2)
-
-#define GPIO_BUTTON1              (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_CFG_DEGLITCH|GPIO_PORT_PIOA|GPIO_PIN18)
-#define GPIO_BUTTON2              (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_CFG_DEGLITCH|GPIO_PORT_PIOA|GPIO_PIN19)
+#define LED_INIRQ                  4 /* LED0=OFF LED1=TOG LED2=XXX */
+#define LED_SIGNAL                 5 /* LED0=OFF LED1=XXX LED2=TOG */
+#define LED_ASSERTION              6 /* LED0=TOG LED1=XXX LED2=XXX */
+#define LED_PANIC                  7 /* LED0=TOG LED1=XXX LED2=XXX*/
 
 /************************************************************************************
  * Public Data
