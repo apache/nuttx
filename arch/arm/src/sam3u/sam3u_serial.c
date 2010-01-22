@@ -821,10 +821,9 @@ static void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 
   priv->imr = imr;
 
-  /* And restore the interrupt state */
+  /* And re-enable interrrupts previoulsy disabled by up_disableallints */
 
-  up_serialout(priv, SAM3U_UART_IDR_OFFSET, ~imr);
-  up_serialout(priv, SAM3U_UART_IER_OFFSET, imr);
+  up_enableint(priv);
 }
 
 /****************************************************************************
@@ -842,7 +841,8 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *imr)
 
   /* Disable all interrupts */
 
-  up_restoreusartint(priv, 0);
+  priv->imr = 0;
+  up_disableint(priv);
 }
 
 /****************************************************************************
