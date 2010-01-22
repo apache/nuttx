@@ -243,7 +243,7 @@ void stm32_lowsetup(void)
 {
 #if defined(CONFIG_STM32_USART1) || defined(CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3)
   uint32_t mapr;
-#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_USART_CONFIG)
+#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
 #endif
 
@@ -332,7 +332,7 @@ void stm32_lowsetup(void)
 
   /* Enable and configure the selected console device */
 
-#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_USART_CONFIG)
+#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   /* Configure CR2 */
 
   cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
