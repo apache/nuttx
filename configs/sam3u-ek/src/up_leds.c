@@ -102,8 +102,8 @@ static const uint8_t g_ledon[8] =
   (LED0_OFF     |LED1_ON      |LED2_OFF),      /* LED_IRQSENABLED  */
   (LED0_ON      |LED1_ON      |LED2_ON),       /* LED_STACKCREATED  */
 
-  (LED0_OFF     |LED1_OFF     |LED2_NOCHANGE), /* LED_INIRQ  */
-  (LED0_OFF     |LED1_NOCHANGE|LED2_OFF),      /* LED_SIGNAL  */
+  (LED0_NOCHANGE|LED1_OFF     |LED2_NOCHANGE), /* LED_INIRQ  */
+  (LED0_NOCHANGE|LED1_NOCHANGE|LED2_OFF),      /* LED_SIGNAL  */
   (LED0_ON      |LED1_NOCHANGE|LED2_NOCHANGE), /* LED_ASSERTION  */
   (LED0_ON      |LED1_NOCHANGE|LED2_NOCHANGE)  /* LED_PANIC */
 };
@@ -116,8 +116,8 @@ static const uint8_t g_ledoff[8] =
   (LED0_OFF     |LED1_ON      |LED2_OFF),      /* LED_IRQSENABLED (does not happen) */
   (LED0_ON      |LED1_ON      |LED2_ON),       /* LED_STACKCREATED (does not happen) */
 
-  (LED0_OFF     |LED1_ON      |LED2_NOCHANGE), /* LED_INIRQ  */
-  (LED0_OFF     |LED1_NOCHANGE|LED2_ON),       /* LED_SIGNAL */
+  (LED0_NOCHANGE|LED1_ON      |LED2_NOCHANGE), /* LED_INIRQ  */
+  (LED0_NOCHANGE|LED1_NOCHANGE|LED2_ON),       /* LED_SIGNAL */
   (LED0_OFF     |LED1_NOCHANGE|LED2_NOCHANGE), /* LED_ASSERTION */
   (LED0_OFF     |LED1_NOCHANGE|LED2_NOCHANGE)  /* LED_PANIC */
 };
