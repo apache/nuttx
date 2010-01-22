@@ -91,8 +91,8 @@
 #define LED_IRQSENABLED            2 /* LED0=OFF LED1=ON  LED2=OFF */
 #define LED_STACKCREATED           3 /* LED0=OFF LED1=ON  LED2=ON */
 
-#define LED_INIRQ                  4 /* LED0=OFF LED1=TOG LED2=XXX */
-#define LED_SIGNAL                 5 /* LED0=OFF LED1=XXX LED2=TOG */
+#define LED_INIRQ                  4 /* LED0=XXX LED1=TOG LED2=XXX */
+#define LED_SIGNAL                 5 /* LED0=XXX LED1=XXX LED2=TOG */
 #define LED_ASSERTION              6 /* LED0=TOG LED1=XXX LED2=XXX */
 #define LED_PANIC                  7 /* LED0=TOG LED1=XXX LED2=XXX*/
 
