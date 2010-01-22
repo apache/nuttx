@@ -304,7 +304,7 @@ void sam3u_lowsetup(void)
 #endif
 
   /* Configure the console (only) */
-#ifdef HAVE_CONSOLE
+#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   /* Reset and disable receiver and transmitter */
 
   putreg32((UART_CR_RSTRX|UART_CR_RSTTX|UART_CR_RXDIS|UART_CR_TXDIS),
@@ -316,7 +316,7 @@ void sam3u_lowsetup(void)
 
   /* Set up the mode register */
 
-  putreg32(MR_VALUE, AM3U_CONSOLE_BASE+SAM3U_UART_MR_OFFSET);
+  putreg32(MR_VALUE, SAM3U_CONSOLE_BASE+SAM3U_UART_MR_OFFSET);
 
   /* Configure the console baud */
 

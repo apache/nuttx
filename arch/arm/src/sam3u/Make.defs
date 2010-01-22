@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/sam3u/Make.defs
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,5 +46,5 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 
 CHIP_ASRCS	= 
 CHIP_CSRCS	= sam3u_clockconfig.c sam3u_irq.c sam3u_lowputc.c sam3u_pio.c \
-		  sam3u_start.c sam3u_timerisr.c
+		  sam3u_serial.c sam3u_start.c sam3u_timerisr.c
 

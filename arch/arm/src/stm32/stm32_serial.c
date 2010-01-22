@@ -425,7 +425,7 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 static int up_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-#ifdef CONFIG_SUPPRESS_USART_CONFIG
+#ifdef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t uartdiv32;
   uint32_t mantissa;
   uint32_t fraction;
