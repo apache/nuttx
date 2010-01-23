@@ -73,7 +73,7 @@
  * Name: sam3u_gpiobase
  *
  * Description:
- *   Returun the base address of the GPIO register set
+ *   Return the base address of the GPIO register set
  *
  ****************************************************************************/
 
