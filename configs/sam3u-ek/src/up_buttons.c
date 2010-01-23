@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam3u-ek/src/up_leds.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,12 @@
 
 #include <stdint.h>
 
+#include <nuttx/irq.h>
+
+#include <arch/irq.h>
 #include <arch/board/board.h>
+
+#include "sam3u_internal.h"
 #include "sam3uek_internal.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -53,6 +58,9 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static xcpt_t g_irqbutton1;
+static xcpt_t g_irqbutton2;
 
 /****************************************************************************
  * Private Functions
@@ -68,6 +76,8 @@
 
 void up_buttoninit(void)
 {
+  (void)sam3u_configgpio(GPIO_BUTTON1);
+  (void)sam3u_configgpio(GPIO_BUTTON2);
 }
 
 /****************************************************************************
@@ -76,7 +86,76 @@ void up_buttoninit(void)
 
 uint8_t up_buttons(void)
 {
-  return 0;
+  uint8_t retval;
+
+  retval  = sam3u_gpioread(GPIO_BUTTON1) ? 0 : GPIO_BUTTON1;
+  retval |= sam3u_gpioread(GPIO_BUTTON2) ? 0 : GPIO_BUTTON2;
+
+  return retval;
 }
+
+/****************************************************************************
+ * Name: up_irqbutton1
+ ****************************************************************************/
+
+#ifdef CONFIG_GPIOA_IRQ
+xcpt_t up_irqbutton1(xcpt_t irqhandler)
+{
+  xcpt_t oldhandler;
+  irqstate_t flags;
+
+  /* Disable interrupts until we are done */
+
+  flags        = irqsave();
+
+  /* Get the old button interrupt handler and save the new one */
+
+  oldhandler   = g_irqbutton1;
+  g_irqbutton1 = irqhandler;
+
+  /* Configure the interrupt */
+
+  sam3u_gpioirq(IRQ_BUTTON1);
+  (void)irq_attach(IRQ_BUTTON1, irqhandler);
+  sam3u_gpioirqenable(IRQ_BUTTON1);
+  irqrestore(flags);
+
+  /* Return the old button handler (so that it can be restored) */
+
+  return oldhandler;
+}
+#endif
+
+/****************************************************************************
+ * Name: up_irqbutton2
+ ****************************************************************************/
+
+#ifdef CONFIG_GPIOA_IRQ
+xcpt_t up_irqbutton2(xcpt_t irqhandler)
+{
+  xcpt_t oldhandler;
+  irqstate_t flags;
+
+  /* Disable interrupts until we are done */
+
+  flags        = irqsave();
+
+  /* Get the old button interrupt handler and save the new one */
+
+  oldhandler   = g_irqbutton2;
+  g_irqbutton2 = irqhandler;
+
+  /* Configure the interrupt */
+
+  sam3u_gpioirq(IRQ_BUTTON2);
+  (void)irq_attach(IRQ_BUTTON2, irqhandler);
+  sam3u_gpioirqenable(IRQ_BUTTON2);
+  irqrestore(flags);
+
+  /* Return the old button handler (so that it can be restored) */
+
+  return oldhandler;
+}
+#endif
 
 #endif /* CONFIG_ARCH_BUTTONS */

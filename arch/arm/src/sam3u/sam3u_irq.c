@@ -209,7 +209,7 @@ static int sam3u_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 
   if (irq >= SAM3U_IRQ_EXTINT)
     {
-      if (irq < NR_IRQS)
+      if (irq < SAM3U_IRQ_NIRQS)
         {
            *regaddr = NVIC_IRQ0_31_ENABLE;
            *bit     = 1 << (irq - SAM3U_IRQ_EXTINT);
@@ -317,7 +317,7 @@ void up_irqinitialize(void)
   irq_attach(SAM3U_IRQ_RESERVED, sam3u_reserved);
 #endif
 
-  sam3u_dumpnvic("initial", NR_IRQS);
+  sam3u_dumpnvic("initial", SAM3U_IRQ_NIRQS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -325,6 +325,14 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_ARCH_FIQ
   up_fiqinitialize();
+#endif
+
+  /* Initialize logic to support a second level of interrupt decoding for
+   * GPIO pins.
+   */
+ 
+#ifdef CONFIG_GPIO_IRQ
+  sam3u_gpioirqinitialize();
 #endif
 
   /* And finally, enable interrupts */
@@ -356,6 +364,14 @@ void up_disable_irq(int irq)
       regval &= ~bit;
       putreg32(regval, regaddr);
     }
+#ifdef CONFIG_GPIO_IRQ
+  else
+    {
+      /* Maybe it is a (derived) GPIO IRQ */
+
+      sam3u_gpioirqdisable(irq);
+    }
+#endif
   sam3u_dumpnvic("disable", irq);
 }
 
@@ -381,6 +397,14 @@ void up_enable_irq(int irq)
       regval |= bit;
       putreg32(regval, regaddr);
     }
+#ifdef CONFIG_GPIO_IRQ
+  else
+    {
+      /* Maybe it is a (derived) GPIO IRQ */
+
+      sam3u_gpioirqenable(irq);
+    }
+#endif
   sam3u_dumpnvic("enable", irq);
 }
 
@@ -415,7 +439,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= SAM3U_IRQ_MPU && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
+  DEBUGASSERT(irq >= SAM3U_IRQ_MPU && irq < SAM3U_IRQ_NIRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < SAM3U_IRQ_EXTINT)
     {

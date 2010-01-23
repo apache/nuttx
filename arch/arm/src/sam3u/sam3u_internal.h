@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -55,10 +56,16 @@
 
 /* Configuration ********************************************************************/
 
+#if defined(CONFIG_GPIOA_IRQ) || defined(CONFIG_GPIOB_IRQ) || defined(CONFIG_GPIOC_IRQ)
+#  define CONFIG_GPIO_IRQ 1
+#else
+#  undef CONFIG_GPIO_IRQ
+#endif
+
 /* Bit-encoded input to sam3u_configgpio() ******************************************/
 
 /* 16-bit Encoding:
- * MMCC C... VPPB BBBB
+ * MMCC CII. VPPB BBBB
  */
 
 /* Input/Output mode:
@@ -83,6 +90,19 @@
 #  define GPIO_CFG_PULLUP          (1 << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
 #  define GPIO_CFG_DEGLITCH        (2 << GPIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
 #  define GPIO_CFG_OPENDRAIN       (4 << GPIO_CFG_SHIFT) /* Bit 13: Open drain */
+
+/* Additional interrupt modes:
+ * .... .II. .... ....
+ */
+
+#define GPIO_INT_SHIFT             (9)        /* Bits 9-10: GPIO configuration bits */
+#define GPIO_INT_MASK              (3 << GPIO_INT_SHIFT)
+#  define GPIO_INT_LEVEL           (1 << 10)   /* Bit 10: Level detection interrupt */
+#  define GPIO_INT_EDGE            (0)         /*        (vs. Edge detection interrupt) */
+#  define GPIO_INT_HIGHLEVEL       (1 << 9)    /* Bit 9: High level detection interrupt */
+#  define GPIO_INT_LOWLEVEL        (0)         /*        (vs. Low level detection interrupt) */
+#  define GPIO_INT_RISING          (1 << 9)    /* Bit 9: Rising edge detection interrupt */
+#  define GPIO_INT_FALLING         (0)         /*        (vs. Falling edge detection interrupt) */
 
 /* If the pin is an GPIO output, then this identifies the initial output value:
  * .... .... V... ....
@@ -324,6 +344,20 @@ EXTERN void sam3u_clockconfig(void);
 EXTERN void sam3u_lowsetup(void);
 
 /************************************************************************************
+ * Name: sam3u_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+EXTERN void sam3u_gpioirqinitialize(void);
+#else
+#  define sam3u_gpioirqinitialize()
+#endif
+
+/************************************************************************************
  * Name: sam3u_configgpio
  *
  * Description:
@@ -352,6 +386,48 @@ EXTERN void sam3u_gpiowrite(uint16_t pinset, bool value);
  ************************************************************************************/
 
 EXTERN bool sam3u_gpioread(uint16_t pinset);
+
+/************************************************************************************
+ * Name: sam3u_gpioirq
+ *
+ * Description:
+ *   Configure an interrupt for the specified GPIO pin.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+EXTERN void sam3u_gpioirq(uint16_t pinset);
+#else
+#  define sam3u_gpioirq(pinset)
+#endif
+
+/************************************************************************************
+ * Name: sam3u_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+EXTERN void sam3u_gpioirqenable(int irq);
+#else
+#  define sam3u_gpioirqenable(irq)
+#endif
+
+/************************************************************************************
+ * Name: sam3u_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+EXTERN void sam3u_gpioirqdisable(int irq);
+#else
+#  define sam3u_gpioirqdisable(irq)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

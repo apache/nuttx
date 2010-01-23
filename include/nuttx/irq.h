@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/irq.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __IRQ_H
-#define __IRQ_H
+#ifndef __INCLUDE_NUTTX_IRQ_H
+#define __INCLUDE_NUTTX_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -91,5 +91,5 @@ EXTERN int irq_attach(int irq, xcpt_t isr);
 #endif
 #endif
 
-#endif /* __IRQ_H */
+#endif /* __INCLUDE_NUTTX_IRQ_H */
 
