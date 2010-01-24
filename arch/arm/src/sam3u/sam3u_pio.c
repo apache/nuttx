@@ -241,7 +241,7 @@ static inline int sam3u_configperiph(uintptr_t base, uint32_t pin,
     {
       regval |= pin;
     }
-  putreg32(pin, base+SAM3U_PIO_ABSR_OFFSET);
+  putreg32(regval, base+SAM3U_PIO_ABSR_OFFSET);
 
   /* Disable PIO functionality */
 

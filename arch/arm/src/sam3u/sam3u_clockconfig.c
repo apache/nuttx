@@ -144,7 +144,7 @@ static inline void sam3u_supcsetup(void)
  * Name: sam3u_pmcwait
  *
  * Description:
- *   Initialize clocking
+ *   Wait for the specide PMC status bit to become "1"
  *
  ****************************************************************************/
 
@@ -168,18 +168,45 @@ static inline void sam3u_pmcsetup(void)
 {
   uint32_t regval;
 
-  /* Initialize main oscillator (if it has not already been selected */
+  /* Enable main oscillator (if it has not already been selected) */
 
   if ((getreg32(SAM3U_CKGR_MOR) & CKGR_MOR_MOSCSEL) == 0)
     {
+      /* "When the MOSCXTEN bit and the MOSCXTCNT are written in CKGR_MOR to
+       *  enable the main oscillator, the MOSCXTS bit in the Power Management
+       *  Controller Status Register (PMC_SR) is cleared and the counter starts
+       *  counting down on the slow clock divided by 8 from the MOSCXTCNT
+       *  value. ... When the counter reaches 0, the MOSCXTS bit is set,
+       *  indicating that the main clock is valid."
+       */
+
       putreg32(BOARD_CKGR_MOR, SAM3U_CKGR_MOR);
       sam3u_pmcwait(PMC_INT_MOSCXTS);
     }
  
-  /* Switch to the main oscillator */
+  /* "Switch to the main oscillator.  The selection is made by writing the
+   *  MOSCSEL bit in the Main Oscillator Register (CKGR_MOR). The switch of
+   *  the Main Clock source is glitch free, so there is no need to run out
+   *  of SLCK, PLLACK or UPLLCK in order to change the selection. The MOSCSELS
+   *  bit of the power Management Controller Status Register (PMC_SR) allows
+   *  knowing when the switch sequence is done."
+   *
+   *   MOSCSELS: Main Oscillator Selection Status
+   *             0 = Selection is done
+   *             1 = Selection is in progress
+   */
 
   putreg32((BOARD_CKGR_MOR|CKGR_MOR_MOSCSEL), SAM3U_CKGR_MOR);
   sam3u_pmcwait(PMC_INT_MOSCSELS);
+
+  /* "Select the master clock. "The Master Clock selection is made by writing
+   *  the CSS field (Clock Source Selection) in PMC_MCKR (Master Clock Register).
+   *  The prescaler supports the division by a power of 2 of the selected clock
+   *  between 1 and 64, and the division by 3. The PRES field in PMC_MCKR programs
+   *  the prescaler. Each time PMC_MCKR is written to define a new Master Clock,
+   *  the MCKRDY bit is cleared in PMC_SR. It reads 0 until the Master Clock is
+   *  established.
+   */
 
   regval = getreg32(SAM3U_PMC_MCKR);
   regval &= ~PMC_MCKR_CSS_MASK;
@@ -187,12 +214,12 @@ static inline void sam3u_pmcsetup(void)
   putreg32(regval, SAM3U_PMC_MCKR);
   sam3u_pmcwait(PMC_INT_MCKRDY);
 
-  /* Settup PLLA */
+  /* Settup PLLA and wait for LOCKA */
 
   putreg32(BOARD_CKGR_PLLAR, SAM3U_CKGR_PLLAR);
   sam3u_pmcwait(PMC_INT_LOCKA);
 
-  /* Setup UTMI for USB */
+  /* Setup UTMI for USB and wait for LOCKU */
 
 #ifdef CONFIG_USBDEV
   regval = getreg32(SAM3U_CKGR_UCKR);
@@ -201,7 +228,7 @@ static inline void sam3u_pmcsetup(void)
   sam3u_pmcwait(PMC_INT_LOCKU);
 #endif
 
-  /* Switch to the fast clock */
+  /* Switch to the fast clock and wait for MCKRDY */
 
   putreg32(BOARD_PMC_MCKR_FAST, SAM3U_PMC_MCKR);
   sam3u_pmcwait(PMC_INT_MCKRDY);

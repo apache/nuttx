@@ -243,7 +243,7 @@ void sam3u_lowsetup(void)
   /* Enable clocking for all selected UART/USARTs */
 
   regval = getreg32(SAM3U_PMC_PCER);
-#ifdef CONFIG_SAM3U_USART
+#ifdef CONFIG_SAM3U_UART
   regval |= (1 << SAM3U_PID_UART);
 #endif
 #ifdef CONFIG_SAM3U_USART0
@@ -262,7 +262,7 @@ void sam3u_lowsetup(void)
 
   /* Configure UART pins for all selected UART/USARTs */
  
-#ifdef CONFIG_SAM3U_USART
+#ifdef CONFIG_SAM3U_UART
   (void)sam3u_configgpio(GPIO_UART_RXD);
   (void)sam3u_configgpio(GPIO_UART_TXD);
 #endif
