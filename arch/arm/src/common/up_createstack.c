@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_createstack.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -95,7 +96,11 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
 
    if (!tcb->stack_alloc_ptr)
      {
-       tcb->stack_alloc_ptr = (uint32_t*)kzmalloc(stack_size);
+#ifdef CONFIG_DEBUG
+       tcb->stack_alloc_ptr = (uint32_t*)zalloc(stack_size);
+#else
+       tcb->stack_alloc_ptr = (uint32_t*)malloc(stack_size);
+#endif
      }
 
    if (tcb->stack_alloc_ptr)
