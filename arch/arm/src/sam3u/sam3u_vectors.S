@@ -2,7 +2,7 @@
  * arch/arm/src/sam3u/sam3u_vectors.S
  * arch/arm/src/chip/sam3u_vectors.S
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,19 +47,20 @@
 
 /* Memory Map:
  *
- * 0x0800:0000 - Beginning of FLASH. Address of vectors (if not using bootloader)
- *               Mapped to address 0x0000:0000 at boot time.
- * 0x0800:3000 - Address of vectors if using bootloader
+ * 0x0800:0000 - Beginning of FLASH. Address of vectors.  Mapped to address 0x0000:0000 at boot
+ *               time.
  * 0x0803:ffff - End of flash
  * 0x2000:0000 - Start of SRAM and start of .data (_sdata)
- *             - End of .data (_edata) abd start of .bss (_sbss)
+ *             - End of .data (_edata) and start of .bss (_sbss)
  *             - End of .bss (_ebss) and bottom of idle stack
- *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack, start of heap
- * 0x2000:ffff - End of SRAM and end of heap
+ *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack, start of heap. NOTE
+ *               that the ARM uses a decrement before store stack so that the correct initial
+ *               value is the end of the stack + 4;
+ * 0x2000:bfff - End of SRAM and end of heap
  */
 
-#define IDLE_STACK      (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE       (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#define IDLE_STACK      (_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define HEAP_BASE       (_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
 /* The Cortex-M3 return from interrupt is unusual.  We provide the following special
  * address to the BX instruction.  The particular value also forces a return to
@@ -333,7 +334,7 @@ up_interruptstack_base:
         .globl  g_heapbase
         .type   g_heapbase, object
 g_heapbase:
-        .long   _ebss+CONFIG_IDLETHREAD_STACKSIZE
+        .word   HEAP_BASE
         .size   g_heapbase, .-g_heapbase
 
         .end
