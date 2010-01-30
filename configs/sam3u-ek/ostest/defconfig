@@ -1,7 +1,7 @@
 ############################################################################
 # configs/sam3u-ek/ostest/defconfig
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -73,11 +73,11 @@ CONFIG_ARCH=arm
 CONFIG_ARCH_ARM=y
 CONFIG_ARCH_CORTEXM3=y
 CONFIG_ARCH_CHIP=sam3u
-CONFIG_ARCH_CHIP_AT91SAM3U4=y
+CONFIG_ARCH_CHIP_AT91SAM3U4E=y
 CONFIG_ARCH_BOARD=sam3u-ek
 CONFIG_ARCH_BOARD_SAM3UEK=y
-CONFIG_BOARD_LOOPSPERMSEC=5483
-CONFIG_DRAM_SIZE=0x0000c000
+CONFIG_BOARD_LOOPSPERMSEC=4768
+CONFIG_DRAM_SIZE=0x00008000
 CONFIG_DRAM_START=0x20000000
 CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 CONFIG_ARCH_IRQPRIO=y
@@ -105,6 +105,7 @@ CONFIG_SAM3U_USART0=n
 CONFIG_SAM3U_USART1=n
 CONFIG_SAM3U_USART2=n
 CONFIG_SAM3U_USART3=n
+CONFIG_SAM3U_NAND=n
 
 #
 # Some subsystems can be configured to operate in different ways..
@@ -293,7 +294,7 @@ CONFIG_EXAMPLE=ostest
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
-CONFIG_MM_REGIONS=1
+CONFIG_MM_REGIONS=3
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n
