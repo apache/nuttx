@@ -54,8 +54,8 @@
 #  define SAM3U_INTROM_BASE      0x00180000 /* 0x00180000-0x001fffff:   Internal ROM */
                                             /* 0x00200000-0x1fffffff:   Reserved */
 #define   SAM3U_INTSRAM_BASE     0x20000000 /* 0x20000000-0x3fffffff: Internal SRAM */
-#  define SAM3U_INTSRAM0_BASE    0x20000000 /* 0x20000000-0x2007ffff:   SRAM0 */
-#  define SAM3U_INTSRAM1_BASE    0x20080000 /* 0x20080000-0x200fffff:   SRAM1 */
+#  define SAM3U_INTSRAM0_BASE    0x20000000 /* 0x20000000-0x2007ffff:   SRAM0 (see chip.h) */
+#  define SAM3U_INTSRAM1_BASE    0x20080000 /* 0x20080000-0x200fffff:   SRAM1 (see chip.h) */
 #  define SAM3U_NFCSRAM_BASE     0x20100000 /* 0x20100000-0x207fffff:   NAND FLASH controller (SRAM) */
 #  define SAM3U_UDPHPSDMS_BASE   0x20180000 /* 0x20180000-0x201fffff:   USB Device High Speed (DMA) */
                                             /* 0x20200000-0x2fffffff:   Undefined */
