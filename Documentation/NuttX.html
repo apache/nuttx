@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 15, 2010</p>
+      <p>Last Updated: January 29, 2010</p>
     </td>
   </tr>
 </table>
@@ -1678,6 +1678,13 @@ nuttx-5.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  development board.
 	* confgs/ea3131/tools: Added a tool to create a image suitable for
 	  use with the LPC313x bootloader.
+	* configs/sam3u-3k/ostest - Completed verification of the basic NuttX
+	  OS test for the SAM3U.
+	* arch/arm/src/common/up_createstack - stack was always been cleared
+	  when it was allocated.  This is a good feature for monitoring the 
+	  stack during debug, but really hurts thread start-up performance.
+	  Clearing is now done if CONFIG_DEBUG=y only.  Changes was only made
+	  for arm, but really should be made for all architectures.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
