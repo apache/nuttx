@@ -1029,7 +1029,7 @@
 	* drivers/mmcsd/* - Add casts in contant expressions to avoid warnings
 	  when sizeof(int) is 16-bits.
 
-5.1 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.1 2010-01-30 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/lpc313x and arch/arm/include/lpc313x: Added framework
 	  to support the NXP LPC3131.
@@ -1050,3 +1050,7 @@
 	  stack during debug, but really hurts thread start-up performance.
 	  Clearing is now done if CONFIG_DEBUG=y only.  Changes was only made
 	  for arm, but really should be made for all architectures.
+	* configs/sam3u/nsh - Added NSH configuration for SAM3U
+
+5.2 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
