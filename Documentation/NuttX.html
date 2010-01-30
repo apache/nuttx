@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 29, 2010</p>
+      <p>Last Updated: January 30, 2010</p>
     </td>
   </tr>
 </table>
@@ -729,76 +729,58 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.0 Release Notes</b>:
+<p><b>nuttx-5.1 Release Notes</b>:
 
 <p>
-  This 47<sup>th</sup> release of NuttX was made on December 21, 2009 and is available for download from the
+  This 48<sup>th</sup> release of NuttX was made on January 30, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The previous NuttX release was 4.14.
-  The major revision number has been incremented to indicate that an
-  incompatibility with previous nuttx releases has been introduced.
-  This version adopts standard fixed width integer names as specified by the
-  ANSII C99 standard.
-  The core logic of NuttX is older than that standard and did not conform to it.
+  This release adds support for two new MCU architectures in various states of development:
 </p>
+<ul>
+  <li>
+    <a href="http://www.atmel.com/products/at91/sam3landing.asp?family_id=605">AT91SAM3U</a>
+    <p>
+      This release adds support for the SAM3U-EK development board with the
+      <a href="http://www.atmel.com/dyn/products/product_card_mcu.asp?part_id=4562">AT91SAM3U4E</a>.
+      As with most NuttX architecutre releases, the release will be rolled out in
+      two parts:  A basic port and an extended port.
+    </p>
+    <p>
+      NuttX-5.1 includes the basic port for the SAM3U-EK board.  This release
+       passes the NuttX OS test and is proven to have a valid OS implementation.
+      It supports the basic boot-up, serial console and timer interrupts.  A
+      configuration to support the NuttShell is also included.
+    </p>
+    <p>
+      The extended port will also include support for SDIO-based SD cards and
+      USB device (and possible LCD support).  These extensions may or may not
+      happen by the Nuttx 5.2 release as my plate is kind of full now.
+    </p>
+  </li>
+  <li>
+    <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a>
+    <p>
+      This release also adds the complete implementation of the basic port for
+      the NXP LPC3131 MCU on the
+      <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a>
+      board.  That port, unfortunately has stalled due to tools issues.  Those tool issues have
+      been resolved and I am confident that the verified basic port will be
+      available in NuttX-5.2.
+    </p>
+    <p>
+     The extended release will follow and should include SDIO-based SD card
+     support and device USB.
+    </p>
+  </li>
+</ul>
 <p>
-  If you have applications running on nuttx-4.14, those applications should continue
-  to build and execute without problem on nuttx-5.0.
-  However, if you have device drivers or other OS-internal logic, you will probably
-  have to make some minor changes to your code to use this version.
-  Below is a summary of those changes:
-  <ul>
-    <li>If you include <code>sys/types.h</code> to get the non-standard, fixed width
-      integer types (<code>uint32</code>, <code>uint16</code>, <code>ubyte</code>, etc.),
-      that is no longer necessary.
-    <li>Instead, you will need to include <code>stdint.h</code> where the new fixed width
-      integer types are defined (<code>uint32_t</code>, <code>uint16_t</code>, <code>uint8_t</code>, etc.).
-    <li>You will have to change all occurrences of the following types:
-    <ul><pre>
-uint32 -> uint32_t
-uint16 -> uint16_t
-ubyte  -> uint8_t
-uint8  -> uint8_t
-sint32 -> int32_t
-sint16 -> int16_t
-sint8  -> int8_t
-</pre></ul>
-    <li>In addition, the non-standard type <code>boolean</code> must replaced with the
-      standard type <code>bool</code>. 
-      The type definition for <code>bool</code> is in <code>stdbool.h</code>.
-  </ul>
-</p>
-<p>
-  This change in typing caused small changes to many, many files.
-  The changes was verified that all configurations in the release still build correctly
-  (other than the SDCC-based configurations).
-  Regression testing was performed on a few configurations, but it is possible that minor build
-  issues still exist (if you encounter any, please let me know and I will
-  help you to fix them).
-</p>
-<p>
-  In the course of the regression testing, several important bugs unrelated
-  to the type changes were found and corrected.
-  Two of these are critical bugs:
-  <ul>
-    <li>Fixed an important error in the RX FIFO handling logic of the LM3S6918
-      Ethernet driver.
-    <li>Corrected the handling of TCP sequence numbers in the TCP stack.
-  </ul>
-</p>
-<p>
-  And other less important bug fixes as detailed in the <a href="#currentrelease">ChangeLog</a>.
-</p>
-<p>
-  The primary focus of this release was standards compatibility, but a few new
-  features were added including a (1) Flash Translation Layer (FTL) that will
-  support filesystems on a FLASH device and (2) partial ports for the STM32F107VC
-  and HCS12 M9S12NE64 MCUs.  Those ports are very incomplete as of this writing.
+  A few additional features and bugfixes of a minor nature were also incorporated
+  as detailed in the <a href="#currentrelease">ChangeLog</a>.
 </p>
 
 <table width ="100%">
@@ -970,7 +952,32 @@ sint8  -> int8_t
           driver; that implementation is complete but untested.
       </p>
     </ul>
-   </td>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <b>NXP LPC3131</b>.  The basic port for the NXP LPC3131 on the Embedded Artists EA3131
+    development board was released in NuttX-5.1 with a GNU arm-elf or arm-eabi toolchain* under Linux or Cygwin.
+    </p>
+    <p>
+       
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+          The basic EA3131 port is complete in NuttX-5.1 but, unfortunately, has not yet been verfied.
+          That effort has stalled due to some tool-related issues.
+          Those tool issues have been resolved and I am confident that the verified basic EA3131 port will be
+          available in NuttX-5.2.   The extended release will follow and should include SDIO-based SD card
+          support and device USB.
+      </p>
+    </ul>
+  </td>
 </tr>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
@@ -1033,6 +1040,44 @@ sint8  -> int8_t
         <b>Development Environments:</b>
         1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
         with Windows native toolchain (RIDE7, CodeSourcery or devkitARM).  A DIY toolchain for Linux
+        or Cygwin is provided by the NuttX
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
+        package.
+      </p>
+     </ul>
+   </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>Atmel AT91SAM3U</b>.
+      This port uses the <a href=" http://www.atmel.com/">Atmel</a> SAM3U-EK
+	  development board that features the AT91SAM3U4E MCU.
+	  This port uses a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU
+	  tools or Cygwin-based GNU tools).
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        The basic SAM3U-EK port was released in NuttX version 5.1. The basic port includes boot-up
+        logic, interrupt driven serial console, and system timer interrupts.
+        That release passes the NuttX OS test and is proven to have a valid OS implementation.
+        A configuration to support the NuttShell is also included.
+      </p>
+      <p>
+        Subsequent NuttX releases will extend this port and add support for SDIO-based SD cards and
+        USB device (and possible LCD support).
+        These extensions may or may not happen by the Nuttx 5.2 release as my plate is kind of full now.
+      </p>
+      <p>
+        <b>Development Environments:</b>
+        1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
+        with Windows native toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux
         or Cygwin is provided by the NuttX
         <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
         package.
@@ -1589,54 +1634,26 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.1 2010-01-30 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* arch/hc: Adding framework to support m68hc11/12
-	* configs/demo9s12ne64: Configuration to support Freescale DEMO9S12NE64
-	  development board (MC9S12NE64 m68hcs12 processor).
-	* drivers/mtd/ftl.c - A FLASH translation layer (FTL) has been implemented.
-	  This layer will convert a FLASH MTD interface into a block driver that
-	  can be used with any file system.  Good performance of this layer will
-	  depend upon functioning write buffer support!
-	  NOTE: FTL support is untested as of the initial check-in.
-	* Numerous minor changes for m68hc12 to eliminate compilation errors and
-	  warnings due to the fact that it uses 16-bit integer types and for casts
-	  between uint32 (32-bits) and an mc68hc12 pointer (16-bits).
-	* sys/types:  Size of off_t and blkcnt_t should not depend on size of
-	  int in the architecture;  Removed non-standard type STATUS
-	* include/ - Added header files stdint.h, stdbool.h, cxx/cstdint, and
-	  cxx/cstdbool
-	* Changed ALL references to non-standard fixed-size types (like uint32,
-	  ubyte, etc.) to standard types (like uint32_t, uint8_t, etc.) from
-	  stdint.h.  Use type bool and {true, false} from stdbool.  This effected
-	  most of the files in the system!  Almost all configurations have been
-	  re-built and many have been re-verified in order to get confidence in
-	  these changes.
-	* graphics/ and examples/nx - Fix numerous build errors that have been
-	  introduced lately.  NXGL has suffered some bit-rot from not being used
-	  in some of the most recent ports.
-	* The misc/pascal NuttX add-on package has been updated to use the new
-	  standard types from stdint.h and stdbool.h and re-integrated with NuttX.
-	  The released pascal-2.0 will be the first version that contains the
-	  compatible changes.
-	* arch/arm/src/lm3s/lm3s_ethernet.c - Fixed an important bug in the LM3S
-	  ethernet driver:  If full packet is received, the packet-too-big check
-	  will fail because it needs to subtract 6 from the packet size (to
-	  account for the 2-byte packet length and the 4-byte packet FCS in the
-	  FIFO).
-	* net/accept.c - Fixed a bad assertion (only happens when debug is enabled).
-	* net/send.c net/uip/uip_tcpseqno.c - Fixed a critical error in the TCP/IP
-	  logic.  The NuttX port of uIP imcludes logic to send data ahead without
-	  waiting for ACKs from the recipient; this greatly improves throughput.
-	  However, the packet sequence number was not being updated correctly and,
-	  as a result, packets were not be ACKed by the recipient and transfers
-	  would sometimes stall.  This is a very important bug fix (in fact, I
-	  don't understand how TCP/IP worked at all without this fix???)
-	* include/nuttx/arch.h and arch/*/common/up_udelay.c - Change argument
-	  of up_udelay() to type useconds_t to avoid warnings when sizeof(int)
-	  is 16-bits.
-	* drivers/mmcsd/* - Add casts in contant expressions to avoid warnings
-	  when sizeof(int) is 16-bits.
+	* arch/arm/src/lpc313x and arch/arm/include/lpc313x: Added framework
+	  to support the NXP LPC3131 MCU
+	* Add configs/ea3131.  The LPC3131 port for the Embedded Artist EA3131
+	  (LPC3131) is code complete and waiting for me to get hardware in
+	  hand.
+	* arch/arm/src/sam3u, arch/arm/include/sam3u, and configs/sam3u-ek -
+	  Added the basic framework needed to begin a port for the SAM3U-EK
+	  development board.
+	* confgs/ea3131/tools: Added a tool to create a image suitable for
+	  use with the LPC313x bootloader.
+	* configs/sam3u-3k/ostest - Completed verification of the basic NuttX
+	  OS test for the SAM3U.
+	* arch/arm/src/common/up_createstack - stack was always been cleared
+	  when it was allocated.  This is a good feature for monitoring the 
+	  stack during debug, but really hurts thread start-up performance.
+	  Clearing is now done if CONFIG_DEBUG=y only.  Changes was only made
+	  for arm, but really should be made for all architectures.
+	* configs/sam3u/nsh - Added NSH configuration for SAM3U
 
 pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1666,25 +1683,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* arch/arm/src/lpc313x and arch/arm/include/lpc313x: Added framework
-	  to support the NXP LPC3131 MCU
-	* Add configs/ea3131.  The LPC3131 port for the Embedded Artist EA3131
-	  (LPC3131) is code complete and waiting for me to get hardware in
-	  hand.
-	* arch/arm/src/sam3u, arch/arm/include/sam3u, and configs/sam3u-ek -
-	  Added the basic framework needed to begin a port for the SAM3U-EK
-	  development board.
-	* confgs/ea3131/tools: Added a tool to create a image suitable for
-	  use with the LPC313x bootloader.
-	* configs/sam3u-3k/ostest - Completed verification of the basic NuttX
-	  OS test for the SAM3U.
-	* arch/arm/src/common/up_createstack - stack was always been cleared
-	  when it was allocated.  This is a good feature for monitoring the 
-	  stack during debug, but really hurts thread start-up performance.
-	  Clearing is now done if CONFIG_DEBUG=y only.  Changes was only made
-	  for arm, but really should be made for all architectures.
+nuttx-5.2 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
