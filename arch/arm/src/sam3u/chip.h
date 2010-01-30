@@ -48,6 +48,15 @@
 
 /* Get customizations for each supported chip */
 
+#ifdef CONFIG_ARCH_CHIP_AT91SAM3U4E
+#  define CONFIG_SAM3U_SRAM0_SIZE   0x00008000  /* 32Kb */
+#  define CONFIG_SAM3U_SRAM1_SIZE   0x00004000  /* 16Kb */
+#  define CONFIG_SAM3U_NFCSRAM_SIZE 0x00001000  /*  4Kb */
+
+#else
+#  error "Unknown SAM3U chip type"
+#endif
+
 /* Include only the memory map.  Other chip hardware files should then include this
  * file for the proper setup
  */
