@@ -1685,6 +1685,10 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-5.2 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+	* arch/arm/src/sam3u/sam3u_pio.c - Fix an address calculation error
+	  that caused ports B & C to get mapped to the PIOA base address.
+	  This is an important bugfix! (a patch is available)
+
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-1.9 2010-xx-xx <spudmonkey@racsa.co.cr>

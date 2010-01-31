@@ -80,7 +80,7 @@
 static inline uintptr_t sam3u_gpiobase(uint16_t cfgset)
 {
   int port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  return SAM3U_PION_BASE(port >> GPIO_PORT_SHIFT);
+  return SAM3U_PION_BASE(port);
 }
 
 /****************************************************************************
