@@ -99,4 +99,10 @@ void sam3u_boardinitialize(void)
 #ifdef CONFIG_ARCH_LEDS
   up_ledinit();
 #endif
+
+  /* Setup SD card detection PIO */
+
+#if CONFIG_SAM3U_HSMCI
+  sam3u_configgpio(GPIO_MCI_CD);
+#endif
 }
