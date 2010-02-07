@@ -1,7 +1,7 @@
 /****************************************************************************************
  * arch/arm/src/sam3u/sam3u_dmac.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@
 #define SAM3U_DMAC_CHER_OFFSET          0x28 /* DMAC Channel Handler Enable Register */
 #define SAM3U_DMAC_CHDR_OFFSET          0x2c /* DMAC Channel Handler Disable Register */
 #define SAM3U_DMAC_CHSR_OFFSET          0x30 /* DMAC Channel Handler Status Register */
-                                             /* 0x034-0x38: Reserved 
+                                             /* 0x034-0x38: Reserved */
 /* DMA channel registers */
 
 #define SAM3U_DMACHAN_OFFSET(n)         (0x3c+((n)*0x28))
@@ -83,7 +83,7 @@
 #define SAM3U_DMACHAN_CFG_OFFSET        0x14 /* DMAC Channel Configuration Register */
                                              /* 0x18-0x24: Reserved */
 
-                                             /* 0x017c-0x1fc: Reserved
+                                             /* 0x017c-0x1fc: Reserved */
 
 /* DMAC register adresses ***************************************************************/
 
