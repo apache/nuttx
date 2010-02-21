@@ -194,6 +194,31 @@ Image Format
   If you don't use setenv.sh, then just set your PATH variable appropriately or
   use the full path to mklpc.sh in the final step.
 
+OpenOCD
+^^^^^^^
+
+  I have been using the Olimex ARM-USB-OCD JTAG debugger with the EA3131
+  (http://www.olimex.com).  The OpenOCD configuration file is here:
+  tools/armusbocb.cfg.  There is also a script on the tools directory that
+  I used to start the OpenOCD daemon on my system called oocd.sh.  That
+  script would probably require some modifications to work in another
+  environment:
+  
+    - possibly the value of OPENOCD_PATH
+    - If you are working under Linux you will need to change any
+      occurances of `cygpath -w blablabla` to just blablabla
+
+  Then you should be able to start the OpenOCD daemon like:
+
+    tools/oocd.sh <topdir>
+
+  Where <topdir> is the directory where NuttX is installed.
+
+  Once the OpenOCD daemon has been started, you can connect to it via
+  GDB using the following GDB command:
+
+   (gdb) target remote localhost:3333
+
 ARM/EA3131-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
