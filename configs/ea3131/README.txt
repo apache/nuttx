@@ -13,6 +13,8 @@ Contents
   o NuttX buildroot Toolchain
   o Boot Sequence
   o Image Format
+  o Image Download to ISRAM
+  o Using OpenOCD and GDB
   o ARM/EA3131-specific Configuration Options
   o Configurations
 
@@ -194,8 +196,27 @@ Image Format
   If you don't use setenv.sh, then just set your PATH variable appropriately or
   use the full path to mklpc.sh in the final step.
 
-OpenOCD
-^^^^^^^
+Image Download to ISRAM
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Assuming that you already have the FTDI driver installed*, then here is the
+are the steps that I use for loading new code into the EA3131:
+
+- Create the bootloader binary, nuttx.lpc, as described above.
+- Connected the EA3131 using the FTDI USB port (not the lpc3131 USB port)
+  This will power up the EA3131 and start the bootloader.
+- Start a terminal emulator (such as TeraTerm) at 115200 8NI.
+- Reset the EA3131 and you should see:
+  LPC31xx READY FOR PLAIN IMAGE>
+- Send the nuttx.lpc file and you should see:
+  Download finished
+
+That will load the NuttX binary into ISRAM and attempt to execute it.
+
+*See the LPC313x documentation if you do not have the FTDI driver installed.
+
+Using OpenOCD and GDB
+^^^^^^^^^^^^^^^^^^^^^
 
   I have been using the Olimex ARM-USB-OCD JTAG debugger with the EA3131
   (http://www.olimex.com).  The OpenOCD configuration file is here:
@@ -210,14 +231,21 @@ OpenOCD
 
   Then you should be able to start the OpenOCD daemon like:
 
-    tools/oocd.sh <topdir>
+    configs/ea3131/tools/oocd.sh $PWD
 
-  Where <topdir> is the directory where NuttX is installed.
+  Where it is assumed that you are executing oocd.sh from the top level
+  directory where NuttX is installed.
 
   Once the OpenOCD daemon has been started, you can connect to it via
   GDB using the following GDB command:
 
+   arm-elf-gdb
    (gdb) target remote localhost:3333
+
+  And you can load the NuttX ELF file:
+
+   (gdb) symbol-file nuttx
+   (gdb) load nuttx
 
 ARM/EA3131-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
