@@ -94,7 +94,7 @@ void lpc313x_resetclks(void)
       bcrndx = lp313x_bcrndx((enum lpc313x_domainid_e)i);
       if (bcrndx != BCRNDX_INVALID)
         {
-          /* Yes.. isable all BCRs */
+          /* Yes.. disable all BCRs */
 
           putreg32(0, LPC313X_CGU_BCR(bcrndx));
         }
