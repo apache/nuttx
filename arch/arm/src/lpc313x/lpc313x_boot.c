@@ -238,14 +238,29 @@ static void up_vectormapping(void)
 
 static void up_copyvectorblock(void)
 {
+  /* Copy the vectors into ISRAM at the address that will be mapped to the vector
+   * address:
+   *
+   *   LPC313X_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
+   *   LPC313X_VECTOR_VSRAM - Virtual address of vector table in SRAM
+   *   LPC313X_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+   */
+
   uint32_t *src  = (uint32_t*)&_vector_start;
   uint32_t *end  = (uint32_t*)&_vector_end;
-  uint32_t *dest = (uint32_t*)LPC313X_VECTOR_VADDR;
+  uint32_t *dest = (uint32_t*)LPC313X_VECTOR_VSRAM;
 
   while (src < end)
     {
       *dest++ = *src++;
     }
+
+  /* Then set the LPC313x shadow register, LPC313X_SYSCREG_ARM926SHADOWPTR, so that
+   * the vector table is mapped to address 0x0000:0000 - NOTE: that there is not yet
+   * full support for the vector table at address 0xffff0000.
+   */
+
+  putreg32(LPC313X_VECTOR_PADDR, LPC313X_SYSCREG_ARM926SHADOWPTR);
 }
 
 /************************************************************************************
