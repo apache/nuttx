@@ -282,6 +282,8 @@ defconfig -- This is a configuration file similar to the Linux
 
 		CONFIG_NOPRINTF_FIELDWIDTH - sprintf-related logic is a
 		   little smaller if we do not support fieldwidthes
+		CONFIG_LIBC_FLOATINGPOINT - By default, floating point
+		  support in printf, sscanf, etc. is disabled.
 
 	Allow for architecture optimized implementations
 

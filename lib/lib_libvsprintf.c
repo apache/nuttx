@@ -1465,12 +1465,14 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
       /* Handle floating point conversions */
 
+#ifdef CONFIG_LIBC_FLOATINGPOINT
       else if (strchr("eEfgG", *src))
         {
 #ifdef CONFIG_CPP_HAVE_WARNING
 #  warning "No floating point support"
 #endif
         }
+#endif
     }
 
   return obj->nput;

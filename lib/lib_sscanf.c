@@ -260,10 +260,9 @@ int vsscanf(char *buf, const char *s, va_list ap)
 
           else if (*s == 'f')
             {
-#if 1
-#  ifdef CONFIG_CPP_HAVE_WARNING
-#    warning "No floating point conversions"
-#  endif
+#ifndef CONFIG_LIBC_FLOATINGPOINT
+              /* No floating point conversions */
+
               void *pv = va_arg(ap, void*);
 
               lvdbg("vsscanf: Return 0.0 to %p\n", pv);
@@ -331,7 +330,9 @@ int vsscanf(char *buf, const char *s, va_list ap)
             }
 
           if (!noassign)
-            count++;
+            {
+              count++;
+            }
           width = noassign = lflag = 0;
           s++;
         }
