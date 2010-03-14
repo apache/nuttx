@@ -1057,3 +1057,6 @@
 	* arch/arm/src/sam3u/sam3u_pio.c - Fix an address calculation error
 	  that caused ports B & C to get mapped to the PIOA base address.
 	  This is an important bugfix! (a patch is available)
+	* arch/arm/src/lpc313x/lpc313x_boot.c - Fix an error in the vector
+	  initialization was causing a memory fault.
+	* lib/lib_strtod.c - Add strtod()
