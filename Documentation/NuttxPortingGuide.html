@@ -2397,6 +2397,10 @@ extern void up_ledoff(int led);
     <code>CONFIG_NOPRINTF_FIELDWIDTH</code>: sprintf-related logic is a
     little smaller if we do not support fieldwidthes
   </li>
+  <li>
+    <code>CONFIG_LIBC_FLOATINGPOINT</code>: By default, floating point
+    support in printf, sscanf, etc. is disabled.
+  </li>
 </ul>
 
 <h2>Allow for architecture optimized implementations</h2>
