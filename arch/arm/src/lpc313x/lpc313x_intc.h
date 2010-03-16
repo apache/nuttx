@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_intc.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,11 +177,11 @@
 #define INTC_REQUEST_ENABLE               (1 << 16) /* Bit 16: Enable interrupt request */
 #define INTC_REQUEST_TARGET_SHIFT         (8)       /* Bits 8-13: Interrupt target */
 #define INTC_REQUEST_TARGET_MASK          (63 << INTC_REQUEST_TARGET_SHIFT)
-#  define INTC_REQUEST_TARGET_IRQ         (0  << INTC_REQUEST_TARGET_SHIFT) /* Proc interrupt request 0: IRQ */
-#  define INTC_REQUEST_TARGET_FIQ         (1  << INTC_REQUEST_TARGET_SHIFT) /* Proc interrupt request 1: FIQ */
+#  define INTC_REQUEST_TARGET_IRQ         (INTC_REQUEST_WETARGET | (0  << INTC_REQUEST_TARGET_SHIFT)) /* Proc interrupt request 0: IRQ */
+#  define INTC_REQUEST_TARGET_FIQ         (INTC_REQUEST_WETARGET | (1  << INTC_REQUEST_TARGET_SHIFT)) /* Proc interrupt request 1: FIQ */
 #define INTC_REQUEST_PRIOLEVEL_SHIFT      (0)       /* Bits 0-7: Priority level */
 #define INTC_REQUEST_PRIOLEVEL_MASK       (255 << INTC_REQUEST_PRIOLEVEL_SHIFT)
-#  define INTC_REQUEST_PRIOLEVEL(n)       (((n)  << INTC_REQUEST_TARGET_SHIFT) & INTC_REQUEST_PRIOLEVEL_MASK)
+#  define INTC_REQUEST_PRIOLEVEL(n)       (((n)  << INTC_REQUEST_PRIOLEVEL_SHIFT) & INTC_REQUEST_PRIOLEVEL_MASK)
 
 /************************************************************************************************
  * Public Types

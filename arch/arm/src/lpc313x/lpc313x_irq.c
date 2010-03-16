@@ -2,7 +2,7 @@
  * arch/arm/src/lpc313x/lpc313x_irq.c
  * arch/arm/src/chip/lpc313x_irq.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,13 +105,13 @@ void up_irqinitialize(void)
  
   /* Disable all interrupts. Start from index 1 since 0 is unused.*/
 
-  for (irq = 1; irq <= NR_IRQS; irq++)
+  for (irq = 0; irq < NR_IRQS; irq++)
     {
       /* Initialize as high-active, disable the interrupt, set target to IRQ,
        * Set priority level to 1 (= lowest) for all the interrupt lines
        */
 
-      uint32_t address = LPC313X_INTC_REQUEST(irq);
+      uint32_t address = LPC313X_INTC_REQUEST(irq+1);
       putreg32(INTC_REQUEST_WEACTLOW|INTC_REQUEST_WEENABLE|INTC_REQUEST_TARGET_IRQ|
                INTC_REQUEST_PRIOLEVEL(1)|INTC_REQUEST_WEPRIO, address);
 
@@ -142,7 +142,7 @@ void up_disable_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC313X_INTC_REQUEST(irq);
+  uint32_t address = LPC313X_INTC_REQUEST(irq+1);
 
   /* Clear the ENABLE bit with WE_ENABLE=1.  Configuration settings will be
    * preserved because WE_TARGET is zero.
@@ -165,7 +165,7 @@ void up_enable_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC313X_INTC_REQUEST(irq);
+  uint32_t address = LPC313X_INTC_REQUEST(irq+1);
 
   /* Set the ENABLE bit with WE_ENABLE=1.  Configuration settings will be
    * preserved because WE_TARGET is zero.
@@ -188,7 +188,7 @@ void up_maskack_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC313X_INTC_REQUEST(irq);
+  uint32_t address = LPC313X_INTC_REQUEST(irq+1);
 
   /* Clear the pending interrupt (INTC_REQUEST_CLRSWINT=1) AND disable interrupts
    * (ENABLE=0 && WE_ENABLE=1). Configuration settings will be preserved because

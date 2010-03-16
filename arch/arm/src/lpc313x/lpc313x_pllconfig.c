@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc313x/lpc313x_pllconfig.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -89,7 +89,7 @@ lpc313x_switchdomains(const struct lpc313x_pllconfig_s * const cfg)
     {
       /* Get the switch status registers (SSR) for this frequency input domain */
 
-      address = LPC313X_CGU_SSR_OFFSET(i);
+      address = LPC313X_CGU_SSR(i);
       regval  = getreg32(address);
 
       /* Check if the current frequency selection is the PLL-to-be-configured */

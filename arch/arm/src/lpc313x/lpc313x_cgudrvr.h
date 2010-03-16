@@ -1,7 +1,7 @@
 /************************************************************************
  * arch/arm/src/lpc313x/lpc313x_cgudrvr.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -561,7 +561,7 @@ static inline uint32_t lpc313x_getbasefreq(enum lpc313x_domainid_e dmnid)
 
   /* Fetch the SSR register associated with this clock domain */
 
-  regval = getreg32(LPC313X_CGU_SSR_OFFSET((int)dmnid));
+  regval = getreg32(LPC313X_CGU_SSR((int)dmnid));
 
   /* Extract the last frequency input selection */
 
