@@ -191,10 +191,24 @@ Image Format
   - make				# Make NuttX.  This will produce nuttx.bin
   - mklpc.sh				# Make the bootloader binary (nuttx.lpc)
 
-  NOTE: setenv.sh just sets up pathes to the toolchain and also to
-  configs/ea3131/tools where mklpc.sh resides. Use of setenv.sh is optional.
-  If you don't use setenv.sh, then just set your PATH variable appropriately or
-  use the full path to mklpc.sh in the final step.
+  NOTES:
+  
+    1. setenv.sh just sets up pathes to the toolchain and also to
+       configs/ea3131/tools where mklpc.sh resides. Use of setenv.sh is optional.
+       If you don't use setenv.sh, then just set your PATH variable appropriately or
+       use the full path to mklpc.sh in the final step.
+    2. You can't instruct Symantec to ignore the errors and it will stop quarantining
+       the NXP program.
+    3. The CRC32 logic in configs/ea3131/tools doesn't seem to work.  As a result,
+       the CRC is currently disabled in the header:
+
+       RCS file: /cvsroot/nuttx/nuttx/configs/ea3131/tools/lpchdr.c,v
+       retrieving revision 1.2
+       diff -r1.2 lpchdr.c
+       264c264
+       <   g_hdr.imageType       = 0x0000000b;
+       ---
+       >   g_hdr.imageType       = 0x0000000a;
 
 Image Download to ISRAM
 ^^^^^^^^^^^^^^^^^^^^^^^
