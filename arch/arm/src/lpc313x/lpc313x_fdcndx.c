@@ -1,7 +1,7 @@
 /************************************************************************
  * arch/arm/src/lpc313x/lpc313x_fdcndx.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -109,7 +109,7 @@ int lpc313x_fdcndx(enum lpc313x_clockid_e clkid, enum lpc313x_domainid_e dmnid)
   {
     /* Read the clock's ESR to get the fractional divider */
 
-    uint32_t regval = getreg32(LPC313X_CGU_ESR_OFFSET(esrndx));
+    uint32_t regval = getreg32(LPC313X_CGU_ESR(esrndx));
 
     /* Check if any fractional divider is enabled for this clock. */
 

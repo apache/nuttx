@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_cgu.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -1223,17 +1223,19 @@
 /* Fractional divider register 0 to 23 FDC0 to FDC23 (except FDC17) addresses 0x13004518 to 0x13004574 */
 
 #define CGU_FDC_MSUB_SHIFT               (11)      /* Bits 11-18: Modulo subtraction value */
-#define CGU_FDC_MSUB_MASK                (255 << CGU_FDC_MSUB_SHIFT)
+#define CGU_FDC_MSUB_MASK                (0x000000ff << CGU_FDC_MSUB_SHIFT)
+#define CGU_FDC_MSUB_EXTEND              (0xffffff00)
 #define CGU_FDC_MADD_SHIFT               (3)       /* Bits 3-10: Modulo addition value */
-#define CGU_FDC_MADD_MASK                (255 << CGU_FDC_MADD_SHIFT)
+#define CGU_FDC_MADD_MASK                (0x000000ff << CGU_FDC_MADD_SHIFT)
 #define CGU_FDC_STRETCH                  (1 << 2)  /* Bit 2:  Enables the stretching option */
 #define CGU_FDC_RESET                    (1 << 1)  /* Bit 1:  Reset fractional divider */
 #define CGU_FDC_RUN                      (1 << 0)  /* Bit 0:  Enable fractional divider */
 
 #define CGU_FDC17_MSUB_SHIFT             (16)      /* Bits 16-28: Modulo subtraction value */
-#define CGU_FDC17_MSUB_MASK              (0x1fff << CGU_FDC17_MSUB_SHIFT)
+#define CGU_FDC17_MSUB_MASK              (0x00001fff << CGU_FDC17_MSUB_SHIFT)
+#define CGU_FDC17_MSUB_EXTEND            (0xffffe000)
 #define CGU_FDC17_MADD_SHIFT             (3)       /* Bits 3-15: Modulo addition value */
-#define CGU_FDC17_MADD_MASK              (0x1fff << CGU_FDC17_MADD_SHIFT)
+#define CGU_FDC17_MADD_MASK              (0x00001fff << CGU_FDC17_MADD_SHIFT)
 #define CGU_FDC17_STRETCH                (1 << 2)  /* Bit 2:  Enables the stretching option */
 #define CGU_FDC17_RESET                  (1 << 1)  /* Bit 1:  Reset fractional divider */
 #define CGU_FDC17_RUN                    (1 << 0)  /* Bit 0:  Enable fractional divider */

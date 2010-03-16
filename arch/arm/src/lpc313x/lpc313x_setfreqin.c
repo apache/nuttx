@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc313x/lpc313x_setfreqin.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -92,7 +92,7 @@ void lpc313x_selectfreqin(enum lpc313x_domainid_e dmnid, uint32_t finsel)
 
   /* If FS1 is currently enabled set the reference clock to FS2 and enable FS2 */
 
-  if (getreg32(LPC313X_CGU_SSR(dmnid) & CGU_SSR_FS1STAT) != 0)
+  if ((getreg32(LPC313X_CGU_SSR(dmnid)) & CGU_SSR_FS1STAT) != 0)
     {
       /* Check if the selected frequency, FS1, is same as requested */
 

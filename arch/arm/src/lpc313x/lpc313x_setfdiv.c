@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc313x/lpc313x_setfdiv.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,7 +95,7 @@ void lpc313x_setfdiv(enum lpc313x_domainid_e dmnid,
     {
       /* Yes.. Save the current reference frequency selection */
 
-      regaddr  = LPC313X_CGU_SSR_OFFSET((int)dmnid);
+      regaddr  = LPC313X_CGU_SSR((int)dmnid);
       basefreq = (getreg32(regaddr) & CGU_SSR_FS_MASK) >> CGU_SSR_FS_SHIFT;
       
       /* Switch domain to FFAST input */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/lpc313x/irq.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@
 #define LPC313X_IRQ_TMR1      5 /* IRQ6:  Timer 1 Interrupt */
 #define LPC313X_IRQ_TMR2      6 /* IRQ7:  Timer 2 Interrupt */
 #define LPC313X_IRQ_TMR3      7 /* IRQ8:  Timer 3 Interrupt */
-#define LPC313X_IRQ_TMR3      8 /* IRQ9:  ADC 10-bit */
+#define LPC313X_IRQ_ADC       8 /* IRQ9:  ADC 10-bit */
 #define LPC313X_IRQ_UART      9 /* IRQ10: UART */
 #define LPC313X_IRQ_I2C0     10 /* IRQ11: I2C0 */
 #define LPC313X_IRQ_I2C1     11 /* IRQ12: I2C1 */

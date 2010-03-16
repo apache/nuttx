@@ -261,7 +261,11 @@ int main(int argc, char **argv, char **envp)
   memset(&g_hdr, 0, sizeof(struct lpc313x_header_s));
   g_hdr.vector          = 0xea00001e;  /* b 0x11029080 */
   g_hdr.magic           = 0x41676d69;
+#if 1 /* CRC doesn't seem to be functional */
+  g_hdr.imageType       = 0x0000000a;
+#else
   g_hdr.imageType       = 0x0000000b;
+#endif
   g_hdr.imageLength     = (buf.st_size + sizeof(struct lpc313x_header_s) + 511) & ~0x1ff;
 
   /* This is how much we must pad at the end of the binary image. */

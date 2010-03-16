@@ -1,7 +1,7 @@
 /************************************************************************
  * arch/arm/src/lpc313x/lpc313x_clkfreq.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -100,7 +100,7 @@ uint32_t lpc313x_clkfreq(enum lpc313x_clockid_e clkid,
    * it is enabled (not necessary since lpc313x_fdcndx() also does this check
    */
 
-  regval = getreg32(LPC313X_CGU_FDC_OFFSET(fdcndx));
+  regval = getreg32(LPC313X_CGU_FDC(fdcndx));
   if ((regval & CGU_ESR_ESREN) != 0)
     {
       int32_t msub;
@@ -117,14 +117,14 @@ uint32_t lpc313x_clkfreq(enum lpc313x_clockid_e clkid,
         {
           /* Range is 0-0x1fff for both */
 
-          msub = (regval & CGU_FDC17_MSUB_MASK) >> CGU_FDC17_MSUB_SHIFT;
+          msub = ((regval & CGU_FDC17_MSUB_MASK) >> CGU_FDC17_MSUB_SHIFT) | CGU_FDC17_MSUB_EXTEND;
           madd = (regval & CGU_FDC17_MADD_MASK) >> CGU_FDC17_MADD_SHIFT;
         }
       else
         {
           /* Range is 0-255 for both */
 
-          msub = (regval & CGU_FDC_MSUB_MASK) >> CGU_FDC_MSUB_SHIFT;
+          msub = ((regval & CGU_FDC_MSUB_MASK) >> CGU_FDC_MSUB_SHIFT) | CGU_FDC_MSUB_EXTEND;
           madd = (regval & CGU_FDC_MADD_MASK) >> CGU_FDC_MADD_SHIFT;
         }
 
