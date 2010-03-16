@@ -1060,3 +1060,5 @@
 	* arch/arm/src/lpc313x/lpc313x_boot.c - Fix an error in the vector
 	  initialization was causing a memory fault.
 	* lib/lib_strtod.c - Add strtod()
+	* lpc3131/ea3131 - Several bring fixes submitted by David Hewson.  The
+	  lpc3131 is almost there!  Thanks David!
