@@ -209,34 +209,61 @@ __start:
 	mcr	p15, 0, r0, c3, c0		/* Load domain access register */
 	mrc	p15, 0, r0, c1, c0		/* Get control register */
 	
-	/* Clear bits (see arm.h) */
+	/* Clear bits (see arm.h)
+	 *
+	 * CR_R - ROM MMU protection
+	 * CR_F - Implementation defined
+	 * CR_Z - Implementation defined
+	 *
+	 * CR_A - Alignment abort enable
+	 * CR_C - Dcache enable
+	 * CR_W - Write buffer enable
+	 *
+	 * CR_I - Icache enable
+	 */
 
 	bic	r0, r0, #(CR_R|CR_F|CR_Z)
 	bic	r0, r0, #(CR_A|CR_C|CR_W)
 	bic	r0, r0, #(CR_I)
 
-	/* Set bits (see arm.h) */
+	/* Set bits (see arm.h)
+	 *
+	 * CR_M - MMU enable
+	 * CR_P - 32-bit exception handler
+	 * CR_D - 32-bit data address range
+	 */
 
 	orr	r0, r0, #(CR_M|CR_P|CR_D)
 	
 	/* In most architectures, vectors are relocated to 0xffff0000.
 	 * -- but not all
+	 *
+	 * CR_S - System MMU protection
+	 * CR_V - Vectors relocated to 0xffff0000
 	 */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
-	orr	r0, r0, #(CR_S)
-#else
 	orr	r0, r0, #(CR_S|CR_V)
+#else
+	orr	r0, r0, #(CR_S)
 #endif
+	/* CR_RR - Round Robin cache replacement */
+
 #ifdef CPU_CACHE_ROUND_ROBIN
 	orr	r0, r0, #(CR_RR)
 #endif
+	/* CR_C - Dcache enable */
+
 #ifndef CPU_DCACHE_DISABLE
 	orr	r0, r0, #(CR_C)
 #endif
+	/* CR_C - Dcache enable */
+
 #ifndef CPU_ICACHE_DISABLE
 	orr	r0, r0, #(CR_I)
 #endif
+	/* CR_A - Alignment abort enable */
+
 #ifdef ALIGNMENT_TRAP
 	orr	r0, r0, #(CR_A)
 #endif
