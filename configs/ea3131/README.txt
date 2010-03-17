@@ -392,6 +392,10 @@ selected as follow:
 
 Where <subdir> is one of the following:
 
+  nsh:
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables only the serial NSH interface.
+
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are

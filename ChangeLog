@@ -1062,3 +1062,8 @@
 	* lib/lib_strtod.c - Add strtod()
 	* lpc3131/ea3131 - Several bring fixes submitted by David Hewson.  The
 	  lpc3131 is almost there!  Thanks David!
+	* arch/arm/src/arm/up_head.S - Corrected backward conditional compilation
+	  that selects if vectors are located at 0x0000:0000 or 0xffff:f000.
+	  This fixes the last show stopper bug in the lpc313x bring-up.
+	* configs/ea3131/nsh - Added a NuttShell (NSH) configuration for the
+	  EA3131.

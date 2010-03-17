@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 15, 2010</p>
+      <p>Last Updated: March 16, 2010</p>
     </td>
   </tr>
 </table>
@@ -1693,6 +1693,11 @@ nuttx-5.2 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* lib/lib_strtod.c - Add strtod()
 	* lpc3131/ea3131 - Several bring fixes submitted by David Hewson.  The
 	  lpc3131 is almost there!  Thanks David!
+	* arch/arm/src/arm/up_head.S - Corrected backward conditional compilation
+	  that selects if vectors are located at 0x0000:0000 or 0xffff:f000.
+	  This fixes the last show stopper bug in the lpc313x bring-up.
+	* configs/ea3131/nsh - Added a NuttShell (NSH) configuration for the
+	  EA3131.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
