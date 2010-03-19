@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 16, 2010</p>
+      <p>Last Updated: March 18, 2010</p>
     </td>
   </tr>
 </table>
@@ -729,55 +729,27 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.1 Release Notes</b>:
+<p><b>nuttx-5.2 Release Notes</b>:
 
 <p>
-  This 48<sup>th</sup> release of NuttX was made on January 30, 2010 and is available for download from the
+  This 49<sup>th</sup> release of NuttX was made on March 18, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release adds support for two new MCU architectures in various states of development:
+  This release completes the verification of the basic port for the NXP
+  <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a> MCU
+  on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a> board.
+  This basic port includes basic boot-up, serial console, and timer interrupts.  This port
+  has been verified on the using the NuttX OS test and includes a working
+  implementation of the NuttShell (NSH).
 </p>
-<ul>
-  <li>
-    <a href="http://www.atmel.com/products/at91/sam3landing.asp?family_id=605">AT91SAM3U</a>
-    <p>
-      This release adds support for the SAM3U-EK development board with the
-      <a href="http://www.atmel.com/dyn/products/product_card_mcu.asp?part_id=4562">AT91SAM3U4E</a>.
-      As with most NuttX architecutre releases, the release will be rolled out in
-      two parts:  A basic port and an extended port.
-    </p>
-    <p>
-      NuttX-5.1 includes the basic port for the SAM3U-EK board.  This release
-       passes the NuttX OS test and is proven to have a valid OS implementation.
-      It supports the basic boot-up, serial console and timer interrupts.  A
-      configuration to support the NuttShell is also included.
-    </p>
-    <p>
-      The extended port will also include support for SDIO-based SD cards and
-      USB device (and possible LCD support).  These extensions may or may not
-      happen by the Nuttx 5.2 release as my plate is kind of full now.
-    </p>
-  </li>
-  <li>
-    <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a>
-    <p>
-      This release also adds the complete implementation of the basic port for
-      the NXP LPC3131 MCU on the
-      <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a>
-      board.  That port, unfortunately has stalled due to tools issues.  Those tool issues have
-      been resolved and I am confident that the verified basic port will be
-      available in NuttX-5.2.
-    </p>
-    <p>
-     The extended release will follow and should include SDIO-based SD card
-     support and device USB.
-    </p>
-  </li>
-</ul>
+<p>
+  An extended release will follow and should include SDIO-based SD card
+  support and device USB.
+</p>
 <p>
   A few additional features and bugfixes of a minor nature were also incorporated
   as detailed in the <a href="#currentrelease">ChangeLog</a>.
@@ -961,19 +933,19 @@
 <tr>
   <td><br></td>
   <td>
-    <b>NXP LPC3131</b>.  The basic port for the NXP LPC3131 on the Embedded Artists EA3131
-    development board was released in NuttX-5.1 with a GNU arm-elf or arm-eabi toolchain* under Linux or Cygwin.
-    </p>
-    <p>
-       
+    <b>NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a></b>.
+    The basic port for the NXP LPC3131 on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a> 
+    development board was released in NuttX-5.1 with a GNU arm-elf or arm-eabi toolchain* under Linux or Cygwin
+    (but was not functional until NuttX-5.2).
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-          The basic EA3131 port is complete in NuttX-5.1 but, unfortunately, has not yet been verfied.
-          That effort has stalled due to some tool-related issues.
-          Those tool issues have been resolved and I am confident that the verified basic EA3131 port will be
-          available in NuttX-5.2.   The extended release will follow and should include SDIO-based SD card
+          The basic EA3131 port is complete and verified in NuttX-5.2 
+          This basic port includes basic boot-up, serial console, and timer interrupts.
+          This port has been verified on the using the NuttX OS test and includes a working
+          implementation of the NuttShell (NSH).
+          An extended release will follow and should include SDIO-based SD card
           support and device USB.
       </p>
     </ul>
@@ -1072,7 +1044,7 @@
       <p>
         Subsequent NuttX releases will extend this port and add support for SDIO-based SD cards and
         USB device (and possible LCD support).
-        These extensions may or may not happen by the Nuttx 5.2 release as my plate is kind of full now.
+        These extensions may or may not happen by the Nuttx 5.3 release as my plate is kind of full now.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1634,26 +1606,21 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.1 2010-01-30 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.2 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* arch/arm/src/lpc313x and arch/arm/include/lpc313x: Added framework
-	  to support the NXP LPC3131 MCU
-	* Add configs/ea3131.  The LPC3131 port for the Embedded Artist EA3131
-	  (LPC3131) is code complete and waiting for me to get hardware in
-	  hand.
-	* arch/arm/src/sam3u, arch/arm/include/sam3u, and configs/sam3u-ek -
-	  Added the basic framework needed to begin a port for the SAM3U-EK
-	  development board.
-	* confgs/ea3131/tools: Added a tool to create a image suitable for
-	  use with the LPC313x bootloader.
-	* configs/sam3u-3k/ostest - Completed verification of the basic NuttX
-	  OS test for the SAM3U.
-	* arch/arm/src/common/up_createstack - stack was always been cleared
-	  when it was allocated.  This is a good feature for monitoring the 
-	  stack during debug, but really hurts thread start-up performance.
-	  Clearing is now done if CONFIG_DEBUG=y only.  Changes was only made
-	  for arm, but really should be made for all architectures.
-	* configs/sam3u/nsh - Added NSH configuration for SAM3U
+	* arch/arm/src/sam3u/sam3u_pio.c - Fix an address calculation error
+	  that caused ports B & C to get mapped to the PIOA base address.
+	  This is an important bugfix! (a patch is available)
+	* arch/arm/src/lpc313x/lpc313x_boot.c - Fix an error in the vector
+	  initialization was causing a memory fault.
+	* lib/lib_strtod.c - Add strtod()
+	* lpc3131/ea3131 - Several bring fixes submitted by David Hewson.  The
+	  lpc3131 is almost there!  Thanks David!
+	* arch/arm/src/arm/up_head.S - Corrected backward conditional compilation
+	  that selects if vectors are located at 0x0000:0000 or 0xffff:f000.
+	  This fixes the last show stopper bug in the lpc313x bring-up.
+	* configs/ea3131/nsh - Added a NuttShell (NSH) configuration for the
+	  EA3131.
 
 pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1683,21 +1650,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.2 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* arch/arm/src/sam3u/sam3u_pio.c - Fix an address calculation error
-	  that caused ports B & C to get mapped to the PIOA base address.
-	  This is an important bugfix! (a patch is available)
-	* arch/arm/src/lpc313x/lpc313x_boot.c - Fix an error in the vector
-	  initialization was causing a memory fault.
-	* lib/lib_strtod.c - Add strtod()
-	* lpc3131/ea3131 - Several bring fixes submitted by David Hewson.  The
-	  lpc3131 is almost there!  Thanks David!
-	* arch/arm/src/arm/up_head.S - Corrected backward conditional compilation
-	  that selects if vectors are located at 0x0000:0000 or 0xffff:f000.
-	  This fixes the last show stopper bug in the lpc313x bring-up.
-	* configs/ea3131/nsh - Added a NuttShell (NSH) configuration for the
-	  EA3131.
+nuttx-5.3 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

@@ -1165,3 +1165,16 @@ o LPC3131 (http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/)
 
 A few additional features and bugfixes of a minor nature were also incorporated
 as detailed in the ChangeLog.
+
+nuttx-5.2
+^^^^^^^^^
+
+This is the 49th release of NuttX.  This release completes the verification of
+the basic port for the NXP LPC3131 MCU on the Embedded Artists EA3131 board
+(http://www.embeddedartists.com/products/kits/lpc3131_kit.php).  This basic
+port includes basic boot-up, serial console, and timer interrupts.  This port
+has been verified on the using the NuttX OS test and includes a working
+implementation of the NuttShell (NSH).
+
+An extended release will follow and should include SDIO-based SD card
+support and device USB.
