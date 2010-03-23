@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sam3u/chip.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@
 #  define CONFIG_SAM3U_SRAM0_SIZE   0x00008000  /* 32Kb */
 #  define CONFIG_SAM3U_SRAM1_SIZE   0x00004000  /* 16Kb */
 #  define CONFIG_SAM3U_NFCSRAM_SIZE 0x00001000  /*  4Kb */
-
+#  define CONFIG_SAM3U_MCI2         1
 #else
 #  error "Unknown SAM3U chip type"
 #endif
