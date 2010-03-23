@@ -231,6 +231,7 @@
 #define GPIO_MCI_DAT7             (GPIO_PERIPHA|GPIO_CFG_PULLUP|GPIO_PORT_PIOB|GPIO_PIN31)
 #define GPIO_MCI_CK               (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN3)
 #define GPIO_MCI_DA               (GPIO_PERIPHA|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN4)
+#define GPIO_MCI_DAT0IN           (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN5)
 
 #define GPIO_PWMC_PWMH0           (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOB|GPIO_PIN0)
 #define GPIO_PWMC_PWML0           (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN7)
@@ -292,6 +293,9 @@
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+
+typedef FAR void *DMA_HANDLE;
+typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t isr, void *arg);
 
 /************************************************************************************
  * Inline Functions
@@ -427,6 +431,85 @@ EXTERN void sam3u_gpioirqdisable(int irq);
 #else
 #  define sam3u_gpioirqdisable(irq)
 #endif
+
+/****************************************************************************
+ * Name: sam3u_dmachannel
+ *
+ * Description:
+ *   Allocate a DMA channel.  This function sets aside a DMA channel and
+ *   gives the caller mutually exclusive access to the DMA channel.
+ *
+ * Returned Value:
+ *   One success, this function ALWAYS will return a non-NULL, DMA channel
+ *   handle.
+ *
+ ****************************************************************************/
+
+EXTERN DMA_HANDLE sam3u_dmachannel(void);
+
+/****************************************************************************
+ * Name: sam3u_dmafree
+ *
+ * Description:
+ *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
+ *   NEVER be used again until sam3u_dmachannel() is called again to
+ *   re-allocate the channel.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   - The caller holds the DMA channel.
+ *   - There is no DMA in progress
+ *
+ ****************************************************************************/
+
+EXTERN void sam3u_dmafree(DMA_HANDLE handle);
+
+/****************************************************************************
+ * Name: sam3u_dmasetup
+ *
+ * Description:
+ *   Configure DMA before using
+ *
+ * Assumptions:
+ *   - DMA handle allocated by sam3u_dmachannel()
+ *   - No DMA in progress
+ *
+ ****************************************************************************/
+
+EXTERN void sam3u_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                           size_t ntransfers, uint32_t ccr);
+
+/****************************************************************************
+ * Name: sam3u_dmastart
+ *
+ * Description:
+ *   Start the DMA transfer
+ *
+ * Assumptions:
+ *   - DMA handle allocated by sam3u_dmachannel()
+ *   - No DMA in progress
+ *
+ ****************************************************************************/
+
+EXTERN void sam3u_dmastart(DMA_HANDLE handle, dma_callback_t callback,
+                           void *arg, bool half);
+
+/****************************************************************************
+ * Name: sam3u_dmastop
+ *
+ * Description:
+ *   Cancel the DMA.  After sam3u_dmastop() is called, the DMA channel is
+ *   reset and sam3u_dmasetup() must be called before sam3u_dmastart() can be
+ *   called again
+ *
+ * Assumptions:
+ *   - DMA handle allocated by sam3u_dmachannel()
+ *
+ ****************************************************************************/
+
+EXTERN void sam3u_dmastop(DMA_HANDLE handle);
 
 #undef EXTERN
 #if defined(__cplusplus)

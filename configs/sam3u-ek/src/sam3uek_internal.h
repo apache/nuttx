@@ -2,7 +2,7 @@
  * configs/sam3uek_eval/src/sam3uek_internal.h
  * arch/arm/src/board/sam3uek_internal.n
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,13 +65,12 @@
 #define GPIO_BUTTON1 (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_CFG_DEGLITCH|GPIO_PORT_PIOA|GPIO_PIN18)
 #define GPIO_BUTTON2 (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_CFG_DEGLITCH|GPIO_PORT_PIOA|GPIO_PIN19)
 
+#define IRQ_BUTTON1  SAM3U_IRQ_PA18
+#define IRQ_BUTTON2  SAM3U_IRQ_PA19
+
 /* SD Card Detect */
 
 #define GPIO_MCI_CD  (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN25)
-
-
-#define IRQ_BUTTON1  SAM3U_IRQ_PA18
-#define IRQ_BUTTON2  SAM3U_IRQ_PA19
 
 /* SPI Chip Selects */
 
