@@ -62,6 +62,7 @@
 
 #include "sam3u_internal.h"
 #include "sam3u_dmac.h"
+#include "sam3u_pmc.h"
 #include "sam3u_hsmci.h"
 
 #if CONFIG_SAM3U_HSMCI
@@ -103,14 +104,10 @@
  * HSMCI_MMCXFR_CLKDIV, and HSMCI_SDXFR_CLKDIV.
  */
   
-#define SAM3U_CLCKCR_INIT        (HSMCI_INIT_CLKDIV|HSMCI_CLKCR_RISINGEDGE|\
-                                  HSMCI_CLKCR_WIDBUS_D1)
-#define HSMCI_CLKCR_MMCXFR       (HSMCI_MMCXFR_CLKDIV|HSMCI_CLKCR_RISINGEDGE|\
-                                  HSMCI_CLKCR_WIDBUS_D1)
-#define HSMCI_CLCKR_SDXFR        (HSMCI_SDXFR_CLKDIV|HSMCI_CLKCR_RISINGEDGE|\
-                                  HSMCI_CLKCR_WIDBUS_D1)
-#define HSMCI_CLCKR_SDWIDEXFR    (HSMCI_SDXFR_CLKDIV|HSMCI_CLKCR_RISINGEDGE|\
-                                  HSMCI_CLKCR_WIDBUS_D4)
+#define HSMCI_CLCKCR_INIT        (((SAM3U_MCK_FREQUENCY / (  400000 * 2)) - 1) | (7 << HSMCI_MR_PWSDIV_SHIFT))
+#define HSMCI_CLKCR_MMCXFR       (((SAM3U_MCK_FREQUENCY / (20000000 * 2)) - 1) | (7 << HSMCI_MR_PWSDIV_SHIFT))
+#define HSMCI_CLCKR_SDXFR        (((SAM3U_MCK_FREQUENCY / (25000000 * 2)) - 1) | (7 << HSMCI_MR_PWSDIV_SHIFT))
+#define HSMCI_CLCKR_SDWIDEXFR    (((SAM3U_MCK_FREQUENCY / (25000000 * 2)) - 1) | (7 << HSMCI_MR_PWSDIV_SHIFT))
 
 /* Timing */
 
@@ -1309,11 +1306,11 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
   
   /* Reset the MCI */
 
-  putreg32(AT91C_MCI_SWRST, SAM3U_HSMCI_CR);
+  putreg32(HSMCI_CR_SWRST, SAM3U_HSMCI_CR);
   
   /* Disable the MCI */
 
-  putreg32(AT91C_MCI_MCIDIS | AT91C_MCI_PWSDIS, SAM3U_HSMCI_CR);
+  putreg32(HSMCI_CR_MCIDIS | HSMCI_CR_PWSDIS, SAM3U_HSMCI_CR);
   
   /* Disable all the interrupts */
 
@@ -1321,30 +1318,28 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
   
   /* Set the Data Timeout Register */
 
-  putreg32(DTOR_1MEGA_CYCLES, SAM3U_HSMCI_DTOR);
+  putreg32(HSMCI_DTOR_DTOCYC_MAX | HSMCI_DTOR_DTOMUL_MAX, SAM3U_HSMCI_DTOR);
   
   /* Set the Mode Register: 400KHz for MCK = 48MHz (clkdiv = 58) */
 
-  clkdiv = (BOARD_MCK / (MCI_INITIAL_SPEED * 2)) - 1;
-  putreg32((clkdiv | (AT91C_MCI_PWSDIV & (7 << 8))), SAM3U_HSMCI_MR);
+  putreg32(HSMCI_CLCKCR_INIT, SAM3U_HSMCI_MR);
   
   /* Set the SDCard Register */
 
-  putreg32(mode, SAM3U_HSMCI_SDCR);
-  
+  putreg32(HSMCI_SDCR_SDCSEL_SLOTA | HSMCI_SDCR_SDCBUS_4BIT, SAM3U_HSMCI_SDCR);
+
   /* Enable the MCI and the Power Saving */
 
-  putreg32(AT91C_MCI_MCIEN, SAM3U_HSMCI_CR);
-  
+  putreg32(HSMCI_CR_MCIEN, SAM3U_HSMCI_CR);
+
   /* Disable the DMA interface */
 
-  putreg32(AT91C_MCI_DMAEN_DISABLE, SAM3U_HSMCI_DMA);
+  putreg32(0, SAM3U_HSMCI_DMA);
   
   /* Configure MCI */
 
-  regval = AT91C_MCI_FIFOMODE_ONEDATA | AT91C_MCI_FERRCTRL_RWCMD;
-  putreg32(regval, SAM3U_HSMCI_CFG);
-  
+  putreg32(HSMCI_CFG_FIFOMODE, SAM3U_HSMCI_CFG);
+
   /* Disable the MCI peripheral clock */
 
   putreg32((1 << SAM3U_PID_HSMCI), SAM3U_PMC_PCDR);
@@ -1438,12 +1433,12 @@ static void sam3u_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
     {
     default:
     case CLOCK_HSMCI_DISABLED:     /* Clock is disabled */
-      clckr  = SAM3U_CLCKCR_INIT;
+      clckr  = HSMCI_CLCKCR_INIT;
       enable = 0;
       return;
 
     case CLOCK_IDMODE:            /* Initial ID mode clocking (<400KHz) */
-      clckr  = SAM3U_CLCKCR_INIT;
+      clckr  = HSMCI_CLCKCR_INIT;
       break;
 
     case CLOCK_MMC_TRANSFER:      /* MMC normal operation clocking */
