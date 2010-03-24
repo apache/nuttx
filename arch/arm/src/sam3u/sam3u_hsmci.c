@@ -120,42 +120,95 @@
 
 /* DMA CCR register settings */
 
-#define HSMCI_RXDMA32_CONFIG     (CONFIG_HSMCI_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
-                                  DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC)
-#define HSMCI_TXDMA32_CONFIG     (CONFIG_HSMCI_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
-                                  DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
+#define HSMCI_RXDMA32_CONFIG \
+  ( CONFIG_HSMCI_DMAPRIO | DMA_CCR_MSIZE_32BITS | DMA_CCR_PSIZE_32BITS | DMA_CCR_MINC)
+#define HSMCI_TXDMA32_CONFIG \
+  ( CONFIG_HSMCI_DMAPRIO | DMA_CCR_MSIZE_32BITS | DMA_CCR_PSIZE_32BITS | DMA_CCR_MINC | DMA_CCR_DIR)
 
 /* FIFO sizes */
 
 #define HSMCI_HALFFIFO_WORDS     (8)
 #define HSMCI_HALFFIFO_BYTES     (8*4)
 
-/* Data transfer interrupt mask bits */
+/* Status errors:
+ *
+ *   HSMCI_INT_UNRE          Data transmit underrun
+ *   HSMCI_INT_OVRE          Data receive overrun
+ *   HSMCI_INT_BLKOVRE       DMA receive block overrun error
+ *   HSMCI_INT_CSTOE         Completion signal time-out error (see HSMCI_CSTOR)
+ *   HSMCI_INT_DTOE          Data time-out error (see HSMCI_DTOR)
+ *   HSMCI_INT_DCRCE         Data CRC Error
+ *   HSMCI_INT_RTOE          Response Time-out
+ *   HSMCI_INT_RENDE         Response End Bit Error
+ *   HSMCI_INT_RCRCE         Response CRC Error
+ *   HSMCI_INT_RDIRE         Response Direction Error
+ *   HSMCI_INT_RINDE         Response Index Error
+ */
 
-#define HSMCI_RECV_IER      (HSMCI_INT_DCRCE|HSMCI_INT_DTOE|\
-                             HSMCI_INT_BLKE|HSMCI_INT_OVRE|\
-                             HSMCI_INT_RXFIFOHF|HSMCI_INT_RENDE)
-#define HSMCI_SEND_IER      (HSMCI_INT_DCRCE|HSMCI_INT_DTOE|\
-                             HSMCI_INT_BLKE|HSMCI_INT_UNRE|\
-                             HSMCI_INT_TXFIFOHE|HSMCI_INT_RENDE)
-#define HSMCI_DMARECV_IER   (HSMCI_INT_DCRCE|HSMCI_INT_DTOE|\
-                             HSMCI_INT_BLKE|HSMCI_INT_OVRE|\
-                             HSMCI_INT_RENDE)
-#define HSMCI_DMASEND_IER   (HSMCI_INT_DCRCE|HSMCI_INT_DTOE|\
-                             HSMCI_INT_BLKE|HSMCI_INT_UNRE|\
-                             HSMCI_INT_RENDE)
+#define HSMCI_STATUS_ERRORS \
+  ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+    HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
+    HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE )  
+
+/* Response errors:
+ *
+ *   HSMCI_INT_CSTOE         Completion signal time-out error (see HSMCI_CSTOR)
+ *   HSMCI_INT_RTOE          Response Time-out
+ *   HSMCI_INT_RENDE         Response End Bit Error
+ *   HSMCI_INT_RCRCE         Response CRC Error
+ *   HSMCI_INT_RDIRE         Response Direction Error
+ *   HSMCI_INT_RINDE         Response Index Error
+ */
+
+#define HSMCI_RESPONSE_ERRORS \
+  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
+    HSMCI_INT_RDIRE | HSMCI_INT_RINDE )  
+
+/* Data transfer errors:
+ *
+ *   HSMCI_INT_UNRE          Data transmit underrun
+ *   HSMCI_INT_OVRE          Data receive overrun
+ *   HSMCI_INT_BLKOVRE       DMA receive block overrun error
+ *   HSMCI_INT_CSTOE         Completion signal time-out error (see HSMCI_CSTOR)
+ *   HSMCI_INT_DTOE          Data time-out error (see HSMCI_DTOR)
+ *   HSMCI_INT_DCRCE         Data CRC Error
+ */
+
+#define HSMCI_DATA_ERRORS \
+  ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+    HSMCI_INT_DTOE  | HSMCI_INT_DCRCE )
+
+#define HSMCI_DATA_RECV_ERRORS \
+  ( HSMCI_INT_OVRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
+
+#define HSMCI_DATA_DMARECV_ERRORS \
+  ( HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
+    HSMCI_INT_DCRCE )
+
+#define HSMCI_DATA_SEND_ERRORS \
+  ( HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
+
+#define HSMCI_DATA_DMASEND_ERRORS \
+  ( HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
+
+/* Data transfer status and interrupt mask bits */
+
+#define HSMCI_RECV_INTS \
+  ( HSMCI_DATA_RECV_ERRORS    | HSMCI_INT_XFRDONE )
+#define HSMCI_SEND_INTS \
+  ( HSMCI_DATA_SEND_ERROR     | HSMCI_INT_XFRDONE )
+#define HSMCI_DMARECV_INTS \
+  ( HSMCI_DATA_DMARECV_ERRORS | HSMCI_INT_XFRDONE | HSMCI_INT_DMADONE )
+#define HSMCI_DMASEND_INTS \
+  ( HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE | HSMCI_INT_DMADONE )
 
 /* Event waiting interrupt mask bits */
 
-#define HSMCI_CMDDONE_SR    (HSMCI_INT_CMDRDY)
-#define HSMCI_RESPDONE_SR   (HSMCI_INT_RTOE|HSMCI_INT_RCRCE|\
-                             HSMCI_INT_CMDREND)
-#define HSMCI_XFRDONE_SR    (0)
-
-#define HSMCI_CMDDONE_IER   (HSMCI_INT_CMDRDY)
-#define HSMCI_RESPDONE_IER  (HSMCI_INT_RCRCE|HSMCI_INT_RTOE|\
-                             HSMCI_INT_CMDREND)
-#define HSMCI_XFRDONE_IER   (0)
+#define HSMCI_CMDDONE_INTS \
+  ( HSMCI_INT_CMDRDY )
+#define HSMCI_RESPONSE_INTS \
+  ( HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDREND )
+#define HSMCI_XFRDONE_INTS (0)
 
 /* Register logging support */
 
@@ -1126,7 +1179,7 @@ static int sam3u_interrupt(int irq, void *context)
   /* Loop while there are pending interrupts.  Check the HSMCI status
    * register.  Mask out all bits that don't correspond to enabled
    * interrupts.  (This depends on the fact that bits are ordered
-   * the same in both the SR and MASK register).  If there are non-zero
+   * the same in both the SR and IMR registers).  If there are non-zero
    * bits remaining, then we have work to do here.
    */
 
@@ -1246,7 +1299,7 @@ static int sam3u_interrupt(int irq, void *context)
         {
           /* Is this a response completion event? */
 
-          if ((pending & HSMCI_RESPDONE_SR) != 0)
+          if ((pending & HSMCI_RESPONSE_INTS) != 0)
             {
               /* Yes.. Is their a thread waiting for response done? */
 
@@ -1260,7 +1313,7 @@ static int sam3u_interrupt(int irq, void *context)
 
           /* Is this a command completion event? */
 
-          if ((pending & HSMCI_CMDDONE_SR) != 0)
+          if ((pending & HSMCI_CMDDONE_INTS) != 0)
             {
               /* Yes.. Is their a thread waiting for command done? */
 
@@ -1624,7 +1677,7 @@ static int sam3u_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* And enable interrupts */
 
-  sam3u_enablexfrints(priv, HSMCI_RECV_IER);
+  sam3u_enablexfrints(priv, HSMCI_RECV_INTS);
   sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
@@ -1678,7 +1731,7 @@ static int sam3u_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
   /* Enable TX interrrupts */
 
-  sam3u_enablexfrints(priv, HSMCI_SEND_IER);
+  sam3u_enablexfrints(priv, HSMCI_SEND_INTS);
   sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
@@ -1760,7 +1813,7 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
     case MMCSD_NO_RESPONSE:
-      events  = HSMCI_CMDDONE_SR;
+      events  = HSMCI_CMDDONE_INTS;
       timeout = HSMCI_CMDTIMEOUT;
       break;
 
@@ -1768,7 +1821,7 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     case MMCSD_R1B_RESPONSE:
     case MMCSD_R2_RESPONSE:
     case MMCSD_R6_RESPONSE:
-      events  = HSMCI_RESPDONE_SR;
+      events  = HSMCI_RESPONSE_INTS;
       timeout = HSMCI_LONGTIMEOUT;
       break;
 
@@ -1778,7 +1831,7 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
     case MMCSD_R3_RESPONSE:
     case MMCSD_R7_RESPONSE:
-      events  = HSMCI_RESPDONE_SR;
+      events  = HSMCI_RESPONSE_INTS;
       timeout = HSMCI_CMDTIMEOUT;
       break;
 
@@ -2057,17 +2110,17 @@ static void sam3u_waitenable(FAR struct sdio_dev_s *dev,
   waitmask = 0;
   if ((eventset & SDIOWAIT_CMDDONE) != 0)
     {
-      waitmask |= HSMCI_CMDDONE_IER;
+      waitmask |= HSMCI_CMDDONE_INTS;
     }
 
   if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
     {
-      waitmask |= HSMCI_RESPDONE_IER;
+      waitmask |= HSMCI_RESPONSE_INTS;
     }
 
   if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
     {
-      waitmask |= HSMCI_XFRDONE_IER;
+      waitmask |= HSMCI_XFRDONE_INTS;
     }
 
   /* Enable event-related interrupts */
@@ -2318,7 +2371,7 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* Configure the RX DMA */
 
-      sam3u_enablexfrints(priv, HSMCI_DMARECV_IER);
+      sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
 
       putreg32(1, HSMCI_DCTRL_DMAEN_BB);
       sam3u_dmasetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer,
@@ -2402,7 +2455,7 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Enable TX interrrupts */
 
-      sam3u_enablexfrints(priv, HSMCI_DMASEND_IER);
+      sam3u_enablexfrints(priv, HSMCI_DMASEND_INTS);
 
       ret = OK;
     }
