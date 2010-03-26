@@ -49,9 +49,20 @@
 /* Get customizations for each supported chip */
 
 #ifdef CONFIG_ARCH_CHIP_AT91SAM3U4E
+/* Internal memory */
+
 #  define CONFIG_SAM3U_SRAM0_SIZE   0x00008000  /* 32Kb */
 #  define CONFIG_SAM3U_SRAM1_SIZE   0x00004000  /* 16Kb */
 #  define CONFIG_SAM3U_NFCSRAM_SIZE 0x00001000  /*  4Kb */
+
+/* DMA */
+
+#  define CONFIG_SAM3U_NDMACHAN     4           /* 4 DMA Channels */
+#  define CONFIG_SAM3U_DMACHAN8SET  0x07        /* DMA Channels 0-2 have 8-byte FIFOs */
+#  define CONFIG_SAM3U_DMACHAN32SET 0x08        /* DMA channel 3 has a 32-byte FIFO */
+
+/* Memory card interface */
+
 #  define CONFIG_SAM3U_MCI2         1
 #else
 #  error "Unknown SAM3U chip type"

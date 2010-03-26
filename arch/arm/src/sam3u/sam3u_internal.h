@@ -297,6 +297,31 @@
 typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t isr, void *arg);
 
+#ifdef CONFIG_DEBUG_DMA
+struct sam3u_dmaregs_s
+{
+  /* Global Registers */
+
+  uint32_t gcfg;    /* DMAC Global Configuration Register */
+  uint32_t en;      /* DMAC Enable Register */
+  uint32_t sreq;    /* DMAC Software Single Request Register */
+  uint32_t creq;    /* DMAC Software Chunk Transfer Request Register */
+  uint32_t last;    /* DMAC Software Last Transfer Flag Register */
+  uint32_t ebcimr;  /* DMAC Error Mask */
+  uint32_t ebcisr;  /* DMAC Error Status */
+  uint32_t chsr;    /* DMAC Channel Handler Status Register */
+
+  /* Channel Registers */
+
+  uint32_t saddr;   /* DMAC Channel Source Address Register */
+  uint32_t daddr;   /* DMAC Channel Destination Address Register */
+  uint32_t dscr;    /* DMAC Channel Descriptor Address Register */
+  uint32_t ctrla;   /* DMAC Channel Control A Register */
+  uint32_t ctrlb;   /* DMAC Channel Control B Register */
+  uint32_t cfg;     /* DMAC Channel Configuration Register */
+};
+#endif
+
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
@@ -510,6 +535,42 @@ EXTERN void sam3u_dmastart(DMA_HANDLE handle, dma_callback_t callback,
  ****************************************************************************/
 
 EXTERN void sam3u_dmastop(DMA_HANDLE handle);
+
+/****************************************************************************
+ * Name: sam3u_dmasample
+ *
+ * Description:
+ *   Sample DMA register contents
+ *
+ * Assumptions:
+ *   - DMA handle allocated by sam3u_dmachannel()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_DMA
+EXTERN void sam3u_dmasample(DMA_HANDLE handle, struct sam3u_dmaregs_s *regs);
+#else
+#  define sam3u_dmasample(handle,regs)
+#endif
+
+/****************************************************************************
+ * Name: sam3u_dmadump
+ *
+ * Description:
+ *   Dump previously sampled DMA register contents
+ *
+ * Assumptions:
+ *   - DMA handle allocated by sam3u_dmachannel()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_DMA
+EXTERN void sam3u_dmadump(DMA_HANDLE handle, const struct sam3u_dmaregs_s *regs,
+                          const char *msg);
+#else
+#  define sam3u_dmadump(handle,regs,msg)
+#endif
+
 
 #undef EXTERN
 #if defined(__cplusplus)
