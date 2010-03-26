@@ -73,9 +73,8 @@
 
 /* Configuration ************************************************************/
 
-#if defined(CONFIG_HSMCI_DMA) && !defined(CONFIG_SAM3U_DMA2)
-#  warning "CONFIG_HSMCI_DMA support requires CONFIG_SAM3U_DMA2"
-#  undef CONFIG_HSMCI_DMA
+#if !defined(CONFIG_SDIO_DMA) || !defined(CONFIG_SAM3U_DMA)
+#  warning "HSMCI requires CONFIG_SDIO_DMA and CONFIG_SAM3U_DMA"
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -213,7 +212,7 @@
 /* Register logging support */
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-#  if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_HSMCI_DMA)
+#ifdef CONFIG_DEBUG_DMA
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_BEFORE_ENABLE 1
 #    define SAMPLENDX_AFTER_SETUP   2
@@ -264,10 +263,8 @@ struct sam3u_dev_s
   /* DMA data transfer support */
 
   bool               widebus;    /* Required for DMA support */
-#ifdef CONFIG_HSMCI_DMA
   bool               dmamode;    /* true: DMA mode transfer */
   DMA_HANDLE         dma;        /* Handle for DMA channel */
-#endif
 };
 
 /* Register logging support */
@@ -288,8 +285,8 @@ struct sam3u_hsmciregs_s
 
 struct sam3u_sampleregs_s
 {
-  struct sam3u_hsmciregs_s sdio;
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_HSMCI_DMA)
+  struct sam3u_hsmciregs_s hsmci;
+#ifdef CONFIG_DEBUG_DMA
   struct sam3u_dmaregs_s  dma;
 #endif
 };
@@ -328,9 +325,7 @@ static void sam3u_dumpsamples(struct sam3u_dev_s *priv);
 #  define   sam3u_dumpsamples(priv)
 #endif
 
-#ifdef CONFIG_HSMCI_DMA
 static void sam3u_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg);
-#endif
 
 /* Data Transfer Helpers ****************************************************/
 
@@ -391,13 +386,11 @@ static int  sam3u_registercallback(FAR struct sdio_dev_s *dev,
 
 /* DMA */
 
-#ifdef CONFIG_HSMCI_DMA
 static bool sam3u_dmasupported(FAR struct sdio_dev_s *dev);
 static int  sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
-#endif
 
 /* Initialization/uninitialization/reset ************************************/
 
@@ -432,11 +425,9 @@ struct sam3u_dev_s g_sdiodev =
     .eventwait        = sam3u_eventwait,
     .callbackenable   = sam3u_callbackenable,
     .registercallback = sam3u_registercallback,
-#ifdef CONFIG_HSMCI_DMA
     .dmasupported     = sam3u_dmasupported,
     .dmarecvsetup     = sam3u_dmarecvsetup,
     .dmasendsetup     = sam3u_dmasendsetup,
-#endif
   },
 };
 
@@ -704,13 +695,13 @@ static void sam3u_sdiosample(struct sam3u_hsmciregs_s *regs)
 static void sam3u_sample(struct sam3u_dev_s *priv, int index)
 {
   struct sam3u_sampleregs_s *regs = &g_sampleregs[index];
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_HSMCI_DMA)
+#ifdef CONFIG_DEBUG_DMA
   if (priv->dmamode)
     {
       sam3u_dmasample(priv->dma, &regs->dma);
     }
 #endif
-  sam3u_sdiosample(&regs->sdio);
+  sam3u_sdiosample(&regs->hsmci);
 }
 #endif
 
@@ -750,13 +741,13 @@ static void sam3u_sdiodump(struct sam3u_hsmciregs_s *regs, const char *msg)
 static void sam3u_dumpsample(struct sam3u_dev_s *priv,
                              struct sam3u_sampleregs_s *regs, const char *msg)
 {
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_HSMCI_DMA)
+#ifdef CONFIG_DEBUG_DMA
   if (priv->dmamode)
     {
       sam3u_dmadump(priv->dma, &regs->dma, msg);
     }
 #endif
-  sam3u_sdiodump(&regs->sdio, msg);
+  sam3u_sdiodump(&regs->hsmci, msg);
 }
 #endif
 
@@ -772,7 +763,7 @@ static void sam3u_dumpsample(struct sam3u_dev_s *priv,
 static void  sam3u_dumpsamples(struct sam3u_dev_s *priv)
 {
   sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_HSMCI_DMA)
+#ifdef CONFIG_DEBUG_DMA
   if (priv->dmamode)
     {
       sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
@@ -780,7 +771,7 @@ static void  sam3u_dumpsamples(struct sam3u_dev_s *priv)
 #endif
   sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
   sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_HSMCI_DMA)
+#ifdef CONFIG_DEBUG_DMA
   if (priv->dmamode)
     {
       sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
@@ -797,7 +788,6 @@ static void  sam3u_dumpsamples(struct sam3u_dev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_DMA
 static void sam3u_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
   /* FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)arg; */
@@ -813,7 +803,6 @@ static void sam3u_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   sam3u_sample((struct sam3u_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
 }
-#endif
 
 /****************************************************************************
  * Data Transfer Helpers
@@ -1121,7 +1110,6 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
-#ifdef CONFIG_HSMCI_DMA
   if (priv->dmamode)
     {
       /* DMA debug instrumentation */
@@ -1135,7 +1123,6 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
 
       sam3u_dmastop(priv->dma);
     }
-#endif
 
   /* Mark the transfer finished */
 
@@ -1190,9 +1177,7 @@ static int sam3u_interrupt(int irq, void *context)
       pending  = enabled & priv->xfrmask;
       if (pending != 0)
         {
-#ifdef CONFIG_HSMCI_DMA
           if (!priv->dmamode)
-#endif
            {
              /* Is the RX FIFO half full or more?  Is so then we must be
               * processing a receive transaction.
@@ -1227,9 +1212,7 @@ static int sam3u_interrupt(int irq, void *context)
                * half-full interrupt will be received.
                */
 
-#ifdef CONFIG_HSMCI_DMA
               if (!priv->dmamode)
-#endif
                 {
                   /* Receive data from the RX FIFO */
 
@@ -1413,9 +1396,7 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
   /* DMA data transfer support */
 
   priv->widebus    = false;  /* Required for DMA support */
-#ifdef CONFIG_HSMCI_DMA
   priv->dmamode    = false;  /* true: DMA mode transfer */
-#endif
   irqrestore(flags);
 }
 
@@ -1666,9 +1647,7 @@ static int sam3u_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t*)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_HSMCI_DMA
   priv->dmamode   = false;
-#endif
 
   /* Then set up the SDIO data path */
 
@@ -1720,9 +1699,7 @@ static int sam3u_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
   priv->buffer    = (uint32_t*)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_HSMCI_DMA
   priv->dmamode   = false;
-#endif
 
   /* Then set up the HSMCI data path */
 
@@ -1772,7 +1749,6 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
-#ifdef CONFIG_HSMCI_DMA
   if (priv->dmamode)
     {
       /* Make sure that the DMA is stopped (it will be stopped automatically
@@ -1782,7 +1758,6 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
 
       sam3u_dmastop(priv->dma);
     }
-#endif
 
   /* Mark no transfer in progress */
 
@@ -2310,12 +2285,10 @@ static int sam3u_registercallback(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_DMA
 static bool sam3u_dmasupported(FAR struct sdio_dev_s *dev)
 {
   return true;
 }
-#endif
 
 /****************************************************************************
  * Name: sam3u_dmarecvsetup
@@ -2336,7 +2309,6 @@ static bool sam3u_dmasupported(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_DMA
 static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
@@ -2386,7 +2358,6 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
     }
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: sam3u_dmasendsetup
@@ -2407,7 +2378,6 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_DMA
 static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
@@ -2461,7 +2431,6 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
     }
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Initialization/uninitialization/reset
@@ -2576,9 +2545,8 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
   /* Allocate a DMA channel */
 
-#if defined(CONFIG_HSMCI_DMA) && defined(CONFIG_SAM3U_MCI2)
   priv->dma = sam3u_dmachannel();
-#endif
+  DEBUGASSERT(priv->dma);
 
   /* Configure GPIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip is capable of
    * 8-bit wide bus operation but D4-D7 are not configured, (2) any card detection
@@ -2683,4 +2651,4 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
   irqrestore(flags);
 }
-#endif /* CONFIG_SAM3U_SDIO */
+#endif /* CONFIG_SAM3U_HSMCI */
