@@ -341,8 +341,9 @@
 /* DMA channel registers */
 /* DMAC Channel n [n = 0..3] Control A Register */
 
+#define DMACHAN_CTRLA_BTSIZE_MAX       (0xfff)
 #define DMACHAN_CTRLA_BTSIZE_SHIFT     (0)       /* Bits 0-11: Buffer Transfer Size */
-#define DMACHAN_CTRLA_BTSIZE_MASK      (0xfff << DMACHAN_CTRLA_BTSIZE_SHIFT)
+#define DMACHAN_CTRLA_BTSIZE_MASK      (DMACHAN_CTRLA_BTSIZE_MAX << DMACHAN_CTRLA_BTSIZE_SHIFT)
 #define DMACHAN_CTRLA_SCSIZE           (1 << 16) /* Bit 16: Source Chunk Transfer Size */
 #define DMACHAN_CTRLA_DCSIZE           (1 << 20) /* Bit 20:  Destination Chunk Transfer size */
 #define DMACHAN_CTRLA_SRCWIDTH_SHIFT   (24)      /* Bits 24-25 */
@@ -351,11 +352,11 @@
 #  define DMACHAN_CTRLA_SRCWIDTH_HWORD (1 << DMACHAN_CTRLA_SRCWIDTH_SHIFT)
 #  define DMACHAN_CTRLA_SRCWIDTH_WORD  (2 << DMACHAN_CTRLA_SRCWIDTH_SHIFT)
 #define DMACHAN_CTRLA_DSTWIDTH_SHIFT   (28)      /* Bits 28-29 */
-#define DMACHAN_CTRLA_DSTWIDTH__MASK   (3 << DMACHAN_CTRLA_DSTWIDTH_SHIFT)
+#define DMACHAN_CTRLA_DSTWIDTH_MASK    (3 << DMACHAN_CTRLA_DSTWIDTH_SHIFT)
 #  define DMACHAN_CTRLA_DSTWIDTH_BYTE  (0 << DMACHAN_CTRLA_DSTWIDTH_SHIFT)
 #  define DMACHAN_CTRLA_DSTWIDTH_HWORD (1 << DMACHAN_CTRLA_DSTWIDTH_SHIFT)
 #  define DMACHAN_CTRLA_DSTWIDTH_WORD  (2 << DMACHAN_CTRLA_DSTWIDTH_SHIFT)
-#define DMACHAN_CTRLA_DONE             (1 << 31)
+#define DMACHAN_CTRLA_DONE             (1 << 31) /* Bit 31: Auto disable DMAC */
 
 /* DMAC Channel n [n = 0..3] Control B Register */
 
@@ -403,6 +404,17 @@
 /****************************************************************************************
  * Public Types
  ****************************************************************************************/
+
+/* DMA multi buffer transfer link list entry structure */
+
+struct dma_linklist_s
+{
+  uint32_t src;    /* Source address */
+  uint32_t dest;   /* Destination address */
+  uint32_t ctrla;  /* Control A value */
+  uint32_t ctrlb;  /* Congtrol B value */
+  uint32_t desc;   /* Descriptor address */
+};
 
 /****************************************************************************************
  * Public Data

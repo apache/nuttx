@@ -117,12 +117,10 @@
 
 #define HSMCI_DTIMER_DATATIMEOUT (0x000fffff)
 
-/* DMA CCR register settings */
+/* DMA configuration flags */
 
-#define HSMCI_RXDMA32_CONFIG \
-  ( CONFIG_HSMCI_DMAPRIO | DMA_CCR_MSIZE_32BITS | DMA_CCR_PSIZE_32BITS | DMA_CCR_MINC)
-#define HSMCI_TXDMA32_CONFIG \
-  ( CONFIG_HSMCI_DMAPRIO | DMA_CCR_MSIZE_32BITS | DMA_CCR_PSIZE_32BITS | DMA_CCR_MINC | DMA_CCR_DIR)
+#define DMA_FLAGS \
+  (DMACH_FLAG_FIFO_8BYTES|DMACH_FLAG_SRCWIDTH_32BITS|DMACH_FLAG_DESTWIDTH_32BITS|DMACH_FLAG_MEMINCREMENT)
 
 /* FIFO sizes */
 
@@ -2346,8 +2344,7 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
 
       putreg32(1, HSMCI_DCTRL_DMAEN_BB);
-      sam3u_dmarxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer,
-                       (buflen + 3) >> 2, HSMCI_RXDMA32_CONFIG);
+      sam3u_dmarxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
  
      /* Start the DMA */
 
@@ -2412,8 +2409,7 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Configure the TX DMA */
 
-      sam3u_dmatxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer,
-                       (buflen + 3) >> 2, HSMCI_TXDMA32_CONFIG);
+      sam3u_dmatxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
 
       sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
       putreg32(1, HSMCI_DCTRL_DMAEN_BB);
@@ -2545,7 +2541,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
   /* Allocate a DMA channel.  A FIFO size of 8 is sufficient. */
 
-  priv->dma = sam3u_dmachannel(8);
+  priv->dma = sam3u_dmachannel(DMA_FLAGS);
   DEBUGASSERT(priv->dma);
 
   /* Configure GPIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip is capable of
