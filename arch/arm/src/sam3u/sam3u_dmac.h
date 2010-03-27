@@ -263,6 +263,7 @@
 #  define DMAC_EBC_ERR1                (1 << (DMAC_EBC_ERR_SHIFT+1))
 #  define DMAC_EBC_ERR2                (1 << (DMAC_EBC_ERR_SHIFT+2))
 #  define DMAC_EBC_ERR3                (1 << (DMAC_EBC_ERR_SHIFT+3))
+#define DMAC_DBC_ERR_ALLINTS           (0x000f0f0f)
 
 /* DMAC Channel Handler Enable Register */
 
@@ -297,6 +298,7 @@
 #  define DMAC_CHDR_DIS1               (1 << (DMAC_CHDR_DIS_SHIFT+1))
 #  define DMAC_CHDR_DIS2               (1 << (DMAC_CHDR_DIS_SHIFT+2))
 #  define DMAC_CHDR_DIS3               (1 << (DMAC_CHDR_DIS_SHIFT+3))
+#  define DMAC_CHDR_DIS_ALL            DMAC_CHDR_DIS_MASK
 #define DMAC_CHDR_RES_SHIFT            (8)       /* Bits 8-11:  Resume trasnfer, restoring context */
 #define DMAC_CHDR_RES_MASK             (15 << DMAC_CHDR_RES_SHIFT)
 #  define DMAC_CHDR_RES(n)             (1 << (DMAC_CHDR_RES_SHIFT+(n)))

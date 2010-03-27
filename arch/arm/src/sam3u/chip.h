@@ -58,8 +58,6 @@
 /* DMA */
 
 #  define CONFIG_SAM3U_NDMACHAN     4           /* 4 DMA Channels */
-#  define CONFIG_SAM3U_DMACHAN8SET  0x07        /* DMA Channels 0-2 have 8-byte FIFOs */
-#  define CONFIG_SAM3U_DMACHAN32SET 0x08        /* DMA channel 3 has a 32-byte FIFO */
 
 /* Memory card interface */
 
