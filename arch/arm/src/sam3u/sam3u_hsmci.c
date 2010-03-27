@@ -2346,8 +2346,8 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
 
       putreg32(1, HSMCI_DCTRL_DMAEN_BB);
-      sam3u_dmasetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer,
-                     (buflen + 3) >> 2, HSMCI_RXDMA32_CONFIG);
+      sam3u_dmarxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer,
+                       (buflen + 3) >> 2, HSMCI_RXDMA32_CONFIG);
  
      /* Start the DMA */
 
@@ -2412,8 +2412,8 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Configure the TX DMA */
 
-      sam3u_dmasetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer,
-                     (buflen + 3) >> 2, HSMCI_TXDMA32_CONFIG);
+      sam3u_dmatxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer,
+                       (buflen + 3) >> 2, HSMCI_TXDMA32_CONFIG);
 
       sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
       putreg32(1, HSMCI_DCTRL_DMAEN_BB);
@@ -2543,9 +2543,9 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
 
-  /* Allocate a DMA channel */
+  /* Allocate a DMA channel.  A FIFO size of 8 is sufficient. */
 
-  priv->dma = sam3u_dmachannel();
+  priv->dma = sam3u_dmachannel(8);
   DEBUGASSERT(priv->dma);
 
   /* Configure GPIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip is capable of

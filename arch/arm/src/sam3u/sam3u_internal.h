@@ -461,41 +461,39 @@ EXTERN void sam3u_gpioirqdisable(int irq);
  * Name: sam3u_dmachannel
  *
  * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel and
- *   gives the caller mutually exclusive access to the DMA channel.
+ *   Allocate a DMA channel.  This function gives the caller mutually
+ *   sets aside a DMA channel with the required FIFO size and gives the
+ *   caller exclusive access to the DMA channelt.
  *
  * Returned Value:
- *   One success, this function ALWAYS will return a non-NULL, DMA channel
- *   handle.
+ *   If a DMA channel if the required FIFO size is available, this function
+ *   returns a non-NULL, void* DMA channel handle.  NULL is returned on any
+ *   failure.
  *
  ****************************************************************************/
 
-EXTERN DMA_HANDLE sam3u_dmachannel(void);
+EXTERN DMA_HANDLE sam3u_dmachannel(unsigned int fifosize);
 
 /****************************************************************************
  * Name: sam3u_dmafree
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until sam3u_dmachannel() is called again to
- *   re-allocate the channel.
+ *   NEVER be used again until sam3u_dmachannel() is called again to re-gain
+ *   a valid handle.
  *
  * Returned Value:
  *   None
- *
- * Assumptions:
- *   - The caller holds the DMA channel.
- *   - There is no DMA in progress
  *
  ****************************************************************************/
 
 EXTERN void sam3u_dmafree(DMA_HANDLE handle);
 
 /****************************************************************************
- * Name: sam3u_dmasetup
+ * Name: sam3u_dmatxsetup
  *
  * Description:
- *   Configure DMA before using
+ *   Configure DMA for transmit (memory to periphal) before using
  *
  * Assumptions:
  *   - DMA handle allocated by sam3u_dmachannel()
@@ -503,8 +501,23 @@ EXTERN void sam3u_dmafree(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-EXTERN void sam3u_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                           size_t ntransfers, uint32_t ccr);
+EXTERN void sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                             size_t ntransfers, uint32_t ccr);
+
+/****************************************************************************
+ * Name: sam3u_dmarxsetup
+ *
+ * Description:
+ *   Configure DMA for receive (peripheral to memory) before using
+ *
+ * Assumptions:
+ *   - DMA handle allocated by sam3u_dmachannel()
+ *   - No DMA in progress
+ *
+ ****************************************************************************/
+
+EXTERN void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                             size_t ntransfers, uint32_t ccr);
 
 /****************************************************************************
  * Name: sam3u_dmastart
