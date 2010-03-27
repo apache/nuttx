@@ -290,12 +290,39 @@
 
 #define GPIO_USB_VBUS             (GPIO_INPUT|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN0)
 
+/* DMA ******************************************************************************/
+
+/* Flags used to characterize the desired DMA channel.  The naming convention is that
+ * one side is the peripheral and the other is memory (however, the interface could still
+ * be used if, for example, both sides were memory although the naming would be awkward)
+ */
+
+#define DMACH_FLAG_FLOWCONTROL          (1 << 0)  /* Bit 0: Channel supports flow control */
+#define DMACH_FLAG_FIFOSIZE_SHIFT       (1)       /* Bit 1: Size of DMA FIFO */
+#define DMACH_FLAG_FIFOSIZE_MASK        (1 << DMACH_FLAG_FIFOSIZE_SHIFT)
+#  define DMACH_FLAG_FIFO_8BYTES        (0 << DMACH_FLAG_FIFOSIZE_SHIFT) /* 8 bytes */
+#  define DMACH_FLAG_FIFO_32BYTES       (1 << DMACH_FLAG_FIFOSIZE_SHIFT) /* 32 bytes */
+#define DMACH_FLAG_PERIPHWIDTH_SHIFT    (2)       /* Bits 2-3: Peripheral width */
+#define DMACH_FLAG_PERIPHWIDTH_MASK     (3 << DMACH_FLAG_PERIPHWIDTH_SHIFT)
+#  define DMACH_FLAG_PERIPHWIDTH_8BITS  (0 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 8 bits */
+#  define DMACH_FLAG_PERIPHWIDTH_16BITS (1 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
+#  define DMACH_FLAG_PERIPHWIDTH_32BITS (2 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
+#define DMACH_FLAG_PERIPHINCREMENT      (1 << 4)  /* Bit 4: Autoincrement peripheral address */
+#define DMACH_FLAG_MEMWIDTH_SHIFT       (5)       /* Bits 5-6: Memory width */
+#define DMACH_FLAG_MEMWIDTH_MASK        (3 << DMACH_FLAG_MEMWIDTH_SHIFT)
+#  define DMACH_FLAG_MEMWIDTH_8BITS     (0 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 8 bits */
+#  define DMACH_FLAG_MEMWIDTH_16BITS    (1 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
+#  define DMACH_FLAG_MEMWIDTH_32BITS    (2 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
+#define DMACH_FLAG_MEMINCREMENT         (1 << 7)  /* Bit 7: Autoincrement memory address */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
 typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t isr, void *arg);
+
+/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
 
 #ifdef CONFIG_DEBUG_DMA
 struct sam3u_dmaregs_s
@@ -461,9 +488,9 @@ EXTERN void sam3u_gpioirqdisable(int irq);
  * Name: sam3u_dmachannel
  *
  * Description:
- *   Allocate a DMA channel.  This function gives the caller mutually
- *   sets aside a DMA channel with the required FIFO size and gives the
- *   caller exclusive access to the DMA channelt.
+ *   Allocate a DMA channel.  This function sets aside a DMA channel with
+ *   the required FIFO size and flow control capabilities (determined by
+ *   dma_flags) then  gives the caller exclusive access to the DMA channel.
  *
  * Returned Value:
  *   If a DMA channel if the required FIFO size is available, this function
@@ -472,7 +499,7 @@ EXTERN void sam3u_gpioirqdisable(int irq);
  *
  ****************************************************************************/
 
-EXTERN DMA_HANDLE sam3u_dmachannel(unsigned int fifosize);
+EXTERN DMA_HANDLE sam3u_dmachannel(uint8_t dmach_flags);
 
 /****************************************************************************
  * Name: sam3u_dmafree
@@ -495,14 +522,10 @@ EXTERN void sam3u_dmafree(DMA_HANDLE handle);
  * Description:
  *   Configure DMA for transmit (memory to periphal) before using
  *
- * Assumptions:
- *   - DMA handle allocated by sam3u_dmachannel()
- *   - No DMA in progress
- *
  ****************************************************************************/
 
 EXTERN void sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                             size_t ntransfers, uint32_t ccr);
+                             size_t nbytes);
 
 /****************************************************************************
  * Name: sam3u_dmarxsetup
@@ -510,24 +533,16 @@ EXTERN void sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  * Description:
  *   Configure DMA for receive (peripheral to memory) before using
  *
- * Assumptions:
- *   - DMA handle allocated by sam3u_dmachannel()
- *   - No DMA in progress
- *
  ****************************************************************************/
 
 EXTERN void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                             size_t ntransfers, uint32_t ccr);
+                             size_t nbytes);
 
 /****************************************************************************
  * Name: sam3u_dmastart
  *
  * Description:
  *   Start the DMA transfer
- *
- * Assumptions:
- *   - DMA handle allocated by sam3u_dmachannel()
- *   - No DMA in progress
  *
  ****************************************************************************/
 
@@ -542,9 +557,6 @@ EXTERN void sam3u_dmastart(DMA_HANDLE handle, dma_callback_t callback,
  *   reset and sam3u_dmasetup() must be called before sam3u_dmastart() can be
  *   called again
  *
- * Assumptions:
- *   - DMA handle allocated by sam3u_dmachannel()
- *
  ****************************************************************************/
 
 EXTERN void sam3u_dmastop(DMA_HANDLE handle);
@@ -554,9 +566,6 @@ EXTERN void sam3u_dmastop(DMA_HANDLE handle);
  *
  * Description:
  *   Sample DMA register contents
- *
- * Assumptions:
- *   - DMA handle allocated by sam3u_dmachannel()
  *
  ****************************************************************************/
 
@@ -571,9 +580,6 @@ EXTERN void sam3u_dmasample(DMA_HANDLE handle, struct sam3u_dmaregs_s *regs);
  *
  * Description:
  *   Dump previously sampled DMA register contents
- *
- * Assumptions:
- *   - DMA handle allocated by sam3u_dmachannel()
  *
  ****************************************************************************/
 

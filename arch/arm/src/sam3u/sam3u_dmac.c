@@ -69,7 +69,7 @@
 struct sam3u_dma_s
 {
   uint8_t           chan;       /* DMA channel number (0-6) */
-  uint8_t           fifosize;   /* Size of DMA FIFO in btyes */
+  uint8_t           flags;      /* DMA channel flags */
   bool              inuse;      /* TRUE: The DMA channel is in use */
   uint32_t          base;       /* DMA register channel base address */
   dma_callback_t    callback;   /* Callback invoked when the DMA completes */
@@ -100,24 +100,27 @@ static struct sam3u_dma_s g_dma[CONFIG_SAM3U_NDMACHAN] =
 
   {
     .chan     = 0,
-    .fifosize = 8,
+    .flags    = DMACH_FLAG_FIFO_8BYTES;
     .base     = SAM3U_DMACHAN0_BASE,
   },
   {
     .chan     = 1,
-    .fifosize = 8,
+    .flags    = DMACH_FLAG_FIFO_8BYTES;
     .base     = SAM3U_DMACHAN1_BASE,
   },
   {
     .chan     = 2,
-    .fifosize = 8,
+    .flags    = DMACH_FLAG_FIFO_8BYTES;
     .base     = SAM3U_DMACHAN2_BASE,
   },
   {
     .chan     = 3,
-    .fifosize = 32,
+    .flags    = (DMACH_FLAG_FIFO_32BYTES | DMACH_FLAG_FLOWCONTROL),
     .base     = SAM3U_DMACHAN3_BASE,
   }
+#else
+#  error "Nothing is known about the DMA channels for this device"
+#endif
 };
 
 /****************************************************************************
@@ -152,6 +155,144 @@ static inline void sam3u_dmagive(void)
 }
 
 /************************************************************************************
+ * Name: sam3u_fifosize
+ *
+ * Description:
+ *  Decode the FIFO size from the flags
+ *
+ ************************************************************************************/
+
+static unsigned int sam3u_fifosize(uint8_t dmach_flags)
+{
+  dmach_flags &= DMACH_FLAG_FIFOSIZE_MASK;
+  if (dmach_flags == DMACH_FLAG_FIFO_8BYTES)
+    {
+      return 8;
+    }
+  else /* if (dmach_flags == DMACH_FLAG_FIFO_32BYTES) */
+    {
+      return 32;
+    }
+}
+
+/************************************************************************************
+ * Name: sam3u_flowcontrol
+ *
+ * Description:
+ *  Decode the FIFO flow control from the flags
+ *
+ ************************************************************************************/
+
+static inline boolean sam3u_flowcontrol(uint8_t dmach_flags)
+{
+  return ((dmach_flags & DMACH_FLAG_FLOWCONTROL) != 0);
+}
+
+/************************************************************************************
+ * Name: sam3u_settxctrla
+ *
+ * Description:
+ *  Decode the the flags to get the correct CTRLA register bit settings for a transmit
+ *  (memory to peripheral) transfer.
+ *
+ ************************************************************************************/
+
+static inline void
+sam3u_settxctrla(struct sam3u_dma_s *dmach, uint32_t dmasize, uint32_t otherbits)
+{
+  uint32_t regval;
+  uint32_t flags;
+
+  DEBUGASSERT(dmach && dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
+  regval = (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT) | otherbits;
+
+  /* Since this is a transmit, the source is described by the memeory selections */
+
+  flags  = dmach->flags & DMACH_FLAG_MEMWIDTH_MASK;
+  if (flags == DMACH_FLAG_MEMWIDTH_8BITS)
+    {
+      regval |= DMACHAN_CTRLA_SRCWIDTH_BYTE;
+    }
+  else if (flags == DMACH_FLAG_MEMWIDTH_16BITS)
+    {
+      regval |= DMACHAN_CTRLA_SRCWIDTH_HWORD;
+    }
+  else /* if (flags == DMACH_FLAG_MEMWIDTH_32BITS) */
+    {
+      regval |= DMACHAN_CTRLA_SRCWIDTH_WORD;
+    }
+
+  /* Since this is a transmit, the destination is described by the peripheral selections */
+
+  flags = dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK;
+  if (flags == DMACH_FLAG_PERIPHWIDTH_8BITS)
+    {
+      regval |= DMACHAN_CTRLA_DSTWIDTH_BYTE;
+    }
+  else if (flags == DMACH_FLAG_PERIPHWIDTH_16BITS)
+    {
+      regval |= DMACHAN_CTRLA_DSTWIDTH_HWORD;
+    }
+  else /* if (flags == DMACH_FLAG_PERIPHWIDTH_32BITS) */
+    {
+      regval |= DMACHAN_CTRLA_DSTWIDTH_WORD;
+    }
+  return regval;
+}
+
+/************************************************************************************
+ * Name: sam3u_setrxctrla
+ *
+ * Description:
+ *  Decode the the flags to get the correct CTRLA register bit settings for a read
+ *  (peripheral to memory) transfer.
+ *
+ ************************************************************************************/
+
+static inline void
+sam3u_setrxctrla(struct sam3u_dma_s *dmach, uint32_t dmasize, uint32_t otherbits)
+{
+  uint32_t regval;
+  uint32_t flags;
+
+  DEBUGASSERT(dmach && dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
+  regval = (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT) | otherbits;
+
+  /* Since this is a receive, the source is described by the peripheral selections */
+
+  flags  = dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK;
+  if (flags == DMACH_FLAG_PERIPHWIDTH_8BITS)
+    {
+      regval |= DMACHAN_CTRLA_SRCWIDTH_BYTE;
+    }
+  else if (flags == DMACH_FLAG_PERIPHWIDTH_16BITS)
+    {
+      regval |= DMACHAN_CTRLA_SRCWIDTH_HWORD;
+    }
+  else /* if (flags == DMACH_FLAG_PERIPHWIDTH_32BITS) */
+    {
+      regval |= DMACHAN_CTRLA_SRCWIDTH_WORD;
+    }
+
+  /* Since this is a receive, the destination is described by the memory selections */
+
+  flags = dmach->flags & DMACH_FLAG_MEMWIDTH_MASK;
+  if (flags == DMACH_FLAG_MEMWIDTH_8BITS)
+    {
+      regval |= DMACHAN_CTRLA_DSTWIDTH_BYTE;
+    }
+  else if (flags == DMACH_FLAG_MEMWIDTH_16BITS)
+    {
+      regval |= DMACHAN_CTRLA_DSTWIDTH_HWORD;
+    }
+  else /* if (flags == DMACH_FLAG_MEMWIDTH_32BITS) */
+    {
+      regval |= DMACHAN_CTRLA_DSTWIDTH_WORD;
+    }
+  return regval;
+}
+
+/************************************************************************************
  * Name: sam3u_dmainterrupt
  *
  * Description:
@@ -181,8 +322,6 @@ static int sam3u_dmainterrupt(int irq, void *context)
 
 void weak_function up_dmainitialize(void)
 {
-  struct sam3u_dma_s *dmach;
-
   /* Enable peripheral clock */
 
   putreg32((1 << SAM3U_PID_DMAC), SAM3U_PMC_PCER);
@@ -212,9 +351,9 @@ void weak_function up_dmainitialize(void)
  * Name: sam3u_dmachannel
  *
  * Description:
- *   Allocate a DMA channel.  This function gives the caller mutually
- *   sets aside a DMA channel with the required FIFO size and gives the
- *   caller exclusive access to the DMA channelt.
+ *   Allocate a DMA channel.  This function sets aside a DMA channel with
+ *   the required FIFO size and flow control capabilities (determined by
+ *   dma_flags) then  gives the caller exclusive access to the DMA channel.
  *
  * Returned Value:
  *   If a DMA channel if the required FIFO size is available, this function
@@ -223,11 +362,16 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE sam3u_dmachannel(unsigned int fifosize)
+DMA_HANDLE sam3u_dmachannel(uint8_t dmach_flags)
 {
   struct sam3u_dma_s *dmach;
   unsigned int chndx;
   uint32_t regval;
+
+  /* Get the search parameters */
+
+  bool flowcontrol = sam3u_flowcontrol(dmach_flags);
+  unsigned int fifosize = sam3u_fifosize(dmach_flags);
 
   /* Search for an available DMA channel with at least the requested FIFO
    * size.
@@ -238,32 +382,35 @@ DMA_HANDLE sam3u_dmachannel(unsigned int fifosize)
   for (chndx = 0; chndx < CONFIG_SAM3U_NDMACHAN; chndx++)
     {
       struct sam3u_dma_s *candidate = &g_dma[chndx];
-      if (!candidate->inuse && candidate->fifosize >= fifosize)
+      if (!candidate->inuse &&
+          (sam3u_fifosize(candidate->flags) >= fifosize) &&
+          (!flowcontrol || sam3u_flowcontrol(dmach_flags)))
         {
-          dmach        = candidate;
-          dmach->inuse = true;
+          dmach         = candidate;
+          dmach->inuse  = true;
+
+          /* Read the status register to clear any pending interrupts on the channel */
+
+          (void)getreg32(SAM3U_DMAC_EBCISR);
+
+          /* Disable the channel by writing one to the write-only channel disable register */
+ 
+          putreg32(DMAC_CHDR_DIS(chndx), SAM3U_DMAC_CHDR);
+
+          /* See the DMA channel flags, retaining the fifo size and flow control
+           * settings which are inherent properties of the FIFO and cannot be changed.
+           */
+
+          dmach->flags &= (DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK);
+          dmach->flags |= (dma_flags & ~((DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK)));
+
+          /* Initialize the transfer state */
+
+          dmach->xfrsize = 0;
           break;
         }
     }
   sam3u_dmagive();
-
-  /* Did we get one? */
-
-  if (dmach)
-    {
-      /* Read the status register to clear any pending interrupts on the channel */
-
-      (void)getreg32(SAM3U_DMAC_EBCISR);
-
-      /* Disable the channel by writing one to the write-only channel disable register */
- 
-      putreg32(DMAC_CHDR_DIS(chndx), SAM3U_DMAC_CHDR);
-
-      /* Initilize the transfer size */
-
-      dmach->xfrsize = 0;
-    }
-
   return (DMA_HANDLE)dmach;
 }
 
@@ -284,12 +431,13 @@ void sam3u_dmafree(DMA_HANDLE handle)
 {
   struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
 
-  /* Mark the channel no longer in use.  This is an atomic operation and so
-   * should be safe.
+  /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
+   * operation and so should be safe.
    */
 
-  DEBUGASSERT(dmach != NULL);
-  dmach->inuse = true;
+  DEBUGASSERT((dmach != NULL) && (dmach->inuse));
+  dmach->flags &= (DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK);
+  dmach->inuse  = false;                   /* No longer in use */
 }
 
 /****************************************************************************
@@ -300,7 +448,7 @@ void sam3u_dmafree(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t ntransfers, uint32_t ccr)
+void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
   struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
   uint32_t regval;
@@ -315,7 +463,7 @@ void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t 
  *
  ****************************************************************************/
 
-void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t ntransfers, uint32_t ccr)
+void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
   struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
   uint32_t regval;
