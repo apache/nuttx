@@ -69,12 +69,13 @@
 struct sam3u_dma_s
 {
   uint8_t           chan;       /* DMA channel number (0-6) */
-  uint8_t           flags;      /* DMA channel flags */
   bool              inuse;      /* TRUE: The DMA channel is in use */
+  uint16_t          flags;      /* DMA channel flags */
   uint32_t          base;       /* DMA register channel base address */
   dma_callback_t    callback;   /* Callback invoked when the DMA completes */
   void             *arg;        /* Argument passed to callback function */
-  volatile uint16_t xfrsize;    /* Total transfer size */
+  uint16_t          bufsize;    /* Transfer buffer size in bytes */
+  volatile uint16_t remaining;  /* Total number of bytes remaining to be transferred */
 };
 
 /****************************************************************************
@@ -84,6 +85,22 @@ struct sam3u_dma_s
 /* This semaphore protects the DMA channel table */
 
 static sem_t g_dmasem;
+
+/* CTRLA field lookups */
+
+static const uint32_t g_srcwidth[3] =
+{
+  DMACHAN_CTRLA_SRCWIDTH_BYTE,
+  DMACHAN_CTRLA_SRCWIDTH_HWORD,
+  DMACHAN_CTRLA_SRCWIDTH_WORD
+};
+
+static const uint32_t g_destwidth[3] =
+{
+  DMACHAN_CTRLA_DSTWIDTH_BYTE,
+  DMACHAN_CTRLA_DSTWIDTH_HWORD,
+  DMACHAN_CTRLA_DSTWIDTH_WORD
+};
 
 /* This array describes the state of each DMA */
 
@@ -201,42 +218,23 @@ static inline void
 sam3u_settxctrla(struct sam3u_dma_s *dmach, uint32_t dmasize, uint32_t otherbits)
 {
   uint32_t regval;
-  uint32_t flags;
+  unsigned int ndx;
 
   DEBUGASSERT(dmach && dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
   regval = (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT) | otherbits;
 
   /* Since this is a transmit, the source is described by the memeory selections */
 
-  flags  = dmach->flags & DMACH_FLAG_MEMWIDTH_MASK;
-  if (flags == DMACH_FLAG_MEMWIDTH_8BITS)
-    {
-      regval |= DMACHAN_CTRLA_SRCWIDTH_BYTE;
-    }
-  else if (flags == DMACH_FLAG_MEMWIDTH_16BITS)
-    {
-      regval |= DMACHAN_CTRLA_SRCWIDTH_HWORD;
-    }
-  else /* if (flags == DMACH_FLAG_MEMWIDTH_32BITS) */
-    {
-      regval |= DMACHAN_CTRLA_SRCWIDTH_WORD;
-    }
+  ndx = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK) >> DMACH_FLAG_MEMWIDTH_SHIFT;
+  DEBUGASSERT(ndx < 3);
+  regval |= g_srcwidth[ndx];
+  return regval;
 
   /* Since this is a transmit, the destination is described by the peripheral selections */
 
-  flags = dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK;
-  if (flags == DMACH_FLAG_PERIPHWIDTH_8BITS)
-    {
-      regval |= DMACHAN_CTRLA_DSTWIDTH_BYTE;
-    }
-  else if (flags == DMACH_FLAG_PERIPHWIDTH_16BITS)
-    {
-      regval |= DMACHAN_CTRLA_DSTWIDTH_HWORD;
-    }
-  else /* if (flags == DMACH_FLAG_PERIPHWIDTH_32BITS) */
-    {
-      regval |= DMACHAN_CTRLA_DSTWIDTH_WORD;
-    }
+  ndx = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
+  DEBUGASSERT(ndx < 3);
+  regval |= g_destwidth[ndx];
   return regval;
 }
 
@@ -252,44 +250,108 @@ sam3u_settxctrla(struct sam3u_dma_s *dmach, uint32_t dmasize, uint32_t otherbits
 static inline void
 sam3u_setrxctrla(struct sam3u_dma_s *dmach, uint32_t dmasize, uint32_t otherbits)
 {
-  uint32_t regval;
-  uint32_t flags;
+  uint32_t     regval;
+  unsigned int ndx;
 
   DEBUGASSERT(dmach && dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
   regval = (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT) | otherbits;
 
   /* Since this is a receive, the source is described by the peripheral selections */
 
-  flags  = dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK;
-  if (flags == DMACH_FLAG_PERIPHWIDTH_8BITS)
-    {
-      regval |= DMACHAN_CTRLA_SRCWIDTH_BYTE;
-    }
-  else if (flags == DMACH_FLAG_PERIPHWIDTH_16BITS)
-    {
-      regval |= DMACHAN_CTRLA_SRCWIDTH_HWORD;
-    }
-  else /* if (flags == DMACH_FLAG_PERIPHWIDTH_32BITS) */
-    {
-      regval |= DMACHAN_CTRLA_SRCWIDTH_WORD;
-    }
+  ndx = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
+  DEBUGASSERT(ndx < 3);
+  regval |= g_srcwidth[ndx];
 
   /* Since this is a receive, the destination is described by the memory selections */
 
-  flags = dmach->flags & DMACH_FLAG_MEMWIDTH_MASK;
-  if (flags == DMACH_FLAG_MEMWIDTH_8BITS)
-    {
-      regval |= DMACHAN_CTRLA_DSTWIDTH_BYTE;
-    }
-  else if (flags == DMACH_FLAG_MEMWIDTH_16BITS)
-    {
-      regval |= DMACHAN_CTRLA_DSTWIDTH_HWORD;
-    }
-  else /* if (flags == DMACH_FLAG_MEMWIDTH_32BITS) */
-    {
-      regval |= DMACHAN_CTRLA_DSTWIDTH_WORD;
-    }
+  ndx = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK) >> DMACH_FLAG_MEMWIDTH_SHIFT;
+  DEBUGASSERT(ndx < 3);
+  regval |= g_destwidth[ndx];
   return regval;
+}
+
+/************************************************************************************
+ * Name: sam3u_srcctrlb
+ *
+ * Description:
+ *  Set source related CTRLB fields
+ *
+ ************************************************************************************/
+
+static void sam3u_srcctrlb(struct sam3u_dma_s *dmach, bool lli, bool autoincr)
+{
+  uint32_t regval;
+
+  /* Fetch CTRLB and clear the configurable bits */
+
+  regval = getreg32(dmach->base + SAM3U_DMACHAN_CTRLB_OFFSET);
+  regval &= ~ (DMACHAN_CTRLB_SRCDSCR | DMACHAN_CTRLB_SRCINCR_MASK | 1<<31);
+
+  /* Disable the source descriptor if we are not using the LLI transfer mode */
+
+  if (lli)
+    {
+      regval |= DMACHAN_CTRLB_SRCDSCR;
+    }
+
+  /* Select address incrementing */
+
+  regval |= autoincr ? DMACHAN_CTRLB_SRCINCR_INCR ? DMACHAN_CTRLB_SRCINCR_FIXED;
+
+  /* Save the updated CTRLB value */
+
+  putreg32(regval, dmach->base + SAM3U_DMACHAN_CTRLB_OFFSET)
+}
+
+/************************************************************************************
+ * Name: sam3u_destctrlb
+ *
+ * Description:
+ *  Set destination related CTRLB fields
+ *
+ ************************************************************************************/
+
+static void sam3u_destctrlb(struct sam3u_dma_s *dmach, bool lli, bool autoincr)
+{
+  uint32_t regval;
+
+  /* Fetch CTRLB and clear the configurable bits */
+
+  regval = getreg32(dmach->base + SAM3U_DMACHAN_CTRLB_OFFSET);
+  regval &= ~ (DMACHAN_CTRLB_DSTDSCR | DMACHAN_CTRLB_DSTINCR_MASK);
+
+  /* Disable the source descriptor if we are not using the LLI transfer mode */
+
+  if (lli)
+    {
+      regval |= DMACHAN_CTRLB_DSTDSCR;
+    }
+
+  /* Select address incrementing */
+
+  regval |= autoincr ? DMACHAN_CTRLB_DESTINCR_INCR ? DMACHAN_CTRLB_DESTINCR_FIXED;
+        
+  /* Save the updated CTRLB value */
+
+  putreg32(regval, dmach->base + SAM3U_DMACHAN_CTRLB_OFFSET)
+}
+
+/************************************************************************************
+ * Name: sam3u_flowcontrol
+ *
+ * Description:
+ *  Select flow control
+ *
+ ************************************************************************************/
+
+static inline void sam3u_flowcontrol(struct sam3u_dma_s *dmach, uint32_t setting)
+{
+    uint32_t regval;
+
+    regval = getreg32(dmach->base + SAM3U_DMACHAN_CTRLB_OFFSET);
+    regval &= ~(DMACHAN_CTRLB_FC_MASK);
+    regval |= setting;
+    putreg(regval, dmach->base + SAM3U_DMACHAN_CTRLB_OFFSET);   
 }
 
 /************************************************************************************
@@ -355,6 +417,11 @@ void weak_function up_dmainitialize(void)
  *   the required FIFO size and flow control capabilities (determined by
  *   dma_flags) then  gives the caller exclusive access to the DMA channel.
  *
+ *   The naming convention in all of the DMA interfaces is that one side is
+ *   the 'peripheral' and the other is 'memory'.  Howerver, the interface
+ *   could still be used if, for example, both sides were memory although
+ *   the naming would be awkward.
+ *
  * Returned Value:
  *   If a DMA channel if the required FIFO size is available, this function
  *   returns a non-NULL, void* DMA channel handle.  NULL is returned on any
@@ -362,7 +429,7 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE sam3u_dmachannel(uint8_t dmach_flags)
+DMA_HANDLE sam3u_dmachannel(uint16_t dmach_flags)
 {
   struct sam3u_dma_s *dmach;
   unsigned int chndx;
@@ -406,7 +473,7 @@ DMA_HANDLE sam3u_dmachannel(uint8_t dmach_flags)
 
           /* Initialize the transfer state */
 
-          dmach->xfrsize = 0;
+          dmach->remaining = 0;
           break;
         }
     }
