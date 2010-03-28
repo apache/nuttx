@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_usbotg.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -341,7 +341,7 @@
 #define USBHOST_FRINDEX_FLI_SHIFT            (3)       /* Bits 3-(n+2): Frame list current index */
 #define USBHOST_FRINDEX_FLI_MASK(n)          (0x7ff << ((n)+USBHOST_FRINDEX_FLI_SHIFT-1)
 #define USBHOST_FRINDEX_CUFN_SHIFT           (0)       /* Bits 0-2: Current micro frame number */
-#define USBHOST_FRINDEX_CUFN_SHIFT           (7 << USBHOST_FRINDEX_CUFN_SHIFT)
+#define USBHOST_FRINDEX_CUFN_MASK            (7 << USBHOST_FRINDEX_CUFN_SHIFT)
 
 /* USB Device Address register DEVICEADDR (address 0x19000154) -- Device Mode */
 
@@ -604,8 +604,7 @@
 #define USBDEV_ENDPTCOMPLETE_ERCE1           (1 << 1)  /* Bit 1:  EP recv complete event for physical OUT EP 1 */
 #define USBDEV_ENDPTCOMPLETE_ERCE0           (1 << 0)  /* Bit 0:  EP recv complete event for physical OUT EP 0 */
 
-/* USB Endpoint 0 Control register ENDPTCTRL0 (address 0xffe0c1c0) */
-#warning "REVISIT -- Check address"
+/* USB Endpoint 0 Control register ENDPTCTRL0 (address 0x190001c0) */
 
 #define USBDEV_ENDPTCTRL0_TXE                (1 << 23) /* Bit 23: Tx endpoint enable */
 #define USBDEV_ENDPTCTRL0_TXT_SHIFT          (18)      /* Bits 18-19: Tx endpoint type */

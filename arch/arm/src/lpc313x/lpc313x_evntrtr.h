@@ -1,7 +1,7 @@
 /********************************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_evntrtr.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
 
 #define _B(b)                                      ((b)<<2)          /* Maps bank number 0-3 to word offset */
 #define _O(o)                                      ((o)<<5)          /* Maps output to bank group offset */
-#define _OB(o,b)                                   (_O(o)+_B(b))     /* Mqpw output and bank to word offset
+#define _OB(o,b)                                   (_O(o)+_B(b))     /* Mqpw output and bank to word offset */
 
 #define EVNTRTR_EVENT(bank,bit)                    ((bank)<<5|bit)   /* Makes a event number from a bank and bit */
 #define EVNTRTR_BANK(e)                            ((e)>>5)          /* Maps a event to a bank */
@@ -74,7 +74,7 @@
 #define LPC313X_EVNTRTR_INTSET_OFFSET(b)           (0x0c40+_B(b))    /* Input event set */
 #define LPC313X_EVNTRTR_MASK_OFFSET(b)             (0x0c60+_B(b))    /* Input event mask */
 #define LPC313X_EVNTRTR_MASKCLR_OFFSET(b)          (0x0c80+_B(b))    /* Input event mask clear */
-#define LPC313X_EVNTRTR_PEND_OFFSET(b)             (0x0ca0+_B(b))    /* Input event mask set */
+#define LPC313X_EVNTRTR_MASKSET_OFFSET(b)          (0x0ca0+_B(b))    /* Input event mask set */
 #define LPC313X_EVNTRTR_APR_OFFSET(b)              (0x0cc0+_B(b))    /* Input event activation polarity */
 #define LPC313X_EVNTRTR_ATR_OFFSET(b)              (0x0ce0+_B(b))    /* Input event activation type */
 #define LPC313X_EVNTRTR_RSR_OFFSET(b)              (0x0d20+_B(b))    /* Input event raw status */
@@ -100,7 +100,7 @@
 #define LPC313X_EVNTRTR_APR(b)                     (LPC313X_EVNTRTR_VBASE+LPC313X_EVNTRTR_APR_OFFSET(b))
 #define LPC313X_EVNTRTR_ATR(b)                     (LPC313X_EVNTRTR_VBASE+LPC313X_EVNTRTR_ATR_OFFSET(b))
 #define LPC313X_EVNTRTR_RSR(b)                     (LPC313X_EVNTRTR_VBASE+LPC313X_EVNTRTR_RSR_OFFSET(b))
-#define LPC313X_EVNTRTR_INTOUT_OFFSET              (LPC313X_EVNTRTR_VBASE+LPC313X_EVNTRTR_INTOUT_OFFSET)
+#define LPC313X_EVNTRTR_INTOUT                     (LPC313X_EVNTRTR_VBASE+LPC313X_EVNTRTR_INTOUT_OFFSET)
 #define LPC313X_EVNTRTR_INTOUTPEND(o,b)            (LPC313X_EVNTRTR_VBASE+LPC313X_EVNTRTR_INTOUTPEND_OFFSET(o,b))
 #define LPC313X_EVNTRTR_CGUWKUPPEND(b)             (LPC313X_EVNTRTR_VBASE+LPC313X_EVNTRTR_CGUWKUPPEND_OFFSET(b))
 #define LPC313X_EVNTRTR_INTOUTMASK(o,b)            (LPC313X_EVNTRTR_VBASE+LPC313X_EVNTRTR_INTOUTMASK_OFFSET(o,b))
@@ -239,7 +239,7 @@
 #define EVENTRTR_ARM926LPNFIQ                      EVNTRTR_EVENT(3,11) /* Reflects nFIQ signal to ARM core */
 #define EVENTRTR_I2C1SCLN                          EVNTRTR_EVENT(3,10) /* Input event from I2C1 */
 #define EVENTRTR_I2C0SCLN                          EVNTRTR_EVENT(3,9)  /* Input event from I2C0 */
-#define EVENTRTR_UARTRXD                           EVNTRTR_EVENT(3,8)  /* Input event from UART */
+#define EVENTRTR_UART                              EVNTRTR_EVENT(3,8)  /* Input event from UART */
 #define EVENTRTR_WDOGM0                            EVNTRTR_EVENT(3,7)  /* Input event from Watchdog Timer */
 #define EVENTRTR_ADCINT                            EVNTRTR_EVENT(3,6)  /* Input event from ADC */
 #define EVENTRTR_TIMER3INTCT1                      EVNTRTR_EVENT(3,5)  /* Input event from Timer 3 */
