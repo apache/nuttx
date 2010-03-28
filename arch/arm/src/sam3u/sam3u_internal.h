@@ -297,23 +297,39 @@
  * be used if, for example, both sides were memory although the naming would be awkward)
  */
 
-#define DMACH_FLAG_FLOWCONTROL          (1 << 0)  /* Bit 0: Channel supports flow control */
-#define DMACH_FLAG_FIFOSIZE_SHIFT       (1)       /* Bit 1: Size of DMA FIFO */
-#define DMACH_FLAG_FIFOSIZE_MASK        (1 << DMACH_FLAG_FIFOSIZE_SHIFT)
-#  define DMACH_FLAG_FIFO_8BYTES        (0 << DMACH_FLAG_FIFOSIZE_SHIFT) /* 8 bytes */
-#  define DMACH_FLAG_FIFO_32BYTES       (1 << DMACH_FLAG_FIFOSIZE_SHIFT) /* 32 bytes */
-#define DMACH_FLAG_PERIPHWIDTH_SHIFT    (2)       /* Bits 2-3: Peripheral width */
-#define DMACH_FLAG_PERIPHWIDTH_MASK     (3 << DMACH_FLAG_PERIPHWIDTH_SHIFT)
-#  define DMACH_FLAG_PERIPHWIDTH_8BITS  (0 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 8 bits */
-#  define DMACH_FLAG_PERIPHWIDTH_16BITS (1 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
-#  define DMACH_FLAG_PERIPHWIDTH_32BITS (2 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
-#define DMACH_FLAG_PERIPHINCREMENT      (1 << 4)  /* Bit 4: Autoincrement peripheral address */
-#define DMACH_FLAG_MEMWIDTH_SHIFT       (5)       /* Bits 5-6: Memory width */
-#define DMACH_FLAG_MEMWIDTH_MASK        (3 << DMACH_FLAG_MEMWIDTH_SHIFT)
-#  define DMACH_FLAG_MEMWIDTH_8BITS     (0 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 8 bits */
-#  define DMACH_FLAG_MEMWIDTH_16BITS    (1 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
-#  define DMACH_FLAG_MEMWIDTH_32BITS    (2 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
-#define DMACH_FLAG_MEMINCREMENT         (1 << 7)  /* Bit 7: Autoincrement memory address */
+/* Unchange-able properties of the channel */
+
+#define DMACH_FLAG_FLOWCONTROL                (1 << 0)  /* Bit 0: Channel supports flow control */
+#define DMACH_FLAG_FIFOSIZE_SHIFT             (1)       /* Bit 1: Size of DMA FIFO */
+#define DMACH_FLAG_FIFOSIZE_MASK              (1 << DMACH_FLAG_FIFOSIZE_SHIFT)
+#  define DMACH_FLAG_FIFO_8BYTES              (0 << DMACH_FLAG_FIFOSIZE_SHIFT) /* 8 bytes */
+#  define DMACH_FLAG_FIFO_32BYTES             (1 << DMACH_FLAG_FIFOSIZE_SHIFT) /* 32 bytes */
+
+/* Peripheral endpoint characteristics */
+
+#define DMACH_FLAG_PERIPHPID_SHIFT            (2)       /* Bits 2-5: Peripheral PID */
+#define DMACH_FLAG_PERIPHPID_MASK             (15 << DMACH_FLAG_PERIPHPID_SHIFT)
+#define DMACH_FLAG_PERIPHH2SEL                (1 << 6)  /* Bits 6: HW handshaking */
+#define DMACH_FLAG_PERIPHWIDTH_SHIFT          (7)       /* Bits 7-8: Peripheral width */
+#define DMACH_FLAG_PERIPHWIDTH_MASK           (3 << DMACH_FLAG_PERIPHWIDTH_SHIFT)
+#  define DMACH_FLAG_PERIPHWIDTH_8BITS        (0 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 8 bits */
+#  define DMACH_FLAG_PERIPHWIDTH_16BITS       (1 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
+#  define DMACH_FLAG_PERIPHWIDTH_32BITS       (2 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
+#define DMACH_FLAG_PERIPHINCREMENT            (1 << 9)  /* Bit 9: Autoincrement peripheral address */
+#define DMACH_FLAG_PERIPHLLIMODE              (1 << 10) /* Bit 10: Use link list descriptors */
+
+/* Memory endpoint characteristics */
+
+#define DMACH_FLAG_MEMPID_SHIFT               (11)      /* Bits 11-14: Memory PID */
+#define DMACH_FLAG_MEMPID_MASK                (15 << DMACH_FLAG_PERIPHPID_SHIFT)
+#define DMACH_FLAG_MEMH2SEL                   (1 << 15) /* Bits 15: HW handshaking */
+#define DMACH_FLAG_MEMWIDTH_SHIFT             (16)      /* Bits 16-17: Memory width */
+#define DMACH_FLAG_MEMWIDTH_MASK              (3 << DMACH_FLAG_MEMWIDTH_SHIFT)
+#  define DMACH_FLAG_MEMWIDTH_8BITS           (0 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 8 bits */
+#  define DMACH_FLAG_MEMWIDTH_16BITS          (1 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
+#  define DMACH_FLAG_MEMWIDTH_32BITS          (2 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
+#define DMACH_FLAG_MEMINCREMENT               (1 << 18) /* Bit 18: Autoincrement memory address */
+#define DMACH_FLAG_MEMLLIMODE                 (1 << 19) /* Bit 19: Use link list descriptors */
 
 /************************************************************************************
  * Public Types
@@ -492,6 +508,11 @@ EXTERN void sam3u_gpioirqdisable(int irq);
  *   the required FIFO size and flow control capabilities (determined by
  *   dma_flags) then  gives the caller exclusive access to the DMA channel.
  *
+ *   The naming convention in all of the DMA interfaces is that one side is
+ *   the 'peripheral' and the other is 'memory'.  Howerver, the interface
+ *   could still be used if, for example, both sides were memory although
+ *   the naming would be awkward.
+ *
  * Returned Value:
  *   If a DMA channel if the required FIFO size is available, this function
  *   returns a non-NULL, void* DMA channel handle.  NULL is returned on any
@@ -499,7 +520,7 @@ EXTERN void sam3u_gpioirqdisable(int irq);
  *
  ****************************************************************************/
 
-EXTERN DMA_HANDLE sam3u_dmachannel(uint8_t dmach_flags);
+EXTERN DMA_HANDLE sam3u_dmachannel(uint32_t dmach_flags);
 
 /****************************************************************************
  * Name: sam3u_dmafree
@@ -520,7 +541,7 @@ EXTERN void sam3u_dmafree(DMA_HANDLE handle);
  * Name: sam3u_dmatxsetup
  *
  * Description:
- *   Configure DMA for transmit (memory to periphal) before using
+ *   Configure DMA for transmit (memory to periphal).
  *
  ****************************************************************************/
 
@@ -531,7 +552,7 @@ EXTERN void sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  * Name: sam3u_dmarxsetup
  *
  * Description:
- *   Configure DMA for receive (peripheral to memory) before using
+ *   Configure DMA for receive (peripheral to memory).
  *
  ****************************************************************************/
 

@@ -360,8 +360,8 @@
 
 /* DMAC Channel n [n = 0..3] Control B Register */
 
-#define DMACHAN_CTRLB_SRCDSCR         (1 << 16) /* Bit 16: Source uffer Descriptor Fetch operation disabled */
-#define DMACHAN_CTRLB_DSTDSCR         (1 << 20) /* Bit 20: Dest Buffer Descriptor Fetch operation disabled */
+#define DMACHAN_CTRLB_SRCDSCR         (1 << 16) /* Bit 16: Source buffer descriptor fetch operation disabled */
+#define DMACHAN_CTRLB_DSTDSCR         (1 << 20) /* Bit 20: Dest buffer descriptor fetch operation disabled */
 #define DMACHAN_CTRLB_FC_SHIFT        (21)      /* Bits 21-22:  Flow controller  */
 #define DMACHAN_CTRLB_FC_MASK         (3 << DMACHAN_CTRLB_FC_SHIFT)
 #  define DMACHAN_CTRLB_FC_M2M        (0 << DMACHAN_CTRLB_FC_SHIFT) /* Memory-to-Memory  */
@@ -380,7 +380,7 @@
 
 /* DMAC Channel n [n = 0..3] Configuration Register */
 
-#define DMACHAN_CFG_SRCPER_SHIFT      (0)       /* Bits 0-3:  Chanel source associated with peripheral ID */
+#define DMACHAN_CFG_SRCPER_SHIFT      (0)       /* Bits 0-3:  Channel source associated with peripheral ID */
 #define DMACHAN_CFG_SRCPER_MASK       (15 << DMACHAN_CFG_SRCPER_SHIFT)
 #define DMACHAN_CFG_DSTPER_SHIFT      (4)       /* Bits 4-7:  Channel dest associated with peripheral ID */
 #define DMACHAN_CFG_DSTPER_MASK       (15 << DMACHAN_CFG_DSTPER_SHIFT)
@@ -400,6 +400,12 @@
 #  define DMACHAN_CFG_FIFOCFG_LARGEST (0 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Largest length AHB burst */
 #  define DMACHAN_CFG_FIFOCFG_HALF    (1 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Half FIFO size */
 #  define DMACHAN_CFG_FIFOCFG_SINGLE  (2 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Single AHB access */
+
+/* DMA Peripheral IDs *******************************************************************/
+
+#define DMACHAN_PID_MCI0               0
+#define DMACHAN_PID_SSC                3
+#define DMACHAN_PID_MCI1               13
 
 /****************************************************************************************
  * Public Types
