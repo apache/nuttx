@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_storage.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -119,7 +119,7 @@ static void   usbstrg_freereq(FAR struct usbdev_ep_s *ep,
                 FAR struct usbdev_req_s *req);
 static int    usbstrg_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 #ifdef CONFIG_USBDEV_DUALSPEED
-static int16_t usbstrg_mkcfgdesc(uint8_t *buf, uint8_t speed);
+static int16_t usbstrg_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type);
 #else
 static int16_t usbstrg_mkcfgdesc(uint8_t *buf);
 #endif
@@ -423,14 +423,14 @@ static int usbstrg_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static int16_t usbstrg_mkcfgdesc(uint8_t *buf, uint8_t speed)
+static int16_t usbstrg_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
 #else
 static int16_t usbstrg_mkcfgdesc(uint8_t *buf)
 #endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = (struct usb_cfgdesc_s*)buf;
 #ifdef CONFIG_USBDEV_DUALSPEED
-  FAR struct usb_epdesc_s *epdesc;
+  FAR const struct usb_epdesc_s *epdesc;
   bool hispeed = (speed == USB_SPEED_HIGH);
   uint16_t bulkmxpacket;
 #endif
@@ -807,7 +807,7 @@ static int usbstrg_setup(FAR struct usbdev_s *dev,
               case USB_DESC_TYPE_CONFIG:
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                  ret = usbstrg_mkcfgdesc(ctrlreq->buf, dev->speed, len);
+                  ret = usbstrg_mkcfgdesc(ctrlreq->buf, dev->speed, ctrl->value[1]);
 #else
                   ret = usbstrg_mkcfgdesc(ctrlreq->buf);
 #endif
@@ -1089,7 +1089,8 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, uint8_t config)
   FAR struct usbstrg_req_s *privreq;
   FAR struct usbdev_req_s *req;
 #ifdef CONFIG_USBDEV_DUALSPEED
-  struct usb_epdesc_s *epdesc;
+  FAR const struct usb_epdesc_s *epdesc;
+  bool hispeed = (priv->usbdev->speed == USB_SPEED_HIGH);
   uint16_t bulkmxpacket;
 #endif
   int i;
@@ -1151,7 +1152,7 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, uint8_t config)
   /* Configure the OUT bulk endpoint */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  epdesc       = USBSTRG_EPBULKINDESC(hispeed);
+  epdesc       = USBSTRG_EPBULKOUTDESC(hispeed);
   ret          = EP_CONFIGURE(priv->epbulkout, epdesc, true);
 #else
   ret          = EP_CONFIGURE(priv->epbulkout, &g_fsepbulkoutdesc, true);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_storage.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -304,8 +304,8 @@
 /* Macros for dual speed vs. full speed only operation */
 
 #ifdef  CONFIG_USBDEV_DUALSPEED
-#  define USBSTRG_EPBULKINDESC(hs)  ((hs) ? (g_hsepbulkindesc) : (g_fsepbulkindesc))
-#  define USBSTRG_EPBULKOUTDESC(hs) ((hs) ? (g_hsepbulkoutdesc) : (g_fsepbulkoutdesc))
+#  define USBSTRG_EPBULKINDESC(hs)  ((hs) ? (&g_hsepbulkindesc) : (&g_fsepbulkindesc))
+#  define USBSTRG_EPBULKOUTDESC(hs) ((hs) ? (&g_hsepbulkoutdesc) : (&g_fsepbulkoutdesc))
 #  define USBSTRG_BULKMAXPACKET(hs) \
    ((hs) ? USBSTRG_HSBULKMAXPACKET : USBSTRG_FSBULKMAXPACKET)
 #  define USBSTRG_BULKMXPKTSHIFT(d) \
