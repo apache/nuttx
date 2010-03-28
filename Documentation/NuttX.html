@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 18, 2010</p>
+      <p>Last Updated: March 28, 2010</p>
     </td>
   </tr>
 </table>
@@ -1651,6 +1651,18 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-5.3 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* arch/arm/src/lpc313x/lpc313x_usbdev.c - USB driver for the LPC313x
+	  contributed by David Hewson.
+	* configs/ea3131/src/up_ubstrgc.c, configs/ea3131/usbserial,
+	  configs/ea3131/usbstorage - USB storage and USB serial example support
+	  contributed by David Hewson.
+	* Several important compilation error fixes in lpc313x and (dualspeed) USB
+	  code also contributed by David Hewson.
+	* arch/arm/src/sam3u/sam3u_dmac.c - DMA support for the AT90SAM3U.
+	  (incomplete on initial checkin).
+	* arch/arm/src/sam3u/sam3u_hsmci.c - SD memory card support for AT90SAM3U
+	  (incomplete on initial checkin).
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

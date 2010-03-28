@@ -1069,3 +1069,15 @@
 	  EA3131.
 
 5.3 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* arch/arm/src/lpc313x/lpc313x_usbdev.c - USB driver for the LPC313x
+	  contributed by David Hewson.
+	* configs/ea3131/src/up_ubstrgc.c, configs/ea3131/usbserial,
+	  configs/ea3131/usbstorage - USB storage and USB serial example support
+	  contributed by David Hewson.
+	* Several important compilation error fixes in lpc313x and (dualspeed) USB
+	  code also contributed by David Hewson.
+	* arch/arm/src/sam3u/sam3u_dmac.c - DMA support for the AT90SAM3U.
+	  (incomplete on initial checkin).
+	* arch/arm/src/sam3u/sam3u_hsmci.c - SD memory card support for AT90SAM3U
+	  (incomplete on initial checkin).
