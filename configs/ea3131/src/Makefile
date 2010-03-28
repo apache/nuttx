@@ -1,7 +1,7 @@
 ############################################################################
 # configs/ea3131/src/Makefile
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,9 @@ AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		= up_boot.c up_buttons.c up_clkinit.c up_leds.c up_mem.c up_spi.c
 ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
+endif
+ifeq ($(CONFIG_EXAMPLE),usbstorage)
+CSRCS		+= up_usbstrg.c
 endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
