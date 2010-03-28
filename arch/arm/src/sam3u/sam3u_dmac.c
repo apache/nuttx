@@ -70,7 +70,7 @@ struct sam3u_dma_s
 {
   uint8_t           chan;       /* DMA channel number (0-6) */
   bool              inuse;      /* TRUE: The DMA channel is in use */
-  uint16_t          flags;      /* DMA channel flags */
+  uint32_t          flags;      /* DMA channel flags */
   uint32_t          base;       /* DMA register channel base address */
   dma_callback_t    callback;   /* Callback invoked when the DMA completes */
   void             *arg;        /* Argument passed to callback function */
