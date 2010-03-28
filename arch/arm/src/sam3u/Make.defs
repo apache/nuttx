@@ -46,6 +46,6 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 
 CHIP_ASRCS	= 
 CHIP_CSRCS	= sam3u_allocateheap.c sam3u_clockconfig.c sam3u_gpioirq.c \
-		  sam3u_irq.c sam3u_lowputc.c sam3u_pio.c sam3u_serial.c \
-		  sam3u_start.c sam3u_timerisr.c
+		  sam3u_hsmci.c sam3u_irq.c sam3u_lowputc.c sam3u_pio.c \
+		  sam3u_serial.c sam3u_start.c sam3u_timerisr.c
 
