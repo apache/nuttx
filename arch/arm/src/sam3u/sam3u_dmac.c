@@ -76,6 +76,7 @@ struct sam3u_dma_s
   void             *arg;        /* Argument passed to callback function */
   uint16_t          bufsize;    /* Transfer buffer size in bytes */
   volatile uint16_t remaining;  /* Total number of bytes remaining to be transferred */
+  int               result;     /* Transfer result (OK or negated errno) */
 };
 
 /****************************************************************************
@@ -364,7 +365,60 @@ static inline void sam3u_flowcontrol(struct sam3u_dma_s *dmach, uint32_t setting
 
 static int sam3u_dmainterrupt(int irq, void *context)
 {
-# warning "Missing logic"
+ struct sam3u_dma_s *dmach;
+  unsigned int chndx;
+  uint32_t regval;
+
+  /* Get the DMAC status register value */
+
+  regval = getreg32(SAM3U_DMAC_EBCISR);
+
+  /* Check if the any buffer transfer has completed */
+
+  if (regval & DMAC_EBC_BTC_MASK)
+    {
+      /* Check each channel status */
+
+      for (chndx = 0; chndx < DMA_CHANNEL_NUM; chndx++)
+        {
+          /* Are interrupts enabled for this channel? */
+
+          if ((regval & DMAC_EBC_BTC(chndx)) != 0)
+            {
+              /* Subtract the number of bytes transferred so far */
+             
+              dmach->remaining -= dmach->bufsize;
+
+              /* Is the transfer finished? */
+
+              if (dmach->remaining == 0)
+               {
+                  /* Disable Buffer Transfer Complete interrupts */
+
+                  dmach = &g_dma[chndx];
+                  putreg32(DMAC_EBC_BTC(dmach->chan), SAM3U_DMAC_EBCIDR);
+
+                  /* Disable the DMA channel */
+
+                  putreg32(DMAC_CHDR_DIS(dmach->chan), SAM3U_DMAC_CHDR);
+ 
+                  /* Perform the DMA complete callback */
+
+                  if (dmach->callback)
+                    {
+                      dmach->callback(dmach->arg);
+                    }
+                }
+              else
+                {
+                  /* Write the KEEPON field to clear the STALL states */
+
+                  putreg32(DMAC_CHER_KEEP(dmach->chan), SAM3U_DMAC_CHER);
+                }
+            }
+        }
+    }
+  return OK;
 }
 
 /****************************************************************************
