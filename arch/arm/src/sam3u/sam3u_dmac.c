@@ -207,36 +207,93 @@ static inline boolean sam3u_flowcontrol(uint8_t dmach_flags)
 }
 
 /************************************************************************************
- * Name: sam3u_settxctrla
+ * Name: sam3u_txctrlabits
  *
  * Description:
  *  Decode the the flags to get the correct CTRLA register bit settings for a transmit
- *  (memory to peripheral) transfer.
+ *  (memory to peripheral) transfer.  These are only the "fixed" CTRLA values and 
+ *  need to be updated with the actual transfer size before being written to CTRLA
+ *  sam3u_txctrla).
  *
  ************************************************************************************/
 
-static inline void
-sam3u_settxctrla(struct sam3u_dma_s *dmach, uint32_t dmasize, uint32_t otherbits)
+static inline uint32_t
+sam3u_txctrlabits(struct sam3u_dma_s *dmach, uint32_t otherbits)
 {
   uint32_t regval;
   unsigned int ndx;
 
-  DEBUGASSERT(dmach && dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
-  regval = (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT) | otherbits;
+  DEBUGASSERT(dmach);
+  regval = otherbits;
 
-  /* Since this is a transmit, the source is described by the memeory selections */
+  /* Since this is a transmit, the source is described by the memory selections.
+   * Set the source width (memory width).
+   */
 
   ndx = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK) >> DMACH_FLAG_MEMWIDTH_SHIFT;
   DEBUGASSERT(ndx < 3);
   regval |= g_srcwidth[ndx];
-  return regval;
 
-  /* Since this is a transmit, the destination is described by the peripheral selections */
+  /* Set the source chuck size (memory chunk size) */
+
+  if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
+    {
+      regval |= DMACHAN_CTRLA_SCSIZE_4;
+    }
+#if 0 /* DMACHAN_CTRLA_SCSIZE_1 is zero */
+  else
+    {
+      regval |= DMACHAN_CTRLA_SCSIZE_1;
+    }
+#endif
+
+  /* Since this is a transmit, the destination is described by the peripheral selections.
+   * Set the destination width (peripheral width).
+   */
 
   ndx = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
   DEBUGASSERT(ndx < 3);
   regval |= g_destwidth[ndx];
+
+  /* Set the destination chuck size (peripheral chunk size) */
+
+  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
+    {
+      regval |= DMACHAN_CTRLA_DCSIZE_4;
+    }
+#if 0 /* DMACHAN_CTRLA_DCSIZE_1 is zero */
+  else
+    {
+      regval |= DMACHAN_CTRLA_DCSIZE_1;
+    }
+#endif
+
   return regval;
+}
+
+/************************************************************************************
+ * Name: sam3u_txctrla
+ *
+ * Description:
+ *  Or in the variable CTRLA bits
+ *
+ ************************************************************************************/
+
+static inline uint32_t sam3u_txctrla(uint32_t dmasize, uint32_t txctrlabits)
+{
+  /* Set the buffer transfer size field.  This is the number of transfers to be
+   * performed, that is, the number of source width transfers to perform.
+   */
+
+  /* Adjust the the source transfer size for the source chunk size (memory chunk size) */
+
+  if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
+    {
+      dmasize >>= 2;
+    }
+ 
+  DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
+  return (txctrlabits & ~DMACHAN_CTRLA_BTSIZE_MASK) | (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
 }
 
 /************************************************************************************
@@ -244,31 +301,89 @@ sam3u_settxctrla(struct sam3u_dma_s *dmach, uint32_t dmasize, uint32_t otherbits
  *
  * Description:
  *  Decode the the flags to get the correct CTRLA register bit settings for a read
- *  (peripheral to memory) transfer.
+ *  (peripheral to memory) transfer. These are only the "fixed" CTRLA values and 
+ *  need to be updated with the actual transfer size before being written to CTRLA
+ *  sam3u_rxctrla).
  *
  ************************************************************************************/
 
-static inline void
-sam3u_setrxctrla(struct sam3u_dma_s *dmach, uint32_t dmasize, uint32_t otherbits)
+static inline uint32_t
+sam3u_setrxctrla(struct sam3u_dma_s *dmach, uint32_t otherbits)
 {
   uint32_t     regval;
   unsigned int ndx;
 
   DEBUGASSERT(dmach && dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
-  regval = (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT) | otherbits;
+  regval = otherbits;
 
-  /* Since this is a receive, the source is described by the peripheral selections */
+  /* Since this is a receive, the source is described by the peripheral selections.
+   * Set the source width (peripheral width).
+   */
 
   ndx = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
   DEBUGASSERT(ndx < 3);
   regval |= g_srcwidth[ndx];
 
-  /* Since this is a receive, the destination is described by the memory selections */
+  /* Set the source chuck size (peripheral chunk size) */
+
+  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
+    {
+      regval |= DMACHAN_CTRLA_SCSIZE_4;
+    }
+#if 0 /* DMACHAN_CTRLA_SCSIZE_1 is zero */
+  else
+    {
+      regval |= DMACHAN_CTRLA_SCSIZE_1;
+    }
+#endif
+
+  /* Since this is a receive, the destination is described by the memory selections.
+   * Set the destination width (memory width).
+   */
 
   ndx = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK) >> DMACH_FLAG_MEMWIDTH_SHIFT;
   DEBUGASSERT(ndx < 3);
   regval |= g_destwidth[ndx];
+
+  /* Set the destination chuck size (memory chunk size) */
+
+  if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
+    {
+      regval |= DMACHAN_CTRLA_DCSIZE_4;
+    }
+#if 0 /* DMACHAN_CTRLA_DCSIZE_1 is zero */
+  else
+    {
+      regval |= DMACHAN_CTRLA_DCSIZE_1;
+    }
+#endif
+
   return regval;
+}
+
+/************************************************************************************
+ * Name: sam3u_rxctrla
+ *
+ * Description:
+ *  Or in the variable CTRLA bits
+ *
+ ************************************************************************************/
+
+static inline uint32_t sam3u_rxctrla(uint32_t dmasize, uint32_t txctrlabits)
+{
+  /* Set the buffer transfer size field.  This is the number of transfers to be
+   * performed, that is, the number of source width transfers to perform.
+   */
+
+  /* Adjust the the source transfer size for the source chunk size (peripheral chunk size) */
+
+  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
+    {
+      dmasize >>= 2;
+    }
+ 
+  DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
+  return (txctrlabits & ~DMACHAN_CTRLA_BTSIZE_MASK) | (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
 }
 
 /************************************************************************************

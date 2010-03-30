@@ -345,7 +345,11 @@
 #define DMACHAN_CTRLA_BTSIZE_SHIFT     (0)       /* Bits 0-11: Buffer Transfer Size */
 #define DMACHAN_CTRLA_BTSIZE_MASK      (DMACHAN_CTRLA_BTSIZE_MAX << DMACHAN_CTRLA_BTSIZE_SHIFT)
 #define DMACHAN_CTRLA_SCSIZE           (1 << 16) /* Bit 16: Source Chunk Transfer Size */
+#  define DMACHAN_CTRLA_SCSIZE_1       (0)
+#  define DMACHAN_CTRLA_SCSIZE_4       DMACHAN_CTRLA_SCSIZE
 #define DMACHAN_CTRLA_DCSIZE           (1 << 20) /* Bit 20:  Destination Chunk Transfer size */
+#  define DMACHAN_CTRLA_DCSIZE_1       (0)
+#  define DMACHAN_CTRLA_DCSIZE_4       DMACHAN_CTRLA_DCSIZE
 #define DMACHAN_CTRLA_SRCWIDTH_SHIFT   (24)      /* Bits 24-25 */
 #define DMACHAN_CTRLA_SRCWIDTH_MASK    (3 << DMACHAN_CTRLA_SRCWIDTH_SHIFT)
 #  define DMACHAN_CTRLA_SRCWIDTH_BYTE  (0 << DMACHAN_CTRLA_SRCWIDTH_SHIFT)
