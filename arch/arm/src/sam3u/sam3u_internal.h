@@ -566,8 +566,8 @@ EXTERN void sam3u_dmafree(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-EXTERN void sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                             size_t nbytes);
+EXTERN int sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                            size_t nbytes);
 
 /****************************************************************************
  * Name: sam3u_dmarxsetup

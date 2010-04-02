@@ -33,7 +33,11 @@
 #
 ############################################################################
 
+# The start-up, "head", file
+
 HEAD_ASRC	= sam3u_vectors.S
+
+# Common ARM and Cortex-M3 files
 
 CMN_ASRCS	= up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
@@ -44,8 +48,19 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_sigdeliver.c up_unblocktask.c up_usestack.c up_doirq.c \
 		  up_hardfault.c up_svcall.c
 
+# Required SAM3U files
+
 CHIP_ASRCS	= 
 CHIP_CSRCS	= sam3u_allocateheap.c sam3u_clockconfig.c sam3u_gpioirq.c \
-		  sam3u_hsmci.c sam3u_irq.c sam3u_lowputc.c sam3u_pio.c \
-		  sam3u_serial.c sam3u_start.c sam3u_timerisr.c
+		  sam3u_irq.c sam3u_lowputc.c sam3u_pio.c sam3u_serial.c \
+		  sam3u_start.c sam3u_timerisr.c
 
+# Configuration-dependent SAM3U files
+
+ifeq ($(CONFIG_SAM3U_DMA),y)
+CHIP_CSRCS	+= sam3u_dmac.c
+endif
+
+ifeq ($(CONFIG_SAM3U_HSMCI),y)
+CHIP_CSRCS	+= sam3u_hsmci.c
+endif
