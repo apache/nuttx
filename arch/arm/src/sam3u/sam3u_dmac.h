@@ -263,7 +263,11 @@
 #  define DMAC_EBC_ERR1                (1 << (DMAC_EBC_ERR_SHIFT+1))
 #  define DMAC_EBC_ERR2                (1 << (DMAC_EBC_ERR_SHIFT+2))
 #  define DMAC_EBC_ERR3                (1 << (DMAC_EBC_ERR_SHIFT+3))
-#define DMAC_DBC_ERR_ALLINTS           (0x000f0f0f)
+
+#define DMAC_EBC_BTCINTS(n)            (0x00010001 << (n))  /* BTC + ERR interrupts */
+#define DMAC_EBC_CBTCINTS(n)           (0x00010100 << (n))  /* CBT + ERR interrupts */
+#define DMAC_EBC_CHANINTS(n)           (0x00010101 << (n))  /* All channel interrupts */
+#define DMAC_EBC_ALLINTS               (0x000f0f0f)         /* All interrupts */
 
 /* DMAC Channel Handler Enable Register */
 
