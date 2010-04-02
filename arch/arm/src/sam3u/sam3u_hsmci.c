@@ -122,10 +122,9 @@
 #define DMA_FLAGS \
   (DMACH_FLAG_FIFO_8BYTES | DMACH_FLAG_FIFOCFG_LARGEST | \
   (DMACHAN_PID_MCI0 << DMACH_FLAG_PERIPHPID_SHIFT) | \
-   DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHLLIMODE | \
+   DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
    DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-   DMACH_FLAG_MEMLLIMODE | DMACH_FLAG_MEMWIDTH_32BITS | \
-   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4)
+   DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4)
 
 /* FIFO sizes */
 
@@ -328,7 +327,7 @@ static void sam3u_dumpsamples(struct sam3u_dev_s *priv);
 #  define   sam3u_dumpsamples(priv)
 #endif
 
-static void sam3u_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg);
+static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result);
 
 /* Data Transfer Helpers ****************************************************/
 
@@ -791,7 +790,7 @@ static void  sam3u_dumpsamples(struct sam3u_dev_s *priv)
  *
  ****************************************************************************/
 
-static void sam3u_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
+static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result)
 {
   /* FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)arg; */
 
@@ -2354,7 +2353,7 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
      /* Start the DMA */
 
       sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-      sam3u_dmastart(priv->dma, sam3u_dmacallback, priv, false);
+      sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
       sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
       ret = OK;
     }
@@ -2421,7 +2420,7 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Start the DMA */
 
-      sam3u_dmastart(priv->dma, sam3u_dmacallback, priv, false);
+      sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
       sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
 
       /* Enable TX interrrupts */

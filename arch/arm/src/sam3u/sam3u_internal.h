@@ -322,13 +322,13 @@
 #define DMACH_FLAG_PERIPHPID_SHIFT            (4)       /* Bits 4-7: Peripheral PID */
 #define DMACH_FLAG_PERIPHPID_MASK             (15 << DMACH_FLAG_PERIPHPID_SHIFT)
 #define DMACH_FLAG_PERIPHH2SEL                (1 << 8)  /* Bits 8: HW handshaking */
-#define DMACH_FLAG_PERIPHWIDTH_SHIFT          (9)       /* Bits 9-10: Peripheral width */
+#define DMACH_FLAG_PERIPHISPERIPH             (1 << 9)  /* Bits 9: 0=memory; 1=peripheral */
+#define DMACH_FLAG_PERIPHWIDTH_SHIFT          (10)      /* Bits 10-11: Peripheral width */
 #define DMACH_FLAG_PERIPHWIDTH_MASK           (3 << DMACH_FLAG_PERIPHWIDTH_SHIFT)
 #  define DMACH_FLAG_PERIPHWIDTH_8BITS        (0 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 8 bits */
 #  define DMACH_FLAG_PERIPHWIDTH_16BITS       (1 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
 #  define DMACH_FLAG_PERIPHWIDTH_32BITS       (2 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 32 bits */
-#define DMACH_FLAG_PERIPHINCREMENT            (1 << 11) /* Bit 11: Autoincrement peripheral address */
-#define DMACH_FLAG_PERIPHLLIMODE              (1 << 12) /* Bit 12: Use link list descriptors */
+#define DMACH_FLAG_PERIPHINCREMENT            (1 << 12) /* Bit 12: Autoincrement peripheral address */
 #define DMACH_FLAG_PERIPHCHUNKSIZE            (1 << 13) /* Bit 13: Peripheral chunk size */
 #  define DMACH_FLAG_PERIPHCHUNKSIZE_1        (0)                        /* Peripheral chunksize = 1 */
 #  define DMACH_FLAG_PERIPHCHUNKSIZE_4        DMACH_FLAG_PERIPHCHUNKSIZE /* Peripheral chunksize = 4 */
@@ -338,14 +338,14 @@
 #define DMACH_FLAG_MEMPID_SHIFT               (14)      /* Bits 14-17: Memory PID */
 #define DMACH_FLAG_MEMPID_MASK                (15 << DMACH_FLAG_PERIPHPID_SHIFT)
 #define DMACH_FLAG_MEMH2SEL                   (1 << 18) /* Bits 18: HW handshaking */
-#define DMACH_FLAG_MEMWIDTH_SHIFT             (19)      /* Bits 19-20: Memory width */
+#define DMACH_FLAG_MEMISPERIPH                (1 << 19) /* Bits 19: 0=memory; 1=peripheral */
+#define DMACH_FLAG_MEMWIDTH_SHIFT             (20)      /* Bits 20-21: Memory width */
 #define DMACH_FLAG_MEMWIDTH_MASK              (3 << DMACH_FLAG_MEMWIDTH_SHIFT)
 #  define DMACH_FLAG_MEMWIDTH_8BITS           (0 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 8 bits */
 #  define DMACH_FLAG_MEMWIDTH_16BITS          (1 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
 #  define DMACH_FLAG_MEMWIDTH_32BITS          (2 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 32 bits */
-#define DMACH_FLAG_MEMINCREMENT               (1 << 21) /* Bit 21: Autoincrement memory address */
-#define DMACH_FLAG_MEMLLIMODE                 (1 << 22) /* Bit 22: Use link list descriptors */
-#define DMACH_FLAG_MEMCHUNKSIZE               (1 << 23) /* Bit 23: Memory chunk size */
+#define DMACH_FLAG_MEMINCREMENT               (1 << 22) /* Bit 22: Autoincrement memory address */
+#define DMACH_FLAG_MEMCHUNKSIZE               (1 << 22) /* Bit 23: Memory chunk size */
 #  define DMACH_FLAG_MEMCHUNKSIZE_1           (0)                     /* Memory chunksize = 1 */
 #  define DMACH_FLAG_MEMCHUNKSIZE_4           DMACH_FLAG_MEMCHUNKSIZE /* Memory chunksize = 4 */
 
@@ -354,7 +354,7 @@
  ************************************************************************************/
 
 typedef FAR void *DMA_HANDLE;
-typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t isr, void *arg);
+typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
 
@@ -559,7 +559,10 @@ EXTERN void sam3u_dmafree(DMA_HANDLE handle);
  * Name: sam3u_dmatxsetup
  *
  * Description:
- *   Configure DMA for transmit (memory to periphal).
+ *   Configure DMA for transmit of one buffer (memory to peripheral).  This
+ *   function may be called multiple times to handle large and/or dis-
+ *   continuous transfers.  Calls to sam3u_dmatxsetup() and sam3u_dmatxsetup()
+ *   must not be intermixed on the same transfer, however.
  *
  ****************************************************************************/
 
@@ -570,12 +573,15 @@ EXTERN void sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  * Name: sam3u_dmarxsetup
  *
  * Description:
- *   Configure DMA for receive (peripheral to memory).
+ *   Configure DMA for receipt of one buffer (peripheral to memory).  This
+ *   function may be called multiple times to handle large and/or dis-
+ *   continuous transfers.  Calls to sam3u_dmatxsetup() and sam3u_dmatxsetup()
+ *   must not be intermixed on the same transfer, however.
  *
  ****************************************************************************/
 
-EXTERN void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                             size_t nbytes);
+EXTERN int sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                            size_t nbytes);
 
 /****************************************************************************
  * Name: sam3u_dmastart
@@ -585,8 +591,7 @@ EXTERN void sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  *
  ****************************************************************************/
 
-EXTERN void sam3u_dmastart(DMA_HANDLE handle, dma_callback_t callback,
-                           void *arg, bool half);
+EXTERN int sam3u_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 
 /****************************************************************************
  * Name: sam3u_dmastop
