@@ -374,12 +374,12 @@
 #  define DMACHAN_CTRLB_FC_P2P        (3 << DMACHAN_CTRLB_FC_SHIFT) /* Peripheral-to-Peripheral */
 #define DMACHAN_CTRLB_SRCINCR_SHIFT   (24)      /* Bits 24-25 */
 #define DMACHAN_CTRLB_SRCINCR_MASK    (3 << DMACHAN_CTRLB_SRCINCR_SHIFT)
-#  define DMACHAN_CTRLB_SRCINCR_INCR  (0 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* INCREMENTING */
-#  define DMACHAN_CTRLB_SRCINCR_FIXED (2 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* FIXED */
+#  define DMACHAN_CTRLB_SRCINCR_INCR  (0 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Incrementing address */
+#  define DMACHAN_CTRLB_SRCINCR_FIXED (2 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Fixed address */
 #define DMACHAN_CTRLB_DSTINCR_SHIFT   (28)      /* Bits 28-29 */  
 #define DMACHAN_CTRLB_DSTINCR_MASK    (3 << DMACHAN_CTRLB_DSTINCR_SHIFT)
-#  define DMACHAN_CTRLB_DSTINCR_INCR  (0 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* INCREMENTING */
-#  define DMACHAN_CTRLB_DSTINCR_FIXED (2 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* FIXED */
+#  define DMACHAN_CTRLB_DSTINCR_INCR  (0 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Incrementing address */
+#  define DMACHAN_CTRLB_DSTINCR_FIXED (2 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Fixed address */
 #define DMACHAN_CTRLB_IEN             (1 << 30)  /* Bit 30:  Clear sets BTC[n] flag in EBCISR */
 
 /* DMAC Channel n [n = 0..3] Configuration Register */
@@ -422,8 +422,8 @@ struct dma_linklist_s
   uint32_t src;    /* Source address */
   uint32_t dest;   /* Destination address */
   uint32_t ctrla;  /* Control A value */
-  uint32_t ctrlb;  /* Congtrol B value */
-  uint32_t desc;   /* Descriptor address */
+  uint32_t ctrlb;  /* Control B value */
+  uint32_t next;   /* Next descriptor address */
 };
 
 /****************************************************************************************
