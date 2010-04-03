@@ -100,12 +100,14 @@ CONFIG_SAM3U_BUILDROOT=y
 #
 #  Individual subsystems can be enabled:
 #
+CONFIG_SAM3U_DMA=n
+CONFIG_SAM3U_NAND=n
+CONFIG_SAM3U_HSMCI=n
 CONFIG_SAM3U_UART=y
 CONFIG_SAM3U_USART0=n
 CONFIG_SAM3U_USART1=n
 CONFIG_SAM3U_USART2=n
 CONFIG_SAM3U_USART3=n
-CONFIG_SAM3U_NAND=n
 
 #
 # Some subsystems can be configured to operate in different ways..
