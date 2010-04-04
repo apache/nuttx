@@ -1623,14 +1623,16 @@ lpc313x_epcomplete(struct lpc313x_usbdev_s *priv, uint8_t epphy)
   if (LPC313X_EPPHYOUT(privep->epphy))
     {
       /* read(OUT) completes when request filled, or a short transfer is received */
+
       complete = (privreq->req.xfrd >= privreq->req.len || xfrd < privep->ep.maxpacket);
 
       usbtrace(TRACE_INTDECODE(LPC313X_TRACEINTID_EPIN), complete);
     }
   else
     {
-      // write(IN) completes when request finished, unless we need to terminate with a ZLP
-      bool need_zlp = xfrd == privep->ep.maxpacket && ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0);
+      /* write(IN) completes when request finished, unless we need to terminate with a ZLP */
+
+      bool need_zlp = (xfrd == privep->ep.maxpacket) && ((privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0);
 
       complete = (privreq->req.xfrd >= privreq->req.len && !need_zlp);
 
@@ -2121,22 +2123,23 @@ static int lpc313x_epstall(FAR struct usbdev_ep_s *ep, bool resume)
   flags = irqsave();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
 
-  uint32_t addr = LPC313X_USBDEV_ENDPTCTRL(privep->epphy);
-  uint32_t mask = LPC313X_EPPHYIN(privep->epphy) ? USBDEV_ENDPTCTRL_TXS : USBDEV_ENDPTCTRL_RXS;
+  uint32_t addr    = LPC313X_USBDEV_ENDPTCTRL(privep->epphy);
+  uint32_t ctrl_xs = LPC313X_EPPHYIN(privep->epphy) ? USBDEV_ENDPTCTRL_TXS : USBDEV_ENDPTCTRL_RXS;
+  uint32_t ctrl_xr = LPC313X_EPPHYIN(privep->epphy) ? USBDEV_ENDPTCTRL_TXR : USBDEV_ENDPTCTRL_RXR;
 
   if (resume)
     {
       privep->stalled = false;
 
-      lpc313x_clrbits (mask, addr);
+      /* Clear stall and reset the data toggle */
 
-      /* FIXME: do we need to restart any queued write requests? */
+      lpc313x_chgbits (ctrl_xs | ctrl_xr, ctrl_xr, addr);
     }
   else
     {
       privep->stalled = true;
 
-      lpc313x_setbits (mask, addr);
+      lpc313x_setbits (ctrl_xs, addr);
     }
 
   irqrestore(flags);
