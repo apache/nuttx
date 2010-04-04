@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 20, 2009)
+NuttX TODO List (Last updated April 4, 2009)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -9,7 +9,7 @@ NuttX TODO List (Last updated December 20, 2009)
   (5)  Binary loaders (binfmt/)
  (14)  Network (net/, netutils/)
   (5)  Network Utilities (netutils/)
-  (1)  USB (drivers/usbdev)
+  (0)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
@@ -23,7 +23,7 @@ NuttX TODO List (Last updated December 20, 2009)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
-  (8)  ARM/LPC214x (arch/arm/src/lpc214x/)
+  (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (5)  ARM/STM32 (arch/arm/src/stm32/)
@@ -287,14 +287,6 @@ o Network Utilities (netutils/)
 
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
-
-  Description: The USB bulk storage class driver configuration (examples/usbstorage)
-               does not work reliably when debug is disabled (CONFIG_DEBUG+CONFIG_DEBUG_VERBOSE
-               +CONFIG_DEBUG_USB) on WinXP (Linux appears to be fine).  A race condition would
-               would be a possibility.  The symptom is that that WinXP sends a MODE SENSE (6)
-               command with an unsupported mode page (0x1c/0x00)
-  Status:      Open
-  Priority:    High
 
 o Libraries (lib/)
   ^^^^^^^^^^^^^^^^
@@ -610,14 +602,6 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
                USB is connected (reports EBADF instead of ENOTCONN)
   Status:      Open
   Priority:    Low
-
-  Description: The USB bulk storage class driver configuration (examples/usbstorage)
-               does not work reliably when debug is disabled (CONFIG_DEBUG+CONFIG_DEBUG_VERBOSE
-               +CONFIG_DEBUG_USB) on WinXP (Linux appears to be fine).  A race condition would
-               would be a possibility.  The symptom is that that WinXP sends a MODE SENSE (6)
-               command with an unsupported mode page (0x1c/0x00)
-  Status:      Open
-  Priority:    High
 
   Description: At present the SPI driver is polled.  Should it be interrupt driven?
                Look at arch/arm/src/imx/imx_spi.c -- that is a good example of an

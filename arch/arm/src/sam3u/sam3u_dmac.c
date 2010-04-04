@@ -69,6 +69,12 @@
 
 #ifdef CONFIG_SAM3U_DMA
 
+/* If AT90SAM3U support is enabled, then OS DMA support should also be enabled */
+
+#ifndef CONFIG_ARCH_DMA
+#  warning "ATSAM3U DMA enabled but CONFIG_ARCH_DMA disabled"
+#endif
+
 /* Check the number of link list descriptors to allocate */
 
 #ifndef CONFIG_SAM3U_NLLDESC
