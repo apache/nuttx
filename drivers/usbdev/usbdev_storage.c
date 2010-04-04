@@ -1717,7 +1717,6 @@ int usbstrg_unbindlun(FAR void *handle, unsigned int lunno)
   if (lun->inode == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_LUNNOTBOUND), 0);
-      pthread_mutex_lock(&priv->mutex);
       ret = -EBUSY;
     }
   else

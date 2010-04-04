@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_storage.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -77,6 +77,21 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* Race condition workaround found by David Hewson.  This race condition
+ * "seems to relate to stalling the endpoint when a short response is
+ * generated which causes a residue to exist when the CSW would be returned.
+ * I think there's two issues here.  The first being if the transfer which
+ * had just been queued before the stall had not completed then it wouldn’t
+ * then complete once the endpoint was stalled?  The second is that the
+ * subsequent transfer for the CSW would be dropped on the floor (by the
+ * epsubmit() function) if the end point was still stalled as the control
+ * transfer to resume it hadn't occurred."
+ */
+
+#define CONFIG_USBSTRG_RACEWAR 1
 
 /****************************************************************************
  * Private Types
@@ -1702,13 +1717,13 @@ static int usbstrg_cmdparsestate(FAR struct usbstrg_dev_s *priv)
   * case SCSI_CMD_REASSIGNBLOCKS:                  * 0x07 Optional */
 
     case SCSI_CMD_READ6:                          /* 0x08 Mandatory */
-      return usbstrg_cmdread6(priv);
+      ret = usbstrg_cmdread6(priv);
       break;
 
  /*                                                * 0x09 Vendor specific */
 
     case SCSI_CMD_WRITE6:                         /* 0x0a Optional */
-      return usbstrg_cmdwrite6(priv);
+      ret = usbstrg_cmdwrite6(priv);
       break;
 
  /* case SCSI_CMD_SEEK6:                           * 0x0b Obsolete
@@ -1757,13 +1772,13 @@ static int usbstrg_cmdparsestate(FAR struct usbstrg_dev_s *priv)
 
  /*                                                * 0x26-27 Vendor specific */
     case SCSI_CMD_READ10:                         /* 0x28 Mandatory */
-      return usbstrg_cmdread10(priv);
+      ret = usbstrg_cmdread10(priv);
       break;
 
  /*                                                * 0x29 Vendor specific */
 
     case SCSI_CMD_WRITE10:                        /* 0x2a Optional */
-      return usbstrg_cmdwrite10(priv);
+      ret = usbstrg_cmdwrite10(priv);
       break;
 
  /* case SCSI_CMD_SEEK10:                          * 0x2b Obsolete
@@ -1839,11 +1854,11 @@ static int usbstrg_cmdparsestate(FAR struct usbstrg_dev_s *priv)
   * case SCSI_CMD_MOVEMEDIUMATTACHED:              * 0xa7 Optional (MCHNGR==0) */
 
     case SCSI_CMD_READ12:                         /* 0xa8 Optional */
-      return usbstrg_cmdread12(priv);
+      ret = usbstrg_cmdread12(priv);
       break;
 
     case SCSI_CMD_WRITE12:                        /* 0xaa Optional */
-      return usbstrg_cmdwrite12(priv);
+      ret = usbstrg_cmdwrite12(priv);
       break;
 
  /* case SCSI_CMD_READMEDIASERIALNUMBER:           * 0xab Optional
@@ -1870,64 +1885,70 @@ static int usbstrg_cmdparsestate(FAR struct usbstrg_dev_s *priv)
       break;
     }
   pthread_mutex_unlock(&priv->mutex);
+ 
+  /* Is a response required?  (Not for read6/10/12 and write6/10/12). */
 
-  /* All commands come through this path (EXCEPT read6/10/12 and write6/10/12). 
-   * For all other commands, the following setup is expected for the response
-   * based on data direction:
-   *
-   * For direction NONE:
-   *   1. priv->u.alloclen == 0
-   *   2. priv->nreqbytes == 0
-   *
-   * For direction = device-to-host:
-   *   1. priv->u.alloclen == allocation length; space set aside by the
-   *      host to receive the device data.  The size of the response
-   *      cannot exceed this value.
-   *   2. response data is in the request currently at the head of
-   *      the priv->wrreqlist queue.  priv->nreqbytes is set to the length
-   *      of data in the response.
-   *
-   * For direction host-to-device
-   *   At present, there are no supported commands that should have host-to-device
-   *   transfers (except write6/10/12 and that command logic does not take this
-   *   path.  The 'residue' is left at the full host-to-device data size.
-   *
-   * For all:
-   *   ret set to <0 if an error occurred in parsing the commands.
-   */
-
-  /* For from device-to-hose operations, the residue is the expected size
-   * (the initial value of 'residue') minus the amount actually returned
-   * in the response:
-   */
-
-  if (priv->cbwdir == USBSTRG_FLAGS_DIRDEVICE2HOST)
+  if (priv->thstate == USBSTRG_STATE_CMDPARSE)
     {
-      /* The number of bytes in the response cannot exceed the host
-       * 'allocation length' in the command.
+      /* All commands come through this path (EXCEPT read6/10/12 and write6/10/12). 
+       * For all other commands, the following setup is expected for the response
+       * based on data direction:
+       *
+       * For direction NONE:
+       *   1. priv->u.alloclen == 0
+       *   2. priv->nreqbytes == 0
+       *
+       * For direction = device-to-host:
+       *   1. priv->u.alloclen == allocation length; space set aside by the
+       *      host to receive the device data.  The size of the response
+       *      cannot exceed this value.
+       *   2. response data is in the request currently at the head of
+       *      the priv->wrreqlist queue.  priv->nreqbytes is set to the length
+       *      of data in the response.
+       *
+       * For direction host-to-device
+       *   At present, there are no supported commands that should have host-to-device
+       *   transfers (except write6/10/12 and that command logic does not take this
+       *   path.  The 'residue' is left at the full host-to-device data size.
+       *
+       * For all:
+       *   ret set to <0 if an error occurred in parsing the commands.
        */
 
-      if (priv->nreqbytes > priv->u.alloclen)
+      /* For from device-to-hose operations, the residue is the expected size
+       * (the initial value of 'residue') minus the amount actually returned
+       * in the response:
+       */
+
+      if (priv->cbwdir == USBSTRG_FLAGS_DIRDEVICE2HOST)
         {
-          priv->nreqbytes = priv->u.alloclen;
+          /* The number of bytes in the response cannot exceed the host
+           * 'allocation length' in the command.
+           */
+
+          if (priv->nreqbytes > priv->u.alloclen)
+            {
+              priv->nreqbytes = priv->u.alloclen;
+            }
+
+          /* The residue is then the number of bytes that were not sent */
+
+          priv->residue -= priv->nreqbytes;
         }
 
-      /* The residue is then the number of bytes that were not sent */
+      /* On return, we need the following:
+       *
+       *   1. Setup for CMDFINISH state if appropriate
+       *   2. priv->thstate set to either CMDPARSE if no buffer was available or
+       *      CMDFINISH to send the response
+       *   3. Return OK to continue; <0 to wait for the next event
+       */
 
-      priv->residue -= priv->nreqbytes;
+      usbtrace(TRACE_CLASSSTATE(USBSTRG_CLASSSTATE_CMDPARSECMDFINISH), priv->cdb[0]);
+      priv->thstate    = USBSTRG_STATE_CMDFINISH;
+      ret = OK;
     }
-
-  /* On return, we need the following:
-   *
-   *   1. Setup for CMDFINISH state if appropriate
-   *   2. priv->thstate set to either CMDPARSE if no buffer was available or
-   *      CMDFINISH to send the response
-   *   3. Return OK to continue; <0 to wait for the next event
-   */
-
-  usbtrace(TRACE_CLASSSTATE(USBSTRG_CLASSSTATE_CMDPARSECMDFINISH), priv->cdb[0]);
-  priv->thstate    = USBSTRG_STATE_CMDFINISH;
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -2301,7 +2322,21 @@ static int usbstrg_cmdfinishstate(FAR struct usbstrg_dev_s *priv)
           if (priv->residue > 0)
             {
               usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_CMDFINISHRESIDUE), (uint16_t)priv->residue);
+
+#ifdef CONFIG_USBSTRG_RACEWAR
+              /* (See description of the workaround at the top of the file).
+               * First, wait for the transfer to complete, then stall the endpoint
+               */
+
+              usleep (100000);
               (void)EP_STALL(priv->epbulkin);
+
+ 	      /* now wait for stall to go away .... */
+
+ 	      usleep (100000);
+#else
+              (void)EP_STALL(priv->epbulkin);
+#endif
             }
         }
       break;
@@ -2513,6 +2548,7 @@ void *usbstrg_workerthread(void *arg)
 
       eventset         = priv->theventset;
       priv->theventset = USBSTRG_EVENT_NOEVENTS;
+      pthread_mutex_unlock(&priv->mutex);
 
       /* Were we awakened by some event that requires immediate action?
        *
