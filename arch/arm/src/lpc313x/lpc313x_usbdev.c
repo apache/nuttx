@@ -1,6 +1,10 @@
 /*******************************************************************************
  * arch/arm/src/lpc313x/lpc313x_usbdev.c
  *
+ *   Author: Davide Hewson
+ *
+ * Part of the NuttX OS and based, in part, on the LPC2148 USB driver:
+ *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
