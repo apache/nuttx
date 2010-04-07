@@ -89,16 +89,6 @@
 #  undef CONFIG_HSMCI_XFRDEBUG
 #endif
 
-/* Mode dependent settings.  These depend on clock devisor settings that must
- * be defined in the board-specific board.h header file: HSMCI_INIT_CLKDIV,
- * HSMCI_MMCXFR_CLKDIV, and HSMCI_SDXFR_CLKDIV.
- */
-  
-#define HSMCI_CLCKCR_INIT        (((SAM3U_MCK_FREQUENCY / (  400000 * 2)) - 1) | (7 << HSMCI_MR_PWSDIV_SHIFT))
-#define HSMCI_CLKCR_MMCXFR       (((SAM3U_MCK_FREQUENCY / (20000000 * 2)) - 1) | (7 << HSMCI_MR_PWSDIV_SHIFT))
-#define HSMCI_CLCKR_SDXFR        (((SAM3U_MCK_FREQUENCY / (25000000 * 2)) - 1) | (7 << HSMCI_MR_PWSDIV_SHIFT))
-#define HSMCI_CLCKR_SDWIDEXFR    (((SAM3U_MCK_FREQUENCY / (25000000 * 2)) - 1) | (7 << HSMCI_MR_PWSDIV_SHIFT))
-
 /* Timing */
 
 #define HSMCI_CMDTIMEOUT         (100000)
@@ -277,15 +267,15 @@ struct sam3u_sampleregs_s
 
 static void sam3u_takesem(struct sam3u_dev_s *priv);
 #define     sam3u_givesem(priv) (sem_post(&priv->waitsem))
-static inline void sam3u_setclkcr(uint32_t clkcr);
 static void sam3u_enablewaitints(struct sam3u_dev_s *priv, uint32_t waitmask,
               sdio_eventset_t waitevents);
 static void sam3u_disablewaitints(struct sam3u_dev_s *priv, sdio_eventset_t wkupevents);
 static void sam3u_enablexfrints(struct sam3u_dev_s *priv, uint32_t xfrmask);
 static void sam3u_disablexfrints(struct sam3u_dev_s *priv);
+static inline void sam3u_disable(void);
+static inline void sam3u_enable(void);
 
 /* DMA Helpers **************************************************************/
-
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
 static void sam3u_sampleinit(void);
@@ -448,42 +438,6 @@ static void sam3u_takesem(struct sam3u_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam3u_setclkcr
- *
- * Description:
- *   Modify oft-changed bits in the CLKCR register.  Only the following bit-
- *   fields are changed:
- *
- *   CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, and HWFC_EN
- *
- * Input Parameters:
- *   clkcr - A new CLKCR setting for the above mentions bits (other bits
- *           are ignored.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void sam3u_setclkcr(uint32_t clkcr)
-{
-  uint32_t regval = getreg32(SAM3U_HSMCI_CLKCR);
-    
-  /* Clear CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, HWFC_EN bits */
-
-  regval &= ~(HSMCI_CLKCR_CLKDIV_MASK|HSMCI_CLKCR_PWRSAV|HSMCI_CLKCR_BYPASS|
-              HSMCI_CLKCR_WIDBUS_MASK|HSMCI_CLKCR_NEGEDGE|HSMCI_CLKCR_HWFC_EN);
-
-  /* Replace with user provided settings */
-
-  clkcr  &=  (HSMCI_CLKCR_CLKDIV_MASK|HSMCI_CLKCR_PWRSAV|HSMCI_CLKCR_BYPASS|
-              HSMCI_CLKCR_WIDBUS_MASK|HSMCI_CLKCR_NEGEDGE|HSMCI_CLKCR_HWFC_EN);
-  regval |=  clkcr;
-  putreg32(regval, SAM3U_HSMCI_CLKCR);
-  fvdbg("CLKCR: %08x\n", getreg32(SAM3U_HSMCI_CLKCR));
-}
-
-/****************************************************************************
  * Name: sam3u_enablewaitints
  *
  * Description:
@@ -592,6 +546,48 @@ static void sam3u_disablexfrints(struct sam3u_dev_s *priv)
   priv->xfrmask = 0;
   putreg32(~priv->waitmask, SAM3U_HSMCI_IDR);
   irqrestore(flags);
+}
+
+/****************************************************************************
+ * Name: sam3u_disable
+ *
+ * Description:
+ *   Enable/disable the HSMCI
+ *
+ ****************************************************************************/
+
+static inline void sam3u_disable(void) 
+{
+  /* Disable the MCI peripheral clock */
+
+  putreg32((1 << SAM3U_PID_HSMCI), SAM3U_PMC_PCDR);
+  
+  /* Disable the MCI */
+
+  putreg32(HSMCI_CR_MCIDIS, SAM3U_HSMCI_CR);
+
+  /* Disable all the interrupts */
+
+  putreg32(0xffffffff, SAM3U_HSMCI_IDR);
+}
+
+/****************************************************************************
+ * Name: sam3u_enable
+ *
+ * Description:
+ *   Enable the HSMCI
+ *
+ ****************************************************************************/
+
+static inline void sam3u_enable(void)
+{
+  /* Enable the MCI peripheral clock */
+
+  putreg32((1 << SAM3U_PID_HSMCI), SAM3U_PMC_PCER);
+
+  /* Enable the MCI and the Power Saving */
+
+  putreg32(HSMCI_CR_MCIEN, SAM3U_HSMCI_CR);
 }
 
 /****************************************************************************
@@ -1134,10 +1130,10 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
 
   putreg32(HSMCI_DTOR_DTOCYC_MAX | HSMCI_DTOR_DTOMUL_MAX, SAM3U_HSMCI_DTOR);
   
-  /* Set the Mode Register: 400KHz for MCK = 48MHz (clkdiv = 58) */
+  /* Set the Mode Register for ID mode frequency (probably 400KHz) */
 
-  putreg32(HSMCI_CLCKCR_INIT, SAM3U_HSMCI_MR);
-  
+  sam3u_clock(dev, CLOCK_IDMODE);
+
   /* Set the SDCard Register */
 
   putreg32(HSMCI_SDCR_SDCSEL_SLOTA | HSMCI_SDCR_SDCBUS_4BIT, SAM3U_HSMCI_SDCR);
@@ -1237,40 +1233,57 @@ static void sam3u_widebus(FAR struct sdio_dev_s *dev, bool wide)
 
 static void sam3u_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
-  uint32_t clckr;
-  uint32_t enable = 1;
+  uint32_t regval;
+  bool enable = true;
 
+  /* Fetch the current mode register and mask out the clkdiv (and pwsdiv) */
+
+  regval = getreg32(SAM3U_HSMCI_MR);
+  regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK);
+
+ /* These clock devisor values that must be defined in the board-specific
+  * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
+  * HSMCI_SDXFR_CLKDIV, and HSMCI_SDWIDEXFR_CLKDIV.
+  */
+  
   switch (rate)
     {
     default:
     case CLOCK_HSMCI_DISABLED:     /* Clock is disabled */
-      clckr  = HSMCI_CLCKCR_INIT;
-      enable = 0;
+      regval |= HSMCI_INIT_CLKDIV | HSMCI_MR_PWSDIV_MAX;
+      enable = false;
       return;
 
     case CLOCK_IDMODE:            /* Initial ID mode clocking (<400KHz) */
-      clckr  = HSMCI_CLCKCR_INIT;
+      regval |= HSMCI_INIT_CLKDIV | HSMCI_MR_PWSDIV_MAX;
       break;
 
     case CLOCK_MMC_TRANSFER:      /* MMC normal operation clocking */
-      clckr  = HSMCI_CLKCR_MMCXFR;
+      regval |= HSMCI_MMCXFR_CLKDIV | HSMCI_MR_PWSDIV_MAX;
       break;
 
     case CLOCK_SD_TRANSFER_1BIT:  /* SD normal operation clocking (narrow 1-bit mode) */
-      clckr  = HSMCI_CLCKR_SDXFR;
+      regval |= HSMCI_SDXFR_CLKDIV | HSMCI_MR_PWSDIV_MAX;
       break;
 
     case CLOCK_SD_TRANSFER_4BIT:  /* SD normal operation clocking (wide 4-bit mode) */
-      clckr  = HSMCI_CLCKR_SDWIDEXFR;
+      regval |= HSMCI_SDWIDEXFR_CLKDIV | HSMCI_MR_PWSDIV_MAX;
       break;
     };
 
-  /* Set the new clock frequency and make sure that the clock is enabled or
-   * disabled, whatever the case.
+  /* Set the new clock  diver and make sure that the clock is enabled or
+   * disabled, whichever the case.
    */
 
-  sam3u_setclkcr(clckr);
-  putreg32(enable, HSMCI_CLKCR_CLKEN_BB);
+  putreg32(regval, SAM3U_HSMCI_MR);
+  if (enable)
+    {
+      sam3u_enable();
+    }
+  else
+    {
+      sam3u_disable();
+    }
 }
 
 /****************************************************************************
