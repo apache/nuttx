@@ -121,6 +121,7 @@
 #define HSMCI_MR_CLKDIV_MASK        (0xff << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_MR_PWSDIV_SHIFT       (8)       /* Bits 8-10: Power Saving Divider */
 #define HSMCI_MR_PWSDIV_MASK        (7 << HSMCI_MR_PWSDIV_SHIFT)
+#  define HSMCI_MR_PWSDIV_MAX       (7 << HSMCI_MR_PWSDIV_SHIFT)
 #define HSMCI_MR_RDPROOF            (1 << 11) /* Bit 11: Read Proof Enable */
 #define HSMCI_MR_WRPROOF            (1 << 12) /* Bit 12: Write Proof Enable */
 #define HSMCI_MR_FBYTE              (1 << 13) /* Bit 13: Force Byte Transfer */
