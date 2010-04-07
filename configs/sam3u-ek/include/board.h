@@ -87,6 +87,28 @@
 #define SAM3U_PLLA_FREQUENCY       (96000000)
 #define SAM3U_CPU_FREQUENCY        (48000000)
 
+/* HSMCI clocking
+ *
+ * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
+ * divided by (2*(CLKDIV+1)).
+ *
+ *   MCI_SPEED = MCK / (2*(CLKDIV+1))
+ *   CLKDIV = MCI / MCI_SPEED / 2 - 1
+ */
+
+/* MCK = 48MHz, CLKDIV = 59, MCI_SPEED = 48MHz / 2 * (59+1) = 400 KHz */
+  
+#define HSMCI_INIT_CLKDIV      (59 << HSMCI_MR_CLKDIV_SHIFT)
+
+/* MCK = 48MHz, CLKDIV = 1, MCI_SPEED = 48MHz / 2 * (1+1) = 12 MHz */
+
+#define HSMCI_MMCXFR_CLKDIV    (3 << HSMCI_MR_CLKDIV_SHIFT) 
+
+/* MCK = 48MHz, CLKDIV = 0, MCI_SPEED = 48MHz / 2 * (0+1) = 24 MHz */
+
+#define HSMCI_SDXFR_CLKDIV     (0 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_SDWIDEXFR_CLKDIV HSMCI_SDXFR_CLKDIV
+
 /* LED definitions ******************************************************************/
 
 #define LED_STARTED                0 /* LED0=OFF LED1=OFF LED2=OFF */
