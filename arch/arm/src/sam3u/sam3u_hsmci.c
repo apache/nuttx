@@ -73,8 +73,8 @@
 
 /* Configuration ************************************************************/
 
-#if !defined(CONFIG_SDIO_DMA) || !defined(CONFIG_SAM3U_DMA)
-#  warning "HSMCI requires CONFIG_SDIO_DMA and CONFIG_SAM3U_DMA"
+#ifndef CONFIG_SAM3U_DMA
+#  warning "HSMCI driver requires CONFIG_SAM3U_DMA"
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -85,18 +85,9 @@
 #  define CONFIG_HSMCI_PRI        NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
-#ifndef CONFIG_HSMCI_DMAPRIO
-#  define CONFIG_HSMCI_DMAPRIO    DMA_CCR_PRIMED
-#endif
-
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
 #  undef CONFIG_HSMCI_XFRDEBUG
 #endif
-
-/* Friendly CLKCR bit re-definitions ****************************************/
-
-#define HSMCI_CLKCR_RISINGEDGE   (0)
-#define HSMCI_CLKCR_FALLINGEDGE  HSMCI_CLKCR_NEGEDGE
 
 /* Mode dependent settings.  These depend on clock devisor settings that must
  * be defined in the board-specific board.h header file: HSMCI_INIT_CLKDIV,
@@ -125,11 +116,6 @@
    DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
    DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
    DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4)
-
-/* FIFO sizes */
-
-#define HSMCI_HALFFIFO_WORDS     (8)
-#define HSMCI_HALFFIFO_BYTES     (8*4)
 
 /* Status errors:
  *
@@ -179,25 +165,15 @@
   ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
     HSMCI_INT_DTOE  | HSMCI_INT_DCRCE )
 
-#define HSMCI_DATA_RECV_ERRORS \
-  ( HSMCI_INT_OVRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
-
 #define HSMCI_DATA_DMARECV_ERRORS \
   ( HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
     HSMCI_INT_DCRCE )
-
-#define HSMCI_DATA_SEND_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
 
 #define HSMCI_DATA_DMASEND_ERRORS \
   ( HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
 
 /* Data transfer status and interrupt mask bits */
 
-#define HSMCI_RECV_INTS \
-  ( HSMCI_DATA_RECV_ERRORS    | HSMCI_INT_XFRDONE )
-#define HSMCI_SEND_INTS \
-  ( HSMCI_DATA_SEND_ERROR     | HSMCI_INT_XFRDONE )
 #define HSMCI_DMARECV_INTS \
   ( HSMCI_DATA_DMARECV_ERRORS | HSMCI_INT_XFRDONE | HSMCI_INT_DMADONE )
 #define HSMCI_DMASEND_INTS \
@@ -265,7 +241,6 @@ struct sam3u_dev_s
   /* DMA data transfer support */
 
   bool               widebus;    /* Required for DMA support */
-  bool               dmamode;    /* true: DMA mode transfer */
   DMA_HANDLE         dma;        /* Handle for DMA channel */
 };
 
@@ -308,7 +283,6 @@ static void sam3u_enablewaitints(struct sam3u_dev_s *priv, uint32_t waitmask,
 static void sam3u_disablewaitints(struct sam3u_dev_s *priv, sdio_eventset_t wkupevents);
 static void sam3u_enablexfrints(struct sam3u_dev_s *priv, uint32_t xfrmask);
 static void sam3u_disablexfrints(struct sam3u_dev_s *priv);
-static inline uint32_t sam3u_getpwrctrl(void);
 
 /* DMA Helpers **************************************************************/
 
@@ -334,8 +308,6 @@ static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result);
 static uint8_t sam3u_log2(uint16_t value);
 static void sam3u_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl);
 static void sam3u_datadisable(void);
-static void sam3u_sendfifo(struct sam3u_dev_s *priv);
-static void sam3u_recvfifo(struct sam3u_dev_s *priv);
 static void sam3u_eventtimeout(int argc, uint32_t arg);
 static void sam3u_endwait(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent);
 static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent);
@@ -359,10 +331,6 @@ static int  sam3u_attach(FAR struct sdio_dev_s *dev);
 
 static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
-static int  sam3u_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-              size_t nbytes);
-static int  sam3u_sendsetup(FAR struct sdio_dev_s *dev,
-              FAR const uint8_t *buffer, uint32_t nbytes);
 static int  sam3u_cancel(FAR struct sdio_dev_s *dev);
 
 static int  sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
@@ -388,7 +356,9 @@ static int  sam3u_registercallback(FAR struct sdio_dev_s *dev,
 
 /* DMA */
 
+#ifdef CONFIG_SDIO_DMA
 static bool sam3u_dmasupported(FAR struct sdio_dev_s *dev);
+#endif
 static int  sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
@@ -412,8 +382,8 @@ struct sam3u_dev_s g_sdiodev =
     .clock            = sam3u_clock,
     .attach           = sam3u_attach,
     .sendcmd          = sam3u_sendcmd,
-    .recvsetup        = sam3u_recvsetup,
-    .sendsetup        = sam3u_sendsetup,
+    .recvsetup        = sam3u_dmarecvsetup,
+    .sendsetup        = sam3u_dmasendsetup,
     .cancel           = sam3u_cancel,
     .waitresponse     = sam3u_waitresponse,
     .recvR1           = sam3u_recvshortcrc,
@@ -427,9 +397,11 @@ struct sam3u_dev_s g_sdiodev =
     .eventwait        = sam3u_eventwait,
     .callbackenable   = sam3u_callbackenable,
     .registercallback = sam3u_registercallback,
+#ifdef CONFIG_SDIO_DMA
     .dmasupported     = sam3u_dmasupported,
     .dmarecvsetup     = sam3u_dmarecvsetup,
     .dmasendsetup     = sam3u_dmasendsetup,
+#endif
   },
 };
 
@@ -623,27 +595,6 @@ static void sam3u_disablexfrints(struct sam3u_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam3u_getpwrctrl
- *
- * Description:
- *   Return the current value of the  the PWRCTRL field of the HSMCI POWER
- *   register.  This function can be used to see the the HSMCI is power ON
- *   or OFF
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The current value of the  the PWRCTRL field of the HSMCI POWER register.
- *
- ****************************************************************************/
-
-static inline uint32_t sam3u_getpwrctrl(void)
-{
-  return getreg32(SAM3U_HSMCI_POWER) & HSMCI_POWER_PWRCTRL_MASK;
-}
-
-/****************************************************************************
  * DMA Helpers
  ****************************************************************************/
 
@@ -698,10 +649,7 @@ static void sam3u_sample(struct sam3u_dev_s *priv, int index)
 {
   struct sam3u_sampleregs_s *regs = &g_sampleregs[index];
 #ifdef CONFIG_DEBUG_DMA
-  if (priv->dmamode)
-    {
-      sam3u_dmasample(priv->dma, &regs->dma);
-    }
+  sam3u_dmasample(priv->dma, &regs->dma);
 #endif
   sam3u_sdiosample(&regs->hsmci);
 }
@@ -744,10 +692,7 @@ static void sam3u_dumpsample(struct sam3u_dev_s *priv,
                              struct sam3u_sampleregs_s *regs, const char *msg)
 {
 #ifdef CONFIG_DEBUG_DMA
-  if (priv->dmamode)
-    {
-      sam3u_dmadump(priv->dma, &regs->dma, msg);
-    }
+  sam3u_dmadump(priv->dma, &regs->dma, msg);
 #endif
   sam3u_sdiodump(&regs->hsmci, msg);
 }
@@ -766,18 +711,12 @@ static void  sam3u_dumpsamples(struct sam3u_dev_s *priv)
 {
   sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
 #ifdef CONFIG_DEBUG_DMA
-  if (priv->dmamode)
-    {
-      sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
-    }
+  sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
 #endif
   sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
   sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
 #ifdef CONFIG_DEBUG_DMA
-  if (priv->dmamode)
-    {
-      sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
-    }
+  sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
 #endif
 }
 #endif
@@ -895,126 +834,6 @@ static void sam3u_datadisable(void)
 }
 
 /****************************************************************************
- * Name: sam3u_sendfifo
- *
- * Description:
- *   Send SDIO data in interrupt mode
- *
- * Input Parameters:
- *   priv - An instance of the HSMCI device interface
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sam3u_sendfifo(struct sam3u_dev_s *priv)
-{
-  union
-  {
-    uint32_t w;
-    uint8_t  b[2];
-  } data;
-
-  /* Loop while there is more data to be sent and the RX FIFO is not full */
-
-  while (priv->remaining > 0 &&
-         (getreg32(SAM3U_HSMCI_SR) & HSMCI_INT_TXFIFOF) == 0)
-    {
-      /* Is there a full word remaining in the user buffer? */
-
-      if (priv->remaining >= sizeof(uint32_t))
-        {
-          /* Yes, transfer the word to the TX FIFO */
-
-          data.w           = *priv->buffer++;
-          priv->remaining -= sizeof(uint32_t);
-        }
-      else
-        {
-           /* No.. transfer just the bytes remaining in the user buffer,
-            * padding with zero as necessary to extend to a full word.
-            */
-
-           uint8_t *ptr = (uint8_t *)priv->remaining;
-           int i;
-
-           data.w = 0;
-           for (i = 0; i < priv->remaining; i++)
-             {
-                data.b[i] = *ptr++;
-             }
- 
-           /* Now the transfer is finished */
-
-           priv->remaining = 0;
-         }
-
-       /* Put the word in the FIFO */
-
-       putreg32(data.w, SAM3U_HSMCI_FIFO);
-    }
-}
-
-/****************************************************************************
- * Name: sam3u_recvfifo
- *
- * Description:
- *   Receive SDIO data in interrupt mode
- *
- * Input Parameters:
- *   priv - An instance of the HSMCI device interface
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sam3u_recvfifo(struct sam3u_dev_s *priv)
-{
-  union
-  {
-    uint32_t w;
-    uint8_t  b[2];
-  } data;
-
-  /* Loop while there is space to store the data and there is more
-   * data available in the RX FIFO.
-   */
-
-  while (priv->remaining > 0 &&
-         (getreg32(SAM3U_HSMCI_SR) & HSMCI_INT_RXDAVL) != 0)
-    {
-      /* Read the next word from the RX FIFO */
-
-      data.w = getreg32(SAM3U_HSMCI_FIFO);
-      if (priv->remaining >= sizeof(uint32_t))
-        {
-          /* Transfer the whole word to the user buffer */
-
-          *priv->buffer++  = data.w;
-          priv->remaining -= sizeof(uint32_t);
-        }
-      else
-        {
-          /* Transfer any trailing fractional word */
-
-          uint8_t *ptr = (uint8_t*)priv->buffer;
-          int i;
-
-          for (i = 0; i < priv->remaining; i++)
-            {
-               *ptr++ = data.b[i];
-            }
-
-          /* Now the transfer is finished */
-
-          priv->remaining = 0;
-        }
-    }
-}
-
-/****************************************************************************
  * Name: sam3u_eventtimeout
  *
  * Description:
@@ -1110,21 +929,16 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
 
   sam3u_disablexfrints(priv);
 
-  /* If this was a DMA transfer, make sure that DMA is stopped */
+  /* DMA debug instrumentation */
 
-  if (priv->dmamode)
-    {
-      /* DMA debug instrumentation */
+  sam3u_sample(priv, SAMPLENDX_END_TRANSFER);
 
-      sam3u_sample(priv, SAMPLENDX_END_TRANSFER);
+  /* Make sure that the DMA is stopped (it will be stopped automatically
+   * on normal transfers, but not necessarily when the transfer terminates
+   * on an error condition.
+   */
 
-      /* Make sure that the DMA is stopped (it will be stopped automatically
-       * on normal transfers, but not necessarily when the transfer terminates
-       * on an error condition.
-       */
-
-      sam3u_dmastop(priv->dma);
-    }
+  sam3u_dmastop(priv->dma);
 
   /* Mark the transfer finished */
 
@@ -1179,49 +993,11 @@ static int sam3u_interrupt(int irq, void *context)
       pending  = enabled & priv->xfrmask;
       if (pending != 0)
         {
-          if (!priv->dmamode)
-           {
-             /* Is the RX FIFO half full or more?  Is so then we must be
-              * processing a receive transaction.
-             */
-
-             if ((pending & HSMCI_INT_RXFIFOHF) != 0)
-               {
-                 /* Receive data from the RX FIFO */
-
-                 sam3u_recvfifo(priv);
-               }
-
-             /* Otherwise, Is the transmit FIFO half empty or less?  If so we must
-              * be processing a send transaction.  NOTE:  We can't be processing
-              * both!
-              */
-
-             else if ((pending & HSMCI_INT_TXFIFOHE) != 0)
-               {
-                 /* Send data via the TX FIFO */
-
-                 sam3u_sendfifo(priv);
-               }
-           }
-
           /* Handle data end events */
 
           if ((pending & HSMCI_INT_BLKE) != 0)
             {
-              /* Handle any data remaining the RX FIFO.  If the RX FIFO is
-               * less than half full at the end of the transfer, then no
-               * half-full interrupt will be received.
-               */
-
-              if (!priv->dmamode)
-                {
-                  /* Receive data from the RX FIFO */
-
-                  sam3u_recvfifo(priv);
-                }
-
-              /* Then terminate the transfer */
+              /* Terminate the transfer */
 
               sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
             }
@@ -1398,7 +1174,6 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
   /* DMA data transfer support */
 
   priv->widebus    = false;  /* Required for DMA support */
-  priv->dmamode    = false;  /* true: DMA mode transfer */
   irqrestore(flags);
 }
 
@@ -1610,112 +1385,6 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
 }
 
 /****************************************************************************
- * Name: sam3u_recvsetup
- *
- * Description:
- *   Setup hardware in preparation for data trasfer from the card in non-DMA
- *   (interrupt driven mode).  This method will do whatever controller setup
- *   is necessary.  This would be called for SD memory just BEFORE sending
- *   CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
- *   (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), etc.  Normally, HSMCI_WAITEVENT
- *   will be called to receive the indication that the transfer is complete.
- *
- * Input Parameters:
- *   dev    - An instance of the SDIO device interface
- *   buffer - Address of the buffer in which to receive the data
- *   nbytes - The number of bytes in the transfer
- *
- * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int sam3u_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-                           size_t nbytes)
-{
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
-  uint32_t dblocksize;
-
-  DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
-
-  /* Reset the DPSM configuration */
-
-  sam3u_datadisable();
-  sam3u_sampleinit();
-  sam3u_sample(priv, SAMPLENDX_BEFORE_SETUP);
-
-  /* Save the destination buffer information for use by the interrupt handler */
-
-  priv->buffer    = (uint32_t*)buffer;
-  priv->remaining = nbytes;
-  priv->dmamode   = false;
-
-  /* Then set up the SDIO data path */
-
-  dblocksize = sam3u_log2(nbytes) << HSMCI_DCTRL_DBLOCKSIZE_SHIFT;
-  sam3u_dataconfig(HSMCI_DTIMER_DATATIMEOUT, nbytes, dblocksize|HSMCI_DCTRL_DTDIR);
-
-  /* And enable interrupts */
-
-  sam3u_enablexfrints(priv, HSMCI_RECV_INTS);
-  sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
-  return OK;
-}
-
-/****************************************************************************
- * Name: sam3u_sendsetup
- *
- * Description:
- *   Setup hardware in preparation for data trasfer from the card.  This method
- *   will do whatever controller setup is necessary.  This would be called
- *   for SD memory just AFTER sending CMD24 (WRITE_BLOCK), CMD25
- *   (WRITE_MULTIPLE_BLOCK), ... and before HSMCI_SENDDATA is called.
- *
- * Input Parameters:
- *   dev    - An instance of the SDIO device interface
- *   buffer - Address of the buffer containing the data to send
- *   nbytes - The number of bytes in the transfer
- *
- * Returned Value:
- *   Number of bytes sent on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int sam3u_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
-                           size_t nbytes)
-{
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
-  uint32_t dblocksize;
-
-  DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
-
-  /* Reset the DPSM configuration */
-
-  sam3u_datadisable();
-  sam3u_sampleinit();
-  sam3u_sample(priv, SAMPLENDX_BEFORE_SETUP);
-
-  /* Save the source buffer information for use by the interrupt handler */
-
-  priv->buffer    = (uint32_t*)buffer;
-  priv->remaining = nbytes;
-  priv->dmamode   = false;
-
-  /* Then set up the HSMCI data path */
-
-  dblocksize = sam3u_log2(nbytes) << HSMCI_DCTRL_DBLOCKSIZE_SHIFT;
-  sam3u_dataconfig(HSMCI_DTIMER_DATATIMEOUT, nbytes, dblocksize);
-
-  /* Enable TX interrrupts */
-
-  sam3u_enablexfrints(priv, HSMCI_SEND_INTS);
-  sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
-  return OK;
-}
-
-/****************************************************************************
  * Name: sam3u_cancel
  *
  * Description:
@@ -1749,17 +1418,12 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
 
   (void)wd_cancel(priv->waitwdog);
 
-  /* If this was a DMA transfer, make sure that DMA is stopped */
+  /* Make sure that the DMA is stopped (it will be stopped automatically
+   * on normal transfers, but not necessarily when the transfer terminates
+   * on an error condition.
+   */
 
-  if (priv->dmamode)
-    {
-      /* Make sure that the DMA is stopped (it will be stopped automatically
-       * on normal transfers, but not necessarily when the transfer terminates
-       * on an error condition.
-       */
-
-      sam3u_dmastop(priv->dma);
-    }
+  sam3u_dmastop(priv->dma);
 
   /* Mark no transfer in progress */
 
@@ -2287,10 +1951,12 @@ static int sam3u_registercallback(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SDIO_DMA
 static bool sam3u_dmasupported(FAR struct sdio_dev_s *dev)
 {
   return true;
 }
+#endif
 
 /****************************************************************************
  * Name: sam3u_dmarecvsetup
@@ -2336,7 +2002,6 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       priv->buffer    = (uint32_t*)buffer;
       priv->remaining = buflen;
-      priv->dmamode   = true;
 
       /* Then set up the HSMCI data path */
 
@@ -2404,7 +2069,6 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       priv->buffer    = (uint32_t*)buffer;
       priv->remaining = buflen;
-      priv->dmamode   = true;
 
       /* Then set up the HSMCI data path */
 
