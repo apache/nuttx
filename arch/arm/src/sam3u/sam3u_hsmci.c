@@ -155,6 +155,9 @@
   ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
     HSMCI_INT_DTOE  | HSMCI_INT_DCRCE )
 
+#define HSMCI_DATA_TIMEOUT_ERRORS \
+  ( HSMCI_INT_CSTOE | HSMCI_INT_DTOE )
+
 #define HSMCI_DATA_DMARECV_ERRORS \
   ( HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
     HSMCI_INT_DCRCE )
@@ -985,71 +988,41 @@ static int sam3u_interrupt(int irq, void *context)
   while ((enabled = getreg32(SAM3U_HSMCI_SR) & getreg32(SAM3U_HSMCI_IMR)) != 0)
     {
       /* Handle in progress, interrupt driven data transfers ****************/
+      /* Do any of these interrupts signal the end a data transfer? */
 
       pending  = enabled & priv->xfrmask;
       if (pending != 0)
         {
-          /* Handle data end events */
+          /* Yes.. the transfer is complete.  Did it complete with an error? */
 
-          if ((pending & HSMCI_INT_BLKE) != 0)
+          if ((pending & HSMCI_DATA_ERRORS) != 0)
             {
-              /* Terminate the transfer */
+              /* Yes.. Was it some kind of timeout error? */
+
+              flldbg("ERROR: enabled: %08x pending: %08x\n", enabled, pending);
+              if ((pending & HSMCI_DATA_TIMEOUT_ERRORS) != 0)
+                {
+                  /* Yes.. Terminate with a timeout. */
+
+                  sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);          
+                }
+              else
+                {
+                  /* No..  Terminate with an I/O error. */
+
+                  sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+                }
+            }
+          else
+            {
+              /* No.. Then the transfer must have completed successfully */
 
               sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
             }
-
-          /* Handle data block send/receive CRC failure */
-
-          else if ((pending & HSMCI_INT_DCRCFAIL) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
-              sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
-            }
-
-          /* Handle data timeout error */
-
-          else if ((pending & HSMCI_INT_DTOE) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
-              sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
-            }
-
-          /* Handle RX FIFO overrun error */
-
-          else if ((pending & HSMCI_INT_OVRE) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
-              sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
-            }
-
-          /* Handle TX FIFO underrun error */
-
-          else if ((pending & HSMCI_INT_UNRE) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
-              sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
-            }
-
-          /* Handle start bit error */
-
-          else if ((pending & HSMCI_INT_RENDE) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: Start bit, remaining: %d\n", priv->remaining);
-              sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
-           }
         }
 
       /* Handle wait events *************************************************/
+      /* Do any of these interrupts signal wakeup event? */
 
       pending  = enabled & priv->waitmask;
       if (pending != 0)
@@ -1194,7 +1167,7 @@ static uint8_t sam3u_status(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: HSMCI_WIDEBUS
+ * Name: sam3u_widebus
  *
  * Description:
  *   Called after change in Bus width has been selected (via ACMD6).  Most
@@ -1213,6 +1186,17 @@ static uint8_t sam3u_status(FAR struct sdio_dev_s *dev)
 static void sam3u_widebus(FAR struct sdio_dev_s *dev, bool wide)
 {
   struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  uint32_t regval;
+
+  /* Set 1-bit or 4-bit bus by configuring the SDCBUS field of the SDCR register */
+
+  regval  = getreg32(SAM3U_HSMCI_SDCR);
+  regval &= ~HSMCI_SDCR_SDCBUS_MASK;
+  regval |= wide ? HSMCI_SDCR_SDCBUS_4BIT : HSMCI_SDCR_SDCBUS_1BIT;
+  putreg32(regval, SAM3U_HSMCI_SDCR);
+
+  /* Remember the setting */
+
   priv->widebus = wide;
 }
 
