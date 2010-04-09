@@ -1083,3 +1083,6 @@
 	  (incomplete on initial checkin).
 	* drivers/usbdev - Several important fixes to the USB mass storage driver
 	  submitted by David Hewson.
+	* configs/olimex-lpc2378, arch/arm/include/lpc2378, and arch/arm/src/lpc2378 -
+	  Basic port of the NXP 2378 on the Olimex board contributed by
+	  Rommel Marcelo.
