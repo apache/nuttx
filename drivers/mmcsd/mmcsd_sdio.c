@@ -461,6 +461,7 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 
   /* Setup up to receive data with interrupt mode */
 
+  SDIO_BLOCKSETUP(priv->dev, 8, 1);
   SDIO_RECVSETUP(priv->dev, (FAR uint8_t*)scr, 8);
 
   /* Send ACMD51 SD_APP_SEND_SCR with argument as 0 to start data receipt */
@@ -1246,6 +1247,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the read transfer */
 
+  SDIO_BLOCKSETUP(priv->dev, priv->blocksize, 1);
   SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
@@ -1354,6 +1356,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the read transfer */
 
+  SDIO_BLOCKSETUP(priv->dev, priv->blocksize, nblocks);
   SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
@@ -1511,6 +1514,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the write transfer */
 
+  SDIO_BLOCKSETUP(priv->dev, priv->blocksize, 1);
   SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
@@ -1655,6 +1659,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   /* Configure SDIO controller hardware for the write transfer */
 
+  SDIO_BLOCKSETUP(priv->dev, priv->blocksize, nblocks);
   SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)

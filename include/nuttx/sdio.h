@@ -422,6 +422,29 @@
 #define SDIO_SENDCMD(dev,cmd,arg) ((dev)->sendcmd(dev,cmd,arg))
 
 /****************************************************************************
+ * Name: SDIO_BLOCKLEN
+ *
+ * Description:
+ *   Some hardward needs to be informed of the selected blocksize and the
+ *   number of blocks.  Others just work on the byte stream.
+ *
+ * Input Parameters:
+ *   dev      - An instance of the SDIO device interface
+ *   blocklen - The selected block size.
+ *   nblocks  - The number of blocks to be transferred.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+#  define SDIO_BLOCKSETUP(dev,blocklen,nblocks) ((dev)->blocksetup(dev,blocklen,nblocks))
+#else
+#  define SDIO_BLOCKSETUP(dev,blocklen,nblocks)
+#endif
+
+/****************************************************************************
  * Name: SDIO_RECVSETUP
  *
  * Description:
@@ -744,6 +767,7 @@ struct sdio_dev_s
   /* Command/Status/Data Transfer */
 
   void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);
+  void  (*blocksetup)(FAR struct sdio_dev_s *dev, unsigned int blocklen, unsigned int nblocks);
   int   (*recvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
           size_t nbytes);
   int   (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
