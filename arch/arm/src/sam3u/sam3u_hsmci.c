@@ -81,12 +81,30 @@
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
 
+#ifndef CONFIG_SDIO_BLOCKSETUP
+#  error "This driver requires CONFIG_SDIO_BLOCKSETUP"
+#endif
+
 #ifndef CONFIG_HSMCI_PRI
 #  define CONFIG_HSMCI_PRI        NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
 #  undef CONFIG_HSMCI_XFRDEBUG
+#endif
+
+#ifdef CONFIG_SAM3U_HSMCI_RDPROOF
+#  ifdef CONFIG_SAM3U_HSMCI_WRPROOF
+#    define HSMCU_PROOF_BITS (HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF)
+#  else
+#    define HSMCU_PROOF_BITS HSMCI_MR_RDPROOF
+#  endif
+#else
+#  ifdef CONFIG_SAM3U_HSMCI_WRPROOF
+#    define HSMCU_PROOF_BITS HSMCI_MR_WRPROOF
+#  else
+#    define HSMCU_PROOF_BITS (0)
+#  endif
 #endif
 
 /* Timing */
@@ -344,8 +362,9 @@ static int  sam3u_attach(FAR struct sdio_dev_s *dev);
 
 static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
+static void sam3u_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
+              unsigned int nblocks);
 static int  sam3u_cancel(FAR struct sdio_dev_s *dev);
-
 static int  sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
 static int  sam3u_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
@@ -393,6 +412,7 @@ struct sam3u_dev_s g_sdiodev =
     .clock            = sam3u_clock,
     .attach           = sam3u_attach,
     .sendcmd          = sam3u_sendcmd,
+    .blocksetup       = sam3u_blocksetup,
     .recvsetup        = sam3u_dmarecvsetup,
     .sendsetup        = sam3u_dmasendsetup,
     .cancel           = sam3u_cancel,
@@ -1334,12 +1354,12 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
     case MMCSD_R5_RESPONSE:
     case MMCSD_R6_RESPONSE:
       priv->cmdrmask = HSMCI_CMDRESP_INTS;
-      regval |= HSMCI_CMDR_RSPTYP_48BIT;
+      regval |= (HSMCI_CMDR_RSPTYP_48BIT | HSMCI_CMDR_MAXLAT);
       break;
 
     case MMCSD_R1B_RESPONSE:
       priv->cmdrmask = HSMCI_CMDRESP_INTS;
-      regval |= HSMCI_CMDR_RSPTYP_R1B;
+      regval |= (HSMCI_CMDR_RSPTYP_R1B | HSMCI_CMDR_MAXLAT);
       break;
 
     /* 48-bit response without CRC */
@@ -1347,14 +1367,14 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
     case MMCSD_R3_RESPONSE:
     case MMCSD_R7_RESPONSE:
       priv->cmdrmask = HSMCI_CMDRESP_NOCRC_INTS;
-      regval |= HSMCI_CMDR_RSPTYP_48BIT;
+      regval |= (HSMCI_CMDR_RSPTYP_48BIT | HSMCI_CMDR_MAXLAT);
       break;
 
     /* 136-bit response with CRC */
       
     case MMCSD_R2_RESPONSE:
       priv->cmdrmask = HSMCI_CMDRESP_INTS;
-      regval |= HSMCI_CMDR_RSPTYP_136BIT;
+      regval |= (HSMCI_CMDR_RSPTYP_136BIT | HSMCI_CMDR_MAXLAT);
       break;
     }
 
@@ -1400,17 +1420,48 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
     }
 #endif
 
-  /* Special case a couple of commands */
-
-  if (cmdidx > MMC_CMDIDX3 && cmdidx != MMCSD_CMDIDX15 && cmd != MMCSD_CMDIDX27)
-    {
-      regval |= HSMCI_CMDR_MAXLAT; /* Max Latency for Command to Response */
-    }
-
   /* Write the fully decorated command to CMDR */
 
   fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
   putreg32(regval, SAM3U_HSMCI_CMDR);
+}
+
+/****************************************************************************
+ * Name: sam3u_blocksetup
+ *
+ * Description:
+ *   Some hardward needs to be informed of the selected blocksize.
+ *
+ * Input Parameters:
+ *   dev      - An instance of the SDIO device interface
+ *   blocklen - The selected block size.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam3u_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
+                             unsigned int nblocks)
+{
+  uint32_t regval;
+
+  DEBUGASSERT(dev != NULL && nblocks > 0 && nblocks < 65535 && blocklen < 65535);
+
+  /* Set the block size */
+
+  regval = getreg32(SAM3U_HSMCI_MR);
+  regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
+  regval |= HSMCU_PROOF_BITS;
+  regval |= (blocklen << HSMCI_MR_BLKLEN_SHIFT);
+  putreg32(regval, SAM3U_HSMCI_MR);
+
+  /* Set the block count */
+
+  regval  = getreg32(SAM3U_HSMCI_BLKR);
+  regval &= ~HSMCI_BLKR_BCNT_MASK;
+  regval |= (nblocks << HSMCI_BLKR_BCNT_SHIFT);
+  putreg32(regval, SAM3U_HSMCI_BLKR);
 }
 
 /****************************************************************************
@@ -1988,39 +2039,26 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
   struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
-  int ret = -EINVAL;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  /* Reset the DPSM configuration */
+  /* Setup register sampling */
 
-//TO BE PROVIDED
+  sam3u_sampleinit();
+  sam3u_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Wide bus operation is required for DMA */
+  /* Configure the RX DMA */
 
-  if (priv->widebus)
-    {
-      sam3u_sampleinit();
-      sam3u_sample(priv, SAMPLENDX_BEFORE_SETUP);
-
-      /* Then set up the HSMCI data path */
-
-//TO BE PROVIDED
-
-      /* Configure the RX DMA */
-
-      sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
-      sam3u_dmarxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
+  sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
+  sam3u_dmarxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
  
-     /* Start the DMA */
+  /* Start the DMA */
 
-      sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-      sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
-      sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
-      ret = OK;
-    }
-  return ret;
+  sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
+  sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
+  sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
+  return OK;
 }
 
 /****************************************************************************
@@ -2046,43 +2084,29 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
   struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
-  int ret = -EINVAL;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  /* Reset the DPSM configuration */
+  /* Setup register sampling */
 
-//TO BE PROVIDED
+  sam3u_sampleinit();
+  sam3u_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Wide bus operation is required for DMA */
+  /* Configure the TX DMA */
 
-  if (priv->widebus)
-    {
-      sam3u_sampleinit();
-      sam3u_sample(priv, SAMPLENDX_BEFORE_SETUP);
+  sam3u_dmatxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
+  sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
 
-      /* Then set up the HSMCI data path */
+  /* Start the DMA */
 
-//TO BE PROVIDED
+  sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
+  sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
 
-      /* Configure the TX DMA */
+  /* Enable TX interrrupts */
 
-      sam3u_dmatxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
-      sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-
-      /* Start the DMA */
-
-      sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
-      sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
-
-      /* Enable TX interrrupts */
-
-      sam3u_enablexfrints(priv, HSMCI_DMASEND_INTS);
-
-      ret = OK;
-    }
-  return ret;
+  sam3u_enablexfrints(priv, HSMCI_DMASEND_INTS);
+  return OK;
 }
 
 /****************************************************************************
