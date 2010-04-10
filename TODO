@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 4, 2009)
+NuttX TODO List (Last updated April 8, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -9,7 +9,7 @@ NuttX TODO List (Last updated April 4, 2009)
   (5)  Binary loaders (binfmt/)
  (14)  Network (net/, netutils/)
   (5)  Network Utilities (netutils/)
-  (0)  USB (drivers/usbdev)
+  (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
  (11)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
@@ -287,6 +287,11 @@ o Network Utilities (netutils/)
 
 o USB (drivers/usbdev)
   ^^^^^^^^^^^^^^^^^^^^
+
+  Description: There is a workaround for a bug in drivers/usbdev/usbdev_storage.c.
+               that involves delays.  This needs to be redesigned to eliminate these delays.
+  Status:      Open
+  Priority:    Medium
 
 o Libraries (lib/)
   ^^^^^^^^^^^^^^^^
