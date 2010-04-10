@@ -1496,7 +1496,7 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
 static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 {
   uint32_t regval;
-  uint32_t cmdidx = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
+  uint32_t cmdidx;
 
   /* Set the SDIO Argument value */
 
