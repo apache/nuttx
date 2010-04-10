@@ -2,7 +2,7 @@
 ############################################################################
 # tools/indent.sh
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 #
 # - I normally put the traiing */ of a multi-line comment on a separate line,
 # - I usually align things vertically (like '='in assignments.
+# - indent puts a bogus blank line at the top of the file
+# - I don't like the way it handles nested conditional compilation intermixed with code.
 #
 
 # Constants
