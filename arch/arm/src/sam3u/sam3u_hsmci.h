@@ -185,6 +185,8 @@
 #  define HSMCI_CMDR_TRCMD_START    (1 << HSMCI_CMDR_TRCMD_SHIFT) /* Start data transfer */
 #  define HSMCI_CMDR_TRCMD_STOP     (2 << HSMCI_CMDR_TRCMD_SHIFT) /* Stop data transfer */
 #define HSMCI_CMDR_TRDIR            (1 << 18) /* Bit 18: Transfer Direction */
+#  define HSMCI_CMDR_TRDIR_WRITE    (0 << 18)
+#  define HSMCI_CMDR_TRDIR_READ     (1 << 18)
 #define HSMCI_CMDR_TRTYP_SHIFT      (19)      /* Bits 19-21: Transfer Type */
 #define HSMCI_CMDR_TRTYP_MASK       (7 << HSMCI_CMDR_TRTYP_SHIFT)
 #  define HSMCI_CMDR_TRTYP_SINGLE   (0 << HSMCI_CMDR_TRTYP_SHIFT) /* MMC/SDCard Single Block */
