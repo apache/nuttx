@@ -139,7 +139,9 @@
 
 #define HSMCI_RESPONSE_ERRORS \
   ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
-    HSMCI_INT_RDIRE | HSMCI_INT_RINDE )  
+    HSMCI_INT_RDIRE | HSMCI_INT_RINDE ) 
+#define HSMCI_RESPONSE_TIMEOUT_ERRORS \
+  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  )
 
 /* Data transfer errors:
  *
@@ -174,11 +176,10 @@
 
 /* Event waiting interrupt mask bits */
 
-#define HSMCI_CMDDONE_INTS \
-  ( HSMCI_INT_CMDRDY )
-#define HSMCI_RESPONSE_INTS \
-  ( HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDREND )
-#define HSMCI_XFRDONE_INTS (0)
+#define HSMCI_CMDRESP_INTS \
+  ( HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDRDY )
+#define HSMCI_XFRDONE_INTS \
+  ( 0 )
 
 /* Register logging support */
 
@@ -298,9 +299,6 @@ static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result);
 
 /* Data Transfer Helpers ****************************************************/
 
-static uint8_t sam3u_log2(uint16_t value);
-static void sam3u_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl);
-static void sam3u_datadisable(void);
 static void sam3u_eventtimeout(int argc, uint32_t arg);
 static void sam3u_endwait(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent);
 static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent);
@@ -749,90 +747,6 @@ static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_log2
- *
- * Description:
- *   Take (approximate) log base 2 of the provided number (Only works if the
- *   provided number is a power of 2).
- *
- ****************************************************************************/
-
-static uint8_t sam3u_log2(uint16_t value)
-{
-  uint8_t log2 = 0;
-
-  /* 0000 0000 0000 0001 -> return 0,
-   * 0000 0000 0000 001x -> return 1,
-   * 0000 0000 0000 01xx -> return 2,
-   * 0000 0000 0000 1xxx -> return 3,
-   * ...
-   * 1xxx xxxx xxxx xxxx -> return 15,
-   */
-
-  DEBUGASSERT(value > 0);
-  while (value != 1)
-  {
-    value >>= 1;
-    log2++;
-  }
-  return log2;
-}
-
-/****************************************************************************
- * Name: sam3u_dataconfig
- *
- * Description:
- *   Configure the HSMCI data path for the next data transfer
- *
- ****************************************************************************/
-
-static void sam3u_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
-{
-  uint32_t regval = 0;
-
-  /* Enable data path */
-
-  putreg32(timeout, SAM3U_HSMCI_DTIMER); /* Set DTIMER */
-  putreg32(dlen,    SAM3U_HSMCI_DLEN);   /* Set DLEN */
-
-  /* Configure DCTRL DTDIR, DTMODE, and DBLOCKSIZE fields and set the DTEN
-   * field
-   */
-
-  regval  =  getreg32(SAM3U_HSMCI_DCTRL);
-  regval &= ~(HSMCI_DCTRL_DTDIR|HSMCI_DCTRL_DTMODE|HSMCI_DCTRL_DBLOCKSIZE_MASK);
-  dctrl  &=  (HSMCI_DCTRL_DTDIR|HSMCI_DCTRL_DTMODE|HSMCI_DCTRL_DBLOCKSIZE_MASK);
-  regval |=  (dctrl|HSMCI_DCTRL_DTEN);
-  putreg32(regval, SAM3U_HSMCI_DCTRL);
-}
-
-/****************************************************************************
- * Name: sam3u_datadisable
- *
- * Description:
- *   Disable the the HSMCI data path setup by sam3u_dataconfig() and
- *   disable DMA.
- *
- ****************************************************************************/
-
-static void sam3u_datadisable(void)
-{
-  uint32_t regval;
-
-  /* Disable the data path */
-
-  putreg32(HSMCI_DTIMER_DATATIMEOUT, SAM3U_HSMCI_DTIMER); /* Reset DTIMER */
-  putreg32(0,                       SAM3U_HSMCI_DLEN);   /* Reset DLEN */
-
-  /* Reset DCTRL DTEN, DTDIR, DTMODE, DMAEN, and DBLOCKSIZE fields */
-
-  regval  = getreg32(SAM3U_HSMCI_DCTRL);
-  regval &= ~(HSMCI_DCTRL_DTEN|HSMCI_DCTRL_DTDIR|HSMCI_DCTRL_DTMODE|
-              HSMCI_DCTRL_DMAEN|HSMCI_DCTRL_DBLOCKSIZE_MASK);
-  putreg32(regval, SAM3U_HSMCI_DCTRL);
-}
-
-/****************************************************************************
  * Name: sam3u_eventtimeout
  *
  * Description:
@@ -1027,31 +941,49 @@ static int sam3u_interrupt(int irq, void *context)
       pending  = enabled & priv->waitmask;
       if (pending != 0)
         {
-          /* Is this a response completion event? */
+          sdio_eventset_t wkupevent = 0;
 
-          if ((pending & HSMCI_RESPONSE_INTS) != 0)
+          /* Is this a Command-Response sequence completion event? */
+
+          if ((pending & HSMCI_CMDRESP_INTS) != 0)
             {
-              /* Yes.. Is their a thread waiting for response done? */
+              /* Yes.. Did the Command-Response sequence end with an error? */
 
-              if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
+              if ((pending & HSMCI_RESPONSE_ERRORS) != 0)
                 {
-                  /* Yes.. wake the thread up */
+                  /* Yes.. Was the error some kind of timeout? */
 
-                  sam3u_endwait(priv, SDIOWAIT_RESPONSEDONE);
+                  fllvdbg("ERROR:events: %08x SR: %08x\n",
+                          HSMCI_CMDRESP_INTS, enabled);
+
+                  if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
+                    {
+                      /* Yes.. signal a timeout error */
+
+                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_TIMEOUT;
+                    }
+                  else
+                    {
+                      /* No.. signal some generic I/O error */
+
+                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE|SDIOWAIT_ERROR;
+                    }
                 }
-            }
+              else
+               {
+                  /* The Command-Response sequence ended with no error */
 
-          /* Is this a command completion event? */
+                      wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE;
+                }
+ 
+             /* Yes.. Is there a thread waiting for this event set? */
 
-          if ((pending & HSMCI_CMDDONE_INTS) != 0)
-            {
-              /* Yes.. Is their a thread waiting for command done? */
-
-              if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
+             wkupevent &= priv->waitevents;
+              if (wkupevent != 0)
                 {
                   /* Yes.. wake the thread up */
 
-                  sam3u_endwait(priv, SDIOWAIT_CMDDONE);
+                  sam3u_endwait(priv, wkupevent);
                 }
             }
         }
@@ -1233,7 +1165,7 @@ static void sam3u_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   switch (rate)
     {
     default:
-    case CLOCK_HSMCI_DISABLED:     /* Clock is disabled */
+    case CLOCK_SDIO_DISABLED:     /* Clock is disabled */
       regval |= HSMCI_INIT_CLKDIV | HSMCI_MR_PWSDIV_MAX;
       enable = false;
       return;
@@ -1338,7 +1270,7 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
 
   /* Set the HSMCI Argument value */
 
-  putreg32(arg, SAM3U_HSMCI_ARG);
+  putreg32(arg, SAM3U_HSMCI_ARGR);
 
   /* Clear CMDINDEX, WAITRESP, WAITINT, WAITPEND, and CPSMEN bits */
 
@@ -1445,21 +1377,15 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
 
 static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
-  int32_t timeout;
-  uint32_t events;
+  uint32_t sr;
+  int32_t  timeout;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      events  = HSMCI_CMDDONE_INTS;
-      timeout = HSMCI_CMDTIMEOUT;
-      break;
-
     case MMCSD_R1_RESPONSE:
     case MMCSD_R1B_RESPONSE:
     case MMCSD_R2_RESPONSE:
     case MMCSD_R6_RESPONSE:
-      events  = HSMCI_RESPONSE_INTS;
       timeout = HSMCI_LONGTIMEOUT;
       break;
 
@@ -1467,9 +1393,9 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     case MMCSD_R5_RESPONSE:
       return -ENOSYS;
 
+    case MMCSD_NO_RESPONSE:
     case MMCSD_R3_RESPONSE:
     case MMCSD_R7_RESPONSE:
-      events  = HSMCI_RESPONSE_INTS;
       timeout = HSMCI_CMDTIMEOUT;
       break;
 
@@ -1479,18 +1405,50 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
-  while ((getreg32(SAM3U_HSMCI_SR) & events) == 0)
+  for (;;)
     {
-      if (--timeout <= 0)
+      /* Did a Command-Response sequence termination evernt occur? */
+
+      sr = getreg32(SAM3U_HSMCI_SR);
+      if ((sr & HSMCI_CMDRESP_INTS) != 0)
+        {
+          /* Yes.. Did the Command-Response sequence end with an error? */
+
+          if ((sr & HSMCI_RESPONSE_ERRORS) != 0)
+            {
+              /* Yes.. Was the error some kind of timeout? */
+
+              fdbg("ERROR: cmd: %08x events: %08x SR: %08x\n",
+                   cmd, HSMCI_CMDRESP_INTS, sr);
+
+              if ((sr & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
+                {
+                  /* Yes.. return a timeout error */
+
+                  return -ETIMEDOUT;
+                }
+              else
+                {
+                  /* No.. return some generic I/O error */
+
+                  return -EIO;
+                }
+            }
+          else
+            {
+              /* The Command-Response sequence ended with no error */
+
+              return OK;
+            }
+       }
+      else if (--timeout <= 0)
         {
           fdbg("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
-               cmd, events, getreg32(SAM3U_HSMCI_SR));
+               cmd, HSMCI_CMDRESP_INTS, sr);
 
           return -ETIMEDOUT;
         }
     }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -1508,19 +1466,15 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
  *
  * Returned Value:
  *   Number of bytes sent on success; a negated errno on failure.  Here a
- *   failure means only a faiure to obtain the requested reponse (due to
+ *   failure means only a failure to obtain the requested reponse (due to
  *   transport problem -- timeout, CRC, etc.).  The implementation only
- *   assures that the response is returned intacta and does not check errors
+ *   assures that the response is returned intact and does not check errors
  *   within the response itself.
  *
  ****************************************************************************/
 
 static int sam3u_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
 {
-#ifdef CONFIG_DEBUG
-  uint32_t respcmd;
-#endif
-  uint32_t regval;
   int ret = OK;
 
   /* R1  Command response (48-bit)
@@ -1562,38 +1516,9 @@ static int sam3u_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
       fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
-  else
 #endif
-    {
-      /* Check if a timeout or CRC error occurred */
 
-      regval = getreg32(SAM3U_HSMCI_SR);
-      if ((regval & HSMCI_INT_RTOE) != 0)
-        {
-          fdbg("ERROR: Command timeout: %08x\n", regval);
-          ret = -ETIMEDOUT;
-        }
-      else if ((regval & HSMCI_INT_RCRCE) != 0)
-        {
-          fdbg("ERROR: CRC failuret: %08x\n", regval);
-          ret = -EIO;
-        }
-#ifdef CONFIG_DEBUG
-      else
-        {
-          /* Check response received is of desired command */
-
-          respcmd = getreg32(SAM3U_HSMCI_RESPCMD);
-          if ((uint8_t)(respcmd & HSMCI_RESPCMD_MASK) != (cmd & MMCSD_CMDIDX_MASK))
-            {
-              fdbg("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
-              ret = -EINVAL;
-            }
-        }
-#endif
-    }
-
-  /* Clear all pending message completion events and return the R1/R6 response */
+  /* Return the R1/R6 response */
 
   *rshort = getreg32(SAM3U_HSMCI_RSPR0);
   return ret;
@@ -1601,7 +1526,6 @@ static int sam3u_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
 
 static int sam3u_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong[4])
 {
-  uint32_t regval;
   int ret = OK;
 
  /* R2  CID, CSD register (136-bit)
@@ -1621,23 +1545,7 @@ static int sam3u_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
       fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
-  else
 #endif
-    {
-      /* Check if a timeout or CRC error occurred */
-
-      regval = getreg32(SAM3U_HSMCI_SR);
-      if (regval & HSMCI_INT_RTOE)
-        {
-          fdbg("ERROR: Timeout SR: %08x\n", regval);
-          ret = -ETIMEDOUT;
-        }
-      else if (regval & HSMCI_INT_RCRCE)
-        {
-          fdbg("ERROR: CRC fail SR: %08x\n", regval);
-          ret = -EIO;
-        }
-    }
     
   /* Return the long response */
 
@@ -1653,7 +1561,6 @@ static int sam3u_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
 
 static int sam3u_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
 {
-  uint32_t regval;
   int ret = OK;
 
  /* R3  OCR (48-bit)
@@ -1674,22 +1581,9 @@ static int sam3u_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
       fdbg("ERROR: Wrong response CMD=%08x\n", cmd);
       ret = -EINVAL;
     }
-  else
 #endif
-    {
-      /* Check if a timeout occurred (Apparently a CRC error can terminate
-       * a good response)
-       */
 
-      regval = getreg32(SAM3U_HSMCI_SR);
-      if (regval & HSMCI_INT_RTOE)
-        {
-          fdbg("ERROR: Timeout SR: %08x\n", regval);
-          ret = -ETIMEDOUT;
-        }
-
-      /* Return the short response */
-    }
+  /* Return the short response */
 
   if (rshort)
     {
@@ -1746,14 +1640,9 @@ static void sam3u_waitenable(FAR struct sdio_dev_s *dev,
    */
 
   waitmask = 0;
-  if ((eventset & SDIOWAIT_CMDDONE) != 0)
+  if ((eventset & (SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE)) != 0)
     {
-      waitmask |= HSMCI_CMDDONE_INTS;
-    }
-
-  if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
-    {
-      waitmask |= HSMCI_RESPONSE_INTS;
+      waitmask |= HSMCI_CMDRESP_INTS;
     }
 
   if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
@@ -1978,7 +1867,6 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
   struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
-  uint32_t dblocksize;
   int ret = -EINVAL;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -1986,7 +1874,7 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Reset the DPSM configuration */
 
-  sam3u_datadisable();
+//TO BE PROVIDED
 
   /* Wide bus operation is required for DMA */
 
@@ -2002,14 +1890,11 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* Then set up the HSMCI data path */
 
-      dblocksize = sam3u_log2(buflen) << HSMCI_DCTRL_DBLOCKSIZE_SHIFT;
-      sam3u_dataconfig(HSMCI_DTIMER_DATATIMEOUT, buflen, dblocksize|HSMCI_DCTRL_DTDIR);
+//TO BE PROVIDED
 
       /* Configure the RX DMA */
 
       sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
-
-      putreg32(1, HSMCI_DCTRL_DMAEN_BB);
       sam3u_dmarxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
  
      /* Start the DMA */
@@ -2045,7 +1930,6 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
   struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
-  uint32_t dblocksize;
   int ret = -EINVAL;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -2053,7 +1937,7 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Reset the DPSM configuration */
 
-  sam3u_datadisable();
+//TO BE PROVIDED
 
   /* Wide bus operation is required for DMA */
 
@@ -2069,15 +1953,12 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Then set up the HSMCI data path */
 
-      dblocksize = sam3u_log2(buflen) << HSMCI_DCTRL_DBLOCKSIZE_SHIFT;
-      sam3u_dataconfig(HSMCI_DTIMER_DATATIMEOUT, buflen, dblocksize);
+//TO BE PROVIDED
 
       /* Configure the TX DMA */
 
       sam3u_dmatxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
-
       sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-      putreg32(1, HSMCI_DCTRL_DMAEN_BB);
 
       /* Start the DMA */
 
