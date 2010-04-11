@@ -48,11 +48,12 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-//~ #define LPC23XX_FIO_BASE	0x3fffc000  /* Fast I/O 0 base address */
+//~ #define LPC23XX_FIO_BASE    0x3fffc000  /* Fast I/O 0 base address */
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
 /* P3.0 : P0.7 PINSEL6 LEDS 1-8 */
 #define LEDBIT(led) (0x01 << (led))
 #define ALL_LEDS	(0xFF)
@@ -76,7 +77,6 @@
 //~ #  define LED_DIR_OFFSET LPC23XX_GPIO_DIR_OFFSET
 //~ #endif
 
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -97,9 +97,10 @@
 void up_ledinit(void)
 {
   /* Initilize GIOs P1.16-P1.23 */
-  putled8(ALL_LEDS,LED_DIR_OFFSET);
-  putled8(ALL_LEDS,LED_CLR_OFFSET);
-  putled8(LEDBIT(0),LED_SET_OFFSET);
+
+  putled8(ALL_LEDS, LED_DIR_OFFSET);
+  putled8(ALL_LEDS, LED_CLR_OFFSET);
+  putled8(LEDBIT(0), LED_SET_OFFSET);
 }
 
 /****************************************************************************
@@ -108,8 +109,8 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
- putled8(~(LEDBIT(led)),LED_MASK_OFFSET);	
- putled8(LEDBIT(led),LED_SET_OFFSET);
+  putled8(~(LEDBIT(led)), LED_MASK_OFFSET);
+  putled8(LEDBIT(led), LED_SET_OFFSET);
 }
 
 /****************************************************************************
@@ -118,7 +119,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  putled8(LEDBIT(led),LED_CLR_OFFSET);
+  putled8(LEDBIT(led), LED_CLR_OFFSET);
 }
 
 /****************************************************************************
@@ -127,16 +128,14 @@ void up_ledoff(int led)
 
 void up_statledoff(void)
 {
- putled8(~STATLED, FIO1MASK2_OFFSET);
- putled8(STATLED, FIO1CLR2_OFFSET);
+  putled8(~STATLED, FIO1MASK2_OFFSET);
+  putled8(STATLED, FIO1CLR2_OFFSET);
 }
 
 void up_statledon(void)
 {
- putled8(~STATLED, FIO1MASK2_OFFSET);
- putled8(STATLED, FIO1SET2_OFFSET);
+  putled8(~STATLED, FIO1MASK2_OFFSET);
+  putled8(STATLED, FIO1SET2_OFFSET);
 }
 
 #endif /* CONFIG_ARCH_LEDS */
-
-

@@ -177,6 +177,10 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
+ |   |- olimex-lpc2378/
+ |   |   |- include/README.txt
+ |   |   |- src/README.txt
+ |   |   `- README.txt
  |   |- pjrc-8051/
  |   |   |- include/README.txt
  |   |   |- src/README.txt

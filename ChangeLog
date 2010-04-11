@@ -42,7 +42,7 @@
 	  Can't do this; the caller must be able to wait for access
 	  to memory.
 	* Fixed bugs associated with debug output:
-		  Cannot do dbg() in middle of context switch logic.
+	  Cannot do dbg() in middle of context switch logic.
 	  because it may require use of semaphores and cause
 	  additional context switches. lldbg() is safe.
 	* Interrupt must be disabled throughout all context switches.
@@ -51,8 +51,8 @@
 	  serial.h defines the interface.
 	* Fixed mq_receive() and mq_send() -- bad memcpy()
 	* Fixed C5471 signal deliver logic: use of dbg() and
-		  other actions by use signal handler can alter errno.
-		  need to protect errno during signal handling.
+	  other actions by use signal handler can alter errno.
+	  need to protect errno during signal handling.
 	* Fixed uninitialized variable in filesystem that could
 	  cause various problems
 	* Added a test for roundrobin scheduler.
@@ -1068,7 +1068,7 @@
 	* configs/ea3131/nsh - Added a NuttShell (NSH) configuration for the
 	  EA3131.
 
-5.3 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.3 2010-04-11 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/lpc313x/lpc313x_usbdev.c - USB driver for the LPC313x
 	  contributed by David Hewson.
@@ -1078,9 +1078,8 @@
 	* Several important compilation error fixes in lpc313x and (dualspeed) USB
 	  code also contributed by David Hewson.
 	* arch/arm/src/sam3u/sam3u_dmac.c - DMA support for the AT90SAM3U.
-	  (untested on initial checkin).
 	* arch/arm/src/sam3u/sam3u_hsmci.c - SD memory card support for AT90SAM3U
-	  (incomplete on initial checkin).
+	  (Neither the DMA nor the HSMCI driver are functional on the initial checkin).
 	* drivers/usbdev - Several important fixes to the USB mass storage driver
 	  submitted by David Hewson.
 	* configs/olimex-lpc2378, arch/arm/include/lpc2378, and arch/arm/src/lpc2378 -
@@ -1089,3 +1088,5 @@
 	* arch/arm/src/sam3u/sam3u_internal.h - Fixed a critical bug in the AT91SAM3U
 	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
 	  no one has been using this port.
+
+5.4 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

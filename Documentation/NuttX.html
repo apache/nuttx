@@ -729,31 +729,37 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.2 Release Notes</b>:
+<p><b>nuttx-5.3 Release Notes</b>:
 
 <p>
-  This 49<sup>th</sup> release of NuttX was made on March 18, 2010 and is available for download from the
+  This 50<sup>th</sup> release of NuttX was made on April 11, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release completes the verification of the basic port for the NXP
-  <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a> MCU
-  on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a> board.
-  This basic port includes basic boot-up, serial console, and timer interrupts.  This port
-  has been verified on the using the NuttX OS test and includes a working
-  implementation of the NuttShell (NSH).
+  This release suport for one new achitecture:
 </p>
+<ul>
+  <li>A basic port for the NXP LPC2378 MCU on the Olimex-LPC2378 development board was contributed by Rommel Marcelo.</li>
+</ul>
 <p>
-  An extended release will follow and should include SDIO-based SD card
-  support and device USB.
+ And extensions to two existing architures:
 </p>
+<ul>
+  <li>David Hewson contributed a dual-speed (full/high) USB device-side driver
+    for the NXP LPC3131 on the Embedded Artists EA3131 development board.</li>
+  <li>A DMA driver and a high speed MCI driver for the Atmel AT91SAM3U are
+    included (but not fully tested in this release).</li>
+</ul>
 <p>
-  A few additional features and bugfixes of a minor nature were also incorporated
-  as detailed in the <a href="#currentrelease">ChangeLog</a>.
+  Two important bugfix was also included:
 </p>
+<ul>
+  <li>An important fix to the USB mass storage driver was contributed by David Hewson.</li>
+  <li>A serious error in the AT91SAM3U PIO handling was fixed.</li>
+</ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -837,6 +843,34 @@
         or Cygwin is provided by the NuttX
         <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
         package.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>NXP LPC2378</b>.
+      Support is provided for the NXP LPC2378 MCU.  In particular,
+      support is provided for the Olimex-LPC2378 development board.
+      This port was contributed by Rommel Marcelo is was first released in NuttX-5.3.
+      This port also used the GNU arm-elf toolchain* under Linux or Cygwin.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        This port boots and passes the OS test (examples/ostest) and includes a
+        working includes a working implementation of the NuttShell (<a href="NuttShell.html">(NSH)</a>).
+        The port is complete and verified.
+        As of NuttX 5.3, the port includes only basic timer interrupts and serial console support.
+      </p>
+      <p>
+        <b>Development Environments:</b> (Same as for the NXP LPC214x).
       </p>
     </ul>
   </td>
@@ -934,8 +968,8 @@
   <td><br></td>
   <td>
     <b>NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a></b>.
-    The basic port for the NXP LPC3131 on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a> 
-    development board was released in NuttX-5.1 with a GNU arm-elf or arm-eabi toolchain* under Linux or Cygwin
+    The port for the NXP LPC3131 on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a> 
+    development board was first released in NuttX-5.1 with a GNU arm-elf or arm-eabi toolchain* under Linux or Cygwin
     (but was not functional until NuttX-5.2).
     </p>
     <ul>
@@ -943,10 +977,10 @@
         <b>STATUS:</b>
           The basic EA3131 port is complete and verified in NuttX-5.2 
           This basic port includes basic boot-up, serial console, and timer interrupts.
-          This port has been verified on the using the NuttX OS test and includes a working
-          implementation of the NuttShell (NSH).
-          An extended release will follow and should include SDIO-based SD card
-          support and device USB.
+          This port was extended in NuttX 5.3 with a USB high speed driver contributed by David Hewson.
+          This port has been verified on the using the NuttX OS test, USB serial and mass storage
+          tests and includes a working implementation of the NuttShell (<a href="NuttShell.html">(NSH)</a>).
+          An extended release will follow and should include SDIO-based SD card support.
       </p>
     </ul>
   </td>
@@ -1606,21 +1640,26 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.2 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.3 2010-04-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* arch/arm/src/sam3u/sam3u_pio.c - Fix an address calculation error
-	  that caused ports B & C to get mapped to the PIOA base address.
-	  This is an important bugfix! (a patch is available)
-	* arch/arm/src/lpc313x/lpc313x_boot.c - Fix an error in the vector
-	  initialization was causing a memory fault.
-	* lib/lib_strtod.c - Add strtod()
-	* lpc3131/ea3131 - Several bring fixes submitted by David Hewson.  The
-	  lpc3131 is almost there!  Thanks David!
-	* arch/arm/src/arm/up_head.S - Corrected backward conditional compilation
-	  that selects if vectors are located at 0x0000:0000 or 0xffff:f000.
-	  This fixes the last show stopper bug in the lpc313x bring-up.
-	* configs/ea3131/nsh - Added a NuttShell (NSH) configuration for the
-	  EA3131.
+	* arch/arm/src/lpc313x/lpc313x_usbdev.c - USB driver for the LPC313x
+	  contributed by David Hewson.
+	* configs/ea3131/src/up_ubstrgc.c, configs/ea3131/usbserial,
+	  configs/ea3131/usbstorage - USB storage and USB serial example support
+	  contributed by David Hewson.
+	* Several important compilation error fixes in lpc313x and (dualspeed) USB
+	  code also contributed by David Hewson.
+	* arch/arm/src/sam3u/sam3u_dmac.c - DMA support for the AT90SAM3U.
+	* arch/arm/src/sam3u/sam3u_hsmci.c - SD memory card support for AT90SAM3U
+	  (Neither the DMA nor the HSMCI driver are functional on the initial checkin).
+	* drivers/usbdev - Several important fixes to the USB mass storage driver
+	  submitted by David Hewson.
+	* configs/olimex-lpc2378, arch/arm/include/lpc2378, and arch/arm/src/lpc2378 -
+	  Basic port of the NXP 2378 on the Olimex board contributed by
+	  Rommel Marcelo.
+	* arch/arm/src/sam3u/sam3u_internal.h - Fixed a critical bug in the AT91SAM3U
+	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
+	  no one has been using this port.
 
 pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1650,7 +1689,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.3 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.3 2010-04-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* arch/arm/src/lpc313x/lpc313x_usbdev.c - USB driver for the LPC313x
 	  contributed by David Hewson.
@@ -1660,9 +1699,8 @@ nuttx-5.3 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* Several important compilation error fixes in lpc313x and (dualspeed) USB
 	  code also contributed by David Hewson.
 	* arch/arm/src/sam3u/sam3u_dmac.c - DMA support for the AT90SAM3U.
-	  (untested on initial checkin).
 	* arch/arm/src/sam3u/sam3u_hsmci.c - SD memory card support for AT90SAM3U
-	  (incomplete on initial checkin).
+	  (Neither the DMA nor the HSMCI driver are functional on the initial checkin).
 	* drivers/usbdev - Several important fixes to the USB mass storage driver
 	  submitted by David Hewson.
 	* configs/olimex-lpc2378, arch/arm/include/lpc2378, and arch/arm/src/lpc2378 -
@@ -1671,6 +1709,8 @@ nuttx-5.3 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* arch/arm/src/sam3u/sam3u_internal.h - Fixed a critical bug in the AT91SAM3U
 	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
 	  no one has been using this port.
+
+nuttx-5.3 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
