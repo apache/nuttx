@@ -70,39 +70,42 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam3u_hsmciinit
  *
  * Description:
- *   Initialize HSMCI support 
+ *   Initialize HSMCI support.  This function is called very early in board
+ *   initialization.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 int sam3u_hsmciinit(void)
 {
-#if GPIO_MCI_CD
+#ifdef GPIO_MCI_CD
   sam3u_configgpio(GPIO_MCI_CD);
 #endif
-#if GPIO_MCI_WP
+#ifdef GPIO_MCI_WP
   sam3u_configgpio(GPIO_MCI_WP);
 #endif
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam3u_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 bool sam3u_cardinserted(unsigned char slot)
 {
   if (slot == 0)
     {
 #ifdef GPIO_MCI_CD
-      return !sam3u_gpioread(GPIO_MCI_CD);
+      bool inserted = sam3u_gpioread(GPIO_MCI_CD);
+      fvdbg("inserted: %s\n", inserted ? "NO" : "YES");
+      return !inserted;
 #else
       return true;
 #endif
@@ -110,20 +113,22 @@ bool sam3u_cardinserted(unsigned char slot)
   return false;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam3u_writeprotected
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 bool sam3u_writeprotected(unsigned char slot)
 {
   if (slot == 0)
     {
 #ifdef GPIO_MCI_WP
-      return sam3u_gpioread(GPIO_MCI_WP);
+      bool protected = sam3u_gpioread(GPIO_MCI_WP);
+      fvdbg("protected: %s\n", inserted ? "YES" : "NO");
+      return protected;
 #else
       return false;
 #endif
