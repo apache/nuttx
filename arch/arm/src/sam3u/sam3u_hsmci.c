@@ -890,6 +890,10 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
 
   sam3u_dmastop(priv->dma);
 
+  /* Disable the DMA handshaking */
+
+  putreg32(0, SAM3U_HSMCI_DMA);
+  
   /* Is a thread wait for these data transfer complete events? */
 
   if ((priv->waitevents & wkupevent) != 0)
@@ -1113,10 +1117,6 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
   /* No data transfer */
 
   sam3u_notransfer(priv);
-
-  /* Disable the MCI peripheral clock */
-
-  putreg32((1 << SAM3U_PID_HSMCI), SAM3U_PMC_PCDR);
 
   /* Reset data */
 
@@ -1508,6 +1508,11 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
    */
 
   sam3u_dmastop(priv->dma);
+
+  /* Disable the DMA handshaking */
+
+  putreg32(0, SAM3U_HSMCI_DMA);
+  
   return OK;
 }
 
@@ -2052,10 +2057,14 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
   sam3u_dmarxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
- 
+
+  /* Enable DMA handshaking */
+
+  putreg32(HSMCI_DMA_DMAEN, SAM3U_HSMCI_DMA);
+  sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
+
   /* Start the DMA */
 
-  sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
   sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
   sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
@@ -2096,6 +2105,10 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
   /* Configure the TX DMA */
 
   sam3u_dmatxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
+
+  /* Enable DMA handshaking */
+
+  putreg32(HSMCI_DMA_DMAEN, SAM3U_HSMCI_DMA);
   sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
@@ -2213,6 +2226,8 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   /* There is only one slot */
 
   struct sam3u_dev_s *priv = &g_sdiodev;
+
+  fdbg("slotno: %d\n", slotno);
 
   /* Initialize the HSMCI slot structure */
 
