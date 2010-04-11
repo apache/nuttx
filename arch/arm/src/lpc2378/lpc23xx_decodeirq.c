@@ -107,7 +107,7 @@
 #ifndef CONFIG_VECTORED_INTERRUPTS
 void up_decodeirq(uint32_t *regs)
 #else
-static void lpc23xx_decodeirq( uint32_t *regs)
+static void lpc23xx_decodeirq(uint32_t *regs)
 #endif
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -118,28 +118,30 @@ static void lpc23xx_decodeirq( uint32_t *regs)
 
   /* Check which IRQ fires */
 
-	uint32_t irqbits = vic_getreg(VIC_IRQSTATUS_OFFSET) & 0xFFFFFFFF;
-	unsigned int irq;
-	
-	for (irq = 0; irq < NR_IRQS; irq++)
-	{
-		if( irqbits & (uint32_t)(1<<irq) ) break;
-	}
+  uint32_t irqbits = vic_getreg(VIC_IRQSTATUS_OFFSET) & 0xFFFFFFFF;
+  unsigned int irq;
+
+  for (irq = 0; irq < NR_IRQS; irq++)
+    {
+      if (irqbits & (uint32_t) (1 << irq))
+        break;
+    }
 
   /* Verify that the resulting IRQ number is valid */
 
-  if (irq < NR_IRQS) /* redundant check ?? */
+  if (irq < NR_IRQS)            /* redundant check ?? */
     {
       /* Current regs non-zero indicates that we are processing an interrupt;
        * current_regs is also used to manage interrupt level context switches.
        */
+
       DEBUGASSERT(current_regs == NULL);
       current_regs = regs;
-      
+
       /* Mask and acknowledge the interrupt */
 
       up_maskack_irq(irq);
-      
+
       /* Deliver the IRQ */
 
       irq_dispatch(irq, regs);
@@ -155,14 +157,15 @@ static void lpc23xx_decodeirq( uint32_t *regs)
 #ifdef CONFIG_VECTORED_INTERRUPTS
 void up_decodeirq(uint32_t *regs)
 {
-  vic_vector_t vector = (vic_vector_t)vic_getreg(VIC_ADDRESS_OFFSET);
-  
+  vic_vector_t vector = (vic_vector_t) vic_getreg(VIC_ADDRESS_OFFSET);
+
   /* Mask and acknowledge the interrupt */
 
-      up_maskack_irq(irq);
-      
+  up_maskack_irq(irq);
+
   /* Valid Interrupt */
-  if(vector != NULL)
-			(vector)(regs);
+
+  if (vector != NULL)
+    (vector) (regs);
 }
 #endif
