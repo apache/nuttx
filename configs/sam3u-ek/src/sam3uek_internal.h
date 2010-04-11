@@ -119,7 +119,7 @@ extern void weak_function sam3u_usbinitialize(void);
 #ifdef CONFIG_SAM3U_HSMCI
 extern int weak_function sam3u_hsmciinit(void);
 #else
-# define sam3u_boardmciinit()
+# define sam3u_hsmciinit()
 #endif
 
 /****************************************************************************
