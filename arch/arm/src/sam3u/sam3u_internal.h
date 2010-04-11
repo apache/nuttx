@@ -85,7 +85,7 @@
  */
 
 #define GPIO_CFG_SHIFT             (11)        /* Bits 11-13: GPIO configuration bits */
-#define GPIO_CFG_MASK              (3 << GPIO_CFG_SHIFT)
+#define GPIO_CFG_MASK              (7 << GPIO_CFG_SHIFT)
 #  define GPIO_CFG_DEFAULT         (0 << GPIO_CFG_SHIFT) /* Default, no attribute */
 #  define GPIO_CFG_PULLUP          (1 << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
 #  define GPIO_CFG_DEGLITCH        (2 << GPIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
@@ -125,40 +125,40 @@
  * .... .... ...B BBBB
  */
 
-#define GPIO_PIN_SHIFT                0        /* Bits 0-3: GPIO number: 0-15 */
-#define GPIO_PIN_MASK                 (15 << GPIO_PIN_SHIFT)
-#define GPIO_PIN0                     (0  << GPIO_PIN_SHIFT)
-#define GPIO_PIN1                     (1  << GPIO_PIN_SHIFT)
-#define GPIO_PIN2                     (2  << GPIO_PIN_SHIFT)
-#define GPIO_PIN3                     (3  << GPIO_PIN_SHIFT)
-#define GPIO_PIN4                     (4  << GPIO_PIN_SHIFT)
-#define GPIO_PIN5                     (5  << GPIO_PIN_SHIFT)
-#define GPIO_PIN6                     (6  << GPIO_PIN_SHIFT)
-#define GPIO_PIN7                     (7  << GPIO_PIN_SHIFT)
-#define GPIO_PIN8                     (8  << GPIO_PIN_SHIFT)
-#define GPIO_PIN9                     (9  << GPIO_PIN_SHIFT)
-#define GPIO_PIN10                    (10 << GPIO_PIN_SHIFT)
-#define GPIO_PIN11                    (11 << GPIO_PIN_SHIFT)
-#define GPIO_PIN12                    (12 << GPIO_PIN_SHIFT)
-#define GPIO_PIN13                    (13 << GPIO_PIN_SHIFT)
-#define GPIO_PIN14                    (14 << GPIO_PIN_SHIFT)
-#define GPIO_PIN15                    (15 << GPIO_PIN_SHIFT)
-#define GPIO_PIN16                    (16 << GPIO_PIN_SHIFT)
-#define GPIO_PIN17                    (17 << GPIO_PIN_SHIFT)
-#define GPIO_PIN18                    (18 << GPIO_PIN_SHIFT)
-#define GPIO_PIN19                    (19 << GPIO_PIN_SHIFT)
-#define GPIO_PIN20                    (20 << GPIO_PIN_SHIFT)
-#define GPIO_PIN21                    (21 << GPIO_PIN_SHIFT)
-#define GPIO_PIN22                    (22 << GPIO_PIN_SHIFT)
-#define GPIO_PIN23                    (23 << GPIO_PIN_SHIFT)
-#define GPIO_PIN24                    (24 << GPIO_PIN_SHIFT)
-#define GPIO_PIN25                    (25 << GPIO_PIN_SHIFT)
-#define GPIO_PIN26                    (26 << GPIO_PIN_SHIFT)
-#define GPIO_PIN27                    (27 << GPIO_PIN_SHIFT)
-#define GPIO_PIN28                    (28 << GPIO_PIN_SHIFT)
-#define GPIO_PIN29                    (29 << GPIO_PIN_SHIFT)
-#define GPIO_PIN30                    (30 << GPIO_PIN_SHIFT)
-#define GPIO_PIN31                    (31 << GPIO_PIN_SHIFT)
+#define GPIO_PIN_SHIFT             0        /* Bits 0-4: GPIO number: 0-31 */
+#define GPIO_PIN_MASK              (31 << GPIO_PIN_SHIFT)
+#define GPIO_PIN0                  (0  << GPIO_PIN_SHIFT)
+#define GPIO_PIN1                  (1  << GPIO_PIN_SHIFT)
+#define GPIO_PIN2                  (2  << GPIO_PIN_SHIFT)
+#define GPIO_PIN3                  (3  << GPIO_PIN_SHIFT)
+#define GPIO_PIN4                  (4  << GPIO_PIN_SHIFT)
+#define GPIO_PIN5                  (5  << GPIO_PIN_SHIFT)
+#define GPIO_PIN6                  (6  << GPIO_PIN_SHIFT)
+#define GPIO_PIN7                  (7  << GPIO_PIN_SHIFT)
+#define GPIO_PIN8                  (8  << GPIO_PIN_SHIFT)
+#define GPIO_PIN9                  (9  << GPIO_PIN_SHIFT)
+#define GPIO_PIN10                 (10 << GPIO_PIN_SHIFT)
+#define GPIO_PIN11                 (11 << GPIO_PIN_SHIFT)
+#define GPIO_PIN12                 (12 << GPIO_PIN_SHIFT)
+#define GPIO_PIN13                 (13 << GPIO_PIN_SHIFT)
+#define GPIO_PIN14                 (14 << GPIO_PIN_SHIFT)
+#define GPIO_PIN15                 (15 << GPIO_PIN_SHIFT)
+#define GPIO_PIN16                 (16 << GPIO_PIN_SHIFT)
+#define GPIO_PIN17                 (17 << GPIO_PIN_SHIFT)
+#define GPIO_PIN18                 (18 << GPIO_PIN_SHIFT)
+#define GPIO_PIN19                 (19 << GPIO_PIN_SHIFT)
+#define GPIO_PIN20                 (20 << GPIO_PIN_SHIFT)
+#define GPIO_PIN21                 (21 << GPIO_PIN_SHIFT)
+#define GPIO_PIN22                 (22 << GPIO_PIN_SHIFT)
+#define GPIO_PIN23                 (23 << GPIO_PIN_SHIFT)
+#define GPIO_PIN24                 (24 << GPIO_PIN_SHIFT)
+#define GPIO_PIN25                 (25 << GPIO_PIN_SHIFT)
+#define GPIO_PIN26                 (26 << GPIO_PIN_SHIFT)
+#define GPIO_PIN27                 (27 << GPIO_PIN_SHIFT)
+#define GPIO_PIN28                 (28 << GPIO_PIN_SHIFT)
+#define GPIO_PIN29                 (29 << GPIO_PIN_SHIFT)
+#define GPIO_PIN30                 (30 << GPIO_PIN_SHIFT)
+#define GPIO_PIN31                 (31 << GPIO_PIN_SHIFT)
 
 /* GPIO pin definitions *************************************************************/
 
