@@ -1086,3 +1086,6 @@
 	* configs/olimex-lpc2378, arch/arm/include/lpc2378, and arch/arm/src/lpc2378 -
 	  Basic port of the NXP 2378 on the Olimex board contributed by
 	  Rommel Marcelo.
+	* arch/arm/src/sam3u/sam3u_internal.h - Fixed a critical bug in the AT91SAM3U
+	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
+	  no one has been using this port.
