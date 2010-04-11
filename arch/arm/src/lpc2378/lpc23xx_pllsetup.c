@@ -71,22 +71,24 @@
 #include "lpc23xx_scb.h"
 
 extern void IO_Init(void);
+
 /***********************************************************************
  * Definitions
  **********************************************************************/
+
 #if ((FOSC < 32000) || (FOSC > 50000000))
-# error Fosc out of range (32KHz-50MHz)
-# error correct and recompile
+#  error Fosc out of range (32KHz-50MHz)
+#  error correct and recompile
 #endif
 
 #if ((CCLK < 10000000) || (CCLK > 72000000))
-# error cclk out of range (10MHz-72MHz)
-# error correct PLL MULTIPLIER and recompile
+#  error cclk out of range (10MHz-72MHz)
+#  error correct PLL MULTIPLIER and recompile
 #endif
 
 #if ((FCCO < 275000000) || (FCCO > 550000000))
-# error Fcco out of range (275MHz-550MHz)
-# error internal algorithm error
+#  error Fcco out of range (275MHz-550MHz)
+#  error internal algorithm error
 #endif
 
 /* Phase Locked Loop (PLL) initialization values
@@ -95,23 +97,25 @@ extern void IO_Init(void);
  *               CCLK = 57 600 000 Hz
  * Bit 16:23 NSEL: PLL Divider "N" Value
  *               Fcco = (2 * M * F_in) / N
- * 				 275MHz <= Fcco <= 550MHz
+ *                               275MHz <= Fcco <= 550MHz
  *
  * PLL clock sources:
- * Internal RC		0 default on reset
- * Main Oscillator	1
- * RTC				2
+ * Internal RC          0 default on reset
+ * Main Oscillator      1
+ * RTC                  2
  */
+
 #ifdef CONFIG_PLL_CLKSRC
-#	if ( (CONFIG_PLL_CLKSRC < 0) || (CONFIG_PLL_CLKSRC > 2) )
-#		error "PLL clock source not valid, check configuration "
-#	endif
+#       if ( (CONFIG_PLL_CLKSRC < 0) || (CONFIG_PLL_CLKSRC > 2) )
+#               error "PLL clock source not valid, check configuration "
+#       endif
 #else
-#	error "PLL clock source not defined, check configuration file"
+#       error "PLL clock source not defined, check configuration file"
 #endif
 
 /* PLL provides CCLK and must always be configured */
-#define PLL	( PLL_M | (PLL_N << 16) )
+
+#define PLL     ( PLL_M | (PLL_N << 16) )
 
 /* Memory Accelerator Module (MAM) initialization values
  *
@@ -131,108 +135,108 @@ extern void IO_Init(void);
  *           6 = 6 CCLK
  *           7 = 7 CCLK
  */
-/* LPC2378 Rev. '-' errata MAM may not work if fully enabled */
-#ifdef CONFIG_MAM_SETUP
-# ifndef CONFIG_MAMCR_VALUE /* Can be selected from config file */
-#   define CONFIG_MAMCR_VALUE  (MAMCR_PART)
-# endif
 
-# ifndef CONFIG_MAMTIM_VALUE /* Can be selected from config file */
-#   define CONFIG_MAMTIM_VALUE (0x00000003)
-# endif
+/* LPC2378 Rev. '-' errata MAM may not work if fully enabled */
+
+#ifdef CONFIG_MAM_SETUP
+#  ifndef CONFIG_MAMCR_VALUE    /* Can be selected from config file */
+#    define CONFIG_MAMCR_VALUE  (MAMCR_PART)
+#  endif
+
+#  ifndef CONFIG_MAMTIM_VALUE   /* Can be selected from config file */
+#    define CONFIG_MAMTIM_VALUE (0x00000003)
+#  endif
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-
 /****************************************************************************
  * Name: up_scbpllfeed
  ****************************************************************************/
+
 static inline void up_scbpllfeed(void)
 {
-	SCB_PLLFEED = 0xAA;
-	SCB_PLLFEED = 0x55;
+  SCB_PLLFEED = 0xAA;
+  SCB_PLLFEED = 0x55;
 }
 
 /****************************************************************************
  * Name: ConfigurePLL
  ****************************************************************************/
-void ConfigurePLL ( void )
+
+void ConfigurePLL(void)
 {
-	uint32_t MSel, NSel;
-	
-	/* LPC2378 Rev.'-' errata Enable the Ethernet block to enable 16k EnetRAM */
-	SCB_PCONP |= PCENET;
-	
-	/* Vectors are remapped to Flash */
-	SCB_MEMMAP = MEMMAP2FLASH;
-	
-	/* Enable PLL, disconnected */
-	if(SCB_PLLSTAT & (1 << 25))
-	{
-		SCB_PLLCON = 0x01;
-		up_scbpllfeed();
-	}
+  uint32_t MSel, NSel;
 
-    /* Disable PLL, disconnected */
-	SCB_PLLCON = 0;
-	up_scbpllfeed();
+  /* LPC2378 Rev.'-' errata Enable the Ethernet block to enable 16k EnetRAM */
+  SCB_PCONP |= PCENET;
 
-	/* Enable main OSC */
-	SCB_SCS |= 0x20;
+  /* Vectors are remapped to Flash */
+  SCB_MEMMAP = MEMMAP2FLASH;
 
-	/* Wait until main OSC is usable */
-	while( !(SCB_SCS & 0x40) );
+  /* Enable PLL, disconnected */
+  if (SCB_PLLSTAT & (1 << 25))
+    {
+      SCB_PLLCON = 0x01;
+      up_scbpllfeed();
+    }
 
+  /* Disable PLL, disconnected */
+  SCB_PLLCON = 0;
+  up_scbpllfeed();
 
-    /* select main OSC, 12MHz, as the PLL clock source */
-	SCB_CLKSRCSEL = CONFIG_PLL_CLKSRC;
+  /* Enable main OSC */
+  SCB_SCS |= 0x20;
 
-	/* Reconfigure PLL */
-	SCB_PLLCFG = PLL;
-	up_scbpllfeed();
+  /* Wait until main OSC is usable */
+  while (!(SCB_SCS & 0x40));
 
+  /* select main OSC, 12MHz, as the PLL clock source */
+  SCB_CLKSRCSEL = CONFIG_PLL_CLKSRC;
 
-    /* Enable PLL */
-	SCB_PLLCON = 0x01;
-	up_scbpllfeed();
+  /* Reconfigure PLL */
+  SCB_PLLCFG = PLL;
+  up_scbpllfeed();
 
-	/* Set clock divider */
-	SCB_CCLKCFG = CCLK_DIV;
+  /* Enable PLL */
+  SCB_PLLCON = 0x01;
+  up_scbpllfeed();
 
+  /* Set clock divider */
+  SCB_CCLKCFG = CCLK_DIV;
 
 #ifdef CONFIG_USBDEV
-    /* usbclk = 288 MHz/6 = 48 MHz */
-	SCB_USBCLKCFG = USBCLK_DIV;
-	/* Turn On USB PCLK */
-	SCB_PCONP |= PCUSB;
+  /* usbclk = 288 MHz/6 = 48 MHz */
+  SCB_USBCLKCFG = USBCLK_DIV;
+  /* Turn On USB PCLK */
+  SCB_PCONP |= PCUSB;
 #endif
 
-	/* Wait for PLL to lock */
-	while( ( SCB_PLLSTAT & (1 << 26) ) == 0);
+  /* Wait for PLL to lock */
+  while ((SCB_PLLSTAT & (1 << 26)) == 0);
 
-	MSel = SCB_PLLSTAT & 0x00007FFF;
-	NSel = ( SCB_PLLSTAT & 0x00FF0000 ) >> 16;
-	while( (MSel != PLL_M) && (NSel != PLL_N) );
-	
-	/* Enable and connect */
-	SCB_PLLCON = 0x03;
-	up_scbpllfeed();
-	
-	/* Check connect bit status */
-	while( ( SCB_PLLSTAT & ( 1 << 25 ) ) == 0 ); 
+  MSel = SCB_PLLSTAT & 0x00007FFF;
+  NSel = (SCB_PLLSTAT & 0x00FF0000) >> 16;
+  while ((MSel != PLL_M) && (NSel != PLL_N));
 
-	/* Set memory accelerater module*/
-	SCB_MAMCR = 0;
-	SCB_MAMTIM = CONFIG_MAMTIM_VALUE;
-	SCB_MAMCR = CONFIG_MAMCR_VALUE;
+  /* Enable and connect */
+  SCB_PLLCON = 0x03;
+  up_scbpllfeed();
 
-	/* Enable FastIO on P0:P1 */
-	SCB_SCS |= 0x01;
-	
-	IO_Init();
-	
-	return;
+  /* Check connect bit status */
+  while ((SCB_PLLSTAT & (1 << 25)) == 0);
+
+  /* Set memory accelerater module */
+  SCB_MAMCR = 0;
+  SCB_MAMTIM = CONFIG_MAMTIM_VALUE;
+  SCB_MAMCR = CONFIG_MAMCR_VALUE;
+
+  /* Enable FastIO on P0:P1 */
+  SCB_SCS |= 0x01;
+
+  IO_Init();
+
+  return;
 }

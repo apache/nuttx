@@ -85,23 +85,25 @@ uint32_t *current_regs;
 
 void up_irqinitialize(void)
 {
-    int reg;
+  int reg;
 
   /* Disable all interrupts.  We do this by writing ones to the IntClearEnable
    * register.
    */
+
   vic_putreg(0xffffffff, VIC_INTENCLEAR_OFFSET);
 
   /* Select all IRQs, FIQs are not used */
+
   vic_putreg(0, VIC_INTSELECT_OFFSET);
 
   /* Clear priority interrupts */
 
   for (reg = 0; reg < NR_IRQS; reg++)
-  {
-	  vic_putreg(0, VIC_VECTADDR0_OFFSET + (reg << 2));
-	  vic_putreg(0x0F, VIC_VECTPRIORITY0_OFFSET + (reg << 2));
-  }
+    {
+      vic_putreg(0, VIC_VECTADDR0_OFFSET + (reg << 2));
+      vic_putreg(0x0F, VIC_VECTPRIORITY0_OFFSET + (reg << 2));
+    }
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -113,25 +115,29 @@ void up_irqinitialize(void)
   irqrestore(SVC_MODE | PSR_F_BIT);
 #endif
 }
+
 /***********************************************************************
  * Name: up_enable_irq_protect
  * VIC registers can be accessed in User or privileged mode
  ***********************************************************************/
+
 static void up_enable_irq_protect(void)
 {
-	//~ uint32_t reg32 = vic_getreg(VIC_PROTECTION_OFFSET);
-	//~ reg32 &= ~(0xFFFFFFFF);
-	vic_putreg(0x01, VIC_PROTECTION_OFFSET);
+  // ~ uint32_t reg32 = vic_getreg(VIC_PROTECTION_OFFSET);
+  // ~ reg32 &= ~(0xFFFFFFFF);
+  vic_putreg(0x01, VIC_PROTECTION_OFFSET);
 }
 
 /***********************************************************************
  * Name: up_disable_irq_protect
  * VIC registers can only be accessed in privileged mode
  ***********************************************************************/
+
 static void up_disable_irq_protect(void)
 {
-	vic_putreg(0, VIC_PROTECTION_OFFSET);
+  vic_putreg(0, VIC_PROTECTION_OFFSET);
 }
+
 /***********************************************************************
  * Name: up_disable_irq
  *
@@ -146,8 +152,8 @@ void up_disable_irq(int irq)
 
   if (irq < NR_IRQS)
     {
-      /* Disable the irq by setting the corresponding bit in the VIC
-       * Interrupt Enable Clear register.
+      /* Disable the irq by setting the corresponding bit in the VIC Interrupt
+       * Enable Clear register.
        */
 
       vic_putreg((1 << irq), VIC_INTENCLEAR_OFFSET);
@@ -172,8 +178,8 @@ void up_enable_irq(int irq)
 
       irqstate_t flags = irqsave();
 
-      /* Enable the irq by setting the corresponding bit in the VIC
-       * Interrupt Enable register.
+      /* Enable the irq by setting the corresponding bit in the VIC Interrupt
+       * Enable register.
        */
 
       uint32_t val = vic_getreg(VIC_INTENABLE_OFFSET);
@@ -196,16 +202,21 @@ void up_maskack_irq(int irq)
 
   if ((unsigned)irq < NR_IRQS)
     {
-		/* Mask the IRQ by clearing the associated bit in Software Priority Mask register */
-		reg32 = vic_getreg(VIC_PRIORITY_MASK_OFFSET);
-		reg32 &= ~(1 << irq);
-		vic_putreg(reg32, VIC_PRIORITY_MASK_OFFSET);
+      /* Mask the IRQ by clearing the associated bit in Software Priority Mask
+       * register
+       */
+
+      reg32 = vic_getreg(VIC_PRIORITY_MASK_OFFSET);
+      reg32 &= ~(1 << irq);
+      vic_putreg(reg32, VIC_PRIORITY_MASK_OFFSET);
     }
-  	/* Clear interrupt */
-	vic_putreg((1<<irq), VIC_SOFTINTCLEAR_OFFSET); 
+
+  /* Clear interrupt */
+
+  vic_putreg((1 << irq), VIC_SOFTINTCLEAR_OFFSET);
 #ifdef CONFIG_VECTORED_INTERRUPTS
-	vic_putreg(0, VIC_ADDRESS_OFFSET); /* dummy write to clear VICADDRESS */
-#endif	 
+  vic_putreg(0, VIC_ADDRESS_OFFSET);    /* dummy write to clear VICADDRESS */
+#endif
 }
 
 /****************************************************************************
@@ -218,13 +229,13 @@ void up_maskack_irq(int irq)
 
 int up_prioritize_irq(int irq, int priority)
 {
-  /* The default priority on reset is 16  */
-  if (irq < NR_IRQS  && priority > 0 && priority < 16) 
-  {
-	  int offset = irq << 2;
-	  vic_putreg( priority, VIC_VECTPRIORITY0_OFFSET + offset );
-	  return OK;
-  }
+  /* The default priority on reset is 16 */
+  if (irq < NR_IRQS && priority > 0 && priority < 16)
+    {
+      int offset = irq << 2;
+      vic_putreg(priority, VIC_VECTPRIORITY0_OFFSET + offset);
+      return OK;
+    }
   return -EINVAL;
 }
 
@@ -251,17 +262,17 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
 
       /* Save the vector address */
 
-      vic_putreg((uint32_t)handler, VIC_VECTADDR0_OFFSET + offset);
-      
-      /* Set the interrupt priority  */
-	  
+      vic_putreg((uint32_t) handler, VIC_VECTADDR0_OFFSET + offset);
+
+      /* Set the interrupt priority */
+
       up_prioritize_irq(irq, vector);
-      
+
       /* Enable the vectored interrupt */
 
       uint32_t val = vic_getreg(VIC_INTENABLE_OFFSET);
       vic_putreg(val | (1 << irq), VIC_INTENABLE_OFFSET);
-      
+
       irqrestore(flags);
     }
 }
