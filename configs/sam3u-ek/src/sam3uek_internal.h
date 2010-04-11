@@ -108,6 +108,48 @@ extern void weak_function sam3u_spiinitialize(void);
 
 extern void weak_function sam3u_usbinitialize(void);
 
+/****************************************************************************
+ * Name: sam3u_hsmciinit
+ *
+ * Description:
+ *   Initialize HSMCI support 
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAM3U_HSMCI
+extern int weak_function sam3u_hsmciinit(void);
+#else
+# define sam3u_boardmciinit()
+#endif
+
+/****************************************************************************
+ * Name: sam3u_cardinserted
+ *
+ * Description:
+ *   Check if a card is inserted into the selected HSMCI slot
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAM3U_HSMCI
+extern bool sam3u_cardinserted(unsigned char slot);
+#else
+#  define sam3u_cardinserted(slot) (false)
+#endif
+
+/****************************************************************************
+ * Name: sam3u_writeprotected
+ *
+ * Description:
+ *   Check if a card is inserted into the selected HSMCI slot
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAM3U_HSMCI
+extern bool sam3u_writeprotected(unsigned char slot);
+#else
+#  define sam3u_writeprotected(slot) (false)
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAM3U_EK_SRC_SAM3UEK_INTERNAL_H */
 

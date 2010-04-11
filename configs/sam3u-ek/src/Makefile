@@ -44,6 +44,9 @@ CSRCS		= up_boot.c up_leds.c up_buttons.c up_spi.c up_usbdev.c
 ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
 endif
+ifeq ($(CONFIG_SAM3U_HSMCI),y)
+CSRCS		+= up_mmcsd.c
+endif
 ifeq ($(CONFIG_EXAMPLE),usbstorage)
 CSRCS		+= up_usbstrg.c
 endif

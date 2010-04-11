@@ -49,6 +49,7 @@
 #include <nuttx/mmcsd.h>
 
 #include "sam3u_internal.h"
+#include "sam3uek_internal.h"
 
 #ifdef CONFIG_SAM3U_HSMCI
 
@@ -154,12 +155,9 @@ int nsh_archinitialize(void)
     }
   message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
   
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the SAM3U-EK board supports a GPIO to detect if there is a card in
-   * the slot.
-   */
+  /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
-   sdio_mediachange(sdio, true);
+   sdio_mediachange(sdio, sam3u_cardinserted(0));
 #endif
   return OK;
 }

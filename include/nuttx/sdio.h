@@ -767,7 +767,10 @@ struct sdio_dev_s
   /* Command/Status/Data Transfer */
 
   void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);
-  void  (*blocksetup)(FAR struct sdio_dev_s *dev, unsigned int blocklen, unsigned int nblocks);
+#ifdef CONFIG_SDIO_BLOCKSETUP
+  void  (*blocksetup)(FAR struct sdio_dev_s *dev, unsigned int blocklen,
+          unsigned int nblocks);
+#endif
   int   (*recvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
           size_t nbytes);
   int   (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
@@ -792,7 +795,10 @@ struct sdio_dev_s
   int   (*registercallback)(FAR struct sdio_dev_s *dev,
           worker_t callback, void *arg);
 
-  /* DMA */
+  /* DMA.  CONFIG_SDIO_DMA should be set if the driver supports BOTH DMA
+   * and non-DMA transfer modes.  If the driver supports only one mode
+   * CONFIG_SDIO_DMA is not required.
+   */
 
 #ifdef CONFIG_SDIO_DMA
   bool  (*dmasupported)(FAR struct sdio_dev_s *dev);

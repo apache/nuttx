@@ -2,7 +2,7 @@
  * configs/sam3u-ek/src/up_boot.c
  * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ void sam3u_boardinitialize(void)
     }
 #endif
 
-   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
+   /* Initialize USB if 1) USBDEV is selected, 2) the USB controller is not
     * disabled, and 3) the weak function sam3u_usbinitialize() has been brought
     * into the build.
     */
@@ -100,9 +100,14 @@ void sam3u_boardinitialize(void)
   up_ledinit();
 #endif
 
-  /* Setup SD card detection PIO */
+  /* Setup SD card-related PIOs if 1) HSMCI is selected and 2) the weak
+   * function sam3u_hsmciinit() has been brought into the build.
+    */
 
-#if CONFIG_SAM3U_HSMCI
-  sam3u_configgpio(GPIO_MCI_CD);
+#ifdef CONFIG_SAM3U_HSMCI
+  if (sam3u_hsmciinit)
+    {
+      sam3u_hsmciinit();
+    }
 #endif
 }

@@ -447,7 +447,7 @@ static inline uint32_t sam3u_rxctrlabits(struct sam3u_dma_s *dmach)
   uint32_t     regval;
   unsigned int ndx;
 
-  DEBUGASSERT(dmach && dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
+  DEBUGASSERT(dmach);
 
   /* Since this is a receive, the source is described by the peripheral
    * selections. Set the source width (peripheral width).
@@ -748,7 +748,7 @@ sam3u_allocdesc(struct sam3u_dma_s *dmach, struct dma_linklist_s *prev,
                 }
               else
                 {
-                  DEBUGASSERT(dmach->llhead != NULL && dmach->tail == prev);
+                  DEBUGASSERT(dmach->llhead != NULL && dmach->lltail == prev);
 
                   /* When the second link is added to the list, that is the
                    * cue that we are going to do the link list transfer.
