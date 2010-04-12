@@ -90,6 +90,7 @@
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
+#  undef CONFIG_HSMCI_CMDDEBUG
 #  undef CONFIG_HSMCI_XFRDEBUG
 #endif
 
@@ -224,19 +225,25 @@
 /* Register logging support */
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-#ifdef CONFIG_DEBUG_DMA
+#  ifdef CONFIG_DEBUG_DMA
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_BEFORE_ENABLE 1
 #    define SAMPLENDX_AFTER_SETUP   2
 #    define SAMPLENDX_END_TRANSFER  3
 #    define SAMPLENDX_DMA_CALLBACK  4
-#    define DEBUG_NSAMPLES          5
+#    define DEBUG_NDMASAMPLES       5
 #  else
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_AFTER_SETUP   1
 #    define SAMPLENDX_END_TRANSFER  2
-#    define DEBUG_NSAMPLES          3
+#    define DEBUG_NDMASAMPLES       3
 #  endif
+#endif
+
+#ifdef CONFIG_HSMCI_CMDDEBUG
+#  define SAMPLENDX_AFTER_CMDR      0
+#  define SAMPLENDX_AT_WAKEUP       1
+#  define DEBUG_NCMDSAMPLES         2
 #endif
 
 /****************************************************************************
@@ -279,21 +286,32 @@ struct sam3u_dev_s
 
 /* Register logging support */
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
 struct sam3u_hsmciregs_s
 {
-  uint8_t  power;
-  uint16_t clkcr;
-  uint16_t dctrl;
-  uint32_t dtimer;
-  uint32_t dlen;
-  uint32_t dcount;
-  uint32_t sr;      /* Status register */
-  uint32_t imr;     /* Interrupt mask register */
-  uint32_t fifocnt;
+  uint32_t cr;    /* Control Register */
+  uint32_t mr;    /* Mode Register */
+  uint32_t dtor;  /* Data Timeout Register */
+  uint32_t sdcr;  /* SD/SDIO Card Register */
+  uint32_t argr;  /* Argument Register */
+  uint32_t cmdr;  /* Command Register */
+  uint32_t blkr;  /* Block Register */
+  uint32_t cstor; /* Completion Signal Timeout Register */
+  uint32_t rsp0;  /* Response Register 0 */
+  uint32_t rsp1;  /* Response Register 1 */
+  uint32_t rsp2;  /* Response Register 2 */
+  uint32_t rsp3;  /* Response Register 3 */
+  uint32_t sr;    /* Status Register */
+  uint32_t imr;   /* Interrupt Mask Register */
+  uint32_t dma;   /* DMA Configuration Register */
+  uint32_t cfg;   /* Configuration Register */
+  uint32_t wpmr;  /* Write Protection Mode Register */
+  uint32_t wpsr;  /* Write Protection Status Register */
 };
+#endif
 
-struct sam3u_sampleregs_s
+#ifdef CONFIG_HSMCI_XFRDEBUG
+struct sam3u_xfrregs_s
 {
   struct sam3u_hsmciregs_s hsmci;
 #ifdef CONFIG_DEBUG_DMA
@@ -318,21 +336,38 @@ static void sam3u_disablexfrints(struct sam3u_dev_s *priv);
 static inline void sam3u_disable(void);
 static inline void sam3u_enable(void);
 
-/* DMA Helpers **************************************************************/
+/* Register Sampling ********************************************************/
+
+#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs);
+static void sam3u_hsmcidump(struct sam3u_hsmciregs_s *regs, const char *msg);
+#endif
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_sampleinit(void);
-static void sam3u_sdiosample(struct sam3u_hsmciregs_s *regs);
-static void sam3u_sample(struct sam3u_dev_s *priv, int index);
-static void sam3u_sdiodump(struct sam3u_hsmciregs_s *regs, const char *msg);
-static void sam3u_dumpsample(struct sam3u_dev_s *priv,
-              struct sam3u_sampleregs_s *regs, const char *msg);
-static void sam3u_dumpsamples(struct sam3u_dev_s *priv);
+static void sam3u_xfrsampleinit(void);
+static void sam3u_xfrsample(struct sam3u_dev_s *priv, int index);
+static void sam3u_xfrdumpone(struct sam3u_dev_s *priv,
+              struct sam3u_xfrregs_s *regs, const char *msg);
+static void sam3u_xfrdump(struct sam3u_dev_s *priv);
 #else
-#  define   sam3u_sampleinit()
-#  define   sam3u_sample(priv,index)
-#  define   sam3u_dumpsamples(priv)
+#  define   sam3u_xfrsampleinit()
+#  define   sam3u_xfrsample(priv,index)
+#  define   sam3u_xfrdump(priv)
 #endif
+
+#ifdef CONFIG_HSMCI_CMDDEBUG
+static void sam3u_cmdsampleinit(void);
+static inline void sam3u_cmdsample1(int index3);
+static inline void sam3u_cmdsample2(int index, uint32_t sr);
+static void sam3u_cmddump(void);
+#else
+#  define   sam3u_cmdsampleinit()
+#  define   sam3u_cmdsample1(index)
+#  define   sam3u_cmdsample2(index,sr)
+#  define   sam3u_cmddump()
+#endif
+
+/* DMA Helpers **************************************************************/
 
 static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result);
 
@@ -439,7 +474,14 @@ struct sam3u_dev_s g_sdiodev =
 /* Register logging support */
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static struct sam3u_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
+static struct sam3u_xfrregs_s   g_xfrsamples[DEBUG_NDMASAMPLES];
+#endif
+#ifdef CONFIG_HSMCI_CMDDEBUG
+static struct sam3u_hsmciregs_s g_cmdsamples[DEBUG_NCMDSAMPLES];
+#endif
+#if defined(CONFIG_HSMCI_XFRDEBUG) && defined(CONFIG_HSMCI_CMDDEBUG)
+static bool                     g_xfrinitialized;
+static bool                     g_cmdinitialized;
 #endif
 
 /****************************************************************************
@@ -632,49 +674,76 @@ static inline void sam3u_enable(void)
 }
 
 /****************************************************************************
- * DMA Helpers
+ * Register Sampling
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_sampleinit
- *
- * Description:
- *   Setup prior to collecting DMA samples
- *
- ****************************************************************************/
-
-#ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_sampleinit(void)
-{
-  memset(g_sampleregs, 0xff, DEBUG_NSAMPLES * sizeof(struct sam3u_sampleregs_s));
-}
-#endif
-
-/****************************************************************************
- * Name: sam3u_sdiosample
+ * Name: sam3u_hsmcisample
  *
  * Description:
  *   Sample HSMCI registers
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_sdiosample(struct sam3u_hsmciregs_s *regs)
+#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs)
 {
-  regs->power   = (uint8_t)getreg32(SAM3U_HSMCI_POWER);
-  regs->clkcr   = (uint16_t)getreg32(SAM3U_HSMCI_CLKCR);
-  regs->dctrl   = (uint16_t)getreg32(SAM3U_HSMCI_DCTRL);
-  regs->dtimer  = getreg32(SAM3U_HSMCI_DTIMER);
-  regs->dlen    = getreg32(SAM3U_HSMCI_DLEN);
-  regs->dcount  = getreg32(SAM3U_HSMCI_DCOUNT);
-  regs->sr      = getreg32(SAM3U_HSMCI_SR);
-  regs->imr     = getreg32(SAM3U_HSMCI_IMR);
-  regs->fifocnt = getreg32(SAM3U_HSMCI_FIFOCNT);
+  regs->cr    = getreg32(SAM3U_HSMCI_CR);
+  regs->mr    = getreg32(SAM3U_HSMCI_MR);
+  regs->dtor  = getreg32(SAM3U_HSMCI_DTOR);
+  regs->sdcr  = getreg32(SAM3U_HSMCI_SDCR);
+  regs->argr  = getreg32(SAM3U_HSMCI_ARGR);
+  regs->cmdr  = getreg32(SAM3U_HSMCI_CMDR);
+  regs->blkr  = getreg32(SAM3U_HSMCI_BLKR);
+  regs->cstor = getreg32(SAM3U_HSMCI_CSTOR);
+  regs->rsp0  = getreg32(SAM3U_HSMCI_RSPR0);
+  regs->rsp1  = getreg32(SAM3U_HSMCI_RSPR1);
+  regs->rsp2  = getreg32(SAM3U_HSMCI_RSPR2);
+  regs->rsp3  = getreg32(SAM3U_HSMCI_RSPR3);
+  regs->sr    = getreg32(SAM3U_HSMCI_SR);
+  regs->imr   = getreg32(SAM3U_HSMCI_IMR);
+  regs->dma   = getreg32(SAM3U_HSMCI_DMA);
+  regs->cfg   = getreg32(SAM3U_HSMCI_CFG);
+  regs->wpmr  = getreg32(SAM3U_HSMCI_WPMR);
+  regs->wpsr  = getreg32(SAM3U_HSMCI_WPSR);
 }
 #endif
 
 /****************************************************************************
- * Name: sam3u_sample
+ * Name: sam3u_hsmcidump
+ *
+ * Description:
+ *   Dump one register sample
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+static void sam3u_hsmcidump(struct sam3u_hsmciregs_s *regs, const char *msg)
+{
+  fdbg("HSMCI Registers: %s\n", msg);
+  fdbg("     CR[%08x]: %08x\n", SAM3U_HSMCI_CR,    regs->cr);
+  fdbg("     MR[%08x]: %08x\n", SAM3U_HSMCI_MR,    regs->mr);
+  fdbg("   DTOR[%08x]: %08x\n", SAM3U_HSMCI_DTOR,  regs->dtor);
+  fdbg("   SDCR[%08x]: %08x\n", SAM3U_HSMCI_SDCR,  regs->sdcr);
+  fdbg("   ARGR[%08x]: %08x\n", SAM3U_HSMCI_ARGR,  regs->argr);
+  fdbg("   CMDR[%08x]: %08x\n", SAM3U_HSMCI_CMDR,  regs->cmdr);
+  fdbg("   BLKR[%08x]: %08x\n", SAM3U_HSMCI_BLKR,  regs->blkr);
+  fdbg("  CSTOR[%08x]: %08x\n", SAM3U_HSMCI_CSTOR, regs->cstor);
+  fdbg("  RSPR0[%08x]: %08x\n", SAM3U_HSMCI_RSPR0, regs->rsp0);
+  fdbg("  RSPR1[%08x]: %08x\n", SAM3U_HSMCI_RSPR1, regs->rsp1);
+  fdbg("  RSPR2[%08x]: %08x\n", SAM3U_HSMCI_RSPR2, regs->rsp2);
+  fdbg("  RSPR3[%08x]: %08x\n", SAM3U_HSMCI_RSPR3, regs->rsp3);
+  fdbg("     SR[%08x]: %08x\n", SAM3U_HSMCI_SR,    regs->sr);
+  fdbg("    IMR[%08x]: %08x\n", SAM3U_HSMCI_IMR,   regs->imr);
+  fdbg("    DMA[%08x]: %08x\n", SAM3U_HSMCI_DMA,   regs->dma);
+  fdbg("    CFG[%08x]: %08x\n", SAM3U_HSMCI_CFG,   regs->cfg);
+  fdbg("   WPMR[%08x]: %08x\n", SAM3U_HSMCI_WPMR,  regs->wpmr);
+  fdbg("   WPSR[%08x]: %08x\n", SAM3U_HSMCI_WPSR,  regs->wpsr);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam3u_xfrsample
  *
  * Description:
  *   Sample HSMCI/DMA registers
@@ -682,81 +751,150 @@ static void sam3u_sdiosample(struct sam3u_hsmciregs_s *regs)
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_sample(struct sam3u_dev_s *priv, int index)
+static void sam3u_xfrsample(struct sam3u_dev_s *priv, int index)
 {
-  struct sam3u_sampleregs_s *regs = &g_sampleregs[index];
+  struct sam3u_xfrregs_s *regs = &g_xfrsamples[index];
 #ifdef CONFIG_DEBUG_DMA
   sam3u_dmasample(priv->dma, &regs->dma);
 #endif
-  sam3u_sdiosample(&regs->hsmci);
+  sam3u_hsmcisample(&regs->hsmci);
 }
 #endif
 
 /****************************************************************************
- * Name: sam3u_sdiodump
+ * Name: sam3u_xfrsampleinit
  *
  * Description:
- *   Dump one register sample
+ *   Setup prior to collecting transfer samples
  *
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_sdiodump(struct sam3u_hsmciregs_s *regs, const char *msg)
+static void sam3u_xfrsampleinit(void)
 {
-  fdbg("HSMCI Registers: %s\n", msg);
-  fdbg("  POWER[%08x]: %08x\n", SAM3U_HSMCI_POWER,   regs->power);
-  fdbg("  CLKCR[%08x]: %08x\n", SAM3U_HSMCI_CLKCR,   regs->clkcr);
-  fdbg("  DCTRL[%08x]: %08x\n", SAM3U_HSMCI_DCTRL,   regs->dctrl);
-  fdbg(" DTIMER[%08x]: %08x\n", SAM3U_HSMCI_DTIMER,  regs->dtimer);
-  fdbg("   DLEN[%08x]: %08x\n", SAM3U_HSMCI_DLEN,    regs->dlen);
-  fdbg(" DCOUNT[%08x]: %08x\n", SAM3U_HSMCI_DCOUNT,  regs->dcount);
-  fdbg("     SR[%08x]: %08x\n", SAM3U_HSMCI_SR,      regs->sr);
-  fdbg("    IMR[%08x]: %08x\n", SAM3U_HSMCI_IMR,     regs->imr);
-  fdbg("FIFOCNT[%08x]: %08x\n", SAM3U_HSMCI_FIFOCNT, regs->fifocnt);
+  memset(g_xfrsamples, 0xff, DEBUG_NDMASAMPLES * sizeof(struct sam3u_xfrregs_s));
+#ifdef CONFIG_HSMCI_CMDDEBUG
+  g_xfrinitialized = true;
+#endif
 }
 #endif
 
 /****************************************************************************
- * Name: sam3u_dumpsample
+ * Name: sam3u_xfrdumpone
  *
  * Description:
- *   Dump one register sample
+ *   Dump one transfer register sample
  *
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_dumpsample(struct sam3u_dev_s *priv,
-                             struct sam3u_sampleregs_s *regs, const char *msg)
+static void sam3u_xfrdumpone(struct sam3u_dev_s *priv,
+                             struct sam3u_xfrregs_s *regs, const char *msg)
 {
 #ifdef CONFIG_DEBUG_DMA
   sam3u_dmadump(priv->dma, &regs->dma, msg);
 #endif
-  sam3u_sdiodump(&regs->hsmci, msg);
+  sam3u_hsmcidump(&regs->hsmci, msg);
 }
 #endif
 
 /****************************************************************************
- * Name: sam3u_dumpsamples
+ * Name: sam3u_xfrdump
  *
  * Description:
- *   Dump all sampled register data
+ *   Dump all transfer-related, sampled register data
  *
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void  sam3u_dumpsamples(struct sam3u_dev_s *priv)
+static void  sam3u_xfrdump(struct sam3u_dev_s *priv)
 {
-  sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
-#ifdef CONFIG_DEBUG_DMA
-  sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
+#ifdef CONFIG_HSMCI_CMDDEBUG
+  if (g_xfrinitialized)
 #endif
-  sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
-  sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
+    {
+      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_BEFORE_SETUP], "Before setup");
 #ifdef CONFIG_DEBUG_DMA
-  sam3u_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
+      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
+#endif
+      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_AFTER_SETUP], "After setup");
+      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_END_TRANSFER], "End of transfer");
+#ifdef CONFIG_DEBUG_DMA
+      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
+#endif
+#ifdef CONFIG_HSMCI_CMDDEBUG
+      g_xfrinitialized = false;
+#endif
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam3u_cmdsampleinit
+ *
+ * Description:
+ *   Setup prior to collecting command/response samples
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_HSMCI_CMDDEBUG
+static void sam3u_cmdsampleinit(void)
+{
+  memset(g_cmdsamples, 0xff, DEBUG_NCMDSAMPLES * sizeof(struct sam3u_hsmciregs_s));
+#ifdef CONFIG_HSMCI_XFRDEBUG
+  g_cmdinitialized = true;
 #endif
 }
 #endif
+
+/****************************************************************************
+ * Name: sam3u_cmdsample1 & 2
+ *
+ * Description:
+ *   Sample command/response registers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_HSMCI_CMDDEBUG
+static inline void sam3u_cmdsample1(int index)
+{
+  sam3u_hsmcisample(&g_cmdsamples[index]);
+}
+
+static inline void sam3u_cmdsample2(int index, uint32_t sr)
+{
+  sam3u_hsmcisample(&g_cmdsamples[index]);
+  g_cmdsamples[index].sr = sr;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam3u_cmddump
+ *
+ * Description:
+ *   Dump all comand/response register data
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_HSMCI_CMDDEBUG
+static void sam3u_cmddump(void)
+{
+#ifdef CONFIG_HSMCI_XFRDEBUG
+  if (g_cmdinitialized)
+#endif
+    {
+      sam3u_hsmcidump(&g_cmdsamples[SAMPLENDX_AFTER_CMDR], "After command setup");
+      sam3u_hsmcidump(&g_cmdsamples[SAMPLENDX_AT_WAKEUP],  "After wakeup");
+#ifdef CONFIG_HSMCI_XFRDEBUG
+      g_cmdinitialized = false;
+#endif
+    }
+}
+#endif
+
+/****************************************************************************
+ * DMA Helpers
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: sam3u_dmacallback
@@ -772,7 +910,7 @@ static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result)
    * of the transfer is driven by the HSMCI interrupts.
    */
 
-  sam3u_sample((struct sam3u_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
+  sam3u_xfrsample((struct sam3u_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
 }
 
 /****************************************************************************
@@ -881,7 +1019,7 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
 
   /* DMA debug instrumentation */
 
-  sam3u_sample(priv, SAMPLENDX_END_TRANSFER);
+  sam3u_xfrsample(priv, SAMPLENDX_END_TRANSFER);
 
   /* Make sure that the DMA is stopped (it will be stopped automatically
    * on normal transfers, but not necessarily when the transfer terminates
@@ -948,18 +1086,27 @@ static void sam3u_notransfer(struct sam3u_dev_s *priv)
 static int sam3u_interrupt(int irq, void *context)
 {
   struct sam3u_dev_s *priv = &g_sdiodev;
+  uint32_t sr;
   uint32_t enabled;
   uint32_t pending;
 
-  /* Loop while there are pending interrupts.  Check the HSMCI status
-   * register.  Mask out all bits that don't correspond to enabled
-   * interrupts.  (This depends on the fact that bits are ordered
-   * the same in both the SR and IMR registers).  If there are non-zero
-   * bits remaining, then we have work to do here.
-   */
+  /* Loop while there are pending interrupts. */
 
-  while ((enabled = getreg32(SAM3U_HSMCI_SR) & getreg32(SAM3U_HSMCI_IMR)) != 0)
+  for (;;)
     {
+      /* Check the HSMCI status register.  Mask out all bits that don't
+       * correspond to enabled interrupts.  (This depends on the fact that
+       * bits are ordered the same in both the SR and IMR registers).  If
+       * there are non-zero bits remaining, then we have work to do here.
+       */
+
+      sr      = getreg32(SAM3U_HSMCI_SR);
+      enabled = sr & getreg32(SAM3U_HSMCI_IMR);
+      if (enabled == 0)
+        {
+          break;
+        }
+
       /* Handle in progress, interrupt driven data transfers ****************/
       /* Do any of these interrupts signal the end a data transfer? */
 
@@ -1006,6 +1153,8 @@ static int sam3u_interrupt(int irq, void *context)
 
           if ((pending & priv->cmdrmask) != 0)
             {
+              sam3u_cmdsample2(SAMPLENDX_AT_WAKEUP, sr);
+
               /* Yes.. Did the Command-Response sequence end with an error? */
 
               if ((pending & HSMCI_RESPONSE_ERRORS) != 0)
@@ -1326,7 +1475,9 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
   uint32_t regval;
   uint32_t cmdidx;
 
-  /* Set the HSMCI Argument value */
+  sam3u_cmdsampleinit();
+
+    /* Set the HSMCI Argument value */
 
   putreg32(arg, SAM3U_HSMCI_ARGR);
 
@@ -1424,6 +1575,7 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
 
   fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
   putreg32(regval, SAM3U_HSMCI_CMDR);
+  sam3u_cmdsample1(SAMPLENDX_AFTER_CMDR);
 }
 
 /****************************************************************************
@@ -1569,6 +1721,9 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
       sr = getreg32(SAM3U_HSMCI_SR);
       if ((sr & priv->cmdrmask) != 0)
         {
+          sam3u_cmdsample2(SAMPLENDX_AT_WAKEUP, sr);
+          sam3u_cmddump();
+
           /* Yes.. Did the Command-Response sequence end with an error? */
 
           if ((sr & HSMCI_RESPONSE_ERRORS) != 0)
@@ -1924,7 +2079,8 @@ static sdio_eventset_t sam3u_eventwait(FAR struct sdio_dev_s *dev,
         }
     }
 
-  sam3u_dumpsamples(priv);
+  sam3u_cmddump();
+  sam3u_xfrdump(priv);
   return wkupevent;
 }
 
@@ -2050,8 +2206,8 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Setup register sampling */
 
-  sam3u_sampleinit();
-  sam3u_sample(priv, SAMPLENDX_BEFORE_SETUP);
+  sam3u_xfrsampleinit();
+  sam3u_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
 
   /* Configure the RX DMA */
 
@@ -2061,12 +2217,12 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM3U_HSMCI_DMA);
-  sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
+  sam3u_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
 
   sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
-  sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
+  sam3u_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
 
@@ -2099,8 +2255,8 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Setup register sampling */
 
-  sam3u_sampleinit();
-  sam3u_sample(priv, SAMPLENDX_BEFORE_SETUP);
+  sam3u_xfrsampleinit();
+  sam3u_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
 
   /* Configure the TX DMA */
 
@@ -2109,12 +2265,12 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM3U_HSMCI_DMA);
-  sam3u_sample(priv, SAMPLENDX_BEFORE_ENABLE);
+  sam3u_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
 
   sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
-  sam3u_sample(priv, SAMPLENDX_AFTER_SETUP);
+  sam3u_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
 
   /* Enable TX interrrupts */
 
