@@ -66,6 +66,10 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_DEBUG
+static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -337,3 +341,54 @@ bool sam3u_gpioread(uint16_t pinset)
 
   return (regval & pin) != 0;
 }
+
+/************************************************************************************
+ * Function:  sam3u_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_DEBUG
+int sam3u_dumpgpio(uint32_t pinset, const char *msg)
+{
+  irqstate_t    flags;
+  uintptr_t     base;
+  unsigned int  pin;
+  unsigned int  port;
+
+  /* Get the base address associated with the PIO port */
+
+  pin  = sam3u_gpiopin(pinset);
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  base = SAM3U_PION_BASE(port);
+
+  /* The following requires exclusive access to the GPIO registers */
+
+  flags = irqsave();
+  lldbg("PIO%c pinset: %08x base: %08x -- %s\n",
+        g_portchar[port], pinset, base, msg);
+  lldbg("    PSR: %08x    OSR: %08x   IFSR: %08x   ODSR: %08x\n",
+        getreg32(base + SAM3U_PIO_PSR_OFFSET), getreg32(base + SAM3U_PIO_OSR_OFFSET),
+        getreg32(base + SAM3U_PIO_IFSR_OFFSET), getreg32(base + SAM3U_PIO_ODSR_OFFSET));
+  lldbg("   PDSR: %08x    IMR: %08x    ISR: %08x   MDSR: %08x\n",
+        getreg32(base + SAM3U_PIO_PDSR_OFFSET), getreg32(base + SAM3U_PIO_IMR_OFFSET),
+        getreg32(base + SAM3U_PIO_ISR_OFFSET), getreg32(base + SAM3U_PIO_MDSR_OFFSET));
+  lldbg("   PUSR: %08x   ABSR: %08x SCIFSR: %08x  DIFSR: %08x\n",
+        getreg32(base + SAM3U_PIO_PUSR_OFFSET), getreg32(base + SAM3U_PIO_ABSR_OFFSET),
+        getreg32(base + SAM3U_PIO_SCIFSR_OFFSET), getreg32(base + SAM3U_PIO_DIFSR_OFFSET));
+  lldbg(" IFDGSR: %08x   SCDR: %08x   OWSR: %08x  AIMMR: %08x\n",
+        getreg32(base + SAM3U_PIO_IFDGSR_OFFSET), getreg32(base + SAM3U_PIO_SCDR_OFFSET),
+        getreg32(base + SAM3U_PIO_OWSR_OFFSET), getreg32(base + SAM3U_PIO_AIMMR_OFFSET));
+  lldbg("    ESR: %08x    LSR: %08x   ELSR: %08x FELLSR: %08x\n",
+        getreg32(base + SAM3U_PIO_ESR_OFFSET), getreg32(base + SAM3U_PIO_LSR_OFFSET),
+        getreg32(base + SAM3U_PIO_ELSR_OFFSET), getreg32(base + SAM3U_PIO_FELLSR_OFFSET));
+  lldbg(" FRLHSR: %08x LOCKSR: %08x   WPMR: %08x   WPSR: %08x\n",
+        getreg32(base + SAM3U_PIO_FRLHSR_OFFSET), getreg32(base + SAM3U_PIO_LOCKSR_OFFSET),
+        getreg32(base + SAM3U_PIO_WPMR_OFFSET), getreg32(base + SAM3U_PIO_WPSR_OFFSET));
+  irqrestore(flags);
+  return OK;
+}
+#endif
+

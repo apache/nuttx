@@ -518,6 +518,20 @@ EXTERN void sam3u_gpioirqdisable(int irq);
 #  define sam3u_gpioirqdisable(irq)
 #endif
 
+/************************************************************************************
+ * Function:  sam3u_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_DEBUG
+EXTERN int sam3u_dumpgpio(uint32_t pinset, const char *msg);
+#else
+#  define sam3u_dumpgpio(p,m)
+#endif
+
 /****************************************************************************
  * Name: sam3u_dmachannel
  *

@@ -289,12 +289,10 @@ struct sam3u_dev_s
 #if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
 struct sam3u_hsmciregs_s
 {
-  uint32_t cr;    /* Control Register */
   uint32_t mr;    /* Mode Register */
   uint32_t dtor;  /* Data Timeout Register */
   uint32_t sdcr;  /* SD/SDIO Card Register */
   uint32_t argr;  /* Argument Register */
-  uint32_t cmdr;  /* Command Register */
   uint32_t blkr;  /* Block Register */
   uint32_t cstor; /* Completion Signal Timeout Register */
   uint32_t rsp0;  /* Response Register 0 */
@@ -635,7 +633,7 @@ static void sam3u_disablexfrints(struct sam3u_dev_s *priv)
  * Name: sam3u_disable
  *
  * Description:
- *   Enable/disable the HSMCI
+ *   Disable the HSMCI
  *
  ****************************************************************************/
 
@@ -688,12 +686,10 @@ static inline void sam3u_enable(void)
 #if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
 static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs)
 {
-  regs->cr    = getreg32(SAM3U_HSMCI_CR);
   regs->mr    = getreg32(SAM3U_HSMCI_MR);
   regs->dtor  = getreg32(SAM3U_HSMCI_DTOR);
   regs->sdcr  = getreg32(SAM3U_HSMCI_SDCR);
   regs->argr  = getreg32(SAM3U_HSMCI_ARGR);
-  regs->cmdr  = getreg32(SAM3U_HSMCI_CMDR);
   regs->blkr  = getreg32(SAM3U_HSMCI_BLKR);
   regs->cstor = getreg32(SAM3U_HSMCI_CSTOR);
   regs->rsp0  = getreg32(SAM3U_HSMCI_RSPR0);
@@ -721,12 +717,10 @@ static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs)
 static void sam3u_hsmcidump(struct sam3u_hsmciregs_s *regs, const char *msg)
 {
   fdbg("HSMCI Registers: %s\n", msg);
-  fdbg("     CR[%08x]: %08x\n", SAM3U_HSMCI_CR,    regs->cr);
   fdbg("     MR[%08x]: %08x\n", SAM3U_HSMCI_MR,    regs->mr);
   fdbg("   DTOR[%08x]: %08x\n", SAM3U_HSMCI_DTOR,  regs->dtor);
   fdbg("   SDCR[%08x]: %08x\n", SAM3U_HSMCI_SDCR,  regs->sdcr);
   fdbg("   ARGR[%08x]: %08x\n", SAM3U_HSMCI_ARGR,  regs->argr);
-  fdbg("   CMDR[%08x]: %08x\n", SAM3U_HSMCI_CMDR,  regs->cmdr);
   fdbg("   BLKR[%08x]: %08x\n", SAM3U_HSMCI_BLKR,  regs->blkr);
   fdbg("  CSTOR[%08x]: %08x\n", SAM3U_HSMCI_CSTOR, regs->cstor);
   fdbg("  RSPR0[%08x]: %08x\n", SAM3U_HSMCI_RSPR0, regs->rsp0);
@@ -1226,6 +1220,7 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
 
   flags = irqsave();
   putreg32((1 << SAM3U_PID_HSMCI), SAM3U_PMC_PCER);
+  fdbg("PCSR: %08x\n", getreg32(SAM3U_PMC_PCSR));
   
   /* Reset the MCI */
 
@@ -1251,7 +1246,7 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
 
   putreg32(HSMCI_SDCR_SDCSEL_SLOTA | HSMCI_SDCR_SDCBUS_4BIT, SAM3U_HSMCI_SDCR);
 
-  /* Enable the MCI and the Power Saving */
+  /* Enable the MCI controller */
 
   putreg32(HSMCI_CR_MCIEN, SAM3U_HSMCI_CR);
 
@@ -2407,6 +2402,11 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   sam3u_configgpio(GPIO_MCI_DAT3);   /* Data 3 of Slot A */
   sam3u_configgpio(GPIO_MCI_CK);     /* SD clock */
   sam3u_configgpio(GPIO_MCI_DA);     /* Command/Response */
+
+#ifdef CONFIG_DEBUG_FS
+  sam3u_dumpgpio(GPIO_PORT_PIOA, "Pins: 3-8");
+  sam3u_dumpgpio(GPIO_PORT_PIOB, "Pins: 28-31");
+#endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.
