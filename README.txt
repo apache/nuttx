@@ -234,6 +234,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   `- README.txt
  |- libxx/
  |   `- README.txt
- `- netutils/
-     |- telnetd/README.txt
-     `- README
+ |- netutils/
+ |   |- telnetd/README.txt
+ |   `- README
+ `- tools/
+     `- README.txt
