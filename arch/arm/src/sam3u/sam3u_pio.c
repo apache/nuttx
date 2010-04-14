@@ -66,7 +66,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_GPIO
 static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
 #endif
 
@@ -350,7 +350,7 @@ bool sam3u_gpioread(uint16_t pinset)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_GPIO
 int sam3u_dumpgpio(uint32_t pinset, const char *msg)
 {
   irqstate_t    flags;

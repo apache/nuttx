@@ -62,6 +62,11 @@
 #  undef CONFIG_GPIO_IRQ
 #endif
 
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_GPIO
+#  undef CONFIG_DEBUG_DMA
+#endif
+
 /* Bit-encoded input to sam3u_configgpio() ******************************************/
 
 /* 16-bit Encoding:
@@ -526,7 +531,7 @@ EXTERN void sam3u_gpioirqdisable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_GPIO
 EXTERN int sam3u_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define sam3u_dumpgpio(p,m)
