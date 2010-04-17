@@ -1,7 +1,7 @@
 ############################################################################
 # graphics/nxglib/Makefile.sources
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -96,33 +96,39 @@ RCOPY_TMP	= $(RCOPY_CSRC:.c=.i)
 
 GEN_CSRCS	= $(RFILL_CSRC) $(TFILL_CSRC) $(RMOVE_CSRC) $(RCOPY_CSRC)
 
+ifeq ($(CONFIG_NX_LCDDRIVER),y)
+BLITDIR		= lcd
+else
+BLITDIR		= fb
+endif
+
 all:	$(GEN_CSRCS)
 .PHONY : clean distclean
 
-$(RFILL_CSRC) : nxglib_fillrectangle.c nxglib_bitblit.h
+$(RFILL_CSRC) : $(BLITDIR)/nxglib_fillrectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
-	@$(call PREPROCESS, nxglib_fillrectangle.c, $(RFILL_TMP))
+	@$(call PREPROCESS, $(BLITDIR)/nxglib_fillrectangle.c, $(RFILL_TMP))
 	@cat $(RFILL_TMP) | sed -e "/^#/d" >$@
 	@rm -f  $(RFILL_TMP)
 endif
 
-$(TFILL_CSRC) : nxglib_filltrapezoid.c nxglib_bitblit.h
+$(TFILL_CSRC) : $(BLITDIR)/nxglib_filltrapezoid.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
-	@$(call PREPROCESS, nxglib_filltrapezoid.c, $(TFILL_TMP))
+	@$(call PREPROCESS, $(BLITDIR)/nxglib_filltrapezoid.c, $(TFILL_TMP))
 	@cat $(TFILL_TMP) | sed -e "/^#/d" >$@
 	@rm -f  $(TFILL_TMP)
 endif
 
-$(RMOVE_CSRC) : nxglib_moverectangle.c nxglib_bitblit.h
+$(RMOVE_CSRC) : $(BLITDIR)/nxglib_moverectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
-	@$(call PREPROCESS, nxglib_moverectangle.c, $(RMOVE_TMP))
+	@$(call PREPROCESS, $(BLITDIR)/nxglib_moverectangle.c, $(RMOVE_TMP))
 	@cat $(RMOVE_TMP) | sed -e "/^#/d" >$@
 	@rm -f  $(RMOVE_TMP)
 endif
 
-$(RCOPY_CSRC) : nxglib_copyrectangle.c nxglib_bitblit.h
+$(RCOPY_CSRC) : $(BLITDIR)/nxglib_copyrectangle.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
-	@$(call PREPROCESS, nxglib_copyrectangle.c, $(RCOPY_TMP))
+	@$(call PREPROCESS, $(BLITDIR)/nxglib_copyrectangle.c, $(RCOPY_TMP))
 	@cat $(RCOPY_TMP) | sed -e "/^#/d" >$@
 	@rm -f  $(RCOPY_TMP)
 endif

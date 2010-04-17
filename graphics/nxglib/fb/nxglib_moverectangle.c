@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxglib_fillrectangle.c
+ * graphics/nxglib/fb/nxglib_moverectangle.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,6 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#ifndef NXGLIB_SUFFIX
-#  error "NXGLIB_SUFFIX must be defined before including this header file"
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -71,46 +67,91 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxgl_lowresmemcpy
+ ****************************************************************************/
+
+#if NXGLIB_BITSPERPIXEL < 8
+static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *sline,
+                                     unsigned int width,
+                                     uint8_t leadmask, uint8_t tailmask)
+{
+  FAR const uint8_t *sptr;
+  FAR uint8_t *dptr;
+  uint8_t mask;
+  int lnlen;
+
+  /* Handle masking of the fractional initial byte */
+
+  mask  = leadmask;
+  sptr  = sline;
+  dptr  = dline;
+  lnlen = width;
+
+  if (lnlen > 1 && mask)
+     {
+       dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
+       mask = 0xff;
+       dptr++;
+       sptr++;
+       lnlen--;
+     }
+
+   /* Handle masking of the fractional final byte */
+
+   mask &= tailmask;
+   if (lnlen > 0 && mask)
+     {
+       dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
+       lnlen--;
+     }
+
+   /* Handle all of the unmasked bytes in-between */
+
+   if (lnlen > 0)
+     {
+       NXGL_MEMCPY(dptr, sptr, lnlen);
+     }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_fillrectangle_*bpp
+ * Name: nxgl_moverectangle_*bpp
  *
  * Descripton:
- *   Fill a rectangle region in the framebuffer memory with a fixed color
+ *   Move a rectangular region from location to another in the
+ *   framebuffer memory.
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
-(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, nxgl_mxpixel_t color)
+void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
+(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
+ FAR struct nxgl_point_s *offset)
 {
-  FAR uint8_t *line;
+  FAR const uint8_t *sline;
+  FAR uint8_t *dline;
   unsigned int width;
   unsigned int stride;
-  int rows;
+  unsigned int rows;
 
 #if NXGLIB_BITSPERPIXEL < 8
-  FAR uint8_t *dest;
-  uint8_t mpixel = NXGL_MULTIPIXEL(color);
   uint8_t leadmask;
   uint8_t tailmask;
-  uint8_t mask;
-  int lnlen;
 #endif
 
   /* Get the width of the framebuffer in bytes */
 
   stride = pinfo->stride;
 
-  /* Get the dimensions of the rectange to fill in pixels */
+  /* Get the dimensions of the rectange to fill: width in pixels, height
+   * in rows
+   */
 
-  width  = rect->pt2.x - rect->pt1.x + 1;
-  rows   = rect->pt2.y - rect->pt1.y + 1;
-
-  /* Get the address of the first byte in the first line to write */
-
-  line   = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
+  width = rect->pt2.x - rect->pt1.x + 1;
+  rows  = rect->pt2.y - rect->pt1.y + 1;
 
 #if NXGLIB_BITSPERPIXEL < 8
 # ifdef CONFIG_NX_PACKEDMSFIRST
@@ -131,45 +172,41 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 # endif
 #endif
 
-  /* Then fill the rectangle line-by-line */
+  /* Case 1:  The starting position is above the display */
 
-  while (rows-- > 0)
+  if (offset->y < 0)
     {
+      dline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
+      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
+
+      while (rows--)
+        {
 #if NXGLIB_BITSPERPIXEL < 8
-     /* Handle masking of the fractional initial byte */
-
-     mask  = leadmask;
-     dest  = line;
-     lnlen = width;
-
-     if (lnlen > 1 && mask)
-        {
-          dest[0] = (dest[0] & ~mask) | (mpixel & mask);
-          mask = 0xff;
-          dest++;
-          lnlen--;
-        }
-
-      /* Handle masking of the fractional final byte */
-
-      mask &= tailmask;
-      if (lnlen > 0 && mask)
-        {
-          dest[lnlen-1] = (dest[lnlen-1] & ~mask) | (mpixel & mask);
-          lnlen--;
-        }
-
-      /* Handle all of the unmasked bytes in-between */
-
-      if (lnlen > 0)
-        {
-          NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, lnlen);
-        }
+          nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
 #else
-      /* Draw the entire raster line */
-
-      NXGL_MEMSET(line, (NXGL_PIXEL_T)color, width);
+          NXGL_MEMCPY(dline, sline, width);
 #endif
-      line += stride;
+          dline += stride;
+          sline += stride;
+        }
+    }
+
+  /* Case 2: It's not */
+
+  else
+    {
+      dline = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
+      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
+
+      while (rows--)
+        {
+          dline -= stride;
+          sline -= stride;
+#if NXGLIB_BITSPERPIXEL < 8
+          nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
+#else
+          NXGL_MEMCPY(dline, sline, width);
+#endif
+        }
     }
 }

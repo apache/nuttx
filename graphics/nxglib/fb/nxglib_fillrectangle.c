@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_copyrectangle.c
+ * graphics/nxglib/fb/nxglib_fillrectangle.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,10 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#ifndef NXGLIB_SUFFIX
+#  error "NXGLIB_SUFFIX must be defined before including this header file"
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -71,28 +75,24 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_copyrectangle_*bpp
+ * Name: nxgl_fillrectangle_*bpp
  *
  * Descripton:
- *   Copy a rectangular bitmap image into the specific position in the
- *   framebuffer memory.
+ *   Fill a rectangle region in the framebuffer memory with a fixed color
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
-(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *dest,
- FAR const void *src, FAR const struct nxgl_point_s *origin,
- unsigned int srcstride)
+void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
+(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, nxgl_mxpixel_t color)
 {
-  FAR const uint8_t *sline;
-  FAR uint8_t *dline;
+  FAR uint8_t *line;
   unsigned int width;
-  unsigned int deststride;
-  unsigned int rows;
+  unsigned int stride;
+  int rows;
 
 #if NXGLIB_BITSPERPIXEL < 8
-  FAR const uint8_t *sptr;
-  FAR uint8_t *dptr;
+  FAR uint8_t *dest;
+  uint8_t mpixel = NXGL_MULTIPIXEL(color);
   uint8_t leadmask;
   uint8_t tailmask;
   uint8_t mask;
@@ -101,14 +101,16 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 
   /* Get the width of the framebuffer in bytes */
 
-  deststride = pinfo->stride;
+  stride = pinfo->stride;
 
-  /* Get the dimensions of the rectange to fill: width in pixels,
-   * height in rows
-   */
+  /* Get the dimensions of the rectange to fill in pixels */
 
-  width = dest->pt2.x - dest->pt1.x + 1;
-  rows  = dest->pt2.y - dest->pt1.y + 1;
+  width  = rect->pt2.x - rect->pt1.x + 1;
+  rows   = rect->pt2.y - rect->pt1.y + 1;
+
+  /* Get the address of the first byte in the first line to write */
+
+  line   = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
 
 #if NXGLIB_BITSPERPIXEL < 8
 # ifdef CONFIG_NX_PACKEDMSFIRST
@@ -117,39 +119,34 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
    * MS byte down.
    */
 
-  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x-1)));
+  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
+  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
 # else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
-  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x-1)));
+  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
+  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
 # endif
 #endif
 
-  /* Then copy the image */
+  /* Then fill the rectangle line-by-line */
 
-  sline = (const uint8_t*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
-  dline = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
-
-  while (rows--)
+  while (rows-- > 0)
     {
 #if NXGLIB_BITSPERPIXEL < 8
      /* Handle masking of the fractional initial byte */
 
      mask  = leadmask;
-     sptr  = sline;
-     dptr  = dline;
+     dest  = line;
      lnlen = width;
 
      if (lnlen > 1 && mask)
         {
-          dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
+          dest[0] = (dest[0] & ~mask) | (mpixel & mask);
           mask = 0xff;
-          dptr++;
-          sptr++;
+          dest++;
           lnlen--;
         }
 
@@ -158,7 +155,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
       mask &= tailmask;
       if (lnlen > 0 && mask)
         {
-          dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
+          dest[lnlen-1] = (dest[lnlen-1] & ~mask) | (mpixel & mask);
           lnlen--;
         }
 
@@ -166,14 +163,13 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 
       if (lnlen > 0)
         {
-          NXGL_MEMCPY(dptr, sptr, lnlen);
+          NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, lnlen);
         }
 #else
-      /* Copy the whole line */
+      /* Draw the entire raster line */
 
-      NXGL_MEMCPY((NXGL_PIXEL_T*)dline, (NXGL_PIXEL_T*)sline, width);
+      NXGL_MEMSET(line, (NXGL_PIXEL_T)color, width);
 #endif
-      dline += deststride;
-      sline += srcstride;
+      line += stride;
     }
 }

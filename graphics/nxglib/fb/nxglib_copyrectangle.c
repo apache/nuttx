@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxglib_moverectangle.c
+ * graphics/nxglib/fb/nxsglib_copyrectangle.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,91 +67,48 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_lowresmemcpy
- ****************************************************************************/
-
-#if NXGLIB_BITSPERPIXEL < 8
-static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *sline,
-                                     unsigned int width,
-                                     uint8_t leadmask, uint8_t tailmask)
-{
-  FAR const uint8_t *sptr;
-  FAR uint8_t *dptr;
-  uint8_t mask;
-  int lnlen;
-
-  /* Handle masking of the fractional initial byte */
-
-  mask  = leadmask;
-  sptr  = sline;
-  dptr  = dline;
-  lnlen = width;
-
-  if (lnlen > 1 && mask)
-     {
-       dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
-       mask = 0xff;
-       dptr++;
-       sptr++;
-       lnlen--;
-     }
-
-   /* Handle masking of the fractional final byte */
-
-   mask &= tailmask;
-   if (lnlen > 0 && mask)
-     {
-       dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
-       lnlen--;
-     }
-
-   /* Handle all of the unmasked bytes in-between */
-
-   if (lnlen > 0)
-     {
-       NXGL_MEMCPY(dptr, sptr, lnlen);
-     }
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_moverectangle_*bpp
+ * Name: nxgl_copyrectangle_*bpp
  *
  * Descripton:
- *   Move a rectangular region from location to another in the
+ *   Copy a rectangular bitmap image into the specific position in the
  *   framebuffer memory.
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
-(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
- FAR struct nxgl_point_s *offset)
+void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
+(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *dest,
+ FAR const void *src, FAR const struct nxgl_point_s *origin,
+ unsigned int srcstride)
 {
   FAR const uint8_t *sline;
   FAR uint8_t *dline;
   unsigned int width;
-  unsigned int stride;
+  unsigned int deststride;
   unsigned int rows;
 
 #if NXGLIB_BITSPERPIXEL < 8
+  FAR const uint8_t *sptr;
+  FAR uint8_t *dptr;
   uint8_t leadmask;
   uint8_t tailmask;
+  uint8_t mask;
+  int lnlen;
 #endif
 
   /* Get the width of the framebuffer in bytes */
 
-  stride = pinfo->stride;
+  deststride = pinfo->stride;
 
-  /* Get the dimensions of the rectange to fill: width in pixels, height
-   * in rows
+  /* Get the dimensions of the rectange to fill: width in pixels,
+   * height in rows
    */
 
-  width = rect->pt2.x - rect->pt1.x + 1;
-  rows  = rect->pt2.y - rect->pt1.y + 1;
+  width = dest->pt2.x - dest->pt1.x + 1;
+  rows  = dest->pt2.y - dest->pt1.y + 1;
 
 #if NXGLIB_BITSPERPIXEL < 8
 # ifdef CONFIG_NX_PACKEDMSFIRST
@@ -160,53 +117,63 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
    * MS byte down.
    */
 
-  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
+  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
+  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x-1)));
 # else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
-  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
+  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
+  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x-1)));
 # endif
 #endif
 
-  /* Case 1:  The starting position is above the display */
+  /* Then copy the image */
 
-  if (offset->y < 0)
+  sline = (const uint8_t*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
+  dline = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
+
+  while (rows--)
     {
-      dline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
-      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
-
-      while (rows--)
-        {
 #if NXGLIB_BITSPERPIXEL < 8
-          nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
-#else
-          NXGL_MEMCPY(dline, sline, width);
-#endif
-          dline += stride;
-          sline += stride;
-        }
-    }
+     /* Handle masking of the fractional initial byte */
 
-  /* Case 2: It's not */
+     mask  = leadmask;
+     sptr  = sline;
+     dptr  = dline;
+     lnlen = width;
 
-  else
-    {
-      dline = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
-      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
-
-      while (rows--)
+     if (lnlen > 1 && mask)
         {
-          dline -= stride;
-          sline -= stride;
-#if NXGLIB_BITSPERPIXEL < 8
-          nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
-#else
-          NXGL_MEMCPY(dline, sline, width);
-#endif
+          dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
+          mask = 0xff;
+          dptr++;
+          sptr++;
+          lnlen--;
         }
+
+      /* Handle masking of the fractional final byte */
+
+      mask &= tailmask;
+      if (lnlen > 0 && mask)
+        {
+          dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
+          lnlen--;
+        }
+
+      /* Handle all of the unmasked bytes in-between */
+
+      if (lnlen > 0)
+        {
+          NXGL_MEMCPY(dptr, sptr, lnlen);
+        }
+#else
+      /* Copy the whole line */
+
+      NXGL_MEMCPY((NXGL_PIXEL_T*)dline, (NXGL_PIXEL_T*)sline, width);
+#endif
+      dline += deststride;
+      sline += srcstride;
     }
 }
