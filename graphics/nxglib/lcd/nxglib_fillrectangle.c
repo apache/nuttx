@@ -109,7 +109,7 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 
   for (row = 0; row < nrows; row++)
     {
-      /* Draw the entire raster line */
+      /* Draw the raster line at this row */
 
       (void)pinfo->putrun(row, rect->pt2.x, g_runbuffer, ncols);
     }

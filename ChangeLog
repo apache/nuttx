@@ -1092,4 +1092,5 @@
 5.4 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* include/nuttx/lcd.h - Defines an LCD interface.
+	* graphics/nxglib/fb and lcd - Support LCD and framebuffer rasterizers for NX.
 
