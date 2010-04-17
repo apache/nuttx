@@ -55,6 +55,7 @@
 #else
 #  define NXGLIB_RUNTYPE uint32_t
 #endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -88,7 +89,8 @@ static uint8_t g_wide_2bpp[4] = { 0x00, 0x55, 0xaa, 0xff };
  ****************************************************************************/
 
 #if NXGLIB_BITSPERPIXEL == 1
-static inline void nxgl_fillrun_1bpp(uint8_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_1bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
+                                    size_t npixels)
 {
   /* Get the number of bytes to fill */
 
@@ -98,13 +100,16 @@ static inline void nxgl_fillrun_1bpp(uint8_t *run, nxgl_mxpixel_t color, size_t 
 
   uint8_t wide = (color & 1) != 0 ? 0xff : 0x00;
 
-  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+  /* Fill the run with the color (it is okay to run a fractional byte over
+   * the end
+   */
 
   memset(run, wide, nbytes);
 }
 
 #elif NXGLIB_BITSPERPIXEL == 2
-static inline void nxgl_fillrun_2bpp(uint8_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_2bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
+                                     size_t npixels)
 {
   /* Get the number of bytes to fill */
 
@@ -114,13 +119,16 @@ static inline void nxgl_fillrun_2bpp(uint8_t *run, nxgl_mxpixel_t color, size_t 
 
   uint8_t wide = g_wide_2bpp[color & 3];
 
-  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+  /* Fill the run with the color (it is okay to run a fractional byte over
+   * the end
+   */
 
   memset(run, wide, nbytes);
 }
 
 #elif NXGLIB_BITSPERPIXEL == 4
-static inline void nxgl_fillrun_4bpp(uint8_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_4bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
+                                     size_t npixels)
 {
   /* Get the number of bytes to fill */
 
@@ -131,13 +139,16 @@ static inline void nxgl_fillrun_4bpp(uint8_t *run, nxgl_mxpixel_t color, size_t 
   uint8_t narrow = (uint8_t)color & 0x0f;
   uint8_t wide   = narrow | (narrow << 4);
 
-  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+  /* Fill the run with the color (it is okay to run a fractional byte over
+   * the end
+   */
 
   memset(run, wide, nbytes);
 }
 
 #elif NXGLIB_BITSPERPIXEL == 8
-static inline void nxgl_fillrun_8bpp(uint8_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_8bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
+                                     size_t npixels)
 {
   /* Fill the run with the color (it is okay to run a fractional byte overy the end */
 
@@ -145,7 +156,8 @@ static inline void nxgl_fillrun_8bpp(uint8_t *run, nxgl_mxpixel_t color, size_t 
 }
 
 #elif NXGLIB_BITSPERPIXEL == 16
-static inline void nxgl_fillrun_16bpp(uint16_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_16bpp(FAR uint16_t *run, nxgl_mxpixel_t color,
+                                      size_t npixels)
 {
   /* Fill the run with the color (it is okay to run a fractional byte overy the end */
 
@@ -156,7 +168,7 @@ static inline void nxgl_fillrun_16bpp(uint16_t *run, nxgl_mxpixel_t color, size_
 }
 
 #elif NXGLIB_BITSPERPIXEL == 24
-static inline void nxgl_fillrun_24bpp(uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_24bpp(FAR uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
 {
   /* Fill the run with the color (it is okay to run a fractional byte overy the end */
 #warning "Assuming 24-bit color is not packed"
@@ -167,7 +179,7 @@ static inline void nxgl_fillrun_24bpp(uint32_t *run, nxgl_mxpixel_t color, size_
 }
 
 #elif NXGLIB_BITSPERPIXEL == 32
-static inline void nxgl_fillrun_32bpp(uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
+static inline void nxgl_fillrun_32bpp(FAR uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
 {
   /* Fill the run with the color (it is okay to run a fractional byte overy the end */
 

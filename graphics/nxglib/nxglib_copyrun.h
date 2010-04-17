@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/lcd/nxsglib_copyrectangle.c
+ * graphics/nxglib/nxsglib_copyrun.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,18 +33,16 @@
  *
  ****************************************************************************/
 
+#ifndef __GRAPHICS_NXGLIB_NXGLIB_COPYRUN_H
+#define __GRAPHICS_NXGLIB_NXGLIB_COPYRUN_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <stdint.h>
-
-#include <nuttx/lcd.h>
-#include <nuttx/nxglib.h>
-
-#include "nxglib_bitblit.h"
+#include <string.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -71,103 +69,99 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_copyrectangle_*bpp
+ * Name: nxgl_copyrun_*bpp
  *
- * Descripton:
- *   Copy a rectangular bitmap image into the specific position in the
- *   framebuffer memory.
+ * Description:
+ *   Copy a row from an image into run.
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
-(FAR struct lcd_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *dest,
- FAR const void *src, FAR const struct nxgl_point_s *origin,
- unsigned int srcstride)
+#if NXGLIB_BITSPERPIXEL == 1
+static inline void
+nxgl_copyrun_1bpp(FAR const uint8_t *src, FAR uint8_t *dest,
+                  unsigned int inbit, size_t npixels)
 {
-  FAR const uint8_t *sline;
-  unsigned int width;
-  unsigned int rows;
+  uint8_t indata;
+  uint8_t outdata;
+  unsigned int inpixels = 0;
+  unsigned int outpixels = 0;
+  unsigned int outbit;
 
-#if NXGLIB_BITSPERPIXEL < 8
-  FAR const uint8_t *sptr;
-  FAR uint8_t *dptr;
-  uint8_t leadmask;
-  uint8_t tailmask;
-  uint8_t mask;
-  int lnlen;
-#endif
+  /* Set up the input */
 
-  /* Get the dimensions of the rectange to fill: width in pixels,
-   * height in rows
-   */
+  indata = *src++;
 
-  width = dest->pt2.x - dest->pt1.x + 1;
-  rows  = dest->pt2.y - dest->pt1.y + 1;
+  /* Set up the output */
 
-#if NXGLIB_BITSPERPIXEL < 8
-# ifdef CONFIG_NX_PACKEDMSFIRST
+  outdata = 0;
+  outbit  = 0;
 
-  /* Get the mask for pixels that are ordered so that they pack from the
-   * MS byte down.
-   */
+  /* Loop until all pixels have been packed into the destination */
 
-  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x-1)));
-# else
-  /* Get the mask for pixels that are ordered so that they pack from the
-   * LS byte up.
-   */
-
-  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x-1)));
-# endif
-#endif
-
-  /* Then copy the image */
-
-  sline = (const uint8_t*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
-  dline = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
-
-  while (rows--)
+  while (outpixels < npixels && inpixels < npixels)
     {
-#if NXGLIB_BITSPERPIXEL < 8
-     /* Handle masking of the fractional initial byte */
+      /* Pack pixels from the source into the destination */
+      /* Check the input bit */
 
-     mask  = leadmask;
-     sptr  = sline;
-     dptr  = dline;
-     lnlen = width;
-
-     if (lnlen > 1 && mask)
+      if ((*src & (1 << inbit)) != 0)
         {
-          dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
-          mask = 0xff;
-          dptr++;
-          sptr++;
-          lnlen--;
+          /* If it is set, then set the corresponding bit
+           * in the output (probably not the same bit.
+           */
+
+          outdata |= (1 << outbit);
+        }
+      inpixels++;
+
+      /* Check if we have used all of the bits in the input */
+
+      if (++inbit >= 8)
+        {
+          /* Yes.. Get the next byte from the source and reset
+           * the source bit number.
+           */
+
+          indata = *src++;
+          inbit  = 0;
         }
 
-      /* Handle masking of the fractional final byte */
+      /* Now check if we have filled the output byte */
 
-      mask &= tailmask;
-      if (lnlen > 0 && mask)
+      if (++outbit >= 8)
         {
-          dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
-          lnlen--;
+          /* Yes.. Write the output and reset the output bit
+           * number
+           */
+
+          *dest++    = outdata;
+          outdata    = 0;
+          outbit     = 0;
+          outpixels += 8;
         }
+    }
 
-      /* Handle all of the unmasked bytes in-between */
+  /* Handle any bits still in outdata */
 
-      if (lnlen > 0)
-        {
-          NXGL_MEMCPY(dptr, sptr, lnlen);
-        }
-#else
-      /* Copy the whole line */
-
-      NXGL_MEMCPY((NXGL_PIXEL_T*)dline, (NXGL_PIXEL_T*)sline, width);
-#endif
-      dline += deststride;
-      sline += srcstride;
+  if (outpixels < inpixels)
+    {
+      *dest = outdata;
     }
 }
+
+#elif NXGLIB_BITSPERPIXEL == 2
+static inline void
+nxgl_copyrun_2bpp(FAR const uint8_t *src, FAR uint8_t *dest,
+                  unsigned int inbit, size_t npixels)
+{
+}
+
+#elif NXGLIB_BITSPERPIXEL == 4
+static inline void
+nxgl_copyrun_4bpp(FAR const uint8_t *src, FAR uint8_t *dest,
+                  unsigned int inbit, size_t npixels)
+{
+}
+#endif
+#endif /* __GRAPHICS_NXGLIB_NXGLIB_COPYRUN_H */
+
+
