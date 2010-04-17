@@ -1,7 +1,7 @@
 ############################################################################
 # graphics/nxglib/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,29 +37,42 @@ NXGLIB_ASRCS	=
 
 RFILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
 		  nxglib_fillrectangle_4bpp.c
+
 RFILL2_CSRCS	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
 		  nxglib_fillrectangle_24bpp.c nxglib_fillrectangle_32bpp.c
+
 TFILL1_CSRCS	= nxglib_filltrapezoid_1bpp.c nxglib_filltrapezoid_2bpp.c \
 		  nxglib_filltrapezoid_4bpp.c
+
 TFILL2_CSRCS	= nxglib_filltrapezoid_8bpp.c nxglib_filltrapezoid_16bpp.c \
 		  nxglib_filltrapezoid_24bpp.c nxglib_filltrapezoid_32bpp.c
+
 RMOVE1_CSRCS	= nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c \
 		  nxglib_moverectangle_4bpp.c
+
 RMOVE2_CSRCS	= nxglib_moverectangle_8bpp.c nxglib_moverectangle_16bpp.c \
 		  nxglib_moverectangle_24bpp.c nxglib_moverectangle_32bpp.c
+
 RCOPY1_CSRCS	= nxglib_copyrectangle_1bpp.c nxglib_copyrectangle_2bpp.c \
 		  nxglib_copyrectangle_4bpp.c
+
 RCOPY2_CSRCS	= nxglib_copyrectangle_8bpp.c nxglib_copyrectangle_16bpp.c \
 		  nxglib_copyrectangle_24bpp.c nxglib_copyrectangle_32bpp.c
+
 RECT_CSRCS	= nxglib_rectcopy.c nxglib_rectoffset.c nxglib_vectoradd.c \
 		  nxglib_vectsubtract.c nxglib_rectintersect.c \
 		  nxglib_nonintersecting.c nxglib_rectunion.c nxglib_rectinside.c \
 		  nxglib_rectoverlap.c nxglib_rectsize.c nxglib_nullrect.c
+
 TRAP_CSRCS	= nxglib_runoffset.c nxglib_runcopy.c \
 		  nxglib_trapoffset.c nxglib_trapcopy.c
+
 COLOR_CSRCS	= nxglib_colorcopy.c
+
+LCD_CSRCS	= 
+
 NXGLIB_CSRCS	= nxglib_rgb2yuv.c nxglib_yuv2rgb.c \
 		  $(RFILL1_CSRCS) $(RFILL2_CSRCS) $(TFILL1_CSRCS) $(TFILL2_CSRCS) \
 		  $(RMOVE1_CSRCS) $(RMOVE2_CSRCS) $(RCOPY1_CSRCS) $(RCOPY2_CSRCS) \
-		  $(RECT_CSRCS) $(TRAP_CSRCS) $(COLOR_CSRCS)
+		  $(RECT_CSRCS) $(TRAP_CSRCS) $(COLOR_CSRCS) $(LCD_CSRCS)
 

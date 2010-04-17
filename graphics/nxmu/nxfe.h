@@ -486,7 +486,7 @@ EXTERN void nxmu_semtake(sem_t *sem);
  *
  * Input Parameters:
  *   be  - The back-end status structure
- *   wnd  - The pre-allocated window structure to be ininitilized [IN/OUT]
+ *   wnd  - The pre-allocated window structure to be initialized [IN/OUT]
  *
  * Return:
  *   None

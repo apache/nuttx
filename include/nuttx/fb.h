@@ -183,10 +183,10 @@ typedef uint16_t fb_coord_t;
 
 struct fb_videoinfo_s
 {
- uint8_t      fmt;        /* see FB_FMT_*  */
+ uint8_t    fmt;          /* see FB_FMT_*  */
  fb_coord_t xres;         /* Resolution in pixels */
  fb_coord_t yres;
- uint8_t      nplanes;    /* Number of color planes supported */
+ uint8_t    nplanes;      /* Number of color planes supported */
 };
 
 /* This structure describes one color plane.  Some YUV formats may support
@@ -232,8 +232,8 @@ struct fb_cmap_s
 #ifdef CONFIG_FB_HWCURSORIMAGE
 struct fb_cursorimage_s
 {
- fb_coord_t   width;       /* Width of the cursor image in pixels */
- fb_coord_t   height       /* Height of the curor image in pixels */
+ fb_coord_t     width;     /* Width of the cursor image in pixels */
+ fb_coord_t     height     /* Height of the curor image in pixels */
  const uint8_t *image;     /* Pointer to image data */
 };
 #endif

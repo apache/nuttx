@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/lcd/nxglib_fillrectangle.c
+ * graphics/nxglib/nxsglib_fullrun.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,29 +33,28 @@
  *
  ****************************************************************************/
 
+#ifndef __GRAPHICS_NXGLIB_NXGLIB_FILLRUN_H
+#define __GRAPHICS_NXGLIB_NXGLIB_FILLRUN_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
 #include <stdint.h>
-
-#include <nuttx/lcd.h>
-#include <nuttx/nxglib.h>
-
-#include "nxglib_bitblit.h"
-#include "nxglib_fillrun.h"
+#include <string.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#ifndef NXGLIB_SUFFIX
-#  error "NXGLIB_SUFFIX must be defined before including this header file"
+#if NXGLIB_BITSPERPIXEL < 16
+#  define NXGLIB_RUNTYPE uint8_t
+#elif NXGLIB_BITSPERPIXEL == 16
+#  define NXGLIB_RUNTYPE uint16_t
+#else
+#  define NXGLIB_RUNTYPE uint32_t
 #endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -63,6 +62,10 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#if NXGLIB_BITSPERPIXEL == 2
+static uint8_t g_wide_2bpp[4] = { 0x00, 0x55, 0xaa, 0xff };
+#endif
 
 /****************************************************************************
  * Public Data
@@ -77,35 +80,105 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_fillrectangle_*bpp
+ * Name: nxgl_fillrun_*bpp
  *
- * Descripton:
- *   Fill a rectangle region in the framebuffer memory with a fixed color
+ * Description:
+ *   fill a run with the specified color.
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
-(FAR struct lcd_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, nxgl_mxpixel_t color)
+#if NXGLIB_BITSPERPIXEL == 1
+static inline void nxgl_fillrun_1bpp(uint8_t *run, nxgl_mxpixel_t color, size_t npixels)
 {
-  unsigned int ncols;
-  unsigned int nrows;
-  unsigned int row;
+  /* Get the number of bytes to fill */
 
-  /* Get the dimensions of the rectange to fill in pixels */
+  unsigned int nbytes = (npixels + 7) >> 3;
 
-  ncols  = rect->pt2.x - rect->pt1.x + 1;
-  nrows  = rect->pt2.y - rect->pt1.y + 1;
+  /* Get the value of the byte to fill */
 
-  /* Fill the run buffer with the selected color */
+  uint8_t wide = (color & 1) != 0 ? 0xff : 0x00;
 
-  NXGL_FUNCNAME(nxgl_fillrun,NXGLIB_SUFFIX)((NXGLIB_RUNTYPE*)pinfo->buffer, color, ncols);
+  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
 
-  /* Then fill the rectangle line-by-line */
+  memset(run, wide, nbytes);
+}
 
-  for (row = 0; row < nrows; row++)
+#elif NXGLIB_BITSPERPIXEL == 2
+static inline void nxgl_fillrun_2bpp(uint8_t *run, nxgl_mxpixel_t color, size_t npixels)
+{
+  /* Get the number of bytes to fill */
+
+  unsigned int nbytes = (npixels + 3) >> 2;
+
+  /* Get the value of the byte to fill */
+
+  uint8_t wide = g_wide_2bpp[color & 3];
+
+  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+
+  memset(run, wide, nbytes);
+}
+
+#elif NXGLIB_BITSPERPIXEL == 4
+static inline void nxgl_fillrun_4bpp(uint8_t *run, nxgl_mxpixel_t color, size_t npixels)
+{
+  /* Get the number of bytes to fill */
+
+  unsigned int nbytes = (npixels + 1) >> 1;
+
+  /* Get the value of the byte to fill */
+
+  uint8_t narrow = (uint8_t)color & 0x0f;
+  uint8_t wide   = narrow | (narrow << 4);
+
+  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+
+  memset(run, wide, nbytes);
+}
+
+#elif NXGLIB_BITSPERPIXEL == 8
+static inline void nxgl_fillrun_8bpp(uint8_t *run, nxgl_mxpixel_t color, size_t npixels)
+{
+  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+
+  memset(run, color, npixels);
+}
+
+#elif NXGLIB_BITSPERPIXEL == 16
+static inline void nxgl_fillrun_16bpp(uint16_t *run, nxgl_mxpixel_t color, size_t npixels)
+{
+  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+
+  while (npixels-- > 0)
     {
-      /* Draw the raster line at this row */
-
-      (void)pinfo->putrun(row, rect->pt2.x, pinfo->buffer, ncols);
+      *run++ = (uint16_t)color;
     }
 }
+
+#elif NXGLIB_BITSPERPIXEL == 24
+static inline void nxgl_fillrun_24bpp(uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
+{
+  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+#warning "Assuming 24-bit color is not packed"
+  while (npixels-- > 0)
+    {
+      *run++ = (uint32_t)color;
+    }
+}
+
+#elif NXGLIB_BITSPERPIXEL == 32
+static inline void nxgl_fillrun_32bpp(uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
+{
+  /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+
+  while (npixels-- > 0)
+    {
+      *run++ = (uint32_t)color;
+    }
+}
+#else
+#  error "Unsupported value of NXGLIB_BITSPERPIXEL"
+#endif
+#endif /* __GRAPHICS_NXGLIB_NXGLIB_FILLRUN_H */
+
+

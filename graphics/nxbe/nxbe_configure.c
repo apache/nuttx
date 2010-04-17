@@ -94,6 +94,7 @@ int nxbe_configure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
 
   /* Check the number of color planes */
 
+#ifdef CONFIG_DEBUG
   if (be->vinfo.nplanes > CONFIG_NX_NPLANES)
     {
       gdbg("NX configured for only %d planes, controller wants %d\n",
@@ -105,6 +106,7 @@ int nxbe_configure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
       gdbg("NX configured for %d planes, controller only needs %d\n",
            CONFIG_NX_NPLANES, be->vinfo.nplanes);
     }
+#endif
 
   /* Then get information about each color plane */
 

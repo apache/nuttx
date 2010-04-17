@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_openwindow.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
  *
  * Input Parameters:
  *   be  - The back-end status structure
- *   wnd  - The pre-allocated window structure to be ininitilized [IN/OUT]
+ *   wnd  - The pre-allocated window structure to be initialized [IN/OUT]
  *
  * Return:
  *   None

@@ -62,16 +62,47 @@
 struct lcd_planeinfo_s
 {
   /* LCD Data Transfer ******************************************************/
+  /* This method can be used to write a partial raster line to the LCD:
+   *
+   *  row     - Starting row to write to (range: 0 <= row < yres)
+   *  col     - Starting column to write to (range: 0 <= col <= xres-npixels)
+   *  buffer  - The buffer containing the run to be written to the LCD
+   *  npixels - The number of pixels to write to the LCD
+   *            (range: 0 < npixels <= xres-col)
+   */
 
   int (*putrun)(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                 size_t npixels);
 
-  int (*getrun)(fb_coord_t row, fb_coord_t col,FAR uint8_t *buffer,
+  /* This method can be used to read a partial raster line from the LCD:
+   *
+   *  row     - Starting row to read from (range: 0 <= row < yres)
+   *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
+   *  buffer  - The buffer in which to return the run read from the LCD
+   *  npixels - The number of pixels to read from the LCD
+   *            (range: 0 < npixels <= xres-col)
+   */
+
+  int (*getrun)(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                 size_t npixels);
 
   /* Plane color characteristics ********************************************/
 
-  uint8_t bpp; /* Bits per pixel */
+  /* This is working memory allocated by the LCD driver for each LCD device
+   * and for each color plane.  This memory will hold one raster line of data.
+   * The size of the allocated run buffer must therefor be at least
+   * (bpp * xres / 8).  Actual alignment of the buffer must conform to the
+   * bitwidth of the underlying pixel type.
+   */
+
+  uint8_t *buffer; 
+
+  /* This is the number of bits in one pixel.  This may be one of {1, 2, 4,
+   * 8, 16, 24, or 32} unless support for one or more of those resolutions
+   * has been disabled.
+   */
+
+  uint8_t  bpp;
 };
 
 /* This structure defines an LCD interface */
