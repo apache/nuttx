@@ -62,12 +62,10 @@ struct lcd_planeinfo_s
 {
   /* LCD Data Transfer ******************************************************/
 
-  int (*putrun)(struct lcd_dev_s *dev, unsigned int planeno,
-                fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+  int (*putrun)(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                 size_t npixels);
 
-  int (*getrun)(struct lcd_dev_s *dev, unsigned int planeno,
-                fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+  int (*getrun)(fb_coord_t row, fb_coord_t col,FAR uint8_t *buffer,
                 size_t npixels);
 
   /* Plane color characteristics ********************************************/
