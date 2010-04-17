@@ -35,6 +35,19 @@
 
 -include $(TOPDIR)/Make.defs
 
+# The X11 stuff only builds on Linux (but not Ubuntu -- Ubuntu needs
+# some work).
+
+ifneq ($(HOSTOS),Cygwin)
+ifeq ($(CONFIG_SIM_X11FB),y)
+  USEX		= y
+else
+  USEX		= n
+endif
+else
+  USEX		= n
+endif
+
 CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= up_setjmp.S
@@ -46,7 +59,7 @@ CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_exit.c up_schedulesigaction.c up_allocateheap.c \
 		  up_devconsole.c up_framebuffer.c
 HOSTSRCS	= up_stdio.c up_hostusleep.c
-ifneq ($(HOSTOS),Cygwin) 
+ifeq ($(USEX),y)
   HOSTSRCS	+=  up_x11framebuffer.c
 endif
 ifeq ($(CONFIG_FS_FAT),y)
@@ -66,7 +79,7 @@ SRCS		= $(ASRCS) $(CSRCS) $(HOSTSRCS)
 OBJS		= $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 LDFLAGS		= $(ARCHSCRIPT)
-ifneq ($(HOSTOS),Cygwin)
+ifeq ($(USEX),y)
   STDLIBS	= -lX11 -lXext -lc
 else
   STDLIBS       = -lc
