@@ -211,8 +211,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-#if CONFIG_FB_CMAP
-EXTERN int nxbe_colormap(FAR struct NX_DRIVERTYPE *dev);
+#ifdef CONFIG_FB_CMAP
+EXTERN int nxbe_colormap(FAR NX_DRIVERTYPE *dev);
 #endif
 
 /****************************************************************************
