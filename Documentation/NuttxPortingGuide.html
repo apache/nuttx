@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: December 16, 2009</p>
+      <p>Last Updated: April 16, 2010</p>
     </td>
   </tr>
 </table>
@@ -2849,6 +2849,11 @@ extern void up_ledoff(int led);
     <code>CONFIG_NX_PACKEDMSFIRST</code>:
     If a pixel depth of less than 8-bits is used, then NX needs
     to know if the pixels pack from the MS to LS or from LS to MS
+  </li>
+  <li>
+    <code>CONFIG_NX_LCDDRIVER</code>:
+    By default, NX builds to use a framebuffer driver (see <code>include/nuttx/fb.h</code>).
+    If this option is defined, NX will build to use an LCD driver (see <code>include/nuttx/lcd.h</code>).
   </li>
   <li>
     <code>CONFIG_NX_MOUSE</code>:

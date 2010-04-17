@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 11, 2010</p>
+      <p>Last Updated: April 14, 2010</p>
     </td>
   </tr>
 </table>
@@ -1689,28 +1689,9 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.3 2010-04-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.4 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* arch/arm/src/lpc313x/lpc313x_usbdev.c - USB driver for the LPC313x
-	  contributed by David Hewson.
-	* configs/ea3131/src/up_ubstrgc.c, configs/ea3131/usbserial,
-	  configs/ea3131/usbstorage - USB storage and USB serial example support
-	  contributed by David Hewson.
-	* Several important compilation error fixes in lpc313x and (dualspeed) USB
-	  code also contributed by David Hewson.
-	* arch/arm/src/sam3u/sam3u_dmac.c - DMA support for the AT90SAM3U.
-	* arch/arm/src/sam3u/sam3u_hsmci.c - SD memory card support for AT90SAM3U
-	  (Neither the DMA nor the HSMCI driver are functional on the initial checkin).
-	* drivers/usbdev - Several important fixes to the USB mass storage driver
-	  submitted by David Hewson.
-	* configs/olimex-lpc2378, arch/arm/include/lpc2378, and arch/arm/src/lpc2378 -
-	  Basic port of the NXP 2378 on the Olimex board contributed by
-	  Rommel Marcelo.
-	* arch/arm/src/sam3u/sam3u_internal.h - Fixed a critical bug in the AT91SAM3U
-	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
-	  no one has been using this port.
-
-nuttx-5.3 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+	* include/nuttx/lcd.h - Defines an LCD interface.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
