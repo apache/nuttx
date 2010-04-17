@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_fbconfigure.c
+ * graphics/nxbe/nxbe_configure.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_fbconfigure
+ * Name: nxbe_configure
  *
  * Description:
  *   Configure the back end state structure based on information from the
@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-int nxbe_fbconfigure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
+int nxbe_configure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
 {
   int ret;
   int i;

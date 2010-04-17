@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <nuttx/fb.h>
+
+#include <nuttx/nx.h>
 #include <nuttx/nxglib.h>
 
 /****************************************************************************
@@ -211,20 +212,20 @@ extern "C" {
  ****************************************************************************/
 
 #if CONFIG_FB_CMAP
-EXTERN int nxbe_colormap(FAR struct fb_vtable_s *fb);
+EXTERN int nxbe_colormap(FAR struct NX_DRIVERTYPE *dev);
 #endif
 
 /****************************************************************************
- * Name: nx_fbconfigure
+ * Name: nx_configure
  *
  * Description:
  *   Configure the back end state structure based on information from the
- *   framebuffer driver
+ *   framebuffer or LCD driver
  *
  ****************************************************************************/
 
-EXTERN int nxbe_fbconfigure(FAR struct fb_vtable_s *fb,
-                            FAR struct nxbe_state_s *be);
+EXTERN int nxbe_configure(FAR NX_DRIVERTYPE *dev,
+                          FAR struct nxbe_state_s *be);
 
 /****************************************************************************
  * Name: nxbe_closewindow

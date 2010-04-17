@@ -45,8 +45,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fb.h>
-
 #include "nxbe.h"
 
 /****************************************************************************
@@ -82,7 +80,7 @@
  ****************************************************************************/
 
 #if CONFIG_FB_CMAP
-int nxbe_colormap(FAR struct fb_vtable_s *fb)
+int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 {
   struct fb_cmap_s cmap;
   uint8_t *alloc;
@@ -143,7 +141,7 @@ int nxbe_colormap(FAR struct fb_vtable_s *fb)
 
   /* Then set the color map */
 
-  ret =fb->putcmap(fb, &cmap);
+  ret = dev->putcmap(dev, &cmap);
 
   free(alloc);
   return ret;

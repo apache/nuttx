@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_server.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fb.h>
 #include <nuttx/nx.h>
 #include "nxfe.h"
 
@@ -181,34 +180,34 @@ static inline void nxmu_shutdown(FAR struct nxfe_state_s *fe)
  * Name: nxmu_setup
  ****************************************************************************/
 
-static inline int nxmu_setup(FAR const char *mqname,
-                             FAR struct fb_vtable_s *fb,
-                             FAR struct nxfe_state_s *fe)
+static inline int nxmu_lcdsetup(FAR const char *mqname,
+                                FAR NX_DRIVERTYPE *dev,
+                                FAR struct nxfe_state_s *fe)
 {
   struct mq_attr attr;
   int            ret;
 
   memset(fe, 0, sizeof(struct nxfe_state_s));
 
-  /* Configure the framebuffer device */
+  /* Configure the framebuffer/LCD device */
 
-  ret = nxbe_fbconfigure(fb, &fe->be);
+  ret = nxbe_configure(dev, &fe->be);
   if (ret < 0)
     {
-      gdbg("nxbe_fbconfigure failed: %d\n", -ret);
+      gdbg("nxbe_configure failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
 
 #if CONFIG_FB_CMAP
-  ret = nxbe_colormap(fb);
+  ret = nxbe_colormap(dev);
   if (ret < 0)
     {
       gdbg("nxbe_colormap failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
-#endif
+#endif /* CONFIG_FB_CMAP */
 
   /* Initialize the non-NULL elements of the server connection structure.
    * Oddly, this strcture represents the connection between the server and
@@ -289,7 +288,7 @@ static inline int nxmu_setup(FAR const char *mqname,
  *
  * Input Parameters:
  *   mqname - The name for the server incoming message queue
- *   fb     - Vtable "object" of the framebuffer "driver" to use
+ *   dev    - Vtable "object" of the framebuffer/LCD "driver" to use
  *
  * Return:
  *   This function usually does not return.  If it does return, it will
@@ -297,7 +296,7 @@ static inline int nxmu_setup(FAR const char *mqname,
  *
  ****************************************************************************/
 
-int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
+int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 {
   struct nxfe_state_s     fe;
   FAR struct nxsvrmsg_s *msg;
@@ -310,7 +309,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
   /* Sanity checking */
 
 #ifdef CONFIG_DEBUG
-  if (!mqname || !fb)
+  if (!mqname || !dev)
     {
       errno = EINVAL;
       return ERROR;
@@ -319,7 +318,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
 
   /* Initialize and configure the server */
 
-  ret = nxmu_setup(mqname, fb, &fe);
+  ret = nxmu_setup(mqname, dev, &fe);
   if (ret < 0)
     {
       return ret; /* nxmu_setup sets errno */

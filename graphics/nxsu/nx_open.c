@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nx_open.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,23 +108,23 @@ static void nxsu_bkgdredraw(NXWINDOW hwnd,
  * Name: nxsu_setup
  ****************************************************************************/
 
-static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
+static inline int nxsu_setup(FAR NX_DRIVERTYPE *dev,
                              FAR struct nxfe_state_s *fe)
 {
   int ret;
 
   /* Configure the framebuffer device */
 
-  ret = nxbe_fbconfigure(fb, &fe->be);
+  ret = nxbe_configure(dev, &fe->be);
   if (ret < 0)
     {
-      gdbg("nxbe_fbconfigure failed: %d\n", -ret);
+      gdbg("nxbe_configure failed: %d\n", -ret);
       errno = -ret;
       return ERROR;
     }
 
 #if CONFIG_FB_CMAP
-  ret = nxbe_colormap(fb);
+  ret = nxbe_colormap(dev);
   if (ret < 0)
     {
       gdbg("nxbe_colormap failed: %d\n", -ret);
@@ -170,7 +170,7 @@ static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
  *   plus nx_run.
  *
  * Input Parameters:
- *   fb - Vtable "object" of the framebuffer "driver" to use
+ *   dev - Vtable "object" of the framebuffer/LCD "driver" to use
  *
  * Return:
  *   Success: A non-NULL handle used with subsequent NX accesses
@@ -178,7 +178,7 @@ static inline int nxsu_setup(FAR struct fb_vtable_s *fb,
  *
  ****************************************************************************/
 
-NXHANDLE nx_open(FAR struct fb_vtable_s *fb)
+NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev)
 {
   FAR struct nxfe_state_s *fe;
   int ret;
@@ -186,7 +186,7 @@ NXHANDLE nx_open(FAR struct fb_vtable_s *fb)
   /* Sanity checking */
 
 #ifdef CONFIG_DEBUG
-  if (!fb)
+  if (!dev)
     {
       errno = EINVAL;
       return NULL;
@@ -204,7 +204,7 @@ NXHANDLE nx_open(FAR struct fb_vtable_s *fb)
 
   /* Initialize and configure the server */
 
-  ret = nxsu_setup(fb, fe);
+  ret = nxsu_setup(dev, fe);
   if (ret < 0)
     {
       return NULL; /* nxsu_setup sets errno */

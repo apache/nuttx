@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nx.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <nuttx/fb.h>
+
+#ifdef CONFIG_NX_LCDDRIVER
+#  include <nuttx/lcd.h>
+#else
+#  include <nuttx/fb.h>
+#endif
+
 #include <nuttx/nxglib.h>
 
 /****************************************************************************
@@ -61,6 +67,16 @@
 #define NX_MOUSE_LEFTBUTTON   0x01
 #define NX_MOUSE_CENTERBUTTON 0x02
 #define NX_MOUSE_RIGHTBUTTON  0x04
+
+/* NX_DRIVERTYPE selects either the framebuffer or LCD driver.  A define is
+ * used instead of a typedef to avoid type mismatches.
+ */
+
+#ifdef CONFIG_NX_LCDDRIVER
+#  define NX_DRIVERTYPE struct lcd_dev_s
+#else
+#  define NX_DRIVERTYPE struct fb_vtable_s
+#endif
 
 /****************************************************************************
  * Public Types
@@ -215,7 +231,7 @@ extern "C" {
  *
  * Input Parameters:
  *   mqname - The name for the server incoming message queue
- *   fb     - Vtable "object" of the framebuffer "driver" to use
+ *   dev     - Vtable "object" of the framebuffer "driver" to use
  *
  * Return:
  *   This function usually does not return.  If it does return, it will
@@ -224,8 +240,8 @@ extern "C" {
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
-#  define nx_run(fb) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, fb)
+EXTERN int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
+#  define nx_run(dev) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, dev)
 #endif
 
 /****************************************************************************
@@ -273,7 +289,7 @@ EXTERN NXHANDLE nx_connectinstance(FAR const char *svrmqname);
  *   Single user mode only!
  *
  * Input Parameters:
- *   fb - Vtable "object" of the framebuffer "driver" to use
+ *   dev - Vtable "object" of the framebuffer/LCD "driver" to use
  *   cb - Callbacks used to process received NX server messages
  *
  * Return:
@@ -283,7 +299,7 @@ EXTERN NXHANDLE nx_connectinstance(FAR const char *svrmqname);
  ****************************************************************************/
 
 #ifndef CONFIG_NX_MULTIUSER
-EXTERN NXHANDLE nx_open(FAR struct fb_vtable_s *fb);
+EXTERN NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev);
 #endif
 
 /****************************************************************************
