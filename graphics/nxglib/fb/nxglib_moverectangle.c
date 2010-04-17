@@ -123,7 +123,9 @@ static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *slin
  *
  * Descripton:
  *   Move a rectangular region from location to another in the
- *   framebuffer memory.
+ *   framebuffer memory.  The source is expressed as a rectangle; the
+ *   destination position is expressed as a point corresponding to the
+ *   translation of the upper, left-hand corner.
  *
  ****************************************************************************/
 
@@ -172,12 +174,16 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
 # endif
 #endif
 
-  /* Case 1:  The starting position is above the display */
+  /* Case 1:  The destination position (offset) is above the displayed
+   * position (rect)
+   */
 
-  if (offset->y < 0)
+  if (offset->y < rect->pt1.y)
     {
-      dline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
-      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
+      /* Copy the rectangle from top down. */
+
+      sline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
+      dline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
 
       while (rows--)
         {
@@ -191,12 +197,16 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
         }
     }
 
-  /* Case 2: It's not */
+  /* Case 2: The destination position (offset) is below the displayed
+   * position (rect)
+   */
 
   else
     {
-      dline = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
-      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
+      /* Copy the rectangle from the bottom up */
+
+      sline = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
+      dline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
 
       while (rows--)
         {

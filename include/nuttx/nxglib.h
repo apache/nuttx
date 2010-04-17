@@ -284,7 +284,9 @@ EXTERN void nxgl_filltrapezoid_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
  *
  * Descripton:
  *   Move a rectangular region from location to another in the
- *   framebuffer memory.
+ *   framebuffer/LCD memory.  The source is expressed as a rectangle; the
+ *   destination position is expressed as a point corresponding to the
+ *   translation of the upper, left-hand corner.
  *
  ****************************************************************************/
 

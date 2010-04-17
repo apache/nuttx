@@ -80,7 +80,7 @@
  * Name: nxglib_filltrapezoid_*bpp
  *
  * Descripton:
- *   Fill a trapezoidal region in the framebuffer memory with a fixed color.
+ *   Fill a trapezoidal region in the LCD memory with a fixed color.
  *   Clip the trapezoid to lie within a boundng box.  This is useful for
  *   drawing complex shapes that can be broken into a set of trapezoids.
  *

@@ -67,54 +67,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_lowresmemcpy
- ****************************************************************************/
-
-#if NXGLIB_BITSPERPIXEL < 8
-static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *sline,
-                                     unsigned int width,
-                                     uint8_t leadmask, uint8_t tailmask)
-{
-  FAR const uint8_t *sptr;
-  FAR uint8_t *dptr;
-  uint8_t mask;
-  int lnlen;
-
-  /* Handle masking of the fractional initial byte */
-
-  mask  = leadmask;
-  sptr  = sline;
-  dptr  = dline;
-  lnlen = width;
-
-  if (lnlen > 1 && mask)
-     {
-       dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
-       mask = 0xff;
-       dptr++;
-       sptr++;
-       lnlen--;
-     }
-
-   /* Handle masking of the fractional final byte */
-
-   mask &= tailmask;
-   if (lnlen > 0 && mask)
-     {
-       dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
-       lnlen--;
-     }
-
-   /* Handle all of the unmasked bytes in-between */
-
-   if (lnlen > 0)
-     {
-       NXGL_MEMCPY(dptr, sptr, lnlen);
-     }
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -123,7 +75,9 @@ static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *slin
  *
  * Descripton:
  *   Move a rectangular region from location to another in the
- *   framebuffer memory.
+ *   LCD memory.  The source is expressed as a rectangle; the
+ *   destination position is expressed as a point corresponding to the
+ *   translation of the upper, left-hand corner.
  *
  ****************************************************************************/
 
@@ -131,82 +85,47 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
 (FAR struct lcd_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
  FAR struct nxgl_point_s *offset)
 {
-  FAR const uint8_t *sline;
-  FAR uint8_t *dline;
-  unsigned int width;
-  unsigned int stride;
-  unsigned int rows;
+  unsigned int ncols;
+  unsigned int srcrow;
+  unsigned int destrow;
 
-#if NXGLIB_BITSPERPIXEL < 8
-  uint8_t leadmask;
-  uint8_t tailmask;
-#endif
+  /* Get the width of the rectange to move in pixels. */
 
-  /* Get the width of the framebuffer in bytes */
+  ncols = rect->pt2.x - rect->pt1.x + 1;
 
-  stride = pinfo->stride;
-
-  /* Get the dimensions of the rectange to fill: width in pixels, height
-   * in rows
+  /* Case 1:  The destination position (offset) is above the displayed
+   * position (rect)
    */
 
-  width = rect->pt2.x - rect->pt1.x + 1;
-  rows  = rect->pt2.y - rect->pt1.y + 1;
-
-#if NXGLIB_BITSPERPIXEL < 8
-# ifdef CONFIG_NX_PACKEDMSFIRST
-
-  /* Get the mask for pixels that are ordered so that they pack from the
-   * MS byte down.
-   */
-
-  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
-# else
-  /* Get the mask for pixels that are ordered so that they pack from the
-   * LS byte up.
-   */
-
-  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
-# endif
-#endif
-
-  /* Case 1:  The starting position is above the display */
-
-  if (offset->y < 0)
+  if (offset->y < rect->pt1.y)
     {
-      dline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
-      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
+      /* Copy the rectangle from top down */
 
-      while (rows--)
+      for (srcrow = rect->pt1.y, destrow = offset->y;
+           srcrow <= rect->pt2.y;
+           srcrow++, destrow++)
         {
-#if NXGLIB_BITSPERPIXEL < 8
-          nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
-#else
-          NXGL_MEMCPY(dline, sline, width);
-#endif
-          dline += stride;
-          sline += stride;
+          (void)pinfo->getrun(srcrow, rect->pt1.x, pinfo->buffer, ncols);
+          (void)pinfo->putrun(destrow, offset->x, pinfo->buffer, ncols);
         }
     }
 
-  /* Case 2: It's not */
+  /* Case 2: The destination position (offset) is below the displayed
+   * position (rect)
+   */
 
   else
     {
-      dline = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
-      sline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
+      unsigned int dy = rect->pt2.y - rect->pt1.y;
 
-      while (rows--)
+      /* Copy the rectangle from the bottom up */
+
+      for (srcrow = rect->pt2.y, destrow = offset->y + dy;
+           srcrow >= rect->pt1.y;
+           srcrow--, destrow--)
         {
-          dline -= stride;
-          sline -= stride;
-#if NXGLIB_BITSPERPIXEL < 8
-          nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
-#else
-          NXGL_MEMCPY(dline, sline, width);
-#endif
+          (void)pinfo->getrun(srcrow, rect->pt1.x, pinfo->buffer, ncols);
+          (void)pinfo->putrun(destrow, offset->x, pinfo->buffer, ncols);
         }
     }
 }
