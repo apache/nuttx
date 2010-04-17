@@ -157,6 +157,12 @@ arch/arm - ARM-based micro-controllers
         NuttX operates on the ARM9EJS of this dual core processor.  This port
         complete, verified, and included in the NuttX release 0.2.1.
 
+    arch/arm/include/imx and arch/arm/src/imx
+	Freescale MC9328MX1 or i.MX1. This port uses the Freescale MX1ADS
+	development board with a GNU arm-elf toolchain* under either Linux or Cygwin.
+	STATUS: This port has stalled because of development tool issues. Coding
+	is complete on the basic port (timer, serial console, SPI).
+
     arch/arm/include/lm3s and arch/arm/src/lm3s
         These directories contain support for the Luminary LMS family, particularly
         for the LM3S6918. The initial, release of this port was included in NuttX version
@@ -166,16 +172,49 @@ arch/arm - ARM-based micro-controllers
 
     arch/arm/include/lpc214x and arch/arm/src/lpc214x
         These directories provide support for NXP LPC214x family of
-        processors.  This port boots and passes the OS test (examples/ostest).
+        ARM7TDMI processors.  This port boots and passes the OS test (examples/ostest).
         The port is complete and verifed.  As of NuttX 0.3.17, the port includes:
         timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
         support.  A verifed NuttShell (NSH) configuration is also available.
 
+    arch/arm/include/lpc2378 and arch/arm/src/lpc2378.
+	NXP LPC2378. Support is provided for the NXP LPC2378 MCU. This port was
+	contributed by Rommel Marcelo is was first released in NuttX-5.3.
+	STATUS: This port boots and passes the OS test (examples/ostest) and
+	includes a working implementation of the NuttShell (NSH). The port is
+	complete and verified. As of NuttX 5.3, the port includes only basic
+	timer interrupts and serial console support.
+
+    arch/arm/include/lpc313x and arch/arm/src/lpc313x
+        These directories provide support for NXP LPC313x family of
+        ARM926EJ-S processors.  The port for the NXP LPC3131 was first
+	released in NuttX-5.1 (but was not functional until NuttX-5.2).
+	STATUS: The basic EA3131 port is complete and verified in NuttX-5.2
+	This basic port includes basic boot-up, serial console, and timer
+	interrupts. This port was extended in NuttX 5.3 with a USB high
+	speed driver contributed by David Hewson. This port has been
+	verified using the NuttX OS test, USB serial and mass storage tests
+	and includes a working implementation of the NuttShell ((NSH)).
+
+    arch/arm/include/sam3u and arch/arm/src/sam3u
+	Atmel AT91SAM3U. This port is for Atmel AT91SAM3U4E MCU.
+	STATUS: The basic AT91SAM3U port was released in NuttX version 5.1.
+	The basic port includes boot-up logic, interrupt driven serial
+	console, and system timer interrupts. That release passes the
+	NuttX OS test and is proven to have a valid OS implementation. A 
+	onfiguration to support the NuttShell is also included.
+
     arch/arm/include/stm32 and arch/arm/src/stm32
-        These directories contain support for the STMicro STM32 family, particularly
-        for the STM32F103ZET6. The initial, release of this port was included in NuttX version
-        0.4.12. The current port includes timer, and serial console.  Work is underway for
-        USB, SPI, microSD, and LCD.
+	These directories contain support for the STMicro STM32 family, particularly
+	for the STM32F103ZET6. 
+	STATUS: The basic STM32 port was released in NuttX version 0.4.12.
+	The basic port includes boot-up logic, interrupt driven serial console,
+	and system timer interrupts. The 0.4.13 release added support for SPI,
+	serial FLASH, and USB device.; The 4.14 release added support for
+	buttons and SDIO-based MMC/SD and verifed DMA support. Verified
+	configurations are available for NuttX OS test, the NuttShell (NSH)
+	example, the USB serial device class, and the USB mass storage device 
+	lass example. 
 
     arch/arm/include/str71x and arch/arm/src/str71x
         These directories provide support for the STMicro STR71x processors.
