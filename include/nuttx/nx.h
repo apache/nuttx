@@ -45,12 +45,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef CONFIG_NX_LCDDRIVER
-#  include <nuttx/lcd.h>
-#else
-#  include <nuttx/fb.h>
-#endif
-
 #include <nuttx/nxglib.h>
 
 /****************************************************************************
@@ -67,19 +61,6 @@
 #define NX_MOUSE_LEFTBUTTON   0x01
 #define NX_MOUSE_CENTERBUTTON 0x02
 #define NX_MOUSE_RIGHTBUTTON  0x04
-
-/* NX_DRIVERTYPE selects either the framebuffer or LCD driver; NX_PLANINFO_TYPE
- * hides the difference in the framebuffer and LCD driver plane types. defines
- * are used instead of a typedefs to avoid type mismatches.
- */
-
-#ifdef CONFIG_NX_LCDDRIVER
-#  define NX_DRIVERTYPE    struct lcd_dev_s
-#  define NX_PLANEINFOTYPE struct lcd_planeinfo_s
-#else
-#  define NX_DRIVERTYPE    struct fb_vtable_s
-#  define NX_PLANEINFOTYPE struct fb_planeinfo_s
-#endif
 
 /****************************************************************************
  * Public Types

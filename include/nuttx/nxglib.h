@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nxglib.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <fixedmath.h>
-#include <nuttx/fb.h>
+
+#ifdef CONFIG_NX_LCDDRIVER
+#  include <nuttx/lcd.h>
+#else
+#  include <nuttx/fb.h>
+#endif
 
 /****************************************************************************
  * Pre-processor definitions
@@ -57,6 +62,22 @@
 #  define CONFIG_NX_NPLANES  1  /* Max number of color planes supported */
 #endif
 
+/* Driver Selection *********************************************************/
+/* NX_DRIVERTYPE selects either the framebuffer or LCD driver;
+ * NX_PLANINFO_TYPE hides the difference in the framebuffer and LCD driver
+ * plane types. defines are used instead of a typedefs to avoid type
+ * mismatches.
+ */
+
+#ifdef CONFIG_NX_LCDDRIVER
+#  define NX_DRIVERTYPE    struct lcd_dev_s
+#  define NX_PLANEINFOTYPE struct lcd_planeinfo_s
+#else
+#  define NX_DRIVERTYPE    struct fb_vtable_s
+#  define NX_PLANEINFOTYPE struct fb_planeinfo_s
+#endif
+
+/* NXGL Macros **************************************************************/
 /* Mnemonics for indices */
 
 #define NX_TOP_NDX           (0)
@@ -197,25 +218,25 @@ EXTERN void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
  *
  ****************************************************************************/
 
-EXTERN void nxgl_fillrectangle_1bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_fillrectangle_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_fillrectangle_2bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_fillrectangle_2bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_fillrectangle_4bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_fillrectangle_4bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_fillrectangle_8bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_fillrectangle_8bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_fillrectangle_16bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_fillrectangle_16bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
                                      nxgl_mxpixel_t color);
-EXTERN void nxgl_fillrectangle_24bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_fillrectangle_24bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
                                      nxgl_mxpixel_t color);
-EXTERN void nxgl_fillrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_fillrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
                                      nxgl_mxpixel_t color);
 
@@ -229,31 +250,31 @@ EXTERN void nxgl_fillrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
  *
  ****************************************************************************/
 
-EXTERN void nxgl_filltrapezoid_1bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_filltrapezoid_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_filltrapezoid_2bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_filltrapezoid_2bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_filltrapezoid_4bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_filltrapezoid_4bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_filltrapezoid_8bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_filltrapezoid_8bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_filltrapezoid_16bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_filltrapezoid_16bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
                                     nxgl_mxpixel_t color);
-EXTERN void nxgl_filltrapezoid_24bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_filltrapezoid_24bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_trapezoid_s *trap,
                                      FAR const struct nxgl_rect_s *bounds,
                                      nxgl_mxpixel_t color);
-EXTERN void nxgl_filltrapezoid_32bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_filltrapezoid_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_trapezoid_s *trap,
                                      FAR const struct nxgl_rect_s *bounds,
                                      nxgl_mxpixel_t color);
@@ -267,25 +288,25 @@ EXTERN void nxgl_filltrapezoid_32bpp(FAR struct fb_planeinfo_s *pinfo,
  *
  ****************************************************************************/
 
-EXTERN void nxgl_moverectangle_1bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_moverectangle_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     FAR struct nxgl_point_s *offset);
-EXTERN void nxgl_moverectangle_2bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_moverectangle_2bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     FAR struct nxgl_point_s *offset);
-EXTERN void nxgl_moverectangle_4bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_moverectangle_4bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     FAR struct nxgl_point_s *offset);
-EXTERN void nxgl_moverectangle_8bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_moverectangle_8bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     FAR struct nxgl_point_s *offset);
-EXTERN void nxgl_moverectangle_16bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_moverectangle_16bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
                                      FAR struct nxgl_point_s *offset);
-EXTERN void nxgl_moverectangle_24bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_moverectangle_24bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
                                      FAR struct nxgl_point_s *offset);
-EXTERN void nxgl_moverectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_moverectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
                                      FAR struct nxgl_point_s *offset);
 
@@ -298,37 +319,37 @@ EXTERN void nxgl_moverectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
  *
  ****************************************************************************/
 
-EXTERN void nxgl_copyrectangle_1bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_copyrectangle_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *dest,
                                     FAR const void *src,
                                     FAR const struct nxgl_point_s *origin,
                                     unsigned int srcstride);
-EXTERN void nxgl_copyrectangle_2bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_copyrectangle_2bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *dest,
                                     FAR const void *src,
                                     FAR const struct nxgl_point_s *origin,
                                     unsigned int srcstride);
-EXTERN void nxgl_copyrectangle_4bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_copyrectangle_4bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *dest,
                                     FAR const void *src,
                                     FAR const struct nxgl_point_s *origin,
                                     unsigned int srcstride);
-EXTERN void nxgl_copyrectangle_8bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_copyrectangle_8bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *dest,
                                     FAR const void *src,
                                     FAR const struct nxgl_point_s *origin,
                                     unsigned int srcstride);
-EXTERN void nxgl_copyrectangle_16bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_copyrectangle_16bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *dest,
                                      FAR const void *src,
                                      FAR const struct nxgl_point_s *origin,
                                      unsigned int srcstride);
-EXTERN void nxgl_copyrectangle_24bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_copyrectangle_24bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *dest,
                                      FAR const void *src,
                                      FAR const struct nxgl_point_s *origin,
                                      unsigned int srcstride);
-EXTERN void nxgl_copyrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_copyrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *dest,
                                      FAR const void *src,
                                      FAR const struct nxgl_point_s *origin,

@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 
 #include <nuttx/lcd.h>
@@ -100,7 +101,7 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
   for (col = 0; col < ncols; col++)
     {
 #if NXGLIB_BITSPERPIXEL < 8
-#elif
+#else
       g_runbuffer
 #endif
     }

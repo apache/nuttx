@@ -484,6 +484,27 @@ EXTERN FAR struct fb_vtable_s *up_fbgetvplane(int vplane);
 EXTERN void fb_uninitialize(void);
 
 /****************************************************************************
+ * Name: up_lcdinitialize, up_lcdgetdev, up_lcduninitialize
+ *
+ * Description:
+ *   If an architecture supports a parallel or serial LCD, then it must
+ *   provide APIs to access the LCD as follows:
+ *
+ *   up_lcdinitialize   - Initialize the video hardware
+ *   up_lcdgetdev       - Return a a reference to the LCD object for
+ *                        the specified LCD.  This allows support for
+ *                        multiple LCD devices.
+ *   up_lcduninitialize - Unitialize the framebuffer support
+ *
+ ***************************************************************************/
+
+struct lcd_dev_s; /* See nuttx/lcd.h */
+
+EXTERN int up_lcdinitialize(void);
+EXTERN FAR struct lcd_dev_s *up_lcdgetdev(int lcdddev);
+EXTERN void up_lcduninitialize(void);
+
+/****************************************************************************
  * These are standard interfaces that are exported by the OS
  * for use by the architecture specific logic
  ****************************************************************************/

@@ -40,6 +40,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <nuttx/fb.h>
 

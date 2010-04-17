@@ -51,7 +51,12 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fb.h>
+#ifdef CONFIG_NX_LCDDRIVER
+#  include <nuttx/lcd.h>
+#else
+#  include <nuttx/fb.h>
+#endif
+
 #include <nuttx/arch.h>
 #include <nuttx/nx.h>
 #include <nuttx/nxtk.h>
@@ -60,8 +65,21 @@
 #include "nx_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+/* If not specified, assume that the hardware supports one video plane */
+
+#ifndef CONFIG_EXAMPLES_NX_VPLANE
+#  define CONFIG_EXAMPLES_NX_VPLANE 0
+#endif
+
+/* If not specified, assume that the hardware supports one LCD device */
+
+#ifndef CONFIG_EXAMPLES_NX_DEVNO
+#  define CONFIG_EXAMPLES_NX_DEVNO 0
+#endif
 
 /****************************************************************************
  * Private Types
@@ -398,9 +416,29 @@ static inline int nxeg_raise(NXEGWINDOW hwnd)
 #ifndef CONFIG_NX_MULTIUSER
 static inline int nxeg_suinitialize(void)
 {
-  FAR struct fb_vtable_s *fb;
+  FAR NX_DRIVERTYPE *dev;
   int ret;
 
+#ifdef CONFIG_NX_LCDDRIVER
+  /* Initialize the LCD device */
+
+  message("nxeg_initialize: Initializing LCD\n");
+  ret = up_lcdinitialize();
+  if (ret < 0)
+    {
+      message("nxeg_initialize: up_lcdinitialize failed: %d\n", -ret);
+      g_exitcode = NXEXIT_LCDINITIALIZE;
+      return ERROR;
+    }
+
+  dev = up_lcdgetdev(CONFIG_EXAMPLES_NX_DEVNO);
+  if (!dev)
+    {
+      message("nxeg_initialize: up_lcdgetdev failed, devno=%d\n", CONFIG_EXAMPLES_NX_DEVNO);
+      g_exitcode = NXEXIT_LCDGETDEV;
+      return ERROR;
+    }
+#else
   /* Initialize the frame buffer device */
 
   message("nxeg_initialize: Initializing framebuffer\n");
@@ -412,18 +450,19 @@ static inline int nxeg_suinitialize(void)
       return ERROR;
     }
 
-  fb = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE);
-  if (!fb)
+  dev = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE);
+  if (!dev)
     {
       message("nxeg_initialize: up_fbgetvplane failed, vplane=%d\n", CONFIG_EXAMPLES_NX_VPLANE);
       g_exitcode = NXEXIT_FBGETVPLANE;
       return ERROR;
     }
+#endif
 
   /* Then open NX */
 
   message("nxeg_initialize: Open NX\n");
-  g_hnx = nx_open(fb);
+  g_hnx = nx_open(dev);
   if (!g_hnx)
     {
       message("user_start: nx_open failed: %d\n", errno);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nx/nx_internal.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -192,6 +192,8 @@ enum exitcode_e
   NXEXIT_PTHREADCREATE,
   NXEXIT_FBINITIALIZE,
   NXEXIT_FBGETVPLANE,
+  NXEXIT_LCDINITIALIZE,
+  NXEXIT_LCDGETDEV,
   NXEXIT_NXOPEN,
   NXEXIT_NXOPENTOOLBAR,
   NXEXIT_NXCONNECT,
