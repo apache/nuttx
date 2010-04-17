@@ -84,17 +84,17 @@ struct nxbe_plane_s
 {
   /* Raster operation callbacks for this bits-per-pixel value */
 
-  void (*fillrectangle)(FAR struct fb_planeinfo_s *pinfo,
+  void (*fillrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_rect_s *rect,
                         nxgl_mxpixel_t color);
-  void (*filltrapezoid)(FAR struct fb_planeinfo_s *pinfo,
+  void (*filltrapezoid)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_trapezoid_s *trap,
                         FAR const struct nxgl_rect_s *bounds,
                         nxgl_mxpixel_t color);
-  void (*moverectangle)(FAR struct fb_planeinfo_s *pinfo,
+  void (*moverectangle)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_rect_s *rect,
                         FAR struct nxgl_point_s *offset);
-  void (*copyrectangle)(FAR struct fb_planeinfo_s *pinfo,
+  void (*copyrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_rect_s *dest,
                         FAR const void *src,
                         FAR const struct nxgl_point_s *origin,
@@ -102,7 +102,7 @@ struct nxbe_plane_s
 
   /* Framebuffer plane info describing destination video plane */
 
-  struct fb_planeinfo_s pinfo;
+  NX_PLANEINFOTYPE pinfo;
 };
 
 /* Clipping *****************************************************************/
