@@ -46,6 +46,7 @@
 #include <nuttx/nxglib.h>
 
 #include "nxglib_bitblit.h"
+#include "nxglib_fillrun.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -91,161 +92,137 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
   FAR const struct nxgl_rect_s *bounds,
   nxgl_mxpixel_t color)
 {
-  unsigned int stride;
-  unsigned int width;
-  FAR uint8_t *line;
-  int nrows;
-  b16_t x1;
-  b16_t x2;
-  nxgl_coord_t y1;
-  nxgl_coord_t y2;
-  b16_t dx1dy;
-  b16_t dx2dy;
+  unsigned int ncols;
+  unsigned int dy;
+  unsigned int topy;
+  unsigned int boty;
+  unsigned int row;
+  unsigned int botw;
+  b16_t        topx1;
+  b16_t        topx2;
+  b16_t        botx1;
+  b16_t        botx2;
+  b16_t        dx1dy;
+  b16_t        dx2dy;
+  int          ix1;
+  int          ix2;
 
-#if NXGLIB_BITSPERPIXEL < 8
-  FAR uint8_t *dest;
-  uint8_t mpixel = NXGL_MULTIPIXEL(color);
-  uint8_t mask;
-  int lnlen;
-#endif
+  /* Get the top run endpoints */
 
-  /* Get the width of the framebuffer in bytes */
-
-  stride = pinfo->stride;
-
-  /* Get the top run position and the number of rows to draw */
-
-  x1 = trap->top.x1;
-  x2 = trap->top.x2;
+  topx1 = trap->top.x1;
+  topx2 = trap->top.x2;
 
   /* Calculate the number of rows to render */
 
-  y1    = trap->top.y;
-  y2    = trap->bot.y;
-  nrows = y2 - y1 + 1;
+  topy  = trap->top.y;
+  boty  = trap->bot.y;
+
+  /* Get the bottom run endpoints */
+
+  botx1  = trap->bot.x1;
+  botx2  = trap->bot.x2;
 
   /* Calculate the slope of the left and right side of the trapezoid */
 
-  dx1dy = b16divi((trap->bot.x1 - x1), nrows - 1);
-  dx2dy = b16divi((trap->bot.x2 - x2), nrows - 1);
+  dy    = boty - topy;
+  dx1dy = b16divi((botx1 - topx1), dy);
+  dx2dy = b16divi((botx2 - topx2), dy);
 
   /* Perform vertical clipping */
 
-  if (y1 < bounds->pt1.y)
+  if (topy < bounds->pt1.y)
     {
       /* Calculate the x values for the new top run */
 
-      int dy = bounds->pt1.y - y1;
-      x1    += dy * dx1dy;
-      x2    += dy * dx2dy;
+      dy      = bounds->pt1.y - topy;
+      topx1  += dy * dx1dy;
+      topx2  += dy * dx2dy;
 
-      /* Clip and re-calculate the number of rows to render */
+      /* Clip the top row to render */
 
-      y1     = bounds->pt1.y;
-      nrows  = y2 - y1 + 1;
+      topy    = bounds->pt1.y;
     }
 
-  if (y2 > bounds->pt2.y)
+  if (boty > bounds->pt2.y)
     {
-      /* Clip and re-calculate the number of rows to render */
+      /* Calculate the x values for the new bottom run */
 
-      y2     = bounds->pt2.y;
-      nrows  = y2 - y1 + 1;
+      dy      = boty - bounds->pt2.y;
+      botx1  -= dy * dx1dy;
+      botx2  -= dy * dx2dy;
+
+      /* Clip the bottom row to render */
+
+      boty    = bounds->pt2.y;
     }
 
-  /* Get the address of the first byte on the first line */
+  /* Break out now if it was completely clipped */
 
-  line = pinfo->fbmem + y1 * stride ;
+  if (topy > boty)
+    {
+      return;
+    }
+
+  /* Handle the special case where the sides cross (as in an hourglass) */
+
+  if (botx1 > botx2)
+    {
+      b16_t tmp;
+      ngl_swap(botx1, botx2, tmp);
+    }
+
+  /* Fill the run buffer for the maximum run that we will need */
+
+  ix1    = ngl_clipl(b16toi(topx1), bounds->pt1.x);
+  ix2    = ngl_clipl(b16toi(topx2), bounds->pt2.x);
+  ncols  = ix2 - ix1 + 1;
+
+  ix1    = ngl_clipl(b16toi(botx1), bounds->pt1.x);
+  ix2    = ngl_clipl(b16toi(botx2), bounds->pt2.x);
+  botw   = ix2 - ix1 + 1;
+
+  if (ncols < botw)
+    {
+      ncols = botw;
+    }
+
+  NXGL_FUNCNAME(nxgl_fillrun,NXGLIB_SUFFIX)((NXGLIB_RUNTYPE*)pinfo->buffer, color, ncols);
 
   /* Then fill the trapezoid line-by-line */
 
-  while (nrows--)
+  for (row = topy; row <= boty; row++)
     {
-      int ix1;
-      int ix2;
-
       /* Handle the special case where the sides cross (as in an hourglass) */
 
-      if (x1 > x2)
+      if (topx1 > topx2)
         {
           b16_t tmp;
-          ngl_swap(x1, x2, tmp);
+          ngl_swap(topx1, topx2, tmp);
           ngl_swap(dx1dy, dx2dy, tmp);
         }
 
-      /* Convert the positions to integer and get the run width */
+      /* Convert the positions to integer and get the run width,
+       * clipping to fit within the bounding box.
+       */
 
-      ix1   = b16toi(x1);
-      ix2   = b16toi(x2);
-      width = ix2 - ix1 + 1;
+      ix1 = ngl_clipl(b16toi(topx1), bounds->pt1.x);
+      ix2 = ngl_clipl(b16toi(topx2), bounds->pt2.x);
 
       /* Handle some corner cases where we draw nothing.  Otherwise, we will
        * always draw at least one pixel.
        */
 
-      if (x1 > x2 || ix2 < bounds->pt1.x || ix1 > bounds->pt2.x)
+      if (ix1 <= ix2)
         {
-          /* Get a clipped copies of the starting and ending X positions.  This
-           * clipped truncates "down" and gives the quantized pixel holding the
-           * fractional X position
-           */
+          /* Then draw the run from ix1 to ix2 at row */
 
-          ix1 = ngl_clipl(ix1, bounds->pt1.x);
-          ix2 = ngl_clipr(ix2, bounds->pt2.x);
-
-#if NXGLIB_BITSPERPIXEL < 8
-          /* Handle masking of the fractional initial byte */
-
-#ifdef CONFIG_NX_PACKEDMSFIRST
-          mask  = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(ix1));
-#else
-          mask  = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(ix1)));
-#endif
-          dest  = line;
-          lnlen = width;
-
-          if (lnlen > 1 && mask)
-            {
-              dest[0] = (dest[0] & ~mask) | (mpixel & mask);
-              mask = 0xff;
-              dest++;
-              lnlen--;
-            }
-
-          /* Handle masking of the fractional final byte */
-
-#ifdef CONFIG_NX_PACKEDMSFIRST
-          mask &= (uint8_t)(0xff << (8 - NXGL_REMAINDERX(ix2)));
-#else
-          mask &= (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(ix2)));
-#endif
-          if (lnlen > 0 && mask)
-            {
-              dest[lnlen-1] = (dest[lnlen-1] & ~mask) | (mpixel & mask);
-              lnlen--;
-            }
-
-          /* Handle all of the unmasked bytes in-between */
-
-          if (lnlen > 0)
-            {
-              NXGL_MEMSET(dest, (NXGL_PIXEL_T)color, lnlen);
-            }
-
-#else
-          /* Then draw the run from (line + ix1) to (line + ix2) */
-
-          NXGL_MEMSET(line + NXGL_SCALEX(ix1), (NXGL_PIXEL_T)color, width);
-#endif
+          ncols = ix2 - ix1 + 1;
+          (void)pinfo->putrun(row, ix1, pinfo->buffer, ncols);
         }
-
-      /* Move to the start of the next line */
-
-      line += stride;
 
       /* Add the dx/dy value to get the run positions on the next row */
 
-      x1   += dx1dy;
-      x2   += dx2dy;
+      topx1 += dx1dy;
+      topx2 += dx2dy;
     }
 }
