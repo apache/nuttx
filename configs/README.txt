@@ -518,6 +518,10 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NX_PACKEDMSFIRST
 		  If a pixel depth of less than 8-bits is used, then NX needs
 		  to know if the pixels pack from the MS to LS or from LS to MS
+		CONFIG_NX_LCDDRIVER
+		  By default, NX builds to use a framebuffer driver (see
+		  include/nuttx/fb.h). If this option is defined, NX will
+		  build to use an LCD driver (see include/nuttx/lcd.h).
 		CONFIG_NX_MOUSE
 		  Build in support for mouse input.
 		CONFIG_NX_KBD

@@ -2355,6 +2355,12 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
     {
       fdbg("WARN: Failed to set wide bus operation: %d\n", ret);
     }
+
+  /* TODO: If widebus selected, then send CMD6 to see if the card supports
+   * high speed mode.  A new SDIO method will be needed to set high speed
+   * mode.
+   */
+
   return OK;
 }
 

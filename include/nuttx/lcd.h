@@ -52,11 +52,25 @@
  ****************************************************************************/
 
 /* This structure describes one color plane.  Some YUV formats may support
- * up to 4 planes
+ * up to 4 planes (although they probably wouldn't be used on LCD hardware).
+ * The framebuffer driver provides the video memory address in its
+ * corresponding fb_planeinfo_s structure.  The LCD driver, instead, provides
+ * methods to transfer data to/from the LCD color plane.
  */
 
 struct lcd_planeinfo_s
 {
+  /* LCD Data Transfer ******************************************************/
+
+  int (*putrun)(struct lcd_dev_s *dev, unsigned int planeno,
+                fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+                size_t npixels);
+  int (*getrun)(struct lcd_dev_s *dev, unsigned int planeno,
+                fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+                size_t npixels);
+
+  /* Plane color characteristics ********************************************/
+
   uint8_t bpp; /* Bits per pixel */
 };
 
@@ -117,12 +131,6 @@ struct lcd_dev_s
   /* Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST) */
 
   int (*setcontrast)(struct lcd_dev_s *dev, unsigned int contrast);
-
-  /* LCD Data Transfer ******************************************************/
-
-  int (*run)(struct lcd_dev_s *dev, unsigned int planeno,
-             fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-             size_t npixels);
 };
 
 /****************************************************************************

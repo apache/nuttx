@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: December 16, 2008</p>
+      <p>Last Updated: April 16, 2010</p>
     </td>
   </tr>
 </table>
@@ -2606,6 +2606,10 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>CONFIG_NX_PACKEDMSFIRST</code>:
       <dd>If a pixel depth of less than 8-bits is used, then NX needs
       to know if the pixels pack from the MS to LS or from LS to MS
+    <dt><code>CONFIG_NX_LCDDRIVER</code>:
+      <dd>By default, NX builds to use a framebuffer driver (see <code>include/nuttx/fb.h</code>).
+      If this option is defined, NX will build to use an LCD driver (see <code>include/nuttx/lcd.h</code>).
+  </li>
   </dl>
 </ul>
 
