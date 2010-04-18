@@ -138,9 +138,18 @@
 #define SAM3UEK_BPP          16
 #define SAM3UEK_RGBFMT       FB_FMT_RGB16_565
 
+/* HX834x register select */
+
+#define HX843X_LCD_RS        (1 << 1)
+
 /**************************************************************************************
  * Private Function Protototypes
  **************************************************************************************/
+
+/* Low-level HX834x Register access */
+
+static void sam3u_putreg(uint16_t reg,  uint16_t data);
+static uint16_t sam3u_getreg(uint16_t reg);
 
 /* LCD Data Transfer Methods */
 
@@ -176,7 +185,7 @@ static int sam3u_getcontrast(struct lcd_dev_s *dev);
 static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
 /**************************************************************************************
- * Private Function Protototypes
+ * Private Data
  **************************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
@@ -235,6 +244,34 @@ static struct lcd_dev_s g_lcddev_s =
 /**************************************************************************************
  * Private Functions
  **************************************************************************************/
+
+/**************************************************************************************
+ * Name:  sam3u_putreg
+ *
+ * Description:
+ *   Write to a HX834x register
+ *
+ **************************************************************************************/
+
+static void sam3u_putreg(uint16_t reg,  uint16_t data)
+{
+  putreg16(reg, LCD_BASE);
+  putreg16(data, LCD_BASE + HX843X_LCD_RS);
+}
+
+/**************************************************************************************
+ * Name:  sam3u_getreg
+ *
+ * Description:
+ *   Read from a HX834x register
+ *
+ **************************************************************************************/
+
+static uint16_t sam3u_getreg(uint16_t reg)
+{
+  putreg16(reg, LCD_BASE);
+  return getreg16(LCD_BASE + HX843X_LCD_RS);
+}
 
 /**************************************************************************************
  * Name:  sam3u_putrun
