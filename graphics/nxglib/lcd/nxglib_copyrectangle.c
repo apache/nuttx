@@ -40,11 +40,13 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 #include <nuttx/lcd.h>
 #include <nuttx/nxglib.h>
 
 #include "nxglib_bitblit.h"
+#include "nxglib_copyrun.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -85,89 +87,55 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
  unsigned int srcstride)
 {
   FAR const uint8_t *sline;
-  unsigned int width;
-  unsigned int rows;
-
+  unsigned int ncols;
+  unsigned int row;
+  unsigned int xoffset;
 #if NXGLIB_BITSPERPIXEL < 8
-  FAR const uint8_t *sptr;
-  FAR uint8_t *dptr;
-  uint8_t leadmask;
-  uint8_t tailmask;
-  uint8_t mask;
-  int lnlen;
+  unsigned int remainder;
 #endif
 
   /* Get the dimensions of the rectange to fill: width in pixels,
    * height in rows
    */
 
-  width = dest->pt2.x - dest->pt1.x + 1;
-  rows  = dest->pt2.y - dest->pt1.y + 1;
+  ncols = dest->pt2.x - dest->pt1.x + 1;
 
+  /* Set up to copy the image */
+
+  xoffset = dest->pt1.x - origin->x;
+  sline = (const uint8_t*)src + NXGL_SCALEX(xoffset) + (dest->pt1.y - origin->y) * srcstride;
 #if NXGLIB_BITSPERPIXEL < 8
-# ifdef CONFIG_NX_PACKEDMSFIRST
-
-  /* Get the mask for pixels that are ordered so that they pack from the
-   * MS byte down.
-   */
-
-  leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt2.x-1)));
-# else
-  /* Get the mask for pixels that are ordered so that they pack from the
-   * LS byte up.
-   */
-
-  leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(dest->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(dest->pt1.x-1)));
-# endif
+  remainder = NXGL_REMAINDERX(xoffset);
 #endif
 
-  /* Then copy the image */
+  /* Copy the image, one row at a time */
 
-  sline = (const uint8_t*)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
-  dline = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
-
-  while (rows--)
+  for (row = dest->pt1.y; row < dest->pt2.y; row++)
     {
 #if NXGLIB_BITSPERPIXEL < 8
-     /* Handle masking of the fractional initial byte */
+      /* if the source pixel is not aligned with a byte boundary, then we will
+       * need to copy the image data to the run buffer first.
+       */
 
-     mask  = leadmask;
-     sptr  = sline;
-     dptr  = dline;
-     lnlen = width;
-
-     if (lnlen > 1 && mask)
+      if (remainder != 0)
         {
-          dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
-          mask = 0xff;
-          dptr++;
-          sptr++;
-          lnlen--;
+          NXGL_FUNCNAME(nxgl_copyrun,NXGLIB_SUFFIX)(sline, pinfo->buffer, remainder, ncols);
+          (void)pinfo->putrun(row, dest->pt1.x, pinfo->buffer, ncols);
         }
-
-      /* Handle masking of the fractional final byte */
-
-      mask &= tailmask;
-      if (lnlen > 0 && mask)
-        {
-          dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
-          lnlen--;
-        }
-
-      /* Handle all of the unmasked bytes in-between */
-
-      if (lnlen > 0)
-        {
-          NXGL_MEMCPY(dptr, sptr, lnlen);
-        }
-#else
-      /* Copy the whole line */
-
-      NXGL_MEMCPY((NXGL_PIXEL_T*)dline, (NXGL_PIXEL_T*)sline, width);
+      else
 #endif
-      dline += deststride;
+        {
+          /* The pixel data is byte aligned.  Copy the image data directly from
+           * the image memory.
+           */
+
+          (void)pinfo->putrun(row, dest->pt1.x, sline, ncols);
+        }
+
+      /* Then adjust the source pointer to refer to the next line in the source
+       * image.
+       */
+
       sline += srcstride;
     }
 }

@@ -78,14 +78,14 @@
  *
  ****************************************************************************/
 
-int nxbe_configure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
+int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 {
   int ret;
   int i;
 
   /* Get the video controller configuration */
 
-  ret = fb->getvideoinfo(fb, &be->vinfo);
+  ret = dev->getvideoinfo(dev, &be->vinfo);
   if (ret < 0)
     {
       gdbg("Failed to get vinfo\n");
@@ -112,7 +112,7 @@ int nxbe_configure(FAR struct fb_vtable_s *fb, FAR struct nxbe_state_s *be)
 
   for (i = 0; i < be->vinfo.nplanes; i++)
     {
-      ret = fb->getplaneinfo(fb, i, &be->plane[i].pinfo);
+      ret = dev->getplaneinfo(dev, i, &be->plane[i].pinfo);
       if (ret < 0)
         {
           gdbg("Failed to get pinfo[%d]\n", i);

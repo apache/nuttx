@@ -79,10 +79,11 @@
 #if NXGLIB_BITSPERPIXEL == 1
 static inline void
 nxgl_copyrun_1bpp(FAR const uint8_t *src, FAR uint8_t *dest,
-                  unsigned int inbit, size_t npixels)
+                  unsigned int remainder, size_t npixels)
 {
   uint8_t indata;
   uint8_t outdata;
+  uint8_t nextdata;
   unsigned int outpixels = 0;
 
   DEBUGASSERT(remainder > 0 && remainder < 8);
@@ -166,10 +167,11 @@ nxgl_copyrun_1bpp(FAR const uint8_t *src, FAR uint8_t *dest,
 #elif NXGLIB_BITSPERPIXEL == 2
 static inline void
 nxgl_copyrun_2bpp(FAR const uint8_t *src, FAR uint8_t *dest,
-                  unsigned int inbit, size_t npixels)
+                  unsigned int remainder, size_t npixels)
 {
   uint8_t indata;
   uint8_t outdata;
+  uint8_t nextdata;
   unsigned int outpixels = 0;
   unsigned int shift;
 
@@ -255,10 +257,11 @@ nxgl_copyrun_2bpp(FAR const uint8_t *src, FAR uint8_t *dest,
 #elif NXGLIB_BITSPERPIXEL == 4
 static inline void
 nxgl_copyrun_4bpp(FAR const uint8_t *src, FAR uint8_t *dest,
-                  unsigned int inbit, size_t npixels)
+                  unsigned int remainder, size_t npixels)
 {
   uint8_t indata;
   uint8_t outdata;
+  uint8_t nextdata;
   unsigned int outpixels = 0;
 
   DEBUGASSERT(remainder == 1);
@@ -269,7 +272,6 @@ nxgl_copyrun_4bpp(FAR const uint8_t *src, FAR uint8_t *dest,
    */
 
   indata = *src++;
-  shift  = (remainder << 1);
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
   /* If CONFIG_NX_PACKEDMSFIRST is defined, then bits 0-3
@@ -317,8 +319,8 @@ nxgl_copyrun_4bpp(FAR const uint8_t *src, FAR uint8_t *dest,
        *   src      = BBBB CCCC  - nextdata = CCCC xxxx
        */
 
-       outdata |= (indata >> 4);
-       nextdata = (indata << 4);
+      outdata |= (indata >> 4);
+      nextdata = (indata << 4);
 #else
       /* If CONFIG_NX_PACKEDMSFIRST is NOT defined, then bits 0-(remainder-1)
        * are carried over from that last pass through the loop (or are
@@ -328,8 +330,8 @@ nxgl_copyrun_4bpp(FAR const uint8_t *src, FAR uint8_t *dest,
        *   src      = CCCC CCBB  - nextdata = xxCC CCCC
        */
 
-       outdata |= (indata << 4);
-       nextdata = (indata >> 4);
+      outdata |= (indata << 4);
+      nextdata = (indata >> 4);
 #endif
 
       /* Transfer the byte to the run buffer */

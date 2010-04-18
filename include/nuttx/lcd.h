@@ -93,6 +93,10 @@ struct lcd_planeinfo_s
    * The size of the allocated run buffer must therefor be at least
    * (bpp * xres / 8).  Actual alignment of the buffer must conform to the
    * bitwidth of the underlying pixel type.
+   *
+   * If there are multiple planes, they may share the same working buffer
+   * because different planes will not be operate on concurrently.  However,
+   * if there are multiple LCD devices, they must each have unique run buffers.
    */
 
   uint8_t *buffer; 
