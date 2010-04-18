@@ -114,8 +114,8 @@ struct lcd_planeinfo_s
 struct lcd_dev_s
 {
   /* LCD Configuration ******************************************************/
-  /* Get information about the video controller configuration and the
-   * configuration of each color plane.
+  /* Get information about the LCD video controller configuration and the
+   * configuration of each LCD color plane.
    */
 
   int (*getvideoinfo)(FAR struct lcd_dev_s *dev,
