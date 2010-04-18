@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fb.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -184,8 +184,8 @@ typedef uint16_t fb_coord_t;
 struct fb_videoinfo_s
 {
  uint8_t    fmt;          /* see FB_FMT_*  */
- fb_coord_t xres;         /* Resolution in pixels */
- fb_coord_t yres;
+ fb_coord_t xres;         /* Horizontal resolution in pixel columns */
+ fb_coord_t yres;         /* Vertical resolution in pixel rows */
  uint8_t    nplanes;      /* Number of color planes supported */
 };
 

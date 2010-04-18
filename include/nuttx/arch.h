@@ -469,7 +469,7 @@ EXTERN void up_udelay(useconds_t microseconds);
  *   If an architecture supports a framebuffer, then it must provide APIs
  *   to access the framebuffer as follows:
  *
- *   up_fbinitialize   - Initialize the video hardware
+ *   up_fbinitialize   - Initialize the framebuffer video hardware
  *   up_fbgetvplane    - Return a a reference to the framebuffer object for
  *                       the specified video plane.  Most OSDs support
  *                       multiple planes of video.
@@ -490,11 +490,11 @@ EXTERN void fb_uninitialize(void);
  *   If an architecture supports a parallel or serial LCD, then it must
  *   provide APIs to access the LCD as follows:
  *
- *   up_lcdinitialize   - Initialize the video hardware
+ *   up_lcdinitialize   - Initialize the LCD video hardware
  *   up_lcdgetdev       - Return a a reference to the LCD object for
  *                        the specified LCD.  This allows support for
  *                        multiple LCD devices.
- *   up_lcduninitialize - Unitialize the framebuffer support
+ *   up_lcduninitialize - Unitialize the LCD support
  *
  ***************************************************************************/
 

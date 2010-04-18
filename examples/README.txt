@@ -100,6 +100,8 @@ examples/nx
 
     CONFIG_EXAMPLES_NX_VPLANE -- The plane to select from the frame-
       buffer driver for use in the test.  Default: 0
+    CONFIG_EXAMPLES_NX_DEVNO - The LCD device to select from the LCD
+      driver for use in the test: Default: 0
     CONFIG_EXAMPLES_NX_BGCOLOR -- The color of the background.  Default depends on
       CONFIG_EXAMPLES_NX_BPP.
     CONFIG_EXAMPLES_NX_COLOR1 -- The color of window 1. Default depends on

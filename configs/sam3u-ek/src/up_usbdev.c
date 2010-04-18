@@ -1,8 +1,8 @@
 /************************************************************************************
  * configs/sam3u-ek/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * arch/arm/src/board/up_usbdev.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
