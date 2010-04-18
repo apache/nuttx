@@ -12,7 +12,7 @@ NuttX TODO List (Last updated April 18, 2010)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (2)  Graphics subystem (graphics/)
+  (3)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (6)  Build system / Toolchains
@@ -409,6 +409,12 @@ o Graphics subystem (graphics/)
                http://nuttx.sourceforge.net/NXGraphicsSubsystem.html#testcoverage
   Status:      Open
   Priority:    Medium
+
+  Description: There is an issue with building NXGL on some newer tool chains
+               (gcc-4.2.2).  The is s problem with the way that the isystem option
+               works with the -E option.  See the full description under Build
+  Status:      Open
+  Priority:    This is a duplicate of an issue addressed under Build problems.
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^

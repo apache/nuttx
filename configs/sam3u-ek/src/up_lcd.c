@@ -43,8 +43,8 @@
  *  -------------------------------------------- --------------------------------------
  *   Pin Symbol Function                         LCD            PeriphA  PeriphB Extra
  *  ---- ------ -------------------------------- -------------- -------- ------- ------
- *   1   GND    Ground
- *   2   CS     Chip Select
+ *   1   GND    Ground                           N/A            ---      ---     ---
+ *   2   CS     Chip Select                      PC16           NCS2     PWML3   AD12BAD5
  *   3   RS     Register select signal           PB8 (see A1)   CTS0     A1      AD3
  *   4   WR     Write operation signal           PB23 (NWE)     NWR0/NEW PCK1    ---
  *   5   RD     Read operation signal            PB19 (NRD)     NRD      PWML2   ---
@@ -372,6 +372,33 @@ static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
 int up_lcdinitialize(void)
 {
+  /* Enable LCD EXTCS2 pins */
+
+  sam3u_configgpio(GPIO_LCD_NCS2);
+  sam3u_configgpio(GPIO_LCD_RS);
+  sam3u_configgpio(GPIO_LCD_NWE);
+  sam3u_configgpio(GPIO_LCD_NRD);
+
+  sam3u_configgpio(GPIO_LCD_D0);
+  sam3u_configgpio(GPIO_LCD_D1);
+  sam3u_configgpio(GPIO_LCD_D2);
+  sam3u_configgpio(GPIO_LCD_D3);
+  sam3u_configgpio(GPIO_LCD_D4);
+  sam3u_configgpio(GPIO_LCD_D5);
+  sam3u_configgpio(GPIO_LCD_D6);
+  sam3u_configgpio(GPIO_LCD_D7);
+  sam3u_configgpio(GPIO_LCD_D8);
+  sam3u_configgpio(GPIO_LCD_D9);
+  sam3u_configgpio(GPIO_LCD_D10);
+  sam3u_configgpio(GPIO_LCD_D11);
+  sam3u_configgpio(GPIO_LCD_D12);
+  sam3u_configgpio(GPIO_LCD_D13);
+  sam3u_configgpio(GPIO_LCD_D14);
+  sam3u_configgpio(GPIO_LCD_D15);
+
+  /* Configure LCD Backlight Pin */
+
+  sam3u_configgpio(GPIO_LCD_D15);
   return -ENOSYS;
 }
 
