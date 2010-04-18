@@ -82,12 +82,12 @@
 #define FB_FMT_RGBRAW      11          /* BPP=? */
 
 /* Raw RGB with arbitrary sample packing within a pixel. Packing and precision
- * ov R, G and B components is determined by bit masks for each.
+ * of R, G and B components is determined by bit masks for each.
  */
 
 #define FB_FMT_RGBBTFLD16  12          /* BPP=16 */
 #define FB_FMT_RGBBTFLD24  13          /* BPP=24 */
-#define FB_FMT_RGBBTFLD24  14          /* BPP=32 */
+#define FB_FMT_RGBBTFLD32  14          /* BPP=32 */
 #define FB_FMT_RGBA16      15          /* BPP=16 Raw RGB with alpha */
 #define FB_FMT_RGBA32      16          /* BPP=32 Raw RGB with alpha */
 
