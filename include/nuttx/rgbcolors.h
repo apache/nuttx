@@ -1,0 +1,171 @@
+/****************************************************************************
+ * include/nuttx/rgbcolors.h
+ * User-friendly RGB color definitions
+ *
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+#ifndef __INCLUDE_NUTTX_RGBCOLOR_H
+#define __INCLUDE_NUTTX_RGBCOLOR_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+/****************************************************************************
+ * Pre-Processor Definitions
+ ****************************************************************************/
+
+/* Color conversions.  This macros converts RGB24 (8:8:8) to RGB16 (5:6:5):
+ *
+ *   00000000 RRRRRRRR BBBBBBBB GGGGGGGG -> RRRRRBBB BBBGGGGG
+ */
+
+#define RGB24TO16(rgb24) \
+  (((rgb24 >> 8) & 0xf800) | ((rgb24 >> 5) & 0x07e0) | ((rgb24 >> 3) & 0x001f))
+
+/* This macros converts RGB16 (5:6:5) to RGB24 (8:8:8):
+ *
+ *   RRRRRBBB BBBGGGGG -> 00000000 RRRRRRRR BBBBBBBB GGGGGGGG
+ */
+
+#define RGB16TO24(rgb16) \
+  (((rgb16 & 0xf800) << 8) | ((rgb16 & 0x07e0) << 5)  | ((rgb16 & 0x001f) << 3))
+
+/* RGB24-888: 00000000 RRRRRRRR GGGGGGGG BBBBBBBB */
+
+#define RGB24_BLACK          0x00000000
+#define RGB24_WHITE          0x00ffffff
+
+#define RGB24_BLUE           0x000000ff
+#define RGB24_GREEN          0x0000ff00
+#define RGB24_RED            0x00ff0000
+
+#define RGB24_NAVY           0x00000080
+#define RGB24_DARKBLUE       0x0000008b
+#define RGB24_DARKGREEN      0x00006400
+#define RGB24_DARKCYAN       0x00008b8b
+#define RGB24_CYAN           0x0000ffff
+#define RGB24_TURQUOISE      0x0040e0d0
+#define RGB24_INDIGO         0x004b0082
+#define RGB24_DARKRED        0x00800000
+#define RGB24_OLIVE          0x00808000
+#define RGB24_GRAY           0x00808080
+#define RGB24_SKYBLUE        0x0087ceeb
+#define RGB24_BLUEVIOLET     0x008a2be2
+#define RGB24_LIGHTGREEN     0x0090ee90
+#define RGB24_DARKVIOLET     0x009400d3
+#define RGB24_YELLOWGREEN    0x009acd32
+#define RGB24_BROWN          0x00a52a2a
+#define RGB24_DARKGRAY       0x00a9a9a9
+#define RGB24_SIENNA         0x00a0522d
+#define RGB24_LIGHTBLUE      0x00add8e6
+#define RGB24_GREENYELLOW    0x00adff2f
+#define RGB24_SILVER         0x00c0c0c0
+#define RGB24_LIGHTGREY      0x00d3d3d3
+#define RGB24_LIGHTCYAN      0x00e0ffff
+#define RGB24_VIOLET         0x00ee82ee
+#define RGB24_AZUR           0x00f0ffff
+#define RGB24_BEIGE          0x00f5f5dc
+#define RGB24_MAGENTA        0x00ff00ff
+#define RGB24_TOMATO         0x00ff6347
+#define RGB24_GOLD           0x00ffd700
+#define RGB24_ORANGE         0x00ffa500
+#define RGB24_SNOW           0x00fffafa
+#define RGB24_YELLOW         0x00ffff00
+
+/* RGB24-565: RRRRRGGG GGGBBBBB */
+
+#define RGB16_BLACK          0x0000
+#define RGB16_WHITE          0xffff
+
+#define RGB16_BLUE           0x001f
+#define RGB16_GREEN          0x07e0
+#define RGB16_RED            0xf800
+
+#define RGB16_NAVY           0x0010
+#define RGB16_DARKBLUE       0x0011
+#define RGB16_DARKGREEN      0x0320
+#define RGB16_DARKCYAN       0x0451
+#define RGB16_CYAN           0x07ff
+#define RGB16_TURQUOISE      0x471a
+#define RGB16_INDIGO         0x4810
+#define RGB16_DARKRED        0x8000
+#define RGB16_OLIVE          0x8400
+#define RGB16_GRAY           0x8410
+#define RGB16_SKYBLUE        0x867d
+#define RGB16_BLUEVIOLET     0x895c
+#define RGB16_LIGHTGREEN     0x9772
+#define RGB16_DARKVIOLET     0x901a
+#define RGB16_YELLOWGREEN    0x9e66
+#define RGB16_BROWN          0xa145
+#define RGB16_DARKGRAY       0xad55
+#define RGB16_SIENNA         0xa285
+#define RGB16_LIGHTBLUE      0xaedc
+#define RGB16_GREENYELLOW    0xafe5
+#define RGB16_SILVER         0xc618
+#define RGB16_LIGHTGREY      0xd69a
+#define RGB16_LIGHTCYAN      0xe7ff
+#define RGB16_VIOLET         0xec1d
+#define RGB16_AZUR           0xf7ff
+#define RGB16_BEIGE          0xf7bb
+#define RGB16_MAGENTA        0xf81f
+#define RGB16_TOMATO         0xfb08
+#define RGB16_GOLD           0xfea0
+#define RGB16_ORANGE         0xfd20
+#define RGB16_SNOW           0xffdf
+#define RGB16_YELLOW         0xffe0
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __INCLUDE_NUTTX_RGBCOLOR_H */
