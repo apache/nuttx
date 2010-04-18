@@ -296,6 +296,14 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  nsh:
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables both the serial and telnetd NSH interfaces.
+
+  nx
+    Configures to use examples/nx using the HX834x LCD hardwar on
+    the SAM3U-EK development board.
+
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are
