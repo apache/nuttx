@@ -1,4 +1,4 @@
-/************************************************************************************
+/**************************************************************************************
  * configs/sam3u-ek/src/up_lcd.c
  * arch/arm/src/board/up_lcd.c
  *
@@ -32,9 +32,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ **************************************************************************************/
 
-/* The SAM3U-EK developement board features a TFT/Transmissive color LCD module with
+/**************************************************************************************
+ * The SAM3U-EK developement board features a TFT/Transmissive color LCD module with
  * touch-screen, FTM280C12D, with integratd driver IC HX8346. The LCD display size
  * is 2.8 inches, with a native resolution of 240 x 320 pixels.
  *
@@ -101,17 +102,19 @@
  * MN5, ADS7843, which is a slave device on the SAM3U4E SPI bus. The ADS7843 touch
  * ADC auxiliary inputs IN3/IN4 are connected to test points for optional function
  * extension.
- */
+ *
+ **************************************************************************************/
 
-/************************************************************************************
+/**************************************************************************************
  * Included Files
- ************************************************************************************/
+ **************************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -121,9 +124,9 @@
 #include "sam3u_internal.h"
 #include "sam3uek_internal.h"
 
-/************************************************************************************
+/**************************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ **************************************************************************************/
 
 /* LCD resolution */
 
@@ -135,9 +138,9 @@
 #define SAM3UEK_BPP          16
 #define SAM3UEK_RGBFMT       FB_FMT_RGB16_565
 
-/************************************************************************************
+/**************************************************************************************
  * Private Function Protototypes
- ************************************************************************************/
+ **************************************************************************************/
 
 /* LCD Data Transfer Methods */
 
@@ -172,9 +175,9 @@ static int sam3u_setpower(struct lcd_dev_s *dev, int power);
 static int sam3u_getcontrast(struct lcd_dev_s *dev);
 static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
-/************************************************************************************
+/**************************************************************************************
  * Private Function Protototypes
- ************************************************************************************/
+ **************************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -210,14 +213,13 @@ static struct lcd_planeinfo_s g_planeinfo =
 };
 
 /* This is the standard, NuttX LCD driver object */
-* This structure defines an LCD interface */
 
 static struct lcd_dev_s g_lcddev_s = 
 {
   /* LCD Configuration */
  
   .getvideoinfo = sam3u_getvideoinfo,
-  .getplaneinfo = sam3u_getplaneinfo;
+  .getplaneinfo = sam3u_getplaneinfo,
 
   /* LCD RGB Mapping -- Not supported */
   /* Cursor Controls -- Not supported */
@@ -230,11 +232,11 @@ static struct lcd_dev_s g_lcddev_s =
   .setcontrast  = sam3u_setcontrast,
 };
 
-/************************************************************************************
+/**************************************************************************************
  * Private Functions
- ************************************************************************************/
+ **************************************************************************************/
 
-/************************************************************************************
+/**************************************************************************************
  * Name:  sam3u_putrun
  *
  * Description:
@@ -246,12 +248,15 @@ static struct lcd_dev_s g_lcddev_s =
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- ************************************************************************************/
+ **************************************************************************************/
 
 static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                        size_t npixels);
+                        size_t npixels)
+{
+  return -ENOSYS;
+}
 
-/************************************************************************************
+/**************************************************************************************
  * Name:  sam3u_getrun
  *
  * Description:
@@ -263,89 +268,134 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- ************************************************************************************/
+ **************************************************************************************/
 
 static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                        size_t npixels);
+                        size_t npixels)
+{
+  return -ENOSYS;
+}
 
-/************************************************************************************
- * Name:  sam3u_getrun
+/**************************************************************************************
+ * Name:  sam3u_getvideoinfo
  *
  * Description:
- *   This method can be used to read a partial raster line from the LCD:
+ *   Get information about the LCD video controller configuration.
  *
- *  row     - Starting row to read from (range: 0 <= row < yres)
- *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
- *  buffer  - The buffer in which to return the run read from the LCD
- *  npixels - The number of pixels to read from the LCD
- *            (range: 0 < npixels <= xres-col)
+ **************************************************************************************/
+
+static int sam3u_getvideoinfo(FAR struct lcd_dev_s *dev,
+                              FAR struct fb_videoinfo_s *vinfo)
+{
+  return -ENOSYS;
+}
+
+/**************************************************************************************
+ * Name:  sam3u_getplaneinfo
  *
- ************************************************************************************/
-  /* Get information about the video controller configuration and the
-   * configuration of each color plane.
-   */
+ * Description:
+ *   Get information about the configuration of each LCD color plane.
+ *
+ **************************************************************************************/
 
-static int sam3u_getvideoinfo(FAR struct lcd_dev_s *dev, FAR struct fb_videoinfo_s *vinfo);
-static int sam3u_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno, FAR struct lcd_planeinfo_s *pinfo);
+static int sam3u_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+                              FAR struct lcd_planeinfo_s *pinfo)
+{
+  return -ENOSYS;
+}
 
-  /* Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER:
-   * full on
-   */
+/**************************************************************************************
+ * Name:  sam3u_getpower
+ *
+ * Description:
+ *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER:
+ *   full on.
+ *
+ **************************************************************************************/
 
 static int sam3u_getpower(struct lcd_dev_s *dev)
 {
+  return -ENOSYS;
 }
 
-  /* Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWERL:
-   * full on)
-   */
+/**************************************************************************************
+ * Name:  sam3u_setpower
+ *
+ * Description:
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWERL:
+ *   full on).
+ *
+ **************************************************************************************/
 
-static int sam3u_setpower(struct lcd_dev_s *dev, int power);
+static int sam3u_setpower(struct lcd_dev_s *dev, int power)
+{
+  return -ENOSYS;
+}
 
-  /* Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST) */
+/**************************************************************************************
+ * Name:  sam3u_getcontrast
+ *
+ * Description:
+ *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
+ *
+ **************************************************************************************/
 
-static int sam3u_getcontrast(struct lcd_dev_s *dev);
+static int sam3u_getcontrast(struct lcd_dev_s *dev)
+{
+  return -ENOSYS;
+}
 
-  /* Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST) */
+/**************************************************************************************
+ * Name:  sam3u_getcontrast
+ *
+ * Description:
+ *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
+ *
+ **************************************************************************************/
 
-static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
+{
+  return -ENOSYS;
+}
 
-/************************************************************************************
+/**************************************************************************************
  * Public Functions
- ************************************************************************************/
+ **************************************************************************************/
 
-/************************************************************************************
+/**************************************************************************************
  * Name:  up_lcdinitialize
  *
  * Description:
  *   Initialize the LCD video hardware.
  *
- ************************************************************************************/
+ **************************************************************************************/
 
 int up_lcdinitialize(void)
 {
+  return -ENOSYS;
 }
 
-/************************************************************************************
+/**************************************************************************************
  * Name:  up_lcdgetdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows
  *   support for multiple LCD devices.
  *
- ************************************************************************************/
+ **************************************************************************************/
 
 FAR struct lcd_dev_s *up_lcdgetdev(int lcdddev)
 {
+  return NULL;
 }
 
-/************************************************************************************
+/**************************************************************************************
  * Name:  up_lcduninitialize
  *
  * Description:
  *   Unitialize the framebuffer support.
  *
- ************************************************************************************/
+ **************************************************************************************/
 
 void up_lcduninitialize(void)
 {
