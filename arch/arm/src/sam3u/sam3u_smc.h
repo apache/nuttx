@@ -125,11 +125,15 @@
 #define SAM3U_SMC_ECCPR15            (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR15_OFFSET)
 
 #define SAM3U_SMCCS_BASE(n)          (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(n))
-#define SAM3U_SMCCS_SETUP            (SAM3U_SMC_BASE+SAM3U_SMCCS_SETUP_OFFSET)
-#define SAM3U_SMCCS_PULSE            (SAM3U_SMC_BASE+SAM3U_SMCCS_PULSE_OFFSET)
-#define SAM3U_SMCCS_CYCLE            (SAM3U_SMC_BASE+SAM3U_SMCCS_CYCLE_OFFSET)
-#define SAM3U_SMCCS_TIMINGS          (SAM3U_SMC_BASE+SAM3U_SMCCS_TIMINGS_OFFSET)
-#define SAM3U_SMCCS_MODE             (SAM3U_SMC_BASE+SAM3U_SMCCS_MODE_OFFSET)
+#  define SAM3U_SMC_CS0_BASE         (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(0))
+#  define SAM3U_SMC_CS1_BASE         (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(1))
+#  define SAM3U_SMC_CS2_BASE         (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(2))
+#  define SAM3U_SMC_CS3_BASE         (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(3))
+#define SAM3U_SMCCS_SETUP(n)         (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_SETUP_OFFSET)
+#define SAM3U_SMCCS_PULSE(n)         (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_PULSE_OFFSET)
+#define SAM3U_SMCCS_CYCLE(n)         (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_CYCLE_OFFSET)
+#define SAM3U_SMCCS_TIMINGS(n)       (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_TIMINGS_OFFSET)
+#define SAM3U_SMCCS_MODE(n)          (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_MODE_OFFSET)
 
 #define SAM3U_SMC_OCMS               (SAM3U_SMC_BASE+SAM3U_SMC_OCMS_OFFSET)
 #define SAM3U_SMC_KEY1               (SAM3U_SMC_BASE+SAM3U_SMC_KEY1_OFFSET)
@@ -226,9 +230,9 @@
 
 /* SMC ECC Status Register 1 */
 
-_RECERR                              (0) /* Recoverable Error */
-_ECCERR                              (1) /* ECC Error */
-_MULERR                              (2) /* Multiple Error */
+#define _RECERR                      (0) /* Recoverable Error */
+#define _ECCERR                      (1) /* ECC Error */
+#define _MULERR                      (2) /* Multiple Error */
 
 #define SMC_ECCSR1_RECERR(n)         (1 << (((n)<<4)+_RECERR))
 #define SMC_ECCSR1_ECCERR(n)         (1 << (((n)<<4)+_ECCERR))
@@ -367,18 +371,29 @@ _MULERR                              (2) /* Multiple Error */
 
 /* SMC Mode Register */
 
-#define SMCCS_MODE_READMODE          (1 << 0)  /* Bit 0 */
-#define SMCCS_MODE_WRITEMODE         (1 << 1)  /* Bit 1 */
+#define SMCCS_MODE_READMODE          (1 << 0)  /* Bit 0: Read mode */
+#define SMCCS_MODE_WRITEMODE         (1 << 1)  /* Bit 1: Write mode */
 #define SMCCS_MODE_EXNWMODE_SHIFT    (4)       /* Bits 4-5: NWAIT Mode */
 #define SMCCS_MODE_EXNWMODE_MASK     (3 << SMCCS_MODE_EXNWMODE_SHIFT)
-0 0 Disabled
-1 0 Frozen Mode
-1 1 Ready Mode
+#  define SMCCS_EXNWMODE_DISABLED    (0 << SMCCS_MODE_EXNWMODE_SHIFT)
+#  define SMCCS_EXNWMODE_FROZEN      (2 << SMCCS_MODE_EXNWMODE_SHIFT)
+#  define SMCCS_EXNWMODE_READY       (3 << SMCCS_MODE_EXNWMODE_SHIFT)
 #define SMCCS_MODE_BAT               (1 << 8)  /* Bit 8:  Byte Access Type */
-#define SMCCS_MODE_DBW               (1 << 12) /* Bit 12: Data Bus Width */
+#define SMCCS_MODE_DBW_SHIFT         (12)      /* Bits 12-13: Data Bus Width */
+#define SMCCS_MODE_DBW_MASK          (3 << SMCCS_MODE_DBW_SHIFT)
+#  define SMCCS_MODE_DBW_8BITS       (0 << 12) /* 8 bits */
+#  define SMCCS_MODE_DBW_16BITS      (1 << 12) /* 16 bits */
+#  define SMCCS_MODE_DBW_32BITS      (2 << 12) /* 32 bits */
 #define SMCCS_MODE_TDFCYCLES_SHIFT   (16)      /* Bits 16-19: Data Float Time */
 #define SMCCS_MODE_TDFCYCLES_MASK    (15 << SMCCS_MODE_TDFCYCLES_SHIFT)
-#define SMCCS_MODE_TDFMODE           (1 << 20) /* Bit 20: TDF Optimization
+#define SMCCS_MODE_TDFMODE           (1 << 20) /* Bit 20: TDF Optimization */
+#define SMCCS_MODE_PMEN              (1 << 24) /* Bit 24: Page Mode Enabled */
+#define SMCCS_MODE_PS_SHIFT          (28) /* Bits 28-29: Page Size */
+#define SMCCS_MODE_PS_MASK           (3 << SMCCS_MODE_PS_SHIFT)
+#  define SMCCS_MODE_PS_SIZE_4BYTES  (0 << SMCCS_MODE_PS_SHIFT) /* 4 bytes */
+#  define SMCCS_MODE_PS_SIZE_8BYTES  (1 << SMCCS_MODE_PS_SHIFT) /* 8 bytes */
+#  define SMCCS_MODE_PS_SIZE_16BYTES (2 << SMCCS_MODE_PS_SHIFT) /* 16 bytes */
+#  define SMCCS_MODE_PS_SIZE_32BYTES (3 << SMCCS_MODE_PS_SHIFT) /* 32 bytes */
 
 /* SMC OCMS Register */
 
