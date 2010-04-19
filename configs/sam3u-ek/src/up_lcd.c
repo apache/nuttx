@@ -120,7 +120,11 @@
 #include <nuttx/arch.h>
 #include <nuttx/lcd.h>
 
+#include <arch/irq.h>
+
 #include "up_arch.h"
+#include "sam3u_pmc.h"
+#include "sam3u_smc.h"
 #include "sam3u_internal.h"
 #include "sam3uek_internal.h"
 
@@ -409,6 +413,8 @@ static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
 int up_lcdinitialize(void)
 {
+  uint32_t regval;
+ 
   /* Enable LCD EXTCS2 pins */
 
   sam3u_configgpio(GPIO_LCD_NCS2);
@@ -436,6 +442,29 @@ int up_lcdinitialize(void)
   /* Configure LCD Backlight Pin */
 
   sam3u_configgpio(GPIO_LCD_D15);
+
+  /* Enable SMC peripheral clock */
+
+  putreg32((1 << SAM3U_PID_SMC), SAM3U_PMC_PCER);
+
+  /* Configure SMC CS2 */
+
+  regval = (4 << SMCCS_SETUP_NWESETUP_SHIFT) | (2 << SMCCS_SETUP_NCSWRSETUP_SHIFT) |
+           (4 << SMCCS_SETUP_NRDSETUP_SHIFT) | (2 << SMCCS_SETUP_NCSRDSETUP_SHIFT);
+  putreg32(regval, SAM3U_SMCCS_SETUP(2));
+
+  regval = (5 << SMCCS_PULSE_NWEPULSE_SHIFT) | (18 << SMCCS_PULSE_NCSWRPULSE_SHIFT) |
+           (5 << SMCCS_PULSE_RDPULSE_SHIFT)  | (18 << SMCCS_PULSE_NCSRDPULSE_SHIFT);
+  putreg32(regval, SAM3U_SMCCS_PULSE(2));
+
+  regval = (22 << SMCCS_CYCLE_NWECYCLE_SHIFT) | (22 << SMCCS_CYCLE_NRDCYCLE_SHIFT);
+  putreg32(regval, SAM3U_SMCCS_CYCLE(2));
+
+  regval = getreg32(SAM3U_SMCCS_MODE(2));
+  regval &= ~(SMCCS_MODE_DBW_MASK | SMCCS_MODE_PMEN);
+  regval |= (SMCCS_MODE_READMODE)  | (SMCCS_MODE_WRITEMODE) | (SMCCS_MODE_DBW_16BITS);
+  putreg32(regval, SAM3U_SMCCS_MODE(2));
+
   return -ENOSYS;
 }
 
