@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 16, 2010</p>
+      <p>Last Updated: April 19, 2010</p>
     </td>
   </tr>
 </table>
@@ -2854,6 +2854,14 @@ extern void up_ledoff(int led);
     <code>CONFIG_NX_LCDDRIVER</code>:
     By default, NX builds to use a framebuffer driver (see <code>include/nuttx/fb.h</code>).
     If this option is defined, NX will build to use an LCD driver (see <code>include/nuttx/lcd.h</code>).
+  </li>
+  <li>
+    <code>CONFIG_LCD_MAXPOWER/code>:
+    The full-on power setting for an LCD device.
+  </li>
+  <li>
+    <code>CONFIG_LCD_MAXCONTRAST/code>:
+    The maximum contrast value for an LCD device.
   </li>
   <li>
     <code>CONFIG_NX_MOUSE</code>:
