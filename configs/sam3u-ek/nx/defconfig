@@ -664,6 +664,8 @@ CONFIG_USBSTRG_REMOVABLE=y
 #   By default, NX builds to use a framebuffer driver (see
 #   include/nuttx/fb.h). If this option is defined, NX will
 #   build to use an LCD driver (see include/nuttx/lcd.h).
+# CONFIG_LCD_MAXPOWER - The full-on power setting for an LCD device.
+# CONFIG_LCD_MAXCONTRAST - The maximum contrast value for an LCD device.
 # CONFIG_NX_MOUSE
 #   Build in support for mouse input
 # CONFIG_NX_KBD
@@ -711,6 +713,8 @@ CONFIG_NX_DISABLE_24BPP=y
 CONFIG_NX_DISABLE_32BPP=y
 CONFIG_NX_PACKEDMSFIRST=n
 CONFIG_NX_LCDDRIVER=y
+CONFIG_LCD_MAXPOWER=31
+CONFIG_LCD_MAXCONTRAST=1
 CONFIG_NX_MOUSE=n
 CONFIG_NX_KBD=n
 #CONFIG_NXTK_BORDERWIDTH=4
