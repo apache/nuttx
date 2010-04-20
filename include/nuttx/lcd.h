@@ -48,16 +48,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_LCD_MAXPOWER
-#  error "CONFIG_LCD_MAXPOWER is not defined"
-#endif
-
-#ifndef CONFIG_LCD_MAXCONTRAST
-#  error "CONFIG_LCD_MAXCONTRAST is not defined"
-#endif
-
 /* Friendlier names */
 
 #define LCD_FULL_OFF     (0)
