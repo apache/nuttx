@@ -57,6 +57,11 @@
 
 #define LCD_BASE     SAM3U_EXTCS2_BASE
 
+/* Touchscreen controller (TSC) */
+
+#define CONFIG_TSC_ADS7843    1   /* ADS7843 present on board */
+#define CONFIG_TSC_SPI        0   /* On SPI0 */
+
 /* SAM3U-EK GPIO Pin Definitions ****************************************************/
 
 /* LCD:
@@ -131,6 +136,11 @@
 
 #define GPIO_LCD_BKL  (GPIO_OUTPUT|GPIO_CFG_DEFAULT|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOC|GPIO_PIN19)
 
+/* Touchscreen controller (TSC) */
+
+#define GPIO_TCS_IRQ  (PIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN6)
+#define GPIO_TCS_BUSY (PIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN6)
+
 /* LEDs */
 
 #define GPIO_LED0     (GPIO_OUTPUT|GPIO_CFG_DEFAULT|GPIO_PORT_PIOB|GPIO_OUTPUT_CLEAR|GPIO_PIN0)
@@ -150,6 +160,10 @@
 #define GPIO_MCI_CD   (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN25)
 
 /* SPI Chip Selects */
+
+/* Chip select pin connected to the touchscreen controller. */
+
+#define GPIO_TSC_NPCS  GPIO_SPI0_NPCS2_PC14
 
 /************************************************************************************
  * Public Types

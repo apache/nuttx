@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nx/nx_main.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -431,6 +431,8 @@ static inline int nxeg_suinitialize(void)
       return ERROR;
     }
 
+  /* Get the device instance */
+
   dev = up_lcdgetdev(CONFIG_EXAMPLES_NX_DEVNO);
   if (!dev)
     {
@@ -438,6 +440,10 @@ static inline int nxeg_suinitialize(void)
       g_exitcode = NXEXIT_LCDGETDEV;
       return ERROR;
     }
+
+  /* Turn the LCD on at 75% power */
+
+  (void)dev->setpower(dev, (3*CONFIG_LCD_MAXPOWER/4));
 #else
   /* Initialize the frame buffer device */
 

@@ -48,6 +48,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_LCD_MAXPOWER
+#  error "CONFIG_LCD_MAXPOWER is not defined"
+#endif
+
+#ifndef CONFIG_LCD_MAXCONTRAST
+#  error "CONFIG_LCD_MAXCONTRAST is not defined"
+#endif
+
+/* Friendlier names */
+
+#define LCD_FULL_OFF     (0)
+#define LCD_FULL_ON      CONFIG_LCD_MAXPOWER
+
+#define LCD_MIN_CONTRAST (0)
+#define LCD_MAX_CONTRAST CONFIG_LCD_MAXCONTRAST
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -147,14 +165,16 @@ struct lcd_dev_s
 #endif
 
   /* LCD Specific Controls **************************************************/
-  /* Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER:
-   * full on
+  /* Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full
+   * on).  On backlit LCDs, this setting may correspond to the backlight
+   * setting.
    */
 
   int (*getpower)(struct lcd_dev_s *dev);
 
-  /* Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWERL:
-   * full on)
+  /* Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full
+   * on).  On backlit LCDs, this setting may correspond to the backlight
+   * setting.
    */
 
   int (*setpower)(struct lcd_dev_s *dev, int power);

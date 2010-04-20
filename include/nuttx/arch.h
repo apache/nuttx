@@ -490,7 +490,10 @@ EXTERN void fb_uninitialize(void);
  *   If an architecture supports a parallel or serial LCD, then it must
  *   provide APIs to access the LCD as follows:
  *
- *   up_lcdinitialize   - Initialize the LCD video hardware
+ *   up_lcdinitialize   - Initialize the LCD video hardware.  The initial
+ *                        state of the LCD is fully initialized, display
+ *                        memory cleared, and the LCD ready to use, but with
+ *                        the power setting at 0 (full off).
  *   up_lcdgetdev       - Return a a reference to the LCD object for
  *                        the specified LCD.  This allows support for
  *                        multiple LCD devices.
@@ -501,7 +504,7 @@ EXTERN void fb_uninitialize(void);
 struct lcd_dev_s; /* See nuttx/lcd.h */
 
 EXTERN int up_lcdinitialize(void);
-EXTERN FAR struct lcd_dev_s *up_lcdgetdev(int lcdddev);
+EXTERN FAR struct lcd_dev_s *up_lcdgetdev(int lcddev);
 EXTERN void up_lcduninitialize(void);
 
 /****************************************************************************
