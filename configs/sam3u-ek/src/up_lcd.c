@@ -134,16 +134,35 @@
  * Pre-processor Definitions
  **************************************************************************************/
 
+/* Configuration **********************************************************************/
+
+/* Define the following to enable register-level debug output */
+
+#undef CONFIG_LCD_REGDEBUG
+
+/* Verbose debug must also be enabled */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_GRAPHICS
+#endif
+
+#ifndef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_LCD_REGDEBUG
+#endif
+
 /* CONFIG_LCD_MAXCONTRAST -- must be defined and less than 32 */
 
 #if !defined(CONFIG_LCD_MAXCONTRAST) || CONFIG_LCD_MAXCONTRAST < 1 || CONFIG_LCD_MAXCONTRAST > 31
 #  error "CONFIG_LCD_MAXCONTRAST must be defined in the range 1 to 31"
 #endif
 
-/* Configuration **********************************************************************/
+/* Debug ******************************************************************************/
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_GRAPHICS
+#ifdef CONFIG_LCD_REGDEBUG
+# define regdbg(format, arg...)  vdbg(format, ##arg)
+#else
+# define regdbg(x...)
 #endif
 
 /* Graphics Capbilities ***************************************************************/
@@ -402,6 +421,7 @@ static struct sam3u_dev_s g_lcddev_s =
 
 static void sam3u_putreg(uint16_t reg,  uint16_t data)
 {
+  regdbg("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
   putreg16(reg, LCD_BASE);
   putreg16(data, LCD_BASE + HX843X_LCD_RS);
 }
@@ -416,8 +436,11 @@ static void sam3u_putreg(uint16_t reg,  uint16_t data)
 
 static uint16_t sam3u_getreg(uint16_t reg)
 {
+  uint16_t data;
   putreg16(reg, LCD_BASE);
-  return getreg16(LCD_BASE + HX843X_LCD_RS);
+  data = getreg16(LCD_BASE + HX843X_LCD_RS);
+  regdbg("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
+  return data;
 }
 
 /**************************************************************************************
@@ -497,6 +520,7 @@ static void sam3u_lcdon(void)
 {
   /* Display ON Setting */
 
+  gvdbg("ON\n");
   sam3u_putreg(HX8347_R90H, 0x7f);      /* SAP=0111 1111 */
   sam3u_putreg(HX8347_R26H, 0x04);      /* GON=0 DTE=0 D=01 */
   up_mdelay(100);
@@ -516,6 +540,7 @@ static void sam3u_lcdon(void)
 
 static void sam3u_lcdoff(void)
 {
+  gvdbg("OFF\n");
   sam3u_putreg(HX8347_R90H, 0x00);      /* SAP=0000 0000 */
   sam3u_putreg(HX8347_R26H, 0x00);      /* GON=0 DTE=0 D=00 */
 }
@@ -537,7 +562,7 @@ static void sam3u_dumpreg(uint8_t startreg, uint8_t endreg)
   for (addr = startreg; addr <= endreg; addr++)
     {
       value = sam3u_getreg(addr);
-      printf("LCD %02x = %04x\n", addr, value);
+      gdbg(" %02x: %04x\n", addr, value);
     }
 }
 #endif
@@ -564,6 +589,7 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
+  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Set up for the write */
@@ -602,6 +628,7 @@ static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
+  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Set up for the read */
@@ -629,6 +656,8 @@ static int sam3u_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
+  gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
+         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
@@ -644,7 +673,8 @@ static int sam3u_getvideoinfo(FAR struct lcd_dev_s *dev,
 static int sam3u_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
-  DEBUGASSERT(dev && pinfo);
+  DEBUGASSERT(dev && pinfo && planeno == 0);
+  gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
 }
@@ -662,6 +692,7 @@ static int sam3u_getpower(struct lcd_dev_s *dev)
 {
   struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
   DEBUGASSERT(dev);
+  gvdbg("power: %d\n", priv->power);
   return priv->power;
 }
 
@@ -685,6 +716,7 @@ static int sam3u_setpower(struct lcd_dev_s *dev, int power)
   struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
   unsigned int i;
 
+  gvdbg("power: %d\n", power);
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
   /* Switch off backlight */
@@ -721,6 +753,7 @@ static int sam3u_setpower(struct lcd_dev_s *dev, int power)
 
 static int sam3u_getcontrast(struct lcd_dev_s *dev)
 {
+  gvdbg("Not implemented\n");
   return -ENOSYS;
 }
 
@@ -734,6 +767,7 @@ static int sam3u_getcontrast(struct lcd_dev_s *dev)
 
 static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
+  gvdbg("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
@@ -785,6 +819,11 @@ int up_lcdinitialize(void)
   sam3u_configgpio(GPIO_LCD_D14);
   sam3u_configgpio(GPIO_LCD_D15);
 
+#ifdef CONFIG_LCD_REGDEBUG
+  sam3u_dumpgpio(GPIO_PORT_PIOB, "PORTB");
+  sam3u_dumpgpio(GPIO_PORT_PIOC, "PORTC");
+#endif
+
   /* Configure LCD Backlight Pin */
 
   sam3u_configgpio(GPIO_LCD_D15);
@@ -792,15 +831,16 @@ int up_lcdinitialize(void)
   /* Enable SMC peripheral clock */
 
   putreg32((1 << SAM3U_PID_SMC), SAM3U_PMC_PCER);
+  regdbg("PMC PCSR: %08x SMC: %08x\n", getreg32(SAM3U_PMC_PCSR), (1 << SAM3U_PID_SMC));
 
   /* Configure SMC CS2 */
 
   regval = (4 << SMCCS_SETUP_NWESETUP_SHIFT) | (2 << SMCCS_SETUP_NCSWRSETUP_SHIFT) |
-             (4 << SMCCS_SETUP_NRDSETUP_SHIFT) | (2 << SMCCS_SETUP_NCSRDSETUP_SHIFT);
+           (4 << SMCCS_SETUP_NRDSETUP_SHIFT) | (2 << SMCCS_SETUP_NCSRDSETUP_SHIFT);
   putreg32(regval, SAM3U_SMCCS_SETUP(2));
 
   regval = (5 << SMCCS_PULSE_NWEPULSE_SHIFT) | (18 << SMCCS_PULSE_NCSWRPULSE_SHIFT) |
-             (5 << SMCCS_PULSE_RDPULSE_SHIFT)  | (18 << SMCCS_PULSE_NCSRDPULSE_SHIFT);
+           (5 << SMCCS_PULSE_RDPULSE_SHIFT)  | (18 << SMCCS_PULSE_NCSRDPULSE_SHIFT);
   putreg32(regval, SAM3U_SMCCS_PULSE(2));
 
   regval = (22 << SMCCS_CYCLE_NWECYCLE_SHIFT) | (22 << SMCCS_CYCLE_NRDCYCLE_SHIFT);
@@ -811,14 +851,21 @@ int up_lcdinitialize(void)
   regval |= (SMCCS_MODE_READMODE)  | (SMCCS_MODE_WRITEMODE) | (SMCCS_MODE_DBW_16BITS);
   putreg32(regval, SAM3U_SMCCS_MODE(2));
 
+  regdbg("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
+         SAM3U_SMCCS_SETUP(2), getreg32(SAM3U_SMCCS_SETUP(2)),
+         SAM3U_SMCCS_PULSE(2), getreg32(SAM3U_SMCCS_PULSE(2)));
+  regdbg("    CYCLE[%08x]: %08x MODE[%08x]:  %08x\n",
+         SAM3U_SMCCS_CYCLE(2), getreg32(SAM3U_SMCCS_CYCLE(2)),
+         SAM3U_SMCCS_MODE(2),  getreg32(SAM3U_SMCCS_MODE(2)));
+
   /* Check HX8347 Chip ID */
 
 #ifdef CONFIG_DEBUG_GRAPHICS
   hxregval = sam3u_getreg(HX8347_R67H);
-  gvdbg("HX8347 chip ID: %04x\n", hxregval);
+  gvdbg("Chip ID: %04x\n", hxregval);
   if (hxregval != HX8347_CHIPID)
     {
-      gdbg("Bad HX8347 chip ID: %04x\n", hxregval);
+      gdbg("Bad chip ID: %04x Expected: %04x\n", hxregval, HX8347_CHIPID);
       return -ENODEV;
     }
 #endif
