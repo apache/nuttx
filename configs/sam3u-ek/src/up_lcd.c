@@ -167,10 +167,10 @@
 
 /* Graphics Capbilities ***************************************************************/
 
-/* LCD resolution */
+/* LCD resolution: 240 (row) x 320 (columns) */
 
-#define SAM3UEK_XRES         320
-#define SAM3UEK_YRES         240
+#define SAM3UEK_XRES         240
+#define SAM3UEK_YRES         320
 
 /* Color depth and format. BPP=16 R=6, G=6, B=5: RRRR RBBB BBBG GGGG */
 
