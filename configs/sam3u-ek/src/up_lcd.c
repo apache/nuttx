@@ -167,10 +167,10 @@
 
 /* Graphics Capbilities ***************************************************************/
 
-/* LCD resolution: 240 (row) x 320 (columns) */
+/* LCD resolution: 240 (rows) x 320 (columns) */
 
-#define SAM3UEK_XRES         240
-#define SAM3UEK_YRES         320
+#define SAM3UEK_XRES         320
+#define SAM3UEK_YRES         240
 
 /* Color depth and format. BPP=16 R=6, G=6, B=5: RRRR RBBB BBBG GGGG */
 
@@ -592,15 +592,17 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Set up for the write */
-
-  sam3u_setcursor(row, col);
-  sam3u_wrsetup();
-
   /* Write the run to GRAM */
 
   for (i = 0; i < npixels; i++)
     {
+      /* Set up for the write */
+
+      sam3u_setcursor(row, col++);
+      sam3u_wrsetup();
+
+      /* Write the pixel to GRAM */
+
       sam3u_wrram(*run++);
     }
   return OK;
