@@ -106,6 +106,6 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
     {
       /* Draw the raster line at this row */
 
-      (void)pinfo->putrun(row, rect->pt2.x, pinfo->buffer, ncols);
+      (void)pinfo->putrun(row, rect->pt1.x, pinfo->buffer, ncols);
     }
 }
