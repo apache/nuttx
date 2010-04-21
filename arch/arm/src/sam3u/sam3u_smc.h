@@ -85,7 +85,7 @@
 #define SAM3U_SMCCS_PULSE_OFFSET     0x004 /* SMC PULSE Register */
 #define SAM3U_SMCCS_CYCLE_OFFSET     0x008 /* SMC CYCLE Register */
 #define SAM3U_SMCCS_TIMINGS_OFFSET   0x00c /* SMC TIMINGS Register */
-#define SAM3U_SMCCS_MODE_OFFSET      0x080 /* SMC MODE Register */
+#define SAM3U_SMCCS_MODE_OFFSET      0x010 /* SMC MODE Register */
 
 #define SAM3U_SMC_OCMS_OFFSET        0x110 /* SMC OCMS MODE Register */
 #define SAM3U_SMC_KEY1_OFFSET        0x114 /* SMC KEY1 Register */
