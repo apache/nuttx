@@ -167,10 +167,19 @@
 
 /* Graphics Capbilities ***************************************************************/
 
-/* LCD resolution: 240 (rows) x 320 (columns) */
+/* LCD resolution: 320 (columns) by 240 (rows).  The physical dimensions of the device
+ * are really 240 (columns) by 320 (rows), but unless CONFIG_SAM3U_240x320 is defined,
+ * we swap rows and columns in setcursor to make things behave nicer (there IS a
+ * performance hit for this swap!).
+ */
 
-#define SAM3UEK_XRES         320
-#define SAM3UEK_YRES         240
+#ifdef CONFIG_SAM3U_240x320
+#  define SAM3UEK_XRES         240
+#  define SAM3UEK_YRES         320
+#else
+#  define SAM3UEK_XRES         320
+#  define SAM3UEK_YRES         240
+#endif
 
 /* Color depth and format. BPP=16 R=6, G=6, B=5: RRRR RBBB BBBG GGGG */
 
@@ -301,7 +310,7 @@ static uint16_t sam3u_getreg(uint16_t reg);
 
 /* Misc. LCD Helper Functions */
 
-static void sam3u_setcursor(fb_coord_t x, fb_coord_t y);
+static void sam3u_setcursor(fb_coord_t row, fb_coord_t col);
 static inline void sam3u_wrsetup(void);
 static inline void sam3u_wrram(uint16_t color);
 static inline uint16_t sam3u_rdram(void);
@@ -451,17 +460,22 @@ static uint16_t sam3u_getreg(uint16_t reg)
  *
  **************************************************************************************/
 
-static void sam3u_setcursor(fb_coord_t x, fb_coord_t y)
+static void sam3u_setcursor(fb_coord_t row, fb_coord_t col)
 {
-  uint8_t x1;
-  uint8_t x2;
-  uint8_t y1;
-  uint8_t y2;
+  uint8_t  x1;
+  uint8_t  x2;
+  uint8_t  y1;
+  uint8_t  y2;
 
-  x1 =  (uint8_t) x & 0xff;
-  x2 = ((uint16_t)x & 0xff00) >> 8;
-  y1 =  (uint8_t) y & 0xff;
-  y2 = ((uint16_t)y & 0xff00) >> 8;
+  /* Get the upper and lower x and y positions */
+
+  x1  = (uint8_t)col;
+  x2  = (uint8_t)((uint16_t)col >> 8);
+
+  y1  = (uint8_t)row;
+  y2  = (uint8_t)((uint16_t)row >> 8);
+
+  /* Then set the cursor position */
 
   sam3u_putreg(HX8347_R02H, x2);        /* column high */
   sam3u_putreg(HX8347_R03H, x1);        /* column low */
@@ -592,19 +606,44 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Write the run to GRAM */
+#ifdef CONFIG_SAM3U_240x320
+  /* Set up to write the run. */
+
+  sam3u_setcursor(row, col);
+  sam3u_wrsetup();
+
+  /* Write the run to GRAM. */
 
   for (i = 0; i < npixels; i++)
     {
-      /* Set up for the write */
-
-      sam3u_setcursor(row, col++);
-      sam3u_wrsetup();
-
-      /* Write the pixel to GRAM */
+      /* Write the pixel pixel to GRAM */
 
       sam3u_wrram(*run++);
     }
+#else
+  /* Write the run to GRAM.  Because rows and colums are swapped, we need to reset
+   * the cursor position for every pixel.  We could do this much faster if we
+   * adapted to the strange device aspect ratio.
+   */
+
+  col = 319-col;
+  for (i = 0; i < npixels; i++)
+    {
+      /* Set up to write the next pixel. Swapping x and y orientations so that the image
+       * comes out with the 320x240 aspect ratio (not the native 240x320).  That is:
+       *
+       *   row: 0-239 maps to x: 0-239
+       *   col: 0-319 maps to y: 319-0
+       */
+
+      sam3u_setcursor(col--, row);
+      sam3u_wrsetup();
+
+      /* Write the pixel pixel to GRAM */
+
+      sam3u_wrram(*run++);
+    }
+#endif
   return OK;
 }
 
@@ -633,16 +672,39 @@ static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Set up for the read */
+#ifdef CONFIG_SAM3U_240x320
+  /* Set up to read the run */
 
   sam3u_setcursor(row, col);
 
-  /* Read the run from GRAM */
+  /* Read the run from GRAM. */
 
   for (i = 0; i < npixels; i++)
     {
-      sam3u_wrram(*run++);
+      /* Read the next pixel */
+
+      *run++ = sam3u_rdram();
     }
+#else
+  /* Read the run from GRAM  Because rows and colums are swapped, we need to reset
+   * the cursor position for every pixel.  We could do this much faster if we
+   * adapted to the strange device aspect ratio.
+   */
+
+  col = 319 - col;
+  for (i = 0; i < npixels; i++)
+    {
+      /* Read the next pixel.. Swapping x and y orientations so that the image
+       * comes out with the 320x240 aspect ratio (not the native 240x320).  That is:
+       *
+       *   row: 0-239 maps to x: 0-239
+       *   col: 0-319 maps to y: 319-0
+       */
+
+      sam3u_setcursor(col--, row);
+      *run++ = sam3u_rdram();
+    }
+#endif
   return OK;
 }
 
@@ -739,6 +801,13 @@ static int sam3u_setpower(struct lcd_dev_s *dev, int power)
       sam3u_gpiowrite(GPIO_LCD_BKL, true);;
       sam3u_gpiowrite(GPIO_LCD_BKL, true);;
       sam3u_gpiowrite(GPIO_LCD_BKL, true);;
+    }
+
+  /* This delay seems to be required... perhaps because of the big current jump? */
+
+  if (power != LCD_FULL_OFF)
+    {
+      up_mdelay(100);
     }
 
   priv->power = power;

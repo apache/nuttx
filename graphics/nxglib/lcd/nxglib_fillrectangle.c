@@ -88,13 +88,11 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 (FAR struct lcd_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, nxgl_mxpixel_t color)
 {
   unsigned int ncols;
-  unsigned int nrows;
   unsigned int row;
 
   /* Get the dimensions of the rectange to fill in pixels */
 
   ncols  = rect->pt2.x - rect->pt1.x + 1;
-  nrows  = rect->pt2.y - rect->pt1.y + 1;
 
   /* Fill the run buffer with the selected color */
 
@@ -102,7 +100,7 @@ void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
 
   /* Then fill the rectangle line-by-line */
 
-  for (row = 0; row < nrows; row++)
+  for (row = rect->pt1.y; row <= rect->pt2.y; row++)
     {
       /* Draw the raster line at this row */
 

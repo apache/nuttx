@@ -443,7 +443,7 @@ static inline int nxeg_suinitialize(void)
 
   /* Turn the LCD on at 75% power */
 
-  (void)dev->setpower(dev, (3*CONFIG_LCD_MAXPOWER/4));
+  (void)dev->setpower(dev, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
 #else
   /* Initialize the frame buffer device */
 
@@ -715,8 +715,8 @@ int user_start(int argc, char *argv[])
   message("user_start: Create window #2\n");
   nxeg_initstate(&g_wstate[1], 2, CONFIG_EXAMPLES_NX_COLOR2);
   hwnd2 = nxeg_openwindow(&g_nxcb, &g_wstate[1]);
-  message("user_start: hwnd1=%p\n", hwnd1);
-  if (!hwnd1)
+  message("user_start: hwnd2=%p\n", hwnd2);
+  if (!hwnd2)
     {
       goto errout_with_hwnd1;
     }
