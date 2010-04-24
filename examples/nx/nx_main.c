@@ -853,8 +853,8 @@ int user_start(int argc, char *argv[])
   /* Close the window 2 */
 
 errout_with_hwnd2:
-  message("user_start: Close window\n");
-  (void)nxeg_closewindow(hwnd2, &g_wstate[2]);
+  message("user_start: Close window #2\n");
+  (void)nxeg_closewindow(hwnd2, &g_wstate[1]);
 
   /* Close the window1 */
 
