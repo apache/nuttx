@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: April 16, 2010</p>
+      <p>Last Updated: April 23, 2010</p>
     </td>
   </tr>
 </table>
@@ -212,7 +212,7 @@
   </tr>
   <tr>
     <td><small>Figure 1.
-    This sceen shot shows the final frame for the NuttX example at <code>examples/nx</code>
+    This scren shot shows the final frame for the NuttX example at <code>examples/nx</code>
     running on the simulated, Linux x86 platform with simulated framebuffer output to
     an X window.
     This picture shows to framed windows with (blank) toolbars.
@@ -256,12 +256,20 @@
     <i>back-end</i> logic.  This back-end supports only a primitive set of graphic
     and rendering operations.
   </li>
-  <li><b>Framebuffer Device Interface</b>.
-    NX supports any graphics device using the NuttX framebuffer <i>driver</i>
-    interface.
-    (However, the dependency of NX on framebuffer drivers is minimal and the
-    logic could be extended to other interfaces -- such as a serial LCD -- with
-    some minimal effort).
+  <li><b>Device Interface</b>.
+    NX supports any graphics device either of two device interfaces:
+    <ul>
+      <li>
+        Any device with random accesss video memory using the NuttX framebuffer driver interface
+        (see <code>include/nuttx/fb.h</code>).
+      </li>
+      <li>
+        Any LCD-like device than can accept raster line <i>runs</i> through a parallel or serial interface
+        (see <code>include/nuttx/lcd.h</code>).
+        By default, NX is configured to use the frame buffer driver unless <code>CONFIG_NX_LCDDRIVER</code> is defined =y in your NuttX configuration file.
+      </li>
+    </ul>
+  </li>
   <li><b>Transparent to NX Client</b>.
     The window client on &quot;sees&quot; the sub-window that is operates in
     and does not need to be concerned with the virtual, vertical space (other
@@ -310,7 +318,7 @@
 
 <p>
   NXGLIB is a standalone library that contains low-level graphics utilities and
-  direct framebuffer rendering logic. NX is built on top NXGLIB.
+  direct framebuffer or LCD rendering logic. NX is built on top NXGLIB.
 </p>
 
 <h3>1.3.2 <a name="nx1">NX (<code>NXSU</code> and <code>NXMU</code>)</a></h3>
@@ -335,7 +343,7 @@
 
 <p><b>NXNULL?</b>
   At one time, I also envisoned a <i>NULL</i> front-end that did not support windowing
-  at all but, rather, simply provided the entire framebuffer memory as one dumb window.
+  at all but, rather, simply provided the entire framebuffer or LCD memory as one dumb window.
   This has the advantage that the same NX APIs can be used on the one dumb window as
   for the other NX windows.
   This would be in the NuttX spirit of scalability.
@@ -412,7 +420,7 @@
   Only those APIs intended for application usage are documented here
   See <code>include/nuttx/nxglib.h</code> for the full set of APIs;
   those APIs might be of interest if you are rendering directly into
-  framebuffer memory.
+  framebuffer or LCD memory.
 </p>
 
 <h3>2.2.1 <a name="nxgltypes">NXGL Types</a></h3>
@@ -922,7 +930,7 @@ void (*kbdin)(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch, FAR void *arg);
 
 #ifdef CONFIG_NX_MULTIUSER
 int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
-#define nx_run(fb) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, fb)
+#define nx_run(fb) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, dev)
 #endif
 </pre></ul>
 <p>
@@ -945,8 +953,8 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
     <dt><code>mqname</code>
     <dd>
      - The name for the server incoming message queue
-    <dt><code>fb</code>
-    <dd>Vtable &quot;object&quot; of the framebuffer &quot;driver&quot; to use
+    <dt><code>dev</code>
+    <dd>Framebuffer or LCD driver &quot;object&quot; to be used
   </dl></ul>
 </p>
 <p>
@@ -1016,7 +1024,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname);
 #include &lt;nuttx/nx.h&gt;
 
 #ifndef CONFIG_NX_MULTIUSER
-NXHANDLE nx_open(FAR struct fb_vtable_s *fb);
+NXHANDLE nx_open(FAR struct fb_vtable_s *dev);
 #endif
 </pre></ul>
 <p>
@@ -1032,8 +1040,8 @@ NXHANDLE nx_open(FAR struct fb_vtable_s *fb);
 <p>
   <b>Input Parameters:</b>
   <ul><dl>
-    <dt><code>fb</code>
-    <dd>Vtable &quot;object&quot; of the framebuffer &quot;driver&quot; to use
+    <dt><code>dev</code>
+    <dd>Frame buffer or LCD driver &quot;object&quot; to be used.
     <dt><code>cb</code>
     <dd>Callbacks used to process received NX server messages
   </dl></ul>
@@ -2525,8 +2533,8 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>graphics/nxglib</code>
       <dd>The NuttX tiny graphics library.
       The directory contains generic utilities support operations on primitive graphics objects
-      and logic to rasterize directly into a framebuffer.
-      It has no concept of windows (other than the one, framebuffer  window).
+      and logic to rasterize directly into a framebuffer or through an LCD driver interface.
+      It has no concept of windows (other than the one, framebuffer  or LCD window).
 
     <dt><code>graphics/nxbe</code>
       <dd>This is the <i>back-end</i> of a tiny windowing system.
@@ -2708,12 +2716,14 @@ make
 </pre></ul>
   </li>
   <li>
-    A preferred configuration extends the test with a simulated framebuffer driver
-    that uses an X window as a framebuffer.
-    This configuration uses the configuration file at <code>configs/sim/nx/defconfig-x11</code>.
-    This is a superior test configuration because the X window appears at your desktop
-    and you can see the NX output.
-    This preferred configuration can be built as follows:
+    <p>
+      A preferred configuration extends the test with a simulated framebuffer driver
+      that uses an X window as a framebuffer.
+      This configuration uses the configuration file at <code>configs/sim/nx/defconfig-x11</code>.
+      This is a superior test configuration because the X window appears at your desktop
+      and you can see the NX output.
+      This preferred configuration can be built as follows:
+    </p>
 <ul><pre>
 cd &lt;NuttX-Directory&gt;/tools
 ./configure sim/nx
@@ -2722,6 +2732,23 @@ cp &lt;NuttX-Directory&gt;/configs/sim/nx/defconfig-x11 .config
 make
 ./nuttx
 </pre></ul>
+    <p>
+      <i>Update:</i>
+      The sim target has suffered some bit-rot over the years and so the following caveats need to be added:
+      <ul>
+        <li>
+          The X target does not build under recent Cygwin configurations.
+        </li>
+        <li>
+          The X target does not build under current Ubuntu distributions;
+          it fails to locate the X header files.
+        </li>
+        <li>
+          The sim target itself is broken under 64-bit Linux.
+          This is because the sim target is based upon some assembly language setjmp/longjmp logic that only works on 32-bit systems.
+        </li>
+      </ul>
+    </p>
   </li>
 </ol>
 <p>
