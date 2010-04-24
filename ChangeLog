@@ -1089,8 +1089,12 @@
 	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
 	  no one has been using this port.
 
-5.4 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.4 2010-04-23 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* include/nuttx/lcd.h - Defines an LCD interface.
 	* graphics/nxglib/fb and lcd - Support LCD and framebuffer rasterizers for NX.
+	* configs/sam3u-ek/src/up_lcd.c - LCD driver for LCD on SAM3U-EK development
+	  board.
+
+5.5 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 

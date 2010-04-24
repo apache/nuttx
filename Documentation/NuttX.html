@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 16, 2010</p>
+      <p>Last Updated: April 23, 2010</p>
     </td>
   </tr>
 </table>
@@ -729,37 +729,39 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.3 Release Notes</b>:
+<p><b>nuttx-5.4 Release Notes</b>:
 
 <p>
-  This 50<sup>th</sup> release of NuttX was made on April 11, 2010 and is available for download from the
+  This 51<sup>st</sup> release of NuttX was made on April 23, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release suport for one new achitecture:
+  This release includes one new, important extension to the
+  <a href="http://www.nuttx.org/NXGraphicsSubsystem.html">NX graphics system</a>:
+  <ul>
+    <p>
+      NX was develop a couple years back on hardware that supported only framebuffer
+      devices, that is, video hardware with video memory directly converts the memroy
+      content to video.  However, most MCUs that NuttX focuses on do not support such
+      video memory; rather, that typically only support LCDs via parallel or serial
+      interfaces.
+    </p>
+    <p>
+      This release of NuttX extends NX so that now renders directly to the LCD device
+      via its serial or parallel interface.  No in-memory copy of the screen memory
+      need be maintained so this solution should also work in MCUs with very limited
+      SRAM.
+    </p>
+  </ul>
 </p>
-<ul>
-  <li>A basic port for the NXP LPC2378 MCU on the Olimex-LPC2378 development board was contributed by Rommel Marcelo.</li>
-</ul>
 <p>
- And extensions to two existing architures:
+  This initial release of this feature includes the verified NX extensions plus
+  a driver for the HX8347, 16-bit parallel LCD.  This LCD supports 16-bit RGB
+  (5:6:5).
 </p>
-<ul>
-  <li>David Hewson contributed a dual-speed (full/high) USB device-side driver
-    for the NXP LPC3131 on the Embedded Artists EA3131 development board.</li>
-  <li>A DMA driver and a high speed MCI driver for the Atmel AT91SAM3U are
-    included (but not fully tested in this release).</li>
-</ul>
-<p>
-  Two important bugfix was also included:
-</p>
-<ul>
-  <li>An important fix to the USB mass storage driver was contributed by David Hewson.</li>
-  <li>A serious error in the AT91SAM3U PIO handling was fixed.</li>
-</ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1061,9 +1063,9 @@
     <p>
       <b>Atmel AT91SAM3U</b>.
       This port uses the <a href=" http://www.atmel.com/">Atmel</a> SAM3U-EK
-	  development board that features the AT91SAM3U4E MCU.
-	  This port uses a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU
-	  tools or Cygwin-based GNU tools).
+      development board that features the AT91SAM3U4E MCU.
+      This port uses a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU
+      tools or Cygwin-based GNU tools).
     </p>
     <ul>
       <p>
@@ -1072,11 +1074,14 @@
         logic, interrupt driven serial console, and system timer interrupts.
         That release passes the NuttX OS test and is proven to have a valid OS implementation.
         A configuration to support the NuttShell is also included.
+        NuttX version 5.4 adds support for the HX8347 LCD on the SAM3U-EK board.
+        This LCD support includes an example using the
+        <a href=" http://www.nuttx.org/NXGraphicsSubsystem.html">NX graphics system</a>.
       </p>
       <p>
         Subsequent NuttX releases will extend this port and add support for SDIO-based SD cards and
         USB device (and possible LCD support).
-        These extensions may or may not happen by the Nuttx 5.3 release as my plate is kind of full now.
+        These extensions may or may not happen by the Nuttx 5.5 release as my plate is kind of full now.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1638,26 +1643,12 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.3 2010-04-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.4 2010-04-23 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* arch/arm/src/lpc313x/lpc313x_usbdev.c - USB driver for the LPC313x
-	  contributed by David Hewson.
-	* configs/ea3131/src/up_ubstrgc.c, configs/ea3131/usbserial,
-	  configs/ea3131/usbstorage - USB storage and USB serial example support
-	  contributed by David Hewson.
-	* Several important compilation error fixes in lpc313x and (dualspeed) USB
-	  code also contributed by David Hewson.
-	* arch/arm/src/sam3u/sam3u_dmac.c - DMA support for the AT90SAM3U.
-	* arch/arm/src/sam3u/sam3u_hsmci.c - SD memory card support for AT90SAM3U
-	  (Neither the DMA nor the HSMCI driver are functional on the initial checkin).
-	* drivers/usbdev - Several important fixes to the USB mass storage driver
-	  submitted by David Hewson.
-	* configs/olimex-lpc2378, arch/arm/include/lpc2378, and arch/arm/src/lpc2378 -
-	  Basic port of the NXP 2378 on the Olimex board contributed by
-	  Rommel Marcelo.
-	* arch/arm/src/sam3u/sam3u_internal.h - Fixed a critical bug in the AT91SAM3U
-	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
-	  no one has been using this port.
+	* include/nuttx/lcd.h - Defines an LCD interface.
+	* graphics/nxglib/fb and lcd - Support LCD and framebuffer rasterizers for NX.
+	* configs/sam3u-ek/src/up_lcd.c - LCD driver for LCD on SAM3U-EK development
+	  board.
 
 pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1687,10 +1678,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.4 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* include/nuttx/lcd.h - Defines an LCD interface.
-	* graphics/nxglib/fb and lcd - Support LCD and framebuffer rasterizers for NX.
+nuttx-5.5 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
