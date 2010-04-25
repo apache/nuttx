@@ -163,6 +163,9 @@ static inline uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi);
 static uint8_t enc28j60_select(FAR struct spi_dev_s *spi);
 static uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi);
 #endif
+
+/* SPI control register access */
+
 static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
          uint8_t cmd);
 static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
@@ -172,6 +175,13 @@ static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
          uint8_t ctrlreg);
 static uint8_t enc28j60_rdphymac(FAR struct enc28j60_driver_s *priv,
          uint8_t ctrlreg);
+
+/* SPI buffer transfers */
+
+static void enc28j60_rdbuffer(FAR struct enc28j60_driver_s *priv,
+         FAR uint8_t *buffer, size_t buflen);
+static void enc28j60_wrbuffer(FAR struct enc28j60_driver_s *priv,
+         FAR const uint8_t *buffer, size_t buflen);
 
 /* Common TX logic */
 
@@ -240,7 +250,7 @@ static inline uint8_t enc28j60_select(FAR struct spi_dev_s *spi)
 #else
 static uint8_t enc28j60_select(FAR struct spi_dev_s *spi)
 {
-  /* Select ENC2J60 chip (locking the SPI bus in case there are multiple
+  /* Select ENC28J60 chip (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
    */
 
@@ -302,7 +312,7 @@ static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
   DEBUGASSERT(priv && priv->spi);
   spi = priv->spi;
 
-  /* Select ENC2J60 chip */
+  /* Select ENC28J60 chip */
 
   enc28j60_select(spi);
 
@@ -333,7 +343,7 @@ static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
   DEBUGASSERT(priv && priv->spi);
   spi = priv->spi;
 
-  /* Select ENC2J60 chip */
+  /* Select ENC28J60 chip */
 
   enc28j60_select(spi);
 
@@ -344,6 +354,72 @@ static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
   /* Send the data byte */
 
   (void)SPI_SEND(spi, wrdata);
+
+  /* De-select ENC28J60 chip. */
+
+  enc28j60_deselect(spi);
+}
+
+/****************************************************************************
+ * Function: enc28j60_rdbuffer
+ *
+ * Description:
+ *   Read a buffer of data.
+ *
+ ****************************************************************************/
+
+static void enc28j60_rdbuffer(FAR struct enc28j60_driver_s *priv,
+                              FAR uint8_t *buffer, size_t buflen)
+{
+  FAR struct spi_dev_s *spi;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC28J60 chip */
+
+  enc28j60_select(spi);
+
+  /* Send the read buffer memory command (ignoring the response) */
+
+  (void)SPI_SEND(spi, ENC28J60_RBM);
+ 
+  /* Then read the buffer data */
+
+  SPI_RECVBLOCK(spi, buffer, buflen);
+
+  /* De-select ENC28J60 chip. */
+
+  enc28j60_deselect(spi);
+}
+
+/****************************************************************************
+ * Function: enc28j60_wrbuffer
+ *
+ * Description:
+ *   Write a buffer of data.
+ *
+ ****************************************************************************/
+
+static void enc28j60_wrbuffer(FAR struct enc28j60_driver_s *priv,
+                              FAR const uint8_t *buffer, size_t buflen)
+{
+  FAR struct spi_dev_s *spi;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC28J60 chip */
+
+  enc28j60_select(spi);
+
+  /* Send the write buffer memory command (ignoring the response) */
+
+  (void)SPI_SEND(spi, ENC28J60_WBM);
+ 
+  /* Then send the buffer */
+
+  SPI_SNDBLOCK(spi, buffer, buflen);
 
   /* De-select ENC28J60 chip. */
 
@@ -401,7 +477,7 @@ static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
   DEBUGASSERT(priv && priv->spi);
   spi = priv->spi;
 
-  /* Select ENC2J60 chip */
+  /* Select ENC28J60 chip */
 
   enc28j60_select(spi);
 
@@ -438,7 +514,7 @@ static uint8_t enc28j60_rdphymac(FAR struct enc28j60_driver_s *priv,
   DEBUGASSERT(priv && priv->spi);
   spi = priv->spi;
 
-  /* Select ENC2J60 chip */
+  /* Select ENC28J60 chip */
 
   enc28j60_select(spi);
 
@@ -476,7 +552,7 @@ static void enc28j60_wrbank(FAR struct enc28j60_driver_s *priv,
   DEBUGASSERT(priv && priv->spi);
   spi = priv->spi;
 
-  /* Select ENC2J60 chip */
+  /* Select ENC28J60 chip */
 
   enc28j60_select(spi);
 
