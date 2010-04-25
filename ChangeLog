@@ -1095,6 +1095,7 @@
 	* graphics/nxglib/fb and lcd - Support LCD and framebuffer rasterizers for NX.
 	* configs/sam3u-ek/src/up_lcd.c - LCD driver for LCD on SAM3U-EK development
 	  board.
+	* configs/sam3u-ek/nx - NX graphics configuration for the SAM3U-EK
 
 5.5 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
