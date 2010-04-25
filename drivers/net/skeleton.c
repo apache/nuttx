@@ -264,21 +264,20 @@ static void skel_receive(FAR struct skel_driver_s *skel)
              uip_arp_out(&skel->sk_dev);
              skel_transmit(skel);
            }
-         }
-       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
-         {
-           uip_arp_arpin(&skel->sk_dev);
+        }
+      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+        {
+          uip_arp_arpin(&skel->sk_dev);
 
-           /* If the above function invocation resulted in data that should be
-            * sent out on the network, the field  d_len will set to a value > 0.
-            */
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
 
-            if (skel->sk_dev.d_len > 0)
-              {
-                skel_transmit(skel);
-              }
-          }
-      }
+          if (skel->sk_dev.d_len > 0)
+            {
+              skel_transmit(skel);
+            }
+        }
     }
   while (); /* While there are more packets to be processed */
 }
@@ -592,4 +591,3 @@ int skel_initialize(void)
 }
 
 #endif /* CONFIG_NET && CONFIG_skeleton_NET */
-

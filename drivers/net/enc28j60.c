@@ -42,11 +42,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_ENC28J60_NET)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_ENC28J60)
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stding.h>
+#include <stdint.h>
 #include <time.h>
 #include <string.h>
 #include <debug.h>
@@ -80,7 +80,7 @@
  *   devices that will be supported.
  */
 
-#ifdef CONFIG_ENC28J60_SPIMODE
+#ifndef CONFIG_ENC28J60_SPIMODE
 #  define CONFIG_ENC28J60_SPIMODE SPIDEV_MODE2
 #endif
 
@@ -104,6 +104,15 @@
 #define ENC28J60_TXTIMEOUT (60*CLK_TCK)
 
 /* Misc. Helper Macros ******************************************************/
+
+#define enc28j60_rdglobal(priv,ctrlref) \
+  enc28j60_rdglobal2(priv, ENC28J60_RCR | GETADDR(ctrlreg))
+#define enc28j60_wrglobal(priv,ctrlreg,wrdata) \
+  enc28j60_wrglobal2(priv, ENC28J60_WCR | GETADDR(ctrlreg), wrdata)
+#define enc28j60_clrglobal(priv,ctrlreg,clrbits) \
+  enc28j60_wrglobal2(priv, ENC28J60_BFC | GETADDR(ctrlreg), clrbits)
+#define enc28j60_setglobal(priv,ctrlreg,setbits) \
+  enc28j60_wrglobal2(priv, ENC28J60_BFS | GETADDR(ctrlreg), setbits)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -147,16 +156,32 @@ static struct enc28j60_driver_s g_enc28j60[CONFIG_ENC28J60_NINTERFACES];
 /* Low-level SPI helpers */
 
 static inline void enc28j60_configspi(FAR struct spi_dev_s *spi);
+#ifdef CONFIG_ENC28J60_OWNBUS
+static inline uint8_t enc28j60_select(FAR struct spi_dev_s *spi);
+static inline uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi);
+#else
+static uint8_t enc28j60_select(FAR struct spi_dev_s *spi);
+static uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi);
+#endif
+static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
+         uint8_t cmd);
+static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
+         uint8_t cmd, uint8_t wrdata);
+static void enc28j60_setbank(FAR struct enc28j60_driver_s *priv, uint8_t bank);
+static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
+         uint8_t ctrlreg);
+static uint8_t enc28j60_rdphymac(FAR struct enc28j60_driver_s *priv,
+         uint8_t ctrlreg);
 
 /* Common TX logic */
 
-static int  enc28j60_transmit(FAR struct enc28j60_drver_s *priv);
+static int  enc28j60_transmit(FAR struct enc28j60_driver_s *priv);
 static int  enc28j60_uiptxpoll(struct uip_driver_s *dev);
 
 /* Interrupt handling */
 
-static void enc28j60_receive(FAR struct enc28j60_drver_s *priv);
-static void enc28j60_txdone(FAR struct enc28j60_drver_s *priv);
+static void enc28j60_receive(FAR struct enc28j60_driver_s *priv);
+static void enc28j60_txdone(FAR struct enc28j60_driver_s *priv);
 static int  enc28j60_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
@@ -260,6 +285,219 @@ static uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi)
 #endif
 
 /****************************************************************************
+ * Function: enc28j60_rdglobal2
+ *
+ * Description:
+ *   Read a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
+ *   include the CMD 'OR'd with the the global address register.
+ *
+ ****************************************************************************/
+
+static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
+                                 uint8_t cmd)
+{
+  FAR struct spi_dev_s *spi;
+  uint8_t rddata;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC2J60 chip */
+
+  enc28j60_select(spi);
+
+  /* Send the read command and (maybe collect the return data) */
+
+  rddata = SPI_SEND(spi, cmd);
+
+  /* De-select ENC28J60 chip */
+
+  enc28j60_deselect(spi);
+  return rddata;
+}
+
+/****************************************************************************
+ * Function: enc28j60_wrglobal2
+ *
+ * Description:
+ *   Write to a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
+ *   include the CMD 'OR'd with the the global address register.
+ *
+ ****************************************************************************/
+
+static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
+                               uint8_t cmd, uint8_t wrdata)
+{
+  FAR struct spi_dev_s *spi;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC2J60 chip */
+
+  enc28j60_select(spi);
+
+  /* Send the write command */
+
+  (void)SPI_SEND(spi, cmd);
+
+  /* Send the data byte */
+
+  (void)SPI_SEND(spi, wrdata);
+
+  /* De-select ENC28J60 chip. */
+
+  enc28j60_deselect(spi);
+}
+
+/****************************************************************************
+ * Function: enc28j60_setbank
+ *
+ * Description:
+ *   Set the bank for these next control register access.
+ *
+ * Assumption:
+ *   The caller has exclusive access to the SPI bus
+ *
+ ****************************************************************************/
+
+static void enc28j60_setbank(FAR struct enc28j60_driver_s *priv, uint8_t bank)
+{
+  /* Check if the bank setting has changed*/
+
+  if (bank != priv->bank)
+    {
+      /* Select bank 0 (just so that all of the bits are cleared) */
+
+      enc28j60_clrglobal(priv, ECON1, ECON1_BSEL_MASK);
+
+      /* Then OR in bits to get the correct bank */
+
+      if (bank != 0)
+        {
+          enc28j60_setglobal(priv, ECON1, (bank << ECON1_BSEL_SHIFT));
+        }
+
+      /* Then remember the bank setting */
+
+      priv->bank = bank;
+    }
+}
+
+/****************************************************************************
+ * Function: enc28j60_rdbank
+ *
+ * Description:
+ *   Set the bank for these next control register access.
+ *
+ ****************************************************************************/
+ 
+static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
+                               uint8_t ctrlreg)
+{
+  FAR struct spi_dev_s *spi;
+  uint8_t rddata;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC2J60 chip */
+
+  enc28j60_select(spi);
+
+  /* set the bank */
+
+  enc28j60_setbank(priv, GETBANK(ctrlreg));
+
+  /* Send the read command and collect the return data. */
+
+  rddata = SPI_SEND(spi, ENC28J60_RCR | GETADDR(ctrlreg));
+
+  /* De-select ENC28J60 chip */
+
+  enc28j60_deselect(spi);
+  return rddata;
+}
+
+/****************************************************************************
+ * Function: enc28j60_rdphymac
+ *
+ * Description:
+ *   Somewhat different timing is required to read from any PHY or MAC
+ *   registers.  The PHY/MAC data is returned on the second byte after the
+ *   command.
+ *
+ ****************************************************************************/
+
+static uint8_t enc28j60_rdphymac(FAR struct enc28j60_driver_s *priv,
+                                 uint8_t ctrlreg)
+{
+  FAR struct spi_dev_s *spi;
+  uint8_t rddata;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC2J60 chip */
+
+  enc28j60_select(spi);
+
+  /* Set the bank */
+
+  enc28j60_setbank(priv, GETBANK(ctrlreg));
+
+  /* Send the read command (discarding the return data) */
+
+  (void)SPI_SEND(spi, ENC28J60_RCR | GETADDR(ctrlreg));
+
+  /* Do an extra transfer to get the data from the MAC or PHY */
+
+  rddata = SPI_SEND(spi, 0);
+
+  /* De-select ENC28J60 chip */
+
+  enc28j60_deselect(spi);
+  return rddata;
+}
+
+/****************************************************************************
+ * Function: enc28j60_wrbank
+ *
+ * Description:
+ *   Set the bank for these next control register access.
+ *
+ ****************************************************************************/
+ 
+static void enc28j60_wrbank(FAR struct enc28j60_driver_s *priv,
+                            uint8_t ctrlreg, uint8_t wrdata)
+{
+  FAR struct spi_dev_s *spi;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC2J60 chip */
+
+  enc28j60_select(spi);
+
+  /* Set the bank */
+
+  enc28j60_setbank(priv, GETBANK(ctrlreg));
+
+  /* Send the write command */
+
+  (void)SPI_SEND(spi, ENC28J60_WCR | GETADDR(ctrlreg));
+
+  /* Send the data byte */
+
+  (void)SPI_SEND(spi, wrdata);
+
+  /* De-select ENC28J60 chip. */
+
+  enc28j60_deselect(spi);
+}
+
+/****************************************************************************
  * Function: enc28j60_transmit
  *
  * Description:
@@ -276,7 +514,7 @@ static uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-static int enc28j60_transmit(FAR struct enc28j60_drver_s *priv)
+static int enc28j60_transmit(FAR struct enc28j60_driver_s *priv)
 {
   /* Verify that the hardware is ready to send another packet */
 
@@ -317,7 +555,7 @@ static int enc28j60_transmit(FAR struct enc28j60_drver_s *priv)
 
 static int enc28j60_uiptxpoll(struct uip_driver_s *dev)
 {
-  FAR struct enc28j60_drver_s *priv = (FAR struct enc28j60_drver_s *)dev->d_private;
+  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -356,7 +594,7 @@ static int enc28j60_uiptxpoll(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void enc28j60_receive(FAR struct enc28j60_drver_s *priv)
+static void enc28j60_receive(FAR struct enc28j60_driver_s *priv)
 {
   do
     {
@@ -384,27 +622,26 @@ static void enc28j60_receive(FAR struct enc28j60_drver_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
-             uip_arp_out(&priv->dev);
-             enc28j60_transmit(priv);
-           }
+            {
+              uip_arp_out(&priv->dev);
+              enc28j60_transmit(priv);
+            }
+        }
+      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+        {
+          uip_arp_arpin(&priv->dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+           if (priv->dev.d_len > 0)
+             {
+               enc28j60_transmit(priv);
+             }
          }
-       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
-         {
-           uip_arp_arpin(&priv->dev);
-
-           /* If the above function invocation resulted in data that should be
-            * sent out on the network, the field  d_len will set to a value > 0.
-            */
-
-            if (priv->dev.d_len > 0)
-              {
-                enc28j60_transmit(priv);
-              }
-          }
-      }
-    }
-  while (); /* While there are more packets to be processed */
+     }
+  while (false); /* While there are more packets to be processed */
 }
 
 /****************************************************************************
@@ -423,7 +660,7 @@ static void enc28j60_receive(FAR struct enc28j60_drver_s *priv)
  *
  ****************************************************************************/
 
-static void enc28j60_txdone(FAR struct enc28j60_drver_s *priv)
+static void enc28j60_txdone(FAR struct enc28j60_driver_s *priv)
 {
   /* Check for errors and update statistics */
 
@@ -455,7 +692,7 @@ static void enc28j60_txdone(FAR struct enc28j60_drver_s *priv)
 
 static int enc28j60_interrupt(int irq, FAR void *context)
 {
-  register FAR struct enc28j60_drver_s *priv = &g_enc28j60[0];
+  register FAR struct enc28j60_driver_s *priv = &g_enc28j60[0];
 
   /* Disable Ethernet interrupts */
 
@@ -498,7 +735,7 @@ static int enc28j60_interrupt(int irq, FAR void *context)
 
 static void enc28j60_txtimeout(int argc, uint32_t arg, ...)
 {
-  FAR struct enc28j60_drver_s *priv = (FAR struct enc28j60_drver_s *)arg;
+  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)arg;
 
   /* Increment statistics and dump debug info */
 
@@ -528,7 +765,7 @@ static void enc28j60_txtimeout(int argc, uint32_t arg, ...)
 
 static void enc28j60_polltimer(int argc, uint32_t arg, ...)
 {
-  FAR struct enc28j60_drver_s *priv = (FAR struct enc28j60_drver_s *)arg;
+  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)arg;
 
   /* Check if there is room in the send another TXr packet.  */
 
@@ -560,7 +797,7 @@ static void enc28j60_polltimer(int argc, uint32_t arg, ...)
 
 static int enc28j60_ifup(struct uip_driver_s *dev)
 {
-  FAR struct enc28j60_drver_s *priv = (FAR struct enc28j60_drver_s *)dev->d_private;
+  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)dev->d_private;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
@@ -597,7 +834,7 @@ static int enc28j60_ifup(struct uip_driver_s *dev)
 
 static int enc28j60_ifdown(struct uip_driver_s *dev)
 {
-  FAR struct enc28j60_drver_s *priv = (FAR struct enc28j60_drver_s *)dev->d_private;
+  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
@@ -638,7 +875,7 @@ static int enc28j60_ifdown(struct uip_driver_s *dev)
 
 static int enc28j60_txavail(struct uip_driver_s *dev)
 {
-  FAR struct enc28j60_drver_s *priv = (FAR struct enc28j60_drver_s *)dev->d_private;
+  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)dev->d_private;
   irqstate_t flags;
 
   flags = irqsave();
