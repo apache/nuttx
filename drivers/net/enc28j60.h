@@ -44,7 +44,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* A total of seven instructions are implemented on the ENC28J60 */
+/* ENC28J60 Commands ********************************************************/
+/* A total of seven instructions are implemented on the ENC28J60.  Where:
+ *
+ *     aaaaaa is the 5-bit address of a control register, and
+ *   dddddddd is one or more bytes of data that may accompany the command.
+ */
 
 #define ENC28J60_RCR        (0x00)    /* Read Control Register
                                        * 000 | aaaaa | (Registe value returned)) */
@@ -61,20 +66,21 @@
 #define ENC28J60_SRC        (0xff)    /* System Reset
                                        * 111 | 11111 | (No data) */
 
-/* Control registers are accessed with the RCR, RBM, WCR, BFS, and BFC commands.
- * The following identifies all ENC28J60 control registers.  The Control register
- * memory is partitioned into four banks, selectable by the bank select bits,
- * BSEL1:BSEL0, in the ECON1 register.
+/* Global Control Registers *************************************************/
+/* Control registers are accessed with the RCR, RBM, WCR, BFS, and BFC
+ * commands. The following identifies all ENC28J60 control registers.  The
+ * control register memory is partitioned into four banks, selectable by the
+ * bank select bits, BSEL1:BSEL0, in the ECON1 register.
  *
- * The last five locations (0x1b to 0x1f) of all banks point to a common set of
- * registers: EIE, EIR, ESTAT, ECON2 and ECON1. These are key registers used
- * in controlling and monitoring the operation of the device. Their common
- * mapping allows easy access without switching the bank.
+ * The last five locations (0x1b to 0x1f) of all banks point to a common set
+ * of registers: EIE, EIR, ESTAT, ECON2 and ECON1. These are key registers
+ * usedin controlling and monitoring the operation of the device. Their
+ * common mapping allows easy access without switching the bank.
  *
  * Control registers for the ENC28J60 are generically grouped as ETH, MAC and
- * MII registers. Register names starting with E belong to the ETH group. Similarly,
- * registers names starting with MA belong to the MAC group and registers prefixed
- * with MI belong to the MII group.
+ * MII registers. Register names starting with E belong to the ETH group.
+ * Similarly, registers names starting with MA belong to the MAC group and
+ * registers prefixed with MI belong to the MII group.
  */
 
 #define EIE                 (0x1b)   /* Ethernet Interrupt Enable Register */
@@ -83,9 +89,66 @@
 #define ECON2               (0x1e)   /* Ethernet Control 2 Register */
 #define ECON1               (0x1f)   /* Ethernet Control 1 Register */
 
-/* The remaining control registers are identified with a a 5 bit address and a
- * bank selection.  We pack the bank number and the control register address
- * together to keep the design simpler.
+/* Ethernet Interrupt Enable Register Bit Definitions */
+
+#define EIE_RXERIE          (1 << 0) /* Bit 0: Receive Error Interrupt Enable */
+#define EIE_TXERIE          (1 << 1) /* Bit 1: Transmit Error Interrupt Enable */
+                                     /* Bit 2: Reserved */
+#define EIE_TXIE            (1 << 3) /* Bit 3: Transmit Enable */
+#define EIE_LINKIE          (1 << 4) /* Bit 4: Link Status Change Interrupt Enable */
+#define EIE_DMAIE           (1 << 5) /* Bit 5: DMA Interrupt Enable */
+#define EIE_PKTIE           (1 << 6) /* Bit 6: Receive Packet Pending Interrupt Enable */
+#define EIE_INTIE           (1 << 7) /* Bit 7: Global INT Interrupt Enable */
+
+/* Ethernet Interrupt Request Register Bit Definitions */
+
+#define EIR_RXERIF          (1 << 0) /* Bit 0: Receive Error Interrupt */
+#define EIR_TXERIF          (1 << 1) /* Bit 1: Transmit Error Interrupt */
+                                     /* Bit 2: Reserved */
+#define EIR_TXIF            (1 << 3) /* Bit 3: Transmit Interrupt */
+#define EIR_LINKIF          (1 << 4) /* Bit 4: Link Change Interrupt */
+#define EIR_DMAIF           (1 << 5) /* Bit 5: DMA Interrupt */
+#define EIR_PKTIF           (1 << 6) /* Bit 6: Receive Packet Pending Interrupt */
+                                     /* Bit 7: Reserved */
+
+/* Ethernet Status Register Bit Definitions */
+
+#define ESTAT_CLKRDY        (1 << 0) /* Bit 0: Clock Ready */
+#define ESTAT_TXABRT        (1 << 1) /* Bit 1: Transmit Abort Error */
+#define ESTAT_RXBUSY        (1 << 2) /* Bit 2: Receive Busy */
+                                     /* Bit 3: Reserved */
+#define ESTAT_LATECOL       (1 << 4) /* Bit 4: Late Collision Error */
+                                     /* Bit 5: Reserved */
+#define ESTAT_BUFER         (1 << 6) /* Bit 6: Ethernet Buffer Error Status */
+#define ESTAT_INT           (1 << 7) /* Bit 7: INT Interrupt */
+
+/* Ethernet Control 1 Register Bit Definitions */
+
+#define ECON1_BSEL_SHIFT    (0)      /* Bits 0-1: Bank select */
+#define ECON1_BSEL_MASK     (3 << ECON1_BSEL_SHIFT)
+#  define ECON1_BSEL_BANK0  (0 << 0) /* Bank 0 */
+#  define ECON1_BSEL_BANK1  (1 << 1) /* Bank 1 */
+#  define ECON1_BSEL_BANK2  (2 << 0) /* Bank 2 */
+#  define ECON1_BSEL_BANK3  (3 << 0) /* Bank 3 */
+#define ECON1_RXEN          (1 << 2) /* Bit 2: Receive Enable */
+#define ECON1_TXRTS         (1 << 3) /* Bit 3: Transmit Request to Send */
+#define ECON1_CSUMEN        (1 << 4) /* Bit 4: DMA Checksum Enable */
+#define ECON1_DMAST         (1 << 5) /* Bit 5: DMA Start and Busy Status */
+#define ECON1_RXRST         (1 << 6) /* Bit 6: Receive Logic Reset */
+#define ECON1_TXRST         (1 << 7) /* Bit 7: Transmit Logic Reset */
+
+/* Ethernet Control 2 Register */
+                                     /* Bits 0-2: Reserved */
+#define ECON2_VRPS          (1 << 3) /* Bit 3: Voltage Regulator Power Save Enable */
+                                     /* Bit 4: Reserved */
+#define ECON2_PWRSV         (1 << 5) /* Bit 5: Power Save Enable */
+#define ECON2_PKTDEC        (1 << 6) /* Bit 6: Packet Decrement */
+#define ECON2_AUTOINC       (1 << 7) /* Bit 7: Automatic Buffer Pointer Increment Enable */
+
+/* Banked Control Registers *************************************************/
+/* The remaining control registers are identified with a a 5 bit address and
+ * a bank selection.  We pack the bank number and the control register
+ * address together to keep the design simpler.
  */
 
 #define ENC28J60_ADDR_SHIFT (0)      /* Bits 0-4: Register address */
@@ -206,61 +269,71 @@
                                      /* 0x1a: Reserved */
                                      /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
 
-/* Ethernet Interrupt Enable Register Bit Definitions */
+/* PHY Registers ************************************************************/
 
-#define EIE_RXERIE          (1 << 0) /* Bit 0: Receive Error Interrupt Enable */
-#define EIE_TXERIE          (1 << 1) /* Bit 1: Transmit Error Interrupt Enable */
-                                     /* Bit 2: Reserved */
-#define EIE_TXIE            (1 << 3) /* Bit 3: Transmit Enable */
-#define EIE_LINKIE          (1 << 4) /* Bit 4: Link Status Change Interrupt Enable */
-#define EIE_DMAIE           (1 << 5) /* Bit 5: DMA Interrupt Enable */
-#define EIE_PKTIE           (1 << 6) /* Bit 6: Receive Packet Pending Interrupt Enable */
-#define EIE_INTIE           (1 << 7) /* Bit 7: Global INT Interrupt Enable */
+#define PHCON1            (0x00)
+#define PHSTAT1           (0x01)
+#define PHHID1            (0x02)
+#define PHHID2            (0x03)
+#define PHCON2            (0x10)
+#define PHSTAT2           (0x11)
+#define PHIE              (0x12)
+#define PHIR              (0x13)
+#define PHLCON            (0x14)
 
-/* Ethernet Interupt Request Register Bit Definitions */
+/* PHCON1 Register Bit Definitions */
 
-#define EIR_RXERIF          (1 << 0) /* Bit 0: Receive Error Interrupt */
-#define EIR_TXERIF          (1 << 1) /* Bit 1: Transmit Error Interrupt */
-                                     /* Bit 2: Reserved */
-#define EIR_TXIF            (1 << 3) /* Bit 3: Transmit Interrupt */
-#define EIR_LINKIF          (1 << 4) /* Bit 4: Link Change Interrupt */
-#define EIR_DMAIF           (1 << 5) /* Bit 5: DMA Interrupt */
-#define EIR_PKTIF           (1 << 6) /* Bit 6: Receive Packet Pending Interrupt */
-                                     /* Bit 7: Reserved */
+#define PHCON1_PDPXMD     (1 << 8)  /* Bit 8:  PHY Power-Down */
+#define PHCON1_PPWRSV     (1 << 11) /* Bit 11: PHY Power-Down */
+#define PHCON1_PLOOPBK    (1 << 14) /* Bit 14: PHY Loopback */
+#define PHCON1_PRST       (1 << 15) /* Bit 15: PHY Software Reset */
 
-/* Ethernet Status Register Bit Definitions */
+/* PHSTAT1 Register Bit Definitions */
 
-#define ESTAT_CLKRDY        (1 << 0) /* Bit 0: Clock Ready */
-#define ESTAT_TXABRT        (1 << 1) /* Bit 1: Transmit Abort Error */
-#define ESTAT_RXBUSY        (1 << 2) /* Bit 2: Receive Busy */
-                                     /* Bit 3: Reserved */
-#define ESTAT_LATECOL       (1 << 4) /* Bit 4: Late Collision Error */
-                                     /* Bit 5: Reserved */
-#define ESTAT_BUFER         (1 << 6) /* Bit 6: Ethernet Buffer Error Status */
-#define ESTAT_INT           (1 << 7) /* Bit 7: INT Interrupt */
+#define PHSTAT1_JBSTAT    (1 << 1)  /* Bit 1: PHY Latching Jabber Status */
+#define PHSTAT1_LLSTAT    (1 << 2)  /* Bit 2: PHY Latching Link Status */
+#define PHSTAT1_PHDPX     (1 << 11) /* Bit 11: PHY Half-Duplex Capable */
+#define PHSTAT1_PFDPX     (1 << 12) /* Bit 12: PHY Full-Duplex Capable */
 
-/* Ethernet Control 1 Register Bit Definitions */
+/* PHCON2 Register Bit Definitions */
 
-#define ECON1_BSEL_SHIFT    (0)      /* Bits 0-1: Bank select */
-#define ECON1_BSEL_MASK     (3 << ECON1_BSEL_SHIFT)
-#  define ECON1_BSEL_BANK0  (0 << 0) /* Bank 0 */
-#  define ECON1_BSEL_BANK1  (1 << 1) /* Bank 1 */
-#  define ECON1_BSEL_BANK2  (2 << 0) /* Bank 2 */
-#  define ECON1_BSEL_BANK3  (3 << 0) /* Bank 3 */
-#define ECON1_RXEN          (1 << 2) /* Bit 2: Receive Enable */
-#define ECON1_TXRTS         (1 << 3) /* Bit 3: Transmit Request to Send */
-#define ECON1_CSUMEN        (1 << 4) /* Bit 4: DMA Checksum Enable */
-#define ECON1_DMAST         (1 << 5) /* Bit 5: DMA Start and Busy Status */
-#define ECON1_RXRST         (1 << 6) /* Bit 6: Receive Logic Reset */
-#define ECON1_TXRST         (1 << 7) /* Bit 7: Transmit Logic Reset */
+#define PHCON2_HDLDIS     (1 << 8)  /* Bit 8:  PHY Half-Duplex Loopback Disable */
+#define PHCON2_JABBER     (1 << 10) /* Bit 10: Jabber Correction Disable */
+#define PHCON2_TXDIS      (1 << 13) /* Bit 13: Twisted-Pair Transmitter Disable */
+#define PHCON2_FRCLINK    (1 << 14) /* Bit 14: PHY Force Linkup */
 
-/* Ethernet Control 2 Register */
-                                     /* Bits 0-2: Reserved */
-#define ECON2_VRPS          (1 << 3) /* Bit 3: Voltage Regulator Power Save Enable */
-                                     /* Bit 4: Reserved */
-#define ECON2_PWRSV         (1 << 5) /* Bit 5: Power Save Enable */
-#define ECON2_PKTDEC        (1 << 6) /* Bit 6: Packet Decrement */
-#define ECON2_AUTOINC       (1 << 7) /* Bit 7: Automatic Buffer Pointer Increment Enable */
+/* PHSTAT2 Register Bit Definitions */
+
+#define PHSTAT2_PLRITY    (1 << 5)  /* Bit 5:  Polarity Status */
+#define PHSTAT2_DPXSTAT   (1 << 9)  /* Bit 9:  PHY Duplex Status */
+#define PHSTAT2_LSTAT     (1 << 10) /* Bit 10: PHY Link Status */
+#define PHSTAT2_COLSTAT   (1 << 11) /* Bit 11: PHY Collision Status */
+#define PHSTAT2_RXSTAT    (1 << 12) /* Bit 12: PHY Receive Status */
+#define PHSTAT2_TXSTAT    (1 << 13) /* Bit 13: PHY Transmit Status */
+
+/* PHIE Regiser Bit Definitions */
+
+#define PHIE_PGEIE        (1 << 1)
+#define PHIE_PLNKIE       (1 << 4)
+
+/* PHIR Regiser Bit Definitions */
+
+#define PHIR_PGIF         (1 << 2)
+#define PHIR_PLNKIF       (1 << 4)
+
+/* PHLCON Regiser Bit Definitions */
+
+#define PHLCON_STRCH      (1 << 1)  /* Bit 1:  LED Pulse Stretching Enable */
+#define PHLCON_LFRQ0      (1 << 2)  /* Bit 2:  LED Pulse Stretch Time Configuration */
+#define PHLCON_LFRQ1      (1 << 3)  /* Bit 3:  " " "   " "     " "  " " */      
+#define PHLCON_LBCFG0     (1 << 4)  /* Bit 4:  LEDB Configuration */
+#define PHLCON_LBCFG1     (1 << 5)  /* Bit 5:  "  " "           " */
+#define PHLCON_LBCFG2     (1 << 6)  /* Bit 6:  "  " "           " */
+#define PHLCON_LBCFG3     (1 << 7)  /* Bit 7:  "  " "           " */
+#define PHLCON_LACFG0     (1 << 8)  /* Bit 8:  LEDA Configuration */
+#define PHLCON_LACFG1     (1 << 9)  /* Bit 9:  "  " "           " */
+#define PHLCON_LACFG2     (1 << 10) /* Bit 10: "  " "           " */
+#define PHLCON_LACFG3     (1 << 11) /* Bit 11: "  " "           " */
 
 /****************************************************************************
  * Public Types
