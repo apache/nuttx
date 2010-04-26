@@ -4,6 +4,10 @@
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
+ * References:
+ * - ENC28J60 Data Sheet, Stand-Alone Ethernet Controller with SPI Interface,
+ *   DS39662C, 2008 Microchip Technology Inc.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -271,38 +275,38 @@
 
 /* PHY Registers ************************************************************/
 
-#define PHCON1            (0x00)
-#define PHSTAT1           (0x01)
-#define PHHID1            (0x02)
-#define PHHID2            (0x03)
-#define PHCON2            (0x10)
-#define PHSTAT2           (0x11)
-#define PHIE              (0x12)
+#define PHCON1            (0x00)     /* PHY Control Register 1 */
+#define PHSTAT1           (0x01)     /* PHY Status 1 */
+#define PHID1             (0x02)     /* PHY ID Register 1 */
+#define PHID2             (0x03)     /* PHY ID Register 2 */
+#define PHCON2            (0x10)     /* PHY Control Register 2 */
+#define PHSTAT2           (0x11)     /* PHY Status 2 */
+#define PHIE              (0x12)     /* PHY Interrupt Enable Register */
 #define PHIR              (0x13)
 #define PHLCON            (0x14)
 
-/* PHCON1 Register Bit Definitions */
+/* PHY Control Register 1 Register Bit Definitions */
 
 #define PHCON1_PDPXMD     (1 << 8)  /* Bit 8:  PHY Power-Down */
 #define PHCON1_PPWRSV     (1 << 11) /* Bit 11: PHY Power-Down */
 #define PHCON1_PLOOPBK    (1 << 14) /* Bit 14: PHY Loopback */
 #define PHCON1_PRST       (1 << 15) /* Bit 15: PHY Software Reset */
 
-/* PHSTAT1 Register Bit Definitions */
+/* HY Status 1 Register Bit Definitions */
 
 #define PHSTAT1_JBSTAT    (1 << 1)  /* Bit 1: PHY Latching Jabber Status */
 #define PHSTAT1_LLSTAT    (1 << 2)  /* Bit 2: PHY Latching Link Status */
 #define PHSTAT1_PHDPX     (1 << 11) /* Bit 11: PHY Half-Duplex Capable */
 #define PHSTAT1_PFDPX     (1 << 12) /* Bit 12: PHY Full-Duplex Capable */
 
-/* PHCON2 Register Bit Definitions */
+/* PHY Control Register 2 Register Bit Definitions */
 
 #define PHCON2_HDLDIS     (1 << 8)  /* Bit 8:  PHY Half-Duplex Loopback Disable */
 #define PHCON2_JABBER     (1 << 10) /* Bit 10: Jabber Correction Disable */
 #define PHCON2_TXDIS      (1 << 13) /* Bit 13: Twisted-Pair Transmitter Disable */
 #define PHCON2_FRCLINK    (1 << 14) /* Bit 14: PHY Force Linkup */
 
-/* PHSTAT2 Register Bit Definitions */
+/* PHY Status 2 Register Bit Definitions */
 
 #define PHSTAT2_PLRITY    (1 << 5)  /* Bit 5:  Polarity Status */
 #define PHSTAT2_DPXSTAT   (1 << 9)  /* Bit 9:  PHY Duplex Status */
@@ -311,15 +315,15 @@
 #define PHSTAT2_RXSTAT    (1 << 12) /* Bit 12: PHY Receive Status */
 #define PHSTAT2_TXSTAT    (1 << 13) /* Bit 13: PHY Transmit Status */
 
-/* PHIE Regiser Bit Definitions */
+/* PHY Interrupt Enable Register Bit Definitions */
 
-#define PHIE_PGEIE        (1 << 1)
-#define PHIE_PLNKIE       (1 << 4)
+#define PHIE_PGEIE        (1 << 1)  /* Bit 1:  PHY Global Interrupt Enable */
+#define PHIE_PLNKIE       (1 << 4)  /* Bit 4:  PHY Link Change Interrupt Enable */
 
 /* PHIR Regiser Bit Definitions */
 
-#define PHIR_PGIF         (1 << 2)
-#define PHIR_PLNKIF       (1 << 4)
+#define PHIR_PGIF         (1 << 2)  /* Bit 2:  PHY Global Interrupt */
+#define PHIR_PLNKIF       (1 << 4)  /* Bit 4:  PHY Link Change Interrupt */
 
 /* PHLCON Regiser Bit Definitions */
 
