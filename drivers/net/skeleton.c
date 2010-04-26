@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_skeleton_NET)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_skeleton)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -590,4 +590,4 @@ int skel_initialize(void)
   return OK;
 }
 
-#endif /* CONFIG_NET && CONFIG_skeleton_NET */
+#endif /* CONFIG_NET && CONFIG_NET_skeleton */

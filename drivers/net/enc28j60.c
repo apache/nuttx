@@ -56,6 +56,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
+#include <nuttx/wqueue.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
@@ -73,7 +74,8 @@
  * defaults will be provided.
  *
  * CONFIG_ENC28J60_OWNBUS - Set if the ENC28J60 is the only active device on
- *   the SPI bus.
+ *   the SPI bus.  No locking or SPI configuration will be performed. All
+ *   transfers will be performed from the ENC2J60 interrupt handler.
  * CONFIG_ENC28J60_SPIMODE - Controls the SPI mode
  * CONFIG_ENC28J60_FREQUENCY - Define to use a different bus frequency
  * CONFIG_ENC28J60_NINTERFACES - Specifies the number of physical ENC28J60
@@ -90,6 +92,12 @@
 
 #ifndef CONFIG_ENC28J60_NINTERFACES
 # define CONFIG_ENC28J60_NINTERFACES 1
+#endif
+
+/* We need to have the work queue to handle SPI interrupts */
+
+#if !defined(CONFIG_SCHED_WORKQUEUE) && !defined(CONFIG_ENC28J60_OWNBUS)
+#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
 /* Timing *******************************************************************/
@@ -128,11 +136,25 @@
 
 struct enc28j60_driver_s
 {
-  bool     bifup;            /* true:ifup false:ifdown */
-  uint8_t  bank;             /* Currently selected bank */
-  uint16_t nextpkt;          /* Next packet address */
-  WDOG_ID  txpoll;           /* TX poll timer */
-  WDOG_ID  txtimeout;        /* TX timeout timer */
+  /* Device control */
+
+  bool          bifup;        /* true:ifup false:ifdown */
+  uint8_t       bank;         /* Currently selected bank */
+  uint16_t      nextpkt;      /* Next packet address */
+  int           irq;          /* GPIO IRQ configured for the ENC28J60 */
+
+  /* Timing */
+
+  WDOG_ID       txpoll;       /* TX poll timer */
+  WDOG_ID       txtimeout;    /* TX timeout timer */
+
+  /* We we don't own the SPI bus, then we cannot do SPI accesses from the
+   * interrupt handler.
+   */
+ 
+#ifndef CONFIG_ENC28J60_OWNBUS
+  struct work_s work;         /* Work queue support */
+#endif
 
   /* This is the contained SPI driver intstance */
 
@@ -140,7 +162,7 @@ struct enc28j60_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s dev;   /* Interface understood by uIP */
+  struct uip_driver_s dev;    /* Interface understood by uIP */
 };
 
 /****************************************************************************
@@ -192,6 +214,7 @@ static int  enc28j60_uiptxpoll(struct uip_driver_s *dev);
 
 static void enc28j60_receive(FAR struct enc28j60_driver_s *priv);
 static void enc28j60_txdone(FAR struct enc28j60_driver_s *priv);
+static void enc28j60_worker(FAR void *arg);
 static int  enc28j60_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
@@ -750,6 +773,48 @@ static void enc28j60_txdone(FAR struct enc28j60_driver_s *priv)
 }
 
 /****************************************************************************
+ * Function: enc28j60_worker
+ *
+ * Description:
+ *   Perform interrupt handling logic outside of the interrupt handler (on
+ *   the work queue thread).
+ *
+ * Parameters:
+ *   arg     - The reference to the driver structure (case to void*)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void enc28j60_worker(FAR void *arg)
+{
+  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)arg;
+
+  DEBUGASSERT(priv);
+
+  /* Disable Ethernet interrupts */
+
+  /* Get and clear interrupt status bits */
+
+  /* Handle interrupts according to status bit settings */
+
+  /* Check if we received an incoming packet, if so, call enc28j60_receive() */
+
+  enc28j60_receive(priv);
+
+  /* Check is a packet transmission just completed.  If so, call enc28j60_txdone */
+
+  enc28j60_txdone(priv);
+
+  /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if 
+   * there are no pending transmissions.
+   */
+}
+
+/****************************************************************************
  * Function: enc28j60_interrupt
  *
  * Description:
@@ -770,25 +835,26 @@ static int enc28j60_interrupt(int irq, FAR void *context)
 {
   register FAR struct enc28j60_driver_s *priv = &g_enc28j60[0];
 
-  /* Disable Ethernet interrupts */
+  DEBUGASSERT(priv->irq == irq);
 
-  /* Get and clear interrupt status bits */
-
-  /* Handle interrupts according to status bit settings */
-
-  /* Check if we received an incoming packet, if so, call enc28j60_receive() */
-
-  enc28j60_receive(priv);
-
-  /* Check is a packet transmission just completed.  If so, call enc28j60_txdone */
-
-  enc28j60_txdone(priv);
-
-  /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if 
-   * there are no pending transmissions.
+#ifdef CONFIG_ENC28J60_OWNBUS
+  /* In very simple environments, we own the SPI and can do data transfers
+   * from the interrupt handler.  That is actually a very bad idea in any
+   * case because it keeps interrupts disabled for a long time.
    */
 
+  enc28j60_worker((FAR void*)priv);
   return OK;
+#else
+  /* In complex environments, we cannot do SPI transfers from the interrupt
+   * handler because semaphores are probably used to lock the SPI bus.  In
+   * this case, we will defer processing to the worker thread.  This is also
+   * much kinder in the use of system resources and is, therefore, probably
+   * a good thing to do in any event.
+   */
+
+  return work_queue(&priv->work, enc28j60_worker, (FAR void *)priv, 0);
+#endif
 }
 
 /****************************************************************************
@@ -888,7 +954,7 @@ static int enc28j60_ifup(struct uip_driver_s *dev)
   /* Enable the Ethernet interrupt */
 
   priv->bifup = true;
-  up_enable_irq(CONFIG_ENC28J60_IRQ);
+  up_enable_irq(priv->irq);
   return OK;
 }
 
@@ -916,7 +982,7 @@ static int enc28j60_ifdown(struct uip_driver_s *dev)
   /* Disable the Ethernet interrupt */
 
   flags = irqsave();
-  up_disable_irq(CONFIG_ENC28J60_IRQ);
+  up_disable_irq(priv->irq);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -983,7 +1049,9 @@ static int enc28j60_txavail(struct uip_driver_s *dev)
  *   Initialize the Ethernet driver
  *
  * Parameters:
- *   None
+ *   spi - A reference to the platform's SPI driver for the ENC28J60
+ *   irq - The fully configured GPIO IRQ that ENC28J60 interrupts will be
+ *         asserted on.  This driver will attach and entable this IRQ.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -994,7 +1062,7 @@ static int enc28j60_txavail(struct uip_driver_s *dev)
 
 /* Initialize the Ethernet controller and driver */
 
-int enc28j60_initialize(FAR struct spi_dev_s *spi)
+int enc28j60_initialize(FAR struct spi_dev_s *spi, int irq)
 {
   /* Initialize and configure the ENC28J60 */
 
@@ -1011,10 +1079,11 @@ int enc28j60_initialize(FAR struct spi_dev_s *spi)
   g_enc28j60[0].txpoll       = wd_create();   /* Create periodic poll timer */
   g_enc28j60[0].txtimeout    = wd_create();   /* Create TX timeout timer */
   g_enc28j60[0].spi          = spi;           /* Save the SPI instance */
+  g_enc28j60[0].irq          = irq;           /* Save the IRQ number */
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_ENC28J60_IRQ, enc28j60_interrupt))
+  if (irq_attach(irq, enc28j60_interrupt))
     {
       /* We could not attach the ISR to the interrupt */
 
