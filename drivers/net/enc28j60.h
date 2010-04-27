@@ -114,6 +114,7 @@
 #define EIR_DMAIF           (1 << 5) /* Bit 5: DMA Interrupt */
 #define EIR_PKTIF           (1 << 6) /* Bit 6: Receive Packet Pending Interrupt */
                                      /* Bit 7: Reserved */
+#define EIR_ALLINTS         (0x7b)   /* All interrupts */
 
 /* Ethernet Status Register Bit Definitions */
 

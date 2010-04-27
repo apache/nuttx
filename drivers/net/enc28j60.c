@@ -113,14 +113,14 @@
 
 /* Misc. Helper Macros ******************************************************/
 
-#define enc28j60_rdglobal(priv,ctrlref) \
-  enc28j60_rdglobal2(priv, ENC28J60_RCR | GETADDR(ctrlreg))
-#define enc28j60_wrglobal(priv,ctrlreg,wrdata) \
-  enc28j60_wrglobal2(priv, ENC28J60_WCR | GETADDR(ctrlreg), wrdata)
-#define enc28j60_clrglobal(priv,ctrlreg,clrbits) \
-  enc28j60_wrglobal2(priv, ENC28J60_BFC | GETADDR(ctrlreg), clrbits)
-#define enc28j60_setglobal(priv,ctrlreg,setbits) \
-  enc28j60_wrglobal2(priv, ENC28J60_BFS | GETADDR(ctrlreg), setbits)
+#define enc_rdgreg(priv,ctrlreg) \
+  enc_rdgreg2(priv, ENC28J60_RCR | GETADDR(ctrlreg))
+#define enc_wdgreg(priv,ctrlreg,wrdata) \
+  enc_wdgreg2(priv, ENC28J60_WCR | GETADDR(ctrlreg), wrdata)
+#define enc_clrglobal(priv,ctrlreg,clrbits) \
+  enc_wdgreg2(priv, ENC28J60_BFC | GETADDR(ctrlreg), clrbits)
+#define enc_setglobal(priv,ctrlreg,setbits) \
+  enc_wdgreg2(priv, ENC28J60_BFS | GETADDR(ctrlreg), setbits)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -130,11 +130,11 @@
  * Private Types
  ****************************************************************************/
 
-/* The enc28j60_driver_s encapsulates all state information for a single hardware
+/* The enc_driver_s encapsulates all state information for a single hardware
  * interface
  */
 
-struct enc28j60_driver_s
+struct enc_driver_s
 {
   /* Device control */
 
@@ -163,13 +163,21 @@ struct enc28j60_driver_s
   /* This holds the information visible to uIP/NuttX */
 
   struct uip_driver_s dev;    /* Interface understood by uIP */
+
+#ifdef CONFIG_ENC28J60_STATS
+  uint8_t  maxpktcnt;         /* Max. number of buffered RX packets */
+  uint32_t txifs;             /* TXIF completion events */
+  uint32_t txabrts;           /* TXIF completions with ESTAT.TXABRT */
+  uint32_t txerifs;           /* TXERIF error events */
+  uint32_t rxerifs;           /* RXERIF error evernts */
+#endif
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct enc28j60_driver_s g_enc28j60[CONFIG_ENC28J60_NINTERFACES];
+static struct enc_driver_s g_enc28j60[CONFIG_ENC28J60_NINTERFACES];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -177,70 +185,79 @@ static struct enc28j60_driver_s g_enc28j60[CONFIG_ENC28J60_NINTERFACES];
 
 /* Low-level SPI helpers */
 
-static inline void enc28j60_configspi(FAR struct spi_dev_s *spi);
+static inline void enc_configspi(FAR struct spi_dev_s *spi);
 #ifdef CONFIG_ENC28J60_OWNBUS
-static inline uint8_t enc28j60_select(FAR struct spi_dev_s *spi);
-static inline uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi);
+static inline void enc_select(FAR struct spi_dev_s *spi);
+static inline void enc_deselect(FAR struct spi_dev_s *spi);
 #else
-static uint8_t enc28j60_select(FAR struct spi_dev_s *spi);
-static uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi);
+static void enc_select(FAR struct spi_dev_s *spi);
+static void enc_deselect(FAR struct spi_dev_s *spi);
 #endif
 
 /* SPI control register access */
 
-static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
-         uint8_t cmd);
-static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
-         uint8_t cmd, uint8_t wrdata);
-static void enc28j60_setbank(FAR struct enc28j60_driver_s *priv, uint8_t bank);
-static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
-         uint8_t ctrlreg);
-static uint8_t enc28j60_rdphymac(FAR struct enc28j60_driver_s *priv,
-         uint8_t ctrlreg);
+static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd);
+static void enc_wdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
+         uint8_t wrdata);
+static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank);
+static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg);
+static uint8_t enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
+         uint8_t wrdata);
+static uint8_t enc_rdphymac(FAR struct enc_driver_s *priv, uint8_t ctrlreg);
 
 /* SPI buffer transfers */
 
-static void enc28j60_rdbuffer(FAR struct enc28j60_driver_s *priv,
-         FAR uint8_t *buffer, size_t buflen);
-static void enc28j60_wrbuffer(FAR struct enc28j60_driver_s *priv,
+static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
+         size_t buflen);
+static void enc_wrbuffer(FAR struct enc_driver_s *priv,
          FAR const uint8_t *buffer, size_t buflen);
+
+/* PHY register access */
+
+static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr);
+static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
+         uint16_t phydata);
 
 /* Common TX logic */
 
-static int  enc28j60_transmit(FAR struct enc28j60_driver_s *priv);
-static int  enc28j60_uiptxpoll(struct uip_driver_s *dev);
+static int  enc_transmit(FAR struct enc_driver_s *priv);
+static int  enc_uiptxpoll(struct uip_driver_s *dev);
 
 /* Interrupt handling */
 
-static void enc28j60_receive(FAR struct enc28j60_driver_s *priv);
-static void enc28j60_txdone(FAR struct enc28j60_driver_s *priv);
-static void enc28j60_worker(FAR void *arg);
-static int  enc28j60_interrupt(int irq, FAR void *context);
+static void enc_linkstatus(FAR struct enc_driver_s *priv);
+static void enc_txif(FAR struct enc_driver_s *priv);
+static void enc_txerif(FAR struct enc_driver_s *priv);
+static void enc_txerif(FAR struct enc_driver_s *priv);
+static void enc_rxerif(FAR struct enc_driver_s *priv);
+static void enc_pktif(FAR struct enc_driver_s *priv);
+static void enc_worker(FAR void *arg);
+static int  enc_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void enc28j60_polltimer(int argc, uint32_t arg, ...);
-static void enc28j60_txtimeout(int argc, uint32_t arg, ...);
+static void enc_polltimer(int argc, uint32_t arg, ...);
+static void enc_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int enc28j60_ifup(struct uip_driver_s *dev);
-static int enc28j60_ifdown(struct uip_driver_s *dev);
-static int enc28j60_txavail(struct uip_driver_s *dev);
+static int enc_ifup(struct uip_driver_s *dev);
+static int enc_ifdown(struct uip_driver_s *dev);
+static int enc_txavail(struct uip_driver_s *dev);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: enc28j60_configspi
+ * Function: enc_configspi
  *
  * Description:
  *   Configure the SPI for use with the ENC28J60
  *
  ****************************************************************************/
  
-static inline void enc28j60_configspi(FAR struct spi_dev_s *spi)
+static inline void enc_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the ENC28J60.  But only if we own the SPI bus.
    * Otherwise, don't bother because it might change.
@@ -256,7 +273,7 @@ static inline void enc28j60_configspi(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Function: enc28j60_select
+ * Function: enc_select
  *
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
@@ -264,14 +281,14 @@ static inline void enc28j60_configspi(FAR struct spi_dev_s *spi)
  ****************************************************************************/
 
 #ifdef CONFIG_ENC28J60_OWNBUS
-static inline uint8_t enc28j60_select(FAR struct spi_dev_s *spi)
+static inline void enc_select(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just select the chip */
 
   SPI_SELECT(spi, SPIDEV_ETHERNET, true);
 }
 #else
-static uint8_t enc28j60_select(FAR struct spi_dev_s *spi)
+static void enc_select(FAR struct spi_dev_s *spi)
 {
   /* Select ENC28J60 chip (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
@@ -293,7 +310,7 @@ static uint8_t enc28j60_select(FAR struct spi_dev_s *spi)
 #endif
 
 /****************************************************************************
- * Function: enc28j60_deselect
+ * Function: enc_deselect
  *
  * Description:
  *   De-select the SPI
@@ -301,14 +318,14 @@ static uint8_t enc28j60_select(FAR struct spi_dev_s *spi)
  ****************************************************************************/
 
 #ifdef CONFIG_ENC28J60_OWNBUS
-static inline uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi)
+static inline void enc_deselect(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just de-select the chip */
 
   SPI_SELECT(spi, SPIDEV_ETHERNET, false);
 }
 #else
-static uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi)
+static void enc_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select ENC28J60 chip and relinquish the SPI bus. */
 
@@ -318,7 +335,7 @@ static uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi)
 #endif
 
 /****************************************************************************
- * Function: enc28j60_rdglobal2
+ * Function: enc_rdgreg2
  *
  * Description:
  *   Read a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
@@ -326,8 +343,7 @@ static uint8_t enc28j60_deselect(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
-                                 uint8_t cmd)
+static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
 {
   FAR struct spi_dev_s *spi;
   uint8_t rddata;
@@ -337,7 +353,7 @@ static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
 
   /* Select ENC28J60 chip */
 
-  enc28j60_select(spi);
+  enc_select(spi);
 
   /* Send the read command and (maybe collect the return data) */
 
@@ -345,12 +361,12 @@ static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
 
   /* De-select ENC28J60 chip */
 
-  enc28j60_deselect(spi);
+  enc_deselect(spi);
   return rddata;
 }
 
 /****************************************************************************
- * Function: enc28j60_wrglobal2
+ * Function: enc_wdgreg2
  *
  * Description:
  *   Write to a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
@@ -358,8 +374,8 @@ static uint8_t enc28j60_rdglobal2(FAR struct enc28j60_driver_s *priv,
  *
  ****************************************************************************/
 
-static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
-                               uint8_t cmd, uint8_t wrdata)
+static void enc_wdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
+                        uint8_t wrdata)
 {
   FAR struct spi_dev_s *spi;
 
@@ -368,7 +384,7 @@ static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
 
   /* Select ENC28J60 chip */
 
-  enc28j60_select(spi);
+  enc_select(spi);
 
   /* Send the write command */
 
@@ -380,77 +396,11 @@ static void enc28j60_wrglobal2(FAR struct enc28j60_driver_s *priv,
 
   /* De-select ENC28J60 chip. */
 
-  enc28j60_deselect(spi);
+  enc_deselect(spi);
 }
 
 /****************************************************************************
- * Function: enc28j60_rdbuffer
- *
- * Description:
- *   Read a buffer of data.
- *
- ****************************************************************************/
-
-static void enc28j60_rdbuffer(FAR struct enc28j60_driver_s *priv,
-                              FAR uint8_t *buffer, size_t buflen)
-{
-  FAR struct spi_dev_s *spi;
-
-  DEBUGASSERT(priv && priv->spi);
-  spi = priv->spi;
-
-  /* Select ENC28J60 chip */
-
-  enc28j60_select(spi);
-
-  /* Send the read buffer memory command (ignoring the response) */
-
-  (void)SPI_SEND(spi, ENC28J60_RBM);
- 
-  /* Then read the buffer data */
-
-  SPI_RECVBLOCK(spi, buffer, buflen);
-
-  /* De-select ENC28J60 chip. */
-
-  enc28j60_deselect(spi);
-}
-
-/****************************************************************************
- * Function: enc28j60_wrbuffer
- *
- * Description:
- *   Write a buffer of data.
- *
- ****************************************************************************/
-
-static void enc28j60_wrbuffer(FAR struct enc28j60_driver_s *priv,
-                              FAR const uint8_t *buffer, size_t buflen)
-{
-  FAR struct spi_dev_s *spi;
-
-  DEBUGASSERT(priv && priv->spi);
-  spi = priv->spi;
-
-  /* Select ENC28J60 chip */
-
-  enc28j60_select(spi);
-
-  /* Send the write buffer memory command (ignoring the response) */
-
-  (void)SPI_SEND(spi, ENC28J60_WBM);
- 
-  /* Then send the buffer */
-
-  SPI_SNDBLOCK(spi, buffer, buflen);
-
-  /* De-select ENC28J60 chip. */
-
-  enc28j60_deselect(spi);
-}
-
-/****************************************************************************
- * Function: enc28j60_setbank
+ * Function: enc_setbank
  *
  * Description:
  *   Set the bank for these next control register access.
@@ -460,7 +410,7 @@ static void enc28j60_wrbuffer(FAR struct enc28j60_driver_s *priv,
  *
  ****************************************************************************/
 
-static void enc28j60_setbank(FAR struct enc28j60_driver_s *priv, uint8_t bank)
+static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank)
 {
   /* Check if the bank setting has changed*/
 
@@ -468,13 +418,13 @@ static void enc28j60_setbank(FAR struct enc28j60_driver_s *priv, uint8_t bank)
     {
       /* Select bank 0 (just so that all of the bits are cleared) */
 
-      enc28j60_clrglobal(priv, ECON1, ECON1_BSEL_MASK);
+      enc_clrglobal(priv, ECON1, ECON1_BSEL_MASK);
 
       /* Then OR in bits to get the correct bank */
 
       if (bank != 0)
         {
-          enc28j60_setglobal(priv, ECON1, (bank << ECON1_BSEL_SHIFT));
+          enc_setglobal(priv, ECON1, (bank << ECON1_BSEL_SHIFT));
         }
 
       /* Then remember the bank setting */
@@ -484,15 +434,14 @@ static void enc28j60_setbank(FAR struct enc28j60_driver_s *priv, uint8_t bank)
 }
 
 /****************************************************************************
- * Function: enc28j60_rdbank
+ * Function: enc_rdbreg
  *
  * Description:
  *   Set the bank for these next control register access.
  *
  ****************************************************************************/
  
-static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
-                               uint8_t ctrlreg)
+static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 {
   FAR struct spi_dev_s *spi;
   uint8_t rddata;
@@ -502,11 +451,11 @@ static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
 
   /* Select ENC28J60 chip */
 
-  enc28j60_select(spi);
+  enc_select(spi);
 
   /* set the bank */
 
-  enc28j60_setbank(priv, GETBANK(ctrlreg));
+  enc_setbank(priv, GETBANK(ctrlreg));
 
   /* Send the read command and collect the return data. */
 
@@ -514,12 +463,12 @@ static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
 
   /* De-select ENC28J60 chip */
 
-  enc28j60_deselect(spi);
+  enc_deselect(spi);
   return rddata;
 }
 
 /****************************************************************************
- * Function: enc28j60_rdphymac
+ * Function: enc_rdphymac
  *
  * Description:
  *   Somewhat different timing is required to read from any PHY or MAC
@@ -528,8 +477,7 @@ static uint8_t enc28j60_rdbank(FAR struct enc28j60_driver_s *priv,
  *
  ****************************************************************************/
 
-static uint8_t enc28j60_rdphymac(FAR struct enc28j60_driver_s *priv,
-                                 uint8_t ctrlreg)
+static uint8_t enc_rdphymac(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 {
   FAR struct spi_dev_s *spi;
   uint8_t rddata;
@@ -539,11 +487,11 @@ static uint8_t enc28j60_rdphymac(FAR struct enc28j60_driver_s *priv,
 
   /* Select ENC28J60 chip */
 
-  enc28j60_select(spi);
+  enc_select(spi);
 
   /* Set the bank */
 
-  enc28j60_setbank(priv, GETBANK(ctrlreg));
+  enc_setbank(priv, GETBANK(ctrlreg));
 
   /* Send the read command (discarding the return data) */
 
@@ -555,20 +503,20 @@ static uint8_t enc28j60_rdphymac(FAR struct enc28j60_driver_s *priv,
 
   /* De-select ENC28J60 chip */
 
-  enc28j60_deselect(spi);
+  enc_deselect(spi);
   return rddata;
 }
 
 /****************************************************************************
- * Function: enc28j60_wrbank
+ * Function: enc_rwrbreg
  *
  * Description:
  *   Set the bank for these next control register access.
  *
  ****************************************************************************/
  
-static void enc28j60_wrbank(FAR struct enc28j60_driver_s *priv,
-                            uint8_t ctrlreg, uint8_t wrdata)
+static void enc_rwrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
+                        uint8_t wrdata)
 {
   FAR struct spi_dev_s *spi;
 
@@ -577,11 +525,11 @@ static void enc28j60_wrbank(FAR struct enc28j60_driver_s *priv,
 
   /* Select ENC28J60 chip */
 
-  enc28j60_select(spi);
+  enc_select(spi);
 
   /* Set the bank */
 
-  enc28j60_setbank(priv, GETBANK(ctrlreg));
+  enc_setbank(priv, GETBANK(ctrlreg));
 
   /* Send the write command */
 
@@ -593,14 +541,80 @@ static void enc28j60_wrbank(FAR struct enc28j60_driver_s *priv,
 
   /* De-select ENC28J60 chip. */
 
-  enc28j60_deselect(spi);
+  enc_deselect(spi);
 }
 
 /****************************************************************************
- * Function: enc28j60_transmit
+ * Function: enc_rdbuffer
  *
  * Description:
- *   Start hardware transmission.  Called either from the txdone interrupt
+ *   Read a buffer of data.
+ *
+ ****************************************************************************/
+
+static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
+                         size_t buflen)
+{
+  FAR struct spi_dev_s *spi;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC28J60 chip */
+
+  enc_select(spi);
+
+  /* Send the read buffer memory command (ignoring the response) */
+
+  (void)SPI_SEND(spi, ENC28J60_RBM);
+ 
+  /* Then read the buffer data */
+
+  SPI_RECVBLOCK(spi, buffer, buflen);
+
+  /* De-select ENC28J60 chip. */
+
+  enc_deselect(spi);
+}
+
+/****************************************************************************
+ * Function: enc_wrbuffer
+ *
+ * Description:
+ *   Write a buffer of data.
+ *
+ ****************************************************************************/
+
+static void enc_wrbuffer(FAR struct enc_driver_s *priv,
+                         FAR const uint8_t *buffer, size_t buflen)
+{
+  FAR struct spi_dev_s *spi;
+
+  DEBUGASSERT(priv && priv->spi);
+  spi = priv->spi;
+
+  /* Select ENC28J60 chip */
+
+  enc_select(spi);
+
+  /* Send the write buffer memory command (ignoring the response) */
+
+  (void)SPI_SEND(spi, ENC28J60_WBM);
+ 
+  /* Then send the buffer */
+
+  SPI_SNDBLOCK(spi, buffer, buflen);
+
+  /* De-select ENC28J60 chip. */
+
+  enc_deselect(spi);
+}
+
+/****************************************************************************
+ * Function: enc_transmit
+ *
+ * Description:
+ *   Start hardware transmission.  Called either from the txifs interrupt
  *   handling or from watchdog based polling.
  *
  * Parameters:
@@ -613,7 +627,7 @@ static void enc28j60_wrbank(FAR struct enc28j60_driver_s *priv,
  *
  ****************************************************************************/
 
-static int enc28j60_transmit(FAR struct enc28j60_driver_s *priv)
+static int enc_transmit(FAR struct enc_driver_s *priv)
 {
   /* Verify that the hardware is ready to send another packet */
 
@@ -627,12 +641,12 @@ static int enc28j60_transmit(FAR struct enc28j60_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, ENC28J60_TXTIMEOUT, enc28j60_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, ENC28J60_TXTIMEOUT, enc_txtimeout, 1, (uint32_t)priv);
   return OK;
 }
 
 /****************************************************************************
- * Function: enc28j60_uiptxpoll
+ * Function: enc_uiptxpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -652,9 +666,9 @@ static int enc28j60_transmit(FAR struct enc28j60_driver_s *priv)
  *
  ****************************************************************************/
 
-static int enc28j60_uiptxpoll(struct uip_driver_s *dev)
+static int enc_uiptxpoll(struct uip_driver_s *dev)
 {
-  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)dev->d_private;
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -663,7 +677,7 @@ static int enc28j60_uiptxpoll(struct uip_driver_s *dev)
   if (priv->dev.d_len > 0)
     {
       uip_arp_out(&priv->dev);
-      enc28j60_transmit(priv);
+      enc_transmit(priv);
 
       /* Check if there is room in the device to hold another packet. If not,
        * return a non-zero value to terminate the poll.
@@ -678,7 +692,125 @@ static int enc28j60_uiptxpoll(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: enc28j60_receive
+ * Function: enc_linkstatus
+ *
+ * Description:
+ *   The current link status can be obtained from the PHSTAT1.LLSTAT or
+ *   PHSTAT2.LSTAT.
+ *
+ ****************************************************************************/
+
+static void enc_linkstatus(FAR struct enc_driver_s *priv)
+{
+#warning "Missing logic"
+}
+
+/****************************************************************************
+ * Function: enc_txif
+ *
+ * Description:
+ *   An TXIF interrupt was received indicating that the last TX packet(s) is
+ *   done
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void enc_txif(FAR struct enc_driver_s *priv)
+{
+  /* Update statistics */
+
+#ifdef CONFIG_ENC28J60_STATS
+  priv->txifs++;
+  if (enc_rdgreg(priv, ESTAT) & ESTAT_TXABRT)
+    {
+      priv->txabrts++;
+    }
+#endif
+
+  /* Clear the request to send bit */
+
+  enc_clrglobal(priv, ECON1, ECON1_TXRTS);
+
+  /* If no further xmits are pending, then cancel the TX timeout */
+
+  wd_cancel(priv->txtimeout);
+
+  /* Then poll uIP for new XMIT data */
+
+  (void)uip_poll(&priv->dev, enc_uiptxpoll);
+}
+
+/****************************************************************************
+ * Function: enc_txerif
+ *
+ * Description:
+ *   An TXERIF interrupt was received indicating that a TX abort has occurred.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void enc_txerif(FAR struct enc_driver_s *priv)
+{
+  /* Update statistics */
+
+#ifdef CONFIG_ENC28J60_STATS
+  priv->txerifs++;
+#endif
+
+  /* Here we really should read the TSV and determine if we should re-transmit
+   * the packet by resetting TXRTS... maybe someday.
+   */
+
+  enc_clrglobal(priv, ECON1, ECON1_TXRTS);
+
+  /* Reset TX */
+
+  enc_setglobal(priv, ECON1, ECON1_TXRST);
+  enc_clrglobal(priv, ECON1, ECON1_TXRST);
+}
+
+/****************************************************************************
+ * Function: enc_rxerif
+ *
+ * Description:
+ *   An RXERIF interrupt was received indicating that the last TX packet(s) is
+ *   done
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void enc_rxerif(FAR struct enc_driver_s *priv)
+{
+  /* Update statistics */
+
+#ifdef CONFIG_ENC28J60_STATS
+  priv->rxerifs++;
+#endif
+}
+
+/****************************************************************************
+ * Function: enc_pktif
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -693,87 +825,57 @@ static int enc28j60_uiptxpoll(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void enc28j60_receive(FAR struct enc28j60_driver_s *priv)
-{
-  do
-    {
-      /* Check for errors and update statistics */
-
-      /* Check if the packet is a valid size for the uIP buffer configuration */
-
-      /* Copy the data data from the hardware to priv->dev.d_buf.  Set
-       * amount of data in priv->dev.d_len
-       */
-
-      /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
-#else
-      if (BUF->type == HTONS(UIP_ETHTYPE_IP))
-#endif
-        {
-          uip_arp_ipin();
-          uip_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              uip_arp_out(&priv->dev);
-              enc28j60_transmit(priv);
-            }
-        }
-      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
-        {
-          uip_arp_arpin(&priv->dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
-
-           if (priv->dev.d_len > 0)
-             {
-               enc28j60_transmit(priv);
-             }
-         }
-     }
-  while (false); /* While there are more packets to be processed */
-}
-
-/****************************************************************************
- * Function: enc28j60_txdone
- *
- * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void enc28j60_txdone(FAR struct enc28j60_driver_s *priv)
+static void enc_pktif(FAR struct enc_driver_s *priv)
 {
   /* Check for errors and update statistics */
+#warning "Missing logic"
 
-  /* If no further xmits are pending, then cancel the TX timeout */
+  /* Check if the packet is a valid size for the uIP buffer configuration */
+#warning "Missing logic"
 
-  wd_cancel(priv->txtimeout);
+  /* Copy the data data from the hardware to priv->dev.d_buf.  Set
+   * amount of data in priv->dev.d_len
+   */
+#warning "Missing logic"
 
-  /* Then poll uIP for new XMIT data */
+  /* We only accept IP packets of the configured type and ARP packets */
 
-  (void)uip_poll(&priv->dev, enc28j60_uiptxpoll);
+#ifdef CONFIG_NET_IPv6
+  if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+#else
+  if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+#endif
+    {
+      uip_arp_ipin();
+      uip_input(&priv->dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
+
+      if (priv->dev.d_len > 0)
+        {
+          uip_arp_out(&priv->dev);
+          enc_transmit(priv);
+        }
+    }
+  else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+    {
+      uip_arp_arpin(&priv->dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
+
+       if (priv->dev.d_len > 0)
+         {
+           enc_transmit(priv);
+         }
+     }
 }
 
 /****************************************************************************
- * Function: enc28j60_worker
+ * Function: enc_worker
  *
  * Description:
  *   Perform interrupt handling logic outside of the interrupt handler (on
@@ -789,33 +891,193 @@ static void enc28j60_txdone(FAR struct enc28j60_driver_s *priv)
  *
  ****************************************************************************/
 
-static void enc28j60_worker(FAR void *arg)
+static void enc_worker(FAR void *arg)
 {
-  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)arg;
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
+  uint8_t eir;
 
   DEBUGASSERT(priv);
 
-  /* Disable Ethernet interrupts */
+  /* Disable further interrupts by clearing the global interrup enable bit */
 
-  /* Get and clear interrupt status bits */
+  enc_clrglobal(priv, EIE, EIE_INTIE);
 
-  /* Handle interrupts according to status bit settings */
+  /* Loop until all interrupts have been processed (EIR==0).  Note that
+   * there is no infinite loop check... if there are always pending interrupts,
+   * we are just broken.
+   */
 
-  /* Check if we received an incoming packet, if so, call enc28j60_receive() */
+  while ((eir = enc_rdgreg(priv, EIR) & EIR_ALLINTS) != 0)
+    {
+      /* Handle interrupts according to interrupt register register bit
+       * settings
+       *
+       * DMAIF: The DMA interrupt indicates that the DMA module has completed
+       * its memory copy or checksum calculation. Additionally, this interrupt
+       * will be caused if the host controller cancels a DMA operation by
+       * manually clearing the DMAST bit. Once set, DMAIF can only be cleared
+       * by the host controller or by a Reset condition.
+       */
 
-  enc28j60_receive(priv);
+      if ((eir & EIR_DMAIF) != 0) /* DMA interrupt */
+        {
+          /* Not used by this driver. Just clear the interrupt request. */
 
-  /* Check is a packet transmission just completed.  If so, call enc28j60_txdone */
+          enc_clrglobal(priv, EIR, EIR_DMAIF);
+        }
 
-  enc28j60_txdone(priv);
+      /* LINKIF: The LINKIF indicates that the link status has changed.
+       * The actual current link status can be obtained from the
+       * PHSTAT1.LLSTAT or PHSTAT2.LSTAT. Unlike other interrupt sources, the
+       * link status change interrupt is created in the integrated PHY
+       * module.
+       *
+       * To receive it, the host controller must set the PHIE.PLNKIE and
+       * PGEIE bits. After setting the two PHY interrupt enable bits, the
+       * LINKIF bit will then shadow the contents of the PHIR.PGIF bit.
+       *
+       * Once LINKIF is set, it can only be cleared by the host controller or
+       * by a Reset. The LINKIF bit is read-only. Performing an MII read on
+       * the PHIR register will clear the LINKIF, PGIF and PLNKIF bits
+       * automatically and allow for future link status change interrupts.
+       */
+
+      if ((eir & EIR_LINKIF) != 0) /* Link change interrupt */
+        {
+          enc_linkstatus(priv);   /* Get current link status */
+          enc_rdphy(priv, PHIR);  /* Clear the LINKIF interrupt */
+        }
+
+      /* TXIF: The Transmit Interrupt Flag (TXIF) is used to indicate that
+       * the requested packet transmission has ended. Upon transmission
+       * completion, abort or transmission cancellation by the host
+       * controller, the EIR.TXIF flag will be set to 1.
+       *
+       * Once TXIF is set, it can only be cleared by the host controller
+       * or by a Reset condition. Once processed, the host controller should
+       * use the BFC command to clear the EIR.TXIF bit.
+       */
+
+      if ((eir & EIR_TXIF) != 0) /* Transmit interrupt */
+        {
+          enc_txif(priv);                   /* Handle TX completion */
+          enc_clrglobal(priv, EIR, EIR_TXIF); /* Clear the TXIF interrupt */
+        }
+
+      /* TXERIF: The Transmit Error Interrupt Flag (TXERIF) is used to
+       * indicate that a transmit abort has occurred. An abort can occur
+       * because of any of the following:
+       *
+       * 1. Excessive collisions occurred as defined by the Retransmission
+       *    Maximum (RETMAX) bits in the MACLCON1 register.
+       * 2. A late collision occurred as defined by the Collision Window
+       *   (COLWIN) bits in the MACLCON2 register.
+       * 3. A collision after transmitting 64 bytes occurred (ESTAT.LATECOL
+       *    set).
+       * 4. The transmission was unable to gain an opportunity to transmit
+       *    the packet because the medium was constantly occupied for too long.
+       *    The deferral limit (2.4287 ms) was reached and the MACON4.DEFER bit
+       *    was clear.
+       * 5. An attempt to transmit a packet larger than the maximum frame
+       *    length defined by the MAMXFL registers was made without setting
+       *    the MACON3.HFRMEN bit or per packet POVERRIDE and PHUGEEN bits.
+       *
+       * Upon any of these conditions, the EIR.TXERIF flag is set to 1. Once
+       * set, it can only be cleared by the host controller or by a Reset
+       * condition.
+       *
+       * After a transmit abort, the TXRTS bit will be cleared, the
+       * ESTAT.TXABRT bit will be set and the transmit status vector will be
+       * written at ETXND + 1. The MAC will not automatically attempt to
+       * retransmit the packet. The host controller may wish to read the
+       * transmit status vector and LATECOL bit to determine the cause of
+       * the abort. After determining the problem and solution, the host
+       * controller should clear the LATECOL (if set) and TXABRT bits so
+       * that future aborts can be detected accurately.
+       *
+       * In Full-Duplex mode, condition 5 is the only one that should cause
+       * this interrupt. Collisions and other problems related to sharing
+       * the network are not possible on full-duplex networks. The conditions
+       * which cause the transmit error interrupt meet the requirements of the
+       * transmit interrupt. As a result, when this interrupt occurs, TXIF
+       * will also be simultaneously set.
+       */
+
+      if ((eir & EIR_TXERIF) != 0) /* Transmit Error Interrupts */
+        {
+          enc_txerif(priv);                     /* Handle the TX error */
+          enc_clrglobal(priv, EIR, EIR_TXERIF); /* Clear the TXERIF interrupt */
+        }
+
+      /* PKTIF The Receive Packet Pending Interrupt Flag (PKTIF) is used to
+       * indicate the presence of one or more data packets in the receive
+       * buffer and to provide a notification means for the arrival of new
+       * packets. When the receive buffer has at least one packet in it,
+       * EIR.PKTIF will be set. In other words, this interrupt flag will be
+       * set anytime the Ethernet Packet Count register (EPKTCNT) is non-zero.
+       *
+       * The PKTIF bit can only be cleared by the host controller or by a Reset
+       * condition. In order to clear PKTIF, the EPKTCNT register must be
+       * decremented to 0. If the last data packet in the receive buffer is
+       * processed, EPKTCNT will become zero and the PKTIF bit will automatically
+       * be cleared.
+       */
+
+      /* Ignore PKTIF because is unreliable. Use EPKTCNT instead */
+      /* if ((eir & EIR_PKTIF) != 0) */
+        {
+          uint8_t pktcnt = enc_rdbreg(priv, EPKTCNT);
+          if (pktcnt > 0)
+            {
+#ifdef CONFIG_ENC28J60_STATS
+              if (pkcnt > priv->maxpktcnt)
+                {
+                  priv->maxpktcnt = pktcnt;
+                }
+#endif
+              /* Handle packet receipt */
+
+              enc_pktif(priv);
+            }
+        }
+
+      /* RXERIF: The Receive Error Interrupt Flag (RXERIF) is used to
+       * indicate a receive buffer overflow condition. Alternately, this
+       * interrupt may indicate that too many packets are in the receive
+       * buffer and more cannot be stored without overflowing the EPKTCNT
+       * register.  When a packet is being received and the receive buffer
+       * runs completely out of space, or EPKTCNT is 255 and cannot be
+       * incremented, the packet being received will be aborted (permanently
+       * lost) and the EIR.RXERIF bit will be set to 1.
+       *
+       * Once set, RXERIF can only be cleared by the host controller or by a
+       * Reset condition. Normally, upon the receive error condition, the
+       * host controller would process any packets pending from the receive
+       * buffer and then make additional room for future packets by
+       * advancing the ERXRDPT registers (low byte first) and decrementing
+       * the EPKTCNT register.
+       *
+       * Once processed, the host controller should use the BFC command to
+       * clear the EIR.RXERIF bit.
+       */
+
+      if ((eir & EIR_RXERIF) != 0) /* Receive Errror Interrupts */
+        {
+          enc_rxerif(priv);                     /* Handle the RX error */
+          enc_clrglobal(priv, EIR, EIR_RXERIF); /* Clear the RXERIF interrupt */
+        }
+
+    }
 
   /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if 
    * there are no pending transmissions.
    */
+
+  enc_setglobal(priv, EIE, EIE_INTIE);
 }
 
 /****************************************************************************
- * Function: enc28j60_interrupt
+ * Function: enc_interrupt
  *
  * Description:
  *   Hardware interrupt handler
@@ -831,9 +1093,9 @@ static void enc28j60_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int enc28j60_interrupt(int irq, FAR void *context)
+static int enc_interrupt(int irq, FAR void *context)
 {
-  register FAR struct enc28j60_driver_s *priv = &g_enc28j60[0];
+  register FAR struct enc_driver_s *priv = &g_enc28j60[0];
 
   DEBUGASSERT(priv->irq == irq);
 
@@ -843,7 +1105,7 @@ static int enc28j60_interrupt(int irq, FAR void *context)
    * case because it keeps interrupts disabled for a long time.
    */
 
-  enc28j60_worker((FAR void*)priv);
+  enc_worker((FAR void*)priv);
   return OK;
 #else
   /* In complex environments, we cannot do SPI transfers from the interrupt
@@ -853,12 +1115,12 @@ static int enc28j60_interrupt(int irq, FAR void *context)
    * a good thing to do in any event.
    */
 
-  return work_queue(&priv->work, enc28j60_worker, (FAR void *)priv, 0);
+  return work_queue(&priv->work, enc_worker, (FAR void *)priv, 0);
 #endif
 }
 
 /****************************************************************************
- * Function: enc28j60_txtimeout
+ * Function: enc_txtimeout
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -875,9 +1137,9 @@ static int enc28j60_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static void enc28j60_txtimeout(int argc, uint32_t arg, ...)
+static void enc_txtimeout(int argc, uint32_t arg, ...)
 {
-  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)arg;
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
 
   /* Increment statistics and dump debug info */
 
@@ -885,11 +1147,11 @@ static void enc28j60_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->dev, enc28j60_uiptxpoll);
+  (void)uip_poll(&priv->dev, enc_uiptxpoll);
 }
 
 /****************************************************************************
- * Function: enc28j60_polltimer
+ * Function: enc_polltimer
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -905,23 +1167,23 @@ static void enc28j60_txtimeout(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static void enc28j60_polltimer(int argc, uint32_t arg, ...)
+static void enc_polltimer(int argc, uint32_t arg, ...)
 {
-  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)arg;
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
 
   /* Check if there is room in the send another TXr packet.  */
 
   /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-  (void)uip_timer(&priv->dev, enc28j60_uiptxpoll, ENC28J60_POLLHSEC);
+  (void)uip_timer(&priv->dev, enc_uiptxpoll, ENC28J60_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, ENC28J60_WDDELAY, enc28j60_polltimer, 1, arg);
+  (void)wd_start(priv->txpoll, ENC28J60_WDDELAY, enc_polltimer, 1, arg);
 }
 
 /****************************************************************************
- * Function: enc28j60_ifup
+ * Function: enc_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -937,9 +1199,9 @@ static void enc28j60_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int enc28j60_ifup(struct uip_driver_s *dev)
+static int enc_ifup(struct uip_driver_s *dev)
 {
-  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)dev->d_private;
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
@@ -949,7 +1211,7 @@ static int enc28j60_ifup(struct uip_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, ENC28J60_WDDELAY, enc28j60_polltimer, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, ENC28J60_WDDELAY, enc_polltimer, 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -959,7 +1221,7 @@ static int enc28j60_ifup(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: enc28j60_ifdown
+ * Function: enc_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -974,9 +1236,9 @@ static int enc28j60_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int enc28j60_ifdown(struct uip_driver_s *dev)
+static int enc_ifdown(struct uip_driver_s *dev)
 {
-  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)dev->d_private;
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
@@ -997,7 +1259,7 @@ static int enc28j60_ifdown(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: enc28j60_txavail
+ * Function: enc_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a 
@@ -1015,9 +1277,9 @@ static int enc28j60_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int enc28j60_txavail(struct uip_driver_s *dev)
+static int enc_txavail(struct uip_driver_s *dev)
 {
-  FAR struct enc28j60_driver_s *priv = (FAR struct enc28j60_driver_s *)dev->d_private;
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   irqstate_t flags;
 
   flags = irqsave();
@@ -1031,7 +1293,7 @@ static int enc28j60_txavail(struct uip_driver_s *dev)
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)uip_poll(&priv->dev, enc28j60_uiptxpoll);
+      (void)uip_poll(&priv->dev, enc_uiptxpoll);
     }
 
   irqrestore(flags);
@@ -1043,10 +1305,11 @@ static int enc28j60_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: enc28j60_initialize
+ * Function: enc_initialize
  *
  * Description:
- *   Initialize the Ethernet driver
+ *   Initialize the Ethernet driver.  The ENC28J60 device is assumed to be
+ *   in the post-reset state upon entry to this function.
  *
  * Parameters:
  *   spi - A reference to the platform's SPI driver for the ENC28J60
@@ -1062,16 +1325,16 @@ static int enc28j60_txavail(struct uip_driver_s *dev)
 
 /* Initialize the Ethernet controller and driver */
 
-int enc28j60_initialize(FAR struct spi_dev_s *spi, int irq)
+int enc_initialize(FAR struct spi_dev_s *spi, int irq)
 {
   /* Initialize and configure the ENC28J60 */
 
   /* Initialize the driver structure */
 
-  memset(g_enc28j60, 0, CONFIG_ENC28J60_NINTERFACES*sizeof(struct enc28j60_driver_s));
-  g_enc28j60[0].dev.d_ifup    = enc28j60_ifup;     /* I/F down callback */
-  g_enc28j60[0].dev.d_ifdown  = enc28j60_ifdown;   /* I/F up (new IP address) callback */
-  g_enc28j60[0].dev.d_txavail = enc28j60_txavail;  /* New TX data callback */
+  memset(g_enc28j60, 0, CONFIG_ENC28J60_NINTERFACES*sizeof(struct enc_driver_s));
+  g_enc28j60[0].dev.d_ifup    = enc_ifup;     /* I/F down callback */
+  g_enc28j60[0].dev.d_ifdown  = enc_ifdown;   /* I/F up (new IP address) callback */
+  g_enc28j60[0].dev.d_txavail = enc_txavail;  /* New TX data callback */
   g_enc28j60[0].dev.d_private = (void*)g_enc28j60; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
@@ -1083,7 +1346,7 @@ int enc28j60_initialize(FAR struct spi_dev_s *spi, int irq)
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(irq, enc28j60_interrupt))
+  if (irq_attach(irq, enc_interrupt))
     {
       /* We could not attach the ISR to the interrupt */
 
