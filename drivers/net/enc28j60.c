@@ -104,23 +104,23 @@
 
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
-#define ENC28J60_WDDELAY   (1*CLK_TCK)
-#define ENC28J60_POLLHSEC  (1*2)
+#define ENC_WDDELAY   (1*CLK_TCK)
+#define ENC_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
-#define ENC28J60_TXTIMEOUT (60*CLK_TCK)
+#define ENC_TXTIMEOUT (60*CLK_TCK)
 
 /* Misc. Helper Macros ******************************************************/
 
 #define enc_rdgreg(priv,ctrlreg) \
-  enc_rdgreg2(priv, ENC28J60_RCR | GETADDR(ctrlreg))
+  enc_rdgreg2(priv, ENC_RCR | GETADDR(ctrlreg))
 #define enc_wdgreg(priv,ctrlreg,wrdata) \
-  enc_wdgreg2(priv, ENC28J60_WCR | GETADDR(ctrlreg), wrdata)
-#define enc_clrglobal(priv,ctrlreg,clrbits) \
-  enc_wdgreg2(priv, ENC28J60_BFC | GETADDR(ctrlreg), clrbits)
-#define enc_setglobal(priv,ctrlreg,setbits) \
-  enc_wdgreg2(priv, ENC28J60_BFS | GETADDR(ctrlreg), setbits)
+  enc_wdgreg2(priv, ENC_WCR | GETADDR(ctrlreg), wrdata)
+#define enc_bfcgreg(priv,ctrlreg,clrbits) \
+  enc_wdgreg2(priv, ENC_BFC | GETADDR(ctrlreg), clrbits)
+#define enc_bfsgreg(priv,ctrlreg,setbits) \
+  enc_wdgreg2(priv, ENC_BFS | GETADDR(ctrlreg), setbits)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -418,13 +418,13 @@ static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank)
     {
       /* Select bank 0 (just so that all of the bits are cleared) */
 
-      enc_clrglobal(priv, ECON1, ECON1_BSEL_MASK);
+      enc_bfcgreg(priv, ENC_ECON1, ECON1_BSEL_MASK);
 
       /* Then OR in bits to get the correct bank */
 
       if (bank != 0)
         {
-          enc_setglobal(priv, ECON1, (bank << ECON1_BSEL_SHIFT));
+          enc_bfsgreg(priv, ENC_ECON1, (bank << ECON1_BSEL_SHIFT));
         }
 
       /* Then remember the bank setting */
@@ -459,7 +459,7 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 
   /* Send the read command and collect the return data. */
 
-  rddata = SPI_SEND(spi, ENC28J60_RCR | GETADDR(ctrlreg));
+  rddata = SPI_SEND(spi, ENC_RCR | GETADDR(ctrlreg));
 
   /* De-select ENC28J60 chip */
 
@@ -495,7 +495,7 @@ static uint8_t enc_rdphymac(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 
   /* Send the read command (discarding the return data) */
 
-  (void)SPI_SEND(spi, ENC28J60_RCR | GETADDR(ctrlreg));
+  (void)SPI_SEND(spi, ENC_RCR | GETADDR(ctrlreg));
 
   /* Do an extra transfer to get the data from the MAC or PHY */
 
@@ -533,7 +533,7 @@ static void enc_rwrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 
   /* Send the write command */
 
-  (void)SPI_SEND(spi, ENC28J60_WCR | GETADDR(ctrlreg));
+  (void)SPI_SEND(spi, ENC_WCR | GETADDR(ctrlreg));
 
   /* Send the data byte */
 
@@ -566,7 +566,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 
   /* Send the read buffer memory command (ignoring the response) */
 
-  (void)SPI_SEND(spi, ENC28J60_RBM);
+  (void)SPI_SEND(spi, ENC_RBM);
  
   /* Then read the buffer data */
 
@@ -599,7 +599,7 @@ static void enc_wrbuffer(FAR struct enc_driver_s *priv,
 
   /* Send the write buffer memory command (ignoring the response) */
 
-  (void)SPI_SEND(spi, ENC28J60_WBM);
+  (void)SPI_SEND(spi, ENC_WBM);
  
   /* Then send the buffer */
 
@@ -641,7 +641,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, ENC28J60_TXTIMEOUT, enc_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -728,7 +728,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
 #ifdef CONFIG_ENC28J60_STATS
   priv->txifs++;
-  if (enc_rdgreg(priv, ESTAT) & ESTAT_TXABRT)
+  if (enc_rdgreg(priv, ENC_ESTAT) & ESTAT_TXABRT)
     {
       priv->txabrts++;
     }
@@ -736,7 +736,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   /* Clear the request to send bit */
 
-  enc_clrglobal(priv, ECON1, ECON1_TXRTS);
+  enc_bfcgreg(priv, ENC_ECON1, ECON1_TXRTS);
 
   /* If no further xmits are pending, then cancel the TX timeout */
 
@@ -771,16 +771,20 @@ static void enc_txerif(FAR struct enc_driver_s *priv)
   priv->txerifs++;
 #endif
 
-  /* Here we really should read the TSV and determine if we should re-transmit
-   * the packet by resetting TXRTS... maybe someday.
-   */
-
-  enc_clrglobal(priv, ECON1, ECON1_TXRTS);
-
   /* Reset TX */
 
-  enc_setglobal(priv, ECON1, ECON1_TXRST);
-  enc_clrglobal(priv, ECON1, ECON1_TXRST);
+  enc_bfsgreg(priv, ENC_ECON1, ECON1_TXRST);
+  enc_bfcgreg(priv, ENC_ECON1, ECON1_TXRST | ECON1_TXRTS);
+
+  /* Here we really should re-transmit:
+   *
+   * 1.  Read the TSV:
+   *     - Read ETXNDL to get the end pointer
+   *     - Read 7 bytes from that pointer + 1 using ENC_RMB.
+   * 2. Determine if we need to retransmit.  Check the LATE COLLISION bit, if 
+   *    set, then we need to transmit.
+   * 3. Retranmit by resetting ECON1_TXRTS.
+   */
 }
 
 /****************************************************************************
@@ -900,14 +904,14 @@ static void enc_worker(FAR void *arg)
 
   /* Disable further interrupts by clearing the global interrup enable bit */
 
-  enc_clrglobal(priv, EIE, EIE_INTIE);
+  enc_bfcgreg(priv, ENC_EIE, EIE_INTIE);
 
   /* Loop until all interrupts have been processed (EIR==0).  Note that
    * there is no infinite loop check... if there are always pending interrupts,
    * we are just broken.
    */
 
-  while ((eir = enc_rdgreg(priv, EIR) & EIR_ALLINTS) != 0)
+  while ((eir = enc_rdgreg(priv, ENC_EIR) & EIR_ALLINTS) != 0)
     {
       /* Handle interrupts according to interrupt register register bit
        * settings
@@ -923,7 +927,7 @@ static void enc_worker(FAR void *arg)
         {
           /* Not used by this driver. Just clear the interrupt request. */
 
-          enc_clrglobal(priv, EIR, EIR_DMAIF);
+          enc_bfcgreg(priv, ENC_EIR, EIR_DMAIF);
         }
 
       /* LINKIF: The LINKIF indicates that the link status has changed.
@@ -944,8 +948,8 @@ static void enc_worker(FAR void *arg)
 
       if ((eir & EIR_LINKIF) != 0) /* Link change interrupt */
         {
-          enc_linkstatus(priv);   /* Get current link status */
-          enc_rdphy(priv, PHIR);  /* Clear the LINKIF interrupt */
+          enc_linkstatus(priv);       /* Get current link status */
+          enc_rdphy(priv, ENC_PHIR);  /* Clear the LINKIF interrupt */
         }
 
       /* TXIF: The Transmit Interrupt Flag (TXIF) is used to indicate that
@@ -960,8 +964,8 @@ static void enc_worker(FAR void *arg)
 
       if ((eir & EIR_TXIF) != 0) /* Transmit interrupt */
         {
-          enc_txif(priv);                   /* Handle TX completion */
-          enc_clrglobal(priv, EIR, EIR_TXIF); /* Clear the TXIF interrupt */
+          enc_txif(priv);                       /* Handle TX completion */
+          enc_bfcgreg(priv, ENC_EIR, EIR_TXIF); /* Clear the TXIF interrupt */
         }
 
       /* TXERIF: The Transmit Error Interrupt Flag (TXERIF) is used to
@@ -1005,8 +1009,8 @@ static void enc_worker(FAR void *arg)
 
       if ((eir & EIR_TXERIF) != 0) /* Transmit Error Interrupts */
         {
-          enc_txerif(priv);                     /* Handle the TX error */
-          enc_clrglobal(priv, EIR, EIR_TXERIF); /* Clear the TXERIF interrupt */
+          enc_txerif(priv);                       /* Handle the TX error */
+          enc_bfcgreg(priv, ENC_EIR, EIR_TXERIF); /* Clear the TXERIF interrupt */
         }
 
       /* PKTIF The Receive Packet Pending Interrupt Flag (PKTIF) is used to
@@ -1026,7 +1030,7 @@ static void enc_worker(FAR void *arg)
       /* Ignore PKTIF because is unreliable. Use EPKTCNT instead */
       /* if ((eir & EIR_PKTIF) != 0) */
         {
-          uint8_t pktcnt = enc_rdbreg(priv, EPKTCNT);
+          uint8_t pktcnt = enc_rdbreg(priv, ENC_EPKTCNT);
           if (pktcnt > 0)
             {
 #ifdef CONFIG_ENC28J60_STATS
@@ -1063,8 +1067,8 @@ static void enc_worker(FAR void *arg)
 
       if ((eir & EIR_RXERIF) != 0) /* Receive Errror Interrupts */
         {
-          enc_rxerif(priv);                     /* Handle the RX error */
-          enc_clrglobal(priv, EIR, EIR_RXERIF); /* Clear the RXERIF interrupt */
+          enc_rxerif(priv);                       /* Handle the RX error */
+          enc_bfcgreg(priv, ENC_EIR, EIR_RXERIF); /* Clear the RXERIF interrupt */
         }
 
     }
@@ -1073,7 +1077,7 @@ static void enc_worker(FAR void *arg)
    * there are no pending transmissions.
    */
 
-  enc_setglobal(priv, EIE, EIE_INTIE);
+  enc_bfsgreg(priv, ENC_EIE, EIE_INTIE);
 }
 
 /****************************************************************************
@@ -1175,11 +1179,11 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
 
   /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-  (void)uip_timer(&priv->dev, enc_uiptxpoll, ENC28J60_POLLHSEC);
+  (void)uip_timer(&priv->dev, enc_uiptxpoll, ENC_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, ENC28J60_WDDELAY, enc_polltimer, 1, arg);
+  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, arg);
 }
 
 /****************************************************************************
@@ -1211,7 +1215,7 @@ static int enc_ifup(struct uip_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, ENC28J60_WDDELAY, enc_polltimer, 1, (uint32_t)priv);
+  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
