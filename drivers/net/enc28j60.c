@@ -245,6 +245,11 @@ static int enc_ifup(struct uip_driver_s *dev);
 static int enc_ifdown(struct uip_driver_s *dev);
 static int enc_txavail(struct uip_driver_s *dev);
 
+/* Initialization */
+
+static void enc_setmacaddr(FAR struct enc_driver_s *priv);
+static void enc_reset(FAR struct enc_driver_s *priv);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -640,7 +645,7 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 
   enc_wrbreg(priv, ENC_MICMD, 0x00);
 
-  /* Get data value */
+  /* Get the PHY data */
 
   data  = (uint16_t)enc_rdmreg(priv, ENC_MIRDL);
   data |= (uint16_t)enc_rdmreg(priv, ENC_MIRDH) << 8;
@@ -1212,6 +1217,9 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then reset the hardware */
 
+  enc_reset(priv);
+  enc_setmacaddr(priv);
+
   /* Then poll uIP for new XMIT data */
 
   (void)uip_poll(&priv->dev, enc_uiptxpoll);
@@ -1274,7 +1282,10 @@ static int enc_ifup(struct uip_driver_s *dev)
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
-  /* Initilize Ethernet interface */
+  /* Initialize Ethernet interface */
+
+  enc_reset(priv);
+  enc_setmacaddr(priv);
 
   /* Set and activate a timer process */
 
@@ -1368,6 +1379,58 @@ static int enc_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: enc_setmacaddr
+ *
+ * Description:
+ *   Set the MAC address to the configured value.  This is done after ifup
+ *   or after a TX timeout.  Note that this means that the interface must
+ *   be down before configuring the MAC addr.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void enc_setmacaddr(FAR struct enc_driver_s *priv)
+{
+  /* Program the hardware with it's MAC address (for filtering) */
+
+  enc_wrbreg(priv, ENC_MAADR1, priv->dev.d_mac.ether_addr_octet[5]);
+  enc_wrbreg(priv, ENC_MAADR2, priv->dev.d_mac.ether_addr_octet[4]);
+  enc_wrbreg(priv, ENC_MAADR3, priv->dev.d_mac.ether_addr_octet[3]);
+  enc_wrbreg(priv, ENC_MAADR4, priv->dev.d_mac.ether_addr_octet[2]);
+  enc_wrbreg(priv, ENC_MAADR5, priv->dev.d_mac.ether_addr_octet[1]);
+  enc_wrbreg(priv, ENC_MAADR6, priv->dev.d_mac.ether_addr_octet[0]);
+}
+
+/****************************************************************************
+ * Function: enc_reset
+ *
+ * Description:
+ *   Stop, reset, re-initialize, and restart the ENC28J60.  This is done
+ *   initially, on ifup, and after a TX timeout.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void enc_reset(FAR struct enc_driver_s *priv)
+{
+#warning "Missing logic"
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1379,9 +1442,11 @@ static int enc_txavail(struct uip_driver_s *dev)
  *   in the post-reset state upon entry to this function.
  *
  * Parameters:
- *   spi - A reference to the platform's SPI driver for the ENC28J60
- *   irq - The fully configured GPIO IRQ that ENC28J60 interrupts will be
- *         asserted on.  This driver will attach and entable this IRQ.
+ *   spi   - A reference to the platform's SPI driver for the ENC28J60
+ *   devno - If more than one ENC28J60 is supported, then this is the
+ *           zero based number that identifies the ENC28J60;
+ *   irq   - The fully configured GPIO IRQ that ENC28J60 interrupts will be
+ *           asserted on.  This driver will attach and entable this IRQ.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -1392,26 +1457,33 @@ static int enc_txavail(struct uip_driver_s *dev)
 
 /* Initialize the Ethernet controller and driver */
 
-int enc_initialize(FAR struct spi_dev_s *spi, int irq)
+int enc_initialize(FAR struct spi_dev_s *spi, unsigned int devno, unsigned int irq)
 {
+  FAR struct enc_driver_s *priv ;
+
+  DEBUGASSERT(devno < CONFIG_ENC28J60_NINTERFACES);
+  priv = &g_enc28j60[devno];
+
   /* Initialize and configure the ENC28J60 */
+
+  enc_reset(priv);
 
   /* Initialize the driver structure */
 
   memset(g_enc28j60, 0, CONFIG_ENC28J60_NINTERFACES*sizeof(struct enc_driver_s));
-  g_enc28j60[0].dev.d_ifup    = enc_ifup;     /* I/F down callback */
-  g_enc28j60[0].dev.d_ifdown  = enc_ifdown;   /* I/F up (new IP address) callback */
-  g_enc28j60[0].dev.d_txavail = enc_txavail;  /* New TX data callback */
-  g_enc28j60[0].dev.d_private = (void*)g_enc28j60; /* Used to recover private state from dev */
+  priv->dev.d_ifup    = enc_ifup;     /* I/F down callback */
+  priv->dev.d_ifdown  = enc_ifdown;   /* I/F up (new IP address) callback */
+  priv->dev.d_txavail = enc_txavail;  /* New TX data callback */
+  priv->dev.d_private = priv;         /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  g_enc28j60[0].txpoll       = wd_create();   /* Create periodic poll timer */
-  g_enc28j60[0].txtimeout    = wd_create();   /* Create TX timeout timer */
-  g_enc28j60[0].spi          = spi;           /* Save the SPI instance */
-  g_enc28j60[0].irq          = irq;           /* Save the IRQ number */
+  priv->txpoll       = wd_create();   /* Create periodic poll timer */
+  priv->txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->spi          = spi;           /* Save the SPI instance */
+  priv->irq          = irq;           /* Save the IRQ number */
 
-  /* Attach the IRQ to the driver */
+  /* Attach the IRQ to the driver (but don't enable it yet) */
 
   if (irq_attach(irq, enc_interrupt))
     {
@@ -1420,11 +1492,13 @@ int enc_initialize(FAR struct spi_dev_s *spi, int irq)
       return -EAGAIN;
     }
 
-  /* Read the MAC address from the hardware into g_enc28j60[0].dev.d_mac.ether_addr_octet */
+  /* NOTE:  The MAC address will not be set up ifup.  That gives the app time
+   * to set the MAC address.
+   */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&g_enc28j60[0].dev);
+  (void)netdev_register(&priv->dev);
   return OK;
 }
 
