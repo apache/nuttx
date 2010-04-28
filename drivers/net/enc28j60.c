@@ -201,9 +201,9 @@ static void enc_wdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
          uint8_t wrdata);
 static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank);
 static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg);
-static uint8_t enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
+static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
          uint8_t wrdata);
-static uint8_t enc_rdphymac(FAR struct enc_driver_s *priv, uint8_t ctrlreg);
+static uint8_t enc_rdmreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg);
 
 /* SPI buffer transfers */
 
@@ -355,9 +355,12 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
 
   enc_select(spi);
 
-  /* Send the read command and (maybe collect the return data) */
+  /* Send the read command and collect the data.  The sequence requires
+   * 16-clocks:  8 to clock out the cmd + 8 to clock in the data.
+   */
 
-  rddata = SPI_SEND(spi, cmd);
+  (void)SPI_SEND(spi, cmd);  /* Clock out the command */
+  rddata = SPI_SEND(spi, 0); /* Clock in the data */
 
   /* De-select ENC28J60 chip */
 
@@ -386,13 +389,12 @@ static void enc_wdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
 
   enc_select(spi);
 
-  /* Send the write command */
+  /* Send the write command and data.  The sequence requires 16-clocks:
+   * 8 to clock out the cmd + 8 to clock out the data.
+   */
 
-  (void)SPI_SEND(spi, cmd);
-
-  /* Send the data byte */
-
-  (void)SPI_SEND(spi, wrdata);
+  (void)SPI_SEND(spi, cmd);    /* Clock out the command */
+  (void)SPI_SEND(spi, wrdata); /* Clock out the data */
 
   /* De-select ENC28J60 chip. */
 
@@ -437,7 +439,7 @@ static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank)
  * Function: enc_rdbreg
  *
  * Description:
- *   Set the bank for these next control register access.
+ *   Read from a banked control register using the RCR command.
  *
  ****************************************************************************/
  
@@ -453,13 +455,16 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 
   enc_select(spi);
 
-  /* set the bank */
+  /* Set the bank */
 
   enc_setbank(priv, GETBANK(ctrlreg));
 
-  /* Send the read command and collect the return data. */
+  /* Send the RCR command and collect the data.  The sequence requires
+   * 16-clocks:  8 to clock out the cmd + 8 to clock in the data.
+   */
 
-  rddata = SPI_SEND(spi, ENC_RCR | GETADDR(ctrlreg));
+  (void)SPI_SEND(spi, ENC_RCR | GETADDR(ctrlreg));  /* Clock out the command */
+  rddata = SPI_SEND(spi, 0);                        /* Clock in the data */
 
   /* De-select ENC28J60 chip */
 
@@ -468,7 +473,7 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 }
 
 /****************************************************************************
- * Function: enc_rdphymac
+ * Function: enc_rdmreg
  *
  * Description:
  *   Somewhat different timing is required to read from any PHY or MAC
@@ -477,7 +482,7 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
  *
  ****************************************************************************/
 
-static uint8_t enc_rdphymac(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
+static uint8_t enc_rdmreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 {
   FAR struct spi_dev_s *spi;
   uint8_t rddata;
@@ -493,13 +498,14 @@ static uint8_t enc_rdphymac(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 
   enc_setbank(priv, GETBANK(ctrlreg));
 
-  /* Send the read command (discarding the return data) */
+  /* Send the RCR command and collect the data.  The sequence requires
+   * 24-clocks:  8 to clock out the cmd, 8 dummy bits, and 8 to clock in
+    the data.
+   */
 
-  (void)SPI_SEND(spi, ENC_RCR | GETADDR(ctrlreg));
-
-  /* Do an extra transfer to get the data from the MAC or PHY */
-
-  rddata = SPI_SEND(spi, 0);
+  (void)SPI_SEND(spi, ENC_RCR | GETADDR(ctrlreg)); /* Clock out the command */
+  (void)SPI_SEND(spi,0);                           /* Clock in the dummy byte */
+  rddata = SPI_SEND(spi, 0);                       /* Clock in the PHY/MAC data */
 
   /* De-select ENC28J60 chip */
 
@@ -508,15 +514,15 @@ static uint8_t enc_rdphymac(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 }
 
 /****************************************************************************
- * Function: enc_rwrbreg
+ * Function: enc_wrbreg
  *
  * Description:
- *   Set the bank for these next control register access.
+ *   Write to a banked control register using the WCR command.
  *
  ****************************************************************************/
  
-static void enc_rwrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
-                        uint8_t wrdata)
+static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
+                       uint8_t wrdata)
 {
   FAR struct spi_dev_s *spi;
 
@@ -531,13 +537,12 @@ static void enc_rwrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 
   enc_setbank(priv, GETBANK(ctrlreg));
 
-  /* Send the write command */
+  /* Send the WCR command and data.  The sequence requires 16-clocks:
+   * 8 to clock out the cmd + 8 to clock out the data.
+   */
 
-  (void)SPI_SEND(spi, ENC_WCR | GETADDR(ctrlreg));
-
-  /* Send the data byte */
-
-  (void)SPI_SEND(spi, wrdata);
+  (void)SPI_SEND(spi, ENC_WCR | GETADDR(ctrlreg)); /* Clock out the command */
+  (void)SPI_SEND(spi, wrdata);                     /* Clock out the data */
 
   /* De-select ENC28J60 chip. */
 
@@ -608,6 +613,63 @@ static void enc_wrbuffer(FAR struct enc_driver_s *priv,
   /* De-select ENC28J60 chip. */
 
   enc_deselect(spi);
+}
+
+/****************************************************************************
+ * Function: enc_rdphy
+ *
+ * Description:
+ *   Read 16-bits of PHY data.
+ *
+ ****************************************************************************/
+
+static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
+{
+  uint16_t data;
+
+  /* Set the PHY address (and start the PHY read operation) */
+
+  enc_wrbreg(priv, ENC_MIREGADR, phyaddr);
+  enc_wrbreg(priv, ENC_MICMD, MICMD_MIIRD);
+
+  /* Wait until the PHY read completes */
+
+  while ((enc_rdmreg(priv, ENC_MISTAT) & MISTAT_BUSY) != 0 );
+
+  /* Terminate reading */
+
+  enc_wrbreg(priv, ENC_MICMD, 0x00);
+
+  /* Get data value */
+
+  data  = (uint16_t)enc_rdmreg(priv, ENC_MIRDL);
+  data |= (uint16_t)enc_rdmreg(priv, ENC_MIRDH) << 8;
+  return data;
+}
+
+/****************************************************************************
+ * Function: enc_wrphy
+ *
+ * Description:
+ *   write 16-bits of PHY data.
+ *
+ ****************************************************************************/
+
+static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
+                      uint16_t phydata)
+{
+  /* Set the PHY register address */
+
+  enc_wrbreg(priv, ENC_MIREGADR, phyaddr);
+
+  /* Write the PHY data */
+
+  enc_wrbreg(priv, ENC_MIWRL, phydata);
+  enc_wrbreg(priv, ENC_MIWRH, phydata >> 8);
+
+  /* Wait until the PHY write completes */
+
+  while ((enc_rdmreg(priv, ENC_MISTAT) & MISTAT_BUSY) != 0);
 }
 
 /****************************************************************************
@@ -776,7 +838,8 @@ static void enc_txerif(FAR struct enc_driver_s *priv)
   enc_bfsgreg(priv, ENC_ECON1, ECON1_TXRST);
   enc_bfcgreg(priv, ENC_ECON1, ECON1_TXRST | ECON1_TXRTS);
 
-  /* Here we really should re-transmit:
+  /* Here we really should re-transmit (I fact, if we want half duplex to
+   * work right, then it is necessary to do this!):
    *
    * 1.  Read the TSV:
    *     - Read ETXNDL to get the end pointer

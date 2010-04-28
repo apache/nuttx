@@ -225,12 +225,24 @@
 #define ENC_EPKTCNT     REGADDR(0x19, 1) /* Ethernet Packet Count */
                                          /* 0x1a: Reserved */
                                          /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
+
+/* Receive Filter Configuration Bit Definitions */
+
+#define ERXFCON_BCEN    (1 << 0) /* Bit 0: Broadcast Filter Enable */
+#define ERXFCON_MCEN    (1 << 1) /* Bit 1: Multicast Filter Enable */
+#define ERXFCON_HTEN    (1 << 2) /* Bit 2: Hash Table Filter Enable */
+#define ERXFCON_MPEN    (1 << 3) /* Bit 3: Magic Packet Filter Enable */
+#define ERXFCON_PMEN    (1 << 4) /* Bit 4: Pattern Match Filter Enable */
+#define ERXFCON_CRCEN   (1 << 5) /* Bit 5: Post-Filter CRC Check Enable */
+#define ERXFCON_ANDOR   (1 << 6) /* Bit 6: AND/OR Filter Select */
+#define ERXFCON_UCEN    (1 << 7) /* Bit 7: Unicast Filter Enable */
+
 /* Bank 2 Control Register Addresses */
 
-#define ENC_MACON1      REGADDR(0x00, 2) /* MAC control 1 */
-#define ENC_MACON2      REGADDR(0x01, 2) /* MAC control 2 */
-#define ENC_MACON3      REGADDR(0x02, 2) /* MAC control 3 */
-#define ENC_MACON4      REGADDR(0x03, 2) /* MAC control 4 */
+#define ENC_MACON1      REGADDR(0x00, 2) /* MAC Control 1 */
+                                         /* 0x01: Reserved */
+#define ENC_MACON3      REGADDR(0x02, 2) /* MAC Control 3 */
+#define ENC_MACON4      REGADDR(0x03, 2) /* MAC Control 4 */
 #define ENC_MABBIPG     REGADDR(0x04, 2) /* Back-to-Back Inter-Packet Gap (BBIPG<6:0>) */
                                          /* 0x05: Reserved */
 #define ENC_MAIPGL      REGADDR(0x06, 2) /* Non-Back-to-Back Inter-Packet Gap Low Byte (MAIPGL<6:0>) */
@@ -250,6 +262,37 @@
 #define ENC_MIRDH       REGADDR(0x19, 2) /* MII Read Data High Byte(MIRD<15:8>) */
                                          /* 0x1a: Reserved */
                                          /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
+
+/* MAC Control 1 Register Bit Definitions */
+
+#define MACON1_MARXEN   (1 << 0) /* Bit 0: MAC Receive Enable */
+#define MACON1_PASSALL  (1 << 1) /* Bit 1: Pass All Received Frames Enable */
+#define MACON1_RXPAUS   (1 << 2) /* Bit 2: Pause Control Frame Reception Enable */
+#define MACON1_TXPAUS   (1 << 3) /* Bit 3: Pause Control Frame Transmission Enable */
+                                 /* Bits 4-7: Unimplemented or reserved */
+
+/* MAC Control 1 Register Bit Definitions */
+
+#define MACON3_FULDPX   (1 << 0) /* Bit 0: MAC Full-Duplex Enable */
+#define MACON3_FRMLNEN  (1 << 1) /* Bit 1: Frame Length Checking Enable */
+#define MACON3_HFRMLEN  (1 << 2) /* Bit 2: Huge Frame Enable */
+#define MACON3_PHDRLEN  (1 << 3) /* Bit 3: Proprietary Header Enable */
+#define MACON3_TXCRCEN  (1 << 4) /* Bit 4: Transmit CRC Enable */
+#define MACON3_PADCFG0  (1 << 5) /* Bit 5: Automatic Pad and CRC Configuration */
+#define MACON3_PADCFG1  (1 << 6) /* Bit 6: "       " " " " " " " "           " */
+#define MACON3_PADCFG2  (1 << 7) /* Bit 7: "       " " " " " " " "           " */
+
+/* MAC Control 1 Register Bit Definitions */
+
+#define MACON4_NOBKOFF  (1 << 4) /* Bit 4: No Backoff Enable */
+#define MACON4_BPEN     (1 << 5) /* Bit 5: No Backoff During Backpressure Enable */
+#define MACON4_DEFER    (1 << 6) /* Bit 6: Defer Transmission Enable bit */
+
+/* MII Command Register Bit Definitions */
+
+#define MICMD_MIIRD     (1 << 0) /* Bit 0: MII Read Enable */
+#define MICMD_MIISCAN   (1 << 1) /* Bit 1: MII Scan Enable */
+
 /* Bank 3 Control Register Addresses */
 
 #define ENC_MAADR5      REGADDR(0x00, 3) /* MAC Address Byte 5 (MAADR<15:8>) */
@@ -273,6 +316,31 @@
 #define ENC_EPAUSH      REGADDR(0x19, 3) /* Pause Timer Value High Byte (EPAUS<15:8>) */
                                          /* 0x1a: Reserved */
                                          /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
+
+/* Built-in Self-Test Control Register Bit Definitions */
+
+#define EBSTCON_BISTST  (1 << 0) /* Bit 0: Built-in Self-Test Start/Busy */
+#define EBSTCON_TME     (1 << 1) /* Bit 1: Test Mode Enable */
+#define EBSTCON_TMSEL0  (1 << 2) /* Bit 2: Test Mode Select */
+#define EBSTCON_TMSEL1  (1 << 3) /* Bit 3: "  " "  " "    " */
+#define EBSTCON_PSEL    (1 << 4) /* Bit 4: Port Select */
+#define EBSTCON_PSV0    (1 << 5) /* Bit 5: Pattern Shift Value */
+#define EBSTCON_PSV1    (1 << 6) /* Bit 6: "     " "   "     " */
+#define EBSTCON_PSV2    (1 << 7) /* Bit 7: "     " "   "     " */
+
+/* MII Status Register Register Bit Definitions */
+
+#define MISTAT_BUSY     (1 << 0) /* Bit 0: MII Management Busy */
+#define MISTAT_SCAN     (1 << 1) /* Bit 1: MII Management Scan Operation */
+#define MISTAT_NVALID   (1 << 2) /* Bit 2: MII Management Read Data Not Valid */
+                                 /* Bits 3-7: Reserved or unimplemented */
+
+/* Ethernet Flow Control Register Bit Definitions */
+
+#define EFLOCON_FCEN0   (1 << 0) /* Bit 0: Flow Control Enable */
+#define EFLOCON_FCEN1   (1 << 1) /* Bit 1: "  " "     " "    " */
+#define EFLOCON_FULDPXS (1 << 2) /* Bit 2: Read-Only MAC Full-Duplex Shadow */
+                                 /* Bits 3-7: Reserved or unimplemented */
 
 /* PHY Registers ************************************************************/
 
@@ -328,6 +396,7 @@
 
 /* PHLCON Regiser Bit Definitions */
 
+                                    /* Bit 0:  Reserved */
 #define PHLCON_STRCH      (1 << 1)  /* Bit 1:  LED Pulse Stretching Enable */
 #define PHLCON_LFRQ0      (1 << 2)  /* Bit 2:  LED Pulse Stretch Time Configuration */
 #define PHLCON_LFRQ1      (1 << 3)  /* Bit 3:  " " "   " "     " "  " " */      
@@ -339,6 +408,13 @@
 #define PHLCON_LACFG1     (1 << 9)  /* Bit 9:  "  " "           " */
 #define PHLCON_LACFG2     (1 << 10) /* Bit 10: "  " "           " */
 #define PHLCON_LACFG3     (1 << 11) /* Bit 11: "  " "           " */
+
+/* Packet Control Bits Definitions ******************************************/
+
+#define PKTCTRL_POVERRIDE (1 << 0)  /* Bit 0:  Per Packet Override */
+#define PKTCTRL_PCRCEN    (1 << 1)  /* Bit 1:  Per Packet CRC Enable */
+#define PKTCTRL_PPADEN    (1 << 2)  /* Bit 2:  Per Packet Padding Enable */
+#define PKTCTRL_PHUGEEN   (1 << 3)  /* Bit 3:  Per Packet Huge Frame Enable */
 
 /****************************************************************************
  * Public Types
