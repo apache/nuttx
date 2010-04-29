@@ -57,6 +57,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/clock.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
@@ -110,6 +111,11 @@
 /* TX timeout = 1 minute */
 
 #define ENC_TXTIMEOUT (60*CLK_TCK)
+
+/* Poll timeout */
+
+#define ENC_POLLTIMEOUT MSEC2TICK(50)
+
 
 /* Misc. Helper Macros ******************************************************/
 
@@ -203,7 +209,8 @@ static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank);
 static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg);
 static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
          uint8_t wrdata);
-static uint8_t enc_rdmreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg);
+static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
+                        uint8_t bits, uint8_t value);
 
 /* SPI buffer transfers */
 
@@ -247,6 +254,8 @@ static int enc_txavail(struct uip_driver_s *dev);
 
 /* Initialization */
 
+static void enc_pwrsave(FAR struct enc_driver_s *priv);
+static void enc_pwrfull(FAR struct enc_driver_s *priv);
 static void enc_setmacaddr(FAR struct enc_driver_s *priv);
 static void enc_reset(FAR struct enc_driver_s *priv);
 
@@ -464,53 +473,21 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 
   enc_setbank(priv, GETBANK(ctrlreg));
 
-  /* Send the RCR command and collect the data.  The sequence requires
-   * 16-clocks:  8 to clock out the cmd + 8 to clock in the data.
-   */
-
-  (void)SPI_SEND(spi, ENC_RCR | GETADDR(ctrlreg));  /* Clock out the command */
-  rddata = SPI_SEND(spi, 0);                        /* Clock in the data */
-
-  /* De-select ENC28J60 chip */
-
-  enc_deselect(spi);
-  return rddata;
-}
-
-/****************************************************************************
- * Function: enc_rdmreg
- *
- * Description:
- *   Somewhat different timing is required to read from any PHY or MAC
- *   registers.  The PHY/MAC data is returned on the second byte after the
- *   command.
- *
- ****************************************************************************/
-
-static uint8_t enc_rdmreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
-{
-  FAR struct spi_dev_s *spi;
-  uint8_t rddata;
-
-  DEBUGASSERT(priv && priv->spi);
-  spi = priv->spi;
-
-  /* Select ENC28J60 chip */
-
-  enc_select(spi);
-
-  /* Set the bank */
-
-  enc_setbank(priv, GETBANK(ctrlreg));
-
-  /* Send the RCR command and collect the data.  The sequence requires
-   * 24-clocks:  8 to clock out the cmd, 8 dummy bits, and 8 to clock in
-    the data.
+  /* Send the RCR command and collect the data.  How we collect the data
+   * depends on if this is a PHY/CAN or not.  The normal sequence requires
+   * 16-clocks:  8 to clock out the cmd and  8 to clock in the data.
    */
 
   (void)SPI_SEND(spi, ENC_RCR | GETADDR(ctrlreg)); /* Clock out the command */
-  (void)SPI_SEND(spi,0);                           /* Clock in the dummy byte */
-  rddata = SPI_SEND(spi, 0);                       /* Clock in the PHY/MAC data */
+  if (ISPHYMAC(ctrlreg))
+    {
+      /* The PHY/MAC sequence requires 24-clocks:  8 to clock out the cmd,
+       * 8 dummy bits, and 8 to clock in the PHY/MAC data.
+       */
+
+      (void)SPI_SEND(spi,0);                       /* Clock in the dummy byte */
+    }
+  rddata = SPI_SEND(spi, 0);                       /* Clock in the data */
 
   /* De-select ENC28J60 chip */
 
@@ -522,7 +499,9 @@ static uint8_t enc_rdmreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
  * Function: enc_wrbreg
  *
  * Description:
- *   Write to a banked control register using the WCR command.
+ *   Write to a banked control register using the WCR command.  Unlike
+ *   reading, this same SPI sequence works for normal, MAC, and PHY
+ *   registers.
  *
  ****************************************************************************/
  
@@ -552,6 +531,35 @@ static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
   /* De-select ENC28J60 chip. */
 
   enc_deselect(spi);
+}
+
+/****************************************************************************
+ * Function: enc_waitbreg
+ *
+ * Description:
+ *   Wait until banked register bit(s) take a specific value (or a timeout
+ *   occurs).
+ *
+ ****************************************************************************/
+
+static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
+                        uint8_t bits, uint8_t value)
+{
+  uint32_t start = g_system_timer;
+  uint32_t elapsed;
+  uint8_t  rddata;
+
+  /* Loop until the exit condition is met */
+
+  do
+    {
+      /* Read the byte from the requested banked register */
+
+      rddata  = enc_rdbreg(priv, ctrlreg);
+      elapsed = g_system_timer - start;
+    }
+  while ((rddata & bits) != value || elapsed > ENC_POLLTIMEOUT);
+  return (rddata & bits) == value ? -ETIMEDOUT : OK;
 }
 
 /****************************************************************************
@@ -630,7 +638,7 @@ static void enc_wrbuffer(FAR struct enc_driver_s *priv,
 
 static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 {
-  uint16_t data;
+  uint16_t data = 0;
 
   /* Set the PHY address (and start the PHY read operation) */
 
@@ -639,16 +647,17 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 
   /* Wait until the PHY read completes */
 
-  while ((enc_rdmreg(priv, ENC_MISTAT) & MISTAT_BUSY) != 0 );
+  if (enc_waitbreg(priv, ENC_MISTAT, MISTAT_BUSY, 0x00) == OK);
+    {
+      /* Terminate reading */
 
-  /* Terminate reading */
+      enc_wrbreg(priv, ENC_MICMD, 0x00);
 
-  enc_wrbreg(priv, ENC_MICMD, 0x00);
+      /* Get the PHY data */
 
-  /* Get the PHY data */
-
-  data  = (uint16_t)enc_rdmreg(priv, ENC_MIRDL);
-  data |= (uint16_t)enc_rdmreg(priv, ENC_MIRDH) << 8;
+      data  = (uint16_t)enc_rdbreg(priv, ENC_MIRDL);
+      data |= (uint16_t)enc_rdbreg(priv, ENC_MIRDH) << 8;
+    }
   return data;
 }
 
@@ -674,7 +683,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 
   /* Wait until the PHY write completes */
 
-  while ((enc_rdmreg(priv, ENC_MISTAT) & MISTAT_BUSY) != 0);
+  enc_waitbreg(priv, ENC_MISTAT, MISTAT_BUSY, 0x00);
 }
 
 /****************************************************************************
@@ -1282,10 +1291,21 @@ static int enc_ifup(struct uip_driver_s *dev)
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
-  /* Initialize Ethernet interface */
+  /* Initialize Ethernet interface, set the MAC address, and make sure that
+   * the ENC28J80 is not in power save mode.
+   */
 
   enc_reset(priv);
   enc_setmacaddr(priv);
+  enc_pwrfull(priv);
+
+  /* Enable interrutps */
+
+  enc_bfsgreg(priv, ENC_EIE, EIE_INTIE | EIE_PKTIE);
+
+  /* Enable packet reception */
+
+   enc_bfsgreg(priv, ENC_ECON1, ECON1_RXEN);
 
   /* Set and activate a timer process */
 
@@ -1329,7 +1349,10 @@ static int enc_ifdown(struct uip_driver_s *dev)
   wd_cancel(priv->txpoll);
   wd_cancel(priv->txtimeout);
 
-  /* Reset the device */
+  /* Reset the device and leave in the power save state */
+
+  enc_reset(priv);
+  enc_pwrsave(priv);
 
   priv->bifup = false;
   irqrestore(flags);
@@ -1376,6 +1399,101 @@ static int enc_txavail(struct uip_driver_s *dev)
 
   irqrestore(flags);
   return OK;
+}
+
+/****************************************************************************
+ * Function: enc_pwrsave
+ *
+ * Description:
+ *   The ENC28J60 may be commanded to power-down via the SPI interface.
+ *   When powered down, it will no longer be able to transmit and receive
+ *   any packets. To maximize power savings:
+ *
+ *   1. Turn off packet reception by clearing ECON1.RXEN.
+ *   2. Wait for any in-progress packets to finish being received by
+ *      polling ESTAT.RXBUSY. This bit should be clear before proceeding.
+ *   3. Wait for any current transmissions to end by confirming ECON1.TXRTS
+ *      is clear.
+ *   4. Set ECON2.VRPS (if not already set).
+ *   5. Enter Sleep by setting ECON2.PWRSV. All MAC, MII and PHY registers
+ *      become inaccessible as a result. Setting PWRSV also clears
+ *      ESTAT.CLKRDY automatically.
+ *
+ *   In Sleep mode, all registers and buffer memory will maintain their
+ *   states. The ETH registers and buffer memory will still be accessible
+ *   by the host controller. Additionally, the clock driver will continue
+ *   to operate. The CLKOUT function will be unaffected.
+ *
+ ****************************************************************************/
+
+static void enc_pwrsave(FAR struct enc_driver_s *priv)
+{
+  /* 1. Turn off packet reception by clearing ECON1.RXEN. */
+
+  enc_bfcgreg(priv, ENC_ECON1, ECON1_RXEN);
+
+  /* 2. Wait for any in-progress packets to finish being received by
+   *    polling ESTAT.RXBUSY. This bit should be clear before proceeding.
+   */
+
+  if (enc_waitbreg(priv, ENC_ESTAT, ESTAT_RXBUSY, 0) == OK)
+    {
+      /* 3. Wait for any current transmissions to end by confirming
+       * ECON1.TXRTS is clear.
+       */
+
+      enc_waitbreg(priv, ENC_ECON1, ECON1_TXRTS, 0);
+
+      /* 4. Set ECON2.VRPS (if not already set). */
+
+      enc_bfsgreg(priv, ENC_ECON2, ECON2_VRPS);
+
+      /* 5. Enter Sleep by setting ECON2.PWRSV. */
+
+      enc_bfsgreg(priv, ENC_ECON2, ECON2_PWRSV);
+    }
+}
+
+/****************************************************************************
+ * Function: enc_pwrfull
+ *
+ * Description:
+ *   When normal operation is desired, the host controller must perform
+ *   a slightly modified procedure:
+ *
+ *   1. Wake-up by clearing ECON2.PWRSV.
+ *   2. Wait at least 300 ìs for the PHY to stabilize. To accomplish the
+ *      delay, the host controller may poll ESTAT.CLKRDY and wait for it
+ *      to become set.
+ *   3. Restore receive capability by setting ECON1.RXEN.
+ *
+ *   After leaving Sleep mode, there is a delay of many milliseconds
+ *   before a new link is established (assuming an appropriate link
+ *   partner is present). The host controller may wish to wait until
+ *   the link is established before attempting to transmit any packets.
+ *   The link status can be determined by polling the PHSTAT2.LSTAT bit.
+ *   Alternatively, the link change interrupt may be used if it is
+ *   enabled.
+ *
+ ****************************************************************************/
+ 
+static void enc_pwrfull(FAR struct enc_driver_s *priv)
+{
+  /* 1. Wake-up by clearing ECON2.PWRSV. */
+
+  enc_bfcgreg(priv, ENC_ECON2, ECON2_PWRSV);
+  
+  /* 2. Wait at least 300 ìs for the PHY to stabilize. To accomplish the
+   * delay, the host controller may poll ESTAT.CLKRDY and wait for it to
+   * become set.
+   */
+
+  enc_waitbreg(priv, ENC_ESTAT, ESTAT_CLKRDY, ESTAT_CLKRDY);
+
+  /* 3. Restore receive capability by setting ECON1.RXEN.
+   *
+   * The caller will do this when it is read to receive packets
+   */
 }
 
 /****************************************************************************
@@ -1464,10 +1582,6 @@ int enc_initialize(FAR struct spi_dev_s *spi, unsigned int devno, unsigned int i
   DEBUGASSERT(devno < CONFIG_ENC28J60_NINTERFACES);
   priv = &g_enc28j60[devno];
 
-  /* Initialize and configure the ENC28J60 */
-
-  enc_reset(priv);
-
   /* Initialize the driver structure */
 
   memset(g_enc28j60, 0, CONFIG_ENC28J60_NINTERFACES*sizeof(struct enc_driver_s));
@@ -1483,6 +1597,13 @@ int enc_initialize(FAR struct spi_dev_s *spi, unsigned int devno, unsigned int i
   priv->spi          = spi;           /* Save the SPI instance */
   priv->irq          = irq;           /* Save the IRQ number */
 
+  /* Make sure that the interface is in the down state.  NOTE:  The MAC
+   * address will not be set up until ifup.  That gives the app time to set
+   * the MAC address before bringing the interface up.
+   */
+
+  enc_ifdown(&priv->dev);
+
   /* Attach the IRQ to the driver (but don't enable it yet) */
 
   if (irq_attach(irq, enc_interrupt))
@@ -1492,9 +1613,6 @@ int enc_initialize(FAR struct spi_dev_s *spi, unsigned int devno, unsigned int i
       return -EAGAIN;
     }
 
-  /* NOTE:  The MAC address will not be set up ifup.  That gives the app time
-   * to set the MAC address.
-   */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

@@ -152,8 +152,9 @@
 
 /* Banked Control Registers *************************************************/
 /* The remaining control registers are identified with a a 5 bit address and
- * a bank selection.  We pack the bank number and the control register
- * address together to keep the design simpler.
+ * a bank selection.  We pack the bank number and an indication if this is
+ * a MAC/PHY register access together with the control register address
+ * together to keep the design simpler.
  */
 
 #define ENC_ADDR_SHIFT      (0)      /* Bits 0-4: Register address */
@@ -164,67 +165,70 @@
 #  define ENC_BANK1         (1 << ENC_BSEL_SHIFT)
 #  define ENC_BANK2         (2 << ENC_BSEL_SHIFT)
 #  define ENC_BANK3         (3 << ENC_BSEL_SHIFT)
+#define ENC_PHYMAC_SHIFT    (7)      /* Bit 7: This is a PHY/MAC command */
+#define ENC_PHYMAC          (1 << ENC_PHYMAC_SHIFT)
 
-#define REGADDR(a,b)        ((b) << ENC_BANK_SHIFT | (a))
+#define REGADDR(a,b,m)      ((m) << ENC_PHYMAC_SHIFT | (b) << ENC_BANK_SHIFT | (a))
 #define GETADDR(a)          ((a) & ENC_ADDR_MASK)
 #define GETBANK(a)          (((a) >> ENC_BANK_SHIFT) & 3)
+#define ISPHYMAC(a)         (((a) & ENC_PHYMAC) != 0)
 
 /* Bank 0 Control Register Addresses */
 
-#define ENC_ERDPTL      REGADDR(0x00, 0) /* Read Pointer Low Byte (ERDPT<7:0> */
-#define ENC_ERDPTH      REGADDR(0x01, 0) /* Read Pointer High Byte (ERDPT<12:8>) */
-#define ENC_EWRPTL      REGADDR(0x02, 0) /* Write Pointer Low Byte (EWRPT<7:0>) */
-#define ENC_EWRPTH      REGADDR(0x03, 0) /* Write Pointer High Byte (EWRPT<12:8>) */
-#define ENC_ETXSTL      REGADDR(0x04, 0) /* TX Start Low Byte (ETXST<7:0>) */
-#define ENC_ETXSTH      REGADDR(0x05, 0) /* TX Start High Byte (ETXST<12:8>) */
-#define ENC_ETXNDL      REGADDR(0x06, 0) /* TX End Low Byte (ETXND<7:0>) */
-#define ENC_ETXNDH      REGADDR(0x07, 0) /* TX End High Byte (ETXND<12:8>) */
-#define ENC_ERXSTL      REGADDR(0x08, 0) /* RX Start Low Byte (ERXST<7:0>) */
-#define ENC_ERXSTH      REGADDR(0x09, 0) /* RX Start High Byte (ERXST<12:8>) */
-#define ENC_ERXNDL      REGADDR(0x0a, 0) /* RX End Low Byte (ERXND<7:0>) */
-#define ENC_ERXNDH      REGADDR(0x0b, 0) /* RX End High Byte (ERXND<12:8>) */
-#define ENC_ERXRDPTL    REGADDR(0x0c, 0) /* RX RD Pointer Low Byte (ERXRDPT<7:0>) */
-#define ENC_ERXRDPTH    REGADDR(0x0d, 0) /* RX RD Pointer High Byte (ERXRDPT<12:8>) */
-#define ENC_ERXWRPTL    REGADDR(0x0e, 0) /* RX WR Pointer Low Byte (ERXWRPT<7:0>) */
-#define ENC_ERXWRPTH    REGADDR(0x0f, 0) /* RX WR Pointer High Byte (ERXWRPT<12:8>) */
-#define ENC_EDMASTL     REGADDR(0x10, 0) /* DMA Start Low Byte (EDMAST<7:0>) */
-#define ENC_EDMASTH     REGADDR(0x11, 0) /* DMA Start High Byte (EDMAST<12:8>) */
-#define ENC_EDMANDL     REGADDR(0x12, 0) /* DMA End Low Byte (EDMAND<7:0>) */
-#define ENC_EDMANDH     REGADDR(0x13, 0) /* DMA End High Byte (EDMAND<12:8>) */
-#define ENC_EDMADSTL    REGADDR(0x14, 0) /* DMA Destination Low Byte (EDMADST<7:0>) */
-#define ENC_EDMADSTH    REGADDR(0x15, 0) /* DMA Destination High Byte (EDMADST<12:8>) */
-#define ENC_EDMACSL     REGADDR(0x16, 0) /* DMA Checksum Low Byte (EDMACS<7:0>) */
-#define ENC_EDMACSH     REGADDR(0x17, 0) /* DMA Checksum High Byte (EDMACS<15:8>) */
-                                         /* 0x18-0x1a: Reserved */
-                                         /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
+#define ENC_ERDPTL      REGADDR(0x00, 0, 0) /* Read Pointer Low Byte (ERDPT<7:0> */
+#define ENC_ERDPTH      REGADDR(0x01, 0, 0) /* Read Pointer High Byte (ERDPT<12:8>) */
+#define ENC_EWRPTL      REGADDR(0x02, 0, 0) /* Write Pointer Low Byte (EWRPT<7:0>) */
+#define ENC_EWRPTH      REGADDR(0x03, 0, 0) /* Write Pointer High Byte (EWRPT<12:8>) */
+#define ENC_ETXSTL      REGADDR(0x04, 0, 0) /* TX Start Low Byte (ETXST<7:0>) */
+#define ENC_ETXSTH      REGADDR(0x05, 0, 0) /* TX Start High Byte (ETXST<12:8>) */
+#define ENC_ETXNDL      REGADDR(0x06, 0, 0) /* TX End Low Byte (ETXND<7:0>) */
+#define ENC_ETXNDH      REGADDR(0x07, 0, 0) /* TX End High Byte (ETXND<12:8>) */
+#define ENC_ERXSTL      REGADDR(0x08, 0, 0) /* RX Start Low Byte (ERXST<7:0>) */
+#define ENC_ERXSTH      REGADDR(0x09, 0, 0) /* RX Start High Byte (ERXST<12:8>) */
+#define ENC_ERXNDL      REGADDR(0x0a, 0, 0) /* RX End Low Byte (ERXND<7:0>) */
+#define ENC_ERXNDH      REGADDR(0x0b, 0, 0) /* RX End High Byte (ERXND<12:8>) */
+#define ENC_ERXRDPTL    REGADDR(0x0c, 0, 0) /* RX RD Pointer Low Byte (ERXRDPT<7:0>) */
+#define ENC_ERXRDPTH    REGADDR(0x0d, 0, 0) /* RX RD Pointer High Byte (ERXRDPT<12:8>) */
+#define ENC_ERXWRPTL    REGADDR(0x0e, 0, 0) /* RX WR Pointer Low Byte (ERXWRPT<7:0>) */
+#define ENC_ERXWRPTH    REGADDR(0x0f, 0, 0) /* RX WR Pointer High Byte (ERXWRPT<12:8>) */
+#define ENC_EDMASTL     REGADDR(0x10, 0, 0) /* DMA Start Low Byte (EDMAST<7:0>) */
+#define ENC_EDMASTH     REGADDR(0x11, 0, 0) /* DMA Start High Byte (EDMAST<12:8>) */
+#define ENC_EDMANDL     REGADDR(0x12, 0, 0) /* DMA End Low Byte (EDMAND<7:0>) */
+#define ENC_EDMANDH     REGADDR(0x13, 0, 0) /* DMA End High Byte (EDMAND<12:8>) */
+#define ENC_EDMADSTL    REGADDR(0x14, 0, 0) /* DMA Destination Low Byte (EDMADST<7:0>) */
+#define ENC_EDMADSTH    REGADDR(0x15, 0, 0) /* DMA Destination High Byte (EDMADST<12:8>) */
+#define ENC_EDMACSL     REGADDR(0x16, 0, 0) /* DMA Checksum Low Byte (EDMACS<7:0>) */
+#define ENC_EDMACSH     REGADDR(0x17, 0, 0) /* DMA Checksum High Byte (EDMACS<15:8>) */
+                                            /* 0x18-0x1a: Reserved */
+                                            /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
 /* Bank 1 Control Register Addresses */
 
-#define ENC_EHT0        REGADDR(0x00, 1) /* Hash Table Byte 0 (EHT<7:0>) */
-#define ENC_EHT1        REGADDR(0x01, 1) /* Hash Table Byte 1 (EHT<15:8>) */
-#define ENC_EHT2        REGADDR(0x02, 1) /* Hash Table Byte 2 (EHT<23:16>) */
-#define ENC_EHT3        REGADDR(0x03, 1) /* Hash Table Byte 3 (EHT<31:24>) */
-#define ENC_EHT4        REGADDR(0x04, 1) /* Hash Table Byte 4 (EHT<39:32>) */
-#define ENC_EHT5        REGADDR(0x05, 1) /* Hash Table Byte 5 (EHT<47:40>) */
-#define ENC_EHT6        REGADDR(0x06, 1) /* Hash Table Byte 6 (EHT<55:48>) */
-#define ENC_EHT7        REGADDR(0x07, 1) /* Hash Table Byte 7 (EHT<63:56>) */
-#define ENC_EPMM0       REGADDR(0x08, 1) /* Pattern Match Mask Byte 0 (EPMM<7:0>) */
-#define ENC_EPMM1       REGADDR(0x09, 1) /* Pattern Match Mask Byte 1 (EPMM<15:8>) */
-#define ENC_EPMM2       REGADDR(0x0a, 1) /* Pattern Match Mask Byte 2 (EPMM<23:16>) */
-#define ENC_EPMM3       REGADDR(0x0b, 1) /* Pattern Match Mask Byte 3 (EPMM<31:24>) */
-#define ENC_EPMM4       REGADDR(0x0c, 1) /* Pattern Match Mask Byte 4 (EPMM<39:32>) */
-#define ENC_EPMM5       REGADDR(0x0d, 1) /* Pattern Match Mask Byte 5 (EPMM<47:40>) */
-#define ENC_EPMM6       REGADDR(0x0e, 1) /* Pattern Match Mask Byte 6 (EPMM<55:48>) */
-#define ENC_EPMM7       REGADDR(0x0f, 1) /* Pattern Match Mask Byte 7 (EPMM<63:56>) */
-#define ENC_EPMCSL      REGADDR(0x10, 1) /* Pattern Match Checksum Low Byte (EPMCS<7:0>) */
-#define ENC_EPMCSH      REGADDR(0x11, 1) /* Pattern Match Checksum High Byte (EPMCS<15:0>) */
-                                         /* 0x12-0x13: Reserved */
-#define ENC_EPMOL       REGADDR(0x14, 1) /* Pattern Match Offset Low Byte (EPMO<7:0>) */
-#define ENC_EPMOH       REGADDR(0x15, 1) /* Pattern Match Offset High Byte (EPMO<12:8>) */
-                                         /* 0x16-0x17: Reserved */
-#define ENC_ERXFCON     REGADDR(0x18, 1) /* Receive Filter Configuration */
-#define ENC_EPKTCNT     REGADDR(0x19, 1) /* Ethernet Packet Count */
-                                         /* 0x1a: Reserved */
-                                         /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
+#define ENC_EHT0        REGADDR(0x00, 1, 0) /* Hash Table Byte 0 (EHT<7:0>) */
+#define ENC_EHT1        REGADDR(0x01, 1, 0) /* Hash Table Byte 1 (EHT<15:8>) */
+#define ENC_EHT2        REGADDR(0x02, 1, 0) /* Hash Table Byte 2 (EHT<23:16>) */
+#define ENC_EHT3        REGADDR(0x03, 1, 0) /* Hash Table Byte 3 (EHT<31:24>) */
+#define ENC_EHT4        REGADDR(0x04, 1, 0) /* Hash Table Byte 4 (EHT<39:32>) */
+#define ENC_EHT5        REGADDR(0x05, 1, 0) /* Hash Table Byte 5 (EHT<47:40>) */
+#define ENC_EHT6        REGADDR(0x06, 1, 0) /* Hash Table Byte 6 (EHT<55:48>) */
+#define ENC_EHT7        REGADDR(0x07, 1, 0) /* Hash Table Byte 7 (EHT<63:56>) */
+#define ENC_EPMM0       REGADDR(0x08, 1, 0) /* Pattern Match Mask Byte 0 (EPMM<7:0>) */
+#define ENC_EPMM1       REGADDR(0x09, 1, 0) /* Pattern Match Mask Byte 1 (EPMM<15:8>) */
+#define ENC_EPMM2       REGADDR(0x0a, 1, 0) /* Pattern Match Mask Byte 2 (EPMM<23:16>) */
+#define ENC_EPMM3       REGADDR(0x0b, 1, 0) /* Pattern Match Mask Byte 3 (EPMM<31:24>) */
+#define ENC_EPMM4       REGADDR(0x0c, 1, 0) /* Pattern Match Mask Byte 4 (EPMM<39:32>) */
+#define ENC_EPMM5       REGADDR(0x0d, 1, 0) /* Pattern Match Mask Byte 5 (EPMM<47:40>) */
+#define ENC_EPMM6       REGADDR(0x0e, 1, 0) /* Pattern Match Mask Byte 6 (EPMM<55:48>) */
+#define ENC_EPMM7       REGADDR(0x0f, 1, 0) /* Pattern Match Mask Byte 7 (EPMM<63:56>) */
+#define ENC_EPMCSL      REGADDR(0x10, 1, 0) /* Pattern Match Checksum Low Byte (EPMCS<7:0>) */
+#define ENC_EPMCSH      REGADDR(0x11, 1, 0) /* Pattern Match Checksum High Byte (EPMCS<15:0>) */
+                                            /* 0x12-0x13: Reserved */
+#define ENC_EPMOL       REGADDR(0x14, 1, 0) /* Pattern Match Offset Low Byte (EPMO<7:0>) */
+#define ENC_EPMOH       REGADDR(0x15, 1, 0) /* Pattern Match Offset High Byte (EPMO<12:8>) */
+                                            /* 0x16-0x17: Reserved */
+#define ENC_ERXFCON     REGADDR(0x18, 1, 0) /* Receive Filter Configuration */
+#define ENC_EPKTCNT     REGADDR(0x19, 1, 0) /* Ethernet Packet Count */
+                                            /* 0x1a: Reserved */
+                                            /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
 
 /* Receive Filter Configuration Bit Definitions */
 
@@ -239,29 +243,29 @@
 
 /* Bank 2 Control Register Addresses */
 
-#define ENC_MACON1      REGADDR(0x00, 2) /* MAC Control 1 */
-                                         /* 0x01: Reserved */
-#define ENC_MACON3      REGADDR(0x02, 2) /* MAC Control 3 */
-#define ENC_MACON4      REGADDR(0x03, 2) /* MAC Control 4 */
-#define ENC_MABBIPG     REGADDR(0x04, 2) /* Back-to-Back Inter-Packet Gap (BBIPG<6:0>) */
-                                         /* 0x05: Reserved */
-#define ENC_MAIPGL      REGADDR(0x06, 2) /* Non-Back-to-Back Inter-Packet Gap Low Byte (MAIPGL<6:0>) */
-#define ENC_MAIPGH      REGADDR(0x07, 2) /* Non-Back-to-Back Inter-Packet Gap High Byte (MAIPGH<6:0>) */
-#define ENC_MACLCON1    REGADDR(0x08, 2) /* MAC Collision Control 1 */
-#define ENC_MACLCON2    REGADDR(0x09, 2) /* MAC Collision Control 2 */
-#define ENC_MAMXFLL     REGADDR(0x0a, 2) /* Maximum Frame Length Low Byte (MAMXFL<7:0>) */
-#define ENC_MAMXFLH     REGADDR(0x0b, 2) /* Maximum Frame Length High Byte (MAMXFL<15:8>) */
-                                         /* 0x0c-0x11: Reserved */
-#define ENC_MICMD       REGADDR(0x12, 2) /* MII Command Register */
-                                         /* 0x13: Reserved */
-#define ENC_MIREGADR    REGADDR(0x14, 2) /* MII Register Address */
-                                         /* 0x15: Reserved */
-#define ENC_MIWRL       REGADDR(0x16, 2) /* MII Write Data Low Byte (MIWR<7:0>) */
-#define ENC_MIWRH       REGADDR(0x17, 2) /* MII Write Data High Byte (MIWR<15:8>) */
-#define ENC_MIRDL       REGADDR(0x18, 2) /* MII Read Data Low Byte (MIRD<7:0>) */
-#define ENC_MIRDH       REGADDR(0x19, 2) /* MII Read Data High Byte(MIRD<15:8>) */
-                                         /* 0x1a: Reserved */
-                                         /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
+#define ENC_MACON1      REGADDR(0x00, 2, 1) /* MAC Control 1 */
+                                            /* 0x01: Reserved */
+#define ENC_MACON3      REGADDR(0x02, 2, 1) /* MAC Control 3 */
+#define ENC_MACON4      REGADDR(0x03, 2, 1) /* MAC Control 4 */
+#define ENC_MABBIPG     REGADDR(0x04, 2, 1) /* Back-to-Back Inter-Packet Gap (BBIPG<6:0>) */
+                                            /* 0x05: Reserved */
+#define ENC_MAIPGL      REGADDR(0x06, 2, 1) /* Non-Back-to-Back Inter-Packet Gap Low Byte (MAIPGL<6:0>) */
+#define ENC_MAIPGH      REGADDR(0x07, 2, 1) /* Non-Back-to-Back Inter-Packet Gap High Byte (MAIPGH<6:0>) */
+#define ENC_MACLCON1    REGADDR(0x08, 2, 1) /* MAC Collision Control 1 */
+#define ENC_MACLCON2    REGADDR(0x09, 2, 1) /* MAC Collision Control 2 */
+#define ENC_MAMXFLL     REGADDR(0x0a, 2, 1) /* Maximum Frame Length Low Byte (MAMXFL<7:0>) */
+#define ENC_MAMXFLH     REGADDR(0x0b, 2, 1) /* Maximum Frame Length High Byte (MAMXFL<15:8>) */
+                                            /* 0x0c-0x11: Reserved */
+#define ENC_MICMD       REGADDR(0x12, 2, 1) /* MII Command Register */
+                                            /* 0x13: Reserved */
+#define ENC_MIREGADR    REGADDR(0x14, 2, 1) /* MII Register Address */
+                                            /* 0x15: Reserved */
+#define ENC_MIWRL       REGADDR(0x16, 2, 1) /* MII Write Data Low Byte (MIWR<7:0>) */
+#define ENC_MIWRH       REGADDR(0x17, 2, 1) /* MII Write Data High Byte (MIWR<15:8>) */
+#define ENC_MIRDL       REGADDR(0x18, 2, 1) /* MII Read Data Low Byte (MIRD<7:0>) */
+#define ENC_MIRDH       REGADDR(0x19, 2, 1) /* MII Read Data High Byte(MIRD<15:8>) */
+                                            /* 0x1a: Reserved */
+                                            /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
 
 /* MAC Control 1 Register Bit Definitions */
 
@@ -295,27 +299,27 @@
 
 /* Bank 3 Control Register Addresses */
 
-#define ENC_MAADR5      REGADDR(0x00, 3) /* MAC Address Byte 5 (MAADR<15:8>) */
-#define ENC_MAADR6      REGADDR(0x01, 3) /* MAC Address Byte 6 (MAADR<7:0>) */
-#define ENC_MAADR3      REGADDR(0x02, 3) /* MAC Address Byte 3 (MAADR<31:24>), OUI Byte 3 */
-#define ENC_MAADR4      REGADDR(0x03, 3) /* MAC Address Byte 4 (MAADR<23:16>) */
-#define ENC_MAADR1      REGADDR(0x04, 3) /* MAC Address Byte 1 (MAADR<47:40>), OUI Byte 1 */
-#define ENC_MAADR2      REGADDR(0x05, 3) /* MAC Address Byte 2 (MAADR<39:32>), OUI Byte  */
-#define ENC_EBSTSD      REGADDR(0x06, 3) /* Built-in Self-Test Fill Seed (EBSTSD<7:0>) */
-#define ENC_EBSTCON     REGADDR(0x07, 3) /* Built-in Self-Test Control */
-#define ENC_EBSTCSL     REGADDR(0x08, 3) /* Built-in Self-Test Checksum Low Byte (EBSTCS<7:0>) */
-#define ENC_EBSTCSH     REGADDR(0x09, 3) /* Built-in Self-Test Checksum High Byte (EBSTCS<15:8>) */
-#define ENC_MISTAT      REGADDR(0x0a, 3) /* MII Status Register */
-                                         /* 0x0b-0x11: Reserved */
-#define ENC_EREVID      REGADDR(0x12, 3) /* Ethernet Revision ID */
-                                         /* 0x13-0x14: Reserved */
-#define ENC_ECOCON      REGADDR(0x15, 3) /* Clock Output Control */
-                                         /* 0x16: Reserved */
-#define ENC_EFLOCON     REGADDR(0x17, 3) /* Ethernet Flow Control */
-#define ENC_EPAUSL      REGADDR(0x18, 3) /* Pause Timer Value Low Byte (EPAUS<7:0>) */
-#define ENC_EPAUSH      REGADDR(0x19, 3) /* Pause Timer Value High Byte (EPAUS<15:8>) */
-                                         /* 0x1a: Reserved */
-                                         /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
+#define ENC_MAADR5      REGADDR(0x00, 3, 1) /* MAC Address Byte 5 (MAADR<15:8>) */
+#define ENC_MAADR6      REGADDR(0x01, 3, 1) /* MAC Address Byte 6 (MAADR<7:0>) */
+#define ENC_MAADR3      REGADDR(0x02, 3, 1) /* MAC Address Byte 3 (MAADR<31:24>), OUI Byte 3 */
+#define ENC_MAADR4      REGADDR(0x03, 3, 1) /* MAC Address Byte 4 (MAADR<23:16>) */
+#define ENC_MAADR1      REGADDR(0x04, 3, 1) /* MAC Address Byte 1 (MAADR<47:40>), OUI Byte 1 */
+#define ENC_MAADR2      REGADDR(0x05, 3, 1) /* MAC Address Byte 2 (MAADR<39:32>), OUI Byte  */
+#define ENC_EBSTSD      REGADDR(0x06, 3, 0) /* Built-in Self-Test Fill Seed (EBSTSD<7:0>) */
+#define ENC_EBSTCON     REGADDR(0x07, 3, 0) /* Built-in Self-Test Control */
+#define ENC_EBSTCSL     REGADDR(0x08, 3, 0) /* Built-in Self-Test Checksum Low Byte (EBSTCS<7:0>) */
+#define ENC_EBSTCSH     REGADDR(0x09, 3, 0) /* Built-in Self-Test Checksum High Byte (EBSTCS<15:8>) */
+#define ENC_MISTAT      REGADDR(0x0a, 3, 1) /* MII Status Register */
+                                            /* 0x0b-0x11: Reserved */
+#define ENC_EREVID      REGADDR(0x12, 3, 0) /* Ethernet Revision ID */
+                                            /* 0x13-0x14: Reserved */
+#define ENC_ECOCON      REGADDR(0x15, 3, 0) /* Clock Output Control */
+                                            /* 0x16: Reserved */
+#define ENC_EFLOCON     REGADDR(0x17, 3, 0) /* Ethernet Flow Control */
+#define ENC_EPAUSL      REGADDR(0x18, 3, 0) /* Pause Timer Value Low Byte (EPAUS<7:0>) */
+#define ENC_EPAUSH      REGADDR(0x19, 3, 0) /* Pause Timer Value High Byte (EPAUS<15:8>) */
+                                            /* 0x1a: Reserved */
+                                            /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
 
 /* Built-in Self-Test Control Register Bit Definitions */
 
