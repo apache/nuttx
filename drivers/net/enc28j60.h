@@ -355,7 +355,7 @@
 #define ENC_PHCON2        (0x10)    /* PHY Control Register 2 */
 #define ENC_PHSTAT2       (0x11)    /* PHY Status 2 */
 #define ENC_PHIE          (0x12)    /* PHY Interrupt Enable Register */
-#define ENC_PHIR          (0x13)
+#define ENC_PHIR          (0x13)    /* PHY Interrupt Request Register */
 #define ENC_PHLCON        (0x14)
 
 /* PHY Control Register 1 Register Bit Definitions */
@@ -412,6 +412,18 @@
 #define PHLCON_LACFG1     (1 << 9)  /* Bit 9:  "  " "           " */
 #define PHLCON_LACFG2     (1 << 10) /* Bit 10: "  " "           " */
 #define PHLCON_LACFG3     (1 << 11) /* Bit 11: "  " "           " */
+
+/* Packet Memory ************************************************************/
+
+/* 8-Kbyte Transmit/Receive Packet Dual Port SRAM */
+
+#define PKTMEM_START      0x0000
+#define PKTMEM_END        0x1fff
+
+/* Ethernet frames are between 64 and 1518 bytes long */
+
+#define MIN_FRAMELEN      64
+#define MAX_FRAMELEN      1518
 
 /* Packet Control Bits Definitions ******************************************/
 

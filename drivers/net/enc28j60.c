@@ -116,17 +116,25 @@
 
 #define ENC_POLLTIMEOUT MSEC2TICK(50)
 
+/* Packet Memory ************************************************************/
+
+/* Packet memory layout */
+
+#define PKTMEM_TX_START 0x0000           /* Start TX buffer at 0 */
+#define PKTMEM_TX_ENDP1 0x0600           /* Allow TX buffer for one frame + */
+#define PKTMEM_RX_START PKTMEM_TX_ENDP1  /* Followed by RX buffer */
+#define PKTMEM_RX_END   PKTMEM_END       /* RX buffer goes to the end of SRAM */
 
 /* Misc. Helper Macros ******************************************************/
 
 #define enc_rdgreg(priv,ctrlreg) \
   enc_rdgreg2(priv, ENC_RCR | GETADDR(ctrlreg))
-#define enc_wdgreg(priv,ctrlreg,wrdata) \
-  enc_wdgreg2(priv, ENC_WCR | GETADDR(ctrlreg), wrdata)
+#define enc_wrgreg(priv,ctrlreg,wrdata) \
+  enc_wrgreg2(priv, ENC_WCR | GETADDR(ctrlreg), wrdata)
 #define enc_bfcgreg(priv,ctrlreg,clrbits) \
-  enc_wdgreg2(priv, ENC_BFC | GETADDR(ctrlreg), clrbits)
+  enc_wrgreg2(priv, ENC_BFC | GETADDR(ctrlreg), clrbits)
 #define enc_bfsgreg(priv,ctrlreg,setbits) \
-  enc_wdgreg2(priv, ENC_BFS | GETADDR(ctrlreg), setbits)
+  enc_wrgreg2(priv, ENC_BFS | GETADDR(ctrlreg), setbits)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -175,6 +183,7 @@ struct enc_driver_s
   uint32_t txifs;             /* TXIF completion events */
   uint32_t txabrts;           /* TXIF completions with ESTAT.TXABRT */
   uint32_t txerifs;           /* TXERIF error events */
+  uint32_t txtimeouts;        /* S/W detected TX timeouts */
   uint32_t rxerifs;           /* RXERIF error evernts */
 #endif
 };
@@ -203,14 +212,14 @@ static void enc_deselect(FAR struct spi_dev_s *spi);
 /* SPI control register access */
 
 static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd);
-static void enc_wdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
+static void enc_wrgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
          uint8_t wrdata);
 static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank);
 static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg);
 static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
          uint8_t wrdata);
-static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
-                        uint8_t bits, uint8_t value);
+static int  enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
+         uint8_t bits, uint8_t value);
 
 /* SPI buffer transfers */
 
@@ -248,16 +257,16 @@ static void enc_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int enc_ifup(struct uip_driver_s *dev);
-static int enc_ifdown(struct uip_driver_s *dev);
-static int enc_txavail(struct uip_driver_s *dev);
+static int  enc_ifup(struct uip_driver_s *dev);
+static int  enc_ifdown(struct uip_driver_s *dev);
+static int  enc_txavail(struct uip_driver_s *dev);
 
 /* Initialization */
 
 static void enc_pwrsave(FAR struct enc_driver_s *priv);
 static void enc_pwrfull(FAR struct enc_driver_s *priv);
 static void enc_setmacaddr(FAR struct enc_driver_s *priv);
-static void enc_reset(FAR struct enc_driver_s *priv);
+static int  enc_reset(FAR struct enc_driver_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -383,7 +392,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
 }
 
 /****************************************************************************
- * Function: enc_wdgreg2
+ * Function: enc_wrgreg2
  *
  * Description:
  *   Write to a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
@@ -391,7 +400,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
  *
  ****************************************************************************/
 
-static void enc_wdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
+static void enc_wrgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
                         uint8_t wrdata)
 {
   FAR struct spi_dev_s *spi;
@@ -706,6 +715,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 static int enc_transmit(FAR struct enc_driver_s *priv)
 {
   /* Verify that the hardware is ready to send another packet */
+#warning "Missing logic"
 
   /* Increment statistics */
 
@@ -758,6 +768,7 @@ static int enc_uiptxpoll(struct uip_driver_s *dev)
       /* Check if there is room in the device to hold another packet. If not,
        * return a non-zero value to terminate the poll.
        */
+#warning "Missing logic"
     }
 
   /* If zero is returned, the polling will continue until all connections have
@@ -1221,13 +1232,22 @@ static int enc_interrupt(int irq, FAR void *context)
 static void enc_txtimeout(int argc, uint32_t arg, ...)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
+  int ret;
 
   /* Increment statistics and dump debug info */
 
-  /* Then reset the hardware */
+#ifdef CONFIG_ENC28J60_STATS
+  priv->txtimeouts++;
+#endif
 
-  enc_reset(priv);
-  enc_setmacaddr(priv);
+  /* Then reset the hardware.  Take the interface down, then bring it
+   * back up
+   */
+ 
+  ret = enc_ifdown(&priv->dev);
+  DEBUGASSERT(ret == OK);
+  ret = enc_ifup(&priv->dev);
+  DEBUGASSERT(ret == OK);
 
   /* Then poll uIP for new XMIT data */
 
@@ -1286,6 +1306,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
 static int enc_ifup(struct uip_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
+  int ret;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
@@ -1295,27 +1316,30 @@ static int enc_ifup(struct uip_driver_s *dev)
    * the ENC28J80 is not in power save mode.
    */
 
-  enc_reset(priv);
-  enc_setmacaddr(priv);
-  enc_pwrfull(priv);
+  ret = enc_reset(priv);
+  if (ret == OK)
+    {
+      enc_setmacaddr(priv);
+      enc_pwrfull(priv);
 
-  /* Enable interrutps */
+      /* Enable interrutps */
 
-  enc_bfsgreg(priv, ENC_EIE, EIE_INTIE | EIE_PKTIE);
+      enc_bfsgreg(priv, ENC_EIE, EIE_INTIE | EIE_PKTIE);
 
-  /* Enable packet reception */
+      /* Enable packet reception */
 
-   enc_bfsgreg(priv, ENC_ECON1, ECON1_RXEN);
+       enc_bfsgreg(priv, ENC_ECON1, ECON1_RXEN);
 
-  /* Set and activate a timer process */
+      /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, (uint32_t)priv);
+      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, (uint32_t)priv);
 
-  /* Enable the Ethernet interrupt */
+      /* Enable the Ethernet interrupt */
 
-  priv->bifup = true;
-  up_enable_irq(priv->irq);
-  return OK;
+      priv->bifup = true;
+      up_enable_irq(priv->irq);
+    }
+  return ret;
 }
 
 /****************************************************************************
@@ -1338,6 +1362,7 @@ static int enc_ifdown(struct uip_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   irqstate_t flags;
+  int ret;
 
   /* Disable the Ethernet interrupt */
 
@@ -1351,12 +1376,12 @@ static int enc_ifdown(struct uip_driver_s *dev)
 
   /* Reset the device and leave in the power save state */
 
-  enc_reset(priv);
+  ret = enc_reset(priv);
   enc_pwrsave(priv);
 
   priv->bifup = false;
   irqrestore(flags);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1445,8 +1470,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
       enc_waitbreg(priv, ENC_ECON1, ECON1_TXRTS, 0);
 
       /* 4. Set ECON2.VRPS (if not already set). */
-
-      enc_bfsgreg(priv, ENC_ECON2, ECON2_VRPS);
+      /* enc_bfsgreg(priv, ENC_ECON2, ECON2_VRPS); <-- Set in enc_reset() */
 
       /* 5. Enter Sleep by setting ECON2.PWRSV. */
 
@@ -1543,9 +1567,129 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
  *
  ****************************************************************************/
 
-static void enc_reset(FAR struct enc_driver_s *priv)
+static int enc_reset(FAR struct enc_driver_s *priv)
 {
-#warning "Missing logic"
+  uint8_t regval;
+
+  ndbg("Entry\n");
+
+  /* Configure SPI for the ENC28J60 */
+
+  enc_configspi(priv->spi);
+
+  /* Reset the ENC28J60 */
+
+  enc_wrgreg(priv, ENC_SRC, ENC_SRC);
+
+  /* Check CLKRDY bit to see when the reset is complete.  There is an errata
+   * that says the CLKRDY may be invalid.  We'll wait a couple of msec to
+   * workaround this condition.
+   */
+
+  up_mdelay(2);
+  /* while ((enc_rdgreg(priv, ENC_ESTAT) & ESTAT_CLKRDY) != 0); */
+
+  /* Initialize ECON1: Clear ECON1 */
+
+  enc_wrgreg(priv, ENC_ECON1, 0x00);
+
+  /* Initialize ECON2: Enable address auto increment and voltage
+   * regulator powersave.
+   */
+
+  enc_wrgreg(priv, ENC_ECON2, ECON2_AUTOINC | ECON2_VRPS);
+
+  /* Initialize receive buffer.
+   * First, set the receive buffer start address.
+   */
+
+  priv->nextpkt = PKTMEM_RX_START;
+  enc_wrbreg(priv, ENC_ERXSTL, PKTMEM_RX_START & 0xff);
+  enc_wrbreg(priv, ENC_ERXSTH, PKTMEM_RX_START >> 8);
+
+  /* Set the receive data pointer */
+
+  enc_wrbreg(priv, ENC_ERXRDPTL, PKTMEM_RX_START & 0xff);
+  enc_wrbreg(priv, ENC_ERXRDPTH, PKTMEM_RX_START >> 8);
+
+  /* Set the receive buffer end. */
+
+  enc_wrbreg(priv, ENC_ERXNDL, PKTMEM_RX_END & 0xff);
+  enc_wrbreg(priv, ENC_ERXNDH, PKTMEM_RX_END >> 8);
+
+  /* Set transmit buffer start. */
+
+  enc_wrbreg(priv, ENC_ETXSTL, PKTMEM_TX_START & 0xff);
+  enc_wrbreg(priv, ENC_ETXSTH, PKTMEM_TX_START >> 8);
+
+  /* Check if we are actually communicating with the ENC28J60.  If its
+   * 0x00 or 0xff, then we are probably not communicating correctly
+   * via SPI.
+   */
+
+  regval = enc_rdbreg(priv, ENC_EREVID);
+  if (regval == 0x00 || regval == 0xff)
+    {
+      ndbg("Bad Rev ID: %0x\n", regval);
+      return -ENODEV;
+    }
+  nvdbg("Rev ID: %02x\n", regval);
+
+  /* Set filter mode: unicast OR broadcast AND crc valid */
+
+  enc_wrbreg(priv, ENC_ERXFCON, ERXFCON_UCEN | ERXFCON_CRCEN | ERXFCON_BCEN);
+
+  /* Enable MAC receive */
+
+  enc_wrbreg(priv, ENC_MACON1, MACON1_MARXEN | MACON1_TXPAUS | MACON1_RXPAUS);
+
+  /* Enable automatic padding and CRC operations */
+
+#ifdef CONFIG_ENC28J60_HALFDUPLEX
+  enc_wrbreg(priv, ENC_MACON3, MACON3_PADCFG0 | MACON3_TXCRCEN | MACON3_FRMLNEN);
+  enc_wrbreg(priv, ENC_MACON4, MACON4_DEFER);        /* Defer transmission enable */
+
+  /* Set Non-Back-to-Back Inter-Packet Gap */
+
+  enc_wrbreg(priv, ENC_MAIPGL, 0x12);
+  enc_wrbreg(priv, ENC_MAIPGH, 0x0c);
+
+  /* Set Back-to-Back Inter-Packet Gap */
+ 
+  enc_wrbreg(priv, ENC_MABBIPG, 0x12);
+#else
+  /* Set filter mode: unicast OR broadcast AND crc valid AND Full Duplex */
+
+  enc_wrbreg(priv, ENC_MACON3,
+             MACON3_PADCFG0 | MACON3_TXCRCEN | MACON3_FRMLNEN | MACON3_FULDPX);
+
+  /* set Non-Back-to-Back Inter-Packet Gap */
+
+  enc_wrbreg(priv, ENC_MAIPGL, 0x12);
+
+  /* set ack-to-Back Inter-Packet Gap */
+
+  enc_wrbreg(priv, ENC_MABBIPG, 0x15);
+#endif
+
+  /* Set the maximum packet size which the controller will accept */
+
+  enc_wrbreg(priv, ENC_MAMXFLL, MAX_FRAMELEN & 0xff);
+  enc_wrbreg(priv, ENC_MAMXFLH, MAX_FRAMELEN >> 8);
+
+  /* Configure LEDs (No, just use the defaults for now) */
+  /* enc_wrphy(priv, ENC_PHLCON, ??); */
+
+  /* Setup up PHCON1 & 2 */
+  
+#ifdef CONFIG_ENC28J60_HALFDUPLEX
+  enc_wrphy(priv, ENC_PHCON1, 0x00);
+  enc_wrphy(priv, ENC_PHCON2, PHCON2_HDLDIS);
+#else
+  enc_wrphy(priv, ENC_PHCON1, PHCON1_PDPXMD);
+  enc_wrphy(priv, ENC_PHCON2, 0x00);
+#endif
+  return OK;
 }
 
 /****************************************************************************
@@ -1578,6 +1722,7 @@ static void enc_reset(FAR struct enc_driver_s *priv)
 int enc_initialize(FAR struct spi_dev_s *spi, unsigned int devno, unsigned int irq)
 {
   FAR struct enc_driver_s *priv ;
+  int ret;
 
   DEBUGASSERT(devno < CONFIG_ENC28J60_NINTERFACES);
   priv = &g_enc28j60[devno];
@@ -1602,22 +1747,23 @@ int enc_initialize(FAR struct spi_dev_s *spi, unsigned int devno, unsigned int i
    * the MAC address before bringing the interface up.
    */
 
-  enc_ifdown(&priv->dev);
-
-  /* Attach the IRQ to the driver (but don't enable it yet) */
-
-  if (irq_attach(irq, enc_interrupt))
+  ret = enc_ifdown(&priv->dev);
+  if (ret == OK)
     {
-      /* We could not attach the ISR to the interrupt */
+      /* Attach the IRQ to the driver (but don't enable it yet) */
 
-      return -EAGAIN;
+      if (irq_attach(irq, enc_interrupt))
+        {
+          /* We could not attach the ISR to the interrupt */
+
+          ret =  -EAGAIN;
+        }
+
+      /* Register the device with the OS so that socket IOCTLs can be performed */
+
+      (void)netdev_register(&priv->dev);
     }
-
-
-  /* Register the device with the OS so that socket IOCTLs can be performed */
-
-  (void)netdev_register(&priv->dev);
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_ENC28J60_NET */
