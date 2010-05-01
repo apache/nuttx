@@ -101,6 +101,7 @@ extern "C" {
  *
  ****************************************************************************/
 
+struct spi_dev_s; /* see nuttx/spi.h */
 EXTERN int enc_initialize(FAR struct spi_dev_s *spi, unsigned int devno,
                           unsigned int irq);
 

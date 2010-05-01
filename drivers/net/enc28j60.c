@@ -58,6 +58,7 @@
 #include <nuttx/spi.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
+#include <nuttx/enc28j60.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
