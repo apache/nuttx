@@ -985,7 +985,7 @@ static int enc_uiptxpoll(struct uip_driver_s *dev)
 static void enc_linkstatus(FAR struct enc_driver_s *priv)
 {
 #if 0
-  uint16_t regval = enc_rdphy(priv, PHSTAT2);
+  uint16_t regval = enc_rdphy(priv, ENC_PHSTAT2);
   priv->duplex    = ((regval & PHSTAT2_DPXSTAT) != 0);
   priv->carrier   = ((regval & PHSTAT2_LSTAT) != 0);
 #endif
