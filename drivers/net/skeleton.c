@@ -154,7 +154,10 @@ static int skel_txavail(struct uip_driver_s *dev);
 
 static int skel_transmit(FAR struct skel_driver_s *skel)
 {
-  /* Verify that the hardware is ready to send another packet */
+  /* Verify that the hardware is ready to send another packet.  If we get
+   * here, then we are committed to sending a packet; Higher level logic
+   * must have assured that there is not transmission in progress.
+   */
 
   /* Increment statistics */
 
@@ -405,9 +408,14 @@ static void skel_polltimer(int argc, uint32_t arg, ...)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
 
-  /* Check if there is room in the send another TXr packet.  */
+  /* Check if there is room in the send another TX packet.  We cannot perform
+   * the TX poll if he are unable to accept another packet for transmission.
+   */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data */
+  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+   * might be bug here.  Does this mean if there is a transmit in progress,
+   * we will missing TCP time state updates?
+   */
 
   (void)uip_timer(&skel->sk_dev, skel_uiptxpoll, skeleton_POLLHSEC);
 

@@ -432,6 +432,25 @@
 #define PKTCTRL_PPADEN    (1 << 2)  /* Bit 2:  Per Packet Padding Enable */
 #define PKTCTRL_PHUGEEN   (1 << 3)  /* Bit 3:  Per Packet Huge Frame Enable */
 
+/* RX Status Bit Definitions ************************************************/
+
+#define RXSTAT_LDEVENT    (1 << 0)  /* Bit 0:  Long event or pack dropped */
+                                    /* Bit 1:  Reserved */
+#define RXSTAT_CEPS       (1 << 2)  /* Bit 2:  Carrier event previously seen */
+                                    /* Bit 3:  Reserved */
+#define RXSTAT_CRCERROR   (1 << 4)  /* Bit 4:  Frame CRC field bad */
+#define RXSTAT_LENERROR   (1 << 5)  /* Bit 5:  Packet length != data length */
+#define RXSTAT_LENRANGE   (1 << 6)  /* Bit 6:  Type/length field > 1500 bytes */
+#define RXSTAT_OK         (1 << 7)  /* Bit 7:  Packet with valid CRC and no symbol errors */
+#define RXSTAT_MCAST      (1 << 8)  /* Bit 8:  Packet with multicast address */
+#define RXSTAT_BCAST      (1 << 9)  /* Bit 9:  Packet with broadcast address */
+#define RXSTAT_DRIBBLE    (1 << 10) /* Bit 10: Additional bits received after packet */
+#define RXSTAT_CTRLFRAME  (1 << 11) /* Bit 11: Control frame with valid type/length */
+#define RXSTAT_PAUSE      (1 << 12) /* Bit 12: Control frame with pause frame opcde */
+#define RXSTAT_UNKOPCODE  (1 << 13) /* Bit 13: Control frame with unknown opcode */
+#define RXSTAT_VLANTYPE   (1 << 14) /* Bit 14: Current frame is a VLAN tagged frame */
+                                    /* Bit 15: Zero */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
