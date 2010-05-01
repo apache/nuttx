@@ -1099,3 +1099,9 @@
 
 5.5 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* drivers/net/enc28j60.c - Microchip ENC28J60 SPI ethernet chip driver.
+	  (untested on original check-in).
+	* configs/olimex-str7p11/nettest - examples/nettest configuration using
+	  the ENC28J60 driver on the Olimex STMicro STR-P711.
+	  (unverified on original check-in)
+

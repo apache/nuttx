@@ -228,8 +228,46 @@ GENERAL STEPS:
   The same commands from the telnet interface can now be accessed through the
   'monitor' command, e.g. 'monitor help'
 
+ENC28J60 Module
+^^^^^^^^^^^^^^^
+
+  Module CON5     QFN ENC2860 Description
+  --------------- -------------------------------------------------------
+  1  J8-1 NET CS   5  ~CS    Chip select input pin for SPI interface (active low)
+  2     2 SCK      4  SCK    Clock in pin for SPI interface
+  3     3 MOSI     3  SI     Data in pin for SPI interface
+  4     4 MISO     2  SO     Data out pin for SPI interface
+  5     5 GND      -- ---    ---
+  10 J9-1 3V3      -- ---    ---
+  9     2 WOL      1  ~WOL   Unicast WOL filter
+  8     3 NET INT  28 ~INT   Interrupt output pin (active low)
+  7     4 CLKOUT   27 CLKOUT Programmable clock output pin
+  6     5 NET RST  6  ~RESET Active-low device Reset input
+
+  For the Olimex STR-P711, the ENC28J60 module is placed on SPI1 (with
+  the MMC slot) and uses P0.0 for CS, P0.1 for an interrupt, and P0.2 as
+  a reset:
+
+  Module CON5     Olimex STR-P711 Connection
+  --------------- -------------------------------------------------------
+  1  J8-1 NET CS   SPI0-4 P0.0  P0.0/S0.MISO/U3.TX
+  2     2 SCK      SPI1-5 SCLK1 P0.6/S1.SCLK
+  3     3 MOSI     SPI1-3 MOSI1 P0.5/S1.MOSI
+  4     4 MISO     SPI1-4 MISO1 P0.4/S1.MISO
+  5     5 GND      SPI1-1 GND
+  10 J9-1 3V3      SPI1-6 3.3V
+  9     2 WOL      NC
+  8     3 NET INT  SPI0-3 P0.1 P0.1/S0.MOSI/U3.RX 
+  7     4 CLKOUT   NC
+  6     5 NET RST  SPI0-5 P0.2 P0.2/S0
+
 Configurations:
 ---------------
+
+  nettest:
+    This configuration directory may be used to enable networking using the
+    an Microchip ENC28J60 SPI ethernet module (see above for connection to
+    STR-P711.
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The

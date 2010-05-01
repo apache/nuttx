@@ -75,6 +75,7 @@
 /* All SPI settings can be specifed in the configuration.  If not, some
  * defaults will be provided.
  *
+ * CONFIG_NET_ENC28J60 - Enabled ENC28J60 support
  * CONFIG_ENC28J60_OWNBUS - Set if the ENC28J60 is the only active device on
  *   the SPI bus.  No locking or SPI configuration will be performed. All
  *   transfers will be performed from the ENC2J60 interrupt handler.
@@ -82,6 +83,12 @@
  * CONFIG_ENC28J60_FREQUENCY - Define to use a different bus frequency
  * CONFIG_ENC28J60_NINTERFACES - Specifies the number of physical ENC28J60
  *   devices that will be supported.
+ * CONFIG_ENC28J60_STATS - Collect network statistics
+ * CONFOG_ENC28J60_HALFDUPPLEX - Default is full duplex
+ */
+
+/* The ENC28J60 spec says that is supports SPI mode 0,0 only.  However,
+ * somtimes you need to tinker with these things.
  */
 
 #ifndef CONFIG_ENC28J60_SPIMODE
@@ -358,7 +365,7 @@ static void enc_select(FAR struct spi_dev_s *spi)
   SPI_SETMODE(spi, CONFIG_ENC28J60_SPIMODE);
   SPI_SETBITS(spi, 8);
 #ifdef CONFIG_ENC28J60_FREQUENCY
-  SPI_SETFREQUENCY(spi, CONFIG_ENC28J60_FREQUENCY)
+  SPI_SETFREQUENCY(spi, CONFIG_ENC28J60_FREQUENCY);
 #endif
 }
 #endif
@@ -909,12 +916,6 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    */
 
   (void)wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1, (uint32_t)priv);
-
-  /* Increment statistics */
-
-#ifdef CONFIG_ENC28J60_STATS
-      priv->txqueued++;
-#endif
   return OK;
 }
 
@@ -1425,7 +1426,7 @@ static void enc_worker(FAR void *arg)
           if (pktcnt > 0)
             {
 #ifdef CONFIG_ENC28J60_STATS
-              if (pkcnt > priv->stats.maxpktcnt)
+              if (pktcnt > priv->stats.maxpktcnt)
                 {
                   priv->stats.maxpktcnt = pktcnt;
                 }
