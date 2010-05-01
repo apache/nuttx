@@ -1,7 +1,7 @@
 ############################################################################
 # configs/olimex-strp711/src/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2008, 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,9 @@ AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		= up_spi.c up_leds.c up_buttons.c
 ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
+endif
+ifeq ($(CONFIG_NET_ENC28J60),y)
+CSRCS		+= up_enc28j60.c
 endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 

@@ -72,8 +72,7 @@
 
 /* Configuration ************************************************************/
 
-/* All SPI settings can be specifed in the configuration.  If not, some
- * defaults will be provided.
+/* ENC28J60 Configuration Settings:
  *
  * CONFIG_NET_ENC28J60 - Enabled ENC28J60 support
  * CONFIG_ENC28J60_OWNBUS - Set if the ENC28J60 is the only active device on
@@ -84,7 +83,7 @@
  * CONFIG_ENC28J60_NINTERFACES - Specifies the number of physical ENC28J60
  *   devices that will be supported.
  * CONFIG_ENC28J60_STATS - Collect network statistics
- * CONFOG_ENC28J60_HALFDUPPLEX - Default is full duplex
+ * CONFIG_ENC28J60_HALFDUPPLEX - Default is full duplex
  */
 
 /* The ENC28J60 spec says that is supports SPI mode 0,0 only.  However,
