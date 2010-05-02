@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <arch/board/board.h>
 
 /************************************************************************************
@@ -91,5 +93,35 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/********************************************************************************
+ * Name: str7x_xtiinitialize
+ *
+ * Description:
+ *   Configure XTI for operation.  Note that the lines are not used as wake-up
+ *   sources in this implementation.  Some extensions would be required for that
+ *   capability.
+ *
+ ********************************************************************************/
+
+#ifdef CONFIG_STR71X_XTI
+extern int str7x_xtiinitialize(void);
+#else
+#  define str7x_xtiinitialize()
+#endif /* CONFIG_STR71X_XTI */
+
+/********************************************************************************
+ * Name: str7x_xticonfig
+ *
+ * Description:
+ *   Configure an external line to provide interrupts.
+ *
+ ********************************************************************************/
+
+#ifdef CONFIG_STR71X_XTI
+extern int str7x_xticonfig(int irq, bool rising);
+#else
+#  define str7x_xticonfig(irq,rising)
+#endif /* CONFIG_STR71X_XTI */
 
 #endif /* __ARCH_ARM_SRC_STR71X_STR71X_INTERNAL_H */

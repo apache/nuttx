@@ -1104,4 +1104,8 @@
 	* configs/olimex-str7p11/nettest - examples/nettest configuration using
 	  the ENC28J60 driver on the Olimex STMicro STR-P711.
 	  (unverified on original check-in)
+	* configs/olimex-str7p11/src/up_enc28j60.c - Add ENC28J60 initialization
+	  logic.
+	* arch/arm/src/str7x/str7x_xti.c - Add basic XTI support (external
+	  interrupts).
 
