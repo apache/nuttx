@@ -54,4 +54,7 @@ CHIP_CSRCS	= str71x_prccu.c str71x_lowputc.c str71x_decodeirq.c str71x_irq.c \
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS	+= str71x_usbdev.c
 endif
+ifeq ($(CONFIG_STR71X_XTI),y)
+CHIP_CSRCS	+= str71x_xti.c
+endif
 
