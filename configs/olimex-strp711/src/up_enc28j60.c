@@ -33,6 +33,45 @@
  *
  ****************************************************************************/
 
+/*
+ * ENC28J60 Module
+ *
+ * The ENC28J60 module does not come on the Olimex-STR-P711, but this describes
+ * how I have connected it:
+ *
+ * Module CON5     QFN ENC2860 Description
+ * --------------- -------------------------------------------------------
+ * 1  J8-1 NET CS   5  ~CS    Chip select input pin for SPI interface (active low)
+ * 2     2 SCK      4  SCK    Clock in pin for SPI interface
+ * 3     3 MOSI     3  SI     Data in pin for SPI interface
+ * 4     4 MISO     2  SO     Data out pin for SPI interface
+ * 5     5 GND      -- ---    ---
+ * 10 J9-1 3V3      -- ---    ---
+ * 9     2 WOL      1  ~WOL   Unicast WOL filter
+ * 8     3 NET INT  28 ~INT   Interrupt output pin (active low)
+ * 7     4 CLKOUT   27 CLKOUT Programmable clock output pin
+ * 6     5 NET RST  6  ~RESET Active-low device Reset input
+ *
+ * For the Olimex STR-P711, the ENC28J60 module is placed on SPI0 and uses
+ * P0.3 for CS, P1.4 for an interrupt, and P1.5 as a reset:
+ *
+ * Module CON5     Olimex STR-P711 Connection
+ * --------------- -------------------------------------------------------
+ * 1  J8-1 NET CS   SPI0-2     P0.3 output P0.3/S0.SS/I1.SDA
+ * 2     2 SCK      SPI0-5     SCLK0       P0.2/S0.SCLK/I1.SCL
+ * 3     3 MOSI     SPI0-3     MOSI0       P0.0/S0.MOSI/U3.RX
+ * 4     4 MISO     SPI0-4     MISO0       P0.1/S0.MISO/U3.TX
+ * 5     5 GND      SPI0-1     GND
+ * 10 J9-1 3V3      SPI0-6     3.3V
+ * 9     2 WOL      NC
+ * 8     3 NET INT  TMR1_EXT-5 P1.4 input  P1.4/T1.ICAPA/T1.EXTCLK
+ * 7     4 CLKOUT   NC
+ * 6     5 NET RST  TMR1_EXT_4 P1.5 output P1.5/T1.ICAPB
+ *
+ * UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
+ * interrupt conflict with TMR1.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -60,8 +99,22 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_STR71X_BSPI1
-# error "Need CONFIG_STR71X_BSP1 in the configuration"
+/* We assume that the ENC28J60 is on SPI0 */
+
+#ifndef CONFIG_STR71X_BSPI0
+# error "Need CONFIG_STR71X_BSPI0 in the configuration"
+#endif
+
+/* UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
+ * interrupt conflict with TIM1.
+ */
+
+#ifdef CONFIG_STR71X_UART3
+# error "CONFIG_STR71X_UART3 cannot be used in this configuration"
+#endif
+
+#ifdef CONFIG_STR71X_TIM1
+# error "CONFIG_STR71X_TIM1 cannot be used in this configuration"
 #endif
 
 /* SPI Assumptions **********************************************************/
