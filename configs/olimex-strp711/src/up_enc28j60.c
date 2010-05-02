@@ -71,6 +71,7 @@
  * UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
  * interrupt conflict with TMR1.
  */
+#warning "Need to select differnt interrupt pin.. XTI doesn't support this one"
 
 /****************************************************************************
  * Included Files
@@ -90,6 +91,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "str71x_internal.h"
 
 #ifdef CONFIG_NET_ENC28J60
 
@@ -103,6 +105,10 @@
 
 #ifndef CONFIG_STR71X_BSPI0
 # error "Need CONFIG_STR71X_BSPI0 in the configuration"
+#endif
+
+#ifndef CONFIG_STR71X_XTI
+# error "Need CONFIG_STR71X_XTI in the configuration"
 #endif
 
 /* UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
@@ -123,7 +129,7 @@
 #define ENC28J60_DEVNO      0 /* Only one ENC28J60 */
 #define ENC28J60_IRQ        0 /* NEEDED!!!!!!!!!!!!!!!! */
 
-/* Debug ********************************************************************/
+#warning "Eventually need to fix XTI IRQ number!"
 
 /****************************************************************************
  * Private Data
@@ -148,34 +154,42 @@ void up_netinitialize(void)
 
   /* Get the SPI port */
 
-  nvdbg("up_netinitialize: Initializing SPI port %d\n", ENC28J60_SPI_PORTNO);
+  nvdbg("Initializing SPI port %d\n", ENC28J60_SPI_PORTNO);
 
   spi = up_spiinitialize(ENC28J60_SPI_PORTNO);
   if (!spi)
     {
-      ndbg("up_netinitialize: Failed to initialize SPI port %d\n",
+      ndbg("Failed to initialize SPI port %d\n",
            ENC28J60_SPI_PORTNO);
       return;
     }
 
-  nvdbg("up_netinitialize: Successfully initialized SPI port %d\n",
+  /* Configure the XTI for the ENC28J60 interrupt.  */
+
+  ret = str7x_xticonfig(ENC28J60_IRQ, false);
+  if (ret < 0)
+    {
+      ndbg("Failed configure interrupt for IRQ %d: %d\n", ENC28J60_IRQ, ret);
+      return;
+    }
+
+  nvdbg("Successfully initialized SPI port %d\n",
         ENC28J60_SPI_PORTNO);
 
   /* Bind the SPI port to the ENC28J60 driver */
 
-  nvdbg("up_netinitialize: Binding SPI port %d to ENC28J60 device %d\n",
+  nvdbg("Binding SPI port %d to ENC28J60 device %d\n",
         ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
 
-#warning "Need to implement IRQ interrupt before we can use this"
   ret = enc_initialize(spi, ENC28J60_DEVNO, ENC28J60_IRQ);
   if (ret < 0)
     {
-      ndbg("up_netinitialize: Failed to bind SPI port %d ENC28J60 device %d: %d\n",
+      ndbg("Failed to bind SPI port %d ENC28J60 device %d: %d\n",
            ENC28J60_SPI_PORTNO, ENC28J60_DEVNO, ret);
       return;
     }
 
-  nvdbg("up_netinitialize: Successfuly bound SPI port %d ENC28J60 device %d\n",
+  nvdbg("Successfuly bound SPI port %d ENC28J60 device %d\n",
         ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
 }
 #endif /* CONFIG_NET_ENC28J60 */
