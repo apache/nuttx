@@ -95,15 +95,11 @@ static int str7x_xtiinterrupt(int irq, FAR void *context)
                      (uint16_t)getreg8(STR71X_XTI_PRL);
   uint16_t mask;
 
-  /* Clear the interrupts now.  This seems unsafe?  Couldn't this cause lost
-   * interupts?
+  /* Dispatch the interrupts, the actions performed by the interrupt
+   * handlers should clear the interrupt at the external source of the
+   * interrupt.  We need to clear the interrupts at the source before
+   * clearing the pending interrupts (see below).
    */
-
-  mask = ~pending;
-  putreg8(mask >> 8, STR71X_XTI_PRH);
-  putreg8(mask & 0xff, STR71X_XTI_PRH);
-
-  /* Then dispatch the interrupts */
 
   pending &= enabled;
 
@@ -121,6 +117,16 @@ static int str7x_xtiinterrupt(int irq, FAR void *context)
           pending &= ~mask;
         }
     }
+
+  /* Clear the pending interrupts.  This should be safe: "it is necessary to
+   * clear at least one pending bit: this operation allows a rising edge to be
+   * generated on the internal line (if there is at least one more pending bit
+   * set and not masked) and so to set the interrupt controller pending bit
+   * again.
+   */
+
+  putreg8(0, STR71X_XTI_PRH);
+  putreg8(0, STR71X_XTI_PRL);
   return OK;
 }
 
