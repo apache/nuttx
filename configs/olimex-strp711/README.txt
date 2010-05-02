@@ -228,8 +228,32 @@ GENERAL STEPS:
   The same commands from the telnet interface can now be accessed through the
   'monitor' command, e.g. 'monitor help'
 
+MMC/SD Slot
+^^^^^^^^^^^
+
+  STR-P711 PIN MMC/SD USAGE     PIN CONFIGURATION
+  ------------ ---------------- -----------------------
+  P0.7/S1.SS   1     CD/DAT3/CS P.07 output
+  P0.5/S1.MOSI 2     CMD/DI     MOSI1
+  ---          3     VSS1       ---
+  ---          4     VDD        ---
+  P0.6/S1.SCLK 5     CLK/SCLK   SLCK1
+  ---          6     VSS2       ---
+  P0.4/S1.MISO 7     DAT0/D0    MISO1
+  ---          8     DAT1/RES   (Pulled up)
+  ---          9     DAT2/RES   (Pulled up)
+             
+  P1.10/USBCLK 10/14 WP         P1.10 input
+  P1.15/HTXD   13/15 CP         P1.15 input
+
+  Use of SPI1 doesn't conflict with anything.  WP conflicts USB; CP conflicts
+  with NTXD. 
+
 ENC28J60 Module
 ^^^^^^^^^^^^^^^
+
+  The ENC28J60 module does not come on the Olimex-STR-P711, but this describes
+  how I have connected it:
 
   Module CON5     QFN ENC2860 Description
   --------------- -------------------------------------------------------
@@ -244,22 +268,24 @@ ENC28J60 Module
   7     4 CLKOUT   27 CLKOUT Programmable clock output pin
   6     5 NET RST  6  ~RESET Active-low device Reset input
 
-  For the Olimex STR-P711, the ENC28J60 module is placed on SPI1 (with
-  the MMC slot) and uses P0.0 for CS, P0.1 for an interrupt, and P0.2 as
-  a reset:
+  For the Olimex STR-P711, the ENC28J60 module is placed on SPI0 and uses
+  P0.3 for CS, P1.4 for an interrupt, and P1.5 as a reset:
 
   Module CON5     Olimex STR-P711 Connection
   --------------- -------------------------------------------------------
-  1  J8-1 NET CS   SPI0-4 P0.0  P0.0/S0.MISO/U3.TX
-  2     2 SCK      SPI1-5 SCLK1 P0.6/S1.SCLK
-  3     3 MOSI     SPI1-3 MOSI1 P0.5/S1.MOSI
-  4     4 MISO     SPI1-4 MISO1 P0.4/S1.MISO
-  5     5 GND      SPI1-1 GND
-  10 J9-1 3V3      SPI1-6 3.3V
+  1  J8-1 NET CS   SPI0-2     P0.3 output P0.3/S0.SS/I1.SDA
+  2     2 SCK      SPI0-5     SCLK0       P0.2/S0.SCLK/I1.SCL
+  3     3 MOSI     SPI0-3     MOSI0       P0.0/S0.MOSI/U3.RX
+  4     4 MISO     SPI0-4     MISO0       P0.1/S0.MISO/U3.TX
+  5     5 GND      SPI0-1     GND
+  10 J9-1 3V3      SPI0-6     3.3V
   9     2 WOL      NC
-  8     3 NET INT  SPI0-3 P0.1 P0.1/S0.MOSI/U3.RX 
+  8     3 NET INT  TMR1_EXT-5 P1.4 input  P1.4/T1.ICAPA/T1.EXTCLK
   7     4 CLKOUT   NC
-  6     5 NET RST  SPI0-5 P0.2 P0.2/S0
+  6     5 NET RST  TMR1_EXT_4 P1.5 output P1.5/T1.ICAPB
+
+  UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
+  interrupt conflict with TIM1.
 
 Configurations:
 ---------------
