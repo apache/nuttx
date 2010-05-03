@@ -125,9 +125,9 @@
 
 /* SPI Assumptions **********************************************************/
 
-#define ENC28J60_SPI_PORTNO 1 /* On SPI1 */
-#define ENC28J60_DEVNO      0 /* Only one ENC28J60 */
-#define ENC28J60_IRQ        0 /* NEEDED!!!!!!!!!!!!!!!! */
+#define ENC28J60_SPI_PORTNO 1                   /* On SPI1 */
+#define ENC28J60_DEVNO      0                   /* Only one ENC28J60 */
+#define ENC28J60_IRQ        STR71X_IRQ_FIRSTXTI /* NEEDED!!!!!!!!!!!!!!!! */
 
 #warning "Eventually need to fix XTI IRQ number!"
 
@@ -166,7 +166,7 @@ void up_netinitialize(void)
 
   /* Configure the XTI for the ENC28J60 interrupt.  */
 
-  ret = str7x_xticonfig(ENC28J60_IRQ, false);
+  ret = str71x_xticonfig(ENC28J60_IRQ, false);
   if (ret < 0)
     {
       ndbg("Failed configure interrupt for IRQ %d: %d\n", ENC28J60_IRQ, ret);

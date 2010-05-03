@@ -105,23 +105,52 @@
  ********************************************************************************/
 
 #ifdef CONFIG_STR71X_XTI
-extern int str7x_xtiinitialize(void);
+extern int str71x_xtiinitialize(void);
 #else
-#  define str7x_xtiinitialize()
+#  define str71x_xtiinitialize()
 #endif /* CONFIG_STR71X_XTI */
 
 /********************************************************************************
  * Name: str7x_xticonfig
  *
  * Description:
- *   Configure an external line to provide interrupts.
+ *   Configure an external line to provide interrupts.  Interrupt is configured,
+ *   but disabled on return.
  *
  ********************************************************************************/
 
 #ifdef CONFIG_STR71X_XTI
-extern int str7x_xticonfig(int irq, bool rising);
+extern int str71x_xticonfig(int irq, bool rising);
 #else
-#  define str7x_xticonfig(irq,rising)
+#  define str71x_xticonfig(irq,rising)
+#endif /* CONFIG_STR71X_XTI */
+
+/****************************************************************************
+ * Name: str71x_enable_xtiirq
+ *
+ * Description:
+ *   Enable an external interrupt.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STR71X_XTI
+extern void str71x_enable_xtiirq(int irq);
+#else
+#  define str71x_enable_xtiirq(irq)
+#endif /* CONFIG_STR71X_XTI */
+
+/****************************************************************************
+ * Name: str71x_disable_xtiirq
+ *
+ * Description:
+ *   Disable an external interrupt.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STR71X_XTI
+extern void str71x_disable_xtiirq(int irq);
+#else
+#  define str71x_disable_xtiirq(irq)
 #endif /* CONFIG_STR71X_XTI */
 
 #endif /* __ARCH_ARM_SRC_STR71X_STR71X_INTERNAL_H */
