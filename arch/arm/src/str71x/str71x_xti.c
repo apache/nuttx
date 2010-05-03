@@ -200,7 +200,7 @@ int str71x_xticonfig(int irq, bool rising)
 
   /* Configure one of the 16 lines as an interrupt source */
 
-  if (irq > STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
+  if (irq >= STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
     {
       /* Make sure that the interrupt is disabled */
 
@@ -254,7 +254,7 @@ void str71x_enable_xtiirq(int irq)
 
   /* Enable the external interrupt */
 
-  if (irq > STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
+  if (irq >= STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
     {
       /* Decide if we use the lower or upper regiser */
  
@@ -294,7 +294,7 @@ void str71x_disable_xtiirq(int irq)
 
   /* Disable the external interrupt */
 
-  if (irq > STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
+  if (irq >= STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
     {
       /* Decide if we use the lower or upper regiser */
  

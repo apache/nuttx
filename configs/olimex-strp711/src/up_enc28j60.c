@@ -125,7 +125,7 @@
 
 /* SPI Assumptions **********************************************************/
 
-#define ENC28J60_SPI_PORTNO 1                   /* On SPI1 */
+#define ENC28J60_SPI_PORTNO 0                   /* On SPI0 */
 #define ENC28J60_DEVNO      0                   /* Only one ENC28J60 */
 #define ENC28J60_IRQ        STR71X_IRQ_FIRSTXTI /* NEEDED!!!!!!!!!!!!!!!! */
 
@@ -154,13 +154,12 @@ void up_netinitialize(void)
 
   /* Get the SPI port */
 
-  nvdbg("Initializing SPI port %d\n", ENC28J60_SPI_PORTNO);
+  nllvdbg("Initializing SPI port %d\n", ENC28J60_SPI_PORTNO);
 
   spi = up_spiinitialize(ENC28J60_SPI_PORTNO);
   if (!spi)
     {
-      ndbg("Failed to initialize SPI port %d\n",
-           ENC28J60_SPI_PORTNO);
+      nlldbg("Failed to initialize SPI port %d\n", ENC28J60_SPI_PORTNO);
       return;
     }
 
@@ -169,27 +168,26 @@ void up_netinitialize(void)
   ret = str71x_xticonfig(ENC28J60_IRQ, false);
   if (ret < 0)
     {
-      ndbg("Failed configure interrupt for IRQ %d: %d\n", ENC28J60_IRQ, ret);
+      nlldbg("Failed configure interrupt for IRQ %d: %d\n", ENC28J60_IRQ, ret);
       return;
     }
 
-  nvdbg("Successfully initialized SPI port %d\n",
-        ENC28J60_SPI_PORTNO);
+  nllvdbg("Successfully initialized SPI port %d\n", ENC28J60_SPI_PORTNO);
 
   /* Bind the SPI port to the ENC28J60 driver */
 
-  nvdbg("Binding SPI port %d to ENC28J60 device %d\n",
-        ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
+  nllvdbg("Binding SPI port %d to ENC28J60 device %d\n",
+          ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
 
   ret = enc_initialize(spi, ENC28J60_DEVNO, ENC28J60_IRQ);
   if (ret < 0)
     {
-      ndbg("Failed to bind SPI port %d ENC28J60 device %d: %d\n",
-           ENC28J60_SPI_PORTNO, ENC28J60_DEVNO, ret);
+      nlldbg("Failed to bind SPI port %d ENC28J60 device %d: %d\n",
+             ENC28J60_SPI_PORTNO, ENC28J60_DEVNO, ret);
       return;
     }
 
-  nvdbg("Successfuly bound SPI port %d ENC28J60 device %d\n",
+  nllvdbg("Successfuly bound SPI port %d ENC28J60 device %d\n",
         ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
 }
 #endif /* CONFIG_NET_ENC28J60 */
