@@ -287,6 +287,43 @@ ENC28J60 Module
   UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
   interrupt conflict with TIM1.
 
+Using OpenOCD and GDB
+^^^^^^^^^^^^^^^^^^^^^
+
+  I have been using the Olimex ARM-USB-OCD JTAG debugger with the STR-P711
+  (http://www.olimex.com).  The OpenOCD configuration file is here:
+  scripts/oocd_ft2xx.cfg.  There is also a script on the scripts/ directory that
+  I used to start the OpenOCD daemon on my system called oocd.sh.  That
+  script would probably require some modifications to work in another
+  environment:
+  
+    - possibly the value of OPENOCD_PATH
+    - If you are working under Linux you will need to change any
+      occurances of `cygpath -w blablabla` to just blablabla
+
+  The setenv.sh file includes some environment varialble settings
+  that are needed by oocd.sh.  If you have $PATH and other environment
+  variables set up, then you should be able to start the OpenOCD daemon like:
+
+    oocd.sh
+
+  Where it is assumed that you are executing oocd.sh from the top level
+  directory where NuttX is installed.
+
+  Once the OpenOCD daemon has been started, you can connect to it via
+  GDB using the following GDB command:
+
+   arm-elf-gdb
+   (gdb) target remote localhost:3333
+
+  And you can load the NuttX ELF file:
+
+   (gdb) load nuttx
+
+  (There are also some files in the scripts/ directory that I used to
+  get OpenOCD working with a Wriggler clone... I never got that stuff
+  working).
+
 Configurations:
 ---------------
 
