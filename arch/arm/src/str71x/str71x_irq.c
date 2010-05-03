@@ -48,6 +48,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "str71x_internal.h"
 
 /****************************************************************************
  * Pre-procesor Definitions
@@ -100,6 +101,10 @@ void up_irqinitialize(void)
   putreg32(0xffffffff, STR71X_EIC_IPR); /* And that no interrupts are pending */
 #endif
 
+  /* Initialize external interrupts */
+
+  str71x_xtiinitialize();
+
   /* Enable global ARM interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -119,7 +124,7 @@ void up_disable_irq(int irq)
 {
   uint32_t reg32;
 
-  if ((unsigned)irq < NR_IRQS)
+  if ((unsigned)irq < STR71X_NBASEIRQS)
     {
       /* Mask the IRQ by clearing the associated bit in the IER register */
 
@@ -127,6 +132,12 @@ void up_disable_irq(int irq)
       reg32 &= ~(1 << irq);
       putreg32(reg32, STR71X_EIC_IER);
     }
+#ifdef CONFIG_STR71X_XTI
+  else if ((unsigned)irq < NR_IRQS)
+    {
+      str71x_disable_xtiirq(irq);
+    }
+#endif /* CONFIG_STR71X_XTI */
 }
 
 /****************************************************************************
@@ -141,7 +152,7 @@ void up_enable_irq(int irq)
 {
   uint32_t reg32;
 
-  if ((unsigned)irq < NR_IRQS)
+  if ((unsigned)irq < STR71X_NBASEIRQS)
     {
       /* Enable the IRQ by setting the associated bit in the IER register */
 
@@ -149,13 +160,20 @@ void up_enable_irq(int irq)
       reg32 |= (1 << irq);
       putreg32(reg32, STR71X_EIC_IER);
     }
+#ifdef CONFIG_STR71X_XTI
+  else if ((unsigned)irq < NR_IRQS)
+    {
+      str71x_enable_xtiirq(irq);
+    }
+#endif /* CONFIG_STR71X_XTI */
 }
 
 /****************************************************************************
  * Name: up_maskack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Mask the IRQ and acknowledge it.  No XTI support.. only used in
+ *   interrupt handling logic.
  *
  ****************************************************************************/
 
@@ -163,7 +181,7 @@ void up_maskack_irq(int irq)
 {
   uint32_t reg32;
 
-  if ((unsigned)irq < NR_IRQS)
+  if ((unsigned)irq < STR71X_NBASEIRQS)
     {
       /* Mask the IRQ by clearing the associated bit in the IER register */
 
@@ -185,7 +203,8 @@ void up_maskack_irq(int irq)
  * Name: up_prioritize_irq
  *
  * Description:
- *   set interrupt priority
+ *   Set interrupt priority.  Note, there is no way to prioritize
+ *   individual XTI interrrupts.
  *
  ****************************************************************************/
 
@@ -198,7 +217,7 @@ int up_prioritize_irq(int irq, int priority)
    * of one is enforced to prevent disabling the interrupt.
    */
 
-  if ((unsigned)irq < NR_IRQS && priority > 0 && priority < 16)
+  if ((unsigned)irq < STR71X_NBASEIRQS && priority > 0 && priority < 16)
     {
       addr   = STR71X_EIC_SIR(irq);
       reg32  = getreg32(addr);

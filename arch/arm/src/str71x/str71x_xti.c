@@ -52,6 +52,7 @@
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
+#include "str71x_internal.h"
 
 #ifdef CONFIG_STR71X_XTI
 
@@ -87,7 +88,15 @@ static const struct xtiregs_s g_xtiregs[2] =
  * Private Functions
  ********************************************************************************/
 
-static int str7x_xtiinterrupt(int irq, FAR void *context)
+/********************************************************************************
+ * Name: str71x_xtiinterrupt
+ *
+ * Description:
+ *   Dispatch an XTI interrupt.
+ *
+ ********************************************************************************/
+
+static int str71x_xtiinterrupt(int irq, FAR void *context)
 {
   uint16_t enabled = (uint16_t)getreg8(STR71X_XTI_MRH) << 8 |
                      (uint16_t)getreg8(STR71X_XTI_MRL);
@@ -135,7 +144,7 @@ static int str7x_xtiinterrupt(int irq, FAR void *context)
  ********************************************************************************/
 
 /********************************************************************************
- * Name: str7x_xtiinitialize
+ * Name: str71x_xtiinitialize
  *
  * Description:
  *   Configure XTI for operation.  Note that the lines are not used as wake-up
@@ -144,7 +153,7 @@ static int str7x_xtiinterrupt(int irq, FAR void *context)
  *
  ********************************************************************************/
 
-int str7x_xtiinitialize(void)
+int str71x_xtiinitialize(void)
 {
   int ret;
 
@@ -160,7 +169,7 @@ int str7x_xtiinitialize(void)
 
   /* Attach the XTI interrupt */
 
-  ret = irq_attach(STR71X_IRQ_XTI, str7x_xtiinterrupt);
+  ret = irq_attach(STR71X_IRQ_XTI, str71x_xtiinterrupt);
   if (ret == OK)
     {
       /* Enable the XTI interrupt at the XTI */
@@ -175,16 +184,16 @@ int str7x_xtiinitialize(void)
 }
 
 /********************************************************************************
- * Name: str7x_xticonfig
+ * Name: str71x_xticonfig
  *
  * Description:
  *   Configure an external line to provide interrupts.
  *
  ********************************************************************************/
 
-int str7x_xticonfig(int irq, bool rising)
+int str71x_xticonfig(int irq, bool rising)
 {
-  uint8_t  regval;
+  uint8_t regval;
   int bit;
   int ndx;
   int ret = -EINVAL;
@@ -193,6 +202,10 @@ int str7x_xticonfig(int irq, bool rising)
 
   if (irq > STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
     {
+      /* Make sure that the interrupt is disabled */
+
+      str71x_disable_xtiirq(irq);
+ 
       /* Decide if we use the lower or upper regiser */
  
       bit = irq - STR71X_IRQ_FIRSTXTI;
@@ -218,6 +231,43 @@ int str7x_xticonfig(int irq, bool rising)
         }
       putreg8(regval, g_xtiregs[ndx].tr);
 
+      /* Return success */
+
+      ret = OK;
+    }
+  return ret;
+}
+
+/****************************************************************************
+ * Name: str71x_enable_xtiirq
+ *
+ * Description:
+ *   Enable an external interrupt.
+ *
+ ****************************************************************************/
+
+void str71x_enable_xtiirq(int irq)
+{
+  uint8_t regval;
+  int bit;
+  int ndx;
+
+  /* Enable the external interrupt */
+
+  if (irq > STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
+    {
+      /* Decide if we use the lower or upper regiser */
+ 
+      bit = irq - STR71X_IRQ_FIRSTXTI;
+      ndx = 0;
+      if (bit > 7)
+        {
+          /* Select the high register */
+
+          bit  -= 8;
+          ndx  = 1;
+        }
+
       /* Enable the interrupt be setting the corresponding mask bit
        * the XTI_MRL/H register.
        */
@@ -225,12 +275,47 @@ int str7x_xticonfig(int irq, bool rising)
       regval = getreg8(g_xtiregs[ndx].mr);
       regval |= (1 << bit);
       putreg8(regval, g_xtiregs[ndx].mr);
-
-      /* Return success */
-
-      ret = OK;
     }
-  return ret;
+}
+
+/****************************************************************************
+ * Name: str71x_disable_xtiirq
+ *
+ * Description:
+ *   Disable an external interrupt.
+ *
+ ****************************************************************************/
+
+void str71x_disable_xtiirq(int irq)
+{
+  uint8_t regval;
+  int bit;
+  int ndx;
+
+  /* Disable the external interrupt */
+
+  if (irq > STR71X_IRQ_FIRSTXTI && irq <= NR_IRQS)
+    {
+      /* Decide if we use the lower or upper regiser */
+ 
+      bit = irq - STR71X_IRQ_FIRSTXTI;
+      ndx = 0;
+      if (bit > 7)
+        {
+          /* Select the high register */
+
+          bit  -= 8;
+          ndx  = 1;
+        }
+
+      /* Disable the interrupt be clearing the corresponding mask bit
+       * the XTI_MRL/H register.
+       */
+
+      regval  = getreg8(g_xtiregs[ndx].mr);
+      regval &= ~(1 << bit);
+      putreg8(regval, g_xtiregs[ndx].mr);
+    }
 }
 
 #endif /* CONFIG_STR71X_XTI */
