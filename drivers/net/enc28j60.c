@@ -947,7 +947,7 @@ static int enc_uiptxpoll(struct uip_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  nllvdbg("Poll result: d_len=%d\n", priv->ld_dev.d_len);
+  nllvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
   if (priv->dev.d_len > 0)
     {
       uip_arp_out(&priv->dev);
@@ -1130,7 +1130,7 @@ static void enc_rxdispath(FAR struct enc_driver_s *priv)
   if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
     {
-      nllvdbg("IP packet received (%02x)\n", ETHBUF->type);
+      nllvdbg("IP packet received (%02x)\n", BUF->type);
       uip_arp_ipin();
       uip_input(&priv->dev);
 
@@ -1146,7 +1146,7 @@ static void enc_rxdispath(FAR struct enc_driver_s *priv)
     }
   else if (BUF->type == htons(UIP_ETHTYPE_ARP))
     {
-      nllvdbg("ARP packet received (%02x)\n", ETHBUF->type);
+      nllvdbg("ARP packet received (%02x)\n", BUF->type);
       uip_arp_arpin(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
@@ -1160,7 +1160,7 @@ static void enc_rxdispath(FAR struct enc_driver_s *priv)
      }
   else
     {
-      nlldbg("Unsupported packet type dropped (%02x)\n", htons(ETHBUF->type));
+      nlldbg("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
     }
 }
 
@@ -1223,7 +1223,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
   if ((rxstat & RXSTAT_OK) == 0)
     {
-      nlldbg("ERROR: RXSTAT: %04x\n", RXSTAT);
+      nlldbg("ERROR: RXSTAT: %04x\n", rxstat);
 #ifdef CONFIG_ENC28J60_STATS
       priv->stats.rxnotok++;
 #endif
