@@ -871,7 +871,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 #endif
 
   /* Verify that the hardware is ready to send another packet.  The driver
-   * start a transmission process by setting ECON1.TXRTS. When the packet is
+   * starts a transmission process by setting ECON1.TXRTS. When the packet is
    * finished transmitting or is aborted due to an error/cancellation, the
    * ECON1.TXRTS bit will be cleared.
    *
@@ -1620,9 +1620,9 @@ static int enc_ifup(struct uip_driver_s *dev)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+  nlldbg("Bringing up: %d.%d.%d.%d\n",
+         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
   /* Initialize Ethernet interface, set the MAC address, and make sure that
    * the ENC28J80 is not in power save mode.
@@ -1739,12 +1739,18 @@ static int enc_txavail(struct uip_driver_s *dev)
 
   if (priv->bifup)
     {
+      /* Check if the hardware is ready to send another packet.  The driver
+       * starts a transmission process by setting ECON1.TXRTS. When the packet is
+       * finished transmitting or is aborted due to an error/cancellation, the
+       * ECON1.TXRTS bit will be cleared.
+       */
 
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+      if ((enc_rdgreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0)
+        {
+          /* The interface is up and TX is idle; poll uIP for new XMIT data */
 
-      /* If so, then poll uIP for new XMIT data */
-
-      (void)uip_poll(&priv->dev, enc_uiptxpoll);
+          (void)uip_poll(&priv->dev, enc_uiptxpoll);
+        }
     }
 
   irqrestore(flags);
@@ -1786,6 +1792,8 @@ static int enc_txavail(struct uip_driver_s *dev)
 
 static void enc_pwrsave(FAR struct enc_driver_s *priv)
 {
+  nllvdbg("Set PWRSV\n");
+
   /* 1. Turn off packet reception by clearing ECON1.RXEN. */
 
   enc_bfcgreg(priv, ENC_ECON1, ECON1_RXEN);
@@ -1844,6 +1852,8 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
  
 static void enc_pwrfull(FAR struct enc_driver_s *priv)
 {
+  nllvdbg("Clear PWRSV\n");
+
   /* 1. Wake-up by clearing ECON2.PWRSV. */
 
   enc_bfcgreg(priv, ENC_ECON2, ECON2_PWRSV);
@@ -1912,7 +1922,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 {
   uint8_t regval;
 
-  ndbg("Entry\n");
+  nlldbg("Reset\n");
 
   /* Configure SPI for the ENC28J60 */
 
@@ -1971,10 +1981,10 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   regval = enc_rdbreg(priv, ENC_EREVID);
   if (regval == 0x00 || regval == 0xff)
     {
-      ndbg("Bad Rev ID: %0x\n", regval);
+      nlldbg("Bad Rev ID: %0x\n", regval);
       return -ENODEV;
     }
-  nvdbg("Rev ID: %02x\n", regval);
+  nllvdbg("Rev ID: %02x\n", regval);
 
   /* Set filter mode: unicast OR broadcast AND crc valid */
 
@@ -2004,11 +2014,11 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   enc_wrbreg(priv, ENC_MACON3,
              MACON3_PADCFG0 | MACON3_TXCRCEN | MACON3_FRMLNEN | MACON3_FULDPX);
 
-  /* set Non-Back-to-Back Inter-Packet Gap */
+  /* Set Non-Back-to-Back Inter-Packet Gap */
 
   enc_wrbreg(priv, ENC_MAIPGL, 0x12);
 
-  /* set ack-to-Back Inter-Packet Gap */
+  /* Set ack-to-Back Inter-Packet Gap */
 
   enc_wrbreg(priv, ENC_MABBIPG, 0x15);
 #endif
