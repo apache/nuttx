@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <debug.h>
 
 #include <nuttx/spi.h>
 
@@ -525,7 +526,7 @@ static inline void spi_drain(FAR struct str71x_spidev_s *priv)
     {
       (void)spi_getreg(priv, STR71X_BSPI_RXR_OFFSET);
     }
-  while (spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET & STR71X_BSPICSR2_RFNE) != 0);
+  while ((spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET) & STR71X_BSPICSR2_RFNE) != 0);
 }
 
 /****************************************************************************
@@ -556,7 +557,7 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
   reg16 = spi_getreg(priv, STR71X_GPIO_PD_OFFSET);
   if (selected)
     {
-     /* Enable slave select (low enables) */
+      /* Enable slave select (low enables) */
 
       reg16 &= ~priv->csbit;
       spi_putreg(priv, STR71X_GPIO_PD_OFFSET, reg16);
@@ -565,12 +566,12 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     {
       /* Disable slave select (low enables) */
 
-       reg16 |= priv->csbit;
-       spi_putreg(priv, STR71X_GPIO_PD_OFFSET, reg16);
+      reg16 |= priv->csbit;
+      spi_putreg(priv, STR71X_GPIO_PD_OFFSET, reg16);
 
-       /* And drain the FIFOs */
+      /* And drain the FIFOs */
 
-       spi_drain(priv);
+      spi_drain(priv);
     }
 }
 

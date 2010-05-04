@@ -154,8 +154,6 @@ void up_netinitialize(void)
 
   /* Get the SPI port */
 
-  nllvdbg("Initializing SPI port %d\n", ENC28J60_SPI_PORTNO);
-
   spi = up_spiinitialize(ENC28J60_SPI_PORTNO);
   if (!spi)
     {
@@ -172,12 +170,7 @@ void up_netinitialize(void)
       return;
     }
 
-  nllvdbg("Successfully initialized SPI port %d\n", ENC28J60_SPI_PORTNO);
-
   /* Bind the SPI port to the ENC28J60 driver */
-
-  nllvdbg("Binding SPI port %d to ENC28J60 device %d\n",
-          ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
 
   ret = enc_initialize(spi, ENC28J60_DEVNO, ENC28J60_IRQ);
   if (ret < 0)
@@ -187,7 +180,7 @@ void up_netinitialize(void)
       return;
     }
 
-  nllvdbg("Successfuly bound SPI port %d ENC28J60 device %d\n",
+  nllvdbg("Bound SPI port %d to ENC28J60 device %d\n",
         ENC28J60_SPI_PORTNO, ENC28J60_DEVNO);
 }
 #endif /* CONFIG_NET_ENC28J60 */
