@@ -36,8 +36,10 @@
 /*
  * ENC28J60 Module
  *
- * The ENC28J60 module does not come on the Olimex-STR-P711, but this describes
- * how I have connected it:
+ * The ENC28J60 module does not come on the Olimex-STR-P711, but this
+ * describes how I have connected it.  NOTE that the ENC28J60 requires an
+ * external interrupt (XTI) pin.  The only easily accessible XTI pins are on
+ * SPI0/1 so you can't have both SPI0 and 1 together with this configuration.
  *
  * Module CON5     QFN ENC2860 Description
  * --------------- -------------------------------------------------------
@@ -53,7 +55,7 @@
  * 6     5 NET RST  6  ~RESET Active-low device Reset input
  *
  * For the Olimex STR-P711, the ENC28J60 module is placed on SPI0 and uses
- * P0.3 for CS, P1.4 for an interrupt, and P1.5 as a reset:
+ * P0.3 for CS, P0.6 for an interrupt, and P0.4 as a reset:
  *
  * Module CON5     Olimex STR-P711 Connection
  * --------------- -------------------------------------------------------
@@ -64,14 +66,14 @@
  * 5     5 GND      SPI0-1     GND
  * 10 J9-1 3V3      SPI0-6     3.3V
  * 9     2 WOL      NC
- * 8     3 NET INT  TMR1_EXT-5 P1.4 input  P1.4/T1.ICAPA/T1.EXTCLK
+ * 8     3 NET INT  SPI1-5     P0.6 XTI 11 P0.6/S1.SCLK
  * 7     4 CLKOUT   NC
- * 6     5 NET RST  TMR1_EXT_4 P1.5 output P1.5/T1.ICAPB
+ * 6     5 NET RST  SPI1-4     P0.4 output P0.4/S1.MISO
  *
  * UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
  * interrupt conflict with TMR1.
  */
-#warning "Need to select differnt interrupt pin.. XTI doesn't support this one"
+
 
 /****************************************************************************
  * Included Files
@@ -112,24 +114,41 @@
 #endif
 
 /* UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
- * interrupt conflict with TIM1.
+ * interrupt conflict with BSPI1.
  */
 
 #ifdef CONFIG_STR71X_UART3
 # error "CONFIG_STR71X_UART3 cannot be used in this configuration"
 #endif
 
-#ifdef CONFIG_STR71X_TIM1
-# error "CONFIG_STR71X_TIM1 cannot be used in this configuration"
+#ifdef CONFIG_STR71X_I2C1
+# error "CONFIG_STR71X_I2C1 cannot be used in this configuration"
+#endif
+
+#ifdef CONFIG_STR71X_BSP1
+# error "CONFIG_STR71X_BSP1 cannot be used in this configuration"
 #endif
 
 /* SPI Assumptions **********************************************************/
 
-#define ENC28J60_SPI_PORTNO 0                   /* On SPI0 */
-#define ENC28J60_DEVNO      0                   /* Only one ENC28J60 */
-#define ENC28J60_IRQ        STR71X_IRQ_FIRSTXTI /* NEEDED!!!!!!!!!!!!!!!! */
+#define ENC28J60_SPI_PORTNO 0                  /* On SPI0 */
+#define ENC28J60_DEVNO      0                  /* Only one ENC28J60 */
+#define ENC28J60_IRQ        STR71X_IRQ_PORT0p6 /* XTI Line 11: P0.6 */
 
-#warning "Eventually need to fix XTI IRQ number!"
+/* ENC28J60 additional pins *************************************************
+ *
+ * NOTE: The ENC28J60 is a 3.3V part; however, it was designed to be
+ * easily integrated into 5V systems. The SPI CS, SCK and SI inputs,
+ * as well as the RESET pin, are all 5V tolerant. On the other hand,
+ * if the host controller is operated at 5V, it quite likely will
+ * not be within specifications when its SPI and interrupt inputs
+ * are driven by the 3.3V CMOS outputs on the ENC28J60. A
+ * unidirectional level translator would be necessary.
+ */
+
+#  define ENC_GPIO0_CS       (1 << 3) /* Chip select (P0.3) */
+#  define ENC_GPIO0_NETRST   (1 << 4) /* Reset (P0.4) */
+#  define ENC_GPIO0_NETINT   (1 << 6) /* Interrupt (P0.6) */
 
 /****************************************************************************
  * Private Data
@@ -150,6 +169,7 @@
 void up_netinitialize(void)
 {
   FAR struct spi_dev_s *spi;
+  uint16_t reg16;
   int ret;
 
   /* Get the SPI port */
@@ -169,6 +189,12 @@ void up_netinitialize(void)
       nlldbg("Failed configure interrupt for IRQ %d: %d\n", ENC28J60_IRQ, ret);
       return;
     }
+
+  /* Take ENC28J60 out of reset (active low)*/
+
+  reg16  = getreg16(STR71X_GPIO0_PD);
+  reg16 &= ~ENC_GPIO0_NETRST;
+  putreg16(reg16, STR71X_GPIO0_PD);
 
   /* Bind the SPI port to the ENC28J60 driver */
 
