@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 18, 2010)
+NuttX TODO List (Last updated May 4, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -7,7 +7,7 @@ NuttX TODO List (Last updated April 18, 2010)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (14)  Network (net/, netutils/)
+ (16)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
@@ -139,8 +139,8 @@ o Binary loaders (binfmt/)
   Status:      Open
   Priority:    Low
 
-o Network (net/)
-  ^^^^^^^^^^^^^^
+o Network (net/, drivers/net)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Description: Should implement SOCK_RAW, SOCK_PACKET
   Status:      Open
@@ -197,6 +197,10 @@ o Network (net/)
                if the destination IP has not been mapped to a MAC.  Could
                improve send() performance by explicitly performing ARP before
                sending the packet.
+               ---
+               Or by enabling arpin() logic.  NOTE: From the uIP forum: "You
+               can use the function but it has a bug. You'll need to comment
+               this line: uip_len -= sizeof(struct uip_eth_hdr);"
   Status:      Open
   Priority:    Medium
 
@@ -240,6 +244,17 @@ o Network (net/)
                connection backlog is enabled.
   Status:      Open
   Priority:    Low.
+
+  Description: I started coding a CrystalLan CS89x0 driver (drivers/net/cs89x0.c),
+               but never finished it.
+  Status:      Open
+  Priority:    Low unless you need it.
+
+  Description: So far, I have not come up with a usable hardware platform to
+               verify the ENC28J60 Ethernet driver (drivers/net/enc28j60.c).
+               So it is untested.
+  Status:      Open
+  Priority:    Low unless you need it.
 
 o Network Utilities (netutils/)
 
