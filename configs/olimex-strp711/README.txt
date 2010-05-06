@@ -373,6 +373,12 @@ ENC28J60 Module
   UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
   interrupt conflict with TIM1.
 
+  NOTE:  As of this writing, the ENC28J60 does not function on the board.
+  The board just locks up when the ENC29J60 is powered.  Most likely,
+  in sufficient current is provided via USB to power both the board and
+  the ENC28J60 (And I don't have the correct wall wart to power the
+  the board).
+
 Configurations:
 ---------------
 
