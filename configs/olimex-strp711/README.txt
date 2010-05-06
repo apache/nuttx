@@ -1,3 +1,25 @@
+README File for the Olimex STR-P711 NuttX Port
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Contents
+^^^^^^^^
+
+  Olimex STR-P711
+    Features
+    Power Supply
+    GIO Usage
+    Jumpers
+    External Interrupts
+  Development Environment
+  GNU Toolchain Options
+  NuttX buildroot Toolchain
+  Linux OpenOCD with Wiggler JTAG
+  Windows OpenOCD will Olimex JTAG
+  MMC/SD Slot
+  ENC28J60 Module
+  Configurations
+  STR71x-Specific Configuration Settings
+  
 Olimex STR-P711
 ^^^^^^^^^^^^^^^
  Features:
@@ -56,6 +78,30 @@ Olimex STR-P711
 
  Jumpers
    STNBY   Will pull pin 23 /STDBY low
+
+ External Interrupt (XTI) availability.
+
+   XTI  TQFP64
+   LINE PIN    SIGNAL                    * OLIMEX USAGE
+   ---- ------ ------------------------- - ------------------------
+    2   --     P2.8                        (Not available in TQFP64)
+    3   --     P2.9                        (Not available in TQFP64)
+    4   --     P2.10                       (Not available in TQFP64)
+    5   25     P2.11                       (Not available in TQFP64)
+    6   42     P1.11/CANRX                 USBOP (to USB connector)
+    7   47     P1.13/HCLK/I0.SCL           CLK ??????????????
+    8   48     P1.14/HRXD/I0.SDA           BUT button (PL open, PU closed)
+    9   53     P0.1/S0.MOSI/U3.RX        * SPI0-3 MOSI0
+   10   54     P0.2/S0.SCLK/I1.SCL       * SPI0-5 SCLK0
+   11   61     P0.6/S1.SCLK              * SPI1-5 SCLK1 (also to MMC slot)
+   12   63     P0.8/U0.RX/U0.TX            U0.TX
+   13    1     P0.10/U1.RX/U1.TX/SC.DATA   U1.RX
+   14    5     P0.13/U2.RX/T2.OCMPA        BUZZ (to buzzer circult)
+   15   20     P0.15/WAKEUP                WAKE-UP button (PL open, PU closed)
+
+                                         * Only these pins are available at a
+                                           connector and are not dedicated to
+                                           other board functions.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -160,8 +206,8 @@ NuttX buildroot Toolchain
   8. Edit setenv.h so that the PATH variable includes the path to the
      newly built binaries.
 
-OpenOCD
-^^^^^^^
+Linux OpenOCD with Wiggler JTAG
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For a debug environment, I am using OpenOCD with a Wiggler-clone JTAG interface.  The
 following steps worked for me with a 20081028 OpenOCD snapshot.
@@ -228,6 +274,44 @@ GENERAL STEPS:
   The same commands from the telnet interface can now be accessed through the
   'monitor' command, e.g. 'monitor help'
 
+Windows OpenOCD will Olimex JTAG
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  I have been using the Olimex ARM-USB-OCD JTAG debugger with the STR-P711
+  (http://www.olimex.com).  The OpenOCD configuration file is here:
+  scripts/oocd_ft2xx.cfg.  There is also a script on the scripts/ directory that
+  I used to start the OpenOCD daemon on my system called oocd.sh.  That
+  script would probably require some modifications to work in another
+  environment:
+  
+    - possibly the value of OPENOCD_PATH
+    - If you are working under Linux you will need to change any
+      occurances of `cygpath -w blablabla` to just blablabla
+
+  The setenv.sh file includes some environment varialble settings
+  that are needed by oocd.sh.  If you have $PATH and other environment
+  variables set up, then you should be able to start the OpenOCD daemon like:
+
+    oocd.sh
+
+  To use the Windows Olimex USB JTAG (or 'oocd.sh pp' to use the Wriggler
+  JTAG) where it is assumed that you are executing oocd.sh from the top level
+  level NuttX directory.
+
+  Once the OpenOCD daemon has been started, you can connect to it via
+  GDB using the following GDB command:
+
+   arm-elf-gdb
+   (gdb) target remote localhost:3333
+
+  And you can load the NuttX ELF file into FLASH:
+
+   (gdb) load nuttx
+
+  (There are also some files in the scripts/ directory that I used to
+  get OpenOCD working with a Wriggler clone... I never got that stuff
+  working).
+
 MMC/SD Slot
 ^^^^^^^^^^^
 
@@ -253,7 +337,9 @@ ENC28J60 Module
 ^^^^^^^^^^^^^^^
 
   The ENC28J60 module does not come on the Olimex-STR-P711, but this describes
-  how I have connected it:
+  how I have connected it.  NOTE that the ENC28J60 requires an external interrupt
+  (XTI) pin.  The only easily accessible XTI pins are on SPI0/1 so you can't have
+  both SPI0 and 1 together with this configuration.
 
   Module CON5     QFN ENC2860 Description
   --------------- -------------------------------------------------------
@@ -269,7 +355,7 @@ ENC28J60 Module
   6     5 NET RST  6  ~RESET Active-low device Reset input
 
   For the Olimex STR-P711, the ENC28J60 module is placed on SPI0 and uses
-  P0.3 for CS, P1.4 for an interrupt, and P1.5 as a reset:
+  P0.3 for CS, P0.6 for an interrupt, and P0.4 as a reset:
 
   Module CON5     Olimex STR-P711 Connection
   --------------- -------------------------------------------------------
@@ -280,49 +366,12 @@ ENC28J60 Module
   5     5 GND      SPI0-1     GND
   10 J9-1 3V3      SPI0-6     3.3V
   9     2 WOL      NC
-  8     3 NET INT  TMR1_EXT-5 P1.4 input  P1.4/T1.ICAPA/T1.EXTCLK
+  8     3 NET INT  SPI1-5     P0.6 XTI 11 P0.6/S1.SCLK
   7     4 CLKOUT   NC
-  6     5 NET RST  TMR1_EXT_4 P1.5 output P1.5/T1.ICAPB
+  6     5 NET RST  SPI1-4     P0.4 output P0.4/S1.MISO
 
   UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
   interrupt conflict with TIM1.
-
-Using OpenOCD and GDB
-^^^^^^^^^^^^^^^^^^^^^
-
-  I have been using the Olimex ARM-USB-OCD JTAG debugger with the STR-P711
-  (http://www.olimex.com).  The OpenOCD configuration file is here:
-  scripts/oocd_ft2xx.cfg.  There is also a script on the scripts/ directory that
-  I used to start the OpenOCD daemon on my system called oocd.sh.  That
-  script would probably require some modifications to work in another
-  environment:
-  
-    - possibly the value of OPENOCD_PATH
-    - If you are working under Linux you will need to change any
-      occurances of `cygpath -w blablabla` to just blablabla
-
-  The setenv.sh file includes some environment varialble settings
-  that are needed by oocd.sh.  If you have $PATH and other environment
-  variables set up, then you should be able to start the OpenOCD daemon like:
-
-    oocd.sh
-
-  Where it is assumed that you are executing oocd.sh from the top level
-  directory where NuttX is installed.
-
-  Once the OpenOCD daemon has been started, you can connect to it via
-  GDB using the following GDB command:
-
-   arm-elf-gdb
-   (gdb) target remote localhost:3333
-
-  And you can load the NuttX ELF file:
-
-   (gdb) load nuttx
-
-  (There are also some files in the scripts/ directory that I used to
-  get OpenOCD working with a Wriggler clone... I never got that stuff
-  working).
 
 Configurations:
 ---------------

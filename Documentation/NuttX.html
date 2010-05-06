@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 2, 2010</p>
+      <p>Last Updated: May 4, 2010</p>
     </td>
   </tr>
 </table>
@@ -897,8 +897,10 @@
         Two configurations have been verified: (1) The board boots and passes the OS test
         with console output visible on UART0, and the NuttShell <a href="NuttShell.html">(NSH)</a>
         is fully functional with interrupt driven serial console.  An SPI driver is available
-        but only partially tested.  Additional features are needed: USB driver, MMC/SD integration,
-        to name two.  And ENC29J60 Ethernet driver for add-on hardware is under development and
+        but only partially tested.  Additional features are needed: USB driver, MMC integration,
+        to name two (the slot on the board appears to accept on MMC card dimensions; I have only
+        SD cards).
+        An SPI-based ENC29J60 Ethernet driver for add-on hardware is under development and
         should be available in the NuttX 5.5 release.
       </p>
       <p>
@@ -1689,6 +1691,8 @@ nuttx-5.5 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  (unverified on original check-in)
 	* configs/olimex-str7p11/src/up_enc28j60.c - Add ENC28J60 initialization
 	  logic.
+	* configs/olimex-str7p11/src/up_spi.c - Fixed some bugs; added support
+	  for ENC28J60.
 	* arch/arm/src/str7x/str7x_xti.c - Add basic XTI support (external
 	  interrupts).
 

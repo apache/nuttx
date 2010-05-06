@@ -80,6 +80,14 @@
 #  define CONFIG_STR714X_BSPI1_RXFIFO_DEPTH 8
 #endif
 
+#if defined(CONFIG_STR71X_UART3) && defined (CONFIG_STR71X_BSPI0)
+#  warning "BSPI0 GPIO usage conflicts with UART3"
+#endif
+
+#if defined(CONFIG_STR71X_IC21) && defined (CONFIG_STR71X_BSPI0)
+#  warning "BSPI0 GPIO usage conflicts with IC21"
+#endif
+
 #if defined(CONFIG_STR71X_HDLC) && defined (CONFIG_STR71X_BSPI1)
 #  warning "BSPI1 GPIO usage conflicts with HDLC"
 #endif
@@ -129,7 +137,9 @@
 /* ENC28J60 Module
  *
  * The ENC28J60 module does not come on the Olimex-STR-P711, but this describes
- * how I have connected it:
+ * how I have connected it. NOTE that the ENC28J60 requires an external interrupt
+ * (XTI) pin.  The only easily accessible XTI pins are on SPI0/1 so you can't have
+ * both SPI0 and 1 together with this configuration.
  *
  * STR-P711 PIN            PIN CONFIGURATION ENC28J60 CONNECTION  
  * ----------------------- ----------------- -----------------------
@@ -140,23 +150,19 @@
  * GND                     GND                   5    5 GND 
  * 3.3V                    3.3V                 10 J9-1 3V3
  * NC                      NC                    9    2 WOL
- * P1.4/T1.ICAPA/T1.EXTCLK P1.4 input            8    3 NET INT
+ * P0.6/S1.SCLK            P0.6 input            8    3 NET INT
  * NC                      NC                    7    4 CLKOUT
- * P1.5/T1.ICAPB           P1.5 output           6    5 NET RST
+ * P0.4/S1.MISO            P0.4 output           6    5 NET RST
  */
 
 #ifdef CONFIG_NET_ENC28J60
 
 /* UART3, I2C cannot be used with SPI0.  The GPIOs selected for the ENC28J60
- * interrupt conflict with TMR1.
+ * interrupt conflict with BSPI1
  */
 
-#  ifdef CONFIG_STR71X_UART3
-#    error "CONFIG_STR71X_UART3 cannot be used in this configuration"
-#  endif
-
-#  ifdef CONFIG_STR71X_TIM3
-#    error "CONFIG_STR71X_TIM3 cannot be used in this configuration"
+#  ifdef CONFIG_STR71X_BSPI1
+#    warning "CONFIG_STR71X_BSPI1 cannot be used in this configuration"
 #  endif
 
 /* ENC28J60 additional pins
@@ -171,27 +177,18 @@
  */
 
 #  define ENC_GPIO0_CS       (1 << 3)
-#  define ENC_GPIO0_INTTL    (0)
-#  define ENC_GPIO0_INCMOS   (0)
-#  define ENC_GPIO0_OUTPP    ENC_GPIO0_CS
-#  define ENC_GPIO0_ALL      ENC_GPIO0_CS
+#  define ENC_GPIO0_NETRST   (1 << 4)
+#  define ENC_GPIO0_NETINT   (1 << 6)
 
-#  define ENC_GPIO1_NETINT (  1 << 4)
-#  define ENC_GPIO1_NETRST   (1 << 5)
-#  define ENC_GPIO1_INTTL    (0)
-#  define ENC_GPIO1_INCMOS   ENC_GPIO1_NETINT
-#  define ENC_GPIO1_OUTPP    ENC_GPIO1_NETRST
-#  define ENC_GPIO1_ALL      (ENC_GPIO1_NETINT|ENC_GPIO1_NETRST)
+#  define ENC_GPIO0_INTTL    (0)
+#  define ENC_GPIO0_INCMOS   ENC_GPIO0_NETINT
+#  define ENC_GPIO0_OUTPP    (ENC_GPIO0_CS|ENC_GPIO0_NETRST)
+#  define ENC_GPIO0_ALL      (ENC_GPIO0_CS|ENC_GPIO0_NETINT|ENC_GPIO0_NETRST)
 
 #  define BSPI0_GPIO0_INTTL  ENC_GPIO0_INTTL
 #  define BSPI0_GPIO0_INCMOS ENC_GPIO0_INCMOS
 #  define BSPI0_GPIO0_OUTPP  ENC_GPIO0_OUTPP
 #  define BSPI0_GPIO0_ALL    (BSPI0_GPIO0_ALT|ENC_GPIO0_ALL)
-
-#  define BSPI0_GPIO1_INTTL  ENC_GPIO1_INTTL
-#  define BSPI0_GPIO1_INCMOS ENC_GPIO1_INCMOS
-#  define BSPI0_GPIO1_OUTPP  ENC_GPIO1_OUTPP
-#  define BSPI0_GPIO1_ALL    ENC_GPIO1_ALL
 
 #else
 #  define BSPI0_GPIO0_INTTL  (0)
@@ -227,7 +224,7 @@
  * P1.15/HTXD   13/15 CP         P1.15 input
  *
  * Use of SPI1 doesn't conflict with anything.  WP conflicts USB; CP conflicts
- * with NTXD. 
+ * with HTXD. 
  */
 
 /* MMC/SD additional pins */
@@ -907,11 +904,13 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
           reg16 |= (BSPI0_GPIO0_ALT|BSPI0_GPIO0_OUTPP);
           putreg16(reg16, STR71X_GPIO0_PC2);
 
-          /* Start with enc28j60 disabled */
+          /* Start with enc28j60 de-selected (active low) and in
+           * reset (also active low)
+           */
 
 #ifdef CONFIG_NET_ENC28J60
           reg16  = getreg16(STR71X_GPIO0_PD);
-          reg16 |= ENC_GPIO0_CS;
+          reg16 |= (ENC_GPIO0_CS | ENC_GPIO0_NETRST);
           putreg16(reg16, STR71X_GPIO0_PD);
 #endif
 
@@ -933,6 +932,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
            * PC0=1 PC1=0 PC2=1: Output, push pull 
            */
 
+#ifdef BSPI0_GPIO1_ALL
           reg16  = getreg16(STR71X_GPIO1_PC0);
           reg16 &= ~BSPI0_GPIO1_ALL;
           reg16 |= (BSPI0_GPIO1_INTTL|BSPI0_GPIO1_OUTPP);
@@ -947,7 +947,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
           reg16 &= ~BSPI0_GPIO1_ALL;
           reg16 |= BSPI0_GPIO0_OUTPP;
           putreg16(reg16, STR71X_GPIO1_PC2);
-
+#endif
           g_spidev0.initialized = true;
         }
 

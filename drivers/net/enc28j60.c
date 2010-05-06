@@ -1981,7 +1981,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   regval = enc_rdbreg(priv, ENC_EREVID);
   if (regval == 0x00 || regval == 0xff)
     {
-      nlldbg("Bad Rev ID: %0x\n", regval);
+      nlldbg("Bad Rev ID: %02x\n", regval);
       return -ENODEV;
     }
   nllvdbg("Rev ID: %02x\n", regval);

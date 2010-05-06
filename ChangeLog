@@ -1106,6 +1106,8 @@
 	  (unverified on original check-in)
 	* configs/olimex-str7p11/src/up_enc28j60.c - Add ENC28J60 initialization
 	  logic.
+	* configs/olimex-str7p11/src/up_spi.c - Fixed some bugs; added support
+	  for ENC28J60.
 	* arch/arm/src/str7x/str7x_xti.c - Add basic XTI support (external
 	  interrupts).
 
