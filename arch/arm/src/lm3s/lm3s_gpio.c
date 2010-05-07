@@ -2,7 +2,7 @@
  * arch/arm/src/lm3s/lm3s_gpio.c
  * arch/arm/src/chip/lm3s_gpio.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,11 +140,18 @@ static const struct gpio_func_s g_funcbits[] =
   {GPIO_INTERRUPT_SETBITS, GPIO_INTERRUPT_CLRBITS}, /* GPIO_FUNC_INTERRUPT */
 };
 
-static const uint32_t g_gpiobase[] =
+#ifdef LM3S_GPIOH_BASE
 {
   LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
   LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE, LM3S_GPIOH_BASE,
 };
+#else
+static const uint32_t g_gpiobase[] =
+{
+  LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
+  LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE, 0,
+};
+#endif
 
 /****************************************************************************
  * Public Data
@@ -704,6 +711,7 @@ int lm3s_configgpio(uint32_t cfgset)
   /* Get the base address associated with the GPIO port */
 
   base = lm3s_gpiobaseaddress(port);
+  DEBUGASSERT(base != 0);
 
   /* The following requires exclusive access to the GPIO registers */
 

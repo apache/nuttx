@@ -1110,4 +1110,8 @@
 	  for ENC28J60.
 	* arch/arm/src/str7x/str7x_xti.c - Add basic XTI support (external
 	  interrupts).
+	* arch/arm/src/lm3s and arch/arm/include/lm3s - Add definitions for
+	  LM3S6965
+	* configs/lm3s6965-ek - Add configuration for Stellaris LM3S6965
+	  Evaluation Kit.
 

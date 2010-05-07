@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lm3s/lm3s_syscontrol.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,6 @@
 
 /* System Control Register Offsets **************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_LM3S6918
-
 #define LM3S_SYSCON_DID0_OFFSET       0x000 /* Device Identification 0 */
 #define LM3S_SYSCON_DID1_OFFSET       0x004 /* Device Identification 1 */
 #define LM3S_SYSCON_DC0_OFFSET        0x008 /* Device Capabilities 0 */
@@ -79,9 +77,6 @@
 #define LM3S_SYSCON_DCGC1_OFFSET      0x124 /* Deep Sleep Mode Clock Gating Control Register 1 */
 #define LM3S_SYSCON_DCGC2_OFFSET      0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
 #define LM3S_SYSCON_DSLPCLKCFG_OFFSET 0x144 /* Deep Sleep Clock Configuration*/
-#else
-#  error "System control register offsets not specified for this LM3S chip"
-#endif
 
 /* System Control Register Addresses ************************************************/
 

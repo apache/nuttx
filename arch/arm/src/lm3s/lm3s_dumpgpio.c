@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lm3s/lm3s_dumpgpio.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,7 @@
 
 /* NOTE: this is duplicated in lm3s_gpio.c */
 
+#ifdef LM3S_GPIOH_BASE
 static const uint32_t g_gpiobase[8] =
 {
   LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
@@ -67,6 +68,15 @@ static const uint32_t g_gpiobase[8] =
 };
 
 static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
+#else
+static const uint32_t g_gpiobase[8] =
+{
+  LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
+  LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE, 0,
+};
+
+static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', '?' };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -123,6 +133,7 @@ int lm3s_dumpgpio(uint32_t pinset, const char *msg)
   /* Get the base address associated with the GPIO port */
 
   base = lm3s_gpiobaseaddress(port);
+  DEBUGASSERT(base != 0);
 
   /* The following requires exclusive access to the GPIO registers */
 

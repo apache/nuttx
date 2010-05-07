@@ -2,7 +2,7 @@
  * arch/arm/src/lm3s/lm3s_gpioirq.c
  * arch/arm/src/chip/lm3s_gpioirq.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,27 +72,43 @@ static const uint32_t g_gpiobase[] =
 {
 #ifndef CONFIG_LM3S_DISABLE_GPIOA_IRQS
    LM3S_GPIOA_BASE,
+#else
+   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOB_IRQS
   LM3S_GPIOB_BASE,
+#else
+   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOC_IRQS
   LM3S_GPIOC_BASE,
+#else
+   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOD_IRQS
   LM3S_GPIOD_BASE,
+#else
+   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOE_IRQS
   LM3S_GPIOE_BASE,
+#else
+   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOF_IRQS
   LM3S_GPIOF_BASE,
+#else
+   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOG_IRQS
   LM3S_GPIOG_BASE,
+#else
+   0,
 #endif
-#ifndef CONFIG_LM3S_DISABLE_GPIOH_IRQS
+#if !defined(CONFIG_LM3S_DISABLE_GPIOH_IRQS) && defined(LM3S_GPIOH_BASE)
   LM3S_GPIOH_BASE,
+#else
+   0,
 #endif
 };
 
@@ -210,7 +226,7 @@ static int lm3s_gpioghandler(int irq, FAR void *context)
 }
 #endif
 
-#ifndef CONFIG_LM3S_DISABLE_GPIOH_IRQS
+#if !defined(CONFIG_LM3S_DISABLE_GPIOH_IRQS) && defined(LM3S_GPIOH_BASE)
 static int lm3s_gpiohhandler(int irq, FAR void *context)
 {
   return lm3s_gpiohandler(LM3S_GPIOH_BASE, LM3S_IRQ_GPIOH_0, context);
@@ -263,7 +279,7 @@ int gpio_irqinitialize(void)
 #ifndef CONFIG_LM3S_DISABLE_GPIOG_IRQS
   irq_attach(LM3S_IRQ_GPIOG, lm3s_gpioghandler);
 #endif
-#ifndef CONFIG_LM3S_DISABLE_GPIOH_IRQS
+#if !defined(CONFIG_LM3S_DISABLE_GPIOH_IRQS) && defined(LM3S_GPIOH_BASE)
   irq_attach(LM3S_IRQ_GPIOH, lm3s_gpiohhandler);
 #endif
 
@@ -332,6 +348,7 @@ void gpio_irqenable(int irq)
       /* Get the base address of the GPIO module associated with this IRQ */
 
       base = lm3s_gpiobaseaddress(gpioirq);
+      DEBUGASSERT(base != 0);
       pin  = (1 << (gpioirq & 7));
 
       /* Disable the GPIO interrupt. "The GPIO IM register is the interrupt

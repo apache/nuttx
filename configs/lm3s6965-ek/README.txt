@@ -1,13 +1,7 @@
 README
 ^^^^^^
 
-README file for the Microment Eagle100 NuttX port.
-
-References:
-^^^^^^^^^^
-
-  Micromint: http://www.micromint.com/
-  Luminary:  http://www.luminarymicro.com/
+README for NuttX port to the Stellaris LMS36965 Evaluation Kit
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -15,8 +9,8 @@ Development Environment
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
   toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment because the Luminary FLASH programming application was used for
-  writing to FLASH and this application works only under Windows.
+  environment because the Raisonance R-Link emulatator and some RIDE7 development tools
+  were used and those tools works only under Windows.
 
 GNU Toolchain Options
 ^^^^^^^^^^^^^^^^^^^^^
@@ -25,24 +19,28 @@ GNU Toolchain Options
   toolchain options.
 
   1. The CodeSourcery GNU toolchain,
-  2. The devkitARM GNU toolchain, or
-  3. The NuttX buildroot Toolchain (see below).
+  2. The devkitARM GNU toolchain,
+  3. Raisonance GNU toolchain, or
+  4. The NuttX buildroot Toolchain (see below).
 
   All testing has been conducted using the NuttX buildroot toolchain.  However,
   the make system is setup to default to use the devkitARM toolchain.  To use
-  the CodeSourcery or devkitARM GNU toolchain, you simply need to build the
-  system as follows:
+  the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
+  add one of the following configuration options to your .config (or defconfig)
+  file:
 
-     make                         # Will build for the devkitARM toolchain
-     make CROSSDEV=arm-eabi-      # Will build for the devkitARM toolchain
-     make CROSSDEV=arm-none-eabi- # Will build for the CodeSourcery toolchain
-     make CROSSDEV=arm-elf-       # Will build for the NuttX buildroot toolchain
+    CONFIG_LM3S_CODESOURCERYW=y   : CodeSourcery under Windows
+    CONFIG_LM3S_CODESOURCERYL=y   : CodeSourcery under Linux
+    CONFIG_LM3S_DEVKITARM=y       : devkitARM under Windows
+    CONFIG_LM3S_RAISONANCE=y      : Raisonance RIDE7 under Windows
+    CONFIG_LM3S_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin (default)
 
-  Of course, hard coding this CROSS_COMPILE value in Make.defs file will save
-  some repetitive typing.
+  If you are not using CONFIG_LM3S_BUILDROOT, then you may also have to modify
+  the PATH in the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery and devkitARM toolchains are Windows native toolchains.
-  The NuttX buildroot toolchain is a Cygwin toolchain.  There are several limitations
+  NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
+  Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
+  toolchains are Cygwin and/or Linux native toolchains. There are several limitations
   to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
@@ -58,7 +56,7 @@ GNU Toolchain Options
      directory.  If you use a Windows toolchain, you should get in the habit of
      making like this:
 
-       make clean_context; make CROSSDEV=arm-none-eabi-
+       make clean_context all
 
      An alias in your .bashrc file might make that less painful.
 
@@ -66,7 +64,7 @@ GNU Toolchain Options
      because the dependencies are generated using Windows pathes which do not
      work with the Cygwin make.
 
-     Support has been added for making dependencies with the CodeSourcery toolchain.
+     Support has been added for making dependencies with the windows-native toolchains.
      That support can be enabled by modifying your Make.defs file as follows:
 
     -  MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
@@ -83,29 +81,26 @@ GNU Toolchain Options
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
   path or will get the wrong version of make.
 
-CodeSourcery on Linux
-^^^^^^^^^^^^^^^^^^^^^
+IDEs
+^^^^
 
-  If you select the CodeSourcery toolchain, the make system will assume that you
-  are running a Windows version of the toolchain.  If you are running under Linux,
-  the the make will probably fail.  The fix is to edit your Make.defs file and
-  use something like:
+  NuttX is built using command-line make.  It can be used with an IDE, but some
+  effort will be required to create the project (There is a simple RIDE project
+  in the RIDE subdirectory).  Here are a few tip before you start that effort:
 
-    CROSSDEV = arm-none-eabi-
-    WINTOOL = n
-    MKDEP = $(TOPDIR)/tools/mkdeps.sh
-    ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-    ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-    ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-    ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
-    MAXOPTIMIZATION = -O2
+  1) Select the toolchain that you will be using in your .config file
+  2) Start the NuttX build at least one time from the Cygwin command line
+     before trying to create your project.  This is necessary to create
+     certain auto-generated files and directories that will be needed.
+  3) Set up include pathes:  You will need include/, arch/arm/src/lm3s,
+     arch/arm/src/common, arch/arm/src/cortexm3, and sched/.
+  4) All assembly files need to have the definition option -D __ASSEMBLY__
+     on the command line.
 
-  The values for TOPDIR is provided by the make system; the value for CONFIG_ARCH_BOARD
-  is provided in your defconfig file.  'ostest' refers to the ostest/ configuration;
-  this would be different for other configurations.
-
-  For an example of a CodeSourcery-under-Linux Make.defs file, see
-  configs/stm3210e-eval/nsh/Make.defs.
+  Startup files will probably cause you some headaches.  The NuttX startup file
+  is arch/arm/src/lm3s/lm3s_vectors.S.  With RIDE, I have to build NuttX
+  one time from the Cygwin command line in order to obtain the pre-built
+  startup object needed by RIDE.
 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -121,7 +116,7 @@ NuttX buildroot Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh eagle100/<sub-dir>
+     ./configure.sh lm3s6965-ek/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -148,22 +143,23 @@ Ethernet-Bootloader
 ^^^^^^^^^^^^^^^^^^^
 
   Here are some notes about using the Luminary Ethernet boot-loader built
-  into the Eagle-100 board.
+  into the Stellaris LM3S6965 Evaluation Kit.
 
   Built-In Application:
 
   - The board has no fixed IP address but uses DHCP to get an address.
     I used a D-link router; I can use a web browser to surf to the D-link
-    web page to get the address assigned by 
+    web page to get the address assigned by DHCP.
 
-  - Then you can use this IP address in your browser to surf to the Eagle-100
+  - Then you can use this IP address in your browser to surf to the evaluation
     board.  It presents several interesting pages -- the most important is
     the page called "Firmware Update".  That page includes instructions on
-    how to download code to the Eagle-100.
+    how to download code to the evaluation board.
 
   - After you burn the first program, you lose this application.  Then you
-    will probably be better off connected directly to the Eagle-100 board
-    or through a switch (The router caused problems for me during downloads).
+    will probably be better off connected directly to the Stellaris LM3S6965
+    Evaluation Kit or through a switch (The router caused problems for me
+    during downloads).
 
   Using the Ethernet Bootloader:
 
@@ -172,8 +168,7 @@ Ethernet-Bootloader
 
   - Is there any documentation for using the bootloader?  Yes and No:  There
     is an application note covering the bootloader on the Luminary site, but
-    it is not very informative.  The Eagle100 User's Manual has the best
-    information.
+    it is not very informative.
 
   - Are there any special things I have to do in my code, other than setting 
     the origin to 0x0000:2000 (APP_START_ADDRESS)?  No.  The bootloader assumes
@@ -188,8 +183,8 @@ Ethernet-Bootloader
   - You can force the bootloader to skip starting the application and stay
     in the update mode.  You will need to do this in order to download a new
     application.  You force the update mode by holding the user button on the
-    Eagle-100 board while resetting the board.  The user button is GPIOA, pin 6
-    (call FORCED_UPDATE_PIN in the bootloader code).
+    Stellaris LM3S6965 Evaluation Kit while resetting the board.  The user
+    button is GPIOA, pin 6 (call FORCED_UPDATE_PIN in the bootloader code).
 
   - Note 1:  I had to remove my D-Link router from the configuration in order
     to use the LM Flash Programmer (the Bootloader issues BOOTP requests to
@@ -199,10 +194,11 @@ Ethernet-Bootloader
 
   - Note 2:  You don't need the router's DHCPD server in the download
     configuration; the Luminary Flash Programmer has the capability of
-    temporarily assigning the IP address to the Eagle-100 via BOOTP.
+    temporarily assigning the IP address to the Stellaris LM3S6965 Evaluation
+    Kit via BOOTP.
 
-Eagle100-specific Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Stellaris LM3S6965 Evaluation Kit Configuration Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
 	   be set to:
@@ -224,16 +220,16 @@ Eagle100-specific Configuration Options
 	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
 	   chip:
 
-	   CONFIG_ARCH_CHIP_LM3S6918
+	   CONFIG_ARCH_CHIP_LM3S6965
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=eagle100 (for the MicroMint Eagle-100 development board)
+	   CONFIG_ARCH_BOARD=lm3s6965-ek (for the Stellaris LM3S6965 Evaluation Kit)
 
 	CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_EAGLE100
+	   CONFIG_ARCH_BOARD_LM3S6965EK
 
 	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
 	   of delay loops
@@ -266,9 +262,6 @@ Eagle100-specific Configuration Options
 	  used during interrupt handling.
 
 	CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
-
-	CONFIG_ARCH_BOOTLOADER - Configure to use the MicroMint Eagle-100
-	   Ethernet bootloader.
 
 	CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
@@ -318,11 +311,11 @@ Eagle100-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Eagle-100 configuration is maintained in a sudirectory and
-can be selected as follow:
+Each Stellaris LM3S6965 Evaluation Kit configuration is maintained in a
+sudirectory and can be selected as follow:
 
 	cd tools
-	./configure.sh eagle100/<subdir>
+	./configure.sh lm3s6965-ek/<subdir>
 	cd -
 	. ./setenv.sh
 

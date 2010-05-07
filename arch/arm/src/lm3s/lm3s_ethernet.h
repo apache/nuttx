@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lm3s/lm3s_ethernet.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@
 #define LM3S_MAC_MRXD_OFFSET  0x030 /* Ethernet MAC Management Receive Data */
 #define LM3S_MAC_NP_OFFSET    0x034 /* Ethernet MAC Number of Packets */
 #define LM3S_MAC_TR_OFFSET    0x038 /* Ethernet MAC Transmission Request */
-#ifndef CONFIG_ARCH_CHIP_LM3S6918
+#if !defined(CONFIG_ARCH_CHIP_LM3S6918) && !defined(CONFIG_ARCH_CHIP_LM3S6965)
 #  define LM3S_MAC_TS_OFFSET  0x03c /* Ethernet MAC Time Stamp Configuration */
 #endif
 
@@ -89,7 +89,7 @@
 #define LM3S_MAC_MRXD         (LM3S_ETHCON_BASE + LM3S_MAC_MRXD_OFFSET)
 #define LM3S_MAC_NP           (LM3S_ETHCON_BASE + LM3S_MAC_NP_OFFSET)
 #define LM3S_MAC_TR           (LM3S_ETHCON_BASE + LM3S_MAC_TR_OFFSET)
-#ifndef CONFIG_ARCH_CHIP_LM3S6918
+#if !defined(CONFIG_ARCH_CHIP_LM3S6918) && !defined(CONFIG_ARCH_CHIP_LM3S6965)
 #  define LM3S_MAC_TS         (LM3S_ETHCON_BASE + LM3S_MAC_TS_OFFSET)
 #endif
 

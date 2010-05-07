@@ -613,6 +613,11 @@ configs/ez80f0910200zco
     development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
     tools.  The development environment is Cygwin under WinXP.
 
+configs/lm3s6965-ek
+    Stellaris LM3S6965 Evaluation Kit.  This board is based on the 
+    an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
+    arm-elf toolchain*.  STATUS:  This port under development.
+
 configs/m68322evb
     This is a work in progress for the venerable m68322evb board from
     Motorola. This OS is also built with the arm-elf toolchain*.
@@ -634,6 +639,10 @@ configs/ntosd-dm320
     NuttX operates on the ARM9EJS of this dual core processor.
     STATUS: This port is code complete, verified, and included in the
     NuttX 0.2.1 release.
+
+configs/olimex-lpc2378
+    This port uses the Olimex Olimex-lpc2378 board arm-elf toolchain* under
+    Linux or Cygwin.  STATUS: ostest and NSH configurations available.
 
 configs/olimex-strp711
     This port uses the Olimex STR-P711 board arm-elf toolchain* under Linux or Cygwin.
