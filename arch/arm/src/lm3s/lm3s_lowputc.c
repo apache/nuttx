@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/arm/src/lm3s/lm3s_lowputc.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,17 +54,37 @@
 
 /* Configuration **********************************************************/
 
+#if LM3S_NUARTS < 2
+#  undef  CONFIG_UART1_DISABLE
+#  undef  CONFIG_UART1_SERIAL_CONSOLE
+#  define CONFIG_UART1_DISABLE 1
+#endif
+
+#if LM3S_NUARTS < 3
+#  undef  CONFIG_UART2_DISABLE
+#  undef  CONFIG_UART2_SERIAL_CONSOLE
+#  define CONFIG_UART2_DISABLE 1
+#endif
+
 /* Is there a serial console? */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && !defined(CONFIG_UART0_DISABLE)
 #  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && !defined(CONFIG_UART1_DISABLE)
 #  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#else
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && !defined(CONFIG_UART2_DISABLE)
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
+#  define HAVE_CONSOLE 1
+#else
+#  warning "No valid CONFIG_UARTn_SERIAL_CONSOLE Setting"
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
 #  undef HAVE_CONSOLE
 #endif
 
@@ -82,6 +102,12 @@
 #  define LM3S_CONSOLE_BITS     CONFIG_UART1_BITS
 #  define LM3S_CONSOLE_PARITY   CONFIG_UART1_PARITY
 #  define LM3S_CONSOLE_2STOP    CONFIG_UART1_2STOP
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#  define LM3S_CONSOLE_BASE     LM3S_UART2_BASE
+#  define LM3S_CONSOLE_BAUD     CONFIG_UART2_BAUD
+#  define LM3S_CONSOLE_BITS     CONFIG_UART2_BITS
+#  define LM3S_CONSOLE_PARITY   CONFIG_UART2_PARITY
+#  define LM3S_CONSOLE_2STOP    CONFIG_UART2_2STOP
 #else
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
