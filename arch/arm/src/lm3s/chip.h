@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lm3s/chip.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,13 +48,28 @@
 
 /* Get customizations for each supported chip (only the LM3S6918 right now) */
 
-#ifdef CONFIG_ARCH_CHIP_LM3S6918
+#if defined(CONFIG_ARCH_CHIP_LM3S6918)
+#  define LM3S_NTIMERS         4  /* Four general purpose timers */
+#  define LM3S_NETHCONTROLLERS 1  /* One Ethernet controller */
+#  define LM3S_NSSI            2  /* Two SSI modules */
 #  define LM3S_NUARTS          2  /* Two UART modules */
 #  define LM3S_NI2C            2  /* Two I2C modules */
-#  define LM3S_NSSI            2  /* Two SSI modules */
-#  define LM3S_NETHCONTROLLERS 1  /* One ethenet controller */
+#  define LM3S_NADC            1  /* One ADC module */
+#  define LM2S_NPWM            0  /* No PWM modules */
+#  define LM3S_NQEI            0  /* No quadrature encoders */
+#  define LC3S_NGPIOS          38 /* 5-38 GPIOs, depending on configuration */
+#elif defined(CONFIG_ARCH_CHIP_LM3S6965)
+#  define LM3S_NTIMERS         4  /* Four general purpose timers */
+#  define LM3S_NETHCONTROLLERS 1  /* One Ethernet controller */
+#  define LM3S_NSSI            1  /* One SSI module */
+#  define LM3S_NUARTS          3  /* Three UART modules */
+#  define LM3S_NI2C            2  /* Two I2C modules */
+#  define LM3S_NADC            1  /* One ADC module */
+#  define LM2S_NPWM            3  /* Three PWM modules */
+#  define LM3S_NQEI            2  /* Two quadrature encoders */
+#  define LC3S_NGPIOS          42 /* 0-42 GPIOs */
 #else
-#  error "No Ethernet support for this LM3S chip"
+#  error "Capabilities not specified for this LM3S chip"
 #endif
 
 /* Then get all of the register definitions */
