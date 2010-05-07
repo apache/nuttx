@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 4, 2010</p>
+      <p>Last Updated: May 6, 2010</p>
     </td>
   </tr>
 </table>
@@ -998,7 +998,7 @@
   <td><br></td>
   <td>
     <p>
-      <b>Luminary LM3S6918</b>.
+      <b>Luminary/TI LM3S6918</b>.
       This port uses the <a href=" http://www.micromint.com/">Micromint</a> Eagle-100 development
       board with a GNU arm-elf toolchain* under either Linux or Cygwin.
     </p>
@@ -1017,6 +1017,29 @@
         or Cygwin is provided by the NuttX
         <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
         package.
+      </p>
+     </ul>
+   </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>Luminary/TI LM3S6965</b>.
+      This port uses the Stellaris LM3S6965 Evalution Kit with a GNU arm-elf toolchain*
+      under either Linux or Cygwin.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+          This port is available in the source tree, but is still under development.
+      </p>
+      <p>
+        <b>Development Environments:</b> See the Eagle-100 above.
       </p>
      </ul>
    </td>
@@ -1695,6 +1718,10 @@ nuttx-5.5 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  for ENC28J60.
 	* arch/arm/src/str7x/str7x_xti.c - Add basic XTI support (external
 	  interrupts).
+	* arch/arm/src/lm3s and arch/arm/include/lm3s - Add definitions for
+	  LM3S6965
+	* configs/lm3s6965-ek - Add configuration for Stellaris LM3S6965
+	  Evaluation Kit.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
