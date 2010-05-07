@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lm3s/lm3s_ethernet.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1068,7 +1068,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
 
   /* Setup the time stamp configuration register */
 
-#ifndef CONFIG_ARCH_CHIP_LM3S6918
+#if !defined(CONFIG_ARCH_CHIP_LM3S6918) && !defined(CONFIG_ARCH_CHIP_LM3S6965)
   regval = lm3s_ethin(priv, LM3S_MAC_TS_OFFSET);
 #ifdef CONFIG_LM3S_TIMESTAMP
   regval |= MAC_TS_EN;

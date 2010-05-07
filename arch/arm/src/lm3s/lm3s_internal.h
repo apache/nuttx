@@ -51,7 +51,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* The LM3S6918 only supports 8 priority levels.  The hardware priority mechanism
+/* The LM3S69xx only supports 8 priority levels.  The hardware priority mechanism
  * will only look at the upper N bits of the 8-bit priority level (where N is 3 for
  * the Stellaris family), so any prioritization must be performed in those bits.
  * The default priority level is set to the middle value
@@ -153,7 +153,7 @@
  * hardware function for each pin.
  */
 
-#ifdef CONFIG_ARCH_CHIP_LM3S6918
+#if defined(CONFIG_ARCH_CHIP_LM3S6918)
 #  define GPIO_UART0_RX    (GPIO_FUNC_PFINPUT | GPIO_PORTA | 0)  /* PA0: UART 0 receive (U0Rx) */
 #  define GPIO_UART0_TX    (GPIO_FUNC_PFOUTPUT | GPIO_PORTA | 1) /* PA1: UART 0 transmit (U0Tx) */
 #  define GPIO_SSI0_CLK    (GPIO_FUNC_PFIO | GPIO_PORTA | 2)     /* PA2: SSI0 clock (SSI0Clk) */
@@ -191,7 +191,7 @@
 #  define GPIO_ETHPHY_LED1 (GPIO_FUNC_PFOUTPUT | GPIO_PORTF | 2) /* PF2: LED1 */
 #  define GPIO_ETHPHY_LED0 (GPIO_FUNC_PFOUTPUT | GPIO_PORTF | 3) /* PF3: LED0 */
 #  define GPIO_I2C1_SCL    (GPIO_FUNC_PFOUTPUT | GPIO_PORTG | 0) /* PG0: I2C1 clock (I2C1SCL) */
-#ifdef CONFIG_ARCH_CHIP_LM3S6965
+#elif defined(CONFIG_ARCH_CHIP_LM3S6965)
 #  define GPIO_UART0_RX    (GPIO_FUNC_PFINPUT | GPIO_PORTA | 0)  /* PA0: UART 0 receive (U0Rx) */
 #  define GPIO_UART0_TX    (GPIO_FUNC_PFOUTPUT | GPIO_PORTA | 1) /* PA1: UART 0 transmit (U0Tx) */
 #  define GPIO_SSI0_CLK    (GPIO_FUNC_PFIO | GPIO_PORTA | 2)     /* PA2: SSI0 clock (SSI0Clk) */

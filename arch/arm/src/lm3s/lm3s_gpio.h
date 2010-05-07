@@ -48,42 +48,38 @@
 
 /* GPIO Register Offsets ************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_LM3S6918
-#  define LM3S_GPIO_DATA_OFFSET       0x000 /* GPIO Data */
-#  define LM3S_GPIO_DIR_OFFSET        0x400 /* GPIO Direction */
-#  define LM3S_GPIO_IS_OFFSET         0x404 /* GPIO Interrupt Sense */
-#  define LM3S_GPIO_IBE_OFFSET        0x408 /* GPIO Interrupt Both Edges */
-#  define LM3S_GPIO_IEV_OFFSET        0x40c /* GPIO Interrupt Event */
-#  define LM3S_GPIO_IM_OFFSET         0x410 /* GPIO Interrupt Mask */
-#  define LM3S_GPIO_RIS_OFFSET        0x414 /* GPIO Raw Interrupt Status */
-#  define LM3S_GPIO_MIS_OFFSET        0x418 /* GPIO Masked Interrupt Status */
-#  define LM3S_GPIO_ICR_OFFSET        0x41c /* GPIO Interrupt Clear */
-#  define LM3S_GPIO_AFSEL_OFFSET      0x420 /* GPIO Alternate Function */
-#  define LM3S_GPIO_DR2R_OFFSET       0x500 /* Select GPIO 2-mA Drive Select */
-#  define LM3S_GPIO_DR4R_OFFSET       0x504 /* GPIO 4-mA Drive Select */
-#  define LM3S_GPIO_DR8R_OFFSET       0x508 /* GPIO 8-mA Drive Select */
-#  define LM3S_GPIO_ODR_OFFSET        0x50c /* GPIO Open Drain Select */
-#  define LM3S_GPIO_PUR_OFFSET        0x510 /* GPIO Pull-Up Select */
-#  define LM3S_GPIO_PDR_OFFSET        0x514 /* GPIO Pull-Down Select */
-#  define LM3S_GPIO_SLR_OFFSET        0x518 /* GPIO Slew Rate Control Select */
-#  define LM3S_GPIO_DEN_OFFSET        0x51C /* GPIO Digital Enable */
-#  define LM3S_GPIO_LOCK_OFFSET       0x520 /* GPIO Lock */
-#  define LM3S_GPIO_CR_OFFSET         0x524 /* GPIO Commit */
-#  define LM3S_GPIO_PERIPHID4_OFFSET  0xfd0 /* GPIO Peripheral Identification 4 */
-#  define LM3S_GPIO_PERIPHID5_OFFSET  0xfd4 /* GPIO Peripheral Identification 5 */
-#  define LM3S_GPIO_PERIPHID6_OFFSET  0xfd8 /* GPIO Peripheral Identification 6 */
-#  define LM3S_GPIO_PERIPHID7_OFFSET  0xfdc /* GPIO Peripheral Identification 7 */
-#  define LM3S_GPIO_PERIPHID0_OFFSET  0xfe0 /* GPIO Peripheral Identification 0 */
-#  define LM3S_GPIO_PERIPHID1_OFFSET  0xfe4 /* GPIO Peripheral Identification 1 */
-#  define LM3S_GPIO_PERIPHID2_OFFSET  0xfe8 /* GPIO Peripheral Identification 2 */
-#  define LM3S_GPIO_PERIPHID3_OFFSET  0xfec /* GPIO Peripheral Identification 3 */
-#  define LM3S_GPIO_PCELLID0_OFFSET   0xff0 /* GPIO PrimeCell Identification 0 */
-#  define LM3S_GPIO_PCELLID1_OFFSET   0xff4 /* GPIO PrimeCell Identification 1 */
-#  define LM3S_GPIO_PCELLID2_OFFSET   0xff8 /* GPIO PrimeCell Identification 2 */
-#  define LM3S_GPIO_PCELLID3_OFFSET   0xffc /* GPIO PrimeCell Identification 3*/
-#else
-#  error "GPIO register offsets not specified for this LM3S chip"
-#endif
+#define LM3S_GPIO_DATA_OFFSET         0x000 /* GPIO Data */
+#define LM3S_GPIO_DIR_OFFSET          0x400 /* GPIO Direction */
+#define LM3S_GPIO_IS_OFFSET           0x404 /* GPIO Interrupt Sense */
+#define LM3S_GPIO_IBE_OFFSET          0x408 /* GPIO Interrupt Both Edges */
+#define LM3S_GPIO_IEV_OFFSET          0x40c /* GPIO Interrupt Event */
+#define LM3S_GPIO_IM_OFFSET           0x410 /* GPIO Interrupt Mask */
+#define LM3S_GPIO_RIS_OFFSET          0x414 /* GPIO Raw Interrupt Status */
+#define LM3S_GPIO_MIS_OFFSET          0x418 /* GPIO Masked Interrupt Status */
+#define LM3S_GPIO_ICR_OFFSET          0x41c /* GPIO Interrupt Clear */
+#define LM3S_GPIO_AFSEL_OFFSET        0x420 /* GPIO Alternate Function */
+#define LM3S_GPIO_DR2R_OFFSET         0x500 /* Select GPIO 2-mA Drive Select */
+#define LM3S_GPIO_DR4R_OFFSET         0x504 /* GPIO 4-mA Drive Select */
+#define LM3S_GPIO_DR8R_OFFSET         0x508 /* GPIO 8-mA Drive Select */
+#define LM3S_GPIO_ODR_OFFSET          0x50c /* GPIO Open Drain Select */
+#define LM3S_GPIO_PUR_OFFSET          0x510 /* GPIO Pull-Up Select */
+#define LM3S_GPIO_PDR_OFFSET          0x514 /* GPIO Pull-Down Select */
+#define LM3S_GPIO_SLR_OFFSET          0x518 /* GPIO Slew Rate Control Select */
+#define LM3S_GPIO_DEN_OFFSET          0x51C /* GPIO Digital Enable */
+#define LM3S_GPIO_LOCK_OFFSET         0x520 /* GPIO Lock */
+#define LM3S_GPIO_CR_OFFSET           0x524 /* GPIO Commit */
+#define LM3S_GPIO_PERIPHID4_OFFSET    0xfd0 /* GPIO Peripheral Identification 4 */
+#define LM3S_GPIO_PERIPHID5_OFFSET    0xfd4 /* GPIO Peripheral Identification 5 */
+#define LM3S_GPIO_PERIPHID6_OFFSET    0xfd8 /* GPIO Peripheral Identification 6 */
+#define LM3S_GPIO_PERIPHID7_OFFSET    0xfdc /* GPIO Peripheral Identification 7 */
+#define LM3S_GPIO_PERIPHID0_OFFSET    0xfe0 /* GPIO Peripheral Identification 0 */
+#define LM3S_GPIO_PERIPHID1_OFFSET    0xfe4 /* GPIO Peripheral Identification 1 */
+#define LM3S_GPIO_PERIPHID2_OFFSET    0xfe8 /* GPIO Peripheral Identification 2 */
+#define LM3S_GPIO_PERIPHID3_OFFSET    0xfec /* GPIO Peripheral Identification 3 */
+#define LM3S_GPIO_PCELLID0_OFFSET     0xff0 /* GPIO PrimeCell Identification 0 */
+#define LM3S_GPIO_PCELLID1_OFFSET     0xff4 /* GPIO PrimeCell Identification 1 */
+#define LM3S_GPIO_PCELLID2_OFFSET     0xff8 /* GPIO PrimeCell Identification 2 */
+#define LM3S_GPIO_PCELLID3_OFFSET     0xffc /* GPIO PrimeCell Identification 3*/
 
 /* GPIO Register Addresses **********************************************************/
 

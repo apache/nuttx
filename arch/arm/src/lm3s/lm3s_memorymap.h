@@ -167,7 +167,6 @@
 #  define LM3S_SYSCON_BASE    (LM3S_PERIPH_BASE + 0xfe000)  /* -0xfefff: System Control */
                                                             /* -0x1ffffff: Reserved */
 #else
-#else
 #  error "Peripheral base addresses not specified for this LM3S chip"
 #endif
 

@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Get customizations for each supported chip (only the LM3S6918 right now) */
+/* Get customizations for each supported chip (only the LM3S6918 and 65 right now) */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S6918)
 #  define LM3S_NTIMERS         4  /* Four general purpose timers */

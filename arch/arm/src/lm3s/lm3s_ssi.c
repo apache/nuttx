@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lm32/lm3s_spi.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,8 +77,8 @@
 #endif
 
 /* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
- * modules (others may support more -- in such case, the following must be
- * expanded).
+ * modules, the LM3S6965 supports 1 module (others may support more than 2-- in
+ * such case, the following must be expanded).
  */
 
 #if LM3S_NSSI == 0
