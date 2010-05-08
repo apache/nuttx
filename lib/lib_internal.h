@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_internal.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,6 +101,13 @@ extern int lib_rawvprintf(const char *src, va_list ap);
 /* Defined lib_lowprintf.c */
 
 extern int lib_lowvprintf(const char *src, va_list ap);
+
+/* Defined in lib_dtoa.c */
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+extern char *__dtoa(double d, int mode, int ndigits,
+                    int *decpt, int *sign, char **rve);
+#endif
 
 /* Defined in lib_libwrite.c */
 

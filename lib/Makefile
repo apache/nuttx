@@ -1,7 +1,7 @@
 ############################################################################
 # lib/Makefile
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,9 @@ STDIO_SRCS	+= lib_fopen.c lib_fclose.c lib_fread.c lib_libfread.c lib_fseek.c \
 		   lib_fputc.c lib_puts.c lib_fputs.c lib_ungetc.c lib_vprintf.c \
 		   lib_fprintf.c lib_vfprintf.c lib_stdinstream.c lib_stdoutstream.c
 endif
+endif
+ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
+STDIO_SRCS	+= lib_dtoa.c
 endif
 
 STDLIB_SRCS	= lib_rand.c lib_qsort.c

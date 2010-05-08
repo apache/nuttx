@@ -1114,4 +1114,9 @@
 	  LM3S6965
 	* configs/lm3s6965-ek - Add configuration for Stellaris LM3S6965
 	  Evaluation Kit.
+	* lib/lib_dtoa.c and lib/lib_dtoa.c - printf will not printf floating
+	  point values if you select CONFIG_LIBC_FLOATINGPOINT in your
+	  configuration file.  Contributed by Yolande Cates.  NOTE:  these
+	  floating point operations have not been well tested and may not
+	  be portable to all floating point implementations.
 

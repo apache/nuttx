@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 6, 2010</p>
+      <p>Last Updated: May 7, 2010</p>
     </td>
   </tr>
 </table>
@@ -1722,6 +1722,11 @@ nuttx-5.5 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  LM3S6965
 	* configs/lm3s6965-ek - Add configuration for Stellaris LM3S6965
 	  Evaluation Kit.
+	* lib/lib_dtoa.c and lib/lib_dtoa.c - printf will not printf floating
+	  point values if you select CONFIG_LIBC_FLOATINGPOINT in your
+	  configuration file.  Contributed by Yolande Cates.  NOTE:  these
+	  floating point operations have not been well tested and may not
+	  be portable to all floating point implementations.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

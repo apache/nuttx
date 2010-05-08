@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_libvsprintf.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -185,6 +185,12 @@ static const char g_nullstring[] = "(null)";
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/* Include floating point functions */
+ 
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+#  include "lib_libdtoa.c"
+#endif
 
 /****************************************************************************
  * Name: ptohex
@@ -1468,9 +1474,8 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 #ifdef CONFIG_LIBC_FLOATINGPOINT
       else if (strchr("eEfgG", *src))
         {
-#ifdef CONFIG_CPP_HAVE_WARNING
-#  warning "No floating point support"
-#endif
+          double dblval = va_arg(ap, double);
+          lib_dtoa(obj, *src, trunc, flags, dblval);
         }
 #endif
     }

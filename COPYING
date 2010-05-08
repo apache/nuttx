@@ -3,7 +3,7 @@
  * COPYING -- Describes the terms under which Nuttx is distributed. A    *
  * copy of the BSD-style licensing is included in this file. In my       *
  * words -- I believe that you should free to use NuttX in any           *
- * environmnet, private, private, commercial, open, closed, etc.         *
+ * environment, private, private, commercial, open, closed, etc.         *
  * provided only that you repect the modest copyright notices as         *
  * described in license (below).  Please feel free to contact me if you  *
  * have any licensing concerns.                                          *
@@ -42,3 +42,10 @@
  *                                                                       *
  *************************************************************************/
 
+If you enable floating point conversions with CONFIG_LIBC_FLOATINGPOINT,
+then some files with an unmodified BSD license will be included.  That
+license is similar to the above (modified) BSD license, but has an
+additional requirement that I state the following:
+
+  "This product includes software developed by the University of
+   California, Berkeley and its contributors."
