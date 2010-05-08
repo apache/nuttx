@@ -89,7 +89,7 @@
 
 /* LED definitions ******************************************************************/
 
-/* The Eagle-100 has only one user LED: Port E, Bit 1.  Below is the mapping of this
+/* The LMS36965 Eval Kit has only one user LED: Port F, Bit 0.  Below is the mapping of this
  * single LED.  From this single LED, we can get the following information:
  *
  *   OFF Steady:    The system has failed to boot to the point of enabling interrupts

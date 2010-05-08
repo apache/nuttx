@@ -3,6 +3,80 @@ README
 
 README for NuttX port to the Stellaris LMS36965 Evaluation Kit
 
+Contents
+^^^^^^^^
+
+  Stellaris LMS36965 Evaluation Kit
+  Development Environment
+  GNU Toolchain Options
+  IDEs
+  NuttX buildroot Toolchain
+  USB Device Controller Functions
+  Stellaris LM3S6965 Evaluation Kit Configuration Options
+  Configurations
+
+Stellaris LMS36965 Evaluation Kit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Stellaris LM3S6965 Evaluation Board includes the following features:
+
+ o  Stellaris LM3S6965 microcontroller with fully-integrated 10/100 embedded
+    Ethernet controller
+ o  Simple setup; USB cable provides serial communication, debugging, and
+    power
+ o  OLED graphics display with 128 x 96 pixel resolution
+ o  User LED, navigation switches, and select pushbuttons
+ o  Magnetic speaker
+ o  LM3S6965 I/O available on labeled break-out pads
+ o  Standard ARM® 20-pin JTAG debug connector with input and output modes
+ o  USB interface for debugging and power supply
+ o  MicroSD card slot
+
+Features of the LM3S6965 Microcontroller
+
+ o  32-bit RISC performance using ARM® Cortex™-M3 v7M architecture
+    – 50-MHz operation
+    – Hardware-division and single-cycle-multiplication
+    – Integrated Nested Vectored Interrupt Controller (NVIC)
+    – 42 interrupt channels with eight priority levels
+ o  256 KB single-cycle flash
+ o  64 KB single-cycle SRAM
+ o  Four general-purpose 32-bit timers
+ o  Integrated Ethernet MAC and PHY
+ o  Three fully programmable 16C550-type UARTs
+ o  Four 10-bit channels (inputs) when used as single-ended inputs
+ o  Two independent integrated analog comparators
+ o  Two I2C modules
+ o  Three PWM generator blocks
+    – One 16-bit counter
+    – Two comparators
+    – Produces two independent PWM signals
+    – One dead-band generator
+ o  Two QEI modules with position integrator for tracking encoder position
+ o  0 to 42 GPIOs, depending on user configuration
+ o  On-chip low drop-out (LDO) voltage regulator
+
+GPIO Usage
+
+PIN SIGNAL      EVB Function
+--- ----------- ---------------------------------------
+ 26 PA0/U0RX    Virtual COM port receive
+ 27 PA1/U0TX    Virtual COM port transmit
+ 10 PD0/IDX0    SD card chip select
+ 11 PD1/PWM1    Sound
+ 30 PA4/SSI0RX  SD card data out
+ 31 PA5/SSI0TX  SD card and OLED display data in
+ 28 PA2/SSI0CLK SD card and OLED display clock
+ 22 PC7/PHB0    OLED display data/control select
+ 29 PA3/SSI0FSS OLED display chip select
+ 73 PE1/PWM5    Down switch
+ 74 PE2/PHB1    Left switch
+ 72 PE0/PWM4    Up switch
+ 75 PE3/PHA1    Right switch
+ 61 PF1/IDX1    Select switch
+ 47 PF0/PWM0    User LED
+ 23 PC6/CCP3    Enable +15 V
+
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -139,63 +213,36 @@ NuttX buildroot Toolchain
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
-Ethernet-Bootloader
-^^^^^^^^^^^^^^^^^^^
+  NOTE: This is an OABI toolchain.
 
-  Here are some notes about using the Luminary Ethernet boot-loader built
-  into the Stellaris LM3S6965 Evaluation Kit.
+USB Device Controller Functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Device Overview
 
-  Built-In Application:
+    An FT2232 device from Future Technology Devices International Ltd manages
+    USB-to-serial conversion. The FT2232 is factory configured by Luminary
+    Micro to implement a JTAG/SWD port (synchronous serial) on channel A and
+    a Virtual COM Port (VCP) on channel B. This feature allows two simultaneous
+    communications links between the host computer and the target device using
+    a single USB cable. Separate Windows drivers for each function are provided
+    on the Documentation and Software CD.
 
-  - The board has no fixed IP address but uses DHCP to get an address.
-    I used a D-link router; I can use a web browser to surf to the D-link
-    web page to get the address assigned by DHCP.
+    A small serial EEPROM holds the FT2232 configuration data. The EEPROM is not
+    accessible by the LM3S6965 microcontroller. For full details on FT2232
+    operation, go to www.ftdichip.com.
 
-  - Then you can use this IP address in your browser to surf to the evaluation
-    board.  It presents several interesting pages -- the most important is
-    the page called "Firmware Update".  That page includes instructions on
-    how to download code to the evaluation board.
+  USB to JTAG/SWD
 
-  - After you burn the first program, you lose this application.  Then you
-    will probably be better off connected directly to the Stellaris LM3S6965
-    Evaluation Kit or through a switch (The router caused problems for me
-    during downloads).
+    The FT2232 USB device performs JTAG/SWD serial operations under the control 
+    of the debugger.  A CPLD (U2) multiplexes SWD and JTAG functions and, when
+    working in SWD mode, provides direction control for the bidirectional data
+    line.
 
-  Using the Ethernet Bootloader:
+  Virtual COM Port
 
-  - You will need the "LM Flash Programmer application".  You can get that
-    program from the Luminary web site.  There is a link on the LM3S6918 page.
-
-  - Is there any documentation for using the bootloader?  Yes and No:  There
-    is an application note covering the bootloader on the Luminary site, but
-    it is not very informative.
-
-  - Are there any special things I have to do in my code, other than setting 
-    the origin to 0x0000:2000 (APP_START_ADDRESS)?  No.  The bootloader assumes
-    that you have a vector table at that address .  The bootloader does the
-    following each time it boots (after you have downloaded the first valid
-    application):
-
-    o The bootloader sets the vector table register to the APP_START_ADDRESS,
-    o It sets the stack pointer to the address at APP_START_ADDRESS, and then
-    o Jumps to the address at APP_START_ADDRESS+4.
-
-  - You can force the bootloader to skip starting the application and stay
-    in the update mode.  You will need to do this in order to download a new
-    application.  You force the update mode by holding the user button on the
-    Stellaris LM3S6965 Evaluation Kit while resetting the board.  The user
-    button is GPIOA, pin 6 (call FORCED_UPDATE_PIN in the bootloader code).
-
-  - Note 1:  I had to remove my D-Link router from the configuration in order
-    to use the LM Flash Programmer (the Bootloader issues BOOTP requests to
-    communicate with the LM Flash Programmer, my router was responding to
-    these BOOTP requests and hosing the download).  It is safer to connect
-    via a switch or via an Ethernet switch.
-
-  - Note 2:  You don't need the router's DHCPD server in the download
-    configuration; the Luminary Flash Programmer has the capability of
-    temporarily assigning the IP address to the Stellaris LM3S6965 Evaluation
-    Kit via BOOTP.
+    The Virtual COM Port (VCP) allows Windows applications (such as HyperTerminal)
+    to communicate with UART0 on the LM3S6965 over USB. Once the FT2232 VCP
+    driver is installed, Windows assigns a COM port number to the VCP channel.
 
 Stellaris LM3S6965 Evaluation Kit Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
