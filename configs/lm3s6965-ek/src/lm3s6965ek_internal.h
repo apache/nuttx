@@ -65,11 +65,33 @@
 
 /* LM3S6965 Eval Kit ***************************************************************/
 
-/* GPIO for microSD card chip select */
+/* GPIO Usage
+ *
+ * PIN SIGNAL      EVB Function
+ * --- ----------- ---------------------------------------
+ *  26 PA0/U0RX    Virtual COM port receive
+ *  27 PA1/U0TX    Virtual COM port transmit
+ *  10 PD0/IDX0    SD card chip select
+ *  11 PD1/PWM1    Sound
+ *  30 PA4/SSI0RX  SD card data out
+ *  31 PA5/SSI0TX  SD card and OLED display data in
+ *  28 PA2/SSI0CLK SD card and OLED display clock
+ *  22 PC7/PHB0    OLED display data/control select
+ *  29 PA3/SSI0FSS OLED display chip select
+ *  73 PE1/PWM5    Down switch
+ *  74 PE2/PHB1    Left switch
+ *  72 PE0/PWM4    Up switch
+ *  75 PE3/PHA1    Right switch
+ *  61 PF1/IDX1    Select switch
+ *  47 PF0/PWM0    User LED
+ *  23 PC6/CCP3    Enable +15 V
+ */
+
+ /* GPIO for microSD card chip select */
 
 #define SDCCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
-                    GPIO_VALUE_ONE | GPIO_PORTG | 1)
-#define LED_GPIO   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTE | 1)
+                    GPIO_VALUE_ONE | GPIO_PORTD | 0)
+#define LED_GPIO   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | 0)
 
 /************************************************************************************
  * Public Functions
