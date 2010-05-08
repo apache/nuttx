@@ -210,13 +210,14 @@ NuttX buildroot Toolchain
      the path to the newly built binaries.
 
   See the file configs/README.txt in the buildroot source tree.  That has more
-  detailed PLUS some special instructions that you will need to follow if you are
-  building a Cortex-M3 toolchain for Cygwin under Windows.
+  detailed PLUS some special instructions that you will need to follow if you
+  are building a Cortex-M3 toolchain for Cygwin under Windows.
 
   NOTE: This is an OABI toolchain.
 
 USB Device Controller Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
   Device Overview
 
     An FT2232 device from Future Technology Devices International Ltd manages
@@ -227,16 +228,25 @@ USB Device Controller Functions
     a single USB cable. Separate Windows drivers for each function are provided
     on the Documentation and Software CD.
 
-    A small serial EEPROM holds the FT2232 configuration data. The EEPROM is not
-    accessible by the LM3S6965 microcontroller. For full details on FT2232
-    operation, go to www.ftdichip.com.
-
-  USB to JTAG/SWD
+  Debugging with JTAG/SWD
 
     The FT2232 USB device performs JTAG/SWD serial operations under the control 
-    of the debugger.  A CPLD (U2) multiplexes SWD and JTAG functions and, when
-    working in SWD mode, provides direction control for the bidirectional data
-    line.
+    of the debugger or the Luminary Flash Programmer.  It also operate as an
+    In-Circuit Debugger Interface (ICDI), allowing debugging of any external
+    target board.  Debugging modes:
+
+    MODE DEBUG FUNCTION       USE                         SELECTED BY
+    1    Internal ICDI        Debug on-board LM3S6965     Default Mode
+                              microcontroller over USB
+                              interface.
+    2    ICDI out to JTAG/SWD The EVB is used as a USB    Connecting to an external
+         header               to SWD/JTAG interface to    target and starting debug
+                              an external target.         software. The red Debug Out
+                                                          LED will be ON.
+    3    In from JTAG/SWD     For users who prefer an     Connecting an external
+         header               external debug interface    debugger to the JTAG/SWD
+                              (ULINK, JLINK, etc.) with   header.
+                              the EVB.
 
   Virtual COM Port
 
@@ -368,26 +378,8 @@ sudirectory and can be selected as follow:
 
 Where <subdir> is one of the following:
 
-  nettest:
-    This configuration directory may be used to enable networking using the
-    LM3S6918's Ethernet controller. It uses examples/nettest to excercise the
-    TCP/IP network.
-
-  httpd:
-    This builds the uIP web server example using the examples/uip application
-    (for execution from FLASH). See examples/README.txt for information
-    about ostest.
-
-  nsh:
-    Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables both the serial and telnetd NSH interfaces.
-
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.
-
-By default, all of these examples are built to be used with the Luminary
-Ethernet Bootloader (you can change the ld.script file in any of these
-sub-directories to change that configuration).
 
 
