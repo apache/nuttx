@@ -1249,5 +1249,8 @@ new drivers and some important bugfixes:
     STR-P711 port and some important bugs were fixed in the STR-P711 SPI
     driver.
 
+  * Added (optional) floating point support for printf() (contributed by
+    Yolande Cates).
+
   * Corrected an important UDP reference counting error.  It was not a serious
     error, but it trigger an assertion was IS a serious error.
