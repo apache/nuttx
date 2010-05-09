@@ -145,7 +145,6 @@ void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
 
 uint8_t lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-#warning "Need to check schematic"
   ssidbg("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }

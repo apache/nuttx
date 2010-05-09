@@ -87,11 +87,28 @@
  *  23 PC6/CCP3    Enable +15 V
  */
 
- /* GPIO for microSD card chip select */
+/* GPIO for microSD card chip select:
+ * - PD0: SD card chip select (CARDCSn)
+ */
 
-#define SDCCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
-                    GPIO_VALUE_ONE | GPIO_PORTD | 0)
-#define LED_GPIO   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | 0)
+#define SDCCS_GPIO  (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
+                     GPIO_VALUE_ONE | GPIO_PORTD | 0)
+
+/* GPIO for single LED:
+ * - PF0: User LED
+ */
+
+#define LED_GPIO    (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | 0)
+
+/* GPIOs for OLED:
+ *  - PC7: OLED display data/control select (D/Cn)
+ *  - PA3: OLED display chip select (CSn)
+ */
+
+#define OLEDDC_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
+                     GPIO_VALUE_ONE | GPIO_PORTC | 7)
+#define OLEDCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
+                     GPIO_VALUE_ONE | GPIO_PORTA | 3)
 
 /************************************************************************************
  * Public Functions

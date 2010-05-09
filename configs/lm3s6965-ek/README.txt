@@ -12,6 +12,7 @@ Contents
   IDEs
   NuttX buildroot Toolchain
   USB Device Controller Functions
+  OLED
   Stellaris LM3S6965 Evaluation Kit Configuration Options
   Configurations
 
@@ -76,6 +77,24 @@ PIN SIGNAL      EVB Function
  61 PF1/IDX1    Select switch
  47 PF0/PWM0    User LED
  23 PC6/CCP3    Enable +15 V
+
+OLED
+^^^^
+
+  The Evaluation Kit includes an OLED graphics display. Features:
+
+  - RiT P14201 series display (www.ritekdisplay.com).
+  - 128 columns by 96rows
+  - High-contrast (typ. 500:1)
+  - Excellent brightness (120 cd/m2)
+  - Fast 10 us response with 128 x 96 pixel resolution.
+
+  The OLED display has a built-in controller IC with synchronous serial and
+  parallel interfaces. Synchronous serial (SSI) is used on the EVB. The SSI
+  port is shared with the microSD card slot.
+
+  - PC7: OLED display data/control select (D/Cn)
+  - PA3: OLED display chip select (CSn)
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -377,6 +396,15 @@ sudirectory and can be selected as follow:
 	. ./setenv.sh
 
 Where <subdir> is one of the following:
+
+  nsh:
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables both the serial and telnetd NSH interfaces.
+
+    NOTE: As it is configured now, you MUST have a network connected.
+    Otherwise, the NSH prompt will not come up because the Ethernet
+    driver is waiting for the network to come up.  That is probably
+    a bug in the Ethernet driver behavior!
 
   ostest:
     This configuration directory, performs a simple OS test using

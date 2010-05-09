@@ -340,7 +340,9 @@ Where <subdir> is one of the following:
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables both the serial and telnetd NSH interfaces.
+    Configuration enables only the serial NSH interfaces (the telnet
+    interface should also be functional, but is not enabled in this
+    configuration).
 
   ostest:
     This configuration directory, performs a simple OS test using
