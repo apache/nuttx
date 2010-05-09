@@ -51,7 +51,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
+
 #include <arch/serial.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
