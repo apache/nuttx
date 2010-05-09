@@ -1097,7 +1097,7 @@
 	  board.
 	* configs/sam3u-ek/nx - NX graphics configuration for the SAM3U-EK
 
-5.5 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.5 2010-05-09 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* drivers/net/enc28j60.c - Microchip ENC28J60 SPI ethernet chip driver.
 	  (untested on original check-in).
@@ -1113,10 +1113,15 @@
 	* arch/arm/src/lm3s and arch/arm/include/lm3s - Add definitions for
 	  LM3S6965
 	* configs/lm3s6965-ek - Add configuration for Stellaris LM3S6965
-	  Evaluation Kit.
+	  Evaluation Kit (including basic examples/ostest configuration)
 	* lib/lib_dtoa.c and lib/lib_dtoa.c - printf will not printf floating
 	  point values if you select CONFIG_LIBC_FLOATINGPOINT in your
 	  configuration file.  Contributed by Yolande Cates.  NOTE:  these
 	  floating point operations have not been well tested and may not
 	  be portable to all floating point implementations.
+	* configs/lm3s6965-ek/nsh - Added NuttShell (NSH) configuration for
+	  the LM3S6965 Evaluation Kit.  Includes both serial and telnet
+	  interfaces.
+	* net/net_close.c - Correct a UDP reference counting error
 
+5.6 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

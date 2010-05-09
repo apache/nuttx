@@ -157,6 +157,10 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- ostest/README.txt
  |   |   |- poll/README.txt
  |   |   `- README.txt
+ |   |- lm3s5965-ek/
+ |   |   |- include/README.txt
+ |   |   |- src/README.txt
+ |   |   `- README.txt
  |   |- m68332evb/
  |   |   |- include/README.txt
  |   |   `- src/README.txt

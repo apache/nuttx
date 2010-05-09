@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 4, 2010)
+NuttX TODO List (Last updated May 8, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -7,7 +7,7 @@ NuttX TODO List (Last updated May 4, 2010)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (16)  Network (net/, drivers/net)
+ (15)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
@@ -484,7 +484,8 @@ o Build system
                older compilers.  My work around for now is to use an older compiler
                for the CPP definition in the configuration Make.defs file, do
                make context, restore the original Make.defs, and then make.
-  Status:      Open
+  Status:      Open.  This may not be a real issue.  I have not seen this
+               happen lately so it may have nothing to do with GCC.
   Priority:    High if you are using NX and a newer compiler.
                
 

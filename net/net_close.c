@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_close.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -277,7 +277,8 @@ int net_closesocket(FAR struct socket *psock)
                 {
                   /* Yes... free the connection structure */
 
-                  uip_udpfree(psock->s_conn);    /* Free uIP resources */
+                  conn->crefs = 0;             /* No more references on the connection */
+                  uip_udpfree(psock->s_conn);  /* Free uIP resources */
                 }
               else
                 {
