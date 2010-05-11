@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/Makefile
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,11 @@ ROOTDEPPATH	= --dep-path .
 MMCSDDEPPATH	= --dep-path mmcsd
 CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/mmcsd}
 
+include lcd/Make.defs
+ROOTDEPPATH	= --dep-path .
+LCDDEPPATH	= --dep-path lcd
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/lcd}
+
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 include bch/Make.defs
@@ -83,7 +88,7 @@ ROOTDEPPATH	= --dep-path .
 MTDDEPPATH	= --dep-path mtd
 
 ASRCS		= $(SERIAL_ASRCS) $(NET_ASRCS) $(PIPE_ASRCS) $(USBDEV_ASRCS) \
-			  $(MMCSD_ASRCS) $(BCH_ASRCS) $(MTD_ASRCS)
+			  $(MMCSD_ASRCS) $(LCD_ASRCS) $(BCH_ASRCS) $(MTD_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		=
@@ -94,7 +99,7 @@ CSRCS		+= ramdisk.c rwbuffer.c
 endif
 endif
 CSRCS		+= $(SERIAL_CSRCS) $(NET_CSRCS) $(PIPE_CSRCS) $(USBDEV_CSRCS) \
-			   $(MMCSD_CSRCS) $(BCH_CSRCS) $(MTD_CSRCS)
+			   $(MMCSD_CSRCS) $(LCD_CSRCS) $(BCH_CSRCS) $(MTD_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -102,7 +107,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libdrivers$(LIBEXT)
 
-VPATH		= serial:net:pipes:usbdev:mmcsd:bch:mtd
+VPATH		= serial:net:pipes:usbdev:mmcsd:lcd:bch:mtd
 
 all:	$(BIN)
 
@@ -119,7 +124,7 @@ $(BIN):	$(OBJS)
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(ROOTDEPPATH) $(SERIALDEPPATH) $(NETDEPPATH) $(PIPEDEPPATH) \
-	  $(USBDEVDEPPATH) $(MMCSDDEPPATH) $(BCHDEPPATH) $(MTDDEPPATH) \
+	  $(USBDEVDEPPATH) $(MMCSDDEPPATH) $(LCDDEPPATH) $(BCHDEPPATH) $(MTDDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

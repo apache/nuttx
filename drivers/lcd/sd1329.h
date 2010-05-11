@@ -121,8 +121,8 @@
 
 #define SSD1329_ICON_CONTROL    0x90
 #  define SSD1329_ICON_NORMAL   0x00 /* A[1:0]1=00: Icon RESET to normal display */
-#  define SSD1329_ICON_ON       0x01 /* A[1:0]1=01: Icon All ON */
-#  define SSD1329_ICON_OFF      0x02 /* A[1:0]=10: Icon All OFF */
+#  define SSD1329_ICON_ALLON    0x01 /* A[1:0]1=01: Icon All ON */
+#  define SSD1329_ICON_ALLOFF   0x02 /* A[1:0]=10: Icon All OFF */
 #  define SSD1329_ICON_DISABLE  0x00 /* A[4]=0: Disable Icon display */
 #  define SSD1329_ICON_ENABLE   0x10 /* A[4]=1: Enable Icon display */
 #  define SSD1329_VICON_DISABLE 0x00 /* A[5]=0: Disable VICON charge pump circuit */

@@ -98,7 +98,7 @@ struct lcd_planeinfo_s
 
   /* This is working memory allocated by the LCD driver for each LCD device
    * and for each color plane.  This memory will hold one raster line of data.
-   * The size of the allocated run buffer must therefor be at least
+   * The size of the allocated run buffer must therefore be at least
    * (bpp * xres / 8).  Actual alignment of the buffer must conform to the
    * bitwidth of the underlying pixel type.
    *

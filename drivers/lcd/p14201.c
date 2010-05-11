@@ -1,5 +1,6 @@
 /**************************************************************************************
- * drivers/lcd/skeleton.c
+ * drivers/lcd/p14201.c
+ * Driver for RiT P14201 series display (wih sd1329 IC controller)
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -47,10 +48,11 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spi.h>
 #include <nuttx/lcd.h>
 
-#include "up_arch.h"
+#include <arch/irq.h>
+
+#include "sd1329.h"
 
 /**************************************************************************************
  * Pre-processor Definitions
@@ -61,7 +63,7 @@
 
 /* Define the following to enable register-level debug output */
 
-#undef CONFIG_LCD_SKELDEBUG
+#undef CONFIG_LCD_RITDEBUG
 
 /* Verbose debug must also be enabled */
 
@@ -71,27 +73,27 @@
 #endif
 
 #ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_LCD_SKELDEBUG
+#  undef CONFIG_LCD_RITDEBUG
 #endif
 
 /* Color Properties *******************************************************************/
 
 /* Display Resolution */
 
-#define SKEL_XRES         320
-#define SKEL_YRES         240
+#define RIT_XRES         128
+#define RIT_YRES         96
 
 /* Color depth and format */
 
-#define SKEL_BPP          16
-#define SKEL_COLORFMT     FB_FMT_RGB16_565
+#define RIT_BPP          4
+#define RIT_COLORFMT     FB_FMT_Y4
 
 /* Debug ******************************************************************************/
 
-#ifdef CONFIG_LCD_SKELDEBUG
-# define skeldbg(format, arg...)  vdbg(format, ##arg)
+#ifdef CONFIG_LCD_RITDEBUG
+# define ritdbg(format, arg...)  vdbg(format, ##arg)
 #else
-# define skeldbg(x...)
+# define ritdbg(x...)
 #endif
 
 /**************************************************************************************
@@ -100,7 +102,7 @@
 
 /* This structure describes the state of this driver */
 
-struct skel_dev_s
+struct rit_dev_s
 {
   /* Publically visible device structure */
 
@@ -115,16 +117,16 @@ struct skel_dev_s
 
 /* LCD Data Transfer Methods */
 
-static int skel_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
              size_t npixels);
-static int skel_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
              size_t npixels);
 
 /* LCD Configuration */
 
-static int skel_getvideoinfo(FAR struct lcd_dev_s *dev,
+static int rit_getvideoinfo(FAR struct lcd_dev_s *dev,
              FAR struct fb_videoinfo_s *vinfo);
-static int skel_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
              FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
@@ -141,10 +143,10 @@ static int skel_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 /* LCD Specific Controls */
 
-static int skel_getpower(struct lcd_dev_s *dev);
-static int skel_setpower(struct lcd_dev_s *dev, int power);
-static int skel_getcontrast(struct lcd_dev_s *dev);
-static int skel_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int rit_getpower(struct lcd_dev_s *dev);
+static int rit_setpower(struct lcd_dev_s *dev, int power);
+static int rit_getcontrast(struct lcd_dev_s *dev);
+static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
 /**************************************************************************************
  * Private Data
@@ -161,48 +163,48 @@ static int skel_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint16_t g_runbuffer[SKEL_XRES];
+static uint8_t g_runbuffer[RIT_XRES/2];
 
 /* This structure describes the overall LCD video controller */
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = SKEL_COLORFMT,    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
-  .xres    = SKEL_XRES,        /* Horizontal resolution in pixel columns */
-  .yres    = SKEL_YRES,        /* Vertical resolution in pixel rows */
-  .nplanes = 1,                /* Number of color planes supported */
+  .fmt     = RIT_COLORFMT,        /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+  .xres    = RIT_XRES,            /* Horizontal resolution in pixel columns */
+  .yres    = RIT_YRES,            /* Vertical resolution in pixel rows */
+  .nplanes = 1,                   /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
 
 static const struct lcd_planeinfo_s g_planeinfo = 
 {
-  .putrun = skel_putrun,           /* Put a run into LCD memory */
-  .getrun = skel_getrun,           /* Get a run from LCD memory */
+  .putrun = rit_putrun,            /* Put a run into LCD memory */
+  .getrun = rit_getrun,            /* Get a run from LCD memory */
   .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = SKEL_BPP,              /* Bits-per-pixel */
+  .bpp    = RIT_BPP,               /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct skel_dev_s g_lcddev_s = 
+static struct rit_dev_s g_lcddev_s = 
 {
   .dev =
   {
     /* LCD Configuration */
  
-    .getvideoinfo = skel_getvideoinfo,
-    .getplaneinfo = skel_getplaneinfo,
+    .getvideoinfo = rit_getvideoinfo,
+    .getplaneinfo = rit_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
 
-    .getpower     = skel_getpower,
-    .setpower     = skel_setpower,
-    .getcontrast  = skel_getcontrast,
-    .setcontrast  = skel_setcontrast,
+    .getpower     = rit_getpower,
+    .setpower     = rit_setpower,
+    .getcontrast  = rit_getcontrast,
+    .setcontrast  = rit_setcontrast,
   },
 };
 
@@ -211,7 +213,7 @@ static struct skel_dev_s g_lcddev_s =
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  skel_putrun
+ * Name:  rit_putrun
  *
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
@@ -224,7 +226,7 @@ static struct skel_dev_s g_lcddev_s =
  *
  **************************************************************************************/
 
-static int skel_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                        size_t npixels)
 {
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -235,12 +237,12 @@ static int skel_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer
   /* Set up to write the run. */
 
   /* Write the run to GRAM. */
-#warning "Missing logic"
+
   return OK;
 }
 
 /**************************************************************************************
- * Name:  skel_getrun
+ * Name:  rit_getrun
  *
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
@@ -253,7 +255,7 @@ static int skel_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer
  *
  **************************************************************************************/
 
-static int skel_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                        size_t npixels)
 {
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -261,22 +263,22 @@ static int skel_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* When the SPI interfacee is used, the SD1329 controller does not support reading
-   * from GDDRAM.
-   */
+  /* Set up to read the run */
 
-  return -ENOSYS;
+  /* Read the run from GRAM. */
+
+  return OK;
 }
 
 /**************************************************************************************
- * Name:  skel_getvideoinfo
+ * Name:  rit_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
  **************************************************************************************/
 
-static int skel_getvideoinfo(FAR struct lcd_dev_s *dev,
+static int rit_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
@@ -287,14 +289,14 @@ static int skel_getvideoinfo(FAR struct lcd_dev_s *dev,
 }
 
 /**************************************************************************************
- * Name:  skel_getplaneinfo
+ * Name:  rit_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
  **************************************************************************************/
 
-static int skel_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
@@ -304,7 +306,7 @@ static int skel_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 }
 
 /**************************************************************************************
- * Name:  skel_getpower
+ * Name:  rit_getpower
  *
  * Description:
  *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on. On
@@ -312,15 +314,15 @@ static int skel_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  *
  **************************************************************************************/
 
-static int skel_getpower(struct lcd_dev_s *dev)
+static int rit_getpower(struct lcd_dev_s *dev)
 {
-  struct skel_dev_s *priv = (struct skel_dev_s *)dev;
+  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
   gvdbg("power: %d\n", 0);
   return 0;
 }
 
 /**************************************************************************************
- * Name:  skel_setpower
+ * Name:  rit_setpower
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
@@ -328,9 +330,9 @@ static int skel_getpower(struct lcd_dev_s *dev)
  *
  **************************************************************************************/
 
-static int skel_setpower(struct lcd_dev_s *dev, int power)
+static int rit_setpower(struct lcd_dev_s *dev, int power)
 {
-  struct skel_dev_s *priv = (struct skel_dev_s *)dev;
+  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
 
   gvdbg("power: %d\n", power);
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
@@ -341,28 +343,28 @@ static int skel_setpower(struct lcd_dev_s *dev, int power)
 }
 
 /**************************************************************************************
- * Name:  skel_getcontrast
+ * Name:  rit_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
  **************************************************************************************/
 
-static int skel_getcontrast(struct lcd_dev_s *dev)
+static int rit_getcontrast(struct lcd_dev_s *dev)
 {
   gvdbg("Not implemented\n");
   return -ENOSYS;
 }
 
 /**************************************************************************************
- * Name:  skel_getcontrast
+ * Name:  rit_getcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
  **************************************************************************************/
 
-static int skel_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
+static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
   gvdbg("contrast: %d\n", contrast);
   return -ENOSYS;
@@ -373,7 +375,7 @@ static int skel_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  up_oledinitialize
+ * Name:  up_lcdinitialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
@@ -382,15 +384,47 @@ static int skel_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *up_oledinitialize(FAR struct spi_dev_s *spi)
+int up_lcdinitialize(void)
 {
   gvdbg("Initializing\n");
 
   /* Configure GPIO pins */
-#warning "Missing logic"
-  /* Enable clocking /
+
+  /* Enable clocking */
 
   /* Configure and enable LCD */
  
+  return OK;
+}
+
+/**************************************************************************************
+ * Name:  up_lcdgetdev
+ *
+ * Description:
+ *   Return a a reference to the LCD object for the specified LCD.  This allows
+ *   support for multiple LCD devices.
+ *
+ **************************************************************************************/
+
+FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+{
+  gvdbg("lcddev: %d\n", lcddev);
   return lcddev == 0 ? &g_lcddev_s.dev : NULL;
 }
+
+/**************************************************************************************
+ * Name:  up_lcduninitialize
+ *
+ * Description:
+ *   Unitialize the framebuffer support.
+ *
+ **************************************************************************************/
+
+void up_lcduninitialize(void)
+{
+  /* Turn the LCD off */
+
+  /* Disable clocking  */
+}
+
+

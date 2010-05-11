@@ -83,15 +83,16 @@ OLED
 
   The Evaluation Kit includes an OLED graphics display. Features:
 
-  - RiT P14201 series display (www.ritekdisplay.com).
-  - 128 columns by 96rows
+  - RiT P14201 series display
+  - 128 columns by 96 rows
+  - 4-bit, 16-level gray scale.
   - High-contrast (typ. 500:1)
   - Excellent brightness (120 cd/m2)
-  - Fast 10 us response with 128 x 96 pixel resolution.
+  - Fast 10 us response.
 
   The OLED display has a built-in controller IC with synchronous serial and
-  parallel interfaces. Synchronous serial (SSI) is used on the EVB. The SSI
-  port is shared with the microSD card slot.
+  parallel interfaces (SSD1329). Synchronous serial (SSI) is used on the EVB.
+  The SSI port is shared with the microSD card slot.
 
   - PC7: OLED display data/control select (D/Cn)
   - PA3: OLED display chip select (CSn)

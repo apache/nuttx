@@ -1125,3 +1125,5 @@
 	* net/net_close.c - Correct a UDP reference counting error
 
 5.6 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* drivers/lcd/p14201.c - Driver for RiT P14201 series OLED.
