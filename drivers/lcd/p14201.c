@@ -96,7 +96,19 @@
 #endif
 
 #if CONFIG_LCD_MAXCONTRAST > 255
-# error "CONFIG_LCD_MAXCONTRAST exceed supported maximum"
+#  error "CONFIG_LCD_MAXCONTRAST exceeds supported maximum"
+#endif
+
+/* Check power setting */
+
+#if !defined(CONFIG_LCD_MAXPOWER)
+#  define CONFIG_LCD_MAXPOWER 1
+#endif
+
+#if CONFIG_LCD_MAXCONTRAST > 1
+#  warning "CONFIG_LCD_MAXPOWER exceeds supported maximum"
+#  undef CONFIG_LCD_MAXPOWER
+#  define CONFIG_LCD_MAXPOWER 1
 #endif
 
 /* Define the following to enable register-level debug output */
@@ -155,6 +167,7 @@ struct rit_dev_s
   struct lcd_dev_s      dev;      /* Publically visible device structure */
   FAR struct spi_dev_s *spi;      /* Cached SPI device reference */
   uint8_t               contrast; /* Current contrast setting */
+  bool                  on;       /* true: display is on */
 };
 
 /**************************************************************************************
@@ -309,9 +322,23 @@ static const uint8_t g_initcmds[] =
   3,  SSD1329_PRECHRG1_VOLT,            /* Set First Precharge voltage, VP */
       0x3f,                             /* 1.00 x Vcc */
       SSD1329_NOOP,
-  2,  SSD1329_SLEEP_OFF,                /* Matrix display ON */
-      SSD1329_NOOP,
   0                                     /* Zero length command terminates table */
+};
+
+/* Turn the maxtrix display on (sleep mode off) */
+
+static const uint8_t g_sleepoff[] =
+{
+  SSD1329_SLEEP_OFF,                    /* Matrix display ON */
+  SSD1329_NOOP,
+};
+
+/* Turn the maxtrix display off (sleep mode on) */
+
+static const uint8_t g_sleepon[] =
+{
+  SSD1329_SLEEP_ON,                     /* Matrix display OFF */
+  SSD1329_NOOP,
 };
 
 /**************************************************************************************
@@ -458,7 +485,7 @@ static void rit_sndbytes(FAR struct spi_dev_s *spi, FAR const uint8_t *buffer,
 
   /* Clear the D/Cn bit to enable command mode */
 
-  oled_data(spi, data);
+  rit_seldata(spi, data);
 
   /* Loop until the entire command is transferred */
 
@@ -472,7 +499,6 @@ static void rit_sndbytes(FAR struct spi_dev_s *spi, FAR const uint8_t *buffer,
       /* Send a dummy byte */
 
       (void)SPI_SEND(spi, 0xff);
-
    }
 
  /* De-select the SD1329 controller */
@@ -614,7 +640,11 @@ static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 static int rit_getpower(struct lcd_dev_s *dev)
 {
-  return -ENOSYS; /* Not implemented */
+  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
+  DEBUGASSERT(priv);
+
+  gvdbg("power: %s\n", priv->on ? "ON" : "OFF");
+  return (int)priv->on;
 }
 
 /**************************************************************************************
@@ -628,7 +658,26 @@ static int rit_getpower(struct lcd_dev_s *dev)
 
 static int rit_setpower(struct lcd_dev_s *dev, int power)
 {
+  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
+  DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER && priv->spi);
+
   gvdbg("power: %d\n", power);
+  if (power > 0)
+    {
+      /* Re-initialize the SSD1329 controller */
+
+      rit_sndcmds(priv->spi, g_initcmds);
+
+      /* Take the display out of sleep mode */
+
+      rit_sndcmd(priv->spi, g_sleepoff, sizeof(g_sleepon));
+    }
+  else
+    {
+      /* Put the display into sleep mode */
+
+      rit_sndcmd(priv->spi, g_sleepon, sizeof(g_sleepon));
+    }
   return -ENOSYS; /* Not implemented */
 }
 
@@ -716,6 +765,7 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, int devno)
       priv->dev.setcontrast  = rit_setcontrast;
       priv->spi              = spi;
       priv->contrast         = RIT_CONTRAST;
+      priv->on               = false;
       return &priv->dev;
     }
   return NULL;
