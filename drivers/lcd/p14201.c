@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spi.h>
 #include <nuttx/lcd.h>
 
 #include <arch/irq.h>
@@ -59,7 +60,44 @@
  **************************************************************************************/
 
 /* Configuration **********************************************************************/
-/* Verify that all configuration requirements have been met */
+
+/* P14201 Configuration Settings:
+ *
+ * CONFIG_LCD_P14201 - Enable P14201 support
+ * CONFIG_P14201_OWNBUS - Set if the P14201 is the only active device on the SPI bus.
+ *   No locking or SPI configuration will be performed. All transfers will be performed
+ *   from the ENC2J60 interrupt handler.
+ * CONFIG_P14201_SPIMODE - Controls the SPI mode
+ * CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
+ * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
+ *   will be supported.
+ */
+
+/* The P14201 spec says that is supports SPI mode 0,0 only.  However,
+ * somtimes you need to tinker with these things.
+ */
+
+#ifndef CONFIG_P14201_SPIMODE
+#  define CONFIG_P14201_SPIMODE SPIDEV_MODE2
+#endif
+
+/* CONFIG_P14201_NINTERFACES determines the number of physical interfaces
+ * that will be supported.
+ */
+
+#ifndef CONFIG_P14201_NINTERFACES
+#  define CONFIG_P14201_NINTERFACES 1
+#endif
+
+/* Check contrast selection */
+
+#if !defined(CONFIG_LCD_MAXCONTRAST)
+#  define CONFIG_LCD_MAXCONTRAST 255
+#endif
+
+#if CONFIG_LCD_MAXCONTRAST > 255
+# error "CONFIG_LCD_MAXCONTRAST exceed supported maximum"
+#endif
 
 /* Define the following to enable register-level debug output */
 
@@ -88,6 +126,16 @@
 #define RIT_BPP          4
 #define RIT_COLORFMT     FB_FMT_Y4
 
+/* Default contrast */
+
+#define RIT_CONTRAST    183  /* 183/255 */
+
+/* Helper Macros **********************************************************************/
+
+#define rit_sndcmd(s,b,l) rit_sndbytes(s,b,l,false);
+#define rit_snddata(s,b,l) rit_sndbytes(s,b,l,true);
+
+
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_RITDEBUG
@@ -104,16 +152,28 @@
 
 struct rit_dev_s
 {
-  /* Publically visible device structure */
-
-  struct lcd_dev_s dev;
-
-  /* Private LCD-specific information follows */
+  struct lcd_dev_s      dev;      /* Publically visible device structure */
+  FAR struct spi_dev_s *spi;      /* Cached SPI device reference */
+  uint8_t               contrast; /* Current contrast setting */
 };
 
 /**************************************************************************************
  * Private Function Protototypes
  **************************************************************************************/
+
+/* Low-level SPI helpers */
+
+static inline void rit_configspi(FAR struct spi_dev_s *spi);
+#ifdef CONFIG_P14201_OWNBUS
+static inline void rit_select(FAR struct spi_dev_s *spi);
+static inline void rit_deselect(FAR struct spi_dev_s *spi);
+#else
+static void rit_select(FAR struct spi_dev_s *spi);
+static void rit_deselect(FAR struct spi_dev_s *spi);
+#endif
+static void rit_sndbytes(FAR struct spi_dev_s *spi, FAR const uint8_t *buffer,
+              size_t buflen, bool data);
+static void rit_sndcmds(FAR struct spi_dev_s *spi, FAR const uint8_t *table);
 
 /* LCD Data Transfer Methods */
 
@@ -187,30 +247,268 @@ static const struct lcd_planeinfo_s g_planeinfo =
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct rit_dev_s g_lcddev_s = 
+static struct rit_dev_s g_oleddev[CONFIG_P14201_NINTERFACES];
+
+
+/* A table of magic initialization commands. This initialization sequence is
+ * derived from RiT Application Note for the P14201 (with a few tweaked values
+ * as discovered in some Luminary code examples).
+ */
+
+static const uint8_t g_initcmds[] =
 {
-  .dev =
-  {
-    /* LCD Configuration */
- 
-    .getvideoinfo = rit_getvideoinfo,
-    .getplaneinfo = rit_getplaneinfo,
-
-    /* LCD RGB Mapping -- Not supported */
-    /* Cursor Controls -- Not supported */
-
-    /* LCD Specific Controls */
-
-    .getpower     = rit_getpower,
-    .setpower     = rit_setpower,
-    .getcontrast  = rit_getcontrast,
-    .setcontrast  = rit_setcontrast,
-  },
+  3,  SSD1329_CMD_LOCK,                 /* Set lock command */
+      SSD1329_LOCK_OFF,                 /* Disable locking */
+      SSD1329_NOOP,
+  2,  SSD1329_SLEEP_ON,                 /* Matrix display OFF */
+      SSD1329_NOOP,
+  3,  SSD1329_ICON_ALL,                 /* Set all ICONs to OFF */
+      SSD1329_ICON_OFF,                 /* OFF selection */
+      SSD1329_NOOP,
+  3,  SSD1329_MUX_RATIO,                /* Set MUX ratio */
+      95,                               /* 96 MUX */
+      SSD1329_NOOP,
+  3,  SSD1329_SET_CONTRAST,             /* Set contrast */
+      RIT_CONTRAST,                     /* Default contrast */
+      SSD1329_NOOP,
+  3,  SSD1329_PRECHRG2_SPEED,           /* Set second pre-charge speed */
+     (31 << 1) | SSD1329_PRECHRG2_DBL,  /* Pre-charge speed == 32, doubled */
+      SSD1329_NOOP,
+  3,  SSD1329_GDDRAM_REMAP,             /* Set GDDRAM re-map */
+     (SSD1329_COM_SPLIT|                /* Enable COM slip even/odd */
+      SSD1329_COM_REMAP|                /* Enable COM re-map */
+      SSD1329_NIBBLE_REMAP),            /* Enable nibble re-map */
+      SSD1329_NOOP,
+  3,  SSD1329_VERT_START,               /* Set Display Start Line */
+      0,                                /* Line = 0 */
+      SSD1329_NOOP,
+  3,  SSD1329_VERT_OFFSET,              /* Set Display Offset */
+      0,                                /* Offset = 0 */
+      SSD1329_NOOP,
+  2,  SSD1329_DISP_NORMAL,              /* Display mode normal */
+      SSD1329_NOOP,
+  3,  SSD1329_PHASE_LENGTH,             /* Set Phase Length */
+      1 |                               /* Phase 1 period = 1 DCLK */
+     (1 << 4),                          /* Phase 2 period = 1 DCLK */
+      SSD1329_NOOP,
+  3,  SSD1329_FRAME_FREQ,
+      35,                               /* 35 DCLK's per row */
+      SSD1329_NOOP,
+  3,  SSD1329_DCLK_DIV,                 /* Set Front Clock Divider / Oscillator Frequency */
+      2 |                               /* Divide ration = 3 */
+     (14 << 4),                         /* Oscillator Frequency, FOSC, setting */
+      SSD1329_NOOP,
+  17, SSD1329_GSCALE_LOOKUP,            /* Look Up Table for Gray Scale Pulse width */
+      1,   2,   3, 4,  5,  6, 8, 10,    /* Value for GS1-8 level Pulse width */
+      12, 14, 16, 19, 22, 26, 30,       /* Value for GS9-15 level Pulse width */
+      SSD1329_NOOP,
+  3,  SSD1329_PRECHRG2_PERIOD,          /* Set Second Pre-charge Period */
+      1,                                /* 1 DCLK */
+      SSD1329_NOOP,
+    // Pre-charge voltage
+  3,  SSD1329_PRECHRG1_VOLT,            /* Set First Precharge voltage, VP */
+      0x3f,                             /* 1.00 x Vcc */
+      SSD1329_NOOP,
+  2,  SSD1329_SLEEP_OFF,                /* Matrix display ON */
+      SSD1329_NOOP,
+  0                                     /* Zero length command terminates table */
 };
 
 /**************************************************************************************
  * Private Functions
  **************************************************************************************/
+
+/**************************************************************************************
+ * Function: rit_configspi
+ *
+ * Description:
+ *   Configure the SPI for use with the P14201
+ *
+ * Parameters:
+ *   spi  - Reference to the SPI driver structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ **************************************************************************************/
+ 
+static inline void rit_configspi(FAR struct spi_dev_s *spi)
+{
+  /* Configure SPI for the P14201.  But only if we own the SPI bus.  Otherwise, don't
+   * bother because it might change.
+   */
+
+#ifdef CONFIG_P14201_OWNBUS
+  SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
+  SPI_SETBITS(spi, 8);
+#ifdef CONFIG_P14201_FREQUENCY
+  SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY)
+#endif
+#endif
+}
+
+/**************************************************************************************
+ * Function: rit_select
+ *
+ * Description:
+ *   Select the SPI, locking and  re-configuring if necessary
+ *
+ * Parameters:
+ *   spi  - Reference to the SPI driver structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ **************************************************************************************/
+
+#ifdef CONFIG_P14201_OWNBUS
+static inline void rit_select(FAR struct spi_dev_s *spi)
+{
+  /* We own the SPI bus, so just select the chip */
+
+  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+}
+#else
+static void rit_select(FAR struct spi_dev_s *spi)
+{
+  /* Select P14201 chip (locking the SPI bus in case there are multiple
+   * devices competing for the SPI bus
+   */
+
+  SPI_LOCK(spi, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+
+  /* Now make sure that the SPI bus is configured for the P14201 (it
+   * might have gotten configured for a different device while unlocked)
+   */
+
+  SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
+  SPI_SETBITS(spi, 8);
+#ifdef CONFIG_P14201_FREQUENCY
+  SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
+#endif
+}
+#endif
+
+/**************************************************************************************
+ * Function: rit_deselect
+ *
+ * Description:
+ *   De-select the SPI
+ *
+ * Parameters:
+ *   spi  - Reference to the SPI driver structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ **************************************************************************************/
+
+#ifdef CONFIG_P14201_OWNBUS
+static inline void rit_deselect(FAR struct spi_dev_s *spi)
+{
+  /* We own the SPI bus, so just de-select the chip */
+
+  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+}
+#else
+static void rit_deselect(FAR struct spi_dev_s *spi)
+{
+  /* De-select P14201 chip and relinquish the SPI bus. */
+
+  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_LOCK(spi, false);
+}
+#endif
+
+/**************************************************************************************
+ * Function: rit_sndbytes
+ *
+ * Description:
+ *   Send a sequence of command or data bytes to the SSD1329 controller.
+ *
+ * Parameters:
+ *   spi    - Reference to the SPI driver structure
+ *   buffer - A reference to memory containing the command bytes to be sent.
+ *   buflen - The number of command bytes in buffer to be sent
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ **************************************************************************************/
+
+static void rit_sndbytes(FAR struct spi_dev_s *spi, FAR const uint8_t *buffer,
+                         size_t buflen, bool data)
+{
+  uint8_t tmp;
+
+  DEBUGASSERT(spi);
+
+  /* Select the SD1329 controller */
+
+  rit_select(spi);
+
+  /* Clear the D/Cn bit to enable command mode */
+
+  oled_data(spi, data);
+
+  /* Loop until the entire command is transferred */
+
+  while (buflen-- > 0)
+    {
+      /* Write the next byte to the controller */
+ 
+      tmp = *buffer++;
+      (void)SPI_SEND(spi, tmp);
+
+      /* Send a dummy byte */
+
+      (void)SPI_SEND(spi, 0xff);
+
+   }
+
+ /* De-select the SD1329 controller */
+
+ rit_deselect(spi);
+}
+
+/**************************************************************************************
+ * Function: rit_sndcmd
+ *
+ * Description:
+ *   Send multiple commands from a table of commands.
+ *
+ * Parameters:
+ *   spi    - Reference to the SPI driver structure
+ *   table  - A reference to table containing all of the commands to be sent.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ **************************************************************************************/
+
+static void rit_sndcmds(FAR struct spi_dev_s *spi, FAR const uint8_t *table)
+{
+  int cmdlen;
+
+  /* Table terminates with a zero length command */
+
+  while ((cmdlen = *table++) != 0)
+    {
+      rit_sndcmd(spi, table, cmdlen);
+      table += cmdlen;
+    }
+}
 
 /**************************************************************************************
  * Name:  rit_putrun
@@ -316,9 +614,7 @@ static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 static int rit_getpower(struct lcd_dev_s *dev)
 {
-  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
-  gvdbg("power: %d\n", 0);
-  return 0;
+  return -ENOSYS; /* Not implemented */
 }
 
 /**************************************************************************************
@@ -332,14 +628,8 @@ static int rit_getpower(struct lcd_dev_s *dev)
 
 static int rit_setpower(struct lcd_dev_s *dev, int power)
 {
-  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
-
   gvdbg("power: %d\n", power);
-  DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
-
-  /* Set new power level */
-
-  return OK;
+  return -ENOSYS; /* Not implemented */
 }
 
 /**************************************************************************************
@@ -352,12 +642,14 @@ static int rit_setpower(struct lcd_dev_s *dev, int power)
 
 static int rit_getcontrast(struct lcd_dev_s *dev)
 {
-  gvdbg("Not implemented\n");
-  return -ENOSYS;
+  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
+
+  gvdbg("contrast: %d\n", priv->contrast);
+  return priv->contrast;
 }
 
 /**************************************************************************************
- * Name:  rit_getcontrast
+ * Name:  rit_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
@@ -366,8 +658,21 @@ static int rit_getcontrast(struct lcd_dev_s *dev)
 
 static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
+  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
+  uint8_t cmd[3];
+
   gvdbg("contrast: %d\n", contrast);
-  return -ENOSYS;
+  DEBUGASSERT(contrast <= CONFIG_LCD_MAXCONTRAST);
+
+  /* Set new contrast */
+
+  cmd[0] = SSD1329_SET_CONTRAST;
+  cmd[1] = contrast;
+  cmd[2] = SSD1329_NOOP;
+  rit_sndcmd(priv->spi, cmd, 3);
+
+  priv->contrast = contrast;
+  return OK;
 }
 
 /**************************************************************************************
@@ -375,56 +680,43 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  up_lcdinitialize
+ * Name:  rit_initialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
  *   initialized, display memory cleared, and the LCD ready to use, but with the power
  *   setting at 0 (full off).
  *
- **************************************************************************************/
-
-int up_lcdinitialize(void)
-{
-  gvdbg("Initializing\n");
-
-  /* Configure GPIO pins */
-
-  /* Enable clocking */
-
-  /* Configure and enable LCD */
- 
-  return OK;
-}
-
-/**************************************************************************************
- * Name:  up_lcdgetdev
- *
- * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows
- *   support for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified OLED.  This allows
+ *   support for multiple OLED devices.
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
+FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, int devno)
 {
-  gvdbg("lcddev: %d\n", lcddev);
-  return lcddev == 0 ? &g_lcddev_s.dev : NULL;
+  DEBUGASSERT(devno == 0 && spi);
+
+  gvdbg("Initializing devno: %d\n", devno);
+  if ((unsigned)devno < CONFIG_P14201_NINTERFACES)
+    {
+      FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev[devno].dev;
+
+      /* Configure and enable LCD */
+
+      rit_configspi(spi);
+      rit_sndcmds(spi, g_initcmds);
+
+      /* Initialize device structure */
+
+      priv->dev.getvideoinfo = rit_getvideoinfo;
+      priv->dev.getplaneinfo = rit_getplaneinfo;
+      priv->dev.getpower     = rit_getpower;
+      priv->dev.setpower     = rit_setpower;
+      priv->dev.getcontrast  = rit_getcontrast;
+      priv->dev.setcontrast  = rit_setcontrast;
+      priv->spi              = spi;
+      priv->contrast         = RIT_CONTRAST;
+      return &priv->dev;
+    }
+  return NULL;
 }
-
-/**************************************************************************************
- * Name:  up_lcduninitialize
- *
- * Description:
- *   Unitialize the framebuffer support.
- *
- **************************************************************************************/
-
-void up_lcduninitialize(void)
-{
-  /* Turn the LCD off */
-
-  /* Disable clocking  */
-}
-
-

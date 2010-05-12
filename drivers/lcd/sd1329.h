@@ -108,7 +108,8 @@
  *         A[0] = 1, Enable doubling the Second Pre-charge speed
  */
 
-#define SSD1329_PRECHRG2_SPEED  0x82 
+#define SSD1329_PRECHRG2_SPEED  0x82
+#  define SSD1329_PRECHRG2_DBL  0x01
 
 /* Set Master Icon Control
  *
@@ -180,10 +181,10 @@
  * This double byte command is used to set the ON / OFF status of all 64 icons.
  *
  * Byte 1: 0x94
- * Byte 2: A[7:6]: OFF/ON/BLINK (Same as 0x93
+ * Byte 2: A[7:6]: OFF/ON/BLINK (Same as 0x93)
  */
 
-#define SSD1329_ICON_REGISTER 0x94
+#define SSD1329_ICON_ALL 0x94
 
 /* Set Icon Blinking Cycle
  *
@@ -377,7 +378,7 @@
  *         A[7:4]: Phase 2 period of 1~16 DCLK’s
  */
 
-#define SSD1329_RESET 0xb1
+#define SSD1329_PHASE_LENGTH 0xb1
 
 /* Set Frame Frequency
  *
@@ -387,7 +388,7 @@
  *
  * Byte 1: 0xb2
  * Byte 2: A[6:0]:Total number of DCLK’s per row. Ranging from
-           0x14hto 0x4e DCLK’s. frame Frequency = DCLK freq /A[6:0].
+ *         0x14 to 0x4e DCLK’s. frame Frequency = DCLK freq /A[6:0].
  */
 
 #define SSD1329_FRAME_FREQ 0xb2
@@ -405,9 +406,10 @@
  * Byte 1: 0xb3
  * Byte 2: A[3:0]: Define divide ratio (D) of display clock (DCLK)
  *                 Divide ratio=A[3:0]+1
+ *         A[7:4] : Set the Oscillator Frequency, FOSC. Range:0-15
  */
 
-#define SSD1329_DIV_RATIO 0xb3
+#define SSD1329_DCLK_DIV 0xb3
 
 /* Set Default Gray Scale Table
  *
@@ -415,7 +417,6 @@
  * default setting.
  *
  * Byte 1: 0xb7
- * Byte 2: A[7:4] : Set the Oscillator Frequency, FOSC. Range:0-15
  */
 
 #define SSD1329_GSCALE_TABLE 0xb7
@@ -438,7 +439,7 @@
  * Bytes 2-16: An[5:0], value for GSn level Pulse width
  */
 
-#define SSD1329_GSCALE_SET 0xb8
+#define SSD1329_GSCALE_LOOKUP 0xb8
 
 /* Set Second Pre-charge Period
  *
@@ -490,10 +491,13 @@
  * This command is used to lock the MCU from accepting any command.
  *
  * Byte 1: 0xfd
- * Byte 2: A[2] == 1, Enable locking the MCU from entering command
+ * Byte 2: 0x12 | A[2]
+ *         A[2] == 1, Enable locking the MCU from entering command
  */
 
-#define SSD1329_CMD_LOCK 0xfd
+#define SSD1329_CMD_LOCK   0xfd
+#  define SSD1329_LOCK_ON  0x13
+#  define SSD1329_LOCK_OFF 0x12
 
 /* SD1329 Status ************************************************************/
 

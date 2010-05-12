@@ -355,7 +355,7 @@ static int skel_getcontrast(struct lcd_dev_s *dev)
 }
 
 /**************************************************************************************
- * Name:  skel_getcontrast
+ * Name:  skel_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
