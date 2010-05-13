@@ -106,9 +106,12 @@ void weak_function lm3s_ssiinitialize(void)
 {
   /* Configure the SPI-based microSD CS GPIO */
 
-  ssi_dumpgpio("lm3s_ssiinitialize() before lm3s_configgpio()");
+  ssi_dumpgpio("lm3s_ssiinitialize() Entry)");
   lm3s_configgpio(SDCCS_GPIO);
-  ssi_dumpgpio("lm3s_ssiinitialize() after lm3s_configgpio()");
+#ifdef CONFIG_NX_LCDDRIVER
+  lm3s_configgpio(OLEDCS_GPIO);
+#endif
+  ssi_dumpgpio("lm3s_ssiinitialize() Exit");
 }
 
 /****************************************************************************
@@ -133,14 +136,22 @@ void weak_function lm3s_ssiinitialize(void)
 void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  ssi_dumpgpio("lm3s_spiselect() Entry");
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert the CS pin to the card */
 
-      ssi_dumpgpio("lm3s_spiselect() before lm3s_gpiowrite()");
       lm3s_gpiowrite(SDCCS_GPIO, !selected);
-      ssi_dumpgpio("lm3s_spiselect() after lm3s_gpiowrite()");
     }
+#ifdef CONFIG_NX_LCDDRIVER
+  else if (devid == SPIDEV_DISPLAY)
+    {
+      /* Assert the CS pin to the display */
+
+      lm3s_gpiowrite(OLEDCS_GPIO, !selected);
+    }
+#endif
+  ssi_dumpgpio("lm3s_spiselect() Exit");
 }
 
 uint8_t lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
