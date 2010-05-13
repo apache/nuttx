@@ -1,5 +1,5 @@
-############################################################################
-# configs/lm3s6965-ek/src/Makefile
+#!/bin/bash
+# configs/lm3s6965-ek/nx/setenv.sh
 #
 #   Copyright (C) 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,60 +31,16 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
--include $(TOPDIR)/Make.defs
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-CFLAGS		+= -I$(TOPDIR)/sched
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
-ASRCS		= 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= up_boot.c up_leds.c up_ethernet.c up_ssi.c
-ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
-endif
-ifeq ($(CONFIG_NX_LCDDRIVER),y)
-CSRCS		+= up_oled.c
-endif
+WD=`pwd`
+export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+export PATH="${BUILDROOT_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-COBJS		= $(CSRCS:.c=$(OBJEXT))
-
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
-
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/cortexm3}"
-else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/cortexm3
-endif
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	@( for obj in $(OBJS) ; do \
-		$(call ARCHIVE, $@, $${obj}); \
-	done ; )
-
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
-
-depend: .depend
-
-clean:
-	@rm -f libboard$(LIBEXT) *~ .*.swp
-	$(call CLEAN)
-
-distclean: clean
-	@rm -f Make.dep .depend
-
--include Make.dep
+echo "PATH : ${PATH}"

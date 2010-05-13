@@ -74,13 +74,22 @@ void lm3s_boardinitialize(void)
    * lm3s_ssiinitialize() has been brought into the link.
    */
 
-/* The LM3S6965 Eval Kit microSD CS is on SSI0 */
+  /* The LM3S6965 Eval Kit microSD CS and OLED are on SSI0 */
 
 #if !defined(CONFIG_SSI0_DISABLE) /* || !defined(CONFIG_SSI1_DISABLE) */
   if (lm3s_ssiinitialize)
     {
       lm3s_ssiinitialize();
     }
+
+   /* Configure the OLED for use */
+
+#ifdef CONFIG_NX_LCDDRIVER
+  if (lm3s_oledinitialize)
+    {
+      lm3s_oledinitialize();
+    }
+#endif
 #endif
 
   /* Configure on-board LEDs if LED support has been selected. */
