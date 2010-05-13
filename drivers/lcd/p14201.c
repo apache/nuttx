@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
 #include <nuttx/lcd.h>
+#include <nuttx/p14201.h>
 
 #include <arch/irq.h>
 
@@ -71,6 +72,10 @@
  * CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
  * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
  *   will be supported.
+ *
+ * Required LCD driver settings:
+ * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXPOWER must be 1
  */
 
 /* The P14201 spec says that is supports SPI mode 0,0 only.  However,
@@ -89,13 +94,17 @@
 #  define CONFIG_P14201_NINTERFACES 1
 #endif
 
+#if CONFIG_P14201_NINTERFACES != 1
+#  error "This implementation supports only a single OLED device"
+#endif
+
 /* Check contrast selection */
 
 #if !defined(CONFIG_LCD_MAXCONTRAST)
 #  define CONFIG_LCD_MAXCONTRAST 255
 #endif
 
-#if CONFIG_LCD_MAXCONTRAST > 255
+#if CONFIG_LCD_MAXCONTRAST <= 0|| CONFIG_LCD_MAXCONTRAST > 255
 #  error "CONFIG_LCD_MAXCONTRAST exceeds supported maximum"
 #endif
 
@@ -105,7 +114,7 @@
 #  define CONFIG_LCD_MAXPOWER 1
 #endif
 
-#if CONFIG_LCD_MAXCONTRAST > 1
+#if CONFIG_LCD_MAXPOWER != 1
 #  warning "CONFIG_LCD_MAXPOWER exceeds supported maximum"
 #  undef CONFIG_LCD_MAXPOWER
 #  define CONFIG_LCD_MAXPOWER 1
@@ -144,9 +153,8 @@
 
 /* Helper Macros **********************************************************************/
 
-#define rit_sndcmd(s,b,l) rit_sndbytes(s,b,l,false);
-#define rit_snddata(s,b,l) rit_sndbytes(s,b,l,true);
-
+#define rit_sndcmd(p,b,l)  rit_sndbytes(p,b,l,false);
+#define rit_snddata(p,b,l) rit_sndbytes(p,b,l,true);
 
 /* Debug ******************************************************************************/
 
@@ -164,10 +172,10 @@
 
 struct rit_dev_s
 {
-  struct lcd_dev_s      dev;      /* Publically visible device structure */
-  FAR struct spi_dev_s *spi;      /* Cached SPI device reference */
-  uint8_t               contrast; /* Current contrast setting */
-  bool                  on;       /* true: display is on */
+  struct lcd_dev_s       dev;      /* Publically visible device structure */
+  FAR struct spi_dev_s  *spi;      /* Cached SPI device reference */
+  uint8_t                contrast; /* Current contrast setting */
+  bool                   on;       /* true: display is on */
 };
 
 /**************************************************************************************
@@ -184,9 +192,9 @@ static inline void rit_deselect(FAR struct spi_dev_s *spi);
 static void rit_select(FAR struct spi_dev_s *spi);
 static void rit_deselect(FAR struct spi_dev_s *spi);
 #endif
-static void rit_sndbytes(FAR struct spi_dev_s *spi, FAR const uint8_t *buffer,
+static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
               size_t buflen, bool data);
-static void rit_sndcmds(FAR struct spi_dev_s *spi, FAR const uint8_t *table);
+static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table);
 
 /* LCD Data Transfer Methods */
 
@@ -236,16 +244,16 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint8_t g_runbuffer[RIT_XRES/2];
+static uint8_t g_runbuffer[CONFIG_P14201_NINTERFACES * RIT_XRES / 2];
 
 /* This structure describes the overall LCD video controller */
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = RIT_COLORFMT,        /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
-  .xres    = RIT_XRES,            /* Horizontal resolution in pixel columns */
-  .yres    = RIT_YRES,            /* Vertical resolution in pixel rows */
-  .nplanes = 1,                   /* Number of color planes supported */
+  .fmt     = RIT_COLORFMT,         /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+  .xres    = RIT_XRES,             /* Horizontal resolution in pixel columns */
+  .yres    = RIT_YRES,             /* Vertical resolution in pixel rows */
+  .nplanes = 1,                    /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
@@ -258,9 +266,28 @@ static const struct lcd_planeinfo_s g_planeinfo =
   .bpp    = RIT_BPP,               /* Bits-per-pixel */
 };
 
-/* This is the standard, NuttX LCD driver object */
+/* This is the OLED driver instance (only a single device is supported for now) */
 
-static struct rit_dev_s g_oleddev[CONFIG_P14201_NINTERFACES];
+static struct rit_dev_s g_oleddev = 
+{
+  .dev =
+  {
+    /* LCD Configuration */
+ 
+    .getvideoinfo = rit_getvideoinfo,
+    .getplaneinfo = rit_getplaneinfo,
+
+    /* LCD RGB Mapping -- Not supported */
+    /* Cursor Controls -- Not supported */
+
+    /* LCD Specific Controls */
+
+    .getpower     = rit_getpower,
+    .setpower     = rit_setpower,
+    .getcontrast  = rit_getcontrast,
+    .setcontrast  = rit_setcontrast,
+  },
+};
 
 
 /* A table of magic initialization commands. This initialization sequence is
@@ -339,6 +366,31 @@ static const uint8_t g_sleepon[] =
 {
   SSD1329_SLEEP_ON,                     /* Matrix display OFF */
   SSD1329_NOOP,
+};
+
+/* Set horizontal increment mode */
+
+static const uint8_t g_horzinc[] =
+{
+  SSD1329_GDDRAM_REMAP,
+ (SSD1329_COM_SPLIT|SSD1329_COM_REMAP|SSD1329_NIBBLE_REMAP),
+  SSD1329_NOOP,
+};
+
+/* The following set a window that covers the entire display */
+
+static const uint8_t g_setallcol[] =
+{
+  SSD1329_SET_COLADDR,
+  0,
+  RIT_YRES-1
+};
+
+static const uint8_t g_setallrow[] =
+{
+  SSD1329_SET_ROWADDR,
+  0,
+  RIT_XRES-1
 };
 
 /**************************************************************************************
@@ -472,9 +524,10 @@ static void rit_deselect(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-static void rit_sndbytes(FAR struct spi_dev_s *spi, FAR const uint8_t *buffer,
+static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
                          size_t buflen, bool data)
 {
+  FAR struct spi_dev_s *spi = priv->spi;
   uint8_t tmp;
 
   DEBUGASSERT(spi);
@@ -485,7 +538,7 @@ static void rit_sndbytes(FAR struct spi_dev_s *spi, FAR const uint8_t *buffer,
 
   /* Clear the D/Cn bit to enable command mode */
 
-  rit_seldata(spi, data);
+  rit_seldata(0, data);
 
   /* Loop until the entire command is transferred */
 
@@ -523,7 +576,7 @@ static void rit_sndbytes(FAR struct spi_dev_s *spi, FAR const uint8_t *buffer,
  *
  **************************************************************************************/
 
-static void rit_sndcmds(FAR struct spi_dev_s *spi, FAR const uint8_t *table)
+static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
 {
   int cmdlen;
 
@@ -531,7 +584,7 @@ static void rit_sndcmds(FAR struct spi_dev_s *spi, FAR const uint8_t *table)
 
   while ((cmdlen = *table++) != 0)
     {
-      rit_sndcmd(spi, table, cmdlen);
+      rit_sndcmd(priv, table, cmdlen);
       table += cmdlen;
     }
 }
@@ -550,18 +603,84 @@ static void rit_sndcmds(FAR struct spi_dev_s *spi, FAR const uint8_t *table)
  *
  **************************************************************************************/
 
-static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+static inline void rit_clear(FAR struct rit_dev_s *priv)
 {
-  /* Buffer must be provided and aligned to a 16-bit address boundary */
+  unsigned int row;
+
+  /* Create a black row */
+
+  memset(g_runbuffer, (RIT_Y4_BLACK << 4) | RIT_Y4_BLACK, RIT_XRES / 2);
+
+  /* Set a window to fill the entire display */
+
+  rit_sndcmd(priv, g_setallcol, sizeof(g_setallcol));
+  rit_sndcmd(priv, g_setallrow, sizeof(g_setallrow));
+  rit_sndcmd(priv, g_horzinc,   sizeof(g_horzinc));
+
+  /* Display each row */
+
+  for(row = 0; row < RIT_YRES; row++)
+    {
+      /* Display a horizontal run */
+  
+      rit_snddata(priv, g_runbuffer, RIT_XRES / 2);
+    }
+}
+
+/**************************************************************************************
+ * Name:  rit_putrun
+ *
+ * Description:
+ *   This method can be used to write a partial raster line to the LCD:
+ *
+ *   row     - Starting row to write to (range: 0 <= row < yres)
+ *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
+ *   buffer  - The buffer containing the run to be written to the LCD
+ *   npixels - The number of pixels to write to the LCD
+ *             (range: 0 < npixels <= xres-col)
+ *
+ **************************************************************************************/
+
+static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+                      size_t npixels)
+{
+  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
+  uint8_t cmd[3];
 
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
-  DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Set up to write the run. */
+  DEBUGASSERT(buffer);
+  if (npixels > 0)
+    {
+      /* Check that the X and Y coordinates are within range */
 
-  /* Write the run to GRAM. */
+      DEBUGASSERT(col < RIT_XRES && (col + npixels) <= RIT_XRES && row < RIT_YRES);
 
+      /* Check that the X coordinates are aligned to 8-bit boundaries
+       * (this needs to get fixed somehow)
+       */
+
+      DEBUGASSERT((col & 1) == 0 && (npixels & 1) == 0);
+
+      /* Setup a window that describes a run starting at the specified column
+       * and row, and ending at the column + npixels on the same row.
+       */
+
+      cmd[0] = SSD1329_SET_COLADDR;
+      cmd[1] = col >> 1;
+      cmd[2] = ((col + npixels) >> 1) - 1;
+      rit_sndcmd(priv, cmd, 3);
+
+      cmd[0] = SSD1329_SET_ROWADDR;
+      cmd[1] = row;
+      cmd[2] = row;
+      rit_sndcmd(priv, cmd, 3);
+
+      /* Write the run to GDDRAM. */
+
+      rit_sndcmd(priv, g_horzinc, sizeof(g_horzinc));
+      rit_snddata(priv, buffer, npixels >> 1);
+    }
   return OK;
 }
 
@@ -580,18 +699,16 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
  **************************************************************************************/
 
 static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                       size_t npixels)
+                      size_t npixels)
 {
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
-  DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
+  DEBUGASSERT(buffer);
 
-  /* Set up to read the run */
+  /* Can't read from OLED GDDRAM in SPI mode */
 
-  /* Read the run from GRAM. */
-
-  return OK;
+  return -ENOSYS;
 }
 
 /**************************************************************************************
@@ -623,7 +740,9 @@ static int rit_getvideoinfo(FAR struct lcd_dev_s *dev,
 static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
-  DEBUGASSERT(dev && pinfo && planeno == 0);
+  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)dev;
+
+  DEBUGASSERT(priv && pinfo && planeno == 0);
   gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;
@@ -638,9 +757,9 @@ static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  *
  **************************************************************************************/
 
-static int rit_getpower(struct lcd_dev_s *dev)
+static int rit_getpower(FAR struct lcd_dev_s *dev)
 {
-  struct rit_dev_s *priv = (struct rit_dev_s *)dev;
+  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)dev;
   DEBUGASSERT(priv);
 
   gvdbg("power: %s\n", priv->on ? "ON" : "OFF");
@@ -666,17 +785,17 @@ static int rit_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Re-initialize the SSD1329 controller */
 
-      rit_sndcmds(priv->spi, g_initcmds);
+      rit_sndcmds(priv, g_initcmds);
 
       /* Take the display out of sleep mode */
 
-      rit_sndcmd(priv->spi, g_sleepoff, sizeof(g_sleepon));
+      rit_sndcmd(priv, g_sleepoff, sizeof(g_sleepon));
     }
   else
     {
       /* Put the display into sleep mode */
 
-      rit_sndcmd(priv->spi, g_sleepon, sizeof(g_sleepon));
+      rit_sndcmd(priv, g_sleepon, sizeof(g_sleepon));
     }
   return -ENOSYS; /* Not implemented */
 }
@@ -718,7 +837,7 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   cmd[0] = SSD1329_SET_CONTRAST;
   cmd[1] = contrast;
   cmd[2] = SSD1329_NOOP;
-  rit_sndcmd(priv->spi, cmd, 3);
+  rit_sndcmd(priv, cmd, 3);
 
   priv->contrast = contrast;
   return OK;
@@ -732,41 +851,43 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  * Name:  rit_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the P14201 video hardware.  The initial state of the OLED is fully
+ *   initialized, display memory cleared, and the OLED ready to use, but with the power
+ *   setting at 0 (full off == sleep mode).
  *
- *   Return a a reference to the LCD object for the specified OLED.  This allows
+ * Input Parameters:
+ *
+ *   spi - A reference to the SPI driver instance.
+ *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.  This allows
  *   support for multiple OLED devices.
+ *
+ * Returned Value:
+ *
+ *   On success, this function returns a reference to the LCD object for the specified
+ *   OLED.  NULL is returned on any failure.
  *
  **************************************************************************************/
 
-FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, int devno)
+FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int devno)
 {
+  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
   DEBUGASSERT(devno == 0 && spi);
 
   gvdbg("Initializing devno: %d\n", devno);
-  if ((unsigned)devno < CONFIG_P14201_NINTERFACES)
-    {
-      FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev[devno].dev;
+ 
+  /* Configure and enable LCD */
 
-      /* Configure and enable LCD */
+  rit_configspi(spi);
+  rit_sndcmds(priv, g_initcmds);
 
-      rit_configspi(spi);
-      rit_sndcmds(spi, g_initcmds);
+  /* Driver state data */
 
-      /* Initialize device structure */
+  priv->spi      = spi;
+  priv->contrast = RIT_CONTRAST;
+  priv->on       = false;
 
-      priv->dev.getvideoinfo = rit_getvideoinfo;
-      priv->dev.getplaneinfo = rit_getplaneinfo;
-      priv->dev.getpower     = rit_getpower;
-      priv->dev.setpower     = rit_setpower;
-      priv->dev.getcontrast  = rit_getcontrast;
-      priv->dev.setcontrast  = rit_setcontrast;
-      priv->spi              = spi;
-      priv->contrast         = RIT_CONTRAST;
-      priv->on               = false;
-      return &priv->dev;
-    }
-  return NULL;
+  /* Clear the display */
+
+  rit_clear(priv);
+  return &priv->dev;
 }

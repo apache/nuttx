@@ -185,7 +185,7 @@ static const struct lcd_planeinfo_s g_planeinfo =
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct skel_dev_s g_lcddev_s = 
+static struct skel_dev_s g_lcddev = 
 {
   .dev =
   {
@@ -392,5 +392,5 @@ FAR struct lcd_dev_s *up_oledinitialize(FAR struct spi_dev_s *spi)
 
   /* Configure and enable LCD */
  
-  return lcddev == 0 ? &g_lcddev_s.dev : NULL;
+  return lcddev == 0 ? &g_lcddev.dev : NULL;
 }
