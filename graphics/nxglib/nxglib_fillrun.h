@@ -101,7 +101,7 @@ static inline void nxgl_fillrun_1bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
   uint8_t wide = (color & 1) != 0 ? 0xff : 0x00;
 
   /* Fill the run with the color (it is okay to run a fractional byte over
-   * the end
+   * the end)
    */
 
   memset(run, wide, nbytes);
@@ -120,7 +120,7 @@ static inline void nxgl_fillrun_2bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
   uint8_t wide = g_wide_2bpp[color & 3];
 
   /* Fill the run with the color (it is okay to run a fractional byte over
-   * the end
+   * the end)
    */
 
   memset(run, wide, nbytes);
@@ -140,7 +140,7 @@ static inline void nxgl_fillrun_4bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
   uint8_t wide   = narrow | (narrow << 4);
 
   /* Fill the run with the color (it is okay to run a fractional byte over
-   * the end
+   * the end)
    */
 
   memset(run, wide, nbytes);

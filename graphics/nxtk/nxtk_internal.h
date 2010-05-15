@@ -61,6 +61,8 @@
 #    define CONFIG_NXTK_BORDERCOLOR1 0x00a9a9a9
 #  elif !defined(CONFIG_NX_DISABLE_16BPP)
 #    define CONFIG_NXTK_BORDERCOLOR1 0xad55
+#  elif !defined(CONFIG_NX_DISABLE_4BPP)
+#    define CONFIG_NXTK_BORDERCOLOR1 6
 #  else
 #    define CONFIG_NXTK_BORDERCOLOR1 'B'
 #  endif
@@ -71,6 +73,8 @@
 #    define CONFIG_NXTK_BORDERCOLOR2 0x00696969
 #  elif !defined(CONFIG_NX_DISABLE_16BPP)
 #    define CONFIG_NXTK_BORDERCOLOR2 0x6b4d
+#  elif !defined(CONFIG_NX_DISABLE_4BPP)
+#    define CONFIG_NXTK_BORDERCOLOR2 4
 #  else
 #    define CONFIG_NXTK_BORDERCOLOR2 'b'
 #  endif

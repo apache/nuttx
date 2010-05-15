@@ -124,6 +124,12 @@
 #  define CONFIG_LCD_MAXPOWER 1
 #endif
 
+/* The leftmost column is contained in bits 7:4  */
+
+#ifndef CONFIG_NX_PACKEDMSFIRST
+#  warning "CONFIG_NX_PACKEDMSFIRST needs to be set"
+#endif
+
 /* Define the following to enable register-level debug output */
 
 #undef CONFIG_LCD_RITDEBUG
@@ -624,6 +630,10 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
   FAR uint8_t *ptr = g_framebuffer;
   unsigned int row;
 
+  /* Initialize the framebuffer */
+
+  memset(g_framebuffer, (RIT_Y4_BLACK << 4) | RIT_Y4_BLACK, RIT_YRES * RIT_XRES / 2);
+
   /* Set a window to fill the entire display */
 
   rit_sndcmd(priv, g_setallcol, sizeof(g_setallcol));
@@ -698,7 +708,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Get the beginning of the run in the framebuffer */
 
-  run = g_framebuffer + row * RIT_XRES / 2 + start;
+  run = g_framebuffer + row * RIT_XRES / 2;
 
   /* Copy the run into the framebuffer, handling nibble alignment */
 
@@ -706,14 +716,15 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
     {
       /* Beginning of buffer is properly aligned */
 
-      memcpy(run, buffer, aend - start);
+      memcpy(&run[start], buffer, aend - start);
 
-      /* Handle an final partial byte */
+      /* Handle any final partial byte */
 
       if (aend != end)
         {
-          /* The leftmost column being contained in bits 7:4  */
-# warning "Missing logic"
+          /* The leftmost column is contained in bits 7:4  */
+
+          run[end] = (run[end] & 0x0f) | (buffer[aend - start] & 0xf0);
         }
     }
   else
@@ -833,8 +844,6 @@ static int rit_getvideoinfo(FAR struct lcd_dev_s *dev,
 static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
-  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)dev;
-
   DEBUGASSERT(priv && pinfo && planeno == 0);
   gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
@@ -978,12 +987,6 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int dev
   priv->spi      = spi;
   priv->contrast = RIT_CONTRAST;
   priv->on       = false;
-
-  /* Initialize the framebuffer */
-
-#ifdef CONFIG_P14201_FRAMEBUFFER
-  memset(g_framebuffer, (RIT_Y4_BLACK << 4) | RIT_Y4_BLACK, RIT_YRES * RIT_XRES / 2);
-#endif
 
   /* Clear the display */
 

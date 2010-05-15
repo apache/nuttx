@@ -154,6 +154,9 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st,
 {
   FAR struct nxeg_glyph_s *glyph = NULL;
   FAR nxgl_mxpixel_t *ptr;
+#if CONFIG_EXAMPLES_NX_BPP < 8
+  nxgl_mxpixel_t pixel;
+#endif
   int bmsize;
   int row;
   int col;
@@ -184,18 +187,54 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st,
         {
           /* Initialize the glyph memory to the background color */
 
-#if CONFIG_EXAMPLES_NX_BPP < 8 || CONFIG_EXAMPLES_NX_BPP == 24
-# error "Additional logic is needed here"
-#else
+#if CONFIG_EXAMPLES_NX_BPP < 8
+          pixel  = st->color[0];
+#  if CONFIG_EXAMPLES_NX_BPP == 1
+          /* Pack 1-bit pixels into a 2-bits */
+
+          pixel &= 0x01;
+          pixel  = (pixel) << 1 |pixel;
+#  endif
+#  if CONFIG_EXAMPLES_NX_BPP < 4
+          /* Pack 2-bit pixels into a nibble */
+
+          pixel &= 0x03;
+          pixel  = (pixel) << 2 |pixel;
+#  endif
+
+          /* Pack 4-bit nibbles into a byte */
+
+          pixel &= 0x0f;
+          pixel  = (pixel) << 4 |pixel;
+
+          ptr    = (FAR nxgl_mxpixel_t *)glyph->bitmap;
+          for (row = 0; row < glyph->height; row++)
+            {
+              for (col = 0; col < glyph->stride; col++)
+                {
+                  /* Transfer the packed bytes into the buffer */
+
+                  *ptr++ = pixel;
+                }
+            }
+
+#elif CONFIG_EXAMPLES_NX_BPP == 24
+# error "Additional logic is needed here for 24bpp support"
+
+#else /* CONFIG_EXAMPLES_NX_BPP = {8,16,32} */
+
           ptr = (FAR nxgl_mxpixel_t *)glyph->bitmap;
           for (row = 0; row < glyph->height; row++)
             {
+              /* Just copy the color value into the glyph memory */
+
               for (col = 0; col < glyph->width; col++)
                 {
                   *ptr++ = st->color[0];
                 }
             }
 #endif
+
           /* Then render the glyph into the allocated memory */
 
           ret = RENDERER((FAR nxgl_mxpixel_t*)glyph->bitmap,
