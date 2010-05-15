@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/spi.h>
+#include <nuttx/lcd.h>
 #include <nuttx/p14201.h>
 
 #include "lm3s_internal.h"
@@ -94,6 +95,10 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
      else
         {
           gllvdbg("Bound SPI port 0 to OLED %d\n", devno);
+
+          /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
+
+          (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
           return dev;
         }
     }
