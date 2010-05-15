@@ -48,6 +48,13 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/nx.h>
+
+#ifdef CONFIG_NX_LCDDRIVER
+#  include <nuttx/lcd.h>
+#else
+#  include <nuttx/fb.h>
+#endif
+
 #include "nx_internal.h"
 
 #ifdef CONFIG_NX_MULTIUSER
@@ -78,9 +85,45 @@
 
 int nx_servertask(int argc, char *argv[])
 {
-  FAR struct fb_vtable_s *fb;
+  FAR NX_DRIVERTYPE *dev;
   int ret;
 
+#if defined(CONFIG_EXAMPLES_NX_EXTERNINIT)
+  /* Use external graphics driver initialization */
+
+  message("nxeg_initialize: Initializing external graphics device\n");
+  dev = up_nxdrvinit(CONFIG_EXAMPLES_NX_DEVNO);
+  if (!dev)
+    {
+      message("nxeg_initialize: up_nxdrvinit failed, devno=%d\n", CONFIG_EXAMPLES_NX_DEVNO);
+      g_exitcode = NXEXIT_EXTINITIALIZE;
+      return ERROR;
+    }
+
+#elif defined(CONFIG_NX_LCDDRIVER)
+  /* Initialize the LCD device */
+
+  message("nx_servertask: Initializing LCD\n");
+  ret = up_lcdinitialize();
+  if (ret < 0)
+    {
+      message("nx_servertask: up_lcdinitialize failed: %d\n", -ret);
+      return 1;
+    }
+
+  /* Get the device instance */
+
+  dev = up_lcdgetdev(CONFIG_EXAMPLES_NX_DEVNO);
+  if (!dev)
+    {
+      message("nx_servertask: up_lcdgetdev failed, devno=%d\n", CONFIG_EXAMPLES_NX_DEVNO);
+      return 2;
+    }
+
+  /* Turn the LCD on at 75% power */
+
+  (void)dev->setpower(dev, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
+#else
   /* Initialize the frame buffer device */
 
   message("nx_servertask: Initializing framebuffer\n");
@@ -91,16 +134,17 @@ int nx_servertask(int argc, char *argv[])
       return 1;
     }
 
-  fb = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE);
-  if (!fb)
+  dev = up_fbgetvplane(CONFIG_EXAMPLES_NX_VPLANE);
+  if (!dev)
     {
       message("nx_servertask: up_fbgetvplane failed, vplane=%d\n", CONFIG_EXAMPLES_NX_VPLANE);
       return 2;
     }
+#endif
 
   /* Then start the server */
 
-  ret = nx_run(fb);
+  ret = nx_run(dev);
   message("nx_servertask: nx_run returned: %d\n", errno);
   return 3;
 }

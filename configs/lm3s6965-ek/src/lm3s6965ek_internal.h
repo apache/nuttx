@@ -126,18 +126,6 @@
 
 extern void weak_function lm3s_ssiinitialize(void);
 
-/************************************************************************************
- * Name: lm3s_oledinitialize
- *
- * Description:
- *   Called to configure OLED.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_NX_LCDDRIVER
-extern void lm3s_oledinitialize(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_LM3S6965_EK_SRC_LM3S6965EK_INTERNAL_H */
 

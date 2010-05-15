@@ -190,6 +190,7 @@ enum exitcode_e
   NXEXIT_EVENTNOTIFY,
   NXEXIT_TASKCREATE,
   NXEXIT_PTHREADCREATE,
+  NXEXIT_EXTINITIALIZE,
   NXEXIT_FBINITIALIZE,
   NXEXIT_FBGETVPLANE,
   NXEXIT_LCDINITIALIZE,
@@ -283,6 +284,10 @@ extern nxgl_mxpixel_t g_tbcolor[CONFIG_NX_NPLANES];
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_EXAMPLES_NX_EXTERNINIT
+extern FAR NX_DRIVERTYPE *up_nxdrvinit(unsigned int devno);
+#endif
 
 #if defined(CONFIG_NX) && defined(CONFIG_NX_MULTIUSER)
 extern int nx_servertask(int argc, char *argv[]);

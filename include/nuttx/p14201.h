@@ -49,20 +49,22 @@
 
 /* P14201 Configuration Settings:
  *
- * CONFIG_LCD_P14201 - Enable P14201 support
  * CONFIG_P14201_SPIMODE - Controls the SPI mode
  * CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
  * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
  *   will be supported.
  * CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed using an in-memory
  *   copy of the OLEDs GDDRAM.  This cost of this buffer is 128 * 96 / 2 = 6Kb.  If this
- *   is defined, then the driver will be fully functioned. If not, then it will have the
+ *   is defined, then the driver will be fully functional. If not, then it will have the
  *   following limitations:
  *
  *   - Reading graphics memory cannot be supported, and
  *   - All pixel writes must be aligned to byte boundaries.
  *
+ *   The latter limitation effectively reduces the 128x96 disply to 64x96.
+ *
  * Required LCD driver settings:
+ * CONFIG_LCD_P14201 - Enable P14201 support
  * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
  * CONFIG_LCD_MAXPOWER must be 1
  */

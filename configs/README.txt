@@ -359,10 +359,11 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed
 		  using an in-memory copy of the OLEDs GDDRAM.  This cost of this
 		  buffer is 128 * 96 / 2 = 6Kb.  If this is defined, then the driver
-		  will be fully functioned. If not, then it will have the following
+		  will be fully functional. If not, then it will have the following
 		  limitations:
 		  - Reading graphics memory cannot be supported, and
 		  - All pixel writes must be aligned to byte boundaries.
+		  The latter limitation effectively reduces the 128x96 disply to 64x96.
 
 	ENC28J60 Ethernet Driver Configuration Settings:
 		CONFIG_NET_ENC28J60 - Enabled ENC28J60 support

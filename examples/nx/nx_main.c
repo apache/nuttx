@@ -419,7 +419,19 @@ static inline int nxeg_suinitialize(void)
   FAR NX_DRIVERTYPE *dev;
   int ret;
 
-#ifdef CONFIG_NX_LCDDRIVER
+#if defined(CONFIG_EXAMPLES_NX_EXTERNINIT)
+  /* Use external graphics driver initialization */
+
+  message("nxeg_initialize: Initializing external graphics device\n");
+  dev = up_nxdrvinit(CONFIG_EXAMPLES_NX_DEVNO);
+  if (!dev)
+    {
+      message("nxeg_initialize: up_nxdrvinit failed, devno=%d\n", CONFIG_EXAMPLES_NX_DEVNO);
+      g_exitcode = NXEXIT_EXTINITIALIZE;
+      return ERROR;
+    }
+
+#elif defined(CONFIG_NX_LCDDRIVER)
   /* Initialize the LCD device */
 
   message("nxeg_initialize: Initializing LCD\n");

@@ -35,9 +35,14 @@ bch/
 	performed by loop.c.  See include/nuttx/fs.h for registration
 	information.
 
+lcd/
+	Drivers for parallel and serial LCD and OLED type devices.  These
+	drivers support interfaces as defined in include/nuttx/lcd.h
+
 mmcsd/
-	Support for MMC/SD block drivers.  At present, only SPI-based
-	MMC/SD is supported. See include/nuttx/mmcsd.h.
+	Support for MMC/SD block drivers.  MMC/SD block drivers based on
+	SPI and SDIO/MCI interfaces are supported.  See include/nuttx/mmcsd.h
+	and include/nuttx/sdio.h for further information.
 
 mtd/
 	Memory Technology Device (MTD) drivers.  Some simple drivers for

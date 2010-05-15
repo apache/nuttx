@@ -56,6 +56,8 @@
 
 #include "sd1329.h"
 
+#ifdef CONFIG_LCD_P14201
+
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
@@ -64,20 +66,22 @@
 
 /* P14201 Configuration Settings:
  *
- * CONFIG_LCD_P14201 - Enable P14201 support
  * CONFIG_P14201_SPIMODE - Controls the SPI mode
  * CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
  * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
  *   will be supported.
  * CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed using an in-memory
  *   copy of the OLEDs GDDRAM.  This cost of this buffer is 128 * 96 / 2 = 6Kb.  If this
- *   is defined, then the driver will be fully functioned. If not, then it will have the
+ *   is defined, then the driver will be fully functional. If not, then it will have the
  *   following limitations:
  *
  *   - Reading graphics memory cannot be supported, and
  *   - All pixel writes must be aligned to byte boundaries.
  *
+ *   The latter limitation effectively reduces the 128x96 disply to 64x96.
+ *
  * Required LCD driver settings:
+ * CONFIG_LCD_P14201 - Enable P14201 support
  * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
  * CONFIG_LCD_MAXPOWER must be 1
  */
@@ -124,13 +128,15 @@
 #  define CONFIG_LCD_MAXPOWER 1
 #endif
 
-/* The leftmost column is contained in bits 7:4  */
+/* Color is 4bpp greyscale with leftmost column contained in bits 7:4  */
 
-#ifndef CONFIG_NX_PACKEDMSFIRST
-#  warning "CONFIG_NX_PACKEDMSFIRST needs to be set"
+#if defined(CONFIG_NX_DISABLE_4BPP) || !defined(CONFIG_NX_PACKEDMSFIRST)
+#  warning "4-bit, big-endian pixel support needed"
 #endif
 
-/* Define the following to enable register-level debug output */
+/* Define the following to enable detailed debug output (stuff you would
+ * never want to see unless you are debugging this file).
+ */
 
 #undef CONFIG_LCD_RITDEBUG
 
@@ -441,9 +447,11 @@ static inline void rit_configspi(FAR struct spi_dev_s *spi)
    */
 
 #ifdef CONFIG_SPI_OWNBUS
+  ritdbg("Mode: %d Bits: 8\n", CONFIG_P14201_SPIMODE);
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
 #ifdef CONFIG_P14201_FREQUENCY
+  ritdbg("Frequency: %d\n", CONFIG_P14201_FREQUENCY);
   SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY)
 #endif
 #endif
@@ -470,6 +478,7 @@ static inline void rit_select(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just select the chip */
 
+  ritdbg("Selected\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 }
 #else
@@ -479,6 +488,7 @@ static void rit_select(FAR struct spi_dev_s *spi)
    * devices competing for the SPI bus
    */
 
+  ritdbg("Selected\n");
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
@@ -486,9 +496,11 @@ static void rit_select(FAR struct spi_dev_s *spi)
    * might have gotten configured for a different device while unlocked)
    */
 
+  ritdbg("Mode: %d Bits: 8\n", CONFIG_P14201_SPIMODE);
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
 #ifdef CONFIG_P14201_FREQUENCY
+  ritdbg("Frequency: %d\n", CONFIG_P14201_FREQUENCY);
   SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
 #endif
 }
@@ -515,6 +527,7 @@ static inline void rit_deselect(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just de-select the chip */
 
+  ritdbg("De-selected\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
 }
 #else
@@ -522,6 +535,7 @@ static void rit_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select P14201 chip and relinquish the SPI bus. */
 
+  ritdbg("De-selected\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
@@ -551,6 +565,7 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
   FAR struct spi_dev_s *spi = priv->spi;
   uint8_t tmp;
 
+  ritdbg("buflen: %d data: %s\n", buflen, data ? "YES" : "NO");
   DEBUGASSERT(spi);
 
   /* Select the SD1329 controller */
@@ -605,13 +620,14 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
 
   while ((cmdlen = *table++) != 0)
     {
+      ritdbg("command: %02x cmdlen: %d\n", buflen, *table);
       rit_sndcmd(priv, table, cmdlen);
       table += cmdlen;
     }
 }
 
 /**************************************************************************************
- * Name:  rit_putrun
+ * Name:  rit_clear
  *
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
@@ -624,11 +640,13 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
  *
  **************************************************************************************/
 
+#ifdef CONFIG_P14201_FRAMEBUFFER
 static inline void rit_clear(FAR struct rit_dev_s *priv)
 {
-#ifdef CONFIG_P14201_FRAMEBUFFER
   FAR uint8_t *ptr = g_framebuffer;
   unsigned int row;
+
+  ritdbg("Clear display\n");
 
   /* Initialize the framebuffer */
 
@@ -649,8 +667,13 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
       rit_snddata(priv, ptr, RIT_XRES / 2);
       ptr += RIT_XRES / 2;
     }
+}
 #else
+static inline void rit_clear(FAR struct rit_dev_s *priv)
+{
   unsigned int row;
+
+  ritdbg("Clear display\n");
 
   /* Create a black row */
 
@@ -670,8 +693,8 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
   
       rit_snddata(priv, g_runbuffer, RIT_XRES / 2);
     }
-#endif
 }
+#endif
 
 /**************************************************************************************
  * Name:  rit_putrun
@@ -687,68 +710,158 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
  *
  **************************************************************************************/
 
+#ifdef CONFIG_P14201_FRAMEBUFFER
 static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                       size_t npixels)
 {
-#ifdef CONFIG_P14201_FRAMEBUFFER
   FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
   uint8_t cmd[3];
   uint8_t *run;
   int start;
   int end;
+  int aend;
   int i;
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  DEBUGASSERT(buffer);
 
-  /* Get the starting and ending byte offsets containing the run */
+  /* Toss out the special case of the empty run now */
+
+  if (npixels < 1)
+    {
+      return OK;
+    }
+
+  /* Get the beginning of the line containing run in the framebuffer */
+
+  run = g_framebuffer + row * RIT_XRES / 2;
+
+  /* Get the starting and ending byte offsets containing the run.
+   * the run starts at &run[start] and continues through run[end-1].
+   * However, the first and final pixels at these locations may
+   * not be byte aligned.
+   *
+   *  example col=7 npixels = 8           example col=6 npixels=8
+   *
+   *  Run:    |AB|AB|AB|AB|               |AB|AB|AB|AB|
+   *  GDDRAM row:
+   *  Byte    | 0| 1| 2| 3| 4| 5| 6| 7|   | 0| 1| 2| 3| 4| 5| 6|
+   *  Pixel:  |--|--|--|-A|BA|BA|BA|B-|   |--|--|--|AB|AB|AB|AB|
+   *
+   *  start = 3                           start = 3
+   *  aend  = 7                           aend  = 7
+   *  end   = 8                           end   = 7
+   *
+   *  example col=7 npixels = 1           example col=7 npixels=2
+   *
+   *  Run:    |A-|                        |AB|
+   *  GDDRAM row:
+   *  Byte    | 0| 1| 2| 3|               | 0| 1| 2| 3| 4|
+   *  Pixel:  |--|--|--|-A|               |--|--|--|-A|B-|
+   *
+   *  start = 3                           start = 3
+   *  aend  = 4                           aend  = 4
+   *  end   = 4                           end   = 5
+   */
 
   start = col >> 1;
   aend  = (col + npixels) >> 1;
   end   = (col + npixels + 1) >> 1;
 
-  /* Get the beginning of the run in the framebuffer */
-
-  run = g_framebuffer + row * RIT_XRES / 2;
-
   /* Copy the run into the framebuffer, handling nibble alignment */
 
   if ((col & 1) == 0)
     {
-      /* Beginning of buffer is properly aligned */
+      /* Check for the special case of only 1 pixels being blitted */
 
-      memcpy(&run[start], buffer, aend - start);
-
-      /* Handle any final partial byte */
-
-      if (aend != end)
+      if (npixels > 1)
         {
-          /* The leftmost column is contained in bits 7:4  */
+          /* Beginning of buffer is properly aligned, from start to aend */
 
-          run[end] = (run[end] & 0x0f) | (buffer[aend - start] & 0xf0);
+          memcpy(&run[start], buffer, aend - start + 1);
         }
+
+       /* Handle any final pixel (including the special case where npixels == 1). */
+
+       if (aend != end)
+         {
+           /* The leftmost column is contained in source bits 7:4 and in
+            * destination bits 7:4
+            */
+
+            run[aend] = (run[aend] & 0x0f) | (buffer[aend - start] & 0xf0);
+         }
     }
   else
     {
-      /* Buffer is not byte aligned with display data.   Each byte contains the
-       * data for two columns:  The leftmost column being contained in bits
-       * 7:4 and the rightmost column being contained in bits 3:0.
+      uint8_t curr = buffer[0];
+      uint8_t last;
+
+      /* Handle the initial unaligned pixel. Source bits 7:4 into
+       * destination bits 3:0.  In the special case of npixel == 1,
+       * this finished the job.
        */
 
-      for (i = 0; i < aend - start; i++)
+      run[start] = (run[start] & 0xf0) | (curr >> 4);
+
+      /* Now construct the rest of the bytes in the run (possibly special
+       * casing the final, partial byte below).
+       */
+
+      for (i = start + 1; i < aend; i++)
         {
-# warning "Missing logic"
+          /* bits 3:0 from previous byte to run bits 7:4;
+           * bits 7:4 of current byte to run bits 3:0
+           */
+
+          last = curr;
+          curr = buffer[i-start];
+          run[i] = (last << 4) | (curr >> 4);
         }
       
+      /* Handle any final pixel (including the special case where npixels == 1). */
+
+      if (aend != end)
+        {
+          /* The leftmost column is contained in source bits 3:0 and in
+           * destination bits 7:4
+           */
+
+           run[aend] = (run[aend] & 0x0f) | (curr << 4);
+        }
     }
 
-  /* Then copy the (aligned) run from the framebuffer to the OLED */
-# warning "Missing logic"
+  /* Setup a window that describes a run starting at the specified column
+   * and row, and ending at the column + npixels on the same row.
+   */
+
+  cmd[0] = SSD1329_SET_COLADDR;
+  cmd[1] = start;
+  cmd[2] = aend - 1;
+  rit_sndcmd(priv, cmd, 3);
+
+  cmd[0] = SSD1329_SET_ROWADDR;
+  cmd[1] = row;
+  cmd[2] = row;
+  rit_sndcmd(priv, cmd, 3);
+
+  /* Write the run to GDDRAM. */
+
+  rit_sndcmd(priv, g_horzinc, sizeof(g_horzinc));
+  rit_snddata(priv, &run[start], aend - start);
+
+  return OK;
+}
 #else
+static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+                      size_t npixels)
+{
   FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
   uint8_t cmd[3];
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
+
   if (npixels > 0)
     {
       /* Check that the X and Y coordinates are within range */
@@ -780,9 +893,9 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
       rit_sndcmd(priv, g_horzinc, sizeof(g_horzinc));
       rit_snddata(priv, buffer, npixels >> 1);
     }
-#endif
   return OK;
 }
+#endif
 
 /**************************************************************************************
  * Name:  rit_getrun
@@ -798,22 +911,107 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
  *
  **************************************************************************************/
 
+#ifdef CONFIG_P14201_FRAMEBUFFER
 static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels)
 {
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  uint8_t *run;
+  int start;
+  int end;
+  int aend;
+  int i;
+
+  ritdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
-#ifdef CONFIG_P14201_FRAMEBUFFER
-  /* Cant read from OLED GDDRAM in SPI mode, but we can read from the framebuffer */
+  /* Can't read from OLED GDDRAM in SPI mode, but we can read from the framebuffer */
+  /* Toss out the special case of the empty run now */
 
-# warning "Missing logic"
+  if (npixels < 1)
+    {
+      return OK;
+    }
+
+  /* Get the beginning of the line containing run in the framebuffer */
+
+  run = g_framebuffer + row * RIT_XRES / 2;
+
+  /* Get the starting and ending byte offsets containing the run.
+   * the run starts at &run[start] and continues through run[end-1].
+   * However, the first and final pixels at these locations may
+   * not be byte aligned (see examples in putrun()).
+   */
+
+  start = col >> 1;
+  aend  = (col + npixels) >> 1;
+  end   = (col + npixels + 1) >> 1;
+
+  /* Copy the run into the framebuffer, handling nibble alignment */
+
+  if ((col & 1) == 0)
+    {
+      /* Check for the special case of only 1 pixels being copied */
+
+      if (npixels > 1)
+        {
+          /* Beginning of buffer is properly aligned, from start to aend */
+
+          memcpy(buffer, &run[start], aend - start + 1);
+        }
+
+       /* Handle any final pixel (including the special case where npixels == 1). */
+
+       if (aend != end)
+         {
+           /* The leftmost column is contained in source bits 7:4 and in
+            * destination bits 7:4
+            */
+
+            buffer[aend - start] = run[aend] & 0xf0;
+         }
+    }
+  else
+    {
+      uint8_t curr = run[start];
+      uint8_t last;
+
+      /* Now construct the rest of the bytes in the run (possibly special
+       * casing the final, partial byte below).
+       */
+
+      for (i = start + 1; i < aend; i++)
+        {
+          /* bits 3:0 from previous byte to run bits 7:4;
+           * bits 7:4 of current byte to run bits 3:0
+           */
+
+          last = curr;
+          curr = run[i];
+          *buffer++ = (last << 4) | (curr >> 4);
+        }
+      
+      /* Handle any final pixel (including the special case where npixels == 1). */
+
+      if (aend != end)
+        {
+          /* The leftmost column is contained in source bits 3:0 and in
+           * destination bits 7:4
+           */
+
+           *buffer = (curr << 4);
+        }
+    }
+  return OK;
+}
 #else
+static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+                      size_t npixels)
+{
   /* Can't read from OLED GDDRAM in SPI mode */
 
   return -ENOSYS;
-#endif
 }
+#endif
 
 /**************************************************************************************
  * Name:  rit_getvideoinfo
@@ -828,7 +1026,7 @@ static int rit_getvideoinfo(FAR struct lcd_dev_s *dev,
 {
   DEBUGASSERT(dev && vinfo);
   gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
-         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+        g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
@@ -993,3 +1191,4 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int dev
   rit_clear(priv);
   return &priv->dev;
 }
+#endif /* CONFIG_LCD_P14201 */

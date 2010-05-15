@@ -116,6 +116,17 @@ examples/nx
       include 2, 4, 8, 16, 24, and 32.  Default is 32.
     CONFIG_EXAMPLES_NX_RAWWINDOWS -- Use raw windows;  Default is to
       use pretty, framed NXTK windows with toolbars.
+    CONFIG_EXAMPLES_NX_EXTERNINIT - The driver for the graphics device on
+      this platform requires some unusual initialization.  This is the
+      for, for example, SPI LCD/OLED devices.  If this configuration is
+      selected, then the platform code must provide an LCD initialization
+      function with a prototype like:
+
+      #ifdef CONFIG_NX_LCDDRIVER
+      FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno);
+      #else
+      FAR struct fb_vtable_s *up_nxdrvinit(unsigned int devno);
+      #endif
 
   This test can be performed with either the single-user version of
   NX or with the multiple user version of NX selected with CONFIG_NX_MULTIUSER.
