@@ -232,6 +232,9 @@ static int  ssi_interrupt(int irq, void *context);
 
 /* SPI methods */
 
+#ifndef CONFIG_SPI_OWNBUS
+static int  ssi_lock(FAR struct spi_dev_s *dev, bool lock);
+#endif
 static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv,
               uint32_t frequency);
 static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
@@ -260,7 +263,9 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
 
 static const struct spi_ops_s g_spiops =
 {
-  .lock         = 0,                 /* Not yet implemented */
+#ifndef CONFIG_SPI_OWNBUS
+  .lock         = ssi_lock,
+#endif
   .select       = lm3s_spiselect,    /* Provided externally by board logic */
   .setfrequency = ssi_setfrequency,
   .setmode      = ssi_setmode,
@@ -965,6 +970,36 @@ static int ssi_interrupt(int irq, void *context)
       ssi_semgive(&priv->xfrsem);
     }
   return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: ssi_lock
+ *
+ * Description:
+ *   On SPI busses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the busses for a sequence of
+ *   transfers.  The bus should be locked before the chip is selected. After
+ *   locking the SPI bus, the caller should then also call the setfrequency,
+ *   setbits, and setmode methods to make sure that the SPI is properly
+ *   configured for the device.  If the SPI buss is being shared, then it
+ *   may have been left in an incompatible state.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   lock - true: Lock spi bus, false: unlock SPI bus
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SPI_OWNBUS
+static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
+{
+  /* Not implemented */
+
+  return -ENOSYS;
 }
 #endif
 
