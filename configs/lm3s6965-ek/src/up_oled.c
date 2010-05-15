@@ -59,17 +59,17 @@
  ****************************************************************************/
 
 /************************************************************************************
- * Name: lm3s_oledinitialize
+ * Name: up_nxdrvinit
  *
  * Description:
- *   Called to configure OLED.
+ *   Called NX initialization logic to configure the OLED.
  *
  ************************************************************************************/
 
-void lm3s_oledinitialize(void)
+FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 {
   FAR struct spi_dev_s *spi;
-  int ret;
+  FAR struct lcd_dev_s *dev;
 
   /* Configure the OLED D/Cn GPIO */
 
@@ -86,16 +86,18 @@ void lm3s_oledinitialize(void)
     {
       /* Bind the SPI port to the OLED */
 
-      ret = rit_initialize(spi, 0);
-      if (ret < 0)
+      dev = rit_initialize(spi, devno);
+      if (!dev)
         {
-          glldbg("Failed to bind SPI port 0 to OLED: %d\n", ret);
+          glldbg("Failed to bind SPI port 0 to OLED %d: %d\n", ret, devno);
         }
      else
         {
-          gllvdbg("Bound SPI port 0 to OLED\n");
+          gllvdbg("Bound SPI port 0 to OLED %d\n", devno);
+          return dev;
         }
     }
+  return NULL;
 }
 
 /**************************************************************************************
