@@ -327,6 +327,13 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_FAT_SECTORSIZE - Max supported sector size
 		CONFIG_FS_ROMFS - Enable ROMFS filesystem support
 
+	SPI driver
+		CONFIG_SPI_OWNBUS - Set if there is only one active device
+		  on the SPI bus.  No locking or SPI configuration will be performed.
+		  It is not necessary for clients to lock, re-configure, etc..
+		CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
+		  (vs a recvblock() and sndblock ()methods)
+
 	SPI-based MMC/SD driver
 		CONFIG_MMCSD_NSLOTS - Number of MMC/SD slots supported by the
 		  driver. Default is one.
@@ -342,6 +349,29 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_MMCSD_MMCSUPPORT - Enable support for MMC cards
 		CONFIG_MMCSD_HAVECARDDETECT - SDIO driver card detection is
 		  100% accurate
+
+	RiT P14201 OLED driver
+		CONFIG_LCD_P14201 - Enable P14201 support
+		CONFIG_P14201_SPIMODE - Controls the SPI mode
+		CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
+		CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201
+		  devices that will be supported.
+		CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed
+		  using an in-memory copy of the OLEDs GDDRAM.  This cost of this
+		  buffer is 128 * 96 / 2 = 6Kb.  If this is defined, then the driver
+		  will be fully functioned. If not, then it will have the following
+		  limitations:
+		  - Reading graphics memory cannot be supported, and
+		  - All pixel writes must be aligned to byte boundaries.
+
+	ENC28J60 Ethernet Driver Configuration Settings:
+		CONFIG_NET_ENC28J60 - Enabled ENC28J60 support
+		CONFIG_ENC28J60_SPIMODE - Controls the SPI mode
+		CONFIG_ENC28J60_FREQUENCY - Define to use a different bus frequency
+		CONFIG_ENC28J60_NINTERFACES - Specifies the number of physical ENC28J60
+		  devices that will be supported.
+		CONFIG_ENC28J60_STATS - Collect network statistics
+		CONFIG_ENC28J60_HALFDUPPLEX - Default is full duplex
 
 	TCP/IP and UDP support via uIP
 		CONFIG_NET - Enable or disable all network features
