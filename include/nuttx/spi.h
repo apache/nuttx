@@ -50,7 +50,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Access macros */
+/* Configuration ************************************************************/
+
+/* CONFIG_SPI_OWNBUS - Set if there is only one active device on the SPI bus.
+ *   No locking or SPI configuration will be performed. It is not necessary
+ *   for clients to lock, re-configure, etc..
+ * CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
+ *   (vs a recvblock() and sndblock ()methods).
+ */
+
+/* Access macros ************************************************************/
 
 /****************************************************************************
  * Name: SPI_LOCK
@@ -73,7 +82,11 @@
  *
  ****************************************************************************/
 
-#define SPI_LOCK(d,l) ((d)->ops->lock ? (d)->ops->lock(d,l) : OK)
+#ifndef CONFIG_SPI_OWNBUS
+#  define SPI_LOCK(d,l) (d)->ops->lock(d,l)
+#else
+#  define SPI_LOCK(d,l)
+#endif
 
 /****************************************************************************
  * Name: SPI_SELECT
@@ -326,7 +339,9 @@ enum spi_mode_e
 struct spi_dev_s;
 struct spi_ops_s
 {
+#ifndef CONFIG_SPI_OWNBUS
   int      (*lock)(FAR struct spi_dev_s *dev, bool lock);
+#endif
   void     (*select)(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                      bool selected);
   uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);

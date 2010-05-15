@@ -1,7 +1,7 @@
 /************************************************************************************
  * arm/arm/src/stm32/stm32_spi.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,9 @@ struct stm32_spidev_s
   sem_t            rxsem;      /* Wait for RX DMA to complete */
   sem_t            txsem;      /* Wait for TX DMA to complete */
 #endif
+#ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
+#endif
 };
 
 /************************************************************************************
@@ -172,7 +174,9 @@ static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv);
 
 /* SPI methods */
 
+#ifndef CONFIG_SPI_OWNBUS
 static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
+#endif
 static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -197,7 +201,9 @@ static void        spi_portinitialize(FAR struct stm32_spidev_s *priv);
 #ifdef CONFIG_STM32_SPI1
 static const struct spi_ops_s g_sp1iops =
 {
+#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
+#endif
   .select            = stm32_spi1select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -231,7 +237,9 @@ static struct stm32_spidev_s g_spi1dev =
 #ifdef CONFIG_STM32_SPI2
 static const struct spi_ops_s g_sp2iops =
 {
+#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
+#endif
   .select            = stm32_spi2select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -265,7 +273,9 @@ static struct stm32_spidev_s g_spi2dev =
 #ifdef CONFIG_STM32_SPI3
 static const struct spi_ops_s g_sp3iops =
 {
+#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
+#endif
   .select            = stm32_spi3select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
@@ -694,6 +704,7 @@ static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits, uin
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
@@ -717,6 +728,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   return OK;
 }
+#endif
 
 /************************************************************************************
  * Name: spi_setfrequency
@@ -1185,7 +1197,9 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
+#ifndef CONFIG_SPI_OWNBUS
   sem_init(&priv->exclsem, 0, 1);
+#endif
 
   /* Initialize the SPI semaphores that is used to wait for DMA completion */
 

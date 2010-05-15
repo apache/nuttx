@@ -1126,4 +1126,6 @@
 
 5.6 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* drivers/lcd/p14201.c - Driver for RiT P14201 series OLED.
+	* drivers/lcd/p14201.c - Driver for RiT P14201 series 128x96 4-bit OLED.
+	* configs/lm3s6965-ek/nx - NX graphics configuration for the LM3S6965
+	  Ethernet Evaluation Kit.

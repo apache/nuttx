@@ -75,9 +75,6 @@
 /* ENC28J60 Configuration Settings:
  *
  * CONFIG_NET_ENC28J60 - Enabled ENC28J60 support
- * CONFIG_ENC28J60_OWNBUS - Set if the ENC28J60 is the only active device on
- *   the SPI bus.  No locking or SPI configuration will be performed. All
- *   transfers will be performed from the ENC2J60 interrupt handler.
  * CONFIG_ENC28J60_SPIMODE - Controls the SPI mode
  * CONFIG_ENC28J60_FREQUENCY - Define to use a different bus frequency
  * CONFIG_ENC28J60_NINTERFACES - Specifies the number of physical ENC28J60
@@ -110,7 +107,7 @@
 
 /* We need to have the work queue to handle SPI interrupts */
 
-#if !defined(CONFIG_SCHED_WORKQUEUE) && !defined(CONFIG_ENC28J60_OWNBUS)
+#if !defined(CONFIG_SCHED_WORKQUEUE) && !defined(CONFIG_SPI_OWNBUS)
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
@@ -189,7 +186,7 @@ struct enc_driver_s
    * interrupt handler.
    */
  
-#ifndef CONFIG_ENC28J60_OWNBUS
+#ifndef CONFIG_SPI_OWNBUS
   struct work_s work;         /* Work queue support */
 #endif
 
@@ -221,7 +218,7 @@ static struct enc_driver_s g_enc28j60[CONFIG_ENC28J60_NINTERFACES];
 /* Low-level SPI helpers */
 
 static inline void enc_configspi(FAR struct spi_dev_s *spi);
-#ifdef CONFIG_ENC28J60_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
 static inline void enc_select(FAR struct spi_dev_s *spi);
 static inline void enc_deselect(FAR struct spi_dev_s *spi);
 #else
@@ -315,7 +312,7 @@ static inline void enc_configspi(FAR struct spi_dev_s *spi)
    * Otherwise, don't bother because it might change.
    */
 
-#ifdef CONFIG_ENC28J60_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
   SPI_SETMODE(spi, CONFIG_ENC28J60_SPIMODE);
   SPI_SETBITS(spi, 8);
 #ifdef CONFIG_ENC28J60_FREQUENCY
@@ -340,7 +337,7 @@ static inline void enc_configspi(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ENC28J60_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
 static inline void enc_select(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just select the chip */
@@ -385,7 +382,7 @@ static void enc_select(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ENC28J60_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
 static inline void enc_deselect(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just de-select the chip */
@@ -1492,7 +1489,7 @@ static int enc_interrupt(int irq, FAR void *context)
 
   DEBUGASSERT(priv->irq == irq);
 
-#ifdef CONFIG_ENC28J60_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
   /* In very simple environments, we own the SPI and can do data transfers
    * from the interrupt handler.  That is actually a very bad idea in any
    * case because it keeps interrupts disabled for a long time.

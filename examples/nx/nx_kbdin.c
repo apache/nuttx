@@ -63,10 +63,20 @@
  * pixel depths that are not directly addressable (1,2,4, and 24).
  */
 
-#if CONFIG_EXAMPLES_NX_BPP == 8
+#if CONFIG_EXAMPLES_NX_BPP == 1
+#  define RENDERER nxf_convert_1bpp
+#elif CONFIG_EXAMPLES_NX_BPP == 2
+#  define RENDERER nxf_convert_2bpp
+#elif CONFIG_EXAMPLES_NX_BPP == 2
+#  define RENDERER nxf_convert_4bpp
+#elif CONFIG_EXAMPLES_NX_BPP == 4
+#  define RENDERER nxf_convert_8bpp
+#elif CONFIG_EXAMPLES_NX_BPP == 8
 #  define RENDERER nxf_convert_8bpp
 #elif CONFIG_EXAMPLES_NX_BPP == 16
 #  define RENDERER nxf_convert_16bpp
+#elif CONFIG_EXAMPLES_NX_BPP == 24
+#  define RENDERER nxf_convert_24bpp
 #elif  CONFIG_EXAMPLES_NX_BPP == 32
 #  define RENDERER nxf_convert_32bpp
 #else

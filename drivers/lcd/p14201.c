@@ -65,13 +65,17 @@
 /* P14201 Configuration Settings:
  *
  * CONFIG_LCD_P14201 - Enable P14201 support
- * CONFIG_P14201_OWNBUS - Set if the P14201 is the only active device on the SPI bus.
- *   No locking or SPI configuration will be performed. All transfers will be performed
- *   from the ENC2J60 interrupt handler.
  * CONFIG_P14201_SPIMODE - Controls the SPI mode
  * CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
  * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
  *   will be supported.
+ * CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed using an in-memory
+ *   copy of the OLEDs GDDRAM.  This cost of this buffer is 128 * 96 / 2 = 6Kb.  If this
+ *   is defined, then the driver will be fully functioned. If not, then it will have the
+ *   following limitations:
+ *
+ *   - Reading graphics memory cannot be supported, and
+ *   - All pixel writes must be aligned to byte boundaries.
  *
  * Required LCD driver settings:
  * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
@@ -149,7 +153,7 @@
 
 /* Default contrast */
 
-#define RIT_CONTRAST    183  /* 183/255 */
+#define RIT_CONTRAST    ((23 * (CONFIG_LCD_MAXCONTRAST+1) / 32) - 1)
 
 /* Helper Macros **********************************************************************/
 
@@ -185,7 +189,7 @@ struct rit_dev_s
 /* Low-level SPI helpers */
 
 static inline void rit_configspi(FAR struct spi_dev_s *spi);
-#ifdef CONFIG_P14201_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
 static inline void rit_select(FAR struct spi_dev_s *spi);
 static inline void rit_deselect(FAR struct spi_dev_s *spi);
 #else
@@ -244,7 +248,19 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint8_t g_runbuffer[CONFIG_P14201_NINTERFACES * RIT_XRES / 2];
+static uint8_t g_runbuffer[RIT_XRES / 2];
+
+/* CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed using an in-memory
+ *   copy of the OLEDs GDDRAM.  This cost of this buffer is 128 * 64 / 2 = 4Kb.  If this
+ *   is defined, then the driver will be full functioned. If not, then:
+ *
+ *   - Reading graphics memory cannot be supported, and
+ *   - All pixel writes must be aligned to byte boundaries.
+ */
+
+#ifdef CONFIG_P14201_FRAMEBUFFER
+static uint8_t g_framebuffer[RIT_YRES * RIT_XRES / 2];
+#endif
 
 /* This structure describes the overall LCD video controller */
 
@@ -288,7 +304,6 @@ static struct rit_dev_s g_oleddev =
     .setcontrast  = rit_setcontrast,
   },
 };
-
 
 /* A table of magic initialization commands. This initialization sequence is
  * derived from RiT Application Note for the P14201 (with a few tweaked values
@@ -419,7 +434,7 @@ static inline void rit_configspi(FAR struct spi_dev_s *spi)
    * bother because it might change.
    */
 
-#ifdef CONFIG_P14201_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
 #ifdef CONFIG_P14201_FREQUENCY
@@ -444,7 +459,7 @@ static inline void rit_configspi(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_P14201_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
 static inline void rit_select(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just select the chip */
@@ -489,7 +504,7 @@ static void rit_select(FAR struct spi_dev_s *spi)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_P14201_OWNBUS
+#ifdef CONFIG_SPI_OWNBUS
 static inline void rit_deselect(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just de-select the chip */
@@ -605,6 +620,26 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
 
 static inline void rit_clear(FAR struct rit_dev_s *priv)
 {
+#ifdef CONFIG_P14201_FRAMEBUFFER
+  FAR uint8_t *ptr = g_framebuffer;
+  unsigned int row;
+
+  /* Set a window to fill the entire display */
+
+  rit_sndcmd(priv, g_setallcol, sizeof(g_setallcol));
+  rit_sndcmd(priv, g_setallrow, sizeof(g_setallrow));
+  rit_sndcmd(priv, g_horzinc,   sizeof(g_horzinc));
+
+  /* Display each row */
+
+  for(row = 0; row < RIT_YRES; row++)
+    {
+      /* Display a horizontal run */
+  
+      rit_snddata(priv, ptr, RIT_XRES / 2);
+      ptr += RIT_XRES / 2;
+    }
+#else
   unsigned int row;
 
   /* Create a black row */
@@ -625,6 +660,7 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
   
       rit_snddata(priv, g_runbuffer, RIT_XRES / 2);
     }
+#endif
 }
 
 /**************************************************************************************
@@ -644,11 +680,63 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
 static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                       size_t npixels)
 {
+#ifdef CONFIG_P14201_FRAMEBUFFER
+  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
+  uint8_t cmd[3];
+  uint8_t *run;
+  int start;
+  int end;
+  int i;
+
+  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+
+  /* Get the starting and ending byte offsets containing the run */
+
+  start = col >> 1;
+  aend  = (col + npixels) >> 1;
+  end   = (col + npixels + 1) >> 1;
+
+  /* Get the beginning of the run in the framebuffer */
+
+  run = g_framebuffer + row * RIT_XRES / 2 + start;
+
+  /* Copy the run into the framebuffer, handling nibble alignment */
+
+  if ((col & 1) == 0)
+    {
+      /* Beginning of buffer is properly aligned */
+
+      memcpy(run, buffer, aend - start);
+
+      /* Handle an final partial byte */
+
+      if (aend != end)
+        {
+          /* The leftmost column being contained in bits 7:4  */
+# warning "Missing logic"
+        }
+    }
+  else
+    {
+      /* Buffer is not byte aligned with display data.   Each byte contains the
+       * data for two columns:  The leftmost column being contained in bits
+       * 7:4 and the rightmost column being contained in bits 3:0.
+       */
+
+      for (i = 0; i < aend - start; i++)
+        {
+# warning "Missing logic"
+        }
+      
+    }
+
+  /* Then copy the (aligned) run from the framebuffer to the OLED */
+# warning "Missing logic"
+#else
   FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
   uint8_t cmd[3];
 
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
-
   DEBUGASSERT(buffer);
   if (npixels > 0)
     {
@@ -701,14 +789,18 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels)
 {
-  /* Buffer must be provided and aligned to a 16-bit address boundary */
-
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
 
+#ifdef CONFIG_P14201_FRAMEBUFFER
+  /* Cant read from OLED GDDRAM in SPI mode, but we can read from the framebuffer */
+
+# warning "Missing logic"
+#else
   /* Can't read from OLED GDDRAM in SPI mode */
 
   return -ENOSYS;
+#endif
 }
 
 /**************************************************************************************
@@ -885,6 +977,12 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int dev
   priv->spi      = spi;
   priv->contrast = RIT_CONTRAST;
   priv->on       = false;
+
+  /* Initialize the framebuffer */
+
+#ifdef CONFIG_P14201_FRAMEBUFFER
+  memset(g_framebuffer, (RIT_Y4_BLACK << 4) | RIT_Y4_BLACK, RIT_YRES * RIT_XRES / 2);
+#endif
 
   /* Clear the display */
 

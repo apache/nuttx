@@ -50,9 +50,6 @@
 /* ENC28J60 Configuration Settings:
  *
  * CONFIG_NET_ENC28J60 - Enabled ENC28J60 support
- * CONFIG_ENC28J60_OWNBUS - Set if the ENC28J60 is the only active device on
- *   the SPI bus.  No locking or SPI configuration will be performed. All
- *   transfers will be performed from the ENC2J60 interrupt handler.
  * CONFIG_ENC28J60_SPIMODE - Controls the SPI mode
  * CONFIG_ENC28J60_FREQUENCY - Define to use a different bus frequency
  * CONFIG_ENC28J60_NINTERFACES - Specifies the number of physical ENC28J60

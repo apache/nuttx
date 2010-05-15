@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imx/imx_spi.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -166,6 +166,9 @@ static int    spi_interrupt(int irq, void *context);
 
 /* SPI methods */
 
+#ifndef CONFIG_SPI_OWNBUS
+static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
+#endif
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void   spi_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -186,7 +189,9 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t 
 
 static const struct spi_ops_s g_spiops =
 {
-  .lock         = 0,                /* Not yet implemented */
+#ifndef CONFIG_SPI_OWNBUS
+  .lock         = spi_lock,
+#endif
   .select       = imx_spiselect,    /* Provided externally by board logic */
   .setfrequency = spi_setfrequency,
   .setmode      = spi_setmode,
@@ -669,6 +674,36 @@ static int spi_interrupt(int irq, void *context)
       sem_post(&priv->sem);
     }
   return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_lock
+ *
+ * Description:
+ *   On SPI busses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the busses for a sequence of
+ *   transfers.  The bus should be locked before the chip is selected. After
+ *   locking the SPI bus, the caller should then also call the setfrequency,
+ *   setbits, and setmode methods to make sure that the SPI is properly
+ *   configured for the device.  If the SPI buss is being shared, then it
+ *   may have been left in an incompatible state.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   lock - true: Lock spi bus, false: unlock SPI bus
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SPI_OWNBUS
+static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+{
+  /* Not implemented */
+
+  return -ENOSYS;
 }
 #endif
 

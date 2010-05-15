@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 8, 2010)
+NuttX TODO List (Last updated May 14, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -11,7 +11,7 @@ NuttX TODO List (Last updated May 8, 2010)
   (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
- (11)  File system/Generic drivers (fs/, drivers/)
+ (12)  File system/Generic drivers (fs/, drivers/)
   (3)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -406,6 +406,11 @@ o File system / Generic drivers (fs/, drivers/)
                will convert a FLASH MTD interface into a block driver that
                can be used with any file system.  Good performance of this
                layer will depend upon functioning write buffer support!
+  Status:      Open
+  Priority:    Low
+
+  Description: ENC28J60 driver is complete, but untested (I still haven't got
+               a good ENC28J60 test platform).
   Status:      Open
   Priority:    Low
 
