@@ -134,13 +134,11 @@
 #  warning "4-bit, big-endian pixel support needed"
 #endif
 
-/* Define the following to enable detailed debug output (stuff you would
+/* Define the CONFIG_LCD_RITDEBUG to enable detailed debug output (stuff you would
  * never want to see unless you are debugging this file).
+ *
+ * Verbose debug must also be enabled
  */
-
-#undef CONFIG_LCD_RITDEBUG
-
-/* Verbose debug must also be enabled */
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_VERBOSE
@@ -620,7 +618,7 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
 
   while ((cmdlen = *table++) != 0)
     {
-      ritdbg("command: %02x cmdlen: %d\n", buflen, *table);
+      ritdbg("command: %02x cmdlen: %d\n", cmdlen, *table);
       rit_sndcmd(priv, table, cmdlen);
       table += cmdlen;
     }
@@ -1042,7 +1040,7 @@ static int rit_getvideoinfo(FAR struct lcd_dev_s *dev,
 static int rit_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
-  DEBUGASSERT(priv && pinfo && planeno == 0);
+  DEBUGASSERT(pinfo && planeno == 0);
   gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
   return OK;

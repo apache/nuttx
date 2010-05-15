@@ -89,7 +89,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
       dev = rit_initialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SPI port 0 to OLED %d: %d\n", ret, devno);
+          glldbg("Failed to bind SPI port 0 to OLED %d: %d\n", devno);
         }
      else
         {
