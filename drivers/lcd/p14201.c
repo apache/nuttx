@@ -93,8 +93,6 @@
 #ifndef CONFIG_P14201_SPIMODE
 #  define CONFIG_P14201_SPIMODE SPIDEV_MODE2
 #endif
-#undef CONFIG_P14201_SPIMODE
-#  define CONFIG_P14201_SPIMODE SPIDEV_MODE2
 
 /* CONFIG_P14201_NINTERFACES determines the number of physical interfaces
  * that will be supported.
@@ -366,7 +364,7 @@ static const uint8_t g_initcmds[] =
      (14 << 4),                         /* Oscillator Frequency, FOSC, setting */
       SSD1329_NOOP,
   17, SSD1329_GSCALE_LOOKUP,            /* Look Up Table for Gray Scale Pulse width */
-      1,   2,   3, 4,  5,  6, 8, 10,    /* Value for GS1-8 level Pulse width */
+      1,   2,   3, 4,  5,  6,  8, 10,   /* Value for GS1-8 level Pulse width */
       12, 14, 16, 19, 22, 26, 30,       /* Value for GS9-15 level Pulse width */
       SSD1329_NOOP,
   3,  SSD1329_PRECHRG2_PERIOD,          /* Set Second Pre-charge Period */
@@ -401,7 +399,6 @@ static const uint8_t g_horzinc[] =
 {
   SSD1329_GDDRAM_REMAP,
  (SSD1329_COM_SPLIT|SSD1329_COM_REMAP|SSD1329_NIBBLE_REMAP),
-  SSD1329_NOOP,
 };
 
 /* The following set a window that covers the entire display */
@@ -564,7 +561,8 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
   FAR struct spi_dev_s *spi = priv->spi;
   uint8_t tmp;
 
-  ritdbg("buflen: %d data: %s\n", buflen, data ? "YES" : "NO");
+  ritdbg("buflen: %d data: %s [%02x %02x %02x]\n",
+         buflen, data ? "YES" : "NO", buffer[0], buffer[1], buffer[2] );
   DEBUGASSERT(spi);
 
   /* Select the SD1329 controller */
