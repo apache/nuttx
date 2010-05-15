@@ -727,7 +727,7 @@ int lm3s_configgpio(uint32_t cfgset)
   putreg32(regval, LM3S_SYSCON_RCGC2);
 
   /* First, set the port to digital input.  This is the safest state in which
-   * to perform reconfiguation.
+   * to perform reconfiguration.
    */
 
   lm3s_gpiofunc(base, pinno, &g_funcbits[0]);
