@@ -47,6 +47,9 @@
 #include <nuttx/spi.h>
 #include <nuttx/p14201.h>
 
+#include "lm3s_internal.h"
+#include "lm3s6965ek_internal.h"
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -63,7 +66,7 @@
  *
  ************************************************************************************/
 
-void weak_function lm3s_oledinitialize(void);
+void lm3s_oledinitialize(void)
 {
   FAR struct spi_dev_s *spi;
   int ret;
