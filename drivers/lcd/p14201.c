@@ -407,14 +407,14 @@ static const uint8_t g_setallcol[] =
 {
   SSD1329_SET_COLADDR,
   0,
-  RIT_YRES-1
+  (RIT_XRES/2)-1
 };
 
 static const uint8_t g_setallrow[] =
 {
   SSD1329_SET_ROWADDR,
   0,
-  RIT_XRES-1
+  RIT_YRES-1
 };
 
 /**************************************************************************************

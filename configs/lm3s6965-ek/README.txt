@@ -97,6 +97,10 @@ OLED
   - PC7: OLED display data/control select (D/Cn)
   - PA3: OLED display chip select (CSn)
 
+  NOTE:  Newer versions of the LM3S6965 Evaluation Kit has an OSAM 128x64x4 OLED
+  display.  Some tweaks to drivers/lcd/p14201.c would be required to support that
+  LCD.
+
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
