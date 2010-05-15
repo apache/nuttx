@@ -135,7 +135,7 @@ extern void weak_function lm3s_ssiinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_NX_LCDDRIVER
-extern void weak_function lm3s_oledinitialize(void);
+extern void lm3s_oledinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

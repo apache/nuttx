@@ -148,12 +148,11 @@ struct lm3s_ssidev_s
 #ifndef CONFIG_SSI_POLLWAIT
   sem_t  xfrsem;                /* Wait for transfer to complete */
 #endif
-  sem_t  exclsem;               /* For exclusive access to the SSI bus */
 
   /* These following are the source and destination buffers of the transfer.
    * they are retained in this structure so that they will be accessible
-   * from an interrupt handler.  The actual type of the buffer is uint8_t is
-   * nbits <=8 and uint16_t is nbits >8.
+   * from an interrupt handler.  The actual type of the buffer is uint8_t if
+   * nbits <=8 and uint16_t if nbits >8.
    */
 
   void  *txbuffer;              /* Source buffer */
@@ -172,17 +171,26 @@ struct lm3s_ssidev_s
 #if NSSI_ENABLED > 1
   uint32_t base;                /* SSI register base address */
 #endif
-  uint32_t frequency;           /* Current desired SCLK frequency */
-  uint32_t actual;              /* Current actual SCLK frequency */
 
   int      ntxwords;            /* Number of words left to transfer on the Tx FIFO */
   int      nrxwords;            /* Number of words received on the Rx FIFO */
   int      nwords;              /* Number of words to be exchanged */
-
-  uint8_t  mode;                /* Current mode */
   uint8_t  nbits;               /* Current number of bits per word */
+
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
   uint8_t  irq;                 /* SSI IRQ number */
+#endif
+
+  /* If there is more than one device on the SPI bus, then we have to enforce
+   * mutual exclusion and remember some configuration settings to reduce the
+   * overhead of constant SPI re-configuration.
+   */
+
+#ifndef CONFIG_SPI_OWNBUS
+  sem_t    exclsem;             /* For exclusive access to the SSI bus */
+  uint32_t frequency;           /* Current desired SCLK frequency */
+  uint32_t actual;              /* Current actual SCLK frequency */
+  uint8_t  mode;                /* Current mode 0,1,2,3 */
 #endif
 };
 
@@ -235,7 +243,7 @@ static int  ssi_interrupt(int irq, void *context);
 #ifndef CONFIG_SPI_OWNBUS
 static int  ssi_lock(FAR struct spi_dev_s *dev, bool lock);
 #endif
-static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv,
+static uint32_t ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv,
               uint32_t frequency);
 static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
               uint32_t frequency);
@@ -378,6 +386,9 @@ static inline void ssi_putreg(struct lm3s_ssidev_s *priv, unsigned int offset, u
  * Returned Value:
  *   State of the SSI before the SSE was disabled
  *
+ * Assumption:
+ *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *
  ****************************************************************************/
 
 static uint32_t ssi_disable(struct lm3s_ssidev_s *priv)
@@ -403,6 +414,9 @@ static uint32_t ssi_disable(struct lm3s_ssidev_s *priv)
  *   enable - The previous operational state
  *
  * Returned Value:
+ *
+ * Assumption:
+ *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
  *
  ****************************************************************************/
 
@@ -749,6 +763,9 @@ static inline void ssi_performrx(struct lm3s_ssidev_s *priv)
  * Returned Value:
  *   0: success, <0:Negated error number on failure
  *
+ * Assumption:
+ *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *
  ****************************************************************************/
 
 static int ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
@@ -760,7 +777,6 @@ static int ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
   int ntxd;
 
   ssidbg("txbuffer: %p rxbuffer: %p nwords: %d\n", txbuffer, rxbuffer, nwords);
-  ssi_semtake(&priv->exclsem);
 
   /* Set up to perform the transfer */
 
@@ -858,7 +874,6 @@ static int ssi_transfer(struct lm3s_ssidev_s *priv, const void *txbuffer,
     }
   while (priv->nrxwords < priv->nwords);
 #endif
-  ssi_semgive(&priv->exclsem);
   return OK;
 }
 
@@ -997,9 +1012,26 @@ static int ssi_interrupt(int irq, void *context)
 #ifndef CONFIG_SPI_OWNBUS
 static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
-  /* Not implemented */
+  FAR struct lm3s_ssidev_s *priv = (FAR struct lm3s_ssidev_s *)dev;
 
-  return -ENOSYS;
+  if (lock)
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      while (sem_wait(&priv->exclsem) != 0)
+        {
+          /* The only case that an error should occur here is if the wait was awakened
+           * by a signal.
+           */
+
+          ASSERT(errno == EINTR);
+        }
+    }
+  else
+    {
+      (void)sem_post(&priv->exclsem);
+    }
+  return OK;
 }
 #endif
 
@@ -1016,18 +1048,28 @@ static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
  * Returned Value:
  *   Returns the actual frequency selected
  *
+ * Assumption:
+ *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *
  ****************************************************************************/
 
-static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32_t frequency)
+static uint32_t ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32_t frequency)
 {
   uint32_t maxdvsr;
   uint32_t cpsdvsr;
   uint32_t regval;
   uint32_t scr;
+  uint32_t actual;
 
   ssidbg("frequency: %d\n", frequency);
-  if (priv && frequency != priv->frequency)
+  DEBUGASSERT(frequency);
+
+  /* Has the frequency changed? */
+
+#ifndef CONFIG_SPI_OWNBUS
+  if (frequency != priv->frequency)
     {
+#endif
       /* "The serial bit rate is derived by dividing down the input clock
        *  (FSysClk). The clock is first divided by an even prescale value
        *  CPSDVSR from 2 to 254, which is programmed in the SSI Clock Prescale
@@ -1095,23 +1137,34 @@ static void ssi_setfrequencyinternal(struct lm3s_ssidev_s *priv, uint32_t freque
 
       /* Calcluate the actual frequency */
 
-      priv->actual = SYSCLK_FREQUENCY / (cpsdvsr * (scr + 1));
+      actual = SYSCLK_FREQUENCY / (cpsdvsr * (scr + 1));
+
+      /* Save the frequency selection so that subsequent reconfigurations will be
+       * faster.
+       */
+
+#ifndef CONFIG_SPI_OWNBUS
+      priv->frequency = frequency;
+      priv->actual    = actual;
     }
+  return priv->actual;
+#else
+  return actual;
+#endif
 }
 
 static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   struct lm3s_ssidev_s *priv = (struct lm3s_ssidev_s *)dev;
   uint32_t enable;
+  uint32_t actual;
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
 
-  ssi_semtake(&priv->exclsem);
   enable = ssi_disable(priv);
-  ssi_setfrequencyinternal(priv, frequency);
+  actual = ssi_setfrequencyinternal(priv, frequency);
   ssi_enable(priv, enable);
-  ssi_semgive(&priv->exclsem);
-  return priv->actual;
+  return actual;
 }
 
 /****************************************************************************
@@ -1127,6 +1180,9 @@ static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  * Returned Value:
  *   none
  *
+ * Assumption:
+ *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *
  ****************************************************************************/
 
 static void ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode)
@@ -1135,8 +1191,14 @@ static void ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode
   uint32_t regval;
 
   ssidbg("mode: %d\n", mode);
-  if (priv && mode != priv->mode)
+  DEBUGASSERT(priv);
+
+  /* Has the number of bits per word changed? */
+
+#ifndef CONFIG_SPI_OWNBUS
+  if (mode != priv->mode)
     {
+#endif
       /* Select the CTL register bits based on the selected mode */
 
       switch (mode)
@@ -1168,7 +1230,13 @@ static void ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode
       regval |= modebits;
       ssi_putreg(priv, LM3S_SSI_CR0_OFFSET, regval);
       ssivdbg("CR0: %08x\n", regval);
+
+      /* Save the mode so that subsequent re-configuratins will be faster */
+
+#ifndef CONFIG_SPI_OWNBUS
+      priv->mode = mode;
     }
+#endif
 }
 
 static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
@@ -1178,11 +1246,9 @@ static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
 
-  ssi_semtake(&priv->exclsem);
   enable = ssi_disable(priv);
   ssi_setmodeinternal(priv, mode);
   ssi_enable(priv, enable);
-  ssi_semgive(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -1198,6 +1264,9 @@ static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  * Returned Value:
  *   none
  *
+ * Assumption:
+ *   Caller holds a lock on the SPI bus (if CONFIG_SPI_OWNBUS not defined)
+ *
  ****************************************************************************/
 
 static void ssi_setbitsinternal(struct lm3s_ssidev_s *priv, int nbits)
@@ -1205,7 +1274,8 @@ static void ssi_setbitsinternal(struct lm3s_ssidev_s *priv, int nbits)
   uint32_t regval;
 
   ssidbg("nbits: %d\n", nbits);
-  if (priv && nbits != priv->nbits && nbits >=4 && nbits <= 16)
+  DEBUGASSERT(priv);
+  if (nbits != priv->nbits && nbits >=4 && nbits <= 16)
     {
       regval  = ssi_getreg(priv, LM3S_SSI_CR0_OFFSET);
       regval &= ~SSI_CR0_DSS_MASK;
@@ -1224,11 +1294,9 @@ static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   /* NOTE that the SSI must be disabled when setting any configuration registers. */
 
-  ssi_semtake(&priv->exclsem);
   enable = ssi_disable(priv);
   ssi_setbitsinternal(priv, nbits);
   ssi_enable(priv, enable);
-  ssi_semgive(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -1434,7 +1502,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 #ifndef CONFIG_SSI_POLLWAIT
   sem_init(&priv->xfrsem, 0, 0);
 #endif
+#ifndef CONFIG_SPI_OWNBUS
   sem_init(&priv->exclsem, 0, 1);
+#endif
 
   /* Set all CR1 fields to reset state.  This will be master mode. */
 

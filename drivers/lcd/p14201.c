@@ -769,6 +769,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
       rit_sndcmd(priv, g_horzinc, sizeof(g_horzinc));
       rit_snddata(priv, buffer, npixels >> 1);
     }
+#endif
   return OK;
 }
 

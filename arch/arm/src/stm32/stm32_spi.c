@@ -120,10 +120,6 @@ struct stm32_spidev_s
   struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
   uint32_t         spibase;    /* SPIn base address */
   uint32_t         spiclock;   /* Clocking for the SPI module */
-  uint32_t         frequency;  /* Requested clock frequency */
-  uint32_t         actual;     /* Actual clock frequency */
-  uint8_t          nbits;      /* Width of work in bits (8 or 16) */
-  uint8_t          mode;       /* Mode 0,1,2,3 */
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   uint8_t          spiirq;     /* SPI IRQ number */
 #endif
@@ -139,6 +135,10 @@ struct stm32_spidev_s
 #endif
 #ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
+  uint32_t         frequency;  /* Requested clock frequency */
+  uint32_t         actual;     /* Actual clock frequency */
+  uint8_t          nbits;      /* Width of word in bits (8 or 16) */
+  uint8_t          mode;       /* Mode 0,1,2,3 */
 #endif
 };
 
@@ -753,8 +753,10 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Has the frequency changed? */
 
+#ifndef CONFIG_SPI_OWNBUS
   if (frequency != priv->frequency)
     {
+#endif
       /* Choices are limited by PCLK frequency with a set of divisors */
 
       if (frequency >= priv->spiclock >> 1)
@@ -815,10 +817,19 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
         }
 
       spi_modifycr1(priv, setbits, SPI_CR1_BR_MASK);
+
+      /* Save the frequency selection so that subsequent reconfigurations will be
+       * faster.
+       */
+
+#ifndef CONFIG_SPI_OWNBUS
       priv->frequency = frequency;
       priv->actual    = actual;
     }
   return priv->actual;
+#else
+  return actual;
+#endif
 }
 
 /************************************************************************************
@@ -844,8 +855,10 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   /* Has the mode changed? */
 
+#ifndef CONFIG_SPI_OWNBUS
   if (mode != priv->mode)
     {
+#endif
       /* Yes... Set CR1 appropriately */
 
       switch (mode)
@@ -875,8 +888,13 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         }
 
         spi_modifycr1(priv, setbits, clrbits);
+
+        /* Save the mode so that subsequent re-configuratins will be faster */
+
+#ifndef CONFIG_SPI_OWNBUS
         priv->mode = mode;
     }
+#endif
 }
 
 /************************************************************************************
@@ -902,8 +920,10 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   /* Has the number of bits changed? */
 
+#ifndef CONFIG_SPI_OWNBUS
   if (nbits != priv->nbits)
     {
+#endif
       /* Yes... Set CR1 appropriately */
 
       switch (nbits)
@@ -923,8 +943,13 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
         }
 
         spi_modifycr1(priv, setbits, clrbits);
+
+        /* Save the selection so the subsequence re-configurations will be faster */
+
+#ifndef CONFIG_SPI_OWNBUS
         priv->nbits = nbits;
     }
+#endif
 }
 
 /************************************************************************************
@@ -1183,12 +1208,14 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
   setbits = SPI_CR1_MSTR|SPI_CR1_SSI|SPI_CR1_SSM;
   spi_modifycr1(priv, setbits, clrbits);
 
-  priv->nbits = 8;
-  priv->mode  = SPIDEV_MODE0;
+#ifndef CONFIG_SPI_OWNBUS
+  priv->frequency = 0;
+  priv->nbits     = 8;
+  priv->mode      = SPIDEV_MODE0;
+#endif
 
   /* Select a default frequency of approx. 400KHz */
 
-  priv->frequency = 0;
   spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
 
   /* CRCPOLY configuration */
