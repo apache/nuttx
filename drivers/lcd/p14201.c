@@ -364,13 +364,13 @@ static const uint8_t g_initcmds[] =
      (14 << 4),                         /* Oscillator Frequency, FOSC, setting */
       SSD1329_NOOP,
   17, SSD1329_GSCALE_LOOKUP,            /* Look Up Table for Gray Scale Pulse width */
-      1,   2,   3, 4,  5,  6,  8, 10,   /* Value for GS1-8 level Pulse width */
-      12, 14, 16, 19, 22, 26, 30,       /* Value for GS9-15 level Pulse width */
+       1,  2,  3,  4,  5,               /* Value for GS1-5 level Pulse width */
+       6,  8, 10, 12, 14,               /* Value for GS6-10 level Pulse width */
+      16, 19, 22, 26, 30,               /* Value for GS11-15 level Pulse width */
       SSD1329_NOOP,
   3,  SSD1329_PRECHRG2_PERIOD,          /* Set Second Pre-charge Period */
       1,                                /* 1 DCLK */
       SSD1329_NOOP,
-    // Pre-charge voltage
   3,  SSD1329_PRECHRG1_VOLT,            /* Set First Precharge voltage, VP */
       0x3f,                             /* 1.00 x Vcc */
       SSD1329_NOOP,
