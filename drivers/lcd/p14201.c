@@ -93,6 +93,8 @@
 #ifndef CONFIG_P14201_SPIMODE
 #  define CONFIG_P14201_SPIMODE SPIDEV_MODE2
 #endif
+#undef CONFIG_P14201_SPIMODE
+#  define CONFIG_P14201_SPIMODE SPIDEV_MODE2
 
 /* CONFIG_P14201_NINTERFACES determines the number of physical interfaces
  * that will be supported.
@@ -440,16 +442,21 @@ static const uint8_t g_setallrow[] =
  
 static inline void rit_configspi(FAR struct spi_dev_s *spi)
 {
+#ifdef CONFIG_P14201_FREQUENCY
+  ritdbg("Mode: %d Bits: 8 Frequency: %d\n",
+         CONFIG_P14201_SPIMODE, CONFIG_P14201_FREQUENCY);
+#else
+  ritdbg("Mode: %d Bits: 8\n", CONFIG_P14201_SPIMODE);
+#endif
+
   /* Configure SPI for the P14201.  But only if we own the SPI bus.  Otherwise, don't
    * bother because it might change.
    */
 
 #ifdef CONFIG_SPI_OWNBUS
-  ritdbg("Mode: %d Bits: 8\n", CONFIG_P14201_SPIMODE);
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
 #ifdef CONFIG_P14201_FREQUENCY
-  ritdbg("Frequency: %d\n", CONFIG_P14201_FREQUENCY);
   SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY)
 #endif
 #endif
@@ -476,7 +483,6 @@ static inline void rit_select(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just select the chip */
 
-  ritdbg("Selected\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 }
 #else
@@ -486,7 +492,6 @@ static void rit_select(FAR struct spi_dev_s *spi)
    * devices competing for the SPI bus
    */
 
-  ritdbg("Selected\n");
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
@@ -494,11 +499,9 @@ static void rit_select(FAR struct spi_dev_s *spi)
    * might have gotten configured for a different device while unlocked)
    */
 
-  ritdbg("Mode: %d Bits: 8\n", CONFIG_P14201_SPIMODE);
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
 #ifdef CONFIG_P14201_FREQUENCY
-  ritdbg("Frequency: %d\n", CONFIG_P14201_FREQUENCY);
   SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
 #endif
 }
@@ -525,7 +528,6 @@ static inline void rit_deselect(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just de-select the chip */
 
-  ritdbg("De-selected\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
 }
 #else
@@ -533,7 +535,6 @@ static void rit_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select P14201 chip and relinquish the SPI bus. */
 
-  ritdbg("De-selected\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
@@ -618,7 +619,7 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
 
   while ((cmdlen = *table++) != 0)
     {
-      ritdbg("command: %02x cmdlen: %d\n", cmdlen, *table);
+      ritdbg("command: %02x cmdlen: %d\n", *table, cmdlen);
       rit_sndcmd(priv, table, cmdlen);
       table += cmdlen;
     }
@@ -765,6 +766,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   start = col >> 1;
   aend  = (col + npixels) >> 1;
   end   = (col + npixels + 1) >> 1;
+  ritdbg("start: %d aend: %d end: %d\n", start, aend, end);
 
   /* Copy the run into the framebuffer, handling nibble alignment */
 
@@ -1173,16 +1175,16 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int dev
 
   gvdbg("Initializing devno: %d\n", devno);
  
-  /* Configure and enable LCD */
-
-  rit_configspi(spi);
-  rit_sndcmds(priv, g_initcmds);
-
   /* Driver state data */
 
   priv->spi      = spi;
   priv->contrast = RIT_CONTRAST;
   priv->on       = false;
+
+  /* Configure and enable LCD */
+
+  rit_configspi(spi);
+  rit_sndcmds(priv, g_initcmds);
 
   /* Clear the display */
 

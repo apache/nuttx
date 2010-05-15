@@ -580,7 +580,7 @@ CONFIG_NX_MXCLIENTMSGS=16
 # RiT P14201 OLED Driver Configuration
 #
 # CONFIG_LCD_P14201 - Enable P14201 support
-# CONFIG_P14201_SPIMODE - Controls the SPI mode
+# CONFIG_P14201_SPIMODE - Controls the SPI mode (should be mode 2)
 # CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
 # CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
 #   will be supported.
@@ -593,7 +593,7 @@ CONFIG_NX_MXCLIENTMSGS=16
 #
 #   The latter limitation effectively reduces the 128x96 disply to 64x96.
 CONFIG_LCD_P14201=y
-CONFIG_P14201_SPIMODE=0
+CONFIG_P14201_SPIMODE=2
 CONFIG_P14201_FREQUENCY=20000000
 CONFIG_P14201_NINTERFACES=1
 CONFIG_P14201_FRAMEBUFFER=y
