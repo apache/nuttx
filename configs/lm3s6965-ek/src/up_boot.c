@@ -85,10 +85,7 @@ void lm3s_boardinitialize(void)
    /* Configure the OLED for use */
 
 #ifdef CONFIG_NX_LCDDRIVER
-  if (lm3s_oledinitialize)
-    {
-      lm3s_oledinitialize();
-    }
+   lm3s_oledinitialize();
 #endif
 #endif
 
