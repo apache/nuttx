@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 19, 2010</p>
+      <p>Last Updated: May 13, 2010</p>
     </td>
   </tr>
 </table>
@@ -2483,7 +2483,21 @@ extern void up_ledoff(int led);
   </li>
 </ul>
 
-<h2>SPI-based MMC/SD driver</h2>
+<h2>Device Drivers</h2>
+<h3>SPI driver</h3>
+<ul>
+  <li>
+    <code>CONFIG_SPI_OWNBUS - Set if there is only one active device
+    on the SPI bus.  No locking or SPI configuration will be performed.
+    It is not necessary for clients to lock, re-configure, etc..
+  </li>
+  <li>
+    <code>CONFIG_SPI_EXCHANGE</code>: Driver supports a single exchange method
+    (vs a recvblock() and sndblock ()methods)
+  </li>
+</ul>
+
+<h3>SPI-based MMC/SD driver</h3>
 <ul>
   <li>
     <code>CONFIG_MMCSD_NSLOTS</code>: Number of MMC/SD slots supported by the driver. Default is one.
@@ -2496,7 +2510,7 @@ extern void up_ledoff(int led);
   </li>
 </ul>
 
-<h2>SDIO-based MMC/SD driver</h2>
+<h3>SDIO-based MMC/SD driver</h3>
 <ul>
   <li>
     <code>CONFIG_FS_READAHEAD</code>: Enable read-ahead buffering
@@ -2515,8 +2529,59 @@ extern void up_ledoff(int led);
   </li>
 </ul>
 
+<h3>RiT P14201 OLED driver</h3>
+<ul>
+  <li>
+    <code>CONFIG_LCD_P14201</code>: Enable P14201 support
+  </li>
+  <li>
+    <code>CONFIG_P14201_SPIMODE</code>: Controls the SPI mode
+  </li>
+  <li>
+    <code>CONFIG_P14201_FREQUENCY</code>: Define to use a different bus frequency
+  </li>
+  <li>
+    <code>CONFIG_P14201_NINTERFACES</code>:
+      Specifies the number of physical P14201 devices that will be supported.
+  </li>
+  <li>
+    <code>CONFIG_P14201_FRAMEBUFFER</code>:
+      If defined, accesses will be performed using an in-memory copy of the OLEDs GDDRAM.
+      This cost of this buffer is 128 * 96 / 2 = 6Kb.
+      If this is defined, then the driver will be fully functioned.
+      If not, then it will have the following limitations:
+      <ul>
+        <li>Reading graphics memory cannot be supported, and</li>
+        <li>All pixel writes must be aligned to byte boundaries.</li>
+      </ul>
+  </li>
+</ul>
+
+<h3>ENC28J60 Ethernet Driver Configuration Settings</h3>
+<ul>
+  <li>
+    <code>CONFIG_NET_ENC28J60</code>: Enabled ENC28J60 support
+  </li>
+  <li>
+    <code>CONFIG_ENC28J60_SPIMODE</code>: Controls the SPI mode
+  </li>
+  <li>
+    <code>CONFIG_ENC28J60_FREQUENCY</code>: Define to use a different bus frequency
+  </li>
+  <li>
+    <code>CONFIG_ENC28J60_NINTERFACES</code>:
+      Specifies the number of physical ENC28J60 devices that will be supported.
+  </li>
+  <li>
+    <code>CONFIG_ENC28J60_STATS</code>: Collect network statistics
+  </li>
+  <li>
+    <code>CONFIG_ENC28J60_HALFDUPPLEX</code>: Default is full duplex
+  </li>
+</ul>
+
 <h2>Network Support</h2>
-<h3>TCP/IP and UDP support via uIP</h2>
+<h3>TCP/IP and UDP support via uIP</h3>
 <ul>
   <li>
     <code>CONFIG_NET</code>: Enable or disable all network features
