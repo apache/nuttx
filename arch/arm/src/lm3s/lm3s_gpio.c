@@ -140,18 +140,19 @@ static const struct gpio_func_s g_funcbits[] =
   {GPIO_INTERRUPT_SETBITS, GPIO_INTERRUPT_CLRBITS}, /* GPIO_FUNC_INTERRUPT */
 };
 
-#ifdef LM3S_GPIOH_BASE
-{
-  LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
-  LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE, LM3S_GPIOH_BASE,
-};
-#else
 static const uint32_t g_gpiobase[] =
 {
   LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
-  LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE, 0,
-};
+  LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE,
+
+  /* GPIOH exists on the LM3S6918, but not on the LM3S6965 */
+
+#ifdef LM3S_GPIOH_BASE
+  LM3S_GPIOH_BASE,
+#else
+  0,
 #endif
+};
 
 /****************************************************************************
  * Public Data
