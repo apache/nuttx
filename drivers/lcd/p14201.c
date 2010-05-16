@@ -552,6 +552,7 @@ static void rit_deselect(FAR struct spi_dev_s *spi)
  *   None
  *
  * Assumptions:
+ *   The caller as selected the OLED device.
  *
  **************************************************************************************/
 
@@ -565,15 +566,11 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
          buflen, data ? "YES" : "NO", buffer[0], buffer[1], buffer[2] );
   DEBUGASSERT(spi);
 
-  /* Select the SD1329 controller */
-
-  rit_select(spi);
-
-  /* Clear the D/Cn bit to enable command mode */
+  /* Clear the D/Cn bit to enable command or data mode */
 
   rit_seldata(0, data);
 
-  /* Loop until the entire command is transferred */
+  /* Loop until the entire command/data block is transferred */
 
   while (buflen-- > 0)
     {
@@ -581,15 +578,7 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
  
       tmp = *buffer++;
       (void)SPI_SEND(spi, tmp);
-
-      /* Send a dummy byte */
-
-      (void)SPI_SEND(spi, 0xff);
    }
-
- /* De-select the SD1329 controller */
-
- rit_deselect(spi);
 }
 
 /**************************************************************************************
@@ -634,6 +623,9 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
  *   buffer  - The buffer containing the run to be written to the LCD
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
+ *
+ * Assumptions:
+ *   Caller has selected the OLED section.
  *
  **************************************************************************************/
 
@@ -829,6 +821,10 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
         }
     }
 
+  /* Select the SD1329 controller */
+
+  rit_select(priv->spi);
+
   /* Setup a window that describes a run starting at the specified column
    * and row, and ending at the column + npixels on the same row.
    */
@@ -848,6 +844,9 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   rit_sndcmd(priv, g_horzinc, sizeof(g_horzinc));
   rit_snddata(priv, &run[start], aend - start);
 
+  /* De-select the SD1329 controller */
+
+  rit_deselect(priv->spi);
   return OK;
 }
 #else
@@ -872,6 +871,10 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
       DEBUGASSERT((col & 1) == 0 && (npixels & 1) == 0);
 
+      /* Select the SD1329 controller */
+
+      rit_select(priv->spi);
+
       /* Setup a window that describes a run starting at the specified column
        * and row, and ending at the column + npixels on the same row.
        */
@@ -890,6 +893,10 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
       rit_sndcmd(priv, g_horzinc, sizeof(g_horzinc));
       rit_snddata(priv, buffer, npixels >> 1);
+
+      /* De-select the SD1329 controller */
+
+      rit_deselect(priv->spi);
     }
   return OK;
 }
@@ -1079,6 +1086,13 @@ static int rit_setpower(struct lcd_dev_s *dev, int power)
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER && priv->spi);
 
   gvdbg("power: %d\n", power);
+
+  /* Select the SD1329 controller */
+
+  rit_select(priv->spi);
+
+  /* Only two power settings -- 0: sleep on, 1: sleep off */
+
   if (power > 0)
     {
       /* Re-initialize the SSD1329 controller */
@@ -1087,7 +1101,7 @@ static int rit_setpower(struct lcd_dev_s *dev, int power)
 
       /* Take the display out of sleep mode */
 
-      rit_sndcmd(priv, g_sleepoff, sizeof(g_sleepon));
+      rit_sndcmd(priv, g_sleepoff, sizeof(g_sleepoff));
     }
   else
     {
@@ -1095,7 +1109,11 @@ static int rit_setpower(struct lcd_dev_s *dev, int power)
 
       rit_sndcmd(priv, g_sleepon, sizeof(g_sleepon));
     }
-  return -ENOSYS; /* Not implemented */
+
+  /* De-select the SD1329 controller */
+
+  rit_deselect(priv->spi);
+  return OK;
 }
 
 /**************************************************************************************
@@ -1130,6 +1148,10 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   gvdbg("contrast: %d\n", contrast);
   DEBUGASSERT(contrast <= CONFIG_LCD_MAXCONTRAST);
 
+  /* Select the SD1329 controller */
+
+  rit_select(priv->spi);
+
   /* Set new contrast */
 
   cmd[0] = SSD1329_SET_CONTRAST;
@@ -1137,6 +1159,9 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   cmd[2] = SSD1329_NOOP;
   rit_sndcmd(priv, cmd, 3);
 
+  /* De-select the SD1329 controller */
+
+  rit_deselect(priv->spi);
   priv->contrast = contrast;
   return OK;
 }
@@ -1179,14 +1204,22 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int dev
   priv->contrast = RIT_CONTRAST;
   priv->on       = false;
 
-  /* Configure and enable LCD */
+  /* Select the SD1329 controller */
 
   rit_configspi(spi);
-  rit_sndcmds(priv, g_initcmds);
+  rit_select(spi);
 
   /* Clear the display */
 
   rit_clear(priv);
+
+  /* Configure (but don't enable) the OLED */
+
+  rit_sndcmds(priv, g_initcmds);
+
+  /* De-select the SD1329 controller */
+
+  rit_deselect(spi);
   return &priv->dev;
 }
 #endif /* CONFIG_LCD_P14201 */
