@@ -205,7 +205,7 @@ nxeg_renderglyph(FAR struct nxeg_state_s *st,
           /* Pack 4-bit nibbles into a byte */
 
           pixel &= 0x0f;
-          pixel  = (pixel) << 4 |pixel;
+          pixel  = (pixel) << 4 | pixel;
 
           ptr    = (FAR nxgl_mxpixel_t *)glyph->bitmap;
           for (row = 0; row < glyph->height; row++)
