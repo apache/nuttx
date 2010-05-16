@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxfonts/nxfonts_convert.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,14 @@
 
 #endif
 
+#if NXFONTS_BITSPERPIXEL < 8
+#  ifdef CONFIG_NX_PACKEDMSFIRST
+#     define NXF_INITMASK         (NXF_PIXELMASK << (8 - NXFONTS_BITSPERPIXEL))
+#  else
+#     define NXF_INITMASK         NXF_PIXELMASK
+#  endif
+#endif
+
 /* Form a function name by concatenating two strings */
 
 #define _NXF_FUNCNAME(a,b) a ## b
@@ -182,11 +190,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
       col   = 0;
       dptr  = (FAR NXF_PIXEL_T*)line;
       pixel = *dptr;
-#ifdef CONFIG_NX_PACKEDMSFIRST
-      mask  = NXF_PIXELMASK << (8 - NXFONTS_BITSPERPIXEL);
-#else
-      mask  = NXF_PIXELMASK;
-#endif
+      mask  = NXF_INITMASK;
       nbits = 0;
 
       for (bmndx = 0; bmndx < bm->metric.stride && col < width; bmndx++)
@@ -216,7 +220,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
                 {
                   *dptr++ = pixel;
                   pixel = *dptr;
-                  mask  = NXF_PIXELMASK;
+                  mask  = NXF_INITMASK;
                   nbits = 0;
                 }
             }

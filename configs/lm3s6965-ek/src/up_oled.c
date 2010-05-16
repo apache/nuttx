@@ -101,8 +101,10 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 
   oledcs_dumpgpio("up_nxdrvinit: After OLEDCS setup");
   oleddc_dumpgpio("up_nxdrvinit: On entry");
+
   lm3s_configgpio(OLEDDC_GPIO); /* PC7: OLED display data/control select (D/Cn) */
   lm3s_configgpio(OLEDEN_GPIO); /* PC6: Enable +15V needed by OLED (EN+15V) */
+
   oleddc_dumpgpio("up_nxdrvinit: After OLEDDC/EN setup");
 
   /* Get the SSI port (configure as a Freescale SPI port) */
@@ -110,7 +112,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   spi = up_spiinitialize(0);
   if (!spi)
     {
-      glldbg("Failed to initialize SPI port 0\n");
+      glldbg("Failed to initialize SSI port 0\n");
     }
   else
     {
