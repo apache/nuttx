@@ -1223,10 +1223,10 @@ static void ssi_setmodeinternal(struct lm3s_ssidev_s *priv, enum spi_mode_e mode
           return;
         }
 
-      /* Then set the selected mode */
+      /* Then set the selected mode: Freescale SPI format, mode0-3 */
 
       regval  = ssi_getreg(priv, LM3S_SSI_CR0_OFFSET);
-      regval &= ~SSI_CR0_FRF_MASK;
+      regval &= ~(SSI_CR0_FRF_MASK|SSI_CR0_SPH|SSI_CR0_SPO);
       regval |= modebits;
       ssi_putreg(priv, LM3S_SSI_CR0_OFFSET, regval);
       ssivdbg("CR0: %08x\n", regval);
