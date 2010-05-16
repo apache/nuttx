@@ -173,9 +173,9 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_RITDEBUG
-# define ritdbg(format, arg...)  vdbg(format, ##arg)
+#  define ritdbg(format, arg...)  vdbg(format, ##arg)
 #else
-# define ritdbg(x...)
+#  define ritdbg(x...)
 #endif
 
 /**************************************************************************************
@@ -1068,7 +1068,7 @@ static int rit_getpower(FAR struct lcd_dev_s *dev)
   DEBUGASSERT(priv);
 
   gvdbg("power: %s\n", priv->on ? "ON" : "OFF");
-  return (int)priv->on;
+  return priv->on ? CONFIG_LCD_MAXPOWER : 0;
 }
 
 /**************************************************************************************
@@ -1102,12 +1102,14 @@ static int rit_setpower(struct lcd_dev_s *dev, int power)
       /* Take the display out of sleep mode */
 
       rit_sndcmd(priv, g_sleepoff, sizeof(g_sleepoff));
+      priv->on = true;
     }
   else
     {
       /* Put the display into sleep mode */
 
       rit_sndcmd(priv, g_sleepon, sizeof(g_sleepon));
+      priv->on = false;
     }
 
   /* De-select the SD1329 controller */

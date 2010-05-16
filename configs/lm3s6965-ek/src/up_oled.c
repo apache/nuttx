@@ -55,28 +55,57 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* Define the CONFIG_LCD_RITDEBUG to enable detailed debug output (stuff you
+ * would never want to see unless you are debugging this file).
+ *
+ * Verbose debug must also be enabled
+ */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_GRAPHICS
+#endif
+
+#ifndef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_LCD_RITDEBUG
+#endif
+
+#ifdef CONFIG_LCD_RITDEBUG
+#  define ritdbg(format, arg...)  vdbg(format, ##arg)
+#  define oleddc_dumpgpio(m) lm3s_dumpgpio(OLEDDC_GPIO, m)
+#  define oledcs_dumpgpio(m) lm3s_dumpgpio(OLEDCS_GPIO, m)
+#else
+#  define ritdbg(x...)
+#  define oleddc_dumpgpio(m)
+#  define oledcs_dumpgpio(m)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_nxdrvinit
  *
  * Description:
  *   Called NX initialization logic to configure the OLED.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 {
   FAR struct spi_dev_s *spi;
   FAR struct lcd_dev_s *dev;
 
-  /* Configure the OLED D/Cn GPIO */
+  /* Configure the OLED GPIOs */
 
-  lm3s_configgpio(OLEDDC_GPIO);
+  oledcs_dumpgpio("up_nxdrvinit: After OLEDCS setup");
+  oleddc_dumpgpio("up_nxdrvinit: On entry");
+  lm3s_configgpio(OLEDDC_GPIO); /* PC7: OLED display data/control select (D/Cn) */
+  lm3s_configgpio(OLEDEN_GPIO); /* PC6: Enable +15V needed by OLED (EN+15V) */
+  oleddc_dumpgpio("up_nxdrvinit: After OLEDDC/EN setup");
 
-  /* Get the SPI port */
+  /* Get the SSI port (configure as a Freescale SPI port) */
 
   spi = up_spiinitialize(0);
   if (!spi)
@@ -85,16 +114,16 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
     }
   else
     {
-      /* Bind the SPI port to the OLED */
+      /* Bind the SSI port to the OLED */
 
       dev = rit_initialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SPI port 0 to OLED %d: %d\n", devno);
+          glldbg("Failed to bind SSI port 0 to OLED %d: %d\n", devno);
         }
      else
         {
-          gllvdbg("Bound SPI port 0 to OLED %d\n", devno);
+          gllvdbg("Bound SSI port 0 to OLED %d\n", devno);
 
           /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
 
@@ -105,23 +134,23 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   return NULL;
 }
 
-/**************************************************************************************
+/******************************************************************************
  * Name:  rit_seldata
  *
  * Description:
- *   Set or clear the SD1329 D/Cn bit to select data (true) or command (false).  This
- *   function must be provided by platform-specific logic.
+ *   Set or clear the SD1329 D/Cn bit to select data (true) or command
+ *   (false).  This function must be provided by platform-specific logic.
  *
  * Input Parameters:
  *
- *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.  This allows
- *   support for multiple OLED devices.
+ *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.
+ *           This allows support for multiple OLED devices.
  *   data - true: select data; false: select command
  *
  * Returned Value:
  *   None
  *
- **************************************************************************************/
+ ******************************************************************************/
 
 void rit_seldata(unsigned int devno, bool data)
 {

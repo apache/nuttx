@@ -44,6 +44,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include "chip.h"
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -103,12 +105,15 @@
 /* GPIOs for OLED:
  *  - PC7: OLED display data/control select (D/Cn)
  *  - PA3: OLED display chip select (CSn)
+ *  - PC6: Enable +15V needed by OLED (EN+15V)
  */
 
 #define OLEDDC_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_8MA | \
                      GPIO_VALUE_ONE | GPIO_PORTC | 7)
 #define OLEDCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
                      GPIO_VALUE_ONE | GPIO_PORTA | 3)
+#define OLEDEN_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_8MA | \
+                     GPIO_VALUE_ONE | GPIO_PORTC | 6)
 
 /************************************************************************************
  * Public Functions

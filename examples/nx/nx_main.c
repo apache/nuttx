@@ -417,7 +417,6 @@ static inline int nxeg_raise(NXEGWINDOW hwnd)
 static inline int nxeg_suinitialize(void)
 {
   FAR NX_DRIVERTYPE *dev;
-  int ret;
 
 #if defined(CONFIG_EXAMPLES_NX_EXTERNINIT)
   /* Use external graphics driver initialization */
@@ -432,6 +431,8 @@ static inline int nxeg_suinitialize(void)
     }
 
 #elif defined(CONFIG_NX_LCDDRIVER)
+  int ret;
+
   /* Initialize the LCD device */
 
   message("nxeg_initialize: Initializing LCD\n");
@@ -457,6 +458,8 @@ static inline int nxeg_suinitialize(void)
 
   (void)dev->setpower(dev, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
 #else
+  int ret;
+
   /* Initialize the frame buffer device */
 
   message("nxeg_initialize: Initializing framebuffer\n");
