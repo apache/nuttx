@@ -137,6 +137,7 @@ void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
 {
   ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   ssi_dumpgpio("lm3s_spiselect() Entry");
+
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert the CS pin to the card */
