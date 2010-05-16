@@ -185,7 +185,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
 
   for (row = 0; row < height; row++)
     {
-      /* Process each byte in the glyph */
+      /* Process each byte in the glyph row */
 
       col   = 0;
       dptr  = (FAR NXF_PIXEL_T*)line;
@@ -197,7 +197,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
         {
           bmbyte = *sptr++;
 
-          /* Process each bit in the byte */
+          /* Process each bit in one byte */
 
           for (bmbit = 7; bmbit >= 0 && col < width; bmbit--, col++)
             {
@@ -224,15 +224,20 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
                   nbits = 0;
                 }
             }
-
-          /* Handle any fractional bytes at the end */
-
-          if (nbits > 0)
-            {
-              *dptr = pixel;
-            }
-          line += stride;
         }
+
+      /* The entire glyph row has been rendered.  Handle any fractional bytes at
+       * the end of the row 
+       */
+
+      if (nbits > 0)
+        {
+          *dptr = pixel;
+        }
+
+      /* Point to the beginning of the next row */
+
+      line += stride;
     }
 #else
   /* Handle each row in both the input and output */
