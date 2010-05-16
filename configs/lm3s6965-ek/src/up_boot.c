@@ -45,6 +45,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "up_internal.h"
 #include "lm3s6965ek_internal.h"
 
 /************************************************************************************
@@ -74,7 +75,7 @@ void lm3s_boardinitialize(void)
    * lm3s_ssiinitialize() has been brought into the link.
    */
 
-  /* The LM3S6965 Eval Kit microSD CS and OLED are on SSI0 */
+  /* The LM3S6965 Eval Kit microSD CS and OLED are on SSI0 (Duh! There is no SSI1) */
 
 #if !defined(CONFIG_SSI0_DISABLE) /* || !defined(CONFIG_SSI1_DISABLE) */
   if (lm3s_ssiinitialize)
