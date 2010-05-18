@@ -762,7 +762,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   if ((col & 1) == 0)
     {
-      /* Check for the special case of only 1 pixels being blitted */
+      /* Check for the special case of only 1 pixel being blitted */
 
       if (npixels > 1)
         {
@@ -804,8 +804,8 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
            * bits 7:4 of current byte to run bits 3:0
            */
 
-          last = curr;
-          curr = buffer[i-start];
+          last   = curr;
+          curr   = buffer[i-start];
           run[i] = (last << 4) | (curr >> 4);
         }
       
@@ -831,7 +831,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   cmd[0] = SSD1329_SET_COLADDR;
   cmd[1] = start;
-  cmd[2] = aend - 1;
+  cmd[2] = end - 1;
   rit_sndcmd(priv, cmd, 3);
 
   cmd[0] = SSD1329_SET_ROWADDR;
@@ -842,7 +842,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   /* Write the run to GDDRAM. */
 
   rit_sndcmd(priv, g_horzinc, sizeof(g_horzinc));
-  rit_snddata(priv, &run[start], aend - start);
+  rit_snddata(priv, &run[start], end - start);
 
   /* De-select the SD1329 controller */
 
