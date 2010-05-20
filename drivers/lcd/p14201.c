@@ -618,11 +618,7 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table)
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
- *   row     - Starting row to write to (range: 0 <= row < yres)
- *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
- *   buffer  - The buffer containing the run to be written to the LCD
- *   npixels - The number of pixels to write to the LCD
- *             (range: 0 < npixels <= xres-col)
+ *   rpriv   - Reference to private driver structure
  *
  * Assumptions:
  *   Caller has selected the OLED section.
@@ -761,7 +757,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
         {
           /* Beginning of buffer is properly aligned, from start to aend */
 
-          memcpy(&run[start], buffer, aend - start + 1);
+          memcpy(&run[start], buffer, aend - start);
         }
 
        /* An even number of byte-aligned pixel pairs have been written (where

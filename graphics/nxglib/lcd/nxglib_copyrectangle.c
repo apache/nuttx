@@ -110,7 +110,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
 
   /* Copy the image, one row at a time */
 
-  for (row = dest->pt1.y; row < dest->pt2.y; row++)
+  for (row = dest->pt1.y; row <= dest->pt2.y; row++)
     {
 #if NXGLIB_BITSPERPIXEL < 8
       /* if the source pixel is not aligned with a byte boundary, then we will
