@@ -729,28 +729,6 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
    * the run starts at &run[start] and continues through run[end-1].
    * However, the first and final pixels at these locations may
    * not be byte aligned.
-   *
-   *  example col=7 npixels = 8           example col=6 npixels=8
-   *
-   *  Run:    |AB|AB|AB|AB|               |AB|AB|AB|AB|
-   *  GDDRAM row:
-   *  Byte    | 0| 1| 2| 3| 4| 5| 6| 7|   | 0| 1| 2| 3| 4| 5| 6|
-   *  Pixel:  |--|--|--|-A|BA|BA|BA|B-|   |--|--|--|AB|AB|AB|AB|
-   *
-   *  start = 3                           start = 3
-   *  aend  = 7                           aend  = 7
-   *  end   = 8                           end   = 7
-   *
-   *  example col=7 npixels = 1           example col=7 npixels=2
-   *
-   *  Run:    |A-|                        |AB|
-   *  GDDRAM row:
-   *  Byte    | 0| 1| 2| 3|               | 0| 1| 2| 3| 4|
-   *  Pixel:  |--|--|--|-A|               |--|--|--|-A|B-|
-   *
-   *  start = 3                           start = 3
-   *  aend  = 4                           aend  = 4
-   *  end   = 4                           end   = 5
    */
 
   start = col >> 1;
@@ -758,7 +736,22 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   end   = (col + npixels + 1) >> 1;
   ritdbg("start: %d aend: %d end: %d\n", start, aend, end);
 
-  /* Copy the run into the framebuffer, handling nibble alignment */
+  /* Copy the run into the framebuffer, handling nibble alignment.
+   *
+   * CASE 1: First pixel X position is byte aligned
+   *
+   *  example col=6 npixels = 8           example col=6 npixels=7
+   *
+   *  Run:    |AB|AB|AB|AB|               |AB|AB|AB|AB|
+   *  GDDRAM row:
+   *  Byte    | 0| 1| 2| 3| 4| 5| 6|      | 0| 1| 2| 3| 4| 5| 6|
+   *  Pixel:  |--|--|--|AB|AB|AB|AB|      |--|--|--|AB|AB|AB|A-|
+   *
+   *  start = 3                           start = 3
+   *  aend  = 6                           aend  = 6
+   *  end   = 6                           end   = 7
+   *
+   */
 
   if ((col & 1) == 0)
     {
@@ -771,7 +764,10 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
           memcpy(&run[start], buffer, aend - start + 1);
         }
 
-       /* Handle any final pixel (including the special case where npixels == 1). */
+       /* An even number of byte-aligned pixel pairs have been written (where
+        * zero counts as an even number).  If npixels was was odd (including
+        * npixels == 1), then handle the final, byte aligned pixel.
+        */
 
        if (aend != end)
          {
@@ -782,6 +778,21 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
             run[aend] = (run[aend] & 0x0f) | (buffer[aend - start] & 0xf0);
          }
     }
+
+  /* CASE 2: First pixel X position is byte aligned
+   *
+   *  example col=7 npixels = 8           example col=7 npixels=7
+   *
+   *  Run:    |AB|AB|AB|AB|               |AB|AB|AB|AB|
+   *  GDDRAM row:
+   *  Byte    | 0| 1| 2| 3| 4| 5| 6| 7|   | 0| 1| 2| 3| 4| 5| 6|
+   *  Pixel:  |--|--|--|-A|BA|BA|BA|B-|   |--|--|--|-A|BA|BA|BA|
+   *
+   *  start = 3                           start = 3
+   *  aend  = 7                           aend  = 7
+   *  end   = 8                           end   = 7
+   */
+
   else
     {
       uint8_t curr = buffer[0];
@@ -809,7 +820,10 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
           run[i] = (last << 4) | (curr >> 4);
         }
       
-      /* Handle any final pixel (including the special case where npixels == 1). */
+       /* An odd number of unaligned pixel have been written (where npixels
+        * may have been as small as one).  If npixels was was even, then handle
+        * the final, unaligned pixel.
+        */
 
       if (aend != end)
         {
