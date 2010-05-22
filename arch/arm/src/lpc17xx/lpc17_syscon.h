@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+#include "lp17_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -186,7 +187,7 @@
 
 #define LPC17_SYSCON_CLKOUTCFG        (LPC17_SYSCON_BASE+LPC17_SYSCON_CLKOUTCFG_OFFSET)
 
-/* Regiser bit definitions **********************************************************/
+/* Register bit definitions *********************************************************/
 /* Flash accelerator module */
                                                   /* Bits 0-11:  Reserved */
 #define SYSCON_FLASHCFG_TIM_SHIFT     (12)        /* Bits 12-15: FLASHTIM Flash access time */
