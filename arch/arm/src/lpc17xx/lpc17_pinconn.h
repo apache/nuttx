@@ -106,8 +106,13 @@
 /* Register bit definitions *********************************************************/
 /* Pin Function Select register 0 (PINSEL0: 0x4002c000) */
 
-#define PINCONN_PINSEL0_P0_SHIFT(n)     ((n) << 1) /* n=0,1,..,15 */
-#define PINCONN_PINSEL0_P0_MASK(n)      (3 << PINCONN_PINSEL0_P0_SHIFT(n))
+#define PINCONN_PINSELL_SHIFT(n)        ((n) << 1) /* n=0,1,..,15 */
+#define PINCONN_PINSELL_MASK(n)         (3 << PINCONN_PINSELL_SHIFT(n))
+#define PINCONN_PINSELH_SHIFT(n)        (((n)-16) << 1) /* n=16,17,..31 */
+#define PINCONN_PINSELH_MASK(n)         (3 << PINCONN_PINSELH_SHIFT(n))
+
+#define PINCONN_PINSEL0_P0_SHIFT(n)     PINCONN_PINSELL_SHIFT(n) /* n=0,1,..,15 */
+#define PINCONN_PINSEL0_P0_MASK(n)      PINCONN_PINSELL_MASK(n)  /* n=0,1,..,15 */
 
 #define PINCONN_PINSEL0_P0p0_SHIFT      (0)       /* Bits 0-1: P0.0 00=GPIO 01=RD1 10=TXD3 11=SDA1 */
 #define PINCONN_PINSEL0_P0p0_MASK       (3 << PINCONN_PINSEL0_P0p0_SHIFT)
@@ -139,8 +144,8 @@
 
 /* Pin Function Select Register 1 (PINSEL1: 0x4002c004) */
 
-#define PINCONN_PINSEL1_P0_SHIFT(n)     (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINSEL1_P0_MASK(n)      (3 << PINCONN_PINSEL1_P0_SHIFT(n))
+#define PINCONN_PINSEL1_P0_SHIFT(n)     PINCONN_PINSELH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINSEL1_P0_MASK(n)      PINCONN_PINSELH_MASK(n)  /* n=16,17,..31 */
 
 #define PINCONN_PINSEL1_P0p16_SHIFT     (0)       /* Bits 0-1: P0.16 00=GPIO 01=RXD1 10=SSEL0 11=SSEL */
 #define PINCONN_PINSEL1_P0p16_MASK      (3 << PINCONN_PINSEL1_P0p16_SHIFT)
@@ -175,8 +180,8 @@
                                                   /* Bits 30-31: Reserved */
 /* Pin Function Select register 2 (PINSEL2: 0x4002c008) */
 
-#define PINCONN_PINSEL2_P1_SHIFT(n)     ((n) << 1) /* n=0,1,..,15 */
-#define PINCONN_PINSEL2_P1_MASK(n)      (3 << PINCONN_PINSEL2_P1_SHIFT(n))
+#define PINCONN_PINSEL2_P1_SHIFT(n)     PINCONN_PINSELL_SHIFT(n) /* n=0,1,..,15 */
+#define PINCONN_PINSEL2_P1_MASK(n)      PINCONN_PINSELL_MASK(n)  /* n=0,1,..,15 */
 
 #define PINCONN_PINSEL2_P1p0_SHIFT      (0)       /* Bits 0-1: P1.0 00=GPIO 01=ENET_TXD0 10=Reserved 11=Reserved */
 #define PINCONN_PINSEL2_P1p0_MASK       (3 << PINCONN_PINSEL2_P1p0_SHIFT)
@@ -200,8 +205,8 @@
 
 /* Pin Function Select Register 3 (PINSEL3: 0x4002c00c) */
 
-#define PINCONN_PINSEL3_P1_SHIFT(n)     (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINSEL3_P1_MASK(n)      (3 << PINCONN_PINSEL3_P1_SHIFT(n))
+#define PINCONN_PINSEL3_P1_SHIFT(n)     PINCONN_PINSELH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINSEL3_P1_MASK(n)      PINCONN_PINSELH_MASK(n)  /* n=16,17,..31 */
 
 #define PINCONN_PINSEL3_P1p16_SHIFT     (0)       /* Bits 0-1: P1.16 00=GPIO 01=ENET_MDC 10=Reserved 11=Reserved */
 #define PINCONN_PINSEL3_P1p16_MASK      (3 << PINCONN_PINSEL3_P1p16_SHIFT)
@@ -238,8 +243,8 @@
 
 /* Pin Function Select Register 4 (PINSEL4: 0x4002c010) */
 
-#define PINCONN_PINSEL4_P2_SHIFT(n)     ((n) << 1) /* n=0,1,..,15 */
-#define PINCONN_PINSEL4_P2_MASK(n)      (3 << PINCONN_PINSEL4_P2_SHIFT(n))
+#define PINCONN_PINSEL4_P2_SHIFT(n)     PINCONN_PINSELL_SHIFT(n) /* n=0,1,..,15 */
+#define PINCONN_PINSEL4_P2_MASK(n)      PINCONN_PINSELL_MASK(n)  /* n=0,1,..,15 */
 
 #define PINCONN_PINSEL4_P2p0_SHIFT     (0)        /* Bits 0-1: P2.0 00=GPIO 01=PWM1.1 10=TXD1 11=Reserved */
 #define PINCONN_PINSEL4_P2p0_MASK      (3 << PINCONN_PINSEL4_P2p0_SHIFT)
@@ -272,8 +277,8 @@
                                                   /* Bits 28-31: Reserved */
 /* Pin Function Select Register 7 (PINSEL7: 0x4002c01c) */
 
-#define PINCONN_PINSEL7_P3_SHIFT(n)     (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINSEL7_P3_MASK(n)      (3 << PINCONN_PINSEL7_P3_SHIFT(n))
+#define PINCONN_PINSEL7_P3_SHIFT(n)     PINCONN_PINSELH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINSEL7_P3_MASK(n)      PINCONN_PINSELH_MASK(n)  /* n=16,17,..31 */
 
                                                   /* Bits 0-17: Reserved */
 #define PINCONN_PINSEL7_P3p25_SHIFT    (18)       /* Bits 18-19: P3.25 00=GPIO 01=Reserved 10=MAT0.0 11=PWM1.2 */
@@ -287,8 +292,8 @@
 
 /* Pin Function Select Register 9 (PINSEL9: 0x4002c024) */
 
-#define PINCONN_PINSEL9_P4_SHIFT(n)     (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINSEL9_P4_MASK(n)      (3 << PINCONN_PINSEL9_P4_SHIFT(n))
+#define PINCONN_PINSEL9_P4_SHIFT(n)     PINCONN_PINSELH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINSEL9_P4_MASK(n)      PINCONN_PINSELH_MASK(n)  /* n=16,17,..31 */
 
                                                   /* Bits 0-23: Reserved */
 #define PINCONN_PINSEL9_P4p28_SHIFT    (24)       /* Bits 24-25: P4.28 00=GPIO 01=RX_MCLK 10=MAT2.0 11=TXD3 */
@@ -308,8 +313,13 @@
 #define PINCONN_PINMODE_PD              (3)       /* 00: pin has a pull-down resistor enabled */
 #define PINCONN_PINMODE_MASK            (3)
 
-#define PINCONN_PINMODE0_P0_SHIFT(n)    ((n) << 1) /* n=0,1,..,15 */
-#define PINCONN_PINMODE0_P0_MASK(n)     (3 << PINCONN_PINMODE0_P0_SHIFT(n))
+#define PINCONN_PINMODEL_SHIFT(n)       ((n) << 1) /* n=0,1,..,15 */
+#define PINCONN_PINMODEL_MASK(n)        (3 << PINCONN_PINMODEL_SHIFT(n))
+#define PINCONN_PINMODEH_SHIFT(n)       (((n)-16) << 1) /* n=16,17,..31 */
+#define PINCONN_PINMODEH_MASK(n)        (3 << PINCONN_PINMODEH_SHIFT(n))
+
+#define PINCONN_PINMODE0_P0_SHIFT(n)    PINCONN_PINMODEL_SHIFT(n) /* n=0,1,..,15 */
+#define PINCONN_PINMODE0_P0_MASK(n)     PINCONN_PINMODEL_MASK(n)  /* n=0,1,..,15 */
 
 #define PINCONN_PINMODE0_P0p0_SHIFT     (0)       /* Bits 0-1: P0.0 mode control */
 #define PINCONN_PINMODE0_P0p0_MASK      (3 << PINCONN_PINMODE0_P0p0_SHIFT)
@@ -341,8 +351,8 @@
 
 /* Pin Mode select register 1 (PINMODE1: 0x4002c044) */
 
-#define PINCONN_PINMODE1_P0_SHIFT(n)    (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINMODE1_P0_MASK(n)     (3 << PINCONN_PINMODE1_P0_SHIFT(n))
+#define PINCONN_PINMODE1_P0_SHIFT(n)    PINCONN_PINMODEH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINMODE1_P0_MASK(n)     PINCONN_PINMODEH_MASK(n)  /* n=16,17,..31 */
 
 #define PINCONN_PINMODE1_P0p16_SHIFT    (0)       /* Bits 0-1: P0.16 mode control */
 #define PINCONN_PINMODE1_P0p16_MASK     (3 << PINCONN_PINMODE1_P0p16_SHIFT)
@@ -370,8 +380,8 @@
 
 /* Pin Mode select register 2 (PINMODE2: 0x4002c048) */
 
-#define PINCONN_PINMODE2_P1_SHIFT(n)    ((n) << 1) /* n=0,1,..,15 */
-#define PINCONN_PINMODE2_P1_MASK(n)     (3 << PINCONN_PINMODE0_P0_SHIFT(n))
+#define PINCONN_PINMODE2_P1_SHIFT(n)    PINCONN_PINMODEL_SHIFT(n) /* n=0,1,..,15 */
+#define PINCONN_PINMODE2_P1_MASK(n)     PINCONN_PINMODEL_MASK(n)  /* n=0,1,..,15 */
 
 #define PINCONN_PINMODE2_P1p0_SHIFT     (0)       /* Bits 2-1: P1.0 mode control */
 #define PINCONN_PINMODE2_P1p0_MASK      (3 << PINCONN_PINMODE2_P1p0_SHIFT)
@@ -395,8 +405,8 @@
 
 /* Pin Mode select register 3 (PINMODE3: 0x4002c04c) */
 
-#define PINCONN_PINMODE3_P1_SHIFT(n)    (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINMODE3_P1_MASK(n)     (3 << PINCONN_PINMODE3_P1_SHIFT(n))
+#define PINCONN_PINMODE3_P1_SHIFT(n)    PINCONN_PINMODEH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINMODE3_P1_MASK(n)     PINCONN_PINMODEH_MASK(n)  /* n=16,17,..31 */
 
 #define PINCONN_PINMODE3_P1p16_SHIFT    (0)       /* Bits 0-1: P1.16 mode control */
 #define PINCONN_PINMODE3_P1p16_MASK     (3 << PINCONN_PINMODE3_P1p16_SHIFT)
@@ -433,8 +443,8 @@
 
 /* Pin Mode select register 4 (PINMODE4: 0x4002c050) */
 
-#define PINCONN_PINMODE4_P2_SHIFT(n)    ((n) << 1) /* n=0,1,..,15 */
-#define PINCONN_PINMODE4_P2_MASK(n)     (3 << PINCONN_PINMODE4_P2_SHIFT(n))
+#define PINCONN_PINMODE4_P2_SHIFT(n)    PINCONN_PINMODEL_SHIFT(n) /* n=0,1,..,15 */
+#define PINCONN_PINMODE4_P2_MASK(n)     PINCONN_PINMODEL_MASK(n)  /* n=0,1,..,15 */
 
 #define PINCONN_PINMODE4_P2p0_SHIFT     (0)       /* Bits 0-1: P2.0 mode control */
 #define PINCONN_PINMODE4_P2p0_MASK      (3 << PINCONN_PINMODE4_P2p0_SHIFT)
@@ -470,16 +480,16 @@
  * No bit definitions -- do these registers exist?
  */
 
-#define PINCONN_PINMODE5_P2_SHIFT(n)    (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINMODE5_P2_MASK(n)     (3 << PINCONN_PINMODE5_P2_SHIFT(n))
+#define PINCONN_PINMODE5_P2_SHIFT(n)    PINCONN_PINMODEH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINMODE5_P2_MASK(n)     PINCONN_PINMODEH_MASK(n)  /* n=16,17,..31 */
 
-#define PINCONN_PINMODE6_P3_SHIFT(n)    ((n) << 1) /* n=0,1,..,15 */
-#define PINCONN_PINMODE6_P3_MASK(n)     (3 << PINCONN_PINMODE4_P2_SHIFT(n))
+#define PINCONN_PINMODE6_P3_SHIFT(n)    PINCONN_PINMODEL_SHIFT(n) /* n=0,1,..,15 */
+#define PINCONN_PINMODE6_P3_MASK(n)     PINCONN_PINMODEL_MASK(n)  /* n=0,1,..,15 */
 
 /* Pin Mode select register 7 (PINMODE7: 0x4002c05c) */
 
-#define PINCONN_PINMODE7_P3_SHIFT(n)    (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINMODE7_P3_MASK(n)     (3 << PINCONN_PINMODE7_P3_SHIFT(n))
+#define PINCONN_PINMODE7_P3_SHIFT(n)    PINCONN_PINMODEH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINMODE7_P3_MASK(n)     PINCONN_PINMODEH_MASK(n)  /* n=16,17,..31 */
                                                   /* Bits 0-17: Reserved */
 #define PINCONN_PINMODE7_P3p25_SHIFT    (18)      /* Bits 18-19: P3.25 mode control */
 #define PINCONN_PINMODE7_P3p25_MASK     (3 << PINCONN_PINMODE7_P3p25_SHIFT)
@@ -488,8 +498,8 @@
                                                   /* Bits 22-31: Reserved */
 /* Pin Mode select register 9 (PINMODE9: 0x4002c064) */
 
-#define PINCONN_PINMODE9_P4_SHIFT(n)    (((n)-16) << 1) /* n=16,17,..31 */
-#define PINCONN_PINMODE9_P4_MASK(n)     (3 << PINCONN_PINMODE7_P3_SHIFT(n))
+#define PINCONN_PINMODE9_P4_SHIFT(n)    PINCONN_PINMODEH_SHIFT(n) /* n=16,17,..31 */
+#define PINCONN_PINMODE9_P4_MASK(n)     PINCONN_PINMODEH_MASK(n)  /* n=16,17,..31 */
                                                   /* Bits 0-23: Reserved */
 #define PINCONN_PINMODE9_P4p28_SHIFT    (24)      /* Bits 24-25: P4.28 mode control */
 #define PINCONN_PINMODE9_P4p28_MASK     (3 << PINCONN_PINMODE9_P4p28_SHIFT)
