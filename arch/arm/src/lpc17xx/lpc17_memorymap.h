@@ -50,17 +50,17 @@
 
 /* Memory Map ***********************************************************************/
 
-#define LPC17X_FLASH_BASE   0x00000000 /* -0x1fffffff: On-chip non-volatilenmemory */
-#define LPC17X_SRAM_BASE    0x10000000 /* -0x10007fff: On-chip SRAM (devices <=32Kb) */
-#define LPC17X_ROM_BASE     0x1fff0000 /* -0x1fffffff: 8Kb Boot ROM with flash services */
-#define LPC17X_AHBSRAM_BASE 0x20000000 /* -0x3fffffff: On-chip AHB SRAM (devices >32Kb) */
-#  define LPC17X_SRAM_BANK0 0x20070000 /* -0x2007ffff: On-chip AHB SRAM Bank0 (devices >=32Kb) */
-#  define LPC17X_SRAM_BANK1 0x20080000 /* -0x2008ffff: On-chip AHB SRAM Bank0 (devices 64Kb) */
-#define LPC17X_GPIO_BASE    0x2009c000 /* -0x2009ffff: GPIO */
-#define LPC17X_APB_BASE     0x40000000 /* -0x5fffffff: APB Peripherals */
-#  define LPC17X_APB0_BASE  0x40000000 /* -0x4007ffff: APB0 Peripherals */
-#  define LPC17X_APB1_BASE  0x40080000 /* -0x400fffff: APB1 Peripherals */
-#  define LPC17X_AHB_BASE   0x50000000 /* -0x501fffff: DMA Controller, Ethernet, and USB */
+#define LPC17_FLASH_BASE    0x00000000 /* -0x1fffffff: On-chip non-volatilenmemory */
+#define LPC17_SRAM_BASE     0x10000000 /* -0x10007fff: On-chip SRAM (devices <=32Kb) */
+#define LPC17_ROM_BASE      0x1fff0000 /* -0x1fffffff: 8Kb Boot ROM with flash services */
+#define LPC17_AHBSRAM_BASE  0x20000000 /* -0x3fffffff: On-chip AHB SRAM (devices >32Kb) */
+#  define LPC17_SRAM_BANK0  0x20070000 /* -0x2007ffff: On-chip AHB SRAM Bank0 (devices >=32Kb) */
+#  define LPC17_SRAM_BANK1  0x20080000 /* -0x2008ffff: On-chip AHB SRAM Bank0 (devices 64Kb) */
+#define LPC17_GPIO_BASE     0x2009c000 /* -0x2009ffff: GPIO */
+#define LPC17_APB_BASE      0x40000000 /* -0x5fffffff: APB Peripherals */
+#  define LPC17_APB0_BASE   0x40000000 /* -0x4007ffff: APB0 Peripherals */
+#  define LPC17_APB1_BASE   0x40080000 /* -0x400fffff: APB1 Peripherals */
+#  define LPC17_AHB_BASE    0x50000000 /* -0x501fffff: DMA Controller, Ethernet, and USB */
 #define LPC17_CORTEXM3_BASE 0xe0000000 /* -0xe00fffff: (see cortexm3/nvic.h) */
 #define LPC17_SCS_BASE      0xe000e000
 #define LPC17_DEBUGMCU_BASE 0xe0042000
