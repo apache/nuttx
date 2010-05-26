@@ -85,7 +85,7 @@
  */
 
 #define ADC_RX_SHIFT                     (0)  /* Bits 0-9: Digital conversion data */
-#define ADC_RX_MASK                      (0x3ff << LPC313X_ADC_RX_SHIFT)
+#define ADC_RX_MASK                      (0x3ff << ADC_RX_SHIFT)
 
 /* ADC_CON, address 0x13002020 */
 

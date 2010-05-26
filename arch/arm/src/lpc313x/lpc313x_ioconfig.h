@@ -76,9 +76,9 @@
 #define LPC313X_IOCONFIG_MODE0SET_OFFSET      0x014 /* WR:Set Bits   RD:Read Mode 0 */
 #define LPC313X_IOCONFIG_MODE0RESET_OFFSET    0x018 /* WR:Reset Bits RD: */
                                                     /* 0x01c: Reserved */
-#define LPC313X_IOCONFIG_MODE1_OFFSET         0x010 /* WR:Load       RD: */
-#define LPC313X_IOCONFIG_MODE1SET_OFFSET      0x014 /* WR:Set Bits   RD:Read Mode 1 */
-#define LPC313X_IOCONFIG_MODE1RESET_OFFSET    0x018 /* WR:Reset Bits RD: */
+#define LPC313X_IOCONFIG_MODE1_OFFSET         0x020 /* WR:Load       RD: */
+#define LPC313X_IOCONFIG_MODE1SET_OFFSET      0x024 /* WR:Set Bits   RD:Read Mode 1 */
+#define LPC313X_IOCONFIG_MODE1RESET_OFFSET    0x028 /* WR:Reset Bits RD: */
                                                     /* 0x02c-0x3c: Reserved */
 
 /* IOCONFIG function block (virtual) base addresses *********************************************/
