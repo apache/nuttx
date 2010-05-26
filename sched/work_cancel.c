@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/work_cancel.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,9 +102,14 @@ int work_cancel(struct work_s *work)
    */
 
   flags = irqsave();
-  DEBUGASSERT(work->dq.flink || (FAR dq_entry_t *)work == g_work.head);
-  DEBUGASSERT(work->dq.blink || (FAR dq_entry_t *)work == g_work.tail);
-  dq_rem((FAR dq_entry_t *)work, &g_work);
+  if (work->worker != NULL)
+    {
+      DEBUGASSERT(work->dq.flink || (FAR dq_entry_t *)work == g_work.head);
+      DEBUGASSERT(work->dq.blink || (FAR dq_entry_t *)work == g_work.tail);
+      dq_rem((FAR dq_entry_t *)work, &g_work);
+
+      work->worker = NULL;
+    }
   irqrestore(flags);
   return OK;
 }

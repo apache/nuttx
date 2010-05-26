@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/work_thread.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -159,6 +159,10 @@ int work_thread(int argc, char *argv[])
 
               worker = work->worker;
               arg    = work->arg;
+
+              /* Mark the work as no longer being queued */
+
+              work->worker = NULL;
 
               /* Do the work.  Re-enable interrupts while the work is being
                * performed... we don't have any idea how long that will take!

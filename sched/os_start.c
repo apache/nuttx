@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/os_start.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -436,9 +436,14 @@ void os_start(void)
   /* Start the worker thread that will perform misc garbage clean-up */
 
 #ifdef CONFIG_SCHED_WORKQUEUE
+#ifndef CONFIG_CUSTOM_STACK
   g_worker = task_create("work", CONFIG_SCHED_WORKPRIORITY,
                          CONFIG_SCHED_WORKSTACKSIZE,
                          (main_t)work_thread, (const char **)NULL);
+#else
+  g_worker = task_create("work", CONFIG_SCHED_WORKPRIORITY,
+                         (main_t)work_thread, (const char **)NULL);
+#endif
   ASSERT(g_worker != ERROR);
 #endif
 
