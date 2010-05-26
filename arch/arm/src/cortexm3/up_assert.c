@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/cortexm3/up_assert.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,19 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 # undef  lldbg
 # define lldbg lib_lowprintf
+#endif
+
+/* The following is just intended to keep some ugliness out of the mainline
+ * code.  We are going to print the task name if:
+ *
+ *  CONFIG_TASK_NAME_SIZE > 0 &&    <-- The task has a name
+ *  (defined(CONFIG_DEBUG)    ||    <-- And the debug is enabled (lldbg used)
+ *   defined(CONFIG_ARCH_STACKDUMP) <-- Or lib_lowprintf() is used
+ */
+
+#undef CONFIG_PRINT_TASKNAME
+#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG) || defined(CONFIG_ARCH_STACKDUMP))
+#  define CONFIG_PRINT_TASKNAME 1
 #endif
 
 /****************************************************************************
@@ -273,12 +286,12 @@ static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
 
 void up_assert(const uint8_t *filename, int lineno)
 {
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
+#ifdef CONFIG_PRINT_TASKNAME
   _TCB *rtcb = (_TCB*)g_readytorun.head;
 #endif
 
   up_ledon(LED_ASSERTION);
-#if CONFIG_TASK_NAME_SIZE > 0
+#ifdef CONFIG_PRINT_TASKNAME
   lldbg("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
@@ -295,12 +308,12 @@ void up_assert(const uint8_t *filename, int lineno)
 
 void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
 {
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG)
+#ifdef CONFIG_PRINT_TASKNAME
   _TCB *rtcb = (_TCB*)g_readytorun.head;
 #endif
 
   up_ledon(LED_ASSERTION);
-#if CONFIG_TASK_NAME_SIZE > 0
+#ifdef CONFIG_PRINT_TASKNAME
   lldbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
         filename, lineno, rtcb->name, errorcode);
 #else
