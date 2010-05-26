@@ -59,8 +59,19 @@
 
 #define M25P_MANUFACTURER         0x20
 #define M25P_MEMORY_TYPE          0x20
+#define M25P_M25P1_CAPACITY       0x11 /* 1 M-bit */
 #define M25P_M25P64_CAPACITY      0x17 /* 64 M-bit */
 #define M25P_M25P128_CAPACITY     0x18 /* 128 M-bit */
+
+/*  M25P1 capapcity is 131,072 bytes:
+ *  (4 sectors) * (32,768 bytes per sector)
+ *  (512 pages) * (256 bytes per page)
+ */
+
+#define M25P_M25P1_SECTOR_SHIFT  15    /* Sector size 1 << 15 = 65,536 */
+#define M25P_M25P1_NSECTORS      4
+#define M25P_M25P1_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
+#define M25P_M25P1_NPAGES        512
 
 /*  M25P64 capapcity is 8,338,608 bytes:
  *  (128 sectors) * (65,536 bytes per sector)
@@ -244,7 +255,17 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
     {
       /* Okay.. is it a FLASH capacity that we understand? */
 
-      if (capacity == M25P_M25P64_CAPACITY)
+      if (capacity == M25P_M25P1_CAPACITY)
+        {
+           /* Save the FLASH geometry */
+
+           priv->sectorshift = M25P_M25P1_SECTOR_SHIFT;
+           priv->nsectors    = M25P_M25P1_NSECTORS;
+           priv->pageshift   = M25P_M25P1_PAGE_SHIFT;
+           priv->npages      = M25P_M25P1_NPAGES;
+           return OK;
+        }
+      else if (capacity == M25P_M25P64_CAPACITY)
         {
            /* Save the FLASH geometry */
 
