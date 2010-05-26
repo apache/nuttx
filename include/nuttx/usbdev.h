@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usbdev.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * NOTE:  This interface was inspired by the Linux gadget interface by
@@ -180,7 +180,8 @@
 
 /* Request flags */
 
-#define USBDEV_REQFLAGS_NULLPKT   0 /* Terminate w/short packet; null packet if necessary */
+#define USBDEV_REQFLAGS_NULLPKT   1 /* Bit 0: Terminate w/short packet; null packet if necessary */
+                                    /* Bits 1-7: Available */
 
 /************************************************************************************
  * Public Types
