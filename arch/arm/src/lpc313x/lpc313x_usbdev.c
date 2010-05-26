@@ -282,7 +282,6 @@ struct lpc313x_ep_s
   struct lpc313x_req_s    *tail;
   uint8_t                 epphy;         /* Physical EP address */
   uint8_t                 stalled:1;     /* 1: Endpoint is stalled */
-  uint8_t                 halted:1;      /* 1: Endpoint feature halted */
 };
 
 /* This structure retains the state of the USB device controller */
@@ -364,12 +363,11 @@ static void        lpc313x_readsetup(uint8_t epphy, struct usb_ctrlreq_s *ctrl);
 static inline void lpc313x_set_address(struct lpc313x_usbdev_s *priv, uint16_t address);
 
 static void        lpc313x_flushep(struct lpc313x_ep_s *privep);
-static inline bool lpc313x_epstalled(struct lpc313x_ep_s *privep);
 
 static int         lpc313x_progressep(struct lpc313x_ep_s *privep);
 static inline void lpc313x_abortrequest(struct lpc313x_ep_s *privep,
 					struct lpc313x_req_s *privreq, int16_t result);
-static void        lpc313x_reqcomplete(struct lpc313x_ep_s *privep, int16_t result);
+static void        lpc313x_reqcomplete(struct lpc313x_ep_s *privep, struct lpc313x_req_s *privreq, int16_t result);
 
 static void        lpc313x_cancelrequests(struct lpc313x_ep_s *privep, int16_t status);
 
@@ -769,24 +767,6 @@ static void lpc313x_flushep(struct lpc313x_ep_s *privep)
 
 
 /*******************************************************************************
- * Name: lpc313x_epstalled
- *
- * Description:
- *   Return whether the endpoint is stalled or not
- *
- *******************************************************************************/
-
-static inline bool lpc313x_epstalled(struct lpc313x_ep_s *privep)
-{
-  uint32_t ctrl = lpc313x_getreg (LPC313X_USBDEV_ENDPTCTRL(privep->epphy));
-
-  if (LPC313X_EPPHYIN(privep->epphy))
-    return (ctrl & USBDEV_ENDPTCTRL_TXS);
-  else
-    return (ctrl & USBDEV_ENDPTCTRL_RXS);
-}
-
-/*******************************************************************************
  * Name: lpc313x_progressep
  *
  * Description:
@@ -825,7 +805,7 @@ static int lpc313x_progressep(struct lpc313x_ep_s *privep)
 		usbtrace(TRACE_DEVERROR(LPC313X_TRACEERR_EPOUTNULLPACKET), 0);
 	  }
 	  
-      lpc313x_reqcomplete(privep, OK);
+      lpc313x_reqcomplete(privep, lpc313x_rqdequeue(privep), OK);
       return OK;
     }
 
@@ -836,15 +816,13 @@ static int lpc313x_progressep(struct lpc313x_ep_s *privep)
 
   int bytesleft = privreq->req.len - privreq->req.xfrd;
 
-  if (bytesleft > privep->ep.maxpacket)
-    bytesleft = privep->ep.maxpacket;
-
   if (LPC313X_EPPHYIN(privep->epphy))
     usbtrace(TRACE_WRITE(privep->epphy), privreq->req.xfrd);
   else
     usbtrace(TRACE_READ(privep->epphy), privreq->req.xfrd);
 
   /* Initialise the DTD to transfer the next chunk */
+
   lpc313x_writedtd (dtd, privreq->req.buf + privreq->req.xfrd, bytesleft);
 
   /* then queue onto the DQH */
@@ -884,39 +862,27 @@ static inline void lpc313x_abortrequest(struct lpc313x_ep_s *privep,
  *
  *******************************************************************************/
 
-static void lpc313x_reqcomplete(struct lpc313x_ep_s *privep, int16_t result)
+static void lpc313x_reqcomplete(struct lpc313x_ep_s *privep, struct lpc313x_req_s *privreq, int16_t result)
 {
-  struct lpc313x_req_s *privreq;
-  irqstate_t flags;
+  /* If endpoint 0, temporarily reflect the state of protocol stalled
+   * in the callback.
+   */
 
-  /* Remove the completed request at the head of the endpoint request list */
+  bool stalled = privep->stalled;
+  if (privep->epphy == LPC313X_EP0_IN)
+    privep->stalled = privep->dev->stalled;
 
-  flags = irqsave();
-  privreq = lpc313x_rqdequeue(privep);
-  irqrestore(flags);
+  /* Save the result in the request structure */
 
-  if (privreq)
-    {
-      /* If endpoint 0, temporarily reflect the state of protocol stalled
-       * in the callback.
-       */
+  privreq->req.result = result;
 
-      bool stalled = privep->stalled;
-      if (privep->epphy == LPC313X_EP0_IN)
-        privep->stalled = privep->dev->stalled;
+  /* Callback to the request completion handler */
 
-      /* Save the result in the request structure */
+  privreq->req.callback(&privep->ep, &privreq->req);
 
-      privreq->req.result = result;
+  /* Restore the stalled indication */
 
-      /* Callback to the request completion handler */
-
-      privreq->req.callback(&privep->ep, &privreq->req);
-
-      /* Restore the stalled indication */
-
-      privep->stalled = stalled;
-    }
+  privep->stalled = stalled;
 }
 
 /*******************************************************************************
@@ -938,7 +904,7 @@ static void lpc313x_cancelrequests(struct lpc313x_ep_s *privep, int16_t status)
       // FIXME: only report the error status if the transfer hasn't completed
       usbtrace(TRACE_COMPLETE(privep->epphy),
                (lpc313x_rqpeek(privep))->req.xfrd);
-      lpc313x_reqcomplete(privep, status);
+      lpc313x_reqcomplete(privep, lpc313x_rqdequeue(privep), status);
     }
 }
 
@@ -1083,7 +1049,6 @@ static void lpc313x_usbreset(struct lpc313x_usbdev_s *priv)
 
       /* Reset endpoint status */
       privep->stalled = false;
-      privep->halted  = false;
     }
 
   /* Tell the class driver that we are disconnected. The class 
@@ -1221,7 +1186,7 @@ static inline void lpc313x_ep0setup(struct lpc313x_usbdev_s *priv)
                       }
                     else
                       {
-  		        if (lpc313x_epstalled(privep))
+			if (privep->stalled)
 			  priv->ep0buf[0] = 1; /* Stalled */
 			else
                           priv->ep0buf[0] = 0; /* Not stalled */
@@ -1294,8 +1259,6 @@ static inline void lpc313x_ep0setup(struct lpc313x_usbdev_s *priv)
           else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT && len == 0 &&
                    (privep = lpc313x_epfindbyaddr(priv, index)) != NULL)
             {
-              privep->halted = 0;
-  	    
               lpc313x_epstall(&privep->ep, true);
   
               lpc313x_ep0state (priv, EP0STATE_WAIT_NAK_IN);
@@ -1329,8 +1292,6 @@ static inline void lpc313x_ep0setup(struct lpc313x_usbdev_s *priv)
           else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT && len == 0 &&
                    (privep = lpc313x_epfindbyaddr(priv, index)) != NULL)
             {
-              privep->halted = 1;
-  
 	      lpc313x_epstall(&privep->ep, false);
   
               lpc313x_ep0state (priv, EP0STATE_WAIT_NAK_IN);
@@ -1623,12 +1584,10 @@ lpc313x_epcomplete(struct lpc313x_usbdev_s *priv, uint8_t epphy)
     
   privreq->req.xfrd += xfrd;
 
-  bool complete;
+  bool complete = true;
   if (LPC313X_EPPHYOUT(privep->epphy))
     {
       /* read(OUT) completes when request filled, or a short transfer is received */
-
-      complete = (privreq->req.xfrd >= privreq->req.len || xfrd < privep->ep.maxpacket);
 
       usbtrace(TRACE_INTDECODE(LPC313X_TRACEINTID_EPIN), complete);
     }
@@ -1643,15 +1602,25 @@ lpc313x_epcomplete(struct lpc313x_usbdev_s *priv, uint8_t epphy)
       usbtrace(TRACE_INTDECODE(LPC313X_TRACEINTID_EPOUT), complete);
     }
 
+  /* If the transfer is complete, then dequeue and progress any further queued requests */
+
+  if (complete)
+    {
+      privreq = lpc313x_rqdequeue (privep);
+    }
+    
+  if (!lpc313x_rqempty(privep))
+    {
+      lpc313x_progressep(privep);
+    }
+
+  /* Now it's safe to call the completion callback as it may well submit a new request */
+
   if (complete)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
-      lpc313x_reqcomplete(privep, OK);
+      lpc313x_reqcomplete(privep, privreq, OK);
     }
-    
-  /* If there's more requests, then progress them */
-  if (!lpc313x_rqempty(privep))
-    lpc313x_progressep(privep);
 
   return complete;
 }
@@ -1863,6 +1832,9 @@ static int lpc313x_epconfigure(FAR struct usbdev_ep_s *ep,
       lpc313x_chgbits (0x0000FFFF, cfg, LPC313X_USBDEV_ENDPTCTRL(privep->epphy));
     }
 
+  /* Reset endpoint status */
+  privep->stalled = false;
+
   /* Enable the endpoint */
   if (LPC313X_EPPHYIN(privep->epphy))
     lpc313x_setbits (USBDEV_ENDPTCTRL_TXE, LPC313X_USBDEV_ENDPTCTRL(privep->epphy));
@@ -1902,10 +1874,10 @@ static int lpc313x_epdisable(FAR struct usbdev_ep_s *ep)
   else
     lpc313x_clrbits (USBDEV_ENDPTCTRL_RXE, LPC313X_USBDEV_ENDPTCTRL(privep->epphy));
 
+  privep->stalled = true;
+
   /* Cancel any ongoing activity */
   lpc313x_cancelrequests(privep, -ESHUTDOWN);
-
-  privep->halted = 1;
 
   irqrestore(flags);
   return OK;
@@ -2048,12 +2020,8 @@ static int lpc313x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 
   if (privep->stalled)
     {
-      lpc313x_abortrequest(privep, privreq, -EBUSY);
       ret = -EBUSY;
     }
-
-  /* Handle IN (device-to-host) requests */
-
   else 
     {
       /* Add the new request to the request queue for the endpoint */
@@ -2061,10 +2029,12 @@ static int lpc313x_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
       if (LPC313X_EPPHYIN(privep->epphy))
 	usbtrace(TRACE_INREQQUEUED(privep->epphy), privreq->req.len);
       else
-	  usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
+	usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
 
       if (lpc313x_rqenqueue(privep, privreq))
+      {
 	lpc313x_progressep(privep);
+      }
     }
 
   irqrestore(flags);
@@ -2676,3 +2646,4 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   g_usbdev.driver = NULL;
   return OK;
 }
+

@@ -143,7 +143,7 @@
 #  define SPI_SLVENABLE2_DISABLED        (0 << SPI_SLVENABLE2_SHIFT) /* Disabled */
 #  define SPI_SLVENABLE2_ENABLED         (1 << SPI_SLVENABLE2_SHIFT) /* Enabled */
 #  define SPI_SLVENABLE2_SUSPENDED       (3 << SPI_SLVENABLE2_SHIFT) /* Suspended */
-#define SPI_SLVENABLE1_SHIFT             (0)       /* Bits 0-1: Slave 3 enable bits */
+#define SPI_SLVENABLE1_SHIFT             (0)       /* Bits 0-1: Slave 1 enable bits */
 #define SPI_SLVENABLE1_MASK              (3 << SPI_SLVENABLE1_SHIFT)
 #  define SPI_SLVENABLE1_DISABLED        (0 << SPI_SLVENABLE1_SHIFT) /* Disabled */
 #  define SPI_SLVENABLE1_ENABLED         (1 << SPI_SLVENABLE1_SHIFT) /* Enabled */

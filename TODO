@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 16, 2010)
+NuttX TODO List (Last updated May 19, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -12,7 +12,7 @@ NuttX TODO List (Last updated May 16, 2010)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
  (12)  File system/Generic drivers (fs/, drivers/)
-  (2)  Graphics subystem (graphics/)
+  (3)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (6)  Build system / Toolchains
@@ -429,6 +429,15 @@ o Graphics subystem (graphics/)
                http://nuttx.sourceforge.net/NXGraphicsSubsystem.html#testcoverage
   Status:      Open
   Priority:    Medium
+
+  Description: The examples/nx test using lcd/p14201.c and the configs/lm3s6965-ek
+               configuration shows two single pixel-wide anomalies.  One along
+               column zero is clearly caused by the NX windowing logic.  It is
+               not certain if these are consequences of the 4bpp logic or if these
+               are anomalies that have always been in NX, but are only visible
+               now at the low resolution of the p14201 LCD (128x96).
+  Status:      Open
+  Priority:    Low (unless you need the p13201 then it is certainly higher).
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
