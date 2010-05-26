@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 12, 2010</p>
+      <p>Last Updated: May 26, 2010</p>
     </td>
   </tr>
 </table>
@@ -1752,6 +1752,19 @@ nuttx-5.6 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* drivers/lcd/p14201.c - Driver for RiT P14201 series 128x96 4-bit OLED.
 	* configs/lm3s6965-ek/nx - NX graphics configuration for the LM3S6965
 	  Ethernet Evaluation Kit.
+	* graphics/ - Numerous fixes to get the P14201 4-bpp greyscale display
+	  working (there may still be some minor issues .. see the TODO list).
+	* arch/arm/include/lpc17xx and arch/arm/src/lpc17xxx - Began port for
+	  NXP LPC1768
+	* drivers/mtd/m25px.c - Add support for M25P1 flash part (See NOTE)
+	* include/nuttx/i2c.h - Extended I2C interface definition to handle
+	  multiple transfers (See NOTE).
+	* include/nuttx/usbdev.h - Corrected an important macro definition
+	  needed to correctly handle USB null packet transfers (See NOTE).
+	* arch/arm/src/lpc313x - New drivers: I2C and SPI.  Plus several
+	  important LPC313x USB bug fixes (See NOTE).
+
+	NOTE: Contributed by David Hewson.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
