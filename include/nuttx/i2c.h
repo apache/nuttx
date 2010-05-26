@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/i2c.h
  *
- *   Copyright(C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,11 @@
 
 #define I2C_READADDR10H(a)   (I2C_ADDR10H(a) | I2C_READBIT)
 #define I2C_READADDR10L(a)   I2C_ADDR10L(a)
+
+/* Bit definitions for the flags field in struct i2c_ops_s */
+
+#define I2C_M_READ           0x0001          /* read data, from slave to master */
+#define I2C_M_TEN            0x0002          /* ten bit address */
 
 /* Access macros */
 
@@ -153,18 +158,56 @@
 #define I2C_READ(d,b,l) ((d)->ops->read(d,b,l))
 
 /****************************************************************************
+ * Name: I2C_TRANSFER
+ *
+ * Description:
+ *   Perform a sequence of I2C transfers, each transfer is started with a 
+ *   START and the final transfer is completed with a STOP. Each sequence 
+ *   will be an 'atomic'  operation in the sense that any other I2C actions 
+ *   will be serialized and pend until this read completes. Optional.
+ *
+ * Input Parameters:
+ *   dev -   Device-specific state data
+ *   msgs - A pointer to a set of message descriptors
+ *   msgcount - The number of transfers to perform
+ *
+ * Returned Value:
+ *   The number of transfers completed
+ *
+ ****************************************************************************/
+
+#define I2C_TRANSFER(d,m,c) ((d)->ops->transfer(d,m,c))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
 /* The I2C vtable */
 
 struct i2c_dev_s;
+struct i2c_msg_s;
 struct i2c_ops_s
 {
   uint32_t (*setfrequency)(FAR struct i2c_dev_s *dev, uint32_t frequency);
   int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
   int    (*write)(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
   int    (*read)(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
+#ifdef CONFIG_I2C_TRANSFER
+  int    (*transfer)(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count);
+#endif
+};
+
+/* I2C transaction segment beginning with a START.  A number of these can
+ * be transfered together to form an arbitrary sequence of write/read transfer
+ * to an I2C slave device.
+ */
+
+struct i2c_msg_s
+{
+    uint16_t  addr;                  /* Slave address */
+    uint16_t  flags;                 /* See I2C_M_* definitions */
+    uint8_t  *buffer;
+    int       length;
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
