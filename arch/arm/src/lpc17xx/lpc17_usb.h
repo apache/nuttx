@@ -281,71 +281,48 @@
 
 /* Register bit definitions *********************************************************/
 /* USB Host Controller **************************************************************/
-
-/* Version of HCI specification */
-#define USBHOST_HCIREV_
-/* HC control */
-#define USBHOST_CTRL_
-/* HC command status */
-#define USBHOST_CMDST_
-/* HC interrupt status */
-#define USBHOST_INTST_
-/* HC interrupt enable */
-#define USBHOST_INTEN_
-/* HC interrupt disable */
-#define USBHOST_INTDIS_
-/* HC communication area */
-#define USBHOST_HCCA_
-/* Current isoc or int endpoint desc */
-#define USBHOST_IIED_
-/* First EP desc in the control list */
-#define USBHOST_CTRLHEADED_
-/* Current EP desc in the control list */
-#define USBHOST_CTRLED_
-/* First EP desc in the bulk list */
-#define USBHOST_BULKHEADED_
-/* Current EP desc in the bulk list */
-#define USBHOST_BULKED_
-/* Last transfer desc added to DONE queue */
-#define USBHOST_DONEHEAD_
-/* Bit time interval that would not cause overrun */
-#define USBHOST_FMINT_
-/* Bit time remaining in current frame */
-#define USBHOST_FMREM_
-/* Frame number counter */
-#define USBHOST_FMNO_
-/* Time to start processing periodic list */
-#define USBHOST_PERSTART_
-/* Commit to transfer threshold */
-#define USBHOST_LSTHRES_
-/* Describes root hub (part A) */
-#define USBHOST_RHDESCA_
-/* Describes root hub (part B) */
-#define USBHOST_RHDESCB_
-/* Root hub status */
-#define USBHOST_RHSTATUS_
-/* Root hub port status 1 */
-#define USBHOST_RHPORTST0_
-/* Root hub port status 2 */
-#define USBHOST_RHPORTST1_
-/* Module ID/Revision ID */
-#define USBHOST_MODID_
+/* UM10360: "Refer to the OHCI specification document on the Compaq website for
+ *           register definitions"
+ */
 
 /* USB OTG Controller ***************************************************************/
 /* OTG registers */
+/* OTG Interrupt Status, OTG Interrupt Enable, OTG Interrupt Set, AND OTG Interrupt
+ * Clear
+ */
 
-/* OTG Interrupt Status */
-#define USBOTG_INTST_
-/* OTG Interrupt Enable */
-#define USBOTG_INTEN_
-/* OTG Interrupt Set */
-#define USBOTG_INTSET_
-/* OTG Interrupt Clear */
-#define USBOTG_INTCLR_
+#define USBOTG_INT_TMR                   (1 << 0)  /* Bit 0:  Timer time-out */
+#define USBOTG_INT_REMOVE_PU             (1 << 1)  /* Bit 1:  Remove pull-up */
+#define USBOTG_INT_HNP_FAILURE           (1 << 2)  /* Bit 2:  HNP failed */
+#define USBOTG_INT_HNP_SUCCESS           (1 << 3)  /* Bit 3:  HNP succeeded */
+                                                   /* Bits 4-31: Reserved */
 /* OTG Status and Control */
-#define USBOTG_STCTRL_
+
+#define USBOTG_STCTRL_PORTFUNC_SHIFT     (0)       /* Bits 0-1: Controls port function */
+#define USBOTG_STCTRL_PORTFUNC_MASK      (3 << USBOTG_STCTRL_PORTFUNC_SHIFT)
+#  define USBOTG_STCTRL_PORTFUNC_HNPOK   (1 << USBOTG_STCTRL_PORTFUNC_SHIFT) /* HNP suceeded */
+
+#define USBOTG_STCTRL_TMRSCALE_SHIFT     (0)       /* Bits 2-3: Timer scale selection */
+#define USBOTG_STCTRL_TMRSCALE_MASK      (3 << USBOTG_STCTRL_TMR_SCALE_SHIFT)
+#  define USBOTG_STCTRL_TMRSCALE_10US    (0 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 10uS (100 KHz) */
+#  define USBOTG_STCTRL_TMRSCALE_100US   (1 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 100uS (10 KHz) */
+#  define USBOTG_STCTRL_TMRSCALE_1000US  (2 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 1000uS (1 KHz) */
+#define USBOTG_STCTRL_TMRMODE            (1 << 4)  /* Bit 4:  Timer mode selection */
+#define USBOTG_STCTRL_TMREN              (1 << 5)  /* Bit 5:  Timer enable */
+#define USBOTG_STCTRL_TMRRST             (1 << 6)  /* Bit 6:  TTimer reset */
+                                                   /* Bit 7:  Reserved */
+#define USBOTG_STCTRL_BHNPTRACK          (1 << 8)  /* Bit 8:  Enable HNP tracking for B-device (peripheral) */
+#define USBOTG_STCTRL_AHNPTRACK          (1 << 9)  /* Bit 9:  Enable HNP tracking for A-device (host) */
+#define USBOTG_STCTRL_PUREMOVED          (1 << 10) /* Bit 10: Set when D+ pull-up removed */
+                                                   /* Bits 11-15: Reserved */
+#define USBOTG_STCTRL_TMRCNT_SHIFT       (0)       /* Bits 16-313: Timer scale selection */
+#define USBOTG_STCTRL_TMRCNT_MASK        (0ffff << USBOTG_STCTRL_TMR_CNT_SHIFT)
+
 /* OTG Timer */
-#define USBOTG_TMR_
+
+#define USBOTG_TMR_TIMEOUTCNT_SHIFT      (0)       /* Bits 0-15: Interrupt when CNT matches this */
+#define USBOTG_TMR_TIMEOUTCNT_MASK       (0xffff << USBOTG_TMR_TIMEOUTCNT_SHIFT)
+                                                   /* Bits 16-31: Reserved */
 
 /* USB Device Controller ************************************************************/
 /* Device interrupt registers.  See also SYSCON_USBINTST in lpc17_syscon.h */

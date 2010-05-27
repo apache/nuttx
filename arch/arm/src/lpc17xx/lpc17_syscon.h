@@ -88,18 +88,18 @@
 
 /* System control registers -- External Interrupts */
 
-#define LPC17_SYSCON_EXTINT_OFFSET    0x140       /* External Interrupt Flag Register */
+#define LPC17_SYSCON_EXTINT_OFFSET    0x0140      /* External Interrupt Flag Register */
 
-#define LPC17_SYSCON_EXTMODE_OFFSET   0x148       /* External Interrupt Mode register */
-#define LPC17_SYSCON_EXTPOLAR_OFFSET  0x14c       /* External Interrupt Polarity Register */
+#define LPC17_SYSCON_EXTMODE_OFFSET   0x0148      /* External Interrupt Mode register */
+#define LPC17_SYSCON_EXTPOLAR_OFFSET  0x014c      /* External Interrupt Polarity Register */
 
 /* System control registers -- Reset */
 
-#define LPC17_SYSCON_RSID_OFFSET      0x180       /* Reset Source Identification Register */
+#define LPC17_SYSCON_RSID_OFFSET      0x0180      /* Reset Source Identification Register */
 
 /* System control registers -- Syscon Miscellaneous Registers */
 
-#define LPC17_SYSCON_SCS_OFFSET       0x1a0       /* System Control and Status */
+#define LPC17_SYSCON_SCS_OFFSET       0x01a0      /* System Control and Status */
 
 /* More clocking and power control -- Clock dividers */
 
