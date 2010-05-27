@@ -50,31 +50,31 @@
  ************************************************************************************/
  
 /* Register offsets *****************************************************************/
-/* USB Host Controller **************************************************************/
+/* USB Host Controller (OHCI) *******************************************************/
 
-#define LPC17_USBHOST_HCIREV_OFFSET      0x0000 /* Version of HCI specification */
-#define LPC17_USBHOST_CTRL_OFFSET        0x0004 /* HC control */
-#define LPC17_USBHOST_CMDST_OFFSET       0x0008 /* HC command status */
-#define LPC17_USBHOST_INTST_OFFSET       0x000c /* HC interrupt status */
-#define LPC17_USBHOST_INTEN_OFFSET       0x0010 /* HC interrupt enable */
-#define LPC17_USBHOST_INTDIS_OFFSET      0x0014 /* HC interrupt disable */
-#define LPC17_USBHOST_HCCA_OFFSET        0x0018 /* HC communication area */
-#define LPC17_USBHOST_IIED_OFFSET        0x001c /* Current isoc or int endpoint desc */
-#define LPC17_USBHOST_CTRLHEADED_OFFSET  0x0020 /* First EP desc in the control list */
-#define LPC17_USBHOST_CTRLED_OFFSET      0x0024 /* Current EP desc in the control list */
-#define LPC17_USBHOST_BULKHEADED_OFFSET  0x0028 /* First EP desc in the bulk list */
-#define LPC17_USBHOST_BULKED_OFFSET      0x002c /* Current EP desc in the bulk list */
-#define LPC17_USBHOST_DONEHEAD_OFFSET    0x0030 /* Last transfer desc added to DONE queue */
-#define LPC17_USBHOST_FMINT_OFFSET       0x0034 /* Bit time interval that would not cause overrun */
-#define LPC17_USBHOST_FMREM_OFFSET       0x0038 /* Bit time remaining in current frame */
-#define LPC17_USBHOST_FMNO_OFFSET        0x003c /* Frame number counter */
-#define LPC17_USBHOST_PERSTART_OFFSET    0x0040 /* Time to start processing periodic list */
-#define LPC17_USBHOST_LSTHRES_OFFSET     0x0044 /* Commit to transfer threshold */
-#define LPC17_USBHOST_RHDESCA_OFFSET     0x0048 /* Describes root hub (part A) */
-#define LPC17_USBHOST_RHDESCB_OFFSET     0x004c /* Describes root hub (part B) */
-#define LPC17_USBHOST_RHSTATUS_OFFSET    0x0050 /* Root hub status */
-#define LPC17_USBHOST_RHPORTST0_OFFSET   0x0054 /* Root hub port status 1 */
-#define LPC17_USBHOST_RHPORTST1_OFFSET   0x0058 /* Root hub port status 2 */
+#define LPC17_USBHOST_HCIREV_OFFSET      0x0000 /* HcRevision: Version of HCI specification */
+#define LPC17_USBHOST_CTRL_OFFSET        0x0004 /* HcControl: HC control */
+#define LPC17_USBHOST_CMDST_OFFSET       0x0008 /* HcCommandStatus: HC command status */
+#define LPC17_USBHOST_INTST_OFFSET       0x000c /* HcInterruptStatus: HC interrupt status */
+#define LPC17_USBHOST_INTEN_OFFSET       0x0010 /* HcInterruptEnable: HC interrupt enable */
+#define LPC17_USBHOST_INTDIS_OFFSET      0x0014 /* HcInterruptDisable: HC interrupt disable */
+#define LPC17_USBHOST_HCCA_OFFSET        0x0018 /* HcHCCA: HC communication area */
+#define LPC17_USBHOST_IIED_OFFSET        0x001c /* HcPeriodCurrentED: Current isoc or int endpoint desc */
+#define LPC17_USBHOST_CTRLHEADED_OFFSET  0x0020 /* HcControlHeadED: First EP desc in the control list */
+#define LPC17_USBHOST_CTRLED_OFFSET      0x0024 /* HcControlCurrentED: Current EP desc in the control list */
+#define LPC17_USBHOST_BULKHEADED_OFFSET  0x0028 /* HcBulkHeadED: First EP desc in the bulk list */
+#define LPC17_USBHOST_BULKED_OFFSET      0x002c /* HcBulkCurrentED: Current EP desc in the bulk list */
+#define LPC17_USBHOST_DONEHEAD_OFFSET    0x0030 /* HcDoneHead: Last transfer desc added to DONE queue */
+#define LPC17_USBHOST_FMINT_OFFSET       0x0034 /* HcFmInterval: Bit time interval that would not cause overrun */
+#define LPC17_USBHOST_FMREM_OFFSET       0x0038 /* HcFmRemaining: Bit time remaining in current frame */
+#define LPC17_USBHOST_FMNO_OFFSET        0x003c /* HcFmNumber: Frame number counter */
+#define LPC17_USBHOST_PERSTART_OFFSET    0x0040 /* HcPeriodicStart: Time to start processing periodic list */
+#define LPC17_USBHOST_LSTHRES_OFFSET     0x0044 /* HcLSThreshold: Commit to transfer threshold */
+#define LPC17_USBHOST_RHDESCA_OFFSET     0x0048 /* HcRhDescriptorA: Describes root hub (part A) */
+#define LPC17_USBHOST_RHDESCB_OFFSET     0x004c /* HcRhDescriptorB: Describes root hub (part B) */
+#define LPC17_USBHOST_RHSTATUS_OFFSET    0x0050 /* HcRhStatus: Root hub status */
+#define LPC17_USBHOST_RHPORTST1_OFFSET   0x0054 /* HcRhPort1Status: Root hub port status 1 */
+#define LPC17_USBHOST_RHPORTST2_OFFSET   0x0058 /* HcRhPort2Status: Root hub port status 2 */
 #define LPC17_USBHOST_MODID_OFFSET       0x00fc /* Module ID/Revision ID */
 
 /* USB OTG Controller ***************************************************************/
@@ -165,7 +165,7 @@
 #define LPC17_USBDEV_CLKST_OFFSET        0x0ff8 /* USB Clock Status */
 
 /* Register addresses ***************************************************************/
-/* USB Host Controller **************************************************************/
+/* USB Host Controller (OHCI) *******************************************************/
 
 #define LPC17_USBHOST_HCIREV             (LPC17_USB_BASE+LPC17_USBHOST_HCIREV_OFFSET)
 #define LPC17_USBHOST_CTRL               (LPC17_USB_BASE+LPC17_USBHOST_CTRL_OFFSET)
@@ -188,8 +188,8 @@
 #define LPC17_USBHOST_RHDESCA            (LPC17_USB_BASE+LPC17_USBHOST_RHDESCA_OFFSET)
 #define LPC17_USBHOST_RHDESCB            (LPC17_USB_BASE+LPC17_USBHOST_RHDESCB_OFFSET)
 #define LPC17_USBHOST_RHSTATUS           (LPC17_USB_BASE+LPC17_USBHOST_RHSTATUS_OFFSET)
-#define LPC17_USBHOST_RHPORTST0          (LPC17_USB_BASE+LPC17_USBHOST_RHPORTST0_OFFSET)
 #define LPC17_USBHOST_RHPORTST1          (LPC17_USB_BASE+LPC17_USBHOST_RHPORTST1_OFFSET)
+#define LPC17_USBHOST_RHPORTST2          (LPC17_USB_BASE+LPC17_USBHOST_RHPORTST2_OFFSET)
 #define LPC17_USBHOST_MODID              (LPC17_USB_BASE+LPC17_USBHOST_MODID_OFFSET)
 
 /* USB OTG Controller ***************************************************************/
@@ -280,7 +280,7 @@
 #define LPC17_USBDEV_CLKST               (LPC17_USB_BASE+LPC17_USBDEV_CLKST_OFFSET)
 
 /* Register bit definitions *********************************************************/
-/* USB Host Controller **************************************************************/
+/* USB Host Controller (OHCI) *******************************************************/
 /* UM10360: "Refer to the OHCI specification document on the Compaq website for
  *           register definitions"
  */
