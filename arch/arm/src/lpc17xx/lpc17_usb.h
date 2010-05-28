@@ -286,8 +286,9 @@
  */
 
 /* USB OTG Controller ***************************************************************/
-/* OTG registers */
-/* OTG Interrupt Status, OTG Interrupt Enable, OTG Interrupt Set, AND OTG Interrupt
+/* OTG registers:
+ *
+ * OTG Interrupt Status, OTG Interrupt Enable, OTG Interrupt Set, AND OTG Interrupt
  * Clear
  */
 
@@ -326,128 +327,260 @@
 
 /* USB Device Controller ************************************************************/
 /* Device interrupt registers.  See also SYSCON_USBINTST in lpc17_syscon.h */
-
-/* USB Device Interrupt Status */
-#define USBDEV_INTST_
-/* USB Device Interrupt Enable */
-#define USBDEV_INTEN_
-/* USB Device Interrupt Clear */
-#define USBDEV_INTCLR_
-/* USB Device Interrupt Set */
-#define USBDEV_INTSET_
-
-/* SIE Command registers */
-
-/* USB Command Code */
-#define USBDEV_CMDCODE_
+/* USB Device Interrupt Status, USB Device Interrupt Enable, USB Device Interrupt
+ * Clear, USB Device Interrupt Set, and USB Device Interrupt Priority
+ */
+ 
+#define USBDEV_INT_FRAME                 (1 << 0)  /* Bit 0:  frame interrupt (every 1 ms) */
+#define USBDEV_INT_EPFAST                (1 << 1)  /* Bit 1:  Fast endpoint interrupt */
+#define USBDEV_INT_EPSLOW                (1 << 2)  /* Bit 2:  Slow endpoints interrupt */
+#define USBDEV_INT_DEVSTAT               (1 << 3)  /* Bit 3:  Bus reset, suspend change or connect change */
+#define USBDEV_INT_CCEMPTY               (1 << 4)  /* Bit 4:  Command code register empty */
+#define USBDEV_INT_CDFULL                (1 << 5)  /* Bit 5:  Command data register full */
+#define USBDEV_INT_RXENDPKT              (1 << 6)  /* Bit 6:  RX endpoint data transferred */
+#define USBDEV_INT_TXENDPKT              (1 << 7)  /* Bit 7:  TX endpoint data tansferred */
+#define USBDEV_INT_EPRLZED               (1 << 8)  /* Bit 8:  Endpoints realized */
+#define USBDEV_INT_ERRINT                (1 << 9)  /* Bit 9:  Error Interrupt */
+                                                   /* Bits 10-31: Reserved */
+/* SIE Command registers:
+ *
+ * USB Command Code
+ */
+                                                   /* Bits 0-7: Reserved */
+#define USBDEV_CMDCODE_PHASE_SHIFT       (8)       /* Bits 8-15: Command phase */
+#define USBDEV_CMDCODE_PHASE_MASK        (0xff << USBDEV_CMDCODE_PHASE_SHIFT)
+#  define USBDEV_CMDCODE_PHASE_READ      (1 << USBDEV_CMDCODE_PHASE_SHIFT)
+#  define USBDEV_CMDCODE_PHASE_WRITE     (2 << USBDEV_CMDCODE_PHASE_SHIFT)
+#  define USBDEV_CMDCODE_PHASE_COMMAND   (5 << USBDEV_CMDCODE_PHASE_SHIFT)
+#define USBDEV_CMDCODE_CMD_SHIFT         (16)     /* Bits 15-23: Command (READ/COMMAND phases) */
+#define USBDEV_CMDCODE_CMD_MASK          (0xff << USBDEV_CMDCODE_CMD_SHIFT)
+#define USBDEV_CMDCODE_WDATA_SHIFT       (16)     /* Bits 15-23: Write dagta (WRITE phase) */
+#define USBDEV_CMDCODE_WDATA_MASK        (0xff << USBDEV_CMDCODE_CMD_SHIFT)
+                                                   /* Bits 24-31: Reserved */
 /* USB Command Data */
-#define USBDEV_CMDDATA_
 
-/* USB transfer registers */
+#define USBDEV_CMDDATA_SHIFT             (0)       /* Bits 0-7: Command read data */
+#define USBDEV_CMDDATA_MASK              (0xff << USBDEV_CMDDATA_SHIFT)
+                                                   /* Bits 8-31: Reserved */
 
-/* USB Receive Data */
-#define USBDEV_RXDATA_
+/* USB transfer registers:
+ *
+ * USB Receive Data (Bits 0-31: Received data)
+ */
+
 /* USB Receive Packet Length */
-#define USBDEV_RXPLEN_
-/* USB Transmit Data */
-#define USBDEV_TXDATA_
+
+#define USBDEV_RXPLEN_SHIFT              (0)       /* Bits 0-9: Bytes remaining to be read */
+#define USBDEV_RXPLEN_MASK               (0x3ff << USBDEV_RXPLEN_SHIFT)
+#define USBDEV_RXPLEN_DV                 (1 << 10) /* Bit 10: DV Data valid*/
+#define USBDEV_RXPLEN_PKTRDY             (1 << 11) /* Bit 11: Packet ready for reading */
+                                                   /* Bits 12-31: Reserved */
+/* USB Transmit Data (Bits 0-31: Transmit data) */
+
 /* USB Transmit Packet Length */
-#define USBDEV_TXPLEN_
+
+#define USBDEV_TXPLEN_SHIFT              (0)       /* Bits 0-9: Bytes remaining to be written */
+#define USBDEV_TXPLEN_MASK               (0x3ff << USBDEV_TXPLEN_SHIFT)
+                                                   /* Bits 10-31: Reserved */
 /* USB Control */
-#define USBDEV_CTRL_
 
-/* More Device interrupt registers */
+#define USBDEV_CTRL_RDEN                 (1 << 0)  /* Bit 0:  Read mode control */
+#define USBDEV_CTRL_WREN                 (1 << 1)  /* Bit 1:  Write mode control */
+#define USBDEV_CTRL_LOGENDPOINT_SHIFT    (2)       /* Bits 2-5: Logical Endpoint number */
+#define USBDEV_CTRL_LOGENDPOINT_MASK     (15 << USBDEV_CTRL_LOGENDPOINT_SHIFT)
+                                                   /* Bits 6-31: Reserved */
+/* Endpoint interrupt registers:
+ *
+ * USB Endpoint Interrupt Status, USB Endpoint Interrupt Enable, USB Endpoint Interrupt
+ * Clear, USB Endpoint Interrupt Set, and USB Endpoint Priority.  Bits correspond
+ * to on RX or TX value for any of 15 logical endpoints).
+ */
 
-/* USB Device Interrupt Priority */
-#define USBDEV_INTPRI_
+#define USBDEV_LOGEPRX(n)                (1 << ((n) << 1))
+#define USBDEV_LOGEPTX(n)                ((1 << ((n) << 1)) + 1)
+#define USBDEV_LOGEPRX0                  (1 << 0)
+#define USBDEV_LOGEPTX0                  (1 << 1)
+#define USBDEV_LOGEPRX1                  (1 << 2)
+#define USBDEV_LOGEPTX1                  (1 << 3)
+#define USBDEV_LOGEPRX2                  (1 << 4)
+#define USBDEV_LOGEPTX2                  (1 << 5)
+#define USBDEV_LOGEPRX3                  (1 << 6)
+#define USBDEV_LOGEPTX3                  (1 << 7)
+#define USBDEV_LOGEPRX4                  (1 << 8)
+#define USBDEV_LOGEPTX4                  (1 << 9)
+#define USBDEV_LOGEPRX5                  (1 << 10)
+#define USBDEV_LOGEPTX5                  (1 << 11)
+#define USBDEV_LOGEPRX6                  (1 << 12)
+#define USBDEV_LOGEPTX6                  (1 << 13)
+#define USBDEV_LOGEPRX7                  (1 << 14)
+#define USBDEV_LOGEPTX7                  (1 << 15)
+#define USBDEV_LOGEPRX8                  (1 << 16)
+#define USBDEV_LOGEPTX8                  (1 << 17)
+#define USBDEV_LOGEPRX9                  (1 << 18)
+#define USBDEV_LOGEPTX9                  (1 << 19)
+#define USBDEV_LOGEPRX10                 (1 << 20)
+#define USBDEV_LOGEPTX10                 (1 << 21)
+#define USBDEV_LOGEPRX11                 (1 << 22)
+#define USBDEV_LOGEPTX11                 (1 << 23)
+#define USBDEV_LOGEPRX12                 (1 << 24)
+#define USBDEV_LOGEPTX12                 (1 << 25)
+#define USBDEV_LOGEPRX13                 (1 << 26)
+#define USBDEV_LOGEPTX13                 (1 << 27)
+#define USBDEV_LOGEPRX14                 (1 << 28)
+#define USBDEV_LOGEPTX14                 (1 << 29)
+#define USBDEV_LOGEPRX15                 (1 << 30)
+#define USBDEV_LOGEPTX15                 (1 << 31)
 
-/* Endpoint interrupt registers */
+/* Endpoint realization registers:
+ *
+ * USB Realize Endpoint (Bits correspond to 1 of 32 physical endpoints)
+ */
 
-/* USB Endpoint Interrupt Status */
-#define USBDEV_EPINTST_
-/* USB Endpoint Interrupt Enable */
-#define USBDEV_EPINTEN_
-/* USB Endpoint Interrupt Clear */
-#define USBDEV_EPINTCLR_
-/* USB Endpoint Interrupt Set */
-#define USBDEV_EPINTSET_
-/* USB Endpoint Priority */
-#define USBDEV_EPINTPRI_
+#define USBDEV_PHYEP(n)                  (1 << (n))
+#define USBDEV_PHYEP0                    (1 << 0)
+#define USBDEV_PHYEP0                    (1 << 1)
+#define USBDEV_PHYEP0                    (1 << 2)
+#define USBDEV_PHYEP0                    (1 << 3)
+#define USBDEV_PHYEP0                    (1 << 4)
+#define USBDEV_PHYEP0                    (1 << 5)
+#define USBDEV_PHYEP0                    (1 << 6)
+#define USBDEV_PHYEP0                    (1 << 7)
+#define USBDEV_PHYEP0                    (1 << 8)
+#define USBDEV_PHYEP0                    (1 << 9)
+#define USBDEV_PHYEP10                   (1 << 10)
+#define USBDEV_PHYEP11                   (1 << 11)
+#define USBDEV_PHYEP12                   (1 << 12)
+#define USBDEV_PHYEP13                   (1 << 13)
+#define USBDEV_PHYEP14                   (1 << 14)
+#define USBDEV_PHYEP15                   (1 << 15)
+#define USBDEV_PHYEP16                   (1 << 16)
+#define USBDEV_PHYEP17                   (1 << 17)
+#define USBDEV_PHYEP18                   (1 << 18)
+#define USBDEV_PHYEP19                   (1 << 19)
+#define USBDEV_PHYEP20                   (1 << 20)
+#define USBDEV_PHYEP21                   (1 << 21)
+#define USBDEV_PHYEP22                   (1 << 22)
+#define USBDEV_PHYEP23                   (1 << 23)
+#define USBDEV_PHYEP24                   (1 << 24)
+#define USBDEV_PHYEP25                   (1 << 25)
+#define USBDEV_PHYEP26                   (1 << 26)
+#define USBDEV_PHYEP27                   (1 << 27)
+#define USBDEV_PHYEP28                   (1 << 28)
+#define USBDEV_PHYEP29                   (1 << 29)
+#define USBDEV_PHYEP30                   (1 << 30)
+#define USBDEV_PHYEP31                   (1 << 31)
 
-/* Endpoint realization registers */
-
-/* USB Realize Endpoint */
-#define USBDEV_REEP_
 /* USB Endpoint Index */
-#define USBDEV_EPIND_
+
+#define USBDEV_EPIND_SHIFT               (0)       /* Bits 0-4: Physical endpoint number (0-31) */
+#define USBDEV_EPIND_MASK                (31 << USBDEV_EPIND_SHIFT)
+                                                   /* Bits 5-31: Reserved */
+
 /* USB MaxPacketSize */
-#define USBDEV_MAXPSIZE_
 
-/* DMA registers */
+#define USBDEV_MAXPSIZE_SHIFT            (0)       /* Bits 0-9: Maximum packet size value */
+#define USBDEV_MAXPSIZE_                 (0x3ff << USBDEV_MAXPSIZE_SHIFT)
+                                                   /* Bits 10-31: Reserved */
+/* DMA registers:
+ *
+ * USB DMA Request Status, USB DMA Request Clear, and USB DMA Request Set.  Registers
+ * contain bits for each of 32 physical endpoints.  Use the USBDEV_PHYEP* definitions
+ * above.  PHYEP0-1 (bits 0-1) must be zero.
+ */
 
-/* USB DMA Request Status */
-#define USBDEV_DMARST_
-/* USB DMA Request Clear */
-#define USBDEV_DMARCLR_
-/* USB DMA Request Set */
-#define USBDEV_DMARSET_
 /* USB UDCA Head */
-#define USBDEV_UDCAH_
-/* USB Endpoint DMA Status */
-#define USBDEV_EPDMAST_
-/* USB Endpoint DMA Enable */
-#define USBDEV_EPDMAEN_
-/* USB Endpoint DMA Disable */
-#define USBDEV_EPDMADIS_
-/* USB DMA Interrupt Status */
-#define USBDEV_DMAINTST_
-/* USB DMA Interrupt Enable */
-#define USBDEV_DMAINTEN_
-/* USB End of Transfer Interrupt Status */
-#define USBDEV_EOTINTST_
-/* USB End of Transfer Interrupt Clear */
-#define USBDEV_EOTINTCLR_
-/* USB End of Transfer Interrupt Set */
-#define USBDEV_EOTINTSET_
-/* USB New DD Request Interrupt Status */
-#define USBDEV_NDDRINTST_
-/* USB New DD Request Interrupt Clear */
-#define USBDEV_NDDRINTCLR_
-/* USB New DD Request Interrupt Set */
-#define USBDEV_NDDRINTSET_
-/* USB System Error Interrupt Status */
-#define USBDEV_SYSERRINTST_
-/* USB System Error Interrupt Clear */
-#define USBDEV_SYSERRINTCLR_
-/* USB System Error Interrupt Set */
-#define USBDEV_SYSERRINTSET_
+                                                  /* Bits 0-6: Reserved */
+#define USBDEV_UDCAH_SHIFT               (7)      /* Bits 7-31: UDCA start address */
+#define USBDEV_UDCAH_MASK                (0x01ffffff << USBDEV_UDCAH_SHIFT)
+
+/* USB Endpoint DMA Status, USB Endpoint DMA Enable, and USB Endpoint DMA Disable.
+ * Registers contain bits for physical endpoints 2-31. Use the USBDEV_PHYEP*
+ * definitions above.  PHYEP0-1 (bits 0-1) must be zero.
+ */
+
+/* USB DMA Interrupt Status and USB DMA Interrupt Enable */
+
+#define USBDEV_DMAINT_EOT                (1 << 0)  /* Bit 0:  End of Transfer Interrupt */
+#define USBDEV_DMAINT_NDDR               (1 << 1)  /* Bit 1:  New DD Request Interrupt */
+#define USBDEV_DMAINT_ERR                (1 << 2)  /* Bit 2:  System Error Interrupt */
+                                                   /* Bits 3-31: Reserved */
+/* USB End of Transfer Interrupt Status, USB End of Transfer Interrupt Clear, and USB
+ * End of Transfer Interrupt Set.  Registers contain bits for physical endpoints 2-31.
+ * Use the USBDEV_PHYEP* definitions above.  PHYEP0-1 (bits 0-1) must be zero.
+ */
+
+/* USB New DD Request Interrupt Status, USB New DD Request Interrupt Clear, and USB
+ * New DD Request Interrupt Set.  Registers contain bits for physical endpoints 2-31.
+ * Use the USBDEV_PHYEP* definitions above.  PHYEP0-1 (bits 0-1) must be zero.
+ */
+
+/* USB System Error Interrupt Status, USB System Error Interrupt Clear, USB System
+ * Error Interrupt Set.  Registers contain bits for  physical endpoints 2-31.  Use
+ * the USBDEV_PHYEP* definitions above.  PHYEP0-1 (bits 0-1) must be zero.
+ */
 
 /* OTG I2C registers ****************************************************************/
 
 /* I2C Receive */
-#define OTGI2C_RX_
-/* I2C Transmit */
-#define OTGI2C_TX_
-/* I2C Status */
-#define OTGI2C_STS_
-/* I2C Control */
-#define OTGI2C_CTL_
-/* I2C Clock High */
-#define OTGI2C_CLKHI_
-/* I2C Clock Low */
-#define OTGI2C_CLKLO_
 
+#define OTGI2C_RX_DATA_SHIFT             (0)       /* Bits 0-7: RX data */
+#define OTGI2C_RX_DATA_MASK              (0xff << OTGI2C_RX_SHIFT)
+                                                   /* Bits 8-31: Reserved */
+/* I2C Transmit */
+
+#define OTGI2C_TX_DATA_SHIFT             (0)       /* Bits 0-7: TX data */
+#define OTGI2C_TX_DATA_MASK              (0xff << OTGI2C_TX_DATA_SHIFT)
+#define OTGI2C_TX_DATA_START             (1 << 8)  /* Bit 8:  Issue START before transmit */
+#define OTGI2C_TX_DATA_STOP              (1 << 9)  /* Bit 9:  Issue STOP before transmit */
+                                                   /* Bits 3-31: Reserved */
+/* I2C Status */
+
+#define OTGI2C_STS_TDI                   (1 << 0)  /* Bit 0:  Transaction Done Interrupt */
+#define OTGI2C_STS_AFI                   (1 << 1)  /* Bit 1:  Arbitration Failure Interrupt */
+#define OTGI2C_STS_NAI                   (1 << 2)  /* Bit 2:  No Acknowledge Interrupt */
+#define OTGI2C_STS_DRMI                  (1 << 3)  /* Bit 3:  Master Data Request Interrupt */
+#define OTGI2C_STS_DRSI                  (1 << 4)  /* Bit 4:  Slave Data Request Interrupt */
+#define OTGI2C_STS_ACTIVE                (1 << 5)  /* Bit 5:  Indicates whether the bus is busy */
+#define OTGI2C_STS_SCL                   (1 << 6)  /* Bit 6:  The current value of the SCL signal */
+#define OTGI2C_STS_SDA                   (1 << 7)  /* Bit 7:  The current value of the SDA signal */
+#define OTGI2C_STS_RFF                   (1 << 8)  /* Bit 8:  Receive FIFO Full (RFF) */
+#define OTGI2C_STS_RFE                   (1 << 9)  /* Bit 9:  Receive FIFO Empty */
+#define OTGI2C_STS_TFF                   (1 << 10) /* Bit 10: Transmit FIFO Full */
+#define OTGI2C_STS_TFE                   (1 << 11) /* Bit 11: Transmit FIFO Empty */
+                                                   /* Bits 12-31: Reserved */
+/* I2C Control */
+
+#define OTGI2C_CTL_TDIE                  (1 << 0)  /* Bit 0:  Transmit Done Interrupt Enable */
+#define OTGI2C_CTL_AFIE                  (1 << 1)  /* Bit 1:  Transmitter Arbitration Failure Interrupt Enable */
+#define OTGI2C_CTL_NAIE                  (1 << 2)  /* Bit 2:  Transmitter No Acknowledge Interrupt Enable */
+#define OTGI2C_CTL_DRMIE                 (1 << 3)  /* Bit 3:  Master Transmitter Data Request Interrupt Enable */
+#define OTGI2C_CTL_DRSIE                 (1 << 4)  /* Bit 4:  Slave Transmitter Data Request Interrupt Enable */
+#define OTGI2C_CTL_REFIE                 (1 << 5)  /* Bit 5:  Receive FIFO Full Interrupt Enable */
+#define OTGI2C_CTL_RFDAIE                (1 << 6)  /* Bit 6:  Receive Data Available Interrupt Enable */
+#define OTGI2C_CTL_TFFIE                 (1 << 7)  /* Bit 7:  Transmit FIFO Not Full Interrupt Enable */
+#define OTGI2C_CTL_SRST                  (1 << 8)  /* Bit 8:  Soft reset */
+                                                   /* Bits 9-31: Reserved */
+/* I2C Clock High */
+
+#define OTGI2C_CLKHI_SHIFT               (0)       /* Bits 0-7: Clock divisor high */
+#define OTGI2C_CLKHI_MASK                (0xff << OTGI2C_CLKHI_SHIFT)
+                                                   /* Bits 8-31: Reserved */
+/* I2C Clock Low */
+
+#define OTGI2C_CLKLO_SHIFT               (0)       /* Bits 0-7: Clock divisor high */
+#define OTGI2C_CLLO_MASK                (0xff << OTGI2C_CLKLO_SHIFT)
+                                                   /* Bits 8-31: Reserved */
 /* Clock control registers ***********************************************************/
 
-/* OTG clock controller */
-#define USBOTG_CLKCTRL_
-/* OTG clock status */
-#define USBOTG_CLKST_
+/* USB Clock Control (OTG clock controller) and USB Clock Status (OTG clock status) */
 
-/* USB Clock Control */
-#define USBDEV_CLKCTRL_
-/* USB Clock Status */
-#define USBDEV_CLKST_
+#define USBDEV_CLK_HOSTCLK               (1 << 0)  /* Bit 1:  Host clock (OTG only) */
+#define USBDEV_CLK_DEVCLK                (1 << 1)  /* Bit 1:  Device clock */
+#define USBDEV_CLK_I2CCLK                (1 << 2)  /* Bit 2:  I2C clock (OTG only) */
+#define USBDEV_CLK_PORTSELCLK            (1 << 3)  /* Bit 3:  Port select register clock (device only) */
+#define USBDEV_CLK_OTGCLK                (1 << 3)  /* Bit 3:  OTG clock (OTG only) */
+#define USBDEV_CLK_AHBCLK                (1 << 4)  /* Bit 4:  AHB clock */
+                                                   /* Bits 5-31: Reserved */
 
 /************************************************************************************
  * Public Types
