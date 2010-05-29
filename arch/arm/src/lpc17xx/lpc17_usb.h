@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/ohci.h>
 
 #include "chip.h"
 #include "lp17_memorymap.h"
@@ -51,30 +52,8 @@
  
 /* Register offsets *****************************************************************/
 /* USB Host Controller (OHCI) *******************************************************/
+/* See include/nuttx/ohci.h */
 
-#define LPC17_USBHOST_HCIREV_OFFSET      0x0000 /* HcRevision: Version of HCI specification */
-#define LPC17_USBHOST_CTRL_OFFSET        0x0004 /* HcControl: HC control */
-#define LPC17_USBHOST_CMDST_OFFSET       0x0008 /* HcCommandStatus: HC command status */
-#define LPC17_USBHOST_INTST_OFFSET       0x000c /* HcInterruptStatus: HC interrupt status */
-#define LPC17_USBHOST_INTEN_OFFSET       0x0010 /* HcInterruptEnable: HC interrupt enable */
-#define LPC17_USBHOST_INTDIS_OFFSET      0x0014 /* HcInterruptDisable: HC interrupt disable */
-#define LPC17_USBHOST_HCCA_OFFSET        0x0018 /* HcHCCA: HC communication area */
-#define LPC17_USBHOST_IIED_OFFSET        0x001c /* HcPeriodCurrentED: Current isoc or int endpoint desc */
-#define LPC17_USBHOST_CTRLHEADED_OFFSET  0x0020 /* HcControlHeadED: First EP desc in the control list */
-#define LPC17_USBHOST_CTRLED_OFFSET      0x0024 /* HcControlCurrentED: Current EP desc in the control list */
-#define LPC17_USBHOST_BULKHEADED_OFFSET  0x0028 /* HcBulkHeadED: First EP desc in the bulk list */
-#define LPC17_USBHOST_BULKED_OFFSET      0x002c /* HcBulkCurrentED: Current EP desc in the bulk list */
-#define LPC17_USBHOST_DONEHEAD_OFFSET    0x0030 /* HcDoneHead: Last transfer desc added to DONE queue */
-#define LPC17_USBHOST_FMINT_OFFSET       0x0034 /* HcFmInterval: Bit time interval that would not cause overrun */
-#define LPC17_USBHOST_FMREM_OFFSET       0x0038 /* HcFmRemaining: Bit time remaining in current frame */
-#define LPC17_USBHOST_FMNO_OFFSET        0x003c /* HcFmNumber: Frame number counter */
-#define LPC17_USBHOST_PERSTART_OFFSET    0x0040 /* HcPeriodicStart: Time to start processing periodic list */
-#define LPC17_USBHOST_LSTHRES_OFFSET     0x0044 /* HcLSThreshold: Commit to transfer threshold */
-#define LPC17_USBHOST_RHDESCA_OFFSET     0x0048 /* HcRhDescriptorA: Describes root hub (part A) */
-#define LPC17_USBHOST_RHDESCB_OFFSET     0x004c /* HcRhDescriptorB: Describes root hub (part B) */
-#define LPC17_USBHOST_RHSTATUS_OFFSET    0x0050 /* HcRhStatus: Root hub status */
-#define LPC17_USBHOST_RHPORTST1_OFFSET   0x0054 /* HcRhPort1Status: Root hub port status 1 */
-#define LPC17_USBHOST_RHPORTST2_OFFSET   0x0058 /* HcRhPort2Status: Root hub port status 2 */
 #define LPC17_USBHOST_MODID_OFFSET       0x00fc /* Module ID/Revision ID */
 
 /* USB OTG Controller ***************************************************************/
@@ -166,30 +145,40 @@
 
 /* Register addresses ***************************************************************/
 /* USB Host Controller (OHCI) *******************************************************/
+/* Control and status registers (section 7.1) */
 
-#define LPC17_USBHOST_HCIREV             (LPC17_USB_BASE+LPC17_USBHOST_HCIREV_OFFSET)
-#define LPC17_USBHOST_CTRL               (LPC17_USB_BASE+LPC17_USBHOST_CTRL_OFFSET)
-#define LPC17_USBHOST_CMDST              (LPC17_USB_BASE+LPC17_USBHOST_CMDST_OFFSET)
-#define LPC17_USBHOST_INTST              (LPC17_USB_BASE+LPC17_USBHOST_INTST_OFFSET)
-#define LPC17_USBHOST_INTEN              (LPC17_USB_BASE+LPC17_USBHOST_INTEN_OFFSET)
-#define LPC17_USBHOST_INTDIS             (LPC17_USB_BASE+LPC17_USBHOST_INTDIS_OFFSET)
-#define LPC17_USBHOST_HCCA               (LPC17_USB_BASE+LPC17_USBHOST_HCCA_OFFSET)
-#define LPC17_USBHOST_IIED               (LPC17_USB_BASE+LPC17_USBHOST_IIED_OFFSET)
-#define LPC17_USBHOST_CTRLHEADED         (LPC17_USB_BASE+LPC17_USBHOST_CTRLHEADED_OFFSET)
-#define LPC17_USBHOST_CTRLED             (LPC17_USB_BASE+LPC17_USBHOST_CTRLED_OFFSET)
-#define LPC17_USBHOST_BULKHEADED         (LPC17_USB_BASE+LPC17_USBHOST_BULKHEADED_OFFSET)
-#define LPC17_USBHOST_BULKED             (LPC17_USB_BASE+LPC17_USBHOST_BULKED_OFFSET)
-#define LPC17_USBHOST_DONEHEAD           (LPC17_USB_BASE+LPC17_USBHOST_DONEHEAD_OFFSET)
-#define LPC17_USBHOST_FMINT              (LPC17_USB_BASE+LPC17_USBHOST_FMINT_OFFSET)
-#define LPC17_USBHOST_FMREM              (LPC17_USB_BASE+LPC17_USBHOST_FMREM_OFFSET)
-#define LPC17_USBHOST_FMNO               (LPC17_USB_BASE+LPC17_USBHOST_FMNO_OFFSET)
-#define LPC17_USBHOST_PERSTART           (LPC17_USB_BASE+LPC17_USBHOST_PERSTART_OFFSET)
-#define LPC17_USBHOST_LSTHRES            (LPC17_USB_BASE+LPC17_USBHOST_LSTHRES_OFFSET)
-#define LPC17_USBHOST_RHDESCA            (LPC17_USB_BASE+LPC17_USBHOST_RHDESCA_OFFSET)
-#define LPC17_USBHOST_RHDESCB            (LPC17_USB_BASE+LPC17_USBHOST_RHDESCB_OFFSET)
-#define LPC17_USBHOST_RHSTATUS           (LPC17_USB_BASE+LPC17_USBHOST_RHSTATUS_OFFSET)
-#define LPC17_USBHOST_RHPORTST1          (LPC17_USB_BASE+LPC17_USBHOST_RHPORTST1_OFFSET)
-#define LPC17_USBHOST_RHPORTST2          (LPC17_USB_BASE+LPC17_USBHOST_RHPORTST2_OFFSET)
+#define LPC17_USBHOST_HCIREV             (LPC17_USB_BASE+OHCI_HCIREV_OFFSET)
+#define LPC17_USBHOST_CTRL               (LPC17_USB_BASE+OHCI_CTRL_OFFSET)
+#define LPC17_USBHOST_CMDST              (LPC17_USB_BASE+OHCI_CMDST_OFFSET)
+#define LPC17_USBHOST_INTST              (LPC17_USB_BASE+OHCI_INTST_OFFSET)
+#define LPC17_USBHOST_INTEN              (LPC17_USB_BASE+OHCI_INTEN_OFFSET)
+#define LPC17_USBHOST_INTDIS             (LPC17_USB_BASE+OHCI_INTDIS_OFFSET)
+
+/* Memory pointers (section 7.2) */
+
+#define LPC17_USBHOST_HCCA               (LPC17_USB_BASE+OHCI_HCCA_OFFSET)
+#define LPC17_USBHOST_PERED              (LPC17_USB_BASE+OHCI_PERED_OFFSET)
+#define LPC17_USBHOST_CTRLHEADED         (LPC17_USB_BASE+OHCI_CTRLHEADED_OFFSET)
+#define LPC17_USBHOST_CTRLED             (LPC17_USB_BASE+OHCI_CTRLED_OFFSET)
+#define LPC17_USBHOST_BULKHEADED         (LPC17_USB_BASE+OHCI_BULKHEADED_OFFSET)
+#define LPC17_USBHOST_BULKED             (LPC17_USB_BASE+OHCI_BULKED_OFFSET)
+#define LPC17_USBHOST_DONEHEAD           (LPC17_USB_BASE+OHCI_DONEHEAD_OFFSET)
+
+/* Frame counters (section 7.3) */
+
+#define LPC17_USBHOST_FMINT              (LPC17_USB_BASE+OHCI_FMINT_OFFSET)
+#define LPC17_USBHOST_FMREM              (LPC17_USB_BASE+OHCI_FMREM_OFFSET)
+#define LPC17_USBHOST_FMNO               (LPC17_USB_BASE+OHCI_FMNO_OFFSET)
+#define LPC17_USBHOST_PERSTART           (LPC17_USB_BASE+OHCI_PERSTART_OFFSET)
+
+/* Root hub ports (section 7.4) */
+
+#define LPC17_USBHOST_LSTHRES            (LPC17_USB_BASE+OHCI_LSTHRES_OFFSET)
+#define LPC17_USBHOST_RHDESCA            (LPC17_USB_BASE+OHCI_RHDESCA_OFFSET)
+#define LPC17_USBHOST_RHDESCB            (LPC17_USB_BASE+OHCI_RHDESCB_OFFSET)
+#define LPC17_USBHOST_RHSTATUS           (LPC17_USB_BASE+OHCI_RHSTATUS_OFFSET)
+#define LPC17_USBHOST_RHPORTST1          (LPC17_USB_BASE+OHCI_RHPORTST1_OFFSET)
+#define LPC17_USBHOST_RHPORTST2          (LPC17_USB_BASE+OHCI_RHPORTST2_OFFSET)
 #define LPC17_USBHOST_MODID              (LPC17_USB_BASE+LPC17_USBHOST_MODID_OFFSET)
 
 /* USB OTG Controller ***************************************************************/
@@ -212,8 +201,8 @@
 
 /* SIE Command registers */
 
-#define LPC17_USBDEV_CMDCODE            (LPC17_USB_BASE+LPC17_USBDEV_CMDCODE_OFFSET)
-#define LPC17_USBDEV_CMDDATA            (LPC17_USB_BASE+LPC17_USBDEV_CMDDATA_OFFSET)
+#define LPC17_USBDEV_CMDCODE             (LPC17_USB_BASE+LPC17_USBDEV_CMDCODE_OFFSET)
+#define LPC17_USBDEV_CMDDATA             (LPC17_USB_BASE+LPC17_USBDEV_CMDDATA_OFFSET)
 
 /* USB transfer registers */
 
@@ -281,9 +270,17 @@
 
 /* Register bit definitions *********************************************************/
 /* USB Host Controller (OHCI) *******************************************************/
-/* UM10360: "Refer to the OHCI specification document on the Compaq website for
- *           register definitions"
- */
+/* See include/nuttx/ohci.h */
+
+/* Module ID/Revision ID */
+
+#define USBHOST_MODID_VER_SHIFT          (0)      /* Bits 0-7: Unique version number */
+#define USBHOST_MODID_VER_MASK           (0xff << USBHOST_MODID_VER_SHIFT)
+#define USBHOST_MODID_REV_SHIFT          (8)      /* Bits 9-15: Unique revision number */
+#define USBHOST_MODID_REV_MASK           (0xff << USBHOST_MODID_REV_SHIFT)
+#define USBHOST_MODID_3505_SHIFT         (16)     /* Bits 16-31: 0x3505 */
+#define USBHOST_MODID_3505_MASK          (0xffff << USBHOST_MODID_3505_SHIFT)
+#  define USBHOST_MODID_3505             (0x3505 << USBHOST_MODID_3505_SHIFT)
 
 /* USB OTG Controller ***************************************************************/
 /* OTG registers:
