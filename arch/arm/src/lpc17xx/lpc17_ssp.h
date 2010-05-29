@@ -114,7 +114,6 @@
 #define SSP_CR0_SCR_SHIFT       (8)       /* Bits 8-15: Serial Clock Rate */
 #define SSP_CR0_SCR_MASK        (0xff << SSP_CR0_SCR_SHIFT)
                                           /* Bits 8-31: Reserved */
-
 /* Control Register 1 */
 
 #define SSP_CR1_LBM             (1 << 0)  /* Bit 0:  Loop Back Mode */
