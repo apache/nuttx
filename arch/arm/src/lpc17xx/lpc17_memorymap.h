@@ -105,7 +105,7 @@
                                        /* -0x400affff: Reserved */
 #define LPC17_RIT_BASE      0x400b0000 /* -0x400b3fff: Repetitive interrupt timer */
                                        /* -0x400b7fff: Reserved */
-#define LPC17_MPWM_BASE     0x400b8000 /* -0x400bbfff: Motor control PWM */
+#define LPC17_MCPWM_BASE    0x400b8000 /* -0x400bbfff: Motor control PWM */
 #define LPC17_QEI_BASE      0x400bc000 /* -0x400bffff: Quadrature encoder interface */
                                        /* -0x400fbfff: Reserved */
 #define LPC17_SYSCON_BASE   0x400fc000 /* -0x400fffff: System control */

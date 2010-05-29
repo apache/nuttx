@@ -181,7 +181,7 @@
 #define TMR_CCR_CAP0RE            (1 << 0)  /* Bit 0: Capture on CAPn.0 rising edge */
 #define TMR_CCR_CAP0FE            (1 << 1)  /* Bit 1: Capture on CAPn.0 falling edg */
 #define TMR_CCR_CAP0I             (1 << 2)  /* Bit 2: Interrupt on CAPn.0 */
-#define TMR_CCR_CAP1RE            (1 << 3)  /* Bit 3: Capture on CAPn.1rising edge */
+#define TMR_CCR_CAP1RE            (1 << 3)  /* Bit 3: Capture on CAPn.1 rising edge */
 #define TMR_CCR_CAP1FE            (1 << 4)  /* Bit 4: Capture on CAPn.1 falling edg */
 #define TMR_CCR_CAP1I             (1 << 5)  /* Bit 5: Interrupt on CAPn.1 */
                                             /* Bits 6-31: Reserved */
