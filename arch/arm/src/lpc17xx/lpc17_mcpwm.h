@@ -116,125 +116,154 @@
 #define LPC17_MCPWM_CAPCLR           (LPC17_MCPWM_BASE+LPC17_MCPWM_CAPCLR_OFFSET)
 
 /* Register bit definitions *********************************************************/
-/* PWM Control read address */
+/* There are no bit field definitions for the following registers because they support
+ * 32-bit values:
+ *
+ * - Timer Counter register, channel 0 (TC0), Timer Counter register, channel 1 (TC1),
+ *   and Timer Counter register, channel 2 (TC2): 32-bit Timer/Counter values for
+ *   channels 0, 1, 2 (no bit field definitions)
+ *
+ * - Limit register, channel 0 (LIM0), Limit register, channel 1 (LIM1), and Limit
+ *   register, channel 2 (LIM2): 32-bit Limit values for TC0, 1, 2 (no bit field
+ *   definitions)
+ *
+ * - Match register, channel 0 MAT0), Match register, channel 1 (MAT1), and Match
+ *   register, channel 2 (MAT2): 32-bit Match values for TC0, 1, 2 (no bit field
+ *   definitions).
+ *
+ * - Capture register, channel 0 (CAP0), Capture register, channel 1 (CAP1), and
+ *   Capture register, channel 2 (CAP2): 32-bit TC value at a capture event for
+ *  channels 0, 1, 2 (no bit field definitions)
+ */
 
-#define MCPWM_CON_
+/* PWM Control read address (CON), PWM Control set address (CONSET), and PWM Control
+ * clear address (CONCLR) common regiser bit definitions.
+ */
 
-/* PWM Control set address */
+#define MCPWM_CON_RUN0               (1 << 0)  /* Bit 0:  Stops/starts timer channel 0 */
+#define MCPWM_CON_CENTER0            (1 << 1)  /* Bit 1:  Chan 0 edge/center aligned operation */
+#define MCPWM_CON_POLA0              (1 << 2)  /* Bit 2:  Polarity of MCOA0 and MCOB0 */
+#define MCPWM_CON_DTE0               (1 << 3)  /* Bit 3:  Dead time feature control */
+#define MCPWM_CON_DISUP0             (1 << 4)  /* Bit 4:  Enable/disable register updates */
+                                               /* Bits 5-7: Reserved */
+#define MCPWM_CON_RUN1               (1 << 8)  /* Bit 8:  Stops/starts timer channel 1 */
+#define MCPWM_CON_CENTER1            (1 << 9)  /* Bit 9:  Chan 1 edge/center aligned operation */
+#define MCPWM_CON_POLA1              (1 << 10) /* Bit 10: Polarity of MCOA1 and MCOB1 */
+#define MCPWM_CON_DTE1               (1 << 11) /* Bit 11: Dead time feature control */
+#define MCPWM_CON_DISUP1             (1 << 12) /* Bit 12: Enable/disable register updates */
+                                               /* Bits 13-15: Reserved */
+#define MCPWM_CON_RUN2               (1 << 16) /* Bit 16:  Stops/starts timer channel 2 */
+#define MCPWM_CON_CENTER2            (1 << 17) /* Bit 17:  Chan 2 edge/center aligned operation */
+#define MCPWM_CON_POLA2              (1 << 18) /* Bit 18: Polarity of MCOA1 and MCOB1 */
+#define MCPWM_CON_DTE2               (1 << 19) /* Bit 19: Dead time feature control */
+#define MCPWM_CON_DISUP2             (1 << 20) /* Bit 20: Enable/disable register updates */
+                                               /* Bits 21-28: Reserved */
+#define MCPWM_CON_INVBDC             (1 << 29) /* Bit 29: Polarity of MCOB outputs (all channels)  */
+#define MCPWM_CON_ACMODE             (1 << 30) /* Bit 30: 3-phase AC mode select */
+#define MCPWM_CON_DCMODE             (1 << 31) /* Bit 31: 3-phase DC mode select */
 
-#define MCPWM_CONSET_
+/* Capture Control read address (CAPCON), Capture Control set address (CAPCONSET),
+ * and Event Control clear address (CAPCONCLR) common register bit defintions
+ */
 
-/* PWM Control clear address */
-
-#define MCPWM_CONCLR_
-
-/* Capture Control read address */
-
-#define MCPWM_CAPCON_
-
-/* Capture Control set address */
-
-#define MCPWM_CAPCONSET_
-
-/* Event Control clear address */
-
-#define MCPWM_CAPCONCLR_
-
-/* Timer Counter register, channel 0 */
-
-#define MCPWM_TC0_
-
-/* Timer Counter register, channel 1 */
-
-#define MCPWM_TC1_
-
-/* Timer Counter register, channel 2 */
-
-#define MCPWM_TC2_
-
-/* Limit register, channel 0 */
-
-#define MCPWM_LIM0_
-
-/* Limit register, channel 1 */
-
-#define MCPWM_LIM1_
-
-/* Limit register, channel 2 */
-
-#define MCPWM_LIM2_
-
-/* Match register, channel 0 */
-
-#define MCPWM_MAT0_
-
-/* Match register, channel 1 */
-
-#define MCPWM_MAT1_
-
-/* Match register, channel 2 */
-
-#define MCPWM_MAT2_
-
+#define MCPWM_CAPCON_CAP0MCI0RE      (1 << 0)  /* Bit 0:  Enable chan0 rising edge capture MCI0 */
+#define MCPWM_CAPCON_CAP0MCI0FE      (1 << 1)  /* Bit 1:  Enable chan 0 falling edge capture MCI0 */
+#define MCPWM_CAPCON_CAP0MCI1RE      (1 << 2)  /* Bit 2:  Enable chan 0 rising edge capture MCI1 */
+#define MCPWM_CAPCON_CAP0MCI1FE      (1 << 3)  /* Bit 3:  Enable chan 0 falling edge capture MCI1 */
+#define MCPWM_CAPCON_CAP0MCI2RE      (1 << 4)  /* Bit 4:  Enable chan 0 rising edge capture MCI2 */
+#define MCPWM_CAPCON_CAP0MCI2FE      (1 << 5)  /* Bit 5:  Enable chan 0 falling edge capture MCI2 */
+#define MCPWM_CAPCON_CAP1MCI0RE      (1 << 6)  /* Bit 6:  Enable chan 1 rising edge capture MCI0 */
+#define MCPWM_CAPCON_CAP1MCI0FE      (1 << 7)  /* Bit 7:  Enable chan 1 falling edge capture MCI0 */
+#define MCPWM_CAPCON_CAP1MCI1RE      (1 << 8)  /* Bit 8:  Enable chan 1 rising edge capture MCI1 */
+#define MCPWM_CAPCON_CAP1MCI1FE      (1 << 9)  /* Bit 9:  Enable chan 1 falling edge capture MCI1 */
+#define MCPWM_CAPCON_CAP1MCI2RE      (1 << 10) /* Bit 10: Enable chan 1 rising edge capture MCI2 */
+#define MCPWM_CAPCON_CAP1MCI2FE      (1 << 11) /* Bit 11: Enable chan 1 falling edge capture MCI2 */
+#define MCPWM_CAPCON_CAP2MCI0RE      (1 << 12) /* Bit 12: Enable chan 2 rising edge capture MCI0 */
+#define MCPWM_CAPCON_CAP2MCI0FE      (1 << 13) /* Bit 13: Enable chan 2 falling edge capture MCI0 */
+#define MCPWM_CAPCON_CAP2MCI1RE      (1 << 14) /* Bit 14: Enable chan 2 rising edge capture MCI1 */
+#define MCPWM_CAPCON_CAP2MCI1FE      (1 << 15) /* Bit 15: Enable chan 2 falling edge capture MCI1 */
+#define MCPWM_CAPCON_CAP2MCI2RE      (1 << 16) /* Bit 16: Enable chan 2 rising edge capture MCI2 */
+#define MCPWM_CAPCON_CAP2MCI2FE      (1 << 17) /* Bit 17: Enable chan 2 falling edge capture MCI2 */
+#define MCPWM_CAPCON_RT0             (1 << 18) /* Bit 18: TC0 reset by chan 0 capture event */
+#define MCPWM_CAPCON_RT1             (1 << 19) /* Bit 19: TC1 reset by chan 1 capture event */
+#define MCPWM_CAPCON_RT2             (1 << 20) /* Bit 20: TC2 reset by chan 2 capture event */
+#define MCPWM_CAPCON_HNFCAP0         (1 << 21) /* Bit 21: Hardware noise filter */
+#define MCPWM_CAPCON_HNFCAP1         (1 << 22) /* Bit 22: Hardware noise filter */
+#define MCPWM_CAPCON_HNFCAP2         (1 << 23) /* Bit 23: Hardware noise filter */
+                                               /* Bits 24-31: Reserved
 /* Dead time register */
 
-#define MCPWM_DT_
-
+#define MCPWM_DT_DT0_SHIFT           (0)       /* Bits 0-9: Dead time for channel 0 */
+#define MCPWM_DT_DT0_MASK            (0x03ff << MCPWM_DT_DT0_SHIFT)
+#define MCPWM_DT_DT1_SHIFT           (10)      /* Bits 10-19: Dead time for channel 1 */
+#define MCPWM_DT_DT1_MASK            (0x03ff << MCPWM_DT_DT1_SHIFT)
+#define MCPWM_DT_DT2_SHIFT           (20)      /* Bits 20-29: Dead time for channel 2 */
+#define MCPWM_DT_DT2_MASK            (0x03ff << MCPWM_DT_DT2_SHIFT)
+                                               /* Bits 30-31: reserved */
 /* Commutation Pattern register */
 
-#define MCPWM_CP_
+#define MCPWM_CP_CCPA0               (1 << 0)  /* Bit 0:  Iinternal MCOA0 */
+#define MCPWM_CP_CCPB0               (1 << 1)  /* Bit 1:  MCOB0 tracks internal MCOA0 */
+#define MCPWM_CP_CCPA1               (1 << 2)  /* Bit 2:  MCOA1 tracks internal MCOA0 */
+#define MCPWM_CP_CCPB1               (1 << 3)  /* Bit 3:  MCOB1 tracks internal MCOA0 */
+#define MCPWM_CP_CCPA2               (1 << 4)  /* Bit 4:  MCOA2 tracks internal MCOA0 */
+#define MCPWM_CP_CCPB2               (1 << 5)  /* Bit 5:  MCOB2 tracks internal MCOA0 */
+                                               /* Bits 6-31: reserved */
 
-/* Capture register, channel 0 */
+/* Interrupt Enable read address (INTEN), Interrupt Enable set address (INTENSET),
+ * Interrupt Enable clear address (INTENCLR), Interrupt flags read address (INTF),
+ * Interrupt flags set address (INTFSET), and Interrupt flags clear address (INTFCLR)
+ * common bit field definitions
+ */
 
-#define MCPWM_CAP0_
+#define MCPWM_INT_ILIM0              (1 << 0)  /* Bit 0:  Limit interrupts for channel 0 */
+#define MCPWM_INT_IMAT0              (1 << 1)  /* Bit 1:  Match interrupts for channel 0 */
+#define MCPWM_INT_ICAP0              (1 << 2)  /* Bit 2:  Capture interrupts for channel 0 */
+                                               /* Bit 3:  Reserved */
+#define MCPWM_INT_ILIM1              (1 << 4)  /* Bit 4:  Limit interrupts for channel 1 */
+#define MCPWM_INT_IMAT1              (1 << 5)  /* Bit 5:  Match interrupts for channel 1 */
+#define MCPWM_INT_ICAP1              (1 << 6)  /* Bit 6:  Capture interrupts for channel 1 */
+                                               /* Bit 7:  Reserved */
+#define MCPWM_INT_ILIM2              (1 << 8)  /* Bit 8:  Limit interrupts for channel 2 */
+#define MCPWM_INT_IMAT2              (1 << 9)  /* Bit 9:  Match interrupts for channel 2 */
+#define MCPWM_INT_ICAP2              (1 << 10) /* Bit 10: Capture interrupts for channel 2 */
+                                               /* Bits 11-14:  Reserved */
+#define MCPWM_INT_ABORT              (1 << 15) /* Bit 15:  Fast abort interrupt */
+                                               /* Bits 16-31: Reserved */
 
-/* Capture register, channel 1 */
+/* Count Control read address (CNTCON), Count Control set address (CNTCONSET), and
+ * Count Control clear address (CNTCONCLR) common register bit definitions.
+ */
 
-#define MCPWM_CAP1_
-
-/* Capture register, channel 2 */
-
-#define MCPWM_CAP2_
-
-/* Interrupt Enable read address */
-
-#define MCPWM_INTEN_
-
-/* Interrupt Enable set address */
-
-#define MCPWM_INTENSET_
-
-/* Interrupt Enable clear address */
-
-#define MCPWM_INTENCLR_
-
-/* Count Control read address */
-
-#define MCPWM_CNTCON_
-
-/* Count Control set address */
-
-#define MCPWM_CNTCONSET_
-
-/* Count Control clear address */
-
-#define MCPWM_CNTCONCLR_
-
-/* Interrupt flags read address */
-
-#define MCPWM_INTF_
-
-/* Interrupt flags set address */
-
-#define MCPWM_INTFSET_
-
-/* Interrupt flags clear address */
-
-#define MCPWM_INTFCLR_
+#define MCPWM_CNTCON_TC0MCI0RE       (1 << 0)  /* Bit 0:  Counter 0 incr on rising edge MCI0 */
+#define MCPWM_CNTCON_TC0MCI0FE       (1 << 1)  /* Bit 1:  Counter 0 incr onfalling edge MCI0 */
+#define MCPWM_CNTCON_TC0MCI1RE       (1 << 2)  /* Bit 2:  Counter 0 incr onrising edge MCI1 */
+#define MCPWM_CNTCON_TC0MCI1FE       (1 << 3)  /* Bit 3:  Counter 0 incr onfalling edge MCI1 */
+#define MCPWM_CNTCON_TC0MCI2RE       (1 << 4)  /* Bit 4:  Counter 0 incr onrising edge MCI2 */
+#define MCPWM_CNTCON_TC0MCI2FE       (1 << 5)  /* Bit 5:  Counter 0 incr onfalling edge MCI2 */
+#define MCPWM_CNTCON_TC1MCI0RE       (1 << 6)  /* Bit 6:  Counter 1 incr onrising edge MCI0 */
+#define MCPWM_CNTCON_TC1MCI0FE       (1 << 7)  /* Bit 7:  Counter 1 incr onfalling edge MCI0 */
+#define MCPWM_CNTCON_TC1MCI1RE       (1 << 8)  /* Bit 8:  Counter 1 incr onrising edge MCI1 */
+#define MCPWM_CNTCON_TC1MCI1FE       (1 << 9)  /* Bit 9:  Counter 1 incr onfalling edge MCI1 */
+#define MCPWM_CNTCON_TC1MCI2RE       (1 << 10) /* Bit 10: Counter 1 incr onrising edge MCI2 */
+#define MCPWM_CNTCON_TC1MCI2FE       (1 << 11) /* Bit 11: Counter 1 incr onfalling edge MCI2 */
+#define MCPWM_CNTCON_TC2MCI0RE       (1 << 12) /* Bit 12: Counter 2 incr onrising edge MCI0 */
+#define MCPWM_CNTCON_TC2MCI0FE       (1 << 13) /* Bit 13: Counter 2 incr onfalling edge MCI0 */
+#define MCPWM_CNTCON_TC2MCI1RE       (1 << 14) /* Bit 14: Counter 2 incr onrising edge MCI1 */
+#define MCPWM_CNTCON_TC2MCI1FE       (1 << 15) /* Bit 15: Counter 2 incr onfalling edge MCI1 */
+#define MCPWM_CNTCON_TC2MCI2RE       (1 << 16) /* Bit 16: Counter 2 incr onrising edge MCI2 */
+#define MCPWM_CNTCON_TC2MCI2FE       (1 << 17) /* Bit 17: Counter 2 incr onfalling edge MCI2 */
+                                               /* Bits 28-28: Reserved */
+#define MCPWM_CNTCON_CNTR0           (1 << 29) /* Bit 29: Channel 0 counter mode */
+#define MCPWM_CNTCON_CNTR1           (1 << 30) /* Bit 30: Channel 1 counter mode */
+#define MCPWM_CNTCON_CNTR2           (1 << 31) /* Bit 31: Channel 2 counter mode */
 
 /* Capture clear address */
 
-#define MCPWM_CAPCLR_
+#define MCPWM_CAPCLR_MCCLR0          (1 << 0)  /* Bit 0:  Clear MCCAP0 register */
+#define MCPWM_CAPCLR_MCCLR1          (1 << 1)  /* Bit 1:  Clear MCCAP1 register */
+#define MCPWM_CAPCLR_MCCLR2          (1 << 2)  /* Bit 2:  Clear MCCAP2 register */
+                                               /* Bits 2-31: Reserved */ 
 
 /************************************************************************************
  * Public Types
