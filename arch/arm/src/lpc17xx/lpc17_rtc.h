@@ -144,134 +144,116 @@
 #define LPC17_RTC_ALYEAR        (LPC17_RTC_BASE+LPC17_RTC_ALYEAR_OFFSET)
 
 /* Register bit definitions *********************************************************/
+/* The following registers hold 32-bit values and have no bit fields to be defined:
+ *
+ *   General Purpose Register 0
+ *   General Purpose Register 1
+ *   General Purpose Register 2
+ *   General Purpose Register 3
+ *   General Purpose Register 4
+ */
+
 /* Miscellaneous registers */
 /* Interrupt Location Register */
 
-#define RTC_ILR_
-
+#define RTC_ILR_RTCCIF          (1 << 0)  /* Bit 0:  Counter Increment Interrupt */
+#define RTC_ILR_RTCALF          (1 << 1)  /* Bit 1:  Alarm interrupt */
+                                          /* Bits 2-31: Reserved */
 /* Clock Control Register */
 
-#define RTC_CCR_
-
+#define RTC_CCR_CLKEN           (1 << 0)  /* Bit 0:  Clock Enable */
+#define RTC_CCR_CTCRST          (1 << 1)  /* Bit 1:  CTC Reset */
+                                          /* Bits 2-3: Internal test mode controls */
+#define RTC_CCR_CCALEN          (1 << 4)  /* Bit 4:  Calibration counter enable */
+                                          /* Bits 5-31: Reserved */
 /* Counter Increment Interrupt Register */
 
-#define RTC_CIIR_
-
+#define RTC_CIIR_IMSEC          (1 << 0)  /* Bit 0:  Second interrupt */
+#define RTC_CIIR_IMMIN          (1 << 1)  /* Bit 1:  Minute interrupt */
+#define RTC_CIIR_IMHOUR         (1 << 2)  /* Bit 2:  Hour interrupt */
+#define RTC_CIIR_IMDOM          (1 << 3)  /* Bit 3:  Day of Month value interrupt */
+#define RTC_CIIR_IMDOW          (1 << 4)  /* Bit 4:  Day of Week value interrupt */
+#define RTC_CIIR_IMDOY          (1 << 5)  /* Bit 5:  Day of Year interrupt */
+#define RTC_CIIR_IMMON          (1 << 6)  /* Bit 6:  Month interrupt */
+#define RTC_CIIR_IMYEAR         (1 << 7)  /* Bit 7:  Yearinterrupt */
+                                          /* Bits 8-31: Reserved */
 /* Alarm Mask Register */
 
-#define RTC_AMR_
-
+#define RTC_AMR_SEC             (1 << 0)  /* Bit 0:  Second not compared for alarm */
+#define RTC_AMR_MIN             (1 << 1)  /* Bit 1:  Minutes not compared for alarm */
+#define RTC_AMR_HOUR            (1 << 2)  /* Bit 2:  Hour not compared for alarm */
+#define RTC_AMR_DOM             (1 << 3)  /* Bit 3:  Day of Monthnot compared for alarm */
+#define RTC_AMR_DOW             (1 << 4)  /* Bit 4:  Day of Week not compared for alarm */
+#define RTC_AMR_DOY             (1 << 5)  /* Bit 5:  Day of Year not compared for alarm */
+#define RTC_AMR_MON             (1 << 6)  /* Bit 6:  Month not compared for alarm */
+#define RTC_AMR_YEAR            (1 << 7)  /* Bit 7:  Year not compared for alarm */
+                                          /* Bits 8-31: Reserved */
 /* RTC Auxiliary Enable register */
-
-#define RTC_AUXEN_
-
+                                          /* Bits 0-3: Reserved */
+#define RTC_AUXEN_RTCOSCF       (1 << 4)  /* Bit 4:  RTC Oscillator Fail detect flag */
+                                          /* Bits 5-31: Reserved */
 /* RTC Auxiliary control register */
-
-#define RTC_AUX_
-
+                                          /* Bits 0-3: Reserved */
+#define RTC_AUX_OSCFEN          (1 << 4)  /* Bit 4:  Oscillator Fail Detect interrupt enable */
+                                          /* Bits 5-31: Reserved */
 /* Consolidated time registers */
 /* Consolidated Time Register 0 */
 
-#define RTC_CTIME0_
-
+#define RTC_CTIME0_SEC_SHIFT    (0)       /* Bits 0-5: Seconds */
+#define RTC_CTIME0_SEC_MASK     (63 << RTC_CTIME0_SEC_SHIFT)
+                                          /* Bits 6-7: Reserved */
+#define RTC_CTIME0_MIN_SHIFT    (8)       /* Bits 8-13: Minutes */
+#define RTC_CTIME0_MIN_MASK     (63 << RTC_CTIME0_MIN_SHIFT)
+                                          /* Bits 14-15: Reserved */
+#define RTC_CTIME0_HOURS_SHIFT  (16)      /* Bits 16-20: Hours */
+#define RTC_CTIME0_HOURS_MASK   (31 << RTC_CTIME0_HOURS_SHIFT)
+                                          /* Bits 21-23: Reserved */
+#define RTC_CTIME0_DOW_SHIFT    (24)      /* Bits 24-26: Day of Week */
+#define RTC_CTIME0_DOW_MASK     (7 << RTC_CTIME0_DOW_SHIFT)
+                                          /* Bits 27-31: Reserved */
 /* Consolidated Time Register 1 */
 
-#define RTC_CTIME1_
+#define RTC_CTIME1_DOM_SHIFT    (0)       /* Bits 0-4: Day of Month */
+#define RTC_CTIME1_DOM_MASK     (31 << RTC_CTIME1_DOM_SHIFT)
+                                          /* Bits 5-7: Reserved */
+#define RTC_CTIME1_MON_SHIFT    (8)       /* Bits 8-11: Month */
+#define RTC_CTIME1_MON_MASK     (15 << RTC_CTIME1_MON_SHIFT)
+                                          /* Bits 12-15: Reserved */
+#define RTC_CTIME1_YEAR_SHIFT   (16)      /* Bits 16-27: Year */
+#define RTC_CTIME1_YEAR_MASK    (0x0fff << RTC_CTIME1_YEAR_SHIFT)
+                                          /* Bits 28-31: Reserved */
+/* Consolidated Time Register 2 (Shouldn't DOY width be 9 bits?) */
 
-/* Consolidated Time Register 2 */
-
-#define RTC_CTIME2_
-
+#define RTC_CTIME2_DOY_SHIFT    (0)       /* Bits 0-11: Day of Year */
+#define RTC_CTIME2_DOY_MASK     (0x0fff << RTC_CTIME2_DOY_SHIFT)
+                                          /* Bits 12-31: Reserved */
 /* Time counter registers */
-/* Seconds Counter */
 
-#define RTC_SEC_
-
-/* Minutes Register */
-
-#define RTC_MIN_
-
-/* Hours Register */
-
-#define RTC_HOUR_
-
-/* Day of Month Register */
-
-#define RTC_DOM_
-
-/* Day of Week Register */
-
-#define RTC_DOW_
-
-/* Day of Year Register */
-
-#define RTC_DOY_
-
-/* Months Register */
-
-#define RTC_MONTH_
-
-/* Years Register */
-
-#define RTC_YEAR_
+#define RTC_SEC_MASK            (0x003f)
+#define RTC_MIN_MASK            (0x003f)
+#define RTC_HOUR_MASK           (0x001f)
+#define RTC_DOM_MASK            (0x001f)
+#define RTC_DOW_MASK            (0x0007)
+#define RTC_DOY_MASK            (0x01ff)
+#define RTC_MONTH_MASK          (0x000f)
+#define RTC_YEAR_MASK           (0x0fff)
 
 /* Calibration Value Register */
 
-#define RTC_CALIB_
-
-/* General purpose registers */
-/* General Purpose Register 0 */
-
-#define RTC_GPREG0_
-
-/* General Purpose Register 1 */
-
-#define RTC_GPREG1_
-
-/* General Purpose Register 2 */
-
-#define RTC_GPREG2_
-
-/* General Purpose Register 3 */
-
-#define RTC_GPREG3_
-
-/* General Purpose Register 4 */
-
-#define RTC_GPREG4_
-
+#define RTC_CALIB_CALVAL_SHIFT  (0)       /* Bits 0-16: calibration counter counts to this value */
+#define RTC_CALIB_CALVAL_MASK   (0xffff << RTC_CALIB_CALVAL_SHIFT)
+#define RTC_CALIB_CALDIR        (1 << 17) /* Bit 17: Calibration direction */
+                                          /* Bits 12-31: Reserved */
 /* Alarm register group */
-/* Alarm value for Seconds */
 
-#define RTC_ALSEC_
-
-/* Alarm value for Minutes */
-
-#define RTC_ALMIN_
-
-/* Alarm value for Hours */
-
-#define RTC_ALHOUR_
-
-/* Alarm value for Day of Month */
-
-#define RTC_ALDOM_
-
-/* Alarm value for Day of Week */
-
-#define RTC_ALDOW_
-
-/* Alarm value for Day of Year */
-
-#define RTC_ALDOY_
-
-/* Alarm value for Months  */
-
-#define RTC_ALMON_
-
-/* Alarm value for Year */
-
-#define RTC_ALYEAR_
+#define RTC_ALSEC_MASK          (0x003f)
+#define RTC_ALMIN_MASK          (0x003f)
+#define RTC_ALHOUR_MASK         (0x001f)
+#define RTC_ALDOM_MASK          (0x001f)
+#define RTC_ALDOW_MASK          (0x0007)
+#define RTC_ALDOY_MASK          (0x01ff)
+#define RTC_ALMON_MASK          (0x000f)
+#define RTC_ALYEAR_MASK         (0x0fff)
 
 /************************************************************************************
  * Public Types

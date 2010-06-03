@@ -114,97 +114,66 @@
 #define LPC17_QEI_SET            (LPC17_QEI_BASE+LPC17_QEI_SET_OFFSET)
 
 /* Register bit definitions *********************************************************/
-/* Control registers */
+/* The following registers hold 32-bit integer values and have no bit fields defined
+ * in this section:
+ *
+ *   Position register (POS)
+ *   Maximum position register (MAXPOS)
+ *   Position compare register 0 (CMPOS0)
+ *   Position compare register 1 (CMPOS)
+ *   Position compare register 2 (CMPOS2)
+ *   Index count register (INXCNT)
+ *   Index compare register (INXCMP)
+ *   Velocity timer reload register (LOAD)
+ *   Velocity timer register (TIME)
+ *   Velocity counter register (VEL)
+ *   Velocity capture register (CAP)
+ *   Velocity compare register (VELCOMP)
+ *   Digital filter register (FILTER)
+ */
 
+/* Control registers */
 /* Control register */
 
-#define QEI_CON_
-
+#define QEI_CON_RESP             (1 << 0)  /* Bit 0:  Reset position counter */
+#define QEI_CON_RESPI            (1 << 1)  /* Bit 1:  Reset position counter on index */
+#define QEI_CON_RESV             (1 << 2)  /* Bit 2:  Reset velocity */
+#define QEI_CON_RESI             (1 << 3)  /* Bit 3:  Reset index counter */
+                                           /* Bits 4-31: reserved */
 /* Encoder status register */
 
-#define QEI_STAT_
-
+#define QEI_STAT_DIR             (1 << 0)  /* Bit 0:  Direction bit */
+                                           /* Bits 1-31: reserved */
 /* Configuration register */
 
-#define QEI_CONF_
-
-/* Position, index, and timer registers */
-/* Position register */
-
-#define QEI_POS_
-
-/* Maximum position register */
-
-#define QEI_MAXPOS_
-
-/* Position compare register */
-
-#define QEI_CMPOS0_
-
-/* Position compare register */
-
-#define QEI_CMPOS1_
-
-/* Position compare register */
-
-#define QEI_CMPOS2_
-
-/* Index count register */
-
-#define QEI_INXCNT_
-
-/* Index compare register */
-
-#define QEI_INXCMP_
-
-/* Velocity timer reload register */
-
-#define QEI_LOAD_
-
-/* Velocity timer register */
-
-#define QEI_TIME_
-
-/* Velocity counter register */
-
-#define QEI_VEL_
-
-/* Velocity capture register */
-
-#define QEI_CAP_
-
-/* Velocity compare register */
-
-#define QEI_VELCOMP_
-
-/* Digital filter register */
-
-#define QEI_FILTER_
+#define QEI_CONF_DIRINV          (1 << 0)  /* Bit 0:  Direction invert */
+#define QEI_CONF_SIGMODE         (1 << 1)  /* Bit 1:  Signal Mode */
+#define QEI_CONF_CAPMODE         (1 << 2)  /* Bit 2:  Capture Mode */
+#define QEI_CONF_INVINX          (1 << 3)  /* Bit 3:  Invert Index */
+                                           /* Bits 4-31: reserved */
+/* Position, index, and timer registers (all 32-bit integer values with not bit fields */
 
 /* Interrupt registers */
-/* Interrupt enable clear register */
+/* Interrupt enable clear register (IEC), Interrupt enable set register (IES),
+ * Interrupt status register (INTSTAT), Interrupt enable register (IE), Interrupt
+ * status clear register (CLR), and Interrupt status set register (SET) common
+ * bit definitions.
+ */
 
-#define QEI_IEC_
-
-/* Interrupt enable set register */
-
-#define QEI_IES_
-
-/* Interrupt status register */
-
-#define QEI_INTSTAT_
-
-/* Interrupt enable register */
-
-#define QEI_IE_
-
-/* Interrupt status clear register */
-
-#define QEI_CLR_
-
-/* Interrupt status set register */
-
-#define QEI_SET_
+#define QEI_INT_INX              (1 << 0)  /* Bit 0:  Index pulse detected */
+#define QEI_INT_TIM              (1 << 1)  /* Bit 1:  Velocity timer overflow occurred */
+#define QEI_INT_VELC             (1 << 2)  /* Bit 2:  Captured velocity less than compare velocity */
+#define QEI_INT_DIR              (1 << 3)  /* Bit 3:  Change of direction detected */
+#define QEI_INT_ERR              (1 << 4)  /* Bit 4:  Encoder phase error detected */
+#define QEI_INT_ENCLK            (1 << 5)  /* Bit 5:  Eencoder clock pulse detected */
+#define QEI_INT_POS0             (1 << 6)  /* Bit 6:  Position 0 compare equal to current position */
+#define QEI_INT_POS1             (1 << 7)  /* Bit 7:  Position 1 compare equal to current position */
+#define QEI_INT_POS2             (1 << 8)  /* Bit 8:  Position 2 compare equal to current position */
+#define QEI_INT_REV              (1 << 9)  /* Bit 9:  Index compare value equal to current index count */
+#define QEI_INT_POS0REV          (1 << 10) /* Bit 10: Combined position 0 and revolution count interrupt */
+#define QEI_INT_POS1REV          (1 << 11) /* Bit 11: Position 1 and revolution count interrupt */
+#define QEI_INT_POS2REV          (1 << 12) /* Bit 12: Position 2 and revolution count interrupt */
+                                           /* Bits 13-31: reserved */
 
 /************************************************************************************
  * Public Types
