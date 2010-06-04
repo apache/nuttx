@@ -517,12 +517,12 @@
 <ul>
   <li><code>arch/c5471</code>:
     Replaced with <code>arch/arm/include/c5471</code> and
-    <code>arch/arm/src/c5471<code>.
+    <code>arch/arm/src/c5471</code>.
   </li>
 
   <li><code>arch/dm320</code>:
     Replaced with <code>arch/arm/include/dm320</code> and
-    <code>arch/arm/src/dm320<code>.
+    <code>arch/arm/src/dm320</code>.
   </li>
 </ul>
 <p>
@@ -583,7 +583,7 @@
   <li>
     <code>src/</code>:
     This directory contains board specific drivers.
-    This directory will be linked as <config>arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</config> at configuration
+    This directory will be linked as <config>arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code> at configuration
     time and will be integrated into the build system.
   </li>
   <li>
@@ -2267,7 +2267,7 @@ extern void up_ledoff(int led);
     instrumentation is selected.  Set to zero to disable.
   </li>
   <li>
-    <code>CONFIG_START_YEAR, CONFIG_START_MONTH, CONFIG_START_DAY -
+    <code>CONFIG_START_YEAR</code>, <code>CONFIG_START_MONTH</code>, <code>CONFIG_START_DAY</code> -
     Used to initialize the internal time logic.
   </li>
   <li>
@@ -2487,7 +2487,7 @@ extern void up_ledoff(int led);
 <h3>SPI driver</h3>
 <ul>
   <li>
-    <code>CONFIG_SPI_OWNBUS - Set if there is only one active device
+    <code>CONFIG_SPI_OWNBUS</code> - Set if there is only one active device
     on the SPI bus.  No locking or SPI configuration will be performed.
     It is not necessary for clients to lock, re-configure, etc..
   </li>
@@ -2783,7 +2783,7 @@ extern void up_ledoff(int led);
     CONFIG_THTTPD_TILDE_MAP1 and &quot;public_html&quot; forCONFIG_THTTPD_TILDE_MAP2. 
   </li>
   <li>
-    <code>CONFIG_THTTPD_GENERATE_INDICES
+    <code>CONFIG_THTTPD_GENERATE_INDICES</code>:
   </li>
   <li>
     <code>CONFIG_THTTPD_URLPATTERN</code>: If defined, then it will be used to match
@@ -2922,11 +2922,11 @@ extern void up_ledoff(int led);
     If this option is defined, NX will build to use an LCD driver (see <code>include/nuttx/lcd.h</code>).
   </li>
   <li>
-    <code>CONFIG_LCD_MAXPOWER/code>:
+    <code>CONFIG_LCD_MAXPOWER</code>:
     The full-on power setting for an LCD device.
   </li>
   <li>
-    <code>CONFIG_LCD_MAXCONTRAST/code>:
+    <code>CONFIG_LCD_MAXCONTRAST</code>:
     The maximum contrast value for an LCD device.
   </li>
   <li>
