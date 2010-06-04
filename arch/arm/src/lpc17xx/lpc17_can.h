@@ -75,7 +75,7 @@
 #define LPC17_CAN_MOD_OFFSET        0x0000 /* CAN operating mode */
 #define LPC17_CAN_CMR_OFFSET        0x0004 /* Command bits */
 #define LPC17_CAN_GSR_OFFSET        0x0008 /* Controller Status and Error Counters */
-#define LPC17_CAN_ICR_OFFSET        0x000c /* Interrupt status */
+#define LPC17_CAN_ICR_OFFSET        0x000c /* Interrupt and capure register */
 #define LPC17_CAN_IER_OFFSET        0x0010 /* Interrupt Enable */
 #define LPC17_CAN_BTR_OFFSET        0x0014 /* Bus Timing */
 #define LPC17_CAN_EWL_OFFSET        0x0018 /* Error Warning Limit */
@@ -270,28 +270,111 @@
                                               /* Bits 8-31: Reserved */
 /* Command bits */
 
-#define CAN_CMR_
-
+#define CAN_CMR_TR                  (1 << 0)  /* Bit 0:  Transmission Request */
+#define CAN_CMR_AT                  (1 << 1)  /* Bit 1:  Abort Transmission */
+#define CAN_CMR_RRB                 (1 << 2)  /* Bit 2:  Release Receive Buffer */
+#define CAN_CMR_CDO                 (1 << 3)  /* Bit 3:  Clear Data Overrun */
+#define CAN_CMR_SRR                 (1 << 4)  /* Bit 4:  Self Reception Request */
+#define CAN_CMR_STB1                (1 << 5)  /* Bit 5:  Select Tx Buffer 1 */
+#define CAN_CMR_STB2                (1 << 6)  /* Bit 6:  Select Tx Buffer 2 */
+#define CAN_CMR_STB3                (1 << 7)  /* Bit 7:  Select Tx Buffer 3 */
+                                              /* Bits 8-31: Reserved */
 /* Controller Status and Error Counters */
 
-#define CAN_GSR_
+#define CAN_GSR_RBS                 (1 << 0)  /* Bit 0:  Receive Buffer Status */
+#define CAN_GSR_DOS                 (1 << 1)  /* Bit 1:  Data Overrun Status */
+#define CAN_GSR_TBS                 (1 << 2)  /* Bit 2:  Transmit Buffer Status */
+#define CAN_GSR_TCS                 (1 << 3)  /* Bit 3:  Transmit Complete Status */
+#define CAN_GSR_RS                  (1 << 4)  /* Bit 4:  Receive Status */
+#define CAN_GSR_TS                  (1 << 5)  /* Bit 5:  Transmit Status */
+#define CAN_GSR_ES                  (1 << 6)  /* Bit 6:  Error Status */
+#define CAN_GSR_BS                  (1 << 7)  /* Bit 7:  Bus Status */
+                                              /* Bits 8-15: Reserved */
+#define CAN_GSR_RXERR_SHIFT         (16)      /* Bits 16-23: Rx Error Counter */
+#define CAN_GSR_RXERR_MASK          (0xff << CAN_GSR_RXERR_SHIFT)
+#define CAN_GSR_TXERR_SHIFT         (24)       /* Bits 24-31: Tx Error Counter */
+#define CAN_GSR_TXERR_MASK          (0xff << CAN_GSR_TXERR_SHIFT)
 
-/* Interrupt status */
+/* Interrupt and capure register */
 
-#define CAN_ICR_
+#define CAN_ICR_RI                  (1 << 0)  /* Bit 0:  Receive Interrupt */
+#define CAN_ICR_TI1                 (1 << 1)  /* Bit 1:  Transmit Interrupt 1 */
+#define CAN_ICR_EI                  (1 << 2)  /* Bit 2:  Error Warning Interrupt */
+#define CAN_ICR_DOI                 (1 << 3)  /* Bit 3:  Data Overrun Interrupt */
+#define CAN_ICR_WUI                 (1 << 4)  /* Bit 4:  Wake-Up Interrupt */
+#define CAN_ICR_EPI                 (1 << 5)  /* Bit 5:  Error Passive Interrupt */
+#define CAN_ICR_ALI                 (1 << 6)  /* Bit 6:  Arbitration Lost Interrupt */
+#define CAN_ICR_BEI                 (1 << 7)  /* Bit 7:  Bus Error Interrupt */
+#define CAN_ICR_IDI                 (1 << 8)  /* Bit 8:  ID Ready Interrupt */
+#define CAN_ICR_TI2                 (1 << 9)  /* Bit 9:  Transmit Interrupt 2 */
+#define CAN_ICR_TI3                 (1 << 10) /* Bit 10: Transmit Interrupt 3 */
+                                              /* Bits 11-15: Reserved */
+#define CAN_ICR_ERRBIT_SHIFT        (16)      /* Bits 16-20: Error Code Capture */
+#define CAN_ICR_ERRBIT_MASK         (0x1f << CAN_ICR_ERRBIT_SHIFT)
+# define CAN_ICR_ERRBIT_SOF         (3  << CAN_ICR_ERRBIT_SHIFT) /* Start of Frame */
+# define CAN_ICR_ERRBIT_ID28        (2  << CAN_ICR_ERRBIT_SHIFT) /* ID28 ... ID21 */
+# define CAN_ICR_ERRBIT_SRTR        (4  << CAN_ICR_ERRBIT_SHIFT) /* SRTR Bit */
+# define CAN_ICR_ERRBIT_IDE         (5  << CAN_ICR_ERRBIT_SHIFT) /* DE bit */
+# define CAN_ICR_ERRBIT_ID20        (6  << CAN_ICR_ERRBIT_SHIFT) /* ID20 ... ID18 */
+# define CAN_ICR_ERRBIT_ID17        (7  << CAN_ICR_ERRBIT_SHIFT) /* ID17 ... 13 */
+# define CAN_ICR_ERRBIT_CRC         (8  << CAN_ICR_ERRBIT_SHIFT) /* CRC Sequence */
+# define CAN_ICR_ERRBIT_DATA        (10 << CAN_ICR_ERRBIT_SHIFT) /* Data Field */
+# define CAN_ICR_ERRBIT_LEN         (11 << CAN_ICR_ERRBIT_SHIFT) /* Data Length Code */
+# define CAN_ICR_ERRBIT_ RTR        (12 << CAN_ICR_ERRBIT_SHIFT) /* RTR Bit */
+# define CAN_ICR_ERRBIT_ID4         (14 << CAN_ICR_ERRBIT_SHIFT) /* ID4 ... ID0 */
+# define CAN_ICR_ERRBIT_ID12        (15 << CAN_ICR_ERRBIT_SHIFT) /* ID12 ... ID5 */
+# define CAN_ICR_ERRBIT_AERR        (17 << CAN_ICR_ERRBIT_SHIFT) /* Active Error Flag */
+# define CAN_ICR_ERRBIT_INTERMSN    (18 << CAN_ICR_ERRBIT_SHIFT) /* Intermission */
+# define CAN_ICR_ERRBIT_DOM         (19 << CAN_ICR_ERRBIT_SHIFT) /* Tolerate Dominant Bits */
+# define CAN_ICR_ERRBIT_PERR        (22 << CAN_ICR_ERRBIT_SHIFT) /* Passive Error Flag */
+# define CAN_ICR_ERRBIT_ERRDLM      (23 << CAN_ICR_ERRBIT_SHIFT) /* Error Delimiter */
+# define CAN_ICR_ERRBIT_CRCDLM      (24 << CAN_ICR_ERRBIT_SHIFT) /* CRC Delimiter */
+# define CAN_ICR_ERRBIT_ACKSLT      (25 << CAN_ICR_ERRBIT_SHIFT) /* Acknowledge Slot */
+# define CAN_ICR_ERRBIT_EOF         (26 << CAN_ICR_ERRBIT_SHIFT) /* End of Frame */
+# define CAN_ICR_ERRBIT_ACKDLM      (27 << CAN_ICR_ERRBIT_SHIFT) /* Acknowledge Delimiter */
+# define CAN_ICR_ERRBIT_OVLD        (28 << CAN_ICR_ERRBIT_SHIFT) /* Overload flag */
+#define CAN_ICR_ERRDIR              (1 << 21) /* Bit 21: Direction bit at time of error */
+#define CAN_ICR_ERRC_SHIFT          (22)      /* Bits 22-23: Type of error */
+#define CAN_ICR_ERRC_MASK           (3 << CAN_ICR_ERRC_SHIFT)
+#  define CAN_ICR_ERRC_BIT          (0 << CAN_ICR_ERRC_SHIFT)
+#  define CAN_ICR_ERRC_FORM         (1 << CAN_ICR_ERRC_SHIFT)
+#  define CAN_ICR_ERRC_STUFF        (2 << CAN_ICR_ERRC_SHIFT)
+#  define CAN_ICR_ERRC_OTHER        (3 << CAN_ICR_ERRC_SHIFT)
+#define CAN_ICR_ALCBIT_SHIFT        (24)      /* Bits 24-31: Bit number within frame */
+#define CAN_ICR_ALCBIT_MASK         (0xff << CAN_ICR_ALCBIT_SHIFT)
 
 /* Interrupt Enable */
 
-#define CAN_IER_
-
+#define CAN_IER_RIE                 (1 << 0)  /* Bit 0:  Receiver Interrupt Enable */
+#define CAN_IER_TIE1                (1 << 1)  /* Bit 1:  Transmit Interrupt Enable for Buffer1 */
+#define CAN_IER_EIE                 (1 << 2)  /* Bit 2:  Error Warning Interrupt Enable */
+#define CAN_IER_DOIE                (1 << 3)  /* Bit 3:  Data Overrun Interrupt Enable */
+#define CAN_IER_WUIE                (1 << 4)  /* Bit 4:  Wake-Up Interrupt Enable */
+#define CAN_IER_EPIE                (1 << 5)  /* Bit 5:  Error Passive Interrupt Enable */
+#define CAN_IER_ALIE                (1 << 6)  /* Bit 6:  Arbitration Lost Interrupt Enable */
+#define CAN_IER_BEIE                (1 << 7)  /* Bit 7:  Bus Error Interrupt */
+#define CAN_IER_IDIE                (1 << 8)  /* Bit 8:  ID Ready Interrupt Enable */
+#define CAN_IER_TIE2                (1 << 9)  /* Bit 9:  Transmit Interrupt Enable for Buffer2 */
+#define CAN_IER_TIE3                (1 << 10) /* Bit 10: Transmit Interrupt Enable for Buffer3 */
+                                              /* Bits 11-31: Reserved */
 /* Bus Timing */
 
-#define CAN_BTR_
-
+#define CAN_BTR_BRP_SHIFT           (0)       /* Bits 0-9: Baud Rate Prescaler */
+#define CAN_BTR_BRP_MASK            (0x3ff << CAN_BTR_BRP_SHIFT)
+                                              /* Bits 10-13: Reserved */
+#define CAN_BTR_SJW_SHIFT           (14)      /* Bits 14-15: Synchronization Jump Width */
+#define CAN_BTR_SJW_MASK            (3 << CAN_BTR_SJW_SHIFT)
+#define CAN_BTR_TESG1_SHIFT         (16)      /* Bits 16-19: Sync to sample delay */
+#define CAN_BTR_TESG1_MASK          (15 << CAN_BTR_TESG1_SHIFT)
+#define CAN_BTR_TESG2_SHIFT         (20)      /* Bits 20-22: smaple to next delay */
+#define CAN_BTR_TESG2_MASK          (7 << CAN_BTR_TESG2_SHIFT)
+#define CAN_BTR_SAM                 (1 << 23) /* Bit 23: Sampling */
+                                              /* Bits 24-31: Reserved */
 /* Error Warning Limit */
 
-#define CAN_EWL_
-
+#define CAN_EWL_SHIFT               (0)       /* Bits 0-7: Error warning limit */ 
+#define CAN_EWL_MASK                (0xff << CAN_EWL_SHIFT)
+                                              /* Bits 8-31: Reserved */
 /* Status Register */
 
 #define CAN_SR_
