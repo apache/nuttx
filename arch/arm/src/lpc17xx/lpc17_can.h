@@ -377,75 +377,118 @@
                                               /* Bits 8-31: Reserved */
 /* Status Register */
 
-#define CAN_SR_
-
+#define CAN_SR_RBS1                 (1 << 0)  /* Bit 0:  Receive Buffer Status */
+#define CAN_SR_DOS1                 (1 << 1)  /* Bit 1:  Data Overrun Status */
+#define CAN_SR_TBS1                 (1 << 2)  /* Bit 2:  Transmit Buffer Status 1 */
+#define CAN_SR_TCS1                 (1 << 3)  /* Bit 3:  Transmission Complete Status */
+#define CAN_SR_RS1                  (1 << 4)  /* Bit 4:  Receive Status */
+#define CAN_SR_TS1                  (1 << 5)  /* Bit 5:  Transmit Status 1 */
+#define CAN_SR_ES1                  (1 << 6)  /* Bit 6:  Error Status */
+#define CAN_SR_BS1                  (1 << 7)  /* Bit 7:  Bus Status */
+#define CAN_SR_RBS2                 (1 << 8)  /* Bit 8:  Receive Buffer Status */
+#define CAN_SR_DOS2                 (1 << 9)  /* Bit 9:  Data Overrun Status */
+#define CAN_SR_TBS2                 (1 << 10) /* Bit 10: Transmit Buffer Status 2 */
+#define CAN_SR_TCS2                 (1 << 11) /* Bit 11: Transmission Complete Status */
+#define CAN_SR_RS2                  (1 << 12) /* Bit 12: Receive Status */
+#define CAN_SR_TS2                  (1 << 13) /* Bit 13: Transmit Status 2 */
+#define CAN_SR_ES2                  (1 << 14) /* Bit 14: Error Status */
+#define CAN_SR_BS2                  (1 << 15) /* Bit 15: Bus Status  */
+#define CAN_SR_RBS3                 (1 << 16) /* Bit 16: Receive Buffer Status */
+#define CAN_SR_DOS3                 (1 << 17) /* Bit 17: Data Overrun Status */
+#define CAN_SR_TBS3                 (1 << 18) /* Bit 18: Transmit Buffer Status 3 */
+#define CAN_SR_TCS3                 (1 << 19) /* Bit 19: Transmission Complete Status */
+#define CAN_SR_RS3                  (1 << 20) /* Bit 20: Receive Status */
+#define CAN_SR_TS3                  (1 << 21) /* Bit 21: Transmit Status 3 */
+#define CAN_SR_ES3                  (1 << 22) /* Bit 22: Error Status */
+#define CAN_SR_BS3                  (1 << 23) /* Bit 23: Bus Status */
+                                              /* Bits 24-31: Reserved */
 /* Receive frame status */
 
-#define CAN_RFS_
+#define CAN_RFS_ID_SHIFT            (0)       /* Bits 0-9: ID Index */
+#define CAN_RFS_ID_MASK             (0x03ff << CAN_RFS_ID_SHIFT)
+#define CAN_RFS_BP                  (1 << 10) /* Bit 10: Received in AF Bypass mode */
+                                              /* Bits 11-15: Reserved */
+#define CAN_RFS_DLC_SHIFT           (16)      /* Bits 16-19: Message Data Length Code (DLC) */
+#define CAN_RFS_DLC_MASK            (15 << yy)
+                                              /* Bits 20-29: Reserved */
+define CAN_RFS_RTR                  (1 << 30) /* Bit 30: Message Remote Transmission Request */
+#define CAN_RFS_FF                  (1 << 31) /* Bit 31: Message 29-bit vs 11-bit ID */
 
 /* Received Identifier */
 
-#define CAN_RID_
-
+#define CAN_RID_ID11_MASK           (0x7ff)   /* Bits 0-10: 11-bit Identifier (FF=0) */
+                                              /* Bits 11-31: Reserved */
+#define CAN_RID_ID29_MASK           (0x1fffffff) /* Bits 0-28: 29-bit Identifiter (FF=1) */
+                                              /* Bits 29-31: Reserved */
 /* Received data bytes 1-4 */
 
-#define CAN_RDA_
+#define CAN_RDA_DATA1_SHIFT         (0)       /* Bits 0-7: If CANRFS >= 1 */
+#define CAN_RDA_DATA1_MASK          (0x0ff << CAN_RDA_DATA1_SHIFT)
+#define CAN_RDA_DATA2_SHIFT         (8)       /* Bits 8-15: If CANRFS >= 2 */
+#define CAN_RDA_DATA2_MASK          (0x0ff << CAN_RDA_DATA2_SHIFT)
+#define CAN_RDA_DATA3_SHIFT         (16)      /* Bits 16-23: If CANRFS >= 3 */
+#define CAN_RDA_DATA3_MASK          (0x0ff << CAN_RDA_DATA3_SHIFT)
+#define CAN_RDA_DATA4_SHIFT         (24)      /* Bits 24-31: If CANRFS >= 4 */
+#define CAN_RDA_DATA4_MASK          (0x0ff << CAN_RDA_DATA4_SHIFT)
 
 /* Received data bytes 5-8 */
 
-#define CAN_RDB_
+#define CAN_RDB_DATA5_SHIFT         (0)       /* Bits 0-7: If CANRFS >= 5 */
+#define CAN_RDB_DATA5_MASK          (0x0ff << CAN_RDB_DATA5_SHIFT)
+#define CAN_RDB_DATA6_SHIFT         (8)       /* Bits 8-15: If CANRFS >= 6 */
+#define CAN_RDB_DATA6_MASK          (0x0ff << CAN_RDB_DATA6_SHIFT)
+#define CAN_RDB_DATA7_SHIFT         (16)      /* Bits 16-23: If CANRFS >= 7 */
+#define CAN_RDB_DATA7_MASK          (0x0ff << CAN_RDB_DATA7_SHIFT)
+#define CAN_RDB_DATA8_SHIFT         (24)      /* Bits 24-31: If CANRFS >= 8 */
+#define CAN_RDB_DATA8_MASK          (0x0ff << CAN_RDB_DATA8_SHIFT)
 
-/* Transmit frame info (Tx Buffer 1) */
+/* Transmit frame info (Tx Buffer 1),  Transmit frame info (Tx Buffer 2), and
+ * Transmit frame info (Tx Buffer 3) common bit field definitions
+ */
 
-#define CAN_TFI1_
+#define CAN_TFI_PRIO_SHIFT          (0)       /* Bits 0-7: TX buffer priority */
+#define CAN_TFI_PRIO_MASK           (0xff << CAN_TFI_PRIO_SHIFT)
+                                              /* Bits 8-15: Reserved */
+#define CAN_TFI_DLC_SHIFT           (16)      /* Bits 16-19: TX Data Length Code */
+#define CAN_TFI_DLC_MASK            (15 << CAN_TFI_DLC_SHIFT)
+                                              /* Bits 20-29: Reserved */
+#define CAN_TFI_RTR                 (1 << 30) /* Bit 30: TX RTR bit */
+#define CAN_TFI_FF                  (1 << 31) /* Bit 31: Message 29-bit vs 11-bit ID */
 
-/* Transmit Identifier (Tx Buffer 1) */
+/* Transmit Identifier (Tx Buffer 1), Transmit Identifier (Tx Buffer 2), and
+ * Transmit Identifier (Tx Buffer 3) common bit field definitions.
+ */
 
-#define CAN_TID1_
+#define CAN_TID_ID11_MASK           (0x7ff)   /* Bits 0-10: 11-bit Identifier (FF=0) */
+                                              /* Bits 11-31: Reserved */
+#define CAN_TID_ID29_MASK           (0x1fffffff) /* Bits 0-28: 29-bit Identifiter (FF=1) */
+                                              /* Bits 29-31: Reserved */
 
-/* Transmit data bytes 1-4 (Tx Buffer 1) */
+/* Transmit data bytes 1-4 (Tx Buffer 1), Transmit data bytes 1-4 (Tx Buffer 2), and
+ * Transmit data bytes 1-4 (Tx Buffer 3) common bit field definitions.
+ */
 
-#define CAN_TDA1_
+#define CAN_TDA_DATA1_SHIFT         (0)       /* Bits 0-7: RTR=0 && DLC >= 1 */
+#define CAN_TDA_DATA1_MASK          (0x0ff << CAN_TDA_DATA1_SHIFT)
+#define CAN_TDA_DATA2_SHIFT         (8)       /* Bits 8-15: RTR=0 && DLC >= 2 */
+#define CAN_TDA_DATA2_MASK          (0x0ff << CAN_TDA_DATA2_SHIFT)
+#define CAN_TDA_DATA3_SHIFT         (16)      /* Bits 16-23: RTR=0 && DLC >= 3 */
+#define CAN_TDA_DATA3_MASK          (0x0ff << CAN_TDA_DATA3_SHIFT)
+#define CAN_TDA_DATA4_SHIFT         (24)      /* Bits 24-31: RTR=0 && DLC >= 4 */
+#define CAN_TDA_DATA4_MASK          (0x0ff << CAN_TDA_DATA4_SHIFT)
 
-/* Transmit data bytes 5-8 (Tx Buffer 1) */
+/* Transmit data bytes 5-8 (Tx Buffer 1), Transmit data bytes 5-8 (Tx Buffer 2), and 
+ * Transmit data bytes 5-8 (Tx Buffer 3) common bit field definitions.
+ */
 
-#define CAN_TDB1_
-
-/* Transmit frame info (Tx Buffer 2) */
-
-#define CAN_TFI2_
-
-/* Transmit Identifier (Tx Buffer 2) */
-
-#define CAN_TID2_
-
-/* Transmit data bytes 1-4 (Tx Buffer 2) */
-
-#define CAN_TDA2_
-
-/* Transmit data bytes 5-8 (Tx Buffer 2) */
-
-#define CAN_TDB2_
-
-/* Transmit frame info (Tx Buffer 3) */
-
-#define CAN_TFI3_
-
-/* Transmit Identifier (Tx Buffer 3) */
-
-#define CAN_TID3_
-
-/* Transmit data bytes 1-4 (Tx Buffer 3) */
-
-#define CAN_TDA3_
-
-/* Transmit data bytes 5-8 (Tx Buffer 3) */
-
-#define CAN_TDB3_
-
-            (1 << xx)  /* Bit xx:  
-_SHIFT        (xx)       /* Bits xx-yy: 
-_MASK         (xx << yy)
+#define CAN_RDB_DATA5_SHIFT         (0)       /* Bits 0-7: RTR=0 && DLC >= 5 */
+#define CAN_RDB_DATA5_MASK          (0x0ff << CAN_RDB_DATA5_SHIFT)
+#define CAN_RDB_DATA6_SHIFT         (8)       /* Bits 8-15: RTR=0 && DLC >= 6 */
+#define CAN_RDB_DATA6_MASK          (0x0ff << CAN_RDB_DATA6_SHIFT)
+#define CAN_RDB_DATA7_SHIFT         (16)      /* Bits 16-23: RTR=0 && DLC >= 7 */
+#define CAN_RDB_DATA7_MASK          (0x0ff << CAN_RDB_DATA7_SHIFT)
+#define CAN_RDB_DATA8_SHIFT         (24)      /* Bits 24-31: RTR=0 && DLC >= 8 */
+#define CAN_RDB_DATA8_MASK          (0x0ff << CAN_RDB_DATA8_SHIFT)
 
 /************************************************************************************
  * Public Types
