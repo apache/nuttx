@@ -50,12 +50,12 @@
 
 /* Memory Map ***********************************************************************/
 
-#define LPC17_FLASH_BASE    0x00000000 /* -0x1fffffff: On-chip non-volatilenmemory */
+#define LPC17_FLASH_BASE    0x00000000 /* -0x1fffffff: On-chip non-volatile memory */
 #define LPC17_SRAM_BASE     0x10000000 /* -0x10007fff: On-chip SRAM (devices <=32Kb) */
 #define LPC17_ROM_BASE      0x1fff0000 /* -0x1fffffff: 8Kb Boot ROM with flash services */
 #define LPC17_AHBSRAM_BASE  0x20000000 /* -0x3fffffff: On-chip AHB SRAM (devices >32Kb) */
 #  define LPC17_SRAM_BANK0  0x20070000 /* -0x2007ffff: On-chip AHB SRAM Bank0 (devices >=32Kb) */
-#  define LPC17_SRAM_BANK1  0x20080000 /* -0x2008ffff: On-chip AHB SRAM Bank0 (devices 64Kb) */
+#  define LPC17_SRAM_BANK1  0x20080000 /* -0x2008ffff: On-chip AHB SRAM Bank1 (devices 64Kb) */
 #define LPC17_GPIO_BASE     0x2009c000 /* -0x2009ffff: GPIO */
 #define LPC17_APB_BASE      0x40000000 /* -0x5fffffff: APB Peripherals */
 #  define LPC17_APB0_BASE   0x40000000 /* -0x4007ffff: APB0 Peripherals */

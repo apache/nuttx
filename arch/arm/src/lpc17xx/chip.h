@@ -48,7 +48,7 @@
 
 /* Get customizations for each supported chip */
 
-#if defined(CONFIG_LPC17XX_LPC1769) || defined(CONFIG_LPC17XX_LPC1768)
+#if defined(CONFIG_ARCH_CHIP_LPC1769) || defined(CONFIG_ARCH_CHIP_LPC1768)
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -58,7 +58,7 @@
 #  define LPC17_NCAN            2  /* Two CAN controllers */
 #  define LPC17_NI2S            1  /* One I2S module */
 #  define LPC17_NDAC            1  /* One DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1767)
+#elif defined(CONFIG_ARCH_CHIP_LPC1767)
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -68,7 +68,7 @@
 #  define LPC17_NCAN            0  /* No CAN controllers */
 #  define LPC17_NI2S            1  /* One I2S module */
 #  define LPC17_NDAC            1  /* One DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1766)
+#elif defined(CONFIG_ARCH_CHIP_LPC1766)
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -78,7 +78,7 @@
 #  define LPC17_NCAN            2  /* Two CAN controllers */
 #  define LPC17_NI2S            1  /* One I2S module */
 #  define LPC17_NDAC            1  /* One DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1765)
+#elif defined(CONFIG_ARCH_CHIP_LPC1765)
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
@@ -88,7 +88,7 @@
 #  define LPC17_NCAN            2  /* Two CAN controllers */
 #  define LPC17_NI2S            1  /* One I2S module */
 #  define LPC17_NDAC            1  /* One DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1764)
+#elif defined(CONFIG_ARCH_CHIP_LPC1764)
 #  define LPC17_FLASH_SIZE      (128*1024) /* 128Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -98,7 +98,7 @@
 #  define LPC17_NCAN            2  /* Two CAN controllers */
 #  define LPC17_NI2S            0  /* No I2S modules */
 #  define LPC17_NDAC            0  /* No DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1759)
+#elif defined(CONFIG_ARCH_CHIP_LPC1759)
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
@@ -108,7 +108,7 @@
 #  define LPC17_NCAN            2  /* Two CAN controllers */
 #  define LPC17_NI2S            1  /* One I2S module */
 #  define LPC17_NDAC            1  /* One DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1758)
+#elif defined(CONFIG_ARCH_CHIP_LPC1758)
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -118,7 +118,7 @@
 #  define LPC17_NCAN            2  /* Two CAN controllers */
 #  define LPC17_NI2S            1  /* One I2S module */
 #  define LPC17_NDAC            1  /* One DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1756)
+#elif defined(CONFIG_ARCH_CHIP_LPC1756)
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
@@ -128,7 +128,7 @@
 #  define LPC17_NCAN            2  /* Two CAN controllers */
 #  define LPC17_NI2S            1  /* One I2S module */
 #  define LPC17_NDAC            1  /* One DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1754)
+#elif defined(CONFIG_ARCH_CHIP_LPC1754)
 #  define LPC17_FLASH_SIZE      (128*1024) /* 128Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
@@ -138,7 +138,7 @@
 #  define LPC17_NCAN            1  /* One CAN controller */
 #  define LPC17_NI2S            0  /* No I2S modules */
 #  define LPC17_NDAC            1  /* One DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1752)
+#elif defined(CONFIG_ARCH_CHIP_LPC1752)
 #  define LPC17_FLASH_SIZE      (64*1024) /* 65Kb */
 #  define LPC17_SRAM_SIZE       (16*1024) /* 16Kb */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
@@ -148,7 +148,7 @@
 #  define LPC17_NCAN            1  /* One CAN controller */
 #  define LPC17_NI2S            0  /* No I2S modules */
 #  define LPC17_NDAC            0  /* No DAC module */
-#elif defined(CONFIG_LPC17XX_LPC1751)
+#elif defined(CONFIG_ARCH_CHIP_LPC1751)
 #  define LPC17_FLASH_SIZE      (32*1024) /* 32Kb */
 #  define LPC17_SRAM_SIZE       (8*1024)  /*  8Kb */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
@@ -166,7 +166,7 @@
  * file for the proper setup
  */
 
-#include "lpc17xx_memorymap.h"
+#include "lpc17_memorymap.h"
 
 /************************************************************************************
  * Public Types
