@@ -85,13 +85,13 @@
                                                        * Capture 0-1 */
 #define LPC17_IRQ_TMR3          (LPC17_IRQ_EXTINT+4)  /* Timer 3 Match 0-3
                                                        * Capture 0-1 */
-#define LPC17_IRQ_UART0         (LPC17_IRQ_EXTINT+5)  /* UART0 Rx Line Status (RLS)
+#define LPC17_IRQ_UART0         (LPC17_IRQ_EXTINT+5)  /* UART 0 Rx Line Status (RLS)
                                                        * Transmit Holding Register Empty (THRE)
                                                        * Rx Data Available (RDA)
                                                        * Character Time-out Indicator (CTI)
                                                        * End of Auto-Baud (ABEO)
                                                        * Auto-Baud Time-Out (ABTO) */
-#define LPC17_IRQ_UART1         (LPC17_IRQ_EXTINT+6)  /* UART1 Rx Line Status (RLS)
+#define LPC17_IRQ_UART1         (LPC17_IRQ_EXTINT+6)  /* UART 1 Rx Line Status (RLS)
                                                        * Transmit Holding Register Empty (THRE)
                                                        * Rx Data Available (RDA)
                                                        * Character Time-out Indicator (CTI)
@@ -128,10 +128,10 @@
 #define LPC17_IRQ_PLL0          (LPC17_IRQ_EXTINT+16) /* PLL0 (Main PLL) PLL0 Lock (PLOCK0) */
 #define LPC17_IRQ_RTC           (LPC17_IRQ_EXTINT+17) /* RTC Counter Increment (RTCCIF)
                                                        * Alarm (RTCALF) */
-#define LPC17_IRQ_EINT0         (LPC17_IRQ_EXTINT+18) /* External Interrupt External Interrupt 0 (EINT0) */
-#define LPC17_IRQ_EINT1         (LPC17_IRQ_EXTINT+19) /* External Interrupt External Interrupt 1 (EINT1) */
-#define LPC17_IRQ_EINT2         (LPC17_IRQ_EXTINT+20) /* External Interrupt External Interrupt 2 (EINT2) */
-#define LPC17_IRQ_EINT3         (LPC17_IRQ_EXTINT+21) /* External Interrupt External Interrupt 3 (EINT3)
+#define LPC17_IRQ_EINT0         (LPC17_IRQ_EXTINT+18) /* External Interrupt 0 (EINT0) */
+#define LPC17_IRQ_EINT1         (LPC17_IRQ_EXTINT+19) /* External Interrupt 1 (EINT1) */
+#define LPC17_IRQ_EINT2         (LPC17_IRQ_EXTINT+20) /* External Interrupt 2 (EINT2) */
+#define LPC17_IRQ_EINT3         (LPC17_IRQ_EXTINT+21) /* External Interrupt 3 (EINT3)
                                                        * Note: EINT3 channel is shared with GPIO interrupts */
 #define LPC17_IRQ_ADC           (LPC17_IRQ_EXTINT+22) /* ADC A/D Converter end of conversion */
 #define LPC17_IRQ_BOD           (LPC17_IRQ_EXTINT+23) /* BOD Brown Out detect */
