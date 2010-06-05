@@ -1124,7 +1124,7 @@
 	  interfaces.
 	* net/net_close.c - Correct a UDP reference counting error
 
-5.6 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.6 2010-06-05 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* drivers/lcd/p14201.c - Driver for RiT P14201 series 128x96 4-bit OLED.
 	* configs/lm3s6965-ek/nx - NX graphics configuration for the LM3S6965
@@ -1132,7 +1132,9 @@
 	* graphics/ - Numerous fixes to get the P14201 4-bpp greyscale display
 	  working (there may still be some minor issues .. see the TODO list).
 	* arch/arm/include/lpc17xx and arch/arm/src/lpc17xxx - Began port for
-	  NXP LPC1768
+	  NXP LPC1768.  As of the 5.6 release, there is a complete set of
+	  LPC17xx header files defining all bits in all LPC17xx registers,
+	  but little else (I still do not have hardware in hand).
 	* drivers/mtd/m25px.c - Add support for M25P1 flash part (See NOTE)
 	* include/nuttx/i2c.h - Extended I2C interface definition to handle
 	  multiple transfers (See NOTE).
@@ -1142,3 +1144,5 @@
 	  important LPC313x USB bug fixes (See NOTE).
 
 	NOTE: Contributed by David Hewson.
+
+5.7 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

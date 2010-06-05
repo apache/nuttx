@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 26, 2010</p>
+      <p>Last Updated: June 5, 2010</p>
     </td>
   </tr>
 </table>
@@ -490,6 +490,34 @@
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
+    <b>FLASH Support</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li><i>MTD</i>-inspired interface for <i>M</i>emory <i>T</i>echnology <i>D</i>evices.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li><i>FTL</i>.  Simple <i>F</i>lash <i>T</i>ranslation <i>L</i>ayer support file systems on FLASH.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Support for SPI-based FLASH devices.</li>
+    </p>
+</tr>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
     <b>USB Device Support</b>
   </td>
 </tr>
@@ -504,7 +532,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>USB device controller drivers available for the NXP LPC214x and TI DM320.</li>
+      <li>USB device controller drivers available for the NXP LPC214x, LPC313x, STMicro STM32 and TI DM320.</li>
     </p>
 </tr>
 <tr>
@@ -539,8 +567,15 @@
   <td><br></td>
   <td>
     <p>
+      <li>LCD drivers for both parallel and SPI LCDs and OLEDs.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <li>
-         NX: A graphics library, tiny windowing system and tiny font support.
+         NX: A graphics library, tiny windowing system and tiny font support that works with either framebuffer or LCD drivers.
          Documented in the <a href="NXGraphicsSubsystem.html">NX Graphics Subsystem</a>
          manual.
       </li>
@@ -729,52 +764,44 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.5 Release Notes</b>:
+<p><b>nuttx-5.6 Release Notes</b>:
 
 <p>
-  This 52<sup>nd</sup> release of NuttX was made on May 9, 2010 and is available for download from the
+  This 53<sup>rd</sup> release of NuttX was made on June 5, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This relese includes one new port, some new drivers and some important bugfixes:
+  This release includes one several new drivers for existing NuttX ports:
   <ul>
-    <li><p>
-      NuttX was ported to the Luminary/TI LM3S6965 Ethernet Evaluation Kit.
-      At present, that port includes an OS test configuration and a NuttShell
-      (NSH) configuration with telnet support.
-    </p>
-    <p>
-      MMC/SD and Networking support are provided but not thoroughly verified
-      in this release: Current development efforts are focused on porting the
-      NuttX window system (NX) to work with the Evaluation Kits OLED display.
-    </p></li>
-    <li><p>
-      A NuttX Ethernet driver for the Microchip ENC28J60 SPI Ethernet chip is
-      available in the source tree (but has not yet been fully verified because
-      I haven't properly connected it to hardware yet).
-    </p></li>
-    <li><p>
-      The Olimex STR-P711 NuttX port was extended to support the ENC28J60 and
-      some new networking configurations were added.  The ENC28J60 has not
-      been tested on the STR-P711, however, because of hardware issues (I don't
-      think the USB powered board provides enough power for the ENC28J60 and
-      I don't have the right wall wart yet).
-    </p></li>
-    <li><p>
-      Along the way, external interrupt support (XTI) was added to the STMicro
-      STR-P711 port and some important bugs were fixed in the STR-P711 SPI
-      driver.
-    </p></li>
-    <li><p>
-      Corrected an important UDP reference counting error.  It was not a serious
-      error, but it trigger an assertion was IS a serious error.
-    </p></li>
+    <li>
+      This port adds support for the RiT displays P14201 4-bpp, greyscale OLED.
+      4-bpp greyscale support was integrated into the NX graphics sub-system and
+      verified using the TI/Luminary LP3S6965 Ethernet Evaluation Kit.
+    </li>
+    <li>
+      The MP25Px driver was extended for the M24P1 FLASH part (see NOTE).
+    </li>
+    <li>
+      An I2C driver and (basic) SPI driver were added for the NXP LPC313x port.
+      The I2C interface definition was extended to efficiently handle multiple I2C
+      transfers (See NOTE).
+    </li>
   </ul>
 </p>
-
+<p>
+  As well as a few, important USB-related bugfixes (See the ChangeLog for details).
+</p>
+<p>
+  This release also includes the beginnings of a port for the NXP LPC1768 MCU.  However,
+  it is too early for that port to be useful (stay tuned for a future announcement of the
+  availability of the verified LPC1768 port).
+</p>
+<p>
+  <small><b>NOTE</b>: Contributed by David Hewson where noted.</small>
+</p>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -847,7 +874,7 @@
         This port boots and passes the OS test (examples/ostest).
         The port is complete and verified.  As of NuttX 0.3.17, the port includes:
         timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
-        support.  A verified NuttShell <a href="NuttShell.html">(NSH)</a>
+        support.  A verified NuttShell (<a href="NuttShell.html">NSH</a>)
         configuration is also available.
       </p>
       <p>
@@ -907,7 +934,7 @@
         <b>STATUS:</b>
         Integration is complete on the basic port (boot logic, system time, serial console).
         Two configurations have been verified: (1) The board boots and passes the OS test
-        with console output visible on UART0, and the NuttShell <a href="NuttShell.html">(NSH)</a>
+        with console output visible on UART0, and the NuttShell (<a href="NuttShell.html">NSH</a>)
         is fully functional with interrupt driven serial console.  An SPI driver is available
         but only partially tested.  Additional features are needed: USB driver, MMC integration,
         to name two (the slot on the board appears to accept on MMC card dimensions; I have only
@@ -993,9 +1020,10 @@
           The basic EA3131 port is complete and verified in NuttX-5.2 
           This basic port includes basic boot-up, serial console, and timer interrupts.
           This port was extended in NuttX 5.3 with a USB high speed driver contributed by David Hewson.
+          David also contributed I2C and SPI drivers plus several important LPC313x USB bug fixes
+          that appear in the NuttX 5.6 release.
           This port has been verified using the NuttX OS test, USB serial and mass storage
-          tests and includes a working implementation of the NuttShell (<a href="NuttShell.html">(NSH)</a>).
-          An extended release may follow and should include SDIO-based SD card support.
+          tests and includes a working implementation of the NuttShell (<a href="NuttShell.html">NSH</a>).
       </p>
     </ul>
   </td>
@@ -1076,10 +1104,10 @@
   <td>
     <p>
       <b>STMicro STM32F103x</b>.
-      This port uses the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL
-	  development board that features the STM32F103ZET6 MCU.
-	  This port uses a GNU arm-elf toolchain* under either Linux or Cygwin (with native Windows GNU
-	  tools or Cygwin-based GNU tools).
+      This port uses the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL development board that
+      features the STM32F103ZET6 MCU.
+      This port uses a GNU arm-elf toolchain* under either Linux or Cygwin (with native Windows GNU
+      tools or Cygwin-based GNU tools).
     </p>
     <ul>
       <p>
@@ -1139,6 +1167,30 @@
         or Cygwin is provided by the NuttX
         <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
         package.
+      </p>
+     </ul>
+   </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>NXP LPC1768</b>.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        Some initial files for the LPCP17xx family were released in NuttX 5.6, but that port is not yet ready for general use
+        (I, in fact, still do not have hardware in hand).
+        Look for the announcement of the LPC1768 NuttX port in a future release.
+      </p>
+      <p>
+        <b>Development Environments:</b>
+        Same as for the other Cortex-M3 ports.
       </p>
      </ul>
    </td>
@@ -1692,32 +1744,26 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.5 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+5.6 2010-06-05 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* drivers/net/enc28j60.c - Microchip ENC28J60 SPI ethernet chip driver.
-	  (untested on original check-in).
-	* configs/olimex-str7p11/nettest - examples/nettest configuration using
-	  the ENC28J60 driver on the Olimex STMicro STR-P711.
-	  (unverified on original check-in)
-	* configs/olimex-str7p11/src/up_enc28j60.c - Add ENC28J60 initialization
-	  logic.
-	* configs/olimex-str7p11/src/up_spi.c - Fixed some bugs; added support
-	  for ENC28J60.
-	* arch/arm/src/str7x/str7x_xti.c - Add basic XTI support (external
-	  interrupts).
-	* arch/arm/src/lm3s and arch/arm/include/lm3s - Add definitions for
-	  LM3S6965
-	* configs/lm3s6965-ek - Add configuration for Stellaris LM3S6965
-	  Evaluation Kit (including basic examples/ostest configuration)
-	* lib/lib_dtoa.c and lib/lib_dtoa.c - printf will not printf floating
-	  point values if you select CONFIG_LIBC_FLOATINGPOINT in your
-	  configuration file.  Contributed by Yolande Cates.  NOTE:  these
-	  floating point operations have not been well tested and may not
-	  be portable to all floating point implementations.
-	* configs/lm3s6965-ek/nsh - Added NuttShell (NSH) configuration for
-	  the LM3S6965 Evaluation Kit.  Includes both serial and telnet
-	  interfaces.
-	* net/net_close.c - Correct a UDP reference counting error
+	* drivers/lcd/p14201.c - Driver for RiT P14201 series 128x96 4-bit OLED.
+	* configs/lm3s6965-ek/nx - NX graphics configuration for the LM3S6965
+	  Ethernet Evaluation Kit.
+	* graphics/ - Numerous fixes to get the P14201 4-bpp greyscale display
+	  working (there may still be some minor issues .. see the TODO list).
+	* arch/arm/include/lpc17xx and arch/arm/src/lpc17xxx - Began port for
+	  NXP LPC1768.  As of the 5.6 release, there is a complete set of
+	  LPC17xx header files defining all bits in all LPC17xx registers,
+	  but little else (I still do not have hardware in hand).
+	* drivers/mtd/m25px.c - Add support for M25P1 flash part (See NOTE)
+	* include/nuttx/i2c.h - Extended I2C interface definition to handle
+	  multiple transfers (See NOTE).
+	* include/nuttx/usbdev.h - Corrected an important macro definition
+	  needed to correctly handle USB null packet transfers (See NOTE).
+	* arch/arm/src/lpc313x - New drivers: I2C and SPI.  Plus several
+	  important LPC313x USB bug fixes (See NOTE).
+
+	NOTE: Contributed by David Hewson.
 
 pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1747,24 +1793,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.6 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* drivers/lcd/p14201.c - Driver for RiT P14201 series 128x96 4-bit OLED.
-	* configs/lm3s6965-ek/nx - NX graphics configuration for the LM3S6965
-	  Ethernet Evaluation Kit.
-	* graphics/ - Numerous fixes to get the P14201 4-bpp greyscale display
-	  working (there may still be some minor issues .. see the TODO list).
-	* arch/arm/include/lpc17xx and arch/arm/src/lpc17xxx - Began port for
-	  NXP LPC1768
-	* drivers/mtd/m25px.c - Add support for M25P1 flash part (See NOTE)
-	* include/nuttx/i2c.h - Extended I2C interface definition to handle
-	  multiple transfers (See NOTE).
-	* include/nuttx/usbdev.h - Corrected an important macro definition
-	  needed to correctly handle USB null packet transfers (See NOTE).
-	* arch/arm/src/lpc313x - New drivers: I2C and SPI.  Plus several
-	  important LPC313x USB bug fixes (See NOTE).
-
-	NOTE: Contributed by David Hewson.
+nuttx-5.7 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
