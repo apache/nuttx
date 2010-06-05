@@ -671,6 +671,11 @@ configs/ntosd-dm320
     STATUS: This port is code complete, verified, and included in the
     NuttX 0.2.1 release.
 
+configs/nucleus2g
+    This port uses the Nucleus 2G board (with Babel CAN board).  This board
+    features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
+    for more information about the Nucleus 2G.
+
 configs/olimex-lpc2378
     This port uses the Olimex Olimex-lpc2378 board arm-elf toolchain* under
     Linux or Cygwin.  STATUS: ostest and NSH configurations available.
