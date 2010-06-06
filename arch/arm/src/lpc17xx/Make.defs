@@ -48,7 +48,7 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_sigdeliver.c up_unblocktask.c up_usestack.c up_doirq.c \
 		  up_hardfault.c up_svcall.c
 
-# Required SAM3U files
+# Required LPC17xx files
 
 CHIP_ASRCS	=
 CHIP_CSRCS	= lpc17_gpio.c lpc17_start.c
@@ -56,7 +56,11 @@ CHIP_CSRCS	= lpc17_gpio.c lpc17_start.c
 #		  lpc17_irq.c lpc17_lowputc.c lpc17_gpio.c lpc17_serial.c \
 #		  lpc17_start.c lpc17_timerisr.c
 
-# Configuration-dependent SAM3U files
+# Configuration-dependent LPC17xx files
+
+ifeq ($(CONFIG_DEBUG),y)
+CHIP_CSRCS	+= lpc17_gpiodbg.c
+endif
 
 ifeq ($(CONFIG_LPC17_DMA),y)
 CHIP_CSRCS	+= lpc17_dmac.c

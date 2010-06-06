@@ -73,8 +73,8 @@
  */
 
 #ifdef CONFIG_GPIO_IRQ
-static uint32_t g_intedge0[2];
-static uint32_t g_intedge2[2];
+static uint64_t g_intedge0;
+static uint64_t g_intedge2;
 #endif
 
 /****************************************************************************
@@ -278,35 +278,28 @@ static int lpc17_pullup(uint16_t cfgset, unsigned int port, unsigned int pin)
 #ifdef CONFIG_GPIO_IRQ
 static int lpc17_setintedge(unsigned int port, unsigned int pin, unsigned int value)
 {
-  const uint32_t *table;
-  uint32_t tabval;
+  const uint64_t *intedge;
   unsigned int shift;
 
   /* Which word to we use? */
 
   if (port == 0)
     {
-      table = g_intedge0;
+      intedge = g_intedge0;
     }
   else if (port == 2)
     {
-      table  = g_intedge2;
+      intedge  = g_intedge2;
     }
   else
     {
       return;
     }
 
-  if (pin >= 16)
-    {
-      table++;
-      pin -= 16;
-    }
-
   /* Set the requested value in the PINSEL register */
 
-  *table &= ~(3 << shift);
-  *table |= (value << shift);
+  *intedge &= ~(3 << shift);
+  *intedge |= (value << shift);
 }
 #endif
 
