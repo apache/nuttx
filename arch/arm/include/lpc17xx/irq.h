@@ -158,14 +158,93 @@
 #define LPC17_IRQ_CANACT        (LPC17_IRQ_EXTINT+34) /* CAN Activity Interrupt CAN1WAKE, CAN2WAKE */
 #define LPC17_IRQ_NEXTINT       (35)
 
-/* No GPIO interrupts yet */
+/* GPIO interrupts.  The LPC17xx supports several interrupts on ports 0 and
+ * 2 (only).  We go through some special efforts to keep the number of IRQs
+ * to a minimum in this sparse interrupt case.
+ *
+ * 28 interrupts on Port 0:  p0.0 - p0.11, p0.15-p0.30
+ * 14 interrupts on Port 2:  p2.0 - p2.13
+ * --
+ * 42
+ */
 
-#define LPC17_NGPIOAIRQS        0
+#ifdef CONFIG_GPIO_IRQ
+#  define LPC17_VALID_GPIOINT0  (0x7fff8ffful) /* GPIO port 0 interrrupt set */
+#  define LPC17_VALID_GPIOINT2  (0x00003ffful) /* GPIO port 2 interrupt set */
+
+   /* Set 1: 12 interrupts p0.0-p0.11 */
+
+#  define LPC17_VALID_GPIOINT0L (0x00000ffful)
+#  define LPC17_VALID_SHIFT0L   (0)
+#  define LPC17_VALID_FIRST0L   (LPC17_IRQ_EXTINT+LPC17_IRQ_NEXTINT)
+
+#  define LPC17_IRQ_P0p0        (LPC17_VALID_FIRST0L+0)
+#  define LPC17_IRQ_P0p1        (LPC17_VALID_FIRST0L+1)
+#  define LPC17_IRQ_P0p2        (LPC17_VALID_FIRST0L+2)
+#  define LPC17_IRQ_P0p3        (LPC17_VALID_FIRST0L+3)
+#  define LPC17_IRQ_P0p4        (LPC17_VALID_FIRST0L+4)
+#  define LPC17_IRQ_P0p5        (LPC17_VALID_FIRST0L+5)
+#  define LPC17_IRQ_P0p6        (LPC17_VALID_FIRST0L+6)
+#  define LPC17_IRQ_P0p7        (LPC17_VALID_FIRST0L+7)
+#  define LPC17_IRQ_P0p8        (LPC17_VALID_FIRST0L+8)
+#  define LPC17_IRQ_P0p9        (LPC17_VALID_FIRST0L+9)
+#  define LPC17_IRQ_P0p10       (LPC17_VALID_FIRST0L+10)
+#  define LPC17_IRQ_P0p11       (LPC17_VALID_FIRST0L+11)
+#  define LPC17_VALID_NIRQS0L   (12)
+
+   /* Set 2: 16 interrupts p0.15-p0.30 */
+
+#  define LPC17_VALID_GPIOINT0H (0x7fff8000ull)
+#  define LPC17_VALID_SHIFT0H   (15)
+#  define LPC17_VALID_FIRST0H   (LPC17_VALID_FIRST0L+LPC17_VALID_NIRQS0L)
+
+#  define LPC17_IRQ_P0p15       (LPC17_VALID_FIRST0H+0)
+#  define LPC17_IRQ_P0p16       (LPC17_VALID_FIRST0H+1)
+#  define LPC17_IRQ_P0p17       (LPC17_VALID_FIRST0H+2)
+#  define LPC17_IRQ_P0p18       (LPC17_VALID_FIRST0H+3)
+#  define LPC17_IRQ_P0p19       (LPC17_VALID_FIRST0H+4)
+#  define LPC17_IRQ_P0p20       (LPC17_VALID_FIRST0H+5)
+#  define LPC17_IRQ_P0p21       (LPC17_VALID_FIRST0H+6)
+#  define LPC17_IRQ_P0p22       (LPC17_VALID_FIRST0H+7)
+#  define LPC17_IRQ_P0p23       (LPC17_VALID_FIRST0H+8)
+#  define LPC17_IRQ_P0p24       (LPC17_VALID_FIRST0H+9)
+#  define LPC17_IRQ_P0p25       (LPC17_VALID_FIRST0H+10)
+#  define LPC17_IRQ_P0p26       (LPC17_VALID_FIRST0H+11)
+#  define LPC17_IRQ_P0p27       (LPC17_VALID_FIRST0H+12)
+#  define LPC17_IRQ_P0p28       (LPC17_VALID_FIRST0H+13)
+#  define LPC17_IRQ_P0p29       (LPC17_VALID_FIRST0H+14)
+#  define LPC17_IRQ_P0p30       (LPC17_VALID_FIRST0H+15)
+#  define LPC17_VALID_NIRQS0H   (16)
+
+   /* Set 3: 14 interrupts p2.0-p2.13 */
+
+#  define LPC17_VALID_GPIOINT2  (0x00003ffful)
+#  define LPC17_VALID_SHIFT2    (0)
+#  define LPC17_VALID_FIRST2    (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H)
+
+#  define LPC17_IRQ_P2p0        (LPC17_IRQ_GPIOINT+0)
+#  define LPC17_IRQ_P2p1        (LPC17_IRQ_GPIOINT+1)
+#  define LPC17_IRQ_P2p2        (LPC17_IRQ_GPIOINT+2)
+#  define LPC17_IRQ_P2p3        (LPC17_IRQ_GPIOINT+3)
+#  define LPC17_IRQ_P2p4        (LPC17_IRQ_GPIOINT+4)
+#  define LPC17_IRQ_P2p5        (LPC17_IRQ_GPIOINT+5)
+#  define LPC17_IRQ_P2p6        (LPC17_IRQ_GPIOINT+6)
+#  define LPC17_IRQ_P2p7        (LPC17_IRQ_GPIOINT+7)
+#  define LPC17_IRQ_P2p8        (LPC17_IRQ_GPIOINT+8)
+#  define LPC17_IRQ_P2p9        (LPC17_IRQ_GPIOINT+9)
+#  define LPC17_IRQ_P2p10       (LPC17_IRQ_GPIOINT+10)
+#  define LPC17_IRQ_P2p11       (LPC17_IRQ_GPIOINT+11)
+#  define LPC17_IRQ_P2p12       (LPC17_IRQ_GPIOINT+12)
+#  define LPC17_IRQ_P2p13       (LPC17_IRQ_GPIOINT+13)
+#  define LPC17_VALID_NIRQS2    (14)
+#  define LPC17_NGPIOAIRQS      (LPC17_VALID_NIRQS0L+LPC17_VALID_NIRQS0H+LPC17_VALID_NIRQS2)
+#else
+#  define LPC17_NGPIOAIRQS      (0)
+#endif
 
 /* Total number of IRQ numbers */
 
 #define NR_IRQS                 (LPC17_IRQ_EXTINT+LPC17_IRQ_NEXTINT+LPC17_NGPIOAIRQS)
-
 
 /****************************************************************************
  * Public Types
