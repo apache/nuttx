@@ -157,6 +157,7 @@
 #define LPC17_IRQ_USBACT        (LPC17_IRQ_EXTINT+33) /* USB Activity Interrupt USB_NEED_CLK */
 #define LPC17_IRQ_CANACT        (LPC17_IRQ_EXTINT+34) /* CAN Activity Interrupt CAN1WAKE, CAN2WAKE */
 #define LPC17_IRQ_NEXTINT       (35)
+#define LPC17_IRQ_NIRQS         (LPC17_IRQ_EXTINT+LPC17_IRQ_NEXTINT)
 
 /* GPIO interrupts.  The LPC17xx supports several interrupts on ports 0 and
  * 2 (only).  We go through some special efforts to keep the number of IRQs
