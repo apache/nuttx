@@ -241,12 +241,70 @@ static void lpc17_setintedge(uint32_t intbase, unsigned int pin, unsigned int ed
  * Name: lpc17_irq2port
  *
  * Description:
- *  Get the stored interrupt edge configuration.
+ *  Given an IRQ number, return the GPIO port number (0 or 2) of the interrupt.
  *
  ****************************************************************************/
 
 static int lpc17_irq2port(int irq)
 {
+ /* Set 1: 12 interrupts p0.0-p0.11 */
+
+  if (irq >= LPC17_VALID_FIRST0L && irq < (LPC17_VALID_FIRST0L+LPC17_VALID_NIRQS0L)
+    {
+      return 0;
+    }
+
+  /* Set 2: 16 interrupts p0.15-p0.30 */
+
+  else if (irq >= LPC17_VALID_FIRST0H && irq < (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H)
+    {
+      return 0;
+    }
+
+  /* Set 3: 14 interrupts p2.0-p2.13 */
+
+  else if (irq >= LPC17_VALID_NIRQS2 && irq < (LPC17_VALID_FIRST2+LPC17_VALID_NIRQS2)
+    {
+      return 2;
+    }
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: lpc17_irq2pin
+ *
+ * Description:
+ *  Given an IRQ number, return the GPIO pin number (0..31) of the interrupt.
+ *
+ ****************************************************************************/
+
+static int lpc17_irq2port(int irq)
+{
+ /* Set 1: 12 interrupts p0.0-p0.11 */
+
+  if (irq >= LPC17_VALID_FIRST0L && irq < (LPC17_VALID_FIRST0L+LPC17_VALID_NIRQS0L)
+    {
+      return irq - LPC17_VALID_FIRST0L + LPC17_VALID_SHIFT0L;
+    }
+
+  /* Set 2: 16 interrupts p0.15-p0.30 */
+
+  else if (irq >= LPC17_VALID_FIRST0H && irq < (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H)
+    {
+      return irq - LPC17_VALID_FIRST0H + LPC17_VALID_SHIFT0H;
+      
+      12
+    }
+
+  /* Set 3: 14 interrupts p2.0-p2.13 */
+
+  else if (irq >= LPC17_VALID_NIRQS2 && irq < (LPC17_VALID_FIRST2+LPC17_VALID_NIRQS2)
+    {
+      return irq - LPC17_VALID_FIRST0H + LPC17_VALID_SHIFT2;
+    }
+  return -EINVAL;
+}
+
 
 /****************************************************************************
  * Global Functions
