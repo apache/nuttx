@@ -73,8 +73,8 @@
  */
 
 #ifdef CONFIG_GPIO_IRQ
-static uint64_t g_intedge0;
-static uint64_t g_intedge2;
+uint64_t g_intedge0;
+atic uint64_t g_intedge2;
 #endif
 
 /****************************************************************************
@@ -83,6 +83,17 @@ static uint64_t g_intedge2;
 /* These tables have global scope because they are also used in
  * lpc17_gpiodbg.c
  */
+
+/* We have to remember the configured interrupt setting.. PINs are not
+ * actually set up to interrupt until the interrupt is enabled.
+ */
+
+#ifdef CONFIG_GPIO_IRQ
+uint64_t g_intedge0;
+uint64_t g_intedge2;
+#endif
+
+/* FIO register base addresses */
 
 const uint32_t g_fiobase[GPIO_NPORTS] =
 {
@@ -298,6 +309,7 @@ static int lpc17_setintedge(unsigned int port, unsigned int pin, unsigned int va
 
   /* Set the requested value in the PINSEL register */
 
+  shift = pin << 1;
   *intedge &= ~(3 << shift);
   *intedge |= (value << shift);
 }

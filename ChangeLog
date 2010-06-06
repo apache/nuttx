@@ -1146,3 +1146,8 @@
 	NOTE: Contributed by David Hewson.
 
 5.7 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* configs/nucleus2g - Add ostest configuration for the Nucleus 2G
+	  LPC1768 board from 2G Engineering (http://www.2g-eng.com/)
+	* arch/arm/src/lpc17xx - Added basic LPC17xx boot-up logic,
+	  interrupt handling, and GPIO configuration.

@@ -355,9 +355,14 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* These tables have global scope only because they are shared between lpc_gpio.c
- * and lpc17_gpiodbg.c
+/* These tables have global scope only because they are shared between lpc17_gpio.c,
+ * lpc17_gpioint.c, and lpc17_gpiodbg.c
  */
+
+#ifdef CONFIG_GPIO_IRQ
+extern uint64_t g_intedge0;
+extern uint64_t g_intedge2;
+#endif
 
 extern const uint32_t g_fiobase[GPIO_NPORTS];
 extern const uint32_t g_intbase[GPIO_NPORTS];
@@ -438,20 +443,6 @@ EXTERN void lpc17_gpiowrite(uint16_t pinset, bool value);
  ************************************************************************************/
 
 EXTERN bool lpc17_gpioread(uint16_t pinset);
-
-/************************************************************************************
- * Name: lpc17_gpioirq
- *
- * Description:
- *   Configure an interrupt for the specified GPIO pin.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_GPIO_IRQ
-EXTERN void lpc17_gpioirq(uint16_t pinset);
-#else
-#  define lpc17_gpioirq(pinset)
-#endif
 
 /************************************************************************************
  * Name: lpc17_gpioirqenable
