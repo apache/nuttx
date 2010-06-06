@@ -44,7 +44,7 @@
 #include <nuttx/ohci.h>
 
 #include "chip.h"
-#include "lp17_memorymap.h"
+#include "lpc17_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

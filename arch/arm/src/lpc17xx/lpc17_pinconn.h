@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "lp17_memorymap.h"
+#include "lpc17_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -105,6 +105,12 @@
 
 /* Register bit definitions *********************************************************/
 /* Pin Function Select register 0 (PINSEL0: 0x4002c000) */
+
+#define PINCONN_PINSEL_GPIO             (0)
+#define PINCONN_PINSEL_ALT1             (1)
+#define PINCONN_PINSEL_ALT2             (2)
+#define PINCONN_PINSEL_ALT3             (3)
+#define PINCONN_PINSEL_MASK             (3)
 
 #define PINCONN_PINSELL_SHIFT(n)        ((n) << 1) /* n=0,1,..,15 */
 #define PINCONN_PINSELL_MASK(n)         (3 << PINCONN_PINSELL_SHIFT(n))
@@ -457,21 +463,21 @@
 #define PINCONN_PINMODE4_P2p4_SHIFT     (8)       /* Bits 8-9: P2.4 mode control */
 #define PINCONN_PINMODE4_P2p4_MASK      (3 << PINCONN_PINMODE4_P2p4_SHIFT)
 #define PINCONN_PINMODE4_P2p5_SHIFT     (10)      /* Bits 10-11: P2.5 mode control */
-#define PINCONN_PINMODE4_P2p6_MASK      (3 << PINCONN_PINMODE4_P2p5_SHIFT)
+#define PINCONN_PINMODE4_P2p5_MASK      (3 << PINCONN_PINMODE4_P2p5_SHIFT)
 #define PINCONN_PINMODE4_P2p6_SHIFT     (12)      /* Bits 12-13: P2.6 mode control */
-#define PINCONN_PINMODE4_P2p7_MASK      (3 << PINCONN_PINMODE4_P2p6_SHIFT)
+#define PINCONN_PINMODE4_P2p6_MASK      (3 << PINCONN_PINMODE4_P2p6_SHIFT)
 #define PINCONN_PINMODE4_P2p7_SHIFT     (14)      /* Bits 14-15: P2.7 mode control */
-#define PINCONN_PINMODE4_P2p8_MASK      (3 << PINCONN_PINMODE4_P2p7_SHIFT)
+#define PINCONN_PINMODE4_P2p7_MASK      (3 << PINCONN_PINMODE4_P2p7_SHIFT)
 #define PINCONN_PINMODE4_P2p8_SHIFT     (16)      /* Bits 16-17: P2.8 mode control */
-#define PINCONN_PINMODE4_P2p9_MASK      (3 << PINCONN_PINMODE4_P2p8_SHIFT)
+#define PINCONN_PINMODE4_P2p8_MASK      (3 << PINCONN_PINMODE4_P2p8_SHIFT)
 #define PINCONN_PINMODE4_P2p9_SHIFT     (18)      /* Bits 18-19: P2.9 mode control */
-#define PINCONN_PINMODE4_P2p10_MASK     (3 << PINCONN_PINMODE4_P2p9_SHIFT)
+#define PINCONN_PINMODE4_P2p9_MASK      (3 << PINCONN_PINMODE4_P2p9_SHIFT)
 #define PINCONN_PINMODE4_P2p10_SHIFT    (20)      /* Bits 20-21: P2.10 mode control */
-#define PINCONN_PINMODE4_P2p11_MASK     (3 << PINCONN_PINMODE4_P2p10_SHIFT)
+#define PINCONN_PINMODE4_P2p10_MASK     (3 << PINCONN_PINMODE4_P2p10_SHIFT)
 #define PINCONN_PINMODE4_P2p11_SHIFT    (22)      /* Bits 22-23: P2.11 mode control */
-#define PINCONN_PINMODE4_P2p12_MASK     (3 << PINCONN_PINMODE4_P2p11_SHIFT)
+#define PINCONN_PINMODE4_P2p11_MASK     (3 << PINCONN_PINMODE4_P2p11_SHIFT)
 #define PINCONN_PINMODE4_P2p12_SHIFT    (24)      /* Bits 24-25: P2.12 mode control */
-#define PINCONN_PINMODE4_P2p13_MASK     (3 << PINCONN_PINMODE4_P2p12_SHIFT)
+#define PINCONN_PINMODE4_P2p12_MASK     (3 << PINCONN_PINMODE4_P2p12_SHIFT)
 #define PINCONN_PINMODE4_P2p13_SHIFT    (26)      /* Bits 26-27: P2.13 mode control */
 #define PINCONN_PINMODE4_P2p13_MASK     (3 << PINCONN_PINMODE4_P2p13_SHIFT)
                                                   /* Bits 28-31: Reserved */
