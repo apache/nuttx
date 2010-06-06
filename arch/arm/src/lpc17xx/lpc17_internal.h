@@ -58,30 +58,51 @@
 
 /* Bit-encoded input to lpc17_configgpio() ******************************************/
 
-/* Encoding: FFMM OGGG PPPN NNNN
+/* Encoding: FFFx MMOV PPPN NNNN
  *
- *   Pin Function:   FF
- *   Pin Mode:       MM (input pins)
+ *   Pin Function:   FFF
+ *   Pin Mode bits:  MM
  *   Open drain:     O (output pins)
- *   GPIO Mode bits: GGG
+ *   Initial value:  V (output pins)
  *   Port number:    PPP (0-4)
  *   Pin number:     NNNNN (0-31)
  */
  
- /* Pin Function: FF */
- 
-#define GPIO_FUNC_SHIFT      (14)      /* Bits 14-15: Pin function select */
-#define GPIO_FUNC_MASK       (3 << GPIO_FUNC_SHIFT)
-#  define GPIO_PIN  0        (0 << GPIO_FUNC_SHIFT)
-#  define GPIO_ALT1 1        (1 << GPIO_FUNC_SHIFT)
-#  define GPIO_ALT2 2        (2 << GPIO_FUNC_SHIFT)
-#  define GPIO_ALT3 3        (3 << GPIO_FUNC_SHIFT)
+/* Pin Function bits: FFF
+ * Only meaningful when the GPIO function is GPIO_PIN
+ */
 
-#define GPIO_ISGPIO(ps)      (((ps) & GPIO_FUNC_MASK) == GPIO_PIN)
+#define GPIO_FUNC_SHIFT      (13)       /* Bits 13-15: GPIO mode */
+#define GPIO_FUNC_MASK       (7 << GPIO_FUNC_SHIFT)
+#  define GPIO_INPUT         (0 << GPIO_FUNC_SHIFT) /* 000 GPIO input pin */
+#  define GPIO_INTFE         (1 << GPIO_FUNC_SHIFT) /* 001 GPIO interrupt falling edge */
+#  define GPIO_INTRE         (2 << GPIO_FUNC_SHIFT) /* 010 GPIO interrupt rising edge */
+#  define GPIO_INTBOTH       (3 << GPIO_FUNC_SHIFT) /* 011 GPIO interrupt both edges */
+#  define GPIO_OUTPUT        (4 << GPIO_FUNC_SHIFT) /* 100 GPIO outpout pin */
+#  define GPIO_ALT1          (5 << GPIO_FUNC_SHIFT) /* 101 Alternate function 1 */
+#  define GPIO_ALT2          (6 << GPIO_FUNC_SHIFT) /* 110 Alternate function 2 */
+#  define GPIO_ALT3          (7 << GPIO_FUNC_SHIFT) /* 111 Alternate function 3 */
+
+#define GPIO_EDGE_SHIFT      (13)       /* Bits 13-14: Interrupt edge bits */
+#define GPIO_EDGE_MASK       (3 << GPIO_EDGE_SHIFT)
+
+#define GPIO_INOUT_MASK      GPIO_OUTPUT
+#define GPIO_FE_MASK         GPIO_INTFE
+#define GPIO_RE_MASK         GPIO_INTRE
+
+#define GPIO_ISGPIO(ps)      ((uint16_t(ps) & GPIO_FUNC_MASK) <= GPIO_OUTPUT)
+#define GPIO_ISALT(ps)       ((uint16_t(ps) & GPIO_FUNC_MASK) > GPIO_OUTPUT)
+#define GPIO_ISINPUT(ps)     ((ps) & GPIO_FUNC_MASK) == GPIO_INPUT)
+#define GPIO_ISOUTPUT(ps)    ((ps) & GPIO_FUNC_MASK) == GPIO_OUTPUT)
+#define GPIO_ISINORINT(ps)   ((ps) & GPIO_INOUT_MASK) == 0)
+#define GPIO_ISOUTORALT(ps)  ((ps) & GPIO_INOUT_MASK) != 0)
+#define GPIO_ISINTERRUPT(ps) (GPIO_ISOUTPUT(ps) && !GPIO_ISINPUT(ps))
+#define GPIO_ISFE(ps)        ((ps) & GPIO_FE_MASK) != 0)
+#define GPIO_ISRE(ps)        ((ps) & GPIO_RE_MASK) != 0)
 
 /* Pin Mode: MM */
 
-#define GPIO_PUMODE_SHIFT    (12)      /* Bits 12-13: Pin pull-up mode */
+#define GPIO_PUMODE_SHIFT    (10)      /* Bits 10-11: Pin pull-up mode */
 #define GPIO_PUMODE_MASK     (3 << GPIO_PUMODE_SHIFT)
 #  define GPIO_PULLUP        (0 << GPIO_PUMODE_SHIFT) /* Pull-up resistor enabled */
 #  define GPIO_REPEATER      (1 << GPIO_PUMODE_SHIFT) /* Repeater mode enabled */
@@ -90,29 +111,13 @@
 
 /* Open drain: O */
 
-#define GPIO_OPEN_DRAIN      (1 << 11) /* Bit 11: Open drain mode */
+#define GPIO_OPEN_DRAIN      (1 << 9)  /* Bit 9:  Open drain mode */
 
-/* GPIO Mode bits: GGG
- * Only meaningful when the GPIO function is GPIO_PIN
- */
+/* Initial value: V */
 
-#define GPIO_GMODE_SHIFT     (8)       /* Bits 8-10: GPIO mode */
-#define GPIO_GMODE_MASK      (7 << GPIO_GMODE_SHIFT)
-#  define GPIO_INPUT         (0 << GPIO_GMODE_SHIFT) /* 000 GPIO input pin */
-#  define GPIO_INTFE         (1 << GPIO_GMODE_SHIFT) /* 001 GPIO interrupt falling edge */
-#  define GPIO_INTRE         (2 << GPIO_GMODE_SHIFT) /* 010 GPIO interrupt rising edge */
-#  define GPIO_INTBOTH       (3 << GPIO_GMODE_SHIFT) /* 011 GPIO interrupt both edges */
-#  define GPIO_OUTPUT        (4 << GPIO_GMODE_SHIFT) /* 100 GPIO outpout pin */
-
-#define GPIO_OUTPUT_MASK     GPIO_OUTPUT
-#define GPIO_FE_MASK         GPIO_INTFE
-#define GPIO_RE_MASK         GPIO_INTRE
-
-#define GPIO_ISINPUT(ps)     ((ps) & GPIO_GMODE_MASK) == GPIO_INPUT)
-#define GPIO_ISOUTPUT(ps)    ((ps) & GPIO_OUTPUT_MASK) != 0)
-#define GPIO_ISINTERRUPT(ps) (!GPIO_ISINPUT(ps) && !GPIO_ISOUTPUT(ps))
-#define GPIO_ISFE(ps)        ((ps) & GPIO_FE_MASK) != 0)
-#define GPIO_ISRE(ps)        ((ps) & GPIO_RE_MASK) != 0)
+#define GPIO_VALUE           (1 << 8)  /* Bit 8:  Initial GPIO output value */
+#define GPIO_VALUE_ONE       GPIO_VALUE
+#define GPIO_VALUE_ZERO      (0)
 
 /* Port number:    PPP (0-4) */
 
@@ -123,6 +128,8 @@
 #  define GPIO_PORT2         (2 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT3         (3 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT4         (4 << GPIO_PORT_SHIFT)
+
+#define GPIO_NPORTS          5
 
 /* Pin number:     NNNNN (0-31) */
 
@@ -347,6 +354,18 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
+
+/* These tables have global scope only because they are shared between lpc_gpio.c
+ * and lpc17_gpiodbg.c
+ */
+
+extern const uint32_t g_fiobase[GPIO_NPORTS];
+extern const uint32_t g_intbase[GPIO_NPORTS];
+extern const uint32_t g_lopinsel[GPIO_NPORTS];
+extern const uint32_t g_hipinsel[GPIO_NPORTS];
+extern const uint32_t g_lopinmode[GPIO_NPORTS];
+extern const uint32_t g_hipinmode[GPIO_NPORTS];
+extern const uint32_t g_odmode[GPIO_NPORTS];
 
 /************************************************************************************
  * Public Function Prototypes
