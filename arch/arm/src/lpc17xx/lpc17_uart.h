@@ -175,19 +175,21 @@
 #define UART_IER_ABEOIE              (1 << 8)  /* Bit 8: Enables the end of auto-baud interrupt */
 #define UART_IER_ABTOIE              (1 << 9)  /* Bit 9: Enables the auto-baud time-out interrupt */
                                                /* Bits 10-31: Reserved */
+#define UART_IER_ALLIE               (0x038f)
+
 /* IIR Interrupt ID Register (all) */
 
 #define UART_IIR_INTSTATUS           (1 << 0)  /* Bit 0:  Interrupt status (active low) */
 #define UART_IIR_INTID_SHIFT         (1)       /* Bits 1-3: Interrupt identification */
-#define UART_IIR_INTID_MASK          (7 < UART_IIR_INTID_SHIFT)
-#  define UART_IIR_INTID_MSI         (0 < UART_IIR_INTID_SHIFT) /* Modem Status (UART1 only) */
-#  define UART_IIR_INTID_THRE        (1 < UART_IIR_INTID_SHIFT) /* THRE Interrupt */
-#  define UART_IIR_INTID_RDA         (2 < UART_IIR_INTID_SHIFT) /* 2a - Receive Data Available (RDA */
-#  define UART_IIR_INTID_RLS         (3 < UART_IIR_INTID_SHIFT) /* 1 - Receive Line Status (RLS) */
-#  define UART_IIR_INTID_CTI         (6 < UART_IIR_INTID_SHIFT) /* 2b - Character Time-out Indicator (CTI) */
+#define UART_IIR_INTID_MASK          (7 << UART_IIR_INTID_SHIFT)
+#  define UART_IIR_INTID_MSI         (0 << UART_IIR_INTID_SHIFT) /* Modem Status (UART1 only) */
+#  define UART_IIR_INTID_THRE        (1 << UART_IIR_INTID_SHIFT) /* THRE Interrupt */
+#  define UART_IIR_INTID_RDA         (2 << UART_IIR_INTID_SHIFT) /* 2a - Receive Data Available (RDA */
+#  define UART_IIR_INTID_RLS         (3 << UART_IIR_INTID_SHIFT) /* 1 - Receive Line Status (RLS) */
+#  define UART_IIR_INTID_CTI         (6 << UART_IIR_INTID_SHIFT) /* 2b - Character Time-out Indicator (CTI) */
                                                /* Bits 4-5: Reserved */
 #define UART_IIR_FIFOEN_SHIFT        (6)       /* Bits 6-7: Copies of FCR bit 0 */
-#define UART_IIR_FIFOEN_MASK         (3 < UART_IIR_FIFOEN_SHIFT)
+#define UART_IIR_FIFOEN_MASK         (3 << UART_IIR_FIFOEN_SHIFT)
 #define UART_IIR_ABEOINT             (1 << 8)  /* Bit 8:  End of auto-baud interrupt */
 #define UART_IIR_ABTOINT             (1 << 9)  /* Bit 9:  Auto-baud time-out interrupt */
                                                /* Bits 10-31: Reserved */
@@ -243,7 +245,7 @@
 #define UART_LSR_BI                  (1 << 4)  /* Bit 4:  Break Interrupt */
 #define UART_LSR_THRE                (1 << 5)  /* Bit 5:  Transmitter Holding Register Empty */
 #define UART_LSR_TEMT                (1 << 6)  /* Bit 6:  Transmitter Empty */
-#define UART_LSR_RXFE                (1 << 7)  /* Bit 7:  Error in RX FIFO (RXFE)
+#define UART_LSR_RXFE                (1 << 7)  /* Bit 7:  Error in RX FIFO (RXFE) */
                                                /* Bits 8-31: Reserved */
 /* MSR Modem Status Register (UART1 only) */
 

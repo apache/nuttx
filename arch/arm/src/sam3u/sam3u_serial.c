@@ -212,7 +212,7 @@
 #        ifdef CONFIG_SAM3U_USART3
 #          define TTYS2_DEV g_usart3port  /* UART=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
-#          undef TTYS3_DEV                /* UART=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
+#          undef TTYS2_DEV                /* UART=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
 #        ifdef CONFIG_SAM3U_USART3
@@ -449,7 +449,7 @@
 #        ifdef CONFIG_SAM3U_USART3
 #          define TTYS2_DEV g_usart3port  /* USART2=ttyS0;USART1=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
-#          undef TTYS3_DEV                /* USART2=ttyS0;USART1=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
+#          undef TTYS2_DEV                /* USART2=ttyS0;USART1=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
 #        ifdef CONFIG_SAM3U_USART3
@@ -528,7 +528,7 @@
 #        ifdef CONFIG_SAM3U_USART2
 #          define TTYS2_DEV g_EEEEport    /* USART3=ttyS0;USART1=ttyS1;USART2=ttyS2;No ttyS3;No ttyS4 */
 #        else
-#          undef TTYS3_DEV                /* USART3=ttyS0;USART1=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
+#          undef TTYS2_DEV                /* USART3=ttyS0;USART1=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
 #        ifdef CONFIG_SAM3U_USART2
