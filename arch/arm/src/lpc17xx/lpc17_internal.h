@@ -331,7 +331,7 @@
 #define GPIO_UART3_TXD_3   (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN28)
 #define GPIO_TXMCLK        (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN29)
 #define GPIO_MAT2p1_2      (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN29)
-#define GPIO_UART3_RXD     (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN29)
+#define GPIO_UART3_RXD_3   (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN29)
 
 /************************************************************************************
  * Public Types
