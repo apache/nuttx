@@ -212,7 +212,7 @@
 
 #define SYSCON_CLKSRCSEL_SHIFT        (0)         /* Bits 0-1: Clock selection */
 #define SYSCON_CLKSRCSEL_MASK         (3 << SYSCON_CLKSRCSEL_SHIFT)
-#  define SYSCON_CLKSRCSEL_MAIN       (0 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = internal RC oscillator */
+#  define SYSCON_CLKSRCSEL_INTRC      (0 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = internal RC oscillator */
 #  define SYSCON_CLKSRCSEL_RTC        (1 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = main oscillator */
 #  define SYSCON_CLKSRCSEL_MAIN       (2 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = RTC oscillator */
                                                   /* Bits 2-31:  Reserved */
@@ -282,12 +282,12 @@
                                                   /* Bits 8-31:  Reserved */
 /* Peripheral Clock Selection registers 0 and 1 */
 
-#define SYSCON_PCLKSET_CCLK4          (0)         /* PCLK_peripheral = CCLK/4 */
-#define SYSCON_PCLKSET_CCLK           (1)         /* PCLK_peripheral = CCLK */
-#define SYSCON_PCLKSET_CCLK2          (2)         /* PCLK_peripheral = CCLK/2 */
-#define SYSCON_PCLKSET_CCLK6          (3)         /* PCLK_peripheral = CCLK/8 (except CAN1, CAN2, and CAN) */
-#define SYSCON_PCLKSET_CCLK8          (3)         /* PCLK_peripheral = CCLK/6 (CAN1, CAN2, and CAN) */
-#define SYSCON_PCLKSET_MASK           (3)
+#define SYSCON_PCLKSEL_CCLK4          (0)         /* PCLK_peripheral = CCLK/4 */
+#define SYSCON_PCLKSEL_CCLK           (1)         /* PCLK_peripheral = CCLK */
+#define SYSCON_PCLKSEL_CCLK2          (2)         /* PCLK_peripheral = CCLK/2 */
+#define SYSCON_PCLKSEL_CCLK8          (3)         /* PCLK_peripheral = CCLK/8 (except CAN1, CAN2, and CAN) */
+#define SYSCON_PCLKSEL_CCLK6          (3)         /* PCLK_peripheral = CCLK/6 (CAN1, CAN2, and CAN) */
+#define SYSCON_PCLKSEL_MASK           (3)
 
 #define SYSCON_PCLKSEL0_WDT_SHIFT     (0)         /* Bits 0-1: Peripheral clock WDT */
 #define SYSCON_PCLKSEL0_WDT_MASK      (3 << SYSCON_PCLKSEL0_WDT_SHIFT)

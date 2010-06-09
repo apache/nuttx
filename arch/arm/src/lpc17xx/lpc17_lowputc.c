@@ -55,27 +55,103 @@
  * Private Definitions
  **************************************************************************/
      
+/* Select UART parameters for the selected console */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     LPC17_UART0_BASE
+#  define CONSOLE_BAUD     CONFIG_UART0_BAUD
+#  define CONSOLE_BITS     CONFIG_UART0_BITS
+#  define CONSOLE_PARITY   CONFIG_UART0_PARITY
+#  define CONSOLE_2STOP    CONFIG_UART0_2STOP
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     LPC17_UART1_BASE
+#  define CONSOLE_BAUD     CONFIG_UART1_BAUD
+#  define CONSOLE_BITS     CONFIG_UART1_BITS
+#  define CONSOLE_PARITY   CONFIG_UART1_PARITY
+#  define CONSOLE_2STOP    CONFIG_UART1_2STOP
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     LPC17_UART2_BASE
+#  define CONSOLE_BAUD     CONFIG_UART2_BAUD
+#  define CONSOLE_BITS     CONFIG_UART2_BITS
+#  define CONSOLE_PARITY   CONFIG_UART2_PARITY
+#  define CONSOLE_2STOP    CONFIG_UART2_2STOP
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     LPC17_UART3_BASE
+#  define CONSOLE_BAUD     CONFIG_UART3_BAUD
+#  define CONSOLE_BITS     CONFIG_UART3_BITS
+#  define CONSOLE_PARITY   CONFIG_UART3_PARITY
+#  define CONSOLE_2STOP    CONFIG_UART3_2STOP
+#else
+#  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
+#endif
+
+/* Get word length setting for the console */
+
+#if CONSOLE_BITS == 5
+#  define CONSOLE_LCR_WLS UART_LCR_WLS_5BIT
+#elif CONSOLE_BITS == 6
+#  define CONSOLE_LCR_WLS UART_LCR_WLS_6BIT
+#elif CONSOLE_BITS == 7
+#  define CONSOLE_LCR_WLS UART_LCR_WLS_7BIT
+#elif CONSOLE_BITS == 8
+#  define CONSOLE_LCR_WLS UART_LCR_WLS_8BIT
+#else
+#  error "Invalid CONFIG_UARTn_BITS setting for console "
+#endif
+
+/* Get parity setting for the console */
+
+#if CONSOLE_PARITY == 0
+#  define CONSOLE_LCR_PAR 0
+#elif CONSOLE_PARITY == 1
+#  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_ODD)
+#elif CONSOLE_PARITY == 2
+#  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_EVEN)
+#elif CONSOLE_PARITY == 3
+#  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK1)
+#elif CONSOLE_PARITY == 4
+#  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK0)
+#else
+#    error "Invalid CONFIG_UARTn_PARITY setting for CONSOLE"
+#endif
+
+/* Get stop-bit setting for the console and UART0-3 */
+
+#if CONSOLE_2STOP != 0
+#  define CONSOLE_LCR_STOP LPC214X_LCR_STOP_2
+#else
+#  define CONSOLE_LCR_STOP LPC214X_LCR_STOP_1
+#endif
+
+/* LCR and FCR values for the console */
+
+#define CONSOLE_LCR_VALUE (CONSOLE_LCR_WLS | CONSOLE_LCR_PAR | CONSOLE_LCR_STOP)
+#define CONSOLE_FCR_VALUE (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST |\
+                           UART_FCR_RXRST | UART_FCR_FIFOEN)
+
 /* Baud calculations
-
-BAUD = PCLK / (16 x (256 x DLM + DLL) x (1 + DIVADDVAL/MULVAL))
-
-Where PCLK is the peripheral clock, DLM and DLL are the standard
-UART baud rate divider registers, and DIVADDVAL and MULVAL are UART
-fractional baud rate generator specific parameters.
-
-The value of MULVAL and DIVADDVAL should comply to the following conditions:
-
-1. 1 <= MULVAL <= 15
-2. 0 <= DIVADDVAL <= 14
-3. DIVADDVAL < MULVAL
-
-The peripheral clock is controlled by:
-
-#define SYSCON_PCLKSET_CCLK4 PCLK_peripheral = CCLK/4
-#define SYSCON_PCLKSET_CCLK  PCLK_peripheral = CCLK
-#define SYSCON_PCLKSET_CCLK2 PCLK_peripheral = CCLK/2
-#define SYSCON_PCLKSET_CCLK6 PCLK_peripheral = CCLK/8 (except CAN1, CAN2, and CAN)
-#define SYSCON_PCLKSET_CCLK8 PCLK_peripheral = CCLK/6 (CAN1, CAN2, and CAN)
+ *
+ *   BAUD = PCLK / ((16 x DL) x (1 + DIVADDVAL/MULVAL))
+ *
+ * Where:
+ *
+ *   - PCLK is the peripheral clock
+ *   - DL is (256*DML + DLL), the standard UART baud rate divider registers, and 
+ *   - DIVADDVAL and MULVAL are UART fractional baud rate generator specific
+ *     parameters.
+ *
+ * The value of MULVAL and DIVADDVAL should comply to the following conditions:
+ *
+ *   1. 1 <= MULVAL <= 15
+ *   2. 0 <= DIVADDVAL <= 14
+ *   3. DIVADDVAL < MULVAL
+ *
+ * The peripheral clock is controlled by:
+ *
+ *   SYSCON_PCLKSEL_CCLK4: PCLK_peripheral = CCLK/4
+ *   SYSCON_PCLKSEL_CCLK: PCLK_peripheral = CCLK
+ *   SYSCON_PCLKSEL_CCLK2: PCLK_peripheral = CCLK/2
+ *   SYSCON_PCLKSEL_CCLK8: PCLK_peripheral = CCLK/8
  */
 
 /**************************************************************************
@@ -112,6 +188,7 @@ The peripheral clock is controlled by:
 
 void up_lowputc(char ch)
 {
+#ifdef HAVE_UART
   /* Wait for the transmitter to be available */
 
   while ((getreg32(CONSOLE_BASE+LPC17_UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
@@ -119,6 +196,7 @@ void up_lowputc(char ch)
   /* Send the character */
 
   putreg32((uint32_t)ch, CONSOLE_BASE+LPC17_UART_THR_OFFSET);
+#endif
 }
 
 /**************************************************************************
@@ -153,6 +231,8 @@ void up_lowputc(char ch)
 
 void lpc17_lowsetup(void)
 {
+#ifdef HAVE_UART
+
 #if 0
   uint32_t regval;
 
@@ -288,6 +368,7 @@ void lpc17_lowsetup(void)
            CONSOLE_BASE+LPC17_UART_CR_OFFSET);
 #endif
 #endif /* 0 */
+#endif /* HAVE_UART */
 }
 
 

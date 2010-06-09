@@ -41,6 +41,10 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/board/board.h>
+
+#include "lpc17_uart.h"
+#include "lpc17_syscon.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -48,7 +52,17 @@
 
 /* Configuration *********************************************************************/
 
-/* Is there a serial console? It could be on any UARTn, n=0,1,2,3 */
+/* Are any UARTs enabled? */
+
+#undef HAVE_UART
+#if defined(CONFIG_LPC17_UART0) || defined(CONFIG_LPC17_UART1) || \
+    defined(CONFIG_LPC17_UART2) || defined(CONFIG_LPC17_UART3)
+#  define HAVE_UART1
+#endif
+
+/* Is there a serial console? There should be at most one defined.  It could be on
+ * any UARTn, n=0,1,2,3
+ */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_LPC17_UART0)
 #  undef CONFIG_UART1_SERIAL_CONSOLE
@@ -78,239 +92,12 @@
 #  undef HAVE_CONSOLE
 #endif
 
-/* Select UART parameters for the selected console */
+/* We cannot allow the DLM/DLL divisor to become to small or will will lose too
+ * much accuracy.  This following is a "fudge factor" that represents the minimum
+ * value of the divisor that we will permit.
+ */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#  define CONSOLE_BASE     LPC17_UART0_BASE
-#  define CONSOLE_BAUD     CONFIG_UART0_BAUD
-#  define CONSOLE_BITS     CONFIG_UART0_BITS
-#  define CONSOLE_PARITY   CONFIG_UART0_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART0_2STOP
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define CONSOLE_BASE     LPC17_UART1_BASE
-#  define CONSOLE_BAUD     CONFIG_UART1_BAUD
-#  define CONSOLE_BITS     CONFIG_UART1_BITS
-#  define CONSOLE_PARITY   CONFIG_UART1_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART1_2STOP
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#  define CONSOLE_BASE     LPC17_UART2_BASE
-#  define CONSOLE_BAUD     CONFIG_UART2_BAUD
-#  define CONSOLE_BITS     CONFIG_UART2_BITS
-#  define CONSOLE_PARITY   CONFIG_UART2_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART2_2STOP
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-#  define CONSOLE_BASE     LPC17_UART3_BASE
-#  define CONSOLE_BAUD     CONFIG_UART3_BAUD
-#  define CONSOLE_BITS     CONFIG_UART3_BITS
-#  define CONSOLE_PARITY   CONFIG_UART3_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART3_2STOP
-#else
-#  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
-#endif
-
-/* Get word length setting for the console UART and UART0-3 */
-
-#if CONSOLE_BITS == 5
-#  define CONSOLE_LCR_WLS UART_LCR_WLS_5BIT
-#elif CONSOLE_BITS == 6
-#  define CONSOLE_LCR_WLS UART_LCR_WLS_6BIT
-#elif CONSOLE_BITS == 7
-#  define CONSOLE_LCR_WLS UART_LCR_WLS_7BIT
-#elif CONSOLE_BITS == 8
-#  define CONSOLE_LCR_WLS UART_LCR_WLS_8BIT
-#else
-#  error "Invalid CONFIG_UARTn_BITS setting for console "
-#endif
-
-#ifdef CONFIG_LPC17_UART0
-#  if CONFIG_UART0_BITS == 5
-#    define UART0_LCR_WLS UART_LCR_WLS_5BIT
-#  elif CONFIG_UART0_BITS == 6
-#    define UART0_LCR_WLS UART_LCR_WLS_6BIT
-#  elif CONFIG_UART0_BITS == 7
-#    define UART0_LCR_WLS UART_LCR_WLS_7BIT
-#  elif CONFIG_UART0_BITS == 8
-#    define UART0_LCR_WLS UART_LCR_WLS_8BIT
-#  else
-#    error "Invalid CONFIG_UARTn_BITS setting for UART0 "
-#  endif
-#endif
-
-#ifdef CONFIG_LPC17_UART1
-#  if CONFIG_UART1_BITS == 5
-#    define UART1_LCR_WLS UART_LCR_WLS_5BIT
-#  elif CONFIG_UART1_BITS == 6
-#    define UART1_LCR_WLS UART_LCR_WLS_6BIT
-#  elif CONFIG_UART1_BITS == 7
-#    define UART1_LCR_WLS UART_LCR_WLS_7BIT
-#  elif CONFIG_UART1_BITS == 8
-#    define UART1_LCR_WLS UART_LCR_WLS_8BIT
-#  else
-#    error "Invalid CONFIG_UARTn_BITS setting for UART1 "
-#  endif
-#endif
-
-#ifdef CONFIG_LPC17_UART2
-#  if CONFIG_UART2_BITS == 5
-#    define UART2_LCR_WLS UART_LCR_WLS_5BIT
-#  elif CONFIG_UART2_BITS == 6
-#    define UART2_LCR_WLS UART_LCR_WLS_6BIT
-#  elif CONFIG_UART2_BITS == 7
-#    define UART2_LCR_WLS UART_LCR_WLS_7BIT
-#  elif CONFIG_UART2_BITS == 8
-#    define UART2_LCR_WLS UART_LCR_WLS_8BIT
-#  else
-#    error "Invalid CONFIG_UARTn_BITS setting for UART2 "
-#  endif
-#endif
-
-#ifdef CONFIG_LPC17_UART3
-#  if CONFIG_UART3_BITS == 5
-#    define UART3_LCR_WLS UART_LCR_WLS_5BIT
-#  elif CONFIG_UART3_BITS == 6
-#    define UART3_LCR_WLS UART_LCR_WLS_6BIT
-#  elif CONFIG_UART3_BITS == 7
-#    define UART3_LCR_WLS UART_LCR_WLS_7BIT
-#  elif CONFIG_UART3_BITS == 8
-#    define UART3_LCR_WLS UART_LCR_WLS_8BIT
-#  else
-#    error "Invalid CONFIG_UARTn_BITS setting for UART3 "
-#  endif
-#endif
-
-/* Get parity setting for the console UART and UART0-3 */
-
-#if CONSOLE_PARITY == 0
-#  define CONSOLE_LCR_PAR 0
-#elif CONSOLE_PARITY == 1
-#  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_ODD)
-#elif CONSOLE_PARITY == 2
-#  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_EVEN)
-#elif CONSOLE_PARITY == 3
-#  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK1)
-#elif CONSOLE_PARITY == 4
-#  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK0)
-#else
-#    error "Invalid CONFIG_UARTn_PARITY setting for CONSOLE"
-#endif
-
-#ifdef CONFIG_LPC17_UART0
-#  if CONFIG_UART0_PARITY == 0
-#    define UART0_LCR_PAR 0
-#  elif CONFIG_UART0_PARITY == 1
-#    define UART0_LCR_PAR (UART_LCR_PE|UART_LCR_PS_ODD)
-#  elif CONFIG_UART0_PARITY == 2
-#    define UART0_LCR_PAR (UART_LCR_PE|UART_LCR_PS_EVEN)
-#  elif CONFIG_UART0_PARITY == 3
-#    define UART0_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK1)
-#  elif CONFIG_UART0_PARITY == 4
-#    define UART0_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK0)
-#  else
-#    error "Invalid CONFIG_UARTn_PARITY setting for UART0"
-#  endif
-#endif
-
-#ifdef CONFIG_LPC17_UART1
-#  if CONFIG_UART1_PARITY == 0
-#    define UART1_LCR_PAR 0
-#  elif CONFIG_UART1_PARITY == 1
-#    define UART1_LCR_PAR (UART_LCR_PE|UART_LCR_PS_ODD)
-#  elif CONFIG_UART1_PARITY == 2
-#    define UART1_LCR_PAR (UART_LCR_PE|UART_LCR_PS_EVEN)
-#  elif CONFIG_UART1_PARITY == 3
-#    define UART1_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK1)
-#  elif CONFIG_UART1_PARITY == 4
-#    define UART1_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK0)
-#  else
-#    error "Invalid CONFIG_UARTn_PARITY setting for UART1"
-#  endif
-#endif
-
-#ifdef CONFIG_LPC17_UART2
-#  if CONFIG_UART2_PARITY == 0
-#    define UART2_LCR_PAR 0
-#  elif CONFIG_UART2_PARITY == 1
-#    define UART2_LCR_PAR (UART_LCR_PE|UART_LCR_PS_ODD)
-#  elif CONFIG_UART2_PARITY == 2
-#    define UART2_LCR_PAR (UART_LCR_PE|UART_LCR_PS_EVEN)
-#  elif CONFIG_UART2_PARITY == 3
-#    define UART2_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK1)
-#  elif CONFIG_UART2_PARITY == 4
-#    define UART2_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK0)
-#  else
-#    error "Invalid CONFIG_UARTn_PARITY setting for UART2"
-#  endif
-#endif
-
-#ifdef CONFIG_LPC17_UART3
-#  if CONFIG_UART3_PARITY == 0
-#    define UART3_LCR_PAR 0
-#  elif CONFIG_UART3_PARITY == 1
-#    define UART3_LCR_PAR (UART_LCR_PE|UART_LCR_PS_ODD)
-#  elif CONFIG_UART3_PARITY == 2
-#    define UART3_LCR_PAR (UART_LCR_PE|UART_LCR_PS_EVEN)
-#  elif CONFIG_UART3_PARITY == 3
-#    define UART3_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK1)
-#  elif CONFIG_UART3_PARITY == 4
-#    define UART3_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK0)
-#  else
-#    error "Invalid CONFIG_UARTn_PARITY setting for UART3"
-#  endif
-#endif
-
-/* Get stop-bit setting for the console UART and UART0-3 */
-
-#if CONSOLE_2STOP != 0
-#  define CONSOLE_LCR_STOP LPC214X_LCR_STOP_2
-#else
-#  define CONSOLE_LCR_STOP LPC214X_LCR_STOP_1
-#endif
-
-#if CONFIG_UART0_2STOP != 0
-#  define UART0_LCR_STOP LPC214X_LCR_STOP_2
-#else
-#  define UART0_LCR_STOP LPC214X_LCR_STOP_1
-#endif
-
-#if CONFIG_UART1_2STOP != 0
-#  define UART1_LCR_STOP LPC214X_LCR_STOP_2
-#else
-#  define UART1_LCR_STOP LPC214X_LCR_STOP_1
-#endif
-
-#if CONFIG_UART2_2STOP != 0
-#  define UART2_LCR_STOP LPC214X_LCR_STOP_2
-#else
-#  define UART2_LCR_STOP LPC214X_LCR_STOP_1
-#endif
-
-#if CONFIG_UART3_2STOP != 0
-#  define UART3_LCR_STOP LPC214X_LCR_STOP_2
-#else
-#  define UART3_LCR_STOP LPC214X_LCR_STOP_1
-#endif
-
-/* LCR and FCR values */
-
-#define CONSOLE_LCR_VALUE (CONSOLE_LCR_WLS | CONSOLE_LCR_PAR | CONSOLE_LCR_STOP)
-#define CONSOLE_FCR_VALUE (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST |\
-                           UART_FCR_RXRST | UART_FCR_FIFOEN)
-
-#define UART0_LCR_VALUE   (UART0_LCR_WLS | UART0_LCR_PAR | UART0_LCR_STOP)
-#define UART0_FCR_VALUE   (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST |\
-                           UART_FCR_RXRST | UART_FCR_FIFOEN)
-
-#define UART1_LCR_VALUE   (UART1_LCR_WLS | UART1_LCR_PAR | UART1_LCR_STOP)
-#define UART1_FCR_VALUE   (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST |\
-                           UART_FCR_RXRST | UART_FCR_FIFOEN)
-
-#define UART2_LCR_VALUE   (UART2_LCR_WLS | UART2_LCR_PAR | UART2_LCR_STOP)
-#define UART2_FCR_VALUE   (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST |\
-                           UART_FCR_RXRST | UART_FCR_FIFOEN)
-
-#define UART3_LCR_VALUE   (UART3_LCR_WLS | UART3_LCR_PAR | UART3_LCR_STOP)
-#define UART3_FCR_VALUE   (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST |\
-                           UART_FCR_RXRST | UART_FCR_FIFOEN)
+#define UART_MINDL 32
 
 /************************************************************************************
  * Public Types
@@ -319,6 +106,149 @@
 /************************************************************************************
  * Public Data
  ************************************************************************************/
+
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: lpc17_uartcclkdiv
+ *
+ * Descrption:
+ *   Select a CCLK divider to produce the UART PCLK.  The stratey is to select the
+ *   smallest divisor that results in an solution within range of the 16-bit
+ *   DLM and DLL divisor:
+ *
+ *     PCLK = CCLK / divisor
+ *     BAUD = PCLK / (16 * DL)
+ *
+ *   Ignoring the fractional divider for now.
+ *
+ *   NOTE:  This is an inline function.  If a typical optimization level is used and
+ *   a constant is provided for the desired frequency, then most of the following
+ *   logic will be optimized away.
+ *
+ ************************************************************************************/
+
+static inline uint8_t lpc17_uartcclkdiv(uint32_t baud)
+{
+  /* Ignoring the fractional divider, the BAUD is given by:
+   *
+   *   BAUD = PCLK / (16 * DL), or
+   *   DL   = PCLK / BAUD / 16
+   *
+   * Where:
+   *
+   *   PCLK = CCLK / divisor.
+   *
+   * Check divisor == 1.  This works if the upper limit is met	
+   *
+   *   DL < 0xffff, or
+   *   PCLK / BAUD / 16 < 0xffff, or
+   *   CCLK / BAUD / 16 < 0xffff, or
+   *   CCLK < BAUD * 0xffff * 16
+   *   BAUD > CCLK / 0xffff / 16
+   *
+   * And the lower limit is met (we can't allow DL to get very close to one).
+   *
+   *   DL >= MinDL
+   *   CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 16 / MinDL
+   */
+
+  if (baud < (LPC17_CCLK / 16 / UART_MINDL ))
+    {
+      return SYSCON_PCLKSEL_CCLK;
+    }
+   
+  /* Check divisor == 2.  This works if:
+   *
+   *   2 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 8
+   *
+   * And
+   *
+   *   2 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 8 / MinDL
+   */
+
+  else if (baud < (LPC17_CCLK / 8 / UART_MINDL ))
+    {
+      return SYSCON_PCLKSEL_CCLK2;
+    }
+
+  /* Check divisor == 4.  This works if:
+   *
+   *   4 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 4
+   *
+   * And
+   *
+   *   4 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 4 / MinDL 
+   */
+
+  else if (baud < (LPC17_CCLK / 4 / UART_MINDL ))
+    {
+      return SYSCON_PCLKSEL_CCLK4;
+    }
+
+  /* Check divisor == 8.  This works if:
+   *
+   *   8 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 2
+    *
+   * And
+   *
+   *   8 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 2 / MinDL 
+  */
+
+  else /* if (baud < (LPC17_CCLK / 2 / UART_MINDL )) */
+    {
+      return SYSCON_PCLKSEL_CCLK8;
+    }
+}
+
+/************************************************************************************
+ * Name: lpc17_uartdl
+ *
+ * Descrption:
+ *   Select a divider to produce the BAUD from the UART PCLK.
+ *
+ *     BAUD = PCLK / (16 * DL), or
+ *     DL   = PCLK / BAUD / 16
+ *
+ *   Ignoring the fractional divider for now.
+ *
+ ************************************************************************************/
+
+static inline uint32_t lpc17_uartdl(uint32_t baud, uint8_t divcode)
+{
+  uint32_t num;
+
+  switch (divcode)
+    {
+
+    case SYSCON_PCLKSEL_CCLK4:   /* PCLK_peripheral = CCLK/4 */
+      num = (LPC17_CCLK / 4);
+      break;
+
+    case SYSCON_PCLKSEL_CCLK:    /* PCLK_peripheral = CCLK */
+      num = LPC17_CCLK;
+      break;
+
+    case SYSCON_PCLKSEL_CCLK2:   /* PCLK_peripheral = CCLK/2 */
+      num = (LPC17_CCLK / 2);
+      break;
+
+    case SYSCON_PCLKSEL_CCLK8:   /* PCLK_peripheral = CCLK/8 (except CAN1, CAN2, and CAN) */
+    default:
+      num = (LPC17_CCLK / 8);
+      break;
+    }
+  return num / (baud << 4);
+}
 
 /************************************************************************************
  * Public Functions
