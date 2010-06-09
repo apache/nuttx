@@ -129,30 +129,87 @@
 #define CONSOLE_FCR_VALUE (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST |\
                            UART_FCR_RXRST | UART_FCR_FIFOEN)
 
-/* Baud calculations
+/* Select a CCLK divider to produce the UART PCLK.  The stratey is to select the
+ * smallest divisor that results in an solution within range of the 16-bit
+ * DLM and DLL divisor:
  *
- *   BAUD = PCLK / ((16 x DL) x (1 + DIVADDVAL/MULVAL))
+ *   BAUD = PCLK / (16 * DL), or
+ *   DL   = PCLK / BAUD / 16
  *
  * Where:
  *
- *   - PCLK is the peripheral clock
- *   - DL is (256*DML + DLL), the standard UART baud rate divider registers, and 
- *   - DIVADDVAL and MULVAL are UART fractional baud rate generator specific
- *     parameters.
+ *   PCLK = CCLK / divisor
  *
- * The value of MULVAL and DIVADDVAL should comply to the following conditions:
+ * Ignoring the fractional divider for now.
  *
- *   1. 1 <= MULVAL <= 15
- *   2. 0 <= DIVADDVAL <= 14
- *   3. DIVADDVAL < MULVAL
+ * Check divisor == 1.  This works if the upper limit is met	
  *
- * The peripheral clock is controlled by:
+ *   DL < 0xffff, or
+ *   PCLK / BAUD / 16 < 0xffff, or
+ *   CCLK / BAUD / 16 < 0xffff, or
+ *   CCLK < BAUD * 0xffff * 16
+ *   BAUD > CCLK / 0xffff / 16
  *
- *   SYSCON_PCLKSEL_CCLK4: PCLK_peripheral = CCLK/4
- *   SYSCON_PCLKSEL_CCLK: PCLK_peripheral = CCLK
- *   SYSCON_PCLKSEL_CCLK2: PCLK_peripheral = CCLK/2
- *   SYSCON_PCLKSEL_CCLK8: PCLK_peripheral = CCLK/8
+ * And the lower limit is met (we can't allow DL to get very close to one).
+ *
+ *   DL >= MinDL
+ *   CCLK / BAUD / 16 >= MinDL, or
+ *   BAUD <= CCLK / 16 / MinDL
  */
+
+#if CONSOLE_BAUD < (LPC17_CCLK / 16 / UART_MINDL )
+#  define CONSOLE_CCLKDIV  SYSCON_PCLKSEL_CCLK
+#  define CONSOLE_NUMERATOR (LPC17_CCLK)
+
+/* Check divisor == 2.  This works if:
+ *
+ *   2 * CCLK / BAUD / 16 < 0xffff, or
+ *   BAUD > CCLK / 0xffff / 8
+ *
+ * And
+ *
+ *   2 * CCLK / BAUD / 16 >= MinDL, or
+ *   BAUD <= CCLK / 8 / MinDL
+ */
+
+#elif CONSOLE_BAUD < (LPC17_CCLK / 8 / UART_MINDL )
+#  define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK2
+#  define CONSOLE_NUMERATOR (LPC17_CCLK / 2)
+
+/* Check divisor == 4.  This works if:
+ *
+ *   4 * CCLK / BAUD / 16 < 0xffff, or
+ *   BAUD > CCLK / 0xffff / 4
+ *
+ * And
+ *
+ *   4 * CCLK / BAUD / 16 >= MinDL, or
+ *   BAUD <= CCLK / 4 / MinDL 
+ */
+
+#elif CONSOLE_BAUD < (LPC17_CCLK / 4 / UART_MINDL )
+#  define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK4
+#  define CONSOLE_NUMERATOR (LPC17_CCLK / 4)
+
+/* Check divisor == 8.  This works if:
+ *
+ *   8 * CCLK / BAUD / 16 < 0xffff, or
+ *   BAUD > CCLK / 0xffff / 2
+ *
+ * And
+ *
+ *   8 * CCLK / BAUD / 16 >= MinDL, or
+ *   BAUD <= CCLK / 2 / MinDL 
+ */
+
+#else /* if CONSOLE_BAUD < (LPC17_CCLK / 2 / UART_MINDL ) */
+#  define CONSOLE_CCLKDIV   SYSCON_PCLKSEL_CCLK8
+#  define CONSOLE_NUMERATOR (LPC17_CCLK /  8)
+#endif
+
+/* Then this is the value to use for the DLM and DLL registers */
+
+#define CONSOLE_DL          (CONSOLE_NUMERATOR / (CONSOLE_BAUD << 4)
 
 /**************************************************************************
  * Private Types
