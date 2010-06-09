@@ -68,7 +68,7 @@
  * provide some minimal implementation of up_putc.
  */
 
-#ifdef CONFIG_USE_SERIALDRIVER
+#if defined(CONFIG_USE_SERIALDRIVER) && defined(HAVE_UART)
 
 /* Configuration *********************************************************************/
 
@@ -84,6 +84,7 @@ struct up_dev_s
   uint8_t  irq;       /* IRQ associated with this UART */
   uint8_t  parity;    /* 0=none, 1=odd, 2=even */
   uint8_t  bits;      /* Number of bits (7 or 8) */
+  uint8_t  cclkdiv;   /* Divisor needed to get PCLK from CCLK */
   bool     stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
@@ -504,7 +505,7 @@ static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_LPC17_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint16_t baud;
+  uint16_t dl;
   uint8_t lcr;
 
   /* Clear fifos */
@@ -552,9 +553,9 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Set the BAUD divisor */
 
-  baud = UART_BAUD(priv->baud);
-  up_serialout(priv, LPC17_UART_DLM_OFFSET, baud >> 8);
-  up_serialout(priv, LPC17_UART_DLL_OFFSET, baud & 0xff);
+  dl = lpc17_uartdl(priv->baud, priv->cclkdiv);
+  up_serialout(priv, LPC17_UART_DLM_OFFSET, dl >> 8);
+  up_serialout(priv, LPC17_UART_DLL_OFFSET, dl & 0xff);
 
   /* Clear DLAB */
 
@@ -961,15 +962,19 @@ void up_earlyserialinit(void)
   /* Disable all UARTS */
 
 #ifdef TTYS0_DEV
+  TTYS0_DEV.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART0_BAUD);
   up_disableuartint(TTYS0_DEV.priv, NULL);
 #endif
 #ifdef TTYS1_DEV
+  TTYS1_DEV.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART1_BAUD);
   up_disableuartint(TTYS1_DEV.priv, NULL);
 #endif
 #ifdef TTYS2_DEV
+  TTYS2_DEV.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART2_BAUD);
   up_disableuartint(TTYS2_DEV.priv, NULL);
 #endif
 #ifdef TTYS3_DEV
+  TTYS3_DEV.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART3_BAUD);
   up_disableuartint(TTYS3_DEV.priv, NULL);
 #endif
 
@@ -1050,6 +1055,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
+#ifdef HAVE_UART
   /* Check for LF */
 
   if (ch == '\n')
@@ -1060,6 +1066,7 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
+#endif
   return ch;
 }
 
