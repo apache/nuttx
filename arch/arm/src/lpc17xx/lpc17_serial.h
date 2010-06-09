@@ -197,12 +197,12 @@ static inline uint8_t lpc17_uartcclkdiv(uint32_t baud)
    *
    *   8 * CCLK / BAUD / 16 < 0xffff, or
    *   BAUD > CCLK / 0xffff / 2
-    *
+   *
    * And
    *
    *   8 * CCLK / BAUD / 16 >= MinDL, or
    *   BAUD <= CCLK / 2 / MinDL 
-  */
+   */
 
   else /* if (baud < (LPC17_CCLK / 2 / UART_MINDL )) */
     {
