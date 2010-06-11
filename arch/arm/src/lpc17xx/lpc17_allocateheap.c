@@ -49,15 +49,29 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "lpc17_memorymap.h"
+
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
 
-#if CONFIG_DRAM_END > (LPC17_SRAM_BASE+LPC17_SRAM_SIZE)
-#  error "CONFIG_DRAM_END is beyond the end of CPU SRAM"
+/* Configuration ************************************************************/
+
+#if CONFIG_DRAM_START != LPC17_SRAM_BASE
+#  warning "CONFIG_DRAM_START is not at LPC17_SRAM_BASE"
+#  undef CONFIG_DRAM_START
 #  undef CONFIG_DRAM_END
-#  define CONFIG_DRAM_END (LPC17_SRAM_BASE+LPC17_SRAM_SIZE)
-#elif CONFIG_DRAM_END < (LPC17_SRAM_BASE+LPC17_SRAM_SIZE)
+#  define CONFIG_DRAM_START LPC17_SRAM_BASE
+#  define CONFIG_DRAM_END  (LPC17_SRAM_BASE+LPC17_CPUSRAM_SIZE)
+#endif
+
+#if CONFIG_DRAM_SIZE > LPC17_CPUSRAM_SIZE
+#  warning "CONFIG_DRAM_SIZE is larger than the size of CPU SRAM"
+#  undef CONFIG_DRAM_SIZE
+#  undef CONFIG_DRAM_END
+#  define CONFIG_DRAM_SIZE LPC17_CPUSRAM_SIZE
+#  define CONFIG_DRAM_END (LPC17_SRAM_BASE+LPC17_CPUSRAM_SIZE)
+#elif CONFIG_DRAM_SIZE < LPC17_CPUSRAM_SIZE
 #  warning "CONFIG_DRAM_END is before end of CPU SRAM... not all of CPU SRAM used"
 #endif
 
@@ -67,7 +81,9 @@
 #  endif
 #else
 #  if CONFIG_MM_REGIONS > 1
-#    warning "CONFIG_MM_REGIONS > 1: This MCH has no AHB SRAM Bank0"
+#    warning "CONFIG_MM_REGIONS > 1: This MCU has no AHB SRAM Bank0"
+#    undef CONFIG_MM_REGIONS
+#    define CONFIG_MM_REGIONS 1
 #  endif
 #endif
 
@@ -77,7 +93,9 @@
 #  endif
 #else
 #  if CONFIG_MM_REGIONS > 2
-#    warning "CONFIG_MM_REGIONS > 2: This MCH has no AHB SRAM Bank1"
+#    warning "CONFIG_MM_REGIONS > 2: This MCU has no AHB SRAM Bank1"
+#    undef CONFIG_MM_REGIONS
+#    define CONFIG_MM_REGIONS 2
 #  endif
 #endif
 

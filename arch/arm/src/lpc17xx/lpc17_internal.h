@@ -169,6 +169,15 @@
 #define GPIO_PIN31           (31 << GPIO_PIN_SHIFT)
 
 /* GPIO pin definitions *************************************************************/
+/* NOTE that functions have a alternate pins that can be selected.  These alternates
+ * are identified with a numerica suffix like _1, _2, or _3.  Your board.h file
+ * should select the correct alternative for your board by including definitions
+ * such as:
+ *
+ * #define GPIO_UART1_RXD GPIO_UART1_RXD_1
+ *
+ * (without the suffix)
+ */
 
 #define GPIO_CAN1_RD_1     (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN0)
 #define GPIO_UART3_TXD_1   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN0)

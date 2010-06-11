@@ -51,6 +51,7 @@
 #if defined(CONFIG_ARCH_CHIP_LPC1769) || defined(CONFIG_ARCH_CHIP_LPC1768)
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have AHB SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -63,6 +64,7 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1767)
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have AHB SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -75,6 +77,7 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1766)
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have AHB SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -87,6 +90,7 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1765)
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have AHB SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
@@ -99,8 +103,9 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1764)
 #  define LPC17_FLASH_SIZE      (128*1024) /* 128Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
-#  undef  LPC17_HAVE_BANK0      1  /* No AHB SRAM bank 0 */
-#  undef  LPC17_HAVE_BANK1      1  /* No AHB SRAM bank 1 */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
+#  undef  LPC17_HAVE_BANK0         /* No AHB SRAM bank 0 */
+#  undef  LPC17_HAVE_BANK1         /* No AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  define LPC17_NUSBHOST        0  /* No USB host controller */
 #  define LPC17_NUSBOTG         0  /* No USB OTG controller */
@@ -111,6 +116,7 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1759)
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have AHB SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
@@ -123,6 +129,7 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1758)
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
 #  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have AHB SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -135,8 +142,9 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1756)
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
-#  undef  LPC17_HAVE_BANK0      1  /* No AHB SRAM bank 0 */
-#  undef  LPC17_HAVE_BANK1      1  /* No AHB SRAM bank 1 */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
+#  undef  LPC17_HAVE_BANK0         /* No AHB SRAM bank 0 */
+#  undef  LPC17_HAVE_BANK1         /* No AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define LPC17_NUSBHOST        1  /* One USB host controller */
 #  define LPC17_NUSBOTG         1  /* One USB OTG controller */
@@ -147,8 +155,9 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1754)
 #  define LPC17_FLASH_SIZE      (128*1024) /* 128Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
-#  undef  LPC17_HAVE_BANK0      1  /* No AHB SRAM bank 0 */
-#  undef  LPC17_HAVE_BANK1      1  /* No AHB SRAM bank 1 */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
+#  undef  LPC17_HAVE_BANK0         /* No AHB SRAM bank 0 */
+#  undef  LPC17_HAVE_BANK1         /* No AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define LPC17_NUSBHOST        1  /* One USB host controller */
 #  define LPC17_NUSBOTG         1  /* One USB OTG controller */
@@ -159,8 +168,9 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1752)
 #  define LPC17_FLASH_SIZE      (64*1024) /* 65Kb */
 #  define LPC17_SRAM_SIZE       (16*1024) /* 16Kb */
-#  undef  LPC17_HAVE_BANK0      1  /* No AHB SRAM bank 0 */
-#  undef  LPC17_HAVE_BANK1      1  /* No AHB SRAM bank 1 */
+#  define LPC17_CPUSRAM_SIZE    (16*1024)
+#  undef  LPC17_HAVE_BANK0         /* No AHB SRAM bank 0 */
+#  undef  LPC17_HAVE_BANK1         /* No AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define LPC17_NUSBHOST        0  /* No USB host controller */
 #  define LPC17_NUSBOTG         0  /* No USB OTG controller */
@@ -171,8 +181,9 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1751)
 #  define LPC17_FLASH_SIZE      (32*1024) /* 32Kb */
 #  define LPC17_SRAM_SIZE       (8*1024)  /*  8Kb */
-#  undef  LPC17_HAVE_BANK0      1  /* No AHB SRAM bank 0 */
-#  undef  LPC17_HAVE_BANK1      1  /* No AHB SRAM bank 1 */
+#  define LPC17_CPUSRAM_SIZE    (8*1024)
+#  undef  LPC17_HAVE_BANK0         /* No AHB SRAM bank 0 */
+#  undef  LPC17_HAVE_BANK1         /* No AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define LPC17_NUSBHOST        0  /* No USB host controller */
 #  define LPC17_NUSBOTG         0  /* No USB OTG controller */

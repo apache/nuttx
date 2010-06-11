@@ -64,6 +64,23 @@
 #define LED_ASSERTION              6
 #define LED_PANIC                  7
 
+/* Alternate pin selections *********************************************************/
+
+#define GPIO_UART1_TXD             GPIO_UART1_TXD_1
+#define GPIO_UART1_RXD             GPIO_UART1_RXD_1
+#define GPIO_UART1_CTS             GPIO_UART1_CTS_1
+#define GPIO_UART1_DCD             GPIO_UART1_DCD_1
+#define GPIO_UART1_DSR             GPIO_UART1_DSR_1
+#define GPIO_UART1_DTR             GPIO_UART1_DTR_1
+#define GPIO_UART1_RI              GPIO_UART1_RI_1
+#define GPIO_UART1_RTS             GPIO_UART1_RTS_1
+
+#define GPIO_UART2_TXD             GPIO_UART2_TXD_1
+#define GPIO_UART2_RXD             GPIO_UART2_RXD_1
+
+#define GPIO_UART3_TXD             GPIO_UART3_TXD_1
+#define GPIO_UART3_RXD             GPIO_UART3_RXD_1
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

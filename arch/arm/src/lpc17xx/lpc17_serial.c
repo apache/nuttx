@@ -47,10 +47,13 @@
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
+
 #include <arch/serial.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -426,9 +429,9 @@ static uart_dev_t g_uart3port =
 #  endif
 #endif
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
 
 /****************************************************************************
  * Name: up_serialin
@@ -490,6 +493,287 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
     }
   up_serialout(priv, LPC17_UART_LCR_OFFSET, lcr);
 }
+
+/************************************************************************************
+ * Name: lpc17_uartcclkdiv
+ *
+ * Descrption:
+ *   Select a CCLK divider to produce the UART PCLK.  The stratey is to select the
+ *   smallest divisor that results in an solution within range of the 16-bit
+ *   DLM and DLL divisor:
+ *
+ *     PCLK = CCLK / divisor
+ *     BAUD = PCLK / (16 * DL)
+ *
+ *   Ignoring the fractional divider for now.
+ *
+ *   NOTE:  This is an inline function.  If a typical optimization level is used and
+ *   a constant is provided for the desired frequency, then most of the following
+ *   logic will be optimized away.
+ *
+ ************************************************************************************/
+
+static inline uint8_t lpc17_uartcclkdiv(uint32_t baud)
+{
+  /* Ignoring the fractional divider, the BAUD is given by:
+   *
+   *   BAUD = PCLK / (16 * DL), or
+   *   DL   = PCLK / BAUD / 16
+   *
+   * Where:
+   *
+   *   PCLK = CCLK / divisor.
+   *
+   * Check divisor == 1.  This works if the upper limit is met	
+   *
+   *   DL < 0xffff, or
+   *   PCLK / BAUD / 16 < 0xffff, or
+   *   CCLK / BAUD / 16 < 0xffff, or
+   *   CCLK < BAUD * 0xffff * 16
+   *   BAUD > CCLK / 0xffff / 16
+   *
+   * And the lower limit is met (we can't allow DL to get very close to one).
+   *
+   *   DL >= MinDL
+   *   CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 16 / MinDL
+   */
+
+  if (baud < (LPC17_CCLK / 16 / UART_MINDL ))
+    {
+      return SYSCON_PCLKSEL_CCLK;
+    }
+   
+  /* Check divisor == 2.  This works if:
+   *
+   *   2 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 8
+   *
+   * And
+   *
+   *   2 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 8 / MinDL
+   */
+
+  else if (baud < (LPC17_CCLK / 8 / UART_MINDL ))
+    {
+      return SYSCON_PCLKSEL_CCLK2;
+    }
+
+  /* Check divisor == 4.  This works if:
+   *
+   *   4 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 4
+   *
+   * And
+   *
+   *   4 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 4 / MinDL 
+   */
+
+  else if (baud < (LPC17_CCLK / 4 / UART_MINDL ))
+    {
+      return SYSCON_PCLKSEL_CCLK4;
+    }
+
+  /* Check divisor == 8.  This works if:
+   *
+   *   8 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 2
+   *
+   * And
+   *
+   *   8 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 2 / MinDL 
+   */
+
+  else /* if (baud < (LPC17_CCLK / 2 / UART_MINDL )) */
+    {
+      return SYSCON_PCLKSEL_CCLK8;
+    }
+}
+
+/************************************************************************************
+ * Name: lpc17_uart0config, uart1config, uart2config, nad uart3config
+ *
+ * Descrption:
+ *   Configure the UART.  UART0/1/2/3 peripherals are configured using the following
+ *   registers:
+ *
+ *   1. Power: In the PCONP register, set bits PCUART0/1/2/3.
+ *      On reset, UART0 and UART 1 are enabled (PCUART0 = 1 and PCUART1 = 1)
+ *      and UART2/3 are disabled (PCUART1 = 0 and PCUART3 = 0).
+ *   2. Peripheral clock: In the PCLKSEL0 register, select PCLK_UART0 and
+ *      PCLK_UART1; in the PCLKSEL1 register, select PCLK_UART2 and PCLK_UART3.
+ *   3. Pins: Select UART pins through the PINSEL registers and pin modes
+ *      through the PINMODE registers. UART receive pins should not have
+ *      pull-down resistors enabled.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LPC17_UART0
+static inline void lpc17_uart0config(uint8_t clkdiv)
+{
+  uint32_t   regval;
+  irqstate_t flags;
+
+  /* Step 1: Enable power on UART0 */
+
+  flags   = irqsave();
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= ~SYSCON_PCONP_PCUART0;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+
+  /* Step 2: Enable clocking on UART */
+
+  regval = getreg32(LPC17_SYSCON_PCLKSEL0);
+  regval &= ~SYSCON_PCLKSEL0_UART0_MASK;
+  regval |= ((uint32_t)clkdiv << SYSCON_PCLKSEL0_UART0_SHIFT);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL0);
+
+  /* Step 3: Configure I/O pins */
+
+  lpc17_configgpio(GPIO_UART0_TXD);
+  lpc17_configgpio(GPIO_UART0_RXD);
+  irqrestore(flags);
+};
+#endif
+
+#ifdef CONFIG_LPC17_UART1
+static inline void lpc17_uart1config(uint8_t clkdiv)
+{
+  uint32_t   regval;
+  irqstate_t flags;
+
+  /* Step 1: Enable power on UART1 */
+
+  flags   = irqsave();
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= ~SYSCON_PCONP_PCUART1;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+
+  /* Step 2: Enable clocking on UART */
+
+  regval = getreg32(LPC17_SYSCON_PCLKSEL0);
+  regval &= ~SYSCON_PCLKSEL0_UART1_MASK;
+  regval |= ((uint32_t)clkdiv << SYSCON_PCLKSEL0_UART1_SHIFT);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL0);
+
+  /* Step 3: Configure I/O pins */
+
+  lpc17_configgpio(GPIO_UART1_TXD);
+  lpc17_configgpio(GPIO_UART1_RXD);
+#ifdef CONFIG_UART0_FLOWCONTROL
+  lpc17_configgpio(GPIO_UART1_CTS);
+  lpc17_configgpio(GPIO_UART1_DCD);
+  lpc17_configgpio(GPIO_UART1_DSR);
+  lpc17_configgpio(GPIO_UART1_DTR);
+  lpc17_configgpio(GPIO_UART1_RI);
+  lpc17_configgpio(GPIO_UART1_RTS);
+#endif
+  irqrestore(flags);
+};
+#endif
+
+#ifdef CONFIG_LPC17_UART2
+static inline void lpc17_uart2config(uint8_t clkdiv)
+{
+  uint32_t   regval;
+  irqstate_t flags;
+
+  /* Step 1: Enable power on UART2 */
+
+  flags   = irqsave();
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCUART2;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+
+  /* Step 2: Enable clocking on UART */
+
+  regval = getreg32(LPC17_SYSCON_PCLKSEL1);
+  regval &= ~SYSCON_PCLKSEL0_UART2_MASK;
+  regval |= ((uint32_t)clkdiv << SYSCON_PCLKSEL1_UART2_SHIFT);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL1);
+
+  /* Step 3: Configure I/O pins */
+
+  lpc17_configgpio(GPIO_UART2_TXD);
+  lpc17_configgpio(GPIO_UART2_RXD);
+  irqrestore(flags);
+};
+#endif
+
+#ifdef CONFIG_LPC17_UART3
+static inline void lpc17_uart3config(uint8_t clkdiv)
+{
+  uint32_t   regval;
+  irqstate_t flags;
+
+  /* Step 1: Enable power on UART3 */
+
+  flags   = irqsave();
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= ~SYSCON_PCONP_PCUART3;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+
+  /* Step 2: Enable clocking on UART */
+
+  regval = getreg32(LPC17_SYSCON_PCLKSEL1);
+  regval &= ~SYSCON_PCLKSEL0_UART3_MASK;
+  regval |= ((uint32_t)clkdiv << SYSCON_PCLKSEL1_UART3_SHIFT);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL1);
+
+  /* Step 3: Configure I/O pins */
+
+  lpc17_configgpio(GPIO_UART3_TXD);
+  lpc17_configgpio(GPIO_UART3_RXD);
+  irqrestore(flags);
+};
+#endif
+
+/************************************************************************************
+ * Name: lpc17_uartdl
+ *
+ * Descrption:
+ *   Select a divider to produce the BAUD from the UART PCLK.
+ *
+ *     BAUD = PCLK / (16 * DL), or
+ *     DL   = PCLK / BAUD / 16
+ *
+ *   Ignoring the fractional divider for now.
+ *
+ ************************************************************************************/
+
+static inline uint32_t lpc17_uartdl(uint32_t baud, uint8_t divcode)
+{
+  uint32_t num;
+
+  switch (divcode)
+    {
+
+    case SYSCON_PCLKSEL_CCLK4:   /* PCLK_peripheral = CCLK/4 */
+      num = (LPC17_CCLK / 4);
+      break;
+
+    case SYSCON_PCLKSEL_CCLK:    /* PCLK_peripheral = CCLK */
+      num = LPC17_CCLK;
+      break;
+
+    case SYSCON_PCLKSEL_CCLK2:   /* PCLK_peripheral = CCLK/2 */
+      num = (LPC17_CCLK / 2);
+      break;
+
+    case SYSCON_PCLKSEL_CCLK8:   /* PCLK_peripheral = CCLK/8 (except CAN1, CAN2, and CAN) */
+    default:
+      num = (LPC17_CCLK / 8);
+      break;
+    }
+  return num / (baud << 4);
+}
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_setup
@@ -952,30 +1236,42 @@ static bool up_txempty(struct uart_dev_s *dev)
  *   serial console will be available during bootup.  This must be called
  *   before up_serialinit.
  *
- *   NOTE: Power, clocking, and pin configuration was performed in
- *   up_lowsetup() very, early in the boot sequence.
+ *   NOTE: Configuration of the CONSOLE UART was performed by up_lowsetup()
+ *   very early in the boot sequence.
  *
  ****************************************************************************/
 
 void up_earlyserialinit(void)
 {
-  /* Disable all UARTS */
+  /* Configure all UARTs (except the CONSOLE UART) and disable interrupts */
 
-#ifdef TTYS0_DEV
-  TTYS0_DEV.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART0_BAUD);
-  up_disableuartint(TTYS0_DEV.priv, NULL);
+#ifdef CONFIG_LPC17_UART0
+  g_uart0priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART0_BAUD);
+#ifndef CONFIG_UART0_SERIAL_CONSOLE
+  lpc17_uart0config(g_uart0priv.cclkdiv);
 #endif
-#ifdef TTYS1_DEV
-  TTYS1_DEV.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART1_BAUD);
-  up_disableuartint(TTYS1_DEV.priv, NULL);
+  up_disableuartint(g_uart0priv.priv, NULL);
 #endif
-#ifdef TTYS2_DEV
-  TTYS2_DEV.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART2_BAUD);
-  up_disableuartint(TTYS2_DEV.priv, NULL);
+#ifdef CONFIG_LPC17_UART1
+  g_uart1priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART1_BAUD);
+#ifndef CONFIG_UART1_SERIAL_CONSOLE
+  lpc17_uart1config(g_uart1priv.cclkdiv);
 #endif
-#ifdef TTYS3_DEV
-  TTYS3_DEV.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART3_BAUD);
-  up_disableuartint(TTYS3_DEV.priv, NULL);
+  up_disableuartint(g_uart1priv.priv, NULL);
+#endif
+#ifdef CONFIG_LPC17_UART2
+  g_uart2priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART2_BAUD);
+#ifndef CONFIG_UART2_SERIAL_CONSOLE
+  lpc17_uart2config(g_uart2priv.cclkdiv);
+#endif
+  up_disableuartint(g_uart2priv.priv, NULL);
+#endif
+#ifdef CONFIG_LPC17_UART3
+  g_uart3priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART3_BAUD);
+#ifndef CONFIG_UART3_SERIAL_CONSOLE
+  lpc17_uart3config(g_uart3priv.cclkdiv);
+#endif
+  up_disableuartint(g_uart3priv.priv, NULL);
 #endif
 
   /* Configuration whichever one is the console */
