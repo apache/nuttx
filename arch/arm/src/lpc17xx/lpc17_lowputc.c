@@ -264,7 +264,7 @@ void up_lowputc(char ch)
  *   console.  Its purpose is to get the console output availabe as soon
  *   as possible.
  *
- *   The UART0/2/3 peripherals are configured using the following registers:
+ *   The UART0/1/2/3 peripherals are configured using the following registers:
  *   1. Power: In the PCONP register, set bits PCUART0/1/2/3.
  *      On reset, UART0 and UART 1 are enabled (PCUART0 = 1 and PCUART1 = 1)
  *      and UART2/3 are disabled (PCUART1 = 0 and PCUART3 = 0).
@@ -289,142 +289,104 @@ void up_lowputc(char ch)
 void lpc17_lowsetup(void)
 {
 #ifdef HAVE_UART
-
-#if 0
   uint32_t regval;
 
-  /* Step 1: Enable power for all selected UARTs */
+  /* Step 1: Enable power for all console UART and disable power for
+   * other UARTs
+   */
 
-  regval = getreg32(LPC17_SYSCON_PCONP);
-  regval &= ~(SYSCON_PCONP_PCUART0|SYSCON_PCONP_PCUART1|SYSCON_PCONP_PCUART2|SYSCON_PCONP_PCUART3)
-#ifdef CONFIG_LPC17_UART0
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval &= ~(SYSCON_PCONP_PCUART0|SYSCON_PCONP_PCUART1|
+              SYSCON_PCONP_PCUART2|SYSCON_PCONP_PCUART3)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval |= SYSCON_PCONP_PCUART0;
-#endif
-#ifdef CONFIG_LPC17_UART1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
   regval |= SYSCON_PCONP_PCUART1;
-#endif
-#ifdef CONFIG_LPC17_UART2
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
   regval |= SYSCON_PCONP_PCUART2;
-#endif
-#ifdef CONFIG_LPC17_UART3
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
   regval |= SYSCON_PCONP_PCUART3;
 #endif
   putreg32(regval, LPC17_SYSCON_PCONP);
 
-/* Step 2: Enable peripheral clocking for all selected UARTs */
+/* Step 2: Enable peripheral clocking for the console UART and disable
+ * clocking for all other UARTs
+ */
 
-#define SYSCON_PCLKSET_MASK           (3)
-
-#define SYSCON_PCLKSEL0_UART0_SHIFT   (6)         /* Bits 6-7: Peripheral clock UART0 */
-#define SYSCON_PCLKSEL0_UART0_MASK    (3 << SYSCON_PCLKSEL0_UART0_MASK)
-#define SYSCON_PCLKSEL0_UART1_SHIFT   (8)         /* Bits 8-9: Peripheral clock UART1 */
-#define SYSCON_PCLKSEL0_UART1_MASK    (3 << SYSCON_PCLKSEL0_UART1_SHIFT)
-
-
-#define SYSCON_PCLKSEL1_UART2_SHIFT   (16)        /* Bits 16-17: Peripheral clock UART2 */
-#define SYSCON_PCLKSEL1_UART2_MASK    (3 << SYSCON_PCLKSEL1_UART2_SHIFT)
-#define SYSCON_PCLKSEL1_UART3_SHIFT   (18)        /* Bits 18-19: Peripheral clock UART3 */
-#define SYSCON_PCLKSEL1_UART3_MASK    (3 << SYSCON_PCLKSEL1_UART3_SHIFT)
-
-  /* Configure UART pins for all selected UARTs */
-
-#define GPIO_UART0_TXD     (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN2)
-#define GPIO_UART0_RXD     (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN3
-
-#define GPIO_UART1_TXD_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN15)
-#define GPIO_UART1_RXD_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN16)
-#define GPIO_UART1_CTS_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN17)
-#define GPIO_UART1_DCD_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN18)
-#define GPIO_UART1_DSR_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN19)
-#define GPIO_UART1_DTR_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN20)
-#define GPIO_UART1_RI_1    (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN21)
-#define GPIO_UART1_RTS_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN22)
-
-#define GPIO_UART1_TXD_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN0)
-#define GPIO_UART1_RXD_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN1)
-#define GPIO_UART1_CTS_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN2)
-#define GPIO_UART1_DCD_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN3)
-#define GPIO_UART1_DSR_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN4)
-#define GPIO_UART1_DTR_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN5)
-#define GPIO_UART1_RI_2    (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN6)
-#define GPIO_UART1_RTS_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN7)
-
-#define GPIO_UART2_TXD_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN10)
-#define GPIO_UART2_RXD_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN11)
-#define GPIO_UART2_TXD_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN8)
-#define GPIO_UART2_RXD_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN9)
-
-#define GPIO_UART3_TXD_1   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN0)
-#define GPIO_UART3_RXD_1   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN1)
-#define GPIO_UART3_TXD_2   (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN25)
-#define GPIO_UART3_RXD_2   (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN26)
-#define GPIO_UART3_TXD_3   (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN28)
-#define GPIO_UART3_RXD_3     (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN29)
-
-
-#ifdef CONFIG_LPC17_UART0
-  (void)lpc17_configgpio(GPIO_UART0_RXD);
-  (void)lpc17_configgpio(GPIO_UART0_TXD);
-  (void)lpc17_configgpio(GPIO_UART0_CTS);
-  (void)lpc17_configgpio(GPIO_UART0_RTS);
+  regval = getreg32(LPC17_SYSCON_PCLKSEL0);
+  regval &= SYSCON_PCLKSEL0_UART1_MASK;
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+  regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL0_UART0_SHIFT);
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+  regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL0_UART1_SHIFT);
 #endif
-#ifdef CONFIG_LPC17_UART1
-  (void)lpc17_configgpio(GPIO_UART1_RXD);
-  (void)lpc17_configgpio(GPIO_UART1_TXD);
-  (void)lpc17_configgpio(GPIO_UART1_CTS);
-  (void)lpc17_configgpio(GPIO_UART1_RTS);
-#endif
-#ifdef CONFIG_LPC17_UART2
-  (void)lpc17_configgpio(GPIO_UART2_RXD);
-  (void)lpc17_configgpio(GPIO_UART2_TXD);
-  (void)lpc17_configgpio(GPIO_UART2_CTS);
-  (void)lpc17_configgpio(GPIO_UART2_RTS);
-#endif
-#ifdef CONFIG_LPC17_UART3
-  (void)lpc17_configgpio(GPIO_UART3_RXD);
-  (void)lpc17_configgpio(GPIO_UART3_TXD);
-  (void)lpc17_configgpio(GPIO_UART3_CTS);
-  (void)lpc17_configgpio(GPIO_UART3_RTS);
-#endif
+  putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
-#ifdef GPIO_CONSOLE_RXD
+  regval = getreg32(LPC17_SYSCON_PCLKSEL1);
+  regval &= SYSCON_PCLKSEL0_UART2_MASK;
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+  regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART2_SHIFT);
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+  regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART23_SHIFT);
 #endif
-#ifdef GPIO_CONSOLE_TXD
-  (void)lpc17_configgpio(GPIO_CONSOLE_TXD);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL1);
+
+  /* Configure UART pins for the selected CONSOLE */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+  lpc17_configgpio(GPIO_UART0_TXD);
+  lpc17_configgpio(GPIO_UART0_RXD);
+  irqrestore(flags);
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+  lpc17_configgpio(GPIO_UART1_TXD);
+  lpc17_configgpio(GPIO_UART1_RXD);
+#ifdef CONFIG_UART0_FLOWCONTROL
+  lpc17_configgpio(GPIO_UART1_CTS);
+  lpc17_configgpio(GPIO_UART1_DCD);
+  lpc17_configgpio(GPIO_UART1_DSR);
+  lpc17_configgpio(GPIO_UART1_DTR);
+  lpc17_configgpio(GPIO_UART1_RI);
+  lpc17_configgpio(GPIO_UART1_RTS);
 #endif
-#ifdef GPIO_CONSOLE_CTS
-  (void)lpc17_configgpio(GPIO_CONSOLE_CTS);
-#endif
-#ifdef GPIO_CONSOLE_RTS
-  (void)lpc17_configgpio(GPIO_CONSOLE_RTS);
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+  lpc17_configgpio(GPIO_UART2_TXD);
+  lpc17_configgpio(GPIO_UART2_RXD);
+  irqrestore(flags);
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
+  lpc17_configgpio(GPIO_UART3_TXD);
+  lpc17_configgpio(GPIO_UART3_RXD);
 #endif
 
   /* Configure the console (only) */
+
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
-  /* Reset and disable receiver and transmitter */
 
-  putreg32((UART_CR_RSTRX|UART_CR_RSTTX|UART_CR_RXDIS|UART_CR_TXDIS),
-           CONSOLE_BASE+LPC17_UART_CR_OFFSET);
+  /* Clear fifos */
 
-  /* Disable all interrupts */
+  putreg32(UART_FCR_RXRST|UART_FCR_TXRST, CONSOLE_BASE+LPC17_UART_FCR_OFFSET);
 
-  putreg32(0xffffffff, CONSOLE_BASE+LPC17_UART_IDR_OFFSET);
+  /* Set trigger */
 
-  /* Set up the mode register */
+  putreg32(UART_FCR_FIFOEN|UART_FCR_RXTRIGGER_8, CONSOLE_BASE+LPC17_UART_FCR_OFFSET);
 
-  putreg32(MR_VALUE, CONSOLE_BASE+LPC17_UART_MR_OFFSET);
+  /* Set up the LCR and set DLAB=1*/
 
-  /* Configure the console baud */
+  putreg32(CONSOLE_LCR_VALUE|UART_LCR_DLAB, CONSOLE_BASE+LPC17_UART_LCR_OFFSET);
 
-  putreg32(((LPC17_MCK_FREQUENCY + (LPC17_CONSOLE_BAUD << 3))/(LPC17_CONSOLE_BAUD << 4)),
-           CONSOLE_BASE+LPC17_UART_BRGR_OFFSET);
+  /* Set the BAUD divisor */
 
-  /* Enable receiver & transmitter */
+  putreg32(CONSOLE_DL >> 8, CONSOLE_BASE+LPC17_UART_DLM_OFFSET);
+  putreg32(CONSOLE_DL & 0xff, CONSOLE_BASE+LPC17_UART_DLL_OFFSET);
 
-  putreg32((UART_CR_RXEN|UART_CR_TXEN),
-           CONSOLE_BASE+LPC17_UART_CR_OFFSET);
+  /* Clear DLAB */
+
+  putreg32(CONSOLE_LCR_VALUE, LPC17_UART_LCR_OFFSET);
+
+  /* Configure the FIFOs */
+
+  putreg32(UART_FCR_RXTRIGGER_8|UART_FCR_TXRST|UART_FCR_RXRST|UART_FCR_FIFOEN,
+           CONSOLE_BASE+LPC17_UART_FCR_OFFSET);
 #endif
-#endif /* 0 */
 #endif /* HAVE_UART */
 }
 
