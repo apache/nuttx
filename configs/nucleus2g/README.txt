@@ -286,6 +286,9 @@ Nucleus 2G Configuration Options
 	   the delay actually is 100 seconds.
 
 	Individual subsystems can be enabled:
+	  CONFIG_LPC17_MAINOSC=y
+	  CONFIG_LPC17_PLL0=y
+	  CONFIG_LPC17_PLL1=n
 	  CONFIG_LPC17_ETHERNET=n
 	  CONFIG_LPC17_USBHOST=n
 	  CONFIG_LPC17_USBOTG=n
@@ -315,6 +318,7 @@ Nucleus 2G Configuration Options
 	  CONFIG_LPC17_ADC=n
 	  CONFIG_LPC17_DAC=n
 	  CONFIG_LPC17_GPDMA=n
+	  CONFIG_LP17_FLASH=n
 
   LPC17xx specific device driver settings
 

@@ -213,8 +213,8 @@
 #define SYSCON_CLKSRCSEL_SHIFT        (0)         /* Bits 0-1: Clock selection */
 #define SYSCON_CLKSRCSEL_MASK         (3 << SYSCON_CLKSRCSEL_SHIFT)
 #  define SYSCON_CLKSRCSEL_INTRC      (0 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = internal RC oscillator */
-#  define SYSCON_CLKSRCSEL_RTC        (1 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = main oscillator */
-#  define SYSCON_CLKSRCSEL_MAIN       (2 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = RTC oscillator */
+#  define SYSCON_CLKSRCSEL_MAIN       (1 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = main oscillator */
+#  define SYSCON_CLKSRCSEL_RTC        (2 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = RTC oscillator */
                                                   /* Bits 2-31:  Reserved */
 
 /* Clocking and power control - Phase locked loops */
