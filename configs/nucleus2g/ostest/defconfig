@@ -101,6 +101,7 @@ CONFIG_LPC17_BUILDROOT=y
 #  Individual subsystems can be enabled:
 #
 # Individual subsystems can be enabled:
+# (MAINOSC, PLL0, PLL1 and FLASH are controlled in board.h)
 CONFIG_LPC17_ETHERNET=n
 CONFIG_LPC17_USBHOST=n
 CONFIG_LPC17_USBOTG=n
