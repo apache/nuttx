@@ -177,6 +177,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
+ |   |- nucleus1g/
+ |   |   `- README.txt
  |   |- olimex-strp711/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
