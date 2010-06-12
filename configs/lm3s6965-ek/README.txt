@@ -107,8 +107,7 @@ Development Environment
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
   toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment because the Raisonance R-Link emulatator and some RIDE7 development tools
-  were used and those tools works only under Windows.
+  environment.
 
 GNU Toolchain Options
 ^^^^^^^^^^^^^^^^^^^^^
@@ -118,28 +117,25 @@ GNU Toolchain Options
 
   1. The CodeSourcery GNU toolchain,
   2. The devkitARM GNU toolchain,
-  3. Raisonance GNU toolchain, or
-  4. The NuttX buildroot Toolchain (see below).
+  3. The NuttX buildroot Toolchain (see below).
 
   All testing has been conducted using the NuttX buildroot toolchain.  However,
   the make system is setup to default to use the devkitARM toolchain.  To use
-  the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
-  add one of the following configuration options to your .config (or defconfig)
-  file:
+  the CodeSourcery or devkitARM, you simply need to add one of the following
+  configuration options to your .config (or defconfig) file:
 
     CONFIG_LM3S_CODESOURCERYW=y   : CodeSourcery under Windows
     CONFIG_LM3S_CODESOURCERYL=y   : CodeSourcery under Linux
     CONFIG_LM3S_DEVKITARM=y       : devkitARM under Windows
-    CONFIG_LM3S_RAISONANCE=y      : Raisonance RIDE7 under Windows
-    CONFIG_LM3S_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_LM3S_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
 
   If you are not using CONFIG_LM3S_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
-  Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
-  toolchains are Cygwin and/or Linux native toolchains. There are several limitations
-  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
+  NOTE: the CodeSourcery (for Windows) and devkitARM are Windows native toolchains.
+  The CodeSourcey (for Linux) and NuttX buildroot toolchains are Cygwin and/or Linux
+  native toolchains. There are several limitations to using a Windows based
+  toolchain in a Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -183,8 +179,8 @@ IDEs
 ^^^^
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
-  effort will be required to create the project (There is a simple RIDE project
-  in the RIDE subdirectory).  Here are a few tip before you start that effort:
+  effort will be required to create the project.  Here are a few tip before you
+  start that effort:
 
   1) Select the toolchain that you will be using in your .config file
   2) Start the NuttX build at least one time from the Cygwin command line
@@ -196,9 +192,7 @@ IDEs
      on the command line.
 
   Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/lm3s/lm3s_vectors.S.  With RIDE, I have to build NuttX
-  one time from the Cygwin command line in order to obtain the pre-built
-  startup object needed by RIDE.
+  is arch/arm/src/lm3s/lm3s_vectors.S.
 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
