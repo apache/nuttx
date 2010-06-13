@@ -3069,11 +3069,8 @@ static int lpc17_pullup(struct usbdev_s *dev, bool enable)
  *   Initialize USB hardware.
  *
  * Assumptions:
- * - This function is called very early in the initialization sequence
- * - PLL and GIO pin initialization is not performed here but should been in
- *   the low-level  boot logic:  PLL1 must be configured for operation at 48MHz
- *   and P0.23 and PO.31 in PINSEL1 must be configured for Vbus and USB connect
- *   LED.
+ *   This function is called very early in the initialization sequence in order
+ *   to initialize the USB device functionality.
  *
  *******************************************************************************/
 
@@ -3085,9 +3082,32 @@ void up_usbinitialize(void)
 
   usbtrace(TRACE_DEVINIT, 0);
 
+  uint32_t   regval;
+  irqstate_t flags;
+
+  /* Step 1: Enable power by setting PCUSB in the PCONP register */
+
+  flags   = irqsave();
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCUSB;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+
+  /* Step 2: Enable clocking on UART (USB clocking was initialized in very
+   * low-level clock setup logic (see lpc17_clockconfig.c)
+   */
+
+  /* Step 3: Configure I/O pins */
+
+  lpc17_configgpio(GPIO_USB_VBUS);    /* VBUS status input */
+  lpc17_configgpio(GPIO_USB_CONNECT); /* SoftConnect control signal */
+  lpc17_configgpio(GPIO_USB_UPLED);   /* GoodLink LED control signal */
+  lpc17_configgpio(GPIO_USB_DP);      /* Positive differential data */
+  lpc17_configgpio(GPIO_USB_DM);      /* Negative differential data */
+
   /* Disable USB interrupts */
 
   lpc17_putreg(0, LPC17_USBDEV_INTST);
+  irqrestore(flags);
 
   /* Initialize the device state structure */
 
