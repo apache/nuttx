@@ -208,30 +208,6 @@
 #define LPC17_READOVERRUN_BIT (0x80000000)
 #define LPC17_READOVERRUN(s)  (((s) & LPC17_READOVERRUN_BIT) != 0)
 
-/* USB RAM  ********************************************************************
- *
- * UBS_UDCA is is list of 32 pointers to DMA desciptors located at the
- * beginning of USB RAM.  Each pointer points to a DMA descriptor with
- * assocated DMA buffer.
- */
-
-#define USB_UDCA           (uint32_t*)LPC17_USBDEV_RAMBASE)
-#define USB_USCASIZE       (LPC17_NPHYSENDPOINTS*sizeof(uint32_t))
-
-/* Each descriptor must be aligned to a 128 address boundary */
-
-#define USB_DDALIGNDOWN(a) ((a)&~0x7f)
-#define USB_DDALIGNUP(a)   USB_DDALIGNDOWN((a)+0x7f)
-
-#define USB_DDSIZE USB_DDALIGNDOWN((LPC17_USBDEV_RAMSIZE-USB_USCASIZE)/CONFIG_LPC17_USBDEV_NDMADESCRIPTORS)
-#define USB_DDESC  ((struct lpc17_dmadesc_s*)(LPC17_USBDEV_RAMBASE+USB_USCASIZE))
-
-#ifdef CONFIG_USBDEV_ISOCHRONOUS
-#  define USB_DDESCSIZE (5*sizeof(uint32_t))
-#else
-#  define USB_DDESCSIZE (4*sizeof(uint32_t))
-#endif
-
 /* Endpoints ******************************************************************/
 
 /* Number of endpoints */
@@ -321,14 +297,13 @@ struct lpc17_ep_s
 #ifdef CONFIG_LPC17_USBDEV_DMA
 struct lpc17_dmadesc_s
 {
-  uint32_t                nextdesc;      /* Address of the next DMA descripto in RAM */
+  uint32_t                nextdesc;      /* Address of the next DMA descriptor in RAM */
   uint32_t                config;        /* Misc. bit encoded configuration information */
   uint32_t                start;         /* DMA start address */
   uint32_t                status;        /* Misc. bit encoded status inforamation */
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
   uint32_t                size;          /* Isochronous packet size address */
 #endif
-  uint8_t                 buffer[USB_DDSIZE-USB_DDESCSIZE];
 };
 #endif
 
@@ -499,6 +474,26 @@ static const struct usbdev_ops_s g_devops =
   .selfpowered = lpc17_selfpowered,
   .pullup      = lpc17_pullup,
 };
+
+/* USB Device Communication Area ***********************************************
+ *
+ * The CPU and DMA controller communicate through a common area of memory, called
+ * the USB Device Communication Area, or UDCA. The UDCA is a 32-word array of DMA
+ * Descriptor Pointers (DDPs), each of which corresponds to a physical endpoint.
+ * Each DDP points to the start address of a DMA Descriptor, if one is defined for
+ * the endpoint. DDPs for unrealized endpoints and endpoints disabled for DMA
+ * operation are ignored and can be set to a NULL (0x0) value.
+ *
+ * The start address of the UDCA is stored in the USBUDCAH register. The UDCA can
+ * reside at any 128-byte boundary of RAM that is accessible to both the CPU and DMA
+ * controller (on other MCU's like the LPC2148, the UDCA lies in a specialized
+ * 8Kb memory region).
+ */
+
+#ifdef CONFIG_LPC17_USBDEV_DMA
+static uint32_t                g_udca[LPC17_NPHYSENDPOINTS] __attribute__ ((aligned (128)));
+static struct lpc17_dmadesc_s  g_usbddesc[CONFIG_LPC17_USBDEV_NDMADESCRIPTORS];
+#endif
 
 /*******************************************************************************
  * Public Data
@@ -1362,18 +1357,18 @@ static inline void lpc17_dmareset(uint32_t enable)
 
   for (i = 0; i < LPC17_NPHYSENDPOINTS; ++i)
     {
-      USB_UDCA[i] = NULL;
+      g_udca[i] = NULL;
     }
 
   /* Set USB UDCA Head register */
 
-  lpc17_putreg((uint32_t)USB_UDCA, LPC17_USBDEV_UDCAH);
+  lpc17_putreg((uint32_t)g_udca, LPC17_USBDEV_UDCAH);
 
   /* Invalidate all DMA descriptors */
 
   for (i = 0; i < CONFIG_LPC17_USBDEV_NDMADESCRIPTORS; ++i)
     {
-      memset(&USB_DDESC[i], 0, USB_DDESCSIZE);
+      memset(&g_usbddesc[i], 0, sizeof(struct lpc17_dmadesc_s));
     }
 
   /* Enable DMA interrupts */
@@ -2635,8 +2630,8 @@ static FAR void *lpc17_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t nbytes
 
   /* Set UDCA to the allocated DMA descriptor for this endpoint */
 
-  USB_UDCA[privep->epphy] = &USB_DDESC[descndx];
-  return  &USB_DDESC[descndx]
+  g_udca[privep->epphy] = &g_usbddesc[descndx];
+  return  &g_usbddesc[descndx]
 }
 #endif
 
@@ -2657,7 +2652,7 @@ static void lpc17_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 
   /* Indicate that there is no DMA descriptor associated with this endpoint  */
 
-  USB_UDCA[privep->epphy] = NULL;
+  g_udca[privep->epphy] = NULL;
 
   /* Mark the DMA descriptor as free for re-allocation */
 
