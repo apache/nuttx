@@ -359,7 +359,6 @@
 #define USBDEV_CMDDATA_SHIFT             (0)       /* Bits 0-7: Command read data */
 #define USBDEV_CMDDATA_MASK              (0xff << USBDEV_CMDDATA_SHIFT)
                                                    /* Bits 8-31: Reserved */
-
 /* USB transfer registers:
  *
  * USB Receive Data (Bits 0-31: Received data)
@@ -369,7 +368,7 @@
 
 #define USBDEV_RXPLEN_SHIFT              (0)       /* Bits 0-9: Bytes remaining to be read */
 #define USBDEV_RXPLEN_MASK               (0x3ff << USBDEV_RXPLEN_SHIFT)
-#define USBDEV_RXPLEN_DV                 (1 << 10) /* Bit 10: DV Data valid*/
+#define USBDEV_RXPLEN_DV                 (1 << 10) /* Bit 10: DV Data valid */
 #define USBDEV_RXPLEN_PKTRDY             (1 << 11) /* Bit 11: Packet ready for reading */
                                                    /* Bits 12-31: Reserved */
 /* USB Transmit Data (Bits 0-31: Transmit data) */
@@ -383,8 +382,8 @@
 
 #define USBDEV_CTRL_RDEN                 (1 << 0)  /* Bit 0:  Read mode control */
 #define USBDEV_CTRL_WREN                 (1 << 1)  /* Bit 1:  Write mode control */
-#define USBDEV_CTRL_LOGENDPOINT_SHIFT    (2)       /* Bits 2-5: Logical Endpoint number */
-#define USBDEV_CTRL_LOGENDPOINT_MASK     (15 << USBDEV_CTRL_LOGENDPOINT_SHIFT)
+#define USBDEV_CTRL_LOGEP_SHIFT          (2)       /* Bits 2-5: Logical Endpoint number */
+#define USBDEV_CTRL_LOGEP_MASK           (15 << USBDEV_CTRL_LOGEP_SHIFT)
                                                    /* Bits 6-31: Reserved */
 /* Endpoint interrupt registers:
  *
@@ -435,15 +434,15 @@
 
 #define USBDEV_PHYEP(n)                  (1 << (n))
 #define USBDEV_PHYEP0                    (1 << 0)
-#define USBDEV_PHYEP0                    (1 << 1)
-#define USBDEV_PHYEP0                    (1 << 2)
-#define USBDEV_PHYEP0                    (1 << 3)
-#define USBDEV_PHYEP0                    (1 << 4)
-#define USBDEV_PHYEP0                    (1 << 5)
-#define USBDEV_PHYEP0                    (1 << 6)
-#define USBDEV_PHYEP0                    (1 << 7)
-#define USBDEV_PHYEP0                    (1 << 8)
-#define USBDEV_PHYEP0                    (1 << 9)
+#define USBDEV_PHYEP1                    (1 << 1)
+#define USBDEV_PHYEP2                    (1 << 2)
+#define USBDEV_PHYEP3                    (1 << 3)
+#define USBDEV_PHYEP4                    (1 << 4)
+#define USBDEV_PHYEP5                    (1 << 5)
+#define USBDEV_PHYEP6                    (1 << 6)
+#define USBDEV_PHYEP7                    (1 << 7)
+#define USBDEV_PHYEP8                    (1 << 8)
+#define USBDEV_PHYEP9                    (1 << 9)
 #define USBDEV_PHYEP10                   (1 << 10)
 #define USBDEV_PHYEP11                   (1 << 11)
 #define USBDEV_PHYEP12                   (1 << 12)
@@ -472,7 +471,6 @@
 #define USBDEV_EPIND_SHIFT               (0)       /* Bits 0-4: Physical endpoint number (0-31) */
 #define USBDEV_EPIND_MASK                (31 << USBDEV_EPIND_SHIFT)
                                                    /* Bits 5-31: Reserved */
-
 /* USB MaxPacketSize */
 
 #define USBDEV_MAXPSIZE_SHIFT            (0)       /* Bits 0-9: Maximum packet size value */
@@ -578,6 +576,157 @@
 #define USBDEV_CLK_OTGCLK                (1 << 3)  /* Bit 3:  OTG clock (OTG only) */
 #define USBDEV_CLK_AHBCLK                (1 << 4)  /* Bit 4:  AHB clock */
                                                    /* Bits 5-31: Reserved */
+
+/* Endpoints *************************************************************************/
+
+#define LPC17_EP0_OUT                    0
+#define LPC17_EP0_IN                     1
+#define LPC17_CTRLEP_OUT                 LPC17_EP0_OUT
+#define LPC17_CTRLEP_IN                  LPC17_EP0_IN
+#define LPC17_EP1_OUT                    2
+#define LPC17_EP1_IN                     3
+#define LPC17_EP2_OUT                    4
+#define LPC17_EP2_IN                     5
+#define LPC17_EP3_OUT                    6
+#define LPC17_EP3_IN                     7
+#define LPC17_EP4_OUT                    8
+#define LPC17_EP4_IN                     9
+#define LPC17_EP5_OUT                    10
+#define LPC17_EP5_IN                     11
+#define LPC17_EP6_OUT                    12
+#define LPC17_EP6_IN                     13
+#define LPC17_EP7_OUT                    14
+#define LPC17_EP7_IN                     15
+#define LPC17_EP8_OUT                    16
+#define LPC17_EP8_IN                     17
+#define LPC17_EP9_OUT                    18
+#define LPC17_EP9_IN                     19
+#define LPC17_EP10_OUT                   20
+#define LPC17_EP10_IN                    21
+#define LPC17_EP11_OUT                   22
+#define LPC17_EP11_IN                    23
+#define LPC17_EP12_OUT                   24
+#define LPC17_EP12_IN                    25
+#define LPC17_EP13_OUT                   26
+#define LPC17_EP13_IN                    27
+#define LPC17_EP14_OUT                   28
+#define LPC17_EP14_IN                    29
+#define LPC17_EP15_OUT                   30
+#define LPC17_EP15_IN                    31
+#define LPC17_NUMEPS                     32
+
+/* Commands *************************************************************************/
+
+/* USB Command Code Register -- Command phase values */
+
+#define CMD_USBDEV_CMDWR                 (0x00000500)
+#define CMD_USBDEV_DATAWR                (0x00000100)
+#define CMD_USBDEV_DATARD                (0x00000200)
+
+/* Device Commands */
+
+#define CMD_USBDEV_SETADDRESS            (0x00d0)
+#define CMD_USBDEV_CONFIG                (0x00d8)
+#define CMD_USBDEV_SETMODE               (0x00f3)
+#define CMD_USBDEV_READFRAMENO           (0x00f5)
+#define CMD_USBDEV_READTESTREG           (0x00fd)
+#define CMD_USBDEV_SETSTATUS             (0x01fe)
+#define CMD_USBDEV_GETSTATUS             (0x00fe)
+#define CMD_USBDEV_GETERRORCODE          (0x00ff)
+#define CMD_USBDEV_READERRORSTATUS       (0x00fb)
+
+/* Endpoint Commands */
+
+#define CMD_USBDEV_EPSELECT              (0x0000)
+#define CMD_USBDEV_EPSELECTCLEAR         (0x0040)
+#define CMD_USBDEV_EPSETSTATUS           (0x0140)
+#define CMD_USBDEV_EPCLRBUFFER           (0x00f2)
+#define CMD_USBDEV_EPVALIDATEBUFFER      (0x00fa)
+
+/* Command/response bit definitions ********************************************/
+/* SETADDRESS (0xd0) command definitions */
+
+#define CMD_USBDEV_SETADDRESS_MASK       (0x7f)    /* Bits 0-6: Device address */
+#define CMD_USBDEV_SETADDRESS_DEVEN      (1 << 7)  /* Bit 7:  Device enable */
+
+/* SETSTATUS (0xfe) and GETSTATUS (0xfe) response: */
+
+#define CMD_STATUS_CONNECT               (1 << 0)  /* Bit 0:  Connected */
+#define CMD_STATUS_CONNCHG               (1 << 1)  /* Bit 1:  Connect change */
+#define CMD_STATUS_SUSPEND               (1 << 2)  /* Bit 2:  Suspend */
+#define CMD_STATUS_SUSPCHG               (1 << 3)  /* Bit 3:  Suspend change */
+#define CMD_STATUS_RESET                 (1 << 4)  /* Bit 4:  Bus reset bit */
+
+/* EPSELECT (0x00) endpoint status response */
+
+#define CMD_EPSELECT_FE                  (1 << 0)  /* Bit 0:  IN empty or OUT full */
+#define CMD_EPSELECT_ST                  (1 << 1)  /* Bit 1:  Endpoint is stalled */
+#define CMD_EPSELECT_STP                 (1 << 2)  /* Bit 2:  Last packet was setup */
+#define CMD_EPSELECT_PO                  (1 << 3)  /* Bit 3:  Previous packet was overwritten */
+#define CMD_EPSELECT_EPN                 (1 << 4)  /* Bit 4:  NAK sent */
+#define CMD_EPSELECT_B1FULL              (1 << 5)  /* Bit 5:  Buffer 1 full */
+#define CMD_EPSELECT_B2FULL              (1 << 6)  /* Bit 6:  Buffer 2 full */
+                                                   /* Bit 7:  Reserved */
+/* EPSETSTATUS (0x40) command */
+
+#define CMD_SETSTAUS_ST                  (1 << 0)  /* Bit 0:  Stalled endpoint bit */
+                                                   /* Bits 1-4: Reserved */
+#define CMD_SETSTAUS_DA                  (1 << 5)  /* Bit 5:  Disabled endpoint bit */
+#define CMD_SETSTAUS_RFMO                (1 << 6)  /* Bit 6:  Rate feedback mode */
+#define CMD_SETSTAUS_CNDST               (1 << 7)  /* Bit 7:  Conditional stall bit */
+
+/* EPCLRBUFFER (0xf2) response */
+
+#define CMD_USBDEV_CLRBUFFER_PO          (0x00000001)
+
+/* DMA ******************************************************************************/
+/* The DMA descriptor */
+
+#define USB_DMADESC_NEXTDDPTR            0 /* Offset 0: Next USB descriptor in RAM */
+#define USB_DMADESC_CONFIG               1 /* Offset 1: DMA configuration info. */
+#define USB_DMADESC_STARTADDR            2 /* Offset 2: DMA start address */
+#define USB_DMADESC_STATUS               3 /* Offset 3: DMA status info (read only) */
+#define USB_DMADESC_ISOCSIZEADDR         4 /* Offset 4: Isoc. packet size address */
+
+/* Bit settings for CONFIG (offset 1 )*/
+
+#define USB_DMADESC_MODE_SHIFT           (0)  /* Bits 0-1: DMA mode */
+#define USB_DMADESC_MODE_MASK            (3 << USB_DMADESC_MODE_SHIFT)
+#  define USB_DMADESC_MODENORMAL         (0 << USB_DMADESC_MODE_SHIFT) /* Mode normal */
+#  define USB_DMADESC_MODEATLE           (1 << USB_DMADESC_MODE_SHIFT) /* ATLE normal */
+#define USB_DMADESC_NEXTDDVALID          (1 << 2)  /* Bit 2:  Next descriptor valid */
+                                                   /* Bit 3:  Reserved */
+#define USB_DMADESC_ISCOEP               (1 << 4)  /* Bit 4:  ISOC endpoint */
+#define USB_DMADESC_PKTSIZE_SHIFT        (5)       /* Bits 5-15: Max packet size */
+#define USB_DMADESC_PKTSIZE_MASK         (0x7ff << USB_DMADESC_PKTSIZE_SHIFT)
+#define USB_DMADESC_BUFLEN_SHIFT         (16)      /* Bits 16-31: DMA buffer length */
+#define USB_DMADESC_BUFLEN_MASK          (0xffff << USB_DMADESC_BUFLEN_SHIFT
+
+/* Bit settings for STATUS (offset 3). All must be initialized to zero. */
+
+#define USB_DMADESC_STATUS_SHIFT         (1)       /* Bits 1-4: DMA status */
+#define USB_DMADESC_STATUS_MASK          (15 << USB_DMADESC_STATUS_SHIFT)
+#  define USB_DMADESC_NOTSERVICED        (0 << USB_DMADESC_STATUS_SHIFT)
+#  define USB_DMADESC_BEINGSERVICED      (1 << USB_DMADESC_STATUS_SHIFT)
+#  define USB_DMADESC_NORMALCOMPLETION   (2 << USB_DMADESC_STATUS_SHIFT)
+#  define USB_DMADESC_DATAUNDERRUN       (3 << USB_DMADESC_STATUS_SHIFT)
+#  define USB_DMADESC_DATAOVERRUN        (8 << USB_DMADESC_STATUS_SHIFT)
+#  define USB_DMADESC_SYSTEMERROR        (9 << USB_DMADESC_STATUS_SHIFT)
+#define USB_DMADESC_PKTVALID             (1 << 5)  /* Bit 5:  Packet valid */
+#define USB_DMADESC_LSBEXTRACTED         (1 << 6)  /* Bit 6: LS byte extracted */
+#define USB_DMADESC_MSBEXTRACTED         (1 << 7)  /* Bit 7: MS byte extracted */
+#define USB_DMADESC_MSGLENPOS_SHIFT      (8)       /* Bits 8-13: Message length position */
+#define USB_DMADESC_MSGLENPOS_MASK       (0x3f << USB_DMADESC_MSGLENPOS_SHIFT)
+#define USB_DMADESC_DMACOUNT_SHIFT       (16)      /* Bits 16-31:  DMA count */
+#define USB_DMADESC_DMACOUNT_MASK        (0xffff << USB_DMADESC_DMACOUNT_SHIFT)
+
+/* DMA packet size format */
+
+#define USB_DMAPKTSIZE_PKTLEN_SHIFT      (0)       /* Bits 0-15: Packet length */
+#define USB_DMAPKTSIZE_PKTLEN_MASK       (0xffff << USB_DMAPKTSIZE_PKTLEN_SHIFT)
+#define USB_DMAPKTSIZE_PKTVALID          (1 << 16) /* Bit 16: Packet valid */
+#define USB_DMAPKTSIZE_FRAMENO_SHIFT     (17)      /* Bit 17-31: Frame number */
+#define USB_DMAPKTSIZE_FRAMENO_MASK      (0x7fff << USB_DMAPKTSIZE_FRAMENO_SHIFT)
 
 /************************************************************************************
  * Public Types
