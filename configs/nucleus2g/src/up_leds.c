@@ -49,7 +49,9 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+
 #include "lpc17_internal.h"
+
 #include "nucleus2g_internal.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -57,6 +59,17 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+#define LED_OFF        0
+#define LED_ON         1
+#define LED_GREEN      2
+#define LED_PLUSGREEN  3
+#define LED_MINUSGREEN 4
+#define LED_RED        5
+#define LED_PLUSRED    6
+#define LED_MINUSRED   7
+#define LED_NC         8
+#define LED_PREV       9
 
 /* Enables debug output from this file (needs CONFIG_DEBUG with
  * CONFIG_DEBUG_VERBOSE too)
@@ -76,9 +89,187 @@
  * Private Data
  ****************************************************************************/
 
+static const uint8_t g_led1on[8] =
+{
+  LED_OFF, LED_GREEN,    LED_OFF,      LED_GREEN,
+  LED_NC,  LED_NC,       LED_PLUSRED,  LED_PLUSRED
+};
+
+static const uint8_t g_led1off[8] =
+{
+  LED_OFF, LED_OFF,      LED_GREEN,    LED_OFF,
+  LED_NC,  LED_NC,       LED_MINUSRED, LED_PREV
+};
+
+static const uint8_t g_led2on[8] =
+{
+  LED_OFF, LED_OFF,      LED_GREEN,    LED_GREEN,
+  LED_NC,  LED_PLUSRED,  LED_NC,       LED_PLUSRED
+};
+
+static const uint8_t g_led2off[8] =
+{
+  LED_OFF, LED_OFF,      LED_OFF,      LED_GREEN,
+  LED_NC,  LED_MINUSRED, LED_NC,       LED_PREV
+};
+
+static const uint8_t g_ledhbon[8] =
+{
+  LED_OFF, LED_OFF,      LED_OFF,      LED_OFF,
+  LED_ON,  LED_NC,       LED_NC,       LED_NC
+};
+
+static const uint8_t g_ledhboff[8] =
+{
+  LED_OFF, LED_OFF,      LED_OFF,      LED_OFF,
+  LED_OFF, LED_NC,       LED_NC,       LED_NC
+};
+
+static bool g_prevled1a;
+static bool g_currled1a;
+static bool g_prevled1b;
+static bool g_currled1b;
+static bool g_prevled2a;
+static bool g_currled2a;
+static bool g_prevled2b;
+static bool g_currled2b;
+static bool g_prevledhb;
+static bool g_currledhb;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_led1
+ ****************************************************************************/
+
+void up_led1(uint8_t newstate)
+{
+  bool led1a = false;
+  bool led1b = false;
+
+  switch (newstate)
+    {
+      default:
+      case LED_OFF:
+      case LED_ON:
+        break;
+
+     case LED_GREEN:
+        led1b = true;
+        break;
+
+     case LED_PLUSGREEN:
+        led1b = true;
+     case LED_MINUSGREEN:
+        led1a = g_currled1a;
+        break;
+
+     case LED_RED:
+        break;
+
+     case LED_PLUSRED:
+        led1a = true;
+     case LED_MINUSRED:
+        led1b = g_currled1b;
+        break;
+
+     case LED_NC:
+        led1a = g_currled1a;
+        led1b = g_currled1b;
+        break;
+
+     case LED_PREV:
+        led1a = g_prevled1a;
+        led1b = g_prevled1b;
+        break;
+    }
+        
+  lpc17_gpiowrite(NUCLEUS2G_LED1_A, led1a);
+  lpc17_gpiowrite(NUCLEUS2G_LED1_B, led1b);
+  g_prevled1a = g_currled1a;
+  g_currled1a = led1a;
+  g_prevled1b = g_currled1b;
+  g_currled1b = led1b;
+}
+
+/****************************************************************************
+ * Name: up_led2
+ ****************************************************************************/
+
+void up_led2(uint8_t newstate)
+{
+  bool led2a = false;
+  bool led2b = false;
+
+  switch (newstate)
+    {
+      default:
+      case LED_OFF:
+      case LED_ON:
+        break;
+
+     case LED_GREEN:
+        led2b = true;
+        break;
+
+     case LED_PLUSGREEN:
+        led2b = true;
+     case LED_MINUSGREEN:
+        led2a = g_currled2a;
+        break;
+
+     case LED_RED:
+        break;
+
+     case LED_PLUSRED:
+        led2a = true;
+     case LED_MINUSRED:
+        led2b = g_currled2b;
+        break;
+
+     case LED_NC:
+        led2a = g_currled2a;
+        led2b = g_currled2b;
+        break;
+
+     case LED_PREV:
+        led2a = g_prevled2a;
+        led2b = g_prevled2b;
+        break;
+    }
+        
+  lpc17_gpiowrite(NUCLEUS2G_LED2_A, led2a);
+  lpc17_gpiowrite(NUCLEUS2G_LED2_B, led2b);
+  g_prevled2a = g_currled2a;
+  g_currled2a = led2a;
+  g_prevled2b = g_currled2b;
+  g_currled2b = led2b;
+}
+
+/****************************************************************************
+ * Name: up_led2
+ ****************************************************************************/
+
+void up_ledhb(uint8_t newstate)
+{
+  bool ledhb = false;
+
+  switch (newstate)
+    {
+      default:
+      case LED_OFF:
+        break;
+
+      case LED_ON:
+        ledhb = true;
+        break;
+    }
+  lpc17_gpiowrite(NUCLEUS2G_HEARTBEAT, ledhb);
+  g_prevledhb = g_currledhb;
+  g_currledhb = newstate;
+}
 
 /****************************************************************************
  * Public Functions
@@ -90,6 +281,14 @@
 
 void up_ledinit(void)
 {
+  /* Configure all LED GPIO lines */
+
+  lpc17_configgpio(NUCLEUS2G_LED1_A);
+  lpc17_configgpio(NUCLEUS2G_LED1_B);
+  lpc17_configgpio(NUCLEUS2G_LED2_A);
+  lpc17_configgpio(NUCLEUS2G_LED2_B);
+  lpc17_configgpio(NUCLEUS2G_HEARTBEAT);
+  lpc17_configgpio(NUCLEUS2G_EXTRA_LED);
 }
 
 /****************************************************************************
@@ -98,6 +297,9 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
+  up_led1(g_led1on[led]);
+  up_led2(g_led2on[led]);
+  up_ledhb(g_ledhbon[led]);
 }
 
 /****************************************************************************
@@ -106,6 +308,9 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
+  up_led1(g_led1off[led]);
+  up_led2(g_led2off[led]);
+  up_ledhb(g_ledhboff[led]);
 }
 
 #endif /* CONFIG_ARCH_LEDS */

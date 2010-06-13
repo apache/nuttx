@@ -100,10 +100,24 @@
  * P2[11]/EINT1/I2STX_CLK            HEARTBEAT
  * P2[12]/EINT2/I2STX_WS             EXTRA_LED
  * P2[13]/EINT3/I2STX_SDA            5V_ENABLE
+ *
+ * P3[25]-P3[26]                     Not connected
+ *
+ * P4[28]-P4[29]                     P4[28]-P4[29]
+ */
 
-P3[25]-P3[26]                     Not connected
+#define NUCLEUS2G_LED1_A             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN0)
+#define NUCLEUS2G_LED1_B             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN1)
+#define NUCLEUS2G_LED2_A             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN2)
+#define NUCLEUS2G_LED2_B             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN3)
+#define NUCLEUS2G_232_ENABLE         (GPIO_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORT2 | GPIO_PIN5)
+#define NUCLEUS2G_232_POWERSAVE      (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN5)
+#define NUCLEUS2G_232_VALID          (GPIO_INPUT  | GPIO_PULLUP     | GPIO_PORT2 | GPIO_PIN5)
+#define NUCLEUS2G_HEARTBEAT          (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN11)
+#define NUCLEUS2G_EXTRA_LED          (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN12)
+#define NUCLEUS2G_5V_ENABLE          (GPIO_OUTPUT | GPIO_VALUE_ONE |  GPIO_PORT2 | GPIO_PIN13)
+#define NUCLEUS2G_5V_DISABLE         (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN13)
 
-P4[28]-P4[29]                     P4[28]-P4[29]
 /************************************************************************************
  * Public Types
  ************************************************************************************/

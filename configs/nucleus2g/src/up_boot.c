@@ -46,6 +46,8 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+
+#include "lpc17_internal.h"
 #include "nucleus2g_internal.h"
 
 /************************************************************************************
@@ -72,6 +74,22 @@
 
 void lpc17_boardinitialize(void)
 {
+  /* Enable +5V needed for CAN */
+
+#if defined(CONFIG_LPC17_CAN1) || defined(CONFIG_LPC17_CAN2)
+  lpc17_configgpio(NUCLEUS2G_5V_ENABLE);
+#else
+  lpc17_configgpio(NUCLEUS2G_5V_DISABLE);
+#endif
+
+  /* If UART0 is used, enabled the MAX232 driver */
+
+#ifdef CONFIG_LPC17_UART0
+  lpc17_configgpio(NUCLEUS2G_232_ENABLE);
+#else
+  lpc17_configgpio(NUCLEUS2G_232_POWERSAVE);
+#endif
+
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * lpc17_spiinitialize() has been brought into the link.
    */
