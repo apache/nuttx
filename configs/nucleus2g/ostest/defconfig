@@ -558,6 +558,27 @@ CONFIG_USBDEV_TRACE=n
 CONFIG_USBDEV_TRACE_NRECORDS=128
 
 #
+# LPC17xx USB Configuration
+#
+# CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
+#   Handle USB Start-Of-Frame events. 
+#   Enable reading SOF from interrupt handler vs. simply reading on demand.
+#   Probably a bad idea... Unless there is some issue with sampling the SOF
+#   from hardware asynchronously.
+# CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT
+#   Enable high priority interrupts.  I have no idea why you might want to
+#   do that
+# CONFIG_LPC17_USBDEV_NDMADESCRIPTORS
+#   Number of DMA descriptors to allocate in SRAM.
+# CONFIG_LPC17_USBDEV_DMA
+#   Enable lpc17xx-specific DMA support
+#
+CONFIG_LPC17_USBDEV_FRAME_INTERRUPT=n
+CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT=n
+CONFIG_LPC17_USBDEV_DMA=n
+CONFIG_LPC17_USBDEV_NDMADESCRIPTORS=0
+CONFIG_LPC17_USBDEV_DMAINTMASK=0
+#
 # USB Serial Device Configuration
 #
 # CONFIG_USBSER

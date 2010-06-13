@@ -318,7 +318,7 @@ Nucleus 2G Configuration Options
 	  CONFIG_LPC17_ADC=n
 	  CONFIG_LPC17_DAC=n
 	  CONFIG_LPC17_GPDMA=n
-	  CONFIG_LP17_FLASH=n
+	  CONFIG_LPC17_FLASH=n
 
   LPC17xx specific device driver settings
 
@@ -332,6 +332,21 @@ Nucleus 2G Configuration Options
 	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
 	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_UARTn_2STOP - Two stop bits
+
+  LPC17xx USB Configuration
+
+	CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
+	  Handle USB Start-Of-Frame events. 
+	  Enable reading SOF from interrupt handler vs. simply reading on demand.
+	  Probably a bad idea... Unless there is some issue with sampling the SOF
+	  from hardware asynchronously.
+	CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT
+	  Enable high priority interrupts.  I have no idea why you might want to
+	  do that
+	CONFIG_LPC17_USBDEV_NDMADESCRIPTORS
+	  Number of DMA descriptors to allocate in SRAM.
+	CONFIG_LPC17_USBDEV_DMA
+	  Enable lpc17xx-specific DMA support
 
 Configurations
 ^^^^^^^^^^^^^^
