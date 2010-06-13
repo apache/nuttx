@@ -621,7 +621,7 @@ static inline void lpc17_uart0config(uint8_t clkdiv)
 
   flags   = irqsave();
   regval  = getreg32(LPC17_SYSCON_PCONP);
-  regval |= ~SYSCON_PCONP_PCUART0;
+  regval |= SYSCON_PCONP_PCUART0;
   putreg32(regval, LPC17_SYSCON_PCONP);
 
   /* Step 2: Enable clocking on UART */
@@ -649,7 +649,7 @@ static inline void lpc17_uart1config(uint8_t clkdiv)
 
   flags   = irqsave();
   regval  = getreg32(LPC17_SYSCON_PCONP);
-  regval |= ~SYSCON_PCONP_PCUART1;
+  regval |= SYSCON_PCONP_PCUART1;
   putreg32(regval, LPC17_SYSCON_PCONP);
 
   /* Step 2: Enable clocking on UART */
@@ -713,7 +713,7 @@ static inline void lpc17_uart3config(uint8_t clkdiv)
 
   flags   = irqsave();
   regval  = getreg32(LPC17_SYSCON_PCONP);
-  regval |= ~SYSCON_PCONP_PCUART3;
+  regval |= SYSCON_PCONP_PCUART3;
   putreg32(regval, LPC17_SYSCON_PCONP);
 
   /* Step 2: Enable clocking on UART */
