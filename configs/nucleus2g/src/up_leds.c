@@ -89,6 +89,24 @@
  * Private Data
  ****************************************************************************/
 
+/* The Nucleus2G has 3 LEDs... two on the Babel CAN board and a "heartbeat" LED."
+ * The LEDs on the Babel CAN board are capabl of OFF/GREEN/RED/AMBER status.
+ * In normal usage, the two LEDs on the Babel CAN board would show CAN status, but if
+ * CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for NuttX
+ * debug functionality (where NC means "No Change").
+ * 
+ *                      LED1   LED2   HEARTBEAT
+ *                    +------- ------ -----------------------
+ *   LED_STARTED      | OFF    OFF    OFF
+ *   LED_HEAPALLOCATE | GREEN  OFF    OFF
+ *   LED_IRQSENABLED  | OFF    GREEN  OFF
+ *   LED_STACKCREATED | GREEN  GREEN  OFF
+ *   LED_INIRQ        | NC     NC     ON 
+ *   LED_SIGNAL       | NC     RED    NC 
+ *   LED_ASSERTION    | RED    NC     NC
+ *   LED_PANIC        | RED    RED    NC  (1Hz flashing)
+ */
+
 static const uint8_t g_led1on[8] =
 {
   LED_OFF, LED_GREEN,    LED_OFF,      LED_GREEN,
