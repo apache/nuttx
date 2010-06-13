@@ -122,16 +122,22 @@
 #define BOARD_FLASHCFG_VALUE       0x0000303a
 
 /* LED definitions ******************************************************************/
+/* The Nucleus2G has 3 LEDs... two on the Babel CAN board and a "heartbeat" LED."
+ * The LEDs on the Babel CAN board are capabl of OFF/GREEN/RED/AMBER status.
+ * In normal usage, the two LEDs on the Babel CAN board would show CAN status, but if
+ * CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for NuttX
+ * debug functionality (where NC means "No Change").
+ * 
+                                      /* LED1   LED2   HEARTBEAT */
+#define LED_STARTED                0  /* OFF    OFF    OFF */
+#define LED_HEAPALLOCATE           1  /* GREEN  OFF    OFF */
+#define LED_IRQSENABLED            2  /* OFF    GREEN  OFF */
+#define LED_STACKCREATED           3  /* GREEN  GREEN  OFF */
 
-#define LED_STARTED                0
-#define LED_HEAPALLOCATE           1
-#define LED_IRQSENABLED            2
-#define LED_STACKCREATED           3
-
-#define LED_INIRQ                  4
-#define LED_SIGNAL                 5
-#define LED_ASSERTION              6
-#define LED_PANIC                  7
+#define LED_INIRQ                  4  /*  NC     NC    ON  */
+#define LED_SIGNAL                 5  /*  NC     RED   NC  */
+#define LED_ASSERTION              6  /* RED     NC    NC  */
+#define LED_PANIC                  7  /* RED     RED   NC  (1Hz flashing) */
 
 /* Alternate pin selections *********************************************************/
 
