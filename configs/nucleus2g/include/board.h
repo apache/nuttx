@@ -140,6 +140,7 @@
 #define LED_PANIC                  7  /* RED     RED   NC  (1Hz flashing) */
 
 /* Alternate pin selections *********************************************************/
+/* UART1 -- Not connected */
 
 #define GPIO_UART1_TXD             GPIO_UART1_TXD_1
 #define GPIO_UART1_RXD             GPIO_UART1_RXD_1
@@ -150,11 +151,28 @@
 #define GPIO_UART1_RI              GPIO_UART1_RI_1
 #define GPIO_UART1_RTS             GPIO_UART1_RTS_1
 
+/* UART2 -- Not connected */
+
 #define GPIO_UART2_TXD             GPIO_UART2_TXD_1
 #define GPIO_UART2_RXD             GPIO_UART2_RXD_1
 
+/* UART3 -- Not connected */
+
 #define GPIO_UART3_TXD             GPIO_UART3_TXD_1
 #define GPIO_UART3_RXD             GPIO_UART3_RXD_1
+
+/* Either SPI or SSP0 can drive the MMC/SD slot (SSP0 alternate pin settings are
+ * not connected)
+ */
+
+#define GPIO_SSP0_SCK              GPIO_SSP0_SCK_1
+#define GPIO_SSP0_SSEL             GPIO_SSP0_SSEL_1
+#define GPIO_SSP0_MISO             GPIO_SSP0_MISO_1
+#define GPIO_SSP0_MOSI             GPIO_SSP0_MOSI_1
+
+/* SSP1 */
+
+#define GPIO_SSP1_SCK              GPIO_SSP1_SCK_1
 
 /************************************************************************************
  * Public Data
