@@ -205,7 +205,7 @@
 #define GPIO_SSP1_MISO     (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN8)
 #define GPIO_MAT2p2        (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN8)
 #define GPIO_I2S_TXSDA_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN9)
-#define GPIO_MOSI1         (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN9)
+#define GPIO_SSP1_MOSI     (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN9)
 #define GPIO_MAT2p3        (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN9)
 #define GPIO_UART2_TXD_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN10)
 #define GPIO_I2C2_SDA      (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN10)
@@ -224,7 +224,7 @@
 #define GPIO_SPI_MISO      (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN17)
 #define GPIO_UART1_DCD_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN18)
 #define GPIO_SSP0_MOSI_1   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN18)
-#define GPIO_MOSI          (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN18)
+#define GPIO_SPI_MOSI      (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN18)
 #define GPIO_UART1_DSR_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN19)
 #define GPIO_I2C1_SDA_2    (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN19)
 #define GPIO_UART1_DTR_1   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN20)
@@ -493,6 +493,71 @@ EXTERN void lpc17_gpioirqdisable(int irq);
 EXTERN int lpc17_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define lpc17_dumpgpio(p,m)
+#endif
+
+/************************************************************************************
+ * Name:  lpc17_spi/ssp0/ssp1select and lpc17_spi/ssp0/ssp1status
+ *
+ * Description:
+ *   The external functions, lpc17_spi/ssp0/ssp1select and lpc17_spi/ssp0/ssp1status 
+ *   must be provided by board-specific logic.  They are implementations of the select
+ *   and status methods of the SPI interface defined by struct spi_ops_s (see
+ *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
+ *   are provided by common LPC17xx logic.  To use this common SPI logic on your
+ *   board:
+ *
+ *   1. Provide logic in lpc17_boardinitialize() to configure SPI/SSP chip select
+ *      pins.
+ *   2. Provide lpc17_spi/ssp0/ssp1select() and lpc17_spi/ssp0/ssp1status() functions
+ *      in your board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is configured.
+ *   3. Add a calls to up_spiinitialize() in your low level application
+ *      initialization logic
+ *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling 
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
+ *
+ ************************************************************************************/
+
+struct spi_dev_s;
+enum spi_dev_e;
+
+#ifdef CONFIG_LPC17_SPI
+EXTERN void  lpc17_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#endif
+#ifdef CONFIG_LPC17_SSP0
+EXTERN void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#endif
+#ifdef CONFIG_LPC17_SSP1
+EXTERN void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#endif
+
+/****************************************************************************
+ * Name: ssp_flush
+ *
+ * Description:
+ *   Flush and discard any words left in the RX fifo.  This can be called
+ *   from ssp0/1select after a device is deselected (if you worry about such
+ *   things).
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+struct spi_dev_s;
+#ifdef CONFIG_LPC17_SPI
+EXTERN void spi_flush(FAR struct spi_dev_s *dev);
+#endif
+#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
+EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
 #endif
 
 #undef EXTERN
