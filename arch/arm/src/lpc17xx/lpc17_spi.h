@@ -80,16 +80,16 @@
 #define SPI_CR_LSBF          (1 << 6)  /* Bit 6:  SPI data is transferred LSB first */
 #define SPI_CR_SPIE          (1 << 7)  /* Bit 7:  Serial peripheral interrupt enable */
 #define SPI_CR_BITS_SHIFT    (8)       /* Bits 8-11: Number of bits per word (BITENABLE==1) */
-#define SPI_CR_BITS_MASK     (15 << BITSSPI_CR_BITS_SHIFT)
-#  define SPI_CR_BITS_8BITS  (8 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
-#  define SPI_CR_BITS_9BITS  (9 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
-#  define SPI_CR_BITS_10BITS (10 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
-#  define SPI_CR_BITS_11BITS (11 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
-#  define SPI_CR_BITS_12BITS (12 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
-#  define SPI_CR_BITS_13BITS (13 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
-#  define SPI_CR_BITS_14BITS (14 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
-#  define SPI_CR_BITS_15BITS (15 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
-#  define SPI_CR_BITS_16BITS (0 << BITSSPI_CR_BITS_SHIFT) /* xx bits per transfer */
+#define SPI_CR_BITS_MASK     (15 << SPI_CR_BITS_SHIFT)
+#  define SPI_CR_BITS_8BITS  (8 <<  SPI_CR_BITS_SHIFT) /* 8 bits per transfer */
+#  define SPI_CR_BITS_9BITS  (9 <<  SPI_CR_BITS_SHIFT) /* 9 bits per transfer */
+#  define SPI_CR_BITS_10BITS (10 << SPI_CR_BITS_SHIFT) /* 10 bits per transfer */
+#  define SPI_CR_BITS_11BITS (11 << SPI_CR_BITS_SHIFT) /* 11 bits per transfer */
+#  define SPI_CR_BITS_12BITS (12 << SPI_CR_BITS_SHIFT) /* 12 bits per transfer */
+#  define SPI_CR_BITS_13BITS (13 << SPI_CR_BITS_SHIFT) /* 13 bits per transfer */
+#  define SPI_CR_BITS_14BITS (14 << SPI_CR_BITS_SHIFT) /* 14 bits per transfer */
+#  define SPI_CR_BITS_15BITS (15 << SPI_CR_BITS_SHIFT) /* 15 bits per transfer */
+#  define SPI_CR_BITS_16BITS (0 <<  SPI_CR_BITS_SHIFT) /* 16 bits per transfer */
                                        /* Bits 12-31: Reserved */
 /* SPI Status Register */
                                        /* Bits 0-2: Reserved */
