@@ -111,7 +111,7 @@ struct lpc17_spidev_s
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
-  uint8_t          nbits;      /* Width of word in bits (8 or 16) */
+  uint8_t          nbits;      /* Width of word in bits (8 to 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 #endif
 };
@@ -495,7 +495,9 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
   spidbg("nwords: %d\n", nwords);
   while (nwords)
     {
-      /* Write the data to transmitted to the SPI Data Register */
+      /* Write some dummy data to the SPI Data Register in order to clock the
+       * read data.
+       */
 
       putreg32(0xff, LPC17_SPI_DR);
 

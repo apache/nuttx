@@ -507,7 +507,7 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   regval = ssp_getreg(priv, LPC17_SSP_DR_OFFSET);
   sspdbg("%04x->%04x\n", wd, regval);
-  return regval;
+  return (uint16_t)regval;
 }
 
 /*************************************************************************
@@ -532,22 +532,39 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
 static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
   FAR struct lpc17_sspdev_s *priv = (FAR struct lpc17_sspdev_s *)dev;
-  FAR const uint8_t *ptr = (FAR const uint8_t *)buffer;
-  uint8_t sr;
+  union
+  {
+    FAR const uint8_t  *p8;
+    FAR const uint16_t *p16;
+    FAR const void     *pv;
+  } u;
+  uint32_t data;
+  uint32_t sr;
 
   /* Loop while thre are bytes remaining to be sent */
 
   sspdbg("nwords: %d\n", nwords);
+  u.pv = buffer;
   while (nwords > 0)
     {
       /* While the TX FIFO is not full and there are bytes left to send */
 
       while ((ssp_getreg(priv, LPC17_SSP_SR_OFFSET) & SSP_SR_TNF) && nwords)
         {
+          /* Fetch the data to send */
+
+          if (priv->nbits > 8)
+            {
+              data = (uint32_t)*u.p16++;
+            }
+          else
+            {
+              data = (uint32_t)*u.p8++;
+            }
+
           /* Send the data */
 
-          ssp_putreg(priv, LPC17_SSP_DR_OFFSET, (uint32_t)*ptr);
-          ptr++;
+          ssp_putreg(priv, LPC17_SSP_DR_OFFSET, data);
           nwords--;
         }
     }
@@ -604,16 +621,22 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
   FAR struct lpc17_sspdev_s *priv = (FAR struct lpc17_sspdev_s *)dev;
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  union
+  {
+    FAR uint8_t  *p8;
+    FAR uint16_t *p16;
+    FAR void     *pv;
+  } u;
+  uint32_t data;
   uint32_t rxpending = 0;
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
-#warning "This only works with 8-bit transfers"
 
   sspdbg("nwords: %d\n", nwords);
+  u.pv = buffer;
   while (nwords || rxpending)
     {
-      /* Fill the transmit FIFO with 0xff...
+      /* Fill the transmit FIFO with 0xffff...
        * Write 0xff to the data register while (1) the TX FIFO is
        * not full, (2) we have not exceeded the depth of the TX FIFO,
        * and (3) there are more bytes to be sent.
@@ -623,7 +646,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
       while ((ssp_getreg(priv, LPC17_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC17_SSP_FIFOSZ) && nwords)
         {
-          ssp_putreg(priv, LPC17_SSP_DR_OFFSET, 0xff);
+          ssp_putreg(priv, LPC17_SSP_DR_OFFSET, 0xffff);
           nwords--;
           rxpending++;
         }
@@ -633,7 +656,15 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
       spivdbg("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC17_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
-          *ptr++ = (uint8_t)ssp_getreg(priv, LPC17_SSP_DR_OFFSET);
+          data = (uint8_t)ssp_getreg(priv, LPC17_SSP_DR_OFFSET);
+          if (priv->nbits > 8)
+            {
+              *u.p16++ = (uint16_t)data;
+            }
+          else
+            {
+              *u.p8++  = (uint8_t)data;
+            }
           rxpending--;
         }
     }
