@@ -53,7 +53,7 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 CHIP_ASRCS	=
 CHIP_CSRCS	= lpc17_allocateheap.c lpc17_clockconfig.c lpc17_gpio.c \
 		  lpc17_gpioint.c lpc17_irq.c lpc17_lowputc.c lpc17_serial.c \
-		  lpc17_ssp.c lpc17_start.c lpc17_timerisr.c
+		  lpc17_spi.c lpc17_ssp.c lpc17_start.c lpc17_timerisr.c
 
 # Configuration-dependent LPC17xx files
 
