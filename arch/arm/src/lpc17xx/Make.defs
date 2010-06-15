@@ -69,6 +69,6 @@ ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS	+= lpc17_usbdev.c
 endif
 
-ifeq ($(CONFIG_LPC17_DMA),y)
+ifeq ($(CONFIG_LPC17_GPDMA),y)
 CHIP_CSRCS	+= lpc17_gpdma.c
 endif
