@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -113,7 +114,7 @@ struct lpc17_sspdev_s
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
-  uint8_t          nbits;      /* Width of word in bits (8 or 16) */
+  uint8_t          nbits;      /* Width of word in bits (4 to 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 #endif
 };
@@ -488,7 +489,7 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
 static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
   FAR struct lpc17_sspdev_s *priv = (FAR struct lpc17_sspdev_s *)dev;
-  register uint16_t regval;
+  register uint32_t regval;
 
   /* Wait while the TX FIFO is full */
 
@@ -607,6 +608,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
   uint32_t rxpending = 0;
 
   /* While there is remaining to be sent (and no synchronization error has occurred) */
+#warning "This only works with 8-bit transfers"
 
   sspdbg("nwords: %d\n", nwords);
   while (nwords || rxpending)
@@ -763,7 +765,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   regval = ssp_getreg(priv, LPC17_SSP_CR1_OFFSET);
   ssp_putreg(priv, LPC17_SSP_CR1_OFFSET, regval | SSP_CR1_SSE);
 
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < LPC17_SSP_FIFOSZ; i++)
     {
       (void)ssp_getreg(priv, LPC17_SSP_DR_OFFSET);
     }
