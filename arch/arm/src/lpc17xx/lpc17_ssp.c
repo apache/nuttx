@@ -696,7 +696,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   lpc17_configgpio(GPIO_SSP0_MOSI);
 #endif
 
-#ifdef CONFIG_LPC17_SSP0
+#ifdef CONFIG_LPC17_SSP1
   lpc17_configgpio(GPIO_SSP1_SCK);
   lpc17_configgpio(GPIO_SSP1_MISO);
   lpc17_configgpio(GPIO_SSP1_MOSI);
@@ -711,7 +711,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
 #endif
 
-#ifdef CONFIG_LPC17_SSP0
+#ifdef CONFIG_LPC17_SSP1
   regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_SSP1_MASK;
   regval |= (SSP_PCLKSET_DIV << SYSCON_PCLKSEL0_SSP1_SHIFT);
@@ -724,7 +724,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   regval &= ~(SYSCON_PCONP_PCSSP0|SYSCON_PCONP_PCSSP1);
 #ifdef CONFIG_LPC17_SSP0
   regval |= SYSCON_PCONP_PCSSP0;
-#else
+#endif
+#ifdef CONFIG_LPC17_SSP1
   regval |= SYSCON_PCONP_PCSSP1;
 #endif
   putreg32(regval, LPC17_SYSCON_PCONP);
