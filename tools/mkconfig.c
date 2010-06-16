@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/mkconfig.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -337,6 +337,7 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_DEBUG_NET\n");
   printf("# undef CONFIG_DEBUG_USB\n");
   printf("# undef CONFIG_DEBUG_GRAPHICS\n");
+  printf("# undef CONFIG_DEBUG_GPIO\n");
   printf("#endif\n\n");
   printf("#endif /* __ARCH_CONFIG_H */\n");
   fclose(stream);

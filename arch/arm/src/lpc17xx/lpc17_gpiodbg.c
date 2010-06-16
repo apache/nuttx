@@ -49,7 +49,7 @@
 #include "lpc17_gpio.h"
 #include "lpc17_internal.h"
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_GPIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -134,22 +134,22 @@ int lpc17_dumpgpio(uint16_t pinset, const char *msg)
 
   port    = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   pin     = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  pinsel  = lpc17_pinsel(port);
-  pinmode = lpc17_pinmode(port);
+  pinsel  = lpc17_pinsel(port, pin);
+  pinmode = lpc17_pinmode(port, pin);
 
   /* The following requires exclusive access to the GPIO registers */
 
   flags = irqsave();
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
-        port + '0', pinset, fiobase, msg);
+  lldbg("GPIO%c pinset: %08x -- %s\n",
+        port + '0', pinset, msg);
 
-  lldbg("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n"
+  lldbg("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
         pinsel,  pinsel  ? getreg32(pinsel) : 0,
         pinmode, pinmode ? getreg32(pinmode) : 0, 
         g_odmode[port],    getreg32(g_odmode[port]));
 
   base = g_fiobase[port];
-  lldbg("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n"
+  lldbg("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
         base+LPC17_FIO_DIR_OFFSET,  getreg32(base+LPC17_FIO_DIR_OFFSET),
         base+LPC17_FIO_MASK_OFFSET, getreg32(base+LPC17_FIO_MASK_OFFSET),
         base+LPC17_FIO_PIN_OFFSET,  getreg32(base+LPC17_FIO_PIN_OFFSET));
@@ -165,7 +165,5 @@ int lpc17_dumpgpio(uint16_t pinset, const char *msg)
   irqrestore(flags);
   return OK;
 }
-#endif /* CONFIG_DEBUG */
-
-
+#endif /* CONFIG_DEBUG_GPIO */
 

@@ -537,7 +537,7 @@ EXTERN void lpc17_gpioirqdisable(int irq);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-EXTERN int lpc17_dumpgpio(uint32_t pinset, const char *msg);
+EXTERN int lpc17_dumpgpio(uint16_t pinset, const char *msg);
 #else
 #  define lpc17_dumpgpio(p,m)
 #endif
