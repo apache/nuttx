@@ -40,8 +40,8 @@ fi
 if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
 WD=`pwd`
-export RIDE_BIN="/cygdrive/c/Program Files/Raisonance/Ride/arm-gcc/bin"
+export LPCTOOL_DIR="${WD}/configs/nucleus2g/tools"
 export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
-export PATH="${BUILDROOT_BIN}:${RIDE_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${BUILDROOT_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
