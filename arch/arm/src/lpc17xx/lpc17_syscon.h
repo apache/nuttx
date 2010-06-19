@@ -296,7 +296,7 @@
 #define SYSCON_PCLKSEL0_TMR1_SHIFT    (4)         /* Bits 4-5: Peripheral clock TIMER1 */
 #define SYSCON_PCLKSEL0_TMR1_MASK     (3 << SYSCON_PCLKSEL0_TMR1_SHIFT)
 #define SYSCON_PCLKSEL0_UART0_SHIFT   (6)         /* Bits 6-7: Peripheral clock UART0 */
-#define SYSCON_PCLKSEL0_UART0_MASK    (3 << SYSCON_PCLKSEL0_UART0_MASK)
+#define SYSCON_PCLKSEL0_UART0_MASK    (3 << SYSCON_PCLKSEL0_UART0_SHIFT)
 #define SYSCON_PCLKSEL0_UART1_SHIFT   (8)         /* Bits 8-9: Peripheral clock UART1 */
 #define SYSCON_PCLKSEL0_UART1_MASK    (3 << SYSCON_PCLKSEL0_UART1_SHIFT)
                                                   /* Bits 10-11:  Reserved */
@@ -314,7 +314,7 @@
 #define SYSCON_PCLKSEL0_ADC_SHIFT     (24)        /* Bits 24-25: Peripheral clock ADC */
 #define SYSCON_PCLKSEL0_ADC_MASK      (3 << SYSCON_PCLKSEL0_ADC_SHIFT)
 #define SYSCON_PCLKSEL0_CAN1_SHIFT    (26)        /* Bits 26-27: Peripheral clock CAN1 */
-#define SYSCON_PCLKSEL0_CAN1_MASK     (3 << SYSCON_PCLKSEL0_CAN1_MASK
+#define SYSCON_PCLKSEL0_CAN1_MASK     (3 << SYSCON_PCLKSEL0_CAN1_SHIFT
 #define SYSCON_PCLKSEL0_CAN2_SHIFT    (28)        /* Bits 28-29: Peripheral clock CAN2 */
 #define SYSCON_PCLKSEL0_CAN2_MASK     (3 << SYSCON_PCLKSEL0_CAN2_SHIFT)
 #define SYSCON_PCLKSEL0_ACF_SHIFT     (30)        /* Bits 30-31: Peripheral clock CAN AF */
