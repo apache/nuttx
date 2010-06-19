@@ -77,25 +77,11 @@
 
 #ifdef LPC17_HAVE_BANK0
 #  if CONFIG_MM_REGIONS < 2
-#    warning "CONFIG_MM_REGIONS < 2: AHB SRAM Bank0 not included in HEAP"
+#    warning "CONFIG_MM_REGIONS < 2: AHB SRAM Bank(s) not included in HEAP"
 #  endif
 #else
 #  if CONFIG_MM_REGIONS > 1
-#    warning "CONFIG_MM_REGIONS > 1: This MCU has no AHB SRAM Bank0"
-#    undef CONFIG_MM_REGIONS
-#    define CONFIG_MM_REGIONS 1
-#  endif
-#endif
-
-#ifdef LPC17_HAVE_BANK1
-#  if CONFIG_MM_REGIONS < 3
-#    warning "CONFIG_MM_REGIONS < 3: AHB SRAM Bank1 not included in HEAP"
-#  endif
-#else
-#  if CONFIG_MM_REGIONS > 2
-#    warning "CONFIG_MM_REGIONS > 2: This MCU has no AHB SRAM Bank1"
-#    undef CONFIG_MM_REGIONS
-#    define CONFIG_MM_REGIONS 2
+#    warning "CONFIG_MM_REGIONS > 1: This MCU has no AHB SRAM Bank0/1"
 #  endif
 #endif
 
@@ -141,10 +127,16 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-  mm_addregion((FAR void*)LPC17_HAVE_BANK0, 16*1024);
+  /* Banks 0 and 1 are each 16Kb.  If both are present, they occupy a
+   * contiguous 32Kb memory region.
+   */
 
-#if CONFIG_MM_REGIONS > 2
-  mm_addregion((FAR void*)LPC17_HAVE_BANK1, 16*1024);
+#ifdef LPC17_HAVE_BANK0
+# ifdef LPC17_HAVE_BANK1
+  mm_addregion((FAR void*)LPC17_SRAM_BANK0, 32*1024);
+# else
+  mm_addregion((FAR void*)LPC17_SRAM_BANK0, 16*1024);
+# endif
 #endif
 }
 #endif

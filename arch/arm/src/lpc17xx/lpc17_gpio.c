@@ -110,9 +110,9 @@ const uint32_t g_fiobase[GPIO_NPORTS] =
 
 const uint32_t g_intbase[GPIO_NPORTS] = 
 {
-  LPC17_GPIOINT0_OFFSET,
+  LPC17_GPIOINT0_BASE,
   0,
-  LPC17_GPIOINT2_OFFSET,
+  LPC17_GPIOINT2_BASE,
   0,
   0
 };
