@@ -57,7 +57,7 @@
 #undef HAVE_UART
 #if defined(CONFIG_LPC17_UART0) || defined(CONFIG_LPC17_UART1) || \
     defined(CONFIG_LPC17_UART2) || defined(CONFIG_LPC17_UART3)
-#  define HAVE_UART1
+#  define HAVE_UART 1
 #endif
 
 /* Is there a serial console? There should be at most one defined.  It could be on

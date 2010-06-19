@@ -48,6 +48,7 @@
 #include "up_arch.h"
 
 #include "lpc17_internal.h"
+#include "lpc17_syscon.h"
 #include "lpc17_uart.h"
 #include "lpc17_serial.h"
 
@@ -118,9 +119,9 @@
 /* Get stop-bit setting for the console and UART0-3 */
 
 #if CONSOLE_2STOP != 0
-#  define CONSOLE_LCR_STOP LPC214X_LCR_STOP_2
+#  define CONSOLE_LCR_STOP UART_LCR_STOP
 #else
-#  define CONSOLE_LCR_STOP LPC214X_LCR_STOP_1
+#  define CONSOLE_LCR_STOP 0
 #endif
 
 /* LCR and FCR values for the console */
@@ -209,7 +210,7 @@
 
 /* Then this is the value to use for the DLM and DLL registers */
 
-#define CONSOLE_DL          (CONSOLE_NUMERATOR / (CONSOLE_BAUD << 4)
+#define CONSOLE_DL          (CONSOLE_NUMERATOR / (CONSOLE_BAUD << 4))
 
 /**************************************************************************
  * Private Types
@@ -297,7 +298,7 @@ void lpc17_lowsetup(void)
 
   regval  = getreg32(LPC17_SYSCON_PCONP);
   regval &= ~(SYSCON_PCONP_PCUART0|SYSCON_PCONP_PCUART1|
-              SYSCON_PCONP_PCUART2|SYSCON_PCONP_PCUART3)
+              SYSCON_PCONP_PCUART2|SYSCON_PCONP_PCUART3);
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval |= SYSCON_PCONP_PCUART0;
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
@@ -314,7 +315,7 @@ void lpc17_lowsetup(void)
  */
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL0);
-  regval &= SYSCON_PCLKSEL0_UART1_MASK;
+  regval &= ~(SYSCON_PCLKSEL0_UART0_MASK|SYSCON_PCLKSEL0_UART1_MASK);
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL0_UART0_SHIFT);
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
@@ -323,11 +324,11 @@ void lpc17_lowsetup(void)
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
-  regval &= SYSCON_PCLKSEL0_UART2_MASK;
+  regval &= ~(SYSCON_PCLKSEL1_UART2_MASK|SYSCON_PCLKSEL1_UART3_SHIFT);
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART2_SHIFT);
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-  regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART23_SHIFT);
+  regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART3_SHIFT);
 #endif
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
 
@@ -336,7 +337,6 @@ void lpc17_lowsetup(void)
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
   lpc17_configgpio(GPIO_UART0_TXD);
   lpc17_configgpio(GPIO_UART0_RXD);
-  irqrestore(flags);
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
   lpc17_configgpio(GPIO_UART1_TXD);
   lpc17_configgpio(GPIO_UART1_RXD);
