@@ -325,9 +325,9 @@ void lpc17_lowsetup(void)
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
   regval &= ~(SYSCON_PCLKSEL1_UART2_MASK|SYSCON_PCLKSEL1_UART3_SHIFT);
-#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#if defined(CONFIG_UART2_SERIAL_CONSOLE)
   regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART2_SHIFT);
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
   regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART3_SHIFT);
 #endif
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
@@ -369,7 +369,7 @@ void lpc17_lowsetup(void)
 
   putreg32(UART_FCR_FIFOEN|UART_FCR_RXTRIGGER_8, CONSOLE_BASE+LPC17_UART_FCR_OFFSET);
 
-  /* Set up the LCR and set DLAB=1*/
+  /* Set up the LCR and set DLAB=1 */
 
   putreg32(CONSOLE_LCR_VALUE|UART_LCR_DLAB, CONSOLE_BASE+LPC17_UART_LCR_OFFSET);
 
@@ -380,7 +380,7 @@ void lpc17_lowsetup(void)
 
   /* Clear DLAB */
 
-  putreg32(CONSOLE_LCR_VALUE, LPC17_UART_LCR_OFFSET);
+  putreg32(CONSOLE_LCR_VALUE, CONSOLE_BASE+LPC17_UART_LCR_OFFSET);
 
   /* Configure the FIFOs */
 
