@@ -71,7 +71,7 @@
  */
 
 #undef CONFIG_LPC17_MAINOSC
-#define CONFIG_LPC17_MAINOSC 1
+#define CONFIG_LPC17_MAINOSC       1
 #define BOARD_SCS_VALUE            SYSCON_SCS_OSCEN
 
 /* Select the main oscillator and CCLK divider. The output of the divider is CCLK.
@@ -89,7 +89,7 @@
  */
 
 #undef CONFIG_LPC17_PLL0
-#define CONFIG_LPC17_PLL0 1
+#define CONFIG_LPC17_PLL0          1
 #define BOARD_CLKSRCSEL_VALUE      SYSCON_CLKSRCSEL_MAIN
 
 #define BOARD_PLL0CFG_MSEL         20
@@ -100,7 +100,7 @@
 
 /* PLL1 -- Not used. */
 
-#undef CONFIG_LPC17_PLL0
+#undef CONFIG_LPC17_PLL1
 #define BOARD_PLL1CFG_MSEL         36
 #define BOARD_PLL1CFG_NSEL         1
 #define BOARD_PLL1CFG_VALUE \
