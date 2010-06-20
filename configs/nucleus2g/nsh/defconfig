@@ -1,5 +1,5 @@
 ############################################################################
-# configs/nucleus2g/ostest/defconfig
+# configs/nucleus2g/nsh/defconfig
 #
 #   Copyright (C) 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -295,7 +295,7 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 #  the worker thread.  Default: 4
 #
-CONFIG_EXAMPLE=ostest
+CONFIG_EXAMPLE=nsh
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
@@ -310,7 +310,7 @@ CONFIG_START_DAY=20
 CONFIG_GREGORIAN_TIME=n
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
-CONFIG_DEV_LOWCONSOLE=y
+CONFIG_DEV_LOWCONSOLE=n
 CONFIG_MUTEX_TYPES=n
 CONFIG_PRIORITY_INHERITANCE=n
 CONFIG_SEM_PREALLOCHOLDERS=0
@@ -345,8 +345,8 @@ CONFIG_DISABLE_POSIX_TIMERS=n
 CONFIG_DISABLE_PTHREAD=n
 CONFIG_DISABLE_SIGNALS=n
 CONFIG_DISABLE_MQUEUE=n
-CONFIG_DISABLE_MOUNTPOINT=y
-CONFIG_DISABLE_ENVIRON=y
+CONFIG_DISABLE_MOUNTPOINT=n
+CONFIG_DISABLE_ENVIRON=n
 CONFIG_DISABLE_POLL=y
 
 #
@@ -431,7 +431,7 @@ CONFIG_PREALLOC_TIMERS=4
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
 # CONFIG_FS_ROMFS - Enable ROMFS filesystem support
-CONFIG_FS_FAT=n
+CONFIG_FS_FAT=y
 CONFIG_FS_ROMFS=n
 
 #
