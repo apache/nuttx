@@ -104,7 +104,7 @@ void lpc17_clockconfig(void)
 
   /* PLL0 is used to generate the CPU clock divider input (PLLCLK). */
 
-#if CONFIG_LPC17_PLL0
+#ifdef CONFIG_LPC17_PLL0
   /* Select the PLL0 source clock, multiplier, and pre-divider values.  NOTE that
    * a special "feed" sequence must be written to the PLL0FEED register in order
    * for changes to the PLL0CFG register to take effect.
