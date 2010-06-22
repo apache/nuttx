@@ -60,6 +60,7 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
+#include "lpc17_internal.h"
 #include "lpc17_uart.h"
 #include "lpc17_serial.h"
 
@@ -126,7 +127,7 @@ struct uart_ops_s g_uart_ops =
   .send           = up_send,
   .txint          = up_txint,
   .txready        = up_txready,
-  .txempty    = up_txempty,
+  .txempty        = up_txempty,
 };
 
 /* I/O buffers */
@@ -948,15 +949,34 @@ static int up_interrupt(int irq, void *context)
   uint8_t            status;
   int                passes;
 
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else if (g_uart0priv.irq == irq)
+#ifdef CONFIG_LPC17_UART0
+  if (g_uart0priv.irq == irq)
     {
       dev = &g_uart0port;
     }
   else
+#endif
+#ifdef CONFIG_LPC17_UART1
+  if (g_uart1priv.irq == irq)
+    {
+      dev = &g_uart1port;
+    }
+  else
+#endif
+#ifdef CONFIG_LPC17_UART2
+  if (g_uart2priv.irq == irq)
+    {
+      dev = &g_uart2port;
+    }
+  else
+#endif
+#ifdef CONFIG_LPC17_UART3
+  if (g_uart3priv.irq == irq)
+    {
+      dev = &g_uart3port;
+    }
+  else
+#endif
     {
       PANIC(OSERR_INTERNAL);
     }
@@ -1250,28 +1270,28 @@ void up_earlyserialinit(void)
 #ifndef CONFIG_UART0_SERIAL_CONSOLE
   lpc17_uart0config(g_uart0priv.cclkdiv);
 #endif
-  up_disableuartint(g_uart0priv.priv, NULL);
+  up_disableuartint(&g_uart0priv, NULL);
 #endif
 #ifdef CONFIG_LPC17_UART1
   g_uart1priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART1_BAUD);
 #ifndef CONFIG_UART1_SERIAL_CONSOLE
   lpc17_uart1config(g_uart1priv.cclkdiv);
 #endif
-  up_disableuartint(g_uart1priv.priv, NULL);
+  up_disableuartint(&g_uart1priv, NULL);
 #endif
 #ifdef CONFIG_LPC17_UART2
   g_uart2priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART2_BAUD);
 #ifndef CONFIG_UART2_SERIAL_CONSOLE
   lpc17_uart2config(g_uart2priv.cclkdiv);
 #endif
-  up_disableuartint(g_uart2priv.priv, NULL);
+  up_disableuartint(&g_uart2priv, NULL);
 #endif
 #ifdef CONFIG_LPC17_UART3
   g_uart3priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART3_BAUD);
 #ifndef CONFIG_UART3_SERIAL_CONSOLE
   lpc17_uart3config(g_uart3priv.cclkdiv);
 #endif
-  up_disableuartint(g_uart3priv.priv, NULL);
+  up_disableuartint(&g_uart3priv, NULL);
 #endif
 
   /* Configuration whichever one is the console */
