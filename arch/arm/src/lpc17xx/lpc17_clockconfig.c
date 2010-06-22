@@ -135,7 +135,8 @@ void lpc17_clockconfig(void)
 
   /* Wait for PLL to report that it is connected and enabled */
 
-  while ((getreg32(LPC17_SYSCON_PLL0STAT) & (SYSCON_PLL0STAT_PLLE|SYSCON_PLL0STAT_PLLC)) == 0);
+  while ((getreg32(LPC17_SYSCON_PLL0STAT) & (SYSCON_PLL0STAT_PLLE|SYSCON_PLL0STAT_PLLC))
+          != (SYSCON_PLL0STAT_PLLE|SYSCON_PLL0STAT_PLLC));
 #endif
 
   /* PLL1 receives its clock input from the main oscillator only and can be used to
@@ -173,7 +174,8 @@ void lpc17_clockconfig(void)
 
   /* Wait for PLL to report that it is connected and enabled */
 
-  while ((getreg32(LPC17_SYSCON_PLL1STAT) & (SYSCON_PLL1STAT_PLLE|SYSCON_PLL1STAT_PLLC)) == 0);
+  while ((getreg32(LPC17_SYSCON_PLL1STAT) & (SYSCON_PLL1STAT_PLLE|SYSCON_PLL1STAT_PLLC))
+         != (SYSCON_PLL1STAT_PLLE|SYSCON_PLL1STAT_PLLC));
 #else
   /* Otherwise, setup up the USB clock divider to generate the USB clock from PLL0 */
 
