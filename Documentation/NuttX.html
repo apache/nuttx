@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 6, 2010</p>
+      <p>Last Updated: June 22, 2010</p>
     </td>
   </tr>
 </table>
@@ -764,43 +764,41 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.6 Release Notes</b>:
+<p><b>nuttx-5.7 Release Notes</b>:
 
 <p>
-  This 53<sup>rd</sup> release of NuttX was made on June 5, 2010 and is available for download from the
+  This 54<sup>th</sup> release of NuttX was made on June 22, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release includes one several new drivers for existing NuttX ports:
+  This release adds basic support for one new ARM Cortex-M3 architecture:
   <ul>
     <li>
-      This port adds support for the RiT displays P14201 4-bpp, greyscale OLED.
-      4-bpp greyscale support was integrated into the NX graphics sub-system and
-      verified using the TI/Luminary LP3S6965 Ethernet Evaluation Kit.
+      Added support for NXP LPC1768 MCU as provided on the Nucleus 2G board from
+      <a href="http://www.2g-eng.com">2G Engineering</a>.
     </li>
     <li>
-      The MP25Px driver was extended for the M24P1 FLASH part (see NOTE).
+      Some initial files for the LPC17xx family were released in NuttX 5.6, but the
+      first functional release for the NXP LPC1768/Nucleus2G occured with NuttX 5.7.
     </li>
     <li>
-      An I2C driver and (basic) SPI driver were added for the NXP LPC313x port.
-      The I2C interface definition was extended to efficiently handle multiple I2C
-      transfers (See NOTE).
+      That initial basic release included timer interrupts and a serial console and was
+      verified using the NuttX OS test.
+    </li>
+    <li>
+      That release includes a verified NuttShell (NSH) configuration
+      (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+      Also included are unverified SPI and USB device drivers.
     </li>
   </ul>
 </p>
 <p>
-  As well as a few, important USB-related bugfixes (See the ChangeLog for details).
-</p>
-<p>
-  This release also includes the beginnings of a port for the NXP LPC1768 MCU.  However,
-  it is too early for that port to be useful (stay tuned for a future announcement of the
-  availability of the verified LPC1768 port).
-</p>
-<p>
-  <small><b>NOTE</b>: Contributed by David Hewson where noted.</small>
+  Further efforts include: (1) development of a DMA support library, (2) SPI-based MMC/SD
+  support, and (3) verification of the USB driver.  Watch for announcement of the completed
+  LPC1768 port expected in NuttX-5.8.
 </p>
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1139,7 +1137,7 @@
   <td>
     <p>
       <b>Atmel AT91SAM3U</b>.
-      This port uses the <a href=" http://www.atmel.com/">Atmel</a> SAM3U-EK
+      This port uses the <a href="http://www.atmel.com/">Atmel</a> SAM3U-EK
       development board that features the AT91SAM3U4E MCU.
       This port uses a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU
       tools or Cygwin-based GNU tools).
@@ -1180,17 +1178,34 @@
   <td>
     <p>
       <b>NXP LPC1768</b>.
+      This port uses the Nucleus 2G board from <a href="http://www.2g-eng.com/">2G Engineering</a>
+      featuring the NXP LPC1768 MCU.
+      This port uses a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU
+      tools or Cygwin-based GNU tools).
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-        Some initial files for the LPCP17xx family were released in NuttX 5.6, but that port is not yet ready for general use
-        (I, in fact, still do not have hardware in hand).
-        Look for the announcement of the LPC1768 NuttX port in a future release.
+        Some initial files for the LPC17xx family were released in NuttX 5.6, but the first
+        functional release for the NXP LPC1768/Nucleus2G occured with NuttX 5.7.
+        That initial basic release included timer interrupts and a serial console and was
+        verified using the NuttX OS test (<code>examples/ostest</code>).
+        That release includes a verified NuttShell (NSH) configuration
+        (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+        Also included are unverified SPI and USB device drivers.
+      </p>
+      <p>
+        Current efforts include: (1) development of a DMA support library, (2) SPI-based MMC/SD
+        support, and (3) verification of the USB driver.
+        Watch for announcement of the completed LPC1768 port expected in NuttX-5.8.
       </p>
       <p>
         <b>Development Environments:</b>
-        Same as for the other Cortex-M3 ports.
+        1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
+        with Windows native toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux
+        or Cygwin is provided by the NuttX
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
+        package.
       </p>
      </ul>
    </td>
@@ -1744,26 +1759,16 @@ Other memory:
 </table>
 
 <ul><pre>
-5.6 2010-06-05 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.7 2010-06-22 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* drivers/lcd/p14201.c - Driver for RiT P14201 series 128x96 4-bit OLED.
-	* configs/lm3s6965-ek/nx - NX graphics configuration for the LM3S6965
-	  Ethernet Evaluation Kit.
-	* graphics/ - Numerous fixes to get the P14201 4-bpp greyscale display
-	  working (there may still be some minor issues .. see the TODO list).
-	* arch/arm/include/lpc17xx and arch/arm/src/lpc17xxx - Began port for
-	  NXP LPC1768.  As of the 5.6 release, there is a complete set of
-	  LPC17xx header files defining all bits in all LPC17xx registers,
-	  but little else (I still do not have hardware in hand).
-	* drivers/mtd/m25px.c - Add support for M25P1 flash part (See NOTE)
-	* include/nuttx/i2c.h - Extended I2C interface definition to handle
-	  multiple transfers (See NOTE).
-	* include/nuttx/usbdev.h - Corrected an important macro definition
-	  needed to correctly handle USB null packet transfers (See NOTE).
-	* arch/arm/src/lpc313x - New drivers: I2C and SPI.  Plus several
-	  important LPC313x USB bug fixes (See NOTE).
-
-	NOTE: Contributed by David Hewson.
+	* configs/nucleus2g - Add ostest configuration for the Nucleus 2G
+	  LPC1768 board from 2G Engineering (http://www.2g-eng.com/)
+	* arch/arm/src/lpc17xx - Added basic LPC17xx boot-up logic,
+	  interrupt handling, and GPIO configuration.
+	* configs/nucleus2g/ostest - Completed bring-up of LPC1768 on
+	  the Nucleus2G board using the examples/ostest
+	* configs/nucleus2g/nsh - Added and verified a NuttShell (NSH)
+	  configuration for the LPC1768 on the Nucleus2G board.
 
 pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1793,12 +1798,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.7 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* configs/nucleus2g - Add ostest configuration for the Nucleus 2G
-	  LPC1768 board from 2G Engineering (http://www.2g-eng.com/)
-	* arch/arm/src/lpc17xx - Added basic LPC17xx boot-up logic,
-	  interrupt handling, and GPIO configuration.
+nuttx-5.8 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
