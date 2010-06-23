@@ -38,9 +38,12 @@
 CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+CSRCS		= up_boot.c up_leds.c up_ssp.c
+ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
+CSRCS		+= up_nsh.c
+endif
 
-CSRCS		= up_boot.c up_leds.c
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

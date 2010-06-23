@@ -90,14 +90,14 @@ void lpc17_boardinitialize(void)
   lpc17_configgpio(NUCLEUS2G_232_POWERSAVE);
 #endif
 
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * lpc17_spiinitialize() has been brought into the link.
+  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
+   * function lpc17_sspinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_LPC17_SPI)
-  if (lpc17_spiinitialize)
+#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP0)
+  if (lpc17_sspinitialize)
     {
-      lpc17_spiinitialize();
+      lpc17_sspinitialize();
     }
 #endif
 

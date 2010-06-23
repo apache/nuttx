@@ -151,8 +151,6 @@ static bool g_prevled2a;
 static bool g_currled2a;
 static bool g_prevled2b;
 static bool g_currled2b;
-static bool g_prevledhb;
-static bool g_currledhb;
 
 /****************************************************************************
  * Private Functions
@@ -267,7 +265,7 @@ void up_led2(uint8_t newstate)
 }
 
 /****************************************************************************
- * Name: up_led2
+ * Name: up_ledhb
  ****************************************************************************/
 
 void up_ledhb(uint8_t newstate)
@@ -283,10 +281,12 @@ void up_ledhb(uint8_t newstate)
       case LED_ON:
         ledhb = true;
         break;
+
+      case LED_NC:
+        return;
     }
+
   lpc17_gpiowrite(NUCLEUS2G_HEARTBEAT, ledhb);
-  g_prevledhb = g_currledhb;
-  g_currledhb = newstate;
 }
 
 /****************************************************************************

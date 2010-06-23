@@ -118,6 +118,8 @@
 #define NUCLEUS2G_5V_ENABLE          (GPIO_OUTPUT | GPIO_VALUE_ONE |  GPIO_PORT2 | GPIO_PIN13)
 #define NUCLEUS2G_5V_DISABLE         (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN13)
 
+#define NUCLEUS2G_MMCSD_CS           (GPIO_OUTPUT | GPIO_VALUE_ONE |  GPIO_PORT0 | GPIO_PIN16)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -133,14 +135,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_spiinitialize
+ * Name: lpc17_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the NUCLEUS-2G board.
  *
  ************************************************************************************/
 
-extern void weak_function lpc17_spiinitialize(void);
+extern void weak_function lpc17_sspinitialize(void);
 
 /************************************************************************************
  * Name: lpc17_usbinitialize
