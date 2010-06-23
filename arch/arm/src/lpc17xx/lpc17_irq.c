@@ -212,19 +212,19 @@ static int lpc17_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 
   if (irq >= LPC17_IRQ_EXTINT)
     {
-      if (irq < LPC17_IRQ_NIRQS)
+      if (irq < (LPC17_IRQ_EXTINT+32))
         {
            *regaddr = NVIC_IRQ0_31_ENABLE;
            *bit     = 1 << (irq - LPC17_IRQ_EXTINT);
         }
-      if (irq < LPC17_IRQ_NIRQS)
+      else if (irq < LPC17_IRQ_NIRQS)
         {
            *regaddr = NVIC_IRQ32_63_ENABLE;
            *bit     = 1 << (irq - LPC17_IRQ_EXTINT - 32);
         }
       else
         {
-          return ERROR; /* Invalid interrupt */
+          return ERROR; /* Invalid irq */
         }
     }
 

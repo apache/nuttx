@@ -84,7 +84,7 @@ struct up_dev_s
 {
   uint32_t uartbase;  /* Base address of UART registers */
   uint32_t baud;      /* Configured baud */
-  uint8_t  ier;       /* Saved IER value */
+  uint32_t ier;       /* Saved IER value */
   uint8_t  irq;       /* IRQ associated with this UART */
   uint8_t  parity;    /* 0=none, 1=odd, 2=even */
   uint8_t  bits;      /* Number of bits (7 or 8) */
@@ -438,25 +438,25 @@ static uart_dev_t g_uart3port =
  * Name: up_serialin
  ****************************************************************************/
 
-static inline uint8_t up_serialin(struct up_dev_s *priv, int offset)
+static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
 {
-  return getreg8(priv->uartbase + offset);
+  return getreg32(priv->uartbase + offset);
 }
 
 /****************************************************************************
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
 {
-  putreg8(value, priv->uartbase + offset);
+  putreg32(value, priv->uartbase + offset);
 }
 
 /****************************************************************************
  * Name: up_disableuartint
  ****************************************************************************/
 
-static inline void up_disableuartint(struct up_dev_s *priv, uint8_t *ier)
+static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *ier)
 {
   if (ier)
     {
@@ -471,7 +471,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint8_t *ier)
  * Name: up_restoreuartint
  ****************************************************************************/
 
-static inline void up_restoreuartint(struct up_dev_s *priv, uint8_t ier)
+static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t ier)
 {
   priv->ier |= ier & UART_IER_ALLIE;
   up_serialout(priv, LPC17_UART_IER_OFFSET, priv->ier);
@@ -483,7 +483,7 @@ static inline void up_restoreuartint(struct up_dev_s *priv, uint8_t ier)
 
 static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 {
-  uint8_t lcr = up_serialin(priv, LPC17_UART_LCR_OFFSET);
+  uint32_t lcr = up_serialin(priv, LPC17_UART_LCR_OFFSET);
   if (enable)
     {
       lcr |= UART_LCR_BRK;
@@ -514,7 +514,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
  *
  ************************************************************************************/
 
-static inline uint8_t lpc17_uartcclkdiv(uint32_t baud)
+static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
 {
   /* Ignoring the fractional divider, the BAUD is given by:
    *
@@ -613,7 +613,7 @@ static inline uint8_t lpc17_uartcclkdiv(uint32_t baud)
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_UART0
-static inline void lpc17_uart0config(uint8_t clkdiv)
+static inline void lpc17_uart0config(uint32_t clkdiv)
 {
   uint32_t   regval;
   irqstate_t flags;
@@ -629,7 +629,7 @@ static inline void lpc17_uart0config(uint8_t clkdiv)
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_UART0_MASK;
-  regval |= ((uint32_t)clkdiv << SYSCON_PCLKSEL0_UART0_SHIFT);
+  regval |= (clkdiv << SYSCON_PCLKSEL0_UART0_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
   /* Step 3: Configure I/O pins */
@@ -641,7 +641,7 @@ static inline void lpc17_uart0config(uint8_t clkdiv)
 #endif
 
 #ifdef CONFIG_LPC17_UART1
-static inline void lpc17_uart1config(uint8_t clkdiv)
+static inline void lpc17_uart1config(uint32_t clkdiv)
 {
   uint32_t   regval;
   irqstate_t flags;
@@ -657,7 +657,7 @@ static inline void lpc17_uart1config(uint8_t clkdiv)
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_UART1_MASK;
-  regval |= ((uint32_t)clkdiv << SYSCON_PCLKSEL0_UART1_SHIFT);
+  regval |= (clkdiv << SYSCON_PCLKSEL0_UART1_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
   /* Step 3: Configure I/O pins */
@@ -677,7 +677,7 @@ static inline void lpc17_uart1config(uint8_t clkdiv)
 #endif
 
 #ifdef CONFIG_LPC17_UART2
-static inline void lpc17_uart2config(uint8_t clkdiv)
+static inline void lpc17_uart2config(uint32_t clkdiv)
 {
   uint32_t   regval;
   irqstate_t flags;
@@ -693,7 +693,7 @@ static inline void lpc17_uart2config(uint8_t clkdiv)
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
   regval &= ~SYSCON_PCLKSEL0_UART2_MASK;
-  regval |= ((uint32_t)clkdiv << SYSCON_PCLKSEL1_UART2_SHIFT);
+  regval |= (clkdiv << SYSCON_PCLKSEL1_UART2_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
 
   /* Step 3: Configure I/O pins */
@@ -705,7 +705,7 @@ static inline void lpc17_uart2config(uint8_t clkdiv)
 #endif
 
 #ifdef CONFIG_LPC17_UART3
-static inline void lpc17_uart3config(uint8_t clkdiv)
+static inline void lpc17_uart3config(uint32_t clkdiv)
 {
   uint32_t   regval;
   irqstate_t flags;
@@ -721,7 +721,7 @@ static inline void lpc17_uart3config(uint8_t clkdiv)
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
   regval &= ~SYSCON_PCLKSEL0_UART3_MASK;
-  regval |= ((uint32_t)clkdiv << SYSCON_PCLKSEL1_UART3_SHIFT);
+  regval |= (clkdiv << SYSCON_PCLKSEL1_UART3_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
 
   /* Step 3: Configure I/O pins */
@@ -791,7 +791,7 @@ static int up_setup(struct uart_dev_s *dev)
 #ifndef CONFIG_SUPPRESS_LPC17_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   uint16_t dl;
-  uint8_t lcr;
+  uint32_t lcr;
 
   /* Clear fifos */
 
@@ -946,7 +946,7 @@ static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
-  uint8_t            status;
+  uint32_t           status;
   int                passes;
 
 #ifdef CONFIG_LPC17_UART0
@@ -1133,7 +1133,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint8_t rbr;
+  uint32_t rbr;
 
   *status = up_serialin(priv, LPC17_UART_LSR_OFFSET);
   rbr     = up_serialin(priv, LPC17_UART_RBR_OFFSET);
@@ -1189,7 +1189,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, LPC17_UART_THR_OFFSET, (uint8_t)ch);
+  up_serialout(priv, LPC17_UART_THR_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -1341,7 +1341,7 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  uint8_t ier;
+  uint32_t ier;
 
   up_disableuartint(priv, &ier);
 
