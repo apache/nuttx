@@ -366,8 +366,8 @@ struct lpc17_dmaglobalregs_s
   uint32_t softsreq;    /* DMA Software Single Request Register */
   uint32_t softlbreq;   /* DMA Software Last Burst Request Register */
   uint32_t softlsreq;   /* DMA Software Last Single Request Register */
-  uint32_t config;     /* DMA Configuration Register */
-  uint32_t sync;      /* DMA Synchronization Register */
+  uint32_t config;      /* DMA Configuration Register */
+  uint32_t sync;        /* DMA Synchronization Register */
 };
 
 struct lpc17_dmachanregs_s
