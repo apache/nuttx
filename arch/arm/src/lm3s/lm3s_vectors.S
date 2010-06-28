@@ -130,8 +130,8 @@ lm3s_vectors:
 #if defined(CONFIG_ARCH_CHIP_LM3S6918)
 	.word	lm3s_gpioa		/* Vector 16: GPIO Port A */
 	.word	lm3s_gpiob		/* Vector 17: GPIO Port B */
-	.word	lm3s_gpiod		/* Vector 18: GPIO Port C */
-	.word	lm3s_gpioe		/* Vector 19: GPIO Port D */
+	.word	lm3s_gpioc		/* Vector 18: GPIO Port C */
+	.word	lm3s_gpiod		/* Vector 19: GPIO Port D */
 	.word	lm3s_gpioe		/* Vector 20: GPIO Port E */
 	.word	lm3s_uart0		/* Vector 21: UART 0 */
 	.word	lm3s_uart1		/* Vector 22: UART 1 */
@@ -186,8 +186,8 @@ lm3s_vectors:
 #elif defined(CONFIG_ARCH_CHIP_LM3S6965)
 	.word	lm3s_gpioa		/* Vector 16: GPIO Port A */
 	.word	lm3s_gpiob		/* Vector 17: GPIO Port B */
-	.word	lm3s_gpiod		/* Vector 18: GPIO Port C */
-	.word	lm3s_gpioe		/* Vector 19: GPIO Port D */
+	.word	lm3s_gpioc		/* Vector 18: GPIO Port C */
+	.word	lm3s_gpiod		/* Vector 19: GPIO Port D */
 	.word	lm3s_gpioe		/* Vector 20: GPIO Port E */
 	.word	lm3s_uart0		/* Vector 21: UART 0 */
 	.word	lm3s_uart1		/* Vector 22: UART 1 */
