@@ -416,17 +416,17 @@ extern "C" {
  */
 
 #ifdef CONFIG_GPIO_IRQ
-extern uint64_t g_intedge0;
-extern uint64_t g_intedge2;
+EXTERN uint64_t g_intedge0;
+EXTERN uint64_t g_intedge2;
 #endif
 
-extern const uint32_t g_fiobase[GPIO_NPORTS];
-extern const uint32_t g_intbase[GPIO_NPORTS];
-extern const uint32_t g_lopinsel[GPIO_NPORTS];
-extern const uint32_t g_hipinsel[GPIO_NPORTS];
-extern const uint32_t g_lopinmode[GPIO_NPORTS];
-extern const uint32_t g_hipinmode[GPIO_NPORTS];
-extern const uint32_t g_odmode[GPIO_NPORTS];
+EXTERN const uint32_t g_fiobase[GPIO_NPORTS];
+EXTERN const uint32_t g_intbase[GPIO_NPORTS];
+EXTERN const uint32_t g_lopinsel[GPIO_NPORTS];
+EXTERN const uint32_t g_hipinsel[GPIO_NPORTS];
+EXTERN const uint32_t g_lopinmode[GPIO_NPORTS];
+EXTERN const uint32_t g_hipinmode[GPIO_NPORTS];
+EXTERN const uint32_t g_odmode[GPIO_NPORTS];
 
 /************************************************************************************
  * Public Function Prototypes
