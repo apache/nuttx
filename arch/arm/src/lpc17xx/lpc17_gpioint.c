@@ -66,99 +66,9 @@
  * Private Data
  ****************************************************************************/
 
-/* We have to remember the configured interrupt setting.. PINs are not
- * actually set up to interrupt until the interrupt is enabled.
- */
-
-#ifdef CONFIG_GPIO_IRQ
-uint64_t g_intedge0;
-atic uint64_t g_intedge2;
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-/* These tables have global scope because they are also used in
- * lpc17_gpiodbg.c
- */
-
-/* We have to remember the configured interrupt setting.. PINs are not
- * actually set up to interrupt until the interrupt is enabled.
- */
-
-#ifdef CONFIG_GPIO_IRQ
-uint64_t g_intedge0;
-uint64_t g_intedge2;
-#endif
-
-/* FIO register base addresses */
-
-const uint32_t g_fiobase[GPIO_NPORTS] =
-{
-  LPC17_FIO0_BASE,
-  LPC17_FIO1_BASE,
-  LPC17_FIO2_BASE,
-  LPC17_FIO3_BASE,
-  LPC17_FIO4_BASE
-};
-
-/* Port 0 and Port 2 can provide a single interrupt for any combination of
- * port pins 
- */
-
-const uint32_t g_intbase[GPIO_NPORTS] = 
-{
-  LPC17_GPIOINT0_OFFSET,
-  0,
-  LPC17_GPIOINT2_OFFSET,
-  0,
-  0
-};
-
-const uint32_t g_lopinsel[GPIO_NPORTS] = 
-{
-  LPC17_PINCONN_PINSEL0,
-  LPC17_PINCONN_PINSEL2,
-  LPC17_PINCONN_PINSEL4,
-  0,
-  0
-};
-
-const uint32_t g_hipinsel[GPIO_NPORTS] = 
-{
-  LPC17_PINCONN_PINSEL1,
-  LPC17_PINCONN_PINSEL3,
-  0,
-  LPC17_PINCONN_PINSEL7,
-  LPC17_PINCONN_PINSEL9
-};
-
-const uint32_t g_lopinmode[GPIO_NPORTS] =
-{
-  LPC17_PINCONN_PINMODE0,
-  LPC17_PINCONN_PINMODE2,
-  LPC17_PINCONN_PINMODE4,
-  0,
-  0
-};
-
-const uint32_t g_hipinmode[GPIO_NPORTS] =
-{
-  LPC17_PINCONN_PINMODE1,
-  LPC17_PINCONN_PINMODE3,
-  0,
-  LPC17_PINCONN_PINMODE7,
-  LPC17_PINCONN_PINMODE9
-};
-
-const uint32_t g_odmode[GPIO_NPORTS] =
-{
-  LPC17_PINCONN_ODMODE0,
-  LPC17_PINCONN_ODMODE1,
-  LPC17_PINCONN_ODMODE2,
-  LPC17_PINCONN_ODMODE3,
-  LPC17_PINCONN_ODMODE4
-};
 
 /****************************************************************************
  * Private Functions
