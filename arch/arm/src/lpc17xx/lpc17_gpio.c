@@ -68,15 +68,6 @@
  * Private Data
  ****************************************************************************/
 
-/* We have to remember the configured interrupt setting.. PINs are not
- * actually set up to interrupt until the interrupt is enabled.
- */
-
-#ifdef CONFIG_GPIO_IRQ
-uint64_t g_intedge0;
-atic uint64_t g_intedge2;
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
