@@ -1157,3 +1157,8 @@
 	  configuration for the LPC1768 on the Nucleus2G board.
 
 5.8 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* configs/nucleus2g/src/up_nsh.c and up_ssp.c - Add support
+	  for SPI-based MMC/SD cards and integrate into the NSH example.
+	* arch/arm/src/lm3s/lm3s_vectors.S - Correct vectors for GPIOC & D
+	  interrupts.
