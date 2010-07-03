@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 2, 2010</p>
+      <p>Last Updated: July 3, 2010</p>
     </td>
   </tr>
 </table>
@@ -1606,6 +1606,10 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
         specific directories in place.
         These copied directories make work a little more complex, but otherwise work well.
       </p>
+      <p><small>
+        NOTE: In this environment, it should be possible to use the NTFS <code>mklink</code> command to create links.
+        This should only require a minor modification to the build scripts (see <code>tools/winlink.sh</code> script).
+      </small></p>
       <li>
         <b>Dependencies</b>
         NuttX uses the GCC compiler's <code>-M</code> option to generate make dependencies.  These
@@ -1661,6 +1665,12 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
       to build NuttX.
       However, that environment has not been used as of this writing.
    </p>
+      <p><small>
+        NOTE: One of the members on the <a href="http://tech.groups.yahoo.com/group/nuttx/">NuttX forum</a>
+        reported that they successful built NuttX using such a GNUWin32-based, Windows native environment.
+        They reported that the only necessary change was to the use the NTFS mklink command to create links
+        (see <code>tools/winlink.sh</code> script).
+      </small></p>
   </td>
 </tr>
 </table></center>
