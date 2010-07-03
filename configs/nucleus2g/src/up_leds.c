@@ -75,14 +75,28 @@
  * CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
+#undef LED_DEBUG   /* Define to enable debug */
+#undef LED_VERBOSE /* Define to enable verbose debug */
 
 #ifdef LED_DEBUG
 #  define leddbg  lldbg
-#  define ledvdbg llvdbg
+#  ifdef LED_VERBOSE
+#    define ledvdbg lldbg
+#  else
+#    define ledvdbg(x...)
+#  endif
 #else
+#  undef LED_VERBOSE
 #  define leddbg(x...)
 #  define ledvdbg(x...)
+#endif
+
+/* Dump GPIO registers */
+
+#ifdef LED_VERBOSE
+#  define led_dumpgpio(m) lpc17_dumpgpio(NUCLEUS2G_LED1_A, m)
+#else
+#  define led_dumpgpio(m)
 #endif
 
 /****************************************************************************
@@ -301,12 +315,16 @@ void up_ledinit(void)
 {
   /* Configure all LED GPIO lines */
 
+  led_dumpgpio("up_ledinit() Entry)");
+
   lpc17_configgpio(NUCLEUS2G_LED1_A);
   lpc17_configgpio(NUCLEUS2G_LED1_B);
   lpc17_configgpio(NUCLEUS2G_LED2_A);
   lpc17_configgpio(NUCLEUS2G_LED2_B);
   lpc17_configgpio(NUCLEUS2G_HEARTBEAT);
   lpc17_configgpio(NUCLEUS2G_EXTRA_LED);
+
+  led_dumpgpio("up_ledinit() Exit");
 }
 
 /****************************************************************************
@@ -318,6 +336,13 @@ void up_ledon(int led)
   up_led1(g_led1on[led]);
   up_led2(g_led2on[led]);
   up_ledhb(g_ledhbon[led]);
+
+#ifdef LED_VERBOSE
+  if (led != LED_INIRQ)
+    {
+      led_dumpgpio("up_ledon() Exit");
+    }
+#endif
 }
 
 /****************************************************************************
@@ -329,6 +354,13 @@ void up_ledoff(int led)
   up_led1(g_led1off[led]);
   up_led2(g_led2off[led]);
   up_ledhb(g_ledhboff[led]);
+
+#ifdef LED_VERBOSE
+  if (led != LED_INIRQ)
+    {
+      led_dumpgpio("up_ledoff() Exit");
+    }
+#endif
 }
 
 #endif /* CONFIG_ARCH_LEDS */
