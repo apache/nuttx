@@ -189,11 +189,11 @@ void lpc17_clockconfig(void)
   putreg32(0, LPC17_SYSCON_PCLKSEL0);
   putreg32(0, LPC17_SYSCON_PCLKSEL1);
 
-  /* Disable power to all peripherals.  They must be re-powered one at a time by each
-   * device driver when the driver is initialized.
+  /* Disable power to all peripherals (execpt GPIO).  Peripherals must be re-powered
+   * one at a time by each device driver when the driver is initialized.
    */
 
-  putreg32(0, LPC17_SYSCON_PCONP);
+  putreg32(SYSCON_PCONP_PCGPIO, LPC17_SYSCON_PCONP);
 
   /* Disable CLKOUT */
 

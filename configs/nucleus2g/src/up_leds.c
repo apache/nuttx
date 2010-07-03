@@ -340,7 +340,11 @@ void up_ledon(int led)
 #ifdef LED_VERBOSE
   if (led != LED_INIRQ)
     {
-      led_dumpgpio("up_ledon() Exit");
+      ledvdbg("led: %d LED1: %d LED2: %d HB: %d\n",
+              led, g_led1on[led], g_led2on[led], g_ledhbon[led]);
+      ledvdbg("LED1: {(%d,%d), (%d,%d)} LED2: {(%d,%d), (%d,%d)}\n",
+              g_prevled1a, g_currled1a, g_prevled1b, g_currled1b,
+              g_prevled2a, g_currled2a, g_prevled2b, g_currled2b);
     }
 #endif
 }
@@ -358,7 +362,11 @@ void up_ledoff(int led)
 #ifdef LED_VERBOSE
   if (led != LED_INIRQ)
     {
-      led_dumpgpio("up_ledoff() Exit");
+      ledvdbg("led: %d LED1: %d LED2: %d HB: %d\n",
+              led, g_led1off[led], g_led2off[led], g_ledhboff[led]);
+      ledvdbg("LED1: {(%d,%d), (%d,%d)} LED2: {(%d,%d), (%d,%d)}\n",
+              g_prevled1a, g_currled1a, g_prevled1b, g_currled1b,
+              g_prevled2a, g_currled2a, g_prevled2b, g_currled2b);
     }
 #endif
 }

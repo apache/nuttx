@@ -382,7 +382,7 @@
 #define SYSCON_PCONP_PCADC            (1 << 12)   /* Bit 12: A/D converter (ADC) power/clock control */
 #define SYSCON_PCONP_PCCAN1           (1 << 13)   /* Bit 13: CAN Controller 1 power/clock control */
 #define SYSCON_PCONP_PCCAN2           (1 << 14)   /* Bit 14: CAN Controller 2 power/clock control */
-                                                  /* Bit 15: Reserved */
+#define SYSCON_PCONP_PCGPIO           (1 << 15)   /* Bit 15: GPIOs power/clock enable */
 #define SYSCON_PCONP_PCRIT            (1 << 16)   /* Bit 16: Repetitive Interrupt Timer power/clock control */
 #define SYSCON_PCONP_PCMCPWM          (1 << 17)   /* Bit 17: Motor Control PWM */
 #define SYSCON_PCONP_PCQEI            (1 << 18)   /* Bit 18: Quadrature Encoder power/clock control */
