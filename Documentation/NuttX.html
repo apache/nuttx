@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 30, 2010</p>
+      <p>Last Updated: July 2, 2010</p>
     </td>
   </tr>
 </table>
@@ -1827,6 +1827,8 @@ nuttx-5.8 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  for SPI-based MMC/SD cards and integrate into the NSH example.
 	* arch/arm/src/lm3s/lm3s_vectors.S - Correct vectors for GPIOC & D
 	  interrupts.
+	* arch/arm/src/lpc17xx/lp17_clockconfig.c - Power was not being
+	  provided to GPIO module.  This is a critical bugfix!
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
