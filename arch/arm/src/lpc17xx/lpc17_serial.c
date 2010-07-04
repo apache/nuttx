@@ -850,15 +850,6 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_serialout(priv, LPC17_UART_FCR_OFFSET,
                (UART_FCR_RXTRIGGER_8|UART_FCR_TXRST|UART_FCR_RXRST|UART_FCR_FIFOEN));
-
-  /* The NuttX serial driver waits for the first THRE interrrupt before
-   * sending serial data... However, it appears that the lpc17xx hardware
-   * does not generate that interrupt until a transition from not-empty
-   * to empty.  So, the current kludge here is to send one NULL at
-   * startup to kick things off.
-   */
-
-  up_serialout(priv, LPC17_UART_THR_OFFSET, '\0');
 #endif
   return OK;
 }
@@ -1203,17 +1194,28 @@ static void up_send(struct uart_dev_s *dev, int ch)
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  irqstate_t flags;
+
+  flags = irqsave();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->ier |= UART_IER_THREIE;
+      up_serialout(priv, LPC17_UART_IER_OFFSET, priv->ier);
+
+      /* Fake a TX interrupt here by just calling uart_xmitchars() with
+       * interrupts disabled (note this may recurse).
+       */
+
+      uart_xmitchars(dev);
 #endif
     }
   else
     {
       priv->ier &= ~UART_IER_THREIE;
+      up_serialout(priv, LPC17_UART_IER_OFFSET, priv->ier);
     }
-  up_serialout(priv, LPC17_UART_IER_OFFSET, priv->ier);
+  irqrestore(flags);
 }
 
 /****************************************************************************
