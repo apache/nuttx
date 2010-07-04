@@ -1164,3 +1164,7 @@
 	  interrupts.
 	* arch/arm/src/lpc17xx/lp17_clockconfig.c - Power was not being
 	  provided to GPIO module.  This is a critical bugfix!
+	* arch/arm/src/lpc17xx/lpc17_serial.c - Improved logic to handle
+	  missed TX interrupts.
+	* arch/arm/src/lpc17xx/lpc17_ssp.c - Fix a hard fault during SSP
+	  initialization.
