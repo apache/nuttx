@@ -142,6 +142,15 @@ static uint16_t ssp_send(FAR struct spi_dev_s *dev, uint16_t ch);
 static void     ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
 static void     ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
 
+/* Initialization */
+
+#ifdef CONFIG_LPC17_SSP0
+static inline FAR struct lpc17_sspdev_s *lpc17_ssp0initialize(void);
+#endif
+#ifdef CONFIG_LPC17_SSP1
+static inline FAR struct lpc17_sspdev_s *lpc17_ssp1initialize(void);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -225,7 +234,7 @@ static struct lpc17_sspdev_s g_ssp1dev =
 
 static inline uint32_t ssp_getreg(FAR struct lpc17_sspdev_s *priv, uint8_t offset)
 {
-  return ssp_getreg(priv, priv->sspbase + offset);
+  return getreg32(priv->sspbase + (uint32_t)offset);
 }
 
 /************************************************************************************
@@ -246,7 +255,7 @@ static inline uint32_t ssp_getreg(FAR struct lpc17_sspdev_s *priv, uint8_t offse
 
 static inline void ssp_putreg(FAR struct lpc17_sspdev_s *priv, uint8_t offset, uint32_t value)
 {
-  putreg32(value, priv->sspbase + offset);
+  putreg32(value, priv->sspbase + (uint32_t)offset);
 }
 
 /****************************************************************************
@@ -671,6 +680,110 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 }
 
 /****************************************************************************
+ * Name: lpc17_ssp0initialize
+ *
+ * Description:
+ *   Initialize the SSP0
+ *
+ * Input Parameter:
+ *   None
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPC17_SSP0
+static inline FAR struct lpc17_sspdev_s *lpc17_ssp0initialize(void)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* Configure multiplexed pins as connected on the board.  Chip select
+   * pins must be configured by board-specific logic.  All SSP0 pins and
+   * one SSP1 pin (SCK) have multiple, alternative pin selection.
+   * Definitions in the board.h file must be provided to resolve the
+   * board-specific pin configuration like:
+   *
+   * #define GPIO_SSP0_SCK GPIO_SSP0_SCK_1
+   */
+
+  flags = irqsave();
+  lpc17_configgpio(GPIO_SSP0_SCK);
+  lpc17_configgpio(GPIO_SSP0_MISO);
+  lpc17_configgpio(GPIO_SSP0_MOSI);
+
+  /* Configure clocking */
+
+  regval  = getreg32(LPC17_SYSCON_PCLKSEL1);
+  regval &= ~SYSCON_PCLKSEL1_SSP0_MASK;
+  regval |= (SSP_PCLKSET_DIV << SYSCON_PCLKSEL1_SSP0_SHIFT);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL1);
+
+  /* Enable peripheral clocking to SSP0 */
+
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCSSP0;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+  irqrestore(flags);
+
+  return &g_ssp0dev;
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_ssp1initialize
+ *
+ * Description:
+ *   Initialize the SSP1
+ *
+ * Input Parameter:
+ *   None
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPC17_SSP1
+static inline FAR struct spi_dev_s *lpc17_ssp1initialize(void)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* Configure multiplexed pins as connected on the board.  Chip select
+   * pins must be configured by board-specific logic.  All SSP0 pins and
+   * one SSP1 pin (SCK) have multiple, alternative pin selection.
+   * Definitions in the board.h file must be provided to resolve the
+   * board-specific pin configuration like:
+   *
+   * #define GPIO_SSP0_SCK GPIO_SSP0_SCK_1
+   */
+
+  flags = irqsave();
+  lpc17_configgpio(GPIO_SSP1_SCK);
+  lpc17_configgpio(GPIO_SSP1_MISO);
+  lpc17_configgpio(GPIO_SSP1_MOSI);
+
+  /* Configure clocking */
+
+  regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
+  regval &= ~SYSCON_PCLKSEL0_SSP1_MASK;
+  regval |= (SSP_PCLKSET_DIV << SYSCON_PCLKSEL0_SSP1_SHIFT);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL0);
+
+  /* Enable peripheral clocking to SSP0 and SSP1 */
+
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCSSP1;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+  irqrestore(flags);
+
+  return &g_ssp1dev;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -691,7 +804,6 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct lpc17_sspdev_s *priv;
-  irqstate_t flags;
   uint32_t regval;
   int i;
 
@@ -701,69 +813,18 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
     {
 #ifdef CONFIG_LPC17_SSP0
     case 0:
-      priv = &g_ssp0dev;
+      priv = lpc17_ssp0initialize();
       break;
 #endif
 #ifdef CONFIG_LPC17_SSP1
     case 1:
-      priv = &g_ssp1dev;
+      priv = lpc17_ssp1initialize();
       break;
 #endif
     default:
       return NULL;
     }
 
-  /* Configure multiplexed pins as connected on the board.  Chip select
-   * pins must be configured by board-specific logic.  All SSP0 pins and
-   * one SSP1 pin (SCK) have multiple, alternative pin selection.
-   * Definitions in the board.h file must be provided to resolve the
-   * board-specific pin configuration like:
-   *
-   * #define GPIO_SSP0_SCK GPIO_SSP0_SCK_1
-   */
-
-  flags = irqsave();
-#ifdef CONFIG_LPC17_SSP0
-  lpc17_configgpio(GPIO_SSP0_SCK);
-  lpc17_configgpio(GPIO_SSP0_MISO);
-  lpc17_configgpio(GPIO_SSP0_MOSI);
-#endif
-
-#ifdef CONFIG_LPC17_SSP1
-  lpc17_configgpio(GPIO_SSP1_SCK);
-  lpc17_configgpio(GPIO_SSP1_MISO);
-  lpc17_configgpio(GPIO_SSP1_MOSI);
-#endif
-
-  /* Configure clocking */
-
-#ifdef CONFIG_LPC17_SSP0
-  regval  = getreg32(LPC17_SYSCON_PCLKSEL1);
-  regval &= ~SYSCON_PCLKSEL1_SSP0_MASK;
-  regval |= (SSP_PCLKSET_DIV << SYSCON_PCLKSEL1_SSP0_SHIFT);
-  putreg32(regval, LPC17_SYSCON_PCLKSEL1);
-#endif
-
-#ifdef CONFIG_LPC17_SSP1
-  regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
-  regval &= ~SYSCON_PCLKSEL0_SSP1_MASK;
-  regval |= (SSP_PCLKSET_DIV << SYSCON_PCLKSEL0_SSP1_SHIFT);
-  putreg32(regval, LPC17_SYSCON_PCLKSEL0);
-#endif
-
-  /* Enable peripheral clocking to SSP0 and SSP1 */
-
-  regval  = getreg32(LPC17_SYSCON_PCONP);
-  regval &= ~(SYSCON_PCONP_PCSSP0|SYSCON_PCONP_PCSSP1);
-#ifdef CONFIG_LPC17_SSP0
-  regval |= SYSCON_PCONP_PCSSP0;
-#endif
-#ifdef CONFIG_LPC17_SSP1
-  regval |= SYSCON_PCONP_PCSSP1;
-#endif
-  putreg32(regval, LPC17_SYSCON_PCONP);
-  irqrestore(flags);
-  
   /* Configure 8-bit SPI mode */
 
   ssp_putreg(priv, LPC17_SSP_CR0_OFFSET, SSP_CR0_DSS_8BIT|SSP_CR0_FRF_SPI);
@@ -795,7 +856,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   regval = ssp_getreg(priv, LPC17_SSP_CR1_OFFSET);
   ssp_putreg(priv, LPC17_SSP_CR1_OFFSET, regval | SSP_CR1_SSE);
-
   for (i = 0; i < LPC17_SSP_FIFOSZ; i++)
     {
       (void)ssp_getreg(priv, LPC17_SSP_DR_OFFSET);
