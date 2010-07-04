@@ -13,7 +13,7 @@ Contents
   IDEs
   NuttX buildroot Toolchain
   USB Device Controller Functions
-  OLED
+  LEDs
   Nucleus 2G Configuration Options
   Configurations
 
@@ -207,6 +207,57 @@ NuttX buildroot Toolchain
   are building a Cortex-M3 toolchain for Cygwin under Windows.
 
   NOTE: This is an OABI toolchain.
+
+LEDs
+^^^^
+
+  If CONFIG_ARCH_LEDS is defined, then support for the Nucleus-2G LEDs will be
+  included in the build.  See:
+
+  - configs/nucleus2g/include/board.h - Defines LED constants, types and
+    prototypes the LED interface functions.
+
+  - configs/nucleus2g/src/nucleus2g_internal.h - GPIO settings for the LEDs.
+
+  - configs/nucleus2g/src/up_leds.c - LED control logic.
+
+  The Nucleus2G has 3 LEDs... two on the Babel CAN board and a "heartbeat" LED."
+  The LEDs on the Babel CAN board are capabl of OFF/GREEN/RED/AMBER status.
+  In normal usage, the two LEDs on the Babel CAN board would show CAN status, but if
+  CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for NuttX
+  debug functionality (where NC means "No Change").
+
+  During the boot phases.  LED1 and LED2 will show boot status.
+
+                                          /* LED1   LED2   HEARTBEAT */
+    #define LED_STARTED                0  /* OFF    OFF    OFF */
+    #define LED_HEAPALLOCATE           1  /* GREEN  OFF    OFF */
+    #define LED_IRQSENABLED            2  /* OFF    GREEN  OFF */
+    #define LED_STACKCREATED           3  /* OFF    OFF    OFF */
+
+    #define LED_INIRQ                  4  /*  NC     NC    ON  (momentary) */
+    #define LED_SIGNAL                 5  /*  NC     NC    ON  (momentary) */
+    #define LED_ASSERTION              6  /*  NC     NC    ON  (momentary) */
+    #define LED_PANIC                  7  /*  NC     NC    ON  (1Hz flashing) */
+
+  After the system is booted, this logic will no longer use LEDs 1 and 2.  They
+  are then available for use the application software using lpc17_led1() and
+  lpc17_led2():
+
+    enum lpc17_ledstate_e
+    {
+      LPC17_LEDSTATE_OFF   = 0,
+      LPC17_LEDSTATE_GREEN = 1,
+      LPC17_LEDSTATE_RED   = 2,
+      LPC17_LEDSTATE_AMBER = (LPC17_LEDSTATE_GREEN|LPC17_LEDSTATE_RED),
+    };
+
+    EXTERN void lpc17_led1(enum lpc17_ledstate_e state);
+    EXTERN void lpc17_led2(enum lpc17_ledstate_e state);
+
+  The heartbeat LED is illuminated during all interrupt and signal procressing.
+  Normally, it will glow dimly to inicate that the LPC17xx is taking interrupts.
+  On an assertion PANIC, it will flash at 1Hz.
 
 Nucleus 2G Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

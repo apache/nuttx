@@ -127,17 +127,24 @@
  * In normal usage, the two LEDs on the Babel CAN board would show CAN status, but if
  * CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for NuttX
  * debug functionality (where NC means "No Change").
- * 
+ *
+ * During the boot phases.  LED1 and LED2 will show boot status.
+ */
                                       /* LED1   LED2   HEARTBEAT */
 #define LED_STARTED                0  /* OFF    OFF    OFF */
 #define LED_HEAPALLOCATE           1  /* GREEN  OFF    OFF */
 #define LED_IRQSENABLED            2  /* OFF    GREEN  OFF */
-#define LED_STACKCREATED           3  /* GREEN  GREEN  OFF */
+#define LED_STACKCREATED           3  /* OFF    OFF    OFF */
 
-#define LED_INIRQ                  4  /*  NC     NC    ON  */
-#define LED_SIGNAL                 5  /*  NC     RED   NC  */
-#define LED_ASSERTION              6  /* RED     NC    NC  */
-#define LED_PANIC                  7  /* RED     RED   NC  (1Hz flashing) */
+/* After the system is booted, this logic will no longer use LEDs 1 and 2.  They
+ * are available for use the application software using lpc17_led1() and lpc17_led2()
+ * (prototyped below)
+ */
+                                      /* LED1   LED2   HEARTBEAT */
+#define LED_INIRQ                  4  /*  NC     NC    ON  (momentary) */
+#define LED_SIGNAL                 5  /*  NC     NC    ON  (momentary) */
+#define LED_ASSERTION              6  /*  NC     NC    ON  (momentary) */
+#define LED_PANIC                  7  /*  NC     NC    ON  (1Hz flashing) */
 
 /* Alternate pin selections *********************************************************/
 /* UART1 -- Not connected */
@@ -175,10 +182,23 @@
 #define GPIO_SSP1_SCK              GPIO_SSP1_SCK_1
 
 /************************************************************************************
- * Public Data
+ * Public Types
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
+#ifdef CONFIG_ARCH_LEDS
+enum lpc17_ledstate_e
+{
+  LPC17_LEDSTATE_OFF   = 0,
+  LPC17_LEDSTATE_GREEN = 1,
+  LPC17_LEDSTATE_RED   = 2,
+  LPC17_LEDSTATE_AMBER = (LPC17_LEDSTATE_GREEN|LPC17_LEDSTATE_RED),
+};
+#endif
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -202,6 +222,19 @@ extern "C" {
  ************************************************************************************/
 
 EXTERN void lpc17_boardinitialize(void);
+
+/************************************************************************************
+ * Name: lpc17_led1 and 2
+ *
+ * Description:
+ *   Once the system has booted, these functions can be used to control LEDs 1 and 2
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+EXTERN void lpc17_led1(enum lpc17_ledstate_e state);
+EXTERN void lpc17_led2(enum lpc17_ledstate_e state);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
