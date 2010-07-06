@@ -67,6 +67,11 @@
 #define IGMPv3_MEMBERSHIP_REPORT 0x22    /* IGMP Ver. 3 Membership Report */
 #define IGMP_LEAVE_GROUP         0x17    /* Leave Group */
 
+/* Header sizes */
+
+#define UIP_IGMPH_LEN   4                             /* Size of IGMP header */
+#define UIP_IPIGMPH_LEN (UIP_IGMPH_LEN + UIP_IPH_LEN) /* Size of IP + IGMP header */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
