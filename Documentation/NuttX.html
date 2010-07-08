@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 3, 2010</p>
+      <p>Last Updated: July 7, 2010</p>
     </td>
   </tr>
 </table>
@@ -1843,6 +1843,12 @@ nuttx-5.8 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  missed TX interrupts.
 	* arch/arm/src/lpc17xx/lpc17_ssp.c - Fix a hard fault during SSP
 	  initialization.
+	* configs/nucleus2g/src/up_led.c - Change how LEDs are controlled
+	  so that they can be used both for NuttX instrumentation and
+	  by application software.
+	* include/net/uip/igmp.h and uip-igmp.h - Add header files ini
+	  preparation for NuttX IGMP support
+	* net/uip/uip_igmpinit.c, uip_igmpgroup.c - Add IGMP logic.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
