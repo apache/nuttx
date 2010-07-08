@@ -90,6 +90,20 @@
 #define IGMP_DELAYING_MEMBER     1
 #define IGMP_IDLE_MEMBER         2
 
+/* Group flags */
+
+#define IGMP_PREALLOCATED        1
+#define IGMP_LASTREPORT          2
+
+#define SET_PREALLOCATED(f)      do { (f) |= IGMP_PREALLOCATED; } while (0)
+#define SET_LASTREPORT(f)        do { (f) |= IGMP_LASTREPORT; } while (0)
+
+#define CLR_PREALLOCATED(f)      do { (f) &= ~IGMP_PREALLOCATED; } while (0)
+#define CLR_LASTREPORT(f)        do { (f) &= ~IGMP_LASTREPORT; } while (0)
+
+#define IS_PREALLOCATED(f)       (((f) & IGMP_PREALLOCATED) != 0)
+#define IS_LASTREPORT(f)         (((f) & IGMP_LASTREPORT) != 0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -174,7 +188,7 @@ struct igmp_group_s
   struct igmp_group_s *next;    /* Implements a singly-linked list */
   uip_ipaddr_t         grpaddr; /* Group IP address */
   WDOG_ID              wdog;    /* WDOG used to detect timeouts */
-  bool                 lastrpt; /* Indicates the last to report */
+  uint8_t              flags;   /* See IGMP_ flags definitions */
   uint8_t              state;   /* State of the group */
   uint8_t              msgid;   /* Pending message ID (if non-zero) */
 };

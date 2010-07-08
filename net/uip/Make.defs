@@ -79,7 +79,7 @@ endif
 endif
 
 ifeq ($(CONFIG_NET_IGMP),y)
-UIP_CSRCS += uip_igmpinit.c
+UIP_CSRCS += uip_igmpinit.c uip_igmpgroup.c
 endif
 
 endif

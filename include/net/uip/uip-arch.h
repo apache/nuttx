@@ -176,7 +176,7 @@ struct uip_driver_s
   /* IGMP group list */
 
 #ifdef CONFIG_NET_IGMP
-  FAR struct igmp_group_s *grplist;
+  sq_queue_t grplist;
 #endif
 
   /* Driver callbacks */

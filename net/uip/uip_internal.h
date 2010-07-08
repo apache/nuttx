@@ -223,6 +223,12 @@ EXTERN void uip_igmpinput(struct uip_driver_s *dev);
 EXTERN void uip_grpinit(void);
 EXTERN FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
                                              FAR uip_ipaddr_t *addr);
+EXTERN FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
+                                            FAR uip_ipaddr_t *addr);
+EXTERN FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
+                                                 FAR uip_ipaddr_t *addr);
+EXTERN void uip_grpfree(FAR struct uip_driver_s *dev,
+                        FAR struct igmp_group_s *group);
 
 /* Defined in TBD */
 
