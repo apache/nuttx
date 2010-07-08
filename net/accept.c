@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/accept.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <arch/irq.h>

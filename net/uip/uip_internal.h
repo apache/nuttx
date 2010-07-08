@@ -218,6 +218,16 @@ EXTERN void uip_igmpinit(void);
 
 EXTERN void uip_igmpinput(struct uip_driver_s *dev);
 
+/* Defined in uip_igmpgroup.c ***********************************************/
+
+EXTERN void uip_grpinit(void);
+EXTERN FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
+                                             FAR uip_ipaddr_t *addr);
+
+/* Defined in TBD */
+
+EXTERN void uip_igmpmac(struct uip_driver_s *dev, uip_ipaddr_t *ip, bool on);
+
 #endif /* CONFIG_NET_IGMP */
 
 #undef EXTERN

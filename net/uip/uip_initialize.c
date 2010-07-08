@@ -144,7 +144,7 @@ void uip_initialize(void)
   /* Initialize IGMP support */
 
 #ifdef CONFIG_NET_IGMP
-  uip_udpinit();
+  uip_igmpinit();
 #endif
 }
 #endif /* CONFIG_NET */

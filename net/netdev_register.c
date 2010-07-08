@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev_register.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,6 +140,12 @@ int netdev_register(FAR struct uip_driver_s *dev)
 
       dev->flink  = g_netdevices;
       g_netdevices = dev;
+
+      /* Configure the device for IGMP support */
+
+#ifdef CONFIG_NET_IGMP
+      uip_igmpdevinit(dev);
+#endif
       netdev_semgive();
 
       nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",

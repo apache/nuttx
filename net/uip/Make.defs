@@ -78,6 +78,10 @@ UIP_CSRCS += uip_icmpping.c uip_icmppoll.c uip_icmpsend.c
 endif
 endif
 
+ifeq ($(CONFIG_NET_IGMP),y)
+UIP_CSRCS += uip_igmpinit.c
+endif
+
 endif
 endif
 

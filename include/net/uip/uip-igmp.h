@@ -50,6 +50,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <wdog.h>
 
 #include <netinet/in.h>
 
