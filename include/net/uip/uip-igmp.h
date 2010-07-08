@@ -47,7 +47,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <netinet/in.h>
+
+#include <net/uip/uip.h>
+#include <net/uip/uip-arch.h>
 
 #ifdef CONFIG_NET_IGMP
 
@@ -67,10 +74,20 @@
 #define IGMPv3_MEMBERSHIP_REPORT 0x22    /* IGMP Ver. 3 Membership Report */
 #define IGMP_LEAVE_GROUP         0x17    /* Leave Group */
 
-/* Header sizes */
+/* Header sizes:
+ *
+ * UIP_IGMPH_LEN   - Size of IGMP header in bytes
+ * UIP_IPIGMPH_LEN - Size of IP + IGMP header
+ */
 
-#define UIP_IGMPH_LEN   4                             /* Size of IGMP header */
-#define UIP_IPIGMPH_LEN (UIP_IGMPH_LEN + UIP_IPH_LEN) /* Size of IP + IGMP header */
+#define UIP_IGMPH_LEN            8
+#define UIP_IPIGMPH_LEN          (UIP_IGMPH_LEN + UIP_IPH_LEN)
+
+/* Group membership states */
+
+#define IGMP_NON_MEMBER          0
+#define IGMP_DELAYING_MEMBER     1
+#define IGMP_IDLE_MEMBER         2
 
 /****************************************************************************
  * Public Types
@@ -124,6 +141,43 @@ struct uip_igmphdr_s
   uint16_t grpaddr[2];     /* 32-bit Group address */
 };
 
+#ifdef CONFIG_NET_IGMP_STATS
+struct igmp_stats_s
+{
+  uint32_t length_errors;
+  uint32_t chksum_errors;
+  uint32_t v1_received;
+  uint32_t joins;
+  uint32_t leave_sent;
+  uint32_t ucast_query;
+  uint32_t report_sent;
+  uint32_t query_received;
+  uint32_t report_received;
+};
+
+# define IGMP_STATINCR(p) ((p)++)
+#else
+# define IGMP_STATINCR(p)
+#endif
+
+/* This structure represents one group member.  There is a list of groups
+ * for each device interface structure.
+ * 
+ * There will be a group for the all systems group address but this 
+ * will not run the state machine as it is used to kick off reports
+ * from all the other groups
+ */
+
+struct igmp_group_s
+{
+  struct igmp_group_s *next;    /* Implements a singly-linked list */
+  uip_ipaddr_t         grpaddr; /* Group IP address */
+  WDOG_ID              wdog;    /* WDOG used to detect timeouts */
+  bool                 lastrpt; /* Indicates the last to report */
+  uint8_t              state;   /* State of the group */
+  uint8_t              msgid;   /* Pending message ID (if non-zero) */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -136,10 +190,27 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_NET_IGMP_STATS
+struct igmp_stats_s g_igmpstats;
+#endif
+
+extern uip_ipaddr_t g_allsystems;
+extern uip_ipaddr_t g_allrouters;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name:  uip_igmpdevinit
+ *
+ * Description:
+ *   Called when a new network device is registered to configure that device
+ *   for IGMP support.
+ *
+ ****************************************************************************/
+
+EXTERN void uip_igmpdevinit(struct uip_driver_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

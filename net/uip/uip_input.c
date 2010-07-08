@@ -510,6 +510,16 @@ void uip_input(struct uip_driver_s *dev)
         break;
 #endif
 
+  /* Check for ICMP input */
+
+#ifdef CONFIG_NET_IGMP
+#ifndef CONFIG_NET_IPv6
+      case UIP_PROTO_IGMP:  /* IGMP input */
+        uip_igmpinput(dev);
+        break;
+#endif
+#endif
+
       default:              /* Unrecognized/unsupported protocol */
 #ifdef CONFIG_NET_STATISTICS
         uip_stat.ip.drop++;

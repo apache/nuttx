@@ -47,7 +47,11 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include <net/if.h>
+
 #include <net/uip/uip.h>
+#ifdef CONFIG_NET_IGMP
+#  include <net/uip/uip-igmp.h>
+#endif
 
 /****************************************************************************
  * Included Files
@@ -168,6 +172,12 @@ struct uip_driver_s
    */
 
   uint16_t d_sndlen;
+
+  /* IGMP group list */
+
+#ifdef CONFIG_NET_IGMP
+  FAR struct igmp_group_s *grplist;
+#endif
 
   /* Driver callbacks */
 

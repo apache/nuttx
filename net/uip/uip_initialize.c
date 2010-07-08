@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_initialize.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -138,6 +138,12 @@ void uip_initialize(void)
   /* Initialize the UDP connection structures */
 
 #ifdef CONFIG_NET_UDP
+  uip_udpinit();
+#endif
+
+  /* Initialize IGMP support */
+
+#ifdef CONFIG_NET_IGMP
   uip_udpinit();
 #endif
 }

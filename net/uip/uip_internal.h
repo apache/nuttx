@@ -210,6 +210,10 @@ EXTERN void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
 #endif /* CONFIG_NET_ICMP */
 
 #ifdef CONFIG_NET_IGMP
+/* Defined in uip_igmpinit.c ************************************************/
+
+EXTERN void uip_igmpinit(void);
+
 /* Defined in uip_igmpinput.c ***********************************************/
 
 EXTERN void uip_igmpinput(struct uip_driver_s *dev);
