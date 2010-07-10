@@ -230,6 +230,11 @@ EXTERN FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
 EXTERN void uip_grpfree(FAR struct uip_driver_s *dev,
                         FAR struct igmp_group_s *group);
 
+/* Defined in uip_igmpmsg.c **************************************************/
+
+EXTERN void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
+EXTERN void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
+
 /* Defined in uip_igmppoll.c *************************************************/
 
 EXTERN void uip_igmppoll(FAR struct uip_driver_s *dev);
@@ -237,6 +242,10 @@ EXTERN void uip_igmppoll(FAR struct uip_driver_s *dev);
 /* Defined in up_igmpsend.c **************************************************/
 
 EXTERN void uip_igmpsend(FAR struct uip_driver_s *dev, uip_ipaddr_t *dest);
+
+/* Defined in uip_igmptimer.c ************************************************/
+
+EXTERN void uip_igmpstarttimer(struct igmp_group_s *group, uint8_t decisecs);
 
 /* Defined in TBD ************************************************************/
 

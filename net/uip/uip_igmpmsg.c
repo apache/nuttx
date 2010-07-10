@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_igmppoll.c
+ * net/uip/uip_igmpmgs.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -48,7 +48,7 @@
 
 #include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
-#include <net/uip/uip-arch.h>
+#include <net/uip/uip-igmp.h>
 
 #include "uip_internal.h"
 
@@ -58,118 +58,82 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IGMPBUF ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN])
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name:  uip_schedsend
- *
- * Description:
- *   Construct the .
- *
- * Returned Value:
- *   Returns a non-zero value if a IGP message is sent.
- *
- * Assumptions:
- *   This function is called from the driver polling logic... probably within
- *   an interrupt handler.
- *
- ****************************************************************************/
-
-static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
-{
-  uip_ipaddr_t *dest;
-
-  /* Check what kind of messsage we need to send.  There are only two
-   * possibilities:
-   */
-
-  if (group->msgid == IGMPv2_MEMBERSHIP_REPORT)
-    {
-      nllvdbg("Send IGMPv2_MEMBERSHIP_REPORT\n");
-      dest = &group->grpaddr;
-      IGMP_STATINCR(uip_stat.igmp.report_sched);
-      uiphdr_ipaddr_copy(IGMPBUF->grpaddr, &group->grpaddr);
-      SET_LASTREPORT(group->flags); /* Remember we were the last to report */
-    }
-  else
-    {
-      nllvdbg("Send IGMP_LEAVE_GROUP\n");
-      DEBUGASSERT(group->msgid == IGMP_LEAVE_GROUP);
-      dest = &g_allrouters;
-      IGMP_STATINCR(uip_stat.igmp.leave_sched);
-      uiphdr_ipaddr_copy(IGMPBUF->grpaddr, &group->grpaddr);
-    }
-
-  /* Send the message */
-
-  uip_igmpsend(dev, dest);
-
-  /* Indicate that the message has been sent */
-
-  CLR_SCHEDMSG(group->flags);
-  group->msgid = 0;
-
-  /* If there is a thread waiting fore the message to be sent, wake it up */
-
-  if (IS_WAITMSG(group->flags))
-    {
-      sem_post(&group->sem);
-    }
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_igmppoll
+ * Name: uip_igmpschedmsg
  *
  * Description:
- *   Poll the groups associated with the device to see if any IGMP messages
- *   are pending transfer.
- *
- * Returned Value:
- *   Returns a non-zero value if a IGP message is sent.
+ *   Schedule a message to be send at the next driver polling interval.
  *
  * Assumptions:
- *   This function is called from the driver polling logic... probably within
- *   an interrupt handler.
+ *   This function may be called in most any context.
  *
  ****************************************************************************/
 
-void uip_igmppoll(FAR struct uip_driver_s *dev)
+void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
-  FAR struct igmp_group_s *group;
+  irqstate_t flags = irqsave();
 
-  /* Setup the poll operation */
+  /* The following should be atomic */
 
-  dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPIGMPH_LEN];
-  dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPIGMPH_LEN];
+  flags = irqsave();
+  DEBUGASSERT(!IS_SCHEDMSG(group->flags));
+  group->msgid = msgid;
+  SET_SCHEDMSG(group->flags);
+  irqrestore(flags);
+}
 
-  dev->d_len     = 0;
-  dev->d_sndlen  = 0;
+/****************************************************************************
+ * Name: uip_igmpwaitmsg
+ *
+ * Description:
+ *   Schedule a message to be send at the next driver polling interval and
+ *   block, waiting for the message to be sent.
+ *
+ * Assumptions:
+ *   This function cannot be called from an interrupt handler (if you try it,
+ *   sem_wait will assert).
+ *
+ ****************************************************************************/
 
-  /* Check each member of the group */
+void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
+{
+  irqstate_t flags;
 
-  for (group = (FAR struct igmp_group_s *)dev->grplist.head; group; group = group->next)
+  /* Schedule to send the message */
+
+  flags = irqsave();
+  DEBUGASSERT(!IS_WAITMSG(group->flags));
+  SET_WAITMSG(group->flags);
+  uip_igmpschedmsg(group, msgid);
+
+  /* Then wait for the message to be sent */
+
+  while (IS_SCHEDMSG(group->flags))
     {
-      /* Does this member have a pending outgoing message? */
+      /* Wait for the semaphore to be posted */
 
-      if (IS_SCHEDMSG(group->flags))
+      while (sem_wait(&group->sem) != 0)
         {
-          /* Yes, create the IGMP message in the driver buffer */
-
-          uip_schedsend(dev, group);
-
-          /* Mark the message as sent and break out */
-
-          CLR_SCHEDMSG(group->flags);
-          break;
+          /* The only error that should occur from sem_wait() is if
+           * the wait is awakened by a signal.
+           */
+ 
+          ASSERT(errno == EINTR);
         }
     }
+
+  /* The message has been sent and we are no longer waiting */
+
+  CLR_WAITMSG(group->flags);
+  irqrestore(flags);
 }
+
 #endif /* CONFIG_NET_IGMP */

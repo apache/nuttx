@@ -191,6 +191,7 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev, FAR uip_ipad
       /* Initialize the non-zero elements of the group structure */
 
       uip_ipaddr_copy(group->grpaddr, addr);
+      sem_init(&group->sem, 0, 0);
 
       /* Interrupts must be disabled in order to modify the group list */
 
@@ -277,6 +278,15 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
 
   irqstate_t flags = irqsave();
   DEBUGASSERT(sq_rem((FAR sq_entry_t*)group, &dev->grplist) != NULL);
+  
+  /* Destroy the wait semapore */
+
+  (void)sem_destroy(&group->sem);
+  
+  /* Then release the group structure resources.  Check first if this is one
+   * of the pre-allocated group structures that we will retain in a free list.
+   */
+
   if (IS_PREALLOCATED(group->flags))
     {
       sq_addlast((FAR sq_entry_t*)group, &g_freelist);
@@ -284,6 +294,10 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
     }
   else
     {
+      /* No.. deallocate the group structure.  Use sched_free() just in case
+       * this function is executing within an interrupt handler.
+       */
+
       irqrestore(flags);
       sched_free(group);
     }

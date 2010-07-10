@@ -1,7 +1,7 @@
 ############################################################################
 # Make.defs
 #
-#   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2009-20010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ endif
 endif
 
 ifeq ($(CONFIG_NET_IGMP),y)
-UIP_CSRCS += uip_igmpinit.c uip_igmpgroup.c
+UIP_CSRCS += uip_igmpinit.c uip_igmpgroup.c uip_igmpjoin.c uip_igmpleave.c uip_igmpmsg.c
 endif
 
 endif
