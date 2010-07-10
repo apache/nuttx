@@ -1,6 +1,7 @@
 /****************************************************************************
- * net/uip/uip_igmpinit.c
- * IGMP initialization logic
+ * net/uip/uip-igmp.h
+ * The definitions in this header file are intended only for internal use
+ * by the NuttX port of the uIP stack.
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -44,12 +45,12 @@
 
 #include <nuttx/config.h>
 
-#include <wdog.h>
 #include <assert.h>
 #include <debug.h>
 
+#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
-#include <net/uip/uip-igmp.h>
+#include <net/uip/uip-arch.h>
 
 #include "uip_internal.h"
 
@@ -59,68 +60,102 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-#  error "IGMP for IPv6 not supported"
-#endif
+#define IGMPBUF ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
- * Public Data
+ * Private Functions
  ****************************************************************************/
 
-uip_ipaddr_t g_allsystems;
-uip_ipaddr_t g_allrouters;
+/****************************************************************************
+ * Name:  uip_schedsend
+ *
+ * Description:
+ *   Construct the .
+ *
+ * Returned Value:
+ *   Returns a non-zero value if a IGP message is sent.
+ *
+ * Assumptions:
+ *   This function is called from the driver polling logic... probably within
+ *   an interrupt handler.
+ *
+ ****************************************************************************/
+
+static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
+{
+  uip_ipaddr_t *dest;
+
+  /* IGMP header + IP header + 8 bytes of data */
+
+  if (group->msgid == IGMPv2_MEMBERSHIP_REPORT)
+    {
+      nllvdbg("Send IGMPv2_MEMBERSHIP_REPORT\n");
+      dest = &group->grpaddr;
+      IGMP_STATINCR(uip_stat.igmp.report_sched);
+      uiphdr_ipaddr_copy(IGMPBUF->grpaddr, &group->grpaddr);
+      SET_LASTREPORT(group->flags); /* Remember we were the last to report */
+    }
+  else
+    {
+      nllvdbg("Send IGMP_LEAVE_GROUP\n");
+      DEBUGASSERT(group->msgid == IGMP_LEAVE_GROUP);
+      dest = &g_allrouters;
+      IGMP_STATINCR(uip_stat.igmp.leave_sched);
+      uiphdr_ipaddr_copy(IGMPBUF->grpaddr, &group->grpaddr);
+    }
+
+  uip_igmpsend(dev, dest);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_igmpinit
+ * Name:  uip_igmppoll
  *
  * Description:
- *   Perform one-time IGMP initialization.
+ *   Poll the groups associated with the device to see if any IGMP messages
+ *   are pending transfer.
  *
- ****************************************************************************/
-void uip_igmpinit(void)
-{
-  nvdbg("IGMP initializing\n");
-
-  uip_ipaddr(g_allrouters, 224, 0, 0, 2);
-  uip_ipaddr(g_allsystems, 224, 0, 0, 1);
-
-  /* Initialize the group allocation logic */
-
-  uip_grpinit();
-}
-
-/****************************************************************************
- * Name:  uip_igmpdevinit
+ * Returned Value:
+ *   Returns a non-zero value if a IGP message is sent.
  *
- * Description:
- *   Called when a new network device is registered to configure that device
- *   for IGMP support.
+ * Assumptions:
+ *   This function is called from the driver polling logic... probably within
+ *   an interrupt handler.
  *
  ****************************************************************************/
 
-void uip_igmpdevinit(struct uip_driver_s *dev)
+void uip_igmppoll(FAR struct uip_driver_s *dev)
 {
-  struct igmp_group_s *group;
+  FAR struct igmp_group_s *group;
 
-  nvdbg("IGMP initializing dev %p\n", dev);
-  DEBUGASSERT(dev->grplist == NULL);
+  /* Setup the poll operation */
 
-  /* Add the all systems address to the group */
+  dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPIGMPH_LEN];
+  dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPIGMPH_LEN];
 
-  group = uip_grpalloc(dev, &g_allsystems);
+  dev->d_len     = 0;
+  dev->d_sndlen  = 0;
 
-  /* Initialize the group timer (but don't start it yet) */
+  /* Check each member of the group */
 
-  group->wdog = wd_create();
+  for (group = (FAR struct igmp_group_s *)dev->grplist.head; group; group = group->next)
+    {
+      /* Does this member have a pending outgoing message? */
 
-  /* Allow the IGMP messages at the MAC level */
+      if (IS_SCHEDMSG(group->flags))
+        {
+          /* Yes, create the IGMP message in the driver buffer */
 
-  uip_igmpmac(dev, &g_allrouters, true);
-  uip_igmpmac(dev, &g_allsystems, true);
+          uip_schedsend(dev, group);
+
+          /* Mark the message as sent and break out */
+
+          CLR_SCHEDMSG(group->flags);
+          break;
+        }
+    }
 }
-
 #endif /* CONFIG_NET_IGMP */

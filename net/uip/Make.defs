@@ -70,7 +70,7 @@ endif
 
 ifeq ($(CONFIG_NET_ICMP),y)
 
-UIP_CSRCS += uip_icmpinput.c
+UIP_CSRCS += uip_icmpinput.c uip_igmppoll.c
 
 ifeq ($(CONFIG_NET_ICMP_PING),y)
 ifneq ($(CONFIG_DISABLE_CLOCK),y)

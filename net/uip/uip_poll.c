@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_poll.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_polludpconnections
+ * Function: uip_pollicmp
  *
  * Description:
  *   Poll all UDP connections for available packets to send.
@@ -79,7 +79,32 @@ static inline int uip_pollicmp(struct uip_driver_s *dev, uip_poll_callback_t cal
 
   return callback(dev);
 }
-#endif /* CONFIG_NET_UDP */
+#endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
+
+/****************************************************************************
+ * Function: uip_polligmp
+ *
+ * Description:
+ *   Poll all UDP connections for available packets to send.
+ *
+ * Assumptions:
+ *   This function is called from the CAN device driver and may be called from
+ *   the timer interrupt/watchdog handle level.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static inline int uip_polligmp(struct uip_driver_s *dev, uip_poll_callback_t callback)
+{
+  /* Perform the UDP TX poll */
+
+  uip_igmppoll(dev);
+
+  /* Call back into the driver */
+
+  return callback(dev);
+}
+#endif /* CONFIG_NET_IGMP */
 
 /****************************************************************************
  * Function: uip_polludpconnections
@@ -226,25 +251,33 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
 {
   int bstop;
 
-  /* Traverse all of the active TCP connections and perform the poll action */
+  /* Check for pendig IGMP messages */
 
-  bstop = uip_polltcpconnections(dev, callback);
+#ifdef CONFIG_NET_IGMP
+  bstop = uip_polligmp(dev, callback);
   if (!bstop)
+#endif
     {
-#ifdef CONFIG_NET_UDP
-      /* Traverse all of the allocated UDP connections and perform the poll action */
+      /* Traverse all of the active TCP connections and perform the poll action */
 
-      bstop = uip_polludpconnections(dev, callback);
+      bstop = uip_polltcpconnections(dev, callback);
       if (!bstop)
-#endif
         {
-#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-          /* Traverse all of the tasks waiting to send an ICMP ECHO request */
+#ifdef CONFIG_NET_UDP
+          /* Traverse all of the allocated UDP connections and perform the poll action */
 
-          bstop = uip_pollicmp(dev, callback);
+          bstop = uip_polludpconnections(dev, callback);
+          if (!bstop)
 #endif
+            {
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+              /* Traverse all of the tasks waiting to send an ICMP ECHO request */
+
+              bstop = uip_pollicmp(dev, callback);
+#endif
+            }
         }
-  }
+    }
 
   return bstop;
 }
@@ -254,7 +287,7 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
  *
  * Description:
  *   These function will traverse each active uIP connection structure and
- *   perform TCP timer operations (and UDP polling operations). The CAN
+ *   perform TCP timer operations (and UDP polling operations). The Ethernet
  *   driver MUST implement logic to periodically call uip_timer().
  *
  *   This function will call the provided callback function for every active
@@ -286,23 +319,31 @@ int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec)
     }
 #endif /* UIP_REASSEMBLY */
 
-  /* Traverse all of the active TCP connections and perform the timer action */
+  /* Check for pendig IGMP messages */
 
-  bstop = uip_polltcptimer(dev, callback, hsec);
+#ifdef CONFIG_NET_IGMP
+  bstop = uip_polligmp(dev, callback);
   if (!bstop)
+#endif
     {
-      /* Traverse all of the allocated UDP connections and perform the poll action */
+      /* Traverse all of the active TCP connections and perform the timer action */
+
+      bstop = uip_polltcptimer(dev, callback, hsec);
+      if (!bstop)
+        {
+          /* Traverse all of the allocated UDP connections and perform the poll action */
 
 #ifdef CONFIG_NET_UDP
-      bstop = uip_polludpconnections(dev, callback);
-      if (!bstop)
+          bstop = uip_polludpconnections(dev, callback);
+          if (!bstop)
 #endif
-        {
+            {
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-          /* Traverse all of the tasks waiting to send an ICMP ECHO request */
+              /* Traverse all of the tasks waiting to send an ICMP ECHO request */
 
-          bstop = uip_pollicmp(dev, callback);
+              bstop = uip_pollicmp(dev, callback);
 #endif
+            }
         }
     }
 

@@ -51,6 +51,7 @@
 
 #include <arch/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-igmp.h>
@@ -284,7 +285,7 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
   else
     {
       irqrestore(flags);
-      free(group);
+      sched_free(group);
     }
 }
 

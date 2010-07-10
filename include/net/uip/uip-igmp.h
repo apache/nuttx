@@ -50,7 +50,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <wdog.h>
 
 #include <netinet/in.h>
 
@@ -84,25 +83,29 @@
 #define UIP_IGMPH_LEN            8
 #define UIP_IPIGMPH_LEN          (UIP_IGMPH_LEN + UIP_IPH_LEN)
 
-/* Group membership states */
-
-#define IGMP_NON_MEMBER          0
-#define IGMP_DELAYING_MEMBER     1
-#define IGMP_IDLE_MEMBER         2
-
 /* Group flags */
 
-#define IGMP_PREALLOCATED        1
-#define IGMP_LASTREPORT          2
+#define IGMP_PREALLOCATED        (1 << 0)
+#define IGMP_LASTREPORT          (1 << 1)
+#define IGMP_IDLEMEMBER          (1 << 2)
+#define IGMP_SCHEDMSG            (1 << 3)
 
 #define SET_PREALLOCATED(f)      do { (f) |= IGMP_PREALLOCATED; } while (0)
 #define SET_LASTREPORT(f)        do { (f) |= IGMP_LASTREPORT; } while (0)
+#define SET_IDLEMEMBER(f)        do { (f) |= IGMP_IDLEMEMBER; } while (0)
+#define SET_SCHEDMSG(f)          do { (f) |= IGMP_IDLEMEMBER; } while (0)
 
 #define CLR_PREALLOCATED(f)      do { (f) &= ~IGMP_PREALLOCATED; } while (0)
 #define CLR_LASTREPORT(f)        do { (f) &= ~IGMP_LASTREPORT; } while (0)
+#define CLR_IDLEMEMBER(f)        do { (f) &= ~IGMP_LASTREPORT; } while (0)
+#define CLR_SCHEDMSG(f)          do { (f) &= ~IGMP_LASTREPORT; } while (0)
 
 #define IS_PREALLOCATED(f)       (((f) & IGMP_PREALLOCATED) != 0)
 #define IS_LASTREPORT(f)         (((f) & IGMP_LASTREPORT) != 0)
+#define IS_IDLEMEMBER(f)         (((f) & IGMP_LASTREPORT) != 0)
+#define IS_SCHEDMSG(f)           (((f) & IGMP_LASTREPORT) != 0)
+
+#define IGMP_TTL                 1
 
 /****************************************************************************
  * Public Types
@@ -148,7 +151,16 @@ struct uip_igmphdr_s
 
 #endif /* CONFIG_NET_IPv6 */
 
-  /* IGMP header */
+  /* IGMP header:
+   *
+   *  0                   1                   2                   3
+   *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   * |      Type     | Max Resp Time |           Checksum            |
+   * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   * |                         Group Address                         |
+   * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   */
 
   uint8_t  type;           /* 8-bit IGMP packet type */
   uint8_t  maxresp;        /* 8-bit Max response time */
@@ -156,16 +168,17 @@ struct uip_igmphdr_s
   uint16_t grpaddr[2];     /* 32-bit Group address */
 };
 
-#ifdef CONFIG_NET_IGMP_STATS
-struct igmp_stats_s
+#ifdef CONFIG_NET_STATISTICS
+struct uip_igmp_stats_s
 {
   uint32_t length_errors;
   uint32_t chksum_errors;
   uint32_t v1_received;
   uint32_t joins;
-  uint32_t leave_sent;
+  uint32_t leave_sched;
+  uint32_t report_sched;
+  uint32_t poll_send;
   uint32_t ucast_query;
-  uint32_t report_sent;
   uint32_t query_received;
   uint32_t report_received;
 };
@@ -183,13 +196,13 @@ struct igmp_stats_s
  * from all the other groups
  */
 
+typedef FAR struct wdog_s *WDOG_ID;
 struct igmp_group_s
 {
   struct igmp_group_s *next;    /* Implements a singly-linked list */
   uip_ipaddr_t         grpaddr; /* Group IP address */
   WDOG_ID              wdog;    /* WDOG used to detect timeouts */
   uint8_t              flags;   /* See IGMP_ flags definitions */
-  uint8_t              state;   /* State of the group */
   uint8_t              msgid;   /* Pending message ID (if non-zero) */
 };
 
@@ -203,10 +216,6 @@ struct igmp_group_s
 extern "C" {
 #else
 #define EXTERN extern
-#endif
-
-#ifdef CONFIG_NET_IGMP_STATS
-struct igmp_stats_s g_igmpstats;
 #endif
 
 extern uip_ipaddr_t g_allsystems;

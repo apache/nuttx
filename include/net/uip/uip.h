@@ -222,9 +222,18 @@ struct uip_callback_s
 
 /* Protocol-specific support */
 
-#include <net/uip/uip-tcp.h>
-#include <net/uip/uip-udp.h>
-#include <net/uip/uip-icmp.h>
+#ifdef CONFIG_NET_TCP
+#  include <net/uip/uip-tcp.h>
+#endif
+#ifdef CONFIG_NET_UDP
+#  include <net/uip/uip-udp.h>
+#endif
+#ifdef CONFIG_NET_ICMP
+#  include <net/uip/uip-icmp.h>
+#endif
+#ifdef CONFIG_NET_IGMP
+#  include <net/uip/uip-igmp.h>
+#endif
 
 /* The structure holding the uIP statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.
@@ -256,6 +265,10 @@ struct uip_stats
 
 #ifdef CONFIG_NET_ICMP
   struct uip_icmp_stats_s icmp; /* ICMP statistics */
+#endif
+
+#ifdef CONFIG_NET_IGMP
+  struct uip_igmp_stats_s igmp; /* IGMP statistics */
 #endif
 
 #ifdef CONFIG_NET_TCP
