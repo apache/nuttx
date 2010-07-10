@@ -277,7 +277,7 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
    */
 
   irqstate_t flags = irqsave();
-  DEBUGASSERT(sq_rem((FAR sq_entry_t*)group, &dev->grplist) != NULL);
+  sq_rem((FAR sq_entry_t*)group, &dev->grplist);
   
   /* Destroy the wait semapore */
 

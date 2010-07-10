@@ -130,15 +130,25 @@
 void igmp_leavegroup(struct uip_driver_s *dev, uip_ipaddr_t *grpaddr)
 {
   struct igmp_group_s *group;
+  irqstate_t flags;
 
   /* Find the entry corresponding to the address leaving the group */
 
   group = uip_grpfind(dev, grpaddr);
   if (group)
     {
-      /* Cancel the timer */
+      /* Cancel the timer and discard any queued Membership Reports.  Canceling
+       * the timer will prevent any new Membership Reports from being sent;
+       * clearing the flags will discard any pending Membership Reports that
+       * could interfere with the Leave Group.
+       */
  
+      flags = irqsave();
       wd_cancel(group->wdog);
+      CLR_SCHEDMSG(group->flags);
+      CLR_WAITMSG(group->flags);
+      irqrestore(flags);
+
       IGMP_STATINCR(uip_stat.igmp.leaves);
 
       /* Send a leave if the flag is set according to the state diagram */

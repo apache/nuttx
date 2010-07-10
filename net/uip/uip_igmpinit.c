@@ -107,7 +107,7 @@ void uip_igmpdevinit(struct uip_driver_s *dev)
   struct igmp_group_s *group;
 
   nvdbg("IGMP initializing dev %p\n", dev);
-  DEBUGASSERT(dev->grplist == NULL);
+  DEBUGASSERT(dev->grplist.head == NULL);
 
   /* Add the all systems address to the group */
 
