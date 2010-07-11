@@ -241,7 +241,9 @@ EXTERN void uip_igmppoll(FAR struct uip_driver_s *dev);
 
 /* Defined in up_igmpsend.c **************************************************/
 
-EXTERN void uip_igmpsend(FAR struct uip_driver_s *dev, uip_ipaddr_t *dest);
+EXTERN void uip_igmpsend(FAR struct uip_driver_s *dev,
+                         FAR struct igmp_group_s *group,
+                         FAR uip_ipaddr_t *dest);
 
 /* Defined in uip_igmptimer.c ************************************************/
 

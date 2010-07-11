@@ -58,8 +58,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IGMPBUF ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN])
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -92,7 +90,6 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
       nllvdbg("Send IGMPv2_MEMBERSHIP_REPORT\n");
       dest = &group->grpaddr;
       IGMP_STATINCR(uip_stat.igmp.report_sched);
-      uiphdr_ipaddr_copy(IGMPBUF->grpaddr, &group->grpaddr);
       SET_LASTREPORT(group->flags); /* Remember we were the last to report */
     }
   else
@@ -101,12 +98,11 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
       DEBUGASSERT(group->msgid == IGMP_LEAVE_GROUP);
       dest = &g_allrouters;
       IGMP_STATINCR(uip_stat.igmp.leave_sched);
-      uiphdr_ipaddr_copy(IGMPBUF->grpaddr, &group->grpaddr);
     }
 
   /* Send the message */
 
-  uip_igmpsend(dev, dest);
+  uip_igmpsend(dev, group, dest);
 
   /* Indicate that the message has been sent */
 

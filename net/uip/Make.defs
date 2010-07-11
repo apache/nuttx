@@ -81,8 +81,9 @@ endif
 # IGMP source files
 
 ifeq ($(CONFIG_NET_IGMP),y)
-UIP_CSRCS += uip_igmpinit.c uip_igmpgroup.c uip_igmpinput.c uip_igmpjoin.c \
-	     uip_igmpleave.c uip_igmpmsg.c uip_igmptimer.c uip_mcastmac.c
+UIP_CSRCS += uip_igmpgroup.c uip_igmpinit.c uip_igmpinput.c uip_igmpjoin.c \
+	     uip_igmpleave.c uip_igmpmsg.c uip_igmpsend.c uip_igmptimer.c \
+	     uip_mcastmac.c
 endif
 
 endif
