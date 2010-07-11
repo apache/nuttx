@@ -61,6 +61,17 @@ examples/igmp
   does not do much of value -- Much more is needed in order to verify
   the IGMP features!
 
+  * CONFIG_EXAMPLE_IGMP_NOMAC
+      Set if the hardware has no MAC address; one will be assigned
+  * CONFIG_EXAMPLE_IGMP_IPADDR
+      Target board IP address
+  * CONFIG_EXAMPLE_IGMP_DRIPADDR
+      Default router address
+  * CONFIG_EXAMPLE_IGMP_NETMASK
+      Network mask
+  * CONFIG_EXAMPLE_IGMP_GRPADDR
+      Multicast group address
+
 examples/mount
 ^^^^^^^^^^^^^^
 
