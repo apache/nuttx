@@ -258,6 +258,9 @@ o Network (net/, drivers/net)
 
   Description: Support for client-side IGMPv2 multicast has been added but not yet
                tested (because I don't have a proper environment for multicast testing).
+               There are most likely errors that need to be fixed at least in the
+               receipt of multicast packets.
+
                In addition, an ethernet driver that needs to work with the IGMP logic
                will have to include additional support for multicast MAC address tables.
   Status:      Open

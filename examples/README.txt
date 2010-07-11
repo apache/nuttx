@@ -54,6 +54,13 @@ examples/helloxx
   library suupport is available, and that class are instantiated
   correctly.
 
+examples/igmp
+^^^^^^^^^^^^^
+
+  This is a trivial test of the NuttX IGMP capability.  It present it
+  does not do much of value -- Much more is needed in order to verify
+  the IGMP features!
+
 examples/mount
 ^^^^^^^^^^^^^^
 

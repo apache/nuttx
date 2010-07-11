@@ -1173,4 +1173,6 @@
 	  by application software.
 	* include/net/uip/igmp.h and uip-igmp.h - Add header files ini
 	  preparation for NuttX IGMP support
-	* net/uip/uip_igmpinit.c, uip_igmpgroup.c - Add IGMP logic.
+	* net/uip/uip_igmp*.c - Add IGMP support (untested on initial
+	  checkin).
+	* examples/igmp - Add a trivial test for IGMP (much more is needed)
