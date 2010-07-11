@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/c5471/c5471_ethernet.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based one a C5471 Linux driver and released under this BSD license with
@@ -394,6 +394,10 @@ static void c5471_txtimeout(int argc, uint32_t arg, ...);
 static int c5471_ifup(struct uip_driver_s *dev);
 static int c5471_ifdown(struct uip_driver_s *dev);
 static int c5471_txavail(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+static int c5471_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int c5471_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
 
 /* Initialization functions */
 
@@ -1735,6 +1739,66 @@ static int c5471_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: c5471_addmac
+ *
+ * Description:
+ *   NuttX Callback: Add the specified MAC address to the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be added 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int c5471_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: c5471_rmmac
+ *
+ * Description:
+ *   NuttX Callback: Remove the specified MAC address from the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be removed 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int c5471_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: c5471_eimreset
  *
  * Description
@@ -2094,7 +2158,11 @@ void up_netinitialize(void)
   g_c5471[0].c_dev.d_ifup    = c5471_ifup;     /* I/F down callback */
   g_c5471[0].c_dev.d_ifdown  = c5471_ifdown;   /* I/F up (new IP address) callback */
   g_c5471[0].c_dev.d_txavail = c5471_txavail;  /* New TX data callback */
-  g_c5471[0].c_dev.d_private = (void*)g_c5471; /* Used to recover private state from dev */
+ #ifdef CONFIG_NET_IGMP
+  g_c5471[0].c_dev.d_addmac  = c5471_addmac;   /* Add multicast MAC address */
+  g_c5471[0].c_dev.d_rmmac   = c5471_rmmac;    /* Remove multicast MAC address */
+#endif
+ g_c5471[0].c_dev.d_private = (void*)g_c5471; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
