@@ -140,7 +140,7 @@ static const uint16_t g_broadcast_ipaddr[2] = {0xffff, 0xffff};
  * The following is the first three octects of the IGMP address:
  */
 
-#if defined(CONFIG_NET_MULTICAST) && !defined(CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_NET_IPv6)
 static const uint8_t g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
 #endif
 
@@ -306,7 +306,7 @@ void uip_arp_out(struct uip_driver_s *dev)
     {
       memcpy(peth->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
-#if defined(CONFIG_NET_MULTICAST) && !defined(CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_NET_IPv6)
   /* Check if the destination address is a multicast address
    *
    * - IPv4: multicast addresses lie in the class D group -- The address range

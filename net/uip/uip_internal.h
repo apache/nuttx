@@ -250,9 +250,10 @@ EXTERN void uip_igmpstartticks(FAR struct igmp_group_s *group, int ticks);
 EXTERN void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs);
 EXTERN bool uip_igmpcmptimer(FAR struct igmp_group_s *group, int maxticks);
 
-/* Defined in TBD ************************************************************/
+/* Defined in uip_mcastmac ***************************************************/
 
-EXTERN void uip_igmpmac(struct uip_driver_s *dev, uip_ipaddr_t *ip, bool on);
+EXTERN void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
+EXTERN void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
 
 #endif /* CONFIG_NET_IGMP */
 

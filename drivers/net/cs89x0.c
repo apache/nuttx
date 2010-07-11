@@ -137,6 +137,10 @@ static void cs89x0_txtimeout(int argc, uint32_t arg, ...);
 static int cs89x0_ifup(struct uip_driver_s *dev);
 static int cs89x0_ifdown(struct uip_driver_s *dev);
 static int cs89x0_txavail(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+static int cs89x0_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int cs89x0_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -815,6 +819,66 @@ static int cs89x0_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: cs89x0_addmac
+ *
+ * Description:
+ *   NuttX Callback: Add the specified MAC address to the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be added 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int cs89x0_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct cs89x0_driver_s *priv = (FAR struct cs89x0_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: cs89x0_rmmac
+ *
+ * Description:
+ *   NuttX Callback: Remove the specified MAC address from the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be removed 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int cs89x0_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct cs89x0_driver_s *priv = (FAR struct cs89x0_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -872,6 +936,10 @@ int cs89x0_initialize(FAR const cs89x0_driver_s *cs89x0, int devno)
   cs89x0->cs_dev.d_ifup    = cs89x0_ifup;     /* I/F down callback */
   cs89x0->cs_dev.d_ifdown  = cs89x0_ifdown;   /* I/F up (new IP address) callback */
   cs89x0->cs_dev.d_txavail = cs89x0_txavail;  /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  cs89x0->cs_dev.d_addmac  = cs89x0_addmac;   /* Add multicast MAC address */
+  cs89x0->cs_dev.d_rmmac   = cs89x0_rmmac;    /* Remove multicast MAC address */
+#endif
   cs89x0->cs_dev.d_private = (void*)cs89x0;   /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */

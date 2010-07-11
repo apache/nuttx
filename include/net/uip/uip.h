@@ -5,7 +5,7 @@
  * are used by uIP programs as well as internal uIP structures and function
  * declarations.
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -368,6 +368,24 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
 #  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16_t*)addr)[0] << 16) | (in_addr_t)((uint16_t*)addr)[1])
 #else
 #  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16_t*)addr)[1] << 16) | (in_addr_t)((uint16_t*)addr)[0])
+#endif
+
+/* Extract individual bytes from a 32-bit IPv4 IP address that is in network byte order */
+
+#ifdef CONFIG_ENDIAN_BIG
+   /* Big-endian byte order: 11223344 */
+
+#  define ip4_addr1(ipaddr) (((ipaddr) >> 24) & 0xff)
+#  define ip4_addr2(ipaddr) (((ipaddr) >> 16) & 0xff)
+#  define ip4_addr3(ipaddr) (((ipaddr) >>  8) & 0xff)
+#  define ip4_addr4(ipaddr)  ((ipaddr)        & 0xff)
+#else
+   /* Little endian byte order: 44223311 */
+
+#  define ip4_addr1(ipaddr)  ((ipaddr)        & 0xff)
+#  define ip4_addr2(ipaddr) (((ipaddr) >>  8) & 0xff)
+#  define ip4_addr3(ipaddr) (((ipaddr) >> 16) & 0xff)
+#  define ip4_addr4(ipaddr) (((ipaddr) >> 24) & 0xff)
 #endif
 
 /* Construct an IPv6 address from eight 16-bit words.

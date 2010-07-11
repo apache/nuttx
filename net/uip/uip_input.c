@@ -434,7 +434,7 @@ void uip_input(struct uip_driver_s *dev)
         }
     }
 
-  /* Check if the pack is destined for out IP address */
+  /* Check if the packet is destined for out IP address */
   else
 #endif
     {

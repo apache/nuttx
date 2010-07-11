@@ -130,6 +130,10 @@ static void skel_txtimeout(int argc, uint32_t arg, ...);
 static int skel_ifup(struct uip_driver_s *dev);
 static int skel_ifdown(struct uip_driver_s *dev);
 static int skel_txavail(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+static int skel_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -543,6 +547,64 @@ static int skel_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: skel_addmac
+ *
+ * Description:
+ *   NuttX Callback: Add the specified MAC address to the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be added 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int skel_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: skel_rmmac
+ *
+ * Description:
+ *   NuttX Callback: Remove the specified MAC address from the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be removed 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -583,6 +645,10 @@ int skel_initialize(void)
   g_skel[0].sk_dev.d_ifup    = skel_ifup;     /* I/F down callback */
   g_skel[0].sk_dev.d_ifdown  = skel_ifdown;   /* I/F up (new IP address) callback */
   g_skel[0].sk_dev.d_txavail = skel_txavail;  /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  g_skel[0].sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
+  g_skel[0].sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
+#endif
   g_skel[0].sk_dev.d_private = (void*)g_skel; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */

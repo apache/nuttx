@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/dm9x.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References: Davicom data sheets (DM9000-DS-F03-041906.pdf,
@@ -398,6 +398,10 @@ static void dm9x_txtimeout(int argc, uint32_t arg, ...);
 static int dm9x_ifup(struct uip_driver_s *dev);
 static int dm9x_ifdown(struct uip_driver_s *dev);
 static int dm9x_txavail(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+static int dm9x_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int dm9x_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
 
 /* Initialization functions */
 
@@ -1507,6 +1511,66 @@ static int dm9x_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: dm9x_addmac
+ *
+ * Description:
+ *   NuttX Callback: Add the specified MAC address to the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be added 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int dm9x_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: dm9x_rmmac
+ *
+ * Description:
+ *   NuttX Callback: Remove the specified MAC address from the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be removed 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int dm9x_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Function: dm9x_bringup
  *
  * Description:
@@ -1719,6 +1783,10 @@ int dm9x_initialize(void)
   g_dm9x[0].dm_dev.d_ifup    = dm9x_ifup;     /* I/F down callback */
   g_dm9x[0].dm_dev.d_ifdown  = dm9x_ifdown;   /* I/F up (new IP address) callback */
   g_dm9x[0].dm_dev.d_txavail = dm9x_txavail;  /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  g_dm9x[0].dm_dev.d_addmac  = dm9x_addmac;   /* Add multicast MAC address */
+  g_dm9x[0].dm_dev.d_rmmac   = dm9x_rmmac;    /* Remove multicast MAC address */
+#endif
   g_dm9x[0].dm_dev.d_private = (void*)g_dm9x; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */

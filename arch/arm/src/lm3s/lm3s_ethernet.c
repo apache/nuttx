@@ -254,6 +254,10 @@ static void lm3s_txtimeout(int argc, uint32_t arg, ...);
 static int  lm3s_ifup(struct uip_driver_s *dev);
 static int  lm3s_ifdown(struct uip_driver_s *dev);
 static int  lm3s_txavail(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+static int  lm3s_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int  lm3s_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -1282,6 +1286,66 @@ static int lm3s_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: lm3s_addmac
+ *
+ * Description:
+ *   NuttX Callback: Add the specified MAC address to the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be added 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int lm3s_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct lm3s_driver_s *priv = (FAR struct lm3s_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: lm3s_rmmac
+ *
+ * Description:
+ *   NuttX Callback: Remove the specified MAC address from the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be removed 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int lm3s_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct lm3s_driver_s *priv = (FAR struct lm3s_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1327,6 +1391,10 @@ static inline int lm3s_ethinitialize(int intf)
   priv->ld_dev.d_ifup    = lm3s_ifup;     /* I/F down callback */
   priv->ld_dev.d_ifdown  = lm3s_ifdown;   /* I/F up (new IP address) callback */
   priv->ld_dev.d_txavail = lm3s_txavail;  /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  priv->ld_dev.d_addmac  = lm3s_addmac;   /* Add multicast MAC address */
+  priv->ld_dev.d_rmmac   = lm3s_rmmac;    /* Remove multicast MAC address */
+#endif
   priv->ld_dev.d_private = (void*)priv;   /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */

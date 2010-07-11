@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated May 19, 2010)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated July 11, 2010)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (2)  Memory Managment (mm/)
@@ -7,7 +7,7 @@ NuttX TODO List (Last updated May 19, 2010)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (15)  Network (net/, drivers/net)
+ (16)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
@@ -253,6 +253,13 @@ o Network (net/, drivers/net)
   Description: So far, I have not come up with a usable hardware platform to
                verify the ENC28J60 Ethernet driver (drivers/net/enc28j60.c).
                So it is untested.
+  Status:      Open
+  Priority:    Low unless you need it.
+
+  Description: Support for client-side IGMPv2 multicast has been added but not yet
+               tested (because I don't have a proper environment for multicast testing).
+               In addition, an ethernet driver that needs to work with the IGMP logic
+               will have to include additional support for multicast MAC address tables.
   Status:      Open
   Priority:    Low unless you need it.
 

@@ -184,6 +184,10 @@ struct uip_driver_s
   int (*d_ifup)(struct uip_driver_s *dev);
   int (*d_ifdown)(struct uip_driver_s *dev);
   int (*d_txavail)(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+  int (*d_addmac)(struct uip_driver_s *dev, FAR const uint8_t *mac);
+  int (*d_rmmac)(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
 
   /* Drivers may attached device-specific, private information */
 

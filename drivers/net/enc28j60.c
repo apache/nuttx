@@ -278,6 +278,10 @@ static void enc_txtimeout(int argc, uint32_t arg, ...);
 static int  enc_ifup(struct uip_driver_s *dev);
 static int  enc_ifdown(struct uip_driver_s *dev);
 static int  enc_txavail(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+static int  enc_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int  enc_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
 
 /* Initialization */
 
@@ -1755,6 +1759,66 @@ static int enc_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: enc_addmac
+ *
+ * Description:
+ *   NuttX Callback: Add the specified MAC address to the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be added 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int enc_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: enc_rmmac
+ *
+ * Description:
+ *   NuttX Callback: Remove the specified MAC address from the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be removed 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int enc_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Function: enc_pwrsave
  *
  * Description:
@@ -2079,6 +2143,10 @@ int enc_initialize(FAR struct spi_dev_s *spi, unsigned int devno, unsigned int i
   priv->dev.d_ifup    = enc_ifup;     /* I/F down callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F up (new IP address) callback */
   priv->dev.d_txavail = enc_txavail;  /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  priv->dev.d_addmac  = enc_addmac;   /* Add multicast MAC address */
+  priv->dev.d_rmmac   = enc_rmmac;    /* Remove multicast MAC address */
+#endif
   priv->dev.d_private = priv;         /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */

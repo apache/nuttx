@@ -146,7 +146,7 @@ void igmp_joingroup(struct uip_driver_s *dev, uip_ipaddr_t *grpaddr)
 
        /* Add the group (MAC) address to the ether drivers MAC filter list */
 
-       uip_igmpmac(dev, grpaddr, true);
+       uip_addmcastmac(dev, grpaddr);
     }
 }
 

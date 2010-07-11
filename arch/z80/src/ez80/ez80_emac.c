@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/ez80_emac.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -377,6 +377,10 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...);
 static int  ez80emac_ifup(struct uip_driver_s *dev);
 static int  ez80emac_ifdown(struct uip_driver_s *dev);
 static int  ez80emac_txavail(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+static int ez80emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int ez80emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
 
 /* Initialization */
 
@@ -1795,6 +1799,66 @@ static int ez80emac_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: ez80emac_addmac
+ *
+ * Description:
+ *   NuttX Callback: Add the specified MAC address to the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be added 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int ez80emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: ez80emac_rmmac
+ *
+ * Description:
+ *   NuttX Callback: Remove the specified MAC address from the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be removed 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int ez80emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+#warning "Multicast MAC support not implemented"
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Function: ez80emac_initialize
  *
  * Description:
@@ -2069,6 +2133,10 @@ int up_netinitialize(void)
   priv->dev.d_ifup    = ez80emac_ifup;      /* I/F down callback */
   priv->dev.d_ifdown  = ez80emac_ifdown;    /* I/F up (new IP address) callback */
   priv->dev.d_txavail = ez80emac_txavail;   /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  priv->dev.d_addmac  = ez80emac_addmac;    /* Add multicast MAC address */
+  priv->dev.d_rmmac   = ez80emac_rmmac;     /* Remove multicast MAC address */
+#endif
   priv->dev.d_private = (FAR void*)&g_emac; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
