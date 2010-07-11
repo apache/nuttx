@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/net/ioctls.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,9 @@
 #define SIOCSIFHWADDR   _SIOC(0x000b)  /* Set hardware address */
 #define SIOCDIFADDR     _SIOC(0x000c)  /* Delete IP address */
 #define SIOCGIFCOUNT    _SIOC(0x000d)  /* Get number of devices */
+
+#define SIOCGIPMSFILTER _SIOC(0x000e)  /* Retrieve source filter addresses */
+#define SIOCSIPMSFILTER _SIOC(0x000f)  /* Set source filter content */
 
 /****************************************************************************
  * Type Definitions

@@ -1,7 +1,7 @@
 ############################################################################
 # Make.defs
 #
-#   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,3 +37,7 @@ UIPLIB_ASRCS =
 UIPLIB_CSRCS = uiplib.c uip_setmacaddr.c uip_getmacaddr.c uip_sethostaddr.c \
 	uip_gethostaddr.c uip_setdraddr.c uip_setnetmask.c uip_parsehttpurl.c \
 	uip_server.c
+ifeq ($(CONFIG_NET_IGMP),y)
+UIPLIB_CSRCS += uip_ipmsfilter.c
+endif
+

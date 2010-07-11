@@ -1,7 +1,7 @@
 /****************************************************************************
- * netinet/in.h
+ * include/sys/sockio.h
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,94 +33,88 @@
  *
  ****************************************************************************/
 
-#ifndef __NETINET_IP_H
-#define __NETINET_IP_H
+#ifndef __SYS_SOCKIO_H
+#define __SYS_SOCKIO_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+/* Get NuttX configuration and NuttX-specific network IOCTL definitions */
+
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <stdint.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Values for protocol argument to socket() */
-
-#define IPPROTO_TCP           1
-#define IPPROTO_UDP           2
-
-/* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
-
-#define MCAST_EXCLUDE         0
-#define MCAST_INCLUDE         1
-
-/* Special values of in_addr_t */
-
-#define INADDR_ANY            ((in_addr_t)0x00000000) /* Address to accept any incoming messages */
-#define INADDR_BROADCAST      ((in_addr_t)0xffffffff) /* Address to send to all hosts */
-#define INADDR_NONE           ((in_addr_t)0xffffffff) /* Address indicating an error return */
-#define INADDR_LOOPBACK       ((in_addr_t)0x7f000001) /* Inet 127.0.0.1.  */
-
-/* Special initializer for in6_addr_t */
-
-#define IN6ADDR_ANY_INIT      {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}}
-#define IN6ADDR_LOOPBACK_INIT {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}}}
-
-/* struct in6_addr union selectors */
-
-#define s6_addr               in6_u.u6_addr8
-#define s6_addr16             in6_u.u6_addr16
-#define s6_addr32             in6_u.u6_addr32
+#include <nuttx/ioctl.h>
+#include <net/ioctls.h>
 
 /****************************************************************************
- * Public Type Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
+
+#define IMSFNAMSIZ 8
 
 /****************************************************************************
- * Public Type Definitions
+ * Type Definitions
  ****************************************************************************/
 
-/* IPv4 Internet address */
+ /* RFC3678: IPv4 Options
+  *
+  * o  ioctl() SIOCGIPMSFILTER: to retrieve the list of source addresses
+  *    that comprise the source filter along with the current filter mode.
+  *
+  * o  ioctl() SIOCSIPMSFILTER: to set or modify the source filter content
+  *    (e.g., unicast source address list) or mode (exclude or include).
+  *
+  * Ioctl option                  Argument type
+  * ----------------------------- ----------------------
+  * SIOCGIPMSFILTER               struct ip_msfilter
+  * SIOCSIPMSFILTER               struct ip_msfilter
+  *
+  * The imsf_fmode mode is a 32-bit integer that identifies the filter
+  * mode.  The value of this field must be either MCAST_INCLUDE or
+  * MCAST_EXCLUDE, which are likewise defined in <netinet/in.h>.
+  */
 
-typedef uint32_t in_addr_t;
-struct in_addr
+#if 0 /* REVISIT: Current NuttX implementation is non-standard.
+       * Lookup is by device name, not IP address.
+       */
+
+struct ip_msfilter
 {
-  in_addr_t    s_addr;        /* Address (network byte order) */
+   struct in_addr imsf_multiaddr;  /* IP multicast address of group */
+   struct in_addr imsf_interface;  /* Local IP address of interface */
+   uint32_t       imsf_fmode;      /* Filter mode */
+#ifdef CONFIG_NET_IGMPv3
+   uint32_t       imsf_numsrc;     /* number of sources in src_list */
+   struct in_addr imsf_slist[1];   /* start of source list */
+#endif
 };
 
-struct sockaddr_in
+#else
+
+struct ip_msfilter  
 {
-  sa_family_t sin_family;     /* Address family: AF_INET */
-  uint16_t    sin_port;       /* Port in network byte order */
-  struct in_addr sin_addr;    /* Internet address */
+   char imsf_name[IMSFNAMSIZ];     /* Network device name, e.g., "eth0" */
+   struct in_addr imsf_multiaddr;  /* IP multicast address of group */
+   uint32_t       imsf_fmode;      /* Filter mode */
 };
 
-/* IPv6 Internet address */
-
-struct in6_addr
-{
-  union
-  {
-    uint8_t   u6_addr8[16];
-    uint16_t  u6_addr16[8];
-    uint32_t  u6_addr32[4];
-  } in6_u;
-};
-
-struct sockaddr_in6
-{
-  sa_family_t sin_family;     /* Address family: AF_INET */
-  uint16_t    sin_port;       /* Port in network byte order */
-  struct in6_addr sin6_addr;  /* IPv6 internet address */
-};
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __NETINET_IP_H */
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __SYS_SOCKIO_H */

@@ -120,19 +120,21 @@
  *
  ****************************************************************************/
 
-void igmp_joingroup(struct uip_driver_s *dev, uip_ipaddr_t *grpaddr)
+int igmp_joingroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
 
+  DEBUGASSERT(dev && grpaddr);
+
   /* Check if a this address is already in the group */
  
-  group = uip_grpfind(dev, grpaddr);
+  group = uip_grpfind(dev, &grpaddr->s_addr);
   if (!group)
     {
        /* No... allocate a new entry */
  
        nvdbg("Join to new group\n");
-       group = uip_grpalloc(dev, grpaddr);
+       group = uip_grpalloc(dev, &grpaddr->s_addr);
        IGMP_STATINCR(uip_stat.igmp.joins);
 
        /* Send the Membership Report */
@@ -146,8 +148,10 @@ void igmp_joingroup(struct uip_driver_s *dev, uip_ipaddr_t *grpaddr)
 
        /* Add the group (MAC) address to the ether drivers MAC filter list */
 
-       uip_addmcastmac(dev, grpaddr);
+       uip_addmcastmac(dev, &grpaddr->s_addr);
+       return OK;
     }
+  return -EEXIST;
 }
 
 #endif /* CONFIG_NET_IGMP */

@@ -225,8 +225,8 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-extern uip_ipaddr_t g_allsystems;
-extern uip_ipaddr_t g_allrouters;
+EXTERN uip_ipaddr_t g_allsystems;
+EXTERN uip_ipaddr_t g_allrouters;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -242,6 +242,8 @@ extern uip_ipaddr_t g_allrouters;
  ****************************************************************************/
 
 EXTERN void uip_igmpdevinit(struct uip_driver_s *dev);
+EXTERN int  igmp_joingroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr);
+EXTERN int  igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr);
 
 #undef EXTERN
 #if defined(__cplusplus)

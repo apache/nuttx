@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_ioctl.c
+ * netutils/uiplib/uip_setmultiaddr.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,111 +39,75 @@
 
 #include <nuttx/config.h>
 
+#include <sys/socket.h>
 #include <sys/ioctl.h>
-#include <sched.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <string.h>
 #include <errno.h>
 
-#include <net/if.h>
+#include <netinet/in.h>
+#include <sys/sockio.h>
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-# include <nuttx/net.h>
-#endif
+#include <net/uip/uip-lib.h>
+#include <net/uip/ipmsfilter.h>
 
-#include "fs_internal.h"
+#ifdef CONFIG_NET_IGMP
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ioctl
+ * Name: ipmsfilter
  *
  * Description:
- *   Perform device specific operations.
+ *   Add or remove an IP address from a multicast filter set.
  *
  * Parameters:
- *   fd       File/socket descriptor of device
- *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   ifname     The name of the interface to use, size must less than IMSFNAMSIZ
+ *   multiaddr  Multicast group address to add/remove (network byte order)
+ *   fmode      MCAST_INCLUDE: Add multicast address
+ *              MCAST_EXCLUDE: Remove multicast address
  *
  * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   -1 on failure withi errno set properly:
- *
- *   EBADF
- *     'fd' is not a valid descriptor.
- *   EFAULT
- *     'arg' references an inaccessible memory area.
- *   EINVAL
- *     'cmd' or 'arg' is not valid.
- *   ENOTTY
- *     'fd' is not associated with a character special device.
- *   ENOTTY
- *      The specified request does not apply to the kind of object that the
- *      descriptor 'fd' references.
+ *   0 on sucess; Negated errno on failure
  *
  ****************************************************************************/
 
-int ioctl(int fd, int req, unsigned long arg)
+int ipmsfilter(FAR const char *ifname, FAR const struct in_addr *multiaddr,
+               uint32_t fmode)
 {
-  int err;
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct filelist *list;
-  FAR struct file     *this_file;
-  FAR struct inode    *inode;
-  int                  ret = OK;
-
-  /* Did we get a valid file descriptor? */
-
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
+  int ret = ERROR;
+  if (ifname && multiaddr)
     {
-      /* Perform the socket ioctl */
+      /* Get a socket (only so that we get access to the INET subsystem) */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      int sockfd = socket(PF_INET, UIPLIB_SOCK_IOCTL, 0);
+      if (sockfd >= 0)
         {
-          return netdev_ioctl(fd, req, arg);
-        }
-      else
-#endif
-        {
-          err = EBADF;
-          goto errout;
-        }
-    }
+          struct ip_msfilter imsf;
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Get the thread-specific file list */
+          /* Put the driver name into the request */
 
-  list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
+          strncpy(imsf.imsf_name, ifname, IMSFNAMSIZ);
 
-  /* Is a driver registered? Does it support the ioctl method? */
+          /* Put the new address into the request */
 
-  this_file = &list->fl_files[fd];
-  inode     = this_file->f_inode;
+          imsf.imsf_multiaddr.s_addr = multiaddr->s_addr;
 
-  if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
-    {
-      /* Yes, then let it perform the ioctl */
+          /* Perforom the ioctl to set the MAC address */
 
-      ret = (int)inode->u.i_ops->ioctl(this_file, req, arg);
-      if (ret < 0)
-        {
-          err = -ret;
-          goto errout;
+          imsf.imsf_fmode = fmode;
+          ret = ioctl(sockfd, SIOCSIPMSFILTER, (unsigned long)&imsf);
+          close(sockfd);
         }
     }
   return ret;
-#endif
-
-errout:
-  *get_errno_ptr() = err;
-  return ERROR;
 }
 
+#endif /* CONFIG_NET_IGM */

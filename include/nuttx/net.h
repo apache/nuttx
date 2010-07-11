@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/net.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,8 +153,7 @@ EXTERN int net_close(int sockfd);
  * to this function.
  */
 
-struct ifreq; /* Forward reference -- see net/ioctls.h */
-EXTERN int netdev_ioctl(int sockfd, int cmd, struct ifreq *req);
+EXTERN int netdev_ioctl(int sockfd, int cmd, unsigned long arg);
 
 /* net_poll.c ****************************************************************/
 /* The standard poll() operation redirects operations on socket descriptors

@@ -1,7 +1,8 @@
 /****************************************************************************
- * netinet/in.h
+ * net/uip/ipmsfilter.h
+ * User interface to add/remove IP multicast address
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,94 +34,68 @@
  *
  ****************************************************************************/
 
-#ifndef __NETINET_IP_H
-#define __NETINET_IP_H
+#ifndef __NET_UIP_IPMSFILTER_H
+#define __NET_UIP_IPMSFILTER_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <netinet/in.h>
 
-#include <sys/types.h>
-#include <stdint.h>
+#ifdef CONFIG_NET_IGMP
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Values for protocol argument to socket() */
-
-#define IPPROTO_TCP           1
-#define IPPROTO_UDP           2
-
-/* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
-
-#define MCAST_EXCLUDE         0
-#define MCAST_INCLUDE         1
-
-/* Special values of in_addr_t */
-
-#define INADDR_ANY            ((in_addr_t)0x00000000) /* Address to accept any incoming messages */
-#define INADDR_BROADCAST      ((in_addr_t)0xffffffff) /* Address to send to all hosts */
-#define INADDR_NONE           ((in_addr_t)0xffffffff) /* Address indicating an error return */
-#define INADDR_LOOPBACK       ((in_addr_t)0x7f000001) /* Inet 127.0.0.1.  */
-
-/* Special initializer for in6_addr_t */
-
-#define IN6ADDR_ANY_INIT      {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}}
-#define IN6ADDR_LOOPBACK_INIT {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}}}
-
-/* struct in6_addr union selectors */
-
-#define s6_addr               in6_u.u6_addr8
-#define s6_addr16             in6_u.u6_addr16
-#define s6_addr32             in6_u.u6_addr32
+#ifdef CONFIG_NET_IPv6
+#  error "IGMP for IPv6 not supported"
+#endif
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-/* IPv4 Internet address */
-
-typedef uint32_t in_addr_t;
-struct in_addr
-{
-  in_addr_t    s_addr;        /* Address (network byte order) */
-};
-
-struct sockaddr_in
-{
-  sa_family_t sin_family;     /* Address family: AF_INET */
-  uint16_t    sin_port;       /* Port in network byte order */
-  struct in_addr sin_addr;    /* Internet address */
-};
-
-/* IPv6 Internet address */
-
-struct in6_addr
-{
-  union
-  {
-    uint8_t   u6_addr8[16];
-    uint16_t  u6_addr16[8];
-    uint32_t  u6_addr32[4];
-  } in6_u;
-};
-
-struct sockaddr_in6
-{
-  sa_family_t sin_family;     /* Address family: AF_INET */
-  uint16_t    sin_port;       /* Port in network byte order */
-  struct in6_addr sin6_addr;  /* IPv6 internet address */
-};
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __NETINET_IP_H */
+/****************************************************************************
+ * Name: ipmsfilter
+ *
+ * Description:
+ *   Add or remove an IP address from a multicast filter set.
+ *   (See netutils/uiplib/uip_ipmsfilter.c)
+ *
+ * Parameters:
+ *   ifname     The name of the interface to use, size must less than IMSFNAMSIZ
+ *   multiaddr  Multicast group address to add/remove
+ *   fmode      MCAST_INCLUDE: Add multicast address
+ *              MCAST_EXCLUDE: Remove multicast address
+ *
+ * Return:
+ *   0 on sucess; Negated errno on failure
+ *
+ ****************************************************************************/
+
+EXTERN int ipmsfilter(FAR const char *ifname,
+                      FAR const struct in_addr *multiaddr,
+                      uint32_t fmode);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* CONFIG_NET_IGMP */
+#endif /* __NET_UIP_IPMSFILTER_H */

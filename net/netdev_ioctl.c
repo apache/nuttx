@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev_ioctl.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <sys/ioctl.h>
 
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -53,6 +54,11 @@
 #include <net/ethernet.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip.h>
+
+#ifdef CONFIG_NET_IGMP
+#  include "sys/sockio.h"
+#  include "net/uip/uip-igmp.h"
+#endif
 
 #include "net_internal.h"
 
@@ -130,57 +136,27 @@ static inline void ioctl_ifdown(FAR struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: netdev_ioctl
  *
  * Description:
  *   Perform network device specific operations.
  *
  * Parameters:
- *   sockfd   Socket descriptor of device
+ *   psock    Socket structure
+ *   dev      Ethernet driver device structure
  *   cmd      The ioctl command
  *   req      The argument of the ioctl cmd
  *
  * Return:
  *   >=0 on success (positive non-zero values are cmd-specific)
- *   -1 on failure withi errno set properly:
- *
- *   EBADF
- *     'sockfd' is not a valid descriptor.
- *   EFAULT
- *     'req' references an inaccessible memory area.
- *   EINVAL
- *     'cmd' or 'req' is not valid.
- *   ENOTTY
- *     'sockfd' is not associated with a network device.
- *   ENOTTY
- *      The specified request does not apply to the kind of object that the
- *      descriptor 'sockfd' references.
+ *   Negated errno returned on failure.
  *
  ****************************************************************************/
 
-int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
+static int netdev_ifrioctl(FAR struct socket *psock, int cmd, struct ifreq *req)
 {
-  FAR struct socket *psock = sockfd_socket(sockfd);
   FAR struct uip_driver_s *dev;
-  int err;
-
-  if (!_SIOCVALID(cmd) || !req)
-    {
-      err = EINVAL;
-      goto errout;
-    }
-
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (!psock || psock->s_crefs <= 0)
-    {
-      err = EBADF;
-      goto errout;
-    }
+  int ret = OK;
 
   /* Find the network device associated with the device name
    * in the request data.
@@ -189,7 +165,7 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
   dev = netdev_findbyname(req->ifr_name);
   if (!dev)
     {
-      err = EINVAL;
+      ret = -EINVAL;
       goto errout;
     }
 
@@ -244,13 +220,13 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
 
       case SIOCGIFCOUNT:  /* Get number of devices */
         req->ifr_count = netdev_count();
-        err = ENOSYS;
-       break;
+        ret = -ENOSYS;
+        break;
 
       case SIOCGIFBRDADDR:  /* Get broadcast IP address	*/
       case SIOCSIFBRDADDR:  /* Set broadcast IP address	*/
-        err = ENOSYS;
-        goto errout;
+        ret = -ENOSYS;
+        break;
 
 #ifdef CONFIG_NET_ARPIOCTLS
       case SIOCSARP:  /* Set a ARP mapping */
@@ -260,14 +236,156 @@ int netdev_ioctl(int sockfd, int cmd, struct ifreq *req)
 #endif
 
       default:
-        err = EINVAL;
-        goto errout;
+        ret = -EINVAL;
+        break;;
     }
 
-  return OK;
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: netdev_imsfioctl
+ *
+ * Description:
+ *   Perform network device specific operations.
+ *
+ * Parameters:
+ *   psock    Socket structure
+ *   dev      Ethernet driver device structure
+ *   cmd      The ioctl command
+ *   imsf      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int netdev_imsfioctl(FAR struct socket *psock, int cmd, struct ip_msfilter *imsf)
+{
+  FAR struct uip_driver_s *dev;
+  int ret = OK;
+
+  /* Find the network device associated with the device name
+   * in the request data.
+   */
+
+  dev = netdev_findbyname(imsf->imsf_name);
+  if (!dev)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* Execute the command */
+
+  switch (cmd)
+    {
+      case SIOCSIPMSFILTER:  /* Set source filter content */
+        {
+          if (imsf->imsf_fmode == MCAST_INCLUDE)
+            {
+              ret = igmp_joingroup(dev, &imsf->imsf_multiaddr);
+            }
+          else
+            {
+              DEBUGASSERT(imsf->imsf_fmode == MCAST_EXCLUDE);
+              ret = igmp_leavegroup(dev, &imsf->imsf_multiaddr);
+            }
+        }
+        break;
+
+      case SIOCGIPMSFILTER:  /* Retrieve source filter addresses */
+      default:
+        ret = -EINVAL;
+        break;
+    }
 
 errout:
-  errno = err;
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: netdev_ioctl
+ *
+ * Description:
+ *   Perform network device specific operations.
+ *
+ * Parameters:
+ *   sockfd   Socket descriptor of device
+ *   cmd      The ioctl command
+ *   req      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   On a failure, -1 is returned with errno set appropriately
+ *
+ *   EBADF
+ *     'sockfd' is not a valid descriptor.
+ *   EFAULT
+ *     'req' references an inaccessible memory area.
+ *   EINVAL
+ *     'cmd' or 'req' is not valid.
+ *   ENOTTY
+ *     'sockfd' is not associated with a network device.
+ *   ENOTTY
+ *      The specified request does not apply to the kind of object that the
+ *      descriptor 'sockfd' references.
+ *
+ ****************************************************************************/
+
+int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
+{
+  FAR struct socket *psock = sockfd_socket(sockfd);
+  int ret;
+
+  /* Check if this is a valid command.  In all cases, arg is a pointer that has
+   * been cast to unsigned long.  Verify that the value of the to-be-pointer is
+   * non-NULL.
+   */
+
+  if (!_SIOCVALID(cmd) || !arg)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (!psock || psock->s_crefs <= 0)
+    {
+      ret = -EBADF;
+      goto errout;
+    }
+
+  /* Execute the command */
+
+  ret = netdev_ifrioctl(psock, cmd, (FAR struct ifreq*)arg);
+#ifdef CONFIG_NET_IGMP
+  if (ret == -EINVAL)
+    {
+      ret = netdev_imsfioctl(psock, cmd, (FAR struct ip_msfilter*)arg);
+    }
+#endif
+
+  /* Check for success or failure */
+
+  if (ret >= 0)
+    {
+      return ret;
+    }
+
+/* On failure, set the errno and return -1 */
+
+errout:
+  errno = -ret;
   return ERROR;
 }
 

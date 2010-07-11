@@ -127,14 +127,16 @@
  *
  ****************************************************************************/
 
-void igmp_leavegroup(struct uip_driver_s *dev, uip_ipaddr_t *grpaddr)
+int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
   irqstate_t flags;
 
+  DEBUGASSERT(dev && grpaddr);
+
   /* Find the entry corresponding to the address leaving the group */
 
-  group = uip_grpfind(dev, grpaddr);
+  group = uip_grpfind(dev, &grpaddr->s_addr);
   if (group)
     {
       /* Cancel the timer and discard any queued Membership Reports.  Canceling
@@ -166,8 +168,10 @@ void igmp_leavegroup(struct uip_driver_s *dev, uip_ipaddr_t *grpaddr)
 
       /* And remove the group address from the ethernet drivers MAC filter set */
 
-      uip_removemcastmac(dev, grpaddr);
+      uip_removemcastmac(dev, &grpaddr->s_addr);
+      return OK;
     }
+  return -ENOENT;
 }
 
 #endif /* CONFIG_NET_IGMP */

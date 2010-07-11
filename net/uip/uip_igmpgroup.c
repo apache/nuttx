@@ -169,7 +169,8 @@ void uip_grpinit(void)
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *addr)
+FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
+                                      FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group;
   irqstate_t flags;
@@ -216,7 +217,8 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev, FAR uip_ipad
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *addr)
+FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
+                                     FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group;
   irqstate_t flags;
@@ -249,7 +251,8 @@ FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev, FAR uip_ipadd
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *addr)
+FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
+                                          FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group = uip_grpfind(dev, addr);
   if (!group)
