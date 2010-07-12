@@ -313,6 +313,9 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_PREALLOC_MQ_MSGS - The number of pre-allocated message
 		  structures.  The system manages a pool of preallocated
 		  message structures to minimize dynamic allocations
+		CONFIG_PREALLOC_IGMPGROUPS - Pre-allocated IGMP groups are used
+		  only if needed from interrupt level group created (by the IGMP server).
+		  Default: 4.
 		CONFIG_MQ_MAXMSGSIZE - Message structures are allocated with
 		  a fixed payload size given by this settin (does not include
 		  other message structure overhead.
@@ -405,6 +408,10 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_ICMP_PING - Provide interfaces to support application level
 		  support for sending ECHO (ping) requests and associating ECHO
 		  replies.
+		CONFIG_NET_IGMP - Enable IGMPv2 client support.
+		CONFIG_PREALLOC_IGMPGROUPS - Pre-allocated IGMP groups are used
+		  only if needed from interrupt level group created (by the IGMP server).
+		  Default: 4.
 		CONFIG_NET_PINGADDRCONF - Use "ping" packet for setting IP address
 		CONFIG_NET_STATISTICS - uIP statistics on or off
 		CONFIG_NET_RECEIVE_WINDOW - The size of the advertised receiver's

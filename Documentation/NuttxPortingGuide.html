@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 13, 2010</p>
+      <p>Last Updated: July 12, 2010</p>
     </td>
   </tr>
 </table>
@@ -2465,6 +2465,11 @@ extern void up_ledoff(int led);
     watchdog structures to minimize dynamic allocations
   </li>
   <li>
+    <code>CONFIG_PREALLOC_IGMPGROUPS</code>: Pre-allocated IGMP groups are used
+    Only if needed from interrupt level group created (by the IGMP server).
+    Default: 4
+  </li>
+  <li>
     <code>CONFIG_DEV_PIPE_SIZE</code>: Size, in bytes, of the buffer to allocated
     for pipe and FIFO support (default is 1024).
   </li>
@@ -2644,6 +2649,14 @@ extern void up_ledoff(int led);
   <li>
     <code>CONFIG_NET_ICMP_PING</code>: Provide interfaces to support application level
     support for sending ECHO (ping) requests and associating ECHO replies.
+  </li>
+  <li>
+    <code>CONFIG_NET_IGMP</code>:  Enable IGMPv2 client support.
+  </li>
+  <li>
+    <code>CONFIG_PREALLOC_IGMPGROUPS</code>: Pre-allocated IGMP groups are used
+    Only if needed from interrupt level group created (by the IGMP server).
+    Default: 4
   </li>
   <li>
     <code>CONFIG_NET_PINGADDRCONF</code>: Use "ping" packet for setting IP address
