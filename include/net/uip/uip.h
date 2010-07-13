@@ -150,62 +150,6 @@
 # define UIP_IPH_LEN    20    /* Size of IP header */
 #endif
 
-/* IP Header Options:
- *
- * The basic 20-byte IP header can be extended by up to another 40 bytes
- * (in units of 4 bytes) to provide IP options.  The format of a single IP
- * option is as follows:
- *
- * Single byte options:
- *
- *   Type:         8-bits
- *
- * Multi-byte options:
- *
- *   Type:         8-bits
- *   Length:       8-bits
- *   Pointer:      8-bits:
- *   Option Data: (depends on Length)
- *
- * The IP Option Type byte consists of the following subfields:
- */
- 
-#define IPOPT_TYPE_OPTION_SHIFT       (0)      /* Bits 0-5: Option number*/
-#define IPOPT_TYPE_OPTION_MASK        (0x1f << IPOPT_TYPE_OPTION_SHIFT)
-#  define IPOPT_TYPE_OPTION_END       (0  << IPOPT_TYPE_OPTION_SHIFT) /* End of options list */
-#  define IPOPT_TYPE_OPTION_NOOP      (1  << IPOPT_TYPE_OPTION_SHIFT) /* No operation */
-#  define IPOPT_TYPE_OPTION_SEC       (2  << IPOPT_TYPE_OPTION_SHIFT) /* Security */
-#  define IPOPT_TYPE_OPTION_LSRR      (3  << IPOPT_TYPE_OPTION_SHIFT) /* Loose source and record route */
-#  define IPOPT_TYPE_OPTION_TIMESTAMP (4  << IPOPT_TYPE_OPTION_SHIFT) /* Timestamp */
-#  define IPOPT_TYPE_OPTION_RR        (7  << IPOPT_TYPE_OPTION_SHIFT) /* Record route */
-#  define IPOPT_TYPE_OPTION_SSID      (8  << IPOPT_TYPE_OPTION_SHIFT) /* Stream ID */
-#  define IPOPT_TYPE_OPTION_SSRR      (9  << IPOPT_TYPE_OPTION_SHIFT) /* Strict source and record route */
-#  define IPOPT_TYPE_OPTION_RA        (20 << IPOPT_TYPE_OPTION_SHIFT) /* Router alert */
-#define IPOPT_TYPE_CLASS_SHIFT        (5)      /* Bits 5-6: Class */
-#define IPOPT_TYPE_CLASS_MASK         (3 << IPOPT_TYPE_CLASS_SHIFT)
-#  define IPOPT_TYPE_CLASS_CTRL       (0 << IPOPT_TYPE_CLASS_SHIFT) /* Control */
-#  define IPOPT_TYPE_CLASS_MEASURE    (2 << IPOPT_TYPE_CLASS_SHIFT) /* Debugging and measurement */
-#define IPOPT_TYPE_COPIED             (1 << 7) /* Bit 7: IP layer must copy option to each fragment */
-
-/* IP Option encoding macros */
-
-#define IPOPT_MKTYPE(copied,class,option) (copied|class|option)
-  
-#define IPOPT_MKOPTION8(copied,class,option) \
-  ((uint8_t)IPOPT_MKTYPE(copied,class,option))
-#define IPOPT_MKOPTION32(copied,class,option,len,ptr,data) \
-  ((uint32_t)IPORT_MKTYPE(copied,class,option) << 24 | \
-   (uint32_t)len << 16) | (uint32_t)data << 8 | (uint32_t)data)
-
-/* Some useful pre-defined IP options */
-
-#define IPOPT_END \
-  IPOPT_MKOPTION8(0, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_END)
-#define IPOPT_NOOP \
-  IPOPT_MKOPTION8(0, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_NOOP)
-#define IPOPT_RA \
-  IPOPT_MKOPTION32(IPOPT_TYPE_COPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_RA, 4, 0, 0)
- 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
