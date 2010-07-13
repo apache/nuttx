@@ -2,7 +2,7 @@
  * net/uip/uip_arp.c
  * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -64,19 +64,29 @@
 #include <net/ethernet.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip-arp.h>
+#ifdef CONFIG_NET_IGMP
+#  include <net/uip/uip-igmp.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ARP_REQUEST 1
-#define ARP_REPLY   2
+#define ARP_REQUEST    1
+#define ARP_REPLY      2
 
 #define ARP_HWTYPE_ETH 1
 
-#define ETHBUF ((struct uip_eth_hdr *)&dev->d_buf[0])
-#define ARPBUF ((struct arp_hdr *)&dev->d_buf[UIP_LLH_LEN])
-#define IPBUF  ((struct ethip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define RASIZE         4  /* Size of ROUTER ALERT */
+
+#define ETHBUF        ((struct uip_eth_hdr *)&dev->d_buf[0])
+#define ARPBUF        ((struct arp_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define IPBUF         ((struct ethip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+
+#ifdef CONFIG_NET_IGMP
+#  define RA          ((uint16_t *)&dev->d_buf[UIP_LLH_LEN])
+#  define RAIPBUF     ((struct ethip_hdr *)&dev->d_buf[UIP_LLH_LEN+RASIZE])
+#endif
 
 /****************************************************************************
  * Private Types
@@ -288,9 +298,27 @@ void uip_arp_out(struct uip_driver_s *dev)
   const struct arp_entry *tabptr = NULL;
   struct arp_hdr         *parp   = ARPBUF;
   struct uip_eth_hdr     *peth   = ETHBUF;
-  struct ethip_hdr       *pip    = IPBUF;
+  struct ethip_hdr       *pip;
   in_addr_t               ipaddr;
   in_addr_t               destipaddr;
+
+  /* Check for the router alert option */
+
+#if CONFIG_NET_IGMP
+  if (RA[0] == HTONS(ROUTER_ALERT >> 16) && RA[1] == HTONS(ROUTER_ALERT & 0xffff))
+    {
+      /* Yes... there is a router alert.  This must be an IGMP packet.
+       * bump up the IP header address to index around the router alert.
+       */
+
+      pip = RAIPBUF;
+    }
+  else
+#else
+    {
+      pip = IPBUF;
+    }
+#endif
 
   /* Find the destination IP address in the ARP table and construct
    * the Ethernet header. If the destination IP addres isn't on the
@@ -316,18 +344,18 @@ void uip_arp_out(struct uip_driver_s *dev)
    *   addresses=0xff (ff00::/8.)
    */
 
- else if (pip->eh_destipaddr[0] >= HTONS(0xe000) &&
-          pip->eh_destipaddr[0] <= HTONS(0xefff))
-   {
-     /* Build the well-known IPv4 IGMP ethernet address.  The first
-      * three bytes are fixed; the final three variable come from the
-      * last three bytes of the IP address.
-      */
+ else if (NTOHS(pip->eh_destipaddr[0]) >= 0xe000 &&
+          NTOHS(pip->eh_destipaddr[0]) <= 0xefff)
+    {
+      /* Build the well-known IPv4 IGMP ethernet address.  The first
+       * three bytes are fixed; the final three variable come from the
+       * last three bytes of the IP address.
+       */
 
-     const uint8_t *ip = ((uint8_t*)pip->eh_destipaddr) + 1;
-     memcpy(peth->dest,  g_multicast_ethaddr, 3);
-     memcpy(&peth->dest[3], ip, 3);
-   }
+      const uint8_t *ip = ((uint8_t*)pip->eh_destipaddr) + 1;
+      memcpy(peth->dest,  g_multicast_ethaddr, 3);
+      memcpy(&peth->dest[3], ip, 3);
+    }
 #endif
   else
     {

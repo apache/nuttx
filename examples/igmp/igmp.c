@@ -87,7 +87,9 @@ int user_start(int argc, char *argv[])
   uint8_t mac[IFHWADDRLEN];
 #endif
 
-/* Many embedded network interfaces must have a software assigned MAC */
+  message("Configuring Ethernet...\n");
+  
+  /* Many embedded network interfaces must have a software assigned MAC */
 
 #ifdef CONFIG_EXAMPLE_IGMP_NOMAC
   mac[0] = 0x00;
@@ -117,19 +119,23 @@ int user_start(int argc, char *argv[])
   /* Not much of a test for now */
   /* Join the group */
 
+  message("Join group...\n");
   addr.s_addr = HTONL(CONFIG_EXAMPLE_IGMP_GRPADDR);
   ipmsfilter("eth0", &addr, MCAST_INCLUDE);
 
   /* Wait a while */
 
+  message("Wait for timeout...\n");
   sleep(5);
 
   /* Leave the group */
 
+  message("Leave group...\n");
   ipmsfilter("eth0", &addr, MCAST_EXCLUDE);
 
   /* Wait a while */
 
   sleep(5);
+  message("Exiting...\n");
   return 0;
 }

@@ -118,14 +118,14 @@ void uip_igmpinput(struct uip_driver_s *dev)
   uip_ipaddr_t grpaddr;
   unsigned int ticks;
 
-  nvdbg("IGMP message: %04x%04x\n", IGMPBUF->destipaddr[1], IGMPBUF->destipaddr[0]);
+  nllvdbg("IGMP message: %04x%04x\n", IGMPBUF->destipaddr[1], IGMPBUF->destipaddr[0]);
 
   /* Verify the message length */
 
   if (dev->d_len < UIP_LLH_LEN+UIP_IPIGMPH_LEN)
     {
       IGMP_STATINCR(uip_stat.igmp.length_errors);
-      ndbg("Length error\n");
+      nlldbg("Length error\n");
       return;
     }
 
@@ -134,7 +134,7 @@ void uip_igmpinput(struct uip_driver_s *dev)
   if (uip_chksum((uint16_t*)&IGMPBUF->type, UIP_IGMPH_LEN) != 0)
     {
       IGMP_STATINCR(uip_stat.igmp.chksum_errors);
-      ndbg("Checksum error\n");
+      nlldbg("Checksum error\n");
       return;
     }
 
@@ -182,13 +182,13 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
                 /* This is the general query */
 
-                nvdbg("General multicast query\n");
+                nllvdbg("General multicast query\n");
                 if (IGMPBUF->maxresp == 0)
                   {
                     IGMP_STATINCR(uip_stat.igmp.v1_received);
                     IGMPBUF->maxresp = 10;
 
-                    ndbg("V1 not implemented\n");
+                    nlldbg("V1 not implemented\n");
                   }
 
                 IGMP_STATINCR(uip_stat.igmp.query_received);
@@ -212,7 +212,7 @@ void uip_igmpinput(struct uip_driver_s *dev)
               }
             else /* if (group->grpaddr != 0) */
               {
-                nvdbg("Group-specific multicast queury\n");
+                nllvdbg("Group-specific multicast queury\n");
 
                 /* We first need to re-lookup the group since we used dest last time.
                  * Use the incoming IPaddress!
@@ -234,10 +234,10 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
         else if (group->grpaddr != 0)
           {
-            nvdbg("Unitcast queury\n");
+            nllvdbg("Unitcast queury\n");
             IGMP_STATINCR(uip_stat.igmp.ucast_query);
 
-            ndbg("Query to a specific group with the group address as destination\n");
+            nlldbg("Query to a specific group with the group address as destination\n");
 
             ticks = uip_decisec2tick((int)IGMPBUF->maxresp);
             if (IS_IDLEMEMBER(group->flags) || uip_igmpcmptimer(group, ticks))
@@ -250,7 +250,7 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
       case IGMPv2_MEMBERSHIP_REPORT:
         {
-          nvdbg("Membership report\n");
+          nllvdbg("Membership report\n");
 
           IGMP_STATINCR(uip_stat.igmp.report_received);
           if (!IS_IDLEMEMBER(group->flags))
@@ -266,8 +266,7 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
       default:
         {
-          nvdbg("Unexpected msg %02x in state %d on group %p at dev %p\n",
-                IGMPBUF->type, group->state, &group, dev);
+          nlldbg("Unexpected msg %02x\n", IGMPBUF->type);
         }
       break;
     }

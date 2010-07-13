@@ -81,7 +81,7 @@ static void uip_mcastmac(uip_ipaddr_t *ip, FAR uint8_t *mac)
   mac[4] = ip4_addr3(*ip);
   mac[5] = ip4_addr4(*ip);
 
-  nvdbg("IP: %04x -> MAC: %02%02%02%02%02%02\n",
+  nvdbg("IP: %04x -> MAC: %02x%02x%02x%02x%02x%02x\n",
         *ip, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 

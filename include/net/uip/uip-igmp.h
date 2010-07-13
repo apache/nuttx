@@ -110,6 +110,7 @@
 #define IS_SCHEDMSG(f)           (((f) & IGMP_SCHEDMSG) != 0)
 #define IS_WAITMSG(f)            (((f) & IGMP_WAITMSG) != 0)
 
+#define ROUTER_ALERT             0x94040000
 #define IGMP_TTL                 1
 
 /****************************************************************************

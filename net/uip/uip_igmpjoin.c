@@ -148,7 +148,7 @@ int igmp_joingroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 
        /* Add the group (MAC) address to the ether drivers MAC filter list */
 
-       uip_addmcastmac(dev, &grpaddr->s_addr);
+       uip_addmcastmac(dev, (FAR uip_ipaddr_t *)&grpaddr->s_addr);
        return OK;
     }
   return -EEXIST;

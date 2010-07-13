@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <arpa/inet.h>
 
 #include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
@@ -54,8 +55,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RASIZE      (8)
-#define ROUTERALERT ((uint16_t*)&dev->d_buf[UIP_LLH_LEN])
+/* Debug */
+
+#undef IGMP_DUMPPKT       /* Define to enable packet dump */
+
+#ifndef CONFIG_DEBUG_NET
+#  undef IGMP_DUMPPKT
+#endif
+
+#ifdef IGMP_DUMPPKT
+#  define igmp_dumppkt(b,n) lib_dumpbuffer("IGMP", (FAR const uint8_t*)(b), (n))
+#else
+#  define igmp_dumppkt(b,n)
+#endif
+
+/* Buffer layout */
+
+#define RASIZE      (4)
+#define RA          ((uint16_t*)&dev->d_buf[UIP_LLH_LEN])
 #define IGMPBUF     ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN + RASIZE])
 #define IGMPPAYLOAD (&dev->d_buf[UIP_LLH_LEN + RASIZE + UIP_IPH_LEN])
 
@@ -105,6 +122,8 @@ static uint16_t uip_igmpchksum(FAR uint8_t *buffer, int buflen)
 void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
                   FAR uip_ipaddr_t *destipaddr)
 {
+  nllvdbg("msgid: %02x destipaddr: %08x\n", group->msgid, (int)destipaddr);
+
   /* The total length to send is the size of the IP and IGMP headers and 8
    * bytes for the ROUTER ALERT (and, eventually, the ethernet header)
    */
@@ -117,8 +136,8 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
 
   /* Add the router alert option */
 
-  ROUTERALERT[0]       = HTONS(0x9404);
-  ROUTERALERT[1]       = 0;
+  RA[0]                = HTONS(ROUTER_ALERT >> 16);
+  RA[1]                = HTONS(ROUTER_ALERT & 0xffff);
 
   /* Initialize the IPv4 header */
 
@@ -140,7 +159,7 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate IP checksum. */
 
   IGMPBUF->ipchksum    = 0;
-  IGMPBUF->ipchksum    = ~uip_igmpchksum((FAR uint8_t *)ROUTERALERT, UIP_IPH_LEN + RASIZE);
+  IGMPBUF->ipchksum    = ~uip_igmpchksum((FAR uint8_t *)RA, UIP_IPH_LEN + RASIZE);
 
   /* Set up the IGMP message */
 
@@ -158,7 +177,7 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
 
   nllvdbg("Outgoing IGMP packet length: %d (%d)\n",
           dev->d_len, (IGMPBUF->len[0] << 8) | IGMPBUF->len[1]);
-
+  igmp_dumppkt(RA, UIP_IPIGMPH_LEN + RASIZE);
 }
 
 #endif /* CONFIG_NET_IGMP */
