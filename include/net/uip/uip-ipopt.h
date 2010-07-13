@@ -35,8 +35,8 @@
  *
  ************************************************************************************************************/
 
-#ifndef __NET_UIP_IPOPT_H
-#define __NET_UIP_IPOPT_H
+#ifndef __NET_UIP_UIP_IPOPT_H
+#define __NET_UIP_UIP_IPOPT_H
 
 /************************************************************************************************************
  * Included Files
@@ -115,39 +115,39 @@
 
 /* Option Copy Class Length    Description References
  * ------ ---- ----- --------- ------------------------------------------------
- *   0     0    0     1        End of options list. RFC 791 
- *   1     0    0     1        NOP. RFC 791 
- *   2     1    0     11       Security. RFC 791, RFC 1108 
- *   3     1    0     variable Loose Source Route. RFC 791 
- *   4     0    2     variable Time stamp. RFC 781, RFC 791 
- *   5     1    0     3-31     Extended Security. RFC 1108 
- *   6     1    0              Commercial Security.   
- *   7     0    0     variable Record Route. RFC 791 
- *   8     1    0     4        Stream Identifier. RFC 791, RFC 1122 
- *   9     1    0     variable Strict Source Route. RFC 791 
- *  10     0    0              Experimental Measurement.   
- *  11     0    0     4        MTU Probe. (obsolete). RFC 1063 
- *  12     0    0     4        MTU Reply. (obsolete). RFC 1063 
- *  13     1    2              Experimental Flow Control.   
- *  14     1    0              Expermental Access Control.   
- *  15     0    0              ENCODE.   
- *  16     1    0              IMI Traffic Descriptor.   
- *  17     1    0     variable Extended Internet Protocol. RFC 1385 
- *  18     0    2     12       Traceroute. RFC 1393 
- *  19     1    0     10       Address Extension. RFC 1475 
- *  20     1    0     4        Router Alert. RFC 2113 
- *  21     1    0     6-38     Selective Directed Broadcast Mode. RFC 1770 
+ *   0     0    0     1        End of options list (RFC 791)
+ *   1     0    0     1        NOP (RFC 791 
+ *   2     1    0     11       Security (RFC 791, RFC 1108)
+ *   3     1    0     variable Loose Source Route (RFC 791)
+ *   4     0    2     variable Time stamp (RFC 781, RFC 791)
+ *   5     1    0     3-31     Extended Security (RFC 1108)
+ *   6     1    0              Commercial Security
+ *   7     0    0     variable Record Route (RFC 791)
+ *   8     1    0     4        Stream Identifier (RFC 791, RFC 1122)
+ *   9     1    0     variable Strict Source Route (RFC 791)
+ *  10     0    0              Experimental Measurement
+ *  11     0    0     4        MTU Probe (obsolete) (RFC 1063)
+ *  12     0    0     4        MTU Reply (obsolete) (RFC 1063)
+ *  13     1    2              Experimental Flow Control
+ *  14     1    0              Experimental Access Control
+ *  15     0    0              ENCODE
+ *  16     1    0              IMI Traffic Descriptor
+ *  17     1    0     variable Extended Internet Protocol (RFC 1385)
+ *  18     0    2     12       Traceroute (RFC 1393)
+ *  19     1    0     10       Address Extension (RFC 1475)
+ *  20     1    0     4        Router Alert (RFC 2113)
+ *  21     1    0     6-38     Selective Directed Broadcast Mode (RFC 1770)
  *  22     1    0        
- *  23     1    0              Dynamic Packet State.   
- *  24     1    0              Upstream Multicast Packet.   
- *  25     0    0              QS, Quick-Start. RFC 4782 
+ *  23     1    0              Dynamic Packet State
+ *  24     1    0              Upstream Multicast Packet
+ *  25     0    0              QS, Quick-Start (RFC 4782)
  *  26
  *  -
  *  29             
- *  30     0    0             EXP - RFC3692-style Experiment. RFC 4727 
- *  30     0    2             EXP - RFC3692-style Experiment. RFC 4727 
- *  30     1    0             EXP - RFC3692-style Experiment RFC 4727 
- *  30     1    2             EXP - RFC3692-style Experiment. RFC 4727 
+ *  30     0    0             EXP - RFC3692-style Experiment (RFC 4727)
+ *  30     0    2             EXP - RFC3692-style Experiment (RFC 4727)
+ *  30     1    0             EXP - RFC3692-style Experiment RFC 4727)
+ *  30     1    2             EXP - RFC3692-style Experiment (RFC 4727)
  *  31             
  */
 
@@ -226,10 +226,13 @@
 
 #define IPOPT_SDBM_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_COPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_SDBM)
+  
 #define IPOPT_DPS_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_COPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_DPS)
+  
 #define IPOPT_UMP_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_COPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_UMP)
+  
 #define IPOPT_QS_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_NOTCOPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_QS)
 
@@ -245,4 +248,4 @@
  * Public Function Prototypes
  ************************************************************************************************************/
 
-#endif /* __NET_UIP_IPOPT_H */
+#endif /* __NET_UIP_UIP_IPOPT_H */
