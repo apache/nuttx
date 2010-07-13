@@ -144,7 +144,7 @@ struct uip_igmphdr_s
 
   /* IPv4 IP header */
 
-  uint8_t  vhl;             /*  8-bit Version (4) and header length (5 or 6) */
+  uint8_t  vhl;             /*  8-bit Version (4) and header length (6 with Router Alert) */
   uint8_t  tos;             /*  8-bit Type of service (e.g., 6=TCP) */
   uint8_t  len[2];          /* 16-bit Total length */
   uint8_t  ipid[2];         /* 16-bit Identification */
@@ -157,11 +157,11 @@ struct uip_igmphdr_s
 
 #endif /* CONFIG_NET_IPv6 */
 
-  /* Router alerted IP header option */
+  /* Router Alert IP header option */
 
   uint16_t ra[2];
 
-  /* IGMP header:
+  /* IGMPv2 header:
    *
    *  0                   1                   2                   3
    *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
