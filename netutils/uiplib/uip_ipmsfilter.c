@@ -45,6 +45,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <netinet/in.h>
 #include <sys/sockio.h>
@@ -83,6 +84,8 @@ int ipmsfilter(FAR const char *ifname, FAR const struct in_addr *multiaddr,
                uint32_t fmode)
 {
   int ret = ERROR;
+
+  nvdbg("ifname: %s muliaddr: %08x fmode: %ld\n", ifname, *multiaddr, fmode);
   if (ifname && multiaddr)
     {
       /* Get a socket (only so that we get access to the INET subsystem) */

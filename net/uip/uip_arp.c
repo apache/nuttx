@@ -64,9 +64,6 @@
 #include <net/ethernet.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip-arp.h>
-#ifdef CONFIG_NET_IGMP
-#  include <net/uip/uip-igmp.h>
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,11 +79,6 @@
 #define ETHBUF        ((struct uip_eth_hdr *)&dev->d_buf[0])
 #define ARPBUF        ((struct arp_hdr *)&dev->d_buf[UIP_LLH_LEN])
 #define IPBUF         ((struct ethip_hdr *)&dev->d_buf[UIP_LLH_LEN])
-
-#ifdef CONFIG_NET_IGMP
-#  define RA          ((uint16_t *)&dev->d_buf[UIP_LLH_LEN])
-#  define RAIPBUF     ((struct ethip_hdr *)&dev->d_buf[UIP_LLH_LEN+RASIZE])
-#endif
 
 /****************************************************************************
  * Private Types
@@ -298,27 +290,9 @@ void uip_arp_out(struct uip_driver_s *dev)
   const struct arp_entry *tabptr = NULL;
   struct arp_hdr         *parp   = ARPBUF;
   struct uip_eth_hdr     *peth   = ETHBUF;
-  struct ethip_hdr       *pip;
+  struct ethip_hdr       *pip    = IPBUF;
   in_addr_t               ipaddr;
   in_addr_t               destipaddr;
-
-  /* Check for the router alert option */
-
-#if CONFIG_NET_IGMP
-  if (RA[0] == HTONS(ROUTER_ALERT >> 16) && RA[1] == HTONS(ROUTER_ALERT & 0xffff))
-    {
-      /* Yes... there is a router alert.  This must be an IGMP packet.
-       * bump up the IP header address to index around the router alert.
-       */
-
-      pip = RAIPBUF;
-    }
-  else
-#else
-    {
-      pip = IPBUF;
-    }
-#endif
 
   /* Find the destination IP address in the ARP table and construct
    * the Ethernet header. If the destination IP addres isn't on the

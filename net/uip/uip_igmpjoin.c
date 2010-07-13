@@ -133,7 +133,7 @@ int igmp_joingroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
     {
        /* No... allocate a new entry */
  
-       nvdbg("Join to new group\n");
+       nvdbg("Join to new group: %08x\n", grpaddr->s_addr);
        group = uip_grpalloc(dev, &grpaddr->s_addr);
        IGMP_STATINCR(uip_stat.igmp.joins);
 

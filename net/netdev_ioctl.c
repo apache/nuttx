@@ -158,6 +158,8 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd, struct ifreq *req)
   FAR struct uip_driver_s *dev;
   int ret = OK;
 
+  nvdbg("cmd: %d\n", cmd);
+
   /* Find the network device associated with the device name
    * in the request data.
    */
@@ -267,6 +269,8 @@ static int netdev_imsfioctl(FAR struct socket *psock, int cmd, struct ip_msfilte
 {
   FAR struct uip_driver_s *dev;
   int ret = OK;
+
+  nvdbg("cmd: %d\n", cmd);
 
   /* Find the network device associated with the device name
    * in the request data.

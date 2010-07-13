@@ -72,9 +72,7 @@
 /* Buffer layout */
 
 #define RASIZE      (4)
-#define RA          ((uint16_t*)&dev->d_buf[UIP_LLH_LEN])
-#define IGMPBUF     ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN + RASIZE])
-#define IGMPPAYLOAD (&dev->d_buf[UIP_LLH_LEN + RASIZE + UIP_IPH_LEN])
+#define IGMPBUF     ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -122,13 +120,13 @@ static uint16_t uip_igmpchksum(FAR uint8_t *buffer, int buflen)
 void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
                   FAR uip_ipaddr_t *destipaddr)
 {
-  nllvdbg("msgid: %02x destipaddr: %08x\n", group->msgid, (int)destipaddr);
+  nllvdbg("msgid: %02x destipaddr: %08x\n", group->msgid, (int)*destipaddr);
 
-  /* The total length to send is the size of the IP and IGMP headers and 8
+  /* The total length to send is the size of the IP and IGMP headers and 4
    * bytes for the ROUTER ALERT (and, eventually, the ethernet header)
    */
 
-  dev->d_len           = UIP_IPIGMPH_LEN + RASIZE;
+  dev->d_len           = UIP_IPIGMPH_LEN;
 
   /* The total size of the data is the size of the IGMP header */
 
@@ -136,12 +134,12 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
 
   /* Add the router alert option */
 
-  RA[0]                = HTONS(ROUTER_ALERT >> 16);
-  RA[1]                = HTONS(ROUTER_ALERT & 0xffff);
+  IGMPBUF->ra[0]       = HTONS(ROUTER_ALERT >> 16);
+  IGMPBUF->ra[1]       = HTONS(ROUTER_ALERT & 0xffff);
 
   /* Initialize the IPv4 header */
 
-  IGMPBUF->vhl         = 0x45;
+  IGMPBUF->vhl         = 0x46;  /* 4->IP; 6->24 bytes */
   IGMPBUF->tos         = 0;
   IGMPBUF->len[0]      = (dev->d_len >> 8);
   IGMPBUF->len[1]      = (dev->d_len & 0xff);
@@ -159,7 +157,7 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate IP checksum. */
 
   IGMPBUF->ipchksum    = 0;
-  IGMPBUF->ipchksum    = ~uip_igmpchksum((FAR uint8_t *)RA, UIP_IPH_LEN + RASIZE);
+  IGMPBUF->ipchksum    = ~uip_igmpchksum((FAR uint8_t *)IGMPBUF, UIP_IPH_LEN + RASIZE);
 
   /* Set up the IGMP message */
 
@@ -170,7 +168,7 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate the IGMP checksum. */
 
   IGMPBUF->chksum  = 0;
-  IGMPBUF->chksum  = ~uip_igmpchksum(IGMPPAYLOAD, UIP_IPIGMPH_LEN);
+  IGMPBUF->chksum  = ~uip_igmpchksum(&IGMPBUF->type, UIP_IPIGMPH_LEN);
 
   IGMP_STATINCR(uip_stats.igmp.poll_send);
   IGMP_STATINCR(uip_stats.ip.sent);

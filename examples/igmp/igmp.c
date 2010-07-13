@@ -55,6 +55,20 @@
  * Definitions
  ****************************************************************************/
 
+/* Check if the destination address is a multicast address
+ *
+ * - IPv4: multicast addresses lie in the class D group -- The address range
+ *   224.0.0.0 to 239.255.255.255 (224.0.0.0/4)
+ *
+ * - IPv6 multicast addresses are have the high-order octet of the
+ *   addresses=0xff (ff00::/8.)
+ */
+
+#if ((CONFIG_EXAMPLE_IGMP_GRPADDR & 0xffff0000) < 0xe0000000ul) || \
+    ((CONFIG_EXAMPLE_IGMP_GRPADDR & 0xffff0000) > 0xeffffffful)
+#  error "Bad range for IGMP group address"
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/

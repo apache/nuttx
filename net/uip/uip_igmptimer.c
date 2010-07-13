@@ -81,7 +81,7 @@ static void uip_igmptimeout(int argc, uint32_t arg, ...)
 
   /* If the state is DELAYING_MEMBER then we send a report for this group */
 
-  nvdbg("Timeout!\n");
+  nllvdbg("Timeout!\n");
   group = (FAR struct igmp_group_s *)arg;
   DEBUGASSERT(argc == 1 && group);
 

@@ -87,16 +87,18 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
 
   if (group->msgid == IGMPv2_MEMBERSHIP_REPORT)
     {
-      nllvdbg("Send IGMPv2_MEMBERSHIP_REPORT\n");
       dest = &group->grpaddr;
+      nllvdbg("Send IGMPv2_MEMBERSHIP_REPORT, dest=%08x flags=%02x\n",
+               *dest, group->flags);
       IGMP_STATINCR(uip_stat.igmp.report_sched);
       SET_LASTREPORT(group->flags); /* Remember we were the last to report */
     }
   else
     {
-      nllvdbg("Send IGMP_LEAVE_GROUP\n");
       DEBUGASSERT(group->msgid == IGMP_LEAVE_GROUP);
       dest = &g_allrouters;
+      nllvdbg("Send IGMP_LEAVE_GROUP, dest=%08x flags=%02x\n",
+               *dest, group->flags);
       IGMP_STATINCR(uip_stat.igmp.leave_sched);
     }
 
@@ -113,6 +115,7 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
 
   if (IS_WAITMSG(group->flags))
     {
+      nllvdbg("Awakening waiter\n");
       sem_post(&group->sem);
     }
 }
@@ -140,6 +143,8 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
 void uip_igmppoll(FAR struct uip_driver_s *dev)
 {
   FAR struct igmp_group_s *group;
+
+  nllvdbg("Entry\n");
 
   /* Setup the poll operation */
 

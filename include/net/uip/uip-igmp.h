@@ -78,11 +78,11 @@
 /* Header sizes:
  *
  * UIP_IGMPH_LEN   - Size of IGMP header in bytes
- * UIP_IPIGMPH_LEN - Size of IP + IGMP header
+ * UIP_IPIGMPH_LEN - Size of IP + Size of IGMP header + Size of router alert
  */
 
 #define UIP_IGMPH_LEN            8
-#define UIP_IPIGMPH_LEN          (UIP_IGMPH_LEN + UIP_IPH_LEN)
+#define UIP_IPIGMPH_LEN          (UIP_IGMPH_LEN + UIP_IPH_LEN + 4)
 
 /* Group flags */
 
@@ -156,6 +156,10 @@ struct uip_igmphdr_s
   uint16_t destipaddr[2];   /* 32-bit Destination IP address */
 
 #endif /* CONFIG_NET_IPv6 */
+
+  /* Router alerted IP header option */
+
+  uint16_t ra[2];
 
   /* IGMP header:
    *

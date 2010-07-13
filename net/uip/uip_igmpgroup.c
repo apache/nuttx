@@ -191,7 +191,7 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
     {
       /* Initialize the non-zero elements of the group structure */
 
-      uip_ipaddr_copy(group->grpaddr, addr);
+      uip_ipaddr_copy(group->grpaddr, *addr);
       sem_init(&group->sem, 0, 0);
 
       /* Interrupts must be disabled in order to modify the group list */
@@ -230,7 +230,7 @@ FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
   flags = irqsave();
   for (group = (FAR struct igmp_group_s *)dev->grplist.head; group; group = group->next)
     {
-      if (uip_ipaddr_cmp(&group->grpaddr, addr))
+      if (uip_ipaddr_cmp(&group->grpaddr, *addr))
         {
           break;
         }

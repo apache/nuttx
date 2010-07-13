@@ -81,7 +81,7 @@ static void uip_mcastmac(uip_ipaddr_t *ip, FAR uint8_t *mac)
   mac[4] = ip4_addr3(*ip);
   mac[5] = ip4_addr4(*ip);
 
-  nvdbg("IP: %04x -> MAC: %02x%02x%02x%02x%02x%02x\n",
+  nvdbg("IP: %08x -> MAC: %02x%02x%02x%02x%02x%02x\n",
         *ip, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
@@ -101,7 +101,7 @@ void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
 {
   uint8_t mcastmac[6];
 
-  nvdbg("Adding: IP %04x\n");
+  nvdbg("Adding: IP %08x\n", *ip);
   if (dev->d_addmac)
     {
       uip_mcastmac(ip, mcastmac);
@@ -121,7 +121,7 @@ void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
 {
   uint8_t mcastmac[6];
 
-  nvdbg("Removing: IP %04x\n");
+  nvdbg("Removing: IP %08x\n", *ip);
   if (dev->d_rmmac)
     {
       uip_mcastmac(ip, mcastmac);

@@ -137,6 +137,7 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
   /* Find the entry corresponding to the address leaving the group */
 
   group = uip_grpfind(dev, &grpaddr->s_addr);
+  ndbg("Leaving group: %p\n", group);
   if (group)
     {
       /* Cancel the timer and discard any queued Membership Reports.  Canceling
@@ -157,7 +158,7 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 
       if (IS_LASTREPORT(group->flags))
         {
-          ndbg("Leaving group\n");
+          ndbg("Schedul Leave Group message\n");
           IGMP_STATINCR(uip_stat.igmp.leave_sched);
           uip_igmpwaitmsg(group, IGMP_LEAVE_GROUP);
         }
@@ -171,6 +172,8 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
       uip_removemcastmac(dev, (FAR uip_ipaddr_t *)&grpaddr->s_addr);
       return OK;
     }
+
+  nvdbg("Return -ENOENT\n");
   return -ENOENT;
 }
 
