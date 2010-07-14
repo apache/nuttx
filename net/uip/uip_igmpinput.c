@@ -145,8 +145,8 @@ void uip_igmpinput(struct uip_driver_s *dev)
   if (!group)
     {
       nlldbg("Failed to allocate/find group: %08x\n", destipaddr);
-	  return;
-	}
+      return;
+    }
 
   /* Now handle the message based on the IGMP message type */
 
