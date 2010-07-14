@@ -171,8 +171,8 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
   IGMPBUF->chksum      = 0;
   IGMPBUF->chksum      = ~uip_igmpchksum(&IGMPBUF->type, UIP_IPIGMPH_LEN);
 
-  IGMP_STATINCR(uip_stats.igmp.poll_send);
-  IGMP_STATINCR(uip_stats.ip.sent);
+  IGMP_STATINCR(uip_stat.igmp.poll_send);
+  IGMP_STATINCR(uip_stat.ip.sent);
 
   nllvdbg("Outgoing IGMP packet length: %d (%d)\n",
           dev->d_len, (IGMPBUF->len[0] << 8) | IGMPBUF->len[1]);
