@@ -45,6 +45,7 @@
 #include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
+#include <net/uip/uip-ipopt.h>
 #include <net/uip/uip-igmp.h>
 
 #include "uip_internal.h"
@@ -134,8 +135,8 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
 
   /* Add the router alert option */
 
-  IGMPBUF->ra[0]       = HTONS(ROUTER_ALERT >> 16);
-  IGMPBUF->ra[1]       = HTONS(ROUTER_ALERT & 0xffff);
+  IGMPBUF->ra[0]       = HTONS(IPOPT_RA >> 16);
+  IGMPBUF->ra[1]       = HTONS(IPOPT_RA & 0xffff);
 
   /* Initialize the IPv4 header */
 

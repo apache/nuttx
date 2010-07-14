@@ -158,7 +158,7 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 
       if (IS_LASTREPORT(group->flags))
         {
-          ndbg("Schedul Leave Group message\n");
+          ndbg("Schedule Leave Group message\n");
           IGMP_STATINCR(uip_stat.igmp.leave_sched);
           uip_igmpwaitmsg(group, IGMP_LEAVE_GROUP);
         }

@@ -43,9 +43,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdlib.h>
 #include <string.h>
+#include <wdog.h>
 #include <queue.h>
 #include <debug.h>
 
@@ -64,12 +66,48 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
 #ifdef CONFIG_NET_IPv6
 #  error "IGMP for IPv6 not supported"
 #endif
 
 #ifndef CONFIG_PREALLOC_IGMPGROUPS
 #  define CONFIG_PREALLOC_IGMPGROUPS 4
+#endif
+
+/* Debug ********************************************************************/
+
+#undef IGMP_GRPDEBUG /* Define to enable detailed IGMP group debug */
+
+#ifndef CONFIG_NET_IGMP
+#  undef IGMP_GRPDEBUG
+#endif
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef IGMP_GRPDEBUG
+#    define grpdbg(format, arg...)    ndbg(format, ##arg)
+#    define grplldbg(format, arg...)  nlldbg(format, ##arg)
+#    define grpvdbg(format, arg...)   nvdbg(format, ##arg)
+#    define grpllvdbg(format, arg...) nllvdbg(format, ##arg)
+#  else
+#    define grpdbg(x...)
+#    define grplldbg(x...)
+#    define grpvdbg(x...)
+#    define grpllvdbg(x...)
+#  endif
+#else
+#  ifdef IGMP_GRPDEBUG
+#    define grpdbg    ndbg
+#    define grplldbg  nlldbg
+#    define grpvdbg   nvdbg
+#    define grpllvdbg nllvdbg
+#  else
+#    define grpdbg    (void)
+#    define grplldbg  (void)
+#    define grpvdbg   (void)
+#    define grpllvdbg (void)
+#  endif
 #endif
 
 /****************************************************************************
@@ -151,6 +189,8 @@ void uip_grpinit(void)
   FAR struct igmp_group_s *group;
   int i;
 
+  grplldbg("Initializing\n");
+
   for (i = 0; i < CONFIG_PREALLOC_IGMPGROUPS; i++)
     {
       group = &g_preallocgrps[i];
@@ -178,12 +218,15 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
   nllvdbg("addr: %08x dev: %p\n", *addr, dev);
   if (up_interrupt_context())
     {
+      grplldbg("Allocate from the heap\n");
       group = uip_grpheapalloc();
     }
   else
     {
+      grplldbg("Use a pre-allocated group entry\n");
       group = uip_grpprealloc();
     }
+  grplldbg("group: %p\n", group);
 
   /* Check if we succesfully allocated a group structure */
 
@@ -193,6 +236,11 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
 
       uip_ipaddr_copy(group->grpaddr, *addr);
       sem_init(&group->sem, 0, 0);
+
+      /* Initialize the group timer (but don't start it yet) */
+
+      group->wdog = wd_create();
+      DEBUGASSERT(group->wdog);
 
       /* Interrupts must be disabled in order to modify the group list */
 
@@ -223,15 +271,21 @@ FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
   FAR struct igmp_group_s *group;
   irqstate_t flags;
 
-  /* We must disable interrupts because we don't which context we were called
-   * from.
+  grplldbg("Searching for addr %08x\n", (int)*addr);
+
+  /* We must disable interrupts because we don't which context we were
+   * called from.
    */
 
   flags = irqsave();
-  for (group = (FAR struct igmp_group_s *)dev->grplist.head; group; group = group->next)
+  for (group = (FAR struct igmp_group_s *)dev->grplist.head;
+       group;
+       group = group->next)
     {
-      if (uip_ipaddr_cmp(&group->grpaddr, *addr))
+      grplldbg("Compare: %08x vs. %08x\n", group->grpaddr, *addr);
+      if (uip_ipaddr_cmp(group->grpaddr, *addr))
         {
+          grplldbg("Match!\n");
           break;
         }
     }
@@ -255,10 +309,13 @@ FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
                                           FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group = uip_grpfind(dev, addr);
+
+  grplldbg("group: %p addr: %08x\n", group, (int)*addr);
   if (!group)
     {
       group = uip_grpalloc(dev, addr);
     }
+  grplldbg("group: %p\n", group);
   return group;
 }
 
@@ -275,16 +332,26 @@ FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
 
 void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
 {
-  /* First, remove the group structure from the group list in the device
-   * structure
-   */
+  irqstate_t flags;
 
-  irqstate_t flags = irqsave();
+  grplldbg("Free: %p flags: %02x\n", group, group->flags);
+
+  /* Cancel the wdog */
+
+  flags = irqsave();
+  wd_cancel(group->wdog);
+  
+  /* Remove the group structure from the group list in the device structure */
+
   sq_rem((FAR sq_entry_t*)group, &dev->grplist);
   
   /* Destroy the wait semapore */
 
   (void)sem_destroy(&group->sem);
+
+  /* Destroy the wdog */
+
+  wd_delete(group->wdog);
   
   /* Then release the group structure resources.  Check first if this is one
    * of the pre-allocated group structures that we will retain in a free list.
@@ -292,6 +359,7 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
 
   if (IS_PREALLOCATED(group->flags))
     {
+      grplldbg("Put back on free list\n");
       sq_addlast((FAR sq_entry_t*)group, &g_freelist);
       irqrestore(flags);
     }
@@ -302,6 +370,7 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
        */
 
       irqrestore(flags);
+      grplldbg("Call sched_free()\n");
       sched_free(group);
     }
 }

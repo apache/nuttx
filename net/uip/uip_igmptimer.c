@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <wdog.h>
 #include <assert.h>
@@ -58,6 +59,40 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Debug ********************************************************************/
+
+#undef IGMP_GTMRDEBUG /* Define to enable detailed IGMP group debug */
+
+#ifndef CONFIG_NET_IGMP
+#  undef IGMP_GTMRDEBUG
+#endif
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef IGMP_GTMRDEBUG
+#    define gtmrdbg(format, arg...)    ndbg(format, ##arg)
+#    define gtmrlldbg(format, arg...)  nlldbg(format, ##arg)
+#    define gtmrvdbg(format, arg...)   nvdbg(format, ##arg)
+#    define gtmrllvdbg(format, arg...) nllvdbg(format, ##arg)
+#  else
+#    define gtmrdbg(x...)
+#    define gtmrlldbg(x...)
+#    define gtmrvdbg(x...)
+#    define gtmrllvdbg(x...)
+#  endif
+#else
+#  ifdef IGMP_GTMRDEBUG
+#    define gtmrdbg    ndbg
+#    define gtmrlldbg  nlldbg
+#    define gtmrvdbg   nvdbg
+#    define gtmrllvdbg nllvdbg
+#  else
+#    define gtmrdbg    (void)
+#    define gtmrlldbg  (void)
+#    define gtmrvdbg   (void)
+#    define gtmrllvdbg (void)
+#  endif
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -100,6 +135,14 @@ static void uip_igmptimeout(int argc, uint32_t arg, ...)
 
       IGMP_STATINCR(uip_stat.igmp.report_sched);
       uip_igmpschedmsg(group, IGMPv2_MEMBERSHIP_REPORT);
+
+      /* Also note:  The Membership Report is sent at most two times becasue
+       * the timer is not reset here.  Hmm.. does this mean that the group
+       * is stranded if both reports were lost?  This is consistent with the
+       * RFC that states: "To cover the possibility of the initial Membership
+       * Report being lost or damaged, it is recommended that it be repeated
+       * once or twice after shortdelays [Unsolicited Report Interval]..."
+       */
     }
 }
 
@@ -142,9 +185,13 @@ int uip_decisec2tick(int decisecs)
 
 void uip_igmpstartticks(FAR struct igmp_group_s *group, int ticks)
 {
+  int ret;
+
   /* Start the timer */
 
-  wd_start(group->wdog, ticks, uip_igmptimeout, 1, (uint32_t)group);
+  gtmrlldbg("ticks: %d\n", ticks);
+  ret = wd_start(group->wdog, ticks, uip_igmptimeout, 1, (uint32_t)group);
+  DEBUGASSERT(ret == OK);
 }
 
 void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
@@ -153,6 +200,7 @@ void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
    * Important!! this should be a random timer from 0 to decisecs
    */
   
+  gtmrdbg("decisecs: %d\n", decisecs);
   uip_igmpstartticks(group, uip_decisec2tick(decisecs));
 }
 
@@ -192,6 +240,7 @@ bool uip_igmpcmptimer(FAR struct igmp_group_s *group, int maxticks)
    * test as well.
    */
 
+  gtmrdbg("maxticks: %d remaining: %d\n", maxticks, remaining);
   if (maxticks > remaining)
     {
       /* Cancel the watchdog timer and return true */

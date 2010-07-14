@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <errno.h>
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>

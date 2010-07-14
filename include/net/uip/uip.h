@@ -442,7 +442,7 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  *   uip_ipaddr_t ipaddr1, ipaddr2;
  *
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
- *   if(uip_ipaddr_cmp(&ipaddr2, &ipaddr1)) {
+ *   if(uip_ipaddr_cmp(ipaddr2, ipaddr1)) {
  *      printf("They are the same");
  *   }
  *

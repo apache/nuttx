@@ -44,7 +44,6 @@
 
 #include <nuttx/config.h>
 
-#include <wdog.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -112,10 +111,6 @@ void uip_igmpdevinit(struct uip_driver_s *dev)
   /* Add the all systems address to the group */
 
   group = uip_grpalloc(dev, &g_allsystems);
-
-  /* Initialize the group timer (but don't start it yet) */
-
-  group->wdog = wd_create();
 
   /* Allow the IGMP messages at the MAC level */
 

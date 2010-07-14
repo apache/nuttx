@@ -1822,8 +1822,8 @@ static int ez80emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
+  /* MISSING LOGIC!!! */
 
-#warning "Multicast MAC support not implemented"
   return OK;
 }
 #endif
@@ -1852,8 +1852,8 @@ static int ez80emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
+  /* MISSING LOGIC!!! */
 
-#warning "Multicast MAC support not implemented"
   return OK;
 }
 #endif
