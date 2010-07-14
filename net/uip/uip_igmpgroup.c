@@ -119,8 +119,10 @@
  * handling logic.
  */
 
+#if CONFIG_PREALLOC_IGMPGROUPS > 0
 static struct igmp_group_s g_preallocgrps[CONFIG_PREALLOC_IGMPGROUPS];
 static FAR sq_queue_t g_freelist;
+#endif
 
 /****************************************************************************
  * Public Data
@@ -158,6 +160,7 @@ static inline FAR struct igmp_group_s *uip_grpheapalloc(void)
  *
  ****************************************************************************/
 
+#if CONFIG_PREALLOC_IGMPGROUPS > 0
 static inline FAR struct igmp_group_s *uip_grpprealloc(void)
 {
   FAR struct igmp_group_s *group = (FAR struct igmp_group_s *)sq_remfirst(&g_freelist);
@@ -168,6 +171,7 @@ static inline FAR struct igmp_group_s *uip_grpprealloc(void)
     }
   return group;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -191,11 +195,13 @@ void uip_grpinit(void)
 
   grplldbg("Initializing\n");
 
+#if CONFIG_PREALLOC_IGMPGROUPS > 0
   for (i = 0; i < CONFIG_PREALLOC_IGMPGROUPS; i++)
     {
       group = &g_preallocgrps[i];
       sq_addfirst((FAR sq_entry_t *)group, &g_freelist);
     }
+#endif
 }
 
 /****************************************************************************
@@ -216,15 +222,17 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
   irqstate_t flags;
 
   nllvdbg("addr: %08x dev: %p\n", *addr, dev);
+#if CONFIG_PREALLOC_IGMPGROUPS > 0
   if (up_interrupt_context())
-    {
-      grplldbg("Allocate from the heap\n");
-      group = uip_grpheapalloc();
-    }
-  else
     {
       grplldbg("Use a pre-allocated group entry\n");
       group = uip_grpprealloc();
+    }
+  else
+#endif
+    {
+      grplldbg("Allocate from the heap\n");
+      group = uip_grpheapalloc();
     }
   grplldbg("group: %p\n", group);
 
@@ -357,6 +365,7 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
    * of the pre-allocated group structures that we will retain in a free list.
    */
 
+#if CONFIG_PREALLOC_IGMPGROUPS > 0
   if (IS_PREALLOCATED(group->flags))
     {
       grplldbg("Put back on free list\n");
@@ -364,6 +373,7 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
       irqrestore(flags);
     }
   else
+#endif
     {
       /* No.. deallocate the group structure.  Use sched_free() just in case
        * this function is executing within an interrupt handler.
