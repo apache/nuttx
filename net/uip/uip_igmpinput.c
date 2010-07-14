@@ -142,6 +142,11 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
   destipaddr = uip_ip4addr_conv(IGMPBUF->destipaddr);
   group = uip_grpallocfind(dev, &destipaddr);
+  if (!group)
+    {
+      nlldbg("Failed to allocate/find group: %08x\n", destipaddr);
+	  return;
+	}
 
   /* Now handle the message based on the IGMP message type */
 
@@ -210,7 +215,7 @@ void uip_igmpinput(struct uip_driver_s *dev)
                       }
                   }
               }
-            else /* if (group->grpaddr != 0) */
+            else /* if (IGMPBUF->grpaddr != 0) */
               {
                 nllvdbg("Group-specific multicast queury\n");
 

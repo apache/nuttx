@@ -162,14 +162,14 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
 
   /* Set up the IGMP message */
 
-  IGMPBUF->type    = group->msgid;
-  IGMPBUF->maxresp = 0;
+  IGMPBUF->type        = group->msgid;
+  IGMPBUF->maxresp     = 0;
   uiphdr_ipaddr_copy(IGMPBUF->grpaddr, &group->grpaddr);
 
   /* Calculate the IGMP checksum. */
 
-  IGMPBUF->chksum  = 0;
-  IGMPBUF->chksum  = ~uip_igmpchksum(&IGMPBUF->type, UIP_IPIGMPH_LEN);
+  IGMPBUF->chksum      = 0;
+  IGMPBUF->chksum      = ~uip_igmpchksum(&IGMPBUF->type, UIP_IPIGMPH_LEN);
 
   IGMP_STATINCR(uip_stats.igmp.poll_send);
   IGMP_STATINCR(uip_stats.ip.sent);

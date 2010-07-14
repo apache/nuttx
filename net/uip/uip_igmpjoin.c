@@ -151,6 +151,9 @@ int igmp_joingroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
        uip_addmcastmac(dev, (FAR uip_ipaddr_t *)&grpaddr->s_addr);
        return OK;
     }
+
+  /* Return EEXIST if the address is already a member of the group */
+
   return -EEXIST;
 }
 

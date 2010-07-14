@@ -222,14 +222,17 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
   irqstate_t flags;
 
   nllvdbg("addr: %08x dev: %p\n", *addr, dev);
-#if CONFIG_PREALLOC_IGMPGROUPS > 0
   if (up_interrupt_context())
     {
+#if CONFIG_PREALLOC_IGMPGROUPS > 0
       grplldbg("Use a pre-allocated group entry\n");
       group = uip_grpprealloc();
+#else
+      grplldbg("Cannot allocate from interrupt handler\n");
+      group = NULL;
+#endif
     }
   else
-#endif
     {
       grplldbg("Allocate from the heap\n");
       group = uip_grpheapalloc();
