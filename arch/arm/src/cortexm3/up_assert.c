@@ -187,7 +187,7 @@ static void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32_t)&g_userstack;
+  istackbase = (uint32_t)&g_intstackbase;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
 
   /* Show interrupt stack info */
@@ -206,25 +206,40 @@ static void up_dumpstate(void)
       /* Yes.. dump the interrupt stack */
 
       up_stackdump(sp, istackbase);
-
-      /* Extract the user stack pointer which should lie
-       * at the base of the interrupt stack.
-       */
-
-      sp = g_userstack;
-      lldbg("sp:     %08x\n", sp);
     }
 
-  /* Show user stack info */
+  /* Extract the user stack pointer. */
 
-  lldbg("User stack:\n");
-  lldbg("  base: %08x\n", ustackbase);
-  lldbg("  size: %08x\n", ustacksize);
+  if (current_regs)
+    {
+      sp = current_regs[REG_R13];
+      lldbg("sp:     %08x\n", sp);
+
+      /* Show user stack info */
+
+      lldbg("User stack:\n");
+      lldbg("  base: %08x\n", ustackbase);
+      lldbg("  size: %08x\n", ustacksize);
+
+      /* Dump the user stack if the stack pointer lies within the allocated user
+       * stack memory.
+       */
+
+      if (sp > ustackbase || sp <= ustackbase - ustacksize)
+        {
+#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
+          lldbg("ERROR: Stack pointer is not within allocated stack\n");
+#endif
+        }
+      else
+        {
+          up_stackdump(sp, ustackbase);
+        }
+    }
 #else
   lldbg("sp:         %08x\n", sp);
   lldbg("stack base: %08x\n", ustackbase);
   lldbg("stack size: %08x\n", ustacksize);
-#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
@@ -240,6 +255,7 @@ static void up_dumpstate(void)
     {
       up_stackdump(sp, ustackbase);
     }
+#endif
 
   /* Then dump the registers (if available) */
 
