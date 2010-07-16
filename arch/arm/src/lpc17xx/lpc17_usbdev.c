@@ -59,6 +59,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "lpc17_internal.h"
 #include "lpc17_usb.h"
 #include "lpc17_syscon.h"
 
@@ -103,7 +104,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG
-#  define USB_ERROR_INT USBDEV_INT_EPRINT
+#  define USB_ERROR_INT USBDEV_INT_ERRINT
 #else
 #  define USB_ERROR_INT 0
 #endif
@@ -178,7 +179,7 @@
 #define LPC17_TRACEINTID_EPOUT              0x0013
 #define LPC17_TRACEINTID_EPOUTQEMPTY        0x0014
 #define LPC17_TRACEINTID_EP0SETUPSETADDRESS 0x0015
-#define LPC17_TRACEINTID_EPRINT             0x0016
+#define LPC17_TRACEINTID_ERRINT             0x0016
 #define LPC17_TRACEINTID_EPSLOW             0x0017
 #define LPC17_TRACEINTID_FRAME              0x0018
 #define LPC17_TRACEINTID_GETCONFIG          0x0019
@@ -2021,18 +2022,18 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 #if CONFIG_DEBUG
       /* USB engine error interrupt */
 
-      if ((devintstatus & USBDEV_INT_EPRINT))
+      if ((devintstatus & USBDEV_INT_ERRINT))
         {
           uint8_t errcode;
 
           /* Clear the error interrupt */
 
-          lpc17_putreg(USBDEV_INT_EPRINT, LPC17_USBDEV_INTCLR);
+          lpc17_putreg(USBDEV_INT_ERRINT, LPC17_USBDEV_INTCLR);
 
           /* And show what error occurred */
 
           errcode  = (uint8_t)lpc17_usbcmd(CMD_USBDEV_READERRORSTATUS, 0) & 0x0f;
-          usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_EPRINT), (uint16_t)errcode);
+          usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_ERRINT), (uint16_t)errcode);
         }
 #endif
 
@@ -3106,7 +3107,9 @@ void up_usbinitialize(void)
 
   /* Disable USB interrupts */
 
-  lpc17_putreg(0, LPC17_USBDEV_INTST);
+  regval = lpc17_getreg(LPC17_SYSCON_USBINTST);
+  regval &= ~SYSCON_USBINTST_ENINTS;
+  lpc17_putreg(regval, LPC17_SYSCON_USBINTST);
   irqrestore(flags);
 
   /* Initialize the device state structure */
@@ -3166,9 +3169,11 @@ void up_usbinitialize(void)
 
   /* Turn on USB power and clocking */
 
-  reg = lpc17_getreg(LPC17_PCON_PCONP);
-  reg |= LPC17_PCONP_PCUSB;
-  lpc17_putreg(reg, LPC17_PCON_PCONP);
+  flags = irqsave();
+  reg = lpc17_getreg(LPC17_SYSCON_PCONP);
+  reg |= SYSCON_PCONP_PCUSB;
+  lpc17_putreg(reg, LPC17_SYSCON_PCONP);
+  irqrestore(flags);
 
   /* Attach USB controller interrupt handler */
 
@@ -3184,7 +3189,11 @@ void up_usbinitialize(void)
    * driver
    */
 
-  lpc17_putreg(USBDEV_INTST_ENUSBINTS, LPC17_USBDEV_INTST);
+  flags = irqsave();
+  reg = lpc17_getreg(LPC17_SYSCON_USBINTST);
+  reg |= SYSCON_USBINTST_ENINTS;
+  lpc17_putreg(regval, LPC17_SYSCON_USBINTST);
+  irqrestore(flags);
 
   /* Disconnect device */
 
@@ -3240,9 +3249,9 @@ void up_usbuninitialize(void)
 
   /* Turn off USB power and clocking */
 
-  reg = lpc17_getreg(LPC17_PCON_PCONP);
-  reg &= ~LPC17_PCONP_PCUSB;
-  lpc17_putreg(reg, LPC17_PCON_PCONP);
+  reg = lpc17_getreg(LPC17_SYSCON_PCONP);
+  reg &= ~SYSCON_PCONP_PCUSB;
+  lpc17_putreg(reg, LPC17_SYSCON_PCONP);
   irqrestore(flags);
 }
 
