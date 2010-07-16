@@ -414,15 +414,19 @@ Where <subdir> is one of the following:
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables both the serial and telnetd NSH interfaces.
-
-    NOTE: As it is configured now, you MUST have a network connected.
-    Otherwise, the NSH prompt will not come up because the Ethernet
-    driver is waiting for the network to come up.  That is probably
-    a bug in the Ethernet driver behavior!
+    Configuration enables only the serial  NSH interfaces.
 
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
+  usbserial:
+    This configuration directory exercises the USB serial class
+    driver at examples/usbserial.  See examples/README.txt for
+    more information.
+
+  usbstorage:
+    This configuration directory exercises the USB mass storage
+    class driver at examples/usbstorage.  See examples/README.txt for
+    more information.
 
