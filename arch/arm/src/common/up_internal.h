@@ -120,7 +120,11 @@ extern uint32_t g_heapbase;
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
+#  ifdef CONFIG_ARCH_CORTEXM3
+extern void g_intstackbase;
+#  else
 extern uint32_t g_userstack;
+#  endif
 #endif
 
 /* These 'addresses' of these values are setup by the linker script.  They are
