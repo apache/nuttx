@@ -42,6 +42,9 @@ CSRCS		= up_boot.c up_leds.c up_ssp.c
 ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
 endif
+ifeq ($(CONFIG_EXAMPLE),usbstorage)
+CSRCS		+= up_usbstrg.c
+endif
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 COBJS		= $(CSRCS:.c=$(OBJEXT))
