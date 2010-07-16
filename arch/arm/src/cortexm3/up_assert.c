@@ -208,33 +208,28 @@ static void up_dumpstate(void)
       up_stackdump(sp, istackbase);
     }
 
-  /* Extract the user stack pointer. */
+  /* Extract the user stack pointer if we are in an interrupt handler.
+   * If we are not in an interrupt handler.  Then sp is the user stack
+   * pointer (and the above range check should have failed).
+   */
 
   if (current_regs)
     {
       sp = current_regs[REG_R13];
       lldbg("sp:     %08x\n", sp);
+    }
 
-      /* Show user stack info */
+  lldbg("User stack:\n");
+  lldbg("  base: %08x\n", ustackbase);
+  lldbg("  size: %08x\n", ustacksize);
 
-      lldbg("User stack:\n");
-      lldbg("  base: %08x\n", ustackbase);
-      lldbg("  size: %08x\n", ustacksize);
+  /* Dump the user stack if the stack pointer lies within the allocated user
+   * stack memory.
+   */
 
-      /* Dump the user stack if the stack pointer lies within the allocated user
-       * stack memory.
-       */
-
-      if (sp > ustackbase || sp <= ustackbase - ustacksize)
-        {
-#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-          lldbg("ERROR: Stack pointer is not within allocated stack\n");
-#endif
-        }
-      else
-        {
-          up_stackdump(sp, ustackbase);
-        }
+  if (sp <= ustackbase && sp > ustackbase - ustacksize)
+    {
+      up_stackdump(sp, ustackbase);
     }
 #else
   lldbg("sp:         %08x\n", sp);
@@ -247,9 +242,7 @@ static void up_dumpstate(void)
 
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
-#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
       lldbg("ERROR: Stack pointer is not within allocated stack\n");
-#endif
     }
   else
     {

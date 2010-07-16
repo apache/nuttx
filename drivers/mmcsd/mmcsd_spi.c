@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_spi.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,12 +114,12 @@
  * ticks per second.
  */
 
-#define MMCSD_DELAY_10MS             (CLK_TCK/100 + 1)
-#define MMCSD_DELAY_50MS             (CLK_TCK/20  + 1)
-#define MMCSD_DELAY_100MS            (CLK_TCK/10  + 1)
-#define MMCSD_DELAY_250MS            (CLK_TCK/4  + 1)
-#define MMCSD_DELAY_500MS            (CLK_TCK/2  + 1)
-#define MMCSD_DELAY_1SEC             (CLK_TCK + 1)
+#define MMCSD_DELAY_10MS             (CLK_TCK/100  + 1)
+#define MMCSD_DELAY_50MS             (CLK_TCK/20   + 1)
+#define MMCSD_DELAY_100MS            (CLK_TCK/10   + 1)
+#define MMCSD_DELAY_250MS            (CLK_TCK/4    + 1)
+#define MMCSD_DELAY_500MS            (CLK_TCK/2    + 1)
+#define MMCSD_DELAY_1SEC             (CLK_TCK      + 1)
 #define MMCSD_DELAY_10SEC            (10 * CLK_TCK + 1)
 
 #define ELAPSED_TIME(t)              (g_system_timer-(t))

@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 11, 2010</p>
+      <p>Last Updated: July 15, 2010</p>
     </td>
   </tr>
 </table>
@@ -1851,6 +1851,11 @@ nuttx-5.8 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* net/uip/uip_igmp*.c - Add IGMP support (untested on initial
 	  checkin).
 	* examples/igmp - Add a trivial test for IGMP (much more is needed)
+    * configs/nucleus2g/usbserial and usbstorage - Add USB configurations
+      for testing purposes.
+    * arch/arm/src/common/up_internal.h, cortexm3/up_assert.c,
+      */*_vectors.S - Correct compilations errors when CONFIG_ARCH_INTERRUPTSTACK
+      is enabled (feature still not tested)
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
