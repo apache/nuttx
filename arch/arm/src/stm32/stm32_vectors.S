@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_vectors.S
  * arch/arm/src/chip/stm32_vectors.S
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -439,7 +439,7 @@ stm32_common:
 	 */
 
 #ifdef CONFIG_ARCH_INTERRUPTSTACK
-	ld		sp, #up_interruptstack_base
+	ldr		sp, =g_intstackbase
 	str		r1, [sp, #-4]!			/* Save the MSP on the interrupt stack */
 	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
 	ldr		r1, [sp, #+4]!			/* Recover R1=main stack pointer */
@@ -493,7 +493,7 @@ stm32_common:
 	.size	handlers, .-handlers
 
 /************************************************************************************
- *  Name: up_interruptstack/g_userstack
+ *  Name: up_interruptstack/g_intstackbase
  *
  * Description:
  *   Shouldn't happen
@@ -502,10 +502,11 @@ stm32_common:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
         .bss
+        .global g_intstackbase
         .align  4
 up_interruptstack:
         .skip   (CONFIG_ARCH_INTERRUPTSTACK & ~3)
-up_interruptstack_base:
+g_intstackbase:
         .size   up_interruptstack, .-up_interruptstack
 #endif
 

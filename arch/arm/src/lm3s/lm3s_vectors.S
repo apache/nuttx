@@ -377,7 +377,7 @@ lm3s_irqcommon:
 	 */
 
 #ifdef CONFIG_ARCH_INTERRUPTSTACK
-	ld	sp, #up_interruptstack_base
+	ldr	sp, =g_intstackbase
 	str	r1, [sp, #-4]!		/* Save the MSP on the interrupt stack */
 	bl	up_doirq		/* R0=IRQ, R1=register save (msp) */
 	ldr	r1, [sp, #+4]!		/* Recover R1=main stack pointer */
@@ -431,7 +431,7 @@ lm3s_irqcommon:
 	.size	handlers, .-handlers
 
 /************************************************************************************
- *  Name: up_interruptstack/g_userstack
+ *  Name: up_interruptstack/g_intstackbase
  *
  * Description:
  *   Shouldn't happen
@@ -440,10 +440,11 @@ lm3s_irqcommon:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
         .bss
+        .global g_intstackbase
         .align  4
 up_interruptstack:
         .skip   (CONFIG_ARCH_INTERRUPTSTACK & ~3)
-up_interruptstack_base:
+g_intstackbase:
         .size   up_interruptstack, .-up_interruptstack
 #endif
 
