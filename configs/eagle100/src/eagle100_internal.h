@@ -2,7 +2,7 @@
  * configs/eagle100/src/eagle100_internal.h
  * arch/arm/src/board/eagle100_internal.n
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,6 +88,18 @@
  ************************************************************************************/
 
 extern void weak_function lm3s_ssiinitialize(void);
+
+/****************************************************************************
+ * Name: up_ledinit
+ *
+ * Description:
+ *   Initialize on-board LEDs.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+extern void up_ledinit(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_EAGLE100_SRC_EAGLE100_INTERNAL_H */
