@@ -2,7 +2,7 @@
  * configs/eagle100/src/up_leds.c
  * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,6 +93,10 @@ static uint8_t g_nest;
 
 /****************************************************************************
  * Name: up_ledinit
+ *
+ * Description:
+ *   Initialize on-board LEDs.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
