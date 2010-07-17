@@ -2498,7 +2498,7 @@ static int lpc17_epconfigure(FAR struct usbdev_ep_s *ep,
 #endif
 
   /* If all of the endpoints have been configured, then tell the USB controller
-   * to enabled normal activity on all realized endpoints.
+   * to enable normal activity on all realized endpoints.
    */
 
   if (last)
