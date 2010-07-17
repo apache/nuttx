@@ -1233,7 +1233,7 @@ static void lpc17_eprealize(struct lpc17_ep_s *privep, bool prio, uint32_t packe
 {
   struct lpc17_usbdev_s *priv = privep->dev;
   uint32_t mask;
-  uint32_t reg;
+  uint32_t regval;
 
   /* Initialize endpoint software priority */
 
@@ -1253,9 +1253,9 @@ static void lpc17_eprealize(struct lpc17_ep_s *privep, bool prio, uint32_t packe
 
   /* Realize the endpoint */
 
-  reg  = lpc17_getreg(LPC17_USBDEV_REEP);
-  reg |= (1 << privep->epphy);
-  lpc17_putreg(reg, LPC17_USBDEV_REEP);
+  regval  = lpc17_getreg(LPC17_USBDEV_REEP);
+  regval |= (1 << privep->epphy);
+  lpc17_putreg(regval, LPC17_USBDEV_REEP);
 
   /* Set endpoint maximum packet size */
 
@@ -2323,7 +2323,7 @@ static int lpc17_dmasetup(struct lpc17_usbdev_s *priv, uint8_t epphy,
                             bool isochronous);
 {
   struct lpc17_dmadesc_s *dmadesc = priv;
-  uint32_t reg;
+  uint32_t regval;
 
 #ifdef CONFIG_DEBUG
   if (!priv || epphy < 2)
@@ -2378,10 +2378,10 @@ static int lpc17_dmasetup(struct lpc17_usbdev_s *priv, uint8_t epphy,
 
   /* Check state of IN/OUT Ep buffer */
 
-  reg = lpc17_usbcmd(CMD_USBDEV_EPSELECT | epphy, 0);
+  regval = lpc17_usbcmd(CMD_USBDEV_EPSELECT | epphy, 0);
 
-  if ((LPC17_EPPHYIN(epphy) &&  (reg & 0x60) == 0) ||
-      (LPC17_EPPHYOUT(epphy) &&  (reg & 0x60) == 0x60))
+  if ((LPC17_EPPHYIN(epphy) &&  (regval & 0x60) == 0) ||
+      (LPC17_EPPHYOUT(epphy) &&  (regval & 0x60) == 0x60))
     {
       /* DMA should be "being serviced" */
 
@@ -2408,7 +2408,7 @@ static int lpc17_dmasetup(struct lpc17_usbdev_s *priv, uint8_t epphy,
 #ifdef CONFIG_LPC17_USBDEV_DMA
 static void lpc17_dmarestart(uint8_t epphy, uint32_t descndx)
 {
-  uint32_t reg;
+  uint32_t regval;
 
   /* Clear DMA descriptor status */
 
@@ -2420,9 +2420,9 @@ static void lpc17_dmarestart(uint8_t epphy, uint32_t descndx)
 
   /* Check the state of IN/OUT EP buffer */
 
-  uint32_t reg = lpc17_usbcmd(CMD_USBDEV_EPSELECT | epphy, 0);
-  if ((LPC17_EPPHYIN(epphy) &&  (reg & 0x60) == 0) ||
-      (LPC17_EPPHYIN(epphy) &&  (reg & 0x60) == 0x60))
+  uint32_t regval = lpc17_usbcmd(CMD_USBDEV_EPSELECT | epphy, 0);
+  if ((LPC17_EPPHYIN(epphy) &&  (regval & 0x60) == 0) ||
+      (LPC17_EPPHYIN(epphy) &&  (regval & 0x60) == 0x60))
     {
       /* Re-trigger the DMA Transfer */
 
@@ -2521,7 +2521,7 @@ static int lpc17_epdisable(FAR struct usbdev_ep_s *ep)
   FAR struct lpc17_ep_s *privep = (FAR struct lpc17_ep_s *)ep;
   irqstate_t flags;
   uint32_t mask = (1 << privep->epphy);
-  uint32_t reg;
+  uint32_t regval;
 
 #ifdef CONFIG_DEBUG
   if (!ep)
@@ -2539,15 +2539,15 @@ static int lpc17_epdisable(FAR struct usbdev_ep_s *ep)
 
   /* Disable endpoint and interrupt */
 
-  reg  = lpc17_getreg(LPC17_USBDEV_REEP);
-  reg &= ~mask;
-  lpc17_putreg(reg, LPC17_USBDEV_REEP);
+  regval  = lpc17_getreg(LPC17_USBDEV_REEP);
+  regval &= ~mask;
+  lpc17_putreg(regval, LPC17_USBDEV_REEP);
 
   lpc17_putreg(mask, LPC17_USBDEV_EPDMADIS);
 
-  reg  = lpc17_getreg(LPC17_USBDEV_EPINTEN);
-  reg &= ~mask;
-  lpc17_putreg(reg, LPC17_USBDEV_EPINTEN);
+  regval  = lpc17_getreg(LPC17_USBDEV_EPINTEN);
+  regval &= ~mask;
+  lpc17_putreg(regval, LPC17_USBDEV_EPINTEN);
 
   irqrestore(flags);
   return OK;
@@ -3078,13 +3078,11 @@ static int lpc17_pullup(struct usbdev_s *dev, bool enable)
 void up_usbinitialize(void)
 {
   struct lpc17_usbdev_s *priv = &g_usbdev;
-  uint32_t reg;
+  uint32_t regval;
+  irqstate_t flags;
   int i;
 
   usbtrace(TRACE_DEVINIT, 0);
-
-  uint32_t   regval;
-  irqstate_t flags;
 
   /* Step 1: Enable power by setting PCUSB in the PCONP register */
 
@@ -3167,13 +3165,35 @@ void up_usbinitialize(void)
         }
     }
 
-  /* Turn on USB power and clocking */
+  /* Turn on USB power */
 
   flags = irqsave();
-  reg = lpc17_getreg(LPC17_SYSCON_PCONP);
-  reg |= SYSCON_PCONP_PCUSB;
-  lpc17_putreg(reg, LPC17_SYSCON_PCONP);
+  regval = lpc17_getreg(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCUSB;
+  lpc17_putreg(regval, LPC17_SYSCON_PCONP);
   irqrestore(flags);
+
+  /* Enable device and AHB clocking  */
+
+  lpc17_putreg(USBDEV_CLK_DEVCLK|USBDEV_CLK_AHBCLK, LPC17_USBDEV_CLKCTRL);
+
+  /* And wait for the clocks to be reported as "ON" */
+
+  do
+    {
+      regval = lpc17_getreg(LPC17_USBDEV_CLKST);
+    }
+  while ((regval & (USBDEV_CLK_DEVCLK|USBDEV_CLK_AHBCLK)) != (USBDEV_CLK_DEVCLK|USBDEV_CLK_AHBCLK));
+
+  /* Make sure all USB interrupts are disabled and cleared */
+
+  lpc17_putreg(0, LPC17_USBDEV_INTEN);
+  lpc17_putreg(0xffffffff, LPC17_USBDEV_INTCLR);
+  lpc17_putreg(0, LPC17_USBDEV_INTPRI);
+
+  lpc17_putreg(0, LPC17_USBDEV_EPINTEN);
+  lpc17_putreg(0xffffffff, LPC17_USBDEV_EPINTCLR);
+  lpc17_putreg(0, LPC17_USBDEV_EPINTPRI);
 
   /* Attach USB controller interrupt handler */
 
@@ -3184,14 +3204,14 @@ void up_usbinitialize(void)
       goto errout;
     }
 
-  /* Enable USB inerrupts at the controller -- but do not disable
+  /* Enable USB interrupts at the controller -- but do not enable
    * the ARM interrupt until the device is bound to the class
    * driver
    */
 
   flags = irqsave();
-  reg = lpc17_getreg(LPC17_SYSCON_USBINTST);
-  reg |= SYSCON_USBINTST_ENINTS;
+  regval = lpc17_getreg(LPC17_SYSCON_USBINTST);
+  regval |= SYSCON_USBINTST_ENINTS;
   lpc17_putreg(regval, LPC17_SYSCON_USBINTST);
   irqrestore(flags);
 
@@ -3224,7 +3244,7 @@ errout:
 void up_usbuninitialize(void)
 {
   struct lpc17_usbdev_s *priv = &g_usbdev;
-  uint32_t reg;
+  uint32_t regval;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVUNINIT, 0);
@@ -3249,9 +3269,9 @@ void up_usbuninitialize(void)
 
   /* Turn off USB power and clocking */
 
-  reg = lpc17_getreg(LPC17_SYSCON_PCONP);
-  reg &= ~SYSCON_PCONP_PCUSB;
-  lpc17_putreg(reg, LPC17_SYSCON_PCONP);
+  regval = lpc17_getreg(LPC17_SYSCON_PCONP);
+  regval &= ~SYSCON_PCONP_PCUSB;
+  lpc17_putreg(regval, LPC17_SYSCON_PCONP);
   irqrestore(flags);
 }
 
