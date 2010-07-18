@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 11, 2010)
+NuttX TODO List (Last updated July 19, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -23,6 +23,7 @@ NuttX TODO List (Last updated July 11, 2010)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
+  (4)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
@@ -639,6 +640,44 @@ o ARM/i.MX (arch/arm/src/imx/)
   Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
   Status:      Open
   Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
+
+o ARM/LPC17xx (arch/arm/src/lpc17xx/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: If debug is enabled so that there is a lot of early serial console output,
+               The serial console output may be garbled initially.  If this becomes a
+               problem during debug, I've found that just putting a delaying at the
+               beginning of os_start() (sched/os_start.c) eliminates the garbled output.
+  Status:      Open
+  Priority:    Low, only effects debug and there is a workaround
+  
+  Description: Due to some connector/cabling issues using the Nucleus2g, a couple of
+               important features have not yet been tested:  The microSD card and
+               USB (device).  These features are fully implemented and partially
+               tested, but not fully verified.
+  Status:      Open
+  Priority:    High
+
+  Description: a) USB DMA not fully implemented. Partial logic is in place but it is
+                  fragmentary and bogus. (Leveraged from the lpc214x)
+               b) Possible errors in USB device driver reported "I suspect there’s a few
+                  issues in the lpc214x USB driver – in particular it doesn’t stall both
+                  in/out endpoints for unsupported setup requests and it doesn’t call
+                  CLASS_DISCONNCET on a USB reset – I don’t have any access to that hardware
+                  so can’t pursue it really."
+  Status:      Open
+  Priority:    Low
+
+  Description: a) At present the SSP driver is polled.  Should it be interrupt driven?
+                  Look at arch/arm/src/imx/imx_spi.c -- that is a good example of an
+                  interrupt driven SPI driver.  Should be very easy to part that architecture
+                  to the LPC.
+               b) See other SSP (SPI) driver issues listed under ARM/LPC214x.  The LPC17xx
+                  driver is a port of the LPC214x driver and probably has the same issues.
+               b) Other SSP driver improvements: Add support for multiple devices on the
+                  SSP bus, use DMA data transfers
+  Status:      Open
+  Priority:    Medium
 
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
