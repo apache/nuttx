@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 15, 2010</p>
+      <p>Last Updated: July 18, 2010</p>
     </td>
   </tr>
 </table>
@@ -764,42 +764,53 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.7 Release Notes</b>:
+<p><b>nuttx-5.8 Release Notes</b>:
 
 <p>
-  This 54<sup>th</sup> release of NuttX was made on June 22, 2010 and is available for download from the
+  This 55<sup>th</sup> release of NuttX was made on July 18, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release adds basic support for one new ARM Cortex-M3 architecture:
-  <ul>
-    <li>
-      Added support for NXP LPC1768 MCU as provided on the Nucleus 2G board from
-      <a href="http://www.2g-eng.com">2G Engineering</a>.
-    </li>
-    <li>
-      Some initial files for the LPC17xx family were released in NuttX 5.6, but the
-      first functional release for the NXP LPC1768/Nucleus2G occured with NuttX 5.7.
-    </li>
-    <li>
-      That initial basic release included timer interrupts and a serial console and was
-      verified using the NuttX OS test.
-    </li>
-    <li>
-      That release includes a verified NuttShell (NSH) configuration
-      (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
-      Also included are unverified SPI and USB device drivers.
-    </li>
-  </ul>
+  This includes several important bugfixes:
+</p>
+<ul>
+  <li>Corrects some interrupt vectoring for the TI/Stellarix LM3S port,</li>
+  <li>Correct initialization logic for NXP LPC17xxx NuttX ports:  Power was not being provided to the GPIO module!</li>
+  <li>Corrected (but did not verify) implementation of the optional interrupt stack feature (all Cortex M3 architectures), and</li>
+  <li>Correct a HardFault in the LPC17xx SSP driver.</li>
+</ul>
+<p>
+  Additional minor fixes are also included as detailed in the ChangeLog.
 </p>
 <p>
-  Further efforts include: (1) development of a DMA support library, (2) SPI-based MMC/SD
-  support, and (3) verification of the USB driver.  Watch for announcement of the completed
-  LPC1768 port expected in NuttX-5.8.
+  Several new features have been fully developed and included in this release, but
+  full verification of most of these new features has been blocked for a variety
+  of issues:
 </p>
+<ul>
+  <li>
+    Added microSD support for the NuttShell (NSH) configuration in the Nucleus2G LPC1768 port.
+    For reasons that have not yet been determined, I have not successfully accessed the microSD card as of this writing.
+  </li>
+  <li>
+    Two USB configurations were also added for the Nucleus2G board:
+    One to support the USB serial device and one for the USB mass storage device.
+    Some testing of the USB driver was performed, but full verification is stalled for an OTG style USB cable.
+  </li>
+  <li>
+    LEDs now work correctly on the Nucleus2G LPC1768 board.
+  </li>
+  <li>
+    The uIP-based NuttX networking subsystem now supports IGMPv2 client.
+    IGMP (Internet Group Multicast Protocol) network &quot;appliances&quot; to join into multicast groups.
+    Outbound traffic to enter and leave multicast groups has been verified, but full verification will require a switch capable of multicast.
+    Issues associated with the receipt of multicast packets are likely.
+  </li>
+</ul>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -1190,14 +1201,11 @@
         functional release for the NXP LPC1768/Nucleus2G occured with NuttX 5.7.
         That initial basic release included timer interrupts and a serial console and was
         verified using the NuttX OS test (<code>examples/ostest</code>).
-        That release includes a verified NuttShell (NSH) configuration
+        That release included a verified NuttShell (NSH) configuration
         (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
-        Also included are unverified SPI and USB device drivers.
-      </p>
-      <p>
-        Current efforts include: (1) development of a DMA support library, (2) SPI-based MMC/SD
-        support, and (3) verification of the USB driver.
-        Watch for announcement of the completed LPC1768 port expected in NuttX-5.8.
+        The NSH configuration support the Nucleus2G's microSD slot and additional configurations
+        are available to exercise the the USB serial and USB mass storage devices.
+        However, as of this writing neight the SPI nor the USB device drivers are fully verified.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1792,16 +1800,31 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.7 2010-06-22 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.8 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* configs/nucleus2g - Add ostest configuration for the Nucleus 2G
-	  LPC1768 board from 2G Engineering (http://www.2g-eng.com/)
-	* arch/arm/src/lpc17xx - Added basic LPC17xx boot-up logic,
-	  interrupt handling, and GPIO configuration.
-	* configs/nucleus2g/ostest - Completed bring-up of LPC1768 on
-	  the Nucleus2G board using the examples/ostest
-	* configs/nucleus2g/nsh - Added and verified a NuttShell (NSH)
-	  configuration for the LPC1768 on the Nucleus2G board.
+	* configs/nucleus2g/src/up_nsh.c and up_ssp.c - Add support
+	  for SPI-based MMC/SD cards and integrate into the NSH example.
+	* arch/arm/src/lm3s/lm3s_vectors.S - Correct vectors for GPIOC & D
+	  interrupts.
+	* arch/arm/src/lpc17xx/lp17_clockconfig.c - Power was not being
+	  provided to GPIO module.  This is a critical bugfix!
+	* arch/arm/src/lpc17xx/lpc17_serial.c - Improved logic to handle
+	  missed TX interrupts.
+	* arch/arm/src/lpc17xx/lpc17_ssp.c - Fix a hard fault during SSP
+	  initialization.
+	* configs/nucleus2g/src/up_led.c - Change how LEDs are controlled
+	  so that they can be used both for NuttX instrumentation and
+	  by application software.
+	* include/net/uip/igmp.h and uip-igmp.h - Add header files ini
+	  preparation for NuttX IGMP support
+	* net/uip/uip_igmp*.c - Add IGMP support (untested on initial
+	  checkin).
+	* examples/igmp - Add a trivial test for IGMP (much more is needed)
+	* configs/nucleus2g/usbserial and usbstorage - Add USB configurations
+	  for testing purposes.
+	* arch/arm/src/common/up_internal.h, cortexm3/up_assert.c,
+	  */*_vectors.S - Correct compilations errors when CONFIG_ARCH_INTERRUPTSTACK
+	  is enabled (feature still not tested)
 
 pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1831,31 +1854,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.8 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* configs/nucleus2g/src/up_nsh.c and up_ssp.c - Add support
-	  for SPI-based MMC/SD cards and integrate into the NSH example.
-	* arch/arm/src/lm3s/lm3s_vectors.S - Correct vectors for GPIOC & D
-	  interrupts.
-	* arch/arm/src/lpc17xx/lp17_clockconfig.c - Power was not being
-	  provided to GPIO module.  This is a critical bugfix!
-	* arch/arm/src/lpc17xx/lpc17_serial.c - Improved logic to handle
-	  missed TX interrupts.
-	* arch/arm/src/lpc17xx/lpc17_ssp.c - Fix a hard fault during SSP
-	  initialization.
-	* configs/nucleus2g/src/up_led.c - Change how LEDs are controlled
-	  so that they can be used both for NuttX instrumentation and
-	  by application software.
-	* include/net/uip/igmp.h and uip-igmp.h - Add header files ini
-	  preparation for NuttX IGMP support
-	* net/uip/uip_igmp*.c - Add IGMP support (untested on initial
-	  checkin).
-	* examples/igmp - Add a trivial test for IGMP (much more is needed)
-    * configs/nucleus2g/usbserial and usbstorage - Add USB configurations
-      for testing purposes.
-    * arch/arm/src/common/up_internal.h, cortexm3/up_assert.c,
-      */*_vectors.S - Correct compilations errors when CONFIG_ARCH_INTERRUPTSTACK
-      is enabled (feature still not tested)
+nuttx-5.9 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
