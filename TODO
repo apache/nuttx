@@ -7,7 +7,7 @@ NuttX TODO List (Last updated July 19, 2010)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (16)  Network (net/, drivers/net)
+ (17)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
@@ -266,6 +266,21 @@ o Network (net/, drivers/net)
                will have to include additional support for multicast MAC address tables.
   Status:      Open
   Priority:    Low unless you need it.
+
+  Description: The interfaces used to leave/join IGMP multicast groups is non-standard.
+               RFC3678 (IGMPv3) suggests ioctl() commands to do this (SIOCSIPMSFILTER) but
+               also status that those APIs are historic.  NuttX implements these ioctl
+               commnands, but is non-standard because:  (1) It does not support IGMPv3, and
+               (2) it looks up drivers by their device name (eg., "eth0") vs IP address.
+
+               Linux uses setsockopt() to control multicast group membership using the
+               IP_ADD_MEMBERSHIP and IP_DROP_MEMBERSHIP options.  It also looks up drivers
+               using IP addresses (It would require additional logic in NuttX to look up
+               drivers by IP address).  See http://tldp.org/HOWTO/Multicast-HOWTO-6.html
+  Status:      Open
+  Priority:    Medium.  All standards compatibility is important to NuttX.  However, most
+               the mechanism for leaving and joining groups is hidden behind a wrapper
+               function so that little of this incompatibilities need be exposed.
 
 o Network Utilities (netutils/)
 
