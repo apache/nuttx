@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/hc/src/mc9s12ne64/chip.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
 #define HCS12_ATD_BASE     0x0080 /* 0x0080–0x009f: Analog-to-Digital Converter 10-bit, 8-channel (ATD) */
                                   /* 0x00a0–0x00c7: Reserved */
 #define HCS12_SCI0_BASE    0x00c8 /* 0x00c8–0x00cf: Serial Communications Interface 0 (SCI0) */
-#define HCS12_SCI1_BASE    0x00d0 /* 0x00d0–0x00d7: Serial Communications Interface 1 (SCI1) */
+#define HCS12_SCI1_BASE    0x00d0 /* 0x00d0–0x00d7: Serial Communications Interface 1 (SCI1) */o
 #define HCS12_SPI_BASE     0x00d8 /* 0x00d8–0x00df: Serial Peripheral Interface (SPI) */
 #define HCS12_IIC_BASE     0x00e0 /* 0x00e0–0x00e7: Inter IC Bus (IIC) */
                                   /* 0x00e8–0x00ff: Reserved */
