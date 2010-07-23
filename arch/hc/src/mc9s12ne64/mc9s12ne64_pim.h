@@ -48,13 +48,26 @@
  ************************************************************************************/
 
 /* Register Offsets *****************************************************************/
+/* Friendly names for ports */
 
+#define PIM_PORTT                (0)
+#define PIM_PORTS                (1)
+#define PIM_PORTG                (2)
+#define PIM_PORTH                (3)
+#define PIM_PORTJ                (4)
+#define PIM_PORTL                (5)
+
+/* Port register block offsets */
+
+#define HCS12_PIM_PORT_OFFSET(n) (HCS12_PIM_BASE + ((n) << 3))
 #define HCS12_PIM_PORTT_OFFSET   (0x0000)
 #define HCS12_PIM_PORTS_OFFSET   (0x0008)
 #define HCS12_PIM_PORTG_OFFSET   (0x0010)
 #define HCS12_PIM_PORTH_OFFSET   (0x0018)
 #define HCS12_PIM_PORTJ_OFFSET   (0x0020)
 #define HCS12_PIM_PORTL_OFFSET   (0x0028)
+
+/* Register offsets within a port register block */
 
 #define HCS12_PIM_IO_OFFSET      (0x0000) /* I/O Register (ALL) */
 #define HCS12_PIM_INPUT_OFFSET   (0x0001) /* Input Register (ALL) */
@@ -67,21 +80,17 @@
 #define HCS12_PIM_IF_OFFSET      (0x0007) /* Interrupt Flag Register (PORT G, H, and J) */
 
 /* Register Addresses ***************************************************************/
+/* Port register block addresses */
 
-#define PIM_PORTT                (0)
-#define PIM_PORTS                (1)
-#define PIM_PORTG                (2)
-#define PIM_PORTH                (3)
-#define PIM_PORTJ                (4)
-#define PIM_PORTL                (5)
-
-#define HCS12_PIM_PORT_BASE(n)   (HCS12_PIM_BASE + 0x0008*(n))
+#define HCS12_PIM_PORT_BASE(n)   (HCS12_PIM_BASE + HCS12_PIM_PORT_OFFSET(n))
 #define HCS12_PIM_PORTT_BASE     (HCS12_PIM_BASE + HCS12_PIM_PORTT_OFFSET)
 #define HCS12_PIM_PORTS_BASE     (HCS12_PIM_BASE + HCS12_PIM_PORTS_OFFSET)
 #define HCS12_PIM_PORTG_BASE     (HCS12_PIM_BASE + HCS12_PIM_PORTG_OFFSET)
 #define HCS12_PIM_PORTH_BASE     (HCS12_PIM_BASE + HCS12_PIM_PORTH_OFFSET)
 #define HCS12_PIM_PORTJ_BASE     (HCS12_PIM_BASE + HCS12_PIM_PORTJ_OFFSET)
 #define HCS12_PIM_PORTL_BASE     (HCS12_PIM_BASE + HCS12_PIM_PORTL_OFFSET)
+
+/* Port register addresses */
 
 #define HCS12_PIM_PORT_IO(n)     (HCS12_PIM_PORT_BASE(n) + HCS12_PIM_IO_OFFSET)
 #define HCS12_PIM_PORT_INPUT(n)  (HCS12_PIM_PORT_BASE(n) + HCS12_PIM_INPUT_OFFSET)
@@ -92,12 +101,16 @@
 #define HCS12_PIM_PORT_IE(n)     (HCS12_PIM_PORT_BASE(n) + HCS12_PIM_IE_OFFSET)
 #define HCS12_PIM_PORT_IF(n)     (HCS12_PIM_PORT_BASE(n) + HCS12_PIM_IF_OFFSET)
 
+/* Port T register addresses */
+
 #define HCS12_PIM_PORTT_IO       (HCS12_PIM_PORTT_BASE + HCS12_PIM_IO_OFFSET)
 #define HCS12_PIM_PORTT_INPUT    (HCS12_PIM_PORTT_BASE + HCS12_PIM_INPUT_OFFSET)
 #define HCS12_PIM_PORTT_DDR      (HCS12_PIM_PORTT_BASE + HCS12_PIM_DDR_OFFSET)
 #define HCS12_PIM_PORTT_RDR      (HCS12_PIM_PORTT_BASE + HCS12_PIM_RDR_OFFSET)
 #define HCS12_PIM_PORTT_PER      (HCS12_PIM_PORTT_BASE + HCS12_PIM_PER_OFFSET)
 #define HCS12_PIM_PORTT_PS       (HCS12_PIM_PORTT_BASE + HCS12_PIM_PS_OFFSET)
+
+/* Port S register addresses */
 
 #define HCS12_PIM_PORTS_IO       (HCS12_PIM_PORTS_BASE + HCS12_PIM_IO_OFFSET)
 #define HCS12_PIM_PORTS_INPUT    (HCS12_PIM_PORTS_BASE + HCS12_PIM_INPUT_OFFSET)
@@ -106,6 +119,8 @@
 #define HCS12_PIM_PORTS_PER      (HCS12_PIM_PORTS_BASE + HCS12_PIM_PER_OFFSET)
 #define HCS12_PIM_PORTS_PS       (HCS12_PIM_PORTS_BASE + HCS12_PIM_PS_OFFSET)
 #define HCS12_PIM_PORTS_WOM      (HCS12_PIM_PORTS_BASE + HCS12_PIM_WOM_OFFSET)
+
+/* Port G register addresses */
 
 #define HCS12_PIM_PORTG_IO       (HCS12_PIM_PORTG_BASE + HCS12_PIM_IO_OFFSET)
 #define HCS12_PIM_PORTG_INPUT    (HCS12_PIM_PORTG_BASE + HCS12_PIM_INPUT_OFFSET)
@@ -116,6 +131,8 @@
 #define HCS12_PIM_PORTG_IE       (HCS12_PIM_PORTG_BASE + HCS12_PIM_IE_OFFSET)
 #define HCS12_PIM_PORTG_IF       (HCS12_PIM_PORTG_BASE + HCS12_PIM_IF_OFFSET)
 
+/* Port H register addresses */
+
 #define HCS12_PIM_PORTH_IO       (HCS12_PIM_PORTH_BASE + HCS12_PIM_IO_OFFSET)
 #define HCS12_PIM_PORTH_INPUT    (HCS12_PIM_PORTH_BASE + HCS12_PIM_INPUT_OFFSET)
 #define HCS12_PIM_PORTH_DDR      (HCS12_PIM_PORTH_BASE + HCS12_PIM_DDR_OFFSET)
@@ -125,6 +142,8 @@
 #define HCS12_PIM_PORTH_IE       (HCS12_PIM_PORTH_BASE + HCS12_PIM_IE_OFFSET)
 #define HCS12_PIM_PORTH_IF       (HCS12_PIM_PORTH_BASE + HCS12_PIM_IF_OFFSET)
 
+/* Port J register addresses */
+
 #define HCS12_PIM_PORTJ_IO       (HCS12_PIM_PORTJ_BASE + HCS12_PIM_IO_OFFSET)
 #define HCS12_PIM_PORTJ_INPUT    (HCS12_PIM_PORTJ_BASE + HCS12_PIM_INPUT_OFFSET)
 #define HCS12_PIM_PORTJ_DDR      (HCS12_PIM_PORTJ_BASE + HCS12_PIM_DDR_OFFSET)
@@ -133,6 +152,8 @@
 #define HCS12_PIM_PORTJ_PS       (HCS12_PIM_PORTJ_BASE + HCS12_PIM_PS_OFFSET)
 #define HCS12_PIM_PORTJ_IE       (HCS12_PIM_PORTJ_BASE + HCS12_PIM_IE_OFFSET)
 #define HCS12_PIM_PORTJ_IF       (HCS12_PIM_PORTJ_BASE + HCS12_PIM_IF_OFFSET)
+
+/* Port L register addresses */
 
 #define HCS12_PIM_PORTL_IO       (HCS12_PIM_PORTL_BASE + HCS12_PIM_IO_OFFSET)
 #define HCS12_PIM_PORTL_INPUT    (HCS12_PIM_PORTL_BASE + HCS12_PIM_INPUT_OFFSET)
@@ -144,7 +165,7 @@
 
 /* Register Bit Definitions *********************************************************/
 
-/* Port register bits */
+/* Port register bits (all ports) */
 
 #define PIM_PIN(n)              (1 << (n))
 #define PIM_PIN0                (1 << 0)
