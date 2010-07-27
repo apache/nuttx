@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 19, 2010)
+NuttX TODO List (Last updated July 27, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -582,7 +582,13 @@ o Linux/Cywgin simulation (arch/sim)
                   to pointers on a 64-bit host.
                2) up_setjmp.S does not build
   Status:      Open
-  Priority:    Medium and increasing (as 32-bit hosts gradually disappear)
+  Priority:    Medium and increasing (as 32-bit hosts gradually disappear).  NOTE
+               is it possible to work-around this limitation by building the sim
+               target for 32-bit operation on a 64-bit platform.  Simply modify the
+               Make.defs file in the appropriate places so that:
+               
+               ARCHCPUFLAGS = -m32 -fno-builtin
+               LDFLAGS += -m32 -m elf_i386
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
