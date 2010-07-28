@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 27, 2010)
+NuttX TODO List (Last updated July 28, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -18,7 +18,7 @@ NuttX TODO List (Last updated July 27, 2010)
   (6)  Build system / Toolchains
   (3)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
-  (2)  Linux/Cywgin simulation (arch/sim)
+  (5)  Linux/Cywgin simulation (arch/sim)
   (3)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
@@ -589,6 +589,30 @@ o Linux/Cywgin simulation (arch/sim)
                
                ARCHCPUFLAGS = -m32 -fno-builtin
                LDFLAGS += -m32 -m elf_i386
+
+  Description: I never did get networking to work on the sim target.  It tries to
+               use the tap device (/dev/net/tun) to emulate an Ethernet NIC, but I
+               never got it correctly integrated with the NuttX networking.
+  Status:      Open
+  Priority:    Low (unless you want to test networking features on the simulation).
+  
+  Description: This is an X11-based framebuffer driver that you can use exercise
+               the NuttX graphics subsystem on the simulator.  But I am not much
+               of an X11 programmer so I did not use X11 autoconfiguration stuff.
+               As a result, it builds on old X11 installations, but not on current
+               versions.
+  Status:      Open
+  Priority:    Low (unless you want to test graphics features on the simulation).
+
+  Description: Since it is not pre-emptible, you can't use round-robin scheduling
+               (no time slicing).  Currently, the timer interrupts are "faked"
+               during IDLE loop processing and, as a result, there is no task
+               pre-emption because there are no asynchrous events.  This could
+               probably be fixed if the "timer interrupt" were driver by Linux
+               signals. NOTE:  You would also have to implement irqsave() and
+               irqrestore() to block and (conditionally) unblock the signal.
+  Status:      Open
+  Priority:    Low
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
