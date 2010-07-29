@@ -135,7 +135,7 @@
 
 #if defined(CONFIG_ARCH_CHIP_LPC3131)
 #  define LPC313X_ISRAM_SIZE        (LPC313X_INTSRAM0_SIZE+LPC313X_INTSRAM1_SIZE)
-#elif defined()
+#elif defined(CONFIG_ARCH_CHIP_LPC3130)
 #  define LPC313X_ISRAM_SIZE        LPC313X_INTSRAM0_SIZE
 #else
 #  error "Unsupported LPC313X architecture"

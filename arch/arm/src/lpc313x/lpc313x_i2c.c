@@ -242,6 +242,9 @@ static uint32_t i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
       putreg32 (((50 * freq) / 100) / frequency, priv->base + LPC313X_I2C_CLKLO_OFFSET);
       putreg32 (((50 * freq) / 100) / frequency, priv->base + LPC313X_I2C_CLKHI_OFFSET);
   }
+
+  /* FIXME: This function should return the actual selected frequency */
+  return frequency;
 }
 
 /*******************************************************************************
@@ -280,7 +283,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
     DEBUGASSERT (dev != NULL);
     
     priv->msg.flags &= ~I2C_M_READ;
-    priv->msg.buffer = buffer;
+    priv->msg.buffer = (uint8_t*)buffer;
     priv->msg.length = buflen;
 
     ret = i2c_transfer (dev, &priv->msg, 1);
