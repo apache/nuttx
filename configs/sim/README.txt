@@ -1,6 +1,81 @@
 README
 ^^^^^^
 
+This README file describes the contents of the build configurations available
+for the NuttX "sim" target.  The sim target is a NuttX port that runs as a
+user-space program under Linux or Cygwin.  It is a very "low fidelity" embedded
+system simulation: This environment does not support any kind of asynchonous
+events -- there are nothing like interrupts in this context.  Therefore, there
+can be no pre-empting events.
+
+In order to get timed behavior, the system timer "interrupt handler" is called
+from the sim target's IDLE loop.  The IDLE runs whenever there is no other task
+running.  So, for example, if a task calls sleep(), then that task will suspend
+wanting for the time to elapse.  If nothing else is available to run, then the
+IDLE loop runs and the timer increments, eventually re-awakening the sleeping task.
+
+Context switching is based on logic similar to setjmp() and longjmp().
+
+The sim target is used primarily as a development and test platform for new
+RTOS features.  It is also of academic interest.  But it has no real-world
+application that I know of.
+
+NOTE:  In order to facility fast testing, the sim target's IDLE loop, by default,
+calls the system "interrupt handler" as fast as possible.  As a result, there
+really are no noticeable delays when a task sleeps.  However, the task really does
+sleep -- but the time scale is wrong.  If you want behavior that is closer to
+normal timing, then you can define CONFIG_SIM_WALLTIME=y in your configuration
+file.  This configuration setting will cause the sim target's IDLE loop to delay
+on each call so that the system "timer interrupt" is called at a rate approximately
+correct for the system timer tick rate.  With this definition in the configuration,
+sleep() behavior is more or less normal.
+
+64-Bit Issues
+^^^^^^^^^^^^^
+
+As mentioned above, context switching is based on logic like setjmp and longjmp.
+This context switching is only available for 32-bit targets.  On 64-bit machines,
+this context switching will fail.
+
+There are other 64-bit issues as well.  For example, addresses are retained in
+32-bit unsigned integer types in a few places.  On a 64-bit machine, the 32-bit
+address storage may correcupt 64-bit addressing.  NOTE:  This is really a bug --
+addresses should not be retained in uint32_t types but rather in uintptr_t types
+to avoid issues just like this.
+
+The workaround on 64-bit machines for now is to build for a 32-bit target on the
+64-bit machine.  This workaround involves modifying the Make.defs file in the
+appropriate places so that -m32 is included in the CFLAGS and -m32 and -melf_386
+are included in the LDFLAGS.  See the patch 0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch
+that can be found at http://tech.groups.yahoo.com/group/nuttx/files.
+
+Buffered I/O Issues
+^^^^^^^^^^^^^^^^^^^
+
+The simulated serial driver has some odd behavior.  It will stall for a long time
+on reads when the C stdio buffers are being refilled. This only effects the behavior
+of things like fgetc().  Workaround: Set CONFIG_STDIO_BUFFER_SIZE=0, suppressing
+all C buffered I/O.
+
+Networking Issues
+^^^^^^^^^^^^^^^^^
+
+I never did get networking to work on the sim target.  It tries to use the tap device
+(/dev/net/tun) to emulate an Ethernet NIC, but I never got it correctly integrated
+with the NuttX networking (I probably should try using raw sockets instead).
+
+X11 Issues
+^^^^^^^^^^
+
+There is an X11-based framebuffer driver that you can use exercise the NuttX graphics
+subsystem on the simulator (see the sim/nx configuration below).  But I am not much
+of an X11 programmer so I did not use X11 autoconfiguration stuff. As a result, the X11
+support builds on old X11 installations, but not on current versions.  This needs to
+get fixed someday.
+
+Configurations
+^^^^^^^^^^^^^^
+
 mount
   Configures to use examples/mount.  This configuration may be
   selected as follows:

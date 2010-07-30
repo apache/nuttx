@@ -596,7 +596,7 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Low (unless you want to test networking features on the simulation).
   
-  Description: This is an X11-based framebuffer driver that you can use exercise
+  Description: There is an X11-based framebuffer driver that you can use exercise
                the NuttX graphics subsystem on the simulator.  But I am not much
                of an X11 programmer so I did not use X11 autoconfiguration stuff.
                As a result, it builds on old X11 installations, but not on current
