@@ -721,7 +721,7 @@ EXTERN void lpc313x_softreset(enum lpc313x_resetid_e resetid);
 EXTERN enum lpc313x_domainid_e lpc313x_clkdomain(enum lpc313x_clockid_e clkid);
 
 /************************************************************************
- * Name: lp313x_esrndx
+ * Name: lpc313x_esrndx
  *
  * Description:
  *   Given a clock ID, return the index of the corresponding ESR
@@ -740,10 +740,10 @@ EXTERN enum lpc313x_domainid_e lpc313x_clkdomain(enum lpc313x_clockid_e clkid);
  *
  ************************************************************************/
 
-EXTERN int lp313x_esrndx(enum lpc313x_clockid_e clkid);
+EXTERN int lpc313x_esrndx(enum lpc313x_clockid_e clkid);
 
 /************************************************************************
- * Name: lp313x_bcrndx
+ * Name: lpc313x_bcrndx
  *
  * Description:
  *   Only 5 of the 12 domains have an associated BCR register.  This
@@ -752,7 +752,7 @@ EXTERN int lp313x_esrndx(enum lpc313x_clockid_e clkid);
  *
  ************************************************************************/
 
-EXTERN int lp313x_bcrndx(enum lpc313x_domainid_e dmnid);
+EXTERN int lpc313x_bcrndx(enum lpc313x_domainid_e dmnid);
 
 /************************************************************************
  * Name: lpc313x_fdcndx

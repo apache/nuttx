@@ -1,7 +1,7 @@
 /************************************************************************
  * arch/arm/src/lpc313x/lpc313x_esrndx.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -64,7 +64,7 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: lp313x_esrndx
+ * Name: lpc313x_esrndx
  *
  * Description:
  *   Given a clock ID, return the index of the corresponding ESR
@@ -83,7 +83,7 @@
  *
  ************************************************************************/
 
-int lp313x_esrndx(enum lpc313x_clockid_e clkid)
+int lpc313x_esrndx(enum lpc313x_clockid_e clkid)
 {
   int esrndx = (int)clkid;
 

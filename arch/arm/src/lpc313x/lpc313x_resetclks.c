@@ -91,7 +91,7 @@ void lpc313x_resetclks(void)
 
       /* Check if the domain has a BCR */
 
-      bcrndx = lp313x_bcrndx((enum lpc313x_domainid_e)i);
+      bcrndx = lpc313x_bcrndx((enum lpc313x_domainid_e)i);
       if (bcrndx != BCRNDX_INVALID)
         {
           /* Yes.. disable all BCRs */
@@ -106,7 +106,7 @@ void lpc313x_resetclks(void)
   {
     /* Check if this clock has an ESR register */
 
-    esrndx = lp313x_esrndx((enum lpc313x_clockid_e)i);
+    esrndx = lpc313x_esrndx((enum lpc313x_clockid_e)i);
     if (esrndx != ESRNDX_INVALID)
     {
       /* Yes.. Clear the clocks ESR to deselect fractional divider */

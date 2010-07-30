@@ -1,7 +1,7 @@
 /************************************************************************
  * arch/arm/src/lpc313x/lpc313x_bcrndx.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -64,7 +64,7 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: lp313x_bcrndx
+ * Name: lpc313x_bcrndx
  *
  * Description:
  *   Only 5 of the 12 domains have an associated BCR register.  This
@@ -73,7 +73,7 @@
  *
  ************************************************************************/
 
-int lp313x_bcrndx(enum lpc313x_domainid_e dmnid)
+int lpc313x_bcrndx(enum lpc313x_domainid_e dmnid)
 {
   switch (dmnid)
     {

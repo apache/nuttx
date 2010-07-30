@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_clkinit.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,7 +95,7 @@ static void lpc313x_domaininit(struct lpc313x_domainconfig_s* dmn)
   uint32_t regval;
   int fdndx;
   int clkndx;
-  int bcrndx = lp313x_bcrndx(dmn->dmnid);
+  int bcrndx = lpc313x_bcrndx(dmn->dmnid);
   int esrndx;
 
   if (bcrndx != BCRNDX_INVALID)
@@ -126,7 +126,7 @@ static void lpc313x_domaininit(struct lpc313x_domainconfig_s* dmn)
             {
               /* Does this clock have an ESR register? */
  
-              esrndx = lp313x_esrndx((enum lpc313x_clockid_e)(clkndx + dmn->clk1));
+              esrndx = lpc313x_esrndx((enum lpc313x_clockid_e)(clkndx + dmn->clk1));
               if (esrndx != ESRNDX_INVALID)
                 {
                   /* Yes.. Check if this clock belongs to this sub-domain */
