@@ -106,7 +106,7 @@ void lpc313x_setfdiv(enum lpc313x_domainid_e dmnid,
        * have a BCR?
        */
 
-      bcrndx = lp313x_bcrndx(dmnid);
+      bcrndx = lpc313x_bcrndx(dmnid);
       if (bcrndx != BCRNDX_INVALID)
         {
 

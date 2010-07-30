@@ -104,7 +104,7 @@ int lpc313x_fdcndx(enum lpc313x_clockid_e clkid, enum lpc313x_domainid_e dmnid)
 
   /* Check if there is an ESR register associate with this clock ID */
 
-  esrndx = lp313x_esrndx(clkid);
+  esrndx = lpc313x_esrndx(clkid);
   if (esrndx != ESRNDX_INVALID)
   {
     /* Read the clock's ESR to get the fractional divider */
