@@ -2746,7 +2746,11 @@ make
         <li>
           The sim target itself is broken under 64-bit Linux.
           This is because the sim target is based upon some assembly language setjmp/longjmp logic that only works on 32-bit systems.
-          <p><small><b>NOTE</b>: There is a workaround in this case; you can build for 32-bit execution on a 64-bit machine by adding <code>-m3</code> to the <code>CFLAGS</code> and <code>-m32 -m elf_i38</code> to the <code>LDFLAGS</code>.</small></p>
+          <p><small><b>NOTE</b>: There is a workaround in this case: 
+          You can build for 32-bit execution on a 64-bit machine by adding <code>-m3</code> to the <code>CFLAGS</code> and <code>-m32 -m elf_i386</code> to the <code>LDFLAGS</code>.
+          See the patch file <code>0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch</code>
+          that can be found in NuttX <a href="http://tech.groups.yahoo.com/group/nuttx/files">files</a>.
+          </small></p>
         </li>
       </ul>
     </p>

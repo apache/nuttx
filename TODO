@@ -584,11 +584,11 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Medium and increasing (as 32-bit hosts gradually disappear).  NOTE
                is it possible to work-around this limitation by building the sim
-               target for 32-bit operation on a 64-bit platform.  Simply modify the
-               Make.defs file in the appropriate places so that:
-               
-               ARCHCPUFLAGS = -m32 -fno-builtin
-               LDFLAGS += -m32 -m elf_i386
+               target for 32-bit operation on a 64-bit platform.  Modify the
+               Make.defs file in the appropriate places so that -m32 is included
+               in the CFLAGS and -m32 and -melf_386 are included in the LDFLAGS.
+               See the patch 0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch
+               that can be found at http://tech.groups.yahoo.com/group/nuttx/files.
 
   Description: I never did get networking to work on the sim target.  It tries to
                use the tap device (/dev/net/tun) to emulate an Ethernet NIC, but I
