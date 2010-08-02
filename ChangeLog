@@ -62,8 +62,7 @@
 	* Fix error in handing signed decimal in vsprintf().
 	* Major restructuring of header files to get closer to
 	  POSIX compliance.
-	* Eliminate compilation warnings that that crept into
-	  recent check-ins
+	* Eliminate compilation warnings that crept into recent check-ins
 	* Add kill()
 	* Added support for POSIX timers
 	* Some Documentation updates
@@ -113,7 +112,7 @@
 
 0.2.4 2007-04-28 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* Verfied c5471 build under Cygwin on WinXP
+	* Verified c5471 build under Cygwin on WinXP
 	* Makesystem changes to better support different SoCs.
 	* Made arch/c5471/include and arch/dm320/include identical in
 	  preparation for merging into arch/arm
@@ -129,11 +128,11 @@
 	  development board (untested)
 	* Added support for block devices.
 	* Simulated target now exports a VFAT filesystem
-	* Begin support for VFAT filesystem (missing functionalit)
+	* Begin support for VFAT filesystem (missing functionality)
 	* Added mount() and umount()
 	* Fix bug in memcmp return value
 	* Fix errors in timeslice calculation (several places)
-	* Added missing irqrestore() in timer_deletall().
+	* Added missing irqrestore() in timer_deleteall().
 	* close() was not closing the underlying device.
 	* Added fsync()
 	* Added strspn() and strcspn()
@@ -247,15 +246,15 @@
 0.3.3 2007-11-28 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Removed unused uIP files
-	* sched/, mm/, and net/ subystem debug can not be selectively enabled/disabled
+	* sched/, mm/, and net/ subsystem debug can not be selectively enabled/disabled
 	* Correct socket close logic -- needs to disconnect TCP socket on close
 	* uIP webserver now seems to be fully functional
 	* fs/ and lib/ subystem debug can not be selectively enabled/disabled
 	* Added vsnprintf
 	* Integrated uIP telnetd
-	* Add missing logic to readahead buffer logic
+	* Add missing logic to read-ahead buffer logic
 	* examples/nettest uses larger buffers
-	* Improved ACK handling in send() to better hander deferred acknowledgements
+	* Improved ACK handling in send() to better handler deferred acknowledgements
 	  and polling intervals.  Greatly improves send performance.
 
 0.3.4 2007-12-10 Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -266,7 +265,7 @@
 	* Correct processing of input UDP broadcast packets.
 	* Verfied basic DHCP client functionality (netutils/dhcpc)
 	* Implemented send() timeout logic
-	* Added and verifed a TELNETD front end to NSH (examples/nsh)
+	* Added and verified a TELNETD front end to NSH (examples/nsh)
 	* Add a skeleton Ethernet device driver (drivers/net/skeleton.c)
 	* Added C5471 Ethernet device driver (arch/arm/src/c5471/c5471_ethernet.c)
 	* Found and fixed several problems in uIP when compiled for ARM with optimization.
@@ -281,7 +280,7 @@
 	* Fixed errors in C5471 configuration files for examples/uip
 	* Modified DHCPC (netutils/dhcpc) so that it should work in environments where
 	  there are more than one DHCPD server.
-	* NSH ifconfig command now shows uIP status was well (examples/nsh)
+	* NSH ifconfig command now shows uIP status as well (examples/nsh)
 
 0.3.6 2008-01-06 Gregory Nutt <spudmonkey@racsa.co.cr>
 
@@ -308,7 +307,7 @@
 	  interrupt architecture (like the Z16F)
 	* Added a "dumb" serial console driver to simplify OS bringup
 	* Corrected a bug that caused the errno value of one task to be clobbered
-	  when a different task exits.	Effects all architectures.
+	  when a different task exits.	Affects all architectures.
 
 0.3.8 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
@@ -428,7 +427,7 @@
 	* Added telnet NSH configuration for Neuros OSD.
 	* Basic integration of concurrent telnet/serial NSH functional on Neuros
 	  OSD.
-	* Fixed a critical bug that effects the way that environment variables are
+	* Fixed a critical bug that affects the way that environment variables are
 	  shared amongst pthreads.
 	* uIP port enhance to support multi-threaded, concurrent socket access.  So,
 	  for example, one thread can be reading from a socket while another is
@@ -594,13 +593,13 @@
 	* Add an X11-based simulated framebuffer driver
 	* The simulated target now has an option (CONFIG_SIM_WALLTIME) that will let the simulation
 	  run in more-or-less realtime.
-	* Added more more extensive window support:  frames, toolbars, etc.
+	* Added more extensive window support:  frames, toolbars, etc.
 	* Added support for bitmap fonts
 	* Integrated the new font support with a font test in examples/nx
 	* Add documentation for NX graphics subsystem
 
 0.4.1 2009-02-06 Gregory Nutt <spudmonkey@racsa.co.cr>
-	* Added board support fot the ZiLog eZ80Acclaim! ez80f910200zco Development Kit.
+	* Added board support for the ZiLog eZ80Acclaim! ez80f910200zco Development Kit.
 	* Fixed several compilation errors in fixed precision math library when built
 	  against toolchains that do not support 64-bit type 'long long'.
 	* Fix errors in some function prototypes in dirent.h
@@ -679,7 +678,7 @@
 
 	NOTE: Features related to wget and sendmail are not tested on the target platform
 	in this release and, hence, most likely have problems.	I don't have the correct network
-	network setup to perform that testing now (I'm in a hotel).
+	setup to perform that testing now (I'm in a hotel).
 
 0.4.5 2009-04-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
@@ -709,7 +708,7 @@
 	  and recvblock methods and replace them with a single exchange method
 	* Build:  objcopy fails with toolchains that use newer GCC and binutils.  The
 	  following arguments need to be included in the objcopy command line "-R .note
-	  -R .note.gnu.build-id -R .comment"  This has bin fixed in arch/arm/src/Makefile,
+	  -R .note.gnu.build-id -R .comment"  This has been fixed in arch/arm/src/Makefile,
 	  but other architectures may have the same problem.  Thanks to Dave Marples
 	  for verifying this.
 	* configs/eagle100/ostest: Added support for the MicroMint Eagle100 board. 
@@ -717,7 +716,7 @@
 	  examples/ostest.
 	* arch/arm/src/lpc214x: Add configuration option to enable fast GPIO (vs.
 	  legacy, "slow" GPIO) for LPC214x.
-	* arch/arm: Restructured the arch/arm directory structure to better suppor ARM
+	* arch/arm: Restructured the arch/arm directory structure to better support ARM
 	  and Cortex-M3.
 	* sched/: pthread_create() must return a (non-negated) errno value on failure.
 	* configs/eagle100/nsh: Add a NuttShell (NSH) configuration for the Eagle-100
@@ -758,7 +757,7 @@
 	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
 	  working.	The test at configs/olimex-strp711/ostest passes.  This means that
 	  the basic STR-P711 port is complete.
-	* configs/olimex-strp711/nsh:  Add and verifed a NuttShell (NSH) configuration
+	* configs/olimex-strp711/nsh:  Add and verified a NuttShell (NSH) configuration
 	  for the STR-P711.
 	* arch/arm/str71x/str71x_serial.c:	The STR711 interrupt driven serial driver
 	  finally works after some extradinary measures to handle missed interrupts.
@@ -777,8 +776,8 @@
 
 	* Add strtoll() and strtoull(); Add macros for atol() and atoll().
 	* dup() and dup2() will now clone socket descriptors
-	* All socket descriptors ar now cloned when when a new task is started
-	  via task_create().
+	* All socket descriptors are now cloned when a new task is started via
+	  task_create().
 	* Add configuration options to suppress or eliminate cloning of file
 	  and/or socket descriptors when a new task is started by task_create():
 	  CONFIG_FDCLONE_DISABLE, CONFIG_FDCLONE_STDIO, CONFIG_SDCLONE_DISABLE.
@@ -868,7 +867,7 @@
 	  removing the check should improve write throughput
 	* Add DEBUG configuration option to enable debug console output without disabling
 	  optimization (and vice versa)
-	* Changed lots of occurrents of debug macro dbg() to lldbg().  dbg() uses
+	* Changed lots of occurrences of debug macro dbg() to lldbg().  dbg() uses
 	  stdout to output debug data.	That works fine unless (1) the dbg() macro
 	  is interrupt logic and the interrupted task has redirected stdout!  Most
 	  changes were in uIP.
@@ -907,7 +906,7 @@
 	* configs/stm3210e-eval/src/stm32102e-internal.h.  Fix on-board LED GPIO definitions.
 	* arch/arm/src/stm32/src/stm32/stm32_dma.c.  Added DMA channel support for the STM32
 	* arch/arm/src/stm32/src/stm32/stm32_spi.c.  Added a DMA-based SPI driver for the STM32.
-	* arch/arm/src/stm32/src/stm32/stm32_serial.c.	Finished interrupt-drivent,
+	* arch/arm/src/stm32/src/stm32/stm32_serial.c.	Finished interrupt-driven,
 	  USART console driver.  This makes NSH work perfectly.
 	* Things left to do for the STM32 deferred to the 0.4.13 release:  USB device driver,
 	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
@@ -957,7 +956,7 @@
 	  defer processing from an interrupt to a task.
 	* include/nuttx/sdio.h -- Defines a generic SD/SDIO interface can can be
 	  bound to a MMC/SD driver to provide SDIO-based MMC/SD support.
-	* drivers/mmcsd/mmcsd_sdio.c -- Provides a an SDIO-based MMC/SD driver.
+	* drivers/mmcsd/mmcsd_sdio.c -- Provides an SDIO-based MMC/SD driver.
 	* arch/arm/src/stm32/stm32_sdio.c -- Provides an STM32 implementation of
 	  the SDIO interface defined in include/nuttx/sdio.h.
 	* fs/fs_mount.c -- Correct error handling logic.  If the bind() method
@@ -1026,7 +1025,7 @@
 	* include/nuttx/arch.h and arch/*/common/up_udelay.c - Change argument
 	  of up_udelay() to type useconds_t to avoid warnings when sizeof(int)
 	  is 16-bits.
-	* drivers/mmcsd/* - Add casts in contant expressions to avoid warnings
+	* drivers/mmcsd/* - Add casts in constant expressions to avoid warnings
 	  when sizeof(int) is 16-bits.
 
 5.1 2010-01-30 Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -1114,7 +1113,7 @@
 	  LM3S6965
 	* configs/lm3s6965-ek - Add configuration for Stellaris LM3S6965
 	  Evaluation Kit (including basic examples/ostest configuration)
-	* lib/lib_dtoa.c and lib/lib_dtoa.c - printf will not printf floating
+	* lib/lib_dtoa.c and lib/lib_dtoa.c - printf will not print floating
 	  point values if you select CONFIG_LIBC_FLOATINGPOINT in your
 	  configuration file.  Contributed by Yolande Cates.  NOTE:  these
 	  floating point operations have not been well tested and may not
@@ -1129,7 +1128,7 @@
 	* drivers/lcd/p14201.c - Driver for RiT P14201 series 128x96 4-bit OLED.
 	* configs/lm3s6965-ek/nx - NX graphics configuration for the LM3S6965
 	  Ethernet Evaluation Kit.
-	* graphics/ - Numerous fixes to get the P14201 4-bpp greyscale display
+	* graphics/ - Numerous fixes to get the P14201 4-bpp grayscale display
 	  working (there may still be some minor issues .. see the TODO list).
 	* arch/arm/include/lpc17xx and arch/arm/src/lpc17xxx - Began port for
 	  NXP LPC1768.  As of the 5.6 release, there is a complete set of
