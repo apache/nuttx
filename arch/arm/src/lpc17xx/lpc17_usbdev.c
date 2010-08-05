@@ -1992,16 +1992,15 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
   uint8_t  epphy;         /* Physical endpoint number being processed */
   int      i;
 
-  usbtrace(TRACE_INTENTRY(LPC17_TRACEINTID_USB), 0);
-
   /* Read the device interrupt status register */
 
   devintstatus = lpc17_getreg(LPC17_USBDEV_INTST);
+  usbtrace(TRACE_INTENTRY(LPC17_TRACEINTID_USB), (uint16_t)devintstatus);
 
 #ifdef CONFIG_LPC17_USBDEV_DMA
   /* Check for low priority and high priority (non-DMA) interrupts */
 
-  if ((lpc17_getreg(LPC17_USBDEV_INTST) & (USBDEV_INTST_REQLP|USBDEV_INTST_REQHP)) != 0)
+  if ((devintstatus & (USBDEV_INTST_REQLP|USBDEV_INTST_REQHP)) != 0)
     {
 #endif
 #ifdef CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT
@@ -2022,7 +2021,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 #if CONFIG_DEBUG
       /* USB engine error interrupt */
 
-      if ((devintstatus & USBDEV_INT_ERRINT))
+      if ((devintstatus & USBDEV_INT_ERRINT) != 0)
         {
           uint8_t errcode;
 
@@ -3091,7 +3090,7 @@ void up_usbinitialize(void)
   regval |= SYSCON_PCONP_PCUSB;
   putreg32(regval, LPC17_SYSCON_PCONP);
 
-  /* Step 2: Enable clocking on UART (USB clocking was initialized in very
+  /* Step 2: Enable clocking on USB (USB clocking was initialized in very
    * low-level clock setup logic (see lpc17_clockconfig.c)
    */
 
