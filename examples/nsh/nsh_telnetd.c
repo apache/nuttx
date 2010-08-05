@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_telnetd.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -59,6 +59,9 @@
 
 #include <net/if.h>
 #include <net/uip/uip-lib.h>
+#if defined(CONFIG_EXAMPLES_NSH_DHCPC)
+#  include <net/uip/dhcpc.h>
+#endif
 
 #include "nsh.h"
 
@@ -782,6 +785,9 @@ static void nsh_telnetexit(FAR struct nsh_vtbl_s *vtbl)
 int nsh_telnetmain(int argc, char *argv[])
 {
  struct in_addr addr;
+#if defined(CONFIG_EXAMPLES_NSH_DHCPC)
+ FAR void *handle;
+#endif
 #if defined(CONFIG_EXAMPLES_NSH_DHCPC) || defined(CONFIG_EXAMPLES_NSH_NOMAC)
  uint8_t mac[IFHWADDRLEN];
 #endif

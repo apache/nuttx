@@ -81,7 +81,10 @@ GNU Toolchain Options
 
   NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
-  path or will get the wrong version of make.
+  path or will get the wrong version of make.  It has been reported to me that the
+  devkitARM will require an lower optimization level of -O1.  Currently all of the
+  Make.def files have -O2 for devkitARM -- if you are using this toolchain, you may
+  need to review these settings.
 
 CodeSourcery on Linux
 ^^^^^^^^^^^^^^^^^^^^^
