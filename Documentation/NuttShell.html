@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: June 08, 2009</p>
+      <p>Last Updated: July 06, 2010</p>
     </td>
   </tr>
 </table>
@@ -2099,6 +2099,23 @@ nsh>
     <th align="left">Description</th>
   </tr>
   <tr>
+    <td valign="top"><b><code>CONFIG_NET=y</code></b></td>
+    <td>
+      Of course, networking must be enabled.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSOCKET_DESCRIPTORS</code></b></td>
+    <td>
+      And, of course, you must allocate some socket descriptors.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NET_TCP=y</code></b></td>
+    <td>
+      TCP/IP support is required for telnet (as well as various other TCP-related configuration settings).
+    </td>
+  </tr>
     <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></b></td>
     <td>
       Determines the size of the I/O buffer to use for sending/
@@ -2135,6 +2152,49 @@ nsh>
     <td>
       Set if your ethernet hardware has no built-in MAC address.
       If set, a bogus MAC will be assigned.
+    </td>
+  </tr>
+</table></center>
+
+<p>
+  If you use DHCPC, then some special configuration network options are
+  required.  These include:
+</p>
+
+<center><table width="100%">
+  <tr bgcolor="#e4e4e4">
+    <th align="left" width="25%">Configuration</th>
+    <th align="left">Description</th>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NET=y</code></b></td>
+    <td>
+      Of course, networking must be enabled.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSOCKET_DESCRIPTORS</code></b></td>
+    <td>
+      And, of course, you must allocate some socket descriptors.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NET_UDP=y</code></b></td>
+    <td>
+      UDP support is required for DHCP (as well as various other UDP-related configuration settings).
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NET_BROADCAST=y</code></b></td>
+    <td>
+      UDP broadcast support is needed.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NET_BUFSIZE=650</code></b> (or larger)</td>
+    <td>
+      Per RFC2131 (p. 9), the DHCP client must be prepared to receive DHCP messages of up to
+      576 bytes (excluding Ethernet, IP, or UDP headers and FCS).
     </td>
   </tr>
 </table></center>
