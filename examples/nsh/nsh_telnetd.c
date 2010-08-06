@@ -60,6 +60,7 @@
 #include <net/if.h>
 #include <net/uip/uip-lib.h>
 #if defined(CONFIG_EXAMPLES_NSH_DHCPC)
+#  include <net/uip/resolv.h>
 #  include <net/uip/dhcpc.h>
 #endif
 

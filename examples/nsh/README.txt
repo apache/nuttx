@@ -893,6 +893,16 @@ NSH-Specific Configuration Settings
   must be defined.  If CONFIG_EXAMPLES_NSH_TELNET is selected, then there some
   other configuration settings that apply:
 
+  * CONFIG_NET=y
+      Of course, networking must be enabled
+ 
+  * CONFIG_NSOCKET_DESCRIPTORS
+      And, of course, you must allocate some socket descriptors.
+
+  * CONFIG_NET_TCP=y
+      TCP/IP support is required for telnet (as well as various other TCP-related
+      configuration settings).
+
   * CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE
       Determines the size of the I/O buffer to use for sending/
       receiving TELNET commands/reponses
@@ -913,6 +923,26 @@ NSH-Specific Configuration Settings
   * CONFIG_EXAMPLES_NSH_NOMAC
       Set if your ethernet hardware has no built-in MAC address.
       If set, a bogus MAC will be assigned.
+
+  If you use DHCPC, then some special configuration network options are
+  required.  These include:
+
+  * CONFIG_NET=y
+      Of course, networking must be enabled
+ 
+  * CONFIG_NSOCKET_DESCRIPTORS
+      And, of course, you must allocate some socket descriptors.
+
+  * CONFIG_NET_UDP=y
+      UDP support is required for DHCP (as well as various other UDP-related
+      configuration settings)
+
+  * CONFIG_NET_BROADCAST=y
+      UDP broadcast support is needed.
+ 
+  * CONFIG_NET_BUFSIZE=650 (or larger)
+      Per RFC2131 (p. 9), the DHCP client must be prepared to receive DHCP
+      messages of up to 576 bytes (excluding Ethernet, IP, or UDP headers and FCS).
 
   If CONFIG_EXAMPLES_NSH_ROMFSETC is selected, then the following additional
   configuration setting apply:

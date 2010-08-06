@@ -22,6 +22,14 @@ examples/dhcpd
     make -f Makefile.host
 
   NuttX configuration settings:
+  
+    CONFIG_NET=y                   - Of course
+    CONFIG_NSOCKET_DESCRIPTORS     - And, of course, you must allocate some
+                                     socket descriptors.
+    CONFIG_NET_UDP=y               - UDP support is required for DHCP
+                                     (as well as various other UDP-related
+                                     configuration settings)
+    CONFIG_NET_BROADCAST=y         - UDP broadcast support is needed.
 
     CONFIG_EXAMPLE_DHCPD_NOMAC     - (May be defined to use software assigned MAC)
     CONFIG_EXAMPLE_DHCPD_IPADDR    - Target IP address
@@ -352,6 +360,21 @@ examples/uip
     CONFIG_EXAMPLE_UIP_DRIPADDR  - Default router IP addess
     CONFIG_EXAMPLE_UIP_NETMASK   - Network mask
     CONFIG_EXAMPLE_UIP_DHCPC     - Select to get IP address via DHCP
+
+  If you use DHCPC, then some special configuration network options are
+  required.  These include:
+
+    CONFIG_NET=y                 - Of course
+    CONFIG_NSOCKET_DESCRIPTORS   - And, of course, you must allocate some
+                                   socket descriptors.
+    CONFIG_NET_UDP=y             - UDP support is required for DHCP
+                                   (as well as various other UDP-related
+                                   configuration settings).
+    CONFIG_NET_BROADCAST=y       - UDP broadcast support is needed.
+    CONFIG_NET_BUFSIZE=650       - Per RFC2131 (p. 9), the DHCP client must be
+    (or larger)                    prepared to receive DHCP messages of up to
+                                   576 bytes (excluding Ethernet, IP, or UDP
+                                   headers and FCS).
 
   Other configuration items apply also to the selected webserver net utility.
   Additional relevant settings for the uIP webserver net utility are:
