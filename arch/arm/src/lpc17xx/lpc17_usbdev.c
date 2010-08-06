@@ -86,12 +86,6 @@
 #  define USB_FAST_INT 0
 #endif
 
-/* Extremely detailed register debug that you would normally never want
- * enabled.
- */
-
-#undef CONFIG_LPC17_USBDEV_REGDEBUG
-
 /* Enable reading SOF from interrupt handler vs. simply reading on demand.  Probably
  * a bad idea... Unless there is some issue with sampling the SOF from hardware
  * asynchronously.
@@ -106,7 +100,21 @@
 #ifdef CONFIG_DEBUG
 #  define USB_ERROR_INT USBDEV_INT_ERRINT
 #else
+#  undef  CONFIG_LPC17_USBDEV_REGDEBUG
 #  define USB_ERROR_INT 0
+#endif
+
+/* Dump GPIO registers */
+
+#if defined(CONFIG_LPC17_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
+#  define usbdev_dumpgpio() \
+   do { \
+     lpc17_dumpgpio(GPIO_USB_DP, "D+ P0.29; D- P0.30"); \
+     lpc17_dumpgpio(GPIO_USB_VBUS, "LED P1:18; VBUS P1:30"); \
+     lpc17_dumpgpio(GPIO_USB_CONNECT, "CONNECT P2:9"); \
+   } while (0);
+#else
+#  define usbdev_dumpgpio()
 #endif
 
 /* Number of DMA descriptors */
@@ -356,7 +364,9 @@ struct lpc17_usbdev_s
 
 /* Register operations ********************************************************/
 
-#if defined(CONFIG_LPC17_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC17_USBDEV_REGDEBUG
+static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite);
+static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t lpc17_getreg(uint32_t addr);
 static void lpc17_putreg(uint32_t val, uint32_t addr);
 #else
@@ -505,6 +515,85 @@ static struct lpc17_dmadesc_s  g_usbddesc[CONFIG_LPC17_USBDEV_NDMADESCRIPTORS];
  *******************************************************************************/
 
 /*******************************************************************************
+ * Name: lpc17_printreg
+ *
+ * Description:
+ *   Print the contents of an LPC17xx register operation
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_LPC17_USBDEV_REGDEBUG
+static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
+{
+  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_checkreg
+ *
+ * Description:
+ *   Get the contents of an LPC17xx register
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_LPC17_USBDEV_REGDEBUG
+static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
+{
+  static uint32_t prevaddr = 0;
+  static uint32_t preval = 0;
+  static uint32_t count = 0;
+  static bool     prevwrite = false;
+
+  /* Is this the same value that we read from/wrote to the same register last time?
+   * Are we polling the register?  If so, suppress the output.
+   */
+
+  if (addr == prevaddr && val == preval && prevwrite == iswrite)
+    {
+      /* Yes.. Just increment the count */
+
+      count++;
+    }
+  else
+    {
+      /* No this is a new address or value or operation. Were there any
+       * duplicate accesses before this one?
+       */
+
+      if (count > 0)
+        {
+          /* Yes.. Just one? */
+
+          if (count == 1)
+            {
+              /* Yes.. Just one */
+
+              lpc17_printreg(prevaddr, preval, prevwrite);
+            }
+          else
+            {
+              /* No.. More than one. */
+
+              lldbg("[repeats %d more times]\n", count);
+            }
+        }
+
+      /* Save the new address, value, count, and operation for next time */
+
+      prevaddr  = addr;
+      preval    = val;
+      count     = 0;
+      prevwrite = iswrite;
+
+      /* Show the new regisgter access */
+
+      lpc17_printreg(addr, val, iswrite);
+    }
+}
+#endif
+
+/*******************************************************************************
  * Name: lpc17_getreg
  *
  * Description:
@@ -512,56 +601,16 @@ static struct lpc17_dmadesc_s  g_usbddesc[CONFIG_LPC17_USBDEV_NDMADESCRIPTORS];
  *
  *******************************************************************************/
 
-#if defined(CONFIG_LPC17_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC17_USBDEV_REGDEBUG
 static uint32_t lpc17_getreg(uint32_t addr)
 {
-  static uint32_t prevaddr = 0;
-  static uint32_t preval = 0;
-  static uint32_t count = 0;
-
   /* Read the value from the register */
 
   uint32_t val = getreg32(addr);
 
-  /* Is this the same value that we read from the same registe last time?  Are
-   * we polling the register?  If so, suppress some of the output.
-   */
+  /* Check if we need to print this value */
 
-  if (addr == prevaddr && val == preval)
-    {
-      if (count == 0xffffffff || ++count > 3)
-        {
-           if (count == 4)
-             {
-               lldbg("...\n");
-             }
-          return val;
-        }
-    }
-
-  /* No this is a new address or value */
-
-  else
-    {
-       /* Did we print "..." for the previous value? */
-
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
-
-           lldbg("[repeats %d more times]\n", count-3);
-         }
-
-       /* Save the new address, value, and count */
-
-       prevaddr = addr;
-       preval   = val;
-       count    = 1;
-    }
-
-  /* Show the register value read */
-
-  lldbg("%08x->%08x\n", addr, val);
+  lpc17_checkreg(addr, val, false);
   return val;
 }
 #endif
@@ -574,12 +623,12 @@ static uint32_t lpc17_getreg(uint32_t addr)
  *
  *******************************************************************************/
 
-#if defined(CONFIG_LPC17_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG)
+#ifdef CONFIG_LPC17_USBDEV_REGDEBUG
 static void lpc17_putreg(uint32_t val, uint32_t addr)
 {
-  /* Show the register value being written */
+  /* Check if we need to print this value */
 
-  lldbg("%08x<-%08x\n", addr, val);
+  lpc17_checkreg(addr, val, true);
 
   /* Write the value */
 
@@ -1394,7 +1443,7 @@ static void lpc17_usbreset(struct lpc17_usbdev_s *priv)
 
   /* Frame is Hp interrupt */
 
-  lpc17_putreg(1, LPC17_USBDEV_INTPRI);
+  lpc17_putreg(USBDEV_INT_FRAME, LPC17_USBDEV_INTPRI);
 
   /* Clear all pending interrupts */
 
@@ -1425,7 +1474,7 @@ static void lpc17_usbreset(struct lpc17_usbdev_s *priv)
   /* Enable Device interrupts */
 
   lpc17_putreg(USB_SLOW_INT|USB_DEVSTATUS_INT|USB_FAST_INT|USB_FRAME_INT|USB_ERROR_INT,
-                 LPC17_USBDEV_INTEN);
+               LPC17_USBDEV_INTEN);
 }
 
 /*******************************************************************************
@@ -3086,9 +3135,9 @@ void up_usbinitialize(void)
   /* Step 1: Enable power by setting PCUSB in the PCONP register */
 
   flags   = irqsave();
-  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval  = lpc17_getreg(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUSB;
-  putreg32(regval, LPC17_SYSCON_PCONP);
+  lpc17_putreg(regval, LPC17_SYSCON_PCONP);
 
   /* Step 2: Enable clocking on USB (USB clocking was initialized in very
    * low-level clock setup logic (see lpc17_clockconfig.c)
@@ -3096,11 +3145,13 @@ void up_usbinitialize(void)
 
   /* Step 3: Configure I/O pins */
 
+  usbdev_dumpgpio();
   lpc17_configgpio(GPIO_USB_VBUS);    /* VBUS status input */
   lpc17_configgpio(GPIO_USB_CONNECT); /* SoftConnect control signal */
   lpc17_configgpio(GPIO_USB_UPLED);   /* GoodLink LED control signal */
   lpc17_configgpio(GPIO_USB_DP);      /* Positive differential data */
   lpc17_configgpio(GPIO_USB_DM);      /* Negative differential data */
+  usbdev_dumpgpio();
 
   /* Disable USB interrupts */
 
