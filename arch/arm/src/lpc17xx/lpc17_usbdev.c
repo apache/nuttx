@@ -2080,7 +2080,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
           /* And show what error occurred */
 
-          errcode  = (uint8_t)lpc17_usbcmd(CMD_USBDEV_READERRORSTATUS, 0) & 0x0f;
+          errcode  = (uint8_t)lpc17_usbcmd(CMD_USBDEV_READERRORSTATUS, 0) & CMD_READERRORSTATUS_ALLERRS;
           usbtrace(TRACE_INTDECODE(LPC17_TRACEINTID_ERRINT), (uint16_t)errcode);
         }
 #endif
@@ -3244,6 +3244,10 @@ void up_usbinitialize(void)
   lpc17_putreg(0, LPC17_USBDEV_EPINTEN);
   lpc17_putreg(0xffffffff, LPC17_USBDEV_EPINTCLR);
   lpc17_putreg(0, LPC17_USBDEV_EPINTPRI);
+
+  /* Interrupt only on ACKs */
+
+  lpc17_usbcmd(CMD_USBDEV_SETMODE, 0);
 
   /* Attach USB controller interrupt handler */
 

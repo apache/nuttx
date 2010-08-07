@@ -6,6 +6,9 @@ provided only that you repect the modest copyright notices as
 described in license (below).  Please feel free to contact me if you
 have any licensing concerns.
 
+NuttX
+^^^^^^
+
 License for NuttX in general (authorship of individual files may vary):
 /*************************************************************************
  * 
@@ -41,11 +44,17 @@ License for NuttX in general (authorship of individual files may vary):
  *
  *************************************************************************/
 
-Some networking components of NuttX derive from uIP which has a similar
-BSD style license:
+uIP
+^^^
+
+Many lower-level networking components of NuttX derive from uIP which
+has a similar BSD style license:
 
    Copyright (c) 2001-2003, Adam Dunkels.
    All rights reserved.
+
+IGMP
+^^^^
 
 IGMP support, if enabled in uIP, adds additional logic by Steve Reynolds:
 
@@ -56,11 +65,14 @@ Certain functions in the NuttX C-library derive from other BSD-compatible
 sources:
 
 strtod():
+^^^^^^^^
 
   Copyright (C) 2002 Michael Ringgaard. All rights reserved.
   Copyright (C) 2006-2007 H. Peter Anvin.
 
 dtoa():
+^^^^^^
+
   If you enable floating point conversions with CONFIG_LIBC_FLOATINGPOINT,
   then some files with an unmodified BSD license will be included.  That
   license is similar to the above (modified) BSD license, but has an
@@ -68,3 +80,24 @@ dtoa():
 
   "This product includes software developed by the University of
    California, Berkeley and its contributors."
+
+Documents/rss.gif
+^^^^^^^^^^^^^^^^^
+
+  Licensed under Creative Commons Attribution-Share Alike 2.5 Generic
+  license:
+
+  You are free:
+
+  * to share – to copy, distribute and transmit the work
+  * to remix – to adapt the work
+
+  Under the following conditions:
+
+  * attribution – You must attribute the work in the manner specified
+    by the author or licensor (but not in any way that suggests that
+    they endorse you or your use of the work).
+  * share alike – If you alter, transform, or build upon this work,
+    you may distribute the resulting work only under the same or
+    similar license to this one.
+
