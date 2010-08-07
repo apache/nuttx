@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated July 28, 2010)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated August 7, 2010)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (2)  Memory Managment (mm/)
@@ -464,6 +464,15 @@ o Graphics subystem (graphics/)
                now at the low resolution of the p14201 LCD (128x96).
   Status:      Open
   Priority:    Low (unless you need the p13201 then it is certainly higher).
+
+  Description: When building for a framebuffer driver, there are warnings that a
+               symbol is used before being initialized in graphics/nxglib/ in all
+               of the auto-generated files named nxglib_moverectangle_*bpp.c.  This
+               looks like a real error and must be fixed.  I don't think that the
+               moverectangle logic is currently being used in any of the examples,
+               so this should not be a big problem.
+  Status:      Open
+  Priority:    Medium-to-High
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
