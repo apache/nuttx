@@ -679,6 +679,28 @@
 
 #define CMD_USBDEV_CLRBUFFER_PO          (0x00000001)
 
+/* SETMODE(0xf3) command */
+
+#define CMD_SETMODE_APCLK                (1 << 0)  /* Bit 0:  Always PLL Clock */
+#define CMD_SETMODE_INAKCI               (1 << 1)  /* Bit 1:  Interrupt on NAK for Control IN endpoint */
+#define CMD_SETMODE_INAKCO               (1 << 2)  /* Bit 2:  Interrupt on NAK for Control OUT endpoint */
+#define CMD_SETMODE_INAKII               (1 << 3)  /* Bit 3:  Interrupt on NAK for Interrupt IN endpoint */
+#define CMD_SETMODE_INAKIO               (1 << 4)  /* Bit 4:  Interrupt on NAK for Interrupt OUT endpoints */
+#define CMD_SETMODE_INAKBI               (1 << 5)  /* Bit 5:  Interrupt on NAK for Bulk IN endpoints */
+#define CMD_SETMODE_INAKBO               (1 << 6)  /* Bit 6:  Interrupt on NAK for Bulk OUT endpoints */
+
+/* READERRORSTATUS (0xFb) command */
+
+#define CMD_READERRORSTATUS_PIDERR       (1 << 0) /* Bit 0: PID encoding/unknown or Token CRC */
+#define CMD_READERRORSTATUS_UEPKT        (1 << 1) /* Bit 1: Unexpected Packet */
+#define CMD_READERRORSTATUS_DCRC         (1 << 2) /* Bit 2: Data CRC error */
+#define CMD_READERRORSTATUS_TIMEOUT      (1 << 3) /* Bit 3: Time out error */
+#define CMD_READERRORSTATUS_EOP          (1 << 4) /* Bit 4: End of packet error */
+#define CMD_READERRORSTATUS_BOVRN        (1 << 5) /* Bit 5: Buffer Overrun */
+#define CMD_READERRORSTATUS_BTSTF        (1 << 6) /* Bit 6: Bit stuff error */
+#define CMD_READERRORSTATUS_TGLERR       (1 << 7) /* Bit 7: Wrong toggle in data PID */
+#define CMD_READERRORSTATUS_ALLERRS      (0xff)
+
 /* DMA ******************************************************************************/
 /* The DMA descriptor */
 
