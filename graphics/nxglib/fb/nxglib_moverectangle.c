@@ -183,7 +183,7 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
       /* Copy the rectangle from top down. */
 
       sline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
-      dline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
+      dline = (FAR uint8_t*)sline - offset->y * stride - NXGL_SCALEX(offset->x);
 
       while (rows--)
         {
@@ -206,7 +206,7 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
       /* Copy the rectangle from the bottom up */
 
       sline = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
-      dline = dline - offset->y * stride - NXGL_SCALEX(offset->x);
+      dline = (FAR uint8_t*)sline - offset->y * stride - NXGL_SCALEX(offset->x);
 
       while (rows--)
         {
