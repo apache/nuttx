@@ -12,7 +12,7 @@ NuttX TODO List (Last updated August 7, 2010)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
  (12)  File system/Generic drivers (fs/, drivers/)
-  (3)  Graphics subystem (graphics/)
+  (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (6)  Build system / Toolchains
@@ -464,15 +464,6 @@ o Graphics subystem (graphics/)
                now at the low resolution of the p14201 LCD (128x96).
   Status:      Open
   Priority:    Low (unless you need the p13201 then it is certainly higher).
-
-  Description: When building for a framebuffer driver, there are warnings that a
-               symbol is used before being initialized in graphics/nxglib/ in all
-               of the auto-generated files named nxglib_moverectangle_*bpp.c.  This
-               looks like a real error and must be fixed.  I don't think that the
-               moverectangle logic is currently being used in any of the examples,
-               so this should not be a big problem.
-  Status:      Open
-  Priority:    Medium-to-High
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^

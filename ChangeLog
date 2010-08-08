@@ -1185,3 +1185,7 @@
 
 	* examples/nsh/nsh_telnetd.c - Fix compilation errors that happen
 	  when both DHCPC and TELNETD are enabled in the Nuttshell.
+	* graphics/nxglib/fb/nxglib_moverectangle.c - Fix a logic error
+	  that caused an uninitialized variable warning.  I still don't 
+	  have a test to prove that the changes are correct.
+

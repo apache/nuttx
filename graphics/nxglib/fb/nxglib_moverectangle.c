@@ -174,44 +174,71 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
 # endif
 #endif
 
-  /* Case 1:  The destination position (offset) is above the displayed
-   * position (rect)
+  /* sline = address of the first pixel in the top row of the source in
+   * framebuffer memory
    */
 
-  if (offset->y < rect->pt1.y)
-    {
-      /* Copy the rectangle from top down. */
+  sline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
 
-      sline = pinfo->fbmem + rect->pt1.y * stride + NXGL_SCALEX(rect->pt1.x);
-      dline = (FAR uint8_t*)sline - offset->y * stride - NXGL_SCALEX(offset->x);
+  /* dline = address of the first pixel in the top row of the destination
+   * in framebuffer memory.  We get dline by subtract the offset from the
+   * source position.
+   */
+
+  dline = (FAR uint8_t*)sline - offset->y * stride - NXGL_SCALEX(offset->x);
+
+  /* Case 1:  Is the destination position above the displayed position?
+   * If the Y offset is negative, then the destination is offset to a
+   * postion below (or to the right) in the source in framebuffer memory.
+   */
+
+  if (offset->y < 0)
+    {
+      /* Yes.. Copy the rectangle from top down (i.e., adding the stride
+       * to move to the next, lower row) */
 
       while (rows--)
         {
+          /* Copy the row */
+
 #if NXGLIB_BITSPERPIXEL < 8
           nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
 #else
           NXGL_MEMCPY(dline, sline, width);
 #endif
+          /* Point to the next source/dest row below the current one */
+
           dline += stride;
           sline += stride;
         }
     }
 
-  /* Case 2: The destination position (offset) is below the displayed
-   * position (rect)
+  /* Case 2: No.. the destination position is above (or to the left of)
+   * the displayed source position
    */
 
   else
     {
-      /* Copy the rectangle from the bottom up */
+      /* Adjust sline and dline to point to the bottom row (+1) of the
+       * source and destination rectangles in framebuffer memory.
+       */
 
-      sline = pinfo->fbmem + rect->pt2.y * stride + NXGL_SCALEX(rect->pt1.x);
-      dline = (FAR uint8_t*)sline - offset->y * stride - NXGL_SCALEX(offset->x);
+      unsigned int hoffset = rows * stride;
+      sline += hoffset;
+      dline += hoffset;
+
+      /* Copy the rectangle from the bottom up (i.e., subtracting stride
+       * to re-position to the previous, higher row) */
 
       while (rows--)
         {
+          /* Point to the next source/dest row above the current one */
+
           dline -= stride;
           sline -= stride;
+
+          /* Copy the row */
+
 #if NXGLIB_BITSPERPIXEL < 8
           nxgl_lowresmemcpy(dline, sline, width, leadmask, tailmask);
 #else
