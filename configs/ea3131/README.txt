@@ -45,8 +45,7 @@ GNU Toolchain Options
     CONFIG_LPC313X_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_LPC313X_CODESOURCERYL=y  : CodeSourcery under Linux
     CONFIG_LPC313X_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_LPC313X_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_LPC313X_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_LPC313X_BUILDROOT=y	    : NuttX buildroot under Linux or Cygwin (default)
 
   If you are not using CONFIG_LPC313X_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
