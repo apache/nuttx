@@ -192,7 +192,7 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
    * postion below (or to the right) in the source in framebuffer memory.
    */
 
-  if (offset->y < 0)
+  if (offset->y < 0 || (offset->y == 0 && offset->x <= 0))
     {
       /* Yes.. Copy the rectangle from top down (i.e., adding the stride
        * to move to the next, lower row) */
@@ -228,7 +228,8 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
       dline += hoffset;
 
       /* Copy the rectangle from the bottom up (i.e., subtracting stride
-       * to re-position to the previous, higher row) */
+       * to re-position to the previous, higher row)
+       */
 
       while (rows--)
         {
