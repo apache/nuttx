@@ -341,7 +341,6 @@ void gpio_irqenable(int irq)
   uint32_t   base;
   uint32_t   regval;
   int        pin;
-  int        ret     = ERROR;
 
   if ((unsigned)gpioirq < NR_GPIO_IRQS)
     {
@@ -363,9 +362,7 @@ void gpio_irqenable(int irq)
       regval |= pin;
       putreg32(regval, base + LM3S_GPIO_IM_OFFSET);
       irqrestore(flags);
-      ret = OK;
     }
-  return ret;
 }
 
 /****************************************************************************
@@ -383,7 +380,6 @@ void gpio_irqdisable(int irq)
   uint32_t   base;
   uint32_t   regval;
   int        pin;
-  int        ret     = ERROR;
 
   if ((unsigned)gpioirq < NR_GPIO_IRQS)
     {
@@ -404,8 +400,6 @@ void gpio_irqdisable(int irq)
       regval &= ~pin;
       putreg32(regval, base + LM3S_GPIO_IM_OFFSET);
       irqrestore(flags);
-      ret = OK;
     }
-  return ret;
 }
 
