@@ -1188,4 +1188,10 @@
 	* graphics/nxglib/fb/nxglib_moverectangle.c - Fix a logic error
 	  that caused an uninitialized variable warning.  I still don't 
 	  have a test to prove that the changes are correct.
-
+	* configs/olimex-lpc2378 - Add support for the CodeSourcery toolchain
+	  under Linux (contributed by Alan Carvalho de Assis).
+	* arch/arm/src/lpc17xx/lpc17_gpio.c - Fix an imporation GPIO configuration
+	  bug:  When attempting to set no pull-up or pull-down (floating),
+	  it would, instead, select pull-down.
+	* arch/arm/src/lm3s/lm3s_gpioirq.c - Fix warning for returning a value
+	  from functions returning void (contributed by Tiago Maluta).

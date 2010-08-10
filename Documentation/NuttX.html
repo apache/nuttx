@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 7, 2010</p>
+      <p>Last Updated: August 9, 2010</p>
     </td>
   </tr>
 </table>
@@ -1861,6 +1861,13 @@ nuttx-5.9 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* graphics/nxglib/fb/nxglib_moverectangle.c - Fix a logic error
 	  that caused an uninitialized variable warning.  I still don't 
 	  have a test to prove that the changes are correct.
+	* configs/olimex-lpc2378 - Add support for the CodeSourcery toolchain
+	  under Linux (contributed by Alan Carvalho de Assis).
+	* arch/arm/src/lpc17xx/lpc17_gpio.c - Fix an imporation GPIO configuration
+	  bug:  When attempting to set no pull-up or pull-down (floating),
+	  it would, instead, select pull-down.
+	* arch/arm/src/lm3s/lm3s_gpioirq.c - Fix warning for returning a value
+	  from functions returning void (contributed by Tiago Maluta).
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
