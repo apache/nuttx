@@ -230,12 +230,12 @@ static int lpc17_pullup(uint16_t cfgset, unsigned int port, unsigned int pin)
       value = PINCONN_PINMODE_RM;
       break;
 
-    case GPIO_PUNONE:       /* Neither pull-up nor -down */
-      value = PINCONN_PINMODE_PD;
+    case GPIO_FLOAT:        /* Neither pull-up nor -down */
+      value = PINCONN_PINMODE_FLOAT;
       break;
 
     case GPIO_PULLDN:       /* Pull-down resistor enabled */
-      value = PINCONN_PINMODE_MASK;
+      value = PINCONN_PINMODE_PD;
       break;
    }
 
