@@ -563,7 +563,7 @@
 /* I2C Clock Low */
 
 #define OTGI2C_CLKLO_SHIFT               (0)       /* Bits 0-7: Clock divisor high */
-#define OTGI2C_CLLO_MASK                (0xff << OTGI2C_CLKLO_SHIFT)
+#define OTGI2C_CLLO_MASK                 (0xff << OTGI2C_CLKLO_SHIFT)
                                                    /* Bits 8-31: Reserved */
 /* Clock control registers ***********************************************************/
 
@@ -617,11 +617,17 @@
 
 /* Commands *************************************************************************/
 
-/* USB Command Code Register -- Command phase values */
+/* USB Command Code Register */
 
-#define CMD_USBDEV_CMDWR                 (0x00000500)
-#define CMD_USBDEV_DATAWR                (0x00000100)
-#define CMD_USBDEV_DATARD                (0x00000200)
+#define CMD_USBDEV_PHASESHIFT            (8)       /* Bits 8-15: Command phase value */
+#define CMD_USBDEV_PHASEMASK             (0xff << CMD_USBDEV_PHASESHIFT)
+#  define CMD_USBDEV_DATAWR              (1 << CMD_USBDEV_PHASESHIFT)
+#  define CMD_USBDEV_DATARD              (2 << CMD_USBDEV_PHASESHIFT)
+#  define CMD_USBDEV_CMDWR               (5 << CMD_USBDEV_PHASESHIFT)
+#define CMD_USBDEV_CMDSHIFT              (16)      /* Bits 16-23: Device command/WDATA */
+#define CMD_USBDEV_CMDMASK               (0xff << CMD_USBDEV_CMDSHIFT)
+#define CMD_USBDEV_WDATASHIFT            CMD_USBDEV_CMDSHIFT
+#define CMD_USBDEV_WDATAMASK             CMD_USBDEV_CMDMASK
 
 /* Device Commands */
 
@@ -630,7 +636,7 @@
 #define CMD_USBDEV_SETMODE               (0x00f3)
 #define CMD_USBDEV_READFRAMENO           (0x00f5)
 #define CMD_USBDEV_READTESTREG           (0x00fd)
-#define CMD_USBDEV_SETSTATUS             (0x01fe)
+#define CMD_USBDEV_SETSTATUS             (0x01fe) /* Bit 8 set to distingish get from set */
 #define CMD_USBDEV_GETSTATUS             (0x00fe)
 #define CMD_USBDEV_GETERRORCODE          (0x00ff)
 #define CMD_USBDEV_READERRORSTATUS       (0x00fb)
@@ -639,7 +645,7 @@
 
 #define CMD_USBDEV_EPSELECT              (0x0000)
 #define CMD_USBDEV_EPSELECTCLEAR         (0x0040)
-#define CMD_USBDEV_EPSETSTATUS           (0x0140)
+#define CMD_USBDEV_EPSETSTATUS           (0x0140) /* Bit 8 set to distingish get from selectclear */
 #define CMD_USBDEV_EPCLRBUFFER           (0x00f2)
 #define CMD_USBDEV_EPVALIDATEBUFFER      (0x00fa)
 
