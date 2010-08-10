@@ -106,7 +106,7 @@
 #define GPIO_PUMODE_MASK     (3 << GPIO_PUMODE_SHIFT)
 #  define GPIO_PULLUP        (0 << GPIO_PUMODE_SHIFT) /* Pull-up resistor enabled */
 #  define GPIO_REPEATER      (1 << GPIO_PUMODE_SHIFT) /* Repeater mode enabled */
-#  define GPIO_PUNONE        (2 << GPIO_PUMODE_SHIFT) /* Neither pull-up nor -down */
+#  define GPIO_FLOAT         (2 << GPIO_PUMODE_SHIFT) /* Neither pull-up nor -down */
 #  define GPIO_PULLDN        (3 << GPIO_PUMODE_SHIFT) /* Pull-down resistor enabled */
 
 /* Open drain: O */
@@ -296,7 +296,7 @@
 #define GPIO_MCPWM_MCOB2   (GPIO_ALT1 | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN29)
 #define GPIO_PCAP1p1       (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN29)
 #define GPIO_MAT0p1_1      (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN29)
-#define GPIO_USB_VBUS      (GPIO_ALT2 | GPIO_PUNONE | GPIO_PORT1 | GPIO_PIN30)
+#define GPIO_USB_VBUS      (GPIO_ALT2 | GPIO_FLOAT  | GPIO_PORT1 | GPIO_PIN30)
 #define GPIO_AD0p4         (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN30)
 #define GPIO_SSP1_SCK_2    (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN31)
 #define GPIO_AD0p5         (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN31)

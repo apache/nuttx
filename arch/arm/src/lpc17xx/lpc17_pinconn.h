@@ -314,9 +314,9 @@
 /* Pin Mode select register 0 (PINMODE0: 0x4002c040) */
 
 #define PINCONN_PINMODE_PU              (0)       /* 00: pin has a pull-up resistor enabled */
-#define PINCONN_PINMODE_RM              (1)       /* 00: pin has repeater mode enabled */
-#define PINCONN_PINMODE_NORMAL          (2)       /* 00: pin has neither pull-up nor pull-down */
-#define PINCONN_PINMODE_PD              (3)       /* 00: pin has a pull-down resistor enabled */
+#define PINCONN_PINMODE_RM              (1)       /* 01: pin has repeater mode enabled */
+#define PINCONN_PINMODE_FLOAT           (2)       /* 10: pin has neither pull-up nor pull-down */
+#define PINCONN_PINMODE_PD              (3)       /* 11: pin has a pull-down resistor enabled */
 #define PINCONN_PINMODE_MASK            (3)
 
 #define PINCONN_PINMODEL_SHIFT(n)       ((n) << 1) /* n=0,1,..,15 */
