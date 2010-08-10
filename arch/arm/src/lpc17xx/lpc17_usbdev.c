@@ -647,6 +647,8 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
 static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
 {
   irqstate_t flags;
+  uint32_t cmd32;
+  uint32_t data32;
   uint32_t tmp = 0;
 
   /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
@@ -654,9 +656,13 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
   flags = irqsave();
   lpc17_putreg(USBDEV_INT_CDFULL|USBDEV_INT_CCEMPTY, LPC17_USBDEV_INTCLR);
 
+  /* Shift the command in position and mask out extra bits */
+
+  cmd32 = ((uint32_t)cmd << CMD_USBDEV_CMDSHIFT) & CMD_USBDEV_CMDMASK;
+
   /* Load command + WR in command code register */
 
-  lpc17_putreg(((cmd & 0xff) << 16) + CMD_USBDEV_CMDWR, LPC17_USBDEV_CMDCODE);
+  lpc17_putreg(cmd32 | CMD_USBDEV_CMDWR, LPC17_USBDEV_CMDCODE);
 
   /* Wait until the command register is empty (CCEMPTY != 0, command is accepted) */
 
@@ -679,7 +685,8 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
       {
         /* Send data + WR and wait for CCEMPTY */
 
-        lpc17_putreg((data << 16) + CMD_USBDEV_DATAWR, LPC17_USBDEV_CMDCODE);
+        data32 = (uint32_t)data << CMD_USBDEV_WDATASHIFT;
+        lpc17_putreg(data32 | CMD_USBDEV_DATAWR, LPC17_USBDEV_CMDCODE);
         while ((lpc17_getreg(LPC17_USBDEV_INTST) & USBDEV_INT_CCEMPTY) == 0);
       }
       break;
@@ -691,7 +698,7 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
       {
         /* Send command code + RD and wait for CDFULL */
 
-        lpc17_putreg((cmd << 16) + CMD_USBDEV_DATARD, LPC17_USBDEV_CMDCODE);
+        lpc17_putreg(cmd32 | CMD_USBDEV_DATARD, LPC17_USBDEV_CMDCODE);
         while ((lpc17_getreg(LPC17_USBDEV_INTST) & USBDEV_INT_CDFULL) == 0);
 
         /* Clear CDFULL and read LS data */
@@ -701,7 +708,7 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
 
         /* Send command code + RD and wait for CDFULL */
 
-        lpc17_putreg((cmd << 16) + CMD_USBDEV_DATARD, LPC17_USBDEV_CMDCODE);
+        lpc17_putreg(cmd32 | CMD_USBDEV_DATARD, LPC17_USBDEV_CMDCODE);
         while ((lpc17_getreg(LPC17_USBDEV_INTST) & USBDEV_INT_CDFULL) == 0);
 
         /* Read MS data */
@@ -719,7 +726,7 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
       {
         /* Send command code + RD and wait for CDFULL */
 
-        lpc17_putreg((cmd << 16) + CMD_USBDEV_DATARD, LPC17_USBDEV_CMDCODE);
+        lpc17_putreg(cmd32 | CMD_USBDEV_DATARD, LPC17_USBDEV_CMDCODE);
         while ((lpc17_getreg(LPC17_USBDEV_INTST) & USBDEV_INT_CDFULL) == 0);
 
         /* Read data */
@@ -741,7 +748,7 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
           {
             /* Send command code + RD and wait for CDFULL */
 
-            lpc17_putreg((cmd << 16) + CMD_USBDEV_DATARD, LPC17_USBDEV_CMDCODE);
+            lpc17_putreg(cmd32 | CMD_USBDEV_DATARD, LPC17_USBDEV_CMDCODE);
             while ((lpc17_getreg(LPC17_USBDEV_INTST) & USBDEV_INT_CDFULL) == 0);
 
             /* Read data */
@@ -754,7 +761,8 @@ static uint32_t lpc17_usbcmd(uint16_t cmd, uint8_t data)
           {
             /* Send data + RD and wait for CCEMPTY */
 
-            lpc17_putreg((data << 16) + CMD_USBDEV_DATAWR, LPC17_USBDEV_CMDCODE);
+            data32 = (uint32_t)data << CMD_USBDEV_WDATASHIFT;
+            lpc17_putreg(data32 | CMD_USBDEV_DATAWR, LPC17_USBDEV_CMDCODE);
             while ((lpc17_getreg(LPC17_USBDEV_INTST) & USBDEV_INT_CCEMPTY) == 0);
           }
           break;
