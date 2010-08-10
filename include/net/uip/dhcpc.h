@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/dhcpc.n
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -54,12 +54,12 @@
 
 struct dhcpc_state
 {
-  uint16_t       lease_time[2];
   struct in_addr serverid;
   struct in_addr ipaddr;
   struct in_addr netmask;
   struct in_addr dnsaddr;
   struct in_addr default_router;
+  uint32_t       lease_time;      /* Lease expires in this number of seconds */
 };
 
 /****************************************************************************

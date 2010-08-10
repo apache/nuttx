@@ -273,23 +273,45 @@ static uint8_t dhcpc_parseoptions(struct dhcpc_state *presult, uint8_t *optptr, 
       switch(*optptr)
         {
           case DHCP_OPTION_SUBNET_MASK:
+            /* Get subnet mask in network order */
+
             memcpy(&presult->netmask.s_addr, optptr + 2, 4);
             break;
+
           case DHCP_OPTION_ROUTER:
+            /* Get the default router address in network order */
+
             memcpy(&presult->default_router.s_addr, optptr + 2, 4);
             break;
+
           case DHCP_OPTION_DNS_SERVER:
+            /* Get the DNS server address in network order */
+
             memcpy(&presult->dnsaddr.s_addr, optptr + 2, 4);
             break;
+
           case DHCP_OPTION_MSG_TYPE:
+            /* Get message type */
+
             type = *(optptr + 2);
             break;
+
           case DHCP_OPTION_SERVER_ID:
+            /* Get server address in network order */
+
             memcpy(&presult->serverid.s_addr, optptr + 2, 4);
             break;
+
           case DHCP_OPTION_LEASE_TIME:
-            memcpy(presult->lease_time, optptr + 2, 4);
+            {
+              /* Get lease time (in seconds) in host order */
+
+              uint16_t tmp[2];
+              memcpy(tmp, optptr + 2, 4);
+              presult->lease_time = ((uint32_t)ntohs(tmp[0])) << 16 | (uint32_t)ntohs(tmp[1]);
+            }
             break;
+
           case DHCP_OPTION_END:
             return type;
         }
@@ -580,7 +602,6 @@ int dhcpc_request(void *handle, struct dhcpc_state *presult)
       (presult->default_router.s_addr >> 16 ) & 0xff,
       (presult->default_router.s_addr >> 8  ) & 0xff,
       (presult->default_router.s_addr       ) & 0xff);
-  dbg("Lease expires in %ld seconds\n",
-      ntohs(presult->lease_time[0])*65536ul + ntohs(presult->lease_time[1]));
+  dbg("Lease expires in %d seconds\n", presult->lease_time);
   return OK;
 }

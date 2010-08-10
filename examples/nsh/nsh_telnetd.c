@@ -839,7 +839,9 @@ int nsh_telnetmain(int argc, char *argv[])
 
   handle = dhcpc_open(&mac, IFHWADDRLEN);
 
-  /* Get an IP address */
+  /* Get an IP address.  Note that there is no logic for renewing the IP address in this
+   * example.  The address should be renewed in ds.lease_time/2 seconds.
+   */
 
   if (handle)
     {
