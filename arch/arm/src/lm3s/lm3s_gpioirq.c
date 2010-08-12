@@ -65,56 +65,42 @@
 static FAR xcpt_t g_gpioirqvector[NR_GPIO_IRQS];
 
 /* A table that maps a GPIO group to a GPIO base address.  Overly complicated
- * be we support disabling interrupt support for arbitrary ports
+ * because we support disabling interrupt support for arbitrary ports.  This
+ * must carefully match the IRQ numbers assigned in arch/arm/include/lm3s/irq.h
  */
 
 static const uint32_t g_gpiobase[] =
 {
 #ifndef CONFIG_LM3S_DISABLE_GPIOA_IRQS
    LM3S_GPIOA_BASE,
-#else
-   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOB_IRQS
   LM3S_GPIOB_BASE,
-#else
-   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOC_IRQS
   LM3S_GPIOC_BASE,
-#else
-   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOD_IRQS
   LM3S_GPIOD_BASE,
-#else
-   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOE_IRQS
   LM3S_GPIOE_BASE,
-#else
-   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOF_IRQS
   LM3S_GPIOF_BASE,
-#else
-   0,
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOG_IRQS
   LM3S_GPIOG_BASE,
-#else
-   0,
 #endif
-#if !defined(CONFIG_LM3S_DISABLE_GPIOH_IRQS) && defined(LM3S_GPIOH_BASE)
+#ifndef CONFIG_LM3S_DISABLE_GPIOH_IRQS
   LM3S_GPIOH_BASE,
-#else
-   0,
 #endif
-#if !defined(CONFIG_LM3S_DISABLE_GPIOJ_IRQS) && defined(LM3S_GPIOJ_BASE)
+#ifndef CONFIG_LM3S_DISABLE_GPIOJ_IRQS
   LM3S_GPIOJ_BASE,
 #endif
 };
-#define GPIO_NPORTS (sizeof(g_gpiobase)/sizeof(uint32_t))
+
+#define GPIO_NADDRS (sizeof(g_gpiobase)/sizeof(uint32_t))
 
 /****************************************************************************
  * Public Data
@@ -127,17 +113,22 @@ static const uint32_t g_gpiobase[] =
 /****************************************************************************
  * Name: lm3s_gpiobaseaddress
  *
+ * Input:
+ *   gpioirq - A pin number in the range of 0 to NR_GPIO_IRQS.
+ *
  * Description:
  *   Given a GPIO enumeration value, return the base address of the
- *   associated GPIO registers.
+ *   associated GPIO registers.  NOTE that range checking was provided by
+ *   callee
  *
  ****************************************************************************/
 
-static inline uint32_t lm3s_gpiobaseaddress(unsigned int port)
+static uint32_t lm3s_gpiobaseaddress(unsigned int gpioirq)
 {
-  if (port < GPIO_NPORTS)
+  unsigned int ndx = gpioirq >> 3;
+  if (ndx < GPIO_NADDRS)
     {
-      return g_gpiobase[port >> 3];
+      return g_gpiobase[ndx];
     }
   return 0;
 }
