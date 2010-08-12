@@ -110,7 +110,11 @@ static const uint32_t g_gpiobase[] =
 #else
    0,
 #endif
+#if !defined(CONFIG_LM3S_DISABLE_GPIOJ_IRQS) && defined(LM3S_GPIOJ_BASE)
+  LM3S_GPIOJ_BASE,
+#endif
 };
+#define GPIO_NPORTS (sizeof(g_gpiobase)/sizeof(uint32_t))
 
 /****************************************************************************
  * Public Data
@@ -131,7 +135,11 @@ static const uint32_t g_gpiobase[] =
 
 static inline uint32_t lm3s_gpiobaseaddress(unsigned int port)
 {
-  return g_gpiobase[port >> 3];
+  if (port < GPIO_NPORTS)
+    {
+      return g_gpiobase[port >> 3];
+    }
+  return 0;
 }
 
 /****************************************************************************

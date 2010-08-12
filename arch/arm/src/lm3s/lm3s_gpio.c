@@ -56,6 +56,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* This current implementation can only support, at most, 8 GPIO ports.  Some
+ * newer chips (such as the LM3S9B96) have 9 GPIO ports.  It will require
+ * some restructuring of the definitions in lm3s_internal.h and to the size
+ * of the g_gpiobase[] table and the lm3s_gpiobaseaddress() function in this
+ * file to access GPIOs in ports above GPIOH.
+ */
+
+#if LC3S_NGPIOS > 64
+#  warning "This design must be extended to access ports above GPIOH"
+#endif
+
 /* These definitions are part of the implementation of the  GPIO pad
  * configuration of Table 9-1 in the LM3S6918 data sheet.
  */

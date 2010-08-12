@@ -115,6 +115,7 @@
 #  define LM3S_IRQ_ETHCON    (58) /* Vector 58: Ethernet Controller */
 #  define LM3S_IRQ_HIBERNATE (59) /* Vector 59: Hibernation Module */
                                   /* Vectors 60-70: Reserved */
+#  define NR_IRQS            (60) /* (Really less because of reserved vectors) */
 #elif defined(CONFIG_ARCH_CHIP_LM3S6965)
 #  define LM3S_IRQ_GPIOA     (16) /* Vector 16: GPIO Port A */
 #  define LM3S_IRQ_GPIOB     (17) /* Vector 17: GPIO Port B */
@@ -159,11 +160,68 @@
 #  define LM3S_IRQ_ETHCON    (58) /* Vector 58: Ethernet Controller */
 #  define LM3S_IRQ_HIBERNATE (59) /* Vector 59: Hibernation Module */
                                   /* Vectors 60-70: Reserved */
+#  define NR_IRQS            (60) /* (Really less because of reserved vectors) */
+#elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
+#  define LM3S_IRQ_GPIOA     (16) /* Vector 16: GPIO Port A */
+#  define LM3S_IRQ_GPIOB     (17) /* Vector 17: GPIO Port B */
+#  define LM3S_IRQ_GPIOC     (18) /* Vector 18: GPIO Port C */
+#  define LM3S_IRQ_GPIOD     (19) /* Vector 19: GPIO Port D */
+#  define LM3S_IRQ_GPIOE     (20) /* Vector 20: GPIO Port E */
+#  define LM3S_IRQ_UART0     (21) /* Vector 21: UART 0 */
+#  define LM3S_IRQ_UART1     (22) /* Vector 22: UART 1 */
+#  define LM3S_IRQ_SSI0      (23) /* Vector 23: SSI 0 */
+#  define LM3S_IRQ_I2C0      (24) /* Vector 24: I2C 0 */
+#  define LM3S_IRQ_PWMFAULT  (25) /* Vector 25: PWM Fault */
+#  define LM3S_IRQ_PWM0      (26) /* Vector 26: PWM Generator 0 */
+#  define LM3S_IRQ_PWM1      (27) /* Vector 27: PWM Generator 1 */
+#  define LM3S_IRQ_PWM2      (28) /* Vector 28: PWM Generator 2 */
+#  define LM3S_IRQ_QEI0      (29) /* Vector 29: QEI0 */
+#  define LM3S_IRQ_ADC0      (30) /* Vector 30: ADC0 Sequence 0 */
+#  define LM3S_IRQ_ADC1      (31) /* Vector 31: ADC0 Sequence 1 */
+#  define LM3S_IRQ_ADC2      (32) /* Vector 32: ADC0 Sequence 2 */
+#  define LM3S_IRQ_ADC3      (33) /* Vector 33: ADC0 Sequence 3 */
+#  define LM3S_IRQ_WDOG      (34) /* Vector 34: Watchdog Timer */
+#  define LM3S_IRQ_TIMER0A   (35) /* Vector 35: Timer 0 A */
+#  define LM3S_IRQ_TIMER0B   (36) /* Vector 36: Timer 0 B */
+#  define LM3S_IRQ_TIMER1A   (37) /* Vector 37: Timer 1 A */
+#  define LM3S_IRQ_TIMER1B   (38) /* Vector 38: Timer 1 B */
+#  define LM3S_IRQ_TIMER2A   (39) /* Vector 39: Timer 2 A */
+#  define LM3S_IRQ_TIMER2B   (40) /* Vector 40: Timer 3 B */
+#  define LM3S_IRQ_COMPARE0  (41) /* Vector 41: Analog Comparator 0 */
+#  define LM3S_IRQ_COMPARE1  (42) /* Vector 42: Analog Comparator 1 */
+#  define LM3S_IRQ_COMPARE2  (43) /* Vector 43: Analog Comparator 3 */
+#  define LM3S_IRQ_SYSCON    (44) /* Vector 44: System Control */
+#  define LM3S_IRQ_FLASHCON  (45) /* Vector 45: FLASH Control */
+#  define LM3S_IRQ_GPIOF     (46) /* Vector 46: GPIO Port F */
+#  define LM3S_IRQ_GPIOG     (47) /* Vector 47: GPIO Port G */
+#  define LM3S_IRQ_GPIOH     (48) /* Vector 48: GPIO Port H */
+#  define LM3S_IRQ_UART2     (49) /* Vector 49: UART 2 */
+#  define LM3S_IRQ_SSI1      (50) /* Vector 50: SSI 1  */
+#  define LM3S_IRQ_TIMER3A   (51) /* Vector 51: Timer 3 A */
+#  define LM3S_IRQ_TIMER3B   (52) /* Vector 52: Timer 3 B */
+#  define LM3S_IRQ_I2C1      (53) /* Vector 53: I2C 1 */
+#  define LM3S_IRQ_QEI1      (54) /* Vector 54: QEI1 */
+#  define LM3S_IRQ_CAN0      (55) /* Vector 55: CAN 1 */
+#  define LM3S_IRQ_CAN1      (56) /* Vector 56: CAN 2 */
+                                  /* Vector 57: Reserved */
+#  define LM3S_IRQ_ETHCON    (58) /* Vector 58: Ethernet Controller */
+                                  /* Vector 59: Reserved */
+#  define LM3S_IRQ_USB       (60) /* Vector 60: USB */
+#  define LM3S_IRQ_PWM3      (61) /* Vector 61: PWM Generator 3 */
+#  define LM3S_IRQ_UDMASOFT  (62) /* Vector 62: uDMA Software */
+#  define LM3S_IRQ_UDMAERROR (63) /* Vector 63: uDMA Error */
+#  define LM3S_IRQ_ADC1_0    (64) /* Vector 64: ADC1 Sequence 0 */
+#  define LM3S_IRQ_ADC1_1    (65) /* Vector 65: ADC1 Sequence 1 */
+#  define LM3S_IRQ_ADC1_2    (66) /* Vector 66: ADC1 Sequence 2 */
+#  define LM3S_IRQ_ADC1_3    (67) /* Vector 67: ADC1 Sequence 3 */
+#  define LM3S_IRQ_I2S0      (68) /* Vector 68: I2S0 */
+#  define LM3S_IRQ_EPI       (69) /* Vector 69: EPI */
+#  define LM3S_IRQ_GPIOJ     (70) /* Vector 70: GPIO Port J */
+                                  /* Vector 71: Reserved */
+#  define NR_IRQS            (71) /* (Really less because of reserved vectors) */
 #else
 #  error "IRQ Numbers not specified for this LM3S chip"
 #endif
-
-#define NR_IRQS              (60) /* (Really less because of reserved vectors) */
 
 /* GPIO IRQs -- Note that support for individual GPIO ports can
  * be disabled in order to reduce the size of the implemenation.
@@ -281,7 +339,21 @@
 #  define _NGPIOHIRQS      _NGPIOGIRQS
 #endif
 
-#define NR_GPIO_IRQS       (_NGPIOHIRQS - NR_IRQS)
+#ifndef CONFIG_LM3S_DISABLE_GPIOJ_IRQS
+#  define LM3S_IRQ_GPIOJ_0 (_NGPIOHIRQS + 0)
+#  define LM3S_IRQ_GPIOJ_1 (_NGPIOHIRQS + 1)
+#  define LM3S_IRQ_GPIOJ_2 (_NGPIOHIRQS + 2)
+#  define LM3S_IRQ_GPIOJ_3 (_NGPIOHIRQS + 3)
+#  define LM3S_IRQ_GPIOJ_4 (_NGPIOHIRQS + 4)
+#  define LM3S_IRQ_GPIOJ_5 (_NGPIOHIRQS + 5)
+#  define LM3S_IRQ_GPIOJ_6 (_NGPIOHIRQS + 6)
+#  define LM3S_IRQ_GPIOJ_7 (_NGPIOHIRQS + 7)
+#  define _NGPIOJIRQS      (_NGPIOHIRQS + 8)
+#else
+#  define _NGPIOJIRQS      _NGPIOHIRQS
+#endif
+
+#define NR_GPIO_IRQS       (_NGPIOJIRQS - NR_IRQS)
 
 /************************************************************************************
  * Public Types

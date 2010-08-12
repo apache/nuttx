@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lm3s/lm3s_gpio.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -346,6 +346,39 @@
 #define LM3S_GPIOH_PCELLID1           (LM3S_GPIOH_BASE + LM3S_GPIO_PCELLID1_OFFSET)
 #define LM3S_GPIOH_PCELLID2           (LM3S_GPIOH_BASE + LM3S_GPIO_PCELLID2_OFFSET)
 #define LM3S_GPIOH_PCELLID3           (LM3S_GPIOH_BASE + LM3S_GPIO_PCELLID3_OFFSET)
+
+#define LM3S_GPIOJ_DATA               (LM3S_GPIOJ_BASE + LM3S_GPIO_DATA_OFFSET)
+#define LM3S_GPIOJ_DIR                (LM3S_GPIOJ_BASE + LM3S_GPIO_DIR_OFFSET)
+#define LM3S_GPIOJ_IS                 (LM3S_GPIOJ_BASE + LM3S_GPIO_IS_OFFSET)
+#define LM3S_GPIOJ_IBE                (LM3S_GPIOJ_BASE + LM3S_GPIO_IBE_OFFSET)
+#define LM3S_GPIOJ_IEV                (LM3S_GPIOJ_BASE + LM3S_GPIO_IEV_OFFSET)
+#define LM3S_GPIOJ_IM                 (LM3S_GPIOJ_BASE + LM3S_GPIO_IM_OFFSET)
+#define LM3S_GPIOJ_RIS                (LM3S_GPIOJ_BASE + LM3S_GPIO_RIS_OFFSET)
+#define LM3S_GPIOJ_MIS                (LM3S_GPIOJ_BASE + LM3S_GPIO_MIS_OFFSET)
+#define LM3S_GPIOJ_ICR                (LM3S_GPIOJ_BASE + LM3S_GPIO_ICR_OFFSET)
+#define LM3S_GPIOJ_AFSEL              (LM3S_GPIOJ_BASE + LM3S_GPIO_AFSEL_OFFSET)
+#define LM3S_GPIOJ_DR2R               (LM3S_GPIOJ_BASE + LM3S_GPIO_DR2R_OFFSET)
+#define LM3S_GPIOJ_DR4R               (LM3S_GPIOJ_BASE + LM3S_GPIO_DR4R_OFFSET)
+#define LM3S_GPIOJ_DR8R               (LM3S_GPIOJ_BASE + LM3S_GPIO_DR8R_OFFSET)
+#define LM3S_GPIOJ_ODR                (LM3S_GPIOJ_BASE + LM3S_GPIO_ODR_OFFSET)
+#define LM3S_GPIOJ_PUR                (LM3S_GPIOJ_BASE + LM3S_GPIO_PUR_OFFSET)
+#define LM3S_GPIOJ_PDR                (LM3S_GPIOJ_BASE + LM3S_GPIO_PDR_OFFSET)
+#define LM3S_GPIOJ_SLR                (LM3S_GPIOJ_BASE + LM3S_GPIO_SLR_OFFSET)
+#define LM3S_GPIOJ_DEN                (LM3S_GPIOJ_BASE + LM3S_GPIO_DEN_OFFSET)
+#define LM3S_GPIOJ_LOCK               (LM3S_GPIOJ_BASE + LM3S_GPIO_LOCK_OFFSET)
+#define LM3S_GPIOJ_CR                 (LM3S_GPIOJ_BASE + LM3S_GPIO_CR_OFFSET)
+#define LM3S_GPIOJ_PERIPHID4          (LM3S_GPIOJ_BASE + LM3S_GPIO_PERIPHID4_OFFSET)
+#define LM3S_GPIOJ_PERIPHID5          (LM3S_GPIOJ_BASE + LM3S_GPIO_PERIPHID5_OFFSET)
+#define LM3S_GPIOJ_PERIPHID6          (LM3S_GPIOJ_BASE + LM3S_GPIO_PERIPHID6_OFFSET)
+#define LM3S_GPIOJ_PERIPHID7          (LM3S_GPIOJ_BASE + LM3S_GPIO_PERIPHID7_OFFSET)
+#define LM3S_GPIOJ_PERIPHID0          (LM3S_GPIOJ_BASE + LM3S_GPIO_PERIPHID0_OFFSET)
+#define LM3S_GPIOJ_PERIPHID1          (LM3S_GPIOJ_BASE + LM3S_GPIO_PERIPHID1_OFFSET)
+#define LM3S_GPIOJ_PERIPHID2          (LM3S_GPIOJ_BASE + LM3S_GPIO_PERIPHID2_OFFSET)
+#define LM3S_GPIOJ_PERIPHID3          (LM3S_GPIOJ_BASE + LM3S_GPIO_PERIPHID3_OFFSET)
+#define LM3S_GPIOJ_PCELLID0           (LM3S_GPIOJ_BASE + LM3S_GPIO_PCELLID0_OFFSET)
+#define LM3S_GPIOJ_PCELLID1           (LM3S_GPIOJ_BASE + LM3S_GPIO_PCELLID1_OFFSET)
+#define LM3S_GPIOJ_PCELLID2           (LM3S_GPIOJ_BASE + LM3S_GPIO_PCELLID2_OFFSET)
+#define LM3S_GPIOJ_PCELLID3           (LM3S_GPIOJ_BASE + LM3S_GPIO_PCELLID3_OFFSET)
 
 /************************************************************************************
  * Public Types
