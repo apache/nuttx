@@ -1072,7 +1072,7 @@ static int lm3s_ifup(struct uip_driver_s *dev)
 
   /* Setup the time stamp configuration register */
 
-#if !defined(CONFIG_ARCH_CHIP_LM3S6918) && !defined(CONFIG_ARCH_CHIP_LM3S6965)
+#ifdef LM3S_ETHTS
   regval = lm3s_ethin(priv, LM3S_MAC_TS_OFFSET);
 #ifdef CONFIG_LM3S_TIMESTAMP
   regval |= MAC_TS_EN;

@@ -1195,3 +1195,8 @@
 	  it would, instead, select pull-down.
 	* arch/arm/src/lm3s/lm3s_gpioirq.c - Fix warning for returning a value
 	  from functions returning void (contributed by Tiago Maluta).
+	* netutils/dhcpc/dhcpc.c -- lease_time is not in host order
+	* examples/uip/main.c - if DHCPC is selected, this example now shows
+	  the assigned IP address.
+	* arch/arm/src/lm3s and arch/arm/include/lm3s - Definitions for the
+      TI LM3S9B96 contributed by Tiago Maluta.

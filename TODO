@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated August 7, 2010)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated August 11, 2010)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (2)  Memory Managment (mm/)
@@ -26,7 +26,7 @@ NuttX TODO List (Last updated August 7, 2010)
   (4)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
-  (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
+  (5)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (5)  ARM/STM32 (arch/arm/src/stm32/)
   (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
@@ -818,6 +818,15 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
                from 1024 to 2048 (on the LM3S) eliminates the problem.  So the most
                likely cause is probably a stack overflow, not a hard sofware bug.
   Priority:    Probably Low
+
+  Description: In arch/arm/src/lm3s/lm3s_internal.h, the bit definitions for the encoding
+               of the port number is only 3 bits wide allowing encoding of up to 8 GPIO
+               ports.  However, newer LM3S devices (such as the LM3S9B96) have 9 GPIO ports.
+               That field (as well as some table lookup logic in lm3s_gpio.c) will have to
+               be increased to 4 bits to support the GPIO ports above GPIOH.
+  Status:      Open
+  Priority:    Low (unless you need the one port bit that is in register GPIOJ, then it is
+               pretty high)
 
 o ARM/STM32 (arch/arm/src/stm32/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
