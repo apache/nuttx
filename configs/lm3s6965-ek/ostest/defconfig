@@ -94,6 +94,20 @@ CONFIG_LM3S_BUILDROOT=y
 CONFIG_LM3S_DFU=y
 
 #
+# Disable support for interrupts on GPIOJ which does not
+# exist on the LM3S6918.  Additional interrupt support can be
+# disabled if desired to reduce memory footprint.
+CONFIG_LM3S_DISABLE_GPIOA_IRQS=n
+CONFIG_LM3S_DISABLE_GPIOB_IRQS=n
+CONFIG_LM3S_DISABLE_GPIOC_IRQS=n
+CONFIG_LM3S_DISABLE_GPIOD_IRQS=n
+CONFIG_LM3S_DISABLE_GPIOE_IRQS=n
+CONFIG_LM3S_DISABLE_GPIOF_IRQS=n
+CONFIG_LM3S_DISABLE_GPIOG_IRQS=n
+CONFIG_LM3S_DISABLE_GPIOH_IRQS=n
+CONFIG_LM3S_DISABLE_GPIOJ_IRQS=y
+
+#
 # LM3S6965 specific serial device driver settings
 #
 # CONFIG_UARTn_DISABLE - select to disable all support for
