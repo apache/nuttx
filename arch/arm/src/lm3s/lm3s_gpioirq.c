@@ -255,31 +255,45 @@ int gpio_irqinitialize(void)
       g_gpioirqvector[i] = irq_unexpected_isr;
     }
 
-  /* Then attach all GPIO interrupt handlers */
+  /* Then attach each GPIO interrupt handlers and enable corresponding GPIO
+   * interrupts
+   */
 
 #ifndef CONFIG_LM3S_DISABLE_GPIOA_IRQS
   irq_attach(LM3S_IRQ_GPIOA, lm3s_gpioahandler);
+  up_enable_irq(LM3S_IRQ_GPIOA);
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOB_IRQS
   irq_attach(LM3S_IRQ_GPIOB, lm3s_gpiobhandler);
+  up_enable_irq(LM3S_IRQ_GPIOB);
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOC_IRQS
   irq_attach(LM3S_IRQ_GPIOC, lm3s_gpiochandler);
+  up_enable_irq(LM3S_IRQ_GPIOC);
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOD_IRQS
   irq_attach(LM3S_IRQ_GPIOD, lm3s_gpiodhandler);
+  up_enable_irq(LM3S_IRQ_GPIOD);
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOE_IRQS
   irq_attach(LM3S_IRQ_GPIOE, lm3s_gpioehandler);
+  up_enable_irq(LM3S_IRQ_GPIOE);
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOF_IRQS
   irq_attach(LM3S_IRQ_GPIOF, lm3s_gpiofhandler);
+  up_enable_irq(LM3S_IRQ_GPIOF);
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOG_IRQS
   irq_attach(LM3S_IRQ_GPIOG, lm3s_gpioghandler);
+  up_enable_irq(LM3S_IRQ_GPIOG);
 #endif
-#if !defined(CONFIG_LM3S_DISABLE_GPIOH_IRQS) && defined(LM3S_GPIOH_BASE)
+#ifndef CONFIG_LM3S_DISABLE_GPIOH_IRQS
   irq_attach(LM3S_IRQ_GPIOH, lm3s_gpiohhandler);
+  up_enable_irq(LM3S_IRQ_GPIOH);
+#endif
+#ifndef CONFIG_LM3S_DISABLE_GPIOJ_IRQS
+  irq_attach(LM3S_IRQ_GPIOJ lm3s_gpiohhandler);
+  up_enable_irq(LM3S_IRQ_GPIOJ);
 #endif
 
   return OK;
