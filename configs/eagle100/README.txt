@@ -282,6 +282,21 @@ Eagle100-specific Configuration Options
 	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
 	   the delay actually is 100 seconds.
 
+  There are configurations for disabling support for interrupts GPIO ports.
+  GPIOH and GPIOJ must be disabled because they do not exist on the LM3S6918.
+  Additional interrupt support can be disabled if desired to reduce memory
+  footprint.
+
+	CONFIG_LM3S_DISABLE_GPIOA_IRQS=n
+	CONFIG_LM3S_DISABLE_GPIOB_IRQS=n
+	CONFIG_LM3S_DISABLE_GPIOC_IRQS=n
+	CONFIG_LM3S_DISABLE_GPIOD_IRQS=n
+	CONFIG_LM3S_DISABLE_GPIOE_IRQS=n
+	CONFIG_LM3S_DISABLE_GPIOF_IRQS=n
+	CONFIG_LM3S_DISABLE_GPIOG_IRQS=n
+	CONFIG_LM3S_DISABLE_GPIOH_IRQS=y
+	CONFIG_LM3S_DISABLE_GPIOJ_IRQS=y
+ 
   LM3S6818 specific device driver settings
 
 	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
