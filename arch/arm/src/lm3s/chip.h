@@ -58,7 +58,7 @@
 #  define LM3S_NADC            1  /* One ADC module */
 #  define LM2S_NPWM            0  /* No PWM generator modules */
 #  define LM3S_NQEI            0  /* No quadrature encoders */
-#  define LC3S_NGPIOS          38 /* 5-38 GPIOs, depending on configuration */
+#  define LM3S_NPORTS          8  /* 8 Ports (GPIOA-H) 5-38 GPIOs */
 #elif defined(CONFIG_ARCH_CHIP_LM3S6965)
 #  define LM3S_NTIMERS         4  /* Four general purpose timers */
 #  define LM3S_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -69,7 +69,7 @@
 #  define LM3S_NADC            1  /* One ADC module */
 #  define LM2S_NPWM            3  /* Three PWM generator modules */
 #  define LM3S_NQEI            2  /* Two quadrature encoders */
-#  define LC3S_NGPIOS          42 /* 0-42 GPIOs */
+#  define LM3S_NPORTS          7  /* 7 Ports (GPIOA-G), 0-42 GPIOs */
 #elif defined(CONFIG_ARCH_CHIP_LM3S9B96) 
 #  define LM3S_NTIMERS         4  /* Four general purpose timers */
 #  define LM3S_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -81,7 +81,7 @@
 #  define LM3S_CAN             2  /* Two CAN module */
 #  define LM3S_NPWM            4  /* Four PWM generator modules */
 #  define LM3S_NQEI            2  /* Two quadrature encoders */
-#  define LC3S_NGPIOS          65 /* 0-65 GPIOs */
+#  define LM3S_NPORTS          9  /* 9 Ports (GPIOA-H,J) 0-65 GPIOs */
 #else
 #  error "Capabilities not specified for this LM3S chip"
 #endif

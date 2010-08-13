@@ -64,7 +64,7 @@
 /* Bit-encoded input to lm3s_configgpio() *******************************************/
 
 /* Encoding:
- * FFFS SPPP IIIn nnnn nnnn nnnn nVPP PBBB
+ * FFFS SPPP IIIn nnnn nnnn nnnn VPPP PBBB
  *
  * These bits set the primary function of the pin:
  * FFFn nnnn nnnn nnnn nnnn nnnn nnnn nnnn
@@ -119,25 +119,20 @@
 #define GPIO_INT_HIGHLEVEL            (4 << GPIO_INT_SHIFT)      /*   Interrupt on high level */
 
 /* If the pin is an GPIO digital output, then this identifies the initial output value:
- * nnnn nnnn nnnn nnnn nnnn nnnn nVnn nnnn
+ * nnnn nnnn nnnn nnnn nnnn nnnn Vnnn nnnn
  */
 
-#define GPIO_VALUE_SHIFT              6                          /* Bit 6: If output, inital value of output */
+#define GPIO_VALUE_SHIFT              7                          /* Bit 7: If output, inital value of output */
 #define GPIO_VALUE_MASK               (1 << GPIO_VALUE_SHIFT)
 #define GPIO_VALUE_ZERO               (0 << GPIO_VALUE_SHIFT)    /*   Initial value is zero */
 #define GPIO_VALUE_ONE                (1 << GPIO_VALUE_SHIFT)    /*   Initial value is one */
 
 /* This identifies the GPIO port
- * nnnn nnnn nnnn nnnn nnnn nnnn nnPP Pnnn
- *
- * NOTE: Because this field is limited to 3 bits, it can only support 8 ports.
- * Newer chips (such as the LM3S9B96) have 9 GPIO ports.  It will require
- * some restructuring of these definitions (and the logic in lm3s_gpio.c)
- * to access GPIOs in ports above GPIOH.
+ * nnnn nnnn nnnn nnnn nnnn nnnn nPPP Pnnn
  */
 
-#define GPIO_PORT_SHIFT               3                          /* Bit 3-5:  Port number */
-#define GPIO_PORT_MASK                (7 << GPIO_PORT_SHIFT)
+#define GPIO_PORT_SHIFT               3                          /* Bit 3-6:  Port number */
+#define GPIO_PORT_MASK                (15 << GPIO_PORT_SHIFT)
 #define GPIO_PORTA                    (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
 #define GPIO_PORTB                    (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
 #define GPIO_PORTC                    (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
@@ -146,6 +141,7 @@
 #define GPIO_PORTF                    (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
 #define GPIO_PORTG                    (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 #define GPIO_PORTH                    (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
+#define GPIO_PORTJ                    (8 << GPIO_PORT_SHIFT)     /*   GPIOJ */
 
 /* This identifies the bit in the port:
  * nnnn nnnn nnnn nnnn nnnn nnnn nnnn nBBB

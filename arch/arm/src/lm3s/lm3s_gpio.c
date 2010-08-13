@@ -56,17 +56,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This current implementation can only support, at most, 8 GPIO ports.  Some
- * newer chips (such as the LM3S9B96) have 9 GPIO ports.  It will require
- * some restructuring of the definitions in lm3s_internal.h and to the size
- * of the g_gpiobase[] table and the lm3s_gpiobaseaddress() function in this
- * file to access GPIOs in ports above GPIOH.
- */
-
-#if LC3S_NGPIOS > 64
-#  warning "This design must be extended to access ports above GPIOH"
-#endif
-
 /* These definitions are part of the implementation of the  GPIO pad
  * configuration of Table 9-1 in the LM3S6918 data sheet.
  */
@@ -151,17 +140,23 @@ static const struct gpio_func_s g_funcbits[] =
   {GPIO_INTERRUPT_SETBITS, GPIO_INTERRUPT_CLRBITS}, /* GPIO_FUNC_INTERRUPT */
 };
 
-static const uint32_t g_gpiobase[] =
+static const uint32_t g_gpiobase[LM3S_NPORTS] =
 {
+  /* All support LM3S parts have at least 7 ports, GPIOA-G */
+
   LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
   LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE,
 
-  /* GPIOH exists on the LM3S6918, but not on the LM3S6965 */
+  /* GPIOH exists on the LM3S6918 and th LM3S6B96, but not on the LM3S6965 */
 
-#ifdef LM3S_GPIOH_BASE
+#if LM3S_NPORTS > 7
   LM3S_GPIOH_BASE,
-#else
-  0,
+#endif
+
+  /* GPIOJ exists on the LM3S6B96, but not on the LM3S6918 or LM3S6965 */
+
+#if LM3S_NPORTS > 8
+  LM3S_GPIOJ_BASE,
 #endif
 };
 
@@ -182,9 +177,14 @@ static const uint32_t g_gpiobase[] =
  *
  ****************************************************************************/
 
-static inline uint32_t lm3s_gpiobaseaddress(unsigned int port)
+static uint32_t lm3s_gpiobaseaddress(unsigned int port)
 {
-  return g_gpiobase[port & 7];
+  uint32_t gpiobase = 0;
+  if (port < LM3S_NPORTS)
+    {
+      gpiobase = g_gpiobase[port];
+    }
+  return gpiobase;
 }
 
 /****************************************************************************

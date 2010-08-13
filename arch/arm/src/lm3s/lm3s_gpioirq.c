@@ -92,6 +92,13 @@ static const uint32_t g_gpiobase[] =
 #ifndef CONFIG_LM3S_DISABLE_GPIOG_IRQS
   LM3S_GPIOG_BASE,
 #endif
+
+  /* NOTE: Not all LM3S architectures support GPIOs above GPIOG.  If the chip
+   * does not support these higher ports, then they must be disabled in the
+   * configuration.  Otherwise, the following will likely cause compilation
+   * errors!
+   */
+
 #ifndef CONFIG_LM3S_DISABLE_GPIOH_IRQS
   LM3S_GPIOH_BASE,
 #endif
@@ -399,6 +406,7 @@ void gpio_irqdisable(int irq)
       /* Get the base address of the GPIO module associated with this IRQ */
 
       base = lm3s_gpiobaseaddress(gpioirq);
+      DEBUGASSERT(base != 0);
       pin  = (1 << (gpioirq & 7));
 
       /* Disable the GPIO interrupt. "The GPIO IM register is the interrupt
