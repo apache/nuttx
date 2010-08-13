@@ -232,10 +232,17 @@ static int lm3s_gpioghandler(int irq, FAR void *context)
 }
 #endif
 
-#if !defined(CONFIG_LM3S_DISABLE_GPIOH_IRQS) && defined(LM3S_GPIOH_BASE)
+#ifndef CONFIG_LM3S_DISABLE_GPIOH_IRQS
 static int lm3s_gpiohhandler(int irq, FAR void *context)
 {
   return lm3s_gpiohandler(LM3S_GPIOH_BASE, LM3S_IRQ_GPIOH_0, context);
+}
+#endif
+
+#ifndef CONFIG_LM3S_DISABLE_GPIOJ_IRQS
+static int lm3s_gpiojhandler(int irq, FAR void *context)
+{
+  return lm3s_gpiohandler(LM3S_GPIOJ_BASE, LM3S_IRQ_GPIOJ_0, context);
 }
 #endif
 
@@ -299,7 +306,7 @@ int gpio_irqinitialize(void)
   up_enable_irq(LM3S_IRQ_GPIOH);
 #endif
 #ifndef CONFIG_LM3S_DISABLE_GPIOJ_IRQS
-  irq_attach(LM3S_IRQ_GPIOJ lm3s_gpiohhandler);
+  irq_attach(LM3S_IRQ_GPIOJ, lm3s_gpiojhandler);
   up_enable_irq(LM3S_IRQ_GPIOJ);
 #endif
 
