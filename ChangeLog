@@ -1195,8 +1195,14 @@
 	  it would, instead, select pull-down.
 	* arch/arm/src/lm3s/lm3s_gpioirq.c - Fix warning for returning a value
 	  from functions returning void (contributed by Tiago Maluta).
-	* netutils/dhcpc/dhcpc.c -- lease_time is not in host order
+	* netutils/dhcpc/dhcpc.c -- lease_time was not in host order
 	* examples/uip/main.c - if DHCPC is selected, this example now shows
 	  the assigned IP address.
 	* arch/arm/src/lm3s and arch/arm/include/lm3s - Definitions for the
       TI LM3S9B96 contributed by Tiago Maluta.
+	* arch/arm/src/lm3s/lm3s_gioirq.c - Fix a logic error in the address
+	  table lookup.
+	* arch/arm/src/lm3s/lm3s_gioirq.c - Also needs to enable the global
+      GPIO interrupts.
+	* arch/arm/src/lm3s/lm3s_internal.h and lm3s_gpio.c - Fixed the encoding
+	  of GPIO port number that limited support for GPIO ports to 8
