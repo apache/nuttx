@@ -1,7 +1,7 @@
 ############################################################################
 # configs/eagle100/ostest/defconfig
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ CONFIG_ARCH_LEDS=y
 CONFIG_ARCH_CALIBRATION=n
 
 #
-# Disable support for interrupts on GPIOH and GPIOJ which do not
+# Disable support for interrupts on GPIOJ which does not
 # exist on the LM3S6918.  Additional interrupt support can be
 # disabled if desired to reduce memory footprint.
 CONFIG_LM3S_DISABLE_GPIOA_IRQS=n
@@ -98,7 +98,7 @@ CONFIG_LM3S_DISABLE_GPIOD_IRQS=n
 CONFIG_LM3S_DISABLE_GPIOE_IRQS=n
 CONFIG_LM3S_DISABLE_GPIOF_IRQS=n
 CONFIG_LM3S_DISABLE_GPIOG_IRQS=n
-CONFIG_LM3S_DISABLE_GPIOH_IRQS=y
+CONFIG_LM3S_DISABLE_GPIOH_IRQS=n
 CONFIG_LM3S_DISABLE_GPIOJ_IRQS=y
 
 #
