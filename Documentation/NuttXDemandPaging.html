@@ -30,7 +30,19 @@
       <tr>
         <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
         <td>
-          <a href="#Terminology">Terminolgy</a>
+          <a href="#Introduction">Introduction</a>
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <a href="#Overview">Overview</a>
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <a href="#Terminology">Terminology</a>
         </td>
       </tr>
     </table>
@@ -41,54 +53,36 @@
     <table>
       <tr>
         <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>
+          <a href="#NuttXDesign">NuttX Common Logic Design Description</a>
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
         <td>
           <a href="#Initialization">Initialization</a>
         </td>
       </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-  <td>
-    <table>
       <tr>
-        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>&nbsp;</td>
         <td>
           <a href="#PageFaults">Page Faults</a>
         </td>
       </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-  <td>
-    <table>
       <tr>
-        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>&nbsp;</td>
         <td>
           <a href="#Fillnitiation">Fill Initiation</a>
         </td>
       </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-  <td>
-    <table>
       <tr>
-        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>&nbsp;</td>
         <td>
           <a href="#FillComplete">Fill Complete</a>
         </td>
       </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-  <td>
-    <table>
       <tr>
-        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>&nbsp;</td>
         <td>
           <a href="#TaskResumption">Task Resumption</a>
         </td>
@@ -96,15 +90,72 @@
     </table>
   </td>
 </tr>
+<tr>
+  <td>
+    <table>
+      <tr>
+        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>
+          <a href="#ArchSupport">Architecture-Specific Support Requirements</a>
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <a href="#MemoryOrg">Memory Organization</a>
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <a href="#ArchFuncs">Architecture-Specific Functions</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
 </table></center>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
     <td>
-      <a name="Terminology"><h1>Terminolgy</h1></a>
+      <a name="Introduction"><h1>Introduction</h1></a>
     </td>
   </tr>
 </table>
+<a name="Overview"><h2>Overview</h2></a>
+
+<p>
+  This document summarizes the design of NuttX on-demand page.
+  This feature permits embedded MCUs with some limited RAM space to execute large programs some some non-random access media.
+  This feature was first discussed in this email thread:
+  <a href="http://tech.groups.yahoo.com/group/nuttx/message/213">http://tech.groups.yahoo.com/group/nuttx/message/213</a>.
+</p>
+<p>
+  What kind of platforms can support NuttX on-demang paging?
+  <ol>
+    <li>
+      The MCU should have some large, probably low-cost non-volatile storage such as serial FLASH or an SD card.
+      This storage probably does not support non-random access (otherwise, why not just execute the program directly on the storage media).
+      SD and serial FLASH are inexpensive and do not require very many pins and SPI support is prevalent in just about all MCUs.
+      This large serial FLASH would contain a big program. Perhaps a program of several megabytes in size.
+    </li>
+    <li>
+      The MCU must have a (relatively) small block of fast SRAM  from which it can execute code.
+      A size of, say 256Kb (or 192Kb as in the ea3131) would be sufficient for many applications.
+    </li>
+    <li>
+      The MCU has an MMU (again like the ea3131).
+    </li>
+  </ol>
+</p>
+<p>
+  If the platforms meets these requirement, then NuttX can provide on-demand paging:
+  It can copy .text from the large program in non-volatile media into RAM as needed to execute the huge program from the small RAM.
+</p>
+
+<a name="Terminology"><h2>Terminology</h2></a>
 
 <dl>
   <dt><code>g_waitingforfill</code></dt>
@@ -124,10 +175,13 @@
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
     <td>
-      <a name="Initialization"><h1>Initialization</h1></a>
+      <a name="NuttXDesign"><h1>NuttX Common Logic Design Description</h1></a>
     </td>
   </tr>
 </table>
+
+
+<a name="Initialization"><h2>Initialization</h2></a>
 
 <p>
    The following declarations will be added.
@@ -165,13 +219,7 @@
    in <code>include/nuttx/page.h</code> and <code>include/nuttx/arch.h</code>.
  </p>
 
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-    <td>
-      <a name="PageFaults"><h1>Page Faults</h1></a>
-    </td>
-  </tr>
-</table>
+<a name="PageFaults"><h2>Page Faults</h2></a>
 
 <p>
   <b>Page fault exception handling</b>.
@@ -184,7 +232,7 @@
       <b>Sanity checking</b>.
       This function will ASSERT if the currently executing task is the page fill worker thread.
       The page fill worker thread is how the the page fault is resolved and all logic associated with the page fill worker
-      must be "locked&quot; and always present in memory.
+      must be &quot;<a href="#MemoryOrg">locked</a>&quot; and always present in memory.
     </li>
     <li>
       <b>Block the currently executing task</b>.
@@ -220,33 +268,19 @@
       It is assumed that this function is called from the level of an exception handler and that all interrupts are disabled.
     </li>
     <li>
-      The <code>pg_miss()</code> must be &quot;locked&quot; in memory.
+      The <code>pg_miss()</code> must be &quot;<a href="#MemoryOrg">locked</a>&quot; in memory.
       Calling <code>pg_miss()</code> cannot cause a nested page fault.
     </li>
     <li>
       It is assumed that currently executing task (the one at the head of the ready-to-run list) is the one that cause the fault.
       This will always be true unless the page fault occurred in an interrupt handler.
-      Interrupt handling logic must always be available and &quot;locked&quot; into memory so that page faults never come from interrupt handling.
+      Interrupt handling logic must always be available and &quot;<a href="#MemoryOrg">locked</a>&quot; into memory so that page faults never come from interrupt handling.
     </li>
     <li>
       The chip-specific page fault exception handling has already verified that the exception did not occur from interrupt/exception handling logic.
     </li>
     <li>
       As mentioned above, the task causing the page fault must not be the page fill worker thread because that is the only way to complete the page fill.
-    </li>
-    <li>
-      Chip specific logic will map the virtual address space into three regions:
-      <ol>
-        <li>
-          A .text region containing &quot;locked-in-memory&quot; code that is always avaialable and will never cause a page fault.
-        </li>
-        <li>
-          A .text region containing pages that can be assigned allocated, mapped to various virtual addresses, and filled from some mass storage medium.
-        </li>
-        <li>
-          And a fixed RAM space for .bss, .text, and .heap.
-        </li>
-      </ol>
     </li>
   </ul>
 </p>
@@ -266,13 +300,7 @@
   </ul>
 </p>
 
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-    <td>
-      <a name="FillInitiation"><h1>Fill Initiation</h1></a>
-    </td>
-  </tr>
-</table>
+<a name="FillInitiation"><h2>Fill Initiation</h2></a>
 
 <p>
   The page fill worker thread will be awakened on one of two conditions:
@@ -298,48 +326,49 @@
   That function will perform the following operations:
   <ul>
     <li>
-      Call <code>up_allocpage(vaddr, &page)</code>.
-      This chip-specific function will set aside page in memory and map to virtual address (vaddr).
+      Call the architecture-specific function <code>up_checkmapping()</code> to see if the page fill
+      still needs to be performed.
+      In certain conditions, the page fault may occur on several threads and be queued multiple times.
+      In this corner case, the blocked task will simply be restarted (see the logic below for the
+      case of normal completion of the fill operation).
+    </li>
+    <li>
+      Call <code>up_allocpage(tcb, &vpage)</code>.
+      This chip-specific function will set aside page in memory and map to virtual address (vpage).
       If all pages available pages are in-use (the typical case),
       this function will select a page in-use, un-map it, and make it available.
-     </li>
-     <li>
-       Call the chip-specific function <code>up_fillpage(page, pg_callback)</code>.
-       This will start asynchronous page fill.
-       The page fill worker thread will provide a callback function, <code>pg_callback</code>,
-       that will be called when the page fill is finished (or an error occurs).
-       This callback will probably from interrupt level.
-     </li>
-     <li>
-       Restore default priority of the page fill worker thread's default priority and wait to be signaled for the next event -- the fill completion event.
-     </li>
+    </li>
+    <li>
+      Call the chip-specific function <code>up_fillpage(page, pg_callback)</code>.
+      This will start asynchronous page fill.
+      The page fill worker thread will provide a callback function, <code>pg_callback</code>,
+      that will be called when the page fill is finished (or an error occurs).
+      This callback will probably from interrupt level.
+    </li>
+    <li>
+      Restore default priority of the page fill worker thread's default priority and wait to be signaled for the next event -- the fill completion event.
+    </li>
   </ul>
 </p>
 <p>
   While the fill is in progress, other tasks may execute.
   If another page fault occurs during this time, the faulting task will be blocked and its TCB will be added (in priority order) to <code>g_waitingforfill</code>.
   But no action will be taken until the current page fill completes.
-  NOTE: The IDLE task must also be fully locked in memory.
+  NOTE: The IDLE task must also be fully <a href="#MemoryOrg">locked</a> in memory.
   The IDLE task cannot be blocked.
   It the case where all tasks are blocked waiting for a page fill, the IDLE task must still be available to run.
 <p>
-  The chip-specific functions, <code>up_allocpage(vaddr, &page)</code> and <code>up_fillpage(page, pg_callback)</code>
+  The chip-specific functions, <code>up_allocpage(tcb, &vpage)</code> and <code>up_fillpage(page, pg_callback)</code>
   will be prototyped in <code>include/nuttx/arch.h</code>
 </p>
  
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-    <td>
-      <a name="FillComplete"><h1>Fill Complete</h1></a>
-    </td>
-  </tr>
-</table>
+<a name="FillComplete"><h2>Fill Complete</h2></a>
 
 <p>
   When the chip-specific driver completes the page fill, it will call the <code>pg_callback()</code> that was provided to <code>up_fillpage</code>.
   <code>pg_callback()</code> will probably be called from driver interrupt-level logic.
   The driver ill provide the result of the fill as an argument. 
-  NOTE: <code>pg_callback()</code> must also be locked in memory.
+  NOTE: <code>pg_callback()</code> must also be <a href="#MemoryOrg">locked</a> in memory.
 </p>
 <p>
   When <code>pg_callback()</code> is called, it will perform the following operations:
@@ -356,13 +385,7 @@
   </ul>
 </p>
  
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-    <td>
-      <a name="TaskResumption"><h1>Task Resumption</h1></a>
-    </td>
-  </tr>
-</table>
+<a name="TaskResumption"><h2>Task Resumption</h2></a>
 
 <p>
   When the page fill worker thread is awakened and <code>g_pendingfill</code> is non-NULL (and other state variables are in concurrence),
@@ -412,6 +435,197 @@
     </li>
   </ul>
 </p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <a name="ArchSupport"><h1>Architecture-Specific Support Requirements</h1></a>
+    </td>
+  </tr>
+</table>
+
+<a name="MemoryOrg"><h2>Memory Organization</h2></a>
+
+<p>
+  Chip specific logic will map the virtual and physical address spaces into three general regions:
+  <ol>
+    <li>
+      A .text region containing &quot;<a href="#MemoryOrg">locked-in-memory</a>&quot; code that is always avaialable and will never cause a page fault.
+      This locked memory is loaded at boot time and remains resident for all time.
+      This memory regions must include:
+      <ul>
+        <li>
+          All logic for all interrupt pathes.
+          All interrupt logic must be locked in memory because the design present here will not support page faults from interrupt handlers.
+          This includes the page fault handling logic and <a href="#PageFaults"><code>pg_miss()</code></a> that is called from the page fault handler.
+          It also includes the <a href="#FillComplete"><code>pg_callback()</code></a> function that wakes up the page fill worker thread
+          and whatever chip-specific logic that calls <code>pg_callback()</code>.
+        </li>
+        <li>
+          All logic for the IDLE thread.
+          The IDLE thread must always be ready to run and cannot be blocked for any reason.
+        </li>
+        <li>
+          All of the page fill worker thread must be locked in memory.
+          This thread must execute in order to unblock any thread waiting for a fill.
+          It this thread were to block, there would be no way to complete the fills!
+      </ul>
+    </li>
+    <li>
+      A .text region containing pages that can be assigned allocated, mapped to various virtual addresses, and filled from some mass storage medium.
+    </li>
+    <li>
+      And a fixed RAM space for .bss, .text, and .heap.
+    </li>
+  </ol>
+</p>
+<p>
+  This memory organization is illustrated in the following table.
+  Notice that:
+  <ul>
+    <li>
+      There is a one-to-one relationship between pages in the virtual address space and between pages of .text in the non-volatile mass storage device.
+    </li>
+    <li>
+      There are, however, far fewer physical pages available than virtual pages.
+      Only a subset of physical pages will be mapped to virtual pages at any given time.
+      This mapping will be performed on-demand as needed for program execution.
+  </ul>
+</p>
+
+<center><table width="80%">
+<tr>
+  <th width="33%">SRAM</th>
+  <th width="33%">Virtual Address Space</th>
+  <th width="34%">Non-Volatile Storage</th>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td bgcolor="lightslategray">DATA</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td bgcolor="lightskyblue">Virtual Page <i>n</i> (<i>n</i> > <i>m</i>)</td>
+  <td bgcolor="lightskyblue">Stored Page <i>n</i></td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td bgcolor="lightskyblue">Virtual Page <i>n-1</i></td>
+  <td bgcolor="lightskyblue">Stored Page <i>n-1</i></td>
+</tr>
+<tr>
+  <td bgcolor="lightslategray">DATA</td>
+  <td bgcolor="lightskyblue">...</td>
+  <td bgcolor="lightskyblue">...</td>
+</tr>
+<tr>
+  <td bgcolor="lightskyblue">Physical Page <i>m</i> (<i>m</i> < <i>n</i>)</td>
+  <td bgcolor="lightskyblue">...</td>
+  <td bgcolor="lightskyblue">...</td>
+</tr>
+<tr>
+  <td bgcolor="lightskyblue">Physical Page <i>m-1</i></td>
+  <td bgcolor="lightskyblue">...</td>
+  <td bgcolor="lightskyblue">...</td>
+</tr>
+<tr>
+  <td bgcolor="lightskyblue">...</td>
+  <td bgcolor="lightskyblue">...</td>
+  <td bgcolor="lightskyblue">...</td>
+</tr>
+<tr>
+  <td bgcolor="lightskyblue">Physical Page <i>1</i></td>
+  <td bgcolor="lightskyblue">Virtual Page <i>1</i></td>
+  <td bgcolor="lightskyblue">Stored Page <i>1</i></td>
+</tr>
+<tr>
+  <td bgcolor="slategray">Locked Memory</td>
+  <td bgcolor="slategray">Locked Memory</td>
+  <td bgcolor="slategray">Memory Resident</td>
+</tr>
+</table></center>
+
+<p>
+  As an example, suppose that the size of the SRAM is 192Kb (as in the NXP LPC3131).  And suppose further that:
+  <ul>
+    <li>
+       The size of the locked, memory resident .text area is 32Kb, and
+    </li>
+    <li>
+       The size of the DATA area is 64Kb.
+    </li>
+    <li>
+       The size of one, managed page is 1Kb.
+    </li>
+    <li>
+       The size of the whole .text image on the non-volatile, mass storage device is 1024Kb.
+    </li>
+  </ul>
+<p>
+  Then, the size of the locked, memory resident code is 32Kb (32 pages).
+  The size of the physical page region is 96Kb (96 pages), and the
+  size of the data region is 64 pages.
+  And the size of the virtual paged region must then be greater than or equal to (1024-32) or 992 pages (<i>m</i>).
+</p>
+
+<a name="ArchFuncs"><h2>Architecture-Specific Functions</h2></a>
+
+<p>
+  Standard functions that should already be provided in the architecture port:
+</p>
+<ul><dl>
+  <dt>
+    <code>void up_block_task(FAR _TCB *tcb, tstate_t task_state);</code>
+  </dt>
+  <dd>
+    The currently executing task at the head of the ready to run list must be stopped.
+    Save its context and move it to the inactive list specified by task_state.
+    This function is called by the on-demand paging logic in order to block the task that requires the
+    page fill, and to 
+  </dd>
+  <dt>
+    <code>void up_unblock_task(FAR _TCB *tcb);</code>
+  </dt>
+  <dd>
+    A task is currently in an inactive task list but has been prepped to execute.
+    Move the TCB to the ready-to-run list, restore its context, and start execution.
+    This function will be called
+  </dd>
+</dl></ul>
+
+<p>
+  New, additional functions that must be implemented just for on-demand paging support:
+</p>
+
+<ul><dl>
+  <dt>
+    <code>int up_checkmapping(FAR _TCB *tcb);</code>
+  </dt>
+  <dd>
+    The function <code>up_checkmapping()</code> returns an indication that checks if the page fill still needs to performed or not.
+    In certain conditions, the page fault may occur on several threads and be queued multiple times.
+    This function will prevent the same page from be filled multiple times.
+  </dd>
+  <dt>
+    <code>int up_allocpage(FAR _TCB *tcb, FAR void *vpage);</code>
+  </dt>
+  <dd>
+    This chip-specific function will set aside page in memory and map to its correct virtual address.
+    Architecture-specific context information saved within the TCB will provide the function with the information need to identify the virtual miss address.
+    This function will return the allocated physical page address in <code>paddr</code>.
+    The size of a physical page is determined by the configuration setting <code>CONFIG_PAGING_PAGESIZE</code>.
+    NOTE:  This function must <i>always</i> return a page allocation.
+    If all pages available pages are in-use (the typical case), then this function will select a page in-use, un-map it, and make it available.
+  </dd>
+  <dt><code>int up_fillpage(FAR _TCB *tcb, FAR const void *vpage, void (*pg_callback)(FAR _TCB *tcb, int result));</code>
+  </dt>
+    The actual filling of the page with data from the non-volatile, be performed by a separate call to the architecture-specific function, <code>up_fillpage()</code>.
+    This will start asynchronous page fill.
+    The common logic will provide a callback function, <code>pg_callback</code>, that will be called when the page fill is finished (or an error occurs).
+    This callback is assumed to occur from an interrupt level when the device driver completes the fill operation.
+   </dt>
+</dl></ul>
 </body>
 </html>
         
