@@ -1,0 +1,417 @@
+<html>
+<head>
+<title>On-Demand Paging</title>
+</head>
+<body background="backgd.gif">
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec"><i>On-Demand Paging</i></font></big></h1>
+      <h2><font color="#dc143c">&gt;&gt;&gt; Under Construction &lt;&lt;&lt;</font></h2>
+      <p>Last Updated: August 12, 2010</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>Table of Contents</h1>
+    </td>
+  </tr>
+</table>
+
+<center><table width ="80%">
+<tr>
+  <td>
+    <table>
+      <tr>
+        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>
+          <a href="#Terminology">Terminolgy</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td>
+    <table>
+      <tr>
+        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>
+          <a href="#Initialization">Initialization</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td>
+    <table>
+      <tr>
+        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>
+          <a href="#PageFaults">Page Faults</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td>
+    <table>
+      <tr>
+        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>
+          <a href="#Fillnitiation">Fill Initiation</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td>
+    <table>
+      <tr>
+        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>
+          <a href="#FillComplete">Fill Complete</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td>
+    <table>
+      <tr>
+        <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+        <td>
+          <a href="#TaskResumption">Task Resumption</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table></center>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <a name="Terminology"><h1>Terminolgy</h1></a>
+    </td>
+  </tr>
+</table>
+
+<dl>
+  <dt><code>g_waitingforfill</code></dt>
+    <dd>An OS list that is used to hold the TCBs of tasks that are waiting for a page fill.</dd>
+  <dt><code>g_pendingfill</code></dt>
+    <dd>A variable that holds a reference to the TCB of the thread that is currently be re-filled.</dd>
+  <dt><code>g_pgworker</code></dt>
+    <dd>The <i>process</i> ID of of the thread that will perform the page fills.</dd>
+  <dt><code>pg_callback()</code></dt>
+    <dd>The callback function that is invoked from a driver when the fill is complete.</dd>
+  <dt><code>pg_miss()</code></dt>
+    <dd>The function that is called from chip-specific code to handle a page fault.</dd>
+  <dt><code>TCB</code></dt>
+    <dd>Task Control Block</dd>
+</dl>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <a name="Initialization"><h1>Initialization</h1></a>
+    </td>
+  </tr>
+</table>
+
+<p>
+   The following declarations will be added.
+   <ul>
+     <li>
+       <b><code>g_waitingforfill</code></b>.
+       A doubly linked list that will be used to implement a prioritized list of the TCBs of tasks that are waiting for a page fill.
+     </li>
+     <li>
+       <b><code>g_pgworker</code></b>.
+       The <i>process</i> ID of of the thread that will perform the page fills
+     </li>
+   </ul>
+</p>
+<p>
+   During OS initialization in <code>sched/os_start.c</code>, the following steps
+   will be performed:
+   <ul>
+     <li>
+        The <code>g_waitingforfill</code> queue will be initialized.
+     </li>
+     <li>
+        The special, page fill worker thread, will be started.
+        The <code>pid</code> of the page will worker thread will be saved in <code>g_pgworker</code>.
+        Note that we need a special worker thread to perform fills;
+        we cannot use the &quot;generic&quot; worker thread facility because we cannot be
+        assured that all actions called by that worker thread will always be resident in memory.
+     </li>
+   </ul>
+ </p>
+ <p>
+   Declarations for <code>g_waitingforfill</code>, <code>g_pgworker</code>, and other
+   internal, private definitions will be provided in <code>sched/pg_internal.h</code>.
+   All public definitions that should be used by the chip-specific code will be available
+   in <code>include/nuttx/page.h</code> and <code>include/nuttx/arch.h</code>.
+ </p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <a name="PageFaults"><h1>Page Faults</h1></a>
+    </td>
+  </tr>
+</table>
+
+<p>
+  <b>Page fault exception handling</b>.
+  Page fault handling is performed by the function <code>pg_miss()</code>.
+  This function is called from architecture-specific memory segmentation
+  fault handling logic.  This function will perform the following
+  operations:
+  <ol>
+    <li>
+      <b>Sanity checking</b>.
+      This function will ASSERT if the currently executing task is the page fill worker thread.
+      The page fill worker thread is how the the page fault is resolved and all logic associated with the page fill worker
+      must be "locked&quot; and always present in memory.
+    </li>
+    <li>
+      <b>Block the currently executing task</b>.
+       This function will call <code>up_block_task()</code> to block the task at the head of the ready-to-run list.
+       This should cause an interrupt level context switch to the next highest priority task.
+       The blocked task will be marked with state <code>TSTATE_WAIT_PAGEFILL</code> and will be retained in the <code>g_waitingforfill</code> prioritized task list.
+     </li>
+     <li>
+       <b>Boost the page fill worker thread priority</b>.
+       Check the priority of the task at the head of the <code>g_waitingforfill</code> list. 
+       If the priority of that task is higher than the current priority of the page fill worker thread, then boost the priority of the page fill worker thread to that priority.
+     </li>
+     <li>
+       <b>Signal the page fill worker thread</b>.
+       Is there a page already being filled?
+       If not then signal the page fill worker thread to start working on the queued page fill requests.
+     </li>
+  </ol>
+</p>
+<p>
+  When signaled from <code>pg_miss()</code>, the page fill worker thread will be awakenend and will initiate the fill operation.
+</p>
+<p>
+  <b>Input Parameters.</b>
+  None -- The head of the ready-to-run list is assumed to be that task that caused the exception.
+  The current task context should already be saved in the TCB of that task.
+  No additional inputs are required.
+</p>
+<p>
+  <b>Assumptions</b>.
+  <ul>
+    <li>
+      It is assumed that this function is called from the level of an exception handler and that all interrupts are disabled.
+    </li>
+    <li>
+      The <code>pg_miss()</code> must be &quot;locked&quot; in memory.
+      Calling <code>pg_miss()</code> cannot cause a nested page fault.
+    </li>
+    <li>
+      It is assumed that currently executing task (the one at the head of the ready-to-run list) is the one that cause the fault.
+      This will always be true unless the page fault occurred in an interrupt handler.
+      Interrupt handling logic must always be available and &quot;locked&quot; into memory so that page faults never come from interrupt handling.
+    </li>
+    <li>
+      The chip-specific page fault exception handling has already verified that the exception did not occur from interrupt/exception handling logic.
+    </li>
+    <li>
+      As mentioned above, the task causing the page fault must not be the page fill worker thread because that is the only way to complete the page fill.
+    </li>
+    <li>
+      Chip specific logic will map the virtual address space into three regions:
+      <ol>
+        <li>
+          A .text region containing &quot;locked-in-memory&quot; code that is always avaialable and will never cause a page fault.
+        </li>
+        <li>
+          A .text region containing pages that can be assigned allocated, mapped to various virtual addresses, and filled from some mass storage medium.
+        </li>
+        <li>
+          And a fixed RAM space for .bss, .text, and .heap.
+        </li>
+      </ol>
+    </li>
+  </ul>
+</p>
+<p>
+  <b>Locking code in Memory</b>.
+  One way to accomplish this would be a two phase link:
+  <ul>
+    <li>
+      In the first phase, create a partially linked objected containing all interrupt/exception handling logic, the page fill worker thread plus all parts of the IDLE thread (which must always be available for execution).
+    </li>
+    <li>    
+       All of the <code>.text</code> and <code>.rodata</code> sections of this partial link should be collected into a single section.
+    </li>
+    <li>
+      The second link would link the partially linked object along with the remaining object to produce the final binary.
+      The linker script should position the &quot;special&quot; section so that it lies in a reserved, &quot;non-swappable&quot; region.
+  </ul>
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <a name="FillInitiation"><h1>Fill Initiation</h1></a>
+    </td>
+  </tr>
+</table>
+
+<p>
+  The page fill worker thread will be awakened on one of two conditions:
+  <ul>
+    <li>
+      When signaled by <code>pg_miss()</code>, the page fill worker thread will be awakenend (see above), or
+    </li>
+    <li>
+      From <code>pg_fillcomplete()</code> after completing last fill (see below).
+    </li>
+  </ul>
+</p>
+
+<p>
+  The page fill worker thread will maintain a static variable called <code>_TCB *g_pendingfill</code>.
+  If not fill is in progress, <code>g_pendingfill</code> will be NULL.
+  Otherwise, will point to the TCB of the task which is receiving the fill that is in progess.
+</p>
+
+<p>
+  When awakened from <code>pg_miss()</code>, no fill will be in progress and <code>g_pendingfill</code> will be NULL.
+  In this case, the page fill worker thread will call <code>pg_startfill()</code>.
+  That function will perform the following operations:
+  <ul>
+    <li>
+      Call <code>up_allocpage(vaddr, &page)</code>.
+      This chip-specific function will set aside page in memory and map to virtual address (vaddr).
+      If all pages available pages are in-use (the typical case),
+      this function will select a page in-use, un-map it, and make it available.
+     </li>
+     <li>
+       Call the chip-specific function <code>up_fillpage(page, pg_callback)</code>.
+       This will start asynchronous page fill.
+       The page fill worker thread will provide a callback function, <code>pg_callback</code>,
+       that will be called when the page fill is finished (or an error occurs).
+       This callback will probably from interrupt level.
+     </li>
+     <li>
+       Restore default priority of the page fill worker thread's default priority and wait to be signaled for the next event -- the fill completion event.
+     </li>
+  </ul>
+</p>
+<p>
+  While the fill is in progress, other tasks may execute.
+  If another page fault occurs during this time, the faulting task will be blocked and its TCB will be added (in priority order) to <code>g_waitingforfill</code>.
+  But no action will be taken until the current page fill completes.
+  NOTE: The IDLE task must also be fully locked in memory.
+  The IDLE task cannot be blocked.
+  It the case where all tasks are blocked waiting for a page fill, the IDLE task must still be available to run.
+<p>
+  The chip-specific functions, <code>up_allocpage(vaddr, &page)</code> and <code>up_fillpage(page, pg_callback)</code>
+  will be prototyped in <code>include/nuttx/arch.h</code>
+</p>
+ 
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <a name="FillComplete"><h1>Fill Complete</h1></a>
+    </td>
+  </tr>
+</table>
+
+<p>
+  When the chip-specific driver completes the page fill, it will call the <code>pg_callback()</code> that was provided to <code>up_fillpage</code>.
+  <code>pg_callback()</code> will probably be called from driver interrupt-level logic.
+  The driver ill provide the result of the fill as an argument. 
+  NOTE: <code>pg_callback()</code> must also be locked in memory.
+</p>
+<p>
+  When <code>pg_callback()</code> is called, it will perform the following operations:
+  <ul>
+    <li>
+      Verify that <code>g_pendingfill</code> is non-NULL.
+    </li>
+    <li>
+      If the priority of thread in <code>g_pendingfill</code> is higher than page fill worker thread, boost work thread to that level.
+    </li>
+    <li>
+      Signal the page fill worker thread.
+    </li>
+  </ul>
+</p>
+ 
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <a name="TaskResumption"><h1>Task Resumption</h1></a>
+    </td>
+  </tr>
+</table>
+
+<p>
+  When the page fill worker thread is awakened and <code>g_pendingfill</code> is non-NULL (and other state variables are in concurrence),
+  the page fill thread will know that is was awakened because of a page fill completion event.
+  In this case, the page fill worker thread will:
+  <ul>
+    <li>
+      Verify consistency of state information and <code>g_pendingfill</code>.
+    </li>
+    <li>
+      Verify that the page fill completed successfully, and if so,
+    </li>
+    <li>
+      Call <code>up_unblocktask(g_pendingfill)</code> to make the task that just received the fill ready-to-run.
+    </li>
+    <li>
+      Check if the <code>g_waitingforfill</code> list is empty.
+      If not:
+      <ul>
+        <li>
+          Remove the highest priority task waiting for a page fill from <code>g_waitingforfill</code>,
+        </li>
+        <li>
+          Save the task's TCB in <code>g_pendingfill</code>,
+        </li>
+        <li>
+          If the priority of the thread in <code>g_pendingfill</code>, is higher in priority than the default priority of the page fill worker thread, then set the priority of the page fill worker thread to that priority.
+        </li>
+        <li>
+          Call <code>pg_startfill()</code> which will start the next fill (as described above).
+        </li>
+      </ul>
+    </li>
+    <li>
+      Otherwise,
+      <ul>
+        <li>
+          Set <code>g_pendingfill</code> to NULL.
+        </li>
+        <li>
+          Restore the default priority of the page fill worker thread.
+        </li>
+        <li>
+          Wait for the next fill related event (a new page fault).
+        </li>
+      </ul>
+    </li>
+  </ul>
+</p>
+</body>
+</html>
+        
