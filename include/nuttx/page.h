@@ -76,7 +76,7 @@ extern "C" {
  * Name: pg_miss
  *
  * Description:
- *   This function is called from architecture-specific memory segmentaion
+ *   This function is called from architecture-specific memory segmentation
  *   fault handling logic.  This function will perform the following
  *   operations:
  *
@@ -120,8 +120,8 @@ extern "C" {
  *     that the exception did not occur from interrupt/exception handling
  *     logic.
  *   - As mentioned above, the task causing the page fault must not be the
- *     the page fill worker thread because that is the only way to complete
- *     the page fill.
+ *     page fill worker thread because that is the only way to complete the
+ *     page fill.
  *
  * NOTES:
  *   1. One way to accomplish this would be a two pass link phase:
