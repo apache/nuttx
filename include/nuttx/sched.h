@@ -1,7 +1,7 @@
 /********************************************************************************
  * nuttx/sched.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,21 +87,23 @@
 enum tstate_e
 {
   TSTATE_TASK_INVALID    = 0, /* INVALID      - The TCB is uninitialized */
-  TSTATE_TASK_PENDING    = 1, /* READY_TO_RUN - Pending preemption unlock */
-  TSTATE_TASK_READYTORUN = 2, /* READY-TO-RUN - But not running */
-  TSTATE_TASK_RUNNING    = 3, /* READY_TO_RUN - And running */
+  TSTATE_TASK_PENDING,        /* READY_TO_RUN - Pending preemption unlock */
+  TSTATE_TASK_READYTORUN,     /* READY-TO-RUN - But not running */
+  TSTATE_TASK_RUNNING,        /* READY_TO_RUN - And running */
 
-  TSTATE_TASK_INACTIVE   = 4, /* BLOCKED      - Initialized but not yet activated */
-  TSTATE_WAIT_SEM        = 5  /* BLOCKED      - Waiting for a semaphore */
+  TSTATE_TASK_INACTIVE,       /* BLOCKED      - Initialized but not yet activated */
+  TSTATE_WAIT_SEM,            /* BLOCKED      - Waiting for a semaphore */
 #ifndef CONFIG_DISABLE_SIGNALS
-  ,
-  TSTATE_WAIT_SIG        = 6  /* BLOCKED      - Waiting for a signal */
+  TSTATE_WAIT_SIG,            /* BLOCKED      - Waiting for a signal */
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
-  ,
   TSTATE_WAIT_MQNOTEMPTY,     /* BLOCKED      - Waiting for a MQ to become not empty. */
-  TSTATE_WAIT_MQNOTFULL       /* BLOCKED      - Waiting for a MQ to become not full. */
+  TSTATE_WAIT_MQNOTFULL.      /* BLOCKED      - Waiting for a MQ to become not full. */
 #endif
+#ifdef CONFIG_PAGING
+  TSTATE_WAIT_PAGEFILL,       /* BLOCKED     - Waiting for page fill */
+#endif
+  NUM_TASK_STATES             /* Must be last */
 };
 typedef enum tstate_e tstate_t;
 
@@ -110,22 +112,7 @@ typedef enum tstate_e tstate_t;
 #define FIRST_READY_TO_RUN_STATE TSTATE_TASK_READYTORUN
 #define LAST_READY_TO_RUN_STATE  TSTATE_TASK_RUNNING
 #define FIRST_BLOCKED_STATE      TSTATE_TASK_INACTIVE
-#ifndef CONFIG_DISABLE_MQUEUE
-# define LAST_BLOCKED_STATE      TSTATE_WAIT_MQNOTFULL
-# ifndef CONFIG_DISABLE_SIGNALS
-#  define NUM_TASK_STATES        9
-# else
-#  define NUM_TASK_STATES        8
-# endif
-#else
-# ifndef CONFIG_DISABLE_SIGNALS
-#  define LAST_BLOCKED_STATE     TSTATE_WAIT_SIG
-#  define NUM_TASK_STATES        7
-# else
-#  define LAST_BLOCKED_STATE     TSTATE_WAIT_SEM
-#  define NUM_TASK_STATES        6
-# endif
-#endif
+#define LAST_BLOCKED_STATE       (NUM_TASK_STATES-1)
 
 /* The following is the form of a thread start-up function */
 

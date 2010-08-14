@@ -139,10 +139,15 @@ ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 WORK_SRCS	= work_thread.c work_queue.c work_cancel.c
 endif
 
+ifeq ($(CONFIG_PAGING),y)
+PGFILL_SRCS	= pg_miss.c
+endif
+
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
-		  $(SEM_SRCS) $(TIMER_SRCS) $(WORK_SRCS) $(IRQ_SRCS)
+		  $(SEM_SRCS) $(TIMER_SRCS) $(WORK_SRCS) $(PGFILL_SRCS) $(IRQ_SRCS)
+
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
 CSRCS		+= $(CLOCK_SRCS)
 endif

@@ -130,6 +130,12 @@ volatile dq_queue_t g_waitingformqnotempty;
 volatile dq_queue_t g_waitingformqnotfull;
 #endif
 
+/* This is the list of all tasks that are blocking waiting for a page fill */
+
+#ifdef CONFIG_PAGING
+volatile dq_queue_t g_waitingforfill;
+#endif
+
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
@@ -166,6 +172,12 @@ pidhash_t g_pidhash[CONFIG_MAX_TASKS];
 pid_t g_worker;
 #endif
 
+/* The task ID of the page fill worker thread */
+
+#ifdef CONFIG_PAGING
+pid_t g_pgworker;
+#endif
+
 /* This is a table of task lists.  This table is indexed by
  * the task state enumeration type (tstate_t) and provides
  * a pointer to the associated static task list (if there
@@ -187,6 +199,9 @@ const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
 #ifndef CONFIG_DISABLE_MQUEUE
   { &g_waitingformqnotempty, true  },  /* TSTATE_WAIT_MQNOTEMPTY */
   { &g_waitingformqnotfull,  true  }   /* TSTATE_WAIT_MQNOTFULL */
+#endif
+#ifdef CONFIG_PAGING
+  { &g_waitingforfill,       true  }   /* TSTATE_WAIT_PAGEFILL */
 #endif
 };
 
@@ -239,6 +254,9 @@ void os_start(void)
 #ifndef CONFIG_DISABLE_MQUEUE
   dq_init(&g_waitingformqnotfull);
   dq_init(&g_waitingformqnotempty);
+#endif
+#ifdef CONFIG_PAGING
+  dq_init(&g_waitingforfill);
 #endif
   dq_init(&g_inactivetasks);
   sq_init(&g_delayeddeallocations);
