@@ -2376,6 +2376,46 @@ extern void up_ledoff(int led);
 </ul>
 
 <p>
+ OS setup related to on-demand paging:
+</p>
+<ul>
+  <li>
+    <code>CONFIG_PAGING</code>: If set =y in your configation file, this setting will
+          enable the on-demand paging feature as described in
+          <a href="http://www.nuttx.org/NuttXDemandPaging.html">http://www.nuttx.org/NuttXDemandPaging.html</a>.
+  </li>
+</ul>
+
+<p>
+  If CONFIG_PAGING is selected, then the following also apply:
+</p>
+<ul>
+  <li>
+    <code>CONFIG_PAGING_DEFPRIO</code>:
+    The default, minimum priority of the page fill worker thread.
+    The priority of the page fill work thread will be boosted boosted dynmically so that it matches the priority of the task on behalf of which it peforms the fill.
+    This defines the minimum priority that will be used.
+    Default: 50.
+  </li>
+  <li>
+    <code>CONFIG_PAGING_STACKSIZE </code>:
+    Defines the size of the allocated stack for the page fill worker thread.
+    Default: 1024.
+  </li>
+  <li>
+    <code>CONFIG_PAGING_BLOCKINGFILL</code>:
+    The architecture specific <code>up_fillpage()</code> function may be blocking or non-blocking.
+    If defined, this setting indicates that the <code>up_fillpage()</code> implementation will block until the transfer is completed.
+    Default:  Undefined (non-blocking).
+  </li>
+  <li>
+    <code>CONFIG_PAGING_TIMEOUT_TICKS</code>:
+    If defined, the implementation will monitor the (asynchronous) page fill logic.
+    If the fill takes longer than this number if microseconds, then a fatal error will be declared.
+    Default: No timeouts monitored.
+  </li>
+</ul>
+<p>
   The following can be used to disable categories of APIs supported
   by the OS.  If the compiler supports weak functions, then it
   should not be necessary to disable functions unless you want to

@@ -262,6 +262,31 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 		  the worker thread.  Default: 4
 
+    OS setup related to on-demand paging:
+
+
+		CONFIG_PAGING - If set =y in your configation file, this setting will
+          enable the on-demand paging feature as described in
+          http://www.nuttx.org/NuttXDemandPaging.html.
+
+    If CONFIG_PAGING is selected, then the following also apply:
+
+		CONFIG_PAGING_DEFPRIO - The default, minimum priority of the page fill
+		  worker thread.  The priority of the page fill work thread will be boosted
+		  boosted dynmically so that it matches the priority of the task on behalf
+		  of which it peforms the fill.  This defines the minimum priority that
+		  will be used. Default: 50.
+		CONFIG_PAGING_STACKSIZE - Defines the size of the allocated stack
+		  for the page fill worker thread. Default: 1024.
+		CONFIG_PAGING_BLOCKINGFILL - The architecture specific up_fillpage()
+		  function may be blocking or non-blocking.  If defined, this setting
+		  indicates that the up_fillpage() implementation will block until the
+		  transfer is completed. Default:  Undefined (non-blocking).
+		CONFIG_PAGING_TIMEOUT_TICKS - If defined, the implementation will monitor
+ 		  the (asynchronous) page fill logic.  If the fill takes longer than this
+		  number if microseconds, then a fatal error will be declared.
+          Default: No timeouts monitored.
+
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it
 	should not be necessary to disable functions unless you want to
