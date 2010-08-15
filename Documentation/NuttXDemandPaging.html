@@ -160,7 +160,7 @@
 <dl>
   <dt><code>g_waitingforfill</code></dt>
     <dd>An OS list that is used to hold the TCBs of tasks that are waiting for a page fill.</dd>
-  <dt><code>g_pendingfilltcb</code></dt>
+  <dt><code>g_pftcb</code></dt>
     <dd>A variable that holds a reference to the TCB of the thread that is currently be re-filled.</dd>
   <dt><code>g_pgworker</code></dt>
     <dd>The <i>process</i> ID of of the thread that will perform the page fills.</dd>
@@ -307,8 +307,8 @@
 </p>
 
 <p>
-  The page fill worker thread will maintain a static variable called <code>_TCB *g_pendingfilltcb</code>.
-  If no fill is in progress, <code>g_pendingfilltcb</code> will be NULL.
+  The page fill worker thread will maintain a static variable called <code>_TCB *g_pftcb</code>.
+  If no fill is in progress, <code>g_pftcb</code> will be NULL.
   Otherwise, it will point to the TCB of the task which is receiving the fill that is in progess.
 </p>
 <ul><small>
@@ -319,7 +319,7 @@
 </small></ul>
 
 <p>
-  When awakened from <code>pg_miss()</code>, no fill will be in progress and <code>g_pendingfilltcb</code> will be NULL.
+  When awakened from <code>pg_miss()</code>, no fill will be in progress and <code>g_pftcb</code> will be NULL.
   In this case, the page fill worker thread will call <code>pg_startfill()</code>.
   That function will perform the following operations:
   <ul>
@@ -387,10 +387,10 @@
   In this non-blocking case, the callback <code>pg_callback()</code> will perform the following operations when it is notified that the fill has completed:
   <ul>
     <li>
-      Verify that <code>g_pendingfilltcb</code> is non-NULL.
+      Verify that <code>g_pftcb</code> is non-NULL.
     </li>
     <li>
-      Find the higher priority between the task waiting for the fill to complete in <code>g_pendingfilltcb</code> and the task waiting at the head of the <code>g_waitingforfill</code> list.
+      Find the higher priority between the task waiting for the fill to complete in <code>g_pftcb</code> and the task waiting at the head of the <code>g_waitingforfill</code> list.
       That will be the priority of he highest priority task waiting for a fill.
     </li>
     <li>
@@ -409,20 +409,20 @@
 <a name="TaskResumption"><h2>Task Resumption</h2></a>
 
 <p>
-  For the non-blocking <code>up_fillpage()</code>, the page fill worker thread will detect that the page fill is complete when it is awakened with <code>g_pendingfilltcb</code> non-NULL and fill completion status from <code>pg_callback</code>.
+  For the non-blocking <code>up_fillpage()</code>, the page fill worker thread will detect that the page fill is complete when it is awakened with <code>g_pftcb</code> non-NULL and fill completion status from <code>pg_callback</code>.
   In the non-blocking case, the page fill worker thread will know that the page fill is complete when <code>up_fillpage()</code> returns.
 </p>
 <p>
   In this either, the page fill worker thread will:
   <ul>
     <li>
-      Verify consistency of state information and <code>g_pendingfilltcb</code>.
+      Verify consistency of state information and <code>g_pftcb</code>.
     </li>
     <li>
       Verify that the page fill completed successfully, and if so,
     </li>
     <li>
-      Call <code>up_unblocktask(g_pendingfilltcb)</code> to make the task that just received the fill ready-to-run.
+      Call <code>up_unblocktask(g_pftcb)</code> to make the task that just received the fill ready-to-run.
     </li>
     <li>
       Check if the <code>g_waitingforfill</code> list is empty.
@@ -432,10 +432,10 @@
           Remove the highest priority task waiting for a page fill from <code>g_waitingforfill</code>,
         </li>
         <li>
-          Save the task's TCB in <code>g_pendingfilltcb</code>,
+          Save the task's TCB in <code>g_pftcb</code>,
         </li>
         <li>
-          If the priority of the thread in <code>g_pendingfilltcb</code>, is higher in priority than the default priority of the page fill worker thread, then set the priority of the page fill worker thread to that priority.
+          If the priority of the thread in <code>g_pftcb</code>, is higher in priority than the default priority of the page fill worker thread, then set the priority of the page fill worker thread to that priority.
         </li>
         <li>
           Call <code>pg_startfill()</code> which will start the next fill (as described above).
@@ -446,7 +446,7 @@
       Otherwise,
       <ul>
         <li>
-          Set <code>g_pendingfilltcb</code> to NULL.
+          Set <code>g_pftcb</code> to NULL.
         </li>
         <li>
           Restore the default priority of the page fill worker thread.
