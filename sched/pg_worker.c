@@ -82,8 +82,8 @@
 pid_t g_pgworker;
 
 /* The page fill worker thread maintains a static variable called
- * g_pendingfilltcb. If no fill is in progress, g_pendingfilltcb will be NULL.
- * Otherwise, g_pendingfile will point to the TCB of the task which is
+ * g_pftcb. If no fill is in progress, g_pftcb will be NULL.
+ * Otherwise, g_pftcb will point to the TCB of the task which is
  * receiving the fill that is in progess.
  *
  * NOTE: I think that this is the only state in which a TCB does not reside
@@ -92,7 +92,7 @@ pid_t g_pgworker;
  * TSTATE_TASK_INVALID.
  */
 
-FAR _TCB *g_pendingfilltcb;
+FAR _TCB *g_pftcb;
 
 /****************************************************************************
  * Private Variables
@@ -132,9 +132,9 @@ status uint32_t g_starttime;
  *
  * When pg_callback() is called, it will perform the following operations:
  * 
- * - Verify that g_pendingfilltcb is non-NULL.
+ * - Verify that g_pftcb is non-NULL.
  * - Find the higher priority between the task waiting for the fill to
- *   complete in g_pendingfilltcb and the task waiting at the head of the
+ *   complete in g_pftcb and the task waiting at the head of the
  *   g_waitingforfill list.  That will be the priority of he highest priority
  *   task waiting for a fill.
  * - If this higher priority is higher than current page fill worker thread,
@@ -158,20 +158,20 @@ status uint32_t g_starttime;
 #ifndef CONFIG_PAGING_BLOCKINGFILL
 static void pg_callback(FAR _TCB *tcb, int result)
 {
-  /* Verify that g_pendingfilltcb is non-NULL */
+  /* Verify that g_pftcb is non-NULL */
 
-  if (g_pendingfilltcb)
+  if (g_pftcb)
     {
       FAR _TCB *htcb = (FAR _TCB *)g_waitingforfill.head;
       FAR _TCB *wtcb = sched_gettcb(g_pgworker);
 
       /* Find the higher priority between the task waiting for the fill to
-       * complete in g_pendingfilltcb and the task waiting at the head of the
+       * complete in g_pftcb and the task waiting at the head of the
        * g_waitingforfill list.  That will be the priority of he highest
        * priority task waiting for a fill.
        */
 
-      int priority = g_pendingfilltcb->sched_priority;
+      int priority = g_pftcb->sched_priority;
       if (htcb && priority < htcb->sched_priority)
         {
           priority = htcb->sched_priority;
@@ -218,14 +218,14 @@ static void pg_callback(FAR _TCB *tcb, int result)
  *   g_waitingforfill task list becomes empty.
  *
  *   The result (NULL or a TCB pointer) will be returned in the global
- *   variable, g_pendingfilltcb.
+ *   variable, g_pftcb.
  * 
  * Input parameters:
  *   None
  *
  * Returned Value:
  *   If there are no further queue page fill operations to be performed,
- *   pg_startfill() will return false.  Otherwise, it will return
+ *   pg_dequeue() will return false.  Otherwise, it will return
  *   true to that the full is in process (any errors will result in
  *   assertions and this function will not return).
  *
@@ -245,8 +245,8 @@ static inline bool pg_dequeue(void)
     {
       /* Remove the TCB from the head of the list (if any) */
 
-      g_pendingfilltcb = (FAR _TCB *)dq_remfirst((dq_queue_t*)&g_waitingforfill);
-      if (g_pendingfilltcb != NULL)
+      g_pftcb = (FAR _TCB *)dq_remfirst((dq_queue_t*)&g_waitingforfill);
+      if (g_pftcb != NULL)
         {
           /* Call the architecture-specific function up_checkmapping() to see if
            * the page fill still needs to be performed. In certain conditions,
@@ -255,10 +255,47 @@ static inline bool pg_dequeue(void)
            * simply be restarted.
            */
 
-          if (!up_checkmapping(g_pendingfilltcb))
+          if (!up_checkmapping(g_pftcb))
             {
-               /* This page needs to be filled.  Return with g_pendingfilltcb
-                * holding the pointer to the TCB associated with task.
+               /* This page needs to be filled.  pg_miss bumps up
+                * the priority of the page fill worker thread as each
+                * TCB is added to the g_waitingforfill list.  So we
+                * may need to also drop the priority of the worker
+                * thread as the next TCB comes off of the list.
+                *
+                * If wtcb->sched_priority > CONFIG_PAGING_DEFPRIO,
+                * then the page fill worker thread is executing at
+                * an elevated priority that may be reduced.
+                *
+                * If wtcb->sched_priority > g_pftcb->sched_priority
+                * then the page fill worker thread is executing at
+                * a higher priority than is appropriate for this
+                * fill (this priority can get re-boosted by pg_miss()
+                * if a new higher priority fill is required).
+                */
+               
+               FAR _TCB *wtcb = (FAR _TCB *)g_readytorun.head;
+               if (wtcb->sched_priority > CONFIG_PAGING_DEFPRIO &&
+                   wtcb->sched_priority > g_pftcb->sched_priority)
+                 {
+                   /* Don't reduce the priority of the page fill
+                    * worker thread lower than the configured
+                    * minimum.
+                    */
+
+                   int priority = g_pftcb->sched_priority;
+                   if (priority < CONFIG_PAGING_DEFPRIO)
+                     {
+                       priority = CONFIG_PAGING_DEFPRIO;
+                     }
+
+                   /* Reduce the priority of the page fill worker thread */
+
+                   sched_setpriority(wtcb, priority);
+                 }
+
+               /* Return with g_pftcb holding the pointer to
+                * the TCB associated with task that requires the page fill.
                 */
 
                return true;
@@ -268,10 +305,10 @@ static inline bool pg_dequeue(void)
            * virtual address space -- just restart it.
            */
 
-          up_unblock_task(g_pendingfilltcb);
+          up_unblock_task(g_pftcb);
         }
     }
-  while (g_pendingfilltcb != NULL);
+  while (g_pftcb != NULL);
   return false;
 }
 
@@ -323,7 +360,7 @@ static inline bool pg_startfill(void)
        * a page in-use, un-map it, and make it available.
        */
 
-      result = up_allocpage(g_pendingfilltcb, &vpage);
+      result = up_allocpage(g_pftcb, &vpage);
       DEBUGASSERT(result == OK);
 
       /* Start the fill.  The exact way that the fill is started depends upon
@@ -339,7 +376,7 @@ static inline bool pg_startfill(void)
        * status of the fill will be provided by return value from up_fillpage().
        */
 
-      result = up_fillpage(g_pendingfilltcb, vpage);
+      result = up_fillpage(g_pftcb, vpage);
       DEBUGASSERT(result == OK);
 #else
       /* If CONFIG_PAGING_BLOCKINGFILL is defined, then up_fillpage is non-blocking
@@ -351,7 +388,7 @@ static inline bool pg_startfill(void)
        * This callback will probably from interrupt level.
        */
 
-      result = up_fillpage(g_pendingfilltcb, vpage, pg_callback);
+      result = up_fillpage(g_pftcb, vpage, pg_callback);
       DEBUGASSERT(result == OK);
       
       /* Save the time that the fill was started.  These will be used to check for
@@ -387,7 +424,7 @@ static inline bool pg_startfill(void)
  *
  *   This functin will perform the following operations:
  *
- *   - Set g_pendingfilltcb to NULL.
+ *   - Set g_pftcb to NULL.
  *   - Restore the default priority of the page fill worker thread.
  *
  * Input parameters:
@@ -405,7 +442,7 @@ static inline bool pg_startfill(void)
 static inline void pg_alldone(void)
 {
   FAR _TCB *wtcb = (FAR _TCB *)g_readytorun.head;
-  g_pendingfilltcb = NULL;
+  g_pftcb = NULL;
   sched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
 }
 
@@ -436,11 +473,11 @@ static inline void pg_alldone(void)
 
 static inline void pg_fillcomplete(void)
 {
-  /* Call up_unblocktask(g_pendingfilltcb) to make the task that just
+  /* Call up_unblocktask(g_pftcb) to make the task that just
    * received the fill ready-to-run.
    */
 
-  up_unblock_task(g_pendingfilltcb);
+  up_unblock_task(g_pftcb);
 }
 
 /****************************************************************************
@@ -510,11 +547,11 @@ int pg_worker(int argc, char *argv[])
 
 #ifdef CONFIG_PAGING_BLOCKINGFILL
       /* For the non-blocking up_fillpage(), the page fill worker thread will detect
-       * that the page fill is complete when it is awakened with g_pendingfilltcb non-NULL
+       * that the page fill is complete when it is awakened with g_pftcb non-NULL
        * and fill completion status from pg_callback.
        */
 
-      if (g_pendingfilltcb != NULL)
+      if (g_pftcb != NULL)
         {
           /* If it is a real page fill completion event, then the result of the page
            * fill will be in g_fillresult and will not be equal to -EBUSY.
@@ -530,7 +567,7 @@ int pg_worker(int argc, char *argv[])
                * task that was blocked waiting for this page fill.
                */
 
-              up_unblock_task(g_pendingfilltcb);;
+              up_unblock_task(g_pftcb);;
 
               /* Yes .. Start the next asynchronous fill.  Check the return
                * value to see a fill was actually started (false means that
@@ -563,14 +600,14 @@ int pg_worker(int argc, char *argv[])
 
       /* Otherwise, this might be a page fill initiation event.  When
        * awakened from pg_miss(), no fill will be in progress and
-       * g_pendingfilltcb will be NULL.
+       * g_pftcb will be NULL.
        */
 
       else
         {
           /* Are there tasks blocked and waiting for a fill?  If so,
            * pg_startfill() will start the asynchronous fill (and set
-           * g_pendingfilltcb).
+           * g_pftcb).
            */
 
            (void)pg_startfill();
@@ -601,7 +638,7 @@ int pg_worker(int argc, char *argv[])
            * returns true.
            */
 
-          up_unblock_task(g_pendingfilltcb);;
+          up_unblock_task(g_pftcb);;
         }
 
       /* All queued fills have been processed */

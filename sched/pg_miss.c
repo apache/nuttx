@@ -166,7 +166,7 @@ void pg_miss(void)
    *   thread to start working on the queued page fill requests.
    */
 
-  if (!g_pendingfilltcb)
+  if (!g_pftcb)
     {
       kill(g_pgworker, SIGWORK);
     }
