@@ -127,7 +127,7 @@
 <a name="Overview"><h2>Overview</h2></a>
 
 <p>
-  This document summarizes the design of NuttX on-demand page.
+  This document summarizes the design of NuttX on-demand paging.
   This feature permits embedded MCUs with some limited RAM space to execute large programs some some non-random access media.
   This feature was first discussed in this email thread:
   <a href="http://tech.groups.yahoo.com/group/nuttx/message/213">http://tech.groups.yahoo.com/group/nuttx/message/213</a>.
@@ -143,15 +143,15 @@
     </li>
     <li>
       The MCU must have a (relatively) small block of fast SRAM  from which it can execute code.
-      A size of, say 256Kb (or 192Kb as in the ea3131) would be sufficient for many applications.
+      A size of, say 256Kb (or 192Kb as in the NXP LPC3131) would be sufficient for many applications.
     </li>
     <li>
-      The MCU has an MMU (again like the ea3131).
+      The MCU has an MMU (again like the NXP LPC3131).
     </li>
   </ol>
 </p>
 <p>
-  If the platforms meets these requirement, then NuttX can provide on-demand paging:
+  If the platform meets these requirement, then NuttX can provide on-demand paging:
   It can copy .text from the large program in non-volatile media into RAM as needed to execute the huge program from the small RAM.
 </p>
 

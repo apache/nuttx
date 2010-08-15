@@ -1206,3 +1206,6 @@
       GPIO interrupts.
 	* arch/arm/src/lm3s/lm3s_internal.h and lm3s_gpio.c - Fixed the encoding
 	  of GPIO port number that limited support for GPIO ports to 8
+	* sched/pg_*.c and *.c and include/nuttx/page.h - Implemented the
+	  common, core logic for on-demand paging. See
+	  http://www.nuttx.org/NuttXDemandPaging.html for details.
