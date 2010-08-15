@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <queue.h>
 #include <assert.h>
@@ -203,13 +204,85 @@ static void pg_callback(FAR _TCB *tcb, int result)
 #endif
 
 /****************************************************************************
+ * Name: pg_dequeue
+ *
+ * Description:
+ *   Dequeue the next, highest priority TCB from the g_waitingforfill task
+ *   list.  Call up_checkmapping() see if the still needs to be performed
+ *   for that task. In certain conditions, the page fault may occur on
+ *   several threads for the same page and be queued multiple times. In this
+ *   corner case, the blocked task will simply be restarted.
+ *
+ *   This function will continue to examine g_waitingforfill until either
+ *   (1) a task is found that still needs the page fill, or (2) the
+ *   g_waitingforfill task list becomes empty.
+ *
+ *   The result (NULL or a TCB pointer) will be returned in the global
+ *   variable, g_pendingfilltcb.
+ * 
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   If there are no further queue page fill operations to be performed,
+ *   pg_startfill() will return false.  Otherwise, it will return
+ *   true to that the full is in process (any errors will result in
+ *   assertions and this function will not return).
+ *
+ * Assumptions:
+ *   Executing in the context of the page fill worker thread with all 
+ *   interrupts disabled.
+ *
+ ****************************************************************************/
+
+static inline bool pg_dequeue(void)
+{
+  /* Loop until either (1) the TCB of a task that requires a fill is found, OR
+   * (2) the g_watingforfill list becomes empty.
+   */
+
+  do
+    {
+      /* Remove the TCB from the head of the list (if any) */
+
+      g_pendingfilltcb = (FAR _TCB *)dq_remfirst((dq_queue_t*)&g_waitingforfill);
+      if (g_pendingfilltcb != NULL)
+        {
+          /* Call the architecture-specific function up_checkmapping() to see if
+           * the page fill still needs to be performed. In certain conditions,
+           * the page fault may occur on several threads for the same page and
+           * be queues multiple times. In this corner case, the blocked task will
+           * simply be restarted.
+           */
+
+          if (!up_checkmapping(g_pendingfilltcb))
+            {
+               /* This page needs to be filled.  Return with g_pendingfilltcb
+                * holding the pointer to the TCB associated with task.
+                */
+
+               return true;
+            }
+
+          /* The page need by this task has already been mapped into the
+           * virtual address space -- just restart it.
+           */
+
+          up_unblock_task(g_pendingfilltcb);
+        }
+    }
+  while (g_pendingfilltcb != NULL);
+  return false;
+}
+
+/****************************************************************************
  * Name: pg_startfill
  *
  * Description:
  *   Start a page fill operation on the thread whose TCB is at the head of
- *   of the g_waitingforfill task list.  That is a prioritized list so that will
- *   be the highest priority task waiting for a page fill (in the event that
- *   are multiple tasks waiting for a page fill).
+ *   of the g_waitingforfill task list.  That is a prioritized list so that
+ *   will be the highest priority task waiting for a page fill (in the event
+ *   that are multiple tasks waiting for a page fill).
  *
  *   This function may be called either (1) when the page fill worker thread
  *   is notified that there is a new page fill TCB in the g_waitingforfill
@@ -220,7 +293,10 @@ static void pg_callback(FAR _TCB *tcb, int result)
  *   None
  *
  * Returned Value:
- *   None
+ *   If there are no further queue page fill operations to be performed,
+ *   pg_startfill() will return false.  Otherwise, it will return
+ *   true to that the full is in process (any errors will result in
+ *   assertions and this function will not return).
  *
  * Assumptions:
  *   Executing in the context of the page fill worker thread with all 
@@ -228,30 +304,19 @@ static void pg_callback(FAR _TCB *tcb, int result)
  *
  ****************************************************************************/
 
-static inline void pg_startfill(void)
+static inline bool pg_startfill(void)
 {
   FAR void *vpage;
   int result;
 
-  /* Remove the TCB at the head of the g_waitfor fill list */
+  /* Remove the TCB at the head of the g_waitfor fill list and check if there
+   * is any task waiting for a page fill. pg_dequeue will handle this (plus
+   * some cornercases) and will true if the next page TCB was successfully
+   * dequeued.
+   */
 
-  g_pendingfilltcb = (FAR _TCB *)dq_remfirst((dq_queue_t*)&g_waitingforfill);
-  if (g_pendingfilltcb != NULL)
+  if (pg_dequeue())
     {
-      /* Call the architecture-specific function up_checkmapping() to see if the
-       * page fill still needs to be performed. In certain conditions, the page
-       * fault may occur on several threads and be queued multiple times. In this
-       * corner case, the blocked task will simply be restarted.
-       */
-
-      result = up_checkmapping(g_pendingfilltcb);
-      if (result == OK)
-        {
-          up_unblock_task(g_pendingfilltcb);
-          g_pendingfilltcb = NULL;
-          return;
-        }
-
       /* Call up_allocpage(tcb, &vpage). This architecture-specific function will
        * set aside page in memory and map to virtual address (vpage). If all
        * available pages are in-use (the typical case), this function will select
@@ -308,7 +373,9 @@ static inline void pg_startfill(void)
        * task must still be available to run.
        */
 #endif /* CONFIG_PAGING_BLOCKINGFILL */
+      return true;
     }
+  return false;
 }
 
 /****************************************************************************
@@ -390,7 +457,7 @@ static inline void pg_fillcomplete(void)
  *   The page fill worker thread will be awakened on one of three conditions:
  *   - When signaled by pg_miss(), the page fill worker thread will be
  *     awakenend, or
- *   - if CONFIG_PAGING_BLOCKINGFILL is not defined, from pg_fillcomplete()
+ *   - if CONFIG_PAGING_BLOCKINGFILL is not defined, from pg_callback()
  *     after completing a page fill.
  *   - A configurable timeout with no activity.
  *
@@ -459,21 +526,23 @@ int pg_worker(int argc, char *argv[])
 
               ASSERT(g_fillresult == OK);
 
-              /* Handle the page fill complete event */
+              /* Handle the successful page fill complete event by restarting the
+               * task that was blocked waiting for this page fill.
+               */
 
-              pg_fillcomplete();
+              up_unblock_task(g_pendingfilltcb);;
 
-              /* Check if there are are more pending page fills */
+              /* Yes .. Start the next asynchronous fill.  Check the return
+               * value to see a fill was actually started (false means that
+               * no fill was started).
+               */
 
-              if (g_waitingforfill.head != NULL)
+              if (!pg_startfill())
                 {
-                  /* Yes .. Start the next asynchronous fill */
-
-                  pg_startfill();
-                }
-              else
-                {
-                  /* Otherwise, there is nothing more to do */
+                  /* No fill was started.  This can mean only that all queued
+                   * page fill actions have and been completed and there is
+                   * nothing more to do.
+                   */
 
                   pg_alldone();
                 }
@@ -499,32 +568,40 @@ int pg_worker(int argc, char *argv[])
 
       else
         {
-          /* Are there tasks blocked and waiting for a fill?  */
+          /* Are there tasks blocked and waiting for a fill?  If so,
+           * pg_startfill() will start the asynchronous fill (and set
+           * g_pendingfilltcb).
+           */
 
-          if (g_waitingforfill.head != NULL)
-            {
-              /* Yes .. Start the asynchronous fill */
-
-              pg_startfill();
-            }
+           (void)pg_startfill();
         }
 #else
       /* Are there tasks blocked and waiting for a fill?  Loop until all
-       * pending fills have been processed
+       * pending fills have been processed.
        */
 
-      while (g_waitingforfill.head != NULL)
+      for (;;)
         {
-          /* Yes .. Start the fill and block until the fill completes */
-
-          pg_startfill();
-
-          /* Handle the page fill complete event.  In the non-blocking case,
-           * the page fill worker thread will know that the page fill is 
-           * complete when pg_startfill() returns.
+          /* Yes .. Start the fill and block until the fill completes.
+           * Check the return value to see a fill was actually performed.
+           * (false means that no fill was perforemd).
            */
 
-          pg_fillcomplete();
+          if (!pg_startfill())
+            {
+               /* Break out of the loop -- there is nothing more to do */
+
+               break;
+            }
+
+          /* Handle the page fill complete event by restarting the
+           * task that was blocked waiting for this page fill. In the
+           * non-blocking fill case, the page fill worker thread will
+           * know that the page fill is  complete when pg_startfill()
+           * returns true.
+           */
+
+          up_unblock_task(g_pendingfilltcb);;
         }
 
       /* All queued fills have been processed */

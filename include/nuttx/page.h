@@ -43,10 +43,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
 #include <stdbool.h>
-#include <nuttx/wqueue.h>
 
 #ifdef CONFIG_PAGING
 
@@ -165,10 +162,9 @@ EXTERN void pg_miss(void);
  *         to be performed or not.
  *
  * Returned Value:
- *   This function will return zero (OK) if the mapping is in place and
- *   the negated errn ENXIO if the mapping is still needed.  Other errors
- *   may also be returned but these will be interpreted as fatal error
- *   conditions.
+ *   This function will return true if the mapping is in place and false
+ *   if the mapping is still needed.  Errors encountered should be
+ *   interpreted as fatal.
  *
  * Assumptions:
  *   - This function is called from the normal tasking context (but with
@@ -178,7 +174,7 @@ EXTERN void pg_miss(void);
  *
  ****************************************************************************/
 
-EXTERN int up_checkmapping(FAR _TCB *tcb);
+EXTERN bool up_checkmapping(FAR _TCB *tcb);
 
 /****************************************************************************
  * Name: up_allocpage()
