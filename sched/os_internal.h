@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/os_internal.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -197,6 +197,12 @@ extern volatile dq_queue_t g_waitingformqnotempty;
 
 #ifndef CONFIG_DISABLE_MQUEUE
 extern volatile dq_queue_t g_waitingformqnotfull;
+#endif
+
+/* This is the list of all tasks that are blocking waiting for a page fill */
+
+#ifdef CONFIG_PAGING
+extern volatile dq_queue_t g_waitingforfill;
 #endif
 
 /* This the list of all tasks that have been initialized, but not yet

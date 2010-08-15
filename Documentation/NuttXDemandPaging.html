@@ -72,7 +72,7 @@
       <tr>
         <td>&nbsp;</td>
         <td>
-          <a href="#Fillnitiation">Fill Initiation</a>
+          <a href="#FillInitiation">Fill Initiation</a>
         </td>
       </tr>
       <tr>
@@ -160,14 +160,14 @@
 <dl>
   <dt><code>g_waitingforfill</code></dt>
     <dd>An OS list that is used to hold the TCBs of tasks that are waiting for a page fill.</dd>
-  <dt><code>g_pendingfill</code></dt>
+  <dt><code>g_pendingfilltcb</code></dt>
     <dd>A variable that holds a reference to the TCB of the thread that is currently be re-filled.</dd>
   <dt><code>g_pgworker</code></dt>
     <dd>The <i>process</i> ID of of the thread that will perform the page fills.</dd>
   <dt><code>pg_callback()</code></dt>
     <dd>The callback function that is invoked from a driver when the fill is complete.</dd>
   <dt><code>pg_miss()</code></dt>
-    <dd>The function that is called from chip-specific code to handle a page fault.</dd>
+    <dd>The function that is called from architecture-specific code to handle a page fault.</dd>
   <dt><code>TCB</code></dt>
     <dd>Task Control Block</dd>
 </dl>
@@ -215,8 +215,10 @@
  <p>
    Declarations for <code>g_waitingforfill</code>, <code>g_pgworker</code>, and other
    internal, private definitions will be provided in <code>sched/pg_internal.h</code>.
-   All public definitions that should be used by the chip-specific code will be available
-   in <code>include/nuttx/page.h</code> and <code>include/nuttx/arch.h</code>.
+   All public definitions that should be used by the architecture-specific code will be available
+   in <code>include/nuttx/page.h</code>.
+   Most architecture-specific functions are declared in <code>include/nuttx/arch.h</code>,
+   but for the case of this paging logic, those architecture specific functions are instead declared in <code>include/nuttx/page.h</code>.
  </p>
 
 <a name="PageFaults"><h2>Page Faults</h2></a>
@@ -244,6 +246,7 @@
        <b>Boost the page fill worker thread priority</b>.
        Check the priority of the task at the head of the <code>g_waitingforfill</code> list. 
        If the priority of that task is higher than the current priority of the page fill worker thread, then boost the priority of the page fill worker thread to that priority.
+       Thus, the page fill worker thread will always run at the priority of the highest priority task that is waiting for a fill.
      </li>
      <li>
        <b>Signal the page fill worker thread</b>.
@@ -277,51 +280,46 @@
       Interrupt handling logic must always be available and &quot;<a href="#MemoryOrg">locked</a>&quot; into memory so that page faults never come from interrupt handling.
     </li>
     <li>
-      The chip-specific page fault exception handling has already verified that the exception did not occur from interrupt/exception handling logic.
+      The architecture-specific page fault exception handling has already verified that the exception did not occur from interrupt/exception handling logic.
     </li>
     <li>
       As mentioned above, the task causing the page fault must not be the page fill worker thread because that is the only way to complete the page fill.
     </li>
   </ul>
 </p>
-<p>
-  <b>Locking code in Memory</b>.
-  One way to accomplish this would be a two phase link:
-  <ul>
-    <li>
-      In the first phase, create a partially linked objected containing all interrupt/exception handling logic, the page fill worker thread plus all parts of the IDLE thread (which must always be available for execution).
-    </li>
-    <li>    
-       All of the <code>.text</code> and <code>.rodata</code> sections of this partial link should be collected into a single section.
-    </li>
-    <li>
-      The second link would link the partially linked object along with the remaining object to produce the final binary.
-      The linker script should position the &quot;special&quot; section so that it lies in a reserved, &quot;non-swappable&quot; region.
-  </ul>
-</p>
 
 <a name="FillInitiation"><h2>Fill Initiation</h2></a>
 
 <p>
-  The page fill worker thread will be awakened on one of two conditions:
+  The page fill worker thread will be awakened on one of three conditions:
   <ul>
     <li>
-      When signaled by <code>pg_miss()</code>, the page fill worker thread will be awakenend (see above), or
+      When signaled by <code>pg_miss()</code>, the page fill worker thread will be awakenend (see above),
     </li>
     <li>
-      From <code>pg_fillcomplete()</code> after completing last fill (see below).
+      From <code>pg_callback()</code> after completing last fill (when <code>CONFIG_PAGING_BLOCKINGFILL</code> is defined... see below), or
+    </li>
+    <li>
+       A configurable timeout expires with no activity.
+       This timeout can be used to detect failure conditions such things as fills that never complete.
     </li>
   </ul>
 </p>
 
 <p>
-  The page fill worker thread will maintain a static variable called <code>_TCB *g_pendingfill</code>.
-  If not fill is in progress, <code>g_pendingfill</code> will be NULL.
-  Otherwise, will point to the TCB of the task which is receiving the fill that is in progess.
+  The page fill worker thread will maintain a static variable called <code>_TCB *g_pendingfilltcb</code>.
+  If no fill is in progress, <code>g_pendingfilltcb</code> will be NULL.
+  Otherwise, it will point to the TCB of the task which is receiving the fill that is in progess.
 </p>
+<ul><small>
+  <b>NOTE</b>:
+  I think that this is the only state in which a TCB does not reside in some list.
+  Here is it in limbo, outside of the normally queuing while the page file is in progress.
+  While here, it will be marked with TSTATE_TASK_INVALID.
+</small></ul>
 
 <p>
-  When awakened from <code>pg_miss()</code>, no fill will be in progress and <code>g_pendingfill</code> will be NULL.
+  When awakened from <code>pg_miss()</code>, no fill will be in progress and <code>g_pendingfilltcb</code> will be NULL.
   In this case, the page fill worker thread will call <code>pg_startfill()</code>.
   That function will perform the following operations:
   <ul>
@@ -334,50 +332,73 @@
     </li>
     <li>
       Call <code>up_allocpage(tcb, &vpage)</code>.
-      This chip-specific function will set aside page in memory and map to virtual address (vpage).
-      If all pages available pages are in-use (the typical case),
+      This architecture-specific function will set aside page in memory and map to virtual address (vpage).
+      If all available pages are in-use (the typical case),
       this function will select a page in-use, un-map it, and make it available.
     </li>
     <li>
-      Call the chip-specific function <code>up_fillpage(page, pg_callback)</code>.
-      This will start asynchronous page fill.
-      The page fill worker thread will provide a callback function, <code>pg_callback</code>,
-      that will be called when the page fill is finished (or an error occurs).
-      This callback will probably from interrupt level.
-    </li>
-    <li>
-      Restore default priority of the page fill worker thread's default priority and wait to be signaled for the next event -- the fill completion event.
+      Call the architecture-specific function <code>up_fillpage()</code>.
+      Two versions of the up_fillpage function are supported -- a blocking and a non-blocking version based upon the configuratin setting <code>CONFIG_PAGING_BLOCKINGFILL</code>.
+      <ul>
+        <li>
+          If <code>CONFIG_PAGING_BLOCKINGFILL</code> is defined, then up_fillpage is blocking call.
+          In this case, <code>up_fillpage()</code> will accept only (1) a reference to the TCB that requires the fill.
+          Architecture-specific context information within the TCB will be sufficient to perform the fill.
+          And (2) the (virtual) address of the allocated page to be filled.
+          The resulting status of the fill will be provided by return value from <code>up_fillpage()</code>.
+        </li>
+        <li>
+          If <code>CONFIG_PAGING_BLOCKINGFILL</code> is defined, then up_fillpage is non-blocking call.
+          In this case <code>up_fillpage()</code> will accept an additional argument:
+          The page fill worker thread will provide a callback function, <code>pg_callback</code>.
+          This function is non-blocking, it will start an asynchronous page fill.
+          After calling the non-blocking <code>up_fillpage()</code>,  the page fill worker thread will wait to be signaled for the next event -- the fill completion event.
+          The callback function will be called when the page fill is finished (or an error occurs).
+          The resulting status of the fill will be providing as an argument to the callback functions.
+          This callback will probably occur from interrupt level.
+      </ul>
     </li>
   </ul>
 </p>
 <p>
-  While the fill is in progress, other tasks may execute.
-  If another page fault occurs during this time, the faulting task will be blocked and its TCB will be added (in priority order) to <code>g_waitingforfill</code>.
+  In any case, while the fill is in progress, other tasks may execute.
+  If another page fault occurs during this time, the faulting task will be blocked, its TCB will be added (in priority order) to <code>g_waitingforfill</code>, and the priority of the page worker task may be boosted.
   But no action will be taken until the current page fill completes.
   NOTE: The IDLE task must also be fully <a href="#MemoryOrg">locked</a> in memory.
   The IDLE task cannot be blocked.
   It the case where all tasks are blocked waiting for a page fill, the IDLE task must still be available to run.
 <p>
-  The chip-specific functions, <code>up_allocpage(tcb, &vpage)</code> and <code>up_fillpage(page, pg_callback)</code>
+  The architecture-specific functions, <code>up_checkmapping()</code>, <code>up_allocpage(tcb, &vpage)</code> and <code>up_fillpage(page, pg_callback)</code>
   will be prototyped in <code>include/nuttx/arch.h</code>
 </p>
  
 <a name="FillComplete"><h2>Fill Complete</h2></a>
 
 <p>
-  When the chip-specific driver completes the page fill, it will call the <code>pg_callback()</code> that was provided to <code>up_fillpage</code>.
-  <code>pg_callback()</code> will probably be called from driver interrupt-level logic.
-  The driver ill provide the result of the fill as an argument. 
+  For the blocking <code>up_fillpage()</code>, the result of the fill will be returned directly from the call to <code>up_fillpage</code>.
+</p>
+<p>
+  For the non-blocking <code>up_fillpage()</code>, the architecture-specific driver call the <code>pg_callback()</code> that was provided to <code>up_fillpage()</code> when the fill completes.
+  In this case, the <code>pg_callback()</code> will probably be called from driver interrupt-level logic.
+  The driver will provide the result of the fill as an argument to the callback function. 
   NOTE: <code>pg_callback()</code> must also be <a href="#MemoryOrg">locked</a> in memory.
 </p>
 <p>
-  When <code>pg_callback()</code> is called, it will perform the following operations:
+  In this non-blocking case, the callback <code>pg_callback()</code> will perform the following operations when it is notified that the fill has completed:
   <ul>
     <li>
-      Verify that <code>g_pendingfill</code> is non-NULL.
+      Verify that <code>g_pendingfilltcb</code> is non-NULL.
     </li>
     <li>
-      If the priority of thread in <code>g_pendingfill</code> is higher than page fill worker thread, boost work thread to that level.
+      Find the higher priority between the task waiting for the fill to complete in <code>g_pendingfilltcb</code> and the task waiting at the head of the <code>g_waitingforfill</code> list.
+      That will be the priority of he highest priority task waiting for a fill.
+    </li>
+    <li>
+      If this higher priority is higher than current page fill worker thread, then boost worker thread's priority to that level.
+      Thus, the page fill worker thread will always run at the priority of the highest priority task that is waiting for a fill.
+    </li>
+    <li>
+      Save the result of the fill operation.
     </li>
     <li>
       Signal the page fill worker thread.
@@ -388,18 +409,20 @@
 <a name="TaskResumption"><h2>Task Resumption</h2></a>
 
 <p>
-  When the page fill worker thread is awakened and <code>g_pendingfill</code> is non-NULL (and other state variables are in concurrence),
-  the page fill thread will know that is was awakened because of a page fill completion event.
-  In this case, the page fill worker thread will:
+  For the non-blocking <code>up_fillpage()</code>, the page fill worker thread will detect that the page fill is complete when it is awakened with <code>g_pendingfilltcb</code> non-NULL and fill completion status from <code>pg_callback</code>.
+  In the non-blocking case, the page fill worker thread will know that the page fill is complete when <code>up_fillpage()</code> returns.
+</p>
+<p>
+  In this either, the page fill worker thread will:
   <ul>
     <li>
-      Verify consistency of state information and <code>g_pendingfill</code>.
+      Verify consistency of state information and <code>g_pendingfilltcb</code>.
     </li>
     <li>
       Verify that the page fill completed successfully, and if so,
     </li>
     <li>
-      Call <code>up_unblocktask(g_pendingfill)</code> to make the task that just received the fill ready-to-run.
+      Call <code>up_unblocktask(g_pendingfilltcb)</code> to make the task that just received the fill ready-to-run.
     </li>
     <li>
       Check if the <code>g_waitingforfill</code> list is empty.
@@ -409,10 +432,10 @@
           Remove the highest priority task waiting for a page fill from <code>g_waitingforfill</code>,
         </li>
         <li>
-          Save the task's TCB in <code>g_pendingfill</code>,
+          Save the task's TCB in <code>g_pendingfilltcb</code>,
         </li>
         <li>
-          If the priority of the thread in <code>g_pendingfill</code>, is higher in priority than the default priority of the page fill worker thread, then set the priority of the page fill worker thread to that priority.
+          If the priority of the thread in <code>g_pendingfilltcb</code>, is higher in priority than the default priority of the page fill worker thread, then set the priority of the page fill worker thread to that priority.
         </li>
         <li>
           Call <code>pg_startfill()</code> which will start the next fill (as described above).
@@ -423,7 +446,7 @@
       Otherwise,
       <ul>
         <li>
-          Set <code>g_pendingfill</code> to NULL.
+          Set <code>g_pendingfilltcb</code> to NULL.
         </li>
         <li>
           Restore the default priority of the page fill worker thread.
@@ -447,6 +470,7 @@
 <a name="MemoryOrg"><h2>Memory Organization</h2></a>
 
 <p>
+  <b>Memory Regions</b>.
   Chip specific logic will map the virtual and physical address spaces into three general regions:
   <ol>
     <li>
@@ -459,7 +483,7 @@
           All interrupt logic must be locked in memory because the design present here will not support page faults from interrupt handlers.
           This includes the page fault handling logic and <a href="#PageFaults"><code>pg_miss()</code></a> that is called from the page fault handler.
           It also includes the <a href="#FillComplete"><code>pg_callback()</code></a> function that wakes up the page fill worker thread
-          and whatever chip-specific logic that calls <code>pg_callback()</code>.
+          and whatever architecture-specific logic that calls <code>pg_callback()</code>.
         </li>
         <li>
           All logic for the IDLE thread.
@@ -547,6 +571,7 @@
 </table></center>
 
 <p>
+  <b>Example</b>.
   As an example, suppose that the size of the SRAM is 192Kb (as in the NXP LPC3131).  And suppose further that:
   <ul>
     <li>
@@ -563,16 +588,35 @@
     </li>
   </ul>
 <p>
-  Then, the size of the locked, memory resident code is 32Kb (32 pages).
+  Then, the size of the locked, memory resident code is 32Kb (<i>m</i>=32 pages).
   The size of the physical page region is 96Kb (96 pages), and the
   size of the data region is 64 pages.
-  And the size of the virtual paged region must then be greater than or equal to (1024-32) or 992 pages (<i>m</i>).
+  And the size of the virtual paged region must then be greater than or equal to (1024-32) or 992 pages (<i>n</i>).
+</p>
+
+<p>
+  <b>Building the Locked, In-Memory Image</b>.
+  One way to accomplish this would be a two phase link:
+  <ul>
+    <li>
+      In the first phase, create a partially linked objected containing all interrupt/exception handling logic, the page fill worker thread plus all parts of the IDLE thread (which must always be available for execution).
+    </li>
+    <li>    
+       All of the <code>.text</code> and <code>.rodata</code> sections of this partial link should be collected into a single section.
+    </li>
+    <li>
+      The second link would link the partially linked object along with the remaining object to produce the final binary.
+      The linker script should position the &quot;special&quot; section so that it lies in a reserved, &quot;non-swappable&quot; region.
+  </ul>
 </p>
 
 <a name="ArchFuncs"><h2>Architecture-Specific Functions</h2></a>
 
 <p>
-  Standard functions that should already be provided in the architecture port:
+  Most standard, architecture-specific functions are declared in <code>include/nuttx/arch.h</code>.
+  However, for the case of this paging logic, the architecture specific functions are declared in <code>include/nuttx/page.h</code>.
+  Standard, architecture-specific functions that should already be provided in the architecture port.
+  The following are used by the common paging logic:
 </p>
 <ul><dl>
   <dt>
@@ -603,7 +647,7 @@
     <code>int up_checkmapping(FAR _TCB *tcb);</code>
   </dt>
   <dd>
-    The function <code>up_checkmapping()</code> returns an indication that checks if the page fill still needs to performed or not.
+    The function <code>up_checkmapping()</code> returns an indication if the page fill still needs to performed or not.
     In certain conditions, the page fault may occur on several threads and be queued multiple times.
     This function will prevent the same page from be filled multiple times.
   </dd>
@@ -611,18 +655,18 @@
     <code>int up_allocpage(FAR _TCB *tcb, FAR void *vpage);</code>
   </dt>
   <dd>
-    This chip-specific function will set aside page in memory and map to its correct virtual address.
-    Architecture-specific context information saved within the TCB will provide the function with the information need to identify the virtual miss address.
-    This function will return the allocated physical page address in <code>paddr</code>.
-    The size of a physical page is determined by the configuration setting <code>CONFIG_PAGING_PAGESIZE</code>.
+    This architecture-specific function will set aside page in memory and map to its correct virtual address.
+    Architecture-specific context information saved within the TCB will provide the function with the information needed to identify the virtual miss address.
+    This function will return the allocated physical page address in <code>vpage</code>.
+    The size of the underlying physical page is determined by the configuration setting <code>CONFIG_PAGING_PAGESIZE</code>.
     NOTE:  This function must <i>always</i> return a page allocation.
-    If all pages available pages are in-use (the typical case), then this function will select a page in-use, un-map it, and make it available.
+    If all available pages are in-use (the typical case), then this function will select a page in-use, un-map it, and make it available.
   </dd>
   <dt><code>int up_fillpage(FAR _TCB *tcb, FAR const void *vpage, void (*pg_callback)(FAR _TCB *tcb, int result));</code>
   </dt>
-    The actual filling of the page with data from the non-volatile, be performed by a separate call to the architecture-specific function, <code>up_fillpage()</code>.
+    The actual filling of the page with data from the non-volatile, must be performed by a separate call to the architecture-specific function, <code>up_fillpage()</code>.
     This will start asynchronous page fill.
-    The common logic will provide a callback function, <code>pg_callback</code>, that will be called when the page fill is finished (or an error occurs).
+    The common paging logic will provide a callback function, <code>pg_callback</code>, that will be called when the page fill is finished (or an error occurs).
     This callback is assumed to occur from an interrupt level when the device driver completes the fill operation.
    </dt>
 </dl></ul>

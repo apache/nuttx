@@ -62,6 +62,9 @@
 #include  "clock_internal.h"
 #include  "timer_internal.h"
 #include  "irq_internal.h"
+#ifdef CONFIG_PAGING
+# include "pg_internal.h"
+#endif
 #ifdef CONFIG_SCHED_WORKQUEUE
 # include "work_internal.h"
 #endif
@@ -170,12 +173,6 @@ pidhash_t g_pidhash[CONFIG_MAX_TASKS];
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 pid_t g_worker;
-#endif
-
-/* The task ID of the page fill worker thread */
-
-#ifdef CONFIG_PAGING
-pid_t g_pgworker;
 #endif
 
 /* This is a table of task lists.  This table is indexed by
@@ -450,6 +447,23 @@ void os_start(void)
   /* Create stdout, stderr, stdin */
 
   (void)sched_setupidlefiles(&g_idletcb);
+
+  /* Start the page fill worker thread that will resolve page faults.
+   * This should always be the first thread started because it may
+   * have to resolve page faults in other threads
+   */
+
+#ifdef CONFIG_PAGING
+#ifndef CONFIG_CUSTOM_STACK
+  g_pgworker = task_create("pgfill", CONFIG_PAGING_DEFPRIO,
+                           CONFIG_PAGING_STACKSIZE,
+                           (main_t)pg_worker, (const char **)NULL);
+#else
+  g_pgworker = task_create("pgfill", CONFIG_PAGING_DEFPRIO,
+                           (main_t)pg_worker, (const char **)NULL);
+#endif
+  ASSERT(g_pgworker != ERROR);
+#endif
 
   /* Start the worker thread that will perform misc garbage clean-up */
 

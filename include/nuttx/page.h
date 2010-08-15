@@ -69,7 +69,8 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions -- Provided by common paging logic to architecture-
+ *                     specific logic.
  ****************************************************************************/
 
 /****************************************************************************
@@ -139,6 +140,129 @@ extern "C" {
  ****************************************************************************/
 
 EXTERN void pg_miss(void);
+
+/****************************************************************************
+ * Public Functions -- Provided by architecture-specific logic to common
+ *                     paging logic.
+ ****************************************************************************/
+ 
+/****************************************************************************
+ * Name: up_checkmapping()
+ *
+ * Description:
+ *   
+ *  The function up_checkmapping() returns an indication if the page fill
+ *  still needs to performed or not. In certain conditions, the page fault
+ *  may occur on several threads and be queued multiple times. This function
+ *  will prevent the same page from be filled multiple times.
+ *
+ * Input Parameters:
+ *   tcb - A reference to the task control block of the task that we believe
+ *         needs to have a page fill.  Architecture-specific logic can
+ *         retrieve page fault information from the architecture-specific
+ *         context information in this TCB and can consult processor resources
+ *         (page tables or TLBs or ???) to determine if the fill still needs
+ *         to be performed or not.
+ *
+ * Returned Value:
+ *   This function will return zero (OK) if the mapping is in place and
+ *   the negated errn ENXIO if the mapping is still needed.  Other errors
+ *   may also be returned but these will be interpreted as fatal error
+ *   conditions.
+ *
+ * Assumptions:
+ *   - This function is called from the normal tasking context (but with
+ *     interrupts disabled).  The implementation must take whatever actions
+ *     are necessary to assure that the operation is safe within this
+ *     context.
+ *
+ ****************************************************************************/
+
+EXTERN int up_checkmapping(FAR _TCB *tcb);
+
+/****************************************************************************
+ * Name: up_allocpage()
+ *
+ * Description:
+ *  This architecture-specific function will set aside page in memory and map
+ *  the page to its correct virtual address.  Architecture-specific context
+ *  information saved within the TCB will provide the function with the
+ *  information needed to identify the virtual miss address.
+ *
+ *  This function will return the allocated physical page address in vpage.
+ *  The size of the underlying physical page is determined by the
+ *  configuration setting CONFIG_PAGING_PAGESIZE.
+ *
+ *  NOTE:  This function must always return a page allocation. If all
+ *  available pages are in-use (the typical case), then this function will
+ *  select a page in-use, un-map it, and make it available.
+ *
+ * Input Parameters:
+ *   tcb - A reference to the task control block of the task that needs to
+ *         have a page fill.  Architecture-specific logic can retrieve page
+ *         fault information from the architecture-specific context
+ *         information in this TCB to perform the mapping.
+ *
+ * Returned Value:
+ *   This function will return zero (OK) if the allocation was successful.
+ *   A negated errno value may be returned if an error occurs.  All errors,
+ *   however, are fatal.
+ *
+ * Assumptions:
+ *   - This function is called from the normal tasking context (but with
+ *     interrupts disabled).  The implementation must take whatever actions
+ *     are necessary to assure that the operation is safe within this
+ *     context.
+ *
+ ****************************************************************************/
+
+EXTERN int up_allocpage(FAR _TCB *tcb, FAR void **vpage);
+
+/****************************************************************************
+ * Name: up_fillpage()
+ *
+ * Description:
+ *  After a page is allocated and mapped by up_allocpage(), the actual
+ *  filling of the page with data from the non-volatile, must be performed
+ *  by a separate call to the architecture-specific function, up_fillpage().
+ *  This function is non-blocking, it will start an asynchronous page fill.
+ *  The common paging logic will provide a callback function, pg_callback,
+ *  that will be called when the page fill is finished (or an error occurs).
+ *  This callback is assumed to occur from an interrupt level when the
+ *  device driver completes the fill operation.
+ *
+ * Input Parameters:
+ *   tcb - A reference to the task control block of the task that needs to
+ *         have a page fill.  Architecture-specific logic can retrieve page
+ *         fault information from the architecture-specific context
+ *         information in this TCB to perform the fill.
+ *   pg_callbck - The function to be called when the page fill is complete.
+ *
+ * Returned Value:
+ *   This function will return zero (OK) if the page fill was successfully
+ *   started (the result of the page fill is passed to the callback function
+ *   as the result argument).  A negated errno value may be returned if an
+ *   error occurs.  All errors, however, are fatal.
+ *
+ *   NOTE: -EBUSY has a special meaning. It is used internally to mean that
+ *   the callback function has not executed.  Therefore, -EBUSY should
+ *   never be provided in the result argument of pg_callback.
+ *
+ * Assumptions:
+ *   - This function is called from the normal tasking context (but
+ *     interrupts siabled).  The implementation must take whatever actions
+ *     are necessary to assure that the operation is safe within this context.
+ *   - Upon return, the caller will sleep waiting for the page fill callback
+ *     to occur.  The callback function will perform the wakeup.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PAGING_BLOCKINGFILL
+EXTERN int up_fillpage(FAR _TCB *tcb, FAR void *vpage);
+#else
+typedef void (*up_pgcallback_t)(FAR _TCB *tcb, int result);
+EXTERN int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

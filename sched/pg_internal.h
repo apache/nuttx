@@ -51,12 +51,20 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_PAGING_WORKPRIORITY
-#  define CONFIG_PAGING_WORKPRIORITY 50
+/* Supply reasonable (but probably non-optimal) default settings if
+ * configuration items are omitted.
+ */
+
+#ifndef CONFIG_PAGING_DEFPRIO
+#  define CONFIG_PAGING_DEFPRIO 50
 #endif
 
-#ifndef CONFIG_PAGING_WORKSTACKSIZE
-#  define CONFIG_PAGING_WORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
+#ifndef CONFIG_PAGING_WORKPERIOD
+#  define CONFIG_PAGING_WORKPERIOD (500*1000) /* 1/2 second */
+#endif
+
+#ifndef CONFIG_PAGING_STACKSIZE
+#  define CONFIG_PAGING_STACKSIZE  CONFIG_IDLETHREAD_STACKSIZE
 #endif
 
 #ifdef CONFIG_DISABLE_SIGNALS
@@ -73,13 +81,24 @@
 
 #ifndef __ASSEMBLY
 
-/* If is the PID of the page fill worker thread */
+/* This is the task IDof the page fill worker thread.  This value was set in
+ * os_start when the page fill worker thread was started.
+ */
 
 extern pid_t g_pgworker;
 
-/* If non-NULL, this points to the TCB of the task currently being filled */
+/* The page fill worker thread maintains a static variable called
+ * g_pendingfilltcb. If no fill is in progress, g_pendingfilltcb will be NULL.
+ * Otherwise, g_pendingfile will point to the TCB of the task which is
+ * receiving the fill that is in progess.
+ *
+ * NOTE: I think that this is the only state in which a TCB does not reside
+ * in some list.  Here is it in limbo, outside of the normally queuing while
+ * the page file is in progress.  Where here, it will be marked with
+ * TSTATE_TASK_INVALID.
+ */
 
-extern FAR _TCB *g_filltcb;
+extern FAR _TCB *g_pendingfilltcb;
 
 /****************************************************************************
  * Public Function Prototypes

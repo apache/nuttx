@@ -1,7 +1,7 @@
 ############################################################################
 # sched/Makefile
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -140,7 +140,7 @@ WORK_SRCS	= work_thread.c work_queue.c work_cancel.c
 endif
 
 ifeq ($(CONFIG_PAGING),y)
-PGFILL_SRCS	= pg_miss.c
+PGFILL_SRCS	= pg_miss.c pg_worker.c
 endif
 
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
