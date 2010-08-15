@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: July 12, 2010</p>
+      <p>Last Updated: August 14, 2010</p>
     </td>
   </tr>
 </table>
@@ -98,7 +98,8 @@
       <a href="#schedprocesstimer">4.2.3 <code>sched_process_timer()</code></a><br>
       <a href="#irqdispatch">4.2.4 <code>irq_dispatch()</code></a>
     </ul>
-    <a href="#ledsupport">4.3 LED Support</a>
+    <a href="#demandpaging">4.3 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.4 LED Support</a>
     <ul>
       <a href="#ledheaders">4.3.1 Header Files</a><br>
       <a href="#leddefinitions">4.3.2 LED Definitions</a><br>
@@ -1483,7 +1484,17 @@ The system can be re-made subsequently by just typing <code>make</code>.
   the appropriate, registered handling logic.
 </p>
 
-<h2><a name="ledsupport">4.3 LED Support</a></h2>
+<h2><a name="demandpaging">4.3 On-Demand Paging</a></h2>
+
+<p>
+  The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
+  If the platform meets certiain requirements, then NuttX can provide on-demand paging:
+  It can copy .text from the large program in non-volatile media into RAM as needed to execute a huge program from the small RAM.
+  Design and porting issues for this feature are discussed in a sepate document.
+  Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
+</p>
+
+<h2><a name="ledsupport">4.4 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
