@@ -75,11 +75,93 @@
 /****************************************************************************
  * Name: up_dataabort
  *
+ * Input parameters:
+ *   regs - The standard, ARM register save array.
+ *
+ * If CONFIG_PAGING is selected in the NuttX configuration file, then these
+ * additional input values are expected:
+ *
+ *   far - Fault address register.  On a data abort, the ARM MMU places the
+ *     miss virtual address (MVA) into the FAR register.  This is the address
+ *     of the data which, when accessed, caused the fault.
+ *   fsr - Fault status register.  On a data a abort, the ARM MMU places an
+ *     encoded four-bit value, the fault status, along with the four-bit
+ *     encoded domain number, in the data FSR
+ *
  * Description:
  *   This is the data abort exception handler. The ARM data abort exception
  *   occurs when a memory fault is detected during a data transfer.
  *
  ****************************************************************************/
+
+#ifdef CONFIG_PAGING
+void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
+{
+  FAR _TCB *tcb = (FAR _TCB *)g_readytorun.head;
+
+  /* Save the saved processor context in current_regs where it can be accessed
+   * for register dumps and possibly context switching.
+   */
+
+  current_regs = regs;
+
+  /* In the NuttX on-demand paging implementation, only the read-only, .text
+   * section is paged.  However, the ARM compiler generated PC-relative data
+   * fetches from within the .text sections.  Also, it is customary to locate
+   * read-only data (.rodata) within the same section as .text so that it
+   * does not require copying to RAM. Misses in either of these case should
+   * cause a data abort.
+   *
+   * We are only interested in data aborts due to page translations faults.
+   * Sections should already be in place and permissions should already be
+   * be set correctly (to read-only) so any other data abort reason is a
+   * fatal error.
+   */
+
+  if ((fsr & FSR_MASK) != FSR_PAGE)
+    {
+      goto segfault;
+    }
+
+  /* Check the (virtual) address of data that caused the data abort. When
+   * the exception occurred, this address was provided in the FAR register.
+   * (It has not yet been saved in the register context save area).
+   */
+ 
+  if (far < CONFIG_PAGING_PAGEDBASE || far >= CONFIG_PAGING_PAGEDEND)
+    {
+      goto segfault;
+    }
+
+  /* Save the offending data address as the fault address in the TCB of
+   * the currently task.  This fault address is also used by the prefetch
+   * abort handling; this will allow common paging logic for both
+   * prefetch and data aborts.
+   */
+
+  tcb->far = regs[REG_R15];
+
+  /* Call pg_miss() to schedule the page fill.  A consequences of this
+   * call are:
+   *
+   * (1) The currently executing task will be blocked and saved on
+   *     on the g_waitingforfill task list.
+   * (2) An interrupt-level context switch will occur so that when
+   *     this function returns, it will return to a different task,
+   *     most likely the page fill worker thread.
+   * (3) The page fill worker task has been signalled and should
+   *     execute immediately when we return from this exception.
+   */
+
+  pg_miss();
+  return;
+
+segfault:
+  lldbg("Data abort at PC: %x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
+  PANIC(OSERR_ERREXCEPTION);
+}
+
+#else /* CONFIG_PAGING */
 
 void up_dataabort(uint32_t *regs)
 {
@@ -89,45 +171,10 @@ void up_dataabort(uint32_t *regs)
 
   current_regs = regs;
 
-#ifdef CONFIG_PAGING
-  /* In the NuttX on-demand paging implementation, only the read-only, .text
-   * section is paged.  However, the ARM compiler generated PC-relative data
-   * fetches from within the .text sections.  Also, it is customary to locate
-   * read-only data (.rodata) within the same section as .text so that it
-   * does not require copying to RAM. Misses in either of these case should
-   * cause a data abort.
-   */
+  /* Crash -- possibly showing diagnost debug information. */
 
-#warning "Lots of missing logic"
-#if 0
-  /* Get the (virtual) address of instruction that caused the data abort.
-   * When the exception occurred, this address was provide in the lr register
-   * and this value was saved in the context save area as the PC at the
-   * REG_R15 index.
-   */
- 
-  if (regs[REG_R15] >= CONFIG_PAGING_PAGEDBASE &&
-      regs[REG_R15] <  CONFIG_PAGING_PAGEDEND)
-    {
-      /* Call pg_miss() to schedule the page fill.  A consequences of this
-       * call are:
-       *
-       * (1) The currently executing task will be blocked and saved on
-       *     on the g_waitingforfill task list.
-       * (2) An interrupt-level context switch will occur so that when
-       *     this function returns, it will return to a different task,
-       *     most likely the page fill worker thread.
-       * (3) The page fill worker task has been signalled and should
-       *     execute immediately when we return from this exception.
-       */
-
-      pg_miss();
-    }
-  else
-#endif
-#endif
-    {
-      lldbg("Data abort at 0x%x\n", regs[REG_PC]);
-      PANIC(OSERR_ERREXCEPTION);
-    }
+  lldbg("Data abort at %08x\n", regs[REG_PC]);
+  PANIC(OSERR_ERREXCEPTION);
 }
+
+#endif /* CONFIG_PAGING */

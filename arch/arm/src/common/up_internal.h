@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,11 @@ extern int  up_svcall(int irq, FAR void *context);
 extern int  up_hardfault(int irq, FAR void *context);
 #else
 extern void up_doirq(int irq, uint32_t *regs);
+#ifdef CONFIG_PAGING
+extern void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
+#else
 extern void up_dataabort(uint32_t *regs);
+#endif
 extern void up_prefetchabort(uint32_t *regs);
 extern void up_syscall(uint32_t *regs);
 extern void up_undefinedinsn(uint32_t *regs);

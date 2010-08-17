@@ -109,7 +109,7 @@ void up_prefetchabort(uint32_t *regs)
 
 #ifdef CONFIG_PAGING
   /* Get the (virtual) address of instruction that caused the prefetch abort.
-   * When the exception occurred, this address was provide in the lr register
+   * When the exception occurred, this address was provided in the lr register
    * and this value was saved in the context save area as the PC at the
    * REG_R15 index.
    *
@@ -120,6 +120,15 @@ void up_prefetchabort(uint32_t *regs)
   if (regs[REG_R15] >= CONFIG_PAGING_PAGEDBASE &&
       regs[REG_R15] <  CONFIG_PAGING_PAGEDEND)
     {
+      /* Save the offending PC as the fault address in the TCB of the currently
+       * executing task.  This value is, of course, already known in regs[REG_R15],
+       * but saving it in this location will allow common paging logic for both
+       * prefetch and data aborts.
+       */
+
+      FAR _TCB *tcb = (FAR _TCB *)g_readytorun.head;
+      tcb->far      = regs[REG_R15];
+
       /* Call pg_miss() to schedule the page fill.  A consequences of this
        * call are:
        *
@@ -137,7 +146,7 @@ void up_prefetchabort(uint32_t *regs)
   else
 #endif
     {
-      lldbg("Prefetch abort at 0x%x\n", regs[REG_PC]);
+      lldbg("Prefetch abort at %08x\n", regs[REG_PC]);
       PANIC(OSERR_ERREXCEPTION);
     }
 }
