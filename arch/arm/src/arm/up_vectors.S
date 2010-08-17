@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/arm/up_vectors.S
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,8 +82,8 @@ g_aborttmp:
  * Name: up_vectorirq
  *
  * Description:
- *   Interrupt excetpion. Entered in IRQ mode with spsr = SVC
- *   CPSR, lr = SVC PC
+ *   Interrupt excetpion. Entered in IRQ mode with spsr = SVC CPSR, lr = SVC PC
+ *
  ************************************************************************************/
 
 	.globl	up_vectorirq
@@ -91,7 +91,6 @@ g_aborttmp:
 up_vectorirq:
 	/* On entry, we are in IRQ mode.  We are free to use
 	 * the IRQ mode r13 and r14.
-         *
 	 */
 
 	ldr	r13, .Lirqtmp
@@ -159,7 +158,8 @@ up_vectorirq:
  * Function: up_vectorswi
  * 
  * Description:
- *   SWI interrupt. We enter the SWI in SVC mode
+ *   SWI interrupt. We enter the SWI in SVC mode.
+ *
  ************************************************************************************/
 
 	.globl	up_vectorswi
@@ -205,9 +205,10 @@ up_vectorswi:
  * Name: up_vectordata
  *
  * Description:
- *   Data abort Exception dispatcher. Give control to data
- *   abort handler.  This function is entered in ABORT mode
- *   with spsr = SVC CPSR, lr = SVC PC
+ *   This is the data abort exception dispatcher. The ARM data abort exception occurs
+ *   when a memory fault is detected during a data transfer.  This handler saves the
+ *   current processor state and gives control to data abort handler.  This function
+ *   is entered in ABORT mode with spsr = SVC CPSR, lr = SVC PC
  *
  ************************************************************************************/
 	
@@ -274,8 +275,11 @@ up_vectordata:
  * Name: up_vectorprefetch
  *
  * Description:
- *    Prefetch abort exception.  Entered in ABT mode with
- *    spsr = SVC CPSR, lr = SVC PC
+ *   This is the prefetch abort exception dispatcher. The ARM prefetch abort exception
+ *   occurs when a memory fault is detected during an an instruction fetch.  This
+ *   handler saves the current processor state and gives control to prefetch abort
+ *   handler.  This function is entered in ABT mode with spsr = SVC CPSR, lr = SVC PC.
+ *
  ************************************************************************************/
 	
 	.globl	up_vectorprefetch
@@ -341,8 +345,8 @@ up_vectorprefetch:
  * Name: up_vectorundefinsn
  *
  * Description:
- *   Undefined instruction entry exception.  Entered in
- *   UND mode, spsr = SVC  CPSR, lr = SVC PC
+ *   Undefined instruction entry exception.  Entered in UND mode, spsr = SVC  CPSR,
+ *   lr = SVC PC
  *
  ************************************************************************************/
 	
@@ -409,6 +413,7 @@ up_vectorundefinsn:
  *
  * Description:
  *   Shouldn't happen
+ *
  ************************************************************************************/
 
 	.globl	up_vectorfiq
@@ -419,10 +424,6 @@ up_vectorfiq:
 
 /************************************************************************************
  *  Name: up_interruptstack/g_userstack
- *
- * Description:
- *   Shouldn't happen
- *
  ************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
