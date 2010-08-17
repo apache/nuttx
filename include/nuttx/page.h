@@ -44,12 +44,49 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <nuttx/sched.h>
 
 #ifdef CONFIG_PAGING
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+/* CONFIG_PAGING_PAGESIZE - The size of one managed page.  This must be a
+ *   value supported by the processor's memory management unit.
+ * CONFIG_PAGING_NLOCKED - This is the number of locked pages in the memory
+ *   map.  The locked address region will then be from:
+ */
+
+#define CONFIG_PAGING_LOCKEDBASE CONFIG_DRAM_VSTART
+#define CONFIG_PAGING_LOCKEDSIZE (CONFIG_PAGING_PAGESIZE*CONFIG_PAGING_NLOCKED)
+#define CONFIG_PAGING_LOCKEDEND  (CONFIG_PAGING_LOCKEDBASE + CONFIG_PAGING_LOCKEDSIZE)
+
+/* CONFIG_PAGING_NPAGES - The number of pages in the paged region of the
+ *   memory map.  This paged region then begins and ends at:
+ */
+
+#define CONFIG_PAGING_PAGEDBASE CONFIG_PAGING_LOCKEDEND
+#define CONFIG_PAGING_PAGEDSIZE (CONFIG_PAGING_PAGESIZE*CONFIG_PAGING_NPAGES)
+#define CONFIG_PAGING_PAGEDEND  (CONFIG_PAGING_PAGEDBASE + CONFIG_PAGING_PAGEDSIZE)
+
+/* CONFIG_PAGING_DEFPRIO - The default, minimum priority of the page fill
+ *   worker thread.  The priority of the page fill work thread will be boosted
+ *   boosted dynmically so that it matches the priority of the task on behalf
+ *   of which it peforms the fill.  This defines the minimum priority that
+ *   will be used. Default: 50.
+ * CONFIG_PAGING_STACKSIZE - Defines the size of the allocated stack
+ *   for the page fill worker thread. Default: 1024.
+ * CONFIG_PAGING_BLOCKINGFILL - The architecture specific up_fillpage()
+ *   function may be blocking or non-blocking.  If defined, this setting
+ *   indicates that the up_fillpage() implementation will block until the
+ *   transfer is completed. Default:  Undefined (non-blocking).
+ * CONFIG_PAGING_TIMEOUT_TICKS - If defined, the implementation will monitor
+ *   the (asynchronous) page fill logic.  If the fill takes longer than this
+ *   number if microseconds, then a fatal error will be declared.
+ *   Default: No timeouts monitored.
+ */
 
 /****************************************************************************
  * Public Data

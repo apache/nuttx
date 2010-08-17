@@ -189,15 +189,18 @@ const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
   { &g_readytorun,           true  },  /* TSTATE_TASK_READYTORUN */
   { &g_readytorun,           true  },  /* TSTATE_TASK_RUNNING */
   { &g_inactivetasks,        false },  /* TSTATE_TASK_INACTIVE */
-  { &g_waitingforsemaphore,  true  },  /* TSTATE_WAIT_SEM */
+  { &g_waitingforsemaphore,  true  }   /* TSTATE_WAIT_SEM */
 #ifndef CONFIG_DISABLE_SIGNALS
-  { &g_waitingforsignal,     false },  /* TSTATE_WAIT_SIG */
+  ,
+  { &g_waitingforsignal,     false }  /* TSTATE_WAIT_SIG */
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
+  ,
   { &g_waitingformqnotempty, true  },  /* TSTATE_WAIT_MQNOTEMPTY */
   { &g_waitingformqnotfull,  true  }   /* TSTATE_WAIT_MQNOTFULL */
 #endif
 #ifdef CONFIG_PAGING
+  ,
   { &g_waitingforfill,       true  }   /* TSTATE_WAIT_PAGEFILL */
 #endif
 };
