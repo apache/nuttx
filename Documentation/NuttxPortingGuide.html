@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 14, 2010</p>
+      <p>Last Updated: August 16, 2010</p>
     </td>
   </tr>
 </table>
@@ -2390,6 +2390,26 @@ extern void up_ledoff(int led);
   If CONFIG_PAGING is selected, then the following also apply:
 </p>
 <ul>
+  </li>
+  <li>
+    <code>CONFIG_PAGING_PAGESIZE</code>:
+    The size of one managed page.
+    This must be a value supported by the processor's memory management unit.
+  </li>
+  <li>
+    <code>CONFIG_PAGING_NLOCKED</code>:
+    This is the number of locked pages in the memory map.
+    The locked address region will then be from <code>CONFIG_DRAM_VSTART</code> through
+    (<code>CONFIG_DRAM_VSTART</code> + <code>CONFIG_PAGING_PAGESIZE</code>*<code>CONFIG_PAGING_NLOCKED</code>)
+  </li>
+  <li>
+    <code>CONFIG_PAGING_NPAGES</code>:
+    The number of pages in the paged region of the memory map. 
+    This paged region then begins at
+    (<code>CONFIG_DRAM_VSTART</code> + <code>CONFIG_PAGING_PAGESIZE</code>*<code>CONFIG_PAGING_NLOCKED</code>)
+    and continues until (<code>CONFIG_DRAM_VSTART</code> +
+    <code>CONFIG_PAGING_PAGESIZE</code>*(<code>CONFIG_PAGING_NLOCKED</code> + <code>CONFIG_PAGING_NPAGES</code>)
+  </li>
   <li>
     <code>CONFIG_PAGING_DEFPRIO</code>:
     The default, minimum priority of the page fill worker thread.
