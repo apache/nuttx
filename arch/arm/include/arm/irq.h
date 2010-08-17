@@ -156,6 +156,16 @@ struct xcptcontext
   /* Register save area */
 
   uint32_t regs[XCPTCONTEXT_REGS];
+
+  /* Extra fault address register saved for common paging logic.  In the
+   * case of the prefetch abort, this value is the same as regs[REG_R15];
+   * For the case of the data abort, this value is the value of the fault
+   * address register (FAR) at the time of data abort exception.
+   */
+
+#ifdef CONFIG_PAGING
+  uint32_t far;
+#endif
 };
 #endif
 
