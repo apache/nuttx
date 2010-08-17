@@ -184,7 +184,6 @@ EXTERN void pg_miss(void);
  * Name: up_checkmapping()
  *
  * Description:
- *   
  *  The function up_checkmapping() returns an indication if the page fill
  *  still needs to performed or not. In certain conditions, the page fault
  *  may occur on several threads and be queued multiple times. This function
@@ -226,9 +225,15 @@ EXTERN bool up_checkmapping(FAR _TCB *tcb);
  *  The size of the underlying physical page is determined by the
  *  configuration setting CONFIG_PAGING_PAGESIZE.
  *
- *  NOTE:  This function must always return a page allocation. If all
+ *  NOTE 1: This function must always return a page allocation. If all
  *  available pages are in-use (the typical case), then this function will
  *  select a page in-use, un-map it, and make it available.
+ *
+ *  NOTE 2: Allocating and filling a page is a two step process.  up_allocpage()
+ *  allocates the page, and up_fillpage() fills it with data from some non-
+ *  volatile storage device.  This distinction is made because up_allocpage()
+ *  can probably be implemented in board-independent logic whereas up_fillpage()
+ *  probably must be implemented as board-specific logic.
  *
  * Input Parameters:
  *   tcb - A reference to the task control block of the task that needs to
@@ -263,6 +268,12 @@ EXTERN int up_allocpage(FAR _TCB *tcb, FAR void **vpage);
  *  that will be called when the page fill is finished (or an error occurs).
  *  This callback is assumed to occur from an interrupt level when the
  *  device driver completes the fill operation.
+ *
+ *  NOTE: Allocating and filling a page is a two step process.  up_allocpage()
+ *  allocates the page, and up_fillpage() fills it with data from some non-
+ *  volatile storage device.  This distinction is made because up_allocpage()
+ *  can probably be implemented in board-independent logic whereas up_fillpage()
+ *  probably must be implemented as board-specific logic.
  *
  * Input Parameters:
  *   tcb - A reference to the task control block of the task that needs to
