@@ -177,20 +177,26 @@ extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
 
 #ifdef CONFIG_ARCH_CORTEXM3
+
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
 extern int  up_svcall(int irq, FAR void *context);
 extern int  up_hardfault(int irq, FAR void *context);
-#else
+
+#else /* CONFIG_ARCH_CORTEXM3 */
+
 extern void up_doirq(int irq, uint32_t *regs);
 #ifdef CONFIG_PAGING
+extern void up_pginitialize(void);
 extern void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
-#else
+#else /* CONFIG_PAGING */
+# define up_pginitialize()
 extern void up_dataabort(uint32_t *regs);
-#endif
+#endif /* CONFIG_PAGING */
 extern void up_prefetchabort(uint32_t *regs);
 extern void up_syscall(uint32_t *regs);
 extern void up_undefinedinsn(uint32_t *regs);
-#endif
+
+#endif /* CONFIG_ARCH_CORTEXM3 */
 
 /* Defined in up_vectors.S */
 

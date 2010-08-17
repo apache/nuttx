@@ -46,6 +46,10 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_sigdeliver.c up_syscall.c up_unblocktask.c \
 		  up_undefinedinsn.c up_usestack.c
 
+ifeq ($(CONFIG_PAGING),y)
+CMN_CSRCS	+= up_pginitialize.c up_checkpaging.c up_allocpage.c
+endif
+
 CGU_ASRCS	= 
 CGU_CSRCS	= lpc313x_bcrndx.c lpc313x_clkdomain.c lpc313x_clkexten.c \
 		  lpc313x_clkfreq.c lpc313x_clkinit.c lpc313x_defclk.c \
