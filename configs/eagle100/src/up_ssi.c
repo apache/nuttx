@@ -2,7 +2,7 @@
  * configs/eagle100/src/up_ssi.c
  * arch/arm/src/board/up_ssi.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,7 +145,6 @@ void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
 
 uint8_t lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-#warning "Need to check schematic"
   ssidbg("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
