@@ -98,7 +98,7 @@ enum tstate_e
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
   TSTATE_WAIT_MQNOTEMPTY,     /* BLOCKED      - Waiting for a MQ to become not empty. */
-  TSTATE_WAIT_MQNOTFULL.      /* BLOCKED      - Waiting for a MQ to become not full. */
+  TSTATE_WAIT_MQNOTFULL,      /* BLOCKED      - Waiting for a MQ to become not full. */
 #endif
 #ifdef CONFIG_PAGING
   TSTATE_WAIT_PAGEFILL,       /* BLOCKED     - Waiting for page fill */
