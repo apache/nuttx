@@ -47,6 +47,11 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
+#ifdef CONFIG_PAGING
+#  include <nuttx/page.h>
+#  include "arm.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -139,7 +144,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * prefetch and data aborts.
    */
 
-  tcb->far = regs[REG_R15];
+  tcb->xcp.far = regs[REG_R15];
 
   /* Call pg_miss() to schedule the page fill.  A consequences of this
    * call are:

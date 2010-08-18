@@ -127,7 +127,7 @@ void up_prefetchabort(uint32_t *regs)
        */
 
       FAR _TCB *tcb = (FAR _TCB *)g_readytorun.head;
-      tcb->far      = regs[REG_R15];
+      tcb->xcp.far  = regs[REG_R15];
 
       /* Call pg_miss() to schedule the page fill.  A consequences of this
        * call are:
