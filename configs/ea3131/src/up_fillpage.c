@@ -40,10 +40,11 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
-#include <arch/nuttx/sched.h>
-#include <arch/nuttx/page.h>
+#include <nuttx/sched.h>
+#include <nuttx/page.h>
 
 #ifdef CONFIG_PAGING
 
