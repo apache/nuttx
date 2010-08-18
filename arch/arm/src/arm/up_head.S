@@ -164,26 +164,30 @@ __start:
 	teq	r0, r2
 	bne	.Lpgtableclear
 
-	/* Create identity mapping for first MB section to support this startup
-	 * logic executing out of the physical address space.  This identity
-	 * mapping will be removed by .Lvstart (see below).
+	/* Create identity mapping for first MB of the .text section to support
+	 * this startup logic executing out of the physical address space.  This
+	 * identity mapping will be removed by .Lvstart (see below).
 	 */
-
+#warning "We need to do things differently here if the .text region is smaller or if CONFIG_PAGING"
 	mksection r0, r4			/* r0=phys. base section */
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
 	add	r3, r1, r0			/* r3=flags + base */
 	str	r3, [r4, r0, lsr #18]		/* identity mapping */
 
-	/* Create a "normal" single section mapping for the first
-	 * MB of memory.  Now, we have the first 1MB mapping to
-	 * both phyical and virtual addresses.  The reset of the
-	 * SDRAM mapping will be completed in .Lvstart once we have
-	 * moved the physical mapping out of the way.
+	/* Create a virtual single section mapping for the first MB of the .text
+	 * address space. Now, we have the first 1MB mapping to both phyical and
+	 * virtual addresses.  The rest of the .text mapping will be completed in
+	 * .Lvstart once we have moved the physical mapping out of the way.
 	 */
 
 	ldr	r2, .LCvpgtable			/* r2=virt. page table */
 	mksection r0, r2			/* r0=virt. base section */
 	str	r3, [r4, r0, lsr #18]		/* identity mapping */
+
+	/* NOTE: No .data/.bss access should be attempted.  This temporary mapping
+	 * can only be assumed to cover the initial .text region.
+	 */
+
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
 	/* The following logic will set up the ARM920/ARM926 for normal operation */
@@ -316,7 +320,10 @@ __start:
 	.type	.Lvstart, %function
 .Lvstart:
 
-	/* Remove the temporary null mapping */
+	/* Remove the temporary mapping.  The following assumes that the
+	 * total RAM size is > 1Mb and extends that initial mapping to
+	 * cover additinal RAM sections.
+	 */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 	ldr	r4, .LCvpgtable			/* r4=virtual page table */
@@ -328,7 +335,7 @@ __start:
 	/* Now setup the pagetables for our normal SDRAM mappings mapped region.
 	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
 	 */
-
+#warning "We need to do things differently here if the .text region is smaller or if CONFIG_PAGING"
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
 	add	r3, r3, r1			/* r3=flags + base */
 
@@ -347,6 +354,19 @@ __start:
 	add	r3, r3, #SECTION_SIZE
 	str	r3, [r0], #4
 	.endr
+
+	/* If we are executing from RAM with a fixed page configuration, then
+	 * we can assume that the above contiguous mapping included all of the
+	 * .text, .data, .bss, heap, etc. But if we are executing from FLASH,
+	 * then the RAM area is probably in a separate physical address region
+	 * and will require a separate mapping.  Or, if we are supporting on-demand
+	 * paging of the .text region, then the RAM-based .data/.bss/heap section
+	 * will still probably be located in a separate (virtual) address region.
+	 */
+
+#if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_PAGING)
+# error "Logic not implemented"
+#endif
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
 	/* Zero BSS and set up the stack pointer */
@@ -362,6 +382,19 @@ __start:
 	cmp     r0, r1		       		/* Clear up to _bss_end_ */
 	strcc	fp, [r0],#4
 	bcc	.Lbssinit
+
+	/* If the .data section is in a separate, unitialized address space,
+	 * then we will also need to copy the initial values of of the .data
+	 * section from the .text region into that .data region.  This would
+	 * be the case if we are executing from FLASH and the .data section
+	 * lies in a different physical address region OR if we are support
+	 * on-demand paging and the .data section lies in a different virtual
+	 * address region.
+	 */
+
+#if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_PAGING)
+# error "Logic not implemented"
+#endif
 
 	/* Perform early C-level, platform-specific initialization */
 
