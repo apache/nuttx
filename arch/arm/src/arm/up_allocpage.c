@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/sched.h>
@@ -105,7 +106,7 @@
  *
  ****************************************************************************/
 
-int up_allocpage(FAR _TCB *tcb, FAR void **vpage);
+int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
 {
 # warning "Not implemented"
   return -ENOSYS;
