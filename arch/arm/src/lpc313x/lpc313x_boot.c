@@ -269,7 +269,7 @@ static void up_copyvectorblock(void)
 
 void up_boot(void)
 {
-  /* __start provided the basic MMU mappings for SDRAM.  Now provide mappings for all
+  /* __start provided the basic MMU mappings for SRAM.  Now provide mappings for all
    * IO regions (Including the vector region).
    */
 
