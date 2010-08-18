@@ -1209,3 +1209,5 @@
 	* sched/pg_*.c and *.c and include/nuttx/page.h - Implemented the
 	  common, core logic for on-demand paging. See
 	  http://www.nuttx.org/NuttXDemandPaging.html for details.
+	* drivers/usbdev/usbdev_serial.c - Correct compilation errors that
+	  occur if CONFIG_USBDEV_DUALSPEED is selected.

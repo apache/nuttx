@@ -318,7 +318,7 @@ static void    usbclass_freereq(FAR struct usbdev_ep_s *ep,
 
 static int     usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 #ifdef CONFIG_USBDEV_DUALSPEED
-static void    usbclass_mkepbulkdesc(const struct usb_epdesc *indesc,
+static void    usbclass_mkepbulkdesc(const struct usb_epdesc_s *indesc,
                  uint16_t mxpacket, struct usb_epdesc_s *outdesc);
 static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type);
 #else
@@ -864,7 +864,7 @@ static int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static inline void usbclass_mkepbulkdesc(const FAR struct usb_epdesc *indesc,
+static inline void usbclass_mkepbulkdesc(const FAR struct usb_epdesc_s *indesc,
                                          uint16_t mxpacket,
                                          FAR struct usb_epdesc_s *outdesc)
 {
@@ -1054,7 +1054,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
   /* Configure the IN bulk endpoint */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  if ((priv->usbdev->speed == USB_SPEED_HIGH)
+  if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
       bulkmxpacket = 512;
     }
