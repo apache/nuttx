@@ -193,7 +193,17 @@
                                         /* Bits 11:9:  Should be zero */
 #define PMD_FINE_TEX_MASK   0xfffff000  /* Bits 31:12: v5, Physical page */
 
-/* Level 2 Table Descriptor (PTE).  -- All tables */
+/* Level 2 Table Descriptor (PTE).  A section descriptor provides the base address
+ * of a 1MB block of memory. The page table descriptors provide the base address of
+ * a page table that contains second-level descriptors. There are two sizes of page
+ * table:
+ *   - Coarse page tables have 256 entries, splitting the 1MB that the table
+ *     describes into 4KB blocks
+ *   - Fine/tiny page tables have 1024 entries, splitting the 1MB that the table
+ *     describes into 1KB blocks.
+ *
+ * The following definitions apply to all L2 tables:
+ */
 
 #define PTE_TYPE_MASK       (3 << 0)    /* Bits: 1:0:  Type of mapping */
 #define PTE_TYPE_FAULT      (0 << 0)    /*   None */
@@ -226,7 +236,9 @@
 #define PTE_SMALL_AP_URW_SRW (0xff << 4)
 #define PTE_SMALL_TEX_MASK   0xfffff000  /* Bits: 31:12: Physical page */
 
-/* Tiny page -- 1Kb */
+#define PTE_SMALL_NPAGES     256         /* 256 Coarse PTE's per section */
+
+/* Fine/Tiny page -- 1Kb */
 
                                         /* Bits: 1:0:  Type of mapping */
                                         /* Bits: 3:2:  Bufferable/cacheable */
@@ -237,6 +249,8 @@
 #define PTE_EXT_AP_URW_SRW   (3 << 4)
                                         /* Bits: 9:6:  Should be zero */
 #define PTE_TINY_TEX_MASK    0xfffffc00 /* Bits: 31:10: Physical page */
+
+#define PTE_TINY_NPAGES      1024        /* 1024 Tiny PTE's per section */
 
 /* Default MMU flags for memory and IO */
 
@@ -253,9 +267,11 @@
 
 #define SECTION_SIZE          (1 << 20)   /* 1Mb */
 
-/* We place the page tables 16K below the beginning of .text.  The
- * following value is assume to be the (virtual) start address of
- * .text.
+/* CP15 register c2 contains a pointer to the base address of a paged table in
+ * physical memory.  Only bits 14-31 of the page table address is retained there;
+ * The full 30-bit address is formed by ORing in bits 2-13 or the virtual address
+ * (MVA).  As a consequence, the page table must be aligned to a 16Kb address in
+ * physical memory and could require up to 16Kb of memory.
  */
 
 #define PGTABLE_SIZE          0x00004000

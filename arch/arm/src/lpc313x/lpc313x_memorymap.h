@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc313x/chip.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 
 /* LPC313X Physical (unmapped) Memory Map */
 
+#define LPC313X_FIRST_PSECTION         0x00000000 /* Beginning of the physical address space */
 #define LPC313X_SHADOWSPACE_PSECTION   0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
                                                   /* 0x00001000-0xff027fff: Reserved */
 #define LPC313X_INTSRAM_PSECTION       0x11028000 /*                        Internal SRAM 0+1 192Kb */
@@ -78,6 +79,12 @@
                                                   /* 0x60001000-0x6fffffff: Reserved */
 #define LPC313X_NAND_PSECTION          0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
                                                   /* 0x70000800-0xffffffff: Reserved */
+#ifdef CONDFIG_LPC313X_EXTNAND                    /* End of the physical address space */
+#  define LPC313X_LAST_PSECTION        (LPC313X_NAND_PSECTION + (1 << 20))
+#else
+#  define LPC313X_LAST_PSECTION        (LPC313X_INTC_PSECTION + (1 << 20))
+#endif
+
 /* APB0-4 Domain Offsets */
 
 #define LPC313X_APB0_EVNTRTR_OFFSET    0x00000000 /* Event Router */
@@ -204,6 +211,7 @@
  */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
+# defined LPC313X_FIRST_VSECTION       0x00000000 /* Beginning of the virtual address space */
 #  define LPC313X_SHADOWSPACE_VSECTION 0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
 #  define LPC313X_INTSRAM_VSECTION     0x11028000 /*                        Internal SRAM 96Kb-192Kb */
 #    define LPC313X_INTSRAM0_VADDR     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
@@ -224,6 +232,12 @@
 #  define LPC313X_EXTSDRAM0_VSECTION   0x30000000 /* 0x30000000-0x37ffffff: External SDRAM 0 128Mb */
 #  define LPC313X_INTC_VSECTION        0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
 #  define LPC313X_NAND_VSECTION        0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
+#
+#  ifdef CONDFIG_LPC313X_EXTNAND                  /* End of the virtual address space */
+#    define LPC313X_LAST_VSECTION      (LPC313X_NAND_VSECTION + (1 << 20))
+#  else
+#    define LPC313X_LAST_VSECTION      (LPC313X_INTC_VSECTION + (1 << 20))
+#  endif
 #endif
 
 /* The boot logic will create a temporarily mapping based on where NuttX is
@@ -304,17 +318,17 @@
  * normal operation). We will reuse this memory for coarse page tables as follows:
  */
 
-#define PGTABLE_COARSE_BASE_PADDR   (PGTABLE_BASE_PADDR+0x00000800)
-#define PGTABLE_COARSE_END_PADDR    (PGTABLE_BASE_PADDR+0x00003000)
-#define PTTABLE_PERIPHERALS_PADDR   (PGTABLE_BASE_PADDR+0x00003000)
+#define PGTABLE_COARSE_POFFSET      ((LPC313X_LAST_PSECTION >> 20) << 2)
+#define PGTABLE_COARSE_BASE_PADDR   (PGTABLE_BASE_PADDR+PGTABLE_COARSE_POFFSET)
+#define PGTABLE_COARSE_END_PADDR    (PGTABLE_BASE_PADDR+0x00004000)
 #define PGTABLE_END_PADDR           (PGTABLE_BASE_PADDR+0x00004000)
 
-#define PGTABLE_COARSE_BASE_VADDR   (PGTABLE_BASE_VADDR+0x00000800)
-#define PGTABLE_COARSE_END_VADDR    (PGTABLE_BASE_VADDR+0x00003000)
-#define PTTABLE_PERIPHERALS_VADDR   (PGTABLE_BASE_VADDR+0x00003000)
+#define PGTABLE_COARSE_VOFFSET      ((LPC313X_LAST_VSECTION >>20) << 2)
+#define PGTABLE_COARSE_BASE_VADDR   (PGTABLE_BASE_VADDR+PGTABLE_COARSE_VOFFSET)
+#define PGTABLE_COARSE_END_VADDR    (PGTABLE_BASE_VADDR+0x00004000)
 #define PGTABLE_END_VADDR           (PGTABLE_BASE_VADDR+0x00004000)
 
-#define PGTBALE_COARSE_TABLE_SIZE   (4*256)
+#define PGTABLE_COARSE_TABLE_SIZE   (4*256)
 #define PGTABLE_COARSE_ALLOC        (PGTABLE_COARSE_END_VADDR-PGTABLE_COARSE_BASE_VADDR)
 #define PGTABLE_NCOARSE_TABLES      (PGTABLE_COARSE_SIZE / PGTBALE_COARSE_TABLE_ALLOC)
 
