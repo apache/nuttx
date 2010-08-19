@@ -54,22 +54,60 @@
 
 /* Configuration ************************************************************/
 /* CONFIG_PAGING_PAGESIZE - The size of one managed page.  This must be a
- *   value supported by the processor's memory management unit.
- * CONFIG_PAGING_NLOCKED - This is the number of locked pages in the memory
- *   map.  The locked address region will then be from:
+ *   value supported by the processor's memory management unit.  The
+ *   following may need to be extended to support additional page sizes at
+ *   some point.
  */
 
-#define CONFIG_PAGING_LOCKEDBASE CONFIG_DRAM_VSTART
-#define CONFIG_PAGING_LOCKEDSIZE (CONFIG_PAGING_PAGESIZE*CONFIG_PAGING_NLOCKED)
-#define CONFIG_PAGING_LOCKEDEND  (CONFIG_PAGING_LOCKEDBASE + CONFIG_PAGING_LOCKEDSIZE)
+#if CONFIG_PAGING_PAGESIZE == 1024
+#  define PAGESIZE                 1024
+#  define PAGESHIFT                10
+#  define PAGEMASK                 0x000003ff
+#elif CONFIG_PAGING_PAGESIZE == 4096
+#  define PAGESIZE                 4096
+#  define PAGESHIFT                12
+#  define PAGEMASK                 0x00000fff
+#else
+#  error "Need extended definitions for CONFIG_PAGING_PAGESIZE"
+#endif
+
+/* Alignment macros */
+
+#define PG_ALIGNDOWN(addr)         ((addr) & ~PAGEMASK)
+#define PG_ALIGNUP(addr)           (((addr) + PAGEMASK) & ~PAGEMASK)
+
+/* CONFIG_PAGING_NLOCKED - This is the number of locked pages in the memory
+ *   map.  The size of locked address region will then be:
+ */
+
+#define PG_LOCKEDSIZE              (CONFIG_PAGING_NLOCKED << PAGESHIFT)
+
+/* PG_LOCKEDBASE - May be defined to determine the base address
+ * of the locked page regions (lowest in memory).  If PG_LOCKEDBASE
+ * is not defined, it will be set to CONFIG_DRAM_VSTART (i.e., assuming that
+ * the base address of the locked region is at the virtual address of the
+ * beginning of RAM).
+ */
+
+#ifdef CONFIG_PAGING_LOCKEDBASE
+#  define PG_LOCKEDBASE            CONFIG_PAGING_LOCKEDBASE
+#else
+#  define PG_LOCKEDBASE            CONFIG_DRAM_VSTART
+#endif
+
+#define PG_LOCKEDEND               (PG_LOCKEDBASE + PG_LOCKEDSIZE)
+
+#if (PG_LOCKEDBASE & PAGEMASK) != 0
+#  error "Base address of the locked region is not page aligned"
+#endif
 
 /* CONFIG_PAGING_NPAGES - The number of pages in the paged region of the
  *   memory map.  This paged region then begins and ends at:
  */
 
-#define CONFIG_PAGING_PAGEDBASE CONFIG_PAGING_LOCKEDEND
-#define CONFIG_PAGING_PAGEDSIZE (CONFIG_PAGING_PAGESIZE*CONFIG_PAGING_NPAGES)
-#define CONFIG_PAGING_PAGEDEND  (CONFIG_PAGING_PAGEDBASE + CONFIG_PAGING_PAGEDSIZE)
+#define PG_PAGEDSIZE               (CONFIG_PAGING_NPAGES << PAGESHIFT)
+#define PG_PAGEDBASE               PG_LOCKEDEND
+#define PG_PAGEDEND                (PG_PAGEDBASE + PG_PAGEDSIZE)
 
 /* CONFIG_PAGING_DEFPRIO - The default, minimum priority of the page fill
  *   worker thread.  The priority of the page fill work thread will be boosted

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_head.S
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 #include "up_arch.h"
 
 /**********************************************************************************
- * Conditional Compilation
+ * Configuration
  **********************************************************************************/
 
 #undef ALIGNMENT_TRAP
@@ -94,22 +94,33 @@
  * Definitions
  ****************************************************************************/
 
-/* EXE_NSECTIONS determines the number of 1Mb pages to map for the executable
- * address region.  This is based on CONFIG_DRAM_SIZE.  For most ARM9
- * architectures, CONFIG_DRAM_SIZE describes the size of installed SDRAM.
+/* RX_NSECTIONS determines the number of 1Mb sections to map for the
+ * Read/eXecute address region.  This is based on CONFIG_DRAM_SIZE.  For most
+ * ARM9 architectures, CONFIG_DRAM_SIZE describes the size of installed SDRAM.
  * But for other architectures, this might refer to the size of FLASH or
  * SRAM regions. (bad choice of naming).
  */
 
-#define EXE_NSECTIONS ((CONFIG_DRAM_SIZE+0x000fffff) >> 20)
+#define RX_NSECTIONS ((CONFIG_DRAM_SIZE+0x000fffff) >> 20)
+
+/* If CONFIG_PAGING is defined, then
+ * - RX_NPAGES determines the number of pages of size PAGESIZE that
+ *   are required to span the locked, Read/eXecute .text region.
+ * - RW_NPAGES determines the number of pages of size PAGESIZE this
+ *   are required to span the Read/Write data region.
+ */
+
+#ifdef CONFIG_PAGING
+#  define RX_NPAGES  CONFIG_PAGING_LOCKEDPAGES
+#endif
 
 /****************************************************************************
  * Assembly Macros
  ****************************************************************************/
 
-/* Since the page table is closely related to the NuttX base
- * address, we can convert the page table base address to the
- * base address of the section containing both.
+/* Since the page table is closely related to the NuttX base address, we can
+ * convert the page table base address to the base address of the section
+ * containing both.
  */
 
 	.macro	mksection, section, pgtable
@@ -168,7 +179,7 @@ __start:
 	 * this startup logic executing out of the physical address space.  This
 	 * identity mapping will be removed by .Lvstart (see below).
 	 */
-#warning "We need to do things differently here if the .text region is smaller or if CONFIG_PAGING"
+
 	mksection r0, r4			/* r0=phys. base section */
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
 	add	r3, r1, r0			/* r3=flags + base */
@@ -335,7 +346,7 @@ __start:
 	/* Now setup the pagetables for our normal SDRAM mappings mapped region.
 	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
 	 */
-#warning "We need to do things differently here if the .text region is smaller or if CONFIG_PAGING"
+
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
 	add	r3, r3, r1			/* r3=flags + base */
 
@@ -346,11 +357,11 @@ __start:
 	add	r0, r0, #(NUTTX_START_VADDR & 0x00f00000) >> 18
 	str	r3, [r0], #4
 
-	/* Now map the remaining EXE_NSECTIONS-1 sections of the executable
+	/* Now map the remaining RX_NSECTIONS-1 sections of the executable
 	 * memory region.
 	 */
 
-	.rept	EXE_NSECTIONS-1
+	.rept	RX_NSECTIONS-1
 	add	r3, r3, #SECTION_SIZE
 	str	r3, [r0], #4
 	.endr

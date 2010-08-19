@@ -117,8 +117,7 @@ void up_prefetchabort(uint32_t *regs)
    * virtual addresses.
    */
 
-  if (regs[REG_R15] >= CONFIG_PAGING_PAGEDBASE &&
-      regs[REG_R15] <  CONFIG_PAGING_PAGEDEND)
+  if (regs[REG_R15] >= PG_PAGEDBASE && regs[REG_R15] < PG_PAGEDEND)
     {
       /* Save the offending PC as the fault address in the TCB of the currently
        * executing task.  This value is, of course, already known in regs[REG_R15],
