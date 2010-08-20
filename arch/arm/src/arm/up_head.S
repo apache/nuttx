@@ -182,16 +182,14 @@ __start:
 #ifdef CONFIG_PAGING
 	/* Populate the L1 table for the locked and paged text regions */
 
- 	ldr	r0, =PG_LOCKED_PBASE
- 	ldr	r1, =PG_TEXT_NPAGES
-	ldr	r2, =MMU_L1_TEXTFLAGS
+	adr	r0, .Ltxtspan
+	ldmia	r0, {r0, r1, r2, r3}
  	pg_span r0, r1, r2, r3, r4
 
 	/* Populate the L2 table for the locked text region only */
 
- 	ldr	r0, =PG_LOCKED_PBASE
- 	ldr	r1, =CONFIG_PAGING_NLOCKED
-	ldr	r2, =MMU_L2_TEXTFLAGS
+	adr	r0, .Ltxtmap
+	ldmia	r0, {r0, r1, r2, r3}
  	pg_map r0, r1, r2, r3, r4
  #else
 	/* Create a virtual single section mapping for the first MB of the .text
@@ -355,20 +353,18 @@ __start:
 #if defined(CONFIG_PAGING)
 	/* Populate the L1 table for the data regions */
 
- 	ldr	r0, =PG_PAGED_PBASE
- 	ldr	r1, =PG_DATA_NPAGED
-	ldr	r2, =MMU_L1_DATAFLAGS
+	adr	r0, .Ldatamap
+	ldmia	r0, {r0, r1, r2, r3}
  	pg_span r0, r1, r2, r3, r4
 
 	/* Populate the L2 table for the data region */
 
- 	ldr	r0, =PG_PAGED_PBASE
- 	ldr	r1, =PG_DATA_NPAGED
-	ldr	r2, =MMU_L2_DATAFLAGS
- 	pg_map r0, r1, r2, r3, r4
+	adr	r0, .Ldatamap
+	ldmia	r0, {r0, r1, r2, r3, r4}
+ 	pg_map r0, r1, r2, r4, r3
 
 #elif defined(CONFIG_BOOT_RUNFROMFLASH)
-# error "Logic not implemented"
+#  error "Logic not implemented"
 #else
 	/* Now setup the pagetables for our normal SDRAM mappings mapped region.
 	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
@@ -440,7 +436,7 @@ __start:
 	mov	lr, #0
 	b	os_start
 
-	/* Variables:
+	/* Text-section constants:
 	 *
 	 *   _sbss is the start of the BSS region (see ld.script)
 	 *   _ebss is the end of the BSS regsion (see ld.script)
@@ -454,7 +450,30 @@ __start:
 	.long	_sbss
 	.long	_ebss
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+
+#ifdef CONFIG_PAGING
+.Ltxtspan:
+	.long	PG_L2_BASE_PADDR
+	.long	PG_LOCKED_PBASE
+	.long	PG_TEXT_NPAGES
+	.long	MMU_L1_TEXTFLAGS
+
+.Ltxtmap:
+	.long	PG_L2_BASE_PADDR
+	.long	PG_LOCKED_PBASE
+	.long	CONFIG_PAGING_NLOCKED
+	.long	MMU_L2_TEXTFLAGS
+
+.Ldatamap:
+	.long	PG_L2_DATA_PADDR
+	.long	PG_DATA_PBASE
+	.long	PG_DATA_NPAGED
+	.long	MMU_L1_DATAFLAGS
+	.long	MMU_L2_DATAFLAGS
+ #endif
 	.size	.Lvstart, .-.Lvstart
+
+	 /* Data section variables */
 
 	/* This global variable is unsigned long g_heapbase and is
 	 * exported from here only because of its coupling to .Linitparms

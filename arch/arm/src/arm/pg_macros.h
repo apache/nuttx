@@ -84,6 +84,10 @@
 #  endif
 
 #define PT_SIZE (PTE_NPAGES * 4)
+
+/* We position the data section PTE's just after the text section PTE's */
+
+#define PG_L2_DATA_PADDR       (PG_L2_BASE_PADDR + 4*PG_TEXT_NPAGES)
 #endif /* CONFIG_PAGING */
 
 /****************************************************************************
@@ -100,20 +104,22 @@
  *   written. This macro is used when CONFIG_PAGING is enable.  This case,
  *   it is used asfollows:
  *
- *	ldr	r0, =PG_LOCKED_PBASE
- *	ldr	r1, =CONFIG_PAGING_NLOCKED
- *      ldr	r2, =MMUFLAGS
+ *	ldr	r0, =PG_L2_BASE_PADDR
+ *	ldr	r1, =PG_LOCKED_PBASE
+ *	ldr	r2, =CONFIG_PAGING_NLOCKED
+ *      ldr	r3, =MMUFLAGS
  *	pg_map r0, r1, r2, r3, r4
  *
  * Inputs:
+ *   l2 - Physical start address in the L2 page table (modified)
  *   paddr - The physical address of the start of the region to span. Must
  *            be aligned to 1Mb section boundaries (modified)
  *   npages - Number of pages to write in the section (modified)
  *   mmuflags - L2 MMU FLAGS
  *
- * Scratch registers (modified): tmp1, tmp2
- *   tmp1 - Physical address in the L2 page table.
- *   tmp2 - scratch
+ * Scratch registers (modified): tmp
+ *   l2  - Physical address in the L2 page table.
+ *   tmp - scratch
  *
  * Assumptions:
  * - The MMU is not yet enabled
@@ -123,31 +129,25 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	pg_map, paddr, npages, mmuflags, tmp1, tmp2
-
-	/* tmp1 = Physical address of the start of the L2 page table
-	 * tmp2 = MMU flags
-	 */
-
-	ldr	\tmp1, =PG_L2_BASE_PADDR
+	.macro	pg_map, paddr, npages, mmuflags, l2, tmp
 	b	2f
 1:
-	/* Write the one L2 entries.  First,  get tmp2 = (paddr | mmuflags),
+	/* Write the one L2 entries.  First,  get tmp = (paddr | mmuflags),
 	 * the value to write into the L2 PTE
 	 */
 
-	orr	\tmp2, \paddr, \mmuflags
+	orr	\tmp, \paddr, \mmuflags
 
 	/* Write value into table at the current table address */
 
-	str	\tmp2, [\tmp1], #4
+	str	\tmp, [\l2], #4
 
 	/* Update the physical addresses that will correspond to the next
 	 * table entry.
 	 */
 
 	add	\paddr, \paddr, #CONFIG_PAGING_PAGESIZE
-	add	\tmp1, \tmp1, #4
+	add	\l2, \l2, #4
 
 	/* Decrement the number of pages written */
 
@@ -169,23 +169,25 @@
  *   macro is used when CONFIG_PAGING is enable.  This case, it is used as
  *   follows:
  *
- *	ldr	r0, =PG_LOCKED_PBASE
- *	ldr	r1, =(CONFIG_PAGING_NLOCKED+CONFIG_PAGING_NPAGES)
- *      ldr	r2, =MMU_FLAGS
+ *	ldr	r0, =PG_L2_BASE_PADDR
+ *	ldr	r1, =PG_LOCKED_PBASE
+ *	ldr	r2, =(CONFIG_PAGING_NLOCKED+CONFIG_PAGING_NPAGES)
+ *      ldr	r3, =MMU_FLAGS
  *	pg_span r0, r1, r2, r3, r4
  *
  * Inputs (unmodified unless noted):
+ *   l2 - Physical start address in the L2 page table (modified)
  *   addr - The virtual address of the start of the region to span. Must
  *     be aligned to 1Mb section boundaries (modified)
  *   npages - Number of pages to required to span that memory region (modified)
  *   mmuflags - L1 MMU flags to use
  *
  * Scratch registers (modified):
- *   addr, npages, tmp1, tmp2
- *   addr   - Physical address in the L1 page table.
+ *   addr, npages, tmp
+ *   l2  - L2 page table physical address
+ *   addr - Physical address in the L1 page table.
  *   npages - The number of pages remaining to be accounted for
- *   tmp1   - L2 page table physical address
- *   tmp2   - scratch
+ *   tmp - scratch
  *
  * Return:
  *   Nothing of interest.
@@ -197,36 +199,32 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	pg_span, addr, npages, mmuflags, tmp1, tmp2
-
-	/* tmp1 = Physical address of the start of the L2 page table */
-
-	ldr	\tmp1, =PG_L2_BASE_PADDR
+	.macro	pg_span, l2, addr, npages, mmuflags, tmp
 
 	/* Get addr = the L1 page table address coresponding to the virtual
 	 * address of the start of memory region to be mapped.
 	 */
 
-   	ldr	\tmp2, =PGTABLE_BASE_PADDR
+   	ldr	\tmp, =PGTABLE_BASE_PADDR
 	lsr	\addr, \addr, #20
-	add	\addr, \tmp2, \addr, lsl #2
+	add	\addr, \tmp, \addr, lsl #2
 	b	2f
 1:
 	/* Write the L1 table entry that refers to this (unmapped) coarse page
 	 * table.
 	 *
-	 * tmp2 = (paddr | mmuflags), the value to write into the page table
+	 * tmp = (paddr | mmuflags), the value to write into the page table
 	 */
 
-	orr	\tmp2, \tmp1, \mmuflags
+	orr	\tmp, \l2, \mmuflags
 
 	/* Write the value into the L1 table at the correct offset. */
 	
-	str	\tmp2, [\addr], #4
+	str	\tmp, [\addr], #4
 
 	/* Update the L2 page table address for the next L1 table entry. */
 
-	add	\tmp1, \tmp1, #PT_SIZE  /* Next L2 page table start paddr */
+	add	\l2, \l2, #PT_SIZE  /* Next L2 page table start paddr */
 
 	/* Update the number of pages that we have account for (with
 	 * non-mappings
