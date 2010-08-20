@@ -44,6 +44,11 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#ifdef CONFIG_PAGING
+#  include <nuttx/page.h>
+#  include "pg_macros.h"
+#endif
+
 /**********************************************************************************
  * Configuration
  **********************************************************************************/
@@ -102,17 +107,6 @@
  */
 
 #define RX_NSECTIONS ((CONFIG_DRAM_SIZE+0x000fffff) >> 20)
-
-/* If CONFIG_PAGING is defined, then
- * - RX_NPAGES determines the number of pages of size PAGESIZE that
- *   are required to span the locked, Read/eXecute .text region.
- * - RW_NPAGES determines the number of pages of size PAGESIZE this
- *   are required to span the Read/Write data region.
- */
-
-#ifdef CONFIG_PAGING
-#  define RX_NPAGES  CONFIG_PAGING_LOCKEDPAGES
-#endif
 
 /****************************************************************************
  * Assembly Macros
@@ -185,6 +179,21 @@ __start:
 	add	r3, r1, r0			/* r3=flags + base */
 	str	r3, [r4, r0, lsr #18]		/* identity mapping */
 
+#ifdef CONFIG_PAGING
+	/* Populate the L1 table for the locked and paged text regions */
+
+ 	ldr	r0, =PG_LOCKED_PBASE
+ 	ldr	r1, =PG_TEXT_NPAGES
+	ldr	r2, =MMU_L1_TEXTFLAGS
+ 	pg_span r0, r1, r2, r3, r4
+
+	/* Populate the L2 table for the locked text region only */
+
+ 	ldr	r0, =PG_LOCKED_PBASE
+ 	ldr	r1, =CONFIG_PAGING_NLOCKED
+	ldr	r2, =MMU_L2_TEXTFLAGS
+ 	pg_map r0, r1, r2, r3, r4
+ #else
 	/* Create a virtual single section mapping for the first MB of the .text
 	 * address space. Now, we have the first 1MB mapping to both phyical and
 	 * virtual addresses.  The rest of the .text mapping will be completed in
@@ -198,7 +207,7 @@ __start:
 	/* NOTE: No .data/.bss access should be attempted.  This temporary mapping
 	 * can only be assumed to cover the initial .text region.
 	 */
-
+#endif
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
 	/* The following logic will set up the ARM920/ARM926 for normal operation */
@@ -343,6 +352,24 @@ __start:
 	mov	r0, #0				/* flags + base = 0 */
 	str	r0, [r4, r3, lsr #18]		/* Undo identity mapping */
 
+#if defined(CONFIG_PAGING)
+	/* Populate the L1 table for the data regions */
+
+ 	ldr	r0, =PG_PAGED_PBASE
+ 	ldr	r1, =PG_DATA_NPAGED
+	ldr	r2, =MMU_L1_DATAFLAGS
+ 	pg_span r0, r1, r2, r3, r4
+
+	/* Populate the L2 table for the data region */
+
+ 	ldr	r0, =PG_PAGED_PBASE
+ 	ldr	r1, =PG_DATA_NPAGED
+	ldr	r2, =MMU_L2_DATAFLAGS
+ 	pg_map r0, r1, r2, r3, r4
+
+#elif defined(CONFIG_BOOT_RUNFROMFLASH)
+# error "Logic not implemented"
+#else
 	/* Now setup the pagetables for our normal SDRAM mappings mapped region.
 	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
 	 */
@@ -374,9 +401,6 @@ __start:
 	 * paging of the .text region, then the RAM-based .data/.bss/heap section
 	 * will still probably be located in a separate (virtual) address region.
 	 */
-
-#if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_PAGING)
-# error "Logic not implemented"
 #endif
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 

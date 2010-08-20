@@ -252,7 +252,7 @@
 
 #define PTE_TINY_NPAGES      1024        /* 1024 Tiny PTE's per section */
 
-/* Default MMU flags for memory and IO */
+/* Default MMU flags for RAM memory, IO, vector region */
 
 #define MMU_MEMFLAGS \
   (PMD_TYPE_SECT|PMD_SECT_WB|PMD_BIT4|PMD_SECT_AP_WRITE|PMD_SECT_AP_READ)

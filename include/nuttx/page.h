@@ -77,37 +77,73 @@
 #define PG_ALIGNUP(addr)           (((addr) + PAGEMASK) & ~PAGEMASK)
 
 /* CONFIG_PAGING_NLOCKED - This is the number of locked pages in the memory
- *   map.  The size of locked address region will then be:
+ * map.  The size of locked address region will then be:
  */
 
-#define PG_LOCKEDSIZE              (CONFIG_PAGING_NLOCKED << PAGESHIFT)
+#define PG_LOCKED_SIZE             (CONFIG_PAGING_NLOCKED << PAGESHIFT)
 
-/* PG_LOCKEDBASE - May be defined to determine the base address
- * of the locked page regions (lowest in memory).  If PG_LOCKEDBASE
- * is not defined, it will be set to CONFIG_DRAM_VSTART (i.e., assuming that
- * the base address of the locked region is at the virtual address of the
- * beginning of RAM).
+/* CONFIG_PAGING_LOCKED_P/VBASE - May be defined to determine the base
+ * address of the locked page regions (lowest in memory).  If both are not
+ * not defined, then this logic will be set to then to CONFIG_DRAM_START
+ * and CONFIG_DRAM_VSTART (i.e., assuming that the base address of the
+ * locked region is at the virtual address of the beginning of RAM).
  */
 
-#ifdef CONFIG_PAGING_LOCKEDBASE
-#  define PG_LOCKEDBASE            CONFIG_PAGING_LOCKEDBASE
+#if defined(CONFIG_PAGING_LOCKED_PBASE) && defined(CONFIG_PAGING_LOCKED_VBASE)
+#  define PG_LOCKED_PBASE          CONFIG_PAGING_LOCKED_PBASE
+#  define PG_LOCKED_VBASE          CONFIG_PAGING_LOCKED_VBASE
 #else
-#  define PG_LOCKEDBASE            CONFIG_DRAM_VSTART
+#  define PG_LOCKED_PBASE          CONFIG_DRAM_START
+#  define PG_LOCKED_VBASE          CONFIG_DRAM_VSTART
 #endif
 
-#define PG_LOCKEDEND               (PG_LOCKEDBASE + PG_LOCKEDSIZE)
+#define PG_LOCKED_PEND             (PG_LOCKED_PBASE + PG_LOCKED_SIZE)
+#define PG_LOCKED_VEND             (PG_LOCKED_VBASE + PG_LOCKED_SIZE)
 
-#if (PG_LOCKEDBASE & PAGEMASK) != 0
+#if (PG_LOCKED_PBASE & PAGEMASK) != 0 || (PG_LOCKED_VBASE & PAGEMASK) != 0
 #  error "Base address of the locked region is not page aligned"
 #endif
 
-/* CONFIG_PAGING_NPAGES - The number of pages in the paged region of the
- *   memory map.  This paged region then begins and ends at:
+/* CONFIG_PAGING_NPAGED - This is the number of paged pages in the memory
+ * map.  The size of paged address region will then be:
  */
 
-#define PG_PAGEDSIZE               (CONFIG_PAGING_NPAGES << PAGESHIFT)
-#define PG_PAGEDBASE               PG_LOCKEDEND
-#define PG_PAGEDEND                (PG_PAGEDBASE + PG_PAGEDSIZE)
+#define PG_PAGED_SIZE              (CONFIG_PAGING_NPAGED << PAGESHIFT)
+
+/* This positions the paging Read-Only text section */
+
+#define PG_PAGED_PBASE             PG_LOCKED_PEND
+#define PG_PAGED_VBASE             PG_LOCKED_VEND
+#define PG_PAGED_PEND              (PG_PAGED_PBASE + PG_PAGED_SIZE)
+#define PG_PAGED_VEND              (PG_PAGED_VBASE + PG_PAGED_SIZE)
+
+/* CONFIG_PAGING_NDATA - This is the number of data pages in the memory
+ * map.  The size of data address region will then be:
+ */
+
+#define PG_TEXT_NPAGES             (CONFIG_PAGING_NLOCKED + CONFIG_PAGING_NPAGED)
+#define PG_RAM_PAGES               (CONFIG_DRAM_SIZE >> PAGESHIFT)
+#if PG_RAM_PAGES <= PG_TEXT_NPAGES
+#  error "Not enough memory for this page layout"
+#endif
+
+#ifdef CONFIG_PAGING_NDATA
+#  PG_DATA_NPAGED                  CONFIG_PAGING_NDATA
+#else
+#  PG_DATA_NPAGED                  (PG_RAM_PAGES - PG_TEXT_NPAGES)
+#endif
+
+#define PG_DATA_SIZE               (CONFIG_PAGING_NPAGED << PAGESHIFT)
+
+/* This positions the Read/Write data region */
+
+#if defined(CONFIG_PAGING_DATA_PBASE) && defined(CONFIG_PAGING_DATA_VBASE)
+#  define PG_DATA_PBASE            CONFIG_PAGING_DATA_PBASE
+#  define PG_DATA_VBASE            CONFIG_PAGING_DATA_VBASE
+#else
+#  define PG_DATA_PBASE            PG_LOCKED_PEND
+#  define PG_DATA_VBASE            PG_LOCKED_VEND
+#endif
 
 /* CONFIG_PAGING_DEFPRIO - The default, minimum priority of the page fill
  *   worker thread.  The priority of the page fill work thread will be boosted
