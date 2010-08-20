@@ -64,9 +64,21 @@
    */
 
 #  if CONFIG_PAGING_PAGESIZE == 1024
-#    define PTE_NPAGES PTE_TINY_NPAGES
+#    define PTE_NPAGES         PTE_TINY_NPAGES
+#    define PG_L2_BASE_PADDR   PGTABLE_FINE_BASE_PADDR
+#    define PG_L2_BASE_VADDR   PGTABLE_FINE_BASE_VADDR
+#    define MMU_L1_TEXTFLAGS   (PMD_TYPE_FINE|PMD_BIT4|PTE_CACHEABLE)
+#    define MMU_L2_TEXTFLAGS   (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRO|PTE_CACHEABLE)
+#    define MMU_L1_DATAFLAGS   (PMD_TYPE_FINE|PMD_BIT4|PTE_CACHEABLE)
+#    define MMU_L2_DATAFLAGS   (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW|PTE_CACHEABLE)
 #  elif CONFIG_PAGING_PAGESIZE == 4096
 #    define PTE_NPAGES PTE_SMALL_NPAGES
+#    define PG_L2_BASE_PADDR   PGTABLE_COARSE_BASE_PADDR
+#    define PG_L2_BASE_vADDR   PGTABLE_COARSE_BASE_VADDR
+#    define MMU_L1_TEXTFLAGS   (PMD_TYPE_COARSE|PMD_BIT4|PTE_CACHEABLE)
+#    define MMU_L2_TEXTFLAGS   (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
+#    define MMU_L1_DATAFLAGS   (PMD_TYPE_COARSE|PMD_BIT4|PTE_CACHEABLE|PTE_BUFFERABLE)
+#    define MMU_L2_DATAFLAGS   (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW|PTE_CACHEABLE|PTE_BUFFERABLE)
 #  else
 #    error "Need extended definitions for CONFIG_PAGING_PAGESIZE"
 #  endif
@@ -81,177 +93,163 @@
 #ifdef __ASSEMBLY
 
 /****************************************************************************
- * Name: wrpte_coarse
+ * Name: pg_map
  *
  * Description:
- *   Write one L2 entry for a coarse PTE.
+ *   Write several, contiguous L2 page table entries.  npages entries will be
+ *   written. This macro is used when CONFIG_PAGING is enable.  This case,
+ *   it is used asfollows:
  *
- * Inputs (unmodified):
- *   ctab  - Register containing the address of the coarse page table
- *   paddr - Physical address of the page to be mapped
- *   vaddr - Virtual address of the page to be mapped
- *   mmuflags - the MMU flags to use in the mapping
- *
- * Scratch registers (modified): tmp1, tmp2
- *
- ****************************************************************************/
- 
-#ifdef CONFIG_PAGING
-	.macro	wrpte_coarse, ctab, paddr, vaddr, mmuflags, tmp1, tmp2
-	
-	/* Get tmp1 = (paddr | mmuflags), the value to write into the table */
-
-	orr	\tmp1, \mmuflags, \paddr
-
-	/* index  = (vaddr & 0x000ff000) >> 12
-	 * offset = (vaddr & 0x000ff000) >> 10
-	 */
-
-	and	\tmp2, \vaddr, #0x0000ff000
-
-	/* Write value into table at ofset */
-
-	str	\tmp1, [\ctab, \tmp2, lsr #10]
-	.endm
-#endif /* CONFIG_PAGING */
-
-/****************************************************************************
- * Name: wrpmd_coarse
- *
- * Description:
- *   Write one L1 entry for a coarse page table.
- *
- * Inputs (unmodified unless noted):
- *   paddr - Physical address of the section (modified)
- *   vaddr - Virtual address of the section
- *   mmuflags - MMU flags to use in the section mapping
- *
- * Scratch registers (modified): tmp1, tmp2, tmp3
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PAGING
-	.macro	wrpmd_coarse, paddr, vaddr, mmuflags, tmp1, tmp2
-	/* tmp1 = the base of the L1 page table */
-
-   	ldr	\tmp1, =PGTABLE_BASE_VADDR
-
-	/* tmp2 = (paddr | mmuflags), the value to write into the page table */
-
-	orr	\paddr, \paddr, \mmuflags
-
-	/* Write the value into the table at the correc offset.
-	 * table index = vaddr >> 20, offset = index << 2
-	 */
-	
-	lsr	\tmp2, \vaddr, #20
-	str	\paddr, [\tmp1, \tmp2, lsl #2]
-	.endm
-#endif /* CONFIG_PAGING */
-
-/****************************************************************************
- * Name: wr_coarse
- *
- * Description:
- *   Write one coarse L1 entry and all assocated L2 entries for a coarse
- *   page table.
+ *	ldr	r0, =PG_LOCKED_PBASE
+ *	ldr	r1, =CONFIG_PAGING_NLOCKED
+ *      ldr	r2, =MMUFLAGS
+ *	pg_map r0, r1, r2, r3, r4
  *
  * Inputs:
- *   offset - coarse page table offset (unmodified)
- *   paddr - Physical address of the section (modified)
- *   vaddr - Virtual address of the section (modified)
+ *   paddr - The physical address of the start of the region to span. Must
+ *            be aligned to 1Mb section boundaries (modified)
  *   npages - Number of pages to write in the section (modified)
+ *   mmuflags - L2 MMU FLAGS
  *
- * Scratch registers (modified): tmp1, tmp2, tmp3, tmp4, tmp5
+ * Scratch registers (modified): tmp1, tmp2
+ *   tmp1 - Physical address in the L2 page table.
+ *   tmp2 - scratch
  *
- * On return, paddr and vaddr refer to the beginning of the
- * next section.
+ * Assumptions:
+ * - The MMU is not yet enabled
+ * - The L2 page tables have been zeroed prior to calling this function
+ * - pg_span has been called to initialize the L1 table.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	wr_coarse, offset, paddr, vaddr, npages, tmp1, tmp2, tmp3, tmp4
+	.macro	pg_map, paddr, npages, mmuflags, tmp1, tmp2
 
-	/* tmp1 = address of L2 table; tmp2 = MMU flags */
+	/* tmp1 = Physical address of the start of the L2 page table
+	 * tmp2 = MMU flags
+	 */
 
-	ldr	\tmp1, =PGTABLE_COARSE_BASE_VADDR
-	add	\tmp1, \offset, \paddr
-	ldr	\tmp2, =MMU_L2_VECTORFLAGS
+	ldr	\tmp1, =PG_L2_BASE_PADDR
 	b	2f
 1:
-	/* Write that L2 entry into the coarse page table */
+	/* Write the one L2 entries.  First,  get tmp2 = (paddr | mmuflags),
+	 * the value to write into the L2 PTE
+	 */
 
-	wrpte_coarse \tmp1, \paddr, \vaddr, \tmp2, \tmp3, \tmp4
+	orr	\tmp2, \paddr, \mmuflags
 
-	/* Update the physical and virtual addresses that will
-	 * correspond to the next table entry.
+	/* Write value into table at the current table address */
+
+	str	\tmp2, [\tmp1], #4
+
+	/* Update the physical addresses that will correspond to the next
+	 * table entry.
 	 */
 
 	add	\paddr, \paddr, #CONFIG_PAGING_PAGESIZE
-	add	\vaddr, \vaddr, #CONFIG_PAGING_PAGESIZE
-2:
-	/* Check if all of the pages have been written.  If not, then
-	 * loop and write the next entry.
-	 */
+	add	\tmp1, \tmp1, #4
+
+	/* Decrement the number of pages written */
 
 	sub	\npages, \npages, #1
-	cmn	\npages #1
-	bne	1b
-
-	/* Write the section entry that refers to this coarse page
-	 * table.
+2:
+	/* Check if all of the pages have been written.  If not, then
+	 * loop and write the next PTE.
 	 */
-
-	ldr	\tmp1, =PGTABLE_COARSE_BASE_PADDR
-	ldr	\tmp2, =MMU_L1_VECTORFLAGS
-	add	\tmp1, \offset, \tmp1
-	wrpmd_coarse \tmp1, \vaddr, \tmp2, \tmp3, \tmp4
+	cmp	\npages, #0
+	bgt	1b
 	.endm
-#endif /* CONFIG_PAGING */
 
 /****************************************************************************
- * Name: wr_sections
+ * Name: pg_span
  *
  * Description:
- *   Write several, contiguous coarse L1 page table entries (and all
- *   associated L2 page table entries).  As many entries will be written as
- *   many as needed to span npages.
+ *   Write several, contiguous unmapped coarse L1 page table entries.  As
+ *   many entries will be written as  many as needed to span npages.  This
+ *   macro is used when CONFIG_PAGING is enable.  This case, it is used as
+ *   follows:
  *
- * Inputs:
- *   offset - coarse page table offset (modified)
- *   paddr - Physical address of the section (modified)
- *   vaddr - Virtual address of the section
- *   npages - Number of pages to write in the section
+ *	ldr	r0, =PG_LOCKED_PBASE
+ *	ldr	r1, =(CONFIG_PAGING_NLOCKED+CONFIG_PAGING_NPAGES)
+ *      ldr	r2, =MMU_FLAGS
+ *	pg_span r0, r1, r2, r3, r4
  *
- * Scratch registers (modified): tmp1, tmp2, tmp3, tmp4, tmp5
+ * Inputs (unmodified unless noted):
+ *   addr - The virtual address of the start of the region to span. Must
+ *     be aligned to 1Mb section boundaries (modified)
+ *   npages - Number of pages to required to span that memory region (modified)
+ *   mmuflags - L1 MMU flags to use
+ *
+ * Scratch registers (modified):
+ *   addr, npages, tmp1, tmp2
+ *   addr   - Physical address in the L1 page table.
+ *   npages - The number of pages remaining to be accounted for
+ *   tmp1   - L2 page table physical address
+ *   tmp2   - scratch
+ *
+ * Return:
+ *   Nothing of interest.
+ *
+ * Assumptions:
+ * - The MMU is not yet enabled
+ * - The L2 page tables have been zeroed prior to calling this function
  *
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	wr_sections, offset, paddr, vaddr, npages, tmp1, tmp2, tmp3, tmp4
-	b	2f
-1:
-	/* Select the number of pages to write in this section. This number
-	 * will be 256 for coarse page tables or 1024 for fine/tiny page
-	 * tables (unless the npages argument indicates that there are fewer
-	 * than pages remaining to be mapped).
+	.macro	pg_span, addr, npages, mmuflags, tmp1, tmp2
+
+	/* tmp1 = Physical address of the start of the L2 page table */
+
+	ldr	\tmp1, =PG_L2_BASE_PADDR
+
+	/* Get addr = the L1 page table address coresponding to the virtual
+	 * address of the start of memory region to be mapped.
 	 */
 
-	cmp	\npages, #(PTE_NPAGES-1)	/* Check if npages < PTE_NPAGES */
-	movls	\tmp1, \npages			/* YES.. tmp1 = npages */
-	movls	\npages, #0			/*       npages = 0 */
-	movhi	\tmp1, #PTE_NPAGES		/* NO..  tmp1 = PTE_NPAGES */
-	subhi	\npages, \npages, #PTE_NPAGES	/*       npages -= PTE_NPAGES */
+   	ldr	\tmp2, =PGTABLE_BASE_PADDR
+	lsr	\addr, \addr, #20
+	add	\addr, \tmp2, \addr, lsl #2
+	b	2f
+1:
+	/* Write the L1 table entry that refers to this (unmapped) coarse page
+	 * table.
+	 *
+	 * tmp2 = (paddr | mmuflags), the value to write into the page table
+	 */
 
-	/* Write the L2 entries for this section */
+	orr	\tmp2, \tmp1, \mmuflags
 
-	wr_coarse \offset, \paddr, \vaddr, \tmp1, \tmp1, \tmp2, \tmp3, \tmp4
-	add	\offset, \offset, #PT_SIZE
+	/* Write the value into the L1 table at the correct offset. */
+	
+	str	\tmp2, [\addr], #4
+
+	/* Update the L2 page table address for the next L1 table entry. */
+
+	add	\tmp1, \tmp1, #PT_SIZE  /* Next L2 page table start paddr */
+
+	/* Update the number of pages that we have account for (with
+	 * non-mappings
+	 */
+
+	sub	\npages, \npages, PTE_NPAGES
 2:
+	/* Check if all of the pages have been written.  If not, then
+	 * loop and write the next L1 entry.
+	 */
+
 	cmp	\npages, #0
-	bne	1b
+	bgt	1b
 	.endm
+
 #endif /* CONFIG_PAGING */
+#endif /* __ASSEMBLY */
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY
 
 #endif /* __ASSEMBLY */
 #endif /* __ARCH_ARM_SRC_ARM_PG_MACROS_H */
