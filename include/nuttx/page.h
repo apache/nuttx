@@ -117,11 +117,15 @@
 #define PG_PAGED_PEND              (PG_PAGED_PBASE + PG_PAGED_SIZE)
 #define PG_PAGED_VEND              (PG_PAGED_VBASE + PG_PAGED_SIZE)
 
+/* Size of the overall text section */
+
+#define PG_TEXT_NPAGES             (CONFIG_PAGING_NLOCKED + CONFIG_PAGING_NPAGED)
+#define PG_TEXT_SIZE               (PG_TEXT_NPAGES << PAGESHIFT)
+
 /* CONFIG_PAGING_NDATA - This is the number of data pages in the memory
  * map.  The size of data address region will then be:
  */
 
-#define PG_TEXT_NPAGES             (CONFIG_PAGING_NLOCKED + CONFIG_PAGING_NPAGED)
 #define PG_RAM_PAGES               (CONFIG_DRAM_SIZE >> PAGESHIFT)
 #if PG_RAM_PAGES <= PG_TEXT_NPAGES
 #  error "Not enough memory for this page layout"
