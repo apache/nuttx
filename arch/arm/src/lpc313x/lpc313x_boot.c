@@ -193,6 +193,56 @@ static void up_setupmappings(void)
 #endif
 
 /************************************************************************************
+ * Name: up_vectorpermissions
+ *
+ * Description:
+ *   Set permissions on the vector mapping.
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
+static void  up_vectorpermissions(uint32 mmuflags)
+{
+  uint32_t *ptr = (uint3t*)PG_L2_VECT_VADDR;
+  uint32_t pte;
+
+  /* This is easily because we have already been told everything! */
+
+  pte = *ptr;
+#ifdef CONFIG_PAGING_VECPPAGE
+  /* We've been told to use a specify page for the vectors.  In this
+   * case, I expect the pte to be zero the first time this function is
+   * called (what if it is not?)
+   */
+
+  if (pte == 0)
+    {
+      pte = PG_VECT_PBASE;   
+    }
+  else
+    {
+      pte &= PG_L1_PADDRMASK;
+    }
+#else
+  /* Otherwise, we should be using the page at the beginning of the
+   * locked text region.
+   */
+
+  ASSERT(pte != 0);
+  pte &= PG_L1_PADDRMASK;
+#endif
+
+  /* Update the MMU flags and save */
+
+  *ptr = pte | mmuflags;
+
+  /* Invalid the TLB for this address */
+
+  tlb_invalidate_single(PG_L2_VECT_VADDR);
+}
+#endif
+
+/************************************************************************************
  * Name: up_vectormapping
  *
  * Description:
@@ -288,6 +338,14 @@ void up_boot(void)
 #ifndef CONFIG_ARCH_ROMPGTABLE
   up_setupmappings();
 
+  /* If we are using vectors in low memory but RAM in that area has been marked
+   * read only, then temparily mark the mapping write-able (non-buffered).
+   */
+
+#if defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
+  up_vectorpermissions(MMU_L2_VECTRWFLAGS);
+#endif
+
   /* Provide a special mapping for the IRAM interrupt vector positioned in high
    * memory.
    */
@@ -295,13 +353,19 @@ void up_boot(void)
 #ifndef CONFIG_ARCH_LOWVECTORS
   up_vectormapping();
 #endif
-#endif
+#endif /* CONFIG_ARCH_ROMPGTABLE */
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
    * up_vector.S
    */
 
   up_copyvectorblock();
+
+  /* Make the vectors read-only, cacheable again */
+
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
+  up_vectorpermissions(MMU_L2_VECTROFLAGS);
+#endif
 
   /* Reset all clocks */
 
