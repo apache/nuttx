@@ -671,6 +671,11 @@ configs/demo9s12ne64
     Feescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
     port uses the m68hc12 GCC toolchain.  STATUS:  Under development.
 
+configs/ea3131
+    Embedded Artists EA3131 Development bard.  This board is based on the 
+    an NXP LPC3131 MCU. This OS is built with the arm-elf toolchain*.
+    STATUS:  This port is complete and reasonably well tested.
+
 configs/eagle100
     Micromint Eagle-100 Development board.  This board is based on the 
     an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
@@ -707,8 +712,16 @@ configs/mx1ads
     (work is stalled until I devote time to the Micromint Eagle-100)
 
 configs/ntosd-dm320
-    This port uses the Neuros OSD with a GNU arm-elf toolchain*:
-    see http://wiki.neurostechnology.com/index.php/Developer_Welcome .
+    This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-elf
+    toolchain*: see
+    
+      http://wiki.neurostechnology.com/index.php/OSD_1.0_Developer_Home
+ 
+    There are some differences between the Dev Board and the currently
+    available commercial v1.0 Boards.  See
+    
+      http://wiki.neurostechnology.com/index.php/OSD_Developer_Board_v1
+
     NuttX operates on the ARM9EJS of this dual core processor.
     STATUS: This port is code complete, verified, and included in the
     NuttX 0.2.1 release.
@@ -721,6 +734,9 @@ configs/nucleus2g
 configs/olimex-lpc2378
     This port uses the Olimex Olimex-lpc2378 board arm-elf toolchain* under
     Linux or Cygwin.  STATUS: ostest and NSH configurations available.
+
+configs/olimex-lpc2378
+    This port for the NXP LPC2378 was contributed by Rommel Marcelo.
 
 configs/olimex-strp711
     This port uses the Olimex STR-P711 board arm-elf toolchain* under Linux or Cygwin.

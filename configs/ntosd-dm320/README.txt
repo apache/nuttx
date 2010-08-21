@@ -1,6 +1,26 @@
 README
 ^^^^^^
 
+  This is the README file for the port of NuttX to the Neuros OSD
+  v1.0 Dev Board.  References:
+
+    http://www.neurostechnology.com/neuros-developer-community
+    http://wiki.neurostechnology.com/index.php/OSD_1.0_Developer_Home
+    http://wiki.neurostechnology.com/index.php/DM320_Platform_development
+
+  There are some differences between the Dev Board and the currently
+  available commercial v1.0 Boards, most notably in the amount of memory:
+  8Mb FLASH and 32Mb RAM vs. 16Mb and 64Mb as in the production board.
+  See the following for more information:
+    
+     http://wiki.neurostechnology.com/index.php/OSD_Developer_Board_v1
+
+  NuttX operates on the ARM9EJS of this dual core processor.  The DSP
+  is available and unused.
+
+  STATUS: This port is code complete, verified, and included in the
+  NuttX 0.2.1 release.
+
 Toolchain
 ^^^^^^^^^
 
