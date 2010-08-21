@@ -1,7 +1,6 @@
 /****************************************************************************
- * arch/arm/src/arm/up_checkmapping.c
- * Check if the current task's fault address has been mapped into the virtual
- * address space.
+ * arch/arm/src/arm/up_va2pte.c
+ * Utility to map a virtual address to a L2 page table entry.
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -47,6 +46,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/page.h>
 
+#include "pg_macros.h"
 #include "up_internal.h"
 
 #ifdef CONFIG_PAGING
@@ -68,26 +68,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_checkmapping()
+ * Name: up_va2pte()
  *
  * Description:
- *  The function up_checkmapping() returns an indication if the page fill
- *  still needs to performed or not. In certain conditions, the page fault
- *  may occur on several threads and be queued multiple times. This function
- *  will prevent the same page from be filled multiple times.
+ *  Convert a virtual address within the paged text region into a pointer to
+ *  the corresponding page table entry.
  *
  * Input Parameters:
- *   tcb - A reference to the task control block of the task that we believe
- *         needs to have a page fill.  Architecture-specific logic can
- *         retrieve page fault information from the architecture-specific
- *         context information in this TCB and can consult processor resources
- *         (page tables or TLBs or ???) to determine if the fill still needs
- *         to be performed or not.
+ *   vaddr - The virtual address within the paged text region.
  *
  * Returned Value:
- *   This function will return true if the mapping is in place and false
- *   if the mapping is still needed.  Errors encountered should be
- *   interpreted as fatal.
+ *   A pointer to  the corresponding page table entry.
  *
  * Assumptions:
  *   - This function is called from the normal tasking context (but with
@@ -97,27 +88,33 @@
  *
  ****************************************************************************/
 
-bool up_checkmapping(FAR _TCB *tcb)
+uint32_t *up_va2pte(uintptr_t vaddr);
 {
-  uintptr_t vaddr;
-  uint32_t *te;
+  uint32_t L1;
+  uint32_t *L2;
+  unsigned int ndx;
 
-  /* Since interrupts are disabled, we don't need to anything special. */
+  /* The virtual address is expected to lie in the paged text region */
 
-  DEBUGASSERT(tcb);
-
-  /* Get the virtual address that caused the fault */
-
-  vaddr = tcb->xcp.far;
   DEBUGASSERT(vaddr >= PG_PAGED_VBASE && vaddr < PG_PAGED_VEND);
 
-  /* Get the PTE associated with this virtual address */
+  /* Get the L1 table entry associated with this virtual address */
 
-  pte = up_va2pte(vaddr);
+  L1 = *(uint32_t*)PG_POOL_VA2L1VADDR(vaddr);
+
+  /* Get the address of the L2 page table from the L1 entry */
+
+  L2 = (uint32_t*)PG_POOL_L12VPTABLE(L1);
+
+  /* Get the index into the L2 page table.  Each L1 entry maps
+   * 256 x 4Kb or 1024 x 1Kb pages.
+   */
+
+  ndx = ((vaddr & 0x000fffff) >> PAGESHIFT;
 
   /* Return true if this virtual address is mapped. */
 
-  return (*pte != 0);
+  return &L2[ndx];
 }
 
 #endif /* CONFIG_PAGING */

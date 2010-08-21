@@ -73,6 +73,10 @@
 
 #  define PTE_NPAGES           PTE_TINY_NPAGES
 
+   /* Mask to get the page table physical address from an L1 entry */
+
+#  define PG_L1_PADDRMASK     PMD_FINE_TEX_MASK
+
    /* L2 Page table address */
 
 #  define PG_L2_BASE_PADDR     PGTABLE_FINE_BASE_PADDR
@@ -92,6 +96,10 @@
    /* Number of pages in an L2 table per L1 entry */
 
 #  define PTE_NPAGES           PTE_SMALL_NPAGES
+
+   /* Mask to get the page table physical address from an L1 entry */
+
+#  define PG_L1_PADDRMASK     PMD_COARSE_TEX_MASK
 
    /* L2 Page table address */
 
@@ -127,7 +135,7 @@
 
 #define PG_L2_PAGED_PADDR      (PG_L2_BASE_PADDR + PG_L2_LOCKED_SIZE)
 #define PG_L2_PAGED_VADDR      (PG_L2_BASE_VADDR + PG_L2_LOCKED_SIZE)
-#define PG_L2_PAGED_SIZE       (4*CONFIG_PAGING_NPAGED)
+#define PG_L2_PAGED_SIZE       (4*CONFIG_PAGING_NPPAGED)
 
 /* This describes the overall text region */
 
@@ -202,23 +210,25 @@
 
 /* This is the total number of pages used in the text/data mapping: */
 
-#define PG_TOTAL_NPAGES          (PG_TEXT_NPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
-#if PG_TOTAL_NPAGES >PG_RAM_PAGES
+#define PG_TOTAL_NPPAGES         (PG_TEXT_NPPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
+#define PG_TOTAL_NVPAGES         (PG_TEXT_NVPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
+#if PG_TOTAL_NPPAGES >PG_RAM_PAGES
 #  error "Total pages required exceeds RAM size"
 #endif
 
 /* For page managment purposes, the following summarize the "heap" of
  * free pages, operations on free pages and the L2 page table.
  *
- * PG_POOL_L2NDX(va)        - Converts a virtual address in the paged SRAM
- *                            region into a index into the paged region of
- *                            the L2 page table.
- * PG_POOL_L2OFFSET(va)     - Converts a virtual address in the paged SRAM
- *                            region into a byte offset into the paged
- *                            region of the L2 page table.
- * PG_POOL_L2VADDR(va)      - Converts a virtual address in the paged SRAM
- *                            region into the virtual address of the
- *                            corresponding PTE entry.
+ * PG_POOL_VA2L1OFFSET(va)  - Given a virtual address, return the L1 table
+ *                            offset (in bytes).
+ * PG_POOL_VA2L1VADDR(va)   - Given a virtual address, return the virtual
+ *                            address of the L1 table entry
+ * PG_POOL_L12PPTABLE(L1)   - Given the value of an L1 table entry return
+ *                            the physical address of the start of the L2
+ *                            page table
+ * PG_POOL_L12PPTABLE(L1)   - Given the value of an L1 table entry return
+ *                            the virtual address of the start of the L2
+ *                            page table.
  *
  * PG_POOL_L1VBASE          - The virtual address of the start of the L1
  *                            page table range corresponding to the first
@@ -239,21 +249,11 @@
  *                            text region (the address at the beginning of
  *                            the page).
  * PG_POOL_MAXL2NDX         - This is the maximum value+1 of such an index.
- * PG_POOL_NDX2L2VADDR(ndx) - Converts an index to the corresponding address
- *                            in the L1 page table entry.
- * PG_POOL_VA2L2VADDR(va)   - Converts a virtual address within the paged
- *                            text region to the corresponding address in
- *                            the L2 page table entry.
- *
- * PG_POOL_PGPADDR(ndx)     - Converts an index into the corresponding
+ * 
+ * PG_POOL_PGPADDR(ndx)     - Converts an page index into the corresponding
  *                            (physical) address of the backing page memory.
- * PG_POOL_PGVADDR(ndx)     - Converts an index into the corresponding
+ * PG_POOL_PGVADDR(ndx)     - Converts an page index into the corresponding
  *                            (virtual)address of the backing page memory.
- *
- * PG_POOL_VIRT2PHYS(va)    - Convert a virtual address within the paged
- *                            text region into a physical address.
- * PG_POOL_PHYS2VIRT(va)    - Convert a physical address within the paged
- *                            text region into a virtual address.
  *
  * These are used as follows:  If a miss occurs at some virtual address, va,
  * A new page index, ndx, is allocated.  PG_POOL_PGPADDR(i) converts the index
@@ -262,24 +262,20 @@
  * written.
  */
 
-#define PG_POOL_L2NDX(va)        ((va) - PG_PAGED_VBASE) >> PAGESHIFT)
-#define PG_POOL_L2OFFSET(va)     (PG_POOL_L2NDX(va) << 2)
-#define PG_POOL_L2VADDR(va)      (PG_L2_PAGED_VADDR + PG_POOL_L2OFFSET(va))
+#define PG_POOL_VA2L1OFFSET(va)  (((va) >> 20) << 2) 
+#define PG_POOL_VA2L1VADDR(va)   (PGTABLE_BASE_VADDR + PG_POOL_VA2L1OFFSET(va))
+#define PG_POOL_L12PPTABLE(L1)   ((L1) & PG_L1_PADDRMASK)
+#define PG_POOL_L12VPTABLE(L1)   (PG_POOL_L12PPTABLE(L1) - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR)
 
 #define PG_POOL_L1VBASE          (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
-#define PG_POOL_L1VEND           (PG_POOL_L1VBASE + (CONFIG_PAGING_NPAGED << 2))
+#define PG_POOL_L1VEND           (PG_POOL_L1VBASE + (CONFIG_PAGING_NVPAGED << 2))
 
 #define PG_POOL_VA2L2NDX(va)     (((va) -  PG_PAGED_VBASE) >> PAGESHIFT)
 #define PG_POOL_NDX2VA(ndx)      (((ndx) << PAGESHIFT) + PG_PAGED_VBASE)
 #define PG_POOL_MAXL2NDX         PG_POOL_VA2L2NDX(PG_PAGED_VEND)
-#define PG_POOL_NDX2L2VADDR(ndx) (PG_L2_PAGED_VADDR + ((ndx) << 2))
-#define PG_POOL_VA2L2VADDR(va)   PG_POOL_NDX2L2VADDR(PG_POOL_VA2L2NDX(va))
 
 #define PG_POOL_PGPADDR(ndx)     (PG_PAGED_PBASE + ((ndx) << PAGESHIFT))
 #define PG_POOL_PGVADDR(ndx)     (PG_PAGED_VBASE + ((ndx) << PAGESHIFT))
-
-#define PG_POOL_VIRT2PHYS(va)    ((va) + (PG_PAGED_PBASE - PG_PAGED_VBASE))
-#define PG_POOL_PHYS2VIRT(pa)    ((pa) + (PG_PAGED_VBASE - PG_PAGED_PBASE))
 
 #endif /* CONFIG_PAGING */
 

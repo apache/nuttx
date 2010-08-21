@@ -60,9 +60,9 @@
  * Private Types
  ****************************************************************************/
 
-#if CONFIG_PAGING_NPAGED < 256
+#if CONFIG_PAGING_NPPAGED < 256
 typedef uint8_t  pgndx_t;
-#elif CONFIG_PAGING_NPAGED < 65536
+#elif CONFIG_PAGING_NPPAGED < 65536
 typedef uint16_t pgndx_t;
 #else
 typedef uint32_t pgndx_t;
@@ -98,7 +98,7 @@ static pgndx_t g_pgndx;
  * another index to the mapped virtual page.
  */
 
-static L1ndx_t g_ptemap[CONFIG_PAGING_NPAGED];
+static L1ndx_t g_ptemap[CONFIG_PAGING_NPPAGED];
 
 /* The contents of g_ptemap[] are not valid until g_pgndx has wrapped at
  * least one time.
@@ -162,7 +162,6 @@ int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
   uintptr_t paddr;
   uint32_t *pte;
   unsigned int pgndx;
-  unsigned int l2ndx;
   
   /* Since interrupts are disabled, we don't need to anything special. */
 
@@ -172,13 +171,6 @@ int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
 
   vaddr = tcb->xcp.far;
   DEBUGASSERT(vaddr >= PG_PAGED_VBASE && vaddr < PG_PAGED_VEND);
-
-  /* Verify that this virtual address was previously unmapped */
-
-#if CONFIG_DEBUG
-  pte = (uint32_t*)PG_POOL_L2VADDR(vaddr);
-  DEBUGASSERT(*pte == 0);
-#endif
 
   /* Allocate page memory to back up the mapping.  Start by getting the
    * index of the next page that we are going to allocate.
@@ -191,10 +183,6 @@ int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
       g_pgwrap = true;
     }
 
-  /* Then convert the index to a (physical) page address. */
-
-  paddr = PG_POOL_PGPADDR(pgndx);
-
   /* Was this physical page previously mapped? If so, then we need to un-map
    * it.
    */
@@ -205,27 +193,35 @@ int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
        * mapping -- then zero it!  
        */
 
-       l2ndx = g_ptemap[pgndx];
-       pte = (uint32_t*)PG_POOL_NDX2L2VADDR(l2ndx);
+       uintptr_t oldvaddr = PG_POOL_NDX2VA(g_ptemap[pgndx]);
+       pte = up_va2pte(oldvaddr);
       *pte = 0;
 
-      /* Invalidate the TLB corresponding to the virtual address */
+      /* Invalidate the instruction TLB corresponding to the virtual address */
 
-      tlb_inst_invalidate_single(PG_POOL_NDX2VA(l2ndx))
+      tlb_inst_invalidate_single(oldvaddr)
     }
+
+  /* Then convert the index to a (physical) page address. */
+
+  paddr = PG_POOL_PGPADDR(pgndx);
 
   /* Now setup up the new mapping.  Get a pointer to the L2 entry
    * corresponding to the new mapping.  Then set it map to the newly
    * allocated page address.
    */
 
-  pte = (uint32_t*)PG_POOL_VA2L2VADDR(va)
+  pte = up_va2pte(vaddr);
   *pte = (paddr | MMU_L2_TEXTFLAGS);
 
- /* Finally, return the virtual address of allocated page */
+  /* And save the new L1 index */
+ 
+  g_ptemap[pgndx] = PG_POOL_VA2L2NDX(vaddr);
 
- *vpage = (void*)PG_POOL_PHYS2VIRT(paddr);
- return OK;
+  /* Finally, return the virtual address of allocated page */
+
+  *vpage = (void*)(vaddr & ~PAGEMASK);
+  return OK;
 }
 
 #endif /* CONFIG_PAGING */

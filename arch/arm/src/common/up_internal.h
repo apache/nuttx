@@ -187,6 +187,7 @@ extern int  up_hardfault(int irq, FAR void *context);
 extern void up_doirq(int irq, uint32_t *regs);
 #ifdef CONFIG_PAGING
 extern void up_pginitialize(void);
+extern uint32_t *up_va2pte(uintptr_t vaddr);
 extern void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
 #else /* CONFIG_PAGING */
 # define up_pginitialize()
