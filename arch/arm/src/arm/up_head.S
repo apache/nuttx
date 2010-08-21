@@ -352,7 +352,7 @@ __start:
 .Ltxtspan:
 	.long	PG_L2_TEXT_PADDR		/* Physical address of L2 table */
 	.long	PG_TEXT_VBASE			/* Virtual address of text base */
-	.long	PG_TEXT_NPAGES			/* Total mapped text pages */
+	.long	PG_TEXT_NVPAGES			/* Total virtual text pages to be mapped */
 	.long	MMU_L1_TEXTFLAGS		/* L1 MMU flags to use */
 
 .Ltxtmap:

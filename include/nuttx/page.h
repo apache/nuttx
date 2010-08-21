@@ -78,7 +78,8 @@
 
 /* CONFIG_PAGING_NLOCKED - This is the number of locked pages in the memory
  * map.  The size of locked address region will then be given by
- * PG_LOCKED_SIZE.
+ * PG_LOCKED_SIZE.  These values applies to both physical and virtual memory
+ * regions.
  */
 
 #define PG_LOCKED_SIZE             (CONFIG_PAGING_NLOCKED << PAGESHIFT)
@@ -111,13 +112,25 @@
 #  error "Base address of the locked region is not page aligned"
 #endif
 
-/* CONFIG_PAGING_NPAGED - This is the number of paged pages in the memory
- * map.  The size of paged address region will then be:
+/* CONFIG_PAGING_NPPAGED - This is the number of physical pages available to
+ *   support the paged text region.
+ * CONFIG_PAGING_NVPAGED - This actual size of the paged text region (in
+ *   pages).  This is also the number of virtual pages required to support
+ *   the entire paged retion. This feature is intended to support only the
+ *   case where the virtual paged text area is much larger the available
+ *   physical pages.  Otherwise, why would you being on-demand paging?
  */
 
-#define PG_PAGED_SIZE              (CONFIG_PAGING_NPAGED << PAGESHIFT)
+#if CONFIG_PAGING_NPPAGED >= CONFIG_PAGING_NVPAGED
+#  error "CONFIG_PAGING_NPPAGED must be less than CONFIG_PAGING_NVPAGED"
+#endif
 
-/* This positions the paging Read-Only text section.  If the configuration
+/* The size of physical and virutal paged address regions will then be: */
+
+#define PG_PAGED_PSIZE              CONFIG_PAGING_NPPAGED << PAGESHIFT)
+#define PG_PAGED_VSIZE              CONFIG_PAGING_NVPAGED << PAGESHIFT)
+
+/* This positions the paging Read-Only text region.  If the configuration
  * did not override the default, the paged region will immediately follow
  * the locked region.
  */
@@ -130,8 +143,8 @@
 #  define PG_PAGED_VBASE           PG_LOCKED_VEND
 #endif
 
-#define PG_PAGED_PEND              (PG_PAGED_PBASE + PG_PAGED_SIZE)
-#define PG_PAGED_VEND              (PG_PAGED_VBASE + PG_PAGED_SIZE)
+#define PG_PAGED_PEND              (PG_PAGED_PBASE + PG_PAGED_PSIZE)
+#define PG_PAGED_VEND              (PG_PAGED_VBASE + PG_PAGED_VSIZE)
 
 /* Size and description of the overall text section.  The number of
  * pages in the text section is the sum of the number of pages in
@@ -139,8 +152,10 @@
  * is the base of the locked region.
  */
 
-#define PG_TEXT_NPAGES             (CONFIG_PAGING_NLOCKED + CONFIG_PAGING_NPAGED)
-#define PG_TEXT_SIZE               (PG_TEXT_NPAGES << PAGESHIFT)
+#define PG_TEXT_NPPAGES            (CONFIG_PAGING_NLOCKED + CONFIG_PAGING_NPPAGED)
+#define PG_TEXT_NVPAGES            (CONFIG_PAGING_NLOCKED + CONFIG_PAGING_NVPAGED)
+#define PG_TEXT_PSIZE              (PG_TEXT_NPPAGES << PAGESHIFT)
+#define PG_TEXT_VSIZE              (PG_TEXT_NVPAGES << PAGESHIFT)
 #define PG_TEXT_PBASE              PG_LOCKED_PBASE
 #define PG_TEXT_VBASE              PG_LOCKED_VBASE
 
@@ -159,7 +174,7 @@
 
 #ifdef CONFIG_PAGING_NDATA
 #  PG_DATA_NPAGES                  CONFIG_PAGING_NDATA
-#elif PG_RAM_PAGES > PG_TEXT_NPAGES
+#elif PG_RAM_PAGES > PG_TEXT_NPPAGES
 #  PG_DATA_NPAGES                  (PG_RAM_PAGES - PG_TEXT_NPAGES)
 #else
 #  error "Not enough memory for this page layout"
