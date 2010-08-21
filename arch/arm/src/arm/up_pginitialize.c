@@ -79,14 +79,18 @@
  *   initialization
  *
  * Assumptions:
- *   - Called early in the platform initializatin sequence so that no special
+ *   - Called early in the platform initialization sequence so that no special
  *     concurrency protection is required.
  *
  ****************************************************************************/
 
 void up_pginitialize(void)
 {
-# warning "Not implemented"
+  /* None needed at present.  This file is just retained in case the need
+   * arises in the future.  Nothing calls up_pginitialize() now.  If needed,
+   * if should be called early in up_boot.c to assure that all paging is
+   * ready.
+   */
 }
 
 #endif /* CONFIG_PAGING */

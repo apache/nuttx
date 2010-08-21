@@ -350,13 +350,13 @@ __start:
 
 #ifdef CONFIG_PAGING
 .Ltxtspan:
-	.long	PG_L2_BASE_PADDR		/* Physical address of L2 table */
-	.long	PG_LOCKED_VBASE			/* Virtual address of locked base */
+	.long	PG_L2_TEXT_PADDR		/* Physical address of L2 table */
+	.long	PG_TEXT_VBASE			/* Virtual address of text base */
 	.long	PG_TEXT_NPAGES			/* Total mapped text pages */
 	.long	MMU_L1_TEXTFLAGS		/* L1 MMU flags to use */
 
 .Ltxtmap:
-	.long	PG_L2_BASE_PADDR		/* Physical address of L2 table */
+	.long	PG_L2_LOCKED_PADDR		/* Physical address of L2 table */
 	.long	PG_LOCKED_PBASE			/* Physical address of locked base */
 	.long	CONFIG_PAGING_NLOCKED		/* Number of pages in the locked region */
 	.long	MMU_L2_TEXTFLAGS		/* L2 MMU flags to use */

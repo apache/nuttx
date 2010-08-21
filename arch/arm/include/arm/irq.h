@@ -164,7 +164,7 @@ struct xcptcontext
    */
 
 #ifdef CONFIG_PAGING
-  uint32_t far;
+  uintptr_t far;
 #endif
 };
 #endif

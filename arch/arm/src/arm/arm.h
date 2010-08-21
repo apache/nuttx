@@ -282,6 +282,124 @@
 
 #ifndef __ASSEMBLY__
 
+/* ARMv4/ARMv5 operation: Invalidate TLB
+ * ARM926EJ-S operation:  Invalidate set-associative
+ * Data:                  Should be zero
+ */
+ 
+static inline void tlb_invalidate(void)
+{
+  unsigned int sbz = 0;
+  __asm__ __volatile__
+    (
+     "\tmcr    p15, 0, %0, c8, c7, 0"
+     :
+     : "r" (sbz)
+     : "memory");
+}
+
+/* ARMv4/ARMv5 operation: Invalidate TLB single entry (MVA)
+ * ARM926EJ-S operation:  Invalidate single entry
+ * Data:                  MVA
+ */
+
+static inline void tlb_invalidate_single(unsigned int mva)
+{
+  mva &= 0xfffffc00;
+  __asm__ __volatile__
+    (
+     "mcr    p15, 0, %0, c8, c7, 1"
+     :
+     : "r" (mva)
+     : "memory");
+}
+
+/* ARMv4/ARMv5 operation: Invalidate instruction TLB
+ * ARM926EJ-S operation:  Invalidate set-associative TLB
+ * Data:                  Should be zero
+ */
+
+static inline void tlb_instr_invalidate(void)
+{
+  unsigned int sbz = 0;
+  __asm__ __volatile__
+    (
+     "\tmcr    p15, 0, %0, c8, c5, 0"
+     :
+     : "r" (sbz)
+     : "memory");
+}
+
+/* ARMv4/ARMv5 operation: Invalidate instruction TLB single entry (MVA)
+ * ARM926EJ-S operation:  Invalidate single entry
+ * Data:                  MVA
+ */
+
+static inline void tlb_inst_invalidate_single(unsigned int mva)
+{
+  mva &= 0xfffffc00;
+  __asm__ __volatile__
+    (
+     "mcr    p15, 0, %0, c8, c5, 1"
+     :
+     : "r" (mva)
+     : "memory");
+}
+
+/* ARMv4/ARMv5 operation: Invalidate data TLB
+ * ARM926EJ-S operation:  Invalidate set-associative TLB
+ * Data:                  Should be zero
+ */
+
+static inline void tlb_data_invalidate(void)
+{
+  unsigned int sbz = 0;
+  __asm__ __volatile__
+    (
+     "\tmcr    p15, 0, %0, c8, c6, 0"
+     :
+     : "r" (sbz)
+     : "memory");
+}
+
+/* ARMv4/ARMv5 operation: Invalidate data TLB single entry (MVA)
+ * ARM926EJ-S operation:  Invalidate single entry
+ * Data:                  MVA
+ */
+
+static inline void tlb_data_invalidate_single(unsigned int mva)
+{
+  mva &= 0xfffffc00;
+  __asm__ __volatile__
+    (
+     "mcr    p15, 0, %0, c8, c6, 1"
+     :
+     : "r" (mva)
+     : "memory");
+}
+
+#endif /* __ASSEMBLY__ */
+
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __ARCH_ARM_SRC_COMMON_ARM_H */
