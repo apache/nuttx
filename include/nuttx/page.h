@@ -123,8 +123,8 @@
  */
 
 #if defined(CONFIG_PAGING_LOCKED_PBASE) && defined(CONFIG_PAGING_LOCKED_VBASE)
-#  define PG_LOCKED_PBASE          CONFIG_PAGING_LOCKED_PBASE
-#  define PG_LOCKED_VBASE          CONFIG_PAGING_LOCKED_VBASE
+#  define PG_PAGED_PBASE           CONFIG_PAGING_LOCKED_PBASE
+#  define PG_PAGED_VBASE           CONFIG_PAGING_LOCKED_VBASE
 #else
 #  define PG_PAGED_PBASE           PG_LOCKED_PEND
 #  define PG_PAGED_VBASE           PG_LOCKED_VEND
@@ -133,10 +133,16 @@
 #define PG_PAGED_PEND              (PG_PAGED_PBASE + PG_PAGED_SIZE)
 #define PG_PAGED_VEND              (PG_PAGED_VBASE + PG_PAGED_SIZE)
 
-/* Size of the overall text section */
+/* Size and description of the overall text section.  The number of
+ * pages in the text section is the sum of the number of pages in
+ * both the locked and paged regions.  The base of the text section
+ * is the base of the locked region.
+ */
 
 #define PG_TEXT_NPAGES             (CONFIG_PAGING_NLOCKED + CONFIG_PAGING_NPAGED)
 #define PG_TEXT_SIZE               (PG_TEXT_NPAGES << PAGESHIFT)
+#define PG_TEXT_PBASE              PG_LOCKED_PBASE
+#define PG_TEXT_VBASE              PG_LOCKED_VBASE
 
 /* CONFIG_PAGING_NDATA - This is the number of data pages in the memory
  * map.  The data region will extend to the end of RAM unless overridden
