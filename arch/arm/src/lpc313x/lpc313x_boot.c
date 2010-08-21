@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_boot.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -234,6 +234,10 @@ static void up_vectormapping(void)
 
 /************************************************************************************
  * Name: up_copyvectorblock
+ *
+ * Description:
+ *   Copy the interrupt block to its final destination.
+ *
  ************************************************************************************/
 
 static void up_copyvectorblock(void)
@@ -265,6 +269,14 @@ static void up_copyvectorblock(void)
 
 /************************************************************************************
  * Public Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: up_boot
+ *
+ * Description:
+ *   Complete boot operations started in up_head.S
+ *
  ************************************************************************************/
 
 void up_boot(void)
