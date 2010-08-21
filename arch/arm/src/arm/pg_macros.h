@@ -59,35 +59,85 @@
 #    error "Cannot support both CONFIG_PAGING and CONFIG_ARCH_ROMPGTABLE"
 #  endif
 
+  /* Page Size Selections ***************************************************/
+
   /* Create some friendly definitions to handle some differences between
    * small and tiny pages.
    */
 
 #  if CONFIG_PAGING_PAGESIZE == 1024
+
+     /* Number of pages in an L2 table per L1 entry */
+
 #    define PTE_NPAGES         PTE_TINY_NPAGES
+
+     /* L2 Page table address */
+
 #    define PG_L2_BASE_PADDR   PGTABLE_FINE_BASE_PADDR
 #    define PG_L2_BASE_VADDR   PGTABLE_FINE_BASE_VADDR
-#    define MMU_L1_TEXTFLAGS   (PMD_TYPE_FINE|PMD_BIT4|PTE_CACHEABLE)
+
+     /* MMU Flags for each memory region */
+
+#    define MMU_L1_TEXTFLAGS   (PMD_TYPE_FINE|PMD_BIT4)
 #    define MMU_L2_TEXTFLAGS   (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRO|PTE_CACHEABLE)
-#    define MMU_L1_DATAFLAGS   (PMD_TYPE_FINE|PMD_BIT4|PTE_CACHEABLE)
-#    define MMU_L2_DATAFLAGS   (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW|PTE_CACHEABLE)
+#    define MMU_L1_DATAFLAGS   (PMD_TYPE_FINE|PMD_BIT4)
+#    define MMU_L2_DATAFLAGS   (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW|PTE_CACHEABLE|PTE_BUFFERABLE)
+#    define MMU_L1_PGTABFLAGS  (PMD_TYPE_FINE|PMD_BIT4)
+#    define MMU_L2_PGTABFLAGS  (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW)
+
 #  elif CONFIG_PAGING_PAGESIZE == 4096
-#    define PTE_NPAGES PTE_SMALL_NPAGES
+
+     /* Number of pages in an L2 table per L1 entry */
+
+#    define PTE_NPAGES         PTE_SMALL_NPAGES
+
+     /* L2 Page table address */
+
 #    define PG_L2_BASE_PADDR   PGTABLE_COARSE_BASE_PADDR
-#    define PG_L2_BASE_vADDR   PGTABLE_COARSE_BASE_VADDR
-#    define MMU_L1_TEXTFLAGS   (PMD_TYPE_COARSE|PMD_BIT4|PTE_CACHEABLE)
+#    define PG_L2_BASE_VADDR   PGTABLE_COARSE_BASE_VADDR
+
+     /* MMU Flags for each memory region. */
+
+#    define MMU_L1_TEXTFLAGS   (PMD_TYPE_COARSE|PMD_BIT4)
 #    define MMU_L2_TEXTFLAGS   (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
-#    define MMU_L1_DATAFLAGS   (PMD_TYPE_COARSE|PMD_BIT4|PTE_CACHEABLE|PTE_BUFFERABLE)
+#    define MMU_L1_DATAFLAGS   (PMD_TYPE_COARSE|PMD_BIT4)
 #    define MMU_L2_DATAFLAGS   (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW|PTE_CACHEABLE|PTE_BUFFERABLE)
+#    define MMU_L1_PGTABFLAGS  (PMD_TYPE_COARSE|PMD_BIT4)
+#    define MMU_L2_PGTABFLAGS  (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW)
+
 #  else
 #    error "Need extended definitions for CONFIG_PAGING_PAGESIZE"
 #  endif
 
 #define PT_SIZE (PTE_NPAGES * 4)
 
-/* We position the data section PTE's just after the text section PTE's */
+/* We position the data section PTEs just after the text section PTE's */
 
 #define PG_L2_DATA_PADDR       (PG_L2_BASE_PADDR + 4*PG_TEXT_NPAGES)
+#define PG_L2_DATA_VADDR       (PG_L2_BASE_VADDR + 4*PG_TEXT_NPAGES)
+
+/* Page Table Info: The number of pages in the in the page table
+ * (PG_PGTABLE_NPAGES).  We position the pagetable PTEs just after
+ * the data section PTEs.
+ */
+
+#define PG_PGTABLE_NPAGES      (PGTABLE_SIZE >> PAGESHIFT)
+#define PG_L2_PGTABLE_PADDR    (PG_L2_DATA_PADDR + 4*PG_DATA_NPAGES)
+#define PG_L2_PGTABLE_VADDR    (PG_L2_DATA_VADDR + 4*PG_DATA_NPAGES)
+
+/* This is the total number of pages used in the initial page table setup
+ * in up_head.S
+ */
+
+#define PG_STATIC_NPAGES (PG_TEXT_NPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
+
+/* For page managment purposes, the following summarize the "heap" of
+ * free pages
+ */
+
+#define PG_POOL_FIRSTPAGE  PG_STATIC_NPAGES
+#define PG_POOL_NPAGES     CONFIG_PAGING_NLOCKED
+
 #endif /* CONFIG_PAGING */
 
 /****************************************************************************
@@ -184,7 +234,7 @@
  *
  * Scratch registers (modified):
  *   addr, npages, tmp
- *   l2  - L2 page table physical address
+ *   l2 - L2 page table physical address
  *   addr - Physical address in the L1 page table.
  *   npages - The number of pages remaining to be accounted for
  *   tmp - scratch

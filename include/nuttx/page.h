@@ -77,7 +77,8 @@
 #define PG_ALIGNUP(addr)           (((addr) + PAGEMASK) & ~PAGEMASK)
 
 /* CONFIG_PAGING_NLOCKED - This is the number of locked pages in the memory
- * map.  The size of locked address region will then be:
+ * map.  The size of locked address region will then be given by
+ * PG_LOCKED_SIZE.
  */
 
 #define PG_LOCKED_SIZE             (CONFIG_PAGING_NLOCKED << PAGESHIFT)
@@ -87,6 +88,12 @@
  * not defined, then this logic will be set to then to CONFIG_DRAM_START
  * and CONFIG_DRAM_VSTART (i.e., assuming that the base address of the
  * locked region is at the virtual address of the beginning of RAM).
+ *
+ * NOTE:  In some architectures, it may be necessary to take some memory
+ * from the beginning of this region for vectors or for a page table.
+ * In such cases, CONFIG_PAGING_LOCKED_P/VBASE should take that into
+ * consideration to prevent overlapping the locked memory region and the
+ * system data at the beginning of SRAM.
  */
 
 #if defined(CONFIG_PAGING_LOCKED_PBASE) && defined(CONFIG_PAGING_LOCKED_VBASE)
@@ -110,10 +117,19 @@
 
 #define PG_PAGED_SIZE              (CONFIG_PAGING_NPAGED << PAGESHIFT)
 
-/* This positions the paging Read-Only text section */
+/* This positions the paging Read-Only text section.  If the configuration
+ * did not override the default, the paged region will immediately follow
+ * the locked region.
+ */
 
-#define PG_PAGED_PBASE             PG_LOCKED_PEND
-#define PG_PAGED_VBASE             PG_LOCKED_VEND
+#if defined(CONFIG_PAGING_LOCKED_PBASE) && defined(CONFIG_PAGING_LOCKED_VBASE)
+#  define PG_LOCKED_PBASE          CONFIG_PAGING_LOCKED_PBASE
+#  define PG_LOCKED_VBASE          CONFIG_PAGING_LOCKED_VBASE
+#else
+#  define PG_PAGED_PBASE           PG_LOCKED_PEND
+#  define PG_PAGED_VBASE           PG_LOCKED_VEND
+#endif
+
 #define PG_PAGED_PEND              (PG_PAGED_PBASE + PG_PAGED_SIZE)
 #define PG_PAGED_VEND              (PG_PAGED_VBASE + PG_PAGED_SIZE)
 
@@ -123,23 +139,32 @@
 #define PG_TEXT_SIZE               (PG_TEXT_NPAGES << PAGESHIFT)
 
 /* CONFIG_PAGING_NDATA - This is the number of data pages in the memory
- * map.  The size of data address region will then be:
+ * map.  The data region will extend to the end of RAM unless overridden
+ * by a setting in the configuration file.
+ *
+ * NOTE:  In some architectures, it may be necessary to take some memory
+ * from the end of RAM for page tables or other system usage.  The
+ * configuration settings and linker directives must be cognizant of that.
+ * CONFIG_PAGING_NDATA should be defined to prevent the data region from
+ * extending all the way to the end of memory. 
  */
 
 #define PG_RAM_PAGES               (CONFIG_DRAM_SIZE >> PAGESHIFT)
-#if PG_RAM_PAGES <= PG_TEXT_NPAGES
+
+#ifdef CONFIG_PAGING_NDATA
+#  PG_DATA_NPAGES                  CONFIG_PAGING_NDATA
+#elif PG_RAM_PAGES > PG_TEXT_NPAGES
+#  PG_DATA_NPAGES                  (PG_RAM_PAGES - PG_TEXT_NPAGES)
+#else
 #  error "Not enough memory for this page layout"
 #endif
 
-#ifdef CONFIG_PAGING_NDATA
-#  PG_DATA_NPAGED                  CONFIG_PAGING_NDATA
-#else
-#  PG_DATA_NPAGED                  (PG_RAM_PAGES - PG_TEXT_NPAGES)
-#endif
+#define PG_DATA_SIZE               (PG_DATA_NPAGES << PAGESHIFT)
 
-#define PG_DATA_SIZE               (CONFIG_PAGING_NPAGED << PAGESHIFT)
-
-/* This positions the Read/Write data region */
+/* This positions the Read/Write data region.  If the configuration
+ * did not override the default, the paged region will immediately follow
+ * the paged region and will extend to the end of memory.
+ */
 
 #if defined(CONFIG_PAGING_DATA_PBASE) && defined(CONFIG_PAGING_DATA_VBASE)
 #  define PG_DATA_PBASE            CONFIG_PAGING_DATA_PBASE

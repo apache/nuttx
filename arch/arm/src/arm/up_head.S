@@ -180,18 +180,41 @@ __start:
 	str	r3, [r4, r0, lsr #18]		/* identity mapping */
 
 #ifdef CONFIG_PAGING
-	/* Populate the L1 table for the locked and paged text regions */
+	/* Map the read-only .text region in place.  This must be done
+	 * before the MMU is enabled and the virtual addressing takes
+	 * effect.  First populate the L1 table for the locked and paged
+	 * text regions.
+	 *
+	 * We could probably make the the pg_span and pg_map macros into
+	 * call-able subroutines, but we would have to be carefully during
+	 * this phase while we are operating in a physical address space.
+	 */
 
 	adr	r0, .Ltxtspan
 	ldmia	r0, {r0, r1, r2, r3}
  	pg_span r0, r1, r2, r3, r4
 
-	/* Populate the L2 table for the locked text region only */
+	/* Then populate the L2 table for the locked text region only. */
 
 	adr	r0, .Ltxtmap
 	ldmia	r0, {r0, r1, r2, r3}
  	pg_map r0, r1, r2, r3, r4
- #else
+
+	/* Make sure that the page table is itself mapped and and read/write-able.
+	 * First, populate the L1 table:
+	 */
+
+	adr	r0, .Lptabspan
+	ldmia	r0, {r0, r1, r2, r3}
+ 	pg_span r0, r1, r2, r3, r4
+
+	/* Then populate the L2 table. */
+
+	adr	r0, .Lptabmap
+	ldmia	r0, {r0, r1, r2, r3}
+ 	pg_map r0, r1, r2, r3, r4
+
+#else
 	/* Create a virtual single section mapping for the first MB of the .text
 	 * address space. Now, we have the first 1MB mapping to both phyical and
 	 * virtual addresses.  The rest of the .text mapping will be completed in
@@ -303,7 +326,7 @@ __start:
  * PC_Relative Data
  ****************************************************************************/
 
-	/* These addresses are all virtual address */
+	/* Most addresses are all virtual address */
 	
 	.type	.LCvstart, %object
 .LCvstart:
@@ -312,17 +335,43 @@ __start:
 #ifndef CONFIG_ARCH_ROMPGTABLE
 	.type	.LCmmuflags, %object
 .LCmmuflags:
-	.long	MMU_MEMFLAGS
+	.long	MMU_MEMFLAGS			/* MMU flags for memory sections */
 #endif
 
-	.type	.LCppagetable, %object
+	.type	.LCppgtable, %object
 .LCppgtable:
-	.long	PGTABLE_BASE_PADDR		/* Physical start of DRAM */
+	.long	PGTABLE_BASE_PADDR		/* Physical start of page table */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-	.type	.LCvpagetable, %object
+	.type	.LCvpgtable, %object
 .LCvpgtable:
-	.long	PGTABLE_BASE_VADDR		/* Virtual start of DRAM */
+	.long	PGTABLE_BASE_VADDR		/* Virtual start of page table */
+#endif
+
+#ifdef CONFIG_PAGING
+.Ltxtspan:
+	.long	PG_L2_BASE_PADDR		/* Physical address of L2 table */
+	.long	PG_LOCKED_VBASE			/* Virtual address of locked base */
+	.long	PG_TEXT_NPAGES			/* Total mapped text pages */
+	.long	MMU_L1_TEXTFLAGS		/* L1 MMU flags to use */
+
+.Ltxtmap:
+	.long	PG_L2_BASE_PADDR		/* Physical address of L2 table */
+	.long	PG_LOCKED_PBASE			/* Physical address of locked base */
+	.long	CONFIG_PAGING_NLOCKED		/* Number of pages in the locked region */
+	.long	MMU_L2_TEXTFLAGS		/* L2 MMU flags to use */
+
+.Lptabspan:
+	.long	PG_L2_PGTABLE_PADDR		/* Physical address of L2 table */
+	.long	PGTABLE_BASE_VADDR		/* Virtual address of the page table */
+	.long	PG_TEXT_NPAGES			/* Total mapped page table pages */
+	.long	MMU_L1_PGTABFLAGS		/* L1 MMU flags to use */
+
+.Lptabmap:
+	.long	PG_L2_PGTABLE_PADDR		/* Physical address of L2 table */
+	.long	PGTABLE_BASE_PADDR		/* Physical address of the page table */
+	.long	CONFIG_PAGING_NLOCKED		/* Total mapped page table pages */
+	.long	MMU_L2_PGTABFLAGS		/* L2 MMU flags to use */
 #endif
 	.size	_start, .-_start
 
@@ -353,15 +402,15 @@ __start:
 #if defined(CONFIG_PAGING)
 	/* Populate the L1 table for the data regions */
 
-	adr	r0, .Ldatamap
+	adr	r0, .Ldataspan
 	ldmia	r0, {r0, r1, r2, r3}
  	pg_span r0, r1, r2, r3, r4
 
 	/* Populate the L2 table for the data region */
 
 	adr	r0, .Ldatamap
-	ldmia	r0, {r0, r1, r2, r3, r4}
- 	pg_map r0, r1, r2, r4, r3
+	ldmia	r0, {r0, r1, r2, r3}
+ 	pg_map r0, r1, r2, r3, r4
 
 #elif defined(CONFIG_BOOT_RUNFROMFLASH)
 #  error "Logic not implemented"
@@ -424,7 +473,13 @@ __start:
 	 */
 
 #if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_PAGING)
-# error "Logic not implemented"
+	adr	r3, .Ldatainit
+	ldmia	r3, {r0, r1, r2}
+
+1:	ldmia	r0!, {r3 - r10}
+	stmia	r1!, {r3 - r10}
+	cmp	r1, r2
+	blt	1b
 #endif
 
 	/* Perform early C-level, platform-specific initialization */
@@ -452,25 +507,25 @@ __start:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 
 #ifdef CONFIG_PAGING
-.Ltxtspan:
-	.long	PG_L2_BASE_PADDR
-	.long	PG_LOCKED_PBASE
-	.long	PG_TEXT_NPAGES
-	.long	MMU_L1_TEXTFLAGS
-
-.Ltxtmap:
-	.long	PG_L2_BASE_PADDR
-	.long	PG_LOCKED_PBASE
-	.long	CONFIG_PAGING_NLOCKED
-	.long	MMU_L2_TEXTFLAGS
+.Ldataspan:
+	.long	PG_L2_DATA_PADDR	/* Physical address of L2 table */
+	.long	PG_DATA_PBASE		/* Physical address of data base */
+	.long	PG_DATA_NPAGED		/* Number of pages in the data region */
+	.long	MMU_L1_DATAFLAGS	/* L1 MMU flags to use */
 
 .Ldatamap:
-	.long	PG_L2_DATA_PADDR
-	.long	PG_DATA_PBASE
-	.long	PG_DATA_NPAGED
-	.long	MMU_L1_DATAFLAGS
-	.long	MMU_L2_DATAFLAGS
- #endif
+	.long	PG_L2_DATA_PADDR	/* Physical address of L2 table */
+	.long	PG_DATA_VBASE		/* Virtual address of data base */
+	.long	PG_DATA_NPAGED		/* Number of pages in the data region */
+	.long	MMU_L2_DATAFLAGS	/* L2 MMU flags to use */
+#endif
+
+#if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_PAGING)
+.Ldatainit:
+	.long	_eronly			/* Where .data defaults are stored in FLASH */
+	.long	_sdata			/* Where .data needs to reside in SDRAM */
+	.long	_edata
+#endif
 	.size	.Lvstart, .-.Lvstart
 
 	 /* Data section variables */
