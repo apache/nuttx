@@ -131,6 +131,8 @@
  * table.
  */
 
+#define PG_L1_LOCKED_PADDR     (PGTABLE_BASE_PADDR + ((PG_LOCKED_VBASE >> 20) << 2))
+#define PG_L1_LOCKED_VADDR     (PGTABLE_BASE_VADDR + ((PG_LOCKED_VBASE >> 20) << 2))
 #define PG_L2_LOCKED_PADDR     PG_L2_BASE_PADDR
 #define PG_L2_LOCKED_VADDR     PG_L2_BASE_VADDR
 #define PG_L2_LOCKED_SIZE      (4*CONFIG_PAGING_NLOCKED)
@@ -138,19 +140,25 @@
 /* We position the paged region PTEs immediately after the locked
  * region PTEs.
  */
-
+ 
+#define PG_L1_PAGED_PADDR      (PGTABLE_BASE_PADDR + ((PG_PAGED_VBASE >> 20) << 2))
+#define PG_L1_PAGED_VADDR      (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
 #define PG_L2_PAGED_PADDR      (PG_L2_BASE_PADDR + PG_L2_LOCKED_SIZE)
 #define PG_L2_PAGED_VADDR      (PG_L2_BASE_VADDR + PG_L2_LOCKED_SIZE)
 #define PG_L2_PAGED_SIZE       (4*CONFIG_PAGING_NPPAGED)
 
 /* This describes the overall text region */
 
+#define PG_L1_TEXT_PADDR       PG_L1_LOCKED_PADDR
+#define PG_L1_TEXT_VADDR       PG_L1_LOCKED_VADDR
 #define PG_L2_TEXT_PADDR       PG_L2_LOCKED_PADDR
 #define PG_L2_TEXT_VADDR       PG_L2_LOCKED_VADDR
 #define PG_L2_TEXT_SIZE        (PG_L2_LOCKED_SIZE + PG_L2_PAGED_SIZE)
 
 /* We position the data section PTEs just after the text region PTE's */
 
+#define PG_L1_DATA_PADDR       (PGTABLE_BASE_PADDR + ((PG_DATA_VBASE >> 20) << 2))
+#define PG_L1_DATA_VADDR       (PGTABLE_BASE_VADDR + ((PG_DATA_VBASE >> 20) << 2))
 #define PG_L2_DATA_PADDR       (PG_L2_BASE_PADDR + PG_L2_TEXT_SIZE)
 #define PG_L2_DATA_VADDR       (PG_L2_BASE_VADDR + PG_L2_TEXT_SIZE)
 #define PG_L2_DATA_SIZE        (4*PG_DATA_NPAGES)
@@ -161,6 +169,8 @@
  */
 
 #define PG_PGTABLE_NPAGES      (PGTABLE_SIZE >> PAGESHIFT)
+#define PG_L1_PGTABLE_PADDR    (PGTABLE_BASE_PADDR + ((PGTABLE_BASE_VADDR >> 20) << 2))
+#define PG_L1_PGTABLE_VADDR    (PGTABLE_BASE_VADDR + ((PGTABLE_BASE_VADDR >> 20) << 2))
 #define PG_L2_PGTABLE_PADDR    (PG_L2_DATA_PADDR + PG_L2_DATA_SIZE)
 #define PG_L2_PGTABLE_VADDR    (PG_L2_DATA_VADDR + PG_L2_DATA_SIZE)
 #define PG_L2_PGTABLE_SIZE     (4*PG_DATA_NPAGES)
@@ -368,12 +378,10 @@
  *   macro is used when CONFIG_PAGING is enable.  This case, it is used as
  *   follows:
  *
- *	ldr	r0, =PGTABLE_BASE_PADDR		<-- Address in L1 table
- *	ldr	r1, =PG_LOCKED_VBASE		<-- Virtual address of region
- *	pg_l1addr r0, r1, r0
- *	ldr	r1, =PG_LOCKED_PBASE		<-- Physical address of region 
- *	ldr	r1, =(CONFIG_PAGING_NLOCKED+CONFIG_PAGING_NVPAGED) <-- number of pages
- *      ldr	r3, =MMU_FLAGS			<-- L1 MMU flags
+ *	ldr	r0, =PG_L1_PGTABLE_PADDR	<-- Address in the L1 table
+ *	ldr	r1, =PG_L2_PGTABLE_PADDR	<-- Physical address of L2 page table 
+ *	ldr	r2, =PG_PGTABLE_NPAGES		<-- Number of pages
+ *      ldr	r3, =MMU_L1_PGTABFLAGS		<-- L1 MMU flags
  *	pg_l1span r0, r1, r2, r3, r4
  *
  * Inputs (unmodified unless noted):
@@ -429,45 +437,6 @@
 
 	cmp	\npages, #0
 	bgt	1b
-	.endm
-
-/****************************************************************************
- * Name: pg_l1addr
- *
- * Description:
- *   Given the start of an L1 table and a virtual address, return the offset
- *   address into the L1 table for that address.
- *
- *	ldr	r0, =PGTABLE_BASE_PADDR
- *	ldr	r1, =PG_LOCKED_VBASE
- *	pg_l1addr r0, r1, r0
- *
- * Inputs (unmodified unless noted):
- *   l1 - The physical or virtual address of the start of the L1 table
- *   vaddr - The virtual address of the start of the region to span. Must
- *     be aligned to 1Mb section boundaries (modified)
- *   npages - Number of pages to required to span that memory region (modified)
- *   mmuflags - L1 MMU flags to use
- *
- * Scratch registers (modified): vaddr
- *
- * Return:
- *   The offset L1 table address is returned in result.
- *
- * Assumptions:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PAGING
-	.macro	pg_l1addr, l1, vaddr, result
-
-	/* Get result = the L1 table address coresponding to a virtual
-	 * address.
-	 */
-
-	lsr	\vaddr, \vaddr, #20
-	add	\result, \l1, \vaddr, lsl #2
 	.endm
 
 #endif /* CONFIG_PAGING */
