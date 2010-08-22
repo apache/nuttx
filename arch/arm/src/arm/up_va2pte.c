@@ -46,6 +46,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/page.h>
 
+#include "chip.h"
 #include "pg_macros.h"
 #include "up_internal.h"
 
@@ -88,7 +89,7 @@
  *
  ****************************************************************************/
 
-uint32_t *up_va2pte(uintptr_t vaddr);
+uint32_t *up_va2pte(uintptr_t vaddr)
 {
   uint32_t L1;
   uint32_t *L2;
@@ -110,7 +111,7 @@ uint32_t *up_va2pte(uintptr_t vaddr);
    * 256 x 4Kb or 1024 x 1Kb pages.
    */
 
-  ndx = ((vaddr & 0x000fffff) >> PAGESHIFT;
+  ndx = (vaddr & 0x000fffff) >> PAGESHIFT;
 
   /* Return true if this virtual address is mapped. */
 

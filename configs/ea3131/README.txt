@@ -400,6 +400,13 @@ Where <subdir> is one of the following:
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
 
+  pgnsh:
+    This is the same configuration as nsh, but with On-Demand
+    paging enabled.  See http://www.nuttx.org/NuttXDemandPaging.html.
+    This configuration is an experiment for the purposes of test
+    and debug.  At present, this does not produce functioning, 
+    usable system
+ 
   usbserial:
     This configuration directory exercises the USB serial class
     driver at examples/usbserial.  See examples/README.txt for

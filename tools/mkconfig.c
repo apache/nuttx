@@ -330,6 +330,7 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_DEBUG_VERBOSE\n");
   printf("# undef CONFIG_DEBUG_SCHED\n");
   printf("# undef CONFIG_DEBUG_MM\n");
+  printf("# undef CONFIG_DEBUG_PAGING\n");
   printf("# undef CONFIG_DEBUG_DMA\n");
   printf("# undef CONFIG_DEBUG_FS\n");
   printf("# undef CONFIG_DEBUG_LIB\n");

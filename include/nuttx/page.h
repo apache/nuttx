@@ -43,8 +43,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <nuttx/sched.h>
+#ifndef __ASSEMBLY__
+#  include <stdbool.h>
+#  include <nuttx/sched.h>
+#endif
 
 #ifdef CONFIG_PAGING
 
@@ -128,8 +130,8 @@
 
 /* The size of physical and virutal paged address regions will then be: */
 
-#define PG_PAGED_PSIZE              CONFIG_PAGING_NPPAGED << PAGESHIFT)
-#define PG_PAGED_VSIZE              CONFIG_PAGING_NVPAGED << PAGESHIFT)
+#define PG_PAGED_PSIZE             (CONFIG_PAGING_NPPAGED << PAGESHIFT)
+#define PG_PAGED_VSIZE             (CONFIG_PAGING_NVPAGED << PAGESHIFT)
 
 /* This positions the paging Read-Only text region.  If the configuration
  * did not override the default, the paged region will immediately follow
@@ -174,9 +176,9 @@
 #define PG_RAM_PAGES               (CONFIG_DRAM_SIZE >> PAGESHIFT)
 
 #ifdef CONFIG_PAGING_NDATA
-#  PG_DATA_NPAGES                  CONFIG_PAGING_NDATA
+#  define PG_DATA_NPAGES           CONFIG_PAGING_NDATA
 #elif PG_RAM_PAGES > PG_TEXT_NPPAGES
-#  PG_DATA_NPAGES                  (PG_RAM_PAGES - PG_TEXT_NPAGES)
+#  define PG_DATA_NPAGES           (PG_RAM_PAGES - PG_TEXT_NPAGES)
 #else
 #  error "Not enough memory for this page layout"
 #endif
@@ -223,8 +225,8 @@
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY
- 
+#ifndef __ASSEMBLY__
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -444,6 +446,6 @@ EXTERN int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callba
 }
 #endif
 
-#endif /* __ASSEMBLY */
+#endif /* __ASSEMBLY__ */
 #endif /* CONFIG_PAGING */
 #endif /* __NUTTX_PAGE_H */

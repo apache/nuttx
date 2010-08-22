@@ -100,7 +100,7 @@
 bool up_checkmapping(FAR _TCB *tcb)
 {
   uintptr_t vaddr;
-  uint32_t *te;
+  uint32_t *pte;
 
   /* Since interrupts are disabled, we don't need to anything special. */
 

@@ -545,7 +545,7 @@ int pg_worker(int argc, char *argv[])
        * Interrupts are still disabled.
        */
 
-#ifdef CONFIG_PAGING_BLOCKINGFILL
+#ifndef CONFIG_PAGING_BLOCKINGFILL
       /* For the non-blocking up_fillpage(), the page fill worker thread will detect
        * that the page fill is complete when it is awakened with g_pftcb non-NULL
        * and fill completion status from pg_callback.
@@ -589,7 +589,7 @@ int pg_worker(int argc, char *argv[])
            * event, then declare a failure.
            */
 
-#if defined() && defined(CONFIG_PAGING_TIMEOUT_TICKS)
+#ifdef CONFIG_PAGING_TIMEOUT_TICKS
           else
             {
               dbg("Timeout!\n");

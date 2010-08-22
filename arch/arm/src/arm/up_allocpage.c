@@ -50,7 +50,9 @@
 #ifdef CONFIG_PAGING
 
 #include <nuttx/page.h>
+
 #include "pg_macros.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -177,7 +179,7 @@ int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
    */
 
   pgndx = g_pgndx++;
-  if (p_pgndx >= CONFIG_PAGING)
+  if (g_pgndx >= CONFIG_PAGING)
     {
       g_pgndx  = 0;
       g_pgwrap = true;
@@ -199,7 +201,7 @@ int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
 
       /* Invalidate the instruction TLB corresponding to the virtual address */
 
-      tlb_inst_invalidate_single(oldvaddr)
+      tlb_inst_invalidate_single(oldvaddr);
     }
 
   /* Then convert the index to a (physical) page address. */

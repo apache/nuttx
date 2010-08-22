@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/debug.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,6 +164,18 @@
 # define sllvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_PAGING
+# define pgdbg(format, arg...)    dbg(format, ##arg)
+# define pglldbg(format, arg...)  lldbg(format, ##arg)
+# define pgvdbg(format, arg...)   vdbg(format, ##arg)
+# define pgllvdbg(format, arg...) llvdbg(format, ##arg)
+#else
+# define pgdbg(x...)
+# define pglldbg(x...)
+# define pgvdbg(x...)
+# define pgllvdbg(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_DMA
 # define dmadbg(format, arg...)    dbg(format, ##arg)
 # define dmalldbg(format, arg...)  lldbg(format, ##arg)
@@ -297,6 +309,18 @@
 # define sllvdbg (void)
 #endif
 
+#ifdef CONFIG_DEBUG_PAGING
+# define pgdbg    dbg
+# define pglldbg  lldbg
+# define pgvdbg   vdbg
+# define pgllvdbg llvdbg
+#else
+# define pgdbg    (void)
+# define pglldbg  (void)
+# define pgvdbg   (void)
+# define pgllvdbg (void)
+#endif
+
 #ifdef CONFIG_DEBUG_DMA
 # define dmadbg    dbg
 # define dmalldbg  lldbg
@@ -413,6 +437,14 @@
 #else
 #  define sdbgdumpbuffer(m,b,n)
 #  define svdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_PAGING
+#  define pgdbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define pgvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define pgdbgdumpbuffer(m,b,n)
+#  define pgvdbgdumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA

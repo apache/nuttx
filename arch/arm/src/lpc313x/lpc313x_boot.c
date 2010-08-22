@@ -51,6 +51,11 @@
 #include "lpc313x_cgudrvr.h"
 #include "lpc313x_internal.h"
 
+#ifdef CONFIG_PAGING
+#  include <nuttx/page.h>
+#  include "pg_macros.h"
+#endif
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -201,14 +206,15 @@ static void up_setupmappings(void)
  ************************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
-static void  up_vectorpermissions(uint32 mmuflags)
+static void  up_vectorpermissions(uint32_t mmuflags)
 {
-  uint32_t *ptr = (uint3t*)PG_L2_VECT_VADDR;
+  uint32_t *ptr = (uint32_t*)PG_L2_VECT_VADDR;
   uint32_t pte;
 
   /* This is easily because we have already been told everything! */
 
   pte = *ptr;
+
 #ifdef CONFIG_PAGING_VECPPAGE
   /* We've been told to use a specify page for the vectors.  In this
    * case, I expect the pte to be zero the first time this function is

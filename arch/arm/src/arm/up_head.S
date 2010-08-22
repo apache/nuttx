@@ -400,7 +400,7 @@ __start:
 	str	r0, [r4, r3, lsr #18]		/* Undo identity mapping */
 
 #if defined(CONFIG_PAGING)
-	/* Populate the L1 table for the data regions */
+	/* Populate the L1 table for the data region */
 
 	adr	r0, .Ldataspan
 	ldmia	r0, {r0, r1, r2, r3}
@@ -510,13 +510,13 @@ __start:
 .Ldataspan:
 	.long	PG_L1_DATA_VADDR	/* Virtual address in the L1 table */
 	.long	PG_L2_DATA_PADDR	/* Physical address of the L2 page table */
-	.long	PG_DATA_NPAGED		/* Number of pages in the data region */
+	.long	PG_DATA_NPAGES		/* Number of pages in the data region */
 	.long	MMU_L1_DATAFLAGS	/* L1 MMU flags to use */
 
 .Ldatamap:
 	.long	PG_L2_DATA_VADDR	/* Virtual address of L2 table */
 	.long	PG_DATA_VBASE		/* Virtual address of data memory  */
-	.long	PG_DATA_NPAGED		/* Number of pages in the data region */
+	.long	PG_DATA_NPAGES		/* Number of pages in the data region */
 	.long	MMU_L2_DATAFLAGS	/* L2 MMU flags to use */
 #endif
 

@@ -1,7 +1,8 @@
-NuttX TODO List (Last updated August 12, 2010)
+NuttX TODO List (Last updated August 21, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
+  (1)  On-demand paging (sched/)
   (2)  Memory Managment (mm/)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
@@ -63,6 +64,17 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium, required for standard compliance (but makes the
                code bigger)
+
+o On-demand paging (sched/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: On-demand paging has recently been incorporated into the RTOS.
+               The design of this feature is described here:
+	       http://www.nuttx.org/NuttXDemandPaging.html.
+	       As of this writing, the feature is incomplete and untested.
+	       It should not be enabled!
+  Status:      Open, in work
+  Priority:    Medium-Low
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
