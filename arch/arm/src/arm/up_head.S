@@ -188,17 +188,20 @@ __start:
 	 * We could probably make the the pg_l1span and pg_l2map macros into
 	 * call-able subroutines, but we would have to be carefully during
 	 * this phase while we are operating in a physical address space.
+	 *
+	 * NOTE: That the value of r5 (L1 table base address) must be
+	 * preserved through the following.
 	 */
 
 	adr	r0, .Ltxtspan
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l1span r0, r1, r2, r3, r4
+ 	pg_l1span r0, r1, r2, r3, r5
  
 	/* Then populate the L2 table for the locked text region only. */
 
 	adr	r0, .Ltxtmap
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l2map r0, r1, r2, r3, r4
+ 	pg_l2map r0, r1, r2, r3, r5
 
 	/* Make sure that the page table is itself mapped and and read/write-able.
 	 * First, populate the L1 table:
@@ -206,19 +209,22 @@ __start:
 
 	adr	r0, .Lptabspan
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l1span r0, r1, r2, r3, r4
+ 	pg_l1span r0, r1, r2, r3, r5
 
 	/* Then populate the L2 table. */
 
 	adr	r0, .Lptabmap
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l2map r0, r1, r2, r3, r4
+ 	pg_l2map r0, r1, r2, r3, r5
 
 #else
 	/* Create a virtual single section mapping for the first MB of the .text
 	 * address space. Now, we have the first 1MB mapping to both phyical and
 	 * virtual addresses.  The rest of the .text mapping will be completed in
 	 * .Lvstart once we have moved the physical mapping out of the way.
+	 *
+	 * Here we expect to have:
+	 * r4 = Address of the base of the L1 table
 	 */
 
 	ldr	r2, .LCvpgtable			/* r2=virt. page table */
@@ -231,7 +237,11 @@ __start:
 #endif
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
-	/* The following logic will set up the ARM920/ARM926 for normal operation */
+	/* The following logic will set up the ARM920/ARM926 for normal operation.
+	 *
+	 * Here we expect to have:
+	 * r4 = Address of the base of the L1 table
+	 */
 
 	mov	r0, #0
 	mcr	p15, 0, r0, c7, c7		/* Invalidate I,D caches */
@@ -317,8 +327,10 @@ __start:
 	/* Get TMP=2 Processor ID register */
 
 	mrc	p15, 0, r1, c0, c0, 0		/* read id reg */
-	mov	r1, r1
-	mov	r1, r1
+	mov	r1,r1				/* Null-avoiding nop */
+	mov	r1,r1				/* Null-avoiding nop */
+
+	/* And "jump" to .Lvstart */
 
 	mov	pc, lr
 
