@@ -133,7 +133,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * (It has not yet been saved in the register context save area).
    */
  
-  if (far < PG_PAGEDBASE || far >= PG_PAGEDEND)
+  if (far < PG_PAGED_VBASE || far >= PG_PAGED_VEND)
     {
       goto segfault;
     }

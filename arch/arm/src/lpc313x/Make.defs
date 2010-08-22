@@ -47,7 +47,7 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_undefinedinsn.c up_usestack.c
 
 ifeq ($(CONFIG_PAGING),y)
-CMN_CSRCS	+= up_pginitialize.c up_checkmapping.c up_allocpage.c up_va1pte.c
+CMN_CSRCS	+= up_pginitialize.c up_checkmapping.c up_allocpage.c up_va2pte.c
 endif
 
 CGU_ASRCS	= 

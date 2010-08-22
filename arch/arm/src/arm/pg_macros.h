@@ -429,7 +429,7 @@
 	 * non-mappings
 	 */
 
-	sub	\npages, \npages, PTE_NPAGES
+	sub	\npages, \npages, #PTE_NPAGES
 2:
 	/* Check if all of the pages have been written.  If not, then
 	 * loop and write the next L1 entry.

@@ -79,7 +79,7 @@
                                                   /* 0x60001000-0x6fffffff: Reserved */
 #define LPC313X_NAND_PSECTION          0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
                                                   /* 0x70000800-0xffffffff: Reserved */
-#ifdef CONDFIG_LPC313X_EXTNAND                    /* End of the physical address space */
+#ifdef CONFIG_LPC313X_EXTNAND                    /* End of the physical address space */
 #  define LPC313X_LAST_PSECTION        (LPC313X_NAND_PSECTION + (1 << 20))
 #else
 #  define LPC313X_LAST_PSECTION        (LPC313X_INTC_PSECTION + (1 << 20))
@@ -211,7 +211,7 @@
  */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-# defined LPC313X_FIRST_VSECTION       0x00000000 /* Beginning of the virtual address space */
+# define LPC313X_FIRST_VSECTION        0x00000000 /* Beginning of the virtual address space */
 #  define LPC313X_SHADOWSPACE_VSECTION 0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
 #  define LPC313X_INTSRAM_VSECTION     0x11028000 /*                        Internal SRAM 96Kb-192Kb */
 #    define LPC313X_INTSRAM0_VADDR     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
@@ -233,7 +233,7 @@
 #  define LPC313X_INTC_VSECTION        0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
 #  define LPC313X_NAND_VSECTION        0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
 #
-#  ifdef CONDFIG_LPC313X_EXTNAND                  /* End of the virtual address space */
+#  ifdef CONFIG_LPC313X_EXTNAND                  /* End of the virtual address space */
 #    define LPC313X_LAST_VSECTION      (LPC313X_NAND_VSECTION + (1 << 20))
 #  else
 #    define LPC313X_LAST_VSECTION      (LPC313X_INTC_VSECTION + (1 << 20))
