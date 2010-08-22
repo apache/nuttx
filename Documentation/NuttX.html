@@ -1881,11 +1881,11 @@ nuttx-5.9 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* examples/uip/main.c - if DHCPC is selected, this example now shows
 	  the assigned IP address.
 	* arch/arm/src/lm3s and arch/arm/include/lm3s - Definitions for the
-      TI LM3S9B96 contributed by Tiago Maluta.
+	  TI LM3S9B96 contributed by Tiago Maluta.
 	* arch/arm/src/lm3s/lm3s_gioirq.c - Fix a logic error in the address
 	  table lookup.
 	* arch/arm/src/lm3s/lm3s_gioirq.c - Also needs to enable the global
-      GPIO interrupts.
+	  GPIO interrupts.
 	* arch/arm/src/lm3s/lm3s_internal.h and lm3s_gpio.c - Fixed the encoding
 	  of GPIO port number that limited support for GPIO ports to 8
 	* sched/pg_*.c and *.c and include/nuttx/page.h - Implemented the
@@ -1893,6 +1893,10 @@ nuttx-5.9 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  http://www.nuttx.org/NuttXDemandPaging.html for details.
 	* drivers/usbdev/usbdev_serial.c - Correct compilation errors that
 	  occur if CONFIG_USBDEV_DUALSPEED is selected.
+	* configs/ea3131/pgnsh - Add an NSH configuration with on-demand paging
+	  enabled.  This is not expected to be a functionality configuration (at
+	  least not yet); it was created in order to debug the on-demand paging
+	  feature.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
