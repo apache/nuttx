@@ -272,15 +272,40 @@ defconfig -- This is a configuration file similar to the Linux
 
 		CONFIG_PAGING_PAGESIZE - The size of one managed page.  This must
 		  be a value supported by the processor's memory management unit.
-                CONFIG_PAGING_NLOCKED - This is the number of locked pages in the
+		CONFIG_PAGING_NLOCKED - This is the number of locked pages in the
 		  memory map.  The locked address region will then be from
 		  CONFIG_DRAM_VSTART through (CONFIG_DRAM_VSTART +
 		  CONFIG_PAGING_PAGESIZE*CONFIG_PAGING_NLOCKED)
-		CONFIG_PAGING_NPAGES - The number of pages in the paged region of
-		  the memory map.  This paged region then begins at (CONFIG_DRAM_VSTART +
-		  CONFIG_PAGING_PAGESIZE*CONFIG_PAGING_NLOCKED) and continues until
-		  (CONFIG_DRAM_VSTART + CONFIG_PAGING_PAGESIZE*(CONFIG_PAGING_NLOCKED +
-		  CONFIG_PAGING_NPAGES)
+		CONFIG_PAGING_LOCKED_PBASE and CONFIG_PAGING_LOCKED_VBASE - These
+		  may be defined to determine the base address of the locked page
+		  regions.  If neither are defined, the logic will be set the bases
+		  to CONFIG_DRAM_START and CONFIG_DRAM_VSTART (i.e., it assumes
+		  that the base address of the locked region is at the beginning
+		  of RAM).
+		  NOTE:  In some architectures, it may be necessary to take some
+		  memory from the beginning of this region for vectors or for a
+		  page table. In such cases, CONFIG_PAGING_LOCKED_P/VBASE should
+		  take that into consideration to prevent overlapping the locked
+		  memory region and the system data at the beginning of SRAM.
+		CONFIG_PAGING_NPPAGED - This is the number of physical pages
+		  available to support the paged text region.  This paged region
+		  begins at (CONFIG_PAGING_LOCKED_PBASE + CONFIG_PAGING_PAGESIZE*CONFIG_PAGING_NPPAGED)
+		  and continues until (CONFIG_PAGING_LOCKED_PBASE + CONFIG_PAGING_PAGESIZE*(CONFIG_PAGING_NLOCKED +
+		  CONFIG_PAGING_NPPAGED)
+		CONFIG_PAGING_NVPAGED - This actual size of the paged text region
+		  (in pages).  This is also the number of virtual pages required to
+		  support the entire paged region. The on-demand paging feature is
+		  intended to support only the case where the virtual paged text
+		  area is much larger the available physical pages.  Otherwise, why
+		  would you enable on-demand paging?
+		CONFIG_PAGING_NDATA - This is the number of data pages in the memory
+		  map.  The data region will extend to the end of RAM unless overridden
+		  by a setting in the configuration file.
+		  NOTE:  In some architectures, it may be necessary to take some memory
+		  from the end of RAM for page tables or other system usage.  The
+		  configuration settings and linker directives must be cognizant of that:
+		  CONFIG_PAGING_NDATA should be defined to prevent the data region from
+		  extending all the way to the end of memory. 
 		CONFIG_PAGING_DEFPRIO - The default, minimum priority of the page fill
 		  worker thread.  The priority of the page fill work thread will be boosted
 		  boosted dynmically so that it matches the priority of the task on behalf
@@ -292,10 +317,27 @@ defconfig -- This is a configuration file similar to the Linux
 		  function may be blocking or non-blocking.  If defined, this setting
 		  indicates that the up_fillpage() implementation will block until the
 		  transfer is completed. Default:  Undefined (non-blocking).
+		CONFIG_PAGING_WORKPERIOD - The page fill worker thread will wake periodically
+		  even if there is no mapping to do.  This selection controls that wake-up
+		  period (in microseconds).  This wake-up a failsafe that will handle any 
+		  cases where a single is lost (that would really be a bug and shouldn't
+		  happen!) and also supports timeouts for case of non-blocking, asynchronous
+		  fills (see CONFIG_PAGING_TIMEOUT_TICKS).
 		CONFIG_PAGING_TIMEOUT_TICKS - If defined, the implementation will monitor
  		  the (asynchronous) page fill logic.  If the fill takes longer than this
 		  number if microseconds, then a fatal error will be declared.
 		  Default: No timeouts monitored.
+
+	    Some architecture-specific settings.  Defaults are architecture specific.
+	    If you don't know what you are doing, it is best to leave these undefined
+	    and try the system defaults:
+ 
+		CONFIG_PAGING_VECPPAGE - This the physical address of the page in
+		  memory to be mapped to the vector address.
+		CONFIG_PAGING_VECL2PADDR - This is the physical address of the L2
+		  page table entry to use for the vector mapping.
+		CONFIG_PAGING_VECL2VADDR - This is the virtual address of the L2
+		  page table entry to use for the vector mapping.
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it
@@ -416,7 +458,7 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET - Enable or disable all network features
 		CONFIG_NET_IPv6 - Build in support for IPv6
 		CONFIG_NSOCKET_DESCRIPTORS - Maximum number of socket descriptors
-                  per task/thread.
+		per task/thread.
 		CONFIG_NET_NACTIVESOCKETS - Maximum number of concurrent socket
 		  operations (recv, send, etc.).  Default: CONFIG_NET_TCP_CONNS+CONFIG_NET_UDP_CONNS
 		CONFIG_NET_SOCKOPTS - Enable or disable support for socket options

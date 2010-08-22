@@ -292,46 +292,49 @@
 #ifdef __ASSEMBLY__
 
 /****************************************************************************
- * Name: pg_map
+ * Name: pg_l2map
  *
  * Description:
  *   Write several, contiguous L2 page table entries.  npages entries will be
  *   written. This macro is used when CONFIG_PAGING is enable.  This case,
  *   it is used asfollows:
  *
- *	ldr	r0, =PG_L2_BASE_PADDR
- *	ldr	r1, =PG_LOCKED_PBASE
- *	ldr	r2, =CONFIG_PAGING_NLOCKED
- *      ldr	r3, =MMUFLAGS
- *	pg_map r0, r1, r2, r3, r4
+ *	ldr	r0, =PG_L2_BASE_PADDR		<-- Address in L2 table
+ *	ldr	r1, =PG_LOCKED_PBASE		<-- Physical page memory address
+ *	ldr	r2, =CONFIG_PAGING_NLOCKED	<-- number of pages
+ *      ldr	r3, =MMUFLAGS			<-- L2 MMU flags
+ *	pg_l2map r0, r1, r2, r3, r4
  *
  * Inputs:
- *   l2 - Physical start address in the L2 page table (modified)
- *   paddr - The physical address of the start of the region to span. Must
- *            be aligned to 1Mb section boundaries (modified)
+ *   l2 - Physical or virtual start address in the L2 page table, depending
+ *        upon the context. (modified)
+ *   ppage - The physical address of the start of the region to span. Must
+ *           be aligned to 1Mb section boundaries (modified)
  *   npages - Number of pages to write in the section (modified)
  *   mmuflags - L2 MMU FLAGS
  *
  * Scratch registers (modified): tmp
- *   l2  - Physical address in the L2 page table.
+ *   l2  - Next address in the L2 page table.
+ *   ppage - Start of next physical page
+ *   npages - Loop counter
  *   tmp - scratch
  *
  * Assumptions:
  * - The MMU is not yet enabled
  * - The L2 page tables have been zeroed prior to calling this function
- * - pg_span has been called to initialize the L1 table.
+ * - pg_l1span has been called to initialize the L1 table.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	pg_map, paddr, npages, mmuflags, l2, tmp
+	.macro	pg_l2map, l2, ppage, npages, mmuflags, tmp
 	b	2f
 1:
-	/* Write the one L2 entries.  First,  get tmp = (paddr | mmuflags),
+	/* Write the one L2 entries.  First,  get tmp = (ppage | mmuflags),
 	 * the value to write into the L2 PTE
 	 */
 
-	orr	\tmp, \paddr, \mmuflags
+	orr	\tmp, \ppage, \mmuflags
 
 	/* Write value into table at the current table address */
 
@@ -341,7 +344,7 @@
 	 * table entry.
 	 */
 
-	add	\paddr, \paddr, #CONFIG_PAGING_PAGESIZE
+	add	\ppage, \ppage, #CONFIG_PAGING_PAGESIZE
 	add	\l2, \l2, #4
 
 	/* Decrement the number of pages written */
@@ -357,7 +360,7 @@
 #endif /* CONFIG_PAGING */
 
 /****************************************************************************
- * Name: pg_span
+ * Name: pg_l1span
  *
  * Description:
  *   Write several, contiguous unmapped coarse L1 page table entries.  As
@@ -365,24 +368,24 @@
  *   macro is used when CONFIG_PAGING is enable.  This case, it is used as
  *   follows:
  *
- *	ldr	r0, =PG_L2_BASE_PADDR
- *	ldr	r1, =PG_LOCKED_PBASE
- *	ldr	r2, =(CONFIG_PAGING_NLOCKED+CONFIG_PAGING_NPAGES)
- *      ldr	r3, =MMU_FLAGS
- *	pg_span r0, r1, r2, r3, r4
+ *	ldr	r0, =PGTABLE_BASE_PADDR		<-- Address in L1 table
+ *	ldr	r1, =PG_LOCKED_VBASE		<-- Virtual address of region
+ *	pg_l1addr r0, r1, r0
+ *	ldr	r1, =PG_LOCKED_PBASE		<-- Physical address of region 
+ *	ldr	r1, =(CONFIG_PAGING_NLOCKED+CONFIG_PAGING_NVPAGED) <-- number of pages
+ *      ldr	r3, =MMU_FLAGS			<-- L1 MMU flags
+ *	pg_l1span r0, r1, r2, r3, r4
  *
  * Inputs (unmodified unless noted):
+ *   l1 - Physical or virtual address in the L1 table to begin writing (modified)
  *   l2 - Physical start address in the L2 page table (modified)
- *   addr - The virtual address of the start of the region to span. Must
- *     be aligned to 1Mb section boundaries (modified)
  *   npages - Number of pages to required to span that memory region (modified)
  *   mmuflags - L1 MMU flags to use
  *
- * Scratch registers (modified):
- *   addr, npages, tmp
- *   l2 - L2 page table physical address
- *   addr - Physical address in the L1 page table.
- *   npages - The number of pages remaining to be accounted for
+ * Scratch registers (modified): l1, l2, npages, tmp
+ *   l1 - Next L1 table address
+ *   l2 - Physical start address of the next L2 page table
+ *   npages - Loop counter
  *   tmp - scratch
  *
  * Return:
@@ -395,32 +398,24 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	pg_span, l2, addr, npages, mmuflags, tmp
-
-	/* Get addr = the L1 page table address coresponding to the virtual
-	 * address of the start of memory region to be mapped.
-	 */
-
-   	ldr	\tmp, =PGTABLE_BASE_PADDR
-	lsr	\addr, \addr, #20
-	add	\addr, \tmp, \addr, lsl #2
+	.macro	pg_l1span, l1, l2, npages, mmuflags, tmp
 	b	2f
 1:
 	/* Write the L1 table entry that refers to this (unmapped) coarse page
 	 * table.
 	 *
-	 * tmp = (paddr | mmuflags), the value to write into the page table
+	 * tmp = (l2table | mmuflags), the value to write into the page table
 	 */
 
 	orr	\tmp, \l2, \mmuflags
 
 	/* Write the value into the L1 table at the correct offset. */
 	
-	str	\tmp, [\addr], #4
+	str	\tmp, [\l1], #4
 
 	/* Update the L2 page table address for the next L1 table entry. */
 
-	add	\l2, \l2, #PT_SIZE  /* Next L2 page table start paddr */
+	add	\l2, \l2, #PT_SIZE  /* Next L2 page table start address */
 
 	/* Update the number of pages that we have account for (with
 	 * non-mappings
@@ -434,6 +429,45 @@
 
 	cmp	\npages, #0
 	bgt	1b
+	.endm
+
+/****************************************************************************
+ * Name: pg_l1addr
+ *
+ * Description:
+ *   Given the start of an L1 table and a virtual address, return the offset
+ *   address into the L1 table for that address.
+ *
+ *	ldr	r0, =PGTABLE_BASE_PADDR
+ *	ldr	r1, =PG_LOCKED_VBASE
+ *	pg_l1addr r0, r1, r0
+ *
+ * Inputs (unmodified unless noted):
+ *   l1 - The physical or virtual address of the start of the L1 table
+ *   vaddr - The virtual address of the start of the region to span. Must
+ *     be aligned to 1Mb section boundaries (modified)
+ *   npages - Number of pages to required to span that memory region (modified)
+ *   mmuflags - L1 MMU flags to use
+ *
+ * Scratch registers (modified): vaddr
+ *
+ * Return:
+ *   The offset L1 table address is returned in result.
+ *
+ * Assumptions:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PAGING
+	.macro	pg_l1addr, l1, vaddr, result
+
+	/* Get result = the L1 table address coresponding to a virtual
+	 * address.
+	 */
+
+	lsr	\vaddr, \vaddr, #20
+	add	\result, \l1, \vaddr, lsl #2
 	.endm
 
 #endif /* CONFIG_PAGING */

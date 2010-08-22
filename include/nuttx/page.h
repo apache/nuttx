@@ -85,10 +85,10 @@
 #define PG_LOCKED_SIZE             (CONFIG_PAGING_NLOCKED << PAGESHIFT)
 
 /* CONFIG_PAGING_LOCKED_P/VBASE - May be defined to determine the base
- * address of the locked page regions (lowest in memory).  If both are not
- * not defined, then this logic will be set to then to CONFIG_DRAM_START
- * and CONFIG_DRAM_VSTART (i.e., assuming that the base address of the
- * locked region is at the virtual address of the beginning of RAM).
+ * address of the locked page regions (lowest in memory).  If neither
+ * are defined, then this logic will be set the bases to CONFIG_DRAM_START
+ * and CONFIG_DRAM_VSTART (i.e., it assumes that the base address of the
+ * locked region is at the beginning of RAM).
  *
  * NOTE:  In some architectures, it may be necessary to take some memory
  * from the beginning of this region for vectors or for a page table.
@@ -116,9 +116,10 @@
  *   support the paged text region.
  * CONFIG_PAGING_NVPAGED - This actual size of the paged text region (in
  *   pages).  This is also the number of virtual pages required to support
- *   the entire paged retion. This feature is intended to support only the
- *   case where the virtual paged text area is much larger the available
- *   physical pages.  Otherwise, why would you being on-demand paging?
+ *   the entire paged region. The on-demand paging  feature is intended to
+ *   support only the case where the virtual paged text area is much larger
+ *   the available physical pages.  Otherwise, why would you enable on-demand
+ *   paging?
  */
 
 #if CONFIG_PAGING_NPPAGED >= CONFIG_PAGING_NVPAGED
@@ -165,7 +166,7 @@
  *
  * NOTE:  In some architectures, it may be necessary to take some memory
  * from the end of RAM for page tables or other system usage.  The
- * configuration settings and linker directives must be cognizant of that.
+ * configuration settings and linker directives must be cognizant of that:
  * CONFIG_PAGING_NDATA should be defined to prevent the data region from
  * extending all the way to the end of memory. 
  */
@@ -206,6 +207,12 @@
  *   function may be blocking or non-blocking.  If defined, this setting
  *   indicates that the up_fillpage() implementation will block until the
  *   transfer is completed. Default:  Undefined (non-blocking).
+ * CONFIG_PAGING_WORKPERIOD - The page fill worker thread will wake periodically
+ *   even if there is no mapping to do.  This selection controls that wake-up
+ *   period (in microseconds).  This wake-up a failsafe that will handle any 
+ *   cases where a single is lost (that would really be a bug and shouldn't
+ *   happen!) and also supports timeouts for case of non-blocking, asynchronous
+ *   fills (see CONFIG_PAGING_TIMEOUT_TICKS).
  * CONFIG_PAGING_TIMEOUT_TICKS - If defined, the implementation will monitor
  *   the (asynchronous) page fill logic.  If the fill takes longer than this
  *   number if microseconds, then a fatal error will be declared.
