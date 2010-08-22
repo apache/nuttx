@@ -191,9 +191,8 @@ __start:
 	 */
 
 	adr	r0, .Ltxtspan
-	ldmia	r0, {r0, r1, r2, r3, r4}
-	pg_l1addr r0, r1, r0
- 	pg_l1span r0, r2, r3, r4, r1
+	ldmia	r0, {r0, r1, r2, r3}
+ 	pg_l1span r0, r1, r2, r3, r4
  
 	/* Then populate the L2 table for the locked text region only. */
 
@@ -206,9 +205,8 @@ __start:
 	 */
 
 	adr	r0, .Lptabspan
-	ldmia	r0, {r0, r1, r2, r3, r4}
-	pg_l1addr r0, r1, r0
- 	pg_l1span r0, r2, r3, r4, r1
+	ldmia	r0, {r0, r1, r2, r3}
+ 	pg_l1span r0, r1, r2, r3, r4
 
 	/* Then populate the L2 table. */
 
@@ -352,8 +350,7 @@ __start:
 
 #ifdef CONFIG_PAGING
 .Ltxtspan:
-	.long	PGTABLE_BASE_PADDR		/* Physical address of L1 table */
-	.long	PG_L2_TEXT_VADDR		/* Virtual address of the L2 page table */
+	.long	PG_L1_TEXT_PADDR		/* Physical address in the L1 table */
 	.long	PG_L2_TEXT_PADDR		/* Physical address of the L2 page table */
 	.long	PG_TEXT_NVPAGES			/* Total (virtual) text pages to be mapped */
 	.long	MMU_L1_TEXTFLAGS		/* L1 MMU flags to use */
@@ -365,8 +362,7 @@ __start:
 	.long	MMU_L2_TEXTFLAGS		/* L2 MMU flags to use */
 
 .Lptabspan:
-	.long	PGTABLE_BASE_PADDR		/* Physical address of L1 table */
-	.long	PG_L2_PGTABLE_VADDR		/* Virtual address of the L2 page table */
+	.long	PG_L1_PGTABLE_PADDR		/* Physical address in the L1 table */
 	.long	PG_L2_PGTABLE_PADDR		/* Physical address of the L2 page table */
 	.long	PG_PGTABLE_NPAGES		/* Total mapped page table pages */
 	.long	MMU_L1_PGTABFLAGS		/* L1 MMU flags to use */
@@ -407,9 +403,8 @@ __start:
 	/* Populate the L1 table for the data regions */
 
 	adr	r0, .Ldataspan
-	ldmia	r0, {r0, r1, r2, r3, r4}
-	pg_l1addr r0, r1, r0
- 	pg_l1span r0, r2, r3, r4, r1
+	ldmia	r0, {r0, r1, r2, r3}
+ 	pg_l1span r0, r1, r2, r3, r4
 
 	/* Populate the L2 table for the data region */
 
@@ -513,8 +508,7 @@ __start:
 
 #ifdef CONFIG_PAGING
 .Ldataspan:
-	.long	PGTABLE_BASE_VADDR	/* Virtual address of the L1 table */
-	.long	PG_L2_DATA_VADDR	/* Virtual address of the L2 page table */
+	.long	PG_L1_DATA_VADDR	/* Virtual address in the L1 table */
 	.long	PG_L2_DATA_PADDR	/* Physical address of the L2 page table */
 	.long	PG_DATA_NPAGED		/* Number of pages in the data region */
 	.long	MMU_L1_DATAFLAGS	/* L1 MMU flags to use */
