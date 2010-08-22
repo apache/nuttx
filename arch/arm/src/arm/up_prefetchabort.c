@@ -54,19 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#ifdef CONFIG_PAGING
-#  ifndef CONFIG_PAGING_PAGESIZE
-#    error "CONFIG_PAGING_PAGESIZE is not defined in your .config file"
-#  endif
-#  ifndef CONFIG_PAGING_NLOCKED
-#    error "CONFIG_PAGING_NLOCKED is not defined in your .config file"
-#  endif
-#  ifndef CONFIG_PAGING_NPAGES
-#    error "CONFIG_PAGING_NPAGES is not defined in your .config file"
-#  endif
-#endif
+/* Debug ********************************************************************/
 
 /* Output debug info if stack dump is selected -- even if 
  * debug is not selected.
