@@ -138,14 +138,16 @@
 #define PG_L2_LOCKED_SIZE      (4*CONFIG_PAGING_NLOCKED)
 
 /* We position the paged region PTEs immediately after the locked
- * region PTEs.
+ * region PTEs.  NOTE that the size of the paged regions is much
+ * larger than the size of the physical paged region.  That is the
+ * core of what the On-Demanding Paging feature provides.
  */
  
 #define PG_L1_PAGED_PADDR      (PGTABLE_BASE_PADDR + ((PG_PAGED_VBASE >> 20) << 2))
 #define PG_L1_PAGED_VADDR      (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
 #define PG_L2_PAGED_PADDR      (PG_L2_BASE_PADDR + PG_L2_LOCKED_SIZE)
 #define PG_L2_PAGED_VADDR      (PG_L2_BASE_VADDR + PG_L2_LOCKED_SIZE)
-#define PG_L2_PAGED_SIZE       (4*CONFIG_PAGING_NPPAGED)
+#define PG_L2_PAGED_SIZE        (4*CONFIG_PAGING_NVPAGED)
 
 /* This describes the overall text region */
 
@@ -346,16 +348,17 @@
 
 	orr	\tmp, \ppage, \mmuflags
 
-	/* Write value into table at the current table address */
+	/* Write value into table at the current table address
+	 * (and increment the L2 page table address by 4)
+	 */
 
 	str	\tmp, [\l2], #4
 
-	/* Update the physical addresses that will correspond to the next
+	/* Update the physical address that will correspond to the next
 	 * table entry.
 	 */
 
 	add	\ppage, \ppage, #CONFIG_PAGING_PAGESIZE
-	add	\l2, \l2, #4
 
 	/* Decrement the number of pages written */
 
@@ -417,7 +420,9 @@
 
 	orr	\tmp, \l2, \mmuflags
 
-	/* Write the value into the L1 table at the correct offset. */
+	/* Write the value into the L1 table at the correct offset.
+	 * (and increment the L1 table address by 4)
+	 */
 	
 	str	\tmp, [\l1], #4
 

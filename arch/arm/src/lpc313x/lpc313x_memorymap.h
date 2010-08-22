@@ -251,7 +251,7 @@
 #  define NUTTX_START_VADDR            LPC313X_EXTSDRAM0_VSECTION
 #elif defined(CONFIG_BOOT_RUNFROMEXTSRAM)
 #  define NUTTX_START_VADDR            LPC313X_EXTSRAM0_VADDR
-#else /* CONFIG_BOOT_RUNFROMISRAM */
+#else /* CONFIG_BOOT_RUNFROMISRAM, CONFIG_PAGING */
 #  define NUTTX_START_VADDR            LPC313X_INTSRAM0_VADDR
 #endif
 
@@ -284,7 +284,7 @@
       * where the vector table was place.
       */
 
-#    ifdef CONFIG_ARCH_ROMPGTABLE  /* Vectors located at 0x0000:0000  */
+#    ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 
        /* In this case, ISRAM0 will be shadowed at address 0x0000:0000.  The page
         * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a LPC3130)
