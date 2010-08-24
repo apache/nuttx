@@ -275,7 +275,7 @@ static void up_vectormapping(void)
 
   while (vector_paddr < end_paddr)
     {
-      up_setlevel2coarseentry(PGTABLE_COARSE_BASE_VADDR,  vector_paddr,
+      up_setlevel2coarseentry(PGTABLE_L2_BASE_VADDR,  vector_paddr,
                               vector_vaddr, MMU_L2_VECTORFLAGS);
       vector_paddr += 4096;
       vector_vaddr += 4096;
@@ -283,7 +283,7 @@ static void up_vectormapping(void)
 
   /* Now set the level 1 descriptor to refer to the level 2 coarse page table. */
 
-  up_setlevel1entry(PGTABLE_COARSE_BASE_PADDR, LPC313X_VECTOR_VCOARSE,
+  up_setlevel1entry(PGTABLE_L2_BASE_PADDR, LPC313X_VECTOR_VCOARSE,
                     MMU_L1_VECTORFLAGS);
 }
 #endif

@@ -263,12 +263,15 @@
  * CONFIG_PGTABLE_VADDR and CONFIG_PGTABLE_PADDR in the configuration or board.h file.
  */
 
+#undef PGTABLE_IN_HIGHSRAM
+#undef PGTABLE_IN_LOWSRAM
+
 #if !defined(PGTABLE_BASE_PADDR) || !defined(PGTABLE_BASE_VADDR)
 
   /* Sanity check.. if one is undefined, both should be undefined */
 
 #  if defined(PGTABLE_BASE_PADDR) || defined(PGTABLE_BASE_VADDR)
-#    error "One of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is defined"
+#    error "Only one of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is defined"
 #  endif
 
   /* A sanity check, if the configuration says that the page table is read-only
@@ -290,15 +293,14 @@
         * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a LPC3130)
         */
 
-#      ifndef PGTABLE_BASE_VADDR
-#        if CONFIG_ARCH_CHIP_LPC3131
+#      if CONFIG_ARCH_CHIP_LPC3131
 #          define PGTABLE_BASE_PADDR (LPC313X_INTSRAM1_PADDR+LPC313X_INTSRAM1_SIZE-PGTABLE_SIZE)
 #          define PGTABLE_BASE_VADDR (LPC313X_INTSRAM1_VADDR+LPC313X_INTSRAM1_SIZE-PGTABLE_SIZE)
-#        else
+#      else
 #          define PGTABLE_BASE_PADDR (LPC313X_INTSRAM0_PADDR+LPC313X_INTSRAM0_SIZE-PGTABLE_SIZE)
 #          define PGTABLE_BASE_VADDR (LPC313X_INTSRAM0_VADDR+LPC313X_INTSRAM0_SIZE-PGTABLE_SIZE)
-#        endif
 #      endif
+#      define PGTABLE_IN_HIGHSRAM    1
 #    else
 
        /* Otherwise, ISRAM1 (or ISRAM0 for the LPC3130) will be mapped so that
@@ -307,8 +309,9 @@
         * the shadow memory region.
         */
 
-#      define PGTABLE_BASE_PADDR LPC313X_SHADOWSPACE_PSECTION
-#      define PGTABLE_BASE_VADDR LPC313X_SHADOWSPACE_VSECTION
+#      define PGTABLE_BASE_PADDR     LPC313X_SHADOWSPACE_PSECTION
+#      define PGTABLE_BASE_VADDR     LPC313X_SHADOWSPACE_VSECTION
+#      define PGTABLE_IN_LOWSRAM     1
 #    endif
 #  endif
 #endif
@@ -318,19 +321,17 @@
  * normal operation). We will reuse this memory for coarse page tables as follows:
  */
 
-#define PGTABLE_COARSE_POFFSET      ((LPC313X_LAST_PSECTION >> 20) << 2)
-#define PGTABLE_COARSE_BASE_PADDR   (PGTABLE_BASE_PADDR+PGTABLE_COARSE_POFFSET)
-#define PGTABLE_COARSE_END_PADDR    (PGTABLE_BASE_PADDR+0x00004000)
-#define PGTABLE_END_PADDR           (PGTABLE_BASE_PADDR+0x00004000)
+#define PGTABLE_L2_OFFSET           ((LPC313X_LAST_PSECTION >> 20) << 2)
+#define PGTABLE_L2_BASE_PADDR       (PGTABLE_BASE_PADDR+PGTABLE_L2_OFFSET)
+#define PGTABLE_L2_END_PADDR        (PGTABLE_BASE_PADDR+PGTABLE_SIZE)
+#define PGTABLE_L2_BASE_VADDR       (PGTABLE_BASE_VADDR+PGTABLE_L2_OFFSET)
+#define PGTABLE_L2_END_VADDR        (PGTABLE_BASE_VADDR+PGTABLE_SIZE)
 
-#define PGTABLE_COARSE_VOFFSET      ((LPC313X_LAST_VSECTION >>20) << 2)
-#define PGTABLE_COARSE_BASE_VADDR   (PGTABLE_BASE_VADDR+PGTABLE_COARSE_VOFFSET)
-#define PGTABLE_COARSE_END_VADDR    (PGTABLE_BASE_VADDR+0x00004000)
-#define PGTABLE_END_VADDR           (PGTABLE_BASE_VADDR+0x00004000)
-
+#define PGTABLE_L2_ALLOC            (PGTABLE_L2_END_VADDR-PGTABLE_L2_BASE_VADDR)
 #define PGTABLE_COARSE_TABLE_SIZE   (4*256)
-#define PGTABLE_COARSE_ALLOC        (PGTABLE_COARSE_END_VADDR-PGTABLE_COARSE_BASE_VADDR)
-#define PGTABLE_NCOARSE_TABLES      (PGTABLE_COARSE_SIZE / PGTBALE_COARSE_TABLE_ALLOC)
+#define PGTABLE_NCOARSE_TABLES      (PGTABLE_L2_ALLOC / PGTABLE_COARSE_TABLE_SIZE)
+#define PGTABLE_FINE_TABLE_SIZE     (4*1024)
+#define PGTABLE_NFINE_TABLES        (PGTABLE_L2_ALLOC / PGTABLE_FINE_TABLE_SIZE)
 
 /* Determine the base address of the vector table:
  *

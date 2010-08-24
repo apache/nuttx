@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include "arm.h"
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -168,23 +170,25 @@
  * page table for the virtual mappings.  A portion of this table is
  * not accessible in the virtual address space (for normal operation).
  * We will reuse this memory for coarse page tables as follows:
+ * FIXME!  Where does that 0x00000800 come from.  I can't remember
+ * and it does not feel right!
  */
 
 #define PGTABLE_BASE_PADDR          DM320_SDRAM_PADDR
 #define PGTABLE_SDRAM_PADDR         PGTABLE_BASE_PADDR
-#define PGTABLE_COARSE_BASE_PADDR   (PGTABLE_BASE_PADDR+0x00000800)
-#define PGTABLE_COARSE_END_PADDR    (PGTABLE_BASE_PADDR+0x00004000)
-#define PGTABLE_END_PADDR           (PGTABLE_BASE_PADDR+0x00004000)
+#define PGTABLE_L2_BASE_PADDR       (PGTABLE_BASE_PADDR+0x00000800)
+#define PGTABLE_L2_END_PADDR        (PGTABLE_BASE_PADDR+PGTABLE_SIZE)
 
 #define PGTABLE_BASE_VADDR          DM320_SDRAM_VADDR
 #define PGTABLE_SDRAM_VADDR         PGTABLE_BASE_VADDR
-#define PGTABLE_COARSE_BASE_VADDR   (PGTABLE_BASE_VADDR+0x00000800)
-#define PGTABLE_COARSE_END_VADDR    (PGTABLE_BASE_VADDR+0x00004000)
-#define PGTABLE_END_VADDR           (PGTABLE_BASE_VADDR+0x00004000)
+#define PGTABLE_L2_BASE_VADDR       (PGTABLE_BASE_VADDR+0x00000800)
+#define PGTABLE_L2_END_VADDR        (PGTABLE_BASE_VADDR+PGTABLE_SIZE)
 
+#define PGTABLE_L2_ALLOC            (PGTABLE_L2_END_VADDR-PGTABLE_L2_BASE_VADDR)
 #define PGTABLE_COARSE_TABLE_SIZE   (4*256)
-#define PGTABLE_COARSE_ALLOC        (PGTABLE_COARSE_END_VADDR-PGTABLE_COARSE_BASE_VADDR)
-#define PGTABLE_NCOARSE_TABLES      (PGTABLE_COARSE_SIZE / PGTBALE_COARSE_TABLE_ALLOC)
+#define PGTABLE_NCOARSE_TABLES      (PGTABLE_L2_ALLOC / PGTABLE_COARSE_TABLE_SIZE)
+#define PGTABLE_FINE_TABLE_SIZE     (4*1024)
+#define PGTABLE_NFINE_TABLES        (PGTABLE_L2_ALLOC / PGTABLE_FINE_TABLE_SIZE)
 
 /* This is the base address of the interrupt vectors on the ARM926 */
 
