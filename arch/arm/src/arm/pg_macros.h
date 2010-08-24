@@ -77,11 +77,6 @@
 
 #  define PG_L1_PADDRMASK     PMD_FINE_TEX_MASK
 
-   /* L2 Page table address */
-
-#  define PG_L2_BASE_PADDR     PGTABLE_FINE_BASE_PADDR
-#  define PG_L2_BASE_VADDR     PGTABLE_FINE_BASE_VADDR
-
    /* MMU Flags for each memory region */
 
 #  define MMU_L1_TEXTFLAGS     (PMD_TYPE_FINE|PMD_BIT4)
@@ -103,11 +98,6 @@
    /* Mask to get the page table physical address from an L1 entry */
 
 #  define PG_L1_PADDRMASK     PMD_COARSE_TEX_MASK
-
-   /* L2 Page table address */
-
-#  define PG_L2_BASE_PADDR     PGTABLE_COARSE_BASE_PADDR
-#  define PG_L2_BASE_VADDR     PGTABLE_COARSE_BASE_VADDR
 
    /* MMU Flags for each memory region. */
 
@@ -133,8 +123,8 @@
 
 #define PG_L1_LOCKED_PADDR     (PGTABLE_BASE_PADDR + ((PG_LOCKED_VBASE >> 20) << 2))
 #define PG_L1_LOCKED_VADDR     (PGTABLE_BASE_VADDR + ((PG_LOCKED_VBASE >> 20) << 2))
-#define PG_L2_LOCKED_PADDR     PG_L2_BASE_PADDR
-#define PG_L2_LOCKED_VADDR     PG_L2_BASE_VADDR
+#define PG_L2_LOCKED_PADDR     PGTABLE_L2_BASE_PADDR
+#define PG_L2_LOCKED_VADDR     PGTABLE_L2_BASE_VADDR
 #define PG_L2_LOCKED_SIZE      (4*CONFIG_PAGING_NLOCKED)
 
 /* We position the paged region PTEs immediately after the locked
@@ -145,9 +135,9 @@
  
 #define PG_L1_PAGED_PADDR      (PGTABLE_BASE_PADDR + ((PG_PAGED_VBASE >> 20) << 2))
 #define PG_L1_PAGED_VADDR      (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
-#define PG_L2_PAGED_PADDR      (PG_L2_BASE_PADDR + PG_L2_LOCKED_SIZE)
-#define PG_L2_PAGED_VADDR      (PG_L2_BASE_VADDR + PG_L2_LOCKED_SIZE)
-#define PG_L2_PAGED_SIZE        (4*CONFIG_PAGING_NVPAGED)
+#define PG_L2_PAGED_PADDR      (PGTABLE_L2_BASE_PADDR + PG_L2_LOCKED_SIZE)
+#define PG_L2_PAGED_VADDR      (PGTABLE_L2_BASE_VADDR + PG_L2_LOCKED_SIZE)
+#define PG_L2_PAGED_SIZE       (4*CONFIG_PAGING_NVPAGED)
 
 /* This describes the overall text region */
 
@@ -161,8 +151,8 @@
 
 #define PG_L1_DATA_PADDR       (PGTABLE_BASE_PADDR + ((PG_DATA_VBASE >> 20) << 2))
 #define PG_L1_DATA_VADDR       (PGTABLE_BASE_VADDR + ((PG_DATA_VBASE >> 20) << 2))
-#define PG_L2_DATA_PADDR       (PG_L2_BASE_PADDR + PG_L2_TEXT_SIZE)
-#define PG_L2_DATA_VADDR       (PG_L2_BASE_VADDR + PG_L2_TEXT_SIZE)
+#define PG_L2_DATA_PADDR       (PGTABLE_L2_BASE_PADDR + PG_L2_TEXT_SIZE)
+#define PG_L2_DATA_VADDR       (PGTABLE_L2_BASE_VADDR + PG_L2_TEXT_SIZE)
 #define PG_L2_DATA_SIZE        (4*PG_DATA_NPAGES)
 
 /* Page Table Info: The number of pages in the in the page table
@@ -311,7 +301,7 @@
  *   written. This macro is used when CONFIG_PAGING is enable.  This case,
  *   it is used asfollows:
  *
- *	ldr	r0, =PG_L2_BASE_PADDR		<-- Address in L2 table
+ *	ldr	r0, =PGTABLE_L2_BASE_PADDR	<-- Address in L2 table
  *	ldr	r1, =PG_LOCKED_PBASE		<-- Physical page memory address
  *	ldr	r2, =CONFIG_PAGING_NLOCKED	<-- number of pages
  *      ldr	r3, =MMUFLAGS			<-- L2 MMU flags

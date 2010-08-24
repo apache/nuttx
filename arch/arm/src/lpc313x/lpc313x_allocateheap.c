@@ -1,7 +1,7 @@
 /************************************************************************
  * arch/arm/src/lpc313x/lpc313x_allocateheap.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
+#include "arm.h"
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
@@ -110,6 +111,22 @@
 #  endif
 #endif
 
+/* The following determines the end+1 address the heap (in SRAM0 or SRAM1)
+ * and that, in turn, determines the size of the heap.  Specifically, this
+ * logic it checks if a page table has been allocated at the end of SRAM
+ * and, if so, subtracts that the size of the page table from the end+1
+ * address of heap.
+ *
+ * If the page table was not allocated at the end of SRAM, then this logic
+ * will let the heap run all the way to the end of SRAM.
+ */
+
+#ifdef PGTABLE_IN_HIGHSRAM
+#  define LPC313X_HEAP_VEND (LPC313X_INTSRAM_VSECTION + LPC313X_ISRAM_SIZE - PGTABLE_SIZE)  
+#else
+#  define LPC313X_HEAP_VEND (LPC313X_INTSRAM_VSECTION + LPC313X_ISRAM_SIZE)  
+#endif
+
 /************************************************************************
  * Private Data
  ************************************************************************/
@@ -146,7 +163,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_heapbase;
-  *heap_size  = (LPC313X_INTSRAM_VSECTION + LPC313X_ISRAM_SIZE) - g_heapbase;
+  *heap_size  = LPC313X_HEAP_VEND - g_heapbase;
 }
 
 /************************************************************************

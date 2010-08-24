@@ -94,9 +94,11 @@
  *
  * NOTE:  In some architectures, it may be necessary to take some memory
  * from the beginning of this region for vectors or for a page table.
- * In such cases, CONFIG_PAGING_LOCKED_P/VBASE should take that into
- * consideration to prevent overlapping the locked memory region and the
- * system data at the beginning of SRAM.
+ * In such cases, either (1) CONFIG_PAGING_LOCKED_P/VBASE might take that
+ * into consideration to prevent overlapping the locked memory region
+ * and the system data at the beginning of SRAM, (2) you extend CONFIG_PAGING_NLOCKED
+ * include these pages at the beginning of memory and map let them be
+ * mapped read-only.
  */
 
 #if defined(CONFIG_PAGING_LOCKED_PBASE) && defined(CONFIG_PAGING_LOCKED_VBASE)
