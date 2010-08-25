@@ -1,7 +1,7 @@
 /************************************************************************************
  * dm320/dm320_memorymap.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <arch/board/board.h>
 #include "arm.h"
 
 /************************************************************************************
@@ -56,10 +57,20 @@
  *   -W = Write buffering only
  *   -- = Neither
  *
- * The DM320 only has a single control line for external peripherals.
- * To support more than one peripheral, most hardware will use an 
- * external memory decode logic, so that physical memory regions is
- * in the hardware specific files dm320-*.h
+ * NOTE:
+ * 1. Most DM320 memory sections can be programmed to lie at different locations in
+ *    the memory map. Therefore, much of the DM320 physical memory map is really
+ *    board-specific and, as such, really belongs in the configs/<board>/include/board.h
+ *    file rather than here.
+ *
+ *    To handle all cases, this file defines a "default" physical memory map, but
+ *    section address for most regions can be overriden if the same setting is
+ *    defined in the board.h file (These defaults correspond to the product Neuros
+ *    OSD memory configuration).
+ *    
+ * 2. The DM320 only has a single control line for external peripherals. To support
+ *    more than one peripheral, most hardware will use external memory decode logic,
+ *    so that physical memory regions is in the board-specific files.
  */
 
 #if CONFIG_DRAM_START != 0x01000000
@@ -73,18 +84,32 @@
 #define   DM320_DSP_ONCHIP_RAM_PADDR 0x00040000 /* 128Kb   1 large page  -- */
 #define   DM320_AHB_PADDR            0x00060000 /*   4Kb   1 small page  -- */
 #define   DM320_COPRO_SUB_PADDR      0x00080000 /* 128Kb                 -- */
-#define DM320_FLASH_PSECTION         0x00100000 /*  16Mb  many sections  -- */
-#define   DM320_EXT_MEM_PADDR        0x00100000 /*  16Mb flash           -- */
-#define DM320_SDRAM_PSECTION         0x01000000 /* 496Mb  many section   -- */
-#define   DM320_SDRAM_PADDR          0x01000000 /* 496Mb  many sections  CW */
-#define DM320_CFI_PSECTION           0x40000000 /*  16Mb  16 sections    -- */
-#define   DM320_CFI_PADDR            0x40000000 /*  16Mb  16 sections    -- */
-#define DM320_SSFDC_PSECTION         0x48000000 /*  16Mb  16 sections    -- */
-#define   DM320_SSFDC_PADDR          0x48000000 /*  16Mb  16 sections    -- */
-#define DM320_CE1_PSECTION           0x50000000 /*  16Mb  16 sections    -- */
-#define   DM320_CE1_PADDR            0x50000000 /*  16Mb  16 sections    -- */
-#define DM320_CE2_PSECTION           0x60000000 /*  16Mb  16 sections    -- */
-#define   DM320_CE2_PADDR            0x60000000 /*  16Mb  16 sections    -- */
+
+#ifndef DM320_FLASH_PSECTION
+#  define DM320_FLASH_PSECTION       0x00100000 /*  16Mb  many sections  -- */
+#  define   DM320_EXT_MEM_PADDR      0x00100000 /*  16Mb flash           -- */
+#endif
+#ifndef DM320_FLASH_PSECTION
+#  define DM320_SDRAM_PSECTION       0x01100000 /* 496Mb  many section   -- */
+#  define   DM320_SDRAM_PADDR        0x01100000 /* 496Mb  many sections  CW */
+#endif
+#ifndef DM320_CFI_PSECTION
+#  define DM320_CFI_PSECTION         0x40000000 /*  16Mb  16 sections    -- */
+#  define   DM320_CFI_PADDR          0x40000000 /*  16Mb  16 sections    -- */
+#endif
+#ifndef DM320_SSFDC_PSECTION
+#  define DM320_SSFDC_PSECTION       0x48000000 /*  16Mb  16 sections    -- */
+#  define   DM320_SSFDC_PADDR        0x48000000 /*  16Mb  16 sections    -- */
+#endif
+#ifndef DM320_CE1_PSECTION
+#  define DM320_CE1_PSECTION         0x50000000 /*  16Mb  16 sections    -- */
+#  define   DM320_CE1_PADDR          0x50000000 /*  16Mb  16 sections    -- */
+#endif
+#ifndef DM320_CE2_PSECTION
+#  define DM320_CE2_PSECTION         0x60000000 /*  16Mb  16 sections    -- */
+#  define   DM320_CE2_PADDR          0x60000000 /*  16Mb  16 sections    -- */
+#endif
+
 #define DM320_VLYNQ_PSECTION         0x70000000 /*  64MB  64 sections    -- */
 #define   DM320_VLYNQ_PADDR          0x70000000 /*  64MB  64 sections    -- */
 #define DM320_USBOTG_PSECTION        0x80000000 /*   1Mb   1 section     -- */
