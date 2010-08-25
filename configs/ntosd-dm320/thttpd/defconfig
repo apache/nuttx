@@ -87,6 +87,14 @@ CONFIG_ARCH_LOWVECTORS=n
 CONFIG_ARCH_ROMPGTABLE=n
 
 #
+# Identify toolchain and linker options
+#
+CONFIG_DM320_CODESOURCERYW=n
+CONFIG_DM320_CODESOURCERYL=y
+CONFIG_DM320_DEVKITARM=n
+CONFIG_DM320_BUILDROOT=n
+
+#
 # DM320 specific device driver settings
 #
 # CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
@@ -548,7 +556,8 @@ CONFIG_USBSTRG_REMOVABLE=y
 # CONFIG_THTTPD_IPADDR - Server IP address (no host name)
 # CONFIG_THTTPD_SERVER_ADDRESS - SERVER_ADDRESS: response
 # CONFIG_THTTPD_SERVER_SOFTWARE - SERVER_SOFTWARE: response
-# CONFIG_THTTPD_CGI_PATH -
+# CONFIG_THTTPD_PATH - Server working directory
+# CONFIG_THTTPD_CGI_PATH - Path to CGI executables
 # CONFIG_THTTPD_CGI_PATTERN - Only CGI programs matching this
 #   pattern will be executed.  In fact, if this value is not defined
 #   then no CGI logic will be built.
@@ -601,6 +610,7 @@ CONFIG_THTTPD_PORT=80
 CONFIG_THTTPD_IPADDR=(10<<24|0<<16|0<<8|2)
 CONFIG_THTTPD_SERVER_ADDRESS="http://www.nuttx.org"
 CONFIG_THTTPD_SERVER_SOFTWARE="thttpd/2.25b 29dec2003-NuttX"
+CONFIG_THTTPD_PATH="/mnt/www"
 CONFIG_THTTPD_CGI_PATH="/mnt/www/cgi-bin"
 CONFIG_THTTPD_CGI_PATTERN="/mnt/www/cgi-bin/*"
 CONFIG_THTTPD_CGI_PRIORITY=50

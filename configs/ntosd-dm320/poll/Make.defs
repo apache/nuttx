@@ -1,7 +1,7 @@
 ############################################################################
 # configs/ntosd-dm320/poll/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2008, 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,23 +35,64 @@
 
 include ${TOPDIR}/.config
 
-CROSSDEV		= arm-elf-
-CC			= $(CROSSDEV)gcc
-CPP			= $(CROSSDEV)gcc -E
-LD			= $(CROSSDEV)ld
-AR			= $(CROSSDEV)ar rcs
-NM			= $(CROSSDEV)nm
-OBJCOPY			= $(CROSSDEV)objcopy
-OBJDUMP			= $(CROSSDEV)objdump
+# Setup for the selected toolchain
 
-ARCHCCVERSION		= ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
-ARCHCCMAJOR		= ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
+ifeq ($(CONFIG_DM320_CODESOURCERYW),y)
+  # CodeSourcery under Windows
+  CROSSDEV = arm-none-eabi-
+  WINTOOL = y
+  MAXOPTIMIZATION = -O2
+endif
+ifeq ($(CONFIG_DM320_CODESOURCERYL),y)
+  # CodeSourcery under Linux
+  CROSSDEV = arm-none-eabi-
+  MAXOPTIMIZATION = -O2
+endif
+ifeq ($(CONFIG_DM320_DEVKITARM),y)
+  # devkitARM under Windows
+  CROSSDEV = arm-eabi-
+  WINTOOL = y
+endif
+ifeq ($(CONFIG_DM320_BUILDROOT),y)
+  # NuttX buildroot under Linux or Cygwin
+  CROSSDEV = arm-elf-
+  MAXOPTIMIZATION = -Os
+endif
+
+ifeq ($(WINTOOL),y)
+  # Windows-native toolchains
+  DIRLINK = $(TOPDIR)/tools/winlink.sh
+  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+  MKDEP = $(TOPDIR)/tools/mknulldeps.sh
+  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
+  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/poll/ld.script}"
+else
+  # Linux/Cygwin-native toolchain 
+  MKDEP = $(TOPDIR)/tools/mkdeps.sh
+  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
+  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/poll/ld.script
+endif
+
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E
+LD = $(CROSSDEV)ld
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
+MKNXFLAT = mknxflat
+LDNXFLAT = ldnxflat
+
+ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
+ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
-  ARCHOPTIMIZATION	= -g
+  ARCHOPTIMIZATION = -g
 else
-  ARCHOPTIMIZATION	= -Os -fno-strict-aliasing -fno-strength-reduce \
-			  -fomit-frame-pointer
+  ARCHOPTIMIZATION = $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
 ifeq ($(ARCHCCMAJOR),4)
@@ -60,15 +101,19 @@ else
   ARCHCPUFLAGS		= -mapcs-32 -mtune=arm9tdmi -march=armv5te -msoft-float -fno-builtin
 endif
 
+ARCHCFLAGS		= -fno-builtin
+ARCHCXXFLAGS		= -fno-builtin -fno-exceptions
 ARCHPICFLAGS		= -fpic -msingle-pic-base -mpic-register=r10
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGSXX		= -Wall -Wshadow
 ARCHDEFINES		=
-ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
-ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/poll/ld.script
 
-CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+CFLAGS			= $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
 CPICFLAGS		= $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS		= $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
+			  $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) -pipe
+CXXPICFLAGS		= $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES)
 AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
 
@@ -82,7 +127,11 @@ OBJEXT			= .o
 LIBEXT			= .a
 EXEEXT			=
 
-ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
+#[blf] The `ea3131' had this, but despite using buildroot, neuros doesn't...
+###	ifneq ($(CONFIG_LPC313X_BUILDROOT),y)	### change to ...DM320...
+###	  LDFLAGS += -nostartfiles -nodefaultlibs
+###	endif
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS		+= -g
 endif
 
@@ -94,6 +143,11 @@ endef
 define COMPILE
 	@echo "CC: $1"
 	@$(CC) -c $(CFLAGS) $1 -o $2
+endef
+
+define COMPILEXX
+	@echo "CXX: $1"
+	@$(CXX) -c $(CXXFLAGS) $1 -o $2
 endef
 
 define ASSEMBLE
@@ -109,8 +163,6 @@ endef
 define CLEAN
 	@rm -f *.o *.a
 endef
-
-MKDEP			= $(TOPDIR)/tools/mkdeps.sh
 
 HOSTCC			= gcc
 HOSTINCLUDES		= -I.

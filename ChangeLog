@@ -1190,7 +1190,7 @@
 	  have a test to prove that the changes are correct.
 	* configs/olimex-lpc2378 - Add support for the CodeSourcery toolchain
 	  under Linux (contributed by Alan Carvalho de Assis).
-	* arch/arm/src/lpc17xx/lpc17_gpio.c - Fix an imporation GPIO configuration
+	* arch/arm/src/lpc17xx/lpc17_gpio.c - Fix an important GPIO configuration
 	  bug:  When attempting to set no pull-up or pull-down (floating),
 	  it would, instead, select pull-down.
 	* arch/arm/src/lm3s/lm3s_gpioirq.c - Fix warning for returning a value
@@ -1215,3 +1215,7 @@
 	  enabled.  This is not expected to be a functionality configuration (at
 	  least not yet); it was created in order to debug the on-demand paging
 	  feature.
+	* configs/ntosd-dm320/*/Make.defs - Codesourcery and devkitARM toolchains
+	  now supported for the Neuros OSD.
+	* configs/ntosd-dm320 and arch/arm/src/dm320 - Add support for the
+	  Neuros production OSD (changes contributed by bf.nuttx).
