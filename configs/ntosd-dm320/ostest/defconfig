@@ -1,7 +1,7 @@
 ############################################################################
 # configs/ntosd-dm320/ostest/defconfig
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -65,11 +65,12 @@ CONFIG_ARCH_CHIP=dm320
 CONFIG_ARCH_CHIP_DM320=y
 CONFIG_ARCH_BOARD=ntosd-dm320
 CONFIG_ARCH_BOARD_NTOSD_DM320=y
+CONFIG_ARCH_NTOSD_DEVBOARD=n
 CONFIG_BOARD_LOOPSPERMSEC=16945
-CONFIG_DRAM_SIZE=0x01000000
-CONFIG_DRAM_START=0x01000000
+CONFIG_DRAM_SIZE=0x02000000
+CONFIG_DRAM_START=0x01100000
 CONFIG_DRAM_VSTART=0x00000000
-CONFIG_DRAM_NUTTXENTRY=0x01008000
+CONFIG_DRAM_NUTTXENTRY=0x01108000
 CONFIG_ARCH_INTERRUPTSTACK=0
 CONFIG_ARCH_STACKDUMP=y
 
@@ -136,7 +137,7 @@ CONFIG_UART1_2STOP=0
 #
 CONFIG_RRLOAD_BINARY=n
 CONFIG_INTELHEX_BINARY=n
-CONFIG_RAW_BINARY=n
+CONFIG_RAW_BINARY=y
 CONFIG_HAVE_LIBM=n
 
 #

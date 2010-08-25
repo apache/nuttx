@@ -13,6 +13,13 @@ http://wiki.neurostechnology.com/index.php/The_Neuros_and_Open_Source
 Status:
 ^^^^^^^
 
+NOTE:  These instructions are for the Neuros development board (and a
+rather old version of NuttX),
+http://wiki.neurostechnology.com/index.php/OSD_Developer_Board_v1
+and have _not_ been updated for the Neuros OSD 1.0 consumer unit
+(or for the current version of NuttX),
+http://wiki.neurostechnology.com/index.php/Neuros_OSD_1.0
+
 At present, the system only supports a serial console and timer
 interrupts so there is not to much that you can do with it.  But I
 would be happy to work with anyone who is interested in using it.

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/board/board.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
  * Definitions
  ************************************************************************************/
 
+/* Clocking *************************************************************************/
 /* This platform has the ARM at 175 MHz and the DSP at 101.25 MHz */
 
 #define DM320_ARM_CLOCK  175500000
@@ -59,6 +60,41 @@
 /* Configration for dm9000 network device */
 
 #define DM9000_BASE      CONFIG_DM9000_BASE
+
+/* Memory Map ***********************************************************************/
+
+/* The Neuros development board has 16MiB RAM starting at 0x01000000 (physical) and
+ * 8MiB of FLASH.  The Neuros OSD 1.0 consumer  has 32MiB RAM starting at 0x01100000
+ * (physical) and 16MiB of FLASH.
+ *
+ * FIXME: Flash location may also differ on OSD 1.0 consumer unit!
+ */
+
+#ifdef CONFIG_ARCH_NTOSD_DEVBOARD
+#  if CONFIG_DRAM_START != 0x01000000
+#    error "Invalid setting for CONFIG_DRAM_START"
+#  endif
+#  if CONFIG_DRAM_SIZE != 0x01000000
+#    warning "Check CONFIG_DRAM_SIZE.  This Neuros OSD has 0x01000000 bytes of SDRAM"
+#  endif
+#  if CONFIG_DRAM_NUTTXENTRY != 0x01008000
+#    warning "Check CONFIG_DRAM_NUTTXENTRY.  Expected 0x01008000"
+#  endif
+#  define DM320_SDRAM_PSECTION         0x01000000 /* 496Mb  many section   -- */
+#  define   DM320_SDRAM_PADDR          0x01000000 /* 496Mb  many sections  CW */
+#else
+#  if CONFIG_DRAM_START != 0x01100000
+#    error "Invalid setting for CONFIG_DRAM_START"
+#  endif
+#  if CONFIG_DRAM_SIZE != 0x02000000
+#    warning "Check CONFIG_DRAM_SIZE.  This Neuros OSD has 0x02000000 bytes of SDRAM"
+#  endif
+#  if CONFIG_DRAM_NUTTXENTRY != 0x01108000
+#    warning "Check CONFIG_DRAM_NUTTXENTRY.  Expected 0x01108000"
+#  endif
+#  define DM320_SDRAM_PSECTION         0x01100000 /* 496Mb  many section   -- */
+#  define   DM320_SDRAM_PADDR          0x01100000 /* 496Mb  many sections  CW */
+#endif
 
 /* GIO keyboard (GIO 1-5) */
 
