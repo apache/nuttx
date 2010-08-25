@@ -2,7 +2,9 @@ README
 ^^^^^^
 
   This is the README file for the port of NuttX to the Neuros OSD
-  v1.0 Dev Board.  References:
+  v1.0 Dev Board.  This port has recently been extended to V1.0
+  Production board (and that is now the default configuration).
+  References:
 
     http://www.neurostechnology.com/neuros-developer-community
     http://wiki.neurostechnology.com/index.php/OSD_1.0_Developer_Home
@@ -328,3 +330,9 @@ DM320 USB Configuration
    GIO connected to D+.  Support software connect/disconnect.
  CONFIG_DMA320_USBDEV_DMA
    Enable DM320-specific DMA support
+
+Neuros OSD Configuration Options
+
+ CONFIG_ARCH_NTOSD_DEVBOARD - Selects the old NTOSD development board.
+   The default is the production OSD board which differs in 
+   several ways.
