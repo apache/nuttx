@@ -73,10 +73,6 @@
  *    so that physical memory regions is in the board-specific files.
  */
 
-#if CONFIG_DRAM_START != 0x01000000
-# error "Invalid setting for CONFIG_DRAM_START"
-#endif
-
 /* Section/Region Name             Phys Address    Size  TLB Enty        CW */
 #define DM320_PERIPHERALS_PSECTION   0x00000000 /*   1Mb   1 section     -- */
 #define   DM320_IRAM_PADDR           0x00000000 /*  16Kb   1 large page  CW */
