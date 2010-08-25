@@ -21,8 +21,104 @@ README
   STATUS: This port is code complete, verified, and included in the
   NuttX 0.2.1 release.
 
-Toolchain
-^^^^^^^^^
+Development Environment
+^^^^^^^^^^^^^^^^^^^^^^^
+
+  Either Linux or Cygwin on Windows can be used for the development environment.
+  The source has been built only using the GNU toolchain (see below).  Other
+  toolchains will likely cause problems.
+
+GNU Toolchain Options
+^^^^^^^^^^^^^^^^^^^^^
+
+  The NuttX make system has been modified to support the following different
+  toolchain options.
+
+  1. The CodeSourcery GNU toolchain,
+  2. The devkitARM GNU toolchain,
+  3. Raisonance GNU toolchain, or
+  4. The NuttX buildroot Toolchain (see below).
+
+  All testing has been conducted using the NuttX buildroot toolchain.  However,
+  the make system is setup to default to use the devkitARM toolchain.  To use
+  the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
+  add one of the following configuration options to your .config (or defconfig)
+  file:
+
+    CONFIG_DM320_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_DM320_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_DM320_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_DM320_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin (default)
+
+  If you are not using CONFIG_DM320_BUILDROOT, then you may also have to modify
+  the PATH in the setenv.h file if your make cannot find the tools.
+
+  NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
+  Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
+  toolchains are Cygwin and/or Linux native toolchains. There are several limitations
+  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
+
+  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
+     performed automatically in the Cygwin makefiles using the 'cygpath' utility
+     but you might easily find some new path problems.  If so, check out 'cygpath -w'
+
+  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
+     are used in Nuttx (e.g., include/arch).  The make system works around these
+     problems for the Windows tools by copying directories instead of linking them.
+     But this can also cause some confusion for you:  For example, you may edit
+     a file in a "linked" directory and find that your changes had not effect.
+     That is because you are building the copy of the file in the "fake" symbolic
+     directory.  If you use a Windows toolchain, you should get in the habit of
+     making like this:
+
+       make clean_context all
+
+     An alias in your .bashrc file might make that less painful.
+
+  3. Dependencies are not made when using Windows versions of the GCC.  This is
+     because the dependencies are generated using Windows pathes which do not
+     work with the Cygwin make.
+
+     Support has been added for making dependencies with the windows-native toolchains.
+     That support can be enabled by modifying your Make.defs file as follows:
+
+    -  MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
+    +  MKDEP                = $(TOPDIR)/tools/mkdeps.sh --winpaths "$(TOPDIR)"
+
+     If you have problems with the dependency build (for example, if you are not
+     building on C:), then you may need to modify tools/mkdeps.sh
+
+  NOTE 1: The CodeSourcery toolchain (2009q1) does not work with default optimization
+  level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
+  -Os.
+
+  NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
+  the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
+  path or will get the wrong version of make.
+
+IDEs
+^^^^
+
+  NuttX is built using command-line make.  It can be used with an IDE, but some
+  effort will be required to create the project (There is a simple RIDE project
+  in the RIDE subdirectory).  Here are a few tip before you start that effort:
+
+  1) Select the toolchain that you will be using in your .config file
+  2) Start the NuttX build at least one time from the Cygwin command line
+     before trying to create your project.  This is necessary to create
+     certain auto-generated files and directories that will be needed.
+  3) Set up include pathes:  You will need include/, arch/arm/src/dm320,
+     arch/arm/src/common, arch/arm/src/arm, and sched/.
+  4) All assembly files need to have the definition option -D __ASSEMBLY__
+     on the command line.
+
+  Startup files will probably cause you some headaches.  The NuttX startup file
+  is arch/arm/src/arm/up_head.S.  You may have to build the NuttX
+  one time from the Cygwin command line in order to obtain the pre-built
+  startup object needed by the IDE.
+
+NuttX buildroot Toolchain
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
   be modified to point to the correct path to the ARM926 GCC toolchain (if
@@ -206,7 +302,7 @@ specific to the DM320:
  CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
  CONFIG_ARCH_BOARD_name - for use in C code
  CONFIG_BOARD_LOOPSPERMSEC - for delay loops
- CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to lpc2148.
+ CONFIG_ARCH_LEDS - Use LEDs to show state.
  CONFIG_DRAM_SIZE - Describes the internal DRAM.
  CONFIG_DRAM_START - The start address of internal DRAM
  CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
