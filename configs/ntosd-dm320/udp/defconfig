@@ -87,6 +87,14 @@ CONFIG_ARCH_LOWVECTORS=n
 CONFIG_ARCH_ROMPGTABLE=n
 
 #
+# Identify toolchain and linker options
+#
+CONFIG_DM320_CODESOURCERYW=n
+CONFIG_DM320_CODESOURCERYL=y
+CONFIG_DM320_DEVKITARM=n
+CONFIG_DM320_BUILDROOT=n
+
+#
 # DM320 specific device driver settings
 #
 # CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
