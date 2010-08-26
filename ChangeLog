@@ -1181,7 +1181,7 @@
 	  */*_vectors.S - Correct compilations errors when CONFIG_ARCH_INTERRUPTSTACK
 	  is enabled (feature still not tested)
 
-5.9 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.9 2010-08-25 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* examples/nsh/nsh_telnetd.c - Fix compilation errors that happen
 	  when both DHCPC and TELNETD are enabled in the Nuttshell.
@@ -1219,3 +1219,6 @@
 	  now supported for the Neuros OSD.
 	* configs/ntosd-dm320 and arch/arm/src/dm320 - Add support for the
 	  Neuros production OSD (changes contributed by bf.nuttx).
+
+5.10 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
