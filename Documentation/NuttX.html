@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 24, 2010</p>
+      <p>Last Updated: August 25, 2010</p>
     </td>
   </tr>
 </table>
@@ -772,52 +772,61 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.8 Release Notes</b>:
+<p><b>nuttx-5.9 Release Notes</b>:
 
 <p>
-  This 55<sup>th</sup> release of NuttX was made on July 18, 2010 and is available for download from the
+  This 56<sup>th</sup> release of NuttX was made on August 25, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
+  This release is difficult to categorize;
+  NuttX-5.9 was really released because there were too many changes accumulating in CVS --
+  a few important, some large, unverified implementations, and a couple of important bugfixes.
+  <ul>
+    <li>
+      By far biggest change in this release is the complete implementation of on-demand paging support.
+      This feature will allow you to execute large programs on a mass storage device (such as SPI FLASH) in a small RAM.
+      All of the core on-demand paging logic was completed
+      (see <a href="http://www.nuttx.org/NuttXDemandPaging.html">NuttXDemandPaging.html</a>)
+      and support was implemented for the ARM-9 family.
+      A test configuration is in place for the NXP LPC3131.
+      It has been verified that this new logic does not interfere with normal fixed-page ARM9 operation, but otherwise this new on-demand paging feature is untested.
+    </li>
+    <li>
+      Add support for the CodeSourcery toolchain to the Olimex-lpc2378 port and for the Neuros OSD port.
+    </li>
+    <li>
+      The Neuros OSD port has been updated to work with the production v1.0 OSD
+      (previously there was NuttX support only for the development board).
+    </li>
+    <li>
+      And some miscellaneous feature enhancements as detailed in the <a href="#currentrelease">ChangeLog</a>.
+    </li>
+  </ul>
+</p>
 <p>
   This includes several important bugfixes:
+  <ul>
+    <li>
+      NXP LPC17xx - Fixed a critical bug in the GPIO configuratino logic:
+      When attempting to set no pull-up or pull-down (floating), it would, instead, select pull-down.
+    </li>
+    <li>
+      TI/Luminary LM3Sxxxx - Fixed (1) a logic error in an address table lookup,
+      (2) GPIO port encoding the limited support to only 8 GPIO ports.
+    </li>
+    <li>
+      Corrected the lease time in the DHCPC implementation:
+      It was not in host byte order.
+    </li>
+    <li>
+      And several other less important bugs as documented in the <a href="#currentrelease">ChangeLog</a>:
+      Warnings, cornercase compilation problems, etc.
+    </li>
+  </ul>
 </p>
-<ul>
-  <li>Corrects some interrupt vectoring for the TI/Stellarix LM3S port,</li>
-  <li>Correct initialization logic for NXP LPC17xxx NuttX ports:  Power was not being provided to the GPIO module!</li>
-  <li>Corrected (but did not verify) implementation of the optional interrupt stack feature (all Cortex M3 architectures), and</li>
-  <li>Correct a HardFault in the LPC17xx SSP driver.</li>
-</ul>
-<p>
-  Additional minor fixes are also included as detailed in the ChangeLog.
-</p>
-<p>
-  Several new features have been fully developed and included in this release, but
-  full verification of most of these new features has been blocked for a variety
-  of issues:
-</p>
-<ul>
-  <li>
-    Added microSD support for the NuttShell (NSH) configuration in the Nucleus2G LPC1768 port.
-    For reasons that have not yet been determined, I have not successfully accessed the microSD card as of this writing.
-  </li>
-  <li>
-    Two USB configurations were also added for the Nucleus2G board:
-    One to support the USB serial device and one for the USB mass storage device.
-    Some testing of the USB driver was performed, but full verification is stalled for an OTG style USB cable.
-  </li>
-  <li>
-    LEDs now work correctly on the Nucleus2G LPC1768 board.
-  </li>
-  <li>
-    The uIP-based NuttX networking subsystem now supports IGMPv2 client.
-    IGMP (Internet Group Multicast Protocol) network &quot;appliances&quot; to join into multicast groups.
-    Outbound traffic to enter and leave multicast groups has been verified, but full verification will require a switch capable of multicast.
-    Issues associated with the receipt of multicast packets are likely.
-  </li>
-</ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1043,6 +1052,11 @@
           This port has been verified using the NuttX OS test, USB serial and mass storage
           tests and includes a working implementation of the NuttShell (<a href="NuttShell.html">NSH</a>).
       </p>
+      <p>
+          Support for <a href="NuttXDemandPaging.html">on-demand paging</a> has been developed for the EA3131.
+	  That support would all execute of a program in SPI FLASH by paging code sections out of SPI flash as needed.
+	  However, as of this writing, I have not had the opportunity to verify this new feature.
+      </p>
     </ul>
   </td>
 </tr>
@@ -1207,14 +1221,16 @@
       <p>
         <b>STATUS:</b>
         Some initial files for the LPC17xx family were released in NuttX 5.6, but the first
-        functional release for the NXP LPC1768/Nucleus2G occured with NuttX 5.7.
-        That initial basic release included timer interrupts and a serial console and was
+        functional release for the NXP LPC1768/Nucleus2G occured with NuttX 5.7 with some
+	additional enhancements through NuttX-5.9.
+        That initial, 5.6, basic release included timer interrupts and a serial console and was
         verified using the NuttX OS test (<code>examples/ostest</code>).
-        That release included a verified NuttShell (NSH) configuration
+	Configurations available include include a verified NuttShell (NSH) configuration
         (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
         The NSH configuration support the Nucleus2G's microSD slot and additional configurations
         are available to exercise the the USB serial and USB mass storage devices.
-        However, as of this writing neight the SPI nor the USB device drivers are fully verified.
+	However, due to some technical reasons, neither the SPI nor the USB device drivers are fully verified.
+	(Although it has been reported to me that the SPI microSD is functional on other platforms).
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1809,61 +1825,7 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.8 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* configs/nucleus2g/src/up_nsh.c and up_ssp.c - Add support
-	  for SPI-based MMC/SD cards and integrate into the NSH example.
-	* arch/arm/src/lm3s/lm3s_vectors.S - Correct vectors for GPIOC & D
-	  interrupts.
-	* arch/arm/src/lpc17xx/lp17_clockconfig.c - Power was not being
-	  provided to GPIO module.  This is a critical bugfix!
-	* arch/arm/src/lpc17xx/lpc17_serial.c - Improved logic to handle
-	  missed TX interrupts.
-	* arch/arm/src/lpc17xx/lpc17_ssp.c - Fix a hard fault during SSP
-	  initialization.
-	* configs/nucleus2g/src/up_led.c - Change how LEDs are controlled
-	  so that they can be used both for NuttX instrumentation and
-	  by application software.
-	* include/net/uip/igmp.h and uip-igmp.h - Add header files ini
-	  preparation for NuttX IGMP support
-	* net/uip/uip_igmp*.c - Add IGMP support (untested on initial
-	  checkin).
-	* examples/igmp - Add a trivial test for IGMP (much more is needed)
-	* configs/nucleus2g/usbserial and usbstorage - Add USB configurations
-	  for testing purposes.
-	* arch/arm/src/common/up_internal.h, cortexm3/up_assert.c,
-	  */*_vectors.S - Correct compilations errors when CONFIG_ARCH_INTERRUPTSTACK
-	  is enabled (feature still not tested)
-
-pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* Updated to use standard C99 types in stdint.h and
-	  stdbool.h.  This change was necessary for compatibility
-	  with NuttX-5.0 (any beyond).
-
-buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
-
-	* configs/cortexm3-defconfig-4.3.3: Added support for NuttX NXFLAT
-	  tools.
-	* configs/arm7tdmi-defconfig-4.3.3: Update to arm7tdmi-defconfig-4.2.4.
-	  Also builds NuttX NXFLAT tools.
-	* configs/m68hc12-defconfig-4.3.3: Update to m68ch11-defconfig.
-	* configs/m68hc12-defconfig-3.4.6: There are problems building GCC
-	  4.3.3 for the hc12.
-	* configs/m32c-defconfig-4.2.4: Added genromfs
-	* configs/m32c-defconfig-4.3.3: Update to m32c-defconfig-4.2.4
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
-nuttx-5.9 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.9 2010-08-25 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* examples/nsh/nsh_telnetd.c - Fix compilation errors that happen
 	  when both DHCPC and TELNETD are enabled in the Nuttshell.
@@ -1901,6 +1863,36 @@ nuttx-5.9 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  now supported for the Neuros OSD.
 	* configs/ntosd-dm320 and arch/arm/src/dm320 - Add support for the
 	  Neuros production OSD (changes contributed by bf.nuttx).
+
+pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* Updated to use standard C99 types in stdint.h and
+	  stdbool.h.  This change was necessary for compatibility
+	  with NuttX-5.0 (any beyond).
+
+buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
+
+	* configs/cortexm3-defconfig-4.3.3: Added support for NuttX NXFLAT
+	  tools.
+	* configs/arm7tdmi-defconfig-4.3.3: Update to arm7tdmi-defconfig-4.2.4.
+	  Also builds NuttX NXFLAT tools.
+	* configs/m68hc12-defconfig-4.3.3: Update to m68ch11-defconfig.
+	* configs/m68hc12-defconfig-3.4.6: There are problems building GCC
+	  4.3.3 for the hc12.
+	* configs/m32c-defconfig-4.2.4: Added genromfs
+	* configs/m32c-defconfig-4.3.3: Update to m32c-defconfig-4.2.4
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<ul><pre>
+nuttx-5.10 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
