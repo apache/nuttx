@@ -1,10 +1,25 @@
 README
 ^^^^^^
 
-  This is the README file for the port of NuttX to the Neuros OSD
-  v1.0 Dev Board.  This port has recently been extended to V1.0
-  Production board (and that is now the default configuration).
-  References:
+This is the README file for the port of NuttX to the Neuros OSD.
+
+CONTENTS
+^^^^^^^^
+  - Dev vs. Production Neuros OSD v1.0 boards
+  - Development Environment
+  - GNU Toolchain Options
+  - IDEs
+  - NuttX buildroot Toolchain
+  - ARM/DM320-specific Configuration Options
+  - Configurations
+  - Configuration Options
+
+Dev vs. Production Neuros OSD v1.0 boards
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  This port supports both the original Neuros OSD v1.0 Dev Board.
+  This port has recently been extended to V1.0 Production board (and
+  that is now the default configuration). References:
 
     http://www.neurostechnology.com/neuros-developer-community
     http://wiki.neurostechnology.com/index.php/OSD_1.0_Developer_Home
@@ -103,7 +118,19 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
-  in the RIDE subdirectory).  Here are a few tip before you start that effort:
+  in the RIDE subdirectory).
+  
+  Makefile Build
+  --------------
+  Under Eclipse, it is pretty easy to set up an "empty makefile project" and
+  simply use the NuttX makefile to build the system.  That is almost for free
+  under Linux.  Under Windows, you will need to set up the "Cygwin GCC" empty
+  makefile project in order to work with Windows (Google for "Eclipse Cygwin" -
+  there is a lot of help on the internet).
+
+  Native Build
+  ------------
+  Here are a few tips before you start that effort:
 
   1) Select the toolchain that you will be using in your .config file
   2) Start the NuttX build at least one time from the Cygwin command line
