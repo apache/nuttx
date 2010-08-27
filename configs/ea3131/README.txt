@@ -391,6 +391,16 @@ selected as follow:
 
 Where <subdir> is one of the following:
 
+  locked
+    This is not a configuration.  When on-demand page is enabled
+    then we must do a two pass link:  The first pass creates an
+    intermediate object that has all of the code that must be
+    placed in the locked memory partition.  This is logic that
+    must be locked in memory at all times.
+
+    The directory contains the logic necessary to do the platform
+    specific first pass link for the EA313x.
+ 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables only the serial NSH interface.
