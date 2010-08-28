@@ -35,20 +35,37 @@
 
 -include $(TOPDIR)/Make.defs
 
-all: liblocked.r
+ifeq ($(WINTOOL),y)
+  # Windows-native toolchains
+  PASS1_LIBPATHS	= ${shell for path in $(LINKLIBS); do dir=`dirname $(TOPDIR)/$$path`;echo "-L\"`cygpath -w $$dir`\"";done}
+  PASS1_LDSCRIPT	= -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/locked/ld-locked.inc}"
+else
+  # Linux/Cygwin-native toolchain 
+  PASS1_LIBPATHS	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+  PASS1_LDSCRIPT	= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/locked/ld-locked.inc
+endif
 
-ld-locked.script:
-	./mklocked.sh "$(TOPDIR)"
+PASS1_LDFLAGS	= -r $(PASS1_LDSCRIPT)
+PASS1_LDLIBS	= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
+PASS1_LIBGCC	= "${shell $(CC) -print-libgcc-file-name}"
 
-liblocked.r: ld-locked.script $(OBJS)
-	@LD -o $@ --start-group $(LDLIBS) --end-group -u os_start $(LIBGCC) 
+all: locked.r
+
+ld-locked.inc: mklocked.sh $(TOPDIR)/.config
+	@echo "MK:  ld-locked.inc"
+	@./mklocked.sh "$(TOPDIR)"
+
+locked.r: ld-locked.inc $(OBJS)
+	@echo "LD:  locked.r"
+	@$(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group -u os_start $(PASS1_LIBGCC) 
 
 .depend:
 
 depend: .depend
 
 clean:
-	@rm -f liblocked.r *~ .*.swp
+	@rm -f locked.r *~ .*.swp
 
 distclean: clean
-	@rm -f ld-locked.script
+	@rm -f ld-locked.inc
+

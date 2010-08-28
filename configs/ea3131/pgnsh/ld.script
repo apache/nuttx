@@ -37,20 +37,37 @@
  * LPC313x boot ROM expects the boot image be compiled with entry point at
  * 0x1102:9000.  A 128b header will appear at this address (applied by
  * lpc313xImgCreator) and the executable code must begin at 0x1102:9080.
+ *
+ * The .text vitual address space begins at the same location as the physical
+ * address space:  0x1102 8000.  The virtual space is broken up into three
+ * regions:
+ *
+ * locked - Pages locked in memory.     Start: 0x1102 8000 Size: 36Kb
+ * paged  - Pages in nonvolatile store. Start: 0x1103 1000 Size: 384Kb
+ * data   - .data/.bss/heap.            Start: 0x1109 1000 Size: 44Kb
  */
 
 MEMORY
 {
-    isram (rwx) : ORIGIN = 0x11029080, LENGTH = 192K - 4224
+    locked (rx) : ORIGIN = 0x11029080, LENGTH = 36K - 4224
+    paged  (rx) : ORIGIN = 0x11031000, LENGTH = 384K
+    data   (rw) : ORIGIN = 0x11091000, LENGTH = 44K
 }
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	.text : {
-		_stext = ABSOLUTE(.);
+	.locked : {
+		_slocked = ABSOLUTE(.);
 		*(.vectors)
+		*(.locked)
+		_elocked = ABSOLUTE(.);
+	} >locked
+	_eronly = ABSOLUTE(.);		/* See below                    */
+
+	.paged : {
+		_spaged = ABSOLUTE(.);
 		*(.text .text.*)        
 		*(.fixup)
 		*(.gnu.warning)
@@ -61,8 +78,8 @@ SECTIONS
 		*(.got)
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > isram
+		_epaged = ABSOLUTE(.);
+	} > paged
 
 	_eronly = ABSOLUTE(.);
 
@@ -72,17 +89,17 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > isram
+	} > data AT > locked
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} >isram
+	} >data
 
 	.ARM.exidx : {
 		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
 		__exidx_end = ABSOLUTE(.);
-	} > isram
+	} > data
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -90,7 +107,7 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > isram
+	} > data
 					/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }

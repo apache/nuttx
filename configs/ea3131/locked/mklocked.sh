@@ -76,62 +76,61 @@ function checkconfig () {
 # Interrupt Handlers
 ############################################################################
 #
-# All interrupt handlers must be forced to lie in the locked
-# .text region
+# All interrupt handlers must be forced to lie in the locked .text region
 #
-# These are the vector entry points (only one is really needed
-# since they are all in the same file). These should drag in all
-# of the vector dispatching logic.
+# These are the vector entry points (only one is really needed since they
+# are all in the same file). These should drag in all of the vector
+# dispatching logic.
 #
 
-rm -f ld-locked.script
-echo "EXTERN(up_vectorswi)" >>ld-locked.script
-echo "EXTERN(up_vectordata)" >>ld-locked.script
-echo "EXTERN(up_vectorprefetch)" >>ld-locked.script
-echo "EXTERN(up_vectorundefinsn)" >>ld-locked.script
-echo "EXTERN(up_vectorfiq)" >>ld-locked.script
-echo "EXTERN(up_vectorirq)" >>ld-locked.script
+rm -f ld-locked.inc
+echo "EXTERN(up_vectorswi)" >>ld-locked.inc
+echo "EXTERN(up_vectordata)" >>ld-locked.inc
+echo "EXTERN(up_vectorprefetch)" >>ld-locked.inc
+echo "EXTERN(up_vectorundefinsn)" >>ld-locked.inc
+echo "EXTERN(up_vectorfiq)" >>ld-locked.inc
+echo "EXTERN(up_vectorirq)" >>ld-locked.inc
 
 #
-# These are the initialization entry points of all device drivers
-# that handle interrupts.  We really want to include as little as
-# possible -- ideally just the interrupt handler itself, but that
-# is not usually possible.
+# These are the initialization entry points of all device drivers that
+# handle interrupts.  We really want to include as little as possible --
+# ideally just the interrupt handler itself, but that is not usually
+# possible.
 #
-# Of course, this list must be extended as interrupt handlers are
-# added.
+# Of course, this list must be extended as interrupt handlers are added.
 
-echo "EXTERN(up_timerinit)" >>ld-locked.script
+echo "EXTERN(up_timerinit)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_LPC313X_UART)
 if [ $answer = y ]; then
-	echo "EXTERN(up_earlyserialinit)" >>ld-locked.script
+	echo "EXTERN(up_earlyserialinit)" >>ld-locked.inc
 fi
 
 # up_i2cinitialize -- Not conditioned on anything
 
 answer=$(checkconfig CONFIG_USBDEV)
 if [ $answer = y ]; then
-	echo "EXTERN(up_usbinitialize)" >>ld-locked.script
+	echo "EXTERN(up_usbinitialize)" >>ld-locked.inc
 fi
 
 ############################################################################
 # Idle Loop
 ############################################################################
 #
-# The IDLE loop must be forced to lie in the locked .text region
-# NOTE that most of the IDLE loop is is os_start.c, but we don't
-# we want to handle that differently so that it does not draw in
-# a lot of things that we do not need.
+# The IDLE loop must be forced to lie in the locked .text region. NOTE that
+# most of the IDLE loop is is os_start.c, but we don't we want to handle
+# that differently so that it does not draw in a lot of things that we do
+# not need in the locked region.  However, we do need to bring in all of
+# the things called by os_start up to the point where the page fill worker
+# thread is started.
 
-echo "EXTERN(up_idle)" >>ld-locked.script
+echo "EXTERN(up_idle)" >>ld-locked.inc
 
 ############################################################################
 # PG Fill Worker Thread
 ############################################################################
 #
-# All of the page fill worker thread must be in the locked .text
-# region.
+# All of the page fill worker thread must be in the locked .text region.
 
-echo "EXTERN(pg_worker)" >>ld-locked.script
+echo "EXTERN(pg_worker)" >>ld-locked.inc
 
