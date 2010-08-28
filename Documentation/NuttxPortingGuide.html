@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 21, 2010</p>
+      <p>Last Updated: August 27, 2010</p>
     </td>
   </tr>
 </table>
@@ -2211,8 +2211,55 @@ extern void up_ledoff(int led);
 
 <ul>
   <li>
-    <code>CONFIG_EXAMPLE</code>: identifies the subdirectory in examples
-    that will be used in the build.
+    <p>
+      <code>CONFIG_APP_DIR</code>: Ldentifies the directory that builds the application to link with NuttX.
+      This symbol must be assigned to the path to the application build directory <i>relative</i> to the NuttX top build direcory.
+      As an an example, there are several example applicatins in the NuttX <code>examples/</code> sub-directory.
+      To use one of these example applications, say <code>nsh</code>, you would set <code>CONFIG_APP_DIR=examples/nsh</code>.
+      If you had an application directory and the NuttX directory both within another directory like this:
+<ul><pre>
+build
+ |-nuttx
+ |  |
+ |  `- Makefile
+ `-application
+    |
+    `- Makefile
+</pre></ul>
+      Then you would set <code>CONFIG_APP_DIR=../application</code>.
+    </p>
+    <p>
+      The application direction must contain <code>Makefile</code> and this make file must support the following targets:
+      <ul>
+        <li>
+          <code>libapp$(LIBEXT)</code> (usually <code>libapp.a</code>).
+          <code>libapp.a</code> is a static library ( an archive) that contains all of application object files.
+        </li>
+        <li>
+          <code>clean</code>.
+          Do whatever is appropriate to clean the application directories for a fresh build.
+        </li>
+        <li>
+          <code>distclean</code>.
+          Clean everthing -- auto-generated files, symbolic links etc. -- so that the directory contents are the same as the contents in your configuration management system.
+          This is only done when you change the NuttX configuration.
+        </li>
+        <li>
+          <code>depend</code>.
+          Make or update the application build dependencies.
+        </li>
+      </ul>
+    </p>
+    <p>
+      When this application is invoked it will receive the setting <code>TOPDIR</code> like:
+      <ul>
+        <code>$(MAKE) -C $(CONFIG_APP_DIR) TOPDIR=&quot;$(TOPDIR)&quot;</code> &lt;target&gt;
+      </ul>
+    </p>
+    <p>
+      <code>TOPDIR</code> is the full path to the NuttX directory.
+      It can be used, for example, to include makefile fragments (e.g., <code>.config</code> or <code>Make.defs</code>) or to set up include file paths.
+    </p>
   </li>
   <li>
     <code>CONFIG_DEBUG</code>: enables built-in debug options
@@ -2925,7 +2972,7 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <code>CONFIG_THTTPD_URLPATTERN</code>: If defined, then it will be used to match
-		  and verify referrers.
+    and verify referrers.
   </li>
 </ul>
 
