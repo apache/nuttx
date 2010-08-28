@@ -92,13 +92,13 @@
 
 #define GPIO_ISGPIO(ps)      ((uint16_t(ps) & GPIO_FUNC_MASK) <= GPIO_OUTPUT)
 #define GPIO_ISALT(ps)       ((uint16_t(ps) & GPIO_FUNC_MASK) > GPIO_OUTPUT)
-#define GPIO_ISINPUT(ps)     ((ps) & GPIO_FUNC_MASK) == GPIO_INPUT)
-#define GPIO_ISOUTPUT(ps)    ((ps) & GPIO_FUNC_MASK) == GPIO_OUTPUT)
-#define GPIO_ISINORINT(ps)   ((ps) & GPIO_INOUT_MASK) == 0)
-#define GPIO_ISOUTORALT(ps)  ((ps) & GPIO_INOUT_MASK) != 0)
+#define GPIO_ISINPUT(ps)     (((ps) & GPIO_FUNC_MASK) == GPIO_INPUT)
+#define GPIO_ISOUTPUT(ps)    (((ps) & GPIO_FUNC_MASK) == GPIO_OUTPUT)
+#define GPIO_ISINORINT(ps)   (((ps) & GPIO_INOUT_MASK) == 0)
+#define GPIO_ISOUTORALT(ps)  (((ps) & GPIO_INOUT_MASK) != 0)
 #define GPIO_ISINTERRUPT(ps) (GPIO_ISOUTPUT(ps) && !GPIO_ISINPUT(ps))
-#define GPIO_ISFE(ps)        ((ps) & GPIO_FE_MASK) != 0)
-#define GPIO_ISRE(ps)        ((ps) & GPIO_RE_MASK) != 0)
+#define GPIO_ISFE(ps)        (((ps) & GPIO_FE_MASK) != 0)
+#define GPIO_ISRE(ps)        (((ps) & GPIO_RE_MASK) != 0)
 
 /* Pin Mode: MM */
 
