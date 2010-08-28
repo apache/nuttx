@@ -117,13 +117,9 @@ fi
 # Idle Loop
 ############################################################################
 #
-# The IDLE loop must be forced to lie in the locked .text region. NOTE that
-# most of the IDLE loop is is os_start.c, but we don't we want to handle
-# that differently so that it does not draw in a lot of things that we do
-# not need in the locked region.  However, we do need to bring in all of
-# the things called by os_start up to the point where the page fill worker
-# thread is started.
+# The IDLE loop must be forced to lie in the locked .text region.
 
+echo "EXTERN(os_start)" >>ld-locked.inc
 echo "EXTERN(up_idle)" >>ld-locked.inc
 
 ############################################################################
@@ -133,4 +129,3 @@ echo "EXTERN(up_idle)" >>ld-locked.inc
 # All of the page fill worker thread must be in the locked .text region.
 
 echo "EXTERN(pg_worker)" >>ld-locked.inc
-
