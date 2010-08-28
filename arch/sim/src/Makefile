@@ -90,7 +90,7 @@ endif
 
 LINKOBJS	= up_head$(OBJEXT)
 LINKLIBS	=
-LDPATHES	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+LDPATHS	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
@@ -126,7 +126,7 @@ Cygwin-names.dat: nuttx-names.dat
 
 nuttx.rel : libarch$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 	@echo "LD:  nuttx.rel"
-	@$(LD) -r $(LDFLAGS) $(LDPATHES) -o $@ $(LINKOBJS) --start-group $(LDLIBS) --end-group $(EXTRA_LIBS)
+	@$(LD) -r $(LDFLAGS) $(LDPATHS) -o $@ $(LINKOBJS) --start-group $(LDLIBS) --end-group $(EXTRA_LIBS)
 	@$(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
 
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
@@ -134,7 +134,7 @@ nuttx.rel : libarch$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 
 nuttx$(EXEEXT): cleanrel nuttx.rel $(HOSTOBJS)
 	@echo "LD:  nuttx$(EXEEXT)"
-	@$(CC) $(LDFLAGS) $(LDPATHES) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS)
+	@$(CC) $(LDFLAGS) $(LDPATHS) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS)
 	@$(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map

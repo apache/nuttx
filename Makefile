@@ -1,7 +1,7 @@
 ############################################################################
 # Makefile
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,13 @@ MAKEDIRS	+= drivers
 endif
 else
 MAKEDIRS	+= $(FSDIRS)
+endif
+
+#
+# Extra objects used in the final link
+
+ifeq ($(CONFIG_BUILD_2PASS),y)
+EXTRA_OBJS	= $(TOPDIR)/$(CONFIG_PASS1_DIR)/$(CONFIG_PASS1_LIB)
 endif
 
 # LINKLIBS is the list of NuttX libraries that is passed to the
@@ -249,8 +256,29 @@ graphics/libgraphics$(LIBEXT): context
 examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
 	@$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR="$(TOPDIR)" lib$(CONFIG_EXAMPLE)$(LIBEXT)
 
-$(BIN):	context depend $(LINKLIBS)
-	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" $(BIN)
+pass1:
+ifeq ($(CONFIG_BUILD_2PASS),y)
+	@if [ -z "$(CONFIG_PASS1_LIB)" ]; then \
+		echo "ERROR: CONFIG_PASS1_LIB not defined"; \
+		exit 1; \
+	fi
+	@if [ -z "$(CONFIG_PASS1_DIR)" ]; then \
+		echo "ERROR: CONFIG_PASS1_DIR not defined"; \
+		exit 1; \
+	fi
+	@if [ ! -d "$(CONFIG_PASS1_DIR)" ]; then \
+		echo "ERROR: CONFIG_PASS1_DIR does not exist"; \
+		exit 1; \
+	fi
+	@if [ ! -f "$(CONFIG_PASS1_DIR)/Makefile" ]; then \
+		echo "ERROR: No Makefile in CONFIG_PASS1_DIR"; \
+		exit 1; \
+	fi
+	@$(MAKE) -C $(CONFIG_PASS1_DIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" $(CONFIG_PASS1_LIB)
+endif
+
+$(BIN):	context depend $(LINKLIBS) pass1
+	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" $(BIN)
 	@if [ -w /tftpboot ] ; then \
 		cp -f $(TOPDIR)/$@ /tftpboot/$@.${CONFIG_ARCH}; \
 	fi
@@ -283,6 +311,9 @@ subdir_clean:
 	done
 	@$(MAKE) -C tools -f Makefile.mkconfig TOPDIR="$(TOPDIR)" clean
 	@$(MAKE) -C mm -f Makefile.test TOPDIR="$(TOPDIR)" clean
+ifeq ($(CONFIG_BUILD_2PASS),y)
+	@$(MAKE) -C $(CONFIG_PASS1_DIR) TOPDIR="$(TOPDIR)" clean
+endif
 
 clean: subdir_clean
 	@rm -f $(BIN) nuttx.* mm_test *.map *~
@@ -296,5 +327,6 @@ subdir_distclean:
 
 distclean: clean subdir_distclean clean_context
 	@rm -f Make.defs setenv.sh .config
-
-
+ifeq ($(CONFIG_BUILD_2PASS),y)
+	@$(MAKE) -C $(CONFIG_PASS1_DIR) TOPDIR="$(TOPDIR)" distclean
+endif

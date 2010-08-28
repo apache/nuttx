@@ -199,6 +199,13 @@ CONFIG_RAW_BINARY=y
 CONFIG_HAVE_LIBM=n
 
 #
+# Setup for a two-pass build
+#
+CONFIG_BUILD_2PASS=y
+CONFIG_PASS1_DIR=configs/ea3131/locked
+CONFIG_PASS1_LIB=locked.r
+
+#
 # General OS setup
 #
 # CONFIG_EXAMPLE - identifies the subdirectory in examples
