@@ -45,7 +45,7 @@ COBJS	= $(CSRCS:.c=$(OBJEXT))
 SRCS	= $(ASRCS) $(CSRCS)
 OBJS	= $(AOBJS) $(COBJS)
 
-BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
+BIN	= libapp$(LIBEXT)
 
 all:	$(BIN)
 

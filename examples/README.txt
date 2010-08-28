@@ -2,11 +2,13 @@ examples
 ^^^^^^^^
 
   The examples directory contains several sample applications that
-  can be linked with nuttx.  The specific example is selected in the
-  configs/<board-name>/defconfig file via the CONFIG_EXAMPLE setting.
-  For example,
+  can be linked with NuttX.  The specific example is selected in the
+  configs/<board-name>/defconfig file via the CONFIG_APP_DIR setting.
+  This setting provides the path to the directory containing the
+  application Makefile (this path is a relative to the NuttX top-
+  level directory).  For example, 
 
-    CONFIG_EXAMPLE=ostest
+    CONFIG_APP_DIR=examples/ostest
 
   Selects the examples/ostest example.
 

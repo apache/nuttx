@@ -162,8 +162,8 @@ CONFIG_HAVE_LIBM=n
 #
 # General OS setup
 #
-# CONFIG_EXAMPLE - identifies the subdirectory in examples
-#   that will be used in the build
+# CONFIG_APP_DIR - Identifies the relative path to the directory
+#   that builds the application to link with NuttX.
 # CONFIG_DEBUG - enables built-in debug options
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
 # CONFIG_MM_REGIONS - If the architecture includes multiple
@@ -193,7 +193,7 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
 #   driver (minimal support)
 #
-CONFIG_EXAMPLE=ostest
+CONFIG_APP_DIR=examples/ostest
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 #CONFIG_DEBUG_MM=y

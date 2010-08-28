@@ -1,7 +1,7 @@
 ############################################################################
 # examples/thttpd/Makefile
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ COBJS	= $(CSRCS:.c=$(OBJEXT))
 SRCS	= $(ASRCS) $(CSRCS)
 OBJS	= $(AOBJS) $(COBJS)
 
-BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
+BIN	= libapp$(LIBEXT)
 
 all:	$(BIN)
 .PHONY:	clean headers

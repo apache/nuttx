@@ -69,7 +69,7 @@ ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR)
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
 #   from the build if file descriptor support is disabled
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm examples/$(CONFIG_EXAMPLE) $(ADDON_DIRS)
+NONFSDIRS	= sched lib $(ARCH_SRC) mm $(CONFIG_APP_DIR) $(ADDON_DIRS)
 FSDIRS		= fs drivers binfmt
 CONTEXTDIRS	=
 
@@ -113,7 +113,7 @@ endif
 #   is disabled.
 
 LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
-		  lib/liblib$(LIBEXT) examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT)
+		  lib/liblib$(LIBEXT) $(CONFIG_APP_DIR)/libapp$(LIBEXT)
 
 # Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
@@ -253,8 +253,8 @@ pcode/libpcode$(LIBEXT): context
 graphics/libgraphics$(LIBEXT): context
 	@$(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT)
 
-examples/$(CONFIG_EXAMPLE)/lib$(CONFIG_EXAMPLE)$(LIBEXT): context
-	@$(MAKE) -C examples/$(CONFIG_EXAMPLE) TOPDIR="$(TOPDIR)" lib$(CONFIG_EXAMPLE)$(LIBEXT)
+$(CONFIG_APP_DIR)/libapp$(LIBEXT): context
+	@$(MAKE) -C $(CONFIG_APP_DIR) TOPDIR="$(TOPDIR)" libapp$(LIBEXT)
 
 pass1:
 ifeq ($(CONFIG_BUILD_2PASS),y)

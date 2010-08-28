@@ -1,7 +1,7 @@
 ############################################################################
 # examples/udp/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2008, 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ TARG_COBJS	= $(TARG_CSRCS:.c=$(OBJEXT))
 TARG_SRCS	= $(TARG_ASRCS) $(TARG_CSRCS)
 TARG_OBJS	= $(TARG_AOBJS) $(TARG_COBJS)
 
-TARG_BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
+TARG_BIN	= libapp$(LIBEXT)
 
 HOSTCFLAGS	+= -DCONFIG_EXAMPLE_UDP_HOST=1
 ifeq ($(CONFIG_EXAMPLE_UDP_SERVER),y)

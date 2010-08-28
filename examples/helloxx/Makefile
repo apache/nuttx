@@ -1,7 +1,7 @@
 ############################################################################
 # examples/helloxx/Makefile
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ CXXOBJS	= $(CXXSRCS:.cxx=$(OBJEXT))
 SRCS	= $(ASRCS) $(CSRCS) $(CXXSRCS)
 OBJS	= $(AOBJS) $(COBJS) $(CXXOBJS)
 
-BIN	= lib$(CONFIG_EXAMPLE)$(LIBEXT)
+BIN	= libapp$(LIBEXT)
 
 all:	$(BIN)
 .PHONY:	clean depend chkcxx
