@@ -1222,3 +1222,12 @@
 
 5.10 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* configs/ea3131/locked - Create logic to support a two pass build
+	  process:  The first pass forces critical logic into the locked text
+	  region, the second pass builds the NuttX executable more-or-less as
+	  normal.
+	* Makefile, arch/arm/src/Makefile, configs/ea3131 - Add logic to
+	  support a two-pass final link.  This logic is only in place in
+	  the arch/arm/src/Makefile for now.
+	* arch/arm/src/lpc17xx/lpc17_internal.h - Add missing parentheses in
+	  macros definitions (patch submitted by Tiago Maluta).

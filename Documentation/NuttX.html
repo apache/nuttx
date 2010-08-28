@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 25, 2010</p>
+      <p>Last Updated: August 27, 2010</p>
     </td>
   </tr>
 </table>
@@ -1893,6 +1893,16 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-5.10 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* configs/ea3131/locked - Create logic to support a two pass build
+	  process:  The first pass forces critical logic into the locked text
+	  region, the second pass builds the NuttX executable more-or-less as
+	  normal.
+	* Makefile, arch/arm/src/Makefile, configs/ea3131 - Add logic to
+	  support a two-pass final link.  This logic is only in place in
+	  the arch/arm/src/Makefile for now.
+	* arch/arm/src/lpc17xx/lpc17_internal.h - Add missing parentheses in
+	  macros definitions (patch submitted by Tiago Maluta).
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
