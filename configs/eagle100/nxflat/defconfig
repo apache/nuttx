@@ -204,8 +204,8 @@ CONFIG_HAVE_LIBM=n
 #
 # General OS setup
 #
-# CONFIG_EXAMPLE - identifies the subdirectory in examples
-#   that will be used in the build
+# CONFIG_APP_DIR - Identifies the relative path to the directory
+#   that builds the application to link with NuttX.
 # CONFIG_DEBUG - enables built-in debug options
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
 # CONFIG_DEBUG_SYMBOLS - build without optimization and with
@@ -266,7 +266,7 @@ CONFIG_HAVE_LIBM=n
 #   desciptors by task_create() when a new task is started. If
 #   set, all sockets will appear to be closed in the new task.
 #
-CONFIG_EXAMPLE=nxflat
+CONFIG_APP_DIR=examples/nxflat
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n

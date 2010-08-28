@@ -159,8 +159,48 @@ defconfig -- This is a configuration file similar to the Linux
 
 	General OS setup
 
-		CONFIG_EXAMPLE - identifies the subdirectory in examples
-		  that will be used in the build
+		CONFIG_APP_DIR - Identifies the directory that builds the
+		  application to link with NuttX. This symbol must be assigned
+		  to the path to the application build directory *relative* to
+		  the NuttX top build direcory. As an an example, there are
+		  several example applicatins in the NuttX examples/ sub-directory.
+                  To use one of these example applications, say nsh, you would
+		  set CONFIG_APP_DIR=examples/nsh. If you had an application
+		  directory and the NuttX directory both within another directory
+		  like this:
+
+		  build
+		   |-nuttx
+		   |  |
+		   |  `- Makefile
+		   `-application
+		   |
+		   `- Makefile
+
+		  Then you would set CONFIG_APP_DIR=../application.
+
+		  The application direction must contain Makefile and this make
+		  file must support the following targets:
+
+		  - libapp$(LIBEXT) (usually libapp.a). libapp.a is a static
+		    library ( an archive) that contains all of application object
+		    files.
+		  - clean. Do whatever is appropriate to clean the application
+		    directories for a fresh build.
+		  - distclean. Clean everthing -- auto-generated files, symbolic
+		    links etc. -- so that the directory contents are the same as
+		    the contents in your configuration management system.
+		    This is only done when you change the NuttX configuration.
+		  - depend. Make or update the application build dependencies.
+
+		  When this application is invoked it will receive the setting TOPDIR< like:
+
+		    $(MAKE) -C $(CONFIG_APP_DIR) TOPDIR="$(TOPDIR)" <target>
+
+		  TOPDIR is the full path to the NuttX directory. It can be used, for
+		  example, to include makefile fragments (e.g., .config or Make.defs)
+		  or to set up include file paths.
+
 		CONFIG_DEBUG - enables built-in debug options
 		CONFIG_DEBUG_VERBOSE - enables verbose debug output
 		CONFIG_DEBUG_SYMBOLS - build without optimization and with

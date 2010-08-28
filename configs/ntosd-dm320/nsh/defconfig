@@ -143,8 +143,8 @@ CONFIG_HAVE_LIBM=n
 #
 # General OS setup
 #
-# CONFIG_EXAMPLE - identifies the subdirectory in examples
-#   that will be used in the build
+# CONFIG_APP_DIR - Identifies the relative path to the directory
+#   that builds the application to link with NuttX.
 # CONFIG_DEBUG - enables built-in debug options
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
 # CONFIG_DEBUG_SYMBOLS - build without optimization and with
@@ -208,7 +208,7 @@ CONFIG_HAVE_LIBM=n
 #  This format will support execution of NuttX binaries located
 #  in a ROMFS filesystem (see examples/nxflat).
 #
-CONFIG_EXAMPLE=nsh
+CONFIG_APP_DIR=examples/nsh
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n

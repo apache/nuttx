@@ -1,7 +1,7 @@
 ############################################################################
 # configs/mcu123-lpc214x/src/Makefile
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ CSRCS		= up_spi.c up_leds.c
 ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
 endif
-ifeq ($(CONFIG_EXAMPLE),usbstorage)
+ifeq ($(CONFIG_APP_DIR),examples/usbstorage)
 CSRCS		+= up_usbstrg.c
 endif
 
