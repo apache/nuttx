@@ -33,38 +33,58 @@
 #
 ############################################################################
 
+-include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
+
+# Remove the application library (libapp) from the list of libraries.
+
+PASS1_LIBAPP	= $(CONFIG_APP_DIR)/libapp$(LIBEXT)
+PASS1_LINKLIBS	= $(filter-out $(PASS1_LIBAPP),$(LINKLIBS))
+
+# Get the paths to the libraries and the links script path in format that
+# is appropriate for the host OS
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
-  PASS1_LIBPATHS	= ${shell for path in $(LINKLIBS); do dir=`dirname $(TOPDIR)/$$path`;echo "-L\"`cygpath -w $$dir`\"";done}
+  PASS1_LIBPATHS	= ${shell for path in $(PASS1_LINKLIBS); do dir=`dirname $(TOPDIR)/$$path`;echo "-L\"`cygpath -w $$dir`\"";done}
   PASS1_LDSCRIPT	= -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/locked/ld-locked.inc}"
 else
   # Linux/Cygwin-native toolchain 
-  PASS1_LIBPATHS	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+  PASS1_LIBPATHS	= $(addprefix -L$(TOPDIR)/,$(dir $(PASS1_LINKLIBS)))
   PASS1_LDSCRIPT	= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/locked/ld-locked.inc
 endif
 
 PASS1_LDFLAGS	= -r $(PASS1_LDSCRIPT)
-PASS1_LDLIBS	= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
+PASS1_LDLIBS	= $(patsubst lib%,-l%,$(basename $(notdir $(PASS1_LINKLIBS))))
 PASS1_LIBGCC	= "${shell $(CC) -print-libgcc-file-name}"
 
 all: locked.r
+
+# Create include-able linker script that specifies all of the symbols to be
+# resolved in the locked.r file.
 
 ld-locked.inc: mklocked.sh $(TOPDIR)/.config
 	@echo "MK:  ld-locked.inc"
 	@./mklocked.sh "$(TOPDIR)"
 
-locked.r: ld-locked.inc $(OBJS)
+# Create the locked.r file containing all of the code (except the start-up code)
+# that needs to lie in the locked text region.
+
+locked.r: ld-locked.inc
 	@echo "LD:  locked.r"
-	@$(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group -u os_start $(PASS1_LIBGCC) 
+	@$(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group $(PASS1_LIBGCC) 
+	@echo "NM:  locked.map"
+	@$(NM) $@ > locked.map
+	@fgrep " U " locked.map | grep -v os_start
+	@echo "SZ:"
+	@$(CROSSDEV)size $@
 
 .depend:
 
 depend: .depend
 
 clean:
-	@rm -f locked.r *~ .*.swp
+	@rm -f locked.r locked.map *~ .*.swp
 
 distclean: clean
 	@rm -f ld-locked.inc
