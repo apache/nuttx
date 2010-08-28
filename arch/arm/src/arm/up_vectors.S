@@ -424,7 +424,7 @@ up_vectorundefinsn:
 	.type	up_vectorfiq, %function
 up_vectorfiq:
 	subs	pc, lr, #4
-	.size	up_vectofiq, . - up_vectorfiq
+	.size	up_vectorfiq, . - up_vectorfiq
 
 /************************************************************************************
  *  Name: up_interruptstack/g_userstack
