@@ -65,7 +65,16 @@ SECTIONS
 	.locked : {
 		_slocked = ABSOLUTE(.);
 		*(.vectors)
-		locked.r (.text)
+		locked.r (.text .text.*)        
+		locked.r (.fixup)
+		locked.r (.gnu.warning)
+		locked.r (.rodata .rodata.*)        
+		locked.r (.gnu.linkonce.t.*)
+		locked.r (.glue_7)
+		locked.r (.glue_7t)
+		locked.r (.got)
+		locked.r (.gcc_except_table)
+		locked.r (.gnu.linkonce.r.*)
 		_elocked = ABSOLUTE(.);
 	} >locked
 	_eronly = ABSOLUTE(.);
