@@ -1231,3 +1231,19 @@
 	  the arch/arm/src/Makefile for now.
 	* arch/arm/src/lpc17xx/lpc17_internal.h - Add missing parentheses in
 	  macros definitions (patch submitted by Tiago Maluta).
+	* Documents/NuttxPortingGuide.html, configs/README.txt, etc. -
+	  Replaced CONFIG_EXAMPLE with CONFIG_APP_DIR (see documents for
+	  desciption).  This allows NuttX application code to be built
+	  outside of the examples/ directory.
+
+	  For people who have their own configurations and/or Makefiles,
+	  you will need to make a couple of changes:
+
+          - Replace all occurrences of CONFIG_EXAMPLE=foobar with
+	    CONFIG_APP_DIR=examples/foobar in all of the configuration
+	    files.
+	  - Replace any occurrences of examples/$(CONFIG_EXAMPLE) with
+	    $(CONFIG_APP_DIR)
+	  - Replace any occurrences of lib$(CONFIG_EXAMPLE)$(LIBEXT)
+	    with libapp$(LIBEXT) in your Makefiles.
+	  - Check any other occurrences of CONFIG_EXAMPLE.

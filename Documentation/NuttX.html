@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 27, 2010</p>
+      <p>Last Updated: August 28, 2010</p>
     </td>
   </tr>
 </table>
@@ -1903,8 +1903,22 @@ nuttx-5.10 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  the arch/arm/src/Makefile for now.
 	* arch/arm/src/lpc17xx/lpc17_internal.h - Add missing parentheses in
 	  macros definitions (patch submitted by Tiago Maluta).
+	* Documents/NuttxPortingGuide.html, configs/README.txt, etc. -
+	  Replaced CONFIG_EXAMPLE with CONFIG_APP_DIR (see documents for
+	  desciption).  This allows NuttX application code to be built
+	  outside of the examples/ directory.
 
-pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+	  For people who have their own configurations and/or Makefiles,
+	  you will need to make a couple of changes:
+
+          - Replace all occurrences of CONFIG_EXAMPLE=foobar with
+	    CONFIG_APP_DIR=examples/foobar in all of the configuration
+	    files.
+	  - Replace any occurrences of examples/$(CONFIG_EXAMPLE) with
+	    $(CONFIG_APP_DIR)
+	  - Replace any occurrences of lib$(CONFIG_EXAMPLE)$(LIBEXT)
+	    with libapp$(LIBEXT) in your Makefiles.
+	  - Check any other occurrences of CONFIG_EXAMPLE.pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-1.9 2010-xx-xx <spudmonkey@racsa.co.cr>
 </pre></ul>

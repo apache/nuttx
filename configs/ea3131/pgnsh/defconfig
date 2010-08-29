@@ -202,8 +202,8 @@ CONFIG_HAVE_LIBM=n
 # Setup for a two-pass build
 #
 CONFIG_BUILD_2PASS=y
-CONFIG_PASS1_DIR=configs/ea3131/locked
-CONFIG_PASS1_LIB=locked.r
+CONFIG_PASS1_BUILDIR=configs/ea3131/locked
+CONFIG_PASS1_OBJECT=locked.r
 
 #
 # General OS setup

@@ -101,10 +101,15 @@ MAKEDIRS	+= $(FSDIRS)
 endif
 
 #
-# Extra objects used in the final link
+# Extra objects used in the final link.
+#
+# Pass 1 1ncremental (relative) link objects should be put into the
+# processor-specific source directory (where other link objects will
+# be created).  If the pass1 obect is an archive, it could go anywhere.
 
 ifeq ($(CONFIG_BUILD_2PASS),y)
-EXTRA_OBJS	= $(TOPDIR)/$(CONFIG_PASS1_DIR)/$(CONFIG_PASS1_LIB)
+#EXTRA_OBJS	= $(TOPDIR)/$(CONFIG_PASS1_BUILDIR)/$(CONFIG_PASS1_OBJECT)
+EXTRA_OBJS	+= $(CONFIG_PASS1_OBJECT)
 endif
 
 # LINKLIBS is the list of NuttX libraries that is passed to the
@@ -256,25 +261,31 @@ graphics/libgraphics$(LIBEXT): context
 $(CONFIG_APP_DIR)/libapp$(LIBEXT): context
 	@$(MAKE) -C $(CONFIG_APP_DIR) TOPDIR="$(TOPDIR)" libapp$(LIBEXT)
 
+# If the 2 pass build option is selected, then this pass1 target is
+# configured be build a extra link object. This is assumed to be an
+# incremental (relative) link object, but could be a static library
+# (archive); some modification to this Makefile would be required if
+# CONFIG_PASS1_OBJECT is an archive.
+
 pass1:
 ifeq ($(CONFIG_BUILD_2PASS),y)
-	@if [ -z "$(CONFIG_PASS1_LIB)" ]; then \
-		echo "ERROR: CONFIG_PASS1_LIB not defined"; \
+	@if [ -z "$(CONFIG_PASS1_OBJECT)" ]; then \
+		echo "ERROR: CONFIG_PASS1_OBJECT not defined"; \
 		exit 1; \
 	fi
-	@if [ -z "$(CONFIG_PASS1_DIR)" ]; then \
-		echo "ERROR: CONFIG_PASS1_DIR not defined"; \
+	@if [ -z "$(CONFIG_PASS1_BUILDIR)" ]; then \
+		echo "ERROR: CONFIG_PASS1_BUILDIR not defined"; \
 		exit 1; \
 	fi
-	@if [ ! -d "$(CONFIG_PASS1_DIR)" ]; then \
-		echo "ERROR: CONFIG_PASS1_DIR does not exist"; \
+	@if [ ! -d "$(CONFIG_PASS1_BUILDIR)" ]; then \
+		echo "ERROR: CONFIG_PASS1_BUILDIR does not exist"; \
 		exit 1; \
 	fi
-	@if [ ! -f "$(CONFIG_PASS1_DIR)/Makefile" ]; then \
-		echo "ERROR: No Makefile in CONFIG_PASS1_DIR"; \
+	@if [ ! -f "$(CONFIG_PASS1_BUILDIR)/Makefile" ]; then \
+		echo "ERROR: No Makefile in CONFIG_PASS1_BUILDIR"; \
 		exit 1; \
 	fi
-	@$(MAKE) -C $(CONFIG_PASS1_DIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" $(CONFIG_PASS1_LIB)
+	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" "$(ARCH_SRC)/$(CONFIG_PASS1_OBJECT)"
 endif
 
 $(BIN):	context depend $(LINKLIBS) pass1
@@ -312,7 +323,7 @@ subdir_clean:
 	@$(MAKE) -C tools -f Makefile.mkconfig TOPDIR="$(TOPDIR)" clean
 	@$(MAKE) -C mm -f Makefile.test TOPDIR="$(TOPDIR)" clean
 ifeq ($(CONFIG_BUILD_2PASS),y)
-	@$(MAKE) -C $(CONFIG_PASS1_DIR) TOPDIR="$(TOPDIR)" clean
+	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" clean
 endif
 
 clean: subdir_clean
@@ -328,5 +339,5 @@ subdir_distclean:
 distclean: clean subdir_distclean clean_context
 	@rm -f Make.defs setenv.sh .config
 ifeq ($(CONFIG_BUILD_2PASS),y)
-	@$(MAKE) -C $(CONFIG_PASS1_DIR) TOPDIR="$(TOPDIR)" distclean
+	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" distclean
 endif
