@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-
+ 
 /* The LPC3131 has 192Kb of ISRAM beginning at virtual address 0x1102:8000.
  * LPC313x boot ROM expects the boot image be compiled with entry point at
  * 0x1102:9000.  A 128b header will appear at this address (applied by
@@ -45,6 +45,10 @@
  * locked - Pages locked in memory.     Start: 0x1102 8000 Size: 36Kb
  * paged  - Pages in nonvolatile store. Start: 0x1103 1000 Size: 384Kb
  * data   - .data/.bss/heap.            Start: 0x1109 1000 Size: 44Kb
+ *
+ * These region sizes must match the size in pages specified for each region
+ * in the NuttX configuration file:  CONFIG_PAGING_NLOCKED, CONFIG_PAGING_NVPAGED,
+ * and CONFIG_PAGING_NDATA.
  */
 
 MEMORY
@@ -61,10 +65,10 @@ SECTIONS
 	.locked : {
 		_slocked = ABSOLUTE(.);
 		*(.vectors)
-		*(.locked)
+		locked.r (.text)
 		_elocked = ABSOLUTE(.);
 	} >locked
-	_eronly = ABSOLUTE(.);		/* See below                    */
+	_eronly = ABSOLUTE(.);
 
 	.paged : {
 		_spaged = ABSOLUTE(.);

@@ -37,8 +37,7 @@ INCLUDE ld-locked.inc
 OUTPUT_ARCH(arm)
 SECTIONS
 {
-	.locked : {
-		*(.vectors)
-		*(.text .text.*)        
-	}
+	.text.locked : { *(.text .text.*) }
+	.data : { *(.data) } 
+	.bss :  { *(.bss)  *(COMMON) } 
 }

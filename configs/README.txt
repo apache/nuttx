@@ -139,7 +139,7 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_DRAM_START - The start address of DRAM (physical)
 		CONFIG_DRAM_VSTART - The start address of DRAM (virtual)
 
-	General build options
+	General build options:
 
 		CONFIG_RRLOAD_BINARY - make the rrload binary format used with
 		  BSPs from www.ridgerun.com using the tools/mkimage.sh script.
@@ -157,7 +157,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  COMPILEXX have been defined in the configuratins Make.defs
 		  file.
 
-	General OS setup
+	Building application code:
 
 		CONFIG_APP_DIR - Identifies the directory that builds the
 		  application to link with NuttX. This symbol must be assigned
@@ -200,6 +200,28 @@ defconfig -- This is a configuration file similar to the Linux
 		  TOPDIR is the full path to the NuttX directory. It can be used, for
 		  example, to include makefile fragments (e.g., .config or Make.defs)
 		  or to set up include file paths.
+
+	Two-pass build options.  If the 2 pass build option is selected, then these
+	options configure the make system build a extra link object. This link object
+	is assumed to be an incremental (relative) link object, but could be a static
+	library (archive) (some modification to this Makefile would be required if
+	CONFIG_PASS1_OBJECT is an archive). Pass 1 1ncremental (relative) link objects
+	should be put into the processor-specific source directory (where other
+	link objects will be created).  If the pass1 obect is an archive, it could
+	go anywhere.
+
+		CONFIG_BUILD_2PASS - Enables the two pass build options.
+
+	When the two pass build option is enabled, the following also apply:
+
+		CONFIG_PASS1_OBJECT - The name of the first pass object.
+		CONFIG_PASS1_BUILDIR - The path, relative to the top NuttX build
+		  directory to directory that contains the Makefile to build the
+		  first pass object.  The Makefile must support the following targets:
+		  - The special target arch/$(CONFIG_ARCH)/src/$(CONFIG_PASS1_OBJECT)
+		  - and the usual depend, clean, and distclean targets.
+
+	General OS setup
 
 		CONFIG_DEBUG - enables built-in debug options
 		CONFIG_DEBUG_VERBOSE - enables verbose debug output
@@ -308,7 +330,8 @@ defconfig -- This is a configuration file similar to the Linux
 		  enable the on-demand paging feature as described in
 		  http://www.nuttx.org/NuttXDemandPaging.html.
 
-    If CONFIG_PAGING is selected, then the following also apply:
+    If CONFIG_PAGING is selected, then you will probabaly need CONFIG_BUILD_2PASS to
+    correctly position the code and the following configuration options also apply:
 
 		CONFIG_PAGING_PAGESIZE - The size of one managed page.  This must
 		  be a value supported by the processor's memory management unit.
