@@ -71,7 +71,16 @@
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 #  error "Configuration not implemented"
-#  define CONFIGURE_SDRAM
+#  define CONFIG_SDRAM 1
+
+  /* Check for the identity mapping:  For this configuration, this would be
+   * the case where the section containing the NuttX entry virtual address
+   * is the same as the physcal beginning of FLASH.
+   */
+
+#  if CONFIG_FLASH_START == (CONFIG_DRAM_NUTTXENTRY & 0xfff00000)
+#    define CONFIG_IDENTITY_TEXTMAP 1
+#  endif
 
 /* 2. We boot in FLASH but copy ourselves to DRAM from better performance.
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).  In this case
@@ -80,18 +89,40 @@
  *    - Configure SDRAM, 
  *    - Copy ourself to DRAM (after mapping it), and
  *    - Clear .bss section
+ *
+ *   In this case, we assume that the logic within this file executes from FLASH.
  */
 
 #elif defined(CONFIG_BOOT_COPYTORAM)
 #  error "configuration not implemented
-#  define CONFIG_SDRAM
+#  define CONFIG_SDRAM 1
+
+  /* Check for the identity mapping:  For this configuration, this would be
+   * the case where the section containing the NuttX entry virtual address
+   * is the same as the physcal beginning of FLASH.
+   */
+
+#  if CONFIG_FLASH_START == (CONFIG_DRAM_NUTTXENTRY & 0xfff00000)
+#    define CONFIG_IDENTITY_TEXTMAP 1
+#  endif
 
 /* 3. There is bootloader that copies us to DRAM (but probably not to the beginning)
- *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n). In this case the
- *    boot logic must:
+ *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n). In this case SDRAM
+ *    was initialized by the boot loader, and this boot logic must: 
  *
  *    - Clear .bss section
  */
+
+#else
+
+  /* Check for the identity mapping:  For this configuration, this would be
+   * the case where the section containing the NuttX entry virtual address
+   * is the same as the physcal beginning of RAM.
+   */
+
+#  if CONFIG_DRAM_START == (CONFIG_DRAM_NUTTXENTRY & 0xfff00000)
+#    define CONFIG_IDENTITY_TEXTMAP 1
+#  endif
 
 #endif
 
@@ -112,14 +143,26 @@
  * Assembly Macros
  ****************************************************************************/
 
-/* Since the page table is closely related to the NuttX base address, we can
- * convert the page table base address to the base address of the section
- * containing both.
+/* The ARM9 L1 page table can be placed at the beginning or at the end of the
+ * RAM space.  This decision is based on the placement of the vector area:
+ * If the vectors are place in low memory at address 0x0000 0000, then the
+ * page table is placed in high memory; if the vectors are placed in high
+ * memory at address 0xfff0 0000, then the page table is locating at the
+ * beginning of RAM.
+ *
+ * For the special case where (1) the program executes out of RAM, and (2) the
+ * page is located at the beginning of RAM, then the following macro can
+ * easily find the physical address of the section that includes the first
+ * part of the text region:  Since the page table is closely related to the
+ * NuttX base address in this case, we can convert the page table base address
+ * to the base address of the section containing both.
  */
 
+#ifndef CONFIG_ARCH_LOWVECTORS
 	.macro	mksection, section, pgtable
 	bic	\section, \pgtable, #0x000ff000
 	.endm
+#endif
 
 /* This macro will modify r0, r1, r2 and r14 */
 
@@ -171,13 +214,17 @@ __start:
 
 	/* Create identity mapping for first MB of the .text section to support
 	 * this startup logic executing out of the physical address space.  This
-	 * identity mapping will be removed by .Lvstart (see below).
+	 * identity mapping will be removed by .Lvstart (see below).  Of course,
+	 * we would only do this if the physical-virtual mapping is not already
+	 * the identity mapping.
 	 */
 
+#ifndef CONFIG_IDENTITY_TEXTMAP
 	mksection r0, r4			/* r0=phys. base section */
 	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
 	add	r3, r1, r0			/* r3=flags + base */
 	str	r3, [r4, r0, lsr #18]		/* identity mapping */
+#endif
 
 #ifdef CONFIG_PAGING
 	/* Map the read-only .text region in place.  This must be done
@@ -399,17 +446,19 @@ __start:
 	.type	.Lvstart, %function
 .Lvstart:
 
-	/* Remove the temporary mapping.  The following assumes that the
-	 * total RAM size is > 1Mb and extends that initial mapping to
+	/* Remove the temporary mapping (if one was made).  The following assumes
+	 * that the total RAM size is > 1Mb and extends that initial mapping to
 	 * cover additinal RAM sections.
 	 */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
+#ifndef  CONFIG_IDENTITY_TEXTMAP
 	ldr	r4, .LCvpgtable			/* r4=virtual page table */
 	ldr	r1, .LCppgtable			/* r1=phys. page table */
 	mksection r3, r1			/* r2=phys. base addr */
 	mov	r0, #0				/* flags + base = 0 */
 	str	r0, [r4, r3, lsr #18]		/* Undo identity mapping */
+#endif
 
 #if defined(CONFIG_PAGING)
 	/* Populate the L1 table for the data region */
