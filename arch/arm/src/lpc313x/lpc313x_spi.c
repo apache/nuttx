@@ -1,7 +1,7 @@
 /************************************************************************************
  * arm/arm/src/lpc313x/lpc313x_spi.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -568,8 +568,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
   FAR struct lpc313x_spidev_s *priv = (FAR struct lpc313x_spidev_s *)dev;
-
-  DEBUGASSERT(priv && priv->spibase);
+  DEBUGASSERT(priv);
 
   spi_writeword(priv, wd);
   return spi_readword(priv);

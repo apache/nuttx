@@ -105,6 +105,9 @@ void up_prefetchabort(uint32_t *regs)
    * virtual addresses.
    */
 
+  pglldbg("VADDR: %08x VBASE: %08x VEND: %08x\n",
+          regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
+
   if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
     {
       /* Save the offending PC as the fault address in the TCB of the currently
@@ -133,7 +136,7 @@ void up_prefetchabort(uint32_t *regs)
   else
 #endif
     {
-      lldbg("Prefetch abort at %08x\n", regs[REG_PC]);
+      lldbg("Prefetch abort. PC: %08x\n", regs[REG_PC]);
       PANIC(OSERR_ERREXCEPTION);
     }
 }
