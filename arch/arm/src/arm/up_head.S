@@ -74,11 +74,11 @@
 #  define CONFIG_SDRAM 1
 
   /* Check for the identity mapping:  For this configuration, this would be
-   * the case where the section containing the NuttX entry virtual address
-   * is the same as the physcal beginning of FLASH.
+   * the case where the virtual beginning of FLASH is the same as the physical
+   * beginning of FLASH.
    */
 
-#  if CONFIG_FLASH_START == (CONFIG_DRAM_NUTTXENTRY & 0xfff00000)
+#  if CONFIG_FLASH_START == CONFIG_FLASH_VSTART
 #    define CONFIG_IDENTITY_TEXTMAP 1
 #  endif
 
@@ -98,11 +98,11 @@
 #  define CONFIG_SDRAM 1
 
   /* Check for the identity mapping:  For this configuration, this would be
-   * the case where the section containing the NuttX entry virtual address
-   * is the same as the physcal beginning of FLASH.
+   * the case where the virtual beginning of FLASH is the same as the physical
+   * beginning of FLASH.
    */
 
-#  if CONFIG_FLASH_START == (CONFIG_DRAM_NUTTXENTRY & 0xfff00000)
+#  if CONFIG_FLASH_START == CONFIG_FLASH_VSTART
 #    define CONFIG_IDENTITY_TEXTMAP 1
 #  endif
 
@@ -116,11 +116,11 @@
 #else
 
   /* Check for the identity mapping:  For this configuration, this would be
-   * the case where the section containing the NuttX entry virtual address
-   * is the same as the physcal beginning of RAM.
+   * the case where the virtual beginning of RAM is the same as the physical
+   * beginning of RAM.
    */
 
-#  if CONFIG_DRAM_START == (CONFIG_DRAM_NUTTXENTRY & 0xfff00000)
+#  if CONFIG_DRAM_START == CONFIG_DRAM_VSTART
 #    define CONFIG_IDENTITY_TEXTMAP 1
 #  endif
 
@@ -264,7 +264,8 @@ __start:
 	ldmia	r0, {r0, r1, r2, r3}
  	pg_l2map r0, r1, r2, r3, r5
 
-#else
+#else /* CONFIG_PAGING */
+
 	/* Create a virtual single section mapping for the first MB of the .text
 	 * address space. Now, we have the first 1MB mapping to both phyical and
 	 * virtual addresses.  The rest of the .text mapping will be completed in
@@ -281,7 +282,8 @@ __start:
 	/* NOTE: No .data/.bss access should be attempted.  This temporary mapping
 	 * can only be assumed to cover the initial .text region.
 	 */
-#endif
+
+#endif /* CONFIG_PAGING */
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
 	/* The following logic will set up the ARM920/ARM926 for normal operation.
@@ -408,6 +410,7 @@ __start:
 #endif
 
 #ifdef CONFIG_PAGING
+
 .Ltxtspan:
 	.long	PG_L1_TEXT_PADDR		/* Physical address in the L1 table */
 	.long	PG_L2_TEXT_PADDR		/* Physical address of the L2 page table */
@@ -431,7 +434,8 @@ __start:
 	.long	PGTABLE_BASE_PADDR		/* Physical address of the page table memory */
 	.long	PG_PGTABLE_NPAGES		/* Total mapped page table pages */
 	.long	MMU_L2_PGTABFLAGS		/* L2 MMU flags to use */
-#endif
+
+#endif /* CONFIG_PAGING */
 	.size	_start, .-_start
 
 /****************************************************************************
@@ -452,7 +456,7 @@ __start:
 	 */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-#ifndef  CONFIG_IDENTITY_TEXTMAP
+#ifndef CONFIG_IDENTITY_TEXTMAP
 	ldr	r4, .LCvpgtable			/* r4=virtual page table */
 	ldr	r1, .LCppgtable			/* r1=phys. page table */
 	mksection r3, r1			/* r2=phys. base addr */
@@ -507,7 +511,8 @@ __start:
 	 * paging of the .text region, then the RAM-based .data/.bss/heap section
 	 * will still probably be located in a separate (virtual) address region.
 	 */
-#endif
+
+#endif /* CONFIG_PAGING */
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
 	/* Zero BSS and set up the stack pointer */
@@ -568,6 +573,7 @@ __start:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 
 #ifdef CONFIG_PAGING
+
 .Ldataspan:
 	.long	PG_L1_DATA_VADDR	/* Virtual address in the L1 table */
 	.long	PG_L2_DATA_PADDR	/* Physical address of the L2 page table */
@@ -579,7 +585,8 @@ __start:
 	.long	PG_DATA_VBASE		/* Virtual address of data memory  */
 	.long	PG_DATA_NPAGES		/* Number of pages in the data region */
 	.long	MMU_L2_DATAFLAGS	/* L2 MMU flags to use */
-#endif
+
+#endif /* CONFIG_PAGING */
 
 #if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_PAGING)
 .Ldatainit:
