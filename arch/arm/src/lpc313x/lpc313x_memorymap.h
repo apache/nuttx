@@ -319,6 +319,8 @@
 /* 16Kb of memory is reserved hold the page table for the virtual mappings.  A
  * portion of this table is not accessible in the virtual address space (for
  * normal operation). We will reuse this memory for coarse page tables as follows:
+ *
+ * Page table start addresses:
  */
 
 #define PGTABLE_L2_COARSE_OFFSET    ((((LPC313X_LAST_PSECTION >> 20) + 255) & ~255) << 2)
@@ -329,14 +331,20 @@
 #define PGTABLE_L2_FINE_PBASE       (PGTABLE_BASE_PADDR+PGTABLE_L2_FINE_OFFSET)
 #define PGTABLE_L2_FINE_VBASE       (PGTABLE_BASE_VADDR+PGTABLE_L2_FINE_OFFSET)
 
+/* Page table end addresses: */
+
 #define PGTABLE_L2_END_PADDR        (PGTABLE_BASE_PADDR+PGTABLE_SIZE)
 #define PGTABLE_L2_END_VADDR        (PGTABLE_BASE_VADDR+PGTABLE_SIZE)
 
-#define PGTABLE_L2_ALLOC            (PGTABLE_L2_END_VADDR-PGTABLE_L2_BASE_VADDR)
+/* Page table sizes */
+
+#define PGTABLE_L2_COARSE_ALLOC     (PGTABLE_L2_END_VADDR-PGTABLE_L2_COARSE_VBASE)
 #define PGTABLE_COARSE_TABLE_SIZE   (4*256)
-#define PGTABLE_NCOARSE_TABLES      (PGTABLE_L2_ALLOC / PGTABLE_COARSE_TABLE_SIZE)
+#define PGTABLE_NCOARSE_TABLES      (PGTABLE_L2_COARSE_ALLOC / PGTABLE_COARSE_TABLE_SIZE)
+
+#define PGTABLE_L2_FINE_ALLOC       (PGTABLE_L2_END_VADDR-PGTABLE_L2_FINE_VBASE)
 #define PGTABLE_FINE_TABLE_SIZE     (4*1024)
-#define PGTABLE_NFINE_TABLES        (PGTABLE_L2_ALLOC / PGTABLE_FINE_TABLE_SIZE)
+#define PGTABLE_NFINE_TABLES        (PGTABLE_L2_FINE_ALLOC / PGTABLE_FINE_TABLE_SIZE)
 
 /* Determine the base address of the vector table:
  *
