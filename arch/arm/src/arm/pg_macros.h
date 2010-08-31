@@ -69,63 +69,73 @@
 
 #if CONFIG_PAGING_PAGESIZE == 1024
 
+   /* Base of the L2 page table (aligned to 4Kb byte boundaries) */
+
+#  define PGTABLE_L2_BASE_PADDR PGTABLE_L2_FINE_PBASE
+#  define PGTABLE_L2_BASE_VADDR PGTABLE_L2_FINE_VBASE
+
    /* Number of pages in an L2 table per L1 entry */
 
-#  define PTE_NPAGES           PTE_TINY_NPAGES
+#  define PTE_NPAGES            PTE_TINY_NPAGES
 
    /* Mask to get the page table physical address from an L1 entry */
 
-#  define PG_L1_PADDRMASK     PMD_FINE_TEX_MASK
+#  define PG_L1_PADDRMASK       PMD_FINE_TEX_MASK
 
    /* MMU Flags for each memory region */
 
-#  define MMU_L1_TEXTFLAGS     (PMD_TYPE_FINE|PMD_BIT4)
-#  define MMU_L2_TEXTFLAGS     (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRO|PTE_CACHEABLE)
-#  define MMU_L1_DATAFLAGS     (PMD_TYPE_FINE|PMD_BIT4)
-#  define MMU_L2_DATAFLAGS     (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW|PTE_CACHEABLE|PTE_BUFFERABLE)
-#  define MMU_L1_PGTABFLAGS    (PMD_TYPE_FINE|PMD_BIT4)
-#  define MMU_L2_PGTABFLAGS    (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW)
+#  define MMU_L1_TEXTFLAGS      (PMD_TYPE_FINE|PMD_BIT4)
+#  define MMU_L2_TEXTFLAGS      (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRO|PTE_CACHEABLE)
+#  define MMU_L1_DATAFLAGS      (PMD_TYPE_FINE|PMD_BIT4)
+#  define MMU_L2_DATAFLAGS      (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW|PTE_CACHEABLE|PTE_BUFFERABLE)
+#  define MMU_L1_PGTABFLAGS     (PMD_TYPE_FINE|PMD_BIT4)
+#  define MMU_L2_PGTABFLAGS     (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW)
 
-#  define MMU_L2_VECTRWFLAGS   (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW)
-#  define MMU_L2_VECTROFLAGS   (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRO|PTE_CACHEABLE)
+#  define MMU_L2_VECTRWFLAGS    (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW)
+#  define MMU_L2_VECTROFLAGS    (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRO|PTE_CACHEABLE)
 
 #elif CONFIG_PAGING_PAGESIZE == 4096
 
+   /* Base of the L2 page table (aligned to 1Kb byte boundaries) */
+
+#  define PGTABLE_L2_BASE_PADDR PGTABLE_L2_COARSE_PBASE
+#  define PGTABLE_L2_BASE_VADDR PGTABLE_L2_COARSE_VBASE
+
    /* Number of pages in an L2 table per L1 entry */
 
-#  define PTE_NPAGES           PTE_SMALL_NPAGES
+#  define PTE_NPAGES            PTE_SMALL_NPAGES
 
    /* Mask to get the page table physical address from an L1 entry */
 
-#  define PG_L1_PADDRMASK     PMD_COARSE_TEX_MASK
+#  define PG_L1_PADDRMASK       PMD_COARSE_TEX_MASK
 
    /* MMU Flags for each memory region. */
 
-#  define MMU_L1_TEXTFLAGS     (PMD_TYPE_COARSE|PMD_BIT4)
-#  define MMU_L2_TEXTFLAGS     (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
-#  define MMU_L1_DATAFLAGS     (PMD_TYPE_COARSE|PMD_BIT4)
-#  define MMU_L2_DATAFLAGS     (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW|PTE_CACHEABLE|PTE_BUFFERABLE)
-#  define MMU_L1_PGTABFLAGS    (PMD_TYPE_COARSE|PMD_BIT4)
-#  define MMU_L2_PGTABFLAGS    (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW)
+#  define MMU_L1_TEXTFLAGS      (PMD_TYPE_COARSE|PMD_BIT4)
+#  define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
+#  define MMU_L1_DATAFLAGS      (PMD_TYPE_COARSE|PMD_BIT4)
+#  define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW|PTE_CACHEABLE|PTE_BUFFERABLE)
+#  define MMU_L1_PGTABFLAGS     (PMD_TYPE_COARSE|PMD_BIT4)
+#  define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW)
 
-#  define MMU_L2_VECTRWFLAGS   (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW)
-#  define MMU_L2_VECTROFLAGS   (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
+#  define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW)
+#  define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
 
 #else
 #  error "Need extended definitions for CONFIG_PAGING_PAGESIZE"
 #endif
 
-#define PT_SIZE                (4*PTE_NPAGES)
+#define PT_SIZE                 (4*PTE_NPAGES)
 
 /* We position the locked region PTEs at the beginning of L2 page
  * table.
  */
 
-#define PG_L1_LOCKED_PADDR     (PGTABLE_BASE_PADDR + ((PG_LOCKED_VBASE >> 20) << 2))
-#define PG_L1_LOCKED_VADDR     (PGTABLE_BASE_VADDR + ((PG_LOCKED_VBASE >> 20) << 2))
-#define PG_L2_LOCKED_PADDR     PGTABLE_L2_BASE_PADDR
-#define PG_L2_LOCKED_VADDR     PGTABLE_L2_BASE_VADDR
-#define PG_L2_LOCKED_SIZE      (4*CONFIG_PAGING_NLOCKED)
+#define PG_L1_LOCKED_PADDR      (PGTABLE_BASE_PADDR + ((PG_LOCKED_VBASE >> 20) << 2))
+#define PG_L1_LOCKED_VADDR      (PGTABLE_BASE_VADDR + ((PG_LOCKED_VBASE >> 20) << 2))
+#define PG_L2_LOCKED_PADDR      PGTABLE_L2_BASE_PADDR
+#define PG_L2_LOCKED_VADDR      PGTABLE_L2_BASE_VADDR
+#define PG_L2_LOCKED_SIZE       (4*CONFIG_PAGING_NLOCKED)
 
 /* We position the paged region PTEs immediately after the locked
  * region PTEs.  NOTE that the size of the paged regions is much
@@ -133,39 +143,39 @@
  * core of what the On-Demanding Paging feature provides.
  */
  
-#define PG_L1_PAGED_PADDR      (PGTABLE_BASE_PADDR + ((PG_PAGED_VBASE >> 20) << 2))
-#define PG_L1_PAGED_VADDR      (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
-#define PG_L2_PAGED_PADDR      (PGTABLE_L2_BASE_PADDR + PG_L2_LOCKED_SIZE)
-#define PG_L2_PAGED_VADDR      (PGTABLE_L2_BASE_VADDR + PG_L2_LOCKED_SIZE)
-#define PG_L2_PAGED_SIZE       (4*CONFIG_PAGING_NVPAGED)
+#define PG_L1_PAGED_PADDR       (PGTABLE_BASE_PADDR + ((PG_PAGED_VBASE >> 20) << 2))
+#define PG_L1_PAGED_VADDR       (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
+#define PG_L2_PAGED_PADDR       (PGTABLE_L2_BASE_PADDR + PG_L2_LOCKED_SIZE)
+#define PG_L2_PAGED_VADDR       (PGTABLE_L2_BASE_VADDR + PG_L2_LOCKED_SIZE)
+#define PG_L2_PAGED_SIZE        (4*CONFIG_PAGING_NVPAGED)
 
 /* This describes the overall text region */
 
-#define PG_L1_TEXT_PADDR       PG_L1_LOCKED_PADDR
-#define PG_L1_TEXT_VADDR       PG_L1_LOCKED_VADDR
-#define PG_L2_TEXT_PADDR       PG_L2_LOCKED_PADDR
-#define PG_L2_TEXT_VADDR       PG_L2_LOCKED_VADDR
-#define PG_L2_TEXT_SIZE        (PG_L2_LOCKED_SIZE + PG_L2_PAGED_SIZE)
+#define PG_L1_TEXT_PADDR        PG_L1_LOCKED_PADDR
+#define PG_L1_TEXT_VADDR        PG_L1_LOCKED_VADDR
+#define PG_L2_TEXT_PADDR        PG_L2_LOCKED_PADDR
+#define PG_L2_TEXT_VADDR        PG_L2_LOCKED_VADDR
+#define PG_L2_TEXT_SIZE         (PG_L2_LOCKED_SIZE + PG_L2_PAGED_SIZE)
 
 /* We position the data section PTEs just after the text region PTE's */
 
-#define PG_L1_DATA_PADDR       (PGTABLE_BASE_PADDR + ((PG_DATA_VBASE >> 20) << 2))
-#define PG_L1_DATA_VADDR       (PGTABLE_BASE_VADDR + ((PG_DATA_VBASE >> 20) << 2))
-#define PG_L2_DATA_PADDR       (PGTABLE_L2_BASE_PADDR + PG_L2_TEXT_SIZE)
-#define PG_L2_DATA_VADDR       (PGTABLE_L2_BASE_VADDR + PG_L2_TEXT_SIZE)
-#define PG_L2_DATA_SIZE        (4*PG_DATA_NPAGES)
+#define PG_L1_DATA_PADDR        (PGTABLE_BASE_PADDR + ((PG_DATA_VBASE >> 20) << 2))
+#define PG_L1_DATA_VADDR        (PGTABLE_BASE_VADDR + ((PG_DATA_VBASE >> 20) << 2))
+#define PG_L2_DATA_PADDR        (PGTABLE_L2_BASE_PADDR + PG_L2_TEXT_SIZE)
+#define PG_L2_DATA_VADDR        (PGTABLE_L2_BASE_VADDR + PG_L2_TEXT_SIZE)
+#define PG_L2_DATA_SIZE         (4*PG_DATA_NPAGES)
 
 /* Page Table Info: The number of pages in the in the page table
  * (PG_PGTABLE_NPAGES).  We position the pagetable PTEs just after
  * the data section PTEs.
  */
 
-#define PG_PGTABLE_NPAGES      (PGTABLE_SIZE >> PAGESHIFT)
-#define PG_L1_PGTABLE_PADDR    (PGTABLE_BASE_PADDR + ((PGTABLE_BASE_VADDR >> 20) << 2))
-#define PG_L1_PGTABLE_VADDR    (PGTABLE_BASE_VADDR + ((PGTABLE_BASE_VADDR >> 20) << 2))
-#define PG_L2_PGTABLE_PADDR    (PG_L2_DATA_PADDR + PG_L2_DATA_SIZE)
-#define PG_L2_PGTABLE_VADDR    (PG_L2_DATA_VADDR + PG_L2_DATA_SIZE)
-#define PG_L2_PGTABLE_SIZE     (4*PG_DATA_NPAGES)
+#define PG_PGTABLE_NPAGES       (PGTABLE_SIZE >> PAGESHIFT)
+#define PG_L1_PGTABLE_PADDR     (PGTABLE_BASE_PADDR + ((PGTABLE_BASE_VADDR >> 20) << 2))
+#define PG_L1_PGTABLE_VADDR     (PGTABLE_BASE_VADDR + ((PGTABLE_BASE_VADDR >> 20) << 2))
+#define PG_L2_PGTABLE_PADDR     (PG_L2_DATA_PADDR + PG_L2_DATA_SIZE)
+#define PG_L2_PGTABLE_VADDR     (PG_L2_DATA_VADDR + PG_L2_DATA_SIZE)
+#define PG_L2_PGTABLE_SIZE      (4*PG_DATA_NPAGES)
 
 /* Vector mapping.  One page is required to map the vector table.  The
  * vector table could lie in at virtual address zero (or at the start
@@ -197,18 +207,18 @@
 /* Case 1: The configuration tells us everything */
 
 #if defined(CONFIG_PAGING_VECPPAGE)
-#  define PG_VECT_PBASE          CONFIG_PAGING_VECPPAGE
-#  define PG_L2_VECT_PADDR       CONFIG_PAGING_VECL2PADDR
-#  define PG_L2_VECT_VADDR       CONFIG_PAGING_VECL2VADDR
+#  define PG_VECT_PBASE         CONFIG_PAGING_VECPPAGE
+#  define PG_L2_VECT_PADDR      CONFIG_PAGING_VECL2PADDR
+#  define PG_L2_VECT_VADDR      CONFIG_PAGING_VECL2VADDR
 
 /* Case 2: Vectors are in low memory and the locked text region starts at
  * the begin of SRAM (which will be aliased to address 0x00000000)
  */
  
 #elif defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_PAGING_LOCKED_PBASE)
-#  define PG_VECT_PBASE          PG_LOCKED_PBASE
-#  define PG_L2_VECT_PADDR       PG_L2_LOCKED_PADDR
-#  define PG_L2_VECT_VADDR       PG_L2_LOCKED_VADDR
+#  define PG_VECT_PBASE         PG_LOCKED_PBASE
+#  define PG_L2_VECT_PADDR      PG_L2_LOCKED_PADDR
+#  define PG_L2_VECT_VADDR      PG_L2_LOCKED_VADDR
 
 /* Case 3: High vectors or the locked region is not at the beginning or SRAM */
 
@@ -218,8 +228,8 @@
 
 /* This is the total number of pages used in the text/data mapping: */
 
-#define PG_TOTAL_NPPAGES         (PG_TEXT_NPPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
-#define PG_TOTAL_NVPAGES         (PG_TEXT_NVPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
+#define PG_TOTAL_NPPAGES        (PG_TEXT_NPPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
+#define PG_TOTAL_NVPAGES        (PG_TEXT_NVPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
 #if PG_TOTAL_NPPAGES >PG_RAM_PAGES
 #  error "Total pages required exceeds RAM size"
 #endif
@@ -270,20 +280,20 @@
  * written.
  */
 
-#define PG_POOL_VA2L1OFFSET(va)  (((va) >> 20) << 2) 
-#define PG_POOL_VA2L1VADDR(va)   (PGTABLE_BASE_VADDR + PG_POOL_VA2L1OFFSET(va))
-#define PG_POOL_L12PPTABLE(L1)   ((L1) & PG_L1_PADDRMASK)
-#define PG_POOL_L12VPTABLE(L1)   (PG_POOL_L12PPTABLE(L1) - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR)
+#define PG_POOL_VA2L1OFFSET(va) (((va) >> 20) << 2) 
+#define PG_POOL_VA2L1VADDR(va)  (PGTABLE_BASE_VADDR + PG_POOL_VA2L1OFFSET(va))
+#define PG_POOL_L12PPTABLE(L1)  ((L1) & PG_L1_PADDRMASK)
+#define PG_POOL_L12VPTABLE(L1)  (PG_POOL_L12PPTABLE(L1) - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR)
 
-#define PG_POOL_L1VBASE          (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
-#define PG_POOL_L1VEND           (PG_POOL_L1VBASE + (CONFIG_PAGING_NVPAGED << 2))
+#define PG_POOL_L1VBASE         (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
+#define PG_POOL_L1VEND          (PG_POOL_L1VBASE + (CONFIG_PAGING_NVPAGED << 2))
 
-#define PG_POOL_VA2L2NDX(va)     (((va) -  PG_PAGED_VBASE) >> PAGESHIFT)
-#define PG_POOL_NDX2VA(ndx)      (((ndx) << PAGESHIFT) + PG_PAGED_VBASE)
-#define PG_POOL_MAXL2NDX         PG_POOL_VA2L2NDX(PG_PAGED_VEND)
+#define PG_POOL_VA2L2NDX(va)    (((va) -  PG_PAGED_VBASE) >> PAGESHIFT)
+#define PG_POOL_NDX2VA(ndx)     (((ndx) << PAGESHIFT) + PG_PAGED_VBASE)
+#define PG_POOL_MAXL2NDX        PG_POOL_VA2L2NDX(PG_PAGED_VEND)
 
-#define PG_POOL_PGPADDR(ndx)     (PG_PAGED_PBASE + ((ndx) << PAGESHIFT))
-#define PG_POOL_PGVADDR(ndx)     (PG_PAGED_VBASE + ((ndx) << PAGESHIFT))
+#define PG_POOL_PGPADDR(ndx)    (PG_PAGED_PBASE + ((ndx) << PAGESHIFT))
+#define PG_POOL_PGVADDR(ndx)    (PG_PAGED_VBASE + ((ndx) << PAGESHIFT))
 
 #endif /* CONFIG_PAGING */
 
