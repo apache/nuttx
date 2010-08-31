@@ -112,12 +112,14 @@
 #ifdef CONFIG_PAGING_BLOCKINGFILL
 int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 {
+  pglldbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
 # warning "Not implemented"
   return -ENOSYS;
 }
 #else
 int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 {
+  pglldbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
 # warning "Not implemented"
   return -ENOSYS;
 }
