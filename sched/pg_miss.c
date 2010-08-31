@@ -39,8 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
@@ -132,6 +132,7 @@ void pg_miss(void)
    * always present in memory.
    */
 
+  pglldbg("Blocking TCB: %p PID: %d\n", ftcb, ftcb->pid);
   DEBUGASSERT(g_pgworker != ftcb->pid);
 
   /* Block the currently executing task
@@ -158,6 +159,8 @@ void pg_miss(void)
     {
       /* Reprioritize the page fill worker thread */
 
+      pgllvdbg("New worker priority. %d->%d\n",
+               wtcb->sched_priority, ftcb->sched_priority);
       sched_setpriority(wtcb, ftcb->sched_priority);
     }
 
@@ -168,6 +171,7 @@ void pg_miss(void)
 
   if (!g_pftcb)
     {
+      pglldbg("Signaling worker. PID: %d\n", g_pgworker);
       kill(g_pgworker, SIGWORK);
     }
 }

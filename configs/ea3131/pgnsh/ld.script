@@ -42,20 +42,35 @@
  * address space:  0x1102 8000.  The virtual space is broken up into three
  * regions:
  *
- * locked - Pages locked in memory.     Start: 0x1102 8000 Size: 36Kb
- * paged  - Pages in nonvolatile store. Start: 0x1103 1000 Size: 384Kb
- * data   - .data/.bss/heap.            Start: 0x1109 1000 Size: 44Kb
+ *                                           PHYSICAL         VIRTUAL
+ *   NAME    DESCRIPTION                 SIZE    START    SIZE    START
+ *  -------- -------------------------- ----- ----------- ------- -----------
+ *   locked  Pages locked in memory.     48Kb 0x1102 8000  48Kb   0x1102 8000
+ *   paged   Pages in nonvolatile store. 96Kb 0x1103 4000 384Kb   0x1103 4000
+ *   data    .data/.bss/heap.            32Kb 0x1104 c000  32Kb   0x1109 4000
+ *           Reserved for page table     16Kb 0x1105 4000  16Kb   0x1109 c000
+ *  -------- -------------------------- ----- ----------- ------- -----------
+ *                                       192Kb 0x1105 8000 480Kb   0x110a 0000
  *
  * These region sizes must match the size in pages specified for each region
  * in the NuttX configuration file:  CONFIG_PAGING_NLOCKED, CONFIG_PAGING_NVPAGED,
  * and CONFIG_PAGING_NDATA.
+ *
+ * NOTE 1: The locked region is really big here so that you can enable lots of
+ * debug output without overflowing the locked region.  32Kb would probably be
+ * plenty if this were a real, optimized application.
+ *
+ * NOTE 2: Different compilers will compile the code to different sizes.  If you
+ * get a link time error saying that the locked region is full, you may have to
+ * re-organize this memory layout (here and in defconfig) to make the locked
+ * region even bigger.
  */
 
 MEMORY
 {
-    locked (rx) : ORIGIN = 0x11029080, LENGTH = 36K - 4224
-    paged  (rx) : ORIGIN = 0x11031000, LENGTH = 384K
-    data   (rw) : ORIGIN = 0x11091000, LENGTH = 44K
+    locked (rx) : ORIGIN = 0x11029080, LENGTH = 48K - 4224
+    paged  (rx) : ORIGIN = 0x11034000, LENGTH = 384K
+    data   (rw) : ORIGIN = 0x11094000, LENGTH = 44K
 }
 
 OUTPUT_ARCH(arm)
@@ -65,18 +80,19 @@ SECTIONS
 	.locked : {
 		_slocked = ABSOLUTE(.);
 		*(.vectors)
-		locked.r (.text .text.*)        
-		locked.r (.fixup)
-		locked.r (.gnu.warning)
-		locked.r (.rodata .rodata.*)        
-		locked.r (.gnu.linkonce.t.*)
-		locked.r (.glue_7)
-		locked.r (.glue_7t)
-		locked.r (.got)
-		locked.r (.gcc_except_table)
-		locked.r (.gnu.linkonce.r.*)
+		up_head.o locked.r (.text .text.*)        
+		up_head.o locked.r (.fixup)
+		up_head.o locked.r (.gnu.warning)
+		up_head.o locked.r (.rodata .rodata.*)        
+		up_head.o locked.r (.gnu.linkonce.t.*)
+		up_head.o locked.r (.glue_7)
+		up_head.o locked.r (.glue_7t)
+		up_head.o locked.r (.got)
+		up_head.o locked.r (.gcc_except_table)
+		up_head.o locked.r (.gnu.linkonce.r.*)
 		_elocked = ABSOLUTE(.);
 	} >locked
+
 	_eronly = ABSOLUTE(.);
 
 	.paged : {
@@ -93,8 +109,6 @@ SECTIONS
 		*(.gnu.linkonce.r.*)
 		_epaged = ABSOLUTE(.);
 	} > paged
-
-	_eronly = ABSOLUTE(.);
 
 	.data : {
 		_sdata = ABSOLUTE(.);

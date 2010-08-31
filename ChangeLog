@@ -1247,3 +1247,6 @@
 	  - Replace any occurrences of lib$(CONFIG_EXAMPLE)$(LIBEXT)
 	    with libapp$(LIBEXT) in your Makefiles.
 	  - Check any other occurrences of CONFIG_EXAMPLE.
+
+	* arch/arm/src/lpc313x/lpc313x_spi.c - Fix compilation error when
+	  when CONFIG_DEBUG is enabled.

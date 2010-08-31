@@ -123,6 +123,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * fatal error.
    */
 
+  pglldbg("FSR: %08x FAR: %08x\n", fsr, far);
   if ((fsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
@@ -133,6 +134,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * (It has not yet been saved in the register context save area).
    */
  
+  pgllvdbg("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
   if (far < PG_PAGED_VBASE || far >= PG_PAGED_VEND)
     {
       goto segfault;
@@ -162,7 +164,7 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
   return;
 
 segfault:
-  lldbg("Data abort at PC: %x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
+  lldbg("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
   PANIC(OSERR_ERREXCEPTION);
 }
 
@@ -178,7 +180,7 @@ void up_dataabort(uint32_t *regs)
 
   /* Crash -- possibly showing diagnost debug information. */
 
-  lldbg("Data abort at %08x\n", regs[REG_PC]);
+  lldbg("Data abort. PC: %08x\n", regs[REG_PC]);
   PANIC(OSERR_ERREXCEPTION);
 }
 

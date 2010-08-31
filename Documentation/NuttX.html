@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 28, 2010</p>
+      <p>Last Updated: August 30, 2010</p>
     </td>
   </tr>
 </table>
@@ -1864,7 +1864,7 @@ nuttx-5.9 2010-08-25 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* configs/ntosd-dm320 and arch/arm/src/dm320 - Add support for the
 	  Neuros production OSD (changes contributed by bf.nuttx).
 
-pascal-2.0 2010-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* Updated to use standard C99 types in stdint.h and
 	  stdbool.h.  This change was necessary for compatibility
@@ -1920,7 +1920,18 @@ nuttx-5.10 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	    with libapp$(LIBEXT) in your Makefiles.
 	  - Check any other occurrences of CONFIG_EXAMPLE.pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+	* arch/arm/src/lpc313x/lpc313x_spi.c - Fix compilation error when
+	  when CONFIG_DEBUG is enabled.
+
+pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
 buildroot-1.9 2010-xx-xx <spudmonkey@racsa.co.cr>
+
+	* configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
+	* configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
+	  arm926
+	* toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
+
 </pre></ul>
 
 <table width ="100%">

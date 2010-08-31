@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_main.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -958,10 +958,17 @@ static inline int nsh_nice(FAR struct nsh_vtbl_s *vtbl, FAR char **ppcmd, FAR ch
  * Name: user_initialize
  ****************************************************************************/
 
+/* In order to support user_initialize if CONFIG_PAGING is defined, this
+ * function (and only this function) would need to get moved to the locked
+ * text region.
+ */
+
+#ifndef CONFIG_PAGING
 void user_initialize(void)
 {
   /* stub */
 }
+#endif
 
 /****************************************************************************
  * Name: user_start
