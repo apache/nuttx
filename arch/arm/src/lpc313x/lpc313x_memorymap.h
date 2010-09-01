@@ -283,6 +283,22 @@
 #    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
 #  else
 
+     /* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
+      * map probably do not apply because paging logic will probably partition
+      * the SRAM section differently.  In particular, if the page table is located
+      * at the end of SRAM, then the virtual page table address defined below
+      * will probably be in error.
+      *
+      * We work around this header file interdependency by (1) insisting that
+      * pg_macros.h be included AFTER this header file, then (2) allowing the
+      * pg_macros.h header file to redefine PGTABLE_BASE_VADDR.
+      */
+
+#    if defined(CONFIG_PAGING) && defined(__ARCH_ARM_SRC_ARM_PG_MACROS_H)
+#       error "pg_macros.h must be included AFTER this header file"
+#    endif
+
+
      /* We must declare the page table in ISRAM0 or 1.  We decide depending upon
       * where the vector table was place.
       */
@@ -301,6 +317,14 @@
 #          define PGTABLE_BASE_VADDR (LPC313X_INTSRAM0_VADDR+LPC313X_INTSRAM0_SIZE-PGTABLE_SIZE)
 #      endif
 #      define PGTABLE_IN_HIGHSRAM    1
+
+       /* If CONFIG_PAGING is defined, insisted that pg_macros.h assign the virtual
+        * address of the page table.
+        */
+
+#      ifdef CONFIG_PAGING
+#        undef PGTABLE_BASE_VADDR
+#      endif
 #    else
 
        /* Otherwise, ISRAM1 (or ISRAM0 for the LPC3130) will be mapped so that
