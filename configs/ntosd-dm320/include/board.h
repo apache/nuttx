@@ -77,9 +77,6 @@
 #  if CONFIG_DRAM_SIZE != 0x01000000
 #    warning "Check CONFIG_DRAM_SIZE.  This Neuros OSD has 0x01000000 bytes of SDRAM"
 #  endif
-#  if CONFIG_DRAM_NUTTXENTRY != 0x01008000
-#    warning "Check CONFIG_DRAM_NUTTXENTRY.  Expected 0x01008000"
-#  endif
 #  define DM320_SDRAM_PSECTION         0x01000000 /* 496Mb  many section   -- */
 #  define   DM320_SDRAM_PADDR          0x01000000 /* 496Mb  many sections  CW */
 #else
@@ -88,9 +85,6 @@
 #  endif
 #  if CONFIG_DRAM_SIZE != 0x02000000
 #    warning "Check CONFIG_DRAM_SIZE.  This Neuros OSD has 0x02000000 bytes of SDRAM"
-#  endif
-#  if CONFIG_DRAM_NUTTXENTRY != 0x01108000
-#    warning "Check CONFIG_DRAM_NUTTXENTRY.  Expected 0x01108000"
 #  endif
 #  define DM320_SDRAM_PSECTION         0x01100000 /* 496Mb  many section   -- */
 #  define   DM320_SDRAM_PADDR          0x01100000 /* 496Mb  many sections  CW */
