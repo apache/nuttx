@@ -126,6 +126,25 @@
 
 #endif
 
+/* For each page table offset, the following provide (1) the physical address of
+ * the start of the page table and (2) the number of page table entries in the
+ * first page table.
+ *
+ * Coarse: PG_L1_PADDRMASK=0xfffffc00
+ *         NPAGE1=(256 -((a) & 0x000003ff) >> 2) NPAGE1=1-256
+ * Fine:   PG_L1_PADDRMASK=0xfffff000
+ *         NPAGE1=(1024 -((a) & 0x00000fff) >> 2) NPAGE1=1-1024
+ */
+
+#ifdef CONFIG_PAGING
+#  define PG_L2_TEXT_PBASE     (PG_L2_TEXT_PADDR & PG_L1_PADDRMASK)
+#  define PG_L2_TEXT_NPAGE1    (PTE_NPAGES - ((PG_L2_TEXT_PADDR & ~PG_L1_PADDRMASK) >> 2))
+#  define PG_L2_PGTABLE_PBASE  (PG_L2_PGTABLE_PADDR & PG_L1_PADDRMASK)
+#  define PG_L2_PGTABLE_NPAGE1 (PTE_NPAGES - ((PG_L2_PGTABLE_PADDR & ~PG_L1_PADDRMASK) >> 2))
+#  define PG_L2_DATA_PBASE     (PG_L2_DATA_PADDR & PG_L1_PADDRMASK)
+#  define PG_L2_DATA_NPAGE1    (PTE_NPAGES - ((PG_L2_DATA_PADDR & ~PG_L1_PADDRMASK) >> 2))
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -227,6 +246,7 @@ __start:
 #endif
 
 #ifdef CONFIG_PAGING
+
 	/* Map the read-only .text region in place.  This must be done
 	 * before the MMU is enabled and the virtual addressing takes
 	 * effect.  First populate the L1 table for the locked and paged
@@ -241,8 +261,8 @@ __start:
 	 */
 
 	adr	r0, .Ltxtspan
-	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l1span r0, r1, r2, r3, r5
+	ldmia	r0, {r0, r1, r2, r3, r5}
+ 	pg_l1span r0, r1, r2, r3, r5, r6
  
 	/* Then populate the L2 table for the locked text region only. */
 
@@ -255,8 +275,8 @@ __start:
 	 */
 
 	adr	r0, .Lptabspan
-	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l1span r0, r1, r2, r3, r5
+	ldmia	r0, {r0, r1, r2, r3, r5}
+ 	pg_l1span r0, r1, r2, r3, r5, r6
 
 	/* Then populate the L2 table. */
 
@@ -285,6 +305,7 @@ __start:
 
 #endif /* CONFIG_PAGING */
 #endif /* CONFIG_ARCH_ROMPGTABLE */
+
 
 	/* The following logic will set up the ARM920/ARM926 for normal operation.
 	 *
@@ -413,24 +434,26 @@ __start:
 
 .Ltxtspan:
 	.long	PG_L1_TEXT_PADDR		/* Physical address in the L1 table */
-	.long	PG_L2_TEXT_PADDR		/* Physical address of the L2 page table */
+	.long	PG_L2_TEXT_PBASE		/* Physical address of the start of the L2 page table */
 	.long	PG_TEXT_NVPAGES			/* Total (virtual) text pages to be mapped */
+	.long	PG_L2_TEXT_NPAGE1		/* The number of text pages in the first page table */
 	.long	MMU_L1_TEXTFLAGS		/* L1 MMU flags to use */
 
 .Ltxtmap:
-	.long	PG_L2_LOCKED_PADDR		/* Physical address of L2 table */
+	.long	PG_L2_LOCKED_PADDR		/* Physical address in the L2 table */
 	.long	PG_LOCKED_PBASE			/* Physical address of locked base memory */
 	.long	CONFIG_PAGING_NLOCKED		/* Number of pages in the locked region */
 	.long	MMU_L2_TEXTFLAGS		/* L2 MMU flags to use */
 
 .Lptabspan:
 	.long	PG_L1_PGTABLE_PADDR		/* Physical address in the L1 table */
-	.long	PG_L2_PGTABLE_PADDR		/* Physical address of the L2 page table */
+	.long	PG_L2_PGTABLE_PBASE		/* Physical address of the start of the L2 page table */
 	.long	PG_PGTABLE_NPAGES		/* Total mapped page table pages */
+	.long	PG_L2_PGTABLE_NPAGE1		/* The number of text pages in the first page table */
 	.long	MMU_L1_PGTABFLAGS		/* L1 MMU flags to use */
 
 .Lptabmap:
-	.long	PG_L2_PGTABLE_PADDR		/* Physical address of L2 table */
+	.long	PG_L2_PGTABLE_PADDR		/* Physical address in the L2 table */
 	.long	PGTABLE_BASE_PADDR		/* Physical address of the page table memory */
 	.long	PG_PGTABLE_NPAGES		/* Total mapped page table pages */
 	.long	MMU_L2_PGTABFLAGS		/* L2 MMU flags to use */
@@ -455,6 +478,7 @@ __start:
 	 * cover additinal RAM sections.
 	 */
 
+
 #ifndef CONFIG_ARCH_ROMPGTABLE
 #ifndef CONFIG_IDENTITY_TEXTMAP
 	ldr	r4, .LCvpgtable			/* r4=virtual page table */
@@ -468,8 +492,8 @@ __start:
 	/* Populate the L1 table for the data region */
 
 	adr	r0, .Ldataspan
-	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l1span r0, r1, r2, r3, r4
+	ldmia	r0, {r0, r1, r2, r3, r4}
+ 	pg_l1span r0, r1, r2, r3, r4, r5
 
 	/* Populate the L2 table for the data region */
 
@@ -576,12 +600,13 @@ __start:
 
 .Ldataspan:
 	.long	PG_L1_DATA_VADDR	/* Virtual address in the L1 table */
-	.long	PG_L2_DATA_PADDR	/* Physical address of the L2 page table */
+	.long	PG_L2_DATA_PBASE	/* Physical address of the start of the L2 page table */
 	.long	PG_DATA_NPAGES		/* Number of pages in the data region */
+	.long	PG_L2_DATA_NPAGE1	/* The number of text pages in the first page table */
 	.long	MMU_L1_DATAFLAGS	/* L1 MMU flags to use */
 
 .Ldatamap:
-	.long	PG_L2_DATA_VADDR	/* Virtual address of L2 table */
+	.long	PG_L2_DATA_VADDR	/* Virtual address in the L2 table */
 	.long	PG_DATA_VBASE		/* Virtual address of data memory  */
 	.long	PG_DATA_NPAGES		/* Number of pages in the data region */
 	.long	MMU_L2_DATAFLAGS	/* L2 MMU flags to use */

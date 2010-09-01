@@ -127,14 +127,23 @@
 
 #define PT_SIZE                 (4*PTE_NPAGES)
 
-/* We position the locked region PTEs at the beginning of L2 page
- * table.
+/* We position the locked region PTEs at an offset into the first
+ * L2 page table.  The L1 entry points to an 1Mb aligned virtual
+ * address.  The actual L2 entry will be offset into the aligned
+ * L2 table.
+ *
+ * Coarse: PG_L1_PADDRMASK=0xfffffc00
+ *         OFFSET=(((a) & 0x000fffff) >> 12) << 2)
+ * Fine:   PG_L1_PADDRMASK=0xfffff000
+ *         OFFSET=(((a) & 0x000fffff) >> 10) << 2)
  */
 
 #define PG_L1_LOCKED_PADDR      (PGTABLE_BASE_PADDR + ((PG_LOCKED_VBASE >> 20) << 2))
 #define PG_L1_LOCKED_VADDR      (PGTABLE_BASE_VADDR + ((PG_LOCKED_VBASE >> 20) << 2))
-#define PG_L2_LOCKED_PADDR      PGTABLE_L2_BASE_PADDR
-#define PG_L2_LOCKED_VADDR      PGTABLE_L2_BASE_VADDR
+
+#define PG_L2_LOCKED_OFFSET     (((PG_LOCKED_PBASE & 0x000fffff) >> PAGESHIFT) << 2)
+#define PG_L2_LOCKED_PADDR      (PGTABLE_L2_BASE_PADDR + PG_L2_LOCKED_OFFSET)
+#define PG_L2_LOCKED_VADDR      (PGTABLE_L2_BASE_VADDR + PG_L2_LOCKED_OFFSET)
 #define PG_L2_LOCKED_SIZE       (4*CONFIG_PAGING_NLOCKED)
 
 /* We position the paged region PTEs immediately after the locked
@@ -145,14 +154,16 @@
  
 #define PG_L1_PAGED_PADDR       (PGTABLE_BASE_PADDR + ((PG_PAGED_VBASE >> 20) << 2))
 #define PG_L1_PAGED_VADDR       (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
-#define PG_L2_PAGED_PADDR       (PGTABLE_L2_BASE_PADDR + PG_L2_LOCKED_SIZE)
-#define PG_L2_PAGED_VADDR       (PGTABLE_L2_BASE_VADDR + PG_L2_LOCKED_SIZE)
+
+#define PG_L2_PAGED_PADDR       (PGTABLE_L2_BASE_PADDR + PG_L2_LOCKED_SIZE + PG_L2_LOCKED_OFFSET)
+#define PG_L2_PAGED_VADDR       (PGTABLE_L2_BASE_VADDR + PG_L2_LOCKED_SIZE + PG_L2_LOCKED_OFFSET)
 #define PG_L2_PAGED_SIZE        (4*CONFIG_PAGING_NVPAGED)
 
 /* This describes the overall text region */
 
 #define PG_L1_TEXT_PADDR        PG_L1_LOCKED_PADDR
 #define PG_L1_TEXT_VADDR        PG_L1_LOCKED_VADDR
+
 #define PG_L2_TEXT_PADDR        PG_L2_LOCKED_PADDR
 #define PG_L2_TEXT_VADDR        PG_L2_LOCKED_VADDR
 #define PG_L2_TEXT_SIZE         (PG_L2_LOCKED_SIZE + PG_L2_PAGED_SIZE)
@@ -161,8 +172,9 @@
 
 #define PG_L1_DATA_PADDR        (PGTABLE_BASE_PADDR + ((PG_DATA_VBASE >> 20) << 2))
 #define PG_L1_DATA_VADDR        (PGTABLE_BASE_VADDR + ((PG_DATA_VBASE >> 20) << 2))
-#define PG_L2_DATA_PADDR        (PGTABLE_L2_BASE_PADDR + PG_L2_TEXT_SIZE)
-#define PG_L2_DATA_VADDR        (PGTABLE_L2_BASE_VADDR + PG_L2_TEXT_SIZE)
+
+#define PG_L2_DATA_PADDR        (PGTABLE_L2_BASE_PADDR + PG_L2_TEXT_SIZE + PG_L2_LOCKED_OFFSET)
+#define PG_L2_DATA_VADDR        (PGTABLE_L2_BASE_VADDR + PG_L2_TEXT_SIZE + PG_L2_LOCKED_OFFSET)
 #define PG_L2_DATA_SIZE         (4*PG_DATA_NPAGES)
 
 /* Page Table Info: The number of pages in the in the page table
@@ -173,8 +185,9 @@
 #define PG_PGTABLE_NPAGES       (PGTABLE_SIZE >> PAGESHIFT)
 #define PG_L1_PGTABLE_PADDR     (PGTABLE_BASE_PADDR + ((PGTABLE_BASE_VADDR >> 20) << 2))
 #define PG_L1_PGTABLE_VADDR     (PGTABLE_BASE_VADDR + ((PGTABLE_BASE_VADDR >> 20) << 2))
-#define PG_L2_PGTABLE_PADDR     (PG_L2_DATA_PADDR + PG_L2_DATA_SIZE)
-#define PG_L2_PGTABLE_VADDR     (PG_L2_DATA_VADDR + PG_L2_DATA_SIZE)
+
+#define PG_L2_PGTABLE_PADDR     (PG_L2_DATA_PADDR + PG_L2_DATA_SIZE + PG_L2_LOCKED_OFFSET)
+#define PG_L2_PGTABLE_VADDR     (PG_L2_DATA_VADDR + PG_L2_DATA_SIZE + PG_L2_LOCKED_OFFSET)
 #define PG_L2_PGTABLE_SIZE      (4*PG_DATA_NPAGES)
 
 /* Vector mapping.  One page is required to map the vector table.  The
@@ -383,20 +396,23 @@
  *
  *	ldr	r0, =PG_L1_PGTABLE_PADDR	<-- Address in the L1 table
  *	ldr	r1, =PG_L2_PGTABLE_PADDR	<-- Physical address of L2 page table 
- *	ldr	r2, =PG_PGTABLE_NPAGES		<-- Number of pages
- *      ldr	r3, =MMU_L1_PGTABFLAGS		<-- L1 MMU flags
- *	pg_l1span r0, r1, r2, r3, r4
+ *	ldr	r2, =PG_PGTABLE_NPAGES		<-- Total number of pages
+ *	ldr	r3, =PG_PGTABLE_NPAGE1		<-- Number of pages in the first PTE
+ *      ldr	r4, =MMU_L1_PGTABFLAGS		<-- L1 MMU flags
+ *	pg_l1span r0, r1, r2, r3, r4, r4
  *
  * Inputs (unmodified unless noted):
  *   l1 - Physical or virtual address in the L1 table to begin writing (modified)
  *   l2 - Physical start address in the L2 page table (modified)
  *   npages - Number of pages to required to span that memory region (modified)
+ *   ppage - The number of pages in page 1 (modified)
  *   mmuflags - L1 MMU flags to use
  *
  * Scratch registers (modified): l1, l2, npages, tmp
  *   l1 - Next L1 table address
  *   l2 - Physical start address of the next L2 page table
  *   npages - Loop counter
+ *   ppage - After the first page, this will be the full number of pages.
  *   tmp - scratch
  *
  * Return:
@@ -409,7 +425,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	pg_l1span, l1, l2, npages, mmuflags, tmp
+	.macro	pg_l1span, l1, l2, npages, ppage, mmuflags, tmp
 	b	2f
 1:
 	/* Write the L1 table entry that refers to this (unmapped) coarse page
@@ -431,10 +447,12 @@
 	add	\l2, \l2, #PT_SIZE  /* Next L2 page table start address */
 
 	/* Update the number of pages that we have account for (with
-	 * non-mappings
+	 * non-mappings).  NOTE that the first page may have fewer than
+	 * the maximum entries per page table.
 	 */
 
-	sub	\npages, \npages, #PTE_NPAGES
+	sub	\npages, \npages, \ppage
+	mov	\ppage, #PTE_NPAGES
 2:
 	/* Check if all of the pages have been written.  If not, then
 	 * loop and write the next L1 entry.
