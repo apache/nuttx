@@ -33,6 +33,11 @@
  *
  ****************************************************************************/
 
+/* Do not change this macro definition without making corresponding name
+ * changes in other files.  This macro name is used in various places to
+ * assure that some file inclusion ordering dependencies are enforced.
+ */
+
 #ifndef __ARCH_ARM_SRC_ARM_PG_MACROS_H
 #define __ARCH_ARM_SRC_ARM_PG_MACROS_H
 
@@ -127,6 +132,30 @@
 
 #define PT_SIZE                 (4*PTE_NPAGES)
 
+/* Sizes of Memory Regions **************************************************/
+
+#define PG_L2_LOCKED_SIZE       (4*CONFIG_PAGING_NLOCKED)
+#define PG_L2_PAGED_PSIZE       (4*CONFIG_PAGING_NPPAGED)
+#define PG_L2_PAGED_VSIZE       (4*CONFIG_PAGING_NVPAGED)
+#define PG_L2_TEXT_PSIZE        (PG_L2_LOCKED_SIZE + PG_L2_PAGED_PSIZE)
+#define PG_L2_TEXT_VSIZE        (PG_L2_LOCKED_SIZE + PG_L2_PAGED_VSIZE)
+#define PG_L2_DATA_SIZE         (4*PG_DATA_NPAGES)
+
+/* Virtual Page Table Location **********************************************/
+
+/* Check if the virtual address of the page table has been defined. It should
+ * not be defined:  architecture specific logic should suppress defining
+ * PGTABLE_BASE_VADDR unless:  (1) it is defined in the NuttX configuration
+ * file, or (2) the page table is position in low memory (because the vectors
+ * are in high memory).
+ */
+
+#ifndef PGTABLE_BASE_VADDR
+#  define PGTABLE_BASE_VADDR    (CONFIG_DRAM_VSTART + PG_L2_TEXT_VSIZE + PG_L2_DATA_SIZE)
+#endif
+
+/* Addresses of Memory Regions **********************************************/
+
 /* We position the locked region PTEs at an offset into the first
  * L2 page table.  The L1 entry points to an 1Mb aligned virtual
  * address.  The actual L2 entry will be offset into the aligned
@@ -144,7 +173,6 @@
 #define PG_L2_LOCKED_OFFSET     (((PG_LOCKED_VBASE & 0x000fffff) >> PAGESHIFT) << 2)
 #define PG_L2_LOCKED_PADDR      (PGTABLE_L2_BASE_PADDR + PG_L2_LOCKED_OFFSET)
 #define PG_L2_LOCKED_VADDR      (PGTABLE_L2_BASE_VADDR + PG_L2_LOCKED_OFFSET)
-#define PG_L2_LOCKED_SIZE       (4*CONFIG_PAGING_NLOCKED)
 
 /* We position the paged region PTEs immediately after the locked
  * region PTEs.  NOTE that the size of the paged regions is much
@@ -157,7 +185,6 @@
 
 #define PG_L2_PAGED_PADDR       (PG_L2_LOCKED_PADDR + PG_L2_LOCKED_SIZE)
 #define PG_L2_PAGED_VADDR       (PG_L2_LOCKED_VADDR + PG_L2_LOCKED_SIZE)
-#define PG_L2_PAGED_SIZE        (4*CONFIG_PAGING_NVPAGED)
 
 /* This describes the overall text region */
 
@@ -166,20 +193,19 @@
 
 #define PG_L2_TEXT_PADDR        PG_L2_LOCKED_PADDR
 #define PG_L2_TEXT_VADDR        PG_L2_LOCKED_VADDR
-#define PG_L2_TEXT_SIZE         (PG_L2_LOCKED_SIZE + PG_L2_PAGED_SIZE)
 
 /* We position the data section PTEs just after the text region PTE's */
 
 #define PG_L1_DATA_PADDR        (PGTABLE_BASE_PADDR + ((PG_DATA_VBASE >> 20) << 2))
 #define PG_L1_DATA_VADDR        (PGTABLE_BASE_VADDR + ((PG_DATA_VBASE >> 20) << 2))
 
-#define PG_L2_DATA_PADDR        (PG_L2_LOCKED_PADDR + PG_L2_TEXT_SIZE)
-#define PG_L2_DATA_VADDR        (PG_L2_LOCKED_VADDR + PG_L2_TEXT_SIZE)
-#define PG_L2_DATA_SIZE         (4*PG_DATA_NPAGES)
+#define PG_L2_DATA_PADDR        (PG_L2_LOCKED_PADDR + PG_L2_TEXT_PSIZE)
+#define PG_L2_DATA_VADDR        (PG_L2_LOCKED_VADDR + PG_L2_TEXT_VSIZE)
 
-/* Page Table Info: The number of pages in the in the page table
- * (PG_PGTABLE_NPAGES).  We position the pagetable PTEs just after
- * the data section PTEs.
+/* Page Table Info **********************************************************/
+
+/* The number of pages in the in the page table (PG_PGTABLE_NPAGES).  We
+ * position the pagetable PTEs just after the data section PTEs.
  */
 
 #define PG_PGTABLE_NPAGES       (PGTABLE_SIZE >> PAGESHIFT)
@@ -190,11 +216,12 @@
 #define PG_L2_PGTABLE_VADDR     (PG_L2_DATA_VADDR + PG_L2_DATA_SIZE)
 #define PG_L2_PGTABLE_SIZE      (4*PG_DATA_NPAGES)
 
-/* Vector mapping.  One page is required to map the vector table.  The
- * vector table could lie in at virtual address zero (or at the start
- * of RAM which is aliased to address zero on the ea3131) or at virtual
- * address 0xfff00000.  We only have logic here to support the former
- * case.
+/* Vector Mapping ***********************************************************/
+
+/* One page is required to map the vector table.  The vector table could lie
+ * at virtual address zero (or at the start of RAM which is aliased to address
+ * zero on the ea3131) or at virtual address 0xfff00000.  We only have logic
+ * here to support the former case.
  *
  * NOTE:  If the vectors are at address zero, the page table will be
  * forced to the highest RAM addresses.  If the vectors are at 0xfff0000,
@@ -239,6 +266,8 @@
 #  error "Logic missing for high vectors in this case"
 #endif
 
+/* Page Usage ***************************************************************/
+
 /* This is the total number of pages used in the text/data mapping: */
 
 #define PG_TOTAL_NPPAGES        (PG_TEXT_NPPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
@@ -246,6 +275,8 @@
 #if PG_TOTAL_NPPAGES >PG_RAM_PAGES
 #  error "Total pages required exceeds RAM size"
 #endif
+
+/* Page Management **********************************************************/
 
 /* For page managment purposes, the following summarize the "heap" of
  * free pages, operations on free pages and the L2 page table.
