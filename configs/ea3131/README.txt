@@ -15,6 +15,7 @@ Contents
   o Image Format
   o Image Download to ISRAM
   o Using OpenOCD and GDB
+  o On-Demand Paging
   o ARM/EA3131-specific Configuration Options
   o Configurations
 
@@ -271,6 +272,117 @@ Using OpenOCD and GDB
 
    (gdb) symbol-file nuttx
    (gdb) load nuttx
+
+On-Demand Paging
+^^^^^^^^^^^^^^^^
+
+  There is a configuration that was used to verify the On-Demand Paging
+  feature for the ARM926 (see http://nuttx.sourceforge.net/NuttXDemandPaging.html).
+  That configuration is contained in the pgnsh sub-directory.  The pgnsh configuration
+  is only a test configuration, and lacks some logic to provide the full On-Demand
+  Paging solution (see below).
+
+  Page Table Layout:
+  ------------------
+
+  The ARM926 MMU uses a page table in memory.  The page table is divided
+  into (1) a level 1 (L1) page table that maps 1Mb memory regions to level 2
+  page tables (except in the case of 1Mb sections, of course), and (2) a level
+  2 (L2) page table that maps the 1Mb memory regions into individual 64Kb, 4kb,
+  or 1kb pages.  The pgnsh configuration uses 1Kb pages:  it positions 48x1Kb
+  pages at beginning of SRAM (the "locked" memory region), 16x1Kb pages at
+  the end of SRAM for the L1 page table, and 44x1Kb pages just before the
+  L1 page table.  That leaves 96x1Kb virtual pages in the middle of SRAM for
+  the paged memory region; up to 384x1kb of physical pages may be paged into
+  this region.  Physical memory map:
+  
+    11028000 "locked" text region   48x1Kb
+    11034000 "paged" text region    96x1Kb
+    1104c000 "data" region          32x1Kb
+    11054000 L1 page table          16x1Kb
+    -------- --------------------- ------
+    11058000                       192x1Kb
+
+  The virtual memory map allows more space for the paged region:
+
+    11028000 "locked" text region   48x1Kb
+    11034000 "paged" text region   384x1Kb
+    11094000 "data" region          32x1Kb
+    1109c000 L1 page table          16x1Kb
+    -------- --------------------- ------
+    110a0000                       480x1Kb
+
+  The L1 contains a single 1Mb entry to span the entire LPC3131 SRAM memory
+  region.  The virtual address for this region is 0x11028000.  The offset into
+  the L1 page table is given by:
+  
+    offset = ((0x11028000 >> 20) << 2) = 0x00000440
+
+  The value at that offset into the L1 page table contains the address of the
+  L2 page table (0x11056000) plus some extra bits to specify that that entry
+  is valid and and points to a 1Kb L1 page table:
+  
+    11054440 11056013
+
+  Why is the address 11056000 used for the address of the L2 page table?  Isn't
+  that inside of the L1 page table?  Yes, this was done to use the preceious
+  SRAM memory more conservatively.  If you look at the LPC313x virtual memory
+  map, you can see that no virtual addresses above 0x60100000 are used.  That
+  corresponds to L1 page table offset 0x0001800 (physical address 0x11055800).
+  The rest of the L1 page table is unused and so we reuse it to hold the L2 page
+  table (or course, this could cause some really weird addressing L1 mapping
+  issues if bad virtual addresses were used in that region -- oh well).  The
+  address 0x11056000 is then the first properly aligned memory that can be used
+  in that L2 page table area.
+
+  Only only L2 page table will be used to span the LPC3131 SRAM virtual text
+  address region (480x1Kb).  That one entry maps the virtual address range of
+  0x11000000 through 0x110ffc00.  Each entry maps a 1Kb page of physical memory:
+  
+    PAGE      VIRTUAL ADDR L2 OFFSET
+    --------- ------------ ---------
+    Page 0    0x11000000   0x00000000
+    Page 1    0x11000400   0x00000004
+    Page 2    0x11000800   0x00000008
+    ...
+    Page 1023 0x110ffc00   0x00000ffc
+  
+  The "locked" text region begins at an offset of 0x00028000 into that region.
+  The 48 page table entries needed to make this region begin at:
+  
+    offset = ((0x00028000 >> 10) << 2) = 0x00000280
+
+  Each entry contains the address of a physical page in the "locked" text region
+  (plus some extra bits to identify domains, page sizes, access privileges, etc.):
+
+    0x11000280 0x1102800b
+    0x11000284 0x1102840b
+    0x11000288 0x1102880b
+    ...
+
+  The locked region is initially unmapped.  But the data region and page table
+  regions must be mapped in a similar manner.
+  
+    data offset = ((0x00094000 >> 10) << 2) = 0x00000940
+    L1 offset   = ((0x0009c000 >> 10) << 2) = 0x000009c0
+
+  Build Sequence:
+  ---------------
+
+  This example uses a two-pass build.  The top-level Makefile recognizes the
+  configuration option CONFIG_BUILD_2PASS and will execute the Makefile in
+  configs/ea3131/locked/Makefile to build the first pass object, locked.r.
+  This first pass object contains all of the code that must be in the locked
+  text region. The Makefile in arch/arm/src/Makefile then includes this 1st
+  pass in build, positioning it as controlled by configs/ea3131/pgnsh/ld.script.
+
+  Finishing the Example:
+  ----------------------
+
+  This example is incomplete in that it does not have any media to reload the
+  page text region from:  The file configs/ea3131/src/up_fillpage.c is only
+  a stub.  That logic to actually reload the page from some storage medium
+  would have to be implemented in order to complete this example.
 
 ARM/EA3131-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
