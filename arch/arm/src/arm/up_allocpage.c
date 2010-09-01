@@ -133,11 +133,18 @@ static bool g_pgwrap;
  *  available pages are in-use (the typical case), then this function will
  *  select a page in-use, un-map it, and make it available.
  *
- *  NOTE 2: Allocating and filling a page is a two step process.  up_allocpage()
+ *  NOTE 2: If an in-use page is un-mapped, it may be necessary to flush the
+ *  instruction cache in some architectures.
+ *
+ *  NOTE 3: Allocating and filling a page is a two step process.  up_allocpage()
  *  allocates the page, and up_fillpage() fills it with data from some non-
  *  volatile storage device.  This distinction is made because up_allocpage()
  *  can probably be implemented in board-independent logic whereas up_fillpage()
  *  probably must be implemented as board-specific logic.
+ *
+ *  NOTE 4: The initial mapping of vpage should be read-able and write-
+ *  able (but not cached).  No special actions will be required of
+ *  up_fillpage() in order to write into this allocated page.
  *
  * Input Parameters:
  *   tcb - A reference to the task control block of the task that needs to
@@ -210,11 +217,12 @@ int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
 
   /* Now setup up the new mapping.  Get a pointer to the L2 entry
    * corresponding to the new mapping.  Then set it map to the newly
-   * allocated page address.
+   * allocated page address.  The inital mapping is read/write but
+   * non-cached (MMU_L2_ALLOCFLAGS)
    */
 
   pte = up_va2pte(vaddr);
-  *pte = (paddr | MMU_L2_TEXTFLAGS);
+  *pte = (paddr | MMU_L2_ALLOCFLAGS);
 
   /* And save the new L1 index */
  
