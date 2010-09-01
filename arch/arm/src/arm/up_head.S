@@ -607,7 +607,7 @@ __start:
 
 .Ldatamap:
 	.long	PG_L2_DATA_VADDR	/* Virtual address in the L2 table */
-	.long	PG_DATA_VBASE		/* Virtual address of data memory  */
+	.long	PG_DATA_PBASE		/* Physical address of data memory  */
 	.long	PG_DATA_NPAGES		/* Number of pages in the data region */
 	.long	MMU_L2_DATAFLAGS	/* L2 MMU flags to use */
 
