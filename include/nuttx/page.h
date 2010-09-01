@@ -364,11 +364,18 @@ EXTERN bool up_checkmapping(FAR _TCB *tcb);
  *  available pages are in-use (the typical case), then this function will
  *  select a page in-use, un-map it, and make it available.
  *
- *  NOTE 2: Allocating and filling a page is a two step process.  up_allocpage()
+ *  NOTE 2: If an in-use page is un-mapped, it may be necessary to flush the
+ *  instruction cache in some architectures.
+ *
+ *  NOTE 3: Allocating and filling a page is a two step process.  up_allocpage()
  *  allocates the page, and up_fillpage() fills it with data from some non-
  *  volatile storage device.  This distinction is made because up_allocpage()
  *  can probably be implemented in board-independent logic whereas up_fillpage()
  *  probably must be implemented as board-specific logic.
+ *
+ *  NOTE 4: The initial mapping of vpage should be read-able and write-
+ *  able (but not cached).  No special actions will be required of
+ *  up_fillpage() in order to write into this allocated page.
  *
  * Input Parameters:
  *   tcb - A reference to the task control block of the task that needs to
@@ -404,11 +411,18 @@ EXTERN int up_allocpage(FAR _TCB *tcb, FAR void **vpage);
  *  This callback is assumed to occur from an interrupt level when the
  *  device driver completes the fill operation.
  *
- *  NOTE: Allocating and filling a page is a two step process.  up_allocpage()
+ *  NOTE 1: Allocating and filling a page is a two step process.  up_allocpage()
  *  allocates the page, and up_fillpage() fills it with data from some non-
  *  volatile storage device.  This distinction is made because up_allocpage()
  *  can probably be implemented in board-independent logic whereas up_fillpage()
  *  probably must be implemented as board-specific logic.
+ *
+ *  NOTE 2: The initial mapping of vpage will be read-able, write-able,
+ *  but non-cacheable.  No special actions will be required of
+ *  up_fillpage() in order to write into this allocated page.  If the
+ *  virtual address maps to a text region, however, this function should
+ *  remap the region so that is is read/execute only.  It should be made
+ *  cache-able in any case.
  *
  * Input Parameters:
  *   tcb - A reference to the task control block of the task that needs to
