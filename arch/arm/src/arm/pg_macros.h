@@ -132,15 +132,6 @@
 
 #define PT_SIZE                 (4*PTE_NPAGES)
 
-/* Sizes of Memory Regions **************************************************/
-
-#define PG_L2_LOCKED_SIZE       (4*CONFIG_PAGING_NLOCKED)
-#define PG_L2_PAGED_PSIZE       (4*CONFIG_PAGING_NPPAGED)
-#define PG_L2_PAGED_VSIZE       (4*CONFIG_PAGING_NVPAGED)
-#define PG_L2_TEXT_PSIZE        (PG_L2_LOCKED_SIZE + PG_L2_PAGED_PSIZE)
-#define PG_L2_TEXT_VSIZE        (PG_L2_LOCKED_SIZE + PG_L2_PAGED_VSIZE)
-#define PG_L2_DATA_SIZE         (4*PG_DATA_NPAGES)
-
 /* Virtual Page Table Location **********************************************/
 
 /* Check if the virtual address of the page table has been defined. It should
@@ -151,7 +142,7 @@
  */
 
 #ifndef PGTABLE_BASE_VADDR
-#  define PGTABLE_BASE_VADDR    (CONFIG_DRAM_VSTART + PG_L2_TEXT_VSIZE + PG_L2_DATA_SIZE)
+#  define PGTABLE_BASE_VADDR    (PG_LOCKED_VBASE + PG_TEXT_VSIZE + PG_DATA_SIZE)
 #endif
 
 /* Addresses of Memory Regions **********************************************/
@@ -173,6 +164,7 @@
 #define PG_L2_LOCKED_OFFSET     (((PG_LOCKED_VBASE & 0x000fffff) >> PAGESHIFT) << 2)
 #define PG_L2_LOCKED_PADDR      (PGTABLE_L2_BASE_PADDR + PG_L2_LOCKED_OFFSET)
 #define PG_L2_LOCKED_VADDR      (PGTABLE_L2_BASE_VADDR + PG_L2_LOCKED_OFFSET)
+#define PG_L2_LOCKED_SIZE       (4*CONFIG_PAGING_NLOCKED)
 
 /* We position the paged region PTEs immediately after the locked
  * region PTEs.  NOTE that the size of the paged regions is much
@@ -185,6 +177,7 @@
 
 #define PG_L2_PAGED_PADDR       (PG_L2_LOCKED_PADDR + PG_L2_LOCKED_SIZE)
 #define PG_L2_PAGED_VADDR       (PG_L2_LOCKED_VADDR + PG_L2_LOCKED_SIZE)
+#define PG_L2_PAGED_SIZE        (4*CONFIG_PAGING_NVPAGED)
 
 /* This describes the overall text region */
 
@@ -193,14 +186,16 @@
 
 #define PG_L2_TEXT_PADDR        PG_L2_LOCKED_PADDR
 #define PG_L2_TEXT_VADDR        PG_L2_LOCKED_VADDR
+#define PG_L2_TEXT_SIZE         (PG_L2_LOCKED_SIZE + PG_L2_PAGED_SIZE)
 
 /* We position the data section PTEs just after the text region PTE's */
 
 #define PG_L1_DATA_PADDR        (PGTABLE_BASE_PADDR + ((PG_DATA_VBASE >> 20) << 2))
 #define PG_L1_DATA_VADDR        (PGTABLE_BASE_VADDR + ((PG_DATA_VBASE >> 20) << 2))
 
-#define PG_L2_DATA_PADDR        (PG_L2_LOCKED_PADDR + PG_L2_TEXT_PSIZE)
-#define PG_L2_DATA_VADDR        (PG_L2_LOCKED_VADDR + PG_L2_TEXT_VSIZE)
+#define PG_L2_DATA_PADDR        (PG_L2_LOCKED_PADDR + PG_L2_TEXT_SIZE)
+#define PG_L2_DATA_VADDR        (PG_L2_LOCKED_VADDR + PG_L2_TEXT_SIZE)
+#define PG_L2_DATA_SIZE         (4*PG_DATA_NPAGES)
 
 /* Page Table Info **********************************************************/
 

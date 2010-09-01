@@ -361,10 +361,17 @@ On-Demand Paging
     ...
 
   The locked region is initially unmapped.  But the data region and page table
-  regions must be mapped in a similar manner.
+  regions must be mapped in a similar manner.  Those 
   
-    data offset = ((0x00094000 >> 10) << 2) = 0x00000940
-    L1 offset   = ((0x0009c000 >> 10) << 2) = 0x000009c0
+    Data:
+       Virtual address  = 0x11094000 Offset = 0x00064000
+       Physical address = 0x1104c000
+       L2 offset        = ((0x00094000 >> 10) << 2) = 0x00000940
+
+    Page table:
+       Virtual address  = 0x1109c000 Offset = 0x0009c000
+       Physical address = 0x11054000
+       L2 offset        = ((0x0009c000 >> 10) << 2) = 0x000009c0
 
   Build Sequence:
   ---------------
