@@ -209,6 +209,12 @@ int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
       /* Invalidate the instruction TLB corresponding to the virtual address */
 
       tlb_inst_invalidate_single(oldvaddr);
+
+      /* I do not believe that it is necessary to flush the I-Cache in this
+       * case:  The I-Cache uses a virtual address index and, hence, since the
+       * NuttX address space is flat, the cached instruction value should be
+       * correct even if the page mapping is no longer in place.
+       */ 
     }
 
   /* Then convert the index to a (physical) page address. */
