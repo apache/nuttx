@@ -107,4 +107,13 @@ void lpc313x_boardinitialize(void)
 #ifdef CONFIG_ARCH_LEDS
   up_ledinit();
 #endif
+
+  /* Set up mass storage device to support on demand paging */
+
+#if defined(CONFIG_PAGING)
+  if (lpc313x_pginitialize)
+    {
+      lpc313x_pginitialize();
+    }
+#endif
 }

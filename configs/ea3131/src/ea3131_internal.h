@@ -2,7 +2,7 @@
  * configs/ea3131/src/ea3131_internal.h
  * arch/arm/src/board/ea3131_internal.n
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,6 +105,18 @@ extern void weak_function lpc313x_spiinitialize(void);
  ************************************************************************************/
 
 extern void weak_function lpc313x_usbinitialize(void);
+
+/************************************************************************************
+ * Name: lpc313x_pginitialize
+ *
+ * Description:
+ *   Set up mass storage device to support on demand paging.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PAGING
+extern void weak_function lpc313x_pginitialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_EA3131_SRC_EA3131_INTERNAL_H */
