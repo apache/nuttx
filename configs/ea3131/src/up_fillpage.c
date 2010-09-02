@@ -132,4 +132,28 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 }
 #endif
 
+/************************************************************************************
+ * Name: lpc313x_pginitialize
+ *
+ * Description:
+ *   Set up mass storage device to support on demand paging.
+ *
+ ************************************************************************************/
+
+void weak_function lpc313x_pginitialize(void)
+{
+  /* This initialization does nothing in this example setup.  But this function is
+   * where you might, for example:
+   *
+   * - Initialize and configure a mass storage device to support on-demand paging.
+   *   This might be, perhaps an SD card or NAND memory.  An SPI FLASH would probably
+   *   already have been configured by lpc313x_spiinitialize(void);
+   * - Set up resources to support up_fillpage() operation.  For example, perhaps the
+   *   the text image is stored in a named binary file.  In this case, the virtual
+   *   text addresses might map to offsets into that file.
+   * - Do whatever else is necessary to make up_fillpage() ready for the first time
+   *   that it is called.
+   */
+}
+
 #endif /* CONFIG_PAGING */
