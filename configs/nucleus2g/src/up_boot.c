@@ -101,18 +101,6 @@ void lpc17_boardinitialize(void)
     }
 #endif
 
-   /* Initialize USB if 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function lpc17_usbinitialize() has been brought
-    * into the build.
-    */
-
-#if defined(CONFIG_USBDEV) && defined(CONFIG_LPC17_USBDEV)
-  if (lpc17_usbinitialize)
-    {
-      lpc17_usbinitialize();
-    }
-#endif
-
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
