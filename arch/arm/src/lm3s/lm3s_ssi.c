@@ -77,7 +77,7 @@
 #endif
 
 /* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
- * modules, the LM3S6965 supports 1 module (others may support more than 2-- in
+ * modules, the LM3S6965 and LM3S8962 support 1 module (others may support more than 2-- in
  * such case, the following must be expanded).
  */
 

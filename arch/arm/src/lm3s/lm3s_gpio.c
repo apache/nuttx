@@ -147,13 +147,13 @@ static const uint32_t g_gpiobase[LM3S_NPORTS] =
   LM3S_GPIOA_BASE, LM3S_GPIOB_BASE, LM3S_GPIOC_BASE, LM3S_GPIOD_BASE,
   LM3S_GPIOE_BASE, LM3S_GPIOF_BASE, LM3S_GPIOG_BASE,
 
-  /* GPIOH exists on the LM3S6918 and th LM3S6B96, but not on the LM3S6965 */
+  /* GPIOH exists on the LM3S6918 and th LM3S6B96, but not on the LM3S6965 or LM3S8962*/
 
 #if LM3S_NPORTS > 7
   LM3S_GPIOH_BASE,
 #endif
 
-  /* GPIOJ exists on the LM3S6B96, but not on the LM3S6918 or LM3S6965 */
+  /* GPIOJ exists on the LM3S6B96, but not on the LM3S6918 or LM3S6965 or LM3S8962*/
 
 #if LM3S_NPORTS > 8
   LM3S_GPIOJ_BASE,
@@ -851,3 +851,4 @@ bool lm3s_gpioread(uint32_t pinset, bool value)
 
   return (getreg32(base + LM3S_GPIO_DATA_OFFSET + (1 << (pinno + 2))) != 0);
 }
+

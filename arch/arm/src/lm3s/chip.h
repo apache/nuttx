@@ -82,6 +82,17 @@
 #  define LM3S_NPWM            4  /* Four PWM generator modules */
 #  define LM3S_NQEI            2  /* Two quadrature encoders */
 #  define LM3S_NPORTS          9  /* 9 Ports (GPIOA-H,J) 0-65 GPIOs */
+#elif defined(CONFIG_ARCH_CHIP_LM3S8962)
+#  define LM3S_NTIMERS         4  /* Four general purpose timers */
+#  define LM3S_NETHCONTROLLERS 1  /* One Ethernet controller */
+#  define LM3S_NSSI            1  /* One SSI module */
+#  define LM3S_NUARTS          3  /* Two UART modules */
+#  define LM3S_NI2C            2  /* One I2C module */
+#  define LM3S_NADC            1  /* One ADC module */
+#  define LM2S_NPWM            3  /* Three PWM generator modules */
+#  define LM3S_NQEI            2  /* Two quadrature encoders */
+#  define LM3S_NPORTS          7  /* 7 Ports (GPIOA-G), 5-42 GPIOs */
+#  define LC3S_CANCONTROLLER   1  /* One CAN controller */
 #else
 #  error "Capabilities not specified for this LM3S chip"
 #endif
