@@ -294,6 +294,49 @@
 #  define GPIO_ETHPHY_LED0 (GPIO_FUNC_PFOUTPUT | GPIO_PORTF | 3) /* PF3: LED0 */
 #  define GPIO_UART2_RX    (GPIO_FUNC_PFINPUT | GPIO_PORTG | 0)  /* PA0: UART 0 receive (UGRx) */
 #  define GPIO_UART2_TX    (GPIO_FUNC_PFOUTPUT | GPIO_PORTG | 1) /* PA1: UART 0 transmit (UGTx) */
+
+
+#elif defined(CONFIG_ARCH_CHIP_LM3S8962)
+#  define GPIO_UART0_RX    (GPIO_FUNC_PFINPUT   | GPIO_PORTA | 0)       /* PA0: UART 0 receive (U0Rx) */
+#  define GPIO_UART0_TX    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTA | 1)       /* PA1: UART 0 transmit (U0Tx) */
+#  define GPIO_SSI0_CLK    (GPIO_FUNC_PFIO      | GPIO_PORTA | 2)       /* PA2: SSI0 clock (SSI0Clk) */
+#  define GPIO_SSI0_FSS    (GPIO_FUNC_PFIO      | GPIO_PORTA | 3)       /* PA3: SSI0 frame (SSI0Fss) */
+#  define GPIO_SSI0_RX     (GPIO_FUNC_PFINPUT   | GPIO_PORTA | 4)       /* PA4: SSI0 receive (SSI0Rx) */
+#  define GPIO_SSI0_TX     (GPIO_FUNC_PFOUTPUT  | GPIO_PORTA | 5)       /* PA5: SSI0 transmit (SSI0Tx) */
+#  define GPIO_TMR1_CCP    (GPIO_FUNC_PFIO  | GPIO_PORTA | 6)        /* PA6: Capture/Compare/PWM0 (CCP1) */
+#  define GPIO_PWM1_2      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTB | 0)       /* PB0: PWM Generator 1, PWM2 */
+#  define GPIO_PWM1_3      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTB | 1)       /* PB1: PWM Generator 1, PWM3 */
+#  define GPIO_I2C0_SCL    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTB | 2)       /* PB2: I2C0 clock (I2C0SCL) */
+#  define GPIO_I2C0_SDA    (GPIO_FUNC_PFODIO    | GPIO_PORTB | 3)       /* PB3: I2C0 data (I2C0SDA) */
+#  define GPIO_CMP0_NIN    (GPIO_FUNC_PFINPUT   | GPIO_PORTB | 4)       /* PB4: Analog comparator 0 negative input (C0-) */
+#  define GPIO_CMP0_OUT    (GPIO_FUNC_PFOUTPUT   | GPIO_PORTB | 5)       /* PB5: Analog comparator 0 output (C0o)  ( differs) */
+#  define GPIO_CMP0_PIN    (GPIO_FUNC_PFINPUT   | GPIO_PORTB | 6)       /* PB6: Analog comparator 0 positive input (C0+) */
+#  define GPIO_JTAG_TRST   (GPIO_FUNC_PFINPUT   | GPIO_PORTB | 7)       /* PB7: JTAG ~TRST */
+#  define GPIO_JTAG_TCK    (GPIO_FUNC_PFINPUT   | GPIO_PORTC | 0)       /* PC0: JTAG/SWD CLK */
+#  define GPIO_JTAG_SWCLK  (GPIO_FUNC_PFINPUT   | GPIO_PORTC | 0)       /* PC0: JTAG/SWD CLK */
+#  define GPIO_JTAG_TMS    (GPIO_FUNC_PFIO      | GPIO_PORTC | 1)       /* PC1: JTAG TMS */
+#  define GPIO_JTAG_SWDIO  (GPIO_FUNC_PFIO      | GPIO_PORTC | 1)       /* PC1: JTAG SWDIO */
+#  define GPIO_JTAG_TDI    (GPIO_FUNC_PFINPUT   | GPIO_PORTC | 2)       /* PC2: JTAG TDI */
+#  define GPIO_JTAG_TDO    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTC | 3)       /* PC3: JTAG TDO */
+#  define GPIO_JTAG_SWO    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTC | 3)       /* PC3: JTAG SWO */
+#  define GPIO_QEI0_PHA    (GPIO_FUNC_PFINPUT   | GPIO_PORTC | 4)       /* PC4: QEI module 0 phase A. */
+#  define GPIO_QEI0_PHB    (GPIO_FUNC_PFINPUT      | GPIO_PORTC | 6)       /* PC6: QEI module 0 phase B. */
+#  define GPIO_CAN0_RX    (GPIO_FUNC_PFINPUT   | GPIO_PORTD | 0)       /* PD0: CAN module  RX */
+#  define GPIO_CAN0_TX     (GPIO_FUNC_PFOUTPUT  | GPIO_PORTD | 1)       /* PD1: CAN module TX */
+#  define GPIO_UART1_RX    (GPIO_FUNC_PFINPUT   | GPIO_PORTD | 2)       /* PD2: UART 1 receive (U1Rx) */
+#  define GPIO_UART1_TX    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTD | 3)       /* PD3: UART 1 transmit (U1Tx) */
+#  define GPIO_TMR0_CCP    (GPIO_FUNC_PFIO      | GPIO_PORTD | 4)       /* PD4: Capture/Compare/PWM0 (CCP0) */
+#  define GPIO_PWM_FAULT   (GPIO_FUNC_PFINPUT   | GPIO_PORTD | 6)       /* PD6: PWM Fault */
+#  define GPIO_QEI0_IDX   (GPIO_FUNC_PFIO      | GPIO_PORTD | 7)       /* PC7: /* PD0: QEI module 0 index. ) */
+#  define GPIO_PWM2_4      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTE | 0)       /* PE0: PWM Generator 2, PWM4 */
+#  define GPIO_PWM2_5      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTE | 1)       /* PE1: PWM Generator 1, PWM5 */
+#  define GPIO_QEI1_PHB    (GPIO_FUNC_PFINPUT   | GPIO_PORTE | 2)       /* PE2: QEI module 1 phase B. */
+#  define GPIO_QEI1_PHA    (GPIO_FUNC_PFINPUT   | GPIO_PORTE | 3)       /* PE3: QEI module 1 phase A. */
+#  define GPIO_PWM0_0      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTF | 0)       /* PF0: PWM Generator 0, PWM0 */
+#  define GPIO_QEI1_IDX    (GPIO_FUNC_PFINPUT   | GPIO_PORTE | 1)       /* PF1: QEI module 1 index. ) */
+#  define GPIO_ETHPHY_LED1 (GPIO_FUNC_PFOUTPUT  | GPIO_PORTF | 2)       /* PF2: LED1 */
+#  define GPIO_ETHPHY_LED0 (GPIO_FUNC_PFOUTPUT  | GPIO_PORTF | 3)       /* PF3: LED0 */
+#  define GPIO_PWM0_1     (GPIO_FUNC_PFOUTPUT  | GPIO_PORTG | 1)       /* PG1:PWM Generator 0, PWM1 */
 #else
 #  error "Unknown LM3S chip"
 #endif

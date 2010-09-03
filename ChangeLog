@@ -1250,3 +1250,7 @@
 
 	* arch/arm/src/lpc313x/lpc313x_spi.c - Fix compilation error when
 	  when CONFIG_DEBUG is enabled.
+	* arch/arm/src/lm3s and arch/arm/include/lm3s - Support for the
+	  lm3s8962 contributed by Larry Arnold.
+	* configs/lm328962-ek - Support for the TI/Stellaris EKC-LM3S8962
+	  board (also contributed by Larry Arnold).

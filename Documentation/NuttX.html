@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 30, 2010</p>
+      <p>Last Updated: September 3, 2010</p>
     </td>
   </tr>
 </table>
@@ -1922,6 +1922,10 @@ nuttx-5.10 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* arch/arm/src/lpc313x/lpc313x_spi.c - Fix compilation error when
 	  when CONFIG_DEBUG is enabled.
+	* arch/arm/src/lm3s and arch/arm/include/lm3s - Support for the
+	  lm3s8962 contributed by Larry Arnold.
+	* configs/lm328962-ek - Support for the TI/Stellaris EKC-LM3S8962
+	  board (also contributed by Larry Arnold).
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1931,6 +1935,9 @@ buildroot-1.9 2010-xx-xx <spudmonkey@racsa.co.cr>
 	* configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
 	  arm926
 	* toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
+	* toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
+	  GDB 6.8 won't build because the tarball was released with -Werror enabled and
+	  the build stops on the first warning.
 
 </pre></ul>
 
