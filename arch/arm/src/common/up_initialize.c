@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_initialize.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -161,7 +161,7 @@ void up_initialize(void)
 
   up_netinitialize();
 
-  /* Initializ USB */
+  /* Initialize USB */
 
   up_usbinitialize();
 
