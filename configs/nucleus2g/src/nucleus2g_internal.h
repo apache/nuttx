@@ -144,16 +144,6 @@
 
 extern void weak_function lpc17_sspinitialize(void);
 
-/************************************************************************************
- * Name: lpc17_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the NUCLEUS-2G board.
- *
- ************************************************************************************/
-
-extern void weak_function lpc17_usbinitialize(void);
-
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_INTERNAL_H */
 
