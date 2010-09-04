@@ -90,6 +90,7 @@ echo "EXTERN(up_vectorprefetch)" >>ld-locked.inc
 echo "EXTERN(up_vectorundefinsn)" >>ld-locked.inc
 echo "EXTERN(up_vectorfiq)" >>ld-locked.inc
 echo "EXTERN(up_vectorirq)" >>ld-locked.inc
+echo "EXTERN(up_vectoaddrexcptn)" >>ld-locked.inc
 
 #
 # These are the initialization entry points of all device drivers that
@@ -112,6 +113,19 @@ answer=$(checkconfig CONFIG_USBDEV)
 if [ $answer = y ]; then
 	echo "EXTERN(up_usbinitialize)" >>ld-locked.inc
 fi
+
+############################################################################
+# Initialization logic
+############################################################################
+# All initialization logic must be in memory because it must execute before
+# the page fill worker thread is started.  Ideally this would be in some
+# region that is mapped initially, but then unmapped after initialization
+# is complete -- effectively freeing the memory used for the 1-time
+# initialization code.  That optimization has not yet been made and, as
+# consequence, the 1-time initialization code takes up precious memory
+# in the locked memory region.
+
+echo "EXTERN(up_boot)" >>ld-locked.inc
 
 ############################################################################
 # Idle Loop
