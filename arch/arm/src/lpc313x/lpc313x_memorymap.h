@@ -318,7 +318,7 @@
 #      endif
 #      define PGTABLE_IN_HIGHSRAM    1
 
-       /* If CONFIG_PAGING is defined, insisted that pg_macros.h assign the virtual
+       /* If CONFIG_PAGING is defined, insist that pg_macros.h assign the virtual
         * address of the page table.
         */
 
@@ -340,11 +340,14 @@
 #  endif
 #endif
 
-/* 16Kb of memory is reserved hold the page table for the virtual mappings.  A
+/* Page table start addresses:
+ *
+ * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
  * portion of this table is not accessible in the virtual address space (for
  * normal operation). We will reuse this memory for coarse page tables as follows:
  *
- * Page table start addresses:
+ * NOTE: If CONFIG_PAGING is defined, pg_macros.h will re-assign the virtual
+ * address of the page table.
  */
 
 #define PGTABLE_L2_COARSE_OFFSET    ((((LPC313X_LAST_PSECTION >> 20) + 255) & ~255) << 2)

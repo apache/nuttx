@@ -208,18 +208,16 @@ static void up_setupmappings(void)
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
 static void  up_vectorpermissions(uint32_t mmuflags)
 {
-  uint32_t *ptr = (uint32_t*)PG_L2_VECT_VADDR;
+  /* The PTE for virtual address zero is at the base of the L2 page table */
+
+  uint32_t *ptr = (uint32_t*)PGTABLE_BASE_VADDR;
   uint32_t pte;
 
   /* This is easily because we have already been told everything! */
 
   pte = *ptr;
 
-#ifdef CONFIG_PAGING_VECPPAGE
-  /* We've been told to use a specify page for the vectors.  In this
-   * case, I expect the pte to be zero the first time this function is
-   * called (what if it is not?)
-   */
+  /* The pte might be zero the first time this function is called . */
 
   if (pte == 0)
     {
@@ -229,14 +227,6 @@ static void  up_vectorpermissions(uint32_t mmuflags)
     {
       pte &= PG_L1_PADDRMASK;
     }
-#else
-  /* Otherwise, we should be using the page at the beginning of the
-   * locked text region.
-   */
-
-  ASSERT(pte != 0);
-  pte &= PG_L1_PADDRMASK;
-#endif
 
   /* Update the MMU flags and save */
 

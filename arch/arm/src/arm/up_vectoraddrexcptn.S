@@ -79,5 +79,5 @@
 	.type	up_vectoraddrexcptn, %function
 up_vectoraddrexcptn:
 	b	up_vectoraddrexcptn
-	.size	up_vectoaddrexcptn, . - up_vectoraddrexcptn
+	.size	up_vectoraddrexcptn, . - up_vectoraddrexcptn
 	.end
