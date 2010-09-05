@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_i2c.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,11 +49,11 @@
 
 /* I2C register base address offset into the APB1 domain ****************************************/
 
-#define LPC313X_I2C0_VBASE               (LPC313X_APB1_VSECTION+LPC313X_APB1_I2C0_OFFSET)
-#define LPC313X_I2C0_PBASE               (LPC313X_APB1_PSECTION+LPC313X_APB1_I2C0_OFFSET)
+#define LPC313X_I2C0_VBASE               (LPC313X_APB1_VADDR+LPC313X_APB1_I2C0_OFFSET)
+#define LPC313X_I2C0_PBASE               (LPC313X_APB1_PADDR+LPC313X_APB1_I2C0_OFFSET)
 
-#define LPC313X_I2C1_VBASE               (LPC313X_APB1_VSECTION+LPC313X_APB1_I2C1_OFFSET)
-#define LPC313X_I2C1_PBASE               (LPC313X_APB1_PSECTION+LPC313X_APB1_I2C1_OFFSET)
+#define LPC313X_I2C1_VBASE               (LPC313X_APB1_VADDR+LPC313X_APB1_I2C1_OFFSET)
+#define LPC313X_I2C1_PBASE               (LPC313X_APB1_PADDR+LPC313X_APB1_I2C1_OFFSET)
 
 /* I2C register offsets (with respect to the I2C base) ******************************************/
 

@@ -100,10 +100,8 @@ static const struct section_mapping_s section_mapping[] =
   { LPC313X_INTSROM0_PSECTION, LPC313X_INTSROM0_VSECTION, 
     LPC313X_INTSROM_MMUFLAGS, LPC313X_INTSROM0_NSECTIONS},
 #endif
-  { LPC313X_APB0_PSECTION, LPC313X_APB0_VSECTION, 
-    LPC313X_APB0_MMUFLAGS, LPC313X_APB0_NSECTIONS},
-  { LPC313X_APB1_PSECTION, LPC313X_APB1_VSECTION, 
-    LPC313X_APB1_MMUFLAGS, LPC313X_APB1_NSECTIONS},
+  { LPC313X_APB01_PSECTION, LPC313X_APB01_VSECTION, 
+    LPC313X_APB01_MMUFLAGS, LPC313X_APB01_NSECTIONS},
   { LPC313X_APB2_PSECTION, LPC313X_APB2_VSECTION, 
     LPC313X_APB2_MMUFLAGS, LPC313X_APB2_NSECTIONS},
   { LPC313X_APB3_PSECTION, LPC313X_APB3_VSECTION, 
@@ -210,17 +208,14 @@ static void up_setupmappings(void)
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
 static void  up_vectorpermissions(uint32_t mmuflags)
 {
-  /* The PTE for virtual address zero is at the base of the L2 page table */
+  /* The PTE for the beginning of ISRAM is at the base of the L2 page table */
 
-  uint32_t *ptr = (uint32_t*)PGTABLE_BASE_VADDR;
+  uint32_t *ptr = (uint32_t*)PG_L2_VECT_VADDR;
   uint32_t pte;
 
-  /* This is easily because we have already been told everything! */
+  /* The pte might be zero the first time this function is called. */
 
   pte = *ptr;
-
-  /* The pte might be zero the first time this function is called . */
-
   if (pte == 0)
     {
       pte = PG_VECT_PBASE;   

@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_timer.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,17 +49,17 @@
 
 /* TIMER register base address offset into the APB1 domain **************************************/
 
-#define LPC313X_TIMER0_VBASE             (LPC313X_APB1_VSECTION+LPC313X_APB1_TIMER0_OFFSET)
-#define LPC313X_TIMER0_PBASE             (LPC313X_APB1_PSECTION+LPC313X_APB1_TIMER0_OFFSET)
+#define LPC313X_TIMER0_VBASE             (LPC313X_APB1_VADDR+LPC313X_APB1_TIMER0_OFFSET)
+#define LPC313X_TIMER0_PBASE             (LPC313X_APB1_PADDR+LPC313X_APB1_TIMER0_OFFSET)
 
-#define LPC313X_TIMER1_VBASE             (LPC313X_APB1_VSECTION+LPC313X_APB1_TIMER1_OFFSET)
-#define LPC313X_TIMER1_PBASE             (LPC313X_APB1_PSECTION+LPC313X_APB1_TIMER1_OFFSET)
+#define LPC313X_TIMER1_VBASE             (LPC313X_APB1_VADDR+LPC313X_APB1_TIMER1_OFFSET)
+#define LPC313X_TIMER1_PBASE             (LPC313X_APB1_PADDR+LPC313X_APB1_TIMER1_OFFSET)
 
-#define LPC313X_TIMER2_VBASE             (LPC313X_APB1_VSECTION+LPC313X_APB1_TIMER2_OFFSET)
-#define LPC313X_TIMER2_PBASE             (LPC313X_APB1_PSECTION+LPC313X_APB1_TIMER2_OFFSET)
+#define LPC313X_TIMER2_VBASE             (LPC313X_APB1_VADDR+LPC313X_APB1_TIMER2_OFFSET)
+#define LPC313X_TIMER2_PBASE             (LPC313X_APB1_PADDR+LPC313X_APB1_TIMER2_OFFSET)
 
-#define LPC313X_TIMER3_VBASE             (LPC313X_APB1_VSECTION+LPC313X_APB1_TIMER3_OFFSET)
-#define LPC313X_TIMER3_PBASE             (LPC313X_APB1_PSECTION+LPC313X_APB1_TIMER3_OFFSET)
+#define LPC313X_TIMER3_VBASE             (LPC313X_APB1_VADDR+LPC313X_APB1_TIMER3_OFFSET)
+#define LPC313X_TIMER3_PBASE             (LPC313X_APB1_PADDR+LPC313X_APB1_TIMER3_OFFSET)
 
 /* TIMER register offsets (with respect to the TIMERn base) *************************************/
 

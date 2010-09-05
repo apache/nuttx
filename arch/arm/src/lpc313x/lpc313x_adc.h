@@ -1,7 +1,7 @@
 /************************************************************************************************
- * arch/arm/src/lpc313x/lpc313x_ADC.h
+ * arch/arm/src/lpc313x/lpc313x_adc.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,8 @@
 
 /* ADC register base address offset into the APB0 domain ****************************************/
 
-#define LPC313X_ADC_VBASE                (LPC313X_APB0_VSECTION+LPC313X_APB0_ADC_OFFSET)
-#define LPC313X_ADC_PBASE                (LPC313X_APB0_PSECTION+LPC313X_APB0_ADC_OFFSET)
+#define LPC313X_ADC_VBASE                (LPC313X_APB0_VADDR+LPC313X_APB0_ADC_OFFSET)
+#define LPC313X_ADC_PBASE                (LPC313X_APB0_PADDR+LPC313X_APB0_ADC_OFFSET)
 
 /* ADC register offsets (with respect to the ADC base) ******************************************/
 

@@ -1,7 +1,7 @@
 /********************************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_syscreg.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,8 @@
 
 /* SYSCREG register base address offset into the APB0 domain ********************************************/
 
-#define LPC313X_SYSCREG_VBASE                    (LPC313X_APB0_VSECTION+LPC313X_APB0_SYSCREG_OFFSET)
-#define LPC313X_SYSCREG_PBASE                    (LPC313X_APB0_PSECTION+LPC313X_APB0_SYSCREG_OFFSET)
+#define LPC313X_SYSCREG_VBASE                    (LPC313X_APB0_VADDR+LPC313X_APB0_SYSCREG_OFFSET)
+#define LPC313X_SYSCREG_PBASE                    (LPC313X_APB0_PADDR+LPC313X_APB0_SYSCREG_OFFSET)
 
 /* SYSCREG register offsets (with respect to the SYSCREG base) ******************************************/
 /* Miscellaneous system configuration registers, part1 */

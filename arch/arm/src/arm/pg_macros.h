@@ -259,13 +259,17 @@
 #  define PG_L2_VECT_VADDR      CONFIG_PAGING_VECL2VADDR
 
 /* Case 2: Vectors are in low memory and the locked text region starts at
- * the begin of SRAM (which will be aliased to address 0x00000000)
+ * the beginning of SRAM (which will be aliased to address 0x00000000).
+ * However, the beginning of SRAM may not be aligned to the beginning
+ * of the L2 page table (because the beginning of RAM is offset into 
+ * the table.
  */
  
 #elif defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_PAGING_LOCKED_PBASE)
 #  define PG_VECT_PBASE         PG_LOCKED_PBASE
-#  define PG_L2_VECT_PADDR      PGTABLE_L2_BASE_PADDR
-#  define PG_L2_VECT_VADDR      PGTABLE_L2_BASE_VADDR
+#  define PG_L2_VECT_OFFSET     (((PG_LOCKED_VBASE & 0x000fffff) >> PAGESHIFT) << 2)
+#  define PG_L2_VECT_PADDR      (PGTABLE_L2_BASE_PADDR + PG_L2_VECT_OFFSET)
+#  define PG_L2_VECT_VADDR      (PGTABLE_L2_BASE_VADDR + PG_L2_VECT_OFFSET)
 
 /* Case 3: High vectors or the locked region is not at the beginning or SRAM */
 

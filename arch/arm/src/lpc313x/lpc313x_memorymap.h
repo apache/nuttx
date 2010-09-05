@@ -57,8 +57,9 @@
                                                   /* 0x11058000-11ffffffff: Reserved */
 #define LPC313X_INTSROM0_PSECTION      0x12000000 /* 0x12000000-0x1201ffff: Internal SROM 0 128Kb */
                                                   /* 0x12020000-0x12ffffff: Reserved */
-#define LPC313X_APB0_PSECTION          0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
-#define LPC313X_APB1_PSECTION          0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
+#define LPC313X_APB01_PSECTION         0x13000000 /* 0x13000000-0x1300bfff: APB0 32Kb APB1 16Kb */
+#  define LPC313X_APB0_PADDR           0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
+#  define LPC313X_APB1_PADDR           0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
                                                   /* 0x1300c000-0x14ffffff: Reserved */
 #define LPC313X_APB2_PSECTION          0x15000000 /* 0x15000000-0x15003fff: APB2 16Kb */
 #define LPC313X_APB3_PSECTION          0x16000000 /* 0x16000000-0x160003ff: APB3 1Kb */
@@ -160,7 +161,7 @@
 
 #define LPC313X_SHADOWSPACE_NSECTIONS  1 /*         4Kb - <1 section  */
 #define LPC313X_INTSRAM_NSECTIONS      1 /* 96 or 192Kb - <1 section */
-#define LPC313X_APB0_NSECTIONS         1 /*        32Kb - <1 section */
+#define LPC313X_APB01_NSECTIONS        1 /*        32Kb - <1 section */
 #define LPC313X_INTSROM0_NSECTIONS     1 /*       128Kb - <1 section */
 #define LPC313X_APB1_NSECTIONS         1 /*        16Kb - <1 section */
 #define LPC313X_APB2_NSECTIONS         1 /*        16Kb - <1 section */
@@ -185,8 +186,7 @@
 #define LPC313X_SHADOWSPACE_MMUFLAGS   MMU_MEMFLAGS
 #define LPC313X_INTSRAM_MMUFLAGS       MMU_MEMFLAGS
 #define LPC313X_INTSROM_MMUFLAGS       MMU_MEMFLAGS
-#define LPC313X_APB0_MMUFLAGS          MMU_IOFLAGS
-#define LPC313X_APB1_MMUFLAGS          MMU_IOFLAGS
+#define LPC313X_APB01_MMUFLAGS         MMU_IOFLAGS
 #define LPC313X_APB2_MMUFLAGS          MMU_IOFLAGS
 #define LPC313X_APB3_MMUFLAGS          MMU_IOFLAGS
 #define LPC313X_APB4MPMC_MMUFLAGS      MMU_IOFLAGS
@@ -217,8 +217,9 @@
 #    define LPC313X_INTSRAM0_VADDR     0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
 #    define LPC313X_INTSRAM1_VADDR     0x11040000 /* 0x11040000-0x11057fff: Internal SRAM 1 96Kb */
 #  define LPC313X_INTSROM0_VSECTION    0x12000000 /* 0x12000000-0x1201ffff: Internal SROM 0 128Kb */
-#  define LPC313X_APB0_VSECTION        0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
-#  define LPC313X_APB1_VSECTION        0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
+#  define LPC313X_APB01_VSECTION       0x13000000 /* 0x13000000-0x1300bfff: APB0 32Kb APB0 32Kb */
+#    define LPC313X_APB0_VADDR         0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
+#    define LPC313X_APB1_VADDR         0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
 #  define LPC313X_APB2_VSECTION        0x15000000 /* 0x15000000-0x15003fff: APB2 16Kb */
 #  define LPC313X_APB3_VSECTION        0x16000000 /* 0x16000000-0x160003ff: APB3 1Kb */
 #  define LPC313X_APB4MPMC_VSECTION    0x17000000 /*                        8Kb */
