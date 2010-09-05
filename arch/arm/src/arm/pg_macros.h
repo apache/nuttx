@@ -66,6 +66,29 @@
 #  error "Cannot support both CONFIG_PAGING and CONFIG_ARCH_ROMPGTABLE"
 #endif
 
+/* Virtual Page Table Location **********************************************/
+
+/* Check if the virtual address of the page table has been defined. It should
+ * not be defined:  architecture specific logic should suppress defining
+ * PGTABLE_BASE_VADDR unless:  (1) it is defined in the NuttX configuration
+ * file, or (2) the page table is position in low memory (because the vectors
+ * are in high memory).
+ */
+
+#ifndef PGTABLE_BASE_VADDR
+#  define PGTABLE_BASE_VADDR      (PG_LOCKED_VBASE + PG_TEXT_VSIZE + PG_DATA_SIZE)
+
+   /* Virtual base of the address of the L2 page tables need to recalculates
+    * using this new virtual base address of the L2 page table.
+	*/
+
+#  undef PGTABLE_L2_FINE_VBASE
+#  define PGTABLE_L2_FINE_VBASE   (PGTABLE_BASE_VADDR+PGTABLE_L2_FINE_OFFSET)
+
+#  undef PGTABLE_L2_COARSE_VBASE
+#  define PGTABLE_L2_COARSE_VBASE (PGTABLE_BASE_VADDR+PGTABLE_L2_COARSE_OFFSET)
+#endif
+
 /* Page Size Selections *****************************************************/
 
 /* Create some friendly definitions to handle some differences between
@@ -133,19 +156,6 @@
 #endif
 
 #define PT_SIZE                 (4*PTE_NPAGES)
-
-/* Virtual Page Table Location **********************************************/
-
-/* Check if the virtual address of the page table has been defined. It should
- * not be defined:  architecture specific logic should suppress defining
- * PGTABLE_BASE_VADDR unless:  (1) it is defined in the NuttX configuration
- * file, or (2) the page table is position in low memory (because the vectors
- * are in high memory).
- */
-
-#ifndef PGTABLE_BASE_VADDR
-#  define PGTABLE_BASE_VADDR    (PG_LOCKED_VBASE + PG_TEXT_VSIZE + PG_DATA_SIZE)
-#endif
 
 /* Addresses of Memory Regions **********************************************/
 
@@ -254,8 +264,8 @@
  
 #elif defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_PAGING_LOCKED_PBASE)
 #  define PG_VECT_PBASE         PG_LOCKED_PBASE
-#  define PG_L2_VECT_PADDR      PG_L2_LOCKED_PADDR
-#  define PG_L2_VECT_VADDR      PG_L2_LOCKED_VADDR
+#  define PG_L2_VECT_PADDR      PGTABLE_L2_BASE_PADDR
+#  define PG_L2_VECT_VADDR      PGTABLE_L2_BASE_VADDR
 
 /* Case 3: High vectors or the locked region is not at the beginning or SRAM */
 
