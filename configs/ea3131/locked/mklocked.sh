@@ -90,7 +90,7 @@ echo "EXTERN(up_vectorprefetch)" >>ld-locked.inc
 echo "EXTERN(up_vectorundefinsn)" >>ld-locked.inc
 echo "EXTERN(up_vectorfiq)" >>ld-locked.inc
 echo "EXTERN(up_vectorirq)" >>ld-locked.inc
-echo "EXTERN(up_vectoaddrexcptn)" >>ld-locked.inc
+echo "EXTERN(up_vectoraddrexcptn)" >>ld-locked.inc
 
 #
 # These are the initialization entry points of all device drivers that
