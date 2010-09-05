@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 3, 2010</p>
+      <p>Last Updated: September 5, 2010</p>
     </td>
   </tr>
 </table>
@@ -1948,6 +1948,10 @@ nuttx-5.10 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  lm3s8962 contributed by Larry Arnold.
 	* configs/lm328962-ek - Support for the TI/Stellaris EKC-LM3S8962
 	  board (also contributed by Larry Arnold).
+	* arch/arm/src/lpc313x/lpc313x_boot.c - The call to lpc313x_boardinitialized()
+	  should not be conditioned on CONFIG_ARCH_LEDs being defined!
+	* arch/arm/src/lpc313x/ - APB0 and APB1 cannot lie in different
+	  sections; they are too close together.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

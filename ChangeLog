@@ -1254,3 +1254,7 @@
 	  lm3s8962 contributed by Larry Arnold.
 	* configs/lm328962-ek - Support for the TI/Stellaris EKC-LM3S8962
 	  board (also contributed by Larry Arnold).
+	* arch/arm/src/lpc313x/lpc313x_boot.c - The call to lpc313x_boardinitialized()
+	  should not be conditioned on CONFIG_ARCH_LEDs being defined!
+	* arch/arm/src/lpc313x/ - APB0 and APB1 cannot lie in different
+	  sections; they are too close together.
