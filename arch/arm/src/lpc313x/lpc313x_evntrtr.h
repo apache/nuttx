@@ -49,8 +49,8 @@
 
 /* EVNTRTR register base address offset into the APB0 domain ********************************************/
 
-#define LPC313X_EVNTRTR_VBASE                      (LPC313X_APB0_VSECTION+LPC313X_APB0_EVNTRTR_OFFSET)
-#define LPC313X_EVNTRTR_PBASE                      (LPC313X_APB0_PSECTION+LPC313X_APB0_EVNTRTR_OFFSET)
+#define LPC313X_EVNTRTR_VBASE                      (LPC313X_APB0_VADDR+LPC313X_APB0_EVNTRTR_OFFSET)
+#define LPC313X_EVNTRTR_PBASE                      (LPC313X_APB0_PADDR+LPC313X_APB0_EVNTRTR_OFFSET)
 
 /* Sizes of things */
 
