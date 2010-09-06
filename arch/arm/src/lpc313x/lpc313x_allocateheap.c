@@ -51,6 +51,11 @@
 #include "up_internal.h"
 #include "lpc313x_memorymap.h"
 
+#ifdef CONFIG_PAGING
+#  include <nuttx/page.h>
+#  include "pg_macros.h"
+#endif
+
 /************************************************************************
  * Pre-processor Definitions
  ************************************************************************/
@@ -121,10 +126,18 @@
  * will let the heap run all the way to the end of SRAM.
  */
 
-#ifdef PGTABLE_IN_HIGHSRAM
-#  define LPC313X_HEAP_VEND (LPC313X_INTSRAM_VSECTION + LPC313X_ISRAM_SIZE - PGTABLE_SIZE)  
+#ifdef CONFIG_PAGING
+#  ifdef PGTABLE_IN_HIGHSRAM
+#    define LPC313X_HEAP_VEND (PG_LOCKED_VBASE + PG_TOTAL_VSIZE - PGTABLE_SIZE)  
+#  else
+#    define LPC313X_HEAP_VEND (PG_LOCKED_VBASE + PG_TOTAL_VSIZE)  
+#  endif
 #else
-#  define LPC313X_HEAP_VEND (LPC313X_INTSRAM_VSECTION + LPC313X_ISRAM_SIZE)  
+#  ifdef PGTABLE_IN_HIGHSRAM
+#    define LPC313X_HEAP_VEND (LPC313X_INTSRAM_VSECTION + LPC313X_ISRAM_SIZE - PGTABLE_SIZE)  
+#  else
+#    define LPC313X_HEAP_VEND (LPC313X_INTSRAM_VSECTION + LPC313X_ISRAM_SIZE)  
+#  endif
 #endif
 
 /************************************************************************

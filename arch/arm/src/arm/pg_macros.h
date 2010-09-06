@@ -281,9 +281,14 @@
 
 /* This is the total number of pages used in the text/data mapping: */
 
-#define PG_TOTAL_NPPAGES        (PG_TEXT_NPPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
-#define PG_TOTAL_NVPAGES        (PG_TEXT_NVPAGES + PG_DATA_PAGES + PG_PGTABLE_NPAGES)
-#if PG_TOTAL_NPPAGES >PG_RAM_PAGES
+#define PG_TOTAL_NPPAGES        (PG_TEXT_NPPAGES + PG_DATA_NPAGES + PG_PGTABLE_NPAGES)
+#define PG_TOTAL_NVPAGES        (PG_TEXT_NVPAGES + PG_DATA_NPAGES + PG_PGTABLE_NPAGES)
+#define PG_TOTAL_PSIZE          (PG_TOTAL_NPPAGES << PAGESHIFT)
+#define PG_TOTAL_VSIZE          (PG_TOTAL_NVPAGES << PAGESHIFT)
+
+/* Sanity check: */
+
+#if PG_TOTAL_NPPAGES > PG_RAM_PAGES
 #  error "Total pages required exceeds RAM size"
 #endif
 
