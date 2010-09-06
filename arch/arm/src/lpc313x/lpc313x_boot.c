@@ -385,16 +385,6 @@ void up_boot(void)
 
   lpc313x_lowsetup();
 
-  /* NOTE:  Something in the operation of lpc313x_resetclks() causes the first
-   * 6 words of memory to be zeroed, wiping out the interrupt vectors.  However,
-   * moving the vector initialization until after the clock setup seems to hang
-   * the system (and I can't step though the clock setup to find why without
-   * losing my JTAG connection).  So, the simplest work-around is to simply
-   * initialize the vectors twice.
-   */
-
-  up_copyvectorblock();
-
   /* Perform early serial initialization if we are going to use the serial driver */
 
 #ifdef CONFIG_USE_EARLYSERIALINIT
