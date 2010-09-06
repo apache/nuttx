@@ -146,6 +146,6 @@ void lpc313x_resetclks(void)
       regaddr = LPC313X_CGU_FDC(i);
       regval  = getreg32(regaddr);
       regval &= ~CGU_FDC_RUN;
-      putreg32(regval, i);
+      putreg32(regval, regaddr);
     }
 }
