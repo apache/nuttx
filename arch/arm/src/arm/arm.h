@@ -254,6 +254,9 @@
 
 /* Default MMU flags for RAM memory, IO, vector region */
 
+#define MMU_ROMFLAGS \
+  (PMD_TYPE_SECT|PMD_BIT4|PMD_SECT_AP_READ)
+
 #define MMU_MEMFLAGS \
   (PMD_TYPE_SECT|PMD_SECT_WB|PMD_BIT4|PMD_SECT_AP_WRITE|PMD_SECT_AP_READ)
 
@@ -281,6 +284,47 @@
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* Get the current value of the CP15 C1 control register */
+
+static inline unsigned int get_cp15c1(void)
+{
+  unsigned int retval;
+  __asm__ __volatile__
+    (
+	 "\tmrc	p15, 0, %0, c1, c0"
+     : "=r" (retval)
+     :
+     : "memory");
+  return retval;
+}
+
+/* Get the current value of the CP15 C2 page table pointer register */
+
+static inline unsigned int get_cp15c2(void)
+{
+  unsigned int retval;
+  __asm__ __volatile__
+    (
+	 "\tmrc	p15, 0, %0, c2, c0"
+     : "=r" (retval)
+     :
+     : "memory");
+  return retval;
+}
+/* Get the current value of the CP15 C3 domain access register */
+
+static inline unsigned int get_cp15c3(void)
+{
+  unsigned int retval;
+  __asm__ __volatile__
+    (
+	 "\tmrc	p15, 0, %0, c3, c0"
+     : "=r" (retval)
+     :
+     : "memory");
+  return retval;
+}
 
 /* ARMv4/ARMv5 operation: Invalidate TLB
  * ARM926EJ-S operation:  Invalidate set-associative

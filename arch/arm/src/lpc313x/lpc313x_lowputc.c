@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc313x/lpc313x_lowputc.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -338,10 +338,6 @@ void lpc313x_lowsetup(void)
   putreg32('\0', LPC313X_UART_THR);
 #endif
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: up_lowputc

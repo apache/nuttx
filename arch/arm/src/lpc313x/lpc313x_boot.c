@@ -285,6 +285,18 @@ static void up_vectormapping(void)
 
 static void up_copyvectorblock(void)
 {
+  uint32_t *src;
+  uint32_t *end;
+  uint32_t *dest;
+
+  /* If we are using vectors in low memory but RAM in that area has been marked
+   * read only, then temparily mark the mapping write-able (non-buffered).
+   */
+
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
+  up_vectorpermissions(MMU_L2_VECTRWFLAGS);
+#endif
+
   /* Copy the vectors into ISRAM at the address that will be mapped to the vector
    * address:
    *
@@ -293,14 +305,20 @@ static void up_copyvectorblock(void)
    *   LPC313X_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
    */
 
-  uint32_t *src  = (uint32_t*)&_vector_start;
-  uint32_t *end  = (uint32_t*)&_vector_end;
-  uint32_t *dest = (uint32_t*)LPC313X_VECTOR_VSRAM;
+  src  = (uint32_t*)&_vector_start;
+  end  = (uint32_t*)&_vector_end;
+  dest = (uint32_t*)LPC313X_VECTOR_VSRAM;
 
   while (src < end)
     {
       *dest++ = *src++;
     }
+
+  /* Make the vectors read-only, cacheable again */
+
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
+  up_vectorpermissions(MMU_L2_VECTROFLAGS);
+#endif
 
   /* Then set the LPC313x shadow register, LPC313X_SYSCREG_ARM926SHADOWPTR, so that
    * the vector table is mapped to address 0x0000:0000 - NOTE: that there is not yet
@@ -331,14 +349,6 @@ void up_boot(void)
 #ifndef CONFIG_ARCH_ROMPGTABLE
   up_setupmappings();
 
-  /* If we are using vectors in low memory but RAM in that area has been marked
-   * read only, then temparily mark the mapping write-able (non-buffered).
-   */
-
-#if defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
-  up_vectorpermissions(MMU_L2_VECTRWFLAGS);
-#endif
-
   /* Provide a special mapping for the IRAM interrupt vector positioned in high
    * memory.
    */
@@ -353,12 +363,6 @@ void up_boot(void)
    */
 
   up_copyvectorblock();
-
-  /* Make the vectors read-only, cacheable again */
-
-#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
-  up_vectorpermissions(MMU_L2_VECTROFLAGS);
-#endif
 
   /* Reset all clocks */
 
@@ -380,6 +384,16 @@ void up_boot(void)
   /* Perform common, low-level chip initialization (might do nothing) */
 
   lpc313x_lowsetup();
+
+  /* NOTE:  Something in the operation of lpc313x_resetclks() causes the first
+   * 6 words of memory to be zeroed, wiping out the interrupt vectors.  However,
+   * moving the vector initialization until after the clock setup seems to hang
+   * the system (and I can't step though the clock setup to find why without
+   * losing my JTAG connection).  So, the simplest work-around is to simply
+   * initialize the vectors twice.
+   */
+
+  up_copyvectorblock();
 
   /* Perform early serial initialization if we are going to use the serial driver */
 
