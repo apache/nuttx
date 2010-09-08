@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 5, 2010</p>
+      <p>Last Updated: September 7, 2010</p>
     </td>
   </tr>
 </table>
@@ -772,58 +772,72 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.9 Release Notes</b>:
+<p><b>nuttx-5.10 Release Notes</b>:
 
 <p>
-  This 56<sup>th</sup> release of NuttX was made on August 25, 2010 and is available for download from the
+  This 57<sup>th</sup> release of NuttX, Version 5.10, was made on September 7, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
-  This release is difficult to categorize;
-  NuttX-5.9 was really released because there were too many changes accumulating in CVS --
-  a few important, some large, unverified implementations, and a couple of important bugfixes.
-  <ul>
-    <li>
-      By far biggest change in this release is the complete implementation of on-demand paging support.
-      This feature will allow you to execute large programs on a mass storage device (such as SPI FLASH) in a small RAM.
-      All of the core on-demand paging logic was completed
-      (see <a href="http://www.nuttx.org/NuttXDemandPaging.html">NuttXDemandPaging.html</a>)
-      and support was implemented for the ARM-9 family.
-      A test configuration is in place for the NXP LPC3131.
-      It has been verified that this new logic does not interfere with normal fixed-page ARM9 operation, but otherwise this new on-demand paging feature is untested.
-    </li>
-    <li>
-      Add support for the CodeSourcery toolchain to the Olimex-lpc2378 port and for the Neuros OSD port.
-    </li>
-    <li>
-      The Neuros OSD port has been updated to work with the production v1.0 OSD
-      (previously there was NuttX support only for the development board).
-    </li>
-    <li>
-      And some miscellaneous feature enhancements as detailed in the <a href="#currentrelease">ChangeLog</a>.
-    </li>
-  </ul>
-</p>
 <p>
-  This includes several important bugfixes:
+  This release includes a combination of some new features as well as several bugfixes.
+  New features include:
   <ul>
     <li>
-      NXP LPC17xx - Fixed a critical bug in the GPIO configuratino logic:
-      When attempting to set no pull-up or pull-down (floating), it would, instead, select pull-down.
+      <b>TI/Luminary Stellaris LM3S9B96</b>.
+      Header file changes contributed by Tiago Maluta.
     </li>
     <li>
-      TI/Luminary LM3Sxxxx - Fixed (1) a logic error in an address table lookup,
-      (2) GPIO port encoding the limited support to only 8 GPIO ports.
+      <b>TI/Luminary Stellaris LM3S8962</b>.
+      Header file changes and support for the Stellaris LM3S8962 Ethernet+CAN Evaluation Board contributed by Larry Arnold.
     </li>
     <li>
-      Corrected the lease time in the DHCPC implementation:
-      It was not in host byte order.
+      <b>On-Demand Paging Support</b>. 
+      The basic logic for the On-Demand Paging feature is complete, implemented for the NXP LPC3131, and partially tested.
+      See <a href="http://www.nuttx.org/NuttXDemandPaging.html">On-Demand Paging Documentation</a>.
+      Some additional test infrastructure will be needed in order to complete the verification.
+      See the EA3131 <a href="http://nuttx.cvs.sourceforge.net/viewvc/nuttx/nuttx/configs/ea3131/README.txt?view=log">README</a> file for details.
     </li>
     <li>
-      And several other less important bugs as documented in the <a href="#currentrelease">ChangeLog</a>:
-      Warnings, cornercase compilation problems, etc.
+      <b>Two Pass Build Support</b>.
+      The make system now supports a two pass build where a relocatable, partially linked object is created on the first pass and that object is linked with the NuttX libraris to produce the final executable on the second pass.
+      This two pass build is currently only used to support the On-Demand paging feature:
+      The first pass link forces critical logic into the locked text region;
+      the second pass builds the NuttX executable more-or-less as normal.
+    <li>
+      <b><code>CONFIG_APP_DIR</code></b>.
+      Generalized the way in which applications are built and linked with NuttX.
+      The new configuration <code>CONFIG_APP_DIR</code> replaces <code>CONFIG_EXAMPLE</code>.
+      <code>CONFIG_EXAMPLE</code> used to identify the sub-directory within the NuttX <code>examples/</code> directory that held the example application to be built.
+      That made it awkward to configure to build an application that resided outside of the NuttX <code>examples/</code> directory.
+      <code>CONFIG_APP_DIR</code> is more general;
+      it can be used to refer to any directory containing the application to be built.
+      <ul>
+        <p><small>
+          For people who have their own configurations and/or Makefiles, you will need to make a couple of changes:
+          <ul>
+            <li>
+              Replace all occurrences of <code>CONFIG_EXAMPLE=foobar</code> with <code>CONFIG_APP_DIR=examples/foobar</code> in all of the configuration files.
+            </li>
+            <li>
+              Replace any occurrences of <code>examples/$(CONFIG_EXAMPLE)</code> with <code>$(CONFIG_APP_DIR)</code>
+            </li>
+            <li>
+              Replace any occurrences of <code>lib$(CONFIG_EXAMPLE)$(LIBEXT)</code> with <code>libapp$(LIBEXT)</code> in your Makefiles.
+            </li>
+            <li>
+              Check any other occurrences of <code>CONFIG_EXAMPLE</code>.
+            </li>
+          </ul>
+        </small></p>
+      </ul>
+    </li>
+    <li>
+      <b>Other</b>.
+      Several bugfixes are included as well as code changes to eliminate some warnings.
+      See the ChangeLog for details.
     </li>
   </ul>
 </p>
@@ -1157,6 +1171,20 @@
   <td><br></td>
   <td>
     <p>
+      <b>Luminary/TI LM3S9B96</b>.
+      Header file support was contributed by Tiago Maluta for this part.
+      However, no complete board support configuration is available as of this writing.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <b>STMicro STM32F103x</b>.
       This port uses the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL development board that
       features the STM32F103ZET6 MCU.
@@ -1244,15 +1272,15 @@
         <b>STATUS:</b>
         Some initial files for the LPC17xx family were released in NuttX 5.6, but the first
         functional release for the NXP LPC1768/Nucleus2G occured with NuttX 5.7 with some
-	additional enhancements through NuttX-5.9.
+        additional enhancements through NuttX-5.9.
         That initial, 5.6, basic release included timer interrupts and a serial console and was
         verified using the NuttX OS test (<code>examples/ostest</code>).
-	Configurations available include include a verified NuttShell (NSH) configuration
+        Configurations available include include a verified NuttShell (NSH) configuration
         (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
         The NSH configuration support the Nucleus2G's microSD slot and additional configurations
         are available to exercise the the USB serial and USB mass storage devices.
-	However, due to some technical reasons, neither the SPI nor the USB device drivers are fully verified.
-	(Although it has been reported to me that the SPI microSD is functional on other platforms).
+        However, due to some technical reasons, neither the SPI nor the USB device drivers are fully verified.
+        (Although it has been reported to me that the SPI microSD is functional on other platforms).
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1933,14 +1961,14 @@ nuttx-5.10 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  For people who have their own configurations and/or Makefiles,
 	  you will need to make a couple of changes:
 
-          - Replace all occurrences of CONFIG_EXAMPLE=foobar with
+      - Replace all occurrences of CONFIG_EXAMPLE=foobar with
 	    CONFIG_APP_DIR=examples/foobar in all of the configuration
 	    files.
 	  - Replace any occurrences of examples/$(CONFIG_EXAMPLE) with
 	    $(CONFIG_APP_DIR)
 	  - Replace any occurrences of lib$(CONFIG_EXAMPLE)$(LIBEXT)
 	    with libapp$(LIBEXT) in your Makefiles.
-	  - Check any other occurrences of CONFIG_EXAMPLE.pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+	  - Check any other occurrences of CONFIG_EXAMPLE.
 
 	* arch/arm/src/lpc313x/lpc313x_spi.c - Fix compilation error when
 	  when CONFIG_DEBUG is enabled.
@@ -1952,6 +1980,12 @@ nuttx-5.10 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  should not be conditioned on CONFIG_ARCH_LEDs being defined!
 	* arch/arm/src/lpc313x/ - APB0 and APB1 cannot lie in different
 	  sections; they are too close together.
+	* arch/arm/src/lpc313x/lpc13x_boot.c - Resetting all of the clocking
+	  had a side effect of wiping out the first 6 words of memory where the
+	  interrupt vectors are located (and also not resetting the fractional
+	  dividers).  This is not usually noticeable because the IRQ vectors
+	  are after this point, but really causes problems if you want to handle
+	  data and prefectch aborts which are within this zeroed region.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
