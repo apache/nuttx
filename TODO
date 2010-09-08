@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated August 21, 2010)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated September 6, 2010)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
@@ -70,9 +70,13 @@ o On-demand paging (sched/)
 
   Description: On-demand paging has recently been incorporated into the RTOS.
                The design of this feature is described here:
-	       http://www.nuttx.org/NuttXDemandPaging.html.
-	       As of this writing, the feature is incomplete and untested.
-	       It should not be enabled!
+               http://www.nuttx.org/NuttXDemandPaging.html.
+               As of this writing, the basic feature implementation is
+               complete and much of the logic has been verified.  The test
+               harness for the feature exists only for the NXP LPC3131 (see
+               configs/ea3131/pgnsh and locked directories).  There are
+               some limitations of this testing so I still cannot say that
+               the feature is fully functional.
   Status:      Open, in work
   Priority:    Medium-Low
 
