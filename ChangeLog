@@ -1220,7 +1220,7 @@
 	* configs/ntosd-dm320 and arch/arm/src/dm320 - Add support for the
 	  Neuros production OSD (changes contributed by bf.nuttx).
 
-5.10 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.10 2010-09-07 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* configs/ea3131/locked - Create logic to support a two pass build
 	  process:  The first pass forces critical logic into the locked text
@@ -1258,3 +1258,11 @@
 	  should not be conditioned on CONFIG_ARCH_LEDs being defined!
 	* arch/arm/src/lpc313x/ - APB0 and APB1 cannot lie in different
 	  sections; they are too close together.
+	* arch/arm/src/lpc313x/lpc13x_boot.c - Resetting all of the clocking
+	  had a side effect of wiping out the first 6 words of memory where the
+	  interrupt vectors are located (and also not resetting the fractional
+	  dividers).  This is not usually noticeable because the IRQ vectors
+	  are after this point, but really causes problems if you want to handle
+	  data and prefectch aborts which are within this zeroed region.
+
+5.11 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
