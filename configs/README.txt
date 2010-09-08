@@ -406,6 +406,20 @@ defconfig -- This is a configuration file similar to the Linux
 		  a binary image of the NuttX executable.  Pages will be filled by
 		  reading from offsets into this file that correspond to virtual
 		  fault addresses.
+		CONFIG_PAGING_MOUNTPT - If CONFIG_PAGING_BINPATH is defined, additional
+		  options may be provided to control the initialization of underlying
+		  devices. CONFIG_PAGING_MOUNTPT identifies the mountpoint to be used
+		  if a device is mounted.
+		CONFIG_PAGING_MINOR - Some mount operations require a "minor" number
+		  to identify the specific device instance. Default: 0
+		CONFIG_PAGING_SDSLOT - If CONFIG_PAGING_BINPATH is defined, additional
+		  options may be provided to control the initialization of underlying
+		  devices. CONFIG_PAGING_SDSLOT identifies the slot number of the SD
+		  device to initialize. This must be undefined if SD is not being used.
+		  This should be defined to be zero for the typical device that has
+		  only a single slot (See CONFIG_MMCSD_NSLOTS). If defined, 
+		  CONFIG_PAGING_SDSLOT will instruct certain board-specific logic to
+		  initialize the media in this SD slot.
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it

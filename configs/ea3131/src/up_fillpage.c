@@ -53,11 +53,74 @@
 #  include <stdbool.h>
 #  include <unistd.h>
 #  include <fcntl.h>
+#  ifdef CONFIG_PAGING_SDSLOT
+#    include <stdio.h>
+#    include <sys/mount.h>
+#    include <nuttx/sdio.h>
+#    include <nuttx/mmcsd.h>
+#    include "lpc313x_internal.h"
+#  endif
 #endif
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* SD SLOT number might depend on the board configuration */
+
+#ifdef CONFIG_ARCH_BOARD_EA3131
+#  define HAVE_SD  1
+#  if defined(CONFIG_PAGING_SDSLOT) && CONFIG_PAGING_SDSLOT != 0
+#    error "Only one SD slot"
+#    undef CONFIG_PAGING_SDSLOT
+#  endif
+#else
+   /* Add configuration for new LPC313X boards here */
+#  error "Unrecognized LPC313X board"
+#  undef CONFIG_PAGING_SDSLOT
+#  undef HAVE_SD
+#endif
+
+/* Are we accessing the page source data through a file path? */
+
+#ifdef CONFIG_PAGING_BINPATH
+
+   /* Can't support SD if the board does not support SD (duh) */
+
+#  if defined(CONFIG_PAGING_SDSLOT) && !defined(HAVE_SD)
+#    error "This board does not support SD"
+#    undef CONFIG_PAGING_SDSLOT
+#  endif
+
+   /* Can't support SD if mountpoints are disabled or if SDIO support
+    * is not enabled.
+    */
+
+#  if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC313X_MCI)
+#    ifdef CONFIG_PAGING_SDSLOT
+#      error "Mountpoints and/or MCI disabled"
+#    endif
+#    undef CONFIG_PAGING_SDSLOT
+#    undef HAVE_SD
+#  endif
+
+   /* A mountpoint for the FAT file system must be provided */
+
+#  if !defined(CONFIG_PAGING_MOUNTPT) && defined(CONFIG_PAGING_SDSLOT)
+#    error "No CONFIG_PAGING_MOUNTPT provided"
+#    undef CONFIG_PAGING_SDSLOT
+#    undef HAVE_SD
+#  endif
+
+   /* If no minor number is provided, default to zero */
+
+#  ifndef CONFIG_PAGING_MINOR
+#    define CONFIG_PAGING_MINOR 0
+#  endif
+
+#endif /* CONFIG_PAGING_BINPATH */
 
 /****************************************************************************
  * Private Types
@@ -84,10 +147,79 @@ static struct pg_source_s g_pgsrc;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: lpc313x_initsrc()
+ *
+ * Description:
+ *  Initialize the source device that will support paging.
+ *  If BINPATH is defined, then it is the full path to a file on a mounted file
+ *  system.  In this case initialization will be deferred until the first
+ *  time that up_fillpage() is called.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PAGING_BINPATH
+static inline void lpc313x_initsrc(void)
+{
+#ifdef CONFIG_PAGING_SDSLOT
+  FAR struct sdio_dev_s *sdio;
+  int ret;
+#endif
+
+  /* Are we already initialized? */
+
+  if (!g_pgsrc.initialized)
+    {
+#ifdef CONFIG_PAGING_SDSLOT
+      char devname[16];
+#endif
+
+      pgvdbg("Initializing %s\n", CONFIG_PAGING_BINPATH);
+
+      /* No, do we need to mount an SD device? */
+
+#ifdef CONFIG_PAGING_SDSLOT
+
+      /* Yes.. First, get an instance of the SDIO interface */
+
+      sdio = sdio_initialize(CONFIG_PAGING_SDSLOT);
+      DEBUGASSERT(sdio != NULL);
+
+      /* Then bind the SDIO interface to the SD driver */
+
+      ret = mmcsd_slotinitialize(CONFIG_PAGING_MINOR, sdio);
+      DEBUGASSERT(ret == OK);
+  
+      /* Then let's guess and say that there is a card in the slot.
+       * (We are basically jodido anyway if there is no card in the slot).
+       */
+
+      sdio_mediachange(sdio, true);
+
+      /* Now mount the file system */
+
+      snprintf(devname, 16, "/dev/mmcsd%d", CONFIG_PAGING_MINOR);
+      ret = mount(devname, CONFIG_PAGING_MOUNTPT, "vfat", MS_RDONLY, NULL);
+      DEBUGASSERT(ret == OK);
+
+#endif /* CONFIG_PAGING_SDSLOT */
+
+      /* Open the selected path for read-only access */
+
+      g_pgsrc.fd = open(CONFIG_PAGING_BINPATH, O_RDONLY);
+      DEBUGASSERT(g_pgsrc.fd >= 0);
+      g_pgsrc.initialized = true;
+    }
+}
+
+#else /* CONFIG_PAGING_BINPATH */
+#  define lpc313x_initsrc()
+#endif /* CONFIG_PAGING_BINPATH */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
- /****************************************************************************
+/****************************************************************************
  * Name: up_fillpage()
  *
  * Description:
@@ -151,24 +283,21 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
   off_t   pos;
 #endif
 
-  pglldbg("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
+  pgdbg("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
   /* If BINPATH is defined, then it is the full path to a file on a mounted file
-   * system.  In this caseinitialization will be deferred until the first
+   * system.  In this case initialization will be deferred until the first
    * time that up_fillpage() is called.  Are we initialized?
    */
 
 #ifdef CONFIG_PAGING_BINPATH
 
-  if (!g_pgsrc.initialized)
-    {
-      /* Open the selected path for read-only access */
+  /* Perform initialization of the paging source device (if necessary and
+   * appropriate)
+   */
 
-      g_pgsrc.fd = open(CONFIG_PAGING_BINPATH, O_RDONLY);
-      DEBUGASSERT(g_pgsrc.fd >= 0);
-      g_pgsrc.initialized = true;
-    }
+  lpc313x_initsrc();
 
   /* Create an offset into the binary image that corresponds to the 
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
@@ -201,7 +330,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 
 int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 {
-  pglldbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
+  pgdbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
 #ifdef CONFIG_PAGING_BINPATH

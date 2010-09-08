@@ -448,6 +448,10 @@ On-Demand Paging
   3. This means that all of the file system logic and FAT file
      system would have to reside in the locked text region.
 
+  And the show-stopper:
+
+  4. There is no MCI driver for the ea3131, yet!
+
 ARM/EA3131-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
