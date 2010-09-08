@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 29, 2010</p>
+      <p>Last Updated: September 8, 2010</p>
     </td>
   </tr>
 </table>
@@ -2294,6 +2294,7 @@ build
 </ul>
 
 <h2>General OS setup</h2>
+<ul>
   <li>
     <code>CONFIG_DEBUG</code>: enables built-in debug options
   </li>
@@ -2568,6 +2569,11 @@ build
   <li>
     <code>CONFIG_PAGING_VECL2VADDR</code>:
     This is the virtual address of the L2 page table entry to use for the vector mapping.
+  </li>
+  <li>
+    <code>CONFIG_PAGING_BINPATH</code>:
+    If <code>CONFIG_PAGING_BINPATH</code> is defined, then it is the full path to a file on a mounted file system that contains a binary image of the NuttX executable.
+    Pages will be filled by reading from offsets into this file that correspond to virtual fault addresses.
   </li>
 </ul>
 <p>
