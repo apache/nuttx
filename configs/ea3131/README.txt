@@ -416,8 +416,41 @@ On-Demand Paging
      The references and issues related to this are discussed in (2)
      and (3) above.
 
+  Alternative:
+  ------------
+
+  I have implemented an alternative within configs/ea3131/src/up_fillpage.c
+  which is probably only useful for testing.  Here is the usage module
+  for this alternative
+
+  1. Place the nuttx.bin file on an SD card.
+  2. Insert the SD card prior to booting
+  3. In up_fillpage(), use the virtual miss address (minus the virtual
+     base address) as an offset into the nuttx.bin file, and read the
+     required page from that offset in the nuttx.bin file:
+
+     off_t offset = (off_t)vpage - PG_LOCKED_VBASE;
+     off_t pos    = lseek(fd, offset, SEEK_SET);
+     if (pos != (off_t)-1)
+       {
+         int ret = read(fd, vpage, PAGESIZE);
+       }
+
+  In this way, the paging implementation can do on-demand paging
+  from an image file on the SD card.  Problems/issues with this
+  approach probably make it only useful for testing:
+
+  1. You would still have to boot the locked section over serial or
+     using a bootloader -- it is not clear how the power up boot
+     would occur.  For testing, the nuttx.bin file could be both
+     provided on the SD card and loaded over serial. 
+  2. If the SD card is not in place, the system will crash.
+  3. This means that all of the file system logic and FAT file
+     system would have to reside in the locked text region.
+
 ARM/EA3131-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
 	   be set to:
 
@@ -500,7 +533,7 @@ ARM/EA3131-specific Configuration Options
 
 	CONFIG_LPC313X_MCI, CONFIG_LPC313X_SPI, CONFIG_LPC313X_UART
 
-  xernal memory available on the board (see also CONFIG_MM_REGIONS)
+  External memory available on the board (see also CONFIG_MM_REGIONS)
 
 	CONFIG_LPC313X_EXTSRAM0 - Select if external SRAM0 is present
 	CONFIG_LPC313X_EXTSRAM0HEAP - Select if external SRAM0 should be

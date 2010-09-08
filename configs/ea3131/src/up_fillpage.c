@@ -47,14 +47,37 @@
 #include <nuttx/page.h>
 
 #ifdef CONFIG_PAGING
+#ifdef CONFIG_PAGING_BINPATH
+#  include <sys/stat.h>
+#  include <sys/types.h>
+#  include <stdbool.h>
+#  include <unistd.h>
+#  include <fcntl.h>
+#endif
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_PAGING_BINPATH
+struct pg_source_s
+{
+  bool initialized;  /* TRUE: we are initialized */
+  int  fd;           /* File descriptor of the nuttx.bin file */
+};
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_PAGING_BINPATH
+static struct pg_source_s g_pgsrc;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -117,20 +140,80 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING_BLOCKINGFILL
+
+/* Version 1:  Supports blocking fill operations */
+
 int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 {
+#ifdef CONFIG_PAGING_BINPATH
+  ssize_t nbytes;
+  off_t   offset;
+  off_t   pos;
+#endif
+
   pglldbg("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
+  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
+
+  /* If BINPATH is defined, then it is the full path to a file on a mounted file
+   * system.  In this caseinitialization will be deferred until the first
+   * time that up_fillpage() is called.  Are we initialized?
+   */
+
+#ifdef CONFIG_PAGING_BINPATH
+
+  if (!g_pgsrc.initialized)
+    {
+      /* Open the selected path for read-only access */
+
+      g_pgsrc.fd = open(CONFIG_PAGING_BINPATH, O_RDONLY);
+      DEBUGASSERT(g_pgsrc.fd >= 0);
+      g_pgsrc.initialized = true;
+    }
+
+  /* Create an offset into the binary image that corresponds to the 
+   * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
+   */
+
+  offset = (off_t)vpage - PG_LOCKED_VBASE;
+
+  /* Seek to that position */
+
+  pos = lseek(g_pgsrc.fd, offset, SEEK_SET);
+  DEBUGASSERT(pos != (off_t)-1);
+  
+  /* And read the page data from that offset */
+
+  nbytes = read(g_pgsrc.fd, vpage, PAGESIZE);
+  DEBUGASSERT(nbytes == PAGESIZE);
+  return OK;
+
+#else /* CONFIG_PAGING_BINPATH */
+
 # warning "Not implemented"
   return -ENOSYS;
+
+#endif /* CONFIG_PAGING_BINPATH */
 }
+
 #else
+
+/* Version 2:  Supports non-blocking, asynchronous fill operations */
+
 int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 {
   pglldbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
-# warning "Not implemented"
+  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
+
+#ifdef CONFIG_PAGING_BINPATH
+#  error "File system-based paging must always be implemented with blocking calls"
+#else
+#  warning "Not implemented"
+#endif
+
   return -ENOSYS;
 }
-#endif
+
+#endif /* CONFIG_PAGING_BLOCKINGFILL */
 
 /************************************************************************************
  * Name: lpc313x_pginitialize
@@ -154,6 +237,16 @@ void weak_function lpc313x_pginitialize(void)
    * - Do whatever else is necessary to make up_fillpage() ready for the first time
    *   that it is called.
    */
+
+#ifdef CONFIG_PAGING_BINPATH
+  /* If BINPATH is defined, then it is the full path to a file on a mounted file
+   * system.  However, in this case, initialization will involve some higher level
+   * file system operations.  Since this function is called from a low level (before
+   * os_start() is even called), it may not be possible to perform file system
+   * operations yet.  Therefore, initialization will be deferred until the first
+   * time that up_fillpage() is called.
+   */
+#endif
 }
 
 #endif /* CONFIG_PAGING */

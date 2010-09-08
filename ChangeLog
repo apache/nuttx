@@ -1266,3 +1266,11 @@
 	  data and prefectch aborts which are within this zeroed region.
 
 5.11 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* configs/ea3131/src/up_fillpage.c - Added new configuration item
+	  CONFIG_PAGING_BINPATH.  If CONFIG_PAGING_BINPATH is defined, then it
+	  is the full path to a file on a mounted file system that contains
+	  a binary image of the NuttX executable.  Pages will be filled by
+	  reading from offsets into this file that correspond to virtual
+	  fault addresses.  up_fillpage.c implements logic to perform page
+	  files using the CONFIG_PAGING_BINPATH file.

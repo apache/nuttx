@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 7, 2010</p>
+      <p>Last Updated: September 8, 2010</p>
     </td>
   </tr>
 </table>
@@ -1949,6 +1949,14 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-5.11 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* configs/ea3131/src/up_fillpage.c - Added new configuration item
+	  CONFIG_PAGING_BINPATH.  If CONFIG_PAGING_BINPATH is defined, then it
+	  is the full path to a file on a mounted file system that contains
+	  a binary image of the NuttX executable.  Pages will be filled by
+	  reading from offsets into this file that correspond to virtual
+	  fault addresses.  up_fillpage.c implements logic to perform page
+	  files using the CONFIG_PAGING_BINPATH file.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
