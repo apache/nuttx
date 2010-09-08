@@ -389,7 +389,32 @@ On-Demand Paging
   This example is incomplete in that it does not have any media to reload the
   page text region from:  The file configs/ea3131/src/up_fillpage.c is only
   a stub.  That logic to actually reload the page from some storage medium
-  would have to be implemented in order to complete this example.
+  (among other things) would have to be implemented in order to complete this
+  example.  At present, the example works correctly up to the point where
+  up_fillpage() is first called and then fails in the expected way.
+
+  Here are the detailed list of things that would need to be done in addition
+  to finishing th up_fillpage() logic (this assumes that SPI NOR FLASH is the
+  media on which the NuttX image is stored):
+
+  1. Develop a NOR FLASH layout can can be used to (1) boot the locked text
+     section into memory on a reset, and (2) map a virtual fault address
+     to an offset into paged text section in NOR FLASH.
+  2. Develop/modify the build logic to build the binaries for this NOR
+     flash layout: Can the NuttX image be formed as a single image that
+     is larger than the IRAM?  Can we boot from such a large image?  If
+     so, then no special build modifications are required.  Or, does the
+     locked section have to be smaller with a separate paged text section
+     image in FLASH?  In this case, some tool will be needed to break
+     the nuttx.bin file into the two pieces.
+  3. Develop a mechanism to load the NuttX image into SPI NOR FLASH.  A
+     basic procedure is already documented in NXP publications: "LPC313x
+     Linux Quick Start Guide, Version 2.0" and "AN10811 Programming SPI
+     flash on EA3131 boards, V1 (May 1, 2009)."  That procedure may be
+     sufficient, depending on the decisions made in (1) and (2):  
+  4. Develop a procedure to boot the locked text image from SPI NOR.
+     The references and issues related to this are discussed in (2)
+     and (3) above.
 
 ARM/EA3131-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
