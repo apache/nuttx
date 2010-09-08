@@ -49,7 +49,7 @@ GARBAGEDIRS="\
   configs/m68332evb/src/doc\
   configs/sim/doc/include\
   configs/sim/doc/src\
-  configs/olimex-strp711/tools\ 
+  configs/olimex-strp711/tools\
   arch/c5471\
   arch/dm320\
   netutils/thttpd/extras
