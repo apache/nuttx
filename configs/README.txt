@@ -401,6 +401,11 @@ defconfig -- This is a configuration file similar to the Linux
 		  page table entry to use for the vector mapping.
 		CONFIG_PAGING_VECL2VADDR - This is the virtual address of the L2
 		  page table entry to use for the vector mapping.
+		CONFIG_PAGING_BINPATH - If CONFIG_PAGING_BINPATH is defined, then it
+		  is the full path to a file on a mounted file system that contains
+		  a binary image of the NuttX executable.  Pages will be filled by
+		  reading from offsets into this file that correspond to virtual
+		  fault addresses.
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it
