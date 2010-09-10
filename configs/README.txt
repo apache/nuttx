@@ -824,6 +824,11 @@ configs/m68322evb
     This is a work in progress for the venerable m68322evb board from
     Motorola. This OS is also built with the arm-elf toolchain*.
 
+configs/mbed
+    The configurations in this directory support the mbed board (http://mbed.org)
+    that features the NXP LPC1768 microcontroller.This OS is also built
+    with the arm-elf toolchain*.
+
 configs/mcu123-lpc214x
     This port is for the NXP LPC2148 as provided on the mcu123.com
     lpc214x development board. This OS is also built with the arm-elf
