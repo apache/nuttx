@@ -1,8 +1,8 @@
 /************************************************************************************
  * drivers/mtd/m25px.c
- * Driver for SPI-based M25P64 (64Mbit) and M25P128 (128Mbit) FLASH
+ * Driver for SPI-based M25P1 (128Kbit), M25P64 (64Mbit), and M25P128 (128Mbit) FLASH
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@
 #define M25P_M25P64_CAPACITY      0x17 /* 64 M-bit */
 #define M25P_M25P128_CAPACITY     0x18 /* 128 M-bit */
 
-/*  M25P1 capapcity is 131,072 bytes:
+/*  M25P1 capacity is 131,072 bytes:
  *  (4 sectors) * (32,768 bytes per sector)
  *  (512 pages) * (256 bytes per page)
  */
@@ -73,7 +73,7 @@
 #define M25P_M25P1_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
 #define M25P_M25P1_NPAGES        512
 
-/*  M25P64 capapcity is 8,338,608 bytes:
+/*  M25P64 capacity is 8,338,608 bytes:
  *  (128 sectors) * (65,536 bytes per sector)
  *  (32768 pages) * (256 bytes per page)
  */
@@ -83,7 +83,7 @@
 #define M25P_M25P64_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
 #define M25P_M25P64_NPAGES        32768
 
-/*  M25P64 capapcity is 16,777,216 bytes:
+/*  M25P128 capacity is 16,777,216 bytes:
  *  (64 sectors) * (262,144 bytes per sector)
  *  (65536 pages) * (256 bytes per page)
  */
@@ -277,6 +277,8 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
         }
       else if (capacity == M25P_M25P128_CAPACITY)
         {
+           /* Save the FLASH geometry */
+
            priv->sectorshift = M25P_M25P128_SECTOR_SHIFT;
            priv->nsectors    = M25P_M25P128_NSECTORS;
            priv->pageshift   = M25P_M25P128_PAGE_SHIFT;
