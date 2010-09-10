@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_wait.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,6 +178,20 @@ int sem_wait(FAR sem_t *sem)
            * assigned to this thread of execution, or (2) the semaphore wait
            * has been interrupted by a signal.  We can detect the latter case
            * be examining the errno value.
+           *
+           * In the event that the semaphore wait was interrupt was interrupted
+           * by a signal, certain semaphore clean-up operations have already been
+           * performed (see sem_waitirq.c).  Specifically:
+           *
+           * - sem_canceled() was called to restore the priority of all threads
+           *   that hold a reference to the semaphore,
+           * - The semaphore count was decremented, and
+           * - tcb->waitsem was nullifed.
+           *
+           * It is necesaary to do these things in sem_waitirq.c because a long
+           * time may elapse between the time that the signal was issued and
+           * this thread is awakened and this leaves a door open to several
+           * race conditions.
            */
 
           if (errno != EINTR)
@@ -186,11 +200,6 @@ int sem_wait(FAR sem_t *sem)
 
               sem_addholder(sem);
               ret = OK;
-            }
-          else
-            {
-              sem_canceled(sem);	            
-              sem->semcount++;
             }
 
 #ifdef CONFIG_PRIORITY_INHERITANCE

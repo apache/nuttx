@@ -1274,3 +1274,8 @@
 	  reading from offsets into this file that correspond to virtual
 	  fault addresses.  up_fillpage.c implements logic to perform page
 	  files using the CONFIG_PAGING_BINPATH file.
+	* configs/mbed - Add configuration to support the mbed.org LPC1768
+	  board (Contributed by Dave Marples).
+	* sched/sem_wait.c and sem_waitirq.c - Eliminate a race condition
+	  that can occur when a semaphore wait is interrupt by a signal.
+	  (see email thread: http://tech.groups.yahoo.com/group/nuttx/message/530)

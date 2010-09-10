@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_waitirq.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,6 +107,23 @@ void sem_waitirq(FAR _TCB *wtcb)
 
   if (wtcb->task_state == TSTATE_WAIT_SEM)
     {
+      sem_t *sem = wtcb->waitsem;
+      DEBUGASSERT(sem != NULL && sem->semcount < 0);
+
+      /* Restore the correct priority of all threads that hold references
+       * to this semaphore.
+       */
+
+      sem_canceled(sem);
+
+      /* And increment the count on the semaphore.  This releases the
+       * count that was taken by sem_post().  This count decremented
+       * the semaphore count to negative and caused the thread to be
+       * blocked in the first place.
+       */ 
+
+      sem->semcount++;
+
       /* Indicate that the semaphore wait is over. */
 
       wtcb->waitsem = NULL;

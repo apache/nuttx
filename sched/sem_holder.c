@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_holder.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -818,7 +818,8 @@ void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
  * Description:
  *   Called from sem_post() after a thread that was waiting for a semaphore
  *   count was awakened because of a signal and the semaphore wait has been
- *   canceled.
+ *   canceled.  This function restores the correct thread priority of each
+ *   holder of the semaphore.
  *
  * Parameters:
  *   sem - A reference to the semaphore no longer being waited for
