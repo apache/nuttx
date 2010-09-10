@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 8, 2010</p>
+      <p>Last Updated: September 9, 2010</p>
     </td>
   </tr>
 </table>
@@ -1262,10 +1262,19 @@
   <td>
     <p>
       <b>NXP LPC1768</b>.
-      This port uses the Nucleus 2G board from <a href="http://www.2g-eng.com/">2G Engineering</a>
-      featuring the NXP LPC1768 MCU.
-      This port uses a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU
-      tools or Cygwin-based GNU tools).
+      Configurations are available for two boards:
+      <ul>
+        <li>
+          The Nucleus 2G board from <a href="http://www.2g-eng.com/">2G Engineering</a>, and
+        </li>
+        <li>
+          The mbed board from <a href="http://mbed.org">mbed.org</a> (Contributed by Dave Marples).
+        </li>
+      </ul>
+    </p>
+    <p>
+      Both boards feature the NXP LPC1768 MCU and a GNU arm-elf or arm-eabi toolchain* under
+      either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
     </p>
     <ul>
       <p>
@@ -1281,6 +1290,9 @@
         are available to exercise the the USB serial and USB mass storage devices.
         However, due to some technical reasons, neither the SPI nor the USB device drivers are fully verified.
         (Although it has been reported to me that the SPI microSD is functional on other platforms).
+      </p>
+      <p>
+        Support for the mbed board was contributed by Dave Marples and released in NuttX-5.11.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1957,6 +1969,11 @@ nuttx-5.11 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  reading from offsets into this file that correspond to virtual
 	  fault addresses.  up_fillpage.c implements logic to perform page
 	  files using the CONFIG_PAGING_BINPATH file.
+	* configs/mbed - Add configuration to support the mbed.org LPC1768
+	  board (Contributed by Dave Marples).
+	* sched/sem_wait.c and sem_waitirq.c - Eliminate a race condition
+	  that can occur when a semaphore wait is interrupt by a signal.
+	  (see email thread: http://tech.groups.yahoo.com/group/nuttx/message/530)
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
