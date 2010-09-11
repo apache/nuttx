@@ -421,7 +421,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  CONFIG_PAGING_SDSLOT will instruct certain board-specific logic to
 		  initialize the media in this SD slot.
 		CONFIG_PAGING_M25PX - Use the m25px.c FLASH driver.  If this is selected,
-		  then the MTD interface to the MP25x device will be used to support
+		  then the MTD interface to the M25Px device will be used to support
 		  paging.
 		CONFIG_PAGING_M25PX_BINOFFSET - If CONFIG_PAGING_M25PX is defined then
 		  CONFIG_PAGING_M25PX_BINOFFSET will be used to specify the offset

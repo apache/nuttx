@@ -188,7 +188,7 @@ struct pg_source_s
   bool initialized;  /* TRUE: we are initialized */
 #endif
 
-  /* This is the MP25P* device state structure */
+  /* This is the M25P* device state structure */
 
   FAR struct mtd_dev_s *mtd;
 
@@ -435,7 +435,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 #elif defined(CONFIG_PAGING_M25PX) /* !CONFIG_PAGING_BINPATH */
 
   /* If CONFIG_PAGING_M25PX is defined, use the m25px.c FLASH driver.  If this
-   * is selected, then the MTD interface to the MP25x device will be used to
+   * is selected, then the MTD interface to the M25Px device will be used to
    * support paging.
    *
    * If the driver is configured to use interrupts or DMA, then it must be
@@ -524,7 +524,7 @@ void weak_function lpc313x_pginitialize(void)
 #elif defined(CONFIG_PAGING_M25PX)
 
   /* If CONFIG_PAGING_M25PX is defined, use the m25px.c FLASH driver.  If this
-   * is selected, then the MTD interface to the MP25x device will be used to
+   * is selected, then the MTD interface to the M25Px device will be used to
    * support paging.
    *
    * If the driver is not configured to use interrupts or DMA, then it is

@@ -1265,7 +1265,7 @@ for existing NuttX ports:
     4-bpp greyscale support was integrated into the NX graphics sub-system and
     verified using the TI/Luminary LP3S6965 Ethernet Evaluation Kit.
 
-  * The MP25Px driver was extended for the M24P1 FLASH part (see NOTE).
+  * The M25Px driver was extended for the M24P1 FLASH part (see NOTE).
 
   * An I2C driver and (basic) SPI driver were added for the NXP LPC313x port.
     The I2C interface definition was extended to efficiently handle multiple I2C
