@@ -100,6 +100,7 @@ void weak_function lpc313x_spiinitialize(void)
    *       architecture.
    */
 
+  gpio_outputhigh(LPC313X_IOCONFIG_SPI, SPINOR_CS);
 }
 
 /****************************************************************************
@@ -130,6 +131,18 @@ void weak_function lpc313x_spiinitialize(void)
 void lpc313x_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+  if (devid == SPIDEV_FLASH)
+    {
+      if (selected)
+        {
+          gpio_outputlow(LPC313X_IOCONFIG_SPI, SPINOR_CS);
+        }
+      else
+        {
+          gpio_outputhigh(LPC313X_IOCONFIG_SPI, SPINOR_CS);
+        }
+    }
 }
 
 uint8_t lpc313x_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
