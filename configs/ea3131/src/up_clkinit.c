@@ -2,7 +2,7 @@
  * configs/ea3131/src/up_clkinit.c
  * arch/arm/src/board/up_clkinit.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:

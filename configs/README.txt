@@ -420,6 +420,17 @@ defconfig -- This is a configuration file similar to the Linux
 		  only a single slot (See CONFIG_MMCSD_NSLOTS). If defined, 
 		  CONFIG_PAGING_SDSLOT will instruct certain board-specific logic to
 		  initialize the media in this SD slot.
+		CONFIG_PAGING_M25PX - Use the m25px.c FLASH driver.  If this is selected,
+		  then the MTD interface to the MP25x device will be used to support
+		  paging.
+		CONFIG_PAGING_M25PX_BINOFFSET - If CONFIG_PAGING_M25PX is defined then
+		  CONFIG_PAGING_M25PX_BINOFFSET will be used to specify the offset
+		  in bytes into the FLASH device where the NuttX binary image is located.
+		  Default: 0
+		CONFIG_PAGING_M25PX_SPIPORT - If CONFIG_PAGING_M25PX is defined and
+		  the device has multiple SPI busses (ports), then this configuration
+		  should be set to indicate which SPI port the M25Px device is connected.
+		  Default: 0
 
 	The following can be used to disable categories of APIs supported
 	by the OS.  If the compiler supports weak functions, then it

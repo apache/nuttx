@@ -117,7 +117,7 @@ CONFIG_LPC313X_BUILDROOT=y
 #  Individual subsystems can be enabled:
 #
 CONFIG_LPC313X_MCI=n
-CONFIG_LPC313X_SPI=n
+CONFIG_LPC313X_SPI=y
 CONFIG_LPC313X_UART=y
 
 #
@@ -424,6 +424,17 @@ CONFIG_SIG_SIGWORK=4
 #   only a single slot (See CONFIG_MMCSD_NSLOTS). If defined, 
 #   CONFIG_PAGING_SDSLOT will instruct certain board-specific logic to
 #   initialize the media in this SD slot.
+# CONFIG_PAGING_M25PX - Use the m25px.c FLASH driver.  If this is selected,
+#   then the MTD interface to the MP25x device will be used to support
+#   paging.
+# CONFIG_PAGING_M25PX_BINOFFSET - If CONFIG_PAGING_M25PX is defined then
+#   CONFIG_PAGING_M25PX_BINOFFSET will be used to specify the offset
+#   in bytes into the FLASH device where the NuttX binary image is located.
+#   Default: 0
+# CONFIG_PAGING_M25PX_SPIPORT - If CONFIG_PAGING_M25PX is defined and
+#   the device has multiple SPI busses (ports), then this configuration
+#   should be set to indicate which SPI port the M25Px device is connected.
+#   Default: 0
 #
 CONFIG_PAGING=y
 CONFIG_PAGING_PAGESIZE=1024
@@ -445,6 +456,9 @@ CONFIG_PAGING_BLOCKINGFILL=y
 CONFIG_PAGING_MOUNTPT="/mnt/pgsrc"
 CONFIG_PAGING_MINOR=0
 CONFIG_PAGING_SDSLOT=0
+CONFIG_PAGING_M25PX=y
+CONFIG_PAGING_M25PX_BINOFFSET=0
+CONFIG_PAGING_M25PX_SPIPORT=0
 
 #
 # The following can be used to disable categories of
