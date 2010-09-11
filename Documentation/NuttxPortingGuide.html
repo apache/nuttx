@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: September 8, 2010</p>
+      <p>Last Updated: September 10, 2010</p>
     </td>
   </tr>
 </table>
@@ -2592,6 +2592,21 @@ build
     This must be undefined if SD is not being used.
     This should be defined to be zero for the typical device that has only a single slot (See <code>CONFIG_MMCSD_NSLOTS</code>).
     If defined, <code>CONFIG_PAGING_SDSLOT</code> will instruct certain board-specific logic to initialize the media in this SD slot.
+  </li>
+  <li>
+    <code>CONFIG_PAGING_M25PX</code>:
+    Use the m25px.c FLASH driver.
+	If this is selected, then the MTD interface to the MP25x device will be used to support paging.
+  </li>
+  <li>
+    <code>CONFIG_PAGING_M25PX_BINOFFSET</code>:
+    If CONFIG_PAGING_M25PX is defined then CONFIG_PAGING_M25PX_BINOFFSET will be used to specify the offset in bytes into the FLASH device where the NuttX binary image is located.
+    Default: 0
+  </li>
+  <li>
+    <code>CONFIG_PAGING_M25PX_SPIPORT</code>:
+    If CONFIG_PAGING_M25PX is defined and the device has multiple SPI busses (ports), then this configuration should be set to indicate which SPI port the M25Px device is connected.
+    Default: 0
   </li>
 </ul>
 <p>

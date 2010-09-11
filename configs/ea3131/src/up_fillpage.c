@@ -62,6 +62,13 @@
 #  endif
 #endif
 
+#ifdef CONFIG_PAGING_M25PX
+#  include <sys/ioctl.h>
+#  include <nuttx/ioctl.h>
+#  include <nuttx/spi.h>
+#  include <nuttx/mtd.h>
+#endif
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -71,7 +78,8 @@
 /* SD SLOT number might depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_EA3131
-#  define HAVE_SD  1
+#  define HAVE_SD     1
+#  define HAVE_SPINOR 1
 #  if defined(CONFIG_PAGING_SDSLOT) && CONFIG_PAGING_SDSLOT != 0
 #    error "Only one SD slot"
 #    undef CONFIG_PAGING_SDSLOT
@@ -81,6 +89,14 @@
 #  error "Unrecognized LPC313X board"
 #  undef CONFIG_PAGING_SDSLOT
 #  undef HAVE_SD
+#  undef HAVE_SPINOR
+#endif
+
+/* Sanity check:  We can only perform paging using a single source device */
+
+#if defined(CONFIG_PAGING_BINPATH) && defined(CONFIG_PAGING_M25PX)
+#  error "Both CONFIG_PAGING_BINPATH and CONFIG_PAGING_M25PX are defined"
+#  undef CONFIG_PAGING_BINPATH 
 #endif
 
 /* Are we accessing the page source data through a file path? */
@@ -122,9 +138,36 @@
 
 #endif /* CONFIG_PAGING_BINPATH */
 
+/* Are we accessing the page source data through the M25P* MTD device? */
+
+#ifdef CONFIG_PAGING_M25PX
+
+   /* Verify that SPI support is enabld */
+
+#ifndef CONFIG_LPC313X_SPI
+#  error "SPI support is not enabled"
+#endif
+
+   /* Make sure that some value is defined for the offset into the FLASH
+    * of the NuttX binary image.
+    */
+
+#  ifndef CONFIG_PAGING_M25PX_BINOFFSET
+#    define CONFIG_PAGING_M25PX_BINOFFSET 0
+#  endif
+
+   /* Make sure that some value is defined for the SPI port number */
+
+#  ifndef CONFIG_PAGING_M25PX_SPIPORT
+#    define CONFIG_PAGING_M25PX_SPIPORT 0
+#  endif
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* State structure needed to support paging from a file */
 
 #ifdef CONFIG_PAGING_BINPATH
 struct pg_source_s
@@ -134,11 +177,34 @@ struct pg_source_s
 };
 #endif
 
+/* State structured needd to support paging through the M25P* MTD interface. */
+
+#ifdef CONFIG_PAGING_M25PX
+struct pg_source_s
+{
+  /* If interrupts or DMA are used, then we will have to defer initialization */
+
+#if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
+  bool initialized;  /* TRUE: we are initialized */
+#endif
+
+  /* This is the MP25P* device state structure */
+
+  FAR struct mtd_dev_s *mtd;
+
+  /* This the the device geometry */
+
+#ifdef CONFIG_DEBUG
+  FAR struct mtd_geometry_s geo;
+#endif
+};
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_PAGING_BINPATH
+#if defined(CONFIG_PAGING_BINPATH) || defined(CONFIG_PAGING_M25PX)
 static struct pg_source_s g_pgsrc;
 #endif
 
@@ -157,7 +223,7 @@ static struct pg_source_s g_pgsrc;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PAGING_BINPATH
+#if defined(CONFIG_PAGING_BINPATH)
 static inline void lpc313x_initsrc(void)
 {
 #ifdef CONFIG_PAGING_SDSLOT
@@ -211,9 +277,56 @@ static inline void lpc313x_initsrc(void)
     }
 }
 
-#else /* CONFIG_PAGING_BINPATH */
+#elif defined(CONFIG_PAGING_M25PX)
+static inline void lpc313x_initsrc(void)
+{
+#ifdef CONFIG_DEBUG
+  uint32_t capacity;
+  int ret;
+#endif
+
+  /* Are we already initialized? */
+
+#if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
+  if (!g_pgsrc.initialized)
+#endif
+    {
+      pgvdbg("Initializing\n");
+
+      /* First get an instance of the SPI device interface */
+
+      FAR struct spi_dev_s *spi = up_spiinitialize(CONFIG_PAGING_M25PX_SPIPORT);
+      DEBUGASSERT(spi != NULL);
+
+      /* Then bind the SPI interface to the M25Px MTD driver */
+
+      g_pgsrc.mtd = m25p_initialize(spi);
+      DEBUGASSERT(g_pgsrc.mtd != NULL);
+
+      /* Verify that we can use the device */
+
+#ifdef CONFIG_DEBUG
+      /* Get the device geometry. (casting to uintptr_t first eliminates
+       * complaints on some architectures where the sizeof long is different
+       * from the size of a pointer).
+       */
+
+      ret = MTD_IOCTL(g_pgsrc.mtd, MTDIOC_GEOMETRY, (unsigned long)&g_pgsrc.geo);
+      DEBUGASSERT(ret >= 0);
+      capacity = g_pgsrc.geo.erasesize*g_pgsrc.geo.neraseblocks;
+      pgllvdbg("capacity: %d\n", capacity);
+      DEBUGASSERT(capacity >= (CONFIG_PAGING_M25PX_BINOFFSET + PG_TEXT_VSIZE));
+#endif
+
+#if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
+      g_pgsrc.initialized = true;
+#endif
+    }
+}
+
+#else
 #  define lpc313x_initsrc()
-#endif /* CONFIG_PAGING_BINPATH */
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -277,10 +390,13 @@ static inline void lpc313x_initsrc(void)
 
 int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 {
-#ifdef CONFIG_PAGING_BINPATH
+#if defined(CONFIG_PAGING_BINPATH)
   ssize_t nbytes;
   off_t   offset;
   off_t   pos;
+#elif defined(CONFIG_PAGING_M25PX)
+  ssize_t nbytes;
+  off_t   offset;
 #endif
 
   pgdbg("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
@@ -291,7 +407,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
    * time that up_fillpage() is called.  Are we initialized?
    */
 
-#ifdef CONFIG_PAGING_BINPATH
+#if defined(CONFIG_PAGING_BINPATH)
 
   /* Perform initialization of the paging source device (if necessary and
    * appropriate)
@@ -303,7 +419,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
    */
 
-  offset = (off_t)vpage - PG_LOCKED_VBASE;
+  offset = (off_t)tcb->xcp.far - PG_LOCKED_VBASE;
 
   /* Seek to that position */
 
@@ -316,15 +432,41 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
   DEBUGASSERT(nbytes == PAGESIZE);
   return OK;
 
-#else /* CONFIG_PAGING_BINPATH */
+#elif defined(CONFIG_PAGING_M25PX) /* !CONFIG_PAGING_BINPATH */
+
+  /* If CONFIG_PAGING_M25PX is defined, use the m25px.c FLASH driver.  If this
+   * is selected, then the MTD interface to the MP25x device will be used to
+   * support paging.
+   *
+   * If the driver is configured to use interrupts or DMA, then it must be
+   * initialized in this context.
+   */
+
+#if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
+  lpc313x_initsrc();
+#endif
+
+  /* Create an offset into the binary image that corresponds to the 
+   * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
+   */
+
+  offset = (off_t)tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_PAGING_M25PX_BINOFFSET;
+
+  /* Read the page at the correct offset into the SPI FLASH device */
+
+  nbytes = MTD_READ(g_pgsrc.mtd, offset, PAGESIZE, (FAR uint8_t *)vpage);
+  DEBUGASSERT(nbytes == PAGESIZE);
+  return OK;
+
+#else /* !CONFIG_PAGING_BINPATH && !CONFIG_PAGING_M25PX */
 
 # warning "Not implemented"
   return -ENOSYS;
 
-#endif /* CONFIG_PAGING_BINPATH */
+#endif /* !CONFIG_PAGING_BINPATH && !CONFIG_PAGING_M25PX */
 }
 
-#else
+#else /* CONFIG_PAGING_BLOCKINGFILL */
 
 /* Version 2:  Supports non-blocking, asynchronous fill operations */
 
@@ -333,8 +475,10 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
   pgdbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
-#ifdef CONFIG_PAGING_BINPATH
+#if defined(CONFIG_PAGING_BINPATH)
 #  error "File system-based paging must always be implemented with blocking calls"
+#elif defined(CONFIG_PAGING_M25PX)
+#  error "SPI FLASH paging must always be implemented with blocking calls"
 #else
 #  warning "Not implemented"
 #endif
@@ -367,7 +511,8 @@ void weak_function lpc313x_pginitialize(void)
    *   that it is called.
    */
 
-#ifdef CONFIG_PAGING_BINPATH
+#if defined(CONFIG_PAGING_BINPATH)
+
   /* If BINPATH is defined, then it is the full path to a file on a mounted file
    * system.  However, in this case, initialization will involve some higher level
    * file system operations.  Since this function is called from a low level (before
@@ -375,6 +520,22 @@ void weak_function lpc313x_pginitialize(void)
    * operations yet.  Therefore, initialization will be deferred until the first
    * time that up_fillpage() is called.
    */
+
+#elif defined(CONFIG_PAGING_M25PX)
+
+  /* If CONFIG_PAGING_M25PX is defined, use the m25px.c FLASH driver.  If this
+   * is selected, then the MTD interface to the MP25x device will be used to
+   * support paging.
+   *
+   * If the driver is not configured to use interrupts or DMA, then it is
+   * probably safe to initialize it in this context.
+   */
+
+#if !defined(CONFIG_LPC313x_SPI_INTERRUPTS) && !defined(CONFIG_LPC313x_SPI_DMA)
+
+  lpc313x_initsrc();
+
+#endif
 #endif
 }
 
