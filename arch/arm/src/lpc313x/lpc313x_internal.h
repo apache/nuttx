@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_internal.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,9 @@
 #include <stdbool.h>
 
 #include "up_internal.h"
+#include "up_arch.h"
 #include "chip.h"
+#include "lpc313x_ioconfig.h"
 
 /************************************************************************************
  * Definitions
@@ -80,6 +82,70 @@ extern "C" {
 #endif
 
 /************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+/* Configure a pin as an input */
+
+static inline void gpio_configinput(uint32_t ioconfig, uint32_t bit)
+{
+  uint32_t regaddr;
+
+  regaddr = ioconfig + LPC313X_IOCONFIG_MODE0RESET_OFFSET;
+  putreg32(bit, regaddr);
+
+  regaddr = ioconfig + LPC313X_IOCONFIG_MODE1RESET_OFFSET;
+  putreg32(bit, regaddr);
+}
+
+/* Return the current state of an input GPIO pin */
+
+static inline bool lpc313x_gpioread(uint32_t ioconfig, uint32_t bit)
+{
+  uint32_t regaddr = ioconfig + LPC313X_IOCONFIG_PINS_OFFSET;
+  return (getreg32(regaddr) & bit) != 0;
+}
+
+/* Configure the pin so that it is driven by the device */
+
+static inline void gpio_configdev(uint32_t ioconfig, uint32_t bit)
+{
+  uint32_t regaddr;
+
+  regaddr = ioconfig + LPC313X_IOCONFIG_MODE1RESET_OFFSET;
+  putreg32(bit, regaddr);
+
+  regaddr = ioconfig + LPC313X_IOCONFIG_MODE0SET_OFFSET;
+  putreg32(bit, regaddr);
+}
+
+/* Configure a pin as a low output */
+
+static inline void gpio_outputlow(uint32_t ioconfig, uint32_t bit)
+{
+  uint32_t regaddr;
+
+  regaddr = ioconfig + LPC313X_IOCONFIG_MODE1SET_OFFSET;
+  putreg32(bit, regaddr);
+
+  regaddr = ioconfig + LPC313X_IOCONFIG_MODE0RESET_OFFSET;
+  putreg32(bit, regaddr);
+}
+
+/* Configure a pin as a high output */
+
+static inline void gpio_outputhigh(uint32_t ioconfig, uint32_t bit)
+{
+  uint32_t regaddr;
+
+  regaddr = ioconfig + LPC313X_IOCONFIG_MODE1SET_OFFSET;
+  putreg32(bit, regaddr);
+
+  regaddr = ioconfig + LPC313X_IOCONFIG_MODE0SET_OFFSET;
+  putreg32(bit, regaddr);
+}
+
+/************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 
@@ -102,50 +168,6 @@ EXTERN void lpc313x_lowsetup(void);
  ************************************************************************************/
 
 EXTERN void lpc313x_clockconfig(void);
-
-/************************************************************************************
- * Name: lpc313x_configgpio
- *
- * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
- *
- ************************************************************************************/
-
-EXTERN int lpc313x_configgpio(uint32_t cfgset);
-
-/************************************************************************************
- * Name: lpc313x_gpiowrite
- *
- * Description:
- *   Write one or zero to the selected GPIO pin
- *
- ************************************************************************************/
-
-EXTERN void lpc313x_gpiowrite(uint32_t pinset, bool value);
-
-/************************************************************************************
- * Name: lpc313x_gpioread
- *
- * Description:
- *   Read one or zero from the selected GPIO pin
- *
- ************************************************************************************/
-
-EXTERN bool lpc313x_gpioread(uint32_t pinset);
-
-/************************************************************************************
- * Function:  lpc313x_dumpgpio
- *
- * Description:
- *   Dump all GPIO registers associated with the provided base address
- *
- ************************************************************************************/
-
-#ifdef CONFIG_DEBUG
-EXTERN int lpc313x_dumpgpio(uint32_t pinset, const char *msg);
-#else
-#  define lpc313x_dumpgpio(p,m)
-#endif
 
 /************************************************************************************
  * Name:  lpc313x_spiselect and lpc313x_spistatus

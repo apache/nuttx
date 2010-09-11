@@ -45,20 +45,24 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
+#include "lpc313x_ioconfig.h"
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
 /* EA3131L GPIOs ********************************************************************/
 
-/* LEDs */
+/* LEDs -- interface through an I2C GPIO expander */
 
 /* BUTTONS -- NOTE that some have EXTI interrupts configured */
 
 /* SPI Chip Selects */
+/* SPI NOR flash is the only device on SPI. SPI_CS_OUT0 is its chip select */
 
-/* USB Soft Connect Pullup*/
+#define SPINOR_CS IOCONFIG_SPI_CSOUT0
 
+/* USB Soft Connect Pullup -- NONE */
 
 /************************************************************************************
  * Public Types
