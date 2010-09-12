@@ -62,7 +62,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_PAGING_M25PX
+#if defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 #  include <sys/ioctl.h>
 #  include <nuttx/ioctl.h>
 #  include <nuttx/spi.h>
@@ -94,8 +94,16 @@
 
 /* Sanity check:  We can only perform paging using a single source device */
 
+#if defined(CONFIG_PAGING_M25PX) && defined(CONFIG_PAGING_AT45DB)
+#  error "Both CONFIG_PAGING_M25PX and CONFIG_PAGING_AT45DB are defined"
+#  undef CONFIG_PAGING_M25PX 
+#endif
 #if defined(CONFIG_PAGING_BINPATH) && defined(CONFIG_PAGING_M25PX)
 #  error "Both CONFIG_PAGING_BINPATH and CONFIG_PAGING_M25PX are defined"
+#  undef CONFIG_PAGING_BINPATH 
+#endif
+#if defined(CONFIG_PAGING_BINPATH) && defined(CONFIG_PAGING_AT45DB)
+#  error "Both CONFIG_PAGING_BINPATH and CONFIG_PAGING_AT45DB are defined"
 #  undef CONFIG_PAGING_BINPATH 
 #endif
 
@@ -140,7 +148,7 @@
 
 /* Are we accessing the page source data through the M25P* MTD device? */
 
-#ifdef CONFIG_PAGING_M25PX
+#if defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 
    /* Verify that SPI support is enabld */
 
@@ -152,14 +160,14 @@
     * of the NuttX binary image.
     */
 
-#  ifndef CONFIG_PAGING_M25PX_BINOFFSET
-#    define CONFIG_PAGING_M25PX_BINOFFSET 0
+#  ifndef CONFIG_PAGING_BINOFFSET
+#    define CONFIG_PAGING_BINOFFSET 0
 #  endif
 
    /* Make sure that some value is defined for the SPI port number */
 
-#  ifndef CONFIG_PAGING_M25PX_SPIPORT
-#    define CONFIG_PAGING_M25PX_SPIPORT 0
+#  ifndef CONFIG_PAGING_SPIPORT
+#    define CONFIG_PAGING_SPIPORT 0
 #  endif
 #endif
 
@@ -179,7 +187,7 @@ struct pg_source_s
 
 /* State structured needd to support paging through the M25P* MTD interface. */
 
-#ifdef CONFIG_PAGING_M25PX
+#if defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 struct pg_source_s
 {
   /* If interrupts or DMA are used, then we will have to defer initialization */
@@ -204,7 +212,7 @@ struct pg_source_s
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_PAGING_BINPATH) || defined(CONFIG_PAGING_M25PX)
+#if defined(CONFIG_PAGING_BINPATH) || defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 static struct pg_source_s g_pgsrc;
 #endif
 
@@ -277,7 +285,7 @@ static inline void lpc313x_initsrc(void)
     }
 }
 
-#elif defined(CONFIG_PAGING_M25PX)
+#elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 static inline void lpc313x_initsrc(void)
 {
 #ifdef CONFIG_DEBUG
@@ -295,12 +303,16 @@ static inline void lpc313x_initsrc(void)
 
       /* First get an instance of the SPI device interface */
 
-      FAR struct spi_dev_s *spi = up_spiinitialize(CONFIG_PAGING_M25PX_SPIPORT);
+      FAR struct spi_dev_s *spi = up_spiinitialize(CONFIG_PAGING_SPIPORT);
       DEBUGASSERT(spi != NULL);
 
-      /* Then bind the SPI interface to the M25Px MTD driver */
+      /* Then bind the SPI interface to the MTD driver */
 
+#ifdef CONFIG_PAGING_M25PX
       g_pgsrc.mtd = m25p_initialize(spi);
+#else
+      g_pgsrc.mtd = at45db_initialize(spi);
+#endif
       DEBUGASSERT(g_pgsrc.mtd != NULL);
 
       /* Verify that we can use the device */
@@ -315,7 +327,7 @@ static inline void lpc313x_initsrc(void)
       DEBUGASSERT(ret >= 0);
       capacity = g_pgsrc.geo.erasesize*g_pgsrc.geo.neraseblocks;
       pgllvdbg("capacity: %d\n", capacity);
-      DEBUGASSERT(capacity >= (CONFIG_PAGING_M25PX_BINOFFSET + PG_TEXT_VSIZE));
+      DEBUGASSERT(capacity >= (CONFIG_PAGING_BINOFFSET + PG_TEXT_VSIZE));
 #endif
 
 #if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
@@ -394,7 +406,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
   ssize_t nbytes;
   off_t   offset;
   off_t   pos;
-#elif defined(CONFIG_PAGING_M25PX)
+#elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
   ssize_t nbytes;
   off_t   offset;
 #endif
@@ -432,11 +444,11 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
   DEBUGASSERT(nbytes == PAGESIZE);
   return OK;
 
-#elif defined(CONFIG_PAGING_M25PX) /* !CONFIG_PAGING_BINPATH */
+#elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB) /* !CONFIG_PAGING_BINPATH */
 
-  /* If CONFIG_PAGING_M25PX is defined, use the m25px.c FLASH driver.  If this
-   * is selected, then the MTD interface to the M25Px device will be used to
-   * support paging.
+  /* If CONFIG_PAGING_M25PX or CONFIG_PAGING_AT45DB is defined, use the
+   * SPI corresponding FLASH driver.  If either are selected, then the
+   * MTD interface to the device will be used to support paging.
    *
    * If the driver is configured to use interrupts or DMA, then it must be
    * initialized in this context.
@@ -450,7 +462,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
    */
 
-  offset = (off_t)tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_PAGING_M25PX_BINOFFSET;
+  offset = (off_t)tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_PAGING_BINOFFSET;
 
   /* Read the page at the correct offset into the SPI FLASH device */
 
@@ -458,12 +470,12 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
   DEBUGASSERT(nbytes == PAGESIZE);
   return OK;
 
-#else /* !CONFIG_PAGING_BINPATH && !CONFIG_PAGING_M25PX */
+#else /* !CONFIG_PAGING_BINPATH && !CONFIG_PAGING_M25PX && !CONFIG_PAGING_AT45DB */
 
 # warning "Not implemented"
   return -ENOSYS;
 
-#endif /* !CONFIG_PAGING_BINPATH && !CONFIG_PAGING_M25PX */
+#endif /* !CONFIG_PAGING_BINPATH && !CONFIG_PAGING_M25PX && !CONFIG_PAGING_AT45DB */
 }
 
 #else /* CONFIG_PAGING_BLOCKINGFILL */
@@ -477,7 +489,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 
 #if defined(CONFIG_PAGING_BINPATH)
 #  error "File system-based paging must always be implemented with blocking calls"
-#elif defined(CONFIG_PAGING_M25PX)
+#elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 #  error "SPI FLASH paging must always be implemented with blocking calls"
 #else
 #  warning "Not implemented"
@@ -521,11 +533,11 @@ void weak_function lpc313x_pginitialize(void)
    * time that up_fillpage() is called.
    */
 
-#elif defined(CONFIG_PAGING_M25PX)
+#elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 
-  /* If CONFIG_PAGING_M25PX is defined, use the m25px.c FLASH driver.  If this
-   * is selected, then the MTD interface to the M25Px device will be used to
-   * support paging.
+  /* If CONFIG_PAGING_M25PX or CONFIG_PAGING_AT45DB is defined, use the corresponding
+   * FLASH driver.  If either is selected, then the MTD interface to the device
+   * will be used to support paging.
    *
    * If the driver is not configured to use interrupts or DMA, then it is
    * probably safe to initialize it in this context.
