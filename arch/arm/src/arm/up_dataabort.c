@@ -161,6 +161,10 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    */
 
   pg_miss();
+
+  /* Indicate that we are no longer in an interrupt handler */
+
+  current_regs = NULL;
   return;
 
 segfault:
