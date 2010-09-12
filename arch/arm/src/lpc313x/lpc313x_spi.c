@@ -2,7 +2,8 @@
  * arm/arm/src/lpc313x/lpc313x_spi.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: David Hewson, deriving in part from other SPI drivers originally by
+ *           Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -241,10 +242,12 @@ static inline void spi_select_slave(FAR struct lpc313x_spidev_s *priv, uint8_t s
 static inline uint16_t spi_readword(FAR struct lpc313x_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
+
   while ((getreg32 (LPC313X_SPI_STATUS) & SPI_STATUS_RXFIFOEMPTY) != 0)
       ;
 
   /* Then return the received byte */
+
   uint32_t val = getreg32 (LPC313X_SPI_FIFODATA);
 
   return val;
@@ -267,9 +270,9 @@ static inline uint16_t spi_readword(FAR struct lpc313x_spidev_s *priv)
 
 static inline void spi_writeword(FAR struct lpc313x_spidev_s *priv, uint16_t word)
 {
-    /* Wait until the transmit buffer is empty */
+  /* Wait until the transmit buffer is not full */
 
-    while ((getreg32 (LPC313X_SPI_STATUS) & SPI_STATUS_TXFIFOFULL) != 0)
+  while ((getreg32 (LPC313X_SPI_STATUS) & SPI_STATUS_TXFIFOFULL) != 0)
 	;
 
   /* Then send the byte */
