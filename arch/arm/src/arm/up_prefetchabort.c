@@ -132,6 +132,10 @@ void up_prefetchabort(uint32_t *regs)
        */
 
       pg_miss();
+
+      /* Indicate that we are no longer in an interrupt handler */
+
+      current_regs = NULL;
     }
   else
 #endif

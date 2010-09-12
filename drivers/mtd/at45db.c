@@ -312,9 +312,10 @@ static inline int at45db_rdid(struct at45db_dev_s *priv)
 
   fvdbg("priv: %p\n", priv);
 
-  /* Lock the SPI bus, configure the bus, and select this FLASH part. */
+  /* Configure the bus, and select this FLASH part. (The caller should alread have
+   * loced the bus for exclusive access)
+   */
 
-  at45db_lock(priv);
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
 
   /* Send the " Manufacturer and Device ID Read" command and read the first three
@@ -329,7 +330,6 @@ static inline int at45db_rdid(struct at45db_dev_s *priv)
   /* Deselect the FLASH and unlock the bus */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
-  at45db_unlock(priv);
 
   fvdbg("manufacturer: %02x devid1: %02x devid2: %02x\n",
         manufacturer, devid1, devid2);

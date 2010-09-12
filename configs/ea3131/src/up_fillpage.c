@@ -192,9 +192,7 @@ struct pg_source_s
 {
   /* If interrupts or DMA are used, then we will have to defer initialization */
 
-#if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
   bool initialized;  /* TRUE: we are initialized */
-#endif
 
   /* This is the M25P* device state structure */
 
@@ -247,7 +245,7 @@ static inline void lpc313x_initsrc(void)
       char devname[16];
 #endif
 
-      pgvdbg("Initializing %s\n", CONFIG_PAGING_BINPATH);
+      pgllvdbg("Initializing %s\n", CONFIG_PAGING_BINPATH);
 
       /* No, do we need to mount an SD device? */
 
@@ -281,6 +279,9 @@ static inline void lpc313x_initsrc(void)
 
       g_pgsrc.fd = open(CONFIG_PAGING_BINPATH, O_RDONLY);
       DEBUGASSERT(g_pgsrc.fd >= 0);
+
+      /* Then we are initialized */
+
       g_pgsrc.initialized = true;
     }
 }
@@ -288,6 +289,7 @@ static inline void lpc313x_initsrc(void)
 #elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 static inline void lpc313x_initsrc(void)
 {
+  FAR struct spi_dev_s *spi;
 #ifdef CONFIG_DEBUG
   uint32_t capacity;
   int ret;
@@ -295,15 +297,15 @@ static inline void lpc313x_initsrc(void)
 
   /* Are we already initialized? */
 
-#if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
-  if (!g_pgsrc.initialized)
-#endif
-    {
-      pgvdbg("Initializing\n");
+ if (!g_pgsrc.initialized)
+   {
+      /* No... the initialize now */
+
+      pgllvdbg("Initializing\n");
 
       /* First get an instance of the SPI device interface */
 
-      FAR struct spi_dev_s *spi = up_spiinitialize(CONFIG_PAGING_SPIPORT);
+      spi = up_spiinitialize(CONFIG_PAGING_SPIPORT);
       DEBUGASSERT(spi != NULL);
 
       /* Then bind the SPI interface to the MTD driver */
@@ -330,9 +332,9 @@ static inline void lpc313x_initsrc(void)
       DEBUGASSERT(capacity >= (CONFIG_PAGING_BINOFFSET + PG_TEXT_VSIZE));
 #endif
 
-#if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
+      /* We are now initialized */
+
       g_pgsrc.initialized = true;
-#endif
     }
 }
 
@@ -411,7 +413,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
   off_t   offset;
 #endif
 
-  pgdbg("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
+  pglldbg("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
   /* If BINPATH is defined, then it is the full path to a file on a mounted file
@@ -421,9 +423,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 
 #if defined(CONFIG_PAGING_BINPATH)
 
-  /* Perform initialization of the paging source device (if necessary and
-   * appropriate)
-   */
+  /* Perform initialization of the paging source device (if necessary) */
 
   lpc313x_initsrc();
 
@@ -446,17 +446,9 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 
 #elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB) /* !CONFIG_PAGING_BINPATH */
 
-  /* If CONFIG_PAGING_M25PX or CONFIG_PAGING_AT45DB is defined, use the
-   * SPI corresponding FLASH driver.  If either are selected, then the
-   * MTD interface to the device will be used to support paging.
-   *
-   * If the driver is configured to use interrupts or DMA, then it must be
-   * initialized in this context.
-   */
+  /* Perform initialization of the paging source device (if necessary) */
 
-#if defined(CONFIG_LPC313x_SPI_INTERRUPTS) || defined(CONFIG_LPC313x_SPI_DMA)
   lpc313x_initsrc();
-#endif
 
   /* Create an offset into the binary image that corresponds to the 
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
@@ -484,7 +476,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 
 int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 {
-  pgdbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
+  pglldbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
 
 #if defined(CONFIG_PAGING_BINPATH)
@@ -521,34 +513,13 @@ void weak_function lpc313x_pginitialize(void)
    *   text addresses might map to offsets into that file.
    * - Do whatever else is necessary to make up_fillpage() ready for the first time
    *   that it is called.
-   */
-
-#if defined(CONFIG_PAGING_BINPATH)
-
-  /* If BINPATH is defined, then it is the full path to a file on a mounted file
-   * system.  However, in this case, initialization will involve some higher level
-   * file system operations.  Since this function is called from a low level (before
-   * os_start() is even called), it may not be possible to perform file system
-   * operations yet.  Therefore, initialization will be deferred until the first
+   *
+   * In reality, however, this function is not very useful: This function is called
+   * from a low level (before os_start() is even called), it may not be possible to
+   * perform file system operations or even to get debug output yet.  Therefore,
+   * to keep life simple, initialization will be deferred in all cases until the first
    * time that up_fillpage() is called.
    */
-
-#elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
-
-  /* If CONFIG_PAGING_M25PX or CONFIG_PAGING_AT45DB is defined, use the corresponding
-   * FLASH driver.  If either is selected, then the MTD interface to the device
-   * will be used to support paging.
-   *
-   * If the driver is not configured to use interrupts or DMA, then it is
-   * probably safe to initialize it in this context.
-   */
-
-#if !defined(CONFIG_LPC313x_SPI_INTERRUPTS) && !defined(CONFIG_LPC313x_SPI_DMA)
-
-  lpc313x_initsrc();
-
-#endif
-#endif
 }
 
 #endif /* CONFIG_PAGING */
