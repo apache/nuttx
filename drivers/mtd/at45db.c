@@ -261,7 +261,7 @@ static void at45db_lock(struct at45db_dev_s *priv)
    * state.
    */
 
-  SPI_SETMODE(priv->spi, SPIDEV_MODE3);
+  SPI_SETMODE(priv->spi, SPIDEV_MODE0);
   SPI_SETBITS(priv->spi, 8);
   (void)SPI_SETFREQUENCY(priv->spi, CONFIG_AT45DB_FREQUENCY);
 }
@@ -274,7 +274,6 @@ static inline void at45db_unlock(struct at45db_dev_s *priv)
 {
   (void)SPI_LOCK(priv->spi, false);
 }
-
 
 /************************************************************************************
  * Name: at45db_pwrdown
