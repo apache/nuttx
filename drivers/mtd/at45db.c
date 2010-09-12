@@ -156,6 +156,7 @@
 #define AT45DB_DEVID1_8MBIT  0x05 /* xxx0 0101 = 8Mbit AT45DB081 */
 #define AT45DB_DEVID1_16MBIT 0x06 /* xxx0 0110 = 16Mbit AT45DB161 */
 #define AT45DB_DEVID1_32MBIT 0x07 /* xxx0 0111 = 32Mbit AT45DB321 */
+#define AT45DB_DEVID1_64MBIT 0x08 /* xxx0 1000 = 32Mbit AT45DB641 */
 #define AT45DB_DEVID1_FAMMSK 0xe0 /* Bits 5-7: Family */
 #define AT45DB_DEVID1_DFLASH 0x20 /* 001x xxxx = Dataflash */
 #define AT45DB_DEVID1_AT26DF 0x40 /* 010x xxxx = AT26DFxxx series (Not supported) */
@@ -229,10 +230,10 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg);
 #define CHIP_ERASE_SIZE 4
 static const uint8_t g_chiperase[CHIP_ERASE_SIZE] = {0xc7, 0x94, 0x80, 0x9a};
 
-/* Sequence to program the device to 512 page size */
+/* Sequence to program the device to binary page sizes{256, 512, 1024} */
 
-#define CFG512_SIZE 4
-static const uint8_t g_cfg512[CFG512_SIZE] = {0x3d, 0x2a, 0x80, 0xa6};
+#define BINPGSIZE_SIZE 4
+static const uint8_t g_binpgsize[BINPGSIZE_SIZE] = {0x3d, 0x2a, 0x80, 0xa6};
 
 /************************************************************************************
  * Private Functions
@@ -353,35 +354,42 @@ static inline int at45db_rdid(struct at45db_dev_s *priv)
         case AT45DB_DEVID1_2MBIT:
           /* Save the FLASH geometry for the 16Mbit AT45DB021 */
 
-          priv->pageshift   = 8;    /* Page size = 256 bytes */
+          priv->pageshift   = 8;    /* Page size = 256/264 bytes */
           priv->npages      = 1024; /* 1024 pages */
           return OK;
 
         case AT45DB_DEVID1_4MBIT:
           /* Save the FLASH geometry for the 16Mbit AT45DB041 */
 
-          priv->pageshift   = 8;    /* Page size = 256 bytes */
+          priv->pageshift   = 8;    /* Page size = 256/264 bytes */
           priv->npages      = 2048; /* 2048 pages */
           return OK;
 
         case AT45DB_DEVID1_8MBIT:
           /* Save the FLASH geometry for the 16Mbit AT45DB081 */
 
-          priv->pageshift   = 8;    /* Page size = 256 bytes */
+          priv->pageshift   = 8;    /* Page size = 256/264 bytes */
           priv->npages      = 4096; /* 4096 pages */
           return OK;
 
         case AT45DB_DEVID1_16MBIT:
           /* Save the FLASH geometry for the 16Mbit AT45DB161 */
 
-          priv->pageshift   = 9;    /* Page size = 512 bytes */
+          priv->pageshift   = 9;    /* Page size = 512/528 bytes */
           priv->npages      = 4096; /* 4096 pages */
           return OK;
 
         case AT45DB_DEVID1_32MBIT:
           /* Save the FLASH geometry for the 16Mbit AT45DB321 */
 
-          priv->pageshift   = 9;    /* Page size = 512 bytes */
+          priv->pageshift   = 9;    /* Page size = 512/528 bytes */
+          priv->npages      = 8192; /* 8192 pages */
+          return OK;
+
+        case AT45DB_DEVID1_64MBIT:
+          /* Save the FLASH geometry for the 16Mbit AT45DB321 */
+
+          priv->pageshift   = 10;   /* Page size = 1024/1056 bytes */
           priv->npages      = 8192; /* 8192 pages */
           return OK;
 
@@ -438,15 +446,13 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
 
   fvdbg("sector: %08lx\n", (long)sector);
 
-  /* The Page Erase command can be used to individually erase any page in the main
-   * memory array allowing the Buffer to Main Memory Page Program to be utilized at a
-   * later time. ... To perform a page erase in the binary page size (512 bytes), the
-   * opcode 81H must be loaded into the device, followed by three address bytes
-   * consist of 3 don’t care bits, 12 page address bits (A20 - A9) that specify the
-   * page in the main memory to be erased and 9 don’t care bits. When a low-to-high
-   * transition occurs on the CS pin, the part will erase the selected page (the
-   * erased state is a logical 1). ... the status register and the RDY/BUSY pin will
-   * indicate that the part is busy.
+  /* "The Page Erase command can be used to individually erase any page in the main
+   *  memory array allowing the Buffer to Main Memory Page Program to be utilized at a
+   *  later time. ... To perform a page erase in the binary page size ..., the
+   *  opcode 81H must be loaded into the device, followed by three address bytes
+   *  ... When a low-to-high transition occurs on the CS pin, the part will erase the
+   *  selected page (the erased state is a logical 1). ... the status register and the
+   *  RDY/BUSY pin will indicate that the part is busy."
    */
 
   erasecmd[0] = AT45DB_PGERASE;   /* Page erase command */
@@ -777,17 +783,17 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
 
       sr = at45db_waitbusy(priv);
 
-      /* Check if the device is configured as 512 page device */
+      /* Check if the device is configured as 256, 512 or 1024 bytes-per-page device */
 
       if ((sr & AT45DB_SR_PGSIZE) == 0)
         {
-          /* No, re-program it for 512 byte pages.  NOTE:  A power cycle
+          /* No, re-program it for the binary page size.  NOTE:  A power cycle
            * is required after the device has be re-programmed.
            */
 
           fdbg("Reprogramming page size\n");
           SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
-          SPI_SNDBLOCK(priv->spi, g_cfg512, CFG512_SIZE);
+          SPI_SNDBLOCK(priv->spi, g_binpgsize, BINPGSIZE_SIZE);
           SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
           goto errout;
         }
