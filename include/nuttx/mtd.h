@@ -2,7 +2,7 @@
  * include/nuttx/mtd.h
  * Memory Technology Device (MTD) interface
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,6 +153,18 @@ EXTERN int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
  ************************************************************************************/
 
 EXTERN FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
+
+/************************************************************************************
+ * Name: at45db_initialize
+ *
+ * Description:
+ *   Create an initialize MTD device instance.  MTD devices are not registered
+ *   in the file system, but are created as instances that can be bound to
+ *   other functions (such as a block or character driver front end).
+ *
+ ************************************************************************************/
+
+EXTERN FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus

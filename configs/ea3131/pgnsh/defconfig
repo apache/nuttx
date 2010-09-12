@@ -427,14 +427,17 @@ CONFIG_SIG_SIGWORK=4
 # CONFIG_PAGING_M25PX - Use the m25px.c FLASH driver.  If this is selected,
 #   then the MTD interface to the M25Px device will be used to support
 #   paging.
-# CONFIG_PAGING_M25PX_BINOFFSET - If CONFIG_PAGING_M25PX is defined then
-#   CONFIG_PAGING_M25PX_BINOFFSET will be used to specify the offset
+# CONFIG_PAGING_AT45DB - Use the at45db.c FLASH driver.  If this is selected,
+#   then the MTD interface to the Atmel AT45DB device will be used to support
+#   paging.
+# CONFIG_PAGING_BINOFFSET - If CONFIG_PAGING_M25PX or CONFIG_PAGING_AT45DB
+#   is defined then CONFIG_PAGING_BINOFFSET will be used to specify the offset
 #   in bytes into the FLASH device where the NuttX binary image is located.
 #   Default: 0
-# CONFIG_PAGING_M25PX_SPIPORT - If CONFIG_PAGING_M25PX is defined and
-#   the device has multiple SPI busses (ports), then this configuration
-#   should be set to indicate which SPI port the M25Px device is connected.
-#   Default: 0
+# CONFIG_PAGING_SPIPORT - If CONFIG_PAGING_M25PX or CONFIG_PAGING_AT45DB
+#   is defined and the device has multiple SPI busses (ports), then this
+#   configuration should be set to indicate which SPI port the device is
+#   connected. Default: 0
 #
 CONFIG_PAGING=y
 CONFIG_PAGING_PAGESIZE=1024
@@ -457,8 +460,9 @@ CONFIG_PAGING_MOUNTPT="/mnt/pgsrc"
 CONFIG_PAGING_MINOR=0
 CONFIG_PAGING_SDSLOT=0
 CONFIG_PAGING_M25PX=n
-CONFIG_PAGING_M25PX_BINOFFSET=0
-CONFIG_PAGING_M25PX_SPIPORT=0
+CONFIG_PAGING_AT45DB=n
+CONFIG_PAGING_BINOFFSET=0
+CONFIG_PAGING_SPIPORT=0
 
 #
 # The following can be used to disable categories of
