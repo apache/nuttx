@@ -150,9 +150,15 @@
 
 #define AT45DB_MANUFACTURER  0x1f /* Manufacturer ID: Atmel */
 #define AT45DB_DEVID1_CAPMSK 0x1f /* Bits 0-4: Capacity */
-#define AT45DB_DEVID1_16MBIT 0x06 /* xxx0 0110 = 16Mbit */
+#define AT45DB_DEVID1_1MBIT  0x02 /* xxx0 0010 = 1Mbit AT45DB011 */
+#define AT45DB_DEVID1_2MBIT  0x03 /* xxx0 0012 = 2Mbit AT45DB021 */
+#define AT45DB_DEVID1_4MBIT  0x04 /* xxx0 0100 = 4Mbit AT45DB041 */
+#define AT45DB_DEVID1_8MBIT  0x05 /* xxx0 0101 = 8Mbit AT45DB081 */
+#define AT45DB_DEVID1_16MBIT 0x06 /* xxx0 0110 = 16Mbit AT45DB161 */
+#define AT45DB_DEVID1_32MBIT 0x07 /* xxx0 0111 = 32Mbit AT45DB321 */
 #define AT45DB_DEVID1_FAMMSK 0xe0 /* Bits 5-7: Family */
 #define AT45DB_DEVID1_DFLASH 0x20 /* 001x xxxx = Dataflash */
+#define AT45DB_DEVID1_AT26DF 0x40 /* 010x xxxx = AT26DFxxx series (Not supported) */
 #define AT45DB_DEVID2_VERMSK 0x1f /* Bits 0-4: MLC mask */
 #define AT45DB_DEVID2_MLCMSK 0xe0 /* Bits 5-7: MLC mask */
 
@@ -335,25 +341,53 @@ static inline int at45db_rdid(struct at45db_dev_s *priv)
       /* Okay.. is it a FLASH capacity that we understand? */
 
       capacity = devid1 & AT45DB_DEVID1_CAPMSK;
-
-      if (capacity == AT45DB_DEVID1_16MBIT)
+      switch (capacity)
         {
-           /* Save the FLASH geometry for the 16Mbit AT45DB161 */
+        case AT45DB_DEVID1_1MBIT:
+          /* Save the FLASH geometry for the 16Mbit AT45DB011 */
 
-           priv->pageshift   = 9;    /* Page size = 512 bytes */
-           priv->npages      = 4096; /* 4096 pages */
-           return OK;
-        }
-# if 0 /* Add support for other at45db FLASH parts here */
-      else if (capacity == )
-        {
-           /* Save the FLASH geometry */
+          priv->pageshift   = 8;    /* Page size = 256 bytes */
+          priv->npages      = 512;  /* 512 pages */
+          return OK;
 
-           priv->pageshift   = ;
-           priv->npages      = ;
-           return OK;
+        case AT45DB_DEVID1_2MBIT:
+          /* Save the FLASH geometry for the 16Mbit AT45DB021 */
+
+          priv->pageshift   = 8;    /* Page size = 256 bytes */
+          priv->npages      = 1024; /* 1024 pages */
+          return OK;
+
+        case AT45DB_DEVID1_4MBIT:
+          /* Save the FLASH geometry for the 16Mbit AT45DB041 */
+
+          priv->pageshift   = 8;    /* Page size = 256 bytes */
+          priv->npages      = 2048; /* 2048 pages */
+          return OK;
+
+        case AT45DB_DEVID1_8MBIT:
+          /* Save the FLASH geometry for the 16Mbit AT45DB081 */
+
+          priv->pageshift   = 8;    /* Page size = 256 bytes */
+          priv->npages      = 4096; /* 4096 pages */
+          return OK;
+
+        case AT45DB_DEVID1_16MBIT:
+          /* Save the FLASH geometry for the 16Mbit AT45DB161 */
+
+          priv->pageshift   = 9;    /* Page size = 512 bytes */
+          priv->npages      = 4096; /* 4096 pages */
+          return OK;
+
+        case AT45DB_DEVID1_32MBIT:
+          /* Save the FLASH geometry for the 16Mbit AT45DB321 */
+
+          priv->pageshift   = 9;    /* Page size = 512 bytes */
+          priv->npages      = 8192; /* 8192 pages */
+          return OK;
+
+        default:
+          return -ENODEV;
         }
-#endif
     }
 
   return -ENODEV;
