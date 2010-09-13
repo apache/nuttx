@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated September 6, 2010)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated September 13, 2010)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
@@ -26,6 +26,7 @@ NuttX TODO List (Last updated September 6, 2010)
   (2)  ARM/i.MX (arch/arm/src/imx/)
   (4)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
+  (1)  ARM/LPC313x (arch/arm/src/lpc313x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (5)  ARM/STM32 (arch/arm/src/stm32/)
@@ -788,6 +789,22 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
                so can’t pursue it really."
   Status:      Open
   Priority:    Medium
+
+o ARM/LPC313x (arch/arm/src/lpc313x/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: arch/arm/src/lpc313x/lpc313x_spi.c contains logic that is specific to the
+               Embedded Artist's ea3131 board.  We need to abstract the assignmen of SPI
+               chip selects and logic SPI functions (like SPIDEV_FLASH).  My thoughts are:
+               - Remove lpc313x_spiselect and lpc313x_spistatus from lpc313x_internal.h
+               - Remove configs/ea3131/src/up_spi.c
+               - Add configurations CONFIG_LPC3131x_CSOUT1DEV, CONFIG_LPC3131x_CSOUT2DEV,
+                 and CONFIG_LPC3131x_CSOUT3DEV that maps the lpc313x SPI chip selects to
+                 SPIDEV_* values.
+               - Change arch/arm/src/lpc313x/lpc313x_spi.c to use those configuration
+                 settings.
+  Status:      Open
+  Priority:    High if you want to use SPI on any board other than the ea3131.
 
 o ARM/STR71x (arch/arm/src/str71x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

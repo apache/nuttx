@@ -69,6 +69,17 @@
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
+/* CONFIG_AT45DB_PREWAIT enables higher performance write logic:  We leave the chip
+ * busy after write and erase operations.  This improves write and erase performance
+ * because we do not have to wait as long between transactions (other processing can
+ * occur while the chip is busy) but means that the chip must stay powered:
+ */
+
+#if defined(CONFIG_AT45DB_PWRSAVE) && defined(CONFIG_AT45DB_PREWAIT)
+#  error "Both CONFIG_AT45DB_PWRSAVE and CONFIG_AT45DB_PREWAIT are defined"
+#endif
+
+/* If the user has provided no frequency, use 1MHz */
 
 #ifndef CONFIG_AT45DB_FREQUENCY
 #  define CONFIG_AT45DB_FREQUENCY 1000000
@@ -460,14 +471,14 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
 
   fvdbg("sector: %08lx\n", (long)sector);
 
-  /* If we not trying to conserve power, then we implement some higher performance
-   * logic:  We leave the chip busy after write and erase operations.  This improves
-   * performance because we do not have to wait as long being transactions (other
-   * processing can occur while the chip is busy) but means that the chip must stay
-   * powered.
+  /* Higher performance write logic:  We leave the chip busy after write and erase
+   * operations.  This improves write and erase performance because we do not have
+   * to wait as long between transactions (other processing can occur while the chip
+   * is busy) but means that the chip must stay powered and that we must check if
+   * the chip is still busy on each entry point.
    */
 
-#ifndef CONFIG_AT45DB_PWRSAVE
+#ifdef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
 
@@ -491,11 +502,11 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
   SPI_SNDBLOCK(priv->spi, erasecmd, 4);
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 
-  /* Wait for any erase to complete if we are not trying to conserve power. (see
-   * comments above).
+  /* Wait for any erase to complete if we are not trying to improve write
+   * performance. (see comments above).
    */
 
-#ifdef CONFIG_AT45DB_PWRSAVE
+#ifndef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
   fvdbg("Erased\n");
@@ -509,14 +520,14 @@ static inline int at32db_chiperase(struct at45db_dev_s *priv)
 {
   fvdbg("priv: %p\n", priv);
 
-  /* If we not trying to conserve power, then we implement some higher performance
-   * logic:  We leave the chip busy after write and erase operations.  This improves
-   * performance because we do not have to wait as long being transactions (other
-   * processing can occur while the chip is busy) but means that the chip must stay
-   * powered.
+  /* Higher performance write logic:  We leave the chip busy after write and erase
+   * operations.  This improves write and erase performance because we do not have
+   * to wait as long between transactions (other processing can occur while the chip
+   * is busy) but means that the chip must stay powered and that we must check if
+   * the chip is still busy on each entry point.
    */
 
-#ifndef CONFIG_AT45DB_PWRSAVE
+#ifdef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
 
@@ -532,11 +543,11 @@ static inline int at32db_chiperase(struct at45db_dev_s *priv)
   SPI_SNDBLOCK(priv->spi, g_chiperase, CHIP_ERASE_SIZE);
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 
-  /* Wait for any erase to complete if we are not trying to conserve power. (see
-   * comments above).
+  /* Wait for any erase to complete if we are not trying to improve write
+   * performance. (see comments above).
    */
 
-#ifdef CONFIG_AT45DB_PWRSAVE
+#ifndef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
   return OK;
@@ -561,14 +572,14 @@ static inline void at45db_pgwrite(struct at45db_dev_s *priv, FAR const uint8_t *
   wrcmd[2] = (offset >>  8) & 0xff; /* 24-bit address middle byte */
   wrcmd[3] =  offset        & 0xff; /* 24-bit address LS byte */
 
-  /* If we not trying to conserve power, then we implement some higher performance
-   * logic:  We leave the chip busy after write and erase operations.  This improves
-   * performance because we do not have to wait as long being transactions (other
-   * processing can occur while the chip is busy) but means that the chip must stay
-   * powered.
+  /* Higher performance write logic:  We leave the chip busy after write and erase
+   * operations.  This improves write and erase performance because we do not have
+   * to wait as long between transactions (other processing can occur while the chip
+   * is busy) but means that the chip must stay powered and that we must check if
+   * the chip is still busy on each entry point.
    */
 
-#ifndef CONFIG_AT45DB_PWRSAVE
+#ifdef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
 
@@ -577,11 +588,11 @@ static inline void at45db_pgwrite(struct at45db_dev_s *priv, FAR const uint8_t *
   SPI_SNDBLOCK(priv->spi, buffer, 1 << priv->pageshift);
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 
-  /* Wait for any erase to complete if we are not trying to conserve power. (see
-   * comments above).
+  /* Wait for any erase to complete if we are not trying to improve write
+   * performance. (see comments above).
    */
 
-#ifdef CONFIG_AT45DB_PWRSAVE
+#ifndef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
   fvdbg("Written\n");
@@ -699,14 +710,14 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
  
   at45db_lock(priv);
  
-  /* If we not trying to conserve power, then we implement some higher performance
-   * logic:  We leave the chip busy after write and erase operations.  This improves
-   * performance because we do not have to wait as long being transactions (other
-   * processing can occur while the chip is busy) but means that the chip must stay
-   * powered and that we have to add waits at all entry points.
+  /* Higher performance write logic:  We leave the chip busy after write and erase
+   * operations.  This improves write and erase performance because we do not have
+   * to wait as long between transactions (other processing can occur while the chip
+   * is busy) but means that the chip must stay powered and that we must check if
+   * the chip is still busy on each entry point.
    */
 
-#ifndef CONFIG_AT45DB_PWRSAVE
+#ifdef CONFIG_AT45DB_PREWAIT
   at45db_waitbusy(priv);
 #endif
 
