@@ -207,7 +207,7 @@ struct at45db_dev_s
  * Private Function Prototypes
  ************************************************************************************/
 
-/* Lock and per-transactino configuration */
+/* Lock and per-transaction configuration */
 
 static void at45db_lock(struct at45db_dev_s *priv);
 static inline void at45db_unlock(struct at45db_dev_s *priv);
@@ -709,6 +709,7 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
    */
  
   at45db_lock(priv);
+  at45db_resume(priv);
  
   /* Higher performance write logic:  We leave the chip busy after write and erase
    * operations.  This improves write and erase performance because we do not have
@@ -848,10 +849,10 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
       /* Lock and configure the SPI bus. */
 
       at45db_lock(priv);
+      at45db_resume(priv);
 
       /* Identify the FLASH chip and get its capacity */
 
-      at45db_resume(priv);
       ret = at45db_rdid(priv);
       if (ret != OK)
         {
