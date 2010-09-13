@@ -53,6 +53,8 @@
 #include "ea3131_internal.h"
 
 #ifdef CONFIG_LPC313X_SPI
+#if 0 /* At present, EA3131 specific logic is hard-coded in the file lpc313x_spi.c
+       * in arch/arm/src/lpc313x */
 
 /************************************************************************************
  * Definitions
@@ -150,4 +152,6 @@ uint8_t lpc313x_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   return SPI_STATUS_PRESENT;
 }
 
+#endif /* 0 */
 #endif /* CONFIG_LPC313X_SPI  */
+
