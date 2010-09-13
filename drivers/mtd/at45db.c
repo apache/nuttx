@@ -196,12 +196,23 @@ struct at45db_dev_s
  * Private Function Prototypes
  ************************************************************************************/
 
-/* Helpers */
+/* Lock and per-transactino configuration */
 
 static void at45db_lock(struct at45db_dev_s *priv);
 static inline void at45db_unlock(struct at45db_dev_s *priv);
+
+/* Power management */
+
+#ifdef CONFIG_AT45DB_PWRSAVE
 static void at45db_pwrdown(struct at45db_dev_s *priv);
 static void at45db_resume(struct at45db_dev_s *priv);
+#else
+#  define  at45db_pwrdown(priv)
+#  define  at45db_resume(priv)
+#endif
+
+/* Low-level AT45DB Helpers */
+
 static inline int at45db_rdid(struct at45db_dev_s *priv);
 static inline uint8_t at45db_rdsr(struct at45db_dev_s *priv);
 static uint8_t at45db_waitbusy(struct at45db_dev_s *priv);
@@ -279,17 +290,20 @@ static inline void at45db_unlock(struct at45db_dev_s *priv)
  * Name: at45db_pwrdown
  ************************************************************************************/
 
+#ifdef CONFIG_AT45DB_PWRSAVE
 static void at45db_pwrdown(struct at45db_dev_s *priv)
 {
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
   SPI_SEND(priv->spi, AT45DB_PWRDOWN);
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 }
+#endif
 
 /************************************************************************************
  * Name: at45db_resume
  ************************************************************************************/
 
+#ifdef CONFIG_AT45DB_PWRSAVE
 static void at45db_resume(struct at45db_dev_s *priv)
 {
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
@@ -297,6 +311,7 @@ static void at45db_resume(struct at45db_dev_s *priv)
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
   up_udelay(50);
 }
+#endif
 
 /************************************************************************************
  * Name: at45db_rdid
@@ -445,6 +460,17 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
 
   fvdbg("sector: %08lx\n", (long)sector);
 
+  /* If we not trying to conserve power, then we implement some higher performance
+   * logic:  We leave the chip busy after write and erase operations.  This improves
+   * performance because we do not have to wait as long being transactions (other
+   * processing can occur while the chip is busy) but means that the chip must stay
+   * powered.
+   */
+
+#ifndef CONFIG_AT45DB_PWRSAVE
+  at45db_waitbusy(priv);
+#endif
+
   /* "The Page Erase command can be used to individually erase any page in the main
    *  memory array allowing the Buffer to Main Memory Page Program to be utilized at a
    *  later time. ... To perform a page erase in the binary page size ..., the
@@ -465,9 +491,13 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
   SPI_SNDBLOCK(priv->spi, erasecmd, 4);
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 
-  /* Wait for any erase to complete */
+  /* Wait for any erase to complete if we are not trying to conserve power. (see
+   * comments above).
+   */
 
+#ifdef CONFIG_AT45DB_PWRSAVE
   at45db_waitbusy(priv);
+#endif
   fvdbg("Erased\n");
 }
 
@@ -478,6 +508,17 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
 static inline int at32db_chiperase(struct at45db_dev_s *priv)
 {
   fvdbg("priv: %p\n", priv);
+
+  /* If we not trying to conserve power, then we implement some higher performance
+   * logic:  We leave the chip busy after write and erase operations.  This improves
+   * performance because we do not have to wait as long being transactions (other
+   * processing can occur while the chip is busy) but means that the chip must stay
+   * powered.
+   */
+
+#ifndef CONFIG_AT45DB_PWRSAVE
+  at45db_waitbusy(priv);
+#endif
 
   /* "The entire main memory can be erased at one time by using the Chip Erase
    * command. To execute the Chip Erase command, a 4-byte command sequence C7H, 94H,
@@ -491,9 +532,13 @@ static inline int at32db_chiperase(struct at45db_dev_s *priv)
   SPI_SNDBLOCK(priv->spi, g_chiperase, CHIP_ERASE_SIZE);
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 
-  /* Wait for any erase to complete */
+  /* Wait for any erase to complete if we are not trying to conserve power. (see
+   * comments above).
+   */
 
+#ifdef CONFIG_AT45DB_PWRSAVE
   at45db_waitbusy(priv);
+#endif
   return OK;
 }
 
@@ -516,14 +561,29 @@ static inline void at45db_pgwrite(struct at45db_dev_s *priv, FAR const uint8_t *
   wrcmd[2] = (offset >>  8) & 0xff; /* 24-bit address middle byte */
   wrcmd[3] =  offset        & 0xff; /* 24-bit address LS byte */
 
+  /* If we not trying to conserve power, then we implement some higher performance
+   * logic:  We leave the chip busy after write and erase operations.  This improves
+   * performance because we do not have to wait as long being transactions (other
+   * processing can occur while the chip is busy) but means that the chip must stay
+   * powered.
+   */
+
+#ifndef CONFIG_AT45DB_PWRSAVE
+  at45db_waitbusy(priv);
+#endif
+
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
   SPI_SNDBLOCK(priv->spi, wrcmd, 4);
   SPI_SNDBLOCK(priv->spi, buffer, 1 << priv->pageshift);
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 
-  /* Wait for any write to complete */
+  /* Wait for any erase to complete if we are not trying to conserve power. (see
+   * comments above).
+   */
 
+#ifdef CONFIG_AT45DB_PWRSAVE
   at45db_waitbusy(priv);
+#endif
   fvdbg("Written\n");
 }
 
@@ -601,12 +661,13 @@ static ssize_t at45db_bwrite(FAR struct mtd_dev_s *mtd, off_t startblock, size_t
 
   /* Write each page to FLASH */
 
-  at45db_lock(priv);
   while (pgsleft-- > 0)
     {
       at45db_pgwrite(priv, buffer, startblock);
       startblock++;
    }
+
+  at45db_pwrdown(priv);
   at45db_unlock(priv);
 
   return nblocks;
@@ -637,7 +698,17 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
    */
  
   at45db_lock(priv);
-  at45db_resume(priv);
+ 
+  /* If we not trying to conserve power, then we implement some higher performance
+   * logic:  We leave the chip busy after write and erase operations.  This improves
+   * performance because we do not have to wait as long being transactions (other
+   * processing can occur while the chip is busy) but means that the chip must stay
+   * powered and that we have to add waits at all entry points.
+   */
+
+#ifndef CONFIG_AT45DB_PWRSAVE
+  at45db_waitbusy(priv);
+#endif
 
   /* Perform the read */
 
@@ -648,6 +719,7 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
 
   at45db_pwrdown(priv);
   at45db_unlock(priv);
+
   fvdbg("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
