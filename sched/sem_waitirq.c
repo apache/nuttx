@@ -114,7 +114,7 @@ void sem_waitirq(FAR _TCB *wtcb)
        * to this semaphore.
        */
 
-      sem_canceled(sem);
+      sem_canceled(wtcb, sem);
 
       /* And increment the count on the semaphore.  This releases the
        * count that was taken by sem_post().  This count decremented

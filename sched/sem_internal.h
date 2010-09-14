@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_internal.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ EXTERN void sem_addholder(FAR sem_t *sem);
 EXTERN void sem_boostpriority(FAR sem_t *sem);
 EXTERN void sem_releaseholder(FAR sem_t *sem);
 EXTERN void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem);
-EXTERN void sem_canceled(FAR sem_t *sem);
+EXTERN void sem_canceled(FAR _TCB *stcb, FAR sem_t *sem);
 #else
 #  define sem_initholders()
 #  define sem_destroyholder(sem)
@@ -108,7 +108,7 @@ EXTERN void sem_canceled(FAR sem_t *sem);
 #  define sem_boostpriority(sem)
 #  define sem_releaseholder(sem)
 #  define sem_restorebaseprio(stcb,sem)
-#  define sem_canceled(sem)
+#  define sem_canceled(stcb, sem)
 #endif
 
 #undef EXTERN

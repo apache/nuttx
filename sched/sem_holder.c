@@ -816,7 +816,7 @@ void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
  * Function:  sem_canceled
  *
  * Description:
- *   Called from sem_post() after a thread that was waiting for a semaphore
+ *   Called from sem_waitirq() after a thread that was waiting for a semaphore
  *   count was awakened because of a signal and the semaphore wait has been
  *   canceled.  This function restores the correct thread priority of each
  *   holder of the semaphore.
@@ -831,17 +831,15 @@ void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
-void sem_canceled(FAR sem_t *sem)
+void sem_canceled(FAR _TCB *stcb, FAR sem_t *sem)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-
   /* Check our assumptions */
 
   DEBUGASSERT(sem->semcount <= 0);
 
   /* Adjust the priority of every holder as necessary */
 
-  (void)sem_foreachholder(sem, sem_restoreholderprio, rtcb);
+  (void)sem_foreachholder(sem, sem_restoreholderprio, stcb);
 }
 
 /****************************************************************************
