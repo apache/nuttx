@@ -394,6 +394,10 @@ void priority_inheritance(void)
 
   printf("priority_inheritance: Started\n");
 
+  g_middlestate = NOTSTARTED;
+  for (i = 0; i < NHIGHPRI_THREADS; i++) g_highstate[i] = NOTSTARTED;
+  for (i = 0; i < NLOWPRI_THREADS; i++)  g_lowstate[i]  = NOTSTARTED;
+
   status = sched_getparam (getpid(), &sparam);
   if (status != 0)
     {
