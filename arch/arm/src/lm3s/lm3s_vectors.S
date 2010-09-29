@@ -449,7 +449,7 @@ handlers:
 	HANDLER lm3s_qei1, LM3S_IRQ_QEI1		/* Vector 54: QEI 1 */
  	HANDLER	lm3s_eth, LM3S_IRQ_ETHCON		/* Vector 58: Ethernet Controller */
 	HANDLER	lm3s_hib, LM3S_IRQ_HIBERNATE		/* Vector 59: Hibernation Module */
-	#elif defined(CONFIG_ARCH_CHIP_LM3S8962)
+#elif defined(CONFIG_ARCH_CHIP_LM3S8962)
 	HANDLER	lm3s_gpioa, LM3S_IRQ_GPIOA		/* Vector 16: GPIO Port A */
 	HANDLER	lm3s_gpiob, LM3S_IRQ_GPIOB		/* Vector 17: GPIO Port B */
 	HANDLER	lm3s_gpioc, LM3S_IRQ_GPIOC		/* Vector 18: GPIO Port C */
@@ -476,7 +476,6 @@ handlers:
 	HANDLER	lm3s_tmr2a, LM3S_IRQ_TIMER2A		/* Vector 39: Timer 2 A */
 	HANDLER	lm3s_tmr2b, LM3S_IRQ_TIMER2B		/* Vector 40: Timer 3 B */
 	HANDLER	lm3s_cmp0, LM3S_IRQ_COMPARE0		/* Vector 41: Analog Comparator 0 */
-	HANDLER	lm3s_cmp1, LM3S_IRQ_COMPARE1		/* Vector 42: Analog Comparator 1 */
 	HANDLER	lm3s_syscon, LM3S_IRQ_SYSCON		/* Vector 44: System Control */
 	HANDLER	lm3s_flashcon, LM3S_IRQ_FLASHCON	/* Vector 45: FLASH Control */
 	HANDLER	lm3s_gpiof, LM3S_IRQ_GPIOF		/* Vector 46: GPIO Port F */
@@ -486,6 +485,7 @@ handlers:
 	HANDLER	lm3s_tmr3b, LM3S_IRQ_TIMER3B		/* Vector 52: Timer 3 B */
 	HANDLER	lm3s_i2c1, LM3S_IRQ_I2C1		/* Vector 53: I2C 1 */
 	HANDLER lm3s_qei1, LM3S_IRQ_QEI1		/* Vector 54: QEI 1 */
+	HANDLER lm3s_can0, LM3S_IRQ_CAN0		/* Vector 55: CAN 0 */
  	HANDLER	lm3s_eth, LM3S_IRQ_ETHCON		/* Vector 58: Ethernet Controller */
 	HANDLER	lm3s_hib, LM3S_IRQ_HIBERNATE		/* Vector 59: Hibernation Module */
 #elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
