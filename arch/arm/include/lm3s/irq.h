@@ -264,6 +264,7 @@
 #  define LM3S_IRQ_ETHCON    (58) /* Vector 58: Ethernet Controller */
 #  define LM3S_IRQ_HIBERNATE (59) /* Vector 59: Hibernation Module */
                                   /* Vectors 60-70: Reserved */
+#  define NR_IRQS            (60) /* (Really less because of reserved vectors) */
 #else
 #  error "IRQ Numbers not specified for this LM3S chip"
 #endif
