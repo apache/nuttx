@@ -96,16 +96,12 @@
 
 void weak_function lpc313x_spiinitialize(void)
 {
-  /* NOTE: Clocking for SPI has already been provided.
-   *       Configurations of SPI pins is performed in lpc313x_spi.c.
-   *       Here, we only initialize chip select pins unique to the board
-   *       architecture.
+  /* NOTE: Clocking for SPI has already been provided. Pin configuration is performed
+   * on-the-fly, so no additional setup is required.
    */
-
-  gpio_outputhigh(LPC313X_IOCONFIG_SPI, SPINOR_CS);
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name:  lpc313x_spiselect and lpc313x_spistatus
  *
  * Description:
@@ -128,23 +124,12 @@ void weak_function lpc313x_spiinitialize(void)
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 void lpc313x_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-
-  if (devid == SPIDEV_FLASH)
-    {
-      if (selected)
-        {
-          gpio_outputlow(LPC313X_IOCONFIG_SPI, SPINOR_CS);
-        }
-      else
-        {
-          gpio_outputhigh(LPC313X_IOCONFIG_SPI, SPINOR_CS);
-        }
-    }
+#warning "Missing logic"
 }
 
 uint8_t lpc313x_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
