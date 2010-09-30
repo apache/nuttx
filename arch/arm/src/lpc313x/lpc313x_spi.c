@@ -59,10 +59,23 @@
  * Definitions
  ************************************************************************************/
 
+/* Configuration ********************************************************************/
+
+/* Debug ****************************************************************************/
+/* Define the following to enable extremely detailed register debug */
+
+#undef CONFIG_DEBUG_SPIREGS
+
+/* CONFIG_DEBUG must also be defined */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_SPIREGS
+#endif
+
+/* Timing ***************************************************************************/
+
 #define SPI_MAX_DIVIDER 65024 /* = 254 * (255 + 1) */
 #define SPI_MIN_DIVIDER 2
-
-/* Configuration ********************************************************************/
 
 /************************************************************************************
  * Private Types
@@ -70,20 +83,30 @@
 
 struct lpc313x_spidev_s
 {
-  struct spi_dev_s spidev;			/* Externally visible part of the SPI interface */
-  sem_t            exclsem;			/* Held while chip is selected for mutual exclusion */
-  uint32_t         frequency;			/* Requested clock frequency */
-  uint32_t         actual;			/* Actual clock frequency */
-  uint8_t          nbits;			/* Width of work in bits (8 or 16) */
-  uint8_t          mode;			/* Mode 0,1,2,3 */
+  struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
+  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
+  uint32_t         frequency;  /* Requested clock frequency */
+  uint32_t         actual;     /* Actual clock frequency */
+  uint8_t          nbits;      /* Width of work in bits (8 or 16) */
+  uint8_t          mode;       /* Mode 0,1,2,3 */
     
-  uint32_t	   slv1;
-  uint32_t	   slv2;
+  uint32_t         slv1;
+  uint32_t         slv2;
 };
 
 /************************************************************************************
  * Private Function Prototypes
  ************************************************************************************/
+
+#ifdef CONFIG_DEBUG_SPIREGS
+static bool        spi_checkreg(bool wr, uint32_t value, uint32_t address);
+static void        spi_putreg(uint32_t value, uint32_t address);
+static uint32_t    spi_getreg(uint32_t address);
+#else
+#  define spi_putreg(v,a) putreg32(v,a)
+#  define spi_getreg(a)   getreg32(a)
+#endif
+
 static inline void spi_drive_cs(FAR struct lpc313x_spidev_s *priv, uint8_t slave, uint8_t val);
 static inline void spi_select_slave(FAR struct lpc313x_spidev_s *priv, uint8_t slave);
 static inline uint16_t spi_readword(FAR struct lpc313x_spidev_s *priv);
@@ -130,8 +153,15 @@ static const struct spi_ops_s g_spiops =
 
 static struct lpc313x_spidev_s g_spidev = 
 {
-  .spidev    = { &g_spiops },
+  .spidev            = { &g_spiops },
 };
+
+#ifdef CONFIG_DEBUG_SPIREGS
+static bool     g_wrlast;
+static uint32_t g_addresslast;
+static uint32_t g_valuelast;
+static int      g_ntimes;
+#endif
 
 /************************************************************************************
  * Public Data
@@ -140,6 +170,98 @@ static struct lpc313x_spidev_s g_spidev =
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
+
+/****************************************************************************
+ * Name: spi_checkreg
+ *
+ * Description:
+ *   Check if the current register access is a duplicate of the preceding.
+ *
+ * Input Parameters:
+ *   value   - The value to be written
+ *   address - The address of the register to write to
+ *
+ * Returned Value:
+ *   true:  This is the first register access of this type.
+ *   flase: This is the same as the preceding register access.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_SPIREGS
+static bool spi_checkreg(bool wr, uint32_t value, uint32_t address)
+{
+  if (wr == g_wrlast && value == g_valuelast && address == g_addresslast)
+    {
+      g_ntimes++;
+      return false;
+    }
+  else
+    {
+      if (g_ntimes > 0)
+        {
+          lldbg("...[Repeats %d times]...\n", g_ntimes);
+        }
+
+      g_wrlast      = wr;
+      g_valuelast   = value;
+      g_addresslast = address;
+      g_ntimes      = 0;
+    }
+  return true;
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_putreg
+ *
+ * Description:
+ *   Write a 32-bit value to an SPI register
+ *
+ * Input Parameters:
+ *   value   - The value to be written
+ *   address - The address of the register to write to
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_SPIREGS
+static void spi_putreg(uint32_t value, uint32_t address)
+{
+  if (spi_checkreg(true, value, address))
+    {
+      lldbg("%08x<-%08x\n", address, value);
+    }
+  putreg32(value, address);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_getreg
+ *
+ * Description:
+ *   Read a 32-bit value from an SPI register
+ *
+ * Input Parameters:
+ *   address - The address of the register to read from
+ *
+ * Returned Value:
+ *   The value read from the register
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_SPIREGS
+static uint32_t spi_getreg(uint32_t address)
+{
+  uint32_t value = getreg32(address);
+  if (spi_checkreg(false, value, address))
+    {
+      lldbg("%08x->%08x\n", address, value);
+    }
+  return value;
+}
+#endif
 
 /****************************************************************************
  * Name: spi_drive_cs
@@ -163,26 +285,38 @@ static inline void spi_drive_cs(FAR struct lpc313x_spidev_s *priv, uint8_t slave
     {
     case 0:
       if (val == 0)
-	  putreg32 (IOCONFIG_SPI_CSOUT0, LPC313X_IOCONFIG_SPI_MODE0RESET);
+        {
+          spi_putreg(IOCONFIG_SPI_CSOUT0, LPC313X_IOCONFIG_SPI_MODE0RESET);
+        }
       else
-	  putreg32 (IOCONFIG_SPI_CSOUT0, LPC313X_IOCONFIG_SPI_MODE0SET);
-      putreg32 (IOCONFIG_SPI_CSOUT0, LPC313X_IOCONFIG_SPI_MODE1SET);
+        {
+          spi_putreg(IOCONFIG_SPI_CSOUT0, LPC313X_IOCONFIG_SPI_MODE0SET);
+        }
+      spi_putreg(IOCONFIG_SPI_CSOUT0, LPC313X_IOCONFIG_SPI_MODE1SET);
       break;
       
     case 1:
       if (val == 0)
-	  putreg32 (IOCONFIG_EBII2STX0_MUARTCTSN, LPC313X_IOCONFIG_EBII2STX0_MODE0RESET);
+        {
+          spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN, LPC313X_IOCONFIG_EBII2STX0_MODE0RESET);
+        }
       else
-	  putreg32 (IOCONFIG_EBII2STX0_MUARTCTSN, LPC313X_IOCONFIG_EBII2STX0_MODE0SET);
-      putreg32 (IOCONFIG_EBII2STX0_MUARTCTSN, LPC313X_IOCONFIG_EBII2STX0_MODE1SET);
+        {
+          spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN, LPC313X_IOCONFIG_EBII2STX0_MODE0SET);
+        }
+      spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN, LPC313X_IOCONFIG_EBII2STX0_MODE1SET);
       break;
 
     case 2:
       if (val == 0)
-	  putreg32 (IOCONFIG_EBII2STX0_MUARTRTSN, LPC313X_IOCONFIG_EBII2STX0_MODE0RESET);
+        {
+          spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN, LPC313X_IOCONFIG_EBII2STX0_MODE0RESET);
+        }
       else
-	  putreg32 (IOCONFIG_EBII2STX0_MUARTRTSN, LPC313X_IOCONFIG_EBII2STX0_MODE0SET);
-      putreg32 (IOCONFIG_EBII2STX0_MUARTRTSN, LPC313X_IOCONFIG_EBII2STX0_MODE1SET);
+        {
+          spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN, LPC313X_IOCONFIG_EBII2STX0_MODE0SET);
+        }
+      spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN, LPC313X_IOCONFIG_EBII2STX0_MODE1SET);
       break;
     }
 }
@@ -207,20 +341,21 @@ static inline void spi_select_slave(FAR struct lpc313x_spidev_s *priv, uint8_t s
   switch (slave)
     {
     case 0:
-      putreg32 (priv->slv1, LPC313X_SPI_SLV0_1);
-      putreg32 (priv->slv2, LPC313X_SPI_SLV0_2);
-      putreg32 (SPI_SLVENABLE1_ENABLED, LPC313X_SPI_SLVENABLE);
+      spi_putreg(priv->slv1, LPC313X_SPI_SLV0_1);
+      spi_putreg(priv->slv2, LPC313X_SPI_SLV0_2);
+      spi_putreg(SPI_SLVENABLE1_ENABLED, LPC313X_SPI_SLVENABLE);
       break;
       
     case 1:
-      putreg32 (priv->slv1, LPC313X_SPI_SLV1_1);
-      putreg32 (priv->slv2, LPC313X_SPI_SLV1_2);
-      putreg32 (SPI_SLVENABLE2_ENABLED, LPC313X_SPI_SLVENABLE);
+      spi_putreg(priv->slv1, LPC313X_SPI_SLV1_1);
+      spi_putreg(priv->slv2, LPC313X_SPI_SLV1_2);
+      spi_putreg(SPI_SLVENABLE2_ENABLED, LPC313X_SPI_SLVENABLE);
+      break;
 
     case 2:
-      putreg32 (priv->slv1, LPC313X_SPI_SLV2_1);
-      putreg32 (priv->slv2, LPC313X_SPI_SLV2_2);
-      putreg32 (SPI_SLVENABLE3_ENABLED, LPC313X_SPI_SLVENABLE);
+      spi_putreg(priv->slv1, LPC313X_SPI_SLV2_1);
+      spi_putreg(priv->slv2, LPC313X_SPI_SLV2_2);
+      spi_putreg(SPI_SLVENABLE3_ENABLED, LPC313X_SPI_SLVENABLE);
       break;
     }
 }
@@ -243,12 +378,12 @@ static inline uint16_t spi_readword(FAR struct lpc313x_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((getreg32 (LPC313X_SPI_STATUS) & SPI_STATUS_RXFIFOEMPTY) != 0)
-      ;
+  while ((spi_getreg(LPC313X_SPI_STATUS) & SPI_STATUS_RXFIFOEMPTY) != 0)
+    ;
 
   /* Then return the received byte */
 
-  uint32_t val = getreg32 (LPC313X_SPI_FIFODATA);
+  uint32_t val = spi_getreg(LPC313X_SPI_FIFODATA);
 
   return val;
 }
@@ -272,12 +407,12 @@ static inline void spi_writeword(FAR struct lpc313x_spidev_s *priv, uint16_t wor
 {
   /* Wait until the transmit buffer is not full */
 
-  while ((getreg32 (LPC313X_SPI_STATUS) & SPI_STATUS_TXFIFOFULL) != 0)
-	;
+  while ((spi_getreg(LPC313X_SPI_STATUS) & SPI_STATUS_TXFIFOFULL) != 0)
+    ;
 
   /* Then send the byte */
 
-  putreg32 (word, LPC313X_SPI_FIFODATA);
+  spi_putreg(word, LPC313X_SPI_FIFODATA);
 }
 
 /****************************************************************************
@@ -355,12 +490,15 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     case SPIDEV_FLASH:
       slave = 0;
       break;
+
     case SPIDEV_MMCSD:
       slave = 1;
       break;
+
     case SPIDEV_ETHERNET:
       slave = 2;
       break;
+
     default:
       return;
     }
@@ -374,24 +512,24 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
   if (selected)
   {
-      spi_drive_cs (priv, slave, 0);
-      spi_select_slave (priv, slave);
+      spi_drive_cs(priv, slave, 0);
+      spi_select_slave(priv, slave);
       
       /* Enable SPI as master and notify of slave enables change */
 
-      putreg32 ((1 << SPI_CONFIG_INTERSLVDELAY_SHIFT) | SPI_CONFIG_UPDENABLE | SPI_CONFIG_SPIENABLE, LPC313X_SPI_CONFIG);
+      spi_putreg((1 << SPI_CONFIG_INTERSLVDELAY_SHIFT) | SPI_CONFIG_UPDENABLE | SPI_CONFIG_SPIENABLE, LPC313X_SPI_CONFIG);
   }
   else
   {
-      spi_drive_cs (priv, slave, 1);
+      spi_drive_cs(priv, slave, 1);
       
       /* Disable all slaves */
 
-      putreg32 (0, LPC313X_SPI_SLVENABLE);
+      spi_putreg(0, LPC313X_SPI_SLVENABLE);
       
       /* Disable SPI as master */
 
-      putreg32 (SPI_CONFIG_UPDENABLE, LPC313X_SPI_CONFIG);
+      spi_putreg(SPI_CONFIG_UPDENABLE, LPC313X_SPI_CONFIG);
   }
 }
 
@@ -420,16 +558,20 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
       /* The SPI clock is derived from the (main system oscillator / 2),
        * so compute the best divider from that clock */
       
-      spi_clk = lpc313x_clkfreq (CLKID_SPICLK, DOMAINID_SPI);
+      spi_clk = lpc313x_clkfreq(CLKID_SPICLK, DOMAINID_SPI);
       
       /* Find closest divider to get at or under the target frequency */
       
       div = (spi_clk + frequency / 2) / frequency;
       
       if (div > SPI_MAX_DIVIDER)
-	  div = SPI_MAX_DIVIDER;
-      if (div < SPI_MIN_DIVIDER)
-	  div = SPI_MIN_DIVIDER;
+        {
+          div = SPI_MAX_DIVIDER;
+        }
+      else if (div < SPI_MIN_DIVIDER)
+        {
+          div = SPI_MIN_DIVIDER;
+        }
       
       div2 = (((div-1) / 512) + 2) * 2;
       div1 = ((((div + div2 / 2) / div2) - 1));
@@ -437,7 +579,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
       priv->slv1 = (priv->slv1 & ~(SPI_SLV_1_CLKDIV2_MASK | SPI_SLV_1_CLKDIV1_MASK)) | (div2 << SPI_SLV_1_CLKDIV2_SHIFT) | (div1 << SPI_SLV_1_CLKDIV1_SHIFT);
 
       priv->frequency = frequency;
-      priv->actual    = frequency;		// FIXME
+      priv->actual    = frequency;                // FIXME
   }
 
   return priv->actual;
@@ -617,7 +759,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         {
           /* Get the next word to write.  Is there a source buffer? */
 
-	  word = src ? *src++ : 0xffff;
+          word = src ? *src++ : 0xffff;
 
           /* Exchange one word */
  
@@ -643,7 +785,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         {
           /* Get the next word to write.  Is there a source buffer? */
 
-	  word = src ? *src++ : 0xff;
+          word = src ? *src++ : 0xff;
 
           /* Exchange one word */
  
@@ -734,22 +876,34 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   FAR struct lpc313x_spidev_s *priv = &g_spidev;
 
   /* Only the SPI0 interface is supported */
+
   if (port != 0)
     {
       return NULL;
     }
 
+  /* Configure SPI pins.  Nothing needs to be done here because the SPI pins
+   * default to "driven-by-IP" on reset.
+   */
+
+#ifdef CONFIG_DEBUG_SPIREGS
+  lldbg("PINS: %08x MODE0: %08x MODE1: %08x\n",
+        spi_getreg(LPC313X_IOCONFIG_SPI_PINS),
+        spi_getreg(LPC313X_IOCONFIG_SPI_MODE0),
+        spi_getreg(LPC313X_IOCONFIG_SPI_MODE1));
+#endif
+
   /* Enable SPI clocks */
 
-  lpc313x_enableclock (CLKID_SPIPCLK);
-  lpc313x_enableclock (CLKID_SPIPCLKGATED);
-  lpc313x_enableclock (CLKID_SPICLK);
-  lpc313x_enableclock (CLKID_SPICLKGATED);
+  lpc313x_enableclock(CLKID_SPIPCLK);
+  lpc313x_enableclock(CLKID_SPIPCLKGATED);
+  lpc313x_enableclock(CLKID_SPICLK);
+  lpc313x_enableclock(CLKID_SPICLKGATED);
 
   /* Soft Reset the module */
 
-  lpc313x_softreset (RESETID_SPIRSTAPB);
-  lpc313x_softreset (RESETID_SPIRSTIP);
+  lpc313x_softreset(RESETID_SPIRSTAPB);
+  lpc313x_softreset(RESETID_SPIRSTIP);
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
@@ -757,7 +911,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Reset the SPI block */
 
-  putreg32 (SPI_CONFIG_SOFTRST, LPC313X_SPI_CONFIG);
+  spi_putreg(SPI_CONFIG_SOFTRST, LPC313X_SPI_CONFIG);
 
   /* Initialise Slave 0 settings registers */
 
@@ -767,12 +921,12 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   /* Configure initial default mode */
 
   priv->mode = SPIDEV_MODE1;
-  spi_setmode (&priv->spidev, SPIDEV_MODE0);
+  spi_setmode(&priv->spidev, SPIDEV_MODE0);
 
   /* Configure word width */
 
   priv->nbits = 0;
-  spi_setbits (&priv->spidev, 8);
+  spi_setbits(&priv->spidev, 8);
 
   /* Select a default frequency of approx. 400KHz */
 
