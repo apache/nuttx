@@ -416,6 +416,14 @@ On-Demand Paging
      The references and issues related to this are discussed in (2)
      and (3) above.
 
+  Basic support for paging from SPI NOR FLASH can be enabled by adding:
+
+    CONFIG_PAGING_AT45DB=y
+
+  Or:
+
+    CONFIG_PAGING_M25PX=y
+
   Alternative:
   ------------
 

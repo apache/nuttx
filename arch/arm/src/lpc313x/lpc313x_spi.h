@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc313x/lpc313x_spi.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,7 +123,7 @@
 
 #define SPI_CONFIG_INTERSLVDELAY_SHIFT   (16)      /* Bits 16-31: Delay between xfrs to different slaves  */
 #define SPI_CONFIG_NTERSLVDELAY_MASK     (0xffff << SPI_CONFIG_INTERSLVDELAY_SHIFT)
-#define SPI_CONFIG_UPDENABLE             (1 << 7)  /* Bit 7:  7 W Update enable bit */
+#define SPI_CONFIG_UPDENABLE             (1 << 7)  /* Bit 7:  7 Update enable bit */
 #define SPI_CONFIG_SOFTRST               (1 << 6)  /* Bit 6:  6 Software reset bit */
 #define SPI_CONFIG_SLVDISABLE            (1 << 4)  /* Bit 4:  4 Slave output disable (slave mode) */
 #define SPI_CONFIG_XMITMODE              (1 << 3)  /* Bit 3:  3 Transmit mode */
