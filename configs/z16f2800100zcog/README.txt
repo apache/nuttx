@@ -1,6 +1,8 @@
 README.txt
 ^^^^^^^^^^
 
+This is the README file for the NuttX port to the ZiLog ZNEO MCU.
+
 ZDS-II Compiler Versions
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -23,10 +25,17 @@ ZDS-II Compiler Versions
   - The Pascal add-on interpreter includes a large switch statement and
     exposes another compiler problem.  This is reported as incident 81459.
 
-If you use any version of ZDS-II other than 4.11.0 or if you install ZDS-II
+4.11.1
+  As of this writing (30 September 2010), the latest release of ZDS-II for the
+  ZNEO is 4.11.1.  It is unknown if this release includes fixes for incidents
+  81400 and 81459 or not.  It is unknown if the code will run without -reduceopt
+  either. (Basically, it compiles with 4.11.1, but is untested with that version).
+
+If you use any version of ZDS-II other than 4.11.1 or if you install ZDS-II
 at any location other than the default location, you will have to modify
 two files:  (1) configs/z16f2800100zcog/*/setenv.sh and (2)
-configs/z16f2800100zcog/*/Make.defs.
+configs/z16f2800100zcog/*/Make.defs.  Simply edit these two files, changing
+4.11.1 to whatever.
 
 Configuration Subdirectories
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -41,7 +50,7 @@ following steps:
 
    cd <nuttx-top-directory>/tools
    ./configure.sh z16f2800100zcog/<sub-directory>
-   cd <nuttx-top-directgory>
+   cd <nuttx-top-directory>
    make
 
 Where <sub-directory> is the specific board configuration that you

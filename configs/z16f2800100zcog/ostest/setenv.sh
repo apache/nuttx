@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/z16f2800100zcog/ostest/setenv.sh
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,9 @@ fi
 # The ZDS-II toolchain lies outside of the Cygwin "sandbox" and
 # attempts to set the PATH variable do not have the desired effect.
 # Instead, alias are provided for all of the ZDS-II command line tools.
-# Version 4.11.0 installed in the default location is assumed here.
+# Version 4.11.1 installed in the default location is assumed here.
 #
-ZDSBINDIR="C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.11.0/bin"
+ZDSBINDIR="C:/Program\ Files/ZiLOG/ZDSII_ZNEO_4.11.1/bin"
 alias zneoasm="${ZDSBINDIR}/zneoasm.exe"
 alias zneocc="${ZDSBINDIR}/zneocc.exe"
 alias zneolib="${ZDSBINDIR}/zneolib.exe"
