@@ -364,7 +364,7 @@ static inline void spi_select_slave(FAR struct lpc313x_spidev_s *priv, uint8_t s
  * Name: spi_readword
  *
  * Description:
- *   Read one byte from SPI
+ *   Read one word from SPI
  *
  * Input Parameters:
  *   priv - Device-specific state data
@@ -381,7 +381,7 @@ static inline uint16_t spi_readword(FAR struct lpc313x_spidev_s *priv)
   while ((spi_getreg(LPC313X_SPI_STATUS) & SPI_STATUS_RXFIFOEMPTY) != 0)
     ;
 
-  /* Then return the received byte */
+  /* Then return the received word */
 
   uint32_t val = spi_getreg(LPC313X_SPI_FIFODATA);
 
@@ -392,11 +392,11 @@ static inline uint16_t spi_readword(FAR struct lpc313x_spidev_s *priv)
  * Name: spi_writeword
  *
  * Description:
- *   Write one byte to SPI
+ *   Write one word to SPI
  *
  * Input Parameters:
  *   priv - Device-specific state data
- *   byte - Byte to send
+ *   word - Word to send
  *
  * Returned Value:
  *   None
@@ -410,7 +410,7 @@ static inline void spi_writeword(FAR struct lpc313x_spidev_s *priv, uint16_t wor
   while ((spi_getreg(LPC313X_SPI_STATUS) & SPI_STATUS_TXFIFOFULL) != 0)
     ;
 
-  /* Then send the byte */
+  /* Then send the word */
 
   spi_putreg(word, LPC313X_SPI_FIFODATA);
 }
