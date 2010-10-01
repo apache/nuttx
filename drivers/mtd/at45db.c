@@ -330,10 +330,8 @@ static void at45db_resume(struct at45db_dev_s *priv)
 
 static inline int at45db_rdid(struct at45db_dev_s *priv)
 {
-  uint16_t manufacturer;
-  uint16_t devid1;
-  uint16_t devid2;
-  uint16_t capacity;
+  uint8_t capacity;
+  uint8_t devid[3];
 
   fvdbg("priv: %p\n", priv);
 
@@ -343,30 +341,28 @@ static inline int at45db_rdid(struct at45db_dev_s *priv)
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
 
-  /* Send the " Manufacturer and Device ID Read" command and read the first three
-   * ID bytes 
+  /* Send the " Manufacturer and Device ID Read" command and read the next three
+   * ID bytes from the FLASH.
    */
 
   (void)SPI_SEND(priv->spi, AT45DB_RDDEVID);
-  manufacturer = SPI_SEND(priv->spi, 0xff);
-  devid1       = SPI_SEND(priv->spi, 0xff);
-  devid2       = SPI_SEND(priv->spi, 0xff);
+  SPI_RECVBLOCK(priv->spi, devid, 3);
 
-  /* Deselect the FLASH and unlock the bus */
+  /* Deselect the FLASH */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
 
   fvdbg("manufacturer: %02x devid1: %02x devid2: %02x\n",
-        manufacturer, devid1, devid2);
+        devid[0], devid[1], devid[2]);
  
   /* Check for a valid manufacturer and memory family */
 
-  if (manufacturer == AT45DB_MANUFACTURER &&
-      (devid1 & AT45DB_DEVID1_FAMMSK) == AT45DB_DEVID1_DFLASH)
+  if (devid[0] == AT45DB_MANUFACTURER &&
+     (devid[1] & AT45DB_DEVID1_FAMMSK) == AT45DB_DEVID1_DFLASH)
     {
       /* Okay.. is it a FLASH capacity that we understand? */
 
-      capacity = devid1 & AT45DB_DEVID1_CAPMSK;
+      capacity = devid[1] & AT45DB_DEVID1_CAPMSK;
       switch (capacity)
         {
         case AT45DB_DEVID1_1MBIT:
