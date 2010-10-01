@@ -72,6 +72,10 @@
 #  undef CONFIG_DEBUG_SPIREGS
 #endif
 
+/* FIFOs ****************************************************************************/
+
+#define SPI_FIFO_DEPTH  64    /* 64 words deep (8- or 16-bit words) */
+
 /* Timing ***************************************************************************/
 
 #define SPI_MAX_DIVIDER 65024 /* = 254 * (255 + 1) */
@@ -118,7 +122,7 @@ static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequenc
 static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint8_t     spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t word);
 static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
@@ -376,16 +380,13 @@ static inline void spi_select_slave(FAR struct lpc313x_spidev_s *priv, uint8_t s
 
 static inline uint16_t spi_readword(FAR struct lpc313x_spidev_s *priv)
 {
-  /* Wait until the receive buffer is not empty */
+  /* Wait until the RX FIFO is not empty */
 
-  while ((spi_getreg(LPC313X_SPI_STATUS) & SPI_STATUS_RXFIFOEMPTY) != 0)
-    ;
+  while ((spi_getreg(LPC313X_SPI_STATUS) & SPI_STATUS_RXFIFOEMPTY) != 0);
 
   /* Then return the received word */
 
-  uint32_t val = spi_getreg(LPC313X_SPI_FIFODATA);
-
-  return val;
+  return (uint16_t)spi_getreg(LPC313X_SPI_FIFODATA);
 }
 
 /************************************************************************************
@@ -405,10 +406,9 @@ static inline uint16_t spi_readword(FAR struct lpc313x_spidev_s *priv)
 
 static inline void spi_writeword(FAR struct lpc313x_spidev_s *priv, uint16_t word)
 {
-  /* Wait until the transmit buffer is not full */
+  /* Wait until the TX FIFO is not full */
 
-  while ((spi_getreg(LPC313X_SPI_STATUS) & SPI_STATUS_TXFIFOFULL) != 0)
-    ;
+  while ((spi_getreg(LPC313X_SPI_STATUS) & SPI_STATUS_TXFIFOFULL) != 0);
 
   /* Then send the word */
 
@@ -701,21 +701,21 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *   Exchange one word on SPI
  *
  * Input Parameters:
- *   dev - Device-specific state data
- *   wd  - The word to send.  the size of the data is determined by the
- *         number of bits selected for the SPI interface.
+ *   dev  - Device-specific state data
+ *   word - The word to send.  the size of the data is determined by the
+ *          number of bits selected for the SPI interface.
  *
  * Returned Value:
  *   response
  *
  ************************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t word)
 {
   FAR struct lpc313x_spidev_s *priv = (FAR struct lpc313x_spidev_s *)dev;
   DEBUGASSERT(priv);
 
-  spi_writeword(priv, wd);
+  spi_writeword(priv, word);
   return spi_readword(priv);
 }
 
@@ -743,6 +743,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   FAR struct lpc313x_spidev_s *priv = (FAR struct lpc313x_spidev_s *)dev;
+  unsigned int maxtx;
+  unsigned int ntx;
+
   DEBUGASSERT(priv);
 
   /* 8- or 16-bit mode? */
@@ -755,21 +758,35 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
             uint16_t *dest = (uint16_t*)rxbuffer;
             uint16_t  word;
 
-      while (nwords-- > 0)
+      while (nwords > 0)
         {
-          /* Get the next word to write.  Is there a source buffer? */
+          /* Fill up the TX FIFO */
 
-          word = src ? *src++ : 0xffff;
-
-          /* Exchange one word */
- 
-          word = spi_send(dev, word);
-
-          /* Is there a buffer to receive the return value? */
-
-          if (dest)
+          maxtx = nwords > SPI_FIFO_DEPTH ? SPI_FIFO_DEPTH : nwords;
+          for (ntx = 0; ntx < maxtx; ntx++)
             {
-              *dest++ = word;
+              /* Get the next word to write.  Is there a source buffer? */
+
+              word = src ? *src++ : 0xffff;
+
+              /* Then send the word */
+
+              spi_writeword(priv, word);
+            }
+          nwords -= maxtx;
+
+          /* Then empty the RX FIFO */
+
+          while (ntx-- > 0)
+            {
+              word = spi_readword(priv);
+
+              /* Is there a buffer to receive the return value? */
+
+              if (dest)
+                {
+                  *dest++ = word;
+                }
             }
         } 
     }
@@ -781,22 +798,36 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
             uint8_t *dest = (uint8_t*)rxbuffer;
             uint8_t  word;
 
-      while (nwords-- > 0)
+      while (nwords > 0)
         {
-          /* Get the next word to write.  Is there a source buffer? */
+          /* Fill up the TX FIFO */
 
-          word = src ? *src++ : 0xff;
-
-          /* Exchange one word */
- 
-          word = (uint8_t)spi_send(dev, (uint16_t)word);
-
-          /* Is there a buffer to receive the return value? */
-
-          if (dest)
+          maxtx = nwords > SPI_FIFO_DEPTH ? SPI_FIFO_DEPTH : nwords;
+          for (ntx = 0; ntx < maxtx; ntx++)
             {
-              *dest++ = word;
-            } 
+              /* Get the next word to write.  Is there a source buffer? */
+
+              word = src ? *src++ : 0xff;
+
+              /* Then send the word */
+
+              spi_writeword(priv, (uint16_t)word);
+            }
+          nwords -= maxtx;
+
+          /* Then empty the RX FIFO */
+
+          while (ntx-- > 0)
+            {
+              word = (uint8_t)spi_readword(priv);
+
+              /* Is there a buffer to receive the return value? */
+
+              if (dest)
+                {
+                  *dest++ = word;
+                }
+            }
         }
     }
 }
