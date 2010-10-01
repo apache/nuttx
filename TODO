@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 13, 2010)
+NuttX TODO List (Last updated September 30, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -34,7 +34,7 @@ NuttX TODO List (Last updated September 13, 2010)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
   (8)  z80/z8/ez80 (arch/z80/)
-  (9)  z16 (arch/z16/)
+  (8)  z16 (arch/z16/)
   (1)  mc68hc1x (arch/hc)
 
 o Task/Scheduler (sched/)
@@ -1164,10 +1164,6 @@ o z16 (arch/z16)
 
   Description: Add support for prioritized interrupts.  Currently logic supports
                only nominal interrupt priority.
-  Status:      Open
-  Priority:    Low
-
-  Description: Upgrade to the ZDS-II ZNEO 4.11.1 toolchain
   Status:      Open
   Priority:    Low
 
