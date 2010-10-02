@@ -424,6 +424,12 @@ On-Demand Paging
 
     CONFIG_PAGING_M25PX=y
 
+  NOTE:  See the TODO list in the top-level directory:
+  
+    "arch/arm/src/lpc313x/lpc313x_spi.c may or may not be functional.  It was
+     reported to be working, but I was unable to get it working with the
+     Atmel at45dbxx serial FLASH driver."
+
   Alternative:
   ------------
 
