@@ -734,13 +734,14 @@ void sem_releaseholder(FAR sem_t *sem)
  *   stcb - The TCB of the task that was just started (if any).  If the
  *     post action caused a count to be given to another thread, then stcb
  *     is the TCB that received the count.  Note, just because stcb received
- *     the count, it does not mean that it it is higher priority than other threads.
+ *     the count, it does not mean that it it is higher priority than other
+ *     threads.
  *   sem - A reference to the semaphore being posted.
  *     - If the semaphore count is <0 then there are still threads waiting
- *       for a count.  stcb should be non-null and will be higher priority than
- *       all of the other threads still waiting.
- *     - If it is ==0 then stcb refers to the thread that got the last count; no
- *       other threads are waiting.
+ *       for a count.  stcb should be non-null and will be higher priority
+ *       than all of the other threads still waiting.
+ *     - If it is ==0 then stcb refers to the thread that got the last count;
+ *       no other threads are waiting.
  *     - If it is >0 then there should be no threads waiting for counts and
  *       stcb should be null.
  *
@@ -831,6 +832,7 @@ void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_SIGNALS
 void sem_canceled(FAR _TCB *stcb, FAR sem_t *sem)
 {
   /* Check our assumptions */
@@ -841,6 +843,7 @@ void sem_canceled(FAR _TCB *stcb, FAR sem_t *sem)
 
   (void)sem_foreachholder(sem, sem_restoreholderprio, stcb);
 }
+#endif
 
 /****************************************************************************
  * Function:  sem_enumholders

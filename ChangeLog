@@ -1265,7 +1265,7 @@
 	  are after this point, but really causes problems if you want to handle
 	  data and prefectch aborts which are within this zeroed region.
 
-5.11 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.11 2010-10-01 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* configs/ea3131/src/up_fillpage.c - Added new configuration item
 	  CONFIG_PAGING_BINPATH.  If CONFIG_PAGING_BINPATH is defined, then it
@@ -1286,4 +1286,7 @@
 	  to work correctly with these changes in place.
 	* examples/ostest/prioinherit.c - Need to reinitialize globals if
 	  test is ran repeatedly in a loop.
+	* configs/ez80f910200zco - Updated to used ZDS-II 4.11.1
+
+5.12 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 

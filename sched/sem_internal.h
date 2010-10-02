@@ -100,7 +100,11 @@ EXTERN void sem_addholder(FAR sem_t *sem);
 EXTERN void sem_boostpriority(FAR sem_t *sem);
 EXTERN void sem_releaseholder(FAR sem_t *sem);
 EXTERN void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem);
+#  ifndef CONFIG_DISABLE_SIGNALS
 EXTERN void sem_canceled(FAR _TCB *stcb, FAR sem_t *sem);
+#  else
+#    define sem_canceled(stcb, sem)
+#  endif
 #else
 #  define sem_initholders()
 #  define sem_destroyholder(sem)

@@ -89,7 +89,10 @@ MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c \
 		  mq_send.c mq_timedsend.c mq_sndinternal.c \
 		  mq_receive.c mq_timedreceive.c mq_rcvinternal.c \
 		  mq_setattr.c mq_getattr.c mq_initialize.c mq_descreate.c \
-		  mq_findnamed.c mq_msgfree.c mq_msgqfree.c mq_waitirq.c
+		  mq_findnamed.c mq_msgfree.c mq_msgqfree.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+MQUEUE_SRCS	+= mq_waitirq.c
+endif
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 MQUEUE_SRCS	+= mq_notify.c
 endif
@@ -125,7 +128,10 @@ endif
 SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
 		  sem_open.c sem_close.c sem_unlink.c \
 		  sem_wait.c sem_trywait.c sem_post.c sem_getvalue.c \
-                  sem_waitirq.c sem_findnamed.c
+		  sem_findnamed.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+SEM_SRCS	+= sem_waitirq.c
+endif
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 SEM_SRCS	+= sem_holder.c
 endif

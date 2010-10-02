@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated September 30, 2010)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated October 1, 2010)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
@@ -26,7 +26,7 @@ NuttX TODO List (Last updated September 30, 2010)
   (2)  ARM/i.MX (arch/arm/src/imx/)
   (4)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
-  (1)  ARM/LPC313x (arch/arm/src/lpc313x/)
+  (2)  ARM/LPC313x (arch/arm/src/lpc313x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (5)  ARM/STM32 (arch/arm/src/stm32/)
@@ -794,7 +794,7 @@ o ARM/LPC313x (arch/arm/src/lpc313x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Description: arch/arm/src/lpc313x/lpc313x_spi.c contains logic that is specific to the
-               Embedded Artist's ea3131 board.  We need to abstract the assignmen of SPI
+               Embedded Artist's ea3131 board.  We need to abstract the assignment of SPI
                chip selects and logic SPI functions (like SPIDEV_FLASH).  My thoughts are:
                - Remove lpc313x_spiselect and lpc313x_spistatus from lpc313x_internal.h
                - Remove configs/ea3131/src/up_spi.c
@@ -805,6 +805,12 @@ o ARM/LPC313x (arch/arm/src/lpc313x/)
                  settings.
   Status:      Open
   Priority:    High if you want to use SPI on any board other than the ea3131.
+
+  Description: arch/arm/src/lpc313x/lpc313x_spi.c may or may not be functional.  It was
+               reported to be working, but I was unable to get it working with the
+               Atmel at45dbxx serial FLASH driver.
+  Status:      Open
+  Priority:    High if you need to use SPI.
 
 o ARM/STR71x (arch/arm/src/str71x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
