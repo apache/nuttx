@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/at91dev1/src/up_boot.c
+ * configs/avr32dev1/src/up_boot.c
  * arch/avr/src/board/up_boot.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
@@ -48,7 +48,7 @@
 #include "up_internal.h"
 
 #include "avr32_internal.h"
-#include "at91dev1_internal.h"
+#include "avr32dev1_internal.h"
 
 /************************************************************************************
  * Definitions

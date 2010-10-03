@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/at91dev1/include/board.h
+ * configs/avr32dev1/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.

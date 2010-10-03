@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/at91dev1/src/up_leds.c
+ * configs/avr32dev1/src/up_leds.c
  * arch/avr/src/board/up_leds.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
@@ -51,7 +51,7 @@
 #include "up_internal.h"
 
 #include "avr32_internal.h"
-#include "at91dev1_internal.h"
+#include "avr32dev1_internal.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
@@ -82,7 +82,7 @@
 /* Dump GPIO registers */
 
 #ifdef LED_VERBOSE
-#  define led_dumpgpio(m) avr32_dumpgpio(at91dev1_LED1_A, m)
+#  warning "Not implemented"
 #else
 #  define led_dumpgpio(m)
 #endif

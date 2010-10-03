@@ -1,5 +1,5 @@
 ############################################################################
-# configs/at91dev1/ostest/defconfig
+# configs/avr32dev1/ostest/defconfig
 #
 #   Copyright (C) 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -72,10 +72,10 @@
 CONFIG_ARCH=avr
 CONFIG_ARCH_AVR=y
 CONFIG_ARCH_AVR32=y
-CONFIG_ARCH_CHIP=at91uc3B0256
-CONFIG_ARCH_CHIP_ATUC3B0256=y
-CONFIG_ARCH_BOARD=at91dev1
-CONFIG_ARCH_BOARD_AT91DEV1=y
+CONFIG_ARCH_CHIP=at91uc3
+CONFIG_ARCH_CHIP_AT91UC3B0256=y
+CONFIG_ARCH_BOARD=avr32dev1
+CONFIG_ARCH_BOARD_AVR32DEV1=y
 CONFIG_BOARD_LOOPSPERMSEC=7982
 CONFIG_DRAM_SIZE=(32*1024)
 CONFIG_DRAM_START=0x10000000
