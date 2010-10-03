@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/at91dev1/src/at91dev1_internal.h
- * arch/avr/src/board/at91dev1_internal.n
+ * configs/avr32dev1/src/avr32dev1_internal.h
+ * arch/avr/src/board/avr32dev1_internal.n
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

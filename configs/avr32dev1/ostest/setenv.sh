@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/at91dev1/ostest/setenv.sh
+# configs/avr32dev1/ostest/setenv.sh
 #
 #   Copyright (C) 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
