@@ -48,7 +48,7 @@
 
 /* Get customizations for each supported chip */
 
-#if 0
+#if CONFIG_ARCH_CHIP_AT91UC3B0256
 #else
 #  error "Unsupported AVR32 chip"
 #endif
@@ -57,7 +57,7 @@
  * file for the proper setup
  */
 
-#include "atuc3_memorymap.h"
+#include "at91uc3_memorymap.h"
 
 /************************************************************************************
  * Public Types

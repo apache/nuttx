@@ -56,7 +56,7 @@
 
 /* Total number of IRQ numbers */
 
-#define NR_IRQS
+#define NR_IRQS 1
 
 /****************************************************************************
  * Public Types

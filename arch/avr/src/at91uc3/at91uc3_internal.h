@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/avr32dev1/include/board.h
- * include/arch/board/board.h
+ * arch/avr/src/at91uc3b/at91uc3_internal.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H
+#define __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H
 
 /************************************************************************************
  * Included Files
@@ -44,60 +43,20 @@
 #include <nuttx/config.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
-
-/* Clocking *************************************************************************/
-
-/* LED definitions ******************************************************************/
-
-#define LED_STARTED          0
-#define LED_HEAPALLOCATE     1
-#define LED_IRQSENABLED      2
-#define LED_STACKCREATED     3
-#define LED_INIRQ            4
-#define LED_SIGNAL           5
-#define LED_ASSERTION        6
-#define LED_PANIC            7
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
-
 /************************************************************************************
  * Public Data
  ************************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
 /************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
- * Name: avr32_boardinitialize
- *
- * Description:
- *   All AVR32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
+ * Public Functions
  ************************************************************************************/
 
-EXTERN void avr32_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif /* __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H */
 

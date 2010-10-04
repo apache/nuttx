@@ -112,16 +112,15 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state */
 
-  irqrestore((uint16_t)regs[REG_PRIMASK]);
+#warning "Not Implemented"
 
   /* Deliver the signals */
 
   sigdeliver(rtcb);
 
-  /* Output any debug messaged BEFORE restoreing errno
-   * (becuase they may alter errno), then restore the
-   * original errno that is needed by the user logic
-   * (it is probably EINTR).
+  /* Output any debug messaged BEFORE restoring errno (becuase they may
+   * alter errno), then restore the original errno that is needed by
+   * the user logic (it is probably EINTR).
    */
 
   sdbg("Resuming\n");
