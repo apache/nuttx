@@ -37,11 +37,16 @@ if [ "$(basename $0)" = "setenv.sh" ] ; then
   exit 1
 fi
 
+#
+# This PATH setup assumes that you are using versin 2.1.4 of the Atmel
+# AVR GNU tools installed at the default location on Windows.
+#
+
 if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
 WD=`pwd`
 
-export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
-export PATH="${BUILDROOT_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export AVRTOOLS_BIN="/cygdrive/c/Program Files/Atmel/AVR Tools/AVR32 Toolchain/bin/"
+export PATH="${AVRTOOLS_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"

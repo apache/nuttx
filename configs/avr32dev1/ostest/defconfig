@@ -93,6 +93,9 @@ CONFIG_ARCH_DMA=n
 # Identify toolchain and linker options
 #
 
+CONFIG_AVR32_AVRTOOLSW=y
+CONFIG_AVR32_AVRTOOLSL=n
+
 #
 #  Individual subsystems can be enabled:
 #
