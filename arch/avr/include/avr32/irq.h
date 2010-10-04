@@ -50,9 +50,11 @@
  * Definitions
  ****************************************************************************/
 
-/* Indices the register state save array */
+/* Register state save array indices */
 
-#defin XCPTCONTEXT_REGS 1
+/* Size of the register state save array */
+
+#define XCPTCONTEXT_REGS 1
 
 /****************************************************************************
  * Public Types
@@ -87,6 +89,7 @@ struct xcptcontext
 
 static inline irqstate_t irqsave(void)
 {
+# warning "Not implemented"
   return 0;
 }
 
@@ -94,6 +97,7 @@ static inline irqstate_t irqsave(void)
 
 static inline void irqrestore(irqstate_t flags)
 {
+# warning "Not implemented"
 }
 #endif /* __ASSEMBLY__ */
 

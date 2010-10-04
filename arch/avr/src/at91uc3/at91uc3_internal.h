@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/avr/src/at91uc3/chip.h
+ * arch/avr/src/at91uc3b/at91uc3_internal.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT91UC3_CHIP_H
-#define __ARCH_AVR_SRC_AT91UC3_CHIP_H
+#ifndef __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H
+#define __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H
 
 /************************************************************************************
  * Included Files
@@ -45,19 +45,6 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* Get customizations for each supported chip */
-
-#if CONFIG_ARCH_CHIP_AT91UC3B0256
-#else
-#  error "Unsupported AVR32 chip"
-#endif
-
-/* Include only the memory map.  Other chip hardware files should then include this
- * file for the proper setup
- */
-
-#include "at91uc3_memorymap.h"
 
 /************************************************************************************
  * Public Types
@@ -71,5 +58,5 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_AT91UC3_CHIP_H */
+#endif /* __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H */
 
