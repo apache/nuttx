@@ -49,6 +49,7 @@ following characteristics:
 
 
 	<board-name>
+        |-- README.txt
 	|-- include/
 	|   `-- (board-specific header files)
 	|-- src/
@@ -65,6 +66,9 @@ following characteristics:
 	...
 Summary of Files
 ^^^^^^^^^^^^^^^^
+
+README.txt -- This text file provides additional information unique to
+  each board configuration sub-directory.
 
 include/ -- This directory contains board specific header files.  This
   directory will be linked as include/arch/board at configuration time and
@@ -797,6 +801,13 @@ setenv.sh -- This is a script that you can include that will be installed at
 
 Supported Boards
 ^^^^^^^^^^^^^^^^
+
+configs/avr32dev1
+    This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
+    based on the Atmel AT91UC3B0256 MCU and uses a specially patched
+    version of the GNU toolchain:  The patches provide support for the
+    AVR32 family.  That patched GNU toolchain is available only from the
+    Atmel website.  STATUS: Under development.
 
 configs/c5471evm
     This is a port to the Spectrum Digital C5471 evaluation board.  The
