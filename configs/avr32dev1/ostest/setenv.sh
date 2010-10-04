@@ -39,7 +39,10 @@ fi
 
 #
 # This PATH setup assumes that you are using versin 2.1.4 of the Atmel
-# AVR GNU tools installed at the default location on Windows.
+# AVR GNU tools installed at the default location on Windows.  NOTE
+# that the path is in appended to the end of the PATH variable; this is
+# because there are also many GNUWin32 binaries there that conflict with
+# Cygwin versions.
 #
 
 if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
@@ -47,6 +50,6 @@ if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 WD=`pwd`
 
 export AVRTOOLS_BIN="/cygdrive/c/Program Files/Atmel/AVR Tools/AVR32 Toolchain/bin/"
-export PATH="${AVRTOOLS_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="/sbin:/usr/sbin:${PATH_ORIG}:${AVRTOOLS_BIN}"
 
 echo "PATH : ${PATH}"

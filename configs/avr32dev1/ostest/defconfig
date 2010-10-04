@@ -371,6 +371,8 @@ CONFIG_ARCH_KFREE=n
 # CONFIG_MQ_MAXMSGSIZE - Message structures are allocated with
 #   a fixed payload size given by this settin (does not include
 #   other message structure overhead.
+# CONFIG_MAX_WDOGPARMS - Maximum number of parameters that
+#   can be passed to a watchdog handler
 # CONFIG_PREALLOC_WDOGS - The number of pre-allocated watchdog
 #   structures.  The system manages a pool of preallocated
 #   watchdog structures to minimize dynamic allocations
@@ -389,6 +391,7 @@ CONFIG_STDIO_BUFFER_SIZE=256
 CONFIG_NUNGET_CHARS=2
 CONFIG_PREALLOC_MQ_MSGS=4
 CONFIG_MQ_MAXMSGSIZE=32
+CONFIG_MAX_WDOGPARMS=2
 CONFIG_PREALLOC_WDOGS=4
 CONFIG_PREALLOC_TIMERS=4
 
