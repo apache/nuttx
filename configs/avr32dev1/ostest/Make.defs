@@ -37,11 +37,16 @@ include ${TOPDIR}/.config
 
 # Setup for the selected toolchain
 
-ifeq ($(CONFIG_AVR32_CODESOURCERYW),y)
-  # CodeSourcery under Windows
-  CROSSDEV = avr32-elf-
+ifeq ($(CONFIG_AVR32_AVRTOOLSW),y)
+  # AVR Tools under Windows
+  CROSSDEV = avr32-
   WINTOOL = y
-  ARCHCPUFLAGS = 
+  ARCHCPUFLAGS = -march=uc -mpart=uc3b0256
+endif
+ifeq ($(CONFIG_AVR32_AVRTOOLSL),y)
+  # AVR Tools under Linux
+  CROSSDEV = avr32-
+  ARCHCPUFLAGS = -march=uc -mpart=uc3b0256
 endif
 
 ifeq ($(WINTOOL),y)
@@ -52,7 +57,6 @@ ifeq ($(WINTOOL),y)
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script}"
-  MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
@@ -76,34 +80,31 @@ ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
   ARCHOPTIMIZATION = -g
 else
-  ARCHOPTIMIZATION = $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION = -Os -ffunction-sections -fdata-sections -fno-strict-aliasing
 endif
 
-ARCHCFLAGS = -fno-builtin
+ARCHCFLAGS = -fno-builtin -muse-rodata-section
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
 ARCHWARNINGSXX = -Wall -Wshadow
 ARCHDEFINES =
-ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+ARCHNOPICFLAGS = -fno-pic
+ARCHPICFLAGS = -fpic
+ARCHALLCFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
+ARCHALLCXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) -pipe
 
-CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
-CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) -pipe
-CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CFLAGS = $(ARCHNOPICFLAGS) $(ARCHALLCFLAGS)
+CPICFLAGS = $(ARCHPICFLAGS) $(ARCHALLCFLAGS)
+CXXFLAGS = $(ARCHNOPICFLAGS) $(ARCHALLCXXFLAGS)
+CXXPICFLAGS = $(ARCHPICFLAGS) $(ARCHALLCXXFLAGS)
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES)
-AFLAGS = $(CFLAGS) -D__ASSEMBLY__
-
-NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat.ld -no-check-sections
-LDNXFLATFLAGS = -e main -s 2048
+AFLAGS = $(ARCHALLCFLAGS) -D__ASSEMBLY__
 
 OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
 
-ifneq ($(CROSSDEV),avr32-elf-)
-  LDFLAGS += -nostartfiles -nodefaultlibs
-endif
+LDFLAGS += -nostartfiles -nodefaultlibs
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
