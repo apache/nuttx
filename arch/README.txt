@@ -222,6 +222,17 @@ arch/arm - ARM-based micro-controllers
         but no testing has been performed due to some problems I am having with my
         JTAG wiggler and OpenOCD on Linux.
 
+arch/avr
+    This directory is dedicated to ports to the Atmel AVR (8-bit) and AVR32 (32-bit)
+    MCU families.  STATUS:  Under development.
+
+    arch/avr/include/avr32 and arch/avr/src/avr32
+      Common support for all AVR32 MCUs
+
+    arch/avr/include/at91uc3 and arch/avr/src/at91uc3
+      Support specifically for the AT91UC3Bxxx family (specifically only for
+      the AT91UC3B0256 at the moment).
+
 arch/hc
     This directory is dedicated to ports to the Freescale HC family.
 
