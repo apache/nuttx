@@ -45,6 +45,7 @@
  ****************************************************************************/
 
 #include <nuttx/irq.h>
+#include <arch/avr32/avr32.h>
 
 /****************************************************************************
  * Definitions
@@ -85,19 +86,48 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
-/* Save the current interrupt enable state & disable IRQs */
+/* Read the AVR32 status register */
+
+static inline uint32_t avr32_sr(void)
+{
+  uint32_t sr;
+  __asm__ __volatile__ (
+    "mfsr\t%0,%1\n\t"
+    : "=r" (sr)
+    : "i" (AVR32_SR)
+  );
+  return sr;
+}
+
+/* Save the current interrupt enable state & disable all interrupts */
 
 static inline irqstate_t irqsave(void)
 {
-# warning "Not implemented"
-  return 0;
+  irqstate_t sr = (irqstate_t)avr32_sr();
+  __asm__ __volatile__ (
+    "ssrf\t%0\n\t"
+    "nop\n\t"
+    "nop"
+    :
+    : "i" (AVR32_SR_GM_SHIFT)
+  );
+  return sr;
 }
 
-/* Restore saved IRQ & FIQ state */
+/* Restore saved interrupt state */
 
 static inline void irqrestore(irqstate_t flags)
 {
-# warning "Not implemented"
+  if ((flags & AVR32_SR_GM_MASK) == 0)
+    {
+      __asm__ __volatile__ (
+        "csrf\t%0\n\t"
+        "nop\n\t"
+        "nop"
+        :
+        : "i" (AVR32_SR_GM_SHIFT)
+      );
+    }
 }
 #endif /* __ASSEMBLY__ */
 
