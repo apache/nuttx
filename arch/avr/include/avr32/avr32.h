@@ -82,9 +82,9 @@
 #define AVR32_JTBA             0x07c /* Java Trap Base Address */
 #define AVR32_JBCR             0x080 /* Java Trap Base Address */
                                      /* 0x084-0x0fc: Reserved for future use */
-#define AVR32_CONFIG0          0x100 /* Configuration register 0 */
-#define AVR32_CONFIG1          0x104 /* Configuration register 1 */
-#define AVR32_COUNT            0x108 /* Cycle Counter regeser */
+#define AVR32_CONFIG0          0x100 /* Configuration Register 0 */
+#define AVR32_CONFIG1          0x104 /* Configuration Register 1 */
+#define AVR32_COUNT            0x108 /* Cycle Counter Register */
 #define AVR32_COMPARE          0x10c /* Compare register */
 #define AVR32_TLBEHI           0x110 /* MMU TLB Entry High */
 #define AVR32_TLBELO           0x114 /* MMU TLB Entry Low */
@@ -121,7 +121,8 @@
 #define AVR32_MPUAPRD          0x190 /* MPU Access Permission Register Data regions */
 #define AVR32_MPUCR            0x194 /* MPU Control Register */
                                      /* 0x198-0x2fc: Reserved for future use */
-                                     /* 0x300-0x3fc: Implementation defined */
+#define AVR32_IMPL             0x30  /* 0x300-0x3fc: Implementation defined */
+
 /* Status register bit definitions */
 
 #define AVR32_SR_C_SHIFT       0
@@ -170,10 +171,10 @@
 #define AVR32_SR_M_MASK        (7 << AVR32_SR_M_SHIFT)
 #  define AVR32_SR_M_APP       (0 << AVR32_SR_M_SHIFT) /* Application */
 #  define AVR32_SR_M_SUPER     (1 << AVR32_SR_M_SHIFT) /* Supervisor */
-#  define AVR32_SR_M_INT0      (2 << AVR32_SR_M_SHIFT) /* Interrupt level */
-#  define AVR32_SR_M_INT1      (3 << AVR32_SR_M_SHIFT) /* Interrupt level */
-#  define AVR32_SR_M_INT2      (4 << AVR32_SR_M_SHIFT) /* Interrupt level */
-#  define AVR32_SR_M_INT3      (5 << AVR32_SR_M_SHIFT) /* Interrupt level */
+#  define AVR32_SR_M_INT0      (2 << AVR32_SR_M_SHIFT) /* Interrupt level 0 */
+#  define AVR32_SR_M_INT1      (3 << AVR32_SR_M_SHIFT) /* Interrupt level 1 */
+#  define AVR32_SR_M_INT2      (4 << AVR32_SR_M_SHIFT) /* Interrupt level 2 */
+#  define AVR32_SR_M_INT3      (5 << AVR32_SR_M_SHIFT) /* Interrupt level 3 */
 #  define AVR32_SR_M_EX        (6 << AVR32_SR_M_SHIFT) /* Exception */
 #  define AVR32_SR_M_NMI       (7 << AVR32_SR_M_SHIFT) /* Non Maskable Interrupt */
 
