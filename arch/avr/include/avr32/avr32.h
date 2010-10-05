@@ -121,7 +121,7 @@
 #define AVR32_MPUAPRD          0x190 /* MPU Access Permission Register Data regions */
 #define AVR32_MPUCR            0x194 /* MPU Control Register */
                                      /* 0x198-0x2fc: Reserved for future use */
-#define AVR32_IMPL             0x30  /* 0x300-0x3fc: Implementation defined */
+#define AVR32_IMPL             0x300 /* 0x300-0x3fc: Implementation defined */
 
 /* Status register bit definitions */
 
