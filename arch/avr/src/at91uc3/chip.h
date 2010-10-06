@@ -48,7 +48,147 @@
 
 /* Get customizations for each supported chip */
 
-#if CONFIG_ARCH_CHIP_AT91UC3B0256
+/* UC3 A0/A1 Series */
+/* UC3 A2/A3 Series */
+
+/* UC3 B0 (64-pin) / B1 (48-pin, no USB host) Series */
+
+#if CONFIG_ARCH_CHIP_AT91UC3B064
+#  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
+#  define CONFIG_ARCH_CHIP_AT91UC3B0 1            /* UC3 B0 (64-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (64*1024)    /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (16*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  define AVR32_USB_HOST             1            /* USB host support (OTG) */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               3            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 1            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                44           /* Number of GPIO pins */
+#  define AVR32_NTIMER               3            /* Number of Timers */
+#  define AVR32_NPWM                 13           /* Number of PWM channels */
+#  define AVR32_NOSC                 2            /* Number of crystal oscillators */
+#  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#elif CONFIG_ARCH_CHIP_AT91UC3B0128
+#  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
+#  define CONFIG_ARCH_CHIP_AT91UC3B0 1            /* UC3 B0 (64-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (128*1024)   /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (32*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  define AVR32_USB_HOST             1            /* USB host support (OTG) */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               3            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 1            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                44           /* Number of GPIO pins */
+#  define AVR32_NTIMER               3            /* Number of Timers */
+#  define AVR32_NPWM                 13           /* Number of PWM channels */
+#  define AVR32_NOSC                 2            /* Number of crystal oscillators */
+#  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#elif CONFIG_ARCH_CHIP_AT91UC3B0256
+#  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
+#  define CONFIG_ARCH_CHIP_AT91UC3B0 1            /* UC3 B0 (64-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (256*1024)   /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (32*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  define AVR32_USB_HOST             1            /* USB host support (OTG) */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               3            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 1            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                44           /* Number of GPIO pins */
+#  define AVR32_NTIMER               3            /* Number of Timers */
+#  define AVR32_NPWM                 13           /* Number of PWM channels */
+#  define AVR32_NOSC                 2            /* Number of crystal oscillators */
+#  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#elif CONFIG_ARCH_CHIP_AT91UC3B0512
+#  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
+#  define CONFIG_ARCH_CHIP_AT91UC3B0 1            /* UC3 B0 (64-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (512*1024)   /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (96*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  define AVR32_USB_HOST             1            /* USB host support (OTG) */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               3            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 1            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                44           /* Number of GPIO pins */
+#  define AVR32_NTIMER               3            /* Number of Timers */
+#  define AVR32_NPWM                 13           /* Number of PWM channels */
+#  define AVR32_NOSC                 2            /* Number of crystal oscillators */
+#  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#elif CONFIG_ARCH_CHIP_AT91UC3B164
+#  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
+#  define CONFIG_ARCH_CHIP_AT91UC3B1 1            /* UC3 B0 (48-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (64*1024)    /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (16*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  undef  AVR32_USB_HOST                          /* No USB host support */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               2            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 0            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                28           /* Number of GPIO pins */
+#  define AVR32_NTIMER               3            /* Number of Timers */
+#  define AVR32_NPWM                 13           /* Number of PWM channels */
+#  define AVR32_NOSC                 1            /* Number of crystal oscillators */
+#  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
+#elif CONFIG_ARCH_CHIP_AT91UC3B1128
+#  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
+#  define CONFIG_ARCH_CHIP_AT91UC3B1 1            /* UC3 B0 (48-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (128*1024)   /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (32*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  undef  AVR32_USB_HOST                          /* No USB host support */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               2            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 0            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                28           /* Number of GPIO pins */
+#  define AVR32_NTIMER               3            /* Number of Timers */
+#  define AVR32_NPWM                 13           /* Number of PWM channels */
+#  define AVR32_NOSC                 1            /* Number of crystal oscillators */
+#  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
+#elif CONFIG_ARCH_CHIP_AT91UC3B1256
+#  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
+#  define CONFIG_ARCH_CHIP_AT91UC3B1 1            /* UC3 B0 (48-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (256*1024)   /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (32*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  undef  AVR32_USB_HOST                          /* No USB host support */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               2            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 0            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                28           /* Number of GPIO pins */
+#  define AVR32_NTIMER               3            /* Number of Timers */
+#  define AVR32_NPWM                 13           /* Number of PWM channels */
+#  define AVR32_NOSC                 1            /* Number of crystal oscillators */
+#  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
+#elif CONFIG_ARCH_CHIP_AT91UC3B1512
+#  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
+#  define CONFIG_ARCH_CHIP_AT91UC3B1 1            /* UC3 B0 (48-pin) series */
+#  define AVR32_ONCHIP_FLASH_SIZE    (512*1024)   /* Size of on-chip FLASH (bytes) */
+#  define AVR32_ONCHIP_SRAM_SIZE     (96*1024)    /* Size of on-chip SRAM (bytes) */
+#  define AVR32_USB_FULLSPEED        1            /* USB full-speed support */
+#  undef  AVR32_USB_HOST                          /* No USB host support */
+#  define AVR32_USB_DEVICE           1            /* USB device support */
+#  define AVR32_NUSART               2            /* Number of USARTs */
+#  define AVR32_NSPI                 2            /* Number of SPI */
+#  define AVR32_NTWI                 1            /* Number of TWI (I2C) */
+#  define AVR32_NSSC                 0            /* Number of SSC (I2S audio) */
+#  define AVR32_NGPIO                28           /* Number of GPIO pins */
+#  define AVR32_NTIMER               3            /* Number of Timers */
+#  define AVR32_NPWM                 13           /* Number of PWM channels */
+#  define AVR32_NOSC                 1            /* Number of crystal oscillators */
+#  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
 #else
 #  error "Unsupported AVR32 chip"
 #endif
