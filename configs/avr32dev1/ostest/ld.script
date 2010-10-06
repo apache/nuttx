@@ -33,21 +33,18 @@
  *
  ****************************************************************************/
 
-/* The AT91UC3B0256 has 256Kb of FLASH beginning at address 0x0000:0000 and
- * 64Kb of total SRAM: 32Kb of SRAM in the CPU block beginning at address
- * 0x10000000 and 32Kb of AHB SRAM in two banks of 16Kb beginning at addresses
- * 0x20070000 and 0x20080000.  Here we assume that .data and .bss will all fit
- * into the 32Kb CPU SRAM address range.
- */
+OUTPUT_FORMAT("elf32-avr32", "elf32-avr32", "elf32-avr32")
+OUTPUT_ARCH(avr32:uc)
+ENTRY(_stext)
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x00000000, LENGTH = 256K
-    sram (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
+    flash (rxai!w)  : ORIGIN = 0x80000000, LENGTH = 0x00020000
+    intram (wxa!ri) : ORIGIN = 0x00000004, LENGTH = 0x00007FFC
+    userpage        : ORIGIN = 0x80800000, LENGTH = 0x00000200
+    factorypage     : ORIGIN = 0x80800200, LENGTH = 0x00000200
 }
 
-OUTPUT_ARCH(avr32)
-ENTRY(_stext)
 SECTIONS
 {
 	.text : {
@@ -74,7 +71,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+	} > intram AT > flash
 
 	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);
@@ -82,7 +79,7 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > sram
+	} > intram
 					/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
