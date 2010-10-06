@@ -35,7 +35,7 @@
 
 # The start-up, "head", file
 
-HEAD_ASRC	= 
+HEAD_ASRC	= up_nommuhead.S
 
 # Common AVR/AVR32 files
 
