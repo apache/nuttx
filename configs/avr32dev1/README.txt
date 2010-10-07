@@ -9,6 +9,10 @@ Contents
  * Toolchains
  * Development Environment
  * GNU Toolchains
+ * IDEs
+ * AVR32 Bootloader
+ * AVR32DEV1 Configuration Options
+ * Configurations
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -54,13 +58,27 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/lm3s,
-     arch/arm/src/common, arch/arm/src/cortexm3, and sched/.
+  3) Set up include pathes:  You will need include/, arch/avr/src/at91uc3,
+     arch/avr/src/common, arch/arm/src/avr, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
 
   Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/lm3s/lm3s_vectors.S.
+  is arch/avr/src/avr3/up_nommuhead.S.
+
+AVR32 Bootloader
+^^^^^^^^^^^^^^^^
+
+  The linker scripts (ld.script) assume that you are using the bootloader.
+  The bootloader resides at 0x8000:0000 and so the ld.script files link
+  the application to execute after the bootloader at 0x8000:2000. To link
+  so that NuttX boots directly without using the bootloader, change the
+  flash definition from:
+
+    flash (rxai!w)  : ORIGIN = 0x80002000, LENGTH = 256K - 8K
+
+  to:
+    flash (rxai!w)  : ORIGIN = 0x80000000, LENGTH = 256K
 
 AVR32DEV1 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -139,16 +157,16 @@ AVR32DEV1 Configuration Options
 
   AT91UC3B0256 specific device driver settings
 
-	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
-	   console and ttys0 (default is the UART0).
-	CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+	CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
+	   console and ttys0 (default is the USART0).
+	CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
 	   This specific the size of the receive buffer
-	CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+	CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
 	   being sent.  This specific the size of the transmit buffer
-	CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_UARTn_2STOP - Two stop bits
+	CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
+	CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+	CONFIG_USARTn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
