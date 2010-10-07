@@ -52,7 +52,7 @@
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	.global		_sdata			/* Start of .data section in RAM */
 	.global		_edata			/* End of .data section in RAM */
-	.global		_erdonly		/* Start of .data section in FLASH */
+	.global		_eronly			/* Start of .data section in FLASH */
 #endif
 	.global		up_lowinit		/* Perform low level initialization */
 	.global		up_boardinit	/* Low-level board initialization */
@@ -127,7 +127,7 @@ __start:
 
 	lda.w		r0, _sdata		/* r0=Start of .data section in RAM */
 	lda.w		r1, _edata		/* r1=End of .data section in RAM */
-	lda.w 		r2, _erdonly	/* r2=Start of .data in FLASH */
+	lda.w 		r2, _eronly		/* r2=Start of .data in FLASH */
 	rjmp		4f				/* Start at the bottom of the loop */
 3:
 	ld.d		r4, r2++		/* Fetch the next data value */

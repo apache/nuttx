@@ -46,6 +46,22 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Physical memory map */
+
+#define   AVR32_ONCHIP_FLASH_BASE 0x80000000 /* 512Kb Flash Array */
+#  define AVR32_APPL_BASE         0x80002000 /* 8Kb offset to application w/bootloader */
+#define   AVR32_USER_FLASH_BASE   0x80800000 /* Flash User Page */
+#  define AVR32_BTLDR_CONFIG      0x808001fc /* Bootloader configuration word */
+
+/* Memory map for systems without an MMU */
+
+#define   AVR32_P1_BASE           0x80000000 /* 512MB non-translated space, cacheable */
+#define   AVR32_P2_BASE           0xa0000000 /* 512MB non-translated space, non-cacheable */
+#define   AVR32_P3_BASE           0xc0000000 /* 512MB translated space, cacheable */
+#define   AVR32_P4_BASE           0xe0000000 /* 512MB system space, non-cacheable */
+
+
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
