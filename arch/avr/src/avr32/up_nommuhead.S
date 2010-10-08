@@ -55,27 +55,12 @@
 	.global		_eronly			/* Start of .data section in FLASH */
 #endif
 	.global		up_lowinit		/* Perform low level initialization */
-	.global		up_boardinit	/* Low-level board initialization */
 	.global		os_start		/* NuttX entry point */
 	.global		vectors			/* Vector base address */
 
 /****************************************************************************
  * Macros
  ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-	.macro	showprogress, code
-	.endm
-	.macro	doputc, code
-	mov		r12, \code
-	mcall	up_putc
-	.endm
-#else
-	.macro	showprogress, code
-	.endm
-	.macro	doputc, code
-	.endm
-#endif
 
 /****************************************************************************
  * OS Entry Point
@@ -105,7 +90,6 @@ __start:
 	/* Enable exception processing */
 
 	csrf		AVR32_SR_EM_SHIFT
-	showprogress 'A'
 
 	/* Clear system BSS section */
 
@@ -118,8 +102,6 @@ __start:
 2:
 	cp			r0, r1			/* Finished? */
 	brlo		1b				/* No... keep looping */
-
-	showprogress 'B'
 
 	/* Copy system .data sections to new home in RAM. */
 
@@ -136,7 +118,6 @@ __start:
 	cp			r0, r1			/* Finished? */
 	brlo		3b				/* No... keep looping */
 
-	showprogress 'C'
 #endif
 
 	/* Clear the frame pointer and link register since this is the outermost
@@ -149,12 +130,6 @@ __start:
 	/* Perform low-level initialization */
 
 	mcall		up_lowinit
-
-	doputc 'D'
-
-	/* Board specific early initialization */
-
-	mcall		up_ledinit
 
 	/* Then jump to OS entry (will not return) */
 

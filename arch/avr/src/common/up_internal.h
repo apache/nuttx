@@ -175,7 +175,7 @@ extern uint32_t *up_va2pte(uintptr_t vaddr);
 # define up_pginitialize()
 #endif /* CONFIG_PAGING */
 
-/* Defined in up_allocateheap.c */
+/* Defined in common/up_allocateheap.c or chip/xxx_allocateheap.c */
 
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void);
@@ -183,7 +183,15 @@ void up_addregion(void);
 # define up_addregion()
 #endif
 
-/* Defined in up_serial.c */
+/* Defined in chip/xxx_lowinit.c.  This function is called from the
+ * head.S file just before jumping to os_start().  This function
+ * performs whatever very low level initialization that is needed
+ * before the OS gets started (clocks, console, LEDs, etc.)
+ */
+
+extern void up_lowinit(void);
+
+/* Defined in chip/xxx_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 extern void up_earlyserialinit(void);
@@ -201,27 +209,25 @@ extern void lowconsole_init(void);
 # define lowconsole_init()
 #endif
 
-/* Defined in up_timerisr.c */
+/* Defined in chip/xxx_timerisr.c */
 
 extern void up_timerinit(void);
 
-/* Defined in up_irq.c */
+/* Defined in chip/xxx_irq.c */
 
 extern void up_maskack_irq(int irq);
 
-/* Defined in board/up_leds.c */
+/* Defined in configs/<board-name>/src/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
-extern void up_ledinit(void);
 extern void up_ledon(int led);
 extern void up_ledoff(int led);
 #else
-# define up_ledinit()
 # define up_ledon(led)
 # define up_ledoff(led)
 #endif
 
-/* Defined in board/up_network.c */
+/* Defined in chip/xxx_ethernet.c */
 
 #ifdef CONFIG_NET
 extern void up_netinitialize(void);
@@ -229,7 +235,7 @@ extern void up_netinitialize(void);
 # define up_netinitialize()
 #endif
 
-/* Defined in board/up_ethernet.c */
+/* Defined in chip/xxx_usbdev.c */
 
 #ifdef CONFIG_USBDEV
 extern void up_usbinitialize(void);
