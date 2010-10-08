@@ -65,14 +65,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: avr32dev1_ledinitialize
+ * Name: up_ledinitialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-extern void avr32dev1_ledinitialize(void);
+extern void up_ledinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
