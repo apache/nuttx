@@ -59,17 +59,27 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: at91uc3_clkinit
+ * Name: up_clkinit
  *
  * Description:
  *   Initialiaze clock/PLL settings per the definitions in the board.h file.
  *
  ************************************************************************************/
 
-extern void at91uc3_clkinitialize(void);
+extern void up_clkinitialize(void);
 
 /************************************************************************************
- * Name: at91uc3_boardinit
+ * Name: up_consoleinit
+ *
+ * Description:
+ *   Initialize a console for debug output.
+ *
+ ************************************************************************************/
+
+extern void up_consoleinit(void);
+
+/************************************************************************************
+ * Name: up_boardinit
  *
  * Description:
  *   This function must be provided by the board-specific logic in the directory
@@ -77,7 +87,7 @@ extern void at91uc3_clkinitialize(void);
  *
  ************************************************************************************/
 
-extern void at91uc3_boardinitialize(void);
+extern void up_boardinitialize(void);
 
 #endif /* __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H */
 
