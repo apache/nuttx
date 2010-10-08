@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_serial.c
+ * arch/arm/src/stm32/avr32_serial.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,11 +52,11 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
 
-#include <arch/serial.h>
 #include <arch/board/board.h>
 
+#include "at91uc3_config.h"
 #include "chip.h"
-#include "stm32_uart.h"
+#include "at91uc3_usart.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "os_internal.h"
@@ -69,30 +69,8 @@
 
 /* Is there a USART enabled? */
 
-#if !defined(CONFIG_STM32_USART1) && !defined(CONFIG_STM32_USART2) && !defined(CONFIG_STM32_USART3)
-#  error "No USARTs enabled"
-#endif
-
-/* Is there a serial console? */
-
-#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART1)
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART2)
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART3)
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#else
-#  warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef CONFIG_USART2_SERIAL_CONSOLE
-#  undef CONFIG_USART3_SERIAL_CONSOLE
-#  undef HAVE_CONSOLE
+#ifndef HAVE_RS232_DEVICE
+#  error "No USARTs enabled as RS232 devices"
 #endif
 
 /* If we are not using the serial driver for the console, then we still must
@@ -103,19 +81,37 @@
 
 /* Which USART with be tty0/console and which tty1? */
 
-#if defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_usart1port     /* USART1 is console */
-#  define TTYS0_DEV       g_usart1port     /* USART1 is ttyS0 */
-#  ifdef CONFIG_STM32_USART2
-#    define TTYS1_DEV     g_usart2port     /* USART2 is ttyS1 */
-#    ifdef CONFIG_STM32_USART3
-#      define TTYS2_DEV   g_usart3port     /* USART3 is ttyS2 */
+#if defined(CONFIG_USART0_SERIAL_CONSOLE)
+#  define CONSOLE_DEV     g_usart0port     /* USART0 is console */
+#  define TTYS0_DEV       g_usart0port     /* USART0 is ttyS0 */
+#  ifdef CONFIG_AVR32_USART1_RS232
+#    define TTYS1_DEV     g_usart1port     /* USART1 is ttyS1 */
+#    ifdef CONFIG_AVR32_USART2_RS232
+#      define TTYS2_DEV   g_usart2port     /* USART2 is ttyS2 */
 #    else
 #      undef TTYS2_DEV                     /* No ttyS2 */
 #    endif
 #  else
-#    ifdef CONFIG_STM32_USART3
-#      define TTYS1_DEV   g_usart3port     /* USART3 is ttyS1 */
+#    ifdef CONFIG_AVR32_USART2_RS232
+#      define TTYS1_DEV   g_usart2port     /* USART2 is ttyS1 */
+#    else
+#      undef TTYS1_DEV                     /* No ttyS1 */
+#    endif
+#    undef TTYS2_DEV                       /* No ttyS2 */
+#  endif
+#elif defined(CONFIG_USART1_SERIAL_CONSOLE)
+#  define CONSOLE_DEV     g_usart1port     /* USART1 is console */
+#  define TTYS0_DEV       g_usart1port     /* USART1 is ttyS0 */
+#  ifdef CONFIG_AVR32_USART0_RS232
+#    define TTYS1_DEV     g_usart0port     /* USART0 is ttyS1 */
+#    ifdef CONFIG_AVR32_USART2_RS232
+#      define TTYS2_DEV   g_usart2port     /* USART2 is ttyS2 */
+#    else
+#      undef TTYS2_DEV                     /* No ttyS2 */
+#    endif
+#  else
+#    ifdef CONFIG_AVR32_USART2_RS232
+#      define TTYS1_DEV   g_usart2port     /* USART2 is ttyS1 */
 #    else
 #      undef TTYS1_DEV                     /* No ttyS1 */
 #    endif
@@ -124,34 +120,16 @@
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart2port     /* USART2 is console */
 #  define TTYS0_DEV       g_usart2port     /* USART2 is ttyS0 */
-#  ifdef CONFIG_STM32_USART1
-#    define TTYS1_DEV     g_usart1port     /* USART1 is ttyS1 */
-#    ifdef CONFIG_STM32_USART3
-#      define TTYS2_DEV   g_usart3port     /* USART3 is ttyS2 */
+#  ifdef CONFIG_AVR32_USART0_RS232
+#    define TTYS1_DEV     g_usart0port     /* USART0 is ttyS1 */
+#    ifdef CONFIG_AVR32_USART1_RS232
+#      define TTYS2_DEV   g_usart1port     /* USART1 is ttyS2 */
 #    else
 #      undef TTYS2_DEV                     /* No ttyS2 */
 #    endif
 #  else
-#    ifdef CONFIG_STM32_USART3
-#      define TTYS1_DEV   g_usart3port     /* USART3 is ttyS1 */
-#    else
-#      undef TTYS1_DEV                     /* No ttyS1 */
-#    endif
-#    undef TTYS2_DEV                       /* No ttyS2 */
-#  endif
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_usart3port     /* USART3 is console */
-#  define TTYS0_DEV       g_usart3port     /* USART3 is ttyS0 */
-#  ifdef CONFIG_STM32_USART1
-#    define TTYS1_DEV     g_usart1port     /* USART1 is ttyS1 */
-#    ifdef CONFIG_STM32_USART2
-#      define TTYS2_DEV   g_usart2port     /* USART2 is ttyS2 */
-#    else
-#      undef TTYS2_DEV                     /* No ttyS2 */
-#    endif
-#  else
-#    ifdef CONFIG_STM32_USART2
-#      define TTYS1_DEV   g_usart2port     /* USART2 is ttyS1 */
+#    ifdef CONFIG_AVR32_USART1_RS232
+#      define TTYS1_DEV   g_usart1port     /* USART1 is ttyS1 */
 #    else
 #      undef TTYS1_DEV                     /* No ttyS1 */
 #    endif
@@ -166,10 +144,9 @@
 struct up_dev_s
 {
   uint32_t usartbase; /* Base address of USART registers */
-  uint32_t apbclock;  /* PCLK 1 or 2 frequency */
   uint32_t baud;      /* Configured baud */
-  uint16_t ie;        /* Saved interrupt mask bits value */
-  uint16_t sr;        /* Saved status bits */
+  uint32_t ie;        /* Saved interrupt mask bits value */
+  uint32_t sr;        /* Saved status bits */
   uint8_t  irq;       /* IRQ associated with this USART */
   uint8_t  parity;    /* 0=none, 1=odd, 2=even */
   uint8_t  bits;      /* Number of bits (7 or 8) */
@@ -215,28 +192,57 @@ struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_AVR32_USART0_RS232
+static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
+static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
+#endif
+#ifdef CONFIG_AVR32_USART1_RS232
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_AVR32_USART2_RS232
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_STM32_USART3
-static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
-static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
+
+/* This describes the state of the AVR32 USART0 ports. */
+
+#ifdef CONFIG_AVR32_USART0_RS232
+static struct up_dev_s g_usart0priv =
+{
+  .usartbase      = AVR32_USART0_BASE,
+  .baud           = CONFIG_USART0_BAUD,
+  .irq            = AVR32_IRQ_USART0,
+  .parity         = CONFIG_USART0_PARITY,
+  .bits           = CONFIG_USART0_BITS,
+  .stopbits2      = CONFIG_USART0_2STOP,
+};
+
+static uart_dev_t g_usart0port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_USART0_RXBUFSIZE,
+    .buffer = g_usart0rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_USART0_TXBUFSIZE,
+    .buffer = g_usart0txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_usart0priv,
+};
 #endif
 
-/* This describes the state of the STM32 USART1 ports. */
+/* This describes the state of the AVR32 USART1 port. */
 
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_AVR32_USART1_RS232
 static struct up_dev_s g_usart1priv =
 {
-  .usartbase      = STM32_USART1_BASE,
-  .apbclock       = STM32_PCLK2_FREQUENCY,
+  .usartbase      = AVR32_USART1_BASE,
   .baud           = CONFIG_USART1_BAUD,
-  .irq            = STM32_IRQ_USART1,
+  .irq            = AVR32_IRQ_USART1,
   .parity         = CONFIG_USART1_PARITY,
   .bits           = CONFIG_USART1_BITS,
   .stopbits2      = CONFIG_USART1_2STOP,
@@ -253,21 +259,20 @@ static uart_dev_t g_usart1port =
   {
     .size   = CONFIG_USART1_TXBUFSIZE,
     .buffer = g_usart1txbuffer,
-  },
+   },
   .ops      = &g_uart_ops,
   .priv     = &g_usart1priv,
 };
 #endif
 
-/* This describes the state of the STM32 USART2 port. */
+/* This describes the state of the AVR32 USART2 port. */
 
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_AVR32_USART2_RS232
 static struct up_dev_s g_usart2priv =
 {
-  .usartbase      = STM32_USART2_BASE,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
+  .usartbase      = AVR32_USART2_BASE,
   .baud           = CONFIG_USART2_BAUD,
-  .irq            = STM32_IRQ_USART2,
+  .irq            = AVR32_IRQ_USART2,
   .parity         = CONFIG_USART2_PARITY,
   .bits           = CONFIG_USART2_BITS,
   .stopbits2      = CONFIG_USART2_2STOP,
@@ -287,37 +292,6 @@ static uart_dev_t g_usart2port =
    },
   .ops      = &g_uart_ops,
   .priv     = &g_usart2priv,
-};
-#endif
-
-/* This describes the state of the STM32 USART3 port. */
-
-#ifdef CONFIG_STM32_USART3
-static struct up_dev_s g_usart3priv =
-{
-  .usartbase      = STM32_USART3_BASE,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
-  .baud           = CONFIG_USART3_BAUD,
-  .irq            = STM32_IRQ_USART3,
-  .parity         = CONFIG_USART3_PARITY,
-  .bits           = CONFIG_USART3_BITS,
-  .stopbits2      = CONFIG_USART3_2STOP,
-};
-
-static uart_dev_t g_usart3port =
-{
-  .recv     =
-  {
-    .size   = CONFIG_USART3_RXBUFSIZE,
-    .buffer = g_usart3rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_USART3_TXBUFSIZE,
-    .buffer = g_usart3txbuffer,
-   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_usart3priv,
 };
 #endif
 
@@ -347,7 +321,7 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
  * Name: up_restoreusartint
  ****************************************************************************/
 
-static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
+static void up_restoreusartint(struct up_dev_s *priv, uint32_t ie)
 {
   uint32_t cr;
 
@@ -356,16 +330,7 @@ static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
   priv->ie = ie;
 
   /* And restore the interrupt state (see the interrupt enable/usage table above) */
-
-  cr = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  cr &= ~(USART_CR1_RXNEIE|USART_CR1_TXEIE|USART_CR1_PEIE);
-  cr |= (ie & (USART_CR1_RXNEIE|USART_CR1_TXEIE|USART_CR1_PEIE));
-  up_serialout(priv, STM32_USART_CR1_OFFSET, cr);
-
-  cr = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  cr &= ~USART_CR3_EIE;
-  cr |= (ie & USART_CR3_EIE);
-  up_serialout(priv, STM32_USART_CR3_OFFSET, cr);
+#warning "Not Implemented"
 }
 
 /****************************************************************************
@@ -376,36 +341,7 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 {
   if (ie)
     {
-      uint32_t cr1;
-      uint32_t cr3;
-
-      /* USART interrupts:
-       *
-       * Enable             Bit Status          Meaning                        Usage
-       * ------------------ --- --------------- ------------------------------ ----------
-       * USART_CR1_IDLEIE    4  USART_SR_IDLE   Idle Line Detected             (not used)
-       * USART_CR1_RXNEIE    5  USART_SR_RXNE   Received Data Ready to be Read
-       * "              "       USART_SR_ORE    Overrun Error Detected
-       * USART_CR1_TCIE      6  USART_SR_TC     Transmission Complete          (not used)
-       * USART_CR1_TXEIE     7  USART_SR_TXE    Transmit Data Register Empty
-       * USART_CR1_PEIE      8  USART_SR_PE     Parity Error
-       *
-       * USART_CR2_LBDIE     6  USART_SR_LBD    Break Flag                     (not used)
-       * USART_CR3_EIE       0  USART_SR_FE     Framing Error
-       * "           "          USART_SR_NE     Noise Error
-       * "           "          USART_SR_ORE    Overrun Error Detected
-       * USART_CR3_CTSIE    10  USART_SR_CTS    CTS flag                       (not used)
-       */
-
-      cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET);
-      cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET);
-
-      /* Return the current interrupt mask value for the used interrupts.  Notice
-       * that this depends on the fact that none of the used interrupt enable bits
-       * overlap.  This logic would fail if we needed the break interrupt!
-       */
-
-      *ie = (cr1 & (USART_CR1_RXNEIE|USART_CR1_TXEIE|USART_CR1_PEIE)) | (cr3 & USART_CR3_EIE);
+#warning "Not Implemented"
     }
 
   /* Disable all interrupts */
@@ -426,104 +362,81 @@ static int up_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 #ifdef CONFIG_SUPPRESS_UART_CONFIG
-  uint32_t uartdiv32;
-  uint32_t mantissa;
-  uint32_t fraction;
-  uint32_t brr;
   uint32_t regval;
-
-  /* Note: The logic here depends on the fact that that the USART module
-   * was enabled and the pins were configured in stm32_lowsetup().
-   */
-
-  /* Configure CR2 */
-  /* Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits */
-
-  regval = up_serialin(priv, STM32_USART_CR2_OFFSET);
-  regval &= ~(USART_CR2_STOP_MASK|USART_CR2_CLKEN|USART_CR2_CPOL|
-              USART_CR2_CPHA|USART_CR2_LBCL|USART_CR2_LBDIE);
 
   /* Configure STOP bits */
 
+  regval = uUSART_MR_MODE_NORMAL;
   if (priv->stopbits2)
     {
-      regval |= USART_CR2_STOP2;
+      regval |= USART_MR_NBSTOP_2;
     }
-  up_serialout(priv, STM32_USART_CR2_OFFSET, regval);
-
-  /* Configure CR1 */
-  /* Clear M, PCE, PS, TE, REm and all interrupt enable bits */
-
-  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval &= ~(USART_CR1_M|USART_CR1_PCE|USART_CR1_PS|USART_CR1_TE|
-              USART_CR1_RE|USART_CR1_ALLINTS);
-
-  /* Configure word length and parity mode */
-
-  if (priv->bits == 9)				/* Default: 1 start, 8 data, n stop */
+  else
     {
-      regval |= USART_CR1_M;			/* 1 start, 9 data, n stop */
+      regval |= USART_MR_NBSTOP_1;
     }
+ 
+  /* Configure parity */
 
-  if (priv->parity == 1)			/* Odd parity */
+  switch (priv->parity)
     {
-      regval |= (USART_CR1_PCE|USART_CR1_PS);
+      case 0:
+      default:
+        regval |= USART_MR_PAR_NONE;
+        break;
+
+      case 1:
+        regval |= USART_MR_PAR_ODD;
+        break;
+
+      case 2:
+        regval |= USART_MR_PAR_EVEN;
+        break;
     }
-  else if (priv->parity == 2)			/* Even parity */
+
+  /* Configure the number of bits per word */
+
+  switch (priv->bits)
     {
-      regval |= USART_CR1_PCE;
+      case 5:
+        regval |= USART_MR_CHRL_5BITS;
+        break;
+
+      case 6:
+        regval |= USART_MR_CHRL_6BITS;
+        break;
+
+      case 7:
+        regval |= USART_MR_CHRL_7BITS;
+        break;
+
+      case 8:
+      default:
+        regval |= USART_MR_CHRL_8BITS;
+        break;
+
+      case 9:
+        regval |= USART_MR_MODE9;
+        break;
     }
-  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+  
+  regval = up_serialout(priv, AVR32_USART_MR_OFFSET, regval);
 
-  /* Configure CR3 */
-  /* Clear CTSE, RTSE, and all interrupt enable bits */
 
-  regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  regval &= ~(USART_CR3_CTSIE|USART_CR3_CTSE|USART_CR3_RTSE|USART_CR3_EIE);
+  /* Enable interrupts at the UART */
+#warning "Not Implemented"
+/*  priv->ie    = */
 
   /* Configure hardware flow control -- Not yet supported */
+#warning "Not Implemented"
 
-  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
-
-  /* Configure the USART Baud Rate.  The baud rate for the receiver and
-   * transmitter (Rx and Tx) are both set to the same value as programmed
-   * in the Mantissa and Fraction values of USARTDIV.
-   *
-   *   baud     = fCK / (16 * usartdiv)
-   *   usartdiv = fCK / (16 * baud)
-   *
-   * Where fCK is the input clock to the peripheral (PCLK1 for USART2, 3, 4, 5
-   * or PCLK2 for USART1)
-   *
-   * First calculate (NOTE: all stand baud values are even so dividing by two
-   * does not lose precision):
-   *
-   *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
-   */
-
-   usartdiv32 = priv->apbclock / (priv->baud >> 1);
-
-   /* The mantissa part is then */
-
-   mantissa   = usartdiv32 >> 5;
-   brr        = mantissa << USART_BRR_MANT_SHIFT;
-
-   /* The fractional remainder (with rounding) */
-
-   fraction   = (usartdiv32 - (mantissa << 5) + 1) >> 1;
-   brr       |= fraction << USART_BRR_FRAC_SHIFT;
-   up_serialout(priv, STM32_USART_BRR_OFFSET, brr);
+  /* Configure the USART Baud Rate */
+#warning "Not Implemented"
 
   /* Enable Rx, Tx, and the USART */
-
-  regval      = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval     |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
-  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+#warning "Not Implemented"
 #endif
 
-  /* Set up the cache interrupt enables value */
-
-  priv->ie    = 0;
   return OK;
 }
 
@@ -547,9 +460,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   /* Disable Rx, Tx, and the UART */
 
-  regval      = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval     &= ~(USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
-  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+#warning "Not Implemented"
 }
 
 /****************************************************************************
@@ -622,24 +533,24 @@ static int up_interrupt(int irq, void *context)
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_STM32_USART1
+#ifdef CONFIG_AVR32_USART0_RS232
+  if (g_usart0priv.irq == irq)
+    {
+      dev = &g_usart0port;
+    }
+  else
+#endif
+#ifdef CONFIG_AVR32_USART1_RS232
   if (g_usart1priv.irq == irq)
     {
       dev = &g_usart1port;
     }
   else
 #endif
-#ifdef CONFIG_STM32_USART2
+#ifdef CONFIG_AVR32_USART2_RS232
   if (g_usart2priv.irq == irq)
     {
       dev = &g_usart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_STM32_USART3
-  if (g_usart3priv.irq == irq)
-    {
-      dev = &g_usart3port;
     }
   else
 #endif
@@ -658,34 +569,11 @@ static int up_interrupt(int irq, void *context)
       handled = false;
 
       /* Get the masked USART status and clear the pending interrupts. */
-
-      priv->sr = up_serialin(priv,  STM32_USART_SR_OFFSET);
-
-      /* USART interrupts:
-       *
-       * Enable             Bit Status          Meaning                         Usage
-       * ------------------ --- --------------- ------------------------------- ----------
-       * USART_CR1_IDLEIE    4  USART_SR_IDLE   Idle Line Detected              (not used)
-       * USART_CR1_RXNEIE    5  USART_SR_RXNE   Received Data Ready to be Read
-       * "              "       USART_SR_ORE    Overrun Error Detected
-       * USART_CR1_TCIE      6  USART_SR_TC     Transmission Complete           (not used)
-       * USART_CR1_TXEIE     7  USART_SR_TXE    Transmit Data Register Empty
-       * USART_CR1_PEIE      8  USART_SR_PE     Parity Error
-       *
-       * USART_CR2_LBDIE     6  USART_SR_LBD    Break Flag                      (not used)
-       * USART_CR3_EIE       0  USART_SR_FE     Framing Error
-       * "           "          USART_SR_NE     Noise Error
-       * "           "          USART_SR_ORE    Overrun Error Detected
-       * USART_CR3_CTSIE    10  USART_SR_CTS    CTS flag                        (not used)
-       *
-       * NOTE: Some of these status bits must be cleared by explicity writing zero
-       * to the SR register: USART_SR_CTS, USART_SR_LBD. Note of those are currently
-       * being used.
-       */
+#warning "Not Implemented"
 
       /* Handle incoming, receive bytes (with or without timeout) */
-
-      if ((priv->sr & USART_SR_RXNE) != 0 && (priv->ie & USART_CR1_RXNEIE) != 0)
+#warning "Not Implemented"
+      if (false)
         {
            /* Received data ready... process incoming bytes */
 
@@ -694,8 +582,8 @@ static int up_interrupt(int irq, void *context)
         }
 
       /* Handle outgoing, transmit bytes */
-
-      if ((priv->sr & USART_SR_TXE) != 0 && (priv->ie & USART_CR1_TXEIE) != 0)
+#warning "Not Implemented"
+      if (false)
         {
            /* Transmit data regiser empty ... process outgoing bytes */
 
@@ -739,27 +627,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
        }
        break;
 
-#ifdef CONFIG_USART_BREAKS
-    case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
-      {
-        irqstate_t flags = irqsave();
-        uint32_t cr2 = up_serialin(priv, STM32_USART_CR2_OFFSET);
-        up_serialout(priv, STM32_USART_CR2_OFFSET, cr2 | USART_CR2_LINEN);
-        irqrestore(flags);
-      }
-      break;
-
-    case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
-      {
-        irqstate_t flags;
-        flags = irqsave();
-        uint32_t cr1 = up_serialin(priv, STM32_USART_CR2_OFFSET);
-        up_serialout(priv, STM32_USART_CR2_OFFSET, cr2 & ~USART_CR2_LINEN);
-        irqrestore(flags);
-      }
-      break;
-#endif
-
     default:
       ret = -ENOTTY;
       break;
@@ -784,12 +651,10 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
   uint32_t dr;
 
   /* Get the Rx byte */
-
-  dr       = up_serialin(priv, STM32_USART_DR_OFFSET);
+#warning "Not Implemented"
 
   /* Get the Rx byte plux error information.  Return those in status */
-
-  *status  = priv->sr << 16 | dr;
+#warning "Not Implemented"
   priv->sr = 0;
 
   /* Then return the actual received byte */
@@ -808,22 +673,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint16_t ie;
-
-      /* USART receive interrupts:
-       *
-       * Enable             Bit Status          Meaning                         Usage
-       * ------------------ --- --------------- ------------------------------- ----------
-       * USART_CR1_IDLEIE    4  USART_SR_IDLE   Idle Line Detected              (not used)
-       * USART_CR1_RXNEIE    5  USART_SR_RXNE   Received Data Ready to be Read
-       * "              "       USART_SR_ORE    Overrun Error Detected
-       * USART_CR1_PEIE      8  USART_SR_PE     Parity Error
-       *
-       * USART_CR2_LBDIE     6  USART_SR_LBD    Break Flag                      (not used)
-       * USART_CR3_EIE       0  USART_SR_FE     Framing Error
-       * "           "          USART_SR_NE     Noise Error
-       * "           "          USART_SR_ORE    Overrun Error Detected
-       */
+  uint32_t ie;
 
   ie = priv->ie;
   if (enable)
@@ -834,15 +684,15 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
 #ifdef CONFIG_USART_ERRINTS
-      ie |= (USART_CR1_RXNEIE|USART_CR1_PEIE|USART_CR3_EIE);
+#warning "Not Implemented"
 #else
-      ie |= USART_CR1_RXNEIE;
+#warning "Not Implemented"
 #endif
 #endif
     }
   else
     {
-      ie &= ~(USART_CR1_RXNEIE|USART_CR1_PEIE|USART_CR3_EIE);
+#warning "Not Implemented"
     }
 
   /* Then set the new interrupt state */
@@ -861,7 +711,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, STM32_USART_SR_OFFSET) & USART_SR_RXNE) != 0);
+#warning "Not Implemented"
 }
 
 /****************************************************************************
@@ -875,7 +725,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, STM32_USART_DR_OFFSET, (uint32_t)ch);
+#warning "Not Implemented"
 }
 
 /****************************************************************************
@@ -891,22 +741,13 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
 
-  /* USART transmit interrupts:
-   *
-   * Enable             Bit Status          Meaning                      Usage
-   * ------------------ --- --------------- ---------------------------- ----------
-   * USART_CR1_TCIE      6  USART_SR_TC     Transmission Complete        (not used)
-   * USART_CR1_TXEIE     7  USART_SR_TXE    Transmit Data Register Empty
-   * USART_CR3_CTSIE    10  USART_SR_CTS    CTS flag                     (not used)
-   */
- 
   flags = irqsave();
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      up_restoreusartint(priv, priv->ie | USART_CR1_TXEIE);
+#warning "Not Implemented"
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -919,7 +760,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      up_restoreusartint(priv, priv->ie & ~USART_CR1_TXEIE);
+#warning "Not Implemented"
     }
   irqrestore(flags);
 }
@@ -935,7 +776,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, STM32_USART_SR_OFFSET) & USART_SR_TXE) != 0);
+#warning "Not Implemented"
 }
 
 /****************************************************************************
@@ -954,10 +795,6 @@ static bool up_txready(struct uart_dev_s *dev)
 
 void up_earlyserialinit(void)
 {
-  /* NOTE:  All GPIO configuration for the USARTs was performed in
-   * stm32_lowsetup
-   */
-
   /* Disable all USARTS */
 
   up_disableusartint(TTYS0_DEV.priv, NULL);
@@ -970,7 +807,7 @@ void up_earlyserialinit(void)
 
   /* Configuration whichever one is the console */
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 #endif
@@ -989,7 +826,7 @@ void up_serialinit(void)
 {
   /* Register the console */
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
@@ -1014,7 +851,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
   uint16_t ie;
 
@@ -1047,7 +884,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   /* Check for LF */
 
   if (ch == '\n')
@@ -1063,3 +900,22 @@ int up_putc(int ch)
 }
 
 #endif /* CONFIG_USE_SERIALDRIVER */
+
+/**************************************************************************
+ * Name: up_lowputc
+ *
+ * Description:
+ *   Output one byte on the serial console
+ *
+ **************************************************************************/
+
+void up_lowputc(char ch)
+{
+#ifdef HAVE_SERIAL_CONSOLE
+  /* Wait until the TX data register is empty */
+#warning "Not Implemented"
+
+  /* Then send the character */
+#warning "Not Implemented"
+#endif
+}

@@ -50,7 +50,7 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 # Required AT91UC3 files
 
 CHIP_ASRCS	=
-CHIP_CSRCS	= 
+CHIP_CSRCS	= at91uc3_lowinit.c at91uc3_serial.c
 
 # Configuration-dependent AT91UC3 files
 

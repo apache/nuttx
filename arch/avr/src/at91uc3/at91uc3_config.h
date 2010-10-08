@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/avr/src/at91uc3b/at91uc3_internal.h
+ * arch/avr/src/at91uc3/at91uc3_config.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,18 +33,81 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H
-#define __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H
+#ifndef __ARCH_AVR_SRC_AT91UC3_AT91UC3_CONFIG_H
+#define __ARCH_AVR_SRC_AT91UC3_AT91UC3_CONFIG_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+/* USART can be configured as a number of different devices (Only UART is supported
+ * here now, that will be extended).  Check for consistency between USART enable
+ * options.
+ */
+
+#if AVR32_NUSART < 1
+#  undef CONFIG_AVR32_USART0
+#  undef CONFIG_AVR32_USART1
+#  undef CONFIG_AVR32_USART2
+#endif
+#if AVR32_NUSART < 2
+#  undef CONFIG_AVR32_USART1
+#  undef CONFIG_AVR32_USART2
+#endif
+#if AVR32_NUSART < 3
+#  undef CONFIG_AVR32_USART2
+#endif
+
+#ifndef CONFIG_AVR32_USART0
+#  undef CONFIG_AVR32_USART0_RS232
+#  undef CONFIG_AVR32_USART0_SPI
+#endif
+#ifndef CONFIG_AVR32_USART1
+#  undef CONFIG_AVR32_USART1_RS232
+#  undef CONFIG_AVR32_USART1_SPI
+#endif
+#ifndef CONFIG_AVR32_USART2
+#  undef CONFIG_AVR32_USART2_RS232
+#  undef CONFIG_AVR32_USART2_SPI
+#endif
+
+/* Is any UART configured? */
+
+#if defined(CONFIG_AVR32_USART0_RS232) || \
+    defined(CONFIG_AVR32_USART1_RS232) || \
+	defined(CONFIG_AVR32_USART2_RS232)
+#  define HAVE_RS232_DEVICE
+#else
+#  undef  HAVE_RS232_DEVICE
+#endif
+
+/* Is there a serial console? */
+
+#if defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_AVR32_USART0_RS232)
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_AVR32_USART10_RS232)
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_AVR32_USART20_RS232)
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#else
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef HAVE_SERIAL_CONSOLE
+#endif
 
 /************************************************************************************
  * Public Types
@@ -58,26 +121,5 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: at91uc3_clkinit
- *
- * Description:
- *   Initialiaze clock/PLL settings per the definitions in the board.h file.
- *
- ************************************************************************************/
-
-extern void at91uc3_clkinitialize(void);
-
-/************************************************************************************
- * Name: at91uc3_boardinit
- *
- * Description:
- *   This function must be provided by the board-specific logic in the directory
- *   configs/<board-name>/up_boot.c.
- *
- ************************************************************************************/
-
-extern void at91uc3_boardinitialize(void);
-
-#endif /* __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H */
+#endif /* __ARCH_AVR_SRC_AT91UC3_AT91UC3_CONFIG_H */
 
