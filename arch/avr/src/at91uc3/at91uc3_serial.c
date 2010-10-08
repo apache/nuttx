@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32/avr32_serial.c
+ * arch/avr/src/at91uc3/at91uc3_serial.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -422,10 +422,8 @@ static int up_setup(struct uart_dev_s *dev)
   
   regval = up_serialout(priv, AVR32_USART_MR_OFFSET, regval);
 
-
-  /* Enable interrupts at the UART */
+  /* Disable interrupts at the UART */
 #warning "Not Implemented"
-/*  priv->ie    = */
 
   /* Configure hardware flow control -- Not yet supported */
 #warning "Not Implemented"
@@ -437,6 +435,9 @@ static int up_setup(struct uart_dev_s *dev)
 #warning "Not Implemented"
 #endif
 
+  /* Initialize the IMR shadow register */
+
+  priv->ie    = up_serialout(priv, AVR32_USART_IMR_OFFSET, regval);;
   return OK;
 }
 
