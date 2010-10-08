@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/avr/src/at91uc3/at91uc3_lowinit.c
+ * arch/avr/src/at91uc3/at91uc3_lowconsole.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -71,38 +71,35 @@
  * Public Functions
  **************************************************************************/
 
-/**************************************************************************
- * Name: up_lowinit
+/************************************************************************************
+ * Name: up_consoleinit
  *
  * Description:
- *   This performs basic initialization of the USART used for the serial
- *   console.  Its purpose is to get the console output availabe as soon
- *   as possible.
+ *   Initialize a console for debug output.
  *
- **************************************************************************/
+ ************************************************************************************/
 
-void up_lowinit(void)
+void up_consoleinit(void)
 {
-  /* Initialize MCU clocking */
-
-  up_clkinitialize();
-
-  /* Initialize a console */
-
-  up_consoleinit();
-
-  /* Perform early serial initialization (so that we will have debug output
-   * available as soon as possible).
-   */
-
-#ifdef CONFIG_USE_SERIALDRIVER
-  up_earlyserialinit();
-#endif
-
-  /* Perform board-level initialization */
-
-  up_boardinitialize();
-
+#warning "Not Implemented"
 }
 
+/************************************************************************************
+ * Name: up_lowputc
+ *
+ * Description:
+ *   Output one byte on the serial console
+ *
+ ************************************************************************************/
+
+void up_lowputc(char ch)
+{
+#ifdef HAVE_SERIAL_CONSOLE
+  /* Wait until the TX data register is empty */
+#warning "Not Implemented"
+
+  /* Then send the character */
+#warning "Not Implemented"
+#endif
+}
 

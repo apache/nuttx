@@ -902,21 +902,3 @@ int up_putc(int ch)
 
 #endif /* CONFIG_USE_SERIALDRIVER */
 
-/**************************************************************************
- * Name: up_lowputc
- *
- * Description:
- *   Output one byte on the serial console
- *
- **************************************************************************/
-
-void up_lowputc(char ch)
-{
-#ifdef HAVE_SERIAL_CONSOLE
-  /* Wait until the TX data register is empty */
-#warning "Not Implemented"
-
-  /* Then send the character */
-#warning "Not Implemented"
-#endif
-}
