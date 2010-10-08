@@ -63,7 +63,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: avr32_boardinitialize
+ * Name: at91uc3_boardinitialize
  *
  * Description:
  *   All AVR32 architectures must provide the following entry point.  This entry point
@@ -72,13 +72,13 @@
  *
  ************************************************************************************/
 
-void avr32_boardinitialize(void)
+void at91uc3_boardinitialize(void)
 {
   /* Configure SPI chip selects */
 
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
+  avr32dev1_ledinitialize();
 #endif
 }
