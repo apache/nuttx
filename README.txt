@@ -99,6 +99,31 @@ At least one configuration (eagle100) requires additional command line
 arguments on the make command.  Read ${TOPDIR}/configs/<board-name>/README.txt
 to see if that applies to your target.
 
+CYGWIN BUILD PROBLEMS
+^^^^^^^^^^^^^^^^^^^^^
+
+If you see strange behaviour when building under Cygwin then you may have
+a problem with your PATH variable.  For example, if you see failures to
+locate files that are clearly present, then may mean that you are using
+the wrong version of a tool.  For example, you may not be using Cywgin's
+'make' program at /usr/bin/make.  Try:
+
+    $ which make
+    /usr/bin/make
+
+When you install some toolchains (such as Yargarto or CodeSourcery tools),
+they may modify your PATH variable to include a path to their binaries.
+At that location, they make have GNUWin32 versions of the tools.  So you
+might actually be using a version of make that does not understand Cygwin
+pathes.
+
+The solution is either:
+
+1. Edit your PATH to remove the path to the GNUWin32 tools, or
+2. Put /usr/local/bin, /usr/bin, and /bin at the front of your path:
+
+   $ export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+
 DOCUMENTATION
 ^^^^^^^^^^^^^
 
@@ -134,6 +159,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |       `- z80/README.txt
  |   `- README.txt
  |- configs/
+ |   |- avr32dev1/
+ |   |   `- README.txt
  |   |- c5471evm/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
@@ -164,6 +191,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |- m68332evb/
  |   |   |- include/README.txt
  |   |   `- src/README.txt
+ |   |- mbed/
+ |   |   `- README.txt
  |   |- mcu123-lpc214x/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
