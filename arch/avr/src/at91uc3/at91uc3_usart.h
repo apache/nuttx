@@ -224,6 +224,7 @@
 #define USART_INT_CTSIC             (1 << 19) /* Bit 19: */
 #define USART_INT_MANE              (1 << 20) /* Bit 20: */
 #define USART_INT_MANEA             (1 << 24) /* Bit 24: */
+#define USART_INT_ALL               0x011f37e7
 
 /* CSR Register Bit-field Definitions */
 

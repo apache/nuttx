@@ -60,6 +60,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "os_internal.h"
+#include "at91uc3_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -67,10 +68,10 @@
 
 /* Some sanity checks *******************************************************/
 
-/* Is there a USART enabled? */
+/* Is there at least one USART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_RS232_DEVICE
-#  error "No USARTs enabled as RS232 devices"
+#  warning "No USARTs enabled as RS-232 devices"
 #endif
 
 /* If we are not using the serial driver for the console, then we still must
@@ -145,11 +146,10 @@ struct up_dev_s
 {
   uintptr_t usartbase; /* Base address of USART registers */
   uint32_t  baud;      /* Configured baud */
-  uint32_t  ie;        /* Saved interrupt mask bits value */
-  uint32_t  sr;        /* Saved status bits */
+  uint32_t  csr;       /* Saved channel status register contents */
   uint8_t   irq;       /* IRQ associated with this USART */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t   bits;      /* Number of bits (7 or 8) */
+  uint8_t   bits;      /* Number of bits (5, 6, 7 or 8) */
   bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
@@ -321,32 +321,27 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
  * Name: up_restoreusartint
  ****************************************************************************/
 
-static void up_restoreusartint(struct up_dev_s *priv, uint32_t ie)
+static void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 {
-  uint32_t cr;
+  /* Re-enable interrupts as for each "1" bit in imr */
 
-  /* Save the interrupt mask */
-
-  priv->ie = ie;
-
-  /* And restore the interrupt state (see the interrupt enable/usage table above) */
-#warning "Not Implemented"
+  up_serialout(priv, AVR32_USART_IER_OFFSET, imr);
 }
 
 /****************************************************************************
  * Name: up_disableusartint
  ****************************************************************************/
 
-static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
+static inline void up_disableusartint(struct up_dev_s *priv, uint32_t *imr)
 {
-  if (ie)
+  if (imr)
     {
-#warning "Not Implemented"
+      *imr = up_serialin(priv, AVR32_USART_IDR_OFFSET);
     }
 
   /* Disable all interrupts */
 
-  up_restoreusartint(priv, 0);
+  up_serialout(priv, AVR32_USART_IDR_OFFSET, USART_INT_ALL);
 }
 
 /****************************************************************************
@@ -360,18 +355,15 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 
 static int up_setup(struct uart_dev_s *dev)
 {
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-#ifdef CONFIG_SUPPRESS_UART_CONFIG
   /* Configure the USART as an RS-232 UART */
 
   usart_configure(priv->usartbase, priv->baud, priv->parity,
                   priv->bits, priv->stopbits2);
 #endif
 
-  /* Initialize the IMR shadow register */
-
-  priv->ie    = up_serialout(priv, AVR32_USART_IMR_OFFSET, regval);;
   return OK;
 }
 
@@ -460,6 +452,7 @@ static int up_interrupt(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
+  uint32_t           csr;
   int                passes;
   bool               handled;
 
@@ -488,6 +481,7 @@ static int up_interrupt(int irq, void *context)
       PANIC(OSERR_INTERNAL);
     }
   priv = (struct up_dev_s*)dev->priv;
+  DEBUGASSERT(priv);
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -498,12 +492,14 @@ static int up_interrupt(int irq, void *context)
     {
       handled = false;
 
-      /* Get the masked USART status and clear the pending interrupts. */
-#warning "Not Implemented"
+      /* Get the USART channel status register contents. */
+
+      csr       = up_serialin(priv, AVR32_USART_CSR_OFFSET);
+      priv->csr = csr;
 
       /* Handle incoming, receive bytes (with or without timeout) */
-#warning "Not Implemented"
-      if (false)
+
+      if ((csr & (USART_CSR_RXRDY|USART_CSR_TIMEOUT)) != 0)
         {
            /* Received data ready... process incoming bytes */
 
@@ -512,8 +508,8 @@ static int up_interrupt(int irq, void *context)
         }
 
       /* Handle outgoing, transmit bytes */
-#warning "Not Implemented"
-      if (false)
+
+      if ((csr & USART_CSR_TXRDY) != 0)
         {
            /* Transmit data regiser empty ... process outgoing bytes */
 
@@ -534,28 +530,23 @@ static int up_interrupt(int irq, void *context)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  struct inode      *inode = filep->f_inode;
-  struct uart_dev_s *dev   = inode->i_private;
-#ifdef CONFIG_USART_BREAKS
-  struct up_dev_s   *priv  = (struct up_dev_s*)dev->priv;
-#endif
-  int                ret    = OK;
+#if 0 /* Reserved for future growth */
+  struct inode      *inode;
+  struct uart_dev_s *dev;
+  struct up_dev_s   *priv;
+  int                ret = OK;
+
+  DEBUGASSERT(filep, filep->f_inode);
+  inode = filep->f_inode;
+  dev   = inode->i_private;
+
+  DEBUGASSERT(dev, dev->priv)
+  priv = (struct up_dev_s*)dev->priv;
 
   switch (cmd)
     {
-    case TIOCSERGSTRUCT:
-      {
-         struct up_dev_s *user = (struct up_dev_s*)arg;
-         if (!user)
-           {
-             ret = -EINVAL;
-           }
-         else
-           {
-             memcpy(user, dev, sizeof(struct up_dev_s));
-           }
-       }
-       break;
+    case xxx: /* Add commands here */
+      break;
 
     default:
       ret = -ENOTTY;
@@ -563,6 +554,9 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
     }
 
   return ret;
+#else
+  return -ENOTTY;
+#endif
 }
 
 /****************************************************************************
@@ -578,18 +572,25 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint32_t dr;
+  uint32_t rhr;
 
-  /* Get the Rx byte */
-#warning "Not Implemented"
+  /* Get the Rx byte.  The USART Rx interrupt flag is cleared by side effect
+   * when reading the received character.
+   */
 
-  /* Get the Rx byte plux error information.  Return those in status */
-#warning "Not Implemented"
-  priv->sr = 0;
+  rhr = up_serialin(priv, AVR32_USART_RHR_OFFSET);
+
+  /* Return status information */
+
+  if (status)
+    {
+      *status = priv->csr;
+    }
+  priv->csr = 0;
 
   /* Then return the actual received byte */
 
-  return dr & 0xff;
+  return rhr & USART_RHR_RXCHR_MASK;
 }
 
 /****************************************************************************
@@ -603,9 +604,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint32_t ie;
-
-  ie = priv->ie;
+ 
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register (or an Rx
@@ -613,21 +612,22 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-#ifdef CONFIG_USART_ERRINTS
-#warning "Not Implemented"
-#else
-#warning "Not Implemented"
-#endif
+#  ifdef CONFIG_USART_ERRINTS
+        up_serialout(priv, AVR32_USART_IER_OFFSET,
+                     USART_INT_RXRDY|USART_INT_TIMEOUT|
+                     USART_INT_OVRE|USART_INT_FRAME|USART_INT_PARE);
+#  else
+        up_serialout(priv, AVR32_USART_IER_OFFSET,
+                     USART_INT_RXRDY|USART_INT_TIMEOUT);
+#  endif
 #endif
     }
   else
     {
-#warning "Not Implemented"
+        up_serialout(priv, AVR32_USART_IDR_OFFSET,
+                     USART_INT_RXRDY|USART_INT_TIMEOUT|
+                     USART_INT_OVRE|USART_INT_FRAME|USART_INT_PARE);
     }
-
-  /* Then set the new interrupt state */
-
-  up_restoreusartint(priv, ie);
 }
 
 /****************************************************************************
@@ -641,21 +641,28 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-#warning "Not Implemented"
+  uint32_t regval;
+
+  /* Read the channel status register and check if character is available to
+   * be read from the RHR.
+   */
+
+  regval = up_serialin(priv, AVR32_USART_CSR_OFFSET);
+  return (regval & USART_CSR_RXRDY) != 0;
 }
 
 /****************************************************************************
  * Name: up_send
  *
  * Description:
- *   This method will send one byte on the USART
+ *   This method will send one byte on the USART.
  *
  ****************************************************************************/
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-#warning "Not Implemented"
+  up_serialout(priv, AVR32_USART_THR_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -677,7 +684,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       /* Set to receive an interrupt when the TX data register is empty */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-#warning "Not Implemented"
+       up_serialout(priv, AVR32_USART_IER_OFFSET, USART_INT_TXRDY);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -690,7 +697,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-#warning "Not Implemented"
+       up_serialout(priv, AVR32_USART_IDR_OFFSET, USART_INT_TXRDY);
     }
   irqrestore(flags);
 }
@@ -706,7 +713,14 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-#warning "Not Implemented"
+  uint32_t regval;
+
+  /* Read the channel status register and check if THR is ready to accept
+   * another character.
+   */
+
+  regval = up_serialin(priv, AVR32_USART_CSR_OFFSET);
+  return (regval & USART_CSR_TXRDY) != 0;
 }
 
 /****************************************************************************
@@ -783,9 +797,9 @@ int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  uint16_t ie;
+  uint32_t imr;
 
-  up_disableusartint(priv, &ie);
+  up_disableusartint(priv, &imr);
 
   /* Check for LF */
 
@@ -797,7 +811,7 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-  up_restoreusartint(priv, ie);
+  up_restoreusartint(priv, imr);
 #endif
   return ch;
 }

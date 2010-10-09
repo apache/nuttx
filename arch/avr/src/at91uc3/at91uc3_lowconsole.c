@@ -298,6 +298,7 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
  *
  ******************************************************************************/
 
+#ifndef CONFIG_USE_EARLYSERIALINIT
 void up_consoleinit(void)
 {
 #ifdef HAVE_SERIAL_CONSOLE
@@ -306,6 +307,7 @@ void up_consoleinit(void)
 # warning "Probably not all Implemented"
 #endif
 }
+#endif
 
 /******************************************************************************
  * Name: up_lowputc
