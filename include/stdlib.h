@@ -144,6 +144,10 @@ EXTERN FAR void  *memalign(size_t, size_t);
 EXTERN FAR void  *zalloc(size_t);
 EXTERN FAR void  *calloc(size_t, size_t);
 
+/* Misc */
+
+EXTERN int        abs(int i);
+
 /* Sorting */
 
 EXTERN void       qsort(void *base, size_t nmemb, size_t size,
