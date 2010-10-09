@@ -60,6 +60,16 @@
 #define AVR32_P3_BASE           0xc0000000 /* 512MB translated space, cacheable */
 #define AVR32_P4_BASE           0xe0000000 /* 512MB system space, non-cacheable */
 
+/* Reset vector addess */
+
+#if defined(CONFIG_ARCH_CHIP_AT91UC3A)
+#  define AVR32_VECTOR_BASE     0x80000000
+#elif defined(CONFIG_ARCH_CHIP_AT91UC3B)
+#  define AVR32_VECTOR_BASE     0xa0000000
+#else
+#  warning "Unknown vector base address"
+#endif
+
 /* Peripheral Address Map */
 
 #define AVR32_USB_BASE          0xfffe0000   /* USB 2.0 Interface */

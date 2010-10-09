@@ -89,13 +89,14 @@ void up_lowinit(void)
 
   /* Initialize a console (probably a serial console) */
 
+#ifndef CONFIG_USE_EARLYSERIALINIT
   up_consoleinit();
+#else
 
   /* Perform early serial initialization (so that we will have debug output
    * available as soon as possible).
    */
 
-#ifdef CONFIG_USE_EARLYSERIALINIT
   up_earlyserialinit();
 #endif
 
