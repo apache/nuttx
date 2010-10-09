@@ -147,13 +147,13 @@
 
 #define USART_MR_MODE_SHIFT         (0)
 #define USART_MR_MODE_MASK          (15 << USART_MR_MODE_SHIFT)
-#  define USART_MR_MODE_NORMAL      (0 << USART_MR_MODE_SHIFT) /* Normal */
-#  define USART_MR_MODE_RS485       (1 << USART_MR_MODE_SHIFT) /* RS485 */
-#  define USART_MR_MODE_HW          (2 << USART_MR_MODE_SHIFT) /* Hardware Handshaking */
-#  define USART_MR_MODE_MODEM       (3 << USART_MR_MODE_SHIFT) /* Modem */
-#  define USART_MR_MODE_T0          (4 << USART_MR_MODE_SHIFT) /* IS07816 Protocol: T = 0 */
-#  define USART_MR_MODE_T1          (6 << USART_MR_MODE_SHIFT) /* IS07816 Protocol: T = 1 */
-#  define USART_MR_MODE_IRDA        (8 << USART_MR_MODE_SHIFT) /* IrDA */
+#  define USART_MR_MODE_NORMAL      (0 << USART_MR_MODE_SHIFT)  /* Normal */
+#  define USART_MR_MODE_RS485       (1 << USART_MR_MODE_SHIFT)  /* RS485 */
+#  define USART_MR_MODE_HW          (2 << USART_MR_MODE_SHIFT)  /* Hardware Handshaking */
+#  define USART_MR_MODE_MODEM       (3 << USART_MR_MODE_SHIFT)  /* Modem */
+#  define USART_MR_MODE_T0          (4 << USART_MR_MODE_SHIFT)  /* IS07816 Protocol: T = 0 */
+#  define USART_MR_MODE_T1          (6 << USART_MR_MODE_SHIFT)  /* IS07816 Protocol: T = 1 */
+#  define USART_MR_MODE_IRDA        (8 << USART_MR_MODE_SHIFT)  /* IrDA */
 #  define USART_MR_MODE_MASTER      (14 << USART_MR_MODE_SHIFT) /* SPI Master */
 #  define USART_MR_MODE_SLAVE       (15 << USART_MR_MODE_SHIFT) /* SPI Slave */
 #define USART_MR_USCLKS_SHIFT       (4)       /* Bits 4-5:  Clock Selection */
@@ -163,6 +163,7 @@
 #  define USART_MR_USCLKS_CLK       (3 << USART_MR_USCLKS_SHIFT) /* CLK */
 #define USART_MR_CHRL_SHIFT         (6)       /* Bit 6-7:  Character Length */
 #define USART_MR_CHRL_MASK          (3 << USART_MR_CHRL_SHIFT)
+#  define USART_MR_CHRL_BITS(n)     (((n) - 5) << USART_MR_CHRL_SHIFT)
 #  define USART_MR_CHRL_5BITS       (0 << USART_MR_CHRL_SHIFT) /* 5 bits */
 #  define USART_MR_CHRL_6BITS       (1 << USART_MR_CHRL_SHIFT) /* 6 bits */
 #  define USART_MR_CHRL_7BITS       (2 << USART_MR_CHRL_SHIFT) /* 7 bits */

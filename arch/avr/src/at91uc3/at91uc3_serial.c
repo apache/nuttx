@@ -143,14 +143,14 @@
 
 struct up_dev_s
 {
-  uint32_t usartbase; /* Base address of USART registers */
-  uint32_t baud;      /* Configured baud */
-  uint32_t ie;        /* Saved interrupt mask bits value */
-  uint32_t sr;        /* Saved status bits */
-  uint8_t  irq;       /* IRQ associated with this USART */
-  uint8_t  parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;      /* Number of bits (7 or 8) */
-  bool     stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+  uintptr_t usartbase; /* Base address of USART registers */
+  uint32_t  baud;      /* Configured baud */
+  uint32_t  ie;        /* Saved interrupt mask bits value */
+  uint32_t  sr;        /* Saved status bits */
+  uint8_t   irq;       /* IRQ associated with this USART */
+  uint8_t   parity;    /* 0=none, 1=odd, 2=even */
+  uint8_t   bits;      /* Number of bits (7 or 8) */
+  bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
 /****************************************************************************
@@ -361,78 +361,12 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 static int up_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+
 #ifdef CONFIG_SUPPRESS_UART_CONFIG
-  uint32_t regval;
+  /* Configure the USART as an RS-232 UART */
 
-  /* Configure STOP bits */
-
-  regval = uUSART_MR_MODE_NORMAL;
-  if (priv->stopbits2)
-    {
-      regval |= USART_MR_NBSTOP_2;
-    }
-  else
-    {
-      regval |= USART_MR_NBSTOP_1;
-    }
- 
-  /* Configure parity */
-
-  switch (priv->parity)
-    {
-      case 0:
-      default:
-        regval |= USART_MR_PAR_NONE;
-        break;
-
-      case 1:
-        regval |= USART_MR_PAR_ODD;
-        break;
-
-      case 2:
-        regval |= USART_MR_PAR_EVEN;
-        break;
-    }
-
-  /* Configure the number of bits per word */
-
-  switch (priv->bits)
-    {
-      case 5:
-        regval |= USART_MR_CHRL_5BITS;
-        break;
-
-      case 6:
-        regval |= USART_MR_CHRL_6BITS;
-        break;
-
-      case 7:
-        regval |= USART_MR_CHRL_7BITS;
-        break;
-
-      case 8:
-      default:
-        regval |= USART_MR_CHRL_8BITS;
-        break;
-
-      case 9:
-        regval |= USART_MR_MODE9;
-        break;
-    }
-  
-  regval = up_serialout(priv, AVR32_USART_MR_OFFSET, regval);
-
-  /* Disable interrupts at the UART */
-#warning "Not Implemented"
-
-  /* Configure hardware flow control -- Not yet supported */
-#warning "Not Implemented"
-
-  /* Configure the USART Baud Rate */
-#warning "Not Implemented"
-
-  /* Enable Rx, Tx, and the USART */
-#warning "Not Implemented"
+  usart_configure(priv->usartbase, priv->baud, priv->parity,
+                  priv->bits, priv->stopbits2);
 #endif
 
   /* Initialize the IMR shadow register */
@@ -453,15 +387,10 @@ static int up_setup(struct uart_dev_s *dev)
 static void up_shutdown(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  uint32_t regval;
 
-  /* Disable all interrupts */
+  /* Reset, disable interrupts, and disable Rx and Tx */
 
-  up_disableusartint(priv, NULL);
-
-  /* Disable Rx, Tx, and the UART */
-
-#warning "Not Implemented"
+  usart_reset(priv->usartbase);
 }
 
 /****************************************************************************
