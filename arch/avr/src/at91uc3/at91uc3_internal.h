@@ -42,6 +42,9 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -68,11 +71,34 @@
 
 extern void up_clkinitialize(void);
 
+/******************************************************************************
+ * Name: usart_reset
+ *
+ * Description:
+ *   Reset a USART.
+ *
+ ******************************************************************************/
+
+extern void usart_reset(uintptr_t usart_base);
+
+/******************************************************************************
+ * Name: usart_configure
+ *
+ * Description:
+ *   Configure a USART as a RS-232 UART.
+ *
+ ******************************************************************************/
+
+void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
+                     unsigned int nbits, bool stop2);
+
 /************************************************************************************
  * Name: up_consoleinit
  *
  * Description:
- *   Initialize a console for debug output.
+ *   Initialize a console for debug output.  This function is called very
+ *   early in the intialization sequence to configure the serial console uart
+ *   (only).
  *
  ************************************************************************************/
 

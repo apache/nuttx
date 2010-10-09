@@ -87,7 +87,7 @@ void up_lowinit(void)
 
   up_clkinitialize();
 
-  /* Initialize a console */
+  /* Initialize a console (probably a serial console) */
 
   up_consoleinit();
 
@@ -95,7 +95,7 @@ void up_lowinit(void)
    * available as soon as possible).
    */
 
-#ifdef CONFIG_USE_SERIALDRIVER
+#ifdef CONFIG_USE_EARLYSERIALINIT
   up_earlyserialinit();
 #endif
 

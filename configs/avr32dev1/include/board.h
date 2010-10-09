@@ -48,6 +48,20 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* #define AVR32_FRCOSC      15200         RCOsc frequency in Hz */
+
+#define AVR32_FOSC32         32768      /* Osc32 frequency in Hz */
+#define AVR32_OSC32STARTUP   3          /* Osc32 startup time in RCOsc periods */
+
+#define AVR32_FOSC0          12000000   /* Osc0 frequency in Hz */
+#define AVR32_OSC0STARTUP    3          /* Osc0 startup time in RCOsc periods.
+
+/* #define AVR32_FOSC1       12000000      Osc1 frequency: Hz.
+ * #define AVR32_OSC1STARTUP 3             Osc1 startup time in RCOsc periods.
+ */
+
+#define AVR32_CPU_CLOCK      AVR32_FOSC0
+#define AVR32_PBA_CLOCK      AVR32_FOSC0
 
 /* LED definitions ******************************************************************/
 
