@@ -44,11 +44,11 @@
  * Global Functions
  ************************************************************************/
 
-int abs(int i)
+int abs(int j)
 {
-  if (i < 0)
+  if (j < 0)
     {
-      i = -i;
+      j = -j;
     }
-  return i;
+  return j;
 }

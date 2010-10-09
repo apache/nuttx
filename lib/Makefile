@@ -75,7 +75,7 @@ ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 STDIO_SRCS	+= lib_dtoa.c
 endif
 
-STDLIB_SRCS	= lib_abs.c lib_rand.c lib_qsort.c
+STDLIB_SRCS	= lib_abs.c lib_imaxabs.c lib_labs.c lib_llabs.c lib_rand.c lib_qsort.c
 
 MATH_SRCS	= lib_rint.c lib_fixedmath.c lib_b16sin.c lib_b16cos.c
 

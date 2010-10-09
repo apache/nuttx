@@ -41,7 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Definitions
@@ -146,7 +148,12 @@ EXTERN FAR void  *calloc(size_t, size_t);
 
 /* Misc */
 
-EXTERN int        abs(int i);
+EXTERN int        abs(int j);
+EXTERN long int   labs(long int j);
+#ifdef CONFIG_HAVE_LONG_LONG
+EXTERN long long int llabs(long long int j);
+#endif
+EXTERN intmax_t   imaxabs(intmax_t j);
 
 /* Sorting */
 
