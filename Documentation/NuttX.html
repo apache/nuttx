@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 1, 2010</p>
+      <p>Last Updated: October 9, 2010</p>
     </td>
   </tr>
 </table>
@@ -1906,6 +1906,16 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-5.12 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+	* arch/avr - Add a place to support AVR family processors.
+	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
+	  (all of the AVR32 is a work in progress).
+	* arch/avr/include/at91uc3 and arch/avr/src/at91uc3 - Add support
+	  for the AT91 UC3A/B family of AVR32 MCUs.
+	* confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
+	  the AT91UC3B0256 MCU.  This board is produced by www.mcuzone.com.
+	* include/stdlib.h, lib/Makefile and lib/lib_abs.c - Add abs().
+
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
