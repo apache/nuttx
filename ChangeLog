@@ -1290,3 +1290,13 @@
 
 5.12 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* arch/avr - Add a place to support AVR family processors.
+	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
+	  (all of the AVR32 is a work in progress).
+	* arch/avr/include/at91uc3 and arch/avr/src/at91uc3 - Add support
+	  for the AT91 UC3A/B family of AVR32 MCUs.
+	* confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
+	  the AT91UC3B0256 MCU.  This board is produced by www.mcuzone.com.
+	* include/stdlib.h, lib/Makefile and lib/lib_abs.c - Add abs().
+
+
