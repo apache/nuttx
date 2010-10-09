@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_irq.c
  * arch/arm/src/chip/stm32_irq.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -296,7 +296,7 @@ void up_irqinitialize(void)
   putreg32((uint32_t)stm32_vectors, NVIC_VECTAB);
 #endif
 
-  /* Set all interrrupts (and exceptions) to the default priority */
+  /* Set all interrupts (and exceptions) to the default priority */
 
   putreg32(DEFPRIORITY32, NVIC_SYSH4_7_PRIORITY);
   putreg32(DEFPRIORITY32, NVIC_SYSH8_11_PRIORITY);
