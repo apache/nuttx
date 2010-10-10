@@ -212,7 +212,7 @@
 /* Group 12 */
 
 #define AVR32_IRQ_BASEIRQGRP12 53
-#define AVR32_IRQ_NREQGRP12    1
+#define AVR32_IRQ_NREQGRP12     1
 
 #define AVR32_IRQ_PWM          53 /* 0 Pulse Width Modulation Controller */
 
