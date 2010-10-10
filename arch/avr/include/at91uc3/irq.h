@@ -66,24 +66,24 @@
 #define AVR32_IRQ_UNREC         0 /* EVBA+0x00 Unrecoverable exception */
 #define AVR32_IRQ_TLBMULT       1 /* EVBA+0x04 TLB multiple hit */
 #define AVR32_IRQ_BUSDATA       2 /* EVBA+0x08 Bus error data fetch */
-#define AVR32_IRQ_BUSINST       3 /* EVBA+0x0C Bus error instruction fetch */
+#define AVR32_IRQ_BUSINST       3 /* EVBA+0x0c Bus error instruction fetch */
 #define AVR32_IRQ_NMI           4 /* EVBA+0x10 NMI */
 #define AVR32_IRQ_INSTADDR      5 /* EVBA+0x14 Instruction Address */
-#define AVR32_IRQ_ITLBMISS      6 /* EVBA+0x50 ITLB Miss */
-#define AVR32_IRQ_ITLBPROT      7 /* EVBA+0x18 ITLB Protection */
-#define AVR32_IRQ_BP            8 /* EVBA+0x1C Breakpoint */
-#define AVR32_IRQ_INVINST       9 /* EVBA+0x20 Illegal Opcode */
-#define AVR32_IRQ_UNIMPINST    10 /* EVBA+0x24 Unimplemented instruction */
-#define AVR32_IRQ_PRIV         11 /* EVBA+0x28 Privilege violation */
-#define AVR32_IRQ_FP           12 /* EVBA+0x2C Floating-point */
-#define AVR32_IRQ_COP          13 /* EVBA+0x30 Coprocessor absent */
-#define AVR32_IRQ_RDDATA       14 /* EVBA+0x34 Data Address (Read) */
-#define AVR32_IRQ_WRDATA       15 /* EVBA+0x38 Data Address (Write) */
-#define AVR32_IRQ_RDDTLB       16 /* EVBA+0x60 DTLB Miss (Read) */
-#define AVR32_IRQ_WRDTLB       17 /* EVBA+0x70 DTLB Miss (Write) */
-#define AVR32_IRQ_RDDTLBPROT   18 /* EVBA+0x3C DTLB Protection (Read) */
-#define AVR32_IRQ_WRDTLBPROT   19 /* EVBA+0x40 DTLB Protection (Write) */
-#define AVR32_IRQ_DLTBMOD      20 /* EVBA+0x44 DTLB Modified */
+#define AVR32_IRQ_ITLBPROT      6 /* EVBA+0x18 ITLB Protection */
+#define AVR32_IRQ_BP            7 /* EVBA+0x1c Breakpoint */
+#define AVR32_IRQ_INVINST       8 /* EVBA+0x20 Illegal Opcode */
+#define AVR32_IRQ_UNIMPINST     9 /* EVBA+0x24 Unimplemented instruction */
+#define AVR32_IRQ_PRIV         10 /* EVBA+0x28 Privilege violation */
+#define AVR32_IRQ_FP           11 /* EVBA+0x2c Floating-point */
+#define AVR32_IRQ_COP          12 /* EVBA+0x30 Coprocessor absent */
+#define AVR32_IRQ_RDDATA       13 /* EVBA+0x34 Data Address (Read) */
+#define AVR32_IRQ_WRDATA       14 /* EVBA+0x38 Data Address (Write) */
+#define AVR32_IRQ_RDDTLBPROT   15 /* EVBA+0x3c DTLB Protection (Read) */
+#define AVR32_IRQ_WRDTLBPROT   16 /* EVBA+0x40 DTLB Protection (Write) */
+#define AVR32_IRQ_DLTBMOD      17 /* EVBA+0x44 DTLB Modified */
+#define AVR32_IRQ_ITLBMISS     18 /* EVBA+0x50 ITLB Miss */
+#define AVR32_IRQ_RDDTLB       19 /* EVBA+0x60 DTLB Miss (Read) */
+#define AVR32_IRQ_WRDTLB       20 /* EVBA+0x70 DTLB Miss (Write) */
 #define AVR32_IRQ_SUPER        21 /* EVBA+0x100 Supervisor call */
 #define AVR32_IRQ_NEVENTS      22
 
@@ -219,6 +219,7 @@
 
 /* Total number of IRQ numbers */
 
+#define AVR32_IRQ_BADVECTOR    61 /* Not a real IRQ number */
 #define NR_IRQS                61
 
 /****************************************************************************

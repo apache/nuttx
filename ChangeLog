@@ -1300,5 +1300,5 @@
 	* include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
 	  lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
 	  imaxabs().
-
+	* Add include/inttypes.h
 
