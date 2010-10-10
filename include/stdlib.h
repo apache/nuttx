@@ -153,7 +153,6 @@ EXTERN long int   labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
 EXTERN long long int llabs(long long int j);
 #endif
-EXTERN intmax_t   imaxabs(intmax_t j);
 
 /* Sorting */
 
