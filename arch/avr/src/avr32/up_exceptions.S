@@ -47,7 +47,11 @@
  * External Symbols
  ****************************************************************************/
 
-	.global		avr32_getirqno
+	.global		avr32_int0irqno	/* Returns the IRQ number of an INT0 interrupt */
+	.global		avr32_int1irqno	/* Returns the IRQ number of an INT1 interrupt */
+	.global		avr32_int2irqno	/* Returns the IRQ number of an INT2 interrupt */
+	.global		avr32_int3irqno	/* Returns the IRQ number of an INT3 interrupt */
+	.global		up_doirq		/* Dispatch an IRQ */
 
 /****************************************************************************
  * Macros
@@ -122,31 +126,44 @@ vectortab:
  * the exception table.
  * On entry to each interrupt handler, R8-R12, LR, PC and SR have already been
  * pushed onto the system stack by the MCU.
+ *
+ * An interrupt may disappear while it is being fetched by the CPU and, hence,
+ * spurious interrupt may result.
  */
 
 	.balign 4
+	.global	avr32_int0
 avr32_int0:
-	mov		r12, 0				/* r12=interrupt level parameter */
-	rjmp	avr32_intcommon		/* Jump to common interrupt logic */
+	mov		r12, 0				/* r12=interrupt level 0 */
+	rjmp	avr32_intcommon		/* Jump to common interrupt handling logic */
 
 	.balign	4
+	.global	avr32_int1
 avr32_int1:
-	mov		r12, 1				/* r12=interrupt level parameter */
-	rjmp	avr32_intcommon		/* Jump to common interrupt logic */
+	mov		r12, 1				/* r12=interrupt level 1 */
+	rjmp	avr32_intcommon		/* Jump to common interrupt handling logic */
 
 	.balign	4
+	.global	avr32_int2
 avr32_int2:
-	mov		r12, 2				/* r12=interrupt level parameter */
-	rjmp	avr32_intcommon		/* Jump to common interrupt logic */
+	mov		r12, 2				/* r12=interrupt level 2 */
+	rjmp	avr32_intcommon		/* Jump to common interrupt handling logic */
 
+	.balign	4
+	.global	avr32_int3
 avr32_int3:
-	mov		r12, 2				/* r12=interrupt level parameter */
+	mov		r12, 3				/* r12=interrupt level 3 */
 
-/* Common interrupt handling logic */
+/* Common interrupt handling logic.  R12 holds the interrupt level index */
 
 avr32_intcommon:
-	call	avr32_getirqno		/* Get the IRQ number of the interrupt to process */
-	rjmp	avr32_common		/* Then go to the common exception handling logic */
+	mcall	.Lavr32_intirqno	/* Get the IRQ number of the int0 event */
+	cp.w	r12, 0				/* Negated errno returned if spurious interrupt */
+	brge	avr32_common		/* Jump to the common exception handling logic */
+	rete						/* Ignore spurious interrupt */
+
+.Lavr32_intirqno:
+	.word	avr32_intirqno
 
 /****************************************************************************
  * Exception Vector Handlers

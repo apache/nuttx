@@ -53,9 +53,30 @@
 #include "up_internal.h"
 #include "at91uc3_internal.h"
 
+#include "chip.h"
+#include "at91uc3_intc.h"
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+
+/* These symbols are exported from up_exceptions.S:
+ */
+
+extern uint32_t vectortab;
+extern uint32_t avr32_int0;
+extern uint32_t avr32_int1;
+extern uint32_t avr32_int2;
+extern uint32_t avr32_int3;
+
+/* The provide interrupt handling offsets relative to the EVBA
+ * address (which should be vectortab).
+ */
+
+#define AVR32_INT0_RADDR ((uint32_t)&avr32_int0 - (uint32_t)&vectortab)
+#define AVR32_INT1_RADDR ((uint32_t)&avr32_int1 - (uint32_t)&vectortab)
+#define AVR32_INT2_RADDR ((uint32_t)&avr32_int2 - (uint32_t)&vectortab)
+#define AVR32_INT3_RADDR ((uint32_t)&avr32_int3 - (uint32_t)&vectortab)
 
 /****************************************************************************
  * Public Data
@@ -64,12 +85,86 @@
 uint32_t *current_regs;
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct irq_groups_s
+{
+  uint8_t baseirq;  /* IRQ number associated with bit 0 */
+  uint8_t nirqs;    /* Number of IRQs in this group */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* This table maps groups into (1) the base IRQ number for the group and (2)
+ * the number of valid interrupts in the group.
+ */
+
+static const struct irq_groups_s g_grpirqs[AVR32_IRQ_NGROUPS] =
+{
+  {AVR32_IRQ_BASEIRQGRP0,  AVR32_IRQ_NREQGRP0 }, /* Group  0 */
+  {AVR32_IRQ_BASEIRQGRP1,  AVR32_IRQ_NREQGRP1 }, /* Group  1 */
+  {AVR32_IRQ_BASEIRQGRP2,  AVR32_IRQ_NREQGRP2 }, /* Group  2 */
+  {AVR32_IRQ_BASEIRQGRP3,  AVR32_IRQ_NREQGRP3 }, /* Group  3 */
+  {AVR32_IRQ_BASEIRQGRP4,  AVR32_IRQ_NREQGRP4 }, /* Group  4 */
+  {AVR32_IRQ_BASEIRQGRP5,  AVR32_IRQ_NREQGRP5 }, /* Group  5 */
+  {AVR32_IRQ_BASEIRQGRP6,  AVR32_IRQ_NREQGRP6 }, /* Group  6 */
+  {AVR32_IRQ_BASEIRQGRP7,  AVR32_IRQ_NREQGRP7 }, /* Group  7 */
+  {AVR32_IRQ_BASEIRQGRP8,  AVR32_IRQ_NREQGRP8 }, /* Group  8 */
+  {AVR32_IRQ_BASEIRQGRP9,  AVR32_IRQ_NREQGRP9 }, /* Group  9 */
+  {AVR32_IRQ_BASEIRQGRP10, AVR32_IRQ_NREQGRP10}, /* Group 10 */
+  {AVR32_IRQ_BASEIRQGRP11, AVR32_IRQ_NREQGRP11}, /* Group 11 */
+  {AVR32_IRQ_BASEIRQGRP12, AVR32_IRQ_NREQGRP12}, /* Group 12 */
+  {AVR32_IRQ_BASEIRQGRP13, AVR32_IRQ_NREQGRP13}, /* Group 13 */
+  {AVR32_IRQ_BASEIRQGRP14, AVR32_IRQ_NREQGRP14}, /* Group 14 */
+  {AVR32_IRQ_BASEIRQGRP15, AVR32_IRQ_NREQGRP15}, /* Group 15 */
+  {AVR32_IRQ_BASEIRQGRP16, AVR32_IRQ_NREQGRP16}, /* Group 16 */
+  {AVR32_IRQ_BASEIRQGRP17, AVR32_IRQ_NREQGRP17}, /* Group 17 */
+  {AVR32_IRQ_BASEIRQGRP18, AVR32_IRQ_NREQGRP18}, /* Group 18 */
+};
+
+/* The following table provides the value of the IPR register to
+ * use to assign a group to different interrupt priorities.
+ */
+
+#if 0 /* REVISIT -- Can we come up with a way to statically initialize? */
+static const uint32_t g_ipr[AVR32_IRQ_INTPRIOS] =
+{
+  ((AVR32_INT0_RADDR << INTC_IPR_INTLEVEL_SHIFT) | INTC_IPR_INTLEVEL_INT0),
+  ((AVR32_INT1_RADDR << INTC_IPR_INTLEVEL_SHIFT) | INTC_IPR_INTLEVEL_INT1),
+  ((AVR32_INT2_RADDR << INTC_IPR_INTLEVEL_SHIFT) | INTC_IPR_INTLEVEL_INT2),
+  ((AVR32_INT3_RADDR << INTC_IPR_INTLEVEL_SHIFT) | INTC_IPR_INTLEVEL_INT3),
+};
+#else
+static uint32_t g_ipr[AVR32_IRQ_INTPRIOS];
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_getgrp
+ ****************************************************************************/
+
+static int up_getgrp(unsigned int irq)
+{
+  int i;
+
+  if (irq >= AVR32_IRQ_BASEIRQGRP0)
+    {
+      for (i = 0; i < AVR32_IRQ_NGROUPS; i++)
+        {
+          if (irq < g_grpirqs[i].baseirq + g_grpirqs[i].nirqs)
+            {
+              return i;
+            }
+        }
+    }
+  return -EINVAL;
+}
 
 /****************************************************************************
  * Public Functions
@@ -81,18 +176,30 @@ uint32_t *current_regs;
 
 void up_irqinitialize(void)
 {
+  int group;
+
   /* Disable all interrupts */
 #warning "Missing logic"
 
-  /* The standard location for the vector table is at the beginning of FLASH
-   * at address 0x0800:0000.  If we are using the STMicro DFU bootloader, then
-   * the vector table will be offset to a different location in FLASH and we
-   * will need to set the EVBA vector location to this alternative location.
+  /* Initialize the table that provides the value of the IPR register to
+   * use to assign a group to different interrupt priorities.
    */
-#warning "Missing logic"
 
-  /* Set all interrupts (and exceptions) to the default priority */
-#warning "Missing logic"
+#if 1 /* REVISIT -- Can we come up with a way to statically initialize? */
+  g_ipr[0] = ((AVR32_INT0_RADDR << INTC_IPR_INTLEVEL_SHIFT) | INTC_IPR_INTLEVEL_INT0);
+  g_ipr[1] = ((AVR32_INT1_RADDR << INTC_IPR_INTLEVEL_SHIFT) | INTC_IPR_INTLEVEL_INT1);
+  g_ipr[2] = ((AVR32_INT2_RADDR << INTC_IPR_INTLEVEL_SHIFT) | INTC_IPR_INTLEVEL_INT2);
+  g_ipr[3] = ((AVR32_INT3_RADDR << INTC_IPR_INTLEVEL_SHIFT) | INTC_IPR_INTLEVEL_INT3);
+#endif
+
+  /* Set the interrupt group priority to a default value.  All are linked to
+   * interrupt priority level 0 and to interrupt vector INT0.
+   */
+
+  for (group = 0; group < AVR32_IRQ_MAXGROUPS; group++)
+  {
+    putreg32(g_ipr[0], AVR32_INTC_IPR(group));
+  }
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -164,7 +271,72 @@ void up_maskack_irq(int irq)
 #ifdef CONFIG_ARCH_IRQPRIO
 int up_prioritize_irq(int irq, int priority)
 {
-#warning "Missing logic"
-  return -ENOSYS;
+  if (priority >= 0 && priority < AVR32_IRQ_INTPRIOS)
+    {
+      int group = up_getgrp(irq);
+      if (group >= 0)
+        {
+          putreg32(g_ipr[priority], AVR32_INTC_IPR(group));
+          return OK;
+        }
+    }
+  return -EINVAL;
 }
 #endif
+
+/****************************************************************************
+ * Name: avr32_intirqno
+ *
+ * Description:
+ *   Return the highest priority pending INT0 interrupt.
+ *
+ ****************************************************************************/
+#warning "Is this safe to call from assembly?"
+unsigned int avr32_int0irqno(unsigned int level)
+{
+  /* Get the group that caused the interrupt: "ICRn identifies the group with
+   * the highest priority that has a pending interrupt of level n. This value
+   * is only defined when at least one interrupt of level n is pending.
+   */
+
+  uint32_t group = getreg32(AVR32_INTC_ICR(level)) & INTC_ICR_CAUSE_MASK;
+  if (group < AVR32_IRQ_NGROUPS)
+    {
+      /* Now get the set of pending interrupt requests for this group.
+       * Note that we may get spurious interrupts due to races conditions
+       */
+
+      uint32_t irr = getreg32(AVR32_INTC_IRR(group));
+      unsigned irq  = g_grpirqs[group].baseirq;
+      uint32_t mask = 1;
+      int i;
+
+      /* Check each interrupt source for this group */
+
+      for (i = 0; i < g_grpirqs[group].nirqs; i++)
+        {
+          /* Is there an interrupt pending? */
+
+          if ((irr & mask) != 0)
+            {
+              /* Yes.. return its IRQ number */
+
+              return irq;
+            }
+
+          /* No.. this is interrupt is not pending */
+
+          irq++;
+          mask <<= 1;
+        }
+
+       lldbg("Spurious interrupt: group=%d IRR=%08x\n", group, IRR);
+       return -ENODEV;
+    }
+
+  lldbg("Bad group: %d\n", group);
+  return AVR32_IRQ_BADVECTOR;
+}
+
+
+

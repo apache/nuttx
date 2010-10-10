@@ -48,38 +48,39 @@
 
 /* Register offsets *****************************************************************/
 
-#define AVR32_INTC_PRIO_OFFSET(n)  ((n) << 2)           /* Interrupt priority registers */
-#define AVR32_INTC_REQ_OFFSET(n)   (0x100 + ((n) << 2)) /* Interrupt request registers */
-#define AVR32_INTC_CAUSE_OFFSET(n) (0x20c - ((n) << 2)) /* Interrupt cause registers */
+#define AVR32_INTC_IPR_OFFSET(n)  ((n) << 2)           /* Interrupt priority registers */
+#define AVR32_INTC_IRR_OFFSET(n)  (0x100 + ((n) << 2)) /* Interrupt request registers */
+#define AVR32_INTC_ICR_OFFSET(n)  (0x20c - ((n) << 2)) /* Interrupt cause registers */
 
 /* Register Addresses ***************************************************************/
 
-#define AVR32_INTC_PRIO(n)         (AVR32_INTC_BASE+AVR32_INTC_PRIO_OFFSET(n))
-#define AVR32_INTC_REQ(n)          (AVR32_INTC_BASE+AVR32_INTC_REQ_OFFSET(n))
-#define AVR32_INTC_CAUSE(n)        (AVR32_INTC_BASE+AVR32_INTC_CAUSE_OFFSET(n))
+#define AVR32_INTC_IPR(n)         (AVR32_INTC_BASE+AVR32_INTC_IPR_OFFSET(n))
+#define AVR32_INTC_IRR(n)         (AVR32_INTC_BASE+AVR32_INTC_IRR_OFFSET(n))
+#define AVR32_INTC_ICR(n)         (AVR32_INTC_BASE+AVR32_INTC_ICR_OFFSET(n))
 
 /* Register Bit-field Definitions ***************************************************/
 
 /* Interrupt priority register bit-field definitions */
 
-#define INTC_PRIO_AUTOVECTOR_SHIFT (0)       /* Bits 0-13: Autovector address */
-#define INTC_PRIO_AUTOVECTOR_MASK  (0x3fff << INTC_PRIO_AUTOVECTOR_SHIFT)
-#define INTC_PRIO_INTLEVEL_SHIFT   (30)      /* Bits 30-31: Interrupt Level */
-#define INTC_PRIO_INTLEVEL_MASK    (3 << INTC_PRIO_INTLEVEL_SHIFT)
-#  define INTC_PRIO_INTLEVEL_INT0  (0 << INTC_PRIO_INTLEVEL_SHIFT) /* Lowest priority */
-#  define INTC_PRIO_INTLEVEL_INT1  (1 << INTC_PRIO_INTLEVEL_SHIFT)
-#  define INTC_PRIO_INTLEVEL_INT2  (2 << INTC_PRIO_INTLEVEL_SHIFT)
-#  define INTC_PRIO_INTLEVEL_INT3  (3 << INTC_PRIO_INTLEVEL_SHIFT) /* Highest priority */
+#define INTC_IPR_AUTOVECTOR_SHIFT (0)       /* Bits 0-13: Autovector address */
+#define INTC_IPR_AUTOVECTOR_MASK  (0x3fff << INTC_IPR_AUTOVECTOR_SHIFT)
+#define INTC_IPR_INTLEVEL_SHIFT   (30)      /* Bits 30-31: Interrupt Level */
+#define INTC_IPR_INTLEVEL_MASK    (3 << INTC_IPR_INTLEVEL_SHIFT)
+#  define INTC_IPR_INTLEVEL_INT0  (0 << INTC_IPR_INTLEVEL_SHIFT) /* Lowest priority */
+#  define INTC_IPR_INTLEVEL_INT1  (1 << INTC_IPR_INTLEVEL_SHIFT)
+#  define INTC_IPR_INTLEVEL_INT2  (2 << INTC_IPR_INTLEVEL_SHIFT)
+#  define INTC_IPR_INTLEVEL_INT3  (3 << INTC_IPR_INTLEVEL_SHIFT) /* Highest priority */
 
 /* Interrupt request register bit-field definitions */
 
-#define INTC_PRIO(n)               (AVR32_INTC_PRIO((n) >> 5))
-#define INTC_PRIO_IRR(n)           (1 << ((n) & 0x1f))
+#define INTC_IRR_REG(n)           (AVR32_INTC_IPR((n) >> 5))
+#define INTC_IRR_SHIFT(n)         (1 << ((n) & 0x1f))
+#define INTC_IRR_MASK(n)          (1 << NTC_IRR_SHIFT(n))
 
 /* Interrupt cause register bit-field definitions */
 
-#define INTC_CAUSE_SHIFT           (0)       /* Bits 0-5: Interrupt Group Causing Interrupt of Priority n */
-#define INTC_CAUSE_MASK            (0x3f << INTC_CAUSE_SHIFT)
+#define INTC_ICR_CAUSE_SHIFT      (0)       /* Bits 0-5: Interrupt Group Causing Interrupt of Priority n */
+#define INTC_ICR_CAUSE_MASK       (0x3f << INTC_ICR_CAUSE_SHIFT)
 
 /************************************************************************************
  * Public Types

@@ -142,7 +142,6 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 extern void up_boot(void);
 extern void up_copystate(uint32_t *dest, uint32_t *src);
-extern void up_decodeirq(uint32_t *regs);
 extern void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
 extern void weak_function up_dmainitialize(void);
@@ -156,14 +155,6 @@ extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
-extern int  up_svcall(int irq, FAR void *context);
-extern int  up_hardfault(int irq, FAR void *context);
-#ifdef CONFIG_PAGING
-extern void up_pginitialize(void);
-extern uint32_t *up_va2pte(uintptr_t vaddr);
-#else /* CONFIG_PAGING */
-# define up_pginitialize()
-#endif /* CONFIG_PAGING */
 
 /* Defined in common/up_allocateheap.c or chip/xxx_allocateheap.c */
 
