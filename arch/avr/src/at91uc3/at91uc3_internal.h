@@ -108,6 +108,9 @@
 #  define GPIO_FUNCC               (2 << GPIO_MUX_SHIFT) /* PMR0=0 PMR1=1 */
 #  define GPIO_FUNCD               (3 << GPIO_MUX_SHIFT) /* PMR0=1 PMR1=1 */
 
+#  define GPIO_PMR0                (1 << GPIO_MUX_SHIFT)
+#  define GPIO_PMR1                (2 << GPIO_MUX_SHIFT)
+
 /* GPIO Enable (1) or Peripheral Enable (0)
  * .... .... .... .... .... ...G .... ....
  */
