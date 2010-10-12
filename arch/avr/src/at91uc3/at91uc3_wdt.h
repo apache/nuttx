@@ -66,7 +66,7 @@
 #define WDT_CTRL_KEY_SHIFT   (24)     /* Bits 24-31: Write protection key */
 #define WDT_CTRL_KEY_MASK    (0xff << WDT_CTRL_KEY_SHIFT)
 
-/* Clear Register Bit-field Definitions.  These register has no bit field: "Writing
+/* Clear Register Bit-field Definitions.  These register has no bit fielda: "Writing
  * periodically any value to this field when the WDT is enabled, within the watchdog
  * time-out period, will prevent a watchdog reset."
  */
