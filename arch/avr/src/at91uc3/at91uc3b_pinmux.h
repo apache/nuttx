@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/avr/src/at91uc3/at91uc3_pinmux.h
+ * arch/avr/src/at91uc3/at91uc3b_pinmux.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT91UC3_AT91UC3_PINMUX_H
-#define __ARCH_AVR_SRC_AT91UC3_AT91UC3_PINMUX_H
+#ifndef __ARCH_AVR_SRC_AT91UC3_AT91UC3B_PINMUX_H
+#define __ARCH_AVR_SRC_AT91UC3_AT91UC3B_PINMUX_H
 
 /************************************************************************************
  * Included Files
@@ -256,5 +256,5 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_AT91UC3_AT91UC3_PINMUX_H */
+#endif /* __ARCH_AVR_SRC_AT91UC3_AT91UC3B_PINMUX_H */
 
