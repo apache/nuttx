@@ -155,6 +155,17 @@ AVR32DEV1 Configuration Options
 	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
 	   the delay actually is 100 seconds.
 
+  Individual subsystems can be enabled:
+
+	CONFIG_AVR32_USARTn - Enable support for USARTn
+	CONFIG_AVR32_USARTn_RS232 - Configure USARTn as an RS232 interface.
+	CONFIG_AVR32_USARTn_SPI - Configure USARTn as an SPI interface.
+	CONFIG_AVR32_USARTn_RS485 - Configure USARTn as an RS485 interface.
+	CONFIG_AVR32_USARTn_MAN - Configure USARTn as an Manchester interface.
+	CONFIG_AVR32_USARTn_MODEM - Configure USARTn as an Modem interface.
+	CONFIG_AVR32_USARTn_IRDA - Configure USARTn as an IRDA interface.
+	CONFIG_AVR32_USARTn_ISO786 - Configure USARTn as an ISO786 interface.
+
   AT91UC3B0256 specific device driver settings
 
 	CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
