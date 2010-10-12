@@ -51,8 +51,8 @@ CMN_CSRCS	= up_assert.c up_allocateheap.c up_blocktask.c up_copystate.c \
 # Required AT91UC3 files
 
 CHIP_ASRCS	=
-CHIP_CSRCS	= at91uc3_clkinit.c at91uc3_irq.c at91uc3_lowconsole.c \
-		  at91uc3_lowinit.c at91uc3_serial.c
+CHIP_CSRCS	= at91uc3_clkinit.c at91uc3_gpio.c at91uc3_irq.c \
+		  at91uc3_lowconsole.c at91uc3_lowinit.c at91uc3_serial.c
 
 # Configuration-dependent AT91UC3 files
 
