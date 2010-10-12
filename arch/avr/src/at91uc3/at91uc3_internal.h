@@ -93,12 +93,12 @@
  * .... .... .... .... .... .XX. .... ....
  */
 
-#define GPIO_MUX_SHIFT             (9)       /* Bits 9-10: Peripheral MUX */
-#define GPIO_MUX_MASK              (3 << GPIO_MUX_SHIFT)
-#  define GPIO_MUX_0               (0 << GPIO_MUX_SHIFT) /* PMR0=0 PMR1=0 */
-#  define GPIO_MUX_1               (1 << GPIO_MUX_SHIFT) /* PMR0=1 PMR1=0 */
-#  define GPIO_MUX_2               (2 << GPIO_MUX_SHIFT) /* PMR0=0 PMR1=1 */
-#  define GPIO_MUX_3               (3 << GPIO_MUX_SHIFT) /* PMR0=1 PMR1=1 */
+#define GPIO_FUNC_SHIFT            (9)       /* Bits 9-10: Peripheral MUX */
+#define GPIO_FUNC_MASK             (3 << GPIO_MUX_SHIFT)
+#  define GPIO_FUNCA               (0 << GPIO_MUX_SHIFT) /* PMR0=0 PMR1=0 */
+#  define GPIO_FUNCB               (1 << GPIO_MUX_SHIFT) /* PMR0=1 PMR1=0 */
+#  define GPIO_FUNCC               (2 << GPIO_MUX_SHIFT) /* PMR0=0 PMR1=1 */
+#  define GPIO_FUNCD               (3 << GPIO_MUX_SHIFT) /* PMR0=1 PMR1=1 */
 
 /* GPIO Enable (1) or Peripheral Enable (0)
  * .... .... .... .... .... ...G .... ....
@@ -114,6 +114,11 @@
 
 #define GPIO_PORT_SHIFT            (5)       /* Bits 5-7: Port number */
 #define GPIO_PORT_MASK             (7 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTA               (0 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTB               (1 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTC               (2 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTD               (3 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTE               (4 << GPIO_PORT_SHIFT)
 
 /* Pin number:
  * .... .... .... .... .... .... ...B BBBB
