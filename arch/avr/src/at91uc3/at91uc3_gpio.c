@@ -81,7 +81,7 @@
  *
  ************************************************************************************/
 
-int at91uc3_configgpio(uint32_t cfgset)
+int at91uc3_configgpio(uint16_t cfgset)
 {
 #warning "Not Implemented"
   return -ENOSYS;
@@ -95,7 +95,7 @@ int at91uc3_configgpio(uint32_t cfgset)
  *
  ************************************************************************************/
 
-void at91uc3_gpiowrite(uint32_t pinset, bool value)
+void at91uc3_gpiowrite(uint16_t pinset, bool value)
 {
 #warning "Not Implemented"
 }
@@ -108,7 +108,7 @@ void at91uc3_gpiowrite(uint32_t pinset, bool value)
  *
  ************************************************************************************/
 
-bool at91uc3_gpioread(uint32_t pinset)
+bool at91uc3_gpioread(uint16_t pinset)
 {
 #warning "Not Implemented"
   return false;

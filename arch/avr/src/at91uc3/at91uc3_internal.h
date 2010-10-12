@@ -51,46 +51,54 @@
 
 /* Bit-encoded input to at91uc3_configgpio() ****************************************/
 
-/* 32-bit Encoding:
- * xxxx xxxx xxxx xxxF MMIU VXXG PPPB BBBB
+/* 16-bit Encoding:
+ * PERIPHERAL: FMMI UXXG PPPB BBBB with G=0
+ * GPIO:       FMMI UVOG PPPB BBBB with G=1
  */
 
 /* Glitch Filter Enable:
- * .... .... .... ...F .... .... .... ....
+ * F... .... .... ....
  */
 
- #define GPIO_GLITCH               (1 << 16) /* Bit 16: Glitch filter enable */
+ #define GPIO_GLITCH               (1 << 15) /* Bit 15: Glitch filter enable */
 
 /* Interrupt modes (valid only if GPIO_INTR==1)
- * .... .... .... .... MM.. .... .... ....
+ * .MM. .... .... ....
  */
 
-#define GPIO_INTMODE_SHIFT         (14)      /* Bits 14-15: Interrupt mode */
+#define GPIO_INTMODE_SHIFT         (13)      /* Bits 13-14: Interrupt mode */
 #define GPIO_INTMODE_MASK          (3 << GPIO_INTMODE_SHIFT)
 #  define GPIO_INTMODE_BOTH        (0 << GPIO_INTMODE_SHIFT)
 #  define GPIO_INTMODE_RISING      (1 << GPIO_INTMODE_SHIFT)
 #  define GPIO_INTMODE_FALLING     (2 << GPIO_INTMODE_SHIFT)
 
 /* Interrupt enable
- * .... .... .... .... ..I. .... .... ....
+ * ...I .... .... ....
  */
 
-#define GPIO_INTR                  (1 << 13) /* Bit 13: Interrupt enable */
+#define GPIO_INTR                  (1 << 12) /* Bit 12: Interrupt enable */
 
 /* Pull-up enable
- * .... .... .... .... ...U .... .... ....
+ * .... U... .... ....
  */
 
-#define GPIO_PULLUP                (1 << 12) /* Bit 12: Pull-up enable */
+#define GPIO_PULLUP                (1 << 11) /* Bit 11: Pull-up enable */
 
-/* Output value (Valid only if GPIO_ENABLE==1 and GPIO_OUTPUT==1)
- * .... .... .... .... .... V... .... ....
+/* Output value (Valid only if GPIO_ENABLE and GPIO_OUTPUT)
+ * .... .V... .... ....
  */
 
-#define GPIO_VALUE                 (1 << 11) /* Bit 11: Output value */
+#define GPIO_VALUE                 (1 << 10) /* Bit 10: Output value */
+
+/* Input/Ouptut (Valid only if GPIO_ENABLE)
+ * .... ..O. .... ....
+ */
+
+#define GPIO_OUTPUT                (1 << 9) /* Bit 9: Output driver enable */
+#define GPIO_INPUT                 (0)
 
 /* Peripheral MUX setting (valid only if GPIO_PERIPH)
- * .... .... .... .... .... .XX. .... ....
+ * .... .XX. .... ....
  */
 
 #define GPIO_FUNC_SHIFT            (9)       /* Bits 9-10: Peripheral MUX */
@@ -215,7 +223,7 @@ EXTERN void up_boardinitialize(void);
  *
  ************************************************************************************/
 
-EXTERN int at91uc3_configgpio(uint32_t cfgset);
+EXTERN int at91uc3_configgpio(uint16_t cfgset);
 
 /************************************************************************************
  * Name: at91uc3_gpiowrite
@@ -225,7 +233,7 @@ EXTERN int at91uc3_configgpio(uint32_t cfgset);
  *
  ************************************************************************************/
 
-EXTERN void at91uc3_gpiowrite(uint32_t pinset, bool value);
+EXTERN void at91uc3_gpiowrite(uint16_t pinset, bool value);
 
 /************************************************************************************
  * Name: at91uc3_gpioread
@@ -235,7 +243,7 @@ EXTERN void at91uc3_gpiowrite(uint32_t pinset, bool value);
  *
  ************************************************************************************/
 
-EXTERN bool at91uc3_gpioread(uint32_t pinset);
+EXTERN bool at91uc3_gpioread(uint16_t pinset);
 
 #undef EXTERN
 #if defined(__cplusplus)
