@@ -70,6 +70,7 @@
 #  define AVR32_NPWM                 13           /* Number of PWM channels */
 #  define AVR32_NOSC                 2            /* Number of crystal oscillators */
 #  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                7            /* Number of DMA channels */
 #elif CONFIG_ARCH_CHIP_AT91UC3B0128
 #  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT91UC3B0 1            /* UC3 B0 (64-pin) series */
@@ -87,6 +88,7 @@
 #  define AVR32_NPWM                 13           /* Number of PWM channels */
 #  define AVR32_NOSC                 2            /* Number of crystal oscillators */
 #  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                7            /* Number of DMA channels */
 #elif CONFIG_ARCH_CHIP_AT91UC3B0256
 #  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT91UC3B0 1            /* UC3 B0 (64-pin) series */
@@ -104,6 +106,7 @@
 #  define AVR32_NPWM                 13           /* Number of PWM channels */
 #  define AVR32_NOSC                 2            /* Number of crystal oscillators */
 #  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                7            /* Number of DMA channels */
 #elif CONFIG_ARCH_CHIP_AT91UC3B0512
 #  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT91UC3B0 1            /* UC3 B0 (64-pin) series */
@@ -121,6 +124,7 @@
 #  define AVR32_NPWM                 13           /* Number of PWM channels */
 #  define AVR32_NOSC                 2            /* Number of crystal oscillators */
 #  define AVR32_NADC10               8            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                7            /* Number of DMA channels */
 #elif CONFIG_ARCH_CHIP_AT91UC3B164
 #  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT91UC3B1 1            /* UC3 B0 (48-pin) series */
@@ -138,6 +142,7 @@
 #  define AVR32_NPWM                 13           /* Number of PWM channels */
 #  define AVR32_NOSC                 1            /* Number of crystal oscillators */
 #  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                7            /* Number of DMA channels */
 #elif CONFIG_ARCH_CHIP_AT91UC3B1128
 #  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT91UC3B1 1            /* UC3 B0 (48-pin) series */
@@ -155,6 +160,7 @@
 #  define AVR32_NPWM                 13           /* Number of PWM channels */
 #  define AVR32_NOSC                 1            /* Number of crystal oscillators */
 #  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                7            /* Number of DMA channels */
 #elif CONFIG_ARCH_CHIP_AT91UC3B1256
 #  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT91UC3B1 1            /* UC3 B0 (48-pin) series */
@@ -172,6 +178,7 @@
 #  define AVR32_NPWM                 13           /* Number of PWM channels */
 #  define AVR32_NOSC                 1            /* Number of crystal oscillators */
 #  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                7            /* Number of DMA channels */
 #elif CONFIG_ARCH_CHIP_AT91UC3B1512
 #  define CONFIG_ARCH_CHIP_AT91UC3B  1            /* UC3 B series */
 #  define CONFIG_ARCH_CHIP_AT91UC3B1 1            /* UC3 B0 (48-pin) series */
@@ -189,6 +196,7 @@
 #  define AVR32_NPWM                 13           /* Number of PWM channels */
 #  define AVR32_NOSC                 1            /* Number of crystal oscillators */
 #  define AVR32_NADC10               6            /* Number of 10-bit A/D channels */
+#  define AVR32_NDMAC                7            /* Number of DMA channels */
 #else
 #  error "Unsupported AVR32 chip"
 #endif

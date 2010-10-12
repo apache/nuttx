@@ -61,7 +61,7 @@
 /* Control Register Bit-field Definitions */
 
 #define WDT_CTRL_EN          (1 << 0) /* Bit 0: WDT Enable */
-#define WDT_CTRL_PSEL_SHIFT  (18)     /* Bit 8-12: Prescale Select */
+#define WDT_CTRL_PSEL_SHIFT  (18)     /* Bits 8-12: Prescale Select */
 #define WDT_CTRL_PSEL_MASK   (0x1f << WDT_CTRL_PSEL_SHIFT)
 #define WDT_CTRL_KEY_SHIFT   (24)     /* Bits 24-31: Write protection key */
 #define WDT_CTRL_KEY_MASK    (0xff << WDT_CTRL_KEY_SHIFT)
