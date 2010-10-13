@@ -72,6 +72,9 @@
 #  define GPIO_INTMODE_RISING      (1 << GPIO_INTMODE_SHIFT)
 #  define GPIO_INTMODE_FALLING     (2 << GPIO_INTMODE_SHIFT)
 
+#  define GPIO_IMR0                (1 << GPIO_INTMODE_SHIFT)
+#  define GPIO_IMR1                (2 << GPIO_INTMODE_SHIFT)
+
 /* Interrupt enable
  * ...I .... .... ....
  */
@@ -102,14 +105,14 @@
  */
 
 #define GPIO_FUNC_SHIFT            (9)       /* Bits 9-10: Peripheral MUX */
-#define GPIO_FUNC_MASK             (3 << GPIO_MUX_SHIFT)
-#  define GPIO_FUNCA               (0 << GPIO_MUX_SHIFT) /* PMR0=0 PMR1=0 */
-#  define GPIO_FUNCB               (1 << GPIO_MUX_SHIFT) /* PMR0=1 PMR1=0 */
-#  define GPIO_FUNCC               (2 << GPIO_MUX_SHIFT) /* PMR0=0 PMR1=1 */
-#  define GPIO_FUNCD               (3 << GPIO_MUX_SHIFT) /* PMR0=1 PMR1=1 */
+#define GPIO_FUNC_MASK             (3 << GPIO_FUNC_SHIFT)
+#  define GPIO_FUNCA               (0 << GPIO_FUNC_SHIFT) /* PMR0=0 PMR1=0 */
+#  define GPIO_FUNCB               (1 << GPIO_FUNC_SHIFT) /* PMR0=1 PMR1=0 */
+#  define GPIO_FUNCC               (2 << GPIO_FUNC_SHIFT) /* PMR0=0 PMR1=1 */
+#  define GPIO_FUNCD               (3 << GPIO_FUNC_SHIFT) /* PMR0=1 PMR1=1 */
 
-#  define GPIO_PMR0                (1 << GPIO_MUX_SHIFT)
-#  define GPIO_PMR1                (2 << GPIO_MUX_SHIFT)
+#  define GPIO_PMR0                (1 << GPIO_FUNC_SHIFT)
+#  define GPIO_PMR1                (2 << GPIO_FUNC_SHIFT)
 
 /* GPIO Enable (1) or Peripheral Enable (0)
  * .... .... .... .... .... ...G .... ....

@@ -112,7 +112,7 @@ void up_clkinitialize(void)
   regval |= (AVR32_OSC0STARTUP << PM_OSCCTRL_STARTUP_SHIFT);
   putreg32(regval, AVR32_PM_OSCCTRL0);
 
-  /* Enabled OSC0 */
+  /* Enable OSC0 */
 
   regval = getreg32(AVR32_PM_MCCTRL);
   regval |= PM_MCCTRL_OSC0EN;
@@ -128,6 +128,9 @@ void up_clkinitialize(void)
   regval &= ~PM_MCCTRL_MCSEL_MASK;
   regval |= PM_MCCTRL_MCSEL_OSC0;
   putreg32(regval, AVR32_PM_MCCTRL);
+
+ /* Now, enable PLL0 */
+#warning "Missing Logic"
 }
 
 

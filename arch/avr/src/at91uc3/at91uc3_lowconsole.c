@@ -50,6 +50,7 @@
 #include "up_internal.h"
 #include "at91uc3_internal.h"
 #include "at91uc3_usart.h"
+#include "at91uc3_pinmux.h"
 
 /******************************************************************************
  * Private Definitions
@@ -301,10 +302,46 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
 #ifndef CONFIG_USE_EARLYSERIALINIT
 void up_consoleinit(void)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+  /* Setup GPIO pins for each configured USART/UART */
+
+#ifdef CONFIG_AVR32_USART0_RS232
+  /* PINMUX_USART0_RXD and PINMUX_USART0_TXD must be defined in board.h.  It
+   * must define them be be one of {PINMUX_USART0_RXD_1, PINMUX_USART0_RXD_2}
+   * and {PINMUX_USART_0TXD_1, PINMUX_USART0_TXD_2}, respectively.
+   */
+
+  at91uc3_configgpio(PINMUX_USART0_RXD);
+  at91uc3_configgpio(PINMUX_USART0_TXD);
+
+#endif
+#ifdef CONFIG_AVR32_USART1_RS232
+  /* PINMUX_USART1_RXD and PINMUX_USART1_TXD must be defined in board.h.  It
+   * must define them be be one of {PINMUX_USART1_RXD_1, PINMUX_USART1_RXD_2,
+   * PINMUX_USART1_RXD_3} and {PINMUX_USART1_TXD_1, PINMUX_USART1_TXD_2,
+   * PINMUX_USART1_TXD_3}, respectively.
+   */
+
+  at91uc3_configgpio(PINMUX_USART1_RXD);
+  at91uc3_configgpio(PINMUX_USART1_TXD);
+
+#endif
+#ifdef CONFIG_AVR32_USART2_RS232
+  /* PINMUX_USART2_RXD and PINMUX_USART2_TXD must be defined in board.h.  It
+   * must define them be be one of {PINMUX_USART2_RXD_1, PINMUX_USART2_RXD_2}
+   * and {PINMUX_USART2_TXD_1, PINMUX_USART2_TXD_2}, respectively.
+   */
+
+  at91uc3_configgpio(PINMUX_USART2_RXD);
+  at91uc3_configgpio(PINMUX_USART2_TXD);
+#endif
+
+  /* Then configure the console here (if it is not going to be configured
+   * by up_earlyserialinit()).
+   */
+
+#if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_USE_EARLYSERIALINIT)
   usart_configure(AVR32_CONSOLE_BASE, AVR32_CONSOLE_BAUD, AVR32_CONSOLE_PARITY,
                   AVR32_CONSOLE_BITS, (bool)AVR32_CONSOLE_2STOP);
-# warning "Probably not all Implemented"
 #endif
 }
 #endif
