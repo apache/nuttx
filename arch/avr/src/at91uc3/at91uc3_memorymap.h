@@ -48,10 +48,15 @@
 
 /* Physical memory map */
 
-#define AVR32_ONCHIP_FLASH_BASE 0x80000000 /* 512Kb Flash Array */
+#define AVR32_ONCHIP_SRAM_BASE  0x00000000 /* 16-64Kb SRAM */
+#define AVR32_GPIO_LBUS_BASE    0x40000000 /* Local bus mapped GPIO registers */
+#define AVR32_ONCHIP_FLASH_BASE 0x80000000 /* 64-512Kb Flash Array */
 #  define AVR32_APPL_BASE       0x80002000 /* 8Kb offset to application w/bootloader */
-#define AVR32_USER_FLASH_BASE   0x80800000 /* Flash User Page */
+#  define AVR32_USER_FLASH_BASE 0x80800000 /* Flash User Page */
 #  define AVR32_BTLDR_CONFIG    0x808001fc /* Bootloader configuration word */
+#define AVR32_USBDATA_BASE      0xd0000000 /* USB data (64Kb) */
+#define AVR32_HSBPB_BRIDGEB     0xfffe0000 /* HSB-PB Bridge B (64Kb) */
+#define AVR32_HSBPB_BRIDGEA     0xffff0000 /* HSB-PB Bridge A (64Kb) */
 
 /* Memory map for systems without an MMU */
 
@@ -63,9 +68,9 @@
 /* Reset vector addess */
 
 #if defined(CONFIG_ARCH_CHIP_AT91UC3A)
-#  define AVR32_VECTOR_BASE     0x80000000
+#  define AVR32_VECTOR_BASE     AVR32_P1_BASE
 #elif defined(CONFIG_ARCH_CHIP_AT91UC3B)
-#  define AVR32_VECTOR_BASE     0xa0000000
+#  define AVR32_VECTOR_BASE     AVR32_P2_BASE
 #else
 #  warning "Unknown vector base address"
 #endif
