@@ -63,6 +63,11 @@
 #define AVR32_CPU_CLOCK      AVR32_FOSC0
 #define AVR32_PBA_CLOCK      AVR32_FOSC0
 
+/* Pin muliplexing selecion *********************************************************/
+
+#define PINMUX_USART1_RXD    PINMUX_USART1_RXD_1
+#define PINMUX_USART1_TXD    PINMUX_USART1_TXD_1
+
 /* LED definitions ******************************************************************/
 
 #define LED_STARTED          0
