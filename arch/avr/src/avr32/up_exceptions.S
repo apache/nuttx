@@ -40,9 +40,6 @@
 #include <nuttx/config.h>
 #include <arch/avr32/avr32.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
-
 /****************************************************************************
  * External Symbols
  ****************************************************************************/
@@ -209,18 +206,52 @@ avr32_excptcommon:
  * Common Event Handling Logic
  ****************************************************************************/
 
-/* After this point, logic to manage interrupts and exceptions is equivalent.
- * Here we have:
- *
- *   R8-R12, LR, SR, and the PC on the stack.
- *   R12 holds the IRQ number to be dispatched.
- *
- * This function will finish construction of the register save structure and
- * call the IRQ dispatching logic.
- */
+/* After this point, logic to manage interrupts and exceptions is           */
+/* equivalent. Here we have:                                                */
+/*                                                                          */
+/*   R8-R12, LR, SR, and the PC on the stack.                               */
+/*   R12 holds the IRQ number to be dispatched.                             */
+/*                                                                          */
+/* The context save area looks like this:                                   */
+/*     xx xx xx xx xx xx xx xx xx SR PC LR 12 11 10 09 08                   */
+/*                                ^                       +8*4              */
+/* This function will finish construction of the register save structure    */
+/* and call the IRQ dispatching logic.                                      */
 
 avr32_common:
+	/* Save the SP (as it was before the interrupt) in the conext save      */
+	/* structure.                                                           */
+	/*     xx xx xx xx xx xx xx xx SP SR PC LR 12 11 10 09 08               */
+	/*                             ^sp                                      */
+
+	mov		r8, sp
+	sub		r8, -8*4
+	st.w	--sp, r8
+
+	/* Saving R0-R7 is all that is left to complete the context save.       */
+	/*     07 06 05 04 03 02 01 00 SP SR PC LR 12 11 10 09 08               */
+	/*     ^sp                                                              */
+
+	stm		--sp, r0-r7
+
+	/* Now call up_doirq passing the IRQ number in r12 and the base address */
+	/* of the register context save area in r13.                            */
+
+	mov		r12, sp
+	mcall	.Lup_doirq
+	 
 #warning "Missing Logic"
 	rjmp	$
+
+	/* On return, r12 will hold the new address of the register context save
+	 * area.  On an interrupt contex switch, this will (1) not be the same
+	 * as the value of r12 passed to up_doirq(), and (2) may not reside on
+	 * a stack.
+	 */
+
+#warning "Missing Logic"
+
+.Lup_doirq:
+	.word	up_doirq
 	.end
 
