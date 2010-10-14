@@ -51,11 +51,46 @@
  * Definitions
  ****************************************************************************/
 
-/* Register state save array indices */
+/* Register state save array indices.
+ *
+ * The following registers are saved by the AVR32 hardware (for the case of
+ * interrupts only).  Note the registers are order in the opposite order the
+ * they appear in memory (i.e., in the order of increasing address) because
+ * this makes it easier to following the ordering of pushing on a push-down
+ * stack.
+ */
+ 
+#define REG_R8           16
+#define REG_R9           15
+#define REG_R10          14
+#define REG_R11          13
+#define REG_R12          12
+#define REG_R14          11
+#define REG_R15          10
+#define REG_SR            9
 
-/* Size of the register state save array */
+#define REG_LR           REG_R14
+#define REG_PC           REG_R15
 
-#define XCPTCONTEXT_REGS 1
+/* Additional registers saved in order have the full CPU context */
+
+#define REG_R13           8
+#define REG_SP           REG_R13
+
+#define REG_R0            7
+#define REG_R1            6
+#define REG_R2            5
+#define REG_R3            4
+#define REG_R4            3
+#define REG_R5            2
+#define REG_R6            1
+#define REG_R7            0
+
+/* Size of the register state save array (in 32-bit words) */
+
+#define INTCONTEXT_REGS   8 /* r8-r12, lr, pc, sr */
+#define XCPTCONTEXT_REGS 17 /* Plus r0-r7, sp */
+
 
 /****************************************************************************
  * Public Types

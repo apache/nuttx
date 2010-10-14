@@ -1,0 +1,113 @@
+/****************************************************************************
+ * arch/avr32/src/avr32/up_fullcontextrestore.S
+ *
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+#include <arch/avr32/avr32.h>
+
+/****************************************************************************
+ * External Symbols
+ ****************************************************************************/
+
+/****************************************************************************
+ * Macros
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_fullcontextrestore
+ *
+ * C Prototype:
+ *  void up_fullcontextrestore(uint32_t *regs);
+ *
+ ****************************************************************************/
+
+	.text
+	.global	up_fullcontextrestore
+	.type	up_fullcontextrestore, @function
+up_fullcontextrestore:
+
+	/* Initially, r12 points to the r7 save area. Restore r0-r7.            */
+	/*     07 06 05 04 03 02 01 00 xx xx xx xx xx xx xx xx xx               */
+	/*                             ^r12                                     */
+
+	ldm 	r12++, r0-r7
+	
+    /* Now, r12 points to the SP (r13) save area.  Recover the value of     */
+	/* the stack pointer (r13).  We will need to save some temporaries on   */
+	/* the final stack.                                                     */
+	/*     07 06 05 04 03 02 01 00 SP xx xx xx xx xx xx xx xx               */
+	/*                                ^r12                                  */
+
+	ld.w	sp, r12++
+
+	/* Now r12 points to the SR save area.  Skip over the SR for now.       */
+	/*     07 06 05 04 03 02 01 00 SP xx xx xx xx xx xx xx xx               */
+	/*                                   ^r12                               */
+	
+    sub		r12, -2*4
+
+	/* Get the pc, lr, and r12 (in r8, r9, and r10) and move them to the    */
+    /* stack.  We can now use r12 and lr as scratch registers.              */
+	/*     07 06 05 04 03 02 01 00 SP xx PC LR 12 xx xx xx xx               */
+	/*                                            ^r12                      */
+
+	ldm		r12++, r8-r10
+	stm		--sp, r8-r10
+
+	/* Now r12 now points to the r11 save area.  Restore r8-r11.            */
+	/*     07 06 05 04 03 02 01 00 SP xx PC LR 12 11 10 09  08              */
+	/*                                                         ^r12         */
+	
+	ldm		r12++, r8-r11
+	
+	/* r12 now points +4 beyond the end of the register save area. Restore  */
+	/* SR.                                                                  */
+	/*     07 06 05 04 03 02 01 00 SP SR PC LR 12 11 10 09  08              */
+	/*                                ^r12-4*8                 ^r12         */
+	
+	ld.w	lr, r12[-4*8]
+	mtsr	AVR32_SR, lr
+	
+	/* Restore PC, LR and r12.  Hmmm.. I need to study the behaviour of ldm */
+	/* when r12,lr, and pc on in ldm reglist16.  I'm not sure that I want   */
+	/* that behavior.                                                       */
+
+/*	ldm		sp++, r12, lr, pc */
+	ldm		sp++, r12, lr
+	ld.w	pc, sp++
+	.end
