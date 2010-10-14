@@ -235,23 +235,73 @@ avr32_common:
 	stm		--sp, r0-r7
 
 	/* Now call up_doirq passing the IRQ number in r12 and the base address */
-	/* of the register context save area in r13.                            */
+	/* of the register context save area in r11.                            */
 
-	mov		r12, sp
+	mov		r11, sp
+
+	/* Switch to the interrrupt stack if so configured.  Move the current   */
+	/* stack pointer into a preserved register (r7) and set the interrupt   */
+	/* stack pointer.                                                       */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	mov		r7, sp
+	mov		sp, up_intstackbase
+	movh	sp, (up_intstackbase >> 0)
+#endif
+
+	/* Call up_doirq with r12=IRQ number and r11=register save area         */
+
 	mcall	.Lup_doirq
-	 
-#warning "Missing Logic"
-	rjmp	$
 
-	/* On return, r12 will hold the new address of the register context save
-	 * area.  On an interrupt contex switch, this will (1) not be the same
-	 * as the value of r12 passed to up_doirq(), and (2) may not reside on
-	 * a stack.
-	 */
+	/* Restore the user stack pointer.                                      */
+	/*     07 06 05 04 03 02 01 00 SP SR PC LR 12 11 10 09 08               */
+	/*     ^sp                                                              */
 
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	mov		sp, r7
+#endif
+
+	/* On return, r12 will hold the new address of the register context     */
+	/* save area.  On an interrupt contex switch, this will (1) not be the  */
+	/* same as the value of r12 passed to up_doirq(), and (2) may not       */
+	/* reside on a stack.                                                   */
+
+	cp.w	sp, r12
+	brne	1f
+
+	/* No context switch... do the simple return.  First, restore r0-r7.    */
+	/*     xx xx xx xx xx xx xx xx SP SR PC LR 12 11 10 09 08               */
+	/*                             ^sp                                      */
+
+	ldm		sp++, r0-r7
+
+	/* Skip over the saved stack pointer and return from the interrupt.     */
+	/*     xx xx xx xx xx xx xx xx xx SR PC LR 12 11 10 09 08               */
+	/*                                ^sp                                   */
+
+	sub		sp, -4
+	rete
+
+	/* Context switch... we need to do a little more work.                  */
+1:
 #warning "Missing Logic"
 
 .Lup_doirq:
 	.word	up_doirq
+
+/************************************************************************************
+ *  Name: up_interruptstack
+ ************************************************************************************/
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	.bss
+	.align	4
+	.globl	up_interruptstack
+	.type	up_interruptstack, object
+up_interruptstack:
+	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
+up_intstackbase:
+	.size	up_interruptstack, .-up_interruptstack
+#endif
 	.end
 

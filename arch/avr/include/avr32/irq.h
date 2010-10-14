@@ -51,6 +51,13 @@
  * Definitions
  ****************************************************************************/
 
+/* General notes about the AVR32 ABI:
+ *
+ * Scratch/Volatile Registers: r8-r12
+ * Preserved/Static Registers: r0-r7
+ * Parameter Passing:          r12-R8 (in that order)
+ */
+
 /* Register state save array indices.
  *
  * The following registers are saved by the AVR32 hardware (for the case of
