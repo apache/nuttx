@@ -44,11 +44,12 @@
  * External Symbols
  ****************************************************************************/
 
-	.global		avr32_int0irqno	/* Returns the IRQ number of an INT0 interrupt */
-	.global		avr32_int1irqno	/* Returns the IRQ number of an INT1 interrupt */
-	.global		avr32_int2irqno	/* Returns the IRQ number of an INT2 interrupt */
-	.global		avr32_int3irqno	/* Returns the IRQ number of an INT3 interrupt */
-	.global		up_doirq		/* Dispatch an IRQ */
+	.global		avr32_int0irqno			/* Returns the IRQ number of an INT0 interrupt */
+	.global		avr32_int1irqno			/* Returns the IRQ number of an INT1 interrupt */
+	.global		avr32_int2irqno			/* Returns the IRQ number of an INT2 interrupt */
+	.global		avr32_int3irqno			/* Returns the IRQ number of an INT3 interrupt */
+	.global		up_doirq				/* Dispatch an IRQ */
+	.global		up_fullcontextrestore	/* Restore new task contex */
 
 /****************************************************************************
  * Macros
@@ -219,6 +220,16 @@ avr32_excptcommon:
 /* and call the IRQ dispatching logic.                                      */
 
 avr32_common:
+    /* Disable interrupts in the current SR.  This is necessary because the */
+	/* AVR32 permits nested interrupts (if they are of higher priority).    */
+	/* We can support nested interrupts without some effort because:        */
+	/* - The global variable current_regs permits only one interrupt,       */
+	/* - If CONFIG_ARCH_INTERRUPTSTACK is defined, then there is a single   */
+	/*   interrupt stack, and                                               */
+	/* - Probably other things.                                             */
+
+	ssrf	AVR32_SR_GM_SHIFT
+
 	/* Save the SP (as it was before the interrupt) in the conext save      */
 	/* structure.                                                           */
 	/*     xx xx xx xx xx xx xx xx SP SR PC LR 12 11 10 09 08               */
@@ -245,8 +256,7 @@ avr32_common:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	mov		r7, sp
-	mov		sp, up_intstackbase
-	movh	sp, (up_intstackbase >> 0)
+	lddpc	sp, .Lup_instackbase
 #endif
 
 	/* Call up_doirq with r12=IRQ number and r11=register save area         */
@@ -282,12 +292,16 @@ avr32_common:
 	sub		sp, -4
 	rete
 
-	/* Context switch... we need to do a little more work.                  */
+	/* Context switch... jump to up_fullcontestrestor with r12=address of   */
+	/* the task context to restore.                                         */
+
 1:
-#warning "Missing Logic"
+	lddpc	pc, .Lup_fullcontextrestore
 
 .Lup_doirq:
 	.word	up_doirq
+.Lup_fullcontextrestore:
+	.word	up_fullcontextrestore
 
 /************************************************************************************
  *  Name: up_interruptstack
@@ -302,6 +316,9 @@ up_interruptstack:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 up_intstackbase:
 	.size	up_interruptstack, .-up_interruptstack
+.Lup_instackbase
+	.word	up_intstackbase
+	.size	.Lup_instackbase, .-.Lup_instackbase
 #endif
 	.end
 

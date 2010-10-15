@@ -292,7 +292,7 @@ int up_prioritize_irq(int irq, int priority)
  *
  ****************************************************************************/
 #warning "Is this safe to call from assembly?"
-unsigned int avr32_int0irqno(unsigned int level)
+unsigned int avr32_intirqno(unsigned int level)
 {
   /* Get the group that caused the interrupt: "ICRn identifies the group with
    * the highest priority that has a pending interrupt of level n. This value
