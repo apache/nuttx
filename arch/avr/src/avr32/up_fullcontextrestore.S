@@ -44,6 +44,8 @@
  * External Symbols
  ****************************************************************************/
 
+	.file		"up_fullcontextrestore.S"
+
 /****************************************************************************
  * Macros
  ****************************************************************************/
@@ -53,6 +55,9 @@
  *
  * C Prototype:
  *  void up_fullcontextrestore(uint32_t *regs);
+ *
+ * Assumptions:
+ *   Interrupts are disabled.
  *
  ****************************************************************************/
 
@@ -96,7 +101,7 @@ up_fullcontextrestore:
 	ldm		r12++, r8-r11
 	
 	/* r12 now points +4 beyond the end of the register save area. Restore  */
-	/* SR.                                                                  */
+	/* SR.  NOTE:  This may enable interrupts!                              */
 	/*     07 06 05 04 03 02 01 00 SP SR PC LR 12 11 10 09  08              */
 	/*                                ^r12-4*8                 ^r12         */
 	

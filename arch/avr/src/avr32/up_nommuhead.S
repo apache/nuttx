@@ -47,6 +47,7 @@
  * External Symbols
  ****************************************************************************/
 
+	.file		"up_nommuhead.S"
 	.global		_sbss			/* Start of .bss.  Defined by ld.script */
 	.global		_ebss			/* End of .bss.  Defined by ld.script */
 #ifdef CONFIG_BOOT_RUNFROMFLASH
