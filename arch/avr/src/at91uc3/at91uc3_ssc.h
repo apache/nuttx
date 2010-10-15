@@ -101,11 +101,22 @@
 
 /* Receive Clock Mode Register Bit-field Definitions */
 
-#define SSC_RCMR_PERIOD_SHIFT     (24)      /* Bits 24-31: Receive Period Divider Selection */
-#define SSC_RCMR_PERIOD_MASK      (0xff << SSC_RCMR_PERIOD_SHIFT)
-#define SSC_RCMR_STTDLY_SHIFT     (16)      /* Bits 16-23: Receive Start Delay */
-#define SSC_RCMR_STTDLY_MASK      (0xff << SSC_RCMR_STTDLY_SHIFT)
-#define SSC_RCMR_STOP             (1 << 12) /* Bit 12: Receive Stop Selection */
+#define SSC_RCMR_CKS_SHIFT        (0)       /* Bits 0-1: Receive Clock Selection */
+#define SSC_RCMR_CKS_MASK         (3 << SSC_RCMR_CKS_SHIFT)
+#  define SSC_RCMR_CKS_DIVCLK     (0 << SSC_RCMR_CKS_SHIFT) /* Divided clock */
+#  define SSC_RCMR_CKS_TXCLK      (1 << SSC_RCMR_CKS_SHIFT) /* TX_CLOCK clock signal */
+#  define SSC_RCMR_CKS_RXCLK      (2 << SSC_RCMR_CKS_SHIFT) /* RX_CLOCK pin */
+#define SSC_RCMR_CKO_SHIFT        (2)       /* Bits 2-4: Receive Clock Output Mode Selection */
+#define SSC_RCMR_CKO_MASK         (7 << SSC_RCMR_CKO_SHIFT)
+#  define SSC_RCMR_CKO_NONE       (0 << SSC_RCMR_CKO_SHIFT) /* None Input-only */
+#  define SSC_RCMR_CKO_CONT       (1 << SSC_RCMR_CKO_SHIFT) /* Continuous receive clock Output */
+#  define SSC_RCMR_CKO_XFR        (2 << SSC_RCMR_CKO_SHIFT) /* Receive clock only during data transfers Output */
+#define SSC_RCMR_CKI              (1 << 5)  /* Bit 5:  Receive Clock Inversion */
+#define SSC_RCMR_CKG_SHIFT        (6)       /* Bits 6-7: Receive Clock Gating Selection */
+#define SSC_RCMR_CKG_MASK         (3 << SSC_RCMR_CKG_SHIFT)
+#  define SSC_RCMR_CKG_NONE       (0 << SSC_RCMR_CKG_SHIFT) /* None, continous clock */
+#  define SSC_RCMR_CKG_LOW        (1 << SSC_RCMR_CKG_SHIFT) /* Enable if RX_FRAME_SYNC low */
+#  define SSC_RCMR_CKG_HIGH       (2 << SSC_RCMR_CKG_SHIFT) /* Enable if RX_FRAME_SYNC high */
 #define SSC_RCMR_START_SHIFT      (8)       /* Bits 8-11: Receive Start Selection */
 #define SSC_RCMR_START_MASK       (15 << SSC_RCMR_START_SHIFT)
 #  define SSC_RCMR_START_CONT     (0 << SSC_RCMR_START_SHIFT) /* Continuous */
@@ -117,22 +128,11 @@
 #  define SSC_RCMR_START_CHANGE   (6 << SSC_RCMR_START_SHIFT) /* RX_FRAME_SYNC change */
 #  define SSC_RCMR_START_BOTH     (7 << SSC_RCMR_START_SHIFT) /* Any edge RX_FRAME_SYNC */
 #  define SSC_RCMR_START_CMP0     (8 << SSC_RCMR_START_SHIFT) /* Compare 0 */
-#define SSC_RCMR_CKG_SHIFT        (6)       /* Bits 6-7: Receive Clock Gating Selection */
-#define SSC_RCMR_CKG_MASK         (3 << SSC_RCMR_CKG_SHIFT)
-#  define SSC_RCMR_CKG_NONE       (0 << SSC_RCMR_CKG_SHIFT) /* None, continous clock */
-#  define SSC_RCMR_CKG_LOW        (1 << SSC_RCMR_CKG_SHIFT) /* Enable if RX_FRAME_SYNC low */
-#  define SSC_RCMR_CKG_HIGH       (2 << SSC_RCMR_CKG_SHIFT) /* Enable if RX_FRAME_SYNC high */
-#define SSC_RCMR_CKI              (1 << 5)  /* Bit 5:  Receive Clock Inversion */
-#define SSC_RCMR_CKO_SHIFT        (2)       /* Bits 2-4: Receive Clock Output Mode Selection */
-#define SSC_RCMR_CKO_MASK         (7 << SSC_RCMR_CKO_SHIFT)
-#  define SSC_RCMR_CKO_NONE       (0 << SSC_RCMR_CKO_SHIFT) /* None Input-only */
-#  define SSC_RCMR_CKO_CONT       (1 << SSC_RCMR_CKO_SHIFT) /* Continuous receive clock Output */
-#  define SSC_RCMR_CKO_XFR        (2 << SSC_RCMR_CKO_SHIFT) /* Receive clock only during data transfers Output */
-#define SSC_RCMR_CKS_SHIFT        (0)       /* Bits 0-1: Receive Clock Selection */
-#define SSC_RCMR_CKS_MASK         (3 << SSC_RCMR_CKS_SHIFT)
-#  define SSC_RCMR_CKS_DIVCLK     (0 << SSC_RCMR_CKS_SHIFT) /* Divided clock */
-#  define SSC_RCMR_CKS_TXCLK      (1 << SSC_RCMR_CKS_SHIFT) /* TX_CLOCK clock signal */
-#  define SSC_RCMR_CKS_RXCLK      (2 << SSC_RCMR_CKS_SHIFT) /* RX_CLOCK pin */
+#define SSC_RCMR_STOP             (1 << 12) /* Bit 12: Receive Stop Selection */
+#define SSC_RCMR_STTDLY_SHIFT     (16)      /* Bits 16-23: Receive Start Delay */
+#define SSC_RCMR_STTDLY_MASK      (0xff << SSC_RCMR_STTDLY_SHIFT)
+#define SSC_RCMR_PERIOD_SHIFT     (24)      /* Bits 24-31: Receive Period Divider Selection */
+#define SSC_RCMR_PERIOD_MASK      (0xff << SSC_RCMR_PERIOD_SHIFT)
 
 /* Receive Frame Mode Register Bit-field Definitions */
 
