@@ -81,19 +81,39 @@ void up_initial_state(_TCB *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
 
-  /* Initialize the initial exception register context structure */
+  /* Initialize the initial exception register context structure.  Zeroing
+   * all registers is a good debug helper, but should not be necessary.
+   */
 
+#ifdef CONFIG_DEBUG
   memset(xcp, 0, sizeof(struct xcptcontext));
+#else
+  /* No pending signal delivery */
 
-  /* Save the initial stack pointer */
-  /* Save the task entry point (stripping off the thumb bit) */
+  xcp->sigdeliver   = NULL;
+  
+  /* Clear the frame pointer and link register since this is the outermost
+   * frame.
+   */
 
-# warning "Not implemented"
+  xcp->regs[REG_R7] = 0;
+  xcp->regs[REG_LR] = 0;
+#endif
+
+  /* Set the initial stack pointer to the "base" of the allocated stack */
+
+  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+
+  /* Save the task entry point */
+
+  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
 
   /* Enable or disable interrupts, based on user configuration */
 
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
-#   warning "Not implemented"
+  xcp->regs[REG_SR]    = ;
+# else
+  xcp->regs[REG_SR]    = 0;
 # endif
 }
 
