@@ -102,7 +102,6 @@ void up_lowinit(void)
   /* Perform board-level initialization */
 
   up_boardinitialize();
-
 }
 
 

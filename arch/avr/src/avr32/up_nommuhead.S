@@ -134,12 +134,14 @@ __start:
 
 	/* Then jump to OS entry (will not return) */
 
-	rjmp		os_start
+	lddpc		pc, .Los_start
 
 .Lstackbase:
 	.word	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 .Lvectortab:
     .word   vectortab
+.Los_start:
+    .word   os_start
 	.size	__start, .-__start
 
 	/* This global variable is unsigned long g_heapbase and is

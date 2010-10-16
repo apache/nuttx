@@ -194,10 +194,6 @@ extern void lowconsole_init(void);
 
 extern void up_timerinit(void);
 
-/* Defined in chip/xxx_irq.c */
-
-extern void up_maskack_irq(int irq);
-
 /* Defined in configs/<board-name>/src/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
