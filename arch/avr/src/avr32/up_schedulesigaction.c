@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/avr32/avr32.h>
 
 #include "os_internal.h"
 #include "up_internal.h"
@@ -152,14 +153,16 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
                * the signal(s) have been delivered.
                */
 
-              tcb->xcp.sigdeliver       = sigdeliver;
-#warning "Not implemented"
+              tcb->xcp.sigdeliver   = sigdeliver;
+              tcb->xcp.saved_pc     = current_regs[REG_PC];
+              tcb->xcp.saved_sr     = current_regs[REG_SR];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-#warning "Not implemented"
+              current_regs[REG_PC]  = (uint32_t)up_sigdeliver;
+              current_regs[REG_SR] |= AVR32_SR_GM_MASK;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -183,13 +186,15 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.sigdeliver       = sigdeliver;
-#warning "Not implemented"
+          tcb->xcp.saved_pc         = current_regs[REG_PC];
+          tcb->xcp.saved_sr         = current_regs[REG_SR];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-#warning "Not implemented"
+          tcb->xcp.regs[REG_PC]     = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_SR]    |= AVR32_SR_GM_MASK;
         }
 
       irqrestore(flags);
