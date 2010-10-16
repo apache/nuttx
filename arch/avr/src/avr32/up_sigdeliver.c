@@ -100,7 +100,8 @@ void up_sigdeliver(void)
   /* Save the real return state on the stack. */
 
   up_copystate(regs, rtcb->xcp.regs);
-#warning "Not Implemented"
+  regs[REG_PC]         = rtcb->xcp.saved_pc;
+  regs[REG_SR]         = rtcb->xcp.saved_sr;
 
   /* Get a local copy of the sigdeliver function pointer. We do this so tha
    * we can nullify the sigdeliver function point in the TCB and accept more
@@ -112,7 +113,7 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state */
 
-#warning "Not Implemented"
+  irqrestore(regs[REG_SR]);
 
   /* Deliver the signals */
 
