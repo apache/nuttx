@@ -57,7 +57,7 @@
 #endif
 	.global		up_lowinit		/* Perform low level initialization */
 	.global		os_start		/* NuttX entry point */
-	.global		vectors			/* Vector base address */
+	.global		vectortab		/* Vector base address */
 
 /****************************************************************************
  * Macros
@@ -85,7 +85,7 @@ __start:
 
 	/* Set up the vector base address so interrupts can be enabled. */
 
-	lda.w		r0, vectors
+	lda.w		r0, .Lvectortab
 	mtsr		AVR32_EVBA, r0
 
 	/* Enable exception processing */
@@ -137,7 +137,9 @@ __start:
 	rjmp		os_start
 
 .Lstackbase:
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.word	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+.Lvectortab:
+    .word   vectortab
 	.size	__start, .-__start
 
 	/* This global variable is unsigned long g_heapbase and is

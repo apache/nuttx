@@ -149,9 +149,9 @@
 #  define PM_PLL_PLLOPT_WBWDIS     (4 << PM_PLL_PLLOPT_SHIFT) /* Disable the Wide-Bandwidth mode */
 #define PM_PLL_PLLDIV_SHIFT        (8)       /* Bits 8-11: PLL Division Factor */
 #define PM_PLL_PLLDIV_MASK         (15 << PM_PLL_PLLDIV_SHIFT)
-#define PM_PLL_PLLMUL_SHIFT        (16)       /* Bits 16-19: PLL Multiply Factor */
+#define PM_PLL_PLLMUL_SHIFT        (16)      /* Bits 16-19: PLL Multiply Factor */
 #define PM_PLL_PLLMUL_MASK         (15 << PM_PLL_PLLMUL_SHIFT)
-#define PM_PLL_PLLCOUNT_SHIFT      (24)       /* Bits 24-29: PLL Count */
+#define PM_PLL_PLLCOUNT_SHIFT      (24)      /* Bits 24-29: PLL Count */
 #define PM_PLL_PLLCOUNT_MASK       (0x3f << PM_PLL_PLLCOUNT_SHIFT)
 
 /* Oscillator 0/1 Control Register Bit-field Definitions */
@@ -179,7 +179,7 @@
 #define PM_OSCCTRL32_MODE_SHIFT     (8)       /* Bits 8-10: Oscillator Mode */
 #define PM_OSCCTRL32_MODE_MASK      (7 << PM_OSCCTRL32_MODE_SHIFT)
 #  define PM_OSCCTRL32_MODE_EXT     (0 << PM_OSCCTRL32_MODE_SHIFT) /* External clock */
-#  define PM_OSCCTRL32_MODE_XTALp9  (1 << PM_OSCCTRL32_MODE_SHIFT) /* Crystal */
+#  define PM_OSCCTRL32_MODE_XTAL    (1 << PM_OSCCTRL32_MODE_SHIFT) /* Crystal */
 #define PM_OSCCTRL32_STARTUPSHIFT   (16)      /* Bits 16-18: Oscillator Startup Time */
 #define PM_OSCCTRL32_STARTUP_MASK   (7 << PM_OSCCTRL32_STARTUP_SHIFT)
 #  define PM_OSCCTRL32_STARTUP_0    (0 << PM_OSCCTRL32_STARTUP_SHIFT) /* Num RCOsc cycles */
@@ -195,7 +195,6 @@
 /* Interrupt Mask Register Bit-field Definitions */
 /* Interrupt Status Register Bit-field Definitions */
 /* Interrupt Clear Register Bit-field Definitions */
-
 
 #define PM_INT_LOCK0               (1 << 0)  /* Bit 0:  PLL0 locked */
 #define PM_INT_LOCK1               (1 << 1)  /* Bit 1:  PLL1 locked */
