@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/avr32dev1/include/board.h
- * include/arch/board/board.h
+ * arch/avr/src/avr32/up_switchcontext.S
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,94 +33,91 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/irq.h>
+#include <arch/avr32/avr32.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
-/* Clocking *************************************************************************/
-/* #define AVR32_FRCOSC      15200         RCOsc frequency in Hz */
-
-#define AVR32_FOSC32         32768      /* OSC32 frequency in Hz */
-#define AVR32_OSC32STARTUP   3          /* OSC32 startup time in RCOsc periods */
-
-#define AVR32_FOSC0          12000000   /* OSC0 frequency in Hz */
-#define AVR32_OSC0STARTUP    3          /* OSC0 startup time in RCOsc periods.
-
-/* #define AVR32_FOSC1       12000000      OSC1 frequency: Hz.
- * #define AVR32_OSC1STARTUP 3             OSC1 startup time in RCOsc periods.
- */
-
-/* Select OSC0 as the main clock */
-
-#define AVR32_CLOCK_OSC0     1
-#undef  AVR32_CLOCK_PLL0
-
-#define AVR32_CPU_CLOCK      AVR32_FOSC0
-#define AVR32_PBA_CLOCK      AVR32_FOSC0
-
-/* Pin muliplexing selecion *********************************************************/
-
-#define PINMUX_USART1_RXD    PINMUX_USART1_RXD_1
-#define PINMUX_USART1_TXD    PINMUX_USART1_TXD_1
-
-/* LED definitions ******************************************************************/
-
-#define LED_STARTED          0
-#define LED_HEAPALLOCATE     1
-#define LED_IRQSENABLED      2
-#define LED_STACKCREATED     3
-#define LED_INIRQ            4
-#define LED_SIGNAL           5
-#define LED_ASSERTION        6
-#define LED_PANIC            7
-
 /************************************************************************************
- * Public Types
+ * Global Symbols
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
+	.file		"up_switchcontext.S"
 
 /************************************************************************************
- * Public Data
+ * Macros
  ************************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
 
 /************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
- * Name: avr32_boardinitialize
+ * Name: up_switchcontext
  *
  * Description:
- *   All AVR32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Save the current thread context and restore the specified context.  The full
+ *   C function prototype is:
+ *
+ *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ *
+ * Return:
+ *   up_switchcontext forces a context switch to the task "canned" in restoreregs.
+ *   It does not 'return' in the normal sense, rather, it will context switch back
+ *   to the function point.  When it does 'return,' it is because the blocked
+ *   task hat was "pickeled" in the saveregs "can" is again ready to run and has
+ *   execution priority.
+ *
+ * Assumptions:
+ *   global interrupts disabled by the caller.
  *
  ************************************************************************************/
 
-EXTERN void avr32_boardinitialize(void);
+	.text
+	.globl		up_switchcontext
+	.type		up_switchcontext, @function
+up_switchcontext:
+	/* "Pickle" the current thread context in the saveregs "can."  r12=saveregs.    */
+	/*     xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx                       */
+	/*     ^r12                                                                     */
+	/* Sample SR and set r12 to just after the LR storage location.                 */
+	/*     xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx                       */
+	/*                                         ^r12                                 */
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+	mfsr	r10, AVR32_SR
+	sub		r12, -4*(REG_LR+1)
 
-#endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+	/* Then "push" PC=LR, LR, SR, and SP as ther are on entry.                      */
+	/*     xx xx xx xx xx xx xx xx SP SR PC LR xx xx xx xx xx                       */
+	/*                             ^r12                                             */
+
+	st.w	--r12, lr
+	st.w	--r12, lr
+	st.w	--r12, r10
+	st.w	--r12, sp
+
+	/* Save the preserved/static registers, r0-r7.  There is no reason to save the  */
+	/* scratch/volatile registers, r8-r12, in this context.                         */
+	/*     07 06 05 04 03 02 01 00 SP SR PC LR xx xx xx xx xx                       */
+	/*     ^r12                                                                     */
+
+	stm		--r12, r0-r7
+
+	/* Finally, let up_fullcontextrestore handling the re-instatement of the thread */
+	/* "canned" in restoregs.                                                       */
+
+	mov		r12, r11
+	lddpc	pc, .Lup_fullcontextrestore
+
+.Lup_fullcontextrestore:
+	.word	up_fullcontextrestore
+	.size	up_switchcontext, .-up_switchcontext
+	.end
 

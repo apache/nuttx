@@ -733,7 +733,9 @@ static bool up_txready(struct uart_dev_s *dev)
  * Description:
  *   Performs the low level USART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before up_serialinit.  NOTE:  This function depends on GPIO pin
+ *   configuration performed in up_consoleinit() and main clock iniialization
+ *   performed in up_clkinitialize().
  *
  ****************************************************************************/
 

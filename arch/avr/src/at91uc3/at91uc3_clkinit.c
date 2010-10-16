@@ -73,18 +73,43 @@
  **************************************************************************/
 
 /**************************************************************************
- * Public Functions
- **************************************************************************/
-
-/************************************************************************************
- * Name: up_clkinit
+ * Name: up_enableosc32
  *
  * Description:
- *   Initialiaze clock/PLL settings per the definitions in the board.h file.
+ *   Initialiaze the 32KHz oscillaor.  This oscillaor is used by the RTC
+ *   logic to provide the sysem timer.
  *
- ************************************************************************************/
+ **************************************************************************/
 
-void up_clkinitialize(void)
+static inline void up_enableosc32(void)
+{
+  uint32_t regval;
+ 
+  /* Select the 32KHz oscillator crystal */
+
+  regval = getreg32(AVR32_PM_OSCCTRL32);
+  regval &= ~PM_OSCCTRL32_MODE_MASK;
+  regval |= PM_OSCCTRL32_MODE_XTAL;
+  putreg32(regval, AVR32_PM_OSCCTRL32);
+
+  /* Enable the 32-kHz clock */
+
+  regval = getreg32(AVR32_PM_OSCCTRL32);
+  regval &= ~PM_OSCCTRL_STARTUP_MASK;
+  regval |= PM_OSCCTRL32_EN|(AVR32_OSC32STARTUP << PM_OSCCTRL_STARTUP_SHIFT);
+  putreg32(regval, AVR32_PM_OSCCTRL32);
+}
+
+/**************************************************************************
+ * Name: up_enableosc0
+ *
+ * Description:
+ *   Initialiaze clock/PLL settings per the definitions in the board.h
+ *   file.
+ *
+ **************************************************************************/
+
+static inline void up_enableosc0(void)
 {
   uint32_t regval;
 
@@ -121,16 +146,60 @@ void up_clkinitialize(void)
   /* Wait for CLK0 to be ready */
 
   while ((getreg32(AVR32_PM_POSCSR) & PM_POSCSR_OSC0RDY) == 0);
+}
 
-  /* Then switch the main clock to OSC0 */
+/**************************************************************************
+ * Name: up_mainclk
+ *
+ * Description:
+ *   Initialiaze clock/PLL settings per the definitions in the board.h
+ *   file.
+ *
+ **************************************************************************/
 
+static inline void up_mainclk(uint32_t mcsel)
+{
+  uint32_t regval;
+ 
   regval = getreg32(AVR32_PM_MCCTRL);
   regval &= ~PM_MCCTRL_MCSEL_MASK;
-  regval |= PM_MCCTRL_MCSEL_OSC0;
+  regval |= mcsel;
   putreg32(regval, AVR32_PM_MCCTRL);
+}
 
- /* Now, enable PLL0 */
-#warning "Missing Logic"
+/**************************************************************************
+ * Public Functions
+ **************************************************************************/
+
+/**************************************************************************
+ * Name: up_clkinit
+ *
+ * Description:
+ *   Initialiaze clock/PLL settings per the definitions in the board.h
+ *   file.
+ *
+ **************************************************************************/
+
+void up_clkinitialize(void)
+{
+  /* Enable the 32KHz oscillator (need by the RTC module) */
+
+  up_enableosc32();
+
+#if defined(AVR32_CLOCK_OSC0)
+  /* Enable OSC0 using the settings in board.h */
+
+  up_enableosc0();
+ 
+  /* Then switch the main clock to OSC0 */
+
+  up_mainclk(PM_MCCTRL_MCSEL_OSC0);
+
+#elif defined(AVR32_CLOCK_PLL0)
+#  warning "Missing Logic"
+#else
+#  error "No main clock"
+#endif
 }
 
 
