@@ -167,6 +167,22 @@ static int up_getgrp(unsigned int irq)
 }
 
 /****************************************************************************
+ * Name: avr32_xcptn
+ *
+ * Description:
+ *   Handlers for unexpected execptions.  All are fatal error conditions.
+ *
+ ****************************************************************************/
+
+static int avr32_xcptn(int irq, FAR void *context)
+{
+  (void)irqsave();
+  lldbg("PANIC!!! Exception IRQ: %d\n", irq);
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -177,6 +193,7 @@ static int up_getgrp(unsigned int irq)
 void up_irqinitialize(void)
 {
   int group;
+  int irq;
 
   /* Initialize the table that provides the value of the IPR register to
    * use to assign a group to different interrupt priorities.
@@ -194,9 +211,9 @@ void up_irqinitialize(void)
    */
 
   for (group = 0; group < AVR32_IRQ_MAXGROUPS; group++)
-  {
-    putreg32(g_ipr[0], AVR32_INTC_IPR(group));
-  }
+   {
+     putreg32(g_ipr[0], AVR32_INTC_IPR(group));
+   }
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -204,9 +221,10 @@ void up_irqinitialize(void)
 
   /* Attach the exception handlers */
 
-#ifdef CONFIG_DEBUG
-#warning "Missing logic"
-#endif
+  for (irq = 0; irq < AVR32_IRQ_NEVENTS; irq++)
+    {
+	  irq_attach(irq, avr32_xcptn);
+	}
 
   /* And finally, enable interrupts */
 
@@ -246,10 +264,13 @@ int up_prioritize_irq(int irq, int priority)
  * Name: avr32_intirqno
  *
  * Description:
- *   Return the highest priority pending INT0 interrupt.
+ *   Return the highest priority pending INTn interrupt (hwere n=level).
+ *   This is called directly from interrupt handling logic.  This should be
+ *   save since the UC3B will save all C scratch/volatile registers (and
+ *   this function should not alter the perserved/static registers).
  *
  ****************************************************************************/
-#warning "Is this safe to call from assembly?"
+
 unsigned int avr32_intirqno(unsigned int level)
 {
   /* Get the group that caused the interrupt: "ICRn identifies the group with
