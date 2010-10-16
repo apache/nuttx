@@ -56,8 +56,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
+/* Output debug info if stack dump is selected -- even if debug is not
+ * selected.
  */
 
 #ifdef CONFIG_ARCH_STACKDUMP
@@ -68,9 +68,9 @@
 /* The following is just intended to keep some ugliness out of the mainline
  * code.  We are going to print the task name if:
  *
- *  CONFIG_TASK_NAME_SIZE > 0 &&    <-- The task has a name
- *  (defined(CONFIG_DEBUG)    ||    <-- And the debug is enabled (lldbg used)
- *   defined(CONFIG_ARCH_STACKDUMP) <-- Or lib_lowprintf() is used
+ *  CONFIG_TASK_NAME_SIZE > 0 &&     <-- The task has a name
+ *  (defined(CONFIG_DEBUG)    ||     <-- And the debug is enabled (lldbg used)
+ *   defined(CONFIG_ARCH_STACKDUMP)) <-- Or lib_lowprintf() is used
  */
 
 #undef CONFIG_PRINT_TASKNAME
@@ -94,8 +94,13 @@
 
 static inline uint32_t up_getsp(void)
 {
-# warning "Not implemented"
-  return 0;
+  uint32_t retval;
+  __asm__ __volatile__ (
+    "mov\t%0,sp\n\t"
+    : "=r" (retval)
+    :
+  );
+  return retval;
 }
 
 /****************************************************************************
@@ -130,9 +135,21 @@ static inline void up_registerdump(void)
 
   if (current_regs)
     {
-      /* Yes.. dump the interrupt registers */
+      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+	        0,
+			current_regs[REG_R0], current_regs[REG_R1],
+			current_regs[REG_R2], current_regs[REG_R3],
+			current_regs[REG_R4], current_regs[REG_R5],
+ 			current_regs[REG_R6], current_regs[REG_R7]);
 
-# warning "Not implemented"
+      lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+	        8,
+			current_regs[REG_R8],  current_regs[REG_R9],
+			current_regs[REG_R10], current_regs[REG_R11],
+			current_regs[REG_R12], current_regs[REG_R13],
+ 			current_regs[REG_R14], current_regs[REG_R15]);
+
+      lldbg("SR: %08x\n", current_regs[REG_SR]);
     }
 }
 #else
