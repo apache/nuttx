@@ -89,10 +89,6 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
   DEBUGASSERT(current_regs == NULL);
   current_regs = regs;
 
-  /* Mask and acknowledge the interrupt */
-
-  up_maskack_irq(irq);
-
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
@@ -108,10 +104,6 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
   /* Indicate that we are no long in an interrupt handler */
 
   current_regs = NULL;
-
-  /* Unmask the last interrupt (global interrupts are still disabled) */
-
-  up_enable_irq(irq);
 #endif
   up_ledoff(LED_INIRQ);
   return regs;

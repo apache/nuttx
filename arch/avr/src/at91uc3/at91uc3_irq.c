@@ -178,9 +178,6 @@ void up_irqinitialize(void)
 {
   int group;
 
-  /* Disable all interrupts */
-#warning "Missing logic"
-
   /* Initialize the table that provides the value of the IPR register to
    * use to assign a group to different interrupt priorities.
    */
@@ -216,45 +213,6 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   irqrestore(0);
 #endif
-}
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "Missing logic"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "Missing logic"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-  up_disable_irq(irq);
 }
 
 /****************************************************************************

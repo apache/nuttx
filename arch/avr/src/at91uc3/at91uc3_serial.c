@@ -403,20 +403,10 @@ static void up_shutdown(struct uart_dev_s *dev)
 static int up_attach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  int ret;
 
-  /* Attach and enable the IRQ */
+  /* Attach the IRQ */
 
-  ret = irq_attach(priv->irq, up_interrupt);
-  if (ret == OK)
-    {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the USART
-        */
-
-       up_enable_irq(priv->irq);
-    }
-  return ret;
+  return irq_attach(priv->irq, up_interrupt);
 }
 
 /****************************************************************************
@@ -432,7 +422,7 @@ static int up_attach(struct uart_dev_s *dev)
 static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_disable_irq(priv->irq);
+  up_serialout(priv, AVR32_USART_IDR_OFFSET, 0xffffffff);
   irq_detach(priv->irq);
 }
 
