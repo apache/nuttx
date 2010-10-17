@@ -39,6 +39,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "at91uc3_config.h"
 
 #include <stdint.h>
 #include <errno.h>
@@ -225,6 +226,12 @@ void up_irqinitialize(void)
     {
 	  irq_attach(irq, avr32_xcptn);
 	}
+
+  /* Initialize GPIO interrupt facilities */
+
+#ifdef CONFIG_AVR32_GPIOIRQ
+  gpio_irqinitialize();
+#endif
 
   /* And finally, enable interrupts */
 

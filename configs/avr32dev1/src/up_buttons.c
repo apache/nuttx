@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "at91uc3_config.h"
 
+#include <sys/types.h>
 #include <stdint.h>
 
 #include <nuttx/irq.h>
@@ -58,9 +60,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static xcpt_t g_irqbutton1;
-static xcpt_t g_irqbutton2;
 
 /****************************************************************************
  * Private Functions
@@ -89,7 +88,7 @@ uint8_t up_buttons(void)
   uint8_t retval;
 
   retval  = at91uc3_gpioread(PINMUX_GPIO_BUTTON1) ? 0 : BUTTON1;
-  retval |= sat91uc3_gpioread(PINMUX_GPIO_BUTTON2) ? 0 : BUTTON2;
+  retval |= at91uc3_gpioread(PINMUX_GPIO_BUTTON2) ? 0 : BUTTON2;
 
   return retval;
 }
@@ -98,30 +97,33 @@ uint8_t up_buttons(void)
  * Name: up_irqbutton1
  ****************************************************************************/
 
-#ifdef CONFIG_GPIOB_IRQ
+#ifdef CONFIG_AVR32_GPIOIRQ
 xcpt_t up_irqbutton1(xcpt_t irqhandler)
 {
+#ifdef CONFIG_AVR32DEV_BUTTON1_IRQ
   xcpt_t oldhandler;
-  irqstate_t flags;
 
-  /* Disable interrupts until we are done */
+  /* Attach the handler */
 
-  flags        = irqsave();
+  gpio_irqattach(GPIO_BUTTON1_IRQ, irqhandler, &oldhandler);
 
-  /* Get the old button interrupt handler and save the new one */
+  /* Enable/disable the interrupt */
 
-  oldhandler   = g_irqbutton1;
-  g_irqbutton1 = irqhandler;
-
-  /* Configure and enable the interrupt */
-
-#warning "Missing Logic"
-
-  irqrestore(flags);
+  if (irqhandler)
+    {
+	  gpio_irqenable(GPIO_BUTTON1_IRQ);
+	}
+  else
+    {
+	  gpio_irqdisable(GPIO_BUTTON1_IRQ);
+	}
 
   /* Return the old button handler (so that it can be restored) */
 
   return oldhandler;
+#else
+  return NULL;
+#endif
 }
 #endif
 
@@ -129,30 +131,33 @@ xcpt_t up_irqbutton1(xcpt_t irqhandler)
  * Name: up_irqbutton2
  ****************************************************************************/
 
-#ifdef CONFIG_GPIOB_IRQ
+#ifdef CONFIG_AVR32_GPIOIRQ
 xcpt_t up_irqbutton2(xcpt_t irqhandler)
 {
+#ifdef CONFIG_AVR32DEV_BUTTON2_IRQ
   xcpt_t oldhandler;
-  irqstate_t flags;
 
-  /* Disable interrupts until we are done */
+  /* Attach the handler */
 
-  flags        = irqsave();
+  gpio_irqattach(GPIO_BUTTON2_IRQ, irqhandler, &oldhandler);
 
-  /* Get the old button interrupt handler and save the new one */
+  /* Enable/disable the interrupt */
 
-  oldhandler   = g_irqbutton2;
-  g_irqbutton2 = irqhandler;
-
-  /* Configure and enable the interrupt */
-
-#warning "Missing Logic"
-
-  irqrestore(flags);
+  if (irqhandler)
+    {
+	  gpio_irqenable(GPIO_BUTTON2_IRQ);
+	}
+  else
+    {
+	  gpio_irqdisable(GPIO_BUTTON2_IRQ);
+	}
 
   /* Return the old button handler (so that it can be restored) */
 
   return oldhandler;
+#else
+  return NULL;
+#endif
 }
 #endif
 

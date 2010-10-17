@@ -57,4 +57,8 @@ CHIP_CSRCS	= at91uc3_clkinit.c at91uc3_gpio.c at91uc3_irq.c \
 
 # Configuration-dependent AT91UC3 files
 
+ifeq ($(CONFIG_AVR32_GPIOIRQ),y)
+CHIP_CSRCS	+= at91uc3_gpioirq.c
+endif
+
 

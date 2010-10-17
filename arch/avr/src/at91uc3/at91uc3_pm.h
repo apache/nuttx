@@ -132,11 +132,39 @@
 #define PM_CKSEL_PBBDIV            (1 << 31) /* Bit 31: PBB Division */
 
 /* CPU Mask Register Bit-field Definitions */
+
+#define PM_CPUMASK_OCD             (1 << 1)  /* Bit 1:  OCD */
+
 /* HSB Mask Register Bit-field Definitions */
+
+#define PM_HSBMASK_FLASHC          (1 << 0)  /* Bit 0:  FLASHC */
+#define PM_HSBMASK_PBA             (1 << 1)  /* Bit 1:  PBA bridge */
+#define PM_HSBMASK_PBB             (1 << 2)  /* Bit 2:  PBB bridge */
+#define PM_HSBMASK_USBB            (1 << 3)  /* Bit 3:  USBB */
+#define PM_HSBMASK_PDCA            (1 << 4)  /* Bit 4:  PDCA */
+
 /* PBA Mask Register Bit-field Definitions */
+
+#define PM_PBAMASK_INTC            (1 << 0)  /* Bit 0:  INTC */
+#define PM_PBAMASK_GPIO            (1 << 1)  /* Bit 1:  GPIO */
+#define PM_PBAMASK_PDCA            (1 << 2)  /* Bit 2:  PDCA */
+#define PM_PBAMASK_PMRTCEIC        (1 << 3)  /* Bit 3:  PM/RTC/EIC */
+#define PM_PBAMASK_ADC             (1 << 4)  /* Bit 4:  ADC */
+#define PM_PBAMASK_SPI             (1 << 5)  /* Bit 5:  SPI */
+#define PM_PBAMASK_TWI             (1 << 6)  /* Bit 6:  TWI */
+#define PM_PBAMASK_USART0          (1 << 7)  /* Bit 7:  USART0 */
+#define PM_PBAMASK_USART1          (1 << 8)  /* Bit 8:  USART1 */
+#define PM_PBAMASK_USART2          (1 << 9)  /* Bit 9:  USART2 */
+#define PM_PBAMASK_PWM             (1 << 10) /* Bit 10: PWM */
+#define PM_PBAMASK_SSC             (1 << 11) /* Bit 11: SSC */
+#define PM_PBAMASK_TC              (1 << 12) /* Bit 12: TC */
+#define PM_PBAMASK_ABDAC           (1 << 13) /* Bit 13: ABDAC */
+
 /* PBB Mask Register Bit-field Definitions */
 
-/* These registers contain a 32-bit value with no smaller bit-field */
+#define PM_PBBMASK_HMATRIX         (1 << 0)  /* Bit 0:  HMATRIX */
+#define PM_PBBMASK_USBB            (1 << 2)  /* Bit 2:  USBB */
+#define PM_PBBMASK_FLASHC          (1 << 3)  /* Bit 3:  FLASHC */
 
 /* PLL0/1 Control Register Bit-field Definitions */
 

@@ -154,6 +154,12 @@
 #  define CONFIG_USE_EARLYSERIALINIT 1
 #endif
 
+/* If GPIO IRQ support is defined, then a set of GPIOs must all be included */
+
+#if CONFIG_AVR32_GPIOIRQSETA == 0 && CONFIG_AVR32_GPIOIRQSETB == 0
+#  undef CONFIG_AVR32_GPIOIRQ
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

@@ -43,10 +43,21 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include "at91uc3_config.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+
+/* Configuration ********************************************************************/
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 4) == 1
+#  define CONFIG_AVR32DEV_BUTTON1_IRQ 1
+#endif 
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 8) == 1
+#  define CONFIG_AVR32DEV_BUTTON2_IRQ 1
+#endif 
 
 /* AVRDEV1 GPIO Pin Definitions *****************************************************/
 /* LEDs
@@ -68,8 +79,23 @@
  * PIN 25  PB3  KEY2
  */
 
-#define PINMUX_GPIO_BUTTON1 (GPIO_ENABLE | GPIO_INPUT | GPIO_PORTB | 2)
-#define PINMUX_GPIO_BUTTON2 (GPIO_ENABLE | GPIO_INPUT | GPIO_PORTB | 3)
+#if CONFIG_AVR32DEV_BUTTON1_IRQ
+#  define PINMUX_GPIO_BUTTON1 (GPIO_ENABLE | GPIO_INPUT | GPIO_INTR | \
+                               GPIO_INTMODE_BOTH | GPIO_GLITCH | GPIO_PORTB | 2)
+#  define GPIO_BUTTON1_IRQ    AVR32_IRQ_GPIO_PB2
+#else
+#  define PINMUX_GPIO_BUTTON1 (GPIO_ENABLE | GPIO_INPUT | GPIO_GLITCH | \
+                               GPIO_PORTB | 2)
+#endif
+
+#if CONFIG_AVR32DEV_BUTTON2_IRQ
+#  define PINMUX_GPIO_BUTTON2 (GPIO_ENABLE | GPIO_INPUT | GPIO_INTR | \
+                               GPIO_INTMODE_BOTH | GPIO_GLITCH | GPIO_PORTB | 3)
+#  define GPIO_BUTTON2_IRQ    AVR32_IRQ_GPIO_PB3
+#else
+#  define PINMUX_GPIO_BUTTON2 (GPIO_ENABLE | GPIO_INPUT | GPIO_GLITCH | \
+                               GPIO_PORTB | 3)
+#endif
 
 /************************************************************************************
  * Public Types
