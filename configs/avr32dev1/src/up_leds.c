@@ -40,16 +40,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include <arch/board/board.h>
-
-#include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
-
 #include "at91uc3_internal.h"
 #include "avr32dev1_internal.h"
 
@@ -58,34 +48,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
- */
-
-#undef LED_DEBUG   /* Define to enable debug */
-#undef LED_VERBOSE /* Define to enable verbose debug */
-
-#ifdef LED_DEBUG
-#  define leddbg  lldbg
-#  ifdef LED_VERBOSE
-#    define ledvdbg lldbg
-#  else
-#    define ledvdbg(x...)
-#  endif
-#else
-#  undef LED_VERBOSE
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
-/* Dump GPIO registers */
-
-#ifdef LED_VERBOSE
-#  warning "Not implemented"
-#else
-#  define led_dumpgpio(m)
-#endif
 
 /****************************************************************************
  * Private Data
