@@ -51,8 +51,20 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+/* Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the overall
+ * GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
+ * CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
+ * interrupts on.
+ */
+
+#ifndef CONFIG_AVR32_GPIOIRQ
+#  undef CONFIG_AVR32_GPIOIRQSETA
+#  undef CONFIG_AVR32_GPIOIRQSETB
+#endif
  
-/* IRQ numbers */
+/* IRQ numbers **************************************************************/
 /* Events.  These exclude:
  *
  * - The Reset event which vectors directly either to 0x8000:0000 (uc3a) or
@@ -260,6 +272,334 @@
 
 #define AVR32_IRQ_BADVECTOR    61 /* Not a real IRQ number */
 #define NR_IRQS                61
+
+/* GPIO IRQ Numbers *********************************************************/
+/* These numbers correspond to GPIO port numbers that have interrupts
+ * enabled.  These are all decoded by the AVR32_IRQ_GPIO interrupt handler.
+ * A lot of effort was made here to keep the number of IRQs to a minimum
+ * since it will correspond to various, internal table sizes.
+ */
+
+/* Up to 32 GPIO interrupts in PORTA0-31 */
+
+#define __IRQ_GPPIO_PA0       0
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000001) != 0
+#  define AVR32_IRQ_GPIO_PA0  __IRQ_GPPIO_PA0
+#  define __IRQ_GPIO_PA1      (__IRQ_GPPIO_PA0+1)
+#else 
+#  define __IRQ_GPIO_PA1      __IRQ_GPPIO_PA0
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000002) != 0
+#  define AVR32_IRQ_GPIO_PA1  __IRQ_GPIO_PA1
+#  define __IRQ_GPIO_PA2      (__IRQ_GPIO_PA1+1)
+#else
+#  define __IRQ_GPIO_PA2      __IRQ_GPIO_PA1
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000004) != 0
+#  define AVR32_IRQ_GPIO_PA2  __IRQ_GPIO_PA2
+#  define __IRQ_GPIO_PA3      (__IRQ_GPIO_PA2+1)
+#else
+#  define __IRQ_GPIO_PA3      __IRQ_GPIO_PA2
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000008) != 0
+#  define AVR32_IRQ_GPIO_PA3  __IRQ_GPIO_PA3
+#  define __IRQ_GPIO_PA4      (__IRQ_GPIO_PA3+1)
+#else
+#  define __IRQ_GPIO_PA4      __IRQ_GPIO_PA3
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000010) != 0
+#  define AVR32_IRQ_GPIO_PA4  __IRQ_GPIO_PA4
+#  define __IRQ_GPIO_PA5      (__IRQ_GPIO_PA4+1)
+#else
+#  define __IRQ_GPIO_PA5      __IRQ_GPIO_PA4
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000020) != 0
+#  define AVR32_IRQ_GPIO_PA5  __IRQ_GPIO_PA5
+#  define __IRQ_GPIO_PA6      (__IRQ_GPIO_PA5+1)
+#else
+#  define __IRQ_GPIO_PA6      __IRQ_GPIO_PA5
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000040) != 0
+#  define AVR32_IRQ_GPIO_PA6  __IRQ_GPIO_PA6
+#  define __IRQ_GPIO_PA7      (__IRQ_GPIO_PA6+1)
+#else
+#  define __IRQ_GPIO_PA7      __IRQ_GPIO_PA6
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000080) != 0
+#  define AVR32_IRQ_GPIO_PA7  __IRQ_GPIO_PA7
+#  define __IRQ_GPIO_PA8      (__IRQ_GPIO_PA7+1)
+#else
+#  define __IRQ_GPIO_PA8      __IRQ_GPIO_PA7
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000100) != 0
+#  define AVR32_IRQ_GPIO_PA8  __IRQ_GPIO_PA8
+#  define __IRQ_GPIO_PA9      (__IRQ_GPIO_PA8+1)
+#else
+#  define __IRQ_GPIO_PA9      __IRQ_GPIO_PA8
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000200) != 0
+#  define AVR32_IRQ_GPIO_PA9  __IRQ_GPIO_PA9
+#  define __IRQ_GPIO_PA10     (__IRQ_GPIO_PA9+1)
+#else
+#  define __IRQ_GPIO_PA10     __IRQ_GPIO_PA9
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000400) != 0
+#  define AVR32_IRQ_GPIO_PA10 __IRQ_GPIO_PA10
+#  define __IRQ_GPIO_PA11     (__IRQ_GPIO_PA10+1)
+#else
+#  define __IRQ_GPIO_PA11     __IRQ_GPIO_PA10
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00000800) != 0
+#  define AVR32_IRQ_GPIO_PA11 __IRQ_GPIO_PA11
+#  define __IRQ_GPIO_PA12     (__IRQ_GPIO_PA11+1)
+#else
+#  define __IRQ_GPIO_PA12     __IRQ_GPIO_PA11
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00001000) != 0
+#  define AVR32_IRQ_GPIO_PA12 __IRQ_GPIO_PA12
+#  define __IRQ_GPIO_PA13     (__IRQ_GPIO_PA12+1)
+#else
+#  define __IRQ_GPIO_PA13     __IRQ_GPIO_PA12
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00002000) != 0
+#  define AVR32_IRQ_GPIO_PA13 __IRQ_GPIO_PA13
+#  define __IRQ_GPIO_PA14     (__IRQ_GPIO_PA13+1)
+#else
+#  define __IRQ_GPIO_PA14     __IRQ_GPIO_PA13
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00004000) != 0
+#  define AVR32_IRQ_GPIO_PA14 __IRQ_GPIO_PA14
+#  define __IRQ_GPIO_PA15     (__IRQ_GPIO_PA14+1)
+#else
+#  define __IRQ_GPIO_PA15     __IRQ_GPIO_PA14
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00008000) != 0
+#  define AVR32_IRQ_GPIO_PA15 __IRQ_GPIO_PA15
+#  define __IRQ_GPIO_PA16     (__IRQ_GPIO_PA15+1)
+#else
+#  define __IRQ_GPIO_PA16     __IRQ_GPIO_PA15
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00010000) != 0
+#  define AVR32_IRQ_GPIO_PA16 __IRQ_GPIO_PA16
+#  define __IRQ_GPIO_PA17     (__IRQ_GPIO_PA16+1)
+#else
+#  define __IRQ_GPIO_PA17     __IRQ_GPIO_PA16
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00020000) != 0
+#  define AVR32_IRQ_GPIO_PA17 __IRQ_GPIO_PA17
+#  define __IRQ_GPIO_PA18     (__IRQ_GPIO_PA17+1)
+#else
+#  define __IRQ_GPIO_PA18     __IRQ_GPIO_PA17
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00040000) != 0
+#  define AVR32_IRQ_GPIO_PA18 __IRQ_GPIO_PA18
+#  define __IRQ_GPIO_PA19     (__IRQ_GPIO_PA18+1)
+#else
+#  define __IRQ_GPIO_PA19     __IRQ_GPIO_PA18
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00080000) != 0
+#  define AVR32_IRQ_GPIO_PA19 __IRQ_GPIO_PA19
+#  define __IRQ_GPIO_PA20     (__IRQ_GPIO_PA19+1)
+#else
+#  define __IRQ_GPIO_PA20     __IRQ_GPIO_PA19
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00100000) != 0
+#  define AVR32_IRQ_GPIO_PA20 __IRQ_GPIO_PA20
+#  define __IRQ_GPIO_PA21     (__IRQ_GPIO_PA20+1)
+#else
+#  define __IRQ_GPIO_PA21     __IRQ_GPIO_PA20
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00200000) != 0
+#  define AVR32_IRQ_GPIO_PA21 __IRQ_GPIO_PA21
+#  define __IRQ_GPIO_PA22     (__IRQ_GPIO_PA21+1)
+#else
+#  define __IRQ_GPIO_PA22     __IRQ_GPIO_PA21
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00400000) != 0
+#  define AVR32_IRQ_GPIO_PA22 __IRQ_GPIO_PA22
+#  define __IRQ_GPIO_PA23     (__IRQ_GPIO_PA22+1)
+#else
+#  define __IRQ_GPIO_PA23     __IRQ_GPIO_PA22
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x00800000) != 0
+#  define AVR32_IRQ_GPIO_PA23 __IRQ_GPIO_PA23
+#  define __IRQ_GPIO_PA24     (__IRQ_GPIO_PA23+1)
+#else
+#  define __IRQ_GPIO_PA24     __IRQ_GPIO_PA23
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x01000000) != 0
+#  define AVR32_IRQ_GPIO_PA24 __IRQ_GPIO_PA24
+#  define __IRQ_GPIO_PA25     (__IRQ_GPIO_PA24+1)
+#else
+#  define __IRQ_GPIO_PA25     __IRQ_GPIO_PA24
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x02000000) != 0
+#  define AVR32_IRQ_GPIO_PA25 __IRQ_GPIO_PA25
+#  define __IRQ_GPIO_PA26     (__IRQ_GPIO_PA25+1)
+#else
+#  define __IRQ_GPIO_PA26     __IRQ_GPIO_PA25
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x04000000) != 0
+#  define AVR32_IRQ_GPIO_PA26 __IRQ_GPIO_PA26
+#  define __IRQ_GPIO_PA27     (__IRQ_GPIO_PA26+1)
+#else
+#  define __IRQ_GPIO_PA27     __IRQ_GPIO_PA26
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x08000000) != 0
+#  define AVR32_IRQ_GPIO_PA27 __IRQ_GPIO_PA27
+#  define __IRQ_GPIO_PA28     (__IRQ_GPIO_PA27+1)
+#else
+#  define __IRQ_GPIO_PA28     __IRQ_GPIO_PA27
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x10000000) != 0
+#  define AVR32_IRQ_GPIO_PA28 __IRQ_GPIO_PA28
+#  define __IRQ_GPIO_PA29     (__IRQ_GPIO_PA28+1)
+#else
+#  define __IRQ_GPIO_PA29     __IRQ_GPIO_PA28
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x20000000) != 0
+#  define AVR32_IRQ_GPIO_PA29 __IRQ_GPIO_PA29
+#  define __IRQ_GPIO_PA30     (__IRQ_GPIO_PA29+1)
+#else
+#  define __IRQ_GPIO_PA30     __IRQ_GPIO_PA29
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x40000000) != 0
+#  define AVR32_IRQ_GPIO_PA30 __IRQ_GPIO_PA30
+#  define __IRQ_GPIO_PA31     (__IRQ_GPIO_PA30+1)
+#else
+#  define __IRQ_GPIO_PA31     __IRQ_GPIO_PA30
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETA & 0x80000000) != 0
+#  define AVR32_IRQ_GPIO_PA31 __IRQ_GPIO_PA31
+#  define __IRQ_GPIO_PB0      (__IRQ_GPIO_PA31+1)
+#else
+#  define __IRQ_GPIO_PB0      __IRQ_GPIO_PA31
+#endif
+
+
+/* Up to 12 GPIO interrupts in PORTB0-11 */
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000001) != 0
+#  define AVR32_IRQ_GPIO_PB0  __IRQ_GPIO_pb0
+#  define __IRQ_GPIO_PB1      (__IRQ_GPIO_PB0+1)
+#else
+#  define __IRQ_GPIO_PB1      __IRQ_GPIO_PB0
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000002) != 0
+#  define AVR32_IRQ_GPIO_PB1  __IRQ_GPIO_PB1
+#  define __IRQ_GPIO_PB2      (__IRQ_GPIO_PB1+1)
+#else
+#  define __IRQ_GPIO_PB2      __IRQ_GPIO_PB1
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000004) != 0
+#  define AVR32_IRQ_GPIO_PB2  __IRQ_GPIO_PB2
+#  define __IRQ_GPIO_PB3      (__IRQ_GPIO_PB2+1)
+#else
+#  define __IRQ_GPIO_PB3      __IRQ_GPIO_PB2
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000008) != 0
+#  define AVR32_IRQ_GPIO_PB3  __IRQ_GPIO_PB3
+#  define __IRQ_GPIO_PB4      (__IRQ_GPIO_PB3+1)
+#else
+#  define __IRQ_GPIO_PB4      __IRQ_GPIO_PB3
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000010) != 0
+#  define AVR32_IRQ_GPIO_PB4  __IRQ_GPIO_PB4
+#  define __IRQ_GPIO_PB5      (__IRQ_GPIO_PB4+1)
+#else
+#  define __IRQ_GPIO_PB5      __IRQ_GPIO_PB4
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000020) != 0
+#  define AVR32_IRQ_GPIO_PB5  __IRQ_GPIO_PB5
+#  define __IRQ_GPIO_PB6      (__IRQ_GPIO_PB5+1)
+#else
+#  define __IRQ_GPIO_PB6      __IRQ_GPIO_PB5
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000040) != 0
+#  define AVR32_IRQ_GPIO_PB6  __IRQ_GPIO_PB6
+#  define __IRQ_GPIO_PB7      (__IRQ_GPIO_PB6+1)
+#else
+#  define __IRQ_GPIO_PB7      __IRQ_GPIO_PB6
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000080) != 0
+#  define AVR32_IRQ_GPIO_PB7  __IRQ_GPIO_PB7
+#  define __IRQ_GPIO_PB8      (__IRQ_GPIO_PB7+1)
+#else
+#  define __IRQ_GPIO_PB8      __IRQ_GPIO_PB7
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000100) != 0
+#  define AVR32_IRQ_GPIO_PB8  __IRQ_GPIO_PB8
+#  define __IRQ_GPIO_PB9      (__IRQ_GPIO_PB8+1)
+#else
+#  define __IRQ_GPIO_PB9      __IRQ_GPIO_PB8
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000200) != 0
+#  define AVR32_IRQ_GPIO_PB9  __IRQ_GPIO_PB9
+#  define __IRQ_GPIO_PB10     (__IRQ_GPIO_PB9+1)
+#else
+#  define __IRQ_GPIO_PB10     __IRQ_GPIO_PB9
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000400) != 0
+#  define AVR32_IRQ_GPIO_PB10 __IRQ_GPIO_PB10
+#  define __IRQ_GPIO_PB11     (__IRQ_GPIO_PB10+1)
+#else
+#  define __IRQ_GPIO_PB11     __IRQ_GPIO_PB10
+#endif
+
+#if (CONFIG_AVR32_GPIOIRQSETB & 0x00000800) != 0
+#  define AVR32_IRQ_GPIO_PB11 __IRQ_GPIO_PB11
+#  define __IRQ_GPIO_PB12     (__IRQ_GPIO_PB11+1)
+#else
+#  define __IRQ_GPIO_PB12     __IRQ_GPIO_PB11
+#endif
+
+#ifdef CONFIG_AVR32_GPIOIRQ
+#  define NR_GPIO_IRQS        __IRQ_GPIO_PB12
+#else
+#  define NR_GPIO_IRQS       0
+#endif
 
 /****************************************************************************
  * Public Types

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at91uc3b/at91uc3_internal.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
@@ -31,25 +31,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H
 #define __ARCH_AVR_SRC_AVR32_AT91UC3_INTERNAL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "at91uc3_config.h"
+
+#ifdef CONFIG_AVR32_GPIOIRQ
+#  include <nuttx/irq.h>
+#endif
 
 #include <stdint.h>
 #include <stdbool.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Bit-encoded input to at91uc3_configgpio() ****************************************/
+/* Bit-encoded input to at91uc3_configgpio() ********************************/
 
 /* 16-bit Encoding:
  * PERIPHERAL: FMMI UXXG PPPB BBBB with G=0
@@ -143,19 +148,19 @@
 #define GPIO_PIN_SHIFT             (0)       /* Bits 0-4: Port number */
 #define GPIO_PIN_MASK              (0x1f << GPIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -165,93 +170,169 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_clkinit
  *
  * Description:
  *   Initialiaze clock/PLL settings per the definitions in the board.h file.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_clkinitialize(void);
 
-/******************************************************************************
+/****************************************************************************
  * Name: usart_reset
  *
  * Description:
  *   Reset a USART.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 EXTERN void usart_reset(uintptr_t usart_base);
 
-/******************************************************************************
+/****************************************************************************
  * Name: usart_configure
  *
  * Description:
  *   Configure a USART as a RS-232 UART.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
                      unsigned int nbits, bool stop2);
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_consoleinit
  *
  * Description:
  *   Initialize a console for debug output.  This function is called very
- *   early in the intialization sequence to configure the serial console uart
- *   (only).
+ *   early in the intialization sequence to configure the serial console
+ *   uart (only).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_consoleinit(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_boardinit
  *
  * Description:
- *   This function must be provided by the board-specific logic in the directory
- *   configs/<board-name>/up_boot.c.
+ *   This function must be provided by the board-specific logic in the
+ *   directory configs/<board-name>/up_boot.c.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 EXTERN void up_boardinitialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: at91uc3_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 EXTERN int at91uc3_configgpio(uint16_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: at91uc3_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 EXTERN void at91uc3_gpiowrite(uint16_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: at91uc3_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 EXTERN bool at91uc3_gpioread(uint16_t pinset);
+
+/****************************************************************************
+ * Name: gpio_irqinitialize
+ *
+ * Description:
+ *   Initialize all vectors to the unexpected interrupt handler
+ *
+ * Configuration Notes:
+ *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
+ *   overall GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
+ *   CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
+ *   interrupts on.
+ *
+ * Assumptions:
+ *   Called during the early boot sequence before global interrupts have
+ *   been enabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AVR32_GPIOIRQ
+EXTERN void gpio_irqinitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: gpio_irqattach
+ *
+ * Description:
+ *   Attach in GPIO interrupt to the provide 'isr'
+ *
+ * Configuration Notes:
+ *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
+ *   overall GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
+ *   CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
+ *   interrupts on.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AVR32_GPIOIRQ
+EXTERN int gpio_irqattach(int irq, xcpt_t newisr, xcpt_t *oldisr);
+#endif
+
+/****************************************************************************
+ * Name: gpio_irqenable
+ *
+ * Description:
+ *   Enable the GPIO IRQ specified by 'irq'
+ *
+ * Configuration Notes:
+ *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
+ *   overall GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
+ *   CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
+ *   interrupts on.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AVR32_GPIOIRQ
+EXTERN void gpio_irqenable(int irq);
+#endif
+
+/*****************************************************************************
+ * Name: gpio_irqdisable
+ *
+ * Description:
+ *   Disable the GPIO IRQ specified by 'irq'
+ *
+ * Configuration Notes:
+ *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
+ *   overall GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
+ *   CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
+ *   interrupts on.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AVR32_GPIOIRQ
+EXTERN void gpio_irqdisable(int irq);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

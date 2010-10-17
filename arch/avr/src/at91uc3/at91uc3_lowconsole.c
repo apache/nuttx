@@ -302,6 +302,11 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
 #ifndef CONFIG_USE_EARLYSERIALINIT
 void up_consoleinit(void)
 {
+  /* Enable clocking for the enabled USART modules.  Hmmm... It looks like the
+   * default state for CLK_USART0, USART1 CLK_USART1, and USART2 CLK_USART2 is
+   * "enabled" in the PM's PBAMASK register.
+   */
+
   /* Setup GPIO pins for each configured USART/UART */
 
 #ifdef CONFIG_AVR32_USART0_RS232
