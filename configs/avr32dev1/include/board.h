@@ -74,15 +74,18 @@
 #define PINMUX_USART1_TXD    PINMUX_USART1_TXD_1
 
 /* LED definitions ******************************************************************/
+/* The AVR32DEV1 board has 3 LEDs, two of which can be controlled through GPIO pins */
 
-#define LED_STARTED          0
-#define LED_HEAPALLOCATE     1
-#define LED_IRQSENABLED      2
-#define LED_STACKCREATED     3
-#define LED_INIRQ            4
-#define LED_SIGNAL           5
-#define LED_ASSERTION        6
-#define LED_PANIC            7
+                                /*    ON        OFF    */
+								/* LED1 LED2 LED1 LED2 */
+#define LED_STARTED          0  /* OFF  OFF  OFF  OFF  */
+#define LED_HEAPALLOCATE     0  /* OFF  OFF  OFF  OFF  */
+#define LED_IRQSENABLED      0  /* OFF  OFF  OFF  OFF  */
+#define LED_STACKCREATED     1  /* ON   OFF  OFF  OFF  */
+#define LED_INIRQ            2  /* ON   ON   ON   OFF  */
+#define LED_SIGNAL           2  /* ON   ON   ON   OFF  */
+#define LED_ASSERTION        2  /* ON   ON   ON   OFF  */
+#define LED_PANIC            2  /* ON   ON   ON   OFF  */
 
 /************************************************************************************
  * Public Types

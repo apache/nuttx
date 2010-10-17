@@ -105,7 +105,8 @@
 
 void up_ledinitialize(void)
 {
-# warning "Not implemented"
+  at91uc3_configgpio(PINMUX_GPIO_LED1);
+  at91uc3_configgpio(PINMUX_GPIO_LED2);
 }
 
 /****************************************************************************
@@ -114,7 +115,8 @@ void up_ledinitialize(void)
 
 void up_ledon(int led)
 {
-# warning "Not implemented"
+  at91uc3_gpiowrite(PINMUX_GPIO_LED1, (led != 0));
+  at91uc3_gpiowrite(PINMUX_GPIO_LED2, (led == 2));
 }
 
 /****************************************************************************
@@ -123,6 +125,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-# warning "Not implemented"
+  at91uc3_gpiowrite(PINMUX_GPIO_LED1, (led == 2));
+  at91uc3_gpiowrite(PINMUX_GPIO_LED2, false);
 }
 #endif /* CONFIG_ARCH_LEDS */
