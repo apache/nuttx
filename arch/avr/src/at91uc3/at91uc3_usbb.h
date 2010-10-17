@@ -48,6 +48,8 @@
 
 /* Register offsets *****************************************************************/
 
+/* USB Device Registers */
+
 #define AVR32_USBB_UDCON_OFFSET       0x0000 /* Device General Control Register */
 #define AVR32_USBB_UDINT_OFFSET       0x0004 /* Device Global Interrupt Register */
 #define AVR32_USBB_UDINTCLR_OFFSET    0x0008 /* Device Global Interrupt Clear Register */
@@ -161,6 +163,8 @@
 #define AVR32_UDDMA6_ADDR_OFFSET      0x0364 /* Device DMA Channel 6 HSB Address Register */
 #define AVR32_UDDMA6_CONTROL_OFFSET   0x0368 /* Device DMA Channel 6 Control Register */
 #define AVR32_UDDMA6_STATUS_OFFSET    0x036c /* Device DMA Channel 6 Status Register */
+
+/* USB Host Registers */
 
 #define AVR32_USBB_UHCON_OFFSET       0x0400 /* Host General Control Register */
 #define AVR32_USBB_UHINT_OFFSET       0x0404 /* Host Global Interrupt Register */
@@ -291,6 +295,8 @@
 #define AVR32_UHDMA6_CONTROL_OFFSET   0x0768 /* Host DMA Channel 6 Control Register */
 #define AVR32_UHDMA6_STATUS_OFFSET    0x076c /* Host DMA Channel 6 Status Register */
 
+/* USB General Registers */
+
 #define AVR32_USBB_USBCON_OFFSET      0x0800 /* General Control Register */
 #define AVR32_USBB_USBSTA_OFFSET      0x0804 /* General Status Register */
 #define AVR32_USBB_USBSTACLR_OFFSET   0x0808 /* General Status Clear Register */
@@ -303,6 +309,8 @@
 #define AVR32_USBB_USBFSM_OFFSET      0x082c /* USB Finite State Machine Status Register */
 
 /* Register Addresses ***************************************************************/
+
+/* USB Device Registers */
 
 #define AVR32_USBB_UDCON              (AVR32_USB_BASE+AVR32_USBB_UDCON_OFFSET)
 #define AVR32_USBB_UDINT              (AVR32_USB_BASE+AVR32_USBB_UDINT_OFFSET)
@@ -412,6 +420,8 @@
 #define AVR32_UDDMA6_ADDR             (AVR32_USB_BASE+AVR32_UDDMA6_ADDR_OFFSET)
 #define AVR32_UDDMA6_CONTROL          (AVR32_USB_BASE+AVR32_UDDMA6_CONTROL_OFFSET)
 #define AVR32_UDDMA6_STATUS           (AVR32_USB_BASE+AVR32_UDDMA6_STATUS_OFFSET)
+
+/* USB Host Registers */
 
 #define AVR32_USBB_UHCON              (AVR32_USB_BASE+AVR32_USBB_UHCON_OFFSET)
 #define AVR32_USBB_UHINT              (AVR32_USB_BASE+AVR32_USBB_UHINT_OFFSET)
@@ -542,6 +552,8 @@
 #define AVR32_UHDMA6_CONTROL          (AVR32_USB_BASE+AVR32_UHDMA6_CONTROL_OFFSET)
 #define AVR32_UHDMA6_STATUS           (AVR32_USB_BASE+AVR32_UHDMA6_STATUS_OFFSET)
 
+/* USB General Registers */
+
 #define AVR32_USBB_USBCON             (AVR32_USB_BASE+AVR32_USBB_USBCON_OFFSET)
 #define AVR32_USBB_USBSTA             (AVR32_USB_BASE+AVR32_USBB_USBSTA_OFFSET)
 #define AVR32_USBB_USBSTACLR          (AVR32_USB_BASE+AVR32_USBB_USBSTACLR_OFFSET)
@@ -554,107 +566,177 @@
 #define AVR32_USBB_USBFSM             (AVR32_USB_BASE+AVR32_USBB_USBFSM_OFFSET)
 
 /* Register Bit-field Definitions ***************************************************/
+/* USB Device Registers Bit-field Definitions ***************************************/
+/* Device General Control Register Bit-field Definitions */
 
-/* Device General Control Register */
-#define USBB_UDCON_
-/* Device Global Interrupt Register */
-#define USBB_UDINT_
-/* Device Global Interrupt Clear Register */
-#define USBB_UDINTCLR_
-/* Device Global Interrupt Set Register */
-#define USBB_UDINTSET_
-/* Device Global Interrupt Enable Register */
-#define USBB_UDINTE_
-/* Device Global Interrupt Enable Clear Register */
-#define USBB_UDINTECLR_
-/* Device Global Interrupt Enable Set Register */
-#define USBB_UDINTESET_
-/* Endpoint Enable/Reset Register */
-#define USBB_UERST_
-/* Device Frame Number Register */
-#define USBB_UDFNUM_
+#define USBB_UDCON_UADD_SHIFT         (0)       /* Bits 0-6: USB Address */
+#define USBB_UDCON_UADD_MASK          (0x7f << USBB_UDCON_UADD_SHIFT)
+#define USBB_UDCON_ADDEN:             (1 << 7)  /* Bit 7:  Address Enable */
+#define USBB_UDCON_DETACH             (1 << 8)  /* Bit 8:  Detach */
+#define USBB_UDCON_RMWKUP             (1 << 9)  /* Bit 9:  Remote Wake-Up */
+#define USBB_UDCON_LS                 (1 << 12) /* Bit 12: Low-Speed Mode Force */
 
-/* Endpoint Configuration Register */
+/* Device Global Interrupt Register Bit-field Definitions */
+/* Device Global Interrupt Clear Register Bit-field Definitions */
+/* Device Global Interrupt Set Register Bit-field Definitions */
+/* Device Global Interrupt Enable Register Bit-field Definitions */
+/* Device Global Interrupt Enable Clear Register Bit-field Definitions */
+/* Device Global Interrupt Enable Set Register Bit-field Definitions */
+
+#define USBB_UDINT_SUSP               (1 << 0)  /* Bit 0:  Suspend Interrupt */
+#define USBB_UDINT_SOF                (1 << 2)  /* Bit 2:  Start of Frame Interrupt */
+#define USBB_UDINT_EORST              (1 << 3)  /* Bit 3:  End of Reset Interrupt */
+#define USBB_UDINT_WAKEUP             (1 << 4)  /* Bit 4:  Wake-Up Interrupt */
+#define USBB_UDINT_EORSM              (1 << 5)  /* Bit 5:  End of Resume Interrupt */
+#define USBB_UDINT_UPRSM              (1 << 6)  /* Bit 6:  Upstream Resume Interrupt */
+#define USBB_UDINT_EPINT(n)           (1 << ((n)+12))  /* Endpoint n Interrupt */
+#define USBB_UDINT_EP0INT             (1 << 12) /* Bit 12: Endpoint n Interrupt */
+#define USBB_UDINT_EP1INT             (1 << 13) /* Bit 13: Endpoint n Interrupt */
+#define USBB_UDINT_EP2INT             (1 << 14) /* Bit 14: Endpoint n Interrupt */
+#define USBB_UDINT_EP3INT             (1 << 15) /* Bit 15: Endpoint n Interrupt */
+#define USBB_UDINT_EP4INT             (1 << 16) /* Bit 16: Endpoint n Interrupt */
+#define USBB_UDINT_EP5INT             (1 << 17) /* Bit 17: Endpoint n Interrupt */
+#define USBB_UDINT_EP6INT             (1 << 18) /* Bit 18: Endpoint n Interrupt */
+#define USBB_UDINT_DMAINT(n)          (1 << ((n)+24)) /* DMA Channel n Interrupt */
+#define USBB_UDINT_DMA1INT            (1 << 25) /* Bit 25: DMA Channel n Interrupt */
+#define USBB_UDINT_DMA2INT            (1 << 26) /* Bit 26: DMA Channel 1 Interrupt */
+#define USBB_UDINT_DMA3INT            (1 << 27) /* Bit 27: DMA Channel 2 Interrupt */
+#define USBB_UDINT_DMA4INT            (1 << 28) /* Bit 28: DMA Channel 3 Interrupt */
+#define USBB_UDINT_DMA5INT            (1 << 29) /* Bit 29: DMA Channel 4 Interrupt */
+#define USBB_UDINT_DMA6INT            (1 << 30) /* Bit 30: DMA Channel 5 Interrupt */
+
+/* Endpoint Enable/Reset Register Bit-field Definitions */
+
+#define USBB_UERST_EPRST(n)           (1 << ((n)+16))  /* Endpoint n Reset */
+#define USBB_UERST_EPRST0             (1 << 16) /* Bit 16: Endpoint 0 Reset */
+#define USBB_UERST_EPRST1             (1 << 17) /* Bit 17: Endpoint 1 Reset */
+#define USBB_UERST_EPRST2             (1 << 18) /* Bit 18: Endpoint 2 Reset */
+#define USBB_UERST_EPRST3             (1 << 19) /* Bit 19: Endpoint 3 Reset */
+#define USBB_UERST_EPRST4             (1 << 20) /* Bit 20: Endpoint 4 Reset */
+#define USBB_UERST_EPRST5             (1 << 21) /* Bit 21: Endpoint 5 Reset */
+#define USBB_UERST_EPRST6             (1 << 22) /* Bit 22: Endpoint 6 Reset */
+#define USBB_UERST_EPEN(n)            (1 << n)  /* Endpoint n Enable */
+#define USBB_UERST_EPEN0              (1 << 0)  /* Bit 0:  Endpoint 0 Enable */
+#define USBB_UERST_EPEN1              (1 << 1)  /* Bit 1:  Endpoint 1 Enable */
+#define USBB_UERST_EPEN2              (1 << 2)  /* Bit 2:  Endpoint 2 Enable */
+#define USBB_UERST_EPEN3              (1 << 3)  /* Bit 3:  Endpoint 3 Enable */
+#define USBB_UERST_EPEN4              (1 << 4)  /* Bit 4:  Endpoint 4 Enable */
+#define USBB_UERST_EPEN5              (1 << 5)  /* Bit 5:  Endpoint 5 Enable */
+#define USBB_UERST_EPEN6              (1 << 6)  /* Bit 5:  Endpoint 6 Enable */
+
+/* Device Frame Number Register Bit-field Definitions */
+
+#define USBB_UDFNUM_FNUM_SHIFT        (3)       /* Bits 3-13: Frame Number */
+#define USBB_UDFNUM_FNUM_MASK         (0x7ff << USBB_UDFNUM_FNUM_SHIFT)
+#define USBB_UDFNUM_FNCERR            (1 << 15) /* Bit 15: Frame Number CRC Error */
+
+/* Endpoint Configuration Register Bit-field Definitions */
 #define USBB_UECFG_
-/* Endpoint Status Register */
+/* Endpoint Status Register Bit-field Definitions */
 #define USBB_UESTA_
-/* Endpoint Status Clear Register */
+/* Endpoint Status Clear Register Bit-field Definitions */
 #define USBB_UESTACLR_
-/* Endpoint  Status Set Register */
+/* Endpoint  Status Set Register Bit-field Definitions */
 #define USBB_UESTASET_
-/* Endpoint Control Register */
+/* Endpoint Control Register Bit-field Definitions */
 #define USBB_UECON_
-/* Endpoint Control Set Register */
+/* Endpoint Control Set Register Bit-field Definitions */
 #define USBB_UECONSET_
-/* Endpoint Control Clear Register */
+/* Endpoint Control Clear Register Bit-field Definitions */
 #define USBB_UECONCLR_
 
-/* Device DMA Channel Next Descriptor Address Register */
+/* Device DMA Channel Next Descriptor Address Register Bit-field Definitions */
 #define UDDMA_NEXTDESC_
-/* Device DMA Channel HSB Address Register */
-#define UDDMA_ADDR_
-/* Device DMA Channel Control Register */
+
+/* Device DMA Channel HSB Address Register Bit-field Definitions */
+/* This register holds a 32-bit address with internal bit fields */
+
+/* Device DMA Channel Control Register Bit-field Definitions */
 #define UDDMA_CONTROL_
-/* Device DMA Channel Status Register */
+/* Device DMA Channel Status Register Bit-field Definitions */
 #define UDDMA_STATUS_
 
-/* Host General Control Register */
+/* USB Host Registers Bit-field Definitions *********************************/
+
+/* Host General Control Register Bit-field Definitions */
 #define USBB_UHCON_
-/* Host Global Interrupt Register */
+/* Host Global Interrupt Register Bit-field Definitions */
 #define USBB_UHINT_
-/* Host Global Interrupt Clear Register */
+/* Host Global Interrupt Clear Register Bit-field Definitions */
 #define USBB_UHINTCLR_
-/* Host Global Interrupt Set Register */
+/* Host Global Interrupt Set Register Bit-field Definitions */
 #define USBB_UHINTSET_
-/* Host Global Interrupt Enable Register */
+/* Host Global Interrupt Enable Register Bit-field Definitions */
 #define USBB_UHINTE_
-/* Host Global Interrupt Enable Clear Register */
+/* Host Global Interrupt Enable Clear Register Bit-field Definitions */
 #define USBB_UHINTECLR_
-/* Host Global Interrupt Enable Set Register */
+/* Host Global Interrupt Enable Set Register Bit-field Definitions */
 #define USBB_UHINTESET_
-/* Pipe Enable/Reset Register */
+/* Pipe Enable/Reset Register Bit-field Definitions */
 #define USBB_UPRST_
-/* Host Frame Number Register */
+/* Host Frame Number Register Bit-field Definitions */
 #define USBB_UHFNUM_
-/* Host Address 1 Register */
+/* Host Address 1 Register Bit-field Definitions */
 #define USBB_UHADDR1_
-/* Host Address 2 Register */
+/* Host Address 2 Register Bit-field Definitions */
 #define USBB_UHADDR2_
 
-/* Pipe Configuration Register */
+/* Pipe Configuration Register Bit-field Definitions */
 #define USBB_UPCFG_
-/* Pipe Status Register */
+/* Pipe Status Register Bit-field Definitions */
 #define USBB_UPSTA_
-/* Pipe Status Clear Register */
+/* Pipe Status Clear Register Bit-field Definitions */
 #define USBB_UPSTACLR_
-/* Pipe Status Set Register */
+/* Pipe Status Set Register Bit-field Definitions */
 #define USBB_UPSTASET_
-/* Pipe Control Register */
+/* Pipe Control Register Bit-field Definitions */
 #define USBB_UPCON_
-/* Pipe Control Set Register */
+/* Pipe Control Set Register Bit-field Definitions */
 #define USBB_UPCONSET_
-/* Pipe Control Clear Register */
+/* Pipe Control Clear Register Bit-field Definitions */
 #define USBB_UPCONCLR_
-/* Pipe IN Request Register */
+/* Pipe IN Request Register Bit-field Definitions */
 #define USBB_UPINRQ_
-/* Pipe Error Register */
+/* Pipe Error Register Bit-field Definitions */
 #define USBB_UPERR_
 
-/* Host DMA Channel Next Descriptor Address Register */
+/* Host DMA Channel Next Descriptor Address Register Bit-field Definitions */
 #define UHDMA_NEXTDESC_
-/* Host DMA Channel HSB Address Register */
-#define UHDMA_ADDR_
-/* Host DMA Channel Control Register */
+
+/* Host DMA Channel HSB Address Register Bit-field Definitions */
+/* This register holds a 32-bit address with internal bit fields */
+
+/* Host DMA Channel Control Register Bit-field Definitions */
 #define UHDMA_CONTROL_
-/* Host DMA Channel Status Register */
+/* Host DMA Channel Status Register Bit-field Definitions */
 #define UHDMA_STATUS_
 
-/* General Control Register */
-#define USBB_USBCON_
+/* USB General Registers Bit-field Definitions ******************************/
 
-/* General Status Register */
-/* General Status Clear Register */
-/* General Status Set Register */
+/* General Control Register Bit-field Definitions */
+
+#define USBB_USBCON_IDTE              (1 << 0)  /* Bit 0:  ID Transition Interrupt Enable */
+#define USBB_USBCON_VBUSTE            (1 << 1)  /* Bit 1:  VBus Transition Interrupt Enable */
+#define USBB_USBCON_VBERRE            (1 << 3)  /* Bit 3:  VBus Error Interrupt Enable */
+#define USBB_USBCON_BCERRE            (1 << 4)  /* Bit 4:  B-Connection Error Interrupt Enable */
+#define USBB_USBCON_ROLEEXE           (1 << 5)  /* Bit 5:  Role Exchange Interrupt Enable */
+#define USBB_USBCON_STOE              (1 << 7)  /* Bit 7:  Suspend Time-Out Interrupt Enable */
+#define USBB_USBCON_VBUSHWC           (1 << 8)  /* Bit 8:  VBus Hardware Control */
+#define USBB_USBCON_OTGPADE           (1 << 12) /* Bit 12: OTG Pad Enable */
+#define USBB_USBCON_VBUSPO            (1 << 13) /* Bit 13: VBus Polarity */
+#define USBB_USBCON_FRZCLK            (1 << 14) /* Bit 14: Freeze USB Clock */
+#define USBB_USBCON_USBE              (1 << 15) /* Bit 15: USBB Enable */
+#define USBB_USBCON_TIMVALUE_SHIFT    (16)      /* Bits 16-17: Timmer Value */
+#define USBB_USBCON_TIMVALUE_MASK     (3 << USBB_USBCON_TIMVALUE_SHIFT)
+#define USBB_USBCON_TIMPAGE_SHIFT     (20)      /* Bits 20-21: Timer Page */
+#define USBB_USBCON_TIMPAGE_MASK      (3 << USBB_USBCON_TIMPAGE_SHIFT)
+#define USBB_USBCON_UNLOCK            (1 << 22) /* Bit 22: Timer Access Unlock */
+#define USBB_USBCON_UIDE              (1 << 24) /* Bit 24: USB_ID Pin Enable */
+#define USBB_USBCON_UIMOD             (1 << 25) /* Bit 25: USBB Mode */
+
+/* General Status Register Bit-field Definitions */
+/* General Status Clear Register Bit-field Definitions */
+/* General Status Set Register Bit-field Definitions */
 
 #define USBB_USBSTA_IDTI              (1 << 0)  /* Bit 0:  ID Transition Interrupt */
 #define USBB_USBSTA_VBUSTI            (1 << 1)  /* Bit 1:  VBus Transition Interrupt */
@@ -668,16 +750,16 @@
 #define USBB_USBSTA_SPEED_SHIFT       (12)      /* Bits 12-13:  Speed Status (read-only) */
 #define USBB_USBSTA_SPEED_MASK        (3 << USBB_USBSTA_SPEED_SHIFT)
 #  define USBB_USBSTA_SPEED_FULL      (0 << USBB_USBSTA_SPEED_SHIFT) /* Full-Speed mode */
-#  define USBB_USBSTA_SPEED_FULL      (2 << USBB_USBSTA_SPEED_SHIFT) /* Low-Speed mode */
+#  define USBB_USBSTA_SPEED_LOW       (2 << USBB_USBSTA_SPEED_SHIFT) /* Low-Speed mode */
 
-/* IP Version Register */
+/* IP Version Register Bit-field Definitions */
 
 #define USBB_UVERS_SHIFT              (0)       /* Bits 0-11: Version Number */
 #define USBB_UVERS_MASK               (0xfff << USBB_UVERS_SHIFT)
 #define USBB_UVERS_VARIANT_SHIFT      (16)      /* Bits 16-19: Variant Number */
 #define USBB_UVERS_VARIANT_MASK       (15 << USBB_UVERS_VARIANT_SHIFT)
 
-/* IP Features Register */
+/* IP Features Register Bit-field Definitions */
 
 #define USBB_UFEAT_EPTNBRMAX_SHIFT    (0)       /* Bits 0-3: Maximal Number of Pipes/Endpoints */
 #define USBB_UFEAT_EPTNBRMAX_MASK     (15 << USBB_UFEAT_EPTNBRMAX_SHIFT)
@@ -700,14 +782,31 @@
 #  define USBB_UFEAT_FIFOMAXSZ_GE16K  (7 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* >= 16384 bytes */
 #define USBB_UFEAT_BWRDPRAM           (1 << 15) /* Bit 15: DPRAM Byte-Write Capability */
 
-/* IP PB Address Size Register */
-#define USBB_UADDRSIZE_
-/* IP Name Register 1 */
-#define USBB_UNAME1_
-/* IP Name Register 2 */
-#define USBB_UNAME2_
-/* USB Finite State Machine Status Register */
-#define USBB_USBFSM_
+/* IP PB Address Size Register Bit-field Definitions */
+/* IP Name Register 1 Bit-field Definitions */
+/* IP Name Register 2 Bit-field Definitions */
+
+/* These registers contain a 32-value and, hence, have no bit fields */
+
+/* USB Finite State Machine Status Register Bit-field Definitions */
+
+#define USBB_USBFSM_MASK              (15)
+#  define USBB_USBFSM_A_IDLESTATE     (0)
+#  define USBB_USBFSM_A_WAITVRISE     (1)
+#  define USBB_USBFSM_A_WAITBCON      (2)
+#  define USBB_USBFSM_A_HOST          (3)
+#  define USBB_USBFSM_A_SUSPEND       (4)
+#  define USBB_USBFSM_A_PERIPHERAL    (5)
+#  define USBB_USBFSM_A_WAITVFALL     (6)
+#  define USBB_USBFSM_A_VBUSERR       (7)
+#  define USBB_USBFSM_A_WAITDISCHARGE (8)
+#  define USBB_USBFSM_B_IDLE          (9)
+#  define USBB_USBFSM_B_PERIPHERAL    (10)
+#  define USBB_USBFSM_B_WAITBEGINHNP  (11)
+#  define USBB_USBFSM_B_WAITDISCHARGE (12)
+#  define USBB_USBFSM_B_WAITACON      (13)
+#  define USBB_USBFSM_B_HOST          (14)
+#  define USBB_USBFSM_B_SRPINIT       (15)
 
               (1 << xxx)  /* Bit xxx:  
 _SHIFT       (xxx)       /* Bits xxx-xxx: 
