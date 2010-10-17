@@ -277,7 +277,7 @@ EXTERN bool at91uc3_gpioread(uint16_t pinset);
  ****************************************************************************/
 
 #ifdef CONFIG_AVR32_GPIOIRQ
-EXTERN void gpio_irqinitialize(void);
+EXTERN void weak_function gpio_irqinitialize(void);
 #endif
 
 /****************************************************************************

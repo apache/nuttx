@@ -230,7 +230,12 @@ void up_irqinitialize(void)
   /* Initialize GPIO interrupt facilities */
 
 #ifdef CONFIG_AVR32_GPIOIRQ
-  gpio_irqinitialize();
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (gpio_irqinitialize != NULL)
+#endif
+    {
+      gpio_irqinitialize();
+    }
 #endif
 
   /* And finally, enable interrupts */
