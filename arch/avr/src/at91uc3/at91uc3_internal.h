@@ -92,6 +92,8 @@
  */
 
 #define GPIO_VALUE                 (1 << 10) /* Bit 10: Output value */
+#define GPIO_HIGH                  GPIO_VALUE
+#define GPIO_LOW                   (0)
 
 /* Input/Ouptut (Valid only if GPIO_ENABLE)
  * .... ..O. .... ....
