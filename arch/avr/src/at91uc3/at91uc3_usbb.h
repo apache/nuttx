@@ -651,16 +651,55 @@
 
 /* General Control Register */
 #define USBB_USBCON_
+
 /* General Status Register */
-#define USBB_USBSTA_
 /* General Status Clear Register */
-#define USBB_USBSTACLR_
 /* General Status Set Register */
-#define USBB_USBSTASET_
+
+#define USBB_USBSTA_IDTI              (1 << 0)  /* Bit 0:  ID Transition Interrupt */
+#define USBB_USBSTA_VBUSTI            (1 << 1)  /* Bit 1:  VBus Transition Interrupt */
+#define USBB_USBSTA_VBERRI            (1 << 3)  /* Bit 3:  VBus Error Interrupt */
+#define USBB_USBSTA_BCERRI            (1 << 4)  /* Bit 4:  B-Connection Error Interrupt */
+#define USBB_USBSTA_ROLEEXI           (1 << 5)  /* Bit 5:  Role Exchange Interrupt */
+#define USBB_USBSTA_STOI              (1 << 7)  /* Bit 7:  Suspend Time-Out Interrupt */
+#define USBB_USBSTA_VBUSRQ            (1 << 9)  /* Bit 8:  VBus Request */
+#define USBB_USBSTA_ID                (1 << 10) /* Bit 10: USB_ID Pin State (read-only) */
+#define USBB_USBSTA_VBUS              (1 << 11) /* Bit 11: VBus Level (read-only) */
+#define USBB_USBSTA_SPEED_SHIFT       (12)      /* Bits 12-13:  Speed Status (read-only) */
+#define USBB_USBSTA_SPEED_MASK        (3 << USBB_USBSTA_SPEED_SHIFT)
+#  define USBB_USBSTA_SPEED_FULL      (0 << USBB_USBSTA_SPEED_SHIFT) /* Full-Speed mode */
+#  define USBB_USBSTA_SPEED_FULL      (2 << USBB_USBSTA_SPEED_SHIFT) /* Low-Speed mode */
+
 /* IP Version Register */
-#define USBB_UVERS_
+
+#define USBB_UVERS_SHIFT              (0)       /* Bits 0-11: Version Number */
+#define USBB_UVERS_MASK               (0xfff << USBB_UVERS_SHIFT)
+#define USBB_UVERS_VARIANT_SHIFT      (16)      /* Bits 16-19: Variant Number */
+#define USBB_UVERS_VARIANT_MASK       (15 << USBB_UVERS_VARIANT_SHIFT)
+
 /* IP Features Register */
-#define USBB_UFEATURES_
+
+#define USBB_UFEAT_EPTNBRMAX_SHIFT    (0)       /* Bits 0-3: Maximal Number of Pipes/Endpoints */
+#define USBB_UFEAT_EPTNBRMAX_MASK     (15 << USBB_UFEAT_EPTNBRMAX_SHIFT)
+#  define USBB_UFEAT_EPTNBRMAX_16     (0 << USBB_UFEAT_EPTNBRMAX_SHIFT) /* 16 is a special case */
+#define USBB_UFEAT_DMACHANNBR_SHIFT   (4)       /* Bits 4-6: Number of DMA Channels */
+#define USBB_UFEAT_DMACHANNBR_MASK    (7 << USBB_UFEAT_DMACHANNBR_SHIFT)
+#define USBB_UFEAT_DMABUFFERSZ        (1 << 7)  /* Bit 7:  DMA Buffer Size */
+#define USBB_UFEAT_DMAWDDEPTH_SHIFT   (8)       /* Bits 8-11: DMA FIFO Depth in Words */
+#define USBB_UFEAT_DMAWDDEPTH_MASK    (15 << USBB_UFEAT_DMAWDDEPTH_SHIFT)
+#  define USBB_UFEAT_DMAWDDEPTH_16    (0 << USBB_UFEAT_DMAWDDEPTH_SHIFT) /* 16 is a special case */
+#define USBB_UFEAT_FIFOMAXSZ_SHIFT    (12)      /* Bits 12-14: Maximal FIFO Size */
+#define USBB_UFEAT_FIFOMAXSZ_MASK     (7 << USBB_UFEAT_FIFOMAXSZ_SHIFT)
+#  define USBB_UFEAT_FIFOMAXSZ_LT256  (0 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 256 bytes */
+#  define USBB_UFEAT_FIFOMAXSZ_LT512  (1 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 512 bytes */
+#  define USBB_UFEAT_FIFOMAXSZ_LT1K   (2 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 1024 bytes */
+#  define USBB_UFEAT_FIFOMAXSZ_LT2K   (3 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 2048 bytes */
+#  define USBB_UFEAT_FIFOMAXSZ_LT4K   (4 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 4096 bytes */
+#  define USBB_UFEAT_FIFOMAXSZ_LT8K   (5 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 8192 bytes */
+#  define USBB_UFEAT_FIFOMAXSZ_LT16K  (6 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 16384 bytes */
+#  define USBB_UFEAT_FIFOMAXSZ_GE16K  (7 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* >= 16384 bytes */
+#define USBB_UFEAT_BWRDPRAM           (1 << 15) /* Bit 15: DPRAM Byte-Write Capability */
+
 /* IP PB Address Size Register */
 #define USBB_UADDRSIZE_
 /* IP Name Register 1 */
@@ -669,6 +708,10 @@
 #define USBB_UNAME2_
 /* USB Finite State Machine Status Register */
 #define USBB_USBFSM_
+
+              (1 << xxx)  /* Bit xxx:  
+_SHIFT       (xxx)       /* Bits xxx-xxx: 
+_MASK        (xxx << xxx)
 
 /* USB HSB Memory Map ***************************************************************/
 

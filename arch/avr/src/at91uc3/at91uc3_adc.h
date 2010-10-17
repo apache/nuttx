@@ -174,10 +174,10 @@
 
 /* Version Register Bit-field Definitions */
 
-#define ADC_VERSION_VARIANT_SHIFT (16)      /* Bits 16-19: Variant Number */
-#define ADC_VERSION_VARIANT_MASK  (15 << ADC_VERSION_VARIANT_SHIFT)
 #define ADC_VERSION_SHIFT         (0)       /* Bits 0-11: Version Number */
 #define ADC_VERSION_MASK          (0xfff << ADC_VERSION_SHIFT)
+#define ADC_VERSION_VARIANT_SHIFT (16)      /* Bits 16-19: Variant Number */
+#define ADC_VERSION_VARIANT_MASK  (15 << ADC_VERSION_VARIANT_SHIFT)
 
 /************************************************************************************
  * Public Types
