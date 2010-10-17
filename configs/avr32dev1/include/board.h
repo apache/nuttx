@@ -43,6 +43,9 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <nuttx/irq.h>
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -135,6 +138,10 @@ EXTERN void avr32_boardinitialize(void);
  *   returns an 8-bit bit set with each bit associated with a button.  See the
  *   BUTTON* definitions above for the meaning of each bit in the returned value.
  *
+ * NOTE: Nothing in the "base" NuttX code calls up_buttoninit().  If you want button
+ * support in an application, your application startup code must call up_buttoninit()
+ * prior to calling any of the other button interfaces.
+ *
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -161,9 +168,15 @@ EXTERN uint8_t up_buttons(void);
  *   called when BUTTON1/2 is depressed.  The previous interrupt handler value is
  *   returned (so that it may restored, if so desired).
  *
+ * Configuration Notes:
+ *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the overall GPIO
+ *   IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or CONFIG_AVR32_GPIOIRQSETB must
+ *   be enabled to select GPIOs to support interrupts on.  For button support, bits
+ *   2 and 3 must be set in CONFIG_AVR32_GPIOIRQSETB (PB2 and PB3).
+ *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIOB_IRQ
+#ifdef CONFIG_AVR32_GPIOIRQ
 EXTERN xcpt_t up_irqbutton1(xcpt_t irqhandler);
 EXTERN xcpt_t up_irqbutton2(xcpt_t irqhandler);
 #endif

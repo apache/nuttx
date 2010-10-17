@@ -156,6 +156,10 @@ AVR32DEV1 Configuration Options
 	   the delay actually is 100 seconds.
 
   Individual subsystems can be enabled:
+  
+	CONFIG_AVR32_GPIOIRQ - GPIO interrupt support
+	CONFIG_AVR32_GPIOIRQSETA - Set of GPIOs on PORTA that support interrupts
+	CONFIG_AVR32_GPIOIRQSETB - Set of GPIOs on PORTB that support interrupts
 
 	CONFIG_AVR32_USARTn - Enable support for USARTn
 	CONFIG_AVR32_USARTn_RS232 - Configure USARTn as an RS232 interface.
