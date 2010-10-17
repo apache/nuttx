@@ -60,16 +60,16 @@
 #define PINMUX_GPIO_LED1 (GPIO_ENABLE | GPIO_OUTPUT | GPIO_LOW | GPIO_PORTA | 7)
 #define PINMUX_GPIO_LED2 (GPIO_ENABLE | GPIO_OUTPUT | GPIO_LOW | GPIO_PORTA | 8)
 
-/* KEYs
+/* BUTTONs
  *
- * The AVR32DEV1 board has 3 KEYs, two of which can be sensed through GPIO pins.
+ * The AVR32DEV1 board has 3 BUTTONs, two of which can be sensed through GPIO pins.
  *
  * PIN 24  PB2  KEY1
  * PIN 25  PB3  KEY2
  */
 
-#define PINMUX_GPIO_KEY1 (GPIO_ENABLE | GPIO_INPUT | GPIO_PORTB | 2)
-#define PINMUX_GPIO_KEY2 (GPIO_ENABLE | GPIO_INPUT | GPIO_PORTB | 3)
+#define PINMUX_GPIO_BUTTON1 (GPIO_ENABLE | GPIO_INPUT | GPIO_PORTB | 2)
+#define PINMUX_GPIO_BUTTON2 (GPIO_ENABLE | GPIO_INPUT | GPIO_PORTB | 3)
 
 /************************************************************************************
  * Public Types

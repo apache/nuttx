@@ -87,6 +87,12 @@
 #define LED_ASSERTION        2  /* ON   ON   ON   OFF  */
 #define LED_PANIC            2  /* ON   ON   ON   OFF  */
 
+/* Button definitions ***************************************************************/
+/* The AVR32DEV1 board has 3 BUTTONs, two of which can be sensed through GPIO pins. */
+
+#define BUTTON1                    1 /* Bit 0: Button 1 */
+#define BUTTON2                    2 /* Bit 1: Button 2 */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -119,6 +125,49 @@ extern "C" {
  ************************************************************************************/
 
 EXTERN void avr32_boardinitialize(void);
+
+/************************************************************************************
+ * Name: up_buttoninit
+ *
+ * Description:
+ *   up_buttoninit() must be called to initialize button resources.  After that,
+ *   up_buttons() may be called to collect the state of all buttons.  up_buttons()
+ *   returns an 8-bit bit set with each bit associated with a button.  See the
+ *   BUTTON* definitions above for the meaning of each bit in the returned value.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+EXTERN void up_buttoninit(void);
+
+/************************************************************************************
+ * Name: up_buttons
+ *
+ * Description:
+ *   After up_buttoninit() has been called, up_buttons() may be called to collect
+ *   the state of all buttons.  up_buttons() returns an 8-bit bit set with each bit
+ *   associated with a button.  See the BUTTON* definitions above for the meaning of
+ *   each bit in the returned value.
+ *
+ ************************************************************************************/
+
+EXTERN uint8_t up_buttons(void);
+
+/************************************************************************************
+ * Name: up_irqbutton1/2
+ *
+ * Description:
+ *   These functions may be called to register an interrupt handler that will be
+ *   called when BUTTON1/2 is depressed.  The previous interrupt handler value is
+ *   returned (so that it may restored, if so desired).
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIOB_IRQ
+EXTERN xcpt_t up_irqbutton1(xcpt_t irqhandler);
+EXTERN xcpt_t up_irqbutton2(xcpt_t irqhandler);
+#endif
+#endif /* CONFIG_ARCH_BUTTONS */
 
 #undef EXTERN
 #if defined(__cplusplus)
