@@ -56,11 +56,11 @@
 
 /* Register Addresses ***************************************************************/
 
-#define AVR32_FLASHC_FCR            (AVR32_FLASHC_BASE+AVR32_FLASHC_FCR_OFFSET)
-#define AVR32_FLASHC_FCMD           (AVR32_FLASHC_BASE+AVR32_FLASHC_FCMD_OFFSET)
-#define AVR32_FLASHC_FSR            (AVR32_FLASHC_BASE+AVR32_FLASHC_FSR_OFFSET)
-#define AVR32_FLASHC_FGPFRHI        (AVR32_FLASHC_BASE+AVR32_FLASHC_FGPFRHI_OFFSET)
-#define AVR32_FLASHC_FGPFRLO        (AVR32_FLASHC_BASE+AVR32_FLASHC_FGPFRLO_OFFSET)
+#define AVR32_FLASHC_FCR            (AVR32_HFLASHC_BASE+AVR32_FLASHC_FCR_OFFSET)
+#define AVR32_FLASHC_FCMD           (AVR32_HFLASHC_BASE+AVR32_FLASHC_FCMD_OFFSET)
+#define AVR32_FLASHC_FSR            (AVR32_HFLASHC_BASE+AVR32_FLASHC_FSR_OFFSET)
+#define AVR32_FLASHC_FGPFRHI        (AVR32_HFLASHC_BASE+AVR32_FLASHC_FGPFRHI_OFFSET)
+#define AVR32_FLASHC_FGPFRLO        (AVR32_HFLASHC_BASE+AVR32_FLASHC_FGPFRLO_OFFSET)
 
 /* Register Bit-field Definitions ***************************************************/
 
@@ -72,7 +72,6 @@
 #define FLASHC_FCR_FWS              (1 << 6)  /* Bit 6:  Flash Wait State */
 
 /* Flash Command Register */
-
 
 #define FLASHC_FCMD_CMD_SHIFT       (0)       /* Bits 0-5: Command */
 #define FLASHC_FCMD_CMD_MASK        (0x3f << FLASHC_FCMD_CMD_SHIFT)
@@ -206,6 +205,13 @@
 #define FLASH_CMD_WUP               13 /* Write User Page */
 #define FLASH_CMD_EUP               14 /* Erase User Page */
 #define FLASH_CMD_QPRUP             15 /* Quick Page Read User Page */
+
+/* Other constants ******************************************************************/
+
+/* Maximum CPU frequency for 0 and 1 FLASH wait states */
+
+#define AVR32_FLASHC_FWS0_MAXFREQ   33000000
+#define AVR32_FLASHC_FWS1_MAXFREQ   66000000
 
 /************************************************************************************
  * Public Types

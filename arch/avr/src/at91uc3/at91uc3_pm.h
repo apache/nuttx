@@ -65,7 +65,7 @@
 #define AVR32_PM_ISR_OFFSET        0x004c /* Interrupt Status Register */
 #define AVR32_PM_ICR_OFFSET        0x0050 /* Interrupt Clear Register */
 #define AVR32_PM_POSCSR_OFFSET     0x0054 /* Power and Oscillators Status Register */
-#define AVR32_PM_GCCTRL_OFFSET     0x0060 /* 0x0060-0x070 Generic Clock Control Register */
+#define AVR32_PM_GCCTRL_OFFSET(n)  (0x0060+((n)<<2)) /* 0x0060-0x070 Generic Clock Control Register */
 #define AVR32_PM_RCCR_OFFSET       0x00c0 /* RC Oscillator Calibration Register */
 #define AVR32_PM_BGCR_OFFSET       0x00c4 /* Bandgap Calibration Register */
 #define AVR32_PM_VREGCR_OFFSET     0x00c8 /* Linear Regulator Calibration Register */
@@ -94,7 +94,7 @@
 #define AVR32_PM_ISR               (AVR32_PM_BASE+AVR32_PM_ISR_OFFSET)
 #define AVR32_PM_ICR               (AVR32_PM_BASE+AVR32_PM_ICR_OFFSET)
 #define AVR32_PM_POSCSR            (AVR32_PM_BASE+AVR32_PM_POSCSR_OFFSET)
-#define AVR32_PM_GCCTRL            (AVR32_PM_BASE+AVR32_PM_GCCTRL_OFFSET)
+#define AVR32_PM_GCCTRL(n)         (AVR32_PM_BASE+AVR32_PM_GCCTRL_OFFSET(n))
 #define AVR32_PM_RCCR              (AVR32_PM_BASE+AVR32_PM_RCCR_OFFSET)
 #define AVR32_PM_BGCR              (AVR32_PM_BASE+AVR32_PM_BGCR_OFFSET)
 #define AVR32_PM_VREGCR            (AVR32_PM_BASE+AVR32_PM_VREGCR_OFFSET)
@@ -310,6 +310,14 @@
 /* General Purpose Low-Power Register 0/1 Bit-field Definitions */
 
 /* These registers contain a 32-bit value with no smaller bit-field */
+
+/* GCLK Allocation ******************************************************************/
+
+#define AVR32_PM_GCLK0                (0)       /* GCLK0 pin */
+#define AVR32_PM_GCLK1                (1)       /* GCLK2 pin */
+#define AVR32_PM_GCLK2                (2)       /* GCLK2 pin */
+#define AVR32_PM_GCLK_USBB            (3)       /* USBB */
+#define AVR32_PM_GCLK_ABDAC           (4)       /* ABDAC */
 
 /************************************************************************************
  * Public Types
