@@ -321,7 +321,7 @@ unsigned int avr32_intirqno(unsigned int level)
           mask <<= 1;
         }
 
-       lldbg("Spurious interrupt: group=%d IRR=%08x\n", group, IRR);
+       lldbg("Spurious interrupt: group=%d IRR=%08x\n", group, irr);
        return -ENODEV;
     }
 
