@@ -51,44 +51,100 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* #define AVR32_FRCOSC      15200         RCOsc frequency in Hz */
+/* Oscillator setup:  RCOSC, OSC32, OSC0, OSC1.  Only RCOSC, OSC0, or PLL0 can drive
+ * the main clock.
+ */
+ 
+/* #define AVR32_FRCOSC      15200         RCOSC frequency in Hz */
 
 #define AVR32_FOSC32         32768      /* OSC32 frequency in Hz */
-#define AVR32_OSC32STARTUP   3          /* OSC32 startup time in RCOsc periods */
+#define AVR32_OSC32STARTUP   3          /* OSC32 startup time in RCOSC periods */
 
 #define AVR32_FOSC0          12000000   /* OSC0 frequency in Hz */
-#define AVR32_OSC0STARTUP    3          /* OSC0 startup time in RCOsc periods.
+#define AVR32_OSC0STARTUP    3          /* OSC0 startup time in RCOSC periods.
 
 /* #define AVR32_FOSC1       12000000      OSC1 frequency: Hz.
- * #define AVR32_OSC1STARTUP 3             OSC1 startup time in RCOsc periods.
+ * #define AVR32_OSC1STARTUP 3             OSC1 startup time in RCOSC periods.
  */
 
-/* Select OSC0 as the main clock */
+/* PLL setup
+ *
+ *   FOSC0 MUL DIV PLL DIV2_EN CPU_CLOCK PBA_CLOCK   COMMENT
+ *   (MHz)         (MHz)        (MHz)    (MHz)
+ *    12   15   1  192     1     12       12
+ *    12    9   3   40     1     20       20    PLL out of spec
+ *    12   15   1  192     1     24       12
+ *    12    9   1  120     1     30       15
+ *    12    9   3   40     0     40       20    PLL out of spec
+ *    12   15   1  192     1     48       12
+ *    12   15   1  192     1     48       24
+ *    12    8   1  108     1     54       27
+ *    12    9   1  120     1     60       15
+ *    12    9   1  120     1     60       30
+ *    12   10   1  132     1     66       16.5
+ */
 
-#define AVR32_CLOCK_OSC0     1
+#define AVR32_CLOCK_PLL0_OSC0 1
+#undef AVR32_CLOCK_PLL0_OSC1
+#define AVR32_PLL0_MUL        15
+#define AVR32_PLL0_DIV        1
+#define AVR32_PLL0_DIV2       1
+#define AVR32_PLL0_WBWM       0
+#define AVR32_PLL0_FREQ       192000000
+
+/* Set PLL1 @ 96 MHz from OSC0: 12MHz*(7+1)/1 = 96MHz */
+
+#define AVR32_CLOCK_PLL1_OSC0 1
+#undef AVR32_CLOCK_PLL1_OSC1
+#define AVR32_PLL1_MUL        7
+#define AVR32_PLL1_DIV        1
+#define AVR32_PLL1_DIV2       1
+#define AVR32_PLL1_WBWM       0
+#define AVR32_PLL1_FREQ       96000000
+
+/* Clock divider setup */
+
+#define AVR32_CKSEL_CPUDIV    0
+#define AVR32_CKSEL_HSBDIV    0
+#define AVR32_CKSEL_PBADIV    0
+#define AVR32_CKSEL_PBBDIV    0
+
+/* GCLK_USBB */
+
+#undef  AVR32_CLOCK_USB_PLL0
+#define AVR32_CLOCK_USB_PLL1  1
+#undef  AVR32_CLOCK_USB_OSC0
+#undef  AVR32_CLOCK_USB_OSC1
+#define AVR32_CLOCK_USB_DIV   0
+
+/* Main Clock settup: Select OSC0 as the main clock */
+
+#define AVR32_CLOCK_OSC0      1
+#undef  AVR32_CLOCK_OSC1
 #undef  AVR32_CLOCK_PLL0
+#undef  AVR32_CLOCK_PLL1
 
-#define AVR32_CPU_CLOCK      AVR32_FOSC0
-#define AVR32_PBA_CLOCK      AVR32_FOSC0
+#define AVR32_CPU_CLOCK       AVR32_FOSC0
+#define AVR32_PBA_CLOCK       AVR32_FOSC0
 
 /* Pin muliplexing selecion *********************************************************/
 
-#define PINMUX_USART1_RXD    PINMUX_USART1_RXD_1
-#define PINMUX_USART1_TXD    PINMUX_USART1_TXD_1
+#define PINMUX_USART1_RXD     PINMUX_USART1_RXD_1
+#define PINMUX_USART1_TXD     PINMUX_USART1_TXD_1
 
 /* LED definitions ******************************************************************/
 /* The AVR32DEV1 board has 3 LEDs, two of which can be controlled through GPIO pins */
 
-                                /*    ON        OFF    */
-								/* LED1 LED2 LED1 LED2 */
-#define LED_STARTED          0  /* OFF  OFF  OFF  OFF  */
-#define LED_HEAPALLOCATE     0  /* OFF  OFF  OFF  OFF  */
-#define LED_IRQSENABLED      0  /* OFF  OFF  OFF  OFF  */
-#define LED_STACKCREATED     1  /* ON   OFF  OFF  OFF  */
-#define LED_INIRQ            2  /* ON   ON   ON   OFF  */
-#define LED_SIGNAL           2  /* ON   ON   ON   OFF  */
-#define LED_ASSERTION        2  /* ON   ON   ON   OFF  */
-#define LED_PANIC            2  /* ON   ON   ON   OFF  */
+                                 /*    ON        OFF    */
+                                 /* LED1 LED2 LED1 LED2 */
+#define LED_STARTED           0  /* OFF  OFF  OFF  OFF  */
+#define LED_HEAPALLOCATE      0  /* OFF  OFF  OFF  OFF  */
+#define LED_IRQSENABLED       0  /* OFF  OFF  OFF  OFF  */
+#define LED_STACKCREATED      1  /* ON   OFF  OFF  OFF  */
+#define LED_INIRQ             2  /* ON   ON   ON   OFF  */
+#define LED_SIGNAL            2  /* ON   ON   ON   OFF  */
+#define LED_ASSERTION         2  /* ON   ON   ON   OFF  */
+#define LED_PANIC             2  /* ON   ON   ON   OFF  */
 
 /* Button definitions ***************************************************************/
 /* The AVR32DEV1 board has 3 BUTTONs, two of which can be sensed through GPIO pins. */
