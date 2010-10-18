@@ -126,42 +126,42 @@
 #define AVR32_UDDMA_OFFSET(n)         (0x0300+((n)<<4))
 #define AVR32_UDDMA_NEXTDESC_OFFSET   0x0000 /* Device DMA Channel Next Descriptor Address Register */
 #define AVR32_UDDMA_ADDR_OFFSET       0x0004 /* Device DMA Channel HSB Address Register */
-#define AVR32_UDDMA_CONTROL_OFFSET    0x0008 /* Device DMA Channel Control Register */
+#define AVR32_UDDMA_CTRL_OFFSET       0x0008 /* Device DMA Channel Control Register */
 #define AVR32_UDDMA_STATUS_OFFSET     0x000c /* Device DMA Channel Status Register */
 
 #define AVR32_UDDMA1_NEXTDESC_OFFSET  0x0310 /* Device DMA Channel 1 Next Descriptor Address Register */
 #define AVR32_UDDMA1_ADDR_OFFSET      0x0314 /* Device DMA Channel 1 HSB Address Register */
-#define AVR32_UDDMA1_CONTROL_OFFSET   0x0318 /* Device DMA Channel 1 Control Register */
+#define AVR32_UDDMA1_CTRL_OFFSET      0x0318 /* Device DMA Channel 1 Control Register */
 #define AVR32_UDDMA1_STATUS_OFFSET    0x031c /* Device DMA Channel 1 Status Register */
 
 #define AVR32_UDDMA1_NEXTDESC_OFFSET  0x0310 /* Device DMA Channel 1 Next Descriptor Address Register */
 #define AVR32_UDDMA1_ADDR_OFFSET      0x0314 /* Device DMA Channel 1 HSB Address Register */
-#define AVR32_UDDMA1_CONTROL_OFFSET   0x0318 /* Device DMA Channel 1 Control Register */
+#define AVR32_UDDMA1_CTRL_OFFSET      0x0318 /* Device DMA Channel 1 Control Register */
 #define AVR32_UDDMA1_STATUS_OFFSET    0x031c /* Device DMA Channel 1 Status Register */
 
 #define AVR32_UDDMA2_NEXTDESC_OFFSET  0x0320 /* Device DMA Channel 2 Next Descriptor Address Register */
 #define AVR32_UDDMA2_ADDR_OFFSET      0x0324 /* Device DMA Channel 2 HSB Address Register */
-#define AVR32_UDDMA2_CONTROL_OFFSET   0x0328 /* Device DMA Channel 2 Control Register */
+#define AVR32_UDDMA2_CTRL_OFFSET      0x0328 /* Device DMA Channel 2 Control Register */
 #define AVR32_UDDMA2_STATUS_OFFSET    0x032c /* Device DMA Channel 2 Status Register */
 
 #define AVR32_UDDMA3_NEXTDESC_OFFSET  0x0330 /* Device DMA Channel 3 Next Descriptor Address Register */
 #define AVR32_UDDMA3_ADDR_OFFSET      0x0334 /* Device DMA Channel 3 HSB Address Register */
-#define AVR32_UDDMA3_CONTROL_OFFSET   0x0338 /* Device DMA Channel 3 Control Register */
+#define AVR32_UDDMA3_CTRL_OFFSET      0x0338 /* Device DMA Channel 3 Control Register */
 #define AVR32_UDDMA3_STATUS_OFFSET    0x033c /* Device DMA Channel 3 Status Register */
 
 #define AVR32_UDDMA4_NEXTDESC_OFFSET  0x0340 /* Device DMA Channel 4 Next Descriptor Address Register */
 #define AVR32_UDDMA4_ADDR_OFFSET      0x0344 /* Device DMA Channel 4 HSB Address Register */
-#define AVR32_UDDMA4_CONTROL_OFFSET   0x0348 /* Device DMA Channel 4 Control Register */
+#define AVR32_UDDMA4_CTRL_OFFSET      0x0348 /* Device DMA Channel 4 Control Register */
 #define AVR32_UDDMA4_STATUS_OFFSET    0x034c /* Device DMA Channel 4 Status Register */
 
 #define AVR32_UDDMA5_NEXTDESC_OFFSET  0x0350 /* Device DMA Channel 5 Next Descriptor Address Register */
 #define AVR32_UDDMA5_ADDR_OFFSET      0x0354 /* Device DMA Channel 5 HSB Address Register */
-#define AVR32_UDDMA5_CONTROL_OFFSET   0x0358 /* Device DMA Channel 5 Control Register */
+#define AVR32_UDDMA5_CTRL_OFFSET      0x0358 /* Device DMA Channel 5 Control Register */
 #define AVR32_UDDMA5_STATUS_OFFSET    0x035c /* Device DMA Channel 5 Status Register */
 
 #define AVR32_UDDMA6_NEXTDESC_OFFSET  0x0360 /* Device DMA Channel 6 Next Descriptor Address Register */
 #define AVR32_UDDMA6_ADDR_OFFSET      0x0364 /* Device DMA Channel 6 HSB Address Register */
-#define AVR32_UDDMA6_CONTROL_OFFSET   0x0368 /* Device DMA Channel 6 Control Register */
+#define AVR32_UDDMA6_CTRL_OFFSET      0x0368 /* Device DMA Channel 6 Control Register */
 #define AVR32_UDDMA6_STATUS_OFFSET    0x036c /* Device DMA Channel 6 Status Register */
 
 /* USB Host Registers */
@@ -262,37 +262,37 @@
 #define AVR32_UHDMA_OFFSET(n)         (0x0700+((n)<<4))
 #define AVR32_UHDMA_NEXTDESC_OFFSET   0x0000 /* Host DMA Channel Next Descriptor Address Register */
 #define AVR32_UHDMA_ADDR_OFFSET       0x0004 /* Host DMA Channel HSB Address Register */
-#define AVR32_UHDMA_CONTROL_OFFSET    0x0008 /* Host DMA Channel Control Register */
+#define AVR32_UHDMA_CTRL_OFFSET       0x0008 /* Host DMA Channel Control Register */
 #define AVR32_UHDMA_STATUS_OFFSET     0x000c /* Host DMA Channel Status Register */
 
 #define AVR32_UHDMA1_NEXTDESC_OFFSET  0x0710 /* Host DMA Channel 1 Next Descriptor Address Register */
 #define AVR32_UHDMA1_ADDR_OFFSET      0x0714 /* Host DMA Channel 1 HSB Address Register */
-#define AVR32_UHDMA1_CONTROL_OFFSET   0x0718 /* Host DMA Channel 1 Control Register */
+#define AVR32_UHDMA1_CTRL_OFFSET      0x0718 /* Host DMA Channel 1 Control Register */
 #define AVR32_UHDMA1_STATUS_OFFSET    0x071c /* Host DMA Channel 1 Status Register */
 
 #define AVR32_UHDMA2_NEXTDESC_OFFSET  0x0720 /* Host DMA Channel 2 Next Descriptor Address Register */
 #define AVR32_UHDMA2_ADDR_OFFSET      0x0724 /* Host DMA Channel 2 HSB Address Register */
-#define AVR32_UHDMA2_CONTROL_OFFSET   0x0728 /* Host DMA Channel 2 Control Register */
+#define AVR32_UHDMA2_CTRL_OFFSET      0x0728 /* Host DMA Channel 2 Control Register */
 #define AVR32_UHDMA2_STATUS_OFFSET    0x072c /* Host DMA Channel 2 Status Register */
 
 #define AVR32_UHDMA3_NEXTDESC_OFFSET  0x0730 /* Host DMA Channel 3 Next Descriptor Address Register */
 #define AVR32_UHDMA3_ADDR_OFFSET      0x0734 /* Host DMA Channel 3 HSB Address Register */
-#define AVR32_UHDMA3_CONTROL_OFFSET   0x0738 /* Host DMA Channel 3 Control Register */
+#define AVR32_UHDMA3_CTRL_OFFSET      0x0738 /* Host DMA Channel 3 Control Register */
 #define AVR32_UHDMA3_STATUS_OFFSET    0x073c /* Host DMA Channel 3 Status Register */
 
 #define AVR32_UHDMA4_NEXTDESC_OFFSET  0x0740 /* Host DMA Channel 4 Next Descriptor Address Register */
 #define AVR32_UHDMA4_ADDR_OFFSET      0x0744 /* Host DMA Channel 4 HSB Address Register */
-#define AVR32_UHDMA4_CONTROL_OFFSET   0x0748 /* Host DMA Channel 4 Control Register */
+#define AVR32_UHDMA4_CTRL_OFFSET      0x0748 /* Host DMA Channel 4 Control Register */
 #define AVR32_UHDMA4_STATUS_OFFSET    0x074c /* Host DMA Channel 4 Status Register */
 
 #define AVR32_UHDMA5_NEXTDESC_OFFSET  0x0750 /* Host DMA Channel 5 Next Descriptor Address Register */
 #define AVR32_UHDMA5_ADDR_OFFSET      0x0754 /* Host DMA Channel 5 HSB Address Register */
-#define AVR32_UHDMA5_CONTROL_OFFSET   0x0758 /* Host DMA Channel 5 Control Register */
+#define AVR32_UHDMA5_CTRL_OFFSET      0x0758 /* Host DMA Channel 5 Control Register */
 #define AVR32_UHDMA5_STATUS_OFFSET    0x075c /* Host DMA Channel 5 Status Register */
 
 #define AVR32_UHDMA6_NEXTDESC_OFFSET  0x0760 /* Host DMA Channel 6 Next Descriptor Address Register */
 #define AVR32_UHDMA6_ADDR_OFFSET      0x0764 /* Host DMA Channel 6 HSB Address Register */
-#define AVR32_UHDMA6_CONTROL_OFFSET   0x0768 /* Host DMA Channel 6 Control Register */
+#define AVR32_UHDMA6_CTRL_OFFSET      0x0768 /* Host DMA Channel 6 Control Register */
 #define AVR32_UHDMA6_STATUS_OFFSET    0x076c /* Host DMA Channel 6 Status Register */
 
 /* USB General Registers */
@@ -388,37 +388,37 @@
 #define AVR32_UDDMA_BASE(n)           (AVR32_USB_BASE+AVR32_UDDMA_OFFSET(n))
 #define AVR32_UDDMA_NEXTDESC(n)       (AVR32_UDDMA_BASE(n)+AVR32_UDDMA_NEXTDESC_OFFSET)
 #define AVR32_UDDMA_ADDR(n)           (AVR32_UDDMA_BASE(n)+AVR32_UDDMA_ADDR_OFFSET)
-#define AVR32_UDDMA_CONTROL(n)        (AVR32_UDDMA_BASE(n)+AVR32_UDDMA_CONTROL_OFFSET)
+#define AVR32_UDDMA_CTRL(n)           (AVR32_UDDMA_BASE(n)+AVR32_UDDMA_CTRL_OFFSET)
 #define AVR32_UDDMA_STATUS(n)         (AVR32_UDDMA_BASE(n)+AVR32_UDDMA_STATUS_OFFSET)
 
 #define AVR32_UDDMA1_NEXTDESC         (AVR32_USB_BASE+AVR32_UDDMA1_NEXTDESC_OFFSET)
 #define AVR32_UDDMA1_ADDR             (AVR32_USB_BASE+AVR32_UDDMA1_ADDR_OFFSET)
-#define AVR32_UDDMA1_CONTROL          (AVR32_USB_BASE+AVR32_UDDMA1_CONTROL_OFFSET)
+#define AVR32_UDDMA1_CTRL             (AVR32_USB_BASE+AVR32_UDDMA1_CTRL_OFFSET)
 #define AVR32_UDDMA1_STATUS           (AVR32_USB_BASE+AVR32_UDDMA1_STATUS_OFFSET)
 
 #define AVR32_UDDMA2_NEXTDESC         (AVR32_USB_BASE+AVR32_UDDMA2_NEXTDESC_OFFSET)
 #define AVR32_UDDMA2_ADDR             (AVR32_USB_BASE+AVR32_UDDMA2_ADDR_OFFSET)
-#define AVR32_UDDMA2_CONTROL          (AVR32_USB_BASE+AVR32_UDDMA2_CONTROL_OFFSET)
+#define AVR32_UDDMA2_CTRL             (AVR32_USB_BASE+AVR32_UDDMA2_CTRL_OFFSET)
 #define AVR32_UDDMA2_STATUS           (AVR32_USB_BASE+AVR32_UDDMA2_STATUS_OFFSET)
 
 #define AVR32_UDDMA3_NEXTDESC         (AVR32_USB_BASE+AVR32_UDDMA3_NEXTDESC_OFFSET)
 #define AVR32_UDDMA3_ADDR             (AVR32_USB_BASE+AVR32_UDDMA3_ADDR_OFFSET)
-#define AVR32_UDDMA3_CONTROL          (AVR32_USB_BASE+AVR32_UDDMA3_CONTROL_OFFSET)
+#define AVR32_UDDMA3_CTRL             (AVR32_USB_BASE+AVR32_UDDMA3_CTRL_OFFSET)
 #define AVR32_UDDMA3_STATUS           (AVR32_USB_BASE+AVR32_UDDMA3_STATUS_OFFSET)
 
 #define AVR32_UDDMA4_NEXTDESC         (AVR32_USB_BASE+AVR32_UDDMA4_NEXTDESC_OFFSET)
 #define AVR32_UDDMA4_ADDR             (AVR32_USB_BASE+AVR32_UDDMA4_ADDR_OFFSET )
-#define AVR32_UDDMA4_CONTROL          (AVR32_USB_BASE+AVR32_UDDMA4_CONTROL_OFFSET)
+#define AVR32_UDDMA4_CTRL             (AVR32_USB_BASE+AVR32_UDDMA4_CTRL_OFFSET)
 #define AVR32_UDDMA4_STATUS           (AVR32_USB_BASE+AVR32_UDDMA4_STATUS_OFFSET)
 
 #define AVR32_UDDMA5_NEXTDESC         (AVR32_USB_BASE+AVR32_UDDMA5_NEXTDESC_OFFSET)
 #define AVR32_UDDMA5_ADDR             (AVR32_USB_BASE+AVR32_UDDMA5_ADDR_OFFSET)
-#define AVR32_UDDMA5_CONTROL          (AVR32_USB_BASE+AVR32_UDDMA5_CONTROL_OFFSET)
+#define AVR32_UDDMA5_CTRL             (AVR32_USB_BASE+AVR32_UDDMA5_CTRL_OFFSET)
 #define AVR32_UDDMA5_STATUS           (AVR32_USB_BASE+AVR32_UDDMA5_STATUS_OFFSET)
 
 #define AVR32_UDDMA6_NEXTDESC         (AVR32_USB_BASE+AVR32_UDDMA6_NEXTDESC_OFFSET)
 #define AVR32_UDDMA6_ADDR             (AVR32_USB_BASE+AVR32_UDDMA6_ADDR_OFFSET)
-#define AVR32_UDDMA6_CONTROL          (AVR32_USB_BASE+AVR32_UDDMA6_CONTROL_OFFSET)
+#define AVR32_UDDMA6_CTRL             (AVR32_USB_BASE+AVR32_UDDMA6_CTRL_OFFSET)
 #define AVR32_UDDMA6_STATUS           (AVR32_USB_BASE+AVR32_UDDMA6_STATUS_OFFSET)
 
 /* USB Host Registers */
@@ -519,37 +519,37 @@
 #define AVR32_UHDMA_BASE(n)           (AVR32_USB_BASE+AVR32_UHDMA_OFFSET(n))
 #define AVR32_UHDMA_NEXTDESC(n)       (AVR32_UHDMA_BASE(n)+AVR32_UHDMA_NEXTDESC_OFFSET)
 #define AVR32_UHDMA_ADDR(n)           (AVR32_UHDMA_BASE(n)+AVR32_UHDMA_ADDR_OFFSET)
-#define AVR32_UHDMA_CONTROL(n)        (AVR32_UHDMA_BASE(n)+AVR32_UHDMA_CONTROL_OFFSET)
+#define AVR32_UHDMA_CTRL(n)           (AVR32_UHDMA_BASE(n)+AVR32_UHDMA_CTRL_OFFSET)
 #define AVR32_UHDMA_STATUS(n)         (AVR32_UHDMA_BASE(n)+AVR32_UHDMA_STATUS_OFFSET)
 
 #define AVR32_UHDMA1_NEXTDESC         (AVR32_USB_BASE+AVR32_UHDMA1_NEXTDESC_OFFSET)
 #define AVR32_UHDMA1_ADDR             (AVR32_USB_BASE+AVR32_UHDMA1_ADDR_OFFSET)
-#define AVR32_UHDMA1_CONTROL          (AVR32_USB_BASE+AVR32_UHDMA1_CONTROL_OFFSET)
+#define AVR32_UHDMA1_CTRL             (AVR32_USB_BASE+AVR32_UHDMA1_CTRL_OFFSET)
 #define AVR32_UHDMA1_STATUS           (AVR32_USB_BASE+AVR32_UHDMA1_STATUS_OFFSET)
 
 #define AVR32_UHDMA2_NEXTDESC         (AVR32_USB_BASE+AVR32_UHDMA2_NEXTDESC_OFFSET)
 #define AVR32_UHDMA2_ADDR             (AVR32_USB_BASE+AVR32_UHDMA2_ADDR_OFFSET)
-#define AVR32_UHDMA2_CONTROL          (AVR32_USB_BASE+AVR32_UHDMA2_CONTROL_OFFSET)
+#define AVR32_UHDMA2_CTRL             (AVR32_USB_BASE+AVR32_UHDMA2_CTRL_OFFSET)
 #define AVR32_UHDMA2_STATUS           (AVR32_USB_BASE+AVR32_UHDMA2_STATUS_OFFSET)
 
 #define AVR32_UHDMA3_NEXTDESC         (AVR32_USB_BASE+AVR32_UHDMA3_NEXTDESC_OFFSET)
 #define AVR32_UHDMA3_ADDR             (AVR32_USB_BASE+AVR32_UHDMA3_ADDR_OFFSET)
-#define AVR32_UHDMA3_CONTROL          (AVR32_USB_BASE+AVR32_UHDMA3_CONTROL_OFFSET)
+#define AVR32_UHDMA3_CTRL             (AVR32_USB_BASE+AVR32_UHDMA3_CTRL_OFFSET)
 #define AVR32_UHDMA3_STATUS           (AVR32_USB_BASE+AVR32_UHDMA3_STATUS_OFFSET)
 
 #define AVR32_UHDMA4_NEXTDESC         (AVR32_USB_BASE+AVR32_UHDMA4_NEXTDESC_OFFSET)
 #define AVR32_UHDMA4_ADDR             (AVR32_USB_BASE+AVR32_UHDMA4_ADDR_OFFSET)
-#define AVR32_UHDMA4_CONTROL          (AVR32_USB_BASE+AVR32_UHDMA4_CONTROL_OFFSET)
+#define AVR32_UHDMA4_CTRL             (AVR32_USB_BASE+AVR32_UHDMA4_CTRL_OFFSET)
 #define AVR32_UHDMA4_STATUS           (AVR32_USB_BASE+AVR32_UHDMA4_STATUS_OFFSET)
 
 #define AVR32_UHDMA5_NEXTDESC         (AVR32_USB_BASE+AVR32_UHDMA5_NEXTDESC_OFFSET)
 #define AVR32_UHDMA5_ADDR             (AVR32_USB_BASE+AVR32_UHDMA5_ADDR_OFFSET)
-#define AVR32_UHDMA5_CONTROL          (AVR32_USB_BASE+AVR32_UHDMA5_CONTROL_OFFSET)
+#define AVR32_UHDMA5_CTRL             (AVR32_USB_BASE+AVR32_UHDMA5_CTRL_OFFSET)
 #define AVR32_UHDMA5_STATUS           (AVR32_USB_BASE+AVR32_UHDMA5_STATUS_OFFSET)
 
 #define AVR32_UHDMA6_NEXTDESC         (AVR32_USB_BASE+AVR32_UHDMA6_NEXTDESC_OFFSET)
 #define AVR32_UHDMA6_ADDR             (AVR32_USB_BASE+AVR32_UHDMA6_ADDR_OFFSET)
-#define AVR32_UHDMA6_CONTROL          (AVR32_USB_BASE+AVR32_UHDMA6_CONTROL_OFFSET)
+#define AVR32_UHDMA6_CTRL             (AVR32_USB_BASE+AVR32_UHDMA6_CTRL_OFFSET)
 #define AVR32_UHDMA6_STATUS           (AVR32_USB_BASE+AVR32_UHDMA6_STATUS_OFFSET)
 
 /* USB General Registers */
@@ -631,85 +631,236 @@
 #define USBB_UDFNUM_FNCERR            (1 << 15) /* Bit 15: Frame Number CRC Error */
 
 /* Endpoint Configuration Register Bit-field Definitions */
-#define USBB_UECFG_
-/* Endpoint Status Register Bit-field Definitions */
-#define USBB_UESTA_
+
+#define USBB_UECFG_ALLOC              (1 << 1)  /* Bit 1:  Endpoint Memory Allocate */
+#define USBB_UECFG_EPBK_SHIFT         (2)       /* Bits 2-3: Endpoint Banks */
+#define USBB_UECFG_EPBK_MASK          (3 << USBB_UECFG_EPBK_SHIFT)
+#  define USBB_UECFG_EPBK_1           (0 << USBB_UECFG_EPBK_SHIFT) /* 1 (single-bank endpoint) */
+#  define USBB_UECFG_EPBK_2           (1 << USBB_UECFG_EPBK_SHIFT) /* 2 (double-bank endpoint) */
+#  define USBB_UECFG_EPBK_3           (2 << USBB_UECFG_EPBK_SHIFT) /* 3 (triple-bank endpoint) */
+#define USBB_UECFG_EPSIZE_SHIFT       (4)       /* Bits 4-6: Endpoint Size */
+#define USBB_UECFG_EPSIZE_MASK        (7 << USBB_UECFG_EPSIZE_SHIFT)
+#  define USBB_UECFG_EPSIZE_8         (0 << USBB_UECFG_EPSIZE_SHIFT) /* 8 bytes */
+#  define USBB_UECFG_EPSIZE_16        (1 << USBB_UECFG_EPSIZE_SHIFT) /* 16 bytes */
+#  define USBB_UECFG_EPSIZE_32        (2 << USBB_UECFG_EPSIZE_SHIFT) /* 32 bytes */
+#  define USBB_UECFG_EPSIZE_64        (3 << USBB_UECFG_EPSIZE_SHIFT) /* 64 bytes */
+#  define USBB_UECFG_EPSIZE_128       (4 << USBB_UECFG_EPSIZE_SHIFT) /* 128 bytes */
+#  define USBB_UECFG_EPSIZE_256       (5 << USBB_UECFG_EPSIZE_SHIFT) /* 256 bytes */
+#  define USBB_UECFG_EPSIZE_512       (6 << USBB_UECFG_EPSIZE_SHIFT) /* 512 bytes */
+#  define USBB_UECFG_EPSIZE_1024      (7 << USBB_UECFG_EPSIZE_SHIFT) /* 1024 bytes */
+#define USBB_UECFG_EPDIR              (1 << 8)  /* Bit 8:  Endpoint Direction */
+#define USBB_UECFG_AUTOSW             (1 << 9)  /* Bit 9:  Automatic Switch */
+#define USBB_UECFG_EPTYPE_SHIFT       (11)      /* Bits 11-12: Endpoint Type */
+#define USBB_UECFG_EPTYPE_MASK        (3 << USBB_UECFG_EPTYPE_SHIFT)
+#  define USBB_UECFG_EPTYPE_CTRL      (0 << USBB_UECFG_EPTYPE_SHIFT) /* Control */
+#  define USBB_UECFG_EPTYPE_ISOC      (1 << USBB_UECFG_EPTYPE_SHIFT) /* Isochronous */
+#  define USBB_UECFG_EPTYPE_BULK      (2 << USBB_UECFG_EPTYPE_SHIFT) /* Bulk */
+#  define USBB_UECFG_EPTYPE_INTR      (3 << USBB_UECFG_EPTYPE_SHIFT) /* Interrupt */
+
+/* Endpoint Status Register Bit-field Definitions (common fields) */
 /* Endpoint Status Clear Register Bit-field Definitions */
-#define USBB_UESTACLR_
-/* Endpoint  Status Set Register Bit-field Definitions */
-#define USBB_UESTASET_
+/* Endpoint Status Set Register Bit-field Definitions (common fields) */
+
+#define USBB_UESTA_SHORTPACKET        (1 << 7)  /* Bit 7:  Short Packet Interrupt */
+#define USBB_UESTA_STALLEDI           (1 << 6)  /* Bit 6:  STALLed Interrupt */
+#define USBB_UESTA_CRCERRI            (1 << 6)  /* Bit 6:  CRC Error Interrupt */
+#define USBB_UESTA_OVERFI             (1 << 5)  /* Bit 5:  Overflow Interrupt */
+#define USBB_UESTA_NAKINI             (1 << 4)  /* Bit 4:  NAKed IN Interrupt */
+#define USBB_UESTA_NAKOUTI            (1 << 3)  /* Bit 3:  NAKed OUT Interrupt */
+#define USBB_UESTA_UNDERFI            (1 << 2)  /* Bit 2:  Underflow Interrupt */
+#define USBB_UESTA_RXSTPI             (1 << 2)  /* Bit 2:  Received SETUP Interrupt */
+#define USBB_UESTA_RXOUTI             (1 << 1)  /* Bit 1:  Received OUT Data Interrupt */
+#define USBB_UESTA_TXINI              (1 << 0)  /* Bit 0:  Transmitted IN Data Interrupt */
+              
+/* Endpoint Status Register Bit-field Definitions (only in UESTA) */
+
+#define USBB_UESTA_DTSEQ_SHIFT        (8)       /* Bits 8-9: Data Toggle Sequence */
+#define USBB_UESTA_DTSEQ_MASK         (3 << USBB_UESTA_DTSEQ_SHIFT)
+#  define USBB_UESTA_DTSEQ_DATA0      (0 << USBB_UESTA_DTSEQ_SHIFT) /* Data0 */
+#  define USBB_UESTA_DTSEQ_DATA1      (1 << USBB_UESTA_DTSEQ_SHIFT) /* Data1 */
+#define USBB_UESTA_NBUSYBK_SHIFT      (12)      /* Bits 12-13: Number of Busy Banks */
+#define USBB_UESTA_NBUSYBK_MASK       (3 << USBB_UESTA_NBUSYBK_SHIFT)
+#  define USBB_UESTA_NBUSYBK_NONE     (0 << USBB_UESTA_NBUSYBK_SHIFT) /* 0 (all banks free) */
+#  define USBB_UESTA_NBUSYBK_1BANK    (1 << USBB_UESTA_NBUSYBK_SHIFT) /* 1 */
+#  define USBB_UESTA_NBUSYBK_2BANKS   (2 << USBB_UESTA_NBUSYBK_SHIFT) /* 2 */
+#  define USBB_UESTA_NBUSYBK_3BANKS   (3 << USBB_UESTA_NBUSYBK_SHIFT) /* 3 */
+#define USBB_UESTA_CURRBK_SHIFT       (14)      /* Bits 14-15: Current Bank */
+#define USBB_UESTA_CURRBK_MASK        (3 << USBB_UESTA_CURRBK_SHIFT)
+#  define USBB_UESTA_CURRBK_BANK0     (0 << USBB_UESTA_CURRBK_SHIFT) /* Bank0 */
+#  define USBB_UESTA_CURRBK_BANK1     (1 << USBB_UESTA_CURRBK_SHIFT) /* Bank1 */
+#  define USBB_UESTA_CURRBK_BANK2     (2 << USBB_UESTA_CURRBK_SHIFT) /* Bank2 */
+#define USBB_UESTA_RWALL              (1 << 16) /* Bit 16: Read/Write Allowed */
+#define USBB_UESTA_CTRLDIR            (1 << 17) /* Bit 17: Control Direction */
+#define USBB_UESTA_CFGOK              (1 << 18) /* Bit 18: Configuration OK Status */
+#define USBB_UESTA_BYCT_SHIFT         (20)       /* Bits 20-30: Byte Count */
+#define USBB_UESTA_BYCT_MASK          (0x7ff << USBB_UESTA_BYCT_SHIFT)
+
+/* Endpoint Status Set Register Bit-field Definitions (only in UESTASET) */
+
+#define USBB_UESTASET_NBUSYBKS        (1 << 12)  /* Bit 12 */
+
 /* Endpoint Control Register Bit-field Definitions */
-#define USBB_UECON_
 /* Endpoint Control Set Register Bit-field Definitions */
-#define USBB_UECONSET_
 /* Endpoint Control Clear Register Bit-field Definitions */
-#define USBB_UECONCLR_
+
+#define USBB_UECON_TXINE              (1 << 0)  /* Bit 0:  Transmitted IN Data Interrupt Enable */
+#define USBB_UECON_RXOUTE             (1 << 1)  /* Bit 1:  Received OUT Data Interrupt Enable */
+#define USBB_UECON_RXSTPE             (1 << 2)  /* Bit 2:  Received SETUP Interrupt Enable */
+#define USBB_UECON_UNDERFE            (1 << 2)  /* Bit 2:  Underflow Interrupt Enable */
+#define USBB_UECON_NAKOUTE            (1 << 3)  /* Bit 3:  NAKed OUT Interrupt Enable */
+#define USBB_UECON_NAKINE             (1 << 4)  /* Bit 4:  NAKed IN Interrupt Enable */
+#define USBB_UECON_OVERFE             (1 << 5)  /* Bit 5:  Overflow Interrupt Enable */
+#define USBB_UECON_STALLEDE           (1 << 6)  /* Bit 6:  STALLed Interrupt Enable */
+#define USBB_UECON_CRCERRE            (1 << 6)  /* Bit 6:  CRC Error Interrupt Enable */
+#define USBB_UECON_SHORTPACKETE       (1 << 7)  /* Bit 7:  Short Packet Interrupt Enable */
+#define USBB_UECON_NBUSYBKE           (1 << 12) /* Bit 12: Number of Busy Banks Interrupt Enable  */
+#define USBB_UECON_KILLBK             (1 << 13) /* Bit 13: Kill IN Bank (SET only) */
+#define USBB_UECON_FIFOCON            (1 << 14) /* Bit 14: FIFO Control (CLR only) */
+#define USBB_UECON_EPDISHDMA          (1 << 16) /* Bit 16: Endpoint Interrupts Disable HDMA Request Enable  */
+#define USBB_UECON_RSTDT              (1 << 18) /* Bit 18: Reset Data Toggle (SET only) */
+#define USBB_UECON_STALLRQ            (1 << 19) /* Bit 19: STALL Request */
 
 /* Device DMA Channel Next Descriptor Address Register Bit-field Definitions */
-#define UDDMA_NEXTDESC_
+
+#define UDDMA_NEXTDESC_MASK           (0xfffffff0)
 
 /* Device DMA Channel HSB Address Register Bit-field Definitions */
 /* This register holds a 32-bit address with internal bit fields */
 
 /* Device DMA Channel Control Register Bit-field Definitions */
-#define UDDMA_CONTROL_
+
+#define UDDMA_CTRL_CHEN               (1 << 0)  /* Bit 0:  Channel Enable */
+#define UDDMA_CTRL_LDNXTCHDESCEN      (1 << 1)  /* Bit 1:  Load Next Channel Descriptor Enable */
+#define UDDMA_CTRL_BUFFCLOSEINEN      (1 << 2)  /* Bit 2:  Buffer Close Input Enable */
+#define UDDMA_CTRL_DMAENDEN           (1 << 3)  /* Bit 3:  End of DMA Buffer Output Enable */
+#define UDDMA_CTRL_EOTIRQEN           (1 << 4)  /* Bit 4:  End of USB Transfer Interrupt Enable */
+#define UDDMA_CTRL_EOBUFFIRQEN        (1 << 5)  /* Bit 5:  End of Buffer Interrupt Enable */
+#define UDDMA_CTRL_DESCLDIRQEN        (1 << 6)  /* Bit 6:  Descriptor Loaded Interrupt Enable */
+#define UDDMA_CTRL_BURSTLOCKEN        (1 << 7)  /* Bit 7:  Burst Lock Enable */
+#define UDDMA_CTRL_CHBYTELENGTH_SHIFT (16)      /* Bits 16-31: Channel Byte Length */
+#define UDDMA_CTRL_CHBYTELENGTH_MASK  (0xffff << UDDMA_CTRL_CHBYTELENGTH_SHIFT)
+
 /* Device DMA Channel Status Register Bit-field Definitions */
-#define UDDMA_STATUS_
+
+#define UDDMA_STATUS_CHEN             (1 << 0)  /* Bit 0:  Channel Enabled */
+#define UDDMA_STATUS_CHACTIVE         (1 << 1)  /* Bit 1:  Channel Active */
+#define UDDMA_STATUS_EOTSTA           (1 << 4)  /* Bit 4:  End of USB Transfer Status */
+#define UDDMA_STATUS_EOCHBUFFSTA      (1 << 5)  /* Bit 5:  End of Channel Buffer Status */
+#define UDDMA_STATUS_DESCLDSTA        (1 << 6)  /* Bit 6:  Descriptor Loaded Status */
+#define UDDMA_STATUS_CHBYTECNT_SHIFT  (16)       /* Bits 16-31: Channel Byte Count */
+#define UDDMA_STATUS_CHBYTECNT_MASK   (0xffff << UDDMA_STATUS_CHBYTECNT_SHIFT)
 
 /* USB Host Registers Bit-field Definitions *********************************/
 
 /* Host General Control Register Bit-field Definitions */
+
 #define USBB_UHCON_
+
 /* Host Global Interrupt Register Bit-field Definitions */
+
 #define USBB_UHINT_
+
 /* Host Global Interrupt Clear Register Bit-field Definitions */
+
 #define USBB_UHINTCLR_
+
 /* Host Global Interrupt Set Register Bit-field Definitions */
+
 #define USBB_UHINTSET_
+
 /* Host Global Interrupt Enable Register Bit-field Definitions */
+
 #define USBB_UHINTE_
+
 /* Host Global Interrupt Enable Clear Register Bit-field Definitions */
+
 #define USBB_UHINTECLR_
+
 /* Host Global Interrupt Enable Set Register Bit-field Definitions */
+
 #define USBB_UHINTESET_
+
 /* Pipe Enable/Reset Register Bit-field Definitions */
+
 #define USBB_UPRST_
+
 /* Host Frame Number Register Bit-field Definitions */
+
 #define USBB_UHFNUM_
+
 /* Host Address 1 Register Bit-field Definitions */
+
 #define USBB_UHADDR1_
+
 /* Host Address 2 Register Bit-field Definitions */
+
 #define USBB_UHADDR2_
 
 /* Pipe Configuration Register Bit-field Definitions */
+
 #define USBB_UPCFG_
+
 /* Pipe Status Register Bit-field Definitions */
+
 #define USBB_UPSTA_
+
 /* Pipe Status Clear Register Bit-field Definitions */
+
 #define USBB_UPSTACLR_
+
 /* Pipe Status Set Register Bit-field Definitions */
+
 #define USBB_UPSTASET_
+
 /* Pipe Control Register Bit-field Definitions */
+
 #define USBB_UPCON_
+
 /* Pipe Control Set Register Bit-field Definitions */
+
 #define USBB_UPCONSET_
+
 /* Pipe Control Clear Register Bit-field Definitions */
+
 #define USBB_UPCONCLR_
+
 /* Pipe IN Request Register Bit-field Definitions */
+
 #define USBB_UPINRQ_
+
 /* Pipe Error Register Bit-field Definitions */
+
 #define USBB_UPERR_
 
 /* Host DMA Channel Next Descriptor Address Register Bit-field Definitions */
-#define UHDMA_NEXTDESC_
+
+#define UHDMA_NEXTDESC_MASK           (0xfffffff0)
 
 /* Host DMA Channel HSB Address Register Bit-field Definitions */
 /* This register holds a 32-bit address with internal bit fields */
 
 /* Host DMA Channel Control Register Bit-field Definitions */
-#define UHDMA_CONTROL_
+
+#define UHDMA_CTRL_CHEN               (1 << 0)  /* Bit 0:  Channel Enable */
+#define UHDMA_CTRL_LDNXTCHDESCEN      (1 << 1)  /* Bit 1:  Load Next Channel Descriptor Enable */
+#define UHDMA_CTRL_BUFFCLOSEINEN      (1 << 2)  /* Bit 2:  Buffer Close Input Enable */
+#define UHDMA_CTRL_DMAENDEN           (1 << 3)  /* Bit 3:  End of DMA Buffer Output Enable */
+#define UHDMA_CTRL_EOTIRQEN           (1 << 4)  /* Bit 4:  End of USB Transfer Interrupt Enable */
+#define UHDMA_CTRL_EOBUFFIRQEN        (1 << 5)  /* Bit 5:  End of Buffer Interrupt Enable */
+#define UHDMA_CTRL_DESCLDIRQEN        (1 << 6)  /* Bit 6:  Descriptor Loaded Interrupt Enable */
+#define UHDMA_CTRL_BURSTLOCKEN        (1 << 7)  /* Bit 7:  Burst Lock Enable */
+#define UHDMA_CTRL_CHBYTELENGTH_SHIFT (16)      /* Bits 16-31: Channel Byte Length */
+#define UHDMA_CTRL_CHBYTELENGTH_MASK  (0xffff << UHDMA_CTRL_CHBYTELENGTH_SHIFT)
+
 /* Host DMA Channel Status Register Bit-field Definitions */
-#define UHDMA_STATUS_
+
+#define UHDMA_STATUS_CHEN             (1 << 0)  /* Bit 0:  Channel Enabled */
+#define UHDMA_STATUS_CHACTIVE         (1 << 1)  /* Bit 1:  Channel Active */
+#define UHDMA_STATUS_EOTSTA           (1 << 4)  /* Bit 4:  End of USB Transfer Status */
+#define UHDMA_STATUS_EOCHBUFFSTA      (1 << 5)  /* Bit 5:  End of Channel Buffer Status */
+#define UHDMA_STATUS_DESCLDSTA        (1 << 6)  /* Bit 6:  Descriptor Loaded Status */
+#define UHDMA_STATUS_CHBYTECNT_SHIFT  (16)       /* Bits 16-31: Channel Byte Count */
+#define UHDMA_STATUS_CHBYTECNT_MASK   (0xffff << UHDMA_STATUS_CHBYTECNT_SHIFT)
 
 /* USB General Registers Bit-field Definitions ******************************/
 
