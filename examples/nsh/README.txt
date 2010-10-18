@@ -15,6 +15,7 @@ examples/nsh
   - NSH Configuration Settings
     Command Dependencies on Configuration Settings
     NSH-Specific Configuration Settings
+  - Common Problems
 
 Console/NSH Front End
 ^^^^^^^^^^^^^^^^^^^^^
@@ -987,3 +988,16 @@ NSH-Specific Configuration Settings
   * CONFIG_EXAMPLES_NSH_FATMOUNTPT
       This is the location where the FAT FS will be mounted.  Default
       is /tmp.
+
+Common Problems
+^^^^^^^^^^^^^^^
+
+  Problem:
+    Using NSH over serial, the "nsh>" prompt repeats over and over again
+    with no serial input.
+  Usual Cause:
+    NSH over serial needs to use the interrupt driven serial driver
+    (drivers/serial/serial.c) not the polled serial driver (drivers/serial/lowconsole.c).
+    Make sure that the polled console is disabled in the OS configuration
+    file, .config.  That file should have CONFIG_DEV_LOWCONSOLE=n for
+    NSH over serial.
