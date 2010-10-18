@@ -661,17 +661,17 @@
 /* Endpoint Status Clear Register Bit-field Definitions */
 /* Endpoint Status Set Register Bit-field Definitions (common fields) */
 
-#define USBB_UESTA_SHORTPACKET        (1 << 7)  /* Bit 7:  Short Packet Interrupt */
-#define USBB_UESTA_STALLEDI           (1 << 6)  /* Bit 6:  STALLed Interrupt */
-#define USBB_UESTA_CRCERRI            (1 << 6)  /* Bit 6:  CRC Error Interrupt */
-#define USBB_UESTA_OVERFI             (1 << 5)  /* Bit 5:  Overflow Interrupt */
-#define USBB_UESTA_NAKINI             (1 << 4)  /* Bit 4:  NAKed IN Interrupt */
-#define USBB_UESTA_NAKOUTI            (1 << 3)  /* Bit 3:  NAKed OUT Interrupt */
+#define USBB_UESTA_TXINI              (1 << 0)  /* Bit 0:  Transmitted IN Data Interrupt */
+#define USBB_UESTA_RXOUTI             (1 << 1)  /* Bit 1:  Received OUT Data Interrupt */
 #define USBB_UESTA_UNDERFI            (1 << 2)  /* Bit 2:  Underflow Interrupt */
 #define USBB_UESTA_RXSTPI             (1 << 2)  /* Bit 2:  Received SETUP Interrupt */
-#define USBB_UESTA_RXOUTI             (1 << 1)  /* Bit 1:  Received OUT Data Interrupt */
-#define USBB_UESTA_TXINI              (1 << 0)  /* Bit 0:  Transmitted IN Data Interrupt */
-              
+#define USBB_UESTA_NAKOUTI            (1 << 3)  /* Bit 3:  NAKed OUT Interrupt */
+#define USBB_UESTA_NAKINI             (1 << 4)  /* Bit 4:  NAKed IN Interrupt */
+#define USBB_UESTA_OVERFI             (1 << 5)  /* Bit 5:  Overflow Interrupt */
+#define USBB_UESTA_STALLEDI           (1 << 6)  /* Bit 6:  STALLed Interrupt */
+#define USBB_UESTA_CRCERRI            (1 << 6)  /* Bit 6:  CRC Error Interrupt */
+#define USBB_UESTA_SHORTPACKET        (1 << 7)  /* Bit 7:  Short Packet Interrupt */
+
 /* Endpoint Status Register Bit-field Definitions (only in UESTA) */
 
 #define USBB_UESTA_DTSEQ_SHIFT        (8)       /* Bits 8-9: Data Toggle Sequence */
@@ -754,83 +754,196 @@
 
 /* Host General Control Register Bit-field Definitions */
 
-#define USBB_UHCON_
+#define USBB_UHCON_SOFE               (1 << 8)  /* Bit 8:  Start of Frame Generation Enable */
+#define USBB_UHCON_RESET              (1 << 9)  /* Bit 9:  Send USB Reset */
+#define USBB_UHCON_RESUME             (1 << 10) /* Bit 10: Send USB Resume */
 
 /* Host Global Interrupt Register Bit-field Definitions */
-
-#define USBB_UHINT_
-
-/* Host Global Interrupt Clear Register Bit-field Definitions */
-
-#define USBB_UHINTCLR_
-
-/* Host Global Interrupt Set Register Bit-field Definitions */
-
-#define USBB_UHINTSET_
-
+/* Host Global Interrupt Clear Register Bit-field Definitions (Except as noted 1) */
+/* Host Global Interrupt Set Register Bit-field Definitions (Except as noted 2) */
 /* Host Global Interrupt Enable Register Bit-field Definitions */
-
-#define USBB_UHINTE_
-
 /* Host Global Interrupt Enable Clear Register Bit-field Definitions */
-
-#define USBB_UHINTECLR_
-
 /* Host Global Interrupt Enable Set Register Bit-field Definitions */
 
-#define USBB_UHINTESET_
+#define USBB_UHINT_DCONNI             (1 << 0)  /* Bit 0:  Device Connection Interrupt (1) */
+#define USBB_UHINT_DDISCI             (1 << 1)  /* Bit 1:  Device Disconnection Interrupt (1) */
+#define USBB_UHINT_RSTI               (1 << 2)  /* Bit 2:  USB Reset Sent Interrupt (1) */
+#define USBB_UHINT_RSMEDI             (1 << 3)  /* Bit 3:  Downstream Resume Sent Interrupt (1) */
+#define USBB_UHINT_RXRSMI             (1 << 4)  /* Bit 4:  Upstream Resume Received Interrupt (1) */
+#define USBB_UHINT_HSOFI              (1 << 5)  /* Bit 5:  Host Start of Frame Interrupt (1) */
+#define USBB_UHINT_HWUPI              (1 << 6)  /* Bit 6:  Host Wake-Up Interrupt (1) */
+#define USBB_UHINT_PINT(n)            (1 << ((n)+8))
+#define USBB_UHINT_P0INT              (1 << 8)  /* Bit 8:  Pipe 0 Interrupt (1,2) */
+#define USBB_UHINT_P1INT              (1 << 9)  /* Bit 9:  Pipe 1 Interrupt (1,2) */
+#define USBB_UHINT_P2INT              (1 << 10) /* Bit 10: Pipe 2 Interrupt (1,2) */
+#define USBB_UHINT_P3INT              (1 << 11) /* Bit 11: Pipe 3 Interrupt (1,2) */
+#define USBB_UHINT_P4INT              (1 << 12) /* Bit 12: Pipe 4 Interrupt (1,2) */
+#define USBB_UHINT_P5INT              (1 << 13) /* Bit 13: Pipe 5 Interrupt (1,2) */
+#define USBB_UHINT_P6INT              (1 << 14) /* Bit 14: Pipe 6 Interrupt (1,2) */
+#define USBB_UHINT_DMAINT(n)          (1 << ((n)+24))
+#define USBB_UHINT_DMAINT1            (1 << 25) /* Bit 25: DMA Channel 1 Interrupt */
+#define USBB_UHINT_DMAINT2            (1 << 26) /* Bit 26: DMA Channel 2 Interrupt */
+#define USBB_UHINT_DMAINT3            (1 << 27) /* Bit 27: DMA Channel 3 Interrupt */
+#define USBB_UHINT_DMAINT4            (1 << 28) /* Bit 28: DMA Channel 4 Interrupt */
+#define USBB_UHINT_DMAINT5            (1 << 29) /* Bit 29: DMA Channel 5 Interrupt */
+#define USBB_UHINT_DMAINT6            (1 << 30) /* Bit 30: DMA Channel 6 Interrupt */
 
 /* Pipe Enable/Reset Register Bit-field Definitions */
 
-#define USBB_UPRST_
+#define USBB_UPRST_PEN(n)             (1 << (n))
+#define USBB_UPRST_PEN0               (1 << 0)  /* Bit 0:  Pipe 0 Enable */
+#define USBB_UPRST_PEN1               (1 << 1)  /* Bit 1:  Pipe 1 Enable */
+#define USBB_UPRST_PEN2               (1 << 2)  /* Bit 2:  Pipe 2 Enable */
+#define USBB_UPRST_PEN3               (1 << 3)  /* Bit 3:  Pipe 3 Enable */
+#define USBB_UPRST_PEN4               (1 << 4)  /* Bit 4:  Pipe 4 Enable */
+#define USBB_UPRST_PEN5               (1 << 5)  /* Bit 5:  Pipe 5 Enable */
+#define USBB_UPRST_PEN6               (1 << 6)  /* Bit 6:  Pipe 6 Enable */
+#define USBB_UPRST_PRST(n)            (1 << ((n)+16))
+#define USBB_UPRST_PRST0              (1 << 16) /* Bit 16: Pipe 0 Reset */
+#define USBB_UPRST_PRST1              (1 << 17) /* Bit 17: Pipe 1 Reset */
+#define USBB_UPRST_PRST2              (1 << 18) /* Bit 18: Pipe 2 Reset */
+#define USBB_UPRST_PRST3              (1 << 19) /* Bit 19: Pipe 3 Reset */
+#define USBB_UPRST_PRST4              (1 << 20) /* Bit 20: Pipe 4 Reset */
+#define USBB_UPRST_PRST5              (1 << 21) /* Bit 21: Pipe 5 Reset */
+#define USBB_UPRST_PRST6              (1 << 22) /* Bit 22: Pipe 6 Reset */
 
 /* Host Frame Number Register Bit-field Definitions */
 
-#define USBB_UHFNUM_
+#define USBB_UHFNUM_FNUM_SHIFT        (3)       /* Bits 3-13: Frame Number */
+#define USBB_UHFNUM_FNUM_MASK         (0x7ff << USBB_UHFNUM_FNUM_SHIFT)
+#define USBB_UHFNUM_FLENHIGH_SHIFT    (16)      /* Bits 16-23: Frame Length */
+#define USBB_UHFNUM_FLENHIGH_MASK     (0xff << USBB_UHFNUM_FLENHIGH_SHIFT)
 
 /* Host Address 1 Register Bit-field Definitions */
 
-#define USBB_UHADDR1_
+#define USBB_UHADDR1_UHADDRP0_SHIFT   (0)       /* Bits 0-6: USB Host Address (Pipe 0) */
+#define USBB_UHADDR1_UHADDRP0_MASK    (0x7f << USBB_UHADDR1_UHADDRP0_SHIFT)
+#define USBB_UHADDR1_UHADDRP1_SHIFT   (8)       /* Bits 8-14: USB Host Address (Pipe 1) */
+#define USBB_UHADDR1_UHADDRP1_MASK    (0x7f << USBB_UHADDR1_UHADDRP1_SHIFT)
+#define USBB_UHADDR1_UHADDRP2_SHIFT   (16)      /* Bits 16-22: USB Host Address (Pipe 2) */
+#define USBB_UHADDR1_UHADDRP2_MASK    (0x7f << USBB_UHADDR1_UHADDRP2_SHIFT)
+#define USBB_UHADDR1_UHADDRP3_SHIFT   (24)      /* Bits 24-30: USB Host Address (Pipe 3) */
+#define USBB_UHADDR1_UHADDRP3_MASK    (0x7f << USBB_UHADDR1_UHADDRP3_SHIFT)
 
 /* Host Address 2 Register Bit-field Definitions */
 
-#define USBB_UHADDR2_
-
+#define USBB_UHADDR2_UHADDRP4_SHIFT   (0)       /* Bits 0-6: USB Host Address (Pipe 4) */
+#define USBB_UHADDR2_UHADDRP4_MASK    (0x7f << USBB_UHADDR1_UHADDRP4_SHIFT)
+#define USBB_UHADDR2_UHADDRP5_SHIFT   (8)       /* Bits 8-14: USB Host Address (Pipe 5) */
+#define USBB_UHADDR2_UHADDRP5_MASK    (0x7f << USBB_UHADDR1_UHADDRP5_SHIFT)
+#define USBB_UHADDR2_UHADDRP6_SHIFT   (16)      /* Bits 16-22: USB Host Address (Pipe 6) */
+#define USBB_UHADDR2_UHADDRP6_MASK    (0x7f << USBB_UHADDR1_UHADDRP6_SHIFT)
+#
 /* Pipe Configuration Register Bit-field Definitions */
 
-#define USBB_UPCFG_
+#define USBB_UPCFG_ALLOC              (1 << 1)  /* Bit 1:  Pipe Memory Allocate */
+#define USBB_UPCFG_PBK_SHIFT          (2)       /* Bits 2-3: Pipe Banks */
+#define USBB_UPCFG_PBK_MASK           (3 << USBB_UPCFG_PBK_SHIFT)
+#  define USBB_UPCFG_PBK_1            (0 << USBB_UPCFG_PBK_SHIFT) /* 1 (single-bank pipe) */
+#  define USBB_UPCFG_PBK_2            (1 << USBB_UPCFG_PBK_SHIFT) /* 2 (double-bank pipe) */
+#  define USBB_UPCFG_PBK_3            (2 << USBB_UPCFG_PBK_SHIFT) /* 3 (triple-bank pipe) */
+#define USBB_UPCFG_PSIZE_SHIFT        (4)       /* Bits 4-6: Pipe Size */
+#define USBB_UPCFG_PSIZE_MASK         (7 << USBB_UPCFG_PSIZE_SHIFT)
+#  define USBB_UPCFG_PSIZE_8          (0 << USBB_UPCFG_PSIZE_SHIFT) /* 8 bytes */
+#  define USBB_UPCFG_PSIZE_16         (1 << USBB_UPCFG_PSIZE_SHIFT) /* 16 bytes */
+#  define USBB_UPCFG_PSIZE_32         (2 << USBB_UPCFG_PSIZE_SHIFT) /* 32 bytes */
+#  define USBB_UPCFG_PSIZE_64         (3 << USBB_UPCFG_PSIZE_SHIFT) /* 64 bytes */
+#  define USBB_UPCFG_PSIZE_128        (4 << USBB_UPCFG_PSIZE_SHIFT) /* 128 bytes */
+#  define USBB_UPCFG_PSIZE_256        (5 << USBB_UPCFG_PSIZE_SHIFT) /* 256 bytes */
+#  define USBB_UPCFG_PSIZE_512        (6 << USBB_UPCFG_PSIZE_SHIFT) /* 512 bytes */
+#  define USBB_UPCFG_PSIZE_1024       (7 << USBB_UPCFG_PSIZE_SHIFT) /* 1024 bytes */
+#define USBB_UPCFG_PTOKEN_SHIFT       (8)       /* Bits 8-9: Pipe Token */
+#define USBB_UPCFG_PTOKEN_MASK        (3 << USBB_UPCFG_PTOKEN_SHIFT)
+#  define USBB_UPCFG_PTOKEN_SETUP     (0 << USBB_UPCFG_PTOKEN_SHIFT) /* SETUP */
+#  define USBB_UPCFG_PTOKEN_IN        (1 << USBB_UPCFG_PTOKEN_SHIFT) /* IN */
+#  define USBB_UPCFG_PTOKEN_OUT       (2 << USBB_UPCFG_PTOKEN_SHIFT) /* OUT */
+#define USBB_UPCFG_AUTOSW             (1 << 10) /* Bit 10:  Automatic Switch */
+#define USBB_UPCFG_PTYPE_SHIFT        (11)      /* Bits 11-12: Pipe Type */
+#define USBB_UPCFG_PTYPE_MASK         (3 << USBB_UPCFG_PTYPE_SHIFT)
+#  define USBB_UPCFG_PTYPE_CTRL       (0 << USBB_UPCFG_PTYPE_SHIFT) /* Control */
+#  define USBB_UPCFG_PTYPE_ISOC       (1 << USBB_UPCFG_PTYPE_SHIFT) /* Isochronous */
+#  define USBB_UPCFG_PTYPE_BULK       (2 << USBB_UPCFG_PTYPE_SHIFT) /* Bulk */
+#  define USBB_UPCFG_PTYPE_INTR       (3 << USBB_UPCFG_PTYPE_SHIFT) /* Interrupt */
+#define USBB_UPCFG_PEPNUM_SHIFT       (16)      /* Bits 16-19: Pipe Endpoint Number */
+#define USBB_UPCFG_PEPNUM_MASK        (15 << USBB_UPCFG_PEPNUM_SHIFT)
+#define USBB_UPCFG_INTFRQ_SHIFT       (24)      /* Bits 24-31: Pipe Interrupt Request Frequency */
+#define USBB_UPCFG_INTFRQ_MASK        (0xff << USBB_UPCFG_INTFRQ_SHIFT)
 
-/* Pipe Status Register Bit-field Definitions */
+/* Pipe Status Register Bit-field Definitions (common) */
+/* Pipe Status Clear Register Bit-field Definitions (common) */
+/* Pipe Status Set Register Bit-field Definitions (common) */
 
-#define USBB_UPSTA_
+#define USBB_UPSTA_RXINI              (1 << 0)  /* Bit 0:  Received IN Data Interrupt */
+#define USBB_UPSTA_TXOUTI             (1 << 1)  /* Bit 1:  Transmitted OUT Data Interrupt */
+#define USBB_UPSTA_TXSTPI             (1 << 2)  /* Bit 2:  Transmitted SETUP Interrupt */
+#define USBB_UPSTA_UNDERFI            (1 << 2)  /* Bit 2:  Underflow Interrupt */
+#define USBB_UPSTA_PERRI              (1 << 3)  /* Bit 3:  Pipe Error Interrupt */
+#define USBB_UPSTA_NAKEDI             (1 << 4)  /* Bit 4:  NAKed Interrupt */
+#define USBB_UPSTA_OVERFI             (1 << 5)  /* Bit 5:  Overflow Interrupt */
+#define USBB_UPSTA_RXSTALLDI          (1 << 6)  /* Bit 6:  Received STALLed Interrupt */
+#define USBB_UPSTA_CRCERRI            (1 << 6)  /* Bit 6:  CRC Error Interrupt */
+#define USBB_UPSTA_SHORTPACKET        (1 << 7)  /* Bit 7:  Short Packet Interrupt */
 
-/* Pipe Status Clear Register Bit-field Definitions */
+/* Pipe Status Register Bit-field Definitions (only in UPSTA) */
 
-#define USBB_UPSTACLR_
+#define USBB_UPSTA_DTSEQ_SHIFT        (8)       /* Bits 8-9: Data Toggle Sequence */
+#define USBB_UPSTA_DTSEQ_MASK         (3 << USBB_UPSTA_DTSEQ_SHIFT)
+#  define USBB_UPSTA_DTSEQ_DATA0      (0 << USBB_UPSTA_DTSEQ_SHIFT) /* Data0 */
+#  define USBB_UPSTA_DTSEQ_DATA1      (1 << USBB_UPSTA_DTSEQ_SHIFT) /* Data1 */
+#define USBB_UPSTA_NBUSYBK_SHIFT      (12)      /* Bits 12-13: Number of Busy Banks */
+#define USBB_UPSTA_NBUSYBK_MASK       (3 << USBB_UPSTA_NBUSYBK_SHIFT)
+#  define USBB_UPSTA_NBUSYBK_NONE     (0 << USBB_UPSTA_NBUSYBK_SHIFT) /* 0 (all banks free) */
+#  define USBB_UPSTA_NBUSYBK_1BANK    (1 << USBB_UPSTA_NBUSYBK_SHIFT) /* 1 */
+#  define USBB_UPSTA_NBUSYBK_2BANKS   (2 << USBB_UPSTA_NBUSYBK_SHIFT) /* 2 */
+#define USBB_UPSTA_CURRBK_SHIFT       (14)      /* Bits 14-15: Current Bank */
+#define USBB_UPSTA_CURRBK_MASK        (3 << USBB_UPSTA_CURRBK_SHIFT)
+#  define USBB_UPSTA_CURRBK_BANK0     (0 << USBB_UPSTA_CURRBK_SHIFT) /* Bank0 */
+#  define USBB_UPSTA_CURRBK_BANK1     (1 << USBB_UPSTA_CURRBK_SHIFT) /* Bank1 */
+#  define USBB_UPSTA_CURRBK_BANK2     (2 << USBB_UPSTA_CURRBK_SHIFT) /* Bank2 */
+#define USBB_UPSTA_RWALL              (1 << 16) /* Bit 16: Read/Write Allowed */
+#define USBB_UPSTA_CFGOK              (1 << 18) /* Bit 18: Configuration OK Status */
+#define USBB_UPSTA_PBYCT_SHIFT        (20)       /* Bits 20-30: Pipe Byte Count */
+#define USBB_UPSTA_PBYCT_MASK         (0x7ff << USBB_UPSTA_BYCT_SHIFT)
 
-/* Pipe Status Set Register Bit-field Definitions */
+/* Pipe Status Set Register Bit-field Definitions (only in UPSTASET) */
 
-#define USBB_UPSTASET_
+#define USBB_UPSTASET_NBUSYBKS        (1 << 12)  /* Bit 12 */
 
 /* Pipe Control Register Bit-field Definitions */
+/* Pipe Control Clear Register Bit-field Definitions (except as noted 1) */
+/* Pipe Control Set Register Bit-field Definitions (except as noted 2) */
 
-#define USBB_UPCON_
-
-/* Pipe Control Set Register Bit-field Definitions */
-
-#define USBB_UPCONSET_
-
-/* Pipe Control Clear Register Bit-field Definitions */
-
-#define USBB_UPCONCLR_
+#define USBB_UPCON_RXINE              (1 << 0)  /* Bit 0:  Received IN Data Interrupt Enable */
+#define USBB_UPCON_TXOUTE             (1 << 1)  /* Bit 1:  Transmitted OUT Data Interrupt Enable */
+#define USBB_UPCON_TXSTPE             (1 << 2)  /* Bit 2:  Transmitted SETUP Interrupt Enable */
+#define USBB_UPCON_UNDERFIE           (1 << 2)  /* Bit 2:  Underflow Interrupt Enable */
+#define USBB_UPCON_PERRE              (1 << 3)  /* Bit 3:  Pipe Error Interrupt Enable */
+#define USBB_UPCON_NAKEDE             (1 << 4)  /* Bit 4:  NAKed Interrupt Enable */
+#define USBB_UPCON_OVERFIE            (1 << 5)  /* Bit 5:  Overflow Interrupt Enable */
+#define USBB_UPCON_RXSTALLDE          (1 << 6)  /* Bit 6:  Received STALLed Interrupt Enable */
+#define USBB_UPCON_CRCERRE            (1 << 6)  /* Bit 6:  CRC Error Interrupt Enable */
+#define USBB_UPCON_SHORTPACKETIE      (1 << 7)  /* Bit 7:  Short Packet Interrupt Enable */
+#define USBB_UPCON_NBUSYBKE           (1 << 12) /* Bit 12:  Number of Busy Banks Interrupt Enable */
+#define USBB_UPCON_FIFOCON            (1 << 14) /* Bit 14: FIFO Control (2) */
+#define USBB_UPCON_PDISHDMA           (1 << 16) /* Bit 16: Pipe Interrupts Disable HDMA Request Enable */
+#define USBB_UPCON_PFREEZE            (1 << 17) /* Bit 17: Pipe Freeze */
+#define USBB_UPCON_RSTDT              (1 << 18) /* Bit 18: Reset Data Toggle (1) */
 
 /* Pipe IN Request Register Bit-field Definitions */
 
-#define USBB_UPINRQ_
+#define USBB_UPINRQ_INRQ_SHIFT        (0)       /* Bits 0-7: IN Request Number before Freeze */
+#define USBB_UPINRQ_INRQ_MASK         (0xff << USBB_UPINRQ_INRQ_SHIFT)
+#define USBB_UPINRQ_INMODE            (1 << 8)  /* Bit 8:  IN Request Mode */
 
 /* Pipe Error Register Bit-field Definitions */
 
-#define USBB_UPERR_
+#define USBB_UPERR_DATATGL            (1 << 0)  /* Bit 0:  Data Toggle Error */
+#define USBB_UPERR_DATAPID            (1 << 1)  /* Bit 1:  Data PID Error */
+#define USBB_UPERR_PID                (1 << 2)  /* Bit 2:  PID Error */
+#define USBB_UPERR_TIMEOUT            (1 << 3)  /* Bit 3:  Time-Out Error */
+#define USBB_UPERR_CRC16              (1 << 4)  /* Bit 4:  CRC16 Error */
+#define USBB_UPERR_COUNTER_SHIFT      (5)       /* Bits 5-6:  Error Counter */
+#define USBB_UPERR_COUNTER_MASK       (3 << USBB_UPERR_COUNTER_SHIFT)
 
 /* Host DMA Channel Next Descriptor Address Register Bit-field Definitions */
 
@@ -958,10 +1071,6 @@
 #  define USBB_USBFSM_B_WAITACON      (13)
 #  define USBB_USBFSM_B_HOST          (14)
 #  define USBB_USBFSM_B_SRPINIT       (15)
-
-              (1 << xxx)  /* Bit xxx:  
-_SHIFT       (xxx)       /* Bits xxx-xxx: 
-_MASK        (xxx << xxx)
 
 /* USB HSB Memory Map ***************************************************************/
 
