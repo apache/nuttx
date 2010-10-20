@@ -109,60 +109,127 @@
 
 /* Register Bit-Field Definitions ***************************************************/
 
-/* Timer Input Capture/Output Compare Select */
-#define TIM_TIOS_
-/* Timer Compare Force Register */
-#define TIM_CFORC_
-/* Output Compare 7 Mask Register */
-#define TIM_OC7M_
-/* Output Compare 7 Data Register */
-#define TIM_OC7D_
-/* Timer Count Register */
-#define TIM_TCNTHI2_
-/* Timer Count Register */
-#define TIM_TCNTLO2_
-/* Timer System Control Register 1 */
-#define TIM_TSCR1_
-/* Timer Toggle Overflow Register */
-#define TIM_TTOV_
-/* Timer Control Register1 */
-#define TIM_TCTL1_
-/* Timer Control Register3 */
-#define TIM_TCTL3_
-/* Timer Interrupt Enable Register */
-#define TIM_TIE_
-/* Timer System Control Register 2 */
-#define TIM_TSCR2_
-/* Main Timer Interrupt Flag 1 */
-#define TIM_TFLG1_
-/* Main Timer Interrupt Flag 2 */
-#define TIM_TFLG2_
-/* Timer Input Capture/Output Compare Register 4 */
-#define TIM_TC4HI_
-/* Timer Input Capture/Output Compare Register 4 */
-#define TIM_TC4LO_
-/* Timer Input Capture/Output Compare Register 5 */
-#define TIM_TC5HI_
-/* Timer Input Capture/Output Compare Register 5 */
-#define TIM_TC5LO_
-/* Timer Input Capture/Output Compare Register 6 */
-#define TIM_TC6HI_
-/* Timer Input Capture/Output Compare Register 6 */
-#define TIM_TC6LO_
-/* Timer Input Capture/Output Compare Register 7 */
-#define TIM_TC7HI_
-/* Timer Input Capture/Output Compare Register 7 */
-#define TIM_TC7LO_
-/* 16-Bit Pulse Accumulator Control Register */
-#define TIM_PACTL_
-/* Pulse Accumulator Flag Register */
-#define TIM_PAFLG_
-/* Pulse Accumulator Count Register */
-#define TIM_PACNTHI_
-/* Pulse Accumulator Count Register */
-#define TIM_PACNTLO_
-/* Timer Test Register */
-#define TIM_TIMTST2_
+/* Timer Input Capture/Output Compare Select Bit-Field Definitions */
+
+#define TIM_TIOS(n)                   (1 << (n)) /* 0:Input capture, 1:Output compare */
+
+/* Timer Compare Force Register Bit-Field Definitions */
+
+#define TIM_CFORC(n)                  (1 << (n)) /* Force Output Compare Action */
+
+/* Output Compare 7 Mask Register Bit-Field Definitions */
+
+#define TIM_OC7M(n)                   (1 << (n)) /* Output Compare 7 Mask */
+
+/* Output Compare 7 Data Register Bit-Field Definitions */
+
+#define TIM_OC7D(n)                   (1 << (n)) /* Output Compare 7 Data */
+
+/* Timer Count HI/LO Register Bit-Field Definitions */
+/* These two registers form a 16-bit timer up counter and have no internal bit-fields */
+
+/* Timer System Control Register 1 Bit-Field Definitions */
+
+#define TIM_TSCR1_TFFCA               (1 << 4)   /* Timer Fast Flag Clear All */
+#define TIM_TSCR1_TSFRA               (1 << 5)   /* Timer Stops While in Freeze Mode */
+#define TIM_TSCR1_TSWAI               (1 << 6)   /* Timer Module Stops While in Wait */
+#define TIM_TSCR1_TEN                 (1 << 7)   /* Timer Enable */
+
+/* Timer Toggle Overflow Register Bit-Field Definitions */
+
+#define TIM_TTOV(n)                   (1 << (n)) /* Toggle On Overflow Bits
+
+/* Timer Control Register1 Bit-Field Definitions */
+
+#define TIM_TCTL1_SHIFT(n)           (((n)-4) << 1)
+#define TIM_TCTL1_MASK (n)           (3 << TIM_TCTL1_SHIFT(n))
+
+#  define TIM_TCTL1_OL(n)            (1 << TIM_TCTL1_SHIFT(n)) /* Output Level */
+#  define TIM_TCTL1_OM(n)            (2 << TIM_TCTL1_SHIFT(n)) /* Output Mode */
+
+#  define TIM_TCTL1_DISABLED(n)      (0 << TIM_TCTL1_SHIFT(n)) /* Timer disconnected from output pin logic */
+#  define TIM_TCTL1_TOGGLE(n)        (1 << TIM_TCTL1_SHIFT(n)) /* Toggle OCx output line */
+#  define TIM_TCTL1_CLEAR(n)         (2 << TIM_TCTL1_SHIFT(n)) /* Clear OCx output line to zero */
+#  define TIM_TCTL1_SET(n)           (3 << TIM_TCTL1_SHIFT(n)) /* Set OCx output line to one */
+
+/* Timer Control Register3 Bit-Field Definitions */
+
+#define TIM_TCTL3_EDG_SHIFT(n)       (((n)-4) << 1) /* Input Capture Edge Control */
+#define TIM_TCTL3_EDG_MASK (n)       (3 << TIM_TCTL3_EDG_SHIFT(n))
+
+#  define TIM_TCTL3_EDGA(n)          (1 << TIM_TCTL3_EDG_SHIFT(n))
+#  define TIM_TCTL3_EDGB(n)          (2 << TIM_TCTL3_EDG_SHIFT(n))
+
+#  define TIM_TCTL3_DISABLED(n)      (0 << TIM_TCTL3_EDG_SHIFT(n)) /* Capture disabled */
+#  define TIM_TCTL3_RISING(n)        (1 << TIM_TCTL3_EDG_SHIFT(n)) /* Capture on rising edges only */
+#  define TIM_TCTL3_FALLING(n)       (2 << TIM_TCTL3_EDG_SHIFT(n)) /* Capture on falling edges only */
+#  define TIM_TCTL3_BOTH(n)          (3 << TIM_TCTL3_EDG_SHIFT(n)) /* Capture on any edge */
+
+/* Timer Interrupt Enable Register Bit-Field Definitions */
+
+#define TIM_TIE(n)                   (1 << (n)) /* Input Capture/Output Compare n Interrupt Enable */
+
+/* Timer System Control Register 2 Bit-Field Definitions */
+
+#define TIM_TSCR2_PR_SHIFT           (0)        /* Timer Prescaler Select */
+#define TIM_TSCR2_PR_MASK            (7 << TIM_TSCR2_PR_SHIFT)
+#  define TIM_TSCR2_PR0              (1 << TIM_TSCR2_PR_SHIFT)
+#  define TIM_TSCR2_PR1              (2 << TIM_TSCR2_PR_SHIFT)
+#  define TIM_TSCR2_PR2              (4 << TIM_TSCR2_PR_SHIFT)
+#  define TIM_TSCR2_PR_DIV1          (0 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/1 */
+#  define TIM_TSCR2_PR_DIV2          (1 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/2 */
+#  define TIM_TSCR2_PR_DIV4          (2 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/4 */
+#  define TIM_TSCR2_PR_DIV8          (3 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/8 */
+#  define TIM_TSCR2_PR_DIV16         (4 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/16 */
+#  define TIM_TSCR2_PR_DIV32         (5 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/32 */
+#  define TIM_TSCR2_PR_DIV64         (6 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/64 */
+#  define TIM_TSCR2_PR_DIV128        (7 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/128 */
+#define TIM_TSCR2_TCRE               (1 << 3)  /* Timer Counter Reset Enable */
+#define TIM_TSCR2_TOI                (1 << 7)  /* Timer Overflow Interrupt Enable */
+
+/* Main Timer Interrupt Flag 1 Bit-Field Definitions */
+
+#define TIM_TFLG1(n)                 (1 << (n)) /* Input Capture/Output Compare Channel n Flag */
+
+/* Main Timer Interrupt Flag 2 Bit-Field Definitions */
+
+#define TIM_TFLG2_TOF                (1 << 7)   /* Timer Overflow Flag */
+
+/* Timer Input Capture/Output Compare HI/LO Register 4-7 Bit-Field Definitions */
+/* These register pairs form a 16-bit timer compare values and have no internal bit-fields */
+
+/* 16-Bit Pulse Accumulator Control Register Bit-Field Definitions */
+
+#define TIM_PACTL_PAI                (1 << 0)   /* Pulse Accumulator Input Interrupt Enable*/
+#define TIM_PACTL_PAOVI              (1 << 1)   /* Pulse Accumulator Overflow Interrupt Enable */
+#define TIM_PACTL_CLK_SHIFT          (2)        /* Clock Select Bits */
+#define TIM_PACTL_CLK_MASK           (3 << TIM_PACTL_CLK_SHIFT)
+#  define TIM_PACTL_CLK0             (1 << TIM_PACTL_CLK_SHIFT)
+#  define TIM_PACTL_CLK1             (1 << TIM_PACTL_CLK_SHIFT)
+#  define TIM_PACTL_PRESCAL          (0 << TIM_PACTL_CLK_SHIFT) /* Use timer prescaler clock as timer counter clock */
+#  define TIM_PACTL_PACLK            (1 << TIM_PACTL_CLK_SHIFT) /* Use PACLK as input to timer counter clock */
+#  define TIM_PACTL_DIV256           (2 << TIM_PACTL_CLK_SHIFT) /* Use PACLK/256 as timer counter clock frequency */
+#  define TIM_PACTL_DIV64K           (3 << TIM_PACTL_CLK_SHIFT) /* Use PACLK/65536 as timer counter clock frequency */
+#define TIM_PACTL_PIN_SHIFT          (4)          /* Pin action */
+#define TIM_PACTL_PIN_MASK           (3 << TIM_PACTL_PIN_SHIFT)
+#  define TIM_PACTL_PEDGE            (1 << TIM_PACTL_PIN_SHIFT) /* Pulse Accumulator Edge Control */
+#  define TIM_PACTL_PAMOD            (2 << TIM_PACTL_PIN_SHIFT) /* Pulse Accumulator Mode */
+#  define TIM_PACTL_FALLING          (0 << TIM_PACTL_PIN_SHIFT) /* Falling edge */
+#  define TIM_PACTL_RISING           (1 << TIM_PACTL_PIN_SHIFT) /* Rising edge */
+#  define TIM_PACTL_DIV64HI          (2 << TIM_PACTL_PIN_SHIFT) /* Div. by 64 clock enabled with pin high level */
+#  define TIM_PACTL_DIV64LO          (3 << TIM_PACTL_PIN_SHIFT) /* Div. by 64 clock enabled with pin low level */
+#define TIM_PACTL_PAEN               (1 << 6)   /* Pulse Accumulator System Enable */
+
+/* Pulse Accumulator Flag Register Bit-Field Definitions */
+
+#define TIM_PAFLG_PAIF               (1 << 0)   /* Pulse Accumulator Input edge Flag */
+#define TIM_PAFLG_PAOVF              (1 << 1)   /* Pulse Accumulator Overflow Flag */
+
+/* Pulse Accumulator Count HI/LO Register Bit-Field Definitions */
+/* This register pair forms a 16-bit pulse accumulator value with no internal bit-fields */
+
+/* Timer Test Register Bit-Field Definitions */
+/* Not documented */
 
 /************************************************************************************
  * Public Types
