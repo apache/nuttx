@@ -6,6 +6,8 @@ This is the README file for the NuttX port to the Atmel AVR32DEV1 board.
 Contents
 ^^^^^^^^
 
+ * Pin Configuration
+ * Serial Connection
  * Toolchains
  * Development Environment
  * GNU Toolchains
@@ -13,6 +15,47 @@ Contents
  * AVR32 Bootloader
  * AVR32DEV1 Configuration Options
  * Configurations
+
+Pin Configuration
+^^^^^^^^^^^^^^^^^
+
+The only GPIO pin usage is for LEDs (2) and Buttons (2):
+
+  PIN 13  PA7  LED1
+  PIN 14  PA8  LED2
+  PIN 24  PB2  KEY1
+  PIN 25  PB3  KEY2
+
+See configs/avr32dev/src/avr32dev_internal.h
+
+Serial Connection
+^^^^^^^^^^^^^^^^^
+
+USART1 is the default USART1 used in the configuration files to
+provide a serial console (of course, that can be easily changed
+by editting the configuration file).  The AVR32DEV1 board has no
+RS-232 drivers or connectors on board.  I use an off-board MAX232
+module that I got on eBay (search for MAX232 if you want to find
+one).  I connect the MAX232 board as follows:
+
+In configs/avr32dev/include/board.h:
+
+  #define PINMUX_USART1_RXD   PINMUX_USART1_RXD_1
+  #define PINMUX_USART1_TXD   PINMUX_USART1_TXD_1
+
+In arch/avr/src/at91uc3/at91uc3b_pinmux.h:
+
+  #define PINMUX_USART1_RXD_1 (GPIO_PERIPH | GPIO_FUNCD | GPIO_PORTA | 17)
+  #define PINMUX_USART1_TXD_1 (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 23)
+
+PA17 and PA23 are avaiable from the AVR32DEV1:
+
+  GPIO  PIN   Header 16X2 (J2)
+  ----- ----- ----------------
+  PA17  PIN37 Pin 5
+  PA23  PIN47 Pin 15
+
+and, of course, +5V and ground.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -69,6 +112,9 @@ IDEs
 AVR32 Bootloader
 ^^^^^^^^^^^^^^^^
 
+  Link Address
+  ------------
+
   The linker scripts (ld.script) assume that you are using the bootloader.
   The bootloader resides at 0x8000:0000 and so the ld.script files link
   the application to execute after the bootloader at 0x8000:2000. To link
@@ -79,6 +125,13 @@ AVR32 Bootloader
 
   to:
     flash (rxai!w)  : ORIGIN = 0x80000000, LENGTH = 256K
+
+  Entering the ISP
+  ----------------
+
+  In order to use the USB port to download the FLASH(ISP), you need to
+  use the S3(PA13) to make CPU return to boot status. In this mode, the
+  on chip bootloader will run, making the ISP possible.
 
 AVR32DEV1 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
