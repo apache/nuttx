@@ -112,19 +112,34 @@ IDEs
 AVR32 Bootloader
 ^^^^^^^^^^^^^^^^
 
+  Boot Sequence
+  -------------
+  
+    "An AVR UC3 part having the bootloader programmed resets as any other
+     part at 80000000h. Bootloader execution begins here. The bootloader
+     first performs the boot process to know whether it should start the
+     USB DFU ISP or the application. If the tested conditions indicate
+     that the USB DFU ISP should be started, then execution continues in
+     the bootloader area, i.e. between 80000000h and 80002000h, else
+     the bootloader launches the application at 80002000h."
+  
   Link Address
   ------------
 
-  The linker scripts (ld.script) assume that you are using the bootloader.
-  The bootloader resides at 0x8000:0000 and so the ld.script files link
-  the application to execute after the bootloader at 0x8000:2000. To link
-  so that NuttX boots directly without using the bootloader, change the
-  flash definition from:
+  The linker scripts (ld.script) assume that you are using the DFU
+  bootloader.  The bootloader resides at 0x8000:0000 and so the ld.script
+  files link the application to execute after the bootloader at
+  0x8000:2000. To link so that NuttX boots directly without using the
+  bootloader, change the flash definition from:
 
     flash (rxai!w)  : ORIGIN = 0x80002000, LENGTH = 256K - 8K
 
   to:
     flash (rxai!w)  : ORIGIN = 0x80000000, LENGTH = 256K
+
+  Or to use the MSC bootloader:
+
+    flash (rxai!w)  : ORIGIN = 0x80008000, LENGTH = 256K - 32K
 
   Entering the ISP
   ----------------
