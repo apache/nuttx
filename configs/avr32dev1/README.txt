@@ -56,12 +56,16 @@ In arch/avr/src/at91uc3/at91uc3b_pinmux.h:
 
 PA17 and PA23 are avaiable from the AVR32DEV1:
 
-  GPIO  PIN   Header 16X2 (J2)
-  ----- ----- ----------------
-  PA17  PIN37 Pin 5
-  PA23  PIN47 Pin 15
+  FUNC GPIO  PIN   Header 16X2 (J1) MX232 Board
+  ---- ----- ----- ---------------- ------------
+  RXD  PA17  PIN37 Pin 5            PIN4 RXD (5V TTL/CMOS)
+  TXD  PA23  PIN47 Pin 15           PIN3 TXD (5V TTL/CMOS)
+                                    PIN2 GND
+									PIN1 VCC (5V)
 
-and, of course, +5V and ground.
+  Voltage on GPIO Pins with respect to Ground for TCK, RESET_N, PA03-PA08,
+  PA11-PA12, PA18-PA19, PA28-PA31............................-0.3 to 3.6V
+  Other Pins ............................................... -0.3 to 5.5V
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -181,12 +185,11 @@ AVR32 Bootloader
 
   "BatchISP works with an internal ISP buffer per target memory. These ISP
    buffers can be filled from several sources. All target operations (program,
-   verify, read) are performed using these buffers.
-
-  "A typical BatchISP command line programming an application will look like
-   this:"
-
-   [For the NuttX ELF file and the AT91UC3B0256 part:]
+   verify, read) are performed using these buffers."
+ 
+  The following BatchISP command line will erase FLASH, write the nuttx binary
+  into FLASH, and reset the AVR32.  This command line is availabel in the
+  script config/avr32dev1/tools/doisp.sh:
 
      batchisp -device at32uc3b0256 -hardware usb -operation erase f memory flash \
      blankcheck loadbuffer nuttx program verify start reset 0
