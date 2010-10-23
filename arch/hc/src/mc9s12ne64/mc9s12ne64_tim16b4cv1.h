@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_TIM_H
-#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_TIM_H
+#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_TIM16B4V1_H
+#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_TIM16B4V1_H
 
 /************************************************************************************
  * Included Files
@@ -243,4 +243,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_TIM_H */
+#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_TIM16B4V1_H */
