@@ -50,6 +50,7 @@ if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 WD=`pwd`
 
 export AVRTOOLS_BIN="/cygdrive/c/Program Files/Atmel/AVR Tools/AVR32 Toolchain/bin/"
-export PATH="/sbin:/usr/sbin:${PATH_ORIG}:${AVRTOOLS_BIN}"
+export FLIP_BIN="/cygdrive/c/Program Files/Atmel/Flip 3.4.2/bin"
+export PATH="$(FLIP_BIN):/sbin:/usr/sbin:${PATH_ORIG}:${AVRTOOLS_BIN}"
 
 echo "PATH : ${PATH}"
