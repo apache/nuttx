@@ -12,7 +12,13 @@ Contents
  * Development Environment
  * GNU Toolchains
  * IDEs
+   - Makefile Build
+   - Native Build
  * AVR32 Bootloader
+   - Boot Sequence
+   - Link Address
+   - Entering the ISP
+   - BatchISP
  * AVR32DEV1 Configuration Options
  * Configurations
 
@@ -147,6 +153,94 @@ AVR32 Bootloader
   In order to use the USB port to download the FLASH(ISP), you need to
   use the S3(PA13) to make CPU return to boot status. In this mode, the
   on chip bootloader will run, making the ISP possible.
+
+  BatchISP
+  --------
+
+  Unlike other Atmel parts, the AVR32 will not work with the FLIP GUI
+  program.  Instead, you must use the command-line loader call BatchISP.
+  If need to download FLIP from the atmel.com website, install the USB
+  driver in the FLIP usb directory.  Then in the bin directory where
+  you installed FLIP, you will also find batchisp.exe.
+
+  NOTE: The AVR32DEV1 setenv.sh files will add the path to the BatchISP
+  bin directory to the Cygwin PATH variable.  If you use a different
+  version of FLIP or if you install FLIP in a different location, you
+  will need to modify the setenv.sh files.
+
+  Notes from "AVR32 UC3 USB DFU Bootloader" (doc7745.pdf)
+  
+  "To launch BatchISP, open a command prompt. Windows or Cygwin command
+   prompt can be used provided that the bin folder of the FLIP installation
+   directory is in the PATH (Windows’ or Cygwin’s) environment variable.
+   When running BatchISP on AT32UC3xxxxx, the target part has to be specified
+   with -device at32uc3xxxxx and the communication port with -hardware usb.
+   Commands can then be placed after -operation. These commands are executed
+   in order. BatchISP options can be placed in a text file invoked using
+   -cmdfile rather than on the command line.
+
+  "BatchISP works with an internal ISP buffer per target memory. These ISP
+   buffers can be filled from several sources. All target operations (program,
+   verify, read) are performed using these buffers.
+
+  "A typical BatchISP command line programming an application will look like
+   this:"
+
+   [For the NuttX ELF file and the AT91UC3B0256 part:]
+
+     batchisp -device at32uc3b0256 -hardware usb -operation erase f memory flash \
+     blankcheck loadbuffer nuttx program verify start reset 0
+
+  "BatchISP main commands available on AT32UC3xxxxx are:
+  
+   - ASSERT { PASS | FAIL } changes the displayed results of the following
+     operations according to the expected behavior.
+   - ONFAIL { ASK | ABORT | RETRY | IGNORE } changes the interactive behavior
+     of BatchISP in case of failure.
+   - WAIT <Nsec> inserts a pause between two ISP operations.
+   - ECHO <comment> displays a message.
+   - ERASE F erases internal flash contents, except the bootloader.
+   - MEMORY { FLASH | SECURITY | CONFIGURATION | BOOTLOADER | SIGNATURE | USER }
+     selects a target memory on which to apply the following operations.
+   - ADDRANGE <addrMin> <addrMax> selects in the current target memory an
+     address range on which to apply the following operations.
+   - BLANKCHECK checks that the selected address range is erased.
+   - FILLBUFFER <data> fills the ISP buffer with a byte value.
+   - LOADBUFFER { <in_elffile> | <in_hexfile> } loads the ISP buffer from an
+     input file.
+   - PROGRAM programs the selected address range with the ISP buffer.
+   - VERIFY verifies that the selected address range has the same contents
+     as the ISP buffer.
+   - READ reads the selected address range to the ISP buffer.
+   - SAVEBUFFER <out_hexfile> { HEX386 | HEX86 } saves the ISP buffer to an
+      output file.
+   - START { RESET | NORESET } 0 starts the execution of the programmed
+     application with an optional hardware reset of the target.
+
+  "The AT32UC3xxxxx memories made available by BatchISP are:
+
+  - FLASH: This memory is the internal flash array of the target, including the
+    bootloader protected area. E.g. on AT32UC3A0512 (512-kB internal flash),
+	addresses from 0 to 0x7FFFF can be accessed in this memory.
+  - SECURITY: This memory contains only one byte. The least significant bit
+    of this byte reflects the value of the target Security bit which can only
+	be set to 1. Once set, the only accepted commands will be ERASE and START.
+	After an ERASE command, all commands are accepted until the end of the
+	non-volatile ISP session, even if the Security bit is set.
+  - CONFIGURATION: This memory contains one byte per target general-purpose
+    fuse bit.  The least significant bit of each byte reflects the value of
+	the corresponding GP fuse bit.
+  - BOOTLOADER: This memory contains three bytes concerning the ISP: the ISP
+    version in BCD format without the major version number (always 1), the
+	ISP ID0 and the ISP ID1.
+  - SIGNATURE: This memory contains four bytes concerning the part: the product
+    manufacturer ID, the product family ID, the product ID and the product
+	revision.
+  - USER: This memory is the internal flash User page of the target, with
+    addresses from 0 to 0x1FF.
+
+  "For further details about BatchISP commands, launch batchisp -h or see the
+   help files installed with FLIP ..."
 
 AVR32DEV1 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
