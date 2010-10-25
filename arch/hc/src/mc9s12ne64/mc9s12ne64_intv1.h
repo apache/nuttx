@@ -61,7 +61,7 @@
 
 /* Register Bit-Field Definitions ***************************************************/
 
-/* nterrupt Test Control Register Bit-Field Definitions */
+/* Interrupt Test Control Register Bit-Field Definitions */
 
 #define INT_ITCR_ADR_SHIFT             (0)       /* Bits 0-3: Test register select */
 #define INT_ITCR_ADR_MASK              (15 << INT_ITCR_ADR_SHIFT)
