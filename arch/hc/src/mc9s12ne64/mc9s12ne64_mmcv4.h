@@ -73,27 +73,27 @@
 
 /* Register Bit-Field Definitions ***************************************************/
 
-/* Internal RAM Position Register */
+/* Internal RAM Position Register Bit-Field Definitions */
 
 #define MMC_INITRM_RAMHAL        (1 << 0) /* Bit 0: RAM High-Align */
 #define MMC_INITRM_RAM_SHIFT     (3)      /* Bits 3-7: Internal RAM Map Position */
 #define MMC_INITRM_RAM_MASK      (0x1f << MMC_INITRM_RAM_SHIFT)
 #define MMC_INITRM_RAM(addr)     (((addr) >> (11-MMC_INITRM_RAM_SHIFT)) & MMC_INITRM_RAM_MASK)
 
-/* Internal Registers Position Register */
+/* Internal Registers Position Register Bit-Field Definitions */
 
 #define MMC_INITRG_REG_SHIFT     (3)      /* Bits 3-6: Internal RAM Map Position */
 #define MMC_INITRG_REG_MASK      (0x0f << MMC_INITRG_REG_SHIFT)
 #define MMC_INITRG_REG(addr)     (((addr) >> (11-MMC_INITRG_REG_SHIFT)) & MMC_INITRG_REG_SHIFT)
 
-/* Internal EEPROM Position Register */
+/* Internal EEPROM Position Register Bit-Field Definitions */
 
 #define MMC_INITEE_EEON          (1 << 0)  /* Bit 0: Enable EEPROM */
 #define MMC_INITEE_EE_SHIFT      (3)       /* Bits 3-7: Internal EEPROM Map Position */
 #define MMC_INITEE_EE_MASK       (0x1f << MMC_INITEE_EE_SHIFT)
 #define MMC_INITEE_EE(addr)      (((addr) >> (11-MMC_INITRG_REG_SHIFT)) & MMC_INITRG_REG_SHIFT)
 
-/* Miscellaneous System Control Register */
+/* Miscellaneous System Control Register Bit-Field Definitions */
 
 #define MMC_MISC_ROMON           (1 << 0) /* Bit 0: Enable FLASH EEPROM or ROM */
 #define MMC_MISC_ROMHM           (1 << 1) /* Bit 1: FLASH EEPROM or ROM Only in Second Half of Memory Map */
@@ -104,9 +104,9 @@
 #  define MISC_EXSTR_CLKS2       (2 << MMC_MISC_EXSTR_SHIFT)
 #  define MISC_EXSTR_CLKS3       (3 << MMC_MISC_EXSTR_SHIFT)
 
-/* Reserved Test Register 0/1 -- Not documented */
+/* Reserved Test Register 0/1 Bit-Field Definitions -- Not documented */
 
-/* Memory Size Register 0 */
+/* Memory Size Register 0 Bit-Field Definitions */
 
 #define MMC_MEMSIZ0_RAMSW_SHIFT (0)       /* Bits 0-2: Allocated System RAM Memory Space */
 #define MMC_MEMSIZ0_RAMSW_MASK  (7 << MMC_MEMSIZ0_RAMSW_SHIFT)
@@ -126,7 +126,7 @@
 #  define MEMSIZ0_EEPSW_5KB     (3 << MMC_MEMSIZ0_EEPSW_MASK)
 #define MMC_MEMSIZ0_REGSW       (1 << 7)  /* Bits 7: Allocated System Register Space */
 
-/* Memory Size Register 1 */
+/* Memory Size Register 1 Bit-Field Definitions */
 
 #define MMC_MEMSIZ1_PAGSW_SHIFT (0)       /* Bits 0-1: Allocated System RAM Memory Space */
 #define MMC_MEMSIZ1_PAGSW_MASK  (3 << MMC_MEMSIZ1_PAGSW_SHIFT)
@@ -141,7 +141,7 @@
 #  define MEMSIZ1_ROMSW_48KB    (2 << MMC_MEMSIZ1_ROMSW_SHIFT)
 #  define MEMSIZ1_ROMSW_64KB    (3 << MMC_MEMSIZ1_ROMSW_SHIFT)
 
-/* Program Page Index Register */
+/* Program Page Index Register Bit-Field Definitions */
 
 #define MMC_PPAGE_PIX_SHIFT     (0)       /* Bits 0-5 Program Page Index Bits 5–0 */
 #define MMC_PPAGE_PIX_MASK      (0x3f << MMC_PPAGE_PIX_SHIFT)
