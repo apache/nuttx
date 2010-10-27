@@ -103,9 +103,9 @@ void up_sigdeliver(void)
   regs[REG_PC]         = rtcb->xcp.saved_pc;
   regs[REG_SR]         = rtcb->xcp.saved_sr;
 
-  /* Get a local copy of the sigdeliver function pointer. We do this so tha
-   * we can nullify the sigdeliver function point in the TCB and accept more
-   * signal deliveries while processing the current pending signals.
+  /* Get a local copy of the sigdeliver function pointer. We do this so that
+   * we can nullify the sigdeliver function pointer in the TCB and accept
+   * more signal deliveries while processing the current pending signals.
    */
 
   sigdeliver           = rtcb->xcp.sigdeliver;
@@ -119,17 +119,16 @@ void up_sigdeliver(void)
 
   sigdeliver(rtcb);
 
-  /* Output any debug messaged BEFORE restoring errno (becuase they may
-   * alter errno), then restore the original errno that is needed by
-   * the user logic (it is probably EINTR).
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
    */
 
   sdbg("Resuming\n");
+  (void)irqsave();
   rtcb->pterrno = saved_errno;
 
-  /* Then restore the correct state for this thread of
-   * execution.
-   */
+  /* Then restore the correct state for this thread of execution. */
 
   up_ledoff(LED_SIGNAL);
   up_fullcontextrestore(regs);

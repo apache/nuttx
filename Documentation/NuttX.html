@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 18, 2010</p>
+      <p>Last Updated: October 26, 2010</p>
     </td>
   </tr>
 </table>
@@ -772,10 +772,10 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.11 Release Notes</b>:
+<p><b>nuttx-5.12 Release Notes</b>:
 
 <p>
-  This 58<sup>th</sup> release of NuttX, Version 5.11, was made on October 1, 2010 and is available for download from the
+  This 59<sup>th</sup> release of NuttX, Version 5.12, was made on October 26, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
@@ -785,26 +785,29 @@
   This is primarily a bugfix release and includes some important corrections to the code:
   <ul>
     <li>
-      One very important bug fixes a race condition that can occur using
-	  semaphores that can be awakened by signals.  Under this particular
-	  race condition, a task could hang waiting for a semaphore.
-    </li>
-    <li>
-	  Corrections to lm3s8962 port contributed by Larry Arnold.  That
-	  port is purported to work correctly with these changes in place.
+	  Fixed an important error in the signal trampoline logic.  Essentially,
+	  interrupts are re-enabled while the signal handler executes, but the
+	  logic to re-disable the interrupts before returning from the signal
+	  handler trampoline was missing.  Under certain circumstances, this
+	  can cause stack corruption.  This was discovered by David Hewson on
+	  an ARM9 platform, but since the code has been leveraged, the bug has
+	  been propogated from ARM to Cortex-M3, AVR32, M16C, SH1, ZNEO, eZ80,
+	  Z8, and Z80 -- almost every architecture. The correction has been
+	  incorporated for all architectures but only verified on a few.
     </li>
   </ul>
 </p>
 <p>
-  Plus less critical bugfixes as detailed in the ChangeLog.  New features
-  include:
+  Other notable changes in NuttX-5.12 include:
   <ul>
     <li>
-	* A new configuration to support the mbed.org LPC1768 board (Contributed
-	  by Dave Marples), and
+	  A complete port for the AVR32 (AT91UC3B0256) is incorporated in the
+	  source tree.  Testing of this port is underway now.  This release
+	  was made before verifying this port in order to get the important
+	  bugfix in place.
     </li>
     <li>
-	* A driver for the Atmel AT45DB161D 4Mbit SPI FLASH part.
+	  Other miscellaneous bugfix and enhancements as noted in the ChangeLog.
     </li>
   </ul>
 </p>
@@ -1342,7 +1345,8 @@
          This port is currently under development.
          All code is complete for the basic NuttX port including header files for all AT91UC3* peripherals.
          Testing of this port is underway now.
-         It is hoped that the first, released AVR32 port will appear in version 5.12 of NuttX, probably near the beginning of September, 2010.
+		 The untest AVR32 is present in the 5.12 release of NuttX.
+		 It is hoped that the first, verified AVR32 port will be released in version 5.13 of NuttX.
       </p>
     </ul>
   </td>
@@ -1880,28 +1884,31 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.11 2010-10-01 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.12 2010-10-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* configs/ea3131/src/up_fillpage.c - Added new configuration item
-	  CONFIG_PAGING_BINPATH.  If CONFIG_PAGING_BINPATH is defined, then it
-	  is the full path to a file on a mounted file system that contains
-	  a binary image of the NuttX executable.  Pages will be filled by
-	  reading from offsets into this file that correspond to virtual
-	  fault addresses.  up_fillpage.c implements logic to perform page
-	  files using the CONFIG_PAGING_BINPATH file.
-	* configs/mbed - Add configuration to support the mbed.org LPC1768
-	  board (Contributed by Dave Marples).
-	* sched/sem_wait.c and sem_waitirq.c - Eliminate a race condition
-	  that can occur when a semaphore wait is interrupt by a signal.
-	  (see email thread: http://tech.groups.yahoo.com/group/nuttx/message/530)
-	* drivers/mtd/at45db.c - Add a driver for the Atmel AT45DB161D 4Mbit
-	  SPI FLASH part (untested on initial check-in).
-	* arch/arm/src/lm3s and arch/arm/include/lm3s - Corrections for the
-	  lm3s8962 port contributed by Larry Arnold.  That port is purported
-	  to work correctly with these changes in place.
-	* examples/ostest/prioinherit.c - Need to reinitialize globals if
-	  test is ran repeatedly in a loop.
-	* configs/ez80f910200zco - Updated to used ZDS-II 4.11.1
+	* arch/avr - Add a place to support AVR family processors.
+	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
+	  (all of the AVR32 is a work in progress).
+	* arch/avr/include/at91uc3 and arch/avr/src/at91uc3 - Add support
+	  for the AT91 UC3A/B family of AVR32 MCUs.
+	* confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
+	  the AT91UC3B0256 MCU.  This board is produced by www.mcuzone.com.
+	* include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
+	  lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
+	  imaxabs().
+	* Add include/inttypes.h
+	* arch/hc/src/mc9s12ne64 - This hcs12 port grew a few more files.  But it
+	  is still a long way from complete.
+	* arch/*/src/*/*_sigdeliver.c - Fixed a serious error in the signal
+	  trampoline logic.  Essentially, interrupts are re-enabled while the
+	  signal handler executes, but the logic to re-disable the interrupts
+	  before returning from the signal handler trampoline was missing.  Under
+	  certain circumstances, this can cause stack corruption.  This was
+	  discovered by David Hewson on an ARM9 platform, but since the code
+	  has been leveraged, the bug has been propogated from ARM to Cortex-M3,
+	  AVR32, M16C, SH1, ZNEO, eZ80, Z8, and Z80 -- almost every architecture.
+	  The correction has been incorporated for all architectures but only
+	  verified on a few.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1931,18 +1938,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.12 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* arch/avr - Add a place to support AVR family processors.
-	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
-	  (all of the AVR32 is a work in progress).
-	* arch/avr/include/at91uc3 and arch/avr/src/at91uc3 - Add support
-	  for the AT91 UC3A/B family of AVR32 MCUs.
-	* confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
-	  the AT91UC3B0256 MCU.  This board is produced by www.mcuzone.com.
-	* include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
-	  lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
-	  imaxabs().
+nuttx-5.13 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

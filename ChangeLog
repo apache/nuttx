@@ -1288,7 +1288,7 @@
 	  test is ran repeatedly in a loop.
 	* configs/ez80f910200zco - Updated to used ZDS-II 4.11.1
 
-5.12 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.12 2010-10-26 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/avr - Add a place to support AVR family processors.
 	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
@@ -1301,4 +1301,18 @@
 	  lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
 	  imaxabs().
 	* Add include/inttypes.h
+	* arch/hc/src/mc9s12ne64 - This hcs12 port grew a few more files.  But it
+	  is still a long way from complete.
+	* arch/*/src/*/*_sigdeliver.c - Fixed a serious error in the signal
+	  trampoline logic.  Essentially, interrupts are re-enabled while the
+	  signal handler executes, but the logic to re-disable the interrupts
+	  before returning from the signal handler trampoline was missing.  Under
+	  certain circumstances, this can cause stack corruption.  This was
+	  discovered by David Hewson on an ARM9 platform, but since the code
+	  has been leveraged, the bug has been propogated from ARM to Cortex-M3,
+	  AVR32, M16C, SH1, ZNEO, eZ80, Z8, and Z80 -- almost every architecture.
+	  The correction has been incorporated for all architectures but only
+	  verified on a few.
+
+5.13 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
