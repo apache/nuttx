@@ -1316,3 +1316,6 @@
 
 5.13 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
+	  by Michael Hrabanek.
+

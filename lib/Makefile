@@ -46,10 +46,11 @@ endif
 STRING_SRCS	= lib_checkbase.c lib_isbasedigit.c lib_memset.c lib_memcpy.c \
 		  lib_memcmp.c lib_memmove.c lib_skipspace.c lib_strcasecmp.c  \
 		  lib_strcat.c lib_strchr.c lib_strcpy.c lib_strcmp.c lib_strcspn.c \
-		  lib_strdup.c lib_strerror.c lib_strlen.c lib_strncasecmp.c \
-		  lib_strncat.c lib_strncmp.c lib_strncpy.c lib_strpbrk.c \
-		  lib_strrchr.c  lib_strspn.c lib_strstr.c lib_strtok.c lib_strtokr.c \
-		  lib_strtol.c lib_strtoll.c lib_strtoul.c lib_strtoull.c lib_strtod.c
+		  lib_strdup.c lib_strerror.c lib_strlen.c lib_strnlen.c \
+		  lib_strncasecmp.c lib_strncat.c lib_strncmp.c lib_strncpy.c \
+		  lib_strpbrk.c lib_strrchr.c  lib_strspn.c lib_strstr.c lib_strtok.c \
+		  lib_strtokr.c lib_strtol.c lib_strtoll.c lib_strtoul.c \
+		  lib_strtoull.c lib_strtod.c
 
 CTYPE_SRCS	= 
 
