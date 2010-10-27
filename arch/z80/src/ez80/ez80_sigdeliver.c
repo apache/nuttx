@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_sigdeliver.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,10 +72,9 @@
  * Name: up_sigdeliver
  *
  * Description:
- *   This is the a signal handling trampoline.  When a
- *   signal action was posted.  The task context was mucked
- *   with and forced to branch to this location with interrupts
- *   disabled.
+ *   This is the a signal handling trampoline.  When a signal action was
+ *   posted.  The task context was mucked with and forced to branch to this
+ *   location with interrupts disabled.
  *
  ****************************************************************************/
 
@@ -106,8 +105,9 @@ void up_sigdeliver(void)
   regs[XCPT_I]  = rtcb->xcp.saved_i;
 
   /* Get a local copy of the sigdeliver function pointer.  We do this so
-   * that we can nullify the sigdeliver function point in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
+   * that we can nullify the sigdeliver function pointer in the TCB and 
+   * accept more signal deliveries while processing the current pending
+   * signals.
    */
 
   sigdeliver           = rtcb->xcp.sigdeliver;
@@ -121,12 +121,13 @@ void up_sigdeliver(void)
 
   sigdeliver(rtcb);
 
-  /* Output any debug messaged BEFORE restoring errno (because they may alter
-   * errno), then restore the original errno that is needed by the user logic
-   * (it is probably EINTR).
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
    */
 
   sdbg("Resuming\n");
+  (void)irqsave();
   rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of

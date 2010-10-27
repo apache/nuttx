@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_sigdeliver.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,8 +95,8 @@ void up_sigdeliver(void)
 
   up_ledon(LED_SIGNAL);
 
-  dbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-       rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   ASSERT(rtcb->xcp.sigdeliver != NULL);
 
   /* Save the real return state on the stack. */
@@ -125,17 +125,16 @@ void up_sigdeliver(void)
 
   sigdeliver(rtcb);
 
-  /* Output any debug messaged BEFORE restoring errno (because they may
-   * alter errno), then restore the original errno that is needed by
-   * the user logic (it is probably EINTR).
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
    */
 
-  dbg("Resuming\n");
+  sdbg("Resuming\n");
+  (void)irqsave();
   rtcb->pterrno = saved_errno;
 
-  /* Then restore the correct state for this thread of
-   * execution.
-   */
+  /* Then restore the correct state for this thread of execution. */
 
   up_ledoff(LED_SIGNAL);
   SIGNAL_RETURN(regs);

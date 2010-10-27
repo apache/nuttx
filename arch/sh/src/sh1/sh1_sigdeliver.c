@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_sigdeliver.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,10 +72,9 @@
  * Name: up_sigdeliver
  *
  * Description:
- *   This is the a signal handling trampoline.  When a
- *   signal action was posted.  The task context was mucked
- *   with and forced to branch to this location with interrupts
- *   disabled.
+ *   This is the a signal handling trampoline.  When a signal action was
+ *   posted.  The task context was mucked with and forced to branch to this
+ *   location with interrupts disabled.
  *
  ****************************************************************************/
 
@@ -86,9 +85,9 @@ void up_sigdeliver(void)
   uint32_t regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 
-  /* Save the errno.  This must be preserved throughout the
-   * signal handling so that the user code final gets
-   * the correct errno value (probably EINTR).
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the user code final gets the correct errno value (probably
+   * EINTR).
    */
 
   int saved_errno = rtcb->pterrno;
@@ -105,17 +104,16 @@ void up_sigdeliver(void)
   regs[REG_PC] = rtcb->xcp.saved_pc;
   regs[REG_SR] = rtcb->xcp.saved_sr;
 
-  /* Get a local copy of the sigdeliver function pointer.
-   * we do this so that we can nullify the sigdeliver
-   * function point in the TCB and accept more signal
-   * deliveries while processing the current pending
+  /* Get a local copy of the sigdeliver function pointer.  We do this so
+   * that we can nullify the sigdeliver function pointer in the TCB and
+   * accept more signal deliveries while processing the current pending
    * signals.
    */
 
   sigdeliver           = rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
-  /* Then restore the task interrupt statat. */
+  /* Then restore the task interrupt state. */
 
   irqrestore(regs[REG_SR] & 0x000000f0);
 
@@ -123,18 +121,16 @@ void up_sigdeliver(void)
 
   sigdeliver(rtcb);
 
-  /* Output any debug messaged BEFORE restoreing errno
-   * (becuase they may alter errno), then restore the
-   * original errno that is needed by the user logic
-   * (it is probably EINTR).
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
    */
 
   sdbg("Resuming\n");
+  (void)irqsave();
   rtcb->pterrno = saved_errno;
 
-  /* Then restore the correct state for this thread of
-   * execution.
-   */
+  /* Then restore the correct state for this thread of execution. */
 
   up_ledoff(LED_SIGNAL);
   up_fullcontextrestore(regs);

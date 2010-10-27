@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/arm/src/arm/up_fullcontextrestore.S
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,9 +95,10 @@ up_fullcontextrestore:
 
 	/* Now we can restore the CPSR.  We wait until we are completely
 	 * finished with the context save data to do this. Restore the CPSR
-	 * may re-enable and interrupts and we couldt be in a context
-	 * where save structure is only protected by interrupts being disabled.
-         */
+	 * may re-enable and interrupts and we could be in a context
+	 * where the save structure is only protected by interrupts being
+	 * disabled.
+	 */
 
 	ldr	r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
 	msr	cpsr, r1		/* Set the CPSR */

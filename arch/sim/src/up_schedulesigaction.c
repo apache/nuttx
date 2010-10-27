@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_schedulesigaction.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@
 
 void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 {
-  /* We don't have to anything complex of the simulated target */
+  /* We don't have to anything complex for the simulated target */
 
   if (tcb == (_TCB*)g_readytorun.head)
     {
