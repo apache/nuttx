@@ -632,6 +632,93 @@ CONFIG_USBSTRG_VERSIONNO=0x0399
 CONFIG_USBSTRG_REMOVABLE=y
 
 #
+# Graphics related configuration settings
+#
+# CONFIG_NX
+#   Enables overall support for graphics library and NX
+# CONFIG_NX_MULTIUSER
+#   Configures NX in multi-user mode
+# CONFIG_NX_NPLANES
+#   Some YUV color formats requires support for multiple planes,
+#   one for each color component.  Unless you have such special
+#   hardware, this value should be undefined or set to 1
+# CONFIG_NX_DISABLE_1BPP, CONFIG_NX_DISABLE_2BPP,
+# CONFIG_NX_DISABLE_4BPP, CONFIG_NX_DISABLE_8BPP,
+# CONFIG_NX_DISABLE_16BPP, CONFIG_NX_DISABLE_24BPP, and
+# CONFIG_NX_DISABLE_32BPP
+#   NX supports a variety of pixel depths.  You can save some
+#   memory by disabling support for unused color depths.
+# CONFIG_NX_PACKEDMSFIRST
+#   If a pixel depth of less than 8-bits is used, then NX needs
+#   to know if the pixels pack from the MS to LS or from LS to MS
+# CONFIG_NX_LCDDRIVER
+#   By default, NX builds to use a framebuffer driver (see
+#   include/nuttx/fb.h). If this option is defined, NX will
+#   build to use an LCD driver (see include/nuttx/lcd.h).
+# CONFIG_LCD_MAXPOWER - The full-on power setting for an LCD device.
+# CONFIG_LCD_MAXCONTRAST - The maximum contrast value for an LCD device.
+# CONFIG_NX_MOUSE
+#   Build in support for mouse input
+# CONFIG_NX_KBD
+#   Build in support of keypad/keyboard input
+# CONFIG_NXTK_BORDERWIDTH
+#   Specifies with with of the border (in pixels) used with
+#   framed windows.  The default is 4.
+# CONFIG_NXTK_BORDERCOLOR1 and CONFIG_NXTK_BORDERCOLOR2
+#   Specify the colors of the border used with framed windows.
+#   CONFIG_NXTK_BORDERCOLOR2 is the shadow side color and so
+#   is normally darker.  The default is medium and dark grey,
+#   respectively
+# CONFIG_NXTK_AUTORAISE
+#   If set, a window will be raised to the top if the mouse position
+#   is over a visible portion of the window.  Default: A mouse
+#   button must be clicked over a visible portion of the window.
+# CONFIG_NXFONTS_CHARBITS
+#   The number of bits in the character set.  Current options are
+#   only 7 and 8.  The default is 7.
+# CONFIG_NXFONT_SANS
+#   At present, there is only one font.  But if there were were more,
+#   then this option would select the sans serif font.
+#
+# NX Multi-user only options:
+#
+# CONFIG_NX_BLOCKING
+#   Open the client message queues in blocking mode.  In this case,
+#   nx_eventhandler()  will not return until a message is received and processed.
+# CONFIG_NX_MXSERVERMSGS and CONFIG_NX_MXCLIENTMSGS
+#   Specifies the maximum number of messages that can fit in
+#   the message queues.  No additional resources are allocated, but
+#   this can be set to prevent flooding of the client or server with
+#   too many messages (CONFIG_PREALLOC_MQ_MSGS controls how many
+#   messages are pre-allocated).
+#
+CONFIG_NX=n
+CONFIG_NX_MULTIUSER=n
+CONFIG_NX_NPLANES=1
+CONFIG_NX_DISABLE_1BPP=y
+CONFIG_NX_DISABLE_2BPP=y
+CONFIG_NX_DISABLE_4BPP=y
+CONFIG_NX_DISABLE_8BPP=y
+CONFIG_NX_DISABLE_16BPP=n
+CONFIG_NX_DISABLE_24BPP=y
+CONFIG_NX_DISABLE_32BPP=y
+CONFIG_NX_PACKEDMSFIRST=n
+CONFIG_NX_LCDDRIVER=y
+CONFIG_LCD_MAXPOWER=31
+CONFIG_LCD_MAXCONTRAST=1
+CONFIG_NX_MOUSE=y
+CONFIG_NX_KBD=y
+#CONFIG_NXTK_BORDERWIDTH=4
+#CONFIG_NXTK_BORDERCOLOR1
+#CONFIG_NXTK_BORDERCOLOR2
+CONFIG_NXTK_AUTORAISE=n
+CONFIG_NXFONT_SANS=y
+CONFIG_NXFONTS_CHARBITS=7
+CONFIG_NX_BLOCKING=y
+CONFIG_NX_MXSERVERMSGS=32
+CONFIG_NX_MXCLIENTMSGS=16
+
+#
 # Settings for examples/uip
 #
 CONFIG_EXAMPLE_UIP_IPADDR=(10<<24|0<<16|0<<8|2)
