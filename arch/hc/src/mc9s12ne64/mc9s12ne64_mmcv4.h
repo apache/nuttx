@@ -48,6 +48,7 @@
  ************************************************************************************/
 
 /* Register Offsets *****************************************************************/
+/* Offsets relative to CORE1 */
 
 #define HCS12_MMC_INITRM_OFFSET    0x0010 /* Internal RAM Position Register */
 #define HCS12_MMC_INITRG_OFFSET    0x0011 /* Internal Registers Position Register */
@@ -55,21 +56,27 @@
 #define HCS12_MMC_MISC_OFFSET      0x0013 /* Miscellaneous System Control Register */
 #define HCS12_MMC_MTST0_OFFSET     0x0014 /* Reserved Test Register 0 */
 #define HCS12_MMC_MTST1_OFFSET     0x0017 /* Reserved Test Register 1 */
-#define HCS12_MMC_MEMSIZ0_OFFSET   0x001c /* Memory Size Register 0 */
-#define HCS12_MMC_MEMSIZ1_OFFSET   0x001d /* Memory Size Register 1 */
-#define HCS12_MMC_PPAGE_OFFSET     0x0030 /* Program Page Index Register */
+
+/* Offsets relative to CORE2 */
+
+#define HCS12_MMC_MEMSIZ0_OFFSET   0x0000 /* Memory Size Register 0 */
+#define HCS12_MMC_MEMSIZ1_OFFSET   0x0001 /* Memory Size Register 1 */
+
+/* Offsets relative to CORE4 */
+
+#define HCS12_MMC_PPAGE_OFFSET     0x0000 /* Program Page Index Register */
 
 /* Register Addresses ***************************************************************/
 
-#define HCS12_MMC_INITRM           (HCS12_CORE1_BASE+HCS12_MMC_INITRM_OFFSET)
-#define HCS12_MMC_INITRG           (HCS12_CORE1_BASE+HCS12_MMC_INITRG_OFFSET)
-#define HCS12_MMC_INITEE           (HCS12_CORE1_BASE+HCS12_MMC_INITEE_OFFSET)
-#define HCS12_MMC_MISC             (HCS12_CORE1_BASE+HCS12_MMC_MISC_OFFSET)
-#define HCS12_MMC_MTST0            (HCS12_CORE1_BASE+HCS12_MMC_MTST0_OFFSET)
-#define HCS12_MMC_MTST1            (HCS12_CORE1_BASE+HCS12_MMC_MTST1_OFFSET)
-#define HCS12_MMC_MEMSIZ0          (HCS12_CORE1_BASE+HCS12_MMC_MEMSIZ0_OFFSET)
-#define HCS12_MMC_MEMSIZ1          (HCS12_CORE1_BASE+HCS12_MMC_MEMSIZ1_OFFSET)
-#define HCS12_MMC_PPAGE            (HCS12_CORE1_BASE+HCS12_MMC_PPAGE_OFFSET)
+#define HCS12_MMC_INITRM           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MMC_INITRM_OFFSET)
+#define HCS12_MMC_INITRG           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MMC_INITRG_OFFSET)
+#define HCS12_MMC_INITEE           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MMC_INITEE_OFFSET)
+#define HCS12_MMC_MISC             (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MMC_MISC_OFFSET)
+#define HCS12_MMC_MTST0            (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MMC_MTST0_OFFSET)
+#define HCS12_MMC_MTST1            (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MMC_MTST1_OFFSET)
+#define HCS12_MMC_MEMSIZ0          (HCS12_REG_BASE+HCS12_CORE2_BASE+HCS12_MMC_MEMSIZ0_OFFSET)
+#define HCS12_MMC_MEMSIZ1          (HCS12_REG_BASE+HCS12_CORE2_BASE+HCS12_MMC_MEMSIZ1_OFFSET)
+#define HCS12_MMC_PPAGE            (HCS12_REG_BASE+HCS12_CORE4_BASE+HCS12_MMC_PPAGE_OFFSET)
 
 /* Register Bit-Field Definitions ***************************************************/
 

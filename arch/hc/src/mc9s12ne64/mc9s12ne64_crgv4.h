@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_crg.h
+ * arch/hc/src/mc9s12ne64/mc9s12ne64_crgv4.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_CRG_H
-#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_CRG_H
+#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_CRGV4_H
+#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_CRGV4_H
 
 /************************************************************************************
  * Included Files
@@ -137,4 +137,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_CRG_H */
+#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_CRGV4_H */

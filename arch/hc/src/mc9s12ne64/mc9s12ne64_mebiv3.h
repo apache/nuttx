@@ -48,6 +48,7 @@
  ************************************************************************************/
 
 /* Register Offsets *****************************************************************/
+/* Offsets relative to CORE1 */
 
 #define HCS12_MEBI_PORTA_OFFSET    0x0000 /* Port A Data Register */
 #define HCS12_MEBI_PORTB_OFFSET    0x0001 /* Port B Data Register */
@@ -60,26 +61,32 @@
 #define HCS12_MEBI_PUCR_OFFSET     0x000c /* Pull Control Register */
 #define HCS12_MEBI_RDRIV_OFFSET    0x000d /* Reduced Drive Register */
 #define HCS12_MEBI_EBICTL_OFFSET   0x000e /* External Bus Interface Control Register */
-#define HCS12_MEBI_IRQCR_OFFSET    0x001e /* IRQ Control Register */
-#define HCS12_MEBI_PORTK_OFFSET    0x0032 /* Port K Data Register */
-#define HCS12_MEBI_DDRK_OFFSET     0x0033 /* Data Direction Register K */
+
+/* Offsets relative to CORE2 */
+
+#define HCS12_MEBI_IRQCR_OFFSET    0x0002 /* IRQ Control Register */
+
+/* Offsets relative to CORE4 */
+
+#define HCS12_MEBI_PORTK_OFFSET    0x0002 /* Port K Data Register */
+#define HCS12_MEBI_DDRK_OFFSET     0x0003 /* Data Direction Register K */
 
 /* Register Addresses ***************************************************************/
 
-#define HCS12_MEBI_PORTA           (HCS12_CORE1_BASE+HCS12_MEBI_PORTA_OFFSET)
-#define HCS12_MEBI_PORTB           (HCS12_CORE1_BASE+HCS12_MEBI_PORTB_OFFSET)
-#define HCS12_MEBI_DDRA            (HCS12_CORE1_BASE+HCS12_MEBI_DDRA_OFFSET)
-#define HCS12_MEBI_DDRB            (HCS12_CORE1_BASE+HCS12_MEBI_DDRB_OFFSET)
-#define HCS12_MEBI_PORTE           (HCS12_CORE1_BASE+HCS12_MEBI_PORTE_OFFSET)
-#define HCS12_MEBI_DDRE            (HCS12_CORE1_BASE+HCS12_MEBI_DDRE_OFFSET)
-#define HCS12_MEBI_PEAR            (HCS12_CORE1_BASE+HCS12_MEBI_PEAR_OFFSET)
-#define HCS12_MEBI_MODE            (HCS12_CORE1_BASE+HCS12_MEBI_MODE_OFFSET)
-#define HCS12_MEBI_PUCR            (HCS12_CORE1_BASE+HCS12_MEBI_PUCR_OFFSET)
-#define HCS12_MEBI_RDRIV           (HCS12_CORE1_BASE+HCS12_MEBI_RDRIV_OFFSET)
-#define HCS12_MEBI_EBICTL          (HCS12_CORE1_BASE+HCS12_MEBI_EBICTL_OFFSET)
-#define HCS12_MEBI_IRQCR           (HCS12_CORE1_BASE+HCS12_MEBI_IRQCR_OFFSET)
-#define HCS12_MEBI_PORTK           (HCS12_CORE1_BASE+HCS12_MEBI_PORTK_OFFSET)
-#define HCS12_MEBI_DDRK            (HCS12_CORE1_BASE+HCS12_MEBI_DDRK_OFFSET)
+#define HCS12_MEBI_PORTA           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_PORTA_OFFSET)
+#define HCS12_MEBI_PORTB           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_PORTB_OFFSET)
+#define HCS12_MEBI_DDRA            (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_DDRA_OFFSET)
+#define HCS12_MEBI_DDRB            (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_DDRB_OFFSET)
+#define HCS12_MEBI_PORTE           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_PORTE_OFFSET)
+#define HCS12_MEBI_DDRE            (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_DDRE_OFFSET)
+#define HCS12_MEBI_PEAR            (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_PEAR_OFFSET)
+#define HCS12_MEBI_MODE            (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_MODE_OFFSET)
+#define HCS12_MEBI_PUCR            (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_PUCR_OFFSET)
+#define HCS12_MEBI_RDRIV           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_RDRIV_OFFSET)
+#define HCS12_MEBI_EBICTL          (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_EBICTL_OFFSET)
+#define HCS12_MEBI_IRQCR           (HCS12_REG_BASE+HCS12_CORE2_BASE+HCS12_MEBI_IRQCR_OFFSET)
+#define HCS12_MEBI_PORTK           (HCS12_REG_BASE+HCS12_CORE4_BASE+HCS12_MEBI_PORTK_OFFSET)
+#define HCS12_MEBI_DDRK            (HCS12_REG_BASE+HCS12_CORE4_BASE+HCS12_MEBI_DDRK_OFFSET)
 
 /* Register Bit-Field Definitions ***************************************************/
 
