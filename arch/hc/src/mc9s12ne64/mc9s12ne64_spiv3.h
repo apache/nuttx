@@ -57,11 +57,11 @@
 
 /* Register Addresses ***************************************************************/
 
-#define HCS12_SPI_CR1             (HCS12_SPI_BASE+HCS12_SPI_CR1_OFFSET)
-#define HCS12_SPI_CR2             (HCS12_SPI_BASE+HCS12_SPI_CR2_OFFSET)
-#define HCS12_SPI_BR              (HCS12_SPI_BASE+HCS12_SPI_BR_OFFSET)
-#define HCS12_SPI_SR              (HCS12_SPI_BASE+HCS12_SPI_SR_OFFSET)
-#define HCS12_SPI_DR              (HCS12_SPI_BASE+HCS12_SPI_DR_OFFSET)
+#define HCS12_SPI_CR1             (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_CR1_OFFSET)
+#define HCS12_SPI_CR2             (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_CR2_OFFSET)
+#define HCS12_SPI_BR              (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_BR_OFFSET)
+#define HCS12_SPI_SR              (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_SR_OFFSET)
+#define HCS12_SPI_DR              (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_DR_OFFSET)
 
 /* Register Bit-Field Definitions ***************************************************/
 

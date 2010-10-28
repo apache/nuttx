@@ -60,12 +60,12 @@
 #define HCS12_PPAGE_BASE   0x8000 /* 0x8000-0xbfff: 16Kb Page window */
 #define HCS12_FFLASH2_BASE 0xc000 /* 0xc000-0xffff: 16Kb Fixed FLASH EEPROM */
 
-/* Device Register Map Overview (all relatvie to HCS12_REG_BASE) */
+/* Device Register Map Overview (all relative to HCS12_REG_BASE) */
 
 #define HCS12_CORE1_BASE   0x0000 /* 0x0000–0x0017: Ports A, B, E, Modes, Inits (MMC, INT, MEBI) */
                                   /* 0x0018–0x0019: Reserved */
 #define HCS12_DEVID_BASE   0x001a /* 0x001a-0x001b: Device ID register (PARTID) */
-#define HCS12_CORE2_BASE   0x001C /* 0x001c–0x001f: MEMSIZ, IRQ, HPRIO (INT, MMC) */
+#define HCS12_CORE2_BASE   0x001c /* 0x001c–0x001f: MEMSIZ, IRQ, HPRIO (INT, MMC) */
 #define HCS12_CORE3_BASE   0x0020 /* 0x0020-0x002f: DBG */
 #define HCS12_CORE4_BASE   0x0030 /* 0x0030–0x0033: PPAGE, Port K (MEBI, MMC) */
 #define HCS12_CRG_BASE     0x0034 /* 0x0034–0x003f: Clock and Reset Generator (PLL, RTI, COP) */

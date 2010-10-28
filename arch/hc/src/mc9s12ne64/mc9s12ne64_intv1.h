@@ -48,16 +48,20 @@
  ************************************************************************************/
 
 /* Register Offsets *****************************************************************/
+/* Offsets relative to CORE1 */
 
 #define HCS12_INT_ITCR_OFFSET          0x0015 /* Interrupt Test Control Register */
 #define HCS12_INT_ITEST_OFFSET         0x0016 /* Interrupt Test Registers */
-#define HCS12_INT_HPRIO_OFFSET         0x001f /* Highest Priority Interrupt */
+
+/* Offsets relative to CORE2 */
+
+#define HCS12_INT_HPRIO_OFFSET         0x0003 /* Highest Priority Interrupt */
 
 /* Register Addresses ***************************************************************/
 
-#define HCS12_INT_ITCR                 (HCS12_CORE1_BASE+HCS12_INT_ITCR_OFFSET)
-#define HCS12_INT_ITEST                (HCS12_CORE1_BASE+HCS12_INT_ITEST_OFFSET)
-#define HCS12_INT_HPRIO                (HCS12_CORE1_BASE+HCS12_INT_HPRIO_OFFSET)
+#define HCS12_INT_ITCR                 (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_INT_ITCR_OFFSET)
+#define HCS12_INT_ITEST                (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_INT_ITEST_OFFSET)
+#define HCS12_INT_HPRIO                (HCS12_REG_BASE+HCS12_CORE2_BASE+HCS12_INT_HPRIO_OFFSET)
 
 /* Register Bit-Field Definitions ***************************************************/
 

@@ -42,7 +42,7 @@
 
 #include "mc9s12ne64_internal.h"
 #include "mc9s12ne64_mmcv4.h"
-#include "mc9s12ne64_crg.h"
+#include "mc9s12ne64_crgv4.h"
 #include "mc9s12ne64_flash.h"
 
 /****************************************************************************
