@@ -72,3 +72,7 @@ endif
 ifeq ($(CONFIG_LPC17_GPDMA),y)
 CHIP_CSRCS	+= lpc17_gpdma.c
 endif
+
+ifdef CONFIG_NET
+CHIP_CSRCS	+= lpc17_ethernet.c
+endif
