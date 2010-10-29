@@ -61,6 +61,7 @@
 /* Does this chip have and ethernet controller? */
 
 #if LPC17_NETHCONTROLLERS > 0
+#warning "This driver has not yet been implemented"
 
 /****************************************************************************
  * Definitions
