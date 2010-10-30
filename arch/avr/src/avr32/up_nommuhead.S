@@ -80,12 +80,11 @@ __start:
 	 * by the IDLE thread when threading is enabled.
 	 */
 
-	lddpc		r0, .Lstackbase
-	ld.w 		sp, r0[0]
+	lddpc		sp, .Lstackbase
 
 	/* Set up the vector base address so interrupts can be enabled. */
 
-	lda.w		r0, .Lvectortab
+	lda.w		r0, vectortab
 	mtsr		AVR32_EVBA, r0
 
 	/* Enable exception processing */
@@ -130,18 +129,16 @@ __start:
 
 	/* Perform low-level initialization */
 
-	mcall		up_lowinit
+	mcall		.Lup_lowinit
 
 	/* Then jump to OS entry (will not return) */
 
-	lddpc		pc, .Los_start
+	lda.w		pc, os_start
 
 .Lstackbase:
 	.word	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
-.Lvectortab:
-    .word   vectortab
-.Los_start:
-    .word   os_start
+.Lup_lowinit:
+	.word	up_lowinit
 	.size	__start, .-__start
 
 	/* This global variable is unsigned long g_heapbase and is
