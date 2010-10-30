@@ -801,7 +801,7 @@
   Other notable changes in NuttX-5.12 include:
   <ul>
     <li>
-	  A complete port for the AVR32 (AT91UC3B0256) is incorporated in the
+	  A complete port for the AVR32 (AT32UC3B0256) is incorporated in the
 	  source tree.  Testing of this port is underway now.  This release
 	  was made before verifying this port in order to get the important
 	  bugfix in place.
@@ -1335,7 +1335,7 @@
   <td>
     <p>
       <b>AV32DEV1</b>.
-      This port uses the www.mcuzon.com AVRDEV1 board based on the Atmel AT91UC3B0256 MCU.
+      This port uses the www.mcuzon.com AVRDEV1 board based on the Atmel AT32UC3B0256 MCU.
       This port requires a special GNU avr32 toolchain available from atmel.com website.
       This is a windows native toolchain and so can be used only under Cygwin on Windows.
     </p>
@@ -1343,7 +1343,7 @@
       <p>
        <b>STATUS:</b>
          This port is currently under development.
-         All code is complete for the basic NuttX port including header files for all AT91UC3* peripherals.
+         All code is complete for the basic NuttX port including header files for all AT32UC3* peripherals.
          Testing of this port is underway now.
 		 The untest AVR32 is present in the 5.12 release of NuttX.
 		 It is hoped that the first, verified AVR32 port will be released in version 5.13 of NuttX.
@@ -1889,10 +1889,10 @@ nuttx-5.12 2010-10-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* arch/avr - Add a place to support AVR family processors.
 	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
 	  (all of the AVR32 is a work in progress).
-	* arch/avr/include/at91uc3 and arch/avr/src/at91uc3 - Add support
-	  for the AT91 UC3A/B family of AVR32 MCUs.
+	* arch/avr/include/at32uc3 and arch/avr/src/at32uc3 - Add support
+	  for the AVR32 UC3A/B family of AVR32 MCUs.
 	* confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
-	  the AT91UC3B0256 MCU.  This board is produced by www.mcuzone.com.
+	  the AT32UC3B0256 MCU.  This board is produced by www.mcuzone.com.
 	* include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
 	  lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
 	  imaxabs().
@@ -1942,6 +1942,8 @@ nuttx-5.13 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 	* lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
 	  by Michael Hrabanek.
+	* Fix wild, consistent naming error.  For some reason, I called the at32uc3*
+	  parts at91uc* everywhere.  Fixed by changing lots of files.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

@@ -1449,7 +1449,7 @@ This is the 59th release of NuttX.  This is a critical bugfix release.
 
 Other notable changes in NuttX-5.12:
 
-	* A complete port for the AVR32 (AT91UC3B0256) is incorporated in the
+	* A complete port for the AVR32 (AT32UC3B0256) is incorporated in the
 	  source tree.  Testing of this port is underway now.  This release
 	  was made before verifying this port in order to get the important
 	  bugfix in place.

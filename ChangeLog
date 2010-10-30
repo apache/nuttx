@@ -1293,10 +1293,10 @@
 	* arch/avr - Add a place to support AVR family processors.
 	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
 	  (all of the AVR32 is a work in progress).
-	* arch/avr/include/at91uc3 and arch/avr/src/at91uc3 - Add support
-	  for the AT91 UC3A/B family of AVR32 MCUs.
+	* arch/avr/include/at32uc3 and arch/avr/src/at32uc3 - Add support
+	  for the AVR32 UC3A/B family of AVR32 MCUs.
 	* confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
-	  the AT91UC3B0256 MCU.  This board is produced by www.mcuzone.com.
+	  the AT32UC3B0256 MCU.  This board is produced by www.mcuzone.com.
 	* include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
 	  lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
 	  imaxabs().
@@ -1318,4 +1318,6 @@
 
 	* lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
 	  by Michael Hrabanek.
+	* Fix wild, consistent naming error.  For some reason, I called the at32uc3*
+	  parts at91uc* everywhere.  Fixed by changing lots of files.
 
