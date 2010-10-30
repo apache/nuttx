@@ -143,7 +143,7 @@ int at32uc3_configgpio(uint16_t cfgset)
   putreg32(pinmask, base + AVR32_GPIO_PUERC_OFFSET);
   putreg32(pinmask, base + AVR32_GPIO_IERC_OFFSET);
   putreg32(pinmask, base + AVR32_GPIO_IMR0C_OFFSET);
-  putreg32(pinmask, base + AVR32_GPIO_IMR0C_OFFSET);
+  putreg32(pinmask, base + AVR32_GPIO_IMR1C_OFFSET);
   putreg32(pinmask, base + AVR32_GPIO_GFERC_OFFSET);
 
   /* Is this a GPIO?  Or a peripheral */
