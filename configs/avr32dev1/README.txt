@@ -6,7 +6,7 @@ This is the README file for the NuttX port to the Atmel AVR32DEV1 board.
 Contents
 ^^^^^^^^
 
- * Pin Configuration
+ * GPIO Pin Configuration
  * Serial Connection
  * Toolchains
  * Development Environment
@@ -22,8 +22,8 @@ Contents
  * AVR32DEV1 Configuration Options
  * Configurations
 
-Pin Configuration
-^^^^^^^^^^^^^^^^^
+GPIO Pin Configuration
+^^^^^^^^^^^^^^^^^^^^^^
 
 The only GPIO pin usage is for LEDs (2) and Buttons (2):
 
@@ -32,7 +32,38 @@ The only GPIO pin usage is for LEDs (2) and Buttons (2):
   PIN 24  PB2  KEY1
   PIN 25  PB3  KEY2
 
-See configs/avr32dev/src/avr32dev_internal.h
+(See configs/avr32dev/src/avr32dev_internal.h).  And also for
+crystals (4), JTAG (1), and USB (1):
+
+  PIN 30  PA11 XIN32
+  PIN 31  PA12 XOUT32
+  PIN 35  PA15 EVTO (JTAG)
+  PIN 39  PA18 X1IN
+  PIN 40  PA19 X1OUT
+  PIN 61  PA26 ID (USB)
+
+All GPIO pins are brought out through connectors J1 (PINS 33-64)
+and J2 (PINS 1-32).
+
+NOTE:  There seems to be some difference in labeling for OSC0 and
+OSC1 between MCUZone.com and Atmel:
+
+  Oscillator pinout
+  -------------------------- --------------------
+  QFP48 QFP64 Pad Oscillator AVR32DEV1
+   PIN   PIN       PIN       LABEL
+  ----- ----- ---- --------- --------------------
+   30    39   PA18 XIN0      X1IN   (12MHz)
+         41   PA28 XIN1      PA28   (no crystal)
+   22    30   PA11 XIN32     XIN32  (32KHz)
+   31    40   PA19 XOUT0     X1OUT  (12Mhz)
+         42   PA29 XOUT1     PA29   (no crystal)
+   23    31   PA12 XOUT32    XOUT32 (32 Khz)
+  ----- ----- ---- --------- --------------------
+
+NOTE: These crystal inputs/outputs are analog signals and my
+assumption is that they need no pin multiplexing setting to
+enable them for the external crystal function.
 
 Serial Connection
 ^^^^^^^^^^^^^^^^^
@@ -61,11 +92,14 @@ PA17 and PA23 are avaiable from the AVR32DEV1:
   RXD  PA17  PIN37 Pin 5            PIN4 RXD (5V TTL/CMOS)
   TXD  PA23  PIN47 Pin 15           PIN3 TXD (5V TTL/CMOS)
                                     PIN2 GND
-									PIN1 VCC (5V)
+                                    PIN1 VCC (5V)
 
   Voltage on GPIO Pins with respect to Ground for TCK, RESET_N, PA03-PA08,
   PA11-PA12, PA18-PA19, PA28-PA31............................-0.3 to 3.6V
   Other Pins ............................................... -0.3 to 5.5V
+
+  I get the 5V from another USB port (using the 5V power cable that normally
+  provides the extra current needed by my USB IDE drive).
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -224,21 +258,21 @@ AVR32 Bootloader
 
   - FLASH: This memory is the internal flash array of the target, including the
     bootloader protected area. E.g. on AT32UC3A0512 (512-kB internal flash),
-	addresses from 0 to 0x7FFFF can be accessed in this memory.
+    addresses from 0 to 0x7FFFF can be accessed in this memory.
   - SECURITY: This memory contains only one byte. The least significant bit
     of this byte reflects the value of the target Security bit which can only
-	be set to 1. Once set, the only accepted commands will be ERASE and START.
-	After an ERASE command, all commands are accepted until the end of the
-	non-volatile ISP session, even if the Security bit is set.
+    be set to 1. Once set, the only accepted commands will be ERASE and START.
+    After an ERASE command, all commands are accepted until the end of the
+    non-volatile ISP session, even if the Security bit is set.
   - CONFIGURATION: This memory contains one byte per target general-purpose
     fuse bit.  The least significant bit of each byte reflects the value of
-	the corresponding GP fuse bit.
+    the corresponding GP fuse bit.
   - BOOTLOADER: This memory contains three bytes concerning the ISP: the ISP
     version in BCD format without the major version number (always 1), the
-	ISP ID0 and the ISP ID1.
+    ISP ID0 and the ISP ID1.
   - SIGNATURE: This memory contains four bytes concerning the part: the product
     manufacturer ID, the product family ID, the product ID and the product
-	revision.
+    revision.
   - USER: This memory is the internal flash User page of the target, with
     addresses from 0 to 0x1FF.
 
@@ -248,105 +282,105 @@ AVR32 Bootloader
 AVR32DEV1 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
-	   be set to:
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
+       be set to:
 
-	   CONFIG_ARCH=avr
+       CONFIG_ARCH=avr
 
-	CONFIG_ARCH_family - For use in C code:
+    CONFIG_ARCH_family - For use in C code:
 
-	   CONFIG_ARCH_AVR=y
+       CONFIG_ARCH_AVR=y
 
-	CONFIG_ARCH_architecture - For use in C code:
+    CONFIG_ARCH_architecture - For use in C code:
 
-	   CONFIG_ARCH_AVR32=y
+       CONFIG_ARCH_AVR32=y
 
-	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+    CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=at32uc3
+       CONFIG_ARCH_CHIP=at32uc3
 
-	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
-	   chip:
+    CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
+       chip:
 
-	   CONFIG_ARCH_CHIP_AT32UC3B0256
+       CONFIG_ARCH_CHIP_AT32UC3B0256
 
-	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
-	   hence, the board that supports the particular chip or SoC.
+    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+       hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=avr32dev1 (for the AV32DEV1 board)
+       CONFIG_ARCH_BOARD=avr32dev1 (for the AV32DEV1 board)
 
-	CONFIG_ARCH_BOARD_name - For use in C code
+    CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_AVR32DEV1
+       CONFIG_ARCH_BOARD_AVR32DEV1
 
-	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
-	   of delay loops
+    CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
+       of delay loops
 
-	CONFIG_ENDIAN_BIG - define if big endian (default is little
-	   endian)
+    CONFIG_ENDIAN_BIG - define if big endian (default is little
+       endian)
 
-	CONFIG_DRAM_SIZE - Describes the installed DRAM (SRAM in this case):
+    CONFIG_DRAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-	   CONFIG_DRAM_SIZE=0x00010000 (64Kb)
+       CONFIG_DRAM_SIZE=0x00010000 (64Kb)
 
-	CONFIG_DRAM_START - The start address of installed DRAM
+    CONFIG_DRAM_START - The start address of installed DRAM
 
-	   CONFIG_DRAM_START=0x20000000
+       CONFIG_DRAM_START=0x20000000
 
-	CONFIG_DRAM_END - Last address+1 of installed RAM
+    CONFIG_DRAM_END - Last address+1 of installed RAM
 
-	   CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
+       CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 
-	CONFIG_ARCH_IRQPRIO - The AT32UC3B0256 supports interrupt prioritization
+    CONFIG_ARCH_IRQPRIO - The AT32UC3B0256 supports interrupt prioritization
 
-	   CONFIG_ARCH_IRQPRIO=y
+       CONFIG_ARCH_IRQPRIO=y
 
-	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
-	   have LEDs
+    CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
+       have LEDs
 
-	CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
-	   stack. If defined, this symbol is the size of the interrupt
-	    stack in bytes.  If not defined, the user task stacks will be
-	  used during interrupt handling.
+    CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+       stack. If defined, this symbol is the size of the interrupt
+        stack in bytes.  If not defined, the user task stacks will be
+      used during interrupt handling.
 
-	CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
+    CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-	CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
+    CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
-	CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
-	   cause a 100 second delay during boot-up.  This 100 second delay
-	   serves no purpose other than it allows you to calibratre
-	   CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
-	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
-	   the delay actually is 100 seconds.
+    CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
+       cause a 100 second delay during boot-up.  This 100 second delay
+       serves no purpose other than it allows you to calibratre
+       CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
+       the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
+       the delay actually is 100 seconds.
 
   Individual subsystems can be enabled:
   
-	CONFIG_AVR32_GPIOIRQ - GPIO interrupt support
-	CONFIG_AVR32_GPIOIRQSETA - Set of GPIOs on PORTA that support interrupts
-	CONFIG_AVR32_GPIOIRQSETB - Set of GPIOs on PORTB that support interrupts
+    CONFIG_AVR32_GPIOIRQ - GPIO interrupt support
+    CONFIG_AVR32_GPIOIRQSETA - Set of GPIOs on PORTA that support interrupts
+    CONFIG_AVR32_GPIOIRQSETB - Set of GPIOs on PORTB that support interrupts
 
-	CONFIG_AVR32_USARTn - Enable support for USARTn
-	CONFIG_AVR32_USARTn_RS232 - Configure USARTn as an RS232 interface.
-	CONFIG_AVR32_USARTn_SPI - Configure USARTn as an SPI interface.
-	CONFIG_AVR32_USARTn_RS485 - Configure USARTn as an RS485 interface.
-	CONFIG_AVR32_USARTn_MAN - Configure USARTn as an Manchester interface.
-	CONFIG_AVR32_USARTn_MODEM - Configure USARTn as an Modem interface.
-	CONFIG_AVR32_USARTn_IRDA - Configure USARTn as an IRDA interface.
-	CONFIG_AVR32_USARTn_ISO786 - Configure USARTn as an ISO786 interface.
+    CONFIG_AVR32_USARTn - Enable support for USARTn
+    CONFIG_AVR32_USARTn_RS232 - Configure USARTn as an RS232 interface.
+    CONFIG_AVR32_USARTn_SPI - Configure USARTn as an SPI interface.
+    CONFIG_AVR32_USARTn_RS485 - Configure USARTn as an RS485 interface.
+    CONFIG_AVR32_USARTn_MAN - Configure USARTn as an Manchester interface.
+    CONFIG_AVR32_USARTn_MODEM - Configure USARTn as an Modem interface.
+    CONFIG_AVR32_USARTn_IRDA - Configure USARTn as an IRDA interface.
+    CONFIG_AVR32_USARTn_ISO786 - Configure USARTn as an ISO786 interface.
 
   AT32UC3B0256 specific device driver settings
 
-	CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
-	   console and ttys0 (default is the USART0).
-	CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
-	   This specific the size of the receive buffer
-	CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
-	   being sent.  This specific the size of the transmit buffer
-	CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
-	CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_USARTn_2STOP - Two stop bits
+    CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
+       console and ttys0 (default is the USART0).
+    CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
+       This specific the size of the receive buffer
+    CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
+       being sent.  This specific the size of the transmit buffer
+    CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
+    CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+    CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_USARTn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
@@ -354,10 +388,10 @@ Configurations
 Each Stellaris LM3S6965 Evaluation Kit configuration is maintained in a
 sudirectory and can be selected as follow:
 
-	cd tools
-	./configure.sh avr32dev1/<subdir>
-	cd -
-	. ./setenv.sh
+    cd tools
+    ./configure.sh avr32dev1/<subdir>
+    cd -
+    . ./setenv.sh
 
 Where <subdir> is one of the following:
 
