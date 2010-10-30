@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_AT91DEV1_SRC_AT91DEV1_INTERNAL_H
-#define _CONFIGS_AT91DEV1_SRC_AT91DEV1_INTERNAL_H
+#ifndef _CONFIGS_AVR32DEV1_SRC_AVR32DEV1_INTERNAL_H
+#define _CONFIGS_AVR32DEV1_SRC_AVR32DEV1_INTERNAL_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include "at91uc3_config.h"
+#include "at32uc3_config.h"
 
 /************************************************************************************
  * Definitions
@@ -123,5 +123,5 @@ extern void up_ledinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_AT91DEV1_SRC_AT91DEV1_INTERNAL_H */
+#endif /* _CONFIGS_AVR32DEV1_SRC_AVR32DEV1_INTERNAL_H */
 

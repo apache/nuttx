@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>
 
-#include "at91uc3_internal.h"
+#include "at32uc3_internal.h"
 #include "avr32dev1_internal.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -67,8 +67,8 @@
 
 void up_ledinitialize(void)
 {
-  at91uc3_configgpio(PINMUX_GPIO_LED1);
-  at91uc3_configgpio(PINMUX_GPIO_LED2);
+  at32uc3_configgpio(PINMUX_GPIO_LED1);
+  at32uc3_configgpio(PINMUX_GPIO_LED2);
 }
 
 /****************************************************************************
@@ -77,8 +77,8 @@ void up_ledinitialize(void)
 
 void up_ledon(int led)
 {
-  at91uc3_gpiowrite(PINMUX_GPIO_LED1, (led != 0));
-  at91uc3_gpiowrite(PINMUX_GPIO_LED2, (led == 2));
+  at32uc3_gpiowrite(PINMUX_GPIO_LED1, (led != 0));
+  at32uc3_gpiowrite(PINMUX_GPIO_LED2, (led == 2));
 }
 
 /****************************************************************************
@@ -87,7 +87,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  at91uc3_gpiowrite(PINMUX_GPIO_LED1, (led == 2));
-  at91uc3_gpiowrite(PINMUX_GPIO_LED2, false);
+  at32uc3_gpiowrite(PINMUX_GPIO_LED1, (led == 2));
+  at32uc3_gpiowrite(PINMUX_GPIO_LED2, false);
 }
 #endif /* CONFIG_ARCH_LEDS */
