@@ -49,7 +49,7 @@ In configs/avr32dev/include/board.h:
   #define PINMUX_USART1_RXD   PINMUX_USART1_RXD_1
   #define PINMUX_USART1_TXD   PINMUX_USART1_TXD_1
 
-In arch/avr/src/at91uc3/at91uc3b_pinmux.h:
+In arch/avr/src/at32uc3/at32uc3b_pinmux.h:
 
   #define PINMUX_USART1_RXD_1 (GPIO_PERIPH | GPIO_FUNCD | GPIO_PORTA | 17)
   #define PINMUX_USART1_TXD_1 (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 23)
@@ -111,7 +111,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/avr/src/at91uc3,
+  3) Set up include pathes:  You will need include/, arch/avr/src/at32uc3,
      arch/avr/src/common, arch/arm/src/avr, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -263,12 +263,12 @@ AVR32DEV1 Configuration Options
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=at91uc3
+	   CONFIG_ARCH_CHIP=at32uc3
 
 	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
 	   chip:
 
-	   CONFIG_ARCH_CHIP_AT91UC3B0256
+	   CONFIG_ARCH_CHIP_AT32UC3B0256
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
@@ -297,7 +297,7 @@ AVR32DEV1 Configuration Options
 
 	   CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 
-	CONFIG_ARCH_IRQPRIO - The AT91UC3B0256 supports interrupt prioritization
+	CONFIG_ARCH_IRQPRIO - The AT32UC3B0256 supports interrupt prioritization
 
 	   CONFIG_ARCH_IRQPRIO=y
 
@@ -335,7 +335,7 @@ AVR32DEV1 Configuration Options
 	CONFIG_AVR32_USARTn_IRDA - Configure USARTn as an IRDA interface.
 	CONFIG_AVR32_USARTn_ISO786 - Configure USARTn as an ISO786 interface.
 
-  AT91UC3B0256 specific device driver settings
+  AT32UC3B0256 specific device driver settings
 
 	CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
 	   console and ttys0 (default is the USART0).

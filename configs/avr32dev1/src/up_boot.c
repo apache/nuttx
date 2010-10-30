@@ -47,7 +47,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "at91uc3_internal.h"
+#include "at32uc3_internal.h"
 #include "avr32dev1_internal.h"
 
 /************************************************************************************

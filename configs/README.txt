@@ -805,7 +805,7 @@ Supported Boards
 
 configs/avr32dev1
     This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
-    based on the Atmel AT91UC3B0256 MCU and uses a specially patched
+    based on the Atmel AT32UC3B0256 MCU and uses a specially patched
     version of the GNU toolchain:  The patches provide support for the
     AVR32 family.  That patched GNU toolchain is available only from the
     Atmel website.  STATUS: Under development.

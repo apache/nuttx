@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "at91uc3_config.h"
+#include "at32uc3_config.h"
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -48,7 +48,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "at91uc3_internal.h"
+#include "at32uc3_internal.h"
 #include "avr32dev1_internal.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -75,8 +75,8 @@
 
 void up_buttoninit(void)
 {
-  (void)at91uc3_configgpio(PINMUX_GPIO_BUTTON1);
-  (void)at91uc3_configgpio(PINMUX_GPIO_BUTTON2);
+  (void)at32uc3_configgpio(PINMUX_GPIO_BUTTON1);
+  (void)at32uc3_configgpio(PINMUX_GPIO_BUTTON2);
 }
 
 /****************************************************************************
@@ -87,8 +87,8 @@ uint8_t up_buttons(void)
 {
   uint8_t retval;
 
-  retval  = at91uc3_gpioread(PINMUX_GPIO_BUTTON1) ? 0 : BUTTON1;
-  retval |= at91uc3_gpioread(PINMUX_GPIO_BUTTON2) ? 0 : BUTTON2;
+  retval  = at32uc3_gpioread(PINMUX_GPIO_BUTTON1) ? 0 : BUTTON1;
+  retval |= at32uc3_gpioread(PINMUX_GPIO_BUTTON2) ? 0 : BUTTON2;
 
   return retval;
 }
