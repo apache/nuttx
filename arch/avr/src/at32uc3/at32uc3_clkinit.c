@@ -55,13 +55,13 @@
 
 #if defined(AVR32_CLOCK_OSC0) || \
     (defined (AVR32_CLOCK_PLL0) && defined(AVR32_CLOCK_PLL0_OSC0)) || \
-    (defined (AVR32_CLOCK_PLL0) && defined(AVR32_CLOCK_PLL0_OSC0))
+    (defined (AVR32_CLOCK_PLL1) && defined(AVR32_CLOCK_PLL1_OSC0))
 #  define NEED_OSC0
 #endif
 
 #if defined(AVR32_CLOCK_OSC1) || \
     (defined (AVR32_CLOCK_PLL0) && defined(AVR32_CLOCK_PLL0_OSC1)) || \
-    (defined (AVR32_CLOCK_PLL1) && defined(AVR32_CLOCK_PLL0_OSC1))
+    (defined (AVR32_CLOCK_PLL1) && defined(AVR32_CLOCK_PLL1_OSC1))
 #  define NEED_OSC1
 #endif
 
