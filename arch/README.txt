@@ -229,9 +229,9 @@ arch/avr
     arch/avr/include/avr32 and arch/avr/src/avr32
       Common support for all AVR32 MCUs
 
-    arch/avr/include/at91uc3 and arch/avr/src/at91uc3
-      Support specifically for the AT91UC3Bxxx family (specifically only for
-      the AT91UC3B0256 at the moment).
+    arch/avr/include/at32uc3 and arch/avr/src/at32uc3
+      Support specifically for the AT32UC3Bxxx family (specifically only for
+      the AT32UC3B0256 at the moment).
 
 arch/hc
     This directory is dedicated to ports to the Freescale HC family.
