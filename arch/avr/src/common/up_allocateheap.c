@@ -68,10 +68,9 @@
  * Name: up_allocate_heap
  *
  * Description:
- *   The heap may be statically allocated by
- *   defining CONFIG_HEAP_BASE and CONFIG_HEAP_SIZE.  If these
- *   are not defined, then this function will be called to
- *   dynamically set aside the heap region.
+ *   The heap may be statically allocated by defining CONFIG_HEAP_BASE and 
+ *   CONFIG_HEAP_SIZE.  If these are not defined, then this function will be
+ *   called to dynamically set aside the heap region.
  *
  ****************************************************************************/
 
