@@ -48,6 +48,7 @@
 
 #include "chip.h"
 #include "at32uc3_internal.h"
+#include "at32uc3_pm.h"
 #include "at32uc3_rtc.h"
 
 /****************************************************************************
@@ -160,6 +161,18 @@ int up_timerisr(int irq, uint32_t *regs)
 void up_timerinit(void)
 {
   uint32_t regval;
+  
+  /* Enable clocking: "The clock for the RTC bus interface (CLK_RTC) is generated
+   * by the Power Manager. This clock is enabled at reset, and can be disabled
+   * in the Power Manager. It is recommended to disable the RTC before disabling
+   * the clock, to avoid freezing the RTC in an undefined state.
+   */
+
+#if 0
+  regval = getreg32(AVR32_PM_PBAMASK);
+  regval |= PM_PBAMASK_PMRTCEIC;
+  putreg32(regval, AVR32_PM_PBAMASK);
+#endif
 
   /* Configure the RTC.  Source == 32KHz OSC32 */
 
