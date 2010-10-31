@@ -93,7 +93,7 @@
 #define GPIO_PULLUP                (1 << 11) /* Bit 11: Pull-up enable */
 
 /* Output value (Valid only if GPIO_ENABLE and GPIO_OUTPUT)
- * .... .V... .... ....
+ * .... .V.. .... ....
  */
 
 #define GPIO_VALUE                 (1 << 10) /* Bit 10: Output value */
