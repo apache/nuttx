@@ -19,6 +19,7 @@ Contents
    - Link Address
    - Entering the ISP
    - BatchISP
+ * Reset
  * AVR32DEV1 Configuration Options
  * Configurations
 
@@ -278,6 +279,14 @@ AVR32 Bootloader
 
   "For further details about BatchISP commands, launch batchisp -h or see the
    help files installed with FLIP ..."
+
+Reset
+^^^^^
+
+   The AVR32DEV1 reset button is not useful for restarting the program.  It
+   seems that, after the reset, the RTC is left is a bad state and is constantly
+   busy (this might be the fault of the bootloader???).  There does not seem
+   to be any way around this except for power cycling the board.
 
 AVR32DEV1 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

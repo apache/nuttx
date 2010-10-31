@@ -119,7 +119,7 @@
 
 static void rtc_waitnotbusy(void)
 {
-  while ((getreg32(AVR32_RTC_CTRL) & RTC_CTRL_BUSY) == 0);
+  while ((getreg32(AVR32_RTC_CTRL) & RTC_CTRL_BUSY) != 0);
 }
 
 /****************************************************************************
