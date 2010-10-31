@@ -108,8 +108,8 @@ static inline void up_enableosc32(void)
   /* Enable the 32-kHz clock */
 
   regval = getreg32(AVR32_PM_OSCCTRL32);
-  regval &= ~PM_OSCCTRL_STARTUP_MASK;
-  regval |= PM_OSCCTRL32_EN|(AVR32_OSC32STARTUP << PM_OSCCTRL_STARTUP_SHIFT);
+  regval &= ~PM_OSCCTRL32_STARTUP_MASK;
+  regval |= PM_OSCCTRL32_EN|(AVR32_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
   putreg32(regval, AVR32_PM_OSCCTRL32);
 }
 
@@ -220,7 +220,7 @@ static inline void up_enableosc1(void)
  **************************************************************************/
 
 #ifdef AVR32_CLOCK_PLL0
-static inline void up_enableosc1(void)
+static inline void up_enablepll0(void)
 {
   /* Setup PLL0 */
   
@@ -270,7 +270,7 @@ static inline void up_enableosc1(void)
  **************************************************************************/
 
 #ifdef AVR32_CLOCK_PLL1
-static inline void up_enableosc1(void)
+static inline void up_enablepll1(void)
 {
   /* Setup PLL1 */
   
