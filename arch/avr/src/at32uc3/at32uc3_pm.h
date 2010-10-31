@@ -208,7 +208,7 @@
 #define PM_OSCCTRL32_MODE_MASK      (7 << PM_OSCCTRL32_MODE_SHIFT)
 #  define PM_OSCCTRL32_MODE_EXT     (0 << PM_OSCCTRL32_MODE_SHIFT) /* External clock */
 #  define PM_OSCCTRL32_MODE_XTAL    (1 << PM_OSCCTRL32_MODE_SHIFT) /* Crystal */
-#define PM_OSCCTRL32_STARTUPSHIFT   (16)      /* Bits 16-18: Oscillator Startup Time */
+#define PM_OSCCTRL32_STARTUP_SHIFT  (16)      /* Bits 16-18: Oscillator Startup Time */
 #define PM_OSCCTRL32_STARTUP_MASK   (7 << PM_OSCCTRL32_STARTUP_SHIFT)
 #  define PM_OSCCTRL32_STARTUP_0    (0 << PM_OSCCTRL32_STARTUP_SHIFT) /* Num RCOsc cycles */
 #  define PM_OSCCTRL32_STARTUP_128  (1 << PM_OSCCTRL32_STARTUP_SHIFT) /* " " "   " "    " */
