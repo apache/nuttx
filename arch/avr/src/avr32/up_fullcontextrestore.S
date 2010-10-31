@@ -67,43 +67,52 @@
 up_fullcontextrestore:
 
 	/* Initially, r12 points to the r7 save area. Restore r0-r7.            */
-	/*     07 06 05 04 03 02 01 00 xx xx xx xx xx xx xx xx xx               */
-	/*                             ^r12                                     */
+	/* regs: 07 06 05 04 03 02 01 00 xx xx xx xx xx xx xx xx xx             */
+	/*                               ^r12                                   */
 
 	ldm 	r12++, r0-r7
 	
     /* Now, r12 points to the SP (r13) save area.  Recover the value of     */
 	/* the stack pointer (r13).  We will need to save some temporaries on   */
 	/* the final stack.                                                     */
-	/*     07 06 05 04 03 02 01 00 SP xx xx xx xx xx xx xx xx               */
-	/*                                ^r12                                  */
+	/* regs: 07 06 05 04 03 02 01 00 SP xx xx xx xx xx xx xx xx             */
+	/*                                  ^r12                                */
 
 	ld.w	sp, r12++
 
 	/* Now r12 points to the SR save area.  Skip over the SR for now.       */
-	/*     07 06 05 04 03 02 01 00 SP xx xx xx xx xx xx xx xx               */
-	/*                                   ^r12                               */
+	/* regs: 07 06 05 04 03 02 01 00 SP xx xx xx xx xx xx xx xx             */
+	/*                                     ^r12                             */
 	
-    sub		r12, -2*4
+    sub		r12, -1*4
 
-	/* Get the pc, lr, and r12 (in r8, r9, and r10) and move them to the    */
+	/* Get the pc, lr, and r12 (in r10, r9, and r8) and move them to the    */
     /* stack.  We can now use r12 and lr as scratch registers.              */
-	/*     07 06 05 04 03 02 01 00 SP xx PC LR 12 xx xx xx xx               */
-	/*                                            ^r12                      */
+	/* regs: 07 06 05 04 03 02 01 00 SP xx PC LR 12 xx xx xx xx             */
+	/*                                              ^r12                    */
+	/* stack: lr, r12, pc                                                   */
+	/*        ^sp                                                           */
 
-	ldm		r12++, r8-r10
-	stm		--sp, r8-r10
+	ldm		r12++, r8-r10		/* Get r10=pc, r9=lr, r8=r12                */
+
+#if 0 /* See comments below */
+	stm		--sp, r8-r10		/* Save r12, lr, and pc from the stack      */
+#else
+	st.w	--sp, r10			/* Save R10=PC on the stack                 */
+	st.w	--sp, r8			/* Save R8=r12 on the stack                 */
+	st.w	--sp, r9			/* Save R9=lr on the stack                  */
+#endif
 
 	/* Now r12 now points to the r11 save area.  Restore r8-r11.            */
-	/*     07 06 05 04 03 02 01 00 SP xx PC LR 12 11 10 09  08              */
-	/*                                                         ^r12         */
+	/* regs: 07 06 05 04 03 02 01 00 SP xx PC LR 12 11 10 09 08             */
+	/*                                                          ^r12        */
 	
 	ldm		r12++, r8-r11
 	
 	/* r12 now points +4 beyond the end of the register save area. Restore  */
 	/* SR.  NOTE:  This may enable interrupts!                              */
-	/*     07 06 05 04 03 02 01 00 SP SR PC LR 12 11 10 09  08              */
-	/*                                ^r12-4*8                 ^r12         */
+	/* regs: 07 06 05 04 03 02 01 00 SP SR PC LR 12 11 10 09 08             */
+	/*                                  ^r12-4*8                ^r12        */
 	
 	ld.w	lr, r12[-4*8]
 	mtsr	AVR32_SR, lr
@@ -111,8 +120,14 @@ up_fullcontextrestore:
 	/* Restore PC, LR and r12.  Hmmm.. I need to study the behaviour of ldm */
 	/* when r12,lr, and pc on in ldm reglist16.  I'm not sure that I want   */
 	/* that behavior.                                                       */
+	/* stack: lr, r12, pc                                                   */
+	/*        ^sp                                                           */
 
-/*	ldm		sp++, r12, lr, pc */
-	ldm		sp++, r12, lr
-	ld.w	pc, sp++
+#if 0
+	ldm		sp++, r12, lr, pc	/* Restore r12, lr, and pc from the stack   */
+#else
+	ld.w	lr, sp++			/* Recover lr from the stack                */
+	ld.w	r12, sp++			/* Recover r12 from the stack               */
+	ld.w	pc, sp++			/* Jump to the address on the stack         */
+#endif
 	.end
