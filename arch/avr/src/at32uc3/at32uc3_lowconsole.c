@@ -49,6 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "at32uc3_internal.h"
+#include "at32uc3_pm.h"
 #include "at32uc3_usart.h"
 #include "at32uc3_pinmux.h"
 
@@ -240,10 +241,6 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
 
   usart_reset(usart_base);
 
-  /* Set the baud rate generation register */
-
-  usart_setbaudrate(usart_base, baud);
-
   /* Configure STOP bits */
 
   regval  = USART_MR_MODE_NORMAL|USART_MR_CHMODE_NORMAL;  /* Normal RS-232 mode */
@@ -281,6 +278,10 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
   
   usart_putreg(usart_base, AVR32_USART_MR_OFFSET, regval);
 
+  /* Set the baud rate generation register */
+
+  usart_setbaudrate(usart_base, baud);
+
   /* Enable RX and TX */
 
   regval = usart_getreg(usart_base, AVR32_USART_CR_OFFSET);
@@ -302,12 +303,10 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
 #ifndef CONFIG_USE_EARLYSERIALINIT
 void up_consoleinit(void)
 {
-  /* Enable clocking for the enabled USART modules.  Hmmm... It looks like the
-   * default state for CLK_USART0, USART1 CLK_USART1, and USART2 CLK_USART2 is
-   * "enabled" in the PM's PBAMASK register.
-   */
+  uint32_t pbamask = 0;
+  uint32_t regval;
 
-  /* Setup GPIO pins for each configured USART/UART */
+  /* Setup GPIO pins fand enable module clocking or each configured USART/UART */
 
 #ifdef CONFIG_AVR32_USART0_RS232
   /* PINMUX_USART0_RXD and PINMUX_USART0_TXD must be defined in board.h.  It
@@ -317,6 +316,10 @@ void up_consoleinit(void)
 
   at32uc3_configgpio(PINMUX_USART0_RXD);
   at32uc3_configgpio(PINMUX_USART0_TXD);
+
+  /* Enable clocking to USART0 (This should be the default state after reset) */
+
+  pbamask |= PM_PBAMASK_USART0;
 
 #endif
 #ifdef CONFIG_AVR32_USART1_RS232
@@ -329,6 +332,10 @@ void up_consoleinit(void)
   at32uc3_configgpio(PINMUX_USART1_RXD);
   at32uc3_configgpio(PINMUX_USART1_TXD);
 
+  /* Enable clocking to USART1 (This should be the default state after reset) */
+
+  pbamask |= PM_PBAMASK_USART1;
+
 #endif
 #ifdef CONFIG_AVR32_USART2_RS232
   /* PINMUX_USART2_RXD and PINMUX_USART2_TXD must be defined in board.h.  It
@@ -338,7 +345,19 @@ void up_consoleinit(void)
 
   at32uc3_configgpio(PINMUX_USART2_RXD);
   at32uc3_configgpio(PINMUX_USART2_TXD);
+
+  /* Enable clocking to USART2 (This should be the default state after reset) */
+
+  pbamask |= PM_PBAMASK_USART2;
+
 #endif
+
+  /* Enable selected clocks (and disabled unselected clocks) */
+
+  regval = getreg32(AVR32_PM_PBAMASK);
+  regval &= ~(PM_PBAMASK_USART0|PM_PBAMASK_USART1|PM_PBAMASK_USART2);
+  regval |= pbamask;
+  putreg32(regval, AVR32_PM_PBAMASK);
 
   /* Then configure the console here (if it is not going to be configured
    * by up_earlyserialinit()).
@@ -364,7 +383,7 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX to become ready */
 
-  while (usart_getreg(AVR32_CONSOLE_BASE, USART_CSR_TXRDY) == 0);
+  while ((usart_getreg(AVR32_CONSOLE_BASE, AVR32_USART_CSR_OFFSET) & USART_CSR_TXRDY) == 0);
 
   /* Then send the character */
 
