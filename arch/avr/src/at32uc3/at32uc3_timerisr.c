@@ -165,7 +165,7 @@ void up_timerinit(void)
   /* Enable clocking: "The clock for the RTC bus interface (CLK_RTC) is generated
    * by the Power Manager. This clock is enabled at reset, and can be disabled
    * in the Power Manager. It is recommended to disable the RTC before disabling
-   * the clock, to avoid freezing the RTC in an undefined state.
+   * the clock, to avoid freezing the RTC in an undefined state."
    */
 
 #if 0
