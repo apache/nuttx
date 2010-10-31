@@ -111,9 +111,9 @@ void up_initial_state(_TCB *tcb)
   /* Enable or disable interrupts, based on user configuration */
 
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_SR]    = ;
+  xcp->regs[REG_SR]    = avr32_sr() | AVR32_SR_GM_MASK;
 # else
-  xcp->regs[REG_SR]    = 0;
+  xcp->regs[REG_SR]    = avr32_sr() & ~AVR32_SR_GM_MASK;
 # endif
 }
 
