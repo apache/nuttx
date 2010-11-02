@@ -62,9 +62,15 @@ OSC1 between MCUZone.com and Atmel:
    23    31   PA12 XOUT32    XOUT32 (32 Khz)
   ----- ----- ---- --------- --------------------
 
-NOTE: These crystal inputs/outputs are analog signals and my
+NOTE 1: These crystal inputs/outputs are analog signals and my
 assumption is that they need no pin multiplexing setting to
 enable them for the external crystal function.
+
+NOTE 2: There is no support for OSC1.
+
+NOTE 3: There are solder pads for the 32KHz OSC32, but the
+crystal is not populated on my board.  Therefore, the RTC will
+have to run from the (uncalibrated) RCOSC.
 
 Serial Connection
 ^^^^^^^^^^^^^^^^^

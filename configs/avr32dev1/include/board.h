@@ -54,8 +54,10 @@
 /* Oscillator setup:  RCOSC, OSC32, OSC0, OSC1.  Only RCOSC, OSC0, or PLL0 can drive
  * the main clock.
  */
- 
-/* #define AVR32_FRCOSC      15200         RCOSC frequency in Hz */
+
+/* The RCOSC frequency needs to be calibrated! */
+
+#define AVR32_FRCOSC         115000     /* RCOSC frequency in Hz. 115KHz nominal */
 
 #define AVR32_FOSC32         32768      /* OSC32 frequency in Hz */
 #define AVR32_OSC32STARTUP   3          /* OSC32 startup time in RCOSC periods */
@@ -117,10 +119,17 @@
 #undef  AVR32_CLOCK_USB_OSC1
 #define AVR32_CLOCK_USB_DIV   0
 
-/* Main Clock settup: Select OSC0 as the main clock */
+/* Main Clock settup: Select OSC0 as the main clock.
+ *
+ * - A 12Mhz crystal is provided on he board for OSC0.
+ * - The AVR32DEV1 board has no support for OSC1.
+ * - There are pads for he 32Khz OSC32, but it is not populated on the
+ *   board.
+ */
 
 #define AVR32_CLOCK_OSC0      1
-#undef  AVR32_CLOCK_OSC1
+#undef  AVR32_CLOCK_OSC1          /* Not supported */
+#undef  AVR32_CLOCK_OSC32         /* Not populated */
 #undef  AVR32_CLOCK_PLL0
 #undef  AVR32_CLOCK_PLL1
 
