@@ -74,32 +74,61 @@
  *
  * fRTC = fINPUT / 2**(PSEL + 1)
  *
- * Using the 32KHz clock, various RTC counting can be obtained:
+ * Using the 32KHz (actually 32786Hz) clock, various RTC counting can
+ * be obtained:
  *
- * fRTC = 32000 / 2**16 = 32000/65536 = 0.49Hz  -> 2048 ms per tick
- * fRTC = 32000 / 2**15 = 32000/32768 = 0.98Hz  -> 1024 ms per tick
- * fRTC = 32000 / 2**14 = 32000/16384 = 1.95Hz  ->  512 ms per tick
- * fRTC = 32000 / 2**13 = 32000/8192  = 3.9Hz   ->  256 ms per tick
- * fRTC = 32000 / 2**12 = 32000/4096  = 7.8Hz   ->  128 ms per tick
- * fRTC = 32000 / 2**11 = 32000/2048  = 15.6Hz  ->   64 ms per tick
- * fRTC = 32000 / 2**10 = 32000/1024  = 31.3Hz  ->   32 ms per tick
- * fRTC = 32000 / 2**9  = 32000/512   = 62.5Hz  ->   16 ms per tick
- * fRTC = 32000 / 2**8  = 32000/256   = 125Hz   ->    8 ms per tick
- * fRTC = 32000 / 2**7  = 32000/128   = 250Hz   ->    4 ms per tick
- * fRTC = 32000 / 2**6  = 32000/64    = 500Hz   ->    2 ms per tick
- * fRTC = 32000 / 2**5  = 32000/32    = 1KHz    ->    1 ms per tick
- * fRTC = 32000 / 2**4  = 32000/16    = 2KHz    ->  500 us per tick
- * fRTC = 32000 / 2**3  = 32000/8     = 4KHz    ->  250 us per tick
- * fRTC = 32000 / 2**2  = 32000/4     = 8KHz    ->  125 us per tick
- * fRTC = 32000 / 2                   = 16KHz   -> 62.5 us per tick
+ * fRTC = 32768 / 2**16 = 32768/65536 = 0.5Hz  -> 2000 ms per tick
+ * fRTC = 32768 / 2**15 = 32768/32768 = 1.0Hz  -> 1000 ms per tick
+ * fRTC = 32768 / 2**14 = 32768/16384 = 2.0Hz  ->  500 ms per tick
+ * fRTC = 32768 / 2**13 = 32768/8192  = 4.0Hz  ->  250 ms per tick
+ * fRTC = 32768 / 2**12 = 32768/4096  = 8.0Hz  ->  125 ms per tick
+ * fRTC = 32768 / 2**11 = 32768/2048  = 16.0Hz ->  62.5 ms per tick
+ * fRTC = 32768 / 2**10 = 32768/1024  = 32.0Hz ->  31.25 ms per tick
+ * fRTC = 32768 / 2**9  = 32768/512   = 64.0Hz ->  15.63 ms per tick
+ * fRTC = 32768 / 2**8  = 32768/256   = 125Hz  ->   7.81 ms per tick
+ * fRTC = 32768 / 2**7  = 32768/128   = 250Hz  ->   3.91 ms per tick
+ * fRTC = 32768 / 2**6  = 32768/64    = 500Hz  ->   1.95 ms per tick
+ * fRTC = 32768 / 2**5  = 32768/32    = 1KHz   ->   0.98 ms per tick
+ * fRTC = 32768 / 2**4  = 32768/16    = 2KHz   -> 488.28 us per tick
+ * fRTC = 32768 / 2**3  = 32768/8     = 4KHz   -> 244.14 us per tick
+ * fRTC = 32768 / 2**2  = 32768/4     = 8KHz   -> 122.07 us per tick
+ * fRTC = 32768 / 2                   = 16KHz  ->  61.03 us per tick
  *
- * We'll use PSEL == 1 (fRTC == 125ns) and we will set TOP to 79.
- * Therefore, the TOP interrupt should occur after 79+1=80 counts
- * at a rate of 125us x 80 = 10 ms
+ * We'll use PSEL == 1 (fRTC == 122.07us) and we will set TOP to 81.
+ * Therefore, the TOP interrupt should occur after 81+1=82 counts
+ * at a rate of 122.07us x 82 = 10.01 ms
+ *
+ * Using the RCOSC at a nominal 115KHz, we can do he following:
+ *
+ * fRTC = 115000 / 2**16 = 115000/65536 = 1.754Hz  -> 569.9 ms per tick
+ * fRTC = 115000 / 2**15 = 115000/32768 = 3.509Hz  -> 284.9 ms per tick
+ * fRTC = 115000 / 2**14 = 115000/16384 = 7.019Hz  -> 142.47 ms per tick
+ * fRTC = 115000 / 2**13 = 115000/8192  = 14.04Hz  ->  71.23 ms per tick
+ * fRTC = 115000 / 2**12 = 115000/4096  = 28.08Hz  ->  35.62 ms per tick
+ * fRTC = 115000 / 2**11 = 115000/2048  = 56.15Hz  ->  17.81 ms per tick
+ * fRTC = 115000 / 2**10 = 115000/1024  = 112.3Hz  ->   8.904 ms per tick
+ * fRTC = 115000 / 2**9  = 115000/512   = 224.6Hz  ->   4.452 ms per tick
+ * fRTC = 115000 / 2**8  = 115000/256   = 449.2Hz  ->   2.227 ms per tick
+ * fRTC = 115000 / 2**7  = 115000/128   = 898.4Hz  ->   1.113 ms per tick
+ * fRTC = 115000 / 2**6  = 115000/64    = 1.796KHz ->  556.5 us per tick
+ * fRTC = 115000 / 2**5  = 115000/32    = 3.594KHz ->  278.3 us per tick
+ * fRTC = 115000 / 2**4  = 115000/16    = 7.188KHz ->  139.1 us per tick
+ * fRTC = 115000 / 2**3  = 115000/8     = 14.38KHz ->  69.57 us per tick
+ * fRTC = 115000 / 2**2  = 115000/4     = 28.75KHz ->  34.78 us per tick
+ * fRTC = 115000 / 2                    = 57.50KHz -> 17l.39 us per tick
+ *
+ * We'll use PSEL == 3 (fRTC == 69.57ns) and we will set TOP to 79.
+ * Therefore, the TOP interrupt should occur after 143+1=144 counts
+ * at a rate of 69.57us x 144 = 10.02 ms
  */
  
-#define AV32_PSEL 15
-#define AV32_TOP (80-1)
+#ifdef AVR32_CLOCK_OSC32
+#  define AV32_PSEL 1
+#  define AV32_TOP (82-1)
+#else
+#  define AV32_PSEL 3
+#  define AV32_TOP (144-1)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -161,7 +190,7 @@ int up_timerisr(int irq, uint32_t *regs)
 void up_timerinit(void)
 {
   uint32_t regval;
-  
+
   /* Enable clocking: "The clock for the RTC bus interface (CLK_RTC) is generated
    * by the Power Manager. This clock is enabled at reset, and can be disabled
    * in the Power Manager. It is recommended to disable the RTC before disabling
@@ -177,8 +206,13 @@ void up_timerinit(void)
   /* Configure the RTC.  Source == 32KHz OSC32 */
 
   rtc_waitnotbusy();
+#ifdef AVR32_CLOCK_OSC32
   putreg32((RTC_CTRL_CLK32 | (AV32_PSEL << RTC_CTRL_PSEL_SHIFT) | RTC_CTRL_CLKEN),
            AVR32_RTC_CTRL);
+#else
+  putreg32(((AV32_PSEL << RTC_CTRL_PSEL_SHIFT) | RTC_CTRL_CLKEN),
+           AVR32_RTC_CTRL);
+#endif
 
   /* Set the counter value to zero and the TOP value to AVR32_TOP (see above) */
 

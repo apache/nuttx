@@ -94,6 +94,7 @@
  *
  **************************************************************************/
 
+#ifdef AVR32_CLOCK_OSC32
 static inline void up_enableosc32(void)
 {
   uint32_t regval;
@@ -112,6 +113,7 @@ static inline void up_enableosc32(void)
   regval |= PM_OSCCTRL32_EN|(AVR32_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
   putreg32(regval, AVR32_PM_OSCCTRL32);
 }
+#endif
 
 /**************************************************************************
  * Name: up_enableosc0
@@ -439,12 +441,14 @@ static inline void up_usbclock(void)
  *   file.
  *
  **************************************************************************/
-
+ 
 void up_clkinitialize(void)
 {
+#ifdef AVR32_CLOCK_OSC32
   /* Enable the 32KHz oscillator (need by the RTC module) */
 
   up_enableosc32();
+#endif
 
 #ifdef NEED_OSC0
   /* Enable OSC0 using the settings in board.h */
