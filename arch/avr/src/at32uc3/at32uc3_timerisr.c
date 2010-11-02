@@ -203,7 +203,7 @@ void up_timerinit(void)
   putreg32(regval, AVR32_PM_PBAMASK);
 #endif
 
-  /* Configure the RTC.  Source == 32KHz OSC32 */
+  /* Configure the RTC.  Source == 32KHz OSC32 or RC OSC */
 
   rtc_waitnotbusy();
 #ifdef AVR32_CLOCK_OSC32
@@ -217,8 +217,9 @@ void up_timerinit(void)
   /* Set the counter value to zero and the TOP value to AVR32_TOP (see above) */
 
   rtc_waitnotbusy();
-  putreg32(0, AVR32_RTC_VAL);
   putreg32(AV32_TOP, AVR32_RTC_TOP);
+  rtc_waitnotbusy();
+  putreg32(0, AVR32_RTC_VAL);
 
   /* Attach the timer interrupt vector */
 
