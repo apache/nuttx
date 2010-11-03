@@ -20,6 +20,7 @@ Contents
    - Entering the ISP
    - BatchISP
  * Reset
+ * Make Tip
  * AVR32DEV1 Configuration Options
  * Configurations
 
@@ -229,11 +230,11 @@ AVR32 Bootloader
    verify, read) are performed using these buffers."
  
   The following BatchISP command line will erase FLASH, write the nuttx binary
-  into FLASH, and reset the AVR32.  This command line is availabel in the
+  into FLASH, and reset the AVR32.  This command line is available in the
   script config/avr32dev1/tools/doisp.sh:
 
      batchisp -device at32uc3b0256 -hardware usb -operation erase f memory flash \
-     blankcheck loadbuffer nuttx program verify start reset 0
+     blankcheck loadbuffer nuttx.elf program verify start reset 0
 
   "BatchISP main commands available on AT32UC3xxxxx are:
   
@@ -289,10 +290,23 @@ AVR32 Bootloader
 Reset
 ^^^^^
 
-   The AVR32DEV1 reset button is not useful for restarting the program.  It
-   seems that, after the reset, the RTC is left is a bad state and is constantly
-   busy (this might be the fault of the bootloader???).  There does not seem
-   to be any way around this except for power cycling the board.
+   I don't trust the reset button -- if you reset and something weird happens,
+   try a full power cycle.
+
+Make Tip
+^^^^^^^^
+
+   Because this build uses a native Windows toolchain and the native Windows
+   does not understand Cygwin/POSIX paths, the NuttX make sysem does something
+   weird:  It copies the configuration directories instead of simply linking
+   to them (it could, perhaps, use the NTFS mklink command, but it doesn't).
+
+   A consequence of this is that you can easily get confused and get editting
+   a file in one of the linked directories, re-build, and not see your changes.
+   To work around this annoying behavior, I also do the following when I make:
+   
+   make clean_context all <-- Remove and re-copy all of the directories, then make all
+   doisp.sh               <-- Load the code onto the board.
 
 AVR32DEV1 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -409,6 +423,10 @@ sudirectory and can be selected as follow:
     . ./setenv.sh
 
 Where <subdir> is one of the following:
+
+  nsh:
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables only the serial NSH interface.
 
   ostest:
     This configuration directory, performs a simple OS test using
