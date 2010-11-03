@@ -146,6 +146,19 @@ static inline uint32_t avr32_sr(void)
   return sr;
 }
 
+/* Read the interrupt vector base address */
+
+static inline uint32_t avr32_evba(void)
+{
+  uint32_t evba;
+  __asm__ __volatile__ (
+    "mfsr\t%0,%1\n\t"
+    : "=r" (evba)
+    : "i" (AVR32_EVBA)
+  );
+  return evba;
+}
+
 /* Save the current interrupt enable state & disable all interrupts */
 
 static inline irqstate_t irqsave(void)

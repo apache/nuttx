@@ -162,116 +162,116 @@
 /* Group 3 */
 
 #define AVR32_IRQ_BASEIRQGRP3  39
-#define AVR32_IRQ_NREQGRP3      6
+#define AVR32_IRQ_NREQGRP3      7
 
-#define AVR32_IRQ_PDCA0        40 /* 0 Peripheral DMA Controller 0 */
-#define AVR32_IRQ_PDCA1        41 /* 1 Peripheral DMA Controller 1 */
-#define AVR32_IRQ_PDCA2        42 /* 2 Peripheral DMA Controller 2 */
-#define AVR32_IRQ_PDCA3        43 /* 3 Peripheral DMA Controller 3 */
-#define AVR32_IRQ_PDCA4        44 /* 4 Peripheral DMA Controller 4 */
-#define AVR32_IRQ_PDCA5        45 /* 5 Peripheral DMA Controller 5 */
-#define AVR32_IRQ_PDCA6        46 /* 6 Peripheral DMA Controller 6 */
+#define AVR32_IRQ_PDCA0        39 /* 0 Peripheral DMA Controller 0 */
+#define AVR32_IRQ_PDCA1        40 /* 1 Peripheral DMA Controller 1 */
+#define AVR32_IRQ_PDCA2        41 /* 2 Peripheral DMA Controller 2 */
+#define AVR32_IRQ_PDCA3        42 /* 3 Peripheral DMA Controller 3 */
+#define AVR32_IRQ_PDCA4        43 /* 4 Peripheral DMA Controller 4 */
+#define AVR32_IRQ_PDCA5        44 /* 5 Peripheral DMA Controller 5 */
+#define AVR32_IRQ_PDCA6        45 /* 6 Peripheral DMA Controller 6 */
 
 /* Group 4 */
 
-#define AVR32_IRQ_BASEIRQGRP4  47
+#define AVR32_IRQ_BASEIRQGRP4  46
 #define AVR32_IRQ_NREQGRP4      1
 
-#define AVR32_IRQ_FLASHC       47 /* 0 Flash Controller */
+#define AVR32_IRQ_FLASHC       46 /* 0 Flash Controller */
 
 /* Group 5 */
 
-#define AVR32_IRQ_BASEIRQGRP5  48
+#define AVR32_IRQ_BASEIRQGRP5  47
 #define AVR32_IRQ_NREQGRP5      1
 
-#define AVR32_IRQ_USART0       48 /* 0 Universal Synchronous/Asynchronous
+#define AVR32_IRQ_USART0       47 /* 0 Universal Synchronous/Asynchronous
                                    *   Receiver/Transmitter 0 */
 /* Group 6 */
 
-#define AVR32_IRQ_BASEIRQGRP6  49
+#define AVR32_IRQ_BASEIRQGRP6  48
 #define AVR32_IRQ_NREQGRP6      1
 
-#define AVR32_IRQ_USART1       49 /* 0 Universal Synchronous/Asynchronous
+#define AVR32_IRQ_USART1       48 /* 0 Universal Synchronous/Asynchronous
                                    *   Receiver/Transmitter 1 */
 /* Group 7 */
 
-#define AVR32_IRQ_BASEIRQGRP7  50
+#define AVR32_IRQ_BASEIRQGRP7  49
 #define AVR32_IRQ_NREQGRP7      1
 
-#define AVR32_IRQ_USART2       50 /* 0 Universal Synchronous/Asynchronous
+#define AVR32_IRQ_USART2       49 /* 0 Universal Synchronous/Asynchronous
                                    *   Receiver/Transmitter 2 */
 
-#define AVR32_IRQ_BASEIRQGRP8  51
+#define AVR32_IRQ_BASEIRQGRP8  50
 #define AVR32_IRQ_NREQGRP8      0
 
 /* Group 9 */
 
-#define AVR32_IRQ_BASEIRQGRP9  51
+#define AVR32_IRQ_BASEIRQGRP9  50
 #define AVR32_IRQ_NREQGRP9      1
 
-#define AVR32_IRQ_SPI          51 /* 0 Serial Peripheral Interface */
+#define AVR32_IRQ_SPI          50 /* 0 Serial Peripheral Interface */
 
-#define AVR32_IRQ_BASEIRQGRP10 52
+#define AVR32_IRQ_BASEIRQGRP10 51
 #define AVR32_IRQ_NREQGRP10     0
 
 /* Group 11 */
 
-#define AVR32_IRQ_BASEIRQGRP11 52
+#define AVR32_IRQ_BASEIRQGRP11 51
 #define AVR32_IRQ_NREQGRP11     1
 
-#define AVR32_IRQ_TWI          52 /* 0 Two-wire Interface TWI */
+#define AVR32_IRQ_TWI          51 /* 0 Two-wire Interface TWI */
 
 /* Group 12 */
 
-#define AVR32_IRQ_BASEIRQGRP12 53
+#define AVR32_IRQ_BASEIRQGRP12 52
 #define AVR32_IRQ_NREQGRP12     1
 
-#define AVR32_IRQ_PWM          53 /* 0 Pulse Width Modulation Controller */
+#define AVR32_IRQ_PWM          52 /* 0 Pulse Width Modulation Controller */
 
 /* Group 13 */
 
-#define AVR32_IRQ_BASEIRQGRP13 54
+#define AVR32_IRQ_BASEIRQGRP13 53
 #define AVR32_IRQ_NREQGRP13     1
 
-#define AVR32_IRQ_SSC          54 /* 0 Synchronous Serial Controller */
+#define AVR32_IRQ_SSC          53 /* 0 Synchronous Serial Controller */
 
 /* Group 14 */
 
-#define AVR32_IRQ_BASEIRQGRP14 55
+#define AVR32_IRQ_BASEIRQGRP14 54
 #define AVR32_IRQ_NREQGRP14     3
 
-#define AVR32_IRQ_TC0          55 /* 0 Timer/Counter 0 */
-#define AVR32_IRQ_TC1          56 /* 1 Timer/Counter 1 */
-#define AVR32_IRQ_TC2          57 /* 2 Timer/Counter 2 */
+#define AVR32_IRQ_TC0          54 /* 0 Timer/Counter 0 */
+#define AVR32_IRQ_TC1          55 /* 1 Timer/Counter 1 */
+#define AVR32_IRQ_TC2          56 /* 2 Timer/Counter 2 */
 
 /* Group 15 */
 
-#define AVR32_IRQ_BASEIRQGRP15 58
+#define AVR32_IRQ_BASEIRQGRP15 57
 #define AVR32_IRQ_NREQGRP15     1
 
-#define AVR32_IRQ_ADC          58 /* 0 Analog to Digital Converter */
+#define AVR32_IRQ_ADC          57 /* 0 Analog to Digital Converter */
 
-#define AVR32_IRQ_BASEIRQGRP16 59
+#define AVR32_IRQ_BASEIRQGRP16 58
 #define AVR32_IRQ_NREQGRP16     0
 
 /* Group 17 */
 
-#define AVR32_IRQ_BASEIRQGRP17 59
+#define AVR32_IRQ_BASEIRQGRP17 58
 #define AVR32_IRQ_NREQGRP17     1
 
-#define AVR32_IRQ_USBB         59 /* 0 USB 2.0 Interface USBB */
+#define AVR32_IRQ_USBB         58 /* 0 USB 2.0 Interface USBB */
 
 /* Group 18 */
 
-#define AVR32_IRQ_BASEIRQGRP18 60
+#define AVR32_IRQ_BASEIRQGRP18 59
 #define AVR32_IRQ_NREQGRP18     1
 
-#define AVR32_IRQ_ABDAC        60 /* 0 Audio Bitstream DAC */
+#define AVR32_IRQ_ABDAC        59 /* 0 Audio Bitstream DAC */
 
 /* Total number of IRQ numbers */
 
-#define AVR32_IRQ_BADVECTOR    61 /* Not a real IRQ number */
-#define NR_IRQS                61
+#define AVR32_IRQ_BADVECTOR    60 /* Not a real IRQ number */
+#define NR_IRQS                60
 
 /* GPIO IRQ Numbers *********************************************************/
 /* These numbers correspond to GPIO port numbers that have interrupts
