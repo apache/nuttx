@@ -94,7 +94,7 @@ up_switchcontext:
 	mfsr	r10, AVR32_SR
 	sub		r12, -4*(REG_LR+1)
 
-	/* Then "push" PC=LR, LR, SR, and SP as ther are on entry.                      */
+	/* Then "push" PC=LR, LR, SR, and SP as they are on entry.                      */
 	/*     xx xx xx xx xx xx xx xx SP SR PC LR xx xx xx xx xx                       */
 	/*                             ^r12                                             */
 

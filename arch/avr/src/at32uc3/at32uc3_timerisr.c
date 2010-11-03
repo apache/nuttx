@@ -126,7 +126,7 @@
 #  define AV32_PSEL 1
 #  define AV32_TOP (82-1)
 #else
-#  define AV32_PSEL 3
+#  define AV32_PSEL 2
 #  define AV32_TOP (144-1)
 #endif
 
