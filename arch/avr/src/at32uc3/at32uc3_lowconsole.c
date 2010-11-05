@@ -300,7 +300,6 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
  *
  ******************************************************************************/
 
-#ifndef CONFIG_USE_EARLYSERIALINIT
 void up_consoleinit(void)
 {
   uint32_t pbamask = 0;
@@ -368,7 +367,6 @@ void up_consoleinit(void)
                   AVR32_CONSOLE_BITS, (bool)AVR32_CONSOLE_2STOP);
 #endif
 }
-#endif
 
 /******************************************************************************
  * Name: up_lowputc
