@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 27, 2010</p>
+      <p>Last Updated: November 4, 2010</p>
     </td>
   </tr>
 </table>
@@ -1335,18 +1335,23 @@
   <td>
     <p>
       <b>AV32DEV1</b>.
-      This port uses the www.mcuzon.com AVRDEV1 board based on the Atmel AT32UC3B0256 MCU.
+      This port uses the www.mcuzone.com AVRDEV1 board based on the Atmel AT32UC3B0256 MCU.
       This port requires a special GNU avr32 toolchain available from atmel.com website.
       This is a windows native toolchain and so can be used only under Cygwin on Windows.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
-         This port is currently under development.
+         This port is nearing he completion of development.
          All code is complete for the basic NuttX port including header files for all AT32UC3* peripherals.
-         Testing of this port is underway now.
-		 The untest AVR32 is present in the 5.12 release of NuttX.
-		 It is hoped that the first, verified AVR32 port will be released in version 5.13 of NuttX.
+		 The untested AVR32 code was present in the 5.12 release of NuttX.
+         Since then, the basic RTOS port has solidified;
+         the port successfully passes the NuttX OS test (examples/ostest).
+         A NuttShell (NSH) configuration is in place see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>)
+         and is under test now.
+         The basic, verified port will be released in NuttX-5.13.
+         A complete port will include drivers for additional AVR32 UC3 devices -- like SPI and USB --- and will be available in a later release,
+         time permitting.
       </p>
     </ul>
   </td>
@@ -1944,6 +1949,10 @@ nuttx-5.13 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  by Michael Hrabanek.
 	* Fix wild, consistent naming error.  For some reason, I called the at32uc3*
 	  parts at91uc* everywhere.  Fixed by changing lots of files.
+	* configs/avr32dev1/ostest - The AVR32 port now successfully passes the
+	  examples/ostest.  We have a good AVR32 port!
+	* configs/avr32dev1/nsh - Added a configuration to support the NuttShell
+	  (NSH). Testing of this configuration is just beginning.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
