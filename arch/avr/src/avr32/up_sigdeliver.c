@@ -82,7 +82,7 @@
 void up_sigdeliver(void)
 {
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32_t regs[XCPTCONTEXT_REGS];
+  uint32_t regs[XCPTCONTEXT_REGS+3];  /* Why +3? See below */
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
@@ -128,7 +128,20 @@ void up_sigdeliver(void)
   (void)irqsave();
   rtcb->pterrno = saved_errno;
 
-  /* Then restore the correct state for this thread of execution. */
+  /* Then restore the correct state for this thread of execution. This is an
+   * unusual case that must be handled by up_fullcontextresore. This case is
+   * unusal in two ways:
+   *
+   *   1. It is not a context switch between threads.  Rather, up_fullcontextrestore
+   *      must behave more it more like a longjmp within the same task, using
+   *      he same stack.
+   *   2. In this case, up_fullcontextrestore is called with r12 pointing to
+   *      a register save area on the stack to be destroyed.  This is
+   *      dangerous because there is the very real possibility that the new
+   *      stack pointer might overlap with the register save area and hat stack
+   *      usage in up_fullcontextrestore might corrupt the register save data
+   *      before the state is restored.
+   */
 
   up_ledoff(LED_SIGNAL);
   up_fullcontextrestore(regs);
