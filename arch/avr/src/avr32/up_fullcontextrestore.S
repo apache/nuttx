@@ -70,7 +70,10 @@
  *      pointer (hence, interrupts must be disabled), and (b) there is the
  *      very real possibility that the new stack pointer might overlap with
  *      the register save area and stack usage in this function might corrupt
- *      the register save data before the state is restored.
+ *      the register save data before the state is restored.  It turns that
+ *      an extra 3 words in the register save structure size will protect its
+ *      contents (because that is the number of temporaries pushed onto the
+ *      stack).
  *
  * Input Parameters:
  *   r12 = A pointer to the register save area of the thread to be restored.

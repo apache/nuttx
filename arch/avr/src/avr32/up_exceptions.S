@@ -233,8 +233,8 @@ avr32_xcptcommon:
 /*     xx xx xx xx xx xx xx xx xx SR PC LI 12 11 10 SR PC                   */
 /*                                ^                       ^+8*4             */
 
-	ld.w	r11, sp[4*4]
-	ld.w	r12, sp[5*4]
+	ld.w	r12, sp[4*4]
+	ld.w	r11, sp[5*4]
 	stm		--sp, r11-r12
 
 /* Save r8 and r8:                                                          */
