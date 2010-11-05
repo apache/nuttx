@@ -1320,4 +1320,9 @@
 	  by Michael Hrabanek.
 	* Fix wild, consistent naming error.  For some reason, I called the at32uc3*
 	  parts at91uc* everywhere.  Fixed by changing lots of files.
+	* configs/avr32dev1/ostest - The AVR32 port now successfully passes the
+	  examples/ostest.  We have a good AVR32 port!
+	* configs/avr32dev1/nsh - Added a configuration to support the NuttShell
+	  (NSH). Testing of this configuration is just beginning.
+
 

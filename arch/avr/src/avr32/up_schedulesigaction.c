@@ -186,8 +186,8 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.sigdeliver       = sigdeliver;
-          tcb->xcp.saved_pc         = current_regs[REG_PC];
-          tcb->xcp.saved_sr         = current_regs[REG_SR];
+          tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
+          tcb->xcp.saved_sr         = tcb->xcp.regs[REG_SR];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
