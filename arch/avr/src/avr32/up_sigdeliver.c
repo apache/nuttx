@@ -82,7 +82,11 @@
 void up_sigdeliver(void)
 {
   _TCB  *rtcb = (_TCB*)g_readytorun.head;
+#if 0
   uint32_t regs[XCPTCONTEXT_REGS+3];  /* Why +3? See below */
+#else
+  uint32_t regs[XCPTCONTEXT_REGS];
+#endif
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
@@ -140,7 +144,9 @@ void up_sigdeliver(void)
    *      dangerous because there is the very real possibility that the new
    *      stack pointer might overlap with the register save area and hat stack
    *      usage in up_fullcontextrestore might corrupt the register save data
-   *      before the state is restored.
+   *      before the state is restored.  At present, there does not appear to
+   *      be any stack overlap problems.  If there were, then adding 3 words
+   *      to the size of register save structure size will protect its contents.
    */
 
   up_ledoff(LED_SIGNAL);

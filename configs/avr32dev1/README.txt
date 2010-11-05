@@ -432,4 +432,8 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
+    NOTE: Round-robin scheduling is disabled in this test because
+    the RR test in examples/ostest declares data structures that
+    are too large for the poor little uc3 SRAM.
+
 
