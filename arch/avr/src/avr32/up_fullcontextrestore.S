@@ -53,6 +53,28 @@
 /****************************************************************************
  * Name: up_fullcontextrestore
  *
+ * Descripion:
+ *   Restore the full-running contex of a thread.
+ *
+ *   NOTE: Thus function must handle one very strange case.  That is when
+ *   this function is called with up_sigdeliver().  That case is strange in
+ *   two ways:
+ *
+ *   1. It is not a context switch between threads.  Rather, up_fullcontextrestore
+ *      must behave more it more like a longjmp within the same task, using the
+ *      same stack.
+ *   2. In this case, this function is called with r12 pointing to a register
+ *      save area on the stack to be destroyed.  This is dangerous for two
+ *      reasons: (a) there is a period of time where the stack contents still
+ *      contain valid data, but are outside of range protected by the stack
+ *      pointer (hence, interrupts must be disabled), and (b) there is the
+ *      very real possibility that the new stack pointer might overlap with
+ *      the register save area and stack usage in this function might corrupt
+ *      the register save data before the state is restored.
+ *
+ * Input Parameters:
+ *   r12 = A pointer to the register save area of the thread to be restored.
+ *
  * C Prototype:
  *  void up_fullcontextrestore(uint32_t *regs);
  *
