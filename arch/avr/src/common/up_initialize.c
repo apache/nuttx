@@ -51,6 +51,19 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Determine which (if any) console driver to use.  This will probably cause
+ * up_serialinit to be incorrectly called if there is no USART configured to
+ * be an RS-232 device (see as an example arch/avr/src/at32uc23/at32uc3_config.h)
+ * This will probably have to be revisited someday.
+ */
+
+#if CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE)
+#  undef CONFIG_USE_SERIALDRIVER
+#  undef CONFIG_USE_EARLYSERIALINIT
+#elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+#  define CONFIG_USE_SERIALDRIVER 1
+#  define CONFIG_USE_EARLYSERIALINIT 1
+#endif
 
 /****************************************************************************
  * Private Types

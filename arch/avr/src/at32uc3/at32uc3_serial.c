@@ -336,7 +336,7 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint32_t *imr)
 {
   if (imr)
     {
-      *imr = up_serialin(priv, AVR32_USART_IDR_OFFSET);
+      *imr = up_serialin(priv, AVR32_USART_IMR_OFFSET);
     }
 
   /* Disable all interrupts */
@@ -594,7 +594,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
- 
+
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register (or an Rx
