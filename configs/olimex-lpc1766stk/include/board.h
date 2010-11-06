@@ -125,14 +125,14 @@
 /* LED definitions ******************************************************************/
 
                                       /* LED1 LED2 */
-#define LED_STARTED                0  /*  OFF  OFF */
-#define LED_HEAPALLOCATE           0  /*  OFF  OFF */
-#define LED_IRQSENABLED            0  /*  OFF  OFF */
-#define LED_STACKCREATED           1  /*  ON   OFF */
-#define LED_INIRQ                  2  /*  NC   ON  */
-#define LED_SIGNAL                 2  /*  NC   ON  */
-#define LED_ASSERTION              2  /*  NC   ON  */
-#define LED_PANIC                  2  /*  NC   ON  (flashing) */
+#define LED_STARTED                0  /*  OFF  OFF = Still initializing */
+#define LED_HEAPALLOCATE           0  /*  OFF  OFF = Still initializing */
+#define LED_IRQSENABLED            0  /*  OFF  OFF = Still initializing */
+#define LED_STACKCREATED           1  /*  ON   OFF = Initialization complete */
+#define LED_INIRQ                  2  /*  NC   ON  = In an interrupt handler */
+#define LED_SIGNAL                 2  /*  NC   ON  = In a signal handler */
+#define LED_ASSERTION              2  /*  NC   ON  = In an assertion */
+#define LED_PANIC                  2  /*  NC   ON  = Oops! We crashed. (flashing) */
 
 /* Alternate pin selections *********************************************************/
 

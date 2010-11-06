@@ -248,11 +248,44 @@ LEDs
 
   - configs/olimex-lpc1766stk/src/up_leds.c - LED control logic.
 
-  The LPC1766-STK has [tbd] LEDs...
-  If CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for
-  NuttX debug functionality (where NC means "No Change").
+  The LPC1766-STK has two LEDs.  If CONFIG_ARCH_LEDS is defined, these LEDs will
+  be controlled as follows for NuttX debug functionality (where NC means "No Change").
+  Basically,
 
-  [To be provided]
+  LED1:
+  - OFF means that the OS is still initializing. Initialization is very fast so
+    if you see this at all, it probably means that the system is hanging up
+    somewhere in the initialization phases.
+  - ON means that the OS completed initialization.
+
+  LED2:
+  - ON/OFF toggles means that various events are happening.
+  - GLowing: LED2 is turned on and off on every interrupt so even timer interrupts
+    should cause LED2 to glow faintly in the normal case.
+  - Flashing. If the LED2 is flashing at about 1Hz, that means that a crash
+    has occurred.  If CONFIG_ARCH_STACKDUMP=y, you will get some diagnostic
+    information on the console to help debug what happened.
+    Will 
+
+  LED1  LED2      Meaning
+  ----- --------  --------------------------------------------------------------------
+   OFF   OFF      Still initializing and there is no interrupt activity. 
+                  Initialization is very fast so if you see this, it probably means
+                  that the system is hung up somewhere in the initialization phases.
+   OFF   Glowing  Still initializing (see above) but taking interrupts.
+   OFF   ON       This would mean that (1) initialization did not complete but the
+                  software is hung, perhaps in an infinite loop, somewhere inside
+                  of an interrupt handler.
+   OFF   Flashing Ooops!  We crashed before finishing initialization.
+ 
+   ON    OFF      The system has completed initialization, but is apparently not taking
+                  any interrupts.
+   ON    Glowing  This is the normal healthy state: The OS successfully initialized
+                  and is taking interrupts.
+   ON    ON       This would mean that (1) the OS complete initialization, but (2)
+                  the software is hung, perhaps in an infinite loop, somewhere inside
+                  of a signal or interrupt handler.
+   ON    Flashing Ooops!  We crashed sometime after initialization.
 
 Olimex LPC1766-STK Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
