@@ -60,7 +60,7 @@ Installation Directories with Spaces in the Path
   the make system tries to build.
 
   [Actually, that problem is probably not to difficult to fix.  Some
-   Makefiles probably just need some pathes within double quotes]
+   Makefiles probably just need some paths within double quotes]
 
   I work around spaces in the home directory name, by creating a
   new directory that does not contain any spaces, such as /home/nuttx.
@@ -157,19 +157,44 @@ NuttX Buildroot Toolchain
 BUILDING NUTTX
 ^^^^^^^^^^^^^^
 
-NuttX builds in-place in the source tree.  You do not need to create
-any special build directories.  Assuming that your Make.defs is setup
-properly for your tool chain and that setenv.sh contains the path to where
-your cross-development tools are installed, the following steps are all that
-are equired to build NuttX:
+Building
 
-  cd ${TOPDIR}
-  . ./setenv.sh
-  make
+  NuttX builds in-place in the source tree.  You do not need to create
+  any special build directories.  Assuming that your Make.defs is setup
+  properly for your tool chain and that setenv.sh contains the path to where
+  your cross-development tools are installed, the following steps are all that
+  are equired to build NuttX:
 
-At least one configuration (eagle100) requires additional command line
-arguments on the make command.  Read ${TOPDIR}/configs/<board-name>/README.txt
-to see if that applies to your target.
+    cd ${TOPDIR}
+    . ./setenv.sh
+    make
+
+  At least one configuration (eagle100) requires additional command line
+  arguments on the make command.  Read ${TOPDIR}/configs/<board-name>/README.txt
+  to see if that applies to your target.
+
+Re-building 
+
+  Re-building is normally simple -- just type make again.
+
+  But there are some things that can "get you" when you use the Cygwin
+  development environment with Windows native tools.  The native Windows
+  tools do not understand Cygwin's symbolic links, so the NuttX make system
+  does something weird:  It copies the configuration directories instead of
+  linking to them (it could, perhaps, use the NTFS 'mklink' command, but it
+  doesn't).
+
+  A consequence of this is that you can easily get confused when you edit
+  a file in one of the linked (i.e., copied) directories, re-build NuttX,
+  and then not see your changes when you run the program.  That is because
+  build is still using the version of the file in the copied directory, not
+  your modified file! To work around this annoying behavior, do the
+  following when you re-build:
+   
+     make clean_context all
+   
+  This 'make' coimmand will remove of the copied directories, re-copy them,
+  then make NuttX.
 
 CYGWIN BUILD PROBLEMS
 ^^^^^^^^^^^^^^^^^^^^^
@@ -187,7 +212,7 @@ When you install some toolchains (such as Yargarto or CodeSourcery tools),
 they may modify your PATH variable to include a path to their binaries.
 At that location, they make have GNUWin32 versions of the tools.  So you
 might actually be using a version of make that does not understand Cygwin
-pathes.
+paths.
 
 The solution is either:
 

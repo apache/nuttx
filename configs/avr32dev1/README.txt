@@ -297,13 +297,15 @@ Make Tip
 ^^^^^^^^
 
    Because this build uses a native Windows toolchain and the native Windows
-   does not understand Cygwin/POSIX paths, the NuttX make sysem does something
-   weird:  It copies the configuration directories instead of simply linking
-   to them (it could, perhaps, use the NTFS mklink command, but it doesn't).
+   tools do not understand Cygwin's symbolic links, the NuttX make system does
+   something weird:  It copies the configuration directories instead of linking
+   to them (it could, perhaps, use the NTFS 'mklink' command, but it doesn't).
 
-   A consequence of this is that you can easily get confused and get editting
-   a file in one of the linked directories, re-build, and not see your changes.
-   To work around this annoying behavior, I also do the following when I make:
+   A consequence of this is that you can easily get confused when you edit
+   a file in one of the "linked" directories, re-build NuttX, and then not see your
+   changes when you run the program.  That is because build is still using the
+   version of the file in the copied directory, not your modified file! To work
+   around this annoying behavior, do the following when you re-build:
    
    make clean_context all <-- Remove and re-copy all of the directories, then make all
    doisp.sh               <-- Load the code onto the board.
