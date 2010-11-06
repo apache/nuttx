@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_fopen.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,15 +137,30 @@ FAR struct file_struct *lib_fdopen(int fd, FAR const char *mode,
                                    FAR struct filelist *flist,
                                    FAR struct streamlist *slist)
 {
-  FAR struct inode *inode = flist->fl_files[fd].f_inode;
+  FAR struct inode *inode = flist;
   FAR FILE         *stream;
   int               oflags = lib_mode2oflags(mode);
   int               err = OK;
   int               i;
 
+  /* Check input parameters */
+
   if (fd < 0 || !flist || !slist)
     {
       err = EBADF;
+      goto errout;
+    }
+
+  /* Get the inode associated with the file descriptor.  This should
+   * normally be the case if fd >= 0.  But not in the case where the
+   * called attempts to explictly stdin with fdopen(0) but stdin has
+   * been closed.
+   */
+  
+  inode = flist->fl_files[fd].f_inode;
+  if (!inode)
+    {
+      err = ENOENT;
       goto errout;
     }
 

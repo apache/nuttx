@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched_setuptaskfiles.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,8 +105,7 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
   tcb->filelist = files_alloclist();
   if (!tcb->filelist)
     {
-      *get_errno_ptr() = ENOMEM;
-       return ERROR;
+      return -ENOMEM;
     }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */
@@ -118,8 +117,7 @@ int sched_setuptaskfiles(FAR _TCB *tcb)
   tcb->sockets = net_alloclist();
   if (!tcb->sockets)
     {
-      *get_errno_ptr() = ENOMEM;
-      return ERROR;
+      return -ENOMEM;
     }
 
 #endif /* CONFIG_NSOCKET_DESCRIPTORS */

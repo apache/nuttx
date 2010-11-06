@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched_setupidlefiles.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/fs.h>
 #include <nuttx/net.h>
@@ -88,8 +89,7 @@ int sched_setupidlefiles(FAR _TCB *tcb)
   tcb->filelist = files_alloclist();
   if (!tcb->filelist)
     {
-      *get_errno_ptr() = ENOMEM;
-      return ERROR;
+      return -ENOMEM;
     }
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
@@ -99,25 +99,40 @@ int sched_setupidlefiles(FAR _TCB *tcb)
   tcb->sockets = net_alloclist();
   if (!tcb->sockets)
     {
-      *get_errno_ptr() = ENOMEM;
-      return ERROR;
+      return -ENOMEM;
     }
 #endif /* CONFIG_NSOCKET_DESCRIPTORS */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
-  /* Open stdin, dup to get stdout and stderr. */
+  /* Open stdin, dup to get stdout and stderr. This should always
+   * be the first file opened and, hence, should always get file
+   * descriptor 0.
+   */
 
   fd = open("/dev/console", O_RDWR);
   if (fd == 0)
     {
+      /* Successfully opened /dev/console as stdin (fd == 0) */
+
       (void)file_dup2(0, 1);
       (void)file_dup2(0, 2);
     }
   else
     {
-      (void)close(fd);
-      *get_errno_ptr() = ENFILE;
-      return ERROR;
+      /* We failed to open /dev/console OR for some reason, we opened
+       * it and got some file descriptor other than 0.
+       */
+  
+      if (fd >- 0)
+        {
+          slldbg("Open /dev/console fd: %d\n", fd);
+          (void)close(fd);
+        }
+      else
+        {
+          slldbg("Failed to open /dev/console: %d\n", errno);
+        }
+      return -ENFILE;
     }
 
 #if CONFIG_NFILE_STREAMS > 0
