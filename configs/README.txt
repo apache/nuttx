@@ -808,7 +808,9 @@ configs/avr32dev1
     based on the Atmel AT32UC3B0256 MCU and uses a specially patched
     version of the GNU toolchain:  The patches provide support for the
     AVR32 family.  That patched GNU toolchain is available only from the
-    Atmel website.  STATUS: Under development.
+    Atmel website.  STATUS: the ostest configuration is functional, but
+	there are issues with the NSH configuration (thought to be a hardware
+	configuration issue, but that has not been confirmed).
 
 configs/c5471evm
     This is a port to the Spectrum Digital C5471 evaluation board.  The
@@ -824,7 +826,7 @@ configs/demo9s12ne64
 configs/ea3131
     Embedded Artists EA3131 Development bard.  This board is based on the 
     an NXP LPC3131 MCU. This OS is built with the arm-elf toolchain*.
-    STATUS:  This port is complete and reasonably well tested.
+    STATUS:  This port is complete and mature.
 
 configs/eagle100
     Micromint Eagle-100 Development board.  This board is based on the 
@@ -844,16 +846,17 @@ configs/ez80f0910200zco
 configs/lm3s6965-ek
     Stellaris LM3S6965 Evaluation Kit.  This board is based on the 
     an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
-    arm-elf toolchain*.  STATUS:  This port under development.
+    arm-elf toolchain*.  STATUS:  This port is complete and mature.
 
 configs/m68322evb
     This is a work in progress for the venerable m68322evb board from
-    Motorola. This OS is also built with the arm-elf toolchain*.
+    Motorola. This OS is also built with the arm-elf toolchain*.  STATUS:
+	This port was never completed.
 
 configs/mbed
     The configurations in this directory support the mbed board (http://mbed.org)
-    that features the NXP LPC1768 microcontroller.This OS is also built
-    with the arm-elf toolchain*.
+    that features the NXP LPC1768 microcontroller. This OS is also built
+    with the arm-elf toolchain*.  STATUS:  Contributed.
 
 configs/mcu123-lpc214x
     This port is for the NXP LPC2148 as provided on the mcu123.com
@@ -886,18 +889,23 @@ configs/nucleus2g
     features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
     for more information about the Nucleus 2G.
 
+configs/olimex-lpc1766stk
+    This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
+    Linux or Cygwin.  STATUS: under development.
+
 configs/olimex-lpc2378
-    This port uses the Olimex Olimex-lpc2378 board arm-elf toolchain* under
+    This port uses the Olimex-lpc2378 board and a GNU arm-elf toolchain* under
     Linux or Cygwin.  STATUS: ostest and NSH configurations available.
 
 configs/olimex-lpc2378
     This port for the NXP LPC2378 was contributed by Rommel Marcelo.
 
 configs/olimex-strp711
-    This port uses the Olimex STR-P711 board arm-elf toolchain* under Linux or Cygwin.
-    See the http://www.olimex.com/dev/str-p711.html" for futher information.
-    STATUS: Coding for the basic port -- serial console and system timer -- is complete
-    but untested to problems I am having using OpenOCD with a wiggler clone JTAG.
+    This port uses the Olimex STR-P711 board and a GNU arm-elf toolchain* under
+	Linux or Cygwin. See the http://www.olimex.com/dev/str-p711.html" for
+	further information. STATUS: Coding for the basic port -- serial console
+	and system timer -- is complete but untested to problems I am having using
+	OpenOCD with a wiggler clone JTAG.
 
 configs/pjrc-8051
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
