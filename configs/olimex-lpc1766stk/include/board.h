@@ -48,14 +48,14 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-#warning "Review -- these settings are for the Nucleus2G board */
+
 /* NOTE:  The following definitions require lpc17_syscon.h.  It is not included here
  * because the including C file may not have that file in its include path.
  */
 
 #define BOARD_XTAL_FREQUENCY        (12000000)            /* XTAL oscillator frequency */
 #define BOARD_OSCCLK_FREQUENCY      BOARD_XTAL_FREQUENCY  /* Main oscillator frequency */
-#define BOARD_RTCCLK_FREQUENCY      (32000)               /* RTC oscillator frequency */
+#define BOARD_RTCCLK_FREQUENCY      (32768)               /* RTC oscillator frequency */
 #define BOARD_INTRCOSC_FREQUENCY    (4000000)             /* Internal RC oscillator frequency */
 
 /* This is the clock setup we configure for:
@@ -124,50 +124,132 @@
 
 /* LED definitions ******************************************************************/
 
-#define LED_STARTED                0
-#define LED_HEAPALLOCATE           1
-#define LED_IRQSENABLED            2
-#define LED_STACKCREATED           3
-#define LED_INIRQ                  4
-#define LED_SIGNAL                 5
-#define LED_ASSERTION              6
-#define LED_PANIC                  7
+                                      /* LED1 LED2 */
+#define LED_STARTED                0  /*  OFF  OFF */
+#define LED_HEAPALLOCATE           0  /*  OFF  OFF */
+#define LED_IRQSENABLED            0  /*  OFF  OFF */
+#define LED_STACKCREATED           1  /*  ON   OFF */
+#define LED_INIRQ                  2  /*  NC   ON  */
+#define LED_SIGNAL                 2  /*  NC   ON  */
+#define LED_ASSERTION              2  /*  NC   ON  */
+#define LED_PANIC                  2  /*  NC   ON  (flashing) */
 
 /* Alternate pin selections *********************************************************/
-#warning "Review -- these are for the Nucleus2G board */
-/* UART1 -- Not connected */
 
-#define GPIO_UART1_TXD             GPIO_UART1_TXD_1
-#define GPIO_UART1_RXD             GPIO_UART1_RXD_1
-#define GPIO_UART1_CTS             GPIO_UART1_CTS_1
-#define GPIO_UART1_DCD             GPIO_UART1_DCD_1
-#define GPIO_UART1_DSR             GPIO_UART1_DSR_1
-#define GPIO_UART1_DTR             GPIO_UART1_DTR_1
-#define GPIO_UART1_RI              GPIO_UART1_RI_1
-#define GPIO_UART1_RTS             GPIO_UART1_RTS_1
-
-/* UART2 -- Not connected */
-
-#define GPIO_UART2_TXD             GPIO_UART2_TXD_1
-#define GPIO_UART2_RXD             GPIO_UART2_RXD_1
-
-/* UART3 -- Not connected */
-
-#define GPIO_UART3_TXD             GPIO_UART3_TXD_1
-#define GPIO_UART3_RXD             GPIO_UART3_RXD_1
-
-/* Either SPI or SSP0 can drive the MMC/SD slot (SSP0 alternate pin settings are
- * not connected)
+/* CAN1 GPIO                        PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P0[0]/RD1/TXD3/SDA1               46  RD1
+ * P0[1]/TD1/RXD3/SCL1               47  TD1
  */
 
-#define GPIO_SSP0_SCK              GPIO_SSP0_SCK_1
-#define GPIO_SSP0_SSEL             GPIO_SSP0_SSEL_1
-#define GPIO_SSP0_MISO             GPIO_SSP0_MISO_1
-#define GPIO_SSP0_MOSI             GPIO_SSP0_MOSI_1
+#define GPIO_CAN1_RD  GPIO_CAN1_RD_1
+#define GPIO_CAN1_TD  GPIO_CAN1_TD_1
 
-/* SSP1 */
+/* UART0 GPIO                       PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P0[2]/TXD0/AD0[7]                 98  TXD0
+ * P0[3]/RXD0/AD0[6]                 99  RXD0
+ */
 
-#define GPIO_SSP1_SCK              GPIO_SSP1_SCK_1
+/* UART1 GPIO                       PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P0[15]/TXD1/SCK0/SCK              62  TXD1
+ * P0[16]/RXD1/SSEL0/SSEL            63  RXD1
+ * P0[17]/CTS1/MISO0/MISO            61  CTS1
+ * P0[18]/DCD1/MOSI0/MOSI            60  DCD1
+ * P0[19]/DSR1/SDA1                  59  DSR1
+ * P0[20]/DTR1/SCL1                  58  DTR1
+ * P0[22]/RTS1/TD1                   56  RTS1
+ */
+
+#define GPIO_UART1_TXD GPIO_UART1_TXD_1
+#define GPIO_UART1_RXD GPIO_UART1_RXD_1
+#define GPIO_UART1_CTS GPIO_UART1_CTS_1
+#define GPIO_UART1_DCD GPIO_UART1_DCD_1
+#define GPIO_UART1_DSR GPIO_UART1_DSR_1
+#define GPIO_UART1_DTR GPIO_UART1_DTR_1
+#define GPIO_UART1_RTS GPIO_UART1_RTS_1
+
+/* SSP0 GPIO                        PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P1[21]/MCABORT/PWM1[3]/SSEL0      35  SSEL0
+ * P1[20]/MCFB0/PWM1[2]/SCK0         34  SCK0
+ * P1[23]/MCFB1/PWM1[4]/MISO0        37  MISO0
+ * P1[24]/MCFB2/PWM1[5]/MOSI0        38  MOSI0
+ */
+
+#define GPIO_SSP0_SSEL GPIO_SSP0_SSEL_2
+#define GPIO_SSP0_SCK  GPIO_SSP0_SCK_2
+#define GPIO_SSP0_MISO GPIO_SSP0_MISO_2
+#define GPIO_SSP0_MOSI GPIO_SSP0_MOSI_2
+
+/* SSP1 GPIO                        PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     79  SSEL1
+ * P0[7]/I2STX_CLK/SCK1/MAT2[1]      78  SCK1
+ * P0[8]/I2STX_WS/MISO1/MAT2[2]      77  MISO1
+ * P0[9]/I2STX_SDA/MOSI1/MAT2[3]     76  MOSI1
+ */
+
+#define GPIO_SSP1_SCK GPIO_SSP1_SCK_1
+
+/* I2C2 GPIO                        PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P0[10]/TXD2/SDA2/MAT3[0]          48  SDA2
+ * P0[11]/RXD2/SCL2/MAT3[1]          49  SCL2
+ */
+
+/* AD GPIO                          PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P0[24]/AD0[1]/I2SRX_WS/CAP3[1]     8  TEMP
+ * P0[25]/AD0[2]/I2SRX_SDA/TXD3       7  MIC IN
+
+/* USB GPIO                         PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P0[27]/SDA0/USB_SDA               25  USB_SDA
+ * P0[28]/SCL0/USB_SCL               24  USB_SCL
+ * P0[29]/USB_D+                     29  USB_D+
+ * P0[30]/USB_D-                     30  USB_D-
+ * P1[22]/MC0B/USB_PWRD/MAT1[0]      36  USBH_PWRD
+ * P1[27]/CLKOUT/#USB_OVRCR/CAP0[1]  43  #USB_OVRCR
+ * P1[30]/VBUS/AD0[4]                21  VBUS
+ * P2[9]/USB_CONNECT/RXD2            64  USBD_CONNECT
+ */
+
+/* Ethernet GPIO                    PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P1[0]/ENET_TXD0                   95  E_TXD0
+ * P1[1]/ENET_TXD1                   94  E_TXD1
+ * P1[4]/ENET_TX_EN                  93  E_TX_EN
+ * P1[8]/ENET_CRS                    92  E_CRS
+ * P1[9]/ENET_RXD0                   91  E_RXD0
+ * P1[10]/ENET_RXD1                  90  E_RXD1
+ * P1[14]/ENET_RX_ER                 89  E_RX_ER
+ * P1[15]/ENET_REF_CLK               88  E_REF_CLK
+ * P1[16]/ENET_MDC                   87  E_MDC
+ * P1[17]/ENET_MDIO                  86  E_MDIO
+ * P1[18]/USB_UP_LED/PWM1[1]/CAP1[0] 32  USB_UP_LED
+ * P1[19]/MC0A/#USB_PPWR/CAP1[1]     33  #USB_PPWR
+ */
+
+/* Trace GPIO                       PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P2[2]/PWM1[3]/CTS1/TRACEDATA[3]   73  TRACE_D3
+ * P2[3]/PWM1[4]/DCD1/TRACEDATA[2]   70  TRACE_D2
+ * P2[4]/PWM1[5]/DSR1/TRACEDATA[1]   69  TRACE_D1
+ * P2[5]/PWM1[6]/DTR1/TRACEDATA[0]   68  TRACE_D0
+ * P2[6]/PCAP1[0]/RI1/TRACECLK       67  TRACE_CLK
+ */
+
+/* EINT GPIO                       PIN  SIGNAL NAME
+ * -------------------------------- ---- --------------
+ * P2[11]/#EINT1/I2STX_CLK           52  #EINT1
+ */
+
+/* ?
+ *  P0[26]/AD0[3]/AOUT/RXD3            6  AOUT
+ *  P1[31]/SCK1/AD0[5]                20  AIN5
+ */
 
 /************************************************************************************
  * Public Types

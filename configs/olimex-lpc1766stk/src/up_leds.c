@@ -109,7 +109,8 @@ void up_ledinit(void)
   /* Configure all LED GPIO lines */
   led_dumpgpio("up_ledinit() Entry)");
 
-#warning "Not implemented"
+  lpc17_configgpio(LPC1766STK_LED1);
+  lpc17_configgpio(LPC1766STK_LED2);
 
   led_dumpgpio("up_ledinit() Exit");
 }
@@ -120,7 +121,23 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-#warning "Not implemented"
+  switch (led)
+    {
+       default:
+       case 0 : /* STARTED, HEAPALLOCATE, IRQSENABLED */
+        lpc17_gpiowrite(LPC1766STK_LED1, true);
+        lpc17_gpiowrite(LPC1766STK_LED2, true);
+        break;
+
+       case 1 : /* STACKCREATED */
+        lpc17_gpiowrite(LPC1766STK_LED1, false);
+        lpc17_gpiowrite(LPC1766STK_LED2, true);
+        break;
+
+       case 2 : /* INIRQ, SIGNAL, ASSERTION, PANIC */
+        lpc17_gpiowrite(LPC1766STK_LED2, false);
+        break;
+    }
 }
 
 /****************************************************************************
@@ -129,6 +146,15 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-#warning "Not implemented"
+  switch (led)
+    {
+       default:
+       case 0 : /* STARTED, HEAPALLOCATE, IRQSENABLED */
+       case 1 : /* STACKCREATED */
+        lpc17_gpiowrite(LPC1766STK_LED1, true);
+       case 2 : /* INIRQ, SIGNAL, ASSERTION, PANIC */
+        lpc17_gpiowrite(LPC1766STK_LED2, true);
+        break;
+    }
 }
 #endif /* CONFIG_ARCH_LEDS */

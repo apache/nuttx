@@ -20,7 +20,76 @@ Olimex LPC1766-STK development board
 
 GPIO Usage:
 
-  [To be provided]
+  GPIO                             PIN  SIGNAL NAME
+  -------------------------------- ---- --------------
+  P0[0]/RD1/TXD3/SDA1               46  RD1
+  P0[1]/TD1/RXD3/SCL1               47  TD1
+  P0[2]/TXD0/AD0[7]                 98  TXD0
+  P0[3]/RXD0/AD0[6]                 99  RXD0
+  P0[4]/I2SRX_CLK/RD2/CAP2[0]       81  LED2/ACC IRQ
+  P0[5]/I2SRX_WS/TD2/CAP2[1]        80  CENTER
+  P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     79  SSEL1
+  P0[7]/I2STX_CLK/SCK1/MAT2[1]      78  SCK1
+  P0[8]/I2STX_WS/MISO1/MAT2[2]      77  MISO1
+  P0[9]/I2STX_SDA/MOSI1/MAT2[3]     76  MOSI1
+  P0[10]/TXD2/SDA2/MAT3[0]          48  SDA2
+  P0[11]/RXD2/SCL2/MAT3[1]          49  SCL2
+  P0[15]/TXD1/SCK0/SCK              62  TXD1
+  P0[16]/RXD1/SSEL0/SSEL            63  RXD1
+  P0[17]/CTS1/MISO0/MISO            61  CTS1
+  P0[18]/DCD1/MOSI0/MOSI            60  DCD1
+  P0[19]/DSR1/SDA1                  59  DSR1
+  P0[20]/DTR1/SCL1                  58  DTR1
+  P0[21]/RI1/RD1                    57  MMC PWR
+  P0[22]/RTS1/TD1                   56  RTS1
+  P0[23]/AD0[0]/I2SRX_CLK/CAP3[0]    9  BUT1
+  P0[24]/AD0[1]/I2SRX_WS/CAP3[1]     8  TEMP
+  P0[25]/AD0[2]/I2SRX_SDA/TXD3       7  MIC IN
+  P0[26]/AD0[3]/AOUT/RXD3            6  AOUT
+  P0[27]/SDA0/USB_SDA               25  USB_SDA
+  P0[28]/SCL0/USB_SCL               24  USB_SCL
+  P0[29]/USB_D+                     29  USB_D+
+  P0[30]/USB_D-                     30  USB_D-
+  P1[0]/ENET_TXD0                   95  E_TXD0
+  P1[1]/ENET_TXD1                   94  E_TXD1
+  P1[4]/ENET_TX_EN                  93  E_TX_EN
+  P1[8]/ENET_CRS                    92  E_CRS
+  P1[9]/ENET_RXD0                   91  E_RXD0
+  P1[10]/ENET_RXD1                  90  E_RXD1
+  P1[14]/ENET_RX_ER                 89  E_RX_ER
+  P1[15]/ENET_REF_CLK               88  E_REF_CLK
+  P1[16]/ENET_MDC                   87  E_MDC
+  P1[17]/ENET_MDIO                  86  E_MDIO
+  P1[18]/USB_UP_LED/PWM1[1]/CAP1[0] 32  USB_UP_LED
+  P1[19]/MC0A/#USB_PPWR/CAP1[1]     33  #USB_PPWR
+  P1[20]/MCFB0/PWM1[2]/SCK0         34  SCK0
+  P1[21]/MCABORT/PWM1[3]/SSEL0      35  SSEL0
+  P1[22]/MC0B/USB_PWRD/MAT1[0]      36  USBH_PWRD
+  P1[23]/MCFB1/PWM1[4]/MISO0        37  MISO0
+  P1[24]/MCFB2/PWM1[5]/MOSI0        38  MOSI0
+  P1[25]/MC1A/MAT1[1]               39  LED1
+  P1[26]/MC1B/PWM1[6]/CAP0[0]       40  CS_UEXT
+  P1[27]/CLKOUT/#USB_OVRCR/CAP0[1]  43  #USB_OVRCR
+  P1[28]/MC2A/PCAP1[0]/MAT0[0]      44  P1.28
+  P1[29]/MC2B/PCAP1[1]/MAT0[1]      45  P1.29
+  P1[30]/VBUS/AD0[4]                21  VBUS
+  P1[31]/SCK1/AD0[5]                20  AIN5
+  P2[0]/PWM1[1]/TXD1                75  UP
+  P2[1]/PWM1[2]/RXD1                74  DOWN
+  P2[2]/PWM1[3]/CTS1/TRACEDATA[3]   73  TRACE_D3
+  P2[3]/PWM1[4]/DCD1/TRACEDATA[2]   70  TRACE_D2
+  P2[4]/PWM1[5]/DSR1/TRACEDATA[1]   69  TRACE_D1
+  P2[5]/PWM1[6]/DTR1/TRACEDATA[0]   68  TRACE_D0
+  P2[6]/PCAP1[0]/RI1/TRACECLK       67  TRACE_CLK
+  P2[7]/RD2/RTS1                    66  LEFT
+  P2[8]/TD2/TXD2                    65  RIGHT
+  P2[9]/USB_CONNECT/RXD2            64  USBD_CONNECT
+  P2[10]/#EINT0/NMI                 53  ISP_E4
+  P2[11]/#EINT1/I2STX_CLK           52  #EINT1
+  P2[12]/#EINT2/I2STX_WS            51  WAKE-UP
+  P2[13]/#EINT3/I2STX_SDA           50  BUT2
+  P3[25]/MAT0[0]/PWM1[2]            27  LCD_RST
+  P3[26]/STCLK/MAT0[1]/PWM1[3]      26  LCD_BL
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
