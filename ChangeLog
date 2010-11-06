@@ -1319,7 +1319,7 @@
 	* lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
 	  by Michael Hrabanek.
 	* Fix wild, consistent naming error.  For some reason, I called the at32uc3*
-	  parts at91uc* everywhere.  Fixed by changing lots of files.
+	  parts at91uc* everywhere.  Fixed by changing lots of files and directories.
 	* configs/avr32dev1/ostest - The AVR32 port now successfully passes the
 	  examples/ostest.  We have a good AVR32 port!
 	* configs/avr32dev1/nsh - Added a configuration to support the NuttShell
@@ -1327,5 +1327,9 @@
 	  is, very likely, my hardware setup).
 	* lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
 	  not refer to an open file.
+	* configs/olimex-lpc1766stk - Add support for the Olimex LPC1766-STK
+	  development board. (Initial check-in is just a clone of the Nucleus-2G
+	  LPC1768 board logic).
+
 
 

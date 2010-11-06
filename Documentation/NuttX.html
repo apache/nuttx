@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 5, 2010</p>
+      <p>Last Updated: November 6, 2010</p>
     </td>
   </tr>
 </table>
@@ -785,15 +785,15 @@
   This is primarily a bugfix release and includes some important corrections to the code:
   <ul>
     <li>
-	  Fixed an important error in the signal trampoline logic.  Essentially,
-	  interrupts are re-enabled while the signal handler executes, but the
-	  logic to re-disable the interrupts before returning from the signal
-	  handler trampoline was missing.  Under certain circumstances, this
-	  can cause stack corruption.  This was discovered by David Hewson on
-	  an ARM9 platform, but since the code has been leveraged, the bug has
-	  been propogated from ARM to Cortex-M3, AVR32, M16C, SH1, ZNEO, eZ80,
-	  Z8, and Z80 -- almost every architecture. The correction has been
-	  incorporated for all architectures but only verified on a few.
+      Fixed an important error in the signal trampoline logic.  Essentially,
+      interrupts are re-enabled while the signal handler executes, but the
+      logic to re-disable the interrupts before returning from the signal
+      handler trampoline was missing.  Under certain circumstances, this
+      can cause stack corruption.  This was discovered by David Hewson on
+      an ARM9 platform, but since the code has been leveraged, the bug has
+      been propogated from ARM to Cortex-M3, AVR32, M16C, SH1, ZNEO, eZ80,
+      Z8, and Z80 -- almost every architecture. The correction has been
+      incorporated for all architectures but only verified on a few.
     </li>
   </ul>
 </p>
@@ -801,13 +801,13 @@
   Other notable changes in NuttX-5.12 include:
   <ul>
     <li>
-	  A complete port for the AVR32 (AT32UC3B0256) is incorporated in the
-	  source tree.  Testing of this port is underway now.  This release
-	  was made before verifying this port in order to get the important
-	  bugfix in place.
+      A complete port for the AVR32 (AT32UC3B0256) is incorporated in the
+      source tree.  Testing of this port is underway now.  This release
+      was made before verifying this port in order to get the important
+      bugfix in place.
     </li>
     <li>
-	  Other miscellaneous bugfix and enhancements as noted in the ChangeLog.
+      Other miscellaneous bugfix and enhancements as noted in the ChangeLog.
     </li>
   </ul>
 </p>
@@ -1038,8 +1038,8 @@
       </p>
       <p>
           Support for <a href="NuttXDemandPaging.html">on-demand paging</a> has been developed for the EA3131.
-	  That support would all execute of a program in SPI FLASH by paging code sections out of SPI flash as needed.
-	  However, as of this writing, I have not had the opportunity to verify this new feature.
+      That support would all execute of a program in SPI FLASH by paging code sections out of SPI flash as needed.
+      However, as of this writing, I have not had the opportunity to verify this new feature.
       </p>
     </ul>
   </td>
@@ -1231,20 +1231,24 @@
   <td><br></td>
   <td>
     <p>
-      <b>NXP LPC1768</b>.
-      Configurations are available for two boards:
+      <b>NXP LPC1766 and LPC1768</b>.
+      Configurations are available for three boards:
       <ul>
         <li>
-          The Nucleus 2G board from <a href="http://www.2g-eng.com/">2G Engineering</a>, and
+          The Nucleus 2G board from <a href="http://www.2g-eng.com/">2G Engineering</a> (LPC1768),
         </li>
         <li>
-          The mbed board from <a href="http://mbed.org">mbed.org</a> (Contributed by Dave Marples).
+          The mbed board from <a href="http://mbed.org">mbed.org</a> (LPC1768, Contributed by Dave Marples), and
+        </li>
+        <li>
+          The LPC1766-sTK board from <a href="http://www.olimex.com/">Olimex</a> (LPC1766).
         </li>
       </ul>
     </p>
     <p>
-      Both boards feature the NXP LPC1768 MCU and a GNU arm-elf or arm-eabi toolchain* under
-      either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
+      The Nucleus 2G and the mbed boards feature the NXP LPC1768 MCU;
+	  the Olimex LPC1766-STK board features an LPC1766.
+	  All use a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
     </p>
     <ul>
       <p>
@@ -1263,6 +1267,11 @@
       </p>
       <p>
         Support for the mbed board was contributed by Dave Marples and released in NuttX-5.11.
+      </p>
+      <p>
+        Support for the Olimex-LPC1766 is newly added to NuttX and is still undergoing development,
+        test, and integration.
+		Basic support for this board is expected in NuttX-5.13.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1344,12 +1353,21 @@
        <b>STATUS:</b>
          This port is nearing he completion of development.
          All code is complete for the basic NuttX port including header files for all AT32UC3* peripherals.
-		 The untested AVR32 code was present in the 5.12 release of NuttX.
-         Since then, the basic RTOS port has solidified;
-         the port successfully passes the NuttX OS test (examples/ostest).
-         A NuttShell (NSH) configuration is in place see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>)
-         and is under test now.
-         The basic, verified port will be released in NuttX-5.13.
+         The untested AVR32 code was present in the 5.12 release of NuttX.
+         Since then, the basic RTOS port has solidified:
+         <ul>
+           <li>
+             The port successfully passes the NuttX OS test (examples/ostest).
+           </li>
+           <li>
+             A NuttShell (NSH) configuration is in place see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+             Testing of that configuration has been postponed (because it got bumped by the Olimex LPC1766-STK port).
+             Current Status: I think I have a hardware problem with my serial port setup.
+             There is a good chance that the NSH port is complete and functionality, but I am not yet able to demonstrate that.
+             At present, I get nothing coming in the serial RXD line (probably because it is configured wrong or I have the MAX232 connected wrong).
+           </li>
+		 </ul>
+         The basic, port (including the verified examples/ostest configuration) will be released in NuttX-5.13.
          A complete port will include drivers for additional AVR32 UC3 devices -- like SPI and USB --- and will be available in a later release,
          time permitting.
       </p>
@@ -1403,7 +1421,7 @@
       <p>
         <b>STATUS:</b>
         Initial source files released in nuttx-0.4.2.
-        At this point, the port has not been integrated;	the target cannot be built
+        At this point, the port has not been integrated;    the target cannot be built
         because the GNU <code>m16c-elf-ld</code> link fails with  the following message:
       </p>
       <ul>
@@ -1891,47 +1909,47 @@ Other memory:
 <ul><pre>
 nuttx-5.12 2010-10-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* arch/avr - Add a place to support AVR family processors.
-	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
-	  (all of the AVR32 is a work in progress).
-	* arch/avr/include/at32uc3 and arch/avr/src/at32uc3 - Add support
-	  for the AVR32 UC3A/B family of AVR32 MCUs.
-	* confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
-	  the AT32UC3B0256 MCU.  This board is produced by www.mcuzone.com.
-	* include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
-	  lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
-	  imaxabs().
-	* Add include/inttypes.h
-	* arch/hc/src/mc9s12ne64 - This hcs12 port grew a few more files.  But it
-	  is still a long way from complete.
-	* arch/*/src/*/*_sigdeliver.c - Fixed a serious error in the signal
-	  trampoline logic.  Essentially, interrupts are re-enabled while the
-	  signal handler executes, but the logic to re-disable the interrupts
-	  before returning from the signal handler trampoline was missing.  Under
-	  certain circumstances, this can cause stack corruption.  This was
-	  discovered by David Hewson on an ARM9 platform, but since the code
-	  has been leveraged, the bug has been propogated from ARM to Cortex-M3,
-	  AVR32, M16C, SH1, ZNEO, eZ80, Z8, and Z80 -- almost every architecture.
-	  The correction has been incorporated for all architectures but only
-	  verified on a few.
+    * arch/avr - Add a place to support AVR family processors.
+    * arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
+      (all of the AVR32 is a work in progress).
+    * arch/avr/include/at32uc3 and arch/avr/src/at32uc3 - Add support
+      for the AVR32 UC3A/B family of AVR32 MCUs.
+    * confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
+      the AT32UC3B0256 MCU.  This board is produced by www.mcuzone.com.
+    * include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
+      lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
+      imaxabs().
+    * Add include/inttypes.h
+    * arch/hc/src/mc9s12ne64 - This hcs12 port grew a few more files.  But it
+      is still a long way from complete.
+    * arch/*/src/*/*_sigdeliver.c - Fixed a serious error in the signal
+      trampoline logic.  Essentially, interrupts are re-enabled while the
+      signal handler executes, but the logic to re-disable the interrupts
+      before returning from the signal handler trampoline was missing.  Under
+      certain circumstances, this can cause stack corruption.  This was
+      discovered by David Hewson on an ARM9 platform, but since the code
+      has been leveraged, the bug has been propogated from ARM to Cortex-M3,
+      AVR32, M16C, SH1, ZNEO, eZ80, Z8, and Z80 -- almost every architecture.
+      The correction has been incorporated for all architectures but only
+      verified on a few.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* Updated to use standard C99 types in stdint.h and
-	  stdbool.h.  This change was necessary for compatibility
-	  with NuttX-5.0 (any beyond).
+    * Updated to use standard C99 types in stdint.h and
+      stdbool.h.  This change was necessary for compatibility
+      with NuttX-5.0 (any beyond).
 
 buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 
-	* configs/cortexm3-defconfig-4.3.3: Added support for NuttX NXFLAT
-	  tools.
-	* configs/arm7tdmi-defconfig-4.3.3: Update to arm7tdmi-defconfig-4.2.4.
-	  Also builds NuttX NXFLAT tools.
-	* configs/m68hc12-defconfig-4.3.3: Update to m68ch11-defconfig.
-	* configs/m68hc12-defconfig-3.4.6: There are problems building GCC
-	  4.3.3 for the hc12.
-	* configs/m32c-defconfig-4.2.4: Added genromfs
-	* configs/m32c-defconfig-4.3.3: Update to m32c-defconfig-4.2.4
+    * configs/cortexm3-defconfig-4.3.3: Added support for NuttX NXFLAT
+      tools.
+    * configs/arm7tdmi-defconfig-4.3.3: Update to arm7tdmi-defconfig-4.2.4.
+      Also builds NuttX NXFLAT tools.
+    * configs/m68hc12-defconfig-4.3.3: Update to m68ch11-defconfig.
+    * configs/m68hc12-defconfig-3.4.6: There are problems building GCC
+      4.3.3 for the hc12.
+    * configs/m32c-defconfig-4.2.4: Added genromfs
+    * configs/m32c-defconfig-4.3.3: Update to m32c-defconfig-4.2.4
 </pre></ul>
 
 <table width ="100%">
@@ -1945,29 +1963,32 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-5.13 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
-	  by Michael Hrabanek.
-	* Fix wild, consistent naming error.  For some reason, I called the at32uc3*
-	  parts at91uc* everywhere.  Fixed by changing lots of files.
-	* configs/avr32dev1/ostest - The AVR32 port now successfully passes the
-	  examples/ostest.  We have a good AVR32 port!
-	* configs/avr32dev1/nsh - Added a configuration to support the NuttShell
-	  (NSH). As of this writing, here is a problem receiving serial data (this
-	  is, very likely, my hardware setup).
-	* lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
-	  not refer to an open file.
+    * lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
+      by Michael Hrabanek.
+    * Fix wild, consistent naming error.  For some reason, I called the at32uc3*
+      parts at91uc* everywhere.  Fixed by changing lots of files and directories.
+    * configs/avr32dev1/ostest - The AVR32 port now successfully passes the
+      examples/ostest.  We have a good AVR32 port!
+    * configs/avr32dev1/nsh - Added a configuration to support the NuttShell
+      (NSH). As of this writing, here is a problem receiving serial data (this
+      is, very likely, my hardware setup).
+    * lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
+      not refer to an open file.
+    * configs/olimex-lpc1766stk - Add support for the Olimex LPC1766-STK
+      development board. (Initial check-in is just a clone of the Nucleus-2G
+      LPC1768 board logic).
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-1.9 2010-xx-xx <spudmonkey@racsa.co.cr>
 
-	* configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
-	* configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
-	  arm926
-	* toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
-	* toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
-	  GDB 6.8 won't build because the tarball was released with -Werror enabled and
-	  the build stops on the first warning.
+    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
+    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
+      arm926
+    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
+    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
+      GDB 6.8 won't build because the tarball was released with -Werror enabled and
+      the build stops on the first warning.
 
 </pre></ul>
 
