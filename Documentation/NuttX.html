@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 4, 2010</p>
+      <p>Last Updated: November 5, 2010</p>
     </td>
   </tr>
 </table>
@@ -1952,7 +1952,10 @@ nuttx-5.13 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* configs/avr32dev1/ostest - The AVR32 port now successfully passes the
 	  examples/ostest.  We have a good AVR32 port!
 	* configs/avr32dev1/nsh - Added a configuration to support the NuttShell
-	  (NSH). Testing of this configuration is just beginning.
+	  (NSH). As of this writing, here is a problem receiving serial data (this
+	  is, very likely, my hardware setup).
+	* lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
+	  not refer to an open file.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

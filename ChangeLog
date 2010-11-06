@@ -1323,6 +1323,9 @@
 	* configs/avr32dev1/ostest - The AVR32 port now successfully passes the
 	  examples/ostest.  We have a good AVR32 port!
 	* configs/avr32dev1/nsh - Added a configuration to support the NuttShell
-	  (NSH). Testing of this configuration is just beginning.
+	  (NSH). As of this writing, here is a problem receiving serial data (this
+	  is, very likely, my hardware setup).
+	* lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
+	  not refer to an open file.
 
 
