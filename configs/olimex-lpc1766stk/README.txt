@@ -1,79 +1,26 @@
 README
 ^^^^^^
 
-README for NuttX port to the Nucleus 2G LPC1768 board from 2G Engineering
-(http://www.2g-eng.com/)
+README for NuttX port to the Olimex LPC1766-STK development board
 
 Contents
 ^^^^^^^^
 
-  2G-Engineering Nucleus Board
+  Olimex LPC1766-STK development board
   Development Environment
   GNU Toolchain Options
   IDEs
   NuttX buildroot Toolchain
   LEDs
-  Nucleus 2G Configuration Options
+  Olimex LPC1766-STK Configuration Options
   Configurations
 
-Nucleus 2G Board
-^^^^^^^^^^^^^^^^
+Olimex LPC1766-STK development board
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-GPIO Usage
+GPIO Usage:
 
-  P0[0]/RD1/TXD3/SDA1               P0[0]/CAN_RX1
-  P0[1]/TD1/RXD3/SCL                P0[1]/CAN_TX1
-  P0[2]/TXD0/AD0[7]                 TX0
-  P0[3]/RXD0/AD0[6]                 RX0
-  P0[4]                             P0[4]/CAN1_STB
-  P0[5]                             P0[5]/CAN2_STB
-  P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     GPI/O_CS1
-  P0[7]/I2STX_CLK/SCK1/MAT2[1]      SCLK1
-  P0[8]/I2STX_WS/MISO1/MAT2[2]      MISO1
-  P0[9]/I2STX_SDA/MOSI1/MAT2[3]     MOSI1
-  P0[10]                            P0[10]/CAN1_TERM
-  P0[11]                            P0[11]/CAN2_TERM
-  P0[15]/TXD1/SCK0/SCK              MMC_CLK
-  P0[16]/RXD1/SSEL0/SSEL            MMC_CD
-  P0[17]/CTS1/MISO0/MISO            MMC_DATA0
-  P0[18]/DCD1/MOSI0/MOSI            MMC_MISO
-  P0[19]/DSR1/SDA1                  GPI/O_CS2
-  P0[20]/DTR1/SCL1                  GPI/O_CS3
-  P0[21]/RI1/MCIPWR/RD1             P0[21]
-  P0[22]/RTS1/TD1                   P0[22]
-  P0[23]/AD0[0]/I2SRX_CLK/CAP3[0]   AD0
-  P0[24]/AD0[1]/I2SRX_WS/CAP3[1]    AD1
-  P0[25]/AD0[2]/I2SRX_SDA/TXD3      AD2
-  P0[26]/AD0[3]/AOUT/RXD3           AD3
-  P0[27]/SDA0/USB_SDA               SDA
-  P0[28]/SCL0                       SCL
-  P0[29]/USB_D+                     USB+
-  P0[30]/USB_D-                     USB-
-
-  P1[0] - P1[17]                    Not connected
-  P1[18]/USB_UP_LED/PWM1[1]/CAP1[0] USB_LINK
-  P1[19]-P[29]                      P[19]-P[29]
-  P1[30]/VBUS/AD0[4]                USB_+5
-  P1[31]/SCK1/AD0[5]                AD5
-
-  P2[0]                             P2[0]/LED1_A
-  P2[1]                             P2[1]/LED1_B
-  P2[2]                             P2[2]/LED2_A
-  P2[3]                             P2[3]/LED2_B
-  P2[4]                             P2[4]
-  P2[5]/PWM1[6]/DTR1/TRACEDATA[0]   232_POWERAVE
-  P2[6]/PCAP1[0]/RI1/TRACECLK       232_VALID
-  P2[7]/RD2/RTS1                    P2[7]/CAN_RX2
-  P2[8]/TD2/TXD2                    P2[8]/CAN_TX2
-  P2[9]/USB_CONNECT/RXD2            USB_CONNECT
-  P2[10]/EINT0/NMI                  BOOTLOADER
-  P2[11]/EINT1/I2STX_CLK            HEARTBEAT
-  P2[12]/EINT2/I2STX_WS             EXTRA_LED
-  P2[13]/EINT3/I2STX_SDA            5V_ENABLE
-
-  P3[25]-P3[26]                     Not connected
-
-  P4[28]-P4[29]                     P4[28]-P4[29]
+  [To be provided]
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -194,7 +141,7 @@ NuttX buildroot Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh nucleus2g/<sub-dir>
+     ./configure.sh olimex-lpc1766stk/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -222,56 +169,24 @@ NuttX buildroot Toolchain
 LEDs
 ^^^^
 
-  If CONFIG_ARCH_LEDS is defined, then support for the Nucleus-2G LEDs will be
+  If CONFIG_ARCH_LEDS is defined, then support for the LPC1766-STK LEDs will be
   included in the build.  See:
 
-  - configs/nucleus2g/include/board.h - Defines LED constants, types and
+  - configs/olimex-lpc1766stk/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/nucleus2g/src/nucleus2g_internal.h - GPIO settings for the LEDs.
+  - configs/olimex-lpc1766stk/src/lpc1766stk_internal.h - GPIO settings for the LEDs.
 
-  - configs/nucleus2g/src/up_leds.c - LED control logic.
+  - configs/olimex-lpc1766stk/src/up_leds.c - LED control logic.
 
-  The Nucleus2G has 3 LEDs... two on the Babel CAN board and a "heartbeat" LED."
-  The LEDs on the Babel CAN board are capabl of OFF/GREEN/RED/AMBER status.
-  In normal usage, the two LEDs on the Babel CAN board would show CAN status, but if
-  CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for NuttX
-  debug functionality (where NC means "No Change").
+  The LPC1766-STK has [tbd] LEDs...
+  If CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for
+  NuttX debug functionality (where NC means "No Change").
 
-  During the boot phases.  LED1 and LED2 will show boot status.
+  [To be provided]
 
-                                          /* LED1   LED2   HEARTBEAT */
-    #define LED_STARTED                0  /* OFF    OFF    OFF */
-    #define LED_HEAPALLOCATE           1  /* GREEN  OFF    OFF */
-    #define LED_IRQSENABLED            2  /* OFF    GREEN  OFF */
-    #define LED_STACKCREATED           3  /* OFF    OFF    OFF */
-
-    #define LED_INIRQ                  4  /*  NC     NC    ON  (momentary) */
-    #define LED_SIGNAL                 5  /*  NC     NC    ON  (momentary) */
-    #define LED_ASSERTION              6  /*  NC     NC    ON  (momentary) */
-    #define LED_PANIC                  7  /*  NC     NC    ON  (1Hz flashing) */
-
-  After the system is booted, this logic will no longer use LEDs 1 and 2.  They
-  are then available for use the application software using lpc17_led1() and
-  lpc17_led2():
-
-    enum lpc17_ledstate_e
-    {
-      LPC17_LEDSTATE_OFF   = 0,
-      LPC17_LEDSTATE_GREEN = 1,
-      LPC17_LEDSTATE_RED   = 2,
-      LPC17_LEDSTATE_AMBER = (LPC17_LEDSTATE_GREEN|LPC17_LEDSTATE_RED),
-    };
-
-    EXTERN void lpc17_led1(enum lpc17_ledstate_e state);
-    EXTERN void lpc17_led2(enum lpc17_ledstate_e state);
-
-  The heartbeat LED is illuminated during all interrupt and signal procressing.
-  Normally, it will glow dimly to inicate that the LPC17xx is taking interrupts.
-  On an assertion PANIC, it will flash at 1Hz.
-
-Nucleus 2G Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Olimex LPC1766-STK Configuration Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
 	   be set to:
@@ -293,16 +208,16 @@ Nucleus 2G Configuration Options
 	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
 	   chip:
 
-	   CONFIG_ARCH_CHIP_LPC1768=y
+	   CONFIG_ARCH_CHIP_LPC1766=y
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=nucleus2g (for the Nucleus 2G)
+	   CONFIG_ARCH_BOARD=olimex-lpc1766stk (for the Olimex LPC1766-STK)
 
 	CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_NUCLEUS2G=y
+	   CONFIG_ARCH_BOARD_LPC1766STK=y
 
 	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
 	   of delay loops
@@ -348,6 +263,7 @@ Nucleus 2G Configuration Options
 	   the delay actually is 100 seconds.
 
 	Individual subsystems can be enabled:
+	
 	  CONFIG_LPC17_MAINOSC=y
 	  CONFIG_LPC17_PLL0=y
 	  CONFIG_LPC17_PLL1=n
@@ -413,11 +329,11 @@ Nucleus 2G Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Nucleus 2G configuration is maintained in a
+Each Olimex LPC1766-STK configuration is maintained in a
 sudirectory and can be selected as follow:
 
 	cd tools
-	./configure.sh nucleus2g/<subdir>
+	./configure.sh olimex-lpc1766stk/<subdir>
 	cd -
 	. ./setenv.sh
 
