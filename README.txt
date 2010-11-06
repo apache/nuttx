@@ -3,6 +3,7 @@ README
 
   o Installation
   o Configuring NuttX
+  o Toolchains
   o Building NuttX
   o Documentation
 
@@ -18,14 +19,21 @@ Download and Unpack:
   match the various instructions in the documentation and some scripts
   in the source tree.
 
-  That nuttx build directory should reside in a path that contains no
-  spaces in the higher level directory names.  For example, under
+Install Directories with Spaces in the Path
+
+  The nuttx build directory should reside in a path that contains no
+  spaces in any higher level directory name.  For example, under
   Cygwin, your home directory might be formed from your first and last
   names like: "/home/First Last". That will cause strange errors when
   the make system tries to build.
 
   [Actually, that problem is probably not to difficult to fix.  Some
-   Makefiles probably just need some pathes within double quotes]
+   Makefiles probably just need some pathes within double quotes]i
+
+  I work around spaces in the home directory name, by creating a
+  new directory that does not contain any spaces, such as /home/nuttx.
+  Then I install NuttX in /home/nuttx and always build from 
+  /home/nuttx/nuttx.
 
 A Note about Header Files:
 
@@ -84,15 +92,47 @@ easier.  It is used as follows:
   cd ${TOPDIR}/tools
   ./configure.sh <board-name>/<config-dir>
 
+TOOLCHAINS
+^^^^^^^^^^
+
+Cross-Development Toolchains
+
+  In order to build NuttX for your board, you will have to obtain a cross-
+  compiler to generate code for your target CPU.  For each board,
+  configuration, there is a README.txt file (at configs/<board-name>/README.txt).
+  That README file contains suggestions and information about appropriate
+  tools and development environments for use with your board.
+
+  In any case, the script, setenv.sh that was deposited in the top-
+  level directory when NuttX was configured should be edited to set
+  the path to where you installed the toolchain.  The use of setenv.sh
+  is optional but can save a lot of confusion in the future.
+
+NuttX Buildroot Toolchain
+
+  For many configurations, a DIY set of tools is available for NuttX.  These
+  tools can be downloaded from the NuttX SourceForge file repository.  After
+  unpacking the buildroot tarball, you can find instructions for building
+  the tools in the buildroot/configs/README.txt file.
+
+  Check the README.txt file in the configuration director for your board
+  to see if you can use the buildroot toolchain with your board (this
+  README.txt file is located in configs/<board-name>/README.txt).
+
+  This toolchain is available for both the Linux and Cygwin development
+  environments.
+
 BUILDING NUTTX
 ^^^^^^^^^^^^^^
 
 NuttX builds in-place in the source tree.  You do not need to create
 any special build directories.  Assuming that your Make.defs is setup
-properly for your tool chain, the following steps are all that are
-required to build NuttX:
+properly for your tool chain and that setenv.sh contains the path to where
+your cross-development tools are installed, the following steps are all that
+are equired to build NuttX:
 
   cd ${TOPDIR}
+  . ./setenv.sh
   make
 
 At least one configuration (eagle100) requires additional command line
@@ -104,7 +144,7 @@ CYGWIN BUILD PROBLEMS
 
 If you see strange behaviour when building under Cygwin then you may have
 a problem with your PATH variable.  For example, if you see failures to
-locate files that are clearly present, then may mean that you are using
+locate files that are clearly present, that may mean that you are using
 the wrong version of a tool.  For example, you may not be using Cywgin's
 'make' program at /usr/bin/make.  Try:
 
@@ -208,11 +248,13 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   `- README.txt
  |   |- nucleus1g/
  |   |   `- README.txt
- |   |- olimex-strp711/
+ |   |- olimex-lpc17xx/
+ |   |   `- README.txt
+ |   |- olimex-lpc2378/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
- |   |- olimex-lpc2378/
+ |   |- olimex-strp711/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
