@@ -10,6 +10,38 @@ README
 INSTALLATION
 ^^^^^^^^^^^^
 
+Installing Cygwin
+
+  NuttX may be installed and built on a Linux system or on a Windows
+  system if Cygwin is installed.  Installing Cygwin on your Windows PC
+  is simple, but time consuming.  See http://www.cygwin.com/ for
+  installation instructions. Basically you just need to download a
+  tiny setup.exe program and it does the real, internet installation
+  for you.
+
+  Some Cygwin installation tips:
+  
+  1. Install at C:\cygwin
+
+  2. Install EVERYTHING:  "Only the minimal base packages from the
+     Cygwin distribution are installed by default. Clicking on categories
+     and packages in the setup.exe package installation screen will
+     provide you with the ability to control what is installed or updated.
+     Clicking on the "Default" field next to the "All" category will
+     provide you with the opportunity to install every Cygwin package.
+     Be advised that this will download and install hundreds of megabytes
+     to your computer."
+     
+     If you use the "default" installation, you will be missing many
+     of the Cygwin utilities that you will need to build NuttX.  The
+     build will fail in numerous places because of missing packages.
+
+  After installing Cygwin, you will get lots of links for installed
+  tools and shells.  I use the RXVT native shell.  It is fast and reliable
+  and does not require you to run the Cygwin X server (which is neither
+  fast nor reliable).  The rest of these instructions assume that you
+  are at a bash command line prompt in either Linux or in Cygwin shell.
+
 Download and Unpack:
 
   Download and unpack the NuttX tarball.  If you are reading this, then
@@ -19,7 +51,7 @@ Download and Unpack:
   match the various instructions in the documentation and some scripts
   in the source tree.
 
-Install Directories with Spaces in the Path
+Installation Directories with Spaces in the Path
 
   The nuttx build directory should reside in a path that contains no
   spaces in any higher level directory name.  For example, under
@@ -28,7 +60,7 @@ Install Directories with Spaces in the Path
   the make system tries to build.
 
   [Actually, that problem is probably not to difficult to fix.  Some
-   Makefiles probably just need some pathes within double quotes]i
+   Makefiles probably just need some pathes within double quotes]
 
   I work around spaces in the home directory name, by creating a
   new directory that does not contain any spaces, such as /home/nuttx.
