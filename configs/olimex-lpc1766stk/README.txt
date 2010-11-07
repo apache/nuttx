@@ -12,6 +12,7 @@ Contents
   IDEs
   NuttX buildroot Toolchain
   LEDs
+  Using OpenOCD and GDB with an FT2232 JTAG emulator
   Olimex LPC1766-STK Configuration Options
   Configurations
 
@@ -286,6 +287,155 @@ LEDs
                   the software is hung, perhaps in an infinite loop, somewhere inside
                   of a signal or interrupt handler.
    ON    Flashing Ooops!  We crashed sometime after initialization.
+
+Using OpenOCD and GDB with an FT2232 JTAG emulator
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Downloading OpenOCD
+  
+    You can get information about OpenOCD here: http://openocd.berlios.de/web/
+    and you can download it from here. http://sourceforge.net/projects/openocd/files/.
+    To get the latest OpenOCD with more mature lpc17xx, you have to download
+    from the GIT archive.
+    
+      git clone git://openocd.git.sourceforge.net/gitroot/openocd/openocd
+
+    At present, there is only the older, frozen 0.4.0 version.  These, of course,
+    may have changed since I wrote this.
+ 
+  Building OpenOCD under Cygwin:
+
+    You can build OpenOCD for Windows using the Cygwin tools.  Below are a
+    few notes that worked as of November 7, 2010.  Things may have changed
+    by the time you read this, but perhaps the following will be helpful to
+    you:
+    
+    1. Install Cygwin (http://www.cygwin.com/).  My recommendation is to install
+       everything.  There are many tools you will need and it is best just to
+       waste a little disk space and have everthing you need.  Everything will
+       require a couple of gigbytes of disk space.
+
+    2. Create a directory /home/OpenOCD.
+
+    3. Get the FT2232 drivr from http://www.ftdichip.com/Drivers/D2XX.htm and
+       extract it into /home/OpenOCD/ftd2xx
+
+       $ pwd
+       /home/OpenOCD
+       $ ls
+       CDM20802 WHQL Certified.zip
+       $ mkdir ftd2xx
+       $ cd ftd2xx
+       $ unzip ..CDM20802\ WHQL\ Certified.zip 
+       Archive:  CDM20802 WHQL Certified.zip
+       ...
+
+    3. Get the latest OpenOCD source
+    
+       $ pwd
+       /home/OpenOCD
+       $ git clone git://openocd.git.sourceforge.net/gitroot/openocd/openocd
+ 
+       You will then have the source code in /home/OpenOCD/openocd
+
+    4. Build OpenOCD for the FT22322 interface
+
+       $ pwd
+       /home/OpenOCD/openocd
+       $ ./bootstrap 
+
+       Jim is a tiny version of the Tcl scripting language.  It is needed
+       by more recent versions of OpenOCD.  Build libjim.a using the following
+       instructions:
+
+       $ git submodule init
+       $ git submodule update
+       $ cd jimtcl
+       $./configure --with-jim-ext=nvp
+       $ make
+       $ make install
+
+       Configure OpenOCD:
+
+       .$ /configure --enable-maintainer-mode --disable-werror --disable-shared \
+                    --enable-ft2232_ftd2xx --with-ftd2xx-win32-zipdir=/home/OpenOCD/ftd2xx \
+                    LDFLAGS="-L/home/OpenOCD/openocd/jimtcl"
+
+        Then build OpenOCD and its HTML documentation:
+
+        $ make
+        $ make html
+
+        The result of the first make will be the "openocd.exe" will be
+        created in the folder /home/openocd/src.  The following command
+        will install OpenOCD to a standard location (/usr/local/bin)
+        using using this command:
+
+        $ make install
+
+  Helper Scripts.
+
+    I have been using the Olimex ARM-USB-OCD JTAG debugger with the
+    LPC1766-STK (http://www.olimex.com).  OpenOCD requires a configuration
+    file.  I keep the one I used last here:
+    
+      configs/olimex-lpc1766stk/tools/olimex.cfg
+
+    However, the "correct" configuration script to use with OpenOCD may
+    change as the features of OpenOCD evolve.  So you should at least
+    compare that olimex.cfg file with configuration files in
+    /usr/local/share/openocd/scripts/target (or /home/OpenOCD/openocd/tcl/target).
+    As of this writing, there is no script for the lpc1766, but the
+    lpc1768 configurtion can be used after changing the flash size to
+    256Kb.  That is, change:
+
+    flash bank $_FLASHNAME lpc2000 0x0 0x80000 0 0 $_TARGETNAME ...
+
+    To:
+ 
+    flash bank $_FLASHNAME lpc2000 0x0 0x40000 0 0 $_TARGETNAME ...
+    
+    There is also a script on the tools/ directory that I use to start
+    the OpenOCD daemon on my system called oocd.sh.  That script will
+    probably require some modifications to work in another environment:
+  
+    - Possibly the value of OPENOCD_PATH and TARGET_PATH
+    - It assumes that the correct script to use is the one at
+      configs/olimex-lpc1766stk/tools/olimex.cfg
+
+  Starting OpenOCD
+
+    Then you should be able to start the OpenOCD daemon like:
+
+      configs/olimex-lpc1766stk/tools/oocd.sh $PWD
+
+    If you use the setenv.sh file, that the path to oocd.sh will be added
+    to your PATH environment variabl.  So, in that case, the command simplifies
+    to just:
+
+      oocd.sh $PWD
+
+    Where it is assumed that you are executing oocd.sh from the top-level
+    directory where NuttX is installed.  $PWD will be the path to the
+    top-level NuttX directory.
+
+  Connecting GDB
+
+    Once the OpenOCD daemon has been started, you can connect to it via
+    GDB using the following GDB command:
+
+     arm-elf-gdb
+     (gdb) target remote localhost:3333
+
+    And you can load the NuttX ELF file:
+
+     (gdb) symbol-file nuttx
+     (gdb) load nuttx
+
+    OpenOCD will support several special 'monitor' commands:
+  
+     (gdb) monitor reset
+     (gdb) monitor halt
 
 Olimex LPC1766-STK Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

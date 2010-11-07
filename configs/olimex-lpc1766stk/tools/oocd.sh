@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# See configs/olimex-lpc1766stk/README.txt for information about
+# this file.
 
 TOPDIR=$1
 USAGE="$0 <TOPDIR> [-d]"
@@ -8,10 +11,16 @@ if [ -z "${TOPDIR}" ]; then
 	exit 1
 fi
 
-OPENOCD_PATH="/cygdrive/c/OpenOCD/openocd-0.4.0/src"
+# Assume that OpenOCD was installed and at /usr/local/bin.  Uncomment
+# the following to run directly from the build directory
+#OPENOCD_PATH="/home/OpenOCD/openocd/src"
+#TARGET_PATH="/home/OpenOCD/openocd/tcl"
+OPENOCD_PATH="/usr/local/bin"
+TARGET_PATH="/usr/local/share/openocd/scripts"
+
 OPENOCD_EXE=openocd.exe
 OPENOCD_CFG="${TOPDIR}/configs/olimex-lpc1766stk/tools/olimex.cfg"
-OPENOCD_ARGS="-f `cygpath -w ${OPENOCD_CFG}`"
+OPENOCD_ARGS="-f ${OPENOCD_CFG} -s ${TARGET_PATH}"
 
 if [ "X$2" = "X-d" ]; then
 	OPENOCD_ARGS=$OPENOCD_ARGS" -d3"
@@ -32,7 +41,8 @@ if [ ! -f ${OPENOCD_CFG} ]; then
 fi
 
 echo "Starting OpenOCD"
-${OPENOCD_PATH}/${OPENOCD_EXE} ${OPENOCD_ARGS} &
+cd ${OPENOCD_PATH} || { echo "Failed to CD to ${OPENOCD_PATH}"; exit 1; }
+${OPENOCD_EXE} ${OPENOCD_ARGS} &
 echo "OpenOCD daemon started"
 ps -ef | grep openocd
 echo "In GDB: target remote localhost:3333"
