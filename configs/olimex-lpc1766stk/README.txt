@@ -19,7 +19,8 @@ Contents
 Olimex LPC1766-STK development board
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-GPIO Usage:
+  GPIO Usage:
+  -----------
 
   GPIO                             PIN  SIGNAL NAME
   -------------------------------- ---- --------------
@@ -91,6 +92,19 @@ GPIO Usage:
   P2[13]/#EINT3/I2STX_SDA           50  BUT2
   P3[25]/MAT0[0]/PWM1[2]            27  LCD_RST
   P3[26]/STCLK/MAT0[1]/PWM1[3]      26  LCD_BL
+
+  Serial Console
+  --------------
+
+  The LPC1766-STK board has two serial connectors.  One, RS232_0, connects to
+  the LPC1766 USART0.  This is the DB-9 connector next to the power connector.
+  The other RS232_1, connect to the LPC1766 USART1.  This is he DB-9 connector
+  next to the Ethernet connector.
+
+  Simple USART1 is the more flexible USART and since the needs for a serial
+  console are minimal, the more minimal USART0/RS232_0 is used for the NuttX
+  system console.  Of course, this can be changed by editting the NuttX
+  configuration file as discussed below.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -351,13 +365,13 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
        $ git submodule init
        $ git submodule update
        $ cd jimtcl
-       $./configure --with-jim-ext=nvp
+       $ ./configure --with-jim-ext=nvp
        $ make
        $ make install
 
        Configure OpenOCD:
 
-       .$ /configure --enable-maintainer-mode --disable-werror --disable-shared \
+       $ ./configure --enable-maintainer-mode --disable-werror --disable-shared \
                     --enable-ft2232_ftd2xx --with-ftd2xx-win32-zipdir=/home/OpenOCD/ftd2xx \
                     LDFLAGS="-L/home/OpenOCD/openocd/jimtcl"
 
@@ -389,11 +403,11 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     lpc1768 configurtion can be used after changing the flash size to
     256Kb.  That is, change:
 
-    flash bank $_FLASHNAME lpc2000 0x0 0x80000 0 0 $_TARGETNAME ...
+      flash bank $_FLASHNAME lpc2000 0x0 0x80000 0 0 $_TARGETNAME ...
 
     To:
  
-    flash bank $_FLASHNAME lpc2000 0x0 0x40000 0 0 $_TARGETNAME ...
+      flash bank $_FLASHNAME lpc2000 0x0 0x40000 0 0 $_TARGETNAME ...
     
     There is also a script on the tools/ directory that I use to start
     the OpenOCD daemon on my system called oocd.sh.  That script will
