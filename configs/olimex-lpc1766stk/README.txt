@@ -280,7 +280,9 @@ LEDs
   - Flashing. If the LED2 is flashing at about 1Hz, that means that a crash
     has occurred.  If CONFIG_ARCH_STACKDUMP=y, you will get some diagnostic
     information on the console to help debug what happened.
-    Will 
+
+  NOTE:  LED2 is controlled by a jumper labeled: ACC_IRQ/LED2.  That jump must be
+  in the LED2 position in order to support LED2.
 
   LED1  LED2      Meaning
   ----- --------  --------------------------------------------------------------------
