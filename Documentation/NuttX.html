@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 6, 2010</p>
+      <p>Last Updated: November 9, 2010</p>
     </td>
   </tr>
 </table>
@@ -772,42 +772,66 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.12 Release Notes</b>:
+<p><b>nuttx-5.13 Release Notes</b>:
 
 <p>
-  This 59<sup>th</sup> release of NuttX, Version 5.12, was made on October 26, 2010 and is available for download from the
+  This 60<sup>th</sup> release of NuttX, Version 5.13, was made on November 9, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This is primarily a bugfix release and includes some important corrections to the code:
+  Headlines for this release include:
   <ul>
     <li>
-      Fixed an important error in the signal trampoline logic.  Essentially,
-      interrupts are re-enabled while the signal handler executes, but the
-      logic to re-disable the interrupts before returning from the signal
-      handler trampoline was missing.  Under certain circumstances, this
-      can cause stack corruption.  This was discovered by David Hewson on
-      an ARM9 platform, but since the code has been leveraged, the bug has
-      been propogated from ARM to Cortex-M3, AVR32, M16C, SH1, ZNEO, eZ80,
-      Z8, and Z80 -- almost every architecture. The correction has been
-      incorporated for all architectures but only verified on a few.
+      <p>
+        AVR32, www.mcuzone.com AVR32DEV1
+        <ul>
+          <p>
+            The port for the www.mcuzone.com AVRDEV1 board based on the Atmel
+            AT32UC3B0256 MCU was (almost) fully integrated. The port now
+            successfully passes the NuttX OS test (examples/ostest).  A
+            NuttShell (NSH) configuration is in place (see the
+            <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+            Testing of that NSH configuration, however, has been postponed
+            (because it got bumped by the Olimex LPC1766-STK port -- see below)
+          </p>
+          <p>
+            Current Status: I think I have a hardware problem with my serial
+            port setup. There is a good chance that the NSH port is complete
+            and functional, but I am not yet able to demonstrate that. At
+            present, I get nothing coming in the serial RXD line (probably
+            because the pins are configured wrong or I have the MAX232
+            connected wrong).
+          </p>
+          <p>
+            A complete port will include drivers for additional AVR32 UC3
+            devices -- like SPI and USB --- and will be available in a later
+            release, time permitting.
+          </p>
+        </ul>
+      </p>
     </li>
-  </ul>
-</p>
-<p>
-  Other notable changes in NuttX-5.12 include:
-  <ul>
     <li>
-      A complete port for the AVR32 (AT32UC3B0256) is incorporated in the
-      source tree.  Testing of this port is underway now.  This release
-      was made before verifying this port in order to get the important
-      bugfix in place.
+      <p>
+        LPC1766, Olimex LPC1766-STK
+        <ul>
+          <p>
+            Support for the Olimex-LPC1766 is newly added to NuttX and is
+            still undergoing development, test, and integration. Verified
+            configurations for the NuttX OS test and for the NuttShell (NSH,
+            see the <a href="ttp://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+            Additional USB configurations are in the release as well, but
+            they have not yet been verified.  Goals for NuttX-5.14 include:
+            (1) An Ethernet driver, (2) Verified USB support, and (3) SD
+            card support.
+          </p>
+        </ul>
+      </p>
     </li>
     <li>
-      Other miscellaneous bugfix and enhancements as noted in the ChangeLog.
+      Additional changes and bugfixes as detailed in the ChangeLog.
     </li>
   </ul>
 </p>
@@ -1247,8 +1271,8 @@
     </p>
     <p>
       The Nucleus 2G and the mbed boards feature the NXP LPC1768 MCU;
-	  the Olimex LPC1766-STK board features an LPC1766.
-	  All use a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
+      the Olimex LPC1766-STK board features an LPC1766.
+      All use a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
     </p>
     <ul>
       <p>
@@ -1271,7 +1295,11 @@
       <p>
         Support for the Olimex-LPC1766 is newly added to NuttX and is still undergoing development,
         test, and integration.
-		Basic support for this board is expected in NuttX-5.13.
+        Verified configurations for the NuttX OS test and for the NuttShell (NSH,
+        see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>)
+        were released in NuttX-5.13.
+        Additional USB configurations are in the release as well, but they have not yet been verified.
+        Goals for NuttX-5.14 include: (1) An Ethernet driver, (2) Verified USB support, and (3) SD card support.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1351,7 +1379,7 @@
     <ul>
       <p>
        <b>STATUS:</b>
-         This port is nearing he completion of development.
+         This port is has completed all basic development, but there is more that needs to be done.
          All code is complete for the basic NuttX port including header files for all AT32UC3* peripherals.
          The untested AVR32 code was present in the 5.12 release of NuttX.
          Since then, the basic RTOS port has solidified:
@@ -1360,14 +1388,14 @@
              The port successfully passes the NuttX OS test (examples/ostest).
            </li>
            <li>
-             A NuttShell (NSH) configuration is in place see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+             A NuttShell (NSH) configuration is in place (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
              Testing of that configuration has been postponed (because it got bumped by the Olimex LPC1766-STK port).
              Current Status: I think I have a hardware problem with my serial port setup.
-             There is a good chance that the NSH port is complete and functionality, but I am not yet able to demonstrate that.
-             At present, I get nothing coming in the serial RXD line (probably because it is configured wrong or I have the MAX232 connected wrong).
+             There is a good chance that the NSH port is complete and functional, but I am not yet able to demonstrate that.
+             At present, I get nothing coming in the serial RXD line (probably because the pins are configured wrong or I have the MAX232 connected wrong).
            </li>
-		 </ul>
-         The basic, port (including the verified examples/ostest configuration) will be released in NuttX-5.13.
+         </ul>
+         The basic, port (including the verified examples/ostest configuration) was be released in NuttX-5.13.
          A complete port will include drivers for additional AVR32 UC3 devices -- like SPI and USB --- and will be available in a later release,
          time permitting.
       </p>
@@ -1907,31 +1935,22 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.12 2010-10-26 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.13 2010-11-09 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * arch/avr - Add a place to support AVR family processors.
-    * arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
-      (all of the AVR32 is a work in progress).
-    * arch/avr/include/at32uc3 and arch/avr/src/at32uc3 - Add support
-      for the AVR32 UC3A/B family of AVR32 MCUs.
-    * confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
-      the AT32UC3B0256 MCU.  This board is produced by www.mcuzone.com.
-    * include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
-      lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
-      imaxabs().
-    * Add include/inttypes.h
-    * arch/hc/src/mc9s12ne64 - This hcs12 port grew a few more files.  But it
-      is still a long way from complete.
-    * arch/*/src/*/*_sigdeliver.c - Fixed a serious error in the signal
-      trampoline logic.  Essentially, interrupts are re-enabled while the
-      signal handler executes, but the logic to re-disable the interrupts
-      before returning from the signal handler trampoline was missing.  Under
-      certain circumstances, this can cause stack corruption.  This was
-      discovered by David Hewson on an ARM9 platform, but since the code
-      has been leveraged, the bug has been propogated from ARM to Cortex-M3,
-      AVR32, M16C, SH1, ZNEO, eZ80, Z8, and Z80 -- almost every architecture.
-      The correction has been incorporated for all architectures but only
-      verified on a few.
+    * lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
+      by Michael Hrabanek.
+    * Fix wild, consistent naming error.  For some reason, I called the at32uc3*
+      parts at91uc* everywhere.  Fixed by changing lots of files and directories.
+    * configs/avr32dev1/ostest - The AVR32 port now successfully passes the
+      examples/ostest.  We have a good AVR32 port!
+    * configs/avr32dev1/nsh - Added a configuration to support the NuttShell
+      (NSH). As of this writing, here is a problem receiving serial data (this
+      is, very likely, my hardware setup).
+    * lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
+      not refer to an open file.
+    * configs/olimex-lpc1766stk - Add support for the Olimex LPC1766-STK
+      development board.  The OS test and NSH configurations (only) have been
+      verified.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1961,22 +1980,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.13 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
-      by Michael Hrabanek.
-    * Fix wild, consistent naming error.  For some reason, I called the at32uc3*
-      parts at91uc* everywhere.  Fixed by changing lots of files and directories.
-    * configs/avr32dev1/ostest - The AVR32 port now successfully passes the
-      examples/ostest.  We have a good AVR32 port!
-    * configs/avr32dev1/nsh - Added a configuration to support the NuttShell
-      (NSH). As of this writing, here is a problem receiving serial data (this
-      is, very likely, my hardware setup).
-    * lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
-      not refer to an open file.
-    * configs/olimex-lpc1766stk - Add support for the Olimex LPC1766-STK
-      development board. (Initial check-in is just a clone of the Nucleus-2G
-      LPC1768 board logic).
+nuttx-5.14 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
