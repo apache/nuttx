@@ -53,7 +53,7 @@ GARBAGEDIRS="\
   arch/c5471\
   arch/dm320\
   arch/avr/include/at91uc3\
-  arch/arv/src/at91uc3\
+  arch/avr/src/at91uc3\
   netutils/thttpd/extras
 "
 
