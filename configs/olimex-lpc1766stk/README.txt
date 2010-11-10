@@ -97,14 +97,30 @@ Olimex LPC1766-STK development board
   --------------
 
   The LPC1766-STK board has two serial connectors.  One, RS232_0, connects to
-  the LPC1766 USART0.  This is the DB-9 connector next to the power connector.
-  The other RS232_1, connect to the LPC1766 USART1.  This is he DB-9 connector
+  the LPC1766 UART0.  This is the DB-9 connector next to the power connector.
+  The other RS232_1, connect to the LPC1766 UART1.  This is he DB-9 connector
   next to the Ethernet connector.
 
-  Simple USART1 is the more flexible USART and since the needs for a serial
-  console are minimal, the more minimal USART0/RS232_0 is used for the NuttX
+  Simple UART1 is the more flexible UART and since the needs for a serial
+  console are minimal, the more minimal UART0/RS232_0 is used for the NuttX
   system console.  Of course, this can be changed by editting the NuttX
   configuration file as discussed below.
+
+  The serial console is configured as follows (57600 8N1):
+
+    BAUD: 57600
+    Number of Bits: 8
+    Parity: None
+    Stop bits: 1
+
+  You will need to connect a monitor program (Hyperterminal, Tera Term,
+  minicom, whatever) to UART0/RS232_0 and configure the serial port as
+  shown above.
+
+  NOTE: The ostest example works fine at 115200, but the other configurations
+  have problems at that rate (probably because they use the interrupt driven
+  serial driver).  Other LPC17xx boards with the same clocking will run at
+  115200.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -448,10 +464,16 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
      (gdb) symbol-file nuttx
      (gdb) load nuttx
 
-    OpenOCD will support several special 'monitor' commands:
+    OpenOCD will support several special 'monitor' commands.  These
+    GDB commands will send comments to the OpenOCD monitor.  Here
+    are a couple that you will need to use:
   
      (gdb) monitor reset
      (gdb) monitor halt
+
+    The MCU must be halted prior to loading code.  Reset will restart
+    the processor after loading code.  The 'monitor' command can be
+    abbreviated as just 'mon'.
 
 Olimex LPC1766-STK Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
