@@ -1314,7 +1314,7 @@
 	  The correction has been incorporated for all architectures but only
 	  verified on a few.
 
-5.13 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.13 2010-11-09 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
 	  by Michael Hrabanek.
@@ -1328,8 +1328,9 @@
 	* lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
 	  not refer to an open file.
 	* configs/olimex-lpc1766stk - Add support for the Olimex LPC1766-STK
-	  development board. (Initial check-in is just a clone of the Nucleus-2G
-	  LPC1768 board logic).
+	  development board.  The OS test and NSH configurations (only) have been
+      verified.
 
+5.14 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 
