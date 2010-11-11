@@ -105,7 +105,7 @@
 
 /* This is the number of ethernet GPIO pins that must be configured */
 
-#define GPIO_NENET_PINS 12
+#define GPIO_NENET_PINS 10
 
 /* Register debug */
 
@@ -147,7 +147,7 @@ static struct lpc17_driver_s g_ethdrvr[CONFIG_LPC17_NINTERFACES];
  * On older Rev '-' devices, P1[6] ENET-TX_CLK would also have be to configured.
  */
 
-static uint16_t g_enetpins[GPIO_NENET_PINS] =
+static const uint16_t g_enetpins[GPIO_NENET_PINS] =
 {
   GPIO_ENET_TXD0, GPIO_ENET_TXD1, GPIO_ENET_TXEN,   GPIO_ENET_CRS, GPIO_ENET_RXD0,
   GPIO_ENET_RXD1, GPIO_ENET_RXER, GPIO_ENET_REFCLK, GPIO_ENET_MDC, GPIO_ENET_MDIO
