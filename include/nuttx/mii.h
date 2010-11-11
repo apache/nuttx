@@ -110,11 +110,20 @@
 #define MII_KS8721_INTCS             0x1b      /* Interrupt control/status register */
 #define MII_KS8721_10BTCR            0x1f      /* 10BASE-TX PHY control register */
 
-/* */
+/* GMII */
 
-#define MII_CTRL1000                 0x09      /* 1000BASE-T control */
-#define MII_STAT1000                 0x0a      /* 1000BASE-T status */
-#define MII_NCONFIG                  0x1c      /* Network interface config */
+#define GMII_MCR                     MII_MCR         /* GMII management control */
+#define GMII_MSR                     MII_MSR         /* GMII management status */
+#define GMII_PHYID1                  MII_PHYID1      /* PHY ID 1 */
+#define GMII_PHYID2                  MII_PHYID2      /* PHY ID 2 */
+#define GMII_ADVERTISE               MII_ADVERTISE   /* Auto-negotiation advertisement */
+#define GMII_LPA                     MII_LPA         /* Auto-negotiation link partner base page ability */
+#define GMII_EXPANSION               MII_EXPANSION   /* Auto-negotiation expansion */
+#define GMII_NEXTPAGE                MII_NEXTPAGE    /* Auto-negotiation next page */
+#define GMII_LPANEXTPAGE             MII_LPANEXTPAGE /* Auto-negotiation link partner received next page */
+#define GMII_CTRL1000                0x09            /* 1000BASE-T control */
+#define GMII_STAT1000                0x0a            /* 1000BASE-T status */
+#define GMII_ESTATUS                 MII_ESTATUS     /* Extended status register */
 
 /* MII register bit settings ************************************************/
 
