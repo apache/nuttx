@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mii.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,6 +104,12 @@
 #define MII_LM3S_LEDCONFIG           0x17      /* LED Configuration */
 #define MII_LM3S_MDICONTROL          0x18      /* Ethernet PHY Management MDI/MDIX Control */
 
+/* Micrel KS8721 */
+
+#define MII_KS8721_RXERCOUNTER       0x15      /* RXER counter */
+#define MII_KS8721_INTCS             0x1b      /* Interrupt control/status register */
+#define MII_KS8721_10BTCR            0x1c      /* 10BASE-TX PHY control register */
+
 /* */
 
 #define MII_CTRL1000                 0x09      /* 1000BASE-T control */
@@ -148,9 +154,6 @@
 #define MII_PHYID2_OUI               0xfc00    /* Bits 19-24 of OUI mask */
 #define MII_PHYID2_MODEL             0x03f0    /* Model number mask */
 #define MII_PHYID2_REV               0x000f    /* Revision number mask */
-
-#define MII_PHYID1_AM79C874          0x0022    /* ID1 value for Am79c874 */
-#define MII_PHYID2_AM79C874          0x561b    /* ID2 value for Am79c874 Rev B */
 
 /* Advertisement control register bit definitions */
 
@@ -228,6 +231,12 @@
 #define DP83840_PHYADDR_DUPLEX       (1 << 7)
 #define DP83840_PHYADDR_SPEED        (1 << 6)
 
+/* Am79c874-specific register bit settings **********************************/
+/* Am79c874 MII ID1/2 register bits */
+
+#define MII_PHYID1_AM79C874          0x0022    /* ID1 value for Am79c874 */
+#define MII_PHYID2_AM79C874          0x561b    /* ID2 value for Am79c874 Rev B */
+
 /* Am79c874 diagnostics register */
 
 #define AM79C874_DIAG_RXLOCK         (1 << 8)  /* Bit 8:  1=Rcv PLL locked on */
@@ -235,6 +244,7 @@
 #define AM79C874_DIAG_100MBPS        (1 << 10) /* Bit 10: 1=ANEG result is 100Mbps */
 #define AM79C874_DIAG_FULLDPLX       (1 << 11) /* Bit 11: 1=ANEG result is full duplex */
 
+/* LM3S6918-specific register bit settings **********************************/
 /* LM3S6918 Vendor-Specific, address 0x10 */
 
 #define LM3S_VSPECIFIC_RXCC          (1 << 0)  /* Bit 0:  Receive Clock Control*/
@@ -283,7 +293,7 @@
 #define LM3S_XCVRCONTROL_TXO_08DB    (2 << LM3S_XCVRCONTROL_TXO_SHIFT) /* Gain 0.8dB of insertion loss */
 #define LM3S_XCVRCONTROL_TXO_12DB    (3 << LM3S_XCVRCONTROL_TXO_SHIFT) /* Gain 1.2dB of insertion loss */
 
-/* LED Configuration, address 0x17 */
+/* LM3S6918 LED Configuration, address 0x17 */
 
 #define LM3S_LEDCONFIG_LED0_SHIFT    0         /* Bits 3-0: LED0 Source */
 #define LM3S_LEDCONFIG_LED0_MASK     (0x0f << LM3S_LEDCONFIG_LED0_SHIFT)
@@ -302,7 +312,7 @@
 #define LM3S_LEDCONFIG_LED1_FDUPLEX  (7 << LM3S_LEDCONFIG_LED1_SHIFT)  /* Full duplex */
 #define LM3S_LEDCONFIG_LED1_OKRXTX   (8 << LM3S_LEDCONFIG_LED1_SHIFT)  /* Full duplex */
 
-/* MDI/MDIX Control, address 0x18 */
+/* LM3S6918 MDI/MDIX Control, address 0x18 */
 
 #define LM3S_MDICONTROL_MDIXSD_SHIFT 0          /* Bits 3-0: Auto-Switching Seed */
 #define LM3S_MDICONTROL_MDIXSD_MASK  (0x0f << LM3S_MDICONTROL_MDIXSD_SHIFT)
@@ -310,6 +320,60 @@
 #define LM3S_MDICONTROL_MDIX         (1 << 5)  /* Bit 5:  Auto-Switching Configuration */
 #define LM3S_MDICONTROL_AUTOSW       (1 << 6)  /* Bit 6:  Auto-Switching Enable */
 #define LM3S_MDICONTROL_PDMODE       (1 << 7)  /* Bit 7:  Parallel Detection Mode */
+
+/* KS8921-specific register bit settings ************************************/
+/* KS8921 MII Control register bit definitions */
+
+#define KS8721_MCR_DISABXMT          (1 << 0)  /* Bit 0:  Disable Transmitter */
+
+/* KS8921 MII ID1/2 register bits */
+
+#define MII_PHYID1_KS8721            0x0022    /* ID1 value for Micrel KS8721 */
+#define MII_PHYID2_KS8721            0x1619    /* ID2 value for Micrel KS8721 */
+
+/* KS8921 RXER Counter -- 16-bit counter */
+
+/* KS8921 Interrupt Control/Status Register */
+
+#define KS8721_INTCS_LINKUP          (1 << 0)  /* Bit 0:  Link up occurred */
+#define KS8721_INTCS_REMFAULT        (1 << 1)  /* Bit 1:  Remote fault occurred */
+#define KS8721_INTCS_LINKDOWN        (1 << 2)  /* Bit 2:  Link down occurred */
+#define KS8721_INTCS_LPACK           (1 << 3)  /* Bit 3:  Link partner acknowlege occurred */
+#define KS8721_INTCS_PDFAULT         (1 << 4)  /* Bit 4:  Parallel detect fault occurred */
+#define KS8721_INTCS_PGRCVD          (1 << 5)  /* Bit 5:  Page received occurred */
+#define KS8721_INTCS_RXERR           (1 << 6)  /* Bit 6:  Receive error occurred */
+#define KS8721_INTCS_JABBER          (1 << 7)  /* Bit 7:  Jabber interrupt occurred */
+#define KS8721_INTCS_LINKUPE         (1 << 8)  /* Bit 8:  Enable link up interrupt */
+#define KS8721_INTCS_REMFAULTE       (1 << 9)  /* Bit 9:  Enable remote fault interrupt */
+#define KS8721_INTCS_LINKDOWNE       (1 << 10) /* Bit 10: Enable link down interrupt */
+#define KS8721_INTCS_LPACKE          (1 << 11) /* Bit 11: Enable link partner acknowldgement interrupt */
+#define KS8721_INTCS_PDFAULT         (1 << 12) /* Bit 12: Enable parallel detect fault interrupt */
+#define KS8721_INTCS_PGRCVDE         (1 << 13) /* Bit 13: Enable page received interrupt */
+#define KS8721_INTCS_RXERRE          (1 << 14) /* Bit 14: Enable receive error interrupt */
+#define KS8721_INTCS_JABBERE         (1 << 15) /* Bit 15: Enable Jabber Interrupt */
+
+/* KS8921 10BASE-TX PHY control register */
+
+#define KS8721_10BTCR_ xxx            (1 << 0)  /* Bit 0:  xxx */
+#define KS8721_10BTCR_ xxx            (1 << 1)  /* Bit 1:  xxx */
+#define KS8721_10BTCR_MODE_SHIFT      (2)       /* Bits 2-4:  Operation Mode Indication */
+#define KS8721_10BTCR_MODE_MASK       (7 << KS8721_10BTCR_MODE_SHIFT)
+#  define KS8721_10BTCR_MODE_ANEG     (0 << KS8721_10BTCR_MODE_SHIFT) /* Still in auto-negotiation */
+#  define KS8721_10BTCR_MODE_10BTHD   (1 << KS8721_10BTCR_MODE_SHIFT) /* 10BASE-T half-duplex */
+#  define KS8721_10BTCR_MODE_100BTHD  (2 << KS8721_10BTCR_MODE_SHIFT) /* 100BASE_t half-duplex */
+#  define KS8721_10BTCR_MODE_DEFAULT  (3 << KS8721_10BTCR_MODE_SHIFT) /* Default */
+#  define KS8721_10BTCR_MODE_10BTFD   (5 << KS8721_10BTCR_MODE_SHIFT) /* 10BASE-T full duplex */
+#  define KS8721_10BTCR_MODE_100BTFD  (6 << KS8721_10BTCR_MODE_SHIFT) /* 100BASE-T full duplex */
+#  define KS8721_10BTCR_MODE_ISOLATE  (7 << KS8721_10BTCR_MODE_SHIFT) /* PHY/MII isolate */
+#define KS8721_10BTCR_ ISOLATE        (1 << 5)  /* Bit 5:  PHY isolate */
+#define KS8721_10BTCR_ PAUSE          (1 << 6)  /* Bit 6:  Enable pause */
+#define KS8721_10BTCR_ ANEGCOMP       (1 << 7)  /* Bit 7:  Auto-negotiation complete */
+#define KS8721_10BTCR_ JABBERE        (1 << 8)  /* Bit 8:  Enable Jabber */
+#define KS8721_10BTCR_ INTLVL         (1 << 9)  /* Bit 9:  Interrupt level */
+#define KS8721_10BTCR_ POWER          (1 << 10) /* Bit 10: Power saving */
+#define KS8721_10BTCR_ FORCE          (1 << 11) /* Bit 11: Force link */
+#define KS8721_10BTCR_ ENERGY         (1 << 12) /* Bit 12: Energy detect */
+#define KS8721_10BTCR_ PAIRSWAPD      (1 << 13) /* Bit 13: Pairswap disable */
 
 /****************************************************************************
  * Type Definitions
