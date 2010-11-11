@@ -95,7 +95,7 @@
 #define MII_AM79C874_DISCONNECT      0x17      /* Disconnect counter */
 #define MII_AM79C874_RCVERROR        0x18      /* Receive error counter */
 
-/* Luminary LM3S6918 built-in PHY, 0x07-0x0f, 0x14-0x16, 0x19-0x1f reserved */
+/* Luminary LM3S6918 built-in PHY: 0x07-0x0f, 0x14-0x16, 0x19-0x1f reserved */
 
 #define MII_LM3S_VSPECIFIC           0x10      /* Vendor-Specific */
 #define MII_LM3S_INTCS               0x11      /* Interrupt control/status */
@@ -104,11 +104,11 @@
 #define MII_LM3S_LEDCONFIG           0x17      /* LED Configuration */
 #define MII_LM3S_MDICONTROL          0x18      /* Ethernet PHY Management MDI/MDIX Control */
 
-/* Micrel KS8721 */
+/* Micrel KS8721: 0x15, 0x1b, and 0x1f */
 
 #define MII_KS8721_RXERCOUNTER       0x15      /* RXER counter */
 #define MII_KS8721_INTCS             0x1b      /* Interrupt control/status register */
-#define MII_KS8721_10BTCR            0x1c      /* 10BASE-TX PHY control register */
+#define MII_KS8721_10BTCR            0x1f      /* 10BASE-TX PHY control register */
 
 /* */
 
@@ -120,6 +120,7 @@
 
 /* MII Control register bit definitions */
 
+#define MII_MCR_UNIDIR               (1 << 5)  /* Bit 5:  Unidirectional enable */
 #define MII_MCR_SPEED1000            (1 << 6)  /* Bit 6:  MSB of Speed (1000 reserved on 10/100) */
 #define MII_MCR_CTST                 (1 << 7)  /* Bit 7:  Enable collision test  */
 #define MII_MCR_FULLDPLX             (1 << 8)  /* Bit 8:  Full duplex */
@@ -322,7 +323,7 @@
 #define LM3S_MDICONTROL_PDMODE       (1 << 7)  /* Bit 7:  Parallel Detection Mode */
 
 /* KS8921-specific register bit settings ************************************/
-/* KS8921 MII Control register bit definitions */
+/* KS8921 MII Control register bit definitions (not in 802.3) */
 
 #define KS8721_MCR_DISABXMT          (1 << 0)  /* Bit 0:  Disable Transmitter */
 
