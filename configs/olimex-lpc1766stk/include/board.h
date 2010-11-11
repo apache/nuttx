@@ -210,6 +210,8 @@
  * P0[28]/SCL0/USB_SCL               24  USB_SCL
  * P0[29]/USB_D+                     29  USB_D+
  * P0[30]/USB_D-                     30  USB_D-
+ * P1[18]/USB_UP_LED/PWM1[1]/CAP1[0] 32  USB_UP_LED
+ * P1[19]/MC0A/#USB_PPWR/CAP1[1]     33  #USB_PPWR
  * P1[22]/MC0B/USB_PWRD/MAT1[0]      36  USBH_PWRD
  * P1[27]/CLKOUT/#USB_OVRCR/CAP0[1]  43  #USB_OVRCR
  * P1[30]/VBUS/AD0[4]                21  VBUS
@@ -228,9 +230,10 @@
  * P1[15]/ENET_REF_CLK               88  E_REF_CLK
  * P1[16]/ENET_MDC                   87  E_MDC
  * P1[17]/ENET_MDIO                  86  E_MDIO
- * P1[18]/USB_UP_LED/PWM1[1]/CAP1[0] 32  USB_UP_LED
- * P1[19]/MC0A/#USB_PPWR/CAP1[1]     33  #USB_PPWR
  */
+
+#define GPIO_ENET_MDC  GPIO_ENET_MDC_1
+#define GPIO_ENET_MDIO GPIO_ENET_MDIO_1
 
 /* Trace GPIO                       PIN  SIGNAL NAME
  * -------------------------------- ---- --------------
