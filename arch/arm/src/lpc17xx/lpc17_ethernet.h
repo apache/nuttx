@@ -263,6 +263,8 @@
 #define ETH_MCMD_READ               (1 << 0)  /* Bit 0:  Single read cycle */
 #define ETH_MCMD_SCAN               (1 << 1)  /* Bit 1:  Continuous read cycles */
                                               /* Bits 2-31: Reserved */
+#define ETH_MCMD_WRITE              (0)
+
 /* MII Mgmt Address register (MADR) */
 
 #define ETH_MADR_REGADDR_SHIFT      (0)       /* Bits 0-4: Register address */
@@ -273,12 +275,12 @@
                                               /* Bits 13-31: Reserved */
 /* MII Mgmt Write Data register (MWTD) */
 
-#define ETH_MWTD_SHIFT              (0)       /* Bits 9-15 */
+#define ETH_MWTD_SHIFT              (0)       /* Bits 0-15 */
 #define ETH_MWTD_MASK               (0xffff << ETH_MWTD_SHIFT)
                                               /* Bits 16-31: Reserved */
 /* MII Mgmt Read Data register (MRDD) */
 
-#define ETH_MRDD_SHIFT              (0)       /* Bits 9-15 */
+#define ETH_MRDD_SHIFT              (0)       /* Bits 0-15 */
 #define ETH_MRDD_MASK               (0xffff << ETH_MRDD_SHIFT)
                                               /* Bits 16-31: Reserved */
 /* MII Mgmt Indicators register (MIND) */

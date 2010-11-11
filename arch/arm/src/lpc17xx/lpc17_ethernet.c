@@ -56,12 +56,16 @@
 #include <net/uip/uip-arch.h>
 
 #include "chip.h"
-#include "lpb17_ethernet.h"
+#include "up_arch.h"
+#include "lpc17_syscon.h"
+#include "lpc17_ethernet.h"
+#include "lpc17_internal.h"
+
+#include <arch/board/board.h>
 
 /* Does this chip have and ethernet controller? */
 
 #if LPC17_NETHCONTROLLERS > 0
-#warning "This driver has not yet been implemented"
 
 /****************************************************************************
  * Definitions
@@ -73,6 +77,17 @@
 
 #if !defined(CONFIG_LPC17_NINTERFACES) || CONFIG_LPC17_NINTERFACES > LPC17_NETHCONTROLLERS
 # define CONFIG_LPC17_NINTERFACES LPC17_NETHCONTROLLERS
+#endif
+
+/* The logic here has a few hooks for support for multiple interfaces, but
+ * that capability is not yet in place (and I won't worry about it until I get
+ * the first multi-interface LPC17xx).
+ */
+
+#if CONFIG_LPC17_NINTERFACES > 1
+#  warning "Only a single ethernet controller is supported"
+#  undef CONFIG_LPC17_NINTERFACES
+#  define CONFIG_LPC17_NINTERFACES 1
 #endif
 
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -87,6 +102,16 @@
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
 #define BUF ((struct uip_eth_hdr *)priv->lp_dev.d_buf)
+
+/* This is the number of ethernet GPIO pins that must be configured */
+
+#define GPIO_NENET_PINS 12
+
+/* Register debug */
+
+#ifndef CONFIG_DEBUG
+#  undef  CONFIG_LPC17_ENET_REGDEBUG
+#endif
 
 /****************************************************************************
  * Private Types
@@ -111,11 +136,40 @@ struct lpc17_driver_s
  * Private Data
  ****************************************************************************/
 
+/* Array of ethernet driver status structures */
+
 static struct lpc17_driver_s g_ethdrvr[CONFIG_LPC17_NINTERFACES];
+
+/* ENET pins are on P1[0,1,4,6,8,9,10,14,15] + MDC on P1[16] or P2[8] and
+ * MDIO on P1[17] or P2[9].  The board.h file will define GPIO_ENET_MDC and
+ * PGIO_ENET_MDIO to selec which pin setting to use.
+ *
+ * On older Rev '-' devices, P1[6] ENET-TX_CLK would also have be to configured.
+ */
+
+static uint16_t g_enetpins[GPIO_NENET_PINS] =
+{
+  GPIO_ENET_TXD0, GPIO_ENET_TXD1, GPIO_ENET_TXEN,   GPIO_ENET_CRS, GPIO_ENET_RXD0,
+  GPIO_ENET_RXD1, GPIO_ENET_RXER, GPIO_ENET_REFCLK, GPIO_ENET_MDC, GPIO_ENET_MDIO
+};
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* Register operations ********************************************************/
+
+#ifdef CONFIG_LPC17_ENET_REGDEBUG
+static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite);
+static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite);
+static uint32_t lpc17_getreg(uint32_t addr);
+static void lpc17_putreg(uint32_t val, uint32_t addr);
+static void lpc17_showpins(void);
+#else
+# define lpc17_getreg(addr)     getreg32(addr)
+# define lpc17_putreg(val,addr) putreg32(val,addr)
+# define lpc17_showpins()
+#endif
 
 /* Common TX logic */
 
@@ -143,9 +197,152 @@ static int lpc17_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 static int lpc17_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
+/* Initialization functions */
+
+static void lpc17_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata);
+static uint16_t lpc17_phyread(uint8_t phyaddr, uint8_t regaddr);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/*******************************************************************************
+ * Name: lpc17_printreg
+ *
+ * Description:
+ *   Print the contents of an LPC17xx register operation
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_LPC17_ENET_REGDEBUG
+static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
+{
+  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_checkreg
+ *
+ * Description:
+ *   Get the contents of an LPC17xx register
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_LPC17_ENET_REGDEBUG
+static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
+{
+  static uint32_t prevaddr = 0;
+  static uint32_t preval = 0;
+  static uint32_t count = 0;
+  static bool     prevwrite = false;
+
+  /* Is this the same value that we read from/wrote to the same register last time?
+   * Are we polling the register?  If so, suppress the output.
+   */
+
+  if (addr == prevaddr && val == preval && prevwrite == iswrite)
+    {
+      /* Yes.. Just increment the count */
+
+      count++;
+    }
+  else
+    {
+      /* No this is a new address or value or operation. Were there any
+       * duplicate accesses before this one?
+       */
+
+      if (count > 0)
+        {
+          /* Yes.. Just one? */
+
+          if (count == 1)
+            {
+              /* Yes.. Just one */
+
+              lpc17_printreg(prevaddr, preval, prevwrite);
+            }
+          else
+            {
+              /* No.. More than one. */
+
+              lldbg("[repeats %d more times]\n", count);
+            }
+        }
+
+      /* Save the new address, value, count, and operation for next time */
+
+      prevaddr  = addr;
+      preval    = val;
+      count     = 0;
+      prevwrite = iswrite;
+
+      /* Show the new regisgter access */
+
+      lpc17_printreg(addr, val, iswrite);
+    }
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_getreg
+ *
+ * Description:
+ *   Get the contents of an LPC17xx register
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_LPC17_ENET_REGDEBUG
+static uint32_t lpc17_getreg(uint32_t addr)
+{
+  /* Read the value from the register */
+
+  uint32_t val = getreg32(addr);
+
+  /* Check if we need to print this value */
+
+  lpc17_checkreg(addr, val, false);
+  return val;
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_putreg
+ *
+ * Description:
+ *   Set the contents of an LPC17xx register to a value
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_LPC17_ENET_REGDEBUG
+static void lpc17_putreg(uint32_t val, uint32_t addr)
+{
+  /* Check if we need to print this value */
+
+  lpc17_checkreg(addr, val, true);
+
+  /* Write the value */
+
+  putreg32(val, addr);
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_showpins
+ *
+ * Description:
+ *   Dump GPIO register
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_LPC17_ENET_REGDEBUG
+static void lpc17_showpins(void)
+{
+  lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN0, "P0[1-15]");
+  lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN16, "P0[16-31]");
+}
+#endif
 
 /****************************************************************************
  * Function: lpc17_transmit
@@ -294,7 +491,7 @@ static void lpc17_receive(FAR struct lpc17_driver_s *priv)
             }
         }
     }
-  while (); /* While there are more packets to be processed */
+  while (1); /* While there are more packets to be processed */
 }
 
 /****************************************************************************
@@ -613,17 +810,101 @@ static int lpc17_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
+ * Function: lpc17_phywrite
+ *
+ * Description:
+ *   Write a value to an MII PHY register
+ *
+ * Parameters:
+ *   phyaddr - The device address where the PHY was discovered
+ *   regaddr - The address of the PHY register to be written
+ *   phydata - The data to write to the PHY register 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void lpc17_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata)
+{
+  uint32_t regval;
+
+  /* Set PHY address and PHY register address */
+
+  regval = ((uint32_t)phyaddr << ETH_MADR_PHYADDR_SHIFT) |
+           ((uint32_t)regaddr << ETH_MADR_REGADDR_SHIFT);
+  lpc17_putreg(regval, LPC17_ETH_MADR);
+
+  /* Set up to write */
+
+  lpc17_putreg(ETH_MCMD_WRITE, LPC17_ETH_MCMD);
+
+  /* Write the register data to the PHY */
+
+  lpc17_putreg((uint32_t)phydata, LPC17_ETH_MWTD);
+
+  /* Wait for the PHY command to complete */
+
+  while ((lpc17_getreg(LPC17_ETH_MIND) & ETH_MIND_BUSY) != 0);
+}
+
+/****************************************************************************
+ * Function: lpc17_phywrite
+ *
+ * Description:
+ *   Read a value from an MII PHY register
+ *
+ * Parameters:
+ *   phyaddr - The device address where the PHY was discovered
+ *   regaddr - The address of the PHY register to be written
+ *
+ * Returned Value:
+ *   Data read from the PHY register
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static uint16_t lpc17_phyread(uint8_t phyaddr, uint8_t regaddr)
+{
+  uint32_t regval;
+
+  lpc17_putreg(0, LPC17_ETH_MCMD);
+
+  /* Set PHY address and PHY register address */
+
+  regval = ((uint32_t)phyaddr << ETH_MADR_PHYADDR_SHIFT) |
+           ((uint32_t)regaddr << ETH_MADR_REGADDR_SHIFT);
+  lpc17_putreg(regval, LPC17_ETH_MADR);
+
+  /* Set up to read */
+
+  lpc17_putreg(ETH_MCMD_READ, LPC17_ETH_MCMD);
+
+  /* Wait for the PHY command to complete */
+
+  while ((lpc17_getreg(LPC17_ETH_MIND) & (ETH_MIND_BUSY|ETH_MIND_NVALID)) != 0);
+  lpc17_putreg(0, LPC17_ETH_MCMD);
+
+  /* Return the PHY register data */
+
+  return (uint16_t)lpc17_getreg(LPC17_ETH_MRDD);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: lpc17_initialize
+ * Function: lpc17_ethinitialize
  *
  * Description:
- *   Initialize the Ethernet driver
+ *   Initialize one Ethernet controller and driver structure.
  *
  * Parameters:
- *   None
+ *   intf - Selects the interface to be initialized.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -632,11 +913,29 @@ static int lpc17_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-/* Initialize the Ethernet controller and driver */
-
-int lpc17_initialize(void)
+#if LPC17_NETHCONTROLLERS > 1
+int lpc17_ethinitialize(int intf)
+#else
+static inline int lpc17_ethinitialize(int intf)
+#endif
 {
-  /* Check if a Ethernet chip is recognized at its I/O base */
+  struct lpc17_driver_s *priv = &g_ethdrvr[intf];
+  uint32_t regval;
+  int i;
+
+  /* Turn on the ethernet MAC clock */
+
+  regval  = lpc17_getreg(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCENET;
+  lpc17_putreg(regval, LPC17_SYSCON_PCONP);
+
+  /* Configure all GPIO pins needed by ENET */
+
+  for (i = 0; i < GPIO_NENET_PINS; i++)
+    {
+      (void)lpc17_configgpio(g_enetpins[i]);
+    }
+  lpc17_showpins();
 
   /* Attach the IRQ to the driver */
 
@@ -650,27 +949,44 @@ int lpc17_initialize(void)
   /* Initialize the driver structure */
 
   memset(g_ethdrvr, 0, CONFIG_LPC17_NINTERFACES*sizeof(struct lpc17_driver_s));
-  g_ethdrvr[0].lp_dev.d_ifup    = lpc17_ifup;     /* I/F down callback */
-  g_ethdrvr[0].lp_dev.d_ifdown  = lpc17_ifdown;   /* I/F up (new IP address) callback */
-  g_ethdrvr[0].lp_dev.d_txavail = lpc17_txavail;  /* New TX data callback */
+  priv->lp_dev.d_ifup    = lpc17_ifup;     /* I/F down callback */
+  priv->lp_dev.d_ifdown  = lpc17_ifdown;   /* I/F up (new IP address) callback */
+  priv->lp_dev.d_txavail = lpc17_txavail;  /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  g_ethdrvr[0].lp_dev.d_addmac  = lpc17_addmac;   /* Add multicast MAC address */
-  g_ethdrvr[0].lp_dev.d_rmmac   = lpc17_rmmac;    /* Remove multicast MAC address */
+  priv->lp_dev.d_addmac  = lpc17_addmac;   /* Add multicast MAC address */
+  priv->lp_dev.d_rmmac   = lpc17_rmmac;    /* Remove multicast MAC address */
 #endif
-  g_ethdrvr[0].lp_dev.d_private = (void*)g_ethdrvr; /* Used to recover private state from dev */
+  priv->lp_dev.d_private = (void*)g_ethdrvr; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  g_ethdrvr[0].lp_txpoll       = wd_create();   /* Create periodic poll timer */
-  g_ethdrvr[0].lp_txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->lp_txpoll       = wd_create();   /* Create periodic poll timer */
+  priv->lp_txtimeout    = wd_create();   /* Create TX timeout timer */
 
-  /* Read the MAC address from the hardware into g_ethdrvr[0].lp_dev.d_mac.ether_addr_octet */
+  /* Read the MAC address from the hardware into priv->lp_dev.d_mac.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&g_ethdrvr[0].lp_dev);
+  (void)netdev_register(&priv->lp_dev);
   return OK;
 }
 
+/****************************************************************************
+ * Name: up_netinitialize
+ *
+ * Description:
+ *   Initialize the first network interface.  If there are more than one
+ *   interface in the chip, then board-specific logic will have to provide
+ *   this function to determine which, if any, Ethernet controllers should
+ *   be initialized.
+ *
+ ****************************************************************************/
+
+#if LPC17_NETHCONTROLLERS == 1
+void up_netinitialize(void)
+{
+  (void)lpc17_ethinitialize(0);
+}
+#endif
 #endif /* LPC17_NETHCONTROLLERS > 0 */
 #endif /* CONFIG_NET && CONFIG_LPC17_ETHERNET */
