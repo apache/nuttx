@@ -1385,6 +1385,8 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         lldbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
+#else
+#  warning "PHY Unknown: speed and duplex are bogus"
 #endif
 
   nlldbg("%dBase-T %s duplex\n",
@@ -1495,7 +1497,7 @@ static inline int lpc17_ethinitialize(int intf)
 
   /* Initialize the driver structure */
 
-  memset(g_ethdrvr, 0, CONFIG_LPC17_NINTERFACES*sizeof(struct lpc17_driver_s));
+  memset(priv, 0, sizeof(struct lpc17_driver_s));
   priv->lp_dev.d_ifup    = lpc17_ifup;    /* I/F down callback */
   priv->lp_dev.d_ifdown  = lpc17_ifdown;  /* I/F up (new IP address) callback */
   priv->lp_dev.d_txavail = lpc17_txavail; /* New TX data callback */
@@ -1513,8 +1515,8 @@ static inline int lpc17_ethinitialize(int intf)
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->lp_txpoll       = wd_create();    /* Create periodic poll timer */
-  priv->lp_txtimeout    = wd_create();    /* Create TX timeout timer */
+  priv->lp_txpoll        = wd_create();   /* Create periodic poll timer */
+  priv->lp_txtimeout     = wd_create();   /* Create TX timeout timer */
 
   /* Perform minimal, one-time initialization -- just reset the controller and
    * leave it disabled.  The Ethernet controller will be reset and properly
