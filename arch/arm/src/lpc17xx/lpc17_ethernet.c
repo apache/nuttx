@@ -147,12 +147,14 @@ struct lpc17_driver_s
   int      lp_irq;              /* Ethernet controller IRQ */
 #endif
 
-  bool    lp_bifup;            /* true:ifup false:ifdown */
+  bool     lp_ifup;             /* true:ifup false:ifdown */
+  bool     lp_speed100;         /* true:100Mbps false:10Mbps */
+  bool     lp_fullduplex;       /* true:full duplex false:half duplex */
 #ifdef LPC17_HAVE_PHY
-  uint8_t lp_phyaddr;          /* PHY device address */
+  uint8_t  lp_phyaddr;          /* PHY device address */
 #endif
-  WDOG_ID lp_txpoll;           /* TX poll timer */
-  WDOG_ID lp_txtimeout;        /* TX timeout timer */
+  WDOG_ID  lp_txpoll;           /* TX poll timer */
+  WDOG_ID  lp_txtimeout;        /* TX timeout timer */
 
   /* This holds the information visible to uIP/NuttX */
 
@@ -247,7 +249,7 @@ static inline int lpc17_phyreset(uint8_t phyaddr);
 static inline int lpc17_phyautoneg(uint8_t phyaddr);
 #  endif
 static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex);
-static void lpc17_phyfullduplex(uint8_t phyaddr);
+static void lpc17_phyduplex(uint8_t phyaddr, bool fullduplex);
 static inline int lpc17_phyinit(struct lpc17_driver_s *priv);
 #else
 #  define lpc17_phyinit()
@@ -720,7 +722,7 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
-  priv->lp_bifup = true;
+  priv->lp_ifup = true;
   up_enable_irq(LPC17_IRQ_ETH);
   return OK;
 }
@@ -758,7 +760,7 @@ static int lpc17_ifdown(struct uip_driver_s *dev)
 
   /* Reset the device */
 
-  priv->lp_bifup = false;
+  priv->lp_ifup = false;
   irqrestore(flags);
   return OK;
 }
@@ -791,7 +793,7 @@ static int lpc17_txavail(struct uip_driver_s *dev)
 
   /* Ignore the notification if the interface is not yet up */
 
-  if (priv->lp_bifup)
+  if (priv->lp_ifup)
     {
 
       /* Check if there is room in the hardware to hold another outgoing packet. */
@@ -1161,10 +1163,11 @@ static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex)
  * Function: lpc17_phyfulldplex
  *
  * Description:
- *   Tweak a few things for full duplex.
+ *   Tweak a few things for full/half duplex.
  *
  * Parameters:
  *   phyaddr - The device address where the PHY was discovered
+ *   fullduplex - TRUE: full duplex
  *
  * Returned Value:
  *   None
@@ -1174,25 +1177,46 @@ static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex)
  ****************************************************************************/
 
 #ifdef LPC17_HAVE_PHY
-static void lpc17_phyfullduplex(uint8_t phyaddr)
+static void lpc17_phyduplex(uint8_t phyaddr, bool fullduplex)
 {
   uint32_t regval;
 
-  /* Set the inter-packet gap */
+  if (fullduplex)
+    {
+      /* Set the inter-packet gap */
  
-  lpc17_putreg(21,LPC17_ETH_IPGT);
+      lpc17_putreg(21, LPC17_ETH_IPGT);
 
-  /* Set MAC to operate in full duplex mode */
+      /* Set MAC to operate in full duplex mode */
 
-  regval = lpc17_getreg(LPC17_ETH_MAC2);
-  regval |= ETH_MAC2_FD;
-  lpc17_putreg(regval, LPC17_ETH_MAC2);
+      regval = lpc17_getreg(LPC17_ETH_MAC2);
+      regval |= ETH_MAC2_FD;
+      lpc17_putreg(regval, LPC17_ETH_MAC2);
 
-  /* Select full duplex operation for ethernet controller */
+      /* Select full duplex operation for ethernet controller */
 
-  regval = lpc17_getreg(LPC17_ETH_CMD);
-  regval |= ETH_CMD_FD;
-  lpc17_putreg(regval, LPC17_ETH_CMD);
+      regval = lpc17_getreg(LPC17_ETH_CMD);
+      regval |= ETH_CMD_FD;
+      lpc17_putreg(regval, LPC17_ETH_CMD);
+    }
+  else
+    {
+      /* Set the inter-packet gap */
+ 
+      lpc17_putreg(18, LPC17_ETH_IPGT);
+
+      /* Set MAC to operate in half duplex mode */
+
+      regval = lpc17_getreg(LPC17_ETH_MAC2);
+      regval &= ~ETH_MAC2_FD;
+      lpc17_putreg(regval, LPC17_ETH_MAC2);
+
+      /* Select half duplex operation for ethernet controller */
+
+      regval = lpc17_getreg(LPC17_ETH_CMD);
+      regval &= ~ETH_CMD_FD;
+      lpc17_putreg(regval, LPC17_ETH_CMD);
+    }
 }
 #endif
 
@@ -1298,6 +1322,9 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
                  (MII_ADVERTISE_100BASETXFULL | MII_ADVERTISE_100BASETXHALF |
                   MII_ADVERTISE_10BASETXFULL  | MII_ADVERTISE_10BASETXHALF  |
                   MII_ADVERTISE_CSMA));
+
+  /* Then perform the auto-negotiation */
+
   ret = lpc17_phyautoneg(phyaddr);
   if (ret < 0)
     {
@@ -1306,7 +1333,19 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 #else
   /* Set up the fixed PHY configuration */
 
-  ret = lpc17_phyfixed(phyaddr, );
+#ifdef CONFIG_PHY_SPEED100
+  priv->lp_speed100 = true;
+#else
+  priv->lp_speed100 = false;
+#endif
+
+#ifdef CONFIG_PHY_FDUPLEX
+  priv->lp_fullduplex = true;
+#else
+  priv->lp_fullduplex = false;
+#endif
+
+  ret = lpc17_phyfixed(phyaddr, priv->lp_speed100, priv->lp_fullduplex);
   if (ret < 0)
     {
       return ret;
@@ -1325,30 +1364,38 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
   switch (phyreg & KS8721_10BTCR_MODE_MASK)
     {
       case KS8721_10BTCR_MODE_10BTHD:  /* 10BASE-T half duplex */
-        nlldbg("10BASE-T half duplex\n");
+        priv->lp_fullduplex = false;
+        priv->lp_speed100 = false;
         lpc17_putreg(0, LPC17_ETH_SUPP);
-        lpc17_phyfixed(phyaddr, false, false);
         break;
       case KS8721_10BTCR_MODE_100BTHD: /* 100BASE-T half duplex */
-        nlldbg("100BASE-T half duplex\n");
-        lpc17_phyfixed(phyaddr, true, false);
+        priv->lp_fullduplex = false;
+        priv->lp_speed100 = true;
         break;
       case KS8721_10BTCR_MODE_10BTFD: /* 10BASE-T full duplex */
-        nlldbg("10BASE-T full duplex\n");
+        priv->lp_fullduplex = true;
+        priv->lp_speed100 = false;
         lpc17_putreg(0, LPC17_ETH_SUPP);
-        lpc17_phyfullduplex(phyaddr);
-        lpc17_phyfixed(phyaddr, false, true);
         break;
       case KS8721_10BTCR_MODE_100BTFD: /* 100BASE-T full duplex */
-        nlldbg("100BASE-T full duplex\n");
-        lpc17_phyfullduplex(phyaddr);
-        lpc17_phyfixed(phyaddr, true, true);
+        priv->lp_fullduplex = true;
+        priv->lp_speed100 = true;
         break;
       default:
         lldbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #endif
+
+  nlldbg("%dBase-T %s duplex\n",
+         priv->lp_speed100 ? 10 : 100,
+         priv->lp_fullduplex ? "full" : "half");
+
+  /* Configure the MAC for this speed */
+
+  lpc17_phyduplex(phyaddr, priv->lp_fullduplex);
+  lpc17_phyfixed(phyaddr, priv->lp_speed100, priv->lp_fullduplex);
+  lpc17_showmii(phyaddr, "At completion");
 
   return OK;
 }
