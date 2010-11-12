@@ -1239,7 +1239,7 @@
 	  For people who have their own configurations and/or Makefiles,
 	  you will need to make a couple of changes:
 
-          - Replace all occurrences of CONFIG_EXAMPLE=foobar with
+	  - Replace all occurrences of CONFIG_EXAMPLE=foobar with
 	    CONFIG_APP_DIR=examples/foobar in all of the configuration
 	    files.
 	  - Replace any occurrences of examples/$(CONFIG_EXAMPLE) with
@@ -1329,8 +1329,13 @@
 	  not refer to an open file.
 	* configs/olimex-lpc1766stk - Add support for the Olimex LPC1766-STK
 	  development board.  The OS test and NSH configurations (only) have been
-      verified.
+	  verified.
 
 5.14 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* configs/olimex-lpc1766stk/nettest - Add examples/nettest configuration to
+	  verify the LPC17xx ethernet driver currently under development.
+	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
+	  the LPC17xx Ethernet driver.
 
 

@@ -122,6 +122,11 @@
 #define CONFIG_LP17_FLASH          1
 #define BOARD_FLASHCFG_VALUE       0x0000303a
 
+/* Ethernet configuration */
+
+//#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44
+#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
+
 /* LED definitions ******************************************************************/
 
                                       /* LED1 LED2 */

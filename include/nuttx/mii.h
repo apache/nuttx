@@ -305,7 +305,7 @@
 
 /* LM3S6918 LED Configuration, address 0x17 */
 
-#define LM3S_LEDCONFIG_LED0_SHIFT    0         /* Bits 3-0: LED0 Source */
+#define LM3S_LEDCONFIG_LED0_SHIFT    (0)       /* Bits 3-0: LED0 Source */
 #define LM3S_LEDCONFIG_LED0_MASK     (0x0f << LM3S_LEDCONFIG_LED0_SHIFT)
 #define LM3S_LEDCONFIG_LED0_LINKOK   (0 << LM3S_LEDCONFIG_LED0_SHIFT)  /* Link OK */
 #define LM3S_LEDCONFIG_LED0_RXTX     (1 << LM3S_LEDCONFIG_LED0_SHIFT)  /* RX or TX activity */
@@ -313,7 +313,7 @@
 #define LM3S_LEDCONFIG_LED0_10BASET  (6 << LM3S_LEDCONFIG_LED0_SHIFT)  /* 10BASE-T mode */
 #define LM3S_LEDCONFIG_LED0_FDUPLEX  (7 << LM3S_LEDCONFIG_LED0_SHIFT)  /* Full duplex */
 #define LM3S_LEDCONFIG_LED0_OKRXTX   (8 << LM3S_LEDCONFIG_LED0_SHIFT)  /* Full duplex */
-#define LM3S_LEDCONFIG_LED1_SHIFT    4          /* Bits 7-4: LED1 Source */
+#define LM3S_LEDCONFIG_LED1_SHIFT    (4)        /* Bits 7-4: LED1 Source */
 #define LM3S_LEDCONFIG_LED1_MASK     (0x0f << LM3S_LEDCONFIG_LED1_SHIFT)
 #define LM3S_LEDCONFIG_LED1_LINKOK   (0 << LM3S_LEDCONFIG_LED1_SHIFT)  /* Link OK */
 #define LM3S_LEDCONFIG_LED1_RXTX     (1 << LM3S_LEDCONFIG_LED1_SHIFT)  /* RX or TX activity */
@@ -324,7 +324,7 @@
 
 /* LM3S6918 MDI/MDIX Control, address 0x18 */
 
-#define LM3S_MDICONTROL_MDIXSD_SHIFT 0          /* Bits 3-0: Auto-Switching Seed */
+#define LM3S_MDICONTROL_MDIXSD_SHIFT (0)        /* Bits 3-0: Auto-Switching Seed */
 #define LM3S_MDICONTROL_MDIXSD_MASK  (0x0f << LM3S_MDICONTROL_MDIXSD_SHIFT)
 #define LM3S_MDICONTROL_MDIXCM       (1 << 4)  /* Bit 4:  Auto-Switching Complete */
 #define LM3S_MDICONTROL_MDIX         (1 << 5)  /* Bit 5:  Auto-Switching Configuration */
