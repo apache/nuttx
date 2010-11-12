@@ -185,7 +185,7 @@
 
 #define ETH_MAC2_FD                 (1 << 0)  /* Bit 0:  Full duplex */
 #define ETH_MAC2_FLC                (1 << 1)  /* Bit 1:  Frame length checking */
-#define ETH_MAC2_HFE                (1 << 2)  /* Bit 2:  Huge fram enable */
+#define ETH_MAC2_HFE                (1 << 2)  /* Bit 2:  Huge frame enable */
 #define ETH_MAC2_DCRC               (1 << 3)  /* Bit 3:  Delayed CRC */
 #define ETH_MAC2_CRCEN              (1 << 4)  /* Bit 4:  CRC enable */
 #define ETH_MAC2_PADCRCEN           (1 << 5)  /* Bit 5:  Pad/CRC enable */
@@ -238,7 +238,7 @@
 
 #define ETH_MCFG_SCANINC            (1 << 0)  /* Bit 0:  Scan increment */
 #define ETH_MCFG_SUPPRE             (1 << 1)  /* Bit 1:  Suppress preamble */
-#define ETH_MCFG_CLKSEL_SHIFT       (2)       /* Bits 2-5:Clock select */
+#define ETH_MCFG_CLKSEL_SHIFT       (2)       /* Bits 2-5: Clock select */
 #define ETH_MCFG_CLKSEL_MASK        (15 << ETH_MCFG_CLKSEL_SHIFT)
 #  define ETH_MCFG_CLKSEL_DIV4      (0 << ETH_MCFG_CLKSEL_SHIFT)
 #  define ETH_MCFG_CLKSEL_DIV6      (2 << ETH_MCFG_CLKSEL_SHIFT)
@@ -316,7 +316,7 @@
 
 #define ETH_CMD_RXEN                (1 << 0)  /* Bit 0:  Receive enable */
 #define ETH_CMD_TXEN                (1 << 1)  /* Bit 1:  Transmit enable */
-                                              /* Bit 2: Reserved */
+                                              /* Bit 2:  Reserved */
 #define ETH_CMD_REGRST              (1 << 3)  /* Bit 3:  Reset host registers */
 #define ETH_CMD_TXRST               (1 << 4)  /* Bit 4:  Reset transmit datapath */
 #define ETH_CMD_RXRST               (1 << 5)  /* Bit 5:  Reset receive datapath */

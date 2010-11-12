@@ -192,7 +192,7 @@ struct lm3s_driver_s
 
 #if LM3S_NETHCONTROLLERS > 1
   uint32_t ld_base;             /* Ethernet controller base address */
-  int      ld-irq;              /* Ethernet controller IRQ */
+  int      ld_irq;              /* Ethernet controller IRQ */
 #endif
 
   bool     ld_bifup;           /* true:ifup false:ifdown */

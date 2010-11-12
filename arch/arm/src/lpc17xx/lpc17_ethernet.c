@@ -50,6 +50,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mii.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
@@ -103,9 +104,23 @@
 
 #define BUF ((struct uip_eth_hdr *)priv->lp_dev.d_buf)
 
+/* Select PHY-specific values.  Add more PHYs as needed. */
+
+#ifdef CONFIG_PHY_KS8721
+#  define LPC17_PHYNAME  "KS8721"
+#  define LPC17_PHYID1   MII_PHYID1_KS8721
+#  define LPC17_PHYID2   MII_PHYID2_KS8721
+#  define LPC17_HAVE_PHY 1
+#else
+#  warning "No PHY specified!"
+#  undef LPC17_HAVE_PHY
+#endif
+
+#define MII_BIG_TIMEOUT  666666
+
 /* This is the number of ethernet GPIO pins that must be configured */
 
-#define GPIO_NENET_PINS 10
+#define GPIO_NENET_PINS  10
 
 /* Register debug */
 
@@ -123,7 +138,19 @@
 
 struct lpc17_driver_s
 {
+  /* The following fields would only be necessary on chips that support
+   * multiple Ethernet controllers.
+   */
+
+#if LM3S_NETHCONTROLLERS > 1
+  uint32_t lp_base;             /* Ethernet controller base address */
+  int      lp_irq;              /* Ethernet controller IRQ */
+#endif
+
   bool    lp_bifup;            /* true:ifup false:ifdown */
+#ifdef LPC17_HAVE_PHY
+  uint8_t lp_phyaddr;          /* PHY device address */
+#endif
   WDOG_ID lp_txpoll;           /* TX poll timer */
   WDOG_ID lp_txtimeout;        /* TX timeout timer */
 
@@ -157,18 +184,16 @@ static const uint16_t g_enetpins[GPIO_NENET_PINS] =
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Register operations ********************************************************/
+/* Register operations */
 
 #ifdef CONFIG_LPC17_ENET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite);
 static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t lpc17_getreg(uint32_t addr);
 static void lpc17_putreg(uint32_t val, uint32_t addr);
-static void lpc17_showpins(void);
 #else
 # define lpc17_getreg(addr)     getreg32(addr)
 # define lpc17_putreg(val,addr) putreg32(val,addr)
-# define lpc17_showpins()
 #endif
 
 /* Common TX logic */
@@ -199,8 +224,38 @@ static int lpc17_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 
 /* Initialization functions */
 
-static void lpc17_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata);
+#ifdef CONFIG_LPC17_ENET_REGDEBUG
+static void lpc17_showpins(void);
+#else
+#  define lpc17_showpins()
+#endif
+
+/* PHY initialization functions */
+
+#ifdef LPC17_HAVE_PHY
+#  ifdef CONFIG_LPC17_ENET_REGDEBUG
+static void lpc17_showmii(uint8_t phyaddr, const char *msg);
+#  else
+#    define lpc17_showmii(phyaddr,msg)
+#  endif
+
+static void lpc17_phywrite(uint8_t phyaddr, uint8_t regaddr,
+                           uint16_t phydata);
 static uint16_t lpc17_phyread(uint8_t phyaddr, uint8_t regaddr);
+static inline int lpc17_phyreset(uint8_t phyaddr);
+#  ifdef CONFIG_PHY_AUTONEG
+static inline int lpc17_phyautoneg(uint8_t phyaddr);
+#  endif
+static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex);
+static void lpc17_phyfullduplex(uint8_t phyaddr);
+static inline int lpc17_phyinit(struct lpc17_driver_s *priv);
+#else
+#  define lpc17_phyinit()
+#endif
+
+/* EMAC Initialization functions */
+
+static void lpc17_ethreset(struct lpc17_driver_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -325,22 +380,6 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
   /* Write the value */
 
   putreg32(val, addr);
-}
-#endif
-
-/*******************************************************************************
- * Name: lpc17_showpins
- *
- * Description:
- *   Dump GPIO register
- *
- *******************************************************************************/
-
-#ifdef CONFIG_LPC17_ENET_REGDEBUG
-static void lpc17_showpins(void)
-{
-  lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN0, "P0[1-15]");
-  lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN16, "P0[16-31]");
 }
 #endif
 
@@ -653,12 +692,27 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
 static int lpc17_ifup(struct uip_driver_s *dev)
 {
   FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
+  uint32_t regval;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
   /* Initilize Ethernet interface */
+
+  /* Configure the MAC station address */
+
+  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[1] << 8 |
+           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[0];
+  lpc17_putreg(regval, LPC17_ETH_SA0);
+
+  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[3] << 8 |
+           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[2];
+  lpc17_putreg(regval, LPC17_ETH_SA1);
+
+  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[5] << 8 |
+           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[4];
+  lpc17_putreg(regval, LPC17_ETH_SA2);
 
   /* Set and activate a timer process */
 
@@ -809,6 +863,61 @@ static int lpc17_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 }
 #endif
 
+/*******************************************************************************
+ * Name: lpc17_showpins
+ *
+ * Description:
+ *   Dump GPIO registers
+ *
+ * Parameters:
+ *   None 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_LPC17_ENET_REGDEBUG
+static void lpc17_showpins(void)
+{
+  lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN0, "P0[1-15]");
+  lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN16, "P0[16-31]");
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_showmii
+ *
+ * Description:
+ *   Dump PHY MII registers
+ *
+ * Parameters:
+ *   phyaddr - The device address where the PHY was discovered
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ *******************************************************************************/
+
+#if defined(CONFIG_LPC17_ENET_REGDEBUG) && defined(LPC17_HAVE_PHY)
+static void lpc17_showmii(uint8_t phyaddr, const char *msg)
+{
+  lldbg("PHY " LPC17_PHYNAME ": %s\n", msg);
+  lldbg("  MCR:       %04x\n", lpc17_getreg(MII_MCR));
+  lldbg("  MSR:       %04x\n", lpc17_getreg(MII_MSR));
+  lldbg("  ADVERTISE: %04x\n", lpc17_getreg(MII_ADVERTISE));
+  lldbg("  LPA:       %04x\n", lpc17_getreg(MII_LPA));
+  lldbg("  EXPANSION: %04x\n", lpc17_getreg(MII_EXPANSION));
+#ifdef CONFIG_PHY_KS8721
+  lldbg("  10BTCR:    %04x\n", lpc17_getreg(MII_KS8721_10BTCR));
+#endif
+}
+#endif
+
 /****************************************************************************
  * Function: lpc17_phywrite
  *
@@ -827,6 +936,7 @@ static int lpc17_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
+#ifdef LPC17_HAVE_PHY
 static void lpc17_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata)
 {
   uint32_t regval;
@@ -849,9 +959,10 @@ static void lpc17_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata)
 
   while ((lpc17_getreg(LPC17_ETH_MIND) & ETH_MIND_BUSY) != 0);
 }
+#endif
 
 /****************************************************************************
- * Function: lpc17_phywrite
+ * Function: lpc17_phyread
  *
  * Description:
  *   Read a value from an MII PHY register
@@ -867,6 +978,7 @@ static void lpc17_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata)
  *
  ****************************************************************************/
 
+#ifdef LPC17_HAVE_PHY
 static uint16_t lpc17_phyread(uint8_t phyaddr, uint8_t regaddr)
 {
   uint32_t regval;
@@ -890,7 +1002,400 @@ static uint16_t lpc17_phyread(uint8_t phyaddr, uint8_t regaddr)
 
   /* Return the PHY register data */
 
-  return (uint16_t)lpc17_getreg(LPC17_ETH_MRDD);
+  return (uint16_t)(lpc17_getreg(LPC17_ETH_MRDD) & ETH_MRDD_MASK);
+}
+#endif
+
+/****************************************************************************
+ * Function: lpc17_phyreset
+ *
+ * Description:
+ *   Reset the PHY
+ *
+ * Parameters:
+ *   phyaddr - The device address where the PHY was discovered
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef LPC17_HAVE_PHY
+static inline int lpc17_phyreset(uint8_t phyaddr)
+{
+  int32_t timeout;
+  uint16_t phyreg;
+
+  /* Reset the PHY.  Needs a minimal 50uS delay after reset. */
+
+  lpc17_phywrite(phyaddr, MII_MCR, MII_MCR_RESET);
+
+  /* Wait for a minimum of 50uS no matter what */
+
+  up_udelay(50);
+
+  /* The MCR reset bit is self-clearing.  Wait for it to be clear
+   * indicating that the reset is complete.
+   */
+
+  for (timeout = MII_BIG_TIMEOUT; timeout > 0; timeout--)
+    {
+      phyreg = lpc17_phyread(phyaddr, MII_MCR);
+      if ((phyreg & MII_MCR_RESET) == 0)
+        {
+          return OK;
+        }
+    }
+
+  nlldbg("Reset failed. MCR: %04x\n", phyreg);
+  return -ETIMEDOUT;
+}
+#endif
+
+/****************************************************************************
+ * Function: lpc17_phyautoneg
+ *
+ * Description:
+ *   Enable auto-negotiation.
+ *
+ * Parameters:
+ *   phyaddr - The device address where the PHY was discovered
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The adverisement regiser has already been configured.
+ *
+ ****************************************************************************/
+
+#if defined(LPC17_HAVE_PHY) && defined(CONFIG_PHY_AUTONEG)
+static inline int lpc17_phyautoneg(uint8_t phyaddr)
+{
+  int32_t timeout;
+  uint16_t phyreg;
+
+  /* Start auto-negotiation */
+
+  lpc17_phywrite(phyaddr, MII_MCR, MII_MCR_ANENABLE | MII_MCR_ANRESTART);
+
+  /* Wait for autonegotiation to complete */
+
+  for (timeout = MII_BIG_TIMEOUT; timeout > 0; timeout--)
+    {
+      /* Check if auto-negotiation has completed */
+
+      phyreg = lpc17_phyread(phyaddr, MII_MSR);
+      if ((phyreg & (MII_MSR_LINKSTATUS | MII_MSR_ANEGCOMPLETE)) == 
+          (MII_MSR_LINKSTATUS | MII_MSR_ANEGCOMPLETE))
+        {
+          /* Yes.. return success */
+
+          return OK;
+        }
+    }
+
+  nlldbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
+  return -ETIMEDOUT;
+}
+#endif
+
+/****************************************************************************
+ * Function: lpc17_phyfixed
+ *
+ * Description:
+ *   Set fixed PHY configuration.
+ *
+ * Parameters:
+ *   phyaddr - The device address where the PHY was discovered
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef LPC17_HAVE_PHY
+static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex)
+{
+  int32_t timeout;
+  uint16_t phyreg;
+
+  /* Disable auto-negotiation and set fixed Speed and Duplex settings */
+
+  phyreg = 0;
+  if (speed100)
+    {
+      phyreg = MII_MCR_SPEED100;
+    }
+
+  if (fullduplex)
+    {
+      phyreg |= MII_MCR_FULLDPLX;
+    }
+
+  lpc17_phywrite(phyaddr, MII_MCR, phyreg);
+
+  /* Then wait for the link to be established */
+
+  for (timeout = MII_BIG_TIMEOUT; timeout > 0; timeout--)
+    {
+      phyreg = lpc17_phyread(phyaddr, MII_MSR);
+      if (phyreg & MII_MSR_LINKSTATUS)
+        {
+          /* Yes.. return success */
+
+          return OK;
+        }
+    }
+
+  nlldbg("Link failed. MSR: %04x\n", phyreg);
+  return -ETIMEDOUT;
+}
+#endif
+
+/****************************************************************************
+ * Function: lpc17_phyfulldplex
+ *
+ * Description:
+ *   Tweak a few things for full duplex.
+ *
+ * Parameters:
+ *   phyaddr - The device address where the PHY was discovered
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef LPC17_HAVE_PHY
+static void lpc17_phyfullduplex(uint8_t phyaddr)
+{
+  uint32_t regval;
+
+  /* Set the inter-packet gap */
+ 
+  lpc17_putreg(21,LPC17_ETH_IPGT);
+
+  /* Set MAC to operate in full duplex mode */
+
+  regval = lpc17_getreg(LPC17_ETH_MAC2);
+  regval |= ETH_MAC2_FD;
+  lpc17_putreg(regval, LPC17_ETH_MAC2);
+
+  /* Select full duplex operation for ethernet controller */
+
+  regval = lpc17_getreg(LPC17_ETH_CMD);
+  regval |= ETH_CMD_FD;
+  lpc17_putreg(regval, LPC17_ETH_CMD);
+}
+#endif
+
+/****************************************************************************
+ * Function: lpc17_phyinit
+ *
+ * Description:
+ *   Initialize the PHY
+ *
+ * Parameters:
+ *   priv - Pointer to EMAC device driver structure 
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef LPC17_HAVE_PHY
+static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
+{
+  unsigned int phyaddr;
+  uint16_t phyreg;
+  uint32_t regval;
+  int ret;
+
+  /* MII configuration: host clocked divided per board.h, no suppress
+   * preambl,e no scan increment.
+   */
+
+  lpc17_putreg(ETH_MCFG_CLKSEL_DIV, LPC17_ETH_MCFG);
+  lpc17_putreg(0, LPC17_ETH_MCMD);
+
+  /* Enter RMII mode and select 100 MBPS support */
+
+  lpc17_putreg(ETH_CMD_RMII, LPC17_ETH_CMD);
+  lpc17_putreg(ETH_SUPP_SPEED, LPC17_ETH_SUPP);
+
+  /* Find PHY Address.  Because controller has a pull-up and the
+   * PHY have pull-down resistors on RXD lines some times the PHY
+   * latches different at different addresses.
+   */
+
+  for (phyaddr = 1; phyaddr < 32; phyaddr++)
+    {
+       /* Check if we can see the selected device ID at this
+        * PHY address.
+        */
+
+       phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
+       if (phyreg == LPC17_PHYID1)
+        {
+          phyreg = lpc17_phyread(phyaddr, MII_PHYID2);
+          if (phyreg  == LPC17_PHYID2)
+            {
+              break;
+            }
+        }
+    }
+  nlldbg("phyaddr: %d\n", phyaddr);
+
+  /* Check if the PHY device address was found */
+
+  if (phyaddr > 31)
+    {
+      /* Failed to find PHY at any location */
+
+      return -ENODEV;
+    }
+
+  /* Save the discovered PHY device address */
+
+  priv->lp_phyaddr = phyaddr;
+
+  /* Reset the PHY */
+
+  ret = lpc17_phyreset(phyaddr);
+  if (ret < 0)
+    {
+      return ret;
+    }
+  lpc17_showmii(phyaddr, "After reset");
+
+  /* Check for preamble suppression support */
+
+  phyreg = lpc17_phyread(phyaddr, MII_MSR);
+  if ((phyreg & MII_MSR_MFRAMESUPPRESS) != 0)
+    {
+      /* The PHY supports preamble suppression */
+
+      regval  = lpc17_getreg(LPC17_ETH_MCFG);
+      regval |= ETH_MCFG_SUPPRE;
+      lpc17_putreg(regval, LPC17_ETH_MCFG);
+    }
+
+  /* Are we configured to do auto-negotiation? */
+
+#ifdef CONFIG_PHY_AUTONEG
+  /* Setup the Auto-negotiation advertisement: 100 or 10, and HD or FD */
+
+  lpc17_phywrite(phyaddr, MII_ADVERTISE, 
+                 (MII_ADVERTISE_100BASETXFULL | MII_ADVERTISE_100BASETXHALF |
+                  MII_ADVERTISE_10BASETXFULL  | MII_ADVERTISE_10BASETXHALF  |
+                  MII_ADVERTISE_CSMA));
+  ret = lpc17_phyautoneg(phyaddr);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#else
+  /* Set up the fixed PHY configuration */
+
+  ret = lpc17_phyfixed(phyaddr, );
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+  /* The link is established */
+
+  lpc17_showmii(phyaddr, "After link established");
+
+  /* Check configuration */
+
+#ifdef CONFIG_PHY_KS8721
+  phyreg = lpc17_phyread(phyaddr, MII_KS8721_10BTCR);
+
+  switch (phyreg & KS8721_10BTCR_MODE_MASK)
+    {
+      case KS8721_10BTCR_MODE_10BTHD:  /* 10BASE-T half duplex */
+        nlldbg("10BASE-T half duplex\n");
+        lpc17_putreg(0, LPC17_ETH_SUPP);
+        lpc17_phyfixed(phyaddr, false, false);
+        break;
+      case KS8721_10BTCR_MODE_100BTHD: /* 100BASE-T half duplex */
+        nlldbg("100BASE-T half duplex\n");
+        lpc17_phyfixed(phyaddr, true, false);
+        break;
+      case KS8721_10BTCR_MODE_10BTFD: /* 10BASE-T full duplex */
+        nlldbg("10BASE-T full duplex\n");
+        lpc17_putreg(0, LPC17_ETH_SUPP);
+        lpc17_phyfullduplex(phyaddr);
+        lpc17_phyfixed(phyaddr, false, true);
+        break;
+      case KS8721_10BTCR_MODE_100BTFD: /* 100BASE-T full duplex */
+        nlldbg("100BASE-T full duplex\n");
+        lpc17_phyfullduplex(phyaddr);
+        lpc17_phyfixed(phyaddr, true, true);
+        break;
+      default:
+        lldbg("Unrecognized mode: %04x\n", phyreg);
+        return -ENODEV;
+    }
+#endif
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: lpc17_ethreset
+ *
+ * Description:
+ *   Configure and reset the Ethernet module, leaving it in a disabled state.
+ *
+ * Parameters:
+ *   priv   - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void lpc17_ethreset(struct lpc17_driver_s *priv)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+#if LPC17_NETHCONTROLLERS > 1
+#  error "If multiple interfaces are supported, this function would have to be redesigned"
+#endif
+
+  /* Make sure that clocking is enabled for the Ethernet (and PHY) peripherals */
+
+  flags   = irqsave();
+
+  /* Put the Ethernet controller into the reset state */
+
+  /* Wait just a bit.  This is a much longer delay than necessary */
+
+  up_mdelay(2);
+
+  /* Then take the Ethernet controller out of the reset state */
+
+  /* Disable all Ethernet controller interrupts */
+
+  /* Clear any pending interrupts (shouldn't be any) */
+
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -919,9 +1424,13 @@ int lpc17_ethinitialize(int intf)
 static inline int lpc17_ethinitialize(int intf)
 #endif
 {
-  struct lpc17_driver_s *priv = &g_ethdrvr[intf];
+  struct lpc17_driver_s *priv;
   uint32_t regval;
+  int ret;
   int i;
+
+  DEBUGASSERT(inf < LPC17_NETHCONTROLLERS);
+  priv = &g_ethdrvr[intf];
 
   /* Turn on the ethernet MAC clock */
 
@@ -937,33 +1446,50 @@ static inline int lpc17_ethinitialize(int intf)
     }
   lpc17_showpins();
 
+  /* Initialize the driver structure */
+
+  memset(g_ethdrvr, 0, CONFIG_LPC17_NINTERFACES*sizeof(struct lpc17_driver_s));
+  priv->lp_dev.d_ifup    = lpc17_ifup;    /* I/F down callback */
+  priv->lp_dev.d_ifdown  = lpc17_ifdown;  /* I/F up (new IP address) callback */
+  priv->lp_dev.d_txavail = lpc17_txavail; /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  priv->lp_dev.d_addmac  = lpc17_addmac;  /* Add multicast MAC address */
+  priv->lp_dev.d_rmmac   = lpc17_rmmac;   /* Remove multicast MAC address */
+#endif
+  priv->lp_dev.d_private = (void*)priv;   /* Used to recover private state from dev */
+
+#if LM3S_NETHCONTROLLERS > 1
+# error "A mechanism to associate base address an IRQ with an interface is needed"
+  priv->lp_base          = ??;            /* Ethernet controller base address */
+  priv->lp_irq           = ??;            /* Ethernet controller IRQ number */
+#endif
+
+  /* Create a watchdog for timing polling for and timing of transmisstions */
+
+  priv->lp_txpoll       = wd_create();    /* Create periodic poll timer */
+  priv->lp_txtimeout    = wd_create();    /* Create TX timeout timer */
+
+  /* Perform minimal, one-time initialization -- just reset the controller and
+   * leave it disabled.  The Ethernet controller will be reset and properly
+   * re-initialized each time lpc17_ifup() is called.
+   */
+
+  lpc17_ethreset(priv);
+  lpc17_ifdown(&priv->lp_dev);
+
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(LPC17_IRQ_ETH, lpc17_interrupt))
+#if LM3S_NETHCONTROLLERS > 1
+  ret = irq_attach(priv->irq, lpc17_interrupt);
+#else
+  ret = irq_attach(LPC17_IRQ_ETH, lpc17_interrupt);
+#endif
+  if (ret != 0)
     {
       /* We could not attach the ISR to the the interrupt */
 
       return -EAGAIN;
     }
-
-  /* Initialize the driver structure */
-
-  memset(g_ethdrvr, 0, CONFIG_LPC17_NINTERFACES*sizeof(struct lpc17_driver_s));
-  priv->lp_dev.d_ifup    = lpc17_ifup;     /* I/F down callback */
-  priv->lp_dev.d_ifdown  = lpc17_ifdown;   /* I/F up (new IP address) callback */
-  priv->lp_dev.d_txavail = lpc17_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
-  priv->lp_dev.d_addmac  = lpc17_addmac;   /* Add multicast MAC address */
-  priv->lp_dev.d_rmmac   = lpc17_rmmac;    /* Remove multicast MAC address */
-#endif
-  priv->lp_dev.d_private = (void*)g_ethdrvr; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmisstions */
-
-  priv->lp_txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->lp_txtimeout    = wd_create();   /* Create TX timeout timer */
-
-  /* Read the MAC address from the hardware into priv->lp_dev.d_mac.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
