@@ -601,6 +601,14 @@ Olimex LPC1766-STK Configuration Options
 	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_UARTn_2STOP - Two stop bits
 
+
+  LPC17xx specific PHY/Ethernet device driver settings
+
+	CONFIG_PHY_KS8721 - Selects Micrel KS8721 PHY
+	CONFIG_PHY_AUTONEG - Enable auto-negotion
+	CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
+	CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex
+
   LPC17xx USB Configuration
 
 	CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
