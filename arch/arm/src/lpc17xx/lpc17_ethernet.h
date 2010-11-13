@@ -459,7 +459,7 @@
 #define ETH_RXFLCTRL_PERFEN         (1 << 5)  /* Bit 5:  Accept perfect dest match */
                                               /* Bits 6-11: Reserved */
 #define ETH_RXFLCTRL_MPKTEN         (1 << 12) /* Bit 12: Magic pkt filter WoL int */
-#define ETH_RXFLCTRL_RXFILEN        (1 << 13) /* Bit 13: Perfect math WoL interrupt */
+#define ETH_RXFLCTRL_RXFILEN        (1 << 13) /* Bit 13: Perfect match WoL interrupt */
                                               /* Bits 14-31: Reserved */
 /* Receive filter WoL status register (RXFLWOLST) AND
  * Receive filter WoL clear register (RXFLWOLCLR)
