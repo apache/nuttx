@@ -151,41 +151,127 @@
 
 #define GPIO_NENET_PINS      10
 
-/* EMAC DMA RAM and descriptor definitions.
+/* EMAC DMA RAM and descriptor definitions.  The configured number of
+ * descriptors will determine the organization and the size of the
+ * descriptor and status tables.  There is a complex interaction between
+ * the maximum packet size (CONFIG_NET_BUFSIZE) and the number of 
+ * Rx and Tx descriptors that can be suppored (CONFIG_ETH_NRXDESC and
+ * CONFIG_ETH_NTXDESC): Small buffers -> more packets.  This is
+ * something that needs to be tuned for you system.
  *
- * All of AHB SRAM, Bank 0 is set aside for EMAC Tx and Rx descriptors.
+ * For a 16Kb SRAM region, here is the relationship:
+ *
+ *  16384 <= ntx * (pktsize + 8 + 4) + nrx * (pktsize + 8 + 8)
+ *
+ * If ntx == nrx and pktsize == 424, then you could have
+ * ntx = nrx = 18.
+ *
+ * An example with all of the details:
+ *
+ * NTXDESC=18 NRXDESC=18 CONFIG_NET_BUFSIZE=420:
+ *   LPC17_TXDESCTAB_SIZE = 18*8 = 144
+ *   LPC17_TXSTATTAB_SIZE = 18*4 =  72
+ *   LPC17_TXTAB_SIZE     = 216
+ *
+ *   LPC17_RXDESCTAB_SIZE = 16*8 = 144
+ *   LPC17_RXSTATTAB_SIZE = 16*8 = 144
+ *   LPC17_TXTAB_SIZE     = 288
+ *
+ *   LPC17_DESCTAB_SIZE   = 504
+ *   LPC17_DESC_BASE      = LPC17_SRAM_BANK0 + 0x00004000 - 504
+ *                        = LPC17_SRAM_BANK0 + 0x00003e08
+ *   LPC17_TXDESC_BASE    = LPC17_SRAM_BANK0 + 0x00003e08
+ *   LPC17_TXSTAT_BASE    = LPC17_SRAM_BANK0 + 0x00003e98
+ *   LPC17_RXDESC_BASE    = LPC17_SRAM_BANK0 + 0x00003ee0
+ *   LPC17_RXSTAT_BASE    = LPC17_SRAM_BANK0 + 0x00003f70
+ *
+ *   LPC17_PKTMEM_BASE    = LPC17_SRAM_BANK0
+ *   LPC17_PKTMEM_SIZE    = 0x00004000-504 = 0x00003e40
+ *   LPC17_PKTMEM_END     = LPC17_SRAM_BANK0 + 0x00003e08
+
+ *   LPC17_MAXPACKET_SIZE = ((420 + 3 + 2) & ~3) = 424
+ *   LPC17_NTXPKTS        = 18
+ *   LPC17_NRXPKTS        = 18
+
+ *   LPC17_TXBUFFER_SIZE  = 18 * 424 = 0x00001dd0
+ *   LPC17_RXBUFFER_SIZE  = 18 * 424 = 0x00001dd0
+ *   LPC17_BUFFER_SIZE    = 0x00003ba0
+
+ *   LPC17_BUFFER_BASE    = LPC17_SRAM_BANK0
+ *   LPC17_TXBUFFER_BASE  = LPC17_SRAM_BANK0
+ *   LPC17_RXBUFFER_BASE  = LPC17_SRAM_BANK0 + 0x00001dd0
+ *   LPC17_BUFFER_END     = LPC17_SRAM_BANK0 + 0x00003ba0
+ *
+ *   Then the check LPC17_BUFFER_END < LPC17_PKTMEM_END passes. The
+ *   amount of unused memory is small: 0x00003e08-0x00003ba0 or about
+ *   616 bytes -- not enough for two more packets.
+ *
+ * [It is also possible, with some effort, to reclaim any unused
+ *  SRAM for the use in the heap.  But that has not yet been pursued.]
  */
+
+#ifndef CONFIG_ETH_NTXDESC
+#  define CONFIG_ETH_NTXDESC 18
+#endif
+#define LPC17_TXDESCTAB_SIZE (CONFIG_ETH_NTXDESC*LPC17_TXDESC_SIZE)
+#define LPC17_TXSTATTAB_SIZE (CONFIG_ETH_NTXDESC*LPC17_TXSTAT_SIZE)
+#define LPC17_TXTAB_SIZE     (LPC17_TXDESCTAB_SIZE+LPC17_TXSTATTAB_SIZE)
+
+#ifndef CONFIG_ETH_NRXDESC
+#  define CONFIG_ETH_NRXDESC 18
+#endif
+#define LPC17_RXDESCTAB_SIZE (CONFIG_ETH_NRXDESC*LPC17_RXDESC_SIZE)
+#define LPC17_RXSTATTAB_SIZE (CONFIG_ETH_NRXDESC*LPC17_RXSTAT_SIZE)
+#define LPC17_RXTAB_SIZE     (LPC17_RXDESCTAB_SIZE+LPC17_RXSTATTAB_SIZE)
+
+#define LPC17_DESCTAB_SIZE   (LPC17_TXTAB_SIZE+LPC17_RXTAB_SIZE)
+
+/* All of AHB SRAM, Bank 0 is set aside for EMAC Tx and Rx descriptors. */
 
 #define LPC17_BANK0_SIZE     0x00004000
+
+#define LPC17_EMACRAM_BASE   LPC17_SRAM_BANK0
+#define LPC17_EMACRAM_SIZE   LPC17_BANK0_SIZE
 #warning "Need to exclude bank0 from the heap"
 
-/* Numbers of descriptors and sizes of descriptor and status regions */
-
-#ifdef CONFIG_ETH_NTXDESC
-#  define CONFIG_ETH_NTXDESC 16
-#endif
-#define LPC17_TXDESC_SIZE    (8*CONFIG_ETH_NTXDESC)
-#define LPC17_TXSTAT_SIZE    (4*CONFIG_ETH_NTXDESC)
-
-#ifdef CONFIG_ETH_NRXDESC
-#  define CONFIG_ETH_NRXDESC 16
-#endif
-#define LPC17_RXDESC_SIZE    (8*CONFIG_ETH_NRXDESC)
-#define LPC17_RXSTAT_SIZE    (8*CONFIG_ETH_NRXDESC)
-
-/* Descriptor Memory Organization.  Descriptors are packed
- * at the end of AHB SRAM, Bank 0.
+/* Descriptor table memory organization.  Descriptor tables are packed at
+ * the end of AHB SRAM, Bank 0.  The beginning of bank 0 is reserved for
+ * packet memory.
  */
 
-#define LPC17_DESC_SIZE      (LPC17_TXDESC_SIZE+LPC17_RXDESC_SIZE+LPC17_TXSTAT_SIZE+LPC17_RXSTAT_SIZE)
-#define LPC17_DESC_BASE      (LPC17_SRAM_BANK0+LPC17_BANK0_SIZE-LPC17_DESC_SIZE)
-
+#define LPC17_DESC_BASE      (LPC17_EMACRAM_BASE+LPC17_EMACRAM_SIZE-LPC17_DESCTAB_SIZE)
 #define LPC17_TXDESC_BASE    LPC17_DESC_BASE
-#define LPC17_TXSTAT_BASE    (LPC17_TXDESC_BASE+LPC17_TXDESC_SIZE)
-#define LPC17_RXDESC_BASE    (LPC17_TXSTAT_BASE+LPC17_TXSTAT_SIZE)
-#define LPC17_RXSTAT_BASE    (LPC17_RXDESC_BASE + LPC17_RXDESC_SIZE)
+#define LPC17_TXSTAT_BASE    (LPC17_TXDESC_BASE+LPC17_TXDESCTAB_SIZE)
+#define LPC17_RXDESC_BASE    (LPC17_TXSTAT_BASE+LPC17_TXSTATTAB_SIZE)
+#define LPC17_RXSTAT_BASE    (LPC17_RXDESC_BASE + LPC17_RXDESCTAB_SIZE)
 
-/* Register debug */
+/* Now carve up the beginning of SRAM for packet memory.  The size of a
+ * packet buffer is related to the size of the MTU.  We'll round sizes up
+ * to multiples of 256 bytes.
+ */
+
+#define LPC17_PKTMEM_BASE     LPC17_EMACRAM_BASE
+#define LPC17_PKTMEM_SIZE     (LPC17_EMACRAM_SIZE-LPC17_DESCTAB_SIZE)
+#define LPC17_PKTMEM_END      (LPC17_EMACRAM_BASE+LPC17_PKTMEM_SIZE)
+
+#define LPC17_MAXPACKET_SIZE  ((CONFIG_NET_BUFSIZE + 3 + 2) & ~3)
+#define LPC17_NTXPKTS         CONFIG_ETH_NTXDESC
+#define LPC17_NRXPKTS         CONFIG_ETH_NRXDESC
+
+#define LPC17_TXBUFFER_SIZE   (LPC17_NTXPKTS * LPC17_MAXPACKET_SIZE)
+#define LPC17_RXBUFFER_SIZE   (LPC17_NRXPKTS * LPC17_MAXPACKET_SIZE)
+#define LPC17_BUFFER_SIZE     (LPC17_TXBUFFER_SIZE + LPC17_RXBUFFER_SIZE)
+
+#define LPC17_BUFFER_BASE     LPC17_PKTMEM_BASE
+#define LPC17_TXBUFFER_BASE   LPC17_BUFFER_BASE
+#define LPC17_RXBUFFER_BASE   (LPC17_TXBUFFER_BASE + LPC17_TXBUFFER_SIZE)
+#define LPC17_BUFFER_END      (LPC17_BUFFER_BASE + LPC17_BUFFER_SIZE)
+
+#if LPC17_BUFFER_END > LPC17_PKTMEM_END
+#  error "Packet memory overlaps descriptor tables"
+#endif
+
+/* Register debug -- can only happen of CONFIG_DEBUG is selected */
 
 #ifndef CONFIG_DEBUG
 #  undef  CONFIG_LPC17_ENET_REGDEBUG
@@ -318,6 +404,8 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv);
 
 /* EMAC Initialization functions */
 
+static inline void lpc17_txdescinit(struct lpc17_driver_s *priv);
+static inline void lpc17_rxdescinit(struct lpc17_driver_s *priv);
 static void lpc17_macmode(uint8_t mode);
 static void lpc17_ethreset(struct lpc17_driver_s *priv);
 
@@ -794,7 +882,10 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 
   lpc17_macmode(priv->lp_mode);
 
-  /* Initialize EMAC DMA memory */
+  /* Initialize EMAC DMA memory -- descriptors, status, packet buffers, etc. */
+
+  lpc17_txdescinit(priv);
+  lpc17_rxdescinit(priv);
 
   /* Set up RX filter and configure to accept broadcast address and perfect
    * station address matches.
@@ -1255,9 +1346,8 @@ static int lpc17_phymode(uint8_t phyaddr, uint8_t mode)
  *   priv - Pointer to EMAC device driver structure 
  *
  * Returned Value:
- *   None directory.
- *   As a side-effect, it will initialize priv->lp_phyaddr and
- *   priv->lp_phymode.
+ *   None directly.  As a side-effect, it will initialize priv->lp_phyaddr
+ *   and priv->lp_phymode.
  *
  * Assumptions:
  *
@@ -1412,7 +1502,126 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
   lpc17_showmii(phyaddr, "After final configuration");
   return ret;
 }
+#else
+static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
+{
+  priv->lp_mode = LPC17_MODE_DEFLT;
+  return OK;
+}
 #endif
+
+/****************************************************************************
+ * Function: lpc17_txdescinit
+ *
+ * Description:
+ *   Initialize the EMAC Tx descriptor table
+ *
+ * Parameters:
+ *   priv - Pointer to EMAC device driver structure 
+ *
+ * Returned Value:
+ *   None directory.
+ *   As a side-effect, it will initialize priv->lp_phyaddr and
+ *   priv->lp_phymode.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void lpc17_txdescinit(struct lpc17_driver_s *priv)
+{
+  uint32_t *txdesc;
+  uint32_t *txstat;
+  uint32_t pktaddr;
+  int i;
+
+  /* Configure Tx descriptor and status tables */
+
+  lpc17_putreg(LPC17_TXDESC_BASE, LPC17_ETH_TXDESC);
+  lpc17_putreg(LPC17_TXSTAT_BASE, LPC17_ETH_TXSTAT);
+  lpc17_putreg(CONFIG_ETH_NTXDESC-1, LPC17_ETH_TXDESCRNO);
+
+  /* Initialize Tx descriptors and link to packet buffers */
+
+  txdesc  = (uint32_t*)LPC17_TXDESC_BASE;
+  pktaddr = LPC17_TXBUFFER_BASE;
+
+  for (i = 0; i < CONFIG_ETH_NTXDESC; i++)
+    {
+      *txdesc++ = pktaddr;
+      *txdesc++ = (TXDESC_CONTROL_INT | (LPC17_MAXPACKET_SIZE - 1));
+	  pktaddr  += LPC17_MAXPACKET_SIZE;
+    }
+
+  /* Initialize Tx status */
+
+  txstat  = (uint32_t*)LPC17_TXSTAT_BASE;
+  for (i = 0; i < CONFIG_ETH_NTXDESC; i++)
+    {
+      *txstat++ = 0;
+    }
+
+  /* Point to first Tx descriptor */
+
+  lpc17_putreg(0, LPC17_ETH_TXPRODIDX);
+}
+
+/****************************************************************************
+ * Function: lpc17_rxdescinit
+ *
+ * Description:
+ *   Initialize the EMAC Rx descriptor table
+ *
+ * Parameters:
+ *   priv - Pointer to EMAC device driver structure 
+ *
+ * Returned Value:
+ *   None directory.
+ *   As a side-effect, it will initialize priv->lp_phyaddr and
+ *   priv->lp_phymode.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void lpc17_rxdescinit(struct lpc17_driver_s *priv)
+{
+  uint32_t *rxdesc;
+  uint32_t *rxstat;
+  uint32_t pktaddr;
+  int i;
+
+  /* Configure Rx descriptor and status tables */
+
+  lpc17_putreg(LPC17_RXDESC_BASE, LPC17_ETH_RXDESC);
+  lpc17_putreg(LPC17_RXSTAT_BASE, LPC17_ETH_RXSTAT);
+  lpc17_putreg(CONFIG_ETH_NRXDESC-1, LPC17_ETH_RXDESCNO);
+
+  /* Initialize Rx descriptors and link to packet buffers */
+
+  rxdesc  = (uint32_t*)LPC17_RXDESC_BASE;
+  pktaddr = LPC17_RXBUFFER_BASE;
+
+  for (i = 0; i < CONFIG_ETH_NRXDESC; i++)
+    {
+      *rxdesc++ = pktaddr;
+      *rxdesc++ = (RXDESC_CONTROL_INT | (LPC17_MAXPACKET_SIZE - 1));
+      pktaddr  += LPC17_MAXPACKET_SIZE;
+    }
+
+  /* Initialize Rx status */
+
+  rxstat  = (uint32_t*)LPC17_TXSTAT_BASE;
+  for (i = 0; i < CONFIG_ETH_NRXDESC; i++)
+    {
+      *rxstat++ = 0;
+      *rxstat++ = 0;
+    }
+
+  /* Point to first Tx descriptor */
+
+  lpc17_putreg(0, LPC17_ETH_RXPRODIDX);
+}
 
 /****************************************************************************
  * Function: lpc17_macmode

@@ -501,6 +501,87 @@
                                               /* Bits 0-30: Reserved */
 #define ETH_PWRDOWN_MACAHB          (1 << 31) /* Power down MAC/AHB */
 
+/* Descriptors Offsets **************************************************************/
+
+/* Tx descriptor offsets */
+
+#define LPC17_TXDESC_PACKET         0x00      /* Base address of the Tx data buffer */
+#define LPC17_TXDESC_CONTROL        0x04      /* Control Information */
+#define LPC17_TXDESC_SIZE           0x08      /* Size in bytes of one Tx descriptor */
+
+/* Tx status offsets */
+
+#define LPC17_TXSTAT_INFO           0x00      /* Transmit status return flags */
+#define LPC17_TXSTAT_SIZE           0x04      /* Size in bytes of one Tx status */
+
+/* Rx descriptor offsets */
+
+#define LPC17_RXDESC_PACKET         0x00      /* Base address of the Rx data buffer */
+#define LPC17_RXDESC_CONTROL        0x04      /* Control Information */
+#define LPC17_RXDESC_SIZE           0x08      /* Size in bytes of one Rx descriptor */
+
+/* Rx status offsets */
+
+#define LPC17_RXSTAT_INFO           0x00      /* Receive status return flags */
+#define LPC17_RXSTAT_HASHCRC        0x04      /* Dest and source hash CRC */
+#define LPC17_RXSTAT_SIZE           0x08      /* Size in bytes of one Rx status */
+
+/* Descriptor Bit Definitions *******************************************************/
+
+/* Tx descriptor bit definitions */
+
+#define TXDESC_CONTROL_SIZE_SHIFT   (0)       /* Bits 0-10: Size of data buffer */
+#define TXDESC_CONTROL_SIZE_MASK    (0x7ff << RXDESC_CONTROL_SIZE_SHIFT)
+
+#define TXDESC_CONTROL_OVERRIDE     (1 << 26  /* Bit 26: Per-frame override */
+#define TXDESC_CONTROL_HUGE         (1 << 27) /* Bit 27: Enable huge frame size */
+#define TXDESC_CONTROL_PAD          (1 << 28) /* Bit 28: Pad short frames */
+#define TXDESC_CONTROL_CRC          (1 << 29) /* Bit 29: Append CRC */
+#define TXDESC_CONTROL_LAST         (1 << 30) /* Bit 30: Last descriptor of a fragment */
+#define TXDESC_CONTROL_INT          (1 << 31) /* Bit 31: Generate TxDone interrupt */
+
+/* Tx statis bit definitions */
+
+#define TXSTAT_INFO_COLCNT_SHIFT    (21)      /* Bits 21-24: Number of collisions */
+#define TXSTAT_INFO_COLCNT_MASK     (15 << TXSTAT_INFO_COLCNT_SHIFT)
+#define TXSTAT_INFO_DEFER           (1 << 25) /* Bit 25: Packet deffered */
+#define TXSTAT_INFO_EXCESSDEFER     (1 << 26) /* Bit 26: Excessive packet defferals */
+#define TXSTAT_INFO_EXCESSCOL       (1 << 27) /* Bit 27: Excessive packet collisions */
+#define TXSTAT_INFO_LATECOL         (1 << 28) /* Bit 28: Out of window collision */
+#define TXSTAT_INFO_UNDERRUN        (1 << 29) /* Bit 29: Tx underrun */
+#define TXSTAT_INFO_NODESC          (1 << 30) /* Bit 29: No Tx descriptor available */
+#define TXSTAT_INFO_ERROR           (1 << 31) /* Bit 31: OR of other error conditions */
+
+/* Rx descriptor bit definitions */
+
+#define RXDESC_CONTROL_SIZE_SHIFT   (0)       /* Bits 0-10: Size of data buffer */
+#define RXDESC_CONTROL_SIZE_MASK    (0x7ff << RXDESC_CONTROL_SIZE_SHIFT)
+#define RXDESC_CONTROL_INT          (1 << 31) /* Bit 31: Generate RxDone interrupt */
+
+/* Rx status bit definitions */
+
+#define RXSTAT_SAHASHCRC_SHIFT      (0)       /* Bits 0-8: Hash CRC calculated from the source address */
+#define RXSTAT_SAHASHCRC_MASK       (0x1ff << RXSTAT_SAHASHCRC_SHIFT)
+#define RXSTAT_DAHASHCRC_SHIFT      (16)      /* Bits 16-24: Hash CRC calculated from the dest address */
+#define RXSTAT_DAHASHCRC_MASK       (0x1ff << RXSTAT_DAHASHCRC_SHIFT)
+
+#define RXSTAT_INFO_RXSIZE_SHIFT    (0)       /* Bits 0-10: Size of actual data transferred */
+#define RXSTAT_INFO_RXSIZE_MASK     (0x7ff << RXSTAT_INFO_RXSIZE_SHIFT)
+#define RXSTAT_INFO_CONTROL         (1 << 18) /* Bit 18: This is a control frame */
+#define RXSTAT_INFO_VLAN            (1 << 19) /* Bit 19: This is a VLAN frame */
+#define RXSTAT_INFO_FAILFILTER      (1 << 20) /* Bit 20: Frame failed Rx filter */
+#define RXSTAT_INFO_MULTICAST       (1 << 21) /* Bit 21: This is a multicast frame */
+#define RXSTAT_INFO_BROADCAST       (1 << 22) /* Bit 22: This is a broadcast frame */
+#define RXSTAT_INFO_CRCERROR        (1 << 23) /* Bit 23: Received frame had a CRC error */
+#define RXSTAT_INFO_SYMBOLERROR     (1 << 24) /* Bit 24: PHY reported bit error */
+#define RXSTAT_INFO_LENGTHERROR     (1 << 25) /* Bit 25: Invalid frame length */
+#define RXSTAT_INFO_RANGEERROR      (1 << 26) /* Bit 26: Exceeds maximum packet size */
+#define RXSTAT_INFO_ALIGNERROR      (1 << 27) /* Bit 27: Alignment error */
+#define RXSTAT_INFO_OVERRUN         (1 << 28) /* Bit 28: Receive overrun error */
+#define RXSTAT_INFO_NODESC          (1 << 29) /* Bit 29: No Rx descriptor available */
+#define RXSTAT_INFO_LASTFLAG        (1 << 30) /* Bit 30: Last fragment of a frame */
+#define RXSTAT_INFO_ERROR           (1 << 31) /* Bit 31: OR of other error conditions */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
