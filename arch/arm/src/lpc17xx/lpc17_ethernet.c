@@ -91,14 +91,22 @@
 #  define CONFIG_LPC17_NINTERFACES 1
 #endif
 
+/* If the user did not specify a priority for Ethernet interrupts, set the
+ * interrupt priority to the maximum.
+ */
+
+#ifndef CONFIG_ETH_PRIORITY
+#  define CONFIG_ETH_PRIORITY NVIC_SYSH_PRIORITY_MAX
+#endif
+
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
-#define LPC17_WDDELAY   (1*CLK_TCK)
-#define LPC17_POLLHSEC  (1*2)
+#define LPC17_WDDELAY        (1*CLK_TCK)
+#define LPC17_POLLHSEC       (1*2)
 
 /* TX timeout = 1 minute */
 
-#define LPC17_TXTIMEOUT (60*CLK_TCK)
+#define LPC17_TXTIMEOUT      (60*CLK_TCK)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -107,31 +115,31 @@
 /* Select PHY-specific values.  Add more PHYs as needed. */
 
 #ifdef CONFIG_PHY_KS8721
-#  define LPC17_PHYNAME    "KS8721"
-#  define LPC17_PHYID1     MII_PHYID1_KS8721
-#  define LPC17_PHYID2     MII_PHYID2_KS8721
-#  define LPC17_HAVE_PHY   1
+#  define LPC17_PHYNAME      "KS8721"
+#  define LPC17_PHYID1       MII_PHYID1_KS8721
+#  define LPC17_PHYID2       MII_PHYID2_KS8721
+#  define LPC17_HAVE_PHY     1
 #else
 #  warning "No PHY specified!"
 #  undef LPC17_HAVE_PHY
 #endif
 
-#define MII_BIG_TIMEOUT    666666
+#define MII_BIG_TIMEOUT      666666
 
 /* These definitions are used to remember the speed/duplex settings */
 
-#define LPC17_SPEED_MASK   0x01
-#define LPC17_SPEED_100    0x01
-#define LPC17_SPEED_10     0x00
+#define LPC17_SPEED_MASK     0x01
+#define LPC17_SPEED_100      0x01
+#define LPC17_SPEED_10       0x00
 
-#define LPC17_DUPLEX_MASK  0x02
-#define LPC17_DUPLEX_FULL  0x02
-#define LPC17_DUPLEX_HALF  0x00
+#define LPC17_DUPLEX_MASK    0x02
+#define LPC17_DUPLEX_FULL    0x02
+#define LPC17_DUPLEX_HALF    0x00
 
-#define LPC17_10BASET_HD   (LPC17_SPEED_10  | LPC17_DUPLEX_HALF)
-#define LPC17_10BASET_FD   (LPC17_SPEED_10  | LPC17_DUPLEX_FULL)
-#define LPC17_100BASET_HD  (LPC17_SPEED_100 | LPC17_DUPLEX_HALF)
-#define LPC17_100BASET_FD  (LPC17_SPEED_100 | LPC17_DUPLEX_FULL)
+#define LPC17_10BASET_HD     (LPC17_SPEED_10  | LPC17_DUPLEX_HALF)
+#define LPC17_10BASET_FD     (LPC17_SPEED_10  | LPC17_DUPLEX_FULL)
+#define LPC17_100BASET_HD    (LPC17_SPEED_100 | LPC17_DUPLEX_HALF)
+#define LPC17_100BASET_FD    (LPC17_SPEED_100 | LPC17_DUPLEX_FULL)
 
 #ifdef CONFIG_PHY_SPEED100
 #  ifdef CONFIG_PHY_FDUPLEX
@@ -887,18 +895,80 @@ static int lpc17_ifup(struct uip_driver_s *dev)
   lpc17_txdescinit(priv);
   lpc17_rxdescinit(priv);
 
-  /* Set up RX filter and configure to accept broadcast address and perfect
-   * station address matches.
+  /* Configure to pass all received frames */
+
+  regval = lpc17_getreg(LPC17_ETH_MAC1);
+  regval |= ETH_MAC1_PARF;
+  lpc17_putreg(regval, LPC17_ETH_MAC1);
+
+  /* Set up RX filter and configure to accept broadcast addresses, multicast
+   * addresses, and perfect station address matches.
    */
+
+  regval = ETH_RXFLCTRL_PERFEN;
+#if CONFIG_NET_BROADCAST
+  regval |= ETH_RXFLCTRL_BCASTEN;
+#endif
+#if CONFIG_NET_MULTICAST
+  RXFILTERCTRL |= (ETH_RXFLCTRL_MCASTEN | ETH_RXFLCTRL_UCASTEN);
+#endif
+#if CONFIG_NET_HASH
+  RXFILTERCTRL |= (ETH_RXFLCTRL_MCASTHASHEN | ETH_RXFLCTRL_UCASTHASHEN);
+#endif
+  lpc17_putreg(regval, LPC17_ETH_RXFLCTRL);
+
+  /* Clear any pending interrupts (shouldn't be any) */
+
+  lpc17_putreg(0xffffffff, LPC17_ETH_INTCLR);
+
+  /* Configure interrupts.  The Ethernet interrupt was attached during one-time
+   * initialization, so we only need to set the interrupt priority, configure
+   * interrupts, and enable them.
+   */
+
+  /* Set the interrupt to the highest priority */
+
+#ifdef CONFIG_ARCH_IRQPRIO
+#if LM3S_NETHCONTROLLERS > 1
+  (void)up_prioritize_irq(priv->irq, CONFIG_ETH_PRIORITY);
+#else
+  (void)up_prioritize_irq(LPC17_IRQ_ETH, CONFIG_ETH_PRIORITY);
+#endif
+#endif
+
+  /* Enable Ethernet interrupts.  The way we do this depends on whether or
+   * not Wakeup on Lan (WoL) has been configured.
+   */
+
+#if CONFIG_NET_WOL
+  /* Configure WoL: Clear all receive filter WoLs and enable the perfect
+   * match WoL interrupt.  We will wait until the Wake-up to finish
+   * bringing things up.
+   */
+
+  lpc17_putreg(0xffffffff, LPC17_ETH_RXFLWOLCLR);
+  lpc17_putreg(ETH_RXFLCTRL_RXFILEN, LPC17_ETH_RXRLCTRL);
+  lpc17_putreg(ETH_INT_WKUP, LPC17_ETH_INTEN);
+#else
+  /* Otherwise, enable all interrupts except SOFTINT and WoL */
+
+  lpc17_putreg((ETH_INT_RXOVR | ETH_INT_RXERR | ETH_INT_RXFIN | ETH_INT_RXDONE |
+                ETH_INT_TXUNR | ETH_INT_TXERR | ETH_INT_TXFIN | ETH_INT_TXDONE),
+			   LPC17_ETH_INTEN);
+#endif
 
   /* Set and activate a timer process */
 
   (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_polltimer, 1, (uint32_t)priv);
 
-  /* Enable the Ethernet interrupt */
+  /* Finally, enable the Ethernet interrupt at the interrupt controller */
 
   priv->lp_ifup = true;
+#if LM3S_NETHCONTROLLERS > 1
+  up_enable_irq(priv->irq);
+#else
   up_enable_irq(LPC17_IRQ_ETH);
+#endif
   return OK;
 }
 
