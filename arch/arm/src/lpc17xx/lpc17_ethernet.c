@@ -107,20 +107,83 @@
 /* Select PHY-specific values.  Add more PHYs as needed. */
 
 #ifdef CONFIG_PHY_KS8721
-#  define LPC17_PHYNAME  "KS8721"
-#  define LPC17_PHYID1   MII_PHYID1_KS8721
-#  define LPC17_PHYID2   MII_PHYID2_KS8721
-#  define LPC17_HAVE_PHY 1
+#  define LPC17_PHYNAME    "KS8721"
+#  define LPC17_PHYID1     MII_PHYID1_KS8721
+#  define LPC17_PHYID2     MII_PHYID2_KS8721
+#  define LPC17_HAVE_PHY   1
 #else
 #  warning "No PHY specified!"
 #  undef LPC17_HAVE_PHY
 #endif
 
-#define MII_BIG_TIMEOUT  666666
+#define MII_BIG_TIMEOUT    666666
+
+/* These definitions are used to remember the speed/duplex settings */
+
+#define LPC17_SPEED_MASK   0x01
+#define LPC17_SPEED_100    0x01
+#define LPC17_SPEED_10     0x00
+
+#define LPC17_DUPLEX_MASK  0x02
+#define LPC17_DUPLEX_FULL  0x02
+#define LPC17_DUPLEX_HALF  0x00
+
+#define LPC17_10BASET_HD   (LPC17_SPEED_10  | LPC17_DUPLEX_HALF)
+#define LPC17_10BASET_FD   (LPC17_SPEED_10  | LPC17_DUPLEX_FULL)
+#define LPC17_100BASET_HD  (LPC17_SPEED_100 | LPC17_DUPLEX_HALF)
+#define LPC17_100BASET_FD  (LPC17_SPEED_100 | LPC17_DUPLEX_FULL)
+
+#ifdef CONFIG_PHY_SPEED100
+#  ifdef CONFIG_PHY_FDUPLEX
+#    define LPC17_MODE_DEFLT LPC17_100BASET_FD
+#  else
+#    define LPC17_MODE_DEFLT LPC17_100BASET_HD
+#  endif
+#else
+#  ifdef CONFIG_PHY_FDUPLEX
+#    define LPC17_MODE_DEFLT LPC17_10BASET_FD
+#  else
+#    define LPC17_MODE_DEFLT LPC17_10BASET_HD
+#  endif
+#endif
 
 /* This is the number of ethernet GPIO pins that must be configured */
 
-#define GPIO_NENET_PINS  10
+#define GPIO_NENET_PINS      10
+
+/* EMAC DMA RAM and descriptor definitions.
+ *
+ * All of AHB SRAM, Bank 0 is set aside for EMAC Tx and Rx descriptors.
+ */
+
+#define LPC17_BANK0_SIZE     0x00004000
+#warning "Need to exclude bank0 from the heap"
+
+/* Numbers of descriptors and sizes of descriptor and status regions */
+
+#ifdef CONFIG_ETH_NTXDESC
+#  define CONFIG_ETH_NTXDESC 16
+#endif
+#define LPC17_TXDESC_SIZE    (8*CONFIG_ETH_NTXDESC)
+#define LPC17_TXSTAT_SIZE    (4*CONFIG_ETH_NTXDESC)
+
+#ifdef CONFIG_ETH_NRXDESC
+#  define CONFIG_ETH_NRXDESC 16
+#endif
+#define LPC17_RXDESC_SIZE    (8*CONFIG_ETH_NRXDESC)
+#define LPC17_RXSTAT_SIZE    (8*CONFIG_ETH_NRXDESC)
+
+/* Descriptor Memory Organization.  Descriptors are packed
+ * at the end of AHB SRAM, Bank 0.
+ */
+
+#define LPC17_DESC_SIZE      (LPC17_TXDESC_SIZE+LPC17_RXDESC_SIZE+LPC17_TXSTAT_SIZE+LPC17_RXSTAT_SIZE)
+#define LPC17_DESC_BASE      (LPC17_SRAM_BANK0+LPC17_BANK0_SIZE-LPC17_DESC_SIZE)
+
+#define LPC17_TXDESC_BASE    LPC17_DESC_BASE
+#define LPC17_TXSTAT_BASE    (LPC17_TXDESC_BASE+LPC17_TXDESC_SIZE)
+#define LPC17_RXDESC_BASE    (LPC17_TXSTAT_BASE+LPC17_TXSTAT_SIZE)
+#define LPC17_RXSTAT_BASE    (LPC17_RXDESC_BASE + LPC17_RXDESC_SIZE)
 
 /* Register debug */
 
@@ -148,8 +211,7 @@ struct lpc17_driver_s
 #endif
 
   bool     lp_ifup;             /* true:ifup false:ifdown */
-  bool     lp_speed100;         /* true:100Mbps false:10Mbps */
-  bool     lp_fullduplex;       /* true:full duplex false:half duplex */
+  bool     lp_mode;             /* speed/duplex */
 #ifdef LPC17_HAVE_PHY
   uint8_t  lp_phyaddr;          /* PHY device address */
 #endif
@@ -248,15 +310,15 @@ static inline int lpc17_phyreset(uint8_t phyaddr);
 #  ifdef CONFIG_PHY_AUTONEG
 static inline int lpc17_phyautoneg(uint8_t phyaddr);
 #  endif
-static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex);
-static void lpc17_phyduplex(uint8_t phyaddr, bool fullduplex);
+static int lpc17_phymode(uint8_t phyaddr, uint8_t mode);
 static inline int lpc17_phyinit(struct lpc17_driver_s *priv);
 #else
-#  define lpc17_phyinit()
+#  define lpc17_phyinit(priv)
 #endif
 
 /* EMAC Initialization functions */
 
+static void lpc17_macmode(uint8_t mode);
 static void lpc17_ethreset(struct lpc17_driver_s *priv);
 
 /****************************************************************************
@@ -274,7 +336,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv);
 #ifdef CONFIG_LPC17_ENET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  lldbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  dbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 
@@ -324,7 +386,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              lldbg("[repeats %d more times]\n", count);
+              dbg("[repeats %d more times]\n", count);
             }
         }
 
@@ -695,12 +757,24 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 {
   FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
   uint32_t regval;
+  int ret;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
-  /* Initilize Ethernet interface */
+  /* Reset the Ethernet controller (again) */
+
+  lpc17_ethreset(priv);
+
+  /* Initialize the PHY and wait for the link to be established */
+
+  ret = lpc17_phyinit(priv);
+  if (ret != 0)
+    {
+      ndbg("lpc17_phyinit failed: %d\n", ret);
+      return ret;
+    }
 
   /* Configure the MAC station address */
 
@@ -715,6 +789,16 @@ static int lpc17_ifup(struct uip_driver_s *dev)
   regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[5] << 8 |
            (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[4];
   lpc17_putreg(regval, LPC17_ETH_SA2);
+
+  /* Initialize Ethernet interface for the PHY setup */
+
+  lpc17_macmode(priv->lp_mode);
+
+  /* Initialize EMAC DMA memory */
+
+  /* Set up RX filter and configure to accept broadcast address and perfect
+   * station address matches.
+   */
 
   /* Set and activate a timer process */
 
@@ -760,6 +844,7 @@ static int lpc17_ifdown(struct uip_driver_s *dev)
 
   /* Reset the device */
 
+  lpc17_ethreset(priv);
   priv->lp_ifup = false;
   irqrestore(flags);
   return OK;
@@ -908,14 +993,14 @@ static void lpc17_showpins(void)
 #if defined(CONFIG_LPC17_ENET_REGDEBUG) && defined(LPC17_HAVE_PHY)
 static void lpc17_showmii(uint8_t phyaddr, const char *msg)
 {
-  lldbg("PHY " LPC17_PHYNAME ": %s\n", msg);
-  lldbg("  MCR:       %04x\n", lpc17_getreg(MII_MCR));
-  lldbg("  MSR:       %04x\n", lpc17_getreg(MII_MSR));
-  lldbg("  ADVERTISE: %04x\n", lpc17_getreg(MII_ADVERTISE));
-  lldbg("  LPA:       %04x\n", lpc17_getreg(MII_LPA));
-  lldbg("  EXPANSION: %04x\n", lpc17_getreg(MII_EXPANSION));
+  dbg("PHY " LPC17_PHYNAME ": %s\n", msg);
+  dbg("  MCR:       %04x\n", lpc17_getreg(MII_MCR));
+  dbg("  MSR:       %04x\n", lpc17_getreg(MII_MSR));
+  dbg("  ADVERTISE: %04x\n", lpc17_getreg(MII_ADVERTISE));
+  dbg("  LPA:       %04x\n", lpc17_getreg(MII_LPA));
+  dbg("  EXPANSION: %04x\n", lpc17_getreg(MII_EXPANSION));
 #ifdef CONFIG_PHY_KS8721
-  lldbg("  10BTCR:    %04x\n", lpc17_getreg(MII_KS8721_10BTCR));
+  dbg("  10BTCR:    %04x\n", lpc17_getreg(MII_KS8721_10BTCR));
 #endif
 }
 #endif
@@ -1051,7 +1136,7 @@ static inline int lpc17_phyreset(uint8_t phyaddr)
         }
     }
 
-  nlldbg("Reset failed. MCR: %04x\n", phyreg);
+  ndbg("Reset failed. MCR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
@@ -1099,19 +1184,20 @@ static inline int lpc17_phyautoneg(uint8_t phyaddr)
         }
     }
 
-  nlldbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
+  ndbg("Auto-negotiation failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
 }
 #endif
 
 /****************************************************************************
- * Function: lpc17_phyfixed
+ * Function: lpc17_phymode
  *
  * Description:
- *   Set fixed PHY configuration.
+ *   Set the PHY to operate at a selected speed/duplex mode.
  *
  * Parameters:
  *   phyaddr - The device address where the PHY was discovered
+ *   mode - speed/duplex mode
  *
  * Returned Value:
  *   None
@@ -1121,7 +1207,7 @@ static inline int lpc17_phyautoneg(uint8_t phyaddr)
  ****************************************************************************/
 
 #ifdef LPC17_HAVE_PHY
-static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex)
+static int lpc17_phymode(uint8_t phyaddr, uint8_t mode)
 {
   int32_t timeout;
   uint16_t phyreg;
@@ -1129,12 +1215,12 @@ static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex)
   /* Disable auto-negotiation and set fixed Speed and Duplex settings */
 
   phyreg = 0;
-  if (speed100)
+  if ((mode & LPC17_SPEED_MASK) ==  LPC17_SPEED_100)
     {
       phyreg = MII_MCR_SPEED100;
     }
 
-  if (fullduplex)
+  if ((mode & LPC17_DUPLEX_MASK) == LPC17_DUPLEX_FULL)
     {
       phyreg |= MII_MCR_FULLDPLX;
     }
@@ -1154,69 +1240,8 @@ static int lpc17_phyfixed(uint8_t phyaddr, bool speed100, bool fullduplex)
         }
     }
 
-  nlldbg("Link failed. MSR: %04x\n", phyreg);
+  ndbg("Link failed. MSR: %04x\n", phyreg);
   return -ETIMEDOUT;
-}
-#endif
-
-/****************************************************************************
- * Function: lpc17_phyfulldplex
- *
- * Description:
- *   Tweak a few things for full/half duplex.
- *
- * Parameters:
- *   phyaddr - The device address where the PHY was discovered
- *   fullduplex - TRUE: full duplex
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef LPC17_HAVE_PHY
-static void lpc17_phyduplex(uint8_t phyaddr, bool fullduplex)
-{
-  uint32_t regval;
-
-  if (fullduplex)
-    {
-      /* Set the inter-packet gap */
- 
-      lpc17_putreg(21, LPC17_ETH_IPGT);
-
-      /* Set MAC to operate in full duplex mode */
-
-      regval = lpc17_getreg(LPC17_ETH_MAC2);
-      regval |= ETH_MAC2_FD;
-      lpc17_putreg(regval, LPC17_ETH_MAC2);
-
-      /* Select full duplex operation for ethernet controller */
-
-      regval = lpc17_getreg(LPC17_ETH_CMD);
-      regval |= ETH_CMD_FD;
-      lpc17_putreg(regval, LPC17_ETH_CMD);
-    }
-  else
-    {
-      /* Set the inter-packet gap */
- 
-      lpc17_putreg(18, LPC17_ETH_IPGT);
-
-      /* Set MAC to operate in half duplex mode */
-
-      regval = lpc17_getreg(LPC17_ETH_MAC2);
-      regval &= ~ETH_MAC2_FD;
-      lpc17_putreg(regval, LPC17_ETH_MAC2);
-
-      /* Select half duplex operation for ethernet controller */
-
-      regval = lpc17_getreg(LPC17_ETH_CMD);
-      regval &= ~ETH_CMD_FD;
-      lpc17_putreg(regval, LPC17_ETH_CMD);
-    }
 }
 #endif
 
@@ -1230,7 +1255,9 @@ static void lpc17_phyduplex(uint8_t phyaddr, bool fullduplex)
  *   priv - Pointer to EMAC device driver structure 
  *
  * Returned Value:
- *   None
+ *   None directory.
+ *   As a side-effect, it will initialize priv->lp_phyaddr and
+ *   priv->lp_phymode.
  *
  * Assumptions:
  *
@@ -1277,7 +1304,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
             }
         }
     }
-  nlldbg("phyaddr: %d\n", phyaddr);
+  nvdbg("phyaddr: %d\n", phyaddr);
 
   /* Check if the PHY device address was found */
 
@@ -1333,19 +1360,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 #else
   /* Set up the fixed PHY configuration */
 
-#ifdef CONFIG_PHY_SPEED100
-  priv->lp_speed100 = true;
-#else
-  priv->lp_speed100 = false;
-#endif
-
-#ifdef CONFIG_PHY_FDUPLEX
-  priv->lp_fullduplex = true;
-#else
-  priv->lp_fullduplex = false;
-#endif
-
-  ret = lpc17_phyfixed(phyaddr, priv->lp_speed100, priv->lp_fullduplex);
+  ret = lpc17_phymode(phyaddr, LPC17_MODE_DEFLT);
   if (ret < 0)
     {
       return ret;
@@ -1364,42 +1379,119 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
   switch (phyreg & KS8721_10BTCR_MODE_MASK)
     {
       case KS8721_10BTCR_MODE_10BTHD:  /* 10BASE-T half duplex */
-        priv->lp_fullduplex = false;
-        priv->lp_speed100 = false;
+        priv->lp_mode = LPC17_10BASET_HD;
         lpc17_putreg(0, LPC17_ETH_SUPP);
         break;
       case KS8721_10BTCR_MODE_100BTHD: /* 100BASE-T half duplex */
-        priv->lp_fullduplex = false;
-        priv->lp_speed100 = true;
+        priv->lp_mode = LPC17_100BASET_HD;
         break;
       case KS8721_10BTCR_MODE_10BTFD: /* 10BASE-T full duplex */
-        priv->lp_fullduplex = true;
-        priv->lp_speed100 = false;
+        priv->lp_mode = LPC17_10BASET_FD;
         lpc17_putreg(0, LPC17_ETH_SUPP);
         break;
       case KS8721_10BTCR_MODE_100BTFD: /* 100BASE-T full duplex */
-        priv->lp_fullduplex = true;
-        priv->lp_speed100 = true;
+        priv->lp_mode = LPC17_100BASET_FD;
         break;
       default:
-        lldbg("Unrecognized mode: %04x\n", phyreg);
+        dbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
 #else
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif
 
-  nlldbg("%dBase-T %s duplex\n",
-         priv->lp_speed100 ? 10 : 100,
-         priv->lp_fullduplex ? "full" : "half");
+  ndbg("%dBase-T %s duplex\n",
+       priv->lp_mode & LPC17_SPEED_MASK ==  LPC17_SPEED_100 ? 100 : 10,
+       priv->lp_mode & LPC17_DUPLEX_MASK == LPC17_DUPLEX_FULL ?"full" : "half");
 
-  /* Configure the MAC for this speed */
+  /* Disable auto-configuration.  Set the fixed speed/duplex mode.
+   * (probably more than little redundant).
+   */
 
-  lpc17_phyduplex(phyaddr, priv->lp_fullduplex);
-  lpc17_phyfixed(phyaddr, priv->lp_speed100, priv->lp_fullduplex);
-  lpc17_showmii(phyaddr, "At completion");
+  ret = lpc17_phymode(phyaddr, LPC17_MODE_DEFLT);
+  lpc17_showmii(phyaddr, "After final configuration");
+  return ret;
+}
+#endif
 
-  return OK;
+/****************************************************************************
+ * Function: lpc17_macmode
+ *
+ * Description:
+ *   Set the MAC to operate at a selected speed/duplex mode.
+ *
+ * Parameters:
+ *   mode - speed/duplex mode
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef LPC17_HAVE_PHY
+static void lpc17_macmode(uint8_t mode)
+{
+  uint32_t regval;
+
+  /* Set up for full or half duplex operation */
+
+  if ((mode & LPC17_DUPLEX_MASK) == LPC17_DUPLEX_FULL)
+    {
+      /* Set the back-to-back inter-packet gap */
+ 
+      lpc17_putreg(21, LPC17_ETH_IPGT);
+
+      /* Set MAC to operate in full duplex mode with CRC and Pad enabled */
+
+      regval = lpc17_getreg(LPC17_ETH_MAC2);
+      regval |= (ETH_MAC2_FD | ETH_MAC2_CRCEN | ETH_MAC2_PADCRCEN);
+      lpc17_putreg(regval, LPC17_ETH_MAC2);
+
+      /* Select full duplex operation for ethernet controller */
+
+      regval = lpc17_getreg(LPC17_ETH_CMD);
+      regval |= (ETH_CMD_FD | ETH_CMD_RMII | ETH_CMD_PRFRAME);
+      lpc17_putreg(regval, LPC17_ETH_CMD);
+    }
+  else
+    {
+      /* Set the back-to-back inter-packet gap */
+ 
+      lpc17_putreg(18, LPC17_ETH_IPGT);
+
+      /* Set MAC to operate in half duplex mode with CRC and Pad enabled */
+
+      regval = lpc17_getreg(LPC17_ETH_MAC2);
+      regval &= ~ETH_MAC2_FD;
+      regval |= (ETH_MAC2_CRCEN | ETH_MAC2_PADCRCEN);
+      lpc17_putreg(regval, LPC17_ETH_MAC2);
+
+      /* Select half duplex operation for ethernet controller */
+
+      regval = lpc17_getreg(LPC17_ETH_CMD);
+      regval &= ~ETH_CMD_FD;
+      regval |= (ETH_CMD_RMII | ETH_CMD_PRFRAME);
+      lpc17_putreg(regval, LPC17_ETH_CMD);
+    }
+
+  /* This is currently done in lpc17_phyinit().  That doesn't
+   * seem like the right place. It should be done here.
+   */
+
+#if 0
+  regval = lpc17_getreg(LPC17_ETH_SUPP);
+  if ((mode & LPC17_SPEED_MASK) == LPC17_SPEED_100)
+    {
+      regval |= ETH_SUPP_SPEED;
+    }
+  else
+    {
+      regval &= ~ETH_SUPP_SPEED;
+    }
+  lpc17_putreg(regval, LPC17_ETH_SUPP);
+#endif
 }
 #endif
 
@@ -1422,28 +1514,51 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 static void lpc17_ethreset(struct lpc17_driver_s *priv)
 {
   irqstate_t flags;
-  uint32_t regval;
 
-#if LPC17_NETHCONTROLLERS > 1
-#  error "If multiple interfaces are supported, this function would have to be redesigned"
-#endif
+  /* Reset the MAC */
 
-  /* Make sure that clocking is enabled for the Ethernet (and PHY) peripherals */
+  flags = irqsave();
 
-  flags   = irqsave();
+  /* Put the MAC into the reset state */
 
-  /* Put the Ethernet controller into the reset state */
+  lpc17_putreg((ETH_MAC1_TXRST    | ETH_MAC1_MCSTXRST |ETH_MAC1_RXRST |
+                ETH_MAC1_MCSRXRST | ETH_MAC1_SIMRST   | ETH_MAC1_SOFTRST),
+               LPC17_ETH_MAC1);
 
-  /* Wait just a bit.  This is a much longer delay than necessary */
+  /* Disable RX/RX, clear modes, reset all control registers */
 
-  up_mdelay(2);
+  lpc17_putreg((ETH_CMD_REGRST | ETH_CMD_TXRST | ETH_CMD_RXRST),
+               LPC17_ETH_CMD);
 
-  /* Then take the Ethernet controller out of the reset state */
+  /* Take the MAC out of the reset state */
+
+  up_udelay(50);
+  lpc17_putreg(0, LPC17_ETH_MAC1);
+
+  /* The RMII bit must be set on initialization (I'm not sure
+   * this needs to be done here but... oh well.
+   */
+
+  lpc17_putreg(ETH_CMD_RMII, LPC17_ETH_CMD);
+
+  /* Set other misc configuration-related registers to default values */
+
+  lpc17_putreg(0, LPC17_ETH_MAC2);
+  lpc17_putreg(0, LPC17_ETH_SUPP);
+  lpc17_putreg(0, LPC17_ETH_TEST);
+
+  lpc17_putreg(18, LPC17_ETH_IPGR);
+  lpc17_putreg(((15 << ETH_CLRT_RMAX_SHIFT) | (55 << ETH_CLRT_COLWIN_SHIFT)),
+               LPC17_ETH_CLRT);
+  lpc17_putreg(0x0600, LPC17_ETH_MAXF);
 
   /* Disable all Ethernet controller interrupts */
 
+  lpc17_putreg(0, LPC17_ETH_INTEN);
+
   /* Clear any pending interrupts (shouldn't be any) */
 
+  lpc17_putreg(0xffffffff, LPC17_ETH_INTCLR);
   irqrestore(flags);
 }
 
@@ -1518,12 +1633,11 @@ static inline int lpc17_ethinitialize(int intf)
   priv->lp_txpoll        = wd_create();   /* Create periodic poll timer */
   priv->lp_txtimeout     = wd_create();   /* Create TX timeout timer */
 
-  /* Perform minimal, one-time initialization -- just reset the controller and
-   * leave it disabled.  The Ethernet controller will be reset and properly
-   * re-initialized each time lpc17_ifup() is called.
+  /* Reset the Ethernet controller and leave in the ifdown statue.  The
+   * Ethernet controller will be properly re-initialized each time
+   * lpc17_ifup() is called.
    */
 
-  lpc17_ethreset(priv);
   lpc17_ifdown(&priv->lp_dev);
 
   /* Attach the IRQ to the driver */
