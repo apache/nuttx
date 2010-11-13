@@ -160,14 +160,14 @@
 /* EMAC statistics (debug only) */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-struct ez80mac_statistics_s
+struct lm3s_statistics_s
 {
   uint32_t rx_int;         /* Number of Rx interrupts received */
   uint32_t rx_packets;     /* Number of packets received (sum of the following): */
   uint32_t rx_ip;          /*   Number of Rx IP packets received */
   uint32_t rx_arp;         /*   Number of Rx ARP packets received */
   uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
-  uint32_t rx_pktsize;     /*   Number of dropped, too small or too bigr */
+  uint32_t rx_pktsize;     /*   Number of dropped, too small or too big */
   uint32_t rx_errors;      /* Number of Rx errors (reception error) */
   uint32_t rx_ovrerrors;   /* Number of Rx FIFO overrun errors */
   uint32_t tx_int;         /* Number of Tx interrupts received */
@@ -200,7 +200,7 @@ struct lm3s_driver_s
   WDOG_ID  ld_txtimeout;       /* TX timeout timer */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
-  struct ez80mac_statistics_s ld_stat;
+  struct lm3s_statistics_s ld_stat;
 #endif
 
   /* This holds the information visible to uIP/NuttX */

@@ -289,6 +289,36 @@
  * Private Types
  ****************************************************************************/
 
+/* EMAC statistics (debug only) */
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+struct lpc17_statistics_s
+{
+#if ENABLE_WOL
+  uint32_t wol;            /* Wake-up interrupts */
+#endif
+  uint32_t rx_finished;    /* Rx finished interrupts */
+  uint32_t rx_done;        /* Rx done interrupts */
+  uint32_t rx_ovrerrors;   /* Number of Rx overrun error interrupts */
+  uint32_t rx_errors;      /* Number of Rx error interrupts (OR of other errors) */
+  uint32_t rx_packets;     /* Number of packets received (sum of the following): */
+  uint32_t rx_ip;          /*   Number of Rx IP packets received */
+  uint32_t rx_arp;         /*   Number of Rx ARP packets received */
+  uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
+  uint32_t rx_pktsize;     /*   Number of dropped, too small or too big */
+
+  uint32_t tx_packets;     /* Number of Tx packets queued */
+  uint32_t tx_finished;    /* Tx finished interrupts */
+  uint32_t tx_done;        /* Tx done interrupts */
+  uint32_t tx_underrun;    /* Number of Tx underrun error interrupts */
+  uint32_t tx_errors;      /* Number of Tx error inerrupts (OR of other errors) */
+  uint32_t tx_timeouts;    /* Number of Tx timeout errors */
+};
+#  define EMAC_STAT(priv,name) priv->lp_stat.name++
+#else
+#  define EMAC_STAT(priv,name)
+#endif
+
 /* The lpc17_driver_s encapsulates all state information for a single hardware
  * interface
  */
@@ -311,6 +341,10 @@ struct lpc17_driver_s
 #endif
   WDOG_ID  lp_txpoll;           /* TX poll timer */
   WDOG_ID  lp_txtimeout;        /* TX timeout timer */
+  
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
+  struct lpc17_statistics_s lp_stat;
+#endif
 
   /* This holds the information visible to uIP/NuttX */
 
@@ -742,24 +776,86 @@ static void lpc17_txdone(FAR struct lpc17_driver_s *priv)
 static int lpc17_interrupt(int irq, FAR void *context)
 {
   register FAR struct lpc17_driver_s *priv = &g_ethdrvr[0];
+  uint32_t status;
 
-  /* Disable Ethernet interrupts */
+  /* Get the interrupt status (zero means no interrupts pending). */
 
-  /* Get and clear interrupt status bits */
+  status = lpc17_getreg(LPC17_ETH_INTST);
+  if (status != 0)
+    {
+      /* Handle each pending interrupt */
+      /* Check for receive errors */
 
-  /* Handle interrupts according to status bit settings */
+      if ((status & ETH_INT_RXOVR) != 0)
+        {
+          lpc17_putreg(ETH_INT_RXOVR, LPC17_ETH_INTCLR);
+          EMAC_STAT(priv, rx_ovrerrors);
+        }
 
-  /* Check if we received an incoming packet, if so, call lpc17_receive() */
+      if ((status & ETH_INT_RXERR) != 0)
+        {
+          lpc17_putreg(ETH_INT_RXERR, LPC17_ETH_INTCLR);
+          EMAC_STAT(priv, rx_errors);
+        }
 
-  lpc17_receive(priv);
+      /* Check if we received an incoming packet, if so, call lpc17_receive() */
 
-  /* Check is a packet transmission just completed.  If so, call lpc17_txdone */
+      if ((status & ETH_INT_RXFIN) != 0)
+        {
+          lpc17_putreg(ETH_INT_RXFIN, LPC17_ETH_INTCLR);
+          EMAC_STAT(priv, rx_finished);
+          DEBUGASSERT(lpc17_getreg(LPC17_ETH_RXPRODIDX) == lpc17_getreg(LPC17_ETH_RXCONSIDX));
+        }
 
-  lpc17_txdone(priv);
+      if ((status & ETH_INT_RXDONE) != 0)
+        {
+          lpc17_putreg(ETH_INT_RXDONE, LPC17_ETH_INTCLR);
+          EMAC_STAT(priv, rx_done);
+          lpc17_receive(priv);
+        }
 
-  /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if 
-   * there are no pending transmissions.
-   */
+      /* Check for Tx errors */
+
+      if ((status & ETH_INT_TXUNR) != 0)
+        {
+          lpc17_putreg(ETH_INT_TXUNR, LPC17_ETH_INTCLR);
+          EMAC_STAT(priv, tx_underrun);
+        }
+
+      if ((status & ETH_INT_TXERR) != 0)
+        {
+          lpc17_putreg(ETH_INT_TXERR, LPC17_ETH_INTCLR);
+          EMAC_STAT(priv, tx_errors);
+        }
+
+      /* Check is a packet transmission just completed.  If so, call lpc17_txdone */
+
+      if ((status & ETH_INT_TXFIN) != 0)
+        {
+          lpc17_putreg(ETH_INT_TXFIN, LPC17_ETH_INTCLR);
+          EMAC_STAT(priv, tx_finished);
+        }
+
+      if ((status & ETH_INT_TXDONE) != 0)
+        {
+          lpc17_putreg(ETH_INT_TXDONE, LPC17_ETH_INTCLR);
+          EMAC_STAT(priv, tx_done);
+          lpc17_txdone(priv);
+        }
+
+      /* Check for Wake-Up on Lan */
+
+#if CONFIG_NET_WOL
+      if ((status & ETH_INT_WKUP) != 0)
+        {
+          lpc17_putreg(ETH_INT_WKUP, LPC17_ETH_INTCLR);
+          INTCLEAR = EMAC_INT_WOL;
+          EMAC_STAT(priv, wol);
+#         warning "Missing logic"
+        }
+#endif
+
+    }
 
   return OK;
 }
@@ -857,7 +953,7 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Reset the Ethernet controller (again) */
 
@@ -954,7 +1050,7 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 
   lpc17_putreg((ETH_INT_RXOVR | ETH_INT_RXERR | ETH_INT_RXFIN | ETH_INT_RXDONE |
                 ETH_INT_TXUNR | ETH_INT_TXERR | ETH_INT_TXFIN | ETH_INT_TXDONE),
-			   LPC17_ETH_INTEN);
+               LPC17_ETH_INTEN);
 #endif
 
   /* Set and activate a timer process */
@@ -1620,7 +1716,7 @@ static inline void lpc17_txdescinit(struct lpc17_driver_s *priv)
     {
       *txdesc++ = pktaddr;
       *txdesc++ = (TXDESC_CONTROL_INT | (LPC17_MAXPACKET_SIZE - 1));
-	  pktaddr  += LPC17_MAXPACKET_SIZE;
+      pktaddr  += LPC17_MAXPACKET_SIZE;
     }
 
   /* Initialize Tx status */
