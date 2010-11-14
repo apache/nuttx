@@ -188,6 +188,17 @@ CONFIG_UART3_2STOP=0
 # CONFIG_PHY_AUTONEG - Enable auto-negotion
 # CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
 # CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex
+# CONFIG_NET_NTXDESC - Configured number of Tx descriptors. Default: 18
+# CONFIG_NET_NRXDESC - Configured number of Rx descriptors. Default: 18
+# CONFIG_NET_PRIORITY - Ethernet interrupt priority.  The is default is
+#   the higest priority.
+# CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
+# CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
+#   CONFIG_DEBUG.
+# CONFIG_NET_BROADCAST - Enable receipt of broadcast frames
+# CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
+# CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
+#   Automatically set if CONFIG_NET_IGMP is selected.
 #
 CONFIG_PHY_KS8721=y
 CONFIG_PHY_AUTONEG=y
