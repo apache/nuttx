@@ -129,14 +129,23 @@ void up_addregion(void)
 {
   /* Banks 0 and 1 are each 16Kb.  If both are present, they occupy a
    * contiguous 32Kb memory region.
+   *
+   * If Ethernet is enabled, it will take all of bank 0 for packet
+   * buffering and descriptor tables.
    */
 
 #ifdef LPC17_HAVE_BANK0
-# ifdef LPC17_HAVE_BANK1
-  mm_addregion((FAR void*)LPC17_SRAM_BANK0, 32*1024);
-# else
-  mm_addregion((FAR void*)LPC17_SRAM_BANK0, 16*1024);
-# endif
+#  if defined(CONFIG_NET) && defined(CONFIG_LPC17_ETHERNET) && defined(LPC17_NETHCONTROLLERS)
+#    ifdef LPC17_HAVE_BANK1
+       mm_addregion((FAR void*)LPC17_SRAM_BANK1, 16*1024);
+#    endif
+#  else
+#    ifdef LPC17_HAVE_BANK1
+       mm_addregion((FAR void*)LPC17_SRAM_BANK0, 32*1024);
+#    else
+       mm_addregion((FAR void*)LPC17_SRAM_BANK0, 16*1024);
+#    endif
+#  endif
 #endif
 }
 #endif

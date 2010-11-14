@@ -153,6 +153,9 @@ static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   global interrupts are disabled, either explicitly or indirectly through
+ *   interrupt handling logic.
  *
  ****************************************************************************/
 
@@ -165,11 +168,9 @@ static int skel_transmit(FAR struct skel_driver_s *skel)
 
   /* Increment statistics */
 
-  /* Disable Ethernet interrupts */
-
   /* Send the packet: address=skel->sk_dev.d_buf, length=skel->sk_dev.d_len */
 
-  /* Restore Ethernet interrupts */
+  /* Enable Tx interrupts */
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -195,6 +196,9 @@ static int skel_transmit(FAR struct skel_driver_s *skel)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   global interrupts are disabled, either explicitly or indirectly through
+ *   interrupt handling logic.
  *
  ****************************************************************************/
 
@@ -236,6 +240,7 @@ static int skel_uiptxpoll(struct uip_driver_s *dev)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
  *
  ****************************************************************************/
 
@@ -302,6 +307,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
@@ -309,7 +315,9 @@ static void skel_txdone(FAR struct skel_driver_s *skel)
 {
   /* Check for errors and update statistics */
 
-  /* If no further xmits are pending, then cancel the TX timeout */
+  /* If no further xmits are pending, then cancel the TX timeout and
+   * disable further Tx interrupts.
+   */
 
   wd_cancel(skel->sk_txtimeout);
 
@@ -339,8 +347,6 @@ static int skel_interrupt(int irq, FAR void *context)
 {
   register FAR struct skel_driver_s *skel = &g_skel[0];
 
-  /* Disable Ethernet interrupts */
-
   /* Get and clear interrupt status bits */
 
   /* Handle interrupts according to status bit settings */
@@ -349,13 +355,12 @@ static int skel_interrupt(int irq, FAR void *context)
 
   skel_receive(skel);
 
-  /* Check is a packet transmission just completed.  If so, call skel_txdone */
+  /* Check is a packet transmission just completed.  If so, call skel_txdone.
+   * This may disable further Tx interrupts if there are no pending
+   * tansmissions.
+   */
 
   skel_txdone(skel);
-
-  /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if 
-   * there are no pending transmissions.
-   */
 
   return OK;
 }
@@ -375,6 +380,7 @@ static int skel_interrupt(int irq, FAR void *context)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
@@ -405,6 +411,7 @@ static void skel_txtimeout(int argc, uint32_t arg, ...)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
@@ -453,7 +460,7 @@ static int skel_ifup(struct uip_driver_s *dev)
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
-  /* Initilize Ethernet interface */
+  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
   /* Set and activate a timer process */
 
@@ -497,7 +504,12 @@ static int skel_ifdown(struct uip_driver_s *dev)
   wd_cancel(skel->sk_txpoll);
   wd_cancel(skel->sk_txtimeout);
 
-  /* Reset the device */
+  /* Put the the EMAC is its reset, non-operational state.  This should be
+   * a known configuration that will guarantee the skel_ifup() always
+   * successfully brings the interface back up.
+   */
+
+  /* Mark the device "down" */
 
   skel->sk_bifup = false;
   irqrestore(flags);
@@ -528,13 +540,16 @@ static int skel_txavail(struct uip_driver_s *dev)
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
   irqstate_t flags;
 
+  /* Disable interrupts because this function may be called from interrupt
+   * level processing.
+   */
+
   flags = irqsave();
 
   /* Ignore the notification if the interface is not yet up */
 
   if (skel->sk_bifup)
     {
-
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
       /* If so, then poll uIP for new XMIT data */
@@ -612,10 +627,11 @@ static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  * Function: skel_initialize
  *
  * Description:
- *   Initialize the Ethernet driver
+ *   Initialize the Ethernet controller and driver
  *
  * Parameters:
- *   None
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -624,11 +640,16 @@ static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-/* Initialize the Ethernet controller and driver */
-
-int skel_initialize(void)
+int skel_initialize(int intf)
 {
-  /* Check if a Ethernet chip is recognized at its I/O base */
+  struct lpc17_driver_s *priv;
+
+  /* Get the interface structure associated with this interface number. */
+
+  DEBUGASSERT(inf <  ONFIG_skeleton_NINTERFACES);
+  priv = &g_ethdrvr[intf];
+
+   /* Check if a Ethernet chip is recognized at its I/O base */
 
   /* Attach the IRQ to the driver */
 
@@ -641,26 +662,30 @@ int skel_initialize(void)
 
   /* Initialize the driver structure */
 
-  memset(g_skel, 0, CONFIG_skeleton_NINTERFACES*sizeof(struct skel_driver_s));
-  g_skel[0].sk_dev.d_ifup    = skel_ifup;     /* I/F down callback */
-  g_skel[0].sk_dev.d_ifdown  = skel_ifdown;   /* I/F up (new IP address) callback */
-  g_skel[0].sk_dev.d_txavail = skel_txavail;  /* New TX data callback */
+  memset(priv, 0, sizeof(struct skel_driver_s));
+  priv->sk_dev.d_ifup    = skel_ifup;     /* I/F down callback */
+  priv->sk_dev.d_ifdown  = skel_ifdown;   /* I/F up (new IP address) callback */
+  priv->sk_dev.d_txavail = skel_txavail;  /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  g_skel[0].sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
-  g_skel[0].sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
+  priv->sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
+  priv->sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
 #endif
-  g_skel[0].sk_dev.d_private = (void*)g_skel; /* Used to recover private state from dev */
+  priv->sk_dev.d_private = (void*)g_skel; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  g_skel[0].sk_txpoll       = wd_create();   /* Create periodic poll timer */
-  g_skel[0].sk_txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->sk_txpoll       = wd_create();   /* Create periodic poll timer */
+  priv->sk_txtimeout    = wd_create();   /* Create TX timeout timer */
 
-  /* Read the MAC address from the hardware into g_skel[0].sk_dev.d_mac.ether_addr_octet */
+  /* Put the interface in the down state.  This usually amounts to resetting
+   * the device and/or calling skel_ifdown().
+   */
+
+  /* Read the MAC address from the hardware into priv->sk_dev.d_mac.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&g_skel[0].sk_dev);
+  (void)netdev_register(&priv->sk_dev);
   return OK;
 }
 
