@@ -91,12 +91,18 @@
 #  define CONFIG_LPC17_NINTERFACES 1
 #endif
 
+/* If IGMP is enabled, then accept multi-cast frames. */
+
+#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_NET_MULTICAST)
+#  define CONFIG_NET_MULTICAST 1
+#endif
+
 /* If the user did not specify a priority for Ethernet interrupts, set the
  * interrupt priority to the maximum.
  */
 
-#ifndef CONFIG_ETH_PRIORITY
-#  define CONFIG_ETH_PRIORITY NVIC_SYSH_PRIORITY_MAX
+#ifndef CONFIG_NET_PRIORITY
+#  define CONFIG_NET_PRIORITY NVIC_SYSH_PRIORITY_MAX
 #endif
 
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -168,8 +174,8 @@
  * descriptors will determine the organization and the size of the
  * descriptor and status tables.  There is a complex interaction between
  * the maximum packet size (CONFIG_NET_BUFSIZE) and the number of 
- * Rx and Tx descriptors that can be suppored (CONFIG_ETH_NRXDESC and
- * CONFIG_ETH_NTXDESC): Small buffers -> more packets.  This is
+ * Rx and Tx descriptors that can be suppored (CONFIG_NET_NRXDESC and
+ * CONFIG_NET_NTXDESC): Small buffers -> more packets.  This is
  * something that needs to be tuned for you system.
  *
  * For a 16Kb SRAM region, here is the relationship:
@@ -223,18 +229,18 @@
  *  SRAM for the use in the heap.  But that has not yet been pursued.]
  */
 
-#ifndef CONFIG_ETH_NTXDESC
-#  define CONFIG_ETH_NTXDESC 18
+#ifndef CONFIG_NET_NTXDESC
+#  define CONFIG_NET_NTXDESC 18
 #endif
-#define LPC17_TXDESCTAB_SIZE (CONFIG_ETH_NTXDESC*LPC17_TXDESC_SIZE)
-#define LPC17_TXSTATTAB_SIZE (CONFIG_ETH_NTXDESC*LPC17_TXSTAT_SIZE)
+#define LPC17_TXDESCTAB_SIZE (CONFIG_NET_NTXDESC*LPC17_TXDESC_SIZE)
+#define LPC17_TXSTATTAB_SIZE (CONFIG_NET_NTXDESC*LPC17_TXSTAT_SIZE)
 #define LPC17_TXTAB_SIZE     (LPC17_TXDESCTAB_SIZE+LPC17_TXSTATTAB_SIZE)
 
-#ifndef CONFIG_ETH_NRXDESC
-#  define CONFIG_ETH_NRXDESC 18
+#ifndef CONFIG_NET_NRXDESC
+#  define CONFIG_NET_NRXDESC 18
 #endif
-#define LPC17_RXDESCTAB_SIZE (CONFIG_ETH_NRXDESC*LPC17_RXDESC_SIZE)
-#define LPC17_RXSTATTAB_SIZE (CONFIG_ETH_NRXDESC*LPC17_RXSTAT_SIZE)
+#define LPC17_RXDESCTAB_SIZE (CONFIG_NET_NRXDESC*LPC17_RXDESC_SIZE)
+#define LPC17_RXSTATTAB_SIZE (CONFIG_NET_NRXDESC*LPC17_RXSTAT_SIZE)
 #define LPC17_RXTAB_SIZE     (LPC17_RXDESCTAB_SIZE+LPC17_RXSTATTAB_SIZE)
 
 #define LPC17_DESCTAB_SIZE   (LPC17_TXTAB_SIZE+LPC17_RXTAB_SIZE)
@@ -267,8 +273,8 @@
 #define LPC17_PKTMEM_END      (LPC17_EMACRAM_BASE+LPC17_PKTMEM_SIZE)
 
 #define LPC17_MAXPACKET_SIZE  ((CONFIG_NET_BUFSIZE + 3 + 2) & ~3)
-#define LPC17_NTXPKTS         CONFIG_ETH_NTXDESC
-#define LPC17_NRXPKTS         CONFIG_ETH_NRXDESC
+#define LPC17_NTXPKTS         CONFIG_NET_NTXDESC
+#define LPC17_NRXPKTS         CONFIG_NET_NRXDESC
 
 #define LPC17_TXBUFFER_SIZE   (LPC17_NTXPKTS * LPC17_MAXPACKET_SIZE)
 #define LPC17_RXBUFFER_SIZE   (LPC17_NRXPKTS * LPC17_MAXPACKET_SIZE)
@@ -286,7 +292,7 @@
 /* Register debug -- can only happen of CONFIG_DEBUG is selected */
 
 #ifndef CONFIG_DEBUG
-#  undef  CONFIG_LPC17_ENET_REGDEBUG
+#  undef  CONFIG_NET_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -298,7 +304,7 @@
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
 struct lpc17_statistics_s
 {
-#if ENABLE_WOL
+#ifdef ENABLE_WOL
   uint32_t wol;            /* Wake-up interrupts */
 #endif
   uint32_t rx_finished;    /* Rx finished interrupts */
@@ -388,7 +394,7 @@ static const uint16_t g_enetpins[GPIO_NENET_PINS] =
 
 /* Register operations */
 
-#ifdef CONFIG_LPC17_ENET_REGDEBUG
+#ifdef CONFIG_NET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite);
 static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t lpc17_getreg(uint32_t addr);
@@ -428,7 +434,7 @@ static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac);
 
 /* Initialization functions */
 
-#ifdef CONFIG_LPC17_ENET_REGDEBUG
+#ifdef CONFIG_NET_REGDEBUG
 static void lpc17_showpins(void);
 #else
 #  define lpc17_showpins()
@@ -437,7 +443,7 @@ static void lpc17_showpins(void);
 /* PHY initialization functions */
 
 #ifdef LPC17_HAVE_PHY
-#  ifdef CONFIG_LPC17_ENET_REGDEBUG
+#  ifdef CONFIG_NET_REGDEBUG
 static void lpc17_showmii(uint8_t phyaddr, const char *msg);
 #  else
 #    define lpc17_showmii(phyaddr,msg)
@@ -475,7 +481,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv);
  *
  *******************************************************************************/
 
-#ifdef CONFIG_LPC17_ENET_REGDEBUG
+#ifdef CONFIG_NET_REGDEBUG
 static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
   dbg("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
@@ -490,7 +496,7 @@ static void lpc17_printreg(uint32_t addr, uint32_t val, bool iswrite)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_LPC17_ENET_REGDEBUG
+#ifdef CONFIG_NET_REGDEBUG
 static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
 {
   static uint32_t prevaddr = 0;
@@ -554,7 +560,7 @@ static void lpc17_checkreg(uint32_t addr, uint32_t val, bool iswrite)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_LPC17_ENET_REGDEBUG
+#ifdef CONFIG_NET_REGDEBUG
 static uint32_t lpc17_getreg(uint32_t addr)
 {
   /* Read the value from the register */
@@ -576,7 +582,7 @@ static uint32_t lpc17_getreg(uint32_t addr)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_LPC17_ENET_REGDEBUG
+#ifdef CONFIG_NET_REGDEBUG
 static void lpc17_putreg(uint32_t val, uint32_t addr)
 {
   /* Check if we need to print this value */
@@ -616,7 +622,7 @@ static int lpc17_txdesc(struct lpc17_driver_s *priv)
   /* Get the next producer index */
 
   prodidx = lpc17_getreg(LPC17_ETH_TXPRODIDX) & ETH_TXPRODIDX_MASK;
-  if (++prodidx >= CONFIG_ETH_NTXDESC)
+  if (++prodidx >= CONFIG_NET_NTXDESC)
     {
      /* Wrap back to index zero */
 
@@ -697,7 +703,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 
   /* Bump the producer index, making the packet available for transmission. */
   
-  if (++prodidx >= CONFIG_ETH_NTXDESC)
+  if (++prodidx >= CONFIG_NET_NTXDESC)
     {
      /* Wrap back to index zero */
 
@@ -975,12 +981,14 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
        * might also have gotten bumped up by the hardware).
        */
 
-      if (++considx >= CONFIG_ETH_NTXDESC)
+      if (++considx >= CONFIG_NET_NRXDESC)
        {
          /* Wrap back to index zero */
 
           considx = 0;
         }
+
+      lpc17_putreg(considx, LPC17_ETH_RXCONSIDX);
       prodidx = lpc17_getreg(LPC17_ETH_RXPRODIDX) & ETH_RXPRODIDX_MASK;
     }
 }
@@ -1135,7 +1143,7 @@ static int lpc17_interrupt(int irq, void *context)
 
       /* Check for Wake-Up on Lan */
 
-#if CONFIG_NET_WOL
+#ifdef CONFIG_NET_WOL
       if ((status & ETH_INT_WKUP) != 0)
         {
           lpc17_putreg(ETH_INT_WKUP, LPC17_ETH_INTCLR);
@@ -1295,13 +1303,13 @@ static int lpc17_ifup(struct uip_driver_s *dev)
    */
 
   regval = ETH_RXFLCTRL_PERFEN;
-#if CONFIG_NET_BROADCAST
+#ifdef CONFIG_NET_BROADCAST
   regval |= ETH_RXFLCTRL_BCASTEN;
 #endif
-#if CONFIG_NET_MULTICAST
+#ifdef CONFIG_NET_MULTICAST
   RXFILTERCTRL |= (ETH_RXFLCTRL_MCASTEN | ETH_RXFLCTRL_UCASTEN);
 #endif
-#if CONFIG_NET_HASH
+#ifdef CONFIG_NET_HASH
   RXFILTERCTRL |= (ETH_RXFLCTRL_MCASTHASHEN | ETH_RXFLCTRL_UCASTHASHEN);
 #endif
   lpc17_putreg(regval, LPC17_ETH_RXFLCTRL);
@@ -1319,9 +1327,9 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 
 #ifdef CONFIG_ARCH_IRQPRIO
 #if LM3S_NETHCONTROLLERS > 1
-  (void)up_prioritize_irq(priv->irq, CONFIG_ETH_PRIORITY);
+  (void)up_prioritize_irq(priv->irq, CONFIG_NET_PRIORITY);
 #else
-  (void)up_prioritize_irq(LPC17_IRQ_ETH, CONFIG_ETH_PRIORITY);
+  (void)up_prioritize_irq(LPC17_IRQ_ETH, CONFIG_NET_PRIORITY);
 #endif
 #endif
 
@@ -1329,7 +1337,7 @@ static int lpc17_ifup(struct uip_driver_s *dev)
    * not Wakeup on Lan (WoL) has been configured.
    */
 
-#if CONFIG_NET_WOL
+#ifdef CONFIG_NET_WOL
   /* Configure WoL: Clear all receive filter WoLs and enable the perfect
    * match WoL interrupt.  We will wait until the Wake-up to finish
    * bringing things up.
@@ -1528,7 +1536,7 @@ static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_LPC17_ENET_REGDEBUG
+#ifdef CONFIG_NET_REGDEBUG
 static void lpc17_showpins(void)
 {
   lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN0, "P0[1-15]");
@@ -1552,7 +1560,7 @@ static void lpc17_showpins(void)
  *
  *******************************************************************************/
 
-#if defined(CONFIG_LPC17_ENET_REGDEBUG) && defined(LPC17_HAVE_PHY)
+#if defined(CONFIG_NET_REGDEBUG) && defined(LPC17_HAVE_PHY)
 static void lpc17_showmii(uint8_t phyaddr, const char *msg)
 {
   dbg("PHY " LPC17_PHYNAME ": %s\n", msg);
@@ -2010,14 +2018,14 @@ static inline void lpc17_txdescinit(struct lpc17_driver_s *priv)
 
   lpc17_putreg(LPC17_TXDESC_BASE, LPC17_ETH_TXDESC);
   lpc17_putreg(LPC17_TXSTAT_BASE, LPC17_ETH_TXSTAT);
-  lpc17_putreg(CONFIG_ETH_NTXDESC-1, LPC17_ETH_TXDESCRNO);
+  lpc17_putreg(CONFIG_NET_NTXDESC-1, LPC17_ETH_TXDESCRNO);
 
   /* Initialize Tx descriptors and link to packet buffers */
 
   txdesc  = (uint32_t*)LPC17_TXDESC_BASE;
   pktaddr = LPC17_TXBUFFER_BASE;
 
-  for (i = 0; i < CONFIG_ETH_NTXDESC; i++)
+  for (i = 0; i < CONFIG_NET_NTXDESC; i++)
     {
       *txdesc++ = pktaddr;
       *txdesc++ = (TXDESC_CONTROL_INT | (LPC17_MAXPACKET_SIZE - 1));
@@ -2027,7 +2035,7 @@ static inline void lpc17_txdescinit(struct lpc17_driver_s *priv)
   /* Initialize Tx status */
 
   txstat  = (uint32_t*)LPC17_TXSTAT_BASE;
-  for (i = 0; i < CONFIG_ETH_NTXDESC; i++)
+  for (i = 0; i < CONFIG_NET_NTXDESC; i++)
     {
       *txstat++ = 0;
     }
@@ -2066,14 +2074,14 @@ static inline void lpc17_rxdescinit(struct lpc17_driver_s *priv)
 
   lpc17_putreg(LPC17_RXDESC_BASE, LPC17_ETH_RXDESC);
   lpc17_putreg(LPC17_RXSTAT_BASE, LPC17_ETH_RXSTAT);
-  lpc17_putreg(CONFIG_ETH_NRXDESC-1, LPC17_ETH_RXDESCNO);
+  lpc17_putreg(CONFIG_NET_NRXDESC-1, LPC17_ETH_RXDESCNO);
 
   /* Initialize Rx descriptors and link to packet buffers */
 
   rxdesc  = (uint32_t*)LPC17_RXDESC_BASE;
   pktaddr = LPC17_RXBUFFER_BASE;
 
-  for (i = 0; i < CONFIG_ETH_NRXDESC; i++)
+  for (i = 0; i < CONFIG_NET_NRXDESC; i++)
     {
       *rxdesc++ = pktaddr;
       *rxdesc++ = (RXDESC_CONTROL_INT | (LPC17_MAXPACKET_SIZE - 1));
@@ -2083,7 +2091,7 @@ static inline void lpc17_rxdescinit(struct lpc17_driver_s *priv)
   /* Initialize Rx status */
 
   rxstat  = (uint32_t*)LPC17_TXSTAT_BASE;
-  for (i = 0; i < CONFIG_ETH_NRXDESC; i++)
+  for (i = 0; i < CONFIG_NET_NRXDESC; i++)
     {
       *rxstat++ = 0;
       *rxstat++ = 0;
