@@ -108,6 +108,11 @@
 
 #define LPC17_TXTIMEOUT      (60*CLK_TCK)
 
+/* Interrupts */
+
+#define ETH_RXINTS           (ETH_INT_RXOVR | ETH_INT_RXERR | ETH_INT_RXFIN | ETH_INT_RXDONE)
+#define ETH_TXINTS           (ETH_INT_TXUNR | ETH_INT_TXERR | ETH_INT_TXFIN | ETH_INT_TXDONE)
+
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
 #define BUF ((struct uip_eth_hdr *)priv->lp_dev.d_buf)
@@ -240,7 +245,6 @@
 
 #define LPC17_EMACRAM_BASE   LPC17_SRAM_BANK0
 #define LPC17_EMACRAM_SIZE   LPC17_BANK0_SIZE
-#warning "Need to exclude bank0 from the heap"
 
 /* Descriptor table memory organization.  Descriptor tables are packed at
  * the end of AHB SRAM, Bank 0.  The beginning of bank 0 is reserved for
@@ -308,6 +312,8 @@ struct lpc17_statistics_s
   uint32_t rx_pktsize;     /*   Number of dropped, too small or too big */
 
   uint32_t tx_packets;     /* Number of Tx packets queued */
+  uint32_t tx_pending;     /* Number of Tx packets that had to wait for a TxDesc */
+  uint32_t tx_unpend;      /* Number of pending Tx packets that were sent */
   uint32_t tx_finished;    /* Tx finished interrupts */
   uint32_t tx_done;        /* Tx done interrupts */
   uint32_t tx_underrun;    /* Number of Tx underrun error interrupts */
@@ -336,9 +342,11 @@ struct lpc17_driver_s
 
   bool     lp_ifup;             /* true:ifup false:ifdown */
   bool     lp_mode;             /* speed/duplex */
+  bool     lp_txpending;        /* There is a pending Tx in lp_dev */
 #ifdef LPC17_HAVE_PHY
   uint8_t  lp_phyaddr;          /* PHY device address */
 #endif
+  uint32_t lp_inten;            /* Shadow copy of INTEN register */
   WDOG_ID  lp_txpoll;           /* TX poll timer */
   WDOG_ID  lp_txtimeout;        /* TX timeout timer */
   
@@ -390,14 +398,16 @@ static void lpc17_putreg(uint32_t val, uint32_t addr);
 
 /* Common TX logic */
 
-static int  lpc17_transmit(FAR struct lpc17_driver_s *priv);
+static bool lpc17_txdesc(struct lpc17_driver_s *priv);
+static int  lpc17_transmit(struct lpc17_driver_s *priv);
 static int  lpc17_uiptxpoll(struct uip_driver_s *dev);
 
 /* Interrupt handling */
 
-static void lpc17_receive(FAR struct lpc17_driver_s *priv);
-static void lpc17_txdone(FAR struct lpc17_driver_s *priv);
-static int  lpc17_interrupt(int irq, FAR void *context);
+static void lpc17_response(struct lpc17_driver_s *priv);
+static void lpc17_rxdone(struct lpc17_driver_s *priv);
+static void lpc17_txdone(struct lpc17_driver_s *priv);
+static int  lpc17_interrupt(int irq, void *context);
 
 /* Watchdog timer expirations */
 
@@ -410,8 +420,8 @@ static int lpc17_ifup(struct uip_driver_s *dev);
 static int lpc17_ifdown(struct uip_driver_s *dev);
 static int lpc17_txavail(struct uip_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int lpc17_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int lpc17_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int lpc17_addmac(struct uip_driver_s *dev, const uint8_t *mac);
+static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac);
 #endif
 
 /* Initialization functions */
@@ -578,6 +588,48 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
 #endif
 
 /****************************************************************************
+ * Function: lpc17_txdesc
+ *
+ * Description:
+ *   Check if a free TX descriptor is available.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   global interrupts are disabled, either explicitly or indirectly through
+ *   interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static bool lpc17_txdesc(struct lpc17_driver_s *priv)
+{
+  unsigned int prodidx;
+  unsigned int considx;
+
+  /* Get the next producer index */
+
+  prodidx = lpc17_getreg(LPC17_ETH_TXPRODIDX) & ETH_TXPRODIDX_MASK;
+  if (++prodidx >= CONFIG_ETH_NTXDESC)
+    {
+     /* Wrap back to index zero */
+
+      prodidx = 0;
+    }
+
+  /* If the next producer index would overrun the consumer index, then there
+   * are not available descriptors.
+   */
+
+  considx = lpc17_getreg(LPC17_ETH_TXCONSIDX) & ETH_TXCONSIDX_MASK;
+  return prodidx != considx ? OK : -EAGAIN;
+}
+
+/****************************************************************************
  * Function: lpc17_transmit
  *
  * Description:
@@ -591,23 +643,70 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   global interrupts are disabled, either explicitly or indirectly through
+ *   interrupt handling logic.
  *
  ****************************************************************************/
 
-static int lpc17_transmit(FAR struct lpc17_driver_s *priv)
+static int lpc17_transmit(struct lpc17_driver_s *priv)
 {
+  uint32_t *txdesc;
+  void     *txbuffer;
+  unsigned int prodidx;
+
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
    * must have assured that there is not transmission in progress.
    */
 
+  DEBUGASSERT(lpc17_txdesc(priv) == OK);
+
   /* Increment statistics */
 
-  /* Disable Ethernet interrupts */
+  EMAC_STAT(priv, tx_packets);
 
-  /* Send the packet: address=priv->lp_dev.d_buf, length=priv->lp_dev.d_len */
+  /* Get the current producer index */
 
-  /* Restore Ethernet interrupts */
+  prodidx = lpc17_getreg(LPC17_ETH_TXPRODIDX) & ETH_TXPRODIDX_MASK;
+
+  /* Get the packet address from the descriptor and set the descriptor control
+   * fields.
+   */
+
+  txdesc   = (uint32_t*)(LPC17_TXDESC_BASE + (prodidx << 3));
+  txbuffer = (void*)*txdesc++;
+  *txdesc  = TXDESC_CONTROL_INT | TXDESC_CONTROL_LAST | TXDESC_CONTROL_CRC |
+             (priv->lp_dev.d_len - 1);
+
+  /* Copy the packet data into the Tx buffer assignd to this.  It should fit;
+   * because each packet buffer is MTU size and breaking up larger TCP messages
+   * is handled by higher level logic.  The hardware does, however, support
+   * breaking up larger messages into many fragments, however, that capability
+   * is not exploited here.
+   *
+   * The would be a great performance improvement:  Remove the buffer from
+   * the lp_dev structure and replac it a pointer directly into the EMAC
+   * DMA memory.  This could eliminate the following, costly memcpy.
+   */
+
+  DEBUGASSERT(priv->lp_dev.d_len <= LPC17_MAXPACKET_SIZE);
+  memcpy((void*)txbuffer, priv->lp_dev.d_buf, priv->lp_dev.d_len);
+
+  /* Bump the producer index, making the packet available for transmission. */
+  
+  if (++prodidx >= CONFIG_ETH_NTXDESC)
+    {
+     /* Wrap back to index zero */
+
+      prodidx = 0;
+    }
+  lpc17_putreg(prodidx, LPC17_ETH_TXPRODIDX);
+
+  /* Enable Tx interrupts */
+
+  priv->lp_inten |= ETH_TXINTS;
+  lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -633,12 +732,16 @@ static int lpc17_transmit(FAR struct lpc17_driver_s *priv)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   global interrupts are disabled, either explicitly or indirectly through
+ *   interrupt handling logic.
  *
  ****************************************************************************/
 
 static int lpc17_uiptxpoll(struct uip_driver_s *dev)
 {
-  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
+  int ret = OK;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -646,23 +749,79 @@ static int lpc17_uiptxpoll(struct uip_driver_s *dev)
 
   if (priv->lp_dev.d_len > 0)
     {
+      /* Send this packet.  In this context, we know that there is space for
+       * at least one more packet in the descriptor list.
+       */
+
       uip_arp_out(&priv->lp_dev);
       lpc17_transmit(priv);
 
       /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
+       * return any non-zero value to terminate the poll.
        */
+
+      ret = lpc17_txdesc(priv);
     }
 
   /* If zero is returned, the polling will continue until all connections have
    * been examined.
    */
 
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
- * Function: lpc17_receive
+ * Function: lpc17_response
+ *
+ * Description:
+ *   While processing an RxDone event, higher logic decides to send a packet,
+ *   possibly a response to the incoming packet (but probably not, in reality).
+ *   However, since the Rx and Tx operations are decoupled, there is no
+ *   guarantee that there will be a Tx descriptor available at that time.
+ *   This function will perform that check and, if no Tx descriptor is 
+ *   available, this function will (1) stop incoming Rx processing (bad), and
+ *   (2) hold the outgoing packet in a pending state until the next Tx
+ *   interrupt occurs. 
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static void lpc17_response(struct lpc17_driver_s *priv)
+{
+  int ret;
+
+  /* Check if there is room in the device to hold another packet. */
+
+  ret = lpc17_txdesc(priv);
+  if (ret == OK)
+    {
+       /* Yes.. queue the packet now. */
+
+       lpc17_transmit(priv);
+    }
+  else
+    {
+       /* No.. mark the Tx as pending and halt further Tx interrupts */
+
+       DEBUGASSERT((priv->lp_inten & ETH_INT_TXDONE) != 0);
+       
+       priv->lp_txpending = true;
+       priv->lp_inten    &= ~ETH_RXINTS;
+       lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
+       EMAC_STAT(priv, tx_pending);
+    }
+}
+
+/****************************************************************************
+ * Function: lpc17_rxdone
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
@@ -674,16 +833,21 @@ static int lpc17_uiptxpoll(struct uip_driver_s *dev)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
  *
  ****************************************************************************/
 
-static void lpc17_receive(FAR struct lpc17_driver_s *priv)
+static void lpc17_rxdone(struct lpc17_driver_s *priv)
 {
   do
     {
-      /* Check for errors and update statistics */
+      /* Update statistics */
+
+      EMAC_STAT(priv, rx_packets);
 
       /* Check if the packet is a valid size for the uIP buffer configuration */
+
+      EMAC_STAT(priv, rx_pktsize);
 
       /* Copy the data data from the hardware to priv->lp_dev.d_buf.  Set
        * amount of data in priv->lp_dev.d_len
@@ -697,6 +861,9 @@ static void lpc17_receive(FAR struct lpc17_driver_s *priv)
       if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
+          /* Handle the incoming Rx packet */
+
+          EMAC_STAT(priv, rx_ip);
           uip_arp_ipin();
           uip_input(&priv->lp_dev);
 
@@ -707,11 +874,12 @@ static void lpc17_receive(FAR struct lpc17_driver_s *priv)
           if (priv->lp_dev.d_len > 0)
            {
              uip_arp_out(&priv->lp_dev);
-             lpc17_transmit(priv);
+             lpc17_response(priv);
            }
         }
       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
         {
+          EMAC_STAT(priv, rx_arp);
           uip_arp_arpin(&priv->lp_dev);
 
           /* If the above function invocation resulted in data that should be
@@ -720,8 +888,14 @@ static void lpc17_receive(FAR struct lpc17_driver_s *priv)
 
           if (priv->lp_dev.d_len > 0)
             {
-              lpc17_transmit(priv);
+             lpc17_response(priv);
             }
+        }
+      else
+        {
+          /* Unrecognized... drop it. */
+
+          EMAC_STAT(priv, rx_dropped);
         }
     }
   while (1); /* While there are more packets to be processed */
@@ -740,20 +914,52 @@ static void lpc17_receive(FAR struct lpc17_driver_s *priv)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
  *
  ****************************************************************************/
 
-static void lpc17_txdone(FAR struct lpc17_driver_s *priv)
+static void lpc17_txdone(struct lpc17_driver_s *priv)
 {
-  /* Check for errors and update statistics */
-
-  /* If no further xmits are pending, then cancel the TX timeout */
+  /* Cancel the pending Tx timeout */
 
   wd_cancel(priv->lp_txtimeout);
 
-  /* Then poll uIP for new XMIT data */
+  /* Disable further Tx interrupts.  Tx interrupts may be re-enabled again
+   * depending upon the result of the poll.
+   */
 
-  (void)uip_poll(&priv->lp_dev, lpc17_uiptxpoll);
+  priv->lp_inten &= ~ETH_TXINTS;
+  lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
+
+  /* Verify that the hardware is ready to send another packet.  Since a Tx
+   * just completed, this must be the case.
+   */
+
+  DEBUGASSERT(lpc17_txdesc(priv) == OK);
+
+  /* Check if there is a pending Tx transfer that was scheduled by Rx handling
+   * while the Tx logic was busy.  If so, processing that pending Tx now.
+   */
+
+  if (priv->lp_txpending)
+    {
+      /* Clear the pending condition, send the packet, and restore Rx interrupts */
+
+      priv->lp_txpending = false;
+      EMAC_STAT(priv, tx_unpend);
+
+      lpc17_transmit(priv);
+
+      priv->lp_inten    |= ETH_RXINTS;
+      lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
+    }
+
+  /* Otherwise poll uIP for new XMIT data */
+
+  else
+    {
+      (void)uip_poll(&priv->lp_dev, lpc17_uiptxpoll);
+    }
 }
 
 /****************************************************************************
@@ -773,9 +979,9 @@ static void lpc17_txdone(FAR struct lpc17_driver_s *priv)
  *
  ****************************************************************************/
 
-static int lpc17_interrupt(int irq, FAR void *context)
+static int lpc17_interrupt(int irq, void *context)
 {
-  register FAR struct lpc17_driver_s *priv = &g_ethdrvr[0];
+  register struct lpc17_driver_s *priv = &g_ethdrvr[0];
   uint32_t status;
 
   /* Get the interrupt status (zero means no interrupts pending). */
@@ -798,7 +1004,7 @@ static int lpc17_interrupt(int irq, FAR void *context)
           EMAC_STAT(priv, rx_errors);
         }
 
-      /* Check if we received an incoming packet, if so, call lpc17_receive() */
+      /* Check if we received an incoming packet, if so, call lpc17_rxdone() */
 
       if ((status & ETH_INT_RXFIN) != 0)
         {
@@ -811,7 +1017,7 @@ static int lpc17_interrupt(int irq, FAR void *context)
         {
           lpc17_putreg(ETH_INT_RXDONE, LPC17_ETH_INTCLR);
           EMAC_STAT(priv, rx_done);
-          lpc17_receive(priv);
+          lpc17_rxdone(priv);
         }
 
       /* Check for Tx errors */
@@ -849,7 +1055,6 @@ static int lpc17_interrupt(int irq, FAR void *context)
       if ((status & ETH_INT_WKUP) != 0)
         {
           lpc17_putreg(ETH_INT_WKUP, LPC17_ETH_INTCLR);
-          INTCLEAR = EMAC_INT_WOL;
           EMAC_STAT(priv, wol);
 #         warning "Missing logic"
         }
@@ -875,15 +1080,18 @@ static int lpc17_interrupt(int irq, FAR void *context)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
 static void lpc17_txtimeout(int argc, uint32_t arg, ...)
 {
-  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)arg;
 
   /* Increment statistics and dump debug info */
 
+  EMAC_STAT(priv, tx_timeouts);
+  
   /* Then reset the hardware */
 
   /* Then poll uIP for new XMIT data */
@@ -905,12 +1113,13 @@ static void lpc17_txtimeout(int argc, uint32_t arg, ...)
  *   None
  *
  * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
 
 static void lpc17_polltimer(int argc, uint32_t arg, ...)
 {
-  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)arg;
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)arg;
 
   /* Check if there is room in the send another TX packet.  We cannot perform
    * the TX poll if he are unable to accept another packet for transmission.
@@ -947,7 +1156,7 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
 
 static int lpc17_ifup(struct uip_driver_s *dev)
 {
-  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
   uint32_t regval;
   int ret;
 
@@ -1044,13 +1253,17 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 
   lpc17_putreg(0xffffffff, LPC17_ETH_RXFLWOLCLR);
   lpc17_putreg(ETH_RXFLCTRL_RXFILEN, LPC17_ETH_RXRLCTRL);
+
+  priv->lp_inten = ETH_INT_WKUP;
   lpc17_putreg(ETH_INT_WKUP, LPC17_ETH_INTEN);
 #else
-  /* Otherwise, enable all interrupts except SOFTINT and WoL */
+  /* Otherwise, enable all Rx interrupts.  Tx interrupts, SOFTINT and WoL are
+   * excluded.  Tx interrupts will not be enabled until there is data to be
+   * sent.
+   */
 
-  lpc17_putreg((ETH_INT_RXOVR | ETH_INT_RXERR | ETH_INT_RXFIN | ETH_INT_RXDONE |
-                ETH_INT_TXUNR | ETH_INT_TXERR | ETH_INT_TXFIN | ETH_INT_TXDONE),
-               LPC17_ETH_INTEN);
+  priv->lp_inten = ETH_RXINTS;
+  lpc17_putreg(ETH_RXINTS, LPC17_ETH_INTEN);
 #endif
 
   /* Set and activate a timer process */
@@ -1086,7 +1299,7 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 
 static int lpc17_ifdown(struct uip_driver_s *dev)
 {
-  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
@@ -1099,7 +1312,7 @@ static int lpc17_ifdown(struct uip_driver_s *dev)
   wd_cancel(priv->lp_txpoll);
   wd_cancel(priv->lp_txtimeout);
 
-  /* Reset the device */
+  /* Reset the device and mark it as down. */
 
   lpc17_ethreset(priv);
   priv->lp_ifup = false;
@@ -1128,8 +1341,12 @@ static int lpc17_ifdown(struct uip_driver_s *dev)
 
 static int lpc17_txavail(struct uip_driver_s *dev)
 {
-  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
   irqstate_t flags;
+
+  /* Disable interrupts because this function may be called from interrupt
+   * level processing.
+   */
 
   flags = irqsave();
 
@@ -1137,7 +1354,6 @@ static int lpc17_txavail(struct uip_driver_s *dev)
 
   if (priv->lp_ifup)
     {
-
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
       /* If so, then poll uIP for new XMIT data */
@@ -1168,9 +1384,9 @@ static int lpc17_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int lpc17_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int lpc17_addmac(struct uip_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1197,9 +1413,9 @@ static int lpc17_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int lpc17_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct lpc17_driver_s *priv = (FAR struct lpc17_driver_s *)dev->d_private;
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
