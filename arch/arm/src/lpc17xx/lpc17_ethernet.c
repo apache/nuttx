@@ -309,7 +309,9 @@ struct lpc17_statistics_s
   uint32_t rx_ip;          /*   Number of Rx IP packets received */
   uint32_t rx_arp;         /*   Number of Rx ARP packets received */
   uint32_t rx_dropped;     /*   Number of dropped, unsupported Rx packets */
+  uint32_t rx_pkterr;      /*   Number of dropped, error in Rx descriptor */
   uint32_t rx_pktsize;     /*   Number of dropped, too small or too big */
+  uint32_t rx_fragment;    /*   Number of dropped, packet fragments */
 
   uint32_t tx_packets;     /* Number of Tx packets queued */
   uint32_t tx_pending;     /* Number of Tx packets that had to wait for a TxDesc */
@@ -398,7 +400,7 @@ static void lpc17_putreg(uint32_t val, uint32_t addr);
 
 /* Common TX logic */
 
-static bool lpc17_txdesc(struct lpc17_driver_s *priv);
+static int  lpc17_txdesc(struct lpc17_driver_s *priv);
 static int  lpc17_transmit(struct lpc17_driver_s *priv);
 static int  lpc17_uiptxpoll(struct uip_driver_s *dev);
 
@@ -606,7 +608,7 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static bool lpc17_txdesc(struct lpc17_driver_s *priv)
+static int lpc17_txdesc(struct lpc17_driver_s *priv)
 {
   unsigned int prodidx;
   unsigned int considx;
@@ -685,13 +687,13 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
    * breaking up larger messages into many fragments, however, that capability
    * is not exploited here.
    *
-   * The would be a great performance improvement:  Remove the buffer from
-   * the lp_dev structure and replac it a pointer directly into the EMAC
+   * This would be a great performance improvement:  Remove the buffer from
+   * the lp_dev structure and replace it a pointer directly into the EMAC
    * DMA memory.  This could eliminate the following, costly memcpy.
    */
 
   DEBUGASSERT(priv->lp_dev.d_len <= LPC17_MAXPACKET_SIZE);
-  memcpy((void*)txbuffer, priv->lp_dev.d_buf, priv->lp_dev.d_len);
+  memcpy(txbuffer, priv->lp_dev.d_buf, priv->lp_dev.d_len);
 
   /* Bump the producer index, making the packet available for transmission. */
   
@@ -839,66 +841,148 @@ static void lpc17_response(struct lpc17_driver_s *priv)
 
 static void lpc17_rxdone(struct lpc17_driver_s *priv)
 {
-  do
+  uint32_t    *rxstat;
+  bool         fragment;
+  unsigned int prodidx;
+  unsigned int considx;
+  unsigned int pktlen;
+
+  /* Get the current producer and consumer indices */
+
+  considx = lpc17_getreg(LPC17_ETH_RXCONSIDX) & ETH_RXCONSIDX_MASK;
+  prodidx = lpc17_getreg(LPC17_ETH_RXPRODIDX) & ETH_RXPRODIDX_MASK;
+
+  /* Loop while there are incoming packets to be processed */
+
+  /* If the next producer index would overrun the consumer index, then there
+   * are not available descriptors.
+   */
+
+  fragment = false;
+  while (considx != prodidx)
     {
       /* Update statistics */
 
       EMAC_STAT(priv, rx_packets);
 
-      /* Check if the packet is a valid size for the uIP buffer configuration */
+      /* Get the Rx status and packet length */
+    
+      rxstat   = (uint32_t*)(LPC17_RXSTAT_BASE + (considx << 3));
+      pktlen   = (*rxstat & RXSTAT_INFO_RXSIZE_MASK) + 1;
 
-      EMAC_STAT(priv, rx_pktsize);
+      /* Check for errors */
 
-      /* Copy the data data from the hardware to priv->lp_dev.d_buf.  Set
-       * amount of data in priv->lp_dev.d_len
-       */
-
-      /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
-#else
-      if (BUF->type == HTONS(UIP_ETHTYPE_IP))
-#endif
+      if ((*rxstat & RXSTAT_INFO_ERROR) != 0)
         {
-          /* Handle the incoming Rx packet */
-
-          EMAC_STAT(priv, rx_ip);
-          uip_arp_ipin();
-          uip_input(&priv->lp_dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
-
-          if (priv->lp_dev.d_len > 0)
-           {
-             uip_arp_out(&priv->lp_dev);
-             lpc17_response(priv);
-           }
+          nlldbg("Error.  rxstat: %08d\n", *rxstat);
+          EMAC_STAT(priv, rx_pkterr);
         }
-      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+
+      /* If the pktlen is greater then the buffer, then we cannot accept
+       * the packet.  Also, since the DMA packet buffers are set up to
+       * be the same size as our max packet size, any fragments also
+       * imply that the packet is too big.
+       */
+ 
+      else if (pktlen > CONFIG_NET_BUFSIZE+2)
         {
-          EMAC_STAT(priv, rx_arp);
-          uip_arp_arpin(&priv->lp_dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
-
-          if (priv->lp_dev.d_len > 0)
-            {
-             lpc17_response(priv);
-            }
+          nlldbg("Too big.  pktlen: %d rxstat: %08x\n", pktlen, *rxstat);
+          EMAC_STAT(priv, rx_pktsize);
+        }
+      else if ((*rxstat & RXSTAT_INFO_LASTFLAG) != 0)
+        {
+          nlldbg("Fragment.  rxstat: %08x\n", pktlen, *rxstat);
+          EMAC_STAT(priv, rx_fragment);
+          fragment = true;
+        }
+      else if (fragment)
+        {
+          nlldbg("Last fragment.  rxstat: %08x\n", pktlen, *rxstat);
+          EMAC_STAT(priv, rx_fragment);
+          fragment = false;
         }
       else
         {
-          /* Unrecognized... drop it. */
+          uint32_t *rxdesc;
+          void     *rxbuffer;
 
-          EMAC_STAT(priv, rx_dropped);
+          /* Get the Rx buffer address from the Rx descriptor */
+ 
+          rxdesc   = (uint32_t*)(LPC17_RXDESC_BASE + (considx << 3));
+          rxbuffer = (void*)*rxdesc;
+
+          /* Copy the data data from the EMAC DMA RAM to priv->lp_dev.d_buf. 
+           * Set amount of data in priv->lp_dev.d_len
+           *
+           * This would be a great performance improvement:  Remove the
+           * buffer from the lp_dev structure and replaceit a pointer
+           * directly into the EMAC DMA memory.  This could eliminate the
+           * following, costly memcpy.
+           */
+
+          memcpy(priv->lp_dev.d_buf, rxbuffer, pktlen);
+          priv->lp_dev.d_len = pktlen;
+
+          /* We only accept IP packets of the configured type and ARP packets */
+
+#ifdef CONFIG_NET_IPv6
+          if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+#else
+          if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+#endif
+            {
+              /* Handle the incoming Rx packet */
+
+              EMAC_STAT(priv, rx_ip);
+              uip_arp_ipin();
+              uip_input(&priv->lp_dev);
+
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the field  d_len will
+               * set to a value > 0.
+               */
+
+              if (priv->lp_dev.d_len > 0)
+                {
+                  uip_arp_out(&priv->lp_dev);
+                  lpc17_response(priv);
+                }
+            }
+          else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+            {
+              EMAC_STAT(priv, rx_arp);
+              uip_arp_arpin(&priv->lp_dev);
+
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the field  d_len will
+               * set to a value > 0.
+               */
+
+              if (priv->lp_dev.d_len > 0)
+                {
+                  lpc17_response(priv);
+                }
+            }
+          else
+            {
+              /* Unrecognized... drop it. */
+
+              EMAC_STAT(priv, rx_dropped);
+            }
         }
+
+      /* Bump up the consumer index and resample the producer index (which
+       * might also have gotten bumped up by the hardware).
+       */
+
+      if (++considx >= CONFIG_ETH_NTXDESC)
+       {
+         /* Wrap back to index zero */
+
+          considx = 0;
+        }
+      prodidx = lpc17_getreg(LPC17_ETH_RXPRODIDX) & ETH_RXPRODIDX_MASK;
     }
-  while (1); /* While there are more packets to be processed */
 }
 
 /****************************************************************************
@@ -1356,9 +1440,12 @@ static int lpc17_txavail(struct uip_driver_s *dev)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
-      /* If so, then poll uIP for new XMIT data */
+      if (lpc17_txdesc(priv) == OK)
+        {
+          /* If so, then poll uIP for new XMIT data */
 
-      (void)uip_poll(&priv->lp_dev, lpc17_uiptxpoll);
+          (void)uip_poll(&priv->lp_dev, lpc17_uiptxpoll);
+        }
     }
 
   irqrestore(flags);
@@ -1390,6 +1477,7 @@ static int lpc17_addmac(struct uip_driver_s *dev, const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
+#warning "Not implemented"
   return OK;
 }
 #endif
@@ -1419,6 +1507,7 @@ static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
 
   /* Add the MAC address to the hardware multicast routing table */
 
+#warning "Not implemented"
   return OK;
 }
 #endif
