@@ -601,7 +601,6 @@ Olimex LPC1766-STK Configuration Options
 	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_UARTn_2STOP - Two stop bits
 
-
   LPC17xx specific PHY/Ethernet device driver settings.  These setting
   also require CONFIG_NET and CONFIG_LPC17_ETHERNET.
 
