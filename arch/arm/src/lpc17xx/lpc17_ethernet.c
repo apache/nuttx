@@ -1970,8 +1970,8 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 #endif
 
   ndbg("%dBase-T %s duplex\n",
-       priv->lp_mode & LPC17_SPEED_MASK ==  LPC17_SPEED_100 ? 100 : 10,
-       priv->lp_mode & LPC17_DUPLEX_MASK == LPC17_DUPLEX_FULL ?"full" : "half");
+       (priv->lp_mode & LPC17_SPEED_MASK) ==  LPC17_SPEED_100 ? 100 : 10,
+       (priv->lp_mode & LPC17_DUPLEX_MASK) == LPC17_DUPLEX_FULL ?"full" : "half");
 
   /* Disable auto-configuration.  Set the fixed speed/duplex mode.
    * (probably more than little redundant).
@@ -2281,7 +2281,7 @@ static inline int lpc17_ethinitialize(int intf)
   int ret;
   int i;
 
-  DEBUGASSERT(inf < LPC17_NETHCONTROLLERS);
+  DEBUGASSERT(intf < LPC17_NETHCONTROLLERS);
   priv = &g_ethdrvr[intf];
 
   /* Turn on the ethernet MAC clock */
