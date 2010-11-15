@@ -632,7 +632,7 @@ static int lpc17_txdesc(struct lpc17_driver_s *priv)
     }
 
   /* If the next producer index would overrun the consumer index, then there
-   * are not available descriptors.
+   * are no available Tx descriptors.
    */
 
   considx = lpc17_getreg(LPC17_ETH_TXCONSIDX) & ETH_TXCONSIDX_MASK;
@@ -667,7 +667,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is not transmission in progress.
+   * must have assured that there is no transmission in progress.
    */
 
   DEBUGASSERT(lpc17_txdesc(priv) == OK);
@@ -689,11 +689,11 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
   *txdesc  = TXDESC_CONTROL_INT | TXDESC_CONTROL_LAST | TXDESC_CONTROL_CRC |
              (priv->lp_dev.d_len - 1);
 
-  /* Copy the packet data into the Tx buffer assignd to this.  It should fit;
-   * because each packet buffer is MTU size and breaking up larger TCP messages
-   * is handled by higher level logic.  The hardware does, however, support
-   * breaking up larger messages into many fragments, however, that capability
-   * is not exploited here.
+  /* Copy the packet data into the Tx buffer assignd to this descriptor.  It
+   * should fit because each packet buffer is the MTU size and breaking up larger
+   * TCP messasges is handled by higher level logic.  The hardware does, however,t
+   * support breaking up larger messages into many fragments, however, that
+   * capability is not exploited here.
    *
    * This would be a great performance improvement:  Remove the buffer from
    * the lp_dev structure and replace it a pointer directly into the EMAC
@@ -860,10 +860,8 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
   considx = lpc17_getreg(LPC17_ETH_RXCONSIDX) & ETH_RXCONSIDX_MASK;
   prodidx = lpc17_getreg(LPC17_ETH_RXPRODIDX) & ETH_RXPRODIDX_MASK;
 
-  /* Loop while there are incoming packets to be processed */
-
-  /* If the next producer index would overrun the consumer index, then there
-   * are not available descriptors.
+  /* Loop while there are incoming packets to be processed, that is, while
+   * the producer index is not equal to the consumer index.
    */
 
   fragment = false;
@@ -922,8 +920,8 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
           /* Copy the data data from the EMAC DMA RAM to priv->lp_dev.d_buf. 
            * Set amount of data in priv->lp_dev.d_len
            *
-           * This would be a great performance improvement:  Remove the
-           * buffer from the lp_dev structure and replaceit a pointer
+           * Here would be a great performance improvement:  Remove the
+           * buffer from the lp_dev structure and replace it with a pointer
            * directly into the EMAC DMA memory.  This could eliminate the
            * following, costly memcpy.
            */
@@ -1185,12 +1183,18 @@ static void lpc17_txtimeout(int argc, uint32_t arg, ...)
   /* Increment statistics and dump debug info */
 
   EMAC_STAT(priv, tx_timeouts);
-  
-  /* Then reset the hardware */
+  if (priv->lp_ifup)
+    {
+      /* Then reset the hardware. ifup() will reset the interface, then bring
+       * it back up.
+       */
 
-  /* Then poll uIP for new XMIT data */
+      (void)lpc17_ifup(&priv->lp_dev);
 
-  (void)uip_poll(&priv->lp_dev, lpc17_uiptxpoll);
+      /* Then poll uIP for new XMIT data */
+
+      (void)uip_poll(&priv->lp_dev, lpc17_uiptxpoll);
+    }
 }
 
 /****************************************************************************
@@ -1219,12 +1223,15 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
-   * might be bug here.  Does this mean if there is a transmit in progress,
-   * we will missing TCP time state updates?
-   */
+  if (lpc17_txdesc(priv) == OK)
+    {
+      /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+       * might be bug here.  Does this mean if there is a transmit in progress,
+       * we will missing TCP time state updates?
+       */
 
-  (void)uip_timer(&priv->lp_dev, lpc17_uiptxpoll, LPC17_POLLHSEC);
+      (void)uip_timer(&priv->lp_dev, lpc17_uiptxpoll, LPC17_POLLHSEC);
+    }
 
   /* Setup the watchdog poll timer again */
 
@@ -1695,8 +1702,8 @@ static inline int lpc17_phyreset(uint8_t phyaddr)
 
   up_udelay(50);
 
-  /* The MCR reset bit is self-clearing.  Wait for it to be clear
-   * indicating that the reset is complete.
+  /* The MCR reset bit is self-clearing.  Wait for it to be clear indicating
+   * that the reset is complete.
    */
 
   for (timeout = MII_BIG_TIMEOUT; timeout > 0; timeout--)
@@ -1843,7 +1850,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
   int ret;
 
   /* MII configuration: host clocked divided per board.h, no suppress
-   * preambl,e no scan increment.
+   * preamble, no scan increment.
    */
 
   lpc17_putreg(ETH_MCFG_CLKSEL_DIV, LPC17_ETH_MCFG);
@@ -1854,8 +1861,8 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
   lpc17_putreg(ETH_CMD_RMII, LPC17_ETH_CMD);
   lpc17_putreg(ETH_SUPP_SPEED, LPC17_ETH_SUPP);
 
-  /* Find PHY Address.  Because controller has a pull-up and the
-   * PHY have pull-down resistors on RXD lines some times the PHY
+  /* Find PHY Address.  Because the controller has a pull-up and the
+   * PHY has pull-down resistors on RXD lines some times the PHY
    * latches different at different addresses.
    */
 
@@ -2092,7 +2099,7 @@ static inline void lpc17_rxdescinit(struct lpc17_driver_s *priv)
 
   /* Initialize Rx status */
 
-  rxstat  = (uint32_t*)LPC17_TXSTAT_BASE;
+  rxstat  = (uint32_t*)LPC17_RXSTAT_BASE;
   for (i = 0; i < CONFIG_NET_NRXDESC; i++)
     {
       *rxstat++ = 0;
@@ -2211,7 +2218,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv)
 
   /* Put the MAC into the reset state */
 
-  lpc17_putreg((ETH_MAC1_TXRST    | ETH_MAC1_MCSTXRST |ETH_MAC1_RXRST |
+  lpc17_putreg((ETH_MAC1_TXRST    | ETH_MAC1_MCSTXRST | ETH_MAC1_RXRST |
                 ETH_MAC1_MCSRXRST | ETH_MAC1_SIMRST   | ETH_MAC1_SOFTRST),
                LPC17_ETH_MAC1);
 
@@ -2225,8 +2232,8 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv)
   up_udelay(50);
   lpc17_putreg(0, LPC17_ETH_MAC1);
 
-  /* The RMII bit must be set on initialization (I'm not sure
-   * this needs to be done here but... oh well.
+  /* The RMII bit must be set on initialization (I'm not sure this needs
+   * to be done here but... oh well).
    */
 
   lpc17_putreg(ETH_CMD_RMII, LPC17_ETH_CMD);
