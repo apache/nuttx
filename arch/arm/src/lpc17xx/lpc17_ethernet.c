@@ -73,11 +73,13 @@
  ****************************************************************************/
 
 /* CONFIG_LPC17_NINTERFACES determines the number of physical interfaces
- * that will be supported.
+ * that will be supported -- unless it is more than actually supported by the
+ * hardware!
  */
 
 #if !defined(CONFIG_LPC17_NINTERFACES) || CONFIG_LPC17_NINTERFACES > LPC17_NETHCONTROLLERS
-# define CONFIG_LPC17_NINTERFACES LPC17_NETHCONTROLLERS
+#  undef CONFIG_LPC17_NINTERFACES
+#  define CONFIG_LPC17_NINTERFACES LPC17_NETHCONTROLLERS
 #endif
 
 /* The logic here has a few hooks for support for multiple interfaces, but
@@ -343,7 +345,7 @@ struct lpc17_driver_s
    * multiple Ethernet controllers.
    */
 
-#if LM3S_NETHCONTROLLERS > 1
+#if CONFIG_LPC17_NINTERFACES > 1
   uint32_t lp_base;             /* Ethernet controller base address */
   int      lp_irq;              /* Ethernet controller IRQ */
 #endif
@@ -1326,7 +1328,7 @@ static int lpc17_ifup(struct uip_driver_s *dev)
   /* Set the interrupt to the highest priority */
 
 #ifdef CONFIG_ARCH_IRQPRIO
-#if LM3S_NETHCONTROLLERS > 1
+#if CONFIG_LPC17_NINTERFACES > 1
   (void)up_prioritize_irq(priv->irq, CONFIG_NET_PRIORITY);
 #else
   (void)up_prioritize_irq(LPC17_IRQ_ETH, CONFIG_NET_PRIORITY);
@@ -1365,7 +1367,7 @@ static int lpc17_ifup(struct uip_driver_s *dev)
   /* Finally, enable the Ethernet interrupt at the interrupt controller */
 
   priv->lp_ifup = true;
-#if LM3S_NETHCONTROLLERS > 1
+#if CONFIG_LPC17_NINTERFACES > 1
   up_enable_irq(priv->irq);
 #else
   up_enable_irq(LPC17_IRQ_ETH);
@@ -2270,7 +2272,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv)
  *
  ****************************************************************************/
 
-#if LPC17_NETHCONTROLLERS > 1
+#if CONFIG_LPC17_NINTERFACES > 1
 int lpc17_ethinitialize(int intf)
 #else
 static inline int lpc17_ethinitialize(int intf)
@@ -2281,7 +2283,7 @@ static inline int lpc17_ethinitialize(int intf)
   int ret;
   int i;
 
-  DEBUGASSERT(intf < LPC17_NETHCONTROLLERS);
+  DEBUGASSERT(intf < CONFIG_LPC17_NINTERFACES);
   priv = &g_ethdrvr[intf];
 
   /* Turn on the ethernet MAC clock */
@@ -2310,7 +2312,7 @@ static inline int lpc17_ethinitialize(int intf)
 #endif
   priv->lp_dev.d_private = (void*)priv;   /* Used to recover private state from dev */
 
-#if LM3S_NETHCONTROLLERS > 1
+#if CONFIG_LPC17_NINTERFACES > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"
   priv->lp_base          = ??;            /* Ethernet controller base address */
   priv->lp_irq           = ??;            /* Ethernet controller IRQ number */
@@ -2330,7 +2332,7 @@ static inline int lpc17_ethinitialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-#if LM3S_NETHCONTROLLERS > 1
+#if CONFIG_LPC17_NINTERFACES > 1
   ret = irq_attach(priv->irq, lpc17_interrupt);
 #else
   ret = irq_attach(LPC17_IRQ_ETH, lpc17_interrupt);
@@ -2359,7 +2361,7 @@ static inline int lpc17_ethinitialize(int intf)
  *
  ****************************************************************************/
 
-#if LPC17_NETHCONTROLLERS == 1
+#if CONFIG_LPC17_NINTERFACES == 1
 void up_netinitialize(void)
 {
   (void)lpc17_ethinitialize(0);
