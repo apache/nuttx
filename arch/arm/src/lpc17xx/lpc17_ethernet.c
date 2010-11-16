@@ -72,6 +72,7 @@
  * Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
 /* CONFIG_LPC17_NINTERFACES determines the number of physical interfaces
  * that will be supported -- unless it is more than actually supported by the
  * hardware!
@@ -107,6 +108,29 @@
 #  define CONFIG_NET_PRIORITY NVIC_SYSH_PRIORITY_MAX
 #endif
 
+/* Debug Configuration *****************************************************/
+/* Register debug -- can only happen of CONFIG_DEBUG is selected */
+
+#ifndef CONFIG_DEBUG
+#  undef  CONFIG_NET_REGDEBUG
+#endif
+
+/* CONFIG_NET_DUMPPACKET will dump the contents of each packet to the
+ * console.
+ */
+
+#ifndef CONFIG_DEBUG
+#  undef  CONFIG_NET_DUMPPACKET
+#endif
+
+#ifdef CONFIG_NET_DUMPPACKET
+#  define lpc17_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
+#else
+#  define lpc17_dumppacket(m,a,n)
+#endif
+
+/* Timing *******************************************************************/
+
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define LPC17_WDDELAY        (1*CLK_TCK)
@@ -116,15 +140,22 @@
 
 #define LPC17_TXTIMEOUT      (60*CLK_TCK)
 
-/* Interrupts */
+/* Interrupts ***************************************************************/
 
 #define ETH_RXINTS           (ETH_INT_RXOVR | ETH_INT_RXERR | ETH_INT_RXFIN | ETH_INT_RXDONE)
 #define ETH_TXINTS           (ETH_INT_TXUNR | ETH_INT_TXERR | ETH_INT_TXFIN | ETH_INT_TXDONE)
+
+/* Misc. Helpers ***********************************************************/
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
 #define BUF ((struct uip_eth_hdr *)priv->lp_dev.d_buf)
 
+/* This is the number of ethernet GPIO pins that must be configured */
+
+#define GPIO_NENET_PINS      10
+
+/* PHYs *********************************************************************/
 /* Select PHY-specific values.  Add more PHYs as needed. */
 
 #ifdef CONFIG_PHY_KS8721
@@ -168,10 +199,7 @@
 #  endif
 #endif
 
-/* This is the number of ethernet GPIO pins that must be configured */
-
-#define GPIO_NENET_PINS      10
-
+/* Descriptors **************************************************************/
 /* EMAC DMA RAM and descriptor definitions.  The configured number of
  * descriptors will determine the organization and the size of the
  * descriptor and status tables.  There is a complex interaction between
@@ -289,12 +317,6 @@
 
 #if LPC17_BUFFER_END > LPC17_PKTMEM_END
 #  error "Packet memory overlaps descriptor tables"
-#endif
-
-/* Register debug -- can only happen of CONFIG_DEBUG is selected */
-
-#ifndef CONFIG_DEBUG
-#  undef  CONFIG_NET_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -672,9 +694,11 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 
   DEBUGASSERT(lpc17_txdesc(priv) == OK);
 
-  /* Increment statistics */
+  /* Increment statistics and dump the packet *if so configured) */
 
   EMAC_STAT(priv, tx_packets);
+  lpc17_dumppacket("Transmit packet",
+                   priv->lp_dev.d_buf, priv->lp_dev.d_len);
 
   /* Get the current producer index */
 
@@ -929,6 +953,9 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
           memcpy(priv->lp_dev.d_buf, rxbuffer, pktlen);
           priv->lp_dev.d_len = pktlen;
 
+          lpc17_dumppacket("Received packet",
+                           priv->ld_dev.d_buf, priv->ld_dev.d_len);
+
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
@@ -1151,7 +1178,6 @@ static int lpc17_interrupt(int irq, void *context)
 #         warning "Missing logic"
         }
 #endif
-
     }
 
   return OK;
@@ -1367,11 +1393,30 @@ static int lpc17_ifup(struct uip_driver_s *dev)
   lpc17_putreg(ETH_RXINTS, LPC17_ETH_INTEN);
 #endif
 
+  /* Enable Rx */
+
+  regval  = lpc17_getreg(LPC17_ETH_CMD);
+  regval |= ETH_CMD_RXEN;
+  lpc17_putreg(regval, LPC17_ETH_CMD);
+
+  regval  = lpc17_getreg(LPC17_ETH_MAC1);
+  regval |= ETH_MAC1_RE;
+  lpc17_putreg(regval, LPC17_ETH_MAC1);
+
+  /* Enable Tx */
+
+  regval  = lpc17_getreg(LPC17_ETH_CMD);
+  regval |= ETH_CMD_TXEN;
+  lpc17_putreg(regval, LPC17_ETH_CMD);
+
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_polltimer, 1, (uint32_t)priv);
+  (void)wd_start(priv->lp_txpoll, LPC17_WDDELAY, lpc17_polltimer, 1,
+                (uint32_t)priv);
 
-  /* Finally, enable the Ethernet interrupt at the interrupt controller */
+  /* Finally, make the interface up and enable the Ethernet interrupt at
+   * the interrupt controller
+   */
 
   priv->lp_ifup = true;
 #if CONFIG_LPC17_NINTERFACES > 1
@@ -1573,13 +1618,13 @@ static void lpc17_showpins(void)
 static void lpc17_showmii(uint8_t phyaddr, const char *msg)
 {
   dbg("PHY " LPC17_PHYNAME ": %s\n", msg);
-  dbg("  MCR:       %04x\n", lpc17_getreg(MII_MCR));
-  dbg("  MSR:       %04x\n", lpc17_getreg(MII_MSR));
-  dbg("  ADVERTISE: %04x\n", lpc17_getreg(MII_ADVERTISE));
-  dbg("  LPA:       %04x\n", lpc17_getreg(MII_LPA));
-  dbg("  EXPANSION: %04x\n", lpc17_getreg(MII_EXPANSION));
+  dbg("  MCR:       %04x\n", lpc17_phyread(phyaddr, MII_MCR));
+  dbg("  MSR:       %04x\n", lpc17_phyread(phyaddr, MII_MSR));
+  dbg("  ADVERTISE: %04x\n", lpc17_phyread(phyaddr, MII_ADVERTISE));
+  dbg("  LPA:       %04x\n", lpc17_phyread(phyaddr, MII_LPA));
+  dbg("  EXPANSION: %04x\n", lpc17_phyread(phyaddr, MII_EXPANSION));
 #ifdef CONFIG_PHY_KS8721
-  dbg("  10BTCR:    %04x\n", lpc17_getreg(MII_KS8721_10BTCR));
+  dbg("  10BTCR:    %04x\n", lpc17_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
 #endif
@@ -2106,9 +2151,9 @@ static inline void lpc17_rxdescinit(struct lpc17_driver_s *priv)
       *rxstat++ = 0;
     }
 
-  /* Point to first Tx descriptor */
+  /* Point to first Rx descriptor */
 
-  lpc17_putreg(0, LPC17_ETH_RXPRODIDX);
+  lpc17_putreg(0, LPC17_ETH_RXCONSIDX);
 }
 
 /****************************************************************************
