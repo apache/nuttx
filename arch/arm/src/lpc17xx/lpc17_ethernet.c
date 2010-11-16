@@ -1100,8 +1100,14 @@ static void lpc17_txdone(struct lpc17_driver_s *priv)
 
 static int lpc17_interrupt(int irq, void *context)
 {
-  register struct lpc17_driver_s *priv = &g_ethdrvr[0];
+  register struct lpc17_driver_s *priv;
   uint32_t status;
+
+#if CONFIG_LPC17_NINTERFACES > 1
+# error "A mechanism to associate and interface with an IRQ is needed"
+#else
+  priv = &g_ethdrvr[0];
+#endif
 
   /* Get the interrupt status (zero means no interrupts pending). */
 

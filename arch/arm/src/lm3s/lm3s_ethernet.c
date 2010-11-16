@@ -915,7 +915,7 @@ static int lm3s_interrupt(int irq, FAR void *context)
     }
 
   /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if 
-   * there are no pending transmissions.
+   * there are no pending transmissions).
    */
 
   return OK;
