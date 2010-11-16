@@ -249,7 +249,7 @@ LEDs
     #define LED_INIRQ                  4  /*  NC     NC    ON  (momentary) */
     #define LED_SIGNAL                 5  /*  NC     NC    ON  (momentary) */
     #define LED_ASSERTION              6  /*  NC     NC    ON  (momentary) */
-    #define LED_PANIC                  7  /*  NC     NC    ON  (1Hz flashing) */
+    #define LED_PANIC                  7  /*  NC     NC    ON  (0.5Hz flashing) */
 
   After the system is booted, this logic will no longer use LEDs 1 and 2.  They
   are then available for use the application software using lpc17_led1() and
@@ -410,6 +410,8 @@ Nucleus 2G Configuration Options
 	CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
 	CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
 	  CONFIG_DEBUG.
+	CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
+	  Also needs CONFIG_DEBUG.
 	CONFIG_NET_BROADCAST - Enable receipt of broadcast frames
 	CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
 	CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.

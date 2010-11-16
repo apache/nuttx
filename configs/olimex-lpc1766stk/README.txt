@@ -293,7 +293,7 @@ LEDs
   - ON/OFF toggles means that various events are happening.
   - GLowing: LED2 is turned on and off on every interrupt so even timer interrupts
     should cause LED2 to glow faintly in the normal case.
-  - Flashing. If the LED2 is flashing at about 1Hz, that means that a crash
+  - Flashing. If the LED2 is flashing at about 0.5Hz, that means that a crash
     has occurred.  If CONFIG_ARCH_STACKDUMP=y, you will get some diagnostic
     information on the console to help debug what happened.
 
@@ -616,6 +616,8 @@ Olimex LPC1766-STK Configuration Options
 	CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
 	CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
 	  CONFIG_DEBUG.
+	CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
+	  Also needs CONFIG_DEBUG.
 	CONFIG_NET_BROADCAST - Enable receipt of broadcast frames
 	CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
 	CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.

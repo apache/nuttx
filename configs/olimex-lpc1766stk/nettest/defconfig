@@ -76,7 +76,7 @@ CONFIG_ARCH_CHIP=lpc17xx
 CONFIG_ARCH_CHIP_LPC1766=y
 CONFIG_ARCH_BOARD=olimex-lpc1766stk
 CONFIG_ARCH_BOARD_LPC1766STK=y
-CONFIG_BOARD_LOOPSPERMSEC=7982
+CONFIG_BOARD_LOOPSPERMSEC=8111
 CONFIG_DRAM_SIZE=(32*1024)
 CONFIG_DRAM_START=0x10000000
 CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
@@ -195,6 +195,8 @@ CONFIG_UART3_2STOP=0
 # CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
 # CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
 #   CONFIG_DEBUG.
+# CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
+#   Also needs CONFIG_DEBUG.
 # CONFIG_NET_BROADCAST - Enable receipt of broadcast frames
 # CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
 # CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
