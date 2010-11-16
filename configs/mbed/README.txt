@@ -298,6 +298,8 @@ mbed Configuration Options
 	CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
 	CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
 	  CONFIG_DEBUG.
+	CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
+	  Also needs CONFIG_DEBUG.
 	CONFIG_NET_BROADCAST - Enable receipt of broadcast frames
 	CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
 	CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
