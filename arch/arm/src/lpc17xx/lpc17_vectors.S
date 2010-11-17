@@ -295,7 +295,7 @@ lpc17_common:
 2:
 	msr		msp, r1					/* Recover the return MSP value */
 
-	/* Do we need to restore interrupts? */
+	/* Do we need to restore interrupts? Why not just: msr primask, r3 */
 
 	tst		r3, #1					/* PRIMASK bit 1=1 means that interrupts are masked */
 	bne		3f
