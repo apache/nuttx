@@ -260,6 +260,33 @@ static int lpc17_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 }
 
 /****************************************************************************
+ * Name: lpc17_clrpend
+ *
+ * Description:
+ *  Clear a pending interrupt.
+ *
+ ****************************************************************************/
+
+static inline void lpc17_clrpend(int irq)
+{
+#if 0 /* Necessary? */
+  /* Check for external interrupt */
+
+  if (irq >= LPC17_IRQ_EXTINT)
+    {
+      if (irq < (LPC17_IRQ_EXTINT+32))
+        {
+          putreg32(1 << (irq - LPC17_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
+        }
+      else if (irq < LPC17_IRQ_NIRQS)
+        {
+          putreg32(1 << (irq - LPC17_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+        }
+    }
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -426,6 +453,7 @@ void up_enable_irq(int irq)
 void up_maskack_irq(int irq)
 {
   up_disable_irq(irq);
+  lpc17_clrpend(irq);
 }
 
 /****************************************************************************

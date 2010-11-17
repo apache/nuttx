@@ -714,10 +714,10 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
              (priv->lp_dev.d_len - 1);
 
   /* Copy the packet data into the Tx buffer assignd to this descriptor.  It
-   * should fit because each packet buffer is the MTU size and breaking up larger
-   * TCP messasges is handled by higher level logic.  The hardware does, however,t
-   * support breaking up larger messages into many fragments, however, that
-   * capability is not exploited here.
+   * should fit because each packet buffer is the MTU size and breaking up
+   * largerTCP messasges is handled by higher level logic.  The hardware
+   * does, however, support breaking up larger messages into many fragments,
+   * however, that capability is not exploited here.
    *
    * This would be a great performance improvement:  Remove the buffer from
    * the lp_dev structure and replace it a pointer directly into the EMAC
@@ -744,7 +744,8 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->lp_txtimeout, LPC17_TXTIMEOUT, lpc17_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->lp_txtimeout, LPC17_TXTIMEOUT, lpc17_txtimeout,
+                 1, (uint32_t)priv);
   return OK;
 }
 
