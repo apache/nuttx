@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer_settime.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -308,7 +308,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
 
   if (!timer || !value)
     {
-      *get_errno_ptr() = EINVAL;
+      errno = EINVAL;
       return ERROR;
     }
 
@@ -349,7 +349,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
 #ifdef CONFIG_DISABLE_CLOCK
        /* Absolute timing depends upon having access to clock functionality */
 
-       *get_errno_ptr() = ENOSYS;
+       errno = ENOSYS;
        return ERROR;
 #else
        /* Calculate a delay corresponding to the absolute time in 'value'.
@@ -371,7 +371,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
     }
 
   /* If the time is in the past or now, then set up the next interval
-   * instead.
+   * instead (assuming a repititive timer).
    */
 
   if (delay <= 0)
@@ -385,7 +385,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
   if (delay > 0)
     {
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, timer->pt_delay, (wdentry_t)timer_timeout, 1, (uint32_t)((uintptr_t)timer));
+      ret = wd_start(timer->pt_wdog, delay, (wdentry_t)timer_timeout, 1, (uint32_t)((uintptr_t)timer));
     }
 
   irqrestore(state);

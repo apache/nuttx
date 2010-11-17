@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 11, 2010</p>
+      <p>Last Updated: November 17, 2010</p>
     </td>
   </tr>
 </table>
@@ -1986,6 +1986,9 @@ nuttx-5.14 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  verify the LPC17xx ethernet driver currently under development.
 	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
 	  the LPC17xx Ethernet driver.
+	* sched/timer_settime.c - Fix an error in set-up of one-shot timer.  It was
+	  using the repititive timer value (which is zero in the one-shot case,
+	  always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
