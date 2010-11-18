@@ -543,6 +543,18 @@ EXTERN int lpc17_dumpgpio(uint16_t pinset, const char *msg);
 #endif
 
 /************************************************************************************
+ * Name: lpc17_clrpend
+ *
+ * Description:
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be required
+ *   for most interrupts.  Don't know why... but the LPC1766 Ethernet EMAC
+ *   interrupt definitely needs it!
+ *
+ ************************************************************************************/
+
+EXTERN void lpc17_clrpend(int irq);
+
+/************************************************************************************
  * Name:  lpc17_spi/ssp0/ssp1select and lpc17_spi/ssp0/ssp1status
  *
  * Description:

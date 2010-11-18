@@ -1115,67 +1115,8 @@ static int lpc17_interrupt(int irq, void *context)
   status = lpc17_getreg(LPC17_ETH_INTST);
   if (status != 0)
     {
-      /* Handle each pending interrupt */
-      /* Check for receive errors */
-
-      if ((status & ETH_INT_RXOVR) != 0)
-        {
-          lpc17_putreg(ETH_INT_RXOVR, LPC17_ETH_INTCLR);
-          EMAC_STAT(priv, rx_ovrerrors);
-        }
-
-      if ((status & ETH_INT_RXERR) != 0)
-        {
-          lpc17_putreg(ETH_INT_RXERR, LPC17_ETH_INTCLR);
-          EMAC_STAT(priv, rx_errors);
-        }
-
-      /* Check if we received an incoming packet, if so, call lpc17_rxdone() */
-
-      if ((status & ETH_INT_RXFIN) != 0)
-        {
-          lpc17_putreg(ETH_INT_RXFIN, LPC17_ETH_INTCLR);
-          EMAC_STAT(priv, rx_finished);
-          DEBUGASSERT(lpc17_getreg(LPC17_ETH_RXPRODIDX) == lpc17_getreg(LPC17_ETH_RXCONSIDX));
-        }
-
-      if ((status & ETH_INT_RXDONE) != 0)
-        {
-          lpc17_putreg(ETH_INT_RXDONE, LPC17_ETH_INTCLR);
-          EMAC_STAT(priv, rx_done);
-          lpc17_rxdone(priv);
-        }
-
-      /* Check for Tx errors */
-
-      if ((status & ETH_INT_TXUNR) != 0)
-        {
-          lpc17_putreg(ETH_INT_TXUNR, LPC17_ETH_INTCLR);
-          EMAC_STAT(priv, tx_underrun);
-        }
-
-      if ((status & ETH_INT_TXERR) != 0)
-        {
-          lpc17_putreg(ETH_INT_TXERR, LPC17_ETH_INTCLR);
-          EMAC_STAT(priv, tx_errors);
-        }
-
-      /* Check is a packet transmission just completed.  If so, call lpc17_txdone */
-
-      if ((status & ETH_INT_TXFIN) != 0)
-        {
-          lpc17_putreg(ETH_INT_TXFIN, LPC17_ETH_INTCLR);
-          EMAC_STAT(priv, tx_finished);
-        }
-
-      if ((status & ETH_INT_TXDONE) != 0)
-        {
-          lpc17_putreg(ETH_INT_TXDONE, LPC17_ETH_INTCLR);
-          EMAC_STAT(priv, tx_done);
-          lpc17_txdone(priv);
-        }
-
-      /* Check for Wake-Up on Lan */
+      /* Handle each pending interrupt **************************************/
+      /* Check for Wake-Up on Lan *******************************************/
 
 #ifdef CONFIG_NET_WOL
       if ((status & ETH_INT_WKUP) != 0)
@@ -1183,10 +1124,132 @@ static int lpc17_interrupt(int irq, void *context)
           lpc17_putreg(ETH_INT_WKUP, LPC17_ETH_INTCLR);
           EMAC_STAT(priv, wol);
 #         warning "Missing logic"
+          goto intexit;
         }
+      else
 #endif
+      /* Fatal Errors *******************************************************/
+      /* RX OVERRUN -- Fatal overrun error in the receive queue. The fatal
+       * interrupt should be resolved by a Rx soft-reset. The bit is not
+       * set when there is a nonfatal overrun error.
+       *
+       * TX UNDERRUN -- Interrupt set on a fatal underrun error in the
+       * transmit queue. The fatal interrupt should be resolved by a Tx
+       * soft-reset. The bit is not set when there is a nonfatal underrun
+       * error.
+       */
+
+      if ((status & (ETH_INT_RXOVR|ETH_INT_TXUNR)) != 0)
+        {
+          if ((status & ETH_INT_RXOVR) != 0)
+            {
+               lpc17_putreg(ETH_INT_RXOVR, LPC17_ETH_INTCLR);
+               EMAC_STAT(priv, rx_ovrerrors);
+            }
+
+          if ((status & ETH_INT_TXUNR) != 0)
+            {
+              lpc17_putreg(ETH_INT_TXUNR, LPC17_ETH_INTCLR);
+              EMAC_STAT(priv, tx_underrun);
+            }
+
+           /* ifup() will reset the EMAC and bring it back up */
+
+           (void)lpc17_ifup(&priv->lp_dev);
+        }
+      else
+        {      
+          /* Check for receive events ***************************************/
+          /* RX ERROR -- Triggered on receive errors: AlignmentError,
+           * RangeError, LengthError, SymbolError, CRCError or
+           * NoDescriptor or Overrun.
+           */
+
+          if ((status & ETH_INT_RXERR) != 0)
+            {
+              lpc17_putreg(ETH_INT_RXERR, LPC17_ETH_INTCLR);
+              EMAC_STAT(priv, rx_errors);
+            }
+          else
+            {
+              /* RX FINISHED -- Triggered when all receive descriptors have
+               * been processed i.e. on the transition to the situation
+               * where ProduceIndex == ConsumeIndex.
+               */
+
+              if ((status & ETH_INT_RXFIN) != 0)
+                {
+                  lpc17_putreg(ETH_INT_RXFIN, LPC17_ETH_INTCLR);
+                  EMAC_STAT(priv, rx_finished);
+                  DEBUGASSERT(lpc17_getreg(LPC17_ETH_RXPRODIDX) == lpc17_getreg(LPC17_ETH_RXCONSIDX));
+                }
+
+              /* RX DONE -- Triggered when a receive descriptor has been
+               * processed while the Interrupt bit in the Control field of
+               * the descriptor was set.
+               */
+
+              if ((status & ETH_INT_RXDONE) != 0)
+                {
+                  lpc17_putreg(ETH_INT_RXDONE, LPC17_ETH_INTCLR);
+                  EMAC_STAT(priv, rx_done);
+
+                  /* We have received at least one new incoming packet. */
+
+                  lpc17_rxdone(priv);
+                }
+            }
+
+          /* Check for Tx events ********************************************/
+          /* TX ERROR -- Triggered on transmit errors: LateCollision,
+           * ExcessiveCollision and ExcessiveDefer, NoDescriptor or Underrun.
+           */
+
+          if ((status & ETH_INT_TXERR) != 0)
+            {
+              lpc17_putreg(ETH_INT_TXERR, LPC17_ETH_INTCLR);
+              EMAC_STAT(priv, tx_errors);
+            }
+          else
+            {
+              /* TX FINISHED -- Triggered when all transmit descriptors have
+               * been processed i.e. on the transition to the situation
+               * where ProduceIndex == ConsumeIndex.
+               */
+
+              if ((status & ETH_INT_TXFIN) != 0)
+                {
+                  lpc17_putreg(ETH_INT_TXFIN, LPC17_ETH_INTCLR);
+                  EMAC_STAT(priv, tx_finished);
+                }
+
+              /* TX DONE -- Triggered when a descriptor has been transmitted
+               * while the Interrupt bit in the Control field of the
+               * descriptor was set.
+               */
+
+              if ((status & ETH_INT_TXDONE) != 0)
+                {
+                  lpc17_putreg(ETH_INT_TXDONE, LPC17_ETH_INTCLR);
+                  EMAC_STAT(priv, tx_done);
+
+                  /* A packet transmission just completed */
+
+                  lpc17_txdone(priv);
+                }
+            }
+        }
     }
 
+  /* Clear the pending interrupt.  Hmmm.. I don't normally do this on 
+   * Cortex-M3 interrupts.  Why is this needed for the EMAC interrupt?
+   */
+
+#if CONFIG_LPC17_NINTERFACES > 1
+  lpc17_clrpend(priv->irq);
+#else
+  lpc17_clrpend(LPC17_IRQ_ETH);
+#endif
   return OK;
 }
 
