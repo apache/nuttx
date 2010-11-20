@@ -1662,8 +1662,8 @@ static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
 #if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
 static void lpc17_showpins(void)
 {
-  lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN0, "P0[1-15]");
-  lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN16, "P0[16-31]");
+  lpc17_dumpgpio(GPIO_PORT1|GPIO_PIN0, "P1[1-15]");
+  lpc17_dumpgpio(GPIO_PORT1|GPIO_PIN16, "P1[16-31]");
 }
 #endif
 
