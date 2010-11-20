@@ -244,7 +244,7 @@ static inline void setbasepri(uint32_t basepri)
       : "memory");
 }
 
-/* Get IPSR */
+/* Get/set IPSR */
 
 static inline uint32_t getipsr(void)
 {
@@ -256,6 +256,16 @@ static inline uint32_t getipsr(void)
      :
      : "memory");
   return ipsr;
+}
+
+static inline void setipsr(uint32_t ipsr)
+{
+  __asm__ __volatile__
+    (
+      "\tmsr ipsr, %0\n"
+      :
+      : "r" (ipsr)
+      : "memory");
 }
 
 /* SVC system call */
