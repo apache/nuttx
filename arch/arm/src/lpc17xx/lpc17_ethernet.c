@@ -458,7 +458,7 @@ static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac);
 
 /* Initialization functions */
 
-#ifdef CONFIG_NET_REGDEBUG
+#if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
 static void lpc17_showpins(void);
 #else
 #  define lpc17_showpins()
@@ -955,7 +955,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
           priv->lp_dev.d_len = pktlen;
 
           lpc17_dumppacket("Received packet",
-                           priv->ld_dev.d_buf, priv->ld_dev.d_len);
+                           priv->lp_dev.d_buf, priv->lp_dev.d_len);
 
           /* We only accept IP packets of the configured type and ARP packets */
 
@@ -1659,7 +1659,7 @@ static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_NET_REGDEBUG
+#if defined(CONFIG_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
 static void lpc17_showpins(void)
 {
   lpc17_dumpgpio(GPIO_PORT0|GPIO_PIN0, "P0[1-15]");
