@@ -607,7 +607,7 @@ lm3s_irqcommon:
 	 * values to the stack.
 	 */
 
-        add	r1, r0, #SW_XCPT_SIZE	/* R1=Address of HW save area in reg array */
+    add	r1, r0, #SW_XCPT_SIZE	/* R1=Address of HW save area in reg array */
 	ldmia	r1, {r4-r11}		/* Fetch eight registers in HW save area */
 	ldr	r1, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
 	stmdb	r1!, {r4-r11}		/* Store eight registers in HW save area */
@@ -622,17 +622,18 @@ lm3s_irqcommon:
 2:
 	msr	msp, r1			/* Recover the return MSP value */
 
-	/* Do we need to restore interrupts? */
+	/* Restore the interrupt state.  Preload r14 with the special return
+	 * value first (so that the return actually occurs with interrupts
+	 * still disabled).
+	 */
 
-	tst	r3, #1			/* PRIMASK bit 1=1 means that interrupts are masked */
-	bne	3f
-	cpsie	i			/* Restore interrupts */
+	ldr	r14, =EXC_RETURN	/* Load the special value */
+	msr	primask, r3		/* Restore interrupts */
 
 	/* Always return with R14 containing the special value that will: (1)
 	 * return to thread mode, and (2) continue to use the MSP
 	 */
-3:
-	ldr	r14, =EXC_RETURN	/* Load the special value */
+
 	bx	r14			/* And return */
 	.size	handlers, .-handlers
 

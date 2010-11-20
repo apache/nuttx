@@ -1124,7 +1124,6 @@ static int lpc17_interrupt(int irq, void *context)
           lpc17_putreg(ETH_INT_WKUP, LPC17_ETH_INTCLR);
           EMAC_STAT(priv, wol);
 #         warning "Missing logic"
-          goto intexit;
         }
       else
 #endif

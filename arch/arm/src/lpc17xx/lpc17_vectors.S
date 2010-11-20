@@ -295,17 +295,18 @@ lpc17_common:
 2:
 	msr		msp, r1					/* Recover the return MSP value */
 
-	/* Do we need to restore interrupts? Why not just: msr primask, r3 */
+	/* Restore the interrupt state.  Preload r14 with the special return
+	 * value first (so that the return actually occurs with interrupts
+	 * still disabled).
+	 */
 
-	tst		r3, #1					/* PRIMASK bit 1=1 means that interrupts are masked */
-	bne		3f
-	cpsie	i						/* Restore interrupts */
+	ldr		r14, =EXC_RETURN		/* Load the special value */
+	msr		primask, r3				/* Restore interrupts */
 
 	/* Always return with R14 containing the special value that will: (1)
 	 * return to thread mode, and (2) continue to use the MSP
 	 */
-3:
-	ldr		r14, =EXC_RETURN		/* Load the special value */
+
 	bx		r14						/* And return */
 	.size	handlers, .-handlers
 
