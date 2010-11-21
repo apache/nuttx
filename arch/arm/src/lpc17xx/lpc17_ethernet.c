@@ -2100,7 +2100,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
    * (probably more than little redundant).
    */
 
-  ret = lpc17_phymode(phyaddr, LPC17_MODE_DEFLT);
+  ret = lpc17_phymode(phyaddr, priv->lp_mode);
   lpc17_showmii(phyaddr, "After final configuration");
   return ret;
 }
@@ -2361,7 +2361,15 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv)
   lpc17_putreg(18, LPC17_ETH_IPGR);
   lpc17_putreg(((15 << ETH_CLRT_RMAX_SHIFT) | (55 << ETH_CLRT_COLWIN_SHIFT)),
                LPC17_ETH_CLRT);
-  lpc17_putreg(0x0600, LPC17_ETH_MAXF);
+
+  /* Set the Maximum Frame size register. "This field resets to the value
+   * 0x0600, which represents a maximum receive frame of 1536 octets. An
+   * untagged maximum size Ethernet frame is 1518 octets. A tagged frame adds
+   * four octets for a total of 1522 octets. If a shorter maximum length
+   * restriction is desired, program this 16-bit field."
+   */
+
+  lpc17_putreg(CONFIG_NET_BUFSIZE+2, LPC17_ETH_MAXF);
 
   /* Disable all Ethernet controller interrupts */
 
