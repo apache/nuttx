@@ -1462,7 +1462,13 @@ static int lpc17_ifup(struct uip_driver_s *dev)
   lpc17_putreg(ETH_RXINTS, LPC17_ETH_INTEN);
 #endif
 
-  /* Enable Rx */
+  /* Enable Rx. "Enabling of the receive function is located in two places.
+   * The receive DMA manager needs to be enabled and the receive data path
+   * of the MAC needs to be enabled. To prevent overflow in the receive
+   * DMA engine the receive DMA engine should be enabled by setting the
+   * RxEnable bit in the Command register before enabling the receive data
+   * path in the MAC by setting the RECEIVE ENABLE bit in the MAC1 register."
+   */
 
   regval  = lpc17_getreg(LPC17_ETH_CMD);
   regval |= ETH_CMD_RXEN;
