@@ -896,16 +896,19 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 
       EMAC_STAT(priv, rx_packets);
 
-      /* Get the Rx status and packet length */
+      /* Get the Rx status and packet length (-4+1) */
     
       rxstat   = (uint32_t*)(LPC17_RXSTAT_BASE + (considx << 3));
-      pktlen   = (*rxstat & RXSTAT_INFO_RXSIZE_MASK) + 1;
+      pktlen   = (*rxstat & RXSTAT_INFO_RXSIZE_MASK) - 3;
 
-      /* Check for errors */
+      /* Check for errors.  NOTE:  The DMA engine reports bogus length errors,
+       * making this a pretty useless check.
+       */
 
       if ((*rxstat & RXSTAT_INFO_ERROR) != 0)
         {
-          nlldbg("Error.  rxstat: %08x\n", *rxstat);
+          nlldbg("Error. considx: %08x prodidx: %08x rxstat: %08x\n",
+                 considx, prodidx, *rxstat);
           EMAC_STAT(priv, rx_pkterr);
         }
 
@@ -915,20 +918,23 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
        * imply that the packet is too big.
        */
  
-      else if (pktlen > CONFIG_NET_BUFSIZE+2)
+      /* else */ if (pktlen > CONFIG_NET_BUFSIZE+2)
         {
-          nlldbg("Too big.  pktlen: %d rxstat: %08x\n", pktlen, *rxstat);
+          nlldbg("Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                 considx, prodidx, pktlen, *rxstat);
           EMAC_STAT(priv, rx_pktsize);
         }
       else if ((*rxstat & RXSTAT_INFO_LASTFLAG) == 0)
         {
-          nlldbg("Fragment.  rxstat: %08x\n", pktlen, *rxstat);
+          nlldbg("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                 considx, prodidx, pktlen, *rxstat);
           EMAC_STAT(priv, rx_fragment);
           fragment = true;
         }
       else if (fragment)
         {
-          nlldbg("Last fragment.  rxstat: %08x\n", pktlen, *rxstat);
+          nlldbg("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+                 considx, prodidx, pktlen, *rxstat);
           EMAC_STAT(priv, rx_fragment);
           fragment = false;
         }
@@ -1115,13 +1121,16 @@ static int lpc17_interrupt(int irq, void *context)
   status = lpc17_getreg(LPC17_ETH_INTST);
   if (status != 0)
     {
+      /* Clear all pending interrupts */
+
+      lpc17_putreg(status, LPC17_ETH_INTCLR);
+      
       /* Handle each pending interrupt **************************************/
       /* Check for Wake-Up on Lan *******************************************/
 
 #ifdef CONFIG_NET_WOL
       if ((status & ETH_INT_WKUP) != 0)
         {
-          lpc17_putreg(ETH_INT_WKUP, LPC17_ETH_INTCLR);
           EMAC_STAT(priv, wol);
 #         warning "Missing logic"
         }
@@ -1142,13 +1151,13 @@ static int lpc17_interrupt(int irq, void *context)
         {
           if ((status & ETH_INT_RXOVR) != 0)
             {
-               lpc17_putreg(ETH_INT_RXOVR, LPC17_ETH_INTCLR);
-               EMAC_STAT(priv, rx_ovrerrors);
+              nlldbg("RX Overrun. status: %08x\n", status);
+              EMAC_STAT(priv, rx_ovrerrors);
             }
 
           if ((status & ETH_INT_TXUNR) != 0)
             {
-              lpc17_putreg(ETH_INT_TXUNR, LPC17_ETH_INTCLR);
+              nlldbg("TX Underrun. status: %08x\n", status);
               EMAC_STAT(priv, tx_underrun);
             }
 
@@ -1160,82 +1169,79 @@ static int lpc17_interrupt(int irq, void *context)
         {      
           /* Check for receive events ***************************************/
           /* RX ERROR -- Triggered on receive errors: AlignmentError,
-           * RangeError, LengthError, SymbolError, CRCError or
-           * NoDescriptor or Overrun.
+           * RangeError, LengthError, SymbolError, CRCError or NoDescriptor
+           * or Overrun.  NOTE:  (1) We will still need to call lpc17_rxdone
+           * on RX errors to bump the considx over the bad packet.  (2) The
+           * DMA engine reports bogus length errors, making this a pretty
+           * useless check anyway.
            */
 
           if ((status & ETH_INT_RXERR) != 0)
             {
-              lpc17_putreg(ETH_INT_RXERR, LPC17_ETH_INTCLR);
+              nlldbg("RX Error. status: %08x\n", status);
               EMAC_STAT(priv, rx_errors);
             }
-          else
+
+          /* RX FINISHED -- Triggered when all receive descriptors have
+           * been processed i.e. on the transition to the situation
+           * where ProduceIndex == ConsumeIndex.
+           */
+
+          if ((status & ETH_INT_RXFIN) != 0)
             {
-              /* RX FINISHED -- Triggered when all receive descriptors have
-               * been processed i.e. on the transition to the situation
-               * where ProduceIndex == ConsumeIndex.
-               */
-
-              if ((status & ETH_INT_RXFIN) != 0)
-                {
-                  lpc17_putreg(ETH_INT_RXFIN, LPC17_ETH_INTCLR);
-                  EMAC_STAT(priv, rx_finished);
-                  DEBUGASSERT(lpc17_getreg(LPC17_ETH_RXPRODIDX) == lpc17_getreg(LPC17_ETH_RXCONSIDX));
-                }
-
-              /* RX DONE -- Triggered when a receive descriptor has been
-               * processed while the Interrupt bit in the Control field of
-               * the descriptor was set.
-               */
-
-              if ((status & ETH_INT_RXDONE) != 0)
-                {
-                  lpc17_putreg(ETH_INT_RXDONE, LPC17_ETH_INTCLR);
-                  EMAC_STAT(priv, rx_done);
-
-                  /* We have received at least one new incoming packet. */
-
-                  lpc17_rxdone(priv);
-                }
+              EMAC_STAT(priv, rx_finished);
+              DEBUGASSERT(lpc17_getreg(LPC17_ETH_RXPRODIDX) == lpc17_getreg(LPC17_ETH_RXCONSIDX));
             }
 
+          /* RX DONE -- Triggered when a receive descriptor has been
+           * processed while the Interrupt bit in the Control field of
+           * the descriptor was set.
+           */
+
+          if ((status & ETH_INT_RXDONE) != 0)
+            {
+              EMAC_STAT(priv, rx_done);
+
+              /* We have received at least one new incoming packet. */
+
+              lpc17_rxdone(priv);
+            }
+ 
           /* Check for Tx events ********************************************/
           /* TX ERROR -- Triggered on transmit errors: LateCollision,
            * ExcessiveCollision and ExcessiveDefer, NoDescriptor or Underrun.
+           * NOTE: We will still need to call lpc17_txdone() in order to
+           * clean up after the failed transmit.
            */
 
           if ((status & ETH_INT_TXERR) != 0)
             {
-              lpc17_putreg(ETH_INT_TXERR, LPC17_ETH_INTCLR);
+              nlldbg("TX Error. status: %08x\n", status);
               EMAC_STAT(priv, tx_errors);
             }
-          else
+
+          /* TX FINISHED -- Triggered when all transmit descriptors have
+           * been processed i.e. on the transition to the situation
+           * where ProduceIndex == ConsumeIndex.
+           */
+
+          if ((status & ETH_INT_TXFIN) != 0)
             {
-              /* TX FINISHED -- Triggered when all transmit descriptors have
-               * been processed i.e. on the transition to the situation
-               * where ProduceIndex == ConsumeIndex.
-               */
+              EMAC_STAT(priv, tx_finished);
+            }
 
-              if ((status & ETH_INT_TXFIN) != 0)
-                {
-                  lpc17_putreg(ETH_INT_TXFIN, LPC17_ETH_INTCLR);
-                  EMAC_STAT(priv, tx_finished);
-                }
+          /* TX DONE -- Triggered when a descriptor has been transmitted
+           * while the Interrupt bit in the Control field of the
+           * descriptor was set.
+           */
 
-              /* TX DONE -- Triggered when a descriptor has been transmitted
-               * while the Interrupt bit in the Control field of the
-               * descriptor was set.
-               */
+          if ((status & ETH_INT_TXDONE) != 0)
+            {
+              EMAC_STAT(priv, tx_done);
 
-              if ((status & ETH_INT_TXDONE) != 0)
-                {
-                  lpc17_putreg(ETH_INT_TXDONE, LPC17_ETH_INTCLR);
-                  EMAC_STAT(priv, tx_done);
+              /* A packet transmission just completed */
 
-                  /* A packet transmission just completed */
-
-                  lpc17_txdone(priv);
-                }
+              lpc17_txdone(priv);
             }
         }
     }
