@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 19, 2010</p>
+      <p>Last Updated: November 23, 2010</p>
     </td>
   </tr>
 </table>
@@ -1985,7 +1985,7 @@ nuttx-5.14 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* configs/olimex-lpc1766stk/nettest - Add examples/nettest configuration to
 	  verify the LPC17xx ethernet driver currently under development.
 	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
-	  the LPC17xx Ethernet driver.
+	  the LPC17xx Ethernet driver.  Driver in CVS functional after 2010-11-23.
 	* sched/timer_settime.c - Fix an error in set-up of one-shot timer.  It was
 	  using the repititive timer value (which is zero in the one-shot case,
 	  always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
@@ -1994,6 +1994,8 @@ nuttx-5.14 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  types of interrupts are pending at the time another interrupt returns
 	  (SYSTICK).  This has not been verified on all plaform, but is a critical
 	  fixed that is needed by all Cortex-M3 NuttX users.
+	* configs/olimex-lpc1766stk/thttpd - Add a THTTPD configuration for the
+	  Olimex LPC2766-STK board.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
