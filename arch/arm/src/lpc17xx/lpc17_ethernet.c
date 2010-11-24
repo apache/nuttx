@@ -905,7 +905,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 
       if ((*rxstat & RXSTAT_INFO_ERROR) != 0)
         {
-          nlldbg("Error.  rxstat: %08d\n", *rxstat);
+          nlldbg("Error.  rxstat: %08x\n", *rxstat);
           EMAC_STAT(priv, rx_pkterr);
         }
 
@@ -920,7 +920,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
           nlldbg("Too big.  pktlen: %d rxstat: %08x\n", pktlen, *rxstat);
           EMAC_STAT(priv, rx_pktsize);
         }
-      else if ((*rxstat & RXSTAT_INFO_LASTFLAG) != 0)
+      else if ((*rxstat & RXSTAT_INFO_LASTFLAG) == 0)
         {
           nlldbg("Fragment.  rxstat: %08x\n", pktlen, *rxstat);
           EMAC_STAT(priv, rx_fragment);
@@ -1240,15 +1240,16 @@ static int lpc17_interrupt(int irq, void *context)
         }
     }
 
-  /* Clear the pending interrupt.  Hmmm.. I don't normally do this on 
-   * Cortex-M3 interrupts.  Why is this needed for the EMAC interrupt?
-   */
+  /* Clear the pending interrupt */
 
-#if CONFIG_LPC17_NINTERFACES > 1
+#if 0 /* Apparently not necessary */
+# if CONFIG_LPC17_NINTERFACES > 1
   lpc17_clrpend(priv->irq);
-#else
+# else
   lpc17_clrpend(LPC17_IRQ_ETH);
+# endif
 #endif
+
   return OK;
 }
 
@@ -1375,16 +1376,16 @@ static int lpc17_ifup(struct uip_driver_s *dev)
 
   /* Configure the MAC station address */
 
-  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[1] << 8 |
-           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[0];
+  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[5] << 8 |
+           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[4];
   lpc17_putreg(regval, LPC17_ETH_SA0);
 
   regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[3] << 8 |
            (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[2];
   lpc17_putreg(regval, LPC17_ETH_SA1);
 
-  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[5] << 8 |
-           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[4];
+  regval = (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[1] << 8 |
+           (uint32_t)priv->lp_dev.d_mac.ether_addr_octet[0];
   lpc17_putreg(regval, LPC17_ETH_SA2);
 
   /* Initialize Ethernet interface for the PHY setup */
@@ -2375,7 +2376,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv)
    * restriction is desired, program this 16-bit field."
    */
 
-  lpc17_putreg(CONFIG_NET_BUFSIZE+2, LPC17_ETH_MAXF);
+  lpc17_putreg(LPC17_MAXPACKET_SIZE, LPC17_ETH_MAXF);
 
   /* Disable all Ethernet controller interrupts */
 
