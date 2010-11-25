@@ -300,6 +300,12 @@ poll
 This configuration exercises the poll()/select() text at
 examples/poll
 
+thttpd
+^^^^^^
+
+This builds the THTTPD web server example using the THTTPD and
+the examples/thttpd application.
+
 udp
 ^^^
 

@@ -658,6 +658,10 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
+  thttpd:
+    This builds the THTTPD web server example using the THTTPD and
+    the examples/thttpd application.
+
   usbserial:
     This configuration directory exercises the USB serial class
     driver at examples/usbserial.  See examples/README.txt for
