@@ -1410,13 +1410,14 @@ static int lpc17_ifup(struct uip_driver_s *dev)
   lpc17_putreg(regval, LPC17_ETH_MAC1);
 
   /* Set up RX filter and configure to accept broadcast addresses, multicast
-   * addresses, and perfect station address matches.
+   * addresses, and perfect station address matches.  We should also accept
+   * perfect matches and, most likely, broadcast (for example, for ARP requests).
+   * Other RX filter options will only be enabled if so selected.  NOTE: There
+   * is a selection CONFIG_NET_BROADCAST, but this enables receipt of UDP
+   * broadcast packets inside of the stack.
    */
 
-  regval = ETH_RXFLCTRL_PERFEN;
-#ifdef CONFIG_NET_BROADCAST
-  regval |= ETH_RXFLCTRL_BCASTEN;
-#endif
+  regval = ETH_RXFLCTRL_PERFEN | ETH_RXFLCTRL_BCASTEN;
 #ifdef CONFIG_NET_MULTICAST
   RXFILTERCTRL |= (ETH_RXFLCTRL_MCASTEN | ETH_RXFLCTRL_UCASTEN);
 #endif
