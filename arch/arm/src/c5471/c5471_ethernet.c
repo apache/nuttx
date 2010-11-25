@@ -1253,7 +1253,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
-          uip_arp_ipin();
+          uip_arp_ipin(dev);
           uip_input(dev);
 
           /* If the above function invocation resulted in data that should be
