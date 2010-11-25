@@ -366,6 +366,10 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
+  thttpd:
+    This builds the THTTPD web server example using the THTTPD and
+    the examples/thttpd application.
+
 By default, all of these examples are built to be used with the Luminary
 Ethernet Bootloader (you can change the ld.script file in any of these
 sub-directories to change that configuration).
