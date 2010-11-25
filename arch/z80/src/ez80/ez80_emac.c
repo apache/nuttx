@@ -1274,7 +1274,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
           nvdbg("IP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_ip);
 
-          uip_arp_ipin();
+          uip_arp_ipin(&priv->dev);
           uip_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be

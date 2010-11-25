@@ -264,7 +264,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
       if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
-          uip_arp_ipin();
+          uip_arp_ipin(&skel->sk_dev);
           uip_input(&skel->sk_dev);
 
           /* If the above function invocation resulted in data that should be

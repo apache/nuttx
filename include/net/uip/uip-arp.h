@@ -126,9 +126,9 @@ EXTERN void uip_arp_init(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ARP_IPIN
-EXTERN void uip_arp_ipin(void);
+EXTERN void uip_arp_ipin(struct uip_driver_s *dev);
 #else
-# define uip_arp_ipin()
+# define uip_arp_ipin(dev)
 #endif
 
 /****************************************************************************

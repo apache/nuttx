@@ -188,7 +188,7 @@ static void uip_arp_dump(struct arp_hdr *arp)
  */
 
 #ifdef CONFIG_NET_ARP_IPIN
-void uip_arp_ipin(void)
+void uip_arp_ipin(struct uip_driver_s *dev)
 {
   in_addr_t srcipaddr;
 

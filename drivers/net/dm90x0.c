@@ -992,7 +992,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
           if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
             {
-              uip_arp_ipin();
+              uip_arp_ipin(&dm9x->dm_dev);
               uip_input(&dm9x->dm_dev);
 
              /* If the above function invocation resulted in data that should be

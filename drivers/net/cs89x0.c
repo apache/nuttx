@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/cs89x0.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -438,7 +438,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
   if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
     {
-      uip_arp_ipin();
+      uip_arp_ipin(&cs89x0->cs_dev);
       uip_input(&cs89x0->cs_dev);
 
       /* If the above function invocation resulted in data that should be

@@ -974,7 +974,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
               /* Handle the incoming Rx packet */
 
               EMAC_STAT(priv, rx_ip);
-              uip_arp_ipin();
+              uip_arp_ipin(&priv->lp_dev);
               uip_input(&priv->lp_dev);
 
               /* If the above function invocation resulted in data that

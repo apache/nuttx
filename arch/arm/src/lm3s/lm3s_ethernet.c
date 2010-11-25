@@ -759,7 +759,7 @@ static void lm3s_receive(struct lm3s_driver_s *priv)
           nllvdbg("IP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_ip);
 
-          uip_arp_ipin();
+          uip_arp_ipin(&priv->ld_dev);
           uip_input(&priv->ld_dev);
 
           /* If the above function invocation resulted in data that should be

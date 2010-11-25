@@ -1132,7 +1132,7 @@ static void enc_rxdispath(FAR struct enc_driver_s *priv)
 #endif
     {
       nllvdbg("IP packet received (%02x)\n", BUF->type);
-      uip_arp_ipin();
+      uip_arp_ipin(&priv->dev);
       uip_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
