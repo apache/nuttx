@@ -176,6 +176,34 @@ static void uip_arp_dump(struct arp_hdr *arp)
  * Public Functions
  ****************************************************************************/
 
+/* ARP processing for incoming IP packets
+ *
+ * This function should be called by the device driver when an IP packet has
+ * been received. The function will check if the address is in the ARP cache,
+ * and if so the ARP cache entry will be refreshed. If no ARP cache entry was
+ * found, a new one is created.
+ *
+ * This function expects an IP packet with a prepended Ethernet header in the
+ * d_buf[] buffer, and the length of the packet in the variable d_len.
+ */
+
+#ifdef CONFIG_NET_ARP_IPIN
+void uip_arp_ipin(void)
+{
+  in_addr_t srcipaddr;
+
+  /* Only insert/update an entry if the source IP address of the incoming IP
+   * packet comes from a host on the local network.
+   */
+
+  srcipaddr = uip_ip4addr_conv(IPBUF->srcipaddr);
+  if (!uip_ipaddr_maskcmp(ipaddr, dev->d_ipaddr, dev->d_netmask))
+    {
+      uip_arp_update(IPBUF->srcipaddr, ETHBUF->src);
+    }
+}
+#endif /* CONFIG_NET_ARP_IPIN */
+
 /* ARP processing for incoming ARP packets.
  *
  * This function should be called by the device driver when an ARP
@@ -194,7 +222,7 @@ static void uip_arp_dump(struct arp_hdr *arp)
  *
  * This function expects an ARP packet with a prepended Ethernet
  * header in the d_buf[] buffer, and the length of the packet in the
- * global variable d_len.
+ * variable d_len.
  */
 
 void uip_arp_arpin(struct uip_driver_s *dev)

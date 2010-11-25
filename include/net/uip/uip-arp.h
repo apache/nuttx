@@ -2,7 +2,7 @@
  * include/net/uip/uip-arch.h
  * Macros and definitions for the ARP module.
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Derived from uIP with has a similar BSD-styple license:
@@ -114,7 +114,7 @@ extern "C" {
 EXTERN void uip_arp_init(void);
 
 /****************************************************************************
- * Name: uip_arp_init
+ * Name: uip_arp_ipin
  *
  * Description:
  *   The uip_arp_ipin() function should be called whenever an IP packet
@@ -125,7 +125,11 @@ EXTERN void uip_arp_init(void);
  *
  ****************************************************************************/
 
-#define uip_arp_ipin()
+#ifdef CONFIG_NET_ARP_IPIN
+EXTERN void uip_arp_ipin(void);
+#else
+# define uip_arp_ipin()
+#endif
 
 /****************************************************************************
  * Name: uip_arp_arpin

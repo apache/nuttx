@@ -214,11 +214,9 @@ o Network (net/, drivers/net)
   Description: Outgoing packets are dropped and overwritten by ARP packets
                if the destination IP has not been mapped to a MAC.  Could
                improve send() performance by explicitly performing ARP before
-               sending the packet.
-               ---
-               Or by enabling arpin() logic.  NOTE: From the uIP forum: "You
-               can use the function but it has a bug. You'll need to comment
-               this line: uip_len -= sizeof(struct uip_eth_hdr);"
+               sending the packet (or by enabling CONFIG_NET_ARP_IPIN logic. 
+               This could, however have negative impacts on busy networks and
+               could require a large value for CONFIG_NET_ARPTAB_SIZE).
   Status:      Open
   Priority:    Medium
 
