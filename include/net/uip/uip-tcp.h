@@ -6,7 +6,7 @@
  * of C macros that are used by uIP programs as well as internal uIP
  * structures, TCP/IP header structures and function declarations.
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -378,10 +378,6 @@ extern int uip_listen(struct uip_conn *conn);
 /* Stop listening to the port bound to the specified TCP connection */
 
 extern int uip_unlisten(struct uip_conn *conn);
-
-/* Check if a connection has outstanding (i.e., unacknowledged) data */
-
-#define uip_outstanding(conn) ((conn)->len)
 
 /* Access to TCP read-ahead buffers */
 

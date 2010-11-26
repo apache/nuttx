@@ -2,7 +2,7 @@
  * net/uip/uip_tcptimer.c
  * Poll for the availability of TCP TX data
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -133,7 +133,7 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
        * retransmit.
        */
 
-      if (uip_outstanding(conn))
+      if (conn->len > 0)
         {
           /* The connection has outstanding data */
 

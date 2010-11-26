@@ -2,7 +2,7 @@
  * net/uip/uip_tcpinput.c
  * Handling incoming TCP input
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -326,7 +326,7 @@ found:
    * retransmission timer.
    */
 
-  if ((pbuf->flags & TCP_ACK) && uip_outstanding(conn))
+  if ((pbuf->flags & TCP_ACK) != 0 && conn->len > 0)
     {
       uint32_t seqno;
       uint32_t ackno;
@@ -533,7 +533,7 @@ found:
 
         if (pbuf->flags & TCP_FIN && !(conn->tcpstateflags & UIP_STOPPED))
           {
-            if (uip_outstanding(conn))
+            if (conn->len > 0)
               {
                 goto drop;
               }
