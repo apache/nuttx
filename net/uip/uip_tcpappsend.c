@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpappsend.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -77,7 +77,9 @@
  * Name: uip_tcpappsend
  *
  * Description:
- *   Handle application response
+ *   Handle application or TCP protocol response.  If this function is called
+ *   with dev->d_sndlen > 0, then this is an application attempting to send
+ *   packet.
  *
  * Parameters:
  *   dev    - The device driver structure to use in the send operation
@@ -97,11 +99,12 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 {
   /* Handle the result based on the application response */
 
-  nllvdbg("result: %04x\n", result);
+  nllvdbg("result: %04x d_sndlen: %d conn->len: %d\n",
+          result, dev->d_sndlen, conn->len);
 
   /* Check for connection aborted */
 
-  if (result & UIP_ABORT)
+  if ((result & UIP_ABORT) != 0)
     {
       dev->d_sndlen = 0;
       conn->tcpstateflags = UIP_CLOSED;
@@ -112,10 +115,10 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 
   /* Check for connection closed */
 
-  else if (result & UIP_CLOSE)
+  else if ((result & UIP_CLOSE) != 0)
     {
       conn->tcpstateflags = UIP_FIN_WAIT_1;
-      conn->len = 1;
+      conn->len  = 1;
       conn->nrtx = 0;
       nllvdbg("TCP state: UIP_FIN_WAIT_1\n");
 
@@ -131,48 +134,34 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 
       if (dev->d_sndlen > 0)
         {
-          /* If the connection has acknowledged data, the contents of
-           * the ->len variable should be discarded.
+          /* If the connection has acknowledged data, the conn->len count
+           * should be discarded.
            */
 
-          if (result & UIP_ACKDATA)
+          if ((result & UIP_ACKDATA) != 0)
             {
               conn->len = 0;
             }
 
-          /* If the ->len variable is non-zero the connection has
-           * already data in transit and cannot send anymore right
-           * now.
+          /* Remember how much data we send out now so that we know
+           * when everything has been acknowledged.  No attempt is made
+           * here to keep track of how much outstanding, un-acked data
+           * there is.  That is handled in the TCP send() logic.  Here
+           * need the conn->len to be the same as the size of the packet
+           * to be sent.
+           *
+           * Just increment the amount of data sent.  This will be needed
+           * in sequence number calculations and we know that this is not
+           * a re-tranmission.  Retransmissions do not go through this path.
            */
 
-          if (conn->len == 0)
-            {
-              /* The application cannot send more than what is
-               * allowed by the mss (the minumum of the MSS and the
-               * available window).
-               */
+          conn->len += dev->d_sndlen;
 
-              if (dev->d_sndlen > conn->mss)
-                {
-                  dev->d_sndlen = conn->mss;
-                }
+          /* The application cannot send more than what is allowed by the
+           * MSS (the minumum of the MSS and the available window).
+           */
 
-              /* Remember how much data we send out now so that we
-               * know when everything has been acknowledged.
-               */
-
-              conn->len = dev->d_sndlen;
-            }
-          else
-            {
-              /* If the application already had unacknowledged data,
-               * we make sure that the application does not send
-               * (i.e., retransmit) out more than it previously sent
-               * out.
-               */
-
-              dev->d_sndlen = conn->len;
-            }
+          DEBUGASSERT(dev->d_sndlen <= conn->mss);
         }
 
       /* Then handle the rest of the operation just as for the rexmit case */
@@ -204,7 +193,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
                    uint16_t result)
 {
-  nllvdbg("result: %04x\n", result);
+  nllvdbg("result: %04x d_sndlen: %d conn->len: %d\n",
+          result, dev->d_sndlen, conn->len);
 
   dev->d_appdata = dev->d_snddata;
 
@@ -218,12 +208,12 @@ void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
        * the IP and TCP headers.
        */
 
-      uip_tcpsend(dev, conn, TCP_ACK | TCP_PSH, conn->len + UIP_TCPIP_HLEN);
+      uip_tcpsend(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + UIP_TCPIP_HLEN);
     }
 
   /* If there is no data to send, just send out a pure ACK if one is requested`. */
 
-  else if (result & UIP_SNDACK)
+  else if ((result & UIP_SNDACK) != 0)
     {
       uip_tcpsend(dev, conn, TCP_ACK, UIP_TCPIP_HLEN);
     }

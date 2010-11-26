@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 23, 2010</p>
+      <p>Last Updated: November 25, 2010</p>
     </td>
   </tr>
 </table>
@@ -1996,6 +1996,12 @@ nuttx-5.14 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	  fixed that is needed by all Cortex-M3 NuttX users.
 	* configs/olimex-lpc1766stk/thttpd - Add a THTTPD configuration for the
 	  Olimex LPC2766-STK board.
+	* net/uip/uip_tcpappsend.c - Correct an important logic bug in some uIP state
+	  data the is used to manage retransmissions.  The uIP logic was incompatible
+	  with the retransmission logic of net/send.c in one place.  The final error
+	  was that the final packet in a sequence of packets was too large!  In the
+	  THTTPD example, this would leave some garbage at the bottom of the display
+	  (or worse).  I don't know why I haven't see this bug before???
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

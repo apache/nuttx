@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/thttpd/main.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
   * Redistribution and use in source and binary forms, with or without
@@ -158,7 +158,7 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   struct in_addr addr;
-#ifdef CONFIG_EXAMPLE_UIP_NOMAC
+#ifdef CONFIG_EXAMPLE_THTTPD_NOMAC
   uint8_t mac[IFHWADDRLEN];
 #endif
   char *thttpd_argv = "thttpd";
@@ -166,7 +166,7 @@ int user_start(int argc, char *argv[])
 
 /* Many embedded network interfaces must have a software assigned MAC */
 
-#ifdef CONFIG_EXAMPLE_UIP_NOMAC
+#ifdef CONFIG_EXAMPLE_THTTPD_NOMAC
   message("Assigning MAC\n");
 
   mac[0] = 0x00;
