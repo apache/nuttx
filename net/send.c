@@ -172,14 +172,15 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
       nllvdbg("ACK: acked=%d sent=%d buflen=%d\n",
               pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
-      /* Have all of the bytes in the buffer been sent and ACKed? */
+      /* Have all of the bytes in the buffer been sent and acknowledged? */
 
-      if ( pstate->snd_acked >= pstate->snd_buflen)
+      if (pstate->snd_acked >= pstate->snd_buflen)
         {
           /* Yes.  Then pstate->snd_buflen should hold the number of bytes
            * actually sent.
            */
 
+          conn->unacked = 0;
           goto end_wait;
         }
 

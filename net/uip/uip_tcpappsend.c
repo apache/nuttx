@@ -134,25 +134,11 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 
       if (dev->d_sndlen > 0)
         {
-          /* If the connection has acknowledged data, the conn->unacked count
-           * should be discarded.
-           */
-
-          if ((result & UIP_ACKDATA) != 0)
-            {
-              conn->unacked = 0;
-            }
-
           /* Remember how much data we send out now so that we know
-           * when everything has been acknowledged.  No attempt is made
-           * here to keep track of how much outstanding, un-acked data
-           * there is.  That is handled in the TCP send() logic.  Here
-           * need the conn->unacked to be the same as the size of the packet
-           * to be sent.
-           *
-           * Just increment the amount of data sent.  This will be needed
-           * in sequence number calculations and we know that this is not
-           * a re-tranmission.  Retransmissions do not go through this path.
+           * when everything has been acknowledged.  Just increment the amount
+           * of data sent.  This will be needed in sequence number calculations
+           * and we know that this is not a re-tranmission.  Retransmissions
+           * do not go through this path.
            */
 
           conn->unacked += dev->d_sndlen;
