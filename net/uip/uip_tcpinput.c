@@ -261,7 +261,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
   /* We do not send resets in response to resets. */
 
-  if (pbuf->flags & TCP_RST)
+  if ((pbuf->flags & TCP_RST) != 0)
     {
       goto drop;
     }
@@ -282,7 +282,7 @@ found:
    * before we accept the reset.
    */
 
-  if (pbuf->flags & TCP_RST)
+  if ((pbuf->flags & TCP_RST) != 0)
     {
       conn->tcpstateflags = UIP_CLOSED;
       nlldbg("RESET - TCP state: UIP_CLOSED\n");
@@ -328,62 +328,84 @@ found:
 
   if ((pbuf->flags & TCP_ACK) != 0 && conn->unacked > 0)
     {
-      uint32_t seqno;
-      uint32_t ackno;
+      uint32_t unackseq;
+      uint32_t ackseq;
 
       /* The next sequence number is equal to the current sequence
-       * number (sndseq) plus the size of the oustanding data (len).
+       * number (sndseq) plus the size of the oustanding, unacknowledged
+       * data (unacked).
        */
 
-      seqno = uip_tcpaddsequence(conn->sndseq, conn->unacked);
+      unackseq = uip_tcpaddsequence(conn->sndseq, conn->unacked);
 
-      /* Check if all of the outstanding bytes have been acknowledged. For
-       * a "generic" send operation, this should always be true.  However,
+      /* Get the sequence number of that has just been acknowledged by this
+       * incoming packet.
+       */
+
+      ackseq = uip_tcpgetsequence(pbuf->ackno);
+
+      /* Check how many of the outstanding bytes have been acknowledged. For
+       * a most uIP send operation, this should always be true.  However,
        * the send() API sends data ahead when it can without waiting for
-       * the ACK.  In this case, the 'ackno' could be less than then the
+       * the ACK.  In this case, the 'ackseq' could be less than then the
        * new sequence number.
        */
 
-      ackno = uip_tcpgetsequence(pbuf->ackno);
-      if (ackno <= seqno)
+      if (ackseq <= unackseq)
         {
-          /* Update sequence number. */
+          /* Calculate the new number of oustanding, unacknowledged bytes */
 
-          uip_tcpsetsequence(conn->sndseq, seqno);
+          conn->unacked = unackseq - ackseq;
+        }
+      else
+        {
+          /* What would it mean if ackseq > unackseq?  The peer has ACKed
+           * more bytes than we think we have sent?  Someone has lost it.
+           * Complain and reset the number of outstanding, unackowledged
+           * bytes
+           */
 
-          /* Do RTT estimation, unless we have done retransmissions. */
-
-          if (conn->nrtx == 0)
-            {
-              signed char m;
-              m = conn->rto - conn->timer;
-
-              /* This is taken directly from VJs original code in his paper */
-
-              m = m - (conn->sa >> 3);
-              conn->sa += m;
-              if (m < 0)
-                {
-                  m = -m;
-                }
-
-              m = m - (conn->sv >> 2);
-              conn->sv += m;
-              conn->rto = (conn->sa >> 3) + conn->sv;
-            }
-
-          /* Set the acknowledged flag. */
-
-          flags = UIP_ACKDATA;
-
-          /* Reset the retransmission timer. */
-
-          conn->timer = conn->rto;
-
-          /* Reset length of outstanding data. */
-
+          nlldbg("ERROR: ackseq[%08x] > unackseq[%08x]\n", ackseq, unackseq);
           conn->unacked = 0;
         }
+
+      /* Update sequence number to the unacknowledge sequence number.  If
+       * there is still outstanding, unacknowledged data, then this will
+       * be beyond ackseq.
+       */
+
+      nllvdbg("sndseq: %08x->%08x unackseq: %08x new unacked: %d\n",
+              conn->sndseq, ackseq, unackseq, conn->unacked);
+      uip_tcpsetsequence(conn->sndseq, ackseq);
+
+      /* Do RTT estimation, unless we have done retransmissions. */
+
+      if (conn->nrtx == 0)
+        {
+          signed char m;
+          m = conn->rto - conn->timer;
+
+          /* This is taken directly from VJs original code in his paper */
+
+          m = m - (conn->sa >> 3);
+          conn->sa += m;
+          if (m < 0)
+            {
+              m = -m;
+            }
+
+          m = m - (conn->sv >> 2);
+          conn->sv += m;
+          conn->rto = (conn->sa >> 3) + conn->sv;
+        }
+
+        /* Set the acknowledged flag. */
+
+       flags |= UIP_ACKDATA;
+
+       /* Reset the retransmission timer. */
+
+       conn->timer = conn->rto;
     }
 
   /* Do different things depending on in what state the connection is. */
@@ -403,7 +425,7 @@ found:
          * flag set. If so, we enter the ESTABLISHED state.
          */
 
-        if (flags & UIP_ACKDATA)
+        if ((flags & UIP_ACKDATA) != 0)
           {
             conn->tcpstateflags = UIP_ESTABLISHED;
             conn->unacked       = 0;
@@ -431,7 +453,7 @@ found:
          * state.
          */
 
-        if ((flags & UIP_ACKDATA) && (pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
+        if ((flags & UIP_ACKDATA) != 0 && (pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
           {
             /* Parse the TCP MSS option, if present. */
 
@@ -511,7 +533,7 @@ found:
 
         /* We do not send resets in response to resets. */
 
-        if (pbuf->flags & TCP_RST)
+        if ((pbuf->flags & TCP_RST) != 0)
           {
             goto drop;
           }
@@ -531,7 +553,7 @@ found:
          * sequence numbers will be screwed up.
          */
 
-        if (pbuf->flags & TCP_FIN && !(conn->tcpstateflags & UIP_STOPPED))
+        if ((pbuf->flags & TCP_FIN) != 0 && (conn->tcpstateflags & UIP_STOPPED) == 0)
           {
             if (conn->unacked > 0)
               {
@@ -639,7 +661,7 @@ found:
          * send, d_len must be set to 0.
          */
 
-        if (flags & (UIP_NEWDATA | UIP_ACKDATA))
+        if ((flags & (UIP_NEWDATA | UIP_ACKDATA)) != 0)
           {
             dev->d_sndlen = 0;
             result        = uip_tcpcallback(dev, conn, flags);
@@ -653,7 +675,7 @@ found:
          * FIN. This is indicated by the UIP_ACKDATA flag.
          */
 
-        if (flags & UIP_ACKDATA)
+        if ((flags & UIP_ACKDATA) != 0)
           {
             conn->tcpstateflags = UIP_CLOSED;
             nllvdbg("UIP_LAST_ACK TCP state: UIP_CLOSED\n");
@@ -672,9 +694,10 @@ found:
           {
             uip_incr32(conn->rcvseq, dev->d_len);
           }
-        if (pbuf->flags & TCP_FIN)
+
+        if ((pbuf->flags & TCP_FIN) != 0)
           {
-            if (flags & UIP_ACKDATA)
+            if ((flags & UIP_ACKDATA) != 0)
               {
                 conn->tcpstateflags = UIP_TIME_WAIT;
                 conn->timer         = 0;
@@ -692,7 +715,7 @@ found:
             uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
           }
-        else if (flags & UIP_ACKDATA)
+        else if ((flags & UIP_ACKDATA) != 0)
           {
             conn->tcpstateflags = UIP_FIN_WAIT_2;
             conn->unacked = 0;
@@ -713,7 +736,7 @@ found:
             uip_incr32(conn->rcvseq, dev->d_len);
           }
 
-        if (pbuf->flags & TCP_FIN)
+        if ((pbuf->flags & TCP_FIN) != 0)
           {
             conn->tcpstateflags = UIP_TIME_WAIT;
             conn->timer         = 0;
@@ -737,7 +760,7 @@ found:
         return;
 
       case UIP_CLOSING:
-        if (flags & UIP_ACKDATA)
+        if ((flags & UIP_ACKDATA) != 0)
           {
             conn->tcpstateflags = UIP_TIME_WAIT;
             conn->timer        = 0;

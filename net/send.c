@@ -233,6 +233,8 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
 
   if ((flags & UIP_NEWDATA) == 0 && pstate->snd_sent < pstate->snd_buflen)
     {
+      uint32_t seqno;
+
       /* Get the amount of data that we can send in the next packet */
 
       uint32_t sndlen = pstate->snd_buflen - pstate->snd_sent;
@@ -241,9 +243,16 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
           sndlen = uip_mss(conn);
         }
 
-      /* Set the sequence number for this packet */
+      /* Set the sequence number for this packet.  NOTE:  uIP updates
+       * sndseq on recept of ACK *before* this function is called.  In that
+       * case sndseq will point to the next unacknowledge byte (which might
+       * have already been sent).  We will overwrite the value of sndseq
+       * here before the packet is sent.
+       */
 
-      uip_tcpsetsequence(conn->sndseq, pstate->snd_sent + pstate->snd_isn);
+      seqno = pstate->snd_sent + pstate->snd_isn;
+      nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+      uip_tcpsetsequence(conn->sndseq, seqno);
 
       /* Then send that amount of data */
 
