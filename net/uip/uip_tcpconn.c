@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpconn.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -465,12 +465,12 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
       uip_ipaddr_copy(conn->ripaddr, uip_ip4addr_conv(buf->srcipaddr));
       conn->tcpstateflags = UIP_SYN_RCVD;
 
-      uip_tcpinitsequence(conn->snd_nxt);
-      conn->len           = 1;
+      uip_tcpinitsequence(conn->sndseq);
+      conn->unacked       = 1;
 
-      /* rcv_nxt should be the seqno from the incoming packet + 1. */
+      /* rcvseq should be the seqno from the incoming packet + 1. */
 
-      memcpy(conn->rcv_nxt, buf->seqno, 4);
+      memcpy(conn->rcvseq, buf->seqno, 4);
 
       /* Initialize the list of TCP read-ahead buffers */
 
@@ -595,10 +595,10 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   /* Initialize and return the connection structure, bind it to the port number */
 
   conn->tcpstateflags = UIP_SYN_SENT;
-  uip_tcpinitsequence(conn->snd_nxt);
+  uip_tcpinitsequence(conn->sndseq);
 
   conn->initialmss = conn->mss = UIP_TCP_MSS;
-  conn->len        = 1;    /* TCP length of the SYN is one. */
+  conn->unacked    = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timer      = 1;    /* Send the SYN next time around. */
   conn->rto        = UIP_RTO;

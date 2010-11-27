@@ -194,7 +194,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
               goto drop;
             }
 
-          uip_incr32(conn->rcv_nxt, 1);
+          uip_incr32(conn->rcvseq, 1);
 
           /* Parse the TCP MSS option, if present. */
 
@@ -313,7 +313,7 @@ found:
       ((pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))))
     {
       if ((dev->d_len > 0 || ((pbuf->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
-          memcmp(pbuf->seqno, conn->rcv_nxt, 4) != 0)
+          memcmp(pbuf->seqno, conn->rcvseq, 4) != 0)
         {
             uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
@@ -326,16 +326,16 @@ found:
    * retransmission timer.
    */
 
-  if ((pbuf->flags & TCP_ACK) != 0 && conn->len > 0)
+  if ((pbuf->flags & TCP_ACK) != 0 && conn->unacked > 0)
     {
       uint32_t seqno;
       uint32_t ackno;
 
       /* The next sequence number is equal to the current sequence
-       * number (snd_nxt) plus the size of the oustanding data (len).
+       * number (sndseq) plus the size of the oustanding data (len).
        */
 
-      seqno = uip_tcpaddsequence(conn->snd_nxt, conn->len);
+      seqno = uip_tcpaddsequence(conn->sndseq, conn->unacked);
 
       /* Check if all of the outstanding bytes have been acknowledged. For
        * a "generic" send operation, this should always be true.  However,
@@ -349,7 +349,7 @@ found:
         {
           /* Update sequence number. */
 
-          uip_tcpsetsequence(conn->snd_nxt, seqno);
+          uip_tcpsetsequence(conn->sndseq, seqno);
 
           /* Do RTT estimation, unless we have done retransmissions. */
 
@@ -382,7 +382,7 @@ found:
 
           /* Reset length of outstanding data. */
 
-          conn->len = 0;
+          conn->unacked = 0;
         }
     }
 
@@ -406,7 +406,7 @@ found:
         if (flags & UIP_ACKDATA)
           {
             conn->tcpstateflags = UIP_ESTABLISHED;
-            conn->len           = 0;
+            conn->unacked       = 0;
             nllvdbg("TCP state: UIP_ESTABLISHED\n");
 
             flags               = UIP_CONNECTED;
@@ -414,7 +414,7 @@ found:
             if (dev->d_len > 0)
               {
                 flags          |= UIP_NEWDATA;
-                uip_incr32(conn->rcv_nxt, dev->d_len);
+                uip_incr32(conn->rcvseq, dev->d_len);
               }
 
             dev->d_sndlen       = 0;
@@ -426,7 +426,7 @@ found:
 
       case UIP_SYN_SENT:
         /* In SYN_SENT, we wait for a SYNACK that is sent in response to
-         * our SYN. The rcv_nxt is set to sequence number in the SYNACK
+         * our SYN. The rcvseq is set to sequence number in the SYNACK
          * plus one, and we send an ACK. We move into the ESTABLISHED
          * state.
          */
@@ -488,11 +488,11 @@ found:
               }
 
             conn->tcpstateflags = UIP_ESTABLISHED;
-            memcpy(conn->rcv_nxt, pbuf->seqno, 4);
+            memcpy(conn->rcvseq, pbuf->seqno, 4);
             nllvdbg("TCP state: UIP_ESTABLISHED\n");
 
-            uip_incr32(conn->rcv_nxt, 1);
-            conn->len           = 0;
+            uip_incr32(conn->rcvseq, 1);
+            conn->unacked       = 0;
             dev->d_len          = 0;
             dev->d_sndlen       = 0;
             result = uip_tcpcallback(dev, conn, UIP_CONNECTED | UIP_NEWDATA);
@@ -533,12 +533,12 @@ found:
 
         if (pbuf->flags & TCP_FIN && !(conn->tcpstateflags & UIP_STOPPED))
           {
-            if (conn->len > 0)
+            if (conn->unacked > 0)
               {
                 goto drop;
               }
 
-            uip_incr32(conn->rcv_nxt, dev->d_len + 1);
+            uip_incr32(conn->rcvseq, dev->d_len + 1);
             flags |= UIP_CLOSE;
 
             if (dev->d_len > 0)
@@ -549,7 +549,7 @@ found:
             (void)uip_tcpcallback(dev, conn, flags);
 
             conn->tcpstateflags = UIP_LAST_ACK;
-            conn->len           = 1;
+            conn->unacked       = 1;
             conn->nrtx          = 0;
             nllvdbg("TCP state: UIP_LAST_ACK\n");
 
@@ -572,7 +572,7 @@ found:
                 dev->d_urglen = dev->d_len;
               }
 
-            uip_incr32(conn->rcv_nxt, dev->d_urglen);
+            uip_incr32(conn->rcvseq, dev->d_urglen);
             dev->d_len     -= dev->d_urglen;
             dev->d_urgdata  = dev->d_appdata;
             dev->d_appdata += dev->d_urglen;
@@ -598,7 +598,7 @@ found:
         if (dev->d_len > 0 && !(conn->tcpstateflags & UIP_STOPPED))
           {
             flags |= UIP_NEWDATA;
-            uip_incr32(conn->rcv_nxt, dev->d_len);
+            uip_incr32(conn->rcvseq, dev->d_len);
           }
 
         /* Check if the available buffer space advertised by the other end
@@ -670,7 +670,7 @@ found:
 
         if (dev->d_len > 0)
           {
-            uip_incr32(conn->rcv_nxt, dev->d_len);
+            uip_incr32(conn->rcvseq, dev->d_len);
           }
         if (pbuf->flags & TCP_FIN)
           {
@@ -678,7 +678,7 @@ found:
               {
                 conn->tcpstateflags = UIP_TIME_WAIT;
                 conn->timer         = 0;
-                conn->len           = 0;
+                conn->unacked       = 0;
                 nllvdbg("TCP state: UIP_TIME_WAIT\n");
               }
             else
@@ -687,7 +687,7 @@ found:
                 nllvdbg("TCP state: UIP_CLOSING\n");
               }
 
-            uip_incr32(conn->rcv_nxt, 1);
+            uip_incr32(conn->rcvseq, 1);
             (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
             uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
@@ -695,7 +695,7 @@ found:
         else if (flags & UIP_ACKDATA)
           {
             conn->tcpstateflags = UIP_FIN_WAIT_2;
-            conn->len = 0;
+            conn->unacked = 0;
             nllvdbg("TCP state: UIP_FIN_WAIT_2\n");
             goto drop;
           }
@@ -710,7 +710,7 @@ found:
       case UIP_FIN_WAIT_2:
         if (dev->d_len > 0)
           {
-            uip_incr32(conn->rcv_nxt, dev->d_len);
+            uip_incr32(conn->rcvseq, dev->d_len);
           }
 
         if (pbuf->flags & TCP_FIN)
@@ -719,7 +719,7 @@ found:
             conn->timer         = 0;
             nllvdbg("TCP state: UIP_TIME_WAIT\n");
 
-            uip_incr32(conn->rcv_nxt, 1);
+            uip_incr32(conn->rcvseq, 1);
             (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
             uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;

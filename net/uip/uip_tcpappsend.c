@@ -99,8 +99,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 {
   /* Handle the result based on the application response */
 
-  nllvdbg("result: %04x d_sndlen: %d conn->len: %d\n",
-          result, dev->d_sndlen, conn->len);
+  nllvdbg("result: %04x d_sndlen: %d conn->unacked: %d\n",
+          result, dev->d_sndlen, conn->unacked);
 
   /* Check for connection aborted */
 
@@ -118,11 +118,11 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
   else if ((result & UIP_CLOSE) != 0)
     {
       conn->tcpstateflags = UIP_FIN_WAIT_1;
-      conn->len  = 1;
-      conn->nrtx = 0;
+      conn->unacked  = 1;
+      conn->nrtx     = 0;
       nllvdbg("TCP state: UIP_FIN_WAIT_1\n");
 
-      dev->d_sndlen = 0;
+      dev->d_sndlen  = 0;
       uip_tcpsend(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
     }
 
@@ -134,20 +134,20 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 
       if (dev->d_sndlen > 0)
         {
-          /* If the connection has acknowledged data, the conn->len count
+          /* If the connection has acknowledged data, the conn->unacked count
            * should be discarded.
            */
 
           if ((result & UIP_ACKDATA) != 0)
             {
-              conn->len = 0;
+              conn->unacked = 0;
             }
 
           /* Remember how much data we send out now so that we know
            * when everything has been acknowledged.  No attempt is made
            * here to keep track of how much outstanding, un-acked data
            * there is.  That is handled in the TCP send() logic.  Here
-           * need the conn->len to be the same as the size of the packet
+           * need the conn->unacked to be the same as the size of the packet
            * to be sent.
            *
            * Just increment the amount of data sent.  This will be needed
@@ -155,7 +155,7 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
            * a re-tranmission.  Retransmissions do not go through this path.
            */
 
-          conn->len += dev->d_sndlen;
+          conn->unacked += dev->d_sndlen;
 
           /* The application cannot send more than what is allowed by the
            * MSS (the minumum of the MSS and the available window).
@@ -193,8 +193,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
                    uint16_t result)
 {
-  nllvdbg("result: %04x d_sndlen: %d conn->len: %d\n",
-          result, dev->d_sndlen, conn->len);
+  nllvdbg("result: %04x d_sndlen: %d conn->unacked: %d\n",
+          result, dev->d_sndlen, conn->unacked);
 
   dev->d_appdata = dev->d_snddata;
 
@@ -202,7 +202,7 @@ void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
    * new data in it, we must send out a packet.
    */
 
-  if (dev->d_sndlen > 0 && conn->len > 0)
+  if (dev->d_sndlen > 0 && conn->unacked > 0)
     {
       /* We always set the ACK flag in response packets adding the length of
        * the IP and TCP headers.

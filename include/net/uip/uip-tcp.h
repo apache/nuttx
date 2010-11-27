@@ -127,10 +127,10 @@ struct uip_conn
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host */
   uint16_t lport;         /* The local TCP port, in network byte order */
   uint16_t rport;         /* The remoteTCP port, in network byte order */
-  uint8_t  rcv_nxt[4];    /* The sequence number that we expect to
+  uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
-  uint8_t  snd_nxt[4];    /* The sequence number that was last sent by us */
-  uint16_t len;           /* Length of the data that was previously sent */
+  uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
+  uint16_t unacked;       /* Number bytes sent but not yet ACKed */
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
   uint16_t initialmss;    /* Initial maximum segment size for the

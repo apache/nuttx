@@ -133,7 +133,7 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
        * retransmit.
        */
 
-      if (conn->len > 0)
+      if (conn->unacked > 0)
         {
           /* The connection has outstanding data */
 

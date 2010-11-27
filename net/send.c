@@ -243,7 +243,7 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
 
       /* Set the sequence number for this packet */
 
-      uip_tcpsetsequence(conn->snd_nxt, pstate->snd_sent + pstate->snd_isn);
+      uip_tcpsetsequence(conn->sndseq, pstate->snd_sent + pstate->snd_isn);
 
       /* Then send that amount of data */
 
@@ -415,7 +415,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
         {
           /* Get the initial sequence number that will be used */
 
-          state.snd_isn         = uip_tcpgetsequence(conn->snd_nxt);
+          state.snd_isn         = uip_tcpgetsequence(conn->sndseq);
 
           /* Update the initial time for calculating timeouts */
 
