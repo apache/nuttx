@@ -1331,28 +1331,35 @@
 	  development board.  The OS test and NSH configurations (only) have been
 	  verified.
 
-5.14 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.14 2010-11-27 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* configs/olimex-lpc1766stk/nettest - Add examples/nettest configuration to
 	  verify the LPC17xx ethernet driver currently under development.
 	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
 	  the LPC17xx Ethernet driver.  Driver in CVS functional after 2010-11-23.
-	* sched/timer_settime.c - Fix an error in set-up of one-shot timer.  It was
-	  using the repititive timer value (which is zero in the one-shot case,
+	* sched/timer_settime.c - Fix an error in set-up of a one-shot POSIX timer.  It
+	  was using the repititive timer value (which is zero in the one-shot case),
 	  always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
 	* arch/arm/src/lpc17xx/lpc17_vector.S, stm32/stm32_vector.S, lm3s/lm3s_vector.S,
 	  sam3u/sam3u_vector.S -- Fixed a hard fault problem that can occur if certain
 	  types of interrupts are pending at the time another interrupt returns
-	  (SYSTICK).  This has not been verified on all plaform, but is a critical
+	  (SYSTICK).  This has not been verified on all plaforms, but is a critical
 	  fixed that is needed by all Cortex-M3 NuttX users.
 	* configs/olimex-lpc1766stk/thttpd - Add a THTTPD configuration for the
-	  Olimex LPC2766-STK board.
+	  Olimex LPC2766-STK board. Verified successfully.
 	* net/uip/uip_tcpappsend.c - Correct an important logic bug in some uIP state
 	  data the is used to manage retransmissions.  The uIP logic was incompatible
 	  with the retransmission logic of net/send.c in one place.  The final error
 	  was that the final packet in a sequence of packets was too large!  In the
 	  THTTPD example, this would leave some garbage at the bottom of the display
 	  (or worse).  I don't know why I haven't see this bug before???
+	* net/uip/uip_tcpinput.c -- The change to uip_tcpappsend.c unmasked an
+	  additional error in the TCP sequence number handling.  This sympom was that
+	  the send() function would hang with outstanding, unacknowledged data (with
+	  no re-transmit requests).  The was due to differences in sequence number
+	  handling in send() and in uip_tcpinput.c; uip_tcpinput.c thought (incorrectly)
+	  that all of the bytes were acknowledged; send.c knew that they were not.
 
+5.15 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 

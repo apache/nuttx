@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 25, 2010</p>
+      <p>Last Updated: November 27, 2010</p>
     </td>
   </tr>
 </table>
@@ -772,68 +772,57 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.13 Release Notes</b>:
+<p><b>nuttx-5.14 Release Notes</b>:
 
 <p>
-  This 60<sup>th</sup> release of NuttX, Version 5.13, was made on November 9, 2010 and is available for download from the
+  This 61<sup>st</sup> release of NuttX, Version 5.14, was made on November 27, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  Headlines for this release include:
+  This release includes multiple, important bugfixes as well as a new driver for the NXP LPC1766.
+  Important bugfixes include:
   <ul>
-    <li>
-      <p>
-        AVR32, www.mcuzone.com AVR32DEV1
-        <ul>
-          <p>
-            The port for the www.mcuzone.com AVRDEV1 board based on the Atmel
-            AT32UC3B0256 MCU was (almost) fully integrated. The port now
-            successfully passes the NuttX OS test (examples/ostest).  A
-            NuttShell (NSH) configuration is in place (see the
-            <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
-            Testing of that NSH configuration, however, has been postponed
-            (because it got bumped by the Olimex LPC1766-STK port -- see below)
-          </p>
-          <p>
-            Current Status: I think I have a hardware problem with my serial
-            port setup. There is a good chance that the NSH port is complete
-            and functional, but I am not yet able to demonstrate that. At
-            present, I get nothing coming in the serial RXD line (probably
-            because the pins are configured wrong or I have the MAX232
-            connected wrong).
-          </p>
-          <p>
-            A complete port will include drivers for additional AVR32 UC3
-            devices -- like SPI and USB --- and will be available in a later
-            release, time permitting.
-          </p>
-        </ul>
-      </p>
+	<li>
+	  Cortex-M3 Hard Fault.
+	  Fixed a hard fault problem that can occur if certaintypes of interrupts are pending at the time another interrupt returns.
+	  This problem has only been observed on the LPC1766 (returning from a SYSTICK interrupt with a pending Ethernet interrupt).
+	  However, it is assumed that all Cortex-M3 ports could have this as a latent bug.
     </li>
-    <li>
-      <p>
-        LPC1766, Olimex LPC1766-STK
-        <ul>
-          <p>
-            Support for the Olimex-LPC1766 is newly added to NuttX and is
-            still undergoing development, test, and integration. Verified
-            configurations for the NuttX OS test and for the NuttShell (NSH,
-            see the <a href="ttp://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
-            Additional USB configurations are in the release as well, but
-            they have not yet been verified.  Goals for NuttX-5.14 include:
-            (1) An Ethernet driver, (2) Verified USB support, and (3) SD
-            card support.
-          </p>
-        </ul>
-      </p>
+	<li>
+	  TCP/IP Sequence Number Bug.
+	  Corrected errors some important logic in the way that sequence numbers are managed when <code>send()</code> sends out packets before a previous packet has been acknowledged.
+	  Some of that send() logic was incompatible with logicin the uIP layer.
+	  Errors seen include:
+	  (1) The final final packet in a sequence of packets might be too large!
+	  In the THTTPD example, this might leave some garbage at the bottom of the display.
+	  Or (2) <code>send()</code> might hang with outstanding, unacknowledged data (and with no re-transmission requests).
+	  This was due to differences in sequence number handling in <code>send()</code> and in <code>uip_tcpinput.c</code>;
+	  <code>uip_tcpinput.c</code> thought (incorrectly) that all of the bytes were acknowledged;
+	  <code>send.c</code> knew that they were not.
     </li>
-    <li>
-      Additional changes and bugfixes as detailed in the ChangeLog.
-    </li>
+	<li>
+	  One-Shot POSIX Timer Bug.
+	  Fixed an error in set-up of a one-shot POSIX timer.
+	  It was using the repititive timer value (which is zero in the one-shot case), always resulting in a 10Ms timer!
+	  Found and fixed by Wilton Tong.
+	</li>
   </ul>
+</p>
+<p>
+  Additional support has been included for the Olimex-LPC1766.
+  Support for that board was added to NuttX 5.13.
+  This release extends that support with an Ethernet driver.
+  Verified configurations are now available for the NuttX OS test,
+  for the NuttShell (NSH, see the <a href="ttp://www.nuttx.org/NuttShell.html">NSH User Guide</a>),
+  for the NuttX network test, and for the <a href="http://acme.com/software/thttpd">THTTPD</a> webserver.
+  (Additional USB configurations are in the release as well, but those have not yet been verified). 
+  Goals for NuttX-5.15 (and beyond) include: (1) Verified USB support, (2) SD card support, and (3) LCD support.
+</p>
+<p>
+   Additional changes and bugfixes as detailed in the ChangeLog.
 </p>
 
 <table width ="100%">
@@ -1293,13 +1282,13 @@
         Support for the mbed board was contributed by Dave Marples and released in NuttX-5.11.
       </p>
       <p>
-        Support for the Olimex-LPC1766 is newly added to NuttX and is still undergoing development,
-        test, and integration.
-        Verified configurations for the NuttX OS test and for the NuttShell (NSH,
-        see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>)
-        were released in NuttX-5.13.
-        Additional USB configurations are in the release as well, but they have not yet been verified.
-        Goals for NuttX-5.14 include: (1) An Ethernet driver, (2) Verified USB support, and (3) SD card support.
+        Support for that Olimex-LPC1766-STK board was added to NuttX 5.13.
+        The NuttX-5.14 release extended that support with an Ethernet driver.
+        Verified configurations are now available for the NuttX OS test,
+        for the NuttShell (NSH, see the <a href="ttp://www.nuttx.org/NuttShell.html">NSH User Guide</a>),
+        for the NuttX network test, and for the <a href="http://acme.com/software/thttpd">THTTPD</a> webserver.
+        (Additional USB configurations are in the release as well, but those have not yet been verified). 
+        Goals for NuttX-5.15 (and beyond) include: (1) Verified USB support, (2) SD card support, and (3) LCD support.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1935,22 +1924,34 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.13 2010-11-09 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+5.14 2010-11-27 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-    * lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
-      by Michael Hrabanek.
-    * Fix wild, consistent naming error.  For some reason, I called the at32uc3*
-      parts at91uc* everywhere.  Fixed by changing lots of files and directories.
-    * configs/avr32dev1/ostest - The AVR32 port now successfully passes the
-      examples/ostest.  We have a good AVR32 port!
-    * configs/avr32dev1/nsh - Added a configuration to support the NuttShell
-      (NSH). As of this writing, here is a problem receiving serial data (this
-      is, very likely, my hardware setup).
-    * lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
-      not refer to an open file.
-    * configs/olimex-lpc1766stk - Add support for the Olimex LPC1766-STK
-      development board.  The OS test and NSH configurations (only) have been
-      verified.
+	* configs/olimex-lpc1766stk/nettest - Add examples/nettest configuration to
+	  verify the LPC17xx ethernet driver currently under development.
+	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
+	  the LPC17xx Ethernet driver.  Driver in CVS functional after 2010-11-23.
+	* sched/timer_settime.c - Fix an error in set-up of a one-shot POSIX timer.  It
+	  was using the repititive timer value (which is zero in the one-shot case),
+	  always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
+	* arch/arm/src/lpc17xx/lpc17_vector.S, stm32/stm32_vector.S, lm3s/lm3s_vector.S,
+	  sam3u/sam3u_vector.S -- Fixed a hard fault problem that can occur if certain
+	  types of interrupts are pending at the time another interrupt returns
+	  (SYSTICK).  This has not been verified on all plaforms, but is a critical
+	  fixed that is needed by all Cortex-M3 NuttX users.
+	* configs/olimex-lpc1766stk/thttpd - Add a THTTPD configuration for the
+	  Olimex LPC2766-STK board. Verified successfully.
+	* net/uip/uip_tcpappsend.c - Correct an important logic bug in some uIP state
+	  data the is used to manage retransmissions.  The uIP logic was incompatible
+	  with the retransmission logic of net/send.c in one place.  The final error
+	  was that the final packet in a sequence of packets was too large!  In the
+	  THTTPD example, this would leave some garbage at the bottom of the display
+	  (or worse).  I don't know why I haven't see this bug before???
+	* net/uip/uip_tcpinput.c -- The change to uip_tcpappsend.c unmasked an
+	  additional error in the TCP sequence number handling.  This sympom was that
+	  the send() function would hang with outstanding, unacknowledged data (with
+	  no re-transmit requests).  The was due to differences in sequence number
+	  handling in send() and in uip_tcpinput.c; uip_tcpinput.c thought (incorrectly)
+	  that all of the bytes were acknowledged; send.c knew that they were not.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1980,28 +1981,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.14 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-	* configs/olimex-lpc1766stk/nettest - Add examples/nettest configuration to
-	  verify the LPC17xx ethernet driver currently under development.
-	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
-	  the LPC17xx Ethernet driver.  Driver in CVS functional after 2010-11-23.
-	* sched/timer_settime.c - Fix an error in set-up of one-shot timer.  It was
-	  using the repititive timer value (which is zero in the one-shot case,
-	  always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
-	* arch/arm/src/lpc17xx/lpc17_vector.S, stm32/stm32_vector.S, lm3s/lm3s_vector.S,
-	  sam3u/sam3u_vector.S -- Fixed a hard fault problem that can occur if certain
-	  types of interrupts are pending at the time another interrupt returns
-	  (SYSTICK).  This has not been verified on all plaform, but is a critical
-	  fixed that is needed by all Cortex-M3 NuttX users.
-	* configs/olimex-lpc1766stk/thttpd - Add a THTTPD configuration for the
-	  Olimex LPC2766-STK board.
-	* net/uip/uip_tcpappsend.c - Correct an important logic bug in some uIP state
-	  data the is used to manage retransmissions.  The uIP logic was incompatible
-	  with the retransmission logic of net/send.c in one place.  The final error
-	  was that the final packet in a sequence of packets was too large!  In the
-	  THTTPD example, this would leave some garbage at the bottom of the display
-	  (or worse).  I don't know why I haven't see this bug before???
+nuttx-5.15 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
