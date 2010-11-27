@@ -51,6 +51,10 @@
 #include <nuttx/clock.h>
 #include <net/uip/uip-arch.h>
 
+#ifndef CONFIG_NET_ARP_IPIN
+#  include <net/uip/uip-arp.h>
+#endif
+
 #include "net_internal.h"
 #include "uip/uip_internal.h"
 
@@ -255,21 +259,37 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
       nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
       uip_tcpsetsequence(conn->sndseq, seqno);
 
-      /* Then send that amount of data */
+      /* Then set-up to send that amount of data. (this won't actually
+       * happen until the polling cycle completes).
+       */
 
       uip_send(dev, &pstate->snd_buffer[pstate->snd_sent], sndlen);
 
-      /* And update the amount of data sent (but not necessarily ACKed) */
+      /* Check if the destination IP address is in the ARP table.  If not,
+       * then the send won't actually make it out... it will be replaced with
+       * an ARP request.
+       *
+       * NOTE: If we are actually harvesting IP addresses on incomming IP
+       * packets, then this check should be necessary; the MAC mapping should
+       * already be in the ARP table.
+       */
 
-      pstate->snd_sent += sndlen;
-      nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
-              pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+#ifndef CONFIG_NET_ARP_IPIN
+      if (uip_arp_find(conn->ripaddr) != NULL)
+#endif
+        {
+          /* Update the amount of data sent (but not necessarily ACKed) */
 
-      /* Update the send time */
+          pstate->snd_sent += sndlen;
+          nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
+                  pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+
+          /* Update the send time */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-      pstate->snd_time = g_system_timer;
+          pstate->snd_time = g_system_timer;
 #endif
+        }
     }
 
   /* All data has been send and we are just waiting for ACK or re-tranmist

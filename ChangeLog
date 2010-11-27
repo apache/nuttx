@@ -1362,4 +1362,11 @@
 
 5.15 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* net/uip/uip_tcpaddsend.c and net/send.c -- Another place where the TCP sequence
+	  number problem "fixed" in 5.14 might occur.
+	* net/send.c -- Check if the destination IP address is in the ARP table.  If
+	  not, then don't consider the packet sent.  It won't be, an ARP packet will go
+	  out instead.
+
+
 
