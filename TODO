@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated October 1, 2010)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated November 27, 2010)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
@@ -8,7 +8,7 @@ NuttX TODO List (Last updated October 1, 2010)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (17)  Network (net/, drivers/net)
+ (16)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
   (5)  Libraries (lib/)
@@ -210,15 +210,6 @@ o Network (net/, drivers/net)
                statistics.
   Status:      Open
   Priority:    Low
-
-  Description: Outgoing packets are dropped and overwritten by ARP packets
-               if the destination IP has not been mapped to a MAC.  Could
-               improve send() performance by explicitly performing ARP before
-               sending the packet (or by enabling CONFIG_NET_ARP_IPIN logic. 
-               This could, however have negative impacts on busy networks and
-               could require a large value for CONFIG_NET_ARPTAB_SIZE).
-  Status:      Open
-  Priority:    Medium
 
   Description: At present, there cannot be two concurrent active TCP send
                operations in progress using the same socket.  This is because
