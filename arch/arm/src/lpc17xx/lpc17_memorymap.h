@@ -65,6 +65,11 @@
 #define LPC17_SCS_BASE      0xe000e000
 #define LPC17_DEBUGMCU_BASE 0xe0042000
 
+/* AHB SRAM Bank sizes **************************************************************/
+
+#define LPC17_BANK0_SIZE    (16*1024)  /* Size of AHB SRAM Bank0 (if present) */
+#define LPC17_BANK1_SIZE    (16*1024)  /* Size of AHB SRAM Bank1 (if present) */
+
 /* APB0 Peripherals *****************************************************************/
 
 #define LPC17_WDT_BASE      0x40000000 /* -0x40003fff: Watchdog timer */
