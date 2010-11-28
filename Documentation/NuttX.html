@@ -785,30 +785,30 @@
   This release includes multiple, important bugfixes as well as a new driver for the NXP LPC1766.
   Important bugfixes include:
   <ul>
-	<li>
-	  Cortex-M3 Hard Fault.
-	  Fixed a hard fault problem that can occur if certaintypes of interrupts are pending at the time another interrupt returns.
-	  This problem has only been observed on the LPC1766 (returning from a SYSTICK interrupt with a pending Ethernet interrupt).
-	  However, it is assumed that all Cortex-M3 ports could have this as a latent bug.
+    <li>
+      Cortex-M3 Hard Fault.
+      Fixed a hard fault problem that can occur if certaintypes of interrupts are pending at the time another interrupt returns.
+      This problem has only been observed on the LPC1766 (returning from a SYSTICK interrupt with a pending Ethernet interrupt).
+      However, it is assumed that all Cortex-M3 ports could have this as a latent bug.
     </li>
-	<li>
-	  TCP/IP Sequence Number Bug.
-	  Corrected errors some important logic in the way that sequence numbers are managed when <code>send()</code> sends out packets before a previous packet has been acknowledged.
-	  Some of that send() logic was incompatible with logicin the uIP layer.
-	  Errors seen include:
-	  (1) The final final packet in a sequence of packets might be too large!
-	  In the THTTPD example, this might leave some garbage at the bottom of the display.
-	  Or (2) <code>send()</code> might hang with outstanding, unacknowledged data (and with no re-transmission requests).
-	  This was due to differences in sequence number handling in <code>send()</code> and in <code>uip_tcpinput.c</code>;
-	  <code>uip_tcpinput.c</code> thought (incorrectly) that all of the bytes were acknowledged;
-	  <code>send.c</code> knew that they were not.
+    <li>
+      TCP/IP Sequence Number Bug.
+      Corrected errors some important logic in the way that sequence numbers are managed when <code>send()</code> sends out packets before a previous packet has been acknowledged.
+      Some of that send() logic was incompatible with logicin the uIP layer.
+      Errors seen include:
+      (1) The final final packet in a sequence of packets might be too large!
+      In the THTTPD example, this might leave some garbage at the bottom of the display.
+      Or (2) <code>send()</code> might hang with outstanding, unacknowledged data (and with no re-transmission requests).
+      This was due to differences in sequence number handling in <code>send()</code> and in <code>uip_tcpinput.c</code>;
+      <code>uip_tcpinput.c</code> thought (incorrectly) that all of the bytes were acknowledged;
+      <code>send.c</code> knew that they were not.
     </li>
-	<li>
-	  One-Shot POSIX Timer Bug.
-	  Fixed an error in set-up of a one-shot POSIX timer.
-	  It was using the repititive timer value (which is zero in the one-shot case), always resulting in a 10Ms timer!
-	  Found and fixed by Wilton Tong.
-	</li>
+    <li>
+      One-Shot POSIX Timer Bug.
+      Fixed an error in set-up of a one-shot POSIX timer.
+      It was using the repititive timer value (which is zero in the one-shot case), always resulting in a 10Ms timer!
+      Found and fixed by Wilton Tong.
+    </li>
   </ul>
 </p>
 <p>
@@ -1926,32 +1926,32 @@ Other memory:
 <ul><pre>
 5.14 2010-11-27 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* configs/olimex-lpc1766stk/nettest - Add examples/nettest configuration to
-	  verify the LPC17xx ethernet driver currently under development.
-	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
-	  the LPC17xx Ethernet driver.  Driver in CVS functional after 2010-11-23.
-	* sched/timer_settime.c - Fix an error in set-up of a one-shot POSIX timer.  It
-	  was using the repititive timer value (which is zero in the one-shot case),
-	  always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
-	* arch/arm/src/lpc17xx/lpc17_vector.S, stm32/stm32_vector.S, lm3s/lm3s_vector.S,
-	  sam3u/sam3u_vector.S -- Fixed a hard fault problem that can occur if certain
-	  types of interrupts are pending at the time another interrupt returns
-	  (SYSTICK).  This has not been verified on all plaforms, but is a critical
-	  fixed that is needed by all Cortex-M3 NuttX users.
-	* configs/olimex-lpc1766stk/thttpd - Add a THTTPD configuration for the
-	  Olimex LPC2766-STK board. Verified successfully.
-	* net/uip/uip_tcpappsend.c - Correct an important logic bug in some uIP state
-	  data the is used to manage retransmissions.  The uIP logic was incompatible
-	  with the retransmission logic of net/send.c in one place.  The final error
-	  was that the final packet in a sequence of packets was too large!  In the
-	  THTTPD example, this would leave some garbage at the bottom of the display
-	  (or worse).  I don't know why I haven't see this bug before???
-	* net/uip/uip_tcpinput.c -- The change to uip_tcpappsend.c unmasked an
-	  additional error in the TCP sequence number handling.  This sympom was that
-	  the send() function would hang with outstanding, unacknowledged data (with
-	  no re-transmit requests).  The was due to differences in sequence number
-	  handling in send() and in uip_tcpinput.c; uip_tcpinput.c thought (incorrectly)
-	  that all of the bytes were acknowledged; send.c knew that they were not.
+    * configs/olimex-lpc1766stk/nettest - Add examples/nettest configuration to
+      verify the LPC17xx ethernet driver currently under development.
+    * arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
+      the LPC17xx Ethernet driver.  Driver in CVS functional after 2010-11-23.
+    * sched/timer_settime.c - Fix an error in set-up of a one-shot POSIX timer.  It
+      was using the repititive timer value (which is zero in the one-shot case),
+      always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
+    * arch/arm/src/lpc17xx/lpc17_vector.S, stm32/stm32_vector.S, lm3s/lm3s_vector.S,
+      sam3u/sam3u_vector.S -- Fixed a hard fault problem that can occur if certain
+      types of interrupts are pending at the time another interrupt returns
+      (SYSTICK).  This has not been verified on all plaforms, but is a critical
+      fixed that is needed by all Cortex-M3 NuttX users.
+    * configs/olimex-lpc1766stk/thttpd - Add a THTTPD configuration for the
+      Olimex LPC2766-STK board. Verified successfully.
+    * net/uip/uip_tcpappsend.c - Correct an important logic bug in some uIP state
+      data the is used to manage retransmissions.  The uIP logic was incompatible
+      with the retransmission logic of net/send.c in one place.  The final error
+      was that the final packet in a sequence of packets was too large!  In the
+      THTTPD example, this would leave some garbage at the bottom of the display
+      (or worse).  I don't know why I haven't see this bug before???
+    * net/uip/uip_tcpinput.c -- The change to uip_tcpappsend.c unmasked an
+      additional error in the TCP sequence number handling.  This sympom was that
+      the send() function would hang with outstanding, unacknowledged data (with
+      no re-transmit requests).  The was due to differences in sequence number
+      handling in send() and in uip_tcpinput.c; uip_tcpinput.c thought (incorrectly)
+      that all of the bytes were acknowledged; send.c knew that they were not.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -1983,17 +1983,21 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-5.15 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* net/uip/uip_tcpaddsend.c and net/send.c -- Another place where the TCP sequence
-	  number problem "fixed" in 5.14 might occur.
-	* net/send.c -- Check if the destination IP address is in the ARP table.  If
-	  not, then don't consider the packet sent.  It won't be, an ARP packet will go
-	  out instead.
-	* arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c -- The Ethernet
-	  logic was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).  An
-	  option was added to limit the amount of SRAM used for packet buffering and to
-	  re-use any extra Bank0 memory for heap.  configs/olimex-lpc1766stk/nettest
-	  now uses only 8Kb at the beginning of Bank0; the 8Kb at the end of Bank0 is
-	  included in the heap
+    * net/uip/uip_tcpaddsend.c and net/send.c -- Another place where the TCP sequence
+      number problem "fixed" in 5.14 might occur.
+    * net/send.c -- Check if the destination IP address is in the ARP table.  If
+      not, then don't consider the packet sent.  It won't be, an ARP packet will go
+      out instead.
+    * arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c -- The Ethernet
+      logic was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).  An
+      option was added to limit the amount of SRAM used for packet buffering and to
+      re-use any extra Bank0 memory for heap.  configs/olimex-lpc1766stk/nettest
+      now uses only 8Kb at the beginning of Bank0; the 8Kb at the end of Bank0 is
+      included in the heap
+    * arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
+      selected.
+    * configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
+      NSH (not verified on initial check-in)
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
