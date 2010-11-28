@@ -268,13 +268,17 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
        * then the send won't actually make it out... it will be replaced with
        * an ARP request.
        *
-       * NOTE: If we are actually harvesting IP addresses on incomming IP
-       * packets, then this check should be necessary; the MAC mapping should
-       * already be in the ARP table.
+       * NOTE 1: This could an expensive check if there are a lot of entries
+       * in the ARP table.  Hence, we only check on the first packet -- when
+       * snd_sent is zero.
+       *
+       * NOTE 2: If we are actually harvesting IP addresses on incomming IP
+       * packets, then this check should not be necessary; the MAC mapping
+       * should already be in the ARP table.
        */
 
 #ifndef CONFIG_NET_ARP_IPIN
-      if (uip_arp_find(conn->ripaddr) != NULL)
+      if (pstate->snd_sent != 0 || uip_arp_find(conn->ripaddr) != NULL)
 #endif
         {
           /* Update the amount of data sent (but not necessarily ACKed) */

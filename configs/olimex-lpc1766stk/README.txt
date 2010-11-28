@@ -609,6 +609,7 @@ Olimex LPC1766-STK Configuration Options
 	CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
 	CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex
 
+    CONFIG_NET_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
 	CONFIG_NET_NTXDESC - Configured number of Tx descriptors. Default: 18
 	CONFIG_NET_NRXDESC - Configured number of Rx descriptors. Default: 18
 	CONFIG_NET_PRIORITY - Ethernet interrupt priority.  The is default is
