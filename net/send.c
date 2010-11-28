@@ -184,7 +184,6 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
            * actually sent.
            */
 
-          conn->unacked = 0;
           goto end_wait;
         }
 
@@ -292,7 +291,7 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
         }
     }
 
-  /* All data has been send and we are just waiting for ACK or re-tranmist
+  /* All data has been send and we are just waiting for ACK or re-transmit
    * indications to complete the send.  Check for a timeout.
    */
 
@@ -301,8 +300,8 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
     {
       /* Yes.. report the timeout */
 
-      nllvdbg("TCP timeout\n");
-      pstate->snd_sent = -EAGAIN;
+      nlldbg("SEND timeout\n");
+      pstate->snd_sent = -ETIMEDOUT;
       goto end_wait;
     }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
@@ -317,6 +316,10 @@ end_wait:
   pstate->snd_cb->flags   = 0;
   pstate->snd_cb->priv    = NULL;
   pstate->snd_cb->event   = NULL;
+
+  /* There are no outstanding, unacknowledged bytes */
+
+  conn->unacked           = 0;
 
   /* Wake up the waiting thread */
 
@@ -446,6 +449,12 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
           /* Get the initial sequence number that will be used */
 
           state.snd_isn         = uip_tcpgetsequence(conn->sndseq);
+
+          /* There is no outstanding, unacknowledged data after this
+           * initial sequence number.
+           */
+
+          conn->unacked         = 0;
 
           /* Update the initial time for calculating timeouts */
 

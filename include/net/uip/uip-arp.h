@@ -213,7 +213,6 @@ EXTERN void uip_arp_update(uint16_t *pipaddr, uint8_t *ethaddr);
 
 EXTERN struct arp_entry *uip_arp_find(in_addr_t ipaddr);
 
-
 /****************************************************************************
  * Name: uip_arp_delete
  *

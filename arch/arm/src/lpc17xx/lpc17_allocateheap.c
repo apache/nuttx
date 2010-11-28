@@ -50,6 +50,7 @@
 #include "up_internal.h"
 
 #include "lpc17_memorymap.h"
+#include "lpc17_emacram.h"
 
 /****************************************************************************
  * Private Definitions
@@ -137,13 +138,13 @@ void up_addregion(void)
 #ifdef LPC17_HAVE_BANK0
 #  if defined(CONFIG_NET) && defined(CONFIG_LPC17_ETHERNET) && defined(LPC17_NETHCONTROLLERS)
 #    ifdef LPC17_HAVE_BANK1
-       mm_addregion((FAR void*)LPC17_SRAM_BANK1, 16*1024);
+       mm_addregion((FAR void*)LPC17_SRAM_BANK1, LPC17_BANK1_SIZE);
 #    endif
 #  else
 #    ifdef LPC17_HAVE_BANK1
-       mm_addregion((FAR void*)LPC17_SRAM_BANK0, 32*1024);
+       mm_addregion((FAR void*)LPC17_SRAM_BANK0, LPC17_BANK0_SIZE+LPC17_BANK1_SIZE);
 #    else
-       mm_addregion((FAR void*)LPC17_SRAM_BANK0, 16*1024);
+       mm_addregion((FAR void*)LPC17_SRAM_BANK0, LPC17_BANK0_SIZE);
 #    endif
 #  endif
 #endif
