@@ -1373,5 +1373,8 @@
 	  re-use any extra Bank0 memory for heap.  configs/olimex-lpc1766stk/nettest
 	  now uses only 8Kb at the beginning of Bank0; the 8Kb at the end of Bank0 is
 	  included in the heap
-
+	* arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
+	  selected.
+	* configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
+	  NSH (not verified on initial check-in)
 

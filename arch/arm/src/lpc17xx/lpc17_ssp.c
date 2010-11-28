@@ -746,7 +746,7 @@ static inline FAR struct lpc17_sspdev_s *lpc17_ssp0initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_LPC17_SSP1
-static inline FAR struct spi_dev_s *lpc17_ssp1initialize(void)
+static inline FAR struct lpc17_sspdev_s *lpc17_ssp1initialize(void)
 {
   irqstate_t flags;
   uint32_t regval;

@@ -56,31 +56,23 @@
 /* PORT and SLOT number probably depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_LPC1766STK
-#  define CONFIG_EXAMPLES_NSH_HAVEUSBDEV 1
 #  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 0
-#    error "The LPC1766-STK MMC/SD is on SSP0"
+#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 1
+#    error "The LPC1766-STK MMC/SD is on SSP1"
 #    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 0
+#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 1
 #  endif
 #  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) || CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
 #    error "The LPC1766-STK MMC/SD is only one slot (0)"
 #    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
 #    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
 #  endif
-#  ifndef CONFIG_LPC17_SSP0
-#    warning "CONFIG_LPC17_SSP0 is not enabled"
+#  ifndef CONFIG_LPC17_SSP1
+#    warning "CONFIG_LPC17_SSP1 is not enabled"
 #  endif
 #else
 #  error "Unrecognized board"
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
-#endif
-
-/* Can't support USB features if USB is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
