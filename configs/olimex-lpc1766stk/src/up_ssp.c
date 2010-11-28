@@ -81,9 +81,11 @@
 /* Dump GPIO registers */
 
 #ifdef SSP_VERBOSE
-#  define ssp_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
+#  define ssp_dumpssp0gpio(m) lpc17_dumpgpio(LPC1766STK_LCD_CS, m)
+#  define ssp_dumpssp1gpio(m) lpc17_dumpgpio(LPC1766STK_MMC_CS, m)
 #else
-#  define ssp_dumpgpio(m)
+#  define ssp_dumpssp0gpio(m)
+#  define ssp_dumpssp1gpio(m)
 #endif
 
 /************************************************************************************
@@ -104,11 +106,21 @@
 
 void weak_function lpc17_sspinitialize(void)
 {
-  /* Configure the SPI chip select GPIOs */
+  /* Configure the SSP0 chip select GPIOs.  Only the Nokia LCD is connected to SSP0 */
 
-  ssp_dumpgpio("lpc17_sspinitialize() Entry)");
-#warning "Not implemented"
-  ssp_dumpgpio("lpc17_sspinitialize() Exit");
+#ifdef CONFIG_LPC17_SSP0
+  ssp_dumpssp0gpio("BEFORE SSP0 Initialization");
+  lpc17_configgpio(LPC1766STK_LCD_CS);
+  ssp_dumpssp0gpio("AFTER SSP0 Initialization");
+#endif
+
+  /* Configure SSP1 chip select GPIOs.  Only the SD/MMC card slot is connected to SSP1 */
+
+#ifdef CONFIG_LPC17_SSP1
+  ssp_dumpssp0gpio("BEFORE SSP1 Initialization");
+  lpc17_configgpio(LPC1766STK_MMC_CS);
+  ssp_dumpssp0gpio("AFTER SSP1 Initialization");
+#endif
 }
 
 /************************************************************************************
@@ -140,20 +152,42 @@ void weak_function lpc17_sspinitialize(void)
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_spiselect() Entry");
-#warning "Not implemented"
-  ssp_dumpgpio("lpc17_spiselect() Exit");
+  if (devid == SPIDEV_DISPLAY)
+    {
+      /* Assert/de-assert the CS pin to the card */
+
+      ssp_dumpssp0gpio("lpc17_ssp0select() Entry");
+      lm3s_gpiowrite(LPC1766STK_LCD_CS, !selected);
+      ssp_dumpssp0gpio("lpc17_ssp0select() Exit");
+    }
 }
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning SPI_STATUS_PRESENT\n");
-  return SPI_STATUS_PRESENT;
+  sspdbg("Returning nothing\n");
+  return 0;
 }
 #endif
 
 #ifdef CONFIG_LPC17_SSP1
-# warning "SSP1 chip selects not known"
+void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  if (devid == SPIDEV_MMCSD)
+    {
+      /* Assert/de-assert the CS pin to the card */
+
+      ssp_dumpssp1gpio("lpc17_ssp1select() Entry");
+      lm3s_gpiowrite(LPC1766STK_MMC_CS, !selected);
+      ssp_dumpssp1gpio("lpc17_ssp1select() Exit");
+    }
+}
+
+uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  sspdbg("Returning SPI_STATUS_PRESENT\n");
+  return SPI_STATUS_PRESENT;
+}
 #endif
 
 #endif /* CONFIG_LPC17_SSP0 || CONFIG_LPC17_SSP1 */
