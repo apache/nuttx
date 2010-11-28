@@ -1367,6 +1367,11 @@
 	* net/send.c -- Check if the destination IP address is in the ARP table.  If
 	  not, then don't consider the packet sent.  It won't be, an ARP packet will go
 	  out instead.
-
+	* arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c -- The Ethernet
+	  logic was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).  An
+	  option was added to limit the amount of SRAM used for packet buffering and to
+	  re-use any extra Bank0 memory for heap.  configs/olimex-lpc1766stk/nettest
+	  now uses only 8Kb at the beginning of Bank0; the 8Kb at the end of Bank0 is
+	  included in the heap
 
 
