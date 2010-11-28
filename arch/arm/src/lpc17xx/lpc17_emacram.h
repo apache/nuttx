@@ -41,20 +41,36 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_LPC17_ETHERNET)
-
 #include "chip.h"
 #include "lpc17_memorymap.h"
-
-/* Does this chip have and ethernet controller? */
-
-#if LPC17_NETHCONTROLLERS > 0
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Default, no-EMAC Case ************************************************************/
+/* Assume that all of AHB SRAM will be available for heap. If this is not true, then
+ * LPC17_BANK0_HEAPSIZE will be undefined and redefined below.
+ */
 
-/* Configuration ********************************************************************/
+#undef LPC17_BANK0_HEAPBASE
+#undef LPC17_BANK0_HEAPSIZE
+#ifdef LPC17_HAVE_BANK0
+#  define LPC17_BANK0_HEAPBASE LPC17_SRAM_BANK0
+#  define LPC17_BANK0_HEAPSIZE LPC17_BANK0_SIZE
+#endif
+
+/* Is networking enabled?  Is the LPC17xx Ethernet device enabled? Does this chip have
+ * and Ethernet controlloer?  Yes... then we will replace the above default definitions.
+ */
+
+#if defined(CONFIG_NET) && defined(CONFIG_LPC17_ETHERNET) && LPC17_NETHCONTROLLERS > 0
+
+/* EMAC RAM Configuration ***********************************************************/
+/* Is AHB SRAM available? */
+
+#ifndef LPC17_HAVE_BANK0
+#  error "AHB SRAM Bank0 is not available for EMAC RAM"
+#endif
 
 /* Number of Tx descriptors */
 
@@ -68,12 +84,43 @@
 #  define CONFIG_NET_NRXDESC 18
 #endif
 
-/* All of AHB SRAM, Bank 0 is set aside for EMAC Tx and Rx descriptors. */
+/* Size of the region at the beginning of AHB SRAM 0 set set aside for the EMAC.
+ * This size must fit within AHB SRAM Bank 0 and also be a multiple of 32-bit
+ * words.
+ */
+
+#ifndef CONFIG_NET_EMACRAM_SIZE
+#  define CONFIG_NET_EMACRAM_SIZE LPC17_BANK0_SIZE
+#endif
+
+#if CONFIG_NET_EMACRAM_SIZE > LPC17_BANK0_SIZE
+#  error "EMAC RAM size cannot exceed the size of AHB SRAM Bank 0"
+#endif
+
+#if (CONFIG_NET_EMACRAM_SIZE & 3) != 0
+#  error "EMAC RAM size must be in multiples of 32-bit words"
+#endif
+
+/* Determine is there is any meaning space left at the end of AHB Bank 0 that
+ * could be added to the heap.
+ */
+
+#undef LPC17_BANK0_HEAPBASE
+#undef LPC17_BANK0_HEAPSIZE
+#if CONFIG_NET_EMACRAM_SIZE < (LPC17_BANK0_SIZE-128)
+#  define LPC17_BANK0_HEAPBASE (LPC17_SRAM_BANK0 + CONFIG_NET_EMACRAM_SIZE)
+#  define LPC17_BANK0_HEAPSIZE (LPC17_BANK0_SIZE - CONFIG_NET_EMACRAM_SIZE)
+#endif
+
+/* Memory at the beginning of AHB SRAM, Bank 0 is set aside for EMAC Tx and Rx
+ * descriptors.  The position is not controllable, only the size of the region
+ * is controllable.
+ */
 
 #define LPC17_EMACRAM_BASE   LPC17_SRAM_BANK0
-#define LPC17_EMACRAM_SIZE   LPC17_BANK0_SIZE
+#define LPC17_EMACRAM_SIZE   CONFIG_NET_EMACRAM_SIZE
 
-/* Descriptors Memory Layout ********************************************************/
+/* Descriptor Memory Layout *********************************************************/
 /* EMAC DMA RAM and descriptor definitions.  The configured number of descriptors
  * will determine the organization and the size of the descriptor and status tables.
  * There is a complex interaction between the maximum packet size (CONFIG_NET_BUFSIZE)
@@ -90,7 +137,7 @@
  *
  * An example with all of the details:
  *
- * NTXDESC=18 NRXDESC=18 CONFIG_NET_BUFSIZE=420:
+ * NTXDESC=18 NRXDESC=18 CONFIG_NET_EMACRAM_SIZE=16Kb CONFIG_NET_BUFSIZE=420:
  *   LPC17_TXDESCTAB_SIZE = 18*8 = 144
  *   LPC17_TXSTATTAB_SIZE = 18*4 =  72
  *   LPC17_TXTAB_SIZE     = 216
@@ -191,6 +238,5 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* LPC17_NETHCONTROLLERS > 0 */
-#endif /* CONFIG_NET && CONFIG_LPC17_ETHERNET */
+#endif /* CONFIG_NET && CONFIG_LPC17_ETHERNET && LPC17_NETHCONTROLLERS > 0*/
 #endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_EMACRAM_H */
