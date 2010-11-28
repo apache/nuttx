@@ -52,8 +52,6 @@
 #include "lpc17_internal.h"
 #include "lpc1766stk_internal.h"
 
-/* The LM3S6965 Eval Kit microSD CS is on SSI0 */
-
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
 
 /************************************************************************************
@@ -100,7 +98,7 @@
  * Name: lpc17_sspinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the LM3S6965 Eval Kit.
+ *   Called to configure SPI chip select GPIO pins for the LPC1766-STK.
  *
  ************************************************************************************/
 
@@ -157,7 +155,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
       /* Assert/de-assert the CS pin to the card */
 
       ssp_dumpssp0gpio("lpc17_ssp0select() Entry");
-      lm3s_gpiowrite(LPC1766STK_LCD_CS, !selected);
+      lpc17_gpiowrite(LPC1766STK_LCD_CS, !selected);
       ssp_dumpssp0gpio("lpc17_ssp0select() Exit");
     }
 }
@@ -178,7 +176,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
       /* Assert/de-assert the CS pin to the card */
 
       ssp_dumpssp1gpio("lpc17_ssp1select() Entry");
-      lm3s_gpiowrite(LPC1766STK_MMC_CS, !selected);
+      lpc17_gpiowrite(LPC1766STK_MMC_CS, !selected);
       ssp_dumpssp1gpio("lpc17_ssp1select() Exit");
     }
 }

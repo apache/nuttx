@@ -52,7 +52,7 @@
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_DRAM_START - The start address of DRAM (physical)
 # CONFIG_DRAM_END - Last address+1 of installed RAM
-# CONFIG_ARCH_IRQPRIO - The ST32F103Z supports interrupt prioritization
+# CONFIG_ARCH_IRQPRIO - The LPC17xx supports interrupt prioritization
 # CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 #   stack. If defined, this symbol is the size of the interrupt
 #   stack in bytes.  If not defined, the user task stacks will be
@@ -102,6 +102,7 @@ CONFIG_LPC17_BUILDROOT=y
 #
 # Individual subsystems can be enabled:
 # (MAINOSC, PLL0, PLL1 and FLASH are controlled in board.h)
+#
 CONFIG_LPC17_ETHERNET=n
 CONFIG_LPC17_USBHOST=n
 CONFIG_LPC17_USBOTG=n
@@ -457,6 +458,7 @@ CONFIG_PREALLOC_TIMERS=4
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
 # CONFIG_FS_ROMFS - Enable ROMFS filesystem support
+#
 CONFIG_FS_FAT=n
 CONFIG_FS_ROMFS=n
 
@@ -701,6 +703,7 @@ CONFIG_EXAMPLE_UIP_DHCPC=n
 # CONFIG_EXAMPLE_NETTEST_NETMASK - Network mask
 # CONFIG_EXAMPLE_NETTEST_CLIENTIP - IP address of the
 #   client side of the test (may be target or host)
+#
 CONFIG_EXAMPLE_NETTEST_SERVER=n
 CONFIG_EXAMPLE_NETTEST_PERFORMANCE=n
 CONFIG_EXAMPLE_NETTEST_NOMAC=y
@@ -708,8 +711,6 @@ CONFIG_EXAMPLE_NETTEST_IPADDR=(10L<<24|0L<<16|0L<<8|2L)
 CONFIG_EXAMPLE_NETTEST_DRIPADDR=(10L<<24|0L<<16|0L<<8|1L)
 CONFIG_EXAMPLE_NETTEST_NETMASK=(255L<<24|255L<<16|255L<<8|0L)
 CONFIG_EXAMPLE_NETTEST_CLIENTIP=(10L<<24|0L<<16|0L<<8|1L)
-
-#
 
 #
 # Settings for examples/ostest
@@ -842,6 +843,7 @@ CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
 #    Show controller events
 #  CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS
 #    Show interrupt-related events.
+#
 CONFIG_EXAMPLES_USBSTRG_NLUNS=1
 CONFIG_EXAMPLES_USBSTRG_DEVMINOR1=0
 CONFIG_EXAMPLES_USBSTRG_DEVPATH1="/dev/mmcsd0"

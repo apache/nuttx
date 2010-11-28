@@ -52,7 +52,7 @@
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_DRAM_START - The start address of DRAM (physical)
 # CONFIG_DRAM_END - Last address+1 of installed RAM
-# CONFIG_ARCH_IRQPRIO - The ST32F103Z supports interrupt prioritization
+# CONFIG_ARCH_IRQPRIO - The LPC17xx supports interrupt prioritization
 # CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 #   stack. If defined, this symbol is the size of the interrupt
 #   stack in bytes.  If not defined, the user task stacks will be
@@ -102,6 +102,7 @@ CONFIG_LPC17_BUILDROOT=y
 #
 # Individual subsystems can be enabled:
 # (MAINOSC, PLL0, PLL1 and FLASH are controlled in board.h)
+#
 CONFIG_LPC17_ETHERNET=y
 CONFIG_LPC17_USBHOST=n
 CONFIG_LPC17_USBOTG=n
@@ -472,6 +473,7 @@ CONFIG_PREALLOC_TIMERS=8
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
 # CONFIG_FS_ROMFS - Enable ROMFS filesystem support
+#
 CONFIG_FS_FAT=n
 CONFIG_FS_ROMFS=y
 
@@ -753,6 +755,7 @@ CONFIG_USBSTRG_REMOVABLE=y
 # CONFIG_THTTPD_GENERATE_INDICES
 # CONFIG_THTTPD_URLPATTERN - If defined, then it will be used to match
 #   and verify referrers.
+#
 CONFIG_THTTPD_PORT=80
 CONFIG_THTTPD_IPADDR=(10<<24|0<<16|0<<8|2)
 CONFIG_THTTPD_SERVER_ADDRESS="http://www.nuttx.org"
@@ -807,6 +810,7 @@ CONFIG_EXAMPLE_UIP_DHCPC=n
 # CONFIG_EXAMPLE_NETTEST_NETMASK - Network mask
 # CONFIG_EXAMPLE_NETTEST_CLIENTIP - IP address of the
 #   client side of the test (may be target or host)
+#
 CONFIG_EXAMPLE_NETTEST_SERVER=n
 CONFIG_EXAMPLE_NETTEST_PERFORMANCE=n
 CONFIG_EXAMPLE_NETTEST_NOMAC=y
