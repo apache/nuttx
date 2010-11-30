@@ -48,6 +48,9 @@
 #include <nuttx/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "lpc17_internal.h"
+#include "lpc1766stk_internal.h"
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -108,6 +111,10 @@ int usbstrg_archinitialize(void)
   FAR struct spi_dev_s *spi;
   int ret;
 
+  /* Enable power to the SD/MMC via a GPIO. LOW enables SD/MMC. */
+
+  lpc17_gpiowrite(LPC1766STK_MMC_PWR, false);
+
   /* Get the SPI port */
 
   message("usbstrg_archinitialize: Initializing SPI port %d\n",
@@ -118,7 +125,8 @@ int usbstrg_archinitialize(void)
     {
       message("usbstrg_archinitialize: Failed to initialize SPI port %d\n",
               LPC17XX_MMCSDSPIPORTNO);
-      return -ENODEV;
+      ret = -ENODEV;
+      goto errout;
     }
 
   message("usbstrg_archinitialize: Successfully initialized SPI port %d\n",
@@ -134,10 +142,15 @@ int usbstrg_archinitialize(void)
     {
       message("usbstrg_archinitialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
               LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO, ret);
-      return ret;
+      goto errout;
     }
 
   message("usbstrg_archinitialize: Successfuly bound SPI port %d to MMC/SD slot %d\n",
           LPC17XX_MMCSDSPIPORTNO, LPC17XX_MMCSDSLOTNO);
   return OK;
-}
+
+  /* Disable power to the SD/MMC via a GPIO. HIGH disables SD/MMC. */
+
+errout:
+  lpc17_gpiowrite(LPC1766STK_MMC_PWR, true);
+  return ret;}
