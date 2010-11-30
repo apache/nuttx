@@ -78,7 +78,7 @@ void lpc17_boardinitialize(void)
    * function lpc17_sspinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP0)
+#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
   if (lpc17_sspinitialize)
     {
       lpc17_sspinitialize();

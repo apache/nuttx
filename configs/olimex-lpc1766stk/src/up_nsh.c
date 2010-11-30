@@ -47,6 +47,9 @@
 #include <nuttx/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "lpc17_internal.h"
+#include "lpc1766stk_internal.h"
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -118,6 +121,10 @@ int nsh_archinitialize(void)
   FAR struct spi_dev_s *ssp;
   int ret;
 
+  /* Enable power to the SD/MMC via a GPIO. LOW enables SD/MMC. */
+
+  lpc17_gpiowrite(LPC1766STK_MMC_PWR, false);
+
   /* Get the SSP port */
 
   ssp = up_spiinitialize(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
@@ -125,7 +132,8 @@ int nsh_archinitialize(void)
     {
       message("nsh_archinitialize: Failed to initialize SSP port %d\n",
               CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
-      return -ENODEV;
+      ret = -ENODEV;
+      goto errout;
     }
 
   message("Successfully initialized SSP port %d\n",
@@ -133,15 +141,25 @@ int nsh_archinitialize(void)
 
   /* Bind the SSP port to the slot */
 
-  ret = mmcsd_spislotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ssp);
+  ret = mmcsd_spislotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR,
+                               CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ssp);
   if (ret < 0)
     {
-      message("nsh_archinitialize: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ret);
-      return ret;
+      message("nsh_archinitialize: "
+              "Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
+              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO,
+              CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ret);
+      goto errout;
     }
 
   message("Successfuly bound SSP port %d to MMC/SD slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO,
+          CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
   return OK;
+
+  /* Disable power to the SD/MMC via a GPIO. HIGH disables SD/MMC. */
+
+errout:
+  lpc17_gpiowrite(LPC1766STK_MMC_PWR, true);
+  return ret;
 }
