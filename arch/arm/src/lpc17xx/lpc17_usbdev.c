@@ -104,6 +104,10 @@
 #  define USB_ERROR_INT 0
 #endif
 
+/* CLKCTRL enable bits */
+
+#define LPC17_CLKCTRL_ENABLES (USBDEV_CLK_DEVCLK|USBDEV_CLK_PORTSELCLK|USBDEV_CLK_AHBCLK)
+
 /* Dump GPIO registers */
 
 #if defined(CONFIG_LPC17_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_GPIO)
@@ -3147,8 +3151,9 @@ void up_usbinitialize(void)
   regval |= SYSCON_PCONP_PCUSB;
   lpc17_putreg(regval, LPC17_SYSCON_PCONP);
 
-  /* Step 2: Enable clocking on USB (USB clocking was initialized in very
-   * low-level clock setup logic (see lpc17_clockconfig.c)
+  /* Step 2: Enable clocking on USB (USB PLL clocking was initialized in
+   * in very low-level clock setup logic (see lpc17_clockconfig.c)).  We
+   * do still need to set up USBCLKCTRL -- see below.
    */
 
   /* Step 3: Configure I/O pins */
@@ -3233,7 +3238,7 @@ void up_usbinitialize(void)
 
   /* Enable device and AHB clocking  */
 
-  lpc17_putreg(USBDEV_CLK_DEVCLK|USBDEV_CLK_AHBCLK, LPC17_USBDEV_CLKCTRL);
+  lpc17_putreg(LPC17_CLKCTRL_ENABLES, LPC17_USBDEV_CLKCTRL);
 
   /* And wait for the clocks to be reported as "ON" */
 
@@ -3241,7 +3246,7 @@ void up_usbinitialize(void)
     {
       regval = lpc17_getreg(LPC17_USBDEV_CLKST);
     }
-  while ((regval & (USBDEV_CLK_DEVCLK|USBDEV_CLK_AHBCLK)) != (USBDEV_CLK_DEVCLK|USBDEV_CLK_AHBCLK));
+  while ((regval & LPC17_CLKCTRL_ENABLES) != LPC17_CLKCTRL_ENABLES);
 
   /* Make sure all USB interrupts are disabled and cleared */
 
