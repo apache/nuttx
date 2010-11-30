@@ -653,7 +653,9 @@ Where <subdir> is one of the following:
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables only the serial  NSH interfaces.
+    Configuration enables both the serial and telnet NSH interfaces.
+    Support for the board's SPI-based MicroSD card is included
+    (but not passing tests as of this writing).
 
   ostest:
     This configuration directory, performs a simple OS test using

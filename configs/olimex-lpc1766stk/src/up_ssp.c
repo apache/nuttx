@@ -58,27 +58,28 @@
  * Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* The following enable debug output from this file (needs CONFIG_DEBUG too).
+ * 
+ * CONFIG_SSP_DEBUG - Define to enable basic SSP debug
+ * CONFIG_SSP_VERBOSE - Define to enable verbose SSP debug
+ */
 
-#undef SSP_DEBUG   /* Define to enable debug */
-#undef SSP_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SSP_DEBUG
+#ifdef CONFIG_SSP_DEBUG
 #  define sspdbg  lldbg
-#  ifdef SSP_VERBOSE
+#  ifdef CONFIG_SSP_VERBOSE
 #    define sspvdbg lldbg
 #  else
 #    define sspvdbg(x...)
 #  endif
 #else
-#  undef SSP_VERBOSE
+#  undef CONFIG_SSP_VERBOSE
 #  define sspdbg(x...)
 #  define sspvdbg(x...)
 #endif
 
 /* Dump GPIO registers */
 
-#ifdef SSP_VERBOSE
+#ifdef CONFIG_SSP_VERBOSE
 #  define ssp_dumpssp0gpio(m) lpc17_dumpgpio(LPC1766STK_LCD_CS, m)
 #  define ssp_dumpssp1gpio(m) lpc17_dumpgpio(LPC1766STK_MMC_CS, m)
 #else
