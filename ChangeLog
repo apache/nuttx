@@ -1376,5 +1376,9 @@
 	* arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
 	  selected.
 	* configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
-	  NSH (not verified on initial check-in)
+	  NSH.  Networking and telnetd interface functional.  Still testing SPI-based
+	  SD/MMC.
+	* examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
+	  CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
+      initialized and bad things happen if you try to ping.
 
