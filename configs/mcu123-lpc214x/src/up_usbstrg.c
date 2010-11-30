@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/mcu123-lpc214x/src/up_usbstrg.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Configure and register the LPC214x MMC/SD SPI block driver.
@@ -113,7 +113,7 @@ int usbstrg_archinitialize(void)
   message("usbstrg_archinitialize: Initializing SPI port %d\n",
           LPC214X_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(1);
+  spi = up_spiinitialize(LPC214X_MMCSDSPIPORTNO);
   if (!spi)
     {
       message("usbstrg_archinitialize: Failed to initialize SPI port %d\n",
