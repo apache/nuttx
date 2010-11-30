@@ -65,20 +65,21 @@
  * Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* The following enable debug output from this file (needs CONFIG_DEBUG too).
+ * 
+ * CONFIG_SSP_DEBUG - Define to enable basic SSP debug
+ * CONFIG_SSP_VERBOSE - Define to enable verbose SSP debug
+ */
 
-#undef SSP_DEBUG     /* Define to enable debug */
-#undef SSP_VERBOSE   /* Define to enable verbose debug */
-
-#ifdef SSP_DEBUG
+#ifdef CONFIG_SSP_DEBUG
 #  define sspdbg  lldbg
-#  ifdef SSP_VERBOSE
+#  ifdef CONFIG_SSP_VERBOSE
 #    define spivdbg lldbg
 #  else
 #    define spivdbg(x...)
 #  endif
 #else
-#  undef SSP_VERBOSE
+#  undef CONFIG_SSP_VERBOSE
 #  define sspdbg(x...)
 #  define spivdbg(x...)
 #endif
@@ -95,6 +96,10 @@
  * If we assume that CCLK less than or equal to 100MHz, we can just
  * use the CCLK undivided to get the SSP_CLOCK.
  */
+
+#if LPC17_CCLK > 100000000
+#  error "CCLK <= 100,000,000 assumed"
+#endif
 
 #define SSP_PCLKSET_DIV    SYSCON_PCLKSEL_CCLK
 #define SSP_CLOCK          LPC17_CCLK
