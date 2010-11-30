@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -291,6 +291,12 @@ extern const char g_fmtinternalerror[];
 extern int nsh_romfsetc(void);
 #else
 #  define nsh_romfsetc() (-ENOSYS)
+#endif
+
+#ifdef CONFIG_NET
+extern int nsh_netinit(void);
+#else
+#  define nsh_netinit()
 #endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)

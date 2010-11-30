@@ -44,7 +44,7 @@ CSRCS	+= nsh_romfsetc.c
 endif
 
 ifeq ($(CONFIG_NET),y)
-CSRCS	+= nsh_netcmds.c
+CSRCS	+= nsh_netinit.c nsh_netcmds.c
 endif
 
 ifeq ($(CONFIG_EXAMPLES_NSH_CONSOLE),y)

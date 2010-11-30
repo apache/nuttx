@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 27, 2010)
+NuttX TODO List (Last updated November 29, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -17,7 +17,7 @@ NuttX TODO List (Last updated November 27, 2010)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (6)  Build system / Toolchains
-  (3)  NuttShell (NSH) (examples/nsh)
+  (4)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
   (5)  Linux/Cywgin simulation (arch/sim)
   (3)  ARM (arch/arm/)
@@ -549,7 +549,11 @@ o NuttShell (NSH) (examples/nsh)
 
   Description: Add support to NSH to run NXFLAT programs from a ROMFS file system
   Status:      Open
-  Priority:    Low
+  Priority:    Low (enhancement)
+
+  Description: Add an ARP command so that we can see the contents of the ARP table.
+  Status:      Open
+  Priority:    Low (enhancement)
 
 o Other Applications & Tests (examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

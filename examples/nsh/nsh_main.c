@@ -989,6 +989,10 @@ int user_start(int argc, char *argv[])
 
   (void)nsh_archinitialize();
 
+  /* Bring up the network */
+
+  (void)nsh_netinit();
+
   /* Set the priority of this task to something in the middle so that 'nice'
    * can both raise and lower the priority.
    */
