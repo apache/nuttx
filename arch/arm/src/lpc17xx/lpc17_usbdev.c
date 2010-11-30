@@ -2046,6 +2046,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
   uint32_t devintstatus;  /* Sampled state of the device interrupt status register */
   uint32_t epintstatus;   /* Sampled state of the endpoint interrupt status register */
 #ifdef CONFIG_LPC17_USBDEV_DMA
+  uint32_t usbintstatus;  /* Sampled state is SYSCON USB interrupt status */
   uint32_t dmaintstatus;  /* Sampled state of dma interrupt status register */
 #endif
   uint32_t softprio;      /* Current priority interrupt bitset */
@@ -2061,7 +2062,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 #ifdef CONFIG_LPC17_USBDEV_DMA
   /* Check for low priority and high priority (non-DMA) interrupts */
 
-  if ((devintstatus & (USBDEV_INTST_REQLP|USBDEV_INTST_REQHP)) != 0)
+  usbintstatus = lpc17_getreg(LPC17_SYSCON_USBINTST);
+  if ((usbintstatus & (SYSCON_USBINTST_REQLP|SYSCON_USBINTST_REQHP)) != 0)
     {
 #endif
 #ifdef CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT
@@ -2309,7 +2311,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
   /* Check for DMA interrupts */
 
-  if ((lpc17_getreg(LPC17_USBDEV_INTST) & USBDEV_INTST_REQDMA) != 0)
+  if (usbintstatus & SYSCON_USBINTST_REQDMA) != 0)
     {
       /* First Software High priority and then low priority */
 
