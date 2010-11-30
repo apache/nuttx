@@ -174,15 +174,15 @@
 
 /* SD/MMC GPIO                      PIN  SIGNAL NAME
  * -------------------------------- ---- --------------
- * P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     79  SSEL1
+ * P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     79  SSEL1 (active low)
  * P0[7]/I2STX_CLK/SCK1/MAT2[1]      78  SCK1
  * P0[8]/I2STX_WS/MISO1/MAT2[2]      77  MISO1
  * P0[9]/I2STX_SDA/MOSI1/MAT2[3]     76  MOSI1
- * P0[21]/RI1/RD1                    57  MMC PWR
+ * P0[21]/RI1/RD1                    57  MMC PWR (active low)
  */
 
 #define LPC1766STK_MMC_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN6)
-#define LPC1766STK_MMC_PWR (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN21)
+#define LPC1766STK_MMC_PWR (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN21)
 
 /* AD GPIO                          PIN  SIGNAL NAME
  * -------------------------------- ---- --------------

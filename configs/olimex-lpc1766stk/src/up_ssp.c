@@ -118,6 +118,13 @@ void weak_function lpc17_sspinitialize(void)
 #ifdef CONFIG_LPC17_SSP1
   ssp_dumpssp0gpio("BEFORE SSP1 Initialization");
   lpc17_configgpio(LPC1766STK_MMC_CS);
+
+  /* Also configure the SD/MMC power GPIO (but leave power off).  This really has
+   * nothing to do with SSP, but does belong with other SD/MMC GPIO configuration
+   * settings.
+   */
+
+  lpc17_configgpio(LPC1766STK_MMC_PWR);
   ssp_dumpssp0gpio("AFTER SSP1 Initialization");
 #endif
 }
