@@ -65,10 +65,10 @@
  *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
  */
 
-#define LPC17_CCLK                 80000000 /* 80Mhz*/
+#define LPC17_CCLK                 80000000 /* 80Mhz */
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
- * of the main osciallator.
+ * of the main oscillator.
  */
 
 #undef CONFIG_LPC17_MAINOSC
@@ -87,6 +87,8 @@
  *  Source clock:               Main oscillator
  *  PLL0 Multiplier value (M):  20 
  *  PLL0 Pre-divider value (N): 1
+ *
+ *  PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz
  */
 
 #undef CONFIG_LPC17_PLL0
@@ -108,8 +110,8 @@
   (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLL1CFG_MSEL_SHIFT) | \
    ((BOARD_PLL1CFG_NSEL-1) << SYSCON_PLL1CFG_NSEL_SHIFT))
 
-/* USB divider.  This divder is used when PLL1 is not enabled to get the USB clock
- * from PLL0:
+/* USB divider.  This divider is used when PLL1 is not enabled to get the
+ * USB clock from PLL0:
  *
  *  USBCLK = PLL0CLK / 10 = 48MHz
  */
