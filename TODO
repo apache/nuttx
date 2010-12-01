@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 29, 2010)
+NuttX TODO List (Last updated November 30, 2010)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -710,16 +710,19 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
                important features have not yet been tested:  The microSD card and
                USB (device).  These features are fully implemented and partially
                tested, but not fully verified.
+               UPDATE:  The SPI-based microSD interface has been verified on the
+               Olimex-LPC1766-STK board.  The USB driver is not functional on either
+               board.  The problem: no interrupts when host connected.
   Status:      Open
   Priority:    High
 
   Description: a) USB DMA not fully implemented. Partial logic is in place but it is
                   fragmentary and bogus. (Leveraged from the lpc214x)
-               b) Possible errors in USB device driver reported "I suspect there’s a few
-                  issues in the lpc214x USB driver – in particular it doesn’t stall both
-                  in/out endpoints for unsupported setup requests and it doesn’t call
-                  CLASS_DISCONNCET on a USB reset – I don’t have any access to that hardware
-                  so can’t pursue it really."
+               b) Possible errors in USB device driver reported "I suspect there's a few
+                  issues in the lpc214x USB driver -- in particular it doesn't stall both
+                  in/out endpoints for unsupported setup requests and it doesn't call
+                  CLASS_DISCONNCET on a USB reset -- I don't have any access to that hardware
+                  so can't pursue it really."
   Status:      Open
   Priority:    Low
 
