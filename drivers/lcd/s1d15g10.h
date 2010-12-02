@@ -36,8 +36,8 @@
  *
  **************************************************************************************/
 
-#ifndef __DRIVERS_LCD_PCF8833_H
-#define __DRIVERS_LCD_PCF8833_H
+#ifndef __DRIVERS_LCD_S1D15G10_H
+#define __DRIVERS_LCD_S1D15G10_H
 
 /**************************************************************************************
  * Included Files
@@ -87,11 +87,11 @@
 
 /* Status register bit definions (after reset or NOP) */
 
-#define S1D15G10_SR_PARTIAL  (1 << 0)  /* Bit 1: Partial display */
-#define S1D15G10_SR_INVERSE  (1 << 1)  /* Bit 1: Display on */
+#define S1D15G10_SR_PARTIAL  (1 << 0)  /* Bit 0: Partial display */
+#define S1D15G10_SR_NORMAL   (1 << 1)  /* Bit 1: Normal (vs. inverse) display */
 #define S1D15G10_SR_EEPROM   (1 << 2)  /* Bit 2: EEPROM access */
 #define S1D15G10_SR_DISPON   (1 << 3)  /* Bit 3: Display on */
-#define S1D15G10_SR_COLSCAN  (1 << 4)  /* Bit 4: Column scan direction */
+#define S1D15G10_SR_COLSCAN  (1 << 4)  /* Bit 4: Column (vs. page) scan direction */
 #define S1D15G10_SR_RMW      (1 << 5)  /* Bit 5: Read modify write */
 #define S1D15G10_SR_SCROLL   (3 << 6)  /* Bits 6-7: Area scroll mode */
 
@@ -103,4 +103,4 @@
 
 #define S1D15G10_SR_VOLUME   0x07      /* Bits 0-2: Built-in resistance ratio */
 
-#endif /* __DRIVERS_LCD_PCF8833_H */
+#endif /* __DRIVERS_LCD_S1D15G10_H */

@@ -46,6 +46,11 @@
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
+/* Pixel format codes */
+
+#define PCF8833_FMT_8BPS  (2)
+#define PCF8833_FMT_12BPS (3)
+#define PCF8833_FMT_16BPS (5)
 
 /* LCD Commands */
 
@@ -103,23 +108,37 @@
 #define PCF8833_OTPSHTIN  0xf1 /* Shift data in OTP shift registers; Data: Any number of bytes */
 
 /* PCF8833 status register bit definitions */
+/* CMD format: RDDST command followed by four status bytes: */
+/* Byte 1: D31 d30 D29 D28 D27 D26 --- --- */
 
-#define PCF8833_ST_RGB_ORD        (1 <<  2)
-#define PCF8833_ST_LINE_ADDR_ORD  (1 <<  3)
-#define PCF8833_ST_ADDR_MODE      (1 <<  4)
-#define PCF8833_ST_X_ADDR_ODR     (1 <<  5)
-#define PCF8833_ST_Y_ADDR_ODR     (1 <<  6)
-#define PCF8833_ST_BOOSTER_ON     (1 <<  7)
-#define PCF8833_ST_NORM_MODE      (1 <<  8)
-#define PCF8833_ST_SLEEP_MODE     (1 <<  9)
-#define PCF8833_ST_PARTIAL_MODE   (1 << 10)
-#define PCF8833_ST_IDLE_MODE      (1 << 11)
-#define PCF8833_ST_PIXEL_FORM     (7 << 12)
-#define PCF8833_ST_TEARING_MODE   (1 << 17)
-#define PCF8833_ST_DISPLAY_MODE   (1 << 18)
-#define PCF8833_ST_ALL_PIXELS_OFF (1 << 19)
-#define PCF8833_ST_ALL_PIXELS_ON  (1 << 20)
-#define PCF8833_ST_INV_MODE       (1 << 21)
-#define PCF8833_ST_V_SCROLL_MODE  (1 << 23)
+#define PCF8833_ST_RGB              (1 <<  2) /* Bit 2: D26 - RGB/BGR order */
+#define PCF8833_ST_LINEADDR         (1 <<  3) /* Bit 3: D27 - Line address order */
+#define PCF8833_ST_ADDRMODE         (1 <<  4) /* Bit 4: D28 - Vertical/horizontal addressing mode */
+#define PCF8833_ST_XADDR            (1 <<  5) /* Bit 5: D29 - X address order */
+#define PCF8833_ST_YADDR            (1 <<  6) /* Bit 6: D30 - Y address order */
+#define PCF8833_ST_BOOSTER          (1 <<  7) /* Bit 7: D31 - Booster voltage status */
+
+/* Byte 2: --- D22 D21 D20 D19 D18 D17 D16 */
+
+#define PCF8833_ST_NORMAL           (1 <<  0) /* Bit 0: D16 - Normal display mode */
+#define PCF8833_ST_SLEEPIN          (1 <<  1) /* Bit 1: D17 - Sleep in selected */
+#define PCF8833_ST_PARTIAL          (1 <<  2) /* Bit 2: D18 - Partial mode on */
+#define PCF8833_ST_IDLE             (1 <<  3) /* Bit 3: D19 - Idle mode selected */
+#define PCF8833_ST_PIXELFMT_SHIFT   (4)       /* Bits 4-6: D20-D22 - Interface pixel format */
+#define PCF8833_ST_PIXELFMT_MASK    (7 << PCF8833_ST_PIXELFMT_SHIFT)
+#  define PCF8833_ST_PIXELFMT_8BPS  (PCF8833_FMT_8BPS << PCF8833_ST_PIXELFMT_SHIFT)
+#  define PCF8833_ST_PIXELFMT_12BPS (PCF8833_FMT_12BPS << PCF8833_ST_PIXELFMT_SHIFT)
+#  define PCF8833_ST_PIXELFMT_16BPS (PCF8833_FMT_16BPS << PCF8833_ST_PIXELFMT_SHIFT)
+
+/* Byte 3: D15 -- D13 D12 D11 D10 D9  --- */
+
+#define PCF8833_ST_TEARING          (1 << 1) /* Bit 1: D9 - Tearing effect on */
+#define PCF8833_ST_DISPLAYON        (1 << 2) /* Bit 2: D10 - Display on */
+#define PCF8833_ST_PIXELSOFF        (1 << 3) /* Bit 3: D11 - All pixels off */
+#define PCF8833_ST_PIXELSON         (1 << 4) /* Bit 4: D12 - All pixels on */
+#define PCF8833_ST_INV              (1 << 5) /* Bit 5: D13 - Display inversion */
+#define PCF8833_ST_VSCROLL          (1 << 7) /* Bit 6: D15 - Vertical scroll mode */
+
+/* Byte 4: All zero */
 
 #endif /* __DRIVERS_LCD_PCF8833_H */
