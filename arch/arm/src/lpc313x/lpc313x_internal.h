@@ -173,21 +173,25 @@ EXTERN void lpc313x_clockconfig(void);
  * Name:  lpc313x_spiselect and lpc313x_spistatus
  *
  * Description:
- *   The external functions, lpc313x_spiselect and lpc313x_spistatus must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common LPC313X logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, lpc313x_spiselect, lpc313x_spistatus, and
+ *   lpc313x_spicmddata must be provided by board-specific logic.  These are
+ *   implementations of the select, status, and cmddata methods of the SPI interface
+ *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods
+ *   (including up_spiinitialize()) are provided by common LPC313X logic.  To use
+ *   this common SPI logic on your board:
  *
  *   1. Provide logic in lpc313x_boardinitialize() to configure SPI chip select
  *      pins.
  *   2. Provide lpc313x_spiselect() and lpc313x_spistatus() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   3. If CONFIG_SPI_CMDDATA is selected in your NuttX configuration, provide
+ *      the lpc313x_spicmddata() function in your board-specific logic.  This
+ *      function will perform cmd/data selection operations using GPIOs in the
+ *      way your board is configured.
+ *   4. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   5. The handle returned by up_spiinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling 
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -198,6 +202,9 @@ struct spi_dev_s;
 enum spi_dev_e;
 EXTERN void  lpc313x_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t lpc313x_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int lpc313x_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 
 /************************************************************************************
  * Name:  lpc313x_usbpullup

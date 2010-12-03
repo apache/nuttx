@@ -94,6 +94,9 @@ static const struct spi_ops_s g_spiops =
   spi_setmode,
   NULL,              /* Variable number of bits not implemented */
   ez80_spistatus,    /* Provided externally by board logic */
+#ifdef CONFIG_SPI_CMDDATA
+  ez80_spicmddata,
+#endif
   spi_send,
   spi_sndblock,
   spi_recvblock,

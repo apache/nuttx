@@ -197,6 +197,9 @@ static const struct spi_ops_s g_spiops =
   .setmode      = spi_setmode,
   .setbits      = spi_setbits,
   .status       = imx_spistatus,    /* Provided externally by board logic */
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata      = imx_spicmddata,
+#endif
   .send         = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
   .exchange     = spi_exchange,

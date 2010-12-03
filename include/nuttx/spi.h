@@ -188,6 +188,34 @@
 #define SPI_STATUS_WRPROTECTED 0x02 /* Bit 1=1: MMC/SD card write protected */
 
 /****************************************************************************
+ * Name: SPI_CMDDATA
+ *
+ * Description:
+ *   Some devices require and additional out-of-band bit to specify if the
+ *   next word sent to the device is a command or data. This is typical, for
+ *   example, in "9-bit" displays where the 9th bit is the CMD/DATA bit.
+ *   This function provides selection of command or data.
+ *
+ *   This "latches" the CMD/DATA state.  It does not have to be called before
+ *   every word is transferred; only when the CMD/DATA state changes.  This
+ *   method is required if CONFIG_SPI_CMDDATA is selected in the NuttX
+ *   configuration
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   cmd - TRUE: The following word is a command; FALSE: the following words
+ *         are data.
+ *
+ * Returned Value:
+ *   OK unless an error occurs.  Then a negated errno value is returned
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SPI_CMDDATA
+#  define SPI_CMDDATA(d,id,cmd) ((d)->ops->cmddata(d,id,cmd))
+#endif
+
+/****************************************************************************
  * Name: SPI_SEND
  *
  * Description:
@@ -348,6 +376,9 @@ struct spi_ops_s
   void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
   void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
   uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifndef CONFIG_SPI_CMDDATA
+  int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
   uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
   void     (*exchange)(FAR struct spi_dev_s *dev, FAR const void *txbuffer,

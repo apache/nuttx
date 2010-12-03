@@ -396,6 +396,9 @@ static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
 static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static uint8_t  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+static int    spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen);
@@ -412,6 +415,9 @@ static const struct spi_ops_s g_spiops =
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
   .status            = spi_status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = spi_cmddata,
+#endif
   .send              = spi_send,
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
@@ -701,6 +707,38 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: spi_cmddata
+ *
+ * Description:
+ *   Some devices require and additional out-of-band bit to specify if the
+ *   next word sent to the device is a command or data. This is typical, for
+ *   example, in "9-bit" displays where the 9th bit is the CMD/DATA bit.
+ *   This function provides selection of command or data.
+ *
+ *   This "latches" the CMD/DATA state.  It does not have to be called before
+ *   every word is transferred; only when the CMD/DATA state changes.  This
+ *   method is required if CONFIG_SPI_CMDDATA is selected in the NuttX
+ *   configuration
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   cmd - TRUE: The following word is a command; FALSE: the following words
+ *         are data.
+ *
+ * Returned Value:
+ *   OK unless an error occurs.  Then a negated errno value is returned
+ *
+ ****************************************************************************/
+
+ #ifdef CONFIG_SPI_CMDDATA
+static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#  error "spi_cmddata not implemented"
+  return -ENOSYS;
+}
+#endif
 
 /****************************************************************************
  * Name: spi_send

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lm32/lm3s_spi.c
+ * arch/arm/src/lm32/lm3s_ssi.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -279,6 +279,9 @@ static const struct spi_ops_s g_spiops =
   .setmode      = ssi_setmode,
   .setbits      = ssi_setbits,
   .status       = lm3s_spistatus,    /* Provided externally by board logic */
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata      = lm3s_spicmddata,
+#endif
   .send         = ssi_send,
 #ifdef CONFIG_SPI_EXCHANGE
   .exchange     = ssi_exchange,

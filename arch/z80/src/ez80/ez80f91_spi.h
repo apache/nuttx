@@ -2,7 +2,7 @@
  * arch/z80/src/ez80/ez80f91_spi.h
  * arch/z80/src/chip/ez80f91_spi.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,23 +99,28 @@ extern "C" {
  * Public Functions
  ************************************************************************************/
 
-/* The external functions, ez80_spiselect and ez80_spistatus must be provided by
- * board-specific logic.  The are implementations of the select and status methods
- * SPI interface defined by struct spi_ops_s (see include/nuttx/spi.h).  All other
- * methods (including up_spiinitialize()) are provided by common logic.  To use this
- * common SPI logic on your board:
+/* The external functions, ez80_spiselect, ez80_spistatus, ans ez80_spicmddata must
+ * be provided by board-specific logic.  These are implementations of the select,
+ * status, and cmddata methods of the SPI interface defined by struct spi_ops_s (see
+ * include/nuttx/spi.h).  All other methods (including up_spiinitialize()) are
+ * provided by common logic.  To use this common SPI logic on your board:
  *
  *   1. Provide ez80_spiselect() and ez80_spistatus() functions in your board-specific 
  *      logic.  This function will perform chip selection and status operations using
  *      GPIOs in the way your board is configured.
- *   2. Add a call to up_spiinitialize() in your low level initialization logic
- *   3. The handle returned by up_spiinitialize() may then be used to bind the
+ *   2. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide the
+ *      ez80_spiscmddata() function in your board-specific logic.  This function will
+ *      perform cmd/data selection operations using GPIOs in the way your board is
+ *      configured.
+ *   3. Add a call to up_spiinitialize() in your low level initialization logic
+ *   4. The handle returned by up_spiinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
 
 EXTERN void ez80_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t ez80_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN int ez80_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 
 #undef EXTERN
 #ifdef __cplusplus
