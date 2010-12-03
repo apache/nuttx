@@ -171,6 +171,9 @@ static const struct spi_ops_s g_spi0ops =
   .setmode           = ssp_setmode,
   .setbits           = ssp_setbits,
   .status            = lpc17_ssp0status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = lpc17_ssp0cmddata,
+#endif
   .send              = ssp_send,
   .sndblock          = ssp_sndblock,
   .recvblock         = ssp_recvblock,
@@ -198,6 +201,9 @@ static const struct spi_ops_s g_spi1ops =
   .setmode           = ssp_setmode,
   .setbits           = ssp_setbits,
   .status            = lpc17_ssp1status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = lpc17_ssp1cmddata,
+#endif
   .send              = ssp_send,
   .sndblock          = ssp_sndblock,
   .recvblock         = ssp_recvblock,

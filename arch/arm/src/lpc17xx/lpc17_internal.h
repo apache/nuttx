@@ -555,22 +555,26 @@ EXTERN int lpc17_dumpgpio(uint16_t pinset, const char *msg);
 EXTERN void lpc17_clrpend(int irq);
 
 /************************************************************************************
- * Name:  lpc17_spi/ssp0/ssp1select and lpc17_spi/ssp0/ssp1status
+ * Name:  lpc17_spi/ssp0/ssp1select, lpc17_spi/ssp0/ssp1status, and
+ *        lpc17_spi/ssp0/ssp1cmddata
  *
  * Description:
- *   The external functions, lpc17_spi/ssp0/ssp1select and lpc17_spi/ssp0/ssp1status 
- *   must be provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common LPC17xx logic.  To use this common SPI logic on your
- *   board:
+ *   These external functions must be provided by board-specific logic.  They are
+ *   implementations of the select, status, and cmddata methods of the SPI interface
+ *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods 
+ *   including up_spiinitialize()) are provided by common LPC17xx logic.  To use
+ *   this common SPI logic on your board:
  *
  *   1. Provide logic in lpc17_boardinitialize() to configure SPI/SSP chip select
  *      pins.
  *   2. Provide lpc17_spi/ssp0/ssp1select() and lpc17_spi/ssp0/ssp1status() functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
+ *      lpc17_spi/ssp0/ssp1cmddata() functions in your board-specific logic.  These
+ *      functions will perform cmd/data selection operations using GPIOs in the way
+ *      your board is configured.
+ *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling 
@@ -585,14 +589,23 @@ enum spi_dev_e;
 #ifdef CONFIG_LPC17_SPI
 EXTERN void  lpc17_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t lpc17_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int lpc17_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 #endif
 #ifdef CONFIG_LPC17_SSP0
 EXTERN void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int lpc17_ssp0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 #endif
 #ifdef CONFIG_LPC17_SSP1
 EXTERN void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 #endif
 
 /****************************************************************************

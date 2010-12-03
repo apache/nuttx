@@ -145,6 +145,9 @@ static const struct spi_ops_s g_spiops =
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
   .status            = spi_status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = lpc313x_spicmddata,
+#endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
   .exchange          = spi_exchange,

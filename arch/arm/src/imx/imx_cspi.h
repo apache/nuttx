@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/imx/imx_cspi.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,23 +176,30 @@ extern "C" {
  * Public Functions
  ************************************************************************************/
 
-/* The external functions, imx_spiselect and imx_spistatus must be provided by
- * board-specific logic.  The are implementations of the select and status methods
- * SPI interface defined by struct spi_ops_s (see include/nuttx/spi.h).  All other
- * methods (including up_spiinitialize()) are provided by common logic.  To use this
- * common SPI logic on your board:
+/* The external functions, imx_spiselect, imx_spistatus, and imx_cmddaa must be
+ * provided by board-specific logic.  These are implementations of the select and
+ * status methods of the SPI interface defined by struct spi_ops_s (see
+ * include/nuttx/spi.h).  All other methods (including up_spiinitialize()) are
+ * provided by common logic.  To use this common SPI logic on your board:
  *
  *   1. Provide imx_spiselect() and imx_spistatus() functions in your board-specific 
  *      logic.  This function will perform chip selection and status operations using
  *      GPIOs in the way your board is configured.
- *   2. Add a call to up_spiinitialize() in your low level initialization logic
- *   3. The handle returned by up_spiinitialize() may then be used to bind the
+ *   2. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide the
+ *      imx_spicmddata() function in your board-specific logic.  This function will
+ *      perform cmd/data selection operations using GPIOs in the way your board is
+ *      configured.
+ *   3. Add a call to up_spiinitialize() in your low level initialization logic
+ *   4. The handle returned by up_spiinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
 
 EXTERN void imx_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t imx_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int imx_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

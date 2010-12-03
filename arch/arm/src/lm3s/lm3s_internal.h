@@ -474,9 +474,10 @@ EXTERN int lm3s_ethinitialize(int intf);
 #endif
 
 /****************************************************************************
- * The external functions, lm3s_spiselect and lm3s_spistatus must be provided
- * by board-specific logic.  The are implementations of the select and status
- * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi.h).
+ * The external functions, lm3s_spiselect, lm3s_spistatus, and
+ * lm3s_spicmddata must be provided by board-specific logic.  These are
+ * implementations of the select, status, and cmddaa methods of the SPI
+ * interface defined by struct spi_ops_s (see include/nuttx/spi.h).
  * All other methods (including up_spiinitialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
@@ -485,9 +486,13 @@ EXTERN int lm3s_ethinitialize(int intf);
  *   2. Provide lm3s_spiselect() and lm3s_spistatus() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide
+ *      the lm3s_spicmddata() function in your board-specific logic.  This
+ *      functions will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   4. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   5. The handle returned by up_spiinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling 
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -498,6 +503,9 @@ struct spi_dev_s;
 enum spi_dev_e;
 EXTERN void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int lm3s_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

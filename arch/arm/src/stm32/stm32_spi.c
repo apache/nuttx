@@ -209,6 +209,9 @@ static const struct spi_ops_s g_sp1iops =
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
   .status            = stm32_spi1status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = stm32_spi1cmddata,
+#endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
   .exchange          = spi_exchange,
@@ -245,6 +248,9 @@ static const struct spi_ops_s g_sp2iops =
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
   .status            = stm32_spi2status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = stm32_spi2cmddata,
+#endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
   .exchange          = spi_exchange,
@@ -281,6 +287,9 @@ static const struct spi_ops_s g_sp3iops =
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
   .status            = stm32_spi3status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = stm32_spi3cmddata,
+#endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
   .exchange          = spi_exchange,
