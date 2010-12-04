@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 29, 2010</p>
+      <p>Last Updated: December 3, 2010</p>
     </td>
   </tr>
 </table>
@@ -1997,11 +1997,20 @@ nuttx-5.15 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
       selected.
     * configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
-	  NSH.  Networking and telnetd interface functional.  Still testing SPI-based
-	  SD/MMC.
-	* examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
-	  CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
+      NSH.  Networking and telnetd interface functional.  Still testing SPI-based
+      SD/MMC.
+    * examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
+      CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
       initialized and bad things happen if you try to ping.
+    * drivers/lcd -- Add header files for the Phillips PCF8833 LCD controller and
+      for the Epson S1D15G10 LCD controller.  A driver for the Nokia 6100 LCD is
+      coming.
+    * include/nuttx/spi.h and almost all other SPI files -- Added an optional
+      cmddata() method to the SPI interface.  Some devices require and additional
+      out-of-band bit to specify if the next word sent to the device is a command
+      or data. This is typical, for example, in "9-bit" displays where the 9th bit
+      is the CMD/DATA bit. The cmddata method provides selection of command or data.
+	* drivers/lcd/p14201.c -- Now used the cmddata() method of the SPI interface.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

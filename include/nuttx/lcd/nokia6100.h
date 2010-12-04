@@ -1,6 +1,6 @@
 /****************************************************************************
- * include/nuttx/p14201.h
- * Application interface to the RiT P14201 OLED driver
+ * include/nuttx/lcd/nokia6100.h
+ * Application interface to the Nokia 6100 LCD display
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_P14201_H
-#define __INCLUDE_NUTTX_P14201_H
+#ifndef __INCLUDE_NUTTX_NOKIA6100_H
+#define __INCLUDE_NUTTX_NOKIA6100_H
 
 /****************************************************************************
  * Included Files
@@ -47,32 +47,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* P14201 Configuration Settings:
+/* Nokia 6100 Configuration Settings:
  *
- * CONFIG_P14201_SPIMODE - Controls the SPI mode
- * CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
- * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
+ * CONFIG_NOKIA6100_SPIMODE - Controls the SPI mode
+ * CONFIG_NOKIA6100_FREQUENCY - Define to use a different bus frequency
+ * CONFIG_NOKIA6100_NINTERFACES - Specifies the number of physical Nokia 6100 devices that
  *   will be supported.
- * CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed using an in-memory
- *   copy of the OLEDs GDDRAM.  This cost of this buffer is 128 * 96 / 2 = 6Kb.  If this
- *   is defined, then the driver will be fully functional. If not, then it will have the
- *   following limitations:
- *
- *   - Reading graphics memory cannot be supported, and
- *   - All pixel writes must be aligned to byte boundaries.
- *
- *   The latter limitation effectively reduces the 128x96 disply to 64x96.
  *
  * Required LCD driver settings:
- * CONFIG_LCD_P14201 - Enable P14201 support
+ * CONFIG_LCD_NOKIA6100 - Enable Nokia 6100 support
  * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
  * CONFIG_LCD_MAXPOWER must be 1
  */
-
-/* Some important "colors" */
-
-#define RIT_Y4_BLACK 0x00
-#define RIT_Y4_WHITE 0x0f
 
 /****************************************************************************
  * Public Types
@@ -94,53 +80,33 @@ extern "C" {
  ****************************************************************************/
 
 /**************************************************************************************
- * Name:  rit_initialize
+ * Name:  nokia_lcdinitialize
  *
  * Description:
- *   Initialize the P14201 video hardware.  The initial state of the OLED is fully
- *   initialized, display memory cleared, and the OLED ready to use, but with the power
+ *   Initialize the NOKIA6100 video hardware.  The initial state of the LCD is fully
+ *   initialized, display memory cleared, and the LCD ready to use, but with the power
  *   setting at 0 (full off == sleep mode).
  *
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.  This allows
- *   support for multiple OLED devices.
+ *   devno - A value in the range of 0 throuh CONFIG_NOKIA6100_NINTERFACES-1.  This
+ *     allows support for multiple LCD devices.
  *
  * Returned Value:
  *
  *   On success, this function returns a reference to the LCD object for the specified
- *   OLED.  NULL is returned on any failure.
+ *   LCD.  NULL is returned on any failure.
  *
  **************************************************************************************/
 
 struct lcd_dev_s; /* see nuttx/lcd.h */
 struct spi_dev_s; /* see nuttx/spi.h */
-EXTERN FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
-
-/**************************************************************************************
- * Name:  rit_seldata
- *
- * Description:
- *   Set or clear the SD1329 D/Cn bit to select data (true) or command (false).  This
- *   function must be provided by platform-specific logic.
- *
- * Input Parameters:
- *
- *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.  This allows
- *   support for multiple OLED devices.
- *   data - true: select data; false: select command
- *
- * Returned Value:
- *   None
- *
- **************************************************************************************/
-
-EXTERN void rit_seldata(unsigned int devno, bool data);
+EXTERN FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned int devno);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_P14201_H */
+#endif /* __INCLUDE_NUTTX_NOKIA6100_H */

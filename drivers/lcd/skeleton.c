@@ -48,7 +48,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
-#include <nuttx/lcd.h>
+#include <nuttx/lcd/lcd.h>
 
 #include "up_arch.h"
 

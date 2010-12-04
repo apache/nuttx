@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/lcd.h
+ * include/nuttx/lcd/lcd.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

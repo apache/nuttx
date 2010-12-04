@@ -215,6 +215,11 @@ CONFIG_RAW_BINARY=y
 CONFIG_HAVE_LIBM=n
 
 #
+# General SPI interface configuration
+#
+CONFIG_SPI_CMDDATA=y
+
+#
 # General OS setup
 #
 # CONFIG_APP_DIR - Identifies the relative path to the directory
@@ -526,7 +531,7 @@ CONFIG_NET_RESOLV_ENTRIES=4
 # CONFIG_NX_LCDDRIVER
 #   By default, NX builds to use a framebuffer driver (see
 #   include/nuttx/fb.h). If this option is defined, NX will
-#   build to use an LCD driver (see include/nuttx/lcd.h).
+#   build to use an LCD driver (see include/nuttx/lcd/lcd.h).
 # CONFIG_LCD_MAXPOWER - The full-on power setting for an LCD device.
 # CONFIG_LCD_MAXCONTRAST - The maximum contrast value for an LCD device.
 # CONFIG_NX_MOUSE
@@ -590,6 +595,7 @@ CONFIG_NX_BLOCKING=y
 CONFIG_NX_MXSERVERMSGS=32
 CONFIG_NX_MXCLIENTMSGS=16
 
+#
 # RiT P14201 OLED Driver Configuration
 #
 # CONFIG_LCD_P14201 - Enable P14201 support

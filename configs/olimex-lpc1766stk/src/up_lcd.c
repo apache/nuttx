@@ -1,6 +1,6 @@
 /****************************************************************************
- * config/lm3s8962-ek/src/up_oled.c
- * arch/arm/src/board/up_oled.c
+ * config/olimex-lpc1766stk/src/up_lcd.c
+ * arch/arm/src/board/up_lcd.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -30,7 +30,7 @@
  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * POSSPBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -46,16 +46,18 @@
 
 #include <nuttx/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/p14201.h>
+#include <nuttx/lcd/nokia6100.h>
 
-#include "lm3s_internal.h"
-#include "lm3s8962ek_internal.h"
+#include "lpc17_internal.h"
+#include "lpc17stk_internal.h"
+
+#ifdef defined(CONFIG_NX_LCDDRIVER) && defined(CONFIG_LCD_NOKIA6100) && defined(CONFIG_LPC17_SSP0)
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Define the CONFIG_LCD_RITDEBUG to enable detailed debug output (stuff you
+/* Define the CONFIG_LCD_NOKIADBG to enable detailed debug output (stuff you
  * would never want to see unless you are debugging this file).
  *
  * Verbose debug must also be enabled
@@ -67,17 +69,15 @@
 #endif
 
 #ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_LCD_RITDEBUG
+#  undef CONFIG_LCD_NOKIADBG
 #endif
 
-#ifdef CONFIG_LCD_RITDEBUG
-#  define ritdbg(format, arg...)  vdbg(format, ##arg)
-#  define oleddc_dumpgpio(m) lm3s_dumpgpio(OLEDDC_GPIO, m)
-#  define oledcs_dumpgpio(m) lm3s_dumpgpio(OLEDCS_GPIO, m)
+#ifdef CONFIG_LCD_NOKIADBG
+#  define lcddbg(format, arg...)  vdbg(format, ##arg)
+#  define lcd_dumpgpio(m) lm3s_dumpgpio(LPC1766STK_LCD_RST, m)
 #else
-#  define ritdbg(x...)
-#  define oleddc_dumpgpio(m)
-#  define oledcs_dumpgpio(m)
+#  define lcddbg(x...)
+#  define lcd_dumpgpio(m)
 #endif
 
 /****************************************************************************
@@ -88,7 +88,7 @@
  * Name: up_nxdrvinit
  *
  * Description:
- *   Called NX initialization logic to configure the OLED.
+ *   Called NX initialization logic to configure the LCD.
  *
  ****************************************************************************/
 
@@ -97,37 +97,41 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   FAR struct spi_dev_s *spi;
   FAR struct lcd_dev_s *dev;
 
-  /* Configure the OLED GPIOs */
+  /* Configure the LCD GPIOs */
 
-  oledcs_dumpgpio("up_nxdrvinit: After OLEDCS setup");
-  oleddc_dumpgpio("up_nxdrvinit: On entry");
+  lcd_dumpgpio("up_nxdrvinit: On entry");
+  lm3s_configgpio(LPC1766STK_LCD_RST);
+  lm3s_configgpio(LPC1766STK_LCD_BL);
+  lcd_dumpgpio("up_nxdrvinit: After GPIO setup");
 
-  lm3s_configgpio(OLEDDC_GPIO); /* PC7: OLED display data/control select (D/Cn) */
-  lm3s_configgpio(OLEDEN_GPIO); /* PC6: Enable +15V needed by OLED (EN+15V) */
+  /* Reset the LCD */
 
-  oleddc_dumpgpio("up_nxdrvinit: After OLEDDC/EN setup");
+  lpc17_gpiowrite(LPC1766STK_LCD_RST, false);
+  up_usdelay(10);
+  lpc17_gpiowrite(LPC1766STK_LCD_RST, true);
+  up_msdelay(5);
 
-  /* Get the SSI port (configure as a Freescale SPI port) */
+  /* Get the SSP port (configure as a Freescale SPI port) */
 
   spi = up_spiinitialize(0);
   if (!spi)
     {
-      glldbg("Failed to initialize SSI port 0\n");
+      glldbg("Failed to initialize SSP port 0\n");
     }
   else
     {
-      /* Bind the SSI port to the OLED */
+      /* Bind the SSP port to the LCD */
 
-      dev = rit_initialize(spi, devno);
+      dev = nokia_lcdinitialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SSI port 0 to OLED %d: %d\n", devno);
+          glldbg("Failed to bind SSP port 0 to LCD %d: %d\n", devno);
         }
      else
         {
-          gllvdbg("Bound SSI port 0 to OLED %d\n", devno);
+          gllvdbg("Bound SSP port 0 to LCD %d\n", devno);
 
-          /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
+          /* And turn the LCD on (CONFIG_LCD_MAXPOWER should be 1) */
 
           (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
           return dev;
@@ -136,37 +140,4 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   return NULL;
 }
 
-/******************************************************************************
- * Name:  lm3s_spicmddata
- *
- * Description:
- *   Set or clear the SD1329 D/Cn bit to select data (true) or command
- *   (false).  This function must be provided by platform-specific logic.
- *   This is an implementation of the cmddata method of the SPI
- *   interface defined by struct spi_ops_s (see include/nuttx/spi.h).
- *
- * Input Parameters:
- *
- *   spi - SPI device that controls the bus the device that requires the CMD/
- *         DATA selection.
- *   devid - If there are multiple devices on the bus, this selects which one
- *         to select cmd or data.  NOTE:  This design restricts, for example,
- *         one one SPI display per SPI bus.
- *   cmd - true: select command; false: select data
- *
- * Returned Value:
- *   None
- *
- ******************************************************************************/
-
-int lm3s_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
-{
-  if (devid == SPIDEV_DISPLAY)
-    {
-      /* Set GPIO to 1 for data, 0 for command */
-
-      lm3s_gpiowrite(OLEDDC_GPIO, !cmd);
-      return OK;
-    }
-  return -ENODEV;
-}
+#endif /* CONFIG_NX_LCDDRIVER && CONFIG_LCD_NOKIA6100 && CONFIG_LPC17_SSP0 */

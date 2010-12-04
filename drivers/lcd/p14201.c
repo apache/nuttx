@@ -49,8 +49,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
-#include <nuttx/lcd.h>
-#include <nuttx/p14201.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/p14201.h>
 
 #include <arch/irq.h>
 
@@ -84,7 +84,14 @@
  * CONFIG_LCD_P14201 - Enable P14201 support
  * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
  * CONFIG_LCD_MAXPOWER must be 1
+ *
+ * Required SPI driver settings:
+ * CONFIG_SPI_CMDDATA - Include support for cmd/data selection.
  */
+
+#ifndef CONFIG_SPI_CMDDATA
+#  error "CONFIG_SPI_CMDDATA must be defined in your NuttX configuration"
+#endif
 
 /* The P14201 spec says that is supports SPI mode 0,0 only.  However,
  * somtimes you need to tinker with these things.
@@ -167,8 +174,8 @@
 
 /* Helper Macros **********************************************************************/
 
-#define rit_sndcmd(p,b,l)  rit_sndbytes(p,b,l,false);
-#define rit_snddata(p,b,l) rit_sndbytes(p,b,l,true);
+#define rit_sndcmd(p,b,l)  rit_sndbytes(p,b,l,true);
+#define rit_snddata(p,b,l) rit_sndbytes(p,b,l,false);
 
 /* Debug ******************************************************************************/
 
@@ -207,7 +214,7 @@ static void rit_select(FAR struct spi_dev_s *spi);
 static void rit_deselect(FAR struct spi_dev_s *spi);
 #endif
 static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
-              size_t buflen, bool data);
+              size_t buflen, bool cmd);
 static void rit_sndcmds(FAR struct rit_dev_s *priv, FAR const uint8_t *table);
 
 /* LCD Data Transfer Methods */
@@ -557,18 +564,18 @@ static void rit_deselect(FAR struct spi_dev_s *spi)
  **************************************************************************************/
 
 static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
-                         size_t buflen, bool data)
+                         size_t buflen, bool cmd)
 {
   FAR struct spi_dev_s *spi = priv->spi;
   uint8_t tmp;
 
-  ritdbg("buflen: %d data: %s [%02x %02x %02x]\n",
-         buflen, data ? "YES" : "NO", buffer[0], buffer[1], buffer[2] );
+  ritdbg("buflen: %d cmd: %s [%02x %02x %02x]\n",
+         buflen, cmd ? "YES" : "NO", buffer[0], buffer[1], buffer[2] );
   DEBUGASSERT(spi);
 
-  /* Clear the D/Cn bit to enable command or data mode */
+  /* Clear/set the D/Cn bit to enable command or data mode */
 
-  rit_seldata(0, data);
+  (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY, cmd);
 
   /* Loop until the entire command/data block is transferred */
 

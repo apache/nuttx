@@ -1381,4 +1381,12 @@
 	* examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
 	  CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
       initialized and bad things happen if you try to ping.
-
+	* drivers/lcd -- Add header files for the Phillips PCF8833 LCD controller and
+	  for the Epson S1D15G10 LCD controller.  A driver for the Nokia 6100 LCD is
+	  coming.
+	* include/nuttx/spi.h and almost all other SPI files -- Added an optional
+	  cmddata() method to the SPI interface.  Some devices require and additional
+	  out-of-band bit to specify if the next word sent to the device is a command
+	  or data. This is typical, for example, in "9-bit" displays where the 9th bit
+	  is the CMD/DATA bit. The cmddata method provides selection of command or data.
+	* drivers/lcd/p14201.c -- Now used the cmddata() method of the SPI interface.

@@ -37,7 +37,7 @@ bch/
 
 lcd/
 	Drivers for parallel and serial LCD and OLED type devices.  These
-	drivers support interfaces as defined in include/nuttx/lcd.h
+	drivers support interfaces as defined in include/nuttx/lcd/lcd.h
 
 mmcsd/
 	Support for MMC/SD block drivers.  MMC/SD block drivers based on

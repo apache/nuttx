@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <fixedmath.h>
 
-#include <nuttx/lcd.h>
+#include <nuttx/lcd/lcd.h>
 #include <nuttx/nxglib.h>
 
 #include "nxglib_bitblit.h"

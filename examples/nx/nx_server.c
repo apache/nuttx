@@ -50,7 +50,7 @@
 #include <nuttx/nx.h>
 
 #ifdef CONFIG_NX_LCDDRIVER
-#  include <nuttx/lcd.h>
+#  include <nuttx/lcd/lcd.h>
 #else
 #  include <nuttx/fb.h>
 #endif

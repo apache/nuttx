@@ -265,7 +265,7 @@
       </li>
       <li>
         Any LCD-like device than can accept raster line <i>runs</i> through a parallel or serial interface
-        (see <code>include/nuttx/lcd.h</code>).
+        (see <code>include/nuttx/lcd/lcd.h</code>).
         By default, NX is configured to use the frame buffer driver unless <code>CONFIG_NX_LCDDRIVER</code> is defined =y in your NuttX configuration file.
       </li>
     </ul>
@@ -2616,7 +2616,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       to know if the pixels pack from the MS to LS or from LS to MS
     <dt><code>CONFIG_NX_LCDDRIVER</code>:
       <dd>By default, NX builds to use a framebuffer driver (see <code>include/nuttx/fb.h</code>).
-      If this option is defined, NX will build to use an LCD driver (see <code>include/nuttx/lcd.h</code>).
+      If this option is defined, NX will build to use an LCD driver (see <code>include/nuttx/lcd/lcd.h</code>).
   </li>
   </dl>
 </ul>

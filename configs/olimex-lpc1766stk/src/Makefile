@@ -45,6 +45,9 @@ endif
 ifeq ($(CONFIG_APP_DIR),examples/usbstorage)
 CSRCS		+= up_usbstrg.c
 endif
+ifeq ($(CONFIG_NX_LCDDRIVER),y)
+CSRCS		+= up_lcd.c
+endif
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 COBJS		= $(CSRCS:.c=$(OBJEXT))

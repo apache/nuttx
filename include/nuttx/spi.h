@@ -211,7 +211,7 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_CMDDATA
+#ifdef CONFIG_SPI_CMDDATA
 #  define SPI_CMDDATA(d,id,cmd) ((d)->ops->cmddata(d,id,cmd))
 #endif
 
@@ -376,7 +376,7 @@ struct spi_ops_s
   void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
   void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
   uint8_t  (*status)(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-#ifndef CONFIG_SPI_CMDDATA
+#ifdef CONFIG_SPI_CMDDATA
   int      (*cmddata)(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
   uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);

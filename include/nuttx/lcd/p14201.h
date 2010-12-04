@@ -1,5 +1,6 @@
 /****************************************************************************
- * graphics/nxglib/lcd/nxsglib_copyrectangle.c
+ * include/nuttx/lcd/p14201.h
+ * Application interface to the RiT P14201 OLED driver
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,109 +34,96 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_P14201_H
+#define __INCLUDE_NUTTX_P14201_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <assert.h>
-
-#include <nuttx/lcd/lcd.h>
-#include <nuttx/nxglib.h>
-
-#include "nxglib_bitblit.h"
-#include "nxglib_copyrun.h"
+#include <stdbool.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* P14201 Configuration Settings:
+ *
+ * CONFIG_P14201_SPIMODE - Controls the SPI mode
+ * CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
+ * CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
+ *   will be supported.
+ * CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed using an in-memory
+ *   copy of the OLEDs GDDRAM.  This cost of this buffer is 128 * 96 / 2 = 6Kb.  If this
+ *   is defined, then the driver will be fully functional. If not, then it will have the
+ *   following limitations:
+ *
+ *   - Reading graphics memory cannot be supported, and
+ *   - All pixel writes must be aligned to byte boundaries.
+ *
+ *   The latter limitation effectively reduces the 128x96 disply to 64x96.
+ *
+ * Required LCD driver settings:
+ * CONFIG_LCD_P14201 - Enable P14201 support
+ * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXPOWER must be 1
+ *
+ * Required SPI driver settings:
+ * CONFIG_SPI_CMDDATA - Include support for cmd/data selection.
+ */
+
+/* Some important "colors" */
+
+#define RIT_Y4_BLACK 0x00
+#define RIT_Y4_WHITE 0x0f
 
 /****************************************************************************
- * Private Data
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: nxgl_copyrectangle_*bpp
+/**************************************************************************************
+ * Name:  rit_initialize
  *
- * Descripton:
- *   Copy a rectangular bitmap image into the specific position in the
- *   framebuffer memory.
+ * Description:
+ *   Initialize the P14201 video hardware.  The initial state of the OLED is fully
+ *   initialized, display memory cleared, and the OLED ready to use, but with the power
+ *   setting at 0 (full off == sleep mode).
  *
- ****************************************************************************/
+ * Input Parameters:
+ *
+ *   spi - A reference to the SPI driver instance.
+ *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.  This allows
+ *   support for multiple OLED devices.
+ *
+ * Returned Value:
+ *
+ *   On success, this function returns a reference to the LCD object for the specified
+ *   OLED.  NULL is returned on any failure.
+ *
+ **************************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_copyrectangle,NXGLIB_SUFFIX)
-(FAR struct lcd_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *dest,
- FAR const void *src, FAR const struct nxgl_point_s *origin,
- unsigned int srcstride)
-{
-  FAR const uint8_t *sline;
-  unsigned int ncols;
-  unsigned int row;
-  unsigned int xoffset;
-#if NXGLIB_BITSPERPIXEL < 8
-  unsigned int remainder;
-#endif
+struct lcd_dev_s; /* see nuttx/lcd.h */
+struct spi_dev_s; /* see nuttx/spi.h */
+EXTERN FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
 
-  /* Get the dimensions of the rectange to fill: width in pixels,
-   * height in rows
-   */
-
-  ncols = dest->pt2.x - dest->pt1.x + 1;
-
-  /* Set up to copy the image */
-
-  xoffset = dest->pt1.x - origin->x;
-  sline = (const uint8_t*)src + NXGL_SCALEX(xoffset) + (dest->pt1.y - origin->y) * srcstride;
-#if NXGLIB_BITSPERPIXEL < 8
-  remainder = NXGL_REMAINDERX(xoffset);
-#endif
-
-  /* Copy the image, one row at a time */
-
-  for (row = dest->pt1.y; row <= dest->pt2.y; row++)
-    {
-#if NXGLIB_BITSPERPIXEL < 8
-      /* if the source pixel is not aligned with a byte boundary, then we will
-       * need to copy the image data to the run buffer first.
-       */
-
-      if (remainder != 0)
-        {
-          NXGL_FUNCNAME(nxgl_copyrun,NXGLIB_SUFFIX)(sline, pinfo->buffer, remainder, ncols);
-          (void)pinfo->putrun(row, dest->pt1.x, pinfo->buffer, ncols);
-        }
-      else
-#endif
-        {
-          /* The pixel data is byte aligned.  Copy the image data directly from
-           * the image memory.
-           */
-
-          (void)pinfo->putrun(row, dest->pt1.x, sline, ncols);
-        }
-
-      /* Then adjust the source pointer to refer to the next line in the source
-       * image.
-       */
-
-      sline += srcstride;
-    }
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __INCLUDE_NUTTX_P14201_H */
