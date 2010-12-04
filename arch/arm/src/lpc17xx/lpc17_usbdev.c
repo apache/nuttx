@@ -1487,6 +1487,15 @@ static void lpc17_usbreset(struct lpc17_usbdev_s *priv)
 
   lpc17_putreg(USB_SLOW_INT|USB_DEVSTATUS_INT|USB_FAST_INT|USB_FRAME_INT|USB_ERROR_INT,
                LPC17_USBDEV_INTEN);
+
+  /* Tell the class driver that we are disconnected. The class 
+   * driver should then accept any new configurations.
+   */
+
+  if (priv->driver)
+    {
+      CLASS_DISCONNECT(priv->driver, &priv->usbdev);
+    }
 }
 
 /*******************************************************************************
@@ -1895,8 +1904,8 @@ static inline void lpc17_ep0setup(struct lpc17_usbdev_s *priv)
   if (priv->stalled)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_EP0SETUPSTALLED), priv->ep0state);
-      lpc17_epstall(&ep0->ep, false);
-      lpc17_epstall(&ep0->ep, false);
+      lpc17_epstall(&priv->eplist[LPC17_EP0_IN].ep, false);
+      lpc17_epstall(&priv->eplist[LPC17_EP0_OUT].ep, false);
     }
 }
 
@@ -1957,9 +1966,8 @@ static inline void lpc17_ep0dataoutinterrupt(struct lpc17_usbdev_s *priv)
   if (priv->stalled)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_EP0OUTSTALLED), priv->ep0state);
-      ep0 = &priv->eplist[LPC17_EP0_OUT];
-      lpc17_epstall(&ep0->ep, false);
-      lpc17_epstall(&ep0->ep, false);
+      lpc17_epstall(&priv->eplist[LPC17_EP0_IN].ep, false);
+      lpc17_epstall(&priv->eplist[LPC17_EP0_OUT].ep, false);
     }
   return;
 }
@@ -2024,9 +2032,8 @@ static inline void lpc17_ep0dataininterrupt(struct lpc17_usbdev_s *priv)
   if (priv->stalled)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_EP0INSTALLED), priv->ep0state);
-      ep0 = &priv->eplist[LPC17_EP0_IN];
-      lpc17_epstall(&ep0->ep, false);
-      lpc17_epstall(&ep0->ep, false);
+      lpc17_epstall(&priv->eplist[LPC17_EP0_IN].ep, false);
+      lpc17_epstall(&priv->eplist[LPC17_EP0_OUT].ep, false);
     }
 }
 

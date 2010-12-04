@@ -2604,7 +2604,11 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       /* FIXME: nothing seems to call DEV_CONNECT(), but we need to set
        *        the RS bit to enable the controller.  It kind of makes sense 
-       *        to do this after the class has bound to us... */
+       *        to do this after the class has bound to us...
+       * GEN:   This bug is really in the class driver.  It should make the
+       *        soft connect when it is ready to be enumerated.  I have added
+       *        that logic to the class drivers but left this logic here.
+       */
 
       lpc313x_pullup(&g_usbdev.usbdev, true);
     }
