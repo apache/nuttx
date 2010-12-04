@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 3, 2010</p>
+      <p>Last Updated: December 4, 2010</p>
     </td>
   </tr>
 </table>
@@ -2011,6 +2011,10 @@ nuttx-5.15 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       or data. This is typical, for example, in "9-bit" displays where the 9th bit
       is the CMD/DATA bit. The cmddata method provides selection of command or data.
 	* drivers/lcd/p14201.c -- Now used the cmddata() method of the SPI interface.
+	* arch/arm/src/lpc17xx/lpc17_usbdev.c -- LPC17xx USB driver is not functional.
+	* drivers/usbdev/usbserial.c and usbstorage.c -- All USB class drivers need
+	  to call DEV_CONNECT() when they are ready to be enumerated.  That is,
+	  (1) initially when bound to the USB driver, and (2) after a USB reset.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

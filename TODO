@@ -716,13 +716,8 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
   Status:      Open
   Priority:    High
 
-  Description: a) USB DMA not fully implemented. Partial logic is in place but it is
-                  fragmentary and bogus. (Leveraged from the lpc214x)
-               b) Possible errors in USB device driver reported "I suspect there's a few
-                  issues in the lpc214x USB driver -- in particular it doesn't stall both
-                  in/out endpoints for unsupported setup requests and it doesn't call
-                  CLASS_DISCONNCET on a USB reset -- I don't have any access to that hardware
-                  so can't pursue it really."
+  Description: USB DMA not fully implemented. Partial logic is in place but it is
+               fragmentary and bogus. (Leveraged from the lpc214x)
   Status:      Open
   Priority:    Low
 

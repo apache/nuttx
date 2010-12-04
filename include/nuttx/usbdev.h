@@ -135,7 +135,10 @@
 
 #define DEV_CLRSELFPOWERED(dev)    (dev)->ops->selfpowered(dev, false)
 
-/* Software-controlled connect to USB host */
+/* Software-controlled connect to USB host. All USB class drivers need to call
+ * DEV_CONNECT() when they are ready to be enumerated.  That is, (1) initially when
+ * bound to the USB driver, and (2) after a USB reset.
+ */
 
 #define DEV_CONNECT(dev)           (dev)->ops->pullup ? (dev)->ops->pullup(dev,true) : -EOPNOTSUPP
 

@@ -60,6 +60,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <string.h>
 #include <errno.h>

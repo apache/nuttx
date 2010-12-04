@@ -1392,6 +1392,10 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 #ifdef CONFIG_USBDEV_SELFPOWERED
   DEV_SETSELFPOWERED(dev);
 #endif
+
+  /* And pull-up the data line for the soft connect function */
+
+  DEV_CONNECT(dev);
   return OK;
 
 errout:
@@ -1830,6 +1834,12 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
   priv->serdev.xmit.head = 0;
   priv->serdev.xmit.tail = 0;
   irqrestore(flags);
+
+  /* Perform the soft connect function so that we will we can be
+   * re-enumerated.
+   */
+
+  DEV_CONNECT(dev); 
 }
 
 /****************************************************************************

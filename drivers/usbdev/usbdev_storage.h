@@ -367,21 +367,21 @@ struct usbstrg_lun_s
 
 struct usbstrg_dev_s
 {
-  FAR struct usbdev_s     *usbdev;    /* usbdev driver pointer (Non-null if registered) */
+  FAR struct usbdev_s *usbdev;        /* usbdev driver pointer (Non-null if registered) */
 
   /* Worker thread interface */
 
-  pthread_t        thread;            /* The worker thread */
-  pthread_mutex_t  mutex;             /* Mutually exclusive access to resources*/
-  pthread_cond_t   cond;              /* Used to signal worker thread */
+  pthread_t         thread;           /* The worker thread */
+  pthread_mutex_t   mutex;            /* Mutually exclusive access to resources*/
+  pthread_cond_t    cond;             /* Used to signal worker thread */
   volatile uint8_t  thstate;          /* State of the worker thread */
   volatile uint16_t theventset;       /* Set of pending events signaled to worker thread */
   volatile uint8_t  thvalue;          /* Value passed with the event (must persist) */
 
   /* Storage class configuration and state */
 
-  uint8_t          nluns:4;           /* Number of LUNs */
-  uint8_t          config;            /* Configuration number */
+  uint8_t           nluns:4;          /* Number of LUNs */
+  uint8_t           config;           /* Configuration number */
 
   /* Endpoints */
 
@@ -394,29 +394,29 @@ struct usbstrg_dev_s
   struct usbstrg_lun_s    *lun;       /* Currently selected LUN */
   struct usbstrg_lun_s    *luntab;    /* Allocated table of all LUNs */
   uint8_t cdb[USBSTRG_MAXCDBLEN];     /* Command data (cdb[]) from CBW */
-  uint8_t          phaseerror:1;      /* Need to send phase sensing status */
-  uint8_t          shortpacket:1;     /* Host transmission stopped unexpectedly */
-  uint8_t          cbwdir:2;          /* Direction from CBW. See USBSTRG_FLAGS_DIR* definitions */
-  uint8_t          cdblen;            /* Length of cdb[] from CBW */
-  uint8_t          cbwlun;            /* LUN from the CBW */
-  uint16_t         nsectbytes;        /* Bytes buffered in iobuffer[] */
-  uint16_t         nreqbytes;         /* Bytes buffered in head write requests */
-  uint16_t         iosize;            /* Size of iobuffer[] */
-  uint32_t         cbwlen;            /* Length of data from CBW */
-  uint32_t         cbwtag;            /* Tag from the CBW */
+  uint8_t           phaseerror:1;     /* Need to send phase sensing status */
+  uint8_t           shortpacket:1;    /* Host transmission stopped unexpectedly */
+  uint8_t           cbwdir:2;         /* Direction from CBW. See USBSTRG_FLAGS_DIR* definitions */
+  uint8_t           cdblen;           /* Length of cdb[] from CBW */
+  uint8_t           cbwlun;           /* LUN from the CBW */
+  uint16_t          nsectbytes;       /* Bytes buffered in iobuffer[] */
+  uint16_t          nreqbytes;        /* Bytes buffered in head write requests */
+  uint16_t          iosize;           /* Size of iobuffer[] */
+  uint32_t          cbwlen;           /* Length of data from CBW */
+  uint32_t          cbwtag;           /* Tag from the CBW */
   union
     {
-      uint32_t     xfrlen;            /* Read/Write: Sectors remaining to be transferred */
-      uint32_t     alloclen;          /* Other device-to-host: Host allocation length */
+      uint32_t      xfrlen;           /* Read/Write: Sectors remaining to be transferred */
+      uint32_t      alloclen;         /* Other device-to-host: Host allocation length */
     } u;
-  uint32_t         sector;            /* Current sector (relative to lun->startsector) */
-  uint32_t         residue;           /* Untransferred amount reported in the CSW */
-  uint8_t         *iobuffer;          /* Buffer for data transfers */
+  uint32_t          sector;           /* Current sector (relative to lun->startsector) */
+  uint32_t          residue;          /* Untransferred amount reported in the CSW */
+  uint8_t          *iobuffer;         /* Buffer for data transfers */
 
   /* Write request list */
 
-  struct sq_queue_s       wrreqlist;   /* List of empty write request containers */
-  struct sq_queue_s       rdreqlist;   /* List of filled read request containers */
+  struct sq_queue_s wrreqlist;        /* List of empty write request containers */
+  struct sq_queue_s rdreqlist;        /* List of filled read request containers */
 
   /* Pre-allocated write request containers.  The write requests will
    * be linked in a free list (wrreqlist), and used to send requests to
