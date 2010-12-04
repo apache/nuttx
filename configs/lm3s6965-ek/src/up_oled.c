@@ -45,8 +45,8 @@
 #include <errno.h>
 
 #include <nuttx/spi.h>
-#include <nuttx/lcd.h>
-#include <nuttx/p14201.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/p14201.h>
 
 #include "lm3s_internal.h"
 #include "lm3s6965ek_internal.h"
@@ -137,26 +137,36 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 }
 
 /******************************************************************************
- * Name:  rit_seldata
+ * Name:  lm3s_spicmddata
  *
  * Description:
  *   Set or clear the SD1329 D/Cn bit to select data (true) or command
  *   (false).  This function must be provided by platform-specific logic.
+ *   This is an implementation of the cmddata method of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi.h).
  *
  * Input Parameters:
  *
- *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.
- *           This allows support for multiple OLED devices.
- *   data - true: select data; false: select command
+ *   spi - SPI device that controls the bus the device that requires the CMD/
+ *         DATA selection.
+ *   devid - If there are multiple devices on the bus, this selects which one
+ *         to select cmd or data.  NOTE:  This design restricts, for example,
+ *         one one SPI display per SPI bus.
+ *   cmd - true: select command; false: select data
  *
  * Returned Value:
  *   None
  *
  ******************************************************************************/
 
-void rit_seldata(unsigned int devno, bool data)
+int lm3s_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
-  /* Set GPIO to 1 for data, 0 for command */
+  if (devid == SPIDEV_DISPLAY)
+    {
+      /* Set GPIO to 1 for data, 0 for command */
 
-  lm3s_gpiowrite(OLEDDC_GPIO, data);
+      lm3s_gpiowrite(OLEDDC_GPIO, !cmd);
+      return OK;
+    }
+  return -ENODEV;
 }

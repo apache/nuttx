@@ -119,7 +119,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/lcd.h>
+#include <nuttx/lcd/lcd.h>
 #include <nuttx/rgbcolors.h>
 
 #include <arch/irq.h>

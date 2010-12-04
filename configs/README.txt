@@ -739,7 +739,7 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NX_LCDDRIVER
 		  By default, NX builds to use a framebuffer driver (see
 		  include/nuttx/fb.h). If this option is defined, NX will
-		  build to use an LCD driver (see include/nuttx/lcd.h).
+		  build to use an LCD driver (see include/nuttx/lcd/lcd.h).
 		CONFIG_LCD_MAXPOWER - The full-on power setting for an LCD
 		  device.
 		CONFIG_LCD_MAXCONTRAST - The maximum contrast value for an
