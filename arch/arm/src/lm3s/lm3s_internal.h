@@ -303,13 +303,13 @@
 #  define GPIO_SSI0_FSS    (GPIO_FUNC_PFIO      | GPIO_PORTA | 3)       /* PA3: SSI0 frame (SSI0Fss) */
 #  define GPIO_SSI0_RX     (GPIO_FUNC_PFINPUT   | GPIO_PORTA | 4)       /* PA4: SSI0 receive (SSI0Rx) */
 #  define GPIO_SSI0_TX     (GPIO_FUNC_PFOUTPUT  | GPIO_PORTA | 5)       /* PA5: SSI0 transmit (SSI0Tx) */
-#  define GPIO_TMR1_CCP    (GPIO_FUNC_PFIO  | GPIO_PORTA | 6)        /* PA6: Capture/Compare/PWM0 (CCP1) */
+#  define GPIO_TMR1_CCP    (GPIO_FUNC_PFIO      | GPIO_PORTA | 6)       /* PA6: Capture/Compare/PWM0 (CCP1) */
 #  define GPIO_PWM1_2      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTB | 0)       /* PB0: PWM Generator 1, PWM2 */
 #  define GPIO_PWM1_3      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTB | 1)       /* PB1: PWM Generator 1, PWM3 */
 #  define GPIO_I2C0_SCL    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTB | 2)       /* PB2: I2C0 clock (I2C0SCL) */
 #  define GPIO_I2C0_SDA    (GPIO_FUNC_PFODIO    | GPIO_PORTB | 3)       /* PB3: I2C0 data (I2C0SDA) */
 #  define GPIO_CMP0_NIN    (GPIO_FUNC_PFINPUT   | GPIO_PORTB | 4)       /* PB4: Analog comparator 0 negative input (C0-) */
-#  define GPIO_CMP0_OUT    (GPIO_FUNC_PFOUTPUT   | GPIO_PORTB | 5)       /* PB5: Analog comparator 0 output (C0o)  ( differs) */
+#  define GPIO_CMP0_OUT    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTB | 5)       /* PB5: Analog comparator 0 output (C0o) (differs) */
 #  define GPIO_CMP0_PIN    (GPIO_FUNC_PFINPUT   | GPIO_PORTB | 6)       /* PB6: Analog comparator 0 positive input (C0+) */
 #  define GPIO_JTAG_TRST   (GPIO_FUNC_PFINPUT   | GPIO_PORTB | 7)       /* PB7: JTAG ~TRST */
 #  define GPIO_JTAG_TCK    (GPIO_FUNC_PFINPUT   | GPIO_PORTC | 0)       /* PC0: JTAG/SWD CLK */
@@ -320,14 +320,14 @@
 #  define GPIO_JTAG_TDO    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTC | 3)       /* PC3: JTAG TDO */
 #  define GPIO_JTAG_SWO    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTC | 3)       /* PC3: JTAG SWO */
 #  define GPIO_QEI0_PHA    (GPIO_FUNC_PFINPUT   | GPIO_PORTC | 4)       /* PC4: QEI module 0 phase A. */
-#  define GPIO_QEI0_PHB    (GPIO_FUNC_PFINPUT      | GPIO_PORTC | 6)       /* PC6: QEI module 0 phase B. */
-#  define GPIO_CAN0_RX    (GPIO_FUNC_PFINPUT   | GPIO_PORTD | 0)       /* PD0: CAN module  RX */
+#  define GPIO_QEI0_PHB    (GPIO_FUNC_PFINPUT   | GPIO_PORTC | 6)       /* PC6: QEI module 0 phase B. */
+#  define GPIO_CAN0_RX     (GPIO_FUNC_PFINPUT   | GPIO_PORTD | 0)       /* PD0: CAN module  RX */
 #  define GPIO_CAN0_TX     (GPIO_FUNC_PFOUTPUT  | GPIO_PORTD | 1)       /* PD1: CAN module TX */
 #  define GPIO_UART1_RX    (GPIO_FUNC_PFINPUT   | GPIO_PORTD | 2)       /* PD2: UART 1 receive (U1Rx) */
 #  define GPIO_UART1_TX    (GPIO_FUNC_PFOUTPUT  | GPIO_PORTD | 3)       /* PD3: UART 1 transmit (U1Tx) */
 #  define GPIO_TMR0_CCP    (GPIO_FUNC_PFIO      | GPIO_PORTD | 4)       /* PD4: Capture/Compare/PWM0 (CCP0) */
 #  define GPIO_PWM_FAULT   (GPIO_FUNC_PFINPUT   | GPIO_PORTD | 6)       /* PD6: PWM Fault */
-#  define GPIO_QEI0_IDX   (GPIO_FUNC_PFIO      | GPIO_PORTD | 7)       /* PC7: /* PD0: QEI module 0 index. ) */
+#  define GPIO_QEI0_IDX    (GPIO_FUNC_PFIO      | GPIO_PORTD | 7)       /* PC7: QEI module 0 index */
 #  define GPIO_PWM2_4      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTE | 0)       /* PE0: PWM Generator 2, PWM4 */
 #  define GPIO_PWM2_5      (GPIO_FUNC_PFOUTPUT  | GPIO_PORTE | 1)       /* PE1: PWM Generator 1, PWM5 */
 #  define GPIO_QEI1_PHB    (GPIO_FUNC_PFINPUT   | GPIO_PORTE | 2)       /* PE2: QEI module 1 phase B. */
@@ -476,7 +476,7 @@ EXTERN int lm3s_ethinitialize(int intf);
 /****************************************************************************
  * The external functions, lm3s_spiselect, lm3s_spistatus, and
  * lm3s_spicmddata must be provided by board-specific logic.  These are
- * implementations of the select, status, and cmddaa methods of the SPI
+ * implementations of the select, status, and cmddata methods of the SPI
  * interface defined by struct spi_ops_s (see include/nuttx/spi.h).
  * All other methods (including up_spiinitialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
