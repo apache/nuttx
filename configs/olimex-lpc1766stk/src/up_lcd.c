@@ -48,6 +48,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/nokia6100.h>
 
+#include "lpc17_syscon.h"
 #include "lpc17_internal.h"
 #include "lpc17stk_internal.h"
 
@@ -56,6 +57,16 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
+/* Check power setting */
+
+#if !defined(CONFIG_LCD_MAXPOWER) || CONFIG_LCD_MAXPOWER != 128
+#  error "CONFIG_LCD_MAXPOWER must be 128"
+#endif
+
+/* Backlight OFF PWM setting */
+
+#define NOKIA_BACKLIGHT_OFF 0x40
 
 /* Define the CONFIG_LCD_NOKIADBG to enable detailed debug output (stuff you
  * would never want to see unless you are debugging this file).
@@ -79,6 +90,84 @@
 #  define lcddbg(x...)
 #  define lcd_dumpgpio(m)
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nokia_blinitialize
+ *
+ * Description:
+ *   Initialize PWM1 to manage the LCD backlight.
+ *
+ ****************************************************************************/
+
+void nokia_blinitialize(void)
+{
+  uint32_t regval;
+
+  /* Enable clocking of PWM1 */
+
+  regval = regreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCPWM1;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+
+  /* Disable and reset PWM1 */
+
+  regval  = getreg32(LPC17_PWM1_TCR);
+  regval &= ~(PWM_TCR_PWMEN|PWM_TCR_CNTREN);
+  regval |= PWM_TCR_CNTRRST;
+  putreg32(regval, LPC17_PWM1_TCR);
+
+  /* Put PWM1 in timer mode */
+
+  regval  = getreg32(LPC17_PWM1_CTCR);
+  regval &= ~PWM_CTCR_MODE_MASK;
+  regval |= PWM_CTCR_MODE_TIMER;
+  putreg32(regval, LPC17_PWM1_CTCR);
+
+  /* Reset on MR0 */
+
+  putreg32(PWM_MCR_MR0R, LPC17_PWM1_MCR);
+
+  /* Single edge controlled mod for PWM3 and enable output */
+
+  regval  = getreg32(LPC17_PWM1_PCR);
+  regval &= ~PWM_PCR_SEL3;
+  regval |= PWM_PCR_ENA3;
+  putreg32(regval, LPC17_PWM1_PCR);
+
+  /* Clear prescaler */
+
+  putreg32(0, LPC17_PWM1_PR);
+
+  /* Set 8-bit resolution */
+
+  putreg32(0xff, LPC17_PWM1_MCR);
+
+  /* Enable PWM match 1 latch */
+
+  regval  = getreg32(LPC17_PWM1_LER);
+  regval |= PWM_LER_M0EN;
+  putreg32(regval, LPC17_PWM1_LER);
+
+  /* Clear match register 3 */
+
+  putreg32(0, LPC17_PWM1_MR3);
+
+  /* Enable PWM1 */
+  
+  regval |= PWM_LER_M3EN;
+  putreg32(regval, LPC17_PWM1_LER);
+
+  regval  = getreg32(LPC17_PWM1_TCR);
+  regval &= ~(PWM_TCR_CNTRRST);
+  regval |= (PWM_TCR_PWMEN|PWM_TCR_CNTREN);
+  putreg32(regval, LPC17_PWM1_TCR);
+
+  nokia_backlight(0);
+}
 
 /****************************************************************************
  * Public Functions
@@ -111,6 +200,10 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   lpc17_gpiowrite(LPC1766STK_LCD_RST, true);
   up_msdelay(5);
 
+  /* Configure PWM1 to support the backlight */
+
+  nokia_blinitialize();
+
   /* Get the SSP port (configure as a Freescale SPI port) */
 
   spi = up_spiinitialize(0);
@@ -138,6 +231,32 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
         }
     }
   return NULL;
+}
+
+/****************************************************************************
+ * Name:  nokia_backlight
+ *
+ * Description:
+ *   The Nokia 6100 backlight is controlled by logic outside of the LCD
+ *   assembly.  This function must be provided by board specific logic to
+ *   manage the backlight.  This function will receive a power value (0:
+ *   full off - CONFIG_LCD_MAXPOWER: full on) and should set the backlight
+ *   accordingly.
+ *
+ *   On the Olimex LPC1766STK, the backlight level is controlled by PWM1.
+ *
+ ****************************************************************************/
+
+int nokia_backlight(unsigned int power)
+{
+  uint32_t regval;
+
+  putreg32(NOKIA_BACKLIGHT_OFF + power, LPC17_PWM1_MR3);
+  
+  regval  = getreg32(LPC17_PWM1_LER);
+  regval |= PWM_LER_M3EN;
+  putreg32(regval, LPC17_PWM1_LER);
+  return OK;
 }
 
 #endif /* CONFIG_NX_LCDDRIVER && CONFIG_LCD_NOKIA6100 && CONFIG_LPC17_SSP0 */

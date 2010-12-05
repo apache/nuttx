@@ -36,12 +36,17 @@
 LCD_ASRCS =
 LCD_CSRCS =
 
+# Don't build anything if there is no NX support for LCD drivers
+
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
+
 ifeq ($(CONFIG_LCD_P14201),y)
   LCD_CSRCS = p14201.c
-else
+endif
+
 ifeq ($(CONFIG_LCD_NOKIA6100),y)
   LCD_CSRCS = nokia6100.c
-else
+endif
+
 endif
 

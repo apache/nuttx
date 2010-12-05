@@ -67,95 +67,96 @@
 
 #define FB_FMT_RGB1        3           /* BPP=1 */
 #define FB_FMT_RGB4        4           /* BPP=4 */
-#define FB_FMT_RGB8        5           /* BPP=8 */
-#define FB_FMT_RGB16_555   6           /* BPP=16 R=5, G=5, B=5 (1 unused bit) */
-#define FB_FMT_RGB16_565   7           /* BPP=16 R=6, G=6, B=5 */
-#define FB_FMT_RGB24       8           /* BPP=24 */
-#define FB_FMT_RGB32       9           /* BPP=32 */
+#define FB_FMT_RGB8_332    5           /* BPP=8 */
+#define FB_FMT_RGB12_444   6           /* BPP=12 */
+#define FB_FMT_RGB16_555   7           /* BPP=16 R=5, G=5, B=5 (1 unused bit) */
+#define FB_FMT_RGB16_565   8           /* BPP=16 R=6, G=6, B=5 */
+#define FB_FMT_RGB24       9           /* BPP=24 */
+#define FB_FMT_RGB32       10          /* BPP=32 */
 
 /* Run length encoded RGB */
 
-#define FB_FMT_RGBRLE4     10          /* BPP=4 */
-#define FB_FMT_RGBRLE8     11          /* BPP=8 */
+#define FB_FMT_RGBRLE4     11          /* BPP=4 */
+#define FB_FMT_RGBRLE8     12          /* BPP=8 */
 
 /* Raw RGB */
 
-#define FB_FMT_RGBRAW      12          /* BPP=? */
+#define FB_FMT_RGBRAW      13          /* BPP=? */
 
 /* Raw RGB with arbitrary sample packing within a pixel. Packing and precision
  * of R, G and B components is determined by bit masks for each.
  */
 
-#define FB_FMT_RGBBTFLD16  13          /* BPP=16 */
-#define FB_FMT_RGBBTFLD24  14          /* BPP=24 */
-#define FB_FMT_RGBBTFLD32  15          /* BPP=32 */
-#define FB_FMT_RGBA16      16          /* BPP=16 Raw RGB with alpha */
-#define FB_FMT_RGBA32      17          /* BPP=32 Raw RGB with alpha */
+#define FB_FMT_RGBBTFLD16  14          /* BPP=16 */
+#define FB_FMT_RGBBTFLD24  15          /* BPP=24 */
+#define FB_FMT_RGBBTFLD32  16          /* BPP=32 */
+#define FB_FMT_RGBA16      17          /* BPP=16 Raw RGB with alpha */
+#define FB_FMT_RGBA32      18          /* BPP=32 Raw RGB with alpha */
 
 /* Raw RGB with a transparency field. Layout is as for stanadard RGB at 16 and
  * 32 bits per pixel but the msb in each pixel indicates whether the pixel is
  * transparent or not.
  */
 
-#define FB_FMT_RGBT16      18          /* BPP=16 */
-#define FB_FMT_RGBT32      19          /* BPP=32 */
+#define FB_FMT_RGBT16      19          /* BPP=16 */
+#define FB_FMT_RGBT32      20          /* BPP=32 */
 
 #define FB_ISRGB(f)  ((f) >= FB_FMT_RGB1) && (f) <= FB_FMT_RGBT32)
 
 /* Packed YUV Formats *******************************************************/
 
-#define FB_FMT_AYUV        20          /* BPP=32  Combined YUV and alpha */
-#define FB_FMT_CLJR        21          /* BPP=8   4 pixels packed into a uint32_t.
+#define FB_FMT_AYUV        21          /* BPP=32  Combined YUV and alpha */
+#define FB_FMT_CLJR        22          /* BPP=8   4 pixels packed into a uint32_t.
                                         * YUV 4:1:1 with l< 8 bits per YUV sample */
-#define FB_FMT_CYUV        22          /* BPP=16  UYVY except that height is reversed */
-#define FB_FMT_IRAW        23          /* BPP=?   Intel uncompressed YUV */
-#define FB_FMT_IUYV        24          /* BPP=16  Interlaced UYVY (line order
+#define FB_FMT_CYUV        23          /* BPP=16  UYVY except that height is reversed */
+#define FB_FMT_IRAW        24          /* BPP=?   Intel uncompressed YUV */
+#define FB_FMT_IUYV        25          /* BPP=16  Interlaced UYVY (line order
                                         * 0,2,4,.., 1,3,5...) */
-#define FB_FMT_IY41        25          /* BPP=12  Interlaced Y41P (line order
+#define FB_FMT_IY41        26          /* BPP=12  Interlaced Y41P (line order
                                         * 0,2,4,.., 1,3,5...) */
-#define FB_FMT_IYU2        26          /* BPP=24 */
-#define FB_FMT_HDYC        27          /* BPP=16  UYVY except uses the BT709 color space  */
-#define FB_FMT_UYVP        28          /* BPP=24? YCbCr 4:2:2, 10-bits per component in U0Y0V0Y1 order */
-#define FB_FMT_UYVY        29          /* BPP=16  YUV 4:2:2 */
+#define FB_FMT_IYU2        27          /* BPP=24 */
+#define FB_FMT_HDYC        28          /* BPP=16  UYVY except uses the BT709 color space  */
+#define FB_FMT_UYVP        29          /* BPP=24? YCbCr 4:2:2, 10-bits per component in U0Y0V0Y1 order */
+#define FB_FMT_UYVY        30          /* BPP=16  YUV 4:2:2 */
 #define FB_FMT_UYNV        FB_FMT_UYVY /* BPP=16  */
 #define FB_FMT_Y422        FB_FMT_UYVY /* BPP=16  */
-#define FB_FMT_V210        30          /* BPP=32  10-bit 4:2:2 YCrCb */
-#define FB_FMT_V422        31          /* BPP=16  Upside down version of UYVY */
-#define FB_FMT_V655        32          /* BPP=16? 16-bit YUV 4:2:2 */
-#define FB_FMT_VYUY        33          /* BPP=?   ATI Packed YUV Data */
-#define FB_FMT_YUYV        34          /* BPP=16  YUV 4:2:2 */
+#define FB_FMT_V210        31          /* BPP=32  10-bit 4:2:2 YCrCb */
+#define FB_FMT_V422        32          /* BPP=16  Upside down version of UYVY */
+#define FB_FMT_V655        33          /* BPP=16? 16-bit YUV 4:2:2 */
+#define FB_FMT_VYUY        34          /* BPP=?   ATI Packed YUV Data */
+#define FB_FMT_YUYV        35          /* BPP=16  YUV 4:2:2 */
 #define FB_FMT_YUY2        FB_FMT_YUYV /* BPP=16  YUV 4:2:2 */
 #define FB_FMT_YUNV        FB_FMT_YUYV /* BPP=16  YUV 4:2:2 */
-#define FB_FMT_YVYU        35          /* BPP=16  YUV 4:2:2 */
-#define FB_FMT_Y41P        36          /* BPP=12  YUV 4:1:1 */
-#define FB_FMT_Y411        37          /* BPP=12  YUV 4:1:1 */
-#define FB_FMT_Y211        38          /* BPP=8  */
-#define FB_FMT_Y41T        39          /* BPP=12  Y41P LSB for transparency */
-#define FB_FMT_Y42T        40          /* BPP=16  UYVY LSB for transparency */
-#define FB_FMT_YUVP        41          /* BPP=24? YCbCr 4:2:2 Y0U0Y1V0 order */
+#define FB_FMT_YVYU        36          /* BPP=16  YUV 4:2:2 */
+#define FB_FMT_Y41P        37          /* BPP=12  YUV 4:1:1 */
+#define FB_FMT_Y411        38          /* BPP=12  YUV 4:1:1 */
+#define FB_FMT_Y211        39          /* BPP=8  */
+#define FB_FMT_Y41T        40          /* BPP=12  Y41P LSB for transparency */
+#define FB_FMT_Y42T        41          /* BPP=16  UYVY LSB for transparency */
+#define FB_FMT_YUVP        42          /* BPP=24? YCbCr 4:2:2 Y0U0Y1V0 order */
 
 #define FB_ISYUVPACKED(f)  ((f) >= FB_FMT_AYUV) && (f) <= FB_FMT_YUVP)
 
 /* Packed Planar YUV Formats ************************************************/
 
-#define FB_FMT_YVU9        42          /* BPP=9  8-bit Y followed by 8-bit 4x4 VU */
-#define FB_FMT_YUV9        43          /* BPP=9? */
-#define FB_FMT_IF09        44          /* BPP=9.5 YVU9 + 4x4 plane of delta relative to tframe. */
-#define FB_FMT_YV16        45          /* BPP=16  8-bit Y followed by 8-bit 2x1 VU */
-#define FB_FMT_YV12        46          /* BPP=12  8-bit Y followed by 8-bit 2x2 VU */
-#define FB_FMT_I420        47          /* BPP=12  8-bit Y followed by 8-bit 2x2 UV */
+#define FB_FMT_YVU9        43          /* BPP=9  8-bit Y followed by 8-bit 4x4 VU */
+#define FB_FMT_YUV9        44          /* BPP=9? */
+#define FB_FMT_IF09        45          /* BPP=9.5 YVU9 + 4x4 plane of delta relative to tframe. */
+#define FB_FMT_YV16        46          /* BPP=16  8-bit Y followed by 8-bit 2x1 VU */
+#define FB_FMT_YV12        47          /* BPP=12  8-bit Y followed by 8-bit 2x2 VU */
+#define FB_FMT_I420        48          /* BPP=12  8-bit Y followed by 8-bit 2x2 UV */
 #define FB_FMT_IYUV        FB_FMT_I420 /* BPP=12 */
-#define FB_FMT_NV12        48          /* BPP=12  8-bit Y followed by an interleaved 2x2 UV */
-#define FB_FMT_NV21        49          /* BPP=12  NV12 with UV reversed */
-#define FB_FMT_IMC1        50          /* BPP=12  YV12 except UV planes ame stride as Y */
-#define FB_FMT_IMC2        51          /* BPP=12  IMC1 except UV lines interleaved at half stride boundaries */
-#define FB_FMT_IMC3        52          /* BPP=12  As IMC1 except that UV swapped */
-#define FB_FMT_IMC4        53          /* BPP=12  As IMC2  except that UV swapped */
-#define FB_FMT_CLPL        54          /* BPP=12  YV12 but including a level of indirection. */
-#define FB_FMT_Y41B        55          /* BPP=12?  4:1:1 planar. */
-#define FB_FMT_Y42B        56          /* BPP=16?  YUV 4:2:2 planar. */
-#define FB_FMT_CXY1        57          /* BPP=12 */
-#define FB_FMT_CXY2        58          /* BPP=16 */
+#define FB_FMT_NV12        49          /* BPP=12  8-bit Y followed by an interleaved 2x2 UV */
+#define FB_FMT_NV21        50          /* BPP=12  NV12 with UV reversed */
+#define FB_FMT_IMC1        51          /* BPP=12  YV12 except UV planes ame stride as Y */
+#define FB_FMT_IMC2        52          /* BPP=12  IMC1 except UV lines interleaved at half stride boundaries */
+#define FB_FMT_IMC3        53          /* BPP=12  As IMC1 except that UV swapped */
+#define FB_FMT_IMC4        54          /* BPP=12  As IMC2  except that UV swapped */
+#define FB_FMT_CLPL        55          /* BPP=12  YV12 but including a level of indirection. */
+#define FB_FMT_Y41B        56          /* BPP=12?  4:1:1 planar. */
+#define FB_FMT_Y42B        57          /* BPP=16?  YUV 4:2:2 planar. */
+#define FB_FMT_CXY1        58          /* BPP=12 */
+#define FB_FMT_CXY2        59          /* BPP=16 */
 
 #define FB_ISYUVPLANAR(f)  ((f) >= FB_FMT_AYUV) && (f) <= FB_FMT_YUVP)
 #define FB_ISYUV(f)        (FB_ISYUVPACKED(f) || FB_ISYUVPLANAR(f))

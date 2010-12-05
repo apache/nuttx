@@ -82,18 +82,26 @@
  * CONFIG_NOKIA6100_BPP - Device supports 8, 12, and 16 bits per pixel.
  * CONFIG_NOKIA6100_S1D15G10 - Selects the Epson S1D15G10 display controller
  * CONFIG_NOKIA6100_PCF8833 - Selects the Phillips PCF8833 display controller
+ * CONFIG_NOKIA6100_BLINIT - Initial backlight setting
  *
  * Required LCD driver settings:
  * CONFIG_LCD_NOKIA6100 - Enable Nokia 6100 support
  * CONFIG_LCD_MAXCONTRAST - must be 63 with the Epson controller and 127 with
  *   the Phillips controller.
- * CONFIG_LCD_MAXPOWER must be 1
+ * CONFIG_LCD_MAXPOWER - Maximum value of backlight setting.  The backlight control is
+ *   managed outside of the 6100 driver so this value has no meaning to the driver.
  */
 
 /* Mode 0,0 should be use.  However, somtimes you need to tinker with these things. */
 
 #ifndef CONFIG_NOKIA6100_SPIMODE
 #  define CONFIG_NOKIA6100_SPIMODE SPIDEV_MODE0
+#endif
+
+/* Default frequency: 1Mhz */
+
+#ifndef CONFIG_NOKIA6100_FREQUENCY
+#  define CONFIG_NOKIA6100_FREQUENCY 1000000
 #endif
 
 /* CONFIG_NOKIA6100_NINTERFACES determines the number of physical interfaces
@@ -159,16 +167,10 @@
 
 #endif
 
-/* Check power setting */
+/* Check initial backlight setting */
 
-#if !defined(CONFIG_LCD_MAXPOWER)
-#  define CONFIG_LCD_MAXPOWER 1
-#endif
-
-#if CONFIG_LCD_MAXPOWER != 1
-#  warning "CONFIG_LCD_MAXPOWER exceeds supported maximum"
-#  undef CONFIG_LCD_MAXPOWER
-#  define CONFIG_LCD_MAXPOWER 1
+#ifndef CONFIG_NOKIA6100_BLINIT
+#  define CONFIG_NOKIA6100_BLINIT (NOKIA_DEFAULT_CONTRAST/3)
 #endif
 
 /* Color is 12bpp RGB with leftmost column contained in bits 7:4  */
@@ -185,6 +187,10 @@
 #ifndef CONFIG_NOKIA6100_WORDWIDTH
 #  define CONFIG_NOKIA6100_WORDWIDTH 9
 #endif
+
+/* If bit 9 is set, the byte is data; clear for commands */
+
+#define NOKIA_LCD_DATA  (1 << 9)
 
 /* Define the following to enable register-level debug output */
 
@@ -204,10 +210,12 @@
 /* Controller independent definitions *************************************************/
 
 #ifdef CONFIG_NOKIA6100_PCF8833
-#  define LCD_NOP PCF8833_NOP
+#  define LCD_NOP   PCF8833_NOP
+#  define LCD_RAMWR PCF8833_RAMWR
 #endif
 #ifdef CONFIG_NOKIA6100_S1D15G10
-#  define LCD_NOP S1D15G10_NOP
+#  define LCD_NOP   S1D15G10_NOP
+#  define  S1D15G10_RAMWR
 #endif
 
 /* Color Properties *******************************************************************/
@@ -219,8 +227,19 @@
 
 /* Color depth and format */
 
-#define NOKIA_BPP          16
-#define NOKIA_COLORFMT     FB_FMT_RGB16_565
+#if CONFIG_NOKIA6100_BPP == 8
+#  define NOKIA_BPP         8
+#  define NOKIA_COLORFMT    FB_FMT_RGB8_332
+#  define NOKIA_STRIDE      NOKIA_XRES
+#elif CONFIG_NOKIA6100_BPP == 12
+#  define NOKIA_BPP         12
+#  define NOKIA_COLORFMT    FB_FMT_RGB12_444
+#  define NOKIA_STRIDE      ((3*NOKIA_XRES+1)/2)
+#elif CONFIG_NOKIA6100_BPP == 16
+#  define NOKIA_BPP         16
+#  define NOKIA_COLORFMT    FB_FMT_RGB16_565
+#  define NOKIA_STRIDE      (2*NOKIA_XRES)
+#endif
 
 /* Debug ******************************************************************************/
 
@@ -245,7 +264,7 @@ struct nokia_dev_s
   /* Private LCD-specific information follows */
 
   uint8_t contrast;
-  uint16_t linebuf[NOKIA_XRES+2];
+  uint16_t linebuf[NOKIA_STRIDE+2];
 };
 
 /**************************************************************************************
@@ -264,6 +283,7 @@ static void nokia_deselect(FAR struct spi_dev_s *spi);
 #endif
 static void nokia_sndcmd(FAR struct spi_dev_s *spi, const uint8_t cmd);
 static void nokia_sndarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cmddata);
+static void nokia_clrram(FAR struct spi_dev_s *spi);
 
 /* LCD Data Transfer Methods */
 
@@ -685,7 +705,7 @@ static void nokia_sndarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cm
   uint16_t word;
   int i;
 
-  DEBUGASSERT(len <= NOKIA_XRES+1);
+  DEBUGASSERT(len <= NOKIA_STRIDE+1);
 
   /* Copy the command into the line buffer. Bit 8 == 0 denotes a command. */
 
@@ -697,7 +717,7 @@ static void nokia_sndarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cm
     {
       /* Bit 8 == 1 denotes data */
 
-      *linebuf++ = (uin16_t)*cmddata++ | (1 << 8);
+      *linebuf++ = (uin16_t)*cmddata++ | NOKIA_LCD_DATA;
     }
 
   /* Terminate with a NOP */
@@ -711,6 +731,46 @@ static void nokia_sndarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cm
   /* Send the line buffer.  */
 
   (void)SPI_SNDBLOCK(spi, priv->linebuf, len+1);
+
+  /* De-select the LCD */
+
+  nokia_deselect(spi);
+}
+
+/**************************************************************************************
+ * Name:  nokia_clrram
+ *
+ * Description:
+ *   Send a 1-byte command followed by len-1 data bytes.
+ *
+ **************************************************************************************/
+
+static void nokia_clrram(FAR struct spi_dev_s *spi)
+{
+  uint16_t *linebuf = priv->linebuf;
+  int i;
+
+  /* Set all zero data in the line buffer */
+
+  for (i = 0; i < NOKIA_STRIDE, i++)
+    {
+      /* Bit 8 == 1 denotes data */
+
+      *linebuf++ = NOKIA_LCD_DATA;
+    }
+  
+  /* Select the LCD and send the RAMWR command */
+
+  nokia_select(spi);
+  SPI_SEND(spi, LCD_RAMWR);
+
+  /* Send the line buffer, once for each row.  */
+
+  for (i = ; i < NOKIA_YRES-1; i++)
+    {
+      (void)SPI_SNDBLOCK(spi, priv->linebuf, NOKIA_STRIDE);
+    }
+  SPI_SEND(spi, LCD_NOP);
 
   /* De-select the LCD */
 
@@ -830,13 +890,21 @@ static int nokia_getpower(struct lcd_dev_s *dev)
 static int nokia_setpower(struct lcd_dev_s *dev, int power)
 {
   struct nokia_dev_s *priv = (struct nokia_dev_s *)dev;
+  int ret;
 
   gvdbg("power: %d\n", power);
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
-  /* Set new power level */
+  /* Set new power level.  The backlight power is controlled outside of the LCD
+   * assembly and must be managmed by board-specific logic.
+   */
 
-  return OK;
+  ret = nokia_backlight(power);
+  if (ret == OK)
+    {
+      priv->power = power;
+    }
+  return ret;
 }
 
 /**************************************************************************************
@@ -905,6 +973,7 @@ static int nokia_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 static int nokia_initialize(struct nokia_dev_s *priv)
 {
   struct struct spi_dev_s *spi = priv->spi;
+  int i;
 
   /* Configure the display */
 
@@ -923,12 +992,7 @@ static int nokia_initialize(struct nokia_dev_s *priv)
 #endif
   nokia_sndarray(spi, sizeof(g_paset), g_paset);     /* Page address set */
   nokia_sndarray(spi, sizeof(g_paset), g_caset);     /* Column address set */
-
-  /* Delay a bit to allow the power regulator circuits to stabilize.  The turn
-   * on the display.
-   */
-
-  up_msdelay(200);
+  nokia_clrram(spi);
   nokia_sndcmd(spi, S1D15G10_DISON);                 /* Display on */
 }
 #endif
@@ -937,6 +1001,7 @@ static int nokia_initialize(struct nokia_dev_s *priv)
 static int nokia_initialize(struct nokia_dev_s *priv)
 {
   struct struct spi_dev_s *spi = priv->spi;
+  int i;
 
   nokia_sndcmd(spi, PCF8833_SLEEPOUT);              /* Exit sleep mode */
   nokia_sndcmd(spi, PCF8833_BSTRON);                /* Turn on voltage booster */
@@ -945,6 +1010,7 @@ static int nokia_initialize(struct nokia_dev_s *priv)
   nokia_sndarray(spi, sizeof(g_colmod), g_colmod);  /* Color interface pixel format */
   nokia_sndarray(spi, sizeof(g_setcon), g_setcon);  /* Set contrast */
   nokia_sndcmd(spi, PCF8833_NOP);                   /* No operation */
+  nokia_clrram(spi);
   nokia_sndcmd(spi, PCF8833_DISPON);                /* Display on */
 }
 #endif /* CONFIG_NOKIA6100_PCF8833 */
@@ -991,6 +1057,9 @@ FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned in
 
   if (nokia_initialize(priv) == OK)
     {
+      /* Turn on the backlight */
+
+      nokia_backlight(CONFIG_NOKIA6100_BLINIT);
       return &priv->dev;
     }
   return NULL;
