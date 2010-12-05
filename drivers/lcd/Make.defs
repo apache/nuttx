@@ -33,11 +33,15 @@
 #
 ############################################################################
 
-LCD_ASRCS   =
+LCD_ASRCS =
+LCD_CSRCS =
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
+ifeq ($(CONFIG_LCD_P14201),y)
   LCD_CSRCS = p14201.c
 else
-  LCD_CSRCS =
+ifeq ($(CONFIG_LCD_NOKIA6100),y)
+  LCD_CSRCS = nokia6100.c
+else
 endif
 

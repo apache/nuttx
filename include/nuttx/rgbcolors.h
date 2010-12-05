@@ -103,7 +103,7 @@
 #define RGB24_SNOW           0x00fffafa
 #define RGB24_YELLOW         0x00ffff00
 
-/* RGB24-565: RRRRRGGG GGGBBBBB */
+/* RGB16-565: RRRRRGGG GGGBBBBB */
 
 #define RGB16_BLACK          0x0000
 #define RGB16_WHITE          0xffff
@@ -144,6 +144,89 @@
 #define RGB16_ORANGE         0xfd20
 #define RGB16_SNOW           0xffdf
 #define RGB16_YELLOW         0xffe0
+
+/* RGB12-444: RRRR GGGGBBBB */
+
+#define RGB12_BLACK          0x0000
+#define RGB12_WHITE          0x0fff
+
+#define RGB12_BLUE           0x000f
+#define RGB12_GREEN          0x00f0
+#define RGB12_RED            0x0f00
+
+#define RGB12_NAVY           0x0008
+#define RGB12_DARKBLUE       0x0009
+#define RGB12_DARKGREEN      0x0060
+#define RGB12_DARKCYAN       0x0099
+#define RGB12_CYAN           0x00ff
+#define RGB12_TURQUOISE      0x04ed
+#define RGB12_INDIGO         0x0508
+#define RGB12_DARKRED        0x0800
+#define RGB12_OLIVE          0x0880
+#define RGB12_GRAY           0x0888
+#define RGB12_SKYBLUE        0x08df
+#define RGB12_BLUEVIOLET     0x093e
+#define RGB12_LIGHTGREEN     0x09f9
+#define RGB12_DARKVIOLET     0x090d
+#define RGB12_YELLOWGREEN    0x0ad3
+#define RGB12_BROWN          0x0a33
+#define RGB12_DARKGRAY       0x0bbb
+#define RGB12_SIENNA         0x0a53
+#define RGB12_LIGHTBLUE      0x0bee
+#define RGB12_GREENYELLOW    0x0bf3
+#define RGB12_SILVER         0x0ccc
+#define RGB12_LIGHTGREY      0x0ddd
+#define RGB12_LIGHTCYAN      0x0eff
+#define RGB12_VIOLET         0x0f8f
+#define RGB12_AZUR           0x0fff
+#define RGB12_BEIGE          0x0ffe
+#define RGB12_MAGENTA        0x0f0f
+#define RGB12_TOMATO         0x0f64
+#define RGB12_GOLD           0x0fd0
+#define RGB12_ORANGE         0x0fa0
+#define RGB12_SNOW           0x0fff
+#define RGB12_YELLOW         0x0ff0
+
+/* RGB8-332: RRRGGGBB (really not enough color resolution for the following) */
+
+#define RGB8_BLACK           0x00
+#define RGB8_WHITE           0xff
+
+#define RGB8_BLUE            0x03
+#define RGB8_GREEN           0x1c
+#define RGB8_RED             0xe0
+#define RGB8_NAVY            0x02
+#define RGB8_DARKBLUE        0x02
+#define RGB8_DARKGREEN       0x0c
+#define RGB8_DARKCYAN        0x16
+#define RGB8_CYAN            0x1f
+#define RGB8_TURQUOISE       0x5f
+#define RGB8_INDIGO          0x62
+#define RGB8_DARKRED         0x80
+#define RGB8_OLIVE           0x90
+#define RGB8_GRAY            0x92
+#define RGB8_SKYBLUE         0x9f
+#define RGB8_BLUEVIOLET      0xab
+#define RGB8_LIGHTGREEN      0xbe
+#define RGB8_DARKVIOLET      0x93
+#define RGB8_YELLOWGREEN     0x9d
+#define RGB8_BROWN           0xa9
+#define RGB8_DARKGRAY        0xdb
+#define RGB8_SIENNA          0xa9
+#define RGB8_LIGHTBLUE       0xdf
+#define RGB8_GREENYELLOW     0xdd
+#define RGB8_SILVER          0xd9
+#define RGB8_LIGHTGREY       0xd9
+#define RGB8_LIGHTCYAN       0xff
+#define RGB8_VIOLET          0xf3
+#define RGB8_AZUR            0xff
+#define RGB8_BEIGE           0xff
+#define RGB8_MAGENTA         0xed
+#define RGB8_TOMATO          0xfc
+#define RGB8_GOLD            0xfc
+#define RGB8_ORANGE          0xf8
+#define RGB8_SNOW            0xff
+#define RGB8_YELLOW          0xfc
 
 /****************************************************************************
  * Public Data

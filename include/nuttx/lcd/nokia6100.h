@@ -53,10 +53,14 @@
  * CONFIG_NOKIA6100_FREQUENCY - Define to use a different bus frequency
  * CONFIG_NOKIA6100_NINTERFACES - Specifies the number of physical Nokia 6100 devices that
  *   will be supported.
+ * CONFIG_NOKIA6100_BPP - Device supports 8, 12, and 16 bits per pixel.
+ * CONFIG_NOKIA6100_S1D15G10 - Selects the Epson S1D15G10 display controller
+ * CONFIG_NOKIA6100_PCF8833 - Selects the Phillips PCF8833 display controller
  *
  * Required LCD driver settings:
  * CONFIG_LCD_NOKIA6100 - Enable Nokia 6100 support
- * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXCONTRAST - must be 63 with the Epson controller and 127 with
+ *   the Phillips controller.
  * CONFIG_LCD_MAXPOWER must be 1
  */
 

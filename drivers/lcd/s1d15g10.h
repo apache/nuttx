@@ -85,6 +85,41 @@
 #define S1D15G10_NOP         0x25 /* NOP intruction (0x45?); Data: none */
 #define S1D15G10_STREAD      0x20 /* Status read; Data: none */
 
+/* Display control (DISCTL) bit definitions */
+
+#define DISCTL_PERIOD_SHIFT  (0)  /* P1: Bits 0-1, F1 and F2 drive-pattern switching period */
+#define DISCTL_PERIOD_MASK   (3 << DISCTL_PERIOD_SHIFT)
+#  define DISCTL_PERIOD_8    (0 << DISCTL_PERIOD_SHIFT)
+#  define DISCTL_PERIOD_4    (1 << DISCTL_PERIOD_SHIFT)
+#  define DISCTL_PERIOD_16   (2 << DISCTL_PERIOD_SHIFT)
+#  define DISCTL_PERIOD_FLD  (3 << DISCTL_PERIOD_SHIFT)
+#define DISCTL_CLDIV_SHIFT   (2)  /* P1: Bits 2-4, Clock divider */
+#define DISCTL_CLDIV_MASK    (7 << DISCTL_CLDIV_SHIFT)
+#  define DISCTL_CLDIV_2     (0 << DISCTL_CLDIV_SHIFT)
+#  define DISCTL_CLDIV_4     (1 << DISCTL_CLDIV_SHIFT)
+#  define DISCTL_CLDIV_8     (2 << DISCTL_CLDIV_SHIFT)
+#  define DISCTL_CLDIV_NONE  (3 << DISCTL_CLDIV_SHIFT)
+
+/* Power control (PWRCTR) bit definitions */
+
+#define PWCTR_REFVOLTAGE     (1 << 0) /* P1: Bit 0, Turn on reference voltage generation circuit. */
+#define PWCTR_REGULATOR      (1 << 1) /* P1: Bit 1, Turn on voltage regulator and circuit voltage follower. */
+#define PWCTR_BOOSTER2       (1 << 2) /* P1: Bit 2, Turn on secondary booster/step-down circuit. */
+#define PWCTR_BOOSTER1       (1 << 3) /* P1: Bit 3, Turn on primary booster circuit. */
+#define PWCTR_EXTR           (1 << 4) /* P1: Bit 4, Use external resistance to adjust voltage. */
+
+/* Data control (DATCTL) bit definitions */
+
+#define DATCTL_PGADDR_INV    (1 << 0) /* P1: Bit 0, Inverse display of the page address. */
+#define DATCTL_COLADDR_REV   (1 << 1) /* P1: Bit 1, Reverse turn of column address. */
+#define DATCTL_ADDR_PGDIR    (1 << 2) /* P1: Bit 2, Address-scan direction in page (vs column) direction. */
+
+#define DATCTL_BGR           (1 << 0) /* P2: Bit0, RGB->BGR */
+
+#define DATCTL_8GRAY         (1)      /* P3: Bits 0-2 = 001, 8 gray-scale */
+#define DATCTL_16GRAY_A      (2)      /* P3: Bits 0-2 = 010, 16 gray-scale display type A */
+#define DATCTL_16GRAY_B      (4)      /* P3: Bits 0-2 = 100, 16 gray-scale display type B */
+
 /* Status register bit definions (after reset or NOP) */
 
 #define S1D15G10_SR_PARTIAL  (1 << 0)  /* Bit 0: Partial display */

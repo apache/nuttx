@@ -107,6 +107,14 @@
 #define PCF8833_ECM       0xf0 /* Enter Calibration mode; Data: (1) Calibration control settings */
 #define PCF8833_OTPSHTIN  0xf1 /* Shift data in OTP shift registers; Data: Any number of bytes */
 
+/* Memory data access control (MADCTL) bit definitions */
+
+#define MADCTL_RGB        (1 << 3) /* Bit 3: BGR */
+#define MADCTL_LAO        (1 << 4) /* Bit 4: Line address order bottom to top */
+#define MADCTL_V          (1 << 5) /* Bit 5: Vertical RAM write; in Y direction */
+#define MADCTL_MX         (1 << 6) /* Bit 6: Mirror X */
+#define MADCTL_MY         (1 << 7) /* Bit 7: Mirror Y */
+
 /* PCF8833 status register bit definitions */
 /* CMD format: RDDST command followed by four status bytes: */
 /* Byte 1: D31 d30 D29 D28 D27 D26 --- --- */
