@@ -212,34 +212,51 @@
 #ifdef CONFIG_NOKIA6100_PCF8833
 #  define LCD_NOP   PCF8833_NOP
 #  define LCD_RAMWR PCF8833_RAMWR
+#  define LCD_PASET PCF8833_PASET
+#  define LCD_CASET PCF8833_CASET
 #endif
 #ifdef CONFIG_NOKIA6100_S1D15G10
 #  define LCD_NOP   S1D15G10_NOP
-#  define  S1D15G10_RAMWR
+#  define LCD_RAMWR S1D15G10_RAMWR
+#  define LCD_PASET S1D15G10_PASET
+#  define LCD_CASET S1D15G10_CASET
 #endif
 
 /* Color Properties *******************************************************************/
 
 /* Display Resolution */
 
-#define NOKIA_XRES         132
-#define NOKIA_YRES         132
+#define NOKIA_XRES           132
+#define NOKIA_YRES           132
 
 /* Color depth and format */
 
 #if CONFIG_NOKIA6100_BPP == 8
-#  define NOKIA_BPP         8
-#  define NOKIA_COLORFMT    FB_FMT_RGB8_332
-#  define NOKIA_STRIDE      NOKIA_XRES
+#  define NOKIA_BPP          8
+#  define NOKIA_COLORFMT     FB_FMT_RGB8_332
+#  define NOKIA_STRIDE       NOKIA_XRES
+#  define NOKIA_PIX2BYTES(b) (b)
 #elif CONFIG_NOKIA6100_BPP == 12
-#  define NOKIA_BPP         12
-#  define NOKIA_COLORFMT    FB_FMT_RGB12_444
-#  define NOKIA_STRIDE      ((3*NOKIA_XRES+1)/2)
+#  define NOKIA_BPP          12
+#  define NOKIA_COLORFMT     FB_FMT_RGB12_444
+#  define NOKIA_STRIDE       ((3*NOKIA_XRES+1)/2)
+#  define NOKIA_PIX2BYTES(b) ((3*(b)+1)/2)
 #elif CONFIG_NOKIA6100_BPP == 16
-#  define NOKIA_BPP         16
-#  define NOKIA_COLORFMT    FB_FMT_RGB16_565
-#  define NOKIA_STRIDE      (2*NOKIA_XRES)
+#  define NOKIA_BPP          16
+#  define NOKIA_COLORFMT     FB_FMT_RGB16_565
+#  define NOKIA_STRIDE       (2*NOKIA_XRES)
+#  define NOKIA_PIX2BYTES(b) (2*(b))
 #endif
+
+/* Handle any potential strange behavior at edges */
+
+#define NOKIA_PGBIAS         2 /* May not be necessary */
+#define NOKIA_COLBIAS        0
+#define NOKIA_XBIAS          2 /* May not be necessary */
+#define NOKIA_YBIAS          0
+
+#define NOKIA_ENDPAGE        131
+#define NOKIA_ENDCOL         131
 
 /* Debug ******************************************************************************/
 
@@ -264,7 +281,7 @@ struct nokia_dev_s
   /* Private LCD-specific information follows */
 
   uint8_t contrast;
-  uint16_t linebuf[NOKIA_STRIDE+2];
+  uint16_t linebuf[NOKIA_STRIDE+1];
 };
 
 /**************************************************************************************
@@ -282,7 +299,7 @@ static void nokia_select(FAR struct spi_dev_s *spi);
 static void nokia_deselect(FAR struct spi_dev_s *spi);
 #endif
 static void nokia_sndcmd(FAR struct spi_dev_s *spi, const uint8_t cmd);
-static void nokia_sndarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cmddata);
+static void nokia_cmdarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cmddata);
 static void nokia_clrram(FAR struct spi_dev_s *spi);
 
 /* LCD Data Transfer Methods */
@@ -498,7 +515,7 @@ static const uint8_t g_rgbset8[] =
 static const uint8_t g_paset[]
 {
   S1D15G10_PASET,                   /* Page start address set */
-  2,                                /* Fr some reason starts at 2 */
+  NOKIA_PGBIAS,
   131
 };
 
@@ -507,7 +524,7 @@ static const uint8_t g_paset[]
 static const uint8_t g_caset[]
 {
   S1D15G10_CASET,                   /* Column start address set */
-  0,          
+  NOKIA_COLBIAS,          
   131
 };
 #endif /* CONFIG_NOKIA6100_S1D15G10 */
@@ -692,14 +709,15 @@ static void nokia_sndcmd(FAR struct spi_dev_s *spi, const uint8_t cmd)
 }
 
 /**************************************************************************************
- * Name:  nokia_sndarray
+ * Name:  nokia_cmddata
  *
  * Description:
- *   Send a 1-byte command followed by len-1 data bytes.
+ *   Send a 1-byte command followed by datlen data bytes.
  *
  **************************************************************************************/
 
-static void nokia_sndarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cmddata)
+static void nokia_cmddata(FAR struct spi_dev_s *spi, uint8_t cmd, int datlen,
+                          const uint8_t *data)
 {
   uint16_t *linebuf = priv->linebuf;
   uint16_t word;
@@ -709,7 +727,7 @@ static void nokia_sndarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cm
 
   /* Copy the command into the line buffer. Bit 8 == 0 denotes a command. */
 
-  *linebuf++ = *cmddata++;
+  *linebuf++ = cmd;
 
   /* Copy any data after the command into the line buffer */
 
@@ -717,24 +735,46 @@ static void nokia_sndarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cm
     {
       /* Bit 8 == 1 denotes data */
 
-      *linebuf++ = (uin16_t)*cmddata++ | NOKIA_LCD_DATA;
+      *linebuf++ = (uin16_t)*data++ | NOKIA_LCD_DATA;
     }
 
-  /* Terminate with a NOP */
-
-  *linebuf = LCD_NOP;
-  
   /* Select the LCD */
 
   nokia_select(spi);
 
   /* Send the line buffer.  */
 
-  (void)SPI_SNDBLOCK(spi, priv->linebuf, len+1);
+  (void)SPI_SNDBLOCK(spi, priv->linebuf, len);
 
   /* De-select the LCD */
 
   nokia_deselect(spi);
+}
+
+/**************************************************************************************
+ * Name:  nokia_ramwr
+ *
+ * Description:
+ *   Send a RAMWR command followed by datlen data bytes.
+ *
+ **************************************************************************************/
+
+static void nokia_ramwr(FAR struct spi_dev_s *spi, int datlen, const uint8_t *data)
+{
+  nokia_cmddata(spi, LCD_RAMWR, datlen, data);
+}
+
+/**************************************************************************************
+ * Name:  nokia_cmdarray
+ *
+ * Description:
+ *   Send a RAMWR command followed by len-1 data bytes.
+ *
+ **************************************************************************************/
+
+static void nokia_cmdarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cmddata)
+{
+  nokia_cmddata(spi, cmddata[0], len-1, &cmddata[1]);
 }
 
 /**************************************************************************************
@@ -770,7 +810,6 @@ static void nokia_clrram(FAR struct spi_dev_s *spi)
     {
       (void)SPI_SNDBLOCK(spi, priv->linebuf, NOKIA_STRIDE);
     }
-  SPI_SEND(spi, LCD_NOP);
 
   /* De-select the LCD */
 
@@ -794,13 +833,40 @@ static void nokia_clrram(FAR struct spi_dev_s *spi)
 static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                        size_t npixels)
 {
+  uint16_t cmd[3];
+  int datlen;
+
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
-  DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
+
+#if NOKIA_XBIAS > 0
+  x += NOKIA_XBIAS;
+#endif
+#if NOKIA_XBIAS > 0
+  y += NOKIA_YBIAS;
+#endif
+  DEBUGASSERT(buffer && col < NOKIA_XRES && row >= 0 && );
 
   /* Set up to write the run. */
 
-  /* Write the run to GRAM. */
-#warning "Missing logic"
+  nokia_select(spi);
+  cmd[0] = PASET;
+  cmd[1] = x | NOKIA_DATA;
+  cmd[2] = NOKIA_ENDPAGE | NOKIA_DATA;
+  (void)SPI_SNDBLOCK(spi, cmd, 3);
+  nokia_deselect(spi);
+
+  /* De-select the LCD */
+
+  nokia_select(spi);
+  cmd[0] = CASET;
+  cmd[1] = y | NOKIA_DATA;
+  cmd[2] = NOKIA_ENDCOL  | NOKIA_DATA;
+  (void)SPI_SNDBLOCK(spi, cmd, 3); 
+  nokia_deselect(spi);
+
+  /* Then send the run */
+
+  nokia_ramwr(spi, NOKIA_PIX2BYTES(npixels), buffer);
   return OK;
 }
 
@@ -823,6 +889,9 @@ static int nokia_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 {
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
+
+  /* At present, this is a write-only LCD driver */
+
 #warning "Not implemented"
   return -ENOSYS;
 }
@@ -977,21 +1046,21 @@ static int nokia_initialize(struct nokia_dev_s *priv)
 
   /* Configure the display */
 
-  nokia_sndarray(spi, sizeof(g_disctl), g_disctl);   /* Display control */
-  nokia_sndarray(spi, sizeof(g_comscn), g_comscn);   /* Common scan direction */
+  nokia_cmdarray(spi, sizeof(g_disctl), g_disctl);   /* Display control */
+  nokia_cmdarray(spi, sizeof(g_comscn), g_comscn);   /* Common scan direction */
   nokia_sndcmd(spi, S1D15G10_OSCON);                 /* Internal oscilator ON */
   nokia_sndcmd(spi, S1D15G10_SLPOUT);                /* Sleep out */
-  nokia_sndarray(spi, sizeof(g_volctr), g_volctr);   /* Volume control (contrast) */
-  nokia_sndarray(spi, sizeof(g_pwrctr), g_pwrctr);   /* Turn on voltage regulators */
+  nokia_cmdarray(spi, sizeof(g_volctr), g_volctr);   /* Volume control (contrast) */
+  nokia_cmdarray(spi, sizeof(g_pwrctr), g_pwrctr);   /* Turn on voltage regulators */
   up_msdelay(100);
   nokia_sndcmd(spi, S1D15G10_DISINV);                /* Invert display */
-  nokia_sndarray(spi, sizeof(g_datctl), g_datctl);   /* Data control */
+  nokia_cmdarray(spi, sizeof(g_datctl), g_datctl);   /* Data control */
 #if CONFIG_NOKIA6100_BPP == 8
-  nokia_sndarray(spi, sizeof(g_rgbset8), g_rgbset8); /* Set up color lookup table */
+  nokia_cmdarray(spi, sizeof(g_rgbset8), g_rgbset8); /* Set up color lookup table */
   nokia_sndcmd(spi, S1D15G10_NOP);
 #endif
-  nokia_sndarray(spi, sizeof(g_paset), g_paset);     /* Page address set */
-  nokia_sndarray(spi, sizeof(g_paset), g_caset);     /* Column address set */
+  nokia_cmdarray(spi, sizeof(g_paset), g_paset);     /* Page address set */
+  nokia_cmdarray(spi, sizeof(g_paset), g_caset);     /* Column address set */
   nokia_clrram(spi);
   nokia_sndcmd(spi, S1D15G10_DISON);                 /* Display on */
 }
@@ -1006,9 +1075,9 @@ static int nokia_initialize(struct nokia_dev_s *priv)
   nokia_sndcmd(spi, PCF8833_SLEEPOUT);              /* Exit sleep mode */
   nokia_sndcmd(spi, PCF8833_BSTRON);                /* Turn on voltage booster */
   nokia_sndcmd(spi, PCF8833_INVON);                 /* Invert display */
-  nokia_sndarray(spi, sizeof(g_madctl), g_madctl);  /* Memory data access control */
-  nokia_sndarray(spi, sizeof(g_colmod), g_colmod);  /* Color interface pixel format */
-  nokia_sndarray(spi, sizeof(g_setcon), g_setcon);  /* Set contrast */
+  nokia_cmdarray(spi, sizeof(g_madctl), g_madctl);  /* Memory data access control */
+  nokia_cmdarray(spi, sizeof(g_colmod), g_colmod);  /* Color interface pixel format */
+  nokia_cmdarray(spi, sizeof(g_setcon), g_setcon);  /* Set contrast */
   nokia_sndcmd(spi, PCF8833_NOP);                   /* No operation */
   nokia_clrram(spi);
   nokia_sndcmd(spi, PCF8833_DISPON);                /* Display on */
