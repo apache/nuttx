@@ -1389,8 +1389,13 @@
 	  out-of-band bit to specify if the next word sent to the device is a command
 	  or data. This is typical, for example, in "9-bit" displays where the 9th bit
 	  is the CMD/DATA bit. The cmddata method provides selection of command or data.
-	* drivers/lcd/p14201.c -- Now used the cmddata() method of the SPI interface.
-	* arch/arm/src/lpc17xx/lpc17_usbdev.c -- LPC17xx USB driver is not functional.
+	* drivers/lcd/p14201.c -- Now uses the cmddata() method of the SPI interface.
+	* arch/arm/src/lpc17xx/lpc17_usbdev.c -- LPC17xx USB driver now appears to
+	  to be fully functional.  examples/usbstorage configuration verified (the
+	  examples/usbserial configuration is untested).
 	* drivers/usbdev/usbserial.c and usbstorage.c -- All USB class drivers need
 	  to call DEV_CONNECT() when they are ready to be enumerated.  That is,
 	  (1) initially when bound to the USB driver, and (2) after a USB reset.
+	* drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.
+	* configs/olimex-lpc1766stk/nx -- A NX graphics configuration for the Olimex
+	  LPC1766-STK board using the Nokia 6100 LCD driver.

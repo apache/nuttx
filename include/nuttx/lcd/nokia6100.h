@@ -123,7 +123,7 @@ EXTERN FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsi
  *
  **************************************************************************************/
 
-EXTERN int nokia_setpower(unsigned int power);
+EXTERN int nokia_backlight(unsigned int power);
 
 #undef EXTERN
 #ifdef __cplusplus

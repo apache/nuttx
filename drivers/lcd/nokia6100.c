@@ -55,9 +55,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/spi.h>
-#include <nuttx/lcd.h>
-
-#include "up_arch.h"
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/nokia6100.h>
 
 #ifdef CONFIG_NOKIA6100_PCF8833
 #  include "pcf8833.h"
@@ -122,11 +121,26 @@
 #  warning "Assuming 8BPP"
 #  define CONFIG_NOKIA6100_BPP 8
 #endif
+
 #if CONFIG_NOKIA6100_BPP != 8 && CONFIG_NOKIA6100_BPP != 12
 #  if CONFIG_NOKIA6100_BPP == 16
 #    error "Support for 16BPP no yet implemented"
 #  else
 #    error "LCD supports only 8, 12, and 16BPP"
+#  endif
+#endif
+
+#if CONFIG_NOKIA6100_BPP == 8
+#  ifdef CONFIG_NX_DISABLE_8BPP
+#    warning "8-bit pixel support needed"
+#  endif
+#elif CONFIG_NOKIA6100_BPP == 12
+#  if defined(CONFIG_NX_DISABLE_12BPP) || !defined(CONFIG_NX_PACKEDMSFIRST)
+#    warning "12-bit, big-endian pixel support needed"
+#  endif
+#elif CONFIG_NOKIA6100_BPP == 16
+#  ifdef CONFIG_NX_DISABLE_16BPP
+#    warning "16-bit pixel support needed"
 #  endif
 #endif
 
@@ -171,12 +185,6 @@
 
 #ifndef CONFIG_NOKIA6100_BLINIT
 #  define CONFIG_NOKIA6100_BLINIT (NOKIA_DEFAULT_CONTRAST/3)
-#endif
-
-/* Color is 12bpp RGB with leftmost column contained in bits 7:4  */
-
-#if defined(CONFIG_NX_DISABLE_4BPP) || !defined(CONFIG_NX_PACKEDMSFIRST)
-#  warning "12-bit, big-endian pixel support needed"
 #endif
 
 /* Word width must be 9 bits */
@@ -280,8 +288,9 @@ struct nokia_dev_s
 
   /* Private LCD-specific information follows */
 
-  uint8_t contrast;
-  uint16_t linebuf[NOKIA_STRIDE+1];
+  FAR struct spi_dev_s *spi; /* Contained SPI driver instance */
+  uint8_t contrast;          /* Current contrast setting */
+  uint8_t power;             /* Current power (backlight) setting */
 };
 
 /**************************************************************************************
@@ -361,6 +370,15 @@ static uint8_t g_runbuffer[(3*NOKIA_XRES+1)/2];
 #else /* CONFIG_NOKIA6100_BPP == 16 */
 static uint16_t g_runbuffer[NOKIA_XRES];
 #endif
+
+/* g_rowbuf is another buffer, but used internally by the Nokia 6100 driver in order
+ * expand the pixel data into 9-bit data needed by the LCD.  There are some
+ * customizations that would eliminate the need for this extra buffer and for the
+ * extra expansion/copy, but those customizations would require a special, non-standard
+ * SPI driver that could expand 8- to 9-bit data on the fly.
+ */
+
+static uint16_t g_rowbuf[NOKIA_STRIDE+1];
 
 /* Device Driver Data Structures ******************************************************/
 
@@ -512,7 +530,7 @@ static const uint8_t g_rgbset8[] =
 
 /* Page address set (PASET) */
 
-static const uint8_t g_paset[]
+static const uint8_t g_paset[] =
 {
   S1D15G10_PASET,                   /* Page start address set */
   NOKIA_PGBIAS,
@@ -521,7 +539,7 @@ static const uint8_t g_paset[]
 
 /* Column address set (CASET) */
   
-static const uint8_t g_caset[]
+static const uint8_t g_caset[] =
 {
   S1D15G10_CASET,                   /* Column start address set */
   NOKIA_COLBIAS,          
@@ -719,11 +737,10 @@ static void nokia_sndcmd(FAR struct spi_dev_s *spi, const uint8_t cmd)
 static void nokia_cmddata(FAR struct spi_dev_s *spi, uint8_t cmd, int datlen,
                           const uint8_t *data)
 {
-  uint16_t *linebuf = priv->linebuf;
-  uint16_t word;
+  uint16_t *linebuf = g_rowbuf;
   int i;
 
-  DEBUGASSERT(len <= NOKIA_STRIDE+1);
+  DEBUGASSERT(datlen <= NOKIA_STRIDE);
 
   /* Copy the command into the line buffer. Bit 8 == 0 denotes a command. */
 
@@ -731,11 +748,11 @@ static void nokia_cmddata(FAR struct spi_dev_s *spi, uint8_t cmd, int datlen,
 
   /* Copy any data after the command into the line buffer */
 
-  for (i = 1; i < len; i++)
+  for (i = 0; i < datlen; i++)
     {
       /* Bit 8 == 1 denotes data */
 
-      *linebuf++ = (uin16_t)*data++ | NOKIA_LCD_DATA;
+      *linebuf++ = (uint16_t)*data++ | NOKIA_LCD_DATA;
     }
 
   /* Select the LCD */
@@ -744,7 +761,7 @@ static void nokia_cmddata(FAR struct spi_dev_s *spi, uint8_t cmd, int datlen,
 
   /* Send the line buffer.  */
 
-  (void)SPI_SNDBLOCK(spi, priv->linebuf, len);
+  (void)SPI_SNDBLOCK(spi, g_rowbuf, datlen+1);
 
   /* De-select the LCD */
 
@@ -787,12 +804,12 @@ static void nokia_cmdarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cm
 
 static void nokia_clrram(FAR struct spi_dev_s *spi)
 {
-  uint16_t *linebuf = priv->linebuf;
+  uint16_t *linebuf = g_rowbuf;
   int i;
 
   /* Set all zero data in the line buffer */
 
-  for (i = 0; i < NOKIA_STRIDE, i++)
+  for (i = 0; i < NOKIA_STRIDE; i++)
     {
       /* Bit 8 == 1 denotes data */
 
@@ -806,9 +823,9 @@ static void nokia_clrram(FAR struct spi_dev_s *spi)
 
   /* Send the line buffer, once for each row.  */
 
-  for (i = ; i < NOKIA_YRES-1; i++)
+  for (i = 0; i < NOKIA_YRES; i++)
     {
-      (void)SPI_SNDBLOCK(spi, priv->linebuf, NOKIA_STRIDE);
+      (void)SPI_SNDBLOCK(spi, g_rowbuf, NOKIA_STRIDE);
     }
 
   /* De-select the LCD */
@@ -831,36 +848,37 @@ static void nokia_clrram(FAR struct spi_dev_s *spi)
  **************************************************************************************/
 
 static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+                        size_t npixels)
 {
+  struct nokia_dev_s *priv = &g_lcddev;
+  FAR struct spi_dev_s *spi = priv->spi;
   uint16_t cmd[3];
-  int datlen;
 
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
 
 #if NOKIA_XBIAS > 0
-  x += NOKIA_XBIAS;
+  col += NOKIA_XBIAS;
 #endif
 #if NOKIA_XBIAS > 0
-  y += NOKIA_YBIAS;
+  row += NOKIA_YBIAS;
 #endif
   DEBUGASSERT(buffer && col < NOKIA_XRES && row >= 0 && );
 
   /* Set up to write the run. */
 
   nokia_select(spi);
-  cmd[0] = PASET;
-  cmd[1] = x | NOKIA_DATA;
-  cmd[2] = NOKIA_ENDPAGE | NOKIA_DATA;
+  cmd[0] = LCD_PASET;
+  cmd[1] = col | NOKIA_LCD_DATA;
+  cmd[2] = NOKIA_ENDPAGE | NOKIA_LCD_DATA;
   (void)SPI_SNDBLOCK(spi, cmd, 3);
   nokia_deselect(spi);
 
   /* De-select the LCD */
 
   nokia_select(spi);
-  cmd[0] = CASET;
-  cmd[1] = y | NOKIA_DATA;
-  cmd[2] = NOKIA_ENDCOL  | NOKIA_DATA;
+  cmd[0] = LCD_CASET;
+  cmd[1] = row | NOKIA_LCD_DATA;
+  cmd[2] = NOKIA_ENDCOL  | NOKIA_LCD_DATA;
   (void)SPI_SNDBLOCK(spi, cmd, 3); 
   nokia_deselect(spi);
 
@@ -885,7 +903,7 @@ static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
  **************************************************************************************/
 
 static int nokia_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                       size_t npixels)
+                        size_t npixels)
 {
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
@@ -943,8 +961,8 @@ static int nokia_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int nokia_getpower(struct lcd_dev_s *dev)
 {
   struct nokia_dev_s *priv = (struct nokia_dev_s *)dev;
-  gvdbg("power: %d\n", 0);
-  return 0;
+  gvdbg("power: %d\n", priv->power);
+  return priv->power;
 }
 
 /**************************************************************************************
@@ -1008,12 +1026,12 @@ static int nokia_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 #ifdef CONFIG_NOKIA6100_S1D15G10
        while (priv->contrast < contrast)
          {
-           nokia_sndcmd(dev->priv, S1D15G10_VOLUP);
+           nokia_sndcmd(priv->spi, S1D15G10_VOLUP);
            priv->contrast++;
          }
        while (priv->contrast > contrast)
          {
-           nokia_sndcmd(dev->priv, S1D15G10_VOLDOWN);
+           nokia_sndcmd(priv->spi, S1D15G10_VOLDOWN);
            priv->contrast--;
          }
 #else /* CONFIG_NOKIA6100_PCF8833 */
@@ -1021,7 +1039,7 @@ static int nokia_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
        cmd[0] = PCF8833_SETCON;
        cmd[1] = priv->contrast;
-       nokia_sndarry(dev->spi, 2, cmd);
+       nokia_sndarry(priv->spi, 2, cmd);
        priv->contrast = contrast;
 #endif
     }
@@ -1041,8 +1059,7 @@ static int nokia_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 #ifdef CONFIG_NOKIA6100_S1D15G10
 static int nokia_initialize(struct nokia_dev_s *priv)
 {
-  struct struct spi_dev_s *spi = priv->spi;
-  int i;
+  struct spi_dev_s *spi = priv->spi;
 
   /* Configure the display */
 
@@ -1052,7 +1069,7 @@ static int nokia_initialize(struct nokia_dev_s *priv)
   nokia_sndcmd(spi, S1D15G10_SLPOUT);                /* Sleep out */
   nokia_cmdarray(spi, sizeof(g_volctr), g_volctr);   /* Volume control (contrast) */
   nokia_cmdarray(spi, sizeof(g_pwrctr), g_pwrctr);   /* Turn on voltage regulators */
-  up_msdelay(100);
+  up_mdelay(100);
   nokia_sndcmd(spi, S1D15G10_DISINV);                /* Invert display */
   nokia_cmdarray(spi, sizeof(g_datctl), g_datctl);   /* Data control */
 #if CONFIG_NOKIA6100_BPP == 8
@@ -1063,6 +1080,7 @@ static int nokia_initialize(struct nokia_dev_s *priv)
   nokia_cmdarray(spi, sizeof(g_paset), g_caset);     /* Column address set */
   nokia_clrram(spi);
   nokia_sndcmd(spi, S1D15G10_DISON);                 /* Display on */
+  return OK;
 }
 #endif
 
@@ -1070,7 +1088,6 @@ static int nokia_initialize(struct nokia_dev_s *priv)
 static int nokia_initialize(struct nokia_dev_s *priv)
 {
   struct struct spi_dev_s *spi = priv->spi;
-  int i;
 
   nokia_sndcmd(spi, PCF8833_SLEEPOUT);              /* Exit sleep mode */
   nokia_sndcmd(spi, PCF8833_BSTRON);                /* Turn on voltage booster */
@@ -1081,6 +1098,7 @@ static int nokia_initialize(struct nokia_dev_s *priv)
   nokia_sndcmd(spi, PCF8833_NOP);                   /* No operation */
   nokia_clrram(spi);
   nokia_sndcmd(spi, PCF8833_DISPON);                /* Display on */
+  return OK;
 }
 #endif /* CONFIG_NOKIA6100_PCF8833 */
 
@@ -1112,7 +1130,6 @@ static int nokia_initialize(struct nokia_dev_s *priv)
 FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned int devno)
 {
   struct nokia_dev_s *priv = &g_lcddev;
-  int ret;
 
   gvdbg("Initializing\n");
   DEBUGASSERT(devno == 0);

@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: September 11, 2010</p>
+      <p>Last Updated: December 4, 2010</p>
     </td>
   </tr>
 </table>
@@ -2811,6 +2811,48 @@ build
         <li>All pixel writes must be aligned to byte boundaries.</li>
       </ul>
       The latter limitation effectively reduces the 128x96 disply to 64x96.
+  </li>
+</ul>
+
+<h3>Nokia 6100 Configuration Settings:</h3>
+<ul>
+  <li>
+    <code>CONFIG_NOKIA6100_SPIMODE</code>: Controls the SPI mode,
+  </li>
+  <li>
+    <code>CONFIG_NOKIA6100_FREQUENCY</code>: Define to use a different bus frequency.
+  </li>
+  <li>
+    <code>CONFIG_NOKIA6100_NINTERFACES</code>:Specifies the number of physical Nokia
+      6100 devices that will be supported.
+  </li>
+  <li>
+    <code>CONFIG_NOKIA6100_BPP</code>: Device supports 8, 12, and 16 bits per pixel.
+  </li>
+  <li>
+    <code>CONFIG_NOKIA6100_S1D15G10</code>: Selects the Epson S1D15G10 display controller
+  </li>
+  <li>
+    <code>CONFIG_NOKIA6100_PCF8833</code>: Selects the Phillips PCF8833 display controller
+  </li>
+  <li>
+    <code>CONFIG_NOKIA6100_BLINIT</code>: Initial backlight setting
+  </li>
+  <p>
+    Required LCD driver settings:
+  </p>
+  <li>
+    <code>CONFIG_LCD_NOKIA6100</code>: Enable Nokia 6100 support
+  </li>
+  <li>
+    <code>CONFIG_LCD_MAXCONTRAST</code>: Must be 63 with the Epson controller and 127 with
+      the Phillips controller.
+  </li>
+  <li>
+    <code>CONFIG_LCD_MAXPOWER</code>:Maximum value of backlight setting.  The backlight
+      control is managed outside of the 6100 driver so this value has no
+      meaning to the driver.  Board-specific logic may place restrictions on
+      this value.
   </li>
 </ul>
 

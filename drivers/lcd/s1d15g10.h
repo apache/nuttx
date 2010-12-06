@@ -136,6 +136,6 @@
 
 /* Status register bit definions (after EPSRRD2) */
 
-#define S1D15G10_SR_VOLUME   0x07      /* Bits 0-2: Built-in resistance ratio */
+#define S1D15G10_SR_RRATIO   0x07      /* Bits 0-2: Built-in resistance ratio */
 
 #endif /* __DRIVERS_LCD_S1D15G10_H */
