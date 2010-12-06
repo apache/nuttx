@@ -546,6 +546,26 @@ defconfig -- This is a configuration file similar to the Linux
 		  - All pixel writes must be aligned to byte boundaries.
 		  The latter limitation effectively reduces the 128x96 disply to 64x96.
 
+	Nokia 6100 Configuration Settings:
+
+		CONFIG_NOKIA6100_SPIMODE - Controls the SPI mode
+		CONFIG_NOKIA6100_FREQUENCY - Define to use a different bus frequency
+		CONFIG_NOKIA6100_NINTERFACES - Specifies the number of physical Nokia
+		  6100 devices that will be supported.
+		CONFIG_NOKIA6100_BPP - Device supports 8, 12, and 16 bits per pixel.
+		CONFIG_NOKIA6100_S1D15G10 - Selects the Epson S1D15G10 display controller
+		CONFIG_NOKIA6100_PCF8833 - Selects the Phillips PCF8833 display controller
+		CONFIG_NOKIA6100_BLINIT - Initial backlight setting
+
+		Required LCD driver settings:
+		CONFIG_LCD_NOKIA6100 - Enable Nokia 6100 support
+		CONFIG_LCD_MAXCONTRAST - must be 63 with the Epson controller and 127 with
+		  the Phillips controller.
+		CONFIG_LCD_MAXPOWER - Maximum value of backlight setting.  The backlight
+		  control is managed outside of the 6100 driver so this value has no
+		  meaning to the driver.  Board-specific logic may place restrictions on
+		  this value.
+
 	ENC28J60 Ethernet Driver Configuration Settings:
 		CONFIG_NET_ENC28J60 - Enabled ENC28J60 support
 		CONFIG_ENC28J60_SPIMODE - Controls the SPI mode

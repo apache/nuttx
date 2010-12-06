@@ -1,5 +1,5 @@
 ############################################################################
-# configs/olimex-lpc1766stk/ostest/defconfig
+# configs/olimex-lpc1766stk/nx/defconfig
 #
 #   Copyright (C) 2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -114,7 +114,7 @@ CONFIG_LPC17_UART3=n
 CONFIG_LPC17_CAN1=n
 CONFIG_LPC17_CAN2=n
 CONFIG_LPC17_SPI=n
-CONFIG_LPC17_SSP0=n
+CONFIG_LPC17_SSP0=y
 CONFIG_LPC17_SSP1=n
 CONFIG_LPC17_I2C0=n
 CONFIG_LPC17_I2C1=n
@@ -229,6 +229,11 @@ CONFIG_RAW_BINARY=n
 CONFIG_HAVE_LIBM=n
 
 #
+# General SPI interface configuration
+#
+CONFIG_SPI_CMDDATA=n
+
+#
 # General OS setup
 #
 # CONFIG_APP_DIR - Identifies the relative path to the directory
@@ -320,22 +325,28 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 #  the worker thread.  Default: 4
 #
-CONFIG_APP_DIR=examples/ostest
+CONFIG_APP_DIR=examples/nx
+
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
+CONFIG_DEBUG_GRAPHICS=n
+CONFIG_SSP_DEBUG=n
+CONFIG_SSP_VERBOSE=n
+CONFIG_LCD_REGDEBUG=n
+
 CONFIG_MM_REGIONS=2
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_START_YEAR=2010
-CONFIG_START_MONTH=11
-CONFIG_START_DAY=10
+CONFIG_START_MONTH=12
+CONFIG_START_DAY=5
 CONFIG_GREGORIAN_TIME=n
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
-CONFIG_DEV_LOWCONSOLE=y
+CONFIG_DEV_LOWCONSOLE=n
 CONFIG_MUTEX_TYPES=n
 CONFIG_PRIORITY_INHERITANCE=n
 CONFIG_SEM_PREALLOCHOLDERS=0
@@ -366,7 +377,7 @@ CONFIG_SIG_SIGWORK=4
 #   up waiting tasks.
 #
 CONFIG_DISABLE_CLOCK=n
-CONFIG_DISABLE_POSIX_TIMERS=n
+CONFIG_DISABLE_POSIX_TIMERS=y
 CONFIG_DISABLE_PTHREAD=n
 CONFIG_DISABLE_SIGNALS=n
 CONFIG_DISABLE_MQUEUE=n
@@ -440,8 +451,8 @@ CONFIG_ARCH_KFREE=n
 CONFIG_MAX_TASKS=16
 CONFIG_MAX_TASK_ARGS=4
 CONFIG_NPTHREAD_KEYS=4
-CONFIG_NFILE_DESCRIPTORS=8
-CONFIG_NFILE_STREAMS=8
+CONFIG_NFILE_DESCRIPTORS=12
+CONFIG_NFILE_STREAMS=12
 CONFIG_NAME_MAX=32
 CONFIG_STDIO_BUFFER_SIZE=256
 CONFIG_NUNGET_CHARS=2
@@ -450,6 +461,14 @@ CONFIG_MQ_MAXMSGSIZE=32
 CONFIG_MAX_WDOGPARMS=2
 CONFIG_PREALLOC_WDOGS=4
 CONFIG_PREALLOC_TIMERS=4
+
+#
+# Framebuffer driver options
+CONFIG_FB_CMAP=n
+CONFIG_FB_HWCURSOR=n
+CONFIG_FB_HWCURSORIMAGE=n
+#CONFIG_FB_HWCURSORSIZE
+#CONFIG_FB_TRANSPARENCY
 
 #
 # Filesystem configuration
@@ -681,6 +700,152 @@ CONFIG_USBSTRG_VERSIONNO=0x0399
 CONFIG_USBSTRG_REMOVABLE=y
 
 #
+# Graphics related configuration settings
+#
+# CONFIG_NX
+#   Enables overall support for graphics library and NX
+# CONFIG_NX_MULTIUSER
+#   Configures NX in multi-user mode
+# CONFIG_NX_NPLANES
+#   Some YUV color formats requires support for multiple planes,
+#   one for each color component.  Unless you have such special
+#   hardware, this value should be undefined or set to 1
+# CONFIG_NX_DISABLE_1BPP, CONFIG_NX_DISABLE_2BPP,
+# CONFIG_NX_DISABLE_4BPP, CONFIG_NX_DISABLE_8BPP,
+# CONFIG_NX_DISABLE_16BPP, CONFIG_NX_DISABLE_24BPP, and
+# CONFIG_NX_DISABLE_32BPP
+#   NX supports a variety of pixel depths.  You can save some
+#   memory by disabling support for unused color depths.
+# CONFIG_NX_PACKEDMSFIRST
+#   If a pixel depth of less than 8-bits is used, then NX needs
+#   to know if the pixels pack from the MS to LS or from LS to MS
+# CONFIG_NX_LCDDRIVER
+#   By default, NX builds to use a framebuffer driver (see
+#   include/nuttx/fb.h). If this option is defined, NX will
+#   build to use an LCD driver (see include/nuttx/lcd/lcd.h).
+# CONFIG_LCD_MAXPOWER - The full-on power setting for an LCD device.
+# CONFIG_LCD_MAXCONTRAST - The maximum contrast value for an LCD device.
+# CONFIG_NX_MOUSE
+#   Build in support for mouse input
+# CONFIG_NX_KBD
+#   Build in support of keypad/keyboard input
+# CONFIG_NXTK_BORDERWIDTH
+#   Specifies with with of the border (in pixels) used with
+#   framed windows.  The default is 4.
+# CONFIG_NXTK_BORDERCOLOR1 and CONFIG_NXTK_BORDERCOLOR2
+#   Specify the colors of the border used with framed windows.
+#   CONFIG_NXTK_BORDERCOLOR2 is the shadow side color and so
+#   is normally darker.  The default is medium and dark grey,
+#   respectively
+# CONFIG_NXTK_AUTORAISE
+#   If set, a window will be raised to the top if the mouse position
+#   is over a visible portion of the window.  Default: A mouse
+#   button must be clicked over a visible portion of the window.
+# CONFIG_NXFONTS_CHARBITS
+#   The number of bits in the character set.  Current options are
+#   only 7 and 8.  The default is 7.
+# CONFIG_NXFONT_SANS
+#   At present, there is only one font.  But if there were were more,
+#   then this option would select the sans serif font.
+#
+# NX Multi-user only options:
+#
+# CONFIG_NX_BLOCKING
+#   Open the client message queues in blocking mode.  In this case,
+#   nx_eventhandler()  will not return until a message is received and processed.
+# CONFIG_NX_MXSERVERMSGS and CONFIG_NX_MXCLIENTMSGS
+#   Specifies the maximum number of messages that can fit in
+#   the message queues.  No additional resources are allocated, but
+#   this can be set to prevent flooding of the client or server with
+#   too many messages (CONFIG_PREALLOC_MQ_MSGS controls how many
+#   messages are pre-allocated).
+#
+CONFIG_NX=y
+CONFIG_NX_MULTIUSER=n
+CONFIG_NX_NPLANES=1
+CONFIG_NX_DISABLE_1BPP=y
+CONFIG_NX_DISABLE_2BPP=y
+CONFIG_NX_DISABLE_4BPP=y
+CONFIG_NX_DISABLE_8BPP=n
+CONFIG_NX_DISABLE_16BPP=y
+CONFIG_NX_DISABLE_24BPP=y
+CONFIG_NX_DISABLE_32BPP=y
+CONFIG_NX_PACKEDMSFIRST=y
+CONFIG_NX_LCDDRIVER=y
+CONFIG_LCD_MAXPOWER=1
+CONFIG_LCD_MAXCONTRAST=255
+CONFIG_NX_MOUSE=y
+CONFIG_NX_KBD=y
+#CONFIG_NXTK_BORDERWIDTH=4
+CONFIG_NXTK_BORDERCOLOR1=8
+CONFIG_NXTK_BORDERCOLOR2=4
+CONFIG_NXTK_AUTORAISE=n
+CONFIG_NXFONT_SANS=y
+CONFIG_NXFONTS_CHARBITS=7
+CONFIG_NX_BLOCKING=y
+CONFIG_NX_MXSERVERMSGS=32
+CONFIG_NX_MXCLIENTMSGS=16
+
+#
+# RiT P14201 OLED Driver Configuration
+#
+# CONFIG_LCD_P14201 - Enable P14201 support
+# CONFIG_P14201_SPIMODE - Controls the SPI mode (should be mode 2)
+# CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
+# CONFIG_P14201_NINTERFACES - Specifies the number of physical P14201 devices that
+#   will be supported.
+# CONFIG_P14201_FRAMEBUFFER - If defined, accesses will be performed using an in-memory
+#   copy of the OLEDs GDDRAM.  This cost of this buffer is 128 * 96 / 2 = 6Kb.  If this
+#   is defined, then the driver will be fully functional. If not, then it will have the
+#   following limitations:
+#   - Reading graphics memory cannot be supported, and
+#   - All pixel writes must be aligned to byte boundaries.
+#
+#   The latter limitation effectively reduces the 128x96 disply to 64x96.
+#
+CONFIG_LCD_P14201=n
+CONFIG_P14201_SPIMODE=2
+CONFIG_P14201_FREQUENCY=3500000
+CONFIG_P14201_NINTERFACES=1
+CONFIG_P14201_FRAMEBUFFER=y
+
+#
+# Nokia LCD Driver
+#
+# Nokia 6100 Configuration Settings:
+#
+# CONFIG_NOKIA6100_SPIMODE - Controls the SPI mode
+# CONFIG_NOKIA6100_FREQUENCY - Define to use a different bus frequency
+# CONFIG_NOKIA6100_NINTERFACES - Specifies the number of physical Nokia
+#   6100 devices that will be supported.
+# CONFIG_NOKIA6100_BPP - Device supports 8, 12, and 16 bits per pixel.
+# CONFIG_NOKIA6100_S1D15G10 - Selects the Epson S1D15G10 display controller
+# CONFIG_NOKIA6100_PCF8833 - Selects the Phillips PCF8833 display controller
+# CONFIG_NOKIA6100_BLINIT - Initial backlight setting
+#
+# Required LCD driver settings:
+# CONFIG_LCD_NOKIA6100 - Enable Nokia 6100 support
+# Required LCD driver settings:
+# CONFIG_LCD_NOKIA6100 - Enable Nokia 6100 support
+# CONFIG_LCD_MAXCONTRAST - must be 63 with the Epson controller and 127 with
+#   the Phillips controller.
+# CONFIG_LCD_MAXPOWER - Maximum value of backlight setting.  The backlight
+#   control is managed outside of the 6100 driver so this value has no
+#   meaning to the driver.  Board-specific logic may place restrictions on
+#   this value.
+#
+CONFIG_LCD_NOKIA6100=y
+#CONFIG_NOKIA6100_SPIMODE
+#CONFIG_NOKIA6100_FREQUENCY
+#CONFIG_NOKIA6100_NINTERFACES
+CONFIG_NOKIA6100_BPP=8
+CONFIG_NOKIA6100_S1D15G10=y
+CONFIG_NOKIA6100_PCF8833=n
+CONFIG_NOKIA6100_BLINIT=40
+CONFIG_LCD_MAXCONTRAST=63
+CONFIG_LCD_MAXPOWER=127
+
+#
 # Settings for examples/uip
 #
 CONFIG_EXAMPLE_UIP_IPADDR=(10<<24|0<<16|0<<8|2)
@@ -857,6 +1022,49 @@ CONFIG_EXAMPLES_USBSTRG_TRACECLASS=n
 CONFIG_EXAMPLES_USBSTRG_TRACETRANSFERS=n
 CONFIG_EXAMPLES_USBSTRG_TRACECONTROLLER=n
 CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS=n
+
+#
+# Settings for examples/nx
+#
+# CONFIG_EXAMPLES_NX_VPLANE -- The plane to select from the frame-
+#   buffer driver for use in the test.  Default: 0
+# CONFIG_EXAMPLES_NX_DEVNO - The LCD device to select from the LCD
+#  driver for use in the test: Default: 0
+# CONFIG_EXAMPLES_NX_BGCOLOR -- The color of the background.  Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_COLOR1 -- The color of window 1. Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_COLOR2 -- The color of window 2. Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_TBCOLOR -- The color of the toolbar. Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_FONTCOLOR -- The color of the toolbar. Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_BPP -- Pixels per pixel to use.  Valid options
+#   include 2, 4, 8, 16, 24, and 32.  Default is 32.
+# CONFIG_EXAMPLES_NX_RAWWINDOWS -- Use raw windows;  Default is to
+#   use pretty, framed NXTK windows with toolbars.
+# CONFIG_EXAMPLES_NX_STACKSIZE -- The stacksize to use when creating
+#   the NX server.  Default 2048
+# CONFIG_EXAMPLES_NX_CLIENTPRIO -- The client priority.  Default: 80
+# CONFIG_EXAMPLES_NX_SERVERPRIO -- The server priority.  Default: 120
+# CONFIG_EXAMPLES_NX_NOTIFYSIGNO -- The signal number to use with
+#   nx_eventnotify().  Default: 4
+#
+CONFIG_EXAMPLES_NX_VPLANE=0
+CONFIG_EXAMPLES_NX_DEVNO=0
+CONFIG_EXAMPLES_NX_BGCOLOR=0x02
+CONFIG_EXAMPLES_NX_COLOR1=0xdf
+CONFIG_EXAMPLES_NX_COLOR2=0xbe
+CONFIG_EXAMPLES_NX_TBCOLOR=0x92
+CONFIG_EXAMPLES_NX_FONTCOLOR=0x00
+CONFIG_EXAMPLES_NX_BPP=8
+CONFIG_EXAMPLES_NX_RAWWINDOWS=n
+CONFIG_EXAMPLES_NX_STACKSIZE=2048
+CONFIG_EXAMPLES_NX_CLIENTPRIO=80
+CONFIG_EXAMPLES_NX_SERVERPRIO=120
+CONFIG_EXAMPLES_NX_NOTIFYSIGNO=4
+CONFIG_EXAMPLES_NX_EXTERNINIT=y
 
 #
 # Stack and heap information

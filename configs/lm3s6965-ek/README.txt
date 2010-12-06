@@ -431,6 +431,10 @@ Where <subdir> is one of the following:
     driver is waiting for the network to come up.  That is probably
     a bug in the Ethernet driver behavior!
 
+  nx:
+    And example using the NuttX graphics system (NX).  This example
+    uses the P14201 OLED driver.
+
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.

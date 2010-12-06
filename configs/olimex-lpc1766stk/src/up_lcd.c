@@ -44,15 +44,18 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/nokia6100.h>
 
+#include "up_arch.h"
 #include "lpc17_syscon.h"
+#include "lpc17_pwm.h"
 #include "lpc17_internal.h"
-#include "lpc17stk_internal.h"
+#include "lpc1766stk_internal.h"
 
-#ifdef defined(CONFIG_NX_LCDDRIVER) && defined(CONFIG_LCD_NOKIA6100) && defined(CONFIG_LPC17_SSP0)
+#if defined(CONFIG_NX_LCDDRIVER) && defined(CONFIG_LCD_NOKIA6100) && defined(CONFIG_LPC17_SSP0)
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -60,8 +63,8 @@
 
 /* Check power setting */
 
-#if !defined(CONFIG_LCD_MAXPOWER) || CONFIG_LCD_MAXPOWER != 128
-#  error "CONFIG_LCD_MAXPOWER must be 128"
+#if !defined(CONFIG_LCD_MAXPOWER) || CONFIG_LCD_MAXPOWER != 127
+#  error "CONFIG_LCD_MAXPOWER must be 127"
 #endif
 
 /* Backlight OFF PWM setting */
@@ -85,7 +88,7 @@
 
 #ifdef CONFIG_LCD_NOKIADBG
 #  define lcddbg(format, arg...)  vdbg(format, ##arg)
-#  define lcd_dumpgpio(m) lm3s_dumpgpio(LPC1766STK_LCD_RST, m)
+#  define lcd_dumpgpio(m) lpc17_dumpgpio(LPC1766STK_LCD_RST, m)
 #else
 #  define lcddbg(x...)
 #  define lcd_dumpgpio(m)
@@ -109,7 +112,7 @@ void nokia_blinitialize(void)
 
   /* Enable clocking of PWM1 */
 
-  regval = regreg32(LPC17_SYSCON_PCONP);
+  regval = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCPWM1;
   putreg32(regval, LPC17_SYSCON_PCONP);
 
@@ -189,16 +192,16 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   /* Configure the LCD GPIOs */
 
   lcd_dumpgpio("up_nxdrvinit: On entry");
-  lm3s_configgpio(LPC1766STK_LCD_RST);
-  lm3s_configgpio(LPC1766STK_LCD_BL);
+  lpc17_configgpio(LPC1766STK_LCD_RST);
+  lpc17_configgpio(LPC1766STK_LCD_BL);
   lcd_dumpgpio("up_nxdrvinit: After GPIO setup");
 
   /* Reset the LCD */
 
   lpc17_gpiowrite(LPC1766STK_LCD_RST, false);
-  up_usdelay(10);
+  up_udelay(10);
   lpc17_gpiowrite(LPC1766STK_LCD_RST, true);
-  up_msdelay(5);
+  up_mdelay(5);
 
   /* Configure PWM1 to support the backlight */
 

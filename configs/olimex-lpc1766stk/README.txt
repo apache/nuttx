@@ -651,11 +651,20 @@ sudirectory and can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  nettest:
+    This configuration directory may be used to enable networking using the
+    LPC17xx's Ethernet controller. It uses examples/nettest to excercise the
+    TCP/IP network.
+
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
     Support for the board's SPI-based MicroSD card is included
     (but not passing tests as of this writing).
+
+  nx:
+    And example using the NuttX graphics system (NX).  This example
+    uses the Nokia 6100 LCD driver.
 
   ostest:
     This configuration directory, performs a simple OS test using
