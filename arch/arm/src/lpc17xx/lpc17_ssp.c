@@ -434,13 +434,14 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
  
         default:
+          sspdbg("Bad mode: %d\n", mode);
           DEBUGASSERT(FALSE);
           return;
         }
 
       ssp_putreg(priv, LPC17_SSP_CR0_OFFSET, regval);
 
-      /* Save the mode so that subsequent re-configuratins will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
 #ifndef CONFIG_SPI_OWNBUS
       priv->mode = mode;
