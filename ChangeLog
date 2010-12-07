@@ -1399,3 +1399,5 @@
 	* drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.
 	* configs/olimex-lpc1766stk/nx -- A NX graphics configuration for the Olimex
 	  LPC1766-STK board using the Nokia 6100 LCD driver.
+	* include/nuttx/spi.h -- the SPI_SETBITS macro was calling the setmode method.
+	  This is a very important bug-fix in some usages.

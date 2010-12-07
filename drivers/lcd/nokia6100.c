@@ -83,6 +83,14 @@
  * CONFIG_NOKIA6100_PCF8833 - Selects the Phillips PCF8833 display controller
  * CONFIG_NOKIA6100_BLINIT - Initial backlight setting
  *
+ * The following may need to be tuned for your hardware:
+ * CONFIG_NOKIA6100_INVERT - Display inversion, 0 or 1, Default: 1
+ * CONFIG_NOKIA6100_MY - Display row direction, 0 or 1, Default: 0
+ * CONFIG_NOKIA6100_MX - Display column direction, 0 or 1, Default: 1
+ * CONFIG_NOKIA6100_V - Display address direction, 0 or 1, Default: 0
+ * CONFIG_NOKIA6100_ML - Display scan direction, 0 or 1, Default: 0
+ * CONFIG_NOKIA6100_RGBORD - Display RGB order, 0 or 1, Default: 0
+ *
  * Required LCD driver settings:
  * CONFIG_LCD_NOKIA6100 - Enable Nokia 6100 support
  * CONFIG_LCD_MAXCONTRAST - must be 63 with the Epson controller and 127 with
@@ -157,6 +165,32 @@
 #  error "One of CONFIG_NOKIA6100_S1D15G10 or CONFIG_NOKIA6100_PCF8833 must be defined"
 #endif
 
+/* Delay geometry defaults */
+
+#ifndef CONFIG_NOKIA6100_INVERT
+#  define CONFIG_NOKIA6100_INVERT 1
+#endif
+
+#ifndef CONFIG_NOKIA6100_MY
+#  define CONFIG_NOKIA6100_MY 0
+#endif
+
+#ifndef CONFIG_NOKIA6100_MX
+#  define CONFIG_NOKIA6100_MX 1
+#endif
+
+#ifndef CONFIG_NOKIA6100_V
+#  define CONFIG_NOKIA6100_V 0
+#endif
+
+#ifndef CONFIG_NOKIA6100_ML
+#  define CONFIG_NOKIA6100_ML 0
+#endif
+
+#ifndef CONFIG_NOKIA6100_RGBORD
+#  define CONFIG_NOKIA6100_RGBORD 0
+#endif
+
 /* Check contrast selection */
 
 #ifdef CONFIG_NOKIA6100_S1D15G10
@@ -200,11 +234,9 @@
 
 #define NOKIA_LCD_DATA  (1 << 9)
 
-/* Define the following to enable register-level debug output */
-
-#undef CONFIG_LCD_REGDEBUG
-
-/* Verbose debug must also be enabled */
+/* Define CONFIG_LCD_REGDEBUG to enable register-level debug output.
+ * (Verbose debug must also be enabled)
+ */
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_VERBOSE
@@ -258,10 +290,17 @@
 
 /* Handle any potential strange behavior at edges */
 
+#if 0 /* REVISIT */
 #define NOKIA_PGBIAS         2 /* May not be necessary */
 #define NOKIA_COLBIAS        0
-#define NOKIA_XBIAS          2 /* May not be necessary */
+#define NOKIA_XBIAS          2 /* May not be necessary, if so need to subtract from XRES */
 #define NOKIA_YBIAS          0
+#else
+#define NOKIA_PGBIAS         0
+#define NOKIA_COLBIAS        0
+#define NOKIA_XBIAS          0
+#define NOKIA_YBIAS          0
+#endif
 
 #define NOKIA_ENDPAGE        131
 #define NOKIA_ENDCOL         131
@@ -269,7 +308,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-# define lcddbg(format, arg...)  vdbg(format, ##arg)
+# define lcddbg(format, arg...)  llvdbg(format, ##arg)
 #else
 # define lcddbg(x...)
 #endif
@@ -484,24 +523,33 @@ static const uint8_t g_pwrctr[] =
  * P3: Grayscale setup
  */
 
-#if CONFIG_NOKIA6100_BPP == 12
 static const uint8_t g_datctl[] = 
 {
   S1D15G10_DATCTL,                  /* Data control */
-  DATCTL_PGADDR_INV,                /* Page addr inverted, col addr normal, addr scan in col direction */
-//DATCTL_PGADDR_INV|DATCTL_COLADDR_REV /* Page addr inverted, col addr normal, addr scan in col direction */
-  0,                                /* RGB->RGB */
-  DATCTL_16GRAY_A                   /* Selects 16-bit color, Type A */
-};
-#else /* CONFIG_NOKIA6100_BPP == 8 */
-static const uint8_t g_datctl[] = 
-{
-  S1D15G10_DATCTL,                  /* Data control */
-  0,                                /* Page addr normal, col addr normal, addr scan in col direction */
-  0,                                /* RGB->RGB */
-  DATCTL_8GRAY                      /* Selects 8-bit color */
-};
+  0
+#if CONFIG_NOKIA6100_MY != 0        /* Display row direction */
+  |DATCTL_PGADDR_INV                /* Page address inverted */
 #endif
+#if CONFIG_NOKIA6100_MX != 0        /* Display column direction */
+  |DATCTL_COLADDR_REV               /* Column address reversed */
+#endif
+#if CONFIG_NOKIA6100_V != 0         /* Display address direction */
+  |DATCTL_ADDR_PGDIR                /* Address scan in page direction */
+#endif
+  ,
+#if CONFIG_NOKIA6100_RGBORD != 0
+  DATCTL_BGR,                       /* RGB->BGR */
+#else
+  0,                                /* RGB->RGB */
+#endif
+#if CONFIG_NOKIA6100_BPP == 8
+  DATCTL_16GRAY_A                   /* Selects 16-bit color, Type A */
+#elif CONFIG_NOKIA6100_BPP == 12
+  DATCTL_8GRAY                      /* Selects 8-bit color */
+#else
+#  error "16-bit mode not yet implemented"
+#endif
+};
 
 /* Voltage control (contrast setting):
  * P1: Volume value
@@ -570,7 +618,22 @@ static const uint8_t g_colmod[] =
 static const uint8_t g_madctl[] =
 {
   PCF8833_MADCTL,                   /* Memory data access control*/
-  MADCTL_MX|MADCTL_MY|MADCTL_RGB    /* Mirror x and y, reverse rgb */
+  0
+#ifdef CONFIG_NOKIA6100_RGBORD != 0
+  |MADCTL_RGB                      /* RGB->BGR */
+#endif
+#ifdef CONFIG_NOKIA6100_MY != 0    /* Display row direction */
+  |MADCTL_MY                       /* Mirror Y */
+#endif
+#ifdef CONFIG_NOKIA6100_MX != 0    /* Display column direction */
+  |MADCTL_MX                       /* Mirror X */
+#endif
+#ifdef CONFIG_NOKIA6100_V != 0     /* Display address direction */
+  |MADCTL_V                        /* ertical RAM write; in Y direction */
+#endif
+#ifdef CONFIG_NOKIA6100_ML != 0    /* Display scan direction */
+  |MADCTL_LAO                      /* Line address order bottom to top */
+#endif
 };
 
 /* Set contrast (SETCON) */
@@ -605,12 +668,8 @@ static const uint8_t g_setcon[] =
  
 static inline void nokia_configspi(FAR struct spi_dev_s *spi)
 {
-#ifdef CONFIG_NOKIA6100_FREQUENCY
   lcddbg("Mode: %d Bits: %d Frequency: %d\n",
          CONFIG_NOKIA6100_SPIMODE, CONFIG_NOKIA6100_WORDWIDTH, CONFIG_NOKIA6100_FREQUENCY);
-#else
-  lcddbg("Mode: %d Bits: 9\n", CONFIG_NOKIA6100_SPIMODE);
-#endif
 
   /* Configure SPI for the Nokia 6100.  But only if we own the SPI bus.  Otherwise, don't
    * bother because it might change.
@@ -619,9 +678,7 @@ static inline void nokia_configspi(FAR struct spi_dev_s *spi)
 #ifdef CONFIG_SPI_OWNBUS
   SPI_SETMODE(spi, CONFIG_NOKIA6100_SPIMODE);
   SPI_SETBITS(spi, CONFIG_NOKIA6100_WORDWIDTH);
-#ifdef CONFIG_NOKIA6100_FREQUENCY
   SPI_SETFREQUENCY(spi, CONFIG_NOKIA6100_FREQUENCY)
-#endif
 #endif
 }
 
@@ -646,6 +703,7 @@ static inline void nokia_select(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just select the chip */
 
+  lcddbg("SELECTED\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 }
 #else
@@ -655,6 +713,7 @@ static void nokia_select(FAR struct spi_dev_s *spi)
    * devices competing for the SPI bus
    */
 
+  lcddbg("SELECTED\n");
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
@@ -664,9 +723,7 @@ static void nokia_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_NOKIA6100_SPIMODE);
   SPI_SETBITS(spi, CONFIG_NOKIA6100_WORDWIDTH);
-#ifdef CONFIG_NOKIA6100_FREQUENCY
   SPI_SETFREQUENCY(spi, CONFIG_NOKIA6100_FREQUENCY);
-#endif
 }
 #endif
 
@@ -691,6 +748,7 @@ static inline void nokia_deselect(FAR struct spi_dev_s *spi)
 {
   /* We own the SPI bus, so just de-select the chip */
 
+  lcddbg("DE-SELECTED\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
 }
 #else
@@ -698,6 +756,7 @@ static void nokia_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select Nokia 6100 chip and relinquish the SPI bus. */
 
+  lcddbg("DE-SELECTED\n");
   SPI_SELECT(spi, SPIDEV_DISPLAY, false);
   SPI_LOCK(spi, false);
 }
@@ -715,6 +774,7 @@ static void nokia_sndcmd(FAR struct spi_dev_s *spi, const uint8_t cmd)
 {
   /* Select the LCD */
 
+  lcddbg("cmd: %02x\n", cmd);
   nokia_select(spi);
 
   /* Send the command. Bit 8 == 0 denotes a command */
@@ -737,14 +797,15 @@ static void nokia_sndcmd(FAR struct spi_dev_s *spi, const uint8_t cmd)
 static void nokia_cmddata(FAR struct spi_dev_s *spi, uint8_t cmd, int datlen,
                           const uint8_t *data)
 {
-  uint16_t *linebuf = g_rowbuf;
+  uint16_t *rowbuf = g_rowbuf;
   int i;
 
+  lcddbg("cmd: %02x datlen: %d\n", cmd, datlen);
   DEBUGASSERT(datlen <= NOKIA_STRIDE);
 
   /* Copy the command into the line buffer. Bit 8 == 0 denotes a command. */
 
-  *linebuf++ = cmd;
+  *rowbuf++ = cmd;
 
   /* Copy any data after the command into the line buffer */
 
@@ -752,7 +813,7 @@ static void nokia_cmddata(FAR struct spi_dev_s *spi, uint8_t cmd, int datlen,
     {
       /* Bit 8 == 1 denotes data */
 
-      *linebuf++ = (uint16_t)*data++ | NOKIA_LCD_DATA;
+      *rowbuf++ = (uint16_t)*data++ | NOKIA_LCD_DATA;
     }
 
   /* Select the LCD */
@@ -791,6 +852,14 @@ static void nokia_ramwr(FAR struct spi_dev_s *spi, int datlen, const uint8_t *da
 
 static void nokia_cmdarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cmddata)
 {
+#ifdef CONFIG_LCD_REGDEBUG
+  int i;
+
+  for (i = 0; i < len; i++)
+    {
+      lcddbg("cmddata[%d]: %02x\n", i, cmddata[i]);
+    }
+#endif
   nokia_cmddata(spi, cmddata[0], len-1, &cmddata[1]);
 }
 
@@ -804,7 +873,7 @@ static void nokia_cmdarray(FAR struct spi_dev_s *spi, int len, const uint8_t *cm
 
 static void nokia_clrram(FAR struct spi_dev_s *spi)
 {
-  uint16_t *linebuf = g_rowbuf;
+  uint16_t *rowbuf = g_rowbuf;
   int i;
 
   /* Set all zero data in the line buffer */
@@ -813,7 +882,7 @@ static void nokia_clrram(FAR struct spi_dev_s *spi)
     {
       /* Bit 8 == 1 denotes data */
 
-      *linebuf++ = NOKIA_LCD_DATA;
+      *rowbuf++ = NOKIA_LCD_DATA;
     }
   
   /* Select the LCD and send the RAMWR command */
@@ -862,7 +931,7 @@ static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
 #if NOKIA_XBIAS > 0
   row += NOKIA_YBIAS;
 #endif
-  DEBUGASSERT(buffer && col < NOKIA_XRES && row >= 0 && );
+  DEBUGASSERT(buffer && col >=0 && (col + npixels) <= NOKIA_XRES && row >= 0 && row < NOKIA_YRES);
 
   /* Set up to write the run. */
 
@@ -1070,7 +1139,11 @@ static int nokia_initialize(struct nokia_dev_s *priv)
   nokia_cmdarray(spi, sizeof(g_volctr), g_volctr);   /* Volume control (contrast) */
   nokia_cmdarray(spi, sizeof(g_pwrctr), g_pwrctr);   /* Turn on voltage regulators */
   up_mdelay(100);
+#ifdef CONFIG_NOKIA6100_INVERT
   nokia_sndcmd(spi, S1D15G10_DISINV);                /* Invert display */
+#else
+  nokia_sndcmd(spi, S1D15G10_DISNOR);                /* Normal display */
+#endif
   nokia_cmdarray(spi, sizeof(g_datctl), g_datctl);   /* Data control */
 #if CONFIG_NOKIA6100_BPP == 8
   nokia_cmdarray(spi, sizeof(g_rgbset8), g_rgbset8); /* Set up color lookup table */
@@ -1091,7 +1164,11 @@ static int nokia_initialize(struct nokia_dev_s *priv)
 
   nokia_sndcmd(spi, PCF8833_SLEEPOUT);              /* Exit sleep mode */
   nokia_sndcmd(spi, PCF8833_BSTRON);                /* Turn on voltage booster */
+#ifdef CONFIG_NOKIA6100_INVERT
   nokia_sndcmd(spi, PCF8833_INVON);                 /* Invert display */
+#else
+  nokia_sndcmd(spi, PCF8833_INVOFF);                /* Don't invert display */
+#endif
   nokia_cmdarray(spi, sizeof(g_madctl), g_madctl);  /* Memory data access control */
   nokia_cmdarray(spi, sizeof(g_colmod), g_colmod);  /* Color interface pixel format */
   nokia_cmdarray(spi, sizeof(g_setcon), g_setcon);  /* Set contrast */
@@ -1141,6 +1218,7 @@ FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned in
 
   /* Configure and enable the LCD controller */
 
+  nokia_configspi(spi);
   if (nokia_initialize(priv) == OK)
     {
       /* Turn on the backlight */

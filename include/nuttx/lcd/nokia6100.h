@@ -58,6 +58,14 @@
  * CONFIG_NOKIA6100_PCF8833 - Selects the Phillips PCF8833 display controller
  * CONFIG_NOKIA6100_BLINIT - Initial backlight setting
  *
+ * The following may need to be tuned for your hardware:
+ * CONFIG_NOKIA6100_INVERT - Display inversion, 0 or 1, Default: 1
+ * CONFIG_NOKIA6100_MY - Display row direction, 0 or 1, Default: 0
+ * CONFIG_NOKIA6100_MX - Display column direction, 0 or 1, Default: 1
+ * CONFIG_NOKIA6100_V - Display address direction, 0 or 1, Default: 0
+ * CONFIG_NOKIA6100_ML - Display scan direction, 0 or 1, Default: 0
+ * CONFIG_NOKIA6100_RGBORD - Display RGB order, 0 or 1, Default: 0
+ *
  * Required LCD driver settings:
  * CONFIG_LCD_NOKIA6100 - Enable Nokia 6100 support
  * CONFIG_LCD_MAXCONTRAST - must be 63 with the Epson controller and 127 with

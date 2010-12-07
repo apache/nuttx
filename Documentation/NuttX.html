@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 4, 2010</p>
+      <p>Last Updated: December 6, 2010</p>
     </td>
   </tr>
 </table>
@@ -1276,10 +1276,11 @@
         The NSH configuration support the Nucleus2G's microSD slot and additional configurations
         are available to exercise the the USB serial and USB mass storage devices.
         However, due to some technical reasons, neither the SPI nor the USB device drivers are fully verified.
-        (Although it has been reported to me that the SPI microSD is functional on other platforms).
+        (Although they have since been verfiied on other platforms; this needs to be revisited on the Nucleus2G).
       </p>
       <p>
         Support for the mbed board was contributed by Dave Marples and released in NuttX-5.11.
+        This port includes a NuttX OS test configuration(see <code>examples/ostest</code>).
       </p>
       <p>
         Support for that Olimex-LPC1766-STK board was added to NuttX 5.13.
@@ -1287,7 +1288,7 @@
         Verified configurations are now available for the NuttX OS test,
         for the NuttShell (NSH, see the <a href="ttp://www.nuttx.org/NuttShell.html">NSH User Guide</a>),
         for the NuttX network test, and for the <a href="http://acme.com/software/thttpd">THTTPD</a> webserver.
-		Additional drivers for USB device and MicroSD has also be added and verified are available in CVS;
+		Additional drivers for USB device and MicroSD have also be added and have been verified and are available in CVS;
 		A driver for the Nokia 6100 LCD has been added and is under test now.
 		All are expected to be released in NuttX-5.15.
       </p>
@@ -2021,6 +2022,8 @@ nuttx-5.15 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.
 	* configs/olimex-lpc1766stk/nx -- A NX graphics configuration for the Olimex
 	  LPC1766-STK board using the Nokia 6100 LCD driver.
+	* include/nuttx/spi.h -- the SPI_SETBITS macro was calling the setmode method.
+	  This is a very important bug-fix in some usages.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
