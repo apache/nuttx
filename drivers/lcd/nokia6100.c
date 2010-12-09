@@ -474,7 +474,7 @@ static struct nokia_dev_s g_lcddev =
  * P4: 0: Dispersion P40= 1: Non-dispersion
  */
 
-#if CONFIG_NOKIA6100_BPP == 12
+#if 1 // CONFIG_NOKIA6100_BPP == 12
 static const uint8_t g_disctl[] =
 {
   S1D15G10_DISCTL,                  /* Display control */
@@ -543,9 +543,9 @@ static const uint8_t g_datctl[] =
   0,                                /* RGB->RGB */
 #endif
 #if CONFIG_NOKIA6100_BPP == 8
-  DATCTL_16GRAY_A                   /* Selects 16-bit color, Type A */
-#elif CONFIG_NOKIA6100_BPP == 12
   DATCTL_8GRAY                      /* Selects 8-bit color */
+#elif CONFIG_NOKIA6100_BPP == 12
+  DATCTL_16GRAY_A                   /* Selects 16-bit color, Type A */
 #else
 #  error "16-bit mode not yet implemented"
 #endif
