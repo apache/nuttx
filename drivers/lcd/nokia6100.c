@@ -232,7 +232,7 @@
 
 /* If bit 9 is set, the byte is data; clear for commands */
 
-#define NOKIA_LCD_DATA  (1 << 9)
+#define NOKIA_LCD_DATA  (1 << 8)
 
 /* Define CONFIG_LCD_REGDEBUG to enable register-level debug output.
  * (Verbose debug must also be enabled)
@@ -275,17 +275,17 @@
 #  define NOKIA_BPP          8
 #  define NOKIA_COLORFMT     FB_FMT_RGB8_332
 #  define NOKIA_STRIDE       NOKIA_XRES
-#  define NOKIA_PIX2BYTES(b) (b)
+#  define NOKIA_PIX2BYTES(p) (p)
 #elif CONFIG_NOKIA6100_BPP == 12
 #  define NOKIA_BPP          12
 #  define NOKIA_COLORFMT     FB_FMT_RGB12_444
 #  define NOKIA_STRIDE       ((3*NOKIA_XRES+1)/2)
-#  define NOKIA_PIX2BYTES(b) ((3*(b)+1)/2)
+#  define NOKIA_PIX2BYTES(p) ((3*(p)+1)/2)
 #elif CONFIG_NOKIA6100_BPP == 16
 #  define NOKIA_BPP          16
 #  define NOKIA_COLORFMT     FB_FMT_RGB16_565
 #  define NOKIA_STRIDE       (2*NOKIA_XRES)
-#  define NOKIA_PIX2BYTES(b) (2*(b))
+#  define NOKIA_PIX2BYTES(p) (2*(p))
 #endif
 
 /* Handle any potential strange behavior at edges */
