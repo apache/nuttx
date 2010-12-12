@@ -1360,13 +1360,14 @@
 	  handling in send() and in uip_tcpinput.c; uip_tcpinput.c thought (incorrectly)
 	  that all of the bytes were acknowledged; send.c knew that they were not.
 
-5.15 2010-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.15 2010-12-12 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* net/uip/uip_tcpaddsend.c and net/send.c -- Another place where the TCP sequence
 	  number problem "fixed" in 5.14 might occur.
 	* net/send.c -- Check if the destination IP address is in the ARP table.  If
 	  not, then don't consider the packet sent.  It won't be, an ARP packet will go
-	  out instead.
+	  out instead.  This improves behavior, for example, on the first GET request
+	  from a browser.
 	* arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c -- The Ethernet
 	  logic was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).  An
 	  option was added to limit the amount of SRAM used for packet buffering and to
@@ -1376,16 +1377,16 @@
 	* arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
 	  selected.
 	* configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
-	  NSH.  Networking and telnetd interface functional.  Still testing SPI-based
-	  SD/MMC.
+	  NSH.  Networking and telnetd interface as well as SPI-based microSD are
+	  now functional.
 	* examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
 	  CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
-      initialized and bad things happen if you try to ping.
+	  initialized and bad things happen if you try to ping.
 	* drivers/lcd -- Add header files for the Phillips PCF8833 LCD controller and
 	  for the Epson S1D15G10 LCD controller.  A driver for the Nokia 6100 LCD is
 	  coming.
 	* include/nuttx/spi.h and almost all other SPI files -- Added an optional
-	  cmddata() method to the SPI interface.  Some devices require and additional
+	  cmddata() method to the SPI interface.  Some devices require an additional
 	  out-of-band bit to specify if the next word sent to the device is a command
 	  or data. This is typical, for example, in "9-bit" displays where the 9th bit
 	  is the CMD/DATA bit. The cmddata method provides selection of command or data.
@@ -1396,8 +1397,12 @@
 	* drivers/usbdev/usbserial.c and usbstorage.c -- All USB class drivers need
 	  to call DEV_CONNECT() when they are ready to be enumerated.  That is,
 	  (1) initially when bound to the USB driver, and (2) after a USB reset.
-	* drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.
+	* drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.  This driver
+	  has not be verified as of the initial check-in.
 	* configs/olimex-lpc1766stk/nx -- A NX graphics configuration for the Olimex
-	  LPC1766-STK board using the Nokia 6100 LCD driver.
+	  LPC1766-STK board using the Nokia 6100 LCD driver.  This configuration has
+	  not been verified as of the initial check-in.
 	* include/nuttx/spi.h -- the SPI_SETBITS macro was calling the setmode method.
 	  This is a very important bug-fix in some usages.
+
+5.16 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
