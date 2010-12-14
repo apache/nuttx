@@ -71,6 +71,8 @@
  *   drvr - An instance of struct usbhost_driver_s that the class implementation will
  *     "bind" to its state structure and will subsequently use to communicate with
  *     the USB host driver.
+ *   id - In the case where the device supports multiple base classes, subclasses, or
+ *     protocols, this specifies which to configure for.
  *
  * Returned Values:
  *   On success, this function will return a non-NULL instance of struct
@@ -81,7 +83,7 @@
  *
  ************************************************************************************/
 
-#definei CLASS_CREATE(reg, drvr) (reg->create(drvr))
+#definei CLASS_CREATE(reg, drvr, id) (reg->create(drvr))
 
 /************************************************************************************
  * Public Types
@@ -93,9 +95,11 @@
 
 struct usbhost_id_s
 {
-  uint8_t  class;   /* Device class code (see USB_CLASS_* defines in usb.h) */
-  uint16_t vid;     /* Vendor ID (for vendor/product specific devices) */
-  uint16_t pid;     /* Product ID (for vendor/product specific devices) */
+  uint8_t  base;     /* Base device class code (see USB_CLASS_* defines in usb.h) */
+  uint8_t  subclass; /* Sub-class, depends on base class. Eg., See USBSTRG_SUBCLASS_* */
+  uint8_t  proto;    /* Protocol, depends on base class. Eg., See USBSTRG_PROTO_* */
+  uint16_t vid;      /* Vendor ID (for vendor/product specific devices) */
+  uint16_t pid;      /* Product ID (for vendor/product specific devices) */
 };
 
 /* The struct usbhost_registry_s type describes information that is kept in the the
@@ -122,13 +126,15 @@ struct usbhost_registry_s
    * simultaneously connected (see the CLASS_CREATE() macro above).
    */
  
-  struct usbhost_class_s    *(*create)(struct usbhost_driver_s *drvr);
+  struct usbhost_class_s    *(*create)(struct usbhost_driver_s *drvr,
+                                       const struct usbhost_id_s *id)
 
   /* This information uniquely identifies the USB host class implementation that
    * goes with a specific USB device.
    */
 
-  struct usbhost_id_s       id;
+  uint8_t                   nids;  /* Number of IDs in the id[] array */
+  struct usbhost_id_s       id[1]; /* Actual dimension is nids */
 };
 
 /************************************************************************************

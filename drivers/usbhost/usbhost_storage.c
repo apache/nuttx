@@ -54,12 +54,17 @@ static struct usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr);
 
 struct usbhost_registry_s g_storage =
 {
-  NULL,                     /* flink */
-  usbhost_create,           /* create */
+  NULL,                       /* flink */
+  usbhost_create,             /* create */
+  1,                          /* nids */
   {
-    USB_CLASS_MASS_STORAGE, /* id.class */
-    0,                      /* id.vid */
-    0                       /* id.pid */
+    {
+      USB_CLASS_MASS_STORAGE, /* id[0].base */
+      SUBSTRG_SUBCLASS_SCSI,  /* id[0].subclass */
+      USBSTRG_PROTO_BULKONLY, /* id[0].proto */
+      0,                      /* id[0].vid */
+      0                       /* id[0].pid */
+    }
   }
 };
 
@@ -82,6 +87,8 @@ struct usbhost_registry_s g_storage =
  *   drvr - An instance of struct usbhost_driver_s that the class
  *     implementation will "bind" to its state structure and will
  *     subsequently use to communicate with the USB host driver.
+ *   id - In the case where the device supports multiple base classes,
+ *     subclasses, or protocols, this specifies which to configure for.
  *
  * Returned Values:
  *   On success, this function will return a non-NULL instance of struct
@@ -92,7 +99,8 @@ struct usbhost_registry_s g_storage =
  *
  ****************************************************************************/
 
-static struct usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr)
+static struct usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr,
+                                              const struct usbhost_id_s *id)
 {
 #warning "Not implemented"
   return NULL;
