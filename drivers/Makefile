@@ -64,6 +64,13 @@ USBDEVDEPPATH	= --dep-path usbdev
 CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/usbdev}
 endif
 
+ifeq ($(CONFIG_USBHOST),y)
+include usbhost/Make.defs
+ROOTDEPPATH	= --dep-path .
+USBHOSTDEPPATH	= --dep-path usbhost
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/usbhost}
+endif
+
 include mmcsd/Make.defs
 ROOTDEPPATH	= --dep-path .
 MMCSDDEPPATH	= --dep-path mmcsd
@@ -88,7 +95,8 @@ ROOTDEPPATH	= --dep-path .
 MTDDEPPATH	= --dep-path mtd
 
 ASRCS		= $(SERIAL_ASRCS) $(NET_ASRCS) $(PIPE_ASRCS) $(USBDEV_ASRCS) \
-			  $(MMCSD_ASRCS) $(LCD_ASRCS) $(BCH_ASRCS) $(MTD_ASRCS)
+			  $(USBHOST_ASRCS) $(MMCSD_ASRCS) $(LCD_ASRCS) $(BCH_ASRCS) \
+			  $(MTD_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		=
@@ -99,7 +107,8 @@ CSRCS		+= ramdisk.c rwbuffer.c
 endif
 endif
 CSRCS		+= $(SERIAL_CSRCS) $(NET_CSRCS) $(PIPE_CSRCS) $(USBDEV_CSRCS) \
-			   $(MMCSD_CSRCS) $(LCD_CSRCS) $(BCH_CSRCS) $(MTD_CSRCS)
+			   $(USBHOST_CSRCS) $(MMCSD_CSRCS) $(LCD_CSRCS) $(BCH_CSRCS) \
+			   $(MTD_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -107,7 +116,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libdrivers$(LIBEXT)
 
-VPATH		= serial:net:pipes:usbdev:mmcsd:lcd:bch:mtd
+VPATH		= serial:net:pipes:usbdev:usbhost:mmcsd:lcd:bch:mtd
 
 all:	$(BIN)
 
@@ -124,7 +133,8 @@ $(BIN):	$(OBJS)
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(ROOTDEPPATH) $(SERIALDEPPATH) $(NETDEPPATH) $(PIPEDEPPATH) \
-	  $(USBDEVDEPPATH) $(MMCSDDEPPATH) $(LCDDEPPATH) $(BCHDEPPATH) $(MTDDEPPATH) \
+	  $(USBDEVDEPPATH) $(USBHOSTDEPPATH) $(MMCSDDEPPATH) $(LCDDEPPATH) \
+	  $(BCHDEPPATH) $(MTDDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
