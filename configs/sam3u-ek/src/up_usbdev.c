@@ -45,8 +45,8 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/usbdev.h>
-#include <nuttx/usbdev_trace.h>
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
 #include "sam3u_internal.h"
@@ -82,7 +82,7 @@ void sam3u_usbinitialize(void)
  * Description:
  *   If USB is supported and the board supports a pullup via GPIO (for USB software
  *   connect and disconnect), then the board software must provide sam3u_pullup.
- *   See include/nuttx/usbdev.h for additional description of this method.
+ *   See include/nuttx/usb/usbdev.h for additional description of this method.
  *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
  *   NULL.
  *
