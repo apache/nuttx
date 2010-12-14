@@ -35,3 +35,7 @@
 
 USBHOST_ASRCS  =
 USBHOST_CSRCS  =
+
+ifeq ($(CONFIG_USBHOST),y)
+USBHOST_CSRCS  += usbhost_registerclass.c usbhost_findclass.c
+endif
