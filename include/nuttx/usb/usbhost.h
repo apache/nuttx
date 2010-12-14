@@ -55,23 +55,145 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: CLASS_CREATE
+ *
+ * Description:
+ *   This macro will call the create() method of struct usb_registry_s.  The create()
+ *   method is a callback into the class implementation.  It is used to (1) create
+ *   a new instance of the USB host class state and to (2) bind a USB host driver
+ *   "session" to the class instance.  Use of this create() method will support
+ *   environments where there may be multiple USB ports and multiple USB devices
+ *   simultaneously connected.
+ *
+ * Input Parameters:
+ *   reg - The USB host class registry entry previously obtained from a call to
+ *     usbhost_findclass().
+ *   drvr - An instance of struct usbhost_driver_s that the class implementation will
+ *     "bind" to its state structure and will subsequently use to communicate with
+ *     the USB host driver.
+ *
+ * Returned Values:
+ *   On success, this function will return a non-NULL instance of struct
+ *   usbhost_class_s that can be used by the USB host driver to communicate with the
+ *   USB host class.  NULL is returned on failure; this function will fail only if
+ *   the drvr input parameter is NULL or if there are insufficient resources to
+ *   create another USB host class instance.
+ *
+ ************************************************************************************/
+
+#definei CLASS_CREATE(reg, drvr) (reg->create(drvr))
+
+/************************************************************************************
  * Public Types
  ************************************************************************************/
 
-/************************************************************************************
- * Private Data
- ************************************************************************************/
+/* This struct contains all of the information that is needed to associate a device
+ * this is connected via a USB port to a class.
+ */
+
+struct usbhost_id_s
+{
+  uint8_t  class;   /* Device class code (see USB_CLASS_* defines in usb.h) */
+  uint16_t vid;     /* Vendor ID (for vendor/product specific devices) */
+  uint16_t pid;     /* Product ID (for vendor/product specific devices) */
+};
+
+/* The struct usbhost_registry_s type describes information that is kept in the the
+ * USB host registry.  USB host class implementations register this information so
+ * that USB host drivers can later find the class that matches the device that is
+ * connected to the USB port.
+ */
+
+struct usbhost_driver_s; /* Forward reference to the driver state structure */
+struct usbhost_class_s;  /* Forward reference to the class state structure */
+struct usbhost_registry_s
+{
+  /* This field is used to implement a singly-link registry structure.  Because of
+   * the presence of this link, provides of structy usbhost_registry_s instances must
+   * provide those instances in write-able memory (RAM).
+   */
+
+  struct usbhsot_registry_s flink;
+
+  /* This is a callback into the class implementation.  It is used to (1) create
+   * a new instance of the USB host class state and to (2) bind a USB host driver
+   * "session" to the class instance.  Use of this create() method will support
+   * environments where there may be multiple USB ports and multiple USB devices
+   * simultaneously connected (see the CLASS_CREATE() macro above).
+   */
+ 
+  struct usbhost_class_s   *(*create)(struct usbhost_driver_s *drvr);
+
+  /* This information uniquely identifies the USB host class implementation that
+   * goes with a specific USB device.
+   */
+
+  struct usbhost_id_s       id;
+};
 
 /************************************************************************************
  * Public Data
  ************************************************************************************/
 
 /************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/************************************************************************************
+ * Name: usbhost_registerclass
+ *
+ * Description:
+ *   Register a USB host class implementation.  The caller provides an instance of
+ *   struct usbhost_registry_s that contains all of the information that will be
+ *   needed later to (1) associate the USB host class implementation with a connected
+ *   USB device, and (2) to obtain and bind a struct usbhost_class_s instance for
+ *   the device.
+ *
+ * Input Parameters:
+ *   class - An write-able instance of struct usbhost_registry_s that will be
+ *     maintained in a registry.
+ *
+ * Returned Values:
+ *   On success, this function will return zero (OK).  Otherwise, a negated errno
+ *   value is returned.
+ *
+ ************************************************************************************/
+
+EXTERN int usbhost_registerclass(struct usbhost_registry_s *class);
+
+/************************************************************************************
+ * Name: usbhost_findclass
+ *
+ * Description:
+ *   Find a USB host class implementation previously registered by
+ *   usbhost_registerclass().  On success, an instance of struct usbhost_registry_s
+ *   will be returned.  That instance will contain all of the information that will
+ *   be needed to obtain and bind a struct usbhost_class_s instance for the device.
+ *
+ * Input Parameters:
+ *   id - Identifies the USB device class that has connect to the USB host.
+ *
+ * Returned Values:
+ *   On success this function will return a non-NULL instance of struct
+ *   usbhost_registry_s.  NULL will be returned on failure.  This function can only
+ *   fail if (1) id is NULL, or (2) no USB host class is registered that matches the
+ *   device class ID.
+ *
+ ************************************************************************************/
+
+EXTERN const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __NUTTX_USB_USBHOST_H */
