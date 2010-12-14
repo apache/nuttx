@@ -113,7 +113,7 @@ struct usbhost_registry_s
    * provide those instances in write-able memory (RAM).
    */
 
-  struct usbhsot_registry_s flink;
+  struct usbhost_registry_s flink;
 
   /* This is a callback into the class implementation.  It is used to (1) create
    * a new instance of the USB host class state and to (2) bind a USB host driver
@@ -122,7 +122,7 @@ struct usbhost_registry_s
    * simultaneously connected (see the CLASS_CREATE() macro above).
    */
  
-  struct usbhost_class_s   *(*create)(struct usbhost_driver_s *drvr);
+  struct usbhost_class_s    *(*create)(struct usbhost_driver_s *drvr);
 
   /* This information uniquely identifies the USB host class implementation that
    * goes with a specific USB device.
@@ -190,6 +190,25 @@ EXTERN int usbhost_registerclass(struct usbhost_registry_s *class);
  ************************************************************************************/
 
 EXTERN const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id);
+
+/****************************************************************************
+ * Name: usbhost_storageinit
+ *
+ * Description:
+ *   Initialize the USB host storage class.  This function should be called
+ *   be platform-specific code in order to initialize and register support
+ *   for the USB host storage class.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+EXTERN int usbhost_storageinit(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
