@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/dm320/dm320_usbdev.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,9 +48,9 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/usb.h>
-#include <nuttx/usbdev.h>
-#include <nuttx/usbdev_trace.h>
+#include <nuttx/usb/usb.h>
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/usbdev_trace.h>
 
 #include <arch/irq.h>
 #include <arch/board/board.h>
