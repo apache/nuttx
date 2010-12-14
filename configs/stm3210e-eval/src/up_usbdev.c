@@ -2,7 +2,7 @@
  * configs/stm3210e-eval/src/up_usbdev.c
  * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,8 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/usbdev.h>
-#include <nuttx/usbdev_trace.h>
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
 #include "stm32_internal.h"
@@ -85,7 +85,7 @@ void stm32_usbinitialize(void)
  * Description:
  *   If USB is supported and the board supports a pullup via GPIO (for USB software
  *   connect and disconnect), then the board software must provide stm32_pullup.
- *   See include/nuttx/usbdev.h for additional description of this method.
+ *   See include/nuttx/usb/usbdev.h for additional description of this method.
  *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
  *   NULL.
  *

@@ -1406,3 +1406,7 @@
 	  This is a very important bug-fix in some usages.
 
 5.16 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* include/nuttx/usb -- Created new directory.  Moved all usb-related header
+	  files to this new directory.  Created a skeleton for a new USB host header
+	  file

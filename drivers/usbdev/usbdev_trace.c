@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_trace.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
-#include <nuttx/usbdev_trace.h>
+#include <nuttx/usb/usbdev_trace.h>
 #undef usbtrace
 
 /****************************************************************************

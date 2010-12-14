@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_usbdev.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -52,9 +52,9 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/usb.h>
-#include <nuttx/usbdev.h>
-#include <nuttx/usbdev_trace.h>
+#include <nuttx/usb/usb.h>
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/usbdev_trace.h>
 
 #include <arch/irq.h>
 

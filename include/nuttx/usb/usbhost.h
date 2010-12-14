@@ -1,9 +1,15 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_usbdev.c
- * arch/arm/src/board/up_usbdev.c
+ * include/nuttx/usb/usbhost.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * References:
+ *   "Universal Serial Bus Mass Storage Class, Specification Overview,"
+ *   Revision 1.2,  USB Implementer's Forum, June 23, 2003.
+ *
+ *   "Universal Serial Bus Mass Storage Class, Bulk-Only Transport,"
+ *   Revision 1.0, USB Implementer's Forum, September 31, 1999.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,26 +40,30 @@
  *
  ************************************************************************************/
 
+#ifndef __NUTTX_USB_USBHOST_H
+#define __NUTTX_USB_USBHOST_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
 #include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/usb/usbdev.h>
-#include <nuttx/usb/usbdev_trace.h>
-
-#include "up_arch.h"
-#include "sam3u_internal.h"
-#include "sam3uek_internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
  ************************************************************************************/
 
 /************************************************************************************
@@ -64,48 +74,4 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: sam3u_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the SAM3U-EK board.
- *
- ************************************************************************************/
-
-void sam3u_usbinitialize(void)
-{
-}
-
-/************************************************************************************
- * Name:  sam3u_usbpullup
- *
- * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide sam3u_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
- *
- ************************************************************************************/
-
-int sam3u_usbpullup(FAR struct usbdev_s *dev, bool enable)
-{
-  return 0;
-}
-
-/************************************************************************************
- * Name:  sam3u_usbsuspend
- *
- * Description:
- *   Board logic must provide the sam3u_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
- *
- ************************************************************************************/
-
-void sam3u_usbsuspend(FAR struct usbdev_s *dev, bool resume)
-{
-  ulldbg("resume: %d\n", resume);
-}
-
+#endif /* __NUTTX_USB_USBHOST_H */

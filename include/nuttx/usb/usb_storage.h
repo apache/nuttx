@@ -1,5 +1,5 @@
 /************************************************************************************
- * include/nuttx/usb_storage.h
+ * include/nuttx/usb/usb_storage.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,8 +40,8 @@
  *
  ************************************************************************************/
 
-#ifndef __NUTTX_USB_STORAGE_H
-#define __NUTTX_USB_STORAGE_H
+#ifndef __NUTTX_USB_USB_STORAGE_H
+#define __NUTTX_USB_USB_STORAGE_H
 
 /************************************************************************************
  * Included Files
@@ -136,4 +136,4 @@ struct usbstrg_csw_s
  * Public Functions
  ************************************************************************************/
 
-#endif /* __NUTTX_USB_STORAGE_H */
+#endif /* __NUTTX_USB_USB_STORAGE_H */

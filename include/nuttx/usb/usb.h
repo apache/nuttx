@@ -1,7 +1,7 @@
 /************************************************************************************
- * include/nuttx/usb.h
+ * include/nuttx/usb/usb.h
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __NUTTX_USB_H
-#define __NUTTX_USB_H
+#ifndef __NUTTX_USB_USB_H
+#define __NUTTX_USB_USB_H
 
 /************************************************************************************
  * Included Files
@@ -337,4 +337,4 @@ struct usb_qualdesc_s
  * Public Functions
  ************************************************************************************/
 
-#endif // __NUTTX_USB_H
+#endif // __NUTTX_USB_USB_H

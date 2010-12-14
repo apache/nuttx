@@ -48,8 +48,8 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/usbdev.h>
-#include <nuttx/usbdev_trace.h>
+#include <nuttx/usb/usbdev.h>
+#include <nuttx/usb/usbdev_trace.h>
 
 /****************************************************************************
  * Definitions

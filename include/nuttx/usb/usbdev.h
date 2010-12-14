@@ -1,5 +1,5 @@
 /************************************************************************************
- * include/nuttx/usbdev.h
+ * include/nuttx/usb/usbdev.h
  *
  *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,8 +39,8 @@
  *
  ************************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_USBDEV_H
-#define _INCLUDE_NUTTX_USBDEV_H
+#ifndef _INCLUDE_NUTTX_USB_USBDEV_H
+#define _INCLUDE_NUTTX_USB_USBDEV_H
 
 /************************************************************************************
  * Included Files
@@ -455,4 +455,4 @@ EXTERN void usbstrg_uninitialize(FAR void *handle);
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_USBDEV_H */
+#endif /* _INCLUDE_NUTTX_USB_USBDEV_H */

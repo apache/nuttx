@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/usbdev_trace.h
+ * include/nuttx/usb/usbdev_trace.h
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_USBDEV_TRACE_H
-#define __INCLUDE_NUTTX_USBDEV_TRACE_H
+#ifndef __INCLUDE_NUTTX_USB_USBDEV_TRACE_H
+#define __INCLUDE_NUTTX_USB_USBDEV_TRACE_H
 
 /****************************************************************************
  * Included Files
@@ -475,4 +475,4 @@ EXTERN void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t valu
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_USBDEV_TRACE_H */
+#endif /* __INCLUDE_NUTTX_USB_USBDEV_TRACE_H */
