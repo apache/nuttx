@@ -39,37 +39,103 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <debug.h>
+
+#include <nuttx/fs.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structur contains the internal, private state of the USB host mass
+ * storage class.
+ */
+
+struct usbhost_state_s
+{
+  /* This is the externally visible portion of the state */
+
+  struct usbhost_class_s class;
+
+  /* The remainder of the fields are provide o the mass storage class */
+  
+  int                    crefs;      /* Reference count on the driver instance */
+  uint16_t               blocksize;  /* Block size of USB mass storage device */
+  uint32_t               nblocks;    /* Number of blocks on the USB mass storage device */
+};
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static struct usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr);
+/* struct usbhost_registry_s methods */
+ 
+static struct  usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr);
+
+/* struct block_operations methods */
+
+static int     usbhost_open(FAR struct inode *inode);
+static int     usbhost_close(FAR struct inode *inode);
+static ssize_t usbhost_read(FAR struct inode *inode, FAR unsigned char *buffer,
+                 size_t startsector, unsigned int nsectors);
+#ifdef CONFIG_FS_WRITABLE
+static ssize_t usbhost_write(FAR struct inode *inode,
+                 FAR const unsigned char *buffer, size_t startsector,
+                 unsigned int nsectors);
+#endif
+static int     usbhost_geometry(FAR struct inode *inode,
+                 FAR struct geometry *geometry);
+static int     usbhost_ioctl(FAR struct inode *inode, int cmd,
+                 unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-struct usbhost_registry_s g_storage =
+static const const struct usbhost_id_s g_id =
 {
-  NULL,                       /* flink */
-  usbhost_create,             /* create */
-  1,                          /* nids */
-  {
-    {
-      USB_CLASS_MASS_STORAGE, /* id[0].base */
-      SUBSTRG_SUBCLASS_SCSI,  /* id[0].subclass */
-      USBSTRG_PROTO_BULKONLY, /* id[0].proto */
-      0,                      /* id[0].vid */
-      0                       /* id[0].pid */
-    }
-  }
+  USB_CLASS_MASS_STORAGE, /* base */
+  SUBSTRG_SUBCLASS_SCSI,  /* subclass */
+  USBSTRG_PROTO_BULKONLY, /* proto */
+  0,                      /* vid */
+  0                       /* pid */
+};
+
+static struct usbhost_registry_s g_storage =
+{
+  NULL,                   /* flink */
+  usbhost_create,         /* create */
+  1,                      /* nids */
+  &g_id                   /* id[] */
+};
+
+static const struct block_operations g_bops =
+{
+  usbhost_open,     /* open     */
+  usbhost_close,    /* close    */
+  usbhost_read,     /* read     */
+#ifdef CONFIG_FS_WRITABLE
+  usbhost_write,    /* write    */
+#else
+  NULL,           /* write    */
+#endif
+  usbhost_geometry, /* geometry */
+  usbhost_ioctl     /* ioctl    */
 };
 
 /****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * struct usbhost_registry_s methods
  ****************************************************************************/
 
 /****************************************************************************
@@ -104,6 +170,193 @@ static struct usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr,
 {
 #warning "Not implemented"
   return NULL;
+}
+
+/****************************************************************************
+ * struct block_operations methods
+ ****************************************************************************/
+/****************************************************************************
+ * Name: usbhost_open
+ *
+ * Description: Open the block device
+ *
+ ****************************************************************************/
+
+static int usbhost_open(FAR struct inode *inode)
+{
+  FAR struct usbhost_state_s *priv;
+
+  uvdbg("Entry\n");
+  DEBUGASSERT(inode && inode->i_private);
+  priv = (FAR struct usbhost_state_s *)inode->i_private;
+
+  /* Just increment the reference count on the driver */
+
+  DEBUGASSERT(priv->crefs < MAX_CREFS);
+  usbhost_takesem(priv);
+  priv->crefs++;
+  usbhost_givesem(priv);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: usbhost_close
+ *
+ * Description: close the block device
+ *
+ ****************************************************************************/
+
+static int usbhost_close(FAR struct inode *inode)
+{
+  FAR struct usbhost_state_s *priv;
+
+  uvdbg("Entry\n");
+  DEBUGASSERT(inode && inode->i_private);
+  priv = (FAR struct usbhost_state_s *)inode->i_private;
+
+  /* Decrement the reference count on the block driver */
+
+  DEBUGASSERT(priv->crefs > 0);
+  usbhost_takesem(priv);
+  priv->crefs--;
+  usbhost_givesem(priv);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: usbhost_read
+ *
+ * Description:
+ *   Read the specified numer of sectors from the read-ahead buffer or from
+ *   the physical device.
+ *
+ ****************************************************************************/
+
+static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
+                            size_t startsector, unsigned int nsectors)
+{
+  FAR struct usbhost_state_s *priv;
+  ssize_t ret = 0;
+
+  DEBUGASSERT(inode && inode->i_private);
+  priv = (FAR struct usbhost_state_s *)inode->i_private;
+  uvdbg("startsector: %d nsectors: %d sectorsize: %d\n",
+        startsector, nsectors, priv->blocksize);
+
+  if (nsectors > 0)
+    {
+      usbhost_takesem(priv);
+#warning "Missing logic"
+      usbhost_givesem(priv);
+    }
+
+  /* On success, return the number of blocks read */
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: usbhost_write
+ *
+ * Description:
+ *   Write the specified number of sectors to the write buffer or to the
+ *   physical device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_WRITABLE
+static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffer,
+                           size_t startsector, unsigned int nsectors)
+{
+  FAR struct usbhost_state_s *priv;
+  int ret;
+
+  uvdbg("sector: %d nsectors: %d sectorsize: %d\n");
+  DEBUGASSERT(inode && inode->i_private);
+  priv = (FAR struct usbhost_state_s *)inode->i_private;
+
+  usbhost_takesem(priv);
+#warning "Missing logic"
+  usbhost_givesem(priv);
+
+  /* On success, return the number of blocks written */
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: usbhost_geometry
+ *
+ * Description: Return device geometry
+ *
+ ****************************************************************************/
+
+static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
+{
+  FAR struct usbhost_state_s *priv;
+  int ret = -EINVAL;
+
+  uvdbg("Entry\n");
+  DEBUGASSERT(inode && inode->i_private);
+
+  if (geometry)
+    {
+      /* Return the geometry of the USB mass storage device */
+
+      priv = (FAR struct usbhost_state_s *)inode->i_private;
+      usbhost_takesem(priv);
+
+      geometry->geo_available     = true;
+      geometry->geo_mediachanged  = false;
+#ifdef CONFIG_FS_WRITABLE
+      geometry->geo_writeenabled  = true;
+#else
+      geometry->geo_writeenabled  = false;
+#endif
+      geometry->geo_nsectors      = priv->nblocks;
+      geometry->geo_sectorsize    = priv->blocksize;
+      usbhost_givesem(priv);
+
+      uvdbg("nsectors: %ld sectorsize: %d\n",
+             (long)geometry->geo_nsectors, geometry->geo_sectorsize);
+
+      ret = OK;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: usbhost_ioctl
+ *
+ * Description: Return device geometry
+ *
+ ****************************************************************************/
+
+static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
+{
+  FAR struct usbhost_state_s *priv;
+  int ret;
+
+  uvdbg("Entry\n");
+  DEBUGASSERT(inode && inode->i_private);
+  priv  = (FAR struct usbhost_state_s *)inode->i_private;
+
+  /* Process the IOCTL by command */
+
+  usbhost_takesem(priv);
+  switch (cmd)
+    {
+    /* Add support for ioctl commands here */
+
+    default:
+      ret = -ENOTTY;
+      break;
+    }
+
+  usbhost_givesem(priv);
+  return ret;
 }
 
 /****************************************************************************

@@ -134,7 +134,40 @@ struct usbhost_registry_s
    */
 
   uint8_t                   nids;  /* Number of IDs in the id[] array */
-  struct usbhost_id_s       id[1]; /* Actual dimension is nids */
+  const struct usbhost_id_s *id;   /* An array of ID info. Actual dimension is nids */
+};
+
+/* struct usbhost_class_s provides access from the USB host driver to the USB host
+ * class implementation.
+ */
+
+struct usbhost_class_s
+{
+  /* Provides the configuration descripor to the class.  The configuration
+   * descriptor contains critical information needed by the class in order to
+   * initialize properly (such as endpoint selections).
+   */
+
+  int (*configdesc)(struct usbhost_class_s *class, const uint8_t *confidesc, int desclen);
+};
+
+/* struct usbhost_driver_s provides access to the USB host driver from the USB host
+ * class implementation.
+ */
+
+struct usbhost_driver_s
+{
+  /* Receive a process a transfer descriptor */
+
+  int (*transfer)();
+
+  /* Enumerate the connected device */
+
+  int (*enumerate)();
+
+  /* Receive control information */
+
+  int (*rcvctrl)();
 };
 
 /************************************************************************************

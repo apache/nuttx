@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/usbhost/usbhost_registerclass.c
+ * drivers/usbhost/usbhost_registry.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,10 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-
 #include <nuttx/usb/usbhost.h>
-#include <arch/irq.h>
 
 #include "usbhost_registry.h"
 
@@ -63,51 +60,21 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* g_classregistry is a singly-linkedlist of class ID information added by
+ * calls to usbhost_registerclass().  Since this list is accessed from USB
+ * host controller interrupt handling logic, accesses to this list must be
+ * protected by disabling interrupts.
+ */
+
+struct usbhost_registry_s *g_classregistry;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: usbhost_registerclass
- *
- * Description:
- *   Register a USB host class implementation.  The caller provides an
- *   instance of struct usbhost_registry_s that contains all of the
- *   information that will be needed later to (1) associate the USB host
- *   class implementation with a connected USB device, and (2) to obtain and
- *   bind a struct usbhost_class_s instance for the device.
- *
- * Input Parameters:
- *   class - An write-able instance of struct usbhost_registry_s that will be
- *     maintained in a registry.
- *
- * Returned Values:
- *   On success, this function will return zero (OK).  Otherwise, a negated
- *   errno value is returned.
- *
- ****************************************************************************/
-
-int usbhost_registerclass(struct usbhost_registry_s *class)
-{
-  irqstate_t flags;
-
-  /* g_classregistry is a singly-linkedlist of class ID information added by
-   * calls to usbhost_registerclass().  Since this list is accessed from USB
-   * host controller interrupt handling logic, accesses to this list must be
-   * protected by disabling interrupts.
-   */
-
-  flags = irqsave();
-
-  /* Add the new class ID info to the head of the list */
-
-  class->flink    = g_classregistry;
-  g_classregistry = class;
-
-  irqrestore(flags);
-  return OK;
-}
-

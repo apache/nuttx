@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/usbhost/usbhost_registerclass.c
+ * drivers/usbhost/usbdev_registry.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,81 +33,55 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_USBHOST_USBHOST_REGISTRY_H
+#define __DRIVERS_USBHOST_USBHOST_REGISTRY_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-
 #include <nuttx/usb/usbhost.h>
-#include <arch/irq.h>
-
-#include "usbhost_registry.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: usbhost_registerclass
- *
- * Description:
- *   Register a USB host class implementation.  The caller provides an
- *   instance of struct usbhost_registry_s that contains all of the
- *   information that will be needed later to (1) associate the USB host
- *   class implementation with a connected USB device, and (2) to obtain and
- *   bind a struct usbhost_class_s instance for the device.
- *
- * Input Parameters:
- *   class - An write-able instance of struct usbhost_registry_s that will be
- *     maintained in a registry.
- *
- * Returned Values:
- *   On success, this function will return zero (OK).  Otherwise, a negated
- *   errno value is returned.
- *
- ****************************************************************************/
-
-int usbhost_registerclass(struct usbhost_registry_s *class)
+#undef EXTERN
+#if defined(__cplusplus)
+#  define EXTERN extern "C"
+extern "C"
 {
-  irqstate_t flags;
+#else
+#  define EXTERN extern
+#endif
 
-  /* g_classregistry is a singly-linkedlist of class ID information added by
-   * calls to usbhost_registerclass().  Since this list is accessed from USB
-   * host controller interrupt handling logic, accesses to this list must be
-   * protected by disabling interrupts.
-   */
+/* g_classregistry is a singly-linkedlist of class ID information added by
+ * calls to usbhost_registerclass().  Since this list is accessed from USB
+ * host controller interrupt handling logic, accesses to this list must be
+ * protected by disabling interrupts.
+ */
 
-  flags = irqsave();
+EXTERN struct usbhost_registry_s *g_classregistry;
 
-  /* Add the new class ID info to the head of the list */
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
 
-  class->flink    = g_classregistry;
-  g_classregistry = class;
-
-  irqrestore(flags);
-  return OK;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
+#endif /* #define __DRIVERS_USBHOST_USBHOST_REGISTRY_H */

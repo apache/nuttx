@@ -38,8 +38,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 
+#include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
+#include <arch/irq.h>
+
+#include "usbhost_registry.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
@@ -53,6 +66,58 @@
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: usbhost_idmatch
+ *
+ * Description:
+ *   Check if the class ID matches what the host controller found.
+ *
+ * Input Parameters:
+ *   classid - ID info for the class under consideration.
+ *   devid - ID info reported by the device.
+ *
+ * Returned Values:
+ *   TRUE - the class will support this device.
+ *
+ ****************************************************************************/
+
+static bool usbhost_ismatch(const struct usbhost_id_s *classid,
+                            const struct usbhost_id_s *devid)
+{
+  /* The base class ID, subclass and protocol have to match up in any event */
+
+  if (devid->base     == classid->base &&
+      devid->subclass == classid->subclass &&
+      devid->proto    == clsssid->proto)
+    {
+      /* If this is a vendor-specific class ID, then the VID and PID have to
+       * match as well.
+       */
+
+      if (devid->base == USB_CLASS_VENDOR_SPEC)
+        {
+          /* Vendor specific... do the VID and PID also match? */
+
+          if (devid->vid == classid->vid && devid->pid == classid->pid)
+            {
+              /* Yes.. then we have a match */
+
+              return true;
+            }
+        }
+      else
+        {
+          /* Not vendor specific?  Then we have a match */
+
+          return true;
+        }
+    }
+
+  /* No match.. not supported */
+
+  return false;
+}
+  
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -80,7 +145,43 @@
 
 const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id)
 {
-#warning "Not Implemented"
-   return NULL;
+  struct usbhost_registry_s *class;
+  irqstate_t flags;
+  int ndx;
+
+  /* g_classregistry is a singly-linkedlist of class ID information added by
+   * calls to usbhost_registerclass().  Since this list is accessed from USB
+   * host controller interrupt handling logic, accesses to this list must be
+   * protected by disabling interrupts.
+   */
+
+  flags = irqsave();
+
+  /* Examine each register class in the linked list */
+
+  for (class = g_classregistry; class; class = class->flink)
+    {
+      /* If the registered class supports more than one ID, subclass, or
+       * protocol, then try each.
+       */
+
+      for (ndx = 0; ndx < class->nids; ndx++)
+        {
+          /* Did we find a matching ID? */
+
+          if (usbhost_idmatch(&class->id[ndx], id))
+            {
+              /* Yes.. restore interrupts and return the class info */
+
+              irqrestore(flags);
+              return class;
+            }
+        }
+    }
+
+  /* Not found... restore interrupts and return NULL */
+
+  irqrestore(flags);
+  return NULL;
 }
 
