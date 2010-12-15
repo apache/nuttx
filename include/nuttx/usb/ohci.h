@@ -226,7 +226,6 @@
 
 /* HcRhStatus: Root hub status (7.4.3) */
 
-#define OHCI_RHSTATUS_
 #define OHCI_RHSTATUS_LPS          (1 << 0)   /* Bit 0:  Local power status */
 #define OHCI_RHSTATUS_OCI          (1 << 1)   /* Bit 1:  Over current indicator */
                                               /* Bits 2-14: Reserved */

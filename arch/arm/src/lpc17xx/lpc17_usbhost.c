@@ -69,7 +69,10 @@
  * Definitions
  *******************************************************************************/
 
-/* Configuration ***************************************************************/
+/* Frame Interval */
+
+#define  FI                     (12000-1) /* 12000 bits per frame (-1) */
+#define  DEFAULT_FMINTERVAL     ((((6 * (FI - 210)) / 7) << 16) | FI)
 
 /* CLKCTRL enable bits */
 
@@ -442,6 +445,10 @@ void up_usbhostinitialize(void)
   regval &= ~OHCI_CTRL_HCFS_MASK;
   regval |= OHCI_CTRL_HCFS_OPER;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+
+  /* Set global power */
+
+  lpc17_putreg(OHCI_RHSTATUS_LPS, LPC17_USBHOST_RHSTATUS);
 
   /* Set HCCA base address */
 
