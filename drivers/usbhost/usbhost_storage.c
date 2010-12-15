@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -62,13 +63,17 @@ struct usbhost_state_s
 {
   /* This is the externally visible portion of the state */
 
-  struct usbhost_class_s class;
+  struct usbhost_class_s  class;
+
+  /* This is an instance of the USB host driver bound to this class instance */
+
+  struct usbhost_driver_s *drvr;
 
   /* The remainder of the fields are provide o the mass storage class */
   
-  int                    crefs;      /* Reference count on the driver instance */
-  uint16_t               blocksize;  /* Block size of USB mass storage device */
-  uint32_t               nblocks;    /* Number of blocks on the USB mass storage device */
+  int                     crefs;      /* Reference count on the driver instance */
+  uint16_t                blocksize;  /* Block size of USB mass storage device */
+  uint32_t                nblocks;    /* Number of blocks on the USB mass storage device */
 };
 
 /****************************************************************************
@@ -78,6 +83,11 @@ struct usbhost_state_s
 /* struct usbhost_registry_s methods */
  
 static struct  usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr);
+
+/* struct usbhost_class_s methods */
+
+static int     usbhost_configdesc(struct usbhost_class_s *class,
+                                  const uint8_t *configdesc, int desclen);
 
 /* struct block_operations methods */
 
@@ -101,33 +111,33 @@ static int     usbhost_ioctl(FAR struct inode *inode, int cmd,
 
 static const const struct usbhost_id_s g_id =
 {
-  USB_CLASS_MASS_STORAGE, /* base */
+  USB_CLASS_MASS_STORAGE, /* base     */
   SUBSTRG_SUBCLASS_SCSI,  /* subclass */
-  USBSTRG_PROTO_BULKONLY, /* proto */
-  0,                      /* vid */
-  0                       /* pid */
+  USBSTRG_PROTO_BULKONLY, /* proto    */
+  0,                      /* vid      */
+  0                       /* pid      */
 };
 
 static struct usbhost_registry_s g_storage =
 {
-  NULL,                   /* flink */
-  usbhost_create,         /* create */
-  1,                      /* nids */
-  &g_id                   /* id[] */
+  NULL,                   /* flink    */
+  usbhost_create,         /* create   */
+  1,                      /* nids     */
+  &g_id                   /* id[]     */
 };
 
 static const struct block_operations g_bops =
 {
-  usbhost_open,     /* open     */
-  usbhost_close,    /* close    */
-  usbhost_read,     /* read     */
+  usbhost_open,           /* open     */
+  usbhost_close,          /* close    */
+  usbhost_read,           /* read     */
 #ifdef CONFIG_FS_WRITABLE
-  usbhost_write,    /* write    */
+  usbhost_write,          /* write    */
 #else
-  NULL,           /* write    */
+  NULL,                   /* write    */
 #endif
-  usbhost_geometry, /* geometry */
-  usbhost_ioctl     /* ioctl    */
+  usbhost_geometry,       /* geometry */
+  usbhost_ioctl           /* ioctl    */
 };
 
 /****************************************************************************
@@ -142,7 +152,7 @@ static const struct block_operations g_bops =
  * Name: usbhost_create
  *
  * Description:
- *   This function implements the create() method of struct usb_registry_s. 
+ *   This function implements the create() method of struct usbhost_registry_s. 
  *   The create() method is a callback into the class implementation.  It is
  *   used to (1) create a new instance of the USB host class state and to (2)
  *   bind a USB host driver "session" to the class instance.  Use of this
@@ -168,8 +178,63 @@ static const struct block_operations g_bops =
 static struct usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr,
                                               const struct usbhost_id_s *id)
 {
-#warning "Not implemented"
+  struct usbhost_state_s *priv;
+
+  /* Allocate a USB host mass storage class instance */
+
+  priv = (struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
+  if (priv)
+    {
+      /* Initialize the allocated storage class instance */
+
+      memset(priv, 0, sizeof(struct usbhost_state_s);
+      priv->class.configdesc = usbhost_configdesc;
+      priv->crefs            = 1;
+
+      /* Bind the driver to the storage class instance */
+
+      priv->drvr             = drvr;
+
+      /* NOTE: We do not yet know the geometry of the USB mass storage device */
+      
+      /* Return the instance of the USB mass storage class */
+ 
+      return &priv->class;
+    }
+
+  /* Return NULL on all failures */
+
   return NULL;
+}
+
+/****************************************************************************
+ * struct usbhost_class_s methods
+ ****************************************************************************/
+/****************************************************************************
+ * Name: usbhost_configdesc
+ *
+ * Description:
+ *   This function implemented the configdesc() method of struct
+ *   usbhost_class_s.  This method is a callback into the class
+ *   implementation.  It is used to provide the device's configuration
+ *   descriptor to the class so that the class may initialize properly
+ *
+ * Input Parameters:
+ *   class - The USB host class entry previously obtained from a call to create().
+ *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
+ *   desclen - The length in bytes of the configuration descriptor.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ ****************************************************************************/
+
+static int usbhost_configdesc(struct usbhost_class_s *class,
+                              const uint8_t *configdesc, int desclen)
+{
+#warning "Missing Implementation"
+  return -ENOSYS;
 }
 
 /****************************************************************************

@@ -58,7 +58,7 @@
  * Name: CLASS_CREATE
  *
  * Description:
- *   This macro will call the create() method of struct usb_registry_s.  The create()
+ *   This macro will call the create() method of struct usbhost_registry_s.  The create()
  *   method is a callback into the class implementation.  It is used to (1) create
  *   a new instance of the USB host class state and to (2) bind a USB host driver
  *   "session" to the class instance.  Use of this create() method will support
@@ -83,7 +83,29 @@
  *
  ************************************************************************************/
 
-#definei CLASS_CREATE(reg, drvr, id) (reg->create(drvr))
+#define CLASS_CREATE(reg, drvr, id) (reg->create(drvr))
+
+/************************************************************************************
+ * Name: CLASS_CONFIGDESC
+ *
+ * Description:
+ *   This macro will call the configdesc() method of struct usbhost_class_s.  This
+ *   method is a callback into the class implementation.  It is used to provide the
+ *   device's configuration descriptor to the class so that the class may initialize
+ *   properly
+ *
+ * Input Parameters:
+ *   class - The USB host class entry previously obtained from a call to create().
+ *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
+ *   desclen - The length in bytes of the configuration descriptor.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ ************************************************************************************/
+
+#definei CLASS_CONFIGDESC(class, configdesc, desclen) (class->create(class, configdesc, desclen))
 
 /************************************************************************************
  * Public Types
