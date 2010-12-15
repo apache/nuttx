@@ -161,9 +161,10 @@ void up_initialize(void)
 
   up_netinitialize();
 
-  /* Initialize USB */
+  /* Initialize USB -- device and/or host */
 
   up_usbinitialize();
+  up_usbhostinitialize();
 
   up_ledon(LED_IRQSENABLED);
 }
