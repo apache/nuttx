@@ -2,7 +2,7 @@
  * arch/arm/src/lpc17xx/lpc17_usbhost.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Authors: Rafael Noronha
+ *   Authors: Rafael Noronha <rafael@pdsolucoes.com.br>
  *            Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -158,13 +158,13 @@ struct usbhost_hcca_s
 
 /* Helper definitions */
 
-#define Hcca       = ((volatile struct usbhost_hcca_s *)(USBHOST_SRAM_BASE + 0x000))
-#define TDHead     = ((volatile struct usbhost_hctd_s *)(USBHOST_SRAM_BASE + 0x100))
-#define TDTail     = ((volatile struct usbhost_hctd_s *)(USBHOST_SRAM_BASE + 0x110))
-#define EDCtrl     = ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x120))
-#define EDBulkIn   = ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x130))
-#define EDBulkOut  = ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x140))
-#define TDBuffer   = ((volatile uint8_t *)(USBHOST_SRAM_BASE + 0x150))
+#define Hcca        ((volatile struct usbhost_hcca_s *)(USBHOST_SRAM_BASE + 0x000))
+#define TDHead      ((volatile struct usbhost_hctd_s *)(USBHOST_SRAM_BASE + 0x100))
+#define TDTail      ((volatile struct usbhost_hctd_s *)(USBHOST_SRAM_BASE + 0x110))
+#define EDCtrl      ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x120))
+#define EDBulkIn    ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x130))
+#define EDBulkOut   ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x140))
+#define TDBuffer    ((volatile uint8_t *)(USBHOST_SRAM_BASE + 0x150))
 
 /*******************************************************************************
  * Private Function Prototypes
