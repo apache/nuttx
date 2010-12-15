@@ -45,6 +45,7 @@
 
 #include <nuttx/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 
@@ -53,6 +54,10 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#endif
 
 /* If the create() method is called by the USB host device driver from an
  * interrupt handler, then it will be unable to call malloc() in order to
@@ -64,11 +69,22 @@
 #  define CONFIG_USBHOST_NPREALLOC 0
 #endif
 
+#if CONFIG_USBHOST_NPREALLOC > 26
+#  error "Currently limited to 26 devices /dev/sda-z"
+#endif
+
+/* This format is used to construct the /dev/sd[n] device driver path.  It
+ * defined here so that it will be used consistently in all places.
+ */
+
+#define DEV_FORMAT      "/dev/sd%c"
+#define DEV_NAMELEN     10
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This structur contains the internal, private state of the USB host mass
+/* This structure contains the internal, private state of the USB host mass
  * storage class.
  */
 
@@ -84,18 +100,40 @@ struct usbhost_state_s
 
   /* The remainder of the fields are provide o the mass storage class */
   
-  int                     crefs;      /* Reference count on the driver instance */
+  int16_t                 crefs;      /* Reference count on the driver instance */
+  char                    sdchar;     /* Character identifying the /dev/sd[n] device */
   uint16_t                blocksize;  /* Block size of USB mass storage device */
   uint32_t                nblocks;    /* Number of blocks on the USB mass storage device */
+  struct work_s           work;       /* For interacting with the worker thread */
+  struct usbhost_epdesc_s bulkin;     /* Bulk IN endpoint */
+  struct usbhost_epdesc_s bulkout;    /* Bulk OUT endpoint */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Memory allocation services */
+
+static inline struct usbhost_state_s *usbhost_allocclass(void);
+static inline usbhost_freeclass(struct usbhost_state_s *class);
+
+/* Device name management */
+
+static int usbhost_allocdevno(FAR struct usbhost_state_s *priv);
+static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
+static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname);
+
+/* Worker thread actions */
+
+static void usbhost_destroy(FAR void *arg);
+
+/* Data helpers */
+
+static inline uint16_t usbhost_getint16(const uint8_t *val);
+
 /* struct usbhost_registry_s methods */
  
-static inline struct usbhost_state_s *usbhost_allocclass(void);
 static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
                                               FAR const struct usbhost_id_s *id);
 
@@ -116,10 +154,10 @@ static ssize_t usbhost_write(FAR struct inode *inode,
                              FAR const unsigned char *buffer, size_t startsector,
                              unsigned int nsectors);
 #endif
-static int     usbhost_geometry(FAR struct inode *inode,
-                 FAR struct geometry *geometry);
-static int     usbhost_ioctl(FAR struct inode *inode, int cmd,
-                 unsigned long arg);
+static int usbhost_geometry(FAR struct inode *inode,
+                            FAR struct geometry *geometry);
+static int usbhost_ioctl(FAR struct inode *inode, int cmd,
+                         unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -179,19 +217,19 @@ static struct usbhost_state_s g_prealloc[CONFIG_USBHOST_NPREALLOC];
 static struct usbhost_state_s *g_freelist;
 #endif
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/* This is a bitmap that is used to allocate device names /dev/sda-z. */
+
+static uint32_t g_devinuse;
 
 /****************************************************************************
- * struct usbhost_registry_s methods
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: usbhost_allocclass
  *
  * Description:
- *   This is really part of the logic that implementes the create() method
+ *   This is really part of the logic that implements the create() method
  *   of struct usbhost_registry_s.  This function allocates memory for one
  *   new class instance.
  *
@@ -206,32 +244,186 @@ static struct usbhost_state_s *g_freelist;
  *
  ****************************************************************************/
 
+#if CONFIG_USBHOST_NPREALLOC > 0
 static inline struct usbhost_state_s *usbhost_allocclass(void)
 {
   struct usbhost_state_s *priv;
+  irqstate_t flags;
 
-#if CONFIG_USBHOST_NPREALLOC > 0
-  /* We are executing from an interrupt handler so we need to take one of our
-   * pre-allocated class instances from the free list.  No special protection
-   * is needed if we are in an interrupt handler.
+  /* We may be executing from an interrupt handler so we need to take one of
+   * our pre-allocated class instances from the free list.
    */
 
+  flags = irqsave();
   priv = g_freelist;
   if (priv)
     {
       g_freelist        = priv->class.flink;
       priv->class.flink = NULL;
     }
+  irqrestore(flags);
+  return priv;
+}
 #else
+static inline struct usbhost_state_s *usbhost_allocclass(void)
+{
   /* We are not executing from an interrupt handler so we can just call
    * malloc() to get memory for the class instance.
    */
 
   DEBUGASSERT(!up_interrupt_context());
-  priv = (struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
-#endif
-  return priv;
+  return (struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
 }
+#endif
+
+/****************************************************************************
+ * Name: usbhost_freeclass
+ *
+ * Description:
+ *   Free a class instance previously allocated by usbhost_allocclass().
+ *
+ * Input Parameters:
+ *   class - A reference to the class instance to be freed.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+#if CONFIG_USBHOST_NPREALLOC > 0
+static inline usbhost_freeclass(struct usbhost_state_s *class)
+{
+  irqstate_t flags;
+  DEBUGASSERT(class != NULL);
+
+  /* Just put the pre-allocated class structure back on the freelist */
+
+  flags = irqsave();
+  class->class.flink = g_freelist;
+  g_freelist = class;
+  irqrestore(flags);  
+}
+#else
+static inline usbhost_freeclass(struct usbhost_state_s *class)
+{
+  DEBUGASSERT(class != NULL);
+
+  /* Free the class instance (calling sched_free() in case we are executing
+   * from an interrupt handler.
+   */
+
+  free(class);
+}
+#endif
+
+/****************************************************************************
+ * Name: Device name management
+ *
+ * Description:
+ *   Some tiny functions to coordinate management of mass storage device names.
+ *
+ ****************************************************************************/
+
+static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
+{
+  irqstate_t flags;
+  int devno;
+
+  flags = irqsave();
+  for (devno = 0; devno < 26; devno++)
+    {
+      uint32_t bitno = 1 << devno;
+      if ((g_devinuse & bitno) == 0)
+        {
+          g_devinuse |= bitno;
+          priv->sdchar = 'a' + devno;
+          irqrestore(flags);
+          return OK;
+        }
+    }
+
+  irqrestore(flags);
+  return -EMFILE;
+}
+
+static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
+{
+  int devno = 'a' - priv->sdchar;
+
+  if (devno >= 0 && devno < 26)
+    {
+      irqstate_t flags = irqsave();
+      g_devinuse &= ~(1 << devno);
+      irqrestore(flags);
+    }
+}
+
+static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname);
+{
+  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->sdchar);
+}
+
+/****************************************************************************
+ * Name: usbhost_destroy
+ *
+ * Description:
+ *   The USB mass storage device has been disconnected and the refernce count
+ *   on the USB host class instance has gone to 1.. Time to destroy the USB
+ *   host class instance.
+ *
+ * Input Parameters:
+ *   arg - A reference to the class instance to be freed.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void usbhost_destroy(FAR void *arg)
+{
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
+  char devname[DEV_NAMELEN];
+
+  DEBUGASSERT(priv != NULL);
+ 
+  /* Unregister the block driver */
+
+  usbhost_mkdevname(priv, devname);
+  (void)unregister_blockdriver(devname);
+
+  /* Release the device name used by this connection */
+
+  usbhost_freedevno(priv);
+
+  /* And free the class instance.  Hmmm.. this may execute on the worker
+   * thread and the work structure is part of what is getting freed.
+   */
+
+  usbhost_freeclass(priv);
+}
+
+/****************************************************************************
+ * Name: usbhost_getint16
+ *
+ * Description:
+ *   Get a (possibly unaligned) 16-bit little endian value.
+ *
+ * Input Parameters:
+ *   val - A pointer to the first byte of the little endian value.
+ *
+ * Returned Values:
+ *   A uin16_t representing the whole 16-bit integer value
+ *
+ ****************************************************************************/
+
+static inline uint16_t usbhost_getint16(const uint8_t *val)
+{
+  return (uint16_t)val[1] << 8 + (uint16_t)val[0];
+}
+
+/****************************************************************************
+ * struct usbhost_registry_s methods
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: usbhost_create
@@ -273,23 +465,33 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
       /* Initialize the allocated storage class instance */
 
       memset(priv, 0, sizeof(struct usbhost_state_s);
-      priv->class.configdesc   = usbhost_configdesc;
-      priv->class.disconnected = usbhost_disconnected;
-      priv->crefs              = 1;
 
-      /* Bind the driver to the storage class instance */
+      /* Assign a device number to this class instance */
 
-      priv->drvr               = drvr;
+      if (usbhost_allocdevno(priv) == OK)
+        {
+          priv->class.configdesc   = usbhost_configdesc;
+          priv->class.disconnected = usbhost_disconnected;
+          priv->crefs              = 1;
 
-      /* NOTE: We do not yet know the geometry of the USB mass storage device */
-      
-      /* Return the instance of the USB mass storage class */
+          /* Bind the driver to the storage class instance */
+
+          priv->drvr               = drvr;
+
+          /* NOTE: We do not yet know the geometry of the USB mass storage device */
  
-      return &priv->class;
+          /* Return the instance of the USB mass storage class */
+ 
+          return &priv->class;
+        }
     }
 
-  /* Return NULL on all failures */
+  /* An error occurred. Free the allocation and return NULL on all failures */
 
+  if (priv)
+    {
+      usbhost_free(priv);
+    }
   return NULL;
 }
 
@@ -316,11 +518,142 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *
  ****************************************************************************/
 
-static int usbhost_configdesc(struct usbhost_class_s *class,
-                              const uint8_t *configdesc, int desclen)
+static int usbhost_configdesc(FAR struct usbhost_class_s *class,
+                              FAR const uint8_t *configdesc, int desclen)
 {
-#warning "Missing Implementation"
-  return -ENOSYS;
+  FAR struct usb_cfgdesc_s *cfgdesc;
+  FAR struct usb_desc_s *desc;
+  int remaining;
+  bool iffound = false;
+  bool boutfound = false;
+  bool binfound = false;
+
+  /* Verify that we were passed a configuration descriptor */
+
+  cfgdesc = (FAR struct usb_cfgdesc_s *)configdesc;
+  if (desc->type != USB_DESC_TYPE_CONFIG)
+    {
+      return -EINVAL;
+    }
+
+  /* Get the total length of the configuration descriptor (little endian).
+   * It might be a good check to get the number of interfaces here too.
+  */
+
+  remaining = (int)usbhost_getint16(cfgdesc->totallen);
+
+  /* Skip to the next entry descriptor */
+
+  configdesc += desc->len;
+  remaining  -= desc->len;
+
+  /* Loop where there are more dscriptors to examine */
+
+  while (remaining >= sizeof(struct usb_desc_s))
+    {
+      /* What is the next descriptor? */
+
+      desc = (FAR struct usb_desc_s *)configdesc;
+      switch (desc->type)
+        {
+        /* Interface descriptor. We really should get the number of endpoints
+         * from this descriptor too.
+         */
+
+        case USB_DESC_TYPE_INTERFACE:
+          {
+            DEBUGASSERT(remaining >= sizeof(struct usb_ifdesc_s));
+            if (iffound)
+              {
+                /* Oops.. more than one interface.  We don't know what to do with this. */
+
+                return -ENOSYS;
+              }
+            iffound = true;
+          }
+          break;
+
+        /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an OUT */
+        case USB_DESC_TYPE_ENDPOINT:
+          {
+            FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
+            DEBUGASSERT(remaining >= sizeof(struct usb_epdesc_s));
+
+            /* Check for a bulk endpoint.  We only support the bulk-only
+             * protocol so I suppose anything else should really be an error.
+             */
+
+            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_BULK)
+              {
+                /* Yes.. it is a bulk endpoint.  IN or OUT? */
+
+                if (USB_ISEPOUT(epdesc->addr))
+                  {
+                    /* It is an OUT bulk endpoint.  There should be only one bulk OUT endpoint. */
+
+                   if (boutfound)
+                     {
+                       /* Oops.. more than one interface.  We don't know what to do with this. */
+
+                       return -EINVAL;
+                     }
+                    boutfound = true;
+
+                    /* Save the bulk OUT endpoint information */
+
+                    priv->bulkout.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
+                    priv->bulkout.in           = false;
+                    priv->bulkout.mxpacketsize = usbhost_getint16(pdesc->mxpacketsize);
+                  }
+                else
+                  {
+                    /* It is an IN bulk endpoint.  There should be only one bulk IN endpoint. */
+
+                   if (binfound)
+                     {
+                       /* Oops.. more than one interface.  We don't know what to do with this. */
+
+                       return -EINVAL;
+                     }
+                    binfound = true;
+
+                    /* Save the bulk IN endpoint information */
+                    
+                    priv->bulkin.addr          = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
+                    priv->bulkin.in            = true;
+                    priv->bulkin.mxpacketsize  = usbhost_getint16(pdesc->mxpacketsize);
+                  }
+              }
+          }
+          break;
+
+        /* Other descriptors are just ignored for now */
+
+        default:
+          break;
+        }
+
+      /* Increment the address of the next descriptor */
+ 
+      configdesc += desc->len;
+      remaining  -= desc->len;
+    }
+
+  /* Sanity checking... did we find all of things that we need? Hmmm..  I wonder..
+   * can we work read-only or write-only if only one bulk endpoint found?
+   */
+    
+  if (!iffound || !binfound || !boutfound)
+    {
+      ulldbg("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
+             iffound  ? "YES" : "NO",
+             binfound ? "YES" : "NO",
+             outfound ? "YES" : "NO");
+      return -EINVAL;
+    }
+
+  ullvdbg("Mass Storage device connected\n");
+  return OK;
 }
 
 /****************************************************************************
@@ -345,12 +678,15 @@ static int usbhost_configdesc(struct usbhost_class_s *class,
 static int usbhost_disconnected(struct usbhost_class_s *class)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+  irqstate_t flags;
+
   DEBUGASSERT(priv != NULL);
 
   /* Nullify the driver instance.  This will be our indication to any users
    * of the mass storage device that the device is no longer available.
    */
 
+  flags = irqsave();
   priv->drvr = NULL;
 
   /* Now check the number of references on the class instance.  If it is one,
@@ -359,12 +695,25 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
    * block driver.
    */
 
-#warning "Missing Implementation"
+  if (priv->crefs == 1)
+    {
+      /* Destroy the class instance */
+      /* Are we in an interrupt handler? */
 
-  /* Unregister the block device */
+      if (up_interrupt_context())
+        {
+          /* Yes.. do the destruction on the worker thread */
 
-#warning "Missing Implementation"
-  return -ENOSYS;
+          (void)work_queue(&priv->work, usbhost_destroy, priv, 0);
+        }
+      else
+        {
+          /* No.. destroy the class now */
+
+          usbhost_destroy(priv);
+    }
+  irqrestore(flags);  
+  return OK;
 }
 
 /****************************************************************************
@@ -391,7 +740,8 @@ static int usbhost_open(FAR struct inode *inode)
   if (!priv->drvr)
     {
       /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.
+       * the USB storage device is no longer connected.  Refuse any further
+       * attempts to open the driver.
        */
 
       ret = -ENODEV;
@@ -431,14 +781,25 @@ static int usbhost_close(FAR struct inode *inode)
   usbhost_takesem(priv);
   priv->crefs--;
 
+  /* Release the semaphore.  The following operations when crefs == 1 are
+   * safe because we know that there is no outstanding open references to
+   * the block driver.
+   */
+
+  usbhost_givesem(priv);
+
   /* Check if the USB mass storage device is still connected.  If the
    * storage device is not connected and the reference count just
    * decremented to one, then unregister the block driver and free
    * the class instance.
    */
-#warning "Missing Implementation"
- 
-  usbhost_givesem(priv);
+
+  if (priv->crefs <= 1 && priv->drvr == NULL)
+    {
+      /* Destroy the class instance */
+
+      usbhost_destroy(priv);
+    }
   return OK;
 }
 
@@ -467,7 +828,8 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
   if (!priv->drvr)
     {
       /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.
+       * the USB storage device is no longer connected.  Refuse any attempt to read
+       * from the device.
        */
 
       ret = -ENODEV;
@@ -509,7 +871,8 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
   if (!priv->drvr)
     {
       /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.
+       * the USB storage device is no longer connected.  Refuse any attempt to
+       * write to the device.
        */
 
       ret = -ENODEV;
@@ -547,7 +910,8 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
   if (!priv->drvr)
     {
       /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.
+       * the USB storage device is no longer connected.  Refuse to return any
+       * geometry info.
        */
 
       ret = -ENODEV;
@@ -600,7 +964,8 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   if (!priv->drvr)
     {
       /* No... the block driver is no longer bound to the class.  That means that
-       * the USB storage device is no longer connected.
+       * the USB storage device is no longer connected.  Refuse to process any
+       * ioctl commands.
        */
 
       ret = -ENODEV;

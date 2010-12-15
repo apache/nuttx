@@ -200,19 +200,29 @@ struct usbhost_class_s
  * class implementation.
  */
 
+struct usbhost_epdesc_s;
 struct usbhost_driver_s
 {
   /* Receive a process a transfer descriptor */
 
-  int (*transfer)();
+  int (*transfer)(FAR struct usbhost_epdesc_s *ed);
 
   /* Enumerate the connected device */
 
-  int (*enumerate)();
+  int (*enumerate)(FAR struct usbhost_epdesc_s *ed);
 
   /* Receive control information */
 
-  int (*rcvctrl)();
+  int (*rcvctrl)(FAR struct usbhost_epdesc_s *ed);
+};
+
+/* This structure describes one endpoint */
+
+struct usbhost_epdesc_s
+{
+  uint8_t  addr;         /* Endpoint address */
+  bool     in;           /* Direction: TRUE = IN */
+  uint16_t mxpacketsize; /* Max packetsize */
 };
 
 /************************************************************************************
