@@ -129,7 +129,6 @@
                                               /* Bits 11-31: Reserved */
 
 /* HcCommandStatus: HC command status (7.1.3) */
-#define OHCI_CMDST_
 
 #define OHCI_CMDST_HCR              (1 << 0)  /* Bit 0:  Host controller reset */
 #define OHCI_CMDST_CLF              (1 << 1)  /* Bit 1:  Control list filled */
