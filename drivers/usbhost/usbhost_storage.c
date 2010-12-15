@@ -44,12 +44,25 @@
 #include <debug.h>
 
 #include <nuttx/fs.h>
+#include <nuttx/arch.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* If the create() method is called by the USB host device driver from an
+ * interrupt handler, then it will be unable to call malloc() in order to
+ * allocate a new class instance.  If the create() method is called from the
+ * interrupt level, then class instances must be pre-allocated.
+ */
+
+#ifndef CONFIG_USBHOST_NPREALLOC
+#  define CONFIG_USBHOST_NPREALLOC 0
+#endif
 
 /****************************************************************************
  * Private Types
@@ -82,23 +95,26 @@ struct usbhost_state_s
 
 /* struct usbhost_registry_s methods */
  
-static struct  usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr);
+static inline struct usbhost_state_s *usbhost_allocclass(void);
+static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
+                                              FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
-static int     usbhost_configdesc(struct usbhost_class_s *class,
-                                  const uint8_t *configdesc, int desclen);
+static int usbhost_configdesc(FAR struct usbhost_class_s *class,
+                              FAR const uint8_t *configdesc, int desclen);
+static int usbhost_disconnected(FAR struct usbhost_class_s *class);
 
 /* struct block_operations methods */
 
-static int     usbhost_open(FAR struct inode *inode);
-static int     usbhost_close(FAR struct inode *inode);
+static int usbhost_open(FAR struct inode *inode);
+static int usbhost_close(FAR struct inode *inode);
 static ssize_t usbhost_read(FAR struct inode *inode, FAR unsigned char *buffer,
-                 size_t startsector, unsigned int nsectors);
+                            size_t startsector, unsigned int nsectors);
 #ifdef CONFIG_FS_WRITABLE
 static ssize_t usbhost_write(FAR struct inode *inode,
-                 FAR const unsigned char *buffer, size_t startsector,
-                 unsigned int nsectors);
+                             FAR const unsigned char *buffer, size_t startsector,
+                             unsigned int nsectors);
 #endif
 static int     usbhost_geometry(FAR struct inode *inode,
                  FAR struct geometry *geometry);
@@ -109,6 +125,11 @@ static int     usbhost_ioctl(FAR struct inode *inode, int cmd,
  * Private Data
  ****************************************************************************/
 
+/* This structure provides the registry entry ID informatino that will  be 
+ * used to associate the USB host mass storage class to a connected USB
+ * device.
+ */
+
 static const const struct usbhost_id_s g_id =
 {
   USB_CLASS_MASS_STORAGE, /* base     */
@@ -118,6 +139,8 @@ static const const struct usbhost_id_s g_id =
   0                       /* pid      */
 };
 
+/* This is the USB host storage class's registry entry */
+
 static struct usbhost_registry_s g_storage =
 {
   NULL,                   /* flink    */
@@ -125,6 +148,10 @@ static struct usbhost_registry_s g_storage =
   1,                      /* nids     */
   &g_id                   /* id[]     */
 };
+
+/* Block driver operations.  This is the interface exposed to NuttX by the
+ * class that permits it to behave like a block driver.
+ */
 
 static const struct block_operations g_bops =
 {
@@ -140,6 +167,18 @@ static const struct block_operations g_bops =
   usbhost_ioctl           /* ioctl    */
 };
 
+/* This is an array of pre-allocated USB host storage class instances */
+
+#if CONFIG_USBHOST_NPREALLOC > 0
+static struct usbhost_state_s g_prealloc[CONFIG_USBHOST_NPREALLOC];
+#endif
+
+/* This is a list of free, pre-allocated USB host storage class instances */
+
+#if CONFIG_USBHOST_NPREALLOC > 0
+static struct usbhost_state_s *g_freelist;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -147,6 +186,52 @@ static const struct block_operations g_bops =
 /****************************************************************************
  * struct usbhost_registry_s methods
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: usbhost_allocclass
+ *
+ * Description:
+ *   This is really part of the logic that implementes the create() method
+ *   of struct usbhost_registry_s.  This function allocates memory for one
+ *   new class instance.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   On success, this function will return a non-NULL instance of struct
+ *   usbhost_class_s.  NULL is returned on failure; this function will
+ *   will fail only if there are insufficient resources to create another
+ *   USB host class instance.
+ *
+ ****************************************************************************/
+
+static inline struct usbhost_state_s *usbhost_allocclass(void)
+{
+  struct usbhost_state_s *priv;
+
+#if CONFIG_USBHOST_NPREALLOC > 0
+  /* We are executing from an interrupt handler so we need to take one of our
+   * pre-allocated class instances from the free list.  No special protection
+   * is needed if we are in an interrupt handler.
+   */
+
+  priv = g_freelist;
+  if (priv)
+    {
+      g_freelist        = priv->class.flink;
+      priv->class.flink = NULL;
+    }
+#else
+  /* We are not executing from an interrupt handler so we can just call
+   * malloc() to get memory for the class instance.
+   */
+
+  DEBUGASSERT(!up_interrupt_context());
+  priv = (struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
+#endif
+  return priv;
+}
 
 /****************************************************************************
  * Name: usbhost_create
@@ -175,25 +260,26 @@ static const struct block_operations g_bops =
  *
  ****************************************************************************/
 
-static struct usbhost_class_s *usbhost_create(struct usbhost_driver_s *drvr,
-                                              const struct usbhost_id_s *id)
+static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
+                                                  FAR const struct usbhost_id_s *id)
 {
-  struct usbhost_state_s *priv;
+  FAR struct usbhost_state_s *priv;
 
   /* Allocate a USB host mass storage class instance */
 
-  priv = (struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
+  priv = usbhost_allocclass(void);
   if (priv)
     {
       /* Initialize the allocated storage class instance */
 
       memset(priv, 0, sizeof(struct usbhost_state_s);
-      priv->class.configdesc = usbhost_configdesc;
-      priv->crefs            = 1;
+      priv->class.configdesc   = usbhost_configdesc;
+      priv->class.disconnected = usbhost_disconnected;
+      priv->crefs              = 1;
 
       /* Bind the driver to the storage class instance */
 
-      priv->drvr             = drvr;
+      priv->drvr               = drvr;
 
       /* NOTE: We do not yet know the geometry of the USB mass storage device */
       
@@ -238,6 +324,50 @@ static int usbhost_configdesc(struct usbhost_class_s *class,
 }
 
 /****************************************************************************
+ * Name: usbhost_disconnected
+ *
+ * Description:
+ *   This function implements the disconnected() method of struct
+ *   usbhost_class_s.  This method is a callback into the class
+ *   implementation.  It is used to inform the class that the USB device has
+ *   been disconnected.
+ *
+ * Input Parameters:
+ *   class - The USB host class entry previously obtained from a call to
+ *     create().
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
+ *
+ ****************************************************************************/
+
+static int usbhost_disconnected(struct usbhost_class_s *class)
+{
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+  DEBUGASSERT(priv != NULL);
+
+  /* Nullify the driver instance.  This will be our indication to any users
+   * of the mass storage device that the device is no longer available.
+   */
+
+  priv->drvr = NULL;
+
+  /* Now check the number of references on the class instance.  If it is one,
+   * then we can free the class instance now.  Otherwise, we will have to
+   * wait until the holders of the references free them by closing the
+   * block driver.
+   */
+
+#warning "Missing Implementation"
+
+  /* Unregister the block device */
+
+#warning "Missing Implementation"
+  return -ENOSYS;
+}
+
+/****************************************************************************
  * struct block_operations methods
  ****************************************************************************/
 /****************************************************************************
@@ -250,18 +380,34 @@ static int usbhost_configdesc(struct usbhost_class_s *class,
 static int usbhost_open(FAR struct inode *inode)
 {
   FAR struct usbhost_state_s *priv;
+  int ret;
 
   uvdbg("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
 
-  /* Just increment the reference count on the driver */
+  /* Check if the mass storage device is still connected */
 
-  DEBUGASSERT(priv->crefs < MAX_CREFS);
-  usbhost_takesem(priv);
-  priv->crefs++;
-  usbhost_givesem(priv);
-  return OK;
+  if (!priv->drvr)
+    {
+      /* No... the block driver is no longer bound to the class.  That means that
+       * the USB storage device is no longer connected.
+       */
+
+      ret = -ENODEV;
+    }
+  else
+    {
+      /* Otherwise, just increment the reference count on the driver */
+
+      DEBUGASSERT(priv->crefs < MAX_CREFS);
+      usbhost_takesem(priv);
+      priv->crefs++;
+      usbhost_givesem(priv);
+      ret = OK;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -284,6 +430,14 @@ static int usbhost_close(FAR struct inode *inode)
   DEBUGASSERT(priv->crefs > 0);
   usbhost_takesem(priv);
   priv->crefs--;
+
+  /* Check if the USB mass storage device is still connected.  If the
+   * storage device is not connected and the reference count just
+   * decremented to one, then unregister the block driver and free
+   * the class instance.
+   */
+#warning "Missing Implementation"
+ 
   usbhost_givesem(priv);
   return OK;
 }
@@ -308,7 +462,17 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
   uvdbg("startsector: %d nsectors: %d sectorsize: %d\n",
         startsector, nsectors, priv->blocksize);
 
-  if (nsectors > 0)
+  /* Check if the mass storage device is still connected */
+
+  if (!priv->drvr)
+    {
+      /* No... the block driver is no longer bound to the class.  That means that
+       * the USB storage device is no longer connected.
+       */
+
+      ret = -ENODEV;
+    }
+  else if (nsectors > 0)
     {
       usbhost_takesem(priv);
 #warning "Missing logic"
@@ -340,9 +504,22 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
 
-  usbhost_takesem(priv);
+  /* Check if the mass storage device is still connected */
+
+  if (!priv->drvr)
+    {
+      /* No... the block driver is no longer bound to the class.  That means that
+       * the USB storage device is no longer connected.
+       */
+
+      ret = -ENODEV;
+    }
+  else
+    {
+      usbhost_takesem(priv);
 #warning "Missing logic"
-  usbhost_givesem(priv);
+      usbhost_givesem(priv);
+    }
 
   /* On success, return the number of blocks written */
 
@@ -365,7 +542,17 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
   uvdbg("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
 
-  if (geometry)
+  /* Check if the mass storage device is still connected */
+
+  if (!priv->drvr)
+    {
+      /* No... the block driver is no longer bound to the class.  That means that
+       * the USB storage device is no longer connected.
+       */
+
+      ret = -ENODEV;
+    }
+  else if (geometry)
     {
       /* Return the geometry of the USB mass storage device */
 
@@ -408,19 +595,32 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   DEBUGASSERT(inode && inode->i_private);
   priv  = (FAR struct usbhost_state_s *)inode->i_private;
 
-  /* Process the IOCTL by command */
+  /* Check if the mass storage device is still connected */
 
-  usbhost_takesem(priv);
-  switch (cmd)
+  if (!priv->drvr)
     {
-    /* Add support for ioctl commands here */
+      /* No... the block driver is no longer bound to the class.  That means that
+       * the USB storage device is no longer connected.
+       */
 
-    default:
-      ret = -ENOTTY;
-      break;
+      ret = -ENODEV;
     }
+  else
+    {
+      /* Process the IOCTL by command */
 
-  usbhost_givesem(priv);
+      usbhost_takesem(priv);
+      switch (cmd)
+        {
+        /* Add support for ioctl commands here */
+
+        default:
+          ret = -ENOTTY;
+          break;
+        }
+
+      usbhost_givesem(priv);
+    }
   return ret;
 }
 
@@ -447,7 +647,24 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
 int usbhost_storageinit(void)
 {
-  /* Advertise our availability to support mass storage devices */
+  /* If we have been configured to use pre-allocated storage class instances,
+   * then place all of the pre-allocated USB host storage class instances
+   * into a free list.
+   */
+
+#if CONFIG_USBHOST_NPREALLOC > 0
+  int i;
+
+  g_freelist = NULL;
+  for (i = 0; i < CONFIG_USBHOST_NPREALLOC; i++)
+    {
+      struct usbhost_state_s *class = &g_prealloc[i];
+      class->class.flink = g_freelist;
+      g_freelist         = class;
+    }
+#endif
+
+  /* Advertise our availability to support (certain) mass storage devices */
 
   return usbhost_registerclass(&g_storage);
 }

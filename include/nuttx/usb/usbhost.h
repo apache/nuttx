@@ -83,7 +83,7 @@
  *
  ************************************************************************************/
 
-#define CLASS_CREATE(reg, drvr, id) (reg->create(drvr))
+#define CLASS_CREATE(reg, drvr, id) ((reg)->create(drvr))
 
 /************************************************************************************
  * Name: CLASS_CONFIGDESC
@@ -105,7 +105,26 @@
  *
  ************************************************************************************/
 
-#definei CLASS_CONFIGDESC(class, configdesc, desclen) (class->create(class, configdesc, desclen))
+#definei CLASS_CONFIGDESC(class, configdesc, desclen) ((class)->configdesc(class, configdesc, desclen))
+
+/************************************************************************************
+ * Name: CLASS_DISCONNECTED
+ *
+ * Description:
+ *   This macro will call the disconnected() method of struct usbhost_class_s.  This
+ *   method is a callback into the class implementation.  It is used to inform the
+ *   class that the USB device has been disconnected.
+ *
+ * Input Parameters:
+ *   class - The USB host class entry previously obtained from a call to create().
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ ************************************************************************************/
+
+#definei CLASS_DISCONNECTED(class) ((class)->disconnected(class))
 
 /************************************************************************************
  * Public Types
@@ -139,7 +158,7 @@ struct usbhost_registry_s
    * provide those instances in write-able memory (RAM).
    */
 
-  struct usbhost_registry_s flink;
+  struct usbhost_registry_s     flink;
 
   /* This is a callback into the class implementation.  It is used to (1) create
    * a new instance of the USB host class state and to (2) bind a USB host driver
@@ -148,15 +167,15 @@ struct usbhost_registry_s
    * simultaneously connected (see the CLASS_CREATE() macro above).
    */
  
-  struct usbhost_class_s    *(*create)(struct usbhost_driver_s *drvr,
-                                       const struct usbhost_id_s *id)
+  FAR struct usbhost_class_s     *(*create)(FAR struct usbhost_driver_s *drvr,
+                                           FAR const struct usbhost_id_s *id)
 
   /* This information uniquely identifies the USB host class implementation that
    * goes with a specific USB device.
    */
 
-  uint8_t                   nids;  /* Number of IDs in the id[] array */
-  const struct usbhost_id_s *id;   /* An array of ID info. Actual dimension is nids */
+  uint8_t                       nids;  /* Number of IDs in the id[] array */
+  FAR const struct usbhost_id_s *id;   /* An array of ID info. Actual dimension is nids */
 };
 
 /* struct usbhost_class_s provides access from the USB host driver to the USB host
@@ -165,12 +184,16 @@ struct usbhost_registry_s
 
 struct usbhost_class_s
 {
-  /* Provides the configuration descripor to the class.  The configuration
+  /* Provides the configuration descriptor to the class.  The configuration
    * descriptor contains critical information needed by the class in order to
    * initialize properly (such as endpoint selections).
    */
 
-  int (*configdesc)(struct usbhost_class_s *class, const uint8_t *confidesc, int desclen);
+  int (*configdesc)(FAR struct usbhost_class_s *class, FAR const uint8_t *confidesc, int desclen);
+
+  /* This method informs the class that the USB device has been disconnected. */
+
+  int (*disconnected)(FAR struct usbhost_class_s *class);
 };
 
 /* struct usbhost_driver_s provides access to the USB host driver from the USB host
