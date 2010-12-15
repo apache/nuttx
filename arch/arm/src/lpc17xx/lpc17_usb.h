@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/ohci.h>
+#include <nuttx/usb/ohci.h>
 
 #include "chip.h"
 #include "lpc17_memorymap.h"
@@ -52,7 +52,7 @@
  
 /* Register offsets *****************************************************************/
 /* USB Host Controller (OHCI) *******************************************************/
-/* See include/nuttx/ohci.h */
+/* See include/nuttx/usb/ohci.h */
 
 #define LPC17_USBHOST_MODID_OFFSET       0x00fc /* Module ID/Revision ID */
 
@@ -270,7 +270,7 @@
 
 /* Register bit definitions *********************************************************/
 /* USB Host Controller (OHCI) *******************************************************/
-/* See include/nuttx/ohci.h */
+/* See include/nuttx/usb/ohci.h */
 
 /* Module ID/Revision ID */
 
@@ -299,8 +299,7 @@
 #define USBOTG_STCTRL_PORTFUNC_SHIFT     (0)       /* Bits 0-1: Controls port function */
 #define USBOTG_STCTRL_PORTFUNC_MASK      (3 << USBOTG_STCTRL_PORTFUNC_SHIFT)
 #  define USBOTG_STCTRL_PORTFUNC_HNPOK   (1 << USBOTG_STCTRL_PORTFUNC_SHIFT) /* HNP suceeded */
-
-#define USBOTG_STCTRL_TMRSCALE_SHIFT     (0)       /* Bits 2-3: Timer scale selection */
+#define USBOTG_STCTRL_TMRSCALE_SHIFT     (2)       /* Bits 2-3: Timer scale selection */
 #define USBOTG_STCTRL_TMRSCALE_MASK      (3 << USBOTG_STCTRL_TMR_SCALE_SHIFT)
 #  define USBOTG_STCTRL_TMRSCALE_10US    (0 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 10uS (100 KHz) */
 #  define USBOTG_STCTRL_TMRSCALE_100US   (1 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 100uS (10 KHz) */
@@ -576,6 +575,14 @@
 #define USBDEV_CLK_OTGCLK                (1 << 3)  /* Bit 3:  OTG clock (OTG only) */
 #define USBDEV_CLK_AHBCLK                (1 << 4)  /* Bit 4:  AHB clock */
                                                    /* Bits 5-31: Reserved */
+/* Alternate naming */
+
+#define USBOTG_CLK_HOSTCLK               USBDEV_CLK_HOSTCLK
+#define USBOTG_CLK_DEVCLK                USBDEV_CLK_DEVCLK
+#define USBOTG_CLK_I2CCLK                USBDEV_CLK_I2CCLK
+#define USBOTG_CLK_PORTSELCLK            USBDEV_CLK_PORTSELCLK
+#define USBOTG_CLK_OTGCLK                USBDEV_CLK_OTGCLK
+#define USBOTG_CLK_AHBCLK                USBDEV_CLK_AHBCLK
 
 /* Endpoints *************************************************************************/
 

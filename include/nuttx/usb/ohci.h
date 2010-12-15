@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/ohci.h
+ * include/nuttx/usb/ohci.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,8 +37,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_OHCI_H
-#define __INCLUDE_NUTTX_OHCI_H
+#ifndef __INCLUDE_NUTTX_USB_OHCI_H
+#define __INCLUDE_NUTTX_USB_OHCI_H
 
 /****************************************************************************
  * Included Files
@@ -427,4 +427,4 @@ extern "C" {
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_OHCI_H */
+#endif /* __INCLUDE_NUTTX_USB_OHCI_H */
