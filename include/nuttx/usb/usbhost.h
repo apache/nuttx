@@ -105,7 +105,7 @@
  *
  ************************************************************************************/
 
-#definei CLASS_CONFIGDESC(class, configdesc, desclen) ((class)->configdesc(class, configdesc, desclen))
+#define CLASS_CONFIGDESC(class, configdesc, desclen) ((class)->configdesc(class, configdesc, desclen))
 
 /************************************************************************************
  * Name: CLASS_DISCONNECTED
@@ -124,7 +124,7 @@
  *
  ************************************************************************************/
 
-#definei CLASS_DISCONNECTED(class) ((class)->disconnected(class))
+#define CLASS_DISCONNECTED(class) ((class)->disconnected(class))
 
 /************************************************************************************
  * Public Types
@@ -158,7 +158,7 @@ struct usbhost_registry_s
    * provide those instances in write-able memory (RAM).
    */
 
-  struct usbhost_registry_s     flink;
+  struct usbhost_registry_s     *flink;
 
   /* This is a callback into the class implementation.  It is used to (1) create
    * a new instance of the USB host class state and to (2) bind a USB host driver
@@ -168,7 +168,7 @@ struct usbhost_registry_s
    */
  
   FAR struct usbhost_class_s     *(*create)(FAR struct usbhost_driver_s *drvr,
-                                           FAR const struct usbhost_id_s *id)
+                                           FAR const struct usbhost_id_s *id);
 
   /* This information uniquely identifies the USB host class implementation that
    * goes with a specific USB device.

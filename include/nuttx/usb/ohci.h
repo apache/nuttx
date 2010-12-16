@@ -118,11 +118,11 @@
 #define OHCI_CTRL_CLE               (1 << 4)  /* Bit 3:  Control list enable */
 #define OHCI_CTRL_BLE               (1 << 5)  /* Bit 4:  Bulk list enable */
 #define OHCI_CTRL_HCFS_SHIFT        (6)       /* Bits 6-7: Host controller functional state */
-#define OHCI_CTRL_HCFS_MASK         (3 << OHCI_CTRL_HCFS_MASK)
-#  define OHCI_CTRL_HCFS_RESET      (0 << OHCI_CTRL_HCFS_MASK)
-#  define OHCI_CTRL_HCFS_RESUME     (1 << OHCI_CTRL_HCFS_MASK)
-#  define OHCI_CTRL_HCFS_OPER       (2 << OHCI_CTRL_HCFS_MASK)
-#  define OHCI_CTRL_HCFS_SUSPEND    (3 << OHCI_CTRL_HCFS_MASK)
+#define OHCI_CTRL_HCFS_MASK         (3 << OHCI_CTRL_HCFS_SHIFT)
+#  define OHCI_CTRL_HCFS_RESET      (0 << OHCI_CTRL_HCFS_SHIFT)
+#  define OHCI_CTRL_HCFS_RESUME     (1 << OHCI_CTRL_HCFS_SHIFT)
+#  define OHCI_CTRL_HCFS_OPER       (2 << OHCI_CTRL_HCFS_SHIFT)
+#  define OHCI_CTRL_HCFS_SUSPEND    (3 << OHCI_CTRL_HCFS_SHIFT)
 #define OHCI_CTRL_IR                (1 << 8)  /* Bit 8:  Interrupt routing */
 #define OHCI_CTRL_RWC               (1 << 9)  /* Bit 9:  Remote wakeup connected */
 #define OHCI_CTRL_RWE               (1 << 10) /* Bit 10: Remote wakeup enable */
