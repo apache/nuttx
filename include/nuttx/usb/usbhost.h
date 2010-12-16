@@ -83,6 +83,11 @@
  *   the drvr input parameter is NULL or if there are insufficient resources to
  *   create another USB host class instance.
  *
+ * Assumptions:
+ *   If this function is called from an interrupt handler, it will be unable to
+ *   allocate memory and CONFIG_USBHOST_NPREALLOC should be defined to be a value
+ *   greater than zero specify a number of pre-allocated class structures.
+ *
  ************************************************************************************/
 
 #define CLASS_CREATE(reg, drvr, id) ((reg)->create(drvr))
@@ -105,9 +110,39 @@
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
  ************************************************************************************/
 
-#define CLASS_CONFIGDESC(class, configdesc, desclen) ((class)->configdesc(class, configdesc, desclen))
+#define CLASS_CONFIGDESC(class,configdesc,desclen) ((class)->configdesc(class,configdesc,desclen))
+
+/************************************************************************************
+ * Name: CLASS_COMPLETE
+ *
+ * Description:
+ *   This macro will call the complete() method of struct usbhost_class_s.  In the
+ *   interface with the USB host drivers, the class will queue USB IN/OUT
+ *   transactions.  The enqueuing function will return and the transactions will be
+ *   performed asynchrounously.  When the transaction completes, the USB host driver
+ *   will call this function in order to inform the class that the transaction has
+ *   completed and to provide any response data.
+ *
+ * Input Parameters:
+ *   class - The USB host class entry previously obtained from a call to create().
+ *   response - Response data buffer
+ *   resplen - Number of bytes of data in the response data buffer.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define CLASS_COMPLETE(class,response,resplen) (class)->complete(class,response,resplen))
 
 /************************************************************************************
  * Name: CLASS_DISCONNECTED
@@ -123,6 +158,9 @@
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
  *
  ************************************************************************************/
 
@@ -191,31 +229,51 @@ struct usbhost_class_s
    * initialize properly (such as endpoint selections).
    */
 
-  int (*configdesc)(FAR struct usbhost_class_s *class, FAR const uint8_t *confidesc, int desclen);
+  int (*configdesc)(FAR struct usbhost_class_s *class, FAR const uint8_t *configdesc, int desclen);
+
+  /* This method must be called by the USB host driver whenever a transfer
+   * completes.
+   */
+
+  int (*complete)(FAR struct usbhost_class_s *class, FAR const uint8_t *response, int resplen);
 
   /* This method informs the class that the USB device has been disconnected. */
 
   int (*disconnected)(FAR struct usbhost_class_s *class);
 };
 
-/* struct usbhost_driver_s provides access to the USB host driver from the USB host
- * class implementation.
+/* struct usbhost_driver_s provides access to the USB host driver from the
+ * USB host class implementation.
  */
 
 struct usbhost_epdesc_s;
 struct usbhost_driver_s
 {
-  /* Receive a process a transfer descriptor */
+  /* Enumerate the connected device.  This function will enqueue the
+   * enumeration process.  As part of this enumeration process, the driver
+   * will (1) get the device's configuration descriptor, (2) extract the class
+   * ID info from the configuration descriptor, (3) call usbhost_findclass()
+   * to find the class that supports this device, (4) call the create()
+   * method on the struct usbhost_registry_s interface to get a class
+   * instance, and finally (5) call the configdesc() method of the struct
+   * usbhost_class_s interface.  After that, the class is in charge of the
+   * sequence of operations.
+   */
 
-  int (*transfer)(FAR struct usbhost_epdesc_s *ed);
+  int (*enumerate)(FAR struct usbhost_driver_s *drvr, FAR struct usbhost_epdesc_s *ed);
 
-  /* Enumerate the connected device */
+  /* Enqueue a request to process a transfer descriptor.  This method will
+   * enqueue the transfer request and return immediately.  The transfer will
+   * be performed asynchronously.  When the transfer completes, the USB host
+   * driver will call he complete() method of the struct usbhost_class_s
+   * interface.
+   */
 
-  int (*enumerate)(FAR struct usbhost_epdesc_s *ed);
+  int (*transfer)(FAR struct usbhost_driver_s *drvr, FAR struct usbhost_epdesc_s *ed);
 
   /* Receive control information */
 
-  int (*rcvctrl)(FAR struct usbhost_epdesc_s *ed);
+  int (*rcvctrl)(FAR struct usbhost_driver_s *drvr, FAR struct usbhost_epdesc_s *ed);
 };
 
 /* This structure describes one endpoint */

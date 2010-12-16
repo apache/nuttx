@@ -164,6 +164,8 @@ static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
 
 static int usbhost_configdesc(FAR struct usbhost_class_s *class,
                               FAR const uint8_t *configdesc, int desclen);
+static int usbhost_complete(FAR struct usbhost_class_s *class,
+                            FAR const uint8_t *response, int resplen);
 static int usbhost_disconnected(FAR struct usbhost_class_s *class);
 
 /* struct block_operations methods */
@@ -585,6 +587,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
       if (usbhost_allocdevno(priv) == OK)
         {
           priv->class.configdesc   = usbhost_configdesc;
+          priv->class.complete     = usbhost_complete;
           priv->class.disconnected = usbhost_disconnected;
           priv->crefs              = 1;
 
@@ -771,6 +774,41 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
 
   usbhost_work(priv, usbhost_configluns);
   return OK;
+}
+
+/****************************************************************************
+ * Name: usbhost_complete
+ *
+ * Description:
+ *   This function implements will the complete() method of struct
+ *   usbhost_class_s.  In the interface with the USB host drivers, the class
+ *   will queue USB IN/OUT transactions.  The enqueuing function will return
+ *   and the transactions will be performed asynchrounously.  When the
+ *   transaction completes, the USB host driver will call this function in
+ *   order to inform the class that the transaction has completed and to
+ *   provide any response data.
+ *
+ * Input Parameters:
+ *   class - The USB host class entry previously obtained from a call to
+ *     create().
+ *   response - Response data buffer
+ *   resplen - Number of bytes of data in the response data buffer.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+static int usbhost_complete(FAR struct usbhost_class_s *class,
+                            FAR const uint8_t *response, int resplen)
+{
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+#warning "Not implemented"
+  return -ENOSYS;
 }
 
 /****************************************************************************
