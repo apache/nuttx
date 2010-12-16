@@ -202,7 +202,7 @@ static const struct usb_ifdesc_s g_ifdesc =
   USBSTRG_ALTINTERFACEID,                       /* alt */
   USBSTRG_NENDPOINTS,                           /* neps */
   USB_CLASS_MASS_STORAGE,                       /* class */
-  SUBSTRG_SUBCLASS_SCSI,                        /* subclass */
+  USBSTRG_SUBCLASS_SCSI,                        /* subclass */
   USBSTRG_PROTO_BULKONLY,                       /* protocol */
   USBSTRG_CONFIGSTRID                           /* iif */
 };

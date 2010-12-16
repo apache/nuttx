@@ -65,11 +65,11 @@
 /* Mass storage subclass codes */
 
 #define USBSTRG_SUBCLASS_RBC          (0x01) /* Reduced block commands (e.g., flash devices) */
-#define SUBSTRG_SUBCLASS_SFF1         (0x02) /* SFF-8020i/MMC-2 (ATAPI) (e.g., C/DVD) */
-#define SUBSTRG_SUBCLASS_QIC          (0x03) /* QIC-157 (e.g., tape device) */
-#define SUBSTRG_SUBCLASS_UFI          (0x04) /* e.g. floppy device */
-#define SUBSTRG_SUBCLASS_SFF2         (0x05) /* SFF-8070i (e.g. floppy disk) */
-#define SUBSTRG_SUBCLASS_SCSI         (0x06) /* SCSI transparent */
+#define USBSTRG_SUBCLASS_SFF1         (0x02) /* SFF-8020i/MMC-2 (ATAPI) (e.g., C/DVD) */
+#define USBSTRG_SUBCLASS_QIC          (0x03) /* QIC-157 (e.g., tape device) */
+#define USBSTRG_SUBCLASS_UFI          (0x04) /* e.g. floppy device */
+#define USBSTRG_SUBCLASS_SFF2         (0x05) /* SFF-8070i (e.g. floppy disk) */
+#define USBSTRG_SUBCLASS_SCSI         (0x06) /* SCSI transparent */
 
 /* Mass storage transport protocols */
 

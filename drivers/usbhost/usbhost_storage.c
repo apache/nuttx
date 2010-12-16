@@ -39,15 +39,21 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <semaphore.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
+
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
+#include <nuttx/usb/usb_storage.h>
 
 #if defined(CONFIG_USBHOST) && !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 
@@ -75,12 +81,20 @@
 #  error "Currently limited to 26 devices /dev/sda-z"
 #endif
 
+/* Driver support ***********************************************************/
 /* This format is used to construct the /dev/sd[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
 
 #define DEV_FORMAT      "/dev/sd%c"
 #define DEV_NAMELEN     10
+
+/* Used in usbhost_configdesc() */
+
+#define USBHOST_IFFOUND   0x01
+#define USBHOST_BINFOUND  0x02
+#define USBHOST_BOUTFOUND 0x04
+#define USBHOST_ALLFOUND  0x07
 
 /****************************************************************************
  * Private Types
@@ -106,6 +120,7 @@ struct usbhost_state_s
   char                    sdchar;     /* Character identifying the /dev/sd[n] device */
   uint16_t                blocksize;  /* Block size of USB mass storage device */
   uint32_t                nblocks;    /* Number of blocks on the USB mass storage device */
+  sem_t                   sem;        /* Used to maintain mutual exclusive access */
   struct work_s           work;       /* For interacting with the worker thread */
   struct usbhost_epdesc_s bulkin;     /* Bulk IN endpoint */
   struct usbhost_epdesc_s bulkout;    /* Bulk OUT endpoint */
@@ -115,10 +130,15 @@ struct usbhost_state_s
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Semaphores */
+
+static void    usbhost_takesem(FAR struct usbhost_state_s *priv);
+#define usbhost_givesem(p) sem_post(&priv->sem);
+
 /* Memory allocation services */
 
 static inline struct usbhost_state_s *usbhost_allocclass(void);
-static inline usbhost_freeclass(struct usbhost_state_s *class);
+static inline void usbhost_freeclass(struct usbhost_state_s *class);
 
 /* Device name management */
 
@@ -129,6 +149,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 /* Worker thread actions */
 
 static void usbhost_destroy(FAR void *arg);
+static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker);
 
 /* Data helpers */
 
@@ -173,7 +194,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd,
 static const const struct usbhost_id_s g_id =
 {
   USB_CLASS_MASS_STORAGE, /* base     */
-  SUBSTRG_SUBCLASS_SCSI,  /* subclass */
+  USBSTRG_SUBCLASS_SCSI,  /* subclass */
   USBSTRG_PROTO_BULKONLY, /* proto    */
   0,                      /* vid      */
   0                       /* pid      */
@@ -226,6 +247,29 @@ static uint32_t g_devinuse;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: usbhost_takesem
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.
+ *
+ ****************************************************************************/
+
+static void usbhost_takesem(FAR struct usbhost_state_s *priv)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(&priv->sem) != 0)
+    {
+      /* The only case that an error should occr here is if the wait was
+       * awakened by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
 
 /****************************************************************************
  * Name: usbhost_allocclass
@@ -293,7 +337,7 @@ static inline struct usbhost_state_s *usbhost_allocclass(void)
  ****************************************************************************/
 
 #if CONFIG_USBHOST_NPREALLOC > 0
-static inline usbhost_freeclass(struct usbhost_state_s *class)
+static inline void usbhost_freeclass(struct usbhost_state_s *class)
 {
   irqstate_t flags;
   DEBUGASSERT(class != NULL);
@@ -306,7 +350,7 @@ static inline usbhost_freeclass(struct usbhost_state_s *class)
   irqrestore(flags);  
 }
 #else
-static inline usbhost_freeclass(struct usbhost_state_s *class)
+static inline void usbhost_freeclass(struct usbhost_state_s *class)
 {
   DEBUGASSERT(class != NULL);
 
@@ -360,7 +404,7 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
     }
 }
 
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname);
+static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname)
 {
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->sdchar);
 }
@@ -405,6 +449,74 @@ static void usbhost_destroy(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: usbhost_configluns
+ *
+ * Description:
+ *   The USB mass storage device has been successfully connected.  Now get
+ *   information about the connect LUNs.
+ *
+ * Input Parameters:
+ *   arg - A reference to the class instance to be freed.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void usbhost_configluns(FAR void *arg)
+{
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
+
+  /* Get the maximum logical unit number */
+
+  /* Check if the unit is ready */
+
+  /* Get sense information */
+
+  /* Read the capacity of the volume */
+
+  /* Register the block driver */
+#warning "Missing Logic"
+}
+
+/****************************************************************************
+ * Name: usbhost_work
+ *
+ * Description:
+ *   Perform work, depending on context:  If we are executing from an
+ *   interrupt handler, then defer the work to the worker thread.  Otherwise,
+ *   just execute the work now.
+ *
+ * Input Parameters:
+ *   priv - A reference to the class instance to be freed.
+ *   worker - A reference to the worker function to be executed
+ *
+ * Returned Values:
+ *   A uin16_t representing the whole 16-bit integer value
+ *
+ ****************************************************************************/
+
+static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker)
+{
+  /* Are we in an interrupt handler? */
+
+  if (up_interrupt_context())
+    {
+      /* Yes.. do the work on the worker thread.  Higher level logic should
+       * prevent us from over-running the work structure.
+       */
+
+      (void)work_queue(&priv->work, worker, priv, 0);
+    }
+  else
+    {
+      /* No.. do the work now */
+
+      worker(priv);
+    }
+}
+
+/****************************************************************************
  * Name: usbhost_getint16
  *
  * Description:
@@ -420,7 +532,7 @@ static void usbhost_destroy(FAR void *arg)
 
 static inline uint16_t usbhost_getint16(const uint8_t *val)
 {
-  return (uint16_t)val[1] << 8 + (uint16_t)val[0];
+  return (uint16_t)val[1] << 8 | (uint16_t)val[0];
 }
 
 /****************************************************************************
@@ -461,12 +573,12 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
 
   /* Allocate a USB host mass storage class instance */
 
-  priv = usbhost_allocclass(void);
+  priv = usbhost_allocclass();
   if (priv)
     {
       /* Initialize the allocated storage class instance */
 
-      memset(priv, 0, sizeof(struct usbhost_state_s);
+      memset(priv, 0, sizeof(struct usbhost_state_s));
 
       /* Assign a device number to this class instance */
 
@@ -492,7 +604,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
 
   if (priv)
     {
-      usbhost_free(priv);
+      usbhost_freeclass(priv);
     }
   return NULL;
 }
@@ -523,17 +635,16 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
 static int usbhost_configdesc(FAR struct usbhost_class_s *class,
                               FAR const uint8_t *configdesc, int desclen)
 {
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
   FAR struct usb_cfgdesc_s *cfgdesc;
   FAR struct usb_desc_s *desc;
   int remaining;
-  bool iffound = false;
-  bool boutfound = false;
-  bool binfound = false;
+  uint8_t found = 0;
 
   /* Verify that we were passed a configuration descriptor */
 
   cfgdesc = (FAR struct usb_cfgdesc_s *)configdesc;
-  if (desc->type != USB_DESC_TYPE_CONFIG)
+  if (cfgdesc->type != USB_DESC_TYPE_CONFIG)
     {
       return -EINVAL;
     }
@@ -546,8 +657,8 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
 
   /* Skip to the next entry descriptor */
 
-  configdesc += desc->len;
-  remaining  -= desc->len;
+  configdesc += cfgdesc->len;
+  remaining  -= cfgdesc->len;
 
   /* Loop where there are more dscriptors to examine */
 
@@ -565,13 +676,13 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
         case USB_DESC_TYPE_INTERFACE:
           {
             DEBUGASSERT(remaining >= sizeof(struct usb_ifdesc_s));
-            if (iffound)
+            if ((found & USBHOST_IFFOUND) != 0)
               {
                 /* Oops.. more than one interface.  We don't know what to do with this. */
 
                 return -ENOSYS;
               }
-            iffound = true;
+            found |= USBHOST_IFFOUND;
           }
           break;
 
@@ -593,37 +704,37 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
                   {
                     /* It is an OUT bulk endpoint.  There should be only one bulk OUT endpoint. */
 
-                   if (boutfound)
-                     {
-                       /* Oops.. more than one interface.  We don't know what to do with this. */
+                    if ((found & USBHOST_BOUTFOUND) != 0)
+                      {
+                        /* Oops.. more than one interface.  We don't know what to do with this. */
 
-                       return -EINVAL;
-                     }
-                    boutfound = true;
+                        return -EINVAL;
+                      }
+                    found |= USBHOST_BOUTFOUND;
 
                     /* Save the bulk OUT endpoint information */
 
                     priv->bulkout.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     priv->bulkout.in           = false;
-                    priv->bulkout.mxpacketsize = usbhost_getint16(pdesc->mxpacketsize);
+                    priv->bulkout.mxpacketsize = usbhost_getint16(epdesc->mxpacketsize);
                   }
                 else
                   {
                     /* It is an IN bulk endpoint.  There should be only one bulk IN endpoint. */
 
-                   if (binfound)
-                     {
-                       /* Oops.. more than one interface.  We don't know what to do with this. */
+                    if ((found & USBHOST_BINFOUND) != 0)
+                      {
+                        /* Oops.. more than one interface.  We don't know what to do with this. */
 
-                       return -EINVAL;
-                     }
-                    binfound = true;
+                        return -EINVAL;
+                      }
+                    found |= USBHOST_BINFOUND;
 
                     /* Save the bulk IN endpoint information */
                     
                     priv->bulkin.addr          = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     priv->bulkin.in            = true;
-                    priv->bulkin.mxpacketsize  = usbhost_getint16(pdesc->mxpacketsize);
+                    priv->bulkin.mxpacketsize  = usbhost_getint16(epdesc->mxpacketsize);
                   }
               }
           }
@@ -645,16 +756,20 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
    * can we work read-only or write-only if only one bulk endpoint found?
    */
     
-  if (!iffound || !binfound || !boutfound)
+  if (found != USBHOST_ALLFOUND)
     {
       ulldbg("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
-             iffound  ? "YES" : "NO",
-             binfound ? "YES" : "NO",
-             outfound ? "YES" : "NO");
+             (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
+             (found & USBHOST_BINFOUND) != 0 ? "YES" : "NO",
+             (found & USBHOST_BOUTFOUND) != 0 ? "YES" : "NO");
       return -EINVAL;
     }
 
   ullvdbg("Mass Storage device connected\n");
+
+  /* Now configure the LUNs and register the block driver(s) */
+
+  usbhost_work(priv, usbhost_configluns);
   return OK;
 }
 
@@ -700,19 +815,8 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
   if (priv->crefs == 1)
     {
       /* Destroy the class instance */
-      /* Are we in an interrupt handler? */
 
-      if (up_interrupt_context())
-        {
-          /* Yes.. do the destruction on the worker thread */
-
-          (void)work_queue(&priv->work, usbhost_destroy, priv, 0);
-        }
-      else
-        {
-          /* No.. destroy the class now */
-
-          usbhost_destroy(priv);
+      usbhost_work(priv, usbhost_destroy);
     }
   irqrestore(flags);  
   return OK;
