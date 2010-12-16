@@ -100,6 +100,20 @@
  * Private Types
  ****************************************************************************/
 
+/* This enumeration provides the state of the storage class */
+
+enum USBSTRG_STATE_e
+{
+  USBSTRG_STATE_CREATED = 0, /* State has been created, waiting for config descriptor */
+  USBSTRG_STATE_CONFIGURED,  /* Received config descriptor */
+  USBSTRG_STATE_MAXLUN,      /* Requested maximum logical unit number */
+  USBSTRG_STATE_UNITREADY,   /* Check if the unit is ready */
+  USBSTRG_STATE_SENSE,       /* Get sense information */
+  USBSTRG_STATE_CAPACITY,    /* Read the capacity of the volume */
+  USBSTRG_STATE_READY,       /* Registered the block driver, idle, waiting for operation */
+  USBSTRG_STATE_BUSY         /* Transfer in progress */
+};
+
 /* This structure contains the internal, private state of the USB host mass
  * storage class.
  */
@@ -116,8 +130,9 @@ struct usbhost_state_s
 
   /* The remainder of the fields are provide o the mass storage class */
   
-  int16_t                 crefs;      /* Reference count on the driver instance */
+  uint8_t                 state;      /* See enum USBSTRG_STATE_e */
   char                    sdchar;     /* Character identifying the /dev/sd[n] device */
+  int16_t                 crefs;      /* Reference count on the driver instance */
   uint16_t                blocksize;  /* Block size of USB mass storage device */
   uint32_t                nblocks;    /* Number of blocks on the USB mass storage device */
   sem_t                   sem;        /* Used to maintain mutual exclusive access */
@@ -451,11 +466,13 @@ static void usbhost_destroy(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: usbhost_configluns
+ * Name: usbhost_statemachine
  *
  * Description:
- *   The USB mass storage device has been successfully connected.  Now get
- *   information about the connect LUNs.
+ *   The USB mass storage device has been successfully connected.  This is
+ *   the state machine for normal operation.  It is first called after the
+ *   configuration descriptor has been received; after that it is called
+ *   only on transfer completion events.
  *
  * Input Parameters:
  *   arg - A reference to the class instance to be freed.
@@ -465,20 +482,76 @@ static void usbhost_destroy(FAR void *arg)
  *
  ****************************************************************************/
 
-static void usbhost_configluns(FAR void *arg)
+static void usbhost_statemachine(FAR void *arg)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
+  DEBUGASSERT(priv != NULL);
 
-  /* Get the maximum logical unit number */
-
-  /* Check if the unit is ready */
-
-  /* Get sense information */
-
-  /* Read the capacity of the volume */
-
-  /* Register the block driver */
+  switch (priv->state)
+    {
+    case USBSTRG_STATE_CONFIGURED:  /* Received config descriptor */
+      {
+        /* Request maximum logical unit number */
 #warning "Missing Logic"
+        priv->state = USBSTRG_STATE_MAXLUN;
+      }
+      break;
+
+    case USBSTRG_STATE_MAXLUN:      /* Requested maximum logical unit number */
+      {
+        /* Handle maximum LUN info */
+
+        /* Check if the unit is ready */
+#warning "Missing Logic"
+        priv->state = USBSTRG_STATE_MAXLUN;
+      }
+      break;
+
+    case USBSTRG_STATE_UNITREADY:        /* Check if the unit is ready */
+      {
+        /* Request sense information */
+#warning "Missing Logic"
+        priv->state = USBSTRG_STATE_SENSE;
+      }
+      break;
+
+    case USBSTRG_STATE_SENSE:       /* Get sense information */
+      {
+        /* Process sense information */
+
+        /* Request the capaciy of the volume */
+#warning "Missing Logic"
+        priv->state = USBSTRG_STATE_CAPACITY;
+      }
+      break;
+
+    case USBSTRG_STATE_CAPACITY:    /* Read the capacity of the volume */
+      {
+        /* Process capacity information */
+#warning "Missing Logic"
+        priv->state = USBSTRG_STATE_READY;
+      }
+      break;
+
+#warning "Missing Logic"
+      break;
+
+    case USBSTRG_STATE_BUSY:        /* Transfer in progress */
+      {
+        /* Transfer has completed */
+
+        priv->state = USBSTRG_STATE_READY;
+      }
+      break;
+
+    case USBSTRG_STATE_READY:       /* Registered the block driver, idle, waiting for operation */
+    case USBSTRG_STATE_CREATED:     /* State has been created, waiting for config descriptor */
+    default:
+      {
+        udbg("ERROR -- completion in unexpected stated: %d\n", priv->state);
+      }
+      break;
+    }
 }
 
 /****************************************************************************
@@ -644,6 +717,11 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
   int remaining;
   uint8_t found = 0;
 
+  DEBUGASSERT(priv != NULL && 
+              configdesc != NULL &&
+              desclen >= sizeof(struct usb_cfgdesc_s) &&
+              priv->state == USBSTRG_STATE_CREATED);
+  
   /* Verify that we were passed a configuration descriptor */
 
   cfgdesc = (FAR struct usb_cfgdesc_s *)configdesc;
@@ -772,7 +850,8 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
 
   /* Now configure the LUNs and register the block driver(s) */
 
-  usbhost_work(priv, usbhost_configluns);
+  priv->state = USBSTRG_STATE_CONFIGURED;
+  usbhost_work(priv, usbhost_statemachine);
   return OK;
 }
 
@@ -807,8 +886,12 @@ static int usbhost_complete(FAR struct usbhost_class_s *class,
                             FAR const uint8_t *response, int resplen)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
-#warning "Not implemented"
-  return -ENOSYS;
+  DEBUGASSERT(priv != NULL && priv->state == USBSTRG_STATE_BUSY);
+
+  /* Invoke the state machine on each transfer completion event */
+
+  usbhost_work(priv, usbhost_statemachine);
+  return OK;
 }
 
 /****************************************************************************
