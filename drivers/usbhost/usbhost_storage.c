@@ -111,7 +111,8 @@ enum USBSTRG_STATE_e
   USBSTRG_STATE_SENSE,       /* Get sense information */
   USBSTRG_STATE_CAPACITY,    /* Read the capacity of the volume */
   USBSTRG_STATE_READY,       /* Registered the block driver, idle, waiting for operation */
-  USBSTRG_STATE_BUSY         /* Transfer in progress */
+  USBSTRG_STATE_BUSY,        /* Transfer in progress */
+  USBSTRG_STATE_FAIL         /* A fatal error occurred */
 };
 
 /* This structure contains the internal, private state of the USB host mass
@@ -135,7 +136,8 @@ struct usbhost_state_s
   int16_t                 crefs;      /* Reference count on the driver instance */
   uint16_t                blocksize;  /* Block size of USB mass storage device */
   uint32_t                nblocks;    /* Number of blocks on the USB mass storage device */
-  sem_t                   sem;        /* Used to maintain mutual exclusive access */
+  sem_t                   exclsem;    /* Used to maintain mutual exclusive access */
+  sem_t                   waitsem;    /* Used to wait for transfer completion events */
   struct work_s           work;       /* For interacting with the worker thread */
   struct usbhost_epdesc_s bulkin;     /* Bulk IN endpoint */
   struct usbhost_epdesc_s bulkout;    /* Bulk OUT endpoint */
@@ -147,8 +149,8 @@ struct usbhost_state_s
 
 /* Semaphores */
 
-static void    usbhost_takesem(FAR struct usbhost_state_s *priv);
-#define usbhost_givesem(p) sem_post(&priv->sem);
+static void    usbhost_takesem(sem_t *sem);
+#define usbhost_givesem(s) sem_post(s);
 
 /* Memory allocation services */
 
@@ -179,8 +181,10 @@ static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
 
 static int usbhost_configdesc(FAR struct usbhost_class_s *class,
                               FAR const uint8_t *configdesc, int desclen);
-static int usbhost_complete(FAR struct usbhost_class_s *class,
-                            FAR const uint8_t *response, int resplen);
+static int usbhost_complete1(FAR struct usbhost_class_s *class,
+                             FAR const uint8_t *response, int resplen);
+static int usbhost_complete2(FAR struct usbhost_class_s *class,
+                             FAR const uint8_t *response, int resplen);
 static int usbhost_disconnected(FAR struct usbhost_class_s *class);
 
 /* struct block_operations methods */
@@ -274,11 +278,11 @@ static uint32_t g_devinuse;
  *
  ****************************************************************************/
 
-static void usbhost_takesem(FAR struct usbhost_state_s *priv)
+static void usbhost_takesem(sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&priv->sem) != 0)
+  while (sem_wait(sem) != 0)
     {
       /* The only case that an error should occr here is if the wait was
        * awakened by a signal.
@@ -470,9 +474,13 @@ static void usbhost_destroy(FAR void *arg)
  *
  * Description:
  *   The USB mass storage device has been successfully connected.  This is
- *   the state machine for normal operation.  It is first called after the
- *   configuration descriptor has been received; after that it is called
- *   only on transfer completion events.
+ *   the state machine for initialization operations.  It is first called
+ *   after the configuration descriptor has been received; after that it is
+ *   called only on transfer completion events.
+ *
+ *   When the block driver is fully initialized and registered, the 
+ *   completion handler will be called again and this function should no
+ *   longer be executed.
  *
  * Input Parameters:
  *   arg - A reference to the class instance to be freed.
@@ -485,8 +493,11 @@ static void usbhost_destroy(FAR void *arg)
 static void usbhost_statemachine(FAR void *arg)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
+  int result;
+
   DEBUGASSERT(priv != NULL);
 
+  usbhost_takesem(&priv->exclsem);
   switch (priv->state)
     {
     case USBSTRG_STATE_CONFIGURED:  /* Received config descriptor */
@@ -527,31 +538,44 @@ static void usbhost_statemachine(FAR void *arg)
 
     case USBSTRG_STATE_CAPACITY:    /* Read the capacity of the volume */
       {
+        char devname[DEV_NAMELEN];
+
         /* Process capacity information */
 #warning "Missing Logic"
-        priv->state = USBSTRG_STATE_READY;
+
+        /* Register the block driver */
+
+        usbhost_mkdevname(priv, devname);
+        result = register_blockdriver(devname, &g_bops, 0, priv);
+        if (result != OK)
+          {
+            udbg("ERROR! Failed to register block driver: %d\n", result);
+            priv->state          = USBSTRG_STATE_FAIL;
+          }
+        else
+          {
+            /* Set up for normal operation as a block device driver */
+
+            uvdbg("Successfully initialized\n");
+            priv->class.complete = usbhost_complete2;
+            priv->state          = USBSTRG_STATE_READY;
+          }
       }
       break;
 
-#warning "Missing Logic"
-      break;
-
-    case USBSTRG_STATE_BUSY:        /* Transfer in progress */
-      {
-        /* Transfer has completed */
-
-        priv->state = USBSTRG_STATE_READY;
-      }
-      break;
+    /* This function should not be executed in the following states */
 
     case USBSTRG_STATE_READY:       /* Registered the block driver, idle, waiting for operation */
+    case USBSTRG_STATE_BUSY:        /* Block driver I/O transfer in progress */
     case USBSTRG_STATE_CREATED:     /* State has been created, waiting for config descriptor */
+    case USBSTRG_STATE_FAIL:        /* A fatal error occurred */
     default:
       {
-        udbg("ERROR -- completion in unexpected stated: %d\n", priv->state);
+        udbg("ERROR! Completion in unexpected stated: %d\n", priv->state);
       }
       break;
     }
+  usbhost_givesem(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -659,10 +683,20 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
 
       if (usbhost_allocdevno(priv) == OK)
         {
+         /* Initialize class method function pointers */
+
           priv->class.configdesc   = usbhost_configdesc;
-          priv->class.complete     = usbhost_complete;
+          priv->class.complete     = usbhost_complete1;
           priv->class.disconnected = usbhost_disconnected;
+
+          /* The initial reference count is 1... One reference is held by the driver */
+
           priv->crefs              = 1;
+
+          /* Initialize semphores (this works okay in the interrupt context) */
+
+          sem_init(&priv->exclsem, 0, 1);
+          sem_init(&priv->waitsem, 0, 0);
 
           /* Bind the driver to the storage class instance */
 
@@ -856,16 +890,24 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
 }
 
 /****************************************************************************
- * Name: usbhost_complete
+ * Name: usbhost_complete1 & 2
  *
  * Description:
- *   This function implements will the complete() method of struct
+ *   These functions implement the complete() method of struct
  *   usbhost_class_s.  In the interface with the USB host drivers, the class
  *   will queue USB IN/OUT transactions.  The enqueuing function will return
  *   and the transactions will be performed asynchrounously.  When the
  *   transaction completes, the USB host driver will call this function in
  *   order to inform the class that the transaction has completed and to
  *   provide any response data.
+ *
+ *   There are two implementations:  usbhost_complete1() is used during
+ *   initialization to sequence through a pre-determined set of queuries
+ *   to configure for the connected USB mass storage device.
+ *
+ *   usbhost_complete2() is used after the completion of the initialization
+ *   sequence.  After initialization, the only interactions with the mass
+ *   storage device will be through block driver operations.
  *
  * Input Parameters:
  *   class - The USB host class entry previously obtained from a call to
@@ -882,15 +924,27 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
  *
  ****************************************************************************/
 
-static int usbhost_complete(FAR struct usbhost_class_s *class,
+static int usbhost_complete1(FAR struct usbhost_class_s *class,
                             FAR const uint8_t *response, int resplen)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
   DEBUGASSERT(priv != NULL && priv->state == USBSTRG_STATE_BUSY);
 
-  /* Invoke the state machine on each transfer completion event */
+  /* Invoke the initialization state machine on each transfer completion event */
 
   usbhost_work(priv, usbhost_statemachine);
+  return OK;
+}
+
+static int usbhost_complete2(FAR struct usbhost_class_s *class,
+                             FAR const uint8_t *response, int resplen)
+{
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+  DEBUGASSERT(priv != NULL && priv->state == USBSTRG_STATE_BUSY);
+
+  /* Wake up the application thread waiting for the transfer completion event */
+
+  usbhost_givesem(&priv->waitsem);
   return OK;
 }
 
@@ -978,9 +1032,10 @@ static int usbhost_open(FAR struct inode *inode)
       /* Otherwise, just increment the reference count on the driver */
 
       DEBUGASSERT(priv->crefs < MAX_CREFS);
-      usbhost_takesem(priv);
+      usbhost_takesem(&priv->exclsem);
+      DEBUGASSERT(priv->state == USBSTRG_STATE_READY);
       priv->crefs++;
-      usbhost_givesem(priv);
+      usbhost_givesem(&priv->exclsem);
       ret = OK;
     }
 
@@ -1005,7 +1060,8 @@ static int usbhost_close(FAR struct inode *inode)
   /* Decrement the reference count on the block driver */
 
   DEBUGASSERT(priv->crefs > 0);
-  usbhost_takesem(priv);
+  usbhost_takesem(&priv->exclsem);
+  DEBUGASSERT(priv->state == USBSTRG_STATE_READY);
   priv->crefs--;
 
   /* Release the semaphore.  The following operations when crefs == 1 are
@@ -1013,7 +1069,7 @@ static int usbhost_close(FAR struct inode *inode)
    * the block driver.
    */
 
-  usbhost_givesem(priv);
+  usbhost_givesem(&priv->exclsem);
 
   /* Check if the USB mass storage device is still connected.  If the
    * storage device is not connected and the reference count just
@@ -1063,9 +1119,10 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
     }
   else if (nsectors > 0)
     {
-      usbhost_takesem(priv);
+      usbhost_takesem(&priv->exclsem);
+      DEBUGASSERT(priv->state == USBSTRG_STATE_READY);
 #warning "Missing logic"
-      usbhost_givesem(priv);
+      usbhost_givesem(&priv->exclsem);
     }
 
   /* On success, return the number of blocks read */
@@ -1106,9 +1163,10 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
     }
   else
     {
-      usbhost_takesem(priv);
+      usbhost_takesem(&priv->exclsem);
+      DEBUGASSERT(priv->state == USBSTRG_STATE_READY);
 #warning "Missing logic"
-      usbhost_givesem(priv);
+      usbhost_givesem(&priv->exclsem);
     }
 
   /* On success, return the number of blocks written */
@@ -1148,7 +1206,8 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
       /* Return the geometry of the USB mass storage device */
 
       priv = (FAR struct usbhost_state_s *)inode->i_private;
-      usbhost_takesem(priv);
+      usbhost_takesem(&priv->exclsem);
+      DEBUGASSERT(priv->state == USBSTRG_STATE_READY);
 
       geometry->geo_available     = true;
       geometry->geo_mediachanged  = false;
@@ -1159,7 +1218,7 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
 #endif
       geometry->geo_nsectors      = priv->nblocks;
       geometry->geo_sectorsize    = priv->blocksize;
-      usbhost_givesem(priv);
+      usbhost_givesem(&priv->exclsem);
 
       uvdbg("nsectors: %ld sectorsize: %d\n",
              (long)geometry->geo_nsectors, geometry->geo_sectorsize);
@@ -1201,7 +1260,9 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
     {
       /* Process the IOCTL by command */
 
-      usbhost_takesem(priv);
+      usbhost_takesem(&priv->exclsem);
+      DEBUGASSERT(priv->state == USBSTRG_STATE_READY);
+
       switch (cmd)
         {
         /* Add support for ioctl commands here */
@@ -1211,7 +1272,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
           break;
         }
 
-      usbhost_givesem(priv);
+      usbhost_givesem(&priv->exclsem);
     }
   return ret;
 }
