@@ -50,8 +50,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/usb/usb.h>
-#include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/ohci.h>
+#include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_trace.h>
 
 #include <arch/irq.h>
@@ -86,7 +86,7 @@
 #  define usbhost_dumpgpio() \
    do { \
      lpc17_dumpgpio(GPIO_USB_DP, "D+ P0.29; D- P0.30"); \
-     lpc17_dumpgpio(GPIO_USB_UPLED, "LED P1:18; PPWR P1:19 PWRD P1:22 PVRCR P1:27); \
+     lpc17_dumpgpio(GPIO_USB_UPLED, "LED P1:18; PPWR P1:19 PWRD P1:22 PVRCR P1:27"); \
    } while (0);
 #else
 #  define usbhost_dumpgpio()
@@ -187,6 +187,12 @@ static void lpc17_putreg(uint32_t val, uint32_t addr);
 static int lpc17_usbinterrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
+
+/* Initializaion ***************************************************************/
+
+static void usbhost_tdinit(volatile struct usbhost_hctd_s *td);
+static void usbhost_edinit(volatile struct usbhost_hced_s *);
+static void usbhost_hccainit(volatile struct usbhost_hcca_s *hcca);
 
 /*******************************************************************************
  * Private Data
@@ -421,7 +427,7 @@ void up_usbhostinitialize(void)
   usbhost_edinit(EDBulkOut);
   usbhost_tdinit(TDHead);
   usbhost_tdinit(TDTail);
-  usbhost_hccanit(Hcca);
+  usbhost_hccainit(Hcca);
 
   /* Wait 50MS then perform hardware reset */
 
@@ -457,7 +463,7 @@ void up_usbhostinitialize(void)
   /* Clear pending interrupts */
 
   regval = lpc17_getreg(LPC17_USBHOST_INTST);
-  lpc17_putreg(revgval, LPC17_USBHOST_INTST);
+  lpc17_putreg(regval, LPC17_USBHOST_INTST);
 
   /* Enable OHCI interrupts */
  
