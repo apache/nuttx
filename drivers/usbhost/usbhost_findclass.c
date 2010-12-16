@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <stdbool.h>
 
 #include <nuttx/usb/usb.h>
@@ -81,14 +83,14 @@
  *
  ****************************************************************************/
 
-static bool usbhost_ismatch(const struct usbhost_id_s *classid,
+static bool usbhost_idmatch(const struct usbhost_id_s *classid,
                             const struct usbhost_id_s *devid)
 {
   /* The base class ID, subclass and protocol have to match up in any event */
 
   if (devid->base     == classid->base &&
       devid->subclass == classid->subclass &&
-      devid->proto    == clsssid->proto)
+      devid->proto    == classid->proto)
     {
       /* If this is a vendor-specific class ID, then the VID and PID have to
        * match as well.

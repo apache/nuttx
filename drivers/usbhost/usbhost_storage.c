@@ -49,6 +49,8 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 
+#if defined(CONFIG_USBHOST) && !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -1034,3 +1036,4 @@ int usbhost_storageinit(void)
   return usbhost_registerclass(&g_storage);
 }
 
+#endif  /* CONFIG_USBHOST && !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 */

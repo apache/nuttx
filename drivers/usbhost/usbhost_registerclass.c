@@ -39,10 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <errno.h>
 
-#include <nuttx/usb/usbhost.h>
 #include <arch/irq.h>
+#include <nuttx/usb/usbhost.h>
 
 #include "usbhost_registry.h"
 
