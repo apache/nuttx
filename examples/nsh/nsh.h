@@ -296,7 +296,7 @@ extern int nsh_romfsetc(void);
 #ifdef CONFIG_NET
 extern int nsh_netinit(void);
 #else
-#  define nsh_netinit()
+#  define nsh_netinit() (-ENOSYS)
 #endif
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0 && !defined(CONFIG_EXAMPLES_NSH_DISABLESCRIPT)
