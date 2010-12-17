@@ -49,6 +49,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -167,6 +168,119 @@
 #define CLASS_DISCONNECTED(class) ((class)->disconnected(class))
 
 /************************************************************************************
+ * Name: DRVR_ENUMERATE
+ *
+ * Description:
+ *   Enumerate the connected device.  This function will enqueue the
+ *   enumeration process.  As part of this enumeration process, the driver
+ *   will (1) get the device's configuration descriptor, (2) extract the class
+ *   ID info from the configuration descriptor, (3) call usbhost_findclass()
+ *   to find the class that supports this device, (4) call the create()
+ *   method on the struct usbhost_registry_s interface to get a class
+ *   instance, and finally (5) call the configdesc() method of the struct
+ *   usbhost_class_s interface.  After that, the class is in charge of the
+ *   sequence of operations.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_ENUMERATE(drvr) ((drvr)->enumerate(drvr))
+
+/************************************************************************************
+ * Name: DRVR_TRANSFER
+ *
+ * Description:
+ *   Enqueue a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request and return immediately.  The transfer will
+ *   be performed asynchronously.  When the transfer completes, the USB host
+ *   driver will call he complete() method of the struct usbhost_class_s
+ *   interface.  Only one transfer may be queued; this function cannot be
+ *   again until the class complete() method has been called.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
+ *     (IN endpoint).
+ *   buflen - The length of the data to be sent or received.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_TRANSFER(drvr,ed,buffer,buflen) ((drvr)->transfer(drvr,ed,buffer,buflen))
+
+/************************************************************************************
+ * Name: DRVR_ALLOC
+ *
+ * Description:
+ *   Some hardware supports special memory in which transfer descriptors can
+ *   be accessed more efficiently.  This method provides a mechanism to allocate
+ *   the transfer descriptor memory.  If the underlying hardware does not support
+ *   such "special" memory, this functions may simply map to malloc.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   buffer - The address of a memory location provided by the caller in which to
+ *     return the allocated buffer memory address.
+ *   maxlen - The address of a memory location provided by the caller in which to
+ *     return the maximum size of the allocated buffer memory.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_ALLOC(drvr,buffer,maxlen) ((drvr)->alloc(drvr,buffer,maxlen))
+
+/************************************************************************************
+ * Name: DRVR_FREE
+ *
+ * Description:
+ *   Some hardware supports special memory in which transfer descriptors can
+ *   be accessed more efficiently.  This method provides a mechanism to free that
+ *   transfer descriptor memory.  If the underlying hardware does not support
+ *   such "special" memory, this functions may simply map to free().
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   buffer - The address of the allocated buffer memory to be freed.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_FREE(drvr,buffer) ((drvr)->free(drvr,buffer))
+
+/************************************************************************************
  * Public Types
  ************************************************************************************/
 
@@ -260,16 +374,30 @@ struct usbhost_driver_s
    * sequence of operations.
    */
 
-  int (*enumerate)(FAR struct usbhost_driver_s *drvr, FAR struct usbhost_epdesc_s *ed);
+  int (*enumerate)(FAR struct usbhost_driver_s *drvr);
 
-  /* Enqueue a request to process a transfer descriptor.  This method will
+  /* Enqueue a request to handle a transfer descriptor.  This method will
    * enqueue the transfer request and return immediately.  The transfer will
    * be performed asynchronously.  When the transfer completes, the USB host
    * driver will call he complete() method of the struct usbhost_class_s
-   * interface.
+   * interface.  Only one transfer may be queued; this function cannot be
+   * again until the class complete() method has been called.
    */
 
-  int (*transfer)(FAR struct usbhost_driver_s *drvr, FAR struct usbhost_epdesc_s *ed);
+  int (*transfer)(FAR struct usbhost_driver_s *drvr,
+                  FAR struct usbhost_epdesc_s *ed,
+                  FAR uint8_t *buffer, size_t buflen);
+
+  /* Some hardware supports special memory in which transfer descriptors can
+   * be accessed more efficiently.  The following methods provide a mechanism
+   * to allocate and free the transfer descriptor memory.  If the underlying
+   * hardware does not support such "special" memory, these functions may
+   * simply map to malloc and free.
+   */
+
+  int (*alloc)(FAR struct usbhost_driver_s *drvr,
+               FAR uint8_t **buffer, FAR size_t *maxlen);
+  int (*free)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 
   /* Receive control information */
 

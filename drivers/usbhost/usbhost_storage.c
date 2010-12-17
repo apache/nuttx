@@ -139,6 +139,8 @@ struct usbhost_state_s
   sem_t                   exclsem;    /* Used to maintain mutual exclusive access */
   sem_t                   waitsem;    /* Used to wait for transfer completion events */
   struct work_s           work;       /* For interacting with the worker thread */
+  FAR uint8_t            *tdbuffer;   /* The allocated transfer descriptor buffer */
+  size_t                  tdbuflen;   /* Size of the allocated transfer buffer */
   struct usbhost_epdesc_s bulkin;     /* Bulk IN endpoint */
   struct usbhost_epdesc_s bulkout;    /* Bulk OUT endpoint */
 };
@@ -168,9 +170,17 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 static void usbhost_destroy(FAR void *arg);
 static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker);
 
-/* Data helpers */
+/* (Little Endian) Data helpers */
 
-static inline uint16_t usbhost_getint16(const uint8_t *val);
+static inline uint16_t usbhost_getle16(const uint8_t *val);
+static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
+static void usbhost_putle32(uint8_t *dest, uint32_t val);
+
+/* Transfer descriptor memory management */
+
+static int usbhost_tdalloc(FAR struct usbhost_state_s *priv);
+static int usbhost_tdfree(FAR struct usbhost_state_s *priv);
+static FAR struct usbstrg_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
  
@@ -439,7 +449,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
  *   host class instance.
  *
  * Input Parameters:
- *   arg - A reference to the class instance to be freed.
+ *   arg - A reference to the class instance to be destroyed.
  *
  * Returned Values:
  *   None
@@ -483,7 +493,7 @@ static void usbhost_destroy(FAR void *arg)
  *   longer be executed.
  *
  * Input Parameters:
- *   arg - A reference to the class instance to be freed.
+ *   arg - A reference to the class instance.
  *
  * Returned Values:
  *   None
@@ -587,7 +597,7 @@ static void usbhost_statemachine(FAR void *arg)
  *   just execute the work now.
  *
  * Input Parameters:
- *   priv - A reference to the class instance to be freed.
+ *   priv - A reference to the class instance.
  *   worker - A reference to the worker function to be executed
  *
  * Returned Values:
@@ -616,7 +626,7 @@ static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker)
 }
 
 /****************************************************************************
- * Name: usbhost_getint16
+ * Name: usbhost_getle16
  *
  * Description:
  *   Get a (possibly unaligned) 16-bit little endian value.
@@ -629,9 +639,145 @@ static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker)
  *
  ****************************************************************************/
 
-static inline uint16_t usbhost_getint16(const uint8_t *val)
+static inline uint16_t usbhost_getle16(const uint8_t *val)
 {
   return (uint16_t)val[1] << 8 | (uint16_t)val[0];
+}
+
+/****************************************************************************
+ * Name: usbhost_putle16
+ *
+ * Description:
+ *   Put a (possibly unaligned) 16-bit little endian value.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the first byte to save the little endian value.
+ *   val - The 16-bit value to be saved.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void usbhost_putle16(uint8_t *dest, uint16_t val)
+{
+  dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
+  dest[1] = val >> 8;
+}
+
+/****************************************************************************
+ * Name: usbhost_putle32
+ *
+ * Description:
+ *   Put a (possibly unaligned) 32-bit little endian value.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the first byte to save the little endian value.
+ *   val - The 32-bit value to be saved.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void usbhost_putle32(uint8_t *dest, uint32_t val)
+{
+  /* Little endian means LS halfwrd first in byte stream */
+
+  usbhost_putle16(dest, (uint16_t)(val & 0xffff));
+  usbhost_putle16(dest+2, (uint16_t)(val >> 16));
+}
+
+/****************************************************************************
+ * Name: usbhost_tdalloc
+ *
+ * Description:
+ *   Allocate transfer descriptor memory.
+ *
+ * Input Parameters:
+ *   priv - A reference to the class instance.
+ *
+ * Returned Values:
+ *   On sucess, zero (OK) is returned.  On failure, an negated errno value
+ *   is returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+static int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
+{
+  int result = OK;
+
+  /* Is a descriptor already allocated? */
+
+  if (!priv->tdbuffer)
+    {
+      result = DRVR_ALLOC(priv->drvr, &priv->tdbuffer, &priv->tdbuflen);
+    }
+  return result;
+}
+
+/****************************************************************************
+ * Name: usbhost_tdfree
+ *
+ * Description:
+ *   Free transfer descriptor memory.
+ *
+ * Input Parameters:
+ *   priv - A reference to the class instance.
+ *
+ * Returned Values:
+ *   On sucess, zero (OK) is returned.  On failure, an negated errno value
+ *   is returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+static int usbhost_tdfree(FAR struct usbhost_state_s *priv)
+{
+  int result = OK;
+
+  /* Is a descriptor already allocated? */
+
+  if (!priv->tdbuffer)
+    {
+      result         = DRVR_FREE(priv->drvr, priv->tdbuffer);
+      priv->tdbuffer = NULL;
+      priv->tdbuflen = 0;
+    }
+  return result;
+}
+
+/****************************************************************************
+ * Name: usbhost_cbwalloc
+ *
+ * Description:
+ *   Allocate and initialize a CBW. Upon successful return, the CBW is cleared
+ *   and has the CBW signature in place.
+ *
+ * Input Parameters:
+ *   priv - A reference to the class instance.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static FAR struct usbstrg_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *priv)
+{
+  FAR struct usbstrg_cbw_s *cbw = NULL;
+  int result;
+
+  /* Allocate any special memory that the the driver may have for us */
+
+  result = usbhost_tdalloc(priv);
+  if (result == OK && priv->tdbuflen >= sizeof(struct usbstrg_cbw_s))
+    {
+      /* Intialize the CBW sructure */
+
+      cbw = (FAR struct usbstrg_cbw_s *)priv->tdbuffer;
+      memset(cbw, 0, sizeof(struct usbstrg_cbw_s));
+      usbhost_putle32(cbw->signature, USBSTRG_CBW_SIGNATURE);
+    }
+  return cbw;
 }
 
 /****************************************************************************
@@ -768,7 +914,7 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
    * It might be a good check to get the number of interfaces here too.
   */
 
-  remaining = (int)usbhost_getint16(cfgdesc->totallen);
+  remaining = (int)usbhost_getle16(cfgdesc->totallen);
 
   /* Skip to the next entry descriptor */
 
@@ -831,7 +977,7 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
 
                     priv->bulkout.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     priv->bulkout.in           = false;
-                    priv->bulkout.mxpacketsize = usbhost_getint16(epdesc->mxpacketsize);
+                    priv->bulkout.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                   }
                 else
                   {
@@ -849,7 +995,7 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
                     
                     priv->bulkin.addr          = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     priv->bulkin.in            = true;
-                    priv->bulkin.mxpacketsize  = usbhost_getint16(epdesc->mxpacketsize);
+                    priv->bulkin.mxpacketsize  = usbhost_getle16(epdesc->mxpacketsize);
                   }
               }
           }
@@ -1192,6 +1338,7 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
 
   /* Check if the mass storage device is still connected */
 
+  priv = (FAR struct usbhost_state_s *)inode->i_private;
   if (!priv->drvr)
     {
       /* No... the block driver is no longer bound to the class.  That means that
@@ -1205,7 +1352,6 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
     {
       /* Return the geometry of the USB mass storage device */
 
-      priv = (FAR struct usbhost_state_s *)inode->i_private;
       usbhost_takesem(&priv->exclsem);
       DEBUGASSERT(priv->state == USBSTRG_STATE_READY);
 
