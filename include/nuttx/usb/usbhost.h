@@ -197,37 +197,6 @@
 #define DRVR_ENUMERATE(drvr) ((drvr)->enumerate(drvr))
 
 /************************************************************************************
- * Name: DRVR_TRANSFER
- *
- * Description:
- *   Enqueue a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request and return immediately.  The transfer will
- *   be performed asynchronously.  When the transfer completes, the USB host
- *   driver will call he complete() method of the struct usbhost_class_s
- *   interface.  Only one transfer may be queued; this function cannot be
- *   again until the class complete() method has been called.
- *
- * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).
- *   buflen - The length of the data to be sent or received.
- *
- * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
- *
- * Assumptions:
- *   This function will *not* be called from an interrupt handler.
- *
- ************************************************************************************/
-
-#define DRVR_TRANSFER(drvr,ed,buffer,buflen) ((drvr)->transfer(drvr,ed,buffer,buflen))
-
-/************************************************************************************
  * Name: DRVR_ALLOC
  *
  * Description:
@@ -279,6 +248,70 @@
  ************************************************************************************/
 
 #define DRVR_FREE(drvr,buffer) ((drvr)->free(drvr,buffer))
+
+/************************************************************************************
+ * Name: DRVR_CONTROL
+ *
+ * Description:
+ *   Enqueue a request on the control endpoint.  This method will enqueue
+ *   the request and return immediately.  The transfer will be performed
+ *   asynchronously.  When the transfer completes, the USB host driver will
+ *   call the complete() method of the struct usbhost_class_s interface.
+ *   Only one transfer may be queued; Neither this method nor the transfer()
+ *   method can be called again until the class complete() method has been called.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   req - Describes the request to be sent.  This data will be copied from the
+ *      user provided memory.  Therefore, the req buffer may be declared on the
+ *      stack.
+ *   buffer - A buffer used for sending the request and for returning any
+ *     responses.  This buffer must be large enough to hold the length value
+ *     in the request description. buffer must have been allocated using DRVR_ALLOC
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_CONTROL(drvr,req,buffer) ((drvr)->control(drvr,req,buffer))
+
+/************************************************************************************
+ * Name: DRVR_TRANSFER
+ *
+ * Description:
+ *   Enqueue a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request and return immediately.  The transfer will
+ *   be performed asynchronously.  When the transfer completes, the USB host
+ *   driver will call the complete() method of the struct usbhost_class_s
+ *   interface.  Only one transfer may be queued; Neither this method nor the
+ *   control method can be called again until the class complete() method has
+ *   been called.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
+ *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   buflen - The length of the data to be sent or received.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_TRANSFER(drvr,ed,buffer,buflen) ((drvr)->transfer(drvr,ed,buffer,buflen))
 
 /************************************************************************************
  * Public Types
@@ -376,18 +409,6 @@ struct usbhost_driver_s
 
   int (*enumerate)(FAR struct usbhost_driver_s *drvr);
 
-  /* Enqueue a request to handle a transfer descriptor.  This method will
-   * enqueue the transfer request and return immediately.  The transfer will
-   * be performed asynchronously.  When the transfer completes, the USB host
-   * driver will call he complete() method of the struct usbhost_class_s
-   * interface.  Only one transfer may be queued; this function cannot be
-   * again until the class complete() method has been called.
-   */
-
-  int (*transfer)(FAR struct usbhost_driver_s *drvr,
-                  FAR struct usbhost_epdesc_s *ed,
-                  FAR uint8_t *buffer, size_t buflen);
-
   /* Some hardware supports special memory in which transfer descriptors can
    * be accessed more efficiently.  The following methods provide a mechanism
    * to allocate and free the transfer descriptor memory.  If the underlying
@@ -399,9 +420,30 @@ struct usbhost_driver_s
                FAR uint8_t **buffer, FAR size_t *maxlen);
   int (*free)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 
-  /* Receive control information */
+  /* Enqueue a request on the control endpoint.  This method will enqueue
+   * the request and return immediately.  The transfer will be performed
+   * asynchronously.  When the transfer completes, the USB host driver will
+   * call the complete() method of the struct usbhost_class_s interface.
+   * Only one transfer may be queued; Neither this method nor the transfer()
+   * method can be called again until the class complete() method has been called.
+   */
 
-  int (*rcvctrl)(FAR struct usbhost_driver_s *drvr, FAR struct usbhost_epdesc_s *ed);
+  int (*control)(FAR struct usbhost_driver_s *drvr,
+                 const struct usb_ctrlreq_s *req,
+                 FAR uint8_t *buffer);
+
+  /* Enqueue a request to handle a transfer descriptor.  This method will
+   * enqueue the transfer request and return immediately.  The transfer will
+   * be performed asynchronously.  When the transfer completes, the USB host
+   * driver will call the complete() method of the struct usbhost_class_s
+   * interface.  Only one transfer may be queued; Neither this method nor the
+   * control method can be called again until the class complete() method has
+   * been called.
+   */
+
+  int (*transfer)(FAR struct usbhost_driver_s *drvr,
+                  FAR struct usbhost_epdesc_s *ed,
+                  FAR uint8_t *buffer, size_t buflen);
 };
 
 /* This structure describes one endpoint */

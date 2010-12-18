@@ -87,15 +87,17 @@
  * defined here so that it will be used consistently in all places.
  */
 
-#define DEV_FORMAT      "/dev/sd%c"
-#define DEV_NAMELEN     10
+#define DEV_FORMAT          "/dev/sd%c"
+#define DEV_NAMELEN         10
 
 /* Used in usbhost_configdesc() */
 
-#define USBHOST_IFFOUND   0x01
-#define USBHOST_BINFOUND  0x02
-#define USBHOST_BOUTFOUND 0x04
-#define USBHOST_ALLFOUND  0x07
+#define USBHOST_IFFOUND     0x01
+#define USBHOST_BINFOUND    0x02
+#define USBHOST_BOUTFOUND   0x04
+#define USBHOST_ALLFOUND    0x07
+
+#define USBHOST_MAX_RETRIES 100
 
 /****************************************************************************
  * Private Types
@@ -105,15 +107,15 @@
 
 enum USBSTRG_STATE_e
 {
-  USBSTRG_STATE_CREATED = 0, /* State has been created, waiting for config descriptor */
-  USBSTRG_STATE_CONFIGURED,  /* Received config descriptor */
-  USBSTRG_STATE_MAXLUN,      /* Requested maximum logical unit number */
-  USBSTRG_STATE_UNITREADY,   /* Check if the unit is ready */
-  USBSTRG_STATE_SENSE,       /* Get sense information */
-  USBSTRG_STATE_CAPACITY,    /* Read the capacity of the volume */
-  USBSTRG_STATE_READY,       /* Registered the block driver, idle, waiting for operation */
-  USBSTRG_STATE_BUSY,        /* Transfer in progress */
-  USBSTRG_STATE_FAIL         /* A fatal error occurred */
+  USBSTRG_STATE_CREATED = 0,    /* State has been created, waiting for config descriptor */
+  USBSTRG_STATE_CONFIGURED,     /* Received config descriptor */
+  USBSTRG_STATE_MAXLUN,         /* Requested maximum logical unit number */
+  USBSTRG_STATE_TESTUNITREADY,  /* Waiting for test unit ready to complete */
+  USBSTRG_STATE_SENSE,          /* Get sense information */
+  USBSTRG_STATE_CAPACITY,       /* Read the capacity of the volume */
+  USBSTRG_STATE_READY,          /* Registered the block driver, idle, waiting for operation */
+  USBSTRG_STATE_BUSY,           /* Transfer in progress */
+  USBSTRG_STATE_FAIL            /* A fatal error occurred */
 };
 
 /* This structure contains the internal, private state of the USB host mass
@@ -133,6 +135,7 @@ struct usbhost_state_s
   /* The remainder of the fields are provide o the mass storage class */
   
   uint8_t                 state;      /* See enum USBSTRG_STATE_e */
+  uint8_t                 retries;    /* Retry counter */
   char                    sdchar;     /* Character identifying the /dev/sd[n] device */
   int16_t                 crefs;      /* Reference count on the driver instance */
   uint16_t                blocksize;  /* Block size of USB mass storage device */
@@ -178,6 +181,9 @@ static inline void usbhost_readcbw (size_t startsector, uint16_t blocksize,
 static inline void usbhost_writecbw(size_t startsector, uint16_t blocksize,
                                     unsigned int nsectors,
                                     FAR struct usbstrg_cbw_s *cbw);
+/* Command helpers */
+
+static int usbhost_testunitready(FAR struct usbhost_state_s *priv);
 
 /* Worker thread actions */
 
@@ -572,6 +578,46 @@ usbhost_writecbw(size_t startsector, uint16_t blocksize,
 }
 
 /****************************************************************************
+ * Name: Command helpers
+ *
+ * Description:
+ *   The following functions are helper functions used to send commands.
+ *
+ * Input Parameters:
+ *   priv - A reference to the class instance.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static int usbhost_testunitready(FAR struct usbhost_state_s *priv)
+{
+  FAR struct usbstrg_cbw_s *cbw;
+  int result = -ENOMEM;
+
+  /* Initialize a CBW (allocating it if necessary) */
+ 
+  cbw = usbhost_cbwalloc(priv);
+  if (cbw)
+    {
+      /* Construc and send the CBW */
+ 
+      usbhost_testunitreadycbw(cbw);
+      result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
+                            (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
+      if (result == OK)
+        {
+          /* Receive the CSW */
+
+          result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
+                                 priv->tdbuffer, USBSTRG_CSW_SIZEOF);
+        }
+    }
+  return result;
+}
+
+/****************************************************************************
  * Name: usbhost_destroy
  *
  * Description:
@@ -602,6 +648,15 @@ static void usbhost_destroy(FAR void *arg)
   /* Release the device name used by this connection */
 
   usbhost_freedevno(priv);
+
+  /* Free any transfer buffers */
+
+  usbhost_tdfree(priv);
+
+  /* Destroy the semaphores */
+
+  sem_destroy(&priv->exclsem);
+  sem_destroy(&priv->waitsem);
 
   /* And free the class instance.  Hmmm.. this may execute on the worker
    * thread and the work structure is part of what is getting freed.
@@ -634,7 +689,7 @@ static void usbhost_destroy(FAR void *arg)
 static void usbhost_statemachine(FAR void *arg)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
-  int result;
+  int result = OK;
 
   DEBUGASSERT(priv != NULL);
 
@@ -643,43 +698,88 @@ static void usbhost_statemachine(FAR void *arg)
     {
     case USBSTRG_STATE_CONFIGURED:  /* Received config descriptor */
       {
-        /* Request maximum logical unit number */
-#warning "Missing Logic"
-        priv->state = USBSTRG_STATE_MAXLUN;
+        struct usb_ctrlreq_s req;
+        uvdbg("USBSTRG_STATE_CONFIGURED\n");
+
+        /* Make sure that we have a buffer allocated */
+
+        result = usbhost_tdalloc(priv);
+        if (result == OK)
+          {
+            /* Request maximum logical unit number */
+
+            memset(&req, 0, sizeof(struct usb_ctrlreq_s));
+            req.type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
+            req.req     = USBSTRG_REQ_GETMAXLUN;
+            usbhost_putle16(req.len, 1);
+
+            result      = DRVR_CONTROL(priv->drvr, &req, priv->tdbuffer);
+            priv->state = USBSTRG_STATE_MAXLUN;
+          }
       }
       break;
 
     case USBSTRG_STATE_MAXLUN:      /* Requested maximum logical unit number */
       {
-        /* Handle maximum LUN info */
+        uvdbg("USBSTRG_STATE_MAXLUN\n");
 
         /* Check if the unit is ready */
+
+        result = usbhost_testunitready(priv);
+        priv->retries = 0;
 #warning "Missing Logic"
         priv->state = USBSTRG_STATE_MAXLUN;
       }
       break;
 
-    case USBSTRG_STATE_UNITREADY:        /* Check if the unit is ready */
+    case USBSTRG_STATE_SENSE: /* MODESENSE compleed */
       {
-        /* Request sense information */
-#warning "Missing Logic"
-        priv->state = USBSTRG_STATE_SENSE;
+        uvdbg("USBSTRG_STATE_SENSE\n");
+
+        /* Check if the unit is ready again */
+
+        result = usbhost_testunitready(priv);
+        priv->state = USBSTRG_STATE_TESTUNITREADY;
+        priv->retries++;
       }
       break;
 
-    case USBSTRG_STATE_SENSE:       /* Get sense information */
+    case USBSTRG_STATE_TESTUNITREADY: /* TESTUNITREADY completed */
       {
-        /* Process sense information */
+        uvdbg("USBSTRG_STATE_TESTUNITREADY\n");
 
-        /* Request the capaciy of the volume */
+        /* Check the result */
+
+        if (priv->tdbuffer[12] != 0)
+          {
+            /* Not ready... retry? */
+
+            if (priv->retries < USBHOST_MAX_RETRIES)
+              {
+                /* Request mode sense information */
 #warning "Missing Logic"
-        priv->state = USBSTRG_STATE_CAPACITY;
+                priv->state = USBSTRG_STATE_SENSE;
+
+              }
+            else
+              {
+                result = -ETIMEDOUT;
+              }
+          }
+        else
+          {
+            /* Request the capaciy of the volume */
+
+#warning "Missing Logic"
+            priv->state = USBSTRG_STATE_CAPACITY;
+          }
       }
       break;
 
     case USBSTRG_STATE_CAPACITY:    /* Read the capacity of the volume */
       {
         char devname[DEV_NAMELEN];
+        uvdbg("USBSTRG_STATE_CAPACITY\n");
 
         /* Process capacity information */
 #warning "Missing Logic"
@@ -713,10 +813,19 @@ static void usbhost_statemachine(FAR void *arg)
     default:
       {
         udbg("ERROR! Completion in unexpected stated: %d\n", priv->state);
+        result = -EINVAL;
       }
       break;
     }
   usbhost_givesem(&priv->exclsem);
+
+  /* Abort everything on an error */
+
+  if (result != OK)
+    {
+      udbg("ERROR! Aborting: %d\n", result);
+      usbhost_destroy(priv);
+    }
 }
 
 /****************************************************************************
