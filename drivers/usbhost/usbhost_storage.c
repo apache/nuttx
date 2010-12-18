@@ -50,6 +50,7 @@
 #include <nuttx/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/scsi.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -165,16 +166,32 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv);
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
 static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname);
 
+/* CBW helpers */
+
+static inline void usbhost_modesensecbw(FAR struct usbstrg_cbw_s *cbw);
+static inline void usbhost_testunitreadycbw(FAR struct usbstrg_cbw_s *cbw);
+static inline void usbhost_readcapacitycbw(FAR struct usbstrg_cbw_s *cbw);
+static inline void usbhost_inquirycbw (FAR struct usbstrg_cbw_s *cbw);
+static inline void usbhost_readcbw (size_t startsector, uint16_t blocksize,
+                                    unsigned int nsectors,
+                                    FAR struct usbstrg_cbw_s *cbw);
+static inline void usbhost_writecbw(size_t startsector, uint16_t blocksize,
+                                    unsigned int nsectors,
+                                    FAR struct usbstrg_cbw_s *cbw);
+
 /* Worker thread actions */
 
 static void usbhost_destroy(FAR void *arg);
+static void usbhost_statemachine(FAR void *arg);
 static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker);
 
 /* (Little Endian) Data helpers */
 
 static inline uint16_t usbhost_getle16(const uint8_t *val);
 static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
+static inline void usbhost_putbe16(uint8_t *dest, uint16_t val);
 static void usbhost_putle32(uint8_t *dest, uint32_t val);
+static void usbhost_putbe32(uint8_t *dest, uint32_t val);
 
 /* Transfer descriptor memory management */
 
@@ -441,6 +458,120 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 }
 
 /****************************************************************************
+ * Name: CBW helpers
+ *
+ * Description:
+ *   The following functions are helper functions used to format CBWs.
+ *
+ * Input Parameters:
+ *   cbw - A reference to allocated and initialized CBW to to built.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void usbhost_modesensecbw(FAR struct usbstrg_cbw_s *cbw)
+{
+  FAR struct scsicmd_requestsense_s *reqsense;
+
+  /* Format the CBW */
+
+  usbhost_putle32(cbw->datlen, SCSIRESP_FIXEDSENSEDATA_SIZEOF);
+  cbw->flags         = USBSTRG_CBWFLAG_IN;
+  cbw->cdblen        = SCSICMD_REQUESTSENSE_SIZEOF;
+
+  /* Format the CDB */
+
+  reqsense           = (FAR struct scsicmd_requestsense_s *)cbw->cdb;
+  reqsense->opcode   = SCSI_CMD_REQUESTSENSE;
+  reqsense->alloclen = SCSIRESP_FIXEDSENSEDATA_SIZEOF;
+}
+
+static inline void usbhost_testunitreadycbw(FAR struct usbstrg_cbw_s *cbw)
+{
+  /* Format the CBW */
+
+  cbw->cdblen = SCSICMD_TESTUNITREADY_SIZEOF;
+
+  /* Format the CDB */
+
+  cbw->cdb[0] = SCSI_CMD_TESTUNITREADY;
+}
+
+static inline void usbhost_readcapacitycbw(FAR struct usbstrg_cbw_s *cbw)
+{
+  FAR struct scsicmd_readcapacity10_s *rcap10;
+
+  /* Format the CBW */
+
+  usbhost_putle32(cbw->datlen, SCSIRESP_READCAPACITY10_SIZEOF);
+  cbw->flags     = USBSTRG_CBWFLAG_IN;
+  cbw->cdblen    = SCSICMD_READCAPACITY10_SIZEOF;
+
+  /* Format the CDB */
+
+  rcap10         = (FAR struct scsicmd_readcapacity10_s *)cbw->cdb;
+  rcap10->opcode = SCSI_CMD_READCAPACITY10;
+}
+
+static inline void usbhost_inquirycbw (FAR struct usbstrg_cbw_s *cbw)
+{
+  FAR struct scscicmd_inquiry_s *inq;
+
+  /* Format the CBW */
+
+    usbhost_putle32(cbw->datlen, SCSIRESP_INQUIRY_SIZEOF);
+    cbw->flags  = USBSTRG_CBWFLAG_IN;
+    cbw->cdblen = SCSICMD_INQUIRY_SIZEOF;
+
+  /* Format the CDB */
+
+  inq           = (FAR struct scscicmd_inquiry_s *)cbw->cdb;
+  inq->opcode   = SCSI_CMD_INQUIRY;
+  usbhost_putbe16(inq->alloclen, SCSIRESP_INQUIRY_SIZEOF);
+}
+
+static inline void
+usbhost_readcbw (size_t startsector, uint16_t blocksize,
+                 unsigned int nsectors, FAR struct usbstrg_cbw_s *cbw)
+{
+  FAR struct scsicmd_read10_s *rd10;
+
+  /* Format the CBW */
+
+  usbhost_putle32(cbw->datlen, blocksize * nsectors);
+  cbw->flags   = USBSTRG_CBWFLAG_IN;
+  cbw->cdblen  = SCSICMD_READ10_SIZEOF;
+
+  /* Format the CDB */
+
+  rd10 = (FAR struct scsicmd_read10_s *)cbw->cdb;
+  rd10->opcode = SCSI_CMD_READ10;
+  usbhost_putbe32(rd10->lba, startsector);
+  usbhost_putbe16(rd10->xfrlen, nsectors);
+}
+
+static inline void
+usbhost_writecbw(size_t startsector, uint16_t blocksize,
+                 unsigned int nsectors, FAR struct usbstrg_cbw_s *cbw)
+{
+  FAR struct scsicmd_write10_s *wr10;
+
+  /* Format the CBW */
+
+  usbhost_putle32(cbw->datlen, blocksize * nsectors);
+  cbw->cdblen  = SCSICMD_WRITE10_SIZEOF;
+
+  /* Format the CDB */
+
+  wr10 = (FAR struct scsicmd_write10_s *)cbw->cdb;
+  wr10->opcode = SCSI_CMD_WRITE10;
+  usbhost_putbe32(wr10->lba, startsector);
+  usbhost_putbe16(wr10->xfrlen, nsectors);
+}
+
+/****************************************************************************
  * Name: usbhost_destroy
  *
  * Description:
@@ -666,6 +797,27 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
 }
 
 /****************************************************************************
+ * Name: usbhost_putbe16
+ *
+ * Description:
+ *   Put a (possibly unaligned) 16-bit big endian value.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the first byte to save the big endian value.
+ *   val - The 16-bit value to be saved.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void usbhost_putbe16(uint8_t *dest, uint16_t val)
+{
+  dest[0] = val >> 8; /* Big endian means MS byte first in byte stream */
+  dest[1] = val & 0xff;
+}
+
+/****************************************************************************
  * Name: usbhost_putle32
  *
  * Description:
@@ -686,6 +838,29 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
 
   usbhost_putle16(dest, (uint16_t)(val & 0xffff));
   usbhost_putle16(dest+2, (uint16_t)(val >> 16));
+}
+
+/****************************************************************************
+ * Name: usbhost_putbe32
+ *
+ * Description:
+ *   Put a (possibly unaligned) 32-bit big endian value.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the first byte to save the big endian value.
+ *   val - The 32-bit value to be saved.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void usbhost_putbe32(uint8_t *dest, uint32_t val)
+{
+  /* Big endian means MS halfwrd first in byte stream */
+
+  usbhost_putbe16(dest, (uint16_t)(val >> 16));
+  usbhost_putbe16(dest+2, (uint16_t)(val & 0xffff));
 }
 
 /****************************************************************************

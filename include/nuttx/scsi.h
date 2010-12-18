@@ -636,6 +636,8 @@
 
 /* Format structures for selected SCSI primary commands */
 
+#define SCSICMD_TESTUNITREADY_SIZEOF 6
+
 struct scsicmd_requestsense_s
 {
   uint8_t opcode;        /* 0: 0x03 */
