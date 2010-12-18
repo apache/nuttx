@@ -188,21 +188,45 @@ static int lpc17_usbinterrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
+static int usbhost_enumerate(FAR struct usbhost_driver_s *drvr);
+static int usbhost_alloc(FAR struct usbhost_driver_s *drvr,
+                         FAR uint8_t **buffer, FAR size_t *maxlen);
+static int usbhost_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
+static int usbhost_control(FAR struct usbhost_driver_s *drvr,
+                           const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
+static int usbhost_transfer(FAR struct usbhost_driver_s *drvr,
+                            FAR struct usbhost_epdesc_s *ed,
+                            FAR uint8_t *buffer, size_t buflen);
+static void usbhost_disconnect(FAR struct usbhost_driver_s *drvr);
+  
 /* Initializaion ***************************************************************/
 
 static void usbhost_tdinit(volatile struct usbhost_hctd_s *td);
-static void usbhost_edinit(volatile struct usbhost_hced_s *);
+static void usbhost_edinit(volatile struct usbhost_hced_s *ed);
 static void usbhost_hccainit(volatile struct usbhost_hcca_s *hcca);
 
 /*******************************************************************************
  * Private Data
  *******************************************************************************/
 
-/* Since there is only a single USB interface, all status information can be
- * be simply retained in a single global instance.
+/* In this driver implementation, support is provided for only a single a single
+ * USB device.  All status information can be simply retained in a single global
+ * instance.
  */
 
-static struct lpc17_usbhost_s g_usbhost;
+static struct lpc17_usbhost_s g_usbhost =
+{
+  .usbhost        =
+    {
+      .enumerate  = usbhost_enumerate,
+      .alloc      = usbhost_alloc,
+      .free       = usbhost_free,
+      .control    = usbhost_control,
+      .transfer   = usbhost_transfer,
+      .disconnect = usbhost_disconnect,
+    },
+  .class          = NULL,
+};
 
 /*******************************************************************************
  * Public Data
@@ -355,8 +379,224 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 }
 
 /*******************************************************************************
- * USB Host Device Operations
+ * USB Host Controller Operations
  *******************************************************************************/
+
+/************************************************************************************
+ * Name: usbhost_enumerate
+ *
+ * Description:
+ *   Enumerate the connected device.  This function will enqueue the
+ *   enumeration process.  As part of this enumeration process, the driver
+ *   will (1) get the device's configuration descriptor, (2) extract the class
+ *   ID info from the configuration descriptor, (3) call usbhost_findclass()
+ *   to find the class that supports this device, (4) call the create()
+ *   method on the struct usbhost_registry_s interface to get a class
+ *   instance, and finally (5) call the configdesc() method of the struct
+ *   usbhost_class_s interface.  After that, the class is in charge of the
+ *   sequence of operations.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int usbhost_enumerate(FAR struct usbhost_driver_s *drvr)
+{
+# warning "Not Implemented"
+  return -ENOSYS;
+}
+
+/************************************************************************************
+ * Name: usbhost_alloc
+ *
+ * Description:
+ *   Some hardware supports special memory in which transfer descriptors can
+ *   be accessed more efficiently.  This method provides a mechanism to allocate
+ *   the transfer descriptor memory.  If the underlying hardware does not support
+ *   such "special" memory, this functions may simply map to malloc.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   buffer - The address of a memory location provided by the caller in which to
+ *     return the allocated buffer memory address.
+ *   maxlen - The address of a memory location provided by the caller in which to
+ *     return the maximum size of the allocated buffer memory.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+ static int usbhost_alloc(FAR struct usbhost_driver_s *drvr,
+                         FAR uint8_t **buffer, FAR size_t *maxlen)
+{
+# warning "Not Implemented"
+  return -ENOSYS;
+}
+
+/************************************************************************************
+ * Name: usbhost_free
+ *
+ * Description:
+ *   Some hardware supports special memory in which transfer descriptors can
+ *   be accessed more efficiently.  This method provides a mechanism to free that
+ *   transfer descriptor memory.  If the underlying hardware does not support
+ *   such "special" memory, this functions may simply map to free().
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   buffer - The address of the allocated buffer memory to be freed.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int usbhost_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+{
+# warning "Not Implemented"
+  return -ENOSYS;
+}
+
+/************************************************************************************
+ * Name: usbhost_control
+ *
+ * Description:
+ *   Enqueue a request on the control endpoint.  This method will enqueue
+ *   the request and return immediately.  The transfer will be performed
+ *   asynchronously.  When the transfer completes, the USB host driver will
+ *   call the complete() method of the struct usbhost_class_s interface.
+ *   Only one transfer may be queued; Neither this method nor the transfer()
+ *   method can be called again until the class complete() method has been called.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   req - Describes the request to be sent.  This data will be copied from the
+ *      user provided memory.  Therefore, the req buffer may be declared on the
+ *      stack.
+ *   buffer - A buffer used for sending the request and for returning any
+ *     responses.  This buffer must be large enough to hold the length value
+ *     in the request description. buffer must have been allocated using DRVR_ALLOC
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int usbhost_control(FAR struct usbhost_driver_s *drvr,
+                           const struct usb_ctrlreq_s *req, FAR uint8_t *buffer)
+{
+# warning "Not Implemented"
+  return -ENOSYS;
+}
+
+/************************************************************************************
+ * Name: usbhost_transfer
+ *
+ * Description:
+ *   Enqueue a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request and return immediately.  The transfer will
+ *   be performed asynchronously.  When the transfer completes, the USB host
+ *   driver will call the complete() method of the struct usbhost_class_s
+ *   interface.  Only one transfer may be queued; Neither this method nor the
+ *   control method can be called again until the class complete() method has
+ *   been called.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *      perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
+ *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   buflen - The length of the data to be sent or received.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int usbhost_transfer(FAR struct usbhost_driver_s *drvr,
+                            FAR struct usbhost_epdesc_s *ed,
+                            FAR uint8_t *buffer, size_t buflen)
+{
+# warning "Not Implemented"
+  return -ENOSYS;
+}
+
+/************************************************************************************
+ * Name: usbhost_disconnect
+ *
+ * Description:
+ *   Called by the class when an error occurs and driver has been disconnected.
+ *   The USB host driver should discard the handle to the class instance (it is
+ *   stale) and not attempt any further interaction with the class driver instance
+ *   (until a new instance is received from the create() method).  The driver
+ *   should not called the class' disconnected() method.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *
+ * Returned Values:
+ *   None
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static void usbhost_disconnect(FAR struct usbhost_driver_s *drvr)
+{
+# warning "Not Implemented"
+}
+  
+/*******************************************************************************
+ * Initialization
+ *******************************************************************************/
+
+static void usbhost_tdinit(volatile struct usbhost_hctd_s *td)
+{
+# warning "Not Implemented"
+}
+
+static void usbhost_edinit(volatile struct usbhost_hced_s *ed)
+{
+# warning "Not Implemented"
+}
+
+static void usbhost_hccainit(volatile struct usbhost_hcca_s *hcca)
+{
+# warning "Not Implemented"
+}
 
 /*******************************************************************************
  * Public Functions

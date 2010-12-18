@@ -314,6 +314,30 @@
 #define DRVR_TRANSFER(drvr,ed,buffer,buflen) ((drvr)->transfer(drvr,ed,buffer,buflen))
 
 /************************************************************************************
+ * Name: DRVR_DISCONNECT
+ *
+ * Description:
+ *   Called by the class when an error occurs and driver has been disconnected.
+ *   The USB host driver should discard the handle to the class instance (it is
+ *   stale) and not attempt any further interaction with the class driver instance
+ *   (until a new instance is received from the create() method).  The driver
+ *   should not called the class' disconnected() method.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *
+ * Returned Values:
+ *   None
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_DISCONNECT(drvr) ((drvr)->disconnect(drvr))
+
+/************************************************************************************
  * Public Types
  ************************************************************************************/
 
@@ -444,6 +468,14 @@ struct usbhost_driver_s
   int (*transfer)(FAR struct usbhost_driver_s *drvr,
                   FAR struct usbhost_epdesc_s *ed,
                   FAR uint8_t *buffer, size_t buflen);
+
+  /* Called by the class when an error occurs and driver has been disconnected.
+   * The USB host driver should discard the handle to the class instance (it is
+   * stale) and not attempt any further interaction with the class driver instance
+   * (until a new instance is received from the create() method).
+   */
+
+  void (*disconnect)(FAR struct usbhost_driver_s *drvr);
 };
 
 /* This structure describes one endpoint */
