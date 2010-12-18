@@ -742,13 +742,13 @@ static int inline usbstrg_cmdmodesense6(FAR struct usbstrg_dev_s *priv,
 
           /* There are no block descriptors, only the following mode page: */
 
-          ret = usbstrg_modepage(priv, &buf[SCSIREP_MODEPARAMETERHDR6_SIZEOF], modesense->pcpgcode, &mdlen);
+          ret = usbstrg_modepage(priv, &buf[SCSIRESP_MODEPARAMETERHDR6_SIZEOF], modesense->pcpgcode, &mdlen);
           if (ret == OK)
             {
                /* Store the mode data length and return the total message size */
 
                mph->mdlen      = mdlen - 1;
-               priv->nreqbytes = mdlen + SCSIREP_MODEPARAMETERHDR6_SIZEOF;
+               priv->nreqbytes = mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF;
             }
         }
     }
@@ -1187,18 +1187,18 @@ static int inline usbstrg_cmdmodesense10(FAR struct usbstrg_dev_s *priv,
            * (3) A variable lengtth list of mode page formats
            */
 
-          memset(mph, 0, SCSIREP_MODEPARAMETERHDR10_SIZEOF);
+          memset(mph, 0, SCSIRESP_MODEPARAMETERHDR10_SIZEOF);
           mph->param = (priv->lun->readonly ? SCSIRESP_MODEPARMHDR_DAPARM_WP : 0x00);
 
           /* There are no block descriptors, only the following mode page: */
 
-          ret = usbstrg_modepage(priv, &buf[SCSIREP_MODEPARAMETERHDR10_SIZEOF], modesense->pcpgcode, &mdlen);
+          ret = usbstrg_modepage(priv, &buf[SCSIRESP_MODEPARAMETERHDR10_SIZEOF], modesense->pcpgcode, &mdlen);
           if (ret == OK)
             {
                /* Store the mode data length and return the total message size */
 
               usbstrg_putbe16(mph->mdlen, mdlen - 2);
-              priv->nreqbytes = mdlen + SCSIREP_MODEPARAMETERHDR10_SIZEOF;
+              priv->nreqbytes = mdlen + SCSIRESP_MODEPARAMETERHDR10_SIZEOF;
             }
         }
     }

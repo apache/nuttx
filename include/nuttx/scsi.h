@@ -735,7 +735,7 @@ struct scsiresp_modeparameterhdr6_s
   uint8_t param;         /* 2: Device-specific parameter */
   uint8_t bdlen;         /* 3: Block descriptor length */
 };
-#define SCSIREP_MODEPARAMETERHDR6_SIZEOF 4
+#define SCSIRESP_MODEPARAMETERHDR6_SIZEOF 4
 
 struct scsiresp_blockdesc_s
 {
@@ -744,7 +744,7 @@ struct scsiresp_blockdesc_s
   uint8_t reserved;      /* 4: reserved */
   uint8_t blklen[3];     /* 5-7: Block len */
 };
-#define SCSIREP_BLOCKDESC_SIZEOF 8
+#define SCSIRESP_BLOCKDESC_SIZEOF 8
 
 struct scsiresp_pageformat_s
 {
@@ -933,7 +933,7 @@ struct scsiresp_modeparameterhdr10_s
   uint8_t reserved[2];   /* 4-5: reserved */
   uint8_t bdlen[2];      /* 6-7: Block descriptor length */
 };
-#define SCSIREP_MODEPARAMETERHDR10_SIZEOF 8
+#define SCSIRESP_MODEPARAMETERHDR10_SIZEOF 8
 
 struct scsicmd_modesense10_s
 {
