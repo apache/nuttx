@@ -64,6 +64,7 @@
 #include "lpc17_internal.h"
 #include "lpc17_usb.h"
 #include "lpc17_syscon.h"
+#include "lpc17_ohciram.h"
 
 /*******************************************************************************
  * Definitions
@@ -94,8 +95,15 @@
 
 /* USB Host Memory *************************************************************/
 
-#warning "Needs to be removed from the heap in lpc17_allocateheap.c"
-#define USBHOST_SRAM_BASE LPC17_SRAM_BANK1
+/* Helper definitions */
+
+#define HCCA        ((volatile struct lpc17_hcca_s *)LPC17_HCCA_BASE)
+#define TDHEAD      ((volatile struct lpc17_hctd_s *)LPC17_TDHEAD_ADDR)
+#define TDTAIL      ((volatile struct lpc17_hctd_s *)LPC17_TDTAIL_ADDR)
+#define EDCTRL      ((volatile struct lpc17_hced_s *)LPC17_EDCTRL_ADDR)
+#define FREEEDS     ((volatile struct lpc17_hced_s *)LPC17_FREEED_BASE)
+
+#define TDBuffer    ((volatile uint8_t *)(LPC17_TDBUFFER_BASE)
 
 /* Debug ***********************************************************************/
 
@@ -125,46 +133,44 @@ struct lpc17_usbhost_s
   struct usbhost_class_s *class;
 };
 
-/* HostController EndPoint Descriptor */
+/* Host Controller Communication Area */
 
-struct usbhost_hced_s
+struct lpc17_hcca_s
 {
-  volatile  uint32_t  control;         /* Endpoint descriptor control */
-  volatile  uint32_t  tailtd;          /* Physical address of tail in Transfer descriptor list */
-  volatile  uint32_t  headtd;          /* Physical address of head in Transfer descriptor list */
-  volatile  uint32_t  hext;            /* Physical address of next Endpoint descriptor */
+  volatile  uint32_t  inttbl[32];       /* Interrupt table */
+  volatile  uint32_t  frameno;          /* Frame number */
+  volatile  uint32_t  donehead;         /* Done head */
+  volatile  uint8_t   reserved[116];    /* Reserved for future use */
+  volatile  uint8_t   unused[4];        /* Unused */
 };
 
 /* HostController Transfer Descriptor */
 
-struct usbhost_hctd_s
+struct lpc17_hctd_s
 {                       
-  volatile  uint32_t  control;         /* Transfer descriptor control */
-  volatile  uint32_t  currbufptr;      /* Physical address of current buffer pointer */
-  volatile  uint32_t  bext;            /* Physical pointer to next Transfer Descriptor */
+  volatile  uint32_t  ctrl;            /* Transfer descriptor control */
+  volatile  uint32_t  currptr;         /* Physical address of current buffer pointer */
+  volatile  uint32_t  next;            /* Physical pointer to next Transfer Descriptor */
   volatile  uint32_t  bufend;          /* Physical address of end of buffer */
 };
 
-/* Host Controller Communication Area */
+/* HostController EndPoint Descriptor */
 
-struct usbhost_hcca_s
+struct lpc17_hced_s
 {
-  volatile  uint32_t  inttable[32];     /* Interrupt table */
-  volatile  uint32_t  framenumber;      /* Frame number */
-  volatile  uint32_t  donehead;         /* Done head */
-  volatile  uint8_t   reserved[116];    /* Reserved for future use */
-  volatile  uint8_t   unknown[4];       /* Unused */
+  volatile  uint32_t  ctrl;            /* Endpoint descriptor control */
+  volatile  uint32_t  tailtd;          /* Physical address of tail in Transfer descriptor list */
+  volatile  uint32_t  headtd;          /* Physical address of head in Transfer descriptor list */
+  volatile  uint32_t  next;            /* Physical address of next Endpoint descriptor */
 };
 
-/* Helper definitions */
+/* The following is used manage a list of free EDs */
 
-#define Hcca        ((volatile struct usbhost_hcca_s *)(USBHOST_SRAM_BASE + 0x000))
-#define TDHead      ((volatile struct usbhost_hctd_s *)(USBHOST_SRAM_BASE + 0x100))
-#define TDTail      ((volatile struct usbhost_hctd_s *)(USBHOST_SRAM_BASE + 0x110))
-#define EDCtrl      ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x120))
-#define EDBulkIn    ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x130))
-#define EDBulkOut   ((volatile struct usbhost_hced_s *)(USBHOST_SRAM_BASE + 0x140))
-#define TDBuffer    ((volatile uint8_t *)(USBHOST_SRAM_BASE + 0x150))
+struct lpc17_edmem_s
+{
+  struct lpc17_edmem_s *flink;         /* Link to next ED in the list */
+  uint32_t              pad[3];        /* To make the same size as struct lpc17_hced_s */
+};
 
 /*******************************************************************************
  * Private Function Prototypes
@@ -188,22 +194,22 @@ static int lpc17_usbinterrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
-static int usbhost_enumerate(FAR struct usbhost_driver_s *drvr);
-static int usbhost_alloc(FAR struct usbhost_driver_s *drvr,
+static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr);
+static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
                          FAR uint8_t **buffer, FAR size_t *maxlen);
-static int usbhost_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
-static int usbhost_control(FAR struct usbhost_driver_s *drvr,
+static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
+static int lpc17_control(FAR struct usbhost_driver_s *drvr,
                            const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
-static int usbhost_transfer(FAR struct usbhost_driver_s *drvr,
+static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
                             FAR struct usbhost_epdesc_s *ed,
                             FAR uint8_t *buffer, size_t buflen);
-static void usbhost_disconnect(FAR struct usbhost_driver_s *drvr);
+static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr);
   
 /* Initializaion ***************************************************************/
 
-static void usbhost_tdinit(volatile struct usbhost_hctd_s *td);
-static void usbhost_edinit(volatile struct usbhost_hced_s *ed);
-static void usbhost_hccainit(volatile struct usbhost_hcca_s *hcca);
+static void lpc17_tdinit(volatile struct lpc17_hctd_s *td);
+static void lpc17_edinit(volatile struct lpc17_hced_s *ed);
+static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca);
 
 /*******************************************************************************
  * Private Data
@@ -218,15 +224,19 @@ static struct lpc17_usbhost_s g_usbhost =
 {
   .usbhost        =
     {
-      .enumerate  = usbhost_enumerate,
-      .alloc      = usbhost_alloc,
-      .free       = usbhost_free,
-      .control    = usbhost_control,
-      .transfer   = usbhost_transfer,
-      .disconnect = usbhost_disconnect,
+      .enumerate  = lpc17_enumerate,
+      .alloc      = lpc17_alloc,
+      .free       = lpc17_free,
+      .control    = lpc17_control,
+      .transfer   = lpc17_transfer,
+      .disconnect = lpc17_disconnect,
     },
   .class          = NULL,
 };
+
+/* This is a free list of EDs */
+
+static struct lpc17_edmem_s *g_freeeds;
 
 /*******************************************************************************
  * Public Data
@@ -383,7 +393,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  *******************************************************************************/
 
 /************************************************************************************
- * Name: usbhost_enumerate
+ * Name: lpc17_enumerate
  *
  * Description:
  *   Enumerate the connected device.  This function will enqueue the
@@ -409,14 +419,14 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  *
  ************************************************************************************/
 
-static int usbhost_enumerate(FAR struct usbhost_driver_s *drvr)
+static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 {
 # warning "Not Implemented"
   return -ENOSYS;
 }
 
 /************************************************************************************
- * Name: usbhost_alloc
+ * Name: lpc17_alloc
  *
  * Description:
  *   Some hardware supports special memory in which transfer descriptors can
@@ -441,15 +451,15 @@ static int usbhost_enumerate(FAR struct usbhost_driver_s *drvr)
  *
  ************************************************************************************/
 
- static int usbhost_alloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, FAR size_t *maxlen)
+ static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
+                        FAR uint8_t **buffer, FAR size_t *maxlen)
 {
 # warning "Not Implemented"
   return -ENOSYS;
 }
 
 /************************************************************************************
- * Name: usbhost_free
+ * Name: lpc17_free
  *
  * Description:
  *   Some hardware supports special memory in which transfer descriptors can
@@ -471,14 +481,14 @@ static int usbhost_enumerate(FAR struct usbhost_driver_s *drvr)
  *
  ************************************************************************************/
 
-static int usbhost_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
 # warning "Not Implemented"
   return -ENOSYS;
 }
 
 /************************************************************************************
- * Name: usbhost_control
+ * Name: lpc17_control
  *
  * Description:
  *   Enqueue a request on the control endpoint.  This method will enqueue
@@ -507,15 +517,15 @@ static int usbhost_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *
  ************************************************************************************/
 
-static int usbhost_control(FAR struct usbhost_driver_s *drvr,
-                           const struct usb_ctrlreq_s *req, FAR uint8_t *buffer)
+static int lpc17_control(FAR struct usbhost_driver_s *drvr,
+                         const struct usb_ctrlreq_s *req, FAR uint8_t *buffer)
 {
 # warning "Not Implemented"
   return -ENOSYS;
 }
 
 /************************************************************************************
- * Name: usbhost_transfer
+ * Name: lpc17_transfer
  *
  * Description:
  *   Enqueue a request to handle a transfer descriptor.  This method will
@@ -544,16 +554,16 @@ static int usbhost_control(FAR struct usbhost_driver_s *drvr,
  *
  ************************************************************************************/
 
-static int usbhost_transfer(FAR struct usbhost_driver_s *drvr,
-                            FAR struct usbhost_epdesc_s *ed,
-                            FAR uint8_t *buffer, size_t buflen)
+static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
+                          FAR struct usbhost_epdesc_s *ed,
+                          FAR uint8_t *buffer, size_t buflen)
 {
 # warning "Not Implemented"
   return -ENOSYS;
 }
 
 /************************************************************************************
- * Name: usbhost_disconnect
+ * Name: lpc17_disconnect
  *
  * Description:
  *   Called by the class when an error occurs and driver has been disconnected.
@@ -574,7 +584,7 @@ static int usbhost_transfer(FAR struct usbhost_driver_s *drvr,
  *
  ************************************************************************************/
 
-static void usbhost_disconnect(FAR struct usbhost_driver_s *drvr)
+static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr)
 {
 # warning "Not Implemented"
 }
@@ -583,19 +593,33 @@ static void usbhost_disconnect(FAR struct usbhost_driver_s *drvr)
  * Initialization
  *******************************************************************************/
 
-static void usbhost_tdinit(volatile struct usbhost_hctd_s *td)
+static void lpc17_tdinit(volatile struct lpc17_hctd_s *td)
 {
-# warning "Not Implemented"
+  td->ctrl    = 0;
+  td->currptr = 0;
+  td->next    = 0;
+  td->bufend  = 0;
 }
 
-static void usbhost_edinit(volatile struct usbhost_hced_s *ed)
+static void lpc17_edinit(volatile struct lpc17_hced_s *ed)
 {
-# warning "Not Implemented"
+  ed->ctrl    = 0;
+  ed->tailtd  = 0;
+  ed->headtd  = 0;
+  ed->next    = 0;
 }
 
-static void usbhost_hccainit(volatile struct usbhost_hcca_s *hcca)
+static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca)
 {
-# warning "Not Implemented"
+  int  i;
+
+  for (i = 0; i < 32; i++)
+    {
+      hcca->inttbl[i] = 0;
+    }
+
+  hcca->frameno   = 0;
+  hcca->donehead  = 0;
 }
 
 /*******************************************************************************
@@ -662,12 +686,25 @@ void up_usbhostinitialize(void)
 
   /* Initialize all the TDs, EDs and HCCA to 0 */
 
-  usbhost_edinit(EDCtrl);
-  usbhost_edinit(EDBulkIn);
-  usbhost_edinit(EDBulkOut);
-  usbhost_tdinit(TDHead);
-  usbhost_tdinit(TDTail);
-  usbhost_hccainit(Hcca);
+  lpc17_hccainit(HCCA);
+  lpc17_tdinit(TDHEAD);
+  lpc17_tdinit(TDTAIL);
+  lpc17_edinit(EDCTRL);
+
+  for (i = 0; i < CONFIG_USBHOST_NEDS; i++)
+    {
+      struct lpc17_edmem_s *freeed;
+
+      /* Initialize the ED */
+
+      lpc17_edinit(&FREEEDS[i]);
+
+      /* Put the ED in a free list */
+
+      freeed        = (struct lpc17_edmem_s *)&FREEEDS[i];
+      freeed->flink = g_freeeds;
+      g_freeeds     = freeed;
+    }
 
   /* Wait 50MS then perform hardware reset */
 
@@ -698,7 +735,7 @@ void up_usbhostinitialize(void)
 
   /* Set HCCA base address */
 
-  lpc17_putreg((uint32_t)Hcca, LPC17_USBHOST_HCCA);
+  lpc17_putreg((uint32_t)HCCA, LPC17_USBHOST_HCCA);
 
   /* Clear pending interrupts */
 

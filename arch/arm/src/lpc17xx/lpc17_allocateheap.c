@@ -51,6 +51,7 @@
 
 #include "lpc17_memorymap.h"
 #include "lpc17_emacram.h"
+#include "lpc17_ohciram.h"
 
 /****************************************************************************
  * Private Definitions
@@ -79,25 +80,88 @@
 #  warning "CONFIG_DRAM_END is before end of CPU SRAM... not all of CPU SRAM used"
 #endif
 
-/* Sanity checking */
+/* Figure out how much heap be have in AHB SRAM (if any).  Complications:
+ * 1) AHB SRAM Bank 0 or 1 may on may not be supported in the hardware.
+ * 2) Some or all of Bank 0 may be used for Ethernet Packet buffering.
+ *    Ethernet packet buffering is used from the beginning of Bank 0 and
+ *    any free memory at the end of Bank 0 will be contiguous with any
+ *    free memory at the beginning of Bank 1.
+ * 3) Some or all of Bank 1 may be used for OHCI descriptor memory.  OCHI
+ *    memory is used from the end of Bank 1 and any free memory at the
+ *    beginning of Bank 1 will be contiguous with any free memory at the
+ *    end of Bank 0.
+ */
+
+#undef LPC17_AHB_HEAPBASE /* Assume that nothing is available */
+#undef LPC17_AHB_HEAPSIZE
+
+/* If we have Bank 0, then we may possibly also have Bank 1 */
 
 #ifdef LPC17_HAVE_BANK0
-#  if defined(LPC17_BANK0_HEAPSIZE) || defined(LPC17_HAVE_BANK1)
-#    if CONFIG_MM_REGIONS < 2
-#      warning "CONFIG_MM_REGIONS < 2: AHB SRAM Bank(s) not included in HEAP"
-#    endif
-#    if CONFIG_MM_REGIONS > 2
-#      warning "CONFIG_MM_REGIONS > 2: Additional regions handled by application?"
-#    endif
-#  else
-#    if CONFIG_MM_REGIONS > 1
-#      warning "CONFIG_MM_REGIONS > 1: This MCU has no available AHB SRAM Bank0/1"
-#    endif
+
+  /* We have BANK0 (and, hence, possibly Bank1).  Is Bank0 all used for
+   * Ethernet packet buffering?  Or is there any part of Bank0 available for
+   * the heap.
+   */
+
+#  ifdef LPC17_BANK0_HEAPSIZE
+
+     /* Some or all of Bank0 is available for the heap.  The heap will begin
+      * in bank 1.
+      */
+
+#     define LPC17_AHB_HEAPBASE LPC17_BANK0_HEAPBASE
+
+     /* Is Bank1 present? Has there available heap memory in Bank 1? */
+
+#    if defined(LPC17_HAVE_BANK1) && defined(LPC17_BANK1_HEAPSIZE)
+
+       /* Yes... the heap space available is the unused memory at the end
+        * of Bank0 plus the unused memory at the beginning of Bank 1.
+        */
+
+#       define LPC17_AHB_HEAPSIZE (LPC17_BANK0_HEAPSIZE + LPC17_BANK1_HEAPSIZE)
+#    else
+
+        /* No... the heap space available is only the unused memory at the
+         * end of Bank 0.
+         */
+
+#       define LPC17_AHB_HEAPSIZE LPC17_BANK0_HEAPSIZE
+
+#    endif /* LPC17_HAVE_BANK1 && LPC17_BANK1_HEAPSIZE */
+#  else /* !LPC17_BANK0_HEAPSIZE */
+
+     /* We have Bnak 0, but no memory is available for the heap there.
+      * Do we have Bank 1? Is any heap memory available in Bank 1?
+      */
+
+#    if defined(LPC17_HAVE_BANK1) && defined(LPC17_BANK1_HEAPSIZE)
+
+       /* Yes... the heap space available is the unused memory at the
+        * beginning of Bank1.
+        */
+
+#      define LPC17_AHB_HEAPBASE LPC17_BANK1_HEAPBASE
+#      define LPC17_AHB_HEAPSIZE LPC17_BANK1_HEAPSIZE
+
+#    endif /* LPC17_HAVE_BANK1 && LPC17_BANK1_HEAPSIZE */
+#  endif /* LPC17_BANK0_HEAPSIZE */
+#endif /* LPC17_HAVE_BANK0 */
+
+/* Sanity checking */
+
+#ifdef LPC17_AHB_HEAPBASE
+#  if CONFIG_MM_REGIONS < 2
+#    warning "CONFIG_MM_REGIONS < 2: Available AHB SRAM Bank(s) not included in HEAP"
+#  endif
+#  if CONFIG_MM_REGIONS > 2
+#    warning "CONFIG_MM_REGIONS > 2: Are additional regions handled by application?"
 #  endif
 #else
 #  if CONFIG_MM_REGIONS > 1
-#    warning "CONFIG_MM_REGIONS > 1: This MCU has no AHB SRAM Bank0/1"
-#    warning "                       Other memory regions handled by application?"
+#    warning "CONFIG_MM_REGIONS > 1: This configuration has no available AHB SRAM Bank0/1"
+#    warning "CONFIG_MM_REGIONS > 1: Are additional regions handled by application?"
 #  endif
 #endif
 
@@ -147,43 +211,19 @@ void up_addregion(void)
    * contiguous 32Kb memory region.
    *
    * If Ethernet is enabled, it will take some or all of bank 0 for packet
-   * buffering and descriptor tables.
+   * buffering and descriptor tables; If USB host is enabled, it will take
+   * some or all of bank 1 for descriptor memory.  The complex conditional
+   * compilation above should boil this all down to a very simple check
+   * here:
+   *
+   * Is any memory available in AHB SRAM for the heap?
    */
 
-#ifdef LPC17_HAVE_BANK0
+#ifdef LPC17_AHB_HEAPBASE
 
-  /* We have BANK0 (and, hence, possibly Bank1).  Is Bank0 all used for
-   * Ethernet packet buffering?  Or is there any part of Bank0 available for
-   * the heap.
-   */
+  /* Yes... Add the AHB SRAM heap region. */
 
-# ifdef LPC17_BANK0_HEAPSIZE
-
-  /* Some or all of Bank0 is available for the heap.  Is Bank1 present? */
-
-#  ifdef LPC17_HAVE_BANK1
-
-  /* Yes... the heap space available is the unused memory at the end of
-   * Bank0 plus all of Bank1.
-   */
-
-   mm_addregion((FAR void*)LPC17_BANK0_HEAPBASE, LPC17_BANK0_HEAPSIZE+LPC17_BANK1_SIZE);
-#  else
-
-   /* No... only the unused memory at the end of Bank0 is available for the
-    * heap/
-    */
-
-   mm_addregion((FAR void*)LPC17_BANK0_HEAPBASE, LPC17_BANK0_HEAPSIZE);
-#  endif
-# else
-
-  /* Nothing is available in Bank0.  Is Bank1 available? */
-
-#  ifdef LPC17_HAVE_BANK1
-   mm_addregion((FAR void*)LPC17_SRAM_BANK1, LPC17_BANK1_SIZE);
-#  endif
-# endif
+   mm_addregion((FAR void*)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
 #endif
 }
 #endif
