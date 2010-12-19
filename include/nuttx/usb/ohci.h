@@ -263,6 +263,34 @@
                                               /* Bits 21-31: Reserved */
 
 /* Transfer Descriptors *****************************************************/
+/* Endpoint Descriptor Offsets (4.2.1) */
+
+#define ED_CONTROL_OFFSET          (0x00)     /* TD status bits */
+#define ED_TAILP_OFFSET            (0x04)     /* Current Buffer Pointer (CBP) */
+#define ED_HEADP_OFFSET            (0x08)     /* Next TD (NextTD) */
+#define ED_NEXTED_OFFSET           (0x0c)     /* Buffer End (BE) */
+
+/* Endpoint Descriptor Bit Definitions (4.2.2) */
+
+#define ED_CONTROL_FA_SHIFT        (0)        /* Bits 0-6: Function Address */
+#define ED_CONTROL_FA_MASK         (0x7f << ED_CONTROL_FA_SHIFT)
+#define ED_CONTROL_EN_SHIFT        (7)        /* Bits 7-10: Endpoint number */
+#define ED_CONTROL_EN_MASK         (15 << ED_CONTROL_EN_SHIFT)
+#define ED_CONTROL_D_SHIFT         (11)       /* Bits 11-12: Direction */
+#define ED_CONTROL_D_MASK          (3 << ED_CONTROL_D_SHIFT)
+#  define ED_CONTROL_D_TD1         (0 << ED_CONTROL_D_SHIFT) /* Get direction from TD */
+#  define ED_CONTROL_D_OUT         (1 << ED_CONTROL_D_SHIFT) /* OUT */
+#  define ED_CONTROL_D_IN          (2 << ED_CONTROL_D_SHIFT) /* IN */
+#  define ED_CONTROL_D_TD2         (3 << ED_CONTROL_D_SHIFT) /* Get direction from TD */
+#define ED_CONTROL_S               (1 << 13)  /* Bit 13: Speed (low) */
+#define ED_CONTROL_K               (1 << 14)  /* Bit 14: Skip */
+#define ED_CONTROL_F               (1 << 15)  /* Bit 15: Format (isochronous) */
+#define ED_CONTROL_MPS_SHIFT       (16)       /* Bits 16-26: Maximum packet size */
+#define ED_CONTROL_MPS_MASK        (0x7ff << ED_CONTROL_MPS_SHIFT)
+
+#define ED_TAILP_H                 (1 << 0)  /* Bit 0: Halted */
+#define ED_TAILP_C                 (1 << 1)  /* Bit 1: Toggle carry */
+
 /* General Transfer Descriptor Offsets (4.3.1) */
 
 #define GTD_STATUS_OFFSET          (0x00)     /* TD status bits */

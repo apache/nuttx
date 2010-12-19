@@ -1850,7 +1850,7 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
               /* Send the user data */
 #warning "For lpc17xx, I think this buffer needs to lie in BANK1"
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
-                                     buffer, priv->blocksize * nsectors);
+                                     (uint8_t*)buffer, priv->blocksize * nsectors);
               if (result == OK)
                 {
                   /* Wait for the data in operation to complete */

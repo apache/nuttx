@@ -466,7 +466,7 @@ struct usbhost_driver_s
    */
 
   int (*transfer)(FAR struct usbhost_driver_s *drvr,
-                  FAR struct usbhost_epdesc_s *ed,
+                  FAR struct usbhost_epdesc_s *ep,
                   FAR uint8_t *buffer, size_t buflen);
 
   /* Called by the class when an error occurs and driver has been disconnected.
