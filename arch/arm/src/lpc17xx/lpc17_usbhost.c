@@ -132,7 +132,7 @@ struct lpc17_usbhost_s
    * to structlpc17_usbhost_s.
    */
 
-  struct usbhost_driver_s usbhost;
+  struct usbhost_driver_s drvr;
 
   /* The bound device class driver */
 
@@ -202,6 +202,14 @@ static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
                             uint32_t toggle, volatile uint8_t *buffer,
                             size_t buflen);
 
+/* Class helper functions ******************************************************/
+
+static int inline lpc17_configdesc(struct lpc17_usbhost_s *priv,
+                                   const uint8_t *configdesc, int desclen,
+                                   struct usbhost_id_s *id);
+static int lpc17_classbind(struct lpc17_usbhost_s *priv,
+                           const uint8_t *configdesc, int desclen);
+
 /* Interrupt handling **********************************************************/
 
 static int lpc17_usbinterrupt(int irq, FAR void *context);
@@ -236,7 +244,7 @@ static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca);
 
 static struct lpc17_usbhost_s g_usbhost =
 {
-  .usbhost        =
+  .drvr           =
     {
       .enumerate  = lpc17_enumerate,
       .alloc      = lpc17_alloc,
@@ -438,6 +446,136 @@ static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
   ed->headtd      = (uint32_t)TDHEAD | ((ed->headtd) & 0x00000002);
   ed->tailtd      = (uint32_t)TDTAIL;
   ed->next        = 0;
+}
+
+/****************************************************************************
+ * Name: lpc17_classbind
+ *
+ * Description:
+ *   A configuration descriptor has been obtained from the device.  Find the
+ *   ID information for the class that supports this device.
+ *
+ ****************************************************************************/
+
+static inline int
+lpc17_configdesc(struct lpc17_usbhost_s *priv, const uint8_t *configdesc,
+                 int desclen, struct usbhost_id_s *id)
+{
+  struct usb_cfgdesc_s *cfgdesc;
+  struct usb_ifdesc_s *ifdesc;
+  int remaining;
+
+  DEBUGASSERT(priv != NULL && 
+              configdesc != NULL &&
+              desclen >= sizeof(struct usb_cfgdesc_s));
+  
+  /* Verify that we were passed a configuration descriptor */
+
+  cfgdesc = (struct usb_cfgdesc_s *)configdesc;
+  if (cfgdesc->type != USB_DESC_TYPE_CONFIG)
+    {
+      return -EINVAL;
+    }
+
+  /* Get the total length of the configuration descriptor (little endian).
+   * It might be a good check to get the number of interfaces here too.
+  */
+
+  remaining = (int)lpc17_getle16(cfgdesc->totallen);
+
+  /* Skip to the next entry descriptor */
+
+  configdesc += cfgdesc->len;
+  remaining  -= cfgdesc->len;
+
+  /* Loop where there are more dscriptors to examine */
+
+  memset(&id, 0, sizeof(FAR struct usb_desc_s));
+  while (remaining >= sizeof(struct usb_desc_s))
+    {
+      /* What is the next descriptor? Is it an interface descriptor? */
+
+      ifdesc = (struct usb_ifdesc_s *)configdesc;
+      if (ifdesc->type == USB_DESC_TYPE_INTERFACE)
+        {
+          /* Yes, extract the class information from the interface descriptor.
+           * (We are going to need to do more than this here in the future:
+           *  ID information might lie elsewhere and we will need the VID and
+           *  PID as well).
+           */
+ 
+          DEBUGASSERT(remaining >= sizeof(struct usb_ifdesc_s));
+          id->base     = ifdesc->class;
+          id->subclass = ifdesc->subclass;
+          id->proto    = ifdesc->protocol;
+          return OK;
+        }
+
+     /* Increment the address of the next descriptor */
+ 
+      configdesc += ifdesc->len;
+      remaining  -= ifdesc->len;
+    }
+
+  return -ENOENT;
+}
+
+/****************************************************************************
+ * Name: lpc17_classbind
+ *
+ * Description:
+ *   A configuration descriptor has been obtained from the device.  Try to
+ *   bind this configuration descriptor with a supported class.
+ *
+ ****************************************************************************/
+
+static int lpc17_classbind(struct lpc17_usbhost_s *priv,
+                           const uint8_t *configdesc, int desclen)
+{
+  struct usbhost_id_s id;
+  int ret;
+
+  DEBUGASSERT(priv && priv->class == NULL);
+
+  /* Get the class identification information for this device. */
+
+  ret = lpc17_configdesc(priv, configdesc, desclen, &id);
+  uvdbg("lpc17_configdesc: %d\n", ret);
+  if (ret)
+    {
+      /* So if there is a class implementation registered to support this
+       * device.
+       */
+
+      ret = -EINVAL;
+      const struct usbhost_registry_s *reg = usbhost_findclass(&id);
+      uvdbg("usbhost_findclass: %p\n", reg);
+      if (reg)
+        {
+          /* Yes.. there is a class for this device.  Get an instance of
+           * its interface.
+           */
+
+          ret = -ENOMEM;
+          priv->class = CLASS_CREATE(reg, &priv->drvr, &id);
+          uvdbg("CLASS_CREATE: %p\n", priv->class);
+          if (priv->class)
+            {
+              /* Then initialize the newly instantiated class instance */
+
+              ret = CLASS_CONFIGDESC(priv->class, configdesc, desclen);
+              if (ret != OK)
+                {
+                  udbg("CLASS_CONFIGDESC failed: %d\n", ret);
+                  CLASS_DISCONNECTED(priv->class);
+                  priv->class = NULL;
+                }
+            }
+        }
+    }
+
+  uvdbg("Returning: %d\n", ret);
+  return ret;
 }
 
 /*******************************************************************************
