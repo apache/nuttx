@@ -91,7 +91,7 @@
  *
  ************************************************************************************/
 
-#define CLASS_CREATE(reg, drvr, id) ((reg)->create(drvr))
+#define CLASS_CREATE(reg, drvr, id) ((reg)->create(drvr, id))
 
 /************************************************************************************
  * Name: CLASS_CONFIGDESC
