@@ -127,7 +127,7 @@
 
 /* Derived size of user endpoint descriptor (ED) memory. */
 
-#define LPC17_FREEED_SIZE (CONFIG_USBHOST_NEDS * LPC17_ED_SIZE)
+#define LPC17_EDFREE_SIZE (CONFIG_USBHOST_NEDS * LPC17_ED_SIZE)
 
 /* Configurable number of descriptor buffer (TDBUFFER) */
 
@@ -170,7 +170,7 @@
  *
  *  Sizes of things
  *    CONFIG_USBHOST_NEDS         2
- *    LPC17_FREEED_SIZE           48
+ *    LPC17_EDFREE_SIZE           48
  *    LPC17_TDBUFFER_SIZE         128
  *    LPC17_TDBUFFER_SIZE         512
  *
@@ -185,7 +185,7 @@
  *    LPC17_TDHEAD_ADDR           0x2000bd00
  *    LPC17_TDTAIL_ADDR           0x2000bd10
  *    LPC17_EDCTRL_ADDR           0x2000bd20
- *    LPC17_FREEED_BASE           0x2000bd30
+ *    LPC17_EDFREE_BASE           0x2000bd30
  *    LPC17_TDBUFFER_BASE         0x2000bd50
  *    LPC17_IOBUFFER_BASE         0x2000bdd0
  *    LPC17_IOBUFFERS            (0x2000c000 + 0x2000bdd0) / 512 = 560/512 = 1
@@ -197,8 +197,8 @@
 #define LPC17_TDHEAD_ADDR   (LPC17_OHCIRAM_BASE + LPC17_HCCA_SIZE)
 #define LPC17_TDTAIL_ADDR   (LPC17_TDHEAD_ADDR + LPC17_TD_SIZE)
 #define LPC17_EDCTRL_ADDR   (LPC17_TDTAIL_ADDR + LPC17_TD_SIZE)
-#define LPC17_FREEED_BASE   (LPC17_EDCTRL_ADDR + LPC17_ED_SIZE)
-#define LPC17_TDBUFFER_BASE (LPC17_FREEED_BASE + LPC17_FREEED_SIZE)
+#define LPC17_EDFREE_BASE   (LPC17_EDCTRL_ADDR + LPC17_ED_SIZE)
+#define LPC17_TDBUFFER_BASE (LPC17_EDFREE_BASE + LPC17_EDFREE_SIZE)
 #define LPC17_IOBUFFER_BASE (LPC17_TDBUFFER_BASE + LPC17_TDBUFFER_SIZE)
 
 /* Finally, use the remainder of the allocated OHCI for IO buffers */

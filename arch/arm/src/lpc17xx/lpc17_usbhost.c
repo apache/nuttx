@@ -101,9 +101,15 @@
 #define TDHEAD      ((volatile struct lpc17_hctd_s *)LPC17_TDHEAD_ADDR)
 #define TDTAIL      ((volatile struct lpc17_hctd_s *)LPC17_TDTAIL_ADDR)
 #define EDCTRL      ((volatile struct lpc17_hced_s *)LPC17_EDCTRL_ADDR)
-#define FREEEDS     ((volatile struct lpc17_hced_s *)LPC17_FREEED_BASE)
 
+#define EDFREE      ((struct lpc17_hced_s *)LPC17_EDFREE_BASE)
 #define TDBuffer    ((volatile uint8_t *)(LPC17_TDBUFFER_BASE)
+
+/* Descriptors *****************************************************************/
+
+/* TD delay interrupt value */
+
+#define TD_DELAY(n) (uint32_t)((n) << GTD_STATUS_DI_SHIFT)
 
 /* Debug ***********************************************************************/
 
@@ -166,10 +172,10 @@ struct lpc17_hced_s
 
 /* The following is used manage a list of free EDs */
 
-struct lpc17_edmem_s
+struct lpc17_edlist_s
 {
-  struct lpc17_edmem_s *flink;         /* Link to next ED in the list */
-  uint32_t              pad[3];        /* To make the same size as struct lpc17_hced_s */
+  struct lpc17_edlist_s *flink;        /* Link to next ED in the list */
+  uint32_t               pad[3];       /* To make the same size as struct lpc17_hced_s */
 };
 
 /*******************************************************************************
@@ -187,6 +193,14 @@ static void lpc17_putreg(uint32_t val, uint32_t addr);
 # define lpc17_getreg(addr)     getreg32(addr)
 # define lpc17_putreg(val,addr) putreg32(val,addr)
 #endif
+
+/* Descriptor helper functions *************************************************/
+
+static struct lpc17_hced_s *lpc17_edalloc(struct lpc17_usbhost_s *priv);
+static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct lpc17_hced_s *ed);
+static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
+                            uint32_t toggle, volatile uint8_t *buffer,
+                            size_t buflen);
 
 /* Interrupt handling **********************************************************/
 
@@ -236,7 +250,7 @@ static struct lpc17_usbhost_s g_usbhost =
 
 /* This is a free list of EDs */
 
-static struct lpc17_edmem_s *g_freeeds;
+static struct lpc17_edlist_s *g_edfree;
 
 /*******************************************************************************
  * Public Data
@@ -367,6 +381,64 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
   putreg32(val, addr);
 }
 #endif
+
+/*******************************************************************************
+ * Name: lpc17_edalloc
+ *
+ * Description:
+ *   Allocate an ED from the free list
+ *
+ *******************************************************************************/
+
+static struct lpc17_hced_s *lpc17_edalloc(struct lpc17_usbhost_s *priv)
+{
+  struct lpc17_hced_s *ret = (struct lpc17_hced_s *)g_edfree;
+  if (ret)
+    {
+      g_edfree = ((struct lpc17_edlist_s*)ret)->flink;
+    }
+  return ret;
+}
+
+/*******************************************************************************
+ * Name: lpc17_edfree
+ *
+ * Description:
+ *   Return an ED to the free list
+ *
+ *******************************************************************************/
+
+static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct lpc17_hced_s *ed)
+{
+  struct lpc17_edlist_s *edfree = (struct lpc17_edlist_s *)ed;
+  edfree->flink                 = g_edfree;
+  g_edfree                      = edfree;
+}
+
+/*******************************************************************************
+ * Name: lpc17_enqueuetd
+ *
+ * Description:
+ *   Enqueue a transfer descriptor
+ *
+ *******************************************************************************/
+
+static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
+                            uint32_t toggle, volatile uint8_t *buffer, size_t buflen)
+{
+  TDHEAD->ctrl    = (GTD_STATUS_R | dirpid | TD_DELAY(0) | toggle | GTD_STATUS_CC_MASK);
+  TDTAIL->ctrl    = 0;
+  TDHEAD->currptr = (uint32_t)buffer;
+  TDTAIL->currptr = 0;
+  TDHEAD->next    = (uint32_t)TDTAIL;
+  TDTAIL->next    = 0;
+  TDHEAD->bufend  = (uint32_t)(buffer + (buflen - 1));
+  TDTAIL->bufend  = 0;
+
+  ed->headtd      = (uint32_t)TDHEAD | ((ed->headtd) & 0x00000002);
+  ed->tailtd      = (uint32_t)TDTAIL;
+  ed->next        = 0;
+}
 
 /*******************************************************************************
  * Name: lpc17_usbinterrupt
@@ -691,19 +763,13 @@ void up_usbhostinitialize(void)
   lpc17_tdinit(TDTAIL);
   lpc17_edinit(EDCTRL);
 
+  /* Initialize user-configurable EDs */
+
   for (i = 0; i < CONFIG_USBHOST_NEDS; i++)
     {
-      struct lpc17_edmem_s *freeed;
-
-      /* Initialize the ED */
-
-      lpc17_edinit(&FREEEDS[i]);
-
       /* Put the ED in a free list */
 
-      freeed        = (struct lpc17_edmem_s *)&FREEEDS[i];
-      freeed->flink = g_freeeds;
-      g_freeeds     = freeed;
+      lpc17_edfree(priv, &EDFREE[i]);
     }
 
   /* Wait 50MS then perform hardware reset */
