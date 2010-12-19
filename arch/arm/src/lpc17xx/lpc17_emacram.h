@@ -101,7 +101,7 @@
 #  error "EMAC RAM size must be in multiples of 32-bit words"
 #endif
 
-/* Determine is there is any meaning space left at the end of AHB Bank 0 that
+/* Determine is there is any meaningful space left at the end of AHB Bank 0 that
  * could be added to the heap.
  */
 
