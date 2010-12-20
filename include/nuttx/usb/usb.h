@@ -73,6 +73,7 @@
 /* Control Setup Packet.  Byte 0=Request */
 
 #define USB_REQ_DIR_IN                          (0x80) /* Bit 7=1: IN */
+#define USB_REQ_DIR_OUT                         (0x00) /* Bit 7=0: OUT */
 
 #define USB_REQ_TYPE_MASK                       (0x60) /* Bits 5:6: Request type */
 #define USB_REQ_TYPE_STANDARD                   (0x00)
