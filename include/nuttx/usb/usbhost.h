@@ -119,33 +119,6 @@
 #define CLASS_CONFIGDESC(class,configdesc,desclen) ((class)->configdesc(class,configdesc,desclen))
 
 /************************************************************************************
- * Name: CLASS_COMPLETE
- *
- * Description:
- *   This macro will call the complete() method of struct usbhost_class_s.  In the
- *   interface with the USB host drivers, the class will queue USB IN/OUT
- *   transactions.  The enqueuing function will return and the transactions will be
- *   performed asynchrounously.  When the transaction completes, the USB host driver
- *   will call this function in order to inform the class that the transaction has
- *   completed and to provide any response data.
- *
- * Input Parameters:
- *   class - The USB host class entry previously obtained from a call to create().
- *   response - Response data buffer
- *   resplen - Number of bytes of data in the response data buffer.
- *
- * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
- *
- ************************************************************************************/
-
-#define CLASS_COMPLETE(class,response,resplen) (class)->complete(class,response,resplen))
-
-/************************************************************************************
  * Name: CLASS_DISCONNECTED
  *
  * Description:
@@ -250,15 +223,16 @@
 #define DRVR_FREE(drvr,buffer) ((drvr)->free(drvr,buffer))
 
 /************************************************************************************
- * Name: DRVR_CONTROL
+ * Name: DRVR_CTRLIN and DRVR_CTRLOUT
  *
  * Description:
- *   Enqueue a request on the control endpoint.  This method will enqueue
- *   the request and return immediately.  The transfer will be performed
- *   asynchronously.  When the transfer completes, the USB host driver will
- *   call the complete() method of the struct usbhost_class_s interface.
- *   Only one transfer may be queued; Neither this method nor the transfer()
- *   method can be called again until the class complete() method has been called.
+ *   Process a IN or OUT request on the control endpoint.  These methods
+ *   will enqueue the request and return immediately.  Only one transfer may be
+ *   queued; Neither these methods nor the transfer() method can be called again
+ *   until the control transfer functions returns.
+ *
+ *   These are blocking methods; these functions will not return until the
+ *   control transfer has completed.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -279,19 +253,20 @@
  *
  ************************************************************************************/
 
-#define DRVR_CONTROL(drvr,req,buffer) ((drvr)->control(drvr,req,buffer))
+#define DRVR_CTRLIN(drvr,req,buffer)  ((drvr)->ctrlin(drvr,req,buffer))
+#define DRVR_CTRLOUT(drvr,req,buffer) ((drvr)->ctrlout(drvr,req,buffer))
 
 /************************************************************************************
  * Name: DRVR_TRANSFER
  *
  * Description:
- *   Enqueue a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request and return immediately.  The transfer will
- *   be performed asynchronously.  When the transfer completes, the USB host
- *   driver will call the complete() method of the struct usbhost_class_s
- *   interface.  Only one transfer may be queued; Neither this method nor the
- *   control method can be called again until the class complete() method has
- *   been called.
+ *   Process a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request and return immediately.  Only one transfer may be
+ *   queued; Neither this method nor the ctrlin or ctrlout methods can be called
+ *   again until this function returns.
+ *
+ *   This is a blocking method; this functions will not return until the
+ *   transfer has completed.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -402,12 +377,6 @@ struct usbhost_class_s
 
   int (*configdesc)(FAR struct usbhost_class_s *class, FAR const uint8_t *configdesc, int desclen);
 
-  /* This method must be called by the USB host driver whenever a transfer
-   * completes.
-   */
-
-  int (*complete)(FAR struct usbhost_class_s *class, FAR const uint8_t *response, int resplen);
-
   /* This method informs the class that the USB device has been disconnected. */
 
   int (*disconnected)(FAR struct usbhost_class_s *class);
@@ -444,25 +413,29 @@ struct usbhost_driver_s
                FAR uint8_t **buffer, FAR size_t *maxlen);
   int (*free)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 
-  /* Enqueue a request on the control endpoint.  This method will enqueue
-   * the request and return immediately.  The transfer will be performed
-   * asynchronously.  When the transfer completes, the USB host driver will
-   * call the complete() method of the struct usbhost_class_s interface.
-   * Only one transfer may be queued; Neither this method nor the transfer()
-   * method can be called again until the class complete() method has been called.
+  /* Process a IN or OUT request on the control endpoint.  These methods
+   * will enqueue the request and return immediately.  Only one transfer may be
+   * queued; Neither these methods nor the transfer() method can be called again
+   * until the control transfer functions returns.
+   *
+   * These are blocking methods; these functions will not return until the
+   * control transfer has completed.
    */
 
-  int (*control)(FAR struct usbhost_driver_s *drvr,
-                 const struct usb_ctrlreq_s *req,
-                 FAR uint8_t *buffer);
+  int (*ctrlin)(FAR struct usbhost_driver_s *drvr,
+                FAR const struct usb_ctrlreq_s *req,
+                FAR uint8_t *buffer);
+  int (*ctrlout)(FAR struct usbhost_driver_s *drvr,
+                 FAR const struct usb_ctrlreq_s *req,
+                 FAR const uint8_t *buffer);
 
-  /* Enqueue a request to handle a transfer descriptor.  This method will
-   * enqueue the transfer request and return immediately.  The transfer will
-   * be performed asynchronously.  When the transfer completes, the USB host
-   * driver will call the complete() method of the struct usbhost_class_s
-   * interface.  Only one transfer may be queued; Neither this method nor the
-   * control method can be called again until the class complete() method has
-   * been called.
+  /* Process a request to handle a transfer descriptor.  This method will
+   * enqueue the transfer request and return immediately.  Only one transfer may be
+   * queued; Neither this method nor the ctrlin or ctrlout methods can be called
+   * again until this function returns.
+   *
+   * This is a blocking method; this functions will not return until the
+   * transfer has completed.
    */
 
   int (*transfer)(FAR struct usbhost_driver_s *drvr,

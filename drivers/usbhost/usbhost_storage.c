@@ -124,7 +124,6 @@ struct usbhost_state_s
   uint16_t                blocksize;  /* Block size of USB mass storage device */
   uint32_t                nblocks;    /* Number of blocks on the USB mass storage device */
   sem_t                   exclsem;    /* Used to maintain mutual exclusive access */
-  sem_t                   waitsem;    /* Used to wait for transfer completion events */
   struct work_s           work;       /* For interacting with the worker thread */
   FAR uint8_t            *tdbuffer;   /* The allocated transfer descriptor buffer */
   size_t                  tdbuflen;   /* Size of the allocated transfer buffer */
@@ -203,8 +202,6 @@ static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
 
 static int usbhost_configdesc(FAR struct usbhost_class_s *class,
                               FAR const uint8_t *configdesc, int desclen);
-static int usbhost_complete(FAR struct usbhost_class_s *class,
-                            FAR const uint8_t *response, int resplen);
 static int usbhost_disconnected(FAR struct usbhost_class_s *class);
 
 /* struct block_operations methods */
@@ -596,13 +593,7 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
       req.req     = USBSTRG_REQ_GETMAXLUN;
       usbhost_putle16(req.len, 1);
 
-      result      = DRVR_CONTROL(priv->drvr, &req, priv->tdbuffer);
-      if (result == OK)
-        {
-          /* Wait for the control operation to complete */
-
-          usbhost_takesem(&priv->waitsem);
-        }
+      result      = DRVR_CTRLIN(priv->drvr, &req, priv->tdbuffer);
     }
   return result;
 }
@@ -624,18 +615,10 @@ static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
                             (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
       if (result == OK)
         {
-          /* Wait for the CBW OUT operation to complete */
-
-          usbhost_takesem(&priv->waitsem);
-
           /* Receive the CSW */
 
           result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                  priv->tdbuffer, USBSTRG_CSW_SIZEOF);
-
-          /* Wait for the CSW IN operation to complete */
-
-          usbhost_takesem(&priv->waitsem); 
         }
     }
   return result;
@@ -658,30 +641,16 @@ static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
                             (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
       if (result == OK)
         {
-          /* Wait for the CBW OUT operation to complete */
-
-          usbhost_takesem(&priv->waitsem);
-
           /* Receive the sense data response */
 
           result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                  priv->tdbuffer, SCSIRESP_FIXEDSENSEDATA_SIZEOF);
           if (result == OK)
             {
-              /* Wait for the CBW IN response operation to complete */
-
-              usbhost_takesem(&priv->waitsem);
-
               /* Receive the CSW */
 
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                      priv->tdbuffer, USBSTRG_CSW_SIZEOF);
-              if (result == OK)
-                {
-                  /* Wait for the CSW IN operation to complete */
-
-                  usbhost_takesem(&priv->waitsem); 
-                }
             }
         }
     }
@@ -706,20 +675,12 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
                              (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
       if (result == OK)
         {
-          /* Wait for the CBW OUT operation to complete */
-
-          usbhost_takesem(&priv->waitsem);
-
           /* Receive the read capacity CBW IN response */
 
           result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                  priv->tdbuffer, SCSIRESP_READCAPACITY10_SIZEOF);
           if (result == OK)
             {
-              /* Wait for the CBW IN response operation to complete */
-
-              usbhost_takesem(&priv->waitsem);
-
               /* Save the capacity information */
 
               resp = (FAR struct scsiresp_readcapacity10_s *)priv->tdbuffer;
@@ -730,12 +691,6 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
 
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                      priv->tdbuffer, USBSTRG_CSW_SIZEOF);
-              if (result == OK)
-                {
-                  /* Wait for the CSW IN operation to complete */
-
-                  usbhost_takesem(&priv->waitsem); 
-                }
             }
         }
     }
@@ -760,20 +715,12 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
                              (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
       if (result == OK)
         {
-          /* Wait for the CBW OUT operation to complete */
-
-          usbhost_takesem(&priv->waitsem);
-
           /* Receive the CBW IN response */
 
           result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                  priv->tdbuffer, SCSIRESP_INQUIRY_SIZEOF);
           if (result == OK)
             {
-              /* Wait for the CBW IN response operation to complete */
-
-              usbhost_takesem(&priv->waitsem);
-
               /* TODO: If USB debug is enabled, dump the response data here */
 
               resp = (FAR struct scsiresp_inquiry_s *)priv->tdbuffer;
@@ -782,10 +729,6 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
 
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                      priv->tdbuffer, USBSTRG_CSW_SIZEOF);
-
-              /* Wait for the CSW IN operation to complete */
-
-              usbhost_takesem(&priv->waitsem); 
             }
         }
     }
@@ -831,7 +774,6 @@ static void usbhost_destroy(FAR void *arg)
   /* Destroy the semaphores */
 
   sem_destroy(&priv->exclsem);
-  sem_destroy(&priv->waitsem);
 
   /* And free the class instance.  Hmmm.. this may execute on the worker
    * thread and the work structure is part of what is getting freed.
@@ -1308,7 +1250,6 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
          /* Initialize class method function pointers */
 
           priv->class.configdesc   = usbhost_configdesc;
-          priv->class.complete     = usbhost_complete;
           priv->class.disconnected = usbhost_disconnected;
 
           /* The initial reference count is 1... One reference is held by the driver */
@@ -1318,7 +1259,6 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
           /* Initialize semphores (this works okay in the interrupt context) */
 
           sem_init(&priv->exclsem, 0, 1);
-          sem_init(&priv->waitsem, 0, 0);
 
           /* Bind the driver to the storage class instance */
 
@@ -1506,45 +1446,6 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
   /* Now configure the LUNs and register the block driver(s) */
 
   usbhost_work(priv, usbhost_statemachine);
-  return OK;
-}
-
-/****************************************************************************
- * Name: usbhost_complete
- *
- * Description:
- *   This function implements the complete() method of struct
- *   usbhost_class_s.  In the interface with the USB host drivers, the class
- *   will queue USB IN/OUT transactions.  The enqueuing function will return
- *   and the transactions will be performed asynchrounously.  When the
- *   transaction completes, the USB host driver will call this function in
- *   order to inform the class that the transaction has completed and to
- *   provide any response data.
- *
- * Input Parameters:
- *   class - The USB host class entry previously obtained from a call to
- *     create().
- *   response - Response data buffer
- *   resplen - Number of bytes of data in the response data buffer.
- *
- * Returned Values:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
- *
- ****************************************************************************/
-
-static int usbhost_complete(FAR struct usbhost_class_s *class,
-                            FAR const uint8_t *response, int resplen)
-{
-  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
-  DEBUGASSERT(priv != NULL && priv->waitsem.semcount <= 0);
-
-  /* Wake up the application thread waiting for the transfer completion event */
-
-  usbhost_givesem(&priv->waitsem);
   return OK;
 }
 
@@ -1743,20 +1644,12 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
                                  (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
           if (result == OK)
             {
-              /* Wait for the CBW OUT operation to complete */
-
-              usbhost_takesem(&priv->waitsem);
-
               /* Receive the user data */
 #warning "For lpc17xx, I think this buffer needs to lie in BANK1"
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                      buffer, priv->blocksize * nsectors);
               if (result == OK)
                 {
-                  /* Wait for the data in operation to complete */
-
-                  usbhost_takesem(&priv->waitsem);
-
                   /* Receive the CSW */
 
                   result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
@@ -1843,20 +1736,12 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
                                  (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
           if (result == OK)
             {
-              /* Wait for the CBW OUT operation to complete */
-
-              usbhost_takesem(&priv->waitsem);
-
               /* Send the user data */
 #warning "For lpc17xx, I think this buffer needs to lie in BANK1"
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
                                      (uint8_t*)buffer, priv->blocksize * nsectors);
               if (result == OK)
                 {
-                  /* Wait for the data in operation to complete */
-
-                  usbhost_takesem(&priv->waitsem);
-
                   /* Receive the CSW */
 
                   result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
