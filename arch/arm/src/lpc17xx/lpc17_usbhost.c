@@ -112,14 +112,6 @@
 
 #define TD_DELAY(n) (uint32_t)((n) << GTD_STATUS_DI_SHIFT)
 
-/* Debug ***********************************************************************/
-
-/* Trace error codes */
-#warning "To be provided"
-
-/* Trace interrupt codes */
-#warning "To be provided"
-
 /*******************************************************************************
  * Private Types
  *******************************************************************************/
@@ -912,8 +904,159 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
 static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 {
-# warning "Not Implemented"
-  return -ENOSYS;
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  struct usb_ctrlreq_s *ctrlreq;
+  unsigned int len;
+  uint8_t *td;
+  int  ret;
+
+  ulldbg("Enumerate device\n");
+
+  /* Allocate a TD buffer for use in this function */
+
+  td = lpc17_tdalloc(priv);
+  if (!td)
+    {
+      return -ENOMEM;
+    }
+  ctrlreq = (struct usb_ctrlreq_s *)td;
+
+  /* Are we already connected? */
+
+  while (!priv->connected)
+    {
+      /* No, wait for the connection */
+
+      lpc17_takesem(&priv->rhssem);
+    }
+
+  /* USB 2.0 spec says at least 50ms delay before port reset */
+
+  up_mdelay(100);
+
+  /* Put the RH port in reset */
+
+  lpc17_putreg(OHCI_RHPORTST_PRS, LPC17_USBHOST_RHPORTST1);
+
+  /* Wait for the port reset to complete */
+
+  while ((lpc17_getreg(LPC17_USBHOST_RHPORTST1) & OHCI_RHPORTST_PRS) != 0);
+
+  /* Release the RH port from reset and wait a bit */
+
+  lpc17_putreg(OHCI_RHPORTST_PRSC, LPC17_USBHOST_RHPORTST1);
+  up_mdelay(200);
+
+  /* Set max pkt size = 8 */
+
+  EDCTRL->ctrl = 8 << ED_CONTROL_MPS_SHIFT;
+
+  /* Read first 8 bytes of the device descriptor */
+
+  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
+  lpc17_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
+  lpc17_putle16(ctrlreq->index, 0);
+  lpc17_putle16(ctrlreq->len, 8);
+
+  ret = lpc17_ctrlin(drvr, ctrlreq, td);
+  if (ret != OK)
+    {
+      ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
+      goto errout;
+    }
+
+  /* Extract the max packetsize for endpoint 0 */
+
+  EDCTRL->ctrl = (uint32_t)(((struct usb_devdesc_s *)td)->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
+
+  /* Set the device address to 1 */
+
+  ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->req  = USB_REQ_SETADDRESS;
+  lpc17_putle16(ctrlreq->value, (1 << 8));
+  lpc17_putle16(ctrlreq->index, 0);
+  lpc17_putle16(ctrlreq->len, 0);
+
+  ret = lpc17_ctrlout(drvr, ctrlreq, NULL);
+  if (ret != OK)
+    {
+      ulldbg("ERROR: lpc17_ctrlout returned %d\n", ret);
+      goto errout;
+    }
+  up_mdelay(2);
+
+  /* Modify control pipe with address 1 */
+
+  EDCTRL->ctrl = (EDCTRL->ctrl) | 1;
+
+ /* Get the configuration descriptor (only) */
+
+  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
+  lpc17_putle16(ctrlreq->value, (USB_DESC_TYPE_CONFIG << 8));
+  lpc17_putle16(ctrlreq->index, 0);
+  lpc17_putle16(ctrlreq->len, USB_SIZEOF_CFGDESC);
+
+  ret = lpc17_ctrlin(drvr, ctrlreq, td);
+  if (ret != OK)
+   {
+      ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
+      goto errout;
+    }
+
+  /* Extract the full size of the configuration data */
+
+  len = ((struct usb_cfgdesc_s *)td)->len;
+
+  /* Get all of the configuration data */
+
+  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
+  lpc17_putle16(ctrlreq->value, (USB_DESC_TYPE_CONFIG << 8));
+  lpc17_putle16(ctrlreq->index, 0);
+  lpc17_putle16(ctrlreq->len, len);
+
+  ret = lpc17_ctrlin(drvr, ctrlreq, td);
+  if (ret != OK)
+    {
+      ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
+      goto errout;
+    }
+
+  /* Parse the configuration descriptor and bind to the class instance for the
+   * device.
+   */
+
+  ret = lpc17_classbind(priv, td, len);
+  if (ret != OK)
+    {
+      ulldbg("ERROR: MS_ParseConfiguration returned %d\n", ret);
+      goto errout;
+    }
+
+  /* Select device configuration 1 */
+
+  ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->req  = USB_REQ_SETCONFIGURATION;
+  lpc17_putle16(ctrlreq->value, 1);
+  lpc17_putle16(ctrlreq->index, 0);
+  lpc17_putle16(ctrlreq->len, 0);
+
+  ret = lpc17_ctrlout(drvr, ctrlreq, NULL);
+  if (ret != OK)
+    {
+      ulldbg("ERROR: lpc17_ctrlout returned %d\n", ret);
+      goto errout;
+    }
+
+  /* Some devices may require this delay */
+
+  up_mdelay(100);
+
+errout:
+  lpc17_tdfree(priv, td);
+  return ret;
 }
 
 /*******************************************************************************
@@ -942,11 +1085,19 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
  *
  *******************************************************************************/
 
- static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
-                        FAR uint8_t **buffer, FAR size_t *maxlen)
+static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
+                       FAR uint8_t **buffer, FAR size_t *maxlen)
 {
-# warning "Not Implemented"
-  return -ENOSYS;
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  DEBUGASSERT(priv && buffer && maxlen);
+
+  *buffer = lpc17_tdalloc(priv);
+  if (*buffer)
+    {
+      *maxlen = CONFIG_USBHOST_TDBUFSIZE;
+      return OK;
+    }
+  return -ENOMEM;
 }
 
 /*******************************************************************************
@@ -974,8 +1125,10 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 
 static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
-# warning "Not Implemented"
-  return -ENOSYS;
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  DEBUGASSERT(priv && buffer);
+  lpc17_tdfree(priv, buffer);
+  return OK;
 }
 
 /*******************************************************************************
@@ -1179,7 +1332,8 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
 
 static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr)
 {
-# warning "Not Implemented"
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  priv->class = NULL;
 }
   
 /*******************************************************************************
