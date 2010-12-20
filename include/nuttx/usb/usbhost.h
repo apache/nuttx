@@ -227,7 +227,7 @@
  *
  * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
- *   will enqueue the request and return immediately.  Only one transfer may be
+ *   will enqueue the request and wait for it to complete.  Only one transfer may be
  *   queued; Neither these methods nor the transfer() method can be called again
  *   until the control transfer functions returns.
  *
@@ -261,8 +261,8 @@
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request and return immediately.  Only one transfer may be
- *   queued; Neither this method nor the ctrlin or ctrlout methods can be called
+ *   enqueue the transfer request and rwait for it to complete.  Only one transfer may
+ *   be queued; Neither this method nor the ctrlin or ctrlout methods can be called
  *   again until this function returns.
  *
  *   This is a blocking method; this functions will not return until the
@@ -414,8 +414,8 @@ struct usbhost_driver_s
   int (*free)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 
   /* Process a IN or OUT request on the control endpoint.  These methods
-   * will enqueue the request and return immediately.  Only one transfer may be
-   * queued; Neither these methods nor the transfer() method can be called again
+   * will enqueue the request and wait for it to complete.  Only one transfer may
+   * be queued; Neither these methods nor the transfer() method can be called again
    * until the control transfer functions returns.
    *
    * These are blocking methods; these functions will not return until the
@@ -430,8 +430,8 @@ struct usbhost_driver_s
                  FAR const uint8_t *buffer);
 
   /* Process a request to handle a transfer descriptor.  This method will
-   * enqueue the transfer request and return immediately.  Only one transfer may be
-   * queued; Neither this method nor the ctrlin or ctrlout methods can be called
+   * enqueue the transfer request and wait for it to complete.  Only one transfer may
+   * be queued; Neither this method nor the ctrlin or ctrlout methods can be called
    * again until this function returns.
    *
    * This is a blocking method; this functions will not return until the

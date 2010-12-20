@@ -144,7 +144,12 @@
 #if CONFIG_USBHOST_TDBUFFERS > 0 && !defined(CONFIG_USBHOST_TDBUFSIZE)
 #  define CONFIG_USBHOST_TDBUFSIZE 128
 #endif
-#define LPC17_TDBUFFER_SIZE (CONFIG_USBHOST_TDBUFFERS * CONFIG_USBHOST_TDBUFSIZE)
+
+#if (CONFIG_USBHOST_TDBUFSIZE & 3) != 0
+#  error "TD buffer size must be an even number of 32-bit words"
+#endif
+
+#define LPC17_TDFREE_SIZE (CONFIG_USBHOST_TDBUFFERS * CONFIG_USBHOST_TDBUFSIZE)
 
 /* Configurable size of an IO buffer.  The number of IO buffers will be determined
  * by what is left at the end of the BANK1 memory setup aside of OHCI RAM.
@@ -152,6 +157,10 @@
 
 #ifndef CONFIG_USBHOST_IOBUFSIZE
 #  define CONFIG_USBHOST_IOBUFSIZE 512
+#endif
+
+#if (CONFIG_USBHOST_IOBUFSIZE & 3) != 0
+#  error "IO buffer size must be an even number of 32-bit words"
 #endif
 
 /* OHCI Memory Layout ***************************************************************/
@@ -171,8 +180,8 @@
  *  Sizes of things
  *    CONFIG_USBHOST_NEDS         2
  *    LPC17_EDFREE_SIZE           48
- *    LPC17_TDBUFFER_SIZE         128
- *    LPC17_TDBUFFER_SIZE         512
+ *    LPC17_TDFREE_SIZE           128
+ *    LPC17_IOFREE_SIZE           512
  *
  *  Memory Layout
  *    LPC17_OHCIRAM_END          (0x20008000 + 16384) = 0x2000c000
@@ -186,8 +195,8 @@
  *    LPC17_TDTAIL_ADDR           0x2000bd10
  *    LPC17_EDCTRL_ADDR           0x2000bd20
  *    LPC17_EDFREE_BASE           0x2000bd30
- *    LPC17_TDBUFFER_BASE         0x2000bd50
- *    LPC17_IOBUFFER_BASE         0x2000bdd0
+ *    LPC17_TDFREE_BASE           0x2000bd50
+ *    LPC17_IOFREE_BASE           0x2000bdd0
  *    LPC17_IOBUFFERS            (0x2000c000 + 0x2000bdd0) / 512 = 560/512 = 1
  *
  *  Wasted memory:                560-512 = 48 bytes
@@ -198,8 +207,8 @@
 #define LPC17_TDTAIL_ADDR   (LPC17_TDHEAD_ADDR + LPC17_TD_SIZE)
 #define LPC17_EDCTRL_ADDR   (LPC17_TDTAIL_ADDR + LPC17_TD_SIZE)
 #define LPC17_EDFREE_BASE   (LPC17_EDCTRL_ADDR + LPC17_ED_SIZE)
-#define LPC17_TDBUFFER_BASE (LPC17_EDFREE_BASE + LPC17_EDFREE_SIZE)
-#define LPC17_IOBUFFER_BASE (LPC17_TDBUFFER_BASE + LPC17_TDBUFFER_SIZE)
+#define LPC17_TDFREE_BASE   (LPC17_EDFREE_BASE + LPC17_EDFREE_SIZE)
+#define LPC17_IOFREE_BASE   (LPC17_TDFREE_BASE + LPC17_TDFREE_SIZE)
 
 /* Finally, use the remainder of the allocated OHCI for IO buffers */
 
