@@ -44,6 +44,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -137,6 +138,11 @@ struct lpc17_usbhost_s
   /* The bound device class driver */
 
   struct usbhost_class_s *class;
+
+  /* Driver status */
+
+  uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
+  sem_t   wdhsem;    /* Semaphore  used to wait for Writeback Done Head event */
 };
 
 /* Host Controller Communication Area */
@@ -194,6 +200,16 @@ static void lpc17_putreg(uint32_t val, uint32_t addr);
 # define lpc17_putreg(val,addr) putreg32(val,addr)
 #endif
 
+/* Semaphores ******************************************************************/
+
+static void lpc17_takesem(sem_t *sem);
+#define lpc17_givesem(s) sem_post(s);
+
+/* Byte stream access helper functions *****************************************/
+
+static inline uint16_t lpc17_getle16(const uint8_t *val);
+static void lpc17_putle16(uint8_t *dest, uint16_t val);
+
 /* Descriptor helper functions *************************************************/
 
 static struct lpc17_hced_s *lpc17_edalloc(struct lpc17_usbhost_s *priv);
@@ -220,8 +236,12 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr);
 static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
                          FAR uint8_t **buffer, FAR size_t *maxlen);
 static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
-static int lpc17_control(FAR struct usbhost_driver_s *drvr,
-                           const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
+static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
+                        FAR const struct usb_ctrlreq_s *req,
+                        FAR uint8_t *buffer);
+static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
+                         FAR const struct usb_ctrlreq_s *req,
+                         FAR const uint8_t *buffer);
 static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
                             FAR struct usbhost_epdesc_s *ed,
                             FAR uint8_t *buffer, size_t buflen);
@@ -249,7 +269,8 @@ static struct lpc17_usbhost_s g_usbhost =
       .enumerate  = lpc17_enumerate,
       .alloc      = lpc17_alloc,
       .free       = lpc17_free,
-      .control    = lpc17_control,
+      .ctrlin     = lpc17_ctrlin,
+      .ctrlout    = lpc17_ctrlout,
       .transfer   = lpc17_transfer,
       .disconnect = lpc17_disconnect,
     },
@@ -389,6 +410,56 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
   putreg32(val, addr);
 }
 #endif
+
+/****************************************************************************
+ * Name: lpc17_takesem
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.
+ *
+ ****************************************************************************/
+
+static void lpc17_takesem(sem_t *sem)
+{
+  /* Take the semaphore (perhaps waiting) */
+
+  while (sem_wait(sem) != 0)
+    {
+      /* The only case that an error should occr here is if the wait was
+       * awakened by a signal.
+       */
+
+      ASSERT(errno == EINTR);
+    }
+}
+
+/****************************************************************************
+ * Name: lpc17_getle16
+ *
+ * Description:
+ *   Get a (possibly unaligned) 16-bit little endian value.
+ *
+ ****************************************************************************/
+
+static inline uint16_t lpc17_getle16(const uint8_t *val)
+{
+  return (uint16_t)val[1] << 8 | (uint16_t)val[0];
+}
+
+/****************************************************************************
+ * Name: lpc17_putle16
+ *
+ * Description:
+ *   Put a (possibly unaligned) 16-bit little endian value.
+ *
+ ****************************************************************************/
+
+static void lpc17_putle16(uint8_t *dest, uint16_t val)
+{
+  dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
+  dest[1] = val >> 8;
+}
 
 /*******************************************************************************
  * Name: lpc17_edalloc
@@ -698,15 +769,16 @@ static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 }
 
 /************************************************************************************
- * Name: lpc17_control
+ * Name: lpc17_ctrlin and lpc17_ctrlout
  *
  * Description:
- *   Enqueue a request on the control endpoint.  This method will enqueue
- *   the request and return immediately.  The transfer will be performed
- *   asynchronously.  When the transfer completes, the USB host driver will
- *   call the complete() method of the struct usbhost_class_s interface.
- *   Only one transfer may be queued; Neither this method nor the transfer()
- *   method can be called again until the class complete() method has been called.
+ *   Process a IN or OUT request on the control endpoint.  These methods
+ *   will enqueue the request and return immediately.  Only one transfer may be
+ *   queued; Neither these methods nor the transfer() method can be called again
+ *   until the control transfer functions returns.
+ *
+ *   These are blocking methods; these functions will not return until the
+ *   control transfer has completed.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -727,8 +799,17 @@ static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *
  ************************************************************************************/
 
-static int lpc17_control(FAR struct usbhost_driver_s *drvr,
-                         const struct usb_ctrlreq_s *req, FAR uint8_t *buffer)
+static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
+                        FAR const struct usb_ctrlreq_s *req,
+                        FAR uint8_t *buffer)
+{
+# warning "Not Implemented"
+  return -ENOSYS;
+}
+
+static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
+                         FAR const struct usb_ctrlreq_s *req,
+                         FAR const uint8_t *buffer)
 {
 # warning "Not Implemented"
   return -ENOSYS;
@@ -738,13 +819,13 @@ static int lpc17_control(FAR struct usbhost_driver_s *drvr,
  * Name: lpc17_transfer
  *
  * Description:
- *   Enqueue a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request and return immediately.  The transfer will
- *   be performed asynchronously.  When the transfer completes, the USB host
- *   driver will call the complete() method of the struct usbhost_class_s
- *   interface.  Only one transfer may be queued; Neither this method nor the
- *   control method can be called again until the class complete() method has
- *   been called.
+ *   Process a request to handle a transfer descriptor.  This method will
+ *   enqueue the transfer request and return immediately.  Only one transfer may be
+ *   queued; Neither this method nor the ctrlin or ctrlout methods can be called
+ *   again until this function returns.
+ *
+ *   This is a blocking method; this functions will not return until the
+ *   transfer has completed.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -856,6 +937,10 @@ void up_usbhostinitialize(void)
   int i;
 
   usbtrace(TRACE_DEVINIT, 0);
+
+  /* Initialize the state data structure */
+
+  sem_init(&priv->wdhsem, 0, 0);
 
   /* Enable power by setting PCUSB in the PCONP register */
 
