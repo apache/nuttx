@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 13, 2010</p>
+      <p>Last Updated: December 20, 2010</p>
     </td>
   </tr>
 </table>
@@ -786,48 +786,48 @@
   Important bugfxes included:
   <ul>
     <li>
-	  Additional fixes needed with the TCP sequence number problem &quot;fixed&quot; in nuttx-5.14.
-	</li>
-	<li>
-	  In the <code>send()</code> logic, now checks if the destination IP address is in the ARP table before sending the packet;
-	  an ARP request will go out instead of the TCP packet.
-	  This improves behavior, for example, on the first on the first GET request from a browser
-	</li>
-	<li>
-	  All USB class drivers need to call DEV_CONNECT() when they are ready to be enumerated.
-	  That is, (1) initially when bound to the USB driver, and (2) after a USB reset.
-	</li>
-	<li>
-	  The SPI_SETBITS macro was calling the SPI setmode method.
-	</li>
-	<li>
-	  And several other bug fixes of lower criticality (see the ChangeLog for details).
-	</li>
+      Additional fixes needed with the TCP sequence number problem &quot;fixed&quot; in nuttx-5.14.
+    </li>
+    <li>
+      In the <code>send()</code> logic, now checks if the destination IP address is in the ARP table before sending the packet;
+      an ARP request will go out instead of the TCP packet.
+      This improves behavior, for example, on the first on the first GET request from a browser
+    </li>
+    <li>
+      All USB class drivers need to call DEV_CONNECT() when they are ready to be enumerated.
+      That is, (1) initially when bound to the USB driver, and (2) after a USB reset.
+    </li>
+    <li>
+      The SPI_SETBITS macro was calling the SPI setmode method.
+    </li>
+    <li>
+      And several other bug fixes of lower criticality (see the ChangeLog for details).
+    </li>
   </ul>
 </p>
 <p>
   And feature enhancements:
   <ul>
-	<li>
-	  The LPC176x Ethernet driver was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).
-	  An option was added to limit the amount of SRAM used for packet buffering and to re-use any extra Bank0 memory for heap.
-	</li>
-	<li>
-	  Enabled networking and SD/MMC card support in the Olimex LPC1766-STK NuttShell (NSH) configuration.
-	</li>
-	<li>
-	  The LPC176x USB driver is now fully fully functional.
-	</li>
-	<li>
-	  Added an optional <code>cmddata()</code> method to the SPI interface.
-	  Some devices require an additional out-of-band bit to specify if the next word sent to the device is a command or data.
-	  The <code>cmddata()</code> method provides selection of command or data.
-	</li>
-	<li>
-	  A driver for the Nokia 6100 LCD (with either the Phillips PCF8833 LCD controller and for the Epson S1D15G10 LCD controller)
-	  and an NX graphics configuration for the Olimex LPC1766-STK have been added.
-	  However, neither the LCD driver nor the NX configuration have been verified as of the this release.
-	</li>
+    <li>
+      The LPC176x Ethernet driver was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).
+      An option was added to limit the amount of SRAM used for packet buffering and to re-use any extra Bank0 memory for heap.
+    </li>
+    <li>
+      Enabled networking and SD/MMC card support in the Olimex LPC1766-STK NuttShell (NSH) configuration.
+    </li>
+    <li>
+      The LPC176x USB driver is now fully fully functional.
+    </li>
+    <li>
+      Added an optional <code>cmddata()</code> method to the SPI interface.
+      Some devices require an additional out-of-band bit to specify if the next word sent to the device is a command or data.
+      The <code>cmddata()</code> method provides selection of command or data.
+    </li>
+    <li>
+      A driver for the Nokia 6100 LCD (with either the Phillips PCF8833 LCD controller and for the Epson S1D15G10 LCD controller)
+      and an NX graphics configuration for the Olimex LPC1766-STK have been added.
+      However, neither the LCD driver nor the NX configuration have been verified as of the this release.
+    </li>
   </ul>
 </p>
 
@@ -1272,10 +1272,10 @@
     <ul>
       <p>
         <b>STATUS:</b>
-	  </p>
-	  <p>
+      </p>
+      <p>
         <b>Nucleus2G LPC1768</b>.
-		Some initial files for the LPC17xx family were released in NuttX 5.6, but the first
+        Some initial files for the LPC17xx family were released in NuttX 5.6, but the first
         functional release for the NXP LPC1768/Nucleus2G occured with NuttX 5.7 with some
         additional enhancements through NuttX-5.9.
         That initial, 5.6, basic release included <i>timer</i> interrupts and a <i>serial console</i> and was
@@ -1288,21 +1288,21 @@
         (Although they have since been verfiied on other platforms; this needs to be revisited on the Nucleus2G).
       </p>
       <p>
-	    <b>mbed LPC1768</b>.
+        <b>mbed LPC1768</b>.
         Support for the mbed board was contributed by Dave Marples and released in NuttX-5.11.
         This port includes a NuttX OS test configuration (see <code>examples/ostest</code>).
       </p>
       <p>
-	    <b>Olimex LPC1766-STK</b>.
+        <b>Olimex LPC1766-STK</b>.
         Support for that Olimex-LPC1766-STK board was added to NuttX 5.13.
         The NuttX-5.14 release extended that support with an <i>Ethernet driver</i>.
-		And the NuttX-5.15 release further extended the support with a functional <i>USB driver</i> and <i>SPI-based micro-SD</i>.
+        And the NuttX-5.15 release further extended the support with a functional <i>USB driver</i> and <i>SPI-based micro-SD</i>.
         Verified configurations are now available for the NuttX OS test,
         for the NuttShell with networking and microSD support(NSH, see the <a href="ttp://www.nuttx.org/NuttShell.html">NSH User Guide</a>),
         for the NuttX network test, for the <a href="http://acme.com/software/thttpd">THTTPD</a> webserver,
-		and for USB serial and USB storage examples.
-	    A driver for the <i>Nokia 6100 LCD</i> and an NX graphics configuration for the Olimex LPC1766-STK have been added.
-	    However, neither the LCD driver nor the NX configuration have been verified as of the the NuttX-5.15 release.
+        and for USB serial and USB storage examples.
+        A driver for the <i>Nokia 6100 LCD</i> and an NX graphics configuration for the Olimex LPC1766-STK have been added.
+        However, neither the LCD driver nor the NX configuration have been verified as of the the NuttX-5.15 release.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1940,48 +1940,48 @@ Other memory:
 <ul><pre>
 5.15 2010-12-12 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-	* net/uip/uip_tcpaddsend.c and net/send.c -- Another place where the TCP sequence
-	  number problem &quot;fixed&quot; in 5.14 might occur.
-	* net/send.c -- Check if the destination IP address is in the ARP table.  If
-	  not, then don't consider the packet sent.  It won't be, an ARP packet will go
-	  out instead.  This improves behavior, for example, on the first GET request
-	  from a browser.
-	* arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c -- The Ethernet
-	  logic was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).  An
-	  option was added to limit the amount of SRAM used for packet buffering and to
-	  re-use any extra Bank0 memory for heap.  configs/olimex-lpc1766stk/nettest
-	  now uses only 8Kb at the beginning of Bank0; the 8Kb at the end of Bank0 is
-	  included in the heap
-	* arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
-	  selected.
-	* configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
-	  NSH.  Networking and telnetd interface as well as SPI-based microSD are
-	  now functional.
-	* examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
-	  CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
-	  initialized and bad things happen if you try to ping.
-	* drivers/lcd -- Add header files for the Phillips PCF8833 LCD controller and
-	  for the Epson S1D15G10 LCD controller.  A driver for the Nokia 6100 LCD is
-	  coming.
-	* include/nuttx/spi.h and almost all other SPI files -- Added an optional
-	  cmddata() method to the SPI interface.  Some devices require an additional
-	  out-of-band bit to specify if the next word sent to the device is a command
-	  or data. This is typical, for example, in &quot;9-bit&quot; displays where the 9th bit
-	  is the CMD/DATA bit. The cmddata method provides selection of command or data.
-	* drivers/lcd/p14201.c -- Now uses the cmddata() method of the SPI interface.
-	* arch/arm/src/lpc17xx/lpc17_usbdev.c -- LPC17xx USB driver now appears to
-	  to be fully functional.  examples/usbstorage configuration verified (the
-	  examples/usbserial configuration is untested).
-	* drivers/usbdev/usbserial.c and usbstorage.c -- All USB class drivers need
-	  to call DEV_CONNECT() when they are ready to be enumerated.  That is,
-	  (1) initially when bound to the USB driver, and (2) after a USB reset.
-	* drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.  This driver
-	  has not be verified as of the initial check-in.
-	* configs/olimex-lpc1766stk/nx -- A NX graphics configuration for the Olimex
-	  LPC1766-STK board using the Nokia 6100 LCD driver.  This configuration has
-	  not been verified as of the initial check-in.
-	* include/nuttx/spi.h -- the SPI_SETBITS macro was calling the setmode method.
-	  This is a very important bug-fix in some usages.
+    * net/uip/uip_tcpaddsend.c and net/send.c -- Another place where the TCP sequence
+      number problem &quot;fixed&quot; in 5.14 might occur.
+    * net/send.c -- Check if the destination IP address is in the ARP table.  If
+      not, then don't consider the packet sent.  It won't be, an ARP packet will go
+      out instead.  This improves behavior, for example, on the first GET request
+      from a browser.
+    * arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c -- The Ethernet
+      logic was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).  An
+      option was added to limit the amount of SRAM used for packet buffering and to
+      re-use any extra Bank0 memory for heap.  configs/olimex-lpc1766stk/nettest
+      now uses only 8Kb at the beginning of Bank0; the 8Kb at the end of Bank0 is
+      included in the heap
+    * arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
+      selected.
+    * configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
+      NSH.  Networking and telnetd interface as well as SPI-based microSD are
+      now functional.
+    * examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
+      CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
+      initialized and bad things happen if you try to ping.
+    * drivers/lcd -- Add header files for the Phillips PCF8833 LCD controller and
+      for the Epson S1D15G10 LCD controller.  A driver for the Nokia 6100 LCD is
+      coming.
+    * include/nuttx/spi.h and almost all other SPI files -- Added an optional
+      cmddata() method to the SPI interface.  Some devices require an additional
+      out-of-band bit to specify if the next word sent to the device is a command
+      or data. This is typical, for example, in &quot;9-bit&quot; displays where the 9th bit
+      is the CMD/DATA bit. The cmddata method provides selection of command or data.
+    * drivers/lcd/p14201.c -- Now uses the cmddata() method of the SPI interface.
+    * arch/arm/src/lpc17xx/lpc17_usbdev.c -- LPC17xx USB driver now appears to
+      to be fully functional.  examples/usbstorage configuration verified (the
+      examples/usbserial configuration is untested).
+    * drivers/usbdev/usbserial.c and usbstorage.c -- All USB class drivers need
+      to call DEV_CONNECT() when they are ready to be enumerated.  That is,
+      (1) initially when bound to the USB driver, and (2) after a USB reset.
+    * drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.  This driver
+      has not be verified as of the initial check-in.
+    * configs/olimex-lpc1766stk/nx -- A NX graphics configuration for the Olimex
+      LPC1766-STK board using the Nokia 6100 LCD driver.  This configuration has
+      not been verified as of the initial check-in.
+    * include/nuttx/spi.h -- the SPI_SETBITS macro was calling the setmode method.
+      This is a very important bug-fix in some usages.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2016,6 +2016,11 @@ nuttx-5.16 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * include/nuttx/usb -- Created new directory.  Moved all usb-related header
       files to this new directory.  Created a skeleton for a new USB host header
       file
+    * drivers/usbhost -- Add USB host "registry" where connect devices can be
+      matched with the correct USB class driver.  Add a USB host class driver
+      for the (Bulk-Only) USB Mass Storage Class.  Untested on initial check-iin
+    * arc/arc/src/lpc17xx/lpc17_usbhost.c -- Add a simple USB host driver for
+      the NXP lpc17xx.  Untested on initial check-in.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

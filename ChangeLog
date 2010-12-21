@@ -1410,3 +1410,9 @@
 	* include/nuttx/usb -- Created new directory.  Moved all usb-related header
 	  files to this new directory.  Created a skeleton for a new USB host header
 	  file
+	* drivers/usbhost -- Add USB host "registry" where connect devices can be
+	  matched with the correct USB class driver.  Add a USB host class driver
+	  for the (Bulk-Only) USB Mass Storage Class.  Untested on initial check-iin
+	* arc/arc/src/lpc17xx/lpc17_usbhost.c -- Add a simple USB host driver for
+	  the NXP lpc17xx.  Untested on initial check-in.
+

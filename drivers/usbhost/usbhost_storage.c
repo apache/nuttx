@@ -98,6 +98,7 @@
 #define USBHOST_ALLFOUND    0x07
 
 #define USBHOST_MAX_RETRIES 100
+#define USBHOST_MAX_CREFS   0x7fff
 
 /****************************************************************************
  * Private Types
@@ -1532,7 +1533,7 @@ static int usbhost_open(FAR struct inode *inode)
     {
       /* Otherwise, just increment the reference count on the driver */
 
-      DEBUGASSERT(priv->crefs < MAX_CREFS);
+      DEBUGASSERT(priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
       usbhost_takesem(&priv->exclsem);
       priv->crefs++;
       usbhost_givesem(&priv->exclsem);
@@ -1559,7 +1560,7 @@ static int usbhost_close(FAR struct inode *inode)
 
   /* Decrement the reference count on the block driver */
 
-  DEBUGASSERT(priv->crefs > 0);
+  DEBUGASSERT(priv->crefs > 1);
   usbhost_takesem(&priv->exclsem);
   priv->crefs--;
 
@@ -1645,7 +1646,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
           if (result == OK)
             {
               /* Receive the user data */
-#warning "For lpc17xx, I think this buffer needs to lie in BANK1"
+
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                      buffer, priv->blocksize * nsectors);
               if (result == OK)
@@ -1737,7 +1738,7 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
           if (result == OK)
             {
               /* Send the user data */
-#warning "For lpc17xx, I think this buffer needs to lie in BANK1"
+
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
                                      (uint8_t*)buffer, priv->blocksize * nsectors);
               if (result == OK)

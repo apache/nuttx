@@ -53,7 +53,6 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/ohci.h>
 #include <nuttx/usb/usbhost.h>
-#include <nuttx/usb/usbhost_trace.h>
 
 #include <arch/irq.h>
 #include <arch/board/board.h>
@@ -70,6 +69,17 @@
 /*******************************************************************************
  * Definitions
  *******************************************************************************/
+
+/* I think it is the case that all I/O buffers must lie in AHB SRAM because of
+ * the OHCI DMA.  But this definition has here so that I can experiment later
+ * to see if this really required.
+ */
+
+#define CONFIG_UBHOST_AHBIOBUFFERS 1
+
+#if defined(CONFIG_UBHOST_AHBIOBUFFERS) && LPC17_IOBUFFERS < 1
+#  error "No IO buffers allocated"
+#endif
 
 /* Frame Interval */
 
@@ -178,9 +188,9 @@ struct lpc17_edlist_s
   uint32_t               pad[3];       /* To make the same size as struct lpc17_hced_s */
 };
 
-struct lpc17_tdlist_s
+struct lpc17_buflist_s
 {
-  struct lpc17_tdlist_s *flink;        /* Link to next TD buffer in the list */
+  struct lpc17_buflist_s *flink;       /* Link to next buffer in the list */
                                        /* Variable length buffer data follows */
 };
 
@@ -214,6 +224,12 @@ static void lpc17_putle16(uint8_t *dest, uint16_t val);
 
 static struct lpc17_hced_s *lpc17_edalloc(struct lpc17_usbhost_s *priv);
 static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct lpc17_hced_s *ed);
+static uint8_t *lpc17_tdalloc(struct lpc17_usbhost_s *priv);
+static void lpc17_tdfree(struct lpc17_usbhost_s *priv, uint8_t *buffer);
+#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv);
+static void lpc17_iofree(struct lpc17_usbhost_s *priv, uint8_t *buffer);
+#endif
 static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
                             uint32_t toggle, volatile uint8_t *buffer,
                             size_t buflen);
@@ -281,8 +297,11 @@ static struct lpc17_usbhost_s g_usbhost =
 
 /* This is a free list of EDs and TD buffers */
 
-static struct lpc17_edlist_s *g_edfree;
-static struct lpc17_tdlist_s *g_tdfree;
+static struct lpc17_edlist_s  *g_edfree;
+static struct lpc17_buflist_s *g_tdfree;
+#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+static struct lpc17_buflist_s *g_iofree;
+#endif
 
 /*******************************************************************************
  * Public Data
@@ -503,6 +522,10 @@ static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct lpc17_hced_s *ed)
  * Description:
  *   Allocate an TD buffer from the free list
  *
+ * Assumptions:
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
  *******************************************************************************/
 
 static uint8_t *lpc17_tdalloc(struct lpc17_usbhost_s *priv)
@@ -510,7 +533,7 @@ static uint8_t *lpc17_tdalloc(struct lpc17_usbhost_s *priv)
   uint8_t *ret = (uint8_t *)g_tdfree;
   if (ret)
     {
-      g_tdfree = ((struct lpc17_tdlist_s*)ret)->flink;
+      g_tdfree = ((struct lpc17_buflist_s*)ret)->flink;
     }
   return ret;
 }
@@ -525,10 +548,51 @@ static uint8_t *lpc17_tdalloc(struct lpc17_usbhost_s *priv)
 
 static void lpc17_tdfree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
 {
-  struct lpc17_tdlist_s *tdfree = (struct lpc17_tdlist_s *)buffer;
-  tdfree->flink                 = g_tdfree;
-  g_tdfree                      = tdfree;
+  struct lpc17_buflist_s *tdfree = (struct lpc17_buflist_s *)buffer;
+  tdfree->flink                  = g_tdfree;
+  g_tdfree                       = tdfree;
 }
+
+/*******************************************************************************
+ * Name: lpc17_ioalloc
+ *
+ * Description:
+ *   Allocate an IO buffer from the free list
+ *
+ * Assumptions:
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv)
+{
+  uint8_t *ret = (uint8_t *)g_iofree;
+  if (ret)
+    {
+      g_iofree = ((struct lpc17_buflist_s*)ret)->flink;
+    }
+  return ret;
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_tdfree
+ *
+ * Description:
+ *   Return an TD buffer to the free list
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+static void lpc17_iofree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
+{
+  struct lpc17_buflist_s *iofree = (struct lpc17_buflist_s *)buffer;
+  iofree->flink                  = g_iofree;
+  g_iofree                       = iofree;
+}
+#endif
 
 /*******************************************************************************
  * Name: lpc17_enqueuetd
@@ -758,7 +822,6 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
   /* Read the device interrupt status register */
 
-  usbtrace(TRACE_INTENTRY(LPC17_TRACEINTID_USB), 0xbeef);
   uint32_t intstatus;
   uint32_t intenable;
 
@@ -775,12 +838,12 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
       if ((intstatus & OHCI_INT_RHSC) != 0)
         {
           uint32_t rhportst1 = lpc17_getreg(LPC17_USBHOST_RHPORTST1);
-          ullvdbg("Root Hub Status Change, RHPORTST: %08x\n", portstatus);
+          ullvdbg("Root Hub Status Change, RHPORTST: %08x\n", rhportst1);
 
           if ((rhportst1 & OHCI_RHPORTST_CSC) != 0)
             {
               uint32_t rhstatus = lpc17_getreg(LPC17_USBHOST_RHSTATUS);
-              ullvdbg("Connect Status Change, RHSTATUS: %08x\n", portstatus);
+              ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhportst1);
 
               /* If DRWE is set, Connect Status Change indicates a remote wake-up event */
 
@@ -867,7 +930,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
       lpc17_putreg(intstatus, LPC17_USBHOST_INTST);
     }
-  usbtrace(TRACE_INTEXIT(LPC17_TRACEINTID_USB), 0);
+
   return OK;
 }
 
@@ -898,7 +961,9 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - Only a single class bound to a single device is supported.
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
@@ -1081,7 +1146,8 @@ errout:
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
@@ -1119,7 +1185,8 @@ static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
@@ -1158,7 +1225,9 @@ static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - Only a single class bound to a single device is supported.
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
@@ -1238,7 +1307,9 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - Only a single class bound to a single device is supported.
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
@@ -1247,64 +1318,111 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
                           FAR uint8_t *buffer, size_t buflen)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  struct lpc17_hced_s *ed;
+  struct lpc17_hced_s *ed = NULL;
   uint32_t dirpid;
   uint32_t regval;
+#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+  uint8_t *origbuf = NULL;
+#endif
   int ret = -ENOMEM;
+
+  /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
+
+#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+  if ((uintptr_t)buffer >= LPC17_SRAM_BANK0 &&
+      (uintptr_t)buffer < (LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0))
+    {
+      /* Allocate an IO buffer in AHB SRAM */
+
+      origbuf = buffer;
+      buffer  = lpc17_ioalloc(priv);
+      if (!buffer)
+        {
+          goto errout;
+        }
+
+      /* Copy the user data into the AHB SRAM IO buffer.  Sad... so
+       * inefficient.  But without exposing the AHB SRAM to the final,
+       * end-user client I don't know of any way around this copy.
+       */
+
+      memcpy(buffer, origbuf, buflen);
+    }
+#endif
 
   /* Allocate an ED */
 
   ed = lpc17_edalloc(priv);
+  if (!ed)
+    {
+      goto errout;
+    }
+
+  /* Format the endpoint descriptor */
+ 
+  lpc17_edinit(ed);
+  ed->ctrl = (uint32_t)(ep->addr) << ED_CONTROL_EN_SHIFT |
+             (uint32_t)(ep->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
+
+  /* Get the direction of the endpoint */
+
+  if (ep->in)
+    {
+      ed->ctrl |= ED_CONTROL_D_IN;
+      dirpid    = GTD_STATUS_DP_IN;
+    }
+  else
+    {
+      ed->ctrl |= ED_CONTROL_D_OUT;
+      dirpid    = GTD_STATUS_DP_OUT;
+    }
+
+  /* Then enqueue the transfer */
+
+  lpc17_enqueuetd(ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
+
+  lpc17_putreg((uint32_t)ed, LPC17_USBHOST_BULKHEADED);
+
+  regval = lpc17_getreg(LPC17_USBHOST_CMDST);
+  regval |= OHCI_CMDST_BLF;
+  lpc17_putreg(regval, LPC17_USBHOST_CMDST);
+      
+  regval = lpc17_getreg(LPC17_USBHOST_CTRL);
+  regval |= OHCI_CTRL_BLE;
+  lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+
+  /* Wait for the Writeback Done Head interrupt */
+
+  lpc17_takesem(&priv->wdhsem);
+
+  /* Check the TDHEAD completion status bits */
+
+  if (priv->tdstatus == 0)
+    {
+      ret = OK;
+    }
+  else 
+    {
+      ret = -EIO;
+    }
+
+errout:
+  /* Free any temporary IO buffers */
+
+#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+  if (buffer && origbuf)
+    {
+      lpc17_iofree(priv, buffer);
+    }
+#endif
+
+  /* Free the endpoint descriptor */
+
   if (ed)
     {
-      /* Format the endpoint descriptor */
- 
-      lpc17_edinit(ed);
-      ed->ctrl = (uint32_t)(ep->addr) << ED_CONTROL_EN_SHIFT |
-                 (uint32_t)(ep->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
-
-      /* Get the direction of the endpoint */
-
-      if (ep->in)
-        {
-          ed->ctrl |= ED_CONTROL_D_IN;
-          dirpid    = GTD_STATUS_DP_IN;
-        }
-      else
-        {
-          ed->ctrl |= ED_CONTROL_D_OUT;
-          dirpid    = GTD_STATUS_DP_OUT;
-        }
-
-      /* Then enqueue the transfer */
-
-      lpc17_enqueuetd(ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
-
-      lpc17_putreg((uint32_t)ed, LPC17_USBHOST_BULKHEADED);
-
-      regval = lpc17_getreg(LPC17_USBHOST_CMDST);
-      regval |= OHCI_CMDST_BLF;
-      lpc17_putreg(regval, LPC17_USBHOST_CMDST);
-      
-      regval = lpc17_getreg(LPC17_USBHOST_CTRL);
-      regval |= OHCI_CTRL_BLE;
-      lpc17_putreg(regval, LPC17_USBHOST_CTRL);
-
-      /* Wait for the Writeback Done Head interrupt */
-
-      lpc17_takesem(&priv->wdhsem);
-
-      /* Check the TDHEAD completion status bits */
-
-      if (priv->tdstatus == 0)
-        {
-          ret = OK;
-        }
-      else 
-        {
-          ret = -EIO;
-        }
+      lpc17_edfree(priv, ed);
     }
+
   return ret;
 }
 
@@ -1326,7 +1444,9 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
  *   None
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - Only a single class bound to a single device is supported.
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
@@ -1392,8 +1512,6 @@ void up_usbhostinitialize(void)
   uint8_t *tdfree;
   irqstate_t flags;
   int i;
-
-  usbtrace(TRACE_DEVINIT, 0);
 
   /* Initialize the state data structure */
 
@@ -1508,8 +1626,7 @@ void up_usbhostinitialize(void)
 
   if (irq_attach(LPC17_IRQ_USB, lpc17_usbinterrupt) != 0)
     {
-      usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_IRQREGISTRATION),
-               (uint16_t)LPC17_IRQ_USB);
+      udbg("Failed to attach IRQ\n");
       return;
     }
 
