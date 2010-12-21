@@ -552,8 +552,16 @@ static uint8_t *lpc17_tdalloc(struct lpc17_usbhost_s *priv)
 static void lpc17_tdfree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
 {
   struct lpc17_buflist_s *tdfree = (struct lpc17_buflist_s *)buffer;
-  tdfree->flink                  = g_tdfree;
-  g_tdfree                       = tdfree;
+
+  /* This may get called with a NULL buffer pointer on certain error handling
+   * paths.
+   */
+
+  if (tdfree)
+    {
+      tdfree->flink              = g_tdfree;
+      g_tdfree                   = tdfree;
+    }
 }
 
 /*******************************************************************************
@@ -581,7 +589,7 @@ static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv)
 #endif
 
 /*******************************************************************************
- * Name: lpc17_tdfree
+ * Name: lpc17_iofree
  *
  * Description:
  *   Return an TD buffer to the free list
@@ -1045,7 +1053,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   if (!buffer)
     {
       ret = -ENOMEM;
-      goto errout_nobuffer;
+      goto errout;
     }
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
@@ -1087,6 +1095,14 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   /* Extract the max packetsize for endpoint 0 */
 
   EDCTRL->ctrl = (uint32_t)(((struct usb_devdesc_s *)buffer)->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
+
+  /* NOTE: Additional logic is needed here.  The device descriptor contains
+   * the class, subclass, protocol, and VID/PID.  However, here we have assumed
+   * for the time being that class == USB_CLASS_PER_INTERFACE.  This is not
+   * generally a good assumption and will need to get fixed someday.
+   */
+
+  DEBUGASSERT(((struct usb_devdesc_s *)buffer)->class == USB_CLASS_PER_INTERFACE);
 
   /* Set the device address to 1 */
 
@@ -1157,6 +1173,14 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
       goto errout;
     }
 
+  /* Free the TD that we were using for the request buffer.  It is not needed
+   * further here but it may be needed by the class driver during its connection
+   * operations.  NOTE:  lpc17_tdfree() can be called with a NULL pointer later.
+   */
+ 
+  lpc17_tdfree(priv, (uint8_t*)ctrlreq);
+  ctrlreq = NULL;
+
   /* Some devices may require this delay before initialization */
 
   up_mdelay(100);
@@ -1174,7 +1198,6 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 
 errout:
   lpc17_tdfree(priv, buffer);
-errout_nobuffer:
   lpc17_tdfree(priv, (uint8_t*)ctrlreq);
   return ret;
 }
@@ -1268,12 +1291,14 @@ static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   req - Describes the request to be sent.  This data will be copied from the
- *      user provided memory.  Therefore, the req buffer may be declared on the
- *      stack.
+ *   req - Describes the request to be sent.  This request must lie in memory
+ *      created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
  *     responses.  This buffer must be large enough to hold the length value
  *     in the request description. buffer must have been allocated using DRVR_ALLOC
+ *
+ *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
+ *   memory.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
