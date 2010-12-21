@@ -115,6 +115,7 @@
 
 #define EDFREE      ((struct lpc17_hced_s *)LPC17_EDFREE_BASE)
 #define TDFREE      ((uint8_t *)LPC17_TDFREE_BASE)
+#define IOFREE      ((uint8_t *)LPC17_IOFREE_BASE)
 
 /* Descriptors *****************************************************************/
 
@@ -1575,7 +1576,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 {
   struct lpc17_usbhost_s *priv = &g_usbhost;
   uint32_t regval;
-  uint8_t *tdfree;
+  uint8_t *buffer;
   irqstate_t flags;
   int i;
 
@@ -1641,14 +1642,27 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   /* Initialize user-configurable TD buffers */
 
-  tdfree = TDFREE;
+  buffer = TDFREE;
   for (i = 0; i < CONFIG_USBHOST_NEDS; i++)
     {
       /* Put the TD buffer in a free list */
 
-      lpc17_tdfree(priv, tdfree);
-      tdfree += CONFIG_USBHOST_TDBUFSIZE;
+      lpc17_tdfree(priv, buffer);
+      buffer += CONFIG_USBHOST_TDBUFSIZE;
     }
+
+#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+  /* Initialize user-configurable IO buffers */
+
+  buffer = IOFREE;
+  for (i = 0; i < LPC17_IOBUFFERS; i++)
+    {
+      /* Put the TD buffer in a free list */
+
+      lpc17_iofree(priv, buffer);
+      buffer += CONFIG_USBHOST_IOBUFSIZE;
+    }
+#endif
 
   /* Wait 50MS then perform hardware reset */
 
