@@ -94,10 +94,10 @@
 #define CLASS_CREATE(reg, drvr, id) ((reg)->create(drvr, id))
 
 /************************************************************************************
- * Name: CLASS_CONFIGDESC
+ * Name: CLASS_CONNECT
  *
  * Description:
- *   This macro will call the configdesc() method of struct usbhost_class_s.  This
+ *   This macro will call the connect() method of struct usbhost_class_s.  This
  *   method is a callback into the class implementation.  It is used to provide the
  *   device's configuration descriptor to the class so that the class may initialize
  *   properly
@@ -112,11 +112,13 @@
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function may be called from an interrupt handler.
+ *   This function is probably called on the same thread that called the driver
+ *   enumerate() method.  However, this function may also be called from an
+ *   interrupt handler.
  *
  ************************************************************************************/
 
-#define CLASS_CONFIGDESC(class,configdesc,desclen) ((class)->configdesc(class,configdesc,desclen))
+#define CLASS_CONNECT(class,configdesc,desclen) ((class)->connect(class,configdesc,desclen))
 
 /************************************************************************************
  * Name: CLASS_DISCONNECTED
@@ -174,7 +176,7 @@
  *   extract the class ID info from the configuration descriptor, (3) call
  *   usbhost_findclass() to find the class that supports this device, (4)
  *   call the create() method on the struct usbhost_registry_s interface
- *   to get a class instance, and finally (5) call the configdesc() method
+ *   to get a class instance, and finally (5) call the connect() method
  *   of the struct usbhost_class_s interface.  After that, the class is in
  *   charge of the sequence of operations.
  *
@@ -399,7 +401,7 @@ struct usbhost_class_s
    * initialize properly (such as endpoint selections).
    */
 
-  int (*configdesc)(FAR struct usbhost_class_s *class, FAR const uint8_t *configdesc, int desclen);
+  int (*connect)(FAR struct usbhost_class_s *class, FAR const uint8_t *configdesc, int desclen);
 
   /* This method informs the class that the USB device has been disconnected. */
 
@@ -422,7 +424,7 @@ struct usbhost_driver_s
    * extract the class ID info from the configuration descriptor, (3) call
    * usbhost_findclass() to find the class that supports this device, (4)
    * call the create() method on the struct usbhost_registry_s interface
-   * to get a class instance, and finally (5) call the configdesc() method
+   * to get a class instance, and finally (5) call the connect() method
    * of the struct usbhost_class_s interface.  After that, the class is in
    * charge of the sequence of operations.
    */

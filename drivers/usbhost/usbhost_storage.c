@@ -90,7 +90,7 @@
 #define DEV_FORMAT          "/dev/sd%c"
 #define DEV_NAMELEN         10
 
-/* Used in usbhost_configdesc() */
+/* Used in usbhost_connect() */
 
 #define USBHOST_IFFOUND     0x01
 #define USBHOST_BINFOUND    0x02
@@ -175,7 +175,7 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv);
 /* Worker thread actions */
 
 static void usbhost_destroy(FAR void *arg);
-static void usbhost_statemachine(FAR void *arg);
+static void usbhost_initvolume(FAR void *arg);
 static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker);
 
 /* (Little Endian) Data helpers */
@@ -201,8 +201,8 @@ static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
 
 /* struct usbhost_class_s methods */
 
-static int usbhost_configdesc(FAR struct usbhost_class_s *class,
-                              FAR const uint8_t *configdesc, int desclen);
+static int usbhost_connect(FAR struct usbhost_class_s *class,
+                           FAR const uint8_t *configdesc, int desclen);
 static int usbhost_disconnected(FAR struct usbhost_class_s *class);
 
 /* struct block_operations methods */
@@ -784,17 +784,16 @@ static void usbhost_destroy(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: usbhost_statemachine
+ * Name: usbhost_initvolume
  *
  * Description:
- *   The USB mass storage device has been successfully connected.  This is
- *   the state machine for initialization operations.  It is first called
- *   after the configuration descriptor has been received; after that it is
- *   called only on transfer completion events.
+ *   The USB mass storage device has been successfully connected.  This
+ *   completes the initialization operations.  It is first called after the
+ *   configuration descriptor has been received.
  *
- *   When the block driver is fully initialized and registered, the 
- *   completion handler will be called again and this function should no
- *   longer be executed.
+ *   This function is called from the connect() method.  It may either
+ *   execute on (1) the thread of the caller of connect(), or (2) if
+ *   connect() was called from an interrupt handler, on the worker thread.
  *
  * Input Parameters:
  *   arg - A reference to the class instance.
@@ -804,7 +803,7 @@ static void usbhost_destroy(FAR void *arg)
  *
  ****************************************************************************/
 
-static void usbhost_statemachine(FAR void *arg)
+static void usbhost_initvolume(FAR void *arg)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
   FAR struct usbstrg_csw_s *csw;
@@ -909,7 +908,7 @@ static void usbhost_statemachine(FAR void *arg)
 
   if (result == OK)
     {
-      /* Set up for normal operation as a block device driver */
+      /* Ready for normal operation as a block device driver */
 
       uvdbg("Successfully initialized\n");
     }
@@ -934,7 +933,7 @@ static void usbhost_statemachine(FAR void *arg)
  *   worker - A reference to the worker function to be executed
  *
  * Returned Values:
- *   A uin16_t representing the whole 16-bit integer value
+ *   None
  *
  ****************************************************************************/
 
@@ -968,7 +967,7 @@ static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker)
  *   val - A pointer to the first byte of the little endian value.
  *
  * Returned Values:
- *   A uin16_t representing the whole 16-bit integer value
+ *   A uint16_t representing the whole 16-bit integer value
  *
  ****************************************************************************/
 
@@ -987,7 +986,7 @@ static inline uint16_t usbhost_getle16(const uint8_t *val)
  *   val - A pointer to the first byte of the big endian value.
  *
  * Returned Values:
- *   A uin16_t representing the whole 16-bit integer value
+ *   A uint16_t representing the whole 16-bit integer value
  *
  ****************************************************************************/
 
@@ -1059,7 +1058,6 @@ static inline uint32_t usbhost_getbe32(const uint8_t *val)
 
   return (uint32_t)usbhost_getbe16(val) << 16 | (uint32_t)usbhost_getbe16(&val[2]);
 }
-
 
 /****************************************************************************
  * Name: usbhost_putle32
@@ -1250,7 +1248,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
         {
          /* Initialize class method function pointers */
 
-          priv->class.configdesc   = usbhost_configdesc;
+          priv->class.connect      = usbhost_connect;
           priv->class.disconnected = usbhost_disconnected;
 
           /* The initial reference count is 1... One reference is held by the driver */
@@ -1286,10 +1284,10 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  * struct usbhost_class_s methods
  ****************************************************************************/
 /****************************************************************************
- * Name: usbhost_configdesc
+ * Name: usbhost_connect
  *
  * Description:
- *   This function implemented the configdesc() method of struct
+ *   This function implements the connect() method of struct
  *   usbhost_class_s.  This method is a callback into the class
  *   implementation.  It is used to provide the device's configuration
  *   descriptor to the class so that the class may initialize properly
@@ -1303,10 +1301,15 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
+ * Assumptions:
+ *   This function is probably called on the same thread that called the driver
+ *   enumerate() method.  However, this function may also be called from an
+ *   interrupt handler.
+ *
  ****************************************************************************/
 
-static int usbhost_configdesc(FAR struct usbhost_class_s *class,
-                              FAR const uint8_t *configdesc, int desclen)
+static int usbhost_connect(FAR struct usbhost_class_s *class,
+                           FAR const uint8_t *configdesc, int desclen)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
   FAR struct usb_cfgdesc_s *cfgdesc;
@@ -1446,7 +1449,7 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
 
   /* Now configure the LUNs and register the block driver(s) */
 
-  usbhost_work(priv, usbhost_statemachine);
+  usbhost_work(priv, usbhost_initvolume);
   return OK;
 }
 
@@ -1466,6 +1469,9 @@ static int usbhost_configdesc(FAR struct usbhost_class_s *class,
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value
  *   is returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
  *
  ****************************************************************************/
 
