@@ -250,6 +250,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
+static int lpc17_wait(FAR struct usbhost_driver_s *drvr);
 static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr);
 static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
                          FAR uint8_t **buffer, FAR size_t *maxlen);
@@ -284,6 +285,7 @@ static struct lpc17_usbhost_s g_usbhost =
 {
   .drvr           =
     {
+	  .wait       = lpc17_wait,
       .enumerate  = lpc17_enumerate,
       .alloc      = lpc17_alloc,
       .free       = lpc17_free,
@@ -939,18 +941,55 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  *******************************************************************************/
 
 /*******************************************************************************
+ * Name: lpc17_wait
+ *
+ * Description:
+ *   Wait for a device to be connected.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned when a device in connected. This function will not
+ *   return until either (1) a device is connected or (2) some failure occurs.
+ *   On a failure, a negated errno value is returned indicating the nature of
+ *   the failure
+ *
+ * Assumptions:
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
+ *******************************************************************************/
+
+static int lpc17_wait(FAR struct usbhost_driver_s *drvr)
+{
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+
+  /* Are we already connected? */
+
+  while (!priv->connected)
+    {
+      /* No, wait for the connection */
+
+      lpc17_takesem(&priv->rhssem);
+    }
+
+  return OK;
+}
+
+/*******************************************************************************
  * Name: lpc17_enumerate
  *
  * Description:
- *   Enumerate the connected device.  This function will enqueue the
- *   enumeration process.  As part of this enumeration process, the driver
- *   will (1) get the device's configuration descriptor, (2) extract the class
- *   ID info from the configuration descriptor, (3) call usbhost_findclass()
- *   to find the class that supports this device, (4) call the create()
- *   method on the struct usbhost_registry_s interface to get a class
- *   instance, and finally (5) call the configdesc() method of the struct
- *   usbhost_class_s interface.  After that, the class is in charge of the
- *   sequence of operations.
+ *   Enumerate the connected device.  As part of this enumeration process,
+ *   the driver will (1) get the device's configuration descriptor, (2)
+ *   extract the class ID info from the configuration descriptor, (3) call
+ *   usbhost_findclass() to find the class that supports this device, (4)
+ *   call the create() method on the struct usbhost_registry_s interface
+ *   to get a class instance, and finally (5) call the configdesc() method
+ *   of the struct usbhost_class_s interface.  After that, the class is in
+ *   charge of the sequence of operations.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -975,7 +1014,17 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   uint8_t *td;
   int  ret;
 
-  ulldbg("Enumerate device\n");
+  /* Are we connected to a device?  The caller should have called the wait()
+   * method first to be assured that a device is connected.
+   */
+
+  while (!priv->connected)
+    {
+      /* No, return an error */
+
+	  return -ENODEV;
+    }
+  ulldbg("Enumerate the device\n");
 
   /* Allocate a TD buffer for use in this function */
 
@@ -985,15 +1034,6 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
       return -ENOMEM;
     }
   ctrlreq = (struct usb_ctrlreq_s *)td;
-
-  /* Are we already connected? */
-
-  while (!priv->connected)
-    {
-      /* No, wait for the connection */
-
-      lpc17_takesem(&priv->rhssem);
-    }
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
@@ -1499,19 +1539,34 @@ static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca)
  * Description:
  *   Initialize USB host device controller hardware.
  *
+ * Input Parameters:
+ *   controller -- If the device supports more than USB host controller, then
+ *     this identifies which controller is being intialized.  Normally, this
+ *     is just zero.
+ *
+ * Returned Value:
+ *   And instance of the USB host interface.  The controlling task should
+ *   use this interface to (1) call the wait() method to wait for a device
+ *   to be connected, and (2) call the enumerate() method to bind the device
+ *   to a class driver.
+ *
  * Assumptions:
- *   This function is called very early in the initialization sequence in order
+ * - This function should called in the initialization sequence in order
  *   to initialize the USB device functionality.
+ * - Class drivers should be initialized prior to calling this function.
+ *   Otherwise, there is a race condition if the device is already connected.
  *
  *******************************************************************************/
 
-void up_usbhostinitialize(void)
+FAR struct usbhost_driver_s *up_usbhostinitialize(int controller)
 {
   struct lpc17_usbhost_s *priv = &g_usbhost;
   uint32_t regval;
   uint8_t *tdfree;
   irqstate_t flags;
   int i;
+
+  DEBUGASSERT(controller == 0);
 
   /* Initialize the state data structure */
 
@@ -1627,7 +1682,7 @@ void up_usbhostinitialize(void)
   if (irq_attach(LPC17_IRQ_USB, lpc17_usbinterrupt) != 0)
     {
       udbg("Failed to attach IRQ\n");
-      return;
+      return NULL;
     }
 
   /* Enable USB interrupts at the SYCON controller */
@@ -1642,4 +1697,5 @@ void up_usbhostinitialize(void)
 
   up_enable_irq(LPC17_IRQ_USB); /* enable USB interrupt */
   udbg("USB host Initialized\n");
+  return &priv->drvr;
 }
