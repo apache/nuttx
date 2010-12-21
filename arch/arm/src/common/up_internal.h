@@ -275,12 +275,6 @@ extern void up_usbuninitialize(void);
 # define up_usbuninitialize()
 #endif
 
-#ifdef CONFIG_USBHOST
-extern void up_usbhostinitialize(void);
-#else
-# define up_usbhostinitialize()
-#endif
-
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __UP_INTERNAL_H */

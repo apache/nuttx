@@ -140,19 +140,41 @@
 
 #define CLASS_DISCONNECTED(class) ((class)->disconnected(class))
 
+/*******************************************************************************
+ * Name: DRVR_WAIT
+ *
+ * Description:
+ *   Wait for a device to be connected.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned when a device in connected. This function will not
+ *   return until either (1) a device is connected or (2) some failure occurs.
+ *   On a failure, a negated errno value is returned indicating the nature of
+ *   the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ *******************************************************************************/
+
+#define DRVR_WAIT(drvr) ((drvr)->wait(drvr))
+
 /************************************************************************************
  * Name: DRVR_ENUMERATE
  *
  * Description:
- *   Enumerate the connected device.  This function will enqueue the
- *   enumeration process.  As part of this enumeration process, the driver
- *   will (1) get the device's configuration descriptor, (2) extract the class
- *   ID info from the configuration descriptor, (3) call usbhost_findclass()
- *   to find the class that supports this device, (4) call the create()
- *   method on the struct usbhost_registry_s interface to get a class
- *   instance, and finally (5) call the configdesc() method of the struct
- *   usbhost_class_s interface.  After that, the class is in charge of the
- *   sequence of operations.
+ *   Enumerate the connected device.  As part of this enumeration process,
+ *   the driver will (1) get the device's configuration descriptor, (2)
+ *   extract the class ID info from the configuration descriptor, (3) call
+ *   usbhost_findclass() to find the class that supports this device, (4)
+ *   call the create() method on the struct usbhost_registry_s interface
+ *   to get a class instance, and finally (5) call the configdesc() method
+ *   of the struct usbhost_class_s interface.  After that, the class is in
+ *   charge of the sequence of operations.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -389,15 +411,18 @@ struct usbhost_class_s
 struct usbhost_epdesc_s;
 struct usbhost_driver_s
 {
-  /* Enumerate the connected device.  This function will enqueue the
-   * enumeration process.  As part of this enumeration process, the driver
-   * will (1) get the device's configuration descriptor, (2) extract the class
-   * ID info from the configuration descriptor, (3) call usbhost_findclass()
-   * to find the class that supports this device, (4) call the create()
-   * method on the struct usbhost_registry_s interface to get a class
-   * instance, and finally (5) call the configdesc() method of the struct
-   * usbhost_class_s interface.  After that, the class is in charge of the
-   * sequence of operations.
+  /* Wait for a device to connect. */
+
+  int (*wait)(FAR struct usbhost_driver_s *drvr);
+
+  /* Enumerate the connected device.  As part of this enumeration process,
+   * the driver will (1) get the device's configuration descriptor, (2)
+   * extract the class ID info from the configuration descriptor, (3) call
+   * usbhost_findclass() to find the class that supports this device, (4)
+   * call the create() method on the struct usbhost_registry_s interface
+   * to get a class instance, and finally (5) call the configdesc() method
+   * of the struct usbhost_class_s interface.  After that, the class is in
+   * charge of the sequence of operations.
    */
 
   int (*enumerate)(FAR struct usbhost_driver_s *drvr);
@@ -538,6 +563,33 @@ EXTERN const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_i
  ****************************************************************************/
 
 EXTERN int usbhost_storageinit(void);
+
+/*******************************************************************************
+ * Name: up_usbhostinitialize
+ *
+ * Description:
+ *   Initialize USB host device controller hardware.
+ *
+ * Input Parameters:
+ *   controller -- If the device supports more than USB host controller, then
+ *     this identifies which controller is being intialized.  Normally, this
+ *     is just zero.
+ *
+ * Returned Value:
+ *   And instance of the USB host interface.  The controlling task should
+ *   use this interface to (1) call the wait() method to wait for a device
+ *   to be connected, and (2) call the enumerate() method to bind the device
+ *   to a class driver.
+ *
+ * Assumptions:
+ * - This function should called in the initialization sequence in order
+ *   to initialize the USB device functionality.
+ * - Class drivers should be initialized prior to calling this function.
+ *   Otherwise, there is a race condition if the device is already connected.
+ *
+ *******************************************************************************/
+
+EXTERN FAR struct usbhost_driver_s *usbhost_initialize(int controller);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -164,7 +164,5 @@ void up_initialize(void)
   /* Initialize USB -- device and/or host */
 
   up_usbinitialize();
-  up_usbhostinitialize();
-
   up_ledon(LED_IRQSENABLED);
 }
