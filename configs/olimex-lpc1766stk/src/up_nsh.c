@@ -46,6 +46,7 @@
 
 #include <nuttx/spi.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/usb/usbhost.h>
 
 #include "lpc17_internal.h"
 #include "lpc1766stk_internal.h"
@@ -60,6 +61,7 @@
 
 #ifdef CONFIG_ARCH_BOARD_LPC1766STK
 #  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
+#  define CONFIG_EXAMPLES_NSH_HAVEUSBHOST  1
 #  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 1
 #    error "The LPC1766-STK MMC/SD is on SSP1"
 #    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
@@ -72,10 +74,12 @@
 #  endif
 #  ifndef CONFIG_LPC17_SSP1
 #    warning "CONFIG_LPC17_SSP1 is not enabled"
+#    undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
 #  endif
 #else
 #  error "Unrecognized board"
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
@@ -86,6 +90,33 @@
 
 #ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR
 #  define CONFIG_EXAMPLES_NSH_MMCSDMINOR 0
+#endif
+
+/* USB Host */
+
+#ifdef CONFIG_USBHOST
+#  ifndef CONFIG_LPC17_USBHOST
+#    error "CONFIG_LPC17_USBHOST is not selected"
+#  endif
+#endif
+
+#ifdef CONFIG_LPC17_USBHOST
+#  ifndef CONFIG_USBHOST
+#    warning "CONFIG_USBHOST is not selected"
+#  endif
+#endif
+
+#if !defined(CONFIG_USBHOST) || !defined(CONFIG_LPC17_USBHOST)
+#  undef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+#endif
+
+#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+#  ifndef CONFIG_USBHOST_DEFPRIO
+#    define CONFIG_USBHOST_DEFPRIO 50
+#  endif
+#  ifndef CONFIG_USBHOST_STACKSIZE
+#    define CONFIG_USBHOST_STACKSIZE 1024
+#  endif
 #endif
 
 /* Debug ********************************************************************/
@@ -105,18 +136,65 @@
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+static struct usbhost_driver_s *g_drvr;
+#endif
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: nsh_waiter
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Wait for USB devices to be connected.
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+static int nsh_waiter(int argc, char *argv[])
+{
+  bool connected = false;
+  int ret;
+
+  for (;;)
+    {
+      /* Wait for the device to change state */
+
+      ret = DRVR_WAIT(g_drvr, connected);
+      DEBUGASSERT(ret == OK);
+      connected = !connected;
+
+      /* Did we just become connected? */
+
+      if (connected)
+        {
+          /* Yes.. enumerate the newly connected device */
+
+          (void)DRVR_ENUMERATE(g_drvr);
+        }
+    }
+
+  /* Keep the compiler from complaining */
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: nsh_sdinitialize
+ *
+ * Description:
+ *   Initialize SPI-based microSD.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+static int nsh_sdinitialize(void)
 {
   FAR struct spi_dev_s *ssp;
   int ret;
@@ -145,7 +223,7 @@ int nsh_archinitialize(void)
                                CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ssp);
   if (ret < 0)
     {
-      message("nsh_archinitialize: "
+      message("nsh_sdinitialize: "
               "Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
               CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO,
               CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ret);
@@ -161,5 +239,72 @@ int nsh_archinitialize(void)
 
 errout:
   lpc17_gpiowrite(LPC1766STK_MMC_PWR, true);
+  return ret;
+}
+#else
+#  define nsh_sdinitialize() (OK)
+#endif
+
+/****************************************************************************
+ * Name: nsh_usbhostinitialize
+ *
+ * Description:
+ *   Initialize SPI-based microSD.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+static int nsh_usbhostinitialize(void)
+{
+  int pid;
+
+  /* First, get an instance of the USB host interface */
+
+  g_drvr = usbhost_initialize(0);
+  if (g_drvr)
+    {
+      /* Start a thread to handle device connection. */
+
+#ifndef CONFIG_CUSTOM_STACK
+      pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
+                        CONFIG_USBHOST_STACKSIZE,
+                        (main_t)nsh_waiter, (const char **)NULL);
+#else
+      pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
+                        (main_t)nsh_waiter, (const char **)NULL);
+#endif
+      return pid < 0 ? -ENOEXEC : OK;
+    }
+  return -ENODEV;
+}
+#else
+#  define nsh_usbhostinitialize() (OK)
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ ****************************************************************************/
+
+int nsh_archinitialize(void)
+{
+  int ret;
+
+  /* Initialize SPI-based microSD */
+
+  ret = nsh_sdinitialize();
+  if (ret == OK)
+    {
+      /* Initialize USB host */
+
+      ret = nsh_usbhostinitialize();
+    }
   return ret;
 }
