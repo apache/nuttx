@@ -263,12 +263,14 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   req - Describes the request to be sent.  This data will be copied from the
- *      user provided memory.  Therefore, the req buffer may be declared on the
- *      stack.
+ *   req - Describes the request to be sent.  This request must lie in memory
+ *      created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
  *     responses.  This buffer must be large enough to hold the length value
- *     in the request description. buffer must have been allocated using DRVR_ALLOC
+ *     in the request description. buffer must have been allocated using DRVR_ALLOC.
+ *
+ *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
+ *   memory.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is

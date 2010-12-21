@@ -190,8 +190,8 @@ static void usbhost_putbe32(uint8_t *dest, uint32_t val);
 
 /* Transfer descriptor memory management */
 
-static int usbhost_tdalloc(FAR struct usbhost_state_s *priv);
-static int usbhost_tdfree(FAR struct usbhost_state_s *priv);
+static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv);
+static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv);
 static FAR struct usbstrg_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
@@ -578,25 +578,20 @@ usbhost_writecbw(size_t startsector, uint16_t blocksize,
 
 static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
 {
-  struct usb_ctrlreq_s req;
-  int result;
- 
-  /* Make sure that we have a buffer allocated */
+  FAR struct usb_ctrlreq_s *req = (FAR struct usb_ctrlreq_s *)priv->tdbuffer;
+  DEBUGASSERT(priv && priv->tdbuffer);
 
-  result = usbhost_tdalloc(priv);
-  if (result == OK)
-    {
-      /* Request maximum logical unit number */
+  /* Request maximum logical unit number.  NOTE: On an IN transaction, The
+   * req and buffer pointers passed to DRVR_CTRLIN may refer to the same
+   * allocated memory.
+   */
 
-      uvdbg("Request maximum logical unit number\n");
-      memset(&req, 0, sizeof(struct usb_ctrlreq_s));
-      req.type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
-      req.req     = USBSTRG_REQ_GETMAXLUN;
-      usbhost_putle16(req.len, 1);
-
-      result      = DRVR_CTRLIN(priv->drvr, &req, priv->tdbuffer);
-    }
-  return result;
+  uvdbg("Request maximum logical unit number\n");
+  memset(req, 0, sizeof(struct usb_ctrlreq_s));
+  req->type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
+  req->req     = USBSTRG_REQ_GETMAXLUN;
+  usbhost_putle16(req->len, 1);
+  return DRVR_CTRLIN(priv->drvr, req, priv->tdbuffer);
 }
 
 static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
@@ -604,7 +599,7 @@ static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
   FAR struct usbstrg_cbw_s *cbw;
   int result = -ENOMEM;
 
-  /* Initialize a CBW (allocating it if necessary) */
+  /* Initialize a CBW (re-using the allocated transfer buffer) */
  
   cbw = usbhost_cbwalloc(priv);
   if (cbw)
@@ -630,7 +625,7 @@ static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
   FAR struct usbstrg_cbw_s *cbw;
   int result = -ENOMEM;
 
-  /* Initialize a CBW (allocating it if necessary) */
+  /* Initialize a CBW (re-using the allocated transfer buffer) */
  
   cbw = usbhost_cbwalloc(priv);
   if (cbw)
@@ -664,7 +659,7 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
   FAR struct scsiresp_readcapacity10_s *resp;
   int result = -ENOMEM;
 
-  /* Initialize a CBW (allocating it if necessary) */
+  /* Initialize a CBW (re-using the allocated transfer buffer) */
  
   cbw = usbhost_cbwalloc(priv);
   if (cbw)
@@ -704,7 +699,7 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
   FAR struct scsiresp_inquiry_s *resp;
   int result = -ENOMEM;
 
-  /* Initialize a CBW (allocating it if necessary) */
+  /* Initialize a CBW (re-using the allocated transfer buffer) */
  
   cbw = usbhost_cbwalloc(priv);
   if (cbw)
@@ -811,6 +806,15 @@ static void usbhost_initvolume(FAR void *arg)
   int result = OK;
 
   DEBUGASSERT(priv != NULL);
+
+  /* Set aside a transfer buffer for exclusive use by the mass storage driver */
+
+  result = usbhost_tdalloc(priv);
+  if (result != OK)
+    {
+      udbg("Failed to allocate transfer buffer\n");
+      return;
+    }
 
   /* Request the maximum logical unit number */
 
@@ -1120,17 +1124,10 @@ static void usbhost_putbe32(uint8_t *dest, uint32_t val)
  *
  ****************************************************************************/
 
-static int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
+static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
 {
-  int result = OK;
-
-  /* Is a descriptor already allocated? */
-
-  if (!priv->tdbuffer)
-    {
-      result = DRVR_ALLOC(priv->drvr, &priv->tdbuffer, &priv->tdbuflen);
-    }
-  return result;
+  DEBUGASSERT(priv && priv->tdbuffer == NULL);
+  return DRVR_ALLOC(priv->drvr, &priv->tdbuffer, &priv->tdbuflen);
 }
 
 /****************************************************************************
@@ -1148,18 +1145,14 @@ static int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
  *
  ****************************************************************************/
 
-static int usbhost_tdfree(FAR struct usbhost_state_s *priv)
+static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
 {
-  int result = OK;
+  int result;
+  DEBUGASSERT(priv && priv->tdbuffer != NULL);
 
-  /* Is a descriptor already allocated? */
-
-  if (!priv->tdbuffer)
-    {
-      result         = DRVR_FREE(priv->drvr, priv->tdbuffer);
-      priv->tdbuffer = NULL;
-      priv->tdbuflen = 0;
-    }
+  result         = DRVR_FREE(priv->drvr, priv->tdbuffer);
+  priv->tdbuffer = NULL;
+  priv->tdbuflen = 0;
   return result;
 }
 
@@ -1167,8 +1160,8 @@ static int usbhost_tdfree(FAR struct usbhost_state_s *priv)
  * Name: usbhost_cbwalloc
  *
  * Description:
- *   Allocate and initialize a CBW. Upon successful return, the CBW is cleared
- *   and has the CBW signature in place.
+ *   Initialize a CBW (re-using the allocated transfer buffer). Upon
+ *   successful return, the CBW is cleared and has the CBW signature in place.
  *
  * Input Parameters:
  *   priv - A reference to the class instance.
@@ -1181,19 +1174,14 @@ static int usbhost_tdfree(FAR struct usbhost_state_s *priv)
 static FAR struct usbstrg_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbstrg_cbw_s *cbw = NULL;
-  int result;
 
-  /* Allocate any special memory that the the driver may have for us */
+  DEBUGASSERT(priv->tdbuffer && priv->tdbuflen >= sizeof(struct usbstrg_cbw_s))
 
-  result = usbhost_tdalloc(priv);
-  if (result == OK && priv->tdbuflen >= sizeof(struct usbstrg_cbw_s))
-    {
-      /* Intialize the CBW sructure */
+  /* Intialize the CBW sructure */
 
-      cbw = (FAR struct usbstrg_cbw_s *)priv->tdbuffer;
-      memset(cbw, 0, sizeof(struct usbstrg_cbw_s));
-      usbhost_putle32(cbw->signature, USBSTRG_CBW_SIGNATURE);
-    }
+  cbw = (FAR struct usbstrg_cbw_s *)priv->tdbuffer;
+  memset(cbw, 0, sizeof(struct usbstrg_cbw_s));
+  usbhost_putle32(cbw->signature, USBSTRG_CBW_SIGNATURE);
   return cbw;
 }
 
@@ -1635,7 +1623,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
 
       ret = -ENOMEM;
 
-      /* Initialize a CBW (allocating it if necessary) */
+      /* Initialize a CBW (re-using the allocated transfer buffer) */
  
       cbw = usbhost_cbwalloc(priv);
       if (cbw)
@@ -1727,7 +1715,7 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
 
       ret = -ENOMEM;
 
-      /* Initialize a CBW (allocating it if necessary) */
+      /* Initialize a CBW (re-using the allocated transfer buffer) */
  
       cbw = usbhost_cbwalloc(priv);
       if (cbw)

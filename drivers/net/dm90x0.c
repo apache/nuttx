@@ -1763,7 +1763,7 @@ int dm9x_initialize(void)
 
   if (vid != DM9X_DAVICOMVID || (pid != DM9X_DM9000PID && pid != DM9X_DM9010PID))
     {
-      nlldbg("DM90x0 vender/product ID not found at this base address\n");
+      nlldbg("DM90x0 vendor/product ID not found at this base address\n");
       return -ENODEV;
     }
 

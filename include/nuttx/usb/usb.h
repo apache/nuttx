@@ -230,7 +230,7 @@ struct usb_devdesc_s
   uint8_t subclass;          /* Device sub-class */
   uint8_t protocol;          /* Device protocol */
   uint8_t mxpacketsize;      /* Max packet size (ep0) */
-  uint8_t vender[2];         /* Vendor ID */
+  uint8_t vendor[2];         /* Vendor ID */
   uint8_t product[2];        /* Product ID */
   uint8_t device[2];         /* Device ID */
   uint8_t imfgr;             /* Manufacturer */
