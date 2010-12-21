@@ -707,8 +707,6 @@ static inline int lpc17_devdesc(struct lpc17_usbhost_s *priv,
                                 const struct usb_devdesc_s *devdesc, int desclen,
                                 struct usbhost_id_s *id)
 {
-  int ret = -EINVAL;
-
   /* Clear the ID info */
 
   memset(id, 0, sizeof(struct usbhost_id_s));
@@ -1025,7 +1023,7 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
 
   while (priv->connected == connected)
     {
-      /* No, wait for the connection/disconnection */
+      /* No... wait for the connection/disconnection */
 
       lpc17_takesem(&priv->rhssem);
     }
@@ -1078,9 +1076,10 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
     {
       /* No, return an error */
 
+      udbg("Not connected\n");
 	  return -ENODEV;
     }
-  ulldbg("Enumerate the device\n");
+  uvdbg("Enumerate the device\n");
 
   /* Allocate TD buffers for use in this function.  We will need two:
    * One for the request and one for the data buffer.
@@ -1089,12 +1088,14 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ctrlreq = (struct usb_ctrlreq_s *)lpc17_tdalloc(priv);
   if (!ctrlreq)
     {
+      udbg("lpc17_tdalloc() failed\n");
       return -ENOMEM;
     }
 
   buffer = lpc17_tdalloc(priv);
   if (!buffer)
     {
+      udbg("lpc17_tdalloc() failed\n");
       ret = -ENOMEM;
       goto errout;
     }
@@ -1131,7 +1132,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ret = lpc17_ctrlin(drvr, ctrlreq, buffer);
   if (ret != OK)
     {
-      ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
+      udbg("ERROR: GETDESCRIPTOR/DEVICE, lpc17_ctrlin returned %d\n", ret);
       goto errout;
     }
 
@@ -1150,10 +1151,12 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
      * a device to support multiple, different classes.
      */
 
-    ret = lpc17_devdesc(priv, devdesc, 8, &id);
+    (void)lpc17_devdesc(priv, devdesc, 8, &id);
 
     /* NOTE: Additional logic is needed here.  We will need additional logic
-     * to extract the vendor/product IDs from the (full) device descriptor.
+     * to (1) get the full device descriptor, (1) extract the vendor/product IDs
+     * and (2) extract the number of configurations from the (full) device
+     * descriptor.
      */
   }
 
@@ -1168,7 +1171,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ret = lpc17_ctrlout(drvr, ctrlreq, NULL);
   if (ret != OK)
     {
-      ulldbg("ERROR: lpc17_ctrlout returned %d\n", ret);
+      udbg("ERROR: SETADDRESS lpc17_ctrlout returned %d\n", ret);
       goto errout;
     }
   up_mdelay(2);
@@ -1177,7 +1180,9 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 
   EDCTRL->ctrl = (EDCTRL->ctrl) | 1;
 
- /* Get the configuration descriptor (only) */
+ /* Get the configuration descriptor (only), index == 0.  More logic is
+  * needed in order to handle devices with multiple configurations.
+  */
 
   ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
@@ -1188,7 +1193,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ret = lpc17_ctrlin(drvr, ctrlreq, buffer);
   if (ret != OK)
    {
-      ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
+      udbg("ERROR: GETDESCRIPTOR/CONFIG, lpc17_ctrlin returned %d\n", ret);
       goto errout;
     }
 
@@ -1196,7 +1201,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 
   len = ((struct usb_cfgdesc_s *)buffer)->len;
 
-  /* Get all of the configuration data */
+  /* Get all of the configuration descriptor data, index == 0 */
 
   ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
@@ -1207,7 +1212,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ret = lpc17_ctrlin(drvr, ctrlreq, buffer);
   if (ret != OK)
     {
-      ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
+      udbg("ERROR: GETDESCRIPTOR/CONFIG, lpc17_ctrlin returned %d\n", ret);
       goto errout;
     }
 
@@ -1222,7 +1227,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ret = lpc17_ctrlout(drvr, ctrlreq, NULL);
   if (ret != OK)
     {
-      ulldbg("ERROR: lpc17_ctrlout returned %d\n", ret);
+      udbg("ERROR: SETCONFIGURATION, lpc17_ctrlout returned %d\n", ret);
       goto errout;
     }
 
@@ -1248,7 +1253,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
       ret = lpc17_configdesc(priv, buffer, len, &id);
       if (ret != OK)
         {
-          ulldbg("ERROR: lpc17_configdesc returned %d\n", ret);
+          udbg("ERROR: lpc17_configdesc returned %d\n", ret);
           goto errout;
         }
     }
@@ -1265,7 +1270,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ret = lpc17_classbind(priv, buffer, len, &id);
   if (ret != OK)
     {
-      ulldbg("ERROR: MS_ParseConfiguration returned %d\n", ret);
+      udbg("ERROR: lpc17_classbind returned %d\n", ret);
     }
 
 errout:
