@@ -1014,7 +1014,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct usb_ctrlreq_s *ctrlreq;
   unsigned int len;
-  uint8_t *td;
+  uint8_t *buffer;
   int  ret;
 
   /* Are we connected to a device?  The caller should have called the wait()
@@ -1029,14 +1029,22 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
     }
   ulldbg("Enumerate the device\n");
 
-  /* Allocate a TD buffer for use in this function */
+  /* Allocate TD buffers for use in this function.  We will need two:
+   * One for the request and one for the data buffer.
+   */
 
-  td = lpc17_tdalloc(priv);
-  if (!td)
+  ctrlreq = (struct usb_ctrlreq_s *)lpc17_tdalloc(priv);
+  if (!ctrlreq)
     {
       return -ENOMEM;
     }
-  ctrlreq = (struct usb_ctrlreq_s *)td;
+
+  buffer = lpc17_tdalloc(priv);
+  if (!buffer)
+    {
+      ret = -ENOMEM;
+      goto errout_nobuffer;
+    }
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
@@ -1067,7 +1075,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   lpc17_putle16(ctrlreq->index, 0);
   lpc17_putle16(ctrlreq->len, 8);
 
-  ret = lpc17_ctrlin(drvr, ctrlreq, td);
+  ret = lpc17_ctrlin(drvr, ctrlreq, buffer);
   if (ret != OK)
     {
       ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
@@ -1076,7 +1084,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 
   /* Extract the max packetsize for endpoint 0 */
 
-  EDCTRL->ctrl = (uint32_t)(((struct usb_devdesc_s *)td)->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
+  EDCTRL->ctrl = (uint32_t)(((struct usb_devdesc_s *)buffer)->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
 
   /* Set the device address to 1 */
 
@@ -1106,7 +1114,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   lpc17_putle16(ctrlreq->index, 0);
   lpc17_putle16(ctrlreq->len, USB_SIZEOF_CFGDESC);
 
-  ret = lpc17_ctrlin(drvr, ctrlreq, td);
+  ret = lpc17_ctrlin(drvr, ctrlreq, buffer);
   if (ret != OK)
    {
       ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
@@ -1115,7 +1123,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 
   /* Extract the full size of the configuration data */
 
-  len = ((struct usb_cfgdesc_s *)td)->len;
+  len = ((struct usb_cfgdesc_s *)buffer)->len;
 
   /* Get all of the configuration data */
 
@@ -1125,21 +1133,10 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   lpc17_putle16(ctrlreq->index, 0);
   lpc17_putle16(ctrlreq->len, len);
 
-  ret = lpc17_ctrlin(drvr, ctrlreq, td);
+  ret = lpc17_ctrlin(drvr, ctrlreq, buffer);
   if (ret != OK)
     {
       ulldbg("ERROR: lpc17_ctrlin returned %d\n", ret);
-      goto errout;
-    }
-
-  /* Parse the configuration descriptor and bind to the class instance for the
-   * device.
-   */
-
-  ret = lpc17_classbind(priv, td, len);
-  if (ret != OK)
-    {
-      ulldbg("ERROR: MS_ParseConfiguration returned %d\n", ret);
       goto errout;
     }
 
@@ -1154,16 +1151,29 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ret = lpc17_ctrlout(drvr, ctrlreq, NULL);
   if (ret != OK)
     {
-      ulldbg("ERROR: lpc17_ctrlout returned %d\n", ret);
+      ulldbg("ERROR: uint16 returned %d\n", ret);
       goto errout;
     }
 
-  /* Some devices may require this delay */
+  /* Some devices may require this delay before initialization */
 
   up_mdelay(100);
 
+  /* Parse the configuration descriptor and bind to the class instance for the
+   * device.  This needs to be the last thing done because the class driver
+   * will begin configuring the device.
+   */
+
+  ret = lpc17_classbind(priv, buffer, len);
+  if (ret != OK)
+    {
+      ulldbg("ERROR: MS_ParseConfiguration returned %d\n", ret);
+    }
+
 errout:
-  lpc17_tdfree(priv, td);
+  lpc17_tdfree(priv, buffer);
+errout_nobuffer:
+  lpc17_tdfree(priv, (uint8_t*)ctrlreq);
   return ret;
 }
 

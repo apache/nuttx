@@ -132,11 +132,11 @@
 /* Configurable number of descriptor buffer (TDBUFFER) */
 
 #ifndef CONFIG_USBHOST_TDBUFFERS
-#  define CONFIG_USBHOST_TDBUFFERS 1
+#  define CONFIG_USBHOST_TDBUFFERS 2
 #endif
 
-#if CONFIG_USBHOST_TDBUFFERS < 1
-#  error "At least one TD buffer is required"
+#if CONFIG_USBHOST_TDBUFFERS < 2
+#  error "At least two TD buffers are required"
 #endif
 
 /* Configurable size of a TD buffer */
@@ -170,36 +170,35 @@
  *    LPC17_BANK1_SIZE            16384
  *
  *  Configuration:
- *    CONFIG_USBHOST_OHCIRAM_SIZE 1024
- *    CONFIG_USBHOST_NTDS         1
+ *    CONFIG_USBHOST_OHCIRAM_SIZE 1280
+ *    CONFIG_USBHOST_NTDS         2
  *    CONFIG_USBHOST_NEDS         2
  *    CONFIG_USBHOST_TDBUFFERS    1
  *    CONFIG_USBHOST_TDBUFSIZE    128
  *    CONFIG_USBHOST_IOBUFSIZE    512
  *
  *  Sizes of things
- *    CONFIG_USBHOST_NEDS         2
  *    LPC17_EDFREE_SIZE           48
- *    LPC17_TDFREE_SIZE           128
+ *    LPC17_TDFREE_SIZE           256
  *    LPC17_IOFREE_SIZE           512
  *
  *  Memory Layout
  *    LPC17_OHCIRAM_END          (0x20008000 + 16384) = 0x2000c000
- *    LPC17_OHCIRAM_BASE         (0x2000c000 - 1024) = 0x2000bc00
- *    LPC17_OHCIRAM_SIZE          1024
+ *    LPC17_OHCIRAM_BASE         (0x2000c000 - 1280) = 0x2000bb00
+ *    LPC17_OHCIRAM_SIZE          1280
  *    LPC17_BANK1_HEAPBASE        0x20008000
- *    LPC17_BANK1_HEAPSIZE       (16384 - 1024) = 15360
+ *    LPC17_BANK1_HEAPSIZE       (16384 - 1280) = 15104
  *
- *    LPC17_HCCA_BASE             0x2000bc00
- *    LPC17_TDHEAD_ADDR           0x2000bd00
- *    LPC17_TDTAIL_ADDR           0x2000bd10
- *    LPC17_EDCTRL_ADDR           0x2000bd20
- *    LPC17_EDFREE_BASE           0x2000bd30
- *    LPC17_TDFREE_BASE           0x2000bd50
- *    LPC17_IOFREE_BASE           0x2000bdd0
- *    LPC17_IOBUFFERS            (0x2000c000 + 0x2000bdd0) / 512 = 560/512 = 1
+ *    LPC17_HCCA_BASE             0x2000bb00
+ *    LPC17_TDHEAD_ADDR           0x2000bc00
+ *    LPC17_TDTAIL_ADDR           0x2000bc10
+ *    LPC17_EDCTRL_ADDR           0x2000bc20
+ *    LPC17_EDFREE_BASE           0x2000bc30
+ *    LPC17_TDFREE_BASE           0x2000bc50
+ *    LPC17_IOFREE_BASE           0x2000bd50
+ *    LPC17_IOBUFFERS            (0x2000c000 - 0x2000bd50) / 512 = 688/512 = 1
  *
- *  Wasted memory:                560-512 = 48 bytes
+ *  Wasted memory:                688-512 = 176 bytes
  */
 
 #define LPC17_HCCA_BASE     (LPC17_OHCIRAM_BASE)
