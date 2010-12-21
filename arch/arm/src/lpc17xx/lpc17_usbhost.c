@@ -793,12 +793,12 @@ static int lpc17_classbind(struct lpc17_usbhost_s *priv,
           uvdbg("CLASS_CREATE: %p\n", priv->class);
           if (priv->class)
             {
-              /* Then initialize the newly instantiated class instance */
+              /* Then bind the newly instantiated class instance */
 
-              ret = CLASS_CONFIGDESC(priv->class, configdesc, desclen);
+              ret = CLASS_CONNECT(priv->class, configdesc, desclen);
               if (ret != OK)
                 {
-                  udbg("CLASS_CONFIGDESC failed: %d\n", ret);
+                  udbg("CLASS_CONNECT failed: %d\n", ret);
                   CLASS_DISCONNECTED(priv->class);
                   priv->class = NULL;
                 }
