@@ -1369,8 +1369,8 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
   /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
 
 #ifdef CONFIG_UBHOST_AHBIOBUFFERS
-  if ((uintptr_t)buffer >= LPC17_SRAM_BANK0 &&
-      (uintptr_t)buffer < (LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0))
+  if ((uintptr_t)buffer < LPC17_SRAM_BANK0 ||
+      (uintptr_t)buffer >= (LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0))
     {
       /* Allocate an IO buffer in AHB SRAM */
 
