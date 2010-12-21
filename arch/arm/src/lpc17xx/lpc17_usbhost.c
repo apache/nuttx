@@ -239,11 +239,15 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 
 /* Class helper functions ******************************************************/
 
-static int inline lpc17_configdesc(struct lpc17_usbhost_s *priv,
+static inline int lpc17_devdesc(struct lpc17_usbhost_s *priv,
+                                const struct usb_devdesc_s *devdesc, int desclen,
+                                struct usbhost_id_s *id);
+static inline int lpc17_configdesc(struct lpc17_usbhost_s *priv,
                                    const uint8_t *configdesc, int desclen,
                                    struct usbhost_id_s *id);
-static int lpc17_classbind(struct lpc17_usbhost_s *priv,
-                           const uint8_t *configdesc, int desclen);
+static inline int lpc17_classbind(struct lpc17_usbhost_s *priv,
+                                  const uint8_t *configdesc, int desclen,
+                                  struct usbhost_id_s *id);
 
 /* Interrupt handling **********************************************************/
 
@@ -631,7 +635,7 @@ static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
 }
 
 /*******************************************************************************
- * Name: lpc17_configdesc
+ * Name: lpc17_ctrltd
  *
  * Description:
  *   Process a IN or OUT request on the control endpoint.  This function
@@ -690,6 +694,49 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
     }
 }
 
+/*******************************************************************************
+ * Name: lpc17_devdesc
+ *
+ * Description:
+ *   A configuration descriptor has been obtained from the device.  Find the
+ *   ID information for the class that supports this device.
+ *
+ *******************************************************************************/
+
+static inline int lpc17_devdesc(struct lpc17_usbhost_s *priv,
+                                const struct usb_devdesc_s *devdesc, int desclen,
+                                struct usbhost_id_s *id)
+{
+  int ret = -EINVAL;
+
+  /* Clear the ID info */
+
+  memset(id, 0, sizeof(struct usbhost_id_s));
+
+  /* Check we have enough of the structure to see the ID info. */
+
+  if (desclen >= 7)
+    {
+      /* Pick off the ID info */
+
+      id->base     = devdesc->class;
+      id->subclass = devdesc->subclass;
+      id->proto    = devdesc->protocol;
+
+      /* Check if we have enough of the structure to see the VID/PID */
+
+      if (desclen >= 12)
+        {
+          /* Yes, then pick off the VID and PID as well */
+
+          id->vid = lpc17_getle16(devdesc->vendor);
+          id->pid = lpc17_getle16(devdesc->product);
+        }
+    }
+
+  return OK;
+}
+                                
 /*******************************************************************************
  * Name: lpc17_configdesc
  *
@@ -771,47 +818,42 @@ lpc17_configdesc(struct lpc17_usbhost_s *priv, const uint8_t *configdesc,
  *
  *******************************************************************************/
 
-static int lpc17_classbind(struct lpc17_usbhost_s *priv,
-                           const uint8_t *configdesc, int desclen)
+static inline int lpc17_classbind(struct lpc17_usbhost_s *priv,
+                                  const uint8_t *configdesc, int desclen,
+                                  struct usbhost_id_s *id)
 {
-  struct usbhost_id_s id;
-  int ret;
+  const struct usbhost_registry_s *reg;
+  int ret = -EINVAL;
 
   DEBUGASSERT(priv && priv->class == NULL);
-
-  /* Get the class identification information for this device. */
-
-  ret = lpc17_configdesc(priv, configdesc, desclen, &id);
-  uvdbg("lpc17_configdesc: %d\n", ret);
-  if (ret)
+  if (id->base == USB_CLASS_VENDOR_SPEC)
     {
-      /* So if there is a class implementation registered to support this
-       * device.
+      udbg("BUG: More logic needed to extract VID and PID\n");
+    }
+
+  /* Is there is a class implementation registered to support this device. */
+
+  reg = usbhost_findclass(id);
+  uvdbg("usbhost_findclass: %p\n", reg);
+  if (reg)
+    {
+      /* Yes.. there is a class for this device.  Get an instance of
+       * its interface.
        */
 
-      ret = -EINVAL;
-      const struct usbhost_registry_s *reg = usbhost_findclass(&id);
-      uvdbg("usbhost_findclass: %p\n", reg);
-      if (reg)
+      ret = -ENOMEM;
+      priv->class = CLASS_CREATE(reg, &priv->drvr, id);
+      uvdbg("CLASS_CREATE: %p\n", priv->class);
+      if (priv->class)
         {
-          /* Yes.. there is a class for this device.  Get an instance of
-           * its interface.
-           */
+          /* Then bind the newly instantiated class instance */
 
-          ret = -ENOMEM;
-          priv->class = CLASS_CREATE(reg, &priv->drvr, &id);
-          uvdbg("CLASS_CREATE: %p\n", priv->class);
-          if (priv->class)
+          ret = CLASS_CONNECT(priv->class, configdesc, desclen);
+          if (ret != OK)
             {
-              /* Then bind the newly instantiated class instance */
-
-              ret = CLASS_CONNECT(priv->class, configdesc, desclen);
-              if (ret != OK)
-                {
-                  udbg("CLASS_CONNECT failed: %d\n", ret);
-                  CLASS_DISCONNECTED(priv->class);
-                  priv->class = NULL;
-                }
+              udbg("CLASS_CONNECT failed: %d\n", ret);
+              CLASS_DISCONNECTED(priv->class);
+              priv->class = NULL;
             }
         }
     }
@@ -1023,6 +1065,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct usb_ctrlreq_s *ctrlreq;
+  struct usbhost_id_s id;
   unsigned int len;
   uint8_t *buffer;
   int  ret;
@@ -1092,17 +1135,27 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
       goto errout;
     }
 
-  /* Extract the max packetsize for endpoint 0 */
+  /* Extract info from the device descriptor */
 
-  EDCTRL->ctrl = (uint32_t)(((struct usb_devdesc_s *)buffer)->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
+  {
+    struct usb_devdesc_s *devdesc = (struct usb_devdesc_s *)buffer;
 
-  /* NOTE: Additional logic is needed here.  The device descriptor contains
-   * the class, subclass, protocol, and VID/PID.  However, here we have assumed
-   * for the time being that class == USB_CLASS_PER_INTERFACE.  This is not
-   * generally a good assumption and will need to get fixed someday.
-   */
+    /* Extract the max packetsize for endpoint 0 */
 
-  DEBUGASSERT(((struct usb_devdesc_s *)buffer)->class == USB_CLASS_PER_INTERFACE);
+    EDCTRL->ctrl = (uint32_t)(devdesc->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
+    
+    /* Get class identification information from the device descriptor.  Most
+     * devices set this to USB_CLASS_PER_INTERFACE (zero) and provide the
+     * identification informatino in the interface descriptor(s).  That allows
+     * a device to support multiple, different classes.
+     */
+
+    ret = lpc17_devdesc(priv, devdesc, 8, &id);
+
+    /* NOTE: Additional logic is needed here.  We will need additional logic
+     * to extract the vendor/product IDs from the (full) device descriptor.
+     */
+  }
 
   /* Set the device address to 1 */
 
@@ -1169,7 +1222,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   ret = lpc17_ctrlout(drvr, ctrlreq, NULL);
   if (ret != OK)
     {
-      ulldbg("ERROR: uint16 returned %d\n", ret);
+      ulldbg("ERROR: lpc17_ctrlout returned %d\n", ret);
       goto errout;
     }
 
@@ -1181,6 +1234,25 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   lpc17_tdfree(priv, (uint8_t*)ctrlreq);
   ctrlreq = NULL;
 
+  /* Was the class identification information provided in the device descriptor?
+   * Or do we need to find it in the interface descriptor(s)?
+   */
+
+  if (id.base == USB_CLASS_PER_INTERFACE)
+    {
+      /* Get the class identification information for this device from the
+       * interface descriptor(s).  Hmmm.. More logic is need to handle the
+       * case of multiple interface descriptors.
+       */
+
+      ret = lpc17_configdesc(priv, buffer, len, &id);
+      if (ret != OK)
+        {
+          ulldbg("ERROR: lpc17_configdesc returned %d\n", ret);
+          goto errout;
+        }
+    }
+
   /* Some devices may require this delay before initialization */
 
   up_mdelay(100);
@@ -1190,7 +1262,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
    * will begin configuring the device.
    */
 
-  ret = lpc17_classbind(priv, buffer, len);
+  ret = lpc17_classbind(priv, buffer, len, &id);
   if (ret != OK)
     {
       ulldbg("ERROR: MS_ParseConfiguration returned %d\n", ret);
