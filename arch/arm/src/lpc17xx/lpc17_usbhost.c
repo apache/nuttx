@@ -653,6 +653,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 
   /* Then enqueue the transfer */
 
+  priv->tdstatus = 0;
   lpc17_enqueuetd(EDCTRL, dirpid, toggle, buffer, buflen);
 
   lpc17_putreg(LPC17_EDCTRL_ADDR, LPC17_USBHOST_CTRLHEADED);
@@ -1386,12 +1387,22 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
   if ((uintptr_t)buffer < LPC17_SRAM_BANK0 ||
       (uintptr_t)buffer >= (LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0))
     {
+      /* Will the transfer fit in an IO buffer? */
+
+      if (buflen > CONFIG_USBHOST_IOBUFSIZE)
+        {
+          uvdbg("buflen (%d) > IO buffer size (%d)\n",
+                 buflen, CONFIG_USBHOST_IOBUFSIZE);
+          goto errout;
+        }
+
       /* Allocate an IO buffer in AHB SRAM */
 
       origbuf = buffer;
       buffer  = lpc17_ioalloc(priv);
       if (!buffer)
         {
+          uvdbg("IO buffer allocation failed\n");
           goto errout;
         }
 
@@ -1409,6 +1420,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
   ed = lpc17_edalloc(priv);
   if (!ed)
     {
+      uvdbg("ED allocation failed\n");
       goto errout;
     }
 
@@ -1433,6 +1445,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
 
   /* Then enqueue the transfer */
 
+  priv->tdstatus = 0;
   lpc17_enqueuetd(ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
 
   lpc17_putreg((uint32_t)ed, LPC17_USBHOST_BULKHEADED);
@@ -1457,6 +1470,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
     }
   else 
     {
+      uvdbg("Bad TD completion status: %d\n", priv->tdstatus);
       ret = -EIO;
     }
 
@@ -1657,7 +1671,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   buffer = IOFREE;
   for (i = 0; i < LPC17_IOBUFFERS; i++)
     {
-      /* Put the TD buffer in a free list */
+      /* Put the IO buffer in a free list */
 
       lpc17_iofree(priv, buffer);
       buffer += CONFIG_USBHOST_IOBUFSIZE;
