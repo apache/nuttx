@@ -144,11 +144,13 @@
  * Name: DRVR_WAIT
  *
  * Description:
- *   Wait for a device to be connected.
+ *   Wait for a device to be connected or disconneced.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   connected - TRUE: Wait for device to be connected; FALSE: wait for device to
+ *      be disconnected
  *
  * Returned Values:
  *   Zero (OK) is returned when a device in connected. This function will not
@@ -161,7 +163,7 @@
  *
  *******************************************************************************/
 
-#define DRVR_WAIT(drvr) ((drvr)->wait(drvr))
+#define DRVR_WAIT(drvr, connected) ((drvr)->wait(drvr,connected))
 
 /************************************************************************************
  * Name: DRVR_ENUMERATE
@@ -411,9 +413,9 @@ struct usbhost_class_s
 struct usbhost_epdesc_s;
 struct usbhost_driver_s
 {
-  /* Wait for a device to connect. */
+  /* Wait for a device to connect or disconnect. */
 
-  int (*wait)(FAR struct usbhost_driver_s *drvr);
+  int (*wait)(FAR struct usbhost_driver_s *drvr, bool connected);
 
   /* Enumerate the connected device.  As part of this enumeration process,
    * the driver will (1) get the device's configuration descriptor, (2)
@@ -565,7 +567,7 @@ EXTERN const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_i
 EXTERN int usbhost_storageinit(void);
 
 /*******************************************************************************
- * Name: up_usbhostinitialize
+ * Name: usbhost_initialize
  *
  * Description:
  *   Initialize USB host device controller hardware.

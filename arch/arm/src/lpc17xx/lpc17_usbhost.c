@@ -250,7 +250,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
-static int lpc17_wait(FAR struct usbhost_driver_s *drvr);
+static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected);
 static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr);
 static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
                          FAR uint8_t **buffer, FAR size_t *maxlen);
@@ -892,6 +892,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
                           CLASS_DISCONNECTED(priv->class);
                         }
+                      lpc17_givesem(&priv->rhssem);
                     }
                   else
                     {
@@ -944,11 +945,13 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  * Name: lpc17_wait
  *
  * Description:
- *   Wait for a device to be connected.
+ *   Wait for a device to be connected or disconneced.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   connected - TRUE: Wait for device to be connected; FALSE: wait for device
+ *      to be disconnected
  *
  * Returned Values:
  *   Zero (OK) is returned when a device in connected. This function will not
@@ -962,15 +965,15 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  *
  *******************************************************************************/
 
-static int lpc17_wait(FAR struct usbhost_driver_s *drvr)
+static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
 
   /* Are we already connected? */
 
-  while (!priv->connected)
+  while (priv->connected == connected)
     {
-      /* No, wait for the connection */
+      /* No, wait for the connection/disconnection */
 
       lpc17_takesem(&priv->rhssem);
     }
@@ -1534,7 +1537,7 @@ static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca)
  *******************************************************************************/
 
 /*******************************************************************************
- * Name: up_usbhostinitialize
+ * Name: usbhost_initialize
  *
  * Description:
  *   Initialize USB host device controller hardware.
@@ -1558,7 +1561,7 @@ static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca)
  *
  *******************************************************************************/
 
-FAR struct usbhost_driver_s *up_usbhostinitialize(int controller)
+FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 {
   struct lpc17_usbhost_s *priv = &g_usbhost;
   uint32_t regval;
