@@ -209,9 +209,17 @@
 #define LPC17_TDFREE_BASE   (LPC17_EDFREE_BASE + LPC17_EDFREE_SIZE)
 #define LPC17_IOFREE_BASE   (LPC17_TDFREE_BASE + LPC17_TDFREE_SIZE)
 
+#if LPC17_IOFREE_BASE > LPC17_OHCIRAM_END
+#  error "Insufficient OHCI RAM allocated"
+#endif
+
 /* Finally, use the remainder of the allocated OHCI for IO buffers */
 
-#define LPC17_IOBUFFERS     ((LPC17_OHCIRAM_END - LPC17_IOBUFFER_BASE) / CONFIG_USBHOST_IOBUFSIZE)
+#define LPC17_IOBUFFERS     ((LPC17_OHCIRAM_END - LPC17_IOFREE_BASE) / CONFIG_USBHOST_IOBUFSIZE)
+
+#if LPC17_IOBUFFERS < 1
+#  warning "No IO buffers allocated"
+#endif
 
 /************************************************************************************
  * Public Types
