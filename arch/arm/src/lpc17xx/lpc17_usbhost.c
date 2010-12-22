@@ -88,9 +88,7 @@
 
 /* CLKCTRL enable bits */
 
-#define LPC17_CLKCTRL_ENABLES (USBOTG_CLK_HOSTCLK|USBOTG_CLK_DEVCLK|\
-                               USBOTG_CLK_I2CCLK|USBOTG_CLK_OTGCLK|\
-                               USBOTG_CLK_AHBCLK)
+#define LPC17_CLKCTRL_ENABLES (USBOTG_CLK_HOSTCLK|USBDEV_CLK_PORTSELCLK|USBOTG_CLK_AHBCLK)
 
 /* Dump GPIO registers */
 
@@ -881,8 +879,9 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
   intstatus  = lpc17_getreg(LPC17_USBHOST_INTST);
   intenable  = lpc17_getreg(LPC17_USBHOST_INTEN);
-  intstatus &= intenable;
+  ullvdbg("INST: %08x INTEN:\n", intstatus, intenable);
 
+  intstatus &= intenable;
   if (intstatus != 0)
     {
       /* Root hub status change interrupt */
@@ -914,6 +913,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                     {
                       if (!priv->connected)
                         {
+                          ullvdbg("Connected\n");
                           DEBUGASSERT(priv->rhssem.semcount <= 0);
                           priv->tdstatus = 0;
                           priv->connected = true;
@@ -929,8 +929,9 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  
                   else if (priv->connected)
                     {
-                      /* Yes.. disable interrupts */
+                      /* Yes.. disable interrupts and disconnect the device */
 
+                      ullvdbg("Disconnected\n");
                       lpc17_putreg(0, LPC17_USBHOST_INTEN);
                       priv->connected = false;
 
@@ -1713,6 +1714,8 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   /* Enable clocking on USB (USB PLL clocking was initialized in very low-
    * evel clock setup logic (see lpc17_clockconfig.c)).  We do still need
    * to set up USBOTG CLKCTRL to enable clocking.
+   *
+   * NOTE: The PORTSEL clock needs to be enabled only when accessing OTGSTCTRL
    */
 
   lpc17_putreg(LPC17_CLKCTRL_ENABLES, LPC17_USBOTG_CLKCTRL);
@@ -1725,7 +1728,21 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
     }
   while ((regval & LPC17_CLKCTRL_ENABLES) != LPC17_CLKCTRL_ENABLES);
 
-  lpc17_putreg(3, LPC17_USBOTG_STCTRL);
+  /* Set the OTG status and control register.  Bits 0:1 apparently mean:
+   *
+   * 10: U1=device, U2=host
+   * 11: U1=host, U2=host
+   * 10: reserved
+   * 11: U1=host, U2=device
+   *
+   * NOTE: The PORTSEL clock needs to be enabled only when accessing OTGSTCTRL
+   */
+
+  lpc17_putreg(1, LPC17_USBOTG_STCTRL);
+
+  /* Now we can turn off the PORTSEL clock */
+
+  lpc17_putreg((LPC17_CLKCTRL_ENABLES & ~USBDEV_CLK_PORTSELCLK), LPC17_USBOTG_CLKCTRL);
 
   /* Step 3: Configure I/O pins */
 
