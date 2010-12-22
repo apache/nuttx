@@ -161,13 +161,16 @@ static int nsh_waiter(int argc, char *argv[])
   bool connected = false;
   int ret;
 
+  message("nsh_waiter: Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
       ret = DRVR_WAIT(g_drvr, connected);
       DEBUGASSERT(ret == OK);
+
       connected = !connected;
+      message("nsh_waiter: %s\n", connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -264,6 +267,8 @@ static int nsh_usbhostinitialize(void)
   if (g_drvr)
     {
       /* Start a thread to handle device connection. */
+
+      message("nsh_usbhostinitialize: Start nsh_waiter\n");
 
 #ifndef CONFIG_CUSTOM_STACK
       pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,

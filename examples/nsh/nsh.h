@@ -63,6 +63,12 @@
 #  endif
 #endif
 
+/* Telnetd requires networking support */
+
+#ifndef CONFIG_NET
+#  undef CONFIG_EXAMPLES_NSH_TELNET
+#endif
+
 /* One front end must be defined */
 
 #if !defined(CONFIG_EXAMPLES_NSH_CONSOLE) && !defined(CONFIG_EXAMPLES_NSH_TELNET)
