@@ -907,7 +907,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
               else
                 {
-                  /* Check if we are not connected */
+                  /* Check if we are now connected */
 
                   if ((rhportst1 & OHCI_RHPORTST_CCS) != 0)
                     {
@@ -1730,12 +1730,12 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   /* Set the OTG status and control register.  Bits 0:1 apparently mean:
    *
-   * 10: U1=device, U2=host
-   * 11: U1=host, U2=host
-   * 10: reserved
-   * 11: U1=host, U2=device
+   *   00: U1=device, U2=host
+   *   01: U1=host, U2=host
+   *   10: reserved
+   *   11: U1=host, U2=device
    *
-   * NOTE: The PORTSEL clock needs to be enabled only when accessing OTGSTCTRL
+   * NOTE: The PORTSEL clock needs to be enabled when accessing OTGSTCTRL
    */
 
   lpc17_putreg(1, LPC17_USBOTG_STCTRL);
