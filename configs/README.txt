@@ -703,6 +703,12 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_USBDEV_TRACE - Enables USB tracing for debug
 		CONFIG_USBDEV_TRACE_NRECORDS - Number of trace entries to remember
 
+    USB host controller driver
+      CONFIG_USBHOST
+        Enables USB host support
+      CONFIG_USBHOST_NPREALLOC
+        Number of pre-allocated class instances
+
 	USB serial device class driver
 		CONFIG_USBSER
 		  Enable compilation of the USB serial driver
