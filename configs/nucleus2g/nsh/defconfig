@@ -102,6 +102,7 @@ CONFIG_LPC17_BUILDROOT=y
 #
 # Individual subsystems can be enabled:
 # (MAINOSC, PLL0, PLL1 and FLASH are controlled in board.h)
+#
 CONFIG_LPC17_ETHERNET=n
 CONFIG_LPC17_USBHOST=n
 CONFIG_LPC17_USBOTG=n
@@ -194,6 +195,8 @@ CONFIG_UART3_2STOP=0
 # CONFIG_NET_PRIORITY - Ethernet interrupt priority.  The is default is
 #   the higest priority.
 # CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
+# CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
+#   Also needs CONFIG_DEBUG.
 # CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
 #   CONFIG_DEBUG.
 # CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
@@ -329,8 +332,8 @@ CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_START_YEAR=2010
-CONFIG_START_MONTH=6
-CONFIG_START_DAY=20
+CONFIG_START_MONTH=12
+CONFIG_START_DAY=22
 CONFIG_GREGORIAN_TIME=n
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
@@ -456,6 +459,7 @@ CONFIG_PREALLOC_TIMERS=4
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
 # CONFIG_FS_ROMFS - Enable ROMFS filesystem support
+#
 CONFIG_FS_FAT=y
 CONFIG_FS_ROMFS=n
 
@@ -583,7 +587,18 @@ CONFIG_USBDEV_TRACE=n
 CONFIG_USBDEV_TRACE_NRECORDS=128
 
 #
-# LPC17xx USB Configuration
+# USB Host Configuration
+#
+# CONFIG_USBHOST
+#   Enables USB host support
+# CONFIG_USBHOST_NPREALLOC
+#   Number of pre-allocated class instances
+#
+CONFIG_USBHOST=n
+CONFIG_USBHOST_NPREALLOC=0
+
+#
+# LPC17xx USB Device Configuration
 #
 # CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
 #   Handle USB Start-Of-Frame events. 
@@ -603,6 +618,27 @@ CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT=n
 CONFIG_LPC17_USBDEV_DMA=n
 CONFIG_LPC17_USBDEV_NDMADESCRIPTORS=0
 CONFIG_LPC17_USBDEV_DMAINTMASK=0
+
+#
+# LPC17xx USB Host Configuration
+#
+# OHCI RAM layout:
+# CONFIG_USBHOST_OHCIRAM_SIZE
+#   Total size of OHCI RAM (in AHB SRAM Bank 1)
+# CONFIG_USBHOST_NEDS
+#   Number of endpoint descriptors
+# CONFIG_USBHOST_TDBUFFERS
+#   Number of transfer descriptor buffers
+# CONFIG_USBHOST_TDBUFSIZE
+#   Size of one transfer descriptor buffer
+# CONFIG_USBHOST_IOBUFSIZE
+#   Size of one end-user I/O buffer
+#
+CONFIG_USBHOST_OHCIRAM_SIZE=1280
+CONFIG_USBHOST_NEDS=2
+CONFIG_USBHOST_TDBUFFERS=3
+CONFIG_USBHOST_TDBUFSIZE=128
+CONFIG_USBHOST_IOBUFSIZE=512
 
 #
 # USB Serial Device Configuration
@@ -688,6 +724,19 @@ CONFIG_EXAMPLE_UIP_DHCPC=n
 
 #
 # Settings for examples/nettest
+# CONFIG_EXAMPLE_NETTEST_SERVER - The target board can act
+#   as either the client side or server side of the test
+# CONFIG_EXAMPLE_NETTEST_PERFORMANCE - If set, then the
+#   client side simply receives messages forever, allowing
+#   measurement of throughput
+# CONFIG_EXAMPLE_NETTEST_NOMAC - Set if the hardware has
+#   no MAC address; one will be assigned
+# CONFIG_EXAMPLE_NETTEST_IPADDR - Target board IP address
+# CONFIG_EXAMPLE_NETTEST_DRIPADDR - Default router address
+# CONFIG_EXAMPLE_NETTEST_NETMASK - Network mask
+# CONFIG_EXAMPLE_NETTEST_CLIENTIP - IP address of the
+#   client side of the test (may be target or host)
+#
 CONFIG_EXAMPLE_NETTEST_SERVER=n
 CONFIG_EXAMPLE_NETTEST_PERFORMANCE=n
 CONFIG_EXAMPLE_NETTEST_NOMAC=n

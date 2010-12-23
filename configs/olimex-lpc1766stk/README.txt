@@ -14,6 +14,7 @@ Contents
   LEDs
   Using OpenOCD and GDB with an FT2232 JTAG emulator
   Olimex LPC1766-STK Configuration Options
+  USB Host Configuration
   Configurations
 
 Olimex LPC1766-STK development board
@@ -677,6 +678,38 @@ Olimex LPC1766-STK Configuration Options
 	  Number of DMA descriptors to allocate in SRAM.
 	CONFIG_LPC17_USBDEV_DMA
 	  Enable lpc17xx-specific DMA support
+
+USB Host Configuration
+^^^^^^^^^^^^^^^^^^^^^^
+
+The NuttShell (NSH) Nucleus 2G can be modified in order to support
+USB host operations.  To make these modifications, do the following:
+
+1. First configure to build the NSH configuration from the top-level
+   NuttX directory:
+
+   cd tools
+   ./configure nucleus2g/nsh
+   cd ..
+
+2. Then edit the top-level .config file to enable USB host.  Make the
+   following changes:
+
+   CONFIG_LPC17_USBHOST=n
+   CONFIG_USBHOST=n
+   CONFIG_SCHED_WORKQUEUE=y
+
+When this change is made, NSH should be extended to support USB flash
+devices.  When a FLASH device is inserted, you should see a device
+appear in the /dev (psuedo) directory.  The device name should be
+like /dev/sda, /dev/sdb, etc.  The USB mass storage device, is present
+it can be mounted from the NSH command line like:
+
+   ls /dev
+   mount -t vfat /dev/sda /mnt/flash
+
+Files on the connect USB flash device should then be accessible under
+the mountpoint /mnt/flash.
 
 Configurations
 ^^^^^^^^^^^^^^
