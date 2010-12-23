@@ -664,7 +664,7 @@ Olimex LPC1766-STK Configuration Options
 	CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
 	  Automatically set if CONFIG_NET_IGMP is selected.
 
-  LPC17xx USB Configuration
+  LPC17xx USB Device Configuration
 
 	CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
 	  Handle USB Start-Of-Frame events. 
@@ -678,6 +678,18 @@ Olimex LPC1766-STK Configuration Options
 	  Number of DMA descriptors to allocate in SRAM.
 	CONFIG_LPC17_USBDEV_DMA
 	  Enable lpc17xx-specific DMA support
+
+  LPC17xx USB Host Configuration
+    CONFIG_USBHOST_OHCIRAM_SIZE
+      Total size of OHCI RAM (in AHB SRAM Bank 1)
+    CONFIG_USBHOST_NEDS
+      Number of endpoint descriptors
+    CONFIG_USBHOST_TDBUFFERS
+      Number of transfer descriptor buffers
+    CONFIG_USBHOST_TDBUFSIZE
+      Size of one transfer descriptor buffer
+    CONFIG_USBHOST_IOBUFSIZE
+      Size of one end-user I/O buffer
 
 USB Host Configuration
 ^^^^^^^^^^^^^^^^^^^^^^
