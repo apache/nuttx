@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: December 4, 2010</p>
+      <p>Last Updated: December 22, 2010</p>
     </td>
   </tr>
 </table>
@@ -3210,6 +3210,17 @@ build
   <li>
     <code>CONFIG_USBSTRG_REMOVABLE</code>:
     Select if the media is removable
+  </li>
+</ul>
+
+<h2>USB Host-Side Support</h2>
+<h3>USB Host Controller Driver</h3>
+<ul>
+  <li>
+    <code>CONFIG_USBHOST</code>: Enables USB host support
+  </li>
+  <li>
+    <code>CONFIG_USBHOST_NPREALLOC</code>: Number of pre-allocated class instances
   </li>
 </ul>
 
