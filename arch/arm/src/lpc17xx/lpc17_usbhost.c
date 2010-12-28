@@ -235,18 +235,6 @@ static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
 static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
                         uint8_t *buffer, size_t buflen);
 
-/* Class helper functions ******************************************************/
-
-static inline int lpc17_devdesc(struct lpc17_usbhost_s *priv,
-                                const struct usb_devdesc_s *devdesc, int desclen,
-                                struct usbhost_id_s *id);
-static inline int lpc17_configdesc(struct lpc17_usbhost_s *priv,
-                                   const uint8_t *configdesc, int desclen,
-                                   struct usbhost_id_s *id);
-static inline int lpc17_classbind(struct lpc17_usbhost_s *priv,
-                                  const uint8_t *configdesc, int desclen,
-                                  struct usbhost_id_s *id);
-
 /* Interrupt handling **********************************************************/
 
 static int lpc17_usbinterrupt(int irq, FAR void *context);
@@ -557,10 +545,6 @@ static uint8_t *lpc17_tdalloc(struct lpc17_usbhost_s *priv)
 static void lpc17_tdfree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
 {
   struct lpc17_buflist_s *tdfree = (struct lpc17_buflist_s *)buffer;
-
-  /* This may get called with a NULL buffer pointer on certain error handling
-   * paths.
-   */
 
   if (tdfree)
     {
@@ -937,7 +921,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 }
 
 /************************************************************************************
- * Name: DRVR_EP0CONFIGURE
+ * Name: lpc17_ep0configure
  *
  * Description:
  *   Configure endpoint 0.  This method is normally used internally by the
