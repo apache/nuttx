@@ -196,6 +196,33 @@
 #define DRVR_ENUMERATE(drvr) ((drvr)->enumerate(drvr))
 
 /************************************************************************************
+ * Name: DRVR_EP0CONFIGURE
+ *
+ * Description:
+ *   Configure endpoint 0.  This method is normally used internally by the
+ *   enumerate() method but is made available at the interface to support
+ *   an external implementation of the enumeration logic.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   funcno - The USB address of the function containing the endpoint that EP0
+ *     controls
+ *   mps (maxpacketsize) - The maximum number of bytes that can be sent to or
+ *    received from the endpoint in a single data packet
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_EP0CONFIGURE(drvr,funcno,mps) ((drvr)->ep0configure(drvr,funcno,mps))
+
+/************************************************************************************
  * Name: DRVR_ALLOC
  *
  * Description:
@@ -433,6 +460,14 @@ struct usbhost_driver_s
 
   int (*enumerate)(FAR struct usbhost_driver_s *drvr);
 
+  /* Configure endpoint 0.  This method is normally used internally by the
+   * enumerate() method but is made available at the interface to support
+   * an external implementation of the enumeration logic.
+   */
+
+  int (*ep0configure)(FAR struct usbhost_driver_s *drvr, uint8_t funcno,
+                      uint16_t maxpacketsize);
+
   /* Some hardware supports special memory in which transfer descriptors can
    * be accessed more efficiently.  The following methods provide a mechanism
    * to allocate and free the transfer descriptor memory.  If the underlying
@@ -596,6 +631,44 @@ EXTERN int usbhost_storageinit(void);
  *******************************************************************************/
 
 EXTERN FAR struct usbhost_driver_s *usbhost_initialize(int controller);
+
+/*******************************************************************************
+ * Name: usbhost_enumerate
+ *
+ * Description:
+ *   This is a share-able implementation of most of the logic required by the
+ *   driver enumerate() method.  This logic within this method should be common
+ *   to all USB host drivers.
+ *
+ *   Enumerate the connected device.  As part of this enumeration process,
+ *   the driver will (1) get the device's configuration descriptor, (2)
+ *   extract the class ID info from the configuration descriptor, (3) call
+ *   usbhost_findclass() to find the class that supports this device, (4)
+ *   call the create() method on the struct usbhost_registry_s interface
+ *   to get a class instance, and finally (5) call the configdesc() method
+ *   of the struct usbhost_class_s interface.  After that, the class is in
+ *   charge of the sequence of operations.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   class - If the class driver for the device is successful located
+ *      and bound to the driver, the allocated class instance is returned into
+ *      this caller-provided memory location.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   - Only a single class bound to a single device is supported.
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
+ *
+ *******************************************************************************/
+
+EXTERN int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
+                             FAR struct usbhost_class_s **class);
 
 #undef EXTERN
 #if defined(__cplusplus)
