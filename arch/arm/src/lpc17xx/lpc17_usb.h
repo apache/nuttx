@@ -473,7 +473,7 @@
 /* USB MaxPacketSize */
 
 #define USBDEV_MAXPSIZE_SHIFT            (0)       /* Bits 0-9: Maximum packet size value */
-#define USBDEV_MAXPSIZE_                 (0x3ff << USBDEV_MAXPSIZE_SHIFT)
+#define USBDEV_MAXPSIZE_MASK             (0x3ff << USBDEV_MAXPSIZE_SHIFT)
                                                    /* Bits 10-31: Reserved */
 /* DMA registers:
  *
