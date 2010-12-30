@@ -444,7 +444,7 @@ struct usbhost_class_s
 struct usbhost_epdesc_s;
 struct usbhost_driver_s
 {
-  /* Wait for a device to connect or disconnect. */
+  /* Wait for a device to connect or disconnect (see CONFIG_USBHOST_HAVERHSC). */
 
   int (*wait)(FAR struct usbhost_driver_s *drvr, bool connected);
 

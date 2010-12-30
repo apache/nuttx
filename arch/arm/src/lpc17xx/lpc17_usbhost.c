@@ -55,13 +55,14 @@
 #include <nuttx/usb/usbhost.h>
 
 #include <arch/irq.h>
-#include <arch/board/board.h>
+
+#include "lpc17_internal.h"   /* Includes default GPIO settings */
+#include <arch/board/board.h> /* May redefine GPIO settings */
 
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "lpc17_internal.h"
 #include "lpc17_usb.h"
 #include "lpc17_syscon.h"
 #include "lpc17_ohciram.h"
@@ -700,7 +701,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
   intstatus  = lpc17_getreg(LPC17_USBHOST_INTST);
   intenable  = lpc17_getreg(LPC17_USBHOST_INTEN);
-  ullvdbg("INST: %08x INTEN:\n", intstatus, intenable);
+  ullvdbg("INST: %08x INTEN: %08x\n", intstatus, intenable);
 
   intstatus &= intenable;
   if (intstatus != 0)
@@ -715,7 +716,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
           if ((rhportst1 & OHCI_RHPORTST_CSC) != 0)
             {
               uint32_t rhstatus = lpc17_getreg(LPC17_USBHOST_RHSTATUS);
-              ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhportst1);
+              ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
 
               /* If DRWE is set, Connect Status Change indicates a remote wake-up event */
 
@@ -735,10 +736,12 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                       if (!priv->connected)
                         {
                           ullvdbg("Connected\n");
-                          DEBUGASSERT(priv->rhssem.semcount <= 0);
                           priv->tdstatus = 0;
                           priv->connected = true;
+#ifdef CONFIG_USBHOST_HAVERHSC
+                          DEBUGASSERT(priv->rhssem.semcount <= 0);
                           lpc17_givesem(&priv->rhssem);
+#endif
                         }
                       else
                         {
@@ -764,6 +767,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
                           CLASS_DISCONNECTED(priv->class);
                         }
+
+                      DEBUGASSERT(priv->rhssem.semcount <= 0);
                       lpc17_givesem(&priv->rhssem);
                     }
                   else
@@ -841,6 +846,7 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
 
+#ifdef CONFIG_USBHOST_HAVERHSC
   /* Are we already connected? */
 
   while (priv->connected == connected)
@@ -849,7 +855,19 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
 
       lpc17_takesem(&priv->rhssem);
     }
+#else
+  if (!connected)
+    {
+      /* Are we already connected? */
 
+      while (priv->connected)
+        {
+          /* Yes... wait for the disconnection */
+
+          lpc17_takesem(&priv->rhssem);
+        }
+    }
+#endif
   return OK;
 }
 
@@ -889,6 +907,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
    * method first to be assured that a device is connected.
    */
 
+#ifdef CONFIG_USBHOST_HAVERHSC
   while (!priv->connected)
     {
       /* No, return an error */
@@ -896,6 +915,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
       udbg("Not connected\n");
 	  return -ENODEV;
     }
+#endif
  
   /* USB 2.0 spec says at least 50ms delay before port reset */
 

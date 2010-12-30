@@ -706,6 +706,12 @@ defconfig -- This is a configuration file similar to the Linux
     USB host controller driver
       CONFIG_USBHOST
         Enables USB host support
+      CONFIG_USBHOST_HAVERHSC
+        Define if the hardware is able to detect a root hub status change
+        when a device is inserted.  If CONFIG_USBHOST_HAVERHSC is not set,
+        then it is assumed that the hardware cannot detect the presence
+        of a USB device and that the application must periodically attempt
+        to enumerate the device.
       CONFIG_USBHOST_NPREALLOC
         Number of pre-allocated class instances
 

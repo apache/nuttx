@@ -225,6 +225,29 @@
  * P2[9]/USB_CONNECT/RXD2            64  USBD_CONNECT
  */
 
+#ifdef GPIO_USB_PPWR  /* We can only redefine this if they have been defined */
+
+/* The Olimex LPC1766-STK has 10K pull-ups on PPWR and OVRCR and a 100k
+ * pull-down on PWRD so we should make sure that the outputs float.
+ */
+
+#  undef  GPIO_USB_PPWR
+#  define GPIO_USB_PPWR    (GPIO_ALT2 | GPIO_FLOAT | GPIO_PORT1 | GPIO_PIN19)
+#  undef  GPIO_USB_OVRCR
+#  define GPIO_USB_OVRCR   (GPIO_ALT2 | GPIO_FLOAT | GPIO_PORT1 | GPIO_PIN27)
+#  undef  GPIO_USB_PWRD
+#  define GPIO_USB_PWRD    (GPIO_ALT2 | GPIO_FLOAT | GPIO_PORT1 | GPIO_PIN22)
+
+/* In host mode (only) there are also 15K pull-downs on D+ and D- */
+
+#  ifdef CONFIG_USBHOST
+#    undef  GPIO_USB_DP
+#    define GPIO_USB_DP    (GPIO_ALT1 | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN29)
+#    undef  GPIO_USB_DM
+#    define GPIO_USB_DM    (GPIO_ALT1 | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN30)
+#  endif
+#endif
+
 /* Ethernet GPIO                    PIN  SIGNAL NAME
  * -------------------------------- ---- --------------
  * P1[0]/ENET_TXD0                   95  E_TXD0
