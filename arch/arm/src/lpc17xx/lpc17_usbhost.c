@@ -88,7 +88,7 @@
 
 /* CLKCTRL enable bits */
 
-#define LPC17_CLKCTRL_ENABLES (USBOTG_CLK_HOSTCLK|USBDEV_CLK_PORTSELCLK|USBOTG_CLK_AHBCLK)
+#define LPC17_CLKCTRL_ENABLES (USBOTG_CLK_HOSTCLK|USBOTG_CLK_PORTSELCLK|USBOTG_CLK_AHBCLK)
 
 /* Dump GPIO registers */
 
@@ -1417,7 +1417,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   /* Now we can turn off the PORTSEL clock */
 
-  lpc17_putreg((LPC17_CLKCTRL_ENABLES & ~USBDEV_CLK_PORTSELCLK), LPC17_USBOTG_CLKCTRL);
+  lpc17_putreg((LPC17_CLKCTRL_ENABLES & ~USBOTG_CLK_PORTSELCLK), LPC17_USBOTG_CLKCTRL);
 
   /* Configure I/O pins */
 
