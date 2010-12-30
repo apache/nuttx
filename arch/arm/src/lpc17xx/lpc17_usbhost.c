@@ -1409,6 +1409,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
    *   10: reserved
    *   11: U1=host, U2=device
    *
+   * We need only select U1=host (Bit 0=1);
    * NOTE: The PORTSEL clock needs to be enabled when accessing OTGSTCTRL
    */
 
@@ -1418,7 +1419,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   lpc17_putreg((LPC17_CLKCTRL_ENABLES & ~USBDEV_CLK_PORTSELCLK), LPC17_USBOTG_CLKCTRL);
 
-  /* Step 3: Configure I/O pins */
+  /* Configure I/O pins */
 
   usbhost_dumpgpio();
   lpc17_configgpio(GPIO_USB_DP);      /* Positive differential data */

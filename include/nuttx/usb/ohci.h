@@ -139,8 +139,8 @@
                                               /* Bits 17-31: Reserved */
 
 /* HcInterruptStatus: HC interrupt status (7.1.4),
- * HcInterruptEnable: HC interrupt enable  (7.1.5), and
- * HcInterruptDisable: HC interrupt disable  (7.1.6)
+ * HcInterruptEnable: HC interrupt enable (7.1.5), and
+ * HcInterruptDisable: HC interrupt disable (7.1.6)
  */
 
 #define OHCI_INT_SO                 (1 << 0)  /* Bit 0:  Scheduling overrun */
