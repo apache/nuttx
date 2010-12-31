@@ -819,6 +819,17 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
           priv->tdstatus = (TDHEAD->ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
 
+#ifdef CONFIG_DEBUG_USB
+          if (priv->tdstatus != 0)
+            {
+              /* The transfer failed for some reason... dump some diagnostic info. */
+
+              ulldbg("ERROR: TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
+                     TDHEAD->ctrl, priv->tdstatus,
+                     lpc17_getreg(LPC17_USBHOST_RHPORTST1));
+           }
+#endif
+
           /* And wake up the thread waiting for the WDH event */
 
           DEBUGASSERT(priv->wdhsem.semcount <= 0);
