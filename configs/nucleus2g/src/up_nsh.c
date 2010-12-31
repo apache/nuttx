@@ -208,8 +208,20 @@ static int nsh_waiter(int argc, char *argv[])
 static int nsh_usbhostinitialize(void)
 {
   int pid;
+  int ret;
 
-  /* First, get an instance of the USB host interface */
+  /* First, register all of the class drivers needed to support the drivers
+   * that we care about:
+   */
+
+  message("nsh_usbhostinitialize: Register class drivers\n");
+  ret = usbhost_storageinit();
+  if (ret != OK)
+    {
+      message("nsh_usbhostinitialize: Failed to register the mass storage class\n");
+    }
+
+  /* Then get an instance of the USB host interface */
 
   message("nsh_usbhostinitialize: Initialize USB host\n");
   g_drvr = usbhost_initialize(0);
