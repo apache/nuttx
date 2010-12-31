@@ -656,12 +656,26 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
   priv->tdstatus = 0;
   lpc17_enqueuetd(EDCTRL, dirpid, toggle, buffer, buflen);
 
+  /* Set the head of the control list to the EP0 EDCTRL (this would have to
+   * change if we want more than on control EP queued at a time).
+   */
+
   lpc17_putreg(LPC17_EDCTRL_ADDR, LPC17_USBHOST_CTRLHEADED);
+
+  /* Set ControlListFilled.  This bit is used to indicate whether there are
+   * TDs on the Control list.
+   */
 
   regval = lpc17_getreg(LPC17_USBHOST_CMDST);
   regval |= OHCI_CMDST_CLF;
   lpc17_putreg(regval, LPC17_USBHOST_CMDST);
-      
+
+  /* ControlListEnable.  This bit is set to enable the processing of the
+   * Control list.  Note: once enabled, it remains enabled and we may even
+   * complete list processing before we get the bit set.  We really
+   * should never modify the control list while CLE is set.
+   */
+
   regval = lpc17_getreg(LPC17_USBHOST_CTRL);
   regval |= OHCI_CTRL_CLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
@@ -714,7 +728,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
       if ((intstatus & OHCI_INT_RHSC) != 0)
         {
           uint32_t rhportst1 = lpc17_getreg(LPC17_USBHOST_RHPORTST1);
-          ullvdbg("Root Hub Status Change, RHPORTST: %08x\n", rhportst1);
+          ullvdbg("Root Hub Status Change, RHPORTST1: %08x\n", rhportst1);
 
           if ((rhportst1 & OHCI_RHPORTST_CSC) != 0)
             {
@@ -782,7 +796,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                     }
                 }
 
-              /* Clear the CSC interrupt */
+              /* Clear the status change interrupt */
 
               lpc17_putreg(OHCI_RHPORTST_CSC, LPC17_USBHOST_RHPORTST1);
             }
@@ -1245,12 +1259,26 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
   priv->tdstatus = 0;
   lpc17_enqueuetd(ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
 
+  /* Set the head of the bulk list to the EP descriptor (this would have to
+   * change if we want more than on bulk EP queued at a time).
+   */
+
   lpc17_putreg((uint32_t)ed, LPC17_USBHOST_BULKHEADED);
 
+  /* BulkListFilled. This bit is used to indicate whether there are any
+   * TDs on the Bulk list.
+   */
+ 
   regval = lpc17_getreg(LPC17_USBHOST_CMDST);
   regval |= OHCI_CMDST_BLF;
   lpc17_putreg(regval, LPC17_USBHOST_CMDST);
-      
+
+  /* BulkListEnable. This bit is set to enable the processing of the Bulk
+   * list.  Note: once enabled, it remains enabled and we may even
+   * complete list processing before we get the bit set.  We really
+   * should never modify the bulk list while BLE is set.
+   */
+
   regval = lpc17_getreg(LPC17_USBHOST_CTRL);
   regval |= OHCI_CTRL_BLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
