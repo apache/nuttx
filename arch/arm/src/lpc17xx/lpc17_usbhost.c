@@ -82,10 +82,12 @@
 #  error "No IO buffers allocated"
 #endif
 
-/* Frame Interval */
+/* Frame Interval / Periodic Start */
 
 #define  FI                     (12000-1) /* 12000 bits per frame (-1) */
-#define  DEFAULT_FMINTERVAL     ((((6 * (FI - 210)) / 7) << 16) | FI)
+#define  FSMPS                  ((6 * (FI - 210)) / 7)
+#define  DEFAULT_FMINTERVAL     ((FSMPS << OHCI_FMINT_FSMPS_SHIFT) | FI)
+#define  DEFAULT_PERSTART       ((9 * FI) / 10)
 
 /* CLKCTRL enable bits */
 
@@ -279,7 +281,7 @@ static struct lpc17_usbhost_s g_usbhost =
 {
   .drvr             =
     {
-	  .wait         = lpc17_wait,
+      .wait         = lpc17_wait,
       .enumerate    = lpc17_enumerate,
       .ep0configure = lpc17_ep0configure,
       .alloc        = lpc17_alloc,
@@ -676,6 +678,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
     }
   else 
     {
+      uvdbg("Bad TD completion status: %d\n", priv->tdstatus);
       return -EIO;
     }
 }
@@ -735,13 +738,15 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                     {
                       if (!priv->connected)
                         {
+                          /* Yes.. connected. */
+
                           ullvdbg("Connected\n");
                           priv->tdstatus = 0;
+
+                          /* Notify any waiters */
+
                           priv->connected = true;
-#ifdef CONFIG_USBHOST_HAVERHSC
-                          DEBUGASSERT(priv->rhssem.semcount <= 0);
                           lpc17_givesem(&priv->rhssem);
-#endif
                         }
                       else
                         {
@@ -756,7 +761,6 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                       /* Yes.. disable interrupts and disconnect the device */
 
                       ullvdbg("Disconnected\n");
-                      lpc17_putreg(0, LPC17_USBHOST_INTEN);
                       priv->connected = false;
 
                       /* Are we bound to a class instance? */
@@ -768,7 +772,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                           CLASS_DISCONNECTED(priv->class);
                         }
 
-                      DEBUGASSERT(priv->rhssem.semcount <= 0);
+                      /* Notify any waiters */
+
                       lpc17_givesem(&priv->rhssem);
                     }
                   else
@@ -846,7 +851,6 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
 
-#ifdef CONFIG_USBHOST_HAVERHSC
   /* Are we already connected? */
 
   while (priv->connected == connected)
@@ -855,19 +859,7 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
 
       lpc17_takesem(&priv->rhssem);
     }
-#else
-  if (!connected)
-    {
-      /* Are we already connected? */
 
-      while (priv->connected)
-        {
-          /* Yes... wait for the disconnection */
-
-          lpc17_takesem(&priv->rhssem);
-        }
-    }
-#endif
   return OK;
 }
 
@@ -907,21 +899,19 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
    * method first to be assured that a device is connected.
    */
 
-#ifdef CONFIG_USBHOST_HAVERHSC
   while (!priv->connected)
     {
       /* No, return an error */
 
       udbg("Not connected\n");
-	  return -ENODEV;
+      return -ENODEV;
     }
-#endif
  
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
   up_mdelay(100);
 
-  /* Put the RH port in reset */
+  /* Put RH port 1 in reset (the LPC176x supports only a single downstream port) */
 
   lpc17_putreg(OHCI_RHPORTST_PRS, LPC17_USBHOST_RHPORTST1);
 
@@ -929,7 +919,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 
   while ((lpc17_getreg(LPC17_USBHOST_RHPORTST1) & OHCI_RHPORTST_PRS) != 0);
 
-  /* Release the RH port from reset and wait a bit */
+  /* Release RH port 1 from reset and wait a bit */
 
   lpc17_putreg(OHCI_RHPORTST_PRSC, LPC17_USBHOST_RHPORTST1);
   up_mdelay(200);
@@ -1091,6 +1081,11 @@ static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
   uint16_t len;
   int  ret;
 
+  DEBUGASSERT(drvr && req);
+  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+        req->type, req->req, req->value[1], req->value[0],
+        req->index[1], req->index[0], req->len[1], req->len[0]);
+
   len = lpc17_getle16(req->len);
   ret = lpc17_ctrltd(priv, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
   if (ret == OK)
@@ -1115,6 +1110,11 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   uint16_t len;
   int  ret;
+
+  DEBUGASSERT(drvr && req);
+  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+        req->type, req->req, req->value[1], req->value[0],
+        req->index[1], req->index[0], req->len[1], req->len[0]);
 
   len = lpc17_getle16(req->len);
   ret = lpc17_ctrltd(priv, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
@@ -1429,7 +1429,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
    *   10: reserved
    *   11: U1=host, U2=device
    *
-   * We need only select U1=host (Bit 0=1);
+   * We need only select U1=host (Bit 0=1, Bit 1 is not used on LPC176x);
    * NOTE: The PORTSEL clock needs to be enabled when accessing OTGSTCTRL
    */
 
@@ -1504,9 +1504,12 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   lpc17_putreg(OHCI_CMDST_HCR, LPC17_USBHOST_CMDST);
   
-  /* Write Fm interval and largest data packet counter */
+  /* Write Fm interval (FI), largest data packet counter (FSMPS), and
+   * periodic start.
+   */
   
   lpc17_putreg(DEFAULT_FMINTERVAL, LPC17_USBHOST_FMINT);
+  lpc17_putreg(DEFAULT_PERSTART, LPC17_USBHOST_PERSTART);
 
   /* Put HC in operational state */
 
@@ -1515,9 +1518,9 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   regval |= OHCI_CTRL_HCFS_OPER;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
 
-  /* Set global power */
+  /* Set global power in HcRhStatus */
 
-  lpc17_putreg(OHCI_RHSTATUS_LPS, LPC17_USBHOST_RHSTATUS);
+  lpc17_putreg(OHCI_RHSTATUS_SGP, LPC17_USBHOST_RHSTATUS);
 
   /* Set HCCA base address */
 

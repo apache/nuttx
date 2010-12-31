@@ -226,25 +226,18 @@
 
 /* HcRhStatus: Root hub status (7.4.3) */
 
-#define OHCI_RHSTATUS_LPS          (1 << 0)   /* Bit 0:  Local power status */
+#define OHCI_RHSTATUS_LPS          (1 << 0)   /* Bit 0:  Local power status (read)*/
+#define OHCI_RHSTATUS_CGP          (1 << 0)   /* Bit 0:  Clear global power (write)*/
 #define OHCI_RHSTATUS_OCI          (1 << 1)   /* Bit 1:  Over current indicator */
                                               /* Bits 2-14: Reserved */
 #define OHCI_RHSTATUS_DRWE         (1 << 15)  /* Bit 15: Device remote wakeup enable */
-#define OHCI_RHSTATUS_LPSC         (1 << 16)  /* Bit 16: Local power status change */
+#define OHCI_RHSTATUS_LPSC         (1 << 16)  /* Bit 16: Local power status change (read) */
+#define OHCI_RHSTATUS_SGP          (1 << 16)  /* Bit 16: Set global power (write) */
 #define OHCI_RHSTATUS_OCIC         (1 << 17)  /* Bit 17: Overcurrent indicator change */
                                               /* Bits 18-30: Reserved */
 #define OHCI_RHSTATUS_CRWE         (1 << 31)  /* Bit 31: Clear remote wakeup enable */
 
 /* HcRhPortStatus: Root hub port status (7.4.4) */
-
-#define OHCI_RHPORTST_LPS          (1 << 0)   /* Bit 0:  Local power status */
-#define OHCI_RHPORTST_OCI          (1 << 1)   /* Bit 1:  Over current indicator */
-                                              /* Bits 2-14: Reserved */
-#define OHCI_RHPORTST_DRWE         (1 << 15)  /* Bit 15: Device remote wakeup enable */
-#define OHCI_RHPORTST_LPSC         (1 << 16)  /* Bit 16: Local power status change */
-#define OHCI_RHPORTST_OCIC         (1 << 17)  /* Bit 17: Overcurrent indicator change */
-                                              /* Bits 18-30: Reserved */
-#define OHCI_RHPORTST_CRWE         (1 << 31)  /* Bit 31: Clear remote wakeup enable */
 
 #define OHCI_RHPORTST_CCS          (1 << 0)   /* Bit 0:  Current connect status */
 #define OHCI_RHPORTST_PES          (1 << 1)   /* Bit 1:  Port enable status*/
