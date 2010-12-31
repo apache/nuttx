@@ -391,7 +391,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
 
   ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_SETADDRESS;
-  usbhost_putle16(ctrlreq->value, (1 << 8));
+  usbhost_putle16(ctrlreq->value, 1);
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, 0);
 

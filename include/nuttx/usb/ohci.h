@@ -240,7 +240,7 @@
 /* HcRhPortStatus: Root hub port status (7.4.4) */
 
 #define OHCI_RHPORTST_CCS          (1 << 0)   /* Bit 0:  Current connect status */
-#define OHCI_RHPORTST_PES          (1 << 1)   /* Bit 1:  Port enable status*/
+#define OHCI_RHPORTST_PES          (1 << 1)   /* Bit 1:  Port enable status */
 #define OHCI_RHPORTST_PSS          (1 << 2)   /* Bit 2:  Port suspend status */
 #define OHCI_RHPORTST_POCI         (1 << 3)   /* Bit 3:  Port over current indicator */
 #define OHCI_RHPORTST_PRS          (1 << 4)   /* Bit 4:  Port reset status */
