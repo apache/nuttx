@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <debug.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -86,6 +87,9 @@
 static bool usbhost_idmatch(const struct usbhost_id_s *classid,
                             const struct usbhost_id_s *devid)
 {
+  uvdbg("Compare to class:%d subclass:%d protocol:%d\n",
+         classid->base, classid->subclass, classid->proto);
+
   /* The base class ID, subclass and protocol have to match up in any event */
 
   if (devid->base     == classid->base &&
@@ -151,6 +155,10 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
   irqstate_t flags;
   int ndx;
 
+  DEBUGASSERT(id);
+  uvdbg("Looking for class:%d subclass:%d protocol:%d\n",
+        id->base, id->subclass, id->proto);
+
   /* g_classregistry is a singly-linkedlist of class ID information added by
    * calls to usbhost_registerclass().  Since this list is accessed from USB
    * host controller interrupt handling logic, accesses to this list must be
@@ -167,7 +175,8 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
        * protocol, then try each.
        */
 
-      for (ndx = 0; ndx < class->nids; ndx++)
+     uvdbg("Checking class:%p nids:%d\n", class, class->nids);
+     for (ndx = 0; ndx < class->nids; ndx++)
         {
           /* Did we find a matching ID? */
 

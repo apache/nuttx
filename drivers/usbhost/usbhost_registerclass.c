@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <arch/irq.h>
 #include <nuttx/usb/usbhost.h>
@@ -94,6 +95,8 @@
 int usbhost_registerclass(struct usbhost_registry_s *class)
 {
   irqstate_t flags;
+
+  uvdbg("Registering class:%p nids:%d\n", class, class->nids);
 
   /* g_classregistry is a singly-linkedlist of class ID information added by
    * calls to usbhost_registerclass().  Since this list is accessed from USB

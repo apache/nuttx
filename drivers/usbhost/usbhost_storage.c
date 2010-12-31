@@ -1343,7 +1343,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
 
         case USB_DESC_TYPE_INTERFACE:
           {
-            DEBUGASSERT(remaining >= sizeof(struct usb_ifdesc_s));
+            DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
             if ((found & USBHOST_IFFOUND) != 0)
               {
                 /* Oops.. more than one interface.  We don't know what to do with this. */
@@ -1358,7 +1358,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
         case USB_DESC_TYPE_ENDPOINT:
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
-            DEBUGASSERT(remaining >= sizeof(struct usb_epdesc_s));
+            DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for a bulk endpoint.  We only support the bulk-only
              * protocol so I suppose anything else should really be an error.

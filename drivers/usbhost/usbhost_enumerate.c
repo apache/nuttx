@@ -139,6 +139,8 @@ static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
       id->base     = devdesc->class;
       id->subclass = devdesc->subclass;
       id->proto    = devdesc->protocol;
+      uvdbg("class:%d subclass:%d protocol:%d\n",
+             id->base, id->subclass, id->proto);
 
       /* Check if we have enough of the structure to see the VID/PID */
 
@@ -148,6 +150,7 @@ static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
 
           id->vid = usbhost_getle16(devdesc->vendor);
           id->pid = usbhost_getle16(devdesc->product);
+          uvdbg("vid:%d pid:%d\n", id->vid, id->pid);
         }
     }
 
@@ -163,38 +166,33 @@ static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
  *
  *******************************************************************************/
 
-static inline int usbhost_configdesc(const uint8_t *configdesc, int desclen,
+static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
                                      struct usbhost_id_s *id)
 {
   struct usb_cfgdesc_s *cfgdesc;
   struct usb_ifdesc_s *ifdesc;
   int remaining;
 
-  DEBUGASSERT(configdesc != NULL &&
-              desclen >= sizeof(struct usb_cfgdesc_s));
-  
+  DEBUGASSERT(configdesc != NULL && cfglen >= USB_SIZEOF_CFGDESC);
+
   /* Verify that we were passed a configuration descriptor */
 
   cfgdesc = (struct usb_cfgdesc_s *)configdesc;
+  uvdbg("cfg len:%d total len:%d\n", cfgdesc->len, cfglen);
+
   if (cfgdesc->type != USB_DESC_TYPE_CONFIG)
     {
       return -EINVAL;
     }
 
-  /* Get the total length of the configuration descriptor (little endian).
-   * It might be a good check to get the number of interfaces here too.
-  */
-
-  remaining = (int)usbhost_getle16(cfgdesc->totallen);
-
   /* Skip to the next entry descriptor */
 
   configdesc += cfgdesc->len;
-  remaining  -= cfgdesc->len;
+  remaining   = cfglen - cfgdesc->len;
 
   /* Loop where there are more dscriptors to examine */
 
-  memset(&id, 0, sizeof(FAR struct usb_desc_s));
+  memset(id, 0, sizeof(FAR struct usb_desc_s));
   while (remaining >= sizeof(struct usb_desc_s))
     {
       /* What is the next descriptor? Is it an interface descriptor? */
@@ -212,6 +210,8 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int desclen,
           id->base     = ifdesc->class;
           id->subclass = ifdesc->subclass;
           id->proto    = ifdesc->protocol;
+          uvdbg("class:%d subclass:%d protocol:%d\n",
+                id->base, id->subclass, id->proto);
           return OK;
         }
 
@@ -319,8 +319,8 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
   struct usb_ctrlreq_s *ctrlreq;
   struct usbhost_id_s id;
   size_t maxlen;
-  unsigned int len;
-  uint16_t maxpacketsize;
+  unsigned int cfglen;
+  uint8_t maxpacketsize;
   uint8_t *buffer;
   int  ret;
 
@@ -369,6 +369,9 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
     struct usb_devdesc_s *devdesc = (struct usb_devdesc_s *)buffer;
 
     /* Extract the max packetsize for endpoint 0 */
+
+    maxpacketsize = devdesc->mxpacketsize;
+    uvdbg("maxpacksetsize: %d\n", maxpacketsize);
 
     DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
 
@@ -426,7 +429,8 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
 
   /* Extract the full size of the configuration data */
 
-  len = ((struct usb_cfgdesc_s *)buffer)->len;
+  cfglen = (unsigned int)usbhost_getle16(((struct usb_cfgdesc_s *)buffer)->totallen);
+  uvdbg("sizeof config data: %d\n", cfglen);
 
   /* Get all of the configuration descriptor data, index == 0 */
 
@@ -434,7 +438,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
   usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_CONFIG << 8));
   usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, len);
+  usbhost_putle16(ctrlreq->len, cfglen);
 
   ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
   if (ret != OK)
@@ -477,7 +481,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
        * case of multiple interface descriptors.
        */
 
-      ret = usbhost_configdesc(buffer, len, &id);
+      ret = usbhost_configdesc(buffer, cfglen, &id);
       if (ret != OK)
         {
           udbg("ERROR: usbhost_configdesc returned %d\n", ret);
@@ -494,7 +498,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
    * will begin configuring the device.
    */
 
-  ret = usbhost_classbind(drvr, buffer, len, &id, class);
+  ret = usbhost_classbind(drvr, buffer, cfglen, &id, class);
   if (ret != OK)
     {
       udbg("ERROR: usbhost_classbind returned %d\n", ret);

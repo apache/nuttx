@@ -202,7 +202,7 @@
 #define OHCI_LSTHRES_SHIFT          (0)       /* Bits 0-11: LS threshold */
 #define OHCI_LSTHRES_MASK           (0x0fff << OHCI_PERSTART_SHIFT)
                                               /* Bits 12-31: Reserved */
-/* HcRhDescriptorN: Describes root hub (7.4.1) */
+/* HcRhDescriptorN: Describes root hub (part A) (7.4.1) */
 
 #define OHCI_RHDESCA_NDP_SHIFT      (0)       /* Bits 0-7: Number downstream ports */
 #define OHCI_RHDESCA_NDP_MASK       (0xff << OHCI_RHDESCA_NDP_SHIFT)
