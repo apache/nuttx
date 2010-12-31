@@ -165,7 +165,6 @@ static int nsh_waiter(int argc, char *argv[])
   message("nsh_waiter: Running\n");
   for (;;)
     {
-#ifdef CONFIG_USBHOST_HAVERHSC
       /* Wait for the device to change state */
 
       ret = DRVR_WAIT(g_drvr, connected);
@@ -182,39 +181,6 @@ static int nsh_waiter(int argc, char *argv[])
 
           (void)DRVR_ENUMERATE(g_drvr);
         }
-#else
-      /* Is the device connected? */
-
-      if (connected)
-        {
-          /* Yes.. wait for the disconnect event */
-
-          ret = DRVR_WAIT(g_drvr, false);
-          DEBUGASSERT(ret == OK);
-
-          connected = false;
-          message("nsh_waiter: Not connected\n");
-        }
-      else
-        {
-          /* Wait a bit */
-
-          sleep(2);
-
-          /* Try to enumerate the device */
-
-          uvdbg("nsh_usbhostinitialize: Enumerate device\n");
-          ret = DRVR_ENUMERATE(g_drvr);
-          if (ret != OK)
-            {
-              uvdbg("nsh_usbhostinitialize: Enumeration failed: %d\n", ret);
-            }
-          else
-            {
-              message("nsh_usbhostinitialize: Connected\n");
-            }
-        }
-#endif
     }
 
   /* Keep the compiler from complaining */
