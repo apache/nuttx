@@ -1384,7 +1384,10 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
 
                     priv->bulkout.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     priv->bulkout.in           = false;
+                    priv->bulkout.funcaddr     = 1;
                     priv->bulkout.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
+                    uvdbg("Bulk OUT EP addr:%d mxpacketsize:%d\n",
+                          priv->bulkout.addr, priv->bulkout.mxpacketsize);
                   }
                 else
                   {
@@ -1402,7 +1405,10 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
                     
                     priv->bulkin.addr          = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     priv->bulkin.in            = true;
+                    priv->bulkin.funcaddr      = 1;
                     priv->bulkin.mxpacketsize  = usbhost_getle16(epdesc->mxpacketsize);
+                    uvdbg("Bulk IN EP addr:%d mxpacketsize:%d\n",
+                          priv->bulkin.addr, priv->bulkin.mxpacketsize);
                   }
               }
           }

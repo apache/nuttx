@@ -246,7 +246,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context);
 
 static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected);
 static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr);
-static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcno,
+static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                               uint16_t maxpacketsize);
 static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
                          FAR uint8_t **buffer, FAR size_t *maxlen);
@@ -617,7 +617,7 @@ static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
   TDHEAD->bufend  = (uint32_t)(buffer + (buflen - 1));
   TDTAIL->bufend  = 0;
 
-  ed->headtd      = (uint32_t)TDHEAD | ((ed->headtd) & 0x00000002);
+  ed->headtd      = (uint32_t)TDHEAD | ((ed->headtd) & ED_HEADP_C);
   ed->tailtd      = (uint32_t)TDTAIL;
   ed->next        = 0;
 }
@@ -966,7 +966,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   funcno - The USB address of the function containing the endpoint that EP0
+ *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
  *   maxpacketsize - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
@@ -980,11 +980,11 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
  *
  ************************************************************************************/
 
-static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcno,
+static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                               uint16_t maxpacketsize)
 {
-  DEBUGASSERT(drvr && funcno < 128 && maxpacketsize < 2048);
-  EDCTRL->ctrl = (uint32_t)funcno << ED_CONTROL_FA_SHIFT | 
+  DEBUGASSERT(drvr && funcaddr < 128 && maxpacketsize < 2048);
+  EDCTRL->ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT | 
                  (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
   return OK;
 }
@@ -1203,11 +1203,15 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
 #endif
   int ret = -ENOMEM;
 
+  DEBUGASSERT(drvr && ep && buffer && buflen > 0);
+  uvdbg("EP%d %s maxpacket:%d buflen:%d\n",
+        ep->addr, ep->in ? "IN" : "OUT", ep->mxpacketsize, buflen);
+
   /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
 
 #ifdef CONFIG_UBHOST_AHBIOBUFFERS
   if ((uintptr_t)buffer < LPC17_SRAM_BANK0 ||
-      (uintptr_t)buffer >= (LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0 + LPC17_SRAM_BANK0))
+      (uintptr_t)buffer >= (LPC17_SRAM_BANK0 + LPC17_BANK0_SIZE + LPC17_BANK1_SIZE))
     {
       /* Will the transfer fit in an IO buffer? */
 
@@ -1242,14 +1246,15 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
   ed = lpc17_edalloc(priv);
   if (!ed)
     {
-      uvdbg("ED allocation failed\n");
+      udbg("ED allocation failed\n");
       goto errout;
     }
 
   /* Format the endpoint descriptor */
  
   lpc17_edinit(ed);
-  ed->ctrl = (uint32_t)(ep->addr) << ED_CONTROL_EN_SHIFT |
+  ed->ctrl = (uint32_t)(ep->funcaddr)     << ED_CONTROL_FA_SHIFT | 
+             (uint32_t)(ep->addr)         << ED_CONTROL_EN_SHIFT |
              (uint32_t)(ep->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
 
   /* Get the direction of the endpoint */
@@ -1280,7 +1285,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
    * TDs on the Bulk list.
    */
  
-  regval = lpc17_getreg(LPC17_USBHOST_CMDST);
+  regval  = lpc17_getreg(LPC17_USBHOST_CMDST);
   regval |= OHCI_CMDST_BLF;
   lpc17_putreg(regval, LPC17_USBHOST_CMDST);
 
@@ -1290,7 +1295,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
    * should never modify the bulk list while BLE is set.
    */
 
-  regval = lpc17_getreg(LPC17_USBHOST_CTRL);
+  regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
   regval |= OHCI_CTRL_BLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
 
@@ -1437,12 +1442,15 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   sem_init(&priv->rhssem, 0, 0);
   sem_init(&priv->wdhsem, 0, 0);
 
-  /* Enable power by setting PCUSB in the PCONP register */
+  /* Enable power by setting PCUSB in the PCONP register.  Disable interrupts
+   * because this register may be shared with other drivers.
+   */
 
   flags   = irqsave();
   regval  = lpc17_getreg(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCUSB;
   lpc17_putreg(regval, LPC17_SYSCON_PCONP);
+  irqrestore(flags);
 
   /* Enable clocking on USB (USB PLL clocking was initialized in very low-
    * evel clock setup logic (see lpc17_clockconfig.c)).  We do still need
@@ -1582,7 +1590,9 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
       return NULL;
     }
 
-  /* Enable USB interrupts at the SYCON controller */
+  /* Enable USB interrupts at the SYCON controller.  Disable interrupts
+   * because this register may be shared with other drivers.
+   */
 
   flags = irqsave();
   regval = lpc17_getreg(LPC17_SYSCON_USBINTST);

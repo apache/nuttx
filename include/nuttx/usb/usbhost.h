@@ -206,7 +206,7 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   funcno - The USB address of the function containing the endpoint that EP0
+ *   funcaddr - The USB address of the function containing the endpoint that EP0
  *     controls
  *   mps (maxpacketsize) - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
@@ -220,7 +220,7 @@
  *
  ************************************************************************************/
 
-#define DRVR_EP0CONFIGURE(drvr,funcno,mps) ((drvr)->ep0configure(drvr,funcno,mps))
+#define DRVR_EP0CONFIGURE(drvr,funcaddr,mps) ((drvr)->ep0configure(drvr,funcaddr,mps))
 
 /************************************************************************************
  * Name: DRVR_ALLOC
@@ -465,7 +465,7 @@ struct usbhost_driver_s
    * an external implementation of the enumeration logic.
    */
 
-  int (*ep0configure)(FAR struct usbhost_driver_s *drvr, uint8_t funcno,
+  int (*ep0configure)(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                       uint16_t maxpacketsize);
 
   /* Some hardware supports special memory in which transfer descriptors can
@@ -523,6 +523,7 @@ struct usbhost_epdesc_s
 {
   uint8_t  addr;         /* Endpoint address */
   bool     in;           /* Direction: TRUE = IN */
+  uint8_t  funcaddr;     /* USB address of function containing endpoint */
   uint16_t mxpacketsize; /* Max packetsize */
 };
 

@@ -281,8 +281,8 @@
 #define ED_CONTROL_MPS_SHIFT       (16)       /* Bits 16-26: Maximum packet size */
 #define ED_CONTROL_MPS_MASK        (0x7ff << ED_CONTROL_MPS_SHIFT)
 
-#define ED_TAILP_H                 (1 << 0)  /* Bit 0: Halted */
-#define ED_TAILP_C                 (1 << 1)  /* Bit 1: Toggle carry */
+#define ED_HEADP_H                 (1 << 0)  /* Bit 0: Halted */
+#define ED_HEADP_C                 (1 << 1)  /* Bit 1: Toggle carry */
 
 /* General Transfer Descriptor Offsets (4.3.1) */
 
