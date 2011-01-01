@@ -258,10 +258,10 @@
 /* Transfer Descriptors *****************************************************/
 /* Endpoint Descriptor Offsets (4.2.1) */
 
-#define ED_CONTROL_OFFSET          (0x00)     /* TD status bits */
-#define ED_TAILP_OFFSET            (0x04)     /* Current Buffer Pointer (CBP) */
-#define ED_HEADP_OFFSET            (0x08)     /* Next TD (NextTD) */
-#define ED_NEXTED_OFFSET           (0x0c)     /* Buffer End (BE) */
+#define ED_CONTROL_OFFSET          (0x00)     /* ED status/control bits */
+#define ED_TAILP_OFFSET            (0x04)     /* TD Queue Tail Pointer (TailP) */
+#define ED_HEADP_OFFSET            (0x08)     /* TD Queue Head Pointer (HeadP) */
+#define ED_NEXTED_OFFSET           (0x0c)     /* Next Endpoint Descriptor (NextED) */
 
 /* Endpoint Descriptor Bit Definitions (4.2.2) */
 
@@ -379,25 +379,35 @@
  * Public Types
  ****************************************************************************/
 
+/* Endpoint Descriptor Offsets (4.2.1) */
+
+struct ohci_ed_s
+{
+  volatile  uint32_t ctrl;         /* ED status/control bits */
+  volatile  uint32_t tailp;        /* TD Queue Tail Pointer (TailP) */
+  volatile  uint32_t headp;        /* TD Queue Head Pointer (HeadP) */
+  volatile  uint32_t nexted;       /* Next Endpoint Descriptor (NextED) */
+};
+
 /* General Transfer Descriptor (4.3.1) */
 
 struct ohci_gtd_s
 {
-  uint32_t status;        /* TD status bits */
-  uint32_t cbp;           /* Current Buffer Pointer (CBP) */
-  uint32_t nexttd;        /* Next TD (NextTD) */
-  uint32_t be;            /* Buffer End (BE) */
+  volatile uint32_t ctrl;          /* TD status/control bits */
+  volatile uint32_t cbp;           /* Current Buffer Pointer (CBP) */
+  volatile uint32_t nexttd;        /* Next TD (NextTD) */
+  volatile uint32_t be;            /* Buffer End (BE) */
 };
 
 /* Isochronous Transfer Descriptor Offsets (4.3.2) */
 
 struct ohci_itd_s
 {
-  uint32_t status;        /* TD status bits */
-  uint32_t bp0;           /* Buffer page 0 (BP0 */
-  uint32_t nexttd;        /* Next TD (NextTD) */
-  uint32_t be;            /* Buffer End (BE) */
-  uint16_t psw[ITD_NPSW]; /* Offset/PSW */
+  volatile uint32_t status;        /* TD status/control bits */
+  volatile uint32_t bp0;           /* Buffer page 0 (BP0 */
+  volatile uint32_t nexttd;        /* Next TD (NextTD) */
+  volatile uint32_t be;            /* Buffer End (BE) */
+  volatile uint16_t psw[ITD_NPSW]; /* Offset/PSW */
 };
 
 /* Host Controller Communications Area Format (4.4.1) */
@@ -406,23 +416,23 @@ struct ohci_hcca_s
 {
   /* HccaInterrruptTable: 32x32-bit pointers to interrupt EDs */
 
-  uint32_t  inttbl[HCCA_INTTBL_WSIZE];
+  volatile uint32_t  inttbl[HCCA_INTTBL_WSIZE];
 
   /* HccaFrameNumber: Current frame number and 
    * HccaPad1: Zero when frame no. updated
    */
 
-  uint16_t fmno;
-  uint16_t pad1;
+  volatile uint16_t fmno;
+  volatile uint16_t pad1;
 
   /* HccaDoneHead: When the HC reaches the end of a frame and its deferred
    * interrupt register is 0, it writes the current value of its HcDoneHead to
    * this location and generates an interrupt.
    */
 
-  uint32_t donehead;
-  uint8_t  reserved[HCCA_RESERVED_BSIZE];
-  uint32_t extra;
+  volatile uint32_t donehead;
+  volatile uint8_t  reserved[HCCA_RESERVED_BSIZE];
+  volatile uint32_t extra;
 };
 
 /****************************************************************************
