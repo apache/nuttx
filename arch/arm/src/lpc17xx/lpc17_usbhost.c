@@ -109,12 +109,12 @@
 
 /* Helper definitions */
 
-#define HCCA        ((volatile struct lpc17_hcca_s *)LPC17_HCCA_BASE)
-#define TDHEAD      ((volatile struct lpc17_hctd_s *)LPC17_TDHEAD_ADDR)
-#define TDTAIL      ((volatile struct lpc17_hctd_s *)LPC17_TDTAIL_ADDR)
-#define EDCTRL      ((volatile struct lpc17_hced_s *)LPC17_EDCTRL_ADDR)
+#define HCCA        ((volatile struct ohci_hcca_s *)LPC17_HCCA_BASE)
+#define TDHEAD      ((volatile struct ohci_gtd_s *)LPC17_TDHEAD_ADDR)
+#define TDTAIL      ((volatile struct ohci_gtd_s *)LPC17_TDTAIL_ADDR)
+#define EDCTRL      ((volatile struct ohci_ed_s *)LPC17_EDCTRL_ADDR)
 
-#define EDFREE      ((struct lpc17_hced_s *)LPC17_EDFREE_BASE)
+#define EDFREE      ((struct ohci_ed_s *)LPC17_EDFREE_BASE)
 #define TDFREE      ((uint8_t *)LPC17_TDFREE_BASE)
 #define IOFREE      ((uint8_t *)LPC17_IOFREE_BASE)
 
@@ -151,43 +151,12 @@ struct lpc17_usbhost_s
   sem_t            wdhsem;    /* Semaphore  used to wait for Writeback Done Head event */
 };
 
-/* Host Controller Communication Area */
-
-struct lpc17_hcca_s
-{
-  volatile  uint32_t  inttbl[32];       /* Interrupt table */
-  volatile  uint32_t  frameno;          /* Frame number */
-  volatile  uint32_t  donehead;         /* Done head */
-  volatile  uint8_t   reserved[116];    /* Reserved for future use */
-  volatile  uint8_t   unused[4];        /* Unused */
-};
-
-/* HostController Transfer Descriptor */
-
-struct lpc17_hctd_s
-{                       
-  volatile  uint32_t  ctrl;            /* Transfer descriptor control */
-  volatile  uint32_t  currptr;         /* Physical address of current buffer pointer */
-  volatile  uint32_t  next;            /* Physical pointer to next Transfer Descriptor */
-  volatile  uint32_t  bufend;          /* Physical address of end of buffer */
-};
-
-/* HostController EndPoint Descriptor */
-
-struct lpc17_hced_s
-{
-  volatile  uint32_t  ctrl;            /* Endpoint descriptor control */
-  volatile  uint32_t  tailtd;          /* Physical address of tail in Transfer descriptor list */
-  volatile  uint32_t  headtd;          /* Physical address of head in Transfer descriptor list */
-  volatile  uint32_t  next;            /* Physical address of next Endpoint descriptor */
-};
-
 /* The following are used to manage lists of free EDs and TD buffers*/
 
 struct lpc17_edlist_s
 {
   struct lpc17_edlist_s *flink;        /* Link to next ED in the list */
-  uint32_t               pad[3];       /* To make the same size as struct lpc17_hced_s */
+  uint32_t               pad[3];       /* To make the same size as struct ohci_ed_s */
 };
 
 struct lpc17_buflist_s
@@ -224,15 +193,15 @@ static void lpc17_putle16(uint8_t *dest, uint16_t val);
 
 /* Descriptor helper functions *************************************************/
 
-static struct lpc17_hced_s *lpc17_edalloc(struct lpc17_usbhost_s *priv);
-static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct lpc17_hced_s *ed);
+static struct ohci_ed_s *lpc17_edalloc(struct lpc17_usbhost_s *priv);
+static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct ohci_ed_s *ed);
 static uint8_t *lpc17_tdalloc(struct lpc17_usbhost_s *priv);
 static void lpc17_tdfree(struct lpc17_usbhost_s *priv, uint8_t *buffer);
 #ifdef CONFIG_UBHOST_AHBIOBUFFERS
 static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv);
 static void lpc17_iofree(struct lpc17_usbhost_s *priv, uint8_t *buffer);
 #endif
-static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
+static void lpc17_enqueuetd(volatile struct ohci_ed_s *ed, uint32_t dirpid,
                             uint32_t toggle, volatile uint8_t *buffer,
                             size_t buflen);
 static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
@@ -264,9 +233,9 @@ static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr);
   
 /* Initializaion ***************************************************************/
 
-static void lpc17_tdinit(volatile struct lpc17_hctd_s *td);
-static void lpc17_edinit(volatile struct lpc17_hced_s *ed);
-static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca);
+static void lpc17_tdinit(volatile struct ohci_gtd_s *td);
+static void lpc17_edinit(volatile struct ohci_ed_s *ed);
+static void lpc17_hccainit(volatile struct ohci_hcca_s *hcca);
 
 /*******************************************************************************
  * Private Data
@@ -490,9 +459,9 @@ static void lpc17_putle16(uint8_t *dest, uint16_t val)
  *
  *******************************************************************************/
 
-static struct lpc17_hced_s *lpc17_edalloc(struct lpc17_usbhost_s *priv)
+static struct ohci_ed_s *lpc17_edalloc(struct lpc17_usbhost_s *priv)
 {
-  struct lpc17_hced_s *ret = (struct lpc17_hced_s *)g_edfree;
+  struct ohci_ed_s *ret = (struct ohci_ed_s *)g_edfree;
   if (ret)
     {
       g_edfree = ((struct lpc17_edlist_s*)ret)->flink;
@@ -508,7 +477,7 @@ static struct lpc17_hced_s *lpc17_edalloc(struct lpc17_usbhost_s *priv)
  *
  *******************************************************************************/
 
-static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct lpc17_hced_s *ed)
+static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct ohci_ed_s *ed)
 {
   struct lpc17_edlist_s *edfree = (struct lpc17_edlist_s *)ed;
   edfree->flink                 = g_edfree;
@@ -605,21 +574,21 @@ static void lpc17_iofree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
  *
  *******************************************************************************/
 
-static void lpc17_enqueuetd(volatile struct lpc17_hced_s *ed, uint32_t dirpid,
+static void lpc17_enqueuetd(volatile struct ohci_ed_s *ed, uint32_t dirpid,
                             uint32_t toggle, volatile uint8_t *buffer, size_t buflen)
 {
   TDHEAD->ctrl    = (GTD_STATUS_R | dirpid | TD_DELAY(0) | toggle | GTD_STATUS_CC_MASK);
   TDTAIL->ctrl    = 0;
-  TDHEAD->currptr = (uint32_t)buffer;
-  TDTAIL->currptr = 0;
-  TDHEAD->next    = (uint32_t)TDTAIL;
-  TDTAIL->next    = 0;
-  TDHEAD->bufend  = (uint32_t)(buffer + (buflen - 1));
-  TDTAIL->bufend  = 0;
+  TDHEAD->cbp     = (uint32_t)buffer;
+  TDTAIL->cbp     = 0;
+  TDHEAD->nexttd  = (uint32_t)TDTAIL;
+  TDTAIL->nexttd  = 0;
+  TDHEAD->be      = (uint32_t)(buffer + (buflen - 1));
+  TDTAIL->be      = 0;
 
-  ed->headtd      = (uint32_t)TDHEAD | ((ed->headtd) & ED_HEADP_C);
-  ed->tailtd      = (uint32_t)TDTAIL;
-  ed->next        = 0;
+  ed->headp       = (uint32_t)TDHEAD | ((ed->headp) & ED_HEADP_C);
+  ed->tailp       = (uint32_t)TDTAIL;
+  ed->nexted      = 0;
 }
 
 /*******************************************************************************
@@ -1195,7 +1164,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
                           FAR uint8_t *buffer, size_t buflen)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  struct lpc17_hced_s *ed = NULL;
+  struct ohci_ed_s *ed = NULL;
   uint32_t dirpid;
   uint32_t regval;
 #ifdef CONFIG_UBHOST_AHBIOBUFFERS
@@ -1369,23 +1338,23 @@ static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr)
  * Initialization
  *******************************************************************************/
 
-static void lpc17_tdinit(volatile struct lpc17_hctd_s *td)
+static void lpc17_tdinit(volatile struct ohci_gtd_s *td)
 {
   td->ctrl    = 0;
-  td->currptr = 0;
-  td->next    = 0;
-  td->bufend  = 0;
+  td->cbp     = 0;
+  td->nexttd  = 0;
+  td->be      = 0;
 }
 
-static void lpc17_edinit(volatile struct lpc17_hced_s *ed)
+static void lpc17_edinit(volatile struct ohci_ed_s *ed)
 {
   ed->ctrl    = 0;
-  ed->tailtd  = 0;
-  ed->headtd  = 0;
-  ed->next    = 0;
+  ed->tailp   = 0;
+  ed->headp   = 0;
+  ed->nexted  = 0;
 }
 
-static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca)
+static void lpc17_hccainit(volatile struct ohci_hcca_s *hcca)
 {
   int  i;
 
@@ -1394,7 +1363,7 @@ static void lpc17_hccainit(volatile struct lpc17_hcca_s *hcca)
       hcca->inttbl[i] = 0;
     }
 
-  hcca->frameno   = 0;
+  hcca->fmno      = 0;
   hcca->donehead  = 0;
 }
 
