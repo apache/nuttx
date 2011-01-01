@@ -218,7 +218,7 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr);
 static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                               uint16_t maxpacketsize);
 static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, FAR size_t *maxlen);
+                       FAR uint8_t **buffer, FAR size_t *maxlen);
 static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
                         FAR const struct usb_ctrlreq_s *req,
@@ -227,8 +227,8 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
                          FAR const struct usb_ctrlreq_s *req,
                          FAR const uint8_t *buffer);
 static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
-                            FAR struct usbhost_epdesc_s *ed,
-                            FAR uint8_t *buffer, size_t buflen);
+                          FAR struct usbhost_epdesc_s *ed,
+                          FAR uint8_t *buffer, size_t buflen);
 static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr);
   
 /* Initializaion ***************************************************************/
@@ -677,24 +677,22 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 static int lpc17_usbinterrupt(int irq, FAR void *context)
 {
   struct lpc17_usbhost_s *priv = &g_usbhost;
-
-  /* Read the device interrupt status register */
-
-  uint32_t intstatus;
-  uint32_t intenable;
+  uint32_t intst;
+  uint32_t pending;
+  uint32_t regval;
 
   /* Read Interrupt Status and mask out interrupts that are not enabled. */
 
-  intstatus  = lpc17_getreg(LPC17_USBHOST_INTST);
-  intenable  = lpc17_getreg(LPC17_USBHOST_INTEN);
-  ullvdbg("INST: %08x INTEN: %08x\n", intstatus, intenable);
+  intst  = lpc17_getreg(LPC17_USBHOST_INTST);
+  regval = lpc17_getreg(LPC17_USBHOST_INTEN);
+  ullvdbg("INST: %08x INTEN: %08x\n", intst, regval);
 
-  intstatus &= intenable;
-  if (intstatus != 0)
+  pending = intst & regval;
+  if (pending != 0)
     {
       /* Root hub status change interrupt */
 
-      if ((intstatus & OHCI_INT_RHSC) != 0)
+      if ((pending & OHCI_INT_RHSC) != 0)
         {
           uint32_t rhportst1 = lpc17_getreg(LPC17_USBHOST_RHPORTST1);
           ullvdbg("Root Hub Status Change, RHPORTST1: %08x\n", rhportst1);
@@ -782,9 +780,22 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
       /* Writeback Done Head interrupt */
  
-      if ((intstatus & OHCI_INT_WDH) != 0)
+      if ((pending & OHCI_INT_WDH) != 0)
         {
-          /* Get the condition code from the control word */
+          /* The host controller just wrote the list of finished TDs into the HCCA
+           * done head.  Here we assume that only a single packet is "in flight"
+           * at any given time and we use only the TD at TDHEAD.  So not much needs
+           * to be done here.  In a more complex implementation we would need to
+           * recover these completed TDs in some meaningful way.
+           */
+
+          /* Since there is only one TD, we can disable further TD processing. */
+
+          regval = lpc17_getreg(LPC17_USBHOST_CTRL);
+          regval &= ~(OHCI_CTRL_PLE|OHCI_CTRL_IE|OHCI_CTRL_CLE|OHCI_CTRL_BLE);
+          lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+
+          /* Get the condition code from the (single) TDHEAD TD status/control word */
 
           priv->tdstatus = (TDHEAD->ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
 
@@ -807,7 +818,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
       /* Clear interrupt status register */
 
-      lpc17_putreg(intstatus, LPC17_USBHOST_INTST);
+      lpc17_putreg(intst, LPC17_USBHOST_INTST);
     }
 
   return OK;
@@ -1563,8 +1574,8 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
    * because this register may be shared with other drivers.
    */
 
-  flags = irqsave();
-  regval = lpc17_getreg(LPC17_SYSCON_USBINTST);
+  flags   = irqsave();
+  regval  = lpc17_getreg(LPC17_SYSCON_USBINTST);
   regval |= SYSCON_USBINTST_ENINTS;
   lpc17_putreg(regval, LPC17_SYSCON_USBINTST);
   irqrestore(flags);
@@ -1573,5 +1584,14 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   up_enable_irq(LPC17_IRQ_USB); /* enable USB interrupt */
   udbg("USB host Initialized\n");
+
+  /* If there is a USB device in the slot at power up, then we will not
+   * get the status change interrupt to signal us that the device is
+   * connected.  We need to set the initial connected state accordingly.
+   */
+
+  regval          = lpc17_getreg(LPC17_USBHOST_RHPORTST1);
+  priv->connected = ((regval & OHCI_RHPORTST_CCS) != 0);
+
   return &priv->drvr;
 }
