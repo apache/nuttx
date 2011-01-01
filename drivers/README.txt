@@ -64,8 +64,10 @@ pipes/
 serial/
 	Front-ends character drivers for chip-specific UARTs.  This provide
 	some TTY-like functionality and are commonly used (but not required for)
-	the NuttX system console.  See include/nuttx/serial.h
+	the NuttX system console.  See also include/nuttx/serial.h
 
 usbdev/
-	USB device drivers.  See include/nuttx/usb*.h
+	USB device drivers.  See also include/nuttx/usb/usbdev.h
 
+usbhost/
+	USB host drivers.  See also include/nuttx/usb/usbhost.h

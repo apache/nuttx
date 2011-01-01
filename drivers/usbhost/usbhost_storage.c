@@ -152,6 +152,16 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv);
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
 static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname);
 
+/* CBW/CSW debug helpers */
+
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+static void usbhost_dumpcbw(FAR struct usbstrg_cbw_s *cbw);
+static void usbhost_dumpcsw(FAR struct usbstrg_csw_s *csw);
+#else
+#  define usbhost_dumpcbw(cbw);
+#  define usbhost_dumpcsw(csw);
+#endif
+
 /* CBW helpers */
 
 static inline void usbhost_requestsensecbw(FAR struct usbstrg_cbw_s *cbw);
@@ -184,6 +194,7 @@ static inline uint16_t usbhost_getle16(const uint8_t *val);
 static inline uint16_t usbhost_getbe16(const uint8_t *val);
 static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
 static inline void usbhost_putbe16(uint8_t *dest, uint16_t val);
+static inline uint32_t usbhost_getle32(const uint8_t *val);
 static inline uint32_t usbhost_getbe32(const uint8_t *val);
 static void usbhost_putle32(uint8_t *dest, uint32_t val);
 static void usbhost_putbe32(uint8_t *dest, uint32_t val);
@@ -449,13 +460,59 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 }
 
 /****************************************************************************
+ * Name: CBW/CSW debug helpers
+ *
+ * Description:
+ *   The following functions are helper functions used to dump CBWs and CSWs.
+ *
+ * Input Parameters:
+ *   cbw/csw - A reference to the CBW/CSW to dump.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+static void usbhost_dumpcbw(FAR struct usbstrg_cbw_s *cbw)
+{
+  int i;
+
+  uvdbg("CBW:\n");
+  uvdbg("  signature: %08x\n", usbhost_getle32(cbw->signature));
+  uvdbg("  tag:       %08x\n", usbhost_getle32(cbw->tag));
+  uvdbg("  datlen:    %08x\n", usbhost_getle32(cbw->datlen));
+  uvdbg("  flags:     %02x\n", cbw->flags);
+  uvdbg("  lun:       %02x\n", cbw->lun);
+  uvdbg("  cdblen:    %02x\n", cbw->cdblen);
+
+  uvdbg("CDB:\n");
+  for (i = 0; i < cbw->cdblen; i += 8)
+    {
+      uvdbg("  %02x %02x %02x %02x %02x %02x %02x %02x\n",
+            cbw->cdb[i],   cbw->cdb[i+1], cbw->cdb[i+2], cbw->cdb[i+3],
+            cbw->cdb[i+4], cbw->cdb[i+5], cbw->cdb[i+6], cbw->cdb[i+7]);
+    }
+}
+
+static void usbhost_dumpcsw(FAR struct usbstrg_csw_s *csw)
+{
+  uvdbg("CSW:\n");
+  uvdbg("  signature: %08x\n", usbhost_getle32(csw->signature));
+  uvdbg("  tag:       %08x\n", usbhost_getle32(csw->tag));
+  uvdbg("  residue:   %08x\n", usbhost_getle32(csw->residue));
+  uvdbg("  status:    %02x\n", csw->status);
+}
+#endif
+
+/****************************************************************************
  * Name: CBW helpers
  *
  * Description:
  *   The following functions are helper functions used to format CBWs.
  *
  * Input Parameters:
- *   cbw - A reference to allocated and initialized CBW to to built.
+ *   cbw - A reference to allocated and initialized CBW to be built.
  *
  * Returned Values:
  *   None
@@ -477,6 +534,8 @@ static inline void usbhost_requestsensecbw(FAR struct usbstrg_cbw_s *cbw)
   reqsense           = (FAR struct scsicmd_requestsense_s *)cbw->cdb;
   reqsense->opcode   = SCSI_CMD_REQUESTSENSE;
   reqsense->alloclen = SCSIRESP_FIXEDSENSEDATA_SIZEOF;
+
+  usbhost_dumpcbw(cbw);
 }
 
 static inline void usbhost_testunitreadycbw(FAR struct usbstrg_cbw_s *cbw)
@@ -488,6 +547,8 @@ static inline void usbhost_testunitreadycbw(FAR struct usbstrg_cbw_s *cbw)
   /* Format the CDB */
 
   cbw->cdb[0] = SCSI_CMD_TESTUNITREADY;
+
+  usbhost_dumpcbw(cbw);
 }
 
 static inline void usbhost_readcapacitycbw(FAR struct usbstrg_cbw_s *cbw)
@@ -504,6 +565,8 @@ static inline void usbhost_readcapacitycbw(FAR struct usbstrg_cbw_s *cbw)
 
   rcap10         = (FAR struct scsicmd_readcapacity10_s *)cbw->cdb;
   rcap10->opcode = SCSI_CMD_READCAPACITY10;
+
+  usbhost_dumpcbw(cbw);
 }
 
 static inline void usbhost_inquirycbw (FAR struct usbstrg_cbw_s *cbw)
@@ -512,15 +575,17 @@ static inline void usbhost_inquirycbw (FAR struct usbstrg_cbw_s *cbw)
 
   /* Format the CBW */
 
-    usbhost_putle32(cbw->datlen, SCSIRESP_INQUIRY_SIZEOF);
-    cbw->flags  = USBSTRG_CBWFLAG_IN;
-    cbw->cdblen = SCSICMD_INQUIRY_SIZEOF;
+  usbhost_putle32(cbw->datlen, SCSIRESP_INQUIRY_SIZEOF);
+  cbw->flags    = USBSTRG_CBWFLAG_IN;
+  cbw->cdblen   = SCSICMD_INQUIRY_SIZEOF;
 
   /* Format the CDB */
 
   inq           = (FAR struct scscicmd_inquiry_s *)cbw->cdb;
   inq->opcode   = SCSI_CMD_INQUIRY;
   usbhost_putbe16(inq->alloclen, SCSIRESP_INQUIRY_SIZEOF);
+
+  usbhost_dumpcbw(cbw);
 }
 
 static inline void
@@ -541,6 +606,8 @@ usbhost_readcbw (size_t startsector, uint16_t blocksize,
   rd10->opcode = SCSI_CMD_READ10;
   usbhost_putbe32(rd10->lba, startsector);
   usbhost_putbe16(rd10->xfrlen, nsectors);
+
+  usbhost_dumpcbw(cbw);
 }
 
 static inline void
@@ -560,6 +627,8 @@ usbhost_writecbw(size_t startsector, uint16_t blocksize,
   wr10->opcode = SCSI_CMD_WRITE10;
   usbhost_putbe32(wr10->lba, startsector);
   usbhost_putbe16(wr10->xfrlen, nsectors);
+
+  usbhost_dumpcbw(cbw);
 }
 
 /****************************************************************************
@@ -615,6 +684,10 @@ static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
 
           result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                  priv->tdbuffer, USBSTRG_CSW_SIZEOF);
+          if (result == OK)
+            {
+              usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
+            }
         }
     }
   return result;
@@ -647,6 +720,10 @@ static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
 
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                      priv->tdbuffer, USBSTRG_CSW_SIZEOF);
+              if (result == OK)
+                {
+                  usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
+                }
             }
         }
     }
@@ -687,6 +764,10 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
 
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                      priv->tdbuffer, USBSTRG_CSW_SIZEOF);
+              if (result == OK)
+                {
+                  usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
+                }
             }
         }
     }
@@ -725,6 +806,10 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
 
               result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
                                      priv->tdbuffer, USBSTRG_CSW_SIZEOF);
+              if (result == OK)
+                {
+                  usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
+                }
             }
         }
     }
@@ -1045,7 +1130,29 @@ static void usbhost_putbe16(uint8_t *dest, uint16_t val)
  * Name: usbhost_getbe32
  *
  * Description:
- *   Put a (possibly unaligned) 32-bit big endian value.
+ *   Get a (possibly unaligned) 32-bit little endian value.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the first byte to save the big endian value.
+ *   val - The 32-bit value to be saved.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline uint32_t usbhost_getle32(const uint8_t *val)
+{
+ /* Little endian means LS halfword first in byte stream */
+
+  return (uint32_t)usbhost_getle16(&val[2]) << 16 | (uint32_t)usbhost_getle16(val);
+}
+
+/****************************************************************************
+ * Name: usbhost_getbe32
+ *
+ * Description:
+ *   Get a (possibly unaligned) 32-bit big endian value.
  *
  * Input Parameters:
  *   dest - A pointer to the first byte to save the big endian value.
