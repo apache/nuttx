@@ -395,11 +395,11 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
      */
   }
 
-  /* Set the device address to 1 */
+  /* Set the USB device address to the value in the 'funcaddr' input */
 
   ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_SETADDRESS;
-  usbhost_putle16(ctrlreq->value, 1);
+  usbhost_putle16(ctrlreq->value, (uint16_t)funcaddr);
   usbhost_putle16(ctrlreq->index, 0);
   usbhost_putle16(ctrlreq->len, 0);
 
@@ -411,12 +411,13 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
     }
   up_mdelay(2);
 
-  /* Modify control pipe with function address 1 */
+  /* Modify control pipe with the provided USB device address */
 
-  DRVR_EP0CONFIGURE(drvr, 1, maxpacketsize);
+  DRVR_EP0CONFIGURE(drvr, funcaddr, maxpacketsize);
 
- /* Get the configuration descriptor (only), index == 0.  More logic is
-  * needed in order to handle devices with multiple configurations.
+ /* Get the configuration descriptor (only), index == 0.  Should not be
+  * hard-coded! More logic is needed in order to handle devices with
+  * multiple configurations.
   */
 
   ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
@@ -437,7 +438,9 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   cfglen = (unsigned int)usbhost_getle16(((struct usb_cfgdesc_s *)buffer)->totallen);
   uvdbg("sizeof config data: %d\n", cfglen);
 
-  /* Get all of the configuration descriptor data, index == 0 */
+  /* Get all of the configuration descriptor data, index == 0 (Should not be
+   * hard-coded!)
+   */
 
   ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
@@ -452,7 +455,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
       goto errout;
     }
 
-  /* Select device configuration 1 */
+  /* Select device configuration 1 (Should not be hard-coded!) */
 
   ctrlreq->type = USB_REQ_DIR_OUT|USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_SETCONFIGURATION;
