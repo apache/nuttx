@@ -213,7 +213,8 @@ static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
 /* struct usbhost_class_s methods */
 
 static int usbhost_connect(FAR struct usbhost_class_s *class,
-                           FAR const uint8_t *configdesc, int desclen);
+                           FAR const uint8_t *configdesc, int desclen,
+                           uint8_t funcaddr);
 static int usbhost_disconnected(FAR struct usbhost_class_s *class);
 
 /* struct block_operations methods */
@@ -1391,6 +1392,8 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *   class - The USB host class entry previously obtained from a call to create().
  *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
  *   desclen - The length in bytes of the configuration descriptor.
+ *   funcaddr - The USB address of the function containing the endpoint that EP0
+ *     controls
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -1404,7 +1407,8 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  ****************************************************************************/
 
 static int usbhost_connect(FAR struct usbhost_class_s *class,
-                           FAR const uint8_t *configdesc, int desclen)
+                           FAR const uint8_t *configdesc, int desclen,
+                           uint8_t funcaddr)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
   FAR struct usb_cfgdesc_s *cfgdesc;
@@ -1490,8 +1494,8 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
                     /* Save the bulk OUT endpoint information */
 
                     priv->bulkout.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
-                    priv->bulkout.in           = false;
-                    priv->bulkout.funcaddr     = 1;
+                    priv->bulkout.in           = 0;
+                    priv->bulkout.funcaddr     = funcaddr;
                     priv->bulkout.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Bulk OUT EP addr:%d mxpacketsize:%d\n",
                           priv->bulkout.addr, priv->bulkout.mxpacketsize);
@@ -1511,8 +1515,8 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
                     /* Save the bulk IN endpoint information */
                     
                     priv->bulkin.addr          = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
-                    priv->bulkin.in            = true;
-                    priv->bulkin.funcaddr      = 1;
+                    priv->bulkin.in            = 1;
+                    priv->bulkin.funcaddr      = funcaddr;
                     priv->bulkin.mxpacketsize  = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Bulk IN EP addr:%d mxpacketsize:%d\n",
                           priv->bulkin.addr, priv->bulkin.mxpacketsize);

@@ -106,6 +106,8 @@
  *   class - The USB host class entry previously obtained from a call to create().
  *   configdesc - A pointer to a uint8_t buffer container the configuration descripor.
  *   desclen - The length in bytes of the configuration descriptor.
+ *   funcaddr - The USB address of the function containing the endpoint that EP0
+ *     controls
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -118,7 +120,8 @@
  *
  ************************************************************************************/
 
-#define CLASS_CONNECT(class,configdesc,desclen) ((class)->connect(class,configdesc,desclen))
+#define CLASS_CONNECT(class,configdesc,desclen,funcaddr) \
+  ((class)->connect(class,configdesc,desclen, funcaddr))
 
 /************************************************************************************
  * Name: CLASS_DISCONNECTED
@@ -430,7 +433,8 @@ struct usbhost_class_s
    * initialize properly (such as endpoint selections).
    */
 
-  int (*connect)(FAR struct usbhost_class_s *class, FAR const uint8_t *configdesc, int desclen);
+  int (*connect)(FAR struct usbhost_class_s *class, FAR const uint8_t *configdesc,
+                 int desclen, uint8_t funcaddr);
 
   /* This method informs the class that the USB device has been disconnected. */
 
@@ -521,9 +525,11 @@ struct usbhost_driver_s
 
 struct usbhost_epdesc_s
 {
-  uint8_t  addr;         /* Endpoint address */
-  bool     in;           /* Direction: TRUE = IN */
-  uint8_t  funcaddr;     /* USB address of function containing endpoint */
+  uint8_t  addr     : 4; /* Endpoint address */
+  uint8_t  pad1     : 3;
+  uint8_t  in       : 1; /* Direction: 1->IN */
+  uint8_t  funcaddr : 7; /* USB address of function containing endpoint */
+  uint8_t  pad2     : 1;
   uint16_t mxpacketsize; /* Max packetsize */
 };
 
@@ -653,6 +659,8 @@ EXTERN FAR struct usbhost_driver_s *usbhost_initialize(int controller);
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   funcaddr - The USB address of the function containing the endpoint that EP0
+ *     controls
  *   class - If the class driver for the device is successful located
  *      and bound to the driver, the allocated class instance is returned into
  *      this caller-provided memory location.
@@ -669,6 +677,7 @@ EXTERN FAR struct usbhost_driver_s *usbhost_initialize(int controller);
  *******************************************************************************/
 
 EXTERN int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
+                             uint8_t funcaddr,
                              FAR struct usbhost_class_s **class);
 
 #undef EXTERN

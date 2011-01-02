@@ -929,10 +929,12 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
   lpc17_putreg(OHCI_RHPORTST_PRSC, LPC17_USBHOST_RHPORTST1);
   up_mdelay(200);
 
-  /* Let the common usbhost_enumerate do all of the real work */
+  /* Let the common usbhost_enumerate do all of the real work.  Note that the
+   * FunctionAddress (USB address) is hardcoded to one.
+   */
 
   uvdbg("Enumerate the device\n");
-  return usbhost_enumerate(drvr, &priv->class);
+  return usbhost_enumerate(drvr, 1, &priv->class);
 }
 
 /************************************************************************************
@@ -1239,7 +1241,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
 
   /* Get the direction of the endpoint */
 
-  if (ep->in)
+  if (ep->in != 0)
     {
       ed->ctrl |= ED_CONTROL_D_IN;
       dirpid    = GTD_STATUS_DP_IN;
