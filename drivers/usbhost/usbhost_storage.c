@@ -928,7 +928,10 @@ static void usbhost_initvolume(FAR void *arg)
               break;
             }
 
-          /* No.. Request mode sense information (ignoring return status) */
+          /* No.. Request mode sense information.  The REQUEST SENSE command
+           * is sent only "to clear interlocked unit attention conditions."
+           * The returned status is ignored here.
+           */
 
           uvdbg("Request sense\n");
           result = usbhost_requestsense(priv);

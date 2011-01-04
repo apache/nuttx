@@ -180,7 +180,6 @@
 
 /* HcFmRemaining: Bit time remaining in current frame (7.3.2) */
 
-#define OHCI_FMREM_
 #define OHCI_FMREM_FR_SHIFT         (0)       /* Bits 0-13: Frame remaining */
 #define OHCI_FMREM_FR_MASK          (0x3fff << OHCI_FMREM_FR_SHIFT)
                                               /* Bits 16-30: Reserved */
@@ -188,7 +187,6 @@
 
 /* HcFmNumber: Frame number counter (7.3.3) */
 
-#define OHCI_FMNO_
 #define OHCI_FMNO_FI_SHIFT          (0)       /* Bits 0-15: Frame number */
 #define OHCI_FMNO_FI_MASK           (0xffff << OHCI_FMINT_FI_SHIFT)
                                               /* Bits 16-31: Reserved */
