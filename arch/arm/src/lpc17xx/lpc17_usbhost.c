@@ -91,7 +91,18 @@
 
 /* CLKCTRL enable bits */
 
-#define LPC17_CLKCTRL_ENABLES (USBOTG_CLK_HOSTCLK|USBOTG_CLK_PORTSELCLK|USBOTG_CLK_AHBCLK)
+#define LPC17_CLKCTRL_ENABLES   (USBOTG_CLK_HOSTCLK|USBOTG_CLK_PORTSELCLK|USBOTG_CLK_AHBCLK)
+
+/* Interrupt enable bits */
+
+#ifdef CONFIG_DEBUG_USB
+#  define LPC17_DEBUG_INTS      (OHCI_INT_SO|OHCI_INT_RD|OHCI_INT_UE|OHCI_INT_OC)
+#else
+#  define LPC17_DEBUG_INTS      0
+#endif
+
+#define LPC17_NORMAL_INTS       (OHCI_INT_WDH|OHCI_INT_RHSC)
+#define LPC17_ALL_INTS          (LPC17_NORMAL_INTS|LPC17_DEBUG_INTS)
 
 /* Dump GPIO registers */
 
@@ -816,6 +827,13 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
           lpc17_givesem(&priv->wdhsem);
         }
 
+#ifdef CONFIG_DEBUG_USB
+      if ((pending & LPC17_DEBUG_INTS) != 0)
+        {
+          ulldbg("ERROR: Unhandled interrupts INTST:%08x\n", intst);
+        }
+#endif
+
       /* Clear interrupt status register */
 
       lpc17_putreg(intst, LPC17_USBHOST_INTST);
@@ -865,6 +883,7 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
       lpc17_takesem(&priv->rhssem);
     }
 
+  udbg("Connected:%s\n", priv->connected ? "YES" : "NO");
   return OK;
 }
 
@@ -1214,12 +1233,16 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
           goto errout;
         }
 
-      /* Copy the user data into the AHB SRAM IO buffer.  Sad... so
-       * inefficient.  But without exposing the AHB SRAM to the final,
-       * end-user client I don't know of any way around this copy.
+      /* If this is an OUT transaction, copy the user data into the AHB
+       * SRAM IO buffer.  Sad... so inefficient.  But without exposing
+       * the AHB SRAM to the final, end-user client I don't know of any
+       * way around this copy.
        */
 
-      memcpy(buffer, origbuf, buflen);
+      if (ep->in == 0)
+        {
+          memcpy(buffer, origbuf, buflen);
+        }
     }
 #endif
 
@@ -1303,6 +1326,19 @@ errout:
 #ifdef CONFIG_UBHOST_AHBIOBUFFERS
   if (buffer && origbuf)
     {
+      /* If this is an IN transaction, get the user data from the AHB
+       * SRAM IO buffer.  Sad... so inefficient.  But without exposing
+       * the AHB SRAM to the final, end-user client I don't know of any
+       * way around this copy.
+       */
+
+      if (ep->in != 0)
+        {
+          memcpy(origbuf, buffer, buflen);
+        }
+
+      /* Then free the temporary I/O buffer */
+
       lpc17_iofree(priv, buffer);
     }
 #endif
@@ -1561,8 +1597,8 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   lpc17_putreg(regval, LPC17_USBHOST_INTST);
 
   /* Enable OHCI interrupts */
- 
-  lpc17_putreg((OHCI_INT_MIE | OHCI_INT_WDH | OHCI_INT_RHSC), LPC17_USBHOST_INTEN);
+
+  lpc17_putreg((LPC17_ALL_INTS|OHCI_INT_MIE), LPC17_USBHOST_INTEN);
 
   /* Attach USB host controller interrupt handler */
 
@@ -1582,11 +1618,6 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   lpc17_putreg(regval, LPC17_SYSCON_USBINTST);
   irqrestore(flags);
 
-  /* Enable interrupts at the interrupt controller */
-
-  up_enable_irq(LPC17_IRQ_USB); /* enable USB interrupt */
-  udbg("USB host Initialized\n");
-
   /* If there is a USB device in the slot at power up, then we will not
    * get the status change interrupt to signal us that the device is
    * connected.  We need to set the initial connected state accordingly.
@@ -1594,6 +1625,12 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   regval          = lpc17_getreg(LPC17_USBHOST_RHPORTST1);
   priv->connected = ((regval & OHCI_RHPORTST_CCS) != 0);
+
+  /* Enable interrupts at the interrupt controller */
+
+  up_enable_irq(LPC17_IRQ_USB); /* enable USB interrupt */
+  udbg("USB host Initialized, Device connected:%s\n",
+       priv->connected ? "YES" : "NO");
 
   return &priv->drvr;
 }
