@@ -158,8 +158,10 @@ struct lpc17_usbhost_s
 
   volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
   volatile bool    connected; /* Connected to device */
-  sem_t            rhssem;    /* Semaphore  to wait Root Hub Status change */
-  sem_t            wdhsem;    /* Semaphore  used to wait for Writeback Done Head event */
+  volatile bool    rhswait;   /* TRUE: Thread is waiting for Root Hub Status change */
+  volatile bool    wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
+  sem_t            rhssem;    /* Semaphore to wait Writeback Done Head event */
+  sem_t            wdhsem;    /* Semaphore used to wait for Writeback Done Head event */
 };
 
 /* The following are used to manage lists of free EDs and TD buffers*/
@@ -603,6 +605,38 @@ static void lpc17_enqueuetd(volatile struct ohci_ed_s *ed, uint32_t dirpid,
 }
 
 /*******************************************************************************
+ * Name: lpc17_wdhwait
+ *
+ * Description:
+ *   Set the request for the Writeback Done Head event well BEFORE enabling the
+ *   transfer (as soon as we are absolutely committed to the to avoid transfer).
+ *   We do this to minimize race conditions.  This logic would have to be expanded
+ *   if we want to have more than one packet in flight at a time!
+ *
+ *******************************************************************************/
+
+static int lpc17_wdhwait(struct lpc17_usbhost_s *priv)
+{
+  irqstate_t flags = irqsave();
+  int        ret   = -ENODEV;
+
+  /* Is the device still connected? */
+
+  if (priv->connected)
+    {
+      /* Yes.. then set wdhwait to indicate that we expect to be informed when
+       * either (1) the device is disconnected, or (2) the transfer completed.
+       */
+
+      priv->wdhwait = true;
+      ret           = OK;
+    }
+
+  irqrestore(flags);
+  return ret;
+}
+
+/*******************************************************************************
  * Name: lpc17_ctrltd
  *
  * Description:
@@ -621,6 +655,20 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 {
   uint32_t toggle;
   uint32_t regval;
+  int ret;
+
+  /* Set the request for the Writeback Done Head event well BEFORE enabling the
+   * transfer.
+   */
+
+  ret = lpc17_wdhwait(priv);
+  if (ret != OK)
+    {
+      udbg("ERROR: Device disconnected\n");
+      return ret;
+    }
+
+  /* Configure the toggle field in the TD */
 
   if (dirpid == GTD_STATUS_DP_SETUP)
     {
@@ -633,7 +681,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 
   /* Then enqueue the transfer */
 
-  priv->tdstatus = 0;
+  priv->tdstatus = TD_CC_NOERROR;
   lpc17_enqueuetd(EDCTRL, dirpid, toggle, buffer, buflen);
 
   /* Set the head of the control list to the EP0 EDCTRL (this would have to
@@ -666,7 +714,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 
   /* Check the TDHEAD completion status bits */
 
-  if (priv->tdstatus == 0)
+  if (priv->tdstatus == TD_CC_NOERROR)
     {
       return OK;
     }
@@ -733,12 +781,16 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                           /* Yes.. connected. */
 
                           ullvdbg("Connected\n");
-                          priv->tdstatus = 0;
+                          priv->tdstatus  = TD_CC_NOERROR;
+                          priv->connected = true;
 
                           /* Notify any waiters */
 
-                          priv->connected = true;
-                          lpc17_givesem(&priv->rhssem);
+                          if (priv->rhswait)
+                            {
+                              lpc17_givesem(&priv->rhssem);
+                              priv->rhswait = false;
+                            }
                         }
                       else
                         {
@@ -762,11 +814,29 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                           /* Yes.. Disconnect the class */
 
                           CLASS_DISCONNECTED(priv->class);
+                          priv->class = NULL;
                         }
 
-                      /* Notify any waiters */
+                      /* Notify any waiters for the Root Hub Status change event */
 
-                      lpc17_givesem(&priv->rhssem);
+                      if (priv->rhswait)
+                        {
+                          lpc17_givesem(&priv->rhssem);
+                          priv->rhswait = false;
+                        }
+
+                      /* Wake up the thread waiting for the WDH event. In my
+                       * experience, the WHD event will occur later after the
+                       * disconnection, but it is safer to make sure that
+                       * there are no waiters.
+                       */
+
+                      if (priv->wdhwait)
+                        {
+                          priv->tdstatus = TD_CC_DEVNOTRESPONDING;
+                          lpc17_givesem(&priv->wdhsem);
+                          priv->wdhwait  = false;
+                        }
                     }
                   else
                     {
@@ -802,7 +872,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
           /* Since there is only one TD, we can disable further TD processing. */
 
-          regval = lpc17_getreg(LPC17_USBHOST_CTRL);
+          regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
           regval &= ~(OHCI_CTRL_PLE|OHCI_CTRL_IE|OHCI_CTRL_CLE|OHCI_CTRL_BLE);
           lpc17_putreg(regval, LPC17_USBHOST_CTRL);
 
@@ -811,7 +881,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
           priv->tdstatus = (TDHEAD->ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
 
 #ifdef CONFIG_DEBUG_USB
-          if (priv->tdstatus != 0)
+          if (priv->tdstatus != TD_CC_NOERROR)
             {
               /* The transfer failed for some reason... dump some diagnostic info. */
 
@@ -823,8 +893,11 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
           /* And wake up the thread waiting for the WDH event */
 
-          DEBUGASSERT(priv->wdhsem.semcount <= 0);
-          lpc17_givesem(&priv->wdhsem);
+          if (priv->wdhwait)
+            {
+              lpc17_givesem(&priv->wdhsem);
+              priv->wdhwait = false;
+            }
         }
 
 #ifdef CONFIG_DEBUG_USB
@@ -873,15 +946,19 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  irqstate_t flags;
 
   /* Are we already connected? */
 
+  flags = irqsave();
   while (priv->connected == connected)
     {
       /* No... wait for the connection/disconnection */
 
+      priv->rhswait = true;
       lpc17_takesem(&priv->rhssem);
     }
+  irqrestore(flags);
 
   udbg("Connected:%s\n", priv->connected ? "YES" : "NO");
   return OK;
@@ -1202,7 +1279,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
 #ifdef CONFIG_UBHOST_AHBIOBUFFERS
   uint8_t *origbuf = NULL;
 #endif
-  int ret = -ENOMEM;
+  int ret;
 
   DEBUGASSERT(drvr && ep && buffer && buflen > 0);
   uvdbg("EP%d %s maxpacket:%d buflen:%d\n",
@@ -1220,6 +1297,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
         {
           uvdbg("buflen (%d) > IO buffer size (%d)\n",
                  buflen, CONFIG_USBHOST_IOBUFSIZE);
+          ret = -ENOMEM;
           goto errout;
         }
 
@@ -1230,6 +1308,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
       if (!buffer)
         {
           uvdbg("IO buffer allocation failed\n");
+          ret = -ENOMEM;
           goto errout;
         }
 
@@ -1246,12 +1325,24 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
     }
 #endif
 
+  /* Set the request for the Writeback Done Head event well BEFORE enabling the
+   * transfer.
+   */
+
+  ret = lpc17_wdhwait(priv);
+  if (ret != OK)
+    {
+      udbg("ERROR: Device disconnected\n");
+      goto errout;
+    }
+
   /* Allocate an ED */
 
   ed = lpc17_edalloc(priv);
   if (!ed)
     {
       udbg("ED allocation failed\n");
+      ret = -ENOMEM;
       goto errout;
     }
 
@@ -1277,7 +1368,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
 
   /* Then enqueue the transfer */
 
-  priv->tdstatus = 0;
+  priv->tdstatus = TD_CC_NOERROR;
   lpc17_enqueuetd(ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
 
   /* Set the head of the bulk list to the EP descriptor (this would have to
@@ -1310,7 +1401,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
 
   /* Check the TDHEAD completion status bits */
 
-  if (priv->tdstatus == 0)
+  if (priv->tdstatus == TD_CC_NOERROR)
     {
       ret = OK;
     }
@@ -1332,7 +1423,7 @@ errout:
        * way around this copy.
        */
 
-      if (ep->in != 0)
+      if (ep->in != 0 && ret == OK)
         {
           memcpy(origbuf, buffer, buflen);
         }

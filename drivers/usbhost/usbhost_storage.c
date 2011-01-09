@@ -120,16 +120,17 @@ struct usbhost_state_s
 
   /* The remainder of the fields are provide o the mass storage class */
   
-  char                    sdchar;     /* Character identifying the /dev/sd[n] device */
-  int16_t                 crefs;      /* Reference count on the driver instance */
-  uint16_t                blocksize;  /* Block size of USB mass storage device */
-  uint32_t                nblocks;    /* Number of blocks on the USB mass storage device */
-  sem_t                   exclsem;    /* Used to maintain mutual exclusive access */
-  struct work_s           work;       /* For interacting with the worker thread */
-  FAR uint8_t            *tdbuffer;   /* The allocated transfer descriptor buffer */
-  size_t                  tdbuflen;   /* Size of the allocated transfer buffer */
-  struct usbhost_epdesc_s bulkin;     /* Bulk IN endpoint */
-  struct usbhost_epdesc_s bulkout;    /* Bulk OUT endpoint */
+  char                    sdchar;       /* Character identifying the /dev/sd[n] device */
+  volatile bool           disconnected; /* TRUE: Device has been disconnected */
+  int16_t                 crefs;        /* Reference count on the driver instance */
+  uint16_t                blocksize;    /* Block size of USB mass storage device */
+  uint32_t                nblocks;      /* Number of blocks on the USB mass storage device */
+  sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
+  struct work_s           work;         /* For interacting with the worker thread */
+  FAR uint8_t            *tdbuffer;     /* The allocated transfer descriptor buffer */
+  size_t                  tdbuflen;     /* Size of the allocated transfer buffer */
+  struct usbhost_epdesc_s bulkin;       /* Bulk IN endpoint */
+  struct usbhost_epdesc_s bulkout;      /* Bulk OUT endpoint */
 };
 
 /****************************************************************************
@@ -143,8 +144,8 @@ static void usbhost_takesem(sem_t *sem);
 
 /* Memory allocation services */
 
-static inline struct usbhost_state_s *usbhost_allocclass(void);
-static inline void usbhost_freeclass(struct usbhost_state_s *class);
+static inline FAR struct usbhost_state_s *usbhost_allocclass(void);
+static inline void usbhost_freeclass(FAR struct usbhost_state_s *class);
 
 /* Device name management */
 
@@ -342,7 +343,7 @@ static void usbhost_takesem(sem_t *sem)
  ****************************************************************************/
 
 #if CONFIG_USBHOST_NPREALLOC > 0
-static inline struct usbhost_state_s *usbhost_allocclass(void)
+static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 {
   struct usbhost_state_s *priv;
   irqstate_t flags;
@@ -359,17 +360,22 @@ static inline struct usbhost_state_s *usbhost_allocclass(void)
       priv->class.flink = NULL;
     }
   irqrestore(flags);
+  ullvdbg("Allocated: %p\n", priv);;
   return priv;
 }
 #else
-static inline struct usbhost_state_s *usbhost_allocclass(void)
+static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 {
+  FAR struct usbhost_state_s *priv;
+
   /* We are not executing from an interrupt handler so we can just call
    * malloc() to get memory for the class instance.
    */
 
   DEBUGASSERT(!up_interrupt_context());
-  return (struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
+  priv = (FAR struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
+  uvdbg("Allocated: %p\n", priv);;
+  return priv;
 }
 #endif
 
@@ -388,10 +394,12 @@ static inline struct usbhost_state_s *usbhost_allocclass(void)
  ****************************************************************************/
 
 #if CONFIG_USBHOST_NPREALLOC > 0
-static inline void usbhost_freeclass(struct usbhost_state_s *class)
+static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
 {
   irqstate_t flags;
   DEBUGASSERT(class != NULL);
+
+  ullvdbg("Freeing: %p\n", class);;
 
   /* Just put the pre-allocated class structure back on the freelist */
 
@@ -401,7 +409,7 @@ static inline void usbhost_freeclass(struct usbhost_state_s *class)
   irqrestore(flags);  
 }
 #else
-static inline void usbhost_freeclass(struct usbhost_state_s *class)
+static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
 {
   DEBUGASSERT(class != NULL);
 
@@ -409,6 +417,7 @@ static inline void usbhost_freeclass(struct usbhost_state_s *class)
    * from an interrupt handler.
    */
 
+  uvdbg("Freeing: %p\n", class);;
   free(class);
 }
 #endif
@@ -651,34 +660,101 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
   FAR struct usb_ctrlreq_s *req = (FAR struct usb_ctrlreq_s *)priv->tdbuffer;
   DEBUGASSERT(priv && priv->tdbuffer);
 
-  /* Request maximum logical unit number.  NOTE: On an IN transaction, The
-   * req and buffer pointers passed to DRVR_CTRLIN may refer to the same
-   * allocated memory.
-   */
+  /* Make sure that the device is still connected. */
 
-  uvdbg("Request maximum logical unit number\n");
-  memset(req, 0, sizeof(struct usb_ctrlreq_s));
-  req->type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
-  req->req     = USBSTRG_REQ_GETMAXLUN;
-  usbhost_putle16(req->len, 1);
-  return DRVR_CTRLIN(priv->drvr, req, priv->tdbuffer);
+  if (!priv->disconnected)
+    {
+      /* Request maximum logical unit number.  NOTE: On an IN transaction, The
+       * req and buffer pointers passed to DRVR_CTRLIN may refer to the same
+       * allocated memory.
+       */
+
+      uvdbg("Request maximum logical unit number\n");
+      memset(req, 0, sizeof(struct usb_ctrlreq_s));
+      req->type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
+      req->req     = USBSTRG_REQ_GETMAXLUN;
+      usbhost_putle16(req->len, 1);
+      return DRVR_CTRLIN(priv->drvr, req, priv->tdbuffer);
+    }
+
+  udbg("ERROR: No longer connected\n");
+  return -ENODEV;
 }
 
 static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbstrg_cbw_s *cbw;
-  int result = -ENOMEM;
+  int result;
+
+  /* Make sure that the device is still connected */
+
+  if (priv->disconnected)
+    {
+      udbg("ERROR: No longer connected\n");
+      return -ENODEV;
+    }
 
   /* Initialize a CBW (re-using the allocated transfer buffer) */
  
   cbw = usbhost_cbwalloc(priv);
-  if (cbw)
+  if (!cbw)
     {
-      /* Construct and send the CBW */
+      udbg("ERROR: Failed to create CBW\n");
+      return -ENOMEM;
+    }
+  
+  /* Construct and send the CBW */
  
-      usbhost_testunitreadycbw(cbw);
-      result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
-                            (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
+  usbhost_testunitreadycbw(cbw);
+  result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
+                        (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
+  if (result == OK)
+    {
+      /* Receive the CSW */
+
+      result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
+                             priv->tdbuffer, USBSTRG_CSW_SIZEOF);
+      if (result == OK)
+        {
+          usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
+        }
+    }
+  return result;
+}
+
+static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
+{
+  FAR struct usbstrg_cbw_s *cbw;
+  int result;
+
+  /* Make sure that the device is still connected */
+
+  if (priv->disconnected)
+    {
+      udbg("ERROR: No longer connected\n");
+      return -ENODEV;
+    }
+
+  /* Initialize a CBW (re-using the allocated transfer buffer) */
+ 
+  cbw = usbhost_cbwalloc(priv);
+  if (!cbw)
+    {
+      udbg("ERROR: Failed to create CBW\n");
+      return -ENOMEM;
+    }
+
+  /* Construct and send the CBW */
+ 
+  usbhost_requestsensecbw(cbw);
+  result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
+                        (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
+  if (result == OK)
+    {
+      /* Receive the sense data response */
+
+      result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
+                             priv->tdbuffer, SCSIRESP_FIXEDSENSEDATA_SIZEOF);
       if (result == OK)
         {
           /* Receive the CSW */
@@ -691,43 +767,7 @@ static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
             }
         }
     }
-  return result;
-}
 
-static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
-{
-  FAR struct usbstrg_cbw_s *cbw;
-  int result = -ENOMEM;
-
-  /* Initialize a CBW (re-using the allocated transfer buffer) */
- 
-  cbw = usbhost_cbwalloc(priv);
-  if (cbw)
-    {
-      /* Construct and send the CBW */
- 
-      usbhost_requestsensecbw(cbw);
-      result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
-                            (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
-      if (result == OK)
-        {
-          /* Receive the sense data response */
-
-          result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
-                                 priv->tdbuffer, SCSIRESP_FIXEDSENSEDATA_SIZEOF);
-          if (result == OK)
-            {
-              /* Receive the CSW */
-
-              result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
-                                     priv->tdbuffer, USBSTRG_CSW_SIZEOF);
-              if (result == OK)
-                {
-                  usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
-                }
-            }
-        }
-    }
   return result;
 }
 
@@ -735,43 +775,55 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbstrg_cbw_s *cbw;
   FAR struct scsiresp_readcapacity10_s *resp;
-  int result = -ENOMEM;
+  int result;
+
+  /* Make sure that the device is still connected */
+
+  if (priv->disconnected)
+    {
+      udbg("ERROR: No longer connected\n");
+      return -ENODEV;
+    }
 
   /* Initialize a CBW (re-using the allocated transfer buffer) */
  
   cbw = usbhost_cbwalloc(priv);
-  if (cbw)
+  if (!cbw)
     {
-      /* Construct and send the CBW */
+      udbg("ERROR: Failed to create CBW\n");
+      return -ENOMEM;
+    }
+
+  /* Construct and send the CBW */
  
-      usbhost_readcapacitycbw(cbw);
-      result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
-                             (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
+  usbhost_readcapacitycbw(cbw);
+  result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
+                        (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
+  if (result == OK)
+    {
+      /* Receive the read capacity CBW IN response */
+
+      result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
+                             priv->tdbuffer, SCSIRESP_READCAPACITY10_SIZEOF);
       if (result == OK)
         {
-          /* Receive the read capacity CBW IN response */
+          /* Save the capacity information */
+
+          resp            = (FAR struct scsiresp_readcapacity10_s *)priv->tdbuffer;
+          priv->nblocks   = usbhost_getbe32(resp->lba);
+          priv->blocksize = usbhost_getbe32(resp->blklen);
+
+          /* Receive the CSW */
 
           result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
-                                 priv->tdbuffer, SCSIRESP_READCAPACITY10_SIZEOF);
+                                 priv->tdbuffer, USBSTRG_CSW_SIZEOF);
           if (result == OK)
             {
-              /* Save the capacity information */
-
-              resp = (FAR struct scsiresp_readcapacity10_s *)priv->tdbuffer;
-              priv->nblocks = usbhost_getbe32(resp->lba);
-              priv->blocksize = usbhost_getbe32(resp->blklen);
-
-              /* Receive the CSW */
-
-              result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
-                                     priv->tdbuffer, USBSTRG_CSW_SIZEOF);
-              if (result == OK)
-                {
-                  usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
-                }
+              usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
             }
         }
     }
+
   return result;
 }
 
@@ -779,41 +831,53 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbstrg_cbw_s *cbw;
   FAR struct scsiresp_inquiry_s *resp;
-  int result = -ENOMEM;
+  int result;
+
+  /* Make sure that the device is still connected */
+
+  if (priv->disconnected)
+    {
+      udbg("ERROR: No longer connected\n");
+      return -ENODEV;
+    }
 
   /* Initialize a CBW (re-using the allocated transfer buffer) */
  
   cbw = usbhost_cbwalloc(priv);
-  if (cbw)
+  if (!cbw)
     {
-      /* Construct and send the CBW */
+      udbg("ERROR: Failed to create CBW\n");
+      return -ENOMEM;
+    }
+
+  /* Construct and send the CBW */
  
-      usbhost_inquirycbw(cbw);
-      result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
-                             (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
+  usbhost_inquirycbw(cbw);
+  result = DRVR_TRANSFER(priv->drvr, &priv->bulkout,
+                         (uint8_t*)cbw, USBSTRG_CBW_SIZEOF);
+  if (result == OK)
+    {
+      /* Receive the CBW IN response */
+
+      result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
+                             priv->tdbuffer, SCSIRESP_INQUIRY_SIZEOF);
       if (result == OK)
         {
-          /* Receive the CBW IN response */
+          /* TODO: If USB debug is enabled, dump the response data here */
+
+          resp = (FAR struct scsiresp_inquiry_s *)priv->tdbuffer;
+
+          /* Receive the CSW */
 
           result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
-                                 priv->tdbuffer, SCSIRESP_INQUIRY_SIZEOF);
+                                 priv->tdbuffer, USBSTRG_CSW_SIZEOF);
           if (result == OK)
             {
-              /* TODO: If USB debug is enabled, dump the response data here */
-
-              resp = (FAR struct scsiresp_inquiry_s *)priv->tdbuffer;
-
-              /* Receive the CSW */
-
-              result = DRVR_TRANSFER(priv->drvr, &priv->bulkin,
-                                     priv->tdbuffer, USBSTRG_CSW_SIZEOF);
-              if (result == OK)
-                {
-                  usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
-                }
+              usbhost_dumpcsw((FAR struct usbstrg_csw_s *)priv->tdbuffer);
             }
         }
     }
+
   return result;
 }
 
@@ -839,6 +903,7 @@ static void usbhost_destroy(FAR void *arg)
   char devname[DEV_NAMELEN];
 
   DEBUGASSERT(priv != NULL);
+  uvdbg("crefs: %d\n", priv->crefs);
  
   /* Unregister the block driver */
 
@@ -857,8 +922,14 @@ static void usbhost_destroy(FAR void *arg)
 
   sem_destroy(&priv->exclsem);
 
+  /* Disconnect the USB host device */
+
+  DRVR_DISCONNECT(priv->drvr);
+
   /* And free the class instance.  Hmmm.. this may execute on the worker
-   * thread and the work structure is part of what is getting freed.
+   * thread and the work structure is part of what is getting freed.  That
+   * should be okay because once the work contained is removed from the
+   * queue, it should not longer be accessed by the worker thread.
    */
 
   usbhost_freeclass(priv);
@@ -898,9 +969,16 @@ static void usbhost_initvolume(FAR void *arg)
   result = usbhost_tdalloc(priv);
   if (result != OK)
     {
-      udbg("Failed to allocate transfer buffer\n");
+      udbg("ERROR: Failed to allocate transfer buffer\n");
       return;
     }
+
+  /* Increment the reference count.  This will prevent usbhost_destroy() from
+   * being called asynchronously if the device is removed.
+   */
+
+  priv->crefs++;
+  DEBUGASSERT(priv->crefs == 2);
 
   /* Request the maximum logical unit number */
 
@@ -959,7 +1037,7 @@ static void usbhost_initvolume(FAR void *arg)
           csw = (FAR struct usbstrg_csw_s *)priv->tdbuffer;
           if (csw->status != 0)
             {
-              udbg("CSW status error: %d\n", csw->status);
+              udbg("ERROR: CSW status error: %d\n", csw->status);
               result = -ENODEV;
             }
         }
@@ -980,7 +1058,7 @@ static void usbhost_initvolume(FAR void *arg)
           csw = (FAR struct usbstrg_csw_s *)priv->tdbuffer;
           if (csw->status != 0)
             {
-              udbg("CSW status error: %d\n", csw->status);
+              udbg("ERROR: CSW status error: %d\n", csw->status);
               result = -ENODEV;
             }
         }
@@ -997,18 +1075,45 @@ static void usbhost_initvolume(FAR void *arg)
       result = register_blockdriver(devname, &g_bops, 0, priv);
     }
 
-  /* Check if we successfully initialized */
+  /* Check if we successfully initialized. We now have to be concerned
+   * about asynchronous modification of crefs because the block
+   * driver has been registerd.
+   */
 
   if (result == OK)
     {
-      /* Ready for normal operation as a block device driver */
+      usbhost_takesem(&priv->exclsem);
+      DEBUGASSERT(priv->crefs >= 2);
 
-      uvdbg("Successfully initialized\n");
+      /* Handle a corner case where (1) open() has been called so the
+       * reference count is > 2, but the device has been disconnected.
+       * In this case, the class instance needs to persist until close()
+       * is called.
+       */
+
+      if (priv->crefs <= 2 && priv->disconnected)
+        {
+          /* We don't have to give the semaphore because it will be
+           * destroyed when usb_destroy is called.
+           */
+  
+          result = -ENODEV;
+        }
+      else
+        {
+          /* Ready for normal operation as a block device driver */
+
+          uvdbg("Successfully initialized\n");
+          priv->crefs--;
+          usbhost_givesem(&priv->exclsem);
+        }
     }
-  else
+
+  /* Disconnect on any errors detected during volume initialization */
+
+  if (result != OK)
     {
       udbg("ERROR! Aborting: %d\n", result);
-      DRVR_DISCONNECT(priv->drvr);
       usbhost_destroy(priv);
     }
 }
@@ -1040,6 +1145,8 @@ static void usbhost_work(FAR struct usbhost_state_s *priv, worker_t worker)
        * prevent us from over-running the work structure.
        */
 
+      uvdbg("Queuing work: worker %p->%p\n", priv->work.worker, worker);
+      DEBUGASSERT(priv->work.worker == NULL);
       (void)work_queue(&priv->work, worker, priv, 0);
     }
   else
@@ -1258,12 +1365,16 @@ static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
 
 static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
 {
-  int result;
-  DEBUGASSERT(priv && priv->tdbuffer != NULL);
+  int result = OK;
+  DEBUGASSERT(priv);
 
-  result         = DRVR_FREE(priv->drvr, priv->tdbuffer);
-  priv->tdbuffer = NULL;
-  priv->tdbuflen = 0;
+  if (priv->tdbuffer)
+    {
+      DEBUGASSERT(priv->drvr);
+      result         = DRVR_FREE(priv->drvr, priv->tdbuffer);
+      priv->tdbuffer = NULL;
+      priv->tdbuflen = 0;
+    }
   return result;
 }
 
@@ -1594,8 +1705,8 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
    * of the mass storage device that the device is no longer available.
    */
 
-  flags = irqsave();
-  priv->drvr = NULL;
+  flags              = irqsave();
+  priv->disconnected = true;
 
   /* Now check the number of references on the class instance.  If it is one,
    * then we can free the class instance now.  Otherwise, we will have to
@@ -1603,6 +1714,7 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
    * block driver.
    */
 
+  ullvdbg("crefs: %d\n", priv->crefs);
   if (priv->crefs == 1)
     {
       /* Destroy the class instance */
@@ -1626,15 +1738,25 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
 static int usbhost_open(FAR struct inode *inode)
 {
   FAR struct usbhost_state_s *priv;
+  irqstate_t flags;
   int ret;
 
   uvdbg("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
 
-  /* Check if the mass storage device is still connected */
+  /* Make sure that we have exclusive access to the private data structure */
 
-  if (!priv->drvr)
+  DEBUGASSERT(priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
+  usbhost_takesem(&priv->exclsem);
+
+  /* Check if the mass storage device is still connected.  We need to disable
+   * interrupts momentarily to assure that there are no asynchronous disconnect
+   * events.
+   */
+
+  flags = irqsave();
+  if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means that
        * the USB storage device is no longer connected.  Refuse any further
@@ -1647,13 +1769,12 @@ static int usbhost_open(FAR struct inode *inode)
     {
       /* Otherwise, just increment the reference count on the driver */
 
-      DEBUGASSERT(priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
-      usbhost_takesem(&priv->exclsem);
       priv->crefs++;
-      usbhost_givesem(&priv->exclsem);
       ret = OK;
     }
+  irqrestore(flags);
 
+  usbhost_givesem(&priv->exclsem);
   return ret;
 }
 
@@ -1667,6 +1788,7 @@ static int usbhost_open(FAR struct inode *inode)
 static int usbhost_close(FAR struct inode *inode)
 {
   FAR struct usbhost_state_s *priv;
+  irqstate_t flags;
 
   uvdbg("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
@@ -1685,19 +1807,27 @@ static int usbhost_close(FAR struct inode *inode)
 
   usbhost_givesem(&priv->exclsem);
 
+  /* We need to disable interrupts momentarily to assure that there are
+   * no asynchronous disconnect events.
+   */
+
+  flags = irqsave();
+
   /* Check if the USB mass storage device is still connected.  If the
    * storage device is not connected and the reference count just
    * decremented to one, then unregister the block driver and free
    * the class instance.
    */
 
-  if (priv->crefs <= 1 && priv->drvr == NULL)
+  if (priv->crefs <= 1 && priv->disconnected)
     {
       /* Destroy the class instance */
 
       DEBUGASSERT(priv->crefs == 1);
       usbhost_destroy(priv);
     }
+
+  irqrestore(flags);
   return OK;
 }
 
@@ -1724,7 +1854,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
 
   /* Check if the mass storage device is still connected */
 
-  if (!priv->drvr)
+  if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means that
        * the USB storage device is no longer connected.  Refuse any attempt to read
@@ -1816,7 +1946,7 @@ static ssize_t usbhost_write(FAR struct inode *inode, const unsigned char *buffe
 
   /* Check if the mass storage device is still connected */
 
-  if (!priv->drvr)
+  if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means that
        * the USB storage device is no longer connected.  Refuse any attempt to
@@ -1904,7 +2034,7 @@ static int usbhost_geometry(FAR struct inode *inode, struct geometry *geometry)
   /* Check if the mass storage device is still connected */
 
   priv = (FAR struct usbhost_state_s *)inode->i_private;
-  if (!priv->drvr)
+  if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means that
        * the USB storage device is no longer connected.  Refuse to return any
@@ -1957,7 +2087,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   /* Check if the mass storage device is still connected */
 
-  if (!priv->drvr)
+  if (priv->disconnected)
     {
       /* No... the block driver is no longer bound to the class.  That means that
        * the USB storage device is no longer connected.  Refuse to process any
