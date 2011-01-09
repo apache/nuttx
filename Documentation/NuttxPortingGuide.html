@@ -2163,7 +2163,7 @@ extern void up_ledoff(int led);
       <b>USB Host Class Driver Registry</b>.
       The NuttX USB host infrastructure includes a <i>registry</i>.
       During its initialization, each USB host class driver must call the interface, <code>usbhost_registerclass()</code>
-      in order add its interface to the register.
+      in order add its interface to the registery.
       Later, when a USB device is connected, the USB host controller will look up the USB host class driver that is needed to support the connected device in this registry.
     </p>
     <p>
@@ -2196,9 +2196,9 @@ extern void up_ledoff(int led);
             As part of this enumeration process, the driver will
             (1) get the device's configuration descriptor,
             (2) extract the class ID info from the configuration descriptor,
-            (3) call usbhost_findclass() to find the class that supports this device,
-            (4) call the create() method on the struct usbhost_registry_s interface to get a class instance, and
-            finally (5) call the connect() method of the struct usbhost_class_s interface.
+            (3) call <code>usbhost_findclass(</code>) to find the class that supports this device,
+            (4) call the <code>create()</code> method on the <code>struct usbhost_registry_s interface</code> to get a class instance, and
+            finally (5) call the <code>connect()</code> method of the <code>struct usbhost_class_s</code> interface.
             After that, the class is in charge of the sequence of operations.
           </p>
       </ul>
