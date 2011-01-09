@@ -802,7 +802,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  
                   else if (priv->connected)
                     {
-                      /* Yes.. disable interrupts and disconnect the device */
+                      /* Yes.. disconnect the device */
 
                       ullvdbg("Disconnected\n");
                       priv->connected = false;

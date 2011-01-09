@@ -660,39 +660,23 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
   FAR struct usb_ctrlreq_s *req = (FAR struct usb_ctrlreq_s *)priv->tdbuffer;
   DEBUGASSERT(priv && priv->tdbuffer);
 
-  /* Make sure that the device is still connected. */
+  /* Request maximum logical unit number.  NOTE: On an IN transaction, The
+   * req and buffer pointers passed to DRVR_CTRLIN may refer to the same
+   * allocated memory.
+   */
 
-  if (!priv->disconnected)
-    {
-      /* Request maximum logical unit number.  NOTE: On an IN transaction, The
-       * req and buffer pointers passed to DRVR_CTRLIN may refer to the same
-       * allocated memory.
-       */
-
-      uvdbg("Request maximum logical unit number\n");
-      memset(req, 0, sizeof(struct usb_ctrlreq_s));
-      req->type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
-      req->req     = USBSTRG_REQ_GETMAXLUN;
-      usbhost_putle16(req->len, 1);
-      return DRVR_CTRLIN(priv->drvr, req, priv->tdbuffer);
-    }
-
-  udbg("ERROR: No longer connected\n");
-  return -ENODEV;
+  uvdbg("Request maximum logical unit number\n");
+  memset(req, 0, sizeof(struct usb_ctrlreq_s));
+  req->type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
+  req->req     = USBSTRG_REQ_GETMAXLUN;
+  usbhost_putle16(req->len, 1);
+  return DRVR_CTRLIN(priv->drvr, req, priv->tdbuffer);
 }
 
 static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbstrg_cbw_s *cbw;
   int result;
-
-  /* Make sure that the device is still connected */
-
-  if (priv->disconnected)
-    {
-      udbg("ERROR: No longer connected\n");
-      return -ENODEV;
-    }
 
   /* Initialize a CBW (re-using the allocated transfer buffer) */
  
@@ -726,14 +710,6 @@ static inline int usbhost_requestsense(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbstrg_cbw_s *cbw;
   int result;
-
-  /* Make sure that the device is still connected */
-
-  if (priv->disconnected)
-    {
-      udbg("ERROR: No longer connected\n");
-      return -ENODEV;
-    }
 
   /* Initialize a CBW (re-using the allocated transfer buffer) */
  
@@ -776,14 +752,6 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
   FAR struct usbstrg_cbw_s *cbw;
   FAR struct scsiresp_readcapacity10_s *resp;
   int result;
-
-  /* Make sure that the device is still connected */
-
-  if (priv->disconnected)
-    {
-      udbg("ERROR: No longer connected\n");
-      return -ENODEV;
-    }
 
   /* Initialize a CBW (re-using the allocated transfer buffer) */
  
@@ -832,14 +800,6 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
   FAR struct usbstrg_cbw_s *cbw;
   FAR struct scsiresp_inquiry_s *resp;
   int result;
-
-  /* Make sure that the device is still connected */
-
-  if (priv->disconnected)
-    {
-      udbg("ERROR: No longer connected\n");
-      return -ENODEV;
-    }
 
   /* Initialize a CBW (re-using the allocated transfer buffer) */
  
