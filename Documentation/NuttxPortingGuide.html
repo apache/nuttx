@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: December 29, 2010</p>
+      <p>Last Updated: January 9, 2011</p>
     </td>
   </tr>
 </table>
@@ -120,6 +120,8 @@
        <a href="#fbdrivers">6.3.5 Frame Buffer Drivers</a><br>
        <a href="#mtddrivers">6.3.6 Memory Technology Device Drivers</a><br>
        <a href="#sdiodrivers">6.3.7 SDIO Device Drivers</a><br>
+       <a href="#usbhostdrivers">6.3.8 USB Host-Side Drivers</a><br>
+       <a href="#usbdevdrivers">6.3.9 USB Device-Side Drivers</a><br>
     </ul>
   </ul>
   <a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a><br>
@@ -779,7 +781,10 @@ drivers/
 |   `-- <i>(net driver source files)</i>
 |-- usbdev/
 |   |-- Make.defs
-|   `-- <i>(usbdev driver source files)</i>
+|   `-- <i>(USB device driver source files)</i>
+|-- usbhost/
+|   |-- Make.defs
+|   `-- <i>(USB host driver source files)</i>
 `-- <i>(common driver source files)</i>
 </pre></ul>
 
@@ -1944,7 +1949,7 @@ extern void up_ledoff(int led);
 <ul>
   <li>
     <b><code>include/nuttx/fb.h</code></b>.
-    All structures and APIs needed to work with serial drivers are provided in this header file.
+    All structures and APIs needed to work with frame buffer drivers are provided in this header file.
   </li>
   <li>
     <b><code>struct fb_vtable_s</code></b>.
@@ -1994,7 +1999,7 @@ extern void up_ledoff(int led);
 <ul>
   <li>
     <b><code>include/nuttx/mtd.h</code></b>.
-    All structures and APIs needed to work with serial drivers are provided in this header file.
+    All structures and APIs needed to work with MTD drivers are provided in this header file.
   </li>
   <li>
     <b><code>struct mtd_dev_s</code></b>.
@@ -2057,11 +2062,11 @@ extern void up_ledoff(int led);
 <ul>
   <li>
     <b><code>include/nuttx/sdio.h</code></b>.
-    All structures and APIs needed to work with serial drivers are provided in this header file.
+    All structures and APIs needed to work with SDIO drivers are provided in this header file.
   </li>
   <li>
     <b><code>struct sdio_dev_s</code></b>.
-    Each MTD device driver must implement an instance of <code>struct sdio_dev_s</code>.
+    Each SDIOI device driver must implement an instance of <code>struct sdio_dev_s</code>.
     That structure defines a call table with the following methods:
     <p>
       Initialization/setup:
@@ -2075,7 +2080,7 @@ extern void up_ledoff(int led);
     </ul>
     <p>
       Command/Status/Data Transfer:
-    </p?
+    </p>
     <ul>
      <p><code>void (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);</code><br>
      <code>int (*recvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer, size_t nbytes);</code><br>
@@ -2121,6 +2126,195 @@ extern void up_ledoff(int led);
   <li>
     <b>Examples</b>:
     <code>arch/arm/src/stm32/stm32_sdio.c</code> and <code>drivers/mmcsd/mmcsd_sdio.c</code>
+  </li>
+</ul>
+
+<h3><a name="usbhostdrivers">6.3.8 USB Host-Side Drivers</a></h3>
+
+<ul>
+  <li>
+    <b><code>include/nuttx/usb/usbhost.h</code></b>.
+    All structures and APIs needed to work with USB host-side drivers are provided in this header file.
+  </li>
+  <li>
+    <p>
+      <b><code>struct usbhost_driver_s</code></b>.
+      Each USB host controller driver must implement an instance of <code>struct usbhost_driver_s</code>.
+      This structure is defined in <code>include/nuttx/usb/usbhost.h</code>.
+    </p>
+    <p>
+      <b>Examples</b>:
+      <code>arch/arm/src/lpc17xx/lpc17_usbhost.c</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>struct usbhost_class_s</code></b>.
+      Each USB host class driver must implement an instance of <code>struct usbhost_class_s</code>.
+      This structure is also defined in <code>include/nuttx/usb/usbhost.h</code>.
+    </p>
+    <p>
+      <b>Examples</b>:
+      <code>drivers/usbhost/usbhost_storage.c</code>
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>USB Host Class Driver Registry</b>.
+      The NuttX USB host infrastructure includes a <i>registry</i>.
+      During its initialization, each USB host class driver must call the interface, <code>usbhost_registerclass()</code>
+      in order add its interface to the register.
+      Later, when a USB device is connected, the USB host controller will look up the USB host class driver that is needed to support the connected device in this registry.
+    </p>
+    <p>
+      <b>Examples</b>:
+      <code>drivers/usbhost/usbhost_registry.c</code>, <code>drivers/usbhost/usbhost_registerclass.c</code>, and <code>drivers/usbhost/usbhost_findclass.c</code>,
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Detection and Enumeration of Connected Devices</b>.
+      Each USB host device controller supports two methods that are used to detect and enumeration newly connected devices
+      (and also detect disconnected devices):
+    </p>
+    <p>
+      <ul>
+        <li>
+          <p>
+            <code>int (*wait)(FAR struct usbhost_driver_s *drvr, bool connected);</code>
+          </p>
+          <p>
+            Wait for a device to be connected or disconnected.
+          </p>
+        </li>
+        <li>
+          <p>
+            <code>int (*enumerate)(FAR struct usbhost_driver_s *drvr);</code>
+          </p>
+          <p>
+            Enumerate the connected device.
+            As part of this enumeration process, the driver will
+            (1) get the device's configuration descriptor,
+            (2) extract the class ID info from the configuration descriptor,
+            (3) call usbhost_findclass() to find the class that supports this device,
+            (4) call the create() method on the struct usbhost_registry_s interface to get a class instance, and
+            finally (5) call the connect() method of the struct usbhost_class_s interface.
+            After that, the class is in charge of the sequence of operations.
+          </p>
+      </ul>
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Binding USB Host-Side Drivers</b>.
+      USB host-side controller drivers are not normally directly accessed by user code,
+      but are usually bound to another, higher level USB host class driver.
+      The class driver exports the standard NuttX device interface so that the connected USB device can be accessed just as with other, similar, on-board devices.
+      For example, the USB host mass storage class driver (<code>drivers/usbhost/usbhost_storage.c</code>) will register a standard, NuttX block driver interface (like <code>/dev/sda</code>)
+      that can be used to mount a file system just as with any other other block driver instance.
+      In general, the binding sequence is:
+    </p>
+    <p>
+      <ul>
+        <li>
+          <p>
+            Each USB host class driver includes an intialization entry point that is called from the
+            application at initialization time.
+            This driver calls <code>usbhost_registerclass()</code> during this initialization in order to makes itself available in the event the the device that it supports is connected.
+          </p>
+          <p>
+            <b>Examples</b>:
+            The function <code>usbhost_storageinit()</code> in the file <code>drivers/usbhost/usbhost_storage.c</code>
+          </p>
+        </li>
+        <li>
+          <p>
+            Each application must include a <i>waiter</i> thread thread that (1) calls the USB host controller driver's <code>wait()</code> to detect the connection of a device, and then
+            (2) call the USB host controller driver's <code>enumerate</code> method to bind the registered USB host class driver to the USB host controller driver.
+          </p>
+          <p>
+            <b>Examples</b>:
+            The function <code>nsh_waiter()</code> in the file <code>configs/nucleus2g/src/up_nsh.c</code> and
+            the function <code>nsh_waiter()</code> in the file <code>configs/olimex-lpc1766stk/src/up_nsh.c</code>.
+          </p>
+        </li>
+        <li>
+          <p>
+            As part of its operation during the binding operation, the USB host class driver will register an instances of a standard NuttX driver under the <code>/dev</code> directory.
+            To repeat the above example, the USB host mass storage class driver (<code>drivers/usbhost/usbhost_storage.c</code>) will register a standard, NuttX block driver interface (like <code>/dev/sda</code>)
+            that can be used to mount a file system just as with any other other block driver instance. 
+          </p>
+          <p>
+            <b>Examples</b>:
+            See the call to <code>register_blockdriver()</code> in the function <code>usbhost_initvolume()</code> in the file <code>drivers/usbhost/usbhost_storage.c</code>.
+          </p>
+        </li>
+      </ul>
+    </p>
+  </li>
+</ul>
+
+<h3><a name="usbdevdrivers">6.3.9 USB Device-Side Drivers</a></h3>
+
+<ul>
+  <li>
+    <b><code>include/nuttx/usb/usbdev.h</code></b>.
+    All structures and APIs needed to work with USB device-side drivers are provided in this header file.
+  </li>
+  <li>
+    <p>
+      <b><code>struct usbdev_s</code></b>.
+      Each USB device controller driver must implement an instance of <code>struct usbdev_s</code>.
+      This structure is defined in <code>include/nuttx/usb/usbdev.h</code>.
+    </p>
+    <p>
+      <b>Examples</b>:
+      <code>arch/arm/src/dm320/dm320_usbdev.c</code>, <code>arch/arm/src/lpc17xx/lpc17_usbdev.c</code>, 
+      <code>arch/arm/src/lpc214x/lpc214x_usbdev.c</code>, <code>arch/arm/src/lpc313x/lpc313x_usbdev.c</code>, and
+       <code>arch/arm/src/stm32/stm32_usbdev.c</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>struct usbdevclass_driver_s</code></b>.
+      Each USB device class driver must implement an instance of <code>struct usbdevclass_driver_s</code>.
+      This structure is also defined in <code>include/nuttx/usb/usbdev.h</code>.
+    </p>
+    <p>
+      <b>Examples</b>:
+      <code>drivers/usbdev/usbdev_serial.c</code> and <code>drivers/usbdev/usbdev_storage.c</code>
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Binding USB Device-Side Drivers</b>.
+      USB device-side controller drivers are not normally directly accessed by user code,
+      but are usually bound to another, higher level USB device class driver.
+      The class driver is then configured to export the USB device functionality.
+      In general, the binding sequence is:
+    </p>
+    <p>
+      <ul>
+        <li>
+          <p>
+            Each USB device class driver includes an intialization entry point that is called from the
+            application at initialization time.
+          </p>
+          <p>
+            <b>Examples</b>:
+            The function <code>usbdev_serialinitialize()</code> in the file <code>drivers/usbdev/usbdev_serial.c</code> and
+            the function <code></code> in the file <code>drivers/usbdev/usbdev_storage.c</code>
+          </p>
+        </li>
+        <li>
+          <p>
+            These initialization functions called the driver API, <code>usbdev_register()</code>.
+            This driver function will <i>bind</i> the USB class driver to the USB device controller driver,
+            completing the initialization.
+          </p>
+        </li>
+      </ul>
+    </p>
   </li>
 </ul>
 
