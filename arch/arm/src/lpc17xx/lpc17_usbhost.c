@@ -1282,8 +1282,8 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
   int ret;
 
   DEBUGASSERT(drvr && ep && buffer && buflen > 0);
-  uvdbg("EP%d %s maxpacket:%d buflen:%d\n",
-        ep->addr, ep->in ? "IN" : "OUT", ep->mxpacketsize, buflen);
+  uvdbg("EP%d %s toggle:%d maxpacket:%d buflen:%d\n",
+        ep->addr, ep->in ? "IN" : "OUT", ep->toggle, ep->mxpacketsize, buflen);
 
   /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
 
@@ -1346,7 +1346,9 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
       goto errout;
     }
 
-  /* Format the endpoint descriptor */
+  /* Format the endpoint descriptor.  This could be a lot simpler if
+   * the OHCI ED structure were exposed outside of the driver.
+   */
  
   lpc17_edinit(ed);
   ed->ctrl = (uint32_t)(ep->funcaddr)     << ED_CONTROL_FA_SHIFT | 
@@ -1364,6 +1366,13 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
     {
       ed->ctrl |= ED_CONTROL_D_OUT;
       dirpid    = GTD_STATUS_DP_OUT;
+    }
+
+  /* Set/restore the toggle carry bit */
+
+  if (ep->toggle)
+    {
+      ed->headp = ED_HEADP_C;
     }
 
   /* Then enqueue the transfer */
@@ -1409,6 +1418,20 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
     {
       uvdbg("Bad TD completion status: %d\n", priv->tdstatus);
       ret = -EIO;
+    }
+
+  /* Save the toggle carry bit.  This bit is updated each time that an
+   * ED is retired.  This could be a lot simpler if the OHCI ED structure
+   * were exposed outside of the driver.
+   */
+
+  if ((ed->headp & ED_HEADP_C) != 0)
+    {
+      ep->toggle = 1;
+    }
+  else
+    {
+      ep->toggle = 0;
     }
 
 errout:
