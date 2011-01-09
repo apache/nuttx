@@ -526,10 +526,10 @@ struct usbhost_driver_s
 struct usbhost_epdesc_s
 {
   uint8_t  addr     : 4; /* Endpoint address */
-  uint8_t  pad1     : 3;
+  uint8_t  pad      : 3;
   uint8_t  in       : 1; /* Direction: 1->IN */
   uint8_t  funcaddr : 7; /* USB address of function containing endpoint */
-  uint8_t  pad2     : 1;
+  uint8_t  toggle   : 1; /* Last toggle (modified by the driver) */
   uint16_t mxpacketsize; /* Max packetsize */
 };
 

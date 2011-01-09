@@ -401,7 +401,7 @@ struct ohci_gtd_s
 
 struct ohci_itd_s
 {
-  volatile uint32_t status;        /* TD status/control bits */
+  volatile uint32_t ctrl;          /* TD status/control bits */
   volatile uint32_t bp0;           /* Buffer page 0 (BP0 */
   volatile uint32_t nexttd;        /* Next TD (NextTD) */
   volatile uint32_t be;            /* Buffer End (BE) */
