@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 20, 2010</p>
+      <p>Last Updated: January 9, 2011</p>
     </td>
   </tr>
 </table>
@@ -387,7 +387,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Network, USB (device), serial, CAN, driver architecture.</li>
+      <li>Network, USB (host), USB (device), serial, CAN, driver architectures.</li>
     </p>
 </tr>
 
@@ -526,6 +526,34 @@
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
+    <b>USB Host Support</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>USB host architecture for USB host controller drivers and device-dependent USB class drivers.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>USB host controller drivers available for the NXP LPC17xx.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Device-dependent USB class drivers available for USB mass storage.</li>
+    </p>
+</tr>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
     <b>USB Device Support</b>
   </td>
 </tr>
@@ -540,7 +568,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>USB device controller drivers available for the NXP LPC214x, LPC313x, STMicro STM32 and TI DM320.</li>
+      <li>USB device controller drivers available for the NXP LPC17xx, LPC214x, LPC313x, STMicro STM32 and TI DM320.</li>
     </p>
 </tr>
 <tr>
@@ -1272,6 +1300,8 @@
     <ul>
       <p>
         <b>STATUS:</b>
+        The following summarizes the features that has been developed and verified on individual LPC17xx-based boards.
+        These features should, however, be common and available for all LPC17xx-based boards.
       </p>
       <p>
         <b>Nucleus2G LPC1768</b>.
@@ -1296,7 +1326,8 @@
         <b>Olimex LPC1766-STK</b>.
         Support for that Olimex-LPC1766-STK board was added to NuttX 5.13.
         The NuttX-5.14 release extended that support with an <i>Ethernet driver</i>.
-        And the NuttX-5.15 release further extended the support with a functional <i>USB driver</i> and <i>SPI-based micro-SD</i>.
+        The NuttX-5.15 release further extended the support with a functional <i>USB device driver</i> and <i>SPI-based micro-SD</i>.
+        And the NuttX-5.16 release added a functional <i>USB host driver</i>.
         Verified configurations are now available for the NuttX OS test,
         for the NuttShell with networking and microSD support(NSH, see the <a href="ttp://www.nuttx.org/NuttShell.html">NSH User Guide</a>),
         for the NuttX network test, for the <a href="http://acme.com/software/thttpd">THTTPD</a> webserver,
@@ -2017,10 +2048,12 @@ nuttx-5.16 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       files to this new directory.  Created a skeleton for a new USB host header
       file
     * drivers/usbhost -- Add USB host "registry" where connect devices can be
-      matched with the correct USB class driver.  Add a USB host class driver
-      for the (Bulk-Only) USB Mass Storage Class.  Untested on initial check-iin
+      matched with the correct USB class driver.
     * arc/arc/src/lpc17xx/lpc17_usbhost.c -- Add a simple USB host driver for
-      the NXP lpc17xx.  Untested on initial check-in.
+      the NXP lpc17xx.
+    * drivers/usbhost -- Add generic USB device enumeration logic.
+    * drivers/usbhost -- Add a USB host class driver for the (Bulk-Only) USB
+      Mass Storage Class.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
