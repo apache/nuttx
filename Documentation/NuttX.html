@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 9, 2011</p>
+      <p>Last Updated: January 10, 2011</p>
     </td>
   </tr>
 </table>
@@ -1969,50 +1969,18 @@ Other memory:
 </table>
 
 <ul><pre>
-5.15 2010-12-12 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.16 2011-01-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * net/uip/uip_tcpaddsend.c and net/send.c -- Another place where the TCP sequence
-      number problem &quot;fixed&quot; in 5.14 might occur.
-    * net/send.c -- Check if the destination IP address is in the ARP table.  If
-      not, then don't consider the packet sent.  It won't be, an ARP packet will go
-      out instead.  This improves behavior, for example, on the first GET request
-      from a browser.
-    * arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c -- The Ethernet
-      logic was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).  An
-      option was added to limit the amount of SRAM used for packet buffering and to
-      re-use any extra Bank0 memory for heap.  configs/olimex-lpc1766stk/nettest
-      now uses only 8Kb at the beginning of Bank0; the 8Kb at the end of Bank0 is
-      included in the heap
-    * arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
-      selected.
-    * configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
-      NSH.  Networking and telnetd interface as well as SPI-based microSD are
-      now functional.
-    * examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
-      CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
-      initialized and bad things happen if you try to ping.
-    * drivers/lcd -- Add header files for the Phillips PCF8833 LCD controller and
-      for the Epson S1D15G10 LCD controller.  A driver for the Nokia 6100 LCD is
-      coming.
-    * include/nuttx/spi.h and almost all other SPI files -- Added an optional
-      cmddata() method to the SPI interface.  Some devices require an additional
-      out-of-band bit to specify if the next word sent to the device is a command
-      or data. This is typical, for example, in &quot;9-bit&quot; displays where the 9th bit
-      is the CMD/DATA bit. The cmddata method provides selection of command or data.
-    * drivers/lcd/p14201.c -- Now uses the cmddata() method of the SPI interface.
-    * arch/arm/src/lpc17xx/lpc17_usbdev.c -- LPC17xx USB driver now appears to
-      to be fully functional.  examples/usbstorage configuration verified (the
-      examples/usbserial configuration is untested).
-    * drivers/usbdev/usbserial.c and usbstorage.c -- All USB class drivers need
-      to call DEV_CONNECT() when they are ready to be enumerated.  That is,
-      (1) initially when bound to the USB driver, and (2) after a USB reset.
-    * drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.  This driver
-      has not be verified as of the initial check-in.
-    * configs/olimex-lpc1766stk/nx -- A NX graphics configuration for the Olimex
-      LPC1766-STK board using the Nokia 6100 LCD driver.  This configuration has
-      not been verified as of the initial check-in.
-    * include/nuttx/spi.h -- the SPI_SETBITS macro was calling the setmode method.
-      This is a very important bug-fix in some usages.
+    * include/nuttx/usb -- Created new directory.  Moved all usb-related header
+      files to this new directory.  Created a skeleton for a new USB host header
+      file
+    * drivers/usbhost -- Add USB host "registry" where connect devices can be
+      matched with the correct USB class driver.
+    * arc/arc/src/lpc17xx/lpc17_usbhost.c -- Add a simple USB host driver for
+      the NXP lpc17xx.
+    * drivers/usbhost -- Add generic USB device enumeration logic.
+    * drivers/usbhost -- Add a USB host class driver for the (Bulk-Only) USB
+      Mass Storage Class.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2042,18 +2010,7 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-5.16 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * include/nuttx/usb -- Created new directory.  Moved all usb-related header
-      files to this new directory.  Created a skeleton for a new USB host header
-      file
-    * drivers/usbhost -- Add USB host "registry" where connect devices can be
-      matched with the correct USB class driver.
-    * arc/arc/src/lpc17xx/lpc17_usbhost.c -- Add a simple USB host driver for
-      the NXP lpc17xx.
-    * drivers/usbhost -- Add generic USB device enumeration logic.
-    * drivers/usbhost -- Add a USB host class driver for the (Bulk-Only) USB
-      Mass Storage Class.
+nuttx-5.17 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
