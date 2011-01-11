@@ -12,6 +12,7 @@ Contents
   NuttX buildroot Toolchain
   USB Device Controller Functions
   mbed Configuration Options
+  USB Host Configuration
   Configurations
 
 Development Environment
@@ -305,7 +306,7 @@ mbed Configuration Options
 	CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
       Automatically set if CONFIG_NET_IGMP is selected.
 
-  LPC17xx USB Configuration
+  LPC17xx USB Device Configuration
 
 	CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
 	  Handle USB Start-Of-Frame events. 
@@ -319,6 +320,53 @@ mbed Configuration Options
 	  Number of DMA descriptors to allocate in SRAM.
 	CONFIG_LPC17_USBDEV_DMA
 	  Enable lpc17xx-specific DMA support
+
+  LPC17xx USB Host Configuration
+
+    CONFIG_USBHOST_OHCIRAM_SIZE
+      Total size of OHCI RAM (in AHB SRAM Bank 1)
+    CONFIG_USBHOST_NEDS
+      Number of endpoint descriptors
+    CONFIG_USBHOST_TDBUFFERS
+      Number of transfer descriptor buffers
+    CONFIG_USBHOST_TDBUFSIZE
+      Size of one transfer descriptor buffer
+    CONFIG_USBHOST_IOBUFSIZE
+      Size of one end-user I/O buffer.  This can be zero if the
+      application can guarantee that all end-user I/O buffers
+      reside in AHB SRAM.
+
+USB Host Configuration
+^^^^^^^^^^^^^^^^^^^^^^
+
+The NuttShell (NSH) mbed can be modified in order to support USB
+host operations.  To make these modifications, do the following:
+
+1. First configure to build the NSH configuration from the top-level
+   NuttX directory:
+
+   cd tools
+   ./configure mbed/nsh
+   cd ..
+
+2. Then edit the top-level .config file to enable USB host.  Make the
+   following changes:
+
+   CONFIG_LPC17_USBHOST=n
+   CONFIG_USBHOST=n
+   CONFIG_SCHED_WORKQUEUE=y
+
+When this change is made, NSH should be extended to support USB flash
+devices.  When a FLASH device is inserted, you should see a device
+appear in the /dev (psuedo) directory.  The device name should be
+like /dev/sda, /dev/sdb, etc.  The USB mass storage device, is present
+it can be mounted from the NSH command line like:
+
+   ls /dev
+   mount -t vfat /dev/sda /mnt/flash
+
+Files on the connect USB flash device should then be accessible under
+the mountpoint /mnt/flash.
 
 Configurations
 ^^^^^^^^^^^^^^

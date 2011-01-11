@@ -1085,14 +1085,14 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   ret = DRVR_EPALLOC(priv->drvr, &boutdesc, &priv->bulkout);
   if (ret != OK)
     {
-      udbg("ERROR: Failed to allocated Bulk OUT endpoint\n");
+      udbg("ERROR: Failed to allocate Bulk OUT endpoint\n");
       return ret;
     }
 
   ret = DRVR_EPALLOC(priv->drvr, &bindesc, &priv->bulkin);
   if (ret != OK)
     {
-      udbg("ERROR: Failed to allocated Bulk IN endpoint\n");
+      udbg("ERROR: Failed to allocate Bulk IN endpoint\n");
       (void)DRVR_EPFREE(priv->drvr, priv->bulkout);
       return ret;
     }
