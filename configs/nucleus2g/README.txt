@@ -434,6 +434,7 @@ Nucleus 2G Configuration Options
 	  Enable lpc17xx-specific DMA support
 
   LPC17xx USB Host Configuration
+
     CONFIG_USBHOST_OHCIRAM_SIZE
       Total size of OHCI RAM (in AHB SRAM Bank 1)
     CONFIG_USBHOST_NEDS
@@ -450,8 +451,9 @@ Nucleus 2G Configuration Options
 USB Host Configuration
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The NuttShell (NSH) Nucleus 2G can be modified in order to support
-USB host operations.  To make these modifications, do the following:
+The NuttShell (NSH) Nucleus 2G configuration can be modified in order
+to support USB host operations.  To make these modifications, do the
+following:
 
 1. First configure to build the NSH configuration from the top-level
    NuttX directory:
