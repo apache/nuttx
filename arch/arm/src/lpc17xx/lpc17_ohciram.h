@@ -214,10 +214,10 @@
 
 /* Finally, use the remainder of the allocated OHCI for IO buffers */
 
-#define LPC17_IOBUFFERS     ((LPC17_OHCIRAM_END - LPC17_IOFREE_BASE) / CONFIG_USBHOST_IOBUFSIZE)
-
-#if LPC17_IOBUFFERS < 1
-#  warning "No IO buffers allocated"
+#if CONFIG_USBHOST_IOBUFSIZE > 0
+#  define LPC17_IOBUFFERS   ((LPC17_OHCIRAM_END - LPC17_IOFREE_BASE) / CONFIG_USBHOST_IOBUFSIZE)
+#else
+#  define LPC17_IOBUFFERS 0
 #endif
 
 /************************************************************************************

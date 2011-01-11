@@ -71,15 +71,13 @@
  * Definitions
  *******************************************************************************/
 
-/* I think it is the case that all I/O buffers must lie in AHB SRAM because of
- * the OHCI DMA.  But this definition has here so that I can experiment later
- * to see if this really required.
+/* All I/O buffers must lie in AHB SRAM because of the OHCI DMA. It might be
+ * okay if no I/O buffers are used *IF* the application can guarantee that all
+ * end-user I/O buffers reside in AHB SRAM.
  */
 
-#define CONFIG_UBHOST_AHBIOBUFFERS 1
-
-#if defined(CONFIG_UBHOST_AHBIOBUFFERS) && LPC17_IOBUFFERS < 1
-#  error "No IO buffers allocated"
+#if LPC17_IOBUFFERS < 1
+#  warning "No IO buffers allocated"
 #endif
 
 /* Frame Interval / Periodic Start */
@@ -206,11 +204,9 @@ static void lpc17_putle16(uint8_t *dest, uint16_t val);
 
 /* Descriptor helper functions *************************************************/
 
-static struct ohci_ed_s *lpc17_edalloc(struct lpc17_usbhost_s *priv);
-static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct ohci_ed_s *ed);
 static uint8_t *lpc17_tdalloc(struct lpc17_usbhost_s *priv);
 static void lpc17_tdfree(struct lpc17_usbhost_s *priv, uint8_t *buffer);
-#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+#if LPC17_IOBUFFERS > 0
 static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv);
 static void lpc17_iofree(struct lpc17_usbhost_s *priv, uint8_t *buffer);
 #endif
@@ -230,6 +226,9 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected);
 static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr);
 static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                               uint16_t maxpacketsize);
+static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
+                         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
                        FAR uint8_t **buffer, FAR size_t *maxlen);
 static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
@@ -239,8 +238,7 @@ static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
 static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
                          FAR const struct usb_ctrlreq_s *req,
                          FAR const uint8_t *buffer);
-static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
-                          FAR struct usbhost_epdesc_s *ed,
+static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen);
 static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr);
   
@@ -266,6 +264,8 @@ static struct lpc17_usbhost_s g_usbhost =
       .wait         = lpc17_wait,
       .enumerate    = lpc17_enumerate,
       .ep0configure = lpc17_ep0configure,
+      .epalloc      = lpc17_epalloc,
+      .epfree       = lpc17_epfree,
       .alloc        = lpc17_alloc,
       .free         = lpc17_free,
       .ctrlin       = lpc17_ctrlin,
@@ -280,7 +280,7 @@ static struct lpc17_usbhost_s g_usbhost =
 
 static struct lpc17_edlist_s  *g_edfree;
 static struct lpc17_buflist_s *g_tdfree;
-#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+#if LPC17_IOBUFFERS > 0
 static struct lpc17_buflist_s *g_iofree;
 #endif
 
@@ -465,39 +465,6 @@ static void lpc17_putle16(uint8_t *dest, uint16_t val)
 }
 
 /*******************************************************************************
- * Name: lpc17_edalloc
- *
- * Description:
- *   Allocate an ED from the free list
- *
- *******************************************************************************/
-
-static struct ohci_ed_s *lpc17_edalloc(struct lpc17_usbhost_s *priv)
-{
-  struct ohci_ed_s *ret = (struct ohci_ed_s *)g_edfree;
-  if (ret)
-    {
-      g_edfree = ((struct lpc17_edlist_s*)ret)->flink;
-    }
-  return ret;
-}
-
-/*******************************************************************************
- * Name: lpc17_edfree
- *
- * Description:
- *   Return an ED to the free list
- *
- *******************************************************************************/
-
-static void lpc17_edfree(struct lpc17_usbhost_s *priv, struct ohci_ed_s *ed)
-{
-  struct lpc17_edlist_s *edfree = (struct lpc17_edlist_s *)ed;
-  edfree->flink                 = g_edfree;
-  g_edfree                      = edfree;
-}
-
-/*******************************************************************************
  * Name: lpc17_tdalloc
  *
  * Description:
@@ -550,7 +517,7 @@ static void lpc17_tdfree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+#if LPC17_IOBUFFERS > 0
 static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv)
 {
   uint8_t *ret = (uint8_t *)g_iofree;
@@ -570,7 +537,7 @@ static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv)
  *
  *******************************************************************************/
 
-#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+#if LPC17_IOBUFFERS > 0
 static void lpc17_iofree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
 {
   struct lpc17_buflist_s *iofree = (struct lpc17_buflist_s *)buffer;
@@ -1067,6 +1034,104 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
   return OK;
 }
 
+/************************************************************************************
+ * Name: lpc17_epalloc
+ *
+ * Description:
+ *   Allocate and configure one endpoint.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   epdesc - Describes the endpoint to be allocated.
+ *   ep - A memory location provided by the caller in which to receive the
+ *      allocated endpoint desciptor.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
+                         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
+{
+  struct ohci_ed_s *ed;
+  int ret = -ENOMEM;
+
+  DEBUGASSERT(epdesc && ep);
+
+  /* Take the next ED from the beginning of the free list */
+
+  ed = (struct ohci_ed_s *)g_edfree;
+  if (ed)
+    {
+      /* Remove the ED from the freelist */
+
+      g_edfree = ((struct lpc17_edlist_s*)ed)->flink;
+
+      /* Configure the endpoint descriptor. */
+ 
+      lpc17_edinit(ed);
+      ed->ctrl = (uint32_t)(epdesc->funcaddr)     << ED_CONTROL_FA_SHIFT | 
+                 (uint32_t)(epdesc->addr)         << ED_CONTROL_EN_SHIFT |
+                 (uint32_t)(epdesc->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
+
+      /* Get the direction of the endpoint */
+
+      if (epdesc->in != 0)
+        {
+          ed->ctrl |= ED_CONTROL_D_IN;
+        }
+      else
+        {
+          ed->ctrl |= ED_CONTROL_D_OUT;
+        }
+
+      /* Return an opaque reference to the ED */
+
+      *ep      = (usbhost_ep_t)ed;
+      ret      = OK;
+    }
+  return ret;
+}
+
+/************************************************************************************
+ * Name: lpc17_epfree
+ *
+ * Description:
+ *   Free and endpoint previously allocated by DRVR_EPALLOC.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The endpint to be freed.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+{
+  struct lpc17_edlist_s *ed = (struct lpc17_edlist_s *)ep;
+
+  DEBUGASSERT(ed);
+
+  /* Put the ED back into the free list */
+
+  ed->flink = g_edfree;
+  g_edfree  = ed;
+  return OK;
+}
+
 /*******************************************************************************
  * Name: lpc17_alloc
  *
@@ -1251,7 +1316,7 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
  *      perform the transfer.
  *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
@@ -1268,26 +1333,32 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
  *
  *******************************************************************************/
 
-static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
-                          FAR struct usbhost_epdesc_s *ep,
+static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  struct ohci_ed_s *ed = NULL;
+  struct ohci_ed_s *ed = (struct ohci_ed_s *)ep;
   uint32_t dirpid;
   uint32_t regval;
-#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+#if LPC17_IOBUFFERS > 0
   uint8_t *origbuf = NULL;
 #endif
+  bool in;
   int ret;
 
-  DEBUGASSERT(drvr && ep && buffer && buflen > 0);
+  DEBUGASSERT(priv && ed && buffer && buflen > 0);
+
+  in = (ed->ctrl  & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
   uvdbg("EP%d %s toggle:%d maxpacket:%d buflen:%d\n",
-        ep->addr, ep->in ? "IN" : "OUT", ep->toggle, ep->mxpacketsize, buflen);
+        (ed->ctrl  & ED_CONTROL_EN_MASK)  >> ED_CONTROL_EN_SHIFT, 
+        in ? "IN" : "OUT",
+        (ed->headp & ED_HEADP_C)          != 0 ? 1 : 0,
+        (ed->ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT, 
+        buflen);
 
   /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
 
-#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+#if LPC17_IOBUFFERS > 0
   if ((uintptr_t)buffer < LPC17_SRAM_BANK0 ||
       (uintptr_t)buffer >= (LPC17_SRAM_BANK0 + LPC17_BANK0_SIZE + LPC17_BANK1_SIZE))
     {
@@ -1318,7 +1389,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
        * way around this copy.
        */
 
-      if (ep->in == 0)
+      if (!in)
         {
           memcpy(buffer, origbuf, buflen);
         }
@@ -1336,43 +1407,15 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
       goto errout;
     }
 
-  /* Allocate an ED */
-
-  ed = lpc17_edalloc(priv);
-  if (!ed)
-    {
-      udbg("ED allocation failed\n");
-      ret = -ENOMEM;
-      goto errout;
-    }
-
-  /* Format the endpoint descriptor.  This could be a lot simpler if
-   * the OHCI ED structure were exposed outside of the driver.
-   */
- 
-  lpc17_edinit(ed);
-  ed->ctrl = (uint32_t)(ep->funcaddr)     << ED_CONTROL_FA_SHIFT | 
-             (uint32_t)(ep->addr)         << ED_CONTROL_EN_SHIFT |
-             (uint32_t)(ep->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
-
   /* Get the direction of the endpoint */
 
-  if (ep->in != 0)
+  if (in)
     {
-      ed->ctrl |= ED_CONTROL_D_IN;
       dirpid    = GTD_STATUS_DP_IN;
     }
   else
     {
-      ed->ctrl |= ED_CONTROL_D_OUT;
       dirpid    = GTD_STATUS_DP_OUT;
-    }
-
-  /* Set/restore the toggle carry bit */
-
-  if (ep->toggle)
-    {
-      ed->headp = ED_HEADP_C;
     }
 
   /* Then enqueue the transfer */
@@ -1420,24 +1463,10 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr,
       ret = -EIO;
     }
 
-  /* Save the toggle carry bit.  This bit is updated each time that an
-   * ED is retired.  This could be a lot simpler if the OHCI ED structure
-   * were exposed outside of the driver.
-   */
-
-  if ((ed->headp & ED_HEADP_C) != 0)
-    {
-      ep->toggle = 1;
-    }
-  else
-    {
-      ep->toggle = 0;
-    }
-
 errout:
   /* Free any temporary IO buffers */
 
-#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+#if LPC17_IOBUFFERS > 0
   if (buffer && origbuf)
     {
       /* If this is an IN transaction, get the user data from the AHB
@@ -1446,7 +1475,7 @@ errout:
        * way around this copy.
        */
 
-      if (ep->in != 0 && ret == OK)
+      if (in && ret == OK)
         {
           memcpy(origbuf, buffer, buflen);
         }
@@ -1456,13 +1485,6 @@ errout:
       lpc17_iofree(priv, buffer);
     }
 #endif
-
-  /* Free the endpoint descriptor */
-
-  if (ed)
-    {
-      lpc17_edfree(priv, ed);
-    }
 
   return ret;
 }
@@ -1644,7 +1666,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
     {
       /* Put the ED in a free list */
 
-      lpc17_edfree(priv, &EDFREE[i]);
+      lpc17_epfree(&priv->drvr, (usbhost_ep_t)&EDFREE[i]);
     }
 
   /* Initialize user-configurable TD buffers */
@@ -1658,7 +1680,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
       buffer += CONFIG_USBHOST_TDBUFSIZE;
     }
 
-#ifdef CONFIG_UBHOST_AHBIOBUFFERS
+#if LPC17_IOBUFFERS > 0
   /* Initialize user-configurable IO buffers */
 
   buffer = IOFREE;

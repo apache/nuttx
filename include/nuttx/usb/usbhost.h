@@ -139,7 +139,7 @@
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function may be called from an interrupt handler.
+ *   This function will *not* be called from an interrupt handler.
  *
  ************************************************************************************/
 
@@ -224,6 +224,52 @@
  ************************************************************************************/
 
 #define DRVR_EP0CONFIGURE(drvr,funcaddr,mps) ((drvr)->ep0configure(drvr,funcaddr,mps))
+
+/************************************************************************************
+ * Name: DRVR_EPALLOC
+ *
+ * Description:
+ *   Allocate and configure one endpoint.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   epdesc - Describes the endpoint to be allocated.
+ *   ep - A memory location provided by the caller in which to receive the
+ *      allocated endpoint desciptor.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_EPALLOC(drvr,epdesc,ep) ((drvr)->epalloc(drvr,epdesc,ep))
+
+/************************************************************************************
+ * Name: DRVR_EPFREE
+ *
+ * Description:
+ *   Free and endpoint previously allocated by DRVR_EPALLOC.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   ep - The endpint to be freed.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_EPFREE(drvr,ep) ((drvr)->epfree(drvr,ep))
 
 /************************************************************************************
  * Name: DRVR_ALLOC
@@ -441,11 +487,30 @@ struct usbhost_class_s
   int (*disconnected)(FAR struct usbhost_class_s *class);
 };
 
+/* This structure describes one endpoint.  It is used as an input to the
+ * allocep() method.
+ */
+
+struct usbhost_epdesc_s
+{
+  uint8_t  addr;         /* Endpoint address */
+  bool     in;           /* Direction: true->IN */
+  uint8_t  funcaddr;     /* USB address of function containing endpoint */
+  uint16_t mxpacketsize; /* Max packetsize */
+};
+
+/* This type represents one endpoint configured by the allocep() method.
+ * The actual form is know only internally to the USB host controller
+ * (for example, for an OHCI driver, this would probably be a pointer
+ * to an endpoint descriptor).
+ */
+
+typedef FAR void *usbhost_ep_t;
+
 /* struct usbhost_driver_s provides access to the USB host driver from the
  * USB host class implementation.
  */
 
-struct usbhost_epdesc_s;
 struct usbhost_driver_s
 {
   /* Wait for a device to connect or disconnect. */
@@ -471,6 +536,12 @@ struct usbhost_driver_s
 
   int (*ep0configure)(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                       uint16_t maxpacketsize);
+
+  /* Allocate and configure an endpoint. */
+
+  int (*epalloc)(FAR struct usbhost_driver_s *drvr,
+                const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+  int (*epfree)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 
   /* Some hardware supports special memory in which transfer descriptors can
    * be accessed more efficiently.  The following methods provide a mechanism
@@ -508,8 +579,7 @@ struct usbhost_driver_s
    * transfer has completed.
    */
 
-  int (*transfer)(FAR struct usbhost_driver_s *drvr,
-                  FAR struct usbhost_epdesc_s *ep,
+  int (*transfer)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                   FAR uint8_t *buffer, size_t buflen);
 
   /* Called by the class when an error occurs and driver has been disconnected.
@@ -519,18 +589,6 @@ struct usbhost_driver_s
    */
 
   void (*disconnect)(FAR struct usbhost_driver_s *drvr);
-};
-
-/* This structure describes one endpoint */
-
-struct usbhost_epdesc_s
-{
-  uint8_t  addr     : 4; /* Endpoint address */
-  uint8_t  pad      : 3;
-  uint8_t  in       : 1; /* Direction: 1->IN */
-  uint8_t  funcaddr : 7; /* USB address of function containing endpoint */
-  uint8_t  toggle   : 1; /* Last toggle (modified by the driver) */
-  uint16_t mxpacketsize; /* Max packetsize */
 };
 
 /************************************************************************************

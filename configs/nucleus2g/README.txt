@@ -443,7 +443,9 @@ Nucleus 2G Configuration Options
     CONFIG_USBHOST_TDBUFSIZE
       Size of one transfer descriptor buffer
     CONFIG_USBHOST_IOBUFSIZE
-      Size of one end-user I/O buffer
+      Size of one end-user I/O buffer.  This can be zero if the
+      application can guarantee that all end-user I/O buffers
+      reside in AHB SRAM.
 
 USB Host Configuration
 ^^^^^^^^^^^^^^^^^^^^^^

@@ -1405,7 +1405,7 @@
 	* include/nuttx/spi.h -- the SPI_SETBITS macro was calling the setmode method.
 	  This is a very important bug-fix in some usages.
 
-5.16 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.16 2011-01-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* include/nuttx/usb -- Created new directory.  Moved all usb-related header
 	  files to this new directory.  Created a skeleton for a new USB host header
@@ -1418,3 +1418,4 @@
 	* drivers/usbhost -- Add a USB host class driver for the (Bulk-Only) USB
 	  Mass Storage Class.
 
+5.17 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
