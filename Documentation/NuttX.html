@@ -800,64 +800,153 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.15 Release Notes</b>:
+<p><b>nuttx-5.16 Release Notes</b>:
 
 <p>
-  This 62<sup>nd</sup> release of NuttX, Version 5.15, was made on December12, 2010 and is available for download from the
+  The 63<sup>rd</sup> release of NuttX, Version 5.16, was made on January 10, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in CVS.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release includes several bugfixes as well as feature enhancements, primarily for the Olimex LPC1766-STK board.
-  Important bugfxes included:
-  <ul>
-    <li>
-      Additional fixes needed with the TCP sequence number problem &quot;fixed&quot; in nuttx-5.14.
-    </li>
-    <li>
-      In the <code>send()</code> logic, now checks if the destination IP address is in the ARP table before sending the packet;
-      an ARP request will go out instead of the TCP packet.
-      This improves behavior, for example, on the first on the first GET request from a browser
-    </li>
-    <li>
-      All USB class drivers need to call DEV_CONNECT() when they are ready to be enumerated.
-      That is, (1) initially when bound to the USB driver, and (2) after a USB reset.
-    </li>
-    <li>
-      The SPI_SETBITS macro was calling the SPI setmode method.
-    </li>
-    <li>
-      And several other bug fixes of lower criticality (see the ChangeLog for details).
-    </li>
-  </ul>
+  This release includes initial support for USB host in NuttX.
+  The USB host infrstruture is new to NuttX.
+  This initial USB host release is probably only beta quality;
+  it is expected the some bugs remain in the logic and that the functionality requires extension.
 </p>
 <p>
-  And feature enhancements:
+  Below is a summary of the NuttX USB host implementation as extracted from the
+  <a href="NuttxPortingGuide.html">NuttX Porting Guide</a>:
+</p>
+<ul>
+  <h3>6.3.9 USB Host-Side Drivers</h3>
+
   <ul>
     <li>
-      The LPC176x Ethernet driver was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).
-      An option was added to limit the amount of SRAM used for packet buffering and to re-use any extra Bank0 memory for heap.
+      <p>
+        <b><code>include/nuttx/usb/usbhost.h</code></b>.
+        All structures and APIs needed to work with USB host-side drivers are provided in this header file.
+      </p>
     </li>
     <li>
-      Enabled networking and SD/MMC card support in the Olimex LPC1766-STK NuttShell (NSH) configuration.
+      <p>
+        <b><code>struct usbhost_driver_s</code></b>.
+        Each USB host controller driver must implement an instance of <code>struct usbhost_driver_s</code>.
+        This structure is defined in <code>include/nuttx/usb/usbhost.h</code>.
+      </p>
+      <p>
+        <b>Examples</b>:
+        <code>arch/arm/src/lpc17xx/lpc17_usbhost.c</code>.
+      </p>
     </li>
     <li>
-      The LPC176x USB driver is now fully fully functional.
+      <p>
+        <b><code>struct usbhost_class_s</code></b>.
+        Each USB host class driver must implement an instance of <code>struct usbhost_class_s</code>.
+        This structure is also defined in <code>include/nuttx/usb/usbhost.h</code>.
+      </p>
+      <p>
+        <b>Examples</b>:
+        <code>drivers/usbhost/usbhost_storage.c</code>
+      </p>
     </li>
     <li>
-      Added an optional <code>cmddata()</code> method to the SPI interface.
-      Some devices require an additional out-of-band bit to specify if the next word sent to the device is a command or data.
-      The <code>cmddata()</code> method provides selection of command or data.
+      <p>
+        <b>USB Host Class Driver Registry</b>.
+        The NuttX USB host infrastructure includes a <i>registry</i>.
+        During its initialization, each USB host class driver must call the interface, <code>usbhost_registerclass()</code>
+        in order add its interface to the registery.
+        Later, when a USB device is connected, the USB host controller will look up the USB host class driver that is needed to support the connected device in this registry.
+      </p>
+      <p>
+        <b>Examples</b>:
+        <code>drivers/usbhost/usbhost_registry.c</code>, <code>drivers/usbhost/usbhost_registerclass.c</code>, and <code>drivers/usbhost/usbhost_findclass.c</code>,
+      </p>
     </li>
     <li>
-      A driver for the Nokia 6100 LCD (with either the Phillips PCF8833 LCD controller and for the Epson S1D15G10 LCD controller)
-      and an NX graphics configuration for the Olimex LPC1766-STK have been added.
-      However, neither the LCD driver nor the NX configuration have been verified as of the this release.
+      <p>
+        <b>Detection and Enumeration of Connected Devices</b>.
+        Each USB host device controller supports two methods that are used to detect and enumeration newly connected devices
+        (and also detect disconnected devices):
+      </p>
+      <p>
+        <ul>
+          <li>
+            <p>
+              <code>int (*wait)(FAR struct usbhost_driver_s *drvr, bool connected);</code>
+            </p>
+            <p>
+              Wait for a device to be connected or disconnected.
+            </p>
+          </li>
+          <li>
+            <p>
+              <code>int (*enumerate)(FAR struct usbhost_driver_s *drvr);</code>
+            </p>
+            <p>
+              Enumerate the connected device.
+              As part of this enumeration process, the driver will
+              (1) get the device's configuration descriptor,
+              (2) extract the class ID info from the configuration descriptor,
+              (3) call <code>usbhost_findclass(</code>) to find the class that supports this device,
+              (4) call the <code>create()</code> method on the <code>struct usbhost_registry_s interface</code> to get a class instance, and
+              finally (5) call the <code>connect()</code> method of the <code>struct usbhost_class_s</code> interface.
+              After that, the class is in charge of the sequence of operations.
+            </p>
+        </ul>
+      </p>
+    </li>
+    <li>
+      <p>
+        <b>Binding USB Host-Side Drivers</b>.
+        USB host-side controller drivers are not normally directly accessed by user code,
+        but are usually bound to another, higher level USB host class driver.
+        The class driver exports the standard NuttX device interface so that the connected USB device can be accessed just as with other, similar, on-board devices.
+        For example, the USB host mass storage class driver (<code>drivers/usbhost/usbhost_storage.c</code>) will register a standard, NuttX block driver interface (like <code>/dev/sda</code>)
+        that can be used to mount a file system just as with any other other block driver instance.
+        In general, the binding sequence is:
+      </p>
+      <p>
+        <ol>
+          <li>
+            <p>
+              Each USB host class driver includes an intialization entry point that is called from the
+              application at initialization time.
+              This driver calls <code>usbhost_registerclass()</code> during this initialization in order to makes itself available in the event the the device that it supports is connected.
+            </p>
+            <p>
+              <b>Examples</b>:
+              The function <code>usbhost_storageinit()</code> in the file <code>drivers/usbhost/usbhost_storage.c</code>
+            </p>
+          </li>
+          <li>
+            <p>
+              Each application must include a <i>waiter</i> thread thread that (1) calls the USB host controller driver's <code>wait()</code> to detect the connection of a device, and then
+              (2) call the USB host controller driver's <code>enumerate</code> method to bind the registered USB host class driver to the USB host controller driver.
+            </p>
+            <p>
+              <b>Examples</b>:
+              The function <code>nsh_waiter()</code> in the file <code>configs/nucleus2g/src/up_nsh.c</code> and
+              the function <code>nsh_waiter()</code> in the file <code>configs/olimex-lpc1766stk/src/up_nsh.c</code>.
+            </p>
+          </li>
+          <li>
+            <p>
+              As part of its operation during the binding operation, the USB host class driver will register an instances of a standard NuttX driver under the <code>/dev</code> directory.
+              To repeat the above example, the USB host mass storage class driver (<code>drivers/usbhost/usbhost_storage.c</code>) will register a standard, NuttX block driver interface (like <code>/dev/sda</code>)
+              that can be used to mount a file system just as with any other other block driver instance. 
+            </p>
+            <p>
+              <b>Examples</b>:
+              See the call to <code>register_blockdriver()</code> in the function <code>usbhost_initvolume()</code> in the file <code>drivers/usbhost/usbhost_storage.c</code>.
+            </p>
+          </li>
+        </ol>
+      </p>
     </li>
   </ul>
-</p>
+</ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
