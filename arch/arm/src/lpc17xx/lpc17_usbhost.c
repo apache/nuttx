@@ -156,6 +156,7 @@ struct lpc17_usbhost_s
 
   volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
   volatile bool    connected; /* Connected to device */
+  volatile bool    lowspeed;      /* Low speed device attached. */
   volatile bool    rhswait;   /* TRUE: Thread is waiting for Root Hub Status change */
   volatile bool    wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
   sem_t            rhssem;    /* Semaphore to wait Writeback Done Head event */
@@ -739,10 +740,12 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
               else
                 {
-                  /* Check if we are now connected */
+                  /* Check current connect status */
 
                   if ((rhportst1 & OHCI_RHPORTST_CCS) != 0)
                     {
+                      /* Connected ... Did we just become connected? */
+
                       if (!priv->connected)
                         {
                           /* Yes.. connected. */
@@ -763,6 +766,13 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                         {
                           ulldbg("Spurious status change (connected)\n");
                         }
+
+                      /* The LSDA (Low speed device attached) bit is valid
+                       * when CCS == 1.
+                       */
+
+                      priv->lowspeed = (rhportst1 & OHCI_RHPORTST_LSDA) != 0;
+                      ullvdbg("Speed:%s\n", priv->lowspeed ? "LOW" : "FULL");
                     }
 
                   /* Check if we are now disconnected */
@@ -773,6 +783,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
                       ullvdbg("Disconnected\n");
                       priv->connected = false;
+                      priv->lowspeed  = false;
 
                       /* Are we bound to a class instance? */
 
@@ -1028,9 +1039,19 @@ static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
 static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                               uint16_t maxpacketsize)
 {
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+
   DEBUGASSERT(drvr && funcaddr < 128 && maxpacketsize < 2048);
+
   EDCTRL->ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT | 
                  (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+
+  if (priv->lowspeed)
+   {
+     EDCTRL->ctrl |= ED_CONTROL_S;
+   }
+
+  uvdbg("EP0 CTRL:%08x\n", EDCTRL->ctrl);
   return OK;
 }
 
@@ -1059,10 +1080,15 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
 static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
                          const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
 {
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct ohci_ed_s *ed;
   int ret = -ENOMEM;
 
-  DEBUGASSERT(epdesc && ep);
+  /* Sanity check.  NOTE that this method should only be called if a device is
+   * connected (because we need a valid low speed indication).
+   */
+
+  DEBUGASSERT(priv && epdesc && ep && priv->connected);
 
   /* Take the next ED from the beginning of the free list */
 
@@ -1090,6 +1116,14 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
         {
           ed->ctrl |= ED_CONTROL_D_OUT;
         }
+
+      /* Check for a low-speed device */
+
+      if (priv->lowspeed)
+        {
+          ed->ctrl |= ED_CONTROL_S;
+        }
+      uvdbg("EP%d CTRL:%08x\n", epdesc->addr, ed->ctrl);
 
       /* Return an opaque reference to the ED */
 
