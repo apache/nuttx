@@ -281,7 +281,11 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- ostest/README.txt
  |   |   |- poll/README.txt
  |   |   `- README.txt
- |   |- lm3s5965-ek/
+ |   |- lm3s6965-ek/
+ |   |   |- include/README.txt
+ |   |   |- src/README.txt
+ |   |   `- README.txt
+ |   |- lm3s8962-ek/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
@@ -305,11 +309,10 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   `- README.txt
  |   |- nucleus1g/
  |   |   `- README.txt
- |   |- olimex-lpc17xx/
+ |   |- olimex-lpc1766stk/
  |   |   `- README.txt
  |   |- olimex-lpc2378/
  |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- olimex-strp711/
  |   |   |- include/README.txt
