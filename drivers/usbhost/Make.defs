@@ -38,5 +38,5 @@ USBHOST_CSRCS  =
 
 ifeq ($(CONFIG_USBHOST),y)
 USBHOST_CSRCS  += usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
-USBHOST_CSRCS  += usbhost_enumerate.c usbhost_storage.c
+USBHOST_CSRCS  += usbhost_enumerate.c usbhost_storage.c usbhost_hidkbd.c
 endif

@@ -1419,3 +1419,10 @@
 	  Mass Storage Class.
 
 5.17 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* include/nuttx/usb -- rename usb_storage.h to storage.h.
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for low-speed devices.
+	* drivers/usbhost/usbhost_skeleton.c -- Template for new class drivers
+	* include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c -- Initial
+	  files for HID keyboard support.  These are mostly empty files on the
+	  initial checkin.

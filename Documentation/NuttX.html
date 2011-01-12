@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 10, 2011</p>
+      <p>Last Updated: January 11, 2011</p>
     </td>
   </tr>
 </table>
@@ -2100,6 +2100,14 @@ buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-5.17 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * include/nuttx/usb -- rename usb_storage.h to storage.h.
+    * arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for low-speed devices.
+    * drivers/usbhost/usbhost_skeleton.c -- Template for new class drivers
+    * include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c -- Initial
+      files for HID keyboard support.  These are mostly empty files on the
+      initial checkin.
+
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
