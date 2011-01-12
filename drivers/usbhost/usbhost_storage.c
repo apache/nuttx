@@ -54,7 +54,7 @@
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
-#include <nuttx/usb/usb_storage.h>
+#include <nuttx/usb/storage.h>
 
 #if defined(CONFIG_USBHOST) && !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 
@@ -1109,9 +1109,8 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
  *   completes the initialization operations.  It is first called after the
  *   configuration descriptor has been received.
  *
- *   This function is called from the connect() method.  It may either
- *   execute on (1) the thread of the caller of connect(), or (2) if
- *   connect() was called from an interrupt handler, on the worker thread.
+ *   This function is called from the connect() method.  This function always
+ *   executes on the thread of the caller of connect().
  *
  * Input Parameters:
  *   priv - A reference to the class instance.
@@ -1366,7 +1365,7 @@ static void usbhost_putbe16(uint8_t *dest, uint16_t val)
 }
 
 /****************************************************************************
- * Name: usbhost_getbe32
+ * Name: usbhost_getle32
  *
  * Description:
  *   Get a (possibly unaligned) 32-bit little endian value.
@@ -1707,8 +1706,8 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Nullify the driver instance.  This will be our indication to any users
-   * of the mass storage device that the device is no longer available.
+  /* Set an indication to any users of the mass storage device that the device
+   * is no longer available.
    */
 
   flags              = irqsave();

@@ -51,7 +51,7 @@
 #include <queue.h>
 
 #include <nuttx/fs.h>
-#include <nuttx/usb/usb_storage.h>
+#include <nuttx/usb/storage.h>
 #include <nuttx/usb/usbdev.h>
 
 /****************************************************************************

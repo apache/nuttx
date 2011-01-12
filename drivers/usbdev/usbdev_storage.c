@@ -75,7 +75,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
 #include <nuttx/usb/usb.h>
-#include <nuttx/usb/usb_storage.h>
+#include <nuttx/usb/storage.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
