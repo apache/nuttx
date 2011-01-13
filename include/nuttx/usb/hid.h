@@ -58,22 +58,22 @@
 /* Subclass and Protocol ****************************************************/
 /* Subclass codes (HID 4.2) */
 
-#define USBHID_SUBCLASS_NONE       0 /* No subclass */
-#define USBHID_SUBCLASS_BOOTIF     1 /* Boot Interface Subclass */
+#define USBHID_SUBCLASS_NONE              0 /* No subclass */
+#define USBHID_SUBCLASS_BOOTIF            1 /* Boot Interface Subclass */
 
 /* A variety of protocols are supported HID devices. The protocol member of
  * an Interface descriptor only has meaning if the subclass member declares
  * that the device supports a boot interface, otherwise it is 0. (HID 4.3)
  */
 
-#define USBHID_PROTOCOL_NONE       0
-#define USBHID_PROTOCOL_KEYBOARD   1
-#define USBHID_PROTOCOL_MOUSE      2
+#define USBHID_PROTOCOL_NONE              0
+#define USBHID_PROTOCOL_KEYBOARD          1
+#define USBHID_PROTOCOL_MOUSE             2
 
 /* Descriptor Requests ******************************************************/
 /* "When a Get_Descriptor(Configuration) request is issued, it returns the
  *  Configuration descriptor, all Interface descriptors, all Endpoint
- * descriptors, and the HID descriptor for each interface."
+ *  descriptors, and the HID descriptor for each interface."
  */
 
 /* Standard Requests (HID 7.1)
@@ -98,9 +98,9 @@
 
 /* Class Descriptor Types (HID 7.1) */
 
-#define USBHID_DESCTYPE_HID       0x21 /* HID */
-#define USBHID_DESCTYPE_REPORT    0x22 /* Report */
-#define USBHID_DESCTYPE_PHYSICAL  0x23 /* Physical descriptor */
+#define USBHID_DESCTYPE_HID               0x21 /* HID */
+#define USBHID_DESCTYPE_REPORT            0x22 /* Report */
+#define USBHID_DESCTYPE_PHYSICAL          0x23 /* Physical descriptor */
 
 /* Class-specific requests (HID 7.2)
  *
@@ -113,57 +113,57 @@
  *   Data          Data
  */
  
-#define USBHID_REQUEST_GETREPORT    0x01
-#define USBHID_REQUEST_GETIDLE      0x02
-#define USBHID_REQUEST_GET_PROTOCOL 0x03
-#define USBHID_REQUEST_SET_REPORT   0x09
-#define USBHID_REQUEST_SET_IDLE     0x0a
-#define USBHID_REQUEST_SET_PROTOCOL 0x0b
+#define USBHID_REQUEST_GETREPORT          0x01
+#define USBHID_REQUEST_GETIDLE            0x02
+#define USBHID_REQUEST_GET_PROTOCOL       0x03
+#define USBHID_REQUEST_SET_REPORT         0x09
+#define USBHID_REQUEST_SET_IDLE           0x0a
+#define USBHID_REQUEST_SET_PROTOCOL       0x0b
 
 /* Report Type (MS byte of wValue for GET_REPORT) (HID 7.2.1) */
 
-#define USBHID_REPORTTYPE_INPUT     0x01 
-#define USBHID_REPORTTYPE_OUTPUT    0x02 
-#define USBHID_REPORTTYPE_FEATURE   0x03 
+#define USBHID_REPORTTYPE_INPUT           0x01 
+#define USBHID_REPORTTYPE_OUTPUT          0x02 
+#define USBHID_REPORTTYPE_FEATURE         0x03 
 
 /* HID Descriptor ***********************************************************/
 
-#define USBHID_COUNTRY_NONE        0x00 /* Not Supported */
-#define USBHID_COUNTRY_ARABIC      0x01 /* Arabic */
-#define USBHID_COUNTRY_BELGIAN     0x02 /* Belgian */
-#define USBHID_COUNTRY_CANADA      0x03 /* Canadian-Bilingual */
-#define USBHID_COUNTRY_CANADRFR    0x04 /* Canadian-French */
-#define USBHID_COUNTRY_CZECH       0x05 /* Czech Republic */
-#define USBHID_COUNTRY_DANISH      0x06 /* Danish */
-#define USBHID_COUNTRY_FINNISH     0x07 /* Finnish */
-#define USBHID_COUNTRY_FRENCH      0x08 /* French */
-#define USBHID_COUNTRY_GERMAN      0x09 /* German */
-#define USBHID_COUNTRY_GREEK       0x10 /* Greek */
-#define USBHID_COUNTRY_HEBREW      0x11 /* Hebrew */
-#define USBHID_COUNTRY_HUNGARY     0x12 /* Hungary */
-#define USBHID_COUNTRY_ISO         0x13 /* International (ISO) */
-#define USBHID_COUNTRY_ITALIAN     0x14 /* Italian */
-#define USBHID_COUNTRY_JAPAN       0x15 /* Japan (Katakana) */
-#define USBHID_COUNTRY_KOREAN      0x16 /* Korean  */
-#define USBHID_COUNTRY_LATINAM     0x17 /* Latin American */
-#define USBHID_COUNTRY_DUTCH       0x18 /* Netherlands/Dutch */
-#define USBHID_COUNTRY_NORWEGIAN   0x19 /* Norwegian */
-#define USBHID_COUNTRY_PERSIAN     0x20 /* Persian (Farsi) */
-#define USBHID_COUNTRY_POLAND      0x21 /* Poland */
-#define USBHID_COUNTRY_PORTUGUESE  0x22 /* Portuguese */
-#define USBHID_COUNTRY_RUSSIA      0x23 /* Russia */
-#define USBHID_COUNTRY_SLOVAKIA    0x24 /* Slovakia */
-#define USBHID_COUNTRY_SPANISH     0x25 /* Spanish */
-#define USBHID_COUNTRY_SWEDISH     0x26 /* Swedish */
-#define USBHID_COUNTRY_SWISSFR     0x27 /* Swiss/French */
-#define USBHID_COUNTRY_SWISSGR     0x28 /* Swiss/German */
-#define USBHID_COUNTRY_SWITZERLAND 0x29 /* Switzerland */
-#define USBHID_COUNTRY_TAIWAN      0x30 /* Taiwan */
-#define USBHID_COUNTRY_TURKISHQ    0x31 /* Turkish-Q */
-#define USBHID_COUNTRY_UK          0x32 /* UK */
-#define USBHID_COUNTRY_US          0x33 /* US */
-#define USBHID_COUNTRY_YUGOSLAVIA  0x34 /* Yugoslavia */
-#define USBHID_COUNTRY_TURKISHF    0x35 /* Turkish-F */
+#define USBHID_COUNTRY_NONE               0x00 /* Not Supported */
+#define USBHID_COUNTRY_ARABIC             0x01 /* Arabic */
+#define USBHID_COUNTRY_BELGIAN            0x02 /* Belgian */
+#define USBHID_COUNTRY_CANADA             0x03 /* Canadian-Bilingual */
+#define USBHID_COUNTRY_CANADRFR           0x04 /* Canadian-French */
+#define USBHID_COUNTRY_CZECH              0x05 /* Czech Republic */
+#define USBHID_COUNTRY_DANISH             0x06 /* Danish */
+#define USBHID_COUNTRY_FINNISH            0x07 /* Finnish */
+#define USBHID_COUNTRY_FRENCH             0x08 /* French */
+#define USBHID_COUNTRY_GERMAN             0x09 /* German */
+#define USBHID_COUNTRY_GREEK              0x10 /* Greek */
+#define USBHID_COUNTRY_HEBREW             0x11 /* Hebrew */
+#define USBHID_COUNTRY_HUNGARY            0x12 /* Hungary */
+#define USBHID_COUNTRY_ISO                0x13 /* International (ISO) */
+#define USBHID_COUNTRY_ITALIAN            0x14 /* Italian */
+#define USBHID_COUNTRY_JAPAN              0x15 /* Japan (Katakana) */
+#define USBHID_COUNTRY_KOREAN             0x16 /* Korean  */
+#define USBHID_COUNTRY_LATINAM            0x17 /* Latin American */
+#define USBHID_COUNTRY_DUTCH              0x18 /* Netherlands/Dutch */
+#define USBHID_COUNTRY_NORWEGIAN          0x19 /* Norwegian */
+#define USBHID_COUNTRY_PERSIAN            0x20 /* Persian (Farsi) */
+#define USBHID_COUNTRY_POLAND             0x21 /* Poland */
+#define USBHID_COUNTRY_PORTUGUESE         0x22 /* Portuguese */
+#define USBHID_COUNTRY_RUSSIA             0x23 /* Russia */
+#define USBHID_COUNTRY_SLOVAKIA           0x24 /* Slovakia */
+#define USBHID_COUNTRY_SPANISH            0x25 /* Spanish */
+#define USBHID_COUNTRY_SWEDISH            0x26 /* Swedish */
+#define USBHID_COUNTRY_SWISSFR            0x27 /* Swiss/French */
+#define USBHID_COUNTRY_SWISSGR            0x28 /* Swiss/German */
+#define USBHID_COUNTRY_SWITZERLAND        0x29 /* Switzerland */
+#define USBHID_COUNTRY_TAIWAN             0x30 /* Taiwan */
+#define USBHID_COUNTRY_TURKISHQ           0x31 /* Turkish-Q */
+#define USBHID_COUNTRY_UK                 0x32 /* UK */
+#define USBHID_COUNTRY_US                 0x33 /* US */
+#define USBHID_COUNTRY_YUGOSLAVIA         0x34 /* Yugoslavia */
+#define USBHID_COUNTRY_TURKISHF           0x35 /* Turkish-F */
 
 /* Main Items (HID 6.2.2.4) */
 
@@ -298,8 +298,8 @@
 #define USBHID_KBDUSE_TILDE               0x32 /* Keyboard Non-US # and ~ */
 #define USBHID_KBDUSE_SEMICOLON           0x33 /* Keyboard ; and : */
 #define USBHID_KBDUSE_COLON               0x33 /* Keyboard ; and : */
-#define USBHID_KBDUSE_SQUOTE              0x34 /* Keyboard ‘ and “ */
-#define USBHID_KBDUSE_DQUOUTE             0x34 /* Keyboard ‘ and “ */
+#define USBHID_KBDUSE_SQUOTE              0x34 /* Keyboard ' and " */
+#define USBHID_KBDUSE_DQUOUTE             0x34 /* Keyboard ' and " */
 #define USBHID_KBDUSE_GACCENT             0x35 /* Keyboard Grave Accent and Tilde */
 #define USBHID_KBDUSE_GTILDE              0x35 /* Keyboard Grave Accent and Tilde */
 #define USBHID_KBDUSE_COMMON              0x36 /* Keyboard , and < */
