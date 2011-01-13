@@ -47,7 +47,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/usb/ohci.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 
