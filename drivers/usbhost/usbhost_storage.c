@@ -186,6 +186,9 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv);
 /* Worker thread actions */
 
 static void usbhost_destroy(FAR void *arg);
+
+/* Helpers for usbhost_connect() */
+
 static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                                   FAR const uint8_t *configdesc, int desclen,
                                   uint8_t funcaddr);
@@ -987,7 +990,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
             if ((found & USBHOST_IFFOUND) != 0)
               {
-                /* Oops.. more than one interface.  We don't know what to do with this. */
+                /* Oops.. more than one interface.  We don't know what to
+                 * do with this.
+                 */
 
                 return -ENOSYS;
               }
@@ -995,7 +1000,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           }
           break;
 
-        /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an OUT */
+        /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an
+         * OUT.
+         */
+
         case USB_DESC_TYPE_ENDPOINT:
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
@@ -1011,11 +1019,15 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
                 if (USB_ISEPOUT(epdesc->addr))
                   {
-                    /* It is an OUT bulk endpoint.  There should be only one bulk OUT endpoint. */
+                    /* It is an OUT bulk endpoint.  There should be only one
+                     * bulk OUT endpoint.
+                     */
 
                     if ((found & USBHOST_BOUTFOUND) != 0)
                       {
-                        /* Oops.. more than one interface.  We don't know what to do with this. */
+                        /* Oops.. more than one endpoint.  We don't know
+                         * what to do with this.
+                         */
 
                         return -EINVAL;
                       }
@@ -1032,11 +1044,15 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                   }
                 else
                   {
-                    /* It is an IN bulk endpoint.  There should be only one bulk IN endpoint. */
+                    /* It is an IN bulk endpoint.  There should be only one
+                     * bulk IN endpoint.
+                     */
 
                     if ((found & USBHOST_BINFOUND) != 0)
                       {
-                        /* Oops.. more than one interface.  We don't know what to do with this. */
+                        /* Oops.. more than one endpoint.  We don't know
+                         * what to do with this.
+                         */
 
                         return -EINVAL;
                       }

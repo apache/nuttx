@@ -72,7 +72,7 @@
 #define DEV_FORMAT          "/dev/sd%c"
 #define DEV_NAMELEN         10
 
-/* Used in usbhost_connect() */
+/* Used in usbhost_cfgdesc() */
 
 #define USBHOST_IFFOUND     0x01
 #define USBHOST_BINFOUND    0x02
@@ -135,6 +135,9 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 /* Worker thread actions */
 
 static void usbhost_destroy(FAR void *arg);
+
+/* Helpers for usbhost_connect() */
+
 static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                                   FAR const uint8_t *configdesc, int desclen,
                                   uint8_t funcaddr);
@@ -453,7 +456,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
             if ((found & USBHOST_IFFOUND) != 0)
               {
-                /* Oops.. more than one interface.  We don't know what to do with this. */
+                /* Oops.. more than one interface.  We don't know what to
+                 * do with this.
+                 */
 
                 return -ENOSYS;
               }
@@ -461,15 +466,16 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           }
           break;
 
-        /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an OUT */
+        /* Endpoint descriptor.  Here, we expect two bulk endpoints, an IN
+         * and an OUT.
+         */
+
         case USB_DESC_TYPE_ENDPOINT:
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
-            /* Check for a bulk endpoint.  We only support the bulk-only
-             * protocol so I suppose anything else should really be an error.
-             */
+            /* Check for a bulk endpoint. */
 
             if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_BULK)
               {
@@ -477,11 +483,15 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
                 if (USB_ISEPOUT(epdesc->addr))
                   {
-                    /* It is an OUT bulk endpoint.  There should be only one bulk OUT endpoint. */
+                    /* It is an OUT bulk endpoint.  There should be only one
+                     * bulk OUT endpoint.
+                     */
 
                     if ((found & USBHOST_BOUTFOUND) != 0)
                       {
-                        /* Oops.. more than one interface.  We don't know what to do with this. */
+                        /* Oops.. more than one endpoint.  We don't know
+                         * what to do with this.
+                         */
 
                         return -EINVAL;
                       }
@@ -498,11 +508,15 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                   }
                 else
                   {
-                    /* It is an IN bulk endpoint.  There should be only one bulk IN endpoint. */
+                    /* It is an IN bulk endpoint.  There should be only one
+                     * bulk IN endpoint.
+                     */
 
                     if ((found & USBHOST_BINFOUND) != 0)
                       {
-                        /* Oops.. more than one interface.  We don't know what to do with this. */
+                        /* Oops.. more than one endpoint.  We don't know
+                         * what to do with this.
+                         */
 
                         return -EINVAL;
                       }
@@ -1014,9 +1028,9 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
  * Name: usbhost_skelinit
  *
  * Description:
- *   Initialize the USB storage class.  This function should be called
+ *   Initialize the USB class driver.  This function should be called
  *   be platform-specific code in order to initialize and register support
- *   for the USB host storage class.
+ *   for the USB host class device.
  *
  * Input Parameters:
  *   None

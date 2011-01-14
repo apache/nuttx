@@ -488,7 +488,22 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* HID Descriptor (HID 6.2.1) ***********************************************/
 
+struct usbhid_descriptor_s
+{
+  uint8_t len;        /* Size of the HID descriptor */
+  uint8_t type;       /* HID descriptor type */
+  uint8_t hid[2];     /* HID class specification release */
+  uint8_t country;    /* Country code */
+  uint8_t ndesc;      /* Number of descriptors (>=1) */
+  uint8_t classdesc;  /* Class descriptor type (See 7.1) */
+  uint8_t desclen[2]; /* Size of the report descriptor */
+  uint8_t optdesc;    /* Type of optional descriptor */
+  uint8_t optlen[2];  /* Size of the optional descriptor */
+};
+
+/* Standard Reports *********************************************************/
 /* Keyboard input report (8 bytes) (HID B.1) */
 
 struct usbhid_kbdreport_s

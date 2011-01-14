@@ -39,10 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <poll.h>
 #include <semaphore.h>
+#include <time.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -58,11 +62,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
+/* Worker thread support is required */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#endif
+
+/* This determines how often the USB keyboard will be polled in units of
+ * of clock ticks.  The default is 100MS.
+ */
+
+#ifndef CONFIG_HIDKBD_POLLTICKS
+  /* The value CLK_TCK gives the frequency in HZ of the system timer.  This
+   * is, the number of ticks in one second.  So one tenth of this would give
+   * is the number of ticks required for a 100MS delay between polls.
+   */
+
+#  define CONFIG_HIDKBD_POLLTICKS (CLK_TCK/10)
 #endif
 
 /* Driver support ***********************************************************/
@@ -73,12 +90,12 @@
 #define DEV_FORMAT          "/dev/sd%c"
 #define DEV_NAMELEN         10
 
-/* Used in usbhost_connect() */
+/* Used in usbhost_cfgdesc() */
 
-#define USBHOST_IFFOUND     0x01
-#define USBHOST_BINFOUND    0x02
-#define USBHOST_BOUTFOUND   0x04
-#define USBHOST_ALLFOUND    0x07
+#define USBHOST_IFFOUND     0x01 /* Required I/F descriptor found */
+#define USBHOST_EPINFOUND   0x02 /* Required interrupt IN EP descriptor found */
+#define USBHOST_EPOUTFOUND  0x04 /* Optional interrupt OUT EP descriptor found */
+#define USBHOST_RQDFOUND    (USBHOST_IFFOUND|USBHOST_EPINFOUND)
 
 #define USBHOST_MAX_CREFS   0x7fff
 
@@ -109,8 +126,21 @@ struct usbhost_state_s
   struct work_s           work;         /* For interacting with the worker thread */
   FAR uint8_t            *tdbuffer;     /* The allocated transfer descriptor buffer */
   size_t                  tdbuflen;     /* Size of the allocated transfer buffer */
-  usbhost_ep_t            epin;         /* IN endpoint */
-  usbhost_ep_t            epout;        /* OUT endpoint */
+
+  /* Endpoints:
+   * EP0 (Control):
+   * - Receiving and responding to requests for USB control and class data.
+   * - IN data when polled by the HID class driver (Get_Report)
+   * - OUT data from the host.
+   * EP Interrupt IN:
+   * - Receiving asynchronous (unrequested) IN data from the device.
+   * EP Interrrupt OUT (optional):
+   * - Transmitting low latency OUT data to the device.
+   * - If not present, EP0 used.
+   */
+
+  usbhost_ep_t            epin;         /* Interrupt IN endpoint */
+  usbhost_ep_t            epout;        /* Optional interrupt OUT endpoint */
 };
 
 /****************************************************************************
@@ -135,7 +165,11 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 
 /* Worker thread actions */
 
+static void usbhost_kbdpoll(FAR void *arg);
 static void usbhost_destroy(FAR void *arg);
+
+/* Helpers for usbhost_connect() */
+
 static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                                   FAR const uint8_t *configdesc, int desclen,
                                   uint8_t funcaddr);
@@ -165,7 +199,16 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
                            uint8_t funcaddr);
 static int usbhost_disconnected(FAR struct usbhost_class_s *class);
 
-/* Driver methods -- depend upon the type of NuttX driver interface exported */
+/* Driver methods.  We export the keyboard as a standard character driver */
+
+static ssize_t usbhost_read(FAR struct file *filp,
+                            FAR char *buffer, size_t len);
+static ssize_t usbhost_write(FAR struct file *filp,
+                             FAR const char *buffer, size_t len);
+#ifndef CONFIG_DISABLE_POLL
+static int usbhost_poll(FAR struct file *filp, FAR struct pollfd *fds,
+                        bool setup);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -193,6 +236,19 @@ static struct usbhost_registry_s g_skeleton =
   usbhost_create,          /* create    */
   1,                       /* nids      */
   &g_id                    /* id[]      */
+};
+
+static const struct file_operations usbhost_fops =
+{
+  0,                       /* open      */
+  0,                       /* close     */
+  usbhost_read,            /* read      */
+  usbhost_write,           /* write     */
+  0,                       /* seek      */
+  0                        /* ioctl     */
+#ifndef CONFIG_DISABLE_POLL
+  , usbhost_poll           /* poll      */
+#endif
 };
 
 /* This is a bitmap that is used to allocate device names /dev/sda-z. */
@@ -329,6 +385,79 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 }
 
 /****************************************************************************
+ * Name: usbhost_kbdpoll
+ *
+ * Description:
+ *   Periodically check for new keyboard data.
+ *
+ * Input Parameters:
+ *   arg - A reference to the class instance to be destroyed.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void usbhost_kbdpoll(FAR void *arg)
+{
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
+  irqstate_t flags;
+#ifdef CONFIG_DEBUG_USB
+  static unsigned int npolls = 0;
+#endif
+  int ret;
+
+  /* Poll the keyboard */
+#warning "Missing logic"
+
+  /* Setup for the next poll.  We have to be careful here because the work
+   * structure may be used by the interrupt handler if the USB device is
+   * disconnected.
+   */
+
+  flags = irqsave();
+
+  /* Is the device still connected?  If not, we do not reschedule any further
+   * polling of the device.
+   */
+
+  if (priv->disconnected)
+    {
+      udbg("Keyboard removed, polling halted\n");
+    }
+  else
+    {
+      /* Otherwise, just setup the next poll. */
+ 
+      ret = work_queue(&priv->work, usbhost_kbdpoll, priv, CONFIG_HIDKBD_POLLTICKS);
+      if (ret != 0)
+        {
+          udbg("ERROR: Failed to re-schedule keyboard poll: %d\n", ret);
+        }
+
+      /* If USB debug is on, then provide some periodic indication that
+       * polling is still happening.
+       */
+
+#ifdef CONFIG_DEBUG_USB
+      npolls++;
+#endif
+    }
+  irqrestore(flags);
+
+  /* If USB debug is on, then provide some periodic indication that
+   * polling is still happening.
+   */
+
+#ifdef CONFIG_DEBUG_USB
+  if (!priv->disconnected && (npolls & ~31) == 0)
+   {
+      udbg("Still polling: %d\n", npolls);
+   }
+#endif
+}
+
+/****************************************************************************
  * Name: usbhost_destroy
  *
  * Description:
@@ -347,21 +476,40 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 static void usbhost_destroy(FAR void *arg)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
+  char devname[DEV_NAMELEN];
 
   DEBUGASSERT(priv != NULL);
   uvdbg("crefs: %d\n", priv->crefs);
  
   /* Unregister the driver */
 
+  uvdbg("Unregister driver\n");
+  usbhost_mkdevname(priv, devname);
+  (void)unregister_driver(devname);
+
   /* Release the device name used by this connection */
 
   usbhost_freedevno(priv);
 
-  /* Free the endpoints */
+  /* Free the interrupt endpoints */
+
+  if (priv->epin)
+    {
+      DRVR_EPFREE(priv->drvr, priv->epin);
+    }
+
+  if (priv->epout)
+    {
+      DRVR_EPFREE(priv->drvr, priv->epout);
+    }
 
   /* Free any transfer buffers */
 
+  usbhost_tdfree(priv);
+
   /* Destroy the semaphores */
+
+  sem_destroy(&priv->exclsem);
 
   /* Disconnect the USB host device */
 
@@ -407,8 +555,8 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 {
   FAR struct usb_cfgdesc_s *cfgdesc;
   FAR struct usb_desc_s *desc;
-  FAR struct usbhost_epdesc_s bindesc;
-  FAR struct usbhost_epdesc_s boutdesc;
+  FAR struct usbhost_epdesc_s epindesc;
+  FAR struct usbhost_epdesc_s epoutdesc;
   int remaining;
   uint8_t found = 0;
   int ret;
@@ -451,6 +599,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
         case USB_DESC_TYPE_INTERFACE:
           {
+            uvdbg("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
             if ((found & USBHOST_IFFOUND) != 0)
               {
@@ -462,61 +611,76 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           }
           break;
 
-        /* Endpoint descriptor.  We expect two bulk endpoints, an IN and an OUT */
+        /* HID descriptor */
+
+        case USBHID_DESCTYPE_HID:
+            uvdbg("HID descriptor\n");
+            break;
+
+        /* Endpoint descriptor.  We expect one or two interrupt endpoints,
+         * a required IN endpoint and an optional OUT endpoint.
+         */
+
         case USB_DESC_TYPE_ENDPOINT:
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
+
+            uvdbg("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
-            /* Check for a bulk endpoint.  We only support the bulk-only
-             * protocol so I suppose anything else should really be an error.
-             */
+            /* Check for an interrupt endpoint. */
 
-            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_BULK)
+            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_INT)
               {
-                /* Yes.. it is a bulk endpoint.  IN or OUT? */
+                /* Yes.. it is a interrupt endpoint.  IN or OUT? */
 
                 if (USB_ISEPOUT(epdesc->addr))
                   {
-                    /* It is an OUT bulk endpoint.  There should be only one bulk OUT endpoint. */
+                    /* It is an interrupt OUT endpoint.  There not be more than one
+                     * interrupt OUT endpoint.
+                     */
 
-                    if ((found & USBHOST_BOUTFOUND) != 0)
+                    if ((found & USBHOST_EPOUTFOUND) != 0)
                       {
-                        /* Oops.. more than one interface.  We don't know what to do with this. */
+                        /* Oops.. more than one endpoint.  We don't know what to do with this. */
 
                         return -EINVAL;
                       }
-                    found |= USBHOST_BOUTFOUND;
+                    found |= USBHOST_EPOUTFOUND;
 
-                    /* Save the bulk OUT endpoint information */
+                    /* Save the interrupt OUT endpoint information */
 
-                    boutdesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
-                    boutdesc.in           = false;
-                    boutdesc.funcaddr     = funcaddr;
-                    boutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
-                    uvdbg("Bulk OUT EP addr:%d mxpacketsize:%d\n",
-                          boutdesc.addr, boutdesc.mxpacketsize);
+                    epoutdesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
+                    epoutdesc.in           = false;
+                    epoutdesc.funcaddr     = funcaddr;
+                    epoutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
+                    uvdbg("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
+                          epoutdesc.addr, epoutdesc.mxpacketsize);
                   }
                 else
                   {
-                    /* It is an IN bulk endpoint.  There should be only one bulk IN endpoint. */
+                    /* It is an interrupt IN endpoint.  There should be only
+                     * one interrupt IN endpoint.
+                     */
 
-                    if ((found & USBHOST_BINFOUND) != 0)
+                    if ((found & USBHOST_EPINFOUND) != 0)
                       {
-                        /* Oops.. more than one interface.  We don't know what to do with this. */
+                        /* Oops.. more than one endpint.  We don't know what
+                         * to do with this.
+                         */
 
                         return -EINVAL;
                       }
-                    found |= USBHOST_BINFOUND;
+                    found |= USBHOST_EPINFOUND;
 
-                    /* Save the bulk IN endpoint information */
+                    /* Save the interrupt IN endpoint information */
                     
-                    bindesc.addr        = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
-                    bindesc.in           = 1;
-                    bindesc.funcaddr     = funcaddr;
-                    bindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
-                    uvdbg("Bulk IN EP addr:%d mxpacketsize:%d\n",
-                          bindesc.addr, bindesc.mxpacketsize);
+                    epindesc.addr        = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
+                    epindesc.in           = 1;
+                    epindesc.funcaddr     = funcaddr;
+                    epindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
+                    uvdbg("Interrupt IN EP addr:%d mxpacketsize:%d\n",
+                          epindesc.addr, epindesc.mxpacketsize);
                   }
               }
           }
@@ -525,6 +689,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         /* Other descriptors are just ignored for now */
 
         default:
+          uvdbg("Other descriptor: %d\n", desc->type);
           break;
         }
 
@@ -534,34 +699,41 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
       remaining  -= desc->len;
     }
 
-  /* Sanity checking... did we find all of things that we need? Hmmm..  I wonder..
-   * can we work read-only or write-only if only one bulk endpoint found?
-   */
+  /* Sanity checking... did we find all of things that we need? */
     
-  if (found != USBHOST_ALLFOUND)
+  if ((found & USBHOST_RQDFOUND) != USBHOST_RQDFOUND)
     {
-      ulldbg("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
+      ulldbg("ERROR: Found IF:%s EPIN:%s\n",
              (found & USBHOST_IFFOUND) != 0  ? "YES" : "NO",
-             (found & USBHOST_BINFOUND) != 0 ? "YES" : "NO",
-             (found & USBHOST_BOUTFOUND) != 0 ? "YES" : "NO");
+             (found & USBHOST_EPINFOUND) != 0 ? "YES" : "NO");
       return -EINVAL;
     }
 
-  /* We are good... Allocate the endpoints */
+  /* We are good... Allocate the endpoints.  First, the required interrupt
+   * IN endpoint.
+   */
 
-  ret = DRVR_EPALLOC(priv->drvr, &boutdesc, &priv->epout);
+  ret = DRVR_EPALLOC(priv->drvr, &epindesc, &priv->epin);
   if (ret != OK)
     {
-      udbg("ERROR: Failed to allocate Bulk OUT endpoint\n");
+      udbg("ERROR: Failed to allocate interrupt IN endpoint\n");
       return ret;
     }
 
-  ret = DRVR_EPALLOC(priv->drvr, &bindesc, &priv->epin);
-  if (ret != OK)
+  /* Then the optional interrupt OUT endpoint */
+
+  ullvdbg("Found EPOOUT:%s\n",
+         (found & USBHOST_EPOUTFOUND) != 0 ? "YES" : "NO");
+
+  if ((found & USBHOST_EPOUTFOUND) != 0)
     {
-      udbg("ERROR: Failed to allocate Bulk IN endpoint\n");
-      (void)DRVR_EPFREE(priv->drvr, priv->epout);
-      return ret;
+      ret = DRVR_EPALLOC(priv->drvr, &epoutdesc, &priv->epout);
+      if (ret != OK)
+        {
+          udbg("ERROR: Failed to allocate interrupt OUT endpoint\n");
+          (void)DRVR_EPFREE(priv->drvr, priv->epin);
+          return ret;
+        }
     }
 
   ullvdbg("Endpoints allocated\n");
@@ -591,7 +763,14 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 {
   int ret;
 
-  /* Set aside a transfer buffer for exclusive use by the class driver */
+  /* Set aside a transfer buffer for exclusive use by the keyboard class driver */
+
+  ret = usbhost_tdalloc(priv);
+  if (ret != OK)
+    {
+      udbg("ERROR: Failed to allocate transfer buffer\n");
+      return ret;
+    }
 
   /* Increment the reference count.  This will prevent usbhost_destroy() from
    * being called asynchronously if the device is removed.
@@ -600,22 +779,24 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   priv->crefs++;
   DEBUGASSERT(priv->crefs == 2);
 
-  /* Configure the device */
+  /* Setup a period worker thread event to poll the USB device. */
 
+  ret = work_queue(&priv->work, usbhost_kbdpoll, priv, CONFIG_HIDKBD_POLLTICKS);
+  
   /* Register the driver */
 
   if (ret == OK)
     {
       char devname[DEV_NAMELEN];
 
-      uvdbg("Register block driver\n");
+      uvdbg("Register driver\n");
       usbhost_mkdevname(priv, devname);
-      // ret = register_blockdriver(devname, &g_bops, 0, priv);
+      (void)register_driver(devname, &usbhost_fops, 0666, NULL);
     }
 
   /* Check if we successfully initialized. We now have to be concerned
-   * about asynchronous modification of crefs because the block
-   * driver has been registerd.
+   * about asynchronous modification of crefs because the driver has
+   * been registerd.
    */
 
   if (ret == OK)
@@ -639,7 +820,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
         }
       else
         {
-          /* Ready for normal operation as a block device driver */
+          /* Ready for normal operation as a character device driver */
 
           uvdbg("Successfully initialized\n");
           priv->crefs--;
@@ -976,7 +1157,7 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
   /* Now check the number of references on the class instance.  If it is one,
    * then we can free the class instance now.  Otherwise, we will have to
    * wait until the holders of the references free them by closing the
-   * block driver.
+   * driver.
    */
 
   ullvdbg("crefs: %d\n", priv->crefs);
@@ -992,7 +1173,14 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
           /* Destroy the instance on the worker thread. */
 
           uvdbg("Queuing destruction: worker %p->%p\n", priv->work.worker, usbhost_destroy);
+
+          /* Cancel the period polling thread */
+
+          (void)work_cancel(&priv->work);
           DEBUGASSERT(priv->work.worker == NULL);
+
+          /* Then schedule the destruction */
+
           (void)work_queue(&priv->work, usbhost_destroy, priv, 0);
        }
       else
@@ -1008,16 +1196,69 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
 }
 
 /****************************************************************************
+ * Character driver methods
+ ****************************************************************************/
+/****************************************************************************
+ * Name: usbhost_read
+ *
+ * Description:
+ *   Standard character driver read method.
+ *
+ ****************************************************************************/
+
+static ssize_t usbhost_read(FAR struct file *filp, FAR char *buffer, size_t len)
+{
+  return 0; /* Return EOF for now */
+}
+
+/****************************************************************************
+ * Name: usbhost_write
+ *
+ * Description:
+ *   Standard character driver write method.
+ *
+ ****************************************************************************/
+
+static ssize_t usbhost_write(FAR struct file *filp, FAR const char *buffer, size_t len)
+{
+  return len; /* Say that everything was written for now */
+}
+
+/****************************************************************************
+ * Name: usbhost_poll
+ *
+ * Description:
+ *   Standard character driver poll method.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int usbhost_poll(FAR struct file *filp, FAR struct pollfd *fds,
+                        bool setup)
+{
+  if (setup)
+    {
+      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      if (fds->revents != 0)
+        {
+          sem_post(fds->sem);
+        }
+    }
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbhost_skelinit
+ * Name: usbhost_kbdinit
  *
  * Description:
- *   Initialize the USB storage class.  This function should be called
- *   be platform-specific code in order to initialize and register support
- *   for the USB host storage class.
+ *   Initialize the USB storage HID keyboard class driver.  This function
+ *   should be called be platform-specific code in order to initialize and
+ *   register support for the USB host HID keyboard class device.
  *
  * Input Parameters:
  *   None
@@ -1028,7 +1269,7 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
  *
  ****************************************************************************/
 
-int usbhost_skelinit(void)
+int usbhost_kbdinit(void)
 {
   /* Perform any one-time initialization of the class implementation */
 
