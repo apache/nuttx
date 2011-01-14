@@ -653,6 +653,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     epoutdesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     epoutdesc.in           = false;
                     epoutdesc.funcaddr     = funcaddr;
+                    epoutdesc.xfrtype      = USB_EP_ATTR_XFER_INT;
                     epoutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
                           epoutdesc.addr, epoutdesc.mxpacketsize);
@@ -675,9 +676,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
                     /* Save the interrupt IN endpoint information */
                     
-                    epindesc.addr        = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
+                    epindesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     epindesc.in           = 1;
                     epindesc.funcaddr     = funcaddr;
+                    epindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
                     epindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Interrupt IN EP addr:%d mxpacketsize:%d\n",
                           epindesc.addr, epindesc.mxpacketsize);

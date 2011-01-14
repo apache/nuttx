@@ -121,9 +121,9 @@
 #define HCCA        ((volatile struct ohci_hcca_s *)LPC17_HCCA_BASE)
 #define TDHEAD      ((volatile struct ohci_gtd_s *)LPC17_TDHEAD_ADDR)
 #define TDTAIL      ((volatile struct ohci_gtd_s *)LPC17_TDTAIL_ADDR)
-#define EDCTRL      ((volatile struct ohci_ed_s *)LPC17_EDCTRL_ADDR)
+#define EDCTRL      ((volatile struct lpc17_ed_s *)LPC17_EDCTRL_ADDR)
 
-#define EDFREE      ((struct ohci_ed_s *)LPC17_EDFREE_BASE)
+#define EDFREE      ((struct lpc17_ed_s *)LPC17_EDFREE_BASE)
 #define TDFREE      ((uint8_t *)LPC17_TDFREE_BASE)
 #define IOFREE      ((uint8_t *)LPC17_IOFREE_BASE)
 
@@ -156,25 +156,43 @@ struct lpc17_usbhost_s
 
   volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
   volatile bool    connected; /* Connected to device */
-  volatile bool    lowspeed;      /* Low speed device attached. */
+  volatile bool    lowspeed;  /* Low speed device attached. */
   volatile bool    rhswait;   /* TRUE: Thread is waiting for Root Hub Status change */
   volatile bool    wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
   sem_t            rhssem;    /* Semaphore to wait Writeback Done Head event */
   sem_t            wdhsem;    /* Semaphore used to wait for Writeback Done Head event */
 };
 
+/* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
+ * However, the size allocated for an endpoint descriptor is 32 bytes in
+ * lpc17_ohciram.h.  This extra 16-bytes is used by the OHCI host driver in
+ * order to maintain additional endpoint-specific data.
+ */
+
+struct lpc17_ed_s
+{
+  /* Hardware specific fields */
+
+  struct ohci_ed_s hw;
+
+  /* Software specific fields */
+
+  uint8_t          xfrtype;   /* Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
+  uint8_t          pad[15];
+};
+
 /* The following are used to manage lists of free EDs and TD buffers*/
 
 struct lpc17_edlist_s
 {
-  struct lpc17_edlist_s *flink;        /* Link to next ED in the list */
-  uint32_t               pad[3];       /* To make the same size as struct ohci_ed_s */
+  struct lpc17_edlist_s *flink;  /* Link to next ED in the list */
+  uint32_t               pad[7]; /* To make the same size as struct lpc17_ed_s */
 };
 
 struct lpc17_buflist_s
 {
-  struct lpc17_buflist_s *flink;       /* Link to next buffer in the list */
-                                       /* Variable length buffer data follows */
+  struct lpc17_buflist_s *flink; /* Link to next buffer in the list */
+                                 /* Variable length buffer data follows */
 };
 
 /*******************************************************************************
@@ -243,12 +261,6 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen);
 static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr);
   
-/* Initializaion ***************************************************************/
-
-static void lpc17_tdinit(volatile struct ohci_gtd_s *td);
-static void lpc17_edinit(volatile struct ohci_ed_s *ed);
-static void lpc17_hccainit(volatile struct ohci_hcca_s *hcca);
-
 /*******************************************************************************
  * Private Data
  *******************************************************************************/
@@ -650,7 +662,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
   /* Then enqueue the transfer */
 
   priv->tdstatus = TD_CC_NOERROR;
-  lpc17_enqueuetd(EDCTRL, dirpid, toggle, buffer, buflen);
+  lpc17_enqueuetd(&EDCTRL->hw, dirpid, toggle, buffer, buflen);
 
   /* Set the head of the control list to the EP0 EDCTRL (this would have to
    * change if we want more than on control EP queued at a time).
@@ -1043,15 +1055,21 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
 
   DEBUGASSERT(drvr && funcaddr < 128 && maxpacketsize < 2048);
 
-  EDCTRL->ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT | 
-                 (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+  /* Set the EP0 ED control word */
+
+  EDCTRL->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT | 
+                    (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
 
   if (priv->lowspeed)
    {
-     EDCTRL->ctrl |= ED_CONTROL_S;
+     EDCTRL->hw.ctrl |= ED_CONTROL_S;
    }
 
-  uvdbg("EP0 CTRL:%08x\n", EDCTRL->ctrl);
+  /* Set the transfer type to control */
+
+  EDCTRL->xfrtype = USB_EP_ATTR_XFER_CONTROL;
+
+  uvdbg("EP0 CTRL:%08x\n", EDCTRL->hw.ctrl);
   return OK;
 }
 
@@ -1081,7 +1099,7 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
                          const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  struct ohci_ed_s *ed;
+  struct lpc17_ed_s *ed;
   int ret = -ENOMEM;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
@@ -1092,7 +1110,7 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Take the next ED from the beginning of the free list */
 
-  ed = (struct ohci_ed_s *)g_edfree;
+  ed = (struct lpc17_ed_s *)g_edfree;
   if (ed)
     {
       /* Remove the ED from the freelist */
@@ -1101,29 +1119,33 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
 
       /* Configure the endpoint descriptor. */
  
-      lpc17_edinit(ed);
-      ed->ctrl = (uint32_t)(epdesc->funcaddr)     << ED_CONTROL_FA_SHIFT | 
-                 (uint32_t)(epdesc->addr)         << ED_CONTROL_EN_SHIFT |
-                 (uint32_t)(epdesc->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
+      memset((void*)ed, 0, sizeof(struct lpc17_ed_s));
+      ed->hw.ctrl = (uint32_t)(epdesc->funcaddr)     << ED_CONTROL_FA_SHIFT | 
+                    (uint32_t)(epdesc->addr)         << ED_CONTROL_EN_SHIFT |
+                    (uint32_t)(epdesc->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
 
       /* Get the direction of the endpoint */
 
       if (epdesc->in != 0)
         {
-          ed->ctrl |= ED_CONTROL_D_IN;
+          ed->hw.ctrl |= ED_CONTROL_D_IN;
         }
       else
         {
-          ed->ctrl |= ED_CONTROL_D_OUT;
+          ed->hw.ctrl |= ED_CONTROL_D_OUT;
         }
 
       /* Check for a low-speed device */
 
       if (priv->lowspeed)
         {
-          ed->ctrl |= ED_CONTROL_S;
+          ed->hw.ctrl |= ED_CONTROL_S;
         }
-      uvdbg("EP%d CTRL:%08x\n", epdesc->addr, ed->ctrl);
+      uvdbg("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
+
+      /* Set the transfer type */
+
+      ed->xfrtype = epdesc->xfrtype;
 
       /* Return an opaque reference to the ED */
 
@@ -1371,7 +1393,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  struct ohci_ed_s *ed = (struct ohci_ed_s *)ep;
+  struct lpc17_ed_s *ed = (struct lpc17_ed_s *)ep;
   uint32_t dirpid;
   uint32_t regval;
 #if LPC17_IOBUFFERS > 0
@@ -1382,12 +1404,12 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   DEBUGASSERT(priv && ed && buffer && buflen > 0);
 
-  in = (ed->ctrl  & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
+  in = (ed->hw.ctrl  & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
   uvdbg("EP%d %s toggle:%d maxpacket:%d buflen:%d\n",
-        (ed->ctrl  & ED_CONTROL_EN_MASK)  >> ED_CONTROL_EN_SHIFT, 
+        (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT, 
         in ? "IN" : "OUT",
-        (ed->headp & ED_HEADP_C)          != 0 ? 1 : 0,
-        (ed->ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT, 
+        (ed->hw.headp & ED_HEADP_C) != 0 ? 1 : 0,
+        (ed->hw.ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT, 
         buflen);
 
   /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
@@ -1455,7 +1477,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   /* Then enqueue the transfer */
 
   priv->tdstatus = TD_CC_NOERROR;
-  lpc17_enqueuetd(ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
+  lpc17_enqueuetd(&ed->hw, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
 
   /* Set the head of the bulk list to the EP descriptor (this would have to
    * change if we want more than on bulk EP queued at a time).
@@ -1553,39 +1575,6 @@ static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr)
   priv->class = NULL;
 }
   
-/*******************************************************************************
- * Initialization
- *******************************************************************************/
-
-static void lpc17_tdinit(volatile struct ohci_gtd_s *td)
-{
-  td->ctrl    = 0;
-  td->cbp     = 0;
-  td->nexttd  = 0;
-  td->be      = 0;
-}
-
-static void lpc17_edinit(volatile struct ohci_ed_s *ed)
-{
-  ed->ctrl    = 0;
-  ed->tailp   = 0;
-  ed->headp   = 0;
-  ed->nexted  = 0;
-}
-
-static void lpc17_hccainit(volatile struct ohci_hcca_s *hcca)
-{
-  int  i;
-
-  for (i = 0; i < 32; i++)
-    {
-      hcca->inttbl[i] = 0;
-    }
-
-  hcca->fmno      = 0;
-  hcca->donehead  = 0;
-}
-
 /*******************************************************************************
  * Public Functions
  *******************************************************************************/
@@ -1689,10 +1678,10 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   /* Initialize all the TDs, EDs and HCCA to 0 */
 
-  lpc17_hccainit(HCCA);
-  lpc17_tdinit(TDHEAD);
-  lpc17_tdinit(TDTAIL);
-  lpc17_edinit(EDCTRL);
+  memset((void*)HCCA,   0, sizeof(struct ohci_hcca_s));
+  memset((void*)TDHEAD, 0, sizeof(struct ohci_gtd_s));
+  memset((void*)TDTAIL, 0, sizeof(struct ohci_gtd_s));
+  memset((void*)EDCTRL, 0, sizeof(struct lpc17_ed_s));
 
   /* Initialize user-configurable EDs */
 

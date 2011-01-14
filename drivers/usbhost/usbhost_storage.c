@@ -1038,6 +1038,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     boutdesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     boutdesc.in           = false;
                     boutdesc.funcaddr     = funcaddr;
+                    boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
                     boutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Bulk OUT EP addr:%d mxpacketsize:%d\n",
                           boutdesc.addr, boutdesc.mxpacketsize);
@@ -1060,9 +1061,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
                     /* Save the bulk IN endpoint information */
                     
-                    bindesc.addr        = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
+                    bindesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     bindesc.in           = 1;
                     bindesc.funcaddr     = funcaddr;
+                    bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
                     bindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Bulk IN EP addr:%d mxpacketsize:%d\n",
                           bindesc.addr, bindesc.mxpacketsize);

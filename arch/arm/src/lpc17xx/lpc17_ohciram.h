@@ -112,10 +112,17 @@
 
 #define LPC17_HCCA_SIZE 256
 
-/* Fixed endpoint and transfer descriptor sizes */
+/* Fixed transfer descriptor size */
 
 #define LPC17_TD_SIZE   16
-#define LPC17_ED_SIZE   16
+
+/* Fixed endpoint descriptor size.  The actual size required by the hardware is only
+ * 16 bytes, however, we set aside an additional 16 bytes for for internal use by
+ * the OHCI host driver.  16-bytes is set aside because the EDs must still be
+ * aligned to 16-byte boundaries.
+ */
+
+#define LPC17_ED_SIZE   32
 
 /* Configurable number of user endpoint descriptors (EDs).  This number excludes
  * the control endpoint that is always allocated.
@@ -177,7 +184,7 @@
  *    CONFIG_USBHOST_IOBUFSIZE    512
  *
  *  Sizes of things
- *    LPC17_EDFREE_SIZE           48
+ *    LPC17_EDFREE_SIZE           96 (including EP0)
  *    LPC17_TDFREE_SIZE           256
  *    LPC17_IOFREE_SIZE           512
  *
@@ -192,12 +199,12 @@
  *    LPC17_TDHEAD_ADDR           0x2000bc00
  *    LPC17_TDTAIL_ADDR           0x2000bc10
  *    LPC17_EDCTRL_ADDR           0x2000bc20
- *    LPC17_EDFREE_BASE           0x2000bc30
- *    LPC17_TDFREE_BASE           0x2000bc50
- *    LPC17_IOFREE_BASE           0x2000bd50
- *    LPC17_IOBUFFERS            (0x2000c000 - 0x2000bd50) / 512 = 688/512 = 1
+ *    LPC17_EDFREE_BASE           0x2000bc40
+ *    LPC17_TDFREE_BASE           0x2000bc80
+ *    LPC17_IOFREE_BASE           0x2000bd80
+ *    LPC17_IOBUFFERS            (0x2000c000 - 0x2000bd80) / 512 = 640/512 = 1
  *
- *  Wasted memory:                688-512 = 176 bytes
+ *  Wasted memory:                640-512 = 128 bytes
  */
 
 #define LPC17_HCCA_BASE     (LPC17_OHCIRAM_BASE)
