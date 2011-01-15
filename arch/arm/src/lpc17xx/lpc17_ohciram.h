@@ -112,10 +112,6 @@
 
 #define LPC17_HCCA_SIZE 256
 
-/* Fixed transfer descriptor size */
-
-#define LPC17_TD_SIZE   16
-
 /* Fixed endpoint descriptor size.  The actual size required by the hardware is only
  * 16 bytes, however, we set aside an additional 16 bytes for for internal use by
  * the OHCI host driver.  16-bytes is set aside because the EDs must still be
@@ -136,7 +132,29 @@
 
 #define LPC17_EDFREE_SIZE (CONFIG_USBHOST_NEDS * LPC17_ED_SIZE)
 
-/* Configurable number of descriptor buffer (TDBUFFER) */
+/* Fixed transfer descriptor size.  The actual size required by the hardware is only
+ * 16 bytes, however, we set aside an additional 16 bytes for for internal use by
+ * the OHCI host driver.  16-bytes is set aside because the TDs must still be
+ * aligned to 16-byte boundaries.
+ */
+
+#define LPC17_TD_SIZE   32
+
+/* Configurable number of user transfer descriptors (TDs).  */
+ 
+#ifndef CONFIG_USBHOST_NTDS
+#  define CONFIG_USBHOST_NTDS 3
+#endif
+ 
+#if CONFIG_USBHOST_NTDS < 2
+#  error "Insufficent TDs"
+#endif
+
+/* Derived size of user trasnfer descriptor (TD) memory. */
+
+#define LPC17_TDFREE_SIZE (CONFIG_USBHOST_NTDS * LPC17_TD_SIZE)
+
+/* Configurable number of request/descriptor buffers (TDBUFFER) */
 
 #ifndef CONFIG_USBHOST_TDBUFFERS
 #  define CONFIG_USBHOST_TDBUFFERS 2
@@ -156,7 +174,7 @@
 #  error "TD buffer size must be an even number of 32-bit words"
 #endif
 
-#define LPC17_TDFREE_SIZE (CONFIG_USBHOST_TDBUFFERS * CONFIG_USBHOST_TDBUFSIZE)
+#define LPC17_TBFREE_SIZE (CONFIG_USBHOST_TDBUFFERS * CONFIG_USBHOST_TDBUFSIZE)
 
 /* Configurable size of an IO buffer.  The number of IO buffers will be determined
  * by what is left at the end of the BANK1 memory setup aside of OHCI RAM.
@@ -177,43 +195,45 @@
  *    LPC17_BANK1_SIZE            16384
  *
  *  Configuration:
- *    CONFIG_USBHOST_OHCIRAM_SIZE 1280
+ *    CONFIG_USBHOST_OHCIRAM_SIZE 1536
  *    CONFIG_USBHOST_NEDS         2
- *    CONFIG_USBHOST_TDBUFFERS    2
+ *    CONFIG_USBHOST_NEDS         3
+ *    CONFIG_USBHOST_TDBUFFERS    3
  *    CONFIG_USBHOST_TDBUFSIZE    128
  *    CONFIG_USBHOST_IOBUFSIZE    512
  *
  *  Sizes of things
- *    LPC17_EDFREE_SIZE           96 (including EP0)
- *    LPC17_TDFREE_SIZE           256
- *    LPC17_IOFREE_SIZE           512
+ *    LPC17_EDFREE_SIZE           64   0x00000040
+ *    LPC17_TDFREE_SIZE           96   0x00000060
+ *    LPC17_TBFREE_SIZE           384  0x00000100
+ *    LPC17_IOFREE_SIZE           512  0x00000200
  *
  *  Memory Layout
- *    LPC17_OHCIRAM_END          (0x20008000 + 16384) = 0x2000c000
- *    LPC17_OHCIRAM_BASE         (0x2000c000 - 1280) = 0x2000bb00
+ *    LPC17_OHCIRAM_END          (0x20008000 + 16384) = 0x20084000
+ *    LPC17_OHCIRAM_BASE         (0x2000c000 - 1536) = 0x2000ba00
  *    LPC17_OHCIRAM_SIZE          1280
  *    LPC17_BANK1_HEAPBASE        0x20008000
  *    LPC17_BANK1_HEAPSIZE       (16384 - 1280) = 15104
  *
- *    LPC17_HCCA_BASE             0x2000bb00
- *    LPC17_TDHEAD_ADDR           0x2000bc00
- *    LPC17_TDTAIL_ADDR           0x2000bc10
- *    LPC17_EDCTRL_ADDR           0x2000bc20
- *    LPC17_EDFREE_BASE           0x2000bc40
- *    LPC17_TDFREE_BASE           0x2000bc80
- *    LPC17_IOFREE_BASE           0x2000bd80
- *    LPC17_IOBUFFERS            (0x2000c000 - 0x2000bd80) / 512 = 640/512 = 1
+ *    LPC17_HCCA_BASE             0x20083a00 -- Communications area
+ *    LPC17_TDTAIL_ADDR           0x20083b00 -- Common. pre-allocated tail TD
+ *    LPC17_EDCTRL_ADDR           0x20083b20 -- Pre-allocated ED for EP0
+ *    LPC17_EDFREE_BASE           0x20083b40 -- Free EDs
+ *    LPC17_TDFREE_BASE           0x20083b80 -- Free TDs
+ *    LPC17_TBFREE_BASE           0x20083be0 -- Free request/descriptor buffers
+ *    LPC17_IOFREE_BASE           0x20083d60 -- Free large I/O buffers
+ *    LPC17_IOBUFFERS            (0x20084000 - 0x20083d60) / 512 = 672/512 = 1
  *
- *  Wasted memory:                640-512 = 128 bytes
+ *  Wasted memory:                672-512 = 160 bytes
  */
 
 #define LPC17_HCCA_BASE     (LPC17_OHCIRAM_BASE)
-#define LPC17_TDHEAD_ADDR   (LPC17_OHCIRAM_BASE + LPC17_HCCA_SIZE)
-#define LPC17_TDTAIL_ADDR   (LPC17_TDHEAD_ADDR + LPC17_TD_SIZE)
+#define LPC17_TDTAIL_ADDR   (LPC17_HCCA_BASE + LPC17_HCCA_SIZE)
 #define LPC17_EDCTRL_ADDR   (LPC17_TDTAIL_ADDR + LPC17_TD_SIZE)
 #define LPC17_EDFREE_BASE   (LPC17_EDCTRL_ADDR + LPC17_ED_SIZE)
 #define LPC17_TDFREE_BASE   (LPC17_EDFREE_BASE + LPC17_EDFREE_SIZE)
-#define LPC17_IOFREE_BASE   (LPC17_TDFREE_BASE + LPC17_TDFREE_SIZE)
+#define LPC17_TBFREE_BASE   (LPC17_TDFREE_BASE + LPC17_TDFREE_SIZE)
+#define LPC17_IOFREE_BASE   (LPC17_TBFREE_BASE + LPC17_TBFREE_SIZE)
 
 #if LPC17_IOFREE_BASE > LPC17_OHCIRAM_END
 #  error "Insufficient OHCI RAM allocated"
