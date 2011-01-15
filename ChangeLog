@@ -1426,3 +1426,11 @@
 	* include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c -- Initial
 	  files for HID keyboard support.  These are mostly empty files on the
 	  initial checkin.
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Will now handle multiple
+	  concurrent transfers on different endpoints (still only one TD per
+	  endpoint).  All methods are protected from re-entrancy; lots of re-
+	  structuring in preparation for interrupt endpoint support.
+	* examples/hidkbd - Added a simple test for the USB host HID keyboard
+	  class driver.
+	* configs/olimex-lpc1766stk/hidkbd - Added a configuration to build the
+	  USB host HID keyboard class driver test for the LPC17xx.

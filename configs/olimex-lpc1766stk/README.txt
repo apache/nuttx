@@ -740,6 +740,10 @@ sudirectory and can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  hidkbd:
+    This configuration directory, performs a simple test of the USB host
+    HID keyboard class driver using the test logic in examples/hidkbd.
+
   nettest:
     This configuration directory may be used to enable networking using the
     LPC17xx's Ethernet controller. It uses examples/nettest to excercise the

@@ -71,6 +71,8 @@
  * Definitions
  *******************************************************************************/
 
+/* Configuration ***************************************************************/
+
 /* All I/O buffers must lie in AHB SRAM because of the OHCI DMA. It might be
  * okay if no I/O buffers are used *IF* the application can guarantee that all
  * end-user I/O buffers reside in AHB SRAM.
@@ -80,6 +82,7 @@
 #  warning "No IO buffers allocated"
 #endif
 
+/* OHCI Setup ******************************************************************/
 /* Frame Interval / Periodic Start */
 
 #define  FI                     (12000-1) /* 12000 bits per frame (-1) */
@@ -122,11 +125,6 @@
 #define TDTAIL      ((struct lpc17_gtd_s *)LPC17_TDTAIL_ADDR)
 #define EDCTRL      ((struct lpc17_ed_s *)LPC17_EDCTRL_ADDR)
 
-#define EDFREE      ((struct lpc17_ed_s *)LPC17_EDFREE_BASE)
-#define TDFREE      ((struct lpc17_gtd_s *)LPC17_TDFREE_BASE)
-#define TBFREE      ((uint8_t *)LPC17_TBFREE_BASE)
-#define IOFREE      ((uint8_t *)LPC17_IOFREE_BASE)
-
 /* Descriptors *****************************************************************/
 
 /* TD delay interrupt value */
@@ -154,13 +152,11 @@ struct lpc17_usbhost_s
 
   /* Driver status */
 
-  volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
   volatile bool    connected; /* Connected to device */
   volatile bool    lowspeed;  /* Low speed device attached. */
   volatile bool    rhswait;   /* TRUE: Thread is waiting for Root Hub Status change */
-  volatile bool    wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
+  sem_t            exclsem;   /* Support mutually exclusive access */
   sem_t            rhssem;    /* Semaphore to wait Writeback Done Head event */
-  sem_t            wdhsem;    /* Semaphore used to wait for Writeback Done Head event */
 };
 
 /* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
@@ -178,7 +174,11 @@ struct lpc17_ed_s
   /* Software specific fields */
 
   uint8_t          xfrtype;   /* Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
-  uint8_t          pad[15];
+  volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
+  volatile bool    wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
+  uint8_t          pad;
+  sem_t            wdhsem;    /* Semaphore used to wait for Writeback Done Head event */
+                              /* Unused bytes follow, depending on the size of sem_t */
 };
 
 /* The OCHI expects the size of an transfer descriptor to be 16 bytes.
@@ -235,13 +235,14 @@ static void lpc17_putle16(uint8_t *dest, uint16_t val);
 
 /* Descriptor helper functions *************************************************/
 
-static  struct lpc17_gtd_s *lpc17_tdalloc(struct lpc17_usbhost_s *priv);
-static void lpc17_tdfree(struct lpc17_usbhost_s *priv, struct lpc17_gtd_s *buffer);
-static uint8_t *lpc17_tballoc(struct lpc17_usbhost_s *priv);
-static void lpc17_tbfree(struct lpc17_usbhost_s *priv, uint8_t *buffer);
+static inline void lpc17_edfree(struct lpc17_ed_s *ed);
+static  struct lpc17_gtd_s *lpc17_tdalloc(void);
+static void lpc17_tdfree(struct lpc17_gtd_s *buffer);
+static uint8_t *lpc17_tballoc(void);
+static void lpc17_tbfree(uint8_t *buffer);
 #if LPC17_IOBUFFERS > 0
-static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv);
-static void lpc17_iofree(struct lpc17_usbhost_s *priv, uint8_t *buffer);
+static uint8_t *lpc17_ioalloc(void);
+static void lpc17_iofree(uint8_t *buffer);
 #endif
 static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
                            struct lpc17_ed_s *ed, uint32_t dirpid,
@@ -275,7 +276,11 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
 static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen);
 static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr);
-  
+
+/* Initialization **************************************************************/
+
+static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv);
+
 /*******************************************************************************
  * Private Data
  *******************************************************************************/
@@ -494,18 +499,38 @@ static void lpc17_putle16(uint8_t *dest, uint16_t val)
 }
 
 /*******************************************************************************
+ * Name: lpc17_edfree
+ *
+ * Description:
+ *   Return an endpoint descriptor to the free list
+ *
+ *******************************************************************************/
+
+static inline void lpc17_edfree(struct lpc17_ed_s *ed)
+{
+  struct lpc17_list_s *entry = (struct lpc17_list_s *)ed;
+
+  /* Put the ED back into the free list */
+
+  entry->flink = g_edfree;
+  g_edfree     = entry;
+}
+
+/*******************************************************************************
  * Name: lpc17_tdalloc
  *
  * Description:
  *   Allocate an transfer descriptor from the free list
  *
  * Assumptions:
- *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
+ *   - Protected from conconcurrent access to the TD pool by the interrupt
+ *     handler
+ *   - Protection from re-entrance must be assured by the caller
  *
  *******************************************************************************/
 
-static struct lpc17_gtd_s *lpc17_tdalloc(struct lpc17_usbhost_s *priv)
+static struct lpc17_gtd_s *lpc17_tdalloc(void)
 {
   struct lpc17_gtd_s *ret;
   irqstate_t flags;
@@ -537,7 +562,7 @@ static struct lpc17_gtd_s *lpc17_tdalloc(struct lpc17_usbhost_s *priv)
  *
  *******************************************************************************/
 
-static void lpc17_tdfree(struct lpc17_usbhost_s *priv, struct lpc17_gtd_s *td)
+static void lpc17_tdfree(struct lpc17_gtd_s *td)
 {
   struct lpc17_list_s *tdfree = (struct lpc17_list_s *)td;
 
@@ -559,12 +584,12 @@ static void lpc17_tdfree(struct lpc17_usbhost_s *priv, struct lpc17_gtd_s *td)
  *   Allocate an request/descriptor transfer buffer from the free list
  *
  * Assumptions:
- *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
+ *   - Protection from re-entrance must be assured by the caller
  *
  *******************************************************************************/
 
-static uint8_t *lpc17_tballoc(struct lpc17_usbhost_s *priv)
+static uint8_t *lpc17_tballoc(void)
 {
   uint8_t *ret = (uint8_t *)g_tbfree;
   if (ret)
@@ -582,7 +607,7 @@ static uint8_t *lpc17_tballoc(struct lpc17_usbhost_s *priv)
  *
  *******************************************************************************/
 
-static void lpc17_tbfree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
+static void lpc17_tbfree(uint8_t *buffer)
 {
   struct lpc17_list_s *tbfree = (struct lpc17_list_s *)buffer;
 
@@ -600,13 +625,13 @@ static void lpc17_tbfree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
  *   Allocate an IO buffer from the free list
  *
  * Assumptions:
- *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
+ *   - Protection from re-entrance must be assured by the caller
  *
  *******************************************************************************/
 
 #if LPC17_IOBUFFERS > 0
-static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv)
+static uint8_t *lpc17_ioalloc(void)
 {
   uint8_t *ret = (uint8_t *)g_iofree;
   if (ret)
@@ -626,7 +651,7 @@ static uint8_t *lpc17_ioalloc(struct lpc17_usbhost_s *priv)
  *******************************************************************************/
 
 #if LPC17_IOBUFFERS > 0
-static void lpc17_iofree(struct lpc17_usbhost_s *priv, uint8_t *buffer)
+static void lpc17_iofree(uint8_t *buffer)
 {
   struct lpc17_list_s *iofree = (struct lpc17_list_s *)buffer;
   iofree->flink               = g_iofree;
@@ -652,7 +677,7 @@ static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
 
   /* Allocate a TD from the free list */
 
-  td = lpc17_tdalloc(priv);
+  td = lpc17_tdalloc();
   if (td != NULL)
     {
       /* Initialize the allocated TD and link it before the common tail TD. */
@@ -674,7 +699,6 @@ static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
 
       ed->hw.headp        = (uint32_t)td | ((ed->hw.headp) & ED_HEADP_C);
       ed->hw.tailp        = (uint32_t)TDTAIL;
-      ed->hw.nexted       = 0;
 
       ret                 = OK;
     }
@@ -693,7 +717,7 @@ static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
  *
  *******************************************************************************/
 
-static int lpc17_wdhwait(struct lpc17_usbhost_s *priv)
+static int lpc17_wdhwait(struct lpc17_usbhost_s *priv, struct lpc17_ed_s *ed)
 {
   irqstate_t flags = irqsave();
   int        ret   = -ENODEV;
@@ -706,8 +730,8 @@ static int lpc17_wdhwait(struct lpc17_usbhost_s *priv)
        * either (1) the device is disconnected, or (2) the transfer completed.
        */
 
-      priv->wdhwait = true;
-      ret           = OK;
+      ed->wdhwait = true;
+      ret         = OK;
     }
 
   irqrestore(flags);
@@ -739,7 +763,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
    * transfer.
    */
 
-  ret = lpc17_wdhwait(priv);
+  ret = lpc17_wdhwait(priv, EDCTRL);
   if (ret != OK)
     {
       udbg("ERROR: Device disconnected\n");
@@ -759,16 +783,10 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
 
   /* Then enqueue the transfer */
 
-  priv->tdstatus = TD_CC_NOERROR;
+  EDCTRL->tdstatus = TD_CC_NOERROR;
   ret = lpc17_enqueuetd(priv, EDCTRL, dirpid, toggle, buffer, buflen);
   if (ret == OK)
     {
-      /* Set the head of the control list to the EP0 EDCTRL (this would have to
-       * change if we want more than on control EP queued at a time).
-       */
-
-      lpc17_putreg(LPC17_EDCTRL_ADDR, LPC17_USBHOST_CTRLHEADED);
-
       /* Set ControlListFilled.  This bit is used to indicate whether there are
        * TDs on the Control list.
        */
@@ -777,36 +795,26 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
       regval |= OHCI_CMDST_CLF;
       lpc17_putreg(regval, LPC17_USBHOST_CMDST);
 
-      /* ControlListEnable.  This bit is set to enable the processing of the
-       * Control list.  Note: once enabled, it remains enabled and we may even
-       * complete list processing before we get the bit set.  We really
-       * should never modify the control list while CLE is set.
-       */
-
-      regval = lpc17_getreg(LPC17_USBHOST_CTRL);
-      regval |= OHCI_CTRL_CLE;
-      lpc17_putreg(regval, LPC17_USBHOST_CTRL);
-
       /* Wait for the Writeback Done Head interrupt */
 
-      lpc17_takesem(&priv->wdhsem);
+      lpc17_takesem(&EDCTRL->wdhsem);
 
       /* Check the TD completion status bits */
 
-      if (priv->tdstatus == TD_CC_NOERROR)
+      if (EDCTRL->tdstatus == TD_CC_NOERROR)
         {
           ret = OK;
         }
       else 
         {
-          uvdbg("Bad TD completion status: %d\n", priv->tdstatus);
+          uvdbg("Bad TD completion status: %d\n", EDCTRL->tdstatus);
           ret = -EIO;
         }
     }
 
   /* Make sure that there is no outstanding request on this endpoint */
 
-  priv->wdhwait = false;
+  EDCTRL->wdhwait = false;
   return ret;
 }
 
@@ -868,7 +876,6 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                           /* Yes.. connected. */
 
                           ullvdbg("Connected\n");
-                          priv->tdstatus  = TD_CC_NOERROR;
                           priv->connected = true;
 
                           /* Notify any waiters */
@@ -949,17 +956,10 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
           struct lpc17_gtd_s *next;
 
           /* The host controller just wrote the list of finished TDs into the HCCA
-           * done head.  Here we assume that only a single packet is "in flight"
-           * at any given time.
-           */
-
-          /* Since there is only one TD, we can disable further TD processing. */
-#warning "This logic needs to be removed"
-          regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
-          regval &= ~(OHCI_CTRL_PLE|OHCI_CTRL_IE|OHCI_CTRL_CLE|OHCI_CTRL_BLE);
-          lpc17_putreg(regval, LPC17_USBHOST_CTRL);
-
-          /* Remove the TD(s) from the Writeback Done Head in the HCCA and return
+           * done head.  This may include multiple packets that were transferred
+           * in the preceding frame.
+           *
+           * Remove the TD(s) from the Writeback Done Head in the HCCA and return
            * them to the free list.  Note that this is safe because the hardware
            * will not modify the writeback done head again until the WDH bit is
            * cleared in the interrupt status register.
@@ -972,20 +972,24 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
 
           for (; td; td = next)
             {
-              /* Get the condition code from the (single) TD status/control
-               * word.  This obviously will not work if/when there are more
-               * one TD in the done list.
+              /* Get the ED in which this TD was enqueued */
+
+              struct lpc17_ed_s *ed = td->ed;
+              DEBUGASSERT(ed != NULL);
+
+              /* Save the condition code from the (single) TD status/control
+               * word.
                */
 
-              priv->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
+              ed->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
 
 #ifdef CONFIG_DEBUG_USB
-              if (priv->tdstatus != TD_CC_NOERROR)
+              if (ed->tdstatus != TD_CC_NOERROR)
                 {
                   /* The transfer failed for some reason... dump some diagnostic info. */
 
-                  ulldbg("ERROR: TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
-                         td->hw.ctrl, priv->tdstatus,
+                  ulldbg("ERROR: ED: xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
+                         ed->xfrtype, td->hw.ctrl, ed->tdstatus,
                          lpc17_getreg(LPC17_USBHOST_RHPORTST1));
                 }
 #endif
@@ -993,15 +997,15 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
               /* Return the TD to the free list */
 
               next = (struct lpc17_gtd_s *)td->hw.nexttd;
-              lpc17_tdfree(priv, td);
-            }
+              lpc17_tdfree(td);
 
-          /* And wake up the thread waiting for the WDH event */
+              /* And wake up the thread waiting for the WDH event */
 
-          if (priv->wdhwait)
-            {
-              lpc17_givesem(&priv->wdhsem);
-              priv->wdhwait = false;
+              if (ed->wdhwait)
+                {
+                  lpc17_givesem(&ed->wdhsem);
+                  ed->wdhwait = false;
+                }
             }
         }
 
@@ -1170,6 +1174,10 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
 
   DEBUGASSERT(drvr && funcaddr < 128 && maxpacketsize < 2048);
 
+  /* We must have exclusive access to EP0 and the control list */
+
+  lpc17_takesem(&priv->exclsem);
+
   /* Set the EP0 ED control word */
 
   EDCTRL->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT | 
@@ -1183,6 +1191,7 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
   /* Set the transfer type to control */
 
   EDCTRL->xfrtype = USB_EP_ATTR_XFER_CONTROL;
+  lpc17_givesem(&priv->exclsem);
 
   uvdbg("EP0 CTRL:%08x\n", EDCTRL->hw.ctrl);
   return OK;
@@ -1214,14 +1223,21 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
                          const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  struct lpc17_ed_s *ed;
-  int ret = -ENOMEM;
+  struct lpc17_ed_s      *ed;
+  uint32_t                regval;
+  int                     ret  = -ENOMEM;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
    * connected (because we need a valid low speed indication).
    */
 
   DEBUGASSERT(priv && epdesc && ep && priv->connected);
+
+  /* We must have exclusive access to the ED pool, the bulk list, the periodic list
+   * and the interrupt table.
+   */
+
+  lpc17_takesem(&priv->exclsem);
 
   /* Take the next ED from the beginning of the free list */
 
@@ -1271,14 +1287,41 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
 #endif
       uvdbg("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
 
+      /* Initialize the semaphore that is used to wait for the endpoint
+       * WDH event.
+       */
+
+      sem_init(&ed->wdhsem, 0, 0);
+
       /* Now add the endpoint descriptor to the appropriate list */
-#warning "Missing logic"
+#warning "Missing logic for other endpoint types"
+
+      /* Link the common tail TD to the ED's TD list */
+
+      ed->hw.headp = (uint32_t)TDTAIL;
+      ed->hw.tailp = (uint32_t)TDTAIL;
+
+      /* Add the new bulk ED to the head of the bulk list */
+
+      ed->hw.nexted = lpc17_getreg(LPC17_USBHOST_BULKHEADED);
+      lpc17_putreg((uint32_t)ed, LPC17_USBHOST_BULKHEADED);
+
+      /* BulkListEnable. This bit is set to enable the processing of the Bulk
+       * list.  Note: once enabled, it remains.  We really should never modify
+       * the bulk list while BLE is set.
+       */
+
+      regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+      regval |= OHCI_CTRL_BLE;
+      lpc17_putreg(regval, LPC17_USBHOST_CTRL);
 
       /* Return an opaque reference to the ED */
 
       *ep      = (usbhost_ep_t)ed;
       ret      = OK;
     }
+
+  lpc17_givesem(&priv->exclsem);
   return ret;
 }
 
@@ -1304,14 +1347,71 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
 
 static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-  struct lpc17_list_s *ed = (struct lpc17_list_s *)ep;
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  struct lpc17_ed_s      *ed   = (struct lpc17_ed_s *)ep;
+  struct lpc17_ed_s      *curr = NULL;
+  struct lpc17_ed_s      *prev = NULL;
+  uint32_t                regval;
 
-  DEBUGASSERT(ed);
+  /* There should not be any pending, real TDs linked to this ED */
+
+  DEBUGASSERT(ed && (ed->hw.headp & ED_HEADP_ADDR_MASK) == LPC17_TDTAIL_ADDR);
+
+  /* We must have exclusive access to the ED pool, the bulk list, the periodic list
+   * and the interrupt table.
+   */
+
+  lpc17_takesem(&priv->exclsem);
+
+  /* Find the ED in the bulk list.  NOTE: We really should never be mucking
+   * with the bulk list while BLE is set.
+   */
+
+  for (curr = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_BULKHEADED),
+       prev = NULL;
+       curr && curr != ed;
+       prev = curr, curr = (struct lpc17_ed_s *)curr->hw.nexted);
+
+  /* Hmmm.. It would be a bug if we do not find the ED in the bulk list. */
+
+  DEBUGASSERT(curr != NULL);
+
+  /* Remove the ED from the bulk list */
+
+  if (curr != NULL)
+    {
+      /* Is this ED the first on in the bulk list? */
+
+      if (prev == NULL)
+        {
+          /* Yes... set the head of the bulk list to skip over this ED */
+
+          lpc17_putreg(ed->hw.nexted, LPC17_USBHOST_BULKHEADED);
+
+          /* If the bulk list is now empty, then disable it */
+
+          regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+          regval &= ~OHCI_CTRL_BLE;
+          lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+        }
+      else
+        {
+          /* No.. set the forward link of the previous ED in the list
+           * skip over this ED.
+           */
+
+          prev->hw.nexted = ed->hw.nexted;
+        }
+    }
+
+  /* Destroy the semaphore */
+
+  sem_destroy(&ed->wdhsem);
 
   /* Put the ED back into the free list */
 
-  ed->flink = g_edfree;
-  g_edfree  = ed;
+  lpc17_edfree(ed);
+  lpc17_givesem(&priv->exclsem);
   return OK;
 }
 
@@ -1347,14 +1447,21 @@ static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   DEBUGASSERT(priv && buffer && maxlen);
+  int ret = -ENOMEM;
 
-  *buffer = lpc17_tballoc(priv);
+  /* We must have exclusive access to the transfer buffer pool */
+
+  lpc17_takesem(&priv->exclsem);
+
+  *buffer = lpc17_tballoc();
   if (*buffer)
     {
       *maxlen = CONFIG_USBHOST_TDBUFSIZE;
-      return OK;
+      ret = OK;
     }
-  return -ENOMEM;
+
+  lpc17_givesem(&priv->exclsem);
+  return ret;
 }
 
 /*******************************************************************************
@@ -1376,7 +1483,6 @@ static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
@@ -1384,8 +1490,13 @@ static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
 static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  DEBUGASSERT(priv && buffer);
-  lpc17_tbfree(priv, buffer);
+  DEBUGASSERT(buffer);
+
+  /* We must have exclusive access to the transfer buffer pool */
+
+  lpc17_takesem(&priv->exclsem);
+  lpc17_tbfree(buffer);
+  lpc17_givesem(&priv->exclsem);
   return OK;
 }
 
@@ -1437,6 +1548,10 @@ static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
+  /* We must have exclusive access to EP0 and the control list */
+
+  lpc17_takesem(&priv->exclsem);
+
   len = lpc17_getle16(req->len);
   ret = lpc17_ctrltd(priv, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
   if (ret == OK)
@@ -1451,6 +1566,8 @@ static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
           ret = lpc17_ctrltd(priv, GTD_STATUS_DP_OUT, NULL, 0);
         }
     }
+
+  lpc17_givesem(&priv->exclsem);
   return ret;
 }
 
@@ -1467,6 +1584,10 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
+  /* We must have exclusive access to EP0 and the control list */
+
+  lpc17_takesem(&priv->exclsem);
+
   len = lpc17_getle16(req->len);
   ret = lpc17_ctrltd(priv, GTD_STATUS_DP_SETUP, (uint8_t*)req, USB_SIZEOF_CTRLREQ);
   if (ret == OK)
@@ -1481,6 +1602,8 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
           ret = lpc17_ctrltd(priv, GTD_STATUS_DP_IN, NULL, 0);
         }
     }
+
+  lpc17_givesem(&priv->exclsem);
   return ret;
 }
 
@@ -1515,7 +1638,7 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
-
+ 
 static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen)
 {
@@ -1539,6 +1662,12 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         (ed->hw.ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT, 
         buflen);
 
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
+   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+   */
+
+  lpc17_takesem(&priv->exclsem);
+
   /* Allocate an IO buffer if the user buffer does not lie in AHB SRAM */
 
 #if LPC17_IOBUFFERS > 0
@@ -1558,7 +1687,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       /* Allocate an IO buffer in AHB SRAM */
 
       origbuf = buffer;
-      buffer  = lpc17_ioalloc(priv);
+      buffer  = lpc17_ioalloc();
       if (!buffer)
         {
           uvdbg("IO buffer allocation failed\n");
@@ -1583,7 +1712,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
    * transfer.
    */
 
-  ret = lpc17_wdhwait(priv);
+  ret = lpc17_wdhwait(priv, ed);
   if (ret != OK)
     {
       udbg("ERROR: Device disconnected\n");
@@ -1603,16 +1732,10 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* Then enqueue the transfer */
 
-  priv->tdstatus = TD_CC_NOERROR;
+  ed->tdstatus = TD_CC_NOERROR;
   ret = lpc17_enqueuetd(priv, ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
   if (ret == OK)
     {
-      /* Set the head of the bulk list to the EP descriptor (this would have to
-       * change if we want more than on bulk EP queued at a time).
-       */
-
-      lpc17_putreg((uint32_t)ed, LPC17_USBHOST_BULKHEADED);
-
       /* BulkListFilled. This bit is used to indicate whether there are any
        * TDs on the Bulk list.
        */
@@ -1621,29 +1744,19 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       regval |= OHCI_CMDST_BLF;
       lpc17_putreg(regval, LPC17_USBHOST_CMDST);
 
-      /* BulkListEnable. This bit is set to enable the processing of the Bulk
-       * list.  Note: once enabled, it remains enabled and we may even
-       * complete list processing before we get the bit set.  We really
-       * should never modify the bulk list while BLE is set.
-       */
-
-      regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
-      regval |= OHCI_CTRL_BLE;
-      lpc17_putreg(regval, LPC17_USBHOST_CTRL);
-
       /* Wait for the Writeback Done Head interrupt */
 
-      lpc17_takesem(&priv->wdhsem);
+      lpc17_takesem(&ed->wdhsem);
 
       /* Check the TD completion status bits */
 
-      if (priv->tdstatus == TD_CC_NOERROR)
+      if (ed->tdstatus == TD_CC_NOERROR)
         {
           ret = OK;
         }
       else 
         {
-          uvdbg("Bad TD completion status: %d\n", priv->tdstatus);
+          uvdbg("Bad TD completion status: %d\n", ed->tdstatus);
           ret = -EIO;
         }
     }
@@ -1651,7 +1764,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 errout:
   /* Make sure that there is no outstanding request on this endpoint */
 
-  priv->wdhwait = false;
+  ed->wdhwait = false;
 
   /* Free any temporary IO buffers */
 
@@ -1671,10 +1784,11 @@ errout:
 
       /* Then free the temporary I/O buffer */
 
-      lpc17_iofree(priv, buffer);
+      lpc17_iofree(buffer);
     }
 #endif
 
+  lpc17_givesem(&priv->exclsem);
   return ret;
 }
 
@@ -1697,7 +1811,6 @@ errout:
  *
  * Assumptions:
  *   - Only a single class bound to a single device is supported.
- *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
@@ -1708,6 +1821,60 @@ static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr)
   priv->class = NULL;
 }
   
+/*******************************************************************************
+ * Initialization
+ *******************************************************************************/
+/*******************************************************************************
+ * Name: lpc17_ep0init
+ *
+ * Description:
+ *   Initialize ED for EP0, add it to the control ED list, and enable control
+ *   transfers.
+ *
+ * Input Parameters:
+ *   priv - private driver state instance.
+ *
+ * Returned Values:
+ *   None
+ *
+ *******************************************************************************/
+
+static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
+{
+  uint32_t regval;
+
+  /* Set up some default values */
+
+  (void)lpc17_ep0configure(&priv->drvr, 1, 8);
+
+  /* Initialize the common tail TD. */
+
+  memset(TDTAIL, 0, sizeof(struct lpc17_gtd_s));
+  TDTAIL->ed              = EDCTRL;
+
+  /* Link the common tail TD to the ED's TD list */
+
+  memset(EDCTRL, 0, sizeof(struct lpc17_ed_s));
+  EDCTRL->hw.headp        = (uint32_t)TDTAIL;
+  EDCTRL->hw.tailp        = (uint32_t)TDTAIL;
+
+  /* Set the head of the control list to the EP0 EDCTRL (this would have to
+   * change if we want more than on control EP queued at a time).
+   */
+
+  lpc17_putreg(LPC17_EDCTRL_ADDR, LPC17_USBHOST_CTRLHEADED);
+
+  /* ControlListEnable.  This bit is set to enable the processing of the
+   * Control list.  Note: once enabled, it remains enabled and we may even
+   * complete list processing before we get the bit set.  We really
+   * should never modify the control list while CLE is set.
+   */
+
+  regval = lpc17_getreg(LPC17_USBHOST_CTRL);
+  regval |= OHCI_CTRL_CLE;
+  lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+}
+
 /*******************************************************************************
  * Public Functions
  *******************************************************************************/
@@ -1745,12 +1912,18 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   irqstate_t flags;
   int i;
 
+  /* Sanity checks.  NOTE: If certain OS features are enabled, it may be
+   * necessary to increase the size of LPC17_ED/TD_SIZE in lpc17_ohciram.h
+   */
+
   DEBUGASSERT(controller == 0);
+  DEBUGASSERT(sizeof(struct lpc17_ed_s)  <= LPC17_ED_SIZE);
+  DEBUGASSERT(sizeof(struct lpc17_gtd_s) <= LPC17_TD_SIZE);
 
   /* Initialize the state data structure */
 
-  sem_init(&priv->rhssem, 0, 0);
-  sem_init(&priv->wdhsem, 0, 0);
+  sem_init(&priv->rhssem,  0, 0);
+  sem_init(&priv->exclsem, 0, 1);
 
   /* Enable power by setting PCUSB in the PCONP register.  Disable interrupts
    * because this register may be shared with other drivers.
@@ -1827,45 +2000,50 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   memset((void*)HCCA,   0, sizeof(struct ohci_hcca_s));
   memset((void*)TDTAIL, 0, sizeof(struct ohci_gtd_s));
   memset((void*)EDCTRL, 0, sizeof(struct lpc17_ed_s));
+  sem_init(&EDCTRL->wdhsem, 0, 0);
 
   /* Initialize user-configurable EDs */
 
+  buffer = (uint8_t *)LPC17_EDFREE_BASE;
   for (i = 0; i < CONFIG_USBHOST_NEDS; i++)
     {
       /* Put the ED in a free list */
 
-      lpc17_epfree(&priv->drvr, (usbhost_ep_t)&EDFREE[i]);
+      lpc17_edfree((struct lpc17_ed_s *)buffer);
+      buffer += LPC17_ED_SIZE;
     }
 
   /* Initialize user-configurable TDs */
 
+  buffer = (uint8_t *)LPC17_TDFREE_BASE;
   for (i = 0; i < CONFIG_USBHOST_NTDS; i++)
     {
       /* Put the ED in a free list */
 
-      lpc17_tdfree(priv, &TDFREE[i]);
+      lpc17_tdfree((struct lpc17_gtd_s *)buffer);
+      buffer += LPC17_TD_SIZE;
     }
 
   /* Initialize user-configurable request/descriptor transfer buffers */
 
-  buffer = TBFREE;
+  buffer = (uint8_t *)LPC17_TBFREE_BASE;
   for (i = 0; i < CONFIG_USBHOST_NEDS; i++)
     {
       /* Put the TD buffer in a free list */
 
-      lpc17_tbfree(priv, buffer);
+      lpc17_tbfree(buffer);
       buffer += CONFIG_USBHOST_TDBUFSIZE;
     }
 
 #if LPC17_IOBUFFERS > 0
   /* Initialize user-configurable IO buffers */
 
-  buffer = IOFREE;
+  buffer = (uint8_t *)LPC17_IOFREE_BASE;
   for (i = 0; i < LPC17_IOBUFFERS; i++)
     {
       /* Put the IO buffer in a free list */
 
-      lpc17_iofree(priv, buffer);
+      lpc17_iofree(buffer);
       buffer += CONFIG_USBHOST_IOBUFSIZE;
     }
 #endif
@@ -1903,6 +2081,10 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   /* Set HCCA base address */
 
   lpc17_putreg((uint32_t)HCCA, LPC17_USBHOST_HCCA);
+
+  /* Set up EP0 */
+
+  lpc17_ep0init(priv);
 
   /* Clear pending interrupts */
 

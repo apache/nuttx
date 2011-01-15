@@ -671,6 +671,25 @@ EXTERN const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_i
 
 EXTERN int usbhost_storageinit(void);
 
+/****************************************************************************
+ * Name: usbhost_kbdinit
+ *
+ * Description:
+ *   Initialize the USB storage HID keyboard class driver.  This function
+ *   should be called be platform-specific code in order to initialize and
+ *   register support for the USB host HID keyboard class device.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+EXTERN int usbhost_kbdinit(void);
+
 /*******************************************************************************
  * Name: usbhost_initialize
  *

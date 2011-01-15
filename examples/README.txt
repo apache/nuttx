@@ -64,6 +64,15 @@ examples/helloxx
   library suupport is available, and that class are instantiated
   correctly.
 
+examples/hidkbd
+^^^^^^^^^^^^^^^^
+
+  This is a simple test to debug/verify the USB host HID keyboard class
+  driver.
+
+    CONFIG_EXAMPLES_HIDKBD_DEFPRIO - Priority of "waiter" thread.
+    CONFIG_EXAMPLES_HIDKBD_STACKSIZE - Stacksize of "waiter" thread.
+
 examples/igmp
 ^^^^^^^^^^^^^
 
