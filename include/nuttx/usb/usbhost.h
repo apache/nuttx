@@ -275,9 +275,9 @@
  * Name: DRVR_ALLOC
  *
  * Description:
- *   Some hardware supports special memory in which transfer descriptors can
+ *   Some hardware supports special memory in which request and descriptor data can
  *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the transfer descriptor memory.  If the underlying hardware does not support
+ *   the request/descriptor memory.  If the underlying hardware does not support
  *   such "special" memory, this functions may simply map to malloc.
  *
  * Input Parameters:
@@ -303,9 +303,9 @@
  * Name: DRVR_FREE
  *
  * Description:
- *   Some hardware supports special memory in which transfer descriptors can
+ *   Some hardware supports special memory in which request and descriptor data can
  *   be accessed more efficiently.  This method provides a mechanism to free that
- *   transfer descriptor memory.  If the underlying hardware does not support
+ *   request/descriptor memory.  If the underlying hardware does not support
  *   such "special" memory, this functions may simply map to free().
  *
  * Input Parameters:
