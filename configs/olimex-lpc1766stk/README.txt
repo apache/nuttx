@@ -684,6 +684,8 @@ Olimex LPC1766-STK Configuration Options
       Total size of OHCI RAM (in AHB SRAM Bank 1)
     CONFIG_USBHOST_NEDS
       Number of endpoint descriptors
+    CONFIG_USBHOST_NTDS
+      Number of transfer descriptors
     CONFIG_USBHOST_TDBUFFERS
       Number of transfer descriptor buffers
     CONFIG_USBHOST_TDBUFSIZE
