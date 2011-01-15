@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 11, 2011</p>
+      <p>Last Updated: January 15, 2011</p>
     </td>
   </tr>
 </table>
@@ -2107,7 +2107,14 @@ nuttx-5.17 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c -- Initial
       files for HID keyboard support.  These are mostly empty files on the
       initial checkin.
-
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Will now handle multiple
+	  concurrent transfers on different endpoints (still only one TD per
+	  endpoint).  All methods are protected from re-entrancy; lots of re-
+	  structuring in preparation for interrupt endpoint support.
+	* examples/hidkbd - Added a simple test for the USB host HID keyboard
+	  class driver.
+	* configs/olimex-lpc1766stk/hidkbd - Added a configuration to build the
+	  USB host HID keyboard class driver test for the LPC17xx.
 
 pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
