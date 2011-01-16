@@ -65,12 +65,12 @@
 #endif
 
 /* Driver support ***********************************************************/
-/* This format is used to construct the /dev/sd[n] device driver path.  It
+/* This format is used to construct the /dev/skel[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
 
-#define DEV_FORMAT          "/dev/sd%c"
-#define DEV_NAMELEN         10
+#define DEV_FORMAT          "/dev/skel%c"
+#define DEV_NAMELEN         12
 
 /* Used in usbhost_cfgdesc() */
 
@@ -85,8 +85,8 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure contains the internal, private state of the USB host mass
- * storage class.
+/* This structure contains the internal, private state of the USB host class
+ * driver.
  */
 
 struct usbhost_state_s
@@ -99,15 +99,15 @@ struct usbhost_state_s
 
   struct usbhost_driver_s *drvr;
 
-  /* The remainder of the fields are provide o the mass storage class */
+  /* The remainder of the fields are provide to the class driver */
   
-  char                    sdchar;       /* Character identifying the /dev/sd[n] device */
+  char                    devchar;       /* Character identifying the /dev/skel[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   int16_t                 crefs;        /* Reference count on the driver instance */
   sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
   struct work_s           work;         /* For interacting with the worker thread */
-  FAR uint8_t            *tdbuffer;     /* The allocated transfer descriptor buffer */
-  size_t                  tdbuflen;     /* Size of the allocated transfer buffer */
+  FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
+  size_t                  tbuflen;      /* Size of the allocated transfer buffer */
   usbhost_ep_t            epin;         /* IN endpoint */
   usbhost_ep_t            epout;        /* OUT endpoint */
 };
@@ -152,8 +152,8 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val);
 
 /* Transfer descriptor memory management */
 
-static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv);
-static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv);
+static inline int usbhost_talloc(FAR struct usbhost_state_s *priv);
+static inline int usbhost_tfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
  
@@ -174,8 +174,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *class);
  ****************************************************************************/
 
 /* This structure provides the registry entry ID informatino that will  be 
- * used to associate the USB host mass storage class to a connected USB
- * device.
+ * used to associate the USB class driver to a connected USB device.
  */
 
 static const const struct usbhost_id_s g_id =
@@ -197,7 +196,7 @@ static struct usbhost_registry_s g_skeleton =
   &g_id                   /* id[]     */
 };
 
-/* This is a bitmap that is used to allocate device names /dev/sda-z. */
+/* This is a bitmap that is used to allocate device names /dev/skela-z. */
 
 static uint32_t g_devinuse;
 
@@ -303,7 +302,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
       if ((g_devinuse & bitno) == 0)
         {
           g_devinuse |= bitno;
-          priv->sdchar = 'a' + devno;
+          priv->devchar = 'a' + devno;
           irqrestore(flags);
           return OK;
         }
@@ -315,7 +314,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
 
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 {
-  int devno = 'a' - priv->sdchar;
+  int devno = 'a' - priv->devchar;
 
   if (devno >= 0 && devno < 26)
     {
@@ -327,7 +326,7 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
 static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname)
 {
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->sdchar);
+  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devchar);
 }
 
 /****************************************************************************
@@ -761,10 +760,10 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
 }
 
 /****************************************************************************
- * Name: usbhost_tdalloc
+ * Name: usbhost_talloc
  *
  * Description:
- *   Allocate transfer descriptor memory.
+ *   Allocate transfer buffer memory.
  *
  * Input Parameters:
  *   priv - A reference to the class instance.
@@ -775,17 +774,17 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
  *
  ****************************************************************************/
 
-static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
+static inline int usbhost_talloc(FAR struct usbhost_state_s *priv)
 {
-  DEBUGASSERT(priv && priv->tdbuffer == NULL);
-  return DRVR_ALLOC(priv->drvr, &priv->tdbuffer, &priv->tdbuflen);
+  DEBUGASSERT(priv && priv->tbuffer == NULL);
+  return DRVR_ALLOC(priv->drvr, &priv->tbuffer, &priv->tbuflen);
 }
 
 /****************************************************************************
- * Name: usbhost_tdfree
+ * Name: usbhost_tfree
  *
  * Description:
- *   Free transfer descriptor memory.
+ *   Free transfer buffer memory.
  *
  * Input Parameters:
  *   priv - A reference to the class instance.
@@ -796,17 +795,17 @@ static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
  *
  ****************************************************************************/
 
-static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
+static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
 {
   int result = OK;
   DEBUGASSERT(priv);
 
-  if (priv->tdbuffer)
+  if (priv->tbuffer)
     {
       DEBUGASSERT(priv->drvr);
-      result         = DRVR_FREE(priv->drvr, priv->tdbuffer);
-      priv->tdbuffer = NULL;
-      priv->tdbuflen = 0;
+      result         = DRVR_FREE(priv->drvr, priv->tbuffer);
+      priv->tbuffer = NULL;
+      priv->tbuflen = 0;
     }
   return result;
 }
@@ -877,9 +876,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
 
           priv->drvr               = drvr;
 
-          /* NOTE: We do not yet know the geometry of the USB mass storage device */
- 
-          /* Return the instance of the USB mass storage class */
+          /* Return the instance of the USB class driver */
  
           return &priv->class;
         }
@@ -983,8 +980,8 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Set an indication to any users of the mass storage device that the device
-   * is no longer available.
+  /* Set an indication to any users of the device that the device is no
+   * longer available.
    */
 
   flags              = irqsave();

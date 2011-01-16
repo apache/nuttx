@@ -150,7 +150,7 @@ int user_start(int argc, char *argv[])
   /* First, register all of the USB host HID keyboard class driver */
 
   printf("user_start: Register class drivers\n");
-  ret = usbhost_storageinit();
+  ret = usbhost_kbdinit();
   if (ret != OK)
     {
       printf("user_start: Failed to register the KBD class\n");

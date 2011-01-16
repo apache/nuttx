@@ -85,10 +85,11 @@
 /* OHCI Setup ******************************************************************/
 /* Frame Interval / Periodic Start */
 
-#define  FI                     (12000-1) /* 12000 bits per frame (-1) */
-#define  FSMPS                  ((6 * (FI - 210)) / 7)
-#define  DEFAULT_FMINTERVAL     ((FSMPS << OHCI_FMINT_FSMPS_SHIFT) | FI)
-#define  DEFAULT_PERSTART       ((9 * FI) / 10)
+#define BITS_PER_FRAME          12000
+#define FI                     (BITS_PER_FRAME-1)
+#define FSMPS                  ((6 * (FI - 210)) / 7)
+#define DEFAULT_FMINTERVAL     ((FSMPS << OHCI_FMINT_FSMPS_SHIFT) | FI)
+#define DEFAULT_PERSTART       (((9 * BITS_PER_FRAME) / 10) - 1)
 
 /* CLKCTRL enable bits */
 
@@ -152,11 +153,15 @@ struct lpc17_usbhost_s
 
   /* Driver status */
 
-  volatile bool    connected; /* Connected to device */
-  volatile bool    lowspeed;  /* Low speed device attached. */
-  volatile bool    rhswait;   /* TRUE: Thread is waiting for Root Hub Status change */
-  sem_t            exclsem;   /* Support mutually exclusive access */
-  sem_t            rhssem;    /* Semaphore to wait Writeback Done Head event */
+  volatile bool    connected;   /* Connected to device */
+  volatile bool    lowspeed;    /* Low speed device attached. */
+  volatile bool    rhswait;     /* TRUE: Thread is waiting for Root Hub Status change */
+#ifndef CONFIG_USBHOST_INT_DISABLE
+  uint8_t          ininterval;  /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
+  uint8_t          outinterval; /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
+#endif
+  sem_t            exclsem;     /* Support mutually exclusive access */
+  sem_t            rhssem;      /* Semaphore to wait Writeback Done Head event */
 };
 
 /* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
@@ -174,7 +179,7 @@ struct lpc17_ed_s
   /* Software specific fields */
 
   uint8_t          xfrtype;   /* Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
-  uint8_t          period;    /* Periodic EP polling frequency 1, 2, 4, 6, 16, or 32 */
+  uint8_t          interval;  /* Periodic EP polling interval: 2, 4, 6, 16, or 32 */
   volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
   volatile bool    wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
   sem_t            wdhsem;    /* Semaphore used to wait for Writeback Done Head event */
@@ -251,11 +256,20 @@ static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed);
 static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed);
+
+#if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
+static unsigned int lpc17_getinterval(uint8_t interval);
+static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int offset);
+#endif
+
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
+                                 const FAR struct usbhost_epdesc_s *epdesc, 
                                  struct lpc17_ed_s *ed);
 static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
                                  struct lpc17_ed_s *ed);
+
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
+                                  const FAR struct usbhost_epdesc_s *epdesc, 
                                   struct lpc17_ed_s *ed);
 static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed);
@@ -722,9 +736,9 @@ static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_BULK_DISABLE
-  struct lpc17_ed_s      *curr = NULL;
-  struct lpc17_ed_s      *prev = NULL;
-  uint32_t                regval;
+  struct lpc17_ed_s *curr;
+  struct lpc17_ed_s *prev;
+  uint32_t           regval;
 
   /* Find the ED in the bulk list.  NOTE: We really should never be mucking
    * with the bulk list while BLE is set.
@@ -774,28 +788,190 @@ static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
 }
 
 /*******************************************************************************
+ * Name: lpc17_getinterval
+ *
+ * Description:
+ *   Convert the endpoint polling interval into a HCCA table increment
+ *
+ *******************************************************************************/
+
+#if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
+static unsigned int lpc17_getinterval(uint8_t interval)
+{
+  /* The bInterval field of the endpoint descriptor contains the polling interval
+   * for interrupt and isochronous endpoints. For other types of endpoint, this
+   * value should be ignored. bInterval is provided in units of 1MS frames.
+   */
+
+  if (interval < 3)
+    {
+      return 2;
+    }
+  else if (interval < 7)
+    {
+      return 4;
+    }
+  else if (interval < 15)
+    {
+      return 8;
+    }
+  else if (interval < 31)
+    {
+      return 16;
+    }
+  else
+    {
+      return 32;
+    }
+}
+#endif
+
+/*******************************************************************************
+ * Name: lpc17_setinttab
+ *
+ * Description:
+ *   Set the interrupt table to the selected value using the provided interval
+ *   and offset.
+ *
+ *******************************************************************************/
+
+#if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
+static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int offset)
+{
+  unsigned int i;
+  for (i = offset; i < HCCA_INTTBL_WSIZE; i += interval)
+    {
+      HCCA->inttbl[i] = value;
+    }
+}
+#endif
+
+/*******************************************************************************
  * Name: lpc17_addinted
  *
  * Description:
  *   Helper function to add an ED to the HCCA interrupt table.
  *
+ *   To avoid reshuffling the table so much and to keep life simple in general,
+ *    the following rules are applied:
+ *
+ *     1. IN EDs get the even entries, OUT EDs get the odd entries.
+ *     2. Add IN/OUT EDs are scheduled together at the minimum interval of all
+ *        IN/OUT EDs.
+ *
+ *   This has the following consequences:
+ *
+ *     1. The minimum support polling rate is 2MS, and
+ *     2. Some devices may get polled at a much higher rate than they request.
+ *
  *******************************************************************************/
  
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
+                                 const FAR struct usbhost_epdesc_s *epdesc, 
                                  struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_INT_DISABLE
-#  warning "Interrupt endpoints not yet supported"
+  unsigned int interval;
+  unsigned int offset;
+  uint32_t head;
+  uint32_t regval;
+
+  /* Disable periodic list processing.  Does this take effect immediately?  Or
+   * at the next SOF... need to check.
+   */
+
+  regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_PLE;
+  lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+
+  /* Get the quanitized interval value associated with this ED and save it
+   * in the ED.
+   */
+
+  interval     = lpc17_getinterval(epdesc->interval);
+  ed->interval = interval;
+  uvdbg("interval: %d->%d\n", epdesc->interval, interval);
+
+  /* Get the offset associated with the ED direction. IN EDs get the even
+   * entries, OUT EDs get the odd entries.
+   *
+   * Get the new, minimum interval. Add IN/OUT EDs are scheduled together
+   * at the minimum interval of all IN/OUT EDs.
+   */
+
+  if (epdesc->in)
+    {
+      offset = 0;
+      if (priv->ininterval > interval)
+        {
+          priv->ininterval = interval;
+        }
+      else
+        {
+          interval = priv->ininterval;
+        }
+    }
+  else
+    {
+      offset = 1;
+      if (priv->outinterval > interval)
+        {
+          priv->outinterval = interval;
+        }
+      else
+        {
+          interval = priv->outinterval;
+        }
+    }
+  uvdbg("min interval: %d offset: %d\n", interval, offset);
+
+  /* Get the head of the first of the duplicated entries.  The first offset
+   * entry is always guaranteed to contain the common ED list head.
+   */
+
+  head = HCCA->inttbl[offset];
+
+  /* Clear all current entries in the interrupt table for this direction */
+
+  lpc17_setinttab(0, 2, offset);
+
+  /* Add the new ED before the old head of the periodic ED list and set the
+   * new ED as the head ED in all of the appropriate entries of the HCCA
+   * interrupt table.
+   */
+
+  ed->hw.nexted = head;
+  lpc17_setinttab((uint32_t)ed, interval, offset);
+  uvdbg("head: %08x next: %08x\n", ed, head);
+
+  /* Re-enabled periodic list processing */
+
+  regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_PLE;
+  lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+  return OK;
 #else
   return -ENOSYS;
 #endif
 }
 
 /*******************************************************************************
- * Name: lpc17_addbulked
+ * Name: lpc17_reminted
  *
  * Description:
  *   Helper function to remove an ED from the HCCA interrupt table.
+ *
+ *   To avoid reshuffling the table so much and to keep life simple in general,
+ *    the following rules are applied:
+ *
+ *     1. IN EDs get the even entries, OUT EDs get the odd entries.
+ *     2. Add IN/OUT EDs are scheduled together at the minimum interval of all
+ *        IN/OUT EDs.
+ *
+ *   This has the following consequences:
+ *
+ *     1. The minimum support polling rate is 2MS, and
+ *     2. Some devices may get polled at a much higher rate than they request.
  *
  *******************************************************************************/
  
@@ -803,14 +979,123 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
                                  struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_INT_DISABLE
-#  warning "Interrupt endpoints not yet supported"
+  struct lpc17_ed_s *head;
+  struct lpc17_ed_s *curr;
+  struct lpc17_ed_s *prev;
+  unsigned int       interval;
+  unsigned int       offset;
+  uint32_t           regval;
+
+  /* Disable periodic list processing.  Does this take effect immediately?  Or
+   * at the next SOF... need to check.
+   */
+
+  regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_PLE;
+  lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+
+  /* Get the offset associated with the ED direction. IN EDs get the even
+   * entries, OUT EDs get the odd entries.
+   */
+
+  if ((ed->hw.ctrl && ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
+    {
+      offset = 0;
+    }
+  else
+    {
+      offset = 1;
+    }
+
+  /* Get the head of the first of the duplicated entries.  The first offset
+   * entry is always guaranteed to contain the common ED list head.
+   */
+
+  head = (struct lpc17_ed_s *)HCCA->inttbl[offset];
+  uvdbg("ed: %08x head: %08x next: %08x offset: %d\n",
+        ed, head, head ? head->hw.nexted : 0, offset);
+
+  /* Find the ED to be removed in the ED list */
+
+  for (curr = head, prev = NULL;
+       curr && curr != ed;
+       prev = curr, curr = (struct lpc17_ed_s *)curr->hw.nexted);
+
+  /* Hmmm.. It would be a bug if we do not find the ED in the bulk list. */
+
+  DEBUGASSERT(curr != NULL);
+  if (curr != NULL)
+    {
+      /* Clear all current entries in the interrupt table for this direction */
+
+      lpc17_setinttab(0, 2, offset);
+
+      /* Remove the ED from the list..  Is this ED the first on in the list? */
+
+      if (prev == NULL)
+        {
+          /* Yes... set the head of the bulk list to skip over this ED */
+
+          head = (struct lpc17_ed_s *)ed->hw.nexted;
+        }
+      else
+        {
+          /* No.. set the forward link of the previous ED in the list
+           * skip over this ED.
+           */
+
+          prev->hw.nexted = ed->hw.nexted;
+        }
+        uvdbg("ed: %08x head: %08x next: %08x\n",
+              ed, head, head ? head->hw.nexted : 0);
+
+      /* Calculate the new minimum interval for this list */
+
+      interval = 32;
+      for (curr = head; curr; curr = (struct lpc17_ed_s *)curr->hw.nexted)
+        {
+          if (curr->interval < interval)
+            {
+              interval = curr->interval;
+            }
+        }
+      uvdbg("min interval: %d offset: %d\n", interval, offset);
+
+      /* Save the new minimum interval */
+ 
+      if ((ed->hw.ctrl && ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
+        {
+          priv->ininterval  = interval;
+        }
+      else
+        {
+          priv->outinterval = interval;
+        }
+
+      /* Set the head ED in all of the appropriate entries of the HCCA interrupt
+       * table (head might be NULL).
+       */
+
+      lpc17_setinttab((uint32_t)head, interval, offset);
+    }
+
+  /* Re-enabled periodic list processing */
+
+  if (head != NULL)
+    {
+      regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+      regval &= ~OHCI_CTRL_PLE;
+      lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+    }
+
+  return OK;
 #else
   return -ENOSYS;
 #endif
 }
 
 /*******************************************************************************
- * Name: lpc17_addbulked
+ * Name: lpc17_addisoced
  *
  * Description:
  *   Helper functions to add an ED to the periodic table.
@@ -818,6 +1103,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
  *******************************************************************************/
  
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
+                                  const FAR struct usbhost_epdesc_s *epdesc, 
                                   struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
@@ -828,7 +1114,7 @@ static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
 }
 
 /*******************************************************************************
- * Name: lpc17_addbulked
+ * Name: lpc17_remisoced
  *
  * Description:
  *   Helper functions to remove an ED from the periodic table.
@@ -1441,7 +1727,7 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
 
       /* Get the direction of the endpoint */
 
-      if (epdesc->in != 0)
+      if (epdesc->in)
         {
           ed->hw.ctrl |= ED_CONTROL_D_IN;
         }
@@ -1491,11 +1777,11 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
           break;
 
         case USB_EP_ATTR_XFER_INT:
-          ret = lpc17_addinted(priv, ed);
+          ret = lpc17_addinted(priv, epdesc, ed);
           break;
 
         case USB_EP_ATTR_XFER_ISOC:
-          ret = lpc17_addisoced(priv, ed);
+          ret = lpc17_addisoced(priv, epdesc, ed);
           break;
 
         case USB_EP_ATTR_XFER_CONTROL:
