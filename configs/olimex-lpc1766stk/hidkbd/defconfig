@@ -330,6 +330,7 @@ CONFIG_APP_DIR=examples/hidkbd
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
+CONFIG_DEBUG_USB=n
 CONFIG_MM_REGIONS=2
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=200
@@ -599,9 +600,21 @@ CONFIG_USBDEV_TRACE_NRECORDS=128
 #   Enables USB host support
 # CONFIG_USBHOST_NPREALLOC
 #   Number of pre-allocated class instances
+# CONFIG_USBHOST_BULK_DISABLE
+#   On some architectures, selecting this setting will reduce driver size
+#   by disabling bulk endpoint support
+# CONFIG_USBHOST_INT_DISABLE
+#   On some architectures, selecting this setting will reduce driver size
+#   by disabling interrupt endpoint support
+# CONFIG_USBHOST_ISOC_DISABLE
+#   On some architectures, selecting this setting will reduce driver size
+#   by disabling isochronous endpoint support
 #
 CONFIG_USBHOST=y
 CONFIG_USBHOST_NPREALLOC=0
+CONFIG_USBHOST_BULK_DISABLE=y
+CONFIG_USBHOST_INT_DISABLE=n
+CONFIG_USBHOST_ISOC_DISABLE=y
 
 #
 # LPC17xx USB Device Configuration

@@ -708,6 +708,15 @@ defconfig -- This is a configuration file similar to the Linux
         Enables USB host support
       CONFIG_USBHOST_NPREALLOC
         Number of pre-allocated class instances
+      CONFIG_USBHOST_BULK_DISABLE
+        On some architectures, selecting this setting will reduce driver size
+        by disabling bulk endpoint support
+      CONFIG_USBHOST_INT_DISABLE
+       On some architectures, selecting this setting will reduce driver size
+        by disabling interrupt endpoint support
+      CONFIG_USBHOST_ISOC_DISABLE
+        On some architectures, selecting this setting will reduce driver size
+        by disabling isochronous endpoint support
 
 	USB serial device class driver
 		CONFIG_USBSER
