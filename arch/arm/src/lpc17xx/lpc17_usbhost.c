@@ -174,9 +174,9 @@ struct lpc17_ed_s
   /* Software specific fields */
 
   uint8_t          xfrtype;   /* Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
+  uint8_t          period;    /* Periodic EP polling frequency 1, 2, 4, 6, 16, or 32 */
   volatile uint8_t tdstatus;  /* TD control status bits from last Writeback Done Head event */
   volatile bool    wdhwait;   /* TRUE: Thread is waiting for WDH interrupt */
-  uint8_t          pad;
   sem_t            wdhsem;    /* Semaphore used to wait for Writeback Done Head event */
                               /* Unused bytes follow, depending on the size of sem_t */
 };
@@ -233,7 +233,7 @@ static void lpc17_takesem(sem_t *sem);
 static inline uint16_t lpc17_getle16(const uint8_t *val);
 static void lpc17_putle16(uint8_t *dest, uint16_t val);
 
-/* Descriptor helper functions *************************************************/
+/* OHCI memory pool helper functions *******************************************/
 
 static inline void lpc17_edfree(struct lpc17_ed_s *ed);
 static  struct lpc17_gtd_s *lpc17_tdalloc(void);
@@ -244,6 +244,24 @@ static void lpc17_tbfree(uint8_t *buffer);
 static uint8_t *lpc17_ioalloc(void);
 static void lpc17_iofree(uint8_t *buffer);
 #endif
+
+/* ED list helper functions ****************************************************/
+
+static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed);
+static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed);
+static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
+                                 struct lpc17_ed_s *ed);
+static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
+                                 struct lpc17_ed_s *ed);
+static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed);
+static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed);
+
+/* Descriptor helper functions *************************************************/
+
 static int lpc17_enqueuetd(struct lpc17_usbhost_s *priv,
                            struct lpc17_ed_s *ed, uint32_t dirpid,
                            uint32_t toggle, volatile uint8_t *buffer,
@@ -658,6 +676,173 @@ static void lpc17_iofree(uint8_t *buffer)
   g_iofree                    = iofree;
 }
 #endif
+
+/*******************************************************************************
+ * Name: lpc17_addbulked
+ *
+ * Description:
+ *   Helper function to add an ED to the bulk list.
+ *
+ *******************************************************************************/
+ 
+static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed)
+{
+#ifndef CONFIG_USBHOST_BULK_DISABLE
+  uint32_t regval;
+
+  /* Add the new bulk ED to the head of the bulk list */
+
+  ed->hw.nexted = lpc17_getreg(LPC17_USBHOST_BULKHEADED);
+  lpc17_putreg((uint32_t)ed, LPC17_USBHOST_BULKHEADED);
+
+  /* BulkListEnable. This bit is set to enable the processing of the
+   * Bulk list.  Note: once enabled, it remains.  We really should
+   * never modify the bulk list while BLE is set.
+   */
+
+  regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+  regval |= OHCI_CTRL_BLE;
+  lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+  return OK;
+#else
+  return -ENOSYS;
+#endif
+}
+
+/*******************************************************************************
+ * Name: lpc17_rembulked
+ *
+ * Description:
+ *   Helper function remove an ED from the bulk list.
+ *
+ *******************************************************************************/
+ 
+static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed)
+{
+#ifndef CONFIG_USBHOST_BULK_DISABLE
+  struct lpc17_ed_s      *curr = NULL;
+  struct lpc17_ed_s      *prev = NULL;
+  uint32_t                regval;
+
+  /* Find the ED in the bulk list.  NOTE: We really should never be mucking
+   * with the bulk list while BLE is set.
+   */
+
+  for (curr = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_BULKHEADED),
+       prev = NULL;
+       curr && curr != ed;
+       prev = curr, curr = (struct lpc17_ed_s *)curr->hw.nexted);
+
+  /* Hmmm.. It would be a bug if we do not find the ED in the bulk list. */
+
+  DEBUGASSERT(curr != NULL);
+
+  /* Remove the ED from the bulk list */
+
+  if (curr != NULL)
+    {
+      /* Is this ED the first on in the bulk list? */
+
+      if (prev == NULL)
+        {
+          /* Yes... set the head of the bulk list to skip over this ED */
+
+          lpc17_putreg(ed->hw.nexted, LPC17_USBHOST_BULKHEADED);
+
+          /* If the bulk list is now empty, then disable it */
+
+          regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
+          regval &= ~OHCI_CTRL_BLE;
+          lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+        }
+      else
+        {
+          /* No.. set the forward link of the previous ED in the list
+           * skip over this ED.
+           */
+
+          prev->hw.nexted = ed->hw.nexted;
+        }
+    }
+
+  return OK;
+#else
+  return -ENOSYS;
+#endif
+}
+
+/*******************************************************************************
+ * Name: lpc17_addinted
+ *
+ * Description:
+ *   Helper function to add an ED to the HCCA interrupt table.
+ *
+ *******************************************************************************/
+ 
+static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
+                                 struct lpc17_ed_s *ed)
+{
+#ifndef CONFIG_USBHOST_INT_DISABLE
+#  warning "Interrupt endpoints not yet supported"
+#else
+  return -ENOSYS;
+#endif
+}
+
+/*******************************************************************************
+ * Name: lpc17_addbulked
+ *
+ * Description:
+ *   Helper function to remove an ED from the HCCA interrupt table.
+ *
+ *******************************************************************************/
+ 
+static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
+                                 struct lpc17_ed_s *ed)
+{
+#ifndef CONFIG_USBHOST_INT_DISABLE
+#  warning "Interrupt endpoints not yet supported"
+#else
+  return -ENOSYS;
+#endif
+}
+
+/*******************************************************************************
+ * Name: lpc17_addbulked
+ *
+ * Description:
+ *   Helper functions to add an ED to the periodic table.
+ *
+ *******************************************************************************/
+ 
+static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed)
+{
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+#  warning "Isochronous endpoints not yet supported"
+#endif
+  return -ENOSYS;
+
+}
+
+/*******************************************************************************
+ * Name: lpc17_addbulked
+ *
+ * Description:
+ *   Helper functions to remove an ED from the periodic table.
+ *
+ *******************************************************************************/
+ 
+static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
+                                  struct lpc17_ed_s *ed)
+{
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+#  warning "Isochronous endpoints not yet supported"
+#endif
+  return -ENOSYS;
+}
 
 /*******************************************************************************
  * Name: lpc17_enqueuetd
@@ -1224,7 +1409,6 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct lpc17_ed_s      *ed;
-  uint32_t                regval;
   int                     ret  = -ENOMEM;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
@@ -1293,32 +1477,49 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
 
       sem_init(&ed->wdhsem, 0, 0);
 
-      /* Now add the endpoint descriptor to the appropriate list */
-#warning "Missing logic for other endpoint types"
-
       /* Link the common tail TD to the ED's TD list */
 
       ed->hw.headp = (uint32_t)TDTAIL;
       ed->hw.tailp = (uint32_t)TDTAIL;
 
-      /* Add the new bulk ED to the head of the bulk list */
+      /* Now add the endpoint descriptor to the appropriate list */
 
-      ed->hw.nexted = lpc17_getreg(LPC17_USBHOST_BULKHEADED);
-      lpc17_putreg((uint32_t)ed, LPC17_USBHOST_BULKHEADED);
+      switch (ed->xfrtype)
+        {
+        case USB_EP_ATTR_XFER_BULK:
+          ret = lpc17_addbulked(priv, ed);
+          break;
 
-      /* BulkListEnable. This bit is set to enable the processing of the Bulk
-       * list.  Note: once enabled, it remains.  We really should never modify
-       * the bulk list while BLE is set.
-       */
+        case USB_EP_ATTR_XFER_INT:
+          ret = lpc17_addinted(priv, ed);
+          break;
 
-      regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
-      regval |= OHCI_CTRL_BLE;
-      lpc17_putreg(regval, LPC17_USBHOST_CTRL);
+        case USB_EP_ATTR_XFER_ISOC:
+          ret = lpc17_addisoced(priv, ed);
+          break;
 
-      /* Return an opaque reference to the ED */
+        case USB_EP_ATTR_XFER_CONTROL:
+        default:
+          ret = -EINVAL;
+          break;
+        }
 
-      *ep      = (usbhost_ep_t)ed;
-      ret      = OK;
+      /* Was the ED successfully added? */
+
+      if (ret != OK)
+        {
+          /* No.. destroy it and report the error */
+
+          udbg("ERROR: Failed to queue ED for transfer type: %d\n", ed->xfrtype);
+          sem_destroy(&ed->wdhsem);
+          lpc17_edfree(ed);
+        }
+      else
+        {
+          /* Yes.. return an opaque reference to the ED */
+
+          *ep = (usbhost_ep_t)ed;
+        }
     }
 
   lpc17_givesem(&priv->exclsem);
@@ -1349,9 +1550,7 @@ static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct lpc17_ed_s      *ed   = (struct lpc17_ed_s *)ep;
-  struct lpc17_ed_s      *curr = NULL;
-  struct lpc17_ed_s      *prev = NULL;
-  uint32_t                regval;
+  int                     ret;
 
   /* There should not be any pending, real TDs linked to this ED */
 
@@ -1363,45 +1562,26 @@ static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   lpc17_takesem(&priv->exclsem);
 
-  /* Find the ED in the bulk list.  NOTE: We really should never be mucking
-   * with the bulk list while BLE is set.
-   */
+  /* Remove the ED to the correct list depending on the trasfer type */
 
-  for (curr = (struct lpc17_ed_s *)lpc17_getreg(LPC17_USBHOST_BULKHEADED),
-       prev = NULL;
-       curr && curr != ed;
-       prev = curr, curr = (struct lpc17_ed_s *)curr->hw.nexted);
-
-  /* Hmmm.. It would be a bug if we do not find the ED in the bulk list. */
-
-  DEBUGASSERT(curr != NULL);
-
-  /* Remove the ED from the bulk list */
-
-  if (curr != NULL)
+  switch (ed->xfrtype)
     {
-      /* Is this ED the first on in the bulk list? */
+    case USB_EP_ATTR_XFER_BULK:
+      ret = lpc17_rembulked(priv, ed);
+      break;
 
-      if (prev == NULL)
-        {
-          /* Yes... set the head of the bulk list to skip over this ED */
+    case USB_EP_ATTR_XFER_INT:
+      ret = lpc17_reminted(priv, ed);
+      break;
 
-          lpc17_putreg(ed->hw.nexted, LPC17_USBHOST_BULKHEADED);
+    case USB_EP_ATTR_XFER_ISOC:
+      ret = lpc17_remisoced(priv, ed);
+      break;
 
-          /* If the bulk list is now empty, then disable it */
-
-          regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
-          regval &= ~OHCI_CTRL_BLE;
-          lpc17_putreg(regval, LPC17_USBHOST_CTRL);
-        }
-      else
-        {
-          /* No.. set the forward link of the previous ED in the list
-           * skip over this ED.
-           */
-
-          prev->hw.nexted = ed->hw.nexted;
-        }
+    case USB_EP_ATTR_XFER_CONTROL:
+    default:
+      ret = -EINVAL;
+      break;
     }
 
   /* Destroy the semaphore */
@@ -1412,7 +1592,7 @@ static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   lpc17_edfree(ed);
   lpc17_givesem(&priv->exclsem);
-  return OK;
+  return ret;
 }
 
 /*******************************************************************************

@@ -488,7 +488,8 @@ struct usbhost_class_s
 };
 
 /* This structure describes one endpoint.  It is used as an input to the
- * allocep() method.
+ * allocep() method.  Most of this information comes from the endpoint
+ * descriptor.
  */
 
 struct usbhost_epdesc_s
@@ -497,6 +498,7 @@ struct usbhost_epdesc_s
   bool     in;           /* Direction: true->IN */
   uint8_t  funcaddr;     /* USB address of function containing endpoint */
   uint8_t  xfrtype;      /* Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
+  uint8_t  interval;     /* Polling interval */
   uint16_t mxpacketsize; /* Max packetsize */
 };
 

@@ -48,6 +48,23 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+/* Sanity checking */
+
+#ifndef CONFIG_USBHOST
+#  error "CONFIG_USBHOST is not defined"
+#endif
+
+#ifdef CONFIG_USBHOST_INT_DISABLE
+#  error "Interrupt endpoints are disabled (CONFIG_USBHOST_INT_DISABLE)"
+#endif
+
+#ifndef CONFIG_NFILE_DESCRIPTORS
+#  error "CONFIG_NFILE_DESCRIPTORS > 0 needed"
+#endif
+
+/* Provide some default values for other configuration settings */
 
 #ifndef CONFIG_EXAMPLES_HIDKBD_DEFPRIO
 #  define CONFIG_EXAMPLES_HIDKBD_DEFPRIO 50

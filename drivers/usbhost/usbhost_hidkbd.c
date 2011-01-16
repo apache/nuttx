@@ -59,6 +59,10 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/hid.h>
 
+/* Don't compile if prerequisites are not met */
+
+#if defined(CONFIG_USBHOST) && !defined(CONFIG_USBHOST_INT_DISABLE) && CONFIG_NFILE_DESCRIPTORS > 0
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -654,6 +658,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     epoutdesc.in           = false;
                     epoutdesc.funcaddr     = funcaddr;
                     epoutdesc.xfrtype      = USB_EP_ATTR_XFER_INT;
+                    epoutdesc.interval     = epdesc->interval;
                     epoutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
                           epoutdesc.addr, epoutdesc.mxpacketsize);
@@ -680,6 +685,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     epindesc.in           = 1;
                     epindesc.funcaddr     = funcaddr;
                     epindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
+                    epindesc.interval     = epdesc->interval;
                     epindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Interrupt IN EP addr:%d mxpacketsize:%d\n",
                           epindesc.addr, epindesc.mxpacketsize);
@@ -1279,4 +1285,7 @@ int usbhost_kbdinit(void)
 
   return usbhost_registerclass(&g_skeleton);
 }
+
+#endif /* CONFIG_USBHOST)&& !CONFIG_USBHOST_INT_DISABLE && CONFIG_NFILE_DESCRIPTORS */
+
 

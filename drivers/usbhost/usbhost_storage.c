@@ -56,7 +56,10 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/storage.h>
 
-#if defined(CONFIG_USBHOST) && !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+/* Don't compile if prerequisites are not met */
+
+#if defined(CONFIG_USBHOST) && !defined(CONFIG_USBHOST_BULK_DISABLE) && \
+   !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1039,6 +1042,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     boutdesc.in           = false;
                     boutdesc.funcaddr     = funcaddr;
                     boutdesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
+                    boutdesc.interval     = epdesc->interval;
                     boutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Bulk OUT EP addr:%d mxpacketsize:%d\n",
                           boutdesc.addr, boutdesc.mxpacketsize);
@@ -1065,6 +1069,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     bindesc.in           = 1;
                     bindesc.funcaddr     = funcaddr;
                     bindesc.xfrtype      = USB_EP_ATTR_XFER_BULK;
+                    bindesc.interval     = epdesc->interval;
                     bindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
                     uvdbg("Bulk IN EP addr:%d mxpacketsize:%d\n",
                           bindesc.addr, bindesc.mxpacketsize);
@@ -2199,4 +2204,4 @@ int usbhost_storageinit(void)
   return usbhost_registerclass(&g_storage);
 }
 
-#endif  /* CONFIG_USBHOST && !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif  /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 */
