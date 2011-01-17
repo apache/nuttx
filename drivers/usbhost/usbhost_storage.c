@@ -125,6 +125,7 @@ struct usbhost_state_s
   
   char                    sdchar;       /* Character identifying the /dev/sd[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
+  uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
   uint16_t                blocksize;    /* Block size of USB mass storage device */
   uint32_t                nblocks;      /* Number of blocks on the USB mass storage device */
@@ -990,16 +991,15 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
         case USB_DESC_TYPE_INTERFACE:
           {
+            FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
+ 
+            uvdbg("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
-            if ((found & USBHOST_IFFOUND) != 0)
-              {
-                /* Oops.. more than one interface.  We don't know what to
-                 * do with this.
-                 */
 
-                return -ENOSYS;
-              }
-            found |= USBHOST_IFFOUND;
+            /* Save the interface number and mark ONLY the interface found */
+
+            priv->ifno = ifdesc->ifno;
+            found      = USBHOST_IFFOUND;
           }
           break;
 
@@ -1010,6 +1010,8 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         case USB_DESC_TYPE_ENDPOINT:
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
+
+            uvdbg("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for a bulk endpoint.  We only support the bulk-only
@@ -1081,6 +1083,15 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         /* Other descriptors are just ignored for now */
 
         default:
+          break;
+        }
+
+      /* If we found everything we need with this interface, then break out
+       * of the loop early.
+       */
+
+      if (found == USBHOST_ALLFOUND)
+        {
           break;
         }
 
@@ -1664,7 +1675,9 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - This function will *not* be called from an interrupt handler.
+ *   - If this function returns an error, the USB host controller driver
+ *     must call to DISCONNECTED method to recover from the error
  *
  ****************************************************************************/
 

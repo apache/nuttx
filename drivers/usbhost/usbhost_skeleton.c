@@ -101,8 +101,9 @@ struct usbhost_state_s
 
   /* The remainder of the fields are provide to the class driver */
   
-  char                    devchar;       /* Character identifying the /dev/skel[n] device */
+  char                    devchar;      /* Character identifying the /dev/skel[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
+  uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
   sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
   struct work_s           work;         /* For interacting with the worker thread */
@@ -452,16 +453,15 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
         case USB_DESC_TYPE_INTERFACE:
           {
+            FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
+ 
+            uvdbg("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
-            if ((found & USBHOST_IFFOUND) != 0)
-              {
-                /* Oops.. more than one interface.  We don't know what to
-                 * do with this.
-                 */
 
-                return -ENOSYS;
-              }
-            found |= USBHOST_IFFOUND;
+            /* Save the interface number and mark ONLY the interface found */
+
+            priv->ifno = ifdesc->ifno;
+            found      = USBHOST_IFFOUND;
           }
           break;
 
@@ -472,6 +472,8 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         case USB_DESC_TYPE_ENDPOINT:
           {
             FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
+
+            uvdbg("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for a bulk endpoint. */
@@ -544,15 +546,22 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
           break;
         }
 
+      /* If we found everything we need with this interface, then break out
+       * of the loop early.
+       */
+
+      if (found == USBHOST_ALLFOUND)
+        {
+          break;
+        }
+
       /* Increment the address of the next descriptor */
  
       configdesc += desc->len;
       remaining  -= desc->len;
     }
 
-  /* Sanity checking... did we find all of things that we need? Hmmm..  I wonder..
-   * can we work read-only or write-only if only one bulk endpoint found?
-   */
+  /* Sanity checking... did we find all of things that we need? */
     
   if (found != USBHOST_ALLFOUND)
     {
@@ -915,7 +924,9 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - This function will *not* be called from an interrupt handler.
+ *   - If this function returns an error, the USB host controller driver
+ *     must call to DISCONNECTED method to recover from the error
  *
  ****************************************************************************/
 
@@ -1050,4 +1061,3 @@ int usbhost_skelinit(void)
 
   return usbhost_registerclass(&g_skeleton);
 }
-

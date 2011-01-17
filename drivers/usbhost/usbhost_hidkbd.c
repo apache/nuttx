@@ -54,6 +54,7 @@
 
 #include <nuttx/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -73,6 +74,14 @@
 
 #ifndef CONFIG_HIDKBD_POLLUSEC
 #  define CONFIG_HIDKBD_POLLUSEC (100*1000)
+#endif
+
+/* Worker thread is needed, unfortunately, to handle some cornercase failure
+ * conditions.  This is kind of wasteful and begs for a re-design.
+ */
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
 /* Signals must not be disabled as they are needed by usleep */
@@ -100,6 +109,7 @@
 #define USBHOST_EPINFOUND   0x02 /* Required interrupt IN EP descriptor found */
 #define USBHOST_EPOUTFOUND  0x04 /* Optional interrupt OUT EP descriptor found */
 #define USBHOST_RQDFOUND    (USBHOST_IFFOUND|USBHOST_EPINFOUND)
+#define USBHOST_ALLFOUND    (USBHOST_RQDFOUND|USBHOST_EPOUTFOUND)
 
 #define USBHOST_MAX_CREFS   0x7fff
 
@@ -126,11 +136,13 @@ struct usbhost_state_s
   char                    devchar;      /* Character identifying the /dev/kbd[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   volatile bool           polling;      /* TRUE: Poll thread is running */
+  uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
   sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
   pid_t                   pollpid;      /* PID of the poll task */
+  struct work_s           work;         /* For cornercase error handling by the worker thread */
 
   /* Endpoints:
    * EP0 (Control):
@@ -170,7 +182,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 
 /* Keyboard polling thread */
 
-static void usbhost_destroy(FAR struct usbhost_state_s *priv);
+static void usbhost_destroy(FAR void *arg);
 static int usbhost_kbdpoll(int argc, char *argv[]);
 
 /* Helpers for usbhost_connect() */
@@ -413,8 +425,9 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
  *
  ****************************************************************************/
 
-static void usbhost_destroy(FAR struct usbhost_state_s *priv)
+static void usbhost_destroy(FAR void *arg)
 {
+  FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)arg;
   char devname[DEV_NAMELEN];
 
   DEBUGASSERT(priv != NULL);
@@ -564,7 +577,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
       ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_INTERFACE;
       ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
       usbhost_putle16(ctrlreq->value, (USBHID_DESCTYPE_REPORT << 8));
-      usbhost_putle16(ctrlreq->index, 0);
+      usbhost_putle16(ctrlreq->index, priv->ifno);
       usbhost_putle16(ctrlreq->len, 8);
 
       /* Send the report */
@@ -683,6 +696,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   FAR struct usbhost_epdesc_s epoutdesc;
   int remaining;
   uint8_t found = 0;
+  bool done = false;
   int ret;
 
   DEBUGASSERT(priv != NULL && 
@@ -710,7 +724,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
   /* Loop where there are more dscriptors to examine */
 
-  while (remaining >= sizeof(struct usb_desc_s))
+  while (remaining >= sizeof(struct usb_desc_s) && !done)
     {
       /* What is the next descriptor? */
 
@@ -723,15 +737,30 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
         case USB_DESC_TYPE_INTERFACE:
           {
+            FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
+ 
             uvdbg("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
-            if ((found & USBHOST_IFFOUND) != 0)
-              {
-                /* Oops.. more than one interface.  We don't know what to do with this. */
 
-                return -ENOSYS;
+            /* Did we already find what we needed from a preceding interface? */
+
+            if ((found & USBHOST_RQDFOUND) == USBHOST_RQDFOUND)
+              {
+                /* Yes.. then break out of the loop and use the preceding
+                 * interface.
+                 */
+
+                done       = true;
               }
-            found |= USBHOST_IFFOUND;
+            else
+              {
+                /* Otherwise, save the interface number and discard any
+                 * endpoints previously found
+                 */
+
+                priv->ifno = ifdesc->ifno;
+                found      = USBHOST_IFFOUND;
+              }
           }
           break;
 
@@ -819,6 +848,15 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         default:
           uvdbg("Other descriptor: %d\n", desc->type);
           break;
+        }
+
+      /* What we found everything that we are going to find? */
+
+      if (found == USBHOST_ALLFOUND)
+        {
+          /* Yes.. then break out of the loop and use the preceding interface */
+
+          done = true;
         }
 
       /* Increment the address of the next descriptor */
@@ -935,7 +973,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
                               (main_t)usbhost_kbdpoll, (const char **)NULL);
 #else
   priv->pollpid = task_create("usbhost", CONFIG_HIDKBD_DEFPRIO,
-                              (main_t)hidkbd_waiter, (const char **)NULL);
+                              (main_t)usbhost_kbdpoll, (const char **)NULL);
 #endif
   if (priv->pollpid == ERROR)
     {
@@ -1209,7 +1247,9 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - This function will *not* be called from an interrupt handler.
+ *   - If this function returns an error, the USB host controller driver
+ *     must call to DISCONNECTED method to recover from the error
  *
  ****************************************************************************/
 
@@ -1242,33 +1282,15 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
         }
     }
  
-  /* Disconnect on any errors detected during initialization. */
-
-  if (ret != OK)
-    {
-      priv->disconnected = true;
-
-      /* Is the polling task still running?  If so, then ask it politely to
-       * stop and release its reference count.
-       */
- 
-      while (priv->polling)
-        {
-          (void)kill(priv->pollpid, SIGALRM);
-          usleep(500*1000);
-        }
-
-      /* The following operations when crefs == 1 are safe because we know
-       * that there is no outstanding open references to the driver.
-       */
-
-      if (priv->crefs <= 1)
-        {
-          /* Destroy the class instance */
-
-          usbhost_destroy(priv);
-        }
-    }
+  /* ERROR handling:  Do nothing. If we return and error during connection,
+   * the driver is required to call the DISCONNECT method.  Possibilities:
+   *
+   * - Failure occurred before the kbdpoll task was started successfully.
+   *   In this case, the disconnection will have to be handled on the worker
+   *   task.
+   * - Failure occured after the kbdpoll task was started succesffuly.  In
+   *   this case, the disconnetion can be performed on the kbdpoll thread.
+   */
 
   return ret;
 }
@@ -1308,11 +1330,36 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
   priv->disconnected = true;
   ullvdbg("Disconnected\n");
 
-  /* Signal the keyboard polling task.  When that task wakes up, it will
-   * decrement the reference count and, perhaps, destroy the class instance.
+  /* Possibilities:
+   *
+   * - Failure occurred before the kbdpoll task was started successfully.
+   *   In this case, the disconnection will have to be handled on the worker
+   *   task.
+   * - Failure occured after the kbdpoll task was started succesffuly.  In
+   *   this case, the disconnetion can be performed on the kbdpoll thread.
    */
 
-  (void)kill(priv->pollpid, SIGALRM);
+  if (priv->polling)
+    {
+      /* The polling task is still alive. Signal the keyboard polling task. 
+       * When that task wakes up, it will decrement the reference count and,
+       * perhaps, destroy the class instance.  Then it will exit.
+       */
+
+      (void)kill(priv->pollpid, SIGALRM);
+    }
+  else
+    {
+      /* In the case where the failure occurs before the polling task was
+       * started.  Now what?  We are probably executing from an interrupt
+       * handler here.  We will use the worker thread.  This is kind of
+       * wasteful and begs for a re-design.
+       */
+
+      DEBUGASSERT(priv->work.worker == NULL);
+      (void)work_queue(&priv->work, usbhost_destroy, priv, 0);
+    }
+
   return OK;
 }
 

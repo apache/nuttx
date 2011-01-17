@@ -181,6 +181,7 @@ int user_start(int argc, char *argv[])
 
       for (;;)
         {
+          fflush(stdout);
           sleep(5);
           printf("user_start: Still running...\n");
         }

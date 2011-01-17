@@ -126,6 +126,11 @@
 #define TDTAIL      ((struct lpc17_gtd_s *)LPC17_TDTAIL_ADDR)
 #define EDCTRL      ((struct lpc17_ed_s *)LPC17_EDCTRL_ADDR)
 
+/* Periodic intervals 2, 4, 8, 16,and 32 supported */
+
+#define MIN_PERINTERVAL 2
+#define MAX_PERINTERVAL 32
+
 /* Descriptors *****************************************************************/
 
 /* TD delay interrupt value */
@@ -1051,7 +1056,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
 
       /* Calculate the new minimum interval for this list */
 
-      interval = 32;
+      interval = MAX_PERINTERVAL;
       for (curr = head; curr; curr = (struct lpc17_ed_s *)curr->hw.nexted)
         {
           if (curr->interval < interval)
@@ -2390,6 +2395,11 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
 
   sem_init(&priv->rhssem,  0, 0);
   sem_init(&priv->exclsem, 0, 1);
+
+#ifndef CONFIG_USBHOST_INT_DISABLE
+  priv->ininterval  = MAX_PERINTERVAL;
+  priv->outinterval = MAX_PERINTERVAL;
+#endif
 
   /* Enable power by setting PCUSB in the PCONP register.  Disable interrupts
    * because this register may be shared with other drivers.

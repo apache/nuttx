@@ -114,9 +114,11 @@
  *   returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function is probably called on the same thread that called the driver
- *   enumerate() method.  However, this function may also be called from an
- *   interrupt handler.
+ *   - This function is probably called on the same thread that called the driver
+ *     enumerate() method. This function will *not* be called from an interrupt
+ *     handler.
+ *   - If this function returns an error, the USB host controller driver
+ *     must call to DISCONNECTED method to recover from the error
  *
  ************************************************************************************/
 
