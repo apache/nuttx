@@ -81,10 +81,16 @@
  */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
-/* Signals must not be disabled as they are needed by usleep */
+/* Signals must not be disabled as they are needed by usleep.  Need to have
+ * CONFIG_DISABLE_SIGNALS=n
+ */
+
+#ifdef CONFIG_DISABLE_SIGNALS
+#  warning "Signal support is required (CONFIG_DISABLE_SIGNALS)"
+#endif
 
 /* Provide some default values for other configuration settings */
 
@@ -100,14 +106,18 @@
 #  define CONFIG_USBHID_BUFSIZE 64
 #endif
 
-/* The default is to support 104 key keyboard.  CONFIG_USBHID_ALLSCANCODES
- * will enable all scancodes.
+/* The default is to support scancode mapping for the standard 104 key
+ * keyboard.  Setting CONFIG_USBHID_RAWSCANCODES will disable all scancode
+ * mapping; Setting CONFIG_USBHID_ALLSCANCODES will enable mapping of all
+ * scancodes; 
  */
 
-#ifdef CONFIG_USBHID_ALLSCANCODES
-#  define USBHID_NUMSCANCODES (USBHID_KBDUSE_MAX+1)
-#else
-#  define USBHID_NUMSCANCODES 104
+#ifndef CONFIG_USBHID_RAWSCANCODES
+#  ifdef CONFIG_USBHID_ALLSCANCODES
+#    define USBHID_NUMSCANCODES (USBHID_KBDUSE_MAX+1)
+#  else
+#    define USBHID_NUMSCANCODES 104
+#  endif
 #endif
 
 /* Driver support ***********************************************************/
@@ -205,7 +215,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 /* Keyboard polling thread */
 
 static void usbhost_destroy(FAR void *arg);
-static uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier);
+static inline uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier);
 static int usbhost_kbdpoll(int argc, char *argv[]);
 
 /* Helpers for usbhost_connect() */
@@ -308,6 +318,7 @@ static struct usbhost_state_s *g_priv;    /* Data passed to thread */
  * controls.
  */
 
+#ifndef CONFIG_USBHID_RAWSCANCODES
 static const uint8_t ucmap[USBHID_NUMSCANCODES] =
 {
   0,    0,      0,      0,     'A',  'B', 'C',    'D',  /* 0x00-0x07: Reserved, errors, A-D */
@@ -377,6 +388,7 @@ static const uint8_t lcmap[USBHID_NUMSCANCODES] =
   0,    0,       0,      0,      0,    0,   0,    0,    /* 0xe0-0xe7: Left Ctrl,Shift,Alt,GUI, Right Ctrl,Shift,Alt,GUI */
 #endif
 };
+#endif /* CONFIG_USBHID_RAWSCANCODES */
 
 /****************************************************************************
  * Private Functions
@@ -591,8 +603,9 @@ static void usbhost_destroy(FAR void *arg)
  *
  ****************************************************************************/
 
-static uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier)
+static inline uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier)
 {
+#ifndef CONFIG_USBHID_RAWSCANCODES
   /* Range check */
 
   if (scancode >= USBHID_NUMSCANCODES)
@@ -610,6 +623,9 @@ static uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier)
     {
       return lcmap[scancode];
     }
+#else
+  return scancode;
+#endif
 }
 
 /****************************************************************************

@@ -68,7 +68,7 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
 /* If the create() method is called by the USB host device driver from an

@@ -61,7 +61,7 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
+#  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
 /* Driver support ***********************************************************/
