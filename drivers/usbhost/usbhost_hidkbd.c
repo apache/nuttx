@@ -91,8 +91,23 @@
 #ifndef CONFIG_HIDKBD_DEFPRIO
 #  define CONFIG_HIDKBD_DEFPRIO 50
 #endif
+
 #ifndef CONFIG_HIDKBD_STACKSIZE
 #  define CONFIG_HIDKBD_STACKSIZE 1024
+#endif
+
+#ifndef CONFIG_USBHID_BUFSIZE
+#  define CONFIG_USBHID_BUFSIZE 64
+#endif
+
+/* The default is to support 104 key keyboard.  CONFIG_USBHID_ALLSCANCODES
+ * will enable all scancodes.
+ */
+
+#ifdef CONFIG_USBHID_ALLSCANCODES
+#  define USBHID_NUMSCANCODES (USBHID_KBDUSE_MAX+1)
+#else
+#  define USBHID_NUMSCANCODES 104
 #endif
 
 /* Driver support ***********************************************************/
@@ -136,6 +151,7 @@ struct usbhost_state_s
   char                    devchar;      /* Character identifying the /dev/kbd[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   volatile bool           polling;      /* TRUE: Poll thread is running */
+  bool                    open;         /* TRUE: The keyboard device is open */
   uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
   sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
@@ -158,6 +174,12 @@ struct usbhost_state_s
 
   usbhost_ep_t            epin;         /* Interrupt IN endpoint */
   usbhost_ep_t            epout;        /* Optional interrupt OUT endpoint */
+
+  /* Buffer used to collect and buffer incoming keyboard characters */
+
+  uint16_t                headndx;      /* Buffer head index */
+  uint16_t                tailndx;      /* Buffer tail index */
+  uint8_t                 buffer[CONFIG_USBHID_BUFSIZE];
 };
 
 /****************************************************************************
@@ -183,6 +205,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 /* Keyboard polling thread */
 
 static void usbhost_destroy(FAR void *arg);
+static uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier);
 static int usbhost_kbdpoll(int argc, char *argv[]);
 
 /* Helpers for usbhost_connect() */
@@ -279,6 +302,81 @@ static uint32_t g_devinuse;
 static sem_t                   g_exclsem; /* For mutually exclusive thread creation */
 static sem_t                   g_syncsem; /* Thread data passing interlock */
 static struct usbhost_state_s *g_priv;    /* Data passed to thread */
+
+/* The following tables map keyboard scan codes to printable ASIC
+ * characters.  There is no support here for function keys or cursor
+ * controls.
+ */
+
+static const uint8_t ucmap[USBHID_NUMSCANCODES] =
+{
+  0,    0,      0,      0,     'A',  'B', 'C',    'D',  /* 0x00-0x07: Reserved, errors, A-D */
+  'E',  'F',    'G',    'H',   'I',  'J', 'K',    'L',  /* 0x08-0x0f: E-L */
+  'M',  'N',    'O',    'P',   'Q',  'R', 'S',    'T',  /* 0x10-0x17: M-T */
+  'U',  'V',    'W',    'X',   'Y',  'Z', '!',    '@',  /* 0x18-0x1f: U-Z,!,@  */
+  '#',  '$',    '%',    '^',   '&',  '*', '(',    ')',  /* 0x20-0x27: #,$,%,^,&,*,(,) */
+  '\n', '\033', '\177', 0,     ' ',  '_', '+',    '{',  /* 0x28-0x2f: Enter,escape,del,back-tab,space,_,+,{ */
+  '}',  '|',    0,      ':',   '"',  0,   '<',    '>',  /* 0x30-0x37: },|,Non-US tilde,:,",grave tidle,<,> */
+  '?',  0,       0,      0,    0,    0,   0,      0,    /* 0x38-0x3f: /,CapsLock,F1,F2,F3,F4,F5,F6 */
+  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x40-0x47: F7,F8,F9,F10,F11,F12,PrtScn,sScrollLock */
+  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x48-0x4f: Pause,Insert,Home,PageUp,DeleteForward,End,PageDown,RightArrow */
+  0,    0,       0,      0,    '/',  '*', '-',    '+',  /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
+  '\n', '1',     '2',    '3',  '4',  '4', '6',    '7',  /* 0x58-0x5f: Enter,1-7 */
+  '8',  '9',     '0',    '.',  0,    0,   0,      '=',  /* 0x60-0x67: 8-9,0,.,Non-US \,Application,Power,= */
+#ifdef CONFIG_USBHID_ALLSCANCODES
+  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
+  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
+  0,    0,       0,      0,    0,    ',', 0,      0,    /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,=,International1 */
+  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x88-0x8f: International 2-9 */
+  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x90-0x97: LAN 1-8 */
+  0,    0,       0,      0,    0,    0,   '\n',   0,    /* 0x98-0x9f: LAN 9,Ease,SysReq,Cancel,Clear,Prior,Return,Separator */
+  0,    0,       0,      0,    0,    0,   0,      0,    /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xa8-0xaf: (reserved) */
+  0,    0,       0,      0,    0,    0,   '(',    ')',  /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
+  '{',  '}',    '\t',    \177, 'A',  'B', 'C',    'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
+  'F',  'F',     0,      '^',    '%',  '<', '>',  '&',  /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
+  0,    '|',     0,      ':',    '%',  ' ', '@',  '!',  /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Muliply,Divide,+/- */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xd8-0xdf: Clear,ClearEntry,Binary,Octal,Decimal,Hexadecimal */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xe0-0xe7: Left Ctrl,Shift,Alt,GUI, Right Ctrl,Shift,Alt,GUI */
+#endif
+};
+
+static const uint8_t lcmap[USBHID_NUMSCANCODES] =
+{
+  0,    0,       0,      0,      'a',  'b', 'c',  'd',  /* 0x00-0x07: Reserved, errors, a-d */
+  'e',  'f',     'g',    'h',    'i',  'j', 'k',  'l',  /* 0x08-0x0f: e-l */
+  'm',  'n',     'o',    'p',    'q',  'r', 's',  't',  /* 0x10-0x17: m-t */
+  'u',  'v',     'w',    'x',    'y',  'z', '1',  '2',  /* 0x18-0x1f: u-z,1-2  */
+  '3',  '4',     '5',    '6',    '7',  '8', '9',  '0',  /* 0x20-0x27: 3-9,0 */
+  '\n', '\033',  '\177', '\t',   ' ',  '-', '=',  '[',  /* 0x28-0x2f: Enter,escape,del,tab,space,-,=,[ */
+  ']',  '\\',    '\234', ';',    '\'', 0,   ',',  '.',  /* 0x30-0x37: ],\,Non-US pound,;,',grave accent,,,. */
+  '/',  0,       0,      0,      0,    0,   0,    0,    /* 0x38-0x3f: /,CapsLock,F1,F2,F3,F4,F5,F6 */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x40-0x47: F7,F8,F9,F10,F11,F12,PrtScn,ScrollLock */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x48-0x4f: Pause,Insert,Home,PageUp,DeleteForward,End,PageDown,RightArrow */
+  0,    0,       0,      0,      '/',  '*', '-',  '+',  /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
+  '\n', '1',     '2',    '3',    '4',  '4', '6',  '7',  /* 0x58-0x5f: Enter,1-7 */
+  '8',  '9',     '0',    '.',    0,    0,   0,    '=',  /* 0x60-0x67: 8-9,0,.,Non-US \,Application,Power,= */
+#ifdef CONFIG_USBHID_ALLSCANCODES
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
+  0,    0,       0,      0,      0,    ',', 0,    0,    /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,=,International1 */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x88-0x8f: International 2-9 */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x90-0x97: LAN 1-8 */
+  0,    0,       0,      0,      0,    0,   '\n', 0,    /* 0x98-0x9f: LAN 9,Ease,SysReq,Cancel,Clear,Prior,Return,Separator */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xa8-0xaf: (reserved) */
+  0,    0,       0,      0,      0,    0,   '(',  ')',  /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
+  '{',  '}',    '\t',    '\177', 'A',  'B', 'C',  'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
+  'F',  'F',     0,      '^',    '%',  '<', '>',  '&',  /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
+  0,    '|',     0,      ':',    '%',  ' ', '@',  '!',  /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Muliply,Divide,+/- */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xd8-0xdf: Clear,ClearEntry,Binary,Octal,Decimal,Hexadecimal */
+  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xe0-0xe7: Left Ctrl,Shift,Alt,GUI, Right Ctrl,Shift,Alt,GUI */
+#endif
+};
 
 /****************************************************************************
  * Private Functions
@@ -477,36 +575,42 @@ static void usbhost_destroy(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: usbhost_dumprpt
+ * Name: usbhost_mapscancode
  *
  * Description:
- *   Dump the interesting context of the keyboard report that we just
- *   received.
+ *   Map a keyboard scancode to a printable ASCII character.  There is no
+ *   support here for function keys or cursor controls in this version of
+ *   the driver.
  *
  * Input Parameters:
- *   arg - A reference to the class instance to be destroyed.
+ *   scancode - Scan code to be mapped.
+ *   modifier - Ctrl,Alt,Shift,GUI modifier bits
  *
  * Returned Values:
  *   None
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
-static inline void usbhost_dumprpt(uint8_t *buffer)
+static uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier)
 {
-  struct usbhid_kbdreport_s *rpt = (struct usbhid_kbdreport_s *)buffer;
-  int i;
-  for (i = 0; i < 6; i++)
+  /* Range check */
+
+  if (scancode >= USBHID_NUMSCANCODES)
     {
-      if (rpt->key[i])
-        {
-          uvdbg("Key %d: %08x modifier: %08x\n", rpt->key[i], rpt->modifier);
-        }
+      return 0;
+    }
+
+  /* Is either shift key pressed? */
+
+  if ((modifier & (USBHID_MODIFER_LSHIFT|USBHID_MODIFER_RSHIFT)) != 0)
+    {
+      return ucmap[scancode];
+    }
+  else
+    {
+      return lcmap[scancode];
     }
 }
-#else
-#  define usbhost_dumprpt(buffer)
-#endif
 
 /****************************************************************************
  * Name: usbhost_kbdpoll
@@ -527,9 +631,9 @@ static int usbhost_kbdpoll(int argc, char *argv[])
   FAR struct usbhost_state_s *priv;
   FAR struct usb_ctrlreq_s   *ctrlreq;
 #ifdef CONFIG_DEBUG_USB
-  static unsigned int         npolls = 0;
+  unsigned int                npolls = 0;
 #endif
-  static unsigned int         nerrors;
+  unsigned int                nerrors;
   int                         ret;
 
   uvdbg("Started\n");
@@ -563,7 +667,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
       usbhost_takesem(&priv->exclsem);
 
-      /* Format the hid report request:
+      /* Format the HID report request:
        *
        *   bmRequestType 10000001
        *   bRequest      GET_DESCRIPTOR (0x06)
@@ -574,39 +678,119 @@ static int usbhost_kbdpoll(int argc, char *argv[])
        */
 
       ctrlreq       = (struct usb_ctrlreq_s *)priv->tbuffer;
-      ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_INTERFACE;
-      ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
-      usbhost_putle16(ctrlreq->value, (USBHID_DESCTYPE_REPORT << 8));
-      usbhost_putle16(ctrlreq->index, priv->ifno);
-      usbhost_putle16(ctrlreq->len, 8);
+      ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
+      ctrlreq->req  = USBHID_REQUEST_GETREPORT;
 
-      /* Send the report */
+      usbhost_putle16(ctrlreq->value, (USBHID_REPORTTYPE_INPUT << 8));
+      usbhost_putle16(ctrlreq->index, priv->ifno);
+      usbhost_putle16(ctrlreq->len,   sizeof(struct usbhid_kbdreport_s));
+
+      /* Send HID report request */
 
       ret = DRVR_CTRLIN(priv->drvr, ctrlreq, priv->tbuffer);
       usbhost_givesem(&priv->exclsem);
 
+      /* Check for errors -- Bail if an excessive number of errors
+       * are encountered.
+       */
+
       if (ret != OK)
         {
           nerrors++;
-          udbg("ERROR: GETDESCRIPTOR/REPORT, DRVR_CTRLIN returned: %d/%d\n",
+          udbg("ERROR: GETREPORT/INPUT, DRVR_CTRLIN returned: %d/%d\n",
                ret, nerrors);
 
           if (nerrors > 200)
             {
-              udbg("Too man errors... aborting: %d\n", nerrors);
+              udbg("Too many errors... aborting: %d\n", nerrors);
               break;
             }
         }
-      else
+
+      /* The report was received correctly.  But ignore the keystrokes if no
+       * task has opened the driver.
+       */
+
+      else if (priv->open)
         {
-          /* If debug is enabled, then dump the interesting poarts of the
-           * report that we just received.
-           */
+          struct usbhid_kbdreport_s *rpt = (struct usbhid_kbdreport_s *)priv->buffer;
+          unsigned int               head;
+          unsigned int               tail;
+          uint8_t                    ascii;
+          int                        i;
 
-          usbhost_dumprpt(priv->tbuffer);
+          /* Add the newly received keystrokes to our internal buffer */
 
-          /* Add the newly recevied keystrokes to our internal buffer */
-#warning "Missing logic"
+          usbhost_takesem(&priv->exclsem);
+          head = priv->headndx;
+          tail = priv->tailndx;
+
+          for (i = 0; i < 6; i++)
+            {
+              /* Is this key pressed? */
+
+              if (rpt->key[i] == USBHID_KBDUSE_NONE)
+                {
+                  /* Yes.. Add it to the buffer. */
+
+                  /* Map the keyboard scancode to a printable ASCII
+                   * character.  There is no support here for function keys
+                   * or cursor controls in this version of the driver.
+                   */
+
+                  ascii = usbhost_mapscancode(rpt->key[i], rpt->modifier);
+                  uvdbg("Key %d: %02x ASCII:%c modifier: %02x\n",
+                         i, rpt->key[i], ascii ? ascii : ' ', rpt->modifier);
+
+                  /* Zero at this point means that the key does not map to a
+                   * printable character.
+                   */
+
+                  if (ascii != 0)
+                    {
+                      /* Handle control characters.  Zero after this means
+                       * a valid, NUL character.
+                       */
+
+                      if ((rpt->modifier & (USBHID_MODIFER_LSHIFT|USBHID_MODIFER_RSHIFT)) != 0)
+                        {
+                          ascii &= 0x1f;
+                        }
+ 
+                      /* Copy the next keyboard character into the user
+                       * buffer.
+                       */
+
+                      priv->buffer[head] = ascii;
+
+                      /* Increment the head index */
+
+                      if (++head >= CONFIG_USBHID_BUFSIZE)
+                        {
+                          head = 0;
+                        }
+
+                      /* If the buffer is full, then increment the tail
+                       * index to make space.  Is it better to lose old
+                       * keystrokes or new?
+                       */
+
+                      if (tail == head)
+                       {
+                          if (++tail >= CONFIG_USBHID_BUFSIZE)
+                            {
+                              tail = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+          /* Update the head/tail indices */
+
+          priv->headndx = head;
+          priv->tailndx = tail;
+          usbhost_givesem(&priv->exclsem);
         }
 
       /* If USB debug is on, then provide some periodic indication that
@@ -1411,7 +1595,8 @@ static int usbhost_open(FAR struct file *filep)
       /* Otherwise, just increment the reference count on the driver */
 
       priv->crefs++;
-      ret = OK;
+      priv->open = true;
+      ret        = OK;
     }
   irqrestore(flags);
 
@@ -1431,7 +1616,6 @@ static int usbhost_close(FAR struct file *filep)
 {
   FAR struct inode           *inode;
   FAR struct usbhost_state_s *priv;
-  irqstate_t flags;
 
   uvdbg("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
@@ -1444,32 +1628,45 @@ static int usbhost_close(FAR struct file *filep)
   usbhost_takesem(&priv->exclsem);
   priv->crefs--;
 
-  /* Release the semaphore.  The following operations when crefs == 1 are
-   * safe because we know that there is no outstanding open references to
-   * the driver.
+  /* Is this the last reference (other than the one held by the USB host
+   * controller driver)
    */
-
-  usbhost_givesem(&priv->exclsem);
-
-  /* We need to disable interrupts momentarily to assure that there are
-   * no asynchronous disconnect events.
-   */
-
-  flags = irqsave();
-
-  /* Check if the USB keyboard device is still connected.  If the device is
-   * not connected and the reference count just decremented to one, then
-   * unregister then free the driver class instance.
-   */
-
-  if (priv->crefs <= 1 && priv->disconnected)
+ 
+  if (priv->crefs <= 1)
     {
-      /* Destroy the class instance */
+      irqstate_t flags;
 
-      usbhost_destroy(priv);
+      /* Yes.. then the driver is no longer open */
+
+      priv->open    = false;
+      priv->headndx = 0;
+      priv->tailndx = 0;
+
+      /* We need to disable interrupts momentarily to assure that there are
+       * no asynchronous disconnect events.
+       */
+
+      flags = irqsave();
+
+      /* Check if the USB keyboard device is still connected.  If the device is
+       * no longer connected, then unregister the driver and free the driver
+       * class instance.
+       */
+
+      if (priv->disconnected)
+        {
+          /* Destroy the class instance (we can't use priv after this; we can't
+           * 'give' the semapore)
+           */
+
+          usbhost_destroy(priv);
+          irqrestore(flags);
+          return OK;
+        }
+      irqrestore(flags);
     }
-
-  irqrestore(flags);
+ 
+  usbhost_givesem(&priv->exclsem);
   return OK;
 }
 
@@ -1485,8 +1682,9 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
 {
   FAR struct inode           *inode;
   FAR struct usbhost_state_s *priv;
-  irqstate_t flags;
-  int ret;
+  size_t                      remaining;
+  unsigned int                tail;
+  int                         ret;
 
   uvdbg("Entry\n");
   DEBUGASSERT(filep && filep->f_inode && buffer);
@@ -1502,7 +1700,6 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
    * momentarily to assure that there are no asynchronous disconnect events.
    */
 
-  flags = irqsave();
   if (priv->disconnected)
     {
       /* No... the driver is no longer bound to the class.  That means that
@@ -1515,9 +1712,28 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
   else
     {
       /* Read data from our internal buffer of received characters */
-#warning "Missing logic"
+ 
+      for (tail  = priv->tailndx;
+           tail != priv->headndx && remaining > 0;
+           tail++, remaining--)
+        {
+           /* Handle wrap-around of the tail index */
+
+           if (tail >= CONFIG_USBHID_BUFSIZE)
+             {
+               tail = 0;
+             }
+
+           /* Copy the next keyboard character into the user buffer */
+
+           *buffer += priv->buffer[tail];
+           remaining--;
+        }
+
+      /* Update the tail index (pehaps marking the buffer empty) */
+
+      priv->tailndx = tail;
     }
-  irqrestore(flags);
 
   usbhost_givesem(&priv->exclsem);
   return 0; /* Return EOF for now */

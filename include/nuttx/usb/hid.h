@@ -115,10 +115,10 @@
  
 #define USBHID_REQUEST_GETREPORT          0x01
 #define USBHID_REQUEST_GETIDLE            0x02
-#define USBHID_REQUEST_GET_PROTOCOL       0x03
-#define USBHID_REQUEST_SET_REPORT         0x09
-#define USBHID_REQUEST_SET_IDLE           0x0a
-#define USBHID_REQUEST_SET_PROTOCOL       0x0b
+#define USBHID_REQUEST_GETPROTOCOL        0x03
+#define USBHID_REQUEST_SETREPORT          0x09
+#define USBHID_REQUEST_SETIDLE            0x0a
+#define USBHID_REQUEST_SETPROTOCOL        0x0b
 
 /* Report Type (MS byte of wValue for GET_REPORT) (HID 7.2.1) */
 
@@ -414,7 +414,7 @@
 #define USBHID_KBDUSE_CLEAR               0x9c /* Keyboard Clear */
 #define USBHID_KBDUSE_PRIOR               0x9d /* Keyboard Prior */
 #define USBHID_KBDUSE_RETURN              0x9e /* Keyboard Return */
-#define USBHID_KBDUSE_SEPARATRO           0x9f /* Keyboard Separator */
+#define USBHID_KBDUSE_SEPARATOR           0x9f /* Keyboard Separator */
 #define USBHID_KBDUSE_OUT                 0xa0 /* Keyboard Out */
 #define USBHID_KBDUSE_OPER                0xa1 /* Keyboard Oper */
 #define USBHID_KBDUSE_CLEARAGAIN          0xa2 /* Keyboard Clear/Again */
@@ -469,6 +469,8 @@
 #define USBHID_KBDUSE_RSHIFT              0xe5 /* Keyboard RightShift */
 #define USBHID_KBDUSE_RALT                0xe6 /* Keyboard RightAlt */
 #define USBHID_KBDUSE_RGUI                0xe7 /* Keyboard Right GUI*/
+
+#define USBHID_KBDUSE_MAX                 0xe7
 
 /* Mouse input report (HID B.2) */
 
