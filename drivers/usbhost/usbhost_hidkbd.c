@@ -1698,7 +1698,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
 {
   FAR struct inode           *inode;
   FAR struct usbhost_state_s *priv;
-  size_t                      remaining;
+  size_t                      nbytes;
   unsigned int                tail;
   int                         ret;
 
@@ -1729,22 +1729,22 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
     {
       /* Read data from our internal buffer of received characters */
  
-      for (tail  = priv->tailndx;
-           tail != priv->headndx && remaining > 0;
-           tail++, remaining--)
+      for (tail  = priv->tailndx, nbytes = 0;
+           tail != priv->headndx && nbytes < len;
+           nbytes++)
         {
-           /* Handle wrap-around of the tail index */
-
-           if (tail >= CONFIG_USBHID_BUFSIZE)
-             {
-               tail = 0;
-             }
-
            /* Copy the next keyboard character into the user buffer */
 
            *buffer += priv->buffer[tail];
-           remaining--;
+
+           /* Handle wrap-around of the tail index */
+
+           if (++tail >= CONFIG_USBHID_BUFSIZE)
+             {
+               tail = 0;
+             }
         }
+      ret = nbytes;
 
       /* Update the tail index (pehaps marking the buffer empty) */
 
@@ -1752,7 +1752,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
     }
 
   usbhost_givesem(&priv->exclsem);
-  return 0; /* Return EOF for now */
+  return (ssize_t)ret;
 }
 
 /****************************************************************************

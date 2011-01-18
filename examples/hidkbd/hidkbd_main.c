@@ -39,8 +39,12 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sched.h>
 
 #include <nuttx/usb/usbhost.h>
@@ -69,8 +73,13 @@
 #ifndef CONFIG_EXAMPLES_HIDKBD_DEFPRIO
 #  define CONFIG_EXAMPLES_HIDKBD_DEFPRIO 50
 #endif
+
 #ifndef CONFIG_EXAMPLES_HIDKBD_STACKSIZE
 #  define CONFIG_EXAMPLES_HIDKBD_STACKSIZE 1024
+#endif
+
+#ifndef CONFIG_EXAMPLES_HIDKBD_DEVNAME
+#  define CONFIG_EXAMPLES_HIDKBD_DEVNAME "/dev/kbda"
 #endif
 
 /****************************************************************************
@@ -144,7 +153,10 @@ void user_initialize(void)
 
 int user_start(int argc, char *argv[])
 {
+  char buffer[256];
   pid_t pid;
+  ssize_t nbytes;
+  int fd;
   int ret;
 
   /* First, register all of the USB host HID keyboard class driver */
@@ -181,9 +193,44 @@ int user_start(int argc, char *argv[])
 
       for (;;)
         {
+          /* Open the keyboard device.  Loop until the device is successfully
+           * opened.
+           */
+
+          do
+            {
+              printf("Opening device %s\n", CONFIG_EXAMPLES_HIDKBD_DEVNAME);
+              fflush(stdout);
+              fd = open(CONFIG_EXAMPLES_HIDKBD_DEVNAME, O_RDONLY);
+              if (fd < 0)
+                {
+                   sleep(3);
+                }
+            }
+          while (fd < 0);
+
+          printf("Device %s opened\n", CONFIG_EXAMPLES_HIDKBD_DEVNAME);
           fflush(stdout);
-          sleep(5);
-          printf("user_start: Still running...\n");
+
+          /* Loop until there is a read failure */
+
+          do
+            {
+              /* Read a buffer of data */
+
+              nbytes = read(fd, buffer, 256);
+              if (nbytes > 0)
+                {
+                  /* On success, echo the buffer to stdout */
+
+                  (void)write(1, buffer, nbytes);
+                }
+            }
+          while (nbytes >= 0);
+
+          printf("Closing device %s\n", CONFIG_EXAMPLES_HIDKBD_DEVNAME);
+          fflush(stdout);
+          close(fd);
         }
     }
   return 0;
