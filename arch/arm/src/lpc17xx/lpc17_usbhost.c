@@ -952,7 +952,7 @@ static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
   /* Re-enabled periodic list processing */
 
   regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
-  regval &= ~OHCI_CTRL_PLE;
+  regval |= OHCI_CTRL_PLE;
   lpc17_putreg(regval, LPC17_USBHOST_CTRL);
   return OK;
 #else
@@ -1089,7 +1089,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
   if (head != NULL)
     {
       regval  = lpc17_getreg(LPC17_USBHOST_CTRL);
-      regval &= ~OHCI_CTRL_PLE;
+      regval |= OHCI_CTRL_PLE;
       lpc17_putreg(regval, LPC17_USBHOST_CTRL);
     }
 
