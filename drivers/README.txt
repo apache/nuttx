@@ -4,7 +4,12 @@ README
 This directory contains various device drivers -- both block and
 character drivers as well as other more specialized drivers.
 
-Files in this directory:
+Contents:
+  - Files in this directory
+  - Subdirectories of this directory
+  - Skeleton files
+
+Files in this directory
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 can.c
@@ -71,3 +76,15 @@ usbdev/
 
 usbhost/
 	USB host drivers.  See also include/nuttx/usb/usbhost.h
+
+Skeleton Files
+^^^^^^^^^^^^^^
+
+Skeleton files a "empty" frameworks for NuttX drivers.  They are provided to
+give you a good starting point if you want to create a new NuttX driver.
+The following skeleton files are available:
+
+    drivers/lcd/skeleton.c -- Skeleton LCD driver
+    drivers/mtd/skeleton.c -- Skeleton memory technology device drivers
+    drivers/net/skeleton.c -- Skeleton network/Ethernet drivers
+    drivers/usbhost/usbhost_skeleton.c -- Skeleton USB host class driver
