@@ -1423,13 +1423,14 @@
 	* include/nuttx/usb -- rename usb_storage.h to storage.h.
 	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for low-speed devices.
 	* drivers/usbhost/usbhost_skeleton.c -- Template for new class drivers
-	* include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c -- Initial
-	  files for HID keyboard support.  These are mostly empty files on the
-	  initial checkin.
+	* include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c -- New
+	  files for HID keyboard support.
 	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Will now handle multiple
 	  concurrent transfers on different endpoints (still only one TD per
 	  endpoint).  All methods are protected from re-entrancy; lots of re-
 	  structuring in preparation for interrupt endpoint support.
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for periodic
+	  interrupt transfers.
 	* examples/hidkbd - Added a simple test for the USB host HID keyboard
 	  class driver.
 	* configs/olimex-lpc1766stk/hidkbd - Added a configuration to build the

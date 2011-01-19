@@ -46,6 +46,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sched.h>
+#include <errno.h>
 
 #include <nuttx/usb/usbhost.h>
 
@@ -200,10 +201,11 @@ int user_start(int argc, char *argv[])
           do
             {
               printf("Opening device %s\n", CONFIG_EXAMPLES_HIDKBD_DEVNAME);
-              fflush(stdout);
               fd = open(CONFIG_EXAMPLES_HIDKBD_DEVNAME, O_RDONLY);
               if (fd < 0)
                 {
+                   printf("Failed: %d\n", errno);
+                   fflush(stdout);
                    sleep(3);
                 }
             }
@@ -228,7 +230,7 @@ int user_start(int argc, char *argv[])
             }
           while (nbytes >= 0);
 
-          printf("Closing device %s\n", CONFIG_EXAMPLES_HIDKBD_DEVNAME);
+          printf("Closing device %s: %d\n", CONFIG_EXAMPLES_HIDKBD_DEVNAME, (int)nbytes);
           fflush(stdout);
           close(fd);
         }

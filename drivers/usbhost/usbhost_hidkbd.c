@@ -48,6 +48,7 @@
 #include <poll.h>
 #include <semaphore.h>
 #include <time.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -106,6 +107,10 @@
 #  define CONFIG_USBHID_BUFSIZE 64
 #endif
 
+#ifndef CONFIG_USBHID_NPOLLWAITERS
+#  define CONFIG_USBHID_NPOLLWAITERS 2
+#endif
+
 /* The default is to support scancode mapping for the standard 104 key
  * keyboard.  Setting CONFIG_USBHID_RAWSCANCODES will disable all scancode
  * mapping; Setting CONFIG_USBHID_ALLSCANCODES will enable mapping of all
@@ -161,10 +166,12 @@ struct usbhost_state_s
   char                    devchar;      /* Character identifying the /dev/kbd[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   volatile bool           polling;      /* TRUE: Poll thread is running */
-  bool                    open;         /* TRUE: The keyboard device is open */
+  volatile bool           open;         /* TRUE: The keyboard device is open */
+  volatile bool           waiting;      /* TRUE: waiting for keyboard data */
   uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
   sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
+  sem_t                   waitsem;      /* Used to wait for keyboard data */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
   pid_t                   pollpid;      /* PID of the poll task */
@@ -185,11 +192,20 @@ struct usbhost_state_s
   usbhost_ep_t            epin;         /* Interrupt IN endpoint */
   usbhost_ep_t            epout;        /* Optional interrupt OUT endpoint */
 
+  /* The following is a list if poll structures of threads waiting for
+   * driver events. The 'struct pollfd' reference for each open is also
+   * retained in the f_priv field of the 'struct file'.
+   */
+
+#ifndef CONFIG_DISABLE_POLL
+  struct pollfd *fds[CONFIG_USBHID_NPOLLWAITERS];
+#endif
+
   /* Buffer used to collect and buffer incoming keyboard characters */
 
-  uint16_t                headndx;      /* Buffer head index */
-  uint16_t                tailndx;      /* Buffer tail index */
-  uint8_t                 buffer[CONFIG_USBHID_BUFSIZE];
+  volatile uint16_t       headndx;      /* Buffer head index */
+  volatile uint16_t       tailndx;      /* Buffer tail index */
+  uint8_t                 kbdbuffer[CONFIG_USBHID_BUFSIZE];
 };
 
 /****************************************************************************
@@ -200,6 +216,14 @@ struct usbhost_state_s
 
 static void usbhost_takesem(sem_t *sem);
 #define usbhost_givesem(s) sem_post(s);
+
+/* Polling support */
+
+#ifndef CONFIG_DISABLE_POLL
+static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
+#else
+#  define usbhost_pollnotify(dev)
+#endif
 
 /* Memory allocation services */
 
@@ -321,71 +345,71 @@ static struct usbhost_state_s *g_priv;    /* Data passed to thread */
 #ifndef CONFIG_USBHID_RAWSCANCODES
 static const uint8_t ucmap[USBHID_NUMSCANCODES] =
 {
-  0,    0,      0,      0,     'A',  'B', 'C',    'D',  /* 0x00-0x07: Reserved, errors, A-D */
-  'E',  'F',    'G',    'H',   'I',  'J', 'K',    'L',  /* 0x08-0x0f: E-L */
-  'M',  'N',    'O',    'P',   'Q',  'R', 'S',    'T',  /* 0x10-0x17: M-T */
-  'U',  'V',    'W',    'X',   'Y',  'Z', '!',    '@',  /* 0x18-0x1f: U-Z,!,@  */
-  '#',  '$',    '%',    '^',   '&',  '*', '(',    ')',  /* 0x20-0x27: #,$,%,^,&,*,(,) */
-  '\n', '\033', '\177', 0,     ' ',  '_', '+',    '{',  /* 0x28-0x2f: Enter,escape,del,back-tab,space,_,+,{ */
-  '}',  '|',    0,      ':',   '"',  0,   '<',    '>',  /* 0x30-0x37: },|,Non-US tilde,:,",grave tidle,<,> */
-  '?',  0,       0,      0,    0,    0,   0,      0,    /* 0x38-0x3f: /,CapsLock,F1,F2,F3,F4,F5,F6 */
-  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x40-0x47: F7,F8,F9,F10,F11,F12,PrtScn,sScrollLock */
-  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x48-0x4f: Pause,Insert,Home,PageUp,DeleteForward,End,PageDown,RightArrow */
-  0,    0,       0,      0,    '/',  '*', '-',    '+',  /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
-  '\n', '1',     '2',    '3',  '4',  '4', '6',    '7',  /* 0x58-0x5f: Enter,1-7 */
-  '8',  '9',     '0',    '.',  0,    0,   0,      '=',  /* 0x60-0x67: 8-9,0,.,Non-US \,Application,Power,= */
+  0,    0,      0,      0,       'A',  'B',  'C',    'D',  /* 0x00-0x07: Reserved, errors, A-D */
+  'E',  'F',    'G',    'H',     'I',  'J',  'K',    'L',  /* 0x08-0x0f: E-L */
+  'M',  'N',    'O',    'P',     'Q',  'R',  'S',    'T',  /* 0x10-0x17: M-T */
+  'U',  'V',    'W',    'X',     'Y',  'Z',  '!',    '@',  /* 0x18-0x1f: U-Z,!,@  */
+  '#',  '$',    '%',    '^',     '&',  '*',  '(',    ')',  /* 0x20-0x27: #,$,%,^,&,*,(,) */
+  '\n', '\033', '\177', 0,       ' ',  '_',  '+',    '{',  /* 0x28-0x2f: Enter,escape,del,back-tab,space,_,+,{ */
+  '}',  '|',    0,      ':',     '"',  0,    '<',    '>',  /* 0x30-0x37: },|,Non-US tilde,:,",grave tidle,<,> */
+  '?',  0,       0,      0,      0,    0,    0,      0,    /* 0x38-0x3f: /,CapsLock,F1,F2,F3,F4,F5,F6 */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0x40-0x47: F7,F8,F9,F10,F11,F12,PrtScn,sScrollLock */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0x48-0x4f: Pause,Insert,Home,PageUp,DeleteForward,End,PageDown,RightArrow */
+  0,    0,       0,      0,      '/',  '*',  '-',    '+',  /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
+  '\n', '1',     '2',    '3',    '4',  '4',  '6',    '7',  /* 0x58-0x5f: Enter,1-7 */
+  '8',  '9',     '0',    '.',    0,    0,    0,      '=',  /* 0x60-0x67: 8-9,0,.,Non-US \,Application,Power,= */
 #ifdef CONFIG_USBHID_ALLSCANCODES
-  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
-  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
-  0,    0,       0,      0,    0,    ',', 0,      0,    /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,=,International1 */
-  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x88-0x8f: International 2-9 */
-  0,    0,       0,      0,    0,    0,   0,      0,    /* 0x90-0x97: LAN 1-8 */
-  0,    0,       0,      0,    0,    0,   '\n',   0,    /* 0x98-0x9f: LAN 9,Ease,SysReq,Cancel,Clear,Prior,Return,Separator */
-  0,    0,       0,      0,    0,    0,   0,      0,    /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xa8-0xaf: (reserved) */
-  0,    0,       0,      0,    0,    0,   '(',    ')',  /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
-  '{',  '}',    '\t',    \177, 'A',  'B', 'C',    'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
-  'F',  'F',     0,      '^',    '%',  '<', '>',  '&',  /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
-  0,    '|',     0,      ':',    '%',  ' ', '@',  '!',  /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Muliply,Divide,+/- */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xd8-0xdf: Clear,ClearEntry,Binary,Octal,Decimal,Hexadecimal */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xe0-0xe7: Left Ctrl,Shift,Alt,GUI, Right Ctrl,Shift,Alt,GUI */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
+  0,    0,       0,      0,      0,    ',',  0,      0,    /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,=,International1 */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0x88-0x8f: International 2-9 */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0x90-0x97: LAN 1-8 */
+  0,    0,       0,      0,      0,    0,    '\n',   0,    /* 0x98-0x9f: LAN 9,Ease,SysReq,Cancel,Clear,Prior,Return,Separator */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
+  0,    0,       0,      0,      0,    0,    0,      0,    /* 0xa8-0xaf: (reserved) */
+  0,    0,       0,      0,      0,    0,    '(',    ')',  /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
+  '{',  '}',    '\t',    \177,   'A',  'B',  'C',    'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
+  'F',  'F',     0,      '^',    '%',  '<', '>',     '&',  /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
+  0,    '|',     0,      ':',    '%',  ' ', '@',     '!',  /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Muliply,Divide,+/- */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0xd8-0xdf: Clear,ClearEntry,Binary,Octal,Decimal,Hexadecimal */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0xe0-0xe7: Left Ctrl,Shift,Alt,GUI, Right Ctrl,Shift,Alt,GUI */
 #endif
 };
 
 static const uint8_t lcmap[USBHID_NUMSCANCODES] =
 {
-  0,    0,       0,      0,      'a',  'b', 'c',  'd',  /* 0x00-0x07: Reserved, errors, a-d */
-  'e',  'f',     'g',    'h',    'i',  'j', 'k',  'l',  /* 0x08-0x0f: e-l */
-  'm',  'n',     'o',    'p',    'q',  'r', 's',  't',  /* 0x10-0x17: m-t */
-  'u',  'v',     'w',    'x',    'y',  'z', '1',  '2',  /* 0x18-0x1f: u-z,1-2  */
-  '3',  '4',     '5',    '6',    '7',  '8', '9',  '0',  /* 0x20-0x27: 3-9,0 */
-  '\n', '\033',  '\177', '\t',   ' ',  '-', '=',  '[',  /* 0x28-0x2f: Enter,escape,del,tab,space,-,=,[ */
-  ']',  '\\',    '\234', ';',    '\'', 0,   ',',  '.',  /* 0x30-0x37: ],\,Non-US pound,;,',grave accent,,,. */
-  '/',  0,       0,      0,      0,    0,   0,    0,    /* 0x38-0x3f: /,CapsLock,F1,F2,F3,F4,F5,F6 */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x40-0x47: F7,F8,F9,F10,F11,F12,PrtScn,ScrollLock */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x48-0x4f: Pause,Insert,Home,PageUp,DeleteForward,End,PageDown,RightArrow */
-  0,    0,       0,      0,      '/',  '*', '-',  '+',  /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
-  '\n', '1',     '2',    '3',    '4',  '4', '6',  '7',  /* 0x58-0x5f: Enter,1-7 */
-  '8',  '9',     '0',    '.',    0,    0,   0,    '=',  /* 0x60-0x67: 8-9,0,.,Non-US \,Application,Power,= */
+  0,    0,       0,      0,      'a',  'b', 'c',     'd',  /* 0x00-0x07: Reserved, errors, a-d */
+  'e',  'f',     'g',    'h',    'i',  'j', 'k',     'l',  /* 0x08-0x0f: e-l */
+  'm',  'n',     'o',    'p',    'q',  'r', 's',     't',  /* 0x10-0x17: m-t */
+  'u',  'v',     'w',    'x',    'y',  'z', '1',     '2',  /* 0x18-0x1f: u-z,1-2  */
+  '3',  '4',     '5',    '6',    '7',  '8', '9',     '0',  /* 0x20-0x27: 3-9,0 */
+  '\n', '\033',  '\177', '\t',   ' ',  '-', '=',     '[',  /* 0x28-0x2f: Enter,escape,del,tab,space,-,=,[ */
+  ']',  '\\',    '\234', ';',    '\'', 0,   ',',     '.',  /* 0x30-0x37: ],\,Non-US pound,;,',grave accent,,,. */
+  '/',  0,       0,      0,      0,    0,   0,       0,    /* 0x38-0x3f: /,CapsLock,F1,F2,F3,F4,F5,F6 */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0x40-0x47: F7,F8,F9,F10,F11,F12,PrtScn,ScrollLock */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0x48-0x4f: Pause,Insert,Home,PageUp,DeleteForward,End,PageDown,RightArrow */
+  0,    0,       0,      0,      '/',  '*', '-',     '+',  /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
+  '\n', '1',     '2',    '3',    '4',  '4', '6',     '7',  /* 0x58-0x5f: Enter,1-7 */
+  '8',  '9',     '0',    '.',    0,    0,   0,       '=',  /* 0x60-0x67: 8-9,0,.,Non-US \,Application,Power,= */
 #ifdef CONFIG_USBHID_ALLSCANCODES
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
-  0,    0,       0,      0,      0,    ',', 0,    0,    /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,=,International1 */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x88-0x8f: International 2-9 */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0x90-0x97: LAN 1-8 */
-  0,    0,       0,      0,      0,    0,   '\n', 0,    /* 0x98-0x9f: LAN 9,Ease,SysReq,Cancel,Clear,Prior,Return,Separator */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xa8-0xaf: (reserved) */
-  0,    0,       0,      0,      0,    0,   '(',  ')',  /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
-  '{',  '}',    '\t',    '\177', 'A',  'B', 'C',  'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
-  'F',  'F',     0,      '^',    '%',  '<', '>',  '&',  /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
-  0,    '|',     0,      ':',    '%',  ' ', '@',  '!',  /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Muliply,Divide,+/- */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xd8-0xdf: Clear,ClearEntry,Binary,Octal,Decimal,Hexadecimal */
-  0,    0,       0,      0,      0,    0,   0,    0,    /* 0xe0-0xe7: Left Ctrl,Shift,Alt,GUI, Right Ctrl,Shift,Alt,GUI */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
+  0,    0,       0,      0,      0,    ',', 0,       0,    /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,=,International1 */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0x88-0x8f: International 2-9 */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0x90-0x97: LAN 1-8 */
+  0,    0,       0,      0,      0,    0,   '\n',    0,    /* 0x98-0x9f: LAN 9,Ease,SysReq,Cancel,Clear,Prior,Return,Separator */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0xa8-0xaf: (reserved) */
+  0,    0,       0,      0,      0,    0,   '(',     ')',  /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
+  '{',  '}',    '\t',    '\177', 'A',  'B', 'C',     'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
+  'F',  'F',     0,      '^',    '%',  '<', '>',     '&',  /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
+  0,    '|',     0,      ':',    '%',  ' ', '@',     '!',  /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Muliply,Divide,+/- */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0xd8-0xdf: Clear,ClearEntry,Binary,Octal,Decimal,Hexadecimal */
+  0,    0,       0,      0,      0,    0,   0,       0,    /* 0xe0-0xe7: Left Ctrl,Shift,Alt,GUI, Right Ctrl,Shift,Alt,GUI */
 #endif
 };
 #endif /* CONFIG_USBHID_RAWSCANCODES */
@@ -416,6 +440,31 @@ static void usbhost_takesem(sem_t *sem)
       ASSERT(errno == EINTR);
     }
 }
+
+/****************************************************************************
+ * Name: usbhost_pollnotify
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_USBHID_NPOLLWAITERS; i++)
+    {
+      struct pollfd *fds = priv->fds[i];
+      if (fds)
+        {
+          fds->revents |= (fds->events & POLLIN);
+          if (fds->revents != 0)
+            {
+              uvdbg("Report events: %02x\n", fds->revents);
+              sem_post(fds->sem);
+            }
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: usbhost_allocclass
@@ -572,6 +621,7 @@ static void usbhost_destroy(FAR void *arg)
   /* Destroy the semaphores */
 
   sem_destroy(&priv->exclsem);
+  sem_destroy(&priv->waitsem);
 
   /* Disconnect the USB host device */
 
@@ -646,7 +696,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 {
   FAR struct usbhost_state_s *priv;
   FAR struct usb_ctrlreq_s   *ctrlreq;
-#ifdef CONFIG_DEBUG_USB
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
   unsigned int                npolls = 0;
 #endif
   unsigned int                nerrors;
@@ -685,9 +735,9 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
       /* Format the HID report request:
        *
-       *   bmRequestType 10000001
-       *   bRequest      GET_DESCRIPTOR (0x06)
-       *   wValue        Descriptor Type and Descriptor Index
+       *   bmRequestType 10100001
+       *   bRequest      GET_REPORT (0x01)
+       *   wValue        Report Type and Report Index
        *   wIndex        Interface Number
        *   wLength       Descriptor Length
        *   Data          Descriptor Data
@@ -729,7 +779,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
       else if (priv->open)
         {
-          struct usbhid_kbdreport_s *rpt = (struct usbhid_kbdreport_s *)priv->buffer;
+          struct usbhid_kbdreport_s *rpt = (struct usbhid_kbdreport_s *)priv->tbuffer;
           unsigned int               head;
           unsigned int               tail;
           uint8_t                    ascii;
@@ -745,7 +795,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
             {
               /* Is this key pressed? */
 
-              if (rpt->key[i] == USBHID_KBDUSE_NONE)
+              if (rpt->key[i] != USBHID_KBDUSE_NONE)
                 {
                   /* Yes.. Add it to the buffer. */
 
@@ -768,7 +818,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                        * a valid, NUL character.
                        */
 
-                      if ((rpt->modifier & (USBHID_MODIFER_LSHIFT|USBHID_MODIFER_RSHIFT)) != 0)
+                      if ((rpt->modifier & (USBHID_MODIFER_LCTRL|USBHID_MODIFER_RCTRL)) != 0)
                         {
                           ascii &= 0x1f;
                         }
@@ -777,7 +827,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                        * buffer.
                        */
 
-                      priv->buffer[head] = ascii;
+                      priv->kbdbuffer[head] = ascii;
 
                       /* Increment the head index */
 
@@ -802,6 +852,25 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                 }
             }
 
+          /* Did we just transition from no data available to data available? */
+
+          if (head != tail && priv->headndx == priv->tailndx)
+            {
+              /* Yes.. Is there a thread waiting for keyboard data now? */
+
+              if (priv->waiting)
+                {
+                  /* Yes.. wake it up */
+
+                  usbhost_givesem(&priv->waitsem);
+                  priv->waiting = false;
+                }
+
+              /* And wake up any threads waiting for the POLLIN event */
+
+              usbhost_pollnotify(priv);
+            }
+
           /* Update the head/tail indices */
 
           priv->headndx = head;
@@ -813,9 +882,9 @@ static int usbhost_kbdpoll(int argc, char *argv[])
        * polling is still happening.
        */
 
-#ifdef CONFIG_DEBUG_USB
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
       npolls++;
-      if (!(npolls & ~31) == 0)
+      if ((npolls & 31) == 0)
         {
           udbg("Still polling: %d\n", npolls);
         }
@@ -1193,7 +1262,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uvdbg("Register driver\n");
   usbhost_mkdevname(priv, devname);
-  ret = register_driver(devname, &usbhost_fops, 0666, NULL);
+  ret = register_driver(devname, &usbhost_fops, 0666, priv);
 
   /* We now have to be concerned about asynchronous modification of crefs
    * because the driver has been registerd.
@@ -1400,9 +1469,10 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
 
           priv->crefs              = 1;
 
-          /* Initialize semphores (this works okay in the interrupt context) */
+          /* Initialize semaphores */
 
           sem_init(&priv->exclsem, 0, 1);
+          sem_init(&priv->waitsem, 0, 0);
 
           /* Bind the driver to the storage class instance */
 
@@ -1530,6 +1600,16 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
   priv->disconnected = true;
   ullvdbg("Disconnected\n");
 
+  /* Is there a thread waiting for keyboard data that will never come? */
+
+  if (priv->waiting)
+    {
+      /* Yes.. wake it up */
+
+      usbhost_givesem(&priv->waitsem);
+      priv->waiting = false;
+    }
+
   /* Possibilities:
    *
    * - Failure occurred before the kbdpoll task was started successfully.
@@ -1588,7 +1668,7 @@ static int usbhost_open(FAR struct file *filep)
 
   /* Make sure that we have exclusive access to the private data structure */
 
-  DEBUGASSERT(priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
+  DEBUGASSERT(priv && priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
   usbhost_takesem(&priv->exclsem);
 
   /* Check if the keyboard device is still connected.  We need to disable
@@ -1727,6 +1807,37 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
     }
   else
     {
+      /* Is there keyboard data now? */
+
+      while (priv->tailndx == priv->headndx)
+        {
+          /* No.. were we open non-blocking? */
+
+          if (filep->f_oflags & O_NONBLOCK)
+            {
+              /* Yes.. then return a failure */
+
+              ret = -EAGAIN;
+              goto errout;
+            }
+
+          /* Wait for data to be available */
+
+          uvdbg("Waiting...\n");
+          priv->waiting = true;
+          usbhost_givesem(&priv->exclsem);
+          usbhost_takesem(&priv->waitsem);
+          usbhost_takesem(&priv->exclsem);
+
+          /* Did the keyboard become disconnected while we were waiting */
+
+          if (priv->disconnected)
+            {
+              ret = -ENODEV;
+              goto errout;
+            }
+        }
+
       /* Read data from our internal buffer of received characters */
  
       for (tail  = priv->tailndx, nbytes = 0;
@@ -1735,7 +1846,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
         {
            /* Copy the next keyboard character into the user buffer */
 
-           *buffer += priv->buffer[tail];
+           *buffer++ = priv->kbdbuffer[tail];
 
            /* Handle wrap-around of the tail index */
 
@@ -1751,6 +1862,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
       priv->tailndx = tail;
     }
 
+errout:
   usbhost_givesem(&priv->exclsem);
   return (ssize_t)ret;
 }
@@ -1782,15 +1894,86 @@ static ssize_t usbhost_write(FAR struct file *filep, FAR const char *buffer, siz
 static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
-  if (setup)
+  FAR struct inode           *inode;
+  FAR struct usbhost_state_s *priv;
+  int                         ret = OK;
+  int                         i;
+
+  uvdbg("Entry\n");
+  DEBUGASSERT(filep && filep->f_inode && fds);
+  inode = filep->f_inode;
+  priv  = inode->i_private;
+
+  /* Make sure that we have exclusive access to the private data structure */
+
+  DEBUGASSERT(priv);
+  usbhost_takesem(&priv->exclsem);
+
+  /* Check if the keyboard is still connected.  We need to disable interrupts
+   * momentarily to assure that there are no asynchronous disconnect events.
+   */
+
+  if (priv->disconnected)
     {
-      fds->revents |= (fds->events & (POLLIN|POLLOUT));
-      if (fds->revents != 0)
+      /* No... the driver is no longer bound to the class.  That means that
+       * the USB keybaord is no longer connected.  Refuse any further attempts
+       * to access the driver.
+       */
+
+      ret = -ENODEV;
+    }
+  else if (setup)
+    {
+      /* This is a request to set up the poll.  Find an availableslot for
+       * the poll structure reference
+       */
+
+      for (i = 0; i < CONFIG_USBHID_NPOLLWAITERS; i++)
         {
-          sem_post(fds->sem);
+          /* Find an available slot */
+
+          if (!priv->fds[i])
+            {
+              /* Bind the poll structure and this slot */
+
+              priv->fds[i] = fds;
+              fds->priv    = &priv->fds[i];
+              break;
+            }
+        }
+
+      if (i >= CONFIG_USBHID_NPOLLWAITERS)
+        {
+          fds->priv    = NULL;
+          ret          = -EBUSY;
+          goto errout;
+        }
+
+      /* Should we immediately notify on any of the requested events? Notify
+       * the POLLIN event if there is buffered keyboard data.
+       */
+
+      if (priv->headndx != priv->tailndx)
+        {
+          usbhost_pollnotify(priv);
         }
     }
-  return OK;
+  else
+    {
+      /* This is a request to tear down the poll. */
+
+      struct pollfd **slot = (struct pollfd **)fds->priv;
+      DEBUGASSERT(slot);
+
+      /* Remove all memory of the poll setup */
+
+      *slot                = NULL;
+      fds->priv            = NULL;
+    }
+
+errout:
+  sem_post(&priv->exclsem);
+  return ret;
 }
 #endif
 
