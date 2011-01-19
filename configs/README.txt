@@ -712,11 +712,40 @@ defconfig -- This is a configuration file similar to the Linux
         On some architectures, selecting this setting will reduce driver size
         by disabling bulk endpoint support
       CONFIG_USBHOST_INT_DISABLE
-       On some architectures, selecting this setting will reduce driver size
+        On some architectures, selecting this setting will reduce driver size
         by disabling interrupt endpoint support
       CONFIG_USBHOST_ISOC_DISABLE
         On some architectures, selecting this setting will reduce driver size
         by disabling isochronous endpoint support
+
+    USB host HID class driver. Requires CONFIG_USBHOST=y,
+      CONFIG_USBHOST_INT_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,
+      CONFIG_SCHED_WORKQUEUE=y, and CONFIG_DISABLE_SIGNALS=n.
+ 
+      CONFIG_HIDKBD_POLLUSEC
+        Device poll rate in microseconds. Default: 100 milliseconds.
+      CONFIG_HIDKBD_DEFPRIO
+        Priority of the polling thread.  Default: 50.
+      CONFIG_HIDKBD_STACKSIZE
+        Stack size for polling thread.  Default: 1024
+      CONFIG_HIDKBD_BUFSIZE
+        Scancode buffer size.  Default: 64.
+      CONFIG_HIDKBD_NPOLLWAITERS
+        If the poll() method is enabled, this defines the maximum number
+        of threads that can be waiting for keyboard events.  Default: 2.
+      CONFIG_HIDKBD_RAWSCANCODES
+        If set to y no conversion will be made on the raw keyboard scan
+        codes.  Default: ASCII conversion.
+      CONFIG_HIDKBD_ALLSCANCODES'
+        If set to y all 231 possible scancodes will be converted to
+        something.  Default:  104 key US keyboard.
+      CONFIG_HIDKBD_NODEBOUNCE
+        If set to y normal debouncing is disabled.  Default: 
+        Debounce enabled (No repeat keys).
+
+    USB host mass storage class driver. Requires CONFIG_USBHOST=y,
+      CONFIG_USBHOST_BULK_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,
+      and CONFIG_SCHED_WORKQUEUE=y
 
 	USB serial device class driver
 		CONFIG_USBSER
