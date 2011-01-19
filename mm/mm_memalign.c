@@ -100,7 +100,7 @@ FAR void *memalign(size_t alignment, size_t size)
   /* Then malloc that size */
 
   rawchunk = (size_t)malloc(allocsize);
-  if (rawchunk == NULL)
+  if (rawchunk == 0)
     {
       return NULL;
     }
