@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/poll/poll_main.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,9 +95,10 @@ int user_start(int argc, char *argv[])
   pthread_t tid3;
 #endif
   int count;
-  int fd1;
-  int fd2;
+  int fd1 = -1;
+  int fd2 = -1;
   int ret;
+  int exitcode = 0;
 
   /* Open FIFOs */
 
@@ -106,7 +107,8 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("user_start: mkfifo failed: %d\n", errno);
-      return 1;
+      exitcode = 1;
+      goto errout;
     }
 
   message("\nuser_start: Creating FIFO %s\n", FIFO_PATH2);
@@ -114,7 +116,8 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("user_start: mkfifo failed: %d\n", errno);
-      return 2;
+      exitcode = 2;
+      goto errout;
     }
 
   /* Open the FIFOs for blocking, write */
@@ -124,7 +127,8 @@ int user_start(int argc, char *argv[])
     {
       message("user_start: Failed to open FIFO %s for writing, errno=%d\n",
               FIFO_PATH1, errno);
-      return 2;
+      exitcode = 3;
+      goto errout;
     }
 
   fd2 = open(FIFO_PATH2, O_WRONLY);
@@ -132,7 +136,8 @@ int user_start(int argc, char *argv[])
     {
       message("user_start: Failed to open FIFO %s for writing, errno=%d\n",
               FIFO_PATH2, errno);
-      return 2;
+      exitcode = 4;
+      goto errout;
     }
 
   /* Start the listeners */
@@ -143,7 +148,8 @@ int user_start(int argc, char *argv[])
   if (ret != 0)
     {
       message("user_start: Failed to create poll_listener thread: %d\n", ret);
-      return 3;
+      exitcode = 5;
+      goto errout;
     }
 
   message("user_start: Starting select_listener thread\n");
@@ -152,7 +158,8 @@ int user_start(int argc, char *argv[])
   if (ret != 0)
     {
       message("user_start: Failed to create select_listener thread: %d\n", ret);
-      return 3;
+      exitcode = 6;
+      goto errout;
     }
 
 #ifdef HAVE_NETPOLL
@@ -184,14 +191,16 @@ int user_start(int argc, char *argv[])
       if (nbytes < 0)
         {
           message("user_start: Write to fd1 failed: %d\n", errno);
-          return 4;
+          exitcode = 7;
+          goto errout;
         }
 
       nbytes = write(fd2, buffer, strlen(buffer));
       if (nbytes < 0)
         {
           message("user_start: Write fd2 failed: %d\n", errno);
-          return 4;
+          exitcode = 8;
+          goto errout;
         }
 
       message("\nuser_start: Sent '%s' (%d bytes)\n", buffer, nbytes);
@@ -204,6 +213,17 @@ int user_start(int argc, char *argv[])
       sleep(WRITER_DELAY);
     }
 
+errout:
+  if (fd1 >= 0)
+    {
+      close(fd1);
+    }
+
+  if (fd2 >= 0)
+    {
+      close(fd2);
+    }
+
   fflush(stdout);
-  return 0;
+  return exitcode;
 }

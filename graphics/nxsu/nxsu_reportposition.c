@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nxsu_reportposition.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009,2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@
 
 void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
 {
-  FAR struct nxbe_state_s  *be = wnd->be;
+  FAR struct nxbe_state_s  *be;
   struct nxgl_size_s        size;
 
 #ifdef CONFIG_DEBUG
@@ -88,6 +88,7 @@ void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
       return;
     }
 #endif
+  be = wnd->be;
 
   /* This is very awkward in single user mode, but at least it is compatible.
    * with the way things are done in multiple user mode.

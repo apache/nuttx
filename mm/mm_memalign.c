@@ -1,7 +1,7 @@
 /************************************************************
  * mm/mm_memalign.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ FAR void *memalign(size_t alignment, size_t size)
   /* Then malloc that size */
 
   rawchunk = (size_t)malloc(allocsize);
-  if (!rawchunk)
+  if (rawchunk == NULL)
     {
       return NULL;
     }

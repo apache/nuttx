@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_registerdump.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009,2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -130,7 +130,7 @@ void z8_registerdump(void)
         regs = g_z8irqstate.regs;
         z8_dumpregs(regs);
         z8_dumpstate(regs[XCPT_SP], regs[XCPT_PC],
-                     regs[XCPT_IRQCTL], regs[XCPT_RPFLAGS];
+                     regs[XCPT_IRQCTL], regs[XCPT_RPFLAGS]);
         break;
 
       case Z8_IRQSTATE_NONE:

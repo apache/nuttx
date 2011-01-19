@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_colormap.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009,2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 
   size  = 3 * CONFIG_NX_NCOLORS * sizeof(uint16_t);
   alloc = (uint8_t*)malloc(size);
-  if (alloc < 0)
+  if (alloc == NULL)
     {
       return -ENOMEM;
     }

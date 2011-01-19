@@ -1445,9 +1445,9 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 #endif
           if (j < 0 || (j == 0 && !mode
 #ifndef ROUND_BIASED
-                        && (!(word1(d) & 1)))
+                        && (!(word1(d) & 1))
 #endif
-            )
+            ))
             {
               if ((j_1 > 0))
                 {

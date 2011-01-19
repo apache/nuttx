@@ -103,22 +103,22 @@
 #  define CONFIG_HIDKBD_STACKSIZE 1024
 #endif
 
-#ifndef CONFIG_USBHID_BUFSIZE
-#  define CONFIG_USBHID_BUFSIZE 64
+#ifndef CONFIG_HIDKBD_BUFSIZE
+#  define CONFIG_HIDKBD_BUFSIZE 64
 #endif
 
-#ifndef CONFIG_USBHID_NPOLLWAITERS
-#  define CONFIG_USBHID_NPOLLWAITERS 2
+#ifndef CONFIG_HIDKBD_NPOLLWAITERS
+#  define CONFIG_HIDKBD_NPOLLWAITERS 2
 #endif
 
 /* The default is to support scancode mapping for the standard 104 key
- * keyboard.  Setting CONFIG_USBHID_RAWSCANCODES will disable all scancode
- * mapping; Setting CONFIG_USBHID_ALLSCANCODES will enable mapping of all
+ * keyboard.  Setting CONFIG_HIDKBD_RAWSCANCODES will disable all scancode
+ * mapping; Setting CONFIG_HIDKBD_ALLSCANCODES will enable mapping of all
  * scancodes; 
  */
 
-#ifndef CONFIG_USBHID_RAWSCANCODES
-#  ifdef CONFIG_USBHID_ALLSCANCODES
+#ifndef CONFIG_HIDKBD_RAWSCANCODES
+#  ifdef CONFIG_HIDKBD_ALLSCANCODES
 #    define USBHID_NUMSCANCODES (USBHID_KBDUSE_MAX+1)
 #  else
 #    define USBHID_NUMSCANCODES 104
@@ -198,14 +198,14 @@ struct usbhost_state_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_USBHID_NPOLLWAITERS];
+  struct pollfd *fds[CONFIG_HIDKBD_NPOLLWAITERS];
 #endif
 
   /* Buffer used to collect and buffer incoming keyboard characters */
 
   volatile uint16_t       headndx;      /* Buffer head index */
   volatile uint16_t       tailndx;      /* Buffer tail index */
-  uint8_t                 kbdbuffer[CONFIG_USBHID_BUFSIZE];
+  uint8_t                 kbdbuffer[CONFIG_HIDKBD_BUFSIZE];
 };
 
 /****************************************************************************
@@ -342,7 +342,7 @@ static struct usbhost_state_s *g_priv;    /* Data passed to thread */
  * controls.
  */
 
-#ifndef CONFIG_USBHID_RAWSCANCODES
+#ifndef CONFIG_HIDKBD_RAWSCANCODES
 static const uint8_t ucmap[USBHID_NUMSCANCODES] =
 {
   0,    0,      0,      0,       'A',  'B',  'C',    'D',  /* 0x00-0x07: Reserved, errors, A-D */
@@ -358,7 +358,7 @@ static const uint8_t ucmap[USBHID_NUMSCANCODES] =
   0,    0,       0,      0,      '/',  '*',  '-',    '+',  /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
   '\n', '1',     '2',    '3',    '4',  '4',  '6',    '7',  /* 0x58-0x5f: Enter,1-7 */
   '8',  '9',     '0',    '.',    0,    0,    0,      '=',  /* 0x60-0x67: 8-9,0,.,Non-US \,Application,Power,= */
-#ifdef CONFIG_USBHID_ALLSCANCODES
+#ifdef CONFIG_HIDKBD_ALLSCANCODES
   0,    0,       0,      0,      0,    0,    0,      0,    /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
   0,    0,       0,      0,      0,    0,    0,      0,    /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
   0,    0,       0,      0,      0,    0,    0,      0,    /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
@@ -393,7 +393,7 @@ static const uint8_t lcmap[USBHID_NUMSCANCODES] =
   0,    0,       0,      0,      '/',  '*', '-',     '+',  /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
   '\n', '1',     '2',    '3',    '4',  '4', '6',     '7',  /* 0x58-0x5f: Enter,1-7 */
   '8',  '9',     '0',    '.',    0,    0,   0,       '=',  /* 0x60-0x67: 8-9,0,.,Non-US \,Application,Power,= */
-#ifdef CONFIG_USBHID_ALLSCANCODES
+#ifdef CONFIG_HIDKBD_ALLSCANCODES
   0,    0,       0,      0,      0,    0,   0,       0,    /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
   0,    0,       0,      0,      0,    0,   0,       0,    /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
   0,    0,       0,      0,      0,    0,   0,       0,    /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
@@ -412,7 +412,7 @@ static const uint8_t lcmap[USBHID_NUMSCANCODES] =
   0,    0,       0,      0,      0,    0,   0,       0,    /* 0xe0-0xe7: Left Ctrl,Shift,Alt,GUI, Right Ctrl,Shift,Alt,GUI */
 #endif
 };
-#endif /* CONFIG_USBHID_RAWSCANCODES */
+#endif /* CONFIG_HIDKBD_RAWSCANCODES */
 
 /****************************************************************************
  * Private Functions
@@ -450,7 +450,7 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
 {
   int i;
 
-  for (i = 0; i < CONFIG_USBHID_NPOLLWAITERS; i++)
+  for (i = 0; i < CONFIG_HIDKBD_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
       if (fds)
@@ -655,7 +655,7 @@ static void usbhost_destroy(FAR void *arg)
 
 static inline uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier)
 {
-#ifndef CONFIG_USBHID_RAWSCANCODES
+#ifndef CONFIG_HIDKBD_RAWSCANCODES
   /* Range check */
 
   if (scancode >= USBHID_NUMSCANCODES)
@@ -831,7 +831,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
                       /* Increment the head index */
 
-                      if (++head >= CONFIG_USBHID_BUFSIZE)
+                      if (++head >= CONFIG_HIDKBD_BUFSIZE)
                         {
                           head = 0;
                         }
@@ -843,7 +843,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
                       if (tail == head)
                        {
-                          if (++tail >= CONFIG_USBHID_BUFSIZE)
+                          if (++tail >= CONFIG_HIDKBD_BUFSIZE)
                             {
                               tail = 0;
                             }
@@ -1850,7 +1850,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
 
            /* Handle wrap-around of the tail index */
 
-           if (++tail >= CONFIG_USBHID_BUFSIZE)
+           if (++tail >= CONFIG_HIDKBD_BUFSIZE)
              {
                tail = 0;
              }
@@ -1928,7 +1928,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_USBHID_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_HIDKBD_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
 
@@ -1942,7 +1942,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
             }
         }
 
-      if (i >= CONFIG_USBHID_NPOLLWAITERS)
+      if (i >= CONFIG_HIDKBD_NPOLLWAITERS)
         {
           fds->priv    = NULL;
           ret          = -EBUSY;

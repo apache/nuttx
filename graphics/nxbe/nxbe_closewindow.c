@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_closewindow.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,17 +86,19 @@
 
 void nxbe_closewindow(struct nxbe_window_s *wnd)
 {
-  FAR struct nxbe_state_s *be = wnd->be;
+  FAR struct nxbe_state_s *be;
+
 #ifdef CONFIG_DEBUG
   if (!wnd)
     {
       return;
     }
+#endif
+  be = wnd->be;
 
   /* The background window should never be closed */
 
   DEBUGASSERT(wnd != &be->bkgd);
-#endif
 
   /* Is there a window above the one being closed? */
 

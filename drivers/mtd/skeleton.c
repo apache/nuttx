@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/skeleton.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -270,5 +270,5 @@ void skel_initialize(void)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  return ((FAR struct mtd_dev_s *)&g_skeldev;
+  return (FAR struct mtd_dev_s *)&g_skeldev;
 }
