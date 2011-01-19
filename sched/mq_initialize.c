@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/mq_initialize.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -210,8 +210,8 @@ void mq_initialize(void)
  * Function: mq_desblockalloc
  *
  * Description:
- *   Allocate a block of message descriptors  and place them
- *   on the free list.
+ *   Allocate a block of message descriptors and place them on the free
+ *   list.
  *
  * Inputs:
  *   None

@@ -614,7 +614,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
 static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 {
-  int ret;
+  int ret = OK;
 
   /* Set aside a transfer buffer for exclusive use by the class driver */
 

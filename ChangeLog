@@ -1435,3 +1435,5 @@
 	  class driver.
 	* configs/olimex-lpc1766stk/hidkbd - Added a configuration to build the
 	  USB host HID keyboard class driver test for the LPC17xx.
+	* Ran the tool CppCheck (http://sourceforge.net/apps/mediawiki/cppcheck) and
+	  fixed several errors in the code identified by the tool.

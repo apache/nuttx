@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread_mutexinit.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,14 +124,14 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR pthread_mutexattr_t *attr
         {
           ret = EINVAL;
         }
-    }
 
-    /* Set up attributes unique to the mutex type */
+      /* Set up attributes unique to the mutex type */
 
 #ifdef CONFIG_MUTEX_TYPES
-    mutex->type   = type;
-    mutex->nlocks = 0;
+      mutex->type   = type;
+      mutex->nlocks = 0;
 #endif
+    }
 
   sdbg("Returning %d\n", ret);
   return ret;
