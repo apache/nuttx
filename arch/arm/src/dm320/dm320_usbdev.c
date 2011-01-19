@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/dm320/dm320_usbdev.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -2402,7 +2402,7 @@ void up_usbinitialize(void)
 
   /* Perform endpoint initialization */
 
-  for (i = 0; i < DM320_NENDPOINTS+1; i++)
+  for (i = 0; i < DM320_NENDPOINTS; i++)
     {
       /* Set up the standard stuff */
 
@@ -2423,7 +2423,7 @@ void up_usbinitialize(void)
       priv->eplist[i].ep.maxpacket = g_epinfo[i].maxpacket;
       if (USB_EPIN(g_epinfo[i].addr))
         {
-          priv->eplist[1].in = 1;
+          priv->eplist[i].in = 1;
         }
 
       /* Reset the endpoint */
