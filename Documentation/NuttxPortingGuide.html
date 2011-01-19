@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: January 16, 2011</p>
+      <p>Last Updated: January 19, 2011</p>
     </td>
   </tr>
 </table>
@@ -3622,6 +3622,42 @@ build
     <code>CONFIG_USBHOST_ISOC_DISABLE</code>: On some architectures, selecting this setting will reduce driver size by disabling isochronous endpoint support
   </li>
 </ul>
+<h3>USB Host HID Class Driver</h3>
+<p>
+  Requires <code>CONFIG_USBHOST=y</code>, <code>CONFIG_USBHOST_INT_DISABLE=n</code>, <code>CONFIG_NFILE_DESCRIPTORS > 0</code>,
+  <code>CONFIG_SCHED_WORKQUEUE=y</code>, and <code>CONFIG_DISABLE_SIGNALS=n</code>.
+</p>
+<ul>
+  <li>
+    <code>CONFIG_HIDKBD_POLLUSEC</code>: Device poll rate in microseconds. Default: 100 milliseconds.
+  </li>
+  <li>
+    <code>CONFIG_HIDKBD_DEFPRIO</code>: Priority of the polling thread.  Default: 50.
+  </li>
+  <li>
+    <code>CONFIG_HIDKBD_STACKSIZE</code>: Stack size for polling thread.  Default: 1024
+  </li>
+  <li>
+    <code>CONFIG_HIDKBD_BUFSIZE</code>: Scancode buffer size.  Default: 64.
+  </li>
+  <li>
+    <code>CONFIG_HIDKBD_NPOLLWAITERS</code>: If the poll() method is enabled, this defines the maximum number of threads that can be waiting for keyboard events.  Default: 2.
+  </li>
+  <li>
+    <code>CONFIG_HIDKBD_RAWSCANCODES</code>: If set to <code>y</code> no conversion will be made on the raw keyboard scan codes.  Default: ASCII conversion.
+  </li>
+  <li>
+    <code>CONFIG_HIDKBD_ALLSCANCODES</code>: If set to <code>y</code> all 231 possible scancodes will be converted to something.  Default:  104 key US keyboard.
+  </li>
+  <li>
+    <code>CONFIG_HIDKBD_NODEBOUNCE</code>: If set to <code>y</code> normal debouncing is disabled.  Default:  Debounce/No repeat keys.
+  </li>
+</ul>
+<h3>USB Host HID Mass Storage Class Driver</h3>
+<p>
+  Requires <code>CONFIG_USBHOST=y</code>, <code>CONFIG_USBHOST_BULK_DISABLE=n</code>, <code>CONFIG_NFILE_DESCRIPTORS > 0</code>,
+  and <code>CONFIG_SCHED_WORKQUEUE=y</code>.
+</p>
 
 <h2>Graphics related configuration settings</h3>
 <ul>
