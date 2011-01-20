@@ -1418,7 +1418,7 @@
 	* drivers/usbhost -- Add a USB host class driver for the (Bulk-Only) USB
 	  Mass Storage Class.
 
-5.17 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.17 2011-01-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* include/nuttx/usb -- rename usb_storage.h to storage.h.
 	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for low-speed devices.
@@ -1437,3 +1437,5 @@
 	  USB host HID keyboard class driver test for the LPC17xx.
 	* Ran the tool CppCheck (http://sourceforge.net/apps/mediawiki/cppcheck) and
 	  fixed several errors in the code identified by the tool.
+
+5.18 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
