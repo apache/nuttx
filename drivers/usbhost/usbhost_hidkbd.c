@@ -696,6 +696,9 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 {
   FAR struct usbhost_state_s *priv;
   FAR struct usb_ctrlreq_s   *ctrlreq;
+#ifndef CONFIG_HIDKBD_NODEBOUNCE
+  uint8_t                     lastkey[6] = {0, 0, 0, 0, 0, 0};
+#endif
 #if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
   unsigned int                npolls = 0;
 #endif
@@ -793,9 +796,29 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
           for (i = 0; i < 6; i++)
             {
-              /* Is this key pressed? */
+              /* Is this key pressed?  But not pressed last time?
+               * HID spec: "The order of keycodes in array fields has no
+               * significance. Order determination is done by the host
+               * software comparing the contents of the previous report to
+               * the current report. If two or more keys are reported in
+               * one report, their order is indeterminate. Keyboards may
+               * buffer events that would have otherwise resulted in
+               * multiple event in a single report.
+               *
+               * "'Repeat Rate' and 'Delay Before First Repeat' are
+               * implemented by the host and not in the keyboard (this
+               * means the BIOS in legacy mode). The host may use the
+               * device report rate and the number of reports to determine
+               * how long a key is being held down. Alternatively, the host
+               * may use its own clock or the idle request for the timing
+               * of these features."
+               */
 
-              if (rpt->key[i] != USBHID_KBDUSE_NONE)
+              if (rpt->key[i] != USBHID_KBDUSE_NONE
+#ifndef CONFIG_HIDKBD_NODEBOUNCE
+                 && rpt->key[i] != lastkey[i]
+#endif
+                 )
                 {
                   /* Yes.. Add it to the buffer. */
 
@@ -850,6 +873,13 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                         }
                     }
                 }
+              /* Save the scancode (or lack thereof) for key debouncing on
+               * next keyboard report.
+               */
+
+#ifndef CONFIG_HIDKBD_NODEBOUNCE
+              lastkey[i] = rpt->key[i];
+#endif
             }
 
           /* Did we just transition from no data available to data available? */
