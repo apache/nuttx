@@ -1003,7 +1003,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
    * entries, OUT EDs get the odd entries.
    */
 
-  if ((ed->hw.ctrl && ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
+  if ((ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
     {
       offset = 0;
     }
