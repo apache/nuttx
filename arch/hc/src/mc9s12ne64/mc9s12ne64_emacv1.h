@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/hc/src/mc9s12ne64/mc9s12ne64_emacv1.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
