@@ -108,29 +108,63 @@
 /* Register Bit-Field Definitions ***************************************************/
 
 /* Network Control (8-bit) */
-#define EMAC_NETCTL_
+
+#define EMAC_NETCTL_FDX                (1 << 1)  /* Bit 1: Full Duplex */
+#define EMAC_NETCTL_MLB                (1 << 2)  /* Bit 2: MAC Loopback */
+#define EMAC_NETCTL_EXTPHY             (1 << 3)  /* Bit 3: External PHY */
+#define EMAC_NETCTL_ESWAI              (1 << 4)  /* Bit 4: EMAC Disabled during Wait Mode */
+#define EMAC_NETCTL_EMACE              (1 << 7)  /* Bit 7: EMAC Enable */
 
 /* Receive Control and Status (8-bit) */
-#define EMAC_RXCTS_
+
+#define EMAC_RXCTS_BCREJ               (1 << 0)  /* Bit 0: Broadcast Reject */
+#define EMAC_RXCTS_CONMC               (1 << 1)  /* Bit 1: Conditional Multicast */
+#define EMAC_RXCTS_PROM                (1 << 2)  /* Bit 2: Promiscuous Mode */
+#define EMAC_RXCTS_RFCE                (1 << 4)  /* Bit 4: Reception Flow Control Enable */
+#define EMAC_RXCTS_RXACT               (1 << 7)  /* Bit 7: Receiver Active Status */
 
 /* Transmit Control and Status (8-bit) */
-#define EMAC_TXCTS_
+
+#define EMAC_TXCTS_TCMD_SHIFT          (0)       /* Bits 0-1: Transmit Command */
+#define EMAC_TXCTS_TCMD_MASK           (3)
+#  define EMAC_TXCTS_TCMD_START        (1)       /* Transmit buffer frame */
+#  define EMAC_TXCTS_TCMD_PAUSE        (2)       /* Transmit PAUSE frame (full-duplex mode only) */
+#  define EMAC_TXCTS_TCMD_ABORT        (3)       /* Abort transmission */
+#define EMAC_TXCTS_SSB                 (1 << 3)  /* Bit 3: Single Slot Backoff */
+#define EMAC_TXCTS_PTRC                (1 << 4)  /* Bit 4: PAUSE Timer Register Control */
+#define EMAC_TXCTS_CSLF                (1 << 5)  /* Bit 5: Carrier Sense Lost Flag */
+#define EMAC_TXCTS_TXACT               (1 << 7)  /* Bit 7: Transmitter Active Status */
 
 /* Ethertype Control (8-bit) */
-#define EMAC_ETCTL_
+
+#define EMAC_ETCTL_FIEEE               (1 << 0)  /* Bit 0: IEEE802.3 Length Field Ethertype */
+#define EMAC_ETCTL_FIPV4               (1 << 1)  /* Bit 1: Internet Protocol Version 4 (IPv4) Ethertype */
+#define EMAC_ETCTL_FARP                (1 << 2)  /* Bit 2: Address Resolution Protocol (ARP) Ethertype */
+#define EMAC_ETCTL_FIPV6               (1 << 3)  /* Bit 3: Internet Protocol Version 6 (IPv6) Ethertype */
+#define EMAC_ETCTL_FEMW                (1 << 4)  /* Bit 4: Emware Ethertype */
+#define EMAC_ETCTL_FPET                (1 << 7)  /* Bit 7: Programmable Ethertype */
 
 /* Programmable Ethertype (16-bit) -- 16-bit Ethernet type data */
 /* PAUSE Timer Value and Counter (16-bit) -- 16-bit PAUSER timer value */
 
 /* Interrupt Event (16-bit) */
-#define EMAC_IEVENT_
-
 /* Interrupt Mask (16-bit) */
-#define EMAC_IMASK_
+
+#define EMAC_INT_TXCI                  (1 << 1)  /* Bit 1:  Frame Transmission Complete Interrupt */
+#define EMAC_INT_ECI                   (1 << 4)  /* Bit 4:  Excessive Collision Interrupt */
+#define EMAC_INT_LCI                   (1 << 5)  /* Bit 5:  Late Collision Interrupt */
+#define EMAC_INT_MMCI                  (1 << 7)  /* Bit 7:  MII Management Transfer Complete Interrupt */
+#define EMAC_INT_RXBCI                 (1 << 8)  /* Bit 8:  Valid Frame Reception to Receive Buffer B Complete Interrupt */
+#define EMAC_INT_RXACI                 (1 << 9)  /* Bit 9:  Valid Frame Reception to Receive Buffer A Complete Interrupt */
+#define EMAC_INT_RXBOI                 (1 << 10) /* Bit 10: Receive Buffer B Overrun Interrupt */
+#define EMAC_INT_RXAOI                 (1 << 11) /* Bit 11: Receive Buffer A Overrun Interrupt */
+#define EMAC_INT_RXEI                  (1 << 12) /* Bit 12: Receive Error Interrupt */
+#define EMAC_INT_BREI                  (1 << 13) /* Bit 13: Babbling Receive Error Interrupt */
+#define EMAC_INT_RFCI                  (1 << 15) /* Bit 15: Receive Flow Control Interrupt */
 
 /* Software Reset (8-bit) */
 
-#define EMAC_SWRST_MACRST              (1<< 7)  /* Bit 7: EMAC is reset */
+#define EMAC_SWRST_MACRST              (1 << 7)  /* Bit 7: EMAC is reset */
 
 /* MII Management PHY Address (8-bit) */
 
@@ -144,10 +178,28 @@
 /* MII Management Read Data (16-bit) -- 16-bit read data */
 
 /* MII Management Command and Status (8-bit) */
-#define EMAC_MCMST_
+
+#define EMAC_MCMST_MDCSEL_SHIFT        (0)       /* Bits 0-3: Management Clock Rate Sel */
+#define EMAC_MCMST_MDCSEL_MASK         (15)      /*           MDC frequency = Bus clock frequency / (2 * MDCSEL) */
+#define EMAC_MCMST_NOPRE               (1 << 4)  /* Bit 4:  No Preamble */
+#define EMAC_MCMST_BUSY                (1 << 5)  /* Bit 5:  Operation in Progress */
+#define EMAC_MCMST_OP_SHIFT            (6)       /* Bits 6-7: Operation Code */
+#define EMAC_MCMST_OP_MASK             (3 << EMAC_MCMST_OP_SHIFT)
+#  define EMAC_MCMST_OP_IGNORE         (0 << EMAC_MCMST_OP_SHIFT)
+#  define EMAC_MCMST_OP_WRITE          (1 << EMAC_MCMST_OP_SHIFT)
+#  define EMAC_MCMST_OP_READ           (2 << EMAC_MCMST_OP_SHIFT)
 
 /* Ethernet Buffer Configuration (16-bit) */
-#define EMAC_BUFCFG_
+
+#define EMAC_BUFCFG_MAXFL_SHIFT        (0)       /* Bits 0-10 Receive Maximum Frame Length */
+#define EMAC_BUFCFG_MAXFL_MASK         (0x07ff)
+#define EMAC_BUFCFG_BUFMAP_SHIFT       (12)      /* Bits 12-14: Buffer Size and Starting Address Mapping */
+#define EMAC_BUFCFG_BUFMAP_SHIFT       (7 << EMAC_BUFCFG_BUFMAP_SHIFT)
+#  define EMAC_BUFCFG_BUFMAP_128       (0 << EMAC_BUFCFG_BUFMAP_SHIFT) /* Rx/Tx = 128 bytes */
+#  define EMAC_BUFCFG_BUFMAP_256       (1 << EMAC_BUFCFG_BUFMAP_SHIFT) /* Rx/Tx = 256 bytes */
+#  define EMAC_BUFCFG_BUFMAP_512       (2 << EMAC_BUFCFG_BUFMAP_SHIFT) /* Rx/Tx = 512 bytes */
+#  define EMAC_BUFCFG_BUFMAP_1024      (3 << EMAC_BUFCFG_BUFMAP_SHIFT) /* Rx/Tx = 1Kb */
+#  define EMAC_BUFCFG_BUFMAP_1536      (4 << EMAC_BUFCFG_BUFMAP_SHIFT) /* Rx/Tx = 1.5Kb */
 
 /* Receive A End-of-Frame Pointer (16-bit) */
 
@@ -171,7 +223,15 @@
 /* MAC Unicast AAddress 0-15 (16-bit) -- 16-bits of address */
 
 /* Miscellaneous (16-bit) */
-#define EMAC_EMISC_
+
+#define EMAC_EMISC_SHIFT               (0)       /* Bits 0-10: Misc data */
+#define EMAC_EMISC_MASK                (0x07ff)
+#define EMAC_EMISC_INDEX_SHIFT         (13)      /* Bits 13-15: Miscellaneous Index */
+#define EMAC_EMISC_INDEX_MASK          (7 << EMAC_EMISC_INDEX_SHIFT)
+#  define EMAC_EMISC_INDEX_TXBYT       (3 << EMAC_EMISC_INDEX_SHIFT) /* Transmit Frame Byte Counter */
+#  define EMAC_EMISC_INDEX_BSLOT       (4 << EMAC_EMISC_INDEX_SHIFT) /* Backoff Slot Time Counter */
+#  define EMAC_EMISC_INDEX_RETX        (5 << EMAC_EMISC_INDEX_SHIFT) /* Retransmission Counter */
+#  define EMAC_EMISC_INDEX_RANDOM      (6 << EMAC_EMISC_INDEX_SHIFT) /* Backoff Random Number */
 
 /************************************************************************************
  * Public Types

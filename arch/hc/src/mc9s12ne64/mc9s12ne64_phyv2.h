@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/hc/src/mc9s12ne64/mc9s12ne64_phyv2.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,13 +62,25 @@
 /* Register Bit-Field Definitions ***************************************************/
 
 /* Ethernet Physical Transceiver Control Register 0 */
-#define PHY_EPHYCTL0_
+
+#define PHY_EPHYCTL0_EPHYIEN           (1 << 0)  /* Bit 0: EPHY Interrupt Enable */
+#define PHY_EPHYCTL0_EPHYWAI           (1 << 2)  /* Bit 2: EPHY Module Stops While in Wait */
+#define PHY_EPHYCTL0_LEDEN             (1 << 3)  /* Bit 3: LED Drive Enable */
+#define PHY_EPHYCTL0_DIS10             (1 << 4)  /* Bit 4: Disable 10BASE-T PLL */
+#define PHY_EPHYCTL0_DIS100            (1 << 5)  /* Bit 5: Disable 100 BASE-TX PLL */
+#define PHY_EPHYCTL0_ANDIS             (1 << 6)  /* Bit 6: Auto Negotiation Disable */
+#define PHY_EPHYCTL0_EPHYEN            (1 << 7)  /* Bit 7: EPHY Enable */
 
 /* Ethernet Physical Transceiver Control Register 1 */
-#define PHY_EPHYCTL1_
+
+#define PHY_EPHYCTL1_PHYADD_SHIFT      (0)       /* Bits 0-4: EPHY Address for MII Requests */
+#define PHY_EPHYCTL1_PHYADD_MASK       (0x1f)
 
 /* Ethernet Physical Transceiver Status Register */
-#define PHY_EPHYSR_
+
+#define PHY_EPHYSR_EPHYI               (1 << 0)  /* Bit 0: EPHY Interrupt Flag */
+#define PHY_EPHYSR_10DIS               (1 << 4)  /* Bit 4: EPHY Port 10BASE-T mode status */
+#define PHY_EPHYSR_100DIS              (1 << 5)  /* Bit 5: EPHY Port 100BASE-TX mode status */
 
 /************************************************************************************
  * Public Types
