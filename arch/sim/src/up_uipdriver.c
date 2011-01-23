@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_uipdriver.c
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on code from uIP which also has a BSD-like license:
@@ -38,13 +38,13 @@
  *
  ****************************************************************************/
 
-#ifdef linux
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#ifdef CONFIG_NET
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -124,7 +124,7 @@ static int sim_uiptxpoll(struct uip_driver_s *dev)
   if (g_sim_dev.d_len > 0)
     {
       uip_arp_out(&g_sim_dev);
-      tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+      netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
     }
 
   /* If zero is returned, the polling will continue until all connections have
@@ -140,9 +140,9 @@ static int sim_uiptxpoll(struct uip_driver_s *dev)
 
 void uipdriver_loop(void)
 {
-  /* tapdev_read will return 0 on a timeout event and >0 on a data received event */
+  /* netdev_read will return 0 on a timeout event and >0 on a data received event */
 
-  g_sim_dev.d_len = tapdev_read((unsigned char*)g_sim_dev.d_buf, CONFIG_NET_BUFSIZE);
+  g_sim_dev.d_len = netdev_read((unsigned char*)g_sim_dev.d_buf, CONFIG_NET_BUFSIZE);
 
   /* Disable preemption through to the following so that it behaves a little more
    * like an interrupt (otherwise, the following logic gets pre-empted an behaves
@@ -177,7 +177,7 @@ void uipdriver_loop(void)
               if (g_sim_dev.d_len > 0)
                 {
                   uip_arp_out(&g_sim_dev);
-                  tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+                  netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
                 }
             }
           else if (BUF->ether_type == htons(UIP_ETHTYPE_ARP))
@@ -191,7 +191,7 @@ void uipdriver_loop(void)
 
               if (g_sim_dev.d_len > 0)
                 {
-                  tapdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+                  netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
                 }
             }
         }
@@ -212,8 +212,7 @@ int uipdriver_init(void)
   /* Internal initalization */
 
   timer_set(&g_periodic_timer, 500);
-  tapdev_init();
-  (void)tapdev_getmacaddr(g_sim_dev.d_mac.ether_addr_octet);
+  netdev_init();
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
@@ -221,5 +220,11 @@ int uipdriver_init(void)
   return OK;
 }
 
-#endif /* linux */
+int uipdriver_setmacaddr(unsigned char *macaddr)
+{
+  (void)memcpy(g_sim_dev.d_mac.ether_addr_octet, macaddr, IFHWADDRLEN);
+  return 0;
+}
+
+#endif /* CONFIG_NET */
 

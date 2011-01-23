@@ -113,20 +113,41 @@ extern char *up_deviceimage(void);
 extern size_t up_hostread(void *buffer, size_t len);
 extern size_t up_hostwrite(const void *buffer, size_t len);
 
+/* up_netdev.c ************************************************************/
+
+#ifdef CONFIG_NET
+extern unsigned long up_getwalltime( void );
+#endif
+
 /* up_tapdev.c ************************************************************/
 
-#ifdef CONFIG_NET 
-extern unsigned long up_getwalltime( void );
+#if defined(CONFIG_NET) && !defined(CYGWIN)
 extern void tapdev_init(void);
-extern int tapdev_getmacaddr(unsigned char *macaddr);
 extern unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
 extern void tapdev_send(unsigned char *buf, unsigned int buflen);
+
+#define netdev_init()           tapdev_init()
+#define netdev_read(buf,buflen) tapdev_read(buf,buflen)
+#define netdev_send(buf,buflen) tapdev_send(buf,buflen)
+#endif
+
+/* up_wpcap.c *************************************************************/
+
+#if defined(CONFIG_NET) && defined(CYGWIN)
+extern void wpcap_init(void);
+extern unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
+extern void wpcap_send(unsigned char *buf, unsigned int buflen);
+
+#define netdev_init()           wpcap_init()
+#define netdev_read(buf,buflen) wpcap_read(buf,buflen)
+#define netdev_send(buf,buflen) wpcap_send(buf,buflen)
 #endif
 
 /* up_uipdriver.c *********************************************************/
 
-#if defined(CONFIG_NET) && defined(linux)
+#ifdef CONFIG_NET
 extern int uipdriver_init(void);
+extern int uipdriver_setmacaddr(unsigned char *macaddr);
 extern void uipdriver_loop(void);
 #endif
 

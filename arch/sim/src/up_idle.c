@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_idle.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@ void up_idle(void)
 
   /* Run the network if enabled */
 
-#if defined(CONFIG_NET) && defined(linux)
+#ifdef CONFIG_NET
   uipdriver_loop();
 #endif
 

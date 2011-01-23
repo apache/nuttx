@@ -40,58 +40,66 @@
 
 ifneq ($(HOSTOS),Cygwin)
 ifeq ($(CONFIG_SIM_X11FB),y)
-  USEX		= y
+  USEX = y
 else
-  USEX		= n
+  USEX = n
 endif
 else
-  USEX		= n
+  USEX = n
+  CFLAGS += -DCYGWIN
+  HOSTCFLAGS += -DCYGWIN
 endif
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		= up_setjmp.S
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= up_initialize.c up_idle.c up_interruptcontext.c \
+ASRCS = up_setjmp.S
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+CSRCS = up_initialize.c up_idle.c up_interruptcontext.c \
 		  up_initialstate.c up_createstack.c up_usestack.c \
 		  up_releasestack.c  up_unblocktask.c up_blocktask.c \
 		  up_releasepending.c up_reprioritizertr.c \
 		  up_exit.c up_schedulesigaction.c up_allocateheap.c \
 		  up_devconsole.c up_framebuffer.c
-HOSTSRCS	= up_stdio.c up_hostusleep.c
+HOSTSRCS = up_stdio.c up_hostusleep.c
 ifeq ($(USEX),y)
-  HOSTSRCS	+=  up_x11framebuffer.c
+  HOSTSRCS +=  up_x11framebuffer.c
 endif
 ifeq ($(CONFIG_FS_FAT),y)
-CSRCS		+= up_blockdevice.c up_deviceimage.c
+CSRCS += up_blockdevice.c up_deviceimage.c
 endif
 ifeq ($(CONFIG_NET),y)
-CSRCS		+= up_uipdriver.c
-HOSTSRCS	+= up_tapdev.c
+CSRCS += up_uipdriver.c
+HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_BUFSIZE)
+ifneq ($(HOSTOS),Cygwin)
+HOSTSRCS += up_tapdev.c up_netdev.c
+else
+HOSTSRCS += up_wpcap.c up_netdev.c
+DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
+endif
 endif
 
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-NXOBJS		= $(AOBJS) $(COBJS)
-HOSTOBJS	= $(HOSTSRCS:.c=$(OBJEXT))
+NXOBJS = $(AOBJS) $(COBJS)
+HOSTOBJS = $(HOSTSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS) $(HOSTSRCS)
-OBJS		= $(AOBJS) $(COBJS) $(HOSTOBJS)
+SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
+OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
-LDFLAGS		= $(ARCHSCRIPT)
+LDFLAGS = $(ARCHSCRIPT)
 ifeq ($(USEX),y)
-  STDLIBS	= -lX11 -lXext -lc
+  STDLIBS = -lX11 -lXext -lc
 else
-  STDLIBS       = -lc
+  STDLIBS = -lc
 endif
 ifeq ($(CONFIG_FS_FAT),y)
 STDLIBS		+= -lz
 endif
 
-LINKOBJS	= up_head$(OBJEXT)
-LINKLIBS	=
+LINKOBJS = up_head$(OBJEXT)
+LINKLIBS =
 LDPATHS	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
-LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
+LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
 .PHONY: clean distclean cleanrel depend
@@ -134,7 +142,7 @@ nuttx.rel : libarch$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 
 nuttx$(EXEEXT): cleanrel nuttx.rel $(HOSTOBJS)
 	@echo "LD:  nuttx$(EXEEXT)"
-	@$(CC) $(LDFLAGS) $(LDPATHS) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS)
+	@$(CC) $(LDFLAGS) $(LDPATHS) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS)
 	@$(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
