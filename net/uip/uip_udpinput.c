@@ -2,7 +2,7 @@
  * net/uip/uip_udpinput.c
  * Handling incoming UDP input
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -96,6 +96,10 @@ void uip_udpinput(struct uip_driver_s *dev)
 {
   struct uip_udp_conn  *conn;
   struct uip_udpip_hdr *pbuf = UDPBUF;
+
+#ifdef CONFIG_NET_STATISTICS
+  uip_stat.udp.recv++;
+#endif
 
   /* UDP processing is really just a hack. We don't do anything to the UDP/IP
    * headers, but let the UDP application do all the hard work. If the

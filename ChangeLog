@@ -1439,3 +1439,8 @@
 	  fixed several errors in the code identified by the tool.
 
 5.18 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Incorporate several uIP patches from http://gitweb.aeruder.net/?p=uip.git;a=summary.
+	  - Lost SYNACK causes connection reset
+	  - Fix missing UDP stats for sent/received packets
+	  - Added support for Cygwin as development/test platform.

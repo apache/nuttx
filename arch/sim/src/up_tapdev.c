@@ -1,8 +1,7 @@
-
 /****************************************************************************
  * up_tapdev.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on code from uIP which also has a BSD-like license:
@@ -39,7 +38,7 @@
  *
  ****************************************************************************/
 
-#ifdef linux
+#ifndef CYGWIN
 
 /****************************************************************************
  * Included Files
@@ -63,6 +62,7 @@
 #include <linux/net.h>
 
 extern int lib_rawprintf(const char *format, ...);
+extern int uipdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Private Definitions
@@ -133,16 +133,41 @@ static inline void dump_ethhdr(const char *msg, unsigned char *buf, int buflen)
 #  define dump_ethhdr(m,b,l)
 #endif
 
+static int up_setmacaddr(void)
+{
+  unsigned char macaddr[6];
+  int ret = -1;
+  if (macaddr)
+    {
+      /* Get a socket (only so that we get access to the INET subsystem) */
+
+      int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+      if (sockfd >= 0)
+        {
+          struct ifreq req;
+          memset(&req, 0, sizeof(struct ifreq));
+
+          /* Put the driver name into the request */
+
+          strncpy(req.ifr_name, "tap0", IFNAMSIZ);
+
+          /* Perform the ioctl to get the MAC address */
+
+          ret = ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
+          if (!ret)
+            {
+              /* Set the MAC address */
+
+              ret = uipdriver_setmacaddr(&req.ifr_hwaddr.sa_data);
+            }
+        }
+    }
+  return ret;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-unsigned long up_getwalltime( void )
-{
-  struct timeval tm;
-  (void)gettimeofday(&tm, NULL);
-  return tm.tv_sec*1000 + tm.tv_usec/1000;
-}
 
 void tapdev_init(void)
 {
@@ -175,37 +200,10 @@ void tapdev_init(void)
   snprintf(buf, sizeof(buf), "/sbin/ifconfig tap0 inet %d.%d.%d.%d\n",
            UIP_IPADDR0, UIP_IPADDR1, UIP_IPADDR2, UIP_IPADDR3);
   system(buf);
-}
 
-int tapdev_getmacaddr(unsigned char *macaddr)
-{
-  int ret = -1;
-  if (macaddr)
-    {
-      /* Get a socket (only so that we get access to the INET subsystem) */
+  /* Set the MAC address */
 
-      int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
-      if (sockfd >= 0)
-        {
-          struct ifreq req;
-          memset (&req, 0, sizeof(struct ifreq));
-
-          /* Put the driver name into the request */
-
-          strncpy(req.ifr_name, "tap0", IFNAMSIZ);
-
-          /* Perform the ioctl to get the MAC address */
-
-          ret = ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
-          if (!ret)
-            {
-              /* Return the MAC address */
-
-              memcpy(macaddr, &req.ifr_hwaddr.sa_data, IFHWADDRLEN);
-            }
-        }
-    }
-  return ret;
+  up_setmacaddr();
 }
 
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
@@ -269,6 +267,6 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
   dump_ethhdr("write", buf, buflen);
 }
 
-#endif /* linux */
+#endif /* !CYGWIN */
 
 

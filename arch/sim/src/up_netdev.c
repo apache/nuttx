@@ -1,7 +1,7 @@
 /****************************************************************************
- * up_initialize.c
+ * up_tapdev.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,17 +37,19 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/fs.h>
-
-#include "up_internal.h"
+#include <sys/types.h>
+#include <sys/time.h>
 
 /****************************************************************************
  * Private Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -62,46 +64,9 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_initialize
- *
- * Description:
- *   up_initialize will be called once during OS
- *   initialization after the basic OS services have been
- *   initialized.  The architecture specific details of
- *   initializing the OS will be handled here.  Such things as
- *   setting up interrupt service routines, starting the
- *   clock, and registering device drivers are some of the
- *   things that are different for each processor and hardware
- *   platform.
- *
- *   up_initialize is called after the OS initialized but
- *   before the init process has been started and before the
- *   libraries have been initialized.  OS services and driver
- *   services are available.
- *
- ****************************************************************************/
-
-void up_initialize(void)
+unsigned long up_getwalltime( void )
 {
-  /* The real purpose of the following is to make sure that lib_rawprintf
-   * is drawn into the link.  It is needed by up_tapdev which is linked
-   * separately.
-   */
-
-#ifdef CONFIG_NET
-  lib_rawprintf("SIM: Initializing");
-#endif
-
-  /* Register devices */
-
-  devnull_register();       /* Standard /dev/null */
-  devzero_register();       /* Standard /dev/zero */
-  up_devconsole();          /* Our private /dev/console */
-#if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
-  up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */
-#endif
-#ifdef CONFIG_NET
-  uipdriver_init();         /* Our "real" netwok driver */
-#endif
+  struct timeval tm;
+  (void)gettimeofday(&tm, NULL);
+  return tm.tv_sec*1000 + tm.tv_usec/1000;
 }

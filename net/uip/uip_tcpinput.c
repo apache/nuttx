@@ -2,7 +2,7 @@
  * net/uip/uip_tcpinput.c
  * Handling incoming TCP input
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -131,7 +131,21 @@ void uip_tcpinput(struct uip_driver_s *dev)
   conn = uip_tcpactive(pbuf);
   if (conn)
     {
-      goto found;
+      /* We found an active connection.. Check for the subsequent SYN
+       * arriving in UIP_SYN_RCVD state after the SYNACK packet was
+       * lost.  To avoid other issues,  reset any active connection
+       * where a SYN arrives in a state != UIP_SYN_RCVD.
+       */
+
+      if ((conn->tcpstateflags & UIP_TS_MASK) != UIP_SYN_RCVD &&
+         (BUF->flags & TCP_CTL) == TCP_SYN)
+        {
+          goto reset;
+        }
+      else
+        {
+          goto found;
+        }
     }
 
   /* If we didn't find and active connection that expected the packet,
@@ -259,6 +273,8 @@ void uip_tcpinput(struct uip_driver_s *dev)
    * no matching listener found.  Send RST packet in either case.
    */
 
+reset:
+
   /* We do not send resets in response to resets. */
 
   if ((pbuf->flags & TCP_RST) != 0)
@@ -278,7 +294,7 @@ found:
 
   /* We do a very naive form of TCP reset processing; we just accept
    * any RST and kill our connection. We should in fact check if the
-   * sequence number of this reset is wihtin our advertised window
+   * sequence number of this reset is within our advertised window
    * before we accept the reset.
    */
 
@@ -306,17 +322,21 @@ found:
 
   /* First, check if the sequence number of the incoming packet is
    * what we're expecting next. If not, we send out an ACK with the
-   * correct numbers in.
+   * correct numbers in, unless we are in the SYN_RCVD state and
+   * receive a SYN, in which case we should retransmit our SYNACK
+   * (which is done further down).
    */
 
-  if (!(((conn->tcpstateflags & UIP_TS_MASK) == UIP_SYN_SENT) &&
-      ((pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))))
+  if (!((((conn->tcpstateflags & UIP_TS_MASK) == UIP_SYN_SENT) &&
+        ((pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))) ||
+        (((conn->tcpstateflags & UIP_TS_MASK) == UIP_SYN_RCVD) &&
+        ((pbuf->flags & TCP_CTL) == TCP_SYN))))
     {
       if ((dev->d_len > 0 || ((pbuf->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
           memcmp(pbuf->seqno, conn->rcvseq, 4) != 0)
         {
-            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
-            return;
+          uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+          return;
         }
     }
 
@@ -442,6 +462,14 @@ found:
             dev->d_sndlen       = 0;
             result              = uip_tcpcallback(dev, conn, flags);
             uip_tcpappsend(dev, conn, result);
+            return;
+          }
+
+        /* We need to retransmit the SYNACK */
+
+        if ((pbuf->flags & TCP_CTL) == TCP_SYN)
+          {
+            uip_tcpack(dev, conn, TCP_ACK | TCP_SYN);
             return;
           }
         goto drop;
@@ -617,7 +645,7 @@ found:
          * remote host.
          */
 
-        if (dev->d_len > 0 && !(conn->tcpstateflags & UIP_STOPPED))
+        if (dev->d_len > 0 && (conn->tcpstateflags & UIP_STOPPED) == 0)
           {
             flags |= UIP_NEWDATA;
             uip_incr32(conn->rcvseq, dev->d_len);
