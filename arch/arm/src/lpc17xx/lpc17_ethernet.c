@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_ethernet.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1800,7 +1800,20 @@ static int lpc17_phymode(uint8_t phyaddr, uint8_t mode)
   int32_t timeout;
   uint16_t phyreg;
 
-  /* Disable auto-negotiation and set fixed Speed and Duplex settings */
+  /* Disable auto-negotiation and set fixed Speed and Duplex settings:
+   *
+   *   MII_MCR_UNIDIR      0=Disable unidirectional enable
+   *   MII_MCR_SPEED1000   0=Reserved on 10/100
+   *   MII_MCR_CTST        0=Disable collision test
+   *   MII_MCR_FULLDPLX    ?=Full duplex
+   *   MII_MCR_ANRESTART   0=Don't restart auto negotiation
+   *   MII_MCR_ISOLATE     0=Don't electronically isolate PHY from MII
+   *   MII_MCR_PDOWN       0=Don't powerdown the PHY
+   *   MII_MCR_ANENABLE    0=Disable auto negotiation
+   *   MII_MCR_SPEED100    ?=Select 100Mbps
+   *   MII_MCR_LOOPBACK    0=Disable loopback mode
+   *   MII_MCR_RESET       0=No PHY reset
+   */
 
   phyreg = 0;
   if ((mode & LPC17_SPEED_MASK) ==  LPC17_SPEED_100)
