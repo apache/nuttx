@@ -57,7 +57,6 @@ MEMORY
   vectors (rx)  : ORIGIN = 0xff80, LENGTH = 256
 }
 
-OUTPUT_ARCH(m68hc12)
 ENTRY(_stext)
 SECTIONS
 {

@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated November 30, 2010)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated January 26, 2011)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
@@ -11,7 +11,7 @@ NuttX TODO List (Last updated November 30, 2010)
  (16)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
-  (5)  Libraries (lib/)
+  (4)  Libraries (lib/)
  (12)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
@@ -78,7 +78,7 @@ o On-demand paging (sched/)
                configs/ea3131/pgnsh and locked directories).  There are
                some limitations of this testing so I still cannot say that
                the feature is fully functional.
-  Status:      Open, in work
+  Status:      Open
   Priority:    Medium-Low
 
 o Memory Managment (mm/)
@@ -314,18 +314,6 @@ o Network Utilities (netutils/)
   Status:      Open
   Priority:    Medium
 
-  Description: There are some lingering bugs in THTTPD, possibly race conditions.  When debug
-               is enabled, it works.  But with debug disabled, there are sometimes
-               mysterious hangs or crashes in the CGI.  Of course, this is hard to fix
-               when the problem goes away with debug output enabled (and also since
-               output from the CGI program is re-directed; you can redefine bdbg to
-               be lldbg in include/debug.h to get non-re-directed debug output).
-  Status:      Open.
-               UPDATE: I have found that increasing the size of the CGI program stack
-               from 1024 to 2048 (on the LM3S) eliminates the problem.  So the most
-               likely cause is probably a stack overflow, not a hard sofware bug.
-  Priority:    Probably Low
-
   Description: If the network is enabled, but THTTPD is not configured, it spews out lots
                of pointless warnings.  This is kind of annoying and unprofessional; needs to
                be fixed someday.
@@ -342,11 +330,6 @@ o USB (drivers/usbdev)
 
 o Libraries (lib/)
   ^^^^^^^^^^^^^^^^
-
-  Description: sscanf() and lib_vsprintf() do not support floating point
-               values.
-  Status:      Open
-  Priority:    Low
 
   Description: The definition of environ in stdlib.h is bogus and will not
                work as it should.  This is because the underlying
@@ -600,9 +583,11 @@ o Linux/Cywgin simulation (arch/sim)
                See the patch 0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch
                that can be found at http://tech.groups.yahoo.com/group/nuttx/files.
 
-  Description: I never did get networking to work on the sim target.  It tries to
-               use the tap device (/dev/net/tun) to emulate an Ethernet NIC, but I
-               never got it correctly integrated with the NuttX networking.
+  Description: I never did get networking to work on the sim Linux target.  On Linux,
+               it tries to use the tap device (/dev/net/tun) to emulate an Ethernet
+               NIC, but I never got it correctly integrated with the NuttX networking.
+               NOTE: On Cygwin, the build uses the Cygwin WPCAP library and is, at
+               least, partially functional (it has never been rigorously tested).
   Status:      Open
   Priority:    Low (unless you want to test networking features on the simulation).
   
@@ -614,10 +599,10 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Low (unless you want to test graphics features on the simulation).
 
-  Description: Since it is not pre-emptible, you can't use round-robin scheduling
-               (no time slicing).  Currently, the timer interrupts are "faked"
-               during IDLE loop processing and, as a result, there is no task
-               pre-emption because there are no asynchrous events.  This could
+  Description: Since the simulation is not pre-emptible, you can't use round-robin
+               scheduling (no time slicing).  Currently, the timer interrupts are
+               "faked" during IDLE loop processing and, as a result, there is no
+               task pre-emption because there are no asynchrous events.  This could
                probably be fixed if the "timer interrupt" were driver by Linux
                signals. NOTE:  You would also have to implement irqsave() and
                irqrestore() to block and (conditionally) unblock the signal.
@@ -643,7 +628,7 @@ o ARM (arch/arm/)
   Status:      Open
   Priority:    Low
 
-  Description: The Cortex-M3 user context swich logic uses SVCall instructions.
+  Description: The Cortex-M3 user context switch logic uses SVCall instructions.
                This user context switching time could be improved by eliminating
                the SVCalls and developing assembly language implementations
                of the context save and restore logic.
@@ -706,16 +691,6 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
   Status:      Open
   Priority:    Low, only effects debug and there is a workaround
   
-  Description: Due to some connector/cabling issues using the Nucleus2g, a couple of
-               important features have not yet been tested:  The microSD card and
-               USB (device).  These features are fully implemented and partially
-               tested, but not fully verified.
-               UPDATE:  The SPI-based microSD interface has been verified on the
-               Olimex-LPC1766-STK board.  The USB driver is not functional on either
-               board.  The problem: no interrupts when host connected.
-  Status:      Open
-  Priority:    High
-
   Description: USB DMA not fully implemented. Partial logic is in place but it is
                fragmentary and bogus. (Leveraged from the lpc214x)
   Status:      Open
@@ -731,6 +706,12 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
                   SSP bus, use DMA data transfers
   Status:      Open
   Priority:    Medium
+
+  Description: An LCD driver for the Olimex LPC1766STK has been developed.  However, that
+               driver is not yet functional on the board:  The backlight comes on, but
+               nothing is visible on the display.
+  Status:      Open
+  Priority:    Medium-Low (unless you need the display on the LPC1766STK!)
 
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

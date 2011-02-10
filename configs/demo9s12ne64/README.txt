@@ -4,6 +4,16 @@ README
   This README discusses issues unique to NuttX configurations for the
   Freescale DEMO9S12NE64 development board.
 
+CONTENTS
+^^^^^^^^
+  • MC9S12NE64 Features
+  • Development Environment
+  • NuttX Buildroot Toolchain
+  • FreeScale HCS12 Serial Monitor
+  • Soft Registers
+  • HCS12/DEMO9S12NEC64-specific Configuration Options
+  • Configurations
+
 MC9S12NE64 Features
 ^^^^^^^^^^^^^^^^^^^
 
@@ -97,7 +107,7 @@ Development Environment
   environment. The source has been built only using the GNU toolchain
   (see below).  Other toolchains will likely cause problems.
 
-NuttX buildroot Toolchain
+NuttX Buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
@@ -122,11 +132,16 @@ NuttX buildroot Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/m68hc12-defconfig-3.4.6 .config
+  5. cp configs/m9s12x-defconfig-3.3.6 .config
 
   6. make oldconfig
 
   7. make
+
+     If the make fails because it can't find the file to download, you may
+     have to locate the file on the internet and download it into the archives/
+     directory manually.  For example, binutils-2.18 can be found here:
+     http://ftp.gnu.org/gnu/binutils/
 
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly built binaries.
@@ -239,7 +254,7 @@ Soft Registers
      files from the Make.defs file so that they no longer cause a problem.
 
 HCS12/DEMO9S12NEC64-specific Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
 	   be set to:

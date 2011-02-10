@@ -38,15 +38,15 @@ include ${TOPDIR}/.config
 # Setup for the selected toolchain
 # NuttX buildroot under Linux or Cygwin
 
-CROSSDEV = m68hc12-elf-
+CROSSDEV = m9s12x-elf-
 MAXOPTIMIZATION = -Os
 WINTOOL = n
 
 ifeq ($(CONFIG_HCS12_NONBANKED),y)
-  ARCHCPUFLAGS = -m68hcs12 -mshort -mnolong-calls
+  ARCHCPUFLAGS = -m9s12x -mshort -mnolong-calls
   LDSCRIPT = ld.script.nonbanked
 else
-  ARCHCPUFLAGS = -m68hcs12 -mshort -mlong-calls
+  ARCHCPUFLAGS = -m9x12x -mshort -mlong-calls
   LDSCRIPT = ld.script.banked
 endif
 
