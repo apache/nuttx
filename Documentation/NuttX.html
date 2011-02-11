@@ -2027,6 +2027,8 @@ nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       the -o option is not standard and is not supported under, for example, OS-X or
       Solaris.  This was solved by changing all 'uname -o' references to the more
       complex:  'uname -o 2>/dev/null || echo &quot;Other&quot;'
+    * drivers/usbhost/usbhost_enumerate.c -- Add logic to get the VID and PID.  This
+      is necessary in order to support vendor-specific USB devices.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

@@ -1450,3 +1450,5 @@
 	  the -o option is not standard and is not supported under, for example, OS-X or
 	  Solaris.  This was solved by changing all 'uname -o' references to the more
 	  complex:  'uname -o 2>/dev/null || echo "Other"'
+	* drivers/usbhost/usbhost_enumerate.c -- Add logic to get the VID and PID.  This
+	  is necessary in order to support vendor-specific USB devices.

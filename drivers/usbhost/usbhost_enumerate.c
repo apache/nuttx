@@ -1,7 +1,7 @@
 /*******************************************************************************
  * drivers/usbhost/usbhost_enumerate.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@
 static inline uint16_t usbhost_getle16(const uint8_t *val);
 static void usbhost_putle16(uint8_t *dest, uint16_t val);
 
-static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc, int desclen,
+static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
                                   struct usbhost_id_s *id);
 static inline int usbhost_configdesc(const uint8_t *configdesc, int desclen,
                                      struct usbhost_id_s *id);
@@ -123,36 +123,24 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  *******************************************************************************/
 
 static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
-                                  int desclen, struct usbhost_id_s *id)
+                                  struct usbhost_id_s *id)
 {
   /* Clear the ID info */
 
   memset(id, 0, sizeof(struct usbhost_id_s));
 
-  /* Check we have enough of the structure to see the ID info. */
+  /* Pick off the ID info */
 
-  if (desclen >= 7)
-    {
-      /* Pick off the ID info */
+  id->base     = devdesc->class;
+  id->subclass = devdesc->subclass;
+  id->proto    = devdesc->protocol;
+  uvdbg("class:%d subclass:%d protocol:%d\n", id->base, id->subclass, id->proto);
 
-      id->base     = devdesc->class;
-      id->subclass = devdesc->subclass;
-      id->proto    = devdesc->protocol;
-      uvdbg("class:%d subclass:%d protocol:%d\n",
-             id->base, id->subclass, id->proto);
+  /* Yes, then pick off the VID and PID as well */
 
-      /* Check if we have enough of the structure to see the VID/PID */
-
-      if (desclen >= 12)
-        {
-          /* Yes, then pick off the VID and PID as well */
-
-          id->vid = usbhost_getle16(devdesc->vendor);
-          id->pid = usbhost_getle16(devdesc->product);
-          uvdbg("vid:%d pid:%d\n", id->vid, id->pid);
-        }
-    }
-
+  id->vid = usbhost_getle16(devdesc->vendor);
+  id->pid = usbhost_getle16(devdesc->product);
+  uvdbg("vid:%d pid:%d\n", id->vid, id->pid);
   return OK;
 }
                                 
@@ -367,32 +355,37 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
       goto errout;
     }
 
-  /* Extract info from the device descriptor */
+  /* Extract the correct max packetsize from the device descriptor */
 
-  {
-    struct usb_devdesc_s *devdesc = (struct usb_devdesc_s *)buffer;
+  maxpacketsize = ((struct usb_devdesc_s *)buffer)->mxpacketsize;
+  uvdbg("maxpacksetsize: %d\n", maxpacketsize);
 
-    /* Extract the max packetsize for endpoint 0 */
+  /* And reconfigure EP0 */
 
-    maxpacketsize = devdesc->mxpacketsize;
-    uvdbg("maxpacksetsize: %d\n", maxpacketsize);
+  DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
 
-    DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
+  /* Now read the full device descriptor */
 
-    /* Get class identification information from the device descriptor.  Most
-     * devices set this to USB_CLASS_PER_INTERFACE (zero) and provide the
-     * identification informatino in the interface descriptor(s).  That allows
-     * a device to support multiple, different classes.
-     */
+  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
+  usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
+  usbhost_putle16(ctrlreq->index, 0);
+  usbhost_putle16(ctrlreq->len, USB_SIZEOF_DEVDESC);
 
-    (void)usbhost_devdesc(devdesc, 8, &id);
+  ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
+  if (ret != OK)
+    {
+      udbg("ERROR: GETDESCRIPTOR/DEVICE, DRVR_CTRLIN returned %d\n", ret);
+      goto errout;
+    }
 
-    /* NOTE: Additional logic is needed here.  We will need additional logic
-     * to (1) get the full device descriptor, (1) extract the vendor/product IDs
-     * and (2) extract the number of configurations from the (full) device
-     * descriptor.
-     */
-  }
+  /* Get class identification information from the device descriptor.  Most
+   * devices set this to USB_CLASS_PER_INTERFACE (zero) and provide the
+   * identification informatino in the interface descriptor(s).  That allows
+   * a device to support multiple, different classes.
+   */
+
+  (void)usbhost_devdesc((struct usb_devdesc_s *)buffer, &id);
 
   /* Set the USB device address to the value in the 'funcaddr' input */
 
