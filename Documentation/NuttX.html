@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 23, 2011</p>
+      <p>Last Updated: February 10, 2011</p>
     </td>
   </tr>
 </table>
@@ -1992,17 +1992,18 @@ pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       stdbool.h.  This change was necessary for compatibility
       with NuttX-5.0 (any beyond).
 
-buildroot-1.8 2009-12-21 &lt;spudmonkey@racsa.co.cr&gt;
+buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
 
-    * configs/cortexm3-defconfig-4.3.3: Added support for NuttX NXFLAT
-      tools.
-    * configs/arm7tdmi-defconfig-4.3.3: Update to arm7tdmi-defconfig-4.2.4.
-      Also builds NuttX NXFLAT tools.
-    * configs/m68hc12-defconfig-4.3.3: Update to m68ch11-defconfig.
-    * configs/m68hc12-defconfig-3.4.6: There are problems building GCC
-      4.3.3 for the hc12.
-    * configs/m32c-defconfig-4.2.4: Added genromfs
-    * configs/m32c-defconfig-4.3.3: Update to m32c-defconfig-4.2.4
+    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
+    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
+      arm926
+    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
+    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
+      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
+      the build stops on the first warning.
+    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
+      patches available from http://www.msextra.com/tools courtesy of James
+      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
 </pre></ul>
 
 <table width ="100%">
@@ -2020,18 +2021,16 @@ nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       - Lost SYNACK causes connection reset
       - Fix missing UDP stats for sent/received packets
       - Added support for Cygwin as development/test platform.
+    * configs/demo9s12ne64 - Integrate new buildroot-1.9 m8s12x toolchain.
+    * 'uname -o' is used throughout the build logic in bash scripts and also in
+      Make.defs files in order to distinguish between Cygwin and Linux.  However,
+      the -o option is not standard and is not supported under, for example, OS-X or
+      Solaris.  This was solved by changing all 'uname -o' references to the more
+      complex:  'uname -o 2>/dev/null || echo &quot;Other&quot;'
 
-pascal-2.1 2010-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-buildroot-1.9 2010-xx-xx <spudmonkey@racsa.co.cr>
-
-    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
-    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
-      arm926
-    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
-    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
-      GDB 6.8 won't build because the tarball was released with -Werror enabled and
-      the build stops on the first warning.
+buildroot-1.10 2011-xx-xx <spudmonkey@racsa.co.cr>
 
 </pre></ul>
 
