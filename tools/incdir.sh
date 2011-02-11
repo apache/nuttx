@@ -1,7 +1,7 @@
 #!/bin/bash
 # tools/incdir.sh
 #
-#   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -109,7 +109,7 @@ fi
 # toolchains, we have to use the full windows-style paths to the header
 # files.
 
-os=`uname -o`
+os=`uname -o 2>/dev/null || echo "Other"`
 
 # Let's assume that all GCC compiler paths contain the string gcc and
 # no non-GCC compiler pathes include this substring

@@ -2,7 +2,7 @@
 
 # Set up pathes to binaries, scripts, configuration files
 
-hostos=`uname -o`
+hostos=`uname -o 2>/dev/null || echo "Other"`
 if [ "X${hostos}" = "XCygwin" ]; then
 	installdir=/cygdrive/c/gccfd/openocd/bin
 	ft2exe=$installdir/openocd-ftd2xx.exe

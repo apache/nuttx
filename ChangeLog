@@ -1444,3 +1444,9 @@
 	  - Lost SYNACK causes connection reset
 	  - Fix missing UDP stats for sent/received packets
 	  - Added support for Cygwin as development/test platform.
+	* configs/demo9s12ne64 - Integrate new buildroot-1.9 m8s12x toolchain.
+	* 'uname -o' is used throughout the build logic in bash scripts and also in
+	  Make.defs files in order to distinguish between Cygwin and Linux.  However,
+	  the -o option is not standard and is not supported under, for example, OS-X or
+	  Solaris.  This was solved by changing all 'uname -o' references to the more
+	  complex:  'uname -o 2>/dev/null || echo "Other"'
