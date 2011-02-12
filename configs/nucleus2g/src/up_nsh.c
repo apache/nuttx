@@ -2,7 +2,7 @@
  * config/nucleus2g/src/up_nsh.c
  * arch/arm/src/board/up_nsh.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,11 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <unistd.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/spi.h>
 #include <nuttx/mmcsd.h>
-#include <nuttx/usb/usbhost.h>
-
-#include "lpc17_internal.h"
-#include "nucleus2g_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -63,7 +58,6 @@
 #ifdef CONFIG_ARCH_BOARD_NUCLEUS2G
 #  define CONFIG_EXAMPLES_NSH_HAVEUSBDEV 1
 #  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#  define CONFIG_EXAMPLES_NSH_HAVEUSBHOST  1
 #  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 0
 #    error "The Nucleus-2G MMC/SD is on SSP0"
 #    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
@@ -81,7 +75,6 @@
 #  error "Unrecognized board"
 #  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
 #endif
 
 /* Can't support USB device features if USB device is not enabled */
@@ -98,33 +91,6 @@
 
 #ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR
 #  define CONFIG_EXAMPLES_NSH_MMCSDMINOR 0
-#endif
-
-/* USB Host */
-
-#ifdef CONFIG_USBHOST
-#  ifndef CONFIG_LPC17_USBHOST
-#    error "CONFIG_LPC17_USBHOST is not selected"
-#  endif
-#endif
-
-#ifdef CONFIG_LPC17_USBHOST
-#  ifndef CONFIG_USBHOST
-#    warning "CONFIG_USBHOST is not selected"
-#  endif
-#endif
-
-#if !defined(CONFIG_USBHOST) || !defined(CONFIG_LPC17_USBHOST)
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
-#endif
-
-#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
-#  ifndef CONFIG_USBHOST_DEFPRIO
-#    define CONFIG_USBHOST_DEFPRIO 50
-#  endif
-#  ifndef CONFIG_USBHOST_STACKSIZE
-#    define CONFIG_USBHOST_STACKSIZE 1024
-#  endif
 #endif
 
 /* Debug ********************************************************************/
@@ -147,105 +113,9 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
-static struct usbhost_driver_s *g_drvr;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nsh_waiter
- *
- * Description:
- *   Wait for USB devices to be connected.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
-static int nsh_waiter(int argc, char *argv[])
-{
-  bool connected = false;
-  int ret;
-
-  message("nsh_waiter: Running\n");
-  for (;;)
-    {
-      /* Wait for the device to change state */
-
-      ret = DRVR_WAIT(g_drvr, connected);
-      DEBUGASSERT(ret == OK);
-
-      connected = !connected;
-      message("nsh_waiter: %s\n", connected ? "connected" : "disconnected");
-
-      /* Did we just become connected? */
-
-      if (connected)
-        {
-          /* Yes.. enumerate the newly connected device */
-
-          (void)DRVR_ENUMERATE(g_drvr);
-        }
-    }
-
-  /* Keep the compiler from complaining */
-
-  return 0;
-}
-#endif
-
-/****************************************************************************
- * Name: nsh_usbhostinitialize
- *
- * Description:
- *   Initialize SPI-based microSD.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
-static int nsh_usbhostinitialize(void)
-{
-  int pid;
-  int ret;
-
-  /* First, register all of the class drivers needed to support the drivers
-   * that we care about:
-   */
-
-  message("nsh_usbhostinitialize: Register class drivers\n");
-  ret = usbhost_storageinit();
-  if (ret != OK)
-    {
-      message("nsh_usbhostinitialize: Failed to register the mass storage class\n");
-    }
-
-  /* Then get an instance of the USB host interface */
-
-  message("nsh_usbhostinitialize: Initialize USB host\n");
-  g_drvr = usbhost_initialize(0);
-  if (g_drvr)
-    {
-      /* Start a thread to handle device connection. */
-
-      message("nsh_usbhostinitialize: Start nsh_waiter\n");
-
-#ifndef CONFIG_CUSTOM_STACK
-      pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
-                        CONFIG_USBHOST_STACKSIZE,
-                        (main_t)nsh_waiter, (const char **)NULL);
-#else
-      pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
-                        (main_t)nsh_waiter, (const char **)NULL);
-#endif
-      return pid < 0 ? -ENOEXEC : OK;
-    }
-  return -ENODEV;
-}
-#else
-#  define nsh_usbhostinitialize() (OK)
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -290,14 +160,5 @@ int nsh_archinitialize(void)
   message("Successfuly bound SSP port %d to MMC/SD slot %d\n",
           CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
 
-  /* Initialize USB host */
-
-  ret = nsh_usbhostinitialize();
-
-  if (ret == OK)
-    {
-      message("USB host successfuly initialized!\n");
-    }
-
-  return ret;
+  return OK;
 }

@@ -14,7 +14,6 @@ Contents
   NuttX buildroot Toolchain
   LEDs
   Nucleus 2G Configuration Options
-  USB Host Configuration
   Configurations
 
 Nucleus 2G Board
@@ -433,7 +432,7 @@ Nucleus 2G Configuration Options
 	CONFIG_LPC17_USBDEV_DMA
 	  Enable lpc17xx-specific DMA support
 
-  LPC17xx USB Host Configuration
+  LPC17xx USB Host Configuration (the Nucleus2G does not support USB Host)
 
     CONFIG_USBHOST_OHCIRAM_SIZE
       Total size of OHCI RAM (in AHB SRAM Bank 1)
@@ -449,39 +448,6 @@ Nucleus 2G Configuration Options
       Size of one end-user I/O buffer.  This can be zero if the
       application can guarantee that all end-user I/O buffers
       reside in AHB SRAM.
-
-USB Host Configuration
-^^^^^^^^^^^^^^^^^^^^^^
-
-The NuttShell (NSH) Nucleus 2G configuration can be modified in order
-to support USB host operations.  To make these modifications, do the
-following:
-
-1. First configure to build the NSH configuration from the top-level
-   NuttX directory:
-
-   cd tools
-   ./configure nucleus2g/nsh
-   cd ..
-
-2. Then edit the top-level .config file to enable USB host.  Make the
-   following changes:
-
-   CONFIG_LPC17_USBHOST=n
-   CONFIG_USBHOST=n
-   CONFIG_SCHED_WORKQUEUE=y
-
-When this change is made, NSH should be extended to support USB flash
-devices.  When a FLASH device is inserted, you should see a device
-appear in the /dev (psuedo) directory.  The device name should be
-like /dev/sda, /dev/sdb, etc.  The USB mass storage device, is present
-it can be mounted from the NSH command line like:
-
-   ls /dev
-   mount -t vfat /dev/sda /mnt/flash
-
-Files on the connect USB flash device should then be accessible under
-the mountpoint /mnt/flash.
 
 Configurations
 ^^^^^^^^^^^^^^
