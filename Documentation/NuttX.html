@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 10, 2011</p>
+      <p>Last Updated: February 11, 2011</p>
     </td>
   </tr>
 </table>
@@ -2029,6 +2029,9 @@ nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       complex:  'uname -o 2>/dev/null || echo &quot;Other&quot;'
     * drivers/usbhost/usbhost_enumerate.c -- Add logic to get the VID and PID.  This
       is necessary in order to support vendor-specific USB devices.
+    * examplex/wlan, configs/olimex-lpc1766stk/wlan, drivers/usbhost/usbhost_rtl8187.c,
+      Add infrastructure to support RTL18187 wireless USB.
+    * configs/nucleus2g -- backed out USB host changes... wrong board.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

@@ -1,7 +1,7 @@
-############################################################################
-# drivers/usbhost/Make.defs
+#!/bin/bash
+# configs/olimex-lpc1766stk/wlan/setenv.sh
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,15 +31,17 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-USBHOST_ASRCS  =
-USBHOST_CSRCS  =
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-ifeq ($(CONFIG_USBHOST),y)
-USBHOST_CSRCS  += usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
-USBHOST_CSRCS  += usbhost_enumerate.c usbhost_storage.c usbhost_hidkbd.c
-#ifeq ($(CONFIG_NET),y)
-USBHOST_CSRCS  += usbhost_rtl8187.c
-#endif
-endif
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
+
+WD=`pwd`
+export LPCTOOL_DIR="${WD}/configs/olimex-lpc1766stk/tools"
+export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+export PATH="${BUILDROOT_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
+
+echo "PATH : ${PATH}"

@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb/usbhost.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -693,6 +693,25 @@ EXTERN int usbhost_storageinit(void);
  ****************************************************************************/
 
 EXTERN int usbhost_kbdinit(void);
+
+/****************************************************************************
+ * Name: usbhost_wlaninit
+ *
+ * Description:
+ *   Initialize the USB WLAN class driver.  This function should be called
+ *   be platform-specific code in order to initialize and register support
+ *   for the USB host class device.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+EXTERN int usbhost_wlaninit(void);
 
 /*******************************************************************************
  * Name: usbhost_initialize

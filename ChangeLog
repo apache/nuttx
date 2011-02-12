@@ -1452,3 +1452,6 @@
 	  complex:  'uname -o 2>/dev/null || echo "Other"'
 	* drivers/usbhost/usbhost_enumerate.c -- Add logic to get the VID and PID.  This
 	  is necessary in order to support vendor-specific USB devices.
+	* examplex/wlan, configs/olimex-lpc1766stk/wlan, drivers/usbhost/usbhost_rtl8187.c,
+	  Add infrastructure to support RTL18187 wireless USB.
+	* configs/nucleus2g -- backed out USB host changes... wrong board.
