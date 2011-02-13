@@ -1455,3 +1455,6 @@
 	* examplex/wlan, configs/olimex-lpc1766stk/wlan, drivers/usbhost/usbhost_rtl8187.c,
 	  Add infrastructure to support RTL18187 wireless USB.
 	* configs/nucleus2g -- backed out USB host changes... wrong board.
+	* Renamed arc/hc/include/mc9s12ne64 and src/mc9s12ne64 -- m9s12.  That name is
+	  shorter and more general.
+

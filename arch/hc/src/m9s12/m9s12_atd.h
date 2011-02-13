@@ -1,5 +1,6 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_atd10b8cv3.h
+ * arch/hc/src/m9s12/m9s12_atd.h
+ * Defintions for ATD10b8c v3
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_ATD10B8CV3_H
-#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_ATD10B8CV3_H
+#ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_ATD_H
+#define __ARCH_ARM_HC_SRC_M9S12_M9S12_ATD_H
 
 /************************************************************************************
  * Included Files
@@ -319,4 +320,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_ATD10B8CV3_H */
+#endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_ATD_H */

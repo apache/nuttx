@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/hc/include/mc9s12ne64/irq.h
+ * arch/hc/include/m9s12/irq.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
  * only indirectly through nuttx/irq.h
  */
 
-#ifndef __ARCH_HC_INCLUDE_MC9S12NE64_IRQ_H
-#define __ARCH_HC_INCLUDE_MC9S12NE64_IRQ_H
+#ifndef __ARCH_HC_INCLUDE_M9S12_IRQ_H
+#define __ARCH_HC_INCLUDE_M9S12_IRQ_H
 
 /************************************************************************************
  * Included Files
@@ -126,4 +126,4 @@ extern "C" {
 #endif
 #endif
 
-#endif /* __ARCH_HC_INCLUDE_MC9S12NE64_IRQ_H */
+#endif /* __ARCH_HC_INCLUDE_M9S12_IRQ_H */

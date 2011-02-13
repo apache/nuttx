@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_start.S
- * arch/hc/src/chip/mc9s12ne64_start.S
+ * arch/hc/src/m9s12/m9s12_start.S
+ * arch/hc/src/chip/m9s12_start.S
  *
- *	 Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *	 Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *	 Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,10 +40,10 @@
 
 #include <nuttx/config.h>
 
-#include "mc9s12ne64_internal.h"
-#include "mc9s12ne64_mmcv4.h"
-#include "mc9s12ne64_crgv4.h"
-#include "mc9s12ne64_flash.h"
+#include "m9s12_internal.h"
+#include "m9s12_mmc.h"
+#include "m9s12_crg.h"
+#include "m9s12_flash.h"
 
 /****************************************************************************
  * Private Definitions
@@ -59,7 +59,7 @@
 
 	.globl		__start
 	.globl		os_start
-	.file		"mc9s12ne64_start.S"
+	.file		"m9s12_start.S"
 
 /****************************************************************************
  * Macros

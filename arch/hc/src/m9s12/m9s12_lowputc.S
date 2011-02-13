@@ -1,7 +1,7 @@
 /**************************************************************************
- * arch/arm/src/mc9s12ne64/mc9s12ne64_lowputc.S
+ * arch/arm/src/m9s12/m9s12_lowputc.S
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 
 #include "up_internal.h"
-#include "mc9s12ne64_internal.h"
-#include "mc9s12ne64_flash.h"
+#include "m9s12_internal.h"
+#include "m9s12_flash.h"
 
 /**************************************************************************
  * Private Definitions

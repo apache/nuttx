@@ -1,7 +1,7 @@
 #!/bin/bash
 # zipme.sh
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,8 @@ GARBAGEDIRS="\
   arch/dm320\
   arch/avr/include/at91uc3\
   arch/avr/src/at91uc3\
+  arch/hc/include/mc9s12ne64\
+  arch/hc/src/mc9s12ne64\
   netutils/thttpd/extras
 "
 

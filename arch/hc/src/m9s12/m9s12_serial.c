@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_serial.c
+ * arch/hc/src/m9s12/m9s12_serial.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without

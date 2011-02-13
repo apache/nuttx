@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_mebiv3.h
+ * arch/hc/src/m9s12/m9s12_mebi.h (v3)
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_MEBIV3_H
-#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_MEBIV3_H
+#ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_MEBI_H
+#define __ARCH_ARM_HC_SRC_M9S12_M9S12_MEBI_H
 
 /************************************************************************************
  * Included Files
@@ -163,4 +163,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_MEBIV3_H */
+#endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_MEBI_H */

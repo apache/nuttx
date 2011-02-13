@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_intv1.h
+ * arch/hc/src/m9s12/m9s12_phyv2.h (v2)
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_INTV1_H
-#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_INTV1_H
+#ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_PHY_H
+#define __ARCH_ARM_HC_SRC_M9S12_M9S12_PHY_H
 
 /************************************************************************************
  * Included Files
@@ -48,45 +48,39 @@
  ************************************************************************************/
 
 /* Register Offsets *****************************************************************/
-/* Offsets relative to CORE1 */
 
-#define HCS12_INT_ITCR_OFFSET          0x0015 /* Interrupt Test Control Register */
-#define HCS12_INT_ITEST_OFFSET         0x0016 /* Interrupt Test Registers */
-
-/* Offsets relative to CORE2 */
-
-#define HCS12_INT_HPRIO_OFFSET         0x0003 /* Highest Priority Interrupt */
+#define HCS12_PHY_EPHYCTL0_OFFSET      0x0000 /* Ethernet Physical Transceiver Control Register 0 */
+#define HCS12_PHY_EPHYCTL1_OFFSET      0x0001 /* Ethernet Physical Transceiver Control Register 1 */
+#define HCS12_PHY_EPHYSR_OFFSET        0x0002 /* Ethernet Physical Transceiver Status Register */
 
 /* Register Addresses ***************************************************************/
 
-#define HCS12_INT_ITCR                 (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_INT_ITCR_OFFSET)
-#define HCS12_INT_ITEST                (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_INT_ITEST_OFFSET)
-#define HCS12_INT_HPRIO                (HCS12_REG_BASE+HCS12_CORE2_BASE+HCS12_INT_HPRIO_OFFSET)
+#define HCS12_PHY_EPHYCTL0             (HCS12_EPHY_BASE+HCS12_PHY_EPHYCTL0_OFFSET)
+#define HCS12_PHY_EPHYCTL1             (HCS12_EPHY_BASE+HCS12_PHY_EPHYCTL1_OFFSET)
+#define HCS12_PHY_EPHYSR               (HCS12_EPHY_BASE+HCS12_PHY_EPHYSR_OFFSET)
 
 /* Register Bit-Field Definitions ***************************************************/
 
-/* Interrupt Test Control Register Bit-Field Definitions */
+/* Ethernet Physical Transceiver Control Register 0 */
 
-#define INT_ITCR_ADR_SHIFT             (0)       /* Bits 0-3: Test register select */
-#define INT_ITCR_ADR_MASK              (15 << INT_ITCR_ADR_SHIFT)
-#define INT_ITCR_WRTINT                (1 << 4)  /* Bit 4:  Write to the Interrupt Test Registers */
+#define PHY_EPHYCTL0_EPHYIEN           (1 << 0)  /* Bit 0: EPHY Interrupt Enable */
+#define PHY_EPHYCTL0_EPHYWAI           (1 << 2)  /* Bit 2: EPHY Module Stops While in Wait */
+#define PHY_EPHYCTL0_LEDEN             (1 << 3)  /* Bit 3: LED Drive Enable */
+#define PHY_EPHYCTL0_DIS10             (1 << 4)  /* Bit 4: Disable 10BASE-T PLL */
+#define PHY_EPHYCTL0_DIS100            (1 << 5)  /* Bit 5: Disable 100 BASE-TX PLL */
+#define PHY_EPHYCTL0_ANDIS             (1 << 6)  /* Bit 6: Auto Negotiation Disable */
+#define PHY_EPHYCTL0_EPHYEN            (1 << 7)  /* Bit 7: EPHY Enable */
 
-/* Interrupt Test Registers Bit-Field Definitions */
+/* Ethernet Physical Transceiver Control Register 1 */
 
-#define INT_ITEST_INT(n)               (1 << ((n) >> 1))
-#define INT_ITEST_INT0                 (1 << 0)  /* Bit 0: Test vector 0xffx0 */
-#define INT_ITEST_INT2                 (1 << 1)  /* Bit 1: Test vector 0xffx2 */
-#define INT_ITEST_INT4                 (1 << 2)  /* Bit 2: Test vector 0xffx4 */
-#define INT_ITEST_INT6                 (1 << 3)  /* Bit 3: Test vector 0xffx6 */
-#define INT_ITEST_INT8                 (1 << 4)  /* Bit 4: Test vector 0xffx8 */
-#define INT_ITEST_INTA                 (1 << 5)  /* Bit 5: Test vector 0xffxa */
-#define INT_ITEST_INTC                 (1 << 6)  /* Bit 6: Test vector 0xffxc */
-#define INT_ITEST_INTE                 (1 << 7)  /* Bit 7: Test vector 0xffxe */
+#define PHY_EPHYCTL1_PHYADD_SHIFT      (0)       /* Bits 0-4: EPHY Address for MII Requests */
+#define PHY_EPHYCTL1_PHYADD_MASK       (0x1f)
 
-/* Highest Priority Interrupt Bit-Field Definitions */
-/* Holds the least of the highest priority interrupt vector address */
+/* Ethernet Physical Transceiver Status Register */
 
-#define INT_HPRIO_MASK                 (0xfe)
+#define PHY_EPHYSR_EPHYI               (1 << 0)  /* Bit 0: EPHY Interrupt Flag */
+#define PHY_EPHYSR_10DIS               (1 << 4)  /* Bit 4: EPHY Port 10BASE-T mode status */
+#define PHY_EPHYSR_100DIS              (1 << 5)  /* Bit 5: EPHY Port 100BASE-TX mode status */
 
 /************************************************************************************
  * Public Types
@@ -100,4 +94,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_INTV1_H */
+#endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_PHY_H */
