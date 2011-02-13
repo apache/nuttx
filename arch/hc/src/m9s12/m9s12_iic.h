@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_spiv3.h
+ * arch/hc/src/m9s12/m9s12_iic.h (v2)
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_SPIV3_H
-#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_SPIV3_H
+#ifndef __ARCH_ARM_HC_SRC_M9S124_M9S124_IIC_H
+#define __ARCH_ARM_HC_SRC_M9S124_M9S124_IIC_H
 
 /************************************************************************************
  * Included Files
@@ -49,55 +49,49 @@
 
 /* Register Offsets *****************************************************************/
 
-#define HCS12_SPI_CR1_OFFSET      0x00 /* SPI Control Register 1 */
-#define HCS12_SPI_CR2_OFFSET      0x01 /* SPI Control Register 2 */
-#define HCS12_SPI_BR_OFFSET       0x02 /* SPI Baud Rate Register */
-#define HCS12_SPI_SR_OFFSET       0x03 /* SPI Status Register */       
-#define HCS12_SPI_DR_OFFSET       0x05 /* SPI Data Register */
+#define HCS12_IIC_IBAD_OFFSET          0x0000 /* IIC Address Register */
+#define HCS12_IIC_IBFD_OFFSET          0x0001 /* IIC Frequency Divider Register */
+#define HCS12_IIC_IBCR_OFFSET          0x0002 /* IIC Control Register */
+#define HCS12_IIC_IBSR_OFFSET          0x0003 /* IIC Status Register */
+#define HCS12_IIC_IBDR_OFFSET          0x0004 /* IIC Data I/O Register */
 
 /* Register Addresses ***************************************************************/
 
-#define HCS12_SPI_CR1             (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_CR1_OFFSET)
-#define HCS12_SPI_CR2             (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_CR2_OFFSET)
-#define HCS12_SPI_BR              (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_BR_OFFSET)
-#define HCS12_SPI_SR              (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_SR_OFFSET)
-#define HCS12_SPI_DR              (HCS12_REG_BASE+HCS12_SPI_BASE+HCS12_SPI_DR_OFFSET)
+#define HCS12_IIC_IBAD                 (HCS12_IIC_BASE+HCS12_IIC_IBAD_OFFSET)
+#define HCS12_IIC_IBFD                 (HCS12_IIC_BASE+HCS12_IIC_IBFD_OFFSET)
+#define HCS12_IIC_IBCR                 (HCS12_IIC_BASE+HCS12_IIC_IBCR_OFFSET)
+#define HCS12_IIC_IBSR                 (HCS12_IIC_BASE+HCS12_IIC_IBSR_OFFSET)
+#define HCS12_IIC_IBDR                 (HCS12_IIC_BASE+HCS12_IIC_IBDR_OFFSET)
 
 /* Register Bit-Field Definitions ***************************************************/
 
-/* SPI Control Register 1 Bit-Field Definitions */
+/* IIC Address Register */
 
-#define SPI_CR1_LSBFE             (1 << 0)  /* Bit 0:  LSB-First Enable */
-#define SPI_CR1_SSOE              (1 << 1)  /* Bit 1:  Slave Select Output Enable */
-#define SPI_CR1_CPHA              (1 << 2)  /* Bit 2:  SPI Clock Phase */
-#define SPI_CR1_CPOL              (1 << 3)  /* Bit 3:  SPI Clock Polarity */
-#define SPI_CR1_MSTR              (1 << 4)  /* Bit 4:  SPI Master/Slave Mode Select */
-#define SPI_CR1_SPTIE             (1 << 5)  /* Bit 5:  SPI Transmit Interrupt Enable */
-#define SPI_CR1_SPE               (1 << 6)  /* Bit 6:  SPI System Enable */
-#define SPI_CR1_SPIE              (1 << 7)  /* Bit 7:  SPI Interrupt Enable */
+#define IIC_IBAD_MASK                  (0xfe)
 
-/* SPI Control Register 2 Bit-Field Definitions */
+/* IIC Frequency Divider Register -- 8-bit bus clock rate value */
 
-#define SPI_CR2_SPC0              (1 << 0)  /* Bit 0:   Serial Pin Control Bit 0  */
-#define SPI_CR2_SPISWAI           (1 << 1)  /* Bit 1:  SPI Stop in Wait Mode */
-#define SPI_CR2_BIDIROE           (1 << 3)  /* Bit 3:  Output Enable in the Bidirectional */
-#define SPI_CR2_MODFEN            (1 << 4)  /* Bit 4:  Mode Fault Enable */
+/* IIC Control Register */
 
-/* SPI Baud Rate Register Bit-Field Definitions */
+#define IIC_IBCR_IBSWAI                (1 << 0)  /* Bit 0: I Bus Interface Stop in Wait Mode */
+#define IIC_IBCR_RSTA                  (1 << 2)  /* Bit 2: Repeat Start */
+#define IIC_IBCR_TXAK                  (1 << 3)  /* Bit 3: Transmit Acknowledge Enable— */
+#define IIC_IBCR_TX                    (1 << 4)  /* Bit 4: Transmit/Receive Mode Select Bit */
+#define IIC_IBCR_MSSL                  (1 << 5)  /* Bit 5: Master/Slave Mode Select Bit— */
+#define IIC_IBCR_IBIE                  (1 << 6)  /* Bit 6: I-Bus Interrupt Enable */
+#define IIC_IBCR_IBEN                  (1 << 7)  /* Bit 7: I-Bus Enable */
 
-#define SPI_BR_SPR_SHIFT          (0)      /* Bits 0-2: SPI Baud Rate Selection */
-#define SPI_BR_SPR_MASK           (7 << SPI_BR_SPR_SHIFT)
-#define SPI_BR_SPPR_SHIFT         (4)      /* Bits 4-6: SPI Baud Rate Preselection */
-#define SPI_BR_SPPR_MASK          (7 << SPI_BR_SPPR_SHIFT)
+/* IIC Status Register */
 
-/* SPI Status Register Bit-Field Definitions */  
+#define IIC_IBSR_RXAK                  (1 << 0)  /* Bit 0: Received Acknowledge */
+#define IIC_IBSR_IBIF                  (1 << 1)  /* Bit 1: I-Bus Interrupt */
+#define IIC_IBSR_SRW                   (1 << 2)  /* Bit 2: Slave Read/Write */
+#define IIC_IBSR_AL                    (1 << 4)  /* Bit 4: Arbitration Lost */
+#define IIC_IBSR_BB                    (1 << 5)  /* Bit 5: Bus Busy Bit */
+#define IIC_IBSR_AAS                   (1 << 6)  /* Bit 6: Addressed as a Slave Bit */
+#define IIC_IBSR_TCF                   (1 << 7)  /* Bit 7: Data Transferring Bit */
 
-#define SPI_SR_MODF               (1 << 4)  /* Bit 4:  Mode Fault */
-#define SPI_SR_SPTEF              (1 << 5)  /* Bit 5:  SPI Transmit Empty Interrupt */
-#define SPI_SR_SPIF               (1 << 7)  /* Bit 7:  SPIF Interrupt */
-
-/* SPI Data Register Bit-Field Definitions */
-/* 8-bit SPI data register */
+/* IIC Data I/O Register -- 8-Bit data value */
 
 /************************************************************************************
  * Public Types
@@ -111,4 +105,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_SPIV3_H */
+#endif /* __ARCH_ARM_HC_SRC_M9S124_M9S124_IIC_H */

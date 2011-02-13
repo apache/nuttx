@@ -1,6 +1,6 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_vectors.S
- * arch/hc/src/chip/mc9s12ne64_vectors.S
+ * arch/hc/src/m9s12/m9s12_vectors.S
+ * arch/hc/src/chip/m9s12_vectors.S
  *
  *	 Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *	 Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -50,7 +50,7 @@
  ************************************************************************************/
 
 	.globl		__start
-	.file		"mc9s12ne64_vectors.S"
+	.file		"m9s12_vectors.S"
 
 /************************************************************************************
  * Macros

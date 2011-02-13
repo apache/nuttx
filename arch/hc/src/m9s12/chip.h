@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/chip.h
+ * arch/hc/src/m9s12/chip.h
  *
  *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_HC_SRC_MC9S12NE64_CHIP_H
-#define __ARCH_HC_SRC_MC9S12NE64_CHIP_H
+#ifndef __ARCH_HC_SRC_M9S12_CHIP_H
+#define __ARCH_HC_SRC_M9S12_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -99,4 +99,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_HC_SRC_MC9S12NE64_CHIP_H */
+#endif /* __ARCH_HC_SRC_M9S12_CHIP_H */

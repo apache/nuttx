@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_emacv1.h
+ * arch/hc/src/m9s12/m9s12_emac.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_EMACV1_H
-#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_EMACV1_H
+#ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H
+#define __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H
 
 /************************************************************************************
  * Included Files
@@ -245,4 +245,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_EMACV1_H */
+#endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H */

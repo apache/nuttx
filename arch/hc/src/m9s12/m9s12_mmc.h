@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9s12ne64_mmcv4.h
+ * arch/hc/src/m9s12/m9s12_mmcv4.h (v4)
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_MMCV4_H
-#define __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_MMCV4_H
+#ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_MMC_H
+#define __ARCH_ARM_HC_SRC_M9S12_M9S12_MMC_H
 
 /************************************************************************************
  * Included Files
@@ -165,4 +165,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_MC9S12NE64_MC9S12NE64_MMCV4_H */
+#endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_MMC_H */

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/hc/src/mc9s12ne64/mc9x12ne64_internal.h
+ * arch/hc/src/m9s12/m9s12_internal.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_HC_SRC_MC9S12NE64_MC9S12NE64_INTERNAL_H
-#define __ARCH_HC_SRC_MC9S12NE64_MC9S12NE64_INTERNAL_H
+#ifndef __ARCH_HC_SRC_M9S12_M9S12_INTERNAL_H
+#define __ARCH_HC_SRC_M9S12_M9S12_INTERNAL_H
 
 /************************************************************************************
  * Included Files
@@ -45,6 +45,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stdbool.h>
+#  include <nuttx/spi.h>
 #endif
 
 #include "up_internal.h"
@@ -126,8 +127,6 @@ EXTERN int hcs12_ethinitialize(int intf);
  *
  ************************************************************************************/
 
-struct spi_dev_s;
-enum spi_dev_e;
 EXTERN void  hcs12_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
@@ -137,4 +136,4 @@ EXTERN uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_HC_SRC_MC9S12NE64_MC9S12NE64_INTERNAL_H */
+#endif /* __ARCH_HC_SRC_M9S12_M9S12_INTERNAL_H */
