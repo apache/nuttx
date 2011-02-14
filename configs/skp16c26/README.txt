@@ -2,7 +2,7 @@ configs/skp16c26/README.txt
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. The buildroot package can be used to build an M16C toolchain.  The toolchain
-   buildroot can be downloaded from misc/buildroot in the NuttX CVS.  Insructions
+   buildroot can be downloaded from misc/buildroot in the NuttX SVN.  Insructions
    for building the toolchain are provided below.
 
    However, the target cannot be built because the GNU m16c-elf-ld link fails with 
@@ -50,12 +50,11 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
      unpack the buildroot package
      rename the directory to buildroot
 
-   b. Using CVS
+   b. Using SVN
    
-     Check out the misc/buildroot module. CVS checkout instructions:
+     Check out the misc/buildroot module. SVN checkout instructions:
 
-        cvs -d:pserver:anonymous@nuttx.cvs.sourceforge.net:/cvsroot/nuttx login
-        cvs -z3 -d:pserver:anonymous@nuttx.cvs.sourceforge.net:/cvsroot/nuttx co -P misc/buildroot
+        svn co https://nuttx.svn.sourceforge.net/svnroot/nuttx nuttx/trunk/misc/buildroot
 
      Move the buildroot Source Tree and create the archive directory
 

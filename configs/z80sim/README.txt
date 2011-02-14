@@ -2,8 +2,8 @@ z80sim README
 ^^^^^^^^^^^^^
 
 This port uses a primitive, emulated Z80 and the SDCC toolchain.
-The instruction set emulator can be found in the NuttX CVS at
-http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim
+The instruction set emulator can be found in the NuttX SVN at
+http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/misc/sims/z80sim
 
 The SDCC toolchain is available from http://sdcc.sourceforge.net/.  All
 testing has been performed using version 2.6.0 of the SDCC toolchain.
