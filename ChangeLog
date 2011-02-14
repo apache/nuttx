@@ -1457,4 +1457,6 @@
 	* configs/nucleus2g -- backed out USB host changes... wrong board.
 	* Renamed arc/hc/include/mc9s12ne64 and src/mc9s12ne64 -- m9s12.  That name is
 	  shorter and more general.
+	* The NuttX repository has been converted to SVN and can now be found here
+	  http://nuttx.svn.sourceforge.net/viewvc/nuttx/
 
