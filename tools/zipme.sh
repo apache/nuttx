@@ -40,25 +40,6 @@ VERSION=$1
 TAR="tar cvf"
 ZIP=gzip
 
-# This is a list of bad directories that have creapt into the CVS tree
-# due to bad imports, renamed directories, unfinished ports, etc.
-
-GARBAGEDIRS="\
-  configs/m68332evb/src/src\
-  configs/m68332evb/src/include\
-  configs/m68332evb/src/doc\
-  configs/sim/doc/include\
-  configs/sim/doc/src\
-  configs/olimex-strp711/tools\
-  arch/c5471\
-  arch/dm320\
-  arch/avr/include/at91uc3\
-  arch/avr/src/at91uc3\
-  arch/hc/include/mc9s12ne64\
-  arch/hc/src/mc9s12ne64\
-  netutils/thttpd/extras
-"
-
 # Make sure we know what is going on
 
 if [ -z ${VERSION} ] ; then
@@ -111,13 +92,6 @@ find ${NUTTXDIR} -name '*~' -exec rm -f '{}' ';' || \
       { echo "Removal of emacs garbage failed!" ; exit 1 ; }
 find ${NUTTXDIR} -name '*.swp' -exec rm -f '{}' ';' || \
       { echo "Removal of VI garbage failed!" ; exit 1 ; }
-
-# Prepare the nuttx directory -- Remove garbage directories
-
-for dir in ${GARBAGEDIRS}; do
-	echo "Removing ${NUTTX}/${dir}"
-	rm -rf ${NUTTX}/${dir}
-done
 
 # Make sure that all of the necessary soft links are in place
 
