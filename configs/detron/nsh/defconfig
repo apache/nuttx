@@ -1,8 +1,10 @@
 ############################################################################
 # configs/detron/nsh/defconfig
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Authors:
+#      Decio Renno <http://www.detroneletronica.com.br>
+#      Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -84,7 +86,7 @@ CONFIG_ARCH_IRQPRIO=y
 CONFIG_ARCH_INTERRUPTSTACK=n
 CONFIG_ARCH_STACKDUMP=y
 CONFIG_ARCH_BOOTLOADER=n
-CONFIG_ARCH_LEDS=y
+CONFIG_ARCH_LEDS=n
 CONFIG_ARCH_BUTTONS=n
 CONFIG_ARCH_CALIBRATION=n
 CONFIG_ARCH_DMA=n
@@ -104,7 +106,7 @@ CONFIG_LPC17_BUILDROOT=y
 # (MAINOSC, PLL0, PLL1 and FLASH are controlled in board.h)
 #
 CONFIG_LPC17_ETHERNET=n
-CONFIG_LPC17_USBHOST=n
+CONFIG_LPC17_USBHOST=y
 CONFIG_LPC17_USBOTG=n
 CONFIG_LPC17_USBDEV=n
 CONFIG_LPC17_UART0=y
@@ -347,7 +349,7 @@ CONFIG_FDCLONE_DISABLE=n
 CONFIG_FDCLONE_STDIO=n
 CONFIG_SDCLONE_DISABLE=y
 CONFIG_NXFLAT=n
-CONFIG_SCHED_WORKQUEUE=n
+CONFIG_SCHED_WORKQUEUE=y
 CONFIG_SCHED_WORKPRIORITY=50
 CONFIG_SCHED_WORKPERIOD=(50*1000)
 CONFIG_SCHED_WORKSTACKSIZE=1024
@@ -604,7 +606,7 @@ CONFIG_USBDEV_TRACE_NRECORDS=128
 #   On some architectures, selecting this setting will reduce driver size
 #   by disabling isochronous endpoint support
 #
-CONFIG_USBHOST=n
+CONFIG_USBHOST=y
 CONFIG_USBHOST_NPREALLOC=0
 CONFIG_USBHOST_BULK_DISABLE=n
 CONFIG_USBHOST_INT_DISABLE=y
@@ -857,6 +859,11 @@ CONFIG_EXAMPLES_USBSERIAL_TRACECLASS=n
 CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS=n
 CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=n
 CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
+
+#
+# Settings for internet_radio by Decio
+#
+CONFIG_INTERNETRADIO_ARCHINIT=n
 
 #
 # Stack and heap information

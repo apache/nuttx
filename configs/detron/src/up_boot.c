@@ -74,36 +74,4 @@
 
 void lpc17_boardinitialize(void)
 {
-  /* Enable +5V needed for CAN */
-
-#if defined(CONFIG_LPC17_CAN1) || defined(CONFIG_LPC17_CAN2)
-  lpc17_configgpio(DETRON_5V_ENABLE);
-#else
-  lpc17_configgpio(DETRON_5V_DISABLE);
-#endif
-
-  /* If UART0 is used, enabled the MAX232 driver */
-
-#ifdef CONFIG_LPC17_UART0
-  lpc17_configgpio(DETRON_232_ENABLE);
-#else
-  lpc17_configgpio(DETRON_232_POWERSAVE);
-#endif
-
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function lpc17_sspinitialize() has been brought into the link.
-   */
-
-#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
-  if (lpc17_sspinitialize)
-    {
-      lpc17_sspinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
-#endif
 }
