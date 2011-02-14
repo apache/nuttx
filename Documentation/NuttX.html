@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 13, 2011</p>
+      <p>Last Updated: February 14, 2011</p>
     </td>
   </tr>
 </table>
@@ -80,7 +80,7 @@
   <td>
     <a href="#history">Release History</a><br>
     What has changed in the last release of NuttX?
-    What unreleased changes are pending in CVS?
+    What unreleased changes are pending in SVN?
   </td>
 </tr>
 <tr>
@@ -805,7 +805,7 @@
   The 64<sup>th</sup> release of NuttX, Version 5.17, was made on January 19, 2010 and is available for download from the
   <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
-  Unreleased changes after this release are available in CVS.
+  Unreleased changes after this release are available in SVN.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
@@ -1599,8 +1599,8 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
       This port uses the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
       under Linux or Cygwin (verified using version 2.6.0).
       This port has been verified using only a Z80 instruction simulator.
-      That simulator can be found in the NuttX CVS
-      <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/sims/z80sim/">here</a>.
+      That simulator can be found in the NuttX SVN
+      <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/misc/sims/z80sim/">here</a>.
     </p>
     <ul>
       <p>
@@ -1682,8 +1682,8 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
       page.
       This download may be used to build a NuttX-compatible ELF toolchain under Linux or Cygwin.
       That toolchain will support ARM, m68k, m68hc11, m68hc12, and SuperH ports.
-      The buildroot CVS may be accessed in the 
-      <a href="http://nuttx.cvs.sourceforge.net/nuttx/misc/buildroot/">NuttX CVS</a>.
+      The buildroot SVN may be accessed in the 
+      <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/misc/buildroot/">NuttX SVN</a>.
     </p>
    </td>
 </tr>
@@ -1931,7 +1931,7 @@ Other memory:
 
 <ul>
 <p>
-   The current NuttX Change Log is available in CVS <a href="http://nuttx.cvs.sourceforge.net/*checkout*/nuttx/nuttx/ChangeLog">here</a>.
+   The current NuttX Change Log is available in SVN <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/ChangeLog?view=log">here</a>.
    ChangeLog snapshots associated with the current release are available below.
 </p>
 </ul>
@@ -2034,6 +2034,8 @@ nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * configs/nucleus2g -- backed out USB host changes... wrong board.
 	* Renamed arc/hc/include/mc9s12ne64 and src/mc9s12ne64 -- m9s12.  That name is
 	  shorter and more general.
+    * The NuttX repository has been converted to SVN and can now be found here
+      http://nuttx.svn.sourceforge.net/viewvc/nuttx/
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2051,7 +2053,7 @@ buildroot-1.10 2011-xx-xx <spudmonkey@racsa.co.cr>
 
 <ul>
 <p>
-   The current list of NuttX <i>Things-To-Do</i> in CVS <a href="http://nuttx.cvs.sourceforge.net/*checkout*/nuttx/nuttx/TODO">here</a>.
+   The current list of NuttX <i>Things-To-Do</i> in SVN <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/TODO?view=log">here</a>.
    A snapshot of the <i>To-Do</i> list associated with the current release are available <a href="TODO.txt">here</a>.
 </p>
 </ul>

@@ -151,14 +151,14 @@
 <ul>
   <li>
     A dynamic loader that is built into the NuttX core
-   (See <a href="http://nuttx.cvs.sourceforge.net/viewvc/nuttx/nuttx/binfmt/">CVS</a>).
+   (See <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/binfmt/">SVN</a>).
   </li>
   <li>
     Minor changes to RTOS to support position independent code, and
   </li>
   <li>
     A linker to bind ELF binaries to produce the NXFLAT binary format
-    (See <a href="http://nuttx.cvs.sourceforge.net/viewvc/nuttx/misc/buildroot/toolchain/nxflat">CVS).
+    (See <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/misc/buildroot/toolchain/nxflat/">SVN).
   </li>
 </ul>
 
@@ -255,7 +255,7 @@
   The initial release of NXFLAT was made in NuttX version 0.4.9.
   Testing is limited to the tests found under <code>examples/nxflat</code> in the source tree.
   Some known problems exist
-  (see the <a href="http://nuttx.cvs.sourceforge.net/*checkout*/nuttx/nuttx/TODO">TODO</a> list).
+  (see the <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/TODO?view=log">TODO</a> list).
   As such, NXFLAT is currently in an early alpha phase.
 </p>
 
@@ -366,7 +366,7 @@ any following arguments.
 
 <p>
   Below is a snippet from an NXFLAT make file (simplified from NuttX
-  <a href="http://nuttx.cvs.sourceforge.net/viewvc/*checkout*/nuttx/nuttx/examples/nxflat/tests/hello/Makefile?revision=1.6">
+  <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/examples/nxflat/tests/hello/Makefile?view=log">
   Hello, World!</a> example.
 <p>
 <ul><table width="50%">
@@ -472,19 +472,19 @@ any following arguments.
 <ul>
   <li>
     The interface to the binary loader is described in the header file 
-    <a href="http://nuttx.cvs.sourceforge.net/viewvc/nuttx/nuttx/include/nuttx/binfmt.h?revision=1.5&view=markup">
+    <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/include/nuttx/binfmt.h?view=log">
     <code>include/nuttx/binfmt.h</code></a>.
     A brief summary of the APIs prototyped in that header file are listed below.
   </li>
   <li>
     NXFLAT APIs needed to register NXFLAT as a binary loader appear in the header file
-    <a href="http://nuttx.cvs.sourceforge.net/viewvc/*checkout*/nuttx/nuttx/include/nuttx/nxflat.h?revision=1.9">
+    <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/include/nuttx/nxflat.h?view=log">
     <code>include/nuttx/nxflat.h</code></a>.
   </li>
   <li>
     The format of an NXFLAT object itself is described in the header file:
-    <a href="http://nuttx.cvs.sourceforge.net/viewvc/*checkout*/nuttx/nuttx/include/nxflat.h?revision=1.12">
-    <code>include/nxflat.h</code></a>.
+    <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/include/nuttx/nxflat.h?view=log">
+    <code>include/nuttx/nxflat.h</code></a>.
   </li>
 </ul>
 
