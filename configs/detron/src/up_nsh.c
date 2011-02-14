@@ -58,25 +58,9 @@
 
 /* Configuration ************************************************************/
 
-/* PORT and SLOT number probably depend on the board configuration */
-
 #ifdef CONFIG_ARCH_BOARD_DETRON
-#  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#  define CONFIG_EXAMPLES_NSH_HAVEUSBHOST  1
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 0
-#    error "The Detron MMC/SD is on SSP0"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 0
-#  endif
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) || CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
-#    error "The Detron MMC/SD is only one slot (0)"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
-#  endif
-#  ifndef CONFIG_LPC17_SSP0
-#    undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
-#    warning "CONFIG_LPC17_SSP0 is not enabled"
-#  endif
+#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  define CONFIG_EXAMPLES_NSH_HAVEUSBHOST 1
 #else
 #  error "Unrecognized board"
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
@@ -87,6 +71,21 @@
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
 #  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#endif
+
+/* MMC/SD PORT and SLOT number probably depend on the board configuration */
+
+#ifdef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 0
+#    error "The Detron MMC/SD is on SSP0"
+#    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
+#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 0
+#  endif
+#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) || CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
+#    error "The Detron MMC/SD is only one slot (0)"
+#    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
+#    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
+#  endif
 #endif
 
 #ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR

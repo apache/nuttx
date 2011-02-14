@@ -3,7 +3,9 @@
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Authors:
+ *      Decio Renno <http://www.detroneletronica.com.br>
+ *      Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -123,70 +125,11 @@
 #define CONFIG_LP17_FLASH          1
 #define BOARD_FLASHCFG_VALUE       0x0000303a
 
-/* LED definitions ******************************************************************/
-/* This describes a board with 3 LEDs, LED1, LED2, and hearbeat... This needes to be
- * updated for the Detron board. If CONFIG_ARCH_LEDS is defined, these LEDs will be
- * controlled as follows for NuttX debug functionality (where NC means "No Change").
- */
-                                      /* LED1   LED2   HEARTBEAT */
-#define LED_STARTED                0  /* OFF    OFF    OFF */
-#define LED_HEAPALLOCATE           1  /* GREEN  OFF    OFF */
-#define LED_IRQSENABLED            2  /* OFF    GREEN  OFF */
-#define LED_STACKCREATED           3  /* OFF    OFF    OFF */
-#define LED_INIRQ                  4  /*  NC     NC    ON  (momentary) */
-#define LED_SIGNAL                 5  /*  NC     NC    ON  (momentary) */
-#define LED_ASSERTION              6  /*  NC     NC    ON  (momentary) */
-#define LED_PANIC                  7  /*  NC     NC    ON  (1Hz flashing) */
-
-/* Alternate pin selections *********************************************************/
-/* UART1 -- Not connected */
-
-#define GPIO_UART1_TXD             GPIO_UART1_TXD_1
-#define GPIO_UART1_RXD             GPIO_UART1_RXD_1
-#define GPIO_UART1_CTS             GPIO_UART1_CTS_1
-#define GPIO_UART1_DCD             GPIO_UART1_DCD_1
-#define GPIO_UART1_DSR             GPIO_UART1_DSR_1
-#define GPIO_UART1_DTR             GPIO_UART1_DTR_1
-#define GPIO_UART1_RI              GPIO_UART1_RI_1
-#define GPIO_UART1_RTS             GPIO_UART1_RTS_1
-
-/* UART2 -- Not connected */
-
-#define GPIO_UART2_TXD             GPIO_UART2_TXD_1
-#define GPIO_UART2_RXD             GPIO_UART2_RXD_1
-
-/* UART3 -- Not connected */
-
-#define GPIO_UART3_TXD             GPIO_UART3_TXD_1
-#define GPIO_UART3_RXD             GPIO_UART3_RXD_1
-
-/* Either SPI or SSP0 can drive the MMC/SD slot (SSP0 alternate pin settings are
- * not connected)
- */
-
-#define GPIO_SSP0_SCK              GPIO_SSP0_SCK_1
-#define GPIO_SSP0_SSEL             GPIO_SSP0_SSEL_1
-#define GPIO_SSP0_MISO             GPIO_SSP0_MISO_1
-#define GPIO_SSP0_MOSI             GPIO_SSP0_MOSI_1
-
-/* SSP1 */
-
-#define GPIO_SSP1_SCK              GPIO_SSP1_SCK_1
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-#ifdef CONFIG_ARCH_LEDS
-enum lpc17_ledstate_e
-{
-  LPC17_LEDSTATE_OFF   = 0,
-  LPC17_LEDSTATE_GREEN = 1,
-  LPC17_LEDSTATE_RED   = 2,
-  LPC17_LEDSTATE_AMBER = (LPC17_LEDSTATE_GREEN|LPC17_LEDSTATE_RED),
-};
-#endif
 
 /************************************************************************************
  * Public Data
@@ -214,19 +157,6 @@ extern "C" {
  ************************************************************************************/
 
 EXTERN void lpc17_boardinitialize(void);
-
-/************************************************************************************
- * Name: lpc17_led1 and 2
- *
- * Description:
- *   Once the system has booted, these functions can be used to control LEDs 1 and 2
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-EXTERN void lpc17_led1(enum lpc17_ledstate_e state);
-EXTERN void lpc17_led2(enum lpc17_ledstate_e state);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

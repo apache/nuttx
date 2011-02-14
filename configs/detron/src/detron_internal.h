@@ -34,6 +34,43 @@
  *
  ************************************************************************************/
 
+/************************************************************************************
+ *
+ * Pin used in the Internet Radio Detron Board
+ *
+ * Graphic Display
+ *
+ * Pin 	Port	Function
+ * 58   	P0(20)	DI
+ * 59   	P0(19)	RW
+ * 49    P0(11)  ENABLE
+ * 78    P0(7)   D0
+ * 79    P0(6)   D1
+ * 78    P0(5)   D2
+ * 81    P0(4)   D3
+ * 94    P1(1)   D4
+ * 95    P1(0)   D5
+ * 47    P0(1)   D6
+ * 46    P0(0)   D7
+ *
+ * VS1003
+ *
+ * Pin	Port	Function
+ * 65	P2(8)	xreset
+ * 85	P4(29)	dreq
+ * 82	P4(28)	xdcs
+ * 63	P0(16)	xcs
+ * 62	P0(15)	sclk
+ * 60	P0(18)	si
+ * 61	P0(17)	so
+ *
+ * USB
+ *
+ * Pin	Port	Function
+ * 29			D+
+ * 30			D-
+ */
+
 #ifndef _CONFIGS_DETRON_SRC_DETRON_INTERNAL_H
 #define _CONFIGS_DETRON_SRC_DETRON_INTERNAL_H
 
@@ -49,21 +86,42 @@
  ************************************************************************************/
 
 /* Detron GPIO Pin Definitions ******************************************************/
-/* Board GPIO Usage: To be provided */
+/* Pinos do Display grafico */
 
-#define DETRON_LED1_A             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN0)
-#define DETRON_LED1_B             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN1)
-#define DETRON_LED2_A             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN2)
-#define DETRON_LED2_B             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN3)
-#define DETRON_232_ENABLE         (GPIO_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORT2 | GPIO_PIN5)
-#define DETRON_232_POWERSAVE      (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN5)
-#define DETRON_232_VALID          (GPIO_INPUT  | GPIO_PULLUP     | GPIO_PORT2 | GPIO_PIN5)
-#define DETRON_HEARTBEAT          (GPIO_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORT2 | GPIO_PIN11)
-#define DETRON_EXTRA_LED          (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN12)
-#define DETRON_5V_ENABLE          (GPIO_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORT2 | GPIO_PIN13)
-#define DETRON_5V_DISABLE         (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN13)
+#define pin_di              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN20)
+#define pin_rw              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN19)
+#define pin_enable          (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN11)
+#define pin_d0              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN7)
+#define pin_d1              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN6)
+#define pin_d2              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN5)
+#define pin_d3              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN4)
+#define pin_d4              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT1 | GPIO_PIN1)
+#define pin_d5              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT1 | GPIO_PIN0)
+#define pin_d6              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN1)
+#define pin_d7              (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN0)
+#define pin_cs1             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN10)
+#define pin_cs2             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN9)
+#define pin_rst             (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN8)
 
-#define DETRON_MMCSD_CS           (GPIO_OUTPUT | GPIO_VALUE_ONE  |  GPIO_PORT0 | GPIO_PIN16)
+/* VS1003 pins
+ * xdcs = SPI in mode SDI (data)
+ * xcs =  SPI in mode SCI (comand)
+ *
+ * sclk = SPI clock
+ * si   = SPI in
+ * so   = SPI out
+ *
+ * dreq = SPI status   1 - free   0 - busy
+ * xreset = hardware reset
+ */
+
+#define pin_vs1003_xreset   (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN8)
+#define pin_vs1003_dreq     (GPIO_INPUT  | GPIO_VALUE_ZERO | GPIO_PORT4 | GPIO_PIN29)
+#define pin_vs1003_xdcs     (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT4 | GPIO_PIN28)
+#define pin_vs1003_xcs      (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN16)
+#define pin_vs1003_sclk     (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN15)
+#define pin_vs1003_si       (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN18)
+#define pin_vs1003_so       (GPIO_INPUT  | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN17)
 
 /************************************************************************************
  * Public Types
@@ -78,17 +136,7 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
-
-/************************************************************************************
- * Name: lpc17_sspinitialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the Detron board.
- *
- ************************************************************************************/
-
-extern void weak_function lpc17_sspinitialize(void);
-
+ 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_DETRON_SRC_DETRON_INTERNAL_H */
 
