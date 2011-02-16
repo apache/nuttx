@@ -2,7 +2,7 @@
  * arch/hc/src/m9s12/m9s12_vectors.S
  * arch/hc/src/chip/m9s12_vectors.S
  *
- *	 Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *	 Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *	 Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,8 +56,24 @@
  * Macros
  ************************************************************************************/
 
+/* On entry into an I- or X-interrupt, into an SWI, or into an undefined instruction
+ * interrupt, the stack frame created by hardware looks like:
+ *
+ * Low Address       <-- SP after interrupt
+ *              CCR
+ *              B
+ *              A
+ *              XH
+ *              XL
+ *              YH
+ *              YL
+ *              PCH
+ * High Address PCL  <-- SP before interrupt
+ */
+ 
 	.macro	HANDLER, label, irqno
 \label:
+#warning "Missing Logic"
 	.endm
 
 /************************************************************************************
@@ -189,11 +205,83 @@ handlers:
  *	Common IRQ handling logic
  *
  * Description:
- *	 To be provided
+ *   On entry into an I- or X-interrupt, into an SWI, or into an undefined
+ *   instruction interrupt, the stack frame created by hardware looks like:
+ *
+ *   Low Address        <-- SP after state save
+ *                [PPAGE]
+ *                [soft regisers]
+ *                XYH
+ *                XYL
+ *                ZH
+ *                ZL
+ *                TMPH
+ *                TMPL
+ *                FRAMEH
+ *                FRAMEL <-- SP after interrupt
+ *                CCR
+ *                B
+ *                A
+ *                XH
+ *                XL
+ *                YH
+ *                YL
+ *                PCH
+ *   High Address PCL    <-- SP before interrupt
  *
  ************************************************************************************/
 
 vcommon:
+	/* Save the rest of the frame */
+
+	movw	_.frame, 2, -sp
+	movw	_.tmp, 2, -sp
+	movw	_.z, 2, -sp
+	movw	_.xy, 2, -sp
+
+	/* Save the soft registers */
+
+#if CONFIG_HCS12_MSOFTREGS > 2
+#  error "Need to save more registers"
+#endif
+#if CONFIG_HCS12_MSOFTREGS > 1
+	movw	_.d2, 2, -sp
+#endif
+#if CONFIG_HCS12_MSOFTREGS > 0
+	movw	_.d1, 2, -sp
+#endif
+
+	/* Save the PPAGE register */
+ 
+#ifndef CONFIG_HCS12_NONBANKED
+	movb	HCS12_MMC_PPAGE, 1, -sp
+#endif
+
+    /* Handle the IRQ */
+#warning "Missing Logic"
+
+	/* Restore registers and return */
+ 
+	/* Restore the PPAGE register */
+
+#ifndef CONFIG_HCS12_NONBANKED
+	movb	1, sp+, HCS12_MMC_PPAGE
+#endif
+
+	/* Restore the soft registers */
+
+#if CONFIG_HCS12_MSOFTREGS > 0
+	movw	2, sp+, _.d1
+#endif
+#if CONFIG_HCS12_MSOFTREGS > 1
+	movw	2, sp+, _.d2
+#endif
+
+	movw	2, sp+, _.xy
+	movw	2, sp+, _.z
+	movw	2, sp+, _.tmp
+	movw	2, sp+, _.frame
+	rti
 	.size	handlers, .-handlers
 
 /************************************************************************************
@@ -203,7 +291,8 @@ vcommon:
  *	Name: up_interruptstack/g_userstack
  *
  * Description:
- *	 Shouldn't happen
+ *	 If CONFIG_ARCH_INTERRUPTSTACK is defined, this sets aside memory for the
+ *   interrupt stack.
  *
  ************************************************************************************/
 

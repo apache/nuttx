@@ -1459,4 +1459,7 @@
 	  shorter and more general.
 	* The NuttX repository has been converted to SVN and can now be found here
 	  http://nuttx.svn.sourceforge.net/viewvc/nuttx/
+	* configs/mbed/hidkbd -- Added USB host support for the mbed LPC1768 board; add
+ 	  a USB host HID keyboard configuraion.
+
 
