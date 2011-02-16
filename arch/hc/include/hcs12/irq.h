@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/hc/include/hcs12/irq.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,79 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+/************************************************************************************
+ *	Register state save strucure
+ *   Low Address        <-- SP after state save
+ *                [PPAGE]
+ *                [soft regisers]
+ *                XYH
+ *                XYL
+ *                ZH
+ *                ZL
+ *                TMPH
+ *                TMPL
+ *                FRAMEH
+ *                FRAMEL <-- SP after interrupt
+ *                CCR
+ *                B
+ *                A
+ *                XH
+ *                XL
+ *                YH
+ *                YL
+ *                PCH
+ *   High Address PCL    <-- SP before interrupt
+ *
+ ************************************************************************************/
+
+/* Byte offsets */
+
+#ifndef CONFIG_HCS12_NONBANKED
+#  define REG_PPAGE          0
+#  define REG_FIRST_SOFTREG  1
+#else
+#  define REG_FIRST_SOFTREG  0
+#endif
+
+#if CONFIG_HCS12_MSOFTREGS > 2
+#  error "Need to save more registers"
+#elif CONFIG_HCS12_MSOFTREGS == 2
+#  define REG_SOFTREG1       REG_FIRST_SOFTREG
+#  define REG_SOFTREG2       (REG_FIRST_SOFTREG+2)
+#  define REG_FIRST_HARDREG  (REG_FIRST_SOFTREG+4)
+#elif CONFIG_HCS12_MSOFTREGS == 1
+#  define REG_SOFTREG1       REG_FIRST_SOFTREG
+#  define REG_FIRST_HARDREG  (REG_FIRST_SOFTREG+2)
+#else
+#  define REG_FIRST_HARDREG  REG_FIRST_SOFTREG
+#endif
+
+#define REG_XY               REG_FIRST_HARDREG
+#define REG_Z                (REG_FIRST_HARDREG+2)
+#  define REG_ZH             (REG_FIRST_HARDREG+2)
+#  define REG_ZL             (REG_FIRST_HARDREG+3)
+#define REG_TMP              (REG_FIRST_HARDREG+4)
+#  define REG_TMPH           (REG_FIRST_HARDREG+4)
+#  define REG_TMPL           (REG_FIRST_HARDREG+5)
+#define REG_FRAME            (REG_FIRST_HARDREG+6)
+#  define REG_FRAMEH         (REG_FIRST_HARDREG+6)
+#  define REG_FRAMEL         (REG_FIRST_HARDREG+7)
+
+#define REG_CCR              (REG_FIRST_HARDREG+8)
+#define REG_BA               (REG_FIRST_HARDREG+9)
+#  define REG_B              (REG_FIRST_HARDREG+9)
+#  define REG_A              (REG_FIRST_HARDREG+10)
+#define REG_X                (REG_FIRST_HARDREG+11)
+#  define REG_XH             (REG_FIRST_HARDREG+11)
+#  define REG_XL             (REG_FIRST_HARDREG+12)
+#define REG_Y                (REG_FIRST_HARDREG+13)
+#  define REG_YH             (REG_FIRST_HARDREG+13)
+#  define REG_YL             (REG_FIRST_HARDREG+14)
+#define REG_PC               (REG_FIRST_HARDREG+15)
+#  define REG_PCH            (REG_FIRST_HARDREG+15)
+#  define REG_PCL            (REG_FIRST_HARDREG+16)
+
+#define XCPTCONTEXT_REGS     (REG_FIRST_HARDREG+17)
 
 /************************************************************************************
  * Public Types
@@ -60,7 +133,7 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  int dummy; /* For now */
+  uint8_t regs[XCPTCONTEXT_REGS];
 };
 
 /****************************************************************************
