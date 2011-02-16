@@ -46,8 +46,12 @@ ifeq ($(CONFIG_HCS12_NONBANKED),y)
   ARCHCPUFLAGS = -m9s12x -mshort -mnolong-calls
   LDSCRIPT = ld.script.nonbanked
 else
-  ARCHCPUFLAGS = -m9x12x -mshort -mlong-calls
+  ARCHCPUFLAGS = -m9s12x -mshort -mlong-calls
   LDSCRIPT = ld.script.banked
+endif
+
+ifneq ($(CONFIG_HCS12_MSOFTREGS),0)
+  ARCHCPUFLAGS += -msoft-reg-count=$(CONFIG_HCS12_MSOFTREGS)
 endif
 
 ifeq ($(WINTOOL),y)
