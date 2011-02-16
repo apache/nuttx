@@ -67,7 +67,7 @@
 #define LPC17_CCLK                 80000000 /* 80Mhz*/
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
- * of the main osciallator.
+ * of the main oscillator.
  */
 
 #undef CONFIG_LPC17_MAINOSC
@@ -86,6 +86,8 @@
  *  Source clock:               Main oscillator
  *  PLL0 Multiplier value (M):  20 
  *  PLL0 Pre-divider value (N): 1
+ *
+ *  PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz
  */
 
 #undef CONFIG_LPC17_PLL0
@@ -107,8 +109,8 @@
   (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLL1CFG_MSEL_SHIFT) | \
    ((BOARD_PLL1CFG_NSEL-1) << SYSCON_PLL1CFG_NSEL_SHIFT))
 
-/* USB divider.  This divder is used when PLL1 is not enabled to get the USB clock
- * from PLL0:
+/* USB divider.  This divider is used when PLL1 is not enabled to get the
+ * USB clock from PLL0:
  *
  *  USBCLK = PLL0CLK / 10 = 48MHz
  */
@@ -149,6 +151,17 @@
 #define GPIO_SSP0_SSEL             GPIO_SSP0_SSEL_1
 #define GPIO_SSP0_MISO             GPIO_SSP0_MISO_1
 #define GPIO_SSP0_MOSI             GPIO_SSP0_MOSI_1
+
+/* We need to redefine USB_PWRD as GPIO to get USB Host working
+ * Also remember to add 2 resistors of 15K to D+ and D- pins.
+ */
+
+#ifdef CONFIG_USBHOST
+#  ifdef GPIO_USB_PWRD
+#    undef  GPIO_USB_PWRD
+#    define GPIO_USB_PWRD    (GPIO_INPUT | GPIO_PORT1 | GPIO_PIN22)
+#  endif
+#endif
 
 /************************************************************************************
  * Public Types

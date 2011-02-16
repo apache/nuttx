@@ -341,7 +341,11 @@ mbed Configuration Options
 USB Host Configuration
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The NuttShell (NSH) mbed can be modified in order to support USB
+The mbed board can be easily modified to support a USB host interface
+(Remember to add 2 resistors of 15K to D+ and D- pins).  The hidkbd
+configuration assumes that this change has been made.
+
+The NuttShell (NSH) mbed can also be modified in order to support USB
 host operations.  To make these modifications, do the following:
 
 1. First configure to build the NSH configuration from the top-level
@@ -383,6 +387,13 @@ as follow:
 
 Where <subdir> is one of the following:
 
+  hidkbd:
+    This configuration directory, performs a simple test of the USB host
+    HID keyboard class driver using the test logic in examples/hidkbd.
+    This configuration assumes that you have modified your mbed for USB
+    host support.
+
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables only the serial  NSH interfaces.
+    Configuration enables only the serial NSH interfaces.  See notes
+    above for enabling USB host support in this configuration.
