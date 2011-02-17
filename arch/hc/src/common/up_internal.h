@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/hc/src/common/up_internal.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,7 +101,7 @@ typedef void (*up_vector_t)(void);
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-extern uint16_t *current_regs;
+extern uint8_t *current_regs;
 
 /* This is the beginning of heap as provided from processor-specific logic.
  * This is the first address in RAM after the loaded program+bss+idle stack.
@@ -139,7 +139,7 @@ extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
 /* Interrupt handling */
 
-extern uint16_t *up_doirq(int irq, uint32_t *regs);
+extern uint8_t *up_doirq(int irq, uint8_t *regs);
 extern void up_maskack_irq(int irq);
 
 /* Signal handling */

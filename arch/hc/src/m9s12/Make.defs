@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/m9s12/Make.defs
 #
-#   Copyright (C) 2009,2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,10 @@
 HEAD_ASRC	= m9s12_vectors.S
 
 CMN_ASRCS	= 
-CMN_CSRCS	= up_allocateheap.c up_createstack.c up_idle.c up_initialize.c \
+CMN_CSRCS	= up_allocateheap.c up_createstack.c up_doirq.c up_idle.c up_initialize.c \
 			  up_interruptcontext.c up_mdelay.c up_modifyreg16.c \
 			  up_modifyreg32.c up_modifyreg8.c up_puts.c up_releasestack.c \
 			  up_udelay.c up_usestack.c
 
 CHIP_ASRCS	= m9s12_start.S m9s12_lowputc.S
-CHIP_CSRCS	= m9s12_serial.c m9s12_irq.c
+CHIP_CSRCS	= m9s12_assert.c m9s12_serial.c m9s12_irq.c

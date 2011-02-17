@@ -62,7 +62,8 @@
  *                TMPH
  *                TMPL
  *                FRAMEH
- *                FRAMEL <-- SP after interrupt
+ *                FRAMEL
+ *                SP    <-- SP after interrupt
  *                CCR
  *                B
  *                A
@@ -76,6 +77,7 @@
  ************************************************************************************/
 
 /* Byte offsets */
+/* PPAGE register (only in banked mode) */
 
 #ifndef CONFIG_HCS12_NONBANKED
 #  define REG_PPAGE          0
@@ -83,6 +85,8 @@
 #else
 #  define REG_FIRST_SOFTREG  0
 #endif
+
+/* Soft registers (as configured) */
 
 #if CONFIG_HCS12_MSOFTREGS > 2
 #  error "Need to save more registers"
@@ -108,20 +112,42 @@
 #  define REG_FRAMEH         (REG_FIRST_HARDREG+6)
 #  define REG_FRAMEL         (REG_FIRST_HARDREG+7)
 
-#define REG_CCR              (REG_FIRST_HARDREG+8)
-#define REG_BA               (REG_FIRST_HARDREG+9)
-#  define REG_B              (REG_FIRST_HARDREG+9)
-#  define REG_A              (REG_FIRST_HARDREG+10)
-#define REG_X                (REG_FIRST_HARDREG+11)
-#  define REG_XH             (REG_FIRST_HARDREG+11)
-#  define REG_XL             (REG_FIRST_HARDREG+12)
-#define REG_Y                (REG_FIRST_HARDREG+13)
-#  define REG_YH             (REG_FIRST_HARDREG+13)
-#  define REG_YL             (REG_FIRST_HARDREG+14)
-#define REG_PC               (REG_FIRST_HARDREG+15)
-#  define REG_PCH            (REG_FIRST_HARDREG+15)
-#  define REG_PCL            (REG_FIRST_HARDREG+16)
+/* Stack pointer before the interrupt */
 
+#define REG_SP               (REG_FIRST_HARDREG+8)
+#  define REG_SPH            (REG_FIRST_HARDREG+8)
+#  define REG_SPL            (REG_FIRST_HARDREG+9)
+
+/* On entry into an I- or X-interrupt, into an SWI, or into an undefined instruction
+ * interrupt, the stack frame created by hardware looks like:
+ *
+ * Low Address       <-- SP after interrupt
+ *              CCR
+ *              B
+ *              A
+ *              XH
+ *              XL
+ *              YH
+ *              YL
+ *              PCH
+ * High Address PCL  <-- SP before interrupt
+ */
+
+#define REG_CCR              (REG_FIRST_HARDREG+10)
+#define REG_BA               (REG_FIRST_HARDREG+11)
+#  define REG_B              (REG_FIRST_HARDREG+11)
+#  define REG_A              (REG_FIRST_HARDREG+12)
+#define REG_X                (REG_FIRST_HARDREG+13)
+#  define REG_XH             (REG_FIRST_HARDREG+13)
+#  define REG_XL             (REG_FIRST_HARDREG+14)
+#define REG_Y                (REG_FIRST_HARDREG+15)
+#  define REG_YH             (REG_FIRST_HARDREG+15)
+#  define REG_YL             (REG_FIRST_HARDREG+16)
+#define REG_PC               (REG_FIRST_HARDREG+17)
+#  define REG_PCH            (REG_FIRST_HARDREG+17)
+#  define REG_PCL            (REG_FIRST_HARDREG+18)
+
+#define INTFRAME_SIZE        9
 #define XCPTCONTEXT_REGS     (REG_FIRST_HARDREG+17)
 
 /************************************************************************************

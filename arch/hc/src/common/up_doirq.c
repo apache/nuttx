@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/m9s12/m9s12_irq.c
- * arch/arm/src/chip/m9s12_irq.c
+ * arch/hc/src/common/up_doirq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,26 +40,23 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <debug.h>
+#include <assert.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
+#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
-#include "m9s12_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-uint8_t *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -74,56 +70,49 @@ uint8_t *current_regs;
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
-
-void up_irqinitialize(void)
+uint8_t *up_doirq(int irq, uint8_t *regs)
 {
-  /* Disable all interrupts */
-#warning "Missing Logic"
+  up_ledon(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC(OSERR_ERREXCEPTION);
+#else
+  /* Nested interrupts are not supported in this implementation.  If you want
+   * implemented nested interrupts, you would have to (1) change the way that
+   * current regs is handled and (2) the design associated with
+   * CONFIG_ARCH_INTERRUPTSTACK.
+   */
 
-  /* currents_regs is non-NULL only while processing an interrupt */
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
+
+  DEBUGASSERT(current_regs == NULL);
+  current_regs = regs;
+
+  /* Mask and acknowledge the interrupt */
+
+  up_maskack_irq(irq);
+
+  /* Deliver the IRQ */
+
+  irq_dispatch(irq, regs);
+
+  /* If a context switch occurred while processing the interrupt then
+   * current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
+  regs = current_regs;
+
+  /* Indicate that we are no long in an interrupt handler */
 
   current_regs = NULL;
 
-}
+  /* Unmask the last interrupt (global interrupts are still disabled) */
 
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "Missing Logic"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "Missing Logic"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "Missing Logic"
+  up_enable_irq(irq);
+#endif
+  up_ledoff(LED_INIRQ);
+  return regs;
 }
