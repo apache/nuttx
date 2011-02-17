@@ -50,6 +50,7 @@
  ************************************************************************************/
 
 	.globl		__start
+	.globl		up_doirq
 	.file		"m9s12_vectors.S"
 
 /************************************************************************************
@@ -73,7 +74,8 @@
  
 	.macro	HANDLER, label, irqno
 \label:
-#warning "Missing Logic"
+	ldab	#\irqno							/* Load B=IRQ number */
+	bra		vcommon							/* Jump to common logic */
 	.endm
 
 /************************************************************************************
@@ -205,8 +207,23 @@ handlers:
  *	Common IRQ handling logic
  *
  * Description:
+ *   On entry in to vcommon: (1) The interrupt stack fram is in place, and (2) the
+ *   IRQ number is in B.
+ *
  *   On entry into an I- or X-interrupt, into an SWI, or into an undefined
  *   instruction interrupt, the stack frame created by hardware looks like:
+ *
+ *   Low Address        <-- SP after interrupt
+ *                B
+ *                A
+ *                XH
+ *                XL
+ *                YH
+ *                YL
+ *                PCH
+ *   High Address PCL   <-- SP before interrupt
+ *
+ *   This function will create the following stack frame and will call up_doirq():
  *
  *   Low Address        <-- SP after state save
  *                [PPAGE]
@@ -218,8 +235,8 @@ handlers:
  *                TMPH
  *                TMPL
  *                FRAMEH
- *                FRAMEL <-- SP after interrupt
- *                CCR
+ *                FRAMEL
+ *                SP    <-- SP after interrupt
  *                B
  *                A
  *                XH
@@ -227,11 +244,22 @@ handlers:
  *                YH
  *                YL
  *                PCH
- *   High Address PCL    <-- SP before interrupt
+ *   High Address PCL   <-- SP before interrupt
  *
  ************************************************************************************/
 
 vcommon:
+	/* Save the IRQ number currently in B */
+
+	stab	.Lbsave
+
+	/* Save the SP at the time of the interrupt */
+
+	tfr		sp, d
+	addd	#INTFRAME_SIZE
+	staa	1, -sp
+	stab	1, -sp
+
 	/* Save the rest of the frame */
 
 	movw	_.frame, 2, -sp
@@ -257,9 +285,27 @@ vcommon:
 	movb	HCS12_MMC_PPAGE, 1, -sp
 #endif
 
-    /* Handle the IRQ */
+    /* Handle the IRQ:  AB=irqno, TOS=register save structure.  Return value in d */
+	/* SP now points o the bottom of the frame - 1 */
+
+	tfr		sp, x
+	inx
+	std		.Lspsave
+	std		2, -sp
+
+	/* Recover the IRQ number and call up_doirq() */
+
+	ldab	.Lbsave
+	bsr		up_doirq
+	leas	2, sp
+
+	/* Check if the return value in d is the same as regs parameter passed in the TOS */
+
+	cpd		.Lspsave
+	beq		.Lnoswitch
 #warning "Missing Logic"
 
+.Lnoswitch:
 	/* Restore registers and return */
  
 	/* Restore the PPAGE register */
@@ -277,6 +323,11 @@ vcommon:
 	movw	2, sp+, _.d2
 #endif
 
+	/* Skip over the saved stack pointer */
+
+	ins
+	ins
+
 	movw	2, sp+, _.xy
 	movw	2, sp+, _.z
 	movw	2, sp+, _.tmp
@@ -288,6 +339,13 @@ vcommon:
  * .bss
  ************************************************************************************/
 /************************************************************************************
+ *	Name: Temporaries used within vcommon
+ ************************************************************************************/
+
+	.comm	.Lbsave, 1, 1
+	.comm	.Lspsave, 2, 1
+
+/************************************************************************************
  *	Name: up_interruptstack/g_userstack
  *
  * Description:
@@ -297,12 +355,9 @@ vcommon:
  ************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 1
-		.bss
-		.align	2
-up_interruptstack:
-		.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~1)
+	.comm	.up_interruptstack:, CONFIG_ARCH_INTERRUPTSTACK, 1
 up_interruptstack_base:
-		.size	up_interruptstack, .-up_interruptstack
+	.size	up_interruptstack, .-up_interruptstack
 #endif
-		.end
+	.end
 
