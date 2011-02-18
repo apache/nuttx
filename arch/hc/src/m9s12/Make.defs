@@ -41,5 +41,5 @@ CMN_CSRCS	= up_allocateheap.c up_createstack.c up_doirq.c up_idle.c up_initializ
 			  up_modifyreg32.c up_modifyreg8.c up_puts.c up_releasestack.c \
 			  up_udelay.c up_usestack.c
 
-CHIP_ASRCS	= m9s12_start.S m9s12_lowputc.S
+CHIP_ASRCS	= m9s12_start.S m9s12_lowputc.S m9s12_saveusercontext.S
 CHIP_CSRCS	= m9s12_assert.c m9s12_serial.c m9s12_irq.c

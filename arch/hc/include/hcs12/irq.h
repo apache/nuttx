@@ -147,8 +147,9 @@
 #  define REG_PCH            (REG_FIRST_HARDREG+17)
 #  define REG_PCL            (REG_FIRST_HARDREG+18)
 
+#define TOTALFRAME_SIZE      (REG_FIRST_HARDREG+17)
 #define INTFRAME_SIZE        9
-#define XCPTCONTEXT_REGS     (REG_FIRST_HARDREG+17)
+#define XCPTCONTEXT_REGS     TOTALFRAME_SIZE
 
 /************************************************************************************
  * Public Types

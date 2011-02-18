@@ -51,6 +51,7 @@
 
 	.globl		__start
 	.globl		up_doirq
+	.globl		up_fullcontextrestore
 	.file		"m9s12_vectors.S"
 
 /************************************************************************************
@@ -204,9 +205,11 @@ handlers:
 	HANDLER villegal, HCS12_IRQ_VILLEGAL 		/* Any reserved vector */
 
 /************************************************************************************
- *	Common IRQ handling logic
+ * Name: vcommon
  *
  * Description:
+ *	 Common IRQ handling logic
+ *
  *   On entry in to vcommon: (1) The interrupt stack fram is in place, and (2) the
  *   IRQ number is in B.
  *
@@ -214,6 +217,7 @@ handlers:
  *   instruction interrupt, the stack frame created by hardware looks like:
  *
  *   Low Address        <-- SP after interrupt
+ *                CCR
  *                B
  *                A
  *                XH
@@ -237,6 +241,7 @@ handlers:
  *                FRAMEH
  *                FRAMEL
  *                SP    <-- SP after interrupt
+ *                CCR
  *                B
  *                A
  *                XH
@@ -302,10 +307,8 @@ vcommon:
 	/* Check if the return value in d is the same as regs parameter passed in the TOS */
 
 	cpd		.Lspsave
-	beq		.Lnoswitch
-#warning "Missing Logic"
+	bne		up_fullcontextrestore
 
-.Lnoswitch:
 	/* Restore registers and return */
  
 	/* Restore the PPAGE register */
@@ -334,6 +337,82 @@ vcommon:
 	movw	2, sp+, _.frame
 	rti
 	.size	handlers, .-handlers
+
+/************************************************************************************
+ * Name: up_fullcontextrestore
+ *
+ * Description:
+ *   Given a pointer to a register save block that was previously created by either
+ *   interrupt handler or by up_saveusercontext(), restore the context of the saved
+ *   thread, thereby completing a context switch.
+ *
+ *   Low Address  [PPAGE]
+ *                [soft regisers]
+ *                XYH
+ *                XYL
+ *                ZH
+ *                ZL
+ *                TMPH
+ *                TMPL
+ *                FRAMEH
+ *                FRAMEL
+ *                SP
+ *                CCR
+ *                B
+ *                A
+ *                XH
+ *                XL
+ *                YH
+ *                YL
+ *                PCH
+ *   High Address PCL
+ *
+ * On entry:
+ *   D = Address of the context switch save block
+ *
+ ************************************************************************************/
+
+up_fullcontextrestore:
+	/* Make sure that interrupts are dissabled */
+
+	orcc	#0x50
+
+	/* Exchange D with X.  Now X points to the save structure. */
+
+	xgdx
+
+	/* Recover PPAGE */
+
+#ifndef CONFIG_HCS12_NONBANKED
+	movb	1, x+, HCS12_MMC_PPAGE
+#endif
+
+	/* Recover _.xy, _.z, _.tmp, _.frame */
+
+	movw	2, x+, _.xy
+	movw	2, x+, _.z
+	movw	2, x+, _.tmp
+	movw	2, x+, _.frame
+
+	/* Recover SP "before" the interrupt occurred */
+
+	ldd		2, x+
+	tfr		d, sp
+
+	/* Now, create a new interrupt return frame */
+
+	ldab	#(INTFRAME_SIZE-1)	/* Offset to PCL */
+	abx							/* X now points to last byte */
+
+	/* Copy the interrupt frame onto the stack */
+
+	movw	2, -sp, 2, -x		/* Copy the PC */
+	movw	2, -sp, 2, -x		/* Copy Y */
+	movw	2, -sp, 2, -x		/* Copy X */
+	movw	2, -sp, 2, -x		/* Copy A:B */
+	movw	1, -sp, 1, -x		/* Copy CCR */
+	rti							/* And return from interrupt */
+	.size	up_fullcontextrestore, .-up_fullcontextrestore
 
 /************************************************************************************
  * .bss
