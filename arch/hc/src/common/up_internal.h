@@ -130,12 +130,12 @@ extern void up_boot(void);
 
 /* Context switching functions */
 
-extern void up_copystate(uint32_t *dest, uint32_t *src);
-extern void up_decodeirq(uint32_t *regs);
+extern void up_copystate(uint8_t *dest, uint8_t *src);
+extern void up_decodeirq(uint8_t *regs);
 extern void up_irqinitialize(void);
-extern int  up_saveusercontext(uint32_t *saveregs);
-extern void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
-extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+extern int  up_saveusercontext(uint8_t *saveregs);
+extern void up_fullcontextrestore(uint8_t *restoreregs) __attribute__ ((noreturn));
+extern void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
 
 /* Interrupt handling */
 
