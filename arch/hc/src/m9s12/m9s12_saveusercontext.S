@@ -112,7 +112,7 @@ up_saveusercontext:
 
 	xgdx
 
-	/* Save he PPAGE register */
+	/* Save the PPAGE register */
 
 #ifndef CONFIG_HCS12_NONBANKED
 	movb	HCS12_MMC_PPAGE, 1, x+
