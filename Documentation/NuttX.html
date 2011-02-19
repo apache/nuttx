@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 15, 2011</p>
+      <p>Last Updated: February 19, 2011</p>
     </td>
   </tr>
 </table>
@@ -2032,12 +2032,14 @@ nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * examplex/wlan, configs/olimex-lpc1766stk/wlan, drivers/usbhost/usbhost_rtl8187.c,
       Add infrastructure to support RTL18187 wireless USB.
     * configs/nucleus2g -- backed out USB host changes... wrong board.
-	* Renamed arc/hc/include/mc9s12ne64 and src/mc9s12ne64 -- m9s12.  That name is
-	  shorter and more general.
+    * Renamed arc/hc/include/mc9s12ne64 and src/mc9s12ne64 -- m9s12.  That name is
+      shorter and more general.
     * The NuttX repository has been converted to SVN and can now be found here
       http://nuttx.svn.sourceforge.net/viewvc/nuttx/
-	* configs/mbed/hidkbd -- Added USB host support for the mbed LPC1768 board; add
- 	  a USB host HID keyboard configuraion.
+    * configs/mbed/hidkbd -- Added USB host support for the mbed LPC1768 board; add
+       a USB host HID keyboard configuraion.
+    * drivers/usbhost/hid_parser.c -- Leverages the LUFA HID parser written by
+      Dean Camera.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

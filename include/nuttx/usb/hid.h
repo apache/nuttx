@@ -165,40 +165,63 @@
 #define USBHID_COUNTRY_YUGOSLAVIA         0x34 /* Yugoslavia */
 #define USBHID_COUNTRY_TURKISHF           0x35 /* Turkish-F */
 
+/* HID report items */
+
+#define USBHID_RPTITEM_SIZE_MASK          0x03
+#  define USBHID_RPTITEM_SIZE_0           0x00 /* No data follows */
+#  define USBHID_RPTITEM_SIZE_1           0x01 /* 1 byte of data follows */
+#  define USBHID_RPTITEM_SIZE_2           0x02 /* 2 bytes of data follow */
+#  define USBHID_RPTITEM_SIZE_4           0x03 /* 4 bytes of data follow */
+#define USBHID_RPTITEM_TYPE_MASK          0x0c
+#  define USBHID_RPTITEM_TYPE_MAIN        0x00
+#  define USBHID_RPTITEM_TYPE_GLOBAL      0x04
+#  define USBHID_RPTITEM_TYPE_LOCAL       0x08
+#define USBHID_RPTITEM_TAG_MASK           0xf0
+
 /* Main Items (HID 6.2.2.4) */
 
-#define USBHID_MAIN_SIZE(pfx)             ((pfx) & 3)
+#define USBHID_MAIN_CONSTANT              (1 << 0) /* Constant(1) vs Data(0) */
+#define USBHID_MAIN_VARIABLE              (1 << 1) /* Variable(1) vs Array(0) */
+#define USBHID_MAIN_RELATIVE              (1 << 2) /* Relative(1) vs Absolute(0) */
+#define USBHID_MAIN_WRAP                  (1 << 3) /* Wrap(1) vs No Wrap(0) */
+#define USBHID_MAIN_NONLINEAR             (1 << 4) /* Non Linear(1) vs Linear(0) */
+#define USBHID_MAIN_NOPREFERRED           (1 << 5) /* No Preferred (1) vs Preferred State(0) */
+#define USBHID_MAIN_NULLSTATE             (1 << 6) /* Null state(1) vs No Null position(0) */
+#define USBHID_MAIN_VOLATILE              (1 << 7) /* Volatile(1) vs Non volatile(0) */
+#define USBHID_MAIN_BUFFEREDBYTES         (1 << 8) /* Buffered Bytes(1) vs Bit Field(0) */
+
+#define USBHID_MAIN_SIZE(pfx)             ((pfx) & USBHID_RPTITEM_SIZE_MASK)
 #define USBHID_MAIN_INPUT_PREFIX          0x80
-#define USBHID_MAIN_INPUT_CONSTANT        (1 << 0) /* Constant(1) vs Data(0) */
-#define USBHID_MAIN_INPUT_VARIABLE        (1 << 1) /* Variable(1) vs Array(0) */
-#define USBHID_MAIN_INPUT_RELATIVE        (1 << 2) /* Relative(1) vs Absolute(0) */
-#define USBHID_MAIN_INPUT_WRAP            (1 << 3) /* Wrap(1) vs No Wrap(0) */
-#define USBHID_MAIN_INPUT_NONLINEAR       (1 << 4) /* Non Linear(1) vs Linear(0) */
-#define USBHID_MAIN_INPUT_NOPREFERRED     (1 << 5) /* No Preferred (1) vs Preferred State(0) */
-#define USBHID_MAIN_INPUT_NULLSTATE       (1 << 6) /* Null state(1) vs No Null position(0) */
-#define USBHID_MAIN_INPUT_BUFFEREDBYTES   (1 << 8) /* Buffered Bytes(1) vs Bit Field(0) */
+#define USBHID_MAIN_INPUT_CONSTANT        USBHID_MAIN_CONSTANT
+#define USBHID_MAIN_INPUT_VARIABLE        USBHID_MAIN_VARIABLE
+#define USBHID_MAIN_INPUT_RELATIVE        USBHID_MAIN_RELATIVE
+#define USBHID_MAIN_INPUT_WRAP            USBHID_MAIN_WRAP
+#define USBHID_MAIN_INPUT_NONLINEAR       USBHID_MAIN_NONLINEAR
+#define USBHID_MAIN_INPUT_NOPREFERRED     USBHID_MAIN_NOPREFERRED
+#define USBHID_MAIN_INPUT_NULLSTATE       USBHID_MAIN_NULLSTATE
+#define USBHID_MAIN_INPUT_BUFFEREDBYTES   USBHID_MAIN_BUFFEREDBYTES
 
 #define USBHID_MAIN_OUTPUT_PREFIX         0x90
-#define USBHID_MAIN_OUTPUT_CONSTANT       (1 << 0) /* Constant(1) vs Data(0) */
-#define USBHID_MAIN_OUTPUT_VARIABLE       (1 << 1) /* Variable(1) vs Array(0) */
-#define USBHID_MAIN_OUTPUT_RELATIVE       (1 << 2) /* Relative(1) vs Absolute(0) */
-#define USBHID_MAIN_OUTPUT_WRAP           (1 << 3) /* Wrap(1) vs No Wrap(0) */
-#define USBHID_MAIN_OUTPUT_NONLINEAR      (1 << 4) /* Non Linear(1) vs Linear(0) */
-#define USBHID_MAIN_OUTPUT_NOPREFERRED    (1 << 5) /* No Preferred (1) vs Preferred State(0) */
-#define USBHID_MAIN_OUTPUT_NULLSTATE      (1 << 6) /* Null state(1) vs No Null position(0) */
-#define USBHID_MAIN_OUTPUT_VOLATILE       (1 << 7) /* Volatile(1) vs Non volatile(0) */
-#define USBHID_MAIN_OUTPUT_BUFFEREDBYTES  (1 << 8) /* Buffered Bytes(1) vs Bit Field(0) */
+#define USBHID_MAIN_OUTPUT_CONSTANT       USBHID_MAIN_CONSTANT
+#define USBHID_MAIN_OUTPUT_VARIABLE       USBHID_MAIN_VARIABLE
+#define USBHID_MAIN_OUTPUT_RELATIVE       USBHID_MAIN_RELATIVE
+#define USBHID_MAIN_OUTPUT_WRAP           USBHID_MAIN_WRAP
+#define USBHID_MAIN_OUTPUT_NONLINEAR      USBHID_MAIN_NONLINEAR
+#define USBHID_MAIN_OUTPUT_NOPREFERRED    USBHID_MAIN_NOPREFERRED
+#define USBHID_MAIN_OUTPUT_NULLSTATE      USBHID_MAIN_NULLSTATE
+#define USBHID_MAIN_OUTPUT_VOLATILE       USBHID_MAIN_VOLATILE
+#define USBHID_MAIN_OUTPUT_BUFFEREDBYTES  USBHID_MAIN_BUFFEREDBYTES
 
 #define USBHID_MAIN_FEATURE_PREFIX        0xb0
-#define USBHID_MAIN_FEATURE_CONSTANT      (1 << 0) /* Constant(1) vs Data(0) */
-#define USBHID_MAIN_FEATURE_VARIABLE      (1 << 1) /* Variable(1) vs Array(0) */
-#define USBHID_MAIN_FEATURE_RELATIVE      (1 << 2) /* Relative(1) vs Absolute(0) */
-#define USBHID_MAIN_FEATURE_WRAP          (1 << 3) /* Wrap(1) vs No Wrap(0) */
-#define USBHID_MAIN_FEATURE_NONLINEAR     (1 << 4) /* Non Linear(1) vs Linear(0) */
-#define USBHID_MAIN_FEATURE_NOPREFERRED   (1 << 5) /* No Preferred (1) vs Preferred State(0) */
-#define USBHID_MAIN_FEATURE_NULLSTATE     (1 << 6) /* Null state(1) vs No Null position(0) */
-#define USBHID_MAIN_FEATURE_VOLATILE      (1 << 7) /* Volatile(1) vs Non volatile(0) */
-#define USBHID_MAIN_FEATURE_BUFFEREDBYTES (1 << 8) /* Buffered Bytes(1) vs Bit Field(0) */
+#define USBHID_MAIN_FEATURE_CONSTANT      USBHID_MAIN_CONSTANT
+#define USBHID_MAIN_FEATURE_VARIABLE      USBHID_MAIN_VARIABLE
+#define USBHID_MAIN_FEATURE_RELATIVE      USBHID_MAIN_RELATIVE
+#define USBHID_MAIN_FEATURE_WRAP          USBHID_MAIN_WRAP
+#define USBHID_MAIN_FEATURE_NONLINEAR     USBHID_MAIN_NONLINEAR
+#define USBHID_MAIN_FEATURE_NOPREFERRED   USBHID_MAIN_NOPREFERRED
+#define USBHID_MAIN_FEATURE_NULLSTATE     USBHID_MAIN_NULLSTATE
+#define USBHID_MAIN_FEATURE_VOLATILE      USBHID_MAIN_VOLATILE
+#define USBHID_MAIN_FEATURE_BUFFEREDBYTES USBHID_MAIN_BUFFEREDBYTES
 
 #define USBHID_MAIN_COLLECTION_PREFIX     0xa0
 #define USBHID_MAIN_COLLECTION_PHYSICAL   0x00 /* Physical (group of axes) */
@@ -213,7 +236,7 @@
 
 /* Global Items (HID 6.2.2.7) */
 
-#define USBHID_GLOBAL_SIZE(pfx)           ((pfx) & 3)
+#define USBHID_GLOBAL_SIZE(pfx)           ((pfx) & USBHID_RPTITEM_SIZE_MASK)
 #define USBHID_GLOBAL_USAGEPAGE_PREFIX    0x04 /* Usage Page */
 #define USBHID_GLOBAL_LOGICALMIN_PREFIX   0x14 /* Logical Minimum */
 #define USBHID_GLOBAL_LOGICALMAX_PREFIX   0x24 /* Logical Maximum */
@@ -229,17 +252,17 @@
 
 /* Local Items (HID 6.2.2.8) */
 
-#define USBHID_LOCAL_SIZE(pfx)            ((pfx) & 3)
-#define USBHID_LOCAL_USAGE                0x08 /* Usage */
-#define USBHID_LOCAL_USAGEMIN             0x18 /* Usage Minimum */
-#define USBHID_LOCAL_USAGEMAX             0x28 /* Usage Maximum */
-#define USBHID_LOCAL_DESIGNATORIDX        0x38 /* Designator Index  */
-#define USBHID_LOCAL_DESIGNATORMIN        0x48 /* Designator Minimum */
-#define USBHID_LOCAL_DESIGNATORMAX        0x58 /* Designator Maximum */
-#define USBHID_LOCAL_STRINGIDX            0x78 /* String Index */
-#define USBHID_LOCAL_STRINGMIN            0x88 /* String Minimum */
-#define USBHID_LOCAL_STRINGMAX            0x98 /* xx */
-#define USBHID_LOCAL_DELIMITER            0xa8 /*Delimiter */
+#define USBHID_LOCAL_SIZE(pfx)            ((pfx) & USBHID_RPTITEM_SIZE_MASK)
+#define USBHID_LOCAL_USAGE_PREFIX         0x08 /* Usage */
+#define USBHID_LOCAL_USAGEMIN_PREFIX      0x18 /* Usage Minimum */
+#define USBHID_LOCAL_USAGEMAX_PREFIX      0x28 /* Usage Maximum */
+#define USBHID_LOCAL_DESIGNATORIDX_PREFIX 0x38 /* Designator Index  */
+#define USBHID_LOCAL_DESIGNATORMIN_PREFIX 0x48 /* Designator Minimum */
+#define USBHID_LOCAL_DESIGNATORMAX_PREFIX 0x58 /* Designator Maximum */
+#define USBHID_LOCAL_STRINGIDX_PREFIX     0x78 /* String Index */
+#define USBHID_LOCAL_STRINGMIN_PREFIX     0x88 /* String Minimum */
+#define USBHID_LOCAL_STRINGMAX_PREFIX     0x98 /* xx */
+#define USBHID_LOCAL_DELIMITER_PREFIX     0xa8 /*Delimiter */
 
 /* Modifier Keys (HID 8.3) */
 

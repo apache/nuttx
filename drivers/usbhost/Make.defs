@@ -34,7 +34,7 @@
 ############################################################################
 
 USBHOST_ASRCS  =
-USBHOST_CSRCS  =
+USBHOST_CSRCS  = hid_parser.c
 
 ifeq ($(CONFIG_USBHOST),y)
 USBHOST_CSRCS  += usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
