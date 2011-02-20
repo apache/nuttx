@@ -182,8 +182,4 @@ void up_timerinit(void)
   regval  = getreg8(HCS12_CRG_CRGINT);
   regval |= CRG_CRGINT_RTIE;
   putreg8(regval, HCS12_CRG_CRGINT);
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(HCS12_IRQ_VRTI);
 }

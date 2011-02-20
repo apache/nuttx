@@ -113,9 +113,13 @@ void up_initial_state(_TCB *tcb)
    */
 
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_CCR]      = 0xd0;  /* Disable STOP, Mask I- and Z- interrupts */
+  /* Disable STOP, Mask I- and Z- interrupts */
+
+  xcp->regs[REG_CCR]      = HCS12_CCR_S|HCS12_CCR_X|HCS12_CCR_I;  
 # else
-  xcp->regs[REG_CCR]      = 0x80;  /* Disable STOP, Enable I- and Z-interrupts */
+  /* Disable STOP, Enable I- and Z-interrupts */
+
+  xcp->regs[REG_CCR]      = HCS12_CCR_S;
 # endif
 }
 

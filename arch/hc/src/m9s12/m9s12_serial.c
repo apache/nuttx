@@ -331,7 +331,9 @@ static int up_setup(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 #ifndef CONFIG_SUPPRESS_SCI_CONFIG
   uint8_t cr1;
+#endif
 
+#ifndef CONFIG_SUPPRESS_SCI_CONFIG
   /* Calculate the BAUD divisor */
 
   tmp = SCIBR_VALUE(priv->baud);
@@ -371,17 +373,12 @@ static int up_setup(struct uart_dev_s *dev)
   up_serialout(priv, HCS12_SCI_CR1_OFFSET, cr1);
 #endif
 
-  /* Enable Rx interrupts from the SCI.  We don't want Tx interrupts until we
-   * have something to send.  We will check for serial errors as part of Rx
-   * interrupt processing.  Interrupts won't be fully enabled until the
-   * interrupt vector is attached.
+  /* Enable Rx and Tx, keeping all interrupts disabled. We don't want
+   * interrupts until the interrupt vector is attached.
    */
 
-  priv->im = SCI_CR2_RIE;
-
-  /* Enable Rx and Tx */
-
-  up_serialout(priv, HCS12_SCI_CR2_OFFSET, (SCI_CR2_RIE|SCI_CR2_TE|SCI_CR2_RE));
+  priv->im = 0;
+  up_serialout(priv, HCS12_SCI_CR2_OFFSET, (SCI_CR2_TE|SCI_CR2_RE));
   return OK;
 }
 
@@ -424,11 +421,12 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, up_interrupt);
   if (ret == OK)
     {
-       /* Enable the interrupt (RX and TX interrupts are still disabled
-        * in the SCI
+       /* Enable the Rx interrupt (the TX interrupt is still disabled
+        * until we have something to send). 
         */
 
-       up_enable_irq(priv->irq);
+       priv->im = SCI_CR2_RIE;
+       up_setsciint(priv);
     }
   return ret;
 }
@@ -446,7 +444,7 @@ static int up_attach(struct uart_dev_s *dev)
 static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_disable_irq(priv->irq);
+  up_disablesciint(priv, NULL);
   irq_detach(priv->irq);
 }
 

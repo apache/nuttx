@@ -93,7 +93,7 @@ typedef unsigned short     _uintptr_t;
 
 /* This is the size of the interrupt state save returned by irqsave()*/
 
-typedef unsigned int       irqstate_t;
+typedef unsigned char      irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 
