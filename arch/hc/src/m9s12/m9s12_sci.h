@@ -113,8 +113,9 @@
 #define SCI_CR2_TE                (1 << 3)  /* Bit 3:  Transmitter Enable */
 #define SCI_CR2_ILIE              (1 << 4)  /* Bit 4:  Idle Line Interrupt Enable */
 #define SCI_CR2_RIE               (1 << 5)  /* Bit 5:  Receiver Full Interrupt Enable Bit */
-#define SCI_CR2_TCIE              (1 << 6)  /* Bit 6:  Transmission Complete Interrupt En */
-#define SCI_CR2_TIE               (1 << 7)  /* Bit 7:  Transmitter Interrupt Ena */
+#define SCI_CR2_TCIE              (1 << 6)  /* Bit 6:  Transmission Complete Interrupt Enable */
+#define SCI_CR2_TIE               (1 << 7)  /* Bit 7:  Transmitter Interrupt Enable */
+#define SCI_CR2_ALLINTS           0xf0
 
 /* SCI Status Register 1 Bit-Field Definitions */
 
