@@ -80,11 +80,11 @@ struct hid_state_s
 int hid_parsereport(FAR const uint8_t *report, int rptlen,
                     hid_rptfilter_t filter, FAR struct hid_rptinfo_s *rptinfo)
 {
-  struct hid_state_s           state[HID_STATETABLE_STACK_DEPTH];
+  struct hid_state_s           state[CONFIG_HID_STATEDEPTH];
   struct hid_state_s          *currstate = &state[0];
   struct hid_collectionpath_s *collectionpath = NULL;
   struct hid_rptsizeinfo_s    *rptidinfo = &rptinfo->rptsize[0];
-  uint16_t                     usage[HID_USAGE_STACK_DEPTH];
+  uint16_t                     usage[CONFIG_HID_USAGEDEPTH];
   uint8_t                      nusage = 0;
   struct hid_range_s           usage_range = { 0, 0 };
   int                          i;
@@ -134,7 +134,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
       switch (item & ~USBHID_RPTITEM_SIZE_MASK)
         {
         case USBHID_GLOBAL_PUSH_PREFIX:
-          if (currstate == &state[HID_STATETABLE_STACK_DEPTH - 1])
+          if (currstate == &state[CONFIG_HID_STATEDEPTH - 1])
             {
               return -E2BIG;
             }
@@ -213,7 +213,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
 
               if (rptidinfo == NULL)
                 {
-                  if (rptinfo->nreports == HID_MAX_REPORT_IDS)
+                  if (rptinfo->nreports == CONFIG_HID_MAXIDS)
                     {
                       return -EINVAL;
                     }
@@ -229,7 +229,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
           break;
 
         case USBHID_LOCAL_USAGE_PREFIX:
-          if (nusage == HID_USAGE_STACK_DEPTH)
+          if (nusage == CONFIG_HID_USAGEDEPTH)
             {
               return -E2BIG;
             }
@@ -258,7 +258,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
 
               while (collectionpath->parent != NULL)
                 {
-                  if (collectionpath == &rptinfo->collectionpaths[HID_MAX_COLLECTIONS - 1])
+                  if (collectionpath == &rptinfo->collectionpaths[CONFIG_HID_MAXCOLLECTIONS - 1])
                     {
                       return -EINVAL;
                     }
@@ -332,15 +332,15 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
                 tag = (item & ~USBHID_RPTITEM_SIZE_MASK);
                 if (tag == USBHID_MAIN_INPUT_PREFIX)
                   {
-                    newitem.type = USBHID_REPORTTYPE_INPUT;
+                    newitem.type = HID_REPORT_ITEM_IN;
                   }
                 else if (tag == USBHID_MAIN_OUTPUT_PREFIX)
                   {
-                    newitem.type = USBHID_REPORTTYPE_OUTPUT;
+                    newitem.type = HID_REPORT_ITEM_OUT;
                   }
                 else
                   {
-                    newitem.type = USBHID_REPORTTYPE_FEATURE;
+                    newitem.type = HID_REPORT_ITEM_FEATURE;
                   }
 
                 newitem.bitoffset              = rptidinfo->size[newitem.type];
@@ -355,7 +355,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
 
                 if ((data & USBHID_MAIN_CONSTANT) == 0 && filter(&newitem))
                   {
-                    if (rptinfo->nitems == HID_MAX_REPORTITEMS)
+                    if (rptinfo->nitems == CONFIG_HID_MAXITEMS)
                       {
                         return -EINVAL;
                       }
@@ -515,7 +515,7 @@ void hid_putitem(FAR uint8_t *report, struct hid_rptitem_s *item)
 size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo, uint8_t id, uint8_t rpttype)
 {
   int i;
-  for (i = 0; i < HID_MAX_REPORT_IDS; i++)
+  for (i = 0; i < CONFIG_HID_MAXIDS; i++)
     {
       size_t size = rptinfo->rptsize[i].size[rpttype];
 

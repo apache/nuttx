@@ -44,64 +44,72 @@
 
 /* Configuration ************************************************************/
 
-/* HID_STATETABLE_STACK_DEPTH
+/* CONFIG_HID_STATEDEPTH
  *   Constant indicating the maximum stack depth of the state table. A larger
  *   state table allows for more PUSH/POP report items to be nested, but
  *   consumes more memory. By default this is set to 2 levels (allowing non-
  *   nested PUSH items) but this can be overridden by defining
- *   HID_STATETABLE_STACK_DEPTH in the Nuttx config file.
+ *   CONFIG_HID_STATEDEPTH in the Nuttx config file.
  *
- * HID_USAGE_STACK_DEPTH
+ * CONFIG_HID_USAGEDEPTH
  *   Constant indicating the maximum stack depth of the usage table. A larger
  *   usage table allows for more USAGE items to be indicated sequentially for
  *   REPORT COUNT entries of more than one, but requires more stack space. By
  *   default this is set to 8 levels (allowing for a report item with a count
- *   of 8) but this can be overridden by defining HID_USAGE_STACK_DEPTH to
+ *   of 8) but this can be overridden by defining CONFIG_HID_USAGEDEPTH to
  *   in the Nuttx config file.
  *
- * HID_MAX_COLLECTIONS
+ * CONFIG_HID_MAXCOLLECTIONS
  *   Constant indicating the maximum number of COLLECTION items (nested or
  *   unnested) that can be processed in the report item descriptor. A large
  *   value allows for more COLLECTION items to be processed, but consumes
  *   more memory. By default this is set to 10 collections, but this can be
- *   overridden by defining HID_MAX_COLLECTIONS in the Nuttx config file.
+ *   overridden by defining CONFIG_HID_MAXCOLLECTIONS in the Nuttx config file.
  *
+ * CONFIG_HID_MAXITEMS
  *   Constant indicating the maximum number of report items (IN, OUT or
  *   FEATURE) that can be processed in the report item descriptor and stored
  *   in the user HID Report Info structure. A large value allows
  *   for more report items to be stored, but consumes more memory. By default
  *   this is set to 20 items, but this can be overridden by defining
- *   HID_MAX_REPORTITEMS in the Nuttx config file.
+ *   CONFIG_HID_MAXITEMS in the Nuttx config file.
  *
+ * CONFIG_HID_MAXIDS
  *   Constant indicating the maximum number of unique report IDs that can be
  *   processed in the report item descriptor for the report size information
  *   array in the user HID Report Info structure. A large value allows for
  *   more report ID report sizes to be stored, but consumes more memory. By
  *   default this is set to 10 items, but this can be overridden by defining
- *   HID_MAX_REPORT_IDS in the Nuttx config file. Note that IN, OUT and FEATURE
+ *   CONFIG_HID_MAXIDS in the Nuttx config file. Note that IN, OUT and FEATURE
  *   items sharing the same report ID consume only one size item in the array.
  */
 
-#ifndef HID_STATETABLE_STACK_DEPTH
-#  define HID_STATETABLE_STACK_DEPTH    2
+#ifndef CONFIG_HID_STATEDEPTH
+#  define CONFIG_HID_STATEDEPTH      2
 #endif
 
-#ifndef HID_USAGE_STACK_DEPTH
-#  define HID_USAGE_STACK_DEPTH         8
+#ifndef CONFIG_HID_USAGEDEPTH
+#  define CONFIG_HID_USAGEDEPTH      8
 #endif
 
-#ifndef HID_MAX_COLLECTIONS
-#  define HID_MAX_COLLECTIONS           10
+#ifndef CONFIG_HID_MAXCOLLECTIONS
+#  define CONFIG_HID_MAXCOLLECTIONS 10
 #endif
 
-#ifndef HID_MAX_REPORTITEMS
-#  define HID_MAX_REPORTITEMS           20
+#ifndef CONFIG_HID_MAXITEMS
+#  define CONFIG_HID_MAXITEMS       20
 #endif
 
-#ifndef HID_MAX_REPORT_IDS
-#  define HID_MAX_REPORT_IDS            10
+#ifndef CONFIG_HID_MAXIDS
+#  define CONFIG_HID_MAXIDS         10
 #endif
 
+/* HID report type indices */
+
+#define HID_REPORT_ITEM_IN           0
+#define HID_REPORT_ITEM_OUT          1
+#define HID_REPORT_ITEM_FEATURE      2
+ 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -112,8 +120,8 @@
 
 struct hid_range_s
 {
-  uint32_t min;                        /* Minimum value for the attribute. */
-  uint32_t max;                        /* Maximum value for the attribute. */
+  uint32_t min;                        /* Minimum value for the attribute */
+  uint32_t max;                        /* Maximum value for the attribute */
 };
 
 /* HID Parser Report Item Unit Structure. Type define for the Unit attributes
@@ -122,8 +130,8 @@ struct hid_range_s
 
 struct hid_unit_t
 {
-  uint32_t type;                       /* Unit type (refer to HID specifications for details). */
-  uint8_t  exponent;                   /* Unit exponent (refer to HID specifications for details). */
+  uint32_t type;                       /* Unit type (refer to HID spec for details) */
+  uint8_t  exponent;                   /* Unit exponent (refer to HID spec for details) */
 };
 
 /* HID Parser Report Item Usage Structure.  Type define for the Usage
@@ -132,8 +140,8 @@ struct hid_unit_t
 
 struct hid_usage_t
 {
-  uint16_t page;                       /* Usage page of the report item. */
-  uint16_t usage;                      /* Usage of the report item. */
+  uint16_t page;                       /* Usage page of the report item */
+  uint16_t usage;                      /* Usage of the report item */
 };
 
 /* HID Parser Report Item Collection Path Structure. Type define for a
@@ -143,9 +151,9 @@ struct hid_usage_t
 
 struct hid_collectionpath_s
 {
-  uint8_t type;                        /* Collection type (e.g. "Generic Desktop"). */
-  struct hid_usage_t usage;            /* Collection usage. */
-  struct hid_collectionpath_s *parent; /* Reference to parent collection, or NULL if root collection. */
+  uint8_t type;                        /* Collection type (e.g. "Generic Desktop") */
+  struct hid_usage_t usage;            /* Collection usage */
+  struct hid_collectionpath_s *parent; /* Reference to parent collection (NULL if root) */
 };
 
 /* HID Parser Report Item Attributes Structure. Type define for all the data
@@ -154,11 +162,11 @@ struct hid_collectionpath_s
 
 struct hid_rptitem_attributes_s
 {
-  uint8_t bitsize;                    /* Size in bits of the report item's data. */
-  struct hid_usage_t usage;           /* Usage of the report item. */
-  struct hid_unit_t unit;             /* Unit type and exponent of the report item. */
-  struct hid_range_s logical;         /* Logical minimum and maximum of the report item. */
-  struct hid_range_s physical;        /* Physical minimum and maximum of the report item. */
+  uint8_t bitsize;                    /* Size in bits of the report item's data */
+  struct hid_usage_t usage;           /* Usage of the report item */
+  struct hid_unit_t unit;             /* Unit type and exponent of the report item */
+  struct hid_range_s logical;         /* Logical minimum and maximum of the report item */
+  struct hid_range_s physical;        /* Physical minimum and maximum of the report item */
 };
 
 /* HID Parser Report Item Details Structure. Type define for a report item
@@ -167,14 +175,14 @@ struct hid_rptitem_attributes_s
 
 struct hid_rptitem_s
 {
-  uint16_t bitoffset;                 /* Bit offset in the IN, OUT or FEATURE report of the item. */
-  uint8_t type;                       /* Report item type, a value in HID_ReportItemTypes_t. */
-  uint16_t flags;                     /* Item data flags, a mask of HID_IOF_* constants. */
-  uint8_t id;                         /* Report ID this item belongs to, or 0x00 if device has only one report */
-  struct hid_collectionpath_s *collectionpath;   /* Collection path of the item. */
-  struct hid_rptitem_attributes_s attrib; /* Report item attributes. */
+  uint16_t bitoffset;                 /* Bit offset in IN, OUT or FEATURE report of the item */
+  uint8_t type;                       /* Report item type */
+  uint16_t flags;                     /* Item data flags */
+  uint8_t id;                         /* Report ID this item belongs to (0 if only one report) */
+  struct hid_collectionpath_s *collectionpath;   /* Collection path of the item */
+  struct hid_rptitem_attributes_s attrib; /* Report item attributes */
   uint32_t value;                     /* Current value of the report item */
-  uint32_t previous;                  /* Previous value of the report item. */
+  uint32_t previous;                  /* Previous value of the report item */
 };
 
 /* HID Parser Report Size Structure. Type define for a report item size
@@ -183,8 +191,8 @@ struct hid_rptitem_s
 
 struct hid_rptsizeinfo_s
 {
-  uint8_t id;                         /* Report ID of the report within the HID interface. */
-  uint16_t size[3];                   /* Number of bits in each report type for the given Report ID */
+  uint8_t id;                         /* Report ID of the report within the HID interface */
+  uint16_t size[3];                   /* Number of bits in report type for the Report ID */
 };
 
 /* HID Parser State Structure. Type define for a complete processed HID
@@ -196,16 +204,16 @@ struct hid_rptinfo_s
   /* nitems is the number of report items stored in the report items array (rptitems[]). */
 
   uint8_t nitems;
-  struct hid_rptitem_s items[HID_MAX_REPORTITEMS];
+  struct hid_rptitem_s items[CONFIG_HID_MAXITEMS];
 
   /* All collection items, referenced by the report items. */
 
-  struct hid_collectionpath_s collectionpaths[HID_MAX_COLLECTIONS];
+  struct hid_collectionpath_s collectionpaths[CONFIG_HID_MAXCOLLECTIONS];
  
   uint8_t nreports;                   /* Number of reports within the HID interface */
-  struct hid_rptsizeinfo_s rptsize[HID_MAX_REPORT_IDS]; /* Report sizes for each report in the interface */
+  struct hid_rptsizeinfo_s rptsize[CONFIG_HID_MAXIDS]; /* Report sizes for each report in the interface */
   uint16_t maxrptsize;                /* Largest report that the attached device will generate, in bits */
-  bool haverptid;                     /* Device has at least one REPORT ID in its HID report. */
+  bool haverptid;                     /* Device has at least one REPORT ID in its HID report */
 };
 
 /* Callback routine for the HID Report Parser. This callback must be

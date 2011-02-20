@@ -40,6 +40,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/board/board.h>
+
 #include "m9s12_internal.h"
 #include "m9s12_mmc.h"
 #include "m9s12_crg.h"
@@ -118,8 +120,9 @@
 	/* Set the multipler and divider and enable the PLL */
 
 	bclr	*HCS12_CRG_PLLCTL #CRG_PLLCTL_PLLON
-	ldab	#15
+	ldab	#HCS12_SYNR_VALUE
 	stab	HCS12_CRG_SYNR
+	ldab	#HCS12_REFDV_VALUE   
 	stab	HCS12_CRG_REFDV
 	bset	*HCS12_CRG_PLLCTL #CRG_PLLCTL_PLLON
 
