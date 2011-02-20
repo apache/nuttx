@@ -132,9 +132,9 @@
 	.globl	up_lowsetup
 	.type	up_lowsetup, function
 up_lowsetup:
-#ifdef CONFIG_HCS12_SERIALMON
-	rts
-#else
+#ifdef HAVE_SERIAL_CONSOLE
+#ifndef CONFIG_HCS12_SERIALMON
+
 	/* Disable the console */
 
 	ldab	#0
@@ -158,9 +158,10 @@ up_lowsetup:
 
 	ldab	#(SCI_CR2_RE|SCI_CR2_TE)
 	stab	(HCS12_CONSOLE_BASE+HCS12_SCI_CR2_OFFSET)
-	rts
 
-#endif
+#endif /* CONFIG_HCS12_SERIALMON */
+#endif /* HAVE_SERIAL_CONSOLE */
+	rts
 	.size	up_lowsetup, . - up_lowsetup
 
 /**************************************************************************
@@ -171,12 +172,13 @@ up_lowsetup:
 	.global	up_lowputc
 	.type	up_lowputc, function
 up_lowputc:
+#ifdef HAVE_SERIAL_CONSOLE
 #ifdef CONFIG_HCS12_SERIALMON
 	jmp		PutChar
 #else
-#  if HCS12_CONSOLE_BITS == 9
+#if HCS12_CONSOLE_BITS == 9
 	staa	1, -sp
-#  endif
+#endif /* HCS12_CONSOLE_BITS == 9 */
 
 	/* Wait for the transmit data register to be available (TRDE==1) */
 
@@ -187,7 +189,7 @@ up_lowputc:
 
 	/* Then write the byte to the transmit data register */
 
-#  if HCS12_CONSOLE_BITS == 9
+#if HCS12_CONSOLE_BITS == 9
 	ldaa	1, sp+
 	bita	#(0x01)
 	bne		.L8bit
@@ -197,9 +199,14 @@ up_lowputc:
 	ldaa	#0
 .Lwrdrh:
 	staa	(HCS12_CONSOLE_BASE+HCS12_SCI_DRH_OFFSET)
-#  endif
+#endif /* HCS12_CONSOLE_BITS == 9 */
+
 	stab	(HCS12_CONSOLE_BASE+HCS12_SCI_DRL_OFFSET)
 	rts
-#endif
+
+#endif /* !CONFIG_HCS12_SERIALMON */
+#else
+	rts
+#endif /* HAVE_SERIAL_CONSOLE */
 	.size	up_lowputc, . - up_lowputc
 	.end
