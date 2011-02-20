@@ -80,50 +80,7 @@ uint8_t *current_regs;
 
 void up_irqinitialize(void)
 {
-  /* Disable all interrupts */
-#warning "Missing Logic"
-
   /* currents_regs is non-NULL only while processing an interrupt */
 
   current_regs = NULL;
-
-}
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "Missing Logic"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "Missing Logic"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "Missing Logic"
 }

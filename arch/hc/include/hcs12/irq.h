@@ -50,6 +50,17 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+/* CCR bit definitions */
+
+#define HCS12_CCR_C (1 << 0) /* Bit 0: Carry/Borrow status bit */
+#define HCS12_CCR_V (1 << 1) /* Bit 1: Two’s complement overflow status bit */
+#define HCS12_CCR_Z (1 << 2) /* Bit 2: Zero status bit */
+#define HCS12_CCR_N (1 << 3) /* Bit 3: Negative status bit */
+#define HCS12_CCR_I (1 << 4) /* Bit 4: Maskable interrupt control bit */
+#define HCS12_CCR_H (1 << 5) /* Bit 5: Half-carry status bit */
+#define HCS12_CCR_X (1 << 6) /* Bit 6: Non-maskable interrupt control bit */
+#define HCS12_CCR_S (1 << 7) /* Bit 7: STOP instruction control bit */
+
 /************************************************************************************
  *	Register state save strucure
  *   Low Address        <-- SP after state save
@@ -167,25 +178,72 @@ struct xcptcontext
  * Inline functions
  ****************************************************************************/
 
+/* Enable/Disable interrupts */
+
+#define ienable()  __asm("cli");
+#define idisable() __asm("orcc #0x10")
+#define xenable()  __asm("andcc #0xbf")
+#define xdisable() __asm("orcc #0x40")
+
+/* Get the current value of the stack pointer */
+
+static inline uint16_t up_getsp(void)
+{
+  uint16_t ret;
+  __asm__
+  (
+    "\tsts %0\n"
+	: "=m"(ret) :
+  );
+  return ret;
+}
+
+/* Get the current value of the CCR */
+
+static inline irqstate_t up_getccr(void)
+{
+  irqstate_t ccr;
+  __asm__
+  (
+    "\ttpa\n"
+    "\tstaa %0\n"
+	: "=m"(ccr) :
+  );
+  return ccr;
+}
+
 /* Save the current interrupt enable state & disable IRQs */
 
 static inline irqstate_t irqsave(void)
 {
-  /* To be provided */
+  irqstate_t ccr;
+  __asm__
+  (
+    "\ttpa\n"
+    "\tstaa %0\n"
+    "\torcc #0x50\n"
+	: "=m"(ccr) :
+  );
+  return ccr;
 }
 
-/* Restore saved IRQ & FIQ state */
+/* Restore saved interrupt state */
 
 static inline void irqrestore(irqstate_t flags)
 {
-  /* To be provided */
+  /* Should interrupts be enabled? */
+
+  if ((flags & HCS12_CCR_I) == 0)
+    {
+      /* Yes.. unmask I- and Z-interrupts */
+
+      __asm("andcc #0xaf");
+    }
 }
 
-static inline void system_call(swint_t func, int parm1,
-                               int parm2, int parm3)
-{
-  /* To be provided */
-}
+/* System call */
+
+#define system_call(f,p1,p2,p3) __asm("swi")
 
 /************************************************************************************
  * Public Data
