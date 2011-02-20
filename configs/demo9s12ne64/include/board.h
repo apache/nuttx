@@ -51,8 +51,29 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* Frequency of the crystal oscillator */
 
 #define HCS12_OSCCLK      16000000 /* 16MHz */
+
+/* PLL Settings
+ *
+ * SYNR register controls the multiplication factor of the PLL. If the PLL is on, the
+ * count in the loop divider (SYNR) register effectively multiplies up the PLL clock
+ * (PLLCLK) from the reference frequency by 2 x (SYNR+1). PLLCLK will not be below
+ * the minimum VCO frequency (fSCM).
+ *
+ * The REFDV register provides a finer granularity for the PLL multiplier steps. The
+ * count in the reference divider divides OSCCLK frequency by REFDV + 1.
+ *
+ *   PLLCLK = 2 * OSCCLK * (SYNR + 1) / (REFDV + 1)
+ *
+ * If (PLLSEL = 1), Bus Clock = PLLCLK / 2
+ */
+
+#define HCS12_SYNR_VALUE  0x15
+#define HCS12_REFDV_VALUE 0x15
+#define HCS12_PLLCLK      (2*HCS12_OSCCLK*(HCS12_SYNR+1)/(HCS12_REFDV+1))
+#define HCS12_BUSCLK      (HSC12_PLLCLK/2)
 
 /* LED definitions ******************************************************************/
 
