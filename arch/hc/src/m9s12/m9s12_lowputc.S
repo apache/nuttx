@@ -126,6 +126,11 @@
 
 /**************************************************************************
  * Name: up_lowsetup
+ *
+ * Note: This function is called from the boot logic very early in the
+ * initialization sequence:  After the stack pointer has been setup, but
+ * before .bss has been cleared and .data initialized.
+ *
  **************************************************************************/
 
 	.text
