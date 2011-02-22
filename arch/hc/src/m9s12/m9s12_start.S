@@ -59,9 +59,11 @@
  * Global Symbols
  ****************************************************************************/
 
+	.file		"m9s12_start.S"
 	.globl		__start
 	.globl		os_start
-	.file		"m9s12_start.S"
+	.globl		up_lowsetup
+	.globl		hcs12_boardinitialize
 
 /****************************************************************************
  * Macros
@@ -72,8 +74,17 @@
  */
 
 	.macro	showprogress, code
-#if defined(CONFIG_DEBUG) && defined(CONFIG_HCS12_SERIALMON)
+#ifdef CONFIG_DEBUG
+	ldab	\code
+#ifdef CONFIG_HCS12_SERIALMON
 	jsr		#PutChar
+#else
+#ifdef CONFIG_HCS12_NONBANKED
+	jsr		up_lowputc
+#else
+	call	up_lowputc
+#endif
+#endif
 #endif
 	.endm
 
@@ -161,6 +172,16 @@ __start:
 	/* Setup the stack pointer */
 
 	lds		.Lstackbase
+
+	/* Perform early, low-level initialization */
+
+#ifndef CONFIG_HCS12_SERIALMON
+#ifdef CONFIG_HCS12_NONBANKED
+	jsr		up_lowsetup
+#else
+	call	up_lowsetup
+#endif
+#endif
 	showprogress 'A'
 
 	/* Clear BSS */
@@ -195,6 +216,15 @@ __start:
 	bra 	.Linitdata				/* And loop until all of .DATA is initialized */
 .Ldatainitialized:
 	showprogress 'C'
+
+	/* Perform early board-level initialization */
+
+#ifdef CONFIG_HCS12_NONBANKED
+	jsr		hcs12_boardinitialize
+#else
+	call	hcs12_boardinitialize
+#endif
+	showprogress 'D'
 
 	/* Now, start the OS */
 
