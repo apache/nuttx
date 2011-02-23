@@ -1463,5 +1463,9 @@
 	  a USB host HID keyboard configuraion.
 	* drivers/usbhost/hid_parser.c -- Leverages the LUFA HID parser written by
 	  Dean Camera.
+	* lib/lib_getopt() -- Correct an error in the getopt() logic: On certain error
+	  return cases, the state was not being reset correcly and incorrect behaviors
+	  could occur on subsequent calls to getopt().
+
 
 

@@ -2,7 +2,7 @@
  * drivers/lcd/nokia6100.c
  * Nokia 6100 LCD Display Driver
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -928,7 +928,7 @@ static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
 #if NOKIA_XBIAS > 0
   col += NOKIA_XBIAS;
 #endif
-#if NOKIA_XBIAS > 0
+#if NOKIA_YBIAS > 0
   row += NOKIA_YBIAS;
 #endif
   DEBUGASSERT(buffer && col >=0 && (col + npixels) <= NOKIA_XRES && row >= 0 && row < NOKIA_YRES);

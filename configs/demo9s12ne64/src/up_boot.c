@@ -2,7 +2,7 @@
  * configs/demo9s12ne64/src/up_boot.c
  * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,7 @@
  * Name: hcs12_boardinitialize
  *
  * Description:
- *   All INCLUDE_HCS12_ARCH architectures must provide the following entry point.  This entry point
+ *   All HCS12 architectures must provide the following entry point.  This entry point
  *   is called early in the intitialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
