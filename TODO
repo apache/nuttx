@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 26, 2011)
+NuttX TODO List (Last updated February 11, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -24,7 +24,7 @@ NuttX TODO List (Last updated January 26, 2011)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
-  (4)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
+  (3)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (2)  ARM/LPC313x (arch/arm/src/lpc313x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
@@ -684,13 +684,6 @@ o ARM/i.MX (arch/arm/src/imx/)
 o ARM/LPC17xx (arch/arm/src/lpc17xx/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: If debug is enabled so that there is a lot of early serial console output,
-               The serial console output may be garbled initially.  If this becomes a
-               problem during debug, I've found that just putting a delaying at the
-               beginning of os_start() (sched/os_start.c) eliminates the garbled output.
-  Status:      Open
-  Priority:    Low, only effects debug and there is a workaround
-  
   Description: USB DMA not fully implemented. Partial logic is in place but it is
                fragmentary and bogus. (Leveraged from the lpc214x)
   Status:      Open
@@ -754,11 +747,11 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Status:      Open
   Priority:    Uncertain
 
-  Description: Possible errors in USB device driver reported "I suspect there’s a few
-               issues in the lpc214x USB driver – in particular it doesn’t stall both
-               in/out endpoints for unsupported setup requests and it doesn’t call
-               CLASS_DISCONNCET on a USB reset – I don’t have any access to that hardware
-               so can’t pursue it really."
+  Description: Possible errors in USB device driver reported "I suspect there's a few
+               issues in the lpc214x USB driver - in particular it doesn't stall both
+               in/out endpoints for unsupported setup requests and it doesn't call
+               CLASS_DISCONNCET on a USB reset - I don't have any access to that hardware
+               so can't pursue it really."
   Status:      Open
   Priority:    Medium
 
