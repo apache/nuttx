@@ -705,7 +705,7 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
   if (badarg)
     {
-      return ERROR;
+      goto errout_with_paths;
     }
 
   /* If this is not a tear down operation, then additional command line
