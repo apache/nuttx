@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_fscmds.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -663,6 +663,7 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   bool  teardown = false;
   bool  readonly = false;
   off_t offset   = 0;
+  bool  badarg   = false;
   int   ret      = ERROR;
   int   option;
 
@@ -695,8 +696,16 @@ int cmd_losetup(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
         case '?':
         default:
           nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-          return ERROR;
+          badarg = true;
+          break;
         }
+    }
+
+  /* If a bad argument was encountered, then return without processing the command */
+
+  if (badarg)
+    {
+      return ERROR;
     }
 
   /* If this is not a tear down operation, then additional command line
@@ -783,6 +792,7 @@ int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   const char *relpath;
   unsigned int lsflags = 0;
   char *fullpath;
+  bool badarg = false;
   int ret;
 
   /* Get the ls options */
@@ -807,8 +817,16 @@ int cmd_ls(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
           case '?':
           default:
             nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-            return ERROR;
+            badarg = true;
+            break;
         }
+    }
+
+  /* If a bad argument was encountered, then return without processing the command */
+
+  if (badarg)
+    {
+      return ERROR;
     }
 
   /* There may be one argument after the options */
@@ -943,6 +961,7 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   const char *fmt;
   uint8_t *buffer;
   uint32_t nsectors;
+  bool badarg = false;
   int sectsize = 512;
   int minor = 0;
   int ret;
@@ -958,8 +977,8 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
             minor = atoi(optarg);
             if (minor < 0 || minor > 255)
               {
-                fmt = g_fmtargrange;
-                goto errout_with_fmt;
+                nsh_output(vtbl, g_fmtargrange, argv[0]);
+                badarg = true;
               }
             break;
 
@@ -967,20 +986,29 @@ int cmd_mkrd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
             sectsize = atoi(optarg);
             if (minor < 0 || minor > 16384)
               {
-                fmt = g_fmtargrange;
-                goto errout_with_fmt;
+                nsh_output(vtbl, g_fmtargrange, argv[0]);
+                badarg = true;
               }
             break;
 
          case ':':
-            fmt = g_fmtargrequired;
-            goto errout_with_fmt;
+            nsh_output(vtbl, g_fmtargrequired, argv[0]);
+            badarg = true;
+            break;
 
           case '?':
           default:
-            fmt = g_fmtarginvalid;
-            goto errout_with_fmt;
+            nsh_output(vtbl, g_fmtarginvalid, argv[0]);
+            badarg = true;
+            break;
         }
+    }
+
+  /* If a bad argument was encountered, then return without processing the command */
+
+  if (badarg)
+    {
+      return ERROR;
     }
 
   /* There should be exactly on parameter left on the command-line */
@@ -1043,6 +1071,7 @@ int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   char *source;
   char *target;
   char *filesystem = 0;
+  bool badarg = false;
   int ret;
 
   /* Get the mount options */
@@ -1058,13 +1087,22 @@ int cmd_mount(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
           case ':':
             nsh_output(vtbl, g_fmtargrequired, argv[0]);
-            return ERROR;
+            badarg = true;
+            break;
 
           case '?':
           default:
             nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-            return ERROR;
+            badarg = true;
+            break;
         }
+    }
+
+  /* If a bad argument was encountered, then return without processing the command */
+
+  if (badarg)
+    {
+      return ERROR;
     }
 
   /* There are two required arguments after the options */

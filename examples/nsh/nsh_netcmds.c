@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_netcmds.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -281,6 +281,7 @@ int tftpc_parseargs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
                     struct tftpc_args_s *args)
 {
   FAR const char *fmt = g_fmtarginvalid;
+  bool badarg = false;
   int option;
 
   /* Get the ping options */
@@ -306,19 +307,28 @@ int tftpc_parseargs(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv,
             if (!uiplib_ipaddrconv(optarg, (FAR unsigned char*)&args->ipaddr))
               {
                 nsh_output(vtbl, g_fmtarginvalid, argv[0]);
-                goto errout;
+                badarg = true;
               }
             break;
 
           case ':':
-            fmt = g_fmtargrequired;
-            goto errout;
+            nsh_output(vtbl, g_fmtargrequired, argv[0]);
+            badarg = true;
+            break;
 
           case '?':
           default:
-            fmt = g_fmtarginvalid;
-            goto errout;
+            nsh_output(vtbl, g_fmtarginvalid, argv[0]);
+            badarg = true;
+            break;
         }
+    }
+
+  /* If a bad argument was encountered, then return without processing the command */
+
+  if (badarg)
+    {
+      return ERROR;
     }
 
   /* There should be exactly on parameter left on the command-line */
@@ -478,6 +488,7 @@ int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   uint32_t next;
   uint32_t dsec = 10;
   uint16_t id;
+  bool badarg = false;
   int count = 10;
   int option;
   int seqno;
@@ -496,8 +507,8 @@ int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
             count = atoi(optarg);
             if (count < 1 || count > 10000)
               {
-                fmt = g_fmtargrange;
-                goto errout;
+                nsh_output(vtbl, g_fmtargrange, argv[0]);
+                badarg = true;
               }
             break;
 
@@ -505,19 +516,33 @@ int cmd_ping(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
             tmp = atoi(optarg);
             if (tmp < 1 || tmp >= 4294)
               {
-                fmt = g_fmtargrange;
-                goto errout;
+                nsh_output(vtbl, g_fmtargrange, argv[0]);
+                badarg = true;
               }
-            dsec = 10 * tmp;
+            else
+              {
+                dsec = 10 * tmp;
+              }
             break;
 
           case ':':
-            fmt = g_fmtargrequired;
+            nsh_output(vtbl, g_fmtargrequired, argv[0]);
+            badarg = true;
+            break;
 
           case '?':
           default:
-            goto errout;
+            nsh_output(vtbl, g_fmtarginvalid, argv[0]);
+            badarg = true;
+            break;
         }
+    }
+
+  /* If a bad argument was encountered, then return without processing the command */
+
+  if (badarg)
+    {
+      return ERROR;
     }
 
   /* There should be exactly on parameter left on the command-line */
@@ -666,6 +691,7 @@ int cmd_wget(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   char *fullpath  = NULL;
   char *url;
   const char *fmt;
+  bool badarg = false;
   int option;
   int fd = -1;
   int ret;
@@ -681,14 +707,23 @@ int cmd_wget(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
             break;
 
           case ':':
-            fmt = g_fmtargrequired;
-            goto errout;
+            nsh_output(vtbl, g_fmtargrequired, argv[0]);
+            badarg = true;
+            break;
 
           case '?':
           default:
-            fmt = g_fmtarginvalid;
-            goto errout;
+            nsh_output(vtbl, g_fmtarginvalid, argv[0]);
+            badarg = true;
+            break;
         }
+    }
+
+  /* If a bad argument was encountered, then return without processing the command */
+
+  if (badarg)
+    {
+      return ERROR;
     }
 
   /* There should be exactly on parameter left on the command-line */
