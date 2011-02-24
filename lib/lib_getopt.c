@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_getopt.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ static bool      g_binitialized = false;
  *   If there are no more option characters, getopt() returns -1. Then optind
  *   is the index in argv of the first argv-element that is not an option.
  *
- *   The 'optstring argument is a string containing the legitimate option
+ *   The 'optstring' argument is a string containing the legitimate option
  *   characters. If such a character is followed by a colon, this indicates
  *   that the option requires an argument.  If an argument is required for an
  *   option so getopt() places a pointer to the following text in the same
@@ -95,6 +95,11 @@ static bool      g_binitialized = false;
  *   1. opterr is not supported and this implementation of getopt() never
  *      printfs error messages.
  *   2. getopt is NOT threadsafe!
+ *   3. This version of getopt() does not reset global variables until
+ *      -1 is returned.  As a result, your command line parsing loops
+ *      must call getopt() repeatedly and continue to parse if other
+ *      errors are returned ('?' or ':') until getopt() finally returns -1.
+ *     (You can also set optind to -1 to force a reset).
  *
  * Return: If an option was successfully found, then getopt() returns the
  *   option character. If all command-line options have been parsed, then
@@ -162,9 +167,6 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
               /* There are no more arguments, we are finished */
 
               g_binitialized = false;
-
-              /* Return -1 with optind == all of the arguments */
-
               return ERROR;
             }
 
@@ -176,11 +178,7 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
             {
               /* The argument does not start with '-', we are finished */
 
-              g_optptr       = NULL;
               g_binitialized = false;
-
-              /* Return the -1 with optind set to the non-option argument */
-
               return ERROR;
             }
 
@@ -226,13 +224,15 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 
         if (optchar[1] != ':')
           {
-            /* No, just return the character that we found */
+            /* No, no arguments. Just return the character that we found */
 
             g_optptr++;
             return *optchar;
           }
 
-        /* Yes.  Is the required argument after the command in this same argument? */
+        /* Yes, it has a required argument.  Is the required argument
+         * immediately after the command in this same argument?
+         */
 
         if (g_optptr[1] != '\0')
           {
@@ -264,6 +264,6 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
         return noarg_ret;
     }
 
-  optind = 1;
+  g_binitialized = false;
   return ERROR;
 }

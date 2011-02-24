@@ -11,7 +11,7 @@ NuttX TODO List (Last updated February 11, 2011)
  (16)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
   (1)  USB (drivers/usbdev)
-  (4)  Libraries (lib/)
+  (5)  Libraries (lib/)
  (12)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
@@ -352,6 +352,19 @@ o Libraries (lib/)
   Priority:    Low
 
   Description: strftime() and other timing functions do not handle days of the week.
+  Status:      Open
+  Priority:    Low
+
+  Description: There is an issue with the way that getopt() handles errors that
+               return '?'.
+               
+               1. Does getopt() reset its global variables after returning '?' so
+                  that it can be re-used?  That would be required to support where
+                  the caller terminates parsing before reaching the last parameter.
+               2. Or is the client expected to continue parsing after getopt()
+                  returns '?'  and parse until the final parameter?
+            
+               The current getopt() implementation only supports #2.
   Status:      Open
   Priority:    Low
 
