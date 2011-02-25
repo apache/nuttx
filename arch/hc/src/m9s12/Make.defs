@@ -43,5 +43,13 @@ CMN_CSRCS	= up_allocateheap.c up_blocktask.c up_copystate.c up_createstack.c \
 			  up_udelay.c up_unblocktask.c up_usestack.c
 
 CHIP_ASRCS	= m9s12_start.S m9s12_lowputc.S m9s12_saveusercontext.S
-CHIP_CSRCS	= m9s12_assert.c m9s12_serial.c m9s12_initialstate.c m9s12_irq.c \
-			  m9s12_timerisr.c
+CHIP_CSRCS	= m9s12_assert.c m9s12_gpio.c m9s12_initialstate.c m9s12_irq.c \
+			  m9s12_serial.c m9s12_timerisr.c
+
+ifeq ($(CONFIG_GPIO_IRQ),y)
+CHIP_CSRCS	+= m9s12_gpioint.c
+endif
+
+ifeq ($(CONFIG_DEBUG_GPIO),y)
+CHIP_CSRCS	+= m9s12_gpiodbg.c
+endif
