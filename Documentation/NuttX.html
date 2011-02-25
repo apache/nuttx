@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 24, 2011</p>
+      <p>Last Updated: February 25, 2011</p>
     </td>
   </tr>
 </table>
@@ -582,7 +582,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Built-in USB trace functionality for USB debug.</li>
+      <li>Built-in <a href="UsbTrace.html">USB trace</a> functionality for USB debug.</li>
     </p>
 </tr>
 
@@ -2043,6 +2043,8 @@ nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 	* examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
 	  before all parameters are parsed, you can leave getopt() in a strange state.
     * Rename arch/pjrc-8051 to arch/8051
+	* configs/ne64badge -- Add a configuration for the Future Electronics Group
+	  NE64 Badge development board (Freescale MC9S12NE64)
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2108,6 +2110,10 @@ buildroot-1.10 2011-xx-xx <spudmonkey@racsa.co.cr>
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td><a href="TODO.txt">To-Do List</a></td>
+</tr>
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td><a href="UsbTrace.html">USB Device Driver Tracing</a></td>
 </tr>
 </center></ul>
 
