@@ -895,7 +895,7 @@ configs/c5471evm
 
 configs/demo9s12ne64
     Feescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
-    port uses the m68hc12 GCC toolchain.  STATUS:  Under development.
+    port uses the m9s12x GCC toolchain.  STATUS:  Under development.
 
 configs/ea3131
     Embedded Artists EA3131 Development bard.  This board is based on the 
@@ -942,6 +942,11 @@ configs/mx1ads
     is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
     STATUS:  This port is nearly code complete but still under development
     (work is stalled until I devote time to the Micromint Eagle-100)
+
+configs/ne64badge
+    Future Electronics Group NE64 /PoE Badge board based on the
+    MC9S12NE64 hcs12 cpu.  This port uses the m9s12x GCC toolchain.
+    STATUS:  Under development.
 
 configs/ntosd-dm320
     This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-elf

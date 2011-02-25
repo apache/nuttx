@@ -1,8 +1,8 @@
 /****************************************************************************
- * config/demo9s12ne64/src/up_nsh.c
+ * config/ne64badge/src/up_nsh.c
  * arch/arm/src/board/up_nsh.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include "demo9s12ne64.h"
+#include "ne64badge_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
