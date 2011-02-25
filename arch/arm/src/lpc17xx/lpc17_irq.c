@@ -326,8 +326,6 @@ void up_irqinitialize(void)
 
   lpc17_dumpnvic("initial", LPC17_IRQ_NIRQS);
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-
   /* Initialize FIQs */
 
 #ifdef CONFIG_ARCH_FIQ
@@ -344,6 +342,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   setbasepri(NVIC_SYSH_PRIORITY_MAX);
   irqrestore(0);
 #endif

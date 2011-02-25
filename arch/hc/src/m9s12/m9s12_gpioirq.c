@@ -1,6 +1,6 @@
 /****************************************************************************
- * arch/arm/src/m9s12/m9s12_irq.c
- * arch/arm/src/chip/m9s12_irq.c
+ * arch/arm/src/m9s12/m9s12_gpioirq.c
+ * arch/arm/src/chip/m9s12_gpioirq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,17 +40,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <arch/irq.h>
-
-#include "up_arch.h"
-#include "os_internal.h"
-#include "up_internal.h"
 #include "m9s12_internal.h"
+
+#ifdef CONFIG_GPIO_IRQ
 
 /****************************************************************************
  * Definitions
@@ -59,8 +51,6 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-uint8_t *current_regs;
 
 /****************************************************************************
  * Private Data
@@ -75,26 +65,44 @@ uint8_t *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Name: hcs12_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
  ****************************************************************************/
 
-void up_irqinitialize(void)
+void hcs12_gpioirqinitialize(void)
 {
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  current_regs = NULL;
-
-  /* Initialize logic to support a second level of interrupt decoding for
-   * GPIO pins.
-   */
- 
-#ifdef CONFIG_GPIO_IRQ
-  lpc17_gpioirqinitialize();
-#endif
-
-  /* And finally, enable interrupts */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqrestore(0);
-#endif
+#warning "Not implemented"
 }
+
+/****************************************************************************
+ * Name: hcs12_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ ****************************************************************************/
+
+void hcs12_gpioirqenable(int irq)
+{
+#warning "Not implemented"
+}
+
+/****************************************************************************
+ * Name: hcs12_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ ****************************************************************************/
+
+void hcs12_gpioirqdisable(int irq)
+{
+#warning "Not implemented"
+}
+
+#endif /* CONFIG_GPIO_IRQ */
+
