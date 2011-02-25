@@ -1,7 +1,7 @@
 /************************************************************
- * arch/pjrc-8051/include/limits.h
+ * arch/8051/include/limits.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************/
 
-#ifndef __ARCH_PJRC8051_INCLUDE_LIMITS_H 
-#define __ARCH_PJRC8051_INCLUDE_LIMITS_H 
+#ifndef __ARCH_8051_INCLUDE_LIMITS_H 
+#define __ARCH_8051_INCLUDE_LIMITS_H 
 
 /************************************************************
  * Included Files
@@ -76,4 +76,4 @@
 #define PTR_MAX     0x7fffff
 #define UPTR_MAX    0xffffff
 
-#endif /* __ARCH_PJRC8051_INCLUDE_LIMITS_H  */
+#endif /* __ARCH_8051_INCLUDE_LIMITS_H  */
