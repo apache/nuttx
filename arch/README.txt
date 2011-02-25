@@ -253,7 +253,7 @@ arch/sh - SuperH and related Hitachi/Renesas microcontrollers
     arch/sh/include/shs and arch/sh/src/sh1
         Support for the SH-1 processor.
 
-arch/pjrc-8051 - 8051/52 microcontrollers
+arch/8051 - 8051/52 microcontrollers
     8051 Microcontroller.  This port is not quite ready for prime time.
 
 arch/z16 - ZiLOG 16-bit processors

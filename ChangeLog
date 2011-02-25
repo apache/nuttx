@@ -1465,6 +1465,6 @@
 	  Dean Camera.
 	* examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
 	  before all parameters are parsed, you can leave getopt() in a strange state.
-
+	* Rename arch/pjrc-8051 to arch/8051
 
 

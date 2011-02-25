@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 11, 2011)
+NuttX TODO List (Last updated February 24, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -16,7 +16,7 @@ NuttX TODO List (Last updated February 11, 2011)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (6)  Build system / Toolchains
+  (5)  Build system / Toolchains
   (4)  NuttShell (NSH) (examples/nsh)
   (3)  Other Applications & Tests (examples/)
   (5)  Linux/Cywgin simulation (arch/sim)
@@ -30,7 +30,7 @@ NuttX TODO List (Last updated February 11, 2011)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (5)  ARM/STM32 (arch/arm/src/stm32/)
-  (4)  pjrc-8052 / MCS51 (arch/pjrc-8051/)
+  (4)  8051 / MCS51 (arch/8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
   (8)  z80/z8/ez80 (arch/z80/)
@@ -490,11 +490,6 @@ o Documentation (Documentation/)
 o Build system
   ^^^^^^^^^^^^
 
-  Description: Some names under arch are still incorrect.  These should be
-               processor architecture names:  pjrc-8051 should be 805x
-  Status:      Open
-  Priority:    Low
-
   Description: configs/pjrc-8051 should be configs/pjrc-87c52
   Status:      Open
   Priority:    Low
@@ -882,8 +877,8 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Priority:    Uncertain.  I don't this is a bug, I think I just don't understand
                how to work with this type of SD card.
 
-o pjrc-8052 / MCS51 (arch/pjrc-8051/)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+o 8051 / MCS51 (arch/8051/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Description: Current status:
                - Basic OS task management seems OK

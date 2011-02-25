@@ -1,7 +1,7 @@
 ############################################################################
 # configs/pjrc-8051/defconfig
 #
-#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 # CONFIG_ARCH_BOARD_name - for use in C code
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 #
-CONFIG_ARCH=pjrc-8051
+CONFIG_ARCH=8051
 CONFIG_ARCH_8051=n
 CONFIG_ARCH_8052=y
 CONFIG_ARCH_BOARD=pjrc-8051
