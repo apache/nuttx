@@ -1466,5 +1466,7 @@
 	* examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
 	  before all parameters are parsed, you can leave getopt() in a strange state.
 	* Rename arch/pjrc-8051 to arch/8051
+	* configs/ne64badge -- Add a configuration for the Future Electronics Group
+	  NE64 Badge development board (Freescale MC9S12NE64)
 
 

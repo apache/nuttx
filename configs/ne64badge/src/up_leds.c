@@ -1,8 +1,8 @@
 /****************************************************************************
- * config/demo9s12ne64/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * configs/ne64badge/src/up_leds.c
+ * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,47 +40,69 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
 #include <debug.h>
-#include <errno.h>
 
-#include "demo9s12ne64.h"
+#include <arch/board/board.h>
+
+#include "ne64badge_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug ********************************************************************/
+/* Enables debug output from this file (needs CONFIG_DEBUG with
+ * CONFIG_DEBUG_VERBOSE too)
+ */
 
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lib_lowprintf(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
+#undef LED_DEBUG  /* Define to enable debug */
+
+#ifdef LED_DEBUG
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
 #else
-#  ifdef CONFIG_DEBUG
-#    define message lib_lowprintf
-#  else
-#    define message printf
-#  endif
+#  define leddbg(x...)
+#  define ledvdbg(x...)
 #endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: up_ledinit
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Configure and initialize on-board LEDs
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+#ifdef CONFIG_ARCH_LEDS
+void up_ledinit(void)
 {
-  /* Configure SPI-based devices */
-
-  return OK;
 }
+
+/****************************************************************************
+ * Name: up_ledon
+ ****************************************************************************/
+
+void up_ledon(int led)
+{
+}
+
+/****************************************************************************
+ * Name: up_ledoff
+ ****************************************************************************/
+
+void up_ledoff(int led)
+{
+}
+
+#endif /* CONFIG_ARCH_LEDS */
