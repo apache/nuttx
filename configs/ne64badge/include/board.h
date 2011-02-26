@@ -79,16 +79,24 @@
 
 /* The NE64 Badge board has 2 red LEDs that we will encode as: */
 
-#define LED_STARTED       1  /* LED1 */
-#define LED_HEAPALLOCATE  1  /* LED1 */
-#define LED_IRQSENABLED   1  /* LED1 */
-#define LED_STACKCREATED  1  /* LED1 */
-#define LED_INIRQ         2  /* LED1 + LED2 */
-#define LED_SIGNAL        2  /* LED1 + LED2 */
-#define LED_ASSERTION     2  /* LED1 + LED2 */
-#define LED_PANIC         7  /* LED2 + N/C  */
+                             /* LED1 LED2 */
+#define LED_STARTED       0  /*  OFF  OFF = Still initializing */
+#define LED_HEAPALLOCATE  0  /*  OFF  OFF = Still initializing */
+#define LED_IRQSENABLED   0  /*  OFF  OFF = Still initializing */
+#define LED_STACKCREATED  1  /*  ON   OFF = Initialization complete */
+#define LED_INIRQ         2  /*  NC   ON  = In an interrupt handler */
+#define LED_SIGNAL        2  /*  NC   ON  = In a signal handler */
+#define LED_ASSERTION     2  /*  NC   ON  = In an assertion */
+#define LED_PANIC         2  /*  NC   ON  = Oops! We crashed. (flashing) */
 
 /* Button definitions ***************************************************************/
+
+/* The NE64 badge has 2 switches, one labed SW1 and the other SW2 on the board (but
+ * referred to as button1 and button2 in some documentation)
+ */
+
+#define BUTTON1           1 /* Bit 0: SW1 button is depressed */
+#define BUTTON2           2 /* Bit 1: SW2 button is depressed */
 
 /************************************************************************************
  * Public Data
