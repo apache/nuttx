@@ -48,6 +48,14 @@
  * Private Definitions
  **************************************************************************/
 
+#ifdef CONFIG_HCS12_NONBANKED
+#  define CALL   jsr
+#  define RETURN rts
+#else
+#  define CALL   call
+#  define RETURN rtc
+#endif
+
 /**************************************************************************
  * Private Types
  **************************************************************************/
@@ -176,6 +184,6 @@ up_saveusercontext:
 #endif
 	clra
 	clrb
-	rts
+	RETURN
 	.size	up_saveusercontext, . - up_saveusercontext
 	.end

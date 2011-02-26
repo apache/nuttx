@@ -45,6 +45,14 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#ifdef CONFIG_HCS12_NONBANKED
+#  define CALL   jsr
+#  define RETURN rts
+#else
+#  define CALL   call
+#  define RETURN rtc
+#endif
+
 /************************************************************************************
  * Global Symbols
  ************************************************************************************/
@@ -161,7 +169,7 @@ hcs12_vectors:
  * .text
  ************************************************************************************/
 
-	.text
+	.section	nonbanked, "x"
 	.type	handlers, function
 handlers:
 
@@ -301,7 +309,7 @@ vcommon:
 	/* Recover the IRQ number and call up_doirq() */
 
 	ldab	.Lbsave
-	bsr		up_doirq
+	CALL	up_doirq
 	leas	2, sp
 
 	/* Check if the return value in d is the same as regs parameter passed in the TOS */
