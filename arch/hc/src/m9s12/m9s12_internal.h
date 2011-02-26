@@ -59,17 +59,18 @@
  *
  * The GPIO configuration is represented by a 16-bit value encoded as follows:
  *
- *   xxII OUUR DMGG GPPP
- *     || |||| |||    `-Pin number
- *     || |||| || `- Port number
- *     || |||| | `- PIM Ports
- *     || |||| `- Direction
- *     || |||`- Reduced drive
- *     || ||`- Polarity
- *     || |`- Pull up (or down)
- *     || `- Wired OR open drain
- *     |`- Interrupt or rising/falling (polarity)
- *     `- Interrupt
+ *   xIIO UURV DMGG GPPP
+ *    ||| |||| |||    `-Pin number
+ *    ||| |||| || `- Port number
+ *    ||| |||| | `- PIM Ports
+ *    ||| |||| `- Direction
+ *    ||| |||`- Initial value of output
+ *    ||| ||`- Reduced drive
+ *    ||| |`- Polarity
+ *    ||| `- Pull up (or down)
+ *    ||`- Wired OR open drain
+ *    |`- Interrupt or rising/falling (polarity)
+ *    `- Interrupt
  *
  * NOTE: MEBI ports E and K can have special configurations as controlled by
  * the PEAR and MODE registers.  Those special configurations are not managed
@@ -79,7 +80,7 @@
 
 /* Interrupts:
  *
- *   xxII xxxx xxxx xxxx
+ *   xIIx xxxx xxxx xxxx
  *
  * For PIM ports G, H, and J.  NOTE:  If pull up/down is also selected, then
  * it must be consistent with the selected interrupt edge (because both are
@@ -92,7 +93,7 @@
  * GPIO_INPUT and an error if GPIO_OUTPUT is also specified)
  */
 
-#define GPIO_INT_SHIFT      (12)
+#define GPIO_INT_SHIFT      (13)
 #define GPIO_INT_MASK       (3 << GPIO_PULLUP_SHIFT)
 #  define GPIO_INT_POLARITY (1 << GPIO_PULLUP_SHIFT)
 #  define GPIO_INT_ENABLE   (2 << GPIO_PULLUP_SHIFT)
@@ -101,22 +102,22 @@
 
 /* Wired OR open-drain:
  *
- *   xxxx Oxxx xxxx xxxx
+ *   xxxO xxxx xxxx xxxx
  *
  * Only PIM ports S and L
  */
 
-#define GPIO_OPENDRAN (1 << 11)
+#define GPIO_OPENDRAIN (1 << 12)
 
 /* Pull up (or down):
  *
- *   xxxx xUUx xxxx xxxx
+ *   xxxx UUxx xxxx xxxx
  *
  * For PIM ports (T,S,G,H,J,L), selection is per-pin
  * For MEBI ports (A,B,E,K), selection is per-port, polarity is ignored
  */
 
-#define GPIO_PULLUP_SHIFT    (9)
+#define GPIO_PULLUP_SHIFT    (10)
 #define GPIO_PULLUP_MASK     (3 << GPIO_PULLUP_SHIFT)
 #  define GPIO_PULL_POLARITY (1 << GPIO_PULLUP_SHIFT)
 #  define GPIO_PULL_ENABLE   (2 << GPIO_PULLUP_SHIFT)
@@ -125,13 +126,25 @@
 
 /* Reduced drive:
  *
- *   xxxx xxxR xxxx xxxx
+ *   xxxx xxRx xxxx xxxx
  *
  * For PIM ports (T,S,G,H,J,L), selection is per-pin
  * For MEBI ports (A,B,E,K), selection is per-port
  */
 
-#define GPIO_REDUCED (1 << 8)
+#define GPIO_REDUCED (1 << 9)
+
+/* Initial value of output:
+ *
+ *   xxxx xxxV xxxx xxxx
+ *
+ * For PIM ports (T,S,G,H,J,L), selection is per-pin
+ * For MEBI ports (A,B,E,K), selection is per-port
+ */
+
+#define GPIO_OUTPUT_VALUE (1 << 8)
+#define GPIO_OUTPUT_LOW   (0)
+#define GPIO_OUTPUT_HIGH  GPIO_OUTPUT_VALUE
 
 /* Data direction (All ports -- A,B,E,K,T,S,G,H,J,L)
  *
@@ -212,11 +225,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIO_IRQ
 EXTERN void hcs12_gpioirqinitialize(void);
-#else
-#  define hcs12_gpioirqinitialize()
-#endif
 
 /************************************************************************************
  * Name: hcs12_configgpio
