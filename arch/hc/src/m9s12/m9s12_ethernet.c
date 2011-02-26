@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/net/skeleton.c
+ * drivers/net/m9s12_ethernet.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_skeleton)
+#if defined(CONFIG_NET) && defined(CONFIG_HCS12_EMAC)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -59,51 +59,51 @@
  * Definitions
  ****************************************************************************/
 
-/* CONFIG_skeleton_NINTERFACES determines the number of physical interfaces
+/* CONFIG_HCS12_NINTERFACES determines the number of physical interfaces
  * that will be supported.
  */
 
-#ifndef CONFIG_skeleton_NINTERFACES
-# define CONFIG_skeleton_NINTERFACES 1
+#ifndef CONFIG_HCS12_NINTERFACES
+# define CONFIG_HCS12_NINTERFACES 1
 #endif
 
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
-#define skeleton_WDDELAY   (1*CLK_TCK)
-#define skeleton_POLLHSEC  (1*2)
+#define HCS12_WDDELAY   (1*CLK_TCK)
+#define HCS12_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
-#define skeleton_TXTIMEOUT (60*CLK_TCK)
+#define HCS12_TXTIMEOUT (60*CLK_TCK)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define BUF ((struct uip_eth_hdr *)skel->sk_dev.d_buf)
+#define BUF ((struct uip_eth_hdr *)priv->d_dev.d_buf)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* The skel_driver_s encapsulates all state information for a single hardware
+/* The emac_driver_s encapsulates all state information for a single hardware
  * interface
  */
 
-struct skel_driver_s
+struct emac_driver_s
 {
-  bool sk_bifup;               /* true:ifup false:ifdown */
-  WDOG_ID sk_txpoll;           /* TX poll timer */
-  WDOG_ID sk_txtimeout;        /* TX timeout timer */
+  bool    d_bifup;            /* true:ifup false:ifdown */
+  WDOG_ID d_txpoll;           /* TX poll timer */
+  WDOG_ID d_txtimeout;        /* TX timeout timer */
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s sk_dev;  /* Interface understood by uIP */
+  struct uip_driver_s d_dev;  /* Interface understood by uIP */
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct skel_driver_s g_skel[CONFIG_skeleton_NINTERFACES];
+static struct emac_driver_s g_emac[CONFIG_HCS12_NINTERFACES];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -111,28 +111,28 @@ static struct skel_driver_s g_skel[CONFIG_skeleton_NINTERFACES];
 
 /* Common TX logic */
 
-static int  skel_transmit(FAR struct skel_driver_s *skel);
-static int  skel_uiptxpoll(struct uip_driver_s *dev);
+static int  emac_transmit(FAR struct emac_driver_s *priv);
+static int  emac_uiptxpoll(struct uip_driver_s *dev);
 
 /* Interrupt handling */
 
-static void skel_receive(FAR struct skel_driver_s *skel);
-static void skel_txdone(FAR struct skel_driver_s *skel);
-static int  skel_interrupt(int irq, FAR void *context);
+static void emac_receive(FAR struct emac_driver_s *priv);
+static void emac_txdone(FAR struct emac_driver_s *priv);
+static int  emac_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
-static void skel_polltimer(int argc, uint32_t arg, ...);
-static void skel_txtimeout(int argc, uint32_t arg, ...);
+static void emac_polltimer(int argc, uint32_t arg, ...);
+static void emac_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int skel_ifup(struct uip_driver_s *dev);
-static int skel_ifdown(struct uip_driver_s *dev);
-static int skel_txavail(struct uip_driver_s *dev);
+static int emac_ifup(struct uip_driver_s *dev);
+static int emac_ifdown(struct uip_driver_s *dev);
+static int emac_txavail(struct uip_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int skel_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /****************************************************************************
@@ -140,14 +140,14 @@ static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
  ****************************************************************************/
 
 /****************************************************************************
- * Function: skel_transmit
+ * Function: emac_transmit
  *
  * Description:
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
  * Parameters:
- *   skel  - Reference to the driver state structure
+ *   priv  - Reference to the driver state structure
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -159,7 +159,7 @@ static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
  *
  ****************************************************************************/
 
-static int skel_transmit(FAR struct skel_driver_s *skel)
+static int emac_transmit(FAR struct emac_driver_s *priv)
 {
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
@@ -168,18 +168,18 @@ static int skel_transmit(FAR struct skel_driver_s *skel)
 
   /* Increment statistics */
 
-  /* Send the packet: address=skel->sk_dev.d_buf, length=skel->sk_dev.d_len */
+  /* Send the packet: address=priv->d_dev.d_buf, length=priv->d_dev.d_len */
 
   /* Enable Tx interrupts */
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(skel->sk_txtimeout, skeleton_TXTIMEOUT, skel_txtimeout, 1, (uint32_t)skel);
+  (void)wd_start(priv->d_txtimeout, HCS12_TXTIMEOUT, emac_txtimeout, 1, (uint32_t)priv);
   return OK;
 }
 
 /****************************************************************************
- * Function: skel_uiptxpoll
+ * Function: emac_uiptxpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -202,18 +202,18 @@ static int skel_transmit(FAR struct skel_driver_s *skel)
  *
  ****************************************************************************/
 
-static int skel_uiptxpoll(struct uip_driver_s *dev)
+static int emac_uiptxpoll(struct uip_driver_s *dev)
 {
-  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
 
-  if (skel->sk_dev.d_len > 0)
+  if (priv->d_dev.d_len > 0)
     {
-      uip_arp_out(&skel->sk_dev);
-      skel_transmit(skel);
+      uip_arp_out(&priv->d_dev);
+      emac_transmit(priv);
 
       /* Check if there is room in the device to hold another packet. If not,
        * return a non-zero value to terminate the poll.
@@ -228,13 +228,13 @@ static int skel_uiptxpoll(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: skel_receive
+ * Function: emac_receive
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
  *
  * Parameters:
- *   skel  - Reference to the driver state structure
+ *   priv  - Reference to the driver state structure
  *
  * Returned Value:
  *   None
@@ -244,7 +244,7 @@ static int skel_uiptxpoll(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void skel_receive(FAR struct skel_driver_s *skel)
+static void emac_receive(FAR struct emac_driver_s *priv)
 {
   do
     {
@@ -252,8 +252,8 @@ static void skel_receive(FAR struct skel_driver_s *skel)
 
       /* Check if the packet is a valid size for the uIP buffer configuration */
 
-      /* Copy the data data from the hardware to skel->sk_dev.d_buf.  Set
-       * amount of data in skel->sk_dev.d_len
+      /* Copy the data data from the hardware to priv->d_dev.d_buf.  Set
+       * amount of data in priv->d_dev.d_len
        */
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -264,30 +264,30 @@ static void skel_receive(FAR struct skel_driver_s *skel)
       if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
-          uip_arp_ipin(&skel->sk_dev);
-          uip_input(&skel->sk_dev);
+          uip_arp_ipin(&priv->d_dev);
+          uip_input(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
            */
 
-          if (skel->sk_dev.d_len > 0)
+          if (priv->d_dev.d_len > 0)
            {
-             uip_arp_out(&skel->sk_dev);
-             skel_transmit(skel);
+             uip_arp_out(&priv->d_dev);
+             emac_transmit(priv);
            }
         }
       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
         {
-          uip_arp_arpin(&skel->sk_dev);
+          uip_arp_arpin(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
            */
 
-          if (skel->sk_dev.d_len > 0)
+          if (priv->d_dev.d_len > 0)
             {
-              skel_transmit(skel);
+              emac_transmit(priv);
             }
         }
     }
@@ -295,13 +295,13 @@ static void skel_receive(FAR struct skel_driver_s *skel)
 }
 
 /****************************************************************************
- * Function: skel_txdone
+ * Function: emac_txdone
  *
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
  *
  * Parameters:
- *   skel  - Reference to the driver state structure
+ *   priv  - Reference to the driver state structure
  *
  * Returned Value:
  *   None
@@ -311,7 +311,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
  *
  ****************************************************************************/
 
-static void skel_txdone(FAR struct skel_driver_s *skel)
+static void emac_txdone(FAR struct emac_driver_s *priv)
 {
   /* Check for errors and update statistics */
 
@@ -319,15 +319,15 @@ static void skel_txdone(FAR struct skel_driver_s *skel)
    * disable further Tx interrupts.
    */
 
-  wd_cancel(skel->sk_txtimeout);
+  wd_cancel(priv->d_txtimeout);
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&skel->sk_dev, skel_uiptxpoll);
+  (void)uip_poll(&priv->d_dev, emac_uiptxpoll);
 }
 
 /****************************************************************************
- * Function: skel_interrupt
+ * Function: emac_interrupt
  *
  * Description:
  *   Hardware interrupt handler
@@ -343,30 +343,30 @@ static void skel_txdone(FAR struct skel_driver_s *skel)
  *
  ****************************************************************************/
 
-static int skel_interrupt(int irq, FAR void *context)
+static int emac_interrupt(int irq, FAR void *context)
 {
-  register FAR struct skel_driver_s *skel = &g_skel[0];
+  register FAR struct emac_driver_s *priv = &g_emac[0];
 
   /* Get and clear interrupt status bits */
 
   /* Handle interrupts according to status bit settings */
 
-  /* Check if we received an incoming packet, if so, call skel_receive() */
+  /* Check if we received an incoming packet, if so, call emac_receive() */
 
-  skel_receive(skel);
+  emac_receive(priv);
 
-  /* Check is a packet transmission just completed.  If so, call skel_txdone.
+  /* Check is a packet transmission just completed.  If so, call emac_txdone.
    * This may disable further Tx interrupts if there are no pending
    * tansmissions.
    */
 
-  skel_txdone(skel);
+  emac_txdone(priv);
 
   return OK;
 }
 
 /****************************************************************************
- * Function: skel_txtimeout
+ * Function: emac_txtimeout
  *
  * Description:
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
@@ -384,9 +384,9 @@ static int skel_interrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static void skel_txtimeout(int argc, uint32_t arg, ...)
+static void emac_txtimeout(int argc, uint32_t arg, ...)
 {
-  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
+  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)arg;
 
   /* Increment statistics and dump debug info */
 
@@ -394,11 +394,11 @@ static void skel_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&skel->sk_dev, skel_uiptxpoll);
+  (void)uip_poll(&priv->d_dev, emac_uiptxpoll);
 }
 
 /****************************************************************************
- * Function: skel_polltimer
+ * Function: emac_polltimer
  *
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
@@ -415,9 +415,9 @@ static void skel_txtimeout(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static void skel_polltimer(int argc, uint32_t arg, ...)
+static void emac_polltimer(int argc, uint32_t arg, ...)
 {
-  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)arg;
+  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)arg;
 
   /* Check if there is room in the send another TX packet.  We cannot perform
    * the TX poll if he are unable to accept another packet for transmission.
@@ -428,15 +428,15 @@ static void skel_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)uip_timer(&skel->sk_dev, skel_uiptxpoll, skeleton_POLLHSEC);
+  (void)uip_timer(&priv->d_dev, emac_uiptxpoll, HCS12_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_polltimer, 1, arg);
+  (void)wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, arg);
 }
 
 /****************************************************************************
- * Function: skel_ifup
+ * Function: emac_ifup
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
@@ -452,9 +452,9 @@ static void skel_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int skel_ifup(struct uip_driver_s *dev)
+static int emac_ifup(struct uip_driver_s *dev)
 {
-  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
@@ -464,17 +464,17 @@ static int skel_ifup(struct uip_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(skel->sk_txpoll, skeleton_WDDELAY, skel_polltimer, 1, (uint32_t)skel);
+  (void)wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
-  skel->sk_bifup = true;
-  up_enable_irq(CONFIG_skeleton_IRQ);
+  priv->d_bifup = true;
+  up_enable_irq(CONFIG_HCS12_IRQ);
   return OK;
 }
 
 /****************************************************************************
- * Function: skel_ifdown
+ * Function: emac_ifdown
  *
  * Description:
  *   NuttX Callback: Stop the interface.
@@ -489,35 +489,35 @@ static int skel_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int skel_ifdown(struct uip_driver_s *dev)
+static int emac_ifdown(struct uip_driver_s *dev)
 {
-  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
 
   flags = irqsave();
-  up_disable_irq(CONFIG_skeleton_IRQ);
+  up_disable_irq(CONFIG_HCS12_IRQ);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(skel->sk_txpoll);
-  wd_cancel(skel->sk_txtimeout);
+  wd_cancel(priv->d_txpoll);
+  wd_cancel(priv->d_txtimeout);
 
   /* Put the the EMAC is its reset, non-operational state.  This should be
-   * a known configuration that will guarantee the skel_ifup() always
+   * a known configuration that will guarantee the emac_ifup() always
    * successfully brings the interface back up.
    */
 
   /* Mark the device "down" */
 
-  skel->sk_bifup = false;
+  priv->d_bifup = false;
   irqrestore(flags);
   return OK;
 }
 
 /****************************************************************************
- * Function: skel_txavail
+ * Function: emac_txavail
  *
  * Description:
  *   Driver callback invoked when new TX data is available.  This is a 
@@ -535,9 +535,9 @@ static int skel_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int skel_txavail(struct uip_driver_s *dev)
+static int emac_txavail(struct uip_driver_s *dev)
 {
-  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable interrupts because this function may be called from interrupt
@@ -548,13 +548,13 @@ static int skel_txavail(struct uip_driver_s *dev)
 
   /* Ignore the notification if the interface is not yet up */
 
-  if (skel->sk_bifup)
+  if (priv->d_bifup)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)uip_poll(&skel->sk_dev, skel_uiptxpoll);
+      (void)uip_poll(&priv->d_dev, emac_uiptxpoll);
     }
 
   irqrestore(flags);
@@ -562,7 +562,7 @@ static int skel_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: skel_addmac
+ * Function: emac_addmac
  *
  * Description:
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
@@ -580,9 +580,9 @@ static int skel_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int skel_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -591,7 +591,7 @@ static int skel_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: skel_rmmac
+ * Function: emac_rmmac
  *
  * Description:
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
@@ -609,9 +609,9 @@ static int skel_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -624,7 +624,7 @@ static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: skel_initialize
+ * Function: emac_initialize
  *
  * Description:
  *   Initialize the Ethernet controller and driver
@@ -640,20 +640,20 @@ static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-int skel_initialize(int intf)
+int emac_initialize(int intf)
 {
   struct lpc17_driver_s *priv;
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(inf <  ONFIG_skeleton_NINTERFACES);
+  DEBUGASSERT(inf <  CONFIG_HCS12_NINTERFACES);
   priv = &g_ethdrvr[intf];
 
    /* Check if a Ethernet chip is recognized at its I/O base */
 
   /* Attach the IRQ to the driver */
 
-  if (irq_attach(CONFIG_skeleton_IRQ, skel_interrupt))
+  if (irq_attach(CONFIG_HCS12_IRQ, emac_interrupt))
     {
       /* We could not attach the ISR to the the interrupt */
 
@@ -662,31 +662,31 @@ int skel_initialize(int intf)
 
   /* Initialize the driver structure */
 
-  memset(priv, 0, sizeof(struct skel_driver_s));
-  priv->sk_dev.d_ifup    = skel_ifup;     /* I/F down callback */
-  priv->sk_dev.d_ifdown  = skel_ifdown;   /* I/F up (new IP address) callback */
-  priv->sk_dev.d_txavail = skel_txavail;  /* New TX data callback */
+  memset(priv, 0, sizeof(struct emac_driver_s));
+  priv->d_dev.d_ifup    = emac_ifup;     /* I/F down callback */
+  priv->d_dev.d_ifdown  = emac_ifdown;   /* I/F up (new IP address) callback */
+  priv->d_dev.d_txavail = emac_txavail;  /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  priv->sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
-  priv->sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
+  priv->d_dev.d_addmac  = emac_addmac;   /* Add multicast MAC address */
+  priv->d_dev.d_rmmac   = emac_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->sk_dev.d_private = (void*)g_skel; /* Used to recover private state from dev */
+  priv->d_dev.d_private = (void*)g_emac; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->sk_txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->sk_txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->d_txpoll       = wd_create();   /* Create periodic poll timer */
+  priv->d_txtimeout    = wd_create();   /* Create TX timeout timer */
 
   /* Put the interface in the down state.  This usually amounts to resetting
-   * the device and/or calling skel_ifdown().
+   * the device and/or calling emac_ifdown().
    */
 
-  /* Read the MAC address from the hardware into priv->sk_dev.d_mac.ether_addr_octet */
+  /* Read the MAC address from the hardware into priv->d_dev.d_mac.ether_addr_octet */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->sk_dev);
+  (void)netdev_register(&priv->d_dev);
   return OK;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_skeleton */
+#endif /* CONFIG_NET && CONFIG_HCS12_EMAC */

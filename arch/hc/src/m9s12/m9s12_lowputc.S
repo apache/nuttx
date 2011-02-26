@@ -52,6 +52,14 @@
  * Private Definitions
  **************************************************************************/
 
+#ifdef CONFIG_HCS12_NONBANKED
+#  define CALL   jsr
+#  define RETURN rts
+#else
+#  define CALL   call
+#  define RETURN rtc
+#endif
+
 /* Select SCI parameters for the selected console */
 
 #if defined(CONFIG_SCI0_SERIAL_CONSOLE)
@@ -166,7 +174,7 @@ up_lowsetup:
 
 #endif /* CONFIG_HCS12_SERIALMON */
 #endif /* HAVE_SERIAL_CONSOLE */
-	rts
+	RETURN
 	.size	up_lowsetup, . - up_lowsetup
 
 /**************************************************************************
@@ -207,11 +215,11 @@ up_lowputc:
 #endif /* HCS12_CONSOLE_BITS == 9 */
 
 	stab	(HCS12_CONSOLE_BASE+HCS12_SCI_DRL_OFFSET)
-	rts
+	RETURN
 
 #endif /* !CONFIG_HCS12_SERIALMON */
 #else
-	rts
+	RETURN
 #endif /* HAVE_SERIAL_CONSOLE */
 	.size	up_lowputc, . - up_lowputc
 	.end

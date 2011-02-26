@@ -51,6 +51,14 @@
  * Private Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_HCS12_NONBANKED
+#  define CALL   jsr
+#  define RETURN rts
+#else
+#  define CALL   call
+#  define RETURN rtc
+#endif
+
 #define INITRG_REG (MMC_INITRG_REG(HCS12_REG_BASE))
 #define INITRM_MAP (MMC_INITRM_RAM(HCS12_SRAM_BASE)|MMC_INITRM_RAMHAL)
 #define INITEE_EE  (MMC_INITEE_EE(HCS12_EEPROM_BASE)|MMC_INITEE_EEON)
@@ -79,11 +87,7 @@
 #ifdef CONFIG_HCS12_SERIALMON
 	jsr		#PutChar
 #else
-#ifdef CONFIG_HCS12_NONBANKED
-	jsr		up_lowputc
-#else
-	call	up_lowputc
-#endif
+	CALL	up_lowputc
 #endif
 #endif
 	.endm
@@ -107,8 +111,8 @@
 	movb	#INITRM_MAP, HCS12_MMC_INITRM	/* Set RAM position to 0x2000-0x3fff */
 	movb	#INITEE_EE, HCS12_MMC_INITEE	/* Set EEPROM position to 0x0800 */
 
-	/* In the non-banked mode, PPAGE is set to 0x3d to create a contiguous, 48Kb
-	 * .text address space.
+	/* In the non-banked mode, PPAGE is set to 0x3d to create a (non-contiguous),
+	 * fixed, 48Kb .text address space.
 	 */
 
 #ifdef CONFIG_HCS12_NONBANKED
@@ -176,11 +180,7 @@ __start:
 	/* Perform early, low-level initialization */
 
 #ifndef CONFIG_HCS12_SERIALMON
-#ifdef CONFIG_HCS12_NONBANKED
-	jsr		up_lowsetup
-#else
-	call	up_lowsetup
-#endif
+	CALL	up_lowsetup
 #endif
 	showprogress 'A'
 
@@ -219,21 +219,13 @@ __start:
 
 	/* Perform early board-level initialization */
 
-#ifdef CONFIG_HCS12_NONBANKED
-	jsr		hcs12_boardinitialize
-#else
-	call	hcs12_boardinitialize
-#endif
+	CALL	hcs12_boardinitialize
 	showprogress 'D'
 
 	/* Now, start the OS */
 
 	showprogress '\n'
-#ifdef CONFIG_HCS12_NONBANKED
-	jsr		os_start
-#else
-	call	os_start
-#endif
+	CALL	os_start
 	bra		__start
 
 	/* Variables:
@@ -258,7 +250,6 @@ __start:
 .Ledata:
 	.hword	_edata
 	.size	__start, .-__start
-
 
 /************************************************************************************
  * .rodata
