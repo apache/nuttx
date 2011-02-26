@@ -39,20 +39,22 @@
 
 MEMORY
 {
-  /* The 8Kb SRAM is mapped to 0x2000-0x2fff.  The top 256 bytes are reserved
-   * for the serial monitor stack space.
+  /* The register space resides at address 0x0000-0x03ff.  The following
+   * address, 0x0400-0x1fff are unused.
+   *
+   * The 8Kb SRAM is mapped to 0x2000-0x2fff.
    */
 
-  sram    (rwx) : ORIGIN = 0x2000, LENGTH = 8K-256
+  sram    (rwx) : ORIGIN = 0x2000, LENGTH = 8K
 
   /* Three fixed text flash pages (corresponding to page 3e, 3d, and 3f) at
-   * 16Kb each (minus 2Kb at the end of page 3f that is reserved at the top for
-   * the serial boot loader
+   * 16Kb each (minus 256 bytes at the end of page 3f that is reserved for
+   * interrupt vectors).
    */
 
-  text    (rx)  : ORIGIN = 0x4000, LENGTH = 48K-2k		/* Page 3e, 3d, and 3f */
+  text    (rx)  : ORIGIN = 0x4000, LENGTH = 48K-256		/* Page 3e, 3d, and 3f */
 
-  /* Vectors.  These get relocated to 0xf780-f7ff by the serial loader */
+  /* Vectors */
 
   vectors (rx)  : ORIGIN = 0xff80, LENGTH = 256
 }
@@ -62,7 +64,7 @@ SECTIONS
 {
 	.text : {
 		_stext = ABSOLUTE(.);
-		*(.vectors)
+		*(nonbanked)
 		*(.text .text.*)        
 		*(.fixup)
 		*(.gnu.warning)
@@ -85,6 +87,10 @@ SECTIONS
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
 	} > sram AT > text
+
+	.vectors : {
+		*(vectors)
+	} > vectors
 
 	.bss : {			/* BSS				*/
 		_sbss = ABSOLUTE(.);
