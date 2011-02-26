@@ -89,7 +89,7 @@ void up_irqinitialize(void)
    */
  
 #ifdef CONFIG_GPIO_IRQ
-  lpc17_gpioirqinitialize();
+  hcs12_gpioirqinitialize();
 #endif
 
   /* And finally, enable interrupts */

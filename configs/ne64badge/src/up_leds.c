@@ -46,6 +46,8 @@
 
 #include "ne64badge_internal.h"
 
+#ifdef CONFIG_ARCH_LEDS
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -54,14 +56,28 @@
  * CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
+#undef LED_DEBUG   /* Define to enable debug */
+#undef LED_VERBOSE /* Define to enable verbose debug */
 
 #ifdef LED_DEBUG
 #  define leddbg  lldbg
-#  define ledvdbg llvdbg
+#  ifdef LED_VERBOSE
+#    define ledvdbg lldbg
+#  else
+#    define ledvdbg(x...)
+#  endif
 #else
+#  undef LED_VERBOSE
 #  define leddbg(x...)
 #  define ledvdbg(x...)
+#endif
+
+/* Dump GPIO registers */
+
+#ifdef LED_VERBOSE
+#  define led_dumpgpio(m) m9s12_dumpgpio(m)
+#else
+#  define led_dumpgpio(m)
 #endif
 
 /****************************************************************************
@@ -84,9 +100,16 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
+  /* Configure all LED GPIO lines */
+
+  led_dumpgpio("up_ledinit() Entry)");
+
+  hcs12_configgpio(NE64BADGE_LED1);
+  hcs12_configgpio(NE64BADGE_LED2);
+
+  led_dumpgpio("up_ledinit() Exit");
 }
 
 /****************************************************************************
@@ -95,6 +118,23 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
+  switch (led)
+    {
+       default:
+       case 0 : /* STARTED, HEAPALLOCATE, IRQSENABLED */
+        hcs12_gpiowrite(NE64BADGE_LED1, true);
+        hcs12_gpiowrite(NE64BADGE_LED2, true);
+        break;
+
+       case 1 : /* STACKCREATED */
+        hcs12_gpiowrite(NE64BADGE_LED1, false);
+        hcs12_gpiowrite(NE64BADGE_LED2, true);
+        break;
+
+       case 2 : /* INIRQ, SIGNAL, ASSERTION, PANIC */
+        hcs12_gpiowrite(NE64BADGE_LED2, false);
+        break;
+    }
 }
 
 /****************************************************************************
@@ -103,6 +143,16 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
+  switch (led)
+    {
+       default:
+       case 0 : /* STARTED, HEAPALLOCATE, IRQSENABLED */
+       case 1 : /* STACKCREATED */
+        hcs12_gpiowrite(NE64BADGE_LED1, true);
+       case 2 : /* INIRQ, SIGNAL, ASSERTION, PANIC */
+        hcs12_gpiowrite(NE64BADGE_LED2, true);
+        break;
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

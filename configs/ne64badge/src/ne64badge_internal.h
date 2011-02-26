@@ -44,6 +44,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include "m9s12_internal.h"
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -93,8 +95,11 @@
  *  40 PE5/IPIPE0/MODA     J3 MODA        " " "  " "" "   "
  *  39 PE6/IPIPE1/MODB     J3 MODB        " " "  " "" "   "
  *  38 PE7/NOACC/XCLKS_B   pulled low     pulled low
- * 
- *  97 PK0/XADR14          N/C            N/C
+ */
+
+#define NE64BADGE_BUTTON1 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT_E | GPIO_PIN_0)
+
+/*  97 PK0/XADR14          N/C            N/C
  *  98 PK1/XADR15          N/C            N/C
  *  99 PK2/XADR16          N/C            N/C
  * 100 PK3/XADR17          N/C            N/C
@@ -135,15 +140,22 @@
  *   3 PH4/TXCLK/KWH4      BUTTON2        SW2
  *   2 PH5/TXDV/KWH5       J5 XBEE_LOAD_H Not used on board
  *   1 PH6/TXER/KWH6       J4 XBEE_LOAD_L Not used on board
- * 
- *   8 PJ0/MDC/KWJ0        LED1           D21, red
+ */
+
+#define NE64BADGE_BUTTON2 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT_H | GPIO_PIN_4)
+ 
+/*   8 PJ0/MDC/KWJ0        LED1           D21, red
  *   9 PJ1/MDIO/KWJ1       LED2           D22, red
  *  20 PJ2/CRS/KWJ2        J3 SPI_CS      Not used on board
  *  21 PJ3/COL/KWJ3        N/C
  * 112 PJ6/SDA/KWJ6        J3 I2C_DATA    Not used on board
  * 111 PJ7/SCL/KWJ7        J3 I2C_CLOCK   " " "  " "" "   "
- * 
- *  51 PL6/TXER/KWL6       N/C            N/C
+ */
+
+#define NE64BADGE_LED1 (GPIO_OUTPUT | GPIO_OUTPUT_HIGH | GPIO_PORT_J | GPIO_PIN_0)
+#define NE64BADGE_LED2 (GPIO_OUTPUT | GPIO_OUTPUT_HIGH | GPIO_PORT_J | GPIO_PIN_1)
+
+/*  51 PL6/TXER/KWL6       N/C            N/C
  *  52 PL5/TXDV/KWL5       N/C            N/C
  *  58 PL4/COLLED          Collision LED  red
  *  59 PL3/DUPLED          Full Duplex LED yellow
