@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sig_kill.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ int kill(pid_t pid, int signo)
 
   if (pid <= 0)
     {
-      *get_errno_ptr() = ENOSYS;
+      errno = ENOSYS;
       return ERROR;
     }
 
@@ -104,7 +104,7 @@ int kill(pid_t pid, int signo)
 
   if (!GOOD_SIGNO(signo))
     {
-      *get_errno_ptr() = EINVAL;
+      errno = EINVAL;
       return ERROR;
     }
 
@@ -118,7 +118,7 @@ int kill(pid_t pid, int signo)
   sdbg("TCB=0x%08x signo=%d\n", stcb, signo);
   if (!stcb)
     {
-      *get_errno_ptr() = ESRCH;
+      errno = ESRCH;
       sched_unlock();
       return ERROR;
     }

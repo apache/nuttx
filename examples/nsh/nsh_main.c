@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_main.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,6 +186,12 @@ static const struct cmdmap_s g_cmdmap[] =
 #ifdef CONFIG_NET
 # ifndef CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG
   { "ifconfig", cmd_ifconfig, 1, 1, NULL },
+# endif
+#endif
+
+#ifndef CONFIG_DISABLE_SIGNALS
+# ifndef CONFIG_EXAMPLES_NSH_DISABLE_SLEEP
+  { "kill",     cmd_kill,     3, 3, "kill -<signal> <pid>" },
 # endif
 #endif
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_proccmds.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sched.h>
+#include <errno.h>
 
 #include "nsh.h"
 
@@ -173,6 +174,80 @@ int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
   sched_foreach(ps_task, vtbl);
   return OK;
 }
+#endif
+
+/****************************************************************************
+ * Name: cmd_kill
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_SIGNALS
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_KILL
+int cmd_kill(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+{
+  char *ptr;
+  char *endptr;
+  long signal;
+  long pid;
+
+  /* Check incoming parameters.  The first parameter should be "-<signal>" */
+
+  ptr = argv[1];
+  if (*ptr != '-' || ptr[1] < '0' || ptr[1] > '9')
+    {
+      goto invalid_arg;
+    }
+
+  /* Extract the signal number */
+
+  signal = strtol(&ptr[1], &endptr, 0);
+
+  /* The second parameter should be <pid>  */
+
+  ptr = argv[2];
+  if (*ptr < '0' || *ptr > '9')
+    {
+      goto invalid_arg;
+    }
+
+  /* Extract athe pid */
+
+  pid = strtol(ptr, &endptr, 0);
+
+  /* Send the signal.  Kill return values:
+   *
+   *   EINVAL An invalid signal was specified.
+   *   EPERM  The process does not have permission to send the signal to any
+   *          of the target processes.
+   *   ESRCH  The pid or process group does not exist.
+   *   ENOSYS Do not support sending signals to process groups.
+   */
+
+  if (kill((pid_t)pid, (int)signal) == 0)
+    {
+      return OK;
+    }
+
+  switch (errno)
+    {
+    case EINVAL:
+      goto invalid_arg;
+
+    case ESRCH:
+      nsh_output(vtbl, g_fmtnosuch, argv[0], "task", argv[2]);
+      return ERROR;
+
+    case EPERM:
+    case ENOSYS:
+    default:
+      nsh_output(vtbl, g_fmtcmdfailed, argv[0], "kill", NSH_ERRNO);
+      return ERROR;
+    }
+
+invalid_arg:
+  nsh_output(vtbl, g_fmtarginvalid, argv[0]);
+  return ERROR;
+}
+#endif
 #endif
 
 /****************************************************************************

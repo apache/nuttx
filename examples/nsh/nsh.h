@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh.h
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -474,6 +474,9 @@ extern int cmd_lbracket(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif /* CONFIG_DISABLE_ENVIRON */
 
 #ifndef CONFIG_DISABLE_SIGNALS
+#  ifndef CONFIG_EXAMPLES_NSH_DISABLE_KILL
+     extern int cmd_kill(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#  endif
 #  ifndef CONFIG_EXAMPLES_NSH_DISABLE_SLEEP
      extern int cmd_sleep(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #  endif
