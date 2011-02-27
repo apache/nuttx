@@ -191,7 +191,7 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #ifndef CONFIG_DISABLE_SIGNALS
 # ifndef CONFIG_EXAMPLES_NSH_DISABLE_SLEEP
-  { "kill",     cmd_kill,     3, 3, "kill -<signal> <pid>" },
+  { "kill",     cmd_kill,     3, 3, "-<signal> <pid>" },
 # endif
 #endif
 
