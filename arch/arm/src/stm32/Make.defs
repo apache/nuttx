@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/stm32/Make.defs
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,14 @@ HEAD_ASRC	= stm32_vectors.S
 CMN_ASRCS	= up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 		  up_createstack.c up_mdelay.c up_udelay.c up_exit.c \
-		  up_idle.c up_initialize.c up_initialstate.c up_interruptcontext.c \
+		  up_initialize.c up_initialstate.c up_interruptcontext.c \
 		  up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
 		  up_releasepending.c up_releasestack.c up_reprioritizertr.c \
 		  up_schedulesigaction.c up_sigdeliver.c up_unblocktask.c \
 		  up_usestack.c up_doirq.c up_hardfault.c up_svcall.c
 
 CHIP_ASRCS	= 
-CHIP_CSRCS	= stm32_start.c stm32_rcc.c stm32_gpio.c stm32_irq.c \
-		  stm32_timerisr.c stm32_dma.c stm32_lowputc.c stm32_serial.c \
-		  stm32_spi.c stm32_usbdev.c stm32_sdio.c
+CHIP_CSRCS	= stm32_start.c stm32_rcc.c stm32_gpio.c stm32_idle.c \
+		  stm32_irq.c stm32_timerisr.c stm32_dma.c stm32_lowputc.c \
+		  stm32_serial.c stm32_spi.c stm32_usbdev.c stm32_sdio.c 
 
