@@ -1004,13 +1004,17 @@ configs/skp16c26
     uses the GNU m32c toolchain.
 
 configs/stm3210e-evel
-    STMicrco STM3210E-EVAL development board based on the STMicro STM32F103ZET6
+    STMicro STM3210E-EVAL development board based on the STMicro STM32F103ZET6
     microcontroller (ARM Cortex-M3).  This port uses the GNU Cortex-M3
     toolchain.
 
 configs/us7032evb1
     This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
     STATUS:  Work has just began on this port.
+
+configs/vsn
+    ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
+	STMicro STM32F103RET6.  Contributed by Uros Platise.
 
 configs/xtrs
     TRS80 Model 3.  This port uses a vintage computer based on the Z80.

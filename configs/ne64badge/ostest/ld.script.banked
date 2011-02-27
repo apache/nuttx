@@ -107,7 +107,7 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > hitext
 
-	_eronly = ABSOLUTE(.);		/* See below                    */
+	_eronly = ABSOLUTE(.);
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -121,7 +121,7 @@ SECTIONS
 		*(vectors)
 	} > vectors
 
-	.bss : {			/* BSS				*/
+	.bss : {
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)

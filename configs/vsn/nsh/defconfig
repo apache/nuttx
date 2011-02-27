@@ -1,8 +1,10 @@
 ############################################################################
-# configs/ne64badge/ostest/defconfig
+# configs/vsn/nsh/defconfig
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+#   Copyright (c) 2011 Uros Platise. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#           Uros Platise <uros.platise@isotel.eu>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,7 +35,7 @@
 #
 ############################################################################
 #
-# Architecture selection
+# architecture selection
 #
 # CONFIG_ARCH - identifies the arch subdirectory and, hence, the
 #   processor architecture.
@@ -49,12 +51,9 @@
 # CONFIG_ARCH_BOARD_name - for use in C code
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
-# CONFIG_DRAM_SIZE - Describes the installed RAM.
-# CONFIG_DRAM_START - The start address of RAM (physical)
+# CONFIG_DRAM_SIZE - Describes the installed DRAM.
+# CONFIG_DRAM_START - The start address of DRAM (physical)
 # CONFIG_DRAM_END - Last address+1 of installed RAM
-# CONFIG_ARCH_NOINTC - define if the architecture does not
-#   support an interrupt controller or otherwise cannot support
-#   APIs like up_enable_irq() and up_disable_irq().
 # CONFIG_ARCH_IRQPRIO - The ST32F103Z supports interrupt prioritization
 # CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 #   stack. If defined, this symbol is the size of the interrupt
@@ -72,106 +71,147 @@
 #   the delay actually is 100 seconds.
 # CONFIG_ARCH_DMA - Support DMA initialization
 #
-CONFIG_ARCH=hc
-CONFIG_ARCH_HC=y
-CONFIG_ARCH_HCS12=y
-CONFIG_ARCH_CHIP=m9s12
-CONFIG_ARCH_CHIP_MCS92S12NEC64=y
-CONFIG_ARCH_BOARD=ne64badge
-CONFIG_ARCH_BOARD_NE64BADGE=y
+CONFIG_ARCH=arm
+CONFIG_ARCH_ARM=y
+CONFIG_ARCH_CORTEXM3=y
+CONFIG_ARCH_CHIP=stm32
+CONFIG_ARCH_CHIP_STM32F103RET6=y
+CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=y
+CONFIG_ARCH_BOARD=vsn
 CONFIG_BOARD_LOOPSPERMSEC=5483
 CONFIG_DRAM_SIZE=0x00010000
 CONFIG_DRAM_START=0x20000000
 CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
-CONFIG_ARCH_NOINTC=y
-CONFIG_ARCH_IRQPRIO=n
+CONFIG_ARCH_IRQPRIO=y
 CONFIG_ARCH_INTERRUPTSTACK=n
 CONFIG_ARCH_STACKDUMP=y
-CONFIG_ARCH_BOOTLOADER=y
+CONFIG_ARCH_BOOTLOADER=n
 CONFIG_ARCH_LEDS=y
-CONFIG_ARCH_BUTTONS=n
+CONFIG_ARCH_BUTTONS=y
 CONFIG_ARCH_CALIBRATION=n
-CONFIG_ARCH_DMA=n
-
-# 
-# CONFIG_GPIO_IRQ - Enable general support for GPIO IRQs
-# CONFIG_HCS12_PORTG_INTS - Enable PortG IRQs
-# CONFIG_HCS12_PORTH_INTS - Enable PortH IRQs
-# CONFIG_HCS12_PORTJ_INTS - Enable PortJ IRQs
-#
-CONFIG_GPIO_IRQ=n
-CONFIG_HCS12_PORTG_INTS=n
-CONFIG_HCS12_PORTH_INTS=n
-CONFIG_HCS12_PORTJ_INTS=n
+CONFIG_ARCH_DMA=y
 
 #
-# HCS12 build options:
+# Identify toolchain and linker options
 #
-# CONFIG_HCS12_SERIALMON - Indicates that the target systems uses
-#  the Freescale serial bootloader.
-# CONFIG_HCS12_NONBANKED - Indicates that the target systems does not
-#  support banking.  Only short calls are made; one fixed page is
-#  presented the the paging window.  Only 48Kb of FLASH is usable
-#  in this configuration: pages 3e, 3d, then 3f will appear as a
-#  contiguous address space in memory.
-#
-
-CONFIG_HCS12_SERIALMON=n
-CONFIG_HCS12_NONBANKED=y
+CONFIG_STM32_CODESOURCERYW=n
+CONFIG_STM32_CODESOURCERYL=n
+CONFIG_STM32_DEVKITARM=n
+CONFIG_STM32_RAISONANCE=n
+CONFIG_STM32_BUILDROOT=y
+CONFIG_STM32_DFU=n
 
 #
-# CS12 Sub-system support
-#
-CONFIG_HCS12_SCI0=y
-CONFIG_HCS12_SCI1=n
+# Individual subsystems can be enabled:
+# AHB: 
+CONFIG_STM32_DMA1=n
+CONFIG_STM32_DMA2=y
+CONFIG_STM32_CRC=n
+CONFIG_STM32_FSMC=n
+CONFIG_STM32_SDIO=y
+# APB1:
+CONFIG_STM32_TIM2=n
+CONFIG_STM32_TIM3=n
+CONFIG_STM32_TIM4=n
+CONFIG_STM32_TIM5=n
+CONFIG_STM32_TIM6=n
+CONFIG_STM32_TIM7=n
+CONFIG_STM32_WWDG=n
+CONFIG_STM32_SPI2=n
+CONFIG_STM32_SPI4=n
+CONFIG_STM32_USART2=n
+CONFIG_STM32_USART3=n
+CONFIG_STM32_UART4=n
+CONFIG_STM32_UART5=n
+CONFIG_STM32_I2C1=n
+CONFIG_STM32_I2C2=n
+CONFIG_STM32_USB=n
+CONFIG_STM32_CAN=n
+CONFIG_STM32_BKP=n
+CONFIG_STM32_PWR=n
+CONFIG_STM32_DAC=n
+# APB2:
+CONFIG_STM32_ADC1=n
+CONFIG_STM32_ADC2=n
+CONFIG_STM32_TIM1=n
+CONFIG_STM32_SPI1=n
+CONFIG_STM32_TIM8=n
+CONFIG_STM32_USART1=y
+CONFIG_STM32_ADC3=n
 
 #
-# MC9S12NEC64 specific serial device driver settings
+# STM32F103Z specific serial device driver settings
 #
-# CONFIG_SCIn_SERIAL_CONSOLE - selects SCIn for the
-#   console and ttys0 (default is the SCIn).
-# CONFIG_SCIn_RXBUFSIZE - Characters are buffered as received.
+# CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
+#   console and ttys0 (default is the USART1).
+# CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
 #   This specific the size of the receive buffer
-# CONFIG_SCIn_TXBUFSIZE - Characters are buffered before
+# CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
 #   being sent.  This specific the size of the transmit buffer
-# CONFIG_SCIn_BAUD - The configure BAUD of the UART.  Must be
-# CONFIG_SCIn_BITS - The number of bits.  Must be either 7 or 8.
-# CONFIG_SCIn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-# CONFIG_SCIn_2STOP - Two stop bits
+# CONFIG_USARTn_BAUD - The configure BAUD of the UART.  Must be
+# CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+# CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+# CONFIG_USARTn_2STOP - Two stop bits
 #
-CONFIG_SCI0_SERIAL_CONSOLE=y
-CONFIG_SCI0_TXBUFSIZE=32
-CONFIG_SCI0_RXBUFSIZE=32
-CONFIG_SCI0_BAUD=38400
-CONFIG_SCI0_BITS=8
-CONFIG_SCI0_PARITY=0
-CONFIG_SCI0_2STOP=0
+CONFIG_USART1_SERIAL_CONSOLE=y
+CONFIG_USART2_SERIAL_CONSOLE=n
+CONFIG_USART3_SERIAL_CONSOLE=n
+CONFIG_USART4_SERIAL_CONSOLE=n
+CONFIG_USART5_SERIAL_CONSOLE=n
 
-CONFIG_SCI1_SERIAL_CONSOLE=n
-CONFIG_SCI1_TXBUFSIZE=32
-CONFIG_SCI1_RXBUFSIZE=32
-CONFIG_SCI1_BAUD=38400
-CONFIG_SCI1_BITS=8
-CONFIG_SCI1_PARITY=0
-CONFIG_SCI1_2STOP=0
+CONFIG_USART1_TXBUFSIZE=256
+CONFIG_USART2_TXBUFSIZE=256
+CONFIG_USART3_TXBUFSIZE=256
+CONFIG_USART4_TXBUFSIZE=256
+CONFIG_USART5_TXBUFSIZE=256
+
+CONFIG_USART1_RXBUFSIZE=256
+CONFIG_USART2_RXBUFSIZE=256
+CONFIG_USART3_RXBUFSIZE=256
+CONFIG_USART4_RXBUFSIZE=256
+CONFIG_USART5_RXBUFSIZE=256
+
+CONFIG_USART1_BAUD=115200
+CONFIG_USART2_BAUD=115200
+CONFIG_USART3_BAUD=115200
+CONFIG_USART4_BAUD=115200
+CONFIG_USART5_BAUD=115200
+
+CONFIG_USART1_BITS=8
+CONFIG_USART2_BITS=8
+CONFIG_USART3_BITS=8
+CONFIG_USART4_BITS=8
+CONFIG_USART5_BITS=8
+
+CONFIG_USART1_PARITY=0
+CONFIG_USART2_PARITY=0
+CONFIG_USART3_PARITY=0
+CONFIG_USART4_PARITY=0
+CONFIG_USART5_PARITY=0
+
+CONFIG_USART1_2STOP=0
+CONFIG_USART2_2STOP=0
+CONFIG_USART3_2STOP=0
+CONFIG_USART4_2STOP=0
+CONFIG_USART5_2STOP=0
 
 #
-# MC9S12NEC64 specific SSI device driver settings
+# STM32F103Z specific SSI device driver settings
 #
-# CONFIG_SPIn_DISABLE - select to disable all support for
+# CONFIG_SSIn_DISABLE - select to disable all support for
 #   the SSI
-# CONFIG_SPI_POLLWAIT - Select to disable interrupt driven SSI support
+# CONFIG_SSI_POLLWAIT - Select to disable interrupt driven SSI support
 #   Poll-waiting is recommended if the interrupt rate would be to
 #   high in the interrupt driven case.
-# CONFIG_SPI_TXLIMIT - Write this many words to the Tx FIFO before
+# CONFIG_SSI_TXLIMIT - Write this many words to the Tx FIFO before
 #   emptying the Rx FIFO.  If the SPI frequency is high and this
 #   value is large, then larger values of this setting may cause
 #   Rx FIFO overrun errors.  Default: half of the Tx FIFO size (4).
 #
-CONFIG_SPI0_DISABLE=n
-CONFIG_SPI1_DISABLE=y
-CONFIG_SPI_POLLWAIT=y
-#CONFIG_SPI_TXLIMIT=4
+CONFIG_SSI0_DISABLE=y
+CONFIG_SSI1_DISABLE=y
+CONFIG_SSI_POLLWAIT=y
+#CONFIG_SSI_TXLIMIT=4
 
 #
 # General build options
@@ -194,13 +234,6 @@ CONFIG_INTELHEX_BINARY=n
 CONFIG_MOTOROLA_SREC=y
 CONFIG_RAW_BINARY=n
 CONFIG_HAVE_LIBM=n
-
-#
-# Setup for a two-pass build
-#
-CONFIG_BUILD_2PASS=n
-CONFIG_PASS1_BUILDIR=configs/ne64badge/initrel
-CONFIG_PASS1_OBJECT=init.r
 
 #
 # General OS setup
@@ -294,7 +327,7 @@ CONFIG_PASS1_OBJECT=init.r
 # CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 #  the worker thread.  Default: 4
 #
-CONFIG_APP_DIR=examples/ostest
+CONFIG_APP_DIR=examples/nsh
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
@@ -304,11 +337,11 @@ CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_START_YEAR=2009
-CONFIG_START_MONTH=12
-CONFIG_START_DAY=11
+CONFIG_START_MONTH=9
+CONFIG_START_DAY=21
 CONFIG_GREGORIAN_TIME=n
 CONFIG_JULIAN_TIME=n
-CONFIG_DEV_CONSOLE=n
+CONFIG_DEV_CONSOLE=y
 CONFIG_DEV_LOWCONSOLE=n
 CONFIG_MUTEX_TYPES=n
 CONFIG_PRIORITY_INHERITANCE=n
@@ -318,10 +351,10 @@ CONFIG_FDCLONE_DISABLE=n
 CONFIG_FDCLONE_STDIO=n
 CONFIG_SDCLONE_DISABLE=y
 CONFIG_NXFLAT=n
-CONFIG_SCHED_WORKQUEUE=n
+CONFIG_SCHED_WORKQUEUE=y
 CONFIG_SCHED_WORKPRIORITY=50
 CONFIG_SCHED_WORKPERIOD=(50*1000)
-CONFIG_SCHED_WORKSTACKSIZE=256
+CONFIG_SCHED_WORKSTACKSIZE=1024
 CONFIG_SIG_SIGWORK=4
 
 #
@@ -339,13 +372,13 @@ CONFIG_SIG_SIGWORK=4
 # o pthread_condtimedwait() depends on signals to wake
 #   up waiting tasks.
 #
-CONFIG_DISABLE_CLOCK=y
-CONFIG_DISABLE_POSIX_TIMERS=y
-CONFIG_DISABLE_PTHREAD=y
-CONFIG_DISABLE_SIGNALS=y
-CONFIG_DISABLE_MQUEUE=y
-CONFIG_DISABLE_MOUNTPOINT=y
-CONFIG_DISABLE_ENVIRON=y
+CONFIG_DISABLE_CLOCK=n
+CONFIG_DISABLE_POSIX_TIMERS=n
+CONFIG_DISABLE_PTHREAD=n
+CONFIG_DISABLE_SIGNALS=n
+CONFIG_DISABLE_MQUEUE=n
+CONFIG_DISABLE_MOUNTPOINT=n
+CONFIG_DISABLE_ENVIRON=n
 CONFIG_DISABLE_POLL=y
 
 #
@@ -354,7 +387,7 @@ CONFIG_DISABLE_POLL=y
 # CONFIG_NOPRINTF_FIELDWIDTH - sprintf-related logic is a
 #   little smaller if we do not support fieldwidthes
 #
-CONFIG_NOPRINTF_FIELDWIDTH=y
+CONFIG_NOPRINTF_FIELDWIDTH=n
 
 #
 # Allow for architecture optimized implementations
@@ -411,19 +444,19 @@ CONFIG_ARCH_KFREE=n
 #   timer structures to minimize dynamic allocations.  Set to
 #   zero for all dynamic allocations.
 #
-CONFIG_MAX_TASKS=8
+CONFIG_MAX_TASKS=16
 CONFIG_MAX_TASK_ARGS=4
-CONFIG_NPTHREAD_KEYS=0
-CONFIG_NFILE_DESCRIPTORS=0
-CONFIG_NFILE_STREAMS=0
+CONFIG_NPTHREAD_KEYS=4
+CONFIG_NFILE_DESCRIPTORS=8
+CONFIG_NFILE_STREAMS=8
 CONFIG_NAME_MAX=32
-CONFIG_STDIO_BUFFER_SIZE=0
-CONFIG_NUNGET_CHARS=0
-CONFIG_PREALLOC_MQ_MSGS=0
-CONFIG_MQ_MAXMSGSIZE=0
+CONFIG_STDIO_BUFFER_SIZE=256
+CONFIG_NUNGET_CHARS=2
+CONFIG_PREALLOC_MQ_MSGS=4
+CONFIG_MQ_MAXMSGSIZE=32
 CONFIG_MAX_WDOGPARMS=2
 CONFIG_PREALLOC_WDOGS=4
-CONFIG_PREALLOC_TIMERS=0
+CONFIG_PREALLOC_TIMERS=4
 
 #
 # Filesystem configuration
@@ -431,8 +464,7 @@ CONFIG_PREALLOC_TIMERS=0
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
 # CONFIG_FS_ROMFS - Enable ROMFS filesystem support
-#
-CONFIG_FS_FAT=n
+CONFIG_FS_FAT=y
 CONFIG_FS_ROMFS=n
 
 #
@@ -470,7 +502,7 @@ CONFIG_FS_WRITEBUFFER=n
 # CONFIG_MMCSD_HAVECARDDETECT
 #   SDIO driver card detection is 100% accurate
 #
-CONFIG_SDIO_DMA=n
+CONFIG_SDIO_DMA=y
 CONFIG_MMCSD_MMCSUPPORT=n
 CONFIG_MMCSD_HAVECARDDETECT=n
 
@@ -654,7 +686,7 @@ CONFIG_EXAMPLE_NETTEST_CLIENTIP=(10<<24|0<<16|0<<8|1)
 # Settings for examples/ostest
 #
 CONFIG_EXAMPLES_OSTEST_LOOPS=1
-CONFIG_EXAMPLES_OSTEST_STACKSIZE=512
+CONFIG_EXAMPLES_OSTEST_STACKSIZE=2048
 CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 
 #
@@ -694,14 +726,14 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 CONFIG_EXAMPLES_NSH_FILEIOSIZE=512
 CONFIG_EXAMPLES_NSH_STRERROR=n
 CONFIG_EXAMPLES_NSH_LINELEN=64
-CONFIG_EXAMPLES_NSH_STACKSIZE=512
+CONFIG_EXAMPLES_NSH_STACKSIZE=2048
 CONFIG_EXAMPLES_NSH_NESTDEPTH=3
 CONFIG_EXAMPLES_NSH_DISABLESCRIPT=n
 CONFIG_EXAMPLES_NSH_DISABLEBG=n
 CONFIG_EXAMPLES_NSH_ROMFSETC=n
 CONFIG_EXAMPLES_NSH_CONSOLE=y
 CONFIG_EXAMPLES_NSH_TELNET=n
-CONFIG_EXAMPLES_NSH_ARCHINIT=n
+CONFIG_EXAMPLES_NSH_ARCHINIT=y
 CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE=512
 CONFIG_EXAMPLES_NSH_DHCPC=n
 CONFIG_EXAMPLES_NSH_NOMAC=n
@@ -752,11 +784,12 @@ CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
 #
 # CONFIG_BOOT_RUNFROMFLASH - Some configurations support XIP
 #   operation from FLASH but must copy initialized .data sections to RAM.
-#   (should also be =n for the NE64 Badge which always runs from flash)
+#   (should also be =n for the STM3210E-EVAL which always runs from flash)
 # CONFIG_BOOT_COPYTORAM -  Some configurations boot in FLASH
 #   but copy themselves entirely into RAM for better performance.
 # CONFIG_CUSTOM_STACK - The up_ implementation will handle
 #   all stack operations outside of the nuttx model.
+# CONFIG_STACK_POINTER - The initial stack pointer (arm7tdmi only)
 # CONFIG_IDLETHREAD_STACKSIZE - The size of the initial stack.
 #  This is the thread that (1) performs the inital boot of the system up
 #  to the point where user_start() is spawned, and (2) there after is the
@@ -773,9 +806,9 @@ CONFIG_BOOT_RUNFROMFLASH=n
 CONFIG_BOOT_COPYTORAM=n
 CONFIG_CUSTOM_STACK=n
 CONFIG_STACK_POINTER=
-CONFIG_IDLETHREAD_STACKSIZE=256
-CONFIG_USERMAIN_STACKSIZE=512
+CONFIG_IDLETHREAD_STACKSIZE=1024
+CONFIG_USERMAIN_STACKSIZE=2048
 CONFIG_PTHREAD_STACK_MIN=256
-CONFIG_PTHREAD_STACK_DEFAULT=256
+CONFIG_PTHREAD_STACK_DEFAULT=2048
 CONFIG_HEAP_BASE=
 CONFIG_HEAP_SIZE=
