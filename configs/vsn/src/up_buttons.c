@@ -1,8 +1,11 @@
 /****************************************************************************
- *  arch/arm/src/common/up_idle.c
+ * configs/vsn-1.2/src/up_buttons.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *
+ *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *            Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,12 +41,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
+#include <arch/board/board.h>
+#include "vsn-internal.h"
 
-#include <nuttx/arch.h>
-#include "up_internal.h"
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -59,35 +64,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
- *
- * Description:
- *   up_idle() is the logic that will be executed when their
- *   is no other ready-to-run task.  This is processor idle
- *   time and will continue until some interrupt occurs to
- *   cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g.,
- *   this is where power management operations might be
- *   performed.
- *
+ * Name: up_buttoninit
  ****************************************************************************/
 
-void up_idle(void)
+void up_buttoninit(void)
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts,
-   * then process "fake" timer interrupts. Hopefully, something
-   * will wake up.
-   */
-
-  sched_process_timer();
-#endif
-
-  /* Sleep until an interrupt occurs to save power */
-
-#if 0
-  asm("WFI");  /* For example */
-#endif
+  stm32_configgpio(GPIO_PUSHBUTTON);
 }
 
+/****************************************************************************
+ * Name: up_buttons
+ ****************************************************************************/
+
+uint8_t up_buttons(void)
+{
+  return stm32_gpioread(GPIO_PUSHBUTTON);
+}
+
+#endif /* CONFIG_ARCH_BUTTONS */

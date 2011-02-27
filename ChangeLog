@@ -1468,5 +1468,11 @@
 	* Rename arch/pjrc-8051 to arch/8051
 	* configs/ne64badge -- Add a configuration for the Future Electronics Group
 	  NE64 Badge development board (Freescale MC9S12NE64)
-
-
+	* Changes contributed by Uros Platise:
+	  - Add support for the STM32F103RET6
+	  - configs/vsn - Support for the ISOTEL NetClamps VSN V1.2 ready2go sensor
+	    network platform
+	* arch/hc, configs/ne64badge -- Development is complete for the Freescale
+	  mc9s12ne64 on the Future Electronics Group NE64 /PoE Badge board.  Howeve,
+	  this port remains untested until I figure out this BDM / Code Warrior
+	  and paged build thing

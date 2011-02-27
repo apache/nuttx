@@ -1,8 +1,12 @@
 /****************************************************************************
- *  arch/arm/src/common/up_idle.c
+ * configs/vsn-1.2/src/up_leds.c
+ * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *
+ *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *            Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,12 +43,31 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include "up_internal.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
+#include "vsn-internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ****************************************************************************/
+
+/* Enables debug output from this file (needs CONFIG_DEBUG with
+ * CONFIG_DEBUG_VERBOSE too)
+ */
+
+#undef LED_DEBUG  /* Define to enable debug */
+
+#ifdef LED_DEBUG
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
+#else
+#  define leddbg(x...)
+#  define ledvdbg(x...)
+#endif
+
 
 /****************************************************************************
  * Private Data
@@ -54,40 +77,40 @@
  * Private Functions
  ****************************************************************************/
 
+static void led_setonoff(unsigned int bits)
+{
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
- *
- * Description:
- *   up_idle() is the logic that will be executed when their
- *   is no other ready-to-run task.  This is processor idle
- *   time and will continue until some interrupt occurs to
- *   cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g.,
- *   this is where power management operations might be
- *   performed.
- *
+ * Name: up_ledinit
  ****************************************************************************/
 
-void up_idle(void)
+#ifdef CONFIG_ARCH_LEDS
+void up_ledinit(void)
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts,
-   * then process "fake" timer interrupts. Hopefully, something
-   * will wake up.
-   */
-
-  sched_process_timer();
-#endif
-
-  /* Sleep until an interrupt occurs to save power */
-
-#if 0
-  asm("WFI");  /* For example */
-#endif
+   stm32_configgpio(GPIO_LED);
 }
 
+/****************************************************************************
+ * Name: up_ledon
+ ****************************************************************************/
+
+void up_ledon(int led)
+{
+  if (led==LED_IDLE) stm32_gpiowrite(GPIO_LED, true);
+}
+
+/****************************************************************************
+ * Name: up_ledoff
+ ****************************************************************************/
+
+void up_ledoff(int led)
+{
+  if (led==LED_IDLE) stm32_gpiowrite(GPIO_LED, false);
+}
+
+#endif /* CONFIG_ARCH_LEDS */

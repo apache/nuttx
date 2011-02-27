@@ -302,6 +302,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
+ |   |- ne63badge/
+ |   |   `- README.txt
  |   |- ntosd-dm320/
  |   |   |- doc/README.txt
  |   |   |- include/README.txt
@@ -341,6 +343,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- bin/README.txt
  |   |   |- include/README.txt
  |   |   |- src/README.txt
+ |   |   `- README.txt
+ |   |- vsn/
  |   |   `- README.txt
  |   |- xtrs/
  |   |   |- include/README.txt
