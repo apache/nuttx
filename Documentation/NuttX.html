@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 25, 2011</p>
+      <p>Last Updated: February 27, 2011</p>
     </td>
   </tr>
 </table>
@@ -1170,21 +1170,41 @@
   <td>
     <p>
       <b>STMicro STM32F103x</b>.
-      This port uses the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL development board that
-      features the STM32F103ZET6 MCU.
-      This port uses a GNU arm-elf toolchain* under either Linux or Cygwin (with native Windows GNU
+      Support for three MCUs and two board configurations are available.
+      MCU support includes: STM32F103ZET6, STM32F103RET6, and STM32F107VC.
+      Board support includes:
+    </p>
+    <ol>
+      <li>
+        This port uses the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL development board that
+        features the STM32F103ZET6 MCU.
+      </li>
+      <li>
+        ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
+        STMicro STM32F103RET6.  Contributed by Uros Platise.
+      </li>
+    </ol>
+    <p>
+      These ports uses a GNU arm-elf toolchain* under either Linux or Cygwin (with native Windows GNU
       tools or Cygwin-based GNU tools).
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-        The basic STM32 port was released in NuttX version 0.4.12. The basic port includes boot-up
-        logic, interrupt driven serial console, and system timer interrupts.
-        The 0.4.13 release added support for SPI, serial FLASH, and USB device.;
-        The 4.14 release added support for buttons and SDIO-based MMC/SD and verifed DMA support.
-        Verified configurations are available for NuttX OS test, the NuttShell (NSH) example,
-        the USB serial device class, and the USB mass storage device class example.
       </p>
+      <ul>
+        <li>
+          The basic STM32 port was released in NuttX version 0.4.12. The basic port includes boot-up
+          logic, interrupt driven serial console, and system timer interrupts.
+          The 0.4.13 release added support for SPI, serial FLASH, and USB device.;
+          The 4.14 release added support for buttons and SDIO-based MMC/SD and verifed DMA support.
+          Verified configurations are available for NuttX OS test, the NuttShell (NSH) example,
+          the USB serial device class, and the USB mass storage device class example.
+        </li>
+        <li>
+          Support for the NetClamps VSN was included in version 5.18 of NuttX.
+        </li>
+      </ul>
       <p>
         <b>Development Environments:</b>
         1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
@@ -1231,7 +1251,7 @@
         1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
         with Windows native toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux
         or Cygwin is provided by the NuttX
-        <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
+        <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
         package.
       </p>
      </ul>
@@ -1337,7 +1357,7 @@
         1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
         with Windows native toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux
         or Cygwin is provided by the NuttX
-        <a href="http://sourceforge.net/project/showfiles.php?group_id=189573&package_id=224585">buildroot</a>
+        <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
         package.
       </p>
      </ul>
@@ -1380,14 +1400,27 @@
   <td>
     <p>
       <b>MC9S12NE64</b>.
-      This port uses the Freescale DEMO9S12NE64 Evaluation Board with a GNU arm-elf toolchain* under Linux or Cygwin.
+      Support for the MC9S12NE64 MCU and two boards are included:
+    </p>
+    <ul>
+      <li>
+        The Freescale DEMO9S12NE64 Evaluation Board, and
+      </li>
+      <li>
+        The Future Electronics Group NE64 /PoE Badge board.
+      </li>
+    </ul>
+    <p>
+      Both use a GNU arm-elf toolchain* under Linux or Cygwin.
+      The NuttX <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> provides a properly patched GCC 3.4.4 toolchain that is highly optimized for the m9s12x family.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
-        This port only fragmentary as of NuttX-5.0.  Some initial pieces appear in that
-        release, but much more is needed.  Time permitting, the HCS12 port may be available
-        int NuttX5.1.
+         Coding is complete for the MC9S12NE64 and for the NE64 Badge board.
+         However, testing has not yet begun due to issues with BDMs, Code Warrior, and
+         the paging in the build process.
+         Progress is slow, but I hope to see a fully verified MC9S12NE64 port in the near future.
       </p>
     </ul>
   </td>
@@ -1720,7 +1753,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
       This combination works well too.
       It works just as well as the native Linux environment except
       that compilation and build times are a little longer.
-      The custom NuttX buildroot referenced above may be build in
+      The custom NuttX <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> referenced above may be build in
       the Cygwin environment as well.
     </p>
   </td>
@@ -2040,11 +2073,19 @@ nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
        a USB host HID keyboard configuraion.
     * drivers/usbhost/hid_parser.c -- Leverages the LUFA HID parser written by
       Dean Camera.
-	* examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
-	  before all parameters are parsed, you can leave getopt() in a strange state.
+    * examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
+      before all parameters are parsed, you can leave getopt() in a strange state.
     * Rename arch/pjrc-8051 to arch/8051
-	* configs/ne64badge -- Add a configuration for the Future Electronics Group
-	  NE64 Badge development board (Freescale MC9S12NE64)
+    * configs/ne64badge -- Add a configuration for the Future Electronics Group
+      NE64 Badge development board (Freescale MC9S12NE64)
+    * Changes contributed by Uros Platise:
+      - Add support for the STM32F103RET6
+      - configs/vsn - Support for the ISOTEL NetClamps VSN V1.2 ready2go sensor
+        network platform
+    * arch/hc, configs/ne64badge -- Development is complete for the Freescale
+      mc9s12ne64 on the Future Electronics Group NE64 /PoE Badge board.  Howeve,
+      this port remains untested until I figure out this BDM / Code Warrior
+      and paged build thing
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
