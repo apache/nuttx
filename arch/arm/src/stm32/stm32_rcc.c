@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_rcc.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -364,27 +364,20 @@ static inline void rcc_enableapb2(void)
 }
 
 /****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32_clockconfig
+ * Name: stm32_stdclockconfig
  *
  * Description:
- *   Called to change to new clock based on settings in board.h.
- *   NOTE:  This logic needs to be extended so that we can selected low-power
- *   clocking modes as well!
+ *   Called to set clocking based on standard definitions in board.h.
+ *   NOTE:  This logic would need to be extended if you need to select low-
+ *   power clocking modes!
  *
  ****************************************************************************/
 
-void stm32_clockconfig(void)
+#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
+static inline void stm32_stdclockconfig(void)
 {
   uint32_t regval;
   volatile int32_t timeout;
-
-  /* Make sure that we are starting in the reset state */
-
-  rcc_reset();
 
   /* Enable External High-Speed Clock (HSE) */
  
@@ -465,9 +458,45 @@ void stm32_clockconfig(void)
   
     while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
   }
+}
+#endif
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_clockconfig
+ *
+ * Description:
+ *   Called to change to new clock based on settings in board.h.
+ *   NOTE:  This logic needs to be extended so that we can selected low-power
+ *   clocking modes as well!
+ *
+ ****************************************************************************/
+
+void stm32_clockconfig(void)
+{
+  /* Make sure that we are starting in the reset state */
+
+  rcc_reset();
+  
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
+
+  /* Invoke Board Custom Clock Configuration */
+
+  stm32_board_clockconfig();
+  
+#else
+
+  /* Invoke standard, fixed clock configuration based on definitions in board.h */
+
+  stm32_stdclockconfig();
+
+#endif
 
   /* Enable peripheral clocking */
-
+  
   rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();

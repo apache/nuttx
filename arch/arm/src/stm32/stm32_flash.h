@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_flash.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@
 #define ACR_LATENCY_SHIFT          (0)
 #define ACR_LATENCY_MASK           (7 << ACR_LATENCY_SHIFT)
 #  define ACR_LATENCY_0            (0 << ACR_LATENCY_SHIFT)  /* FLASH Zero Latency cycle */
-#  define ACR_LATENCY_1            (1 << ACR_LATENCY_SHIFT)) /* FLASH One Latency cycle */
+#  define ACR_LATENCY_1            (1 << ACR_LATENCY_SHIFT)  /* FLASH One Latency cycle */
 #  define ACR_LATENCY_2            (2 << ACR_LATENCY_SHIFT)  /* FLASH Two Latency cycles */
 #define ACR_HLFCYA                 (1 << 3)                  /* FLASH half cycle access */
 #define ACR_PRTFBE                 (1 << 4)                  /* FLASH prefetch enable */

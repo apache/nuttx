@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_internal.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -167,9 +167,11 @@
  * include that header file.  NOTE: You can get the chip-specific pin-mapping info
  * from the chip datasheet.
  */
-
+ 
 #if defined(CONFIG_ARCH_CHIP_STM32F103ZET6)
 #  include "stm32f103ze_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
+#  include "stm32f103re_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #  include "stm32f107vc_pinmap.h"
 #endif

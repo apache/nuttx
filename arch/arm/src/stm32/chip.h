@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,11 +48,11 @@
 
 /* Get customizations for each supported chip (only the STM32F103Z right now) */
 
-#if defined(CONFIG_ARCH_CHIP_STM32F103ZET6)
-#  undef CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
-#  undef  CONFIG_STM32_MEDIUMDENSITY        /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#if defined(CONFIG_ARCH_CHIP_STM32F103ZET6) 
+#  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  define CONFIG_STM32_HIGHDENSITY       1   /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
-#  undef  CONFIG_STM32_CONNECTIVITYLINE     /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* General timers TIM2,3,4,5 */
 #  define STM32 NBTIM                    0   /* No basic timers */
@@ -67,11 +67,32 @@
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NTHERNET                 0   /* No ethernet */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
+#  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  define CONFIG_STM32_HIGHDENSITY       1   /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  define STM32_NATIM                    1   /* One advanced timers TIM1 */
+#  define STM32_NGTIM                    4   /* General timers TIM2,3,4,5 */
+#  define STM32 NBTIM                    0   /* No basic timers */
+#  define STM32_NDMA                     2   /* DMA1-2 */
+#  define STM32_NSPI                     2   /* SPI1-2 */
+#  define STM32_NUSART                   3   /* USART1-3 */
+#  define STM32_NI2C                     2   /* I2C1-2 */
+#  define STM32_NCAN                     1   /* bxCAN1 */
+#  define STM32_NSDIO                    1   /* SDIO */
+#  define STM32_NGPIO                    112 /* GPIOA-G */
+#  define STM32_NADC                     1   /* ADC1 */
+#  define STM32_NDAC                     0   /* No DAC */
+#  define STM32_NCRC                     0   /* No CRC */
+#  define STM32_NTHERNET                 0   /* No ethernet */
+
 #elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
-#  undef CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
-#  undef  CONFIG_STM32_MEDIUMDENSITY        /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
-#  undef CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
-#  define  CONFIG_STM32_CONNECTIVITYLINE 1  /* STM32F105x and STM32F107x */
+#  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef CONFIG_STM32_HIGHDENSITY            /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
+#  define  CONFIG_STM32_CONNECTIVITYLINE 1   /* STM32F105x and STM32F107x */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* General timers TIM2,3,4,5 */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
@@ -86,6 +107,7 @@
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+
 #else
 #  error "Unsupported STM32 chip"
 #endif
