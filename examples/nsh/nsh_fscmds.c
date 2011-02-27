@@ -432,14 +432,21 @@ int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
                   if (nbytesread < 0)
                     {
-                     /* EINTR is not an error */
+                      /* EINTR is not an error (but will stop stop the cat) */
 
-                      if (errno != EINTR)
+#ifndef CONFIG_DISABLE_SIGNALS
+                      if (errno == EINTR)
+                        {
+                          nsh_output(vtbl, g_fmtsignalrecvd, argv[0]);
+                        }
+                      else
+#endif
                         {
                           nsh_output(vtbl, g_fmtcmdfailed, argv[0], "read", NSH_ERRNO);
-                          ret = ERROR;
-                          break;
                         }
+
+                      ret = ERROR;
+                      break;
                     }
 
                   /* Check for data successfully read */
@@ -453,14 +460,20 @@ int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
                           int n = write(1, buffer, nbytesread);
                           if (n < 0)
                             {
-                              /* EINTR is not an error */
+                              /* EINTR is not an error (but will stop stop the cat) */
 
-                              if (errno != EINTR)
+ #ifndef CONFIG_DISABLE_SIGNALS
+                              if (errno == EINTR)
+                                {
+                                  nsh_output(vtbl, g_fmtsignalrecvd, argv[0]);
+                                }
+                              else
+#endif
                                 {
                                   nsh_output(vtbl, g_fmtcmdfailed, argv[0], "write", NSH_ERRNO);
-                                  ret = ERROR;
-                                  break;
                                 }
+                              ret = ERROR;
+                              break;
                             }
                           else
                             {
@@ -593,11 +606,22 @@ int cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
               ret = OK;
               goto errout_with_wrfd;
             }
-          else if (nbytesread < 0 && errno != EINTR)
+          else if (nbytesread < 0)
             {
-              /* Read error */
+              /* EINTR is not an error (but will still stop the copy) */
 
-              nsh_output(vtbl, g_fmtcmdfailed, argv[0], "read", NSH_ERRNO);
+#ifndef CONFIG_DISABLE_SIGNALS
+              if (errno == EINTR)
+                {
+                  nsh_output(vtbl, g_fmtsignalrecvd, argv[0]);
+                }
+              else
+#endif
+                {
+                  /* Read error */
+
+                  nsh_output(vtbl, g_fmtcmdfailed, argv[0], "read", NSH_ERRNO);
+                }
               goto errout_with_wrfd;
             }
         }
@@ -610,11 +634,22 @@ int cmd_cp(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
             {
               nbytesread -= nbyteswritten;
             }
-          else if (errno != EINTR)
+          else
             {
-              /* Read error */
+              /* EINTR is not an error (but will still stop the copy) */
 
-              nsh_output(vtbl, g_fmtcmdfailed, argv[0], "write", NSH_ERRNO);
+#ifndef CONFIG_DISABLE_SIGNALS
+              if (errno == EINTR)
+                {
+                  nsh_output(vtbl, g_fmtsignalrecvd, argv[0]);
+                }
+              else
+#endif
+                {
+                 /* Read error */
+
+                  nsh_output(vtbl, g_fmtcmdfailed, argv[0], "write", NSH_ERRNO);
+                }
               goto errout_with_wrfd;
             }
         }

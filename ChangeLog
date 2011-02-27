@@ -1438,7 +1438,7 @@
 	* Ran the tool CppCheck (http://sourceforge.net/apps/mediawiki/cppcheck) and
 	  fixed several errors in the code identified by the tool.
 
-5.18 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.18 2011-02-27 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Incorporate several uIP patches from http://gitweb.aeruder.net/?p=uip.git;a=summary.
 	  - Lost SYNACK causes connection reset
@@ -1476,3 +1476,7 @@
 	  mc9s12ne64 on the Future Electronics Group NE64 /PoE Badge board.  Howeve,
 	  this port remains untested until I figure out this BDM / Code Warrior
 	  and paged build thing
+	* Added a new 'kill' command to NSH that will support sending signals to
+	  running NuttX tasks.
+
+5.19 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

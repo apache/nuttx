@@ -1658,7 +1658,7 @@ the NuttX Porting Guide:
 nuttx-5.17
 ^^^^^^^^^^
 
-The 64th release of NuttX, Version 5.17, was made on January 19, 2010 and is
+The 64th release of NuttX, Version 5.17, was made on January 19, 2011 and is
 available for download from the SourceForge website. This release follows
 close on the heels of the 5.16 release and extends the USB host capabilities
 first introduced in that version.
@@ -1672,3 +1672,25 @@ first introduced in that version.
        application.
 
 And other changes as detailed in the ChangeLog.
+
+nuttx-5.18
+^^^^^^^^^^
+
+The 65th release of NuttX, Version 5.18, was made on February 27, 2011 and is
+available for download from the SourceForge website.  This is first release from
+the new NuttX SVN repository.  This release is made primarily to keep the release
+tarball in synchronization with SVN.  Many smaller changes have been made as
+identified in the ChangeLog.  Headlines would include:
+
+    * Incorporate several important uIP patches -- including the well known
+      patch to handle missing SYNACK.
+    * The Freescale mc8s12ne64 port is code complete but testing has not yet
+      begun due to toolchain issues.  Added support for the Future Electronics
+      Group NE64 Badge board.
+    * Added support for a new STM32 board, the ISOTEL NetClamps VSN V1.2 ready2go
+      sensor network platform.  This board is based on a STM32F103RET6 and
+      includes some interesting power saving/clock control extensions.
+    * USB host support expanded to handle vendor specific USB devices.
+    * Incorporated the LUFA HID parser.
+    * Various bugfix as detailed in the ChangeLog
+

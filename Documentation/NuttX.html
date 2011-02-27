@@ -800,31 +800,43 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.17 Release Notes</b>:
+<p><b>nuttx-5.18 Release Notes</b>:
+
 <p>
-  The 64<sup>th</sup> release of NuttX, Version 5.17, was made on January 19, 2010 and is available for download from the
-  <a href="http://sourceforge.net/project/showfiles.php?group_id=189573">SourceForge</a> website.
+  The 65<sup>th</sup> release of NuttX, Version 5.18, was made on February 27, 2011 and is available for download from the
+  <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release follows close on the heels of the 5.16 release and extends the USB host capabilities first introduced in that version.
-<p>
+  This is first release from the new NuttX SVN repository.
+  This release is made primarily to keep the release tarball in synchronization with SVN.
+  Many smaller changes have been made as identified in the ChangeLog.
+  Headlines would include:
+</p>
 <ul>
   <li>
-    The LPC17xx USB host controller driver was extended to (1) add support for low-speed devices,
-    (2) handle multiple concurrent transfers on different endpoints (still only one TD per endpoint), and
-    (3) handle periodic interrupt endpoint types.
+    Incorporate several important uIP patches -- including the well known patch to handle missing SYNACK.
   </li>
   <li>
-    Add a USB host HID keyboard class driver.
-    Now you can connect a standard USB keyboard to NuttX and receive keyboard input for an application.
+    The Freescale mc8s12ne64 port is code complete but testing has not yet begun due to toolchain issues.
+    Added support for the Future Electronics Group NE64 Badge board.
+  </li>
+  <li>
+    Added support for a new STM32 board, the ISOTEL NetClamps VSN V1.2 ready2go sensor network platform.
+    This board is based on a STM32F103RET6 and includes some interesting power saving/clock control extensions.
+  </li>
+  <li>
+    USB host support expanded to handle vendor specific USB devices.
+  </li>
+  <li>
+    Incorporated the LUFA HID parser.
+  </li>
+  <li>
+    Various bugfix as detailed in the ChangeLog
   </li>
 </ul>
-<p>
-  And other changes as detailed in the ChangeLog.
-</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1999,56 +2011,7 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.17 2011-01-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * include/nuttx/usb -- rename usb_storage.h to storage.h.
-    * arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for low-speed devices.
-    * drivers/usbhost/usbhost_skeleton.c -- Template for new class drivers
-    * include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c -- New
-      files for HID keyboard support.
-    * arch/arm/src/lpc17xx/lpc17_usbhost.c -- Will now handle multiple
-      concurrent transfers on different endpoints (still only one TD per
-      endpoint).  All methods are protected from re-entrancy; lots of re-
-      structuring in preparation for interrupt endpoint support.
-    * arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for periodic
-      interrupt transfers.
-    * examples/hidkbd - Added a simple test for the USB host HID keyboard
-      class driver.
-    * configs/olimex-lpc1766stk/hidkbd - Added a configuration to build the
-      USB host HID keyboard class driver test for the LPC17xx.
-    * Ran the tool CppCheck (http://sourceforge.net/apps/mediawiki/cppcheck) and
-      fixed several errors in the code identified by the tool.
-
-pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Updated to use standard C99 types in stdint.h and
-      stdbool.h.  This change was necessary for compatibility
-      with NuttX-5.0 (any beyond).
-
-buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
-
-    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
-    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
-      arm926
-    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
-    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
-      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
-      the build stops on the first warning.
-    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
-      patches available from http://www.msextra.com/tools courtesy of James
-      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
-nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-5.18 2011-02-27 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * Incorporate several uIP patches from http://gitweb.aeruder.net/?p=uip.git;a=summary.
       - Lost SYNACK causes connection reset
@@ -2086,6 +2049,39 @@ nuttx-5.18 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       mc9s12ne64 on the Future Electronics Group NE64 /PoE Badge board.  Howeve,
       this port remains untested until I figure out this BDM / Code Warrior
       and paged build thing
+	* Added a new 'kill' command to NSH that will support sending signals to
+	  running NuttX tasks.
+
+pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Updated to use standard C99 types in stdint.h and
+      stdbool.h.  This change was necessary for compatibility
+      with NuttX-5.0 (any beyond).
+
+buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
+
+    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
+    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
+      arm926
+    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
+    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
+      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
+      the build stops on the first warning.
+    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
+      patches available from http://www.msextra.com/tools courtesy of James
+      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<ul><pre>
+nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

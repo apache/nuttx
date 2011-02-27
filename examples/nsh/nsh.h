@@ -286,6 +286,9 @@ extern const char g_fmtcontext[];
 extern const char g_fmtcmdfailed[];
 extern const char g_fmtcmdoutofmemory[];
 extern const char g_fmtinternalerror[];
+#ifndef CONFIG_DISABLE_SIGNALS
+extern const char g_fmtsignalrecvd[];
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
