@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: February 27, 2011</p>
+      <p>Last Updated: February 28, 2011</p>
     </td>
   </tr>
 </table>
@@ -125,55 +125,55 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdget">2.8 Get File Via TFTP (get)</a>
+    <a href="#cmdexit">2.8 Exit NSH (exit)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdexit">2.9 Exit NSH (exit)</a>
+    <a href="#cmdfree">2.9 Show Memory Manager Status (free)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdhelp">2.10 Show Usage Command Usage (help)</a>
+    <a href="#cmdget">2.10 Get File Via TFTP (get)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdifconfig">2.11 Show Network Configuration (ifconfig)</a>
+    <a href="#cmdhelp">2.11 Show Usage Command Usage (help)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdkill">2.12 Send a signal to a task (kill)</a>
+    <a href="#cmdifconfig">2.12 Show Network Configuration (ifconfig)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdlosetup">2.13 Setup/teardown the Loop Device (losetup)</a>
+    <a href="#cmdkill">2.13 Send a signal to a task (kill)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdls">2.14 List Directory Contents (ls)</a>
+    <a href="#cmdlosetup">2.14 Setup/teardown the Loop Device (losetup)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdmbhw">2.15 Access Memory (mb, mh, and mw)</a>
+    <a href="#cmdls">2.15 List Directory Contents (ls)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdmem">2.16 Show Memory Manager Status (mem)</a>
+    <a href="#cmdmbhw">2.16 Access Memory (mb, mh, and mw)</a>
   </td>
 </tr>
 <tr>
@@ -857,7 +857,68 @@ exec &lt;hex-address&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdget"><h2>2.8 Get File Via TFTP (get)</h2></a>
+    <a name="cmdexit"><h2>2.8 Exit NSH (exit)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+exit
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Exit NSH.  Only useful for the serial front end if you have started some other tasks (perhaps
+  using the <code><a href="#cmdexec">exec</a></code> command) and you would like to have NSH out of the
+  way.  For the telnet front-end, <code>exit</code> terminates the telenet session.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdfree"><h2>2.9 Show Memory Manager Status (free)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+free
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Show the current state of the memory allocator.  For example,
+</p>
+<ul><pre>
+nsh&gt; free
+             total       used       free    largest
+Mem:       4194288    1591552    2602736    2601584
+nsh&gt;
+</pre></ul>
+<p><b>Where:</b></p>
+<ul><table>
+  <tr>
+    <td><b><code>total</code></b></td>
+    <td>This is the total size of memory allocated for use by malloc in bytes.</td>
+  </tr>
+  <tr>
+    <td><b><code>used</code></b></td>
+    <td>This is the total size of memory occupied by chunks handed out by malloc.</td>
+  </tr>
+  <tr>
+    <td><b><code>free</code></b></td>
+    <td>This is the total size of memory occupied by free (not in use) chunks.</td>
+  </tr>
+  <tr>
+    <td><b><code>largest</code></b></td>
+    <td>Size of the largest free (not in use) chunk.</td>
+  </tr>
+</table></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdget"><h2>2.10 Get File Via TFTP (get)</h2></a>
   </td>
   </tr>
 </table>
@@ -892,26 +953,7 @@ get [-b|-n] [-f &lt;local-path&gt;] -h &lt;ip-address&gt; &lt;remote-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdexit"><h2>2.9 Exit NSH (exit)</h2></a>
-  </td>
-  </tr>
-</table>
-
-<p><b>Command Syntax:</b></p>
-<ul><pre>
-exit
-</pre></ul>
-<p>
-  <b>Synopsis</b>.
-  Exit NSH.  Only useful for the serial front end if you have started some other tasks (perhaps
-  using the <code><a href="#cmdexec">exec</a></code> command) and you would like to have NSH out of the
-  way.  For the telnet front-end, <code>exit</code> terminates the telenet session.
-</p>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="cmdhelp"><h2>2.10 Show Usage Command Usage (help)</h2></a>
+    <a name="cmdhelp"><h2>2.11 Show Usage Command Usage (help)</h2></a>
   </td>
   </tr>
 </table>
@@ -928,7 +970,7 @@ help
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdifconfig"><h2>2.11 Show Network Configuration (ifconfig)</h2></a>
+    <a name="cmdifconfig"><h2>2.12 Show Network Configuration (ifconfig)</h2></a>
   </td>
   </tr>
 </table>
@@ -954,7 +996,7 @@ eth0    HWaddr 00:18:11:80:10:06
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdkill"><h2>2.12 Send a signal to a task (kill)</h2></a>
+    <a name="cmdkill"><h2>2.13 Send a signal to a task (kill)</h2></a>
   </td>
   </tr>
 </table>
@@ -970,7 +1012,7 @@ kill -&lt;signal&gt; &lt;pid&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdlosetup"><h2>2.13 Setup/teardown the Loop Device (losetup)</h2></a>
+    <a name="cmdlosetup"><h2>2.14 Setup/teardown the Loop Device (losetup)</h2></a>
   </td>
   </tr>
 </table>
@@ -1023,7 +1065,7 @@ losetup d &lt;dev-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdls"><h2>2.14 List Directory Contents (ls)</h2></a>
+    <a name="cmdls"><h2>2.15 List Directory Contents (ls)</h2></a>
   </td>
   </tr>
 </table>
@@ -1060,7 +1102,7 @@ ls [-lRs] &lt;dir-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdmbhw"><h2>2.15 Access Memory (mb, mh, and mw)</h2></a>
+    <a name="cmdmbhw"><h2>2.16 Access Memory (mb, mh, and mw)</h2></a>
   </td>
   </tr>
 </table>
@@ -1110,55 +1152,6 @@ nsh&gt; mh 0 16
   14 = 0x0c1e
 nsh&gt;
 </pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="cmdmem"><h2>2.16 Show Memory Manager Status (mem)</h2></a>
-  </td>
-  </tr>
-</table>
-
-<p><b>Command Syntax:</b></p>
-<ul><pre>
-mem
-</pre></ul>
-<p>
-  <b>Synopsis</b>.
-  Show the current state of the memory allocator.  For example,
-</p>
-<ul><pre>
-nsh&gt; mem
-  arena:      fe2560
-  ordblks:         1
-  mxordblk:   fdc3e0
-  uordblks:     6180
-  fordblks:   fdc3e0
-nsh&gt;
-</pre></ul>
-<p><b>Where:</b></p>
-<ul><table>
-  <tr>
-    <td><b><code>arena</code></b></td>
-    <td>This is the total size of memory allocated for use by malloc in bytes.</td>
-  </tr>
-  <tr>
-    <td><b><code>ordblks</code></b></td>
-    <td>This is the number of free (not in use) chunks.</td>
-  </tr>
-  <tr>
-    <td><b><code>mxordblk</code></b></td>
-    <td>Size of the largest free (not in use) chunk.</td>
-  </tr>
-  <tr>
-    <td><b><code>uordblks</code></b></td>
-    <td>This is the total size of memory occupied by chunks handed out by malloc.</td>
-  </tr>
-  <tr>
-    <td><b><code>fordblks</code></b></td>
-    <td>This is the total size of memory occupied by free (not in use) chunks.</td>
-  </tr>
-</table></ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1832,6 +1825,11 @@ nsh>
     <td><code>CONFIG_EXAMPLES_NSH_DISABLE_EXIT</code></td>
   </tr>
   <tr>
+    <td><b><code>free</code></b></td>
+    <td><br></td>
+    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_FREE</code></td>
+  </tr>
+  <tr>
     <td><b><code>get</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
         <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1</sup></td>
@@ -1870,11 +1868,6 @@ nsh>
       <code>CONFIG_EXAMPLES_NSH_DISABLE_MH</code>,<br>
       <code>CONFIG_EXAMPLES_NSH_DISABLE_MW</code>
     </td>
-  </tr>
-  <tr>
-    <td><b><code>mem</code></b></td>
-    <td><br></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MEM</code></td>
   </tr>
   <tr>
     <td><b><code>mkdir</code></b></td>
@@ -2353,6 +2346,7 @@ nsh>
 <td></ul>
   <li><a href="#cmdexec"><code>exec</code></a></li>
   <li><a href="#cmdexit"><code>exit</code></a></li>
+  <li><a href="#cmdfree"><code>free</code></a></li>
   <li><a href="#cmdget"><code>get</code></a></li>
   <li><a href="#frontend">Greeting</a></li>
   <li><a href="#cmdhelp"><code>help</code></a></li>
@@ -2364,7 +2358,6 @@ nsh>
   <li><a href="#cmdmbhw"><code>mb</code></a></li>
   <li><a href="#cmdmbhw"><code>mh</code></a></li>
   <li><a href="#cmdmbhw"><code>mw</code></a></li>
-  <li><a href="#cmdmem"><code>mem</code></a></li>
   <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
   <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
   <li><a href="#cmdmkfifo"><code>mkfifo</code></a></li>

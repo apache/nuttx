@@ -2038,6 +2038,8 @@ nuttx-5.18 2011-02-27 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       Dean Camera.
     * examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
       before all parameters are parsed, you can leave getopt() in a strange state.
+    * include/nuttx/fb.h -- Restore missing RGB type that was accidentally removed
+      when Nokia 6100 support was added.
     * Rename arch/pjrc-8051 to arch/8051
     * configs/ne64badge -- Add a configuration for the Future Electronics Group
       NE64 Badge development board (Freescale MC9S12NE64)
@@ -2049,8 +2051,8 @@ nuttx-5.18 2011-02-27 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       mc9s12ne64 on the Future Electronics Group NE64 /PoE Badge board.  Howeve,
       this port remains untested until I figure out this BDM / Code Warrior
       and paged build thing
-	* Added a new 'kill' command to NSH that will support sending signals to
-	  running NuttX tasks.
+    * Added a new 'kill' command to NSH that will support sending signals to
+      running NuttX tasks.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2082,6 +2084,9 @@ buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * NSH: 'mem' command renamed to 'free'.  Output is now more similar to the
+      Linux 'free' command.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
