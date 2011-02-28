@@ -364,8 +364,8 @@ extern void nsh_dumpbuffer(FAR struct nsh_vtbl_s *vtbl, const char *msg,
 #ifndef CONFIG_EXAMPLES_NSH_DISABLE_MW
   extern int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
-#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MEM
-  extern int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_FREE
+  extern int cmd_free(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 #endif
 #ifndef CONFIG_EXAMPLES_NSH_DISABLE_PS
   extern int cmd_ps(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);

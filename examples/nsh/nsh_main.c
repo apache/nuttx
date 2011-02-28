@@ -173,6 +173,10 @@ static const struct cmdmap_s g_cmdmap[] =
   { "exit",     cmd_exit,     1, 1, NULL },
 #endif
 
+#ifndef CONFIG_EXAMPLES_NSH_DISABLE_FREE
+  { "free",     cmd_free,     1, 1, NULL },
+#endif
+
 #if defined(CONFIG_NET_UDP) && CONFIG_NFILE_DESCRIPTORS > 0
 # ifndef CONFIG_EXAMPLES_NSH_DISABLE_GET
   { "get",      cmd_get,      4, 7, "[-b|-n] [-f <local-path>] -h <ip-address> <remote-path>" },
@@ -209,9 +213,6 @@ static const struct cmdmap_s g_cmdmap[] =
 
 #ifndef CONFIG_EXAMPLES_NSH_DISABLE_MB
   { "mb",       cmd_mb,       2, 3, "<hex-address>[=<hex-value>][ <hex-byte-count>]" },
-#endif
-#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MEM
-  { "mem",      cmd_mem,      1, 1, NULL },
 #endif
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_FS_WRITABLE)

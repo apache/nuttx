@@ -1,7 +1,7 @@
 /****************************************************************************
- * examples/nsh/dbg_proccmds.c
+ * examples/nsh/dbg_dbgcmds.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 
@@ -282,30 +281,6 @@ int cmd_mw(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 	}
     }
   return ret;
-}
-#endif
-
-/****************************************************************************
- * Name: cmd_mem
- ****************************************************************************/
-
-#ifndef CONFIG_EXAMPLES_NSH_DISABLE_MEM
-int cmd_mem(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
-{
-  struct mallinfo mem;
-
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  mem = mallinfo();
-#else
-  (void)mallinfo(&mem);
-#endif
-
-  nsh_output(vtbl, "  arena:    %8x\n", mem.arena);
-  nsh_output(vtbl, "  ordblks:  %8d\n", mem.ordblks);
-  nsh_output(vtbl, "  mxordblk: %8x\n", mem.mxordblk);
-  nsh_output(vtbl, "  uordblks: %8x\n", mem.uordblks);
-  nsh_output(vtbl, "  fordblks: %8x\n", mem.fordblks);
-  return OK;
 }
 #endif
 

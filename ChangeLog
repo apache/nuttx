@@ -1465,6 +1465,8 @@
 	  Dean Camera.
 	* examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
 	  before all parameters are parsed, you can leave getopt() in a strange state.
+	* include/nuttx/fb.h -- Restore missing RGB type that was accidentally removed
+	  when Nokia 6100 support was added.
 	* Rename arch/pjrc-8051 to arch/8051
 	* configs/ne64badge -- Add a configuration for the Future Electronics Group
 	  NE64 Badge development board (Freescale MC9S12NE64)
@@ -1480,3 +1482,6 @@
 	  running NuttX tasks.
 
 5.19 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* NSH: 'mem' command renamed to 'free'.  Output is now more similar to the
+	  Linux 'free' command.

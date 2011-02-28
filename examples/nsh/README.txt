@@ -302,6 +302,24 @@ o exit
   using the 'exec' command') and you would like to have NSH out of the
   way.
 
+o free
+
+  Show the current state of the memory allocator.  For example,
+
+  nsh> free
+  free
+               total       used       free    largest
+  Mem:       4194288    1591552    2602736    2601584
+
+  Where:
+    total - This is the total size of memory allocated for use
+      by malloc in bytes.
+    used - This is the total size of memory occupied by
+      chunks handed out by malloc.
+    free - This is the total size of memory occupied by
+      free (not in use) chunks.
+    largest - Size of the largest free (not in use) chunk
+
 o get [-b|-n] [-f <local-path>] -h <ip-address> <remote-path>
 
   Use TFTP to copy the file at <remote-address> from the host whose IP
@@ -416,28 +434,6 @@ o mw <hex-address>[=<hex-value>][ <hex-byte-count>]
       12 = 0x0140
       14 = 0x0c1e
     nsh>
-
-o mem
-
-  Show the current state of the memory allocator.  For example,
-
-    nsh> mem
-      arena:      fe2560
-      ordblks:         1
-      mxordblk:   fdc3e0
-      uordblks:     6180
-      fordblks:   fdc3e0
-    nsh>
-
-  Where:
-    arena - This is the total size of memory allocated for use
-      by malloc in bytes.
-    ordblks - This is the number of free (not in use) chunks.
-    mxordblk - Size of the largest free (not in use) chunk
-    uordblks - This is the total size of memory occupied by
-      chunks handed out by malloc.
-    fordblks - This is the total size of memory occupied by
-      free (not in use) chunks.
 
 o mkdir <path>
 
@@ -770,6 +766,7 @@ Command Dependencies on Configuration Settings
   echo       --
   exec       --
   exit       --
+  free       --
   get        CONFIG_NET && CONFIG_NET_UDP && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_BUFSIZE >= 558  (see note 1)
   help       --
   ifconfig   CONFIG_NET
@@ -777,7 +774,6 @@ Command Dependencies on Configuration Settings
   losetup    !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0
   ls         CONFIG_NFILE_DESCRIPTORS > 0
   mb,mh,mw   ---
-  mem        ---
   mkdir      !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_WRITABLE (see note 4)
   mkfatfs    !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_FS_FAT
   mkfifo     CONFIG_NFILE_DESCRIPTORS > 0
@@ -814,17 +810,17 @@ In addition, each NSH command can be individually disabled via one of the follow
 settings.  All of these settings make the configuration of NSH potentially complex but
 also allow it to squeeze into very small memory footprints.
 
-  CONFIG_EXAMPLES_NSH_DISABLE_CAT,      CONFIG_EXAMPLES_NSH_DISABLE_CD,      CONFIG_EXAMPLES_NSH_DISABLE_CP,
-  CONFIG_EXAMPLES_NSH_DISABLE_DD,       CONFIG_EXAMPLES_NSH_DISABLE_ECHO,    CONFIG_EXAMPLES_NSH_DISABLE_EXEC,
-  CONFIG_EXAMPLES_NSH_DISABLE_EXIT,     CONFIG_EXAMPLES_NSH_DISABLE_GET,     CONFIG_EXAMPLES_NSH_DISABLE_HELP,
-  CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG, CONFIG_EXAMPLES_NSH_DISABLE_KILL,    CONFIG_EXAMPLES_NSH_DISABLE_LOSETUP,
-  CONFIG_EXAMPLES_NSH_DISABLE_LS,       CONFIG_EXAMPLES_NSH_DISABLE_MB,      CONFIG_EXAMPLES_NSH_DISABLE_MEM,
-  CONFIG_EXAMPLES_NSH_DISABLE_MKDIR,    CONFIG_EXAMPLES_NSH_DISABLE_MKFATFS, CONFIG_EXAMPLES_NSH_DISABLE_MKFIFO,
-  CONFIG_EXAMPLES_NSH_DISABLE_MKRD,     CONFIG_EXAMPLES_NSH_DISABLE_MH,      CONFIG_EXAMPLES_NSH_DISABLE_MOUNT,
-  CONFIG_EXAMPLES_NSH_DISABLE_MW,       CONFIG_EXAMPLES_NSH_DISABLE_PS,      CONFIG_EXAMPLES_NSH_DISABLE_PING,
-  CONFIG_EXAMPLES_NSH_DISABLE_PUT,      CONFIG_EXAMPLES_NSH_DISABLE_PWD,     CONFIG_EXAMPLES_NSH_DISABLE_RM,
-  CONFIG_EXAMPLES_NSH_DISABLE_RMDIR,    CONFIG_EXAMPLES_NSH_DISABLE_SET,     CONFIG_EXAMPLES_NSH_DISABLE_SH,
-  CONFIG_EXAMPLES_NSH_DISABLE_SLEEP,    CONFIG_EXAMPLES_NSH_DISABLE_TEST,    CONFIG_EXAMPLES_NSH_DISABLE_UMOUNT,
+  CONFIG_EXAMPLES_NSH_DISABLE_CAT,      CONFIG_EXAMPLES_NSH_DISABLE_CD,       CONFIG_EXAMPLES_NSH_DISABLE_CP,
+  CONFIG_EXAMPLES_NSH_DISABLE_DD,       CONFIG_EXAMPLES_NSH_DISABLE_ECHO,     CONFIG_EXAMPLES_NSH_DISABLE_EXEC,
+  CONFIG_EXAMPLES_NSH_DISABLE_EXIT,     CONFIG_EXAMPLES_NSH_DISABLE_FREE,     CONFIG_EXAMPLES_NSH_DISABLE_GET,
+  CONFIG_EXAMPLES_NSH_DISABLE_HELP,     CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG, CONFIG_EXAMPLES_NSH_DISABLE_KILL,
+  CONFIG_EXAMPLES_NSH_DISABLE_LOSETUP,  CONFIG_EXAMPLES_NSH_DISABLE_LS,       CONFIG_EXAMPLES_NSH_DISABLE_MB,
+  CONFIG_EXAMPLES_NSH_DISABLE_MKDIR,    CONFIG_EXAMPLES_NSH_DISABLE_MKFATFS,  CONFIG_EXAMPLES_NSH_DISABLE_MKFIFO,
+  CONFIG_EXAMPLES_NSH_DISABLE_MKRD,     CONFIG_EXAMPLES_NSH_DISABLE_MH,       CONFIG_EXAMPLES_NSH_DISABLE_MOUNT,
+  CONFIG_EXAMPLES_NSH_DISABLE_MW,       CONFIG_EXAMPLES_NSH_DISABLE_PS,       CONFIG_EXAMPLES_NSH_DISABLE_PING,
+  CONFIG_EXAMPLES_NSH_DISABLE_PUT,      CONFIG_EXAMPLES_NSH_DISABLE_PWD,      CONFIG_EXAMPLES_NSH_DISABLE_RM,
+  CONFIG_EXAMPLES_NSH_DISABLE_RMDIR,    CONFIG_EXAMPLES_NSH_DISABLE_SET,      CONFIG_EXAMPLES_NSH_DISABLE_SH,
+  CONFIG_EXAMPLES_NSH_DISABLE_SLEEP,    CONFIG_EXAMPLES_NSH_DISABLE_TEST,     CONFIG_EXAMPLES_NSH_DISABLE_UMOUNT,
   CONFIG_EXAMPLES_NSH_DISABLE_UNSET,    CONFIG_EXAMPLES_NSH_DISABLE_USLEEP,   CONFIG_EXAMPLES_NSH_DISABLE_WGET,
   CONFIG_EXAMPLES_NSH_DISABLE_XD
 
