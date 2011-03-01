@@ -1485,3 +1485,17 @@
 
 	* NSH: 'mem' command renamed to 'free'.  Output is now more similar to the
 	  Linux 'free' command.
+	* NSH: Correct a redirection bug in NSH.  The following would not work; it
+	  resulted in a hang after the 'cat /dev/fifo':
+
+	    nsh> mkfile /dev/fifo
+	    nsh> cd /tmp             # /tmp is a mounted RAM disk
+	    nsh> cat /dev/fifo > test.txt &
+	    nsh> echo "This is a test" > /dev/fifo
+
+	  The error was caused because (1) there was a path that resulted in stdout
+	  being closed (the "hang") and also (2) the 'cat' command was always outputting
+	  to stdout, not to the redirected file descriptor.  Now:
+
+	    nsh> cat test.txt
+	    This is a test

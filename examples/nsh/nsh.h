@@ -177,6 +177,7 @@
 
 #define nsh_clone(v)           (v)->clone(v)
 #define nsh_release(v)         (v)->release(v)
+#define nsh_write(v,b,n)       (v)->write(v,b,n)
 #define nsh_linebuffer(v)      (v)->linebuffer(v)
 #define nsh_redirect(v,f,s)    (v)->redirect(v,f,s)
 #define nsh_undirect(v,s)      (v)->undirect(v,s)
@@ -255,6 +256,7 @@ struct nsh_vtbl_s
   void (*addref)(FAR struct nsh_vtbl_s *vtbl);
   void (*release)(FAR struct nsh_vtbl_s *vtbl);
 #endif
+  ssize_t (*write)(FAR struct nsh_vtbl_s *vtbl, FAR const void *buffer, size_t nbytes);
   int (*output)(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
   FAR char *(*linebuffer)(FAR struct nsh_vtbl_s *vtbl);
   void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save);

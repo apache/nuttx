@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_serial.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdarg.h>
+#include <errno.h>
+#include <debug.h>
 
 #include "nsh.h"
 
@@ -78,6 +80,7 @@ struct serialsave_s
 static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl);
 #endif
+static ssize_t nsh_consolewrite(FAR struct nsh_vtbl_s *vtbl, FAR const void *buffer, size_t nbytes);
 static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl);
 static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save);
@@ -109,6 +112,7 @@ static inline FAR struct serial_s *nsh_allocstruct(void)
       pstate->ss_vtbl.clone      = nsh_consoleclone;
       pstate->ss_vtbl.release    = nsh_consolerelease;
 #endif
+      pstate->ss_vtbl.write      = nsh_consolewrite;
       pstate->ss_vtbl.output     = nsh_consoleoutput;
       pstate->ss_vtbl.linebuffer = nsh_consolelinebuffer;
       pstate->ss_vtbl.redirect   = nsh_consoleredirect;
@@ -168,6 +172,41 @@ static void nsh_closeifnotclosed(struct serial_s *pstate)
       pstate->ss_fd     = -1;
       pstate->ss_stream = NULL;
     }
+}
+
+/****************************************************************************
+ * Name: nsh_consolewrite
+ *
+ * Description:
+ *   write a buffer to the remote shell window.
+ *
+ *   Currently only used by cat.
+ *
+ ****************************************************************************/
+
+static ssize_t nsh_consolewrite(FAR struct nsh_vtbl_s *vtbl, FAR const void *buffer, size_t nbytes)
+{
+  FAR struct serial_s *pstate = (FAR struct serial_s *)vtbl;
+  ssize_t ret;
+
+  /* The stream is open in a lazy fashion.  This is done because the file
+   * descriptor may be opened on a different task than the stream.  The
+   * actual open will then occur with the first output from the new task.
+   */
+
+  if (nsh_openifnotopen(pstate) != 0)
+   {
+     return (ssize_t)ERROR;
+   }
+
+  /* Write the data to the output stream */
+
+  ret = fwrite(buffer, 1, nbytes, pstate->ss_stream);
+  if (ret < 0)
+    {
+      dbg("[%d] Failed to send buffer: %d\n", pstate->ss_fd, errno);
+    }
+  return ret;
 }
 
 /****************************************************************************
@@ -265,7 +304,29 @@ static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl)
  * Name: nsh_consoleredirect
  *
  * Description:
- *   Set up for redirected output
+ *   Set up for redirected output.  This function is called from nsh_parse()
+ *   in two different contexts:
+ *
+ *   1) Redirected background commands of the form:  command > xyz.text &
+ *
+ *      In this case:
+ *      - vtbl: A newly allocated and initialized instance created by
+ *        nsh_consoleclone,
+ *      - fd:- The file descriptor of the redirected output
+ *      - save: NULL
+ *
+ *      nsh_consolerelease() will perform the clean-up when the clone is
+ *      destroyed.
+ *        
+ *   2) Redirected foreground commands of the form:  command > xyz.txt
+ *
+ *      In this case:
+ *      - vtbl: The current state structure,
+ *      - fd: The file descriptor of the redirected output
+ *      - save: Where to save the re-directed registers.
+ *
+ *      nsh_consoleundirect() will perform the clean-up after the redirected
+ *      command completes.
  *
  ****************************************************************************/
 
@@ -274,17 +335,38 @@ static void nsh_consoleredirect(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t
   FAR struct serial_s     *pstate = (FAR struct serial_s *)vtbl;
   FAR struct serialsave_s *ssave  = (FAR struct serialsave_s *)save;
 
-  (void)nsh_openifnotopen(pstate);
-  fflush(pstate->ss_stream);
+  /* Case 1: Redirected foreground commands */
+
   if (ssave)
     {
+      /* pstate->ss_stream and ss_fd refer refer to the
+       * currently opened output stream.  If the console is open, flush
+       * any pending output.
+       */
+
+      if (pstate->ss_stream)
+        {
+          fflush(pstate->ss_stream);          
+        }
+
+      /* Save the current fd and stream values.  These will be restored
+       * when nsh_consoleundirect() is called.
+       */
+
       ssave->ss_fd     = pstate->ss_fd;
       ssave->ss_stream = pstate->ss_stream;
     }
   else
     {
-      fclose(pstate->ss_stream);
+      /* nsh_consoleclone() set pstate->ss_fd and ss_stream to refer
+       * to standard out.  We just want to leave these alone and overwrite
+       * them with the fd for the re-directed stream.
+       */
     }
+
+  /* In either case, set the fd of the new, re-directed output and nullify
+   * the output stream (it will be fdopen'ed if it is used).
+   */
 
   pstate->ss_fd     = fd;
   pstate->ss_stream = NULL;

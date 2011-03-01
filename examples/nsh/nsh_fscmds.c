@@ -457,7 +457,7 @@ int cmd_cat(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 
                       while (nbyteswritten < nbytesread)
                         {
-                          int n = write(1, buffer, nbytesread);
+                          ssize_t n = nsh_write(vtbl, buffer, nbytesread);
                           if (n < 0)
                             {
                               /* EINTR is not an error (but will stop stop the cat) */

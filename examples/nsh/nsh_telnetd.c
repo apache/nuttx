@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_telnetd.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -147,6 +147,7 @@ static void tio_semtake(struct telnetio_s *tio);
 static FAR struct nsh_vtbl_s *nsh_telnetclone(FAR struct nsh_vtbl_s *vtbl);
 #endif
 static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl);
+static ssize_t nsh_telnetwrite(FAR struct nsh_vtbl_s *vtbl, FAR const void *buffer, size_t nbytes);
 static int nsh_telnetoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static int nsh_redirectoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
 static FAR char *nsh_telnetlinebuffer(FAR struct nsh_vtbl_s *vtbl);
@@ -195,6 +196,7 @@ static FAR struct telnetd_s *nsh_allocstruct(void)
       pstate->tn_vtbl.clone      = nsh_telnetclone;
       pstate->tn_vtbl.release    = nsh_telnetrelease;
 #endif
+      pstate->tn_vtbl.write      = nsh_telnetwrite;
       pstate->tn_vtbl.output     = nsh_telnetoutput;
       pstate->tn_vtbl.linebuffer = nsh_telnetlinebuffer;
       pstate->tn_vtbl.redirect   = nsh_telnetredirect;
@@ -538,6 +540,41 @@ static void *nsh_connection(void *arg)
 }
 
 /****************************************************************************
+ * Name: nsh_telnetwrite
+ *
+ * Description:
+ *   write a buffer to the remote shell window.
+ *
+ *   Currently only used by cat.
+ *
+ ****************************************************************************/
+
+static ssize_t nsh_telnetwrite(FAR struct nsh_vtbl_s *vtbl, FAR const void *buffer, size_t nbytes)
+{
+  struct telnetd_s  *pstate = (struct telnetd_s *)vtbl;
+  struct telnetio_s *tio    = pstate->u.tn;
+  ssize_t            ret    = nbytes;
+
+  /* Flush anything already in the output buffer */
+
+  nsh_flush(pstate);
+
+  /* Then write the user buffer */
+
+  nsh_telnetdump(&pstate->tn_vtbl, "Buffer output",(uint8_t*)buffer, nbytes);
+
+  tio_semtake(tio); /* Only one call to send at a time */
+  ret = send(tio->tio_sockfd, buffer, nbytes, 0);
+  if (ret < 0)
+    {
+      dbg("[%d] Failed to send buffer: %d\n", tio->tio_sockfd, errno);
+    }
+
+  tio_semgive(tio);
+  return ret;
+}
+
+/****************************************************************************
  * Name: nsh_telnetoutput
  *
  * Description:
@@ -704,7 +741,29 @@ static void nsh_telnetrelease(FAR struct nsh_vtbl_s *vtbl)
  * Name: nsh_telnetredirect
  *
  * Description:
- *   Set up for redirected output
+ *   Set up for redirected output.  This function is called from nsh_parse()
+ *   in two different contexts:
+ *
+ *   1) Redirected background commands of the form:  command > xyz.text &
+ *
+ *      In this case:
+ *      - vtbl: A newly allocated and initialized instance created by
+ *        nsh_telnetclone,
+ *      - fd:- The file descriptor of the redirected output
+ *      - save: NULL
+ *
+ *      nsh_telnetrelease() will perform the clean-up when the clone is
+ *      destroyed.
+ *        
+ *   2) Redirected foreground commands of the form:  command > xyz.txt
+ *
+ *      In this case:
+ *      - vtbl: The current state structure,
+ *      - fd: The file descriptor of the redirected output
+ *      - save: Where to save the re-directed registers.
+ *
+ *      nsh_telnetundirect() will perform the clean-up after the redirected
+ *      command completes.
  *
  ****************************************************************************/
 
