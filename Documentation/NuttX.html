@@ -2085,6 +2085,9 @@ buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+    * arch/arm/stm32/stm32_idle.c -- During idle times, the STM32 now uses the
+      WFI instruction to sleep in a reduced power mode until the next interrupt
+      occurs (Contributed by Uros Platise).      
     * NSH: 'mem' command renamed to 'free'.  Output is now more similar to the
       Linux 'free' command.
     * NSH: Correct a redirection bug in NSH.  The following would not work; it
@@ -2102,9 +2105,16 @@ nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
         nsh> cat test.txt
         This is a test
 
-    * drvers/pipes/pipe_common.c:  Driver open method eas not returning an EINTR
+    * drivers/pipes/pipe_common.c --  Driver open method eas not returning an EINTR
       error when it received a signal.  Instead, it just re-started the wait.  This
       makes it impossible to kill a background pipe operation from NSH.
+    * include/stdint.h -- Correct some errors in conditional compilation (submitted
+      by Johannes Hampel).
+    * arch/arm/lpc17xx/lp17_idle.c -- Uses the same logic as the STM32: uses the
+      WFI instruction to sleep in a reduced power mode until the next interrupt
+      occurs.
+    * configs/olimex-lpc1766stk -- Added an LED encoded to indicate if the LPC1766
+      is in sleeping.      
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
