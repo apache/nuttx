@@ -360,7 +360,7 @@ const char g_fmtcmdfailed[]      = "nsh: %s: %s failed: %d\n";
 const char g_fmtcmdoutofmemory[] = "nsh: %s: out of memory\n";
 const char g_fmtinternalerror[]  = "nsh: %s: Internal error\n";
 #ifndef CONFIG_DISABLE_SIGNALS
-const char g_fmtsignalrecvd[]    = "nsh: %s: Signal received\n";
+const char g_fmtsignalrecvd[]    = "nsh: %s: Interrupted by signal\n";
 #endif
 
 /****************************************************************************

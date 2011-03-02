@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs_open.c
  *
- *   Copyright (C) 2007, 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,10 @@ int inode_checkflags(FAR struct inode *inode, int oflags)
       return OK;
     }
 }
+
+/****************************************************************************
+ * Name: open
+ ****************************************************************************/
 
 int open(const char *path, int oflags, ...)
 {
@@ -181,7 +185,7 @@ int open(const char *path, int oflags, ...)
  errout_with_inode:
   inode_release(inode);
  errout:
-  *get_errno_ptr() = ret;
+  errno = ret;
   return ERROR;
 }
 

@@ -1499,3 +1499,8 @@
 
 	    nsh> cat test.txt
 	    This is a test
+
+	* drvers/pipes/pipe_common.c:  Driver open method eas not returning an EINTR
+	  error when it received a signal.  Instead, it just re-started the wait.  This
+	  makes it impossible to kill a background pipe operation from NSH.
+

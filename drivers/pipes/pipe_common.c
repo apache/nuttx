@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipes/pipe_common.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -184,6 +184,7 @@ int pipecommon_open(FAR struct file *filep)
   struct inode      *inode = filep->f_inode;
   struct pipe_dev_s *dev   = inode->i_private;
   int                sval;
+  int                ret;
  
   /* Some sanity checking */
 #if CONFIG_DEBUG
@@ -192,66 +193,87 @@ int pipecommon_open(FAR struct file *filep)
        return -EBADF;
     }
 #endif
-  /* Make sure that we have exclusive access to the device structure */
+  /* Make sure that we have exclusive access to the device structure.  The
+   * sem_wait() call should fail only if we are awakened by a signal.
+   */
 
-  if (sem_wait(&dev->d_bfsem) == 0)
+  ret = sem_wait(&dev->d_bfsem);
+  if (ret != OK)
     {
-      /* If this the first reference on the device, then allocate the buffer */
+      fdbg("sem_wait failed: %d\n", errno);
+      DEBUGASSERT(errno > 0);
+      return -errno;
+    }
 
-      if (dev->d_refs == 0)
+  /* If this the first reference on the device, then allocate the buffer */
+
+  if (dev->d_refs == 0)
+    {
+      dev->d_buffer = (uint8_t*)malloc(CONFIG_DEV_PIPE_SIZE);
+      if (!dev->d_buffer)
         {
-          dev->d_buffer = (uint8_t*)malloc(CONFIG_DEV_PIPE_SIZE);
-          if (!dev->d_buffer)
+          (void)sem_post(&dev->d_bfsem);
+          return -ENOMEM;
+        }
+    }
+
+  /* Increment the reference count on the pipe instance */
+
+  dev->d_refs++;
+
+  /* If opened for writing, increment the count of writers on on the pipe instance */
+
+  if ((filep->f_oflags & O_WROK) != 0)
+    {
+      dev->d_nwriters++;
+
+      /* If this this is the first writer, then the read semaphore indicates the
+       * number of readers waiting for the first writer.  Wake them all up.
+       */
+
+      if (dev->d_nwriters == 1)
+        {
+          while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
             {
-              (void)sem_post(&dev->d_bfsem);
-              return -ENOMEM;
+              sem_post(&dev->d_rdsem);
             }
         }
+    }
 
-      /* Increment the reference count on the pipe instance */
+  /* If opened for read-only, then wait for at least one writer on the pipe */
 
-      dev->d_refs++;
+  sched_lock();
+  (void)sem_post(&dev->d_bfsem);
+  if ((filep->f_oflags & O_RDWR) == O_RDONLY && dev->d_nwriters < 1)
+    {
+      /* NOTE: d_rdsem is normally used when the read logic waits for more
+       * data to be written.  But until the first writer has opened the
+       * pipe, the meaning is different: it is used prevent O_RDONLY open
+       * calls from returning until there is at least one writer on the pipe.
+       * This is required both by spec and also because it prevents
+       * subsequent read() calls from returning end-of-file because there is
+       * no writer on the pipe.
+       */
 
-      /* If opened for writing, increment the count of writers on on the pipe instance */
-
-      if ((filep->f_oflags & O_WROK) != 0)
+      ret = sem_wait(&dev->d_rdsem);
+      if (ret != OK)
         {
-          dev->d_nwriters++;
-
-          /* If this this is the first writer, then the read semaphore indicates the
-           * number of readers waiting for the first writer.  Wake them all up.
+          /* The sem_wait() call should fail only if we are awakened by
+           * a signal.
            */
 
-          if (dev->d_nwriters == 1)
-            {
-              while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
-                {
-                  sem_post(&dev->d_rdsem);
-                }
-            }
+          fdbg("sem_wait failed: %d\n", errno);
+          DEBUGASSERT(errno > 0);
+          ret = -errno;
+
+          /* Immediately close the pipe that we just opened */
+
+          (void)pipecommon_close(filep);
         }
+    }
 
-      /* If opened for read-only, then wait for at least one writer on the pipe */
-
-      sched_lock();
-      (void)sem_post(&dev->d_bfsem);
-      if ((filep->f_oflags & O_RDWR) == O_RDONLY && dev->d_nwriters < 1)
-        {
-          /* NOTE: d_rdsem is normally used when the read logic waits for more
-           * data to be written.  But until the first writer has opened the
-           * pipe, the meaning is different: it is used prevent O_RDONLY open
-           * calls from returning until there is at least one writer on the pipe.
-           * This is required both by spec and also because it prevents
-           * subsequent read() calls from returning end-of-file because there is
-           * no writer on the pipe.
-           */
-
-          pipecommon_semtake(&dev->d_rdsem);
-        }
-      sched_unlock();
-      return OK;
-  }
-  return ERROR;
+  sched_unlock();
+  return ret;
 }
 
 /****************************************************************************
