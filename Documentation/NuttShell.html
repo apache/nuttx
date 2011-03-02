@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: February 28, 2011</p>
+      <p>Last Updated: March 1, 2011</p>
     </td>
   </tr>
 </table>
@@ -1006,8 +1006,33 @@ kill -&lt;signal&gt; &lt;pid&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  Send the <signal> to the task identified by <pid>.
+  Send the &lt;signal&gt; to the task identified by &lt;pid&gt;.
 </p>
+<ul><pre>
+nsh&gt; mkfifo /dev/fifo
+nsh&gt; cat /dev/fifo &
+cat [2:128]
+nsh&gt; ps
+PID   PRI SCHD TYPE   NP STATE    NAME
+    0   0 FIFO TASK      READY    Idle Task()
+    1 128 FIFO TASK      RUNNING  init()
+    2 128 FIFO PTHREAD   WAITSEM  <pthread>(51ea50)
+nsh&gt; kill -9 2
+nsh: cat: open failed: 4
+nsh&gt; ps
+PID   PRI SCHD TYPE   NP STATE    NAME
+    0   0 FIFO TASK      READY    Idle Task()
+    1 128 FIFO TASK      RUNNING  init()
+nsh&gt;
+</pre></ul>
+<p><small>
+  <b>NOTE</b>:
+  NuttX does not support a FULL POSIX signalling system.
+  Standard signals like SIGCHLD, SIGINTR, SIGKILL, etc. do not exist in NuttX and sending those signal may not have the result that you expect.
+  Rather, NuttX supports only what are referred to as POSIX real-time signals.
+  These signals may be used to communicate with running tasks, may be use to waiting waiting tasks, etc.
+  But, as an example, <code>kill -9</code> (SIGKILL) will not terminate a task.
+</p></small>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
