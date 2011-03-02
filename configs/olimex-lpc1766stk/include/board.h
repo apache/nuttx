@@ -136,11 +136,12 @@
 #define LED_HEAPALLOCATE           0  /*  OFF  OFF = Still initializing */
 #define LED_IRQSENABLED            0  /*  OFF  OFF = Still initializing */
 #define LED_STACKCREATED           1  /*  ON   OFF = Initialization complete */
-#define LED_INIRQ                  2  /*  NC   ON  = In an interrupt handler */
-#define LED_SIGNAL                 2  /*  NC   ON  = In a signal handler */
-#define LED_ASSERTION              2  /*  NC   ON  = In an assertion */
-#define LED_PANIC                  2  /*  NC   ON  = Oops! We crashed. (flashing) */
-
+#define LED_INIRQ                  2  /*  N/C  ON  = In an interrupt handler */
+#define LED_SIGNAL                 2  /*  N/C  ON  = In a signal handler (glowing) */
+#define LED_ASSERTION              2  /*  N/C  ON  = In an assertion */
+#define LED_PANIC                  2  /*  N/C  ON  = Oops! We crashed. (flashing) */
+#define LED_IDLE                   3  /*  OFF  N/C = LPC17 in sleep mode (LED1 glowing) */
+ 
 /* Alternate pin selections *********************************************************/
 
 /* CAN1 GPIO                        PIN  SIGNAL NAME

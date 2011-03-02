@@ -329,6 +329,9 @@ LEDs
     if you see this at all, it probably means that the system is hanging up
     somewhere in the initialization phases.
   - ON means that the OS completed initialization.
+  - Glowing means that the LPC17 is running in a reduced power mode: LED1 is
+    turned off when the processor enters sleep mode and back on when it wakesup
+    up.
 
   LED2:
   - ON/OFF toggles means that various events are happening.
@@ -341,25 +344,32 @@ LEDs
   NOTE:  LED2 is controlled by a jumper labeled: ACC_IRQ/LED2.  That jump must be
   in the LED2 position in order to support LED2.
 
-  LED1  LED2      Meaning
-  ----- --------  --------------------------------------------------------------------
-   OFF   OFF      Still initializing and there is no interrupt activity. 
-                  Initialization is very fast so if you see this, it probably means
-                  that the system is hung up somewhere in the initialization phases.
-   OFF   Glowing  Still initializing (see above) but taking interrupts.
-   OFF   ON       This would mean that (1) initialization did not complete but the
-                  software is hung, perhaps in an infinite loop, somewhere inside
-                  of an interrupt handler.
-   OFF   Flashing Ooops!  We crashed before finishing initialization.
+  LED1    LED2      Meaning
+  ------- --------  --------------------------------------------------------------------
+   OFF    OFF      Still initializing and there is no interrupt activity. 
+                    Initialization is very fast so if you see this, it probably means
+                    that the system is hung up somewhere in the initialization phases.
+   OFF     Glowing  Still initializing (see above) but taking interrupts.
+   OFF     ON       This would mean that (1) initialization did not complete but the
+                    software is hung, perhaps in an infinite loop, somewhere inside
+                    of an interrupt handler.
+   OFF     Flashing Ooops!  We crashed before finishing initialization (or, perhaps
+                    after initialization, during an interrupt while the LPC17xx was
+                    sleeping -- see below).
  
-   ON    OFF      The system has completed initialization, but is apparently not taking
-                  any interrupts.
-   ON    Glowing  This is the normal healthy state: The OS successfully initialized
-                  and is taking interrupts.
-   ON    ON       This would mean that (1) the OS complete initialization, but (2)
-                  the software is hung, perhaps in an infinite loop, somewhere inside
-                  of a signal or interrupt handler.
-   ON    Flashing Ooops!  We crashed sometime after initialization.
+   ON      OFF      The system has completed initialization, but is apparently not taking
+                    any interrupts.
+   ON      Glowing  The OS successfully initialized and is taking interrupts (but, for
+                    some reason, is never entering a reduced power mode -- perhaps the
+                    CPU is very busy?).
+   ON      ON       This would mean that (1) the OS complete initialization, but (2)
+                    the software is hung, perhaps in an infinite loop, somewhere inside
+                    of a signal or interrupt handler.
+   Glowing Glowing  This is also a normal healthy state: The OS successfully initialized,
+                    is running in reduced power mode, but taking interrupts.  The glow
+                    is very faint and you may have to dim the lights to see that LEDs are
+                    active at all!
+   ON      Flashing Ooops!  We crashed sometime after initialization.
 
 Using OpenOCD and GDB with an FT2232 JTAG emulator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

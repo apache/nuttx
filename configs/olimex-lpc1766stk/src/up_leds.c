@@ -2,7 +2,7 @@
  * configs/olimex-lpc1766stk/src/up_leds.c
  * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,6 +92,8 @@
  * Private Data
  ****************************************************************************/
 
+static bool g_uninitialized = true;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -132,10 +134,15 @@ void up_ledon(int led)
        case 1 : /* STACKCREATED */
         lpc17_gpiowrite(LPC1766STK_LED1, false);
         lpc17_gpiowrite(LPC1766STK_LED2, true);
+        g_uninitialized = false;
         break;
 
        case 2 : /* INIRQ, SIGNAL, ASSERTION, PANIC */
         lpc17_gpiowrite(LPC1766STK_LED2, false);
+        break;
+
+       case 3 : /* IDLE */
+        lpc17_gpiowrite(LPC1766STK_LED1, true);
         break;
     }
 }
@@ -152,8 +159,13 @@ void up_ledoff(int led)
        case 0 : /* STARTED, HEAPALLOCATE, IRQSENABLED */
        case 1 : /* STACKCREATED */
         lpc17_gpiowrite(LPC1766STK_LED1, true);
+
        case 2 : /* INIRQ, SIGNAL, ASSERTION, PANIC */
         lpc17_gpiowrite(LPC1766STK_LED2, true);
+        break;
+
+       case 3 : /* IDLE */
+        lpc17_gpiowrite(LPC1766STK_LED1, g_uninitialized);
         break;
     }
 }

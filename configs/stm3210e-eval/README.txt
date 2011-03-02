@@ -228,6 +228,7 @@ They are encoded as follows:
 	LED_SIGNAL			In a signal handler***  N/C		ON		N/C		OFF
 	LED_ASSERTION		An assertion failed		ON		ON		N/C		OFF
 	LED_PANIC			The system has crashed	N/C		N/C		N/C		ON
+    LED_IDLE            STM32 is is sleep mode  (Optional, not used)
 
   * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
     and these LEDs will give you some indication of where the failure was
