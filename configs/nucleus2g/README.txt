@@ -250,6 +250,7 @@ LEDs
     #define LED_SIGNAL                 5  /*  NC     NC    ON  (momentary) */
     #define LED_ASSERTION              6  /*  NC     NC    ON  (momentary) */
     #define LED_PANIC                  7  /*  NC     NC    ON  (0.5Hz flashing) */
+    #undef  LED_IDLE                      /* Sleep mode indication not supported */
 
   After the system is booted, this logic will no longer use LEDs 1 and 2.  They
   are then available for use the application software using lpc17_led1() and

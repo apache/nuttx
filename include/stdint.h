@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdint.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
 #define INT16_MAX           0x7fff
 #define UINT16_MAX          0xffff
 
-#ifdef __INT64_DEFINED
+#ifdef __INT24_DEFINED
 #  define INT24_MIN         0x800000
 #  define INT24_MAX         0x7fffff
 #  define UINT24_MAX        0xffffff
@@ -86,7 +86,7 @@
 #define INT16_LEASTN_MAX    0x7fff
 #define UINT16_LEASTN_MAX   0xffff
 
-#ifdef __INT64_DEFINED
+#ifdef __INT24_DEFINED
 #  define INT24_LEASTN_MIN  0x800000
 #  define INT24_LEASTN_MAX  0x7fffff
 #  define UINT24_LEASTN_MAX 0xffffff
@@ -112,7 +112,7 @@
 #define INT16_FASTN_MAX     0x7fff
 #define UINT16_FASTN_MAX    0xffff
 
-#ifdef __INT64_DEFINED
+#ifdef __INT24_DEFINED
 #  define INT24_FASTN_MIN   0x800000
 #  define INT24_FASTN_MAX   0x7fffff
 #  define UINT24_FASTN_MAX  0xffffff
