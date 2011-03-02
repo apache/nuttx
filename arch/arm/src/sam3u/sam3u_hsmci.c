@@ -1560,7 +1560,7 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
   /* 'OR' in Open Drain option */
 
 #if 0 /* No MMC support */
-  if ((cmd & MMCSD_OPENDRAN) != 0)
+  if ((cmd & MMCSD_OPENDRAIN) != 0)
     {
       regval |= HSMCI_CMDR_OPDCMD;
     }
