@@ -91,6 +91,15 @@ examples/igmp
   * CONFIG_EXAMPLE_IGMP_GRPADDR
       Multicast group address
 
+examples/mm
+^^^^^^^^^^^
+
+  This is a simplified version of the "built-in" memory manager test of
+  mm/mm_test.c.  It is simplified because it does not have access to the
+  internals of the memory manager as does mm/mm_test.c, but it has the
+  advantage that it runs in the actual NuttX tasking environment (the
+  mm/mm_test.c only runs in a PC simulation environment).
+
 examples/mount
 ^^^^^^^^^^^^^^
 
