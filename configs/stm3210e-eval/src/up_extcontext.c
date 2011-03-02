@@ -2,7 +2,7 @@
  * configs/stm3210e-eval/src/up_extcontext.c
  * arch/arm/src/board/up_extcontext.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <assert.h>
 #include <debug.h>
 
