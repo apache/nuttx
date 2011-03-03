@@ -368,8 +368,35 @@ LEDs
    Glowing Glowing  This is also a normal healthy state: The OS successfully initialized,
                     is running in reduced power mode, but taking interrupts.  The glow
                     is very faint and you may have to dim the lights to see that LEDs are
-                    active at all!
+                    active at all!  See note below.
    ON      Flashing Ooops!  We crashed sometime after initialization.
+
+  NOTE: In glowing/glowing case, you get some good subjective information about the
+  behavior of your system by looking at the level of the LED glow (or better, by
+  connecting O-Scope and calculating the actual duty):
+  
+  1. The intensity of the glow is determined by the duty of LED on/off toggle --
+     as the ON period becomes larger with respect the OFF period, the LED will
+     glow more brightly.
+  2. LED2 is turned ON when entering an interrupt and turned OFF when returning from
+     the interrupt.  A brighter LED2 means that the system is spending more time in
+     interrupt handling.
+  3. LED1 is turned OFF just before the processor goes to sleep.  The processor
+     sleeps until awakened by an interrupt.  LED1 is turned back ON after the
+     processor is re-awakened -- actually after returning from the interrupt that
+     cause the processor to re-awaken (LED1 will be off during the execution of
+     that interrupt).  So a brighter LED1 means that the processor is spending
+     less time sleeping.
+
+  When my STM32 sits IDLE -- doing absolutely nothing but processing timer interrupts --
+  I see the following:
+  
+  1. LED1 glows dimly due to the timer interrupts.
+  2. But LED2 is even more dim!  The LED ON time excludes the time processing the
+     interrupt that re-awakens the processing.  So this tells me that the STM32 is
+     spending more time processing timer interrupts than doing any other kind of
+     processing.  That, of course, makes sense if the system is truly idle and only
+     processing timer interrupts.
 
 Using OpenOCD and GDB with an FT2232 JTAG emulator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

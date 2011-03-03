@@ -81,7 +81,7 @@ mount
   selected as follows:
 
     cd <nuttx-directory>/tools
-    ./Configure.sh sim/mount
+    ./configure.sh sim/mount
 
 nettest
 
@@ -90,7 +90,7 @@ nettest
   be selected via:
 
     cd <nuttx-directory>/tools
-    ./Configure.sh sim/nettest
+    ./configure.sh sim/nettest
 
   NOTES:
   - The NuttX network is not, however, functional on the Linux TAP
@@ -112,14 +112,14 @@ nsh
   may be selected as follows:
 
     cd <nuttx-directory>/tools
-    ./Configure.sh sim/nsh
+    ./configure.sh sim/nsh
 
 nx
   Configures to use examples/nx.  This configuration may be
   selected as follows:
 
     cd <nuttx-directory>/tools
-    ./Configure.sh sim/nx
+    ./configure.sh sim/nx
 
   Special simulated framebuffer configuration options:
 
@@ -155,7 +155,7 @@ ostest
   configuration may be selected as follows:
 
     cd <nuttx-directory>/tools
-    ./Configure.sh sim/ostest
+    ./configure.sh sim/ostest
 
 pashello
 
@@ -163,4 +163,4 @@ pashello
   by selected as follows:
 
     cd <nuttx-directory>/tools
-    ./Configure.sh sim/pashello
+    ./configure.sh sim/pashello
