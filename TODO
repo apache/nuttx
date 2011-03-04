@@ -10,7 +10,7 @@ NuttX TODO List (Last updated March 4, 2011)
   (5)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
-  (1)  USB (drivers/usbdev)
+  (2)  USB (drivers/usbdev, drivers/usbhost)
   (5)  Libraries (lib/)
  (12)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
@@ -29,7 +29,7 @@ NuttX TODO List (Last updated March 4, 2011)
   (2)  ARM/LPC313x (arch/arm/src/lpc313x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
-  (5)  ARM/STM32 (arch/arm/src/stm32/)
+  (4)  ARM/STM32 (arch/arm/src/stm32/)
   (4)  8051 / MCS51 (arch/8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -324,13 +324,18 @@ o Network Utilities (netutils/)
   Status:      Open.  An annoyance, but not a real problem.
   Priority:    Low
 
-o USB (drivers/usbdev)
+o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^
 
   Description: There is a workaround for a bug in drivers/usbdev/usbdev_storage.c.
                that involves delays.  This needs to be redesigned to eliminate these delays.
   Status:      Open
   Priority:    Medium
+
+  Description: drivers/usbhost/usbhost_rtl8187.c is a work in progress.  There is no RTL8187
+               driver available yet.  That is a work in progress.
+  Status:      Open
+  Priority:    Low (Unless you need RTL8187 support).
 
 o Libraries (lib/)
   ^^^^^^^^^^^^^^^^
@@ -775,6 +780,10 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Desription:  I am unable to initialize a 2Gb SanDisk microSD card (in adaptor) on the
                the mcu123 board.  The card fails to accept CMD0.  Doesn't seem like a software
                issue, but if anyone else sees the problem, I'd like to know.
+               Related:  Fixes were recently made for the SDIO-based MMC/SD driver to
+               support 2Gb cards -- the blocksize was forced to 512 in all cases.  The SPI-
+               based driver may also have this problem (but I don't think this would have
+               andything to do with CMD0).
   Status:      Open
   Priority:    Uncertain
 
@@ -891,16 +900,6 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Status:      Open
   Priority:    Low until someone needs DMA1, Channel 5 (ADC3, UART4_TX, TIM5_CH1, or
                TIM8_CH2).
-
-  Desription:  I am unable to access a 2Gb SanDisk microSD card (in adaptor) on the
-               the STM3210E-EVAL board.  The card reports that it is a SDV1.x card
-               with a 1Kb block size, but the CMD16 to set the block length to
-               1024 fails.
-               Update: Part of the fix appears to be to ignore the reported block
-               size and to force the block size to 512.
-  Status:      Open
-  Priority:    Uncertain.  I don't this is a bug, I think I just don't understand
-               how to work with this type of SD card.
 
 o 8051 / MCS51 (arch/8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^

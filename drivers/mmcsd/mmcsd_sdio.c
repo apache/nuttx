@@ -626,23 +626,26 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
        */
 
       uint16_t csize                 = ((csd[1] & 0x03ff) << 2) | ((csd[2] >> 30) & 3);
-      uint8_t  csizemult               = (csd[2] >> 15) & 7;
+      uint8_t  csizemult             = (csd[2] >> 15) & 7;
 
       priv->nblocks                  = ((uint32_t)csize + 1) * (1 << (csizemult + 2));
-      priv->capacity                 = (priv->nblocks << readbllen);
-
-      /* Force the block size to 512 bytes in any event.  Some devices, such
-       * as 2Gb report blocksizes larger than 512 bytes but still expect to be
-       * accessed with a 512 byte blocksize.
-       */
-
-#if 0
       priv->blockshift               = readbllen;
       priv->blocksize                = (1 << readbllen);
-#else
-      priv->blockshift               = 9;
-      priv->blocksize                = (1 << 9);
-#endif
+      priv->capacity                 = (priv->nblocks << readbllen);
+
+      /* Some devices, such as 2Gb devices, report blocksizes larger than 512 bytes
+       * but still expect to be accessed with a 512 byte blocksize.
+       *
+       * NOTE: A minor optimization would be to eliminated priv->blocksize and
+       * priv->blockshift:  Those values will be 512 and 9 in all cases anyway.
+       */
+
+      if (priv->blocksize > 512)
+        {
+          priv->nblocks            <<= (priv->blockshift - 9);
+          priv->blocksize            = 512;
+          priv->blockshift           = 9;
+        }
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
       if (IS_SD(priv->type))
