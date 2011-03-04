@@ -169,7 +169,7 @@
 #  define MMCSD_R6_STATE_RCV        ((uint32_t)6 << MMCSD_R6_STATE_SHIFT) /* 6=Receiving data state */
 #  define MMCSD_R6_STATE_PRG        ((uint32_t)7 << MMCSD_R6_STATE_SHIFT) /* 7=Programming state */
 #  define MMCSD_R6_STATE_DIS        ((uint32_t) << MMCSD_R6_STATE_SHIFT) /* 8=Disconnect state */
-#define MMCSD_R6_ERRORMASK          ((uint32_t)0x0000e00)  /* Error mask */
+#define MMCSD_R6_ERRORMASK          ((uint32_t)0x0000e000)  /* Error mask */
 
 /* SD Configuration Register (SCR) encoding */
 

@@ -1518,4 +1518,5 @@
 	  the internals of the memory manager as does mm/mm_test.c, but it has the
 	  advantage that it runs in the actual NuttX tasking environment (the
 	  mm/mm_test.c only runs in a PC simulation environment).
+	* drivers/mmcsd_sdio.c/h -- Several corrections submitted by Uros Platise.
 

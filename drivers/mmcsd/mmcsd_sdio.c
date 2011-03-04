@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_sdio.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -596,7 +596,9 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
 
   if (IS_BLOCK(priv->type))
     {
-      /* C_SIZE: 69:64 from Word 2 and 63:48 from Word 3
+      /* Block addressed SD:
+       *
+       * C_SIZE: 69:64 from Word 2 and 63:48 from Word 3
        *
        *   512      = (1 << 9)
        *   1024     = (1 << 10)
@@ -618,15 +620,29 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
     }
   else
     {
-      /* C_SIZE: 73:64 from Word 2 and 63:62 from Word 3 */
+      /* Byte addressed SD:
+       *
+       * C_SIZE: 73:64 from Word 2 and 63:62 from Word 3
+       */
 
       uint16_t csize                 = ((csd[1] & 0x03ff) << 2) | ((csd[2] >> 30) & 3);
       uint8_t  csizemult               = (csd[2] >> 15) & 7;
 
       priv->nblocks                  = ((uint32_t)csize + 1) * (1 << (csizemult + 2));
+      priv->capacity                 = (priv->nblocks << readbllen);
+
+      /* Force the block size to 512 bytes in any event.  Some devices, such
+       * as 2Gb report blocksizes larger than 512 bytes but still expect to be
+       * accessed with a 512 byte blocksize.
+       */
+
+#if 0
       priv->blockshift               = readbllen;
       priv->blocksize                = (1 << readbllen);
-      priv->capacity                 = (priv->nblocks << readbllen);
+#else
+      priv->blockshift               = 9;
+      priv->blocksize                = (1 << 9);
+#endif
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
       if (IS_SD(priv->type))

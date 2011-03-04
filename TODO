@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated February 28, 2011)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated March 4, 2011)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
@@ -896,6 +896,8 @@ o ARM/STM32 (arch/arm/src/stm32/)
                the STM3210E-EVAL board.  The card reports that it is a SDV1.x card
                with a 1Kb block size, but the CMD16 to set the block length to
                1024 fails.
+               Update: Part of the fix appears to be to ignore the reported block
+               size and to force the block size to 512.
   Status:      Open
   Priority:    Uncertain.  I don't this is a bug, I think I just don't understand
                how to work with this type of SD card.
