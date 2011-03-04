@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ * arch/x86/include/types.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,33 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
+/* This file should never be included directed but, rather, only indirectly
+ * through sys/types.h
+ */
+
+#ifndef __ARCH_X86_INCLUDE_TYPES_H
+#define __ARCH_X86_INCLUDE_TYPES_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+/* Include architecture-specific limits */
+
+#ifdef CONFIG_ARCH_I486
+# include <arch/i486/types.h>
+#endif
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Global Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+#endif /* __ARCH_X86_INCLUDE_TYPES_H */

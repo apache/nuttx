@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ * arch/x86/src/common/up_arch.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,58 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
+#ifndef ___ARCH_X86_SRC_COMMON_UP_ARCH_H
+#define ___ARCH_X86_SRC_COMMON_UP_ARCH_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+#include <nuttx/config.h>
+#ifndef __ASSEMBLY__
+# include <stdint.h>
+#endif
+#include <arch/io.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Inline Functions
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+# define getreg8(p)           inb(p)
+# define putreg8(v,p)         outb(v,p)
+# define getreg16(p)          inw(p)
+# define putreg16(v,p)        outw(v,p)
+# define getreg32(p)          inl(p)
+# define putreg32(v,p)        outl(v,p)
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/* Atomic modification of registers */
+
+EXTERN void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
+EXTERN void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
+EXTERN void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif  /* ___ARCH_X86_SRC_COMMON_UP_ARCH_H */

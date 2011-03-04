@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/common/up_createstack.c
+ *  arch/x86/src/common/up_udelay.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,19 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <sched.h>
-#include <debug.h>
-
-#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
+#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
 
 /****************************************************************************
  * Private Types
@@ -61,78 +58,72 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_create_stack
- *
- * Description:
- *   Allocate a stack for a new thread and setup
- *   up stack-related information in the TCB.
- *
- *   The following TCB fields must be initialized:
- *   adj_stack_size: Stack size after adjustment for hardware,
- *     processor, etc.  This value is retained only for debug
- *     purposes.
- *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
- *     initial value of the stack pointer.
- *
- * Inputs:
- *   tcb: The TCB of new task
- *   stack_size:  The requested stack size.  At least this much
- *     must be allocated.
+ * Private Functions
  ****************************************************************************/
 
-int up_create_stack(_TCB *tcb, size_t stack_size)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_udelay
+ *
+ * Description:
+ *   Delay inline for the requested number of microseconds.  NOTE:  Because
+ *   of all of the setup, several microseconds will be lost before the actual
+ *   timing looop begins.  Thus, the delay will always be a few microseconds
+ *   longer than requested.
+ *
+ *   *** NOT multi-tasking friendly ***
+ *
+ * ASSUMPTIONS:
+ *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *
+ ****************************************************************************/
+
+void up_udelay(useconds_t microseconds)
 {
-  if (tcb->stack_alloc_ptr &&
-      tcb->adj_stack_size != stack_size)
+  volatile int i;
+
+  /* We'll do this a little at a time because we expect that the
+   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
+   * the divisions of its calculation.  We'll use the largest values that
+   * we can in order to prevent significant error buildup in the loops.
+   */
+
+  while (microseconds > 1000)
     {
-      sched_free(tcb->stack_alloc_ptr);
-      tcb->stack_alloc_ptr = NULL;
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
+        {
+        }
+      microseconds -= 1000;
     }
 
-   if (!tcb->stack_alloc_ptr)
-     {
-#ifdef CONFIG_DEBUG
-       tcb->stack_alloc_ptr = (uint32_t*)zalloc(stack_size);
-#else
-       tcb->stack_alloc_ptr = (uint32_t*)malloc(stack_size);
-#endif
-     }
+  while (microseconds > 100)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
+        {
+        }
+      microseconds -= 100;
+    }
 
-   if (tcb->stack_alloc_ptr)
-     {
-       size_t top_of_stack;
-       size_t size_of_stack;
+  while (microseconds > 10)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
+        {
+        }
+      microseconds -= 10;
+    }
 
-       /* The ARM uses a push-down stack:  the stack grows
-        * toward loweraddresses in memory.  The stack pointer
-        * register, points to the lowest, valid work address
-        * (the "top" of the stack).  Items on the stack are
-        * referenced as positive word offsets from sp.
-        */
-
-       top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
-
-       /* The ARM stack must be aligned at word (4 byte)
-        * boundaries. If necessary top_of_stack must be rounded
-        * down to the next boundary
-        */
-
-       top_of_stack &= ~3;
-       size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
-
-       /* Save the adjusted stack values in the _TCB */
-
-       tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
-       tcb->adj_stack_size = size_of_stack;
-
-       up_ledon(LED_STACKCREATED);
-       return OK;
-     }
-
-   return ERROR;
+  while (microseconds > 0)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
+        {
+        }
+      microseconds--;
+    }
 }

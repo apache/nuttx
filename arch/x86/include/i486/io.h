@@ -1,7 +1,8 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ * arch/x86/include/i486/io.h
+ * arch/chip/io.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +34,120 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
+/* This file should never be included directed but, rather, only indirectly
+ * through arch/io.h
+ */
+
+#ifndef __ARCH_X86_INCLUDE_I486_IO_H
+#define __ARCH_X86_INCLUDE_I486_IO_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Types
+ ****************************************************************************/
+
+ #ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/* Standard x86 Port I/O */
+
+static inline void outb(uint8_t regval, uint16_t port)
+{
+  asm volatile(
+    "\toutb %0,%1\n"
+    :
+    : "a" (regval), "dN" (port)
+    );
+}
+
+static inline uint8_t inb(uint16_t port)
+{
+  uint8_t regval;
+  asm volatile(
+    "\tinb %1,%0\n"
+    : "=a" (regval)
+    : "dN" (port)
+  );
+  return regval;
+}
+
+static inline void outw(uint16_t regval, uint16_t port)
+{
+  asm volatile(
+    "\toutw %0,%1\n"
+    :
+    : "a" (regval), "dN" (port)
+    );
+}
+
+static inline uint16_t inw(uint16_t port)
+{
+  uint16_t regval;
+
+  asm volatile(
+    "\tinw %1,%0\n"
+    : "=a" (regval)
+    : "dN" (port)
+    );
+  return regval;
+}
+
+static inline void outl(uint32_t regval, uint16_t port)
+{
+  asm volatile(
+    "\toutl %0,%1\n"
+    :
+    : "a" (regval), "dN" (port)
+    );
+}
+
+static inline uint32_t inl(uint32_t port)
+{
+  uint32_t regval;
+  asm volatile(
+    "\tinl %1,%0\n"
+    : "=a" (regval)
+    : "dN" (port)
+    );
+  return regval;
+}
+
+/****************************************************************************
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+EXTERN void outp(char p, char c);
+EXTERN char inp(char p);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_X86_INCLUDE_I486_IO_H */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ * arch/x86/src/common/up_allocateheap.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,50 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+/****************************************************************************
+ * Name: up_allocate_heap
+ *
+ * Description:
+ *   The heap may be statically allocated by defining CONFIG_HEAP_BASE and
+ *   CONFIG_HEAP_SIZE.  If these are not defined, then this function will be
+ *   called to dynamically set aside the heap region.
+ *
+ ****************************************************************************/
+
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+{
+  up_ledon(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)g_heapbase;
+  *heap_size = CONFIG_DRAM_END - g_heapbase;
+}
