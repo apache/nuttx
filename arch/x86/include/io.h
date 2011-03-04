@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ * arch/x86/include/io.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
+#ifndef __ARCH_X86_INCLUDE_IO_H
+#define __ARCH_X86_INCLUDE_IO_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+/* Include architecture-specific IO definitions (These are probably common
+ * across all architectures, but this gives a little bit of flexibility).
+ */
+
+#ifdef CONFIG_ARCH_I486
+# include <arch/i486/io.h>
+#endif
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Inline functions
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+#endif /* __ARCH_X86_INCLUDE_IO_H */
+

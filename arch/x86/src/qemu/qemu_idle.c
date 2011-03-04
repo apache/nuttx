@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ *  arch/x86/src/qemu/qemu_idle.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,56 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+#include <nuttx/config.h>
+
+#include <nuttx/arch.h>
+#include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+/****************************************************************************
+ * Name: up_idle
+ *
+ * Description:
+ *   up_idle() is the logic that will be executed when their is no other
+ *   ready-to-run task.  This is processor idle time and will continue until
+ *   some interrupt occurs to cause a context switch from the idle task.
+ *
+ *   Processing in this state may be processor-specific. e.g., this is where
+ *   power management operations might be performed.
+ *
+ ****************************************************************************/
+
+void up_idle(void)
+{
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts, then process
+   * "fake" timer interrupts. Hopefully, something will wake up.
+   */
+
+  sched_process_timer();
+#else
+
+  /* Sleep until an interrupt occurs to save power */
+
+#endif
+}
+

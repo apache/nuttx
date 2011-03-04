@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ * arch/x86/src/common/up_modifyreg16.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,53 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <debug.h>
+
+#include <arch/irq.h>
+#include <nuttx/arch.h>
+
+#include "up_arch.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+/****************************************************************************
+ * Name: modifyreg16
+ *
+ * Description:
+ *   Atomically modify the specified bits in a memory mapped register
+ *
+ ****************************************************************************/
+
+void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits)
+{
+  irqstate_t flags;
+  uint16_t   regval;
+
+  flags   = irqsave();
+  regval  = getreg16((uint16_t)addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg16(regval, (uint16_t)addr);
+  irqrestore(flags);
+}

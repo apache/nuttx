@@ -51,6 +51,8 @@
  * defined below:
  */
 
+#define _TIOCBASE       (0x5400) /* Terminal I/O ioctl commands */
+#define _WDIOCBASE      (0x5400) /* Watchdog driver ioctl commands */
 #define _FIOCBASE       (0x8700) /* File system ioctl commands */
 #define _DIOCBASE       (0x8800) /* Character driver ioctl commands */
 #define _BIOCBASE       (0x8900) /* Block driver ioctl commands */
@@ -65,6 +67,22 @@
 #define _IOC_NR(cmd)    ((cmd)&_IOC_MASK)
 
 #define _IOC(type,nr)   ((type)|(nr))
+
+/* Terminal I/O ioctl commands */
+
+#define _TIOCVALID(c)   (_IOC_TYPE(c)==_TIOCBASE)
+#define _TIOC(nr)       _IOC(_TIOCBASE,nr)
+
+#define TIOCSBRK        _TIOC(0x0001)     /* BSD compatibility */
+#define TIOCCBRK        _TIOC(0x0002)     /* " " "           " */
+#define TIOCSERGSTRUCT  _TIOC(0x0003)     /* Get up_dev_t for port */
+
+/* Watchdog driver ioctl commands */
+
+#define _WDIOCVALID(c)  (_IOC_TYPE(c)==_WDIOCBASE)
+#define _WDIOC(nr)      _IOC(_WDIOCBASE,nr)
+
+#define WDIOC_KEEPALIVE _WDIOC(0x0001)    /* Restart the watchdog timer */
 
 /* NuttX file system ioctl definitions */
 

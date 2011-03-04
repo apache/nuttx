@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ *  arch/x86/src/common/up_interruptcontext.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,40 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+#include <nuttx/config.h>
+
+#include <stdbool.h>
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+
+#include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+/****************************************************************************
+ * Name: up_interrupt_context
+ *
+ * Description:
+ *   Return true is we are currently executing in the interrupt handler
+ *   context.
+ *
+ ****************************************************************************/
+
+bool up_interrupt_context(void)
+{
+   return current_regs != NULL;
+}

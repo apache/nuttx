@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ * arch/x86/include/qemu/irq.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,50 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
+/* This file should never be included directed but, rather,
+ * only indirectly through nuttx/irq.h
+ */
+
+#ifndef __ARCH_X86_INCLUDE_QEMU_IRQ_H
+#define __ARCH_X86_INCLUDE_QEMU_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
+#define NR_IRQS 0
+
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Inline functions
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __ARCH_X86_INCLUDE_QEMU_IRQ_H */
+

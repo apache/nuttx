@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ *  arch/x86/src/common/up_releasestack.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,47 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+#include <nuttx/config.h>
+
+#include <sched.h>
+#include <debug.h>
+#include <nuttx/arch.h>
+
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+/****************************************************************************
+ * Name: up_release_stack
+ *
+ * Description:
+ *   A task has been stopped. Free all stack related resources retained in
+ *   the defunct TCB.
+ *
+ ****************************************************************************/
+
+void up_release_stack(_TCB *dtcb)
+{
+  if (dtcb->stack_alloc_ptr)
+    {
+      sched_free(dtcb->stack_alloc_ptr);
+      dtcb->stack_alloc_ptr = NULL;
+    }
+
+  dtcb->adj_stack_size = 0;
+}

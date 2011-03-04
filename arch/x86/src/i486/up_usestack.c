@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/include/serial.h
+ * arch/x86/src/common/up_usestack.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,87 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-#define __ARCH_Z80_INCLUDE_SERIAL_TYPES_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/ioctl.h>
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <sched.h>
+#include <debug.h>
+
+#include <nuttx/kmalloc.h>
+#include <nuttx/arch.h>
+
+#include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_SERIAL_TYPES_H */
+/****************************************************************************
+ * Name: up_use_stack
+ *
+ * Description:
+ *   Setup up stack-related information in the TCB using pre-allocated stack
+ *   memory
+ *
+ *   The following TCB fields must be initialized:
+ *   adj_stack_size: Stack size after adjustment for hardware, processor,
+ *     etc.  This value is retained only for debug purposes.
+ *   stack_alloc_ptr: Pointer to allocated stack
+ *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
+ *
+ * Inputs:
+ *   tcb: The TCB of new task
+ *   stack_size:  The allocated stack size.
+ *
+ ****************************************************************************/
+
+int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
+{
+  size_t top_of_stack;
+  size_t size_of_stack;
+
+  if (tcb->stack_alloc_ptr)
+    {
+      sched_free(tcb->stack_alloc_ptr);
+    }
+
+  /* Save the stack allocation */
+
+  tcb->stack_alloc_ptr = stack;
+
+  /* The i486 uses a push-down stack:  the stack grows toward loweraddresses in
+   * memory.  The stack pointer register, points to the lowest, valid work
+   * address (the "top" of the stack).  Items on the stack are referenced as
+   * positive word offsets from sp.
+   */
+
+  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+
+  /* The i486 stack must be aligned at word (4 byte) boundaries. If necessary
+   * top_of_stack must be rounded down to the next boundary
+   */
+
+  top_of_stack &= ~3;
+  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+
+  /* Save the adjusted stack values in the _TCB */
+
+  tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
+  tcb->adj_stack_size = size_of_stack;
+
+  return OK;
+}

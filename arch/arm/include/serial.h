@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/serial.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,11 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <nuttx/ioctl.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* IOCTL commands supported by the ARM serial driver */
-
-#define TIOCSBRK        0x5401  /* BSD compatibility */
-#define TIOCCBRK        0x5402  /* " " "           " */
-#define TIOCSERGSTRUCT  0x5403  /* Get up_dev_t for port */
 
 /****************************************************************************
  * Public Data
