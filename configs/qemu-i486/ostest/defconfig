@@ -86,67 +86,61 @@ CONFIG_ARCH_DMA=n
 #
 # General OS setup
 #
-# CONFIG_APP_DIR - Identifies the relative path to the directory
-#   that builds the application to link with NuttX.
+# CONFIG_APP_DIR - Identifies the relative path to the directory that builds
+#   the application to link with NuttX.
 # CONFIG_DEBUG - enables built-in debug options
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
-# CONFIG_DEBUG_SYMBOLS - build without optimization and with
-#   debug symbols (needed for use with a debugger).
-# CONFIG_MM_REGIONS - If the architecture includes multiple
-#   regions of memory to allocate from, this specifies the
-#   number of memory regions that the memory manager must
-#   handle and enables the API mm_addregion(start, end);
-# CONFIG_ARCH_LOWPUTC - architecture supports low-level, boot
-#   time console output
-# CONFIG_TICKS_PER_MSEC - The default system timer is 100Hz
-#   or TICKS_PER_MSEC=10.  This setting may be defined to
-#   inform NuttX that the processor hardware is providing
-#   system timer interrupts at some interrupt interval other
-#   than 10 msec.
-# CONFIG_RR_INTERVAL - The round robin timeslice will be set
-#   this number of milliseconds;  Round robin scheduling can
-#   be disabled by setting this value to zero.
-# CONFIG_SCHED_INSTRUMENTATION - enables instrumentation in 
-#   scheduler to monitor system performance
-# CONFIG_TASK_NAME_SIZE - Spcifies that maximum size of a
-#   task name to save in the TCB.  Useful if scheduler
-#   instrumentation is selected.  Set to zero to disable.
+# CONFIG_DEBUG_SYMBOLS - build without optimization and with debug symbols
+#  (needed for use with a debugger).
+# CONFIG_MM_REGIONS - If the architecture includes multiple regions of memory
+#   to allocate from, this specifies the number of memory regions that the
+#   memory manager must handle and enables the API mm_addregion(start, end);
+# CONFIG_ARCH_LOWPUTC - architecture supports low-level, boot time console
+#   output.
+# CONFIG_TICKS_PER_MSEC - The default system timer is 100Hz or TICKS_PER_MSEC=10.
+#   This setting may be defined to inform NuttX that the processor hardware is
+#   providing system timer interrupts at some interrupt interval other than 10
+#   msec.
+# CONFIG_RR_INTERVAL - The round robin timeslice will be set this number of
+#   milliseconds;  Round robin scheduling can be disabled by setting this
+#   value to zero.
+# CONFIG_SCHED_INSTRUMENTATION - enables instrumentation in scheduler to
+#   monitor system performance
+# CONFIG_TASK_NAME_SIZE - Spcifies that maximum size of a task name to save in
+#   the TCB.  Useful if scheduler instrumentation is selected.  Set to zero to
+#   disable.
 # CONFIG_JULIAN_TIME - Enables Julian time conversions
-# CONFIG_START_YEAR, CONFIG_START_MONTH, CONFIG_START_DAY -
-#   Used to initialize the internal time logic.
-# CONFIG_DEV_CONSOLE - Set if architecture-specific logic
-#   provides /dev/console.  Enables stdout, stderr, stdin.
-# CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
-#   driver (minimul support)
-# CONFIG_MUTEX_TYPES: Set to enable support for recursive and
-#   errorcheck mutexes. Enables pthread_mutexattr_settype().
-# CONFIG_PRIORITY_INHERITANCE : Set to enable support for priority
-#   inheritance on mutexes and semaphores.
-# CONFIG_SEM_PREALLOCHOLDERS: This setting is only used if priority
-#   inheritance is enabled.  It defines the maximum number of
-#   different threads (minus one) that can take counts on a
-#   semaphore with priority inheritance support.  This may be 
-#   set to zero if priority inheritance is disabled OR if you
-#   are only using semaphores as mutexes (only one holder) OR
-#   if no more than two threads participate using a counting
+# CONFIG_START_YEAR, CONFIG_START_MONTH, CONFIG_START_DAY - Used to initialize
+#   the internal time logic.
+# CONFIG_DEV_CONSOLE - Set if architecture-specific logic provides /dev/console.
+#   Enables stdout, stderr, stdin.
+# CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console driver
+#   (minimal support)
+# CONFIG_MUTEX_TYPES: Set to enable support for recursive and errorcheck
+#   mutexes. Enables pthread_mutexattr_settype().
+# CONFIG_PRIORITY_INHERITANCE : Set to enable support for priority inheritance
+#   on mutexes and semaphores.
+# CONFIG_SEM_PREALLOCHOLDERS: This setting is only used if priority inheritance
+#   is enabled.  It defines the maximum number of different threads (minus one)
+#   that can take counts on a semaphore with priority inheritance support.
+#   This may be  set to zero if priority inheritance is disabled OR if you are
+#   only using semaphores as mutexes (only one holder) OR if no more than two
+#   threads participate using a counting semaphore.
+# CONFIG_SEM_NNESTPRIO.  If priority inheritance is enabled, then this setting
+#   is the maximum number of higher priority threads (minus 1) than can be
+#   waiting for another thread to release a count on a semaphore.  This value
+#   may be set to zero if no more than one thread is expected to wait for a
 #   semaphore.
-# CONFIG_SEM_NNESTPRIO.  If priority inheritance is enabled,
-#   then this setting is the maximum number of higher priority
-#   threads (minus 1) than can be waiting for another thread
-#   to release a count on a semaphore.  This value may be set
-#   to zero if no more than one thread is expected to wait for
-#   a semaphore.
-# CONFIG_FDCLONE_DISABLE. Disable cloning of all file descriptors
-#   by task_create() when a new task is started.  If set, all
-#   files/drivers will appear to be closed in the new task.
-# CONFIG_FDCLONE_STDIO. Disable cloning of all but the first
-#   three file descriptors (stdin, stdout, stderr) by task_create()
-#   when a new task is started. If set, all files/drivers will
-#   appear to be closed in the new task except for stdin, stdout,
-#   and stderr.
-# CONFIG_SDCLONE_DISABLE. Disable cloning of all socket
-#   desciptors by task_create() when a new task is started. If
-#   set, all sockets will appear to be closed in the new task.
+# CONFIG_FDCLONE_DISABLE. Disable cloning of all file descriptors by task_create()
+#   when a new task is started.  If set, all files/drivers will appear to be
+#   closed in the new task.
+# CONFIG_FDCLONE_STDIO. Disable cloning of all but the first three file
+#   descriptors (stdin, stdout, stderr) by task_create() when a new task is
+#   started. If set, all files/drivers will appear to be closed in the new
+#   task except for stdin, stdout, and stderr.
+# CONFIG_SDCLONE_DISABLE. Disable cloning of all socket desciptors by
+#   task_create() when a new task is started. If set, all sockets will appear
+#   to be closed in the new task.
 #
 CONFIG_APP_DIR=examples/ostest
 CONFIG_DEBUG=y
@@ -162,7 +156,7 @@ CONFIG_START_MONTH=3
 CONFIG_START_DAY=3
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
-CONFIG_DEV_LOWCONSOLE=n
+CONFIG_DEV_LOWCONSOLE=y
 CONFIG_MUTEX_TYPES=y
 CONFIG_PRIORITY_INHERITANCE=n
 CONFIG_SEM_PREALLOCHOLDERS=0
@@ -172,19 +166,15 @@ CONFIG_FDCLONE_STDIO=n
 CONFIG_SDCLONE_DISABLE=y
 
 #
-# The following can be used to disable categories of
-# APIs supported by the OS.  If the compiler supports
-# weak functions, then it should not be necessary to
-# disable functions unless you want to restrict usage
-# of those APIs.
+# The following can be used to disable categories ofAPIs supported by the OS.
+# If the compiler supports weak functions, then it should not be necessary to
+# disable functions unless you want to restrict usage of those APIs.
 #
-# There are certain dependency relationships in these
-# features.
+# There are certain dependency relationships in these features.
 #
-# o mq_notify logic depends on signals to awaken tasks
-#   waiting for queues to become full or empty.
-# o pthread_condtimedwait() depends on signals to wake
-#   up waiting tasks.
+# o mq_notify logic depends on signals to awaken tasks waiting for queues to
+#   become full or empty.
+# o pthread_condtimedwait() depends on signals to wake up waiting tasks.
 #
 CONFIG_DISABLE_CLOCK=n
 CONFIG_DISABLE_POSIX_TIMERS=n
@@ -198,16 +188,16 @@ CONFIG_DISABLE_POLL=y
 #
 # Misc libc settings
 #
-# CONFIG_NOPRINTF_FIELDWIDTH - sprintf-related logic is a
-#   little smaller if we do not support fieldwidthes
+# CONFIG_NOPRINTF_FIELDWIDTH - sprintf-related logic is a little smaller if we
+#   do not support fieldwidthes
 #
 CONFIG_NOPRINTF_FIELDWIDTH=n
 
 #
 # Allow for architecture optimized implementations
 #
-# The architecture can provide optimized versions of the
-# following to improve sysem performance
+# The architecture can provide optimized versions of the following to improve
+# system performance
 #
 CONFIG_ARCH_MEMCPY=n
 CONFIG_ARCH_MEMCMP=n
@@ -226,14 +216,14 @@ CONFIG_ARCH_KFREE=n
 ##
 # General build options
 #
-# CONFIG_RRLOAD_BINARY - make the rrload binary format used with
-#   BSPs from www.ridgerun.com using the tools/mkimage.sh script
-# CONFIG_INTELHEX_BINARY - make the Intel HEX binary format
-#   used with many different loaders using the GNU objcopy program
-#   Should not be selected if you are not using the GNU toolchain.
-# CONFIG_RAW_BINARY - make a raw binary format file used with many
-#   different loaders using the GNU objcopy program.  This option
-#   should not be selected if you are not using the GNU toolchain.
+# CONFIG_RRLOAD_BINARY - make the rrload binary format used with BSPs from
+#   www.ridgerun.com using the tools/mkimage.sh script
+# CONFIG_INTELHEX_BINARY - make the Intel HEX binary format used with many
+#   different loaders using the GNU objcopy program Should not be selected if
+#   you are not using the GNU toolchain.
+# CONFIG_RAW_BINARY - make a raw binary format file used with many different
+#   loaders using the GNU objcopy program.  This option should not be selected
+#   if you are not using the GNU toolchain.
 # CONFIG_HAVE_LIBM - toolchain supports libm.a
 #
 CONFIG_RRLOAD_BINARY=n
@@ -244,37 +234,33 @@ CONFIG_HAVE_LIBM=y
 #
 # Sizes of configurable things (0 disables)
 #
-# CONFIG_MAX_TASKS - The maximum number of simultaneously
-#   active tasks. This value must be a power of two.
-# CONFIG_MAX_TASK_ARGS - This controls the maximum number of
-#   of parameters that a task may receive (i.e., maxmum value
-#   of 'argc')
-# CONFIG_NPTHREAD_KEYS - The number of items of thread-
-#   specific data that can be retained
-# CONFIG_NFILE_DESCRIPTORS - The maximum number of file
-#   descriptors (one for each open)
-# CONFIG_NFILE_STREAMS - The maximum number of streams that
-#   can be fopen'ed
+# CONFIG_MAX_TASKS - The maximum number of simultaneously active tasks. This
+#   value must be a power of two.
+# CONFIG_MAX_TASK_ARGS - This controls the maximum number of of parameters
+#   that a task may receive (i.e., maxmum value of 'argc')
+# CONFIG_NPTHREAD_KEYS - The number of items of thread-specific data that can
+#   be retained
+# CONFIG_NFILE_DESCRIPTORS - The maximum number of file descriptors (one for
+#   each open)
+# CONFIG_NFILE_STREAMS - The maximum number of streams that can be fopen'ed
 # CONFIG_NAME_MAX - The maximum size of a file name.
-# CONFIG_STDIO_BUFFER_SIZE - Size of the buffer to allocate
-#   on fopen. (Only if CONFIG_NFILE_STREAMS > 0)
-# CONFIG_NUNGET_CHARS - Number of characters that can be
-#   buffered by ungetc() (Only if CONFIG_NFILE_STREAMS > 0)
-# CONFIG_PREALLOC_MQ_MSGS - The number of pre-allocated message
-#   structures.  The system manages a pool of preallocated
-#   message structures to minimize dynamic allocations
-# CONFIG_MQ_MAXMSGSIZE - Message structures are allocated with
-#   a fixed payload size given by this settin (does not include
-#   other message structure overhead.
-# CONFIG_MAX_WDOGPARMS - Maximum number of parameters that
-#   can be passed to a watchdog handler
-# CONFIG_PREALLOC_WDOGS - The number of pre-allocated watchdog
-#   structures.  The system manages a pool of preallocated
-#   watchdog structures to minimize dynamic allocations
-# CONFIG_PREALLOC_TIMERS - The number of pre-allocated POSIX
-#   timer structures.  The system manages a pool of preallocated
-#   timer structures to minimize dynamic allocations.  Set to
-#   zero for all dynamic allocations.
+# CONFIG_STDIO_BUFFER_SIZE - Size of the buffer to allocate on fopen. (Only if
+#   CONFIG_NFILE_STREAMS > 0)
+# CONFIG_NUNGET_CHARS - Number of characters that can be buffered by ungetc()
+#   (Only if CONFIG_NFILE_STREAMS > 0)
+# CONFIG_PREALLOC_MQ_MSGS - The number of pre-allocated message structures.
+#   The system manages a pool of preallocated message structures to minimize
+#   dynamic allocations
+# CONFIG_MQ_MAXMSGSIZE - Message structures are allocated with a fixed payload
+#   size given by this settin (does not include other message structure overhead.
+# CONFIG_MAX_WDOGPARMS - Maximum number of parameters that can be passed to a
+#   watchdog handler
+# CONFIG_PREALLOC_WDOGS - The number of pre-allocated watchdog structures.  The
+#   system manages a pool of preallocated watchdog structures to minimize
+#   dynamic allocations
+# CONFIG_PREALLOC_TIMERS - The number of pre-allocated POSIX timer structures.
+#   The system manages a pool of preallocated timer structures to minimize
+#   dynamic allocations.  Set to zero for all dynamic allocations.
 #
 CONFIG_MAX_TASKS=64
 CONFIG_MAX_TASK_ARGS=4
