@@ -117,8 +117,14 @@ SYMBOL(up_saveusercontext):
 
 	/* Save the framepointer */
 
-	movl %ebp, (REG_EBP)(%eax)
+	movl	%ebp, (REG_EBP)(%eax)
 
+    /* Save the interrupt state */
+
+    pushf
+    pop		%ecx
+	movl	%ecx, (REG_FLAGS)(%eax)
+ 
 	/* And return 0 */
 
 	xorl    %eax, %eax

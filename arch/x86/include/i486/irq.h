@@ -57,23 +57,25 @@
 /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
 
 #ifdef __ASSEMBLY__
-# define REG_EBX (0*4)
-# define REG_ESI (1*4)
-# define REG_EDI (2*4)
-# define REG_EBP (3*4)
-# define REG_SP  (4*4)
-# define REG_PC  (5*4)
+# define REG_EBX   (0*4)
+# define REG_ESI   (1*4)
+# define REG_EDI   (2*4)
+# define REG_EBP   (3*4)
+# define REG_SP    (4*4)
+# define REG_PC    (5*4)
+# define REG_FLAGS (6*4)
 #else
-# define REG_EBX (0)
-# define REG_ESI (1)
-# define REG_EDI (2)
-# define REG_EBP (3)
-# define REG_SP  (4)
-# define REG_PC  (5)
+# define REG_EBX   (0)
+# define REG_ESI   (1)
+# define REG_EDI   (2)
+# define REG_EBP   (3)
+# define REG_SP    (4)
+# define REG_PC    (5)
+# define REG_FLAGS (6)
 #endif /* __ASSEMBLY__ */
 
-#define XCPTCONTEXT_REGS    (6)
-#define XCPTCONTEXT_SIZE    (6 * XCPTCONTEXT_REGS)
+#define XCPTCONTEXT_REGS    (7)
+#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 /****************************************************************************
  * Public Types
@@ -84,9 +86,20 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-   void *sigdeliver; /* Actual type is sig_deliver_t */
+  /* The following function pointer is non-zero if there are pending signals
+   * to be processed.
+   */
 
-   /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
+#ifndef CONFIG_DISABLE_SIGNALS
+  void *sigdeliver; /* Actual type is sig_deliver_t */
+
+  /* These are saved copies of LR and CPSR used during signal processing. */
+
+  uint32_t saved_pc;
+  uint32_t saved_flags;
+#endif
+
+  /* Register save area */
 
    uint32_t regs[XCPTCONTEXT_REGS];
 };
@@ -117,7 +130,7 @@ static inline irqstate_t irqflags()
 
 static inline bool irqdisabled(irqstate_t flags)
 {
-  return ((flags & X86_FLAGS_IF) == 0);
+  return ((flags & X86_FLAGS_IF) != 0);
 }
 
 /* Disable interrupts unconditionally */
