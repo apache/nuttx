@@ -251,6 +251,11 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |   |-m16c/README.txt
  |   |   |   |-sh1/README.txt
  |   |   |   `-README.txt
+ |   |- x86/
+ |   |   |- include/
+ |   |   |   `-README.txt
+ |   |   `- src/
+ |   |       `-README.txt
  |   `- z80/
  |   |   `- src/
  |   |       `- z80/README.txt
@@ -321,6 +326,10 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- pjrc-8051/
+ |   |   |- include/README.txt
+ |   |   |- src/README.txt
+ |   |   `- README.txt
+ |   |- qemu-i486/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
