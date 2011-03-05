@@ -41,6 +41,7 @@ SECTIONS
 	.text : {
 		_stext = ABSOLUTE(.);
 		*(.text .text.*)        
+		*(.gnu.linkonce.t.*)
 		_etext = ABSOLUTE(.);
 	}
 
@@ -49,7 +50,6 @@ SECTIONS
 		*(.rodata .rodata.*)        
 		*(.fixup)
 		*(.gnu.warning)
-		*(.gnu.linkonce.t.*)
 		*(.glue_7)
 		*(.glue_7t)
 		*(.got)
@@ -74,7 +74,7 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	}
 
-	/* Stabs debugging sections.	*/
+	/* Stabs debugging sections */
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }
