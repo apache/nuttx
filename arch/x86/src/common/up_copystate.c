@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/x86/include/i486/io.h
- * arch/chip/io.h
+ * arch/x86/src/common/up_copystate.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,120 +33,50 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through arch/io.h
- */
-
-#ifndef __ARCH_X86_INCLUDE_I486_IO_H
-#define __ARCH_X86_INCLUDE_I486_IO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdint.h>
 
+#include "os_internal.h"
+#include "up_internal.h"
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
- #ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/* Standard x86 Port I/O */
-
-static inline void outb(uint8_t regval, uint16_t port)
-{
-  asm volatile(
-    "\toutb %0,%1\n"
-    :
-    : "a" (regval), "dN" (port)
-    );
-}
-
-static inline uint8_t inb(uint16_t port)
-{
-  uint8_t regval;
-  asm volatile(
-    "\tinb %1,%0\n"
-    : "=a" (regval)
-    : "dN" (port)
-  );
-  return regval;
-}
-
-static inline void outw(uint16_t regval, uint16_t port)
-{
-  asm volatile(
-    "\toutw %0,%1\n"
-    :
-    : "a" (regval), "dN" (port)
-    );
-}
-
-static inline uint16_t inw(uint16_t port)
-{
-  uint16_t regval;
-
-  asm volatile(
-    "\tinw %1,%0\n"
-    : "=a" (regval)
-    : "dN" (port)
-    );
-  return regval;
-}
-
-static inline void outl(uint32_t regval, uint16_t port)
-{
-  asm volatile(
-    "\toutl %0,%1\n"
-    :
-    : "a" (regval), "dN" (port)
-    );
-}
-
-static inline uint32_t inl(uint16_t port)
-{
-  uint32_t regval;
-  asm volatile(
-    "\tinl %1,%0\n"
-    : "=a" (regval)
-    : "dN" (port)
-    );
-  return regval;
-}
-
-/****************************************************************************
- * Public Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-EXTERN void outp(char p, char c);
-EXTERN char inp(char p);
+/****************************************************************************
+ * Name: up_undefinedinsn
+ ****************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+/* A little faster than most memcpy's */
+
+void up_copystate(uint32_t *dest, uint32_t *src)
+{
+  int i;
+
+  /* In the current ARM model, the state is always copied to and from the
+   * stack and TCB.
+   */
+
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+    {
+      *dest++ = *src++;
+    }
 }
-#endif
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_X86_INCLUDE_I486_IO_H */

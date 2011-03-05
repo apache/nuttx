@@ -101,15 +101,15 @@ SYMBOL(up_fullcontextrestore):
 
 	/* Save the return address now.  */
 
-	movl (JB_PC)(%ecx), %edx
+	movl (REG_PC)(%ecx), %edx
 
 	/* Restore registers.  */
 
-	movl (JB_EBX)(%ecx), %ebx
-	movl (JB_ESI)(%ecx), %esi
-	movl (JB_EDI)(%ecx), %edi
-	movl (JB_EBP)(%ecx), %ebp
-	movl (JB_SP)(%ecx), %esp
+	movl (REG_EBX)(%ecx), %ebx
+	movl (REG_ESI)(%ecx), %esi
+	movl (REG_EDI)(%ecx), %edi
+	movl (REG_EBP)(%ecx), %ebp
+	movl (REG_SP)(%ecx), %esp
 
 	/* Jump to saved PC.  */
 

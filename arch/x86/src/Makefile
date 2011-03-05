@@ -42,13 +42,13 @@ ARCH_SUBDIR	= i486
 endif
 
 ifeq ($(WINTOOL),y)
-  NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx}"
+  NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx$(EXEEXT)}"
   CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
   		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
 		   -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}" \
 		   -I "${shell cygpath -w $(TOPDIR)/sched}"
 else
-  NUTTX		= $(TOPDIR)/nuttx
+  NUTTX		= $(TOPDIR)/nuttx$(EXEEXT)
   CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common \
 		   -I$(ARCH_SRCDIR)/$(ARCH_SUBDIR) -I$(TOPDIR)/sched
 endif
@@ -99,8 +99,8 @@ libarch$(LIBEXT): $(OBJS)
 board/libboard$(LIBEXT):
 	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
 
-nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
-	@echo "LD: nuttx"
+nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT)
+	@echo "LD: nuttx$(EXEEXT)"
 	@$(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX)$(EXEEXT) $(HEAD_AOBJ) $(EXTRA_OBJS) \
 		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC)
 ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
