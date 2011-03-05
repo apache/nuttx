@@ -80,12 +80,7 @@ AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 
 OBJEXT = .o
 LIBEXT = .a
-
-ifeq ($(HOSTOS),Cygwin)
-  EXEEXT = .exe
-else
-  EXEEXT =
-endif
+EXEEXT = .elf
 
 ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
   LDFLAGS += -g

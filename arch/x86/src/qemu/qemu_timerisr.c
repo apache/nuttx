@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/qemu-i486/ostest/ld.script
+ * arch/x86/src/qemu/qemu_timerisr.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,58 +33,52 @@
  *
  ****************************************************************************/
 
-ENTRY(__start)
-SECTIONS
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <time.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
+
+#include "clock_internal.h"
+#include "up_internal.h"
+#include "up_arch.h"
+
+#include "chip.h"
+#include "qemu_internal.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  up_timerinit
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
+ ****************************************************************************/
+
+void up_timerinit(void)
 {
-	. = 0x00100000;
-
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.text .text.*)        
-		_etext = ABSOLUTE(.);
-	}
-
-	.text ALIGN (0x1000) : {
-		_srodata = ABSOLUTE(.);
-		*(.rodata .rodata.*)        
-		*(.fixup)
-		*(.gnu.warning)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_erodata = ABSOLUTE(.);
-	}
-
-	.data ALIGN (0x1000) : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	}
-
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	}
-
-	/* Stabs debugging sections.	*/
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+#warning "Not implemented"
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/qemu-i486/ostest/ld.script
+ * arch/x86/src/common/up_copystate.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,58 +33,50 @@
  *
  ****************************************************************************/
 
-ENTRY(__start)
-SECTIONS
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdint.h>
+
+#include "os_internal.h"
+#include "up_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_undefinedinsn
+ ****************************************************************************/
+
+/* A little faster than most memcpy's */
+
+void up_copystate(uint32_t *dest, uint32_t *src)
 {
-	. = 0x00100000;
+  int i;
 
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.text .text.*)        
-		_etext = ABSOLUTE(.);
-	}
+  /* In the current ARM model, the state is always copied to and from the
+   * stack and TCB.
+   */
 
-	.text ALIGN (0x1000) : {
-		_srodata = ABSOLUTE(.);
-		*(.rodata .rodata.*)        
-		*(.fixup)
-		*(.gnu.warning)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_erodata = ABSOLUTE(.);
-	}
-
-	.data ALIGN (0x1000) : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	}
-
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	}
-
-	/* Stabs debugging sections.	*/
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+    {
+      *dest++ = *src++;
+    }
 }
+

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/qemu-i486/ostest/ld.script
+ *  arch/x86/src/qemu/qemu_lowsetup.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,58 +33,48 @@
  *
  ****************************************************************************/
 
-ENTRY(__start)
-SECTIONS
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
+
+#include "up_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_lowsetup
+ *
+ * Description:
+ *   Called from qemu_head BEFORE starting the operating system in order
+ *   perform any necessary, early initialization.
+ *
+ ****************************************************************************/
+
+void up_lowsetup(void)
 {
-	. = 0x00100000;
+  /* Perform chip-specific initializations */
 
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.text .text.*)        
-		_etext = ABSOLUTE(.);
-	}
+  /* Now perform board-specific initializations */
 
-	.text ALIGN (0x1000) : {
-		_srodata = ABSOLUTE(.);
-		*(.rodata .rodata.*)        
-		*(.fixup)
-		*(.gnu.warning)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_erodata = ABSOLUTE(.);
-	}
-
-	.data ALIGN (0x1000) : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	}
-
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	}
-
-	/* Stabs debugging sections.	*/
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+  up_boardinitialize();
 }
+

@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_X86_NASM
-global		loader						/* Making entry point visible to linker */
+global		__start						/* Making entry point visible to linker */
 extern		os_start					/* os_start is defined elsewhere */
 extern		up_lowsetup					/* up_lowsetup is defined elsewhere */
  
@@ -67,7 +67,7 @@ MultiBootHeader:
 
 STACKSIZE	equ	0x4000					/* That's 16k */
  
-loader:
+__start:
 	mov		esp, stack+STACKSIZE		/* Set up the stack */
 	push	eax							/* Pass Multiboot magic number */
 	push	ebx							/* Pass Multiboot info structure */
@@ -85,11 +85,11 @@ align 4
 stack:
 	resb STACKSIZE						/* Reserve 16k stack on a doubleword boundary */
 
-#else /* GAS */
+#else /* !CONFIG_X86_NASM (GAS) */
 
-	.global	loader						/* Making entry point visible to linker */
-	.global	os_start					/* os_start is defined elsewhere */
-	.global	up_lowsetup					/* up_lowsetup is defined elsewhere */
+	.global	__start						/* Making entry point visible to linker */
+	.global	_os_start					/* os_start is defined elsewhere */
+	.global	_up_lowsetup				/* up_lowsetup is defined elsewhere */
 
 /* Setting up the Multiboot header - see GRUB docs for details */
 
@@ -109,18 +109,17 @@ stack:
 	.set	STACKSIZE, 0x4000			/* That is, 16k */
 	.comm	stack, STACKSIZE, 32		/* Reserve 16k stack on a quadword boundary */
 
-loader:
+__start:
 	mov		$(stack + STACKSIZE), %esp	/* Set up the stack */
 	push	%eax						/* Multiboot magic number */
 	push	%ebx						/* Multiboot data structure */
 
-	call	up_lowsetup					/* Low-level, pre-OS initialization */
-	call	os_start					/* Start NuttX */
+	call	_up_lowsetup				/* Low-level, pre-OS initialization */
+	call	_os_start					/* Start NuttX */
 
 	cli
 hang:
 	hlt									/* Halt machine should NuttX return */
 	jmp	hang
-#endif
 	.end
-#endif
+#endif /* CONFIG_X86_NASM */

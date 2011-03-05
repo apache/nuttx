@@ -1,5 +1,6 @@
 /****************************************************************************
- * arch/x86/include/i486/irq.h
+ * arch/x86/src/qemu/qemu_irq.c
+ * arch/x86/src/chip/qemu_irq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,146 +34,127 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_X86_INCLUDE_I486_IRQ_H
-#define __ARCH_X86_INCLUDE_I486_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#  include <stdbool.h>
-#  include <arch/arch.h>
-#endif
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <arch/irq.h>
+
+#include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
+#include "qemu_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
-
-#ifdef __ASSEMBLY__
-# define REG_EBX (0*4)
-# define REG_ESI (1*4)
-# define REG_EDI (2*4)
-# define REG_EBP (3*4)
-# define REG_SP  (4*4)
-# define REG_PC  (5*4)
-#else
-# define REG_EBX (0)
-# define REG_ESI (1)
-# define REG_EDI (2)
-# define REG_EBP (3)
-# define REG_SP  (4)
-# define REG_PC  (5)
-#endif /* __ASSEMBLY__ */
-
-#define XCPTCONTEXT_REGS    (6)
-#define XCPTCONTEXT_SIZE    (6 * XCPTCONTEXT_REGS)
-
 /****************************************************************************
- * Public Types
+ * Public Data
  ****************************************************************************/
 
-/* This struct defines the way the registers are stored */
+uint32_t *current_regs;
 
-#ifndef __ASSEMBLY__
-struct xcptcontext
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_irqinitialize
+ ****************************************************************************/
+
+void up_irqinitialize(void)
 {
-   void *sigdeliver; /* Actual type is sig_deliver_t */
+  /* Disable all interrupts */
 
-   /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
+  /* currents_regs is non-NULL only while processing an interrupt */
 
-   uint32_t regs[XCPTCONTEXT_REGS];
-};
+  current_regs = NULL;
+
+  /* Initialize logic to support a second level of interrupt decoding for
+   * GPIO pins.
+   */
+ 
+#ifdef CONFIG_GPIO_IRQ
+  lpc17_gpioirqinitialize();
 #endif
 
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
+  /* And finally, enable interrupts */
 
-#ifndef __ASSEMBLY__
-
-/* Get the current FLAGS register contents */
-
-static inline irqstate_t irqflags()
-{
-  irqstate_t flags;
-
-  asm volatile(
-    "\tpushf\n"
-    "\tpop %0\n"
-    : "=rm" (flags)
-    :
-    : "memory");
-  return flags;
-}
-
-/* Get a sample of the FLAGS register, determine if interrupts are disabled */
-
-static inline bool irqdisabled(irqstate_t flags)
-{
-  return ((flags & X86_FLAGS_IF) == 0);
-}
-
-/* Disable interrupts unconditionally */
-
-static inline void irqdisable(void)
-{
-  asm volatile("cli": : :"memory");
-}
-
-/* Enable interrupts unconditionally */
-
-static inline void irqenable(void)
-{
-  asm volatile("sti": : :"memory");
-}
-
-/* Disable interrupts, but return previous interrupt state */
-
-static inline irqstate_t irqsave(void)
-{
-  irqstate_t flags = irqflags();
-  irqdisable();
-  return flags;
-}
-
-/* Conditionally disable interrupts */
-
-static inline void irqrestore(irqstate_t flags)
-{
-  if (irqdisabled(flags))
-    {
-      irqdisable();
-    }
-}
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  irqrestore(0);
 #endif
+}
 
-#undef EXTERN
-#ifdef __cplusplus
+/****************************************************************************
+ * Name: up_disable_irq
+ *
+ * Description:
+ *   Disable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_disable_irq(int irq)
+{
+#warning "Missing Logic"
+}
+
+/****************************************************************************
+ * Name: up_enable_irq
+ *
+ * Description:
+ *   Enable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_enable_irq(int irq)
+{
+#warning "Missing Logic"
+}
+
+/****************************************************************************
+ * Name: up_maskack_irq
+ *
+ * Description:
+ *   Mask the IRQ and acknowledge it
+ *
+ ****************************************************************************/
+
+void up_maskack_irq(int irq)
+{
+#warning "Missing Logic"
+}
+
+/****************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *   Set the priority of an IRQ.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQPRIO
+int up_prioritize_irq(int irq, int priority)
+{
+#warning "Missing Logic"
+  return OK;
 }
 #endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_X86_INCLUDE_I486_IRQ_H */
-
