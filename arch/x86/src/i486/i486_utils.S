@@ -1,8 +1,11 @@
 /****************************************************************************
- *  arch/x86/src/qemu/qemu_lowsetup.c
+ * arch/x86/src/i486/i486_utils.S
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ *   Based on Bran's kernel development tutorials. Rewritten for JamesM's
+ *   kernel development tutorials.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,95 +42,125 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <arch/board/board.h>
-
-#include "up_internal.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef __CYGWIN__
+# define SYMBOL(s) _##s
+#else
+# define SYMBOL(s) s
+#endif
+
 /****************************************************************************
- * Private Data
+ * Nasm
+ ****************************************************************************/
+
+#ifdef CONFIG_X86_NASM
+
+/****************************************************************************
+ * Nasm externals
+ ****************************************************************************/
+
+global SYMBOL(gdt_flush)
+global SYMBOL(idt_flush)
+
+/****************************************************************************
+ * Nasm macros
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Nasm .text
  ****************************************************************************/
+
+SECTION .text
+BITS 32
 
 /****************************************************************************
- * Name: up_gdtentry
- *
- * Description:
- *   Set the value of one GDT entry.
- *
+ * Name: gdt_flush
  ****************************************************************************/
 
-static void up_gdtentry(struct gdt_entry_s *entry, uint32_t base,
-                        uint32_t limit, uint8_t access, uint8_t gran)
-{
-  entry->lowbase      = (base & 0xffff);
-  entry->midbase      = (base >> 16) & 0xff;
-  entry->hibase       = (base >> 24) & 0xff;
+SYMBOL(gdt_flush):
+    mov		eax, [esp+4]		/* Get the pointer to the GDT, passed as a parameter */
+    lgdt	[eax]				/* Load the new GDT pointer */
 
-  entry->lowlimit     = (limit & 0xffff);
-  entry->granularity  = (limit >> 16) & 0x0f;
-    
-  entry->granularity |= gran & 0xf0;
-  entry->access       = access;
-}
+    mov		ax, 0x10			/* 0x10 is the offset in the GDT to our data segment */
+    mov		ds, ax				/* Load all data segment selectors */
+    mov		es, ax
+    mov		fs, ax
+    mov		gs, ax
+    mov		ss, ax
+    jmp		0x08:.gflush		/* 0x08 is the offset to our code segment: Far jump! */
+.gflush:
+    ret
 
 /****************************************************************************
- * Name: up_gdtinit
- *
- * Description:
- *   Initialize the GDT. The Global Descriptor Table or GDT is a data
- *   structure used by Intel x86-family processors starting with the 80286
- *   in order to define the characteristics of the various memory areas used
- *   during program execution, for example the base address, the size and
- *   access privileges like executability and writability. These memory areas
- *   are called segments in Intel terminology.
- *
+ * Name: idt_flush
  ****************************************************************************/
 
-static void up_gdtinit(void)
-{
-  struct gdt_entry_s gdt_entries[5];
-  struct gdt_ptr_s   gdt_ptr;
+SYMBOL(idt_flush):
+    mov		eax, [esp+4]		/* Get the pointer to the IDT, passed as a parameter */
+    lidt		[eax]			/* Load the IDT pointer */
+    ret
 
-  up_gdtentry(&gdt_entries[0], 0, 0, 0, 0);                /* Null segment */
-  up_gdtentry(&gdt_entries[1], 0, 0xffffffff, 0x9a, 0xcf); /* Code segment */
-  up_gdtentry(&gdt_entries[2], 0, 0xffffffff, 0x92, 0xcf); /* Data segment */
-  up_gdtentry(&gdt_entries[3], 0, 0xffffffff, 0xfa, 0xcf); /* User mode code segment */
-  up_gdtentry(&gdt_entries[4], 0, 0xffffffff, 0xf2, 0xcf); /* User mode data segment */
-
-  gdt_ptr.limit = (sizeof(struct gdt_entry_s) * 5) - 1;
-  gdt_ptr.base  = (uint32_t)gdt_entries;
-  gdt_flush((uint32_t )&gdt_ptr);
-}
+#else /* !CONFIG_X86_NASM (GAS) */
 
 /****************************************************************************
- * Public Functions
+ * GAS
  ****************************************************************************/
+
+	.file	"i486_utils.S"
 
 /****************************************************************************
- * Name: up_lowsetup
- *
- * Description:
- *   Called from qemu_head BEFORE starting the operating system in order
- *   perform any necessary, early initialization.
- *
+ * GAS Globals
  ****************************************************************************/
 
-void up_lowsetup(void)
-{
-  /* Initialize the Global descriptor table */
+	.globl	SYMBOL(gdt_flush)
+	.globl	SYMBOL(idt_flush)
 
-  up_gdtinit();
+/****************************************************************************
+ * GAS .text
+ ****************************************************************************/
 
-  /* Now perform board-specific initializations */
+	.text
 
-  up_boardinitialize();
-}
+/****************************************************************************
+ * Name: gdt_flush
+ ****************************************************************************/
 
+#ifndef __CYGWIN__
+	.type	SYMBOL(gdt_flush), @function
+#endif
+SYMBOL(gdt_flush):
+    movl	%eax, 4(%esp)	/* Get the pointer to the GDT, passed as a parameter */
+    lgdt	(%eax)			/* Load the new GDT pointer */
+
+    mov		%ax, 0x10		/* 0x10 is the offset in the GDT to our data segment */
+    mov		%ds, %ax		/* Load all data segment selectors */
+    mov		%es, %ax
+    mov		%fs, %ax
+    mov		%gs, %ax
+    mov		%ss, %ax
+    ljmp	*.Lgflush	/* 0x08 is the offset to our code segment: Far jump! */
+.Lgflush:
+    ret
+#ifndef __CYGWIN__
+	.size	SYMBOL(gdt_flush), . - SYMBOL(gdt_flush)
+#endif
+
+/****************************************************************************
+ * Name: idt_flush
+ ****************************************************************************/
+
+#ifndef __CYGWIN__
+	.type	SYMBOL(idt_flush), @function
+#endif
+SYMBOL(idt_flush):
+    movl	%eax, 4(%esp)	/* Get the pointer to the IDT, passed as a parameter */
+    lidt	(%eax)			/* Load the IDT pointer */
+    ret
+#ifndef __CYGWIN__
+	.size	SYMBOL(idt_flush), . - SYMBOL(idt_flush)
+#endif
+	.end
+#endif /* CONFIG_X86_NASM */

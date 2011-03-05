@@ -46,7 +46,7 @@
 #include "up_internal.h"
 
 /**************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  **************************************************************************/
  
 #ifdef __CYGWIN__
@@ -90,6 +90,7 @@
 #ifdef CONFIG_X86_NASM
 #  warning "No Nasm support"
 #else
+	.file	"qemu_fullcontextrestore.S"
 	.text
 	.globl	SYMBOL(up_fullcontextrestore)
 #ifndef __CYGWIN__
@@ -104,7 +105,7 @@ SYMBOL(up_fullcontextrestore):
 
 	/* Save the return address.  */
 
-	movl	(REG_PC)(%ecx), %edx
+	movl	(REG_EIP)(%ecx), %edx
 
 	/* Restore registers.  */
 
@@ -116,7 +117,7 @@ SYMBOL(up_fullcontextrestore):
 
     /* Conditionally restore interrupts */
 
-	testl	$512, (REG_FLAGS)(%ecx)
+	testl	$512, (REG_EFLAGS)(%ecx)
 	je		.Ldisabled
 	sti
 .Ldisabled:

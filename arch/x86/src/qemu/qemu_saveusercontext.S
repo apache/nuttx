@@ -90,6 +90,7 @@
 #ifdef CONFIG_X86_NASM
 #  warning "No Nasm support"
 #else
+	.file	"qemu_saveusercontext.S"
 	.text
 	.globl	SYMBOL(up_saveusercontext)
 #ifndef __CYGWIN__
@@ -113,7 +114,7 @@ SYMBOL(up_saveusercontext):
 	/* Save the return PC */
 
 	movl	0(%esp), %ecx
-	movl	%ecx, (REG_PC)(%eax)
+	movl	%ecx, (REG_EIP)(%eax)
 
 	/* Save the framepointer */
 
@@ -123,7 +124,7 @@ SYMBOL(up_saveusercontext):
 
     pushf
     pop		%ecx
-	movl	%ecx, (REG_FLAGS)(%eax)
+	movl	%ecx, (REG_EFLAGS)(%eax)
  
 	/* And return 0 */
 

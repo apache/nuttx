@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/qemu/qemu_lowsetup.c
+ *  arch/x86/src/qemu/qemu_handlers.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,13 +40,19 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
+#include <arch/io.h>
 
 #include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void idt_outb(uint8_t val, uint16_t addr) __attribute__((noinline));
 
 /****************************************************************************
  * Private Data
@@ -57,77 +63,145 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_gdtentry
+ * Name idt_outb
  *
  * Description:
- *   Set the value of one GDT entry.
+ *   A slightly slower version of outb
  *
  ****************************************************************************/
 
-static void up_gdtentry(struct gdt_entry_s *entry, uint32_t base,
-                        uint32_t limit, uint8_t access, uint8_t gran)
+static void idt_outb(uint8_t val, uint16_t addr)
 {
-  entry->lowbase      = (base & 0xffff);
-  entry->midbase      = (base >> 16) & 0xff;
-  entry->hibase       = (base >> 24) & 0xff;
-
-  entry->lowlimit     = (limit & 0xffff);
-  entry->granularity  = (limit >> 16) & 0x0f;
-    
-  entry->granularity |= gran & 0xf0;
-  entry->access       = access;
+  outb(val, addr);
 }
 
 /****************************************************************************
- * Name: up_gdtinit
+ * Name: common_handler
  *
  * Description:
- *   Initialize the GDT. The Global Descriptor Table or GDT is a data
- *   structure used by Intel x86-family processors starting with the 80286
- *   in order to define the characteristics of the various memory areas used
- *   during program execution, for example the base address, the size and
- *   access privileges like executability and writability. These memory areas
- *   are called segments in Intel terminology.
+ *   Common logic for the ISR/IRQ handlers
  *
  ****************************************************************************/
 
-static void up_gdtinit(void)
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+static uint32_t *common_handler(int irq, uint32_t *regs)
 {
-  struct gdt_entry_s gdt_entries[5];
-  struct gdt_ptr_s   gdt_ptr;
+  up_ledon(LED_INIRQ);
 
-  up_gdtentry(&gdt_entries[0], 0, 0, 0, 0);                /* Null segment */
-  up_gdtentry(&gdt_entries[1], 0, 0xffffffff, 0x9a, 0xcf); /* Code segment */
-  up_gdtentry(&gdt_entries[2], 0, 0xffffffff, 0x92, 0xcf); /* Data segment */
-  up_gdtentry(&gdt_entries[3], 0, 0xffffffff, 0xfa, 0xcf); /* User mode code segment */
-  up_gdtentry(&gdt_entries[4], 0, 0xffffffff, 0xf2, 0xcf); /* User mode data segment */
+  /* Nested interrupts are not supported in this implementation.  If you want
+   * implemented nested interrupts, you would have to (1) change the way that
+   * current regs is handled and (2) the design associated with
+   * CONFIG_ARCH_INTERRUPTSTACK.
+   */
 
-  gdt_ptr.limit = (sizeof(struct gdt_entry_s) * 5) - 1;
-  gdt_ptr.base  = (uint32_t)gdt_entries;
-  gdt_flush((uint32_t )&gdt_ptr);
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
+
+  DEBUGASSERT(current_regs == NULL);
+  current_regs = regs;
+
+  /* Mask and acknowledge the interrupt */
+
+  up_maskack_irq(irq);
+
+  /* Deliver the IRQ */
+
+  irq_dispatch(irq, regs);
+
+  /* If a context switch occurred while processing the interrupt then
+   * current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
+  regs = current_regs;
+
+  /* Indicate that we are no long in an interrupt handler */
+
+  current_regs = NULL;
+
+  /* Unmask the last interrupt (global interrupts are still disabled) */
+
+  up_enable_irq(irq);
+  return regs;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowsetup
+ * Name: isr_handler
  *
  * Description:
- *   Called from qemu_head BEFORE starting the operating system in order
- *   perform any necessary, early initialization.
+ *   This gets called from ISR vector handling logic in qemu_vectors.S
  *
  ****************************************************************************/
 
-void up_lowsetup(void)
+uint32_t *isr_handler(uint32_t *regs)
 {
-  /* Initialize the Global descriptor table */
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  up_ledon(LED_INIRQ);
+  PANIC(OSERR_ERREXCEPTION); /* Doesn't return */
+  return regs;               /* To keep the compiler happy */
+#else
+  uint32_t *ret;
 
-  up_gdtinit();
+  /* Dispatch the interrupt */
 
-  /* Now perform board-specific initializations */
+  up_ledon(LED_INIRQ);
+  ret = common_handler((int)regs[REG_IRQNO], regs);
+  up_ledoff(LED_INIRQ);
+  return ret;
+#endif
+}
 
-  up_boardinitialize();
+/****************************************************************************
+ * Name: isr_handler
+ *
+ * Description:
+ *   This gets called from IRQ vector handling logic in qemu_vectors.S
+ *
+ ****************************************************************************/
+
+uint32_t *irq_handler(uint32_t *regs)
+{
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  up_ledon(LED_INIRQ);
+  PANIC(OSERR_ERREXCEPTION); /* Doesn't return */
+  return regs;               /* To keep the compiler happy */
+#else
+  uint32_t *ret;
+  int irq;
+
+  up_ledon(LED_INIRQ);
+
+  /* Get the IRQ number */
+
+  irq = (int)regs[REG_IRQNO];
+
+  /* Send an EOI (end of interrupt) signal to the PICs if this interrupt
+   * involved the slave.
+   */
+
+  if (irq >= 40)
+    {
+      /* Send reset signal to slave */
+
+      idt_outb(0x20, 0xa0);
+    }
+
+  /* Send reset signal to master */
+
+  idt_outb(0x20, 0x20);
+
+  /* Dispatch the interrupt */
+
+  ret = common_handler(irq, regs);
+  up_ledoff(LED_INIRQ);
+  return ret;
+#endif
 }
 

@@ -4,6 +4,9 @@
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
+ *   Based on Bran's kernel development tutorials. Rewritten for JamesM's
+ *   kernel development tutorials.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -44,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/io.h>
 #include <arch/board/board.h>
 
 #include "clock_internal.h"
@@ -54,8 +58,29 @@
 #include "qemu_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* Programmable interval timer (PIT)
+ *
+ *   Fpit = Fin / divisor
+ *   divisor = Fin / divisor
+ *
+ * Where:
+ *
+ *   Fpit = The desired interrupt frequency.
+ *   Fin  = PIT input frequency (PIT_CLOCK provided in board.h)
+ *
+ * The desired timer interrupt frequency is provided by the definition CLK_TCK
+ * (see include/time.h).  CLK_TCK defines the desired number of system clock
+ * ticks per second.  That value is a user configurable setting that defaults
+ * to 100 (100 ticks per second = 10 MS interval).
+ */
+
+#define PIT_DIVISOR  ((uint32_t)PIT_CLOCK/(uint32_t)CLK_TCK)
+
+#define PIT_MODE     0x43
+#define PIT_CH0      0x40
 
 /****************************************************************************
  * Private Types
@@ -64,6 +89,43 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static void pit_outb(uint8_t val, uint16_t addr) __attribute__((noinline));
+static int up_timerisr(int irq, uint32_t *regs);
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name pit_outb
+ *
+ * Description:
+ *   A slightly slower version of outb
+ *
+ ****************************************************************************/
+
+static void pit_outb(uint8_t val, uint16_t addr)
+{
+  outb(val, addr);
+}
+
+/****************************************************************************
+ * Function:  up_timerisr
+ *
+ * Description:
+ *   The timer ISR will perform a variety of services for various portions
+ *   of the systems.
+ *
+ ****************************************************************************/
+
+static int up_timerisr(int irq, uint32_t *regs)
+{
+   /* Process timer interrupt */
+
+   sched_process_timer();
+   return 0;
+}
 
 /****************************************************************************
  * Global Functions
@@ -80,5 +142,21 @@
 
 void up_timerinit(void)
 {
-#warning "Not implemented"
+  /* uint32_t to avoid compile time overflow errors */
+
+  uint32_t divisor = PIT_DIVISOR;
+  DEBUGASSERT(divisor <= 0xffff);
+
+  /* Attach to the timer interrupt handler */
+
+  (void)irq_attach(IRQ0, (xcpt_t)up_timerisr);
+
+  /* Send the command byte */
+
+  pit_outb(0x36, PIT_MODE);
+
+  /* Set the PIT input frequency divisor */
+
+  pit_outb((uint8_t)(divisor & 0xff),  PIT_CH0);
+  pit_outb((uint8_t)((divisor >> 8) & 0xff), PIT_CH0);
 }

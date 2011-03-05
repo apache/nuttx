@@ -159,7 +159,6 @@ extern int  up_saveusercontext(uint32_t *saveregs);
 extern void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
 extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 extern void up_sigdeliver(void);
-extern int  up_timerisr(int irq, uint32_t *regs);
 extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
