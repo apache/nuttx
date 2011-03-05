@@ -85,7 +85,7 @@
  * Public Types
  ****************************************************************************/
 
-/* GDT data structures
+/* GDT data structures ******************************************************
  *
  * The Global Descriptor Table or GDT is a data structure used by Intel x86-
  * family processors starting with the 80286 in order to define the
@@ -114,7 +114,33 @@ struct gdt_entry_s
 struct gdt_ptr_s
 {
   uint16_t limit;               /* The upper 16 bits of all selector limits */
-  uint32_t base;                /* The address of the first gdt_entry_t struct */
+  uint32_t base;                /* The address of the first GDT entry */
+} __attribute__((packed));
+
+/* IDT data structures ******************************************************
+ *
+ * The Interrupt Descriptor Table (IDT) is a data structure used by the x86
+ * architecture to implement an interrupt vector table. The IDT is used by the
+ * processor to determine the correct response to interrupts and exceptions.
+ */
+
+struct idt_entry_s
+{
+  uint16_t lobase;           /* Lower 16-bits of vector address for interrupt */
+  uint16_t sel;              /* Kernel segment selector */
+  uint8_t  zero;             /* This must always be zero */
+  uint8_t  flags;            /* (See documentation) */
+  uint16_t hibase;           /* Upper 16-bits of vector address for interrupt */
+} __attribute__((packed));
+
+/* A struct describing a pointer to an array of interrupt handlers.  This is
+ * in a format suitable for giving to 'lidt'.
+ */
+
+struct idt_ptr_s
+{
+  uint16_t limit;
+  uint32_t base;             /* The address of the first GDT entry */
 } __attribute__((packed));
 
 /****************************************************************************
@@ -155,6 +181,9 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
+
+EXTERN void gdt_flush(uint32_t gdt_addr);
+EXTERN void idt_flush(uint32_t idt_addr);
 
 #undef EXTERN
 #ifdef __cplusplus

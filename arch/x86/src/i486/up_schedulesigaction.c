@@ -148,15 +148,15 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver       = sigdeliver;
-              tcb->xcp.saved_pc         = current_regs[REG_PC];
-              tcb->xcp.saved_flags      = current_regs[REG_FLAGS];
+              tcb->xcp.saved_eip        = current_regs[REG_EIP];
+              tcb->xcp.saved_eflags     = current_regs[REG_EFLAGS];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              current_regs[REG_PC]      = (uint32_t)up_sigdeliver;
-              current_regs[REG_FLAGS]   = 0;
+              current_regs[REG_EIP]     = (uint32_t)up_sigdeliver;
+              current_regs[REG_EFLAGS]  = 0;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -180,15 +180,15 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.sigdeliver       = sigdeliver;
-          tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
-          tcb->xcp.saved_flags      = tcb->xcp.regs[REG_FLAGS];
+          tcb->xcp.saved_eip        = tcb->xcp.regs[REG_EIP];
+          tcb->xcp.saved_eflags     = tcb->xcp.regs[REG_EFLAGS];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
-          tcb->xcp.regs[REG_FLAGS]   = 0;
+          tcb->xcp.regs[REG_EIP]    = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_EFLAGS]  = 0;
         }
 
       irqrestore(flags);

@@ -47,6 +47,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef __CYGWIN__
+# define SYMBOL(s) _##s
+#else
+# define SYMBOL(s) s
+#endif
+
 #define KSEG 0x10
 
 /****************************************************************************
@@ -54,8 +60,17 @@
  ****************************************************************************/
 
 #ifdef CONFIG_X86_NASM
-extern _irq_handler
-extern _isr_handler
+
+/****************************************************************************
+ * Nasm externals
+ ****************************************************************************/
+
+extern SYMBOL(irq_handler)
+extern SYMBOL(isr_handler)
+
+/****************************************************************************
+ * Nasm macros
+ ****************************************************************************/
 
 /* Trace macros, use like trace 'i' to print char to serial port. */
 
@@ -74,8 +89,8 @@ extern _isr_handler
  */
 
 %macro ISR_NOERRCODE 1
-  global	vector_isr%1
-  vector_isr%1:
+  global	SYMBOL(vector_isr%1)
+  SYMBOL(vector_isr%1):
 	cli							/* Disable interrupts firstly. */
 	push	byte 0				/* Push a dummy error code. */
 	push	byte %1				/* Push the interrupt number. */
@@ -87,8 +102,8 @@ extern _isr_handler
  */
 
 %macro ISR_ERRCODE 1
-  global	vector_isr%1
-  vector_isr%1:
+  global	SYMBOL(vector_isr%1)
+  SYMBOL(vector_isr%1):
 	cli							/* Disable interrupts. */
 	push	byte %1				/* Push the interrupt number */
 	jmp		isr_common
@@ -99,14 +114,18 @@ extern _isr_handler
  */
 
 %macro IRQ 2
-  global	vector_irq%1
-  vector_irq%1:
+  global	SYMBOL(vector_irq%1)
+  SYMBOL(vector_irq%1):
 	cli
 	push	byte 0
 	push	byte %2
 	jmp		irq_common
 %endmacro
 		
+/****************************************************************************
+ * Nasm vectors
+ ****************************************************************************/
+
 /* The following will be the vector address programmed into the IDT */
 
 ISR_NOERRCODE		ISR0
@@ -158,10 +177,15 @@ IRQ				13,	IRQ13
 IRQ				14,	IRQ14
 IRQ				15,	IRQ15
 
-/* This is our common ISR stub. It saves the processor state, sets up for
- * kernel mode segments, calls the C-level fault handler, and finally restores
- * the stack frame.
- */
+/****************************************************************************
+ * Name: isr_common
+ *
+ * Description:
+ *   This is the common ISR logic. It saves the processor state, sets up for
+ *   kernel mode segments, calls the C-level fault handler, and finally
+ *   restores the stack frame.
+ *
+ ****************************************************************************/
 
 isr_common:
 /*	trace	'S' */
@@ -176,7 +200,7 @@ isr_common:
 	mov		fs, ax
 	mov		gs, ax
 
-	call	_isr_handler
+	call	SYMBOL(isr_handler)
 
 	pop		ebx					/* Reload the original data segment descriptor */
 	mov		ds, bx
@@ -189,10 +213,15 @@ isr_common:
 	sti
 	iret						/* Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP */
 
-/* This is our common IRQ stub. It saves the processor state, sets up for
- * kernel mode segments, calls the C-level fault handler, and finally restores
- * the stack frame.
- */
+/****************************************************************************
+ * Name: irq_common
+ *
+ * Description:
+ *   This is the common IRQ logic. It saves the processor state, sets up for
+ *   kernel mode segments, calls the C-level fault handler, and finally
+ *   restores the stack frame.
+ *
+ ****************************************************************************/
 
 irq_common:
 /*	trace	'R' */
@@ -207,7 +236,7 @@ irq_common:
 	mov		fs, ax
 	mov		gs, ax
 
-	call	_irq_handler
+	call	SYMBOL(irq_handler)
 
 	pop		ebx					/* Reload the original data segment descriptor */
 	mov		ds, bx
@@ -226,8 +255,18 @@ irq_common:
  * GAS .text
  ****************************************************************************/
 
-	.globl	_irq_handler
-	.globl	_isr_handler
+	.file	"qemu_vectors.S"
+
+/****************************************************************************
+ * GAS globals
+ ****************************************************************************/
+
+	.globl	SYMBOL(irq_handler)
+	.globl	SYMBOL(isr_handler)
+
+/****************************************************************************
+ * GAS macros
+ ****************************************************************************/
 
 /* Trace macros, use like trace 'i' to print char to serial port. */
 
@@ -246,8 +285,8 @@ irq_common:
  */
 
 	.macro ISR_NOERRCODE, intno
-	.globl	vector_isr\intno
-vector_isr\intno:
+	.globl	SYMBOL(vector_isr\intno)
+SYMBOL(vector_isr\intno):
 	cli							/* Disable interrupts firstly. */
 	push	$0					/* Push a dummy error code. */
 	push	$\intno				/* Push the interrupt number. */
@@ -259,8 +298,8 @@ vector_isr\intno:
  */
 
 	.macro	ISR_ERRCODE, intno
-	.globl	vector_isr\intno
-vector_isr\intno:
+	.globl	SYMBOL(vector_isr\intno)
+SYMBOL(vector_isr\intno):
 	cli							/* Disable interrupts firstly. */
 	push	$\intno				/* Push the interrupt number. */
 	jmp		isr_common			/* Go to the common handler code. */
@@ -271,8 +310,8 @@ vector_isr\intno:
  */
 
 	.macro	IRQ, irqno, intno
-	.globl	vector_irq\irqno
-vector_irq\irqno:
+	.globl	SYMBOL(vector_irq\irqno)
+SYMBOL(vector_irq\irqno):
 	cli							/* Disable interrupts firstly. */
 	push	$0					/* Push a dummy error code. */
 	push	$\intno				/* Push the interrupt number. */
@@ -330,66 +369,88 @@ vector_irq\irqno:
 	IRQ				14,	IRQ14
 	IRQ				15,	IRQ15
 
-/* This is our common ISR stub. It saves the processor state, sets up for
- * kernel mode segments, calls the C-level fault handler, and finally restores
- * the stack frame.
- */
+/****************************************************************************
+ * Name: isr_common
+ *
+ * Description:
+ *   This is the common ISR logic. It saves the processor state, sets up for
+ *   kernel mode segments, calls the C-level fault handler, and finally
+ *   restores the stack frame.
+ *
+ ****************************************************************************/
 
+#ifndef __CYGWIN__
+	.type	isr_common, @function
+#endif
 isr_common:
 /*	trace	'S' */
 	pusha						/* Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax */
 
-	mov		%ax, ds				/* Lower 16-bits of eax = ds. */
+	mov		%ax, %ds			/* Lower 16-bits of eax = ds. */
 	pushl	%eax				/* Save the data segment descriptor */
 
 	mov		%ax, KSEG			/* Load the kernel data segment descriptor */
-	mov		ds, %ax
-	mov		es, %ax
-	mov		fs, %ax
-	mov		gs, %ax
+	mov		%ds, %ax
+	mov		%es, %ax
+	mov		%fs, %ax
+	mov		%gs, %ax
 
-	call	_isr_handler
+	call	SYMBOL(isr_handler)
 
-	pop		ebx					/* Reload the original data segment descriptor */
-	mov		ds, %bx
-	mov		es, %bx
-	mov		fs, %bx
-	mov		gs, %bx
+	pop		%ebx				/* Reload the original data segment descriptor */
+	mov		%ds, %bx
+	mov		%es, %bx
+	mov		%fs, %bx
+	mov		%gs, %bx
 
 	popa						/* Pops edi,esi,ebp... */
 	add		%esp, 8				/* Cleans up the pushed error code and pushed ISR number */
 	sti
+#ifndef __CYGWIN__
+	.size	isr_common, . - isr_common
+#endif
 	iret						/* Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP */
 
-/* This is our common IRQ stub. It saves the processor state, sets up for
- * kernel mode segments, calls the C-level fault handler, and finally restores
- * the stack frame.
- */
+/****************************************************************************
+ * Name: irq_common
+ *
+ * Description:
+ *   This is the common IRQ logic. It saves the processor state, sets up for
+ *   kernel mode segments, calls the C-level fault handler, and finally
+ *   restores the stack frame.
+ *
+ ****************************************************************************/
 
+#ifndef __CYGWIN__
+	.type	irq_common, @function
+#endif
 irq_common:
 /*	trace	'R' */
 	pusha						/* Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax */
 
-	mov		%ax, ds				/* Lower 16-bits of eax = ds. */
+	mov		%ax, %ds				/* Lower 16-bits of eax = ds. */
 	push	%eax				/* Save the data segment descriptor */
 
 	mov		%ax, KSEG			/* Load the kernel data segment descriptor */
-	mov		ds, %ax
-	mov		es, %ax
-	mov		fs, %ax
-	mov		gs, %ax
+	mov		%ds, %ax
+	mov		%es, %ax
+	mov		%fs, %ax
+	mov		%gs, %ax
 
-	call	_irq_handler
+	call	SYMBOL(irq_handler)
 
 	pop		%ebx				/* Reload the original data segment descriptor */
-	mov		ds, %bx
-	mov		es, %bx
-	mov		fs, %bx
-	mov		gs, %bx
+	mov		%ds, %bx
+	mov		%es, %bx
+	mov		%fs, %bx
+	mov		%gs, %bx
 
 	popa						/* Pops edi,esi,ebp... */
 	add		%esp, 8				/* Cleans up the pushed error code and pushed ISR number */
 	sti
 	iret						/* Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP */
+#ifndef __CYGWIN__
+	.size	irq_common, . - irq_common
+#endif
 	.end
 #endif /* CONFIG_X86_NASM */

@@ -91,14 +91,14 @@ void up_initial_state(_TCB *tcb)
 
   /* Save the task entry point */
 
-  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
+  xcp->regs[REG_EIP]     = (uint32_t)tcb->start;
 
   /* Enable or disable interrupts, based on user configuration.  If the IF
    * bit is set, maskable interrupts will be enabled.
    */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_FLAGS]   = X86_FLAGS_IF;
+  xcp->regs[REG_EFLAGS]  = X86_FLAGS_IF;
 #endif
 }
 

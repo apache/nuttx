@@ -54,28 +54,29 @@
  * Definitions
  ****************************************************************************/
 
-/* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
+/* Common register save structgure created by up_saveusercontext() and by
+ * ISR/IRQ interrupt processing.
+ */
 
-#ifdef __ASSEMBLY__
-# define REG_EBX   (0*4)
-# define REG_ESI   (1*4)
-# define REG_EDI   (2*4)
-# define REG_EBP   (3*4)
-# define REG_SP    (4*4)
-# define REG_PC    (5*4)
-# define REG_FLAGS (6*4)
-#else
-# define REG_EBX   (0)
-# define REG_ESI   (1)
-# define REG_EDI   (2)
-# define REG_EBP   (3)
-# define REG_SP    (4)
-# define REG_PC    (5)
-# define REG_FLAGS (6)
-#endif /* __ASSEMBLY__ */
+#define REG_DS            (0)  /* Data segment selector */
+#define REG_EDI           (1)  /* Saved by pusha */
+#define REG_ESI           (2)  /* "   " "" "   " */
+#define REG_EBP           (3)  /* "   " "" "   " */
+#define REG_ESP           (4)  /* "   " "" "   " */
+#define REG_EBX           (5)  /* "   " "" "   " */
+#define REG_EDX           (6)  /* "   " "" "   " */
+#define REG_ECX           (7)  /* "   " "" "   " */
+#define REG_EAX           (8)  /* "   " "" "   " */
+#define REG_IRQNO         (9)  /* Interrupt number */
+#define REG_ERRCODE      (10)  /* Error code */
+#define REG_EIP          (11)  /* Pushed by process on interrupt processing */
+#define REG_CS           (12)  /* "    " "" "     " "" "       " "        " */
+#define REG_EFLAGS       (13)  /* "    " "" "     " "" "       " "        " */
+#define REG_SP           (14)  /* "    " "" "     " "" "       " "        " */
+#define REG_SS           (15)  /* "    " "" "     " "" "       " "        " */
 
-#define XCPTCONTEXT_REGS    (7)
-#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
+#define XCPTCONTEXT_REGS (16)
+#define XCPTCONTEXT_SIZE (4 * XCPTCONTEXT_REGS)
 
 /****************************************************************************
  * Public Types
@@ -93,10 +94,12 @@ struct xcptcontext
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
 
-  /* These are saved copies of LR and CPSR used during signal processing. */
+  /* These are saved copies of instruction pointer and EFLAGS used during
+   * signal processing.
+   */
 
-  uint32_t saved_pc;
-  uint32_t saved_flags;
+  uint32_t saved_eip;
+  uint32_t saved_eflags;
 #endif
 
   /* Register save area */

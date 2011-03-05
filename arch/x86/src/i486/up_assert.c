@@ -119,10 +119,19 @@ static inline void up_registerdump(void)
 
   if (current_regs)
     {
-      lldbg("ebx:%08x esi:%08x edi:%08x ebp:%08x\n",
-            current_regs[REG_EBX], current_regs[REG_ESI], current_regs[REG_EDI], current_regs[REG_EBP]);
-      lldbg(" sp:%08x  pc:%08x\n",
-            current_regs[REG_SP], current_regs[REG_PC]);
+      lldbg(" ds:%08x irq:%08x err:%08x\n",
+            current_regs[REG_DS], current_regs[REG_IRQNO],
+			current_regs[REG_ERRCODE]);
+      lldbg("edi:%08x esi:%08x ebp:%08x esp:%08x\n",
+            current_regs[REG_EDI], current_regs[REG_ESI],
+			current_regs[REG_EBP], current_regs[REG_ESP]);
+      lldbg("ebx:%08x edx:%08x ecx:%08x eax:%08x\n",
+            current_regs[REG_EBX], current_regs[REG_EDX],
+			current_regs[REG_ECX], current_regs[REG_EAX]);
+      lldbg("eip:%08x  cs:%08x flg:%08x sp:%08x ss:%08x\n",
+            current_regs[REG_EIP], current_regs[REG_CS],
+			current_regs[REG_EFLAGS], current_regs[REG_SP],
+			current_regs[REG_SS]);
     }
 }
 #else

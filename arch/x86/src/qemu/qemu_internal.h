@@ -380,6 +380,65 @@ EXTERN void i486_dmadump(DMA_HANDLE handle, const struct i486_dmaregs_s *regs,
 #endif
 #endif
 
+/****************************************************************************
+ * Name: vector_*
+ *
+ * Description:
+ *   These are the various ISR/IRQ vector address exported from
+ *   qemu_vectors.S.  These addresses need to have global scope so that they
+ *   can be known to the interrupt intialization logic in qemu_irq.c.
+ *
+ ****************************************************************************/
+
+EXTERN void vector_isr0(void);
+EXTERN void vector_isr1(void);
+EXTERN void vector_isr2(void);
+EXTERN void vector_isr3(void);
+EXTERN void vector_isr4(void);
+EXTERN void vector_isr5(void);
+EXTERN void vector_isr6(void);
+EXTERN void vector_isr7(void);
+EXTERN void vector_isr8(void);
+EXTERN void vector_isr9(void);
+EXTERN void vector_isr10(void);
+EXTERN void vector_isr11(void);
+EXTERN void vector_isr12(void);
+EXTERN void vector_isr13(void);
+EXTERN void vector_isr14(void);
+EXTERN void vector_isr15(void);
+EXTERN void vector_isr16(void);
+EXTERN void vector_isr17(void);
+EXTERN void vector_isr18(void);
+EXTERN void vector_isr19(void);
+EXTERN void vector_isr20(void);
+EXTERN void vector_isr21(void);
+EXTERN void vector_isr22(void);
+EXTERN void vector_isr23(void);
+EXTERN void vector_isr24(void);
+EXTERN void vector_isr25(void);
+EXTERN void vector_isr26(void);
+EXTERN void vector_isr27(void);
+EXTERN void vector_isr28(void);
+EXTERN void vector_isr29(void);
+EXTERN void vector_isr30(void);
+EXTERN void vector_isr31(void);
+EXTERN void vector_irq0(void);
+EXTERN void vector_irq1(void);
+EXTERN void vector_irq2(void);
+EXTERN void vector_irq3(void);
+EXTERN void vector_irq4(void);
+EXTERN void vector_irq5(void);
+EXTERN void vector_irq6(void);
+EXTERN void vector_irq7(void);
+EXTERN void vector_irq8(void);
+EXTERN void vector_irq9(void);
+EXTERN void vector_irq10(void);
+EXTERN void vector_irq11(void);
+EXTERN void vector_irq12(void);
+EXTERN void vector_irq13(void);
+EXTERN void vector_irq14(void);
+EXTERN void vector_irq15(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
