@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-ENTRY(.loader)
+ENTRY(__start)
 SECTIONS
 {
 	. = 0x00100000;
@@ -64,7 +64,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+	}
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -72,7 +72,7 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > sram
+	}
 
 	/* Stabs debugging sections.	*/
 	.stab 0 : { *(.stab) }
