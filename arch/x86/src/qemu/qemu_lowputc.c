@@ -67,6 +67,14 @@
 
 void up_lowputc(char ch)
 {
+  /* Wait until the BIOS can accept another character (so that the OS will
+   * continue to run.
+   */
+
+  while ((inb(0x3f8+5) & (1 << 5)) == 0);
+
+  /* Then output the character */
+
   outb(ch, 0x3f8);
 }
 

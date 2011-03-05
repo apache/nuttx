@@ -57,6 +57,57 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_gdtentry
+ *
+ * Description:
+ *   Set the value of one GDT entry.
+ *
+ ****************************************************************************/
+
+static void up_gdtentry(struct gdt_entry_s *entry, uint32_t base,
+                        uint32_t limit, uint8_t access, uint8_t gran)
+{
+  entry->lowbase      = (base & 0xffff);
+  entry->midbase      = (base >> 16) & 0xff;
+  entry->hibase       = (base >> 24) & 0xff;
+
+  entry->lowlimit     = (limit & 0xffff);
+  entry->granularity  = (limit >> 16) & 0x0f;
+    
+  entry->granularity |= gran & 0xf0;
+  entry->access       = access;
+}
+
+/****************************************************************************
+ * Name: up_gdtinit
+ *
+ * Description:
+ *   Initialize the GDT. The Global Descriptor Table or GDT is a data
+ *   structure used by Intel x86-family processors starting with the 80286
+ *   in order to define the characteristics of the various memory areas used
+ *   during program execution, for example the base address, the size and
+ *   access privileges like executability and writability. These memory areas
+ *   are called segments in Intel terminology.
+ *
+ ****************************************************************************/
+
+static void up_gdtinit(void)
+{
+  struct gdt_entry_s gdt_entries[5];
+  struct gdt_ptr_s   gdt_ptr;
+
+  up_gdtentry(0, 0, 0, 0, 0);                /* Null segment */
+  up_gdtentry(1, 0, 0xffffffff, 0x9a, 0xcf); /* Code segment */
+  up_gdtentry(2, 0, 0xffffffff, 0x92, 0xcf); /* Data segment */
+  up_gdtentry(3, 0, 0xffffffff, 0xfa, 0xcf); /* User mode code segment */
+  up_gdtentry(4, 0, 0xffffffff, 0xf2, 0xcf); /* User mode data segment */
+
+  gdt_ptr.limit = (sizeof(struct gdt_entry_s) * 5) - 1;
+  gdt_ptr.base  = (uint32_t)gdt_entries;
+  gdt_flush((uint32_t )&gdt_ptr);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

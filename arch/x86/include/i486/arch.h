@@ -82,6 +82,42 @@
 #define X86_EFLAGS_ID        (1 << 21) /* Bit 21: CPUID detection flag (Pentium+) */
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* GDT data structures
+ *
+ * The Global Descriptor Table or GDT is a data structure used by Intel x86-
+ * family processors starting with the 80286 in order to define the
+ * characteristics of the various memory areas used during program execution, 
+ * for example the base address, the size and access privileges like
+ * executability and writability. These memory areas are called segments in
+ * Intel terminology.
+ */
+
+/* This structure defines one segment */
+
+struct gdt_entry_s
+{
+  uint16_t lowlimit;           /* The lower 16 bits of the limit */
+  uint16_t lowbase;            /* The lower 16 bits of the base */
+  uint8_t  midbase;            /* The next 8 bits of the base */
+  uint8_t  access;             /* Access flags, determine ring segment can be used in */
+  uint8_t  granularity;
+  uint8_t  hibase;             /* The last 8 bits of the base */
+} __attribute__((packed));
+
+/* This structure refers to the array of GDT entries, and is in the format
+ * required by the lgdt instruction.
+ */
+
+struct gdt_ptr_s
+{
+  uint16_t limit;               /* The upper 16 bits of all selector limits */
+  uint32_t base;                /* The address of the first gdt_entry_t struct */
+} __attribute__((packed));
+
+/****************************************************************************
  * Inline functions
  ****************************************************************************/
 
