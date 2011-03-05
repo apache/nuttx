@@ -50,7 +50,7 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 
 # Required QEMU files
 
-CHIP_ASRCS	= qemu_saveusercontext.S qemu_fullcontextrestore.S
+CHIP_ASRCS	= qemu_saveusercontext.S qemu_fullcontextrestore.S qemu_vectors.S
 CHIP_CSRCS	= qemu_idle.c qemu_irq.c qemu_lowputc.c qemu_lowsetup.c \
 			  qemu_timerisr.c
 
