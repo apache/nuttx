@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/x86/src/qemu/qemu_fullcontextrestore.S
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,24 +96,35 @@
 	.type	SYMBOL(up_fullcontextrestore), @function
 #endif
 SYMBOL(up_fullcontextrestore):
-	movl	4(%esp), %ecx      /* U_pthread_jmpbuf in %ecx.  */
-	movl	8(%esp), %eax      /* Second argument is return value.  */
+	movl	4(%esp), %ecx      /* Register save area in %ecx.  */
 
-	/* Save the return address now.  */
+	/* Disable interrupts now (the will be conditionally re-enabled below) */
 
-	movl (REG_PC)(%ecx), %edx
+	cli
+
+	/* Save the return address.  */
+
+	movl	(REG_PC)(%ecx), %edx
 
 	/* Restore registers.  */
 
-	movl (REG_EBX)(%ecx), %ebx
-	movl (REG_ESI)(%ecx), %esi
-	movl (REG_EDI)(%ecx), %edi
-	movl (REG_EBP)(%ecx), %ebp
-	movl (REG_SP)(%ecx), %esp
+	movl	(REG_EBX)(%ecx), %ebx
+	movl	(REG_ESI)(%ecx), %esi
+	movl	(REG_EDI)(%ecx), %edi
+	movl	(REG_EBP)(%ecx), %ebp
+	movl	(REG_SP)(%ecx), %esp
 
-	/* Jump to saved PC.  */
+    /* Conditionally restore interrupts */
 
-	jmp *%edx
+	testl	$512, (REG_FLAGS)(%ecx)
+	je		.Ldisabled
+	sti
+.Ldisabled:
+
+	/* Jump to saved PC with non-zero return value in %eax.  */
+
+	movl	$1, %eax
+	jmp		*%edx
 #ifndef __CYGWIN__
 	.size SYMBOL(up_fullcontextrestore), . - SYMBOL(up_fullcontextrestore)
 #endif
