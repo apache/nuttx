@@ -65,6 +65,7 @@
 #   the 100 second delay then adjust CONFIG_BOARD_LOOPSPERMSEC until
 #   the delay actually is 100 seconds.
 # CONFIG_ARCH_DMA - Support DMA initialization
+# CONFIG_X86_NASM - Using Nasm instead of GAS
 #
 CONFIG_ARCH=x86
 CONFIG_ARCH_X86=y
@@ -82,6 +83,7 @@ CONFIG_ARCH_LEDS=n
 CONFIG_ARCH_BUTTONS=n
 CONFIG_ARCH_CALIBRATION=n
 CONFIG_ARCH_DMA=n
+CONFIG_X86_NASM=n
 
 #
 # General OS setup
@@ -213,7 +215,7 @@ CONFIG_ARCH_KMALLOC=n
 CONFIG_ARCH_KZMALLOC=n
 CONFIG_ARCH_KFREE=n
 
-##
+#
 # General build options
 #
 # CONFIG_RRLOAD_BINARY - make the rrload binary format used with BSPs from

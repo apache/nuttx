@@ -1526,3 +1526,5 @@
 	  i486 port.
 	* arch/arm/src/stm32/stm32_spi.c -- Correct base address of SPI3 (reported by
 	  Uros Platise).
+	* drivers/mmcsd/mmcsd_sdio.c -- Correct a loop termination condition (also
+	  reported by Uros Platise).

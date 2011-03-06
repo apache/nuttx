@@ -42,13 +42,13 @@ ARCH_SUBDIR	= i486
 endif
 
 ifeq ($(WINTOOL),y)
-  NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx$(EXEEXT)}"
+  NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx}"
   CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
   		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
 		   -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}" \
 		   -I "${shell cygpath -w $(TOPDIR)/sched}"
 else
-  NUTTX		= $(TOPDIR)/nuttx$(EXEEXT)
+  NUTTX		= $(TOPDIR)/nuttx
   CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common \
 		   -I$(ARCH_SRCDIR)/$(ARCH_SUBDIR) -I$(TOPDIR)/sched
 endif
