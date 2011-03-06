@@ -43,13 +43,14 @@ CFLAGS		+= -I$(TOPDIR)/sched
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= up_sysclock.c up_boot.c up_leds.c up_buttons.c up_spi.c up_usbdev.c 
+CSRCS		= sysclock.c boot.c leds.c buttons.c spi.c \
+			  usbdev.c sdcard.c ramtron.c power.c
 
 ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
+CSRCS		+= nsh.c
 endif
 ifeq ($(CONFIG_APP_DIR),examples/usbstorage)
-CSRCS		+= up_usbstrg.c
+CSRCS		+= usbstrg.c
 endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 

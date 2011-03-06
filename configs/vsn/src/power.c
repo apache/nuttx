@@ -1,11 +1,10 @@
 /****************************************************************************
- * configs/vsn-1.2/src/up_buttons.c
+ * config/vsn/src/ramtron.c
+ * arch/arm/src/board/ramtron.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
- *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
- *            Uros Platise <uros.platise@isotel.eu>
+ *   Authors: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,49 +35,23 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
 #include <nuttx/config.h>
+
 #include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
 #include <arch/board/board.h>
-#include "vsn-internal.h"
+#include "vsn.h"
 
-#ifdef CONFIG_ARCH_BUTTONS
+void board_power_register(void);
+void board_power_adjust(void);
+void board_power_status(void);
 
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_buttoninit
- ****************************************************************************/
-
-void up_buttoninit(void)
+void board_power_setbootvoltage(void)
 {
-  stm32_configgpio(GPIO_PUSHBUTTON);
+	stm32_configgpio(GPIO_PVS);
 }
 
-/****************************************************************************
- * Name: up_buttons
- ****************************************************************************/
-
-uint8_t up_buttons(void)
-{
-  return stm32_gpioread(GPIO_PUSHBUTTON);
-}
-
-#endif /* CONFIG_ARCH_BUTTONS */
+void board_power_reboot(void);
+void board_power_off(void);

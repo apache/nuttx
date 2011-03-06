@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/vsn/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/vsn/src/spi.c
+ * arch/arm/src/board/spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -42,20 +42,20 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spi.h>
+#include <arch/board/board.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
-#include <arch/board/board.h>
-
 #include "up_arch.h"
 #include "chip.h"
+#include "stm32_gpio.h"
 #include "stm32_internal.h"
-#include "vsn-internal.h"
+#include "vsn.h"
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
 
 /************************************************************************************
  * Definitions
@@ -97,16 +97,15 @@
 
 void weak_function stm32_spiinitialize(void)
 {
-  /* NOTE: Clocking for SPI1 and/or SPI2 was already provided in stm32_rcc.c.
+  /* NOTE: Clocking for SPI1 and/or SPI2 and SPI3 was already provided in stm32_rcc.c.
    *       Configurations of SPI pins is performed in stm32_spi.c.
-   *       Here, we only initialize chip select pins unique to the board
-   *       architecture.
+   *       Here, we only initialize chip select pins unique to the board architecture.
    */
 
-#ifdef CONFIG_STM32_SPI1
-  /* Configure the SPI-based FLASH CS GPIO */
+#ifdef CONFIG_STM32_SPI3
 
-  stm32_configgpio(GPIO_FLASH_CS);
+  // Configure the SPI-based FRAM CS GPIO
+  stm32_configgpio(GPIO_FRAM_CS);
 #endif
 }
 
@@ -139,13 +138,6 @@ void weak_function stm32_spiinitialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-
-  if (devid == SPIDEV_FLASH)
-  {
-    /* Set the GPIO low to select and high to de-select */
-
-    stm32_gpiowrite(GPIO_FLASH_CS, !selected);
-  }
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -170,6 +162,11 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  if (devid == SPIDEV_FLASH)
+  {
+    /* Set the GPIO low to select and high to de-select */
+    stm32_gpiowrite(GPIO_FRAM_CS, !selected);
+  }
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

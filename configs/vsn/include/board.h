@@ -55,6 +55,16 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+ 
+/* Board Configuration:
+ *  - USART1, is the default bootloader and console
+ *  - SPI1 is wired to expansion port
+ *  - SPI2 is used for radio module
+ *  - SPI3 has direct connection with FRAM
+ *  - SDCard, conencts the microSD and shares the control lines with Sensor Interface
+ *    to select Amplifier Gain
+ *  - ...
+ */
 
 /* Clocking *************************************************************************/
 
@@ -103,33 +113,44 @@
 
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled 
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode.  These values have not been
- * tuned!!!
+ * to service FIFOs in interrupt driven mode. 
+ * 
+ * SDcard default speed has max SDIO_CK freq of 25 MHz (12.5 Mbps)
+ * After selection of high speed freq may be 50 MHz (25 Mbps)
+ * Recommended default voltage: 3.3 V
  *
- * \todo Not checked yet! Uros.
- * HCLK=36MHz, SDIOCLK=? MHz, SDIO_CK=HCLK/(178+2)=400 KHz 
+ * HCLK=36MHz, SDIOCLK=36 MHz, SDIO_CK=HCLK/(88+2)=400 KHz 
  */
   
-#define SDIO_INIT_CLKDIV       (178 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_INIT_CLKDIV       (88 << SDIO_CLKCR_CLKDIV_SHIFT)
 
-/* DMA ON:  HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(2+2)=18 MHz
- * DMA OFF: HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(3+2)=14.4 MHz
+/* DMA ON:  HCLK=36 MHz, SDIOCLK=36MHz, SDIO_CK=HCLK/(0+2)=18 MHz
+ * DMA OFF: HCLK=36 MHz, SDIOCLK=36MHz, SDIO_CK=HCLK/(1+2)=12 MHz
  */
 
 #ifdef CONFIG_SDIO_DMA
-#  define SDIO_MMCXFR_CLKDIV   (2 << SDIO_CLKCR_CLKDIV_SHIFT) 
+#  define SDIO_MMCXFR_CLKDIV   (0 << SDIO_CLKCR_CLKDIV_SHIFT) 
 #else
-#  define SDIO_MMCXFR_CLKDIV   (3 << SDIO_CLKCR_CLKDIV_SHIFT) 
+#  ifndef CONFIG_DEBUG
+#    define SDIO_MMCXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#  else
+#    define SDIO_MMCXFR_CLKDIV    (10 << SDIO_CLKCR_CLKDIV_SHIFT)
+#  endif
 #endif
 
-/* DMA ON:  HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(1+2)=24 MHz
- * DMA OFF: HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(3+2)=14.4 MHz
+/* DMA ON:  HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(0+2)=18 MHz
+ * DMA OFF: HCLK=72 MHz, SDIOCLK=72MHz, SDIO_CK=HCLK/(1+2)=12 MHz
+ * Extra slow down in debug mode to get rid of underruns.
  */
 
 #ifdef CONFIG_SDIO_DMA
-#  define SDIO_SDXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#  define SDIO_SDXFR_CLKDIV    (0 << SDIO_CLKCR_CLKDIV_SHIFT)
 #else
-#  define SDIO_SDXFR_CLKDIV    (3 << SDIO_CLKCR_CLKDIV_SHIFT)
+#  ifndef CONFIG_DEBUG
+#    define SDIO_SDXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#  else
+#    define SDIO_SDXFR_CLKDIV    (10 << SDIO_CLKCR_CLKDIV_SHIFT)
+#  endif
 #endif
 
 /* LED definitions ******************************************************************/
@@ -145,8 +166,6 @@
 #define LED_ASSERTION     6  /* ... */
 #define LED_PANIC         7  /* ... */
 #define LED_IDLE		  8	 /* shows idle state */
-
-/* eXternal connector pins */
 
 
 /************************************************************************************
@@ -196,6 +215,11 @@ EXTERN void stm32_boardinitialize(void);
 EXTERN void up_buttoninit(void);
 EXTERN uint8_t up_buttons(void);
 #endif
+
+/* Other peripherals startup routines, all returning OK on success */
+EXTERN int up_sdcard(void);
+EXTERN int up_ramtron(void);
+
 
 #undef EXTERN
 #if defined(__cplusplus)

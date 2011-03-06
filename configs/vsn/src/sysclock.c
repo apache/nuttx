@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/vsn-1.2/src/up_sysclock.c
+ * configs/vsn/src/sysclock.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  * 
