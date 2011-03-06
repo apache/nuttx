@@ -2613,7 +2613,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
       elapsed = g_system_timer - start;
     }
-  while (elapsed < TICK_PER_SEC || ret != OK);
+  while (elapsed < TICK_PER_SEC && ret != OK);
 
   /* We get here when the above loop completes, either (1) we could not
    * communicate properly with the card due to errors (and the loop times
