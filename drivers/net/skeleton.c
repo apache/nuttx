@@ -642,12 +642,12 @@ static int skel_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 
 int skel_initialize(int intf)
 {
-  struct lpc17_driver_s *priv;
+  struct skel_driver_s *priv;
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(inf <  ONFIG_skeleton_NINTERFACES);
-  priv = &g_ethdrvr[intf];
+  DEBUGASSERT(inf < CONFIG_skeleton_NINTERFACES);
+  priv = &g_skel[intf];
 
    /* Check if a Ethernet chip is recognized at its I/O base */
 

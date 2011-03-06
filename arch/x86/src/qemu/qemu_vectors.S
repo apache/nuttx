@@ -296,14 +296,10 @@ irq_common:
 
 /* Trace macros, use like trace 'i' to print char to serial port. */
 
-	.macro	io_outb, addr, data
-	mov		dx, $\addr
-	mov		al, $\data
-	out		dx, al
-	.endm
-
 	.macro	trace, ch
-	io_outb	0x3f8, \ch
+	mov		$0x3f8, %dx
+	mov		$\ch, %al
+	out		%al, %dx
 	.endm
 
 /* This macro creates a stub for an ISR which does NOT pass it's own

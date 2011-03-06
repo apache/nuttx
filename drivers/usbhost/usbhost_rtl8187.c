@@ -34,6 +34,9 @@
  *
  ****************************************************************************/
 
+/* @TODO TEMPORARILY. REMOVE LATER!!! */
+#define CONFIG_WLAN_IRQ 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -54,6 +57,25 @@
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
+
+#if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <time.h>
+#include <string.h>
+#include <debug.h>
+#include <wdog.h>
+#include <errno.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include <net/uip/uip.h>
+#include <net/uip/uip-arp.h>
+#include <net/uip/uip-arch.h>
+
+#endif /* CONFIG_NET && CONFIG_NET_WLAN */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,6 +104,30 @@
 #define USBHOST_ALLFOUND    0x07
 
 #define USBHOST_MAX_CREFS   0x7fff
+
+#if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
+/* CONFIG_WLAN_NINTERFACES determines the number of physical interfaces
+ * that will be supported.
+ */
+
+#ifndef CONFIG_WLAN_NINTERFACES
+# define CONFIG_WLAN_NINTERFACES 1
+#endif
+
+/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+
+#define WLAN_WDDELAY   (1*CLK_TCK)
+#define WLAN_POLLHSEC  (1*2)
+
+/* TX timeout = 1 minute */
+
+#define WLAN_TXTIMEOUT (60*CLK_TCK)
+
+/* This is a helper pointer for accessing the contents of the WLAN header */
+
+#define BUF ((struct uip_eth_hdr *)wlan->wl_dev.d_buf)
+
+#endif /* CONFIG_NET && CONFIG_NET_WLAN */
 
 /****************************************************************************
  * Private Types
@@ -114,6 +160,25 @@ struct usbhost_state_s
   usbhost_ep_t            epin;         /* IN endpoint */
   usbhost_ep_t            epout;        /* OUT endpoint */
 };
+
+#if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
+
+ /* The wlan_driver_s encapsulates all state information for a single hardware
+  * interface
+  */
+
+ struct wlan_driver_s
+ {
+   bool wl_bifup;               /* true:ifup false:ifdown */
+   WDOG_ID wl_txpoll;           /* TX poll timer */
+   WDOG_ID wl_txtimeout;        /* TX timeout timer */
+
+   /* This holds the information visible to uIP/NuttX */
+
+   struct uip_driver_s wl_dev;  /* Interface understood by uIP */
+ };
+
+#endif /* CONFIG_NET && CONFIG_NET_WLAN */
 
 /****************************************************************************
  * Private Function Prototypes
@@ -172,6 +237,36 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *class);
 
 /* Driver methods -- depend upon the type of NuttX driver interface exported */
 
+#if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
+
+/* Common TX logic */
+
+static int  wlan_transmit(FAR struct wlan_driver_s *wlan);
+static int  wlan_uiptxpoll(struct uip_driver_s *dev);
+
+/* Interrupt handling */
+
+static void wlan_receive(FAR struct wlan_driver_s *wlan);
+static void wlan_txdone(FAR struct wlan_driver_s *wlan);
+static int  wlan_interrupt(int irq, FAR void *context);
+
+/* Watchdog timer expirations */
+
+static void wlan_polltimer(int argc, uint32_t arg, ...);
+static void wlan_txtimeout(int argc, uint32_t arg, ...);
+
+/* NuttX callback functions */
+
+static int wlan_ifup(struct uip_driver_s *dev);
+static int wlan_ifdown(struct uip_driver_s *dev);
+static int wlan_txavail(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_IGMP
+static int wlan_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int wlan_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+#endif
+
+#endif /* CONFIG_NET && CONFIG_NET_WLAN */
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -202,6 +297,12 @@ static struct usbhost_registry_s g_wlan =
 /* This is a bitmap that is used to allocate device names /dev/wlana-z. */
 
 static uint32_t g_devinuse;
+
+#if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
+
+static struct wlan_driver_s g_wlan1[CONFIG_WLAN_NINTERFACES];
+
+#endif /* CONFIG_NET && CONFIG_NET_WLAN */
 
 /****************************************************************************
  * Private Functions
@@ -1034,6 +1135,490 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
   return OK;
 }
 
+#if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
+
+/****************************************************************************
+ * Function: wlan_transmit
+ *
+ * Description:
+ *   Start hardware transmission.  Called either from the txdone interrupt
+ *   handling or from watchdog based polling.
+ *
+ * Parameters:
+ *   wlan  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   global interrupts are disabled, either explicitly or indirectly through
+ *   interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static int wlan_transmit(FAR struct wlan_driver_s *wlan)
+{
+  /* Verify that the hardware is ready to send another packet.  If we get
+   * here, then we are committed to sending a packet; Higher level logic
+   * must have assured that there is not transmission in progress.
+   */
+
+  /* Increment statistics */
+
+  /* Send the packet: address=wlan->wl_dev.d_buf, length=wlan->wl_dev.d_len */
+
+  /* Enable Tx interrupts */
+
+  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
+
+  (void)wd_start(wlan->wl_txtimeout, WLAN_TXTIMEOUT, wlan_txtimeout, 1, (uint32_t)wlan);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: wlan_uiptxpoll
+ *
+ * Description:
+ *   The transmitter is available, check if uIP has any outgoing packets ready
+ *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *
+ *   1. When the preceding TX packet send is complete,
+ *   2. When the preceding TX packet send timesout and the interface is reset
+ *   3. During normal TX polling
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *   May or may not be called from an interrupt handler.  In either case,
+ *   global interrupts are disabled, either explicitly or indirectly through
+ *   interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static int wlan_uiptxpoll(struct uip_driver_s *dev)
+{
+  FAR struct wlan_driver_s *wlan = (FAR struct wlan_driver_s *)dev->d_private;
+
+  /* If the polling resulted in data that should be sent out on the network,
+   * the field d_len is set to a value > 0.
+   */
+
+  if (wlan->wl_dev.d_len > 0)
+    {
+      uip_arp_out(&wlan->wl_dev);
+      wlan_transmit(wlan);
+
+      /* Check if there is room in the device to hold another packet. If not,
+       * return a non-zero value to terminate the poll.
+       */
+    }
+
+  /* If zero is returned, the polling will continue until all connections have
+   * been examined.
+   */
+
+  return 0;
+}
+
+/****************************************************************************
+ * Function: wlan_receive
+ *
+ * Description:
+ *   An interrupt was received indicating the availability of a new RX packet
+ *
+ * Parameters:
+ *   wlan  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static void wlan_receive(FAR struct wlan_driver_s *wlan)
+{
+  do
+    {
+      /* Check for errors and update statistics */
+
+      /* Check if the packet is a valid size for the uIP buffer configuration */
+
+      /* Copy the data data from the hardware to wlan->wl_dev.d_buf.  Set
+       * amount of data in wlan->wl_dev.d_len
+       */
+
+      /* We only accept IP packets of the configured type and ARP packets */
+
+#ifdef CONFIG_NET_IPv6
+      if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+#else
+      if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+#endif
+        {
+          uip_arp_ipin(&wlan->wl_dev);
+          uip_input(&wlan->wl_dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (wlan->wl_dev.d_len > 0)
+           {
+             uip_arp_out(&wlan->wl_dev);
+             wlan_transmit(wlan);
+           }
+        }
+      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+        {
+          uip_arp_arpin(&wlan->wl_dev);
+
+          /* If the above function invocation resulted in data that should be
+           * sent out on the network, the field  d_len will set to a value > 0.
+           */
+
+          if (wlan->wl_dev.d_len > 0)
+            {
+              wlan_transmit(wlan);
+            }
+        }
+    }
+  while (0); /* While there are more packets to be processed */
+}
+
+/****************************************************************************
+ * Function: wlan_txdone
+ *
+ * Description:
+ *   An interrupt was received indicating that the last TX packet(s) is done
+ *
+ * Parameters:
+ *   wlan  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static void wlan_txdone(FAR struct wlan_driver_s *wlan)
+{
+  /* Check for errors and update statistics */
+
+  /* If no further xmits are pending, then cancel the TX timeout and
+   * disable further Tx interrupts.
+   */
+
+  wd_cancel(wlan->wl_txtimeout);
+
+  /* Then poll uIP for new XMIT data */
+
+  (void)uip_poll(&wlan->wl_dev, wlan_uiptxpoll);
+}
+
+/****************************************************************************
+ * Function: wlan_interrupt
+ *
+ * Description:
+ *   Hardware interrupt handler
+ *
+ * Parameters:
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int wlan_interrupt(int irq, FAR void *context)
+{
+  register FAR struct wlan_driver_s *wlan = &g_wlan1[0];
+
+  /* Get and clear interrupt status bits */
+
+  /* Handle interrupts according to status bit settings */
+
+  /* Check if we received an incoming packet, if so, call wlan_receive() */
+
+  wlan_receive(wlan);
+
+  /* Check is a packet transmission just completed.  If so, call wlan_txdone.
+   * This may disable further Tx interrupts if there are no pending
+   * tansmissions.
+   */
+
+  wlan_txdone(wlan);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Function: wlan_txtimeout
+ *
+ * Description:
+ *   Our TX watchdog timed out.  Called from the timer interrupt handler.
+ *   The last TX never completed.  Reset the hardware and start again.
+ *
+ * Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static void wlan_txtimeout(int argc, uint32_t arg, ...)
+{
+  FAR struct wlan_driver_s *wlan = (FAR struct wlan_driver_s *)arg;
+
+  /* Increment statistics and dump debug info */
+
+  /* Then reset the hardware */
+
+  /* Then poll uIP for new XMIT data */
+
+  (void)uip_poll(&wlan->wl_dev, wlan_uiptxpoll);
+}
+
+/****************************************************************************
+ * Function: wlan_polltimer
+ *
+ * Description:
+ *   Periodic timer handler.  Called from the timer interrupt handler.
+ *
+ * Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by the watchdog logic.
+ *
+ ****************************************************************************/
+
+static void wlan_polltimer(int argc, uint32_t arg, ...)
+{
+  FAR struct wlan_driver_s *wlan = (FAR struct wlan_driver_s *)arg;
+
+  /* Check if there is room in the send another TX packet.  We cannot perform
+   * the TX poll if he are unable to accept another packet for transmission.
+   */
+
+  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+   * might be bug here.  Does this mean if there is a transmit in progress,
+   * we will missing TCP time state updates?
+   */
+
+  (void)uip_timer(&wlan->wl_dev, wlan_uiptxpoll, WLAN_POLLHSEC);
+
+  /* Setup the watchdog poll timer again */
+
+  (void)wd_start(wlan->wl_txpoll, WLAN_WDDELAY, wlan_polltimer, 1, arg);
+}
+
+/****************************************************************************
+ * Function: wlan_ifup
+ *
+ * Description:
+ *   NuttX Callback: Bring up the WLAN interface when an IP address is
+ *   provided
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int wlan_ifup(struct uip_driver_s *dev)
+{
+  FAR struct wlan_driver_s *wlan = (FAR struct wlan_driver_s *)dev->d_private;
+
+  ndbg("Bringing up: %d.%d.%d.%d\n",
+       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+
+  /* Initialize PHYs, the WLAN interface, and setup up WLAN interrupts */
+
+  /* Set and activate a timer process */
+
+  (void)wd_start(wlan->wl_txpoll, WLAN_WDDELAY, wlan_polltimer, 1, (uint32_t)wlan);
+
+  /* Enable the WLAN interrupt */
+
+  wlan->wl_bifup = true;
+  up_enable_irq(CONFIG_WLAN_IRQ);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: wlan_ifdown
+ *
+ * Description:
+ *   NuttX Callback: Stop the interface.
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int wlan_ifdown(struct uip_driver_s *dev)
+{
+  FAR struct wlan_driver_s *wlan = (FAR struct wlan_driver_s *)dev->d_private;
+  irqstate_t flags;
+
+  /* Disable the WLAN interrupt */
+
+  flags = irqsave();
+  up_disable_irq(CONFIG_WLAN_IRQ);
+
+  /* Cancel the TX poll timer and TX timeout timers */
+
+  wd_cancel(wlan->wl_txpoll);
+  wd_cancel(wlan->wl_txtimeout);
+
+  /* Put the the EMAC is its reset, non-operational state.  This should be
+   * a known configuration that will guarantee the wlan_ifup() always
+   * successfully brings the interface back up.
+   */
+
+  /* Mark the device "down" */
+
+  wlan->wl_bifup = false;
+  irqrestore(flags);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: wlan_txavail
+ *
+ * Description:
+ *   Driver callback invoked when new TX data is available.  This is a
+ *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
+ *   latency.
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called in normal user mode
+ *
+ ****************************************************************************/
+
+static int wlan_txavail(struct uip_driver_s *dev)
+{
+  FAR struct wlan_driver_s *wlan = (FAR struct wlan_driver_s *)dev->d_private;
+  irqstate_t flags;
+
+  /* Disable interrupts because this function may be called from interrupt
+   * level processing.
+   */
+
+  flags = irqsave();
+
+  /* Ignore the notification if the interface is not yet up */
+
+  if (wlan->wl_bifup)
+    {
+      /* Check if there is room in the hardware to hold another outgoing packet. */
+
+      /* If so, then poll uIP for new XMIT data */
+
+      (void)uip_poll(&wlan->wl_dev, wlan_uiptxpoll);
+    }
+
+  irqrestore(flags);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: wlan_addmac
+ *
+ * Description:
+ *   NuttX Callback: Add the specified MAC address to the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be added
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int wlan_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct wlan_driver_s *wlan = (FAR struct wlan_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: wlan_rmmac
+ *
+ * Description:
+ *   NuttX Callback: Remove the specified MAC address from the hardware multicast
+ *   address filtering
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *   mac  - The MAC address to be removed
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static int wlan_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+{
+  FAR struct wlan_driver_s *wlan = (FAR struct wlan_driver_s *)dev->d_private;
+
+  /* Add the MAC address to the hardware multicast routing table */
+
+  return OK;
+}
+#endif
+
+#endif /* CONFIG_NET && CONFIG_NET_WLAN */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1063,3 +1648,89 @@ int usbhost_wlaninit(void)
 
   return usbhost_registerclass(&g_wlan);
 }
+
+#if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
+
+/****************************************************************************
+ * Function: wlan_initialize
+ *
+ * Description:
+ *   Initialize the WLAN controller and driver
+ *
+ * Parameters:
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int wlan_initialize(int intf)
+{
+  struct wlan_driver_s *priv;
+
+  /* Get the interface structure associated with this interface number. */
+
+  DEBUGASSERT(inf < CONFIG_WLAN_NINTERFACES);
+  priv = &g_wlan1[intf];
+
+  /* Check if a WLAN chip is recognized at its I/O base */
+
+  /* Attach the IRQ to the driver */
+
+  if (irq_attach(CONFIG_WLAN_IRQ, wlan_interrupt))
+    {
+      /* We could not attach the ISR to the the interrupt */
+
+      return -EAGAIN;
+    }
+
+  /* Initialize the driver structure */
+
+  memset(priv, 0, sizeof(struct wlan_driver_s));
+  priv->wl_dev.d_ifup    = wlan_ifup;     /* I/F down callback */
+  priv->wl_dev.d_ifdown  = wlan_ifdown;   /* I/F up (new IP address) callback */
+  priv->wl_dev.d_txavail = wlan_txavail;  /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  priv->wl_dev.d_addmac  = wlan_addmac;   /* Add multicast MAC address */
+  priv->wl_dev.d_rmmac   = wlan_rmmac;    /* Remove multicast MAC address */
+#endif
+  priv->wl_dev.d_private = (void*)g_wlan1; /* Used to recover private state from dev */
+
+  /* Create a watchdog for timing polling for and timing of transmisstions */
+
+  priv->wl_txpoll       = wd_create();   /* Create periodic poll timer */
+  priv->wl_txtimeout    = wd_create();   /* Create TX timeout timer */
+
+  /* Put the interface in the down state.  This usually amounts to resetting
+   * the device and/or calling wlan_ifdown().
+   */
+
+  /* Read the MAC address from the hardware into priv->wl_dev.d_mac.ether_addr_octet */
+
+  /* Register the device with the OS so that socket IOCTLs can be performed */
+
+  (void)netdev_register(&priv->wl_dev);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_netinitialize
+ *
+ * Description:
+ *   Initialize the first network interface.  If there are more than one
+ *   interface in the device, then device-specific logic will have to provide
+ *   this function to determine which, if any, WLAN controllers should
+ *   be initialized.
+ *
+ ****************************************************************************/
+
+void up_netinitialize(void)
+{
+  (void)wlan_initialize(0);
+}
+#endif /* CONFIG_NET && CONFIG_NET_WLAN */
+
