@@ -48,6 +48,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#define STM32_SPI_CLK_MAX     18000000UL  /* Maximum allowed speed as per specifications for all SPIs */
+
 /* Register Offsets *****************************************************************/
 
 #define STM32_SPI_CR1_OFFSET      0x0000  /* SPI Control Register 1 (16-bit) */
@@ -78,6 +80,16 @@
 #  define STM32_SPI2_CRCPR        (STM32_SPI2_BASE+STM32_SPI_CRCPR_OFFSET)
 #  define STM32_SPI2_RXCRCR       (STM32_SPI2_BASE+STM32_SPI_RXCRCR_OFFSET)
 #  define STM32_SPI2_TXCRCR       (STM32_SPI2_BASE+STM32_SPI_TXCRCR_OFFSET)
+#endif
+
+#if STM32_NSPI > 2
+#  define STM32_SPI3_CR1          (STM32_SPI3_BASE+STM32_SPI_CR1_OFFSET)
+#  define STM32_SPI3_CR2          (STM32_SPI3_BASE+STM32_SPI_CR2_OFFSET)
+#  define STM32_SPI3_SR           (STM32_SPI3_BASE+STM32_SPI_SR_OFFSET)
+#  define STM32_SPI3_DR           (STM32_SPI3_BASE+STM32_SPI_DR_OFFSET)
+#  define STM32_SPI3_CRCPR        (STM32_SPI3_BASE+STM32_SPI_CRCPR_OFFSET)
+#  define STM32_SPI3_RXCRCR       (STM32_SPI3_BASE+STM32_SPI_RXCRCR_OFFSET)
+#  define STM32_SPI3_TXCRCR       (STM32_SPI3_BASE+STM32_SPI_TXCRCR_OFFSET)
 #endif
 
 /* Register Bitfield Definitions ****************************************************/
