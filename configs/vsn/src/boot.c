@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/vsn/src/vsn-internal.h
- * arch/arm/src/board/vsn-internal.n
+ * configs/vsn/src/boot.c
+ * arch/arm/src/board/boot.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (c) 2011 Uros Platise. All rights reserved.
@@ -37,85 +37,76 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H
-#define __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <stdint.h>
+
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "stm32_gpio.h"
+#include "up_arch.h"
+#include "vsn.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
- * modules (others may support more -- in such case, the following must be
- * expanded).
- */
-
-#if STM32_NSPI < 1
-#  undef CONFIG_STM32_SPI1
-#  undef CONFIG_STM32_SPI2
-#elif STM32_NSPI < 2
-#  undef CONFIG_STM32_SPI2
-#endif
-
-/* VSN 1.2 GPIOs **************************************************************/
-
-/* LED */
-
-#define GPIO_LED		(GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN2)
-                         
-/* BUTTON - Note that after a good second button causes hardware reset */
-
-#define GPIO_PUSHBUTTON    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN5)
-
 /************************************************************************************
- * Public Types
+ * Private Functions
  ************************************************************************************/
-
-/************************************************************************************
- * Public data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_boardinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the VSN board.
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-extern void weak_function stm32_spiinitialize(void);
+void stm32_boardinitialize(void)
+{
+#ifdef CONFIG_STM32_SPI3
+#warning JTAG Port Disabled as SPI3 NVRAM/FRAM support is enabled
+  
+  uint32_t val = getreg32(STM32_AFIO_MAPR);
+  val &= 0x00FFFFFF;		// clear undefined readings ... 
+  val |= AFIO_MAPR_DISAB;	// set JTAG-DP and SW-DP Disabled
+  putreg32(val, STM32_AFIO_MAPR);
+#endif
 
-/************************************************************************************
- * Name: stm32_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the VSN board.
- *
- ************************************************************************************/
+   // Set Board Voltage to 3.3 V
+   board_power_setbootvoltage();
 
-extern void weak_function stm32_usbinitialize(void);
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spiinitialize() has been brought into the link.
+   */
 
-/************************************************************************************
- * Name: stm32_extcontextsave
- *
- * Description:
- *  Save current GPIOs that will used by external memory configurations
- *
- ************************************************************************************/
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+  if (stm32_spiinitialize) stm32_spiinitialize();
+#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H */
+   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
+    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
+    * into the build.
+    */
 
+#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
+  if (stm32_usbinitialize) stm32_usbinitialize();
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  up_ledinit();
+#endif
+}

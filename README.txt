@@ -354,6 +354,7 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- vsn/
+ |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- xtrs/
  |   |   |- include/README.txt

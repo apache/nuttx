@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/ftl.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,7 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
 {
   struct ftl_struct_s *dev;
 
-  fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
+  fvdbg("sector: %d nsectors: %d\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct ftl_struct_s *)inode->i_private;
@@ -360,7 +360,7 @@ static ssize_t ftl_write(FAR struct inode *inode, const unsigned char *buffer,
 {
   struct ftl_struct_s *dev;
 
-  fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
+  fvdbg("sector: %d nsectors: %d\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct ftl_struct_s *)inode->i_private;

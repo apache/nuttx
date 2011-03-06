@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/vsn/src/up_usbstrg.c
+ * configs/vsn/src/usbstrg.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (c) 2011 Uros Platise. All rights reserved.
@@ -51,7 +51,7 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "vsn-internal.h"
+#include "vsn.h"
 
 #ifdef CONFIG_STM32_SDIO
 

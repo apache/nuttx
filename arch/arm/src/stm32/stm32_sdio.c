@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_sdio.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1415,12 +1415,14 @@ static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       clckr  = SDIO_CLKCR_MMCXFR;
       break;
 
+    case CLOCK_SD_TRANSFER_4BIT:  /* SD normal operation clocking (wide 4-bit mode) */
+#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+      clckr  = SDIO_CLCKR_SDWIDEXFR;
+      break;
+#endif
+
     case CLOCK_SD_TRANSFER_1BIT:  /* SD normal operation clocking (narrow 1-bit mode) */
       clckr  = SDIO_CLCKR_SDXFR;
-      break;
-
-    case CLOCK_SD_TRANSFER_4BIT:  /* SD normal operation clocking (wide 4-bit mode) */
-      clckr  = SDIO_CLCKR_SDWIDEXFR;
       break;
     };
 
@@ -2531,9 +2533,11 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   stm32_configgpio(GPIO_SDIO_D0);
+#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
   stm32_configgpio(GPIO_SDIO_D1);
   stm32_configgpio(GPIO_SDIO_D2);
   stm32_configgpio(GPIO_SDIO_D3);
+#endif
   stm32_configgpio(GPIO_SDIO_CK);
   stm32_configgpio(GPIO_SDIO_CMD);
 

@@ -2077,6 +2077,7 @@ static void mmcsd_mediachange(FAR void *arg)
 
 static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 {
+#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
   int ret;
 
   /* Check if the SD card supports this feature (as reported in the SCR) */
@@ -2145,6 +2146,13 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   fdbg("WARNING: Card does not support wide-bus operation\n");
   return -ENOSYS;
+  
+#else /* CONFIG_SDIO_WIDTH_D1_ONLY */
+
+  fvdbg("Wide-bus operation is disabled\n");
+  return -ENOSYS;
+  
+#endif /* CONFIG_SDIO_WIDTH_D1_ONLY */
 }
 
 /****************************************************************************
@@ -2613,7 +2621,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
       elapsed = g_system_timer - start;
     }
-  while (elapsed < TICK_PER_SEC && ret != OK);
+  while( elapsed < TICK_PER_SEC ); /* On successful reception while 'breaks', see above. */
 
   /* We get here when the above loop completes, either (1) we could not
    * communicate properly with the card due to errors (and the loop times

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arm/arm/src/stm32/stm32_spi.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -760,6 +760,13 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   uint16_t setbits;
   uint32_t actual;
 
+  /* Limit to max possible (if STM32_SPI_CLK_MAX is defined in board.h) */
+
+  if (frequency > STM32_SPI_CLK_MAX)
+    {
+	  frequency = STM32_SPI_CLK_MAX;
+	}
+
   /* Has the frequency changed? */
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -1286,7 +1293,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   flags = irqsave();
 #ifdef CONFIG_STM32_SPI1
-  if (port == 0)
+  if (port == 1)
     {
       uint32_t mapr;
 
@@ -1317,7 +1324,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   else
 #endif
 #ifdef CONFIG_STM32_SPI2
-  if (port == 1)
+  if (port == 2)
     {
       /* Select SPI2 */
 

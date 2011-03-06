@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/vsn/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/vsn/src/vsn.h
+ * arch/arm/src/board/vsn.n
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (c) 2011 Uros Platise. All rights reserved.
@@ -37,69 +37,102 @@
  *
  ************************************************************************************/
 
+#ifndef __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H
+#define __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "vsn-internal.h"
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+#include <stdint.h>
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
+/* LED */
+
+#define GPIO_LED		(GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN2)
+                         
+/* BUTTON - Note that after a good second button causes hardware reset */
+
+#define GPIO_PUSHBUTTON    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN5)
+
+/* Power Management Pins */
+
+#define GPIO_PVS		(GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN7)
+
+/* FRAM */
+
+#define GPIO_FRAM_CS	(GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN15)
+
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) lib_lowprintf(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG
+#    define message lib_lowprintf
+#  else
+#    define message printf
+#  endif
+#endif
+
+
 /************************************************************************************
- * Private Functions
+ * Public Types
  ************************************************************************************/
+
+/************************************************************************************
+ * Public data
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_spiinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called to configure SPI chip select GPIO pins for the VSN board.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
-{
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
-   */
+extern void weak_function stm32_spiinitialize(void);
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
-  if (stm32_spiinitialize)
-    {
-      stm32_spiinitialize();
-    }
-#endif
+/************************************************************************************
+ * Name: stm32_usbinitialize
+ *
+ * Description:
+ *   Called to setup USB-related GPIO pins for the VSN board.
+ *
+ ************************************************************************************/
 
-   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-    * into the build.
-    */
+extern void weak_function stm32_usbinitialize(void);
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
-  if (stm32_usbinitialize)
-    {
-      stm32_usbinitialize();
-    }
-#endif
 
-  /* Configure on-board LEDs if LED support has been selected. */
+/************************************************************************************
+ * Power Module
+ *
+ * Description:
+ *  - Provides power related board operations, such as voltage selection,
+ *    proper reboot sequence, and power-off
+ ************************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
-#endif
-}
+extern void board_power_setbootvoltage(void);	// Default voltage at boot time
+
+
+#endif /* __ASSEMBLY__ */
+#endif /* __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H */
+

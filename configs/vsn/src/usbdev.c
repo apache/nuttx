@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/svsn/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/svsn/src/usbdev.c
+ * arch/arm/src/board/boot.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Copyright (c) 2011 Uros Platise. All rights reserved.
@@ -53,7 +53,7 @@
 
 #include "up_arch.h"
 #include "stm32_internal.h"
-#include "vsn-internal.h"
+#include "vsn.h"
 
 /************************************************************************************
  * Definitions

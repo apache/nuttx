@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/vsn-1.2/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * configs/vsn/src/buttons.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -42,32 +41,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
 #include <arch/board/board.h>
-#include "vsn-internal.h"
+#include "vsn.h"
+
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
- */
-
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
 
 /****************************************************************************
  * Private Data
@@ -77,40 +59,26 @@
  * Private Functions
  ****************************************************************************/
 
-static void led_setonoff(unsigned int bits)
-{
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: up_buttoninit
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void up_buttoninit(void)
 {
-   stm32_configgpio(GPIO_LED);
+  stm32_configgpio(GPIO_PUSHBUTTON);
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: up_buttons
  ****************************************************************************/
 
-void up_ledon(int led)
+uint8_t up_buttons(void)
 {
-  if (led==LED_IDLE) stm32_gpiowrite(GPIO_LED, true);
+  return stm32_gpioread(GPIO_PUSHBUTTON);
 }
 
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  if (led==LED_IDLE) stm32_gpiowrite(GPIO_LED, false);
-}
-
-#endif /* CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_BUTTONS */

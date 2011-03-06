@@ -1528,3 +1528,5 @@
 	  Uros Platise).
 	* drivers/mmcsd/mmcsd_sdio.c -- Correct a loop termination condition (also
 	  reported by Uros Platise).
+	* drivers/mtd/ramtron.c -  Driver for SPI-based RAMTRON NVRAM devices FM25V10
+	  (and others).  Contributed by Uros Platise.

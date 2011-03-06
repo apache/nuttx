@@ -530,6 +530,8 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_MMCSD_MMCSUPPORT - Enable support for MMC cards
 		CONFIG_MMCSD_HAVECARDDETECT - SDIO driver card detection is
 		  100% accurate
+		CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
+		  4-bit transfer mode.
 
 	RiT P14201 OLED driver
 		CONFIG_LCD_P14201 - Enable P14201 support

@@ -148,8 +148,8 @@ int nsh_archinitialize(void)
 #ifdef CONFIG_STM32_SPI1
   /* Get the SPI port */
 
-  message("nsh_archinitialize: Initializing SPI port 0\n");
-  spi = up_spiinitialize(0);
+  message("nsh_archinitialize: Initializing SPI port 1\n");
+  spi = up_spiinitialize(1);
   if (!spi)
     {
       message("nsh_archinitialize: Failed to initialize SPI port 0\n");

@@ -34,5 +34,4 @@
 ############################################################################
 
 MTD_ASRCS  =
-MTD_CSRCS  = ftl.c m25px.c at45db.c
-
+MTD_CSRCS  = ftl.c m25px.c at45db.c ramtron.c 

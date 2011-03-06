@@ -210,7 +210,7 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_SPI2EN;
 #endif
   
-#if CONFIG_STM32_SPI4
+#if CONFIG_STM32_SPI3
   /* SPI 3 clock enable */
 
   regval |= RCC_APB1ENR_SPI3EN;
