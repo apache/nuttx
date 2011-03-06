@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 5, 2011</p>
+      <p>Last Updated: March 6, 2011</p>
     </td>
   </tr>
 </table>
@@ -519,7 +519,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Support for SPI-based FLASH devices.</li>
+      <li>Support for SPI-based FLASH and FRAM devices.</li>
     </p>
 </tr>
 
@@ -2152,6 +2152,8 @@ nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       Uros Platise).
     * drivers/mmcsd/mmcsd_sdio.c -- Correct a loop termination condition (also
       reported by Uros Platise).
+    * drivers/mtd/ramtron.c -  Driver for SPI-based RAMTRON NVRAM devices FM25V10
+      (and others).  Contributed by Uros Platise.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
