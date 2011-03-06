@@ -2,7 +2,7 @@
  * arch/x86/include/i486/io.h
  * arch/chip/io.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -132,7 +132,6 @@ static inline uint32_t inl(uint16_t port)
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
@@ -140,13 +139,9 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN void outp(char p, char c);
-EXTERN char inp(char p);
-
 #undef EXTERN
 #ifdef __cplusplus
 }
-#endif
 #endif
 
 #endif /* __ASSEMBLY__ */
