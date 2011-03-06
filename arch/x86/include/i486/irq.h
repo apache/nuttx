@@ -62,18 +62,24 @@
 #define REG_EDI           (1)  /* Saved by pusha */
 #define REG_ESI           (2)  /* "   " "" "   " */
 #define REG_EBP           (3)  /* "   " "" "   " */
-#define REG_ESP           (4)  /* "   " "" "   " */
+#define REG_ESP           (4)  /* "   " "" "   " (NOTE 1)*/
 #define REG_EBX           (5)  /* "   " "" "   " */
 #define REG_EDX           (6)  /* "   " "" "   " */
 #define REG_ECX           (7)  /* "   " "" "   " */
 #define REG_EAX           (8)  /* "   " "" "   " */
-#define REG_IRQNO         (9)  /* Interrupt number */
-#define REG_ERRCODE      (10)  /* Error code */
+#define REG_IRQNO         (9)  /* Interrupt number (NOTE 2) */
+#define REG_ERRCODE      (10)  /* Error code (NOTE 2) */
 #define REG_EIP          (11)  /* Pushed by process on interrupt processing */
 #define REG_CS           (12)  /* "    " "" "     " "" "       " "        " */
 #define REG_EFLAGS       (13)  /* "    " "" "     " "" "       " "        " */
 #define REG_SP           (14)  /* "    " "" "     " "" "       " "        " */
 #define REG_SS           (15)  /* "    " "" "     " "" "       " "        " */
+
+/* NOTE 1: Two versions of the ESP are saved:  One from the interrupt
+ *   processing and one from pusha.  Only the interrupt ESP (REG_SP) is used.
+ * NOTE 2: This is not really state data.  Rather, this is just a convenient
+ *   way to pass parameters from the interrupt handler to C cod.
+ */
 
 #define XCPTCONTEXT_REGS (16)
 #define XCPTCONTEXT_SIZE (4 * XCPTCONTEXT_REGS)

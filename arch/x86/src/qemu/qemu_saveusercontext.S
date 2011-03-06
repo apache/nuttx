@@ -85,6 +85,20 @@
  * Full C prototype:
  *  int up_saveusercontext(uint32_t *regs);
  *
+ * Description:
+ *  Save the "user" context.  It is not necessary to save all of the
+ *  registers because it is acceptable for certain registers to be
+ *  modified upon return from a subroutine call.  On a context switch
+ *  back to user mode, it will appear as a return from this function.
+ *
+ *  According to the Intel ABI, the EAX, EDX, and ECX are to be free for
+ *  use within a procedure or function, and need not be preserved.  These
+ *  are the so-called caller-saved registers are EAX, ECX, EDX.
+ *
+ *  On entry,
+ *    sp points to the return address
+ *    sp+4 points to register save array
+ *
  **************************************************************************/
 
 #ifdef CONFIG_X86_NASM
@@ -97,21 +111,34 @@
 	.type	SYMBOL(up_saveusercontext), @function
 #endif
 SYMBOL(up_saveusercontext):
-
-	/* %ebx, %esi, %edi, and %ebp must be preserved.
-	 * save %ebx, $esi, and %edi now... */
+	/* Fetch the pointer to the register save array.  %eax is a available
+	 * because it must be modified later to provide the return value.
+	 */
 
 	movl	4(%esp), %eax
+
+	/* %ebx, %esi, %edi, and %ebp must be preserved.  We can freely used %eax
+	 * because it will be the return value from this function.
+	 */
+
 	movl	%ebx, (REG_EBX)(%eax)
 	movl	%esi, (REG_ESI)(%eax)
 	movl	%edi, (REG_EDI)(%eax)
 
-	/* Save the value of SP as will be after we return */
+	/* Save the segment registers */
+
+	mov		%ss, (REG_SS)(%eax)
+	mov		%cs, (REG_CS)(%eax)
+	mov		%ds, (REG_DS)(%eax)
+
+	/* Save the value of SP as will be after we return (don't bother to save
+	 * REG_ESP).
+	 */
 
 	leal	4(%esp), %ecx
 	movl	%ecx, (REG_SP)(%eax)
 
-	/* Save the return PC */
+	/* Fetch the PC from the stack and save it in the save block */
 
 	movl	0(%esp), %ecx
 	movl	%ecx, (REG_EIP)(%eax)
@@ -120,13 +147,13 @@ SYMBOL(up_saveusercontext):
 
 	movl	%ebp, (REG_EBP)(%eax)
 
-    /* Save the interrupt state */
+    /* Get and save the interrupt state */
 
     pushf
     pop		%ecx
 	movl	%ecx, (REG_EFLAGS)(%eax)
  
-	/* And return 0 */
+	/* And return 0.  'ret' will remove the EIP from the top of the stack. */
 
 	xorl    %eax, %eax
 	ret

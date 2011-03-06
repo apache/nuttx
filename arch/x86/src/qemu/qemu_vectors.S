@@ -200,18 +200,14 @@ isr_common:
 	mov		fs, ax
 	mov		gs, ax
 
+	/* The current value of the SP points to the beginning of the state save
+	 * structure.  Save that on the stack as the input parameter to isr_handler.
+	 */
+
+	mov		esp, eax
+	push	eax
 	call	SYMBOL(isr_handler)
-
-	pop		ebx					/* Reload the original data segment descriptor */
-	mov		ds, bx
-	mov		es, bx
-	mov		fs, bx
-	mov		gs, bx
-
-	popa						/* Pops edi,esi,ebp... */
-	add		esp, 8				/* Cleans up the pushed error code and pushed ISR number */
-	sti
-	iret						/* Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP */
+	jmp		.Lreturn
 
 /****************************************************************************
  * Name: irq_common
@@ -236,8 +232,38 @@ irq_common:
 	mov		fs, ax
 	mov		gs, ax
 
+	/* The current value of the SP points to the beginning of the state save
+	 * structure.  Save that on the stack as the input parameter to irq_handler.
+	 */
+
+	mov		esp, eax
+	push	eax
 	call	SYMBOL(irq_handler)
 
+	/* The common return point for both isr_handler and irq_handler */
+
+.Lreturn:
+	add		4, esp
+
+	/* EAX may possibly hold a pointer to a different regiser save area on
+	 * return.  Are we switching to a new context?
+	 */
+
+	cmp		eax, esp
+	je		.Lnoswitch
+
+	/* A context swith will be performed. EAX holds the address of the new
+	 * register save structure.
+	 *
+	 * 'Jump' to up_fullcontextrestore().  We perform a call here, but that function
+	 * never returns.  The address of the new register save block is the argument
+	 * to the up_fullcontextrestore().
+	 */
+
+	push	eax
+	jmp		SYMBOL(up_fullcontext)
+
+.Lnoswitch:
 	pop		ebx					/* Reload the original data segment descriptor */
 	mov		ds, bx
 	mov		es, bx
@@ -395,21 +421,17 @@ isr_common:
 	mov		%fs, %ax
 	mov		%gs, %ax
 
+	/* The current value of the SP points to the beginning of the state save
+	 * structure.  Save that on the stack as the input parameter to isr_handler.
+	 */
+
+	mov		%esp, %eax
+	push	%eax
 	call	SYMBOL(isr_handler)
-
-	pop		%ebx				/* Reload the original data segment descriptor */
-	mov		%ds, %bx
-	mov		%es, %bx
-	mov		%fs, %bx
-	mov		%gs, %bx
-
-	popa						/* Pops edi,esi,ebp... */
-	add		%esp, 8				/* Cleans up the pushed error code and pushed ISR number */
-	sti
+	jmp		.Lreturn
 #ifndef __CYGWIN__
 	.size	isr_common, . - isr_common
 #endif
-	iret						/* Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP */
 
 /****************************************************************************
  * Name: irq_common
@@ -437,8 +459,38 @@ irq_common:
 	mov		%fs, %ax
 	mov		%gs, %ax
 
+	/* The current value of the SP points to the beginning of the state save
+	 * structure.  Save that on the stack as the input parameter to irq_handler.
+	 */
+
+	mov		%esp, %eax
+	push	%eax
 	call	SYMBOL(irq_handler)
 
+	/* The common return point for both isr_handler and irq_handler */
+
+.Lreturn:
+	add		$4, %esp
+
+	/* EAX may possibly hold a pointer to a different regiser save area on
+	 * return.  Are we switching to a new context?
+	 */
+
+	cmp		%eax, %esp
+	je		.Lnoswitch
+
+	/* A context swith will be performed. EAX holds the address of the new
+	 * register save structure.
+	 *
+	 * Jump to up_fullcontextrestore().  We perform a call here, but that function
+	 * never returns.  The address of the new register save block is the argument
+	 * to the up_fullcontextrestore().
+	 */
+
+	push	%eax
+	call	SYMBOL(up_fullcontextrestore)
+
+.Lnoswitch:
 	pop		%ebx				/* Reload the original data segment descriptor */
 	mov		%ds, %bx
 	mov		%es, %bx

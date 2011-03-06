@@ -97,35 +97,55 @@
 	.type	SYMBOL(up_fullcontextrestore), @function
 #endif
 SYMBOL(up_fullcontextrestore):
-	movl	4(%esp), %ecx      /* Register save area in %ecx.  */
+	/* Fetch the pointer to the register save array in EAX. */
 
-	/* Disable interrupts now (the will be conditionally re-enabled below) */
+	movl	4(%esp), %eax
+
+	/* Disable interrupts now (the correct EFLAGS will be restored before we
+	 * return
+	 */
 
 	cli
 
-	/* Save the return address.  */
+	/* We now have everything we need from the old stack.  Now get the new
+	 * stack pointer.
+	 */
 
-	movl	(REG_EIP)(%ecx), %edx
+	movl	(REG_SP)(%eax), %esp
 
-	/* Restore registers.  */
+	/* Save the return address, EFLAGS, and the values  as well the
+	 * values of EBX and EAC on the new stack.
+	 */
 
-	movl	(REG_EBX)(%ecx), %ebx
-	movl	(REG_ESI)(%ecx), %esi
-	movl	(REG_EDI)(%ecx), %edi
-	movl	(REG_EBP)(%ecx), %ebp
-	movl	(REG_SP)(%ecx), %esp
+	movl	(REG_EIP)(%eax), %ebx
+	push	%ebx
+	movl	(REG_EFLAGS)(%eax), %ebx
+	push	%ebx
+	movl	(REG_EAX)(%eax), %ebx
+	push	%ebx
+	movl	(REG_EBX)(%eax), %ebx
+	push	%ebx
 
-    /* Conditionally restore interrupts */
+	/* Now restore the remaining registers */
 
-	testl	$512, (REG_EFLAGS)(%ecx)
-	je		.Ldisabled
-	sti
-.Ldisabled:
+	movl	(REG_EDI)(%ebx), %edi
+	movl	(REG_ESI)(%ebx), %esi
+	movl	(REG_EBP)(%ebx), %ebp
+	movl	(REG_EDX)(%ebx), %edx
+	movl	(REG_ECX)(%ebx), %ecx
 
-	/* Jump to saved PC with non-zero return value in %eax.  */
+	/* Restore the segment registers */
 
-	movl	$1, %eax
-	jmp		*%edx
+	mov		(REG_DS)(%ebx), %ds
+	mov		(REG_CS)(%ebx), %cs
+	mov		(REG_SS)(%ebx), %ss
+
+	/* Restore the correct value of EAX, EBX, and the EFLAGS then return */
+
+	popl	%ebx
+	popl	%eax
+	popf
+	ret
 #ifndef __CYGWIN__
 	.size SYMBOL(up_fullcontextrestore), . - SYMBOL(up_fullcontextrestore)
 #endif

@@ -225,7 +225,7 @@ hang:
 	.type	SYMBOL(g_heapbase), @object
 #endif
 SYMBOL(g_heapbase):
-	.word	_ebss
+	.long	_ebss
 #ifndef __CYGWIN__
 	.size	SYMBOL(g_heapbase), . - SYMBOL(g_heapbase)
 #endif
