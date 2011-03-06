@@ -303,7 +303,7 @@ static const struct spi_ops_s g_sp3iops =
 static struct stm32_spidev_s g_spi3dev =
 {
   .spidev   = { &g_sp3iops },
-  .spibase  = STM32_SPI2_BASE,
+  .spibase  = STM32_SPI3_BASE,
   .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI3,

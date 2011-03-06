@@ -1524,5 +1524,5 @@
 	  arch/x86/include/qemu, arch/x86/src/i486, and arch/x86/src/qemu.
 	* configs/qemu-i486 - "Board" support configurations for verifying the QEME
 	  i486 port.
-
-
+	* arch/arm/src/stm32/stm32_spi.c -- Correct base address of SPI3 (reported by
+	  Uros Platise).
