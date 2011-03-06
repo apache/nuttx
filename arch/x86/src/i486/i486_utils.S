@@ -100,7 +100,7 @@ SYMBOL(gdt_flush):
 
 SYMBOL(idt_flush):
     mov		eax, [esp+4]		/* Get the pointer to the IDT, passed as a parameter */
-    lidt		[eax]			/* Load the IDT pointer */
+    lidt	[eax]				/* Load the IDT pointer */
     ret
 
 #else /* !CONFIG_X86_NASM (GAS) */
@@ -141,7 +141,7 @@ SYMBOL(gdt_flush):
     mov		%fs, %ax
     mov		%gs, %ax
     mov		%ss, %ax
-    ljmp	*.Lgflush	/* 0x08 is the offset to our code segment: Far jump! */
+    jmp		$0x08, $.Lgflush		/* 0x08 is the offset to our code segment: Far jump! */
 .Lgflush:
     ret
 #ifndef __CYGWIN__
