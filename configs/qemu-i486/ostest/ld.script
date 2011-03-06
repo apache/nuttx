@@ -48,6 +48,7 @@ SECTIONS
 	.text ALIGN (0x1000) : {
 		_srodata = ABSOLUTE(.);
 		*(.rodata .rodata.*)        
+		*(.rdata .rdata.*)        
 		*(.fixup)
 		*(.gnu.warning)
 		*(.glue_7)
