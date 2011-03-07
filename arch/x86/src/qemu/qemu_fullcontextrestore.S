@@ -111,34 +111,34 @@ SYMBOL(up_fullcontextrestore):
 	 * stack pointer.
 	 */
 
-	movl	(REG_SP)(%eax), %esp
+	movl	(4*REG_SP)(%eax), %esp
 
 	/* Save the return address, EFLAGS, and the values  as well the
 	 * values of EBX and EAC on the new stack.
 	 */
 
-	movl	(REG_EIP)(%eax), %ebx
+	movl	(4*REG_EIP)(%eax), %ebx
 	push	%ebx
-	movl	(REG_EFLAGS)(%eax), %ebx
+	movl	(4*REG_EFLAGS)(%eax), %ebx
 	push	%ebx
-	movl	(REG_EAX)(%eax), %ebx
+	movl	(4*REG_EAX)(%eax), %ebx
 	push	%ebx
-	movl	(REG_EBX)(%eax), %ebx
+	movl	(4*REG_EBX)(%eax), %ebx
 	push	%ebx
 
 	/* Now restore the remaining registers */
 
-	movl	(REG_EDI)(%ebx), %edi
-	movl	(REG_ESI)(%ebx), %esi
-	movl	(REG_EBP)(%ebx), %ebp
-	movl	(REG_EDX)(%ebx), %edx
-	movl	(REG_ECX)(%ebx), %ecx
+	movl	(4*REG_EDI)(%ebx), %edi
+	movl	(4*REG_ESI)(%ebx), %esi
+	movl	(4*REG_EBP)(%ebx), %ebp
+	movl	(4*REG_EDX)(%ebx), %edx
+	movl	(4*REG_ECX)(%ebx), %ecx
 
 	/* Restore the segment registers */
 
-	mov		(REG_DS)(%ebx), %ds
-	mov		(REG_CS)(%ebx), %cs
-	mov		(REG_SS)(%ebx), %ss
+	mov		(4*REG_DS)(%ebx), %ds
+	mov		(4*REG_CS)(%ebx), %cs
+	mov		(4*REG_SS)(%ebx), %ss
 
 	/* Restore the correct value of EAX, EBX, and the EFLAGS then return */
 
