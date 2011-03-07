@@ -2159,6 +2159,16 @@ pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 buildroot-1.10 2011-xx-xx <spudmonkey@racsa.co.cr>
 
+    * Add patch submitted by Dimiter Georgiev to work around problems in building
+      GDB 6.8 with versions of Cygwin > 1.7.
+    * configs/i486-defconfig-4.3.3 - Builds an i486 cross development toolchain
+      using gcc 4.3.3.  Why wouldyou want such a thing?  On Linux, of course,
+      such a thing is not needed because you can use the installed GCC to build
+      i486 ELF binaries.  But that will not work under Cygwin!  The Cygwin
+      toolchain (and probably MinGW), build DOS MZ format executables (i.e.,
+      .exe files).  That is probably not usable for most NuttX targets.
+      Instead, you should use this i486-elf-gcc to generate true ELF binaries
+      under Cygwin.
 </pre></ul>
 
 <table width ="100%">
