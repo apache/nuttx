@@ -121,37 +121,37 @@ SYMBOL(up_saveusercontext):
 	 * because it will be the return value from this function.
 	 */
 
-	movl	%ebx, (REG_EBX)(%eax)
-	movl	%esi, (REG_ESI)(%eax)
-	movl	%edi, (REG_EDI)(%eax)
+	movl	%ebx, (4*REG_EBX)(%eax)
+	movl	%esi, (4*REG_ESI)(%eax)
+	movl	%edi, (4*REG_EDI)(%eax)
 
 	/* Save the segment registers */
 
-	mov		%ss, (REG_SS)(%eax)
-	mov		%cs, (REG_CS)(%eax)
-	mov		%ds, (REG_DS)(%eax)
+	mov		%ss, (4*REG_SS)(%eax)
+	mov		%cs, (4*REG_CS)(%eax)
+	mov		%ds, (4*REG_DS)(%eax)
 
 	/* Save the value of SP as will be after we return (don't bother to save
 	 * REG_ESP).
 	 */
 
 	leal	4(%esp), %ecx
-	movl	%ecx, (REG_SP)(%eax)
+	movl	%ecx, (4*REG_SP)(%eax)
 
 	/* Fetch the PC from the stack and save it in the save block */
 
 	movl	0(%esp), %ecx
-	movl	%ecx, (REG_EIP)(%eax)
+	movl	%ecx, (4*REG_EIP)(%eax)
 
 	/* Save the framepointer */
 
-	movl	%ebp, (REG_EBP)(%eax)
+	movl	%ebp, (4*REG_EBP)(%eax)
 
     /* Get and save the interrupt state */
 
     pushf
     pop		%ecx
-	movl	%ecx, (REG_EFLAGS)(%eax)
+	movl	%ecx, (4*REG_EFLAGS)(%eax)
  
 	/* And return 0.  'ret' will remove the EIP from the top of the stack. */
 
