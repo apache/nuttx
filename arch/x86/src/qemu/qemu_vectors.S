@@ -408,14 +408,14 @@ isr_common:
 /*	trace	'S' */
 	pusha						/* Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax */
 
-	mov		%ax, %ds			/* Lower 16-bits of eax = ds. */
+	mov		%ds, %ax			/* Lower 16-bits of eax = ds. */
 	pushl	%eax				/* Save the data segment descriptor */
 
-	mov		%ax, KSEG			/* Load the kernel data segment descriptor */
-	mov		%ds, %ax
-	mov		%es, %ax
-	mov		%fs, %ax
-	mov		%gs, %ax
+	mov		$KSEG, %ax 			/* Load the kernel data segment descriptor */
+	mov		%ax, %ds
+	mov		%ax, %es
+	mov		%ax, %fs
+	mov		%ax, %gs
 
 	/* The current value of the SP points to the beginning of the state save
 	 * structure.  Save that on the stack as the input parameter to isr_handler.
@@ -446,14 +446,14 @@ irq_common:
 /*	trace	'R' */
 	pusha						/* Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax */
 
-	mov		%ax, %ds				/* Lower 16-bits of eax = ds. */
+	mov		%ds, %ax			/* Lower 16-bits of eax = ds. */
 	push	%eax				/* Save the data segment descriptor */
 
-	mov		%ax, KSEG			/* Load the kernel data segment descriptor */
-	mov		%ds, %ax
-	mov		%es, %ax
-	mov		%fs, %ax
-	mov		%gs, %ax
+	mov		$KSEG, %ax 			/* Load the kernel data segment descriptor */
+	mov		%ax, %ds
+	mov		%ax, %es
+	mov		%ax, %fs
+	mov		%ax, %gs
 
 	/* The current value of the SP points to the beginning of the state save
 	 * structure.  Save that on the stack as the input parameter to irq_handler.
@@ -488,13 +488,13 @@ irq_common:
 
 .Lnoswitch:
 	pop		%ebx				/* Reload the original data segment descriptor */
-	mov		%ds, %bx
-	mov		%es, %bx
-	mov		%fs, %bx
-	mov		%gs, %bx
+	mov		%bx, %ds
+	mov		%bx, %es
+	mov		%bx, %fs
+	mov		%bx, %gs
 
 	popa						/* Pops edi,esi,ebp... */
-	add		%esp, 8				/* Cleans up the pushed error code and pushed ISR number */
+	add		$8, %esp			/* Cleans up the pushed error code and pushed ISR number */
 	sti
 	iret						/* Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP */
 #ifndef __CYGWIN__

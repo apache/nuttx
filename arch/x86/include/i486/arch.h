@@ -163,6 +163,44 @@ static inline uint32_t up_getsp()
   return regval;
 }
 
+/* Get segment registers */
+
+static inline uint32_t up_getds()
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%ds, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
+static inline uint32_t up_getcs()
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%cs, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
+static inline uint32_t up_getss()
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%ss, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
