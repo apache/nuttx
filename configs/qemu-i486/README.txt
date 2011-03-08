@@ -1,18 +1,24 @@
 README
-^^^^^^
+======
 
 This README file describes the contents of the build configurations available
 for the NuttX QEMU i486 port.
 
 Contents
-^^^^^^^^
+========
 
   * QEMU
+    - Building QEMU
+	- Cygwin Build Problems
+	- Running QEMU
   * Toolchains
+    - Cygwin Buildroot Toolchain
+	- Buildroot Instructions
   * Configurations
+    - ostest
 
 QEMU
-^^^^
+====
 
 QEMU is a generic and open source machine emulator and virtualizer.  Here are
 some links (which are mostly outdated by the time your read this):
@@ -22,7 +28,8 @@ some links (which are mostly outdated by the time your read this):
   Documentation: http://wiki.qemu.org/Manual
   Usage:         qemu -nographic -kernel nuttx.elf
 
-Building QEMU:
+Building QEMU
+-------------
 
   tar zxf qemu-0.14.0.tar.gz 
   cd qemu-0.14.0
@@ -30,7 +37,8 @@ Building QEMU:
   make
   make install
 
-Cygwin build problems:
+Cygwin Build Problems
+---------------------
 
   Error:
  
@@ -52,8 +60,15 @@ Cygwin build problems:
 	   binaries.  I found 0.14.0 here: http://dietpc.org/windows/qemu/, or
 	2. Try building QEMU with MingGW
 
+Running QEMU
+------------
+
+  In the top-level NuttX directory:
+
+    qemu -cpu 486 -m 2 -kernel nuttx.elf -nographic
+
 Toolchains
-^^^^^^^^^^
+==========
 
   Two target environments are supported: (1) Linux and (2) Cygwin under Windows.
   Any GCC toolchain that can produce i486 ELF binaries should work.  On Linux,
@@ -65,7 +80,8 @@ Toolchains
   The file */setenv.sh should be modified to point to the correct path to the
   GCC toolchain (if different from the default in your PATH variable).
 
-  Cygwin Buildroot Toolchain
+Cygwin Buildroot Toolchain
+--------------------------
 
   With Cygwin the solution is to build an i486 cross-development toolchain to
   generate the i486 ELF files needed by QEMU.  The NuttX buildroot package will
@@ -75,7 +91,8 @@ Toolchains
   i486 build.  This is only available in SVN or in any any 1.10 or later buildroot
   release.
 
-  Buildroot Instructions
+Buildroot Instructions
+----------------------
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
@@ -104,9 +121,10 @@ Toolchains
   run into problems building the toolchain for Cygwin under Windows.
 
 Configurations
-^^^^^^^^^^^^^^
+==============
 
 ostest
+------
 
   The "standard" NuttX examples/ostest configuration.  This
   configuration may be selected as follows:
