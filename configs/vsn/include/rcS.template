@@ -1,0 +1,10 @@
+echo "VSN Board 1.2, www.netclamps.com"
+
+# Create a RAMDISK and mount it at XXXRDMOUNTPOUNTXXX
+#mkrd -m XXXMKRDMINORXXX -s XXMKRDSECTORSIZEXXX XXMKRDBLOCKSXXX
+#mkfatfs /dev/ramXXXMKRDMINORXXX
+#mount -t vfat /dev/ramXXXMKRDMINORXXX XXXRDMOUNTPOUNTXXX
+
+echo "Mounting FRAM to /usr and SDcard to /sdcard"
+mount -t vfat /dev/mtdblock0 /usr
+mount -t vfat /dev/mmcsd0 /sdcard

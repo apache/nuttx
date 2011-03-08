@@ -65,7 +65,15 @@ ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES =
 
+# We have to use a cross-development toolchain under Cygwin because the native
+# Cygwin toolchains don't generate ELF binaries.
+
+ifeq ($(HOSTOS),Cygwin)
+CROSSDEV = i486-elf-
+else
 CROSSDEV =
+endif
+
 CC = $(CROSSDEV)gcc
 CPP = $(CROSSDEV)gcc -E
 LD = $(CROSSDEV)ld

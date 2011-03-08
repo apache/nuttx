@@ -39,8 +39,10 @@ fi
 
 if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
 
-# Define the following if you are using anything other than the system GCC
-#export NUTTX_BIN=
-#export PATH=${NUTTX_BIN}:/sbin:/usr/sbin:${PATH_ORIG}
+# Uncomment and modify the following if you are using anything other
+# than the system GCC
+# WD=`pwd`
+# export BUILDROOT_BIN="${WD}/../../buildroot/build_i486/staging_dir/bin"
+# export PATH="${BUILDROOT_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
