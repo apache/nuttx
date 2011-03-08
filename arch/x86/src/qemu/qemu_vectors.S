@@ -47,12 +47,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __CYGWIN__
-# define SYMBOL(s) _##s
-#else
-# define SYMBOL(s) s
-#endif
-
 #define KSEG 0x10
 
 /****************************************************************************
@@ -65,8 +59,8 @@
  * Nasm externals
  ****************************************************************************/
 
-extern SYMBOL(irq_handler)
-extern SYMBOL(isr_handler)
+extern irq_handler
+extern isr_handler
 
 /****************************************************************************
  * Nasm macros
@@ -89,8 +83,8 @@ extern SYMBOL(isr_handler)
  */
 
 %macro ISR_NOERRCODE 1
-  global	SYMBOL(vector_isr%1)
-  SYMBOL(vector_isr%1):
+  global	vector_isr%1
+  vector_isr%1:
 	cli							/* Disable interrupts firstly. */
 	push	byte 0				/* Push a dummy error code. */
 	push	byte %1				/* Push the interrupt number. */
@@ -102,8 +96,8 @@ extern SYMBOL(isr_handler)
  */
 
 %macro ISR_ERRCODE 1
-  global	SYMBOL(vector_isr%1)
-  SYMBOL(vector_isr%1):
+  global	vector_isr%1
+  vector_isr%1:
 	cli							/* Disable interrupts. */
 	push	byte %1				/* Push the interrupt number */
 	jmp		isr_common
@@ -114,8 +108,8 @@ extern SYMBOL(isr_handler)
  */
 
 %macro IRQ 2
-  global	SYMBOL(vector_irq%1)
-  SYMBOL(vector_irq%1):
+  global	vector_irq%1
+  vector_irq%1:
 	cli
 	push	byte 0
 	push	byte %2
@@ -206,7 +200,7 @@ isr_common:
 
 	mov		esp, eax
 	push	eax
-	call	SYMBOL(isr_handler)
+	call	isr_handler
 	jmp		.Lreturn
 
 /****************************************************************************
@@ -238,7 +232,7 @@ irq_common:
 
 	mov		esp, eax
 	push	eax
-	call	SYMBOL(irq_handler)
+	call	irq_handler
 
 	/* The common return point for both isr_handler and irq_handler */
 
@@ -261,7 +255,7 @@ irq_common:
 	 */
 
 	push	eax
-	jmp		SYMBOL(up_fullcontext)
+	jmp		up_fullcontext
 
 .Lnoswitch:
 	pop		ebx					/* Reload the original data segment descriptor */
@@ -287,8 +281,8 @@ irq_common:
  * GAS globals
  ****************************************************************************/
 
-	.globl	SYMBOL(irq_handler)
-	.globl	SYMBOL(isr_handler)
+	.globl	irq_handler
+	.globl	isr_handler
 
 /****************************************************************************
  * GAS macros
@@ -307,8 +301,8 @@ irq_common:
  */
 
 	.macro ISR_NOERRCODE, intno
-	.globl	SYMBOL(vector_isr\intno)
-SYMBOL(vector_isr\intno):
+	.globl	vector_isr\intno
+vector_isr\intno:
 	cli							/* Disable interrupts firstly. */
 	push	$0					/* Push a dummy error code. */
 	push	$\intno				/* Push the interrupt number. */
@@ -320,8 +314,8 @@ SYMBOL(vector_isr\intno):
  */
 
 	.macro	ISR_ERRCODE, intno
-	.globl	SYMBOL(vector_isr\intno)
-SYMBOL(vector_isr\intno):
+	.globl	vector_isr\intno
+vector_isr\intno:
 	cli							/* Disable interrupts firstly. */
 	push	$\intno				/* Push the interrupt number. */
 	jmp		isr_common			/* Go to the common handler code. */
@@ -332,8 +326,8 @@ SYMBOL(vector_isr\intno):
  */
 
 	.macro	IRQ, irqno, intno
-	.globl	SYMBOL(vector_irq\irqno)
-SYMBOL(vector_irq\irqno):
+	.globl	vector_irq\irqno
+vector_irq\irqno:
 	cli							/* Disable interrupts firstly. */
 	push	$0					/* Push a dummy error code. */
 	push	$\intno				/* Push the interrupt number. */
@@ -401,9 +395,7 @@ SYMBOL(vector_irq\irqno):
  *
  ****************************************************************************/
 
-#ifndef __CYGWIN__
 	.type	isr_common, @function
-#endif
 isr_common:
 /*	trace	'S' */
 	pusha						/* Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax */
@@ -423,11 +415,9 @@ isr_common:
 
 	mov		%esp, %eax
 	push	%eax
-	call	SYMBOL(isr_handler)
+	call	isr_handler
 	jmp		.Lreturn
-#ifndef __CYGWIN__
 	.size	isr_common, . - isr_common
-#endif
 
 /****************************************************************************
  * Name: irq_common
@@ -439,9 +429,7 @@ isr_common:
  *
  ****************************************************************************/
 
-#ifndef __CYGWIN__
 	.type	irq_common, @function
-#endif
 irq_common:
 /*	trace	'R' */
 	pusha						/* Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax */
@@ -461,7 +449,7 @@ irq_common:
 
 	mov		%esp, %eax
 	push	%eax
-	call	SYMBOL(irq_handler)
+	call	irq_handler
 
 	/* The common return point for both isr_handler and irq_handler */
 
@@ -484,7 +472,7 @@ irq_common:
 	 */
 
 	push	%eax
-	call	SYMBOL(up_fullcontextrestore)
+	call	up_fullcontextrestore
 
 .Lnoswitch:
 	pop		%ebx				/* Reload the original data segment descriptor */
@@ -497,8 +485,6 @@ irq_common:
 	add		$8, %esp			/* Cleans up the pushed error code and pushed ISR number */
 	sti
 	iret						/* Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP */
-#ifndef __CYGWIN__
 	.size	irq_common, . - irq_common
-#endif
 	.end
 #endif /* CONFIG_X86_NASM */

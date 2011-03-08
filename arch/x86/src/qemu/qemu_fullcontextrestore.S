@@ -48,12 +48,6 @@
 /**************************************************************************
  * Pre-processor Definitions
  **************************************************************************/
- 
-#ifdef __CYGWIN__
-# define SYMBOL(s) _##s
-#else
-# define SYMBOL(s) s
-#endif
 
 /**************************************************************************
  * Private Types
@@ -92,11 +86,9 @@
 #else
 	.file	"qemu_fullcontextrestore.S"
 	.text
-	.globl	SYMBOL(up_fullcontextrestore)
-#ifndef __CYGWIN__
-	.type	SYMBOL(up_fullcontextrestore), @function
-#endif
-SYMBOL(up_fullcontextrestore):
+	.globl	up_fullcontextrestore
+	.type	up_fullcontextrestore, @function
+up_fullcontextrestore:
 	/* Fetch the pointer to the register save array in EAX. */
 
 	movl	4(%esp), %eax
@@ -146,9 +138,7 @@ SYMBOL(up_fullcontextrestore):
 	popl	%eax
 	popf
 	ret
-#ifndef __CYGWIN__
-	.size SYMBOL(up_fullcontextrestore), . - SYMBOL(up_fullcontextrestore)
-#endif
+	.size up_fullcontextrestore, . - up_fullcontextrestore
     .end
 #endif /* CONFIG_X86_NASM */
 
