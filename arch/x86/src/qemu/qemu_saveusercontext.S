@@ -48,12 +48,6 @@
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
- 
-#ifdef __CYGWIN__
-# define SYMBOL(s) _##s
-#else
-# define SYMBOL(s) s
-#endif
 
 /**************************************************************************
  * Private Types
@@ -106,11 +100,9 @@
 #else
 	.file	"qemu_saveusercontext.S"
 	.text
-	.globl	SYMBOL(up_saveusercontext)
-#ifndef __CYGWIN__
-	.type	SYMBOL(up_saveusercontext), @function
-#endif
-SYMBOL(up_saveusercontext):
+	.globl	up_saveusercontext
+	.type	up_saveusercontext, @function
+up_saveusercontext:
 	/* Fetch the pointer to the register save array.  %eax is a available
 	 * because it must be modified later to provide the return value.
 	 */
@@ -157,8 +149,6 @@ SYMBOL(up_saveusercontext):
 
 	xorl    %eax, %eax
 	ret
-#ifndef __CYGWIN__
-	.size	SYMBOL(up_saveusercontext), . - SYMBOL(up_saveusercontext)
-#endif
+	.size	up_saveusercontext, . - up_saveusercontext
     .end
 #endif

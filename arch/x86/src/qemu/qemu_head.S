@@ -43,12 +43,6 @@
  * Pre-processor definitions
  ****************************************************************************/
  
-#ifdef __CYGWIN__
-# define SYMBOL(s) _##s
-#else
-# define SYMBOL(s) s
-#endif
-
 /* Memory Map: _sbss is the start of the BSS region (see ld.script) _ebss is
  * the end of the BSS regsion (see ld.script). The idle task stack starts at
  * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread
@@ -67,9 +61,9 @@
 
 #ifdef CONFIG_X86_NASM
 global		__start						/* Making entry point visible to linker */
-global		SYMBOL(g_heapbase)			/* The start of the heap */
-extern		SYMBOL(os_start)			/* os_start is defined elsewhere */
-extern		SYMBOL(up_lowsetup)			/* up_lowsetup is defined elsewhere */
+global		g_heapbase					/* The start of the heap */
+extern		os_start					/* os_start is defined elsewhere */
+extern		up_lowsetup					/* up_lowsetup is defined elsewhere */
  
 /* Setting up the Multiboot header - see GRUB docs for details */
 
@@ -98,8 +92,8 @@ __start:
 
 	/* Initialize and start NuttX */
 
-	call	SYMBOL(up_lowsetup)			/* Low-level, pre-OS initialization */
-	call	SYMBOL(os_start)			/* Start NuttX */
+	call	up_lowsetup					/* Low-level, pre-OS initialization */
+	call	os_start					/* Start NuttX */
  
 	/* NuttX will not return */
 
@@ -135,7 +129,7 @@ section .rodata
  */
 
 align 4
-SYMBOL(g_heapbase):
+g_heapbase:
 	dd	_ebss
 
 #else /* !CONFIG_X86_NASM (GAS) */
@@ -146,9 +140,9 @@ SYMBOL(g_heapbase):
 
 	.file	"qemu_head.S"
 	.global	__start						/* Making entry point visible to linker */
-	.global	SYMBOL(os_start)			/* os_start is defined elsewhere */
-	.global	SYMBOL(up_lowsetup)			/* up_lowsetup is defined elsewhere */
-	.global	SYMBOL(g_heapbase)			/* The start of the heap */
+	.global	os_start					/* os_start is defined elsewhere */
+	.global	up_lowsetup					/* up_lowsetup is defined elsewhere */
+	.global	g_heapbase					/* The start of the heap */
 
 	/* Setting up the Multiboot header - see GRUB docs for details */
 
@@ -164,9 +158,7 @@ SYMBOL(g_heapbase):
 	.long	FLAGS
 	.long	CHECKSUM
 
-#ifndef __CYGWIN__
 	.type	__start, @function
-#endif
 __start:
 	/* Set up the stack */
 
@@ -179,8 +171,8 @@ __start:
 
 	/* Initialize and start NuttX */
 
-	call	SYMBOL(up_lowsetup)			/* Low-level, pre-OS initialization */
-	call	SYMBOL(os_start)			/* Start NuttX */
+	call	up_lowsetup					/* Low-level, pre-OS initialization */
+	call	os_start					/* Start NuttX */
 
 	/* NuttX will not return */
 
@@ -188,9 +180,7 @@ __start:
 hang:
 	hlt									/* Halt machine should NuttX return */
 	jmp	hang
-#ifndef __CYGWIN__
 	.size	__start, . - __start
-#endif
 
 /****************************************************************************
  * .bss
@@ -202,13 +192,9 @@ hang:
  * do in the system (see up_idle()).
  */
 
-#ifndef __CYGWIN__
 	.type	idle_stack, @object
-#endif
 	.comm   idle_stack, CONFIG_IDLETHREAD_STACKSIZE, 32
-#ifndef __CYGWIN__
 	.size	idle_stack, . - idle_stack
-#endif
 
 /****************************************************************************
  * .rodata
@@ -221,13 +207,9 @@ hang:
  * until the end of memory.
  */
 
-#ifndef __CYGWIN__
-	.type	SYMBOL(g_heapbase), @object
-#endif
-SYMBOL(g_heapbase):
+	.type	g_heapbase, @object
+g_heapbase:
 	.long	_ebss
-#ifndef __CYGWIN__
-	.size	SYMBOL(g_heapbase), . - SYMBOL(g_heapbase)
-#endif
+	.size	g_heapbase, . - g_heapbase
 	.end
 #endif /* CONFIG_X86_NASM */

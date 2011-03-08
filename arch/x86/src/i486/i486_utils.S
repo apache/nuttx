@@ -46,13 +46,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __CYGWIN__
-# define SYMBOL(s) _##s
-#else
-# define SYMBOL(s) s
-#endif
-
-#define KSEG 0x10
+ #define KSEG 0x10
 
 /****************************************************************************
  * Nasm
@@ -64,8 +58,8 @@
  * Nasm externals
  ****************************************************************************/
 
-global SYMBOL(gdt_flush)
-global SYMBOL(idt_flush)
+global gdt_flush
+global idt_flush
 
 /****************************************************************************
  * Nasm macros
@@ -82,7 +76,7 @@ BITS 32
  * Name: gdt_flush
  ****************************************************************************/
 
-SYMBOL(gdt_flush):
+gdt_flush:
     mov		eax, [esp+4]		/* Get the pointer to the GDT, passed as a parameter */
     lgdt	[eax]				/* Load the new GDT pointer */
 
@@ -100,7 +94,7 @@ SYMBOL(gdt_flush):
  * Name: idt_flush
  ****************************************************************************/
 
-SYMBOL(idt_flush):
+idt_flush:
     mov		eax, [esp+4]		/* Get the pointer to the IDT, passed as a parameter */
     lidt	[eax]				/* Load the IDT pointer */
     ret
@@ -117,8 +111,8 @@ SYMBOL(idt_flush):
  * GAS Globals
  ****************************************************************************/
 
-	.globl	SYMBOL(gdt_flush)
-	.globl	SYMBOL(idt_flush)
+	.globl	gdt_flush
+	.globl	idt_flush
 
 /****************************************************************************
  * GAS .text
@@ -130,10 +124,8 @@ SYMBOL(idt_flush):
  * Name: gdt_flush
  ****************************************************************************/
 
-#ifndef __CYGWIN__
-	.type	SYMBOL(gdt_flush), @function
-#endif
-SYMBOL(gdt_flush):
+	.type	gdt_flush, @function
+gdt_flush:
     movl	%eax, 4(%esp)	/* Get the pointer to the GDT, passed as a parameter */
     lgdt	(%eax)			/* Load the new GDT pointer */
 
@@ -146,23 +138,17 @@ SYMBOL(gdt_flush):
     jmp		$0x08, $.Lgflush		/* 0x08 is the offset to our code segment: Far jump! */
 .Lgflush:
     ret
-#ifndef __CYGWIN__
-	.size	SYMBOL(gdt_flush), . - SYMBOL(gdt_flush)
-#endif
+	.size	gdt_flush, . - gdt_flush
 
 /****************************************************************************
  * Name: idt_flush
  ****************************************************************************/
 
-#ifndef __CYGWIN__
-	.type	SYMBOL(idt_flush), @function
-#endif
-SYMBOL(idt_flush):
+	.type	idt_flush, @function
+idt_flush:
     movl	%eax, 4(%esp)	/* Get the pointer to the IDT, passed as a parameter */
     lidt	(%eax)			/* Load the IDT pointer */
     ret
-#ifndef __CYGWIN__
-	.size	SYMBOL(idt_flush), . - SYMBOL(idt_flush)
-#endif
+	.size	idt_flush, . - idt_flush
 	.end
 #endif /* CONFIG_X86_NASM */
