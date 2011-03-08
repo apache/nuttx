@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: March 1, 2011</p>
+      <p>Last Updated: March 7, 2011</p>
     </td>
   </tr>
 </table>
@@ -580,9 +580,8 @@ mount -t vfat /dev/ram1 /tmp
 </p>
 <p>
   <b>Modifying the ROMFS Image</b>.
-  The contents of the <code>/etc</code> directory are retained in the file
-  <code>examples/nsh/nsh_romfsimg.h</code>.  In order to modify the start-up
-  behavior, there are three things to study:
+  The contents of the <code>/etc</code> directory are retained in the file <code>examples/nsh/nsh_romfsimg.h</code> OR, if <code>CONFIG_EXAMPLES_NSH_ARCHROMFS</code> is defined, <code>include/arch/board/rcs.template</code>).
+  In order to modify the start-up behavior, there are three things to study:
   <ol>
     <li>
       <b>Configuration Options.</b>
@@ -591,29 +590,36 @@ mount -t vfat /dev/ram1 /tmp
     </li>
     <li>
       <p>
-        <b><code>mkromfsimg.sh</code> Script</b>.
-        The script <code>examples/nsh/mkromfsimg.sh</code> creates <code>nsh_romfsimg.h</code>.
+        <b><code>tools/mkromfsimg.sh</code> Script</b>.
+        The script <code>tools/mkromfsimg.sh</code> creates <code>nsh_romfsimg.h</code>.
         It is not automatically executed.  If you want to change the
         configuration settings associated with creating and mounting
         the <code>/tmp</code> directory, then it will be necessary to re-generate
-        this header file using the <code>mkromfsimg.sh</code> script.
+        this header file using the <code>tools/mkromfsimg.sh</code> script.
       </p>
       <p>
         The behavior of this script depends upon three things:
         <ul>
           <li>The configuration settings then installed configuration.
           <li>The <code>genromfs<code> tool (available from <a href="http://romfs.sourceforge.net">http://romfs.sourceforge.net</a>).
-          <li>The file <code>examples/nsh/rcS.template</code>.
+          <li>The file <code>examples/nsh/rcS.template</code>
+		    (OR, if <code>CONFIG_EXAMPLES_NSH_ARCHROMFS</code> is defined <code>include/arch/board/rcs.template</code>.
         </ul>
       </p>
     </li>
     <li>
       <b><code>rcS.template</code></b>.
       The file <code>examples/nsh/rcS.template</code> contains the general form
-      of the <code>rcS</code> file; configurated values are plugged into this
+      of the <code>rcS</code> file; configured values are plugged into this
       template file to produce the final <code>rcS</code> file.
     </li>
   </ol>
+</p>
+<p>
+  <b>NOTE</b>:
+  <code>examples/nsh/rcS.template</code> generates the standard, default <code>nsh_romfsimg.h</code> file.
+  If <code>CONFIG_EXAMPLES_NSH_ARCHROMFS<code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in <code>configs/&lt;board&gt;/include</code> will be used.
+  NOTE when the OS is configured, <code>include/arch/board</code> will be linked to <code>configs/&lt;board&gt;/include</code>.
 </p>
 <p>
   All of the startup-behavior is contained in <code>rcS.template</code>.  The
@@ -2255,6 +2261,12 @@ nsh>
     <th align="left">Description</th>
   </tr>
   <tr>
+    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ARCHROMFS</code></b></td>
+    <td>
+      May be defined to specify an alternative ROMFS image that can be found at <code>configs/&lt;board&gt;/include/nsh_romfsimg.h</code>.
+    </td>
+  </tr>
+  <tr>
     <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT</code></b></td>
     <td>
       The default mountpoint for the ROMFS volume is <code>&quot;/etc&quot;</code>, but that
@@ -2353,6 +2365,7 @@ nsh>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NOMAC</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSDEVNO</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSETC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ARCHROMFS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_STACKSIZE</code></a></li>
