@@ -1530,3 +1530,5 @@
 	  reported by Uros Platise).
 	* drivers/mtd/ramtron.c -  Driver for SPI-based RAMTRON NVRAM devices FM25V10
 	  (and others).  Contributed by Uros Platise.
+	* examples/nsh and tools/mkromfsimg.sh -- Add support for platform-specific
+	  ROMFS-based NSH start-up scripts.

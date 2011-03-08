@@ -93,6 +93,14 @@ void up_initial_state(_TCB *tcb)
 
   xcp->regs[REG_EIP]     = (uint32_t)tcb->start;
 
+  /* Set up the segment registers... assume the same segment as the caller.
+   * That is not a good assumption in the long run.
+   */
+
+  xcp->regs[REG_DS]      = up_getds();
+  xcp->regs[REG_CS]      = up_getcs();
+  xcp->regs[REG_SS]      = up_getss();
+
   /* Enable or disable interrupts, based on user configuration.  If the IF
    * bit is set, maskable interrupts will be enabled.
    */
