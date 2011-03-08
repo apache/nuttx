@@ -31,6 +31,12 @@ mkconfig.c
   into include/nuttx/config.h.  config.h is a another version of the
   NuttX configuration that can be included by C files.
 
+mkromfsimg.sh
+
+  This script may be used to automate the generate of a ROMFS file system
+  image.  It accepts an rcS script "template" and generates and image that
+  may be mounted under /etc in the NuttX pseudo file system.
+
 Makefile.mkconfig
 
   This is the makefile that is used to make the mkconfig program from

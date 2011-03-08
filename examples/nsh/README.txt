@@ -159,15 +159,16 @@ Modifying the ROMFS Image
 -------------------------
 
 The contents of the /etc directory are retained in the file
-examples/nsh/nsh_romfsimg.h.  In order to modify the start-up
-behavior, there are three things to study:
+examples/nsh/nsh_romfsimg.h (OR, if CONFIG_EXAMPLES_NSH_ARCHROMFS
+is defined, include/arch/board/rcs.template).  In order to modify
+the start-up behavior, there are three things to study:
 
 1. Configuration Options.
    The additional CONFIG_EXAMPLES_NSH_ROMFSETC configuration options
    discussed in the final section of this README.
 
-2. mkromfsimg.sh Script.
-   The script examples/nsh/mkromfsimg.sh creates nsh_romfsimg.h.
+2. tools/mkromfsimg.sh Script.
+   The script tools/mkromfsimg.sh creates nsh_romfsimg.h.
    It is not automatically executed.  If you want to change the
    configuration settings associated with creating and mounting
    the /tmp directory, then it will be necessary to re-generate
@@ -175,14 +176,24 @@ behavior, there are three things to study:
 
    The behavior of this script depends upon three things:
 
-   - The configuration settings then installed configuration.
+   - The configuration settings of the installed NuttX configuration.
    - The genromfs tool (available from http://romfs.sourceforge.net).
-   - The file examples/nsh/rcS.template.
+   - The file examples/nsh/rcS.template (OR, if
+     CONFIG_EXAMPLES_NSH_ARCHROMFS is defined, include/arch/board/rcs.template)
 
 3. rcS.template.
    The file examples/nsh/rcS.template contains the general form
-   of the rcS file; configurated values are plugged into this
+   of the rcS file; configured values are plugged into this
    template file to produce the final rcS file.
+
+NOTE:
+
+   examples/nsh/rcS.template generates the standard, default
+   nsh_romfsimg.h file.  If CONFIG_EXAMPLES_NSH_ARCHROMFS is defined
+   in the NuttX configuration file, then a custom, board-specific
+   nsh_romfsimg.h file residing in configs/<board>/include will be
+   used.  NOTE when the OS is configured, include/arch/board will
+   be linked to configs/<board>/include.
 
 All of the startup-behavior is contained in rcS.template.  The
 role of mkromfsimg.sh is to (1) apply the specific configuration

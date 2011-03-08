@@ -1,7 +1,7 @@
 ############################################################################
 # Makefile
 #
-#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -308,6 +308,13 @@ endif
 ifeq ($(CONFIG_RAW_BINARY),y)
 	@$(OBJCOPY) $(OBJCOPYARGS) -O binary $(NUTTX)$(EXEEXT) $(NUTTX)$(EXEEXT).bin
 endif
+
+# This is a helper target that will rebuild NuttX and download it to the
+# target system in one step.  It will generate an error an error if the
+# DOWNLOAD command is not defined in platform Make.defs file.
+
+download: $(BIN)
+	$(call DOWNLOAD, $@)
 
 depend:
 	@for dir in $(MAKEDIRS) ; do \

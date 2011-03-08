@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/nsh/nsh_romfsetc.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,15 @@
 
 #ifdef CONFIG_EXAMPLES_NSH_ROMFSETC
 
-#include "nsh_romfsimg.h"
+/* Should we use the default ROMFS image?  Or a custom, board-specific
+ * ROMFS image?
+ */
+
+#ifdef CONFIG_EXAMPLES_NSH_ARCHROMFS
+#  include <arch/board/nsh_romfsimg.h>
+#else
+#  include "nsh_romfsimg.h"
+#endif
 
 /****************************************************************************
  * Definitions

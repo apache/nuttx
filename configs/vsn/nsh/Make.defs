@@ -167,6 +167,10 @@ define CLEAN
 	@rm -f *.o *.a
 endef
 
+define DOWNLOAD
+	@armst /dev/ttyUSB0 nuttx.srec
+endef
+
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
