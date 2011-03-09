@@ -86,27 +86,23 @@ int up_sdcard(void)
 
   /* First, get an instance of the SDIO interface */
 
-  message("nsh_archinitialize: Initializing SDIO slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
   sdio = sdio_initialize(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+      message("SDIO: Failed to initialize slot %d\n", CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
+  message("SDIO: Initialized slot %d\n", CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
 
   /* Now bind the SPI interface to the MMC/SD driver */
 
-  message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDMINOR);
   ret = mmcsd_slotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      message("SDIO: Failed to bind to the MMC/SD driver: %d\n", ret);
       return ret;
     }
-  message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
+  message("SDIO: Successfully bound to the MMC/SD driver\n");
   
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the VSN board supports a GPIO to detect if there is a card in
