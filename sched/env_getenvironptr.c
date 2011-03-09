@@ -1,7 +1,7 @@
 /****************************************************************************
  * env_getenvironptr.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,10 +78,6 @@ FAR char **get_environ_ptr( void )
    /* Type of internal representation of environment is incompatible with
     * char ** return value.
     */
-
-#ifdef CONFIG_CPP_HAVE_WARNING
-#  warning "get_environ_ptr not Implemented"
-#endif
 
   return NULL;
 

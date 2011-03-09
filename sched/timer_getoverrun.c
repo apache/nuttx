@@ -1,7 +1,7 @@
 /********************************************************************************
  * timer_getoverrun.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,11 +102,7 @@
 
 int timer_getoverrun(timer_t timerid)
 {
-#ifdef CONFIG_CPP_HAVE_WARNING
-#  warning "timer_getoverrun not Implemented"
-#endif
-
-  *get_errno_ptr() = ENOSYS;
+  errno = ENOSYS;
   return ERROR;
 }
 

@@ -314,7 +314,7 @@ endif
 # DOWNLOAD command is not defined in platform Make.defs file.
 
 download: $(BIN)
-	$(call DOWNLOAD, $@)
+	$(call DOWNLOAD, $<)
 
 depend:
 	@for dir in $(MAKEDIRS) ; do \

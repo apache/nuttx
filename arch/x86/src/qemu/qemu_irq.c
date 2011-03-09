@@ -256,64 +256,6 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  irqrestore(0);
+  irqrestore(X86_FLAGS_IF);
 #endif
 }
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_disable_irq(int irq)
-{
-#warning "Missing Logic"
-}
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
-
-void up_enable_irq(int irq)
-{
-#warning "Missing Logic"
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-#warning "Missing Logic"
-}
-
-/****************************************************************************
- * Name: up_prioritize_irq
- *
- * Description:
- *   Set the priority of an IRQ.
- *
- *   Since this API is not supported on all architectures, it should be
- *   avoided in common implementations where possible.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQPRIO
-int up_prioritize_irq(int irq, int priority)
-{
-#warning "Missing Logic"
-  return OK;
-}
-#endif

@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 4, 2011)
+NuttX TODO List (Last updated March 8, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -12,7 +12,7 @@ NuttX TODO List (Last updated March 4, 2011)
   (5)  Network Utilities (netutils/)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (5)  Libraries (lib/)
- (12)  File system/Generic drivers (fs/, drivers/)
+ (13)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -80,6 +80,21 @@ o On-demand paging (sched/)
                the feature is fully functional.
   Status:      Open
   Priority:    Medium-Low
+
+o Other core OS logic
+  ^^^^^^^^^^^^^^^^^^^
+
+  Description: get_environ_ptr() (sched/sched_getenvironptr.c) is not implemented.
+               The representation of the the environment strings selected for
+               NutX is not compatible with the operation.  Some significant
+               re-design would be required to implement this funcion and that
+               effort is thought to be not worth the result.
+  Status:      Open
+  Priority:    Low -- There is no plan to implement this.
+
+  Description: timer_getoverrun() (sched/timer_getoverrun.c) is not implemented.
+  Status:      Open
+  Priority:    Low -- There is no plan to implement this.
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
@@ -450,6 +465,12 @@ o File system / Generic drivers (fs/, drivers/)
                a good ENC28J60 test platform).
   Status:      Open
   Priority:    Low
+
+  Description: Time stamping is no implemented in the NuttX FA file system.
+               See the following functions in fs/fat/fs_fat32util.c:
+               fat_systime2fattime() and fat_fattime2systime()
+  Status:      Open
+  Priority:    Medium
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1030,8 +1051,8 @@ o z80/z8/ez80 (arch/z80)
                I have found the following workaround that I use to build for the
                time being:
 
-               --- mm/mm_initialize.c.SAVE	2008-02-13 08:06:46.833857700 -0600
-               +++ mm/mm_initialize.c	2008-02-13 08:07:26.367608900 -0600
+               --- mm/mm_initialize.c.SAVE    2008-02-13 08:06:46.833857700 -0600
+               +++ mm/mm_initialize.c    2008-02-13 08:07:26.367608900 -0600
                @@ -94,8 +94,11 @@
                {
                   int i;

@@ -161,17 +161,25 @@ g_heapbase:
 	.type	__start, @function
 __start:
 	/* Set up the stack */
-
+        mov     $'a', %ax
+        mov     $0x3f8, %dx
+        outb    %al, %dx
 	mov		$(idle_stack + CONFIG_IDLETHREAD_STACKSIZE), %esp
 
 	/* Multiboot setup */
 
 	push	%eax						/* Multiboot magic number */
 	push	%ebx						/* Multiboot data structure */
+        mov     $'b', %ax
+        mov     $0x3f8, %dx
+        outb    %al, %dx
 
 	/* Initialize and start NuttX */
 
 	call	up_lowsetup					/* Low-level, pre-OS initialization */
+        mov     $'c', %ax
+        mov     $0x3f8, %dx
+        outb    %al, %dx
 	call	os_start					/* Start NuttX */
 
 	/* NuttX will not return */
