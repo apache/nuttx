@@ -163,28 +163,8 @@ extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
 
-extern void up_doirq(int irq, uint32_t *regs);
-#ifdef CONFIG_PAGING
-extern void up_pginitialize(void);
-extern uint32_t *up_va2pte(uintptr_t vaddr);
-extern void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
-#else /* CONFIG_PAGING */
-# define up_pginitialize()
-extern void up_dataabort(uint32_t *regs);
-#endif /* CONFIG_PAGING */
-extern void up_prefetchabort(uint32_t *regs);
 extern void up_syscall(uint32_t *regs);
-extern void up_undefinedinsn(uint32_t *regs);
-
-/* Defined in up_vectors.S */
-
-extern void up_vectorundefinsn(void);
-extern void up_vectorswi(void);
-extern void up_vectorprefetch(void);
-extern void up_vectordata(void);
-extern void up_vectoraddrexcptn(void);
-extern void up_vectorirq(void);
-extern void up_vectorfiq(void);
+extern void up_registerdump(uint32_t *regs);
 
 /* Defined in up_allocateheap.c */
 

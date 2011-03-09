@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86/src/i486/up_assert.c
+ * arch/x86/src/common/up_assert.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -109,36 +109,6 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
 #endif
 
 /****************************************************************************
- * Name: up_registerdump
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_STACKDUMP
-static inline void up_registerdump(void)
-{
-  /* Are user registers available from interrupt processing? */
-
-  if (current_regs)
-    {
-      lldbg(" ds:%08x irq:%08x err:%08x\n",
-            current_regs[REG_DS], current_regs[REG_IRQNO],
-			current_regs[REG_ERRCODE]);
-      lldbg("edi:%08x esi:%08x ebp:%08x esp:%08x\n",
-            current_regs[REG_EDI], current_regs[REG_ESI],
-			current_regs[REG_EBP], current_regs[REG_ESP]);
-      lldbg("ebx:%08x edx:%08x ecx:%08x eax:%08x\n",
-            current_regs[REG_EBX], current_regs[REG_EDX],
-			current_regs[REG_ECX], current_regs[REG_EAX]);
-      lldbg("eip:%08x  cs:%08x flg:%08x sp:%08x ss:%08x\n",
-            current_regs[REG_EIP], current_regs[REG_CS],
-			current_regs[REG_EFLAGS], current_regs[REG_SP],
-			current_regs[REG_SS]);
-    }
-}
-#else
-# define up_registerdump()
-#endif
-
-/****************************************************************************
  * Name: up_dumpstate
  ****************************************************************************/
 
@@ -226,7 +196,10 @@ static void up_dumpstate(void)
 
   /* Then dump the registers (if available) */
 
-  up_registerdump();
+  if (current_regs != NULL)
+    {
+      up_registerdump(current_regs);
+	}
 }
 #else
 # define up_dumpstate()

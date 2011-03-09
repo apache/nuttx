@@ -120,17 +120,17 @@ up_fullcontextrestore:
 
 	/* Now restore the remaining registers */
 
-	movl	(4*REG_EDI)(%ebx), %edi
-	movl	(4*REG_ESI)(%ebx), %esi
-	movl	(4*REG_EBP)(%ebx), %ebp
-	movl	(4*REG_EDX)(%ebx), %edx
-	movl	(4*REG_ECX)(%ebx), %ecx
+	movl	(4*REG_EDI)(%eax), %edi
+	movl	(4*REG_ESI)(%eax), %esi
+	movl	(4*REG_EBP)(%eax), %ebp
+	movl	(4*REG_EDX)(%eax), %edx
+	movl	(4*REG_ECX)(%eax), %ecx
 
 	/* Restore the segment registers */
 
-	mov		(4*REG_DS)(%ebx), %ds
-	mov		(4*REG_CS)(%ebx), %cs
-	mov		(4*REG_SS)(%ebx), %ss
+	mov		(4*REG_DS)(%eax), %ds
+	mov		(4*REG_CS)(%eax), %cs
+	mov		(4*REG_SS)(%eax), %ss
 
 	/* Restore the correct value of EAX, EBX, and the EFLAGS then return */
 
