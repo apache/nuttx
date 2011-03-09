@@ -229,11 +229,6 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
   const struct usbhost_registry_s *reg;
   int ret = -EINVAL;
 
-  if (id->base == USB_CLASS_VENDOR_SPEC)
-    {
-      udbg("BUG: More logic needed to extract VID and PID\n");
-    }
-
   /* Is there is a class implementation registered to support this device. */
 
   reg = usbhost_findclass(id);

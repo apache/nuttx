@@ -213,6 +213,13 @@ static int nsh_usbhostinitialize(void)
       message("nsh_usbhostinitialize: Failed to register the mass storage class\n");
     }
 
+  message("nsh_usbhostinitialize: Register device specific drivers\n");
+  ret = usbhost_wlaninit();
+  if (ret != OK)
+    {
+      message("nsh_usbhostinitialize: Failed to register the WLAN device\n");
+    }
+
   /* Then get an instance of the USB host interface */
 
   message("nsh_usbhostinitialize: Initialize USB host\n");

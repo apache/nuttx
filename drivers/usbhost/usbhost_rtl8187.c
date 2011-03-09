@@ -34,7 +34,7 @@
  *
  ****************************************************************************/
 
-/* @TODO TEMPORARILY. REMOVE LATER!!! */
+/* @TODO REMOVE LATER!!! */
 #define CONFIG_WLAN_IRQ 1
 
 /****************************************************************************
@@ -265,6 +265,11 @@ static int wlan_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 static int wlan_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
+/* Register and unregister network device */
+
+static int wlan_initialize(int intf);
+static int wlan_uninitialize(int intf);
+
 #endif /* CONFIG_NET && CONFIG_NET_WLAN */
 
 /****************************************************************************
@@ -278,10 +283,10 @@ static int wlan_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 static const const struct usbhost_id_s g_id =
 {
   USB_CLASS_VENDOR_SPEC,  /* base */
-  0xff,    /* subclass */
-  0xff,    /* proto  */
-  0x0bda,  /* vid      */
-  0x8189   /* pid      */
+  0xff,                   /* subclass */
+  0xff,                   /* proto */
+  CONFIG_USB_WLAN_VID,    /* vid */
+  CONFIG_USB_WLAN_PID     /* pid */
 };
 
 /* This is the USB host wireless LAN class's registry entry */
@@ -738,12 +743,13 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
       uvdbg("Register block driver\n");
       usbhost_mkdevname(priv, devname);
+      ret = wlan_initialize(0);
       // ret = register_blockdriver(devname, &g_bops, 0, priv);
     }
 
   /* Check if we successfully initialized. We now have to be concerned
    * about asynchronous modification of crefs because the block
-   * driver has been registerd.
+   * driver has been registered.
    */
 
   if (ret == OK)
@@ -1130,6 +1136,10 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
           usbhost_destroy(priv);
         }
     }
+
+  /* Unregister WLAN network interface */
+
+  wlan_uninitialize(0);
 
   irqrestore(flags);  
   return OK;
@@ -1617,6 +1627,117 @@ static int wlan_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 }
 #endif
 
+/****************************************************************************
+ * Function: wlan_initialize
+ *
+ * Description:
+ *   Initialize the WLAN controller and driver
+ *
+ * Parameters:
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int wlan_initialize(int intf)
+{
+  struct wlan_driver_s *priv;
+
+  /* Get the interface structure associated with this interface number. */
+
+  DEBUGASSERT(intf < CONFIG_WLAN_NINTERFACES);
+  priv = &g_wlan1[intf];
+
+  /* Check if a WLAN chip is recognized at its I/O base */
+
+  /* Attach the IRQ to the driver */
+
+#if 0 /* @TODO resolve this */
+  if (irq_attach(CONFIG_WLAN_IRQ, wlan_interrupt))
+    {
+      /* We could not attach the ISR to the the interrupt */
+
+      return -EAGAIN;
+    }
+#endif
+
+  /* Initialize the driver structure */
+
+  memset(priv, 0, sizeof(struct wlan_driver_s));
+  priv->wl_dev.d_ifup    = wlan_ifup;     /* I/F down callback */
+  priv->wl_dev.d_ifdown  = wlan_ifdown;   /* I/F up (new IP address) callback */
+  priv->wl_dev.d_txavail = wlan_txavail;  /* New TX data callback */
+#ifdef CONFIG_NET_IGMP
+  priv->wl_dev.d_addmac  = wlan_addmac;   /* Add multicast MAC address */
+  priv->wl_dev.d_rmmac   = wlan_rmmac;    /* Remove multicast MAC address */
+#endif
+  priv->wl_dev.d_private = (void*)g_wlan1; /* Used to recover private state from dev */
+
+  /* Create a watchdog for timing polling for and timing of transmisstions */
+
+  priv->wl_txpoll       = wd_create();   /* Create periodic poll timer */
+  priv->wl_txtimeout    = wd_create();   /* Create TX timeout timer */
+
+  /* Put the interface in the down state.  This usually amounts to resetting
+   * the device and/or calling wlan_ifdown().
+   */
+
+  /* Read the MAC address from the hardware into priv->wl_dev.d_mac.ether_addr_octet */
+
+  /* Register the device with the OS so that socket IOCTLs can be performed */
+
+  (void)netdev_register(&priv->wl_dev);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: wlan_initialize
+ *
+ * Description:
+ *   Initialize the WLAN controller and driver
+ *
+ * Parameters:
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int wlan_uninitialize(int intf)
+{
+  struct wlan_driver_s *priv;
+
+  /* Get the interface structure associated with this interface number. */
+
+  DEBUGASSERT(intf < CONFIG_WLAN_NINTERFACES);
+  priv = &g_wlan1[intf];
+
+  /* Check if a WLAN chip is recognized at its I/O base */
+
+  /* Detach the IRQ from the driver */
+
+//  irq_detach(CONFIG_WLAN_IRQ); /* @TODO enable this code */
+
+  /* Unregister the device */
+
+//  (void)netdev_unregister(&priv->wl_dev); /* @TODO implement this */
+
+  /* Uninitialize the driver structure */
+
+  memset(priv, 0, sizeof(struct wlan_driver_s));
+
+  return OK;
+}
+
 #endif /* CONFIG_NET && CONFIG_NET_WLAN */
 
 /****************************************************************************
@@ -1652,85 +1773,22 @@ int usbhost_wlaninit(void)
 #if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
 
 /****************************************************************************
- * Function: wlan_initialize
- *
- * Description:
- *   Initialize the WLAN controller and driver
- *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value
- *          identifies which EMAC is to be initialized.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int wlan_initialize(int intf)
-{
-  struct wlan_driver_s *priv;
-
-  /* Get the interface structure associated with this interface number. */
-
-  DEBUGASSERT(inf < CONFIG_WLAN_NINTERFACES);
-  priv = &g_wlan1[intf];
-
-  /* Check if a WLAN chip is recognized at its I/O base */
-
-  /* Attach the IRQ to the driver */
-
-  if (irq_attach(CONFIG_WLAN_IRQ, wlan_interrupt))
-    {
-      /* We could not attach the ISR to the the interrupt */
-
-      return -EAGAIN;
-    }
-
-  /* Initialize the driver structure */
-
-  memset(priv, 0, sizeof(struct wlan_driver_s));
-  priv->wl_dev.d_ifup    = wlan_ifup;     /* I/F down callback */
-  priv->wl_dev.d_ifdown  = wlan_ifdown;   /* I/F up (new IP address) callback */
-  priv->wl_dev.d_txavail = wlan_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
-  priv->wl_dev.d_addmac  = wlan_addmac;   /* Add multicast MAC address */
-  priv->wl_dev.d_rmmac   = wlan_rmmac;    /* Remove multicast MAC address */
-#endif
-  priv->wl_dev.d_private = (void*)g_wlan1; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmisstions */
-
-  priv->wl_txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->wl_txtimeout    = wd_create();   /* Create TX timeout timer */
-
-  /* Put the interface in the down state.  This usually amounts to resetting
-   * the device and/or calling wlan_ifdown().
-   */
-
-  /* Read the MAC address from the hardware into priv->wl_dev.d_mac.ether_addr_octet */
-
-  /* Register the device with the OS so that socket IOCTLs can be performed */
-
-  (void)netdev_register(&priv->wl_dev);
-  return OK;
-}
-
-/****************************************************************************
  * Name: up_netinitialize
  *
  * Description:
  *   Initialize the first network interface.  If there are more than one
- *   interface in the device, then device-specific logic will have to provide
- *   this function to determine which, if any, WLAN controllers should
+ *   interface in the chip, then board-specific logic will have to provide
+ *   this function to determine which, if any, Ethernet controllers should
  *   be initialized.
  *
  ****************************************************************************/
 
+#ifndef CONFIG_LPC17_ETHERNET
 void up_netinitialize(void)
 {
-  (void)wlan_initialize(0);
+  /* stub */
 }
+#endif
+
 #endif /* CONFIG_NET && CONFIG_NET_WLAN */
 

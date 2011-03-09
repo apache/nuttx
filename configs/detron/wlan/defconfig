@@ -241,6 +241,8 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
 # CONFIG_DEBUG_SYMBOLS - build without optimization and with
 #   debug symbols (needed for use with a debugger).
+# CONFIG_DEBUG_NET - enable network debug output
+# CONFIG_DEBUG_USB - enable usb debug output
 # CONFIG_MM_REGIONS - If the architecture includes multiple
 #   regions of memory to allocate from, this specifies the
 #   number of memory regions that the memory manager must
@@ -328,6 +330,7 @@ CONFIG_APP_DIR=examples/wlan
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
+CONFIG_DEBUG_NET=n
 CONFIG_DEBUG_USB=n
 CONFIG_MM_REGIONS=2
 CONFIG_ARCH_LOWPUTC=y
@@ -336,7 +339,7 @@ CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
 CONFIG_START_YEAR=2011
 CONFIG_START_MONTH=3
-CONFIG_START_DAY=6
+CONFIG_START_DAY=8
 CONFIG_GREGORIAN_TIME=n
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
@@ -900,3 +903,9 @@ CONFIG_PTHREAD_STACK_MIN=256
 CONFIG_PTHREAD_STACK_DEFAULT=2048
 CONFIG_HEAP_BASE=
 CONFIG_HEAP_SIZE=
+
+#
+# USB WLAN device identification
+#
+CONFIG_USB_WLAN_VID=0x0bda
+CONFIG_USB_WLAN_PID=0x8189
