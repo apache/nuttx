@@ -62,26 +62,25 @@ int up_ramtron(void)
 
   /* Get the SPI port */
 
-  message("nsh_archinitialize: Initializing SPI port 3\n");
   spi = up_spiinitialize(3);
   if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SPI port 3\n");
+      message("RAMTRON: Failed to initialize SPI3\n");
       return -ENODEV;
     }
-  message("nsh_archinitialize: Successfully initialized SPI port 3\n");
+  message("RAMTRON: Initialized SPI3\n");
 
-  message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
   mtd = ramtron_initialize(spi);
   if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+      message("RAMTRON: Device not found\n");
       return -ENODEV;
     }
-  message("nsh_archinitialize: Successfully bound SPI port 0 to the SPI FLASH driver\n");
+  message("RAMTRON: FM25V10 of size 128 kB\n");
+  //message("RAMTRON: %s of size %d B\n", ramtron_getpart(mtd), ramtron_getsize(mtd) );
 
-  retval = ftl_initialize(0,NULL, mtd);
-  message("FTL returned with %d\n", retval);
+  retval = ftl_initialize(0, NULL, mtd);
+  message("RAMTRON: FTL Initialized (returns with %d)\n", retval);
 #endif
   return OK;
 }
