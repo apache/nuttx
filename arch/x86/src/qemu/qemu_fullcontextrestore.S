@@ -115,8 +115,6 @@ up_fullcontextrestore:
 	push	%ebx
 	movl	(4*REG_EAX)(%eax), %ebx
 	push	%ebx
-	movl	(4*REG_EBX)(%eax), %ebx
-	push	%ebx
 
 	/* Now restore the remaining registers */
 
@@ -125,6 +123,7 @@ up_fullcontextrestore:
 	movl	(4*REG_EBP)(%eax), %ebp
 	movl	(4*REG_EDX)(%eax), %edx
 	movl	(4*REG_ECX)(%eax), %ecx
+	movl	(4*REG_EBX)(%eax), %ebx
 
 	/* Restore the segment registers */
 
@@ -134,7 +133,6 @@ up_fullcontextrestore:
 
 	/* Restore the correct value of EAX, EBX, and the EFLAGS then return */
 
-	popl	%ebx
 	popl	%eax
 	popf
 	ret
