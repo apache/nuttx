@@ -52,6 +52,8 @@
  * Private Data
  ****************************************************************************/
 
+static struct gdt_entry_s gdt_entries[5];
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -93,8 +95,7 @@ static void up_gdtentry(struct gdt_entry_s *entry, uint32_t base,
 
 static void up_gdtinit(void)
 {
-  struct gdt_entry_s gdt_entries[5];
-  struct gdt_ptr_s   gdt_ptr;
+  struct gdt_ptr_s gdt_ptr;
 
   up_gdtentry(&gdt_entries[0], 0, 0, 0, 0);                /* Null segment */
   up_gdtentry(&gdt_entries[1], 0, 0xffffffff, 0x9a, 0xcf); /* Code segment */

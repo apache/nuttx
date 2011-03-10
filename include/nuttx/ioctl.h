@@ -52,13 +52,13 @@
  */
 
 #define _TIOCBASE       (0x5400) /* Terminal I/O ioctl commands */
-#define _WDIOCBASE      (0x5400) /* Watchdog driver ioctl commands */
+#define _WDIOCBASE      (0x5500) /* Watchdog driver ioctl commands */
 #define _FIOCBASE       (0x8700) /* File system ioctl commands */
 #define _DIOCBASE       (0x8800) /* Character driver ioctl commands */
 #define _BIOCBASE       (0x8900) /* Block driver ioctl commands */
 #define _MTDIOCBASE     (0x8a00) /* MTD ioctl commands */
-#define _SIOCBASE       (0x8b00) /* Socket ioctl commandss */
-#define _ARPBASE        (0x8c00) /* ARP ioctl commandss */
+#define _SIOCBASE       (0x8b00) /* Socket ioctl commands */
+#define _ARPBASE        (0x8c00) /* ARP ioctl commands */
 
 /* Macros used to manage ioctl commands */
 

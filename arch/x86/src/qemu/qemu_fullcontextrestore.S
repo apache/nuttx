@@ -45,33 +45,35 @@
 #include <arch/irq.h>
 #include "up_internal.h"
 
+	.file	"qemu_fullcontextrestore.S"
+
 /**************************************************************************
  * Pre-processor Definitions
- **************************************************************************/
-
-/**************************************************************************
- * Private Types
- **************************************************************************/
-
-/**************************************************************************
- * Private Function Prototypes
  **************************************************************************/
 
 /**************************************************************************
  * Global Variables
  **************************************************************************/
 
-/**************************************************************************
- * Private Variables
- **************************************************************************/
+/****************************************************************************
+ * Macros
+ ****************************************************************************/
 
-/**************************************************************************
- * Private Functions
- **************************************************************************/
+/* Trace macros, use like trace 'i' to print char to serial port. */
+
+	.macro	trace, ch
+#ifdef CONFIG_DEBUG
+	mov		$0x3f8, %dx
+	mov		$\ch, %al
+	out		%al, %dx
+#endif
+	.endm
 
 /**************************************************************************
  * Public Functions
  **************************************************************************/
+
+	.text
 
 /**************************************************************************
  * Name: up_fullcontextrestore
@@ -81,11 +83,6 @@
  *
  **************************************************************************/
 
-#ifdef CONFIG_X86_NASM
-#  warning "No Nasm support"
-#else
-	.file	"qemu_fullcontextrestore.S"
-	.text
 	.globl	up_fullcontextrestore
 	.type	up_fullcontextrestore, @function
 up_fullcontextrestore:
@@ -105,38 +102,54 @@ up_fullcontextrestore:
 
 	movl	(4*REG_SP)(%eax), %esp
 
-	/* Save the return address, EFLAGS, and the values  as well the
-	 * values of EBX and EAC on the new stack.
+	/* Create an interrupt stack frame for the final iret.
+	 *
+	 * SP Before -> 
+	 *              SS
+	 *              ESP
+	 *              EFLAGS
+	 *              CS
+	 * SP After  -> EIP
 	 */
 
-	movl	(4*REG_EIP)(%eax), %ebx
+	mov		(4*REG_SS)(%eax), %ebx
+	push	%ebx
+	movl	(4*REG_SP)(%eax), %ebx
 	push	%ebx
 	movl	(4*REG_EFLAGS)(%eax), %ebx
 	push	%ebx
+	mov		(4*REG_CS)(%eax), %ebx
+	push	%ebx
+	movl	(4*REG_EIP)(%eax), %ebx
+	push	%ebx
+
+	/* Save the value of EAX on the stack too */
+
 	movl	(4*REG_EAX)(%eax), %ebx
 	push	%ebx
 
 	/* Now restore the remaining registers */
 
-	movl	(4*REG_EDI)(%eax), %edi
 	movl	(4*REG_ESI)(%eax), %esi
+	movl	(4*REG_EDI)(%eax), %edi
 	movl	(4*REG_EBP)(%eax), %ebp
+	movl	(4*REG_EBX)(%eax), %ebx
 	movl	(4*REG_EDX)(%eax), %edx
 	movl	(4*REG_ECX)(%eax), %ecx
-	movl	(4*REG_EBX)(%eax), %ebx
 
-	/* Restore the segment registers */
+	/* Restore the data segment register.  I think there is an issue that will
+	 * need to be address here at some time:  If the register save area is in
+	 * one data segment and the stack is in another, then the above would not
+	 * work (and, conversely, if they are in the same data segment, the
+	 * following is unnecessary and redundant).
+	 */
 
 	mov		(4*REG_DS)(%eax), %ds
-	mov		(4*REG_CS)(%eax), %cs
-	mov		(4*REG_SS)(%eax), %ss
 
-	/* Restore the correct value of EAX, EBX, and the EFLAGS then return */
+	/* Restore the correct value of EAX and then return */
 
 	popl	%eax
-	popf
-	ret
+	iret
 	.size up_fullcontextrestore, . - up_fullcontextrestore
     .end
-#endif /* CONFIG_X86_NASM */
 
