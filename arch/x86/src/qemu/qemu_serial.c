@@ -40,10 +40,18 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/uart_16550.h>
+
+#include <arch/io.h>
+
 #include "up_internal.h"
 
+/* This is a "stub" file to suppport up_putc if no real serial driver is
+ * configured.  Normally, drivers/serial/uart_16550.c provides the serial
+ * driver for this platform.
+ */
+
 #ifdef CONFIG_USE_SERIALDRIVER
-#error "Serial driver support not initialized"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,6 +68,25 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: uart_getreg(), uart_putreg()
+ *
+ * Description:
+ *   These functions must be provided by the processor-specific code in order
+ *   to correctly access 16550 registers
+ *
+ ****************************************************************************/
+
+uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset)
+{
+  return inb(base + offset);
+}
+
+void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t value)
+{
+  outb(value, base + offset);
+}
 
 #else /* CONFIG_USE_SERIALDRIVER */
 
