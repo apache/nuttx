@@ -86,7 +86,7 @@ vector_isr\intno:
 	cli							/* Disable interrupts firstly. */
 	push	$0					/* Push a dummy error code. */
 	push	$\intno				/* Push the interrupt number. */
-	jmp		isr_common			/* Go to the common handler code. */
+	jmp		isr_common			/* Go to the common ISR handler code. */
 	.endm
 
 /* This macro creates a stub for an ISR which passes it's own
@@ -98,7 +98,7 @@ vector_isr\intno:
 vector_isr\intno:
 	cli							/* Disable interrupts firstly. */
 	push	$\intno				/* Push the interrupt number. */
-	jmp		isr_common			/* Go to the common handler code. */
+	jmp		isr_common			/* Go to the common ISR handler code. */
 	.endm
 
 /* This macro creates a stub for an IRQ - the first parameter is
@@ -111,7 +111,7 @@ vector_irq\irqno:
 	cli							/* Disable interrupts firstly. */
 	push	$0					/* Push a dummy error code. */
 	push	$\intno				/* Push the interrupt number. */
-	jmp		isr_common			/* Go to the common handler code. */
+	jmp		irq_common			/* Go to the common IRQ handler code. */
 	.endm
 
 /****************************************************************************
