@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_UART_16550
+#ifdef CONFIG_16550_UART
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -75,7 +75,7 @@
 #  error "CONFIG_16550_REGWIDTH not defined"
 #endif
 
-#if CONFIG_16550_REGWIDTH != 1 && CONFIG_16550_REGWIDTH != 2 && CONFIG_16550_REGWIDTH != 4
+#if CONFIG_16550_REGWIDTH != 8 && CONFIG_16550_REGWIDTH != 16 && CONFIG_16550_REGWIDTH != 32
 #  error "CONFIG_16550_REGWIDTH not supported"
 #endif
 
@@ -83,7 +83,7 @@
 #  error "CONFIG_16550_ADDRWIDTH not defined"
 #endif
 
-#if CONFIG_16550_ADDRWIDTH != 1 && CONFIG_16550_ADDRWIDTH != 2 && CONFIG_16550_ADDRWIDTH != 4
+#if CONFIG_16550_ADDRWIDTH != 8 && CONFIG_16550_ADDRWIDTH != 16 && CONFIG_16550_ADDRWIDTH != 32
 #  error "CONFIG_16550_ADDRWIDTH not supported"
 #endif
 
@@ -311,19 +311,19 @@
  * Public Types
  ************************************************************************************/
 
-#if CONFIG_16550_REGWIDTH == 1
+#if CONFIG_16550_REGWIDTH == 8
 typedef uint8_t uart_datawidth_t;
-#elif CONFIG_16550_REGWIDTH == 2
+#elif CONFIG_16550_REGWIDTH == 16
 typedef uint16_t uart_datawidth_t;
-#elif CONFIG_16550_REGWIDTH == 4
+#elif CONFIG_16550_REGWIDTH == 32
 typedef uint32_t uart_datawidth_t;
 #endif
 
-#if CONFIG_16550_REGWIDTH == 1
+#if CONFIG_16550_ADDRWIDTH == 8
 typedef uint8_t uart_addrwidth_t;
-#elif CONFIG_16550_REGWIDTH == 2
+#elif CONFIG_16550_ADDRWIDTH == 16
 typedef uint16_t uart_addrwidth_t;
-#elif CONFIG_16550_REGWIDTH == 4
+#elif CONFIG_16550_ADDRWIDTH == 32
 typedef uint32_t uart_addrwidth_t;
 #endif
 

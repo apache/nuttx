@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/serial/Make.defs
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,12 @@
 #
 ############################################################################
 
-SERIAL_ASRCS  =
+SERIAL_ASRCS	=
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 SERIAL_CSRCS	= serial.c serialirq.c lowconsole.c
+ifeq ($(CONFIG_16550_UART),y)
+SERIAL_CSRCS	+= uart_16550.c
+endif
 else
 SERIAL_CSRCS	= 
 endif

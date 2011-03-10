@@ -52,11 +52,12 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
+#include <nuttx/ioctl.h>
 #include <nuttx/uart_16550.h>
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_UART_16550
+#ifdef CONFIG_16550_UART
 
 /****************************************************************************
  * Pre-processor definitions
@@ -66,35 +67,43 @@
  * Private Types
  ****************************************************************************/
 
-struct uart_16550_s
+struct u16550_s
 {
   uart_addrwidth_t uartbase;  /* Base address of UART registers */
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   uint32_t         baud;      /* Configured baud */
   uint32_t         uartclk;   /* UART clock frequency */
+#endif
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
   uart_datawidth_t ier;       /* Saved IER value */
   uint8_t          irq;       /* IRQ associated with this UART */
+#endif
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   uint8_t          parity;    /* 0=none, 1=odd, 2=even */
   uint8_t          bits;      /* Number of bits (7 or 8) */
   bool             stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+#endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  uart_setup(struct uart_dev_s *dev);
-static void uart_shutdown(struct uart_dev_s *dev);
-static int  uart_attach(struct uart_dev_s *dev);
-static void uart_detach(struct uart_dev_s *dev);
-static int  uart_interrupt(int irq, void *context);
-static int  uart_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  uart_receive(struct uart_dev_s *dev, uint32_t *status);
-static void uart_rxint(struct uart_dev_s *dev, bool enable);
-static bool uart_rxavailable(struct uart_dev_s *dev);
-static void uart_send(struct uart_dev_s *dev, int ch);
-static void uart_txint(struct uart_dev_s *dev, bool enable);
-static bool uart_txready(struct uart_dev_s *dev);
-static bool uart_txempty(struct uart_dev_s *dev);
+static int  u16550_setup(struct uart_dev_s *dev);
+static void u16550_shutdown(struct uart_dev_s *dev);
+static int  u16550_attach(struct uart_dev_s *dev);
+static void u16550_detach(struct uart_dev_s *dev);
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+static int  u16550_interrupt(int irq, void *context);
+#endif
+static int  u16550_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  u16550_receive(struct uart_dev_s *dev, uint32_t *status);
+static void u16550_rxint(struct uart_dev_s *dev, bool enable);
+static bool u16550_rxavailable(struct uart_dev_s *dev);
+static void u16550_send(struct uart_dev_s *dev, int ch);
+static void u16550_txint(struct uart_dev_s *dev, bool enable);
+static bool u16550_txready(struct uart_dev_s *dev);
+static bool u16550_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -102,18 +111,18 @@ static bool uart_txempty(struct uart_dev_s *dev);
 
 struct uart_ops_s g_uart_ops =
 {
-  .setup          = uart_setup,
-  .shutdown       = uart_shutdown,
-  .attach         = uart_attach,
-  .detach         = uart_detach,
-  .ioctl          = uart_ioctl,
-  .receive        = uart_receive,
-  .rxint          = uart_rxint,
-  .rxavailable    = uart_rxavailable,
-  .send           = uart_send,
-  .txint          = uart_txint,
-  .txready        = uart_txready,
-  .txempty        = uart_txempty,
+  .setup          = u16550_setup,
+  .shutdown       = u16550_shutdown,
+  .attach         = u16550_attach,
+  .detach         = u16550_detach,
+  .ioctl          = u16550_ioctl,
+  .receive        = u16550_receive,
+  .rxint          = u16550_rxint,
+  .rxavailable    = u16550_rxavailable,
+  .send           = u16550_send,
+  .txint          = u16550_txint,
+  .txready        = u16550_txready,
+  .txempty        = u16550_txempty,
 };
 
 /* I/O buffers */
@@ -138,15 +147,21 @@ static char g_uart3txbuffer[CONFIG_UART1_TXBUFSIZE];
 /* This describes the state of the LPC17xx uart0 port. */
 
 #ifdef CONFIG_16550_UART0
-static struct uart_16550_s g_uart0priv =
+static struct u16550_s g_uart0priv =
 {
   .uartbase       = CONFIG_16550_UART0_BASE,
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   .baud           = CONFIG_UART0_BAUD,
   .uartclk        = CONFIG_16550_UART0_CLOCK,
+#endif
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
   .irq            = CONFIG_16550_UART0_IRQ,
+#endif
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
+#endif
 };
 
 static uart_dev_t g_uart0port =
@@ -169,15 +184,21 @@ static uart_dev_t g_uart0port =
 /* This describes the state of the LPC17xx uart1 port. */
 
 #ifdef CONFIG_16550_UART1
-static struct uart_16550_s g_uart1priv =
+static struct u16550_s g_uart1priv =
 {
   .uartbase       = CONFIG_16550_UART1_BASE,
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   .baud           = CONFIG_UART1_BAUD,
   .uartclk        = CONFIG_16550_UART1_CLOCK,
+#endif
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
   .irq            = CONFIG_16550_UART1_IRQ,
+#endif
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
+#endif
 };
 
 static uart_dev_t g_uart1port =
@@ -200,15 +221,21 @@ static uart_dev_t g_uart1port =
 /* This describes the state of the LPC17xx uart1 port. */
 
 #ifdef CONFIG_16550_UART2
-static struct uart_16550_s g_uart2priv =
+static struct u16550_s g_uart2priv =
 {
   .uartbase       = CONFIG_16550_UART2_BASE,
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   .baud           = CONFIG_UART2_BAUD,
   .uartclk        = CONFIG_16550_UART2_CLOCK,
+#endif
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
   .irq            = CONFIG_16550_UART2_IRQ,
+#endif
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
+#endif
 };
 
 static uart_dev_t g_uart2port =
@@ -231,15 +258,21 @@ static uart_dev_t g_uart2port =
 /* This describes the state of the LPC17xx uart1 port. */
 
 #ifdef CONFIG_16550_UART3
-static struct uart_16550_s g_uart3priv =
+static struct u16550_s g_uart3priv =
 {
   .uartbase       = CONFIG_16550_UART3_BASE,
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   .baud           = CONFIG_UART3_BAUD,
   .uartclk        = CONFIG_16550_UART3_CLOCK,
+#endif
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
   .irq            = CONFIG_16550_UART3_IRQ,
+#endif
+#ifndef CONFIG_16550_SUPRESS_CONFIG
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
   .stopbits2      = CONFIG_UART3_2STOP,
+#endif
 };
 
 static uart_dev_t g_uart3port =
@@ -425,28 +458,29 @@ static uart_dev_t g_uart3port =
  ************************************************************************************/
 
 /****************************************************************************
- * Name: uart_serialin
+ * Name: u16550_serialin
  ****************************************************************************/
 
-static inline uart_datawidth_t uart_serialin(struct uart_16550_s *priv, int offset)
+static inline uart_datawidth_t u16550_serialin(struct u16550_s *priv, int offset)
 {
   return uart_getreg(priv->uartbase, offset);
 }
 
 /****************************************************************************
- * Name: uart_serialout
+ * Name: u16550_serialout
  ****************************************************************************/
 
-static inline void uart_serialout(struct uart_16550_s *priv, int offset, uart_datawidth_t value)
+static inline void u16550_serialout(struct u16550_s *priv, int offset, uart_datawidth_t value)
 {
   uart_putreg(priv->uartbase, offset, value);
 }
 
 /****************************************************************************
- * Name: uart_disableuartint
+ * Name: u16550_disableuartint
  ****************************************************************************/
 
-static inline void uart_disableuartint(struct uart_16550_s *priv, uart_datawidth_t *ier)
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+static inline void u16550_disableuartint(struct u16550_s *priv, uart_datawidth_t *ier)
 {
   if (ier)
     {
@@ -454,26 +488,33 @@ static inline void uart_disableuartint(struct uart_16550_s *priv, uart_datawidth
     }
 
   priv->ier &= ~UART_IER_ALLIE;
-  uart_serialout(priv, UART_IER_OFFSET, priv->ier);
+  u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
 }
+#else
+#  define u16550_disableuartint(priv,ier)
+#endif
 
 /****************************************************************************
- * Name: uart_restoreuartint
+ * Name: u16550_restoreuartint
  ****************************************************************************/
 
-static inline void uart_restoreuartint(struct uart_16550_s *priv, uint32_t ier)
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+static inline void u16550_restoreuartint(struct u16550_s *priv, uint32_t ier)
 {
   priv->ier |= ier & UART_IER_ALLIE;
-  uart_serialout(priv, UART_IER_OFFSET, priv->ier);
+  u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
 }
+#else
+#  define u16550_restoreuartint(priv,ier)
+#endif
 
 /****************************************************************************
- * Name: uart_enablebreaks
+ * Name: u16550_enablebreaks
  ****************************************************************************/
 
-static inline void uart_enablebreaks(struct uart_16550_s *priv, bool enable)
+static inline void u16550_enablebreaks(struct u16550_s *priv, bool enable)
 {
-  uint32_t lcr = uart_serialin(priv, UART_LCR_OFFSET);
+  uint32_t lcr = u16550_serialin(priv, UART_LCR_OFFSET);
   if (enable)
     {
       lcr |= UART_LCR_BRK;
@@ -482,11 +523,11 @@ static inline void uart_enablebreaks(struct uart_16550_s *priv, bool enable)
     {
       lcr &= ~UART_LCR_BRK;
     }
-  uart_serialout(priv, UART_LCR_OFFSET, lcr);
+  u16550_serialout(priv, UART_LCR_OFFSET, lcr);
 }
 
 /************************************************************************************
- * Name: uart_divisor
+ * Name: u16550_divisor
  *
  * Descrption:
  *   Select a divider to produce the BAUD from the UART_CLK.
@@ -498,17 +539,19 @@ static inline void uart_enablebreaks(struct uart_16550_s *priv, bool enable)
  *
  ************************************************************************************/
 
-static inline uint32_t uart_divisor(struct uart_16550_s *priv)
+#ifndef CONFIG_16550_SUPRESS_CONFIG
+static inline uint32_t u16550_divisor(struct u16550_s *priv)
 {
-  return (priv->uartclk + (priv->baud << 3)) / (priv->baurd << 4);
+  return (priv->uartclk + (priv->baud << 3)) / (priv->baud << 4);
 }
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uart_setup
+ * Name: u16550_setup
  *
  * Description:
  *   Configure the UART baud, bits, parity, fifos, etc. This
@@ -517,24 +560,26 @@ static inline uint32_t uart_divisor(struct uart_16550_s *priv)
  *
  ****************************************************************************/
 
-static int uart_setup(struct uart_dev_s *dev)
+static int u16550_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_16550_SUPRESS_CONFIG
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
   uint16_t div;
   uint32_t lcr;
 
   /* Clear fifos */
 
-  uart_serialout(priv, UART_FCR_OFFSET, (UART_FCR_RXRST|UART_FCR_TXRST));
+  u16550_serialout(priv, UART_FCR_OFFSET, (UART_FCR_RXRST|UART_FCR_TXRST));
 
   /* Set trigger */
 
-  uart_serialout(priv, UART_FCR_OFFSET, (UART_FCR_FIFOEN|UART_FCR_RXTRIGGER_8));
+  u16550_serialout(priv, UART_FCR_OFFSET, (UART_FCR_FIFOEN|UART_FCR_RXTRIGGER_8));
 
   /* Set up the IER */
 
-  priv->ier = uart_serialin(priv, UART_IER_OFFSET);
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+  priv->ier = u16550_serialin(priv, UART_IER_OFFSET);
+#endif
 
   /* Set up the LCR */
 
@@ -575,28 +620,28 @@ static int uart_setup(struct uart_dev_s *dev)
 
   /* Enter DLAB=1 */
 
-  uart_serialout(priv, UART_LCR_OFFSET, (lcr | UART_LCR_DLAB));
+  u16550_serialout(priv, UART_LCR_OFFSET, (lcr | UART_LCR_DLAB));
 
   /* Set the BAUD divisor */
 
-  div = uart_divisor(priv);
-  uart_serialout(priv, UART_DLM_OFFSET, div >> 8);
-  uart_serialout(priv, UART_DLL_OFFSET, div & 0xff);
+  div = u16550_divisor(priv);
+  u16550_serialout(priv, UART_DLM_OFFSET, div >> 8);
+  u16550_serialout(priv, UART_DLL_OFFSET, div & 0xff);
 
   /* Clear DLAB */
 
-  uart_serialout(priv, UART_LCR_OFFSET, lcr);
+  u16550_serialout(priv, UART_LCR_OFFSET, lcr);
 
   /* Configure the FIFOs */
 
-  uart_serialout(priv, UART_FCR_OFFSET,
-               (UART_FCR_RXTRIGGER_8|UART_FCR_TXRST|UART_FCR_RXRST|UART_FCR_FIFOEN));
+  u16550_serialout(priv, UART_FCR_OFFSET,
+                   (UART_FCR_RXTRIGGER_8|UART_FCR_TXRST|UART_FCR_RXRST|UART_FCR_FIFOEN));
 #endif
   return OK;
 }
 
 /****************************************************************************
- * Name: uart_shutdown
+ * Name: u16550_shutdown
  *
  * Description:
  *   Disable the UART.  This method is called when the serial
@@ -604,14 +649,14 @@ static int uart_setup(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void uart_shutdown(struct uart_dev_s *dev)
+static void u16550_shutdown(struct uart_dev_s *dev)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
-  uart_disableuartint(priv, NULL);
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
+  u16550_disableuartint(priv, NULL);
 }
 
 /****************************************************************************
- * Name: uart_attach
+ * Name: u16550_attach
  *
  * Description:
  *   Configure the UART to operation in interrupt driven mode.  This method is
@@ -625,14 +670,15 @@ static void uart_shutdown(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int uart_attach(struct uart_dev_s *dev)
+static int u16550_attach(struct uart_dev_s *dev)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, uart_interrupt);
+  ret = irq_attach(priv->irq, u16550_interrupt);
 #ifndef CONFIG_ARCH_NOINTC
   if (ret == OK)
     {
@@ -640,14 +686,17 @@ static int uart_attach(struct uart_dev_s *dev)
         * in the UART
         */
 
-       uart_enable_irq(priv->irq);
+       up_enable_irq(priv->irq);
     }
-endif
+#endif
   return ret;
+#else
+  return OK;
+#endif
 }
 
 /****************************************************************************
- * Name: uart_detach
+ * Name: u16550_detach
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
@@ -656,33 +705,36 @@ endif
  *
  ****************************************************************************/
 
-static void uart_detach(struct uart_dev_s *dev)
+static void u16550_detach(struct uart_dev_s *dev)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+ struct u16550_s *priv = (struct u16550_s*)dev->priv;
 #ifndef CONFIG_ARCH_NOINTC
-  uart_disable_irq(priv->irq);
+  up_disable_irq(priv->irq);
 #endif
   irq_detach(priv->irq);
+#endif
 }
 
 /****************************************************************************
- * Name: uart_interrupt
+ * Name: u16550_interrupt
  *
  * Description:
  *   This is the UART interrupt handler.  It will be invoked when an
  *   interrupt received on the 'irq'  It should call uart_transmitchars or
  *   uart_receivechar to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
- *   appropriate uart_16550_s structure in order to call these functions.
+ *   appropriate u16550_s structure in order to call these functions.
  *
  ****************************************************************************/
 
-static int uart_interrupt(int irq, void *context)
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+static int u16550_interrupt(int irq, void *context)
 {
-  struct uart_dev_s   *dev = NULL;
-  struct uart_16550_s *priv;
-  uint32_t             status;
-  int                  passes;
+  struct uart_dev_s *dev = NULL;
+  struct u16550_s   *priv;
+  uint32_t           status;
+  int                passes;
 
 #ifdef CONFIG_16550_UART0
   if (g_uart0priv.irq == irq)
@@ -710,12 +762,9 @@ static int uart_interrupt(int irq, void *context)
     {
       dev = &g_uart3port;
     }
-  else
 #endif
-    {
-      PANIC(OSERR_INTERNAL);
-    }
-  priv = (struct uart_16550_s*)dev->priv;
+  ASSERT(dev != NULL);
+  priv = (struct u16550_s*)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -727,7 +776,7 @@ static int uart_interrupt(int irq, void *context)
        * termination conditions
        */
 
-       status = uart_serialin(priv, UART_IIR_OFFSET);
+       status = u16550_serialin(priv, UART_IIR_OFFSET);
 
       /* The UART_IIR_INTSTATUS bit should be zero if there are pending
        * interrupts
@@ -769,7 +818,7 @@ static int uart_interrupt(int irq, void *context)
             {
               /* Read the modem status register (MSR) to clear */
 
-              status = uart_serialin(priv, UART_MSR_OFFSET);
+              status = u16550_serialin(priv, UART_MSR_OFFSET);
               vdbg("MSR: %02x\n", status);
               break;
             }
@@ -780,7 +829,7 @@ static int uart_interrupt(int irq, void *context)
             {
               /* Read the line status register (LSR) to clear */
 
-              status = uart_serialin(priv, UART_LSR_OFFSET);
+              status = u16550_serialin(priv, UART_LSR_OFFSET);
               vdbg("LSR: %02x\n", status);
               break;
             }
@@ -796,27 +845,28 @@ static int uart_interrupt(int irq, void *context)
     }
     return OK;
 }
+#endif
 
 /****************************************************************************
- * Name: uart_ioctl
+ * Name: u16550_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  struct inode        *inode = filep->f_inode;
-  struct uart_dev_s   *dev   = inode->i_private;
-  struct uart_16550_s *priv  = (struct uart_16550_s*)dev->priv;
-  int                  ret    = OK;
+  struct inode      *inode = filep->f_inode;
+  struct uart_dev_s *dev   = inode->i_private;
+  struct u16550_s   *priv  = (struct u16550_s*)dev->priv;
+  int                ret   = OK;
 
   switch (cmd)
     {
     case TIOCSERGSTRUCT:
       {
-         struct uart_16550_s *user = (struct uart_16550_s*)arg;
+         struct u16550_s *user = (struct u16550_s*)arg;
          if (!user)
            {
              *get_errno_ptr() = EINVAL;
@@ -824,7 +874,7 @@ static int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
            }
          else
            {
-             memcpy(user, dev, sizeof(struct uart_16550_s));
+             memcpy(user, dev, sizeof(struct u16550_s));
            }
        }
        break;
@@ -832,7 +882,7 @@ static int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags = irqsave();
-        uart_enablebreaks(priv, true);
+        u16550_enablebreaks(priv, true);
         irqrestore(flags);
       }
       break;
@@ -841,7 +891,7 @@ static int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
       {
         irqstate_t flags;
         flags = irqsave();
-        uart_enablebreaks(priv, false);
+        u16550_enablebreaks(priv, false);
         irqrestore(flags);
       }
       break;
@@ -856,7 +906,7 @@ static int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: uart_receive
+ * Name: u16550_receive
  *
  * Description:
  *   Called (usually) from the interrupt level to receive one
@@ -865,129 +915,143 @@ static int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int uart_receive(struct uart_dev_s *dev, uint32_t *status)
+static int u16550_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
   uint32_t rbr;
 
-  *status = uart_serialin(priv, UART_LSR_OFFSET);
-  rbr     = uart_serialin(priv, UART_RBR_OFFSET);
+  *status = u16550_serialin(priv, UART_LSR_OFFSET);
+  rbr     = u16550_serialin(priv, UART_RBR_OFFSET);
   return rbr;
 }
 
 /****************************************************************************
- * Name: uart_rxint
+ * Name: u16550_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
  ****************************************************************************/
 
-static void uart_rxint(struct uart_dev_s *dev, bool enable)
+static void u16550_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
   if (enable)
     {
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->ier |= UART_IER_ERBFI;
-#endif
     }
   else
     {
       priv->ier &= ~UART_IER_ERBFI;
     }
-  uart_serialout(priv, UART_IER_OFFSET, priv->ier);
+  u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
+#endif
 }
 
 /****************************************************************************
- * Name: uart_rxavailable
+ * Name: u16550_rxavailable
  *
  * Description:
  *   Return true if the receive fifo is not empty
  *
  ****************************************************************************/
 
-static bool uart_rxavailable(struct uart_dev_s *dev)
+static bool u16550_rxavailable(struct uart_dev_s *dev)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
-  return ((uart_serialin(priv, UART_LSR_OFFSET) & UART_LSR_RDR) != 0);
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
+  return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_DR) != 0);
 }
 
 /****************************************************************************
- * Name: uart_send
+ * Name: u16550_send
  *
  * Description:
  *   This method will send one byte on the UART
  *
  ****************************************************************************/
 
-static void uart_send(struct uart_dev_s *dev, int ch)
+static void u16550_send(struct uart_dev_s *dev, int ch)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
-  uart_serialout(priv, UART_THR_OFFSET, (uint32_t)ch);
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
+  u16550_serialout(priv, UART_THR_OFFSET, (uart_datawidth_t)ch);
 }
 
 /****************************************************************************
- * Name: uart_txint
+ * Name: u16550_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
  ****************************************************************************/
 
-static void uart_txint(struct uart_dev_s *dev, bool enable)
+static void u16550_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
   if (enable)
     {
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->ier |= UART_IER_ETBEI;
-      uart_serialout(priv, UART_IER_OFFSET, priv->ier);
+      u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */
 
       uart_xmitchars(dev);
-#endif
     }
   else
     {
       priv->ier &= ~UART_IER_ETBEI;
-      uart_serialout(priv, UART_IER_OFFSET, priv->ier);
+      u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
     }
   irqrestore(flags);
+#endif
 }
 
 /****************************************************************************
- * Name: uart_txready
+ * Name: u16550_txready
  *
  * Description:
  *   Return true if the tranmsit fifo is not full
  *
  ****************************************************************************/
 
-static bool uart_txready(struct uart_dev_s *dev)
+static bool u16550_txready(struct uart_dev_s *dev)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
-  return ((uart_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
+  return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
 }
 
 /****************************************************************************
- * Name: uart_txempty
+ * Name: u16550_txempty
  *
  * Description:
  *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
-static bool uart_txempty(struct uart_dev_s *dev)
+static bool u16550_txempty(struct uart_dev_s *dev)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)dev->priv;
-  return ((uart_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
+  struct u16550_s *priv = (struct u16550_s*)dev->priv;
+  return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
+}
+
+/****************************************************************************
+ * Name: u16550_putc
+ *
+ * Description:
+ *   Write one character to the UART (polled)
+ *
+ ****************************************************************************/
+
+static void u16550_putc(struct u16550_s *priv, int ch)
+{
+  while ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
+  u16550_serialout(priv, UART_THR_OFFSET, (uart_datawidth_t)ch);
 }
 
 /****************************************************************************
@@ -995,7 +1059,7 @@ static bool uart_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uart_serialinit
+ * Name: up_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
@@ -1007,39 +1071,41 @@ static bool uart_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-void uart_earlyserialinit(void)
+void up_earlyserialinit(void)
 {
   /* Configure all UARTs (except the CONSOLE UART) and disable interrupts */
 
 #ifdef CONFIG_16550_UART0
-  uart_disableuartint(&g_uart0priv, NULL);
+  u16550_disableuartint(&g_uart0priv, NULL);
 #endif
 #ifdef CONFIG_16550_UART1
-  uart_disableuartint(&g_uart1priv, NULL);
+  u16550_disableuartint(&g_uart1priv, NULL);
 #endif
-  uart_disableuartint(&g_uart2priv, NULL);
+#ifdef CONFIG_16550_UART2
+  u16550_disableuartint(&g_uart2priv, NULL);
 #endif
-  uart_disableuartint(&g_uart3priv, NULL);
+#ifdef CONFIG_16550_UART3
+  u16550_disableuartint(&g_uart3priv, NULL);
 #endif
 
   /* Configuration whichever one is the console */
 
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;
-  uart_setup(&CONSOLE_DEV);
+  u16550_setup(&CONSOLE_DEV);
 #endif
 }
 
 /****************************************************************************
- * Name: uart_serialinit
+ * Name: up_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes that
- *   uart_earlyserialinit was called previously.
+ *   up_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void uart_serialinit(void)
+void up_serialinit(void)
 {
 #ifdef CONSOLE_DEV
   (void)uart_register("/dev/console", &CONSOLE_DEV);
@@ -1059,7 +1125,7 @@ void uart_serialinit(void)
 }
 
 /****************************************************************************
- * Name: uart_putc
+ * Name: up_putc
  *
  * Description:
  *   Provide priority, low-level access to support OS debug  writes
@@ -1067,12 +1133,14 @@ void uart_serialinit(void)
  ****************************************************************************/
 
 #ifdef HAVE_16550_CONSOLE
-int uart_putc(int ch)
+int up_putc(int ch)
 {
-  struct uart_16550_s *priv = (struct uart_16550_s*)CONSOLE_DEV.priv;
+  struct u16550_s *priv = (struct u16550_s*)CONSOLE_DEV.priv;
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
   uart_datawidth_t ier;
 
-  uart_disableuartint(priv, &ier);
+  u16550_disableuartint(priv, &ier);
+#endif
 
   /* Check for LF */
 
@@ -1080,11 +1148,13 @@ int uart_putc(int ch)
     {
       /* Add CR */
 
-      uart_lowputc('\r');
+      u16550_putc(priv, '\r');
     }
 
-  uart_lowputc(ch);
-  uart_restoreuartint(priv, ier);
+  u16550_putc(priv, ch);
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+  u16550_restoreuartint(priv, ier);
+#endif
   return ch;
 }
 #endif

@@ -1532,3 +1532,6 @@
 	  (and others).  Contributed by Uros Platise.
 	* examples/nsh and tools/mkromfsimg.sh -- Add support for platform-specific
 	  ROMFS-based NSH start-up scripts.
+	* drivers/uart_16550.c and include/nuttx/uart_16550.h - Support for a generic
+	  16550 UART.
+	* configure/qemu-i486/nsh - QEMU NSH example.

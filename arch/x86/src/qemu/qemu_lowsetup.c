@@ -127,6 +127,12 @@ void up_lowsetup(void)
 
   up_gdtinit();
 
+  /* Early serial driver initialization */
+
+#ifdef CONFIG_USE_EARLYSERIALINIT
+  up_earlyserialinit();
+#endif
+
   /* Now perform board-specific initializations */
 
   up_boardinitialize();
