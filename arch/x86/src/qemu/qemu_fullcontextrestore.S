@@ -61,11 +61,21 @@
 
 /* Trace macros, use like trace 'i' to print char to serial port. */
 
-	.macro	trace, ch
+	.macro	chout, addr, ch
 #ifdef CONFIG_DEBUG
-	mov		$0x3f8, %dx
+	mov		$\addr, %dx
 	mov		$\ch, %al
 	out		%al, %dx
+#endif
+	.endm
+
+	.macro	trace, ch
+#ifdef CONFIG_DEBUG
+	push	%eax
+	push	%edx
+	chout	0x3f8, \ch
+	pop		%edx
+	pop		%eax
 #endif
 	.endm
 
@@ -151,5 +161,5 @@ up_fullcontextrestore:
 	popl	%eax
 	iret
 	.size up_fullcontextrestore, . - up_fullcontextrestore
-    .end
+	.end
 

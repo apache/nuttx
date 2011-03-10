@@ -57,11 +57,21 @@
 
 /* Trace macros, use like trace 'i' to print char to serial port. */
 
-	.macro	trace, ch
+	.macro	chout, addr, ch
 #ifdef CONFIG_DEBUG
-	mov		$0x3f8, %dx
+	mov		$\addr, %dx
 	mov		$\ch, %al
 	out		%al, %dx
+#endif
+	.endm
+
+	.macro	trace, ch
+#ifdef CONFIG_DEBUG
+	push	%eax
+	push	%edx
+	chout	0x3f8, \ch
+	pop		%edx
+	pop		%eax
 #endif
 	.endm
 
@@ -132,15 +142,26 @@ up_saveusercontext:
 
 	movl	%ebp, (4*REG_EBP)(%eax)
 
-    /* Get and save the interrupt state */
-
-    pushf
-    pop		%ecx
-	movl	%ecx, (4*REG_EFLAGS)(%eax)
+	/* Save EAX=1.  This will be the "apparent" return value from this
+	 * function when context is switch back to this thread.  The non-zero
+	 * return value is the indication that we have been resumed.
+	 */
  
-	/* And return 0.  'ret' will remove the EIP from the top of the stack. */
+	movl	$1, (4*REG_EAX)(%eax)
 
-	xorl    %eax, %eax
+	/* Get and save the interrupt state */
+
+	pushf
+	pop		%ecx
+	movl	%ecx, (4*REG_EFLAGS)(%eax)
+
+	/* And return 0 -- The zero return value is the indication that that
+	 * this is the original, "true" return from the function.
+	 *
+	 * 'ret' will remove the EIP from the top of the stack.
+	 */
+
+	xorl	%eax, %eax
 	ret
 	.size	up_saveusercontext, . - up_saveusercontext
-    .end
+	.end
