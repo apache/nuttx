@@ -336,7 +336,7 @@ CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n
-CONFIG_TASK_NAME_SIZE=0
+CONFIG_TASK_NAME_SIZE=16
 CONFIG_START_YEAR=2009
 CONFIG_START_MONTH=9
 CONFIG_START_DAY=21
@@ -754,6 +754,7 @@ CONFIG_EXAMPLES_NSH_FATSECTSIZE=512
 CONFIG_EXAMPLES_NSH_FATNSECTORS=40
 CONFIG_EXAMPLES_NSH_FATMOUNTPT=/tmp
 
+
 #
 # Architecture-specific NSH options
 #
@@ -817,3 +818,36 @@ CONFIG_PTHREAD_STACK_MIN=256
 CONFIG_PTHREAD_STACK_DEFAULT=2048
 CONFIG_HEAP_BASE=
 CONFIG_HEAP_SIZE=
+
+
+########################################################################
+#
+# Applications to be included within the NuttX binary as described
+# under the apps/README.txt
+#
+# Set this config parameter above to: CONFIG_TASK_NAME_SIZE=16
+# in order to enable argv[0]=<task name> argument. Otherwise argv[0]
+# will be noname.
+#
+# Include builtin NuttX application (disabling this option will 
+# exclude all of the apps found under the nuttx/apps directory, but
+# not the apps found under the ../apps directory unless _APPS_USER=n.
+CONFIG_BUILTIN_APPS_NUTTX=y
+
+# Individual selection of built-in applications:
+CONFIG_BUILTIN_APPS_HELLO=y
+
+# Include user (external) applications located under ../apps directory?
+CONFIG_BUILTIN_APPS_USER=y
+
+# Invoke the following application after NuttX starts
+# (enter app name, as: hello)
+CONFIG_BUILTIN_APP_START=
+
+# CONFIG_EXAMPLES_NSH_BUILTIN_APPS - Support for running the builtin 
+#   apps from command line. See apps/README for more information.
+#
+CONFIG_EXAMPLES_NSH_BUILTIN_APPS=y
+
+#
+########################################################################
