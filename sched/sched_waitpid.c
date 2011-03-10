@@ -195,12 +195,6 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
   /* None of the options are supported */
 
 #ifdef CONFIG_DEBUG
-  if (stat_loc == NULL)
-    {
-	  err = EINVAL;
-	  goto errout_with_errno;
-	}
-
   if (options != 0)
     {
 	  err = ENOSYS;
@@ -214,7 +208,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
    * others?
    */
 
-  if (tcb->stat_loc == NULL)
+  if (stat_loc != NULL && tcb->stat_loc == NULL)
     {
 	  tcb->stat_loc = stat_loc;
 	  mystat        = true;

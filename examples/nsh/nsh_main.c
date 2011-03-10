@@ -55,6 +55,10 @@
 #  include <pthread.h>
 #endif
 
+#ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
+#  include <nuttx/nuttapp.h>
+#endif
+
 #include "nsh.h"
 
 /****************************************************************************
@@ -486,6 +490,35 @@ static int nsh_execute(FAR struct nsh_vtbl_s *vtbl, int argc, char *argv[])
              }
          }
      }
+
+#ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
+   if (handler == cmd_unrecognized)
+     {
+       /* Try to find command within pre-built application list. */
+
+       if ((ret = exec_nuttapp(cmd, argv)) < 0)
+         {
+            if (errno != ENOENT)
+			  {
+			    return -errno;
+              }
+         }
+       else
+         {
+           /* Is the background mode or foreground mode desired? */
+#if 0
+           if (argc > 1 && strcmp(argv[argc-1], "&") == 0)
+             {
+             }
+           else
+             {
+               waitpid(ret, );
+             }
+#endif
+           return ret;
+         }
+     }
+#endif
 
    ret = handler(vtbl, argc, argv);
    return ret;

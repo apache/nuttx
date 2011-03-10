@@ -59,11 +59,16 @@ ARCH_SRC	= $(ARCH_DIR)/src
 ARCH_INC	= $(ARCH_DIR)/include
 BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 
+# This can be over-ridden from the command line:
+
+APPS_LOC	= ../apps
+
 # Add-on directories.  These may or may not be in place in the
 # NuttX source tree (they must be specifically installed)
 
+APPS_DIR	:= ${shell if [ -r $(APPS_LOC)/Makefile ]; then echo "$(APPS_LOC)"; fi}
 PCODE_DIR	:= ${shell if [ -r pcode/Makefile ]; then echo "pcode"; fi}
-ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR)
+ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR) $(APPS_DIR)
 
 # FSDIRS depend on file descriptor support; NONFSDIRS do not
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
@@ -125,6 +130,18 @@ LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT
 
 ifeq ($(CONFIG_HAVE_CXX),y)
 LINKLIBS	+= libxx/liblibxx$(LIBEXT)
+endif
+
+# Add library for application support
+# Always compile the framework which includes exec_nuttapp if users
+# or nuttX applications are to be included.
+
+ifeq ($(CONFIG_BUILTIN_APPS_NUTTX),y)
+LINKLIBS	+= $(APPS_DIR)/libapps$(LIBEXT)
+else
+ifeq ($(CONFIG_BUILTIN_APPS_USER),y)
+LINKLIBS	+= $(APPS_DIR)/libapps$(LIBEXT)
+endif
 endif
 
 # Add libraries for network support
@@ -248,6 +265,9 @@ fs/libfs$(LIBEXT): context
 
 drivers/libdrivers$(LIBEXT): context
 	@$(MAKE) -C drivers TOPDIR="$(TOPDIR)" libdrivers$(LIBEXT)
+
+$(APPS_DIR)/libapps$(LIBEXT): context
+	@$(MAKE) -C $(APPS_DIR) TOPDIR="$(TOPDIR)" libapps$(LIBEXT)
 
 binfmt/libbinfmt$(LIBEXT): context
 	@$(MAKE) -C binfmt TOPDIR="$(TOPDIR)" libbinfmt$(LIBEXT)
