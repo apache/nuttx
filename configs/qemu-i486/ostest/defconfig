@@ -68,7 +68,6 @@
 #   the 100 second delay then adjust CONFIG_BOARD_LOOPSPERMSEC until
 #   the delay actually is 100 seconds.
 # CONFIG_ARCH_DMA - Support DMA initialization
-# CONFIG_X86_NASM - Using Nasm instead of GAS
 #
 CONFIG_ARCH=x86
 CONFIG_ARCH_X86=y
@@ -87,7 +86,6 @@ CONFIG_ARCH_LEDS=n
 CONFIG_ARCH_BUTTONS=n
 CONFIG_ARCH_CALIBRATION=n
 CONFIG_ARCH_DMA=n
-CONFIG_X86_NASM=n
 
 #
 # General OS setup
@@ -149,8 +147,8 @@ CONFIG_X86_NASM=n
 #   to be closed in the new task.
 #
 CONFIG_APP_DIR=examples/ostest
-CONFIG_DEBUG=y
-CONFIG_DEBUG_VERBOSE=y
+CONFIG_DEBUG=n
+CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
