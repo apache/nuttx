@@ -138,6 +138,11 @@ static void up_remappic(void)
   idt_outb(0x28,                        PIC2_ICW2);
   idt_outb(PIC_ICW3_SID2,               PIC2_ICW3);
   idt_outb(PIC_ICW4_808xMODE,           PIC2_ICW4);
+
+  /* Mask interrupts from PIC */
+
+  idt_outb(PIC1_IMR_ALL, PIC1_IMR);
+  idt_outb(PIC2_IMR_ALL, PIC2_IMR);
 }
 
 /****************************************************************************
@@ -276,16 +281,16 @@ void up_disable_irq(int irq)
   unsigned int regaddr;
   uint8_t      regbit;
  
-  if ((unsigned)irq >= IRQ0)
+  if (irq >= IRQ0)
     {
       /* Map the IRQ IMR regiser to a PIC and a bit number */
 
-      if ((unsigned)irq <= IRQ7)
+      if (irq <= IRQ7)
         {
           regaddr = PIC1_IMR;
           regbit  = (1 << (irq - IRQ0));
         }
-      else if ((unsigned)irq <= IRQ15)
+      else if (irq <= IRQ15)
         {
           regaddr = PIC2_IMR;
           regbit  = (1 << (irq - IRQ8));
@@ -295,9 +300,9 @@ void up_disable_irq(int irq)
           return;
         }
 
-      /* Disable the interrupt */
+      /* Disable (mask) the interrupt */
 
-      modifyreg8(regaddr, regbit, 0);
+      modifyreg8(regaddr, 0, regbit);
     }
 }
 
@@ -314,16 +319,16 @@ void up_enable_irq(int irq)
   unsigned int regaddr;
   uint8_t      regbit;
  
-  if ((unsigned)irq >= IRQ0)
+  if (irq >= IRQ0)
     {
       /* Map the IRQ IMR regiser to a PIC and a bit number */
 
-      if ((unsigned)irq <= IRQ7)
+      if (irq <= IRQ7)
         {
           regaddr = PIC1_IMR;
           regbit  = (1 << (irq - IRQ0));
         }
-      else if ((unsigned)irq <= IRQ15)
+      else if (irq <= IRQ15)
         {
           regaddr = PIC2_IMR;
           regbit  = (1 << (irq - IRQ8));
@@ -333,9 +338,9 @@ void up_enable_irq(int irq)
           return;
         }
 
-      /* Enable the interrupt */
+      /* Enable (unmask) the interrupt */
 
-      modifyreg8(regaddr, 0, regbit);
+      modifyreg8(regaddr, regbit, 0);
     }
 }
 
