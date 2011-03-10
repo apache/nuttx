@@ -74,7 +74,7 @@
 
 #if defined(CONFIG_USE_SERIALDRIVER) && defined(HAVE_UART)
 
-/* Configuration *********************************************************************/
+/* Configuration ************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -281,7 +281,7 @@ static uart_dev_t g_uart3port =
 #      ifdef CONFIG_LPC17_UART3
 #        define TTYS3_DEV g_uart3port      /* UART0=ttyS0;UART1=ttyS1;UART2=ttyS2;UART3=ttyS3 */
 #      else
-         undef TTYS3_DEV                   /* UART0=ttyS0;UART1=ttyS1;UART2=ttyS;No ttyS3 */
+#        undef TTYS3_DEV                   /* UART0=ttyS0;UART1=ttyS1;UART2=ttyS;No ttyS3 */
 #      endif
 #    else
 #      ifdef CONFIG_LPC17_UART3
@@ -780,9 +780,8 @@ static inline uint32_t lpc17_uartdl(uint32_t baud, uint8_t divcode)
  * Name: up_setup
  *
  * Description:
- *   Configure the UART baud, bits, parity, fifos, etc. This
- *   method is called the first time that the serial port is
- *   opened.
+ *   Configure the UART baud, bits, parity, fifos, etc. This method is
+ *   called the first time that the serial port is opened.
  *
  ****************************************************************************/
 
@@ -858,8 +857,7 @@ static int up_setup(struct uart_dev_s *dev)
  * Name: up_shutdown
  *
  * Description:
- *   Disable the UART.  This method is called when the serial
- *   port is closed
+ *   Disable the UART.  This method is called when the serial port is closed
  *
  ****************************************************************************/
 
@@ -924,12 +922,11 @@ static void up_detach(struct uart_dev_s *dev)
  * Name: up_interrupt
  *
  * Description:
- *   This is the UART interrupt handler.  It will be invoked
- *   when an interrupt received on the 'irq'  It should call
- *   uart_transmitchars or uart_receivechar to perform the
- *   appropriate data transfers.  The interrupt handling logic\
- *   must be able to map the 'irq' number into the approprite
- *   uart_dev_s structure in order to call these functions.
+ *   This is the UART interrupt handler.  It will be invoked when an
+ *   interrupt received on the 'irq'  It should call uart_transmitchars or
+ *   uart_receivechar to perform the appropriate data transfers.  The
+ *   interrupt handling logic must be able to map the 'irq' number into the
+ *   appropriate uart_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
 

@@ -78,6 +78,8 @@ uint32_t *current_regs;
  * Private Data
  ****************************************************************************/
 
+static struct idt_entry_s idt_entries[256];
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -171,10 +173,7 @@ static void up_idtentry(struct idt_entry_s *entry, uint32_t base,
 
 static inline void up_idtinit(void)
 {
-  /* This uses a ton of stack! */
-
-  struct idt_entry_s idt_entries[256];
-  struct idt_ptr_s   idt_ptr;
+  struct idt_ptr_s idt_ptr;
 
   idt_ptr.limit = sizeof(struct idt_entry_s) * 256 - 1;
   idt_ptr.base  = (uint32_t)&idt_entries;
