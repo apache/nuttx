@@ -9,13 +9,14 @@ Contents
 
   * QEMU
     - Building QEMU
-	- Cygwin Build Problems
-	- Running QEMU
+    - Cygwin Build Problems
+    - Running QEMU
   * Toolchains
     - Cygwin Buildroot Toolchain
-	- Buildroot Instructions
+    - Buildroot Instructions
   * Configurations
     - ostest
+    - nsh
 
 QEMU
 ====
@@ -47,18 +48,18 @@ Cygwin Build Problems
   Workaround:
   
     None known.  It does not seem possible to build QEMU using the Cygwin gcc.
-	I tried editing configure.  Removing the following line will allow QEMU to
-	configure:
+    I tried editing configure.  Removing the following line will allow QEMU to
+    configure:
   
       QEMU_CFLAGS="-mno-cygwin $QEMU_CFLAGS"
 
-	However, it then fails later during the compilation phase.
+    However, it then fails later during the compilation phase.
 
   Recommendation:
  
     1. Google for "qemu windows download" and download some pre-built QEMU
-	   binaries.  I found 0.14.0 here: http://dietpc.org/windows/qemu/, or
-	2. Try building QEMU with MingGW (I understand that this is difficult).
+       binaries.  I found 0.14.0 here: http://dietpc.org/windows/qemu/, or
+    2. Try building QEMU with MingGW (I understand that this is difficult).
 
   NOTE: As of this writing, I have not been successful getting ANY pre-built
   version of QEMU to work successful; they all fail immediately with
@@ -135,3 +136,13 @@ ostest
 
     cd <nuttx-directory>/tools
     ./configure.sh qemu-i486/ostest
+
+nsh
+---
+
+  Configures the NuttShell (nsh) located at examples/nsh.  This
+  configuration may be selected as follows:
+
+    cd <nuttx-directory>/tools
+    ./configure.sh qemu-i486/nsh
+
