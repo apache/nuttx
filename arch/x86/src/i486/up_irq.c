@@ -1,6 +1,6 @@
 /****************************************************************************
- * arch/x86/src/qemu/qemu_irq.c
- * arch/x86/src/chip/qemu_irq.c
+ * arch/x86/src/i486/up_irq.c
+ * arch/x86/src/chip/up_irq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -113,27 +113,31 @@ static void up_remappic(void)
 {
   /* Mask interrupts from PIC */
 
-  idt_outb(0xff, 0x21);
-  idt_outb(0xff, 0xA1);
+  idt_outb(PIC1_IMR_ALL, PIC1_IMR);
+  idt_outb(PIC2_IMR_ALL, PIC2_IMR);
 
-  /* Remap the irq table for primary */
+  /* If the PIC has been reset, it must be initialized with 2 to 4 Initialization
+   * Command Words (ICW) before it will accept and process Interrupt Requests. The
+   * following outlines the four possible Initialization Command Words. 
+   */
 
-  idt_outb(0x11, 0x20);
-  idt_outb(0x20, 0x21);
-  idt_outb(0x04, 0x21);
-  idt_outb(0x01, 0x21);
-  
+  /* Remap the irq table for primary:
+   *
+   * ICW1 - We will be sending ICW4
+   * ICW2 - Address
+   * ICW3    */
+
+  idt_outb(PIC_ICW1_ICW4|PIC_ICW1_ICW1, PIC1_ICW1);
+  idt_outb(0x20,                        PIC1_ICW2);
+  idt_outb(PIC1_ICW3_IRQ2,              PIC1_ICW3);
+  idt_outb(PIC_ICW4_808xMODE,           PIC1_ICW4);
+
   /* Remap irq for slave */
 
-  idt_outb(0x11, 0xA0);
-  idt_outb(0x28, 0xA1);
-  idt_outb(0x02, 0xA1);
-  idt_outb(0x01, 0xA1);    
-
-  /* Enable IRQ0 on the master with the mask */
-
-  idt_outb( 0xff, 0xA1);
-  idt_outb( 0xfe, 0x21);
+  idt_outb(PIC_ICW1_ICW4|PIC_ICW1_ICW1, PIC2_ICW1);
+  idt_outb(0x28,                        PIC2_ICW2);
+  idt_outb(PIC_ICW3_SID2,               PIC2_ICW3);
+  idt_outb(PIC_ICW4_808xMODE,           PIC2_ICW4);
 }
 
 /****************************************************************************
@@ -147,8 +151,8 @@ static void up_remappic(void)
 static void up_idtentry(struct idt_entry_s *entry, uint32_t base,
                         uint16_t sel, uint8_t flags)
 {
-  entry->lobase = base & 0xFFFF;
-  entry->hibase = (base >> 16) & 0xFFFF;
+  entry->lobase = base & 0xffff;
+  entry->hibase = (base >> 16) & 0xffff;
 
   entry->sel    = sel;
   entry->zero   = 0;
@@ -214,16 +218,16 @@ static inline void up_idtinit(void)
   up_idtentry(&idt_entries[29], (uint32_t)vector_isr29, 0x08, 0x8e);
   up_idtentry(&idt_entries[30], (uint32_t)vector_isr30, 0x08, 0x8e);
   up_idtentry(&idt_entries[31], (uint32_t)vector_isr31, 0x08, 0x8e);
-  up_idtentry(&idt_entries[32], (uint32_t)vector_irq0, 0x08, 0x8e);
-  up_idtentry(&idt_entries[33], (uint32_t)vector_irq1, 0x08, 0x8e);
-  up_idtentry(&idt_entries[34], (uint32_t)vector_irq2, 0x08, 0x8e);
-  up_idtentry(&idt_entries[35], (uint32_t)vector_irq3, 0x08, 0x8e);
-  up_idtentry(&idt_entries[36], (uint32_t)vector_irq4, 0x08, 0x8e);
-  up_idtentry(&idt_entries[37], (uint32_t)vector_irq5, 0x08, 0x8e);
-  up_idtentry(&idt_entries[38], (uint32_t)vector_irq6, 0x08, 0x8e);
-  up_idtentry(&idt_entries[39], (uint32_t)vector_irq7, 0x08, 0x8e);
-  up_idtentry(&idt_entries[40], (uint32_t)vector_irq8, 0x08, 0x8e);
-  up_idtentry(&idt_entries[41], (uint32_t)vector_irq9, 0x08, 0x8e);
+  up_idtentry(&idt_entries[32], (uint32_t)vector_irq0,  0x08, 0x8e);
+  up_idtentry(&idt_entries[33], (uint32_t)vector_irq1,  0x08, 0x8e);
+  up_idtentry(&idt_entries[34], (uint32_t)vector_irq2,  0x08, 0x8e);
+  up_idtentry(&idt_entries[35], (uint32_t)vector_irq3,  0x08, 0x8e);
+  up_idtentry(&idt_entries[36], (uint32_t)vector_irq4,  0x08, 0x8e);
+  up_idtentry(&idt_entries[37], (uint32_t)vector_irq5,  0x08, 0x8e);
+  up_idtentry(&idt_entries[38], (uint32_t)vector_irq6,  0x08, 0x8e);
+  up_idtentry(&idt_entries[39], (uint32_t)vector_irq7,  0x08, 0x8e);
+  up_idtentry(&idt_entries[40], (uint32_t)vector_irq8,  0x08, 0x8e);
+  up_idtentry(&idt_entries[41], (uint32_t)vector_irq9,  0x08, 0x8e);
   up_idtentry(&idt_entries[42], (uint32_t)vector_irq10, 0x08, 0x8e);
   up_idtentry(&idt_entries[43], (uint32_t)vector_irq11, 0x08, 0x8e);
   up_idtentry(&idt_entries[44], (uint32_t)vector_irq12, 0x08, 0x8e);
@@ -258,3 +262,98 @@ void up_irqinitialize(void)
   irqrestore(X86_FLAGS_IF);
 #endif
 }
+
+/****************************************************************************
+ * Name: up_disable_irq
+ *
+ * Description:
+ *   Disable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_disable_irq(int irq)
+{
+  unsigned int regaddr;
+  uint8_t      regbit;
+ 
+  if ((unsigned)irq >= IRQ0)
+    {
+      /* Map the IRQ IMR regiser to a PIC and a bit number */
+
+      if ((unsigned)irq <= IRQ7)
+        {
+          regaddr = PIC1_IMR;
+          regbit  = (1 << (irq - IRQ0));
+        }
+      else if ((unsigned)irq <= IRQ15)
+        {
+          regaddr = PIC2_IMR;
+          regbit  = (1 << (irq - IRQ8));
+        }
+      else
+        {
+          return;
+        }
+
+      /* Disable the interrupt */
+
+      modifyreg8(regaddr, regbit, 0);
+    }
+}
+
+/****************************************************************************
+ * Name: up_enable_irq
+ *
+ * Description:
+ *   Enable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_enable_irq(int irq)
+{
+  unsigned int regaddr;
+  uint8_t      regbit;
+ 
+  if ((unsigned)irq >= IRQ0)
+    {
+      /* Map the IRQ IMR regiser to a PIC and a bit number */
+
+      if ((unsigned)irq <= IRQ7)
+        {
+          regaddr = PIC1_IMR;
+          regbit  = (1 << (irq - IRQ0));
+        }
+      else if ((unsigned)irq <= IRQ15)
+        {
+          regaddr = PIC2_IMR;
+          regbit  = (1 << (irq - IRQ8));
+        }
+      else
+        {
+          return;
+        }
+
+      /* Enable the interrupt */
+
+      modifyreg8(regaddr, 0, regbit);
+    }
+}
+
+/****************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *   Set the priority of an IRQ.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQPRIO
+int up_prioritize_irq(int irq, int priority)
+{
+#warning "Missing Logic"
+  return OK;
+}
+#endif
