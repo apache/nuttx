@@ -79,9 +79,6 @@
 
 #define PIT_DIVISOR  ((uint32_t)PIT_CLOCK/(uint32_t)CLK_TCK)
 
-#define PIT_MODE     0x43
-#define PIT_CH0      0x40
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -90,25 +87,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void pit_outb(uint8_t val, uint16_t addr) __attribute__((noinline));
+static void outb(uint8_t val, uint16_t addr) __attribute__((noinline));
 static int up_timerisr(int irq, uint32_t *regs);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name pit_outb
- *
- * Description:
- *   A slightly slower version of outb
- *
- ****************************************************************************/
-
-static void pit_outb(uint8_t val, uint16_t addr)
-{
-  outb(val, addr);
-}
 
 /****************************************************************************
  * Function:  up_timerisr
@@ -151,12 +135,16 @@ void up_timerinit(void)
 
   (void)irq_attach(IRQ0, (xcpt_t)up_timerisr);
 
-  /* Send the command byte */
+  /* Send the command byte to configure counter 0 */
 
-  pit_outb(0x36, PIT_MODE);
+  outb(PIT_OCW_MODE_SQUARE|PIT_OCW_RL_DATA|PIT_OCW_COUNTER_0, PIT_REG_COMMAND);
 
   /* Set the PIT input frequency divisor */
 
-  pit_outb((uint8_t)(divisor & 0xff),  PIT_CH0);
-  pit_outb((uint8_t)((divisor >> 8) & 0xff), PIT_CH0);
+  outb((uint8_t)(divisor & 0xff),  PIT_REG_COUNTER0);
+  outb((uint8_t)((divisor >> 8) & 0xff), PIT_REG_COUNTER0);
+
+  /* And enable IRQ0 */
+
+  up_enable_irq(IRQ0);
 }
