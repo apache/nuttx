@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/qemu-i486/ostest/setenv.sh
+# configs/qemu-i486/nsh/setenv.sh
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
