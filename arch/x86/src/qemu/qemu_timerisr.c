@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/irq.h>
 #include <arch/io.h>
 #include <arch/board/board.h>
 
@@ -86,9 +87,6 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-static void outb(uint8_t val, uint16_t addr) __attribute__((noinline));
-static int up_timerisr(int irq, uint32_t *regs);
 
 /****************************************************************************
  * Private Functions
