@@ -1,7 +1,7 @@
 /********************************************************************************
  * nuttx/sched.h
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,6 +178,10 @@ struct _TCB
   start_t  start;                        /* Thread start function               */
   entry_t  entry;                        /* Entry Point into the thread         */
   exitfunc_t exitfunc;                   /* Called if exit is called.           */
+#ifdef CONFIG_SCHED_WAITPID /* Experimental */
+  sem_t    exitsem;                      /* Support for waitpid                 */
+  int     *stat_loc;                     /* Location to return exit status      */
+#endif
   uint8_t  sched_priority;               /* Current priority of the thread      */
 #ifdef CONFIG_PRIORITY_INHERITANCE
 #  if CONFIG_SEM_NNESTPRIO > 0

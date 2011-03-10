@@ -1,7 +1,7 @@
 ############################################################################
 # sched/Makefile
 #
-#   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,9 @@ SCHED_SRCS	= sched_setparam.c sched_setpriority.c sched_getparam.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 SCHED_SRCS	+= sched_reprioritize.c 
+endif
+ifeq ($(CONFIG_SCHED_WAITPID),y)
+SCHED_SRCS	+= sched_waitpid.c
 endif
 
 ENV_SRCS	= env_getenvironptr.c env_dup.c env_share.c env_release.c \

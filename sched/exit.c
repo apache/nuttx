@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/exit.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,12 +93,39 @@ void exit(int status)
 {
   _TCB *tcb = (_TCB*)g_readytorun.head;
 
+  /* Only the lower 8 bits of the exit status are used */
+
+  status &= 0xff;
+
   /* Flush all streams (File descriptors will be closed when
    * the TCB is deallocated.
    */
 
 #if CONFIG_NFILE_STREAMS > 0
   (void)lib_flushall(tcb->streams);
+#endif
+
+  /* Wakeup any tasks waiting for this task to exit */
+
+#ifdef CONFIG_SCHED_WAITPID /* Experimental */
+  while (tcb->exitsem.semcount < 0)
+    {
+      /* "If more than one thread is suspended in waitpid() awaiting
+       *  termination of the same process, exactly one thread will return
+       *  the process status at the time of the target process termination." 
+       *  Hmmm.. what do we return to the others?
+       */
+
+      if (tcb->stat_loc)
+        {
+          *tcb->stat_loc = status << 8;
+           tcb->stat_loc = NULL;
+        }
+
+      /* Wake up the thread */
+
+      sem_post(&tcb->exitsem);
+    }
 #endif
 
   /* If an exit function was registered, call it now. */
@@ -108,6 +135,7 @@ void exit(int status)
     (*tcb->exitfunc)();
 
   } /* end if */
+  /* Then "really" exit */
 
-  _exit(status & 0377);
+  _exit(status);
 }

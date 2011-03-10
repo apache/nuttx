@@ -152,6 +152,12 @@ typedef uint16_t     ino_t;
 
 typedef int          pid_t;
 
+/* id_t is a general identifier that can be used to contain at least a pid_t,
+ * uid_t, or gid_t.
+ */
+
+typedef unsigned int id_t;
+
 /* blkcnt_t and off_t are signed integer types.
  *
  *   blkcnt_t is used for file block counts.
