@@ -124,7 +124,7 @@ void up_initialize(void)
 
   up_irqinitialize();
 
-  /* Initialize the DMA subsystem if the weak function stm32_dmainitialize has been
+  /* Initialize the DMA subsystem if the weak function up_dmainitialize has been
    * brought into the build
    */
 
