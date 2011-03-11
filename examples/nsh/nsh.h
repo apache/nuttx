@@ -326,6 +326,12 @@ extern int nsh_archinitialize(void);
 
 extern int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline);
 
+/* Application interface */
+
+#ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
+extern int nsh_execapp(FAR struct nsh_vtbl_s *vtbl, const char *cmd, char *argv[]);
+#endif
+
 /* I/O interfaces */
 
 #ifdef CONFIG_EXAMPLES_NSH_CONSOLE

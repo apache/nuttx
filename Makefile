@@ -59,14 +59,16 @@ ARCH_SRC	= $(ARCH_DIR)/src
 ARCH_INC	= $(ARCH_DIR)/include
 BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 
-# This can be over-ridden from the command line:
-
-APPS_LOC	= ../apps
-
 # Add-on directories.  These may or may not be in place in the
 # NuttX source tree (they must be specifically installed)
+#
+# APPS_LOC can be over-ridden from the command line:
 
+ifeq ($(CONFIG_BUILTIN_APPS_NUTTX),y)
+APPS_LOC	= ../apps
 APPS_DIR	:= ${shell if [ -r $(APPS_LOC)/Makefile ]; then echo "$(APPS_LOC)"; fi}
+endif
+
 PCODE_DIR	:= ${shell if [ -r pcode/Makefile ]; then echo "pcode"; fi}
 ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR) $(APPS_DIR)
 

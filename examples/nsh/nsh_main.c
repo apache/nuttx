@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/stat.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -494,29 +495,9 @@ static int nsh_execute(FAR struct nsh_vtbl_s *vtbl, int argc, char *argv[])
 #ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
    if (handler == cmd_unrecognized)
      {
-       /* Try to find command within pre-built application list. */
+       /* Try to execute the command from a list of pre-built applications. */
 
-       if ((ret = exec_nuttapp(cmd, argv)) < 0)
-         {
-            if (errno != ENOENT)
-              {
-                return -errno;
-              }
-         }
-       else
-         {
-#ifdef CONFIG_SCHED_WAITPID
-            if (vtbl->np.np_bg == false)
-              {
-                waitpid(ret, NULL, 0);
-              }
-            else
-#endif
-              {
-                nsh_output(vtbl, "%s [%d:%d]\n", cmd, ret, 128);    // \todo get priority from new pid?
-              }
-            return ret;
-         }
+	   return nsh_execapp(vtbl, cmd, argv);
      }
 #endif
 

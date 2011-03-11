@@ -38,7 +38,11 @@
 
 ASRCS	= 
 CSRCS	= nsh_main.c nsh_fscmds.c nsh_ddcmd.c nsh_proccmds.c nsh_mmcmds.c \
-		  nsh_envcmds.c nsh_dbgcmds.c
+		nsh_envcmds.c nsh_dbgcmds.c
+
+ifeq ($(CONFIG_EXAMPLES_NSH_BUILTIN_APPS),y)
+CSRCS	+= nsh_apps.c
+endif
 
 ifeq ($(CONFIG_EXAMPLES_NSH_ROMFSETC),y)
 CSRCS	+= nsh_romfsetc.c
