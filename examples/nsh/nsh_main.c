@@ -514,8 +514,8 @@ static int nsh_execute(FAR struct nsh_vtbl_s *vtbl, int argc, char *argv[])
 #endif
               {
                 nsh_output(vtbl, "%s [%d:%d]\n", cmd, ret, 128);    // \todo get priority from new pid?
-                return ret;
               }
+            return ret;
          }
      }
 #endif
