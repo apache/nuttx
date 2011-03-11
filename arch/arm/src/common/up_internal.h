@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -259,7 +259,11 @@ extern void up_ledoff(int led);
 # define up_ledoff(led)
 #endif
 
-/* Defined in board/up_network.c */
+/* Defined in board/up_network.c for board-specific ethernet implementations,
+ * or chip/xyx_ethernet.c for chip-specific ethernet implementations, or
+ * common/up_etherstub.c for a cornercase where the network is enable yet
+ * there is no ethernet driver to be initialized.
+ */
 
 #ifdef CONFIG_NET
 extern void up_netinitialize(void);

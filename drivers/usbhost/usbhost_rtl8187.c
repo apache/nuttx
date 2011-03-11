@@ -1770,25 +1770,3 @@ int usbhost_wlaninit(void)
   return usbhost_registerclass(&g_wlan);
 }
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
-
-/****************************************************************************
- * Name: up_netinitialize
- *
- * Description:
- *   Initialize the first network interface.  If there are more than one
- *   interface in the chip, then board-specific logic will have to provide
- *   this function to determine which, if any, Ethernet controllers should
- *   be initialized.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_LPC17_ETHERNET
-void up_netinitialize(void)
-{
-  /* stub */
-}
-#endif
-
-#endif /* CONFIG_NET && CONFIG_NET_WLAN */
-
