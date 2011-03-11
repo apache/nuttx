@@ -1535,3 +1535,10 @@
 	* drivers/uart_16550.c and include/nuttx/uart_16550.h - Support for a generic
 	  16550 UART.
 	* configure/qemu-i486/nsh - QEMU NSH example.
+	* ../apps - The apps directory add-on was created by Uros Platise.  It
+	  supports a set of end-user applications than can be executed on top of
+	  NSH.  Think of it this way:  In a buckled-up embedded application, your
+	  end-user programs will probably have their own dedicated start-up logic.
+	  But, during development, you might want to have you applications
+	  available and executable from the NSH command line.  This apps/ addon
+	  (and NSH hooks) was contributed by Uros to accomplish just that.

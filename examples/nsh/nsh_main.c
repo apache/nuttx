@@ -492,12 +492,18 @@ static int nsh_execute(FAR struct nsh_vtbl_s *vtbl, int argc, char *argv[])
          }
      }
 
-#ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
-   if (handler == cmd_unrecognized)
-     {
-       /* Try to execute the command from a list of pre-built applications. */
+   /* If the command was not found, then try to execute the command from
+    * a list of pre-built applications.
+	*/
 
-	   return nsh_execapp(vtbl, cmd, argv);
+#ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
+   if (handler == cmd_unrecognized && nsh_execapp(vtbl, cmd, argv) == OK)
+     {
+       /* The pre-built application was successfully started -- run OK.
+	    * If not, then fall through to execute the cmd_nrecognized handler.
+		*/
+
+	   return OK;
      }
 #endif
 
