@@ -499,23 +499,23 @@ static int nsh_execute(FAR struct nsh_vtbl_s *vtbl, int argc, char *argv[])
        if ((ret = exec_nuttapp(cmd, argv)) < 0)
          {
             if (errno != ENOENT)
-			  {
-			    return -errno;
+              {
+                return -errno;
               }
          }
        else
          {
-           /* Is the background mode or foreground mode desired? */
-#if 0
-           if (argc > 1 && strcmp(argv[argc-1], "&") == 0)
-             {
-             }
-           else
-             {
-               waitpid(ret, );
-             }
+#ifdef CONFIG_SCHED_WAITPID
+            if (vtbl->np.np_bg == false)
+              {
+                waitpid(ret, NULL, 0);
+              }
+            else
 #endif
-           return ret;
+              {
+                nsh_output(vtbl, "%s [%d:%d]\n", cmd, ret, 128);    // \todo get priority from new pid?
+                return ret;
+              }
          }
      }
 #endif
@@ -1176,6 +1176,7 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
     }
 #endif
 
+
   /* Check if the output was re-directed using > or >> */
 
   if (argc > 2)
@@ -1229,10 +1230,16 @@ int nsh_parse(FAR struct nsh_vtbl_s *vtbl, char *cmdline)
       nsh_output(vtbl, g_fmttoomanyargs, cmd);
     }
 
-  /* Handle the case where the command is executed in background */
+  /* Handle the case where the command is executed in background.
+   * However is app is to be started as nuttapp new process will
+   * be created anyway, so skip this step. */
 
 #ifndef CONFIG_EXAMPLES_NSH_DISABLEBG
-  if (vtbl->np.np_bg)
+  if (vtbl->np.np_bg
+#ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
+      && nuttapp_isavail(argv[0]) < 0     
+#endif
+  )
     {
       struct sched_param param;
       struct nsh_vtbl_s *bkgvtbl;

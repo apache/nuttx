@@ -848,6 +848,7 @@ CONFIG_BUILTIN_APP_START=
 #   apps from command line. See apps/README for more information.
 #
 CONFIG_EXAMPLES_NSH_BUILTIN_APPS=y
+CONFIG_SCHED_WAITPID=y
 
 #
 ########################################################################

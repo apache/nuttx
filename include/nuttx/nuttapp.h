@@ -72,6 +72,45 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+
+/****************************************************************************
+ * Name: check for availability of builtin NuttX application
+ *
+ * Description:
+ *   Checks for availabiliy of application registerred during compile time.
+ *
+ * Input Parameter:
+ *   filename - Name of the linked-in binary to be started.
+ *
+ * Returned Value:
+ *   This is an end-user function, so it follows the normal convention:
+ *   Returns index of builtin application. If it is not found then it
+ *   returns -1 (ERROR) and sets errno appropriately.
+ *
+ ****************************************************************************/
+
+EXTERN int nuttapp_isavail(FAR const char *appname);
+
+
+/****************************************************************************
+ * Name: get name of built-in application
+ *
+ * Description:
+ *   Returns pointer to a name of built-in application pointed by the
+ *   index.
+ *
+ * Input Parameter:
+ *   index, from 0 and on ...
+ *
+ * Returned Value:
+ *   Returns valid pointer pointing to the app name if index is valid.
+ *   Otherwise NULL is returned.
+ *
+ ****************************************************************************/
+
+EXTERN const char * nuttapp_getname(int index);
+
+
 /****************************************************************************
  * Name: execute builtin NuttX application
  *
@@ -88,33 +127,10 @@ extern "C" {
  *   Returns the PID of the exec'ed module.  On failure, it.returns
  *   -1 (ERROR) and sets errno appropriately.
  *
- * Implementation within drivers/bchsbin
  ****************************************************************************/
 
 EXTERN int exec_nuttapp(FAR const char *appname, FAR const char *argv[]);
 
-/****************************************************************************
- * Name: execute a nutt shell command
- *
- * Description:
- *   Invokes an application that is either:
- *    - invokes a nsh script or directly invoke:
- *    - system application list, registerred via XXXX 
- *    - resides in a file system compiled/linked in NXFLAT model
- *    - resides in a non-executable file-system, which is loaded 
- *      into the memory first and then executed.
- *
- * Input Parameter:
- *   Sheel command.
- *
- * Returned Value:
- *   Zero on success or -1 on error with errno set. 
- *
- * TODO: move this command to the stdlib.h (?) and
- *   merge implementation with the nuttshell sh command
- ****************************************************************************/
-
-EXTERN FAR int system(const char *command);
 
 #undef EXTERN
 #if defined(__cplusplus)
