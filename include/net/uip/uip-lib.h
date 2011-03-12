@@ -3,7 +3,7 @@
  * Various non-standard APIs to support netutils.  All non-standard and
  * intended only for internal use.
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Some of these APIs derive from uIP but all of them use the uip_ prefix
@@ -54,7 +54,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
+
 #include <netinet/in.h>
+#include <net/uip/uipopt.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,10 +95,14 @@
 
 extern bool uiplib_ipaddrconv(const char *addrstr, uint8_t *addr);
 
-/* Get and set IP/MAC addresses */
+/* Get and set IP/MAC addresses (Ethernet L2 only) */
 
+#ifdef CONFIG_NET_ETHERNET
 extern int uip_setmacaddr(const char *ifname, const uint8_t *macaddr);
 extern int uip_getmacaddr(const char *ifname, uint8_t *macaddr);
+#endif
+
+/* IP address support */
 
 #ifdef CONFIG_NET_IPv6
 extern int uip_gethostaddr(const char *ifname, struct in6_addr *addr);

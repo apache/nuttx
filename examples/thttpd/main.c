@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/thttpd/main.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
   * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,9 @@
 #include <nuttx/ramdisk.h>
 #include <nuttx/binfmt.h>
 #include <nuttx/nxflat.h>
+#ifdef CONFIG_NET_SLIP
+#  include <nuttx/net.h>
+#endif
 
 #include "content/romfs.h"
 #include "content/symtab.h"
@@ -87,6 +90,29 @@
 
 #ifdef CONFIG_BINFMT_DISABLE
 #  error "You must not disable loadable modules via CONFIG_BINFMT_DISABLE in your configuration file"
+#endif
+
+/* SLIP-specific configuration */
+
+#ifdef CONFIG_NET_SLIP
+
+   /* No MAC address operations */
+
+#  undef CONFIG_EXAMPLE_THTTPD_NOMAC
+
+   /* TTY device to use */
+
+#  ifndef CONFIG_NET_SLIPTTY
+#    define CONFIG_NET_SLIPTTY "/dev/ttyS1"
+#  endif
+
+#  define SLIP_DEVNO 0
+#  define NET_DEVNAME "slip0"
+#else
+
+   /* Otherwise, use the standard ethernet device name */
+
+#  define NET_DEVNAME "eth0"
 #endif
 
 /* Describe the ROMFS file system */
@@ -175,24 +201,35 @@ int user_start(int argc, char *argv[])
   mac[3] = 0x0b;
   mac[4] = 0xba;
   mac[5] = 0xbe;
-  uip_setmacaddr("eth0", mac);
+  uip_setmacaddr(NET_DEVNAME, mac);
+#endif
+
+  /* Configure SLIP */
+
+#ifdef CONFIG_NET_SLIP
+  ret = slip_initialize(SLIP_DEVNO, CONFIG_NET_SLIPTTY);
+  if (ret < 0)
+    {
+      message("ERROR: SLIP initialization failed: %d\n", ret);
+      exit(1);
+    }
 #endif
 
   /* Set up our host address */
 
   message("Setup network addresses\n");
   addr.s_addr = HTONL(CONFIG_THTTPD_IPADDR);
-  uip_sethostaddr("eth0", &addr);
+  uip_sethostaddr(NET_DEVNAME, &addr);
 
   /* Set up the default router address */
 
   addr.s_addr = HTONL(CONFIG_EXAMPLE_THTTPD_DRIPADDR);
-  uip_setdraddr("eth0", &addr);
+  uip_setdraddr(NET_DEVNAME, &addr);
 
   /* Setup the subnet mask */
 
   addr.s_addr = HTONL(CONFIG_EXAMPLE_THTTPD_NETMASK);
-  uip_setnetmask("eth0", &addr);
+  uip_setnetmask(NET_DEVNAME, &addr);
 
   /* Initialize the NXFLAT binary loader */
 
@@ -201,7 +238,7 @@ int user_start(int argc, char *argv[])
   if (ret < 0)
     {
       message("ERROR: Initialization of the NXFLAT loader failed: %d\n", ret);
-      exit(1);
+      exit(2);
     }
 
   /* Create a ROM disk for the ROMFS filesystem */

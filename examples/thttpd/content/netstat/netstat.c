@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/thttpd/netstat/netstat.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <unistd.h>
 
 #include <netinet/ether.h>
+#include <net/uip/uipopt.h>
 #include <net/uip/uip-arch.h>
 
 /****************************************************************************
@@ -85,7 +86,9 @@
   struct in_addr addr;
 
   printf("  <dt>%s\r\n", dev->d_ifname);
-  printf("    <dd>HWaddr %s<br>\r\n", ether_ntoa(&dev->d_mac));
+#ifdef CONFIG_NET_ETHERNET
+  printf("    <dd>HWaddr: %s<br>\r\n", ether_ntoa(&dev->d_mac));
+#endif
   addr.s_addr = dev->d_ipaddr;
   printf("    IPaddr: %s<br>\r\n", inet_ntoa(addr));
   addr.s_addr = dev->d_draddr;

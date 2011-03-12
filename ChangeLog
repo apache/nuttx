@@ -1550,3 +1550,6 @@
 	  CONFIG_SCHED_ATEXIT.  It your application is currently using atexit(),
 	  you will need to add CONFIG_SCHED_ATEXT to your configuration file.
 	* drivers/net/slip.c - Add a SLIP driver (untested on initial check-in).
+	* configs/olimex-lpc1766stk/slip-httpd - An example that uses SLIP to
+	  provide a serial-port based THTTPD web server.
+

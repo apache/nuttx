@@ -1,7 +1,7 @@
-############################################################################
-# Make.defs
+#!/bin/bash
+# configs/olimex-lpc1766stk/slip-httpd/setenv.sh
 #
-#   Copyright (C) 2007, 2010-2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,20 +31,17 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-UIPLIB_ASRCS =
-UIPLIB_CSRCS = uiplib.c uip_sethostaddr.c uip_gethostaddr.c uip_setdraddr.c \
-	uip_setnetmask.c uip_parsehttpurl.c uip_server.c\
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-# No MAC address support for SLIP (Ethernet only)
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
-ifneq ($(CONFIG_NET_SLIP),y)
-UIPLIB_CSRCS += uip_setmacaddr.c uip_getmacaddr.c
-endif
+WD=`pwd`
+export LPCTOOL_DIR="${WD}/configs/olimex-lpc1766stk/tools"
+export BUILDROOT_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+export PATH="${BUILDROOT_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-# IGMP support
-
-ifeq ($(CONFIG_NET_IGMP),y)
-UIPLIB_CSRCS += uip_ipmsfilter.c
-endif
+echo "PATH : ${PATH}"
