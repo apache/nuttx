@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 3, 2011</p>
+      <p>Last Updated: March 12, 2011</p>
     </td>
   </tr>
 </table>
@@ -3304,6 +3304,19 @@ build
     <code>CONFIG_NET</code>: Enable or disable all network features
   </li>
   <li>
+    <code>CONFIG_NET_SLIP</code>: Selects the Serial Line Internet Protocol (SLIP) data link layer.
+     The default data link layer for uIP is Ethernet.
+     If <code>CONFIG_NET_SLIP</code> is defined in the NuttX header file, then SLIP will be supported.
+     The basic differences between the SLIP and Ethernet configurations is that when SLIP is selected:
+     <ul>
+       <li>The link level header (that comes before the IP header) is omitted.</li>
+       <li>All MAC address processing is suppressed.</li>
+       <li>ARP is disabled.</li>
+     </ul>
+     If <code>CONFIG_NET_SLIP</code> is not supported, then Ethernet will be used
+     (there is no need to define anything special in the configuration file to use Ethernet -- it is the default).
+  </li>
+  <li>
     <code>CONFIG_NET_IPv6</code>: Build in support for IPv6
   </li>
   <li>
@@ -3389,9 +3402,6 @@ build
   </li>
   <li>
     <code>CONFIG_NET_MULTICAST</code>: Outgoing multi-cast address support
-  </li>
-  <li>
-    <code>CONFIG_NET_LLH_LEN</code>: The link level header length
   </li>
   <li>
     <code>CONFIG_NET_FWCACHE_SIZE</code>: number of packets to remember when looking for duplicates
