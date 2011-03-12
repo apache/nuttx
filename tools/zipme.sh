@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-set -x
+#set -x
 
 WD=`pwd`
 VERSION=$1
