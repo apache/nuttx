@@ -163,12 +163,6 @@ volatile pid_t g_lastpid;
 
 pidhash_t g_pidhash[CONFIG_MAX_TASKS];
 
-/* The task ID of the worker thread */
-
-#ifdef CONFIG_SCHED_WORKQUEUE
-pid_t g_worker;
-#endif
-
 /* This is a table of task lists.  This table is indexed by
  * the task state enumeration type (tstate_t) and provides
  * a pointer to the associated static task list (if there

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/work_thread.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,12 @@
 /* The queue of pending work */
 
 struct dq_queue_s g_work;
+
+/* The task ID of the worker thread */
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+pid_t g_worker;
+#endif
 
 /****************************************************************************
  * Private Variables

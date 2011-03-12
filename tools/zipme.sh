@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-#set -x
+set -x
 
 WD=`pwd`
 VERSION=$1
@@ -43,43 +43,53 @@ ZIP=gzip
 # Make sure we know what is going on
 
 if [ -z ${VERSION} ] ; then
-   echo "You must supply a version like xx.yy.zz as a parameter"
+   echo "You must supply a version like xx.yy as a parameter"
    exit 1;
 fi
 
 # Find the directory we were executed from and were we expect to
-# see the directory to tar up
+# see the directories to tar up
 
 MYNAME=`basename $0`
 
 if [ -x ${WD}/${MYNAME} ] ; then
-   NUTTX=`dirname ${WD}`
+   PROJECTS="${WD}/../../.."
 else
    if [ -x ${WD}/tools/${MYNAME} ] ; then
-     NUTTX=${WD}
+     PROJECTS="${WD}/../.."
    else
-     echo "You must cd into the NUTTX directory to execute this script."
-     exit 1
+     if [ -x ${WD}/nuttx/tools/${MYNAME} ] ; then
+       PROJECTS="${WD}/.."
+     else
+       echo "You must cd into the NUTTX directory to execute this script."
+       exit 1
+     fi
    fi
 fi
 
 # Get the NuttX directory name and the path to the parent directory
 
-NUTTXDIR=`basename ${NUTTX}`
-PROJECTS=`dirname ${NUTTX}`
+NUTTXDIR=${PROJECTS}/nuttx-${VERSION}
+NUTTX=${NUTTXDIR}/nuttx
+APPS=${NUTTXDIR}/apps
 
-# The name of the directory must match the version number
+# Make sure that the versioned directory exists
 
-if [ "X$NUTTXDIR" != "Xnuttx-${VERSION}" ]; then
-   echo "Expected directory name to be nuttx-${VERSION} found ${NUTTXDIR}"
+if [ ! -d ${NUTTXDIR} ]; then
+   echo "Directory ${NUTTXDIR} does not exist"
    exit 1
 fi
 
 cd ${PROJECTS} || \
    { echo "Failed to cd to ${PROJECTS}" ; exit 1 ; }
 
-if [ ! -d ${NUTTXDIR} ] ; then
-   echo "${PROJECTS}/${NUTTXDIR} does not exist!"
+if [ ! -d nuttx-${VERSION} ] ; then
+   echo "Directory ${PROJECTS}/nuttx-${VERSION} does not exist!"
+   exit 1
+fi
+
+if [ ! -d ${APPS} ] ; then
+   echo "Directory ${APPS} does not exist!"
    exit 1
 fi
 
@@ -124,7 +134,7 @@ fi
 
 # Then zip it
 
-${TAR} ${TAR_NAME} ${NUTTXDIR} || \
+${TAR} ${TAR_NAME} nuttx-${VERSION}/nuttx nuttx-${VERSION}/apps || \
       { echo "tar of ${TAR_NAME} failed!" ; exit 1 ; }
 ${ZIP} ${TAR_NAME} || \
       { echo "zip of ${TAR_NAME} failed!" ; exit 1 ; }

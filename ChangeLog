@@ -1481,7 +1481,7 @@
 	* Added a new 'kill' command to NSH that will support sending signals to
 	  running NuttX tasks.
 
-5.19 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+5.19 2011-03-12 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/stm32/stm32_idle.c -- During idle times, the STM32 now uses the
 	  WFI instruction to sleep in a reduced power mode until the next interrupt
@@ -1503,7 +1503,7 @@
 	    nsh> cat test.txt
 	    This is a test
 
-	* drivers/pipes/pipe_common.c:  Driver open method eas not returning an EINTR
+	* drivers/pipes/pipe_common.c:  Driver open method was not returning an EINTR
 	  error when it received a signal.  Instead, it just re-started the wait.  This
 	  makes it impossible to kill a background pipe operation from NSH.
 	* include/stdint.h -- Correct some errors in conditional compilation (submitted
@@ -1552,4 +1552,6 @@
 	* drivers/net/slip.c - Add a SLIP driver (untested on initial check-in).
 	* configs/olimex-lpc1766stk/slip-httpd - An example that uses SLIP to
 	  provide a serial-port based THTTPD web server.
+
+5.20 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 

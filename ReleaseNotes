@@ -682,31 +682,31 @@ This is the 30th release of NuttX.  This release includes two partially complete
 ports, several new features, and a couple of important bug fixes.  The two partially
 completed ports are:
 
-	* The STMicro STR71x processor and configuration for the Olimex STR-P711
-	  board.
-	* The Hitachi SH-1 using the SH1_LCEVB1 (SH-1/US7032EVB1) board
+    * The STMicro STR71x processor and configuration for the Olimex STR-P711
+      board.
+    * The Hitachi SH-1 using the SH1_LCEVB1 (SH-1/US7032EVB1) board
 
 Progress on these ports is stalled (as detailed in the ChangeLog).
 
 The new features focus primarily on management of block devices and extensions of
 the NuttShell (NSH).  These include:
 
-	* A loop device that converts a file into a block device.
-	* A block to character (BCH) driver that  allow access a block device as
-	  if it were character device.
-	* Added strcasecmp() and strncasecmp() libc functions.
-	* Added the 'dd' and 'losetup' commands to NSH. These commands (along
-	  with mkfatfs and mount), give good managment of filesystems on the target.
+    * A loop device that converts a file into a block device.
+    * A block to character (BCH) driver that  allow access a block device as
+      if it were character device.
+    * Added strcasecmp() and strncasecmp() libc functions.
+    * Added the 'dd' and 'losetup' commands to NSH. These commands (along
+      with mkfatfs and mount), give good managment of filesystems on the target.
 
 Several bugs were fixed, the most important of which are:
 
-	* Fixed a race condition workaround delay in LPC214X SPI logic.  This was also
-	  the cause of some bad MMC/SD performance on that platform.
-	* Fixed a recently introduced FAT file system problem: It would mount a (invalid)
-	  FAT file system even if the medium is not formatted!
-	* Corrected two iother important errors in the FAT lseek implementation:
-	  (1) the sectors-per-cluster value was being reset to "1" and (2) important
-	  lseek logic was omitted when the seek position was zero.
+    * Fixed a race condition workaround delay in LPC214X SPI logic.  This was also
+      the cause of some bad MMC/SD performance on that platform.
+    * Fixed a recently introduced FAT file system problem: It would mount a (invalid)
+      FAT file system even if the medium is not formatted!
+    * Corrected two iother important errors in the FAT lseek implementation:
+      (1) the sectors-per-cluster value was being reset to "1" and (2) important
+      lseek logic was omitted when the seek position was zero.
 
 The FAT filesystem has had many bugs fixed in it and, I think, is now maturing
 and becoming stable.
@@ -722,28 +722,28 @@ nuttx-0.3.19
 
 This is the 31st release of NuttX.  This release includes the following new feature:
 
-	* Add poll() and select() APIs that may be used to monitor for data
-	  availability on character devices or TCP/IP sockets.
-	* Implemented support TCP/IP connection backlog.  This allows select to wake-up
-	  on new connections to a listener socket.
-	* Added definition of a framebuffer driver and implement framebuffer drivers
-	  for the simulated platform and the TI DM320 (untested as of the inital check-in).
-	* Partially developed a graphics framework based on the framebuffer drivers,
-	  however, this will not be ready for use for a few more release.  Currently
-	  this includes only a few color conversion routines and some rasteizing functions.
-	  A tiny windowing system is under development but not ready for check-in yet.
-	* Added support for fixed precision math.
-	* Added support for outgoing multicast packets.
+    * Add poll() and select() APIs that may be used to monitor for data
+      availability on character devices or TCP/IP sockets.
+    * Implemented support TCP/IP connection backlog.  This allows select to wake-up
+      on new connections to a listener socket.
+    * Added definition of a framebuffer driver and implement framebuffer drivers
+      for the simulated platform and the TI DM320 (untested as of the inital check-in).
+    * Partially developed a graphics framework based on the framebuffer drivers,
+      however, this will not be ready for use for a few more release.  Currently
+      this includes only a few color conversion routines and some rasteizing functions.
+      A tiny windowing system is under development but not ready for check-in yet.
+    * Added support for fixed precision math.
+    * Added support for outgoing multicast packets.
 
 Several bugs were fixed, the most important of which are:
 
-	* Fixed an important bug in the TCP/IP buffering logic.  When TCP/IP read-ahead is enabled
-	  and not recv() is in-place when a TCP/IP packet is received, the packet is placed into
-	  a read-ahead buffer.  However, the old contents of the read-ahead buffer were not being
-	  cleared and old data would contaminate the newly received buffer.
-	* Changed the behavior of the serial driver read.  It now returns data as it
-	  is available rather than waiting for the full requested read size.  This
-	  makes functions like fgetc() work much more smoothly.
+    * Fixed an important bug in the TCP/IP buffering logic.  When TCP/IP read-ahead is enabled
+      and not recv() is in-place when a TCP/IP packet is received, the packet is placed into
+      a read-ahead buffer.  However, the old contents of the read-ahead buffer were not being
+      cleared and old data would contaminate the newly received buffer.
+    * Changed the behavior of the serial driver read.  It now returns data as it
+      is available rather than waiting for the full requested read size.  This
+      makes functions like fgetc() work much more smoothly.
 
 These changes were verified only on the Neuros OSD (ARM9) using a Linux development
 environment. Please report any errors to me.
@@ -778,8 +778,8 @@ ZDS-II based targets.  All ZDS-II targets now build correctly (but have not been
 In addition to platform-specific build failures,  release also adds the following features
 which were not tested as of the time of the release:
 
-	* Board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit
-	* ZiLOG eZ80F91 EMAC driver
+    * Board support fot the ZiLog ez80Acclaim! ez80f910200zco Development Kit
+    * ZiLOG eZ80F91 EMAC driver
 
 These changes were verified only on the NuttX simulation platform. Please report any errors
 to me.
@@ -792,17 +792,17 @@ nuttx-0.4.2
 This is the 34th release of NuttX.  This release adds no new OS features but does include
 support for two new architectures:
 
-	* ez80Acclaim!  Basic support has been integrated and verified for the ez80f910200zcog-d
-	  board (eZ80F91-based).  That basic support includes timer interrupts and serial
-	  console.  Ongoing work includes an EMAC driver that should be integrated for
-	  the next release nuttx-0.4.2.
+    * ez80Acclaim!  Basic support has been integrated and verified for the ez80f910200zcog-d
+      board (eZ80F91-based).  That basic support includes timer interrupts and serial
+      console.  Ongoing work includes an EMAC driver that should be integrated for
+      the next release nuttx-0.4.2.
 
-	  eZ80Acclaim! support has been in the code base for some time, but has only just
-	  been integrated due to toolchain issues.
+      eZ80Acclaim! support has been in the code base for some time, but has only just
+      been integrated due to toolchain issues.
 
-	* Renesas M16C/20.  Support for the Renesas SKP16C20 board has been included in
-	  the NuttX source tree.  However, as the eZ80Acclaim!, testing and integration
-	  of that port is stalled due to toolchain issues.
+    * Renesas M16C/20.  Support for the Renesas SKP16C20 board has been included in
+      the NuttX source tree.  However, as the eZ80Acclaim!, testing and integration
+      of that port is stalled due to toolchain issues.
 
 These changes were verified only on the ZiLOG eZ80910200zcog-d board. Please report any errors
 to me.
@@ -815,13 +815,13 @@ nuttx-0.4.3
 This is the 35th release of NuttX.  This release one important new OS feature and corrects
 and extends the eZ80 port:
 
-	* Priority Inheritance.  The basic NuttX waiting logic was extended to
-	  support priority inheritance. See the NuttX User Manual for further
-	  information: http://www.nuttx.org/NuttxUserGuide.html#priorityinheritance.
-	* ez80Acclaim! Corrected several critical, show-stopping bugs on that
-	  platform including: Errors in the serial driver intrrupts and an error
-	  in the eZ80 table,.
-	* eZ80Acclaim!: Completed integration of the eZ80F91 EMAC driver.
+    * Priority Inheritance.  The basic NuttX waiting logic was extended to
+      support priority inheritance. See the NuttX User Manual for further
+      information: http://www.nuttx.org/NuttxUserGuide.html#priorityinheritance.
+    * ez80Acclaim! Corrected several critical, show-stopping bugs on that
+      platform including: Errors in the serial driver intrrupts and an error
+      in the eZ80 table,.
+    * eZ80Acclaim!: Completed integration of the eZ80F91 EMAC driver.
 
 These changes were verified only on the ZiLOG eZ80910200zcog-d board and on Cygwin-based
 simulation platform in various configurations. Please report any errors to me.
@@ -834,11 +834,11 @@ nuttx-0.4.4
 This is the 36th release of NuttX.  This release focuses on bugfixes and extending
 and verifying certain networking features.
 
-	* Important bugs were fixed in NSH, UDP checksum calculation, UDP bind()
-	  behavior for port==0, the eZ80Acclaim! EMAC driver, Z80 interrupt handling,
-	  and in the C libraries.
-	* Testing was extended to further verify the tiny webserver, DHCPD, wget(),
-	  and sendmail.
+    * Important bugs were fixed in NSH, UDP checksum calculation, UDP bind()
+      behavior for port==0, the eZ80Acclaim! EMAC driver, Z80 interrupt handling,
+      and in the C libraries.
+    * Testing was extended to further verify the tiny webserver, DHCPD, wget(),
+      and sendmail.
 
 See the Changelog for a detailed description of these changes.
 
@@ -852,14 +852,14 @@ nuttx-0.4.5
 
 This is the 37th release of NuttX.  This release focuses on a few new features.
 
-	* The basic port for the FreeScale ARM920T i.MX1 processor on the
-	  Freescale MX1ADS board.  Coding is complete for this port, but it is
-	  has not yet fully integrated
-	* Extended I2C and SPI interface definitions
-	* Add basic support for C++ applications.  Very simple C++ applications
-	  can now be built against NuttX without any external libraries.  At
-	  present, only the most primitive C++ programs are supported, but it
-	  is hoped that this support will be extended in future releases.
+    * The basic port for the FreeScale ARM920T i.MX1 processor on the
+      Freescale MX1ADS board.  Coding is complete for this port, but it is
+      has not yet fully integrated
+    * Extended I2C and SPI interface definitions
+    * Add basic support for C++ applications.  Very simple C++ applications
+      can now be built against NuttX without any external libraries.  At
+      present, only the most primitive C++ programs are supported, but it
+      is hoped that this support will be extended in future releases.
 
 See the Changelog for a detailed description of these changes.
 
@@ -928,12 +928,12 @@ nuttx-0.4.9
 
 This is the 41st release of NuttX.  This release adds:
 
-	* Support for a new binary format call NXFLAT that can be used to 
-	  execute separately linked programs in place in a file system.
-	  See http://www.nuttx.org/NuttXNxFlat.html.
+    * Support for a new binary format call NXFLAT that can be used to 
+      execute separately linked programs in place in a file system.
+      See http://www.nuttx.org/NuttXNxFlat.html.
 
-	* Several important bugs were files related to networking and ROMFS
-	  (see the ChangeLog for a complete list).
+    * Several important bugs were files related to networking and ROMFS
+      (see the ChangeLog for a complete list).
 
 This tarball contains a complete CVS snapshot from June 26, 2009.
 
@@ -946,14 +946,14 @@ the 0.4.10 release, that port is still not fully complete and functional.
 However, numerous related bug-fixes and functional additions for THTTPD were
 added:
 
-	* Several new standard C-library functions (fileno, strstr, strpbrk, fcntl).
-	* Improved and extended timing APIs (mktime, gmtime, gmtime_r, gettimeofday,
-	  localtime, localtime_r, and strftime)
-	* Networking enhancements: recvfrom and accept now work with non-blocking
-	  sockets.
-	* NXFLAT extensions (exec)
-	* Pattern matching logic.
-	* And miscellaneous bug fixes (see the ChangeLog for details).
+    * Several new standard C-library functions (fileno, strstr, strpbrk, fcntl).
+    * Improved and extended timing APIs (mktime, gmtime, gmtime_r, gettimeofday,
+      localtime, localtime_r, and strftime)
+    * Networking enhancements: recvfrom and accept now work with non-blocking
+      sockets.
+    * NXFLAT extensions (exec)
+    * Pattern matching logic.
+    * And miscellaneous bug fixes (see the ChangeLog for details).
 
 This tarball contains a complete CVS snapshot from August 8, 2009.
 
@@ -965,9 +965,9 @@ verified port of Jeff Poskanzer's THTTPD HTTP server (see http://acme.com/softwa
 Many of the key features of THTTPD have been tested on the Micromint Eagle-100
 development board (Cortex-M3).  These tests verify:
 
-	* Serving of files from any file system
-	* Execution of CGI executable.  This release supports execution of
-	  NXFLAT executables on a ROMFS file system (http://www.nuttx.org/NuttXNxFlat.html)
+    * Serving of files from any file system
+    * Execution of CGI executable.  This release supports execution of
+      NXFLAT executables on a ROMFS file system (http://www.nuttx.org/NuttXNxFlat.html)
 
 A standard CGI interface is used:  Information is pasted to the CGI program via POST
 commands and via environment variables.  CGI socket I/O is redirected to stdin and stdout
@@ -989,12 +989,12 @@ This is the 44th release of NuttX.  This release adds basic support for the STMi
 Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL development board based
 around the STM32F103ZET6 MCU.  Some highlights of this port:
 
-	* This basic port includes boot-up logic, interrupt driven serial console, and system
-	  timer interrupts.
-	* Includes a basic STMicro RIDE7 project that can be used to perform basic STM32
-	  board bring-up (due to RIDE7 size limitations, it cannot be used for the full NuttX
-	  bring-up).
-	* Working, Tested Configurations:  the NuttX OS test and the NuttShell (NSH) example.
+    * This basic port includes boot-up logic, interrupt driven serial console, and system
+      timer interrupts.
+    * Includes a basic STMicro RIDE7 project that can be used to perform basic STM32
+      board bring-up (due to RIDE7 size limitations, it cannot be used for the full NuttX
+      bring-up).
+    * Working, Tested Configurations:  the NuttX OS test and the NuttShell (NSH) example.
 
 This basic STM32 port will be extended in the 0.4.13 NuttX release.  Functionality needed
 for complete STM32 support includes:  USB device driver, LCD driver and NX bringup on the
@@ -1010,23 +1010,23 @@ This is the 45th release of NuttX.  The release extends the support for the STMi
 STM32 microcontroller.  Minimal support for the STM3210E-EVAL development board based
 around the STM32F103ZET6 MCU was released in NuttX-0.4.12.  This release adds:
 
-	* A simple interface definition to support some FLASH, EEPROM, NVRAM, etc. devices.
-	* Verified SPI operation using driver for SPI based FLASH parts M25P64 and M25P128.
-	* Improved Cortex-M3 context switching.  This should improve context switching
-	  performance be 2x in certain cases.
-	* Added a USB device-side driver for the STM32.  This is an early release of a
-	  very complex driver; some bugs are expected.  
-	* The USB driver has been verified against the USB serial device class driver.
-	  There is at least one known outstanding issue (see the full bug description in
-	  the TODO list).
+    * A simple interface definition to support some FLASH, EEPROM, NVRAM, etc. devices.
+    * Verified SPI operation using driver for SPI based FLASH parts M25P64 and M25P128.
+    * Improved Cortex-M3 context switching.  This should improve context switching
+      performance be 2x in certain cases.
+    * Added a USB device-side driver for the STM32.  This is an early release of a
+      very complex driver; some bugs are expected.  
+    * The USB driver has been verified against the USB serial device class driver.
+      There is at least one known outstanding issue (see the full bug description in
+      the TODO list).
 
 This release also corrects some important bugs in the early STM32 release:
 
-	* Fixed several errors the prevented operation of NuttX on an STM32 development
-	  board using USART2 as the serial console.
-	* Fixed and optimization-dependent race condition in the clock initialization.
-	* Fixed a critical bug in the interrupt control logic that could cause interrupt
-	  operations to failed used for interrupts in a certain range.
+    * Fixed several errors the prevented operation of NuttX on an STM32 development
+      board using USART2 as the serial console.
+    * Fixed and optimization-dependent race condition in the clock initialization.
+    * Fixed a critical bug in the interrupt control logic that could cause interrupt
+      operations to failed used for interrupts in a certain range.
 
 This tarball contains a complete CVS snapshot from November 4, 2009
 
@@ -1040,28 +1040,28 @@ to include initial USB support.  This completes the STM32F103ZET6 and adds:
 
 New Generic RTOS Features:
 
-	* Added generic support that can be included in any block driver to provide
-	  read-ahead buffering and write buffering for improved driver performance.
-	* Added a generic worker thread that can used to defer processing from an
-	  interrupt to a task.
-	* Defined a generic SD/SDIO interface can can be bound to a MMC/SD or SDIO
-	  driver to orovide SDIO support.
-	* Implemented a an SDIO-based MMC/SD driver using this new SDIO interface
+    * Added generic support that can be included in any block driver to provide
+      read-ahead buffering and write buffering for improved driver performance.
+    * Added a generic worker thread that can used to defer processing from an
+      interrupt to a task.
+    * Defined a generic SD/SDIO interface can can be bound to a MMC/SD or SDIO
+      driver to orovide SDIO support.
+    * Implemented a an SDIO-based MMC/SD driver using this new SDIO interface
 
 New STM32 Features:
 
-	* Add support to configure an STM32 input GPIO to generate an EXTI interrupt.
-	* Added support for buttons on the STM3210E-EVAL board.
-	* Implemented an STM32 version of the common the SDIO interface.
-	* Added a configuration to exercise the STM32 with the USB mass storage
-	  device class example.
+    * Add support to configure an STM32 input GPIO to generate an EXTI interrupt.
+    * Added support for buttons on the STM3210E-EVAL board.
+    * Implemented an STM32 version of the common the SDIO interface.
+    * Added a configuration to exercise the STM32 with the USB mass storage
+      device class example.
 
 This release also corrects some important bugs in the early STM32 release:
 
-	* Correct error handling in the mount() logic.
-	* Fixed several STM32 DMA-related issues. Integrated and debugged STM32 DMA
-	  functionality that was added in 0.4.12.
-	* Fixed several bugs in the STM32 USB device-side driver.
+    * Correct error handling in the mount() logic.
+    * Fixed several STM32 DMA-related issues. Integrated and debugged STM32 DMA
+      functionality that was added in 0.4.12.
+    * Fixed several bugs in the STM32 USB device-side driver.
 
 NOTE:  This version, 4.14, is equivalent to what would have been called 0.4.14
 to follow 0.4.13.  The zero has been eliminated from the front of the version
@@ -1437,62 +1437,62 @@ nuttx-5.12
 
 This is the 59th release of NuttX.  This is a critical bugfix release.
 
-	* Fixed an important error in the signal trampoline logic.  Essentially,
-	  interrupts are re-enabled while the signal handler executes, but the
-	  logic to re-disable the interrupts before returning from the signal
-	  handler trampoline was missing.  Under certain circumstances, this
-	  can cause stack corruption.  This was discovered by David Hewson on
-	  an ARM9 platform, but since the code has been leveraged, the bug has
-	  been propogated from ARM to Cortex-M3, AVR32, M16C, SH1, ZNEO, eZ80,
-	  Z8, and Z80 -- almost every architecture. The correction has been
-	  incorporated for all architectures but only verified on a few.
+    * Fixed an important error in the signal trampoline logic.  Essentially,
+      interrupts are re-enabled while the signal handler executes, but the
+      logic to re-disable the interrupts before returning from the signal
+      handler trampoline was missing.  Under certain circumstances, this
+      can cause stack corruption.  This was discovered by David Hewson on
+      an ARM9 platform, but since the code has been leveraged, the bug has
+      been propogated from ARM to Cortex-M3, AVR32, M16C, SH1, ZNEO, eZ80,
+      Z8, and Z80 -- almost every architecture. The correction has been
+      incorporated for all architectures but only verified on a few.
 
 Other notable changes in NuttX-5.12:
 
-	* A complete port for the AVR32 (AT32UC3B0256) is incorporated in the
-	  source tree.  Testing of this port is underway now.  This release
-	  was made before verifying this port in order to get the important
-	  bugfix in place.
-	* Other miscellaneous bugfix and enhancements as noted in the ChangeLog.
+    * A complete port for the AVR32 (AT32UC3B0256) is incorporated in the
+      source tree.  Testing of this port is underway now.  This release
+      was made before verifying this port in order to get the important
+      bugfix in place.
+    * Other miscellaneous bugfix and enhancements as noted in the ChangeLog.
 
 nuttx-5.13
 ^^^^^^^^^^
 
 This is the 60th release of NuttX.  Headlines for this release include:
 
-	* AVR32, www.mcuzone.com AVR32DEV1
+    * AVR32, www.mcuzone.com AVR32DEV1
 
-	  The port for the www.mcuzone.com AVRDEV1 board based on the Atmel
-	  AT32UC3B0256 MCU was (almost) fully integrated. The port now
-	  successfully passes the NuttX OS test (examples/ostest).  A
+      The port for the www.mcuzone.com AVRDEV1 board based on the Atmel
+      AT32UC3B0256 MCU was (almost) fully integrated. The port now
+      successfully passes the NuttX OS test (examples/ostest).  A
       NuttShell (NSH) configuration is in place (see the NSH User Guide at
-	  http://www.nuttx.org/NuttShell.html). Testing of that NSH
-	  configuration, however, has been postponed (because it got bumped
-	  by the Olimex LPC1766-STK port -- see below)
+      http://www.nuttx.org/NuttShell.html). Testing of that NSH
+      configuration, however, has been postponed (because it got bumped
+      by the Olimex LPC1766-STK port -- see below)
 
-	  Current Status: I think I have a hardware problem with my serial
-	  port setup. There is a good chance that the NSH port is complete
-	  and functional, but I am not yet able to demonstrate that. At
-	  present, I get nothing coming in the serial RXD line (probably
-	  because the pins are configured wrong or I have the MAX232
-	  connected wrong).
+      Current Status: I think I have a hardware problem with my serial
+      port setup. There is a good chance that the NSH port is complete
+      and functional, but I am not yet able to demonstrate that. At
+      present, I get nothing coming in the serial RXD line (probably
+      because the pins are configured wrong or I have the MAX232
+      connected wrong).
 
       A complete port will include drivers for additional AVR32 UC3
-	  devices -- like SPI and USB --- and will be available in a later
-	  release, time permitting.
+      devices -- like SPI and USB --- and will be available in a later
+      release, time permitting.
 
-	* LPC1766, Olimex LPC1766-STK
+    * LPC1766, Olimex LPC1766-STK
 
-	  Support for the Olimex-LPC1766 is newly added to NuttX and is
-	  still undergoing development, test, and integration. Verified
-	  configurations for the NuttX OS test and for the NuttShell (NSH,
-	  see the NSH User Guide at http://www.nuttx.org/NuttShell.html.
-	  Additional USB configurations are in the release as well, but
-	  they have not yet been verified.  Goals for NuttX-5.14 include:
-	  (1) An Ethernet driver, (2) Verified USB support, and (3) SD
-	  card support.
+      Support for the Olimex-LPC1766 is newly added to NuttX and is
+      still undergoing development, test, and integration. Verified
+      configurations for the NuttX OS test and for the NuttShell (NSH,
+      see the NSH User Guide at http://www.nuttx.org/NuttShell.html.
+      Additional USB configurations are in the release as well, but
+      they have not yet been verified.  Goals for NuttX-5.14 include:
+      (1) An Ethernet driver, (2) Verified USB support, and (3) SD
+      card support.
 
-	* Additional changes and bugfixes as detailed in the ChangeLog.
+    * Additional changes and bugfixes as detailed in the ChangeLog.
 
 nuttx-5.14
 ^^^^^^^^^^
@@ -1503,26 +1503,26 @@ the NXP LPC1766.
 
 Important bugfixes include:
 
-	* Cortex-M3 Hard Fault.  Fixed a hard fault problem that can occur if certain
-	  types of interrupts are pending at the time another interrupt returns. This
-	  problem has only been observed on the LPC1766 (returning from a SYSTICK
-	  interrupt with a pending Ethernet interrupt).  However, it is assumed that
-	  all Cortex-M3 ports could have this as a latent bug.
+    * Cortex-M3 Hard Fault.  Fixed a hard fault problem that can occur if certain
+      types of interrupts are pending at the time another interrupt returns. This
+      problem has only been observed on the LPC1766 (returning from a SYSTICK
+      interrupt with a pending Ethernet interrupt).  However, it is assumed that
+      all Cortex-M3 ports could have this as a latent bug.
 
-	* TCP/IP Sequence Number Bug.  Corrected errors some important logic in the way
-	  that sequence numbers are managed when send() sends out packets before a
-	  previous packet has been acknowledged.  Some of that send() logic was incompatible
-	  with logic in the uIP layer.  Errors seen include: (1) The final final packet
-	  in a sequence of packets might be too large!  In the THTTPD example, this
-	  might leave some garbage at the bottom of the display. Or (2) send() might hang
-	  with outstanding, unacknowledged data (and with no re-transmission requests).
-	  This was due to differences in sequence number handling in send() and in
-	  uip_tcpinput.c; uip_tcpinput.c thought (incorrectly) that all of the bytes
-	  were acknowledged; send.c knew that they were not.
+    * TCP/IP Sequence Number Bug.  Corrected errors some important logic in the way
+      that sequence numbers are managed when send() sends out packets before a
+      previous packet has been acknowledged.  Some of that send() logic was incompatible
+      with logic in the uIP layer.  Errors seen include: (1) The final final packet
+      in a sequence of packets might be too large!  In the THTTPD example, this
+      might leave some garbage at the bottom of the display. Or (2) send() might hang
+      with outstanding, unacknowledged data (and with no re-transmission requests).
+      This was due to differences in sequence number handling in send() and in
+      uip_tcpinput.c; uip_tcpinput.c thought (incorrectly) that all of the bytes
+      were acknowledged; send.c knew that they were not.
 
-	* One-Shot POSIX Timer Bug. Fixed an error in set-up of a one-shot POSIX timer.
-	  It was using the repititive timer value (which is zero in the one-shot case),
-	  always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
+    * One-Shot POSIX Timer Bug. Fixed an error in set-up of a one-shot POSIX timer.
+      It was using the repititive timer value (which is zero in the one-shot case),
+      always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
 
 Additional support has been included for the Olimex-LPC1766.  Support for that board
 was added to NuttX 5.13.  This release extends that support with an Ethernet driver.
@@ -1542,36 +1542,36 @@ for the Olimex LPC1766-STK board.
 
 Important bugfxes included:
 
-	* Additional fixes needed with the TCP sequence number problem "fixed" in
-	  nuttx-5.14.
-	* In the send() logic, now checks if the destination IP address is in the
-	  ARP table before sending the packet; an ARP request will go out instead.
-	  This improves behavior, for example, on the first on the first GET request
-	  from a browser
-	* All USB class drivers need to call DEV_CONNECT() when they are ready to
-	  be enumerated.  That is, (1) initially when bound to the USB driver, and
-	  (2) after a USB reset.
-	* The SPI_SETBITS macro was calling the SPI setmode method.
-	* And several other bug fixes of lower criticality (see the ChangeLog for
-	  details).
+    * Additional fixes needed with the TCP sequence number problem "fixed" in
+      nuttx-5.14.
+    * In the send() logic, now checks if the destination IP address is in the
+      ARP table before sending the packet; an ARP request will go out instead.
+      This improves behavior, for example, on the first on the first GET request
+      from a browser
+    * All USB class drivers need to call DEV_CONNECT() when they are ready to
+      be enumerated.  That is, (1) initially when bound to the USB driver, and
+      (2) after a USB reset.
+    * The SPI_SETBITS macro was calling the SPI setmode method.
+    * And several other bug fixes of lower criticality (see the ChangeLog for
+      details).
 
 And feature enhancements:
 
-	* The LPC176x Ethernet driver was using all of AHB SRAM Bank0 for Ethernet
-	  packet buffers (16Kb).  An option was added to limit the amount of SRAM
-	  used for packet buffering and to re-use any extra Bank0 memory for heap.
-	* Enabled networking and SD/MMC card support in the Olimex LPC1766-STK
-	  NuttShell (NSH) configuration.
-	* The LPC176x USB driver is now fully fully functional.
-	* Added an optional cmddata() method to the SPI interface.  Some devices
-	  require an additional out-of-band bit to specify if the next word sent
-	  to the device is a command or data. The cmddata method provides selection
-	  of command or data.
-	* A driver for the Nokia 6100 LCD (with either the Phillips PCF8833 LCD
-	  controller and for the Epson S1D15G10 LCD controller) and an NX graphics
-	  configuration for the Olimex LPC1766-STK have been added.  However,
-	  neither the LCD driver nor the NX configuration have been verified
-	  as of the this release.
+    * The LPC176x Ethernet driver was using all of AHB SRAM Bank0 for Ethernet
+      packet buffers (16Kb).  An option was added to limit the amount of SRAM
+      used for packet buffering and to re-use any extra Bank0 memory for heap.
+    * Enabled networking and SD/MMC card support in the Olimex LPC1766-STK
+      NuttShell (NSH) configuration.
+    * The LPC176x USB driver is now fully fully functional.
+    * Added an optional cmddata() method to the SPI interface.  Some devices
+      require an additional out-of-band bit to specify if the next word sent
+      to the device is a command or data. The cmddata method provides selection
+      of command or data.
+    * A driver for the Nokia 6100 LCD (with either the Phillips PCF8833 LCD
+      controller and for the Epson S1D15G10 LCD controller) and an NX graphics
+      configuration for the Olimex LPC1766-STK have been added.  However,
+      neither the LCD driver nor the NX configuration have been verified
+      as of the this release.
 
 nuttx-5.16
 ^^^^^^^^^^
@@ -1694,3 +1694,39 @@ identified in the ChangeLog.  Headlines would include:
     * Incorporated the LUFA HID parser.
     * Various bugfix as detailed in the ChangeLog
 
+nuttx-5.18
+^^^^^^^^^^
+
+The 66th release of NuttX, Version 5.19, was made on March 12, 2011 and is
+available for download from the SourceForge website.  This release includes
+several new features in various states of integration and maturity:
+
+    * 486SX QEMU port.  This port supports the Intel 486SX architecture using
+      the QEMU simulator.  Initial functionality is in place a partially
+      tested.  There are still some outstanding issues with timer interrupts.
+    * Platform specific application support.  A new apps/ directory appears in
+      this port.  This apps/ directory provides a mechanism for applications
+      using NuttX to have a highly customizable initialization process. It
+      supports a set of end-user applications than can be executed (1) standalone
+      so you can have a fully customizable application startup, or (2) on top of
+      NSH.  Think of it this way:  In a buckled-up embedded application, your
+      end-user programs will probably have their own dedicated start-up logic.
+      But, during development, you might want to have you applications
+      available and executable from the NSH command line.  This apps/ add-on
+      (and NSH hooks) was contributed by Uros to accomplish just that.
+    * NSH was also extended to support application specific ROMFS
+      /etc/init.d/rcS start-up scripts.  This feature, as well, as all of the
+      above-mentioned apps/ directory support was contributed by Uros Platise
+    * Additional NSH improvements and bug fixes.  See the Changelog for
+      details.
+    * This release also provides a new SLIP network driver.  This driver
+      should support point-to-point network communications to a host using
+      TCP/IP or UDP.  This driver is code complete, but not tested in this
+      release.
+    * New RAMTRON FRAM driver (contributed by Uros Platise)
+    * New generic 16550 UART driver.
+    * Cortex-M3 Power improvements: Waits for Interrupt (WFI) in idle loop
+      for reduced power consumption (LPC17xx and STM32 only - contributed by
+      Uros Platise))
+    * New waitpid() system interface.
+    * Additional bugfixes: pipes, stdint.h, STM32 SDIO and SPI drivers
