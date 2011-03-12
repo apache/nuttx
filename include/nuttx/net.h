@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/net.h
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -206,6 +206,13 @@ EXTERN int netdev_register(FAR struct uip_driver_s *dev);
 /* Enumerates all registered network devices */
 
 EXTERN int netdev_foreach(netdev_callback_t callback, void *arg);
+
+/* drivers/net/slip.c ******************************************************/
+/* Instantiate a SLIP network interface. */
+
+#ifdef CONFIG_NET_SLIP
+EXTERN int slip_initialize(int intf, const char *devname);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

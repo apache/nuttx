@@ -46,5 +46,8 @@ endif
 ifeq ($(CONFIG_NET_ENC28J60),y)
 NET_CSRCS  += enc28j60.c
 endif
+ifeq ($(CONFIG_NET_SLIP),y)
+NET_CSRCS  += slip.c
+endif
 endif
 

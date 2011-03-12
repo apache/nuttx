@@ -118,8 +118,8 @@ typedef enum tstate_e tstate_t;
 
 typedef void (*start_t)(void);
 
-/* This is the entry point into the main thread of the task
- * or into a created pthread within the task.
+/* This is the entry point into the main thread of the task or into a created
+ * pthread within the task.
  */
 
 union entry_u
@@ -129,17 +129,20 @@ union entry_u
 };
 typedef union entry_u entry_t;
 
-/* This is the type of the function that is executed with
- * exit() is called (if registered via atexit()).
+/* This is the type of the function that is executed with exit() is called
+ * (if registered via atexit()).
  */
 
+#ifdef CONFIG_SCHED_ATEXT
 typedef void (*exitfunc_t)(void);
+#endif
 
 /* POSIX Message queue */
 
 typedef struct msgq_s msgq_t;
 
 /* The structure used to maintain environment variables */
+
 #ifndef CONFIG_DISABLE_ENVIRON
 struct environ_s
 {
@@ -177,7 +180,9 @@ struct _TCB
   pid_t    pid;                          /* This is the ID of the thread        */
   start_t  start;                        /* Thread start function               */
   entry_t  entry;                        /* Entry Point into the thread         */
+#ifdef CONFIG_SCHED_ATEXT
   exitfunc_t exitfunc;                   /* Called if exit is called.           */
+#endif
 #ifdef CONFIG_SCHED_WAITPID /* Experimental */
   sem_t    exitsem;                      /* Support for waitpid                 */
   int     *stat_loc;                     /* Location to return exit status      */

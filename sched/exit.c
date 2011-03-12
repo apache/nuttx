@@ -130,11 +130,13 @@ void exit(int status)
 
   /* If an exit function was registered, call it now. */
 
-  if (tcb->exitfunc) {
+#ifdef CONFIG_SCHED_ATEXT
+  if (tcb->exitfunc)
+    {
+      (*tcb->exitfunc)();
+    }
+#endif
 
-    (*tcb->exitfunc)();
-
-  } /* end if */
   /* Then "really" exit */
 
   _exit(status);

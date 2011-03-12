@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/atexit.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,19 @@
  * Included Files
  ************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
 #include <debug.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
+
 #include "os_internal.h"
+
+#ifdef CONFIG_SCHED_ATEXT
 
 /************************************************************************
  * Definitions
@@ -83,7 +89,7 @@
  *   func
  *
  * Return Value:
- *   zero on success.
+ *   Zero on success. Non-zero on failure.
  *
  ************************************************************************/
 
@@ -92,11 +98,19 @@ int atexit(void (*func)(void))
   _TCB *tcb = (_TCB*)g_readytorun.head;
   int   ret = ERROR;
 
-  if ((func) && (!tcb->exitfunc))
+  /* The following must be atomic */
+
+  sched_lock();
+  if (func && !tcb->exitfunc)
     {
       tcb->exitfunc = func;
       ret = OK;
     }
+
+  sched_unlock();
   return ret;
 }
+
+#endif /* CONFIG_SCHED_ATEXT */
+
 
