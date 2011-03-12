@@ -72,7 +72,7 @@
 /* Configuration ************************************************************/
 
 #if UIP_LLH_LEN > 0
-#  error "CONFIG_NET_LLH_LEN must be set to zero"
+#  error "UIP_LLH_LEN must be set to zero"
 #endif
 
 #ifndef CONFIG_SLIP_STACKSIZE

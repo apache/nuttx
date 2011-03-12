@@ -1,7 +1,7 @@
 ############################################################################
 # net/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,9 +46,12 @@ SOCK_CSRCS	+= send.c listen.c accept.c
 endif
 
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
-SOCK_CSRCS      += setsockopt.c getsockopt.c 
+SOCK_CSRCS	+= setsockopt.c getsockopt.c 
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-SOCK_CSRCS	+= net_timeo.c net_dsec2timeval.c net_timeval2dsec.c net_arptimer.c
+SOCK_CSRCS	+= net_timeo.c net_dsec2timeval.c net_timeval2dsec.c
+ifneq ($(CONFIG_NET_SLIP),y)
+SOCK_CSRCS	+= net_arptimer.c
+endif
 endif
 endif
 

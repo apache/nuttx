@@ -40,14 +40,22 @@ ifeq ($(CONFIG_NET),y)
 
 # Common IP source files
 
-UIP_CSRCS += uip_initialize.c uip_setipid.c uip_arp.c uip_arptab.c uip_input.c \
-	     uip_send.c uip_poll.c uip_chksum.c uip_callback.c
+UIP_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c \
+	     uip_poll.c uip_chksum.c uip_callback.c
+
+# ARP supported is not provided for SLIP (Ethernet only)
+
+ifneq ($(CONFIG_NET_SLIP),y)
+UIP_CSRCS += uip_arp.c uip_arptab.c
+endif
+
+# IPv6-specific logic
 
 ifeq ($(CONFIG_NET_IPv6),y)
 UIP_CSRCS += uip_neighbor.c
 endif
 
-# TCP source files
+# TCP/IP source files
 
 ifeq ($(CONFIG_NET_TCP),y)
 

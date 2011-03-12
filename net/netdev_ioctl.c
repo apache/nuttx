@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev_ioctl.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -205,6 +205,9 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd, struct ifreq *req)
         req->ifr_mtu = CONFIG_NET_BUFSIZE;
         break;
 
+      /* MAC address operations only make sense if Ethernet is supported */
+
+#ifdef CONFIG_NET_ETHERNET
       case SIOCGIFHWADDR:  /* Get hardware address */
         req->ifr_hwaddr.sa_family = AF_INETX;
         memcpy(req->ifr_hwaddr.sa_data, dev->d_mac.ether_addr_octet, IFHWADDRLEN);
@@ -214,6 +217,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd, struct ifreq *req)
         req->ifr_hwaddr.sa_family = AF_INETX;
         memcpy(dev->d_mac.ether_addr_octet, req->ifr_hwaddr.sa_data, IFHWADDRLEN);
         break;
+#endif
 
       case SIOCDIFADDR:  /* Delete IP address */
         ioctl_ifdown(dev);

@@ -20,7 +20,7 @@ configure.sh
 mkconfig.c
 
   This is C file that is used to build mkconfig program.  The mkconfig
-  program is used during the intial NuttX build.
+  program is used during the initial NuttX build.
 
   When you configure NuttX, you will copy a configuration file called .config
   into the top level NuttX directory (See configs/README.txt or
@@ -113,6 +113,6 @@ indent.sh
 
 zipme.sh
 
-  I use this script to create the nutt-xx.yy.tar.gz tarballs for
+  I use this script to create the nuttx-xx.yy.tar.gz tarballs for
   release on SourceForge.  It is handy because it also does the
   kind of clean that you need to do to make a clean code release.

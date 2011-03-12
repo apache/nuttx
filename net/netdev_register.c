@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev_register.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,12 +148,15 @@ int netdev_register(FAR struct uip_driver_s *dev)
 #endif
       netdev_semgive();
 
+#ifdef CONFIG_NET_ETHERNET
       nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
              dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
              dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
              dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
              dev->d_ifname);
-
+#else
+      nlldbg("Registered dev: %s\n", dev->d_ifname);
+#endif
       return OK;
     }
   return -EINVAL;

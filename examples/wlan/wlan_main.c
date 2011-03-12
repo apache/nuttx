@@ -178,7 +178,7 @@ int user_start(int argc, char *argv[])
     {
       /* Start a thread to handle device connection. */
 
-      printf("user_start: Start hidkbd_waiter\n");
+      printf("user_start: Start wlan_waiter\n");
 
 #ifndef CONFIG_CUSTOM_STACK
       pid = task_create("usbhost", CONFIG_EXAMPLES_WLAN_DEFPRIO,

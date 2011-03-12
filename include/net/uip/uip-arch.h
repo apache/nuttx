@@ -2,7 +2,7 @@
  * uip-arch.h
  * Defines architecture-specific device driver interfaces to uIP
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Derived largely from portions of uIP with has a similar BSD-styple license:
@@ -90,9 +90,11 @@ struct uip_driver_s
   char d_ifname[IFNAMSIZ];
 #endif
 
-  /* Device identitity */
+  /* Ethernet device identity */
 
+#ifdef CONFIG_NET_ETHERNET
   struct ether_addr d_mac;  /* Device MAC address */
+#endif
 
   /* Network identity */
 

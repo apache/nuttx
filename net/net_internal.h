@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_internal.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -200,7 +200,11 @@ EXTERN int netdev_count(void);
 
 /* net_arptimer.c ************************************************************/
 
+#ifdef CONFIG_NET_ARP
 EXTERN void arptimer_init(void);
+#else
+# define arptimer_init()
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

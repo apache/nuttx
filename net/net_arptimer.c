@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_arptimer.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,12 @@
 #include <wdog.h>
 #include <debug.h>
 
+#include <net/uip/uipopt.h>
 #include <net/uip/uip-arp.h>
 
 #include "net_internal.h"
+
+#ifdef CONFIG_NET_ARP
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -127,4 +130,5 @@ void arptimer_init(void)
  (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
 }
 
+#endif /* CONFIG_NET_ARP */
 #endif /* CONFIG_NET */

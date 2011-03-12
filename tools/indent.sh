@@ -37,9 +37,9 @@
 # This script uses the Linux 'indent' utility to re-format C source files
 # to match the coding style that I use.  It differs from my coding style in that
 #
-# - I normally put the traiing */ of a multi-line comment on a separate line,
-# - I usually align things vertically (like '='in assignments.
-# - indent puts a bogus blank line at the top of the file
+# - I normally put the trailing */ of a multi-line comment on a separate line,
+# - I usually align things vertically (like '=' in assignments),
+# - indent puts a bogus blank line at the top of the file,
 # - I don't like the way it handles nested conditional compilation intermixed with code.
 #
 
@@ -63,7 +63,7 @@ if [ -z "$infile" ]; then
 fi
 
 if [ ! -r $infile ]; then
-    echo "Readable $nfile does not exist"
+    echo "Readable $infile does not exist"
     exit 1
 fi
 

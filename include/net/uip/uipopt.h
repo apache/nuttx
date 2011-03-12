@@ -16,7 +16,7 @@
  * Note: Most of the configuration options in the uipopt.h should not
  * be changed, but rather the per-project defconfig file.
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -68,6 +68,42 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+/* Layer 2 Configuration Options ********************************************/
+
+/* The default data link layer for uIP is Ethernet.  If CONFIG_NET_SLIP is
+ * defined in the NuttX header file, then SLIP will be supported.  The basic
+ * differences between the SLIP and Ethernet configurations is that when SLIP
+ * is selected:
+ *
+ * - The link level header (that comes before the IP header) is omitted.
+ * - All MAC address processing is suppressed.
+ * - ARP is disabled.
+ *
+ * If CONFIG_NET_SLIP is not supported, then Ethernet will be used (there is
+ * no need to define anything special in the configuration file to use
+ * Ethernet -- it is the default).
+ *
+ * The "link level header" is the offset into the d_buf where the IP header
+ * can be found. For Ethernet, this should be set to 14. For SLIP, this
+ * should be set to 0.
+ */
+
+#undef CONFIG_NET_ETHERNET
+#undef CONFIG_NET_ARP
+
+#ifdef CONFIG_NET_SLIP
+#  ifdef CONFIG_NET_IPv6
+#    error "SLIP is not implemented for IPv6"
+#  endif
+#  define UIP_LLH_LEN         0
+#else
+#  define CONFIG_NET_ETHERNET 1
+#  define CONFIG_NET_ARP      1
+#  define UIP_LLH_LEN         14
+#endif
+
+/* Layer 3/4 Configuration Options ******************************************/
 
 /* IP configuration options */
 
@@ -249,19 +285,6 @@
 
 #ifndef CONFIG_NET_TCP_READAHEAD_BUFSIZE
 # define CONFIG_NET_TCP_READAHEAD_BUFSIZE UIP_TCP_MSS
-#endif
-
-/* The link level header length.
- *
- * This is the offset into the d_buf where the IP header can be
- * found. For Ethernet, this should be set to 14. For SLIP, this
- * should be set to 0.
- */
-
-#ifdef CONFIG_NET_LLH_LEN
-# define UIP_LLH_LEN CONFIG_NET_LLH_LEN
-#else
-# define UIP_LLH_LEN 14
 #endif
 
 /****************************************************************************

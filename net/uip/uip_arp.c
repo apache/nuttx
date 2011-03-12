@@ -2,7 +2,7 @@
  * net/uip/uip_arp.c
  * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -61,9 +61,13 @@
 #include <debug.h>
 
 #include <netinet/in.h>
+
 #include <net/ethernet.h>
+#include <net/uip/uipopt.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip-arp.h>
+
+#ifdef CONFIG_NET_ARP
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -422,4 +426,6 @@ void uip_arp_out(struct uip_driver_s *dev)
   peth->type  = HTONS(UIP_ETHTYPE_IP);
   dev->d_len += UIP_LLH_LEN;
 }
+
+#endif /* CONFIG_NET_ARP */
 #endif /* CONFIG_NET */

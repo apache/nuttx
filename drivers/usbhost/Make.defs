@@ -39,7 +39,7 @@ USBHOST_CSRCS  = hid_parser.c
 ifeq ($(CONFIG_USBHOST),y)
 USBHOST_CSRCS  += usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
 USBHOST_CSRCS  += usbhost_enumerate.c usbhost_storage.c usbhost_hidkbd.c
-#ifeq ($(CONFIG_NET),y)
-USBHOST_CSRCS  += usbhost_rtl8187.c
-#endif
+ifeq ($(CONFIG_NET),y)
+  USBHOST_CSRCS  += usbhost_rtl8187.c
+endif
 endif

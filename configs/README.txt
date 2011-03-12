@@ -625,11 +625,10 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_RECEIVE_WINDOW - The size of the advertised receiver's
 		  window
 		CONFIG_NET_ARPTAB_SIZE - The size of the ARP table
-        CONFIG_NET_ARP_IPIN - Harvest IP/MAC address mappings from the ARP table
-          from incoming IP packets.
+		CONFIG_NET_ARP_IPIN - Harvest IP/MAC address mappings from the ARP table
+		  from incoming IP packets.
 		CONFIG_NET_BROADCAST - Incoming UDP broadcast support
 		CONFIG_NET_MULTICAST - Outgoing multi-cast address support
-		CONFIG_NET_LLH_LEN - The link level header length
 		CONFIG_NET_FWCACHE_SIZE - number of packets to remember when
 		  looking for duplicates
 

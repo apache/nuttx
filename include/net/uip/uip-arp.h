@@ -2,7 +2,7 @@
  * include/net/uip/uip-arch.h
  * Macros and definitions for the ARP module.
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Derived from uIP with has a similar BSD-styple license:
@@ -49,7 +49,9 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+
 #include <net/ethernet.h>
+#include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
 
 /****************************************************************************
@@ -102,6 +104,7 @@ extern "C" {
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_NET_ARP
 /****************************************************************************
  * Name: uip_arp_init
  *
@@ -235,6 +238,21 @@ EXTERN struct arp_entry *uip_arp_find(in_addr_t ipaddr);
       tabptr->at_ipaddr = 0; \
     } \
 }
+
+#else /* CONFIG_NET_ARP */
+
+/* If ARP is disabled, stub out all ARP interfaces */
+
+# define uip_arp_init()
+# define uip_arp_ipin(dev)
+# define uip_arp_arpin(dev)
+# define uip_arp_out(dev)
+# define uip_arp_timer()
+# define uip_arp_update(pipaddr,ethaddr)
+# define uip_arp_find(ipaddr) NULL
+# define uip_arp_delete(ipaddr)
+
+#endif /* CONFIG_NET_ARP */
 
 #undef EXTERN
 #ifdef __cplusplus

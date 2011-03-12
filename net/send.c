@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/send.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -277,6 +277,7 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
        * should already be in the ARP table.
        */
 
+#ifdef CONFIG_NET_ETHERNET
 #ifndef CONFIG_NET_ARP_IPIN
       if (pstate->snd_sent != 0 || uip_arp_find(conn->ripaddr) != NULL)
 #endif
@@ -293,6 +294,7 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
           pstate->snd_time = g_system_timer;
 #endif
         }
+#endif /* CONFIG_NET_ETHERNET */
     }
 
   /* All data has been send and we are just waiting for ACK or re-transmit

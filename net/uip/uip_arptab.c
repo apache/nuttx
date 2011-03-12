@@ -2,7 +2,7 @@
  * net/uip/uip_arptab.c
  * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based originally on uIP which also has a BSD style license:
@@ -51,9 +51,13 @@
 #include <debug.h>
 
 #include <netinet/in.h>
+
 #include <net/ethernet.h>
+#include <net/uip/uipopt.h>
 #include <net/uip/uip-arch.h>
 #include <net/uip/uip-arp.h>
+
+#ifdef CONFIG_NET_ARP
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -249,4 +253,5 @@ struct arp_entry *uip_arp_find(in_addr_t ipaddr)
   return NULL;
 }
 
+#endif /* CONFIG_NET_ARP */
 #endif /* CONFIG_NET */
