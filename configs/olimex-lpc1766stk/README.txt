@@ -800,6 +800,12 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
+  slip-httpd:
+    This configuration is identical to the thttpd configuration except that
+    it uses the SLIP data link layer via a serial driver instead of the
+    Ethernet data link layer.  The Ethernet driver is disabled; SLIP IP
+    packets are exchanged on UART1; UART0 is still the serial console.
+
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
     the examples/thttpd application.
