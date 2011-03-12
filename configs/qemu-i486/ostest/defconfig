@@ -312,8 +312,8 @@ CONFIG_FS_ROMFS=n
 # CONFIG_NET_RECEIVE_WINDOW - The size of the advertised receiver's window
 # CONFIG_NET_ARPTAB_SIZE - The size of the ARP table
 # CONFIG_NET_BROADCAST - Broadcast support
-# CONFIG_NET_LLH_LEN - The link level header length
 # CONFIG_NET_FWCACHE_SIZE - number of packets to remember when looking for duplicates
+#
 CONFIG_NET=n
 CONFIG_NET_IPv6=n
 CONFIG_NSOCKET_DESCRIPTORS=0
@@ -332,7 +332,6 @@ CONFIG_NET_STATISTICS=y
 #CONFIG_NET_RECEIVE_WINDOW=
 #CONFIG_NET_ARPTAB_SIZE=8
 CONFIG_NET_BROADCAST=n
-#CONFIG_NET_LLH_LEN=14
 #CONFIG_NET_FWCACHE_SIZE=2
 
 #
