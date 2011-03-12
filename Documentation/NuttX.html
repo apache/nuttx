@@ -807,41 +807,75 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.18 Release Notes</b>:
+<p><b>nuttx-5.19 Release Notes</b>:
 
 <p>
-  The 65<sup>th</sup> release of NuttX, Version 5.18, was made on February 27, 2011 and is available for download from the
+  The 66<sup>th</sup> release of NuttX, Version 5.19, was made on March 12, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This is first release from the new NuttX SVN repository.
-  This release is made primarily to keep the release tarball in synchronization with SVN.
-  Many smaller changes have been made as identified in the ChangeLog.
-  Headlines would include:
+  This release includes several new features in various states of integration and maturity:
 </p>
 <ul>
-  <li>
-    Incorporate several important uIP patches -- including the well known patch to handle missing SYNACK.
+
   </li>
   <li>
-    The Freescale mc8s12ne64 port is code complete but testing has not yet begun due to toolchain issues.
-    Added support for the Future Electronics Group NE64 Badge board.
+    <b>486SX QEMU port</b>.
+    This port supports the Intel 486SX architecture using the QEMU simulator.
+    Initial functionality is in place a partially tested.
+    There are still some outstanding issues with timer interrupts.
+    A large part of the i486 logic was contributed by Biff of
+    <a href="http://bifferos.bizhat.com">Bifferboard</a> fame.
   </li>
   <li>
-    Added support for a new STM32 board, the ISOTEL NetClamps VSN V1.2 ready2go sensor network platform.
-    This board is based on a STM32F103RET6 and includes some interesting power saving/clock control extensions.
+    <b>Platform specific application support</b>.
+    A new <code>apps/</code> directory appears in this port.
+    This <code>apps/</code> directory provides a mechanism for applications using NuttX to have a highly customizable initialization process.
+    It supports a set of end-user applications than can be executed
+    (1) standalone so you can have a fully customizable application startup, or
+    (2) on top of NSH.
+    Think of it this way:
+    In a buckled-up embedded application, your end-user programs will probably have their own dedicated start-up logic.
+    But, during development, you might want to have you applications available and executable from the NSH command line.
+    This <code>apps/</code> add-on (and NSH hooks) was contributed by Uros Platise to accomplish just that.
   </li>
   <li>
-    USB host support expanded to handle vendor specific USB devices.
+    <b>Custom NSH <code>/etc/init.d/rcS</code> File</b>.
+    NSH was also extended to support application specific ROMFS <code>/etc/init.d/rcS</code> start-up scripts.
+    This feature, as well, as all of the above-mentioned <code>apps/</code> directory support was contributed by Uros Platise
   </li>
   <li>
-    Incorporated the LUFA HID parser.
+    Additional NSH improvements and bug fixes.  See the Changelog for details.
   </li>
   <li>
-    Various bugfix as detailed in the ChangeLog
+    <b>SLIP</b>.
+    This release also provides a new SLIP network driver.
+    This driver should support point-to-point network communications to a host using TCP/IP or UDP.
+    This driver is code complete, but not tested in this release.
+  </li>
+  <li>
+    <b>RAMTROM FRAM Driver</b>.
+    New RAMTRON FRAM driver (contributed by Uros Platise)
+  </li>
+  <li>
+    <b>16550 UART Driver</b>.
+    New generic 16550 UART driver.
+  </li>
+  <li>
+    <b>Cortex-M3 Power improvements</b>.
+    The Cortex-M3 can now waits for Interrupt (WFI) in idle loop for reduced power consumption
+    (LPC17xx and STM32 only - contributed by Uros Platise))
+  </li>
+  <li>
+    <b><code>waitpid()</code></b>.
+    New <code>waitpid()</code> system interface.
+  </li>
+  <li>
+    <b>Bugfixes</b>.
+    Additional bugfixes: pipes, stdint.h, STM32 SDIO and SPI drivers
   </li>
 </ul>
 
@@ -2040,78 +2074,6 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.18 2011-02-27 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Incorporate several uIP patches from http://gitweb.aeruder.net/?p=uip.git;a=summary.
-      - Lost SYNACK causes connection reset
-      - Fix missing UDP stats for sent/received packets
-      - Added support for Cygwin as development/test platform.
-    * configs/demo9s12ne64 - Integrate new buildroot-1.9 m8s12x toolchain.
-    * 'uname -o' is used throughout the build logic in bash scripts and also in
-      Make.defs files in order to distinguish between Cygwin and Linux.  However,
-      the -o option is not standard and is not supported under, for example, OS-X or
-      Solaris.  This was solved by changing all 'uname -o' references to the more
-      complex:  'uname -o 2>/dev/null || echo &quot;Other&quot;'
-    * drivers/usbhost/usbhost_enumerate.c -- Add logic to get the VID and PID.  This
-      is necessary in order to support vendor-specific USB devices.
-    * examplex/wlan, configs/olimex-lpc1766stk/wlan, drivers/usbhost/usbhost_rtl8187.c,
-      Add infrastructure to support RTL18187 wireless USB.
-    * configs/nucleus2g -- backed out USB host changes... wrong board.
-    * Renamed arc/hc/include/mc9s12ne64 and src/mc9s12ne64 -- m9s12.  That name is
-      shorter and more general.
-    * The NuttX repository has been converted to SVN and can now be found here
-      http://nuttx.svn.sourceforge.net/viewvc/nuttx/
-    * configs/mbed/hidkbd -- Added USB host support for the mbed LPC1768 board; add
-       a USB host HID keyboard configuraion.
-    * drivers/usbhost/hid_parser.c -- Leverages the LUFA HID parser written by
-      Dean Camera.
-    * examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
-      before all parameters are parsed, you can leave getopt() in a strange state.
-    * include/nuttx/fb.h -- Restore missing RGB type that was accidentally removed
-      when Nokia 6100 support was added.
-    * Rename arch/pjrc-8051 to arch/8051
-    * configs/ne64badge -- Add a configuration for the Future Electronics Group
-      NE64 Badge development board (Freescale MC9S12NE64)
-    * Changes contributed by Uros Platise:
-      - Add support for the STM32F103RET6
-      - configs/vsn - Support for the ISOTEL NetClamps VSN V1.2 ready2go sensor
-        network platform
-    * arch/hc, configs/ne64badge -- Development is complete for the Freescale
-      mc9s12ne64 on the Future Electronics Group NE64 /PoE Badge board.  Howeve,
-      this port remains untested until I figure out this BDM / Code Warrior
-      and paged build thing
-    * Added a new 'kill' command to NSH that will support sending signals to
-      running NuttX tasks.
-
-pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Updated to use standard C99 types in stdint.h and
-      stdbool.h.  This change was necessary for compatibility
-      with NuttX-5.0 (any beyond).
-
-buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
-
-    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
-    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
-      arm926
-    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
-    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
-      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
-      the build stops on the first warning.
-    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
-      patches available from http://www.msextra.com/tools courtesy of James
-      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
 nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * arch/arm/stm32/stm32_idle.c -- During idle times, the STM32 now uses the
@@ -2134,7 +2096,7 @@ nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
         nsh&gt; cat test.txt
         This is a test
 
-    * drivers/pipes/pipe_common.c --  Driver open method eas not returning an EINTR
+    * drivers/pipes/pipe_common.c --  Driver open method was not returning an EINTR
       error when it received a signal.  Instead, it just re-started the wait.  This
       makes it impossible to kill a background pipe operation from NSH.
     * include/stdint.h -- Correct some errors in conditional compilation (submitted
@@ -2183,6 +2145,37 @@ nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * drivers/net/slip.c - Add a SLIP driver (untested on initial check-in).
     * configs/olimex-lpc1766stk/slip-httpd - An example that uses SLIP to
       provide a serial-port based THTTPD web server.
+
+pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Updated to use standard C99 types in stdint.h and
+      stdbool.h.  This change was necessary for compatibility
+      with NuttX-5.0 (any beyond).
+
+buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
+
+    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
+    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
+      arm926
+    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
+    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
+      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
+      the build stops on the first warning.
+    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
+      patches available from http://www.msextra.com/tools courtesy of James
+      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<ul><pre>
+nuttx-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
