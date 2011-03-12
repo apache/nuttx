@@ -38,7 +38,7 @@
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-MISC_SRCS	= os_start.c get_errno_ptr.c sched_garbage.c \
+MISC_SRCS	= os_start.c os_bringup.c get_errno_ptr.c sched_garbage.c \
 		  sched_setupstreams.c sched_getfiles.c sched_getsockets.c sched_getstreams.c \
 		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
 		  sched_releasefiles.c

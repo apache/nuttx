@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_start.c
  * arch/arm/src/chip/stm32_start.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,8 @@
 #include "up_internal.h"
 
 #include "stm32_internal.h"
+#include "stm32_gpio.h"
+
 
 /****************************************************************************
  * Private Definitions
@@ -67,6 +69,31 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+ 
+void stm32_jtag_enable(void)
+{
+#ifdef CONFIG_STM32_JTAG_FULL_ENABLE
+
+#elif CONFIG_STM32_JTAG_NOJNTRST_ENABLE
+  uint32_t val = getreg32(STM32_AFIO_MAPR);
+  val &= 0x00FFFFFF;		// clear undefined readings ... 
+  val |= AFIO_MAPR_SWJ;		// enabled but without JNTRST
+  putreg32(val, STM32_AFIO_MAPR);
+
+#elif CONFIG_STM32_JTAG_SW_ENABLE
+  uint32_t val = getreg32(STM32_AFIO_MAPR);
+  val &= 0x00FFFFFF;		// clear undefined readings ... 
+  val |= AFIO_MAPR_SWDP;	// set JTAG-DP disabled and SW-DP enabled
+  putreg32(val, STM32_AFIO_MAPR);
+  
+#else
+  uint32_t val = getreg32(STM32_AFIO_MAPR);
+  val &= 0x00FFFFFF;		// clear undefined readings ... 
+  val |= AFIO_MAPR_DISAB;	// set JTAG-DP and SW-DP Disabled
+  putreg32(val, STM32_AFIO_MAPR);
+  
+#endif
+}
 
 /****************************************************************************
  * Name: showprogress
@@ -103,6 +130,7 @@ void __start(void)
 
   stm32_clockconfig();
   stm32_lowsetup();
+  stm32_jtag_enable();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be

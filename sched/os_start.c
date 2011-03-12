@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/os_start.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,12 +62,6 @@
 #include  "clock_internal.h"
 #include  "timer_internal.h"
 #include  "irq_internal.h"
-#ifdef CONFIG_PAGING
-# include "pg_internal.h"
-#endif
-#ifdef CONFIG_SCHED_WORKQUEUE
-# include "work_internal.h"
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -238,7 +232,6 @@ static FAR char g_idlename[] = "Idle Task";
 
 void os_start(void)
 {
-  int init_taskid;
   int i;
 
   slldbg("Entry\n");
@@ -451,51 +444,9 @@ void os_start(void)
 
   (void)sched_setupidlefiles(&g_idletcb);
 
-  /* Start the page fill worker thread that will resolve page faults.
-   * This should always be the first thread started because it may
-   * have to resolve page faults in other threads
-   */
+  /* Create initial tasks and bring-up the system */
 
-#ifdef CONFIG_PAGING
-#ifndef CONFIG_CUSTOM_STACK
-  g_pgworker = task_create("pgfill", CONFIG_PAGING_DEFPRIO,
-                           CONFIG_PAGING_STACKSIZE,
-                           (main_t)pg_worker, (const char **)NULL);
-#else
-  g_pgworker = task_create("pgfill", CONFIG_PAGING_DEFPRIO,
-                           (main_t)pg_worker, (const char **)NULL);
-#endif
-  ASSERT(g_pgworker != ERROR);
-#endif
-
-  /* Start the worker thread that will perform misc garbage clean-up */
-
-#ifdef CONFIG_SCHED_WORKQUEUE
-#ifndef CONFIG_CUSTOM_STACK
-  g_worker = task_create("work", CONFIG_SCHED_WORKPRIORITY,
-                         CONFIG_SCHED_WORKSTACKSIZE,
-                         (main_t)work_thread, (const char **)NULL);
-#else
-  g_worker = task_create("work", CONFIG_SCHED_WORKPRIORITY,
-                         (main_t)work_thread, (const char **)NULL);
-#endif
-  ASSERT(g_worker != ERROR);
-#endif
-
-  /* Once the operating system has been initialized, the system must be
-   * started by spawning the user init thread of execution.
-   */
-
-  sdbg("Starting init thread\n");
-#ifndef CONFIG_CUSTOM_STACK
-  init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
-                            CONFIG_USERMAIN_STACKSIZE,
-                            (main_t)user_start, (const char **)NULL);
-#else
-  init_taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
-                            (main_t)user_start, (const char **)NULL);
-#endif
-  ASSERT(init_taskid != ERROR);
+  (void)os_bringup();
 
   /* When control is return to this point, the system is idle. */
 

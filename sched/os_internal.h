@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/os_internal.h
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -248,6 +248,7 @@ extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
  * Public Function Prototypes
  ****************************************************************************/
 
+extern int  os_bringup(void);
 extern void task_start(void);
 extern int  task_schedsetup(FAR _TCB *tcb, int priority, start_t start,
                             main_t main);
