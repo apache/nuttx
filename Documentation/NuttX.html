@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 12, 2011</p>
+      <p>Last Updated: March 13, 2011</p>
     </td>
   </tr>
 </table>
@@ -2176,6 +2176,14 @@ buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * lib/lib_fopen() -- fopen() was not returning the correct errno value
+      when the underlying open() failed.
+    * include/net/uip/uip-arch.h -- The uIP interface has been extended
+      slightly so that drivers can be concurrenly filling and sending
+      packet buffers.  This capability was needed by the SLIP driver.
+    * drivers/net/slip.c -- Several corrections and some re-design of
+      of the driver.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

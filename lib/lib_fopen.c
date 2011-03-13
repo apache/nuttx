@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_fopen.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -251,15 +251,34 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
 
 FAR FILE *fopen(FAR const char *path, FAR const char *mode)
 {
-  FAR struct filelist   *flist = sched_getfiles();
-  FAR struct streamlist *slist = sched_getstreams();
-  int oflags = lib_mode2oflags(mode);
-  int fd     = open(path, oflags, 0666);
+  FAR FILE *ret = NULL;;
+  int oflags;
+  int fd;
 
-  FAR FILE *ret = lib_fdopen(fd, mode, flist, slist);
-  if (!ret)
+  /* Open the file */
+
+  oflags = lib_mode2oflags(mode);
+  fd = open(path, oflags, 0666);
+
+  /* If the open was successful, then fdopen() the fil using the file
+   * desciptor returned by open.  If open failed, then just return the
+   * NULL stream -- open() has already set the errno.
+   */
+
+  if (fd >= 0)
     {
-      (void)close(fd);
+      FAR struct filelist   *flist = sched_getfiles();
+      FAR struct streamlist *slist = sched_getstreams();
+
+      ret = lib_fdopen(fd, mode, flist, slist);
+      if (!ret)
+        {
+          /* Don't forget to close the file descriptor if any other
+           * failures are reported by fdopen().
+           */
+
+          (void)close(fd);
+        }
     }
   return ret;
 }

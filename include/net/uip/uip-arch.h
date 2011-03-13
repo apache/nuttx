@@ -102,33 +102,23 @@ struct uip_driver_s
   uip_ipaddr_t d_draddr;  /* Default router IP address */
   uip_ipaddr_t d_netmask; /* Network subnet mask */
 
-  /* The d_buf array is used to hold incoming and outgoing
-   * packets. The device driver should place incoming data into this
-   * buffer. When sending data, the device driver should read the link
-   * level headers and the TCP/IP headers from this buffer. The size of
-   * the link level headers is configured by the UIP_LLH_LEN define.
+  /* The d_buf array is used to hold incoming and outgoing packets. The device
+   * driver should place incoming data into this buffer. When sending data,
+   * the device driver should read the link level headers and the TCP/IP
+   * headers from this buffer. The size of the link level headers is
+   * configured by the UIP_LLH_LEN define.
    *
-   * Note: The application data need not be placed in this buffer, so
-   * the device driver must read it from the place pointed to by the
-   * d_appdata pointer as illustrated by the following example:
-   *
-   *    void
-   *    devicedriver_send(void)
-   *    {
-   *      hwsend(&dev->d_buf[0], UIP_LLH_LEN);
-   *      if(dev->d_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN)
-   *        {
-   *          hwsend(&dev->d_buf[UIP_LLH_LEN], dev->d_len - UIP_LLH_LEN);
-   *        }
-   *      else
-   *        {
-   *          hwsend(&dev->d_buf[UIP_LLH_LEN], UIP_TCPIP_HLEN);
-   *          hwsend(dev->d_appdata, dev->d_len - UIP_TCPIP_HLEN - UIP_LLH_LEN);
-   *        }
-   *    }
+   * uIP will handle only a single buffer for both incoming and outgoing
+   * packets.  However, the drive design may be concurrently send and
+   * filling separate, break-off buffers if CONFIG_NET_MULTIBUFFER is
+   * defined.  That buffer management must be controlled by the driver.
    */
 
+#ifdef CONFIG_NET_MULTIBUFFER
+  uint8_t *d_buf;
+#else
   uint8_t d_buf[CONFIG_NET_BUFSIZE + 2];
+#endif
 
   /* d_appdata points to the location where application data can be read from
    * or written into a packet.

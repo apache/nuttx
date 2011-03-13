@@ -1555,3 +1555,10 @@
 
 5.20 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* lib/lib_fopen() -- fopen() was not returning the correct errno value
+	  when the underlying open() failed.
+	* include/net/uip/uip-arch.h -- The uIP interface has been extended
+	  slightly so that drivers can be concurrenly filling and sending
+	  packet buffers.  This capability was needed by the SLIP driver.
+	* drivers/net/slip.c -- Several corrections and some re-design of
+	  of the driver.
