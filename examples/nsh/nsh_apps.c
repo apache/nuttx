@@ -88,13 +88,26 @@
 int nsh_execapp(FAR struct nsh_vtbl_s *vtbl, const char *cmd, char *argv[])
 {
    int ret = OK;
+   const char * name;
 
    /* Try to find command within pre-built application list. */
 
    ret = exec_nuttapp(cmd, argv);
    if (ret < 0)
      {
-	   return -errno;
+       int err = -errno;
+       int i;
+
+       /* On failure, list the set of available built-in commands */
+
+       nsh_output(vtbl, "Builtin Apps: ");
+       for (i = 0; name = nuttapp_getname(i); i++)
+         {
+           nsh_output(vtbl, "%s ", name);
+         }
+       nsh_output(vtbl, "\nand type 'help' for more NSH commands.\n\n");
+       
+	   return err;
      }
 
 #ifdef CONFIG_SCHED_WAITPID

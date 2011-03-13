@@ -8,7 +8,7 @@ NuttX TODO List (Last updated March 8, 2011)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (16)  Network (net/, drivers/net)
+ (17)  Network (net/, drivers/net)
   (5)  Network Utilities (netutils/)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (5)  Libraries (lib/)
@@ -30,6 +30,7 @@ NuttX TODO List (Last updated March 8, 2011)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (4)  ARM/STM32 (arch/arm/src/stm32/)
+  (1)  Intel x86 (arch/x86)
   (4)  8051 / MCS51 (arch/8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -306,6 +307,13 @@ o Network (net/, drivers/net)
   Priority:    Medium.  All standards compatibility is important to NuttX.  However, most
                the mechanism for leaving and joining groups is hidden behind a wrapper
                function so that little of this incompatibilities need be exposed.
+
+  Description: The SLIP driver (drivers/net/slip.c) has had only the most superficial
+               testing.  The main issue is the I haven't yet gotten a dual UART Linux
+               configuration that supports SLIP (I need one UART for SLIP and one for
+               the serial debug console).
+  Status:      Open
+  Priority:    Medium
 
 o Network Utilities (netutils/)
 
@@ -921,6 +929,13 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Status:      Open
   Priority:    Low until someone needs DMA1, Channel 5 (ADC3, UART4_TX, TIM5_CH1, or
                TIM8_CH2).
+
+o Intel x86 (arch/x86)
+  ^^^^^^^^^^^^^^^^^^^^
+
+  Description:  No timer interrupts in the QEMU configuration.
+  Status:       Open
+  Priorty:      Medium-High
 
 o 8051 / MCS51 (arch/8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
