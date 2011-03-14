@@ -67,6 +67,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* NOTE:  Slip requires UART hardware handshake.  If hardware handshake is
+ * not available with your UART, then you might try the 'slattach' option
+ * -L which is supposed to enable "3-wire operation."
+ */
+
 /* Configuration ************************************************************/
 
 #if UIP_LLH_LEN > 0
@@ -83,6 +88,14 @@
 
 #ifndef CONFIG_SLIP_DEFPRIO
 #  define CONFIG_SLIP_DEFPRIO 128
+#endif
+
+/* The Linux slip module hard-codes its MTU size to 296.  So you
+       might as well set CONFIG_NET_BUFSIZE to 296 as well.
+#if CONFIG_NET_BUFSIZE < 296
+#  error "CONFIG_NET_BUFSIZE >= 296 is required"
+#elif CONFIG_NET_BUFSIZE > 296
+#  warning "CONFIG_NET_BUFSIZE == 296 is optimal"
 #endif
 
 /*  SLIP special character codes *******************************************/

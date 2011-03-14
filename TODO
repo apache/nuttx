@@ -309,13 +309,18 @@ o Network (net/, drivers/net)
                function so that little of this incompatibilities need be exposed.
 
   Description: The SLIP driver (drivers/net/slip.c) has had only the most superficial
-               testing.  The main issue is the I haven't yet gotten a dual UART Linux
-               configuration that supports SLIP (I need one UART for SLIP and one for
-               the serial debug console).  A second issue is that SLIP requires
-               hardware handshake and that has not been implemented in the UART
-               drivers on most platforms.  It might be possible to use a special
-               cable to bypass the handshaking (but which may also result in data
-               overrun errors).
+               testing.  Issues/Notes:
+               (1) The main issue is the I haven't yet gotten a dual UART Linux
+                   configuration that supports SLIP (I need one UART for SLIP and
+                   one for the serial debug console).
+               (2) A second issue is that SLIP requires hardware handshake and
+                   that has not been implemented in the UART drivers on most platforms.
+                   It might be possible to use a special cable to bypass the handshaking.
+                   Tiy might also try the slattach' option -L which is supposed to
+                   enable "3-wire operation."  Either action which may also result in
+                   data overrun errors).
+               (3) Finally, the Linux slip driver is hard-coded to use an MTU of 296
+                   so setting CONFIG_NET_BUFSIZE to a 296 is also advised.
   Status:      Open
   Priority:    Medium
 
