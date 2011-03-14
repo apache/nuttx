@@ -38,7 +38,7 @@
  ************************************************************************************/
 
 #ifndef __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H
-#define __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H
+#define __CONFIGS_VSN_SRC_VSN_INTERNAL_H
 
 /************************************************************************************
  * Included Files
@@ -55,19 +55,23 @@
 
 /* LED */
 
-#define GPIO_LED		(GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN2)
+#define GPIO_LED		(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN2 |GPIO_OUTPUT_CLEAR)
                          
 /* BUTTON - Note that after a good second button causes hardware reset */
 
-#define GPIO_PUSHBUTTON    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN5)
+#define GPIO_PUSHBUTTON	(GPIO_INPUT |GPIO_CNF_INFLOAT  |GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN5 )
 
 /* Power Management Pins */
 
-#define GPIO_PVS		(GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN7)
+#define GPIO_PVS		(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTC|GPIO_PIN7 |GPIO_OUTPUT_CLEAR)
+#define GPIO_PST		(GPIO_INPUT |GPIO_CNF_INPULLDWN|GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN13)
+#define GPIO_SCTC		(GPIO_INPUT |GPIO_CNF_INPULLDWN|GPIO_MODE_INPUT|GPIO_PORTA|GPIO_PIN8 )
+#define GPIO_PCLR		(GPIO_INPUT |GPIO_CNF_INPULLDWN|GPIO_MODE_INPUT|GPIO_PORTD|GPIO_PIN1 )	// by default this pin is OSCOUT, requires REMAP
+#define GPIO_XPWR		(GPIO_INPUT |GPIO_CNF_INFLOAT  |GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN4 )
 
 /* FRAM */
 
-#define GPIO_FRAM_CS	(GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN15)
+#define GPIO_FRAM_CS	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_50MHz|GPIO_PORTA|GPIO_PIN15|GPIO_OUTPUT_SET)
 
 
 /* Debug ********************************************************************/
@@ -123,16 +127,12 @@ extern void weak_function stm32_usbinitialize(void);
 
 
 /************************************************************************************
- * Power Module
- *
- * Description:
- *  - Provides power related board operations, such as voltage selection,
- *    proper reboot sequence, and power-off
+ * Init Power Module and set board system voltage
  ************************************************************************************/
 
-extern void board_power_setbootvoltage(void);	// Default voltage at boot time
+extern void board_power_init(void);
 
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H */
+#endif /* __CONFIGS_VSN_SRC_VSN_INTERNAL_H */
 

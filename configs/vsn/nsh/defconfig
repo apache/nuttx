@@ -819,34 +819,49 @@ CONFIG_HEAP_SIZE=
 
 
 ########################################################################
+# STM32 JTAG Options
+#
+# Full JTAG Enable (Parallel and Serial)
+CONFIG_STM32_JTAG_FULL_ENABLE=n
+
+# Full but without the JNTRST pin
+CONFIG_STM32_JTAG_NOJNTRST_ENABLE=n
+
+# Serial (SWJ) dual pin only which, can coexist besides the FRAM on SPI3
+CONFIG_STM32_JTAG_SW_ENABLE=n
+
+
+########################################################################
 #
 # Applications to be included within the NuttX binary as described
-# under the apps/README.txt
+# under the ../apps/README.txt
 #
-# Set this config parameter above to: CONFIG_TASK_NAME_SIZE=16
-# in order to enable argv[0]=<task name> argument. Otherwise argv[0]
-# will be noname.
+# Set thi config parameter above to: CONFIG_TASK_NAME_SIZE=16
+# In order to enable argv[0]=<task name> argument set the option
+# CONFIG_TASK_NAME_SIZE=16
 #
-# Include builtin NuttX application (disabling this option will 
-# exclude all of the apps found under the nuttx/apps directory, but
-# not the apps found under the ../apps directory unless _APPS_USER=n.
+# Include builtin NuttX applications (general option)
 CONFIG_BUILTIN_APPS_NUTTX=y
 
+# Invoke the following application after NuttX starts
+#CONFIG_BUILTIN_APP_START="hello"
+
 # Individual selection of built-in applications:
+
+# Hello world provide a simple skeleton/demo application
 CONFIG_BUILTIN_APPS_HELLO=y
 
-# Include user (external) applications located under ../apps directory?
-CONFIG_BUILTIN_APPS_USER=y
+# Provide poweroff command to switch off the board
+CONFIG_BUILTIN_APPS_POWEROFF=y
 
-# Invoke the following application after NuttX starts
-# (enter app name, as: hello)
-CONFIG_BUILTIN_APP_START=
+# Provide JAVA Virtual Machine (the Darjeeling JVM)
+CONFIG_BUILTIN_APPS_JVM=n
 
-# CONFIG_EXAMPLES_NSH_BUILTIN_APPS - Support for running the builtin 
-#   apps from command line. See apps/README for more information.
+# CONFIG_EXAMPLES_NSH_BUILTIN_APPS - Enable invocation of all builtin 
+#   apps from nsh command line. See apps/README for more information.
 #
 CONFIG_EXAMPLES_NSH_BUILTIN_APPS=y
-CONFIG_SCHED_WAITPID=y
+  CONFIG_SCHED_WAITPID=y
 
 #
 ########################################################################

@@ -61,6 +61,11 @@ int up_ramtron(void)
   int retval;
 
   /* Get the SPI port */
+  
+#if defined(CONFIG_STM32_JTAG_FULL_ENABLE) || defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE)
+  message("RAMTRON: Cannot open SPI3 port as JTAG is enabled. Switch to Serial JTAG mode.\n");
+  return -ENODEV;
+#endif
 
   spi = up_spiinitialize(3);
   if (!spi)
@@ -70,7 +75,7 @@ int up_ramtron(void)
     }
   message("RAMTRON: Initialized SPI3\n");
 
-  mtd = ramtron_initialize(spi);
+  mtd = (struct mtd_dev_s *)ramtron_initialize(spi);
   if (!mtd)
     {
       message("RAMTRON: Device not found\n");

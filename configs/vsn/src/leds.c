@@ -43,12 +43,16 @@
 
 #include <nuttx/config.h>
 
+#include <arch/board/board.h>
+#include <arch/stm32/irq.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
+#include "up_arch.h"
 #include "vsn.h"
+
 
 /****************************************************************************
  * Definitions
@@ -72,6 +76,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+ 
+irqstate_t irqidle_mask;
 
 /****************************************************************************
  * Private Functions
@@ -101,7 +107,10 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  if (led==LED_IDLE) stm32_gpiowrite(GPIO_LED, true);
+  if (led==LED_IDLE) {
+	irqidle_mask = irqsave();
+	stm32_gpiowrite(GPIO_LED, true);
+  }
 }
 
 /****************************************************************************
@@ -110,7 +119,10 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  if (led==LED_IDLE) stm32_gpiowrite(GPIO_LED, false);
+  if (led==LED_IDLE) {
+    stm32_gpiowrite(GPIO_LED, false);
+    irqrestore(irqidle_mask);
+  }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

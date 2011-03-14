@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/vsn-1.2/include/board.h
+ * configs/vsn/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
@@ -183,10 +183,11 @@ extern "C" {
 #endif
 
 /************************************************************************************
- * Public Function Prototypes
+ * Board Clock Configuration, called immediatelly after boot
  ************************************************************************************/
  
- EXTERN void stm32_board_clockconfig(void);
+EXTERN void stm32_board_clockconfig(void);
+
  
 /************************************************************************************
  * Name: stm32_boardinitialize
@@ -200,15 +201,9 @@ extern "C" {
 
 EXTERN void stm32_boardinitialize(void);
 
+
 /************************************************************************************
- * Button support.
- *
- * Description:
- *   up_buttoninit() must be called to initialize button resources.  After that,
- *   up_buttons() may be called to collect the state of all buttons.  up_buttons()
- *   returns an 8-bit bit set with each bit associated with a button.  See the
- *   BUTTON_* and JOYSTICK_* definitions above for the meaning of each bit.
- *
+ * Button support. (TODO: button is not yet supported)
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -216,9 +211,23 @@ EXTERN void up_buttoninit(void);
 EXTERN uint8_t up_buttons(void);
 #endif
 
-/* Other peripherals startup routines, all returning OK on success */
+
+/************************************************************************************
+ * Memories
+ *  - SDcard is tested to work up to 2 GB
+ *  - RAMTRON has size of 128 kB
+ ************************************************************************************/
+
 EXTERN int up_sdcard(void);
 EXTERN int up_ramtron(void);
+
+
+/************************************************************************************
+ * Public Power Supply Contol
+ ************************************************************************************/
+
+void board_power_reboot(void);
+void board_power_off(void);
 
 
 #undef EXTERN
