@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 13, 2011</p>
+      <p>Last Updated: March 14, 2011</p>
     </td>
   </tr>
 </table>
@@ -2146,6 +2146,11 @@ nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * configs/olimex-lpc1766stk/slip-httpd - An example that uses SLIP to
       provide a serial-port based THTTPD web server.
 
+apps-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Initial version of the apps/ directory was released as contributed by
+      Uros Platise.
+
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * Updated to use standard C99 types in stdint.h and
@@ -2184,6 +2189,23 @@ nuttx-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       packet buffers.  This capability was needed by the SLIP driver.
     * drivers/net/slip.c -- Several corrections and some re-design of
       of the driver.
+    * apps/ChangeLog.txt -- the apps/ directory now has its own ChangeLog.
+    * configs/vsn:
+      - IDLE LED blinking fix
+      - Added board power off function
+    * arch/arm/src/stm32/stm32_gpio.c and stm32_internal.h -- Fixed
+      PullUp/Down Input Configuration.
+    * arch/arm/src/lpc17xx/lpc17_serial.h -- Now supports Auto-RTS and
+      Auto-CTS modes.  This is needed to support SLIP.
+
+apps-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * README.txt -- README cosmetics
+    * hello/ -- hello world minor changes
+    * Makefile -- Makefile cosmetics (I am slowly adding the Darjeeling JVM)
+    * Make.defs -- New file adds common make definitions for applications.
+    * hello/Makefile -- Now uses new Make.defs definitions.  Added README.txt.
+    * apps/poweroff -- New application to turn off board power.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

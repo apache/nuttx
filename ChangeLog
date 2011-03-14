@@ -1562,8 +1562,11 @@
 	  packet buffers.  This capability was needed by the SLIP driver.
 	* drivers/net/slip.c -- Several corrections and some re-design of
 	  of the driver.
-    * configs/vsn:
-      - IDLE LED blinking fix
-      - Added board power off function
-    * arch/arm/src/stm32/stm32_gpio.c and stm32_internal.h -- Fixe
-      PullUp/Down Input Configuration.
+	* apps/ChangeLog.txt -- the apps/ directory now has its own ChangeLog.
+	* configs/vsn:
+	  - IDLE LED blinking fix
+	  - Added board power off function
+	* arch/arm/src/stm32/stm32_gpio.c and stm32_internal.h -- Fixed
+	  PullUp/Down Input Configuration.
+	* arch/arm/src/lpc17xx/lpc17_serial.h -- Now supports Auto-RTS and
+	  Auto-CTS modes.  This is needed to support SLIP.

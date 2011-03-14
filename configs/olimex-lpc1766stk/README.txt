@@ -824,7 +824,16 @@ Where <subdir> is one of the following:
 
        $ ifconfig sl0 10.0.0.2/24 up
 
+       Or maybe,
+
+       $ ifconfig sl0 10.0.0.1 pointopoint 10.0.0.2 up
+       $ route add 10.0.0.2 dev sl0
+
        Assuming the SLIP is attached to device sl0.
+
+    5. For monitoring/debugging traffic:
+
+       $ tcpdump -n -nn -i sl0 -x -X -s 1500
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and

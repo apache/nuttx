@@ -664,13 +664,15 @@ static inline void lpc17_uart1config(uint32_t clkdiv)
 
   lpc17_configgpio(GPIO_UART1_TXD);
   lpc17_configgpio(GPIO_UART1_RXD);
-#ifdef CONFIG_UART0_FLOWCONTROL
+#ifdef CONFIG_UART1_FLOWCONTROL
   lpc17_configgpio(GPIO_UART1_CTS);
+  lpc17_configgpio(GPIO_UART1_RTS);
   lpc17_configgpio(GPIO_UART1_DCD);
   lpc17_configgpio(GPIO_UART1_DSR);
   lpc17_configgpio(GPIO_UART1_DTR);
+#ifdef CONFIG_UART1_RINGINDICATOR
   lpc17_configgpio(GPIO_UART1_RI);
-  lpc17_configgpio(GPIO_UART1_RTS);
+#endif
 #endif
   irqrestore(flags);
 };
@@ -849,6 +851,16 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_serialout(priv, LPC17_UART_FCR_OFFSET,
                (UART_FCR_RXTRIGGER_8|UART_FCR_TXRST|UART_FCR_RXRST|UART_FCR_FIFOEN));
+
+  /* Enable Auto-RTS and Auto-CS Flow Control in the Modem Control Register */
+  
+#ifdef CONFIG_UART1_FLOWCONTROL
+  if (priv->uartbase == LPC17_UART1_BASE)
+    {
+      up_serialout(priv, LPC17_UART_MCR_OFFSET, (UART_MCR_RTSEN|UART_MCR_CTSEN));
+    }
+#endif
+
 #endif
   return OK;
 }

@@ -311,7 +311,11 @@ o Network (net/, drivers/net)
   Description: The SLIP driver (drivers/net/slip.c) has had only the most superficial
                testing.  The main issue is the I haven't yet gotten a dual UART Linux
                configuration that supports SLIP (I need one UART for SLIP and one for
-               the serial debug console).
+               the serial debug console).  A second issue is that SLIP requires
+               hardware handshake and that has not been implemented in the UART
+               drivers on most platforms.  It might be possible to use a special
+               cable to bypass the handshaking (but which may also result in data
+               overrun errors).
   Status:      Open
   Priority:    Medium
 
