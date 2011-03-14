@@ -85,10 +85,11 @@
  * Name: nsh_execute
  ****************************************************************************/
 
-int nsh_execapp(FAR struct nsh_vtbl_s *vtbl, const char *cmd, char *argv[])
+int nsh_execapp(FAR struct nsh_vtbl_s *vtbl, FAR const char *cmd,
+                FAR char *argv[])
 {
    int ret = OK;
-   const char * name;
+   FAR const char * name;
 
    /* Try to find command within pre-built application list. */
 
@@ -101,7 +102,7 @@ int nsh_execapp(FAR struct nsh_vtbl_s *vtbl, const char *cmd, char *argv[])
        /* On failure, list the set of available built-in commands */
 
        nsh_output(vtbl, "Builtin Apps: ");
-       for (i = 0; name = nuttapp_getname(i); i++)
+       for (i = 0; (name = nuttapp_getname(i)) != NULL; i++)
          {
            nsh_output(vtbl, "%s ", name);
          }

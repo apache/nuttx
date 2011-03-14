@@ -75,17 +75,9 @@
 
 void stm32_boardinitialize(void)
 {
-#ifdef CONFIG_STM32_SPI3
-#warning JTAG Port Disabled as SPI3 NVRAM/FRAM support is enabled
-  
-  uint32_t val = getreg32(STM32_AFIO_MAPR);
-  val &= 0x00FFFFFF;		// clear undefined readings ... 
-  val |= AFIO_MAPR_DISAB;	// set JTAG-DP and SW-DP Disabled
-  putreg32(val, STM32_AFIO_MAPR);
-#endif
+  /* Set start-up board voltage */
 
-   // Set Board Voltage to 3.3 V
-   board_power_setbootvoltage();
+  board_power_init();
 
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * stm32_spiinitialize() has been brought into the link.

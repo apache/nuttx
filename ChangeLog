@@ -1562,3 +1562,8 @@
 	  packet buffers.  This capability was needed by the SLIP driver.
 	* drivers/net/slip.c -- Several corrections and some re-design of
 	  of the driver.
+    * configs/vsn:
+      - IDLE LED blinking fix
+      - Added board power off function
+    * arch/arm/src/stm32/stm32_gpio.c and stm32_internal.h -- Fixe
+      PullUp/Down Input Configuration.

@@ -73,6 +73,10 @@
 #  error "UIP_LLH_LEN must be set to zero"
 #endif
 
+#ifdef CONFIG_NET_MULTIBUFFER
+#  error "Requires CONFIG_NET_MULTIBUFFER"
+#endif
+
 #ifndef CONFIG_SLIP_STACKSIZE
 #  define CONFIG_SLIP_STACKSIZE 1024
 #endif

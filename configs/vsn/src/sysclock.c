@@ -39,6 +39,7 @@
 
 #include <arch/board/board.h>
 #include "stm32_rcc.h"
+#include "stm32_gpio.h"
 #include "stm32_flash.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -123,6 +124,11 @@ void stm32_board_select_hsi(void)
 
     // Wait until the selected source is used as the system clock source
     while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
+    
+    // map port PD0 and PD1 on OSC pins
+	regval = getreg32(STM32_AFIO_MAPR);
+	regval |= AFIO_MAPR_PD01_REMAP;
+	putreg32(regval, STM32_AFIO_MAPR);
 }
 
 
@@ -140,6 +146,13 @@ void stm32_board_select_hsi(void)
   */
 int stm32_board_select_hse(void)
 {
+	uint32_t regval;
+
+    // be sure to release PD0 and PD1 pins from the OSC pins
+	regval = getreg32(STM32_AFIO_MAPR);
+	regval &= ~AFIO_MAPR_PD01_REMAP;
+	putreg32(regval, STM32_AFIO_MAPR);
+
 	// if (is cc1101 9 MHz clock output enabled), otherwise return with -1
 	// I think that clock register provides HSE valid signal to detect that as well.
 	

@@ -80,6 +80,16 @@
 #define GPIO_OUTPUT                   (0)                        /*         0=Output or alternate function */
 #define GPIO_ALT                      (0)
 
+/* If the pin is a GPIO digital output, then this identifies the initial output value.
+ * If the pin is an input, this bit is overloaded to provide the qualifier to\
+ * distinquish input pull-up and -down:
+ *
+ * .... .... V... ....
+ */
+
+#define GPIO_OUTPUT_SET               (1 << 7)                   /* Bit 7: If output, inital value of output */
+#define GPIO_OUTPUT_CLEAR             (0)
+
 /* These bits set the primary function of the pin:
  * .FF. .... .... ....
  */
@@ -89,8 +99,9 @@
 
 #  define GPIO_CNF_ANALOGIN           (0 << GPIO_CNF_SHIFT)      /* Analog input */
 #  define GPIO_CNF_INFLOAT            (1 << GPIO_CNF_SHIFT)      /* Input floating */
-#  define GPIO_CNF_INPULLUP           (2 << GPIO_CNF_SHIFT)      /* Input pull-up */
-#  define GPIO_CNF_INPULLDWN          (3 << GPIO_CNF_SHIFT)      /* Input pull-down */
+#  define GPIO_CNF_INPULLUD           (2 << GPIO_CNF_SHIFT)      /* Input pull-up/down general bit, since up is composed of two parts */
+#  define GPIO_CNF_INPULLDWN          (2 << GPIO_CNF_SHIFT)      /* Input pull-down */
+#  define GPIO_CNF_INPULLUP          ((2 << GPIO_CNF_SHIFT) | GPIO_OUTPUT_SET) /* Input pull-up */
 
 #  define GPIO_CNF_OUTPP              (0 << GPIO_CNF_SHIFT)      /* Output push-pull */
 #  define GPIO_CNF_OUTOD              (1 << GPIO_CNF_SHIFT)      /* Output open-drain */
@@ -113,13 +124,6 @@
  */
 
 #define GPIO_EXTI                     (1 << 10)                   /* Bit 10: Configure as EXTI interrupt */
-
-/* If the pin is an GPIO digital output, then this identifies the initial output value:
- * .... .... V... ....
- */
-
-#define GPIO_OUTPUT_SET               (1 << 7)                   /* Bit 7: If output, inital value of output */
-#define GPIO_OUTPUT_CLEAR             (0) 
 
 /* This identifies the GPIO port:
  * .... .... .PPP ....

@@ -122,136 +122,123 @@ int stm32_configgpio(uint32_t cfgset)
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32_NGPIO_PORTS)
+  if (port >= STM32_NGPIO_PORTS)
     {
-      /* Get the port base address */
-
-      base = g_gpiobase[port];
-
-      /* Get the pin number and select the port configuration register for that pin */
-
-      pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-      if (pin < 8)
-        {
-          cr  = base + STM32_GPIO_CRL_OFFSET;
-          pos = pin;
-        }
-      else
-        {
-          cr  = base + STM32_GPIO_CRH_OFFSET;
-          pos = pin - 8;
-        }
-
-      /* Input or output? */
-
-      input = ((cfgset & GPIO_INPUT) != 0);
-
-      /* Decode the mode and configuration */
-
-      if (input)
-        {
-          /* Input.. force mode = INPUT */
-
-          modecnf = 0;
-        }
-      else
-        {
-          /* Output or alternate function */
-
-          modecnf = (cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
-        }
-
-      modecnf |= ((cfgset & GPIO_CNF_MASK) >> GPIO_CNF_SHIFT) << 2;
-     
-      /* Set the port configuration register */
-
-      regval = getreg32(cr);
-      regval &= ~(GPIO_CR_MODECNF_MASK(pos));
-      regval |= (modecnf << GPIO_CR_MODECNF_SHIFT(pos));
-      putreg32(regval, cr);
-
-      /* Set or reset the corresponding BRR/BSRR bit */
-
-      if (!input)
-        {
-          /* It is an output or an alternate function.  We have to look at the CNF
-           * bits to know which.
-           */
-
-          unsigned int cnf = (cfgset & GPIO_CNF_MASK);
-          if (cnf == GPIO_CNF_OUTPP || cnf == GPIO_CNF_OUTOD)
-            {
-
-              /* Its an output... set the pin to the correct initial state */
-
-              if ((cfgset & GPIO_OUTPUT_SET) != 0)
-               {
-                  /* Use the BSRR register to set the output */
-
-                  regaddr = base + STM32_GPIO_BSRR_OFFSET;
-                }
-              else
-                {
-                  /* Use the BRR register to clear */
-
-                  regaddr = base + STM32_GPIO_BRR_OFFSET;
-                }
-            }
-          else
-            {
-              /* Its an alternate function pin... we can return early */
-
-              return OK;
-            }
-        }
-      else
-        {
-          /* It is an input pin... Should it configured as an EXTI interrupt? */
-
-          if ((cfgset & GPIO_EXTI) != 0)
-            {
-               int shift;
-
-               /* Yes.. Set the bits in the EXTI CR register */
-
-               regaddr = STM32_AFIO_EXTICR(pin);
-               regval  = getreg32(regaddr);
-               shift   = AFIO_EXTICR_EXTI_SHIFT(pin);
-               regval &= ~(AFIO_EXTICR_PORT_MASK << shift);
-               regval |= (((uint32_t)port) << shift);
-               putreg32(regval, regaddr);
-            }
-
-          /* If it is pull-down or pull up, then we need to set the ODR
-           * appropriately for that function.
-           */
-        
-          if ((cfgset & GPIO_CNF_MASK) == GPIO_CNF_INPULLUP)
-            {
-              /* Set the ODR bit (using BSRR) to one for the PULL-UP functionality */
-            
-	          regaddr = base + STM32_GPIO_BSRR_OFFSET;
-            }
-          else if ((cfgset & GPIO_CNF_MASK) == GPIO_CNF_INPULLDWN)
-            {
-              /* Clear the ODR bit (using BRR) to zero for the PULL-DOWN functionality */
-
-	          regaddr = base + STM32_GPIO_BRR_OFFSET;
-            }
-            else
-            {
-              /* Neither... we can return early */
-
-              return OK;
-            }
-        }
-
-        regval = getreg32(regaddr);
-        regval |= (1 << pin);
-        putreg32(regval, regaddr);
-        return OK;
+      return ERROR;
     }
-  return ERROR;
+    
+  /* Get the port base address */
+
+  base = g_gpiobase[port];
+
+  /* Get the pin number and select the port configuration register for that
+   * pin
+   */
+
+  pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  if (pin < 8)
+    {
+      cr  = base + STM32_GPIO_CRL_OFFSET;
+      pos = pin;
+    }
+  else
+    {
+      cr  = base + STM32_GPIO_CRH_OFFSET;
+      pos = pin - 8;
+    }
+
+  /* Input or output? */
+
+  input = ((cfgset & GPIO_INPUT) != 0);
+
+  /* Decode the mode and configuration */
+
+  if (input)
+    {
+      /* Input.. force mode = INPUT */
+
+      modecnf = 0;
+     }
+  else
+    {
+      /* Output or alternate function */
+
+      modecnf = (cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
+    }
+
+  modecnf |= ((cfgset & GPIO_CNF_MASK) >> GPIO_CNF_SHIFT) << 2;
+     
+  /* Set the port configuration register */
+
+  regval  = getreg32(cr);
+  regval &= ~(GPIO_CR_MODECNF_MASK(pos));
+  regval |= (modecnf << GPIO_CR_MODECNF_SHIFT(pos));
+  putreg32(regval, cr);
+
+  /* Set or reset the corresponding BRR/BSRR bit */
+
+  if (!input)
+    {
+      /* It is an output or an alternate function.  We have to look at the CNF
+       * bits to know which.
+       */
+
+      unsigned int cnf = (cfgset & GPIO_CNF_MASK);
+      if (cnf != GPIO_CNF_OUTPP && cnf != GPIO_CNF_OUTOD)
+        {
+          /* Its an alternate function pin... we can return early */
+
+          return OK;
+        }
+    }
+  else
+    {
+      /* It is an input pin... Should it configured as an EXTI interrupt? */
+
+      if ((cfgset & GPIO_EXTI) != 0)
+        {
+          int shift;
+
+          /* Yes.. Set the bits in the EXTI CR register */
+
+          regaddr = STM32_AFIO_EXTICR(pin);
+          regval  = getreg32(regaddr);
+          shift   = AFIO_EXTICR_EXTI_SHIFT(pin);
+          regval &= ~(AFIO_EXTICR_PORT_MASK << shift);
+          regval |= (((uint32_t)port) << shift);
+          putreg32(regval, regaddr);
+        }
+
+      if ((cfgset & GPIO_CNF_MASK) != GPIO_CNF_INPULLUD)
+        {
+          /* Neither... we can return early */
+
+          return OK;
+        }
+    }
+   
+  /* If it is an output... set the pin to the correct initial state.
+   * If it is pull-down or pull up, then we need to set the ODR
+   * appropriately for that function.
+   */
+
+  if ((cfgset & GPIO_OUTPUT_SET) != 0)
+    {
+      /* Use the BSRR register to set the output */
+
+      regaddr = base + STM32_GPIO_BSRR_OFFSET;
+    }
+  else
+    {
+      /* Use the BRR register to clear */
+
+      regaddr = base + STM32_GPIO_BRR_OFFSET;
+    }
+
+  regval  = getreg32(regaddr);
+  regval |= (1 << pin);
+  putreg32(regval, regaddr);
+  return OK;
 }
 
 /****************************************************************************
