@@ -816,15 +816,14 @@ Where <subdir> is one of the following:
        This should create an interface with a name like sl0, or sl1, etc.
        Add -d to get debug output.  This will show the interface name.
 
+       NOTE: The Linux slip module hard-codes its MTU size to 296.  So you
+       might as well set CONFIG_NET_BUFSIZE to 296 as well.
+
     4. After turning over the line to the SLIP driver, you must configure
        the network interface. Again, you do this using the standard
        ifconfig and route commands. Assume that we have connected to a
        host PC with address 192.168.0.101 from your target with address
        10.0.0.2. On the Linux PC you would execute the following as root:
-
-       $ ifconfig sl0 10.0.0.2/24 up
-
-       Or maybe,
 
        $ ifconfig sl0 10.0.0.1 pointopoint 10.0.0.2 up
        $ route add 10.0.0.2 dev sl0
@@ -834,6 +833,10 @@ Where <subdir> is one of the following:
     5. For monitoring/debugging traffic:
 
        $ tcpdump -n -nn -i sl0 -x -X -s 1500
+
+    NOTES:  Only UART1 supports the hardware handshake.  If hardware
+    handshake is not available, then you might try the slattach option
+    -L which is supposed to enable "3-wire operation."
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
