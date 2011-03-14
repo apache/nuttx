@@ -808,13 +808,13 @@ Where <subdir> is one of the following:
 
     1. Configure and build the slip-httpd configuration.
     2. Connect to a Linux box (assuming /dev/ttyS0)
-    3. Reset on the target side / attach SLIP on the Linux side:
+    3. Reset on the target side and attach SLIP on the Linux side:
     
+       $ modprobe slip
        $ slattach -p slip -s 57600 /dev/ttyS0 &
  
-       This should create an interface with a name like sl0. Add -d to
-       get debug output.  In the naming, slN, the N corresponds to the
-       tty device number as in /dev/ttySN.
+       This should create an interface with a name like sl0, or sl1, etc.
+       Add -d to get debug output.  This will show the interface name.
 
     4. After turning over the line to the SLIP driver, you must configure
        the network interface. Again, you do this using the standard
@@ -822,16 +822,10 @@ Where <subdir> is one of the following:
        host PC with address 192.168.0.101 from your target with address
        10.0.0.2. On the Linux PC you would execute the following as root:
 
-       $ ifconfig sl0 192.168.0.101 pointopoint 10.0.0.2 up -OR?-
-       $ ifconfig sl0 10.0.0.2 pointopoint 192.168.0.101 up
-       $ route add 10.0.0.2 dev sl0
+       $ ifconfig sl0 10.0.0.2/24 up
 
        Assuming the SLIP is attached to device sl0.
 
-    [ NOTE: As of this writing, I actually have not yet successfully         ]
-    [ configured SLIP on Linux.  The above are really just my working notes. ]
-    [ I suspect that I may have the IP address backward for one thing.       ]
-       
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
     the examples/thttpd application.
