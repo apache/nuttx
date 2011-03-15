@@ -58,6 +58,12 @@
  * Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_NET_SLIP
+#  define NETDEV_FORMAT "sl%d"
+#else
+#  define NETDEV_FORMAT "eth%d"
+#endif
+
 /****************************************************************************
  * Priviate Types
  ****************************************************************************/
@@ -134,7 +140,7 @@ int netdev_register(FAR struct uip_driver_s *dev)
       /* Assign a device name to the interface */
 
       devnum = g_next_devnum++;
-      snprintf( dev->d_ifname, IFNAMSIZ, "eth%d", devnum );
+      snprintf( dev->d_ifname, IFNAMSIZ, NETDEV_FORMAT, devnum );
 
       /* Add the device to the list of known network devices */
 

@@ -107,7 +107,7 @@
 #  endif
 
 #  define SLIP_DEVNO 0
-#  define NET_DEVNAME "slip0"
+#  define NET_DEVNAME "sl0"
 #else
 
    /* Otherwise, use the standard ethernet device name */
@@ -190,6 +190,17 @@ int user_start(int argc, char *argv[])
   char *thttpd_argv = "thttpd";
   int ret;
 
+  /* Configure SLIP */
+
+#ifdef CONFIG_NET_SLIP
+  ret = slip_initialize(SLIP_DEVNO, CONFIG_NET_SLIPTTY);
+  if (ret < 0)
+    {
+      message("ERROR: SLIP initialization failed: %d\n", ret);
+      exit(1);
+    }
+#endif
+
 /* Many embedded network interfaces must have a software assigned MAC */
 
 #ifdef CONFIG_EXAMPLE_THTTPD_NOMAC
@@ -202,17 +213,6 @@ int user_start(int argc, char *argv[])
   mac[4] = 0xba;
   mac[5] = 0xbe;
   uip_setmacaddr(NET_DEVNAME, mac);
-#endif
-
-  /* Configure SLIP */
-
-#ifdef CONFIG_NET_SLIP
-  ret = slip_initialize(SLIP_DEVNO, CONFIG_NET_SLIPTTY);
-  if (ret < 0)
-    {
-      message("ERROR: SLIP initialization failed: %d\n", ret);
-      exit(1);
-    }
 #endif
 
   /* Set up our host address */

@@ -83,15 +83,17 @@
 #endif
 
 #ifndef CONFIG_SLIP_STACKSIZE
-#  define CONFIG_SLIP_STACKSIZE 1024
+#  define CONFIG_SLIP_STACKSIZE 2048
 #endif
 
 #ifndef CONFIG_SLIP_DEFPRIO
 #  define CONFIG_SLIP_DEFPRIO 128
 #endif
 
-/* The Linux slip module hard-codes its MTU size to 296.  So you
-       might as well set CONFIG_NET_BUFSIZE to 296 as well.
+/* The Linux slip module hard-codes its MTU size to 296.  So you might as
+ * well set CONFIG_NET_BUFSIZE to 296 as well.
+ */
+
 #if CONFIG_NET_BUFSIZE < 296
 #  error "CONFIG_NET_BUFSIZE >= 296 is required"
 #elif CONFIG_NET_BUFSIZE > 296
@@ -278,7 +280,7 @@ static inline void slip_write(FAR struct slip_driver_s *priv,
 
 static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
 {
-#if CONFIG_DEBUG
+#if 0 // CONFIG_DEBUG
   int ret = putc(ch, priv->stream);
   DEBUGASSERT(ret == ch);
 #else
@@ -385,7 +387,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
       src++;
     }
 
-  /* We have looked at every charcter in the packet.  Now flush any unsent
+  /* We have looked at every character in the packet.  Now flush any unsent
    * data
    */
 
@@ -919,8 +921,8 @@ int slip_initialize(int intf, const char *devname)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct slip_driver_s));
-  priv->dev.d_ifup    = slip_ifup;     /* I/F down callback */
-  priv->dev.d_ifdown  = slip_ifdown;   /* I/F up (new IP address) callback */
+  priv->dev.d_ifup    = slip_ifup;     /* I/F up (new IP address) callback */
+  priv->dev.d_ifdown  = slip_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = slip_txavail;  /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
   priv->dev.d_addmac  = slip_addmac;   /* Add multicast MAC address */
@@ -976,9 +978,6 @@ int slip_initialize(int intf, const char *devname)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-  snprintf(priv->dev.d_ifname, IFNAMSIZ, "slip%d", intf);
-#endif
   (void)netdev_register(&priv->dev);
   return OK;
 }

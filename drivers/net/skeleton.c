@@ -663,8 +663,8 @@ int skel_initialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct skel_driver_s));
-  priv->sk_dev.d_ifup    = skel_ifup;     /* I/F down callback */
-  priv->sk_dev.d_ifdown  = skel_ifdown;   /* I/F up (new IP address) callback */
+  priv->sk_dev.d_ifup    = skel_ifup;     /* I/F up (new IP address) callback */
+  priv->sk_dev.d_ifdown  = skel_ifdown;   /* I/F down callback */
   priv->sk_dev.d_txavail = skel_txavail;  /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
   priv->sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */

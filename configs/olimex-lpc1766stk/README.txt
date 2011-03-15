@@ -811,10 +811,14 @@ Where <subdir> is one of the following:
     3. Reset on the target side and attach SLIP on the Linux side:
     
        $ modprobe slip
-       $ slattach -p slip -s 57600 /dev/ttyS0 &
+       $ slattach -L -p slip -s 57600 /dev/ttyS0 &
  
        This should create an interface with a name like sl0, or sl1, etc.
        Add -d to get debug output.  This will show the interface name.
+
+       NOTE: The -L option is included to suppress use of hardware flow
+       control.  This is necessary because I haven't figure out how to 
+       use the UART1 hardwar flow control yet.
 
        NOTE: The Linux slip module hard-codes its MTU size to 296.  So you
        might as well set CONFIG_NET_BUFSIZE to 296 as well.
