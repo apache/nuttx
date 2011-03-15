@@ -817,8 +817,8 @@ Where <subdir> is one of the following:
        Add -d to get debug output.  This will show the interface name.
 
        NOTE: The -L option is included to suppress use of hardware flow
-       control.  This is necessary because I haven't figure out how to 
-       use the UART1 hardwar flow control yet.
+       control.  This is necessary because I haven't figured out how to 
+       use the UART1 hardware flow control yet.
 
        NOTE: The Linux slip module hard-codes its MTU size to 296.  So you
        might as well set CONFIG_NET_BUFSIZE to 296 as well.

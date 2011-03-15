@@ -57,6 +57,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/net.h>
+#include <nuttx/wqueue.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
@@ -76,6 +77,10 @@
 
 #if UIP_LLH_LEN > 0
 #  error "UIP_LLH_LEN must be set to zero"
+#endif
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  warning "CONFIG_SCHED_WORKQUEUE must be set"
 #endif
 
 #ifndef CONFIG_NET_MULTIBUFFER
@@ -154,12 +159,13 @@ struct slip_statistics_s
 
 struct slip_driver_s
 {
-  bool     bifup;           /* true:ifup false:ifdown */
-  WDOG_ID  txpoll;          /* TX poll timer */
-  FILE    *stream;          /* The contained serial stream */
-  pid_t    pid;             /* Receiver thread ID */
-  sem_t    waitsem;         /* Only used at start-up */
-  uint16_t rxlen;           /* The number of bytes in rxbuf */
+  bool          bifup;      /* true:ifup false:ifdown */
+  WDOG_ID       txpoll;     /* TX poll timer */
+  FILE         *stream;     /* The contained serial stream */
+  pid_t         pid;        /* Receiver thread ID */
+  sem_t         waitsem;    /* Mutually exclusive access to uIP */
+  uint16_t      rxlen;      /* The number of bytes in rxbuf */
+  struct work_s txwork;     /* Scheduled TX work */
 
   /* Driver statistics */
 
@@ -192,15 +198,15 @@ static void slip_semtake(FAR struct slip_driver_s *priv);
 
 /* Common TX logic */
 
-static inline void slip_write(FAR struct slip_driver_s *priv,
-                              const uint8_t *buffer, int len);
-static inline void slip_putc(FAR struct slip_driver_s *priv, int ch);
-static int  slip_transmit(FAR struct slip_driver_s *priv);
-static int  slip_uiptxpoll(struct uip_driver_s *dev);
+static void slip_write(FAR struct slip_driver_s *priv, const uint8_t *buffer, int len);
+static void slip_putc(FAR struct slip_driver_s *priv, int ch);
+static int slip_transmit(FAR struct slip_driver_s *priv);
+static int slip_uiptxpoll(struct uip_driver_s *dev);
+static void slip_txworker(FAR void *arg);
 
 /* Packet receiver task */
 
-static inline int slip_getc(FAR struct slip_driver_s *priv);
+static int slip_getc(FAR struct slip_driver_s *priv);
 static inline void slip_receive(FAR struct slip_driver_s *priv);
 static int slip_rxtask(int argc, char *argv[]);
 
@@ -258,12 +264,16 @@ static void slip_semtake(FAR struct slip_driver_s *priv)
 static inline void slip_write(FAR struct slip_driver_s *priv,
                               const uint8_t *buffer, int len)
 {
-#if CONFIG_DEBUG
-  size_t nbytes = fwrite(buffer, 1, len, priv->stream);
-  DEBUGASSERT(nbytes == len);
-#else
-  (void)fwrite(buffer, 1, len, priv->stream);
-#endif
+  int remaining = len;
+
+  /* Signals will be received on the worker thread.  In this case, fwrite
+   * may return with fewer then len bytes written.
+   */
+
+  while (remaining > 0)
+    {
+      remaining -= fwrite(&buffer[len - remaining], 1, remaining, priv->stream);
+    }
 }
 
 /****************************************************************************
@@ -280,12 +290,17 @@ static inline void slip_write(FAR struct slip_driver_s *priv,
 
 static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
 {
-#if 0 // CONFIG_DEBUG
-  int ret = putc(ch, priv->stream);
-  DEBUGASSERT(ret == ch);
-#else
-  putc(ch, priv->stream);
-#endif
+  int ret;
+
+  /* putc will return ch unless an error occurs (included being awakened
+   * a signal on the worker thread).  Then it will return EOF.
+   */
+
+  do
+    {
+      ret = putc(ch, priv->stream);
+    }
+  while (ret != ch);
 }
 
 /****************************************************************************
@@ -301,20 +316,15 @@ static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
  * Returned Value:
  *   OK on success; a negated errno on failure
  *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
- *
  ****************************************************************************/
 
 static int slip_transmit(FAR struct slip_driver_s *priv)
 {
   uint8_t *src;
   uint8_t *start;
-  uint8_t esc;
-  int remaining;
-  int len;
+  uint8_t  esc;
+  int      remaining;
+  int      len;
 
   /* Increment statistics */
 
@@ -332,6 +342,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
   src       = priv->dev.d_buf;
   remaining = priv->dev.d_len;
   start     = src;
+  len       = 0;
   
   while (remaining-- > 0)
     {
@@ -395,11 +406,14 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
     {
       slip_write(priv, start, len);
     }
-  fflush(priv->stream);
 
   /* And send the END token */
 
   slip_putc(priv, SLIP_END);
+
+  /* Finally, flush everything to the host */
+
+  fflush(priv->stream);
   return OK;
 }
 
@@ -407,11 +421,11 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
  * Function: slip_uiptxpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   Check if uIP has any outgoing packets ready to send.  This is a
+ *   callback from uip_poll().  uip_poll() may be called:
  *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
+ *   1. When the preceding TX packet send is complete, or
+ *   2. When the preceding TX packet send times o ]ut and the interface is reset
  *   3. During normal TX polling
  *
  * Parameters:
@@ -421,9 +435,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   The initiator of the poll holds the priv->waitsem;
  *
  ****************************************************************************/
 
@@ -448,6 +460,36 @@ static int slip_uiptxpoll(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: slip_txworker
+ *
+ * Description:
+ *   Polling and transmission is performed on the worker thread.
+ *
+ * Parameters:
+ *   arg  - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void slip_txworker(FAR void *arg)
+{
+  FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)arg;
+  DEBUGASSERT(priv != NULL);
+
+  /* Get exclusive access to uIP */
+
+  slip_semtake(priv);
+
+  /* Poll uIP for new XMIT data. uIP expects interrupts to be disabled. */
+
+  priv->dev.d_buf = priv->txbuf;
+  (void)uip_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
+  slip_semgive(priv);
+}
+
+/****************************************************************************
  * Function: slip_getc
  *
  * Description:
@@ -463,8 +505,18 @@ static int slip_uiptxpoll(struct uip_driver_s *dev)
 
 static inline int slip_getc(FAR struct slip_driver_s *priv)
 {
-  int ret = getc(priv->stream);
-  DEBUGASSERT(ret != EOF);
+  int ret;
+
+  /* It is not expected that getc will be awakened by signals on the
+   * slip_rxtask thread.  But just in case...
+   */
+
+  do
+    {
+      ret = getc(priv->stream);
+    }
+  while (ret == EOF);
+
   return ret;
 }
 
@@ -591,9 +643,14 @@ static int slip_rxtask(int argc, char *argv[])
   ndbg("index: %d\n", index);
   DEBUGASSERT(index < CONFIG_SLIP_NINTERFACES);
 
-  /* Get our private data structure instance */
+  /* Get our private data structure instance and wake up the waiting
+   * initialization logic.  The first slip_semgive() wakes up the wainter
+   * initializer; the second raises the count to 1 so that the semaphore
+   * can now be used as a mutex for mutually exclusive access to uIP.
+   */
 
   priv = &g_slip[index];
+  slip_semgive(priv);
   slip_semgive(priv);
 
   /* Loop forever */
@@ -602,24 +659,16 @@ static int slip_rxtask(int argc, char *argv[])
     {
       /* Wait for the next character to be available on the input stream. */
 
+      nvdbg("Waiting...\n");
       ch = slip_getc(priv);
 
-      /* We have something... three interesting cases.  First there might
-       * be a read error.  Anything other an EINTR would indicate a serious
-       * device-related problem or software bug.
-       */
-
-      if (ch == EOF)
-        {
-          DEBUGASSERT(errno == EINTR);
-          continue;
-        }
-
-      /* END characters may appear at packet boundaries BEFORE as well as
+      /* We have something...
+       *
+       * END characters may appear at packet boundaries BEFORE as well as
        * after the beginning of the packet.  This is normal and expected.
        */
 
-      else if (ch == SLIP_END)
+      if (ch == SLIP_END)
         {
           priv->rxlen = 0;
         }
@@ -649,11 +698,9 @@ static int slip_rxtask(int argc, char *argv[])
 
       if (priv->rxlen >= UIP_IPH_LEN)
         {
-          /* Handle the IP input.  Interrupts must be disabled here to
-           * keep the POLL watchdog from firing.
-           */
+          /* Handle the IP input.  Get exclusive access to uIP. */
 
-          irqstate_t flags = irqsave();
+          slip_semtake(priv);
           priv->dev.d_buf = priv->rxbuf;
           priv->dev.d_len = priv->rxlen;
           uip_input(&priv->dev);
@@ -665,9 +712,9 @@ static int slip_rxtask(int argc, char *argv[])
 
           if (priv->dev.d_len > 0)
             {
-              slip_transmit(priv);
+              slip_transmit(priv); 
             }
-          irqrestore(flags);
+          slip_semgive(priv);
         }
       else
         {
@@ -701,11 +748,17 @@ static int slip_rxtask(int argc, char *argv[])
 static void slip_polltimer(int argc, uint32_t arg, ...)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)arg;
+  int ret;
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. */
+  /* Perform the poll on the worker thread.  We cannot access standard I/O
+   * from an interrupt handler.
+   */
 
-  priv->dev.d_buf = priv->txbuf;
-  (void)uip_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
+  ret = work_queue(&priv->txwork, slip_txworker, priv, 0);
+  if (ret != OK)
+    {
+      ndbg("Failed to schedule work: %d\n", ret);
+    }
 
   /* Setup the watchdog poll timer again */
 
@@ -797,34 +850,29 @@ static int slip_ifdown(struct uip_driver_s *dev)
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   Called in normal user mode
- *
  ****************************************************************************/
 
 static int slip_txavail(struct uip_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
-  irqstate_t flags;
-
-  /* Disable interrupts because this function may be called from interrupt
-   * level processing.
-   */
-
-  flags = irqsave();
+  int ret = OK;
 
   /* Ignore the notification if the interface is not yet up */
 
   if (priv->bifup)
     {
-      /* Poll uIP for new XMIT data */
+      /* Perform a poll on the worker thread.  We cannot access standard I/O
+       * from an interrupt handler.
+       */
 
-      priv->dev.d_buf = priv->txbuf;
-      (void)uip_poll(&priv->dev, slip_uiptxpoll);
+      ret = work_queue(&priv->txwork, slip_txworker, priv, 0);
+      if (ret != OK)
+        {
+          ndbg("Failed to schedule work: %d\n", ret);
+        }
     }
 
-  irqrestore(flags);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -957,10 +1005,10 @@ int slip_initialize(int intf, const char *devname)
 
 #ifndef CONFIG_CUSTOM_STACK
   priv->pid = task_create("usbhost", CONFIG_SLIP_DEFPRIO,
-                         CONFIG_SLIP_STACKSIZE, (main_t)slip_rxtask, argv);
+                          CONFIG_SLIP_STACKSIZE, (main_t)slip_rxtask, argv);
 #else
   priv->pid = task_create("usbhost", CONFIG_SLIP_DEFPRIO,
-                         (main_t)slip_rxtask, argv);
+                          (main_t)slip_rxtask, argv);
 #endif
   if (priv->pid < 0)
     {
