@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_initialize.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -115,6 +115,10 @@ uint8_t uip_reasstmr;
 
 void uip_initialize(void)
 {
+  /* Initialize the locking facility */
+
+  uip_lockinit();
+
   /* Initialize callback support */
 
   uip_callbackinit();

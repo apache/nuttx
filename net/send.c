@@ -405,7 +405,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   struct send_s state;
-  irqstate_t save;
+  uip_lock_t save;
   int err;
   int ret = OK;
 
@@ -436,7 +436,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
    * are ready.
    */
 
-  save                = irqsave();
+  save                = uip_lock();
   memset(&state, 0, sizeof(struct send_s));
   (void)sem_init(&state. snd_sem, 0, 0); /* Doesn't really fail */
   state.snd_sock      = psock;             /* Socket descriptor to use */
@@ -478,12 +478,12 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
           netdev_txnotify(&conn->ripaddr);
 
           /* Wait for the send to complete or an error to occur:  NOTES: (1)
-           * sem_wait will also terminate if a signal is received, (2) interrupts
-           * are disabled!  They will be re-enabled while the task sleeps and
+           * uip_lockedwait will also terminate if a signal is received, (2) interrupts
+           * may be disabled!  They will be re-enabled while the task sleeps and
            * automatically re-enabled when the task restarts.
            */
 
-          ret = sem_wait(&state. snd_sem);
+          ret = uip_lockedwait(&state. snd_sem);
 
           /* Make sure that no further interrupts are processed */
 
@@ -492,7 +492,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
     }
 
   sem_destroy(&state. snd_sem);
-  irqrestore(save);
+  uip_unlock(save);
 
   /* Set the socket state to idle */
 
@@ -508,8 +508,8 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
       goto errout;
     }
 
-  /* If sem_wait failed, then we were probably reawakened by a signal. In
-   * this case, sem_wait will have set errno appropriately.
+  /* If uip_lockedwait failed, then we were probably reawakened by a signal. In
+   * this case, uip_lockedwait will have set errno appropriately.
    */
 
   if (ret < 0)

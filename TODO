@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 8, 2011)
+NuttX TODO List (Last updated March 15, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   (5)  Task/Scheduler (sched/)
@@ -310,15 +310,14 @@ o Network (net/, drivers/net)
 
   Description: The SLIP driver (drivers/net/slip.c) has had only the most superficial
                testing.  Issues/Notes:
-               (1) The main issue is the I haven't yet gotten a dual UART Linux
-                   configuration that supports SLIP (I need one UART for SLIP and
-                   one for the serial debug console).
-               (2) A second issue is that SLIP requires hardware handshake and
+               (1) A minor issue is that SLIP requires hardware handshake and
                    that has not been implemented in the UART drivers on most platforms.
-                   It might be possible to use a special cable to bypass the handshaking.
-                   Tiy might also try the slattach' option -L which is supposed to
-                   enable "3-wire operation."  Either action which may also result in
-                   data overrun errors).
+                   You can use the slattach' option -L which enables "3-wire
+                   operation."  NOTE: This may also result in data overrun errors.
+               (2) Current State:  The driver connects and responds to PINGs (ICMP
+                   ECHO) commands.  However, when used with the TCP stack and THTTPD,
+                   there is some condition that causes a hang.  So the SLIP driver
+                   is still not ready for prime-time.
                (3) Finally, the Linux slip driver is hard-coded to use an MTU of 296
                    so setting CONFIG_NET_BUFSIZE to a 296 is also advised.
   Status:      Open

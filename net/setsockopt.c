@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/setsockopt.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@
 int setsockopt(int sockfd, int level, int option, const void *value, socklen_t value_len)
 {
   FAR struct socket *psock;
-  irqstate_t flags;
+  uip_lock_t flags;
   int err;
 
   /* Get the underlying socket structure */
@@ -160,7 +160,7 @@ int setsockopt(int sockfd, int level, int option, const void *value, socklen_t v
            * level access to options.
            */
 
-           flags = irqsave();
+           flags = uip_lock();
 
           /* Set or clear the option bit */
 
@@ -172,6 +172,7 @@ int setsockopt(int sockfd, int level, int option, const void *value, socklen_t v
             {
               _SO_CLROPT(psock->s_options, option);
             }
+          uip_unlock(flags);
         }
         break;
 

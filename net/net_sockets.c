@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_sockets.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ static void _net_semtake(FAR struct socketlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&list->sl_sem) != 0)
+  while (uip_lockedwait(&list->sl_sem) != 0)
     {
       /* The only case that an error should occr here is if
        * the wait was awakened by a signal.
@@ -149,9 +149,9 @@ int net_addreflist(FAR struct socketlist *list)
         * on semaphores.
         */
 
-       register irqstate_t flags = irqsave();
+       register uip_lock_t flags = uip_lock();
        list->sl_crefs++;
-       irqrestore(flags);
+       uip_unlock(flags);
     }
   return OK;
 }
@@ -173,9 +173,9 @@ int net_releaselist(FAR struct socketlist *list)
         * on semaphores.
         */
 
-       irqstate_t flags = irqsave();
+       uip_lock_t flags = uip_lock();
        crefs = --(list->sl_crefs);
-       irqrestore(flags);
+       uip_unlock(flags);
 
        /* If the count decrements to zero, then there is no reference
         * to the structure and it should be deallocated.  Since there

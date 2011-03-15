@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpbacklog.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
 {
   FAR struct uip_backlog_s     *bls = NULL;
   FAR struct uip_blcontainer_s *blc;
-  irqstate_t flags;
+  uip_lock_t flags;
   int size;
   int offset;
   int i;
@@ -131,7 +131,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
 
   /* Destroy any existing backlog (shouldn't be any) */
 
-  flags = irqsave();
+  flags = uip_lock();
   uip_backlogdestroy(conn);
 
   /* Now install the backlog tear-off in the connection.  NOTE that bls may
@@ -141,7 +141,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
    */
 
   conn->backlog = bls;
-  irqrestore(flags);
+  uip_unlock(flags);
   return OK;
 }
 

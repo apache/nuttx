@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_igmpmgs.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -79,15 +79,15 @@
 
 void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
-  irqstate_t flags = irqsave();
+  uip_lock_t flags;
 
   /* The following should be atomic */
 
-  flags = irqsave();
+  flags = uip_lock();
   DEBUGASSERT(!IS_SCHEDMSG(group->flags));
   group->msgid = msgid;
   SET_SCHEDMSG(group->flags);
-  irqrestore(flags);
+  uip_unlock(flags);
 }
 
 /****************************************************************************
@@ -99,17 +99,17 @@ void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
  *
  * Assumptions:
  *   This function cannot be called from an interrupt handler (if you try it,
- *   sem_wait will assert).
+ *   uip_lockedwait will assert).
  *
  ****************************************************************************/
 
 void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
-  irqstate_t flags;
+  uip_lock_t flags;
 
   /* Schedule to send the message */
 
-  flags = irqsave();
+  flags = uip_lock();
   DEBUGASSERT(!IS_WAITMSG(group->flags));
   SET_WAITMSG(group->flags);
   uip_igmpschedmsg(group, msgid);
@@ -120,9 +120,9 @@ void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
     {
       /* Wait for the semaphore to be posted */
 
-      while (sem_wait(&group->sem) != 0)
+      while (uip_lockedwait(&group->sem) != 0)
         {
-          /* The only error that should occur from sem_wait() is if
+          /* The only error that should occur from uip_lockedwait() is if
            * the wait is awakened by a signal.
            */
  
@@ -133,7 +133,7 @@ void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
   /* The message has been sent and we are no longer waiting */
 
   CLR_WAITMSG(group->flags);
-  irqrestore(flags);
+  uip_unlock(flags);
 }
 
 #endif /* CONFIG_NET_IGMP */

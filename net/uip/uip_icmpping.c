@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_icmpping.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -315,7 +315,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
              uint16_t datalen, int dsecs)
 {
   struct icmp_ping_s state;
-  irqstate_t save;
+  uip_lock_t save;
 
   /* Initialize the state structure */
 
@@ -328,7 +328,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
   state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
   state.png_sent   = false;            /* ECHO request not yet sent */
 
-  save             = irqsave();
+  save             = uip_lock();
   state.png_time   = g_system_timer;
 
   /* Set up the callback */
@@ -346,18 +346,18 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
       netdev_txnotify(&state.png_addr);
 
       /* Wait for either the full round trip transfer to complete or
-       * for timeout to occur. (1) sem_wait will also terminate if a
-       * signal is received, (2) interrupts are disabled!  They will
+       * for timeout to occur. (1) uip_lockedwait will also terminate if a
+       * signal is received, (2) interrupts may be disabled!  They will
        * be re-enabled while the task sleeps and automatically
        * re-enabled when the task restarts.
        */
 
       nlldbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
-      sem_wait(&state.png_sem);
+      uip_lockedwait(&state.png_sem);
 
       uip_icmpcallbackfree(state.png_cb);
     }
-  irqrestore(save);
+  uip_unlock(save);
 
   /* Return the negated error number in the event of a failure, or the
    * sequence number of the ECHO reply on success.

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_igmptimer.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -220,14 +220,14 @@ void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
 
 bool uip_igmpcmptimer(FAR struct igmp_group_s *group, int maxticks)
 {
-  irqstate_t flags;
+  uip_lock_t flags;
   int remaining;
 
   /* Disable interrupts so that there is no race condition with the actual
    * timer expiration.
    */
 
-  flags = irqsave();
+  flags = uip_lock();
 
   /* Get the timer remaining on the watchdog.  A time of <= zero means that
    * the watchdog was never started.
@@ -246,11 +246,11 @@ bool uip_igmpcmptimer(FAR struct igmp_group_s *group, int maxticks)
       /* Cancel the watchdog timer and return true */
 
       wd_cancel(group->wdog);
-      irqrestore(flags);
+      uip_unlock(flags);
       return true;
     }
 
-  irqrestore(flags);
+  uip_unlock(flags);
   return false;
 }
 

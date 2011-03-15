@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/dhcpd/dhcpd.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -270,15 +270,15 @@ static struct dhcpd_state_s g_state;
 #ifndef CONFIG_NETUTILS_DHCPD_HOST
 static inline void dhcpd_arpupdate(uint16_t *pipaddr, uint8_t *phwaddr)
 {
-  irqstate_t flags;
+  uip_lock_t flags;
 
   /* Disable interrupts and update the ARP table -- very non-portable hack.
    * REVISIT -- switch to the SIOCSARP ioctl call if/when it is implemented.
    */
 
-  flags = irqsave();
+  flags = uip_lock();
   uip_arp_update(pipaddr, phwaddr);
-  irqrestore(flags);
+  uip_unlock(flags);
 }
 #else
 #  define dhcpd_arpupdate(pipaddr,phwaddr)

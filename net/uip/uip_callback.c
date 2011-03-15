@@ -104,11 +104,11 @@ void uip_callbackinit(void)
 FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list)
 {
   struct uip_callback_s *ret;
-  irqstate_t save;
+  uip_lock_t save;
 
   /* Check  the head of the free list */
 
-  save = irqsave();
+  save = uip_lock();
   ret  = g_cbfreelist;
   if (ret)
     {
@@ -136,7 +136,7 @@ FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list)
     }
 #endif
 
-  irqrestore(save);
+  uip_unlock(save);
   return ret;
 }
 
@@ -157,13 +157,13 @@ void uip_callbackfree(FAR struct uip_callback_s *cb, FAR struct uip_callback_s *
 {
   FAR struct uip_callback_s *prev;
   FAR struct uip_callback_s *curr;
-  irqstate_t save;
+  uip_lock_t save;
 
   if (cb)
     {
       /* Find the callback structure in the connection's list */
 
-      save = irqsave();
+      save = uip_lock();
       if (list)
         {
           for (prev = NULL, curr = *list;
@@ -189,7 +189,7 @@ void uip_callbackfree(FAR struct uip_callback_s *cb, FAR struct uip_callback_s *
 
       cb->flink    = g_cbfreelist;
       g_cbfreelist = cb;
-      irqrestore(save);
+      uip_unlock(save);
     }
 }
 
@@ -210,13 +210,13 @@ uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
                              uint16_t flags, FAR struct uip_callback_s *list)
 {
   FAR struct uip_callback_s *next;
-  irqstate_t save;
+  uip_lock_t save;
 
   /* Loop for each callback in the list and while there are still events
    * set in the flags set.
    */
 
-  save = irqsave();
+  save = uip_lock();
   while (list && flags)
     {
       /* Save the pointer to the next callback in the lists.  This is done
@@ -244,7 +244,7 @@ uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
       list = next;
     }
 
-  irqrestore(save);
+  uip_unlock(save);
   return flags;
 }
 

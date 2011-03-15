@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/accept.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -262,7 +262,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 #else
   FAR struct sockaddr_in *inaddr = (struct sockaddr_in *)addr;
 #endif
-  irqstate_t save;
+  uip_lock_t save;
   int newfd;
   int err;
   int ret;
@@ -344,7 +344,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
    * for this listener.
    */
 
-  save = irqsave();
+  save = uip_lock();
   conn = (struct uip_conn *)psock->s_conn;
 
 #ifdef CONFIG_NET_TCPBACKLOG
@@ -366,7 +366,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   else if (_SS_ISNONBLOCK(psock->s_flags))
     {
       err = EAGAIN;
-      goto errout_with_irq;
+      goto errout_with_lock;
     }
   else
 #endif
@@ -393,12 +393,12 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       conn->accept          = accept_interrupt;
 
       /* Wait for the send to complete or an error to occur:  NOTES: (1)
-       * sem_wait will also terminate if a signal is received, (2) interrupts
-       * are disabled!  They will be re-enabled while the task sleeps and
+       * uip_lockedwait will also terminate if a signal is received, (2) interrupts
+       * may be disabled!  They will be re-enabled while the task sleeps and
        * automatically re-enabled when the task restarts.
        */
 
-      ret = sem_wait(&state.acpt_sem);
+      ret = uip_lockedwait(&state.acpt_sem);
 
       /* Make sure that no further interrupts are processed */
 
@@ -418,20 +418,20 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       if (state.acpt_result != 0)
         {
           err = state.acpt_result;
-          goto errout_with_irq;
+          goto errout_with_lock;
         }
 
-      /* If sem_wait failed, then we were probably reawakened by a signal. In
-       * this case, sem_wait will have set errno appropriately.
+      /* If uip_lockedwait failed, then we were probably reawakened by a signal. In
+       * this case, uip_lockedwait will have set errno appropriately.
        */
 
       if (ret < 0)
         {
           err = -ret;
-          goto errout_with_irq;
+          goto errout_with_lock;
         }
     }
-  irqrestore(save);
+  uip_unlock(save);
 
   /* Initialize the socket structure and mark the socket as connected.
    * (The reference count on the new connection structure was set in the
@@ -443,8 +443,8 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   pnewsock->s_flags |= _SF_CONNECTED;
   return newfd;
 
-errout_with_irq:
-  irqrestore(save);
+errout_with_lock:
+  uip_unlock(save);
 
 errout_with_socket:
   sockfd_release(newfd);

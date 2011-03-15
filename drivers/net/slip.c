@@ -83,8 +83,12 @@
 #  warning "CONFIG_SCHED_WORKQUEUE must be set"
 #endif
 
+#ifndef CONFIG_NET_NOINTS
+#  warning "CONFIG_NET_NOINTS must be set"
+#endif
+
 #ifndef CONFIG_NET_MULTIBUFFER
-#  error "Requires CONFIG_NET_MULTIBUFFER"
+#  warning "CONFIG_NET_MULTIBUFFER must be set"
 #endif
 
 #ifndef CONFIG_SLIP_STACKSIZE
@@ -476,16 +480,22 @@ static int slip_uiptxpoll(struct uip_driver_s *dev)
 static void slip_txworker(FAR void *arg)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)arg;
+  uip_lock_t flags;
+
   DEBUGASSERT(priv != NULL);
 
-  /* Get exclusive access to uIP */
+  /* Get exclusive access to uIP (if it it is already being used slip_rxtask,
+   * then we have to wait).
+   */
 
   slip_semtake(priv);
 
-  /* Poll uIP for new XMIT data. uIP expects interrupts to be disabled. */
+  /* Poll uIP for new XMIT data. */
 
+  flags = uip_lock();
   priv->dev.d_buf = priv->txbuf;
   (void)uip_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
+  uip_unlock(flags);
   slip_semgive(priv);
 }
 
@@ -638,6 +648,7 @@ static int slip_rxtask(int argc, char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
+  uip_lock_t flags;
   int ch;
 
   ndbg("index: %d\n", index);
@@ -703,6 +714,8 @@ static int slip_rxtask(int argc, char *argv[])
           slip_semtake(priv);
           priv->dev.d_buf = priv->rxbuf;
           priv->dev.d_len = priv->rxlen;
+
+          flags = uip_lock();
           uip_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should
@@ -714,6 +727,7 @@ static int slip_rxtask(int argc, char *argv[])
             {
               slip_transmit(priv); 
             }
+          uip_unlock(flags);
           slip_semgive(priv);
         }
       else
@@ -750,14 +764,17 @@ static void slip_polltimer(int argc, uint32_t arg, ...)
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)arg;
   int ret;
 
-  /* Perform the poll on the worker thread.  We cannot access standard I/O
-   * from an interrupt handler.
+  /* Perform the poll on the worker thread (if the work structure is available).
+   * We should not access standard I/O from an interrupt handler.
    */
 
-  ret = work_queue(&priv->txwork, slip_txworker, priv, 0);
-  if (ret != OK)
+  if (priv->txwork.worker == NULL)
     {
-      ndbg("Failed to schedule work: %d\n", ret);
+      ret = work_queue(&priv->txwork, slip_txworker, priv, 0);
+      if (ret != OK)
+        {
+          ndbg("Failed to schedule work: %d\n", ret);
+        }
     }
 
   /* Setup the watchdog poll timer again */
@@ -857,9 +874,11 @@ static int slip_txavail(struct uip_driver_s *dev)
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
   int ret = OK;
 
-  /* Ignore the notification if the interface is not yet up */
+  /* Ignore the notification if the interface is not yet up OR if the worker
+   * action is already queued.
+   */
 
-  if (priv->bifup)
+  if (priv->bifup && priv->txwork.worker == NULL)
     {
       /* Perform a poll on the worker thread.  We cannot access standard I/O
        * from an interrupt handler.

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_close.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,11 +146,11 @@ static uint16_t netclose_interrupt(struct uip_driver_s *dev, void *pvconn,
 static inline void netclose_disconnect(FAR struct socket *psock)
 {
   struct tcp_close_s state;
-  irqstate_t flags;
+  uip_lock_t flags;
 
   /* Interrupts are disabled here to avoid race conditions */
 
-  flags = irqsave();
+  flags = uip_lock();
 
   /* Is the TCP socket in a connected state? */
 
@@ -180,7 +180,7 @@ static inline void netclose_disconnect(FAR struct socket *psock)
 
                /* Wait for the disconnect event */
 
-               (void)sem_wait(&state.cl_sem);
+               (void)uip_lockedwait(&state.cl_sem);
 
                /* We are now disconnected */
 
@@ -190,7 +190,7 @@ static inline void netclose_disconnect(FAR struct socket *psock)
         }
     }
 
-  irqrestore(flags);
+  uip_unlock(flags);
 }
 #endif
 

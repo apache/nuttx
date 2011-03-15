@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_igmpleave.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -130,7 +130,7 @@
 int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
-  irqstate_t flags;
+  uip_lock_t flags;
 
   DEBUGASSERT(dev && grpaddr);
 
@@ -146,11 +146,11 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
        * could interfere with the Leave Group.
        */
  
-      flags = irqsave();
+      flags = uip_lock();
       wd_cancel(group->wdog);
       CLR_SCHEDMSG(group->flags);
       CLR_WAITMSG(group->flags);
-      irqrestore(flags);
+      uip_unlock(flags);
 
       IGMP_STATINCR(uip_stat.igmp.leaves);
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpconn.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -208,14 +208,14 @@ void uip_tcpinit(void)
 struct uip_conn *uip_tcpalloc(void)
 {
   struct uip_conn *conn;
-  irqstate_t flags;
+  uip_lock_t flags;
 
   /* Because this routine is called from both interrupt level and
    * and from user level, we have not option but to disable interrupts
    * while accessing g_free_tcp_connections[];
    */
 
-  flags = irqsave();
+  flags = uip_lock();
 
   /* Return the entry from the head of the free list */
 
@@ -258,7 +258,7 @@ struct uip_conn *uip_tcpalloc(void)
     }
 #endif
 
-  irqrestore(flags);
+  uip_unlock(flags);
 
   /* Mark the connection allocated */
 
@@ -284,7 +284,7 @@ void uip_tcpfree(struct uip_conn *conn)
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
   struct uip_readahead_s *readahead;
 #endif
-  irqstate_t flags;
+  uip_lock_t flags;
 
   /* Because g_free_tcp_connections is accessed from user level and interrupt
    * level, code, it is necessary to keep interrupts disabled during this
@@ -292,7 +292,7 @@ void uip_tcpfree(struct uip_conn *conn)
    */
 
   DEBUGASSERT(conn->crefs == 0);
-  flags = irqsave();
+  flags = uip_lock();
 
   /* UIP_ALLOCATED means that that the connection is not in the active list
    * yet.
@@ -336,7 +336,7 @@ void uip_tcpfree(struct uip_conn *conn)
 
   conn->tcpstateflags = UIP_CLOSED;
   dq_addlast(&conn->node, &g_free_tcp_connections);
-  irqrestore(flags);
+  uip_unlock(flags);
 }
 
 /****************************************************************************
@@ -508,14 +508,14 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in6 *addr)
 int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
-  irqstate_t flags;
+  uip_lock_t flags;
   int port;
 
   /* Verify or select a local port */
 
-  flags = irqsave();
+  flags = uip_lock();
   port = uip_selectport(ntohs(addr->sin_port));
-  irqrestore(flags);
+  uip_unlock(flags);
 
   if (port < 0)
     {
@@ -566,7 +566,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr)
 int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
-  irqstate_t flags;
+  uip_lock_t flags;
   int port;
 
   /* The connection is expected to be in the UIP_ALLOCATED state.. i.e., 
@@ -583,9 +583,9 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
    * one now.
    */
 
-  flags = irqsave();
+  flags = uip_lock();
   port = uip_selectport(ntohs(conn->lport));
-  irqrestore(flags);
+  uip_unlock(flags);
 
   if (port < 0)
     {
@@ -626,9 +626,9 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
    * this operation.
    */
 
-  flags = irqsave();
+  flags = uip_lock();
   dq_addlast(&conn->node, &g_active_tcp_connections);
-  irqrestore(flags);
+  uip_unlock(flags);
 
   return OK;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_poll.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -166,7 +166,7 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
 {
   FAR struct uip_conn *conn = psock->s_conn;
   FAR struct uip_callback_s *cb;
-  irqstate_t flags;
+  uip_lock_t flags;
   int ret;
 
   /* Sanity check */
@@ -180,7 +180,7 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
 
   /* Some of the  following must be atomic */
 
-  flags = irqsave();
+  flags = uip_lock();
 
   /* Allocate a TCP/IP callback structure */
 
@@ -219,11 +219,11 @@ static inline int net_pollsetup(FAR struct socket *psock, struct pollfd *fds)
           sem_post(fds->sem);
         }
     }
-  irqrestore(flags);
+  uip_unlock(flags);
   return OK;
 
 errout_with_irq:
-  irqrestore(flags);
+  uip_unlock(flags);
   return ret;
 }
 #endif /* HAVE_NETPOLL */
@@ -247,7 +247,7 @@ static inline int net_pollteardown(FAR struct socket *psock, struct pollfd *fds)
 {
   FAR struct uip_conn *conn = psock->s_conn;
   FAR struct uip_callback_s *cb;
-  irqstate_t flags;
+  uip_lock_t flags;
 
   /* Sanity check */
 
@@ -265,9 +265,9 @@ static inline int net_pollteardown(FAR struct socket *psock, struct pollfd *fds)
     {
       /* Release the callback */
 
-      flags = irqsave();
+      flags = uip_lock();
       uip_tcpcallbackfree(conn, cb);
-      irqrestore(flags);
+      uip_unlock(flags);
 
       /* Release the poll/select data slot */
 

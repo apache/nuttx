@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/connect.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -325,7 +325,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
 #endif
 {
   struct tcp_connect_s state;
-  irqstate_t           flags;
+  uip_lock_t           flags;
   int                  ret = OK;
 
   /* Interrupts must be disabled through all of the following because
@@ -333,7 +333,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
    * setup.
    */
 
-  flags = irqsave();
+  flags = uip_lock();
 
   /* Get the connection reference from the socket */
 
@@ -356,19 +356,19 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
       if (ret >= 0)
         {
           /* Wait for either the connect to complete or for an error/timeout
-           * to occur. NOTES:  (1) sem_wait will also terminate if a signal
-           * is received, (2) interrupts are disabled!  They will be re-
+           * to occur. NOTES:  (1) uip_lockedwait will also terminate if a signal
+           * is received, (2) interrupts may be disabled!  They will be re-
            * enabled while the task sleeps and automatically re-disabled
            * when the task restarts.
            */
 
-          ret = sem_wait(&state.tc_sem);
+          ret = uip_lockedwait(&state.tc_sem);
 
           /* Uninitialize the state structure */
 
           (void)sem_destroy(&state.tc_sem);
 
-          /* If sem_wait failed, recover the negated error (probably -EINTR) */
+          /* If uip_lockedwait failed, recover the negated error (probably -EINTR) */
 
           if (ret < 0)
             {
@@ -401,7 +401,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
         }
     }
 
-    irqrestore(flags);
+    uip_unlock(flags);
     return ret;
 }
 #endif /* CONFIG_NET_TCP */

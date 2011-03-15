@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_udpconn.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -99,9 +99,9 @@ static inline void _uip_semtake(sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(sem) != 0)
+  while (uip_lockedwait(sem) != 0)
     {
-      /* The only case that an error should occr here is if
+      /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
        */
 
@@ -165,7 +165,7 @@ static uint16_t uip_selectport(void)
    * listen port number that is not being used by any other connection.
    */
 
-  irqstate_t flags = irqsave();
+  uip_lock_t flags = uip_lock();
   do
     {
       /* Guess that the next available port number will be the one after
@@ -188,7 +188,7 @@ static uint16_t uip_selectport(void)
    */
 
   portno = g_last_udp_port;
-  irqrestore(flags);
+  uip_unlock(flags);
 
   return portno;
 }
@@ -367,7 +367,7 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
 #endif
 {
   int ret = -EADDRINUSE;
-  irqstate_t flags;
+  uip_lock_t flags;
 
   /* Is the user requesting to bind to any port? */
 
@@ -382,7 +382,7 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
     {
       /* Interrupts must be disabled while access the UDP connection list */
 
-      flags = irqsave();
+      flags = uip_lock();
 
       /* Is any other UDP connection bound to this port? */
 
@@ -394,7 +394,7 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
           ret         = OK;
         }
 
-      irqrestore(flags);
+      uip_unlock(flags);
     }
   return ret;
 }
@@ -471,9 +471,9 @@ void uip_udpenable(struct uip_udp_conn *conn)
    * access it safely.
    */
 
-  irqstate_t flags = irqsave();
+  uip_lock_t flags = uip_lock();
   dq_addlast(&conn->node, &g_active_udp_connections);
-  irqrestore(flags);
+  uip_unlock(flags);
 }
 
 void uip_udpdisable(struct uip_udp_conn *conn)
@@ -483,9 +483,9 @@ void uip_udpdisable(struct uip_udp_conn *conn)
    * access it safely.
    */
 
-  irqstate_t flags = irqsave();
+  uip_lock_t flags = uip_lock();
   dq_rem(&conn->node, &g_active_udp_connections);
-  irqrestore(flags);
+  uip_unlock(flags);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */

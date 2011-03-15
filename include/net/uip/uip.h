@@ -5,7 +5,7 @@
  * are used by uIP programs as well as internal uIP structures and function
  * declarations.
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -53,6 +53,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <queue.h>
+
+#ifdef CONFIG_NET_NOINTS
+#  include <semaphore.h>
+#endif
+
 #include <arpa/inet.h>
 
 #include <net/uip/uipopt.h>
@@ -308,6 +313,51 @@ extern void uip_initialize(void);
 /* This function may be used at boot time to set the initial ip_id.*/
 
 extern void uip_setipid(uint16_t id);
+
+/* Critical section management.  The NuttX configuration setting
+ * CONFIG_NET_NOINT indicates that uIP not called from the interrupt level.
+ * If CONFIG_NET_NOINTS is defined, then these will map to semaphore
+ * controls.  Otherwise, it assumed that uIP will be called from interrupt
+ * level handling and these will map to interrupt enable/disable controls.
+ */
+
+#ifdef CONFIG_NET_NOINTS
+
+/* Semaphore based locking for non-interrupt based logic.
+ *
+ * uip_lock_t       -- Not used.  Only for compatibility
+ * uip_lockinit()   -- Initializes an underlying semaphore/mutex
+ * uip_lock()       -- Takes the semaphore().  Implements a re-entrant mutex.
+ * uip_unlock()     -- Gives the semaphore().
+ * uip_lockedwait() -- Like pthread_cond_wait(); releases the semaphore
+ *                     momemtarily to wait on another semaphore()
+ */
+
+typedef uint8_t uip_lock_t; /* Not really used */
+
+extern void uip_lockinit(void);
+extern uip_lock_t uip_lock(void);
+extern void uip_unlock(uip_lock_t flags);
+extern int uip_lockedwait(sem_t *sem);
+
+#else
+
+/* Enable/disable locking for interrupt based logic:
+ *
+ * uip_lock_t       -- The processor specific representation of interrupt state.
+ * uip_lockinit()   -- (Does not exist).
+ * uip_lock()       -- Disables interrupts.
+ * uip_unlock()     -- Conditionally restores interrupts.
+ * uip_lockedwait() -- Just wait for the semaphore.
+ */
+
+#  define uip_lock_t        irqstate_t
+#  define uip_lockinit()
+#  define uip_lock()        irqsave()
+#  define uip_unlock(f)     irqrestore(f)
+#  define uip_lockedwait(s) sem_wait(s)
+
+#endif
 
 /* uIP application functions
  *

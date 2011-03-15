@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_clone.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,12 +62,12 @@
 
 int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 {
-  irqstate_t flags;
+  uip_lock_t flags;
   int ret = OK;
 
   /* Parts of this operation need to be atomic */
 
-  flags = irqsave();
+  flags = uip_lock();
 
   /* Duplicate the socket state */
 
@@ -110,7 +110,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
       ret = -EBADF;
     }
 
-  irqrestore(flags);
+  uip_unlock(flags);
   return ret;
 }
 

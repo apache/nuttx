@@ -43,6 +43,12 @@ ifeq ($(CONFIG_NET),y)
 UIP_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c \
 	     uip_poll.c uip_chksum.c uip_callback.c
 
+# Non-interrupt level support required?
+
+ifeq ($(CONFIG_NET_NOINTS),y)
+UIP_CSRCS += uip_lock.c
+endif
+
 # ARP supported is not provided for SLIP (Ethernet only)
 
 ifneq ($(CONFIG_NET_SLIP),y)

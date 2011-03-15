@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_listen.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * A direct leverage of logic from uIP which also has b BSD style license
@@ -139,11 +139,11 @@ void uip_listeninit(void)
 
 int uip_unlisten(struct uip_conn *conn)
 {
-  irqstate_t flags;
+  uip_lock_t flags;
   int ndx;
   int ret = -EINVAL;
 
-  flags = irqsave();
+  flags = uip_lock();
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       if (uip_listenports[ndx] == conn)
@@ -154,7 +154,7 @@ int uip_unlisten(struct uip_conn *conn)
         }
     }
 
-  irqrestore(flags);
+  uip_unlock(flags);
   return ret;
 }
 
@@ -171,7 +171,7 @@ int uip_unlisten(struct uip_conn *conn)
 
 int uip_listen(struct uip_conn *conn)
 {
-  irqstate_t flags;
+  uip_lock_t flags;
   int ndx;
   int ret;
 
@@ -179,7 +179,7 @@ int uip_listen(struct uip_conn *conn)
    * is accessed from interrupt level as well.
    */
 
-  flags = irqsave();
+  flags = uip_lock();
 
   /* First, check if there is already a socket listening on this port */
 
@@ -214,7 +214,7 @@ int uip_listen(struct uip_conn *conn)
         }
     }
 
-  irqrestore(flags);
+  uip_unlock(flags);
   return ret;
 }
 

@@ -1,8 +1,9 @@
 /****************************************************************************
- * net/netdev_register.c
+ * net/uip/uip_lock.c
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,134 +39,181 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <sys/socket.h>
-#include <stdio.h>
 #include <semaphore.h>
 #include <assert.h>
-#include <string.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <net/if.h>
-#include <net/ethernet.h>
-#include <net/uip/uip-arch.h>
+#include <nuttx/arch.h>
+#include <net/uip/uip.h>
 
-#include "net_internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SLIP
-#  define NETDEV_FORMAT "sl%d"
-#else
-#  define NETDEV_FORMAT "eth%d"
-#endif
+#if defined(CONFIG_NET) && defined(CONFIG_NET_NOINTS)
 
 /****************************************************************************
- * Priviate Types
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define NO_HOLDER (pid_t)-1
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static int g_next_devnum = 0;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* List of registered ethernet device drivers */
-struct uip_driver_s *g_netdevices = NULL;
-sem_t                g_netdev_sem;
+static sem_t        g_uipsem;
+static pid_t        g_holder  = NO_HOLDER;
+static unsigned int g_count   = 0;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: netdev_semtake
+ * Function: uip_takesem
  *
  * Description:
- *   Managed access to the network device list
+ *   Take the semaphore
  *
  ****************************************************************************/
 
-void netdev_semtake(void)
+static void uip_takesem(void)
 {
-  /* Take the semaphore (perhaps waiting) */
-
-  while (uip_lockedwait(&g_netdev_sem) != 0)
+  while (sem_wait(&g_uipsem) != 0)
     {
-      /* The only case that an error should occr here is if
-       * the wait was awakened by a signal.
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(*get_errno_ptr() == EINTR);
+      ASSERT(errno == EINTR);
     }
 }
 
 /****************************************************************************
- * Function: netdev_register
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: uip_lockinit
  *
  * Description:
- *   Register a netword device driver and assign a name to it so tht it can
- *   be found in subsequent network ioctl operations on the device.
- *
- * Parameters:
- *   dev - The device driver structure to register
- *
- * Returned Value:
- *  0:Success; -1 on failure
- *
- * Assumptions:
- *  Called during system initialization from normal user mode
+ *   Initialize the locking facility
  *
  ****************************************************************************/
 
-int netdev_register(FAR struct uip_driver_s *dev)
+void uip_lockinit(void)
 {
-  if (dev)
-    {
-      int devnum;
-      netdev_semtake();
-
-      /* Assign a device name to the interface */
-
-      devnum = g_next_devnum++;
-      snprintf( dev->d_ifname, IFNAMSIZ, NETDEV_FORMAT, devnum );
-
-      /* Add the device to the list of known network devices */
-
-      dev->flink  = g_netdevices;
-      g_netdevices = dev;
-
-      /* Configure the device for IGMP support */
-
-#ifdef CONFIG_NET_IGMP
-      uip_igmpdevinit(dev);
-#endif
-      netdev_semgive();
-
-#ifdef CONFIG_NET_ETHERNET
-      nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
-             dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-             dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-             dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
-             dev->d_ifname);
-#else
-      nlldbg("Registered dev: %s\n", dev->d_ifname);
-#endif
-      return OK;
-    }
-  return -EINVAL;
+  sem_init(&g_uipsem, 0, 1);
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+/****************************************************************************
+ * Function: uip_lock
+ *
+ * Description:
+ *   Take the lock
+ *
+ ****************************************************************************/
+
+uip_lock_t uip_lock(void)
+{
+  pid_t me = getpid();
+
+  /* Does this thread already hold the semaphore? */
+
+  if (g_holder == me)
+    {
+      /* Yes.. just increment the reference count */
+
+      g_count++;
+    }
+  else
+    {
+      /* No.. take the semaphore (perhaps waiting) */
+
+      uip_takesem();
+
+      /* Now this thread holds the semaphore */
+
+      g_holder = me;
+      g_count  = 1;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Function: uip_unlock
+ *
+ * Description:
+ *   Release the lock.
+ *
+ ****************************************************************************/
+
+void uip_unlock(uip_lock_t flags)
+{
+  DEBUGASSERT(g_holder == getpid() && g_count > 0);
+
+  /* If the count would go to zero, then release the semaphore */
+
+  if (g_count == 1)
+    {
+      /* We no longer hold the semaphored */
+
+      g_holder = NO_HOLDER;
+      g_count  = 0;
+      sem_post(&g_uipsem);
+    }
+  else
+    {
+      /* We still hold the seamphore. Just decrement the count */
+
+      g_count--;
+    }
+}
+
+/****************************************************************************
+ * Function: uip_lockedwait
+ *
+ * Description:
+ *   Atomically wait for sem while temporarilty releasing.
+ *
+ ****************************************************************************/
+
+int uip_lockedwait(sem_t *sem)
+{
+  pid_t        me = getpid();
+  unsigned int count;
+  irqstate_t   flags;
+  int          ret;
+
+  flags = irqsave(); /* No interrupts */
+  sched_lock();      /* No context switches */
+  if (g_holder == me)
+    {
+      /* Release the uIP semaphore, remembering the count */
+ 
+      count    = g_count;
+      g_holder = NO_HOLDER;
+      g_count  = 0;
+      sem_post(&g_uipsem);
+
+      /* Now take semaphore */
+
+      ret = sem_wait(sem);
+
+      /* Recover the uIP semaphore at the proper count */
+
+      uip_takesem();
+      g_holder = me;
+      g_count  = count;
+    }
+  else
+    {
+      ret = sem_wait(sem);
+    }
+
+  sched_unlock();
+  irqrestore(flags);
+  return ret;
+ }
+
+#endif /* CONFIG_NET */

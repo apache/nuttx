@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sendto.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -233,7 +233,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   FAR const struct sockaddr_in *into = (const struct sockaddr_in *)to;
 #endif
   struct sendto_s state;
-  irqstate_t save;
+  uip_lock_t save;
   int ret;
 #endif
   int err;
@@ -294,7 +294,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
    * are ready.
    */
 
-  save            = irqsave();
+  save            = uip_lock();
   memset(&state, 0, sizeof(struct sendto_s));
   sem_init(&state.st_sem, 0, 0);
   state.st_buflen = len;
@@ -306,7 +306,7 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
   ret = uip_udpconnect(conn, into);
   if (ret < 0)
     {
-      irqrestore(save);
+      uip_unlock(save);
       err = -ret;
       goto errout;
     }
@@ -329,19 +329,19 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
       netdev_txnotify(&conn->ripaddr);
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
-       * NOTES:  (1) sem_wait will also terminate if a signal is received, (2)
-       * interrupts are disabled!  They will be re-enabled while the task sleeps
+       * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)
+       * interrupts may be disabled!  They will be re-enabled while the task sleeps
        * and automatically re-enabled when the task restarts.
        */
 
-      sem_wait(&state.st_sem);
+      uip_lockedwait(&state.st_sem);
 
       /* Make sure that no further interrupts are processed */
 
       uip_udpdisable(conn);
       uip_udpcallbackfree(conn, state.st_cb);
     }
-  irqrestore(save);
+  uip_unlock(save);
 
   sem_destroy(&state.st_sem);
 

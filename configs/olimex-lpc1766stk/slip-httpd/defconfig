@@ -522,6 +522,7 @@ CONFIG_MMCSD_HAVECARDDETECT=n
 # TCP/IP and UDP support via uIP
 # CONFIG_NET - Enable or disable all network features
 # CONFIG_NET_SLIP - Use the SLIP data link layer (L2)
+# CONFIG_NET_NOINT - uIP not called from interrupt level.
 # CONFIG_NET_MULTIBUFFER - Use multiple input/output buffers (probably no)
 # CONFIG_NET_IPv6 - Build in support for IPv6
 # CONFIG_NSOCKET_DESCRIPTORS - Maximum number of socket descriptors per task/thread.
@@ -548,6 +549,7 @@ CONFIG_MMCSD_HAVECARDDETECT=n
 #
 CONFIG_NET=y
 CONFIG_NET_SLIP=y
+CONFIG_NET_NOINTS=y
 CONFIG_NET_MULTIBUFFER=y
 CONFIG_NET_IPv6=n
 CONFIG_NSOCKET_DESCRIPTORS=16
