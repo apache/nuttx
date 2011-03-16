@@ -1573,3 +1573,5 @@
 	* drivers/net/slip.c -- SLIP is now basically functional on the
 	  LPC17xx with some caveats as described in the TODO list under
 	  LPC17xx.
+	* arch/x86/include/i486/irq.h -- Fix irqrestore() macro... it was not
+	  correctly re-enabling interrupts.

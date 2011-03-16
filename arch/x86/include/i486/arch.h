@@ -121,7 +121,7 @@
 #define PIC2_OCW2                0xa0
 
 #  define PIC_OCW2_ACT_SHIFT     (0)
-#  define PIC_OCW2_ACT_SHIFT     (7 << PIC_OCW2_ACT_SHIFT)
+#  define PIC_OCW2_ACT_MASK      (7 << PIC_OCW2_ACT_SHIFT)
 #    define PIC1_OCW2_ACT_IRQ0   (0 << PIC_OCW2_ACT_SHIFT) /* Act on IRQ 0 */
 #    define PIC1_OCW2_ACT_IRQ1   (1 << PIC_OCW2_ACT_SHIFT) /* Act on IRQ 1 */
 #    define PIC1_OCW2_ACT_IRQ2   (2 << PIC_OCW2_ACT_SHIFT) /* Act on IRQ 2 */
@@ -141,7 +141,7 @@
 #    define PIC2_OCW2_ACT_IRQ15  (7 << PIC_OCW2_ACT_SHIFT) /* Act on IRQ 15 */
 
 #  define PIC_OCW2_EOI_SHIFT     (5)
-#  define PIC_OCW2_EOI_SHIFT     (7 << PIC_OCW2_EOI_SHIFT)
+#  define PIC_OCW2_EOI_MASK      (7 << PIC_OCW2_EOI_SHIFT)
 #    define PIC_OCW2_EOI_AUTO    (0 << PIC_OCW2_EOI_SHIFT) /* Rotate in Auto EOI Mode (Clear) */
 #    define PIC_OCW2_EOI_NONSPEC (1 << PIC_OCW2_EOI_SHIFT) /* Non Specific EOI */
 #    define PIC_OCW2_EOI_SPEC    (3 << PIC_OCW2_EOI_SHIFT) /* Specific EOI */
@@ -171,7 +171,7 @@
 #  define PIC_OCW3_POLLCMD       (1 << 2) /* Poll command */
 #  define PIC_OCW3_ONE           (1 << 3) /* Must be set to 1 */
 #  define PIC_OCW3_SM_SHIFT      (5)
-#  define PIC_OCW3_SM_SHIFT      (3 << PIC_OCW3_SM_SHIFT)
+#  define PIC_OCW3_SM_MASK       (3 << PIC_OCW3_SM_SHIFT)
 #    define PIC_OCW3_RSM         (2 << PIC_OCW3_SM_SHIFT) /* Reset Special Mask */
 #    define PIC_OCW3_SSM         (3 << PIC_OCW3_SM_SHIFT) /* Set Special Mask */
 

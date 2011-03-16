@@ -68,7 +68,8 @@
 
 /* NOTE:  Slip requires UART hardware handshake.  If hardware handshake is
  * not available with your UART, then you might try the 'slattach' option
- * -L which is supposed to enable "3-wire operation."
+ * -L which enable "3-wire operation."  That allows operation without the
+ * hardware handshake (but with the possibility of data overrun).
  */
 
 /* Configuration ************************************************************/
@@ -93,8 +94,15 @@
 #  define CONFIG_SLIP_DEFPRIO 128
 #endif
 
-/* The Linux slip module hard-codes its MTU size to 296.  So you might as
- * well set CONFIG_NET_BUFSIZE to 296 as well.
+/* The Linux slip module hard-codes its MTU size to 296 (40 bytes for the
+ * IP+TPC headers plus 256 bytes of data).  So you might as well set
+ * CONFIG_NET_BUFSIZE to 296 as well.
+ *
+ * There may be an issue with this setting, however.  I see that Linux uses
+ * a MTU of 296 and window of 256, but actually only sends 168 bytes of data:
+ * 40 + 128.  I believe that is to allow for the 2x worst cast packet
+ * expansion.  Ideally we would like to advertise the 256 MSS, but restrict
+ * uIP to 128 bytes (possibly by modifying the uip_mss() macro).
  */
 
 #if CONFIG_NET_BUFSIZE < 296
@@ -995,6 +1003,13 @@ int slip_initialize(int intf, const char *devname)
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   (void)netdev_register(&priv->dev);
+
+  /* When the RX and TX tasks were created, the TTY file descriptor was
+   * dup'ed for each task.  This task no longer needs the file descriptor
+   * and we can safely close it.
+   */
+
+  close(priv->fd);
   return OK;
 }
 
