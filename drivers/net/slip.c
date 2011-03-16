@@ -51,13 +51,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <wdog.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/net.h>
-#include <nuttx/wqueue.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arch.h>
@@ -77,10 +75,6 @@
 
 #if UIP_LLH_LEN > 0
 #  error "UIP_LLH_LEN must be set to zero"
-#endif
-
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  warning "CONFIG_SCHED_WORKQUEUE must be set"
 #endif
 
 #ifndef CONFIG_NET_NOINTS
@@ -109,6 +103,14 @@
 #  warning "CONFIG_NET_BUFSIZE == 296 is optimal"
 #endif
 
+/* CONFIG_SLIP_NINTERFACES determines the number of physical interfaces
+ * that will be supported.
+ */
+
+#ifndef CONFIG_SLIP_NINTERFACES
+# define CONFIG_SLIP_NINTERFACES 1
+#endif
+
 /*  SLIP special character codes *******************************************/
 
 #define SLIP_END      0300    /* Indicates end of packet */
@@ -118,22 +120,10 @@
 
 /* General driver definitions **********************************************/
 
-/* CONFIG_SLIP_NINTERFACES determines the number of physical interfaces
- * that will be supported.
- */
+/* TX poll delay = 1 second = 1000000 microseconds. */
 
-#ifndef CONFIG_SLIP_NINTERFACES
-# define CONFIG_SLIP_NINTERFACES 1
-#endif
-
-/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
-
-#define SLIP_WDDELAY   (1*CLK_TCK)
+#define SLIP_WDDELAY   (1*1000000)
 #define SLIP_POLLHSEC  (1*2)
-
-/* TX timeout = 1 minute */
-
-#define SLIP_TXTIMEOUT (60*CLK_TCK)
 
 /* Statistics helper */
 
@@ -163,13 +153,12 @@ struct slip_statistics_s
 
 struct slip_driver_s
 {
-  bool          bifup;      /* true:ifup false:ifdown */
-  WDOG_ID       txpoll;     /* TX poll timer */
-  FILE         *stream;     /* The contained serial stream */
-  pid_t         pid;        /* Receiver thread ID */
+  volatile bool bifup;      /* true:ifup false:ifdown */
+  int           fd;         /* TTY file descriptor */
+  pid_t         rxpid;      /* Receiver thread ID */
+  pid_t         txpid;      /* Transmitter thread ID */
   sem_t         waitsem;    /* Mutually exclusive access to uIP */
   uint16_t      rxlen;      /* The number of bytes in rxbuf */
-  struct work_s txwork;     /* Scheduled TX work */
 
   /* Driver statistics */
 
@@ -206,17 +195,13 @@ static void slip_write(FAR struct slip_driver_s *priv, const uint8_t *buffer, in
 static void slip_putc(FAR struct slip_driver_s *priv, int ch);
 static int slip_transmit(FAR struct slip_driver_s *priv);
 static int slip_uiptxpoll(struct uip_driver_s *dev);
-static void slip_txworker(FAR void *arg);
+static void slip_txtask(int argc, char *argv[]);
 
 /* Packet receiver task */
 
 static int slip_getc(FAR struct slip_driver_s *priv);
 static inline void slip_receive(FAR struct slip_driver_s *priv);
 static int slip_rxtask(int argc, char *argv[]);
-
-/* Watchdog timer expirations */
-
-static void slip_polltimer(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -268,15 +253,11 @@ static void slip_semtake(FAR struct slip_driver_s *priv)
 static inline void slip_write(FAR struct slip_driver_s *priv,
                               const uint8_t *buffer, int len)
 {
-  int remaining = len;
+  /* Handle the case where the write is awakened by a signal */
 
-  /* Signals will be received on the worker thread.  In this case, fwrite
-   * may return with fewer then len bytes written.
-   */
-
-  while (remaining > 0)
+  while (write(priv->fd, buffer, len) < 0)
     {
-      remaining -= fwrite(&buffer[len - remaining], 1, remaining, priv->stream);
+      DEBUGASSERT(errno == EINTR);
     }
 }
 
@@ -294,17 +275,8 @@ static inline void slip_write(FAR struct slip_driver_s *priv,
 
 static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
 {
-  int ret;
-
-  /* putc will return ch unless an error occurs (included being awakened
-   * a signal on the worker thread).  Then it will return EOF.
-   */
-
-  do
-    {
-      ret = putc(ch, priv->stream);
-    }
-  while (ret != ch);
+  uint8_t buffer = (uint8_t)ch;
+  slip_write(priv, &buffer, 1);
 }
 
 /****************************************************************************
@@ -361,7 +333,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
             esc = SLIP_ESC_END;
             goto escape;
 
-          /* if it's the same code as an ESC character, we send a special two
+          /* If it's the same code as an ESC character, we send a special two
            * character code so as not to make the receiver think we sent an
            * ESC
            */
@@ -414,10 +386,6 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
   /* And send the END token */
 
   slip_putc(priv, SLIP_END);
-
-  /* Finally, flush everything to the host */
-
-  fflush(priv->stream);
   return OK;
 }
 
@@ -464,10 +432,10 @@ static int slip_uiptxpoll(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: slip_txworker
+ * Function: slip_txtask
  *
  * Description:
- *   Polling and transmission is performed on the worker thread.
+ *   Polling and transmission is performed on tx thread.
  *
  * Parameters:
  *   arg  - Reference to the NuttX driver state structure
@@ -477,26 +445,53 @@ static int slip_uiptxpoll(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void slip_txworker(FAR void *arg)
+static void slip_txtask(int argc, char *argv[])
 {
-  FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)arg;
+  FAR struct slip_driver_s *priv;
+  unsigned int index = *(argv[1]) - '0';
   uip_lock_t flags;
 
-  DEBUGASSERT(priv != NULL);
+  ndbg("index: %d\n", index);
+  DEBUGASSERT(index < CONFIG_SLIP_NINTERFACES);
 
-  /* Get exclusive access to uIP (if it it is already being used slip_rxtask,
-   * then we have to wait).
+  /* Get our private data structure instance and wake up the waiting
+   * initialization logic.
    */
 
-  slip_semtake(priv);
-
-  /* Poll uIP for new XMIT data. */
-
-  flags = uip_lock();
-  priv->dev.d_buf = priv->txbuf;
-  (void)uip_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
-  uip_unlock(flags);
+  priv = &g_slip[index];
   slip_semgive(priv);
+
+  /* Loop forever */
+
+  for (;;)
+    {
+      /* Wait for the timeout to expire (or until we are signaled by by  */
+
+      usleep(SLIP_WDDELAY);
+
+      /* Is the interface up? */
+
+      if (priv->bifup)
+        {
+          /* Get exclusive access to uIP (if it it is already being used
+           * slip_rxtask, then we have to wait).
+           */
+
+          slip_semtake(priv);
+
+          /* Poll uIP for new XMIT data. BUG:  We really need to calculate
+           * the number of hsecs!  When we are awakened by slip_txavail, the
+           * number will be smaller; when we have to wait for the semaphore
+           * (above), it may be larger.
+           */
+
+          flags = uip_lock();
+          priv->dev.d_buf = priv->txbuf;
+          (void)uip_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
+          uip_unlock(flags);
+          slip_semgive(priv);
+        }
+    }
 }
 
 /****************************************************************************
@@ -515,19 +510,14 @@ static void slip_txworker(FAR void *arg)
 
 static inline int slip_getc(FAR struct slip_driver_s *priv)
 {
-  int ret;
+  uint8_t ch;
 
-  /* It is not expected that getc will be awakened by signals on the
-   * slip_rxtask thread.  But just in case...
-   */
-
-  do
+  while (read(priv->fd, &ch, 1) < 0)
     {
-      ret = getc(priv->stream);
+      DEBUGASSERT(errno == EINTR);
     }
-  while (ret == EOF);
 
-  return ret;
+  return (int)ch;
 }
 
 /****************************************************************************
@@ -655,13 +645,10 @@ static int slip_rxtask(int argc, char *argv[])
   DEBUGASSERT(index < CONFIG_SLIP_NINTERFACES);
 
   /* Get our private data structure instance and wake up the waiting
-   * initialization logic.  The first slip_semgive() wakes up the wainter
-   * initializer; the second raises the count to 1 so that the semaphore
-   * can now be used as a mutex for mutually exclusive access to uIP.
+   * initialization logic.
    */
 
   priv = &g_slip[index];
-  slip_semgive(priv);
   slip_semgive(priv);
 
   /* Loop forever */
@@ -672,6 +659,13 @@ static int slip_rxtask(int argc, char *argv[])
 
       nvdbg("Waiting...\n");
       ch = slip_getc(priv);
+
+      /* Ignore any input that we receive before the interface is up. */
+
+      if (!priv->bifup)
+        {
+          continue;
+        }
 
       /* We have something...
        *
@@ -742,47 +736,6 @@ static int slip_rxtask(int argc, char *argv[])
 }
 
 /****************************************************************************
- * Function: slip_polltimer
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void slip_polltimer(int argc, uint32_t arg, ...)
-{
-  FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)arg;
-  int ret;
-
-  /* Perform the poll on the worker thread (if the work structure is available).
-   * We should not access standard I/O from an interrupt handler.
-   */
-
-  if (priv->txwork.worker == NULL)
-    {
-      ret = work_queue(&priv->txwork, slip_txworker, priv, 0);
-      if (ret != OK)
-        {
-          ndbg("Failed to schedule work: %d\n", ret);
-        }
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  (void)wd_start(priv->txpoll, SLIP_WDDELAY, slip_polltimer, 1, arg);
-}
-
-/****************************************************************************
  * Function: slip_ifup
  *
  * Description:
@@ -806,10 +759,6 @@ static int slip_ifup(struct uip_driver_s *dev)
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
-
-  /* Set and activate a timer process */
-
-  (void)wd_start(priv->txpoll, SLIP_WDDELAY, slip_polltimer, 1, (uint32_t)priv);
 
   /* Mark the interface up */
 
@@ -836,20 +785,10 @@ static int slip_ifup(struct uip_driver_s *dev)
 static int slip_ifdown(struct uip_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
-  irqstate_t flags;
-
-  /* Disable the interrupts */
-
-  flags = irqsave();
-
-  /* Cancel the TX poll timer and TX timeout timers */
-
-  wd_cancel(priv->txpoll);
 
   /* Mark the device "down" */
 
   priv->bifup = false;
-  irqrestore(flags);
   return OK;
 }
 
@@ -872,26 +811,17 @@ static int slip_ifdown(struct uip_driver_s *dev)
 static int slip_txavail(struct uip_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
-  int ret = OK;
 
-  /* Ignore the notification if the interface is not yet up OR if the worker
-   * action is already queued.
-   */
+  /* Ignore the notification if the interface is not yet up */
 
-  if (priv->bifup && priv->txwork.worker == NULL)
+  if (priv->bifup)
     {
-      /* Perform a poll on the worker thread.  We cannot access standard I/O
-       * from an interrupt handler.
-       */
+      /* Wake up the TX polling thread */
 
-      ret = work_queue(&priv->txwork, slip_txworker, priv, 0);
-      if (ret != OK)
-        {
-          ndbg("Failed to schedule work: %d\n", ret);
-        }
+      kill(priv->txpid, SIGALRM);
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -999,10 +929,10 @@ int slip_initialize(int intf, const char *devname)
 
   /* Open the device */
 
-  priv->stream        = fopen(devname, "rw");
-  if (priv->stream == NULL)
+  priv->fd            = open(devname, O_RDWR, 0666);
+  if (priv->fd < 0)
     {
-      ndbg("ERROR: Failed to fdopen %s: %d\n", devname, errno);
+      ndbg("ERROR: Failed to open %s: %d\n", devname, errno);
       return -errno;
     }
 
@@ -1023,13 +953,13 @@ int slip_initialize(int intf, const char *devname)
   argv[1] = NULL;
 
 #ifndef CONFIG_CUSTOM_STACK
-  priv->pid = task_create("usbhost", CONFIG_SLIP_DEFPRIO,
+  priv->rxpid = task_create("rxslip", CONFIG_SLIP_DEFPRIO,
                           CONFIG_SLIP_STACKSIZE, (main_t)slip_rxtask, argv);
 #else
-  priv->pid = task_create("usbhost", CONFIG_SLIP_DEFPRIO,
+  priv->rxpid = task_create("rxslip", CONFIG_SLIP_DEFPRIO,
                           (main_t)slip_rxtask, argv);
 #endif
-  if (priv->pid < 0)
+  if (priv->rxpid < 0)
     {
       ndbg("ERROR: Failed to start receiver task\n");
       return -errno;
@@ -1039,9 +969,28 @@ int slip_initialize(int intf, const char *devname)
 
   slip_semtake(priv);
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Start the SLIP transmitter task */
 
-  priv->txpoll       = wd_create();   /* Create periodic poll timer */
+#ifndef CONFIG_CUSTOM_STACK
+  priv->txpid = task_create("txslip", CONFIG_SLIP_DEFPRIO,
+                          CONFIG_SLIP_STACKSIZE, (main_t)slip_txtask, argv);
+#else
+  priv->txpid = task_create("txslip", CONFIG_SLIP_DEFPRIO,
+                          (main_t)slip_txtask, argv);
+#endif
+  if (priv->txpid < 0)
+    {
+      ndbg("ERROR: Failed to start receiver task\n");
+      return -errno;
+    }
+
+  /* Wait and make sure that the transmit task is started. */
+
+  slip_semtake(priv);
+
+  /* Bump the semaphore count so that it can now be used as a mutex */
+
+  slip_semgive(priv);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

@@ -430,8 +430,8 @@ extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blc
 /* Restart the current connection, if is has previously been stopped
  * with uip_stop().
  *
- * This function will open the receiver's window again so that we
- * start receiving data for the current connection.
+ * This function will open the receiver's window again so that we start
+ * receiving data for the current connection.
  */
 
 #define uip_restart(conn,f) \
@@ -446,13 +446,12 @@ extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blc
 
 #define uip_initialmss(conn) ((conn)->initialmss)
 
-/* Get the current maxium segment size that can be sent on the current
+/* Get the current maximum segment size that can be sent on the current
  * connection.
  *
- * The current maxiumum segment size that can be sent on the
- * connection is computed from the receiver's window and the MSS of
- * the connection (which also is available by calling
- * uip_initialmss()).
+ * The current maxiumum segment size that can be sent on the connection is
+ * computed from the receiver's window and the MSS of the connection (which
+ * also is available by calling uip_initialmss()).
  */
 
 #define uip_mss(conn) ((conn)->mss)
