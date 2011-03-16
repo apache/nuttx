@@ -178,16 +178,16 @@ uint32_t *irq_handler(uint32_t *regs)
    * involved the slave.
    */
 
-  if (irq >= 40)
+  if (irq >= IRQ8)
     {
       /* Send reset signal to slave */
 
-      idt_outb(0x20, 0xa0);
+      idt_outb(PIC_OCW2_EOI_NONSPEC, PIC2_OCW2);
     }
 
   /* Send reset signal to master */
 
-  idt_outb(0x20, 0x20);
+  idt_outb(PIC_OCW2_EOI_NONSPEC, PIC1_OCW2);
 
   /* Dispatch the interrupt */
 

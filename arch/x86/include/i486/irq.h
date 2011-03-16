@@ -135,9 +135,17 @@ static inline irqstate_t irqflags()
   return flags;
 }
 
-/* Get a sample of the FLAGS register, determine if interrupts are disabled */
+/* Get a sample of the FLAGS register, determine if interrupts are disabled.
+ * If the X86_FLAGS_IF is cleared by cli, then interrupts are disabled.  If
+ * if the X86_FLAGS_IF is set by sti, then interrupts are enable.
+ */
 
 static inline bool irqdisabled(irqstate_t flags)
+{
+  return ((flags & X86_FLAGS_IF) == 0);
+}
+
+static inline bool irqenabled(irqstate_t flags)
 {
   return ((flags & X86_FLAGS_IF) != 0);
 }
@@ -169,9 +177,9 @@ static inline irqstate_t irqsave(void)
 
 static inline void irqrestore(irqstate_t flags)
 {
-  if (irqdisabled(flags))
+  if (irqenabled(flags))
     {
-      irqdisable();
+      irqenable();
     }
 }
 
