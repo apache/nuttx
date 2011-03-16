@@ -24,7 +24,7 @@ NuttX TODO List (Last updated March 15, 2011)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
-  (3)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
+  (4)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (2)  ARM/LPC313x (arch/arm/src/lpc313x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
@@ -778,6 +778,14 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
                nothing is visible on the display.
   Status:      Open
   Priority:    Medium-Low (unless you need the display on the LPC1766STK!)
+
+  Description: SLIP (Configuration olimex-lpc1766stk/slip-httpd) only works with VERBOSE
+               debug disabled.  For some reason, certain debug statements hang(?).
+               Also, this example does not use UART1's hardware flow control.  UART1
+               hardware flow control is partially implemented but does not behave as
+               expected.  It needs a little more work.
+  Status:      Open
+  Priority:    Low
 
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

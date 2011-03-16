@@ -838,11 +838,18 @@ Where <subdir> is one of the following:
 
        $ tcpdump -n -nn -i sl0 -x -X -s 1500
 
-    NOTES:  Only UART1 supports the hardware handshake.  If hardware
+    NOTE: Only UART1 supports the hardware handshake.  If hardware
     handshake is not available, then you might try the slattach option
     -L which is supposed to enable "3-wire operation."
 
-  thttpd:
+    NOTE: This configurat only works with VERBOSE debug disabled.  For some
+    reason, certain debug statements hang(?).
+    
+    NOTE: This example does not use UART1's hardware flow control.  UART1
+    hardware flow control is partially implemented but does not behave as
+    expected.  It needs a little more work.
+
+ thttpd:
     This builds the THTTPD web server example using the THTTPD and
     the examples/thttpd application.
 
