@@ -56,55 +56,55 @@
 
 /* ISR and IRQ numbers */
 
-#define ISR0     0
-#define ISR1     1
-#define ISR2     2
-#define ISR3     3
-#define ISR4     4
-#define ISR5     5
-#define ISR6     6
-#define ISR7     7
-#define ISR8     8
-#define ISR9     9
-#define ISR10   10
-#define ISR11   11
-#define ISR12   12
-#define ISR13   13
-#define ISR14   14
-#define ISR15   15
-#define ISR16   16
-#define ISR17   17
-#define ISR18   18
-#define ISR19   19
-#define ISR20   20
-#define ISR21   21
-#define ISR22   22
-#define ISR23   23
-#define ISR24   24
-#define ISR25   25
-#define ISR26   26
-#define ISR27   27
-#define ISR28   28
-#define ISR29   29
-#define ISR30   30
-#define ISR31   31
+#define ISR0     0 /* Division by zero exception */
+#define ISR1     1 /* Debug exception */
+#define ISR2     2 /* Non maskable interrupt */
+#define ISR3     3 /* Breakpoint exception */
+#define ISR4     4 /* 'Into detected overflow' */
+#define ISR5     5 /* Out of bounds exception */
+#define ISR6     6 /* Invalid opcode exception */
+#define ISR7     7 /* No coprocessor exception */
+#define ISR8     8 /* Double fault (pushes an error code) */
+#define ISR9     9 /* Coprocessor segment overrun */
+#define ISR10   10 /* Bad TSS (pushes an error code) */
+#define ISR11   11 /* Segment not present (pushes an error code) */
+#define ISR12   12 /* Stack fault (pushes an error code) */
+#define ISR13   13 /* General protection fault (pushes an error code) */
+#define ISR14   14 /* Page fault (pushes an error code) */
+#define ISR15   15 /* Unknown interrupt exception */
+#define ISR16   16 /* Coprocessor fault */
+#define ISR17   17 /* Alignment check exception */
+#define ISR18   18 /* Machine check exception */
+#define ISR19   19 /* Reserved */
+#define ISR20   20 /* Reserved */
+#define ISR21   21 /* Reserved */
+#define ISR22   22 /* Reserved */
+#define ISR23   23 /* Reserved */
+#define ISR24   24 /* Reserved */
+#define ISR25   25 /* Reserved */
+#define ISR26   26 /* Reserved */
+#define ISR27   27 /* Reserved */
+#define ISR28   28 /* Reserved */
+#define ISR29   29 /* Reserved */
+#define ISR30   30 /* Reserved */
+#define ISR31   31 /* Reserved */
 
-#define IRQ0    32
-#define IRQ1    33
-#define IRQ2    34
-#define IRQ3    35
-#define IRQ4    36
-#define IRQ5    37
-#define IRQ6    38
-#define IRQ7    39
-#define IRQ8    40
-#define IRQ9    41
-#define IRQ10   42
-#define IRQ11   43
-#define IRQ12   44
-#define IRQ13   45
-#define IRQ14   46
-#define IRQ15   47
+#define IRQ0    32 /* System timer (cannot be changed) */
+#define IRQ1    33 /* Keyboard controller (cannot be changed) */
+#define IRQ2    34 /* Cascaded signals from IRQs 8–15 */
+#define IRQ3    35 /* Serial port controller for COM2/4 */
+#define IRQ4    36 /* serial port controller for COM1/3 */
+#define IRQ5    37 /* LPT port 2 or sound card */
+#define IRQ6    38 /* Floppy disk controller */
+#define IRQ7    39 /* LPT port 1 or sound card */
+#define IRQ8    40 /* Real time clock (RTC) */
+#define IRQ9    41 /* Open interrupt/available or SCSI host adapter */
+#define IRQ10   42 /* Open interrupt/available or SCSI or NIC */
+#define IRQ11   43 /* Open interrupt/available or SCSI or NIC */
+#define IRQ12   44 /* Mouse on PS/2 connector */
+#define IRQ13   45 /* Math coprocessor */
+#define IRQ14   46 /* Primary ATA channel */
+#define IRQ15   47 /* Secondary ATA channel */
 
 #define NR_IRQS 48
 
@@ -137,6 +137,25 @@
 
 #define XCPTCONTEXT_REGS (16)
 #define XCPTCONTEXT_SIZE (4 * XCPTCONTEXT_REGS)
+
+/* Some special landmarks in the stack frame:
+ *
+ * TOP_PUSHA - The offset (in 32-bit words) from the beginning of the
+ *   save area on the stack to the value that should be in REG_ESP.
+ * BOTTOM_PUSHA - The offset (in 32-bit words) from the stack position before
+ *   the interrupt occurred to the value that should be in REG_ESP.
+ *   save area on the stack to the value that should be in REG_ESP.
+ * OFFSET_PRIO - The offset from the value of REG_ESP to the value of the
+ *   stack pointer before the interrupt occurred (assuming that a priority
+ *   change occurred.
+ * OFFSET_PRIO - The offset from the value of REG_ESP to the value of the
+ *   stack pointer before the interrupt occurred (assuming that NO priority
+ *   change occurred.
+ */
+
+#define TOP_PUSHA    	 REG_IRQNO
+#define BOTTOM_PRIO      (XCPTCONTEXT_REGS-REG_IRQNO)
+#define BOTTOM_NOPRIO    (REG_SP-REG_IRQNO)
 
 /****************************************************************************
  * Public Types

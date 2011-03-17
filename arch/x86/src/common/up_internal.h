@@ -80,7 +80,6 @@
  * referenced is passed to get the state from the TCB.
  */
 
-#define up_savestate(regs)    up_copystate(regs, current_regs)
 #define up_restorestate(regs) (current_regs = regs)
 
 /****************************************************************************
@@ -150,6 +149,7 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 extern void up_boot(void);
 extern void up_copystate(uint32_t *dest, uint32_t *src);
+extern void up_savestate(uint32_t *regs);
 extern void up_decodeirq(uint32_t *regs);
 extern void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA

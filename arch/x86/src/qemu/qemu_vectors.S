@@ -266,7 +266,6 @@ irq_common:
 
 	popa						/* Pops edi,esi,ebp... */
 	add		$8, %esp			/* Cleans up the pushed error code and pushed ISR number */
-	sti
-	iret						/* Pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP */
+	iret						/* Pops 3-5 things at once: CS, EIP, EFLAGS (and maybe SS and ESP) */
 	.size	irq_common, . - irq_common
 	.end

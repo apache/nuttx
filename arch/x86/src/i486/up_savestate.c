@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/x86/src/i486/up_initialstate.c
+ * arch/x86/src/i486/up_savestate.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,14 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <string.h>
+#include <debug.h>
 
-#include <nuttx/arch.h>
 #include <arch/arch.h>
+#include <arch/irq.h>
 
 #include "up_internal.h"
-#include "up_arch.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,53 +61,53 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 /****************************************************************************
- * Name: up_initial_state
+ * Name: up_savestate
  *
  * Description:
- *   A new thread is being started and a new TCB has been created. This
- *   function is called to initialize the processor specific portions of the
- *   new TCB.
- *
- *   This function must setup the intial architecture registers and/or stack
- *   so that execution will begin at tcb->start on the next context switch.
+ *   This function saves the interrupt level context information in the
+ *   TCB.  This would just be a up_copystate but we have to handle one
+ *   special case.  In the case where the privilige level changes, the
+ *   value of sp and ss will not be saved on stack by the interrupt handler.
+ *   So, in that case, we will have to fudge those values here.
  *
  ****************************************************************************/
 
-void up_initial_state(_TCB *tcb)
+void up_savestate(uint32_t *regs)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
+  uint8_t cpl;
+  uint8_t rpl;
+  
+  /* First, just copy all of the registers */
 
-  /* Initialize the initial exception register context structure */
+  up_copystate(regs, current_regs);
 
-  memset(xcp, 0, sizeof(struct xcptcontext));
-
-  /* Save the initial stack pointer... the value of the stackpointer before
-   * the "interrupt occurs."  We don't know the value of REG_ESP yet..
-   * that depends on if a priority change is required or not.
+  /* The RES_SP and REG_SS values will not be saved by the interrupt handling
+   * logic if there is no change in privilege level.  In that case, we will
+   * have to "fudge" those values here.  For now, just overwrite the REG_SP
+   * and REG_SS values with what we believe to be correct.  Obviously, this
+   * will have to change in the future to support multi-segment operation.
+   *
+   * Check for a change in privilege level.
    */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+  rpl = regs[REG_CS] & 3;
+  cpl = up_getcs() & 3;
+  DEBUGASSERT(rpl >= cpl);
 
-  /* Save the task entry point */
+  if (rpl == cpl)
+    {
+      /* No priority change, SP and SS are not present in the stack frame.
+       *
+       * The value saved in the REG_ESP will be the stackpointer value prior to
+       * the execution of the PUSHA.  It will point at REG_IRQNO.
+       */
 
-  xcp->regs[REG_EIP]     = (uint32_t)tcb->start;
-
-  /* Set up the segment registers... assume the same segment as the caller.
-   * That is not a good assumption in the long run.
-   */
-
-  xcp->regs[REG_DS]      = up_getds();
-  xcp->regs[REG_CS]      = up_getcs();
-  xcp->regs[REG_SS]      = up_getss();
-
-  /* Enable or disable interrupts, based on user configuration.  If the IF
-   * bit is set, maskable interrupts will be enabled.
-   */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_EFLAGS]  = X86_FLAGS_IF;
-#endif
+      regs[REG_SP] = current_regs[REG_ESP] + 4*BOTTOM_NOPRIO;
+      regs[REG_SS] = up_getss();
+    }
+  else
+    {
+	  DEBUGASSERT(regs[REG_SP] == current_regs[REG_ESP] + 4*BOTTOM_PRIO);
+	}
 }
-
