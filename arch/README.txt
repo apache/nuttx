@@ -271,8 +271,6 @@ arch/x86 - Intel x86 architectures
     arch/x86/include/qemu and arch/x86/src/qemu
         This is the implementation of NuttX on the QEMU x86 simulation.
 
-    STATUS:  This is a work in progress and not yet ready for prime time.
-
 arch/z16 - ZiLOG 16-bit processors
     This directory holds related, 16-bit architectures from ZiLOG.  At
     present, this includes the following subdirectories:

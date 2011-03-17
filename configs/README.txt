@@ -585,8 +585,20 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_ENC28J60_STATS - Collect network statistics
 		CONFIG_ENC28J60_HALFDUPPLEX - Default is full duplex
 
-	TCP/IP and UDP support via uIP
+	Networking support via uIP
 		CONFIG_NET - Enable or disable all network features
+		CONFIG_NET_NOINTS --  CONFIG_NET_NOINT indicates that uIP not called from
+		  the interrupt level.  If CONFIG_NET_NOINTS is defined, critical sections
+		  will be managed with semaphores; Otherwise, it assumed that uIP will be
+		  called from interrupt level handling and critical sections will be
+		  managed by enabling and disabling interrupts.
+		CONFIG_NET_MULTIBUFFER - Traditionally, uIP has used a single buffer
+		  for all incoming and outgoing traffic.  If this configuration is
+		  selected, then the driver can manage multiple I/O buffers and can,
+		  for example, be filling one input buffer while sending another
+		  output buffer.  Or, as another example, the driver may support
+		  queuing of concurrent input/ouput and output transfers for better
+		  performance.
 		CONFIG_NET_IPv6 - Build in support for IPv6
 		CONFIG_NSOCKET_DESCRIPTORS - Maximum number of socket descriptors
 		per task/thread.
@@ -631,6 +643,36 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NET_MULTICAST - Outgoing multi-cast address support
 		CONFIG_NET_FWCACHE_SIZE - number of packets to remember when
 		  looking for duplicates
+
+	SLIP Driver.  SLIP supports point-to-point IP communications over a serial
+		port.  The default data link layer for uIP is Ethernet. If CONFIG_NET_SLIP
+		is defined in the NuttX configuration file, then SLIP will be supported.
+		The basic differences between the SLIP and Ethernet configurations is that
+		when SLIP is selected: 
+
+		* The link level header (that comes before the IP header) is omitted. 
+		* All MAC address processing is suppressed. 
+		* ARP is disabled.
+
+		If CONFIG_NET_SLIP is not selected, then Ethernet will be used (there is
+		no need to define anything special in the configuration file to use
+		Ethernet -- it is the default). 
+
+		CONFIG_NET_SLIP -- Enables building of the SLIP driver. SLIP requires
+		  at least one IP protocols selected and the following additional
+		  network settings: CONFIG_NET_NOINTS and CONFIG_NET_MULTIBUFFER.
+		  CONFIG_NET_BUFSIZE *must* be set to 296.  Other optional configuration
+		  settings that affect the SLIP driver: CONFIG_NET_STATISTICS. 
+		  Default: Ethernet
+
+		If SLIP is selected, then the following SLIP options are available:
+
+		CONFIG_CLIP_NINTERFACES -- Selects the number of physical SLIP
+		  interfaces to support.  Default: 1
+		CONFIG_SLIP_STACKSIZE -- Select the stack size of the SLIP RX and
+		  TX tasks.  Default: 2048
+		CONFIG_SLIP_DEFPRIO - The priority of the SLIP RX and TX tasks.
+		  Default: 128
 
 	UIP Network Utilities
 		CONFIG_NET_DHCP_LIGHT - Reduces size of DHCP

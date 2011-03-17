@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 15, 2011</p>
+      <p>Last Updated: March 16, 2011</p>
     </td>
   </tr>
 </table>
@@ -2200,6 +2200,8 @@ nuttx-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * drivers/net/slip.c -- SLIP is now basically functional on the
       LPC17xx with some caveats as described in the TODO list under
       LPC17xx.
+    * arch/x86/include/i486/irq.h -- Fix irqrestore() macro... it was not
+      correctly re-enabling interrupts.
 
 apps-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

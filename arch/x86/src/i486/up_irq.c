@@ -64,8 +64,8 @@
 
 static void idt_outb(uint8_t val, uint16_t addr) __attribute__((noinline));
 static void up_remappic(void);
-static void up_idtentry(struct idt_entry_s *entry, uint32_t base,
-                        uint16_t sel, uint8_t flags);
+static void up_idtentry(unsigned int index, uint32_t base, uint16_t sel,
+                        uint8_t flags);
 static inline void up_idtinit(void);
 
 /****************************************************************************
@@ -153,9 +153,11 @@ static void up_remappic(void)
  *
  ****************************************************************************/
 
-static void up_idtentry(struct idt_entry_s *entry, uint32_t base,
-                        uint16_t sel, uint8_t flags)
+static void up_idtentry(unsigned int index, uint32_t base, uint16_t sel,
+                       uint8_t flags)
 {
+  struct idt_entry_s *entry = &idt_entries[index];
+
   entry->lobase = base & 0xffff;
   entry->hibase = (base >> 16) & 0xffff;
 
@@ -189,56 +191,66 @@ static inline void up_idtinit(void)
 
   memset(&idt_entries, 0, sizeof(struct idt_entry_s)*256);
 
+  /* Re-map the PIC */
+
   up_remappic();
 
-  up_idtentry(&idt_entries[0],  (uint32_t)vector_isr0 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[1],  (uint32_t)vector_isr1 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[2],  (uint32_t)vector_isr2 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[3],  (uint32_t)vector_isr3 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[4],  (uint32_t)vector_isr4 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[5],  (uint32_t)vector_isr5 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[6],  (uint32_t)vector_isr6 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[7],  (uint32_t)vector_isr7 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[8],  (uint32_t)vector_isr8 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[9],  (uint32_t)vector_isr9 , 0x08, 0x8e);
-  up_idtentry(&idt_entries[10], (uint32_t)vector_isr10, 0x08, 0x8e);
-  up_idtentry(&idt_entries[11], (uint32_t)vector_isr11, 0x08, 0x8e);
-  up_idtentry(&idt_entries[12], (uint32_t)vector_isr12, 0x08, 0x8e);
-  up_idtentry(&idt_entries[13], (uint32_t)vector_isr13, 0x08, 0x8e);
-  up_idtentry(&idt_entries[14], (uint32_t)vector_isr14, 0x08, 0x8e);
-  up_idtentry(&idt_entries[15], (uint32_t)vector_isr15, 0x08, 0x8e);
-  up_idtentry(&idt_entries[16], (uint32_t)vector_isr16, 0x08, 0x8e);
-  up_idtentry(&idt_entries[17], (uint32_t)vector_isr17, 0x08, 0x8e);
-  up_idtentry(&idt_entries[18], (uint32_t)vector_isr18, 0x08, 0x8e);
-  up_idtentry(&idt_entries[19], (uint32_t)vector_isr19, 0x08, 0x8e);
-  up_idtentry(&idt_entries[20], (uint32_t)vector_isr20, 0x08, 0x8e);
-  up_idtentry(&idt_entries[21], (uint32_t)vector_isr21, 0x08, 0x8e);
-  up_idtentry(&idt_entries[22], (uint32_t)vector_isr22, 0x08, 0x8e);
-  up_idtentry(&idt_entries[23], (uint32_t)vector_isr23, 0x08, 0x8e);
-  up_idtentry(&idt_entries[24], (uint32_t)vector_isr24, 0x08, 0x8e);
-  up_idtentry(&idt_entries[25], (uint32_t)vector_isr25, 0x08, 0x8e);
-  up_idtentry(&idt_entries[26], (uint32_t)vector_isr26, 0x08, 0x8e);
-  up_idtentry(&idt_entries[27], (uint32_t)vector_isr27, 0x08, 0x8e);
-  up_idtentry(&idt_entries[28], (uint32_t)vector_isr28, 0x08, 0x8e);
-  up_idtentry(&idt_entries[29], (uint32_t)vector_isr29, 0x08, 0x8e);
-  up_idtentry(&idt_entries[30], (uint32_t)vector_isr30, 0x08, 0x8e);
-  up_idtentry(&idt_entries[31], (uint32_t)vector_isr31, 0x08, 0x8e);
-  up_idtentry(&idt_entries[32], (uint32_t)vector_irq0,  0x08, 0x8e);
-  up_idtentry(&idt_entries[33], (uint32_t)vector_irq1,  0x08, 0x8e);
-  up_idtentry(&idt_entries[34], (uint32_t)vector_irq2,  0x08, 0x8e);
-  up_idtentry(&idt_entries[35], (uint32_t)vector_irq3,  0x08, 0x8e);
-  up_idtentry(&idt_entries[36], (uint32_t)vector_irq4,  0x08, 0x8e);
-  up_idtentry(&idt_entries[37], (uint32_t)vector_irq5,  0x08, 0x8e);
-  up_idtentry(&idt_entries[38], (uint32_t)vector_irq6,  0x08, 0x8e);
-  up_idtentry(&idt_entries[39], (uint32_t)vector_irq7,  0x08, 0x8e);
-  up_idtentry(&idt_entries[40], (uint32_t)vector_irq8,  0x08, 0x8e);
-  up_idtentry(&idt_entries[41], (uint32_t)vector_irq9,  0x08, 0x8e);
-  up_idtentry(&idt_entries[42], (uint32_t)vector_irq10, 0x08, 0x8e);
-  up_idtentry(&idt_entries[43], (uint32_t)vector_irq11, 0x08, 0x8e);
-  up_idtentry(&idt_entries[44], (uint32_t)vector_irq12, 0x08, 0x8e);
-  up_idtentry(&idt_entries[45], (uint32_t)vector_irq13, 0x08, 0x8e);
-  up_idtentry(&idt_entries[46], (uint32_t)vector_irq14, 0x08, 0x8e);
-  up_idtentry(&idt_entries[47], (uint32_t)vector_irq15, 0x08, 0x8e);
+  /* Set each ISR/IRQ to the appropriate vector with selector=8 and with
+   * 32-bit interrupt gate.  Interrupt gate (vs. trap gate) will leave
+   * interrupts enabled when the IRS/IRQ handler is entered.
+   */
+
+  up_idtentry(ISR0,  (uint32_t)vector_isr0 , 0x08, 0x8e);
+  up_idtentry(ISR1,  (uint32_t)vector_isr1 , 0x08, 0x8e);
+  up_idtentry(ISR2,  (uint32_t)vector_isr2 , 0x08, 0x8e);
+  up_idtentry(ISR3,  (uint32_t)vector_isr3 , 0x08, 0x8e);
+  up_idtentry(ISR4,  (uint32_t)vector_isr4 , 0x08, 0x8e);
+  up_idtentry(ISR5,  (uint32_t)vector_isr5 , 0x08, 0x8e);
+  up_idtentry(ISR6,  (uint32_t)vector_isr6 , 0x08, 0x8e);
+  up_idtentry(ISR7,  (uint32_t)vector_isr7 , 0x08, 0x8e);
+  up_idtentry(ISR8,  (uint32_t)vector_isr8 , 0x08, 0x8e);
+  up_idtentry(ISR9,  (uint32_t)vector_isr9 , 0x08, 0x8e);
+  up_idtentry(ISR10, (uint32_t)vector_isr10, 0x08, 0x8e);
+  up_idtentry(ISR11, (uint32_t)vector_isr11, 0x08, 0x8e);
+  up_idtentry(ISR12, (uint32_t)vector_isr12, 0x08, 0x8e);
+  up_idtentry(ISR13, (uint32_t)vector_isr13, 0x08, 0x8e);
+  up_idtentry(ISR14, (uint32_t)vector_isr14, 0x08, 0x8e);
+  up_idtentry(ISR15, (uint32_t)vector_isr15, 0x08, 0x8e);
+  up_idtentry(ISR16, (uint32_t)vector_isr16, 0x08, 0x8e);
+  up_idtentry(ISR17, (uint32_t)vector_isr17, 0x08, 0x8e);
+  up_idtentry(ISR18, (uint32_t)vector_isr18, 0x08, 0x8e);
+  up_idtentry(ISR19, (uint32_t)vector_isr19, 0x08, 0x8e);
+  up_idtentry(ISR20, (uint32_t)vector_isr20, 0x08, 0x8e);
+  up_idtentry(ISR21, (uint32_t)vector_isr21, 0x08, 0x8e);
+  up_idtentry(ISR22, (uint32_t)vector_isr22, 0x08, 0x8e);
+  up_idtentry(ISR23, (uint32_t)vector_isr23, 0x08, 0x8e);
+  up_idtentry(ISR24, (uint32_t)vector_isr24, 0x08, 0x8e);
+  up_idtentry(ISR25, (uint32_t)vector_isr25, 0x08, 0x8e);
+  up_idtentry(ISR26, (uint32_t)vector_isr26, 0x08, 0x8e);
+  up_idtentry(ISR27, (uint32_t)vector_isr27, 0x08, 0x8e);
+  up_idtentry(ISR28, (uint32_t)vector_isr28, 0x08, 0x8e);
+  up_idtentry(ISR29, (uint32_t)vector_isr29, 0x08, 0x8e);
+  up_idtentry(ISR30, (uint32_t)vector_isr30, 0x08, 0x8e);
+  up_idtentry(ISR31, (uint32_t)vector_isr31, 0x08, 0x8e);
+
+  up_idtentry(IRQ0,  (uint32_t)vector_irq0,  0x08, 0x8e);
+  up_idtentry(IRQ1,  (uint32_t)vector_irq1,  0x08, 0x8e);
+  up_idtentry(IRQ2,  (uint32_t)vector_irq2,  0x08, 0x8e);
+  up_idtentry(IRQ3,  (uint32_t)vector_irq3,  0x08, 0x8e);
+  up_idtentry(IRQ4,  (uint32_t)vector_irq4,  0x08, 0x8e);
+  up_idtentry(IRQ5,  (uint32_t)vector_irq5,  0x08, 0x8e);
+  up_idtentry(IRQ6,  (uint32_t)vector_irq6,  0x08, 0x8e);
+  up_idtentry(IRQ7,  (uint32_t)vector_irq7,  0x08, 0x8e);
+  up_idtentry(IRQ8,  (uint32_t)vector_irq8,  0x08, 0x8e);
+  up_idtentry(IRQ9,  (uint32_t)vector_irq9,  0x08, 0x8e);
+  up_idtentry(IRQ10, (uint32_t)vector_irq10, 0x08, 0x8e);
+  up_idtentry(IRQ11, (uint32_t)vector_irq11, 0x08, 0x8e);
+  up_idtentry(IRQ12, (uint32_t)vector_irq12, 0x08, 0x8e);
+  up_idtentry(IRQ13, (uint32_t)vector_irq13, 0x08, 0x8e);
+  up_idtentry(IRQ14, (uint32_t)vector_irq14, 0x08, 0x8e);
+  up_idtentry(IRQ15, (uint32_t)vector_irq15, 0x08, 0x8e);
+
+  /* Then program the IDT */
 
   idt_flush((uint32_t)&idt_ptr);
 }
