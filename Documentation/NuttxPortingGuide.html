@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 12, 2011</p>
+      <p>Last Updated: March 16, 2011</p>
     </td>
   </tr>
 </table>
@@ -3305,16 +3305,17 @@ build
   </li>
   <li>
     <code>CONFIG_NET_SLIP</code>: Selects the Serial Line Internet Protocol (SLIP) data link layer.
-     The default data link layer for uIP is Ethernet.
-     If <code>CONFIG_NET_SLIP</code> is defined in the NuttX header file, then SLIP will be supported.
-     The basic differences between the SLIP and Ethernet configurations is that when SLIP is selected:
-     <ul>
-       <li>The link level header (that comes before the IP header) is omitted.</li>
-       <li>All MAC address processing is suppressed.</li>
-       <li>ARP is disabled.</li>
-     </ul>
-     If <code>CONFIG_NET_SLIP</code> is not supported, then Ethernet will be used
-     (there is no need to define anything special in the configuration file to use Ethernet -- it is the default).
+     (This selection is discussed further <a href="#slipdriver">below</a>).
+  </li>
+  <li>
+    <code>CONFIG_NET_NOINTS</code>: <code>CONFIG_NET_NOINT</code> indicates that uIP not called from the interrupt level.
+    If <code>CONFIG_NET_NOINTS</code> is defined, critical sections will be managed with semaphores;
+    Otherwise, it assumed that uIP will be called from interrupt level handling and critical sections will be managed by enabling and disabling interrupts.
+  </li>
+  <li>
+    <code>CONFIG_NET_MULTIBUFFER</code>: Traditionally, uIP has used a single buffer for all incoming and outgoing traffic.
+    If this configuration is selected, then the driver can manage multiple I/O buffers and can, for example, be filling one input buffer while sending another output buffer.
+    Or, as another example, the driver may support queuing of concurrent input/ouput and output transfers for better performance.
   </li>
   <li>
     <code>CONFIG_NET_IPv6</code>: Build in support for IPv6
@@ -3405,6 +3406,43 @@ build
   </li>
   <li>
     <code>CONFIG_NET_FWCACHE_SIZE</code>: number of packets to remember when looking for duplicates
+  </li>
+</ul>
+
+<h3><a name="slipdriver">SLIP</a></h3>
+<p>
+  The NuttX SLIP driver supports point-to-point IP communications over a serial port.
+  The default data link layer for uIP is Ethernet.
+  If <code>CONFIG_NET_SLIP</code> is defined in the NuttX configuration file, then SLIP will be supported.
+  The basic differences between the SLIP and Ethernet configurations is that when SLIP is selected:
+   <ul>
+     <li>The link level header (that comes before the IP header) is omitted.</li>
+     <li>All MAC address processing is suppressed.</li>
+     <li>ARP is disabled.</li>
+   </ul>
+   If <code>CONFIG_NET_SLIP</code> is not selected, then Ethernet will be used
+   (there is no need to define anything special in the configuration file to use Ethernet -- it is the default).
+</p>
+<ul>
+  <li>
+    <code>CONFIG_NET_SLIP</code>: Enables building of the SLIP driver.
+    SLIP requires at least one IP protocols selected and the following additional network settings: <code>CONFIG_NET_NOINTS</code> and <code>CONFIG_NET_MULTIBUFFER</code>.
+    <code>CONFIG_NET_BUFSIZE</code> <i>must</i> be set to 296.
+    Other optional configuration settings that affect the SLIP driver: <code>CONFIG_NET_STATISTICS</code>.
+    Default: Ethernet.
+  </li>
+  <p>
+    If SLIP is selected, then the following SLIP options are available:
+  </p>
+  <li>
+    <code>CONFIG_CLIP_NINTERFACES</code>: Selects the number of physical SLIP interfaces to support.  Default: 1
+  </li>
+  <li>
+    <code>CONFIG_SLIP_STACKSIZE</code>: Select the stack size of the SLIP RX and TX tasks.  Default: 2048
+  </li>
+  <li>
+    <code>CONFIG_SLIP_DEFPRIO</code>: The priority of the SLIP RX and TX tasks. Default: 128
+  </li>
   </li>
 </ul>
 
