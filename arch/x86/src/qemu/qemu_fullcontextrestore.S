@@ -106,26 +106,43 @@ up_fullcontextrestore:
 
 	cli
 
-	/* We now have everything we need from the old stack.  Now get the new
-	 * stack pointer.
+	/* Get the value of the stack pointer as it was when the pusha was
+	 * executed the interrupt handler.
 	 */
 
 	movl	(4*REG_SP)(%eax), %esp
 
 	/* Create an interrupt stack frame for the final iret.
 	 *
-	 * SP Before -> 
-	 *              SS
-	 *              ESP
-	 *              EFLAGS
-	 *              CS
-	 * SP After  -> EIP
+	 *
+	 *							IRET STACK
+	 *				PRIO CHANGE			No PRIO CHANGE
+	 *				---------------		-----------------
+	 * SP Before 	->
+	 * 				   SS				   EFLAGS
+	 *				   ESP				   CS
+	 *				   EFLAGS			-> EIP
+	 *				   CS				   ...
+	 * SP After		-> EIP
+	 *
+	 * So, first check for a priority change.
 	 */
+
+	movl	(4*REG_CS)(%eax), %edx
+	andl	$3, %edx
+	mov		%cs, %ebx
+	andl	$3, %ebx
+	cmpb	%bl, %dl
+	je		.Lnopriochange
+
+	/* The priority will change... put SS and ESP on the stack */
 
 	mov		(4*REG_SS)(%eax), %ebx
 	push	%ebx
 	movl	(4*REG_SP)(%eax), %ebx
 	push	%ebx
+
+.Lnopriochange:
 	movl	(4*REG_EFLAGS)(%eax), %ebx
 	push	%ebx
 	mov		(4*REG_CS)(%eax), %ebx
@@ -162,4 +179,3 @@ up_fullcontextrestore:
 	iret
 	.size up_fullcontextrestore, . - up_fullcontextrestore
 	.end
-

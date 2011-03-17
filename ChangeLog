@@ -1575,3 +1575,7 @@
 	  LPC17xx.
 	* arch/x86/include/i486/irq.h -- Fix irqrestore() macro... it was not
 	  correctly re-enabling interrupts.
+	* arch/x86/src - Fix numerous problems with i486/QEMU context
+	  switching.  Basically, the logic was missing the cases to handle
+	  the differing stack frames when a priority change occurs and when
+	  no priority change occurs.

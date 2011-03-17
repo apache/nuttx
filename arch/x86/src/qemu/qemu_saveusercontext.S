@@ -126,11 +126,26 @@ up_saveusercontext:
 	mov		%cs, (4*REG_CS)(%eax)
 	mov		%ds, (4*REG_DS)(%eax)
 
-	/* Save the value of SP as will be after we return (don't bother to save
-	 * REG_ESP).
+	/* Save the value of SP as will be at the time of the IRET that will
+	 * appear to be the return from this function.
+	 *
+	 *
+	 * 		CURRENT STACK				IRET STACK
+	 *							PRIO CHANGE			No PRIO CHANGE
+	 *		---------------		---------------		-----------------
+	 *							EIP
+	 *							CS					...
+	 *							EFLAGS				EIP
+	 *						->	ESP					CS
+	 * ESP->Return address		SS					EFLAGS
+	 *		Argument			Argument			Argument
+	 *
+	 * NOTE:  We don't yet know the value for REG_ESP!  That depends upon
+	 * if a priority change occurs or not.
 	 */
 
-	leal	4(%esp), %ecx
+
+	leal	-4(%esp), %ecx
 	movl	%ecx, (4*REG_SP)(%eax)
 
 	/* Fetch the PC from the stack and save it in the save block */
