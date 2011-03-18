@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 17, 2011</p>
+      <p>Last Updated: March 18, 2011</p>
     </td>
   </tr>
 </table>
@@ -2206,6 +2206,18 @@ nuttx-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       switching.  Basically, the logic was missing the cases to handle
       the differing stack frames when a priority change occurs and when
       no priority change occurs.
+    * configs/qemu-i486/ostest and nsh -- The QEMU i486 port is complete.
+      it now passes the OS test and supports the NuttShell (NSH).
+    * misc/drivers -- Created a new directory to hold non-BSD licensed
+      drivers that may be added into NuttX via an installation script.
+    * drivers/usbhost/usbhost_rtl8187.c -- A decision was made to
+      incorporate code taken from the Linux kernel.  That changes the
+      licensing on this module to GPL.  To avoid licensing contamination,
+      this driver was moved to misc/drivers/rtl8187x *prior* to adding
+      and of the GPL log.  There is an INSTALL.sh script at the location
+      where the GPL driver(s) can be re-installed into the NuttX source
+      tree.  By re-installing the driver, you agree to the GPL licsensing
+      and all of its implications.
 
 apps-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

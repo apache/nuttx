@@ -14,6 +14,7 @@ Contents
   * Toolchains
     - Cygwin Buildroot Toolchain
     - Buildroot Instructions
+  * FAQ
   * Configurations
     - ostest
     - nsh
@@ -22,7 +23,7 @@ QEMU
 ====
 
 QEMU is a generic and open source machine emulator and virtualizer.  Here are
-some links (which are mostly outdated by the time your read this):
+some links (which will probably be mostly outdated by the time your read this):
 
   Home Page:     http://wiki.qemu.org/Main_Page
   Downloads:     http://wiki.qemu.org/Download
@@ -34,7 +35,7 @@ Building QEMU
 
   tar zxf qemu-0.14.0.tar.gz 
   cd qemu-0.14.0
-  ./configure
+  ./configure --target-list=i386-softmmu
   make
   make install
 
@@ -62,8 +63,8 @@ Cygwin Build Problems
     2. Try building QEMU with MingGW (I understand that this is difficult).
 
   NOTE: As of this writing, I have not been successful getting ANY pre-built
-  version of QEMU to work successful; they all fail immediately with
-  initialization errors.
+  version of QEMU to work successfully with WinXP.  The same binaries work
+  fine on Vista, however.
 
 Running QEMU
 ------------
@@ -72,6 +73,13 @@ Running QEMU
 
     qemu -cpu 486 -m 2 -kernel nuttx.elf -nographic
 
+  The -nographic option redirects COM1 to your console.  However, the -nographic
+  option does not work under Cygwin.  For simple testing under Cygwin, I use
+  
+    qemu -cpu 486 -m 2 -kernel nuttx.elf -serial file:test.txt
+
+  which will send COM1 output to the file test.txt.
+ 
 Toolchains
 ==========
 
@@ -124,6 +132,12 @@ Buildroot Instructions
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you
   run into problems building the toolchain for Cygwin under Windows.
+
+FAQ
+===
+
+Q: I get the following error message, "undefined reference to '__stack_chk_fail'"
+A: Add -fno-stack-protector to ARCHCPUFLAGS in you Make.defs file.
 
 Configurations
 ==============

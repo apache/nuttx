@@ -36,10 +36,16 @@
 USBHOST_ASRCS  =
 USBHOST_CSRCS  = hid_parser.c
 
+# Built-in USB driver logic
+
 ifeq ($(CONFIG_USBHOST),y)
 USBHOST_CSRCS  += usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
 USBHOST_CSRCS  += usbhost_enumerate.c usbhost_storage.c usbhost_hidkbd.c
+
+# Add-on USB driver logic (see misc/drivers)
+
 ifeq ($(CONFIG_NET),y)
-  USBHOST_CSRCS  += usbhost_rtl8187.c
+  RTL8187_CSRC  := ${shell if [ -f usbhost/rtl8187x.c ]; then echo "rtl8187x.c"; fi}
+  USBHOST_CSRCS += $(RTL8187_CSRC)
 endif
 endif
