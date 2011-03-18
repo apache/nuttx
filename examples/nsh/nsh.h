@@ -333,16 +333,6 @@ extern int nsh_execapp(FAR struct nsh_vtbl_s *vtbl, FAR const char *cmd,
                        FAR char *argv[]);
 #endif
 
-/* I/O interfaces */
-
-#ifdef CONFIG_EXAMPLES_NSH_CONSOLE
-extern int nsh_consolemain(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_EXAMPLES_NSH_TELNET
-extern int nsh_telnetmain(int argc, char *argv[]);
-#endif
-
 /* Working directory support */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)

@@ -1,9 +1,8 @@
 /****************************************************************************
- * examples/nsh/nsh_apps.c
+ * include/apps/nsh.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
+ *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,99 +33,59 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_APPS_NSHLIB_H
+#define __INCLUDE_APPS_NSHLIB_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_SCHED_WAITPID
-#  include <sys/wait.h>
-#endif
-
-#include <stdbool.h>
-#include <errno.h>
-
-#include <apps/apps.h>
-
-#include "nsh.h"
-
-#ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
-
 /****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
+ * Pre-Processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nsh_execute
- ****************************************************************************/
-
-int nsh_execapp(FAR struct nsh_vtbl_s *vtbl, FAR const char *cmd,
-                FAR char *argv[])
-{
-   int ret = OK;
-   FAR const char * name;
-
-   /* Try to find command within pre-built application list. */
-
-   ret = exec_nuttapp(cmd, argv);
-   if (ret < 0)
-     {
-       int err = -errno;
-       int i;
-
-       /* On failure, list the set of available built-in commands */
-
-       nsh_output(vtbl, "Builtin Apps: ");
-       for (i = 0; (name = nuttapp_getname(i)) != NULL; i++)
-         {
-           nsh_output(vtbl, "%s ", name);
-         }
-       nsh_output(vtbl, "\nand type 'help' for more NSH commands.\n\n");
-       
-	   return err;
-     }
-
-#ifdef CONFIG_SCHED_WAITPID
-   if (vtbl->np.np_bg == false)
-     {
-       waitpid(ret, NULL, 0);
-     }
-   else
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
 #endif
-     {
-       struct sched_param param;
-       sched_getparam(0, &param);
-       nsh_output(vtbl, "%s [%d:%d]\n", cmd, ret, param.sched_priority);
-     }
 
-   return OK;
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* Interfaces needed to initialize and execute the NuttShell (NSH).
+ *
+ * nsh_initialize() - This function function should be called one during
+ *   application start-up prior to executing nsh_consolemain() or
+ *   nsh_telnetmain().
+ */
+
+EXTERN void nsh_initialize(void);
+
+/* The following interfaces maybe to called or started with task_start to
+ * start an NSH instance.
+ *
+ * nsh_consolemain() starts NSH on the console (/dev/console).
+ * nsh_telnetmain() starts a telnet daemon that will allow multiple
+ *   connections via telnet.
+ *
+ * These functions do not return.
+ */
+
+EXTERN int nsh_consolemain(int argc, char *argv[]);
+EXTERN int nsh_telnetmain(int argc, char *argv[]);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_EXAMPLES_NSH_BUILTIN_APPS */
-
-
+#endif /* __INCLUDE_APPS_NSHLIB_H */

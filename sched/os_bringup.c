@@ -120,7 +120,10 @@
 
 int os_bringup(void)
 {
-   int init_taskid;
+#if defined(CONFIG_BUILTIN_APPS) && defined(CONFIG_BUILTIN_APP_START)
+  static const char *argv[3] = {NULL, "init", NULL};
+#endif
+  int init_taskid;
 
   /* Start the page fill worker thread that will resolve page faults.
    * This should always be the first thread started because it may
@@ -154,8 +157,14 @@ int os_bringup(void)
   svdbg("Starting init thread\n");
   
 #if defined(CONFIG_BUILTIN_APPS) && defined(CONFIG_BUILTIN_APP_START)
-  init_taskid = exec_nuttapp(CONFIG_BUILTIN_APP_START, (const char **)NULL);
+  /* Start the built-in application, passing an "init" argument, so that
+   * application can distinguish different run-levels 
+   */
+  
+  init_taskid = exec_nuttapp(CONFIG_BUILTIN_APP_START, argv);
 #else
+  /* Start the default application at user_start() */
+
   init_taskid = START_TASK("init", SCHED_PRIORITY_DEFAULT,
                            CONFIG_USERMAIN_STACKSIZE,
                            (main_t)user_start, (const char **)NULL);
@@ -165,3 +174,15 @@ int os_bringup(void)
 }
 
 
+Index: sched/os_bringup.c
+===================================================================
+--- sched/os_bringup.c	(revision 3388)
++++ sched/os_bringup.c	(working copy)
+@@ -154,7 +154,14 @@
+   svdbg("Starting init thread\n");
+   
+ #if defined(CONFIG_BUILTIN_APPS_NUTTX) && defined(CONFIG_BUILTIN_APP_START)
+-  init_taskid = exec_nuttapp(CONFIG_BUILTIN_APP_START, (const char **)NULL);
+ #else
+   init_taskid = START_TASK("init", SCHED_PRIORITY_DEFAULT,
+                            CONFIG_USERMAIN_STACKSIZE,

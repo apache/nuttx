@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/nuttapp.h
+ * include/apps/apps.h
  *
  *   Copyright(C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_NUTTAPP_H
-#define __NUTTX_NUTTAPP_H
+#ifndef __INCLUDE_APPS_APPS_H
+#define __INCLUDE_APPS_APPS_H
 
 /****************************************************************************
  * Included Files
@@ -72,7 +72,6 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-
 /****************************************************************************
  * Name: check for availability of builtin NuttX application
  *
@@ -91,7 +90,6 @@ extern "C" {
 
 EXTERN int nuttapp_isavail(FAR const char *appname);
 
-
 /****************************************************************************
  * Name: get name of built-in application
  *
@@ -109,7 +107,6 @@ EXTERN int nuttapp_isavail(FAR const char *appname);
  ****************************************************************************/
 
 EXTERN const char * nuttapp_getname(int index);
-
 
 /****************************************************************************
  * Name: execute builtin NuttX application
@@ -131,9 +128,8 @@ EXTERN const char * nuttapp_getname(int index);
 
 EXTERN int exec_nuttapp(FAR const char *appname, FAR const char *argv[]);
 
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __NUTTX_NUTAPP_H */
+#endif /* __INCLUDE_APPS_APPS_H */

@@ -1591,4 +1591,9 @@
 	  where the GPL driver(s) can be re-installed into the NuttX source
 	  tree.  By re-installing the driver, you agree to the GPL licsensing
 	  and all of its implications.
-
+	* Makefile, apps/Makefile, tools/configure.sh -- add logic to copy
+	  configs/<board>/<config>/appdir to apps/.config and to simply the
+	  application configuration logic.
+	* examples/nsh and apps/nshlib - Move the core NuttShell (NSH) logic
+	  out of the exemples directory and into the apps/directory where
+	  it belongs.

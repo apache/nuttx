@@ -81,11 +81,11 @@ void board_power_off(void)
 
 	// \todo
 	
-	// stop backgorund processes
+	// stop background processes
 	irqsave();
 
 	// switch to internal HSI and get the PD0 and PD1 as GPIO
-	stm32_board_select_hsi();
+	sysclock_select_hsi();
 
 	// trigger shutdown with pull-up resistor (not push-pull!) and wait.
 	stm32_gpiowrite(GPIO_PCLR, true);

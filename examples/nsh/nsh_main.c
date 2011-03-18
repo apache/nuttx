@@ -57,8 +57,9 @@
 #endif
 
 #ifdef CONFIG_EXAMPLES_NSH_BUILTIN_APPS
-#  include <nuttx/nuttapp.h>
+#  include <apps/apps.h>
 #endif
+#include <apps/nsh.h>
 
 #include "nsh.h"
 
