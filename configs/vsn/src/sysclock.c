@@ -65,7 +65,7 @@
   * 
   * \return Nothing, operation is always successful.
   */
-void stm32_board_select_hsi(void)
+void sysclock_select_hsi(void)
 {
 	uint32_t regval;
 
@@ -144,7 +144,7 @@ void stm32_board_select_hsi(void)
   * \retval -1 External clock is not provided
   * \retval -2 Could not lock to external clock
   */
-int stm32_board_select_hse(void)
+int sysclock_select_hse(void)
 {
 	uint32_t regval;
 
@@ -168,7 +168,7 @@ int stm32_board_select_hse(void)
   *   so spawn a task for that... once cc1101 is restarted signal an event
   *   to restart clock.
   */
-void stm32_board_hse_lost(void)
+void sysclock_hse_lost(void)
 {
 }
 
@@ -181,5 +181,5 @@ void stm32_board_hse_lost(void)
   */
 void stm32_board_clockconfig(void)
 {
-	stm32_board_select_hsi();
+	sysclock_select_hsi();
 }

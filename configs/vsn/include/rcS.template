@@ -6,5 +6,9 @@ echo "VSN Board 1.2, www.netclamps.com"
 #mount -t vfat /dev/ramXXXMKRDMINORXXX XXXRDMOUNTPOUNTXXX
 
 echo "Mounting FRAM to /usr and SDcard to /sdcard"
+
+ramtron start 3
 mount -t vfat /dev/mtdblock0 /usr
+
+sdcard start 0
 mount -t vfat /dev/mmcsd0 /sdcard

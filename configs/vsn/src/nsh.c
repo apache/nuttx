@@ -82,8 +82,8 @@
 
 int nsh_archinitialize(void)
 {
-  up_ramtron();
-  up_sdcard();
+//  up_ramtron();
+//  up_sdcard();
    
   return OK;
 }

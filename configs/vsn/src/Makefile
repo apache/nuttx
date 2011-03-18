@@ -44,7 +44,7 @@ ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= sysclock.c boot.c leds.c buttons.c spi.c \
-			  usbdev.c sdcard.c ramtron.c power.c
+			  usbdev.c power.c
 
 ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
 CSRCS		+= nsh.c
