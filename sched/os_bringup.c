@@ -55,7 +55,7 @@
 # include "work_internal.h"
 #endif
 #ifdef CONFIG_BUILTIN_APPS
-# include "nuttx/nuttapp.h"
+# include "apps/apps.h"
 #endif
 
 /****************************************************************************
@@ -172,17 +172,3 @@ int os_bringup(void)
   ASSERT(init_taskid != ERROR);
   return OK;
 }
-
-
-Index: sched/os_bringup.c
-===================================================================
---- sched/os_bringup.c	(revision 3388)
-+++ sched/os_bringup.c	(working copy)
-@@ -154,7 +154,14 @@
-   svdbg("Starting init thread\n");
-   
- #if defined(CONFIG_BUILTIN_APPS_NUTTX) && defined(CONFIG_BUILTIN_APP_START)
--  init_taskid = exec_nuttapp(CONFIG_BUILTIN_APP_START, (const char **)NULL);
- #else
-   init_taskid = START_TASK("init", SCHED_PRIORITY_DEFAULT,
-                            CONFIG_USERMAIN_STACKSIZE,

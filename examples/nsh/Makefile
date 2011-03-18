@@ -1,7 +1,7 @@
 ############################################################################
 # examples/nsh/Makefile
 #
-#   Copyright (C) 2007-2008, 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2008, 2010-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,32 +37,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS	= 
-CSRCS	= nsh_main.c nsh_fscmds.c nsh_ddcmd.c nsh_proccmds.c nsh_mmcmds.c \
-		nsh_envcmds.c nsh_dbgcmds.c
-
-ifeq ($(CONFIG_EXAMPLES_NSH_BUILTIN_APPS),y)
-CSRCS	+= nsh_apps.c
-endif
-
-ifeq ($(CONFIG_EXAMPLES_NSH_ROMFSETC),y)
-CSRCS	+= nsh_romfsetc.c
-endif
-
-ifeq ($(CONFIG_NET),y)
-CSRCS	+= nsh_netinit.c nsh_netcmds.c
-endif
-
-ifeq ($(CONFIG_EXAMPLES_NSH_CONSOLE),y)
-CSRCS	+= nsh_serial.c
-endif
-
-ifeq ($(CONFIG_EXAMPLES_NSH_TELNET),y)
-CSRCS	+= nsh_telnetd.c
-endif
-
-ifneq ($(CONFIG_EXAMPLES_NSH_DISABLESCRIPT),y)
-CSRCS	+= nsh_test.c
-endif
+CSRCS	= nsh_main.c
 
 AOBJS	= $(ASRCS:.S=$(OBJEXT))
 COBJS	= $(CSRCS:.c=$(OBJEXT))

@@ -132,10 +132,10 @@ examples/netttest
 examples/nsh
 ^^^^^^^^^^^^
 
-  This directory contains the NuttShell (NSH).  This is a simple
-  shell application.  With some additional development, NSH will
-  someday be a great NuttX application debugger.  NSH is described
-  in its own README located at examples/nsh/README.txt
+  This directory provides an example of how to configure and use
+  the NuttShell (NSH) application.  NSH is a simple shell
+  application.  NSH is described in its own README located at
+  apps/nshlib/README.txt
 
 examples/nx
 ^^^^^^^^^^^
