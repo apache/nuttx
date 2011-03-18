@@ -37,4 +37,6 @@
 
 # Add the list of built-in apps needed by this configuration
 
-CONFIGURED_APPS += hello/.built_always poweroff/.built_always jvm/.built_always
+CONFIGURED_APPS += hello/.built_always poweroff/.built_always \
+	sdcard/.built_always ramtron/.built_always nshlib/.built_always
+
