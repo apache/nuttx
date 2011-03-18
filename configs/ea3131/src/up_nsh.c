@@ -61,26 +61,26 @@
 /* PORT and SLOT number probably depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_EA3131
-#  define CONFIG_EXAMPLES_NSH_HAVEUSBDEV 1
-#  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#  if defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) && CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
+#  define CONFIG_NSH_HAVEUSBDEV 1
+#  define CONFIG_NSH_HAVEMMCSD  1
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
 #    error "Only one MMC/SD slot"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
+#    undef CONFIG_NSH_MMCSDSLOTNO
 #  endif
-#  ifndef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
+#  ifndef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #else
    /* Add configuration for new LPC313X boards here */
 #  error "Unrecognized LPC313X board"
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
 /* Can't support USB features if USB is not enabled */
 
 #ifndef CONFIG_USBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEUSBDEV
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
@@ -88,11 +88,11 @@
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC313X_MCI)
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
-#ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR
-#  define CONFIG_EXAMPLES_NSH_MMCSDMINOR 0
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* Debug ********************************************************************/
@@ -125,27 +125,27 @@
 
 int nsh_archinitialize(void)
 {
-#ifdef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#ifdef CONFIG_NSH_HAVEMMCSD
   FAR struct sdio_dev_s *sdio;
   int ret;
 
   /* First, get an instance of the SDIO interface */
 
   message("nsh_archinitialize: Initializing SDIO slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
-  sdio = sdio_initialize(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+          CONFIG_NSH_MMCSDSLOTNO);
+  sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
       message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+              CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
 
   /* Now bind the SPI interface to the MMC/SD driver */
 
   message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDMINOR);
-  ret = mmcsd_slotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR, sdio);
+          CONFIG_NSH_MMCSDMINOR);
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
       message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);

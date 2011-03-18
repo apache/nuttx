@@ -41,7 +41,7 @@ ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= up_boot.c up_leds.c up_buttons.c up_spi.c
-ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
 endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))

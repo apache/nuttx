@@ -53,7 +53,7 @@ endif
 ifeq ($(CONFIG_LPC313X_SPI),y)
 CSRCS		+= up_spi.c
 endif
-ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
 endif
 ifeq ($(CONFIG_PAGING),y)

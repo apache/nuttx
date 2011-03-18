@@ -46,7 +46,7 @@ AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		= sysclock.c boot.c leds.c buttons.c spi.c \
 			  usbdev.c power.c
 
-ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS		+= nsh.c
 endif
 ifeq ($(CONFIG_APP_DIR),examples/usbstorage)
