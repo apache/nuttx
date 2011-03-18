@@ -140,6 +140,18 @@ CONFIG_STM32_USART1=y
 CONFIG_STM32_ADC3=n
 
 #
+# STM32 JTAG Options
+#
+# CONFIG_STM32_JTAG_FULL_ENABLE -- Full JTAG Enable (Parallel and Serial)
+# CONFIG_STM32_JTAG_NOJNTRST_ENABLE -- Full but without the JNTRST pin
+# CONFIG_STM32_JTAG_SW_ENABLE - Serial (SWJ) dual pin only which, can
+#   coexist besides the FRAM on SPI3
+#
+CONFIG_STM32_JTAG_FULL_ENABLE=n
+CONFIG_STM32_JTAG_NOJNTRST_ENABLE=n
+CONFIG_STM32_JTAG_SW_ENABLE=n
+
+#
 # STM32F103Z specific serial device driver settings
 #
 # CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
@@ -357,7 +369,7 @@ CONFIG_SCHED_WORKPRIORITY=50
 CONFIG_SCHED_WORKPERIOD=(50*1000)
 CONFIG_SCHED_WORKSTACKSIZE=1024
 CONFIG_SIG_SIGWORK=4
-
+CONFIG_SCHED_WAITPID=y
 #
 # The following can be used to disable categories of
 # APIs supported by the OS.  If the compiler supports
@@ -725,6 +737,7 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 # CONFIG_EXAMPLES_NSH_FATNSECTORS - FAT FS number of sectors
 # CONFIG_EXAMPLES_NSH_FATMOUNTPT - FAT FS mountpoint
 #
+CONFIG_EXAMPLES_NSH_BUILTIN_APPS=y
 CONFIG_EXAMPLES_NSH_FILEIOSIZE=512
 CONFIG_EXAMPLES_NSH_STRERROR=n
 CONFIG_EXAMPLES_NSH_LINELEN=64
@@ -816,52 +829,3 @@ CONFIG_PTHREAD_STACK_MIN=256
 CONFIG_PTHREAD_STACK_DEFAULT=2048
 CONFIG_HEAP_BASE=
 CONFIG_HEAP_SIZE=
-
-
-########################################################################
-# STM32 JTAG Options
-#
-# Full JTAG Enable (Parallel and Serial)
-CONFIG_STM32_JTAG_FULL_ENABLE=n
-
-# Full but without the JNTRST pin
-CONFIG_STM32_JTAG_NOJNTRST_ENABLE=n
-
-# Serial (SWJ) dual pin only which, can coexist besides the FRAM on SPI3
-CONFIG_STM32_JTAG_SW_ENABLE=n
-
-
-########################################################################
-#
-# Applications to be included within the NuttX binary as described
-# under the ../apps/README.txt
-#
-# Set thi config parameter above to: CONFIG_TASK_NAME_SIZE=16
-# In order to enable argv[0]=<task name> argument set the option
-# CONFIG_TASK_NAME_SIZE=16
-#
-# Include builtin NuttX applications (general option)
-CONFIG_BUILTIN_APPS_NUTTX=y
-
-# Invoke the following application after NuttX starts
-#CONFIG_BUILTIN_APP_START="hello"
-
-# Individual selection of built-in applications:
-
-# Hello world provide a simple skeleton/demo application
-CONFIG_BUILTIN_APPS_HELLO=y
-
-# Provide poweroff command to switch off the board
-CONFIG_BUILTIN_APPS_POWEROFF=y
-
-# Provide JAVA Virtual Machine (the Darjeeling JVM)
-CONFIG_BUILTIN_APPS_JVM=n
-
-# CONFIG_EXAMPLES_NSH_BUILTIN_APPS - Enable invocation of all builtin 
-#   apps from nsh command line. See apps/README for more information.
-#
-CONFIG_EXAMPLES_NSH_BUILTIN_APPS=y
-  CONFIG_SCHED_WAITPID=y
-
-#
-########################################################################
