@@ -1847,21 +1847,21 @@ extern void up_ledoff(int led);
     indirectly through the <code>mount()</code> API.
     The <code>mount()</code> API binds a block driver instance with a file system and with a mountpoint.
     Then the user may use the block driver to access the file system on the underlying media.
-    <i>Example</i>: See the <code>cmd_mount()</code> implementation in <code>examples/nsh/nsh_fscmds.c</code>.
+    <i>Example</i>: See the <code>cmd_mount()</code> implementation in <code>apps/nshlib/nsh_fscmds.c</code>.
     </p>
   </li>
   <li>
     <p>
     <b>Accessing a Character Driver as a Block Device</b>.
     See the loop device at <code>drivers/loop.c</code>.
-    <i>Example</i>: See the <code>cmd_losetup()</code> implementation in <code>examples/nsh/nsh_fscmds.c</code>.
+    <i>Example</i>: See the <code>cmd_losetup()</code> implementation in <code>apps/nshlib/nsh_fscmds.c</code>.
     </p>
   </li>
   <li>
     <p>
     <b>Accessing a Block Driver as Character Device</b>.
     See the Block-to-Character (BCH) conversion logic in <code>drivers/bch/</code>.
-    <i>Example</i>: See the <code>cmd_dd()</code> implementation in <code>examples/nsh/nsh_ddcmd.c</code>.
+    <i>Example</i>: See the <code>cmd_dd()</code> implementation in <code>apps/nshlib/nsh_ddcmd.c</code>.
     </p>
   </li>
   <li>

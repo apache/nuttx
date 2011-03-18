@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: March 7, 2011</p>
+      <p>Last Updated: March 18, 2011</p>
     </td>
   </tr>
 </table>
@@ -327,7 +327,9 @@
 </table>
 
 <p>
-  The <code>examples/nsh</code> sub-directory contains the NuttShell (NSH).
+  The <code>apps/nshlib</code> sub-directory contains the NuttShell (NSH)
+  library.
+  This library can easily to linked to produce a NSH application (See as an example <code>apps/nshlib</code>).
   NSH is a simple shell application for NuttX.
 </p>
 
@@ -511,7 +513,7 @@ fi
 <p>
   <b>NSH Start-Up Script</b>.
   NSH supports options to provide a start up script for NSH.  In general
-  this capability is enabled with <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code>, but has
+  this capability is enabled with <code>CONFIG_NSH_ROMFSETC</code>, but has
   several other related configuration options as described with the
   <a href="#nshconfiguration">NSH-specific configuration settings</a>.
   This capability also depends on:
@@ -530,7 +532,7 @@ fi
   values.
 </p>
 <p>
-  In this default case, enabling <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code> will cause
+  In this default case, enabling <code>CONFIG_NSH_ROMFSETC</code> will cause
   NSH to behave as follows at NSH startup time:
   <ul>
     <li>
@@ -580,12 +582,12 @@ mount -t vfat /dev/ram1 /tmp
 </p>
 <p>
   <b>Modifying the ROMFS Image</b>.
-  The contents of the <code>/etc</code> directory are retained in the file <code>examples/nsh/nsh_romfsimg.h</code> OR, if <code>CONFIG_EXAMPLES_NSH_ARCHROMFS</code> is defined, <code>include/arch/board/rcs.template</code>).
+  The contents of the <code>/etc</code> directory are retained in the file <code>apps/nshlib/nsh_romfsimg.h</code> OR, if <code>CONFIG_NSH_ARCHROMFS</code> is defined, <code>include/arch/board/rcs.template</code>).
   In order to modify the start-up behavior, there are three things to study:
   <ol>
     <li>
       <b>Configuration Options.</b>
-      The additional <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code> configuration options
+      The additional <code>CONFIG_NSH_ROMFSETC</code> configuration options
       discussed with the other <a href="#nshconfiguration">NSH-specific configuration settings</a>.
     </li>
     <li>
@@ -602,14 +604,14 @@ mount -t vfat /dev/ram1 /tmp
         <ul>
           <li>The configuration settings then installed configuration.
           <li>The <code>genromfs<code> tool (available from <a href="http://romfs.sourceforge.net">http://romfs.sourceforge.net</a>).
-          <li>The file <code>examples/nsh/rcS.template</code>
-		    (OR, if <code>CONFIG_EXAMPLES_NSH_ARCHROMFS</code> is defined <code>include/arch/board/rcs.template</code>.
+          <li>The file <code>apps/nshlib/rcS.template</code>
+		    (OR, if <code>CONFIG_NSH_ARCHROMFS</code> is defined <code>include/arch/board/rcs.template</code>.
         </ul>
       </p>
     </li>
     <li>
       <b><code>rcS.template</code></b>.
-      The file <code>examples/nsh/rcS.template</code> contains the general form
+      The file <code>apps/nshlib/rcS.template</code> contains the general form
       of the <code>rcS</code> file; configured values are plugged into this
       template file to produce the final <code>rcS</code> file.
     </li>
@@ -617,8 +619,8 @@ mount -t vfat /dev/ram1 /tmp
 </p>
 <p>
   <b>NOTE</b>:
-  <code>examples/nsh/rcS.template</code> generates the standard, default <code>nsh_romfsimg.h</code> file.
-  If <code>CONFIG_EXAMPLES_NSH_ARCHROMFS<code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in <code>configs/&lt;board&gt;/include</code> will be used.
+  <code>apps/nshlib/rcS.template</code> generates the standard, default <code>nsh_romfsimg.h</code> file.
+  If <code>CONFIG_NSH_ARCHROMFS<code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in <code>configs/&lt;board&gt;/include</code> will be used.
   NOTE when the OS is configured, <code>include/arch/board</code> will be linked to <code>configs/&lt;board&gt;/include</code>.
 </p>
 <p>
@@ -1817,192 +1819,192 @@ nsh>
   </tr>
   <tr>
     <td><b><code>[</code></b></td>
-    <td>!<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_TEST</code></td>
+    <td>!<code>CONFIG_NSH_DISABLESCRIPT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_TEST</code></td>
   </tr>
   <tr>
     <td><b><code>cat</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_CAT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_CAT</code></td>
   </tr>
   <tr>
     <td><b><code>cd</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_CD</code></td>
+    <td><code>CONFIG_NSH_DISABLE_CD</code></td>
   </tr>
   <tr>
     <td><b><code>cp</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_CP</code></td>
+    <td><code>CONFIG_NSH_DISABLE_CP</code></td>
   </tr>
   <tr>
     <td><b><code>dd</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_DD</code></td>
+    <td><code>CONFIG_NSH_DISABLE_DD</code></td>
   </tr>
   <tr>
     <td><b><code>echo</code></b></td>
     <td><br></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_ECHO</code></td>
+    <td><code>CONFIG_NSH_DISABLE_ECHO</code></td>
   </tr>
   <tr>
     <td><b><code>exec</code></b></td>
     <td><br></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_EXEC</code></td>
+    <td><code>CONFIG_NSH_DISABLE_EXEC</code></td>
   </tr>
   <tr>
     <td><b><code>exit</code></b></td>
     <td><br></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_EXIT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_EXIT</code></td>
   </tr>
   <tr>
     <td><b><code>free</code></b></td>
     <td><br></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_FREE</code></td>
+    <td><code>CONFIG_NSH_DISABLE_FREE</code></td>
   </tr>
   <tr>
     <td><b><code>get</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
         <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1</sup></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_GET</code></td>
+    <td><code>CONFIG_NSH_DISABLE_GET</code></td>
   </tr>
   <tr>
     <td><b><code>help</code></b></td>
     <td><br></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_HELP</code></td>
+    <td><code>CONFIG_NSH_DISABLE_HELP</code></td>
   </tr>
   <tr>
     <td><b><code>ifconfig</code></b></td>
     <td><code>CONFIG_NET</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_IFCONFIG</code></td>
+    <td><code>CONFIG_NSH_DISABLE_IFCONFIG</code></td>
   </tr>
   <tr>
     <td><b><code>kill</code></b></td>
     <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_KILL</code></td>
+    <td><code>CONFIG_NSH_DISABLE_KILL</code></td>
   </tr>
   <tr>
     <td><b><code>losetup</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_LOSETUP</code></td>
+    <td><code>CONFIG_NSH_DISABLE_LOSETUP</code></td>
   </tr>
   <tr>
     <td><b><code>ls</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_LS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_LS</code></td>
   </tr>
   <tr>
     <td><b><code>mb,mh,mw</code></b></td>
     <td><br></td>
     <td>
-      <code>CONFIG_EXAMPLES_NSH_DISABLE_MB</code>,<br>
-      <code>CONFIG_EXAMPLES_NSH_DISABLE_MH</code>,<br>
-      <code>CONFIG_EXAMPLES_NSH_DISABLE_MW</code>
+      <code>CONFIG_NSH_DISABLE_MB</code>,<br>
+      <code>CONFIG_NSH_DISABLE_MH</code>,<br>
+      <code>CONFIG_NSH_DISABLE_MW</code>
     </td>
   </tr>
   <tr>
     <td><b><code>mkdir</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MKDIR</code></td>
+    <td><code>CONFIG_NSH_DISABLE_MKDIR</code></td>
   </tr>
   <tr>
     <td><b><code>mkfatfs</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_FAT</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MKFATFS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_MKFATFS</code></td>
   </tr>
   <tr>
     <td><b><code>mkfifo</code></b></td>
     <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MKFIFO</code></td>
+    <td><code>CONFIG_NSH_DISABLE_MKFIFO</code></td>
   </tr>
   <tr>
     <td><b><code>mkrd</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MKRD</code></td>
+    <td><code>CONFIG_NSH_DISABLE_MKRD</code></td>
   </tr>
   <tr>
     <td><b><code>mount</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_MOUNT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_MOUNT</code></td>
   </tr>
   <tr>
     <td><b><code>ping</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMP</code> &amp;&amp;
         <code>CONFIG_NET_ICMP_PING</code>  &amp;&amp; !<code>CONFIG_DISABLE_CLOCK</code> &amp;&amp;
         !<code>CONFIG_DISABLE_SIGNALS</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_PING</code></td>
+    <td><code>CONFIG_NSH_DISABLE_PING</code></td>
   </tr>
   <tr>
     <td><b><code>ps</code></b></td>
     <td><br></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_PS</code></td>
+    <td><code>CONFIG_NSH_DISABLE_PS</code></td>
   </tr>
   <tr>
     <td><b><code>put</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_UDP</code> &amp;&amp;
     <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_NET_BUFSIZE</code> &gt;= 558<sup>1,2</sup></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_PUT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_PUT</code></td>
   </tr>
   <tr>
     <td><b><code>pwd</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_PWD</code></td>
+    <td><code>CONFIG_NSH_DISABLE_PWD</code></td>
   </tr>
   <tr>
     <td><b><code>rm</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_RM</code></td>
+    <td><code>CONFIG_NSH_DISABLE_RM</code></td>
   </tr>
   <tr>
     <td><b><code>rmdir</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_RMDIR</code></td>
+    <td><code>CONFIG_NSH_DISABLE_RMDIR</code></td>
   </tr>
   <tr>
     <td><b><code>set</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_SET</code></td>
+    <td><code>CONFIG_NSH_DISABLE_SET</code></td>
   </tr>
   <tr>
     <td><b><code>sh</code></b></td>
-    <td><code>CONFIG_NFILE_DESCRIPTORS &gt; 0 &amp;&amp; <code>CONFIG_NFILE_STREAMS &gt; 0 &amp;&amp; !<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_SH</code></td>
+    <td><code>CONFIG_NFILE_DESCRIPTORS &gt; 0 &amp;&amp; <code>CONFIG_NFILE_STREAMS &gt; 0 &amp;&amp; !<code>CONFIG_NSH_DISABLESCRIPT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_SH</code></td>
   </tr>
   <tr>
     <td><b><code>sleep</code></b></td>
     <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_SLEEP</code></td>
+    <td><code>CONFIG_NSH_DISABLE_SLEEP</code></td>
   </tr>
   <tr>
     <td><b><code>test</code></b></td>
-    <td>!<code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_TEST</code></td>
+    <td>!<code>CONFIG_NSH_DISABLESCRIPT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_TEST</code></td>
   </tr>
   <tr>
     <td><b><code>umount</code></b></td>
     <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_UMOUNT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_UMOUNT</code></td>
   </tr>
   <tr>
     <td><b><code>unset</code></b></td>
     <td>!<code>CONFIG_DISABLE_ENVIRON</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_UNSET</code></td>
+    <td><code>CONFIG_NSH_DISABLE_UNSET</code></td>
   </tr>
   <tr>
     <td><b><code>usleep</code></b></td>
     <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_USLEEP</code></td>
+    <td><code>CONFIG_NSH_DISABLE_USLEEP</code></td>
   </tr>
   <tr>
     <td><b><code>wget</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_TCP</code> &amp;&amp;
         <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_WGET</code></td>
+    <td><code>CONFIG_NSH_DISABLE_WGET</code></td>
   </tr>
   <tr>
     <td><b><code>xd</code></b></td>
     <td><br></td>
-    <td><code>CONFIG_EXAMPLES_NSH_DISABLE_XD</code></td>
+    <td><code>CONFIG_NSH_DISABLE_XD</code></td>
   </tr>
 </table></center>
 
@@ -2039,28 +2041,28 @@ nsh>
     <th align="left">Description</th>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_FILEIOSIZE</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_FILEIOSIZE</code></b></td>
     <td>
       Size of a static I/O buffer used for file access (ignored if
       there is no filesystem). Default is 1024.
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_STRERROR</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_STRERROR</code></b></td>
     <td>
       strerror(errno) makes more readable output but strerror() is
       very large and will not be used unless this setting is <i>y</i>
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_LINELEN</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_LINELEN</code></b></td>
     <td>
       The maximum length of one command line and of one output line.
       Default: 80
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_STACKSIZE</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_STACKSIZE</code></b></td>
     <td>
       The stack size to use when spawning new threads or tasks.  Such
       new threads are generated when a command is executed in background
@@ -2068,14 +2070,14 @@ nsh>
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_NESTDEPTH</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_NESTDEPTH</code></b></td>
     <td>
       The maximum number of nested <a href="#conditional"><code>if-then[-else]-fi</code></a> sequences that
       are permissable.  Default: 3
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_DISABLESCRIPT</code></b></td>
     <td>
       This can be set to <i>y</i> to suppress support for scripting.  This
       setting disables the <a href="#cmdsh"><code>sh</code></a>, <a href="#cmdtest"><code>test</code></a>, and <a href="#cmtest"><code>[</code></a> commands and the
@@ -2084,7 +2086,7 @@ nsh>
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_DISABLEBG</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_DISABLEBG</code></b></td>
     <td>
       This can be set to <i>y</i> to suppress support for background
       commands.  This setting disables the <a href="#cmdoverview"><code>nice</code></a> command prefix and
@@ -2093,7 +2095,7 @@ nsh>
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_MMCSDMINOR</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_MMCSDMINOR</code></b></td>
     <td>
       If the architecture supports an MMC/SD slot and if the NSH
       architecture specific logic is present, this option will provide
@@ -2103,7 +2105,7 @@ nsh>
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSETC</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_ROMFSETC</code></b></td>
     <td>
       Mount a ROMFS filesystem at <code>/etc</code> and provide a startup script
       at <code>/etc/init.d/rcS</code>.  The default startup script will mount
@@ -2112,25 +2114,25 @@ nsh>
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_CONSOLE</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_CONSOLE</code></b></td>
     <td>
-      If <code>CONFIG_EXAMPLES_NSH_CONSOLE</code>is set to <i>y</i>, then a serial
+      If <code>CONFIG_NSH_CONSOLE</code>is set to <i>y</i>, then a serial
       console front-end is selected.
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_TELNET</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_TELNET</code></b></td>
     <td>
-      If <code>CONFIG_EXAMPLES_NSH_TELNET</code> is set to <i>y</i>, then a TELENET
+      If <code>CONFIG_NSH_TELNET</code> is set to <i>y</i>, then a TELENET
       server front-end is selected.  When this option is provided,
       you may log into NuttX remotely using telnet in order to
       access NSH.
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ARCHINIT</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_ARCHINIT</code></b></td>
     <td>
-      Set <code>CONFIG_EXAMPLES_NSH_ARCHINIT</code> if your board provides architecture
+      Set <code>CONFIG_NSH_ARCHINIT</code> if your board provides architecture
       specific initialization  via the board-specific function <code>nsh_archinitialize()</code>.
       This function will be called early in NSH initialization to allow board logic to
       do such things as configure MMC/SD slots.
@@ -2139,8 +2141,8 @@ nsh>
 </table></center>
 
 <p>
-  One or both of <code>CONFIG_EXAMPLES_NSH_CONSOLE</code> and <code>CONFIG_EXAMPLES_NSH_TELNET</code>
-  must be defined.  If <code>CONFIG_EXAMPLES_NSH_TELNET</code> is selected, then there some
+  One or both of <code>CONFIG_NSH_CONSOLE</code> and <code>CONFIG_NSH_TELNET</code>
+  must be defined.  If <code>CONFIG_NSH_TELNET</code> is selected, then there some
   other configuration settings that apply:
 </p>
 
@@ -2167,39 +2169,39 @@ nsh>
       TCP/IP support is required for telnet (as well as various other TCP-related configuration settings).
     </td>
   </tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_IOBUFFER_SIZE</code></b></td>
     <td>
       Determines the size of the I/O buffer to use for sending/
       receiving TELNET commands/reponses
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_DHCPC</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_DHCPC</code></b></td>
     <td>
       Obtain the IP address via DHCP.
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_IPADDR</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_IPADDR</code></b></td>
     <td>
-      If <code>CONFIG_EXAMPLES_NSH_DHCPC</code> is NOT set, then the static IP
+      If <code>CONFIG_NSH_DHCPC</code> is NOT set, then the static IP
       address must be provided.
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_DRIPADDR</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_DRIPADDR</code></b></td>
     <td>
       Default router IP address
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_NETMASK</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_NETMASK</code></b></td>
     <td>
       Network mask
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_NOMAC</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_NOMAC</code></b></td>
     <td>
       Set if your ethernet hardware has no built-in MAC address.
       If set, a bogus MAC will be assigned.
@@ -2251,7 +2253,7 @@ nsh>
 </table></center>
 
 <p>
-  If <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code> is selected, then the following additional
+  If <code>CONFIG_NSH_ROMFSETC</code> is selected, then the following additional
   configuration setting apply:
 </p>
 
@@ -2261,13 +2263,13 @@ nsh>
     <th align="left">Description</th>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ARCHROMFS</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_ARCHROMFS</code></b></td>
     <td>
       May be defined to specify an alternative ROMFS image that can be found at <code>configs/&lt;board&gt;/include/nsh_romfsimg.h</code>.
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_ROMFSMOUNTPT</code></b></td>
     <td>
       The default mountpoint for the ROMFS volume is <code>&quot;/etc&quot;</code>, but that
       can be changed with this setting.  This must be a absolute path
@@ -2275,7 +2277,7 @@ nsh>
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_INITSCRIPT</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_INITSCRIPT</code></b></td>
     <td>
       This is the relative path to the startup script within the mountpoint.
       The default is <code>&quot;init.d/rcS&quot;</code>.  This is a relative path and must not
@@ -2283,14 +2285,14 @@ nsh>
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSDEVNO</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_ROMFSDEVNO</code></b></td>
     <td>
       This is the minor number of the ROMFS block device.  The default is
       '<code>0</code>' corresponding to <code>/dev/ram0</code>.
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_ROMFSSECTSIZE</code></b></td>
     <td>
       This is the sector size to use with the ROMFS volume.  Since the
       default volume is very small, this defaults to 64 but should be
@@ -2301,7 +2303,7 @@ nsh>
 </table></center>
 
 <p>
-  When the default <code>rcS</code> file used when <code>CONFIG_EXAMPLES_NSH_ROMFSETC</code> is
+  When the default <code>rcS</code> file used when <code>CONFIG_NSH_ROMFSETC</code> is
   selected, it will mount a FAT FS under <code>/tmp</code>.  The following selections
   describe that FAT FS.
 </p>
@@ -2312,14 +2314,14 @@ nsh>
     <th align="left">Description</th>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_FATDEVNO</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_FATDEVNO</code></b></td>
     <td>
       This is the minor number of the FAT FS block device.  The default is
       '<code>1</code>' corresponding to <code>/dev/ram1</code>.
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_EXAMPLES_NSH_FATSECTSIZE</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_FATSECTSIZE</code></b></td>
     <td>
       This is the sector size use with the FAT FS. Default is 512.
     </td>
@@ -2346,31 +2348,31 @@ nsh>
   <li><a href="#cmdcd"><code>cd</code></a></li>
   <li><a href="#commands">Command summaries</a></li>
   <li><a href="#conditional">Conditional command execution</a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_CONSOLE</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DHCPC</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DISABLEBG</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DISABLESCRIPT</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_DRIPADDR</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FATDEVNO</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FATMOUNTPT</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FATNSECTORS</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FATSECTSIZE</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_FILEIOSIZE</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_INITSCRIPT</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_IOBUFFER_SIZE</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_IPADDR</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_LINELEN</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NESTDEPTH</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NETMASK</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_NOMAC</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSDEVNO</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSETC</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ARCHROMFS</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_STACKSIZE</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_STRERROR</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_EXAMPLES_NSH_TELNET</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_CONSOLE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_DHCPC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_DISABLEBG</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_DISABLESCRIPT</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_DRIPADDR</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_FATDEVNO</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_FATMOUNTPT</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_FATNSECTORS</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_FATSECTSIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_FILEIOSIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_INITSCRIPT</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_IOBUFFER_SIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_IPADDR</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_LINELEN</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_NESTDEPTH</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_NETMASK</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_NOMAC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSDEVNO</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSETC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARCHROMFS</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSMOUNTPT</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSSECTSIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_STACKSIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_STRERROR</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_TELNET</code></a></li>
   <li><a href="#configuration">Configuration settings</a></li>
   <li><a href="#cmddependencies">Configuration settings, command dependencies</a></li>
   <li><a href="#nshconfiguration">Configuration settings, NSH-specific</a></li>
