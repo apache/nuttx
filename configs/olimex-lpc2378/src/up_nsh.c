@@ -61,23 +61,23 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
-#undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#undef CONFIG_NSH_HAVEUSBDEV
+#undef CONFIG_NSH_HAVEMMCSD
 
 /* Can't support USB features if USB is not enabled */
 
 #ifndef CONFIG_USBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEUSBDEV
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
-#ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR
-#  define CONFIG_EXAMPLES_NSH_MMCSDMINOR 0
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* Debug ********************************************************************/

@@ -61,36 +61,36 @@
 /* PORT and SLOT number probably depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_LPC1766STK
-#  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#  define CONFIG_EXAMPLES_NSH_HAVEUSBHOST  1
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 1
+#  define CONFIG_NSH_HAVEMMCSD  1
+#  define CONFIG_NSH_HAVEUSBHOST  1
+#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
 #    error "The LPC1766-STK MMC/SD is on SSP1"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 1
+#    undef CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO 1
 #  endif
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) || CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
 #    error "The LPC1766-STK MMC/SD is only one slot (0)"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #  ifndef CONFIG_LPC17_SSP1
 #    warning "CONFIG_LPC17_SSP1 is not enabled"
-#    undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#    undef CONFIG_NSH_HAVEMMCSD
 #  endif
 #else
 #  error "Unrecognized board"
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+#  undef CONFIG_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEUSBHOST
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
-#ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR
-#  define CONFIG_EXAMPLES_NSH_MMCSDMINOR 0
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* USB Host */
@@ -108,10 +108,10 @@
 #endif
 
 #if !defined(CONFIG_USBHOST) || !defined(CONFIG_LPC17_USBHOST)
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+#  undef CONFIG_NSH_HAVEUSBHOST
 #endif
 
-#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+#ifdef CONFIG_NSH_HAVEUSBHOST
 #  ifndef CONFIG_USBHOST_DEFPRIO
 #    define CONFIG_USBHOST_DEFPRIO 50
 #  endif
@@ -140,7 +140,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+#ifdef CONFIG_NSH_HAVEUSBHOST
 static struct usbhost_driver_s *g_drvr;
 #endif
 
@@ -156,7 +156,7 @@ static struct usbhost_driver_s *g_drvr;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+#ifdef CONFIG_NSH_HAVEUSBHOST
 static int nsh_waiter(int argc, char *argv[])
 {
   bool connected = false;
@@ -197,7 +197,7 @@ static int nsh_waiter(int argc, char *argv[])
  *
  ****************************************************************************/
 
-#ifdef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#ifdef CONFIG_NSH_HAVEMMCSD
 static int nsh_sdinitialize(void)
 {
   FAR struct spi_dev_s *ssp;
@@ -209,34 +209,34 @@ static int nsh_sdinitialize(void)
 
   /* Get the SSP port */
 
-  ssp = up_spiinitialize(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+  ssp = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!ssp)
     {
       message("nsh_archinitialize: Failed to initialize SSP port %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+              CONFIG_NSH_MMCSDSPIPORTNO);
       ret = -ENODEV;
       goto errout;
     }
 
   message("Successfully initialized SSP port %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+          CONFIG_NSH_MMCSDSPIPORTNO);
 
   /* Bind the SSP port to the slot */
 
-  ret = mmcsd_spislotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR,
-                               CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ssp);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                               CONFIG_NSH_MMCSDSLOTNO, ssp);
   if (ret < 0)
     {
       message("nsh_sdinitialize: "
               "Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO,
-              CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ret);
+              CONFIG_NSH_MMCSDSPIPORTNO,
+              CONFIG_NSH_MMCSDSLOTNO, ret);
       goto errout;
     }
 
   message("Successfuly bound SSP port %d to MMC/SD slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO,
-          CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+          CONFIG_NSH_MMCSDSPIPORTNO,
+          CONFIG_NSH_MMCSDSLOTNO);
   return OK;
 
   /* Disable power to the SD/MMC via a GPIO. HIGH disables SD/MMC. */
@@ -257,7 +257,7 @@ errout:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_EXAMPLES_NSH_HAVEUSBHOST
+#ifdef CONFIG_NSH_HAVEUSBHOST
 static int nsh_usbhostinitialize(void)
 {
   int pid;

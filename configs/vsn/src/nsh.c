@@ -58,12 +58,12 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#define CONFIG_EXAMPLES_NSH_HAVEUSBDEV 1
+#define CONFIG_NSH_HAVEUSBDEV 1
 
 /* Can't support USB features if USB is not enabled */
 
 #ifndef CONFIG_USBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEUSBDEV
 #endif
 
 

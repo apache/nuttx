@@ -65,21 +65,21 @@ if [ ! -r $topdir/.config ]; then
     exit 1
 fi
 
-romfsetc=`grep CONFIG_EXAMPLES_NSH_ROMFSETC= $topdir/.config | cut -d'=' -f2`
+romfsetc=`grep CONFIG_NSH_ROMFSETC= $topdir/.config | cut -d'=' -f2`
 disablempt=`grep CONFIG_DISABLE_MOUNTPOINT= $topdir/.config | cut -d'=' -f2`
-disablescript=`grep CONFIG_EXAMPLES_NSH_DISABLESCRIPT= $topdir/.config | cut -d'=' -f2`
+disablescript=`grep CONFIG_NSH_DISABLESCRIPT= $topdir/.config | cut -d'=' -f2`
 ndescriptors=`grep CONFIG_NFILE_DESCRIPTORS= $topdir/.config | cut -d'=' -f2`
 devconsole=`grep CONFIG_DEV_CONSOLE= $topdir/.config | cut -d'=' -f2`
 romfs=`grep CONFIG_FS_ROMFS= $topdir/.config | cut -d'=' -f2`
-romfsmpt=`grep CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT= $topdir/.config | cut -d'=' -f2`
-initscript=`grep CONFIG_EXAMPLES_NSH_INITSCRIPT= $topdir/.config | cut -d'=' -f2`
-romfsdevno=`grep CONFIG_EXAMPLES_NSH_ROMFSDEVNO= $topdir/.config | cut -d'=' -f2`
-romfssectsize=`grep CONFIG_EXAMPLES_NSH_ROMFSSECTSIZE= $topdir/.config | cut -d'=' -f2`
+romfsmpt=`grep CONFIG_NSH_ROMFSMOUNTPT= $topdir/.config | cut -d'=' -f2`
+initscript=`grep CONFIG_NSH_INITSCRIPT= $topdir/.config | cut -d'=' -f2`
+romfsdevno=`grep CONFIG_NSH_ROMFSDEVNO= $topdir/.config | cut -d'=' -f2`
+romfssectsize=`grep CONFIG_NSH_ROMFSSECTSIZE= $topdir/.config | cut -d'=' -f2`
 fatfs=`grep CONFIG_FS_FAT= $topdir/.config | cut -d'=' -f2`
-fatdevno=`grep CONFIG_EXAMPLES_NSH_FATDEVNO= $topdir/.config | cut -d'=' -f2`
-fatsectsize=`grep CONFIG_EXAMPLES_NSH_FATSECTSIZE= $topdir/.config | cut -d'=' -f2`
-fatnsectors=`grep CONFIG_EXAMPLES_NSH_FATNSECTORS= $topdir/.config | cut -d'=' -f2`
-fatmpt=`grep CONFIG_EXAMPLES_NSH_FATMOUNTPT= $topdir/.config | cut -d'=' -f2`
+fatdevno=`grep CONFIG_NSH_FATDEVNO= $topdir/.config | cut -d'=' -f2`
+fatsectsize=`grep CONFIG_NSH_FATSECTSIZE= $topdir/.config | cut -d'=' -f2`
+fatnsectors=`grep CONFIG_NSH_FATNSECTORS= $topdir/.config | cut -d'=' -f2`
+fatmpt=`grep CONFIG_NSH_FATMOUNTPT= $topdir/.config | cut -d'=' -f2`
 
 # The following settings are required for general ROMFS support
 #
@@ -95,7 +95,7 @@ fi
 
 if [ "X$disablescript" = "Xy" ]; then
     echo "NSH scripting support is required for this feature"
-    echo "Set CONFIG_EXAMPLES_NSH_DISABLESCRIPT=n to continue"
+    echo "Set CONFIG_NSH_DISABLESCRIPT=n to continue"
     exit 1
 fi
 
@@ -179,7 +179,7 @@ fi
 # /., /./*, /.., or /../*
 
 if [ ${romfsmpt:0:1} != "\"" ]; then
-   echo "CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT must be a string"
+   echo "CONFIG_NSH_ROMFSMOUNTPT must be a string"
    echo "Change it so that it is enclosed in quotes."
    exit 1
 fi
@@ -187,7 +187,7 @@ fi
 uromfsmpt=`echo $romfsmpt | sed -e "s/\"//g"`
 
 if [ ${uromfsmpt:0:1} != "/" ]; then
-   echo "CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT must be an absolute path in the target FS"
+   echo "CONFIG_NSH_ROMFSMOUNTPT must be an absolute path in the target FS"
    echo "Change it so that it begins with the character '/'.  Eg. /etc"
    exit 1
 fi
@@ -199,14 +199,14 @@ done
 
 if [ -z "$tmpdir" -o "X$tmpdir" = "Xdev" -o "X$tmpdir" = "." -o \
      ${tmpdir:0:2} = "./" -o "X$tmpdir" = ".." -o ${tmpdir:0:3} = "../" ]; then
-   echo "Invalid CONFIG_EXAMPLES_NSH_ROMFSMOUNTPT selection."
+   echo "Invalid CONFIG_NSH_ROMFSMOUNTPT selection."
    exit 1
 fi
 
 # Verify that the path to the init file is a relative path and not ., ./*, .., or ../*
 
 if [ ${initscript:0:1} != "\"" ]; then
-   echo "CONFIG_EXAMPLES_NSH_INITSCRIPT must be a string"
+   echo "CONFIG_NSH_INITSCRIPT must be a string"
    echo "Change it so that it is enclosed in quotes."
    exit 1
 fi
@@ -214,14 +214,14 @@ fi
 uinitscript=`echo $initscript | sed -e "s/\"//g"`
 
 if [ ${uinitscript:0:1} == "/" ]; then
-   echo "CONFIG_EXAMPLES_NSH_INITSCRIPT must be an relative path in under $romfsmpt"
+   echo "CONFIG_NSH_INITSCRIPT must be an relative path in under $romfsmpt"
    echo "Change it so that it begins with the character '/'.  Eg. init.d/rcS. "
    exit 1
 fi
 
 if [ "X$uinitscript" = "."  -o ${uinitscript:0:2} = "./" -o \
      "X$uinitscript" = ".." -o ${uinitscript:0:3} = "../" ]; then
-   echo "Invalid CONFIG_EXAMPLES_NSH_INITSCRIPT selection.  Must not begin with . or .."
+   echo "Invalid CONFIG_NSH_INITSCRIPT selection.  Must not begin with . or .."
    exit 1
 fi
 

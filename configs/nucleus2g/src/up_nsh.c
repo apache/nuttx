@@ -56,41 +56,41 @@
 /* PORT and SLOT number probably depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_NUCLEUS2G
-#  define CONFIG_EXAMPLES_NSH_HAVEUSBDEV 1
-#  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 0
+#  define CONFIG_NSH_HAVEUSBDEV 1
+#  define CONFIG_NSH_HAVEMMCSD  1
+#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
 #    error "The Nucleus-2G MMC/SD is on SSP0"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 0
+#    undef CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO 0
 #  endif
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) || CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
 #    error "The Nucleus-2G MMC/SD is only one slot (0)"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #  ifndef CONFIG_LPC17_SSP0
 #    warning "CONFIG_LPC17_SSP0 is not enabled"
 #  endif
 #else
 #  error "Unrecognized board"
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
 /* Can't support USB device features if USB device is not enabled */
 
 #ifndef CONFIG_USBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEUSBDEV
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
-#ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR
-#  define CONFIG_EXAMPLES_NSH_MMCSDMINOR 0
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* Debug ********************************************************************/
@@ -136,29 +136,29 @@ int nsh_archinitialize(void)
 
   /* Get the SSP port */
 
-  ssp = up_spiinitialize(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+  ssp = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!ssp)
     {
       message("nsh_archinitialize: Failed to initialize SSP port %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+              CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
   message("Successfully initialized SSP port %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+          CONFIG_NSH_MMCSDSPIPORTNO);
 
   /* Bind the SSP port to the slot */
 
-  ret = mmcsd_spislotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ssp);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, ssp);
   if (ret < 0)
     {
       message("nsh_archinitialize: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ret);
+              CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }
 
   message("Successfuly bound SSP port %d to MMC/SD slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 
   return OK;
 }

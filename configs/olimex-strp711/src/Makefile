@@ -48,7 +48,7 @@ endif
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		= up_spi.c up_leds.c up_buttons.c
-ifeq ($(CONFIG_EXAMPLES_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
 endif
 ifeq ($(CONFIG_NET_ENC28J60),y)

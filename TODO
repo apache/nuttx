@@ -17,7 +17,7 @@ NuttX TODO List (Last updated March 16 2011)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (5)  Build system / Toolchains
-  (4)  NuttShell (NSH) (examples/nsh)
+  (4)  NuttShell (NSH) (apps/nshlib)
   (3)  Other Applications & Tests (examples/)
   (7)  Linux/Cywgin simulation (arch/sim)
   (3)  ARM (arch/arm/)
@@ -226,7 +226,7 @@ o Network (net/, drivers/net)
   Priority:    Medium
 
   Description: Need to standardize collection of statistics from network
-               drivers.  examples/nsh ifconfig command should present
+               drivers.  apps/nshlib ifconfig command should present
                statistics.
   Status:      Open
   Priority:    Low
@@ -237,7 +237,7 @@ o Network (net/, drivers/net)
                solution is simple: A mutex will be needed to make sure that each 
                send that is started is able to be the exclusive sender until all of
                the data to be sent has been ACKed.
-  Status:      Open.  There is some temporary logic to examples/nsh that does
+  Status:      Open.  There is some temporary logic to apps/nshlib that does
                this same fix and that temporary logic should be removed when
                send() is fixed.
   Priority:    Medium-Low.  This is an important issue for applications that
@@ -551,8 +551,8 @@ o Build system
   Priority:    High if you are using NX and a newer compiler.
                
 
-o NuttShell (NSH) (examples/nsh)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+o NuttShell (NSH) (apps/nshlib)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Description: When the telnetd front end is received, each TCP packet
                received causes a prompt (nsh >) to be presented.  The

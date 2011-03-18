@@ -52,13 +52,13 @@
 #include "vsn.h"
 
 
-#define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#if defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) && CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
+#define CONFIG_NSH_HAVEMMCSD  1
+#if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
 #  error "Only one MMC/SD slot"
-#  undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
+#  undef CONFIG_NSH_MMCSDSLOTNO
 #endif
-#ifndef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#  define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
+#ifndef CONFIG_NSH_MMCSDSLOTNO
+#  define CONFIG_NSH_MMCSDSLOTNO 0
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
@@ -66,11 +66,11 @@
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
-#ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR
-#  define CONFIG_EXAMPLES_NSH_MMCSDMINOR 0
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 
@@ -79,24 +79,24 @@ int up_sdcard(void)
 {
   /* Mount the SDIO-based MMC/SD block driver */
 
-#ifdef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#ifdef CONFIG_NSH_HAVEMMCSD
 
   FAR struct sdio_dev_s *sdio;
   int ret;
 
   /* First, get an instance of the SDIO interface */
 
-  sdio = sdio_initialize(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+  sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
-      message("SDIO: Failed to initialize slot %d\n", CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+      message("SDIO: Failed to initialize slot %d\n", CONFIG_NSH_MMCSDSLOTNO);
       return -ENODEV;
     }
-  message("SDIO: Initialized slot %d\n", CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+  message("SDIO: Initialized slot %d\n", CONFIG_NSH_MMCSDSLOTNO);
 
   /* Now bind the SPI interface to the MMC/SD driver */
 
-  ret = mmcsd_slotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR, sdio);
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
       message("SDIO: Failed to bind to the MMC/SD driver: %d\n", ret);

@@ -101,7 +101,7 @@ void user_initialize(void)
 int user_start(int argc, char *argv[])
 {
   int mid_priority;
-#if defined(CONFIG_EXAMPLES_NSH_CONSOLE) && defined(CONFIG_EXAMPLES_NSH_TELNET)
+#if defined(CONFIG_NSH_CONSOLE) && defined(CONFIG_NSH_TELNET)
   int ret;
 #endif
 
@@ -125,9 +125,9 @@ int user_start(int argc, char *argv[])
    * the telnet front end on another thread.
    */
 
-#if defined(CONFIG_EXAMPLES_NSH_CONSOLE) && defined(CONFIG_EXAMPLES_NSH_TELNET)
+#if defined(CONFIG_NSH_CONSOLE) && defined(CONFIG_NSH_TELNET)
 # ifndef CONFIG_CUSTOM_STACK
-  ret = task_create("nsh_telnetmain", mid_priority, CONFIG_EXAMPLES_NSH_STACKSIZE,
+  ret = task_create("nsh_telnetmain", mid_priority, CONFIG_NSH_STACKSIZE,
                     nsh_telnetmain, NULL);
 # else
   ret = task_create("nsh_telnetmain", mid_priority, nsh_telnetmain, NULL);
@@ -139,13 +139,13 @@ int user_start(int argc, char *argv[])
 
   /* If only the telnet front-end is selected, run it on this thread */
 
-#elif defined(CONFIG_EXAMPLES_NSH_TELNET)
+#elif defined(CONFIG_NSH_TELNET)
   return nsh_telnetmain(0, NULL);
 #endif
 
 /* If the serial console front end is selected, then run it on this thread */
 
-#ifdef CONFIG_EXAMPLES_NSH_CONSOLE
+#ifdef CONFIG_NSH_CONSOLE
   return nsh_consolemain(0, NULL);
 #endif
 }

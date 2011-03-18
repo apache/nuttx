@@ -56,39 +56,39 @@
 /* PORT and SLOT number probably depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_MCU123
-#  define CONFIG_EXAMPLES_NSH_HAVEUSBDEV 1
-#  define CONFIG_EXAMPLES_NSH_HAVEMMCSD  1
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO) || CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO != 1
+#  define CONFIG_NSH_HAVEUSBDEV 1
+#  define CONFIG_NSH_HAVEMMCSD  1
+#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
 #    error "The LPC214x MMC/SD is on SPI1"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO 1
+#    undef CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO 1
 #  endif
-#  if !defined(CONFIG_EXAMPLES_NSH_MMCSDSLOTNO) || CONFIG_EXAMPLES_NSH_MMCSDSLOTNO != 0
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
 #    error "The LPC214x MMC/SD is on SPI1"
-#    undef CONFIG_EXAMPLES_NSH_MMCSDSLOTNO
-#    define CONFIG_EXAMPLES_NSH_MMCSDSLOTNO 0
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #else
    /* Add configuration for new LPC214x boards here */
 #  error "Unrecognized LPC214x board"
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
 /* Can't support USB features if USB is not enabled */
 
 #ifndef CONFIG_USBDEV
-#  undef CONFIG_EXAMPLES_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEUSBDEV
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef CONFIG_EXAMPLES_NSH_HAVEMMCSD
+#  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
-#ifndef CONFIG_EXAMPLES_NSH_MMCSDMINOR
-#  define CONFIG_EXAMPLES_NSH_MMCSDMINOR 0
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
 /* Debug ********************************************************************/
@@ -127,33 +127,33 @@ int nsh_archinitialize(void)
   /* Get the SPI port */
 
   message("nsh_archinitialize: Initializing SPI port %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+          CONFIG_NSH_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+  spi = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!spi)
     {
       message("nsh_archinitialize: Failed to initialize SPI port %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+              CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
   message("nsh_archinitialize: Successfully initialized SPI port %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO);
+          CONFIG_NSH_MMCSDSPIPORTNO);
 
   /* Bind the SPI port to the slot */
 
   message("nsh_archinitialize: Binding SPI port %d to MMC/SD slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 
-  ret = mmcsd_spislotinitialize(CONFIG_EXAMPLES_NSH_MMCSDMINOR, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       message("nsh_archinitialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-              CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO, ret);
+              CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }
 
   message("nsh_archinitialize: Successfuly bound SPI port %d to MMC/SD slot %d\n",
-          CONFIG_EXAMPLES_NSH_MMCSDSPIPORTNO, CONFIG_EXAMPLES_NSH_MMCSDSLOTNO);
+          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
   return OK;
 }
