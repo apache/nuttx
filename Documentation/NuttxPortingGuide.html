@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 16, 2011</p>
+      <p>Last Updated: March 18, 2011</p>
     </td>
   </tr>
 </table>
@@ -564,14 +564,20 @@
 |-- <i>&lt;config1-dir&gt;</i>
 |   |-- Make.defs
 |   |-- defconfig
+|   |-- appconfig<sup>1</sup>
 |   `-- setenv.sh
 |-- <i>&lt;config2-dir&gt;</i>
 |   |-- Make.defs
 |   |-- defconfig
+|   |-- appconfig<sup>1</sup>
 |   `-- setenv.sh
 |   ...
 `-- <i>(other board-specific configuration sub-directories)</i>/
-</pre></ul>
+</pre>
+<p><small>
+  <sup>1</sup>Optional
+</small></p>
+</ul>
 
 <h3><a name="summaryofconfigfiles">2.3.2 Summary of Files</a></h3>
 <h4><a name="boardlogic">2.3.2.1 Board Specific Logic</a></h4>
@@ -628,24 +634,35 @@
     </p>
   </li>
   <li>
-    <code>defconfig</code>: This is a configuration file similar to the Linux
-    configuration file.  In contains variable/value pairs like:
+    <p>
+      <code>defconfig</code>: This is a configuration file similar to the Linux
+      configuration file.  In contains variable/value pairs like:
+    </p>
     <ul>
       <li><code>CONFIG_VARIABLE</code>=value</li>
     </ul>
     <p>
       This configuration file will be used at build time:
     </p>
-    <ol>
+    <p><ol>
       <li>As a makefile fragment included in other makefiles, and</li>
       <li>to generate <code>include/nuttx/config.h</code> which is included by
           most C files in the system.</li>
-    </ol>
+    </ol></p>
   </li>
   <li>
-    <code>setenv.sh</code>: This is a script that you can include that will be installed at
-    the top level of the directory structure and can be sourced to set any
-    necessary environment variables.
+    <p>
+      <code>appconfig</code>: This is another configuration file that is specific to the
+      application.  This file is copied into the application build directory
+      when NuttX is configured.  See <code>../apps/README.txt</code> for further details.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>setenv.sh</code>: This is a script that you can include that will be installed at
+      the top level of the directory structure and can be sourced to set any
+      necessary environment variables.
+    </p>
   </li>
 </ul>
 
@@ -942,6 +959,7 @@ tools/
 |-- mkdeps.sh
 |-- mkimage.sh
 |-- mknulldeps.sh
+|-- mkromfsimg.sh
 |-- unlink.sh
 |-- winlink.sh
 `-- zipme
@@ -974,12 +992,24 @@ tools/
   <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]setenv.sh</code> to <code>${TOPDIR}/setenv.sh</code>, and</li>
   <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
 </ul>
+
+<p>
+  And if <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/appconfig</code> exists in the board configuration directory:
+</p>
+<ul>
+  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/appconfig</code> to &lt;app-dir&gt;<code>/.config</code></li>
+  <li><code>echo &quot;CONFIG_BUILTIN_APPS=y" &gt;&gt; "${TOPDIR}/.config&quot;</code></li>
+  <li><code>echo &quot;APPS_LOC=\"&lt;app-dir&gt;\"" &gt;&gt; "${TOPDIR}/.config&quot;</code></li>
+</ul>
+
+</p>
 <p>
   Where <i>&lt;board-name&gt;</i> is the name of one of the sub-directories of the
   NuttX <a href="#DirStructConfigs"><code>configs/</code></a> directory.
   This sub-directory name corresponds to one of the supported boards
   identified <a href="#supportedboards">above</a>.
-  And &lt;config-dir&gt; is the optional, specific configuration directory for the board.
+  &lt;config-dir&gt; is the optional, specific configuration directory for the board.
+  And &lt;app-dir&gt; is the location of the optonal application directory.
 </p>
 <p>
   <b>Automated Configuration</b>.
@@ -988,7 +1018,17 @@ tools/
 </p>
 <ul><pre>
   cd tools
-  ./configure.sh <i>&lt;board-name&gt;</i></i><code>[/</code><i>&lt;config-dir&gt;</i><code>]</code>
+  ./configure.sh <i>&lt;board-name&gt;</i></i>[/<i>&lt;config-dir&gt;</i>]
+</pre></ul>
+
+<p>
+  And if <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/appconfig</code>
+  exists and your application directory is not in the standard loction (<config>../apps</config>),
+  then you should also specify the location of the application directory on the +command line like:
+</p>
+<ul><pre>
+  cd tools
+  ./configure.sh -a &lt;app-dir&gt; <i>&lt;board-name&gt;</i></i>[/<i>&lt;config-dir&gt;</i>]
 </pre></ul>
 
 <p>
