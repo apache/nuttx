@@ -64,8 +64,10 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 #
 # APPS_LOC can be over-ridden from the command line:
 
-ifeq ($(CONFIG_BUILTIN_APPS_NUTTX),y)
+ifeq ($(CONFIG_BUILTIN_APPS),y)
+ifeq ($(APP_LOC),)
 APPS_LOC	= ../apps
+endif
 APPS_DIR	:= ${shell if [ -r $(APPS_LOC)/Makefile ]; then echo "$(APPS_LOC)"; fi}
 endif
 
@@ -138,12 +140,8 @@ endif
 # Always compile the framework which includes exec_nuttapp if users
 # or nuttX applications are to be included.
 
-ifeq ($(CONFIG_BUILTIN_APPS_NUTTX),y)
+ifeq ($(CONFIG_BUILTIN_APPS),y)
 LINKLIBS	+= $(APPS_DIR)/libapps$(LIBEXT)
-else
-ifeq ($(CONFIG_BUILTIN_APPS_USER),y)
-LINKLIBS	+= $(APPS_DIR)/libapps$(LIBEXT)
-endif
 endif
 
 # Add libraries for network support

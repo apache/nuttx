@@ -31,26 +31,54 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-#set -x
 
-BOARD=$1
 WD=`pwd`
 TOPDIR="${WD}/.."
+USAGE="${0} [-d] [-a <app-dir>] <board-name>"
 
-function show_usage ()
-{
-  echo "${0} <board-name>"
-  exit 1
-}
+# Parse command arguments
 
-if [ "${BOARD}X" = "X" ]; then
-  echo "Missing argument"
-  show_usage
+unset boardconfig
+unset appdir
+
+while [ ! -z "$1" ]; do
+  case "$1" in
+    -d )
+      set -x
+      ;;
+    -h )
+      echo "$usage"
+      exit 0
+      ;;
+    -a )
+      shift
+      appdir=$1
+      ;;
+    *)
+      if [ ! -z "${boardconfig}" ]; then
+        echo ""
+        echo "<board/config> defined twice"
+        echo "$USAGE"
+        exit 1
+      fi
+      boardconfig=$1
+      ;;
+  esac
+  shift
+done
+
+# Sanity checking
+
+if [ -z "${boardconfig}" ]; then
+  echo ""
+  echo "Missing <board/config> argument"
+  echo "$USAGE"
+  exit 2
 fi
 
-BOARDDIR=${TOPDIR}/configs/${BOARD}
-if [ ! -d "${BOARDDIR}" ]; then
-  echo "Directory ${BOARDDIR} does not exist.  Options are:"
+configpath=${TOPDIR}/configs/${boardconfig}
+if [ ! -d "${configpath}" ]; then
+  echo "Directory ${configpath} does not exist.  Options are:"
   echo ""
   echo "Select one of the following options for <board-name>:"
   configlist=`find ${TOPDIR}/configs -name defconfig`
@@ -59,29 +87,57 @@ if [ ! -d "${BOARDDIR}" ]; then
     echo "  $config"
   done
   echo ""
-  show_usage
+  echo "$USAGE"
+  exit 3
 fi
 
-if [ ! -r "${BOARDDIR}/Make.defs" ]; then
-  echo "File ${BOARDDIR}/Make.defs does not exist"
-  exit 1
+if [ ! -r "${configpath}/Make.defs" ]; then
+  echo "File ${configpath}/Make.defs does not exist"
+  exit 4
 fi
 
-if [ ! -r "${BOARDDIR}/setenv.sh" ]; then
-  echo "File ${BOARDDIR}/setenv.sh does not exist"
-  exit 1
+if [ ! -r "${configpath}/setenv.sh" ]; then
+  echo "File ${configpath}/setenv.sh does not exist"
+  exit 5
 fi
 
-if [ ! -r "${BOARDDIR}/defconfig" ]; then
-  echo "File ${BOARDDIR}/defconfig does not exist"
-  exit 1
+if [ ! -r "${configpath}/defconfig" ]; then
+  echo "File ${configpath}/defconfig does not exist"
+  exit 6
 fi
 
-cp -f "${BOARDDIR}/Make.defs" "${TOPDIR}/." || \
-  { echo "Failed to copy ${BOARDDIR}/Make.defs" ; exit 1 ; }
-cp -f "${BOARDDIR}/setenv.sh" "${TOPDIR}/." || \
-  { echo "Failed to copy ${BOARDDIR}/setenv.sh" ; exit 1 ; }
+# Check for the apps/ dir in the usual place if appdir was not provided
+
+if [ -z "${appdir}" ]; then
+  if [ -d "${TOPDIR}/../apps" ]; then
+    appdir="${TOPDIR}/../apps"
+  fi
+fi
+
+# Okay... setup the configuration
+
+cp -f "${configpath}/Make.defs" "${TOPDIR}/." || \
+  { echo "Failed to copy ${configpath}/Make.defs" ; exit 7 ; }
+cp -f "${configpath}/setenv.sh" "${TOPDIR}/." || \
+  { echo "Failed to copy ${configpath}/setenv.sh" ; exit 8 ; }
 chmod 755 "${TOPDIR}/setenv.sh"
-cp -f "${BOARDDIR}/defconfig" "${TOPDIR}/.config" || \
-  { echo "Failed to copy ${BOARDDIR}/defconfig" ; exit 1 ; }
+cp -f "${configpath}/defconfig" "${TOPDIR}/.config" || \
+  { echo "Failed to copy ${configpath}/defconfig" ; exit 9 ; }
+
+# Copy option appconfig
+
+if [ ! -z "${appdir}" ]; then
+  if [ ! -r "${configpath}/appconfig" ]; then
+    echo "NOTE: No readable appconfig file found in ${configpath}"
+  else
+    cp -f "${configpath}/appconfig" "${appdir}/.config" || \
+      { echo "Failed to copy ${configpath}/appconfig" ; exit 10 ; }
+
+    echo "" >> "${TOPDIR}/.config"
+    echo "# Application configuration" >> "${TOPDIR}/.config"
+    echo "" >> "${TOPDIR}/.config"
+    echo "CONFIG_BUILTIN_APPS=y" >> "${TOPDIR}/.config"
+    echo "APPS_LOC=\"$appdir\"" >> "${TOPDIR}/.config"
+  fi
+fi
 

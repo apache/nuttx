@@ -54,7 +54,7 @@
 #ifdef CONFIG_SCHED_WORKQUEUE
 # include "work_internal.h"
 #endif
-#ifdef CONFIG_BUILTIN_APPS_NUTTX
+#ifdef CONFIG_BUILTIN_APPS
 # include "nuttx/nuttapp.h"
 #endif
 
@@ -153,7 +153,7 @@ int os_bringup(void)
 
   svdbg("Starting init thread\n");
   
-#if defined(CONFIG_BUILTIN_APPS_NUTTX) && defined(CONFIG_BUILTIN_APP_START)
+#if defined(CONFIG_BUILTIN_APPS) && defined(CONFIG_BUILTIN_APP_START)
   init_taskid = exec_nuttapp(CONFIG_BUILTIN_APP_START, (const char **)NULL);
 #else
   init_taskid = START_TASK("init", SCHED_PRIORITY_DEFAULT,
