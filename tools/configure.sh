@@ -1,7 +1,7 @@
 #!/bin/bash
 # configure.sh
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,16 @@
 
 WD=`pwd`
 TOPDIR="${WD}/.."
-USAGE="${0} [-d] [-a <app-dir>] <board-name>"
+USAGE="
+
+USAGE: ${0} [-d] [-a <app-dir>] <board-name>/<config-name>
+
+Where:
+  <board-name> is the name of the board in the configs directory
+  <config-name> is the name of the board configuration sub-directory
+  <add-dir> is the path to the apps/ directory, relative to the nuttx directory
+
+"
 
 # Parse command arguments
 
@@ -47,7 +56,7 @@ while [ ! -z "$1" ]; do
       set -x
       ;;
     -h )
-      echo "$usage"
+      echo "$USAGE"
       exit 0
       ;;
     -a )
@@ -110,7 +119,7 @@ fi
 
 if [ -z "${appdir}" ]; then
   if [ -d "${TOPDIR}/../apps" ]; then
-    appdir="${TOPDIR}/../apps"
+    appdir="../apps"
   fi
 fi
 
@@ -130,7 +139,7 @@ if [ ! -z "${appdir}" ]; then
   if [ ! -r "${configpath}/appconfig" ]; then
     echo "NOTE: No readable appconfig file found in ${configpath}"
   else
-    cp -f "${configpath}/appconfig" "${appdir}/.config" || \
+    cp -f "${configpath}/appconfig" "${TOPDIR}/${appdir}/.config" || \
       { echo "Failed to copy ${configpath}/appconfig" ; exit 10 ; }
 
     echo "" >> "${TOPDIR}/.config"

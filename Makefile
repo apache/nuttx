@@ -65,7 +65,7 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 # APPS_LOC can be over-ridden from the command line:
 
 ifeq ($(CONFIG_BUILTIN_APPS),y)
-ifeq ($(APP_LOC),)
+ifeq ($(APPS_LOC),)
 APPS_LOC	= ../apps
 endif
 APPS_DIR	:= ${shell if [ -r $(APPS_LOC)/Makefile ]; then echo "$(APPS_LOC)"; fi}

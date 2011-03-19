@@ -49,24 +49,24 @@
 #CONFIG_BUILTIN_APP_START="hello"
 
 # Application Libraries
-CONFIGURED_APPS += nshlib/.built_always
+CONFIGURED_APPS += nshlib=.built_always
 
 # Individual selection of built-in applications:
 
 # Hello world provide a simple skeleton/demo application
-CONFIGURED_APPS += hello/.built_always
+CONFIGURED_APPS += hello=.built_always
 
 # Provide poweroff command to switch off the board
-CONFIGURED_APPS += poweroff/.built_always 
+CONFIGURED_APPS += poweroff=.built_always 
 
 # Provide SDcard tool
-CONFIGURED_APPS += sdcard/.built_always 
+CONFIGURED_APPS += sdcard=.built_always 
 
 # Provide RAMTRON tool
-CONFIGURED_APPS += ramtron/.built_always 
+CONFIGURED_APPS += ramtron=.built_always 
 
 # Provide UNIX style free 
-CONFIGURED_APPS += free/.built_always 
+CONFIGURED_APPS += free=.built_always 
 
 # Provide JAVA Virtual Machine (the Darjeeling JVM)
-#CONFIGURED_APPS += jvm/.built_always 
+#CONFIGURED_APPS += jvm=.built_always 
