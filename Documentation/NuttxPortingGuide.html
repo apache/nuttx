@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 18, 2011</p>
+      <p>Last Updated: March 19, 2011</p>
     </td>
   </tr>
 </table>
@@ -163,86 +163,96 @@
 </p>
 <ul><pre>
 .
-|-- <a href="#topmakefile">Makefile</a>
-|-- <a href="#DirStructDocumentation">Documentation</a>
-|   `-- <i>(documentation files)</i>/
-|-- <a href="#DirStructArch">arch</a>/
-|   |-- <i>&lt;arch-name&gt;</i>/
-|   |   |-- include/
-|   |   |   |--<i>&lt;chip-name&gt;</i>/
-|   |   |   |  `-- <i>(chip-specific header files)</i>
-|   |   |   |--<i>&lt;other-chips&gt;</i>/
-|   |   |   `-- <i>(architecture-specific header files)</i>
-|   |   `-- src/
-|   |       |--<i>&lt;chip-name&gt;</i>/
-|   |       |  `-- <i>(chip-specific source files)</i>
-|   |       |--<i>&lt;other-chips&gt;</i>/
-|   |       `-- <i>(architecture-specific source files)</i>
-|   `-- <i>&lt;other-architecture directories&gt;</i>/
-|-- <a href="#DirStructBinFmt">binfmt</a>/
-|   |-- Makefile
-|   |-- <i>(binfmt-specific sub-directories)</i>/
-|   |   `-- <i>(binfmt-specific source files)</i>
-|   `-- <i>(common binfmt source files)</i>
-|-- <a href="#DirStructConfigs">configs</a>/
-|   |-- <i>&lt;board-name&gt;</i>/
-|   |   |-- include/
-|   |   |   `-- <i>(other board-specific header files)</i>
-|   |   |-- src/
-|   |   |   `-- <i>(board-specific source files)</i>
-|   |   |---<i>&lt;config-name&gt;</i>/
-|   |   |   `-- <i>(board configuration-specific source files)</i>
-|   |   `---<i>(other configuration sub-directories for this board)</i>/
-|   `-- <i>&lt;(other board directories)&gt;</i>/
-|-- <a href="#DirStructDrivers">drivers</a>/
-|   |-- Makefile
-|   |-- <i>(driver-specific sub-directories)/</i>
-|   |   `-- <i>(driver-specific source files)</i>
-|   `-- <i>(common driver source files)</i>
-|-- <a href="#DirStructExamples">examples</a>/
-|   `-- <i>(example)</i>/
-|       |-- Makefile
-|       `-- <i>(example source files)</i>
-|-- <a href="#DirStructFs">fs</a>/
-|   |-- Makefile
-|   |-- <i>(file system-specific sub-directories)</i>/
-|   |   `-- <i>(file system-specific source files)</i>
-|   `-- <i>(common file system source files)</i>
-|-- <a href="#DirStructGraphics">graphics</a>/
-|   |-- Makefile
-|   |-- <i>(feature-specific sub-directories)</i>/
-|   |   `-- <i>(feature-specific source files library source files)</i>
-|   `-- <i>(common graphics-related source files)</i>
-|-- <a href="#DirStructInclude">include</a>/
-|   |-- <i>(standard header files)</i>
-|   |-- <i>(standard include sub-directories)</i>
-|   |   `-- <i>(more standard header files)</i>
-|   |-- <i>(non-standard include sub-directories)</i>
-|       `-- <i>(non-standard header files)</i>
-|-- <a href="#DirStructLib">lib</a>/
-|   |-- Makefile
-|   `-- <i>(lib source files)</i>
-|-- <a href="#DirStructLibXX">libxx</a>/
-|   |-- Makefile
-|   `-- <i>(libxx management source files)</i>
-|-- <a href="#DirStructMm">mm</a>/
-|   |-- Makefile
-|   `-- <i>(memory management source files)</i>
-|-- <a href="#DirStructNet">net</a>/
-|   |-- Makefile
-|   |-- uip/
-|   |   `-- <i>(uip source files)</i>
-|   `-- <i>(BSD socket source files)</i>
-|-- <a href="#DirStructNetUtils">netutils</a>/
-|   |-- Makefile
-|   |-- <i>(network feature sub-directories)</i>/
-|   |   `-- <i>(network feature source files)</i>
-|   `-- <i>(netutils common files)</i>
-|-- <a href="#DirStructSched">sched</a>/
-|   |-- Makefile
-|   `-- <i>(sched source files)</i>
-`-- <a href="#DirStructTools">tools</a>/
-    `-- <i>(miscellaneous scripts and programs)</i>
+|- nuttx
+|   |-- <a href="#topmakefile">Makefile</a>
+|   |-- <a href="#DirStructDocumentation">Documentation</a>
+|   |   `-- <i>(documentation files)</i>/
+|   |-- <a href="#DirStructArch">arch</a>/
+|   |   |-- <i>&lt;arch-name&gt;</i>/
+|   |   |   |-- include/
+|   |   |   |   |--<i>&lt;chip-name&gt;</i>/
+|   |   |   |   |  `-- <i>(chip-specific header files)</i>
+|   |   |   |   |--<i>&lt;other-chips&gt;</i>/
+|   |   |   |   `-- <i>(architecture-specific header files)</i>
+|   |   |   `-- src/
+|   |   |       |--<i>&lt;chip-name&gt;</i>/
+|   |   |       |  `-- <i>(chip-specific source files)</i>
+|   |   |       |--<i>&lt;other-chips&gt;</i>/
+|   |   |       `-- <i>(architecture-specific source files)</i>
+|   |   `-- <i>&lt;other-architecture directories&gt;</i>/
+|   |-- <a href="#DirStructBinFmt">binfmt</a>/
+|   |   |-- Makefile
+|   |   |-- <i>(binfmt-specific sub-directories)</i>/
+|   |   |   `-- <i>(binfmt-specific source files)</i>
+|   |   `-- <i>(common binfmt source files)</i>
+|   |-- <a href="#DirStructConfigs">configs</a>/
+|   |   |-- <i>&lt;board-name&gt;</i>/
+|   |   |   |-- include/
+|   |   |   |   `-- <i>(other board-specific header files)</i>
+|   |   |   |-- src/
+|   |   |   |   `-- <i>(board-specific source files)</i>
+|   |   |   |---<i>&lt;config-name&gt;</i>/
+|   |   |   |   `-- <i>(board configuration-specific source files)</i>
+|   |   |   `---<i>(other configuration sub-directories for this board)</i>/
+|   |   `-- <i>&lt;(other board directories)&gt;</i>/
+|   |-- <a href="#DirStructDrivers">drivers</a>/
+|   |   |-- Makefile
+|   |   |-- <i>(driver-specific sub-directories)/</i>
+|   |   |   `-- <i>(driver-specific source files)</i>
+|   |   `-- <i>(common driver source files)</i>
+|   |-- <a href="#DirStructExamples">examples</a>/
+|   |   `-- <i>(example)</i>/
+|   |       |-- Makefile
+|   |       `-- <i>(example source files)</i>
+|   |-- <a href="#DirStructFs">fs</a>/
+|   |   |-- Makefile
+|   |   |-- <i>(file system-specific sub-directories)</i>/
+|   |   |   `-- <i>(file system-specific source files)</i>
+|   |   `-- <i>(common file system source files)</i>
+|   |-- <a href="#DirStructGraphics">graphics</a>/
+|   |   |-- Makefile
+|   |   |-- <i>(feature-specific sub-directories)</i>/
+|   |   |   `-- <i>(feature-specific source files library source files)</i>
+|   |   `-- <i>(common graphics-related source files)</i>
+|   |-- <a href="#DirStructInclude">include</a>/
+|   |   |-- <i>(standard header files)</i>
+|   |   |-- <i>(standard include sub-directories)</i>
+|   |   |   `-- <i>(more standard header files)</i>
+|   |   |-- <i>(non-standard include sub-directories)</i>
+|   |       `-- <i>(non-standard header files)</i>
+|   |-- <a href="#DirStructLib">lib</a>/
+|   |   |-- Makefile
+|   |   `-- <i>(lib source files)</i>
+|   |-- <a href="#DirStructLibXX">libxx</a>/
+|   |   |-- Makefile
+|   |   `-- <i>(libxx management source files)</i>
+|   |-- <a href="#DirStructMm">mm</a>/
+|   |   |-- Makefile
+|   |   `-- <i>(memory management source files)</i>
+|   |-- <a href="#DirStructNet">net</a>/
+|   |   |-- Makefile
+|   |   |-- uip/
+|   |   |   `-- <i>(uip source files)</i>
+|   |   `-- <i>(BSD socket source files)</i>
+|   |-- <a href="#DirStructSched">sched</a>/
+|   |   |-- Makefile
+|   |   `-- <i>(sched source files)</i>
+|   `-- <a href="#DirStructTools">tools</a>/
+|       `-- <i>(miscellaneous scripts and programs)</i>
+`- apps
+    |-- <a href="#DirStructNetUtils">netutils</a>/
+    |   |-- Makefile
+    |   |-- <i>(network feature sub-directories)</i>/
+    |   |   `-- <i>(network feature source files)</i>
+    |   `-- <i>(netutils common files)</i>
+    |-- nshlib/
+    |   |-- Makefile
+    |   `-- <i>NuttShell (NSH) files</i>
+    `-- <i>(Board-specific applications)</i>/
+        |-- Makefile
+        |-- <i>(Board-specific application sub-directories)</i>/
+        |   `-- <i>(Board-specific application source files)</i>
+        `-- <i>(Board-specific common files)</i>
 </pre></ul>
 
 <p>
@@ -926,6 +936,9 @@ netutils/
 |-- tftpc/
 |   |-- Make.defs
 |   `-- <i>(tftpc source files)</i>
+|-- thttpd/
+|   |-- Make.defs
+|   `-- <i>(thttpd source files)</i>
 |-- uiplib/
 |   |-- Make.defs
 |   `-- <i>(uiplib source files)</i>
