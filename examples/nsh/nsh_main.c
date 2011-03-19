@@ -41,7 +41,9 @@
 
 #include <sys/stat.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sched.h>
+#include <errno.h>
 
 #include <apps/nsh.h>
 
@@ -134,7 +136,11 @@ int user_start(int argc, char *argv[])
 # endif
   if (ret < 0)
    {
-     fprintf(stderr, g_fmtcmdfailed, "user_start", "task_create", NSH_ERRNO);
+     /* The daemon is NOT running.  Report the the error then fail...
+      * either with the serial console up or just exiting.
+      */
+
+     fprintf(stderr, "ERROR: Failed to start TELNET daemon: %d\n", errno);
    }
 
   /* If only the telnet front-end is selected, run it on this thread */
