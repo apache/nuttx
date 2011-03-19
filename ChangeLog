@@ -1597,3 +1597,8 @@
 	* examples/nsh and apps/nshlib - Move the core NuttShell (NSH) logic
 	  out of the exemples directory and into the apps/directory where
 	  it belongs.
+	* apps/Makefile and configs/*/appconfig - Use '=' as the delimiter
+	  instead of '/' so that sub-directories in apps/ can be used.
+	* apps/vsn - Move all VSN apps to apps/vsn.
+
+	  
