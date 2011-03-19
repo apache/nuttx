@@ -135,33 +135,32 @@ static inline void dump_ethhdr(const char *msg, unsigned char *buf, int buflen)
 
 static int up_setmacaddr(void)
 {
-  unsigned char macaddr[6];
+  int sockfd;
   int ret = -1;
-  if (macaddr)
+
+  /* Get a socket (only so that we get access to the INET subsystem) */
+
+  sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+  if (sockfd >= 0)
     {
-      /* Get a socket (only so that we get access to the INET subsystem) */
+      struct ifreq req;
+      memset(&req, 0, sizeof(struct ifreq));
 
-      int sockfd = socket(PF_INET, SOCK_DGRAM, 0);
-      if (sockfd >= 0)
+      /* Put the driver name into the request */
+
+      strncpy(req.ifr_name, "tap0", IFNAMSIZ);
+
+      /* Perform the ioctl to get the MAC address */
+
+      ret = ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
+      if (!ret)
         {
-          struct ifreq req;
-          memset(&req, 0, sizeof(struct ifreq));
+          /* Set the MAC address */
 
-          /* Put the driver name into the request */
-
-          strncpy(req.ifr_name, "tap0", IFNAMSIZ);
-
-          /* Perform the ioctl to get the MAC address */
-
-          ret = ioctl(sockfd, SIOCGIFHWADDR, (unsigned long)&req);
-          if (!ret)
-            {
-              /* Set the MAC address */
-
-              ret = uipdriver_setmacaddr(&req.ifr_hwaddr.sa_data);
-            }
+          ret = uipdriver_setmacaddr(&req.ifr_hwaddr.sa_data);
         }
     }
+
   return ret;
 }
 

@@ -36,4 +36,4 @@
 # Networking support
 
 CONFIGURED_APPS += netutils/uiplib=.built_always
-CONFIGURED_APPS += netutils/thttps=.built_always
+CONFIGURED_APPS += netutils/thttpd=.built_always
