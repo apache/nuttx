@@ -33,4 +33,4 @@
 #
 ############################################################################
 
-CONFIGURED_APPS += nshlib/.built_always
+CONFIGURED_APPS += nshlib=.built_always
