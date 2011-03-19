@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/telnetd/telnetd.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -53,8 +53,8 @@
 #include <pthread.h>
 #include <debug.h>
 
-#include <net/uip/telnetd.h>
-#include <net/uip/uip-lib.h>
+#include <apps/netutils/telnetd.h>
+#include <apps/netutils/uiplib.h>
 
 #include "shell.h"
 

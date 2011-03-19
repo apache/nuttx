@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/thttpd.h
+ * apps/netutils/thttpd.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_UIP_THTTPD_H
-#define __NET_UIP_THTTPD_H
+#ifndef __APPS_NETUTILS_THTTPD_H
+#define __APPS_NETUTILS_THTTPD_H
 
 /****************************************************************************
  * Included Files
@@ -98,4 +98,4 @@ EXTERN int thttpd_main(int argc, char **argv);
 }
 #endif
 
-#endif /* __NET_UIP_THTTPD_H */
+#endif /* __APPS_NETUTILS_THTTPD_H */

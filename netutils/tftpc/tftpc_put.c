@@ -1,7 +1,7 @@
 /****************************************************************************
  * netuils/tftp/tftpc_put.c
  *
- *   Copyright (C) 2008-2009Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 
 #include <net/uip/uipopt.h>
 #include <net/uip/uip.h>
-#include <net/uip/tftp.h>
+#include <apps/netutils/tftp.h>
 
 #include "tftpc_internal.h"
 

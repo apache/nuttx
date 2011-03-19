@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/igmp/igmp.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +46,8 @@
 
 #include <net/if.h>
 #include <net/uip/uip.h>
-#include <net/uip/uip-lib.h>
-#include <net/uip/ipmsfilter.h>
+#include <apps/netutils/uiplib.h>
+#include <apps/netutils/ipmsfilter.h>
 
 #include "igmp.h"
 

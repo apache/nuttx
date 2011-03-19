@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/wget/target.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,9 +47,10 @@
 #include <net/if.h>
 
 #include <net/uip/uip.h>
-#include <net/uip/uip-lib.h>
-#include <net/uip/resolv.h>
-#include <net/uip/webclient.h>
+
+#include <apps/netutils/uiplib.h>
+#include <apps/netutils/resolv.h>
+#include <apps/netutils/webclient.h>
 
 /****************************************************************************
  * Preprocessor Definitions

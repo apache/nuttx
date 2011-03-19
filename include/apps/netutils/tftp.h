@@ -1,8 +1,7 @@
 /****************************************************************************
- * net/uip/ipmsfilter.h
- * User interface to add/remove IP multicast address
+ * include/apps/netutils/tftp.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,68 +33,41 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_UIP_IPMSFILTER_H
-#define __NET_UIP_IPMSFILTER_H
+#ifndef __APPS_NETUTILS_TFTP_H
+#define __APPS_NETUTILS_TFTP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <netinet/in.h>
-
-#ifdef CONFIG_NET_IGMP
+#include <stdbool.h>
+#include <arpa/inet.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-#  error "IGMP for IPv6 not supported"
-#endif
-
 /****************************************************************************
- * Public Data
+ * Public Type Definitions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
 #else
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: ipmsfilter
- *
- * Description:
- *   Add or remove an IP address from a multicast filter set.
- *   (See netutils/uiplib/uip_ipmsfilter.c)
- *
- * Parameters:
- *   ifname     The name of the interface to use, size must less than IMSFNAMSIZ
- *   multiaddr  Multicast group address to add/remove
- *   fmode      MCAST_INCLUDE: Add multicast address
- *              MCAST_EXCLUDE: Remove multicast address
- *
- * Return:
- *   0 on sucess; Negated errno on failure
- *
- ****************************************************************************/
-
-EXTERN int ipmsfilter(FAR const char *ifname,
-                      FAR const struct in_addr *multiaddr,
-                      uint32_t fmode);
+EXTERN int tftpget(const char *remote, const char *local, in_addr_t addr, bool binary);
+EXTERN int tftpput(const char *local, const char *remote, in_addr_t addr, bool binary);
 
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_NET_IGMP */
-#endif /* __NET_UIP_IPMSFILTER_H */
+#endif /* __APPS_NETUTILS_TFTP_H */

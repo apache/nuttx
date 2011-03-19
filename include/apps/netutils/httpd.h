@@ -1,19 +1,19 @@
 /****************************************************************************
- * smtp.h
- * SMTP header file
+ * apps/netutils/httpd.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * Heavily leveraged from uIP 1.0 which also has a BSD-like license:
+ * Based on uIP which also has a BSD style license:
  *
- *   Author: Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2002, Adam Dunkels.
+ *   Author: Adam Dunkels <adam@sics.se>
+ *   Copyright (c) 2001-2005, Adam Dunkels.
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -37,30 +37,18 @@
  *
  ****************************************************************************/
 
-#ifndef __SMTP_H__
-#define __SMTP_H__
+#ifndef __APPS_NETUTILS_HTTPD_H
+#define __APPS_NETUTILS_HTTPD_H
 
 /****************************************************************************
  * Included Files
- ****************************************************************************/
-
-#include <net/uip/uipopt.h>
-#include <net/uip/uip.h>
-
-/****************************************************************************
- * Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-extern void *smtp_open(void);
-extern void  smtp_configure(void *handle, const char *localhostname,
-                            const uip_ipaddr_t *paddr);
-extern int   smtp_send(void *handle, const char *to, const char *cc,
-                       const char *from, const char *subject,
-                       const char *msg, int msglen);
-extern void  smtp_close(void *handle);
+extern void httpd_init(void);
+extern int httpd_listen(void);
 
-#endif /* __SMTP_H__ */
+#endif /* __APPS_NETUTILS_HTTPD_H */

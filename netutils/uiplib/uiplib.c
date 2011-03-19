@@ -2,7 +2,7 @@
  * netutils/uiplib/uiplib.c
  * Various uIP library functions.
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -45,8 +45,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <net/uip/uip.h>
-#include <net/uip/uip-lib.h>
+#include <apps/netutils/uiplib.h>
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 bool uiplib_ipaddrconv(const char *addrstr, uint8_t *ipaddr)
 {

@@ -50,14 +50,14 @@ all: $(BIN)
 $(OBJS): %.o1: %.c
 	$(HOSTCC) -c $(HOSTCFLAGS) $< -o $@
 
-net/uip:
-	@mkdir -p net/uip
+apps/netutils:
+	@mkdir -p apps/netutils
 
-net/uip/webclient.h: net/uip $(TOPDIR)/include/net/uip/webclient.h
-	@cp -a $(TOPDIR)/include/net/uip/webclient.h net/uip/.
+apps/netutils/webclient.h: apps/netutils $(TOPDIR)/include/apps/netutils/webclient.h
+	@cp -a $(TOPDIR)/include/apps/netutils/webclient.h apps/netutils/.
 
-net/uip/uip-lib.h: net/uip $(TOPDIR)/include/net/uip/uip-lib.h
-	@cp -a $(TOPDIR)/include/net/uip/uip-lib.h net/uip/.
+apps/netutils/uiplib.h: apps/netutils $(TOPDIR)/include/apps/netutils/uiplib.h
+	@cp -a $(TOPDIR)/include/apps/netutils/uiplib.h apps/netutils/.
 
 nuttx:
 	@mkdir nuttx
@@ -65,7 +65,7 @@ nuttx:
 nuttx/config.h: nuttx
 	@touch nuttx/config.h
 
-headers: net/uip/webclient.h net/uip/uip-lib.h nuttx/config.h
+headers: apps/netutils/webclient.h apps/netutils/uiplib.h nuttx/config.h
 
 $(BIN): headers $(OBJS)
 	$(HOSTCC) $(HOSTLDFLAGS) $(OBJS) -o $@

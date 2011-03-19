@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/webserver/httpd_fs.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -43,7 +43,7 @@
 
 #include <stdint.h>
 
-#include <net/uip/httpd.h>
+#include <apps/netutils/httpd.h>
 
 #include "httpd.h"
 #include "httpd_fsdata.h"

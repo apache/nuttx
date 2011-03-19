@@ -1,4 +1,4 @@
-/* resolv.h
+/* includes/apps/netutils/resolv.h
  * DNS resolver code header file.
  * Authtor Adam Dunkels <adam@dunkels.com>
  *
@@ -30,8 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __UIP_RESOLV_H__
-#define __UIP_RESOLV_H__
+#ifndef __APPS_NETUTILS_RESOLVE_H
+#define __APPS_NETUTILS_RESOLVE_H
 
 #include <net/uip/uipopt.h>
 
@@ -62,4 +62,4 @@ EXTERN int  resolv_query(const char *name, struct sockaddr_in *addr);
 }
 #endif
 
-#endif /* __UIP_RESOLV_H__ */
+#endif /* __APPS_NETUTILS_RESOLVE_H */

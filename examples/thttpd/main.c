@@ -49,10 +49,11 @@
 #include <debug.h>
 
 #include <net/if.h>
-#include <net/uip/thttpd.h>
-#include <net/uip/uip-arp.h>
-#include <net/uip/uip-lib.h>
 #include <netinet/ether.h>
+
+#include <net/uip/uip-arp.h>
+#include <apps/netutils/uiplib.h>
+#include <apps/netutils/thttpd.h>
 
 #include <nuttx/ramdisk.h>
 #include <nuttx/binfmt.h>

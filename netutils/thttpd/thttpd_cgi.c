@@ -2,7 +2,7 @@
  * netutils/thttpd/thttpd_cgi.c
  * CGI support
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Derived from the file libhttpd.c in the original THTTPD package:
@@ -55,7 +55,7 @@
 
 #include <nuttx/symtab.h>
 #include <nuttx/binfmt.h>
-#include <net/uip/thttpd.h>
+#include <apps/netutils/thttpd.h>
 
 #include "config.h"
 #include "libhttpd.h"

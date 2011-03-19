@@ -63,7 +63,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include <net/uip/resolv.h>
+#include <apps/netutils/resolv.h>
 
 /****************************************************************************
  * Definitions

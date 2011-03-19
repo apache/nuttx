@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uiplib.h
+ * apps/netutils/uiplib.h
  * Various non-standard APIs to support netutils.  All non-standard and
  * intended only for internal use.
  *
@@ -42,8 +42,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_UIP_UIP_LIB_H
-#define __NET_UIP_UIP_LIB_H
+#ifndef __APPS_NETUTILS_UIPLIB_H
+#define __APPS_NETUTILS_UIPLIB_H
 
 /****************************************************************************
  * Included Files
@@ -126,4 +126,4 @@ extern int  uip_parsehttpurl(const char *url, uint16_t *port,
 
 extern void uip_server(uint16_t portno, pthread_startroutine_t handler, int stacksize);
 
-#endif /* __NET_UIP_UIP_LIB_H */
+#endif /* __APPS_NETUTILS_UIPLIB_H */

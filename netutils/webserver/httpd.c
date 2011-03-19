@@ -2,7 +2,7 @@
  * netutils/webserver/httpd.c
  * httpd Web server
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This is a leverage of similar logic from uIP:
@@ -59,8 +59,8 @@
 #include <debug.h>
 
 #include <net/uip/uip.h>
-#include <net/uip/uip-lib.h>
-#include <net/uip/httpd.h>
+#include <apps/netutils/uiplib.h>
+#include <apps/netutils/httpd.h>
 
 #include "httpd.h"
 #include "httpd_cgi.h"

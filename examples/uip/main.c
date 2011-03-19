@@ -1,7 +1,7 @@
 /****************************************************************************
  * examples/uip/main.c
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -56,7 +56,9 @@
 #include <net/if.h>
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
-#include <net/uip/uip-lib.h>
+
+#include <apps/netutils/uiplib.h>
+
 #ifdef CONFIG_EXAMPLE_UIP_DHCPC
 #include <arpa/inet.h>
 #endif
@@ -68,13 +70,13 @@
 /* DHCPC may be used in conjunction with any other feature (or not) */
 
 #ifdef CONFIG_EXAMPLE_UIP_DHCPC
-# include <net/uip/resolv.h>
-# include <net/uip/dhcpc.h>
+# include <apps/netutils/resolv.h>
+# include <apps/netutils/dhcpc.h>
 #endif
 
 /* Include uIP webserver definitions */
 
-#include <net/uip/httpd.h>
+#include <apps/netutils/httpd.h>
 
 /****************************************************************************
  * Definitions

@@ -33,7 +33,7 @@
 #ifndef __HTTPD_CGI_H__
 #define __HTTPD_CGI_H__
 
-#include <net/uip/httpd.h>
+#include <apps/netutils/httpd.h>
 
 #include "httpd.h"
 

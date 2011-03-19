@@ -1,13 +1,12 @@
 /****************************************************************************
- * include/net/uip/telnetd.h
+ * apps/netutils/dhcpc.n
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- * This is a leverage of similar logic from uIP:
+ * This logic was leveraged from uIP which also has a BSD-style license:
  *
- *   Author: Adam Dunkels <adam@sics.se>
- *   Copyright (c) 2003, Adam Dunkels.
+ *   Copyright (c) 2005, Swedish Institute of Computer Science
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,18 +33,34 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- ****************************************************************************/
+ */
 
-#ifndef __NET_UIP_TELNETD_H
-#define __NET_UIP_TELNETD_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#ifndef __APPS_NETUTILS_DHCPC_H
+#define __APPS_NETUTILS_DHCPC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <stdint.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct dhcpc_state
+{
+  struct in_addr serverid;
+  struct in_addr ipaddr;
+  struct in_addr netmask;
+  struct in_addr dnsaddr;
+  struct in_addr default_router;
+  uint32_t       lease_time;      /* Lease expires in this number of seconds */
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -58,13 +73,13 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Start the telnet server -- does not return unless an error occurs */
-
-EXTERN void telnetd_init(void);
+EXTERN void *dhcpc_open(const void *mac_addr, int mac_len);
+EXTERN int   dhcpc_request(void *handle, struct dhcpc_state *presult);
+EXTERN void  dhcpc_close(void *handle);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __NET_UIP_TELNETD_H */
+#endif /* __APPS_NETUTILS_DHCPC_H */

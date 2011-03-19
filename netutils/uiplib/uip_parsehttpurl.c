@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/uiplib/uip_parsehttpurl.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,12 @@
  *****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <net/uip/uip-lib.h>
+
+#include <apps/netutils/uiplib.h>
 
 /****************************************************************************
  * Private Data

@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/dhcpc/dhcpc.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based heavily on portions of uIP:
@@ -53,8 +53,8 @@
 #include <debug.h>
 
 #include <net/uip/uip.h>
-#include <net/uip/dhcpc.h>
-#include <net/uip/uip-lib.h>
+#include <apps/netutils/dhcpc.h>
+#include <apps/netutils/uiplib.h>
 
 /****************************************************************************
  * Definitions

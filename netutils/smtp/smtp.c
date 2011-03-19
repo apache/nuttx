@@ -1,8 +1,8 @@
 /****************************************************************************
- * smtp.c
+ * apps/netutitls/smtp/smtp.c
  * smtp SMTP E-mail sender
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Heavily leveraged from uIP 1.0 which also has a BSD-like license:
@@ -58,7 +58,7 @@
 #include <sys/socket.h>
 
 #include <net/uip/uip.h>
-#include <net/uip/smtp.h>
+#include <apps/netutils/smtp.h>
 
 /****************************************************************************
  * Definitions

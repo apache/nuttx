@@ -2,7 +2,7 @@
  * netutils/webclient/webclient.c
  * Implementation of the HTTP client.
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Based on uIP which also has a BSD style license:
@@ -64,13 +64,13 @@
 #ifdef CONFIG_HAVE_GETHOSTBYNAME
 #  include <netdb.h>
 #else
-#  include <net/uip/resolv.h>
+#  include <apps/netutils/resolv.h>
 #endif
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <net/uip/uip-lib.h>
-#include <net/uip/webclient.h>
+#include <apps/netutils/uiplib.h>
+#include <apps/netutils/webclient.h>
 
 /****************************************************************************
  * Definitions

@@ -52,12 +52,12 @@
 # define ERROR (-1)
 # define OK    (0)
 #else
-# include <nuttx/config.h>    /* NuttX configuration */
-# include <debug.h>           /* For ndbg, vdbg */
-# include <nuttx/compiler.h>  /* For CONFIG_CPP_HAVE_WARNING */
-# include <arch/irq.h>        /* For irqstore() and friends -- REVISIT */
-# include <net/uip/uip-arp.h> /* For low-level ARP interfaces -- REVISIT */
-# include <net/uip/dhcpd.h>   /* Advertised DHCPD APIs */
+# include <nuttx/config.h>        /* NuttX configuration */
+# include <debug.h>               /* For ndbg, vdbg */
+# include <nuttx/compiler.h>      /* For CONFIG_CPP_HAVE_WARNING */
+# include <arch/irq.h>            /* For irqstore() and friends -- REVISIT */
+# include <net/uip/uip-arp.h>     /* For low-level ARP interfaces -- REVISIT */
+# include <apps/netutils/dhcpd.h> /* Advertised DHCPD APIs */
 #endif
 
 #include <sys/socket.h>

@@ -2,7 +2,7 @@
  * netutils/thttpd/libhttpd.c
  * HTTP Protocol Library
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Derived from the file of the same name in the original THTTPD package:
@@ -59,7 +59,7 @@
 #include <debug.h>
 
 #include <nuttx/regex.h>
-#include <net/uip/thttpd.h>
+#include <apps/netutils/thttpd.h>
 
 #include "config.h"
 #include "libhttpd.h"

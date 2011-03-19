@@ -37,12 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <net/uip/webclient.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+
+#include <apps/netutils/webclient.h>
 
 /****************************************************************************
  * Private Data

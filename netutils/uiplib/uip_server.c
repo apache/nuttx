@@ -1,7 +1,7 @@
 /****************************************************************************
  * netutils/uiplib/uip_server.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
 #include <debug.h>
 #include <netinet/in.h>
 
-#include <net/uip/uip-lib.h>
+#include <apps/netutils/uiplib.h>
 
 /****************************************************************************
  * Public Functions
