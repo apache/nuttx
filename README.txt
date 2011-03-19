@@ -378,15 +378,11 @@ Below is a guide to the available README files in the NuttX source tree:
  |- drivers/
  |   `- README.txt
  |- examples/
- |   |- nsh/README.txt
  |   |- pashello/README.txt
  |   `- README.txt
  |- graphics/
  |   `- README.txt
  |- libxx/
  |   `- README.txt
- |- netutils/
- |   |- telnetd/README.txt
- |   `- README
  `- tools/
      `- README.txt

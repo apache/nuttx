@@ -1,6 +1,8 @@
 NuttX TODO List (Last updated March 16 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+nuttx/
+
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
   (2)  Memory Managment (mm/)
@@ -9,7 +11,6 @@ NuttX TODO List (Last updated March 16 2011)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
  (16  Network (net/, drivers/net)
-  (5)  Network Utilities (netutils/)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (5)  Libraries (lib/)
  (13)  File system/Generic drivers (fs/, drivers/)
@@ -17,7 +18,6 @@ NuttX TODO List (Last updated March 16 2011)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (5)  Build system / Toolchains
-  (4)  NuttShell (NSH) (apps/nshlib)
   (3)  Other Applications & Tests (examples/)
   (7)  Linux/Cywgin simulation (arch/sim)
   (3)  ARM (arch/arm/)
@@ -37,6 +37,11 @@ NuttX TODO List (Last updated March 16 2011)
   (8)  z80/z8/ez80 (arch/z80/)
   (8)  z16 (arch/z16/)
   (1)  mc68hc1x (arch/hc)
+
+apps/
+
+  (5)  Network Utilities (apps/netutils/)
+  (4)  NuttShell (NSH) (apps/nshlib)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -308,38 +313,6 @@ o Network (net/, drivers/net)
                the mechanism for leaving and joining groups is hidden behind a wrapper
                function so that little of this incompatibilities need be exposed.
 
-o Network Utilities (netutils/)
-
-  Description: One critical part of netutils/ apps is untested: The uIP
-               resolver in netutils/resolv.  The webclient code has been
-               tested on host using gethosbyname(), but still depends on the
-               untested resolve logic.
-  Status:      Open
-  Priority:    Medium, Important but not core NuttX functionality
-
-  Description: Port PPP support from http://contiki.cvs.sourceforge.net/contiki/contiki-2.x/backyard/core/net/ppp/
-  Status:      Open
-  Priority:    Low
-
-  Description: Not all THTTPD features/options have been verified.  In particular, there is no
-               test case of a CGI program receiving POST input.  Only the configuration of
-               examples/thttpd has been tested.
-  Status:      Open
-  Priority:    Medium
-
-  Description: The first GET received by THTTPD is not responded to.  Refreshing the page
-               from the browser solves the problem and THTTPD works fine after thatg.  I 
-               believe that this is the duplicate of another bug: "Outgoing [uIP] packets are dropped
-               and overwritten by ARP packets if the destination IP has not been mapped to a MAC."
-  Status:      Open
-  Priority:    Medium
-
-  Description: If the network is enabled, but THTTPD is not configured, it spews out lots
-               of pointless warnings.  This is kind of annoying and unprofessional; needs to
-               be fixed someday.
-  Status:      Open.  An annoyance, but not a real problem.
-  Priority:    Low
-
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^
 
@@ -550,32 +523,6 @@ o Build system
                happen lately so it may have nothing to do with GCC.
   Priority:    High if you are using NX and a newer compiler.
                
-
-o NuttShell (NSH) (apps/nshlib)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Description: When the telnetd front end is received, each TCP packet
-               received causes a prompt (nsh >) to be presented.  The
-               prompt should only be presented when the user enters a
-               carriage return.
-  Status:      Open
-  Priority:    Low
-
-  Description: The wget command has been incorporated into NSH, however
-               it is still untested as of this writing (only because I
-               have not had the correct network setup for the testing
-               yet).  Since wget depends on the also untest uIP resolv/
-               logic, it is like non-functional.
-  Status:      Open
-  Priority:    Med-High
-
-  Description: Add support to NSH to run NXFLAT programs from a ROMFS file system
-  Status:      Open
-  Priority:    Low (enhancement)
-
-  Description: Add an ARP command so that we can see the contents of the ARP table.
-  Status:      Open
-  Priority:    Low (enhancement)
 
 o Other Applications & Tests (examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1222,4 +1169,64 @@ o mc68hc1x (arch/hc)
                It would be necessary to implement banked mode to able to access more
                the 48Kb of FLASH.
   Status:      Open.
-  Priority:    Medium/Low.
+  Priority:    Medium/Low
+
+o Network Utilities (apps/netutils/)
+
+  Description: One critical part of netutils/ apps is untested: The uIP
+               resolver in netutils/resolv.  The webclient code has been
+               tested on host using gethosbyname(), but still depends on the
+               untested resolve logic.
+  Status:      Open
+  Priority:    Medium, Important but not core NuttX functionality
+
+  Description: Port PPP support from http://contiki.cvs.sourceforge.net/contiki/contiki-2.x/backyard/core/net/ppp/
+  Status:      Open
+  Priority:    Low
+
+  Description: Not all THTTPD features/options have been verified.  In particular, there is no
+               test case of a CGI program receiving POST input.  Only the configuration of
+               examples/thttpd has been tested.
+  Status:      Open
+  Priority:    Medium
+
+  Description: The first GET received by THTTPD is not responded to.  Refreshing the page
+               from the browser solves the problem and THTTPD works fine after thatg.  I 
+               believe that this is the duplicate of another bug: "Outgoing [uIP] packets are dropped
+               and overwritten by ARP packets if the destination IP has not been mapped to a MAC."
+  Status:      Open
+  Priority:    Medium
+
+  Description: If the network is enabled, but THTTPD is not configured, it spews out lots
+               of pointless warnings.  This is kind of annoying and unprofessional; needs to
+               be fixed someday.
+  Status:      Open.  An annoyance, but not a real problem.
+  Priority:    Low
+
+o NuttShell (NSH) (apps/nshlib)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: When the telnetd front end is received, each TCP packet
+               received causes a prompt (nsh >) to be presented.  The
+               prompt should only be presented when the user enters a
+               carriage return.
+  Status:      Open
+  Priority:    Low
+
+  Description: The wget command has been incorporated into NSH, however
+               it is still untested as of this writing (only because I
+               have not had the correct network setup for the testing
+               yet).  Since wget depends on the also untest uIP resolv/
+               logic, it is like non-functional.
+  Status:      Open
+  Priority:    Med-High
+
+  Description: Add support to NSH to run NXFLAT programs from a ROMFS file system
+  Status:      Open
+  Priority:    Low (enhancement)
+
+  Description: Add an ARP command so that we can see the contents of the ARP table.
+  Status:      Open
+  Priority:    Low (enhancement)
+
+

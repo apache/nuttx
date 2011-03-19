@@ -1,5 +1,5 @@
 ############################################################################
-# ez80f910200zco/nsh/appconfig
+# eagle100/httpd/appconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,16 +33,9 @@
 #
 ############################################################################
 
-# NSH library
-
-CONFIGURED_APPS += nshlib=.built_always
-
 # Networking support
 
-ifeq ($(CONFIG_NET),y)
 CONFIGURED_APPS += netutils/uiplib=.built_always
 CONFIGURED_APPS += netutils/dhcpc=.built_always
 CONFIGURED_APPS += netutils/resolv=.built_always
-CONFIGURED_APPS += netutils/tftp=.built_always
-CONFIGURED_APPS += netutils/webclient=.built_always
-endif
+CONFIGURED_APPS += netutils/webserver=.built_always

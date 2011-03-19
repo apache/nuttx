@@ -42,6 +42,12 @@ examples/dhcpd
   and used in netutils/dhcpd/dhcpd.c. These settings are required
   to described the behavior of the daemon.
 
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = uiplib=.built_always
+
 examples/hello
 ^^^^^^^^^^^^^^
 
@@ -91,6 +97,12 @@ examples/igmp
   * CONFIG_EXAMPLE_IGMP_GRPADDR
       Multicast group address
 
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = uiplib=.built_always
+
 examples/mm
 ^^^^^^^^^^^
 
@@ -129,6 +141,12 @@ examples/netttest
   This is a simple network test for verifying client- and server-
   functionality in a TCP/IP connection.
 
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = uiplib=.built_always
+
 examples/nsh
 ^^^^^^^^^^^^
 
@@ -136,6 +154,20 @@ examples/nsh
   the NuttShell (NSH) application.  NSH is a simple shell
   application.  NSH is described in its own README located at
   apps/nshlib/README.txt
+
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = nshlib=.built_always
+
+  And if networking is included:
+
+  CONFIGURED_APPS = uiplib=.built_always
+  CONFIGURED_APPS = dhcpc=.built_always
+  CONFIGURED_APPS = resolv=.built_always
+  CONFIGURED_APPS = tftp=.built_always
+  CONFIGURED_APPS = webclient=.built_always
 
 examples/nx
 ^^^^^^^^^^^
@@ -296,6 +328,12 @@ examples/poll
   The target example should read the small message and send it back to
   the host.  The host should then receive the echo'ed message.
 
+  If networking is enabled, applications using this example will need to
+  provide an appconfig file in the configuration driver with instruction
+  to build applications like:
+
+  CONFIGURED_APPS = uiplib=.built_always
+
 examples/romfs
 ^^^^^^^^^^^^^^
 
@@ -342,6 +380,13 @@ examples/sendmail
   unprotected recipients can be used.  Most will protect themselves
   from this test email because it looks like SPAM.
 
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = uiplib=.built_always
+  CONFIGURED_APPS = smtp=.built_always
+
 examples/serloop
 ^^^^^^^^^^^^^^^^
 
@@ -363,11 +408,24 @@ examples/thttpd
     CONFIG_EXAMPLE_THTTPD_DRIPADDR - Default router IP addess
     CONFIG_EXAMPLE_THTTPD_NETMASK  - Network mask
 
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = uiplib=.built_always
+  CONFIGURED_APPS = thttpd=.built_always
+
 examples/udp
 ^^^^^^^^^^^^
 
   This is a simple network test for verifying client- and server-
   functionality over UDP.
+
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = uiplib=.built_always
 
 examples/uip
 ^^^^^^^^^^^^
@@ -402,6 +460,15 @@ examples/uip
     CONFIG_NETUTILS_HTTPDSTACKSIZE
     CONFIG_NETUTILS_HTTPDFILESTATS
     CONFIG_NETUTILS_HTTPDNETSTATS
+
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = uiplib=.built_always
+  CONFIGURED_APPS = dhcpc=.built_always
+  CONFIGURED_APPS = resolv=.built_always
+  CONFIGURED_APPS = webserver=.built_always
 
 examples/usbserial
 ^^^^^^^^^^^^^^^^^^
@@ -557,4 +624,13 @@ examples/wget
 
     cd examples/wget
     make -f Makefile.host
+
+  Applications using this example will need to provide an appconfig
+  file in the configuration driver with instruction to build applications
+  like:
+
+  CONFIGURED_APPS = uiplib=.built_always
+  CONFIGURED_APPS = resolv=.built_always
+  CONFIGURED_APPS = webclient=.built_always
+
 

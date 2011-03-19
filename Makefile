@@ -82,10 +82,6 @@ NONFSDIRS	= sched lib $(ARCH_SRC) mm $(CONFIG_APP_DIR) $(ADDON_DIRS)
 FSDIRS		= fs drivers binfmt
 CONTEXTDIRS	=
 
-ifeq ($(CONFIG_NET),y)
-NONFSDIRS	+= net netutils
-endif
-
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS	+= graphics
 CONTEXTDIRS	+= graphics
@@ -147,7 +143,7 @@ endif
 # Add libraries for network support
 
 ifeq ($(CONFIG_NET),y)
-LINKLIBS	+= net/libnet$(LIBEXT) netutils/libnetutils$(LIBEXT)
+LINKLIBS	+= net/libnet$(LIBEXT)
 endif
 
 # Add libraries for file system support
@@ -256,9 +252,6 @@ mm/libmm$(LIBEXT): context
 
 net/libnet$(LIBEXT): context
 	@$(MAKE) -C net TOPDIR="$(TOPDIR)" libnet$(LIBEXT)
-
-netutils/libnetutils$(LIBEXT): context
-	@$(MAKE) -C netutils TOPDIR="$(TOPDIR)" libnetutils$(LIBEXT)
 
 fs/libfs$(LIBEXT): context
 	@$(MAKE) -C fs TOPDIR="$(TOPDIR)" libfs$(LIBEXT)
