@@ -1,7 +1,7 @@
 ############################################################################
-# configs/c5471evm/Make.defs
+# configs/c5471evm/httpd/Make.defs
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ ARCHPICFLAGS		= -fpic -msingle-pic-base -mpic-register=r10
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
-ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ld.script
+ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/httpd/ld.script
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe

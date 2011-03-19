@@ -1,5 +1,5 @@
 #!/bin/bash
-# c5471evm/setenv.sh
+# c5471evm/httpd/setenv.sh
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
