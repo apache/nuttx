@@ -10,7 +10,7 @@ nuttx/
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (16  Network (net/, drivers/net)
+ (15) Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (5)  Libraries (lib/)
  (13)  File system/Generic drivers (fs/, drivers/)
@@ -427,14 +427,6 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low
 
-  Description: A FLASH translation layer (FTL) has been implemented at
-               drivers/mtd/ftl.c but has not yet been tested.  This layer
-               will convert a FLASH MTD interface into a block driver that
-               can be used with any file system.  Good performance of this
-               layer will depend upon functioning write buffer support!
-  Status:      Open
-  Priority:    Low
-
   Description: ENC28J60 driver is complete, but untested (I still haven't got
                a good ENC28J60 test platform).
   Status:      Open
@@ -843,7 +835,7 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
 o ARM/STM32 (arch/arm/src/stm32/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: NOR Flash driver and FTL layer to support a file system.
+  Description: NOR Flash driver with FTL layer to support a file system.
   Status:      Open
   Priority:    Low
 
