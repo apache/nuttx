@@ -41,7 +41,16 @@
 PASS1_SRCDIR	= arch/$(CONFIG_ARCH)/src
 PASS1_BOARDDIR	= $(PASS1_SRCDIR)/board
 PASS1_LIBBOARD	= $(PASS1_BOARDDIR)/libboard$(LIBEXT)
+
+# Where is the application library?
+
+ifneq ($(CONFIG_APP_DIR),)
 PASS1_LIBAPP	= $(CONFIG_APP_DIR)/libapp$(LIBEXT)
+else
+ifneq ($(APPDIR),)
+PASS1_LIBAPP	= $(APPDIR)/libapps$(LIBEXT)
+endif
+endif
 
 # Remove the application library (libapp) from the list of libraries.  Add
 # the boad library (liboard)

@@ -59,7 +59,7 @@ endif
 ifeq ($(CONFIG_PAGING),y)
 CSRCS		+= up_fillpage.c
 endif
-ifeq ($(CONFIG_APP_DIR),examples/usbstorage)
+ifeq ($(CONFIG_USBSTRG),y)
 CSRCS		+= up_usbstrg.c
 endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))

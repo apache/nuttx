@@ -171,12 +171,9 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_APP_DIR - Identifies the directory that builds the
 		  application to link with NuttX. This symbol must be assigned
 		  to the path to the application build directory *relative* to
-		  the NuttX top build direcory. As an an example, there are
-		  several example applicatins in the NuttX examples/ sub-directory.
-                  To use one of these example applications, say nsh, you would
-		  set CONFIG_APP_DIR=examples/nsh. If you had an application
-		  directory and the NuttX directory both within another directory
-		  like this:
+		  the NuttX top build direcory. If you had an application
+          directory and the NuttX directory each in separate directory
+		  trees like this:
 
 		  build
 		   |-nuttx
@@ -202,7 +199,7 @@ defconfig -- This is a configuration file similar to the Linux
 		    This is only done when you change the NuttX configuration.
 		  - depend. Make or update the application build dependencies.
 
-		  When this application is invoked it will receive the setting TOPDIR< like:
+		  When this application is invoked it will receive the setting TOPDIR like:
 
 		    $(MAKE) -C $(CONFIG_APP_DIR) TOPDIR="$(TOPDIR)" <target>
 
