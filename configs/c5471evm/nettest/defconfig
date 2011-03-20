@@ -200,7 +200,7 @@ CONFIG_NET_C5471_BASET10=n
 #  This format will support execution of NuttX binaries located
 #  in a ROMFS filesystem (see examples/nxflat).
 #
-CONFIG_APP_DIR=examples/nettest
+#CONFIG_APP_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n

@@ -325,7 +325,7 @@ CONFIG_SPI_CMDDATA=n
 # CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 #  the worker thread.  Default: 4
 #
-CONFIG_APP_DIR=examples/nx
+#CONFIG_APP_DIR=
 
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n

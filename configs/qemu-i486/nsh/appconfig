@@ -1,5 +1,5 @@
 ############################################################################
-# qemu-i486/nsh/appconfig
+# configs/qemu-i486/nsh/appconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,4 +33,11 @@
 #
 ############################################################################
 
+# Path to example in apps/examples containing the user_start entry point
+
+CONFIGURED_APPS += examples/nsh=.built_always
+
+# The NSH library
+
 CONFIGURED_APPS += nshlib=.built_always
+

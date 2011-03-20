@@ -1,5 +1,5 @@
 ############################################################################
-# z80sim/nsh/appconfig
+# configs/z80sim/nsh/appconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,4 +33,11 @@
 #
 ############################################################################
 
+# Path to example in apps/examples containing the user_start entry point
+
+CONFIGURED_APPS += examples/nsh=.built_always
+
+# The NSH Library
+
 CONFIGURED_APPS += nshlib=.built_always
+
