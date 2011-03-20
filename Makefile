@@ -80,6 +80,7 @@ ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR) $(APPDIR)
 
 NONFSDIRS	= sched lib $(ARCH_SRC) mm $(ADDON_DIRS)
 FSDIRS		= fs drivers binfmt
+NETFSDIRS	= fs drivers
 CONTEXTDIRS	=
 
 ifeq ($(CONFIG_NX),y)
@@ -98,16 +99,25 @@ endif
 CLEANDIRS	= $(NONFSDIRS) $(FSDIRS)
 MAKEDIRS	= $(NONFSDIRS)
 
+# Add file system directories to MAKEDIRS (they are already in CLEANDIRS)
+
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
+ifeq ($(CONFIG_NET),y)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 MAKEDIRS	+= fs
 endif
-ifeq ($(CONFIG_NET),y)
-MAKEDIRS	+= net
+MAKEDIRS	+= drivers
 endif
 else
 MAKEDIRS	+= $(FSDIRS)
 endif
+
+# Add networking directories to MAKEDIRS and CLEANDIRS
+
+ifeq ($(CONFIG_NET),y)
+MAKEDIRS	+= net
+endif
+CLEANDIRS	+= net
 
 #
 # Extra objects used in the final link.
@@ -367,7 +377,8 @@ subdir_distclean:
 	done
 
 distclean: clean subdir_distclean clean_context
-	@rm -f Make.defs setenv.sh .config
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" distclean
 endif
+	@rm -f Make.defs setenv.sh .config
+

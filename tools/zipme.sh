@@ -132,6 +132,10 @@ if [ -f ${ZIP_NAME} ] ; then
       { echo "rm ${ZIP_NAME} failed!" ; exit 1 ; }
 fi
 
+# Write a version file
+
+echo "CONFIG_NUTTX_VERSION=\"${VERSION}\" >${NUTTX}/.version
+
 # Then zip it
 
 ${TAR} ${TAR_NAME} nuttx-${VERSION}/nuttx nuttx-${VERSION}/apps || \
