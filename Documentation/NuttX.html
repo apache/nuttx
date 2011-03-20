@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 19, 2011</p>
+      <p>Last Updated: March 20, 2011</p>
     </td>
   </tr>
 </table>
@@ -948,7 +948,7 @@
     <ul>
       <p>
         <b>STATUS:</b>
-        This port boots and passes the OS test (examples/ostest).
+        This port boots and passes the OS test (apps/examples/ostest).
         The port is complete and verified.  As of NuttX 0.3.17, the port includes:
         timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
         support.  A verified NuttShell (<a href="NuttShell.html">NSH</a>)
@@ -982,7 +982,7 @@
     <ul>
       <p>
         <b>STATUS:</b>
-        This port boots and passes the OS test (examples/ostest) and includes a
+        This port boots and passes the OS test (apps/examples/ostest) and includes a
         working implementation of the NuttShell (<a href="NuttShell.html">NSH</a>).
         The port is complete and verified.
         As of NuttX 5.3, the port includes only basic timer interrupts and serial console support.
@@ -1161,7 +1161,7 @@
         <b>STATUS:</b>
           This port was released in NuttX 5.5.  
           Features are the same as with the Eagle-100 LM3S6918 described above.
-          The examples/ostest configuration has been successfully verified and an
+          The apps/examples/ostest configuration has been successfully verified and an
           NSH configuration with telnet support is available.
           MMC/SD and Networking support was not been thoroughly verified:
           Current development efforts are focused on porting the NuttX window system (NX)
@@ -1357,7 +1357,7 @@
       </p>
       <p>
         That initial, 5.6, basic release included <i>timer</i> interrupts and a <i>serial console</i> and was
-        verified using the NuttX OS test (<code>examples/ostest</code>).
+        verified using the NuttX OS test (<code>apps/examples/ostest</code>).
         Configurations available include include a verified NuttShell (NSH) configuration
         (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
         The NSH configuration supports the Nucleus2G's microSD slot and additional configurations
@@ -1374,7 +1374,7 @@
         </ul>
       </p>
       <p>
-        This port includes a NuttX OS test configuration (see <code>examples/ostest</code>).
+        This port includes a NuttX OS test configuration (see <code>apps/examples/ostest</code>).
       </p>
       <p>
         <b>Olimex LPC1766-STK</b>.
@@ -1524,7 +1524,7 @@
          Since then, the basic RTOS port has solidified:
          <ul>
            <li>
-             The port successfully passes the NuttX OS test (examples/ostest).
+             The port successfully passes the NuttX OS test (apps/examples/ostest).
            </li>
            <li>
              A NuttShell (NSH) configuration is in place (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
@@ -1534,7 +1534,7 @@
              At present, I get nothing coming in the serial RXD line (probably because the pins are configured wrong or I have the MAX232 connected wrong).
            </li>
          </ul>
-         The basic, port (including the verified examples/ostest configuration) was be released in NuttX-5.13.
+         The basic, port (including the verified apps/examples/ostest configuration) was be released in NuttX-5.13.
          A complete port will include drivers for additional AVR32 UC3 devices -- like SPI and USB --- and will be available in a later release,
          time permitting.
       </p>
@@ -1979,7 +1979,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
   This build for the ARM9 target includes a significant subset of OS
   features, a filesystem, Ethernet driver, full TCP/IP, UDP and (minimal)
   ICMP stacks (via uIP) and a small network test application: (11/8/07,
-  configuration netconfig, examples/nettest)
+  configuration netconfig, apps/examples/nettest)
 </p>
 <pre>
    text    data     bss     dec     hex filename
@@ -1988,7 +1988,7 @@ m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
 <p>
   Another build for the ARM9 target includes a minimal OS feature
   set, Ethernet driver, full TCP/IP and (minimal) ICMP stacks, and
-  a small webserver: (11/20/07, configuration uipconfig, examples/uip)
+  a small webserver: (11/20/07, configuration uipconfig, apps/examples/uip)
 </p>
 <pre>
    text    data     bss     dec     hex filename
@@ -2224,6 +2224,10 @@ nuttx-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * examples/nsh and apps/nshlib - Move the core NuttShell (NSH) logic
       out of the exemples directory and into the apps/directory where
       it belongs.
+    * apps/Makefile and configs/*/appconfig - Use '=' as the delimiter
+      instead of '/' so that sub-directories in apps/ can be used.
+    * apps/vsn - Move all VSN apps to apps/vsn.
+    * nuttx/examples moved to apps/examples
 
 apps-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

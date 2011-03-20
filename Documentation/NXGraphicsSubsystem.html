@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: July 27, 2010</p>
+      <p>Last Updated: March 20, 2010</p>
     </td>
   </tr>
 </table>
@@ -212,7 +212,7 @@
   </tr>
   <tr>
     <td><small>Figure 1.
-    This scren shot shows the final frame for the NuttX example at <code>examples/nx</code>
+    This scren shot shows the final frame for the NuttX example at <code>apps/examples/nx</code>
     running on the simulated, Linux x86 platform with simulated framebuffer output to
     an X window.
     This picture shows to framed windows with (blank) toolbars.
@@ -2499,9 +2499,9 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 
 <h2>2.6 <a name="samplecode">Sample Code</a></h2>
 
-<p><b><code>examples/nx</code></b>.
+<p><b><code>apps/examples/nx</code></b>.
   No sample code is provided in this document.
-  However, an example can be found in the NuttX source tree at <code>examples/nx</code>.
+  However, an example can be found in the NuttX source tree at <code>apps/examples/nx</code>.
   That code is intended to test NX.
   Since it is test code, it is designed to exercise functionality and does not necessarily
   represent best NX coding practices.
@@ -2514,7 +2514,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
   be implemented by the NX client code.
 </p>
 
-<p><b>Building <code>examples/nx</code></b>.
+<p><b>Building <code>apps/examples/nx</code></b>.
   Testing was performed using the Linux/Cygwin-based NuttX simulator.
   Instructions are provided for building that simulation are provided in 
   <a href="#testcoverage">Appendix C</a> of this document.
@@ -2690,11 +2690,11 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
   </tr>
 </table>
 
-<p><b><code>examples/nx</code></b>.
-  The primary test tool for debugging NX resides at <code>examples/nx</code>.
+<p><b><code>apps/examples/nx</code></b>.
+  The primary test tool for debugging NX resides at <code>apps/examples/nx</code>.
 </p>
-<p><b>Building <code>examples/nx</code></b>.
-  NX testing was performed using <code>examples/nx</code> with the
+<p><b>Building <code>apps/examples/nx</code></b>.
+  NX testing was performed using <code>apps/examples/nx</code> with the
   Linux/Cygwin-based NuttX simulator.
   Configuration files for building this test can be found in <code>configs/sim/nx</code>.
   There are two alternative configurations for building the simulation:
@@ -2761,7 +2761,7 @@ make
 </p>
 
 <p><b>Test Coverage</b>.
-  At present, <code>examples/nx</code>t only exercises a subset of NX;
+  At present, <code>apps/examples/nx</code>t only exercises a subset of NX;
   the remainder is essentially untested.
   The following table describes the testing performed on each NX API:
 </p>
@@ -2938,7 +2938,7 @@ make
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxeventnotify"><code>nx_eventnotify()</code></a></td>
-  <td>This is not used in the current version of <code>examples/nx</code>,
+  <td>This is not used in the current version of <code>apps/examples/nx</code>,
       was tested in a previous version)</td>
   <td align="center" bgcolor="lightgrey">NO</td>
 </tr>
