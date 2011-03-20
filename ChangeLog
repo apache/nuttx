@@ -1600,5 +1600,6 @@
 	* apps/Makefile and configs/*/appconfig - Use '=' as the delimiter
 	  instead of '/' so that sub-directories in apps/ can be used.
 	* apps/vsn - Move all VSN apps to apps/vsn.
+	* nuttx/examples moved to apps/examples
 
 	  

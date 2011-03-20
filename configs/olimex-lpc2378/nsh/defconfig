@@ -193,7 +193,7 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_DEV_LOWCONSOLE - Use the simple, low-level serial console
 #   driver (minimal support)
 #
-CONFIG_APP_DIR=examples/nsh
+#CONFIG_APP_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 #CONFIG_DEBUG_MM=y

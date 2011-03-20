@@ -1,5 +1,5 @@
 ############################################################################
-# lm3s6965-ek/nsh/appconfig
+# configs/lm3s6965-ek/nsh/appconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,6 +33,10 @@
 #
 ############################################################################
 
+# Path to example in apps/examples containing the user_start entry point
+
+CONFIGURED_APPS += examples/nsh=.built_always
+
 # NSH library
 
 CONFIGURED_APPS += nshlib=.built_always
@@ -43,6 +47,8 @@ ifeq ($(CONFIG_NET),y)
 CONFIGURED_APPS += netutils/uiplib=.built_always
 CONFIGURED_APPS += netutils/dhcpc=.built_always
 CONFIGURED_APPS += netutils/resolv=.built_always
-CONFIGURED_APPS += netutils/tftp=.built_always
+CONFIGURED_APPS += netutils/tftpc=.built_always
 CONFIGURED_APPS += netutils/webclient=.built_always
 endif
+
+

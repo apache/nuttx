@@ -1,5 +1,5 @@
 ############################################################################
-# ez80f910200zco/httpd/appconfig
+# configs/ez80f910200zco/httpd/appconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -32,6 +32,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
+
+# Path to example in apps/examples containing the user_start entry point
+
+CONFIGURED_APPS += examples/uip=.built_always
+
 
 # Networking support
 

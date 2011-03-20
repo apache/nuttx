@@ -220,7 +220,7 @@ CONFIG_HAVE_LIBM=n
 #  This format will support execution of NuttX binaries located
 #  in a ROMFS filesystem (see examples/nxflat).
 #
-CONFIG_APP_DIR=examples/ostest
+#CONFIG_APP_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n

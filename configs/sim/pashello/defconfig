@@ -114,7 +114,7 @@ CONFIG_ARCH_BOARD_SIM=y
 #   desciptors by task_create() when a new task is started. If
 #   set, all sockets will appear to be closed in the new task.
 #
-CONFIG_APP_DIR=examples/pashello
+#CONFIG_APP_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n

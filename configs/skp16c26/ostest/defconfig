@@ -212,7 +212,7 @@ CONFIG_HAVE_LIBM=n
 #   desciptors by task_create() when a new task is started. If
 #   set, all sockets will appear to be closed in the new task.
 #
-CONFIG_APP_DIR=examples/ostest
+#CONFIG_APP_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n

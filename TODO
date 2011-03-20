@@ -18,7 +18,6 @@ nuttx/
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (5)  Build system / Toolchains
-  (3)  Other Applications & Tests (examples/)
   (7)  Linux/Cywgin simulation (arch/sim)
   (3)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -42,6 +41,7 @@ apps/
 
   (5)  Network Utilities (apps/netutils/)
   (4)  NuttShell (NSH) (apps/nshlib)
+  (3)  Other Applications & Tests (apps/examples/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,7 +152,7 @@ o C++ Support
 o Binary loaders (binfmt/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: Not all of the NXFLAT test under examples/nxflat are working.
+  Description: Not all of the NXFLAT test under apps/examples/nxflat are working.
                Most simply do not compile yet.  tests/mutex runs okay but
                outputs garbage on completion.
   Status:      Open
@@ -454,7 +454,7 @@ o Graphics subystem (graphics/)
   Status:      Open
   Priority:    Medium
 
-  Description: The examples/nx test using lcd/p14201.c and the configs/lm3s6965-ek
+  Description: The apps/examples/nx test using lcd/p14201.c and the configs/lm3s6965-ek
                configuration shows two single pixel-wide anomalies.  One along
                column zero is clearly caused by the NX windowing logic.  It is
                not certain if these are consequences of the 4bpp logic or if these
@@ -515,26 +515,6 @@ o Build system
                happen lately so it may have nothing to do with GCC.
   Priority:    High if you are using NX and a newer compiler.
                
-
-o Other Applications & Tests (examples/)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Description: The redirection test (part of examples/pipe) terminates
-               incorrectly on the Cywgin-based simulation platform (but works
-               fine on the Linux-based simulation platform).
-  Status:      Open
-  Priority:    Low
-
-  Description: examples/wget is untested on the target (it has been tested
-               on the host, but not in the target using the uIP resolv logic).
-  Status:      Open
-  Priority:    Med
-
-  Description: examples/sendmail is untested on the target (it has been tested
-               on the host, but not on the target.
-  Status:      Open
-  Priority:    Med
-
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -840,7 +820,7 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Priority:    Low
 
   Description  A USB device-side driver is in place but not well tested.  At
-               present, the examples/usbserial test sometimes fails.  The situation
+               present, the apps/examples/usbserial test sometimes fails.  The situation
                that causes the failure is:
 
                - Host-side of the test started after the target side sends the
@@ -897,8 +877,8 @@ o 8051 / MCS51 (arch/8051/)
                sched/gmtime_r.c aroud lines 184 and 185
                sched/clock_initialize.c at line 107
                sched/pthread_create.c at 330
-               examples/ostest/barrier.c around lines 53 and 74
-               examples/ostest/sighand.c at 225 and 244
+               apps/examples/ostest/barrier.c around lines 53 and 74
+               apps/examples/ostest/sighand.c at 225 and 244
                driver/serial.c in usleep calls around 347 and 354
   Status:      Open.  Update:  These were reviewed during the hcs12 port.  The
                hcs12 also has 16-bit integer types (if -mshort is in the CFLAGS).
@@ -1075,7 +1055,7 @@ o z16 (arch/z16)
                interim for system testing.
 
   Description: The system delays do not appear to be correct with the
-               examples/ostest/timedmqueue.c test.
+               apps/examples/ostest/timedmqueue.c test.
   Status:      Open
   Priority:    Medium-High
 
@@ -1178,7 +1158,7 @@ o Network Utilities (apps/netutils/)
 
   Description: Not all THTTPD features/options have been verified.  In particular, there is no
                test case of a CGI program receiving POST input.  Only the configuration of
-               examples/thttpd has been tested.
+               apps/examples/thttpd has been tested.
   Status:      Open
   Priority:    Medium
 
@@ -1220,5 +1200,24 @@ o NuttShell (NSH) (apps/nshlib)
   Description: Add an ARP command so that we can see the contents of the ARP table.
   Status:      Open
   Priority:    Low (enhancement)
+
+o Other Applications & Tests (apps/examples/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Description: The redirection test (part of examples/pipe) terminates
+               incorrectly on the Cywgin-based simulation platform (but works
+               fine on the Linux-based simulation platform).
+  Status:      Open
+  Priority:    Low
+
+  Description: examples/wget is untested on the target (it has been tested
+               on the host, but not in the target using the uIP resolv logic).
+  Status:      Open
+  Priority:    Med
+
+  Description: examples/sendmail is untested on the target (it has been tested
+               on the host, but not on the target.
+  Status:      Open
+  Priority:    Med
 
 

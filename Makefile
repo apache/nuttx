@@ -62,29 +62,33 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 # Add-on directories.  These may or may not be in place in the
 # NuttX source tree (they must be specifically installed)
 #
-# APPS_LOC can be over-ridden from the command line:
+# APPLOC can be over-ridden from the command line or in the .config file:
 
 ifeq ($(CONFIG_BUILTIN_APPS),y)
-ifeq ($(APPS_LOC),)
-APPS_LOC	= ../apps
+ifeq ($(APPLOC),)
+APPLOC	= ../apps
 endif
-APPS_DIR	:= ${shell if [ -r $(APPS_LOC)/Makefile ]; then echo "$(APPS_LOC)"; fi}
+APPDIR		:= ${shell if [ -r $(APPLOC)/Makefile ]; then echo "$(APPLOC)"; fi}
 endif
 
 PCODE_DIR	:= ${shell if [ -r pcode/Makefile ]; then echo "pcode"; fi}
-ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR) $(APPS_DIR)
+ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR) $(APPDIR)
 
 # FSDIRS depend on file descriptor support; NONFSDIRS do not
 #   (except for parts of FSDIRS).  We will exclude FSDIRS
 #   from the build if file descriptor support is disabled
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm $(CONFIG_APP_DIR) $(ADDON_DIRS)
+NONFSDIRS	= sched lib $(ARCH_SRC) mm $(ADDON_DIRS)
 FSDIRS		= fs drivers binfmt
 CONTEXTDIRS	=
 
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS	+= graphics
 CONTEXTDIRS	+= graphics
+endif
+
+ifneq ($(CONFIG_APP_DIR),)
+NONFSDIRS	= $(CONFIG_APP_DIR)
 endif
 
 # CLEANDIRS are the directories that will clean in.  These are
@@ -99,7 +103,7 @@ ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 MAKEDIRS	+= fs
 endif
 ifeq ($(CONFIG_NET),y)
-MAKEDIRS	+= drivers
+MAKEDIRS	+= net
 endif
 else
 MAKEDIRS	+= $(FSDIRS)
@@ -123,7 +127,7 @@ endif
 #   is disabled.
 
 LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
-		  lib/liblib$(LIBEXT) $(CONFIG_APP_DIR)/libapp$(LIBEXT)
+		  lib/liblib$(LIBEXT)
 
 # Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
@@ -132,12 +136,18 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 LINKLIBS	+= libxx/liblibxx$(LIBEXT)
 endif
 
+# Add application-specific library
+
+ifneq ($(CONFIG_APP_DIR),)
+LINKLIBS	= $(CONFIG_APP_DIR)/libapp$(LIBEXT)
+endif
+
 # Add library for application support
 # Always compile the framework which includes exec_nuttapp if users
 # or nuttX applications are to be included.
 
 ifeq ($(CONFIG_BUILTIN_APPS),y)
-LINKLIBS	+= $(APPS_DIR)/libapps$(LIBEXT)
+LINKLIBS	+= $(APPDIR)/libapps$(LIBEXT)
 endif
 
 # Add libraries for network support
@@ -259,8 +269,8 @@ fs/libfs$(LIBEXT): context
 drivers/libdrivers$(LIBEXT): context
 	@$(MAKE) -C drivers TOPDIR="$(TOPDIR)" libdrivers$(LIBEXT)
 
-$(APPS_DIR)/libapps$(LIBEXT): context
-	@$(MAKE) -C $(APPS_DIR) TOPDIR="$(TOPDIR)" libapps$(LIBEXT)
+$(APPDIR)/libapps$(LIBEXT): context
+	@$(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)" libapps$(LIBEXT)
 
 binfmt/libbinfmt$(LIBEXT): context
 	@$(MAKE) -C binfmt TOPDIR="$(TOPDIR)" libbinfmt$(LIBEXT)

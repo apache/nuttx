@@ -290,7 +290,7 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 #  the worker thread.  Default: 4
 #
-CONFIG_APP_DIR=examples/ostest
+#CONFIG_APP_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
