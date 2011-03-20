@@ -349,7 +349,7 @@ endif
 download: $(BIN)
 	$(call DOWNLOAD, $<)
 
-depend:
+depend: context
 	@for dir in $(MAKEDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend ; \
 	done

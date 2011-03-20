@@ -118,8 +118,25 @@ fi
 # Check for the apps/ dir in the usual place if appdir was not provided
 
 if [ -z "${appdir}" ]; then
+
+  # Check for a version file
+
+  unset CONFIG_NUTTX_VERSION
+  if [ -x "${TOPDIR}/.version" ]; then
+    source "${TOPDIR}/.version"
+  fi
+
+  # Check for an unversioned apps/ directory
+ 
   if [ -d "${TOPDIR}/../apps" ]; then
     appdir="../apps"
+
+  else
+    # Check for a versioned apps/ directory
+
+    if [ -d "${TOPDIR}/../apps-${CONFIG_NUTTX_VERSION}" ]; then
+      appdir="../apps-${CONFIG_NUTTX_VERSION}"
+    fi 
   fi
 fi
 

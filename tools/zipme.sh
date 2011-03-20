@@ -132,11 +132,15 @@ if [ -f ${ZIP_NAME} ] ; then
       { echo "rm ${ZIP_NAME} failed!" ; exit 1 ; }
 fi
 
-# Write a version file
+# Write a version file.  The syntax of file is such that it may be sourced
+# by a bash script or included by a Makefile
 
-echo "CONFIG_NUTTX_VERSION=\"${VERSION}\" >${NUTTX}/.version
+echo "#!/bin/bash" >${NUTTX}/.version
+echo "" >>${NUTTX}/.version
+echo "CONFIG_NUTTX_VERSION=\"${VERSION}\" >>${NUTTX}/.version
+chmod 755 ${NUTTX}/.version
 
-# Then zip it
+# Then zip-up the directories
 
 ${TAR} ${TAR_NAME} nuttx-${VERSION}/nuttx nuttx-${VERSION}/apps || \
       { echo "tar of ${TAR_NAME} failed!" ; exit 1 ; }
