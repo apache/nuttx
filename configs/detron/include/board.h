@@ -44,6 +44,8 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/irq.h>          //GPIO IRQ
+#include <arch/lpc17xx/irq.h>
 
 /************************************************************************************
  * Definitions
@@ -125,6 +127,13 @@
 #define CONFIG_LP17_FLASH          1
 #define BOARD_FLASHCFG_VALUE       0x0000303a
 
+
+/* Button definitions ***************************************************************/
+
+#define panel_pulse_up                   1 /* Bit 0: painel_pulsada_up */
+#define panel_pulse_down                 2 /* Bit 1: painel_pulsada_down */
+#define panel_center                     4 /* Bit 2: painel_pulsada_centro */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -157,6 +166,37 @@ extern "C" {
  ************************************************************************************/
 
 EXTERN void lpc17_boardinitialize(void);
+
+
+EXTERN void up_buttoninit(void);
+
+/************************************************************************************
+ * Name: up_buttons
+ *
+ * Description:
+ *   After up_buttoninit() has been called, up_buttons() may be called to collect
+ *   the state of all buttons.  up_buttons() returns an 8-bit bit set with each bit
+ *   associated with a button.  See the BUTTON* definitions above for the meaning of
+ *   each bit in the returned value.
+ *
+ ************************************************************************************/
+
+EXTERN uint8_t up_buttons(void);
+
+/************************************************************************************
+ * Name: up_up_irq_pin_panel_pulse_up/down/center
+ *
+ * Description:
+ *   These functions may be called to register an interrupt handler that will be
+ *   called when BUTTON UP/DOWN/CENTER is depressed.  The previous interrupt handler value is
+ *   returned (so that it may restored, if so desired).
+ *
+ ************************************************************************************/
+
+
+EXTERN xcpt_t up_irq_pin_panel_pulse_up(xcpt_t irqhandler);
+EXTERN xcpt_t up_irq_pin_panel_pulse_down(xcpt_t irqhandler);
+EXTERN xcpt_t up_irq_pin_panel_center(xcpt_t irqhandler);
 
 #undef EXTERN
 #if defined(__cplusplus)

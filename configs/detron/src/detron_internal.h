@@ -64,6 +64,12 @@
  * 60	P0(18)	si
  * 61	P0(17)	so
  *
+ * Botoes do painel
+ *
+ * 85	Chave pulsada 1  		P4(29)
+ * 87	Chave Pulsada 2 	 	P1(16)
+ * 88   Chave pulsada centro	P1(15)
+ *
  * USB
  *
  * Pin	Port	Function
@@ -80,6 +86,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <arch/lpc17xx/irq.h>
 
 /************************************************************************************
  * Definitions
@@ -122,6 +129,16 @@
 #define pin_vs1003_sclk     (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN15)
 #define pin_vs1003_si       (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN18)
 #define pin_vs1003_so       (GPIO_INPUT  | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN17)
+
+/* Pinos do painel  */
+
+#define pin_panel_center		  		(GPIO_INPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN3)
+#define pin_panel_pulse_up   			(GPIO_INPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN4)
+#define pin_panel_pulse_down	   		(GPIO_INPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN5)
+
+#define IRQ_pin_panel_center 			LPC17_IRQ_P2p3
+#define IRQ_pin_panel_pulse_up   		LPC17_IRQ_P2p4
+#define IRQ_pin_panel_pulse_down   		LPC17_IRQ_P2p5
 
 /************************************************************************************
  * Public Types
